@@ -33,16 +33,16 @@
 │   │   -> ../other-path/to/that-other-project/           │
 │   ┌─────────────────────────────────────────────────────┐
 │   │ my-project/                                         │
-│   │   package.json                                      │
+│   │   * package.json                                    │
 │   │   ┌─────────────────────────────────────────────────────┐
 │   │   │ node_modules/...                                    │
 │   │   ┌─────────────────────────────────────────────────────┐
 │   │   │ src/                                                │
-│   │   │   main.coffee                                       │
+│   │   │   * main.coffee                                     │
 │   │   │   ┌─────────────────────────────────────────────────────┐
 │   │   │   │ benchmarks/                                         │
-│   │   │   │   main.coffee                                       │
-│   │   │   │   foobar.benchmark.coffee                           │
+│   │   │   │   * main.coffee                                     │
+│   │   │   │   * foobar.benchmark.coffee                         │
 │   │   │   ┌─────────────────────────────────────────────────────┐
 │   │   │   │ tests/                                              │
 │   │   │   │   main.coffee                                       │
