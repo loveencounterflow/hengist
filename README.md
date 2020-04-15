@@ -20,16 +20,16 @@
 
 
 <pre>
-my-hengist/
+<strong>my-hengist/</strong>
 │ package.json
 │ README.md
-│ apps/
-│ │ ➡ ../path/to/my-project
-│ │ ➡ ../other-path/to/that-other-project
+│ <strong>apps/</strong>
+│ │ ➡ ../path/to/my-project/
+│ │ ➡ ../other-path/to/that-other-project/
 │ 
 │ ———————————————————————————————
-│ .git/...
-│ node_modules/...
+│ <strong>.git/...</strong>
+│ <strong>node_modules/...</strong>
 │ 
 │ ———————————————————————————————
 │ my-project/
