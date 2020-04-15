@@ -19,7 +19,7 @@
 
 
 
-<pre class='avatar foo bar'>
+<pre>
 ┌────────────────────────────────────────────────────┐
 │ <strong>my-hengist/</strong>
 ┌────────────────────────────────────────────────────┐
@@ -30,24 +30,24 @@
 │ <strong>node_modules/...</strong>
 ┌────────────────────────────────────────────────────┐
 │ <strong>apps/</strong>
-    ➡ ../path/to/my-project/
-    ➡ ../other-path/to/that-other-project/
+  ➡ ../path/to/my-project/
+  ➡ ../other-path/to/that-other-project/
 ┌────────────────────────────────────────────────────┐
 │ <strong>my-project/</strong>
-    package.json
+  package.json
+  ┌────────────────────────────────────────────────────┐
+  │ <strong>node_modules/...</strong>
+  ┌────────────────────────────────────────────────────┐
+  │ <strong>src/</strong>
+    main.coffee
     ┌────────────────────────────────────────────────────┐
-    │ <strong>node_modules/...</strong>
-    ┌────────────────────────────────────────────────────┐
-    │ <strong>src/</strong>
-      ┌────────────────────────────────────────────────────┐
-      │ <strong>benchmarks/</strong>
-        main.coffee
-        foobar.benchmark.coffee
-      ┌────────────────────────────────────────────────────┐
-      │ <strong>tests/</strong>
-        main.coffee
-        arithmetic.test.coffee
+    │ <strong>benchmarks/</strong>
       main.coffee
+      foobar.benchmark.coffee
+    ┌────────────────────────────────────────────────────┐
+    │ <strong>tests/</strong>
+      main.coffee
+      arithmetic.test.coffee
     ┌────────────────────────────────────────────────────┐
     │ <strong>lib/</strong>
       main.js
