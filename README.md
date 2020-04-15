@@ -17,7 +17,10 @@
 
 ## App Layout
 
-
+* apps
+* assets
+* individual project folders (each with `src/` and `lib/`, if you're so inclined and transpile stuff, or any
+  other structure deemed suitable)
 
 <pre>
 ┌─────────────────────────────────────────────────────╖
@@ -33,6 +36,16 @@
 │   │   ▸  ../path/to/my-project                          ║
 │   │   ▸  ../other-path/to/that-other-project            ║
 │   ┌─────────────────────────────────────────────────────╖
+│   │ assets                                              ║
+│   │   ▸  ../path/to/some-data.file                      ║
+│   │   ●  image.png                                      ║
+│   │   ┌─────────────────────────────────────────────────────╖
+│   │   │ my-project                                          ║
+│   │   │   ●  huge-data.file                                 ║
+│   │   ┌─────────────────────────────────────────────────────╖
+│   │   │ that-other-project                                  ║
+│   │   │   ●  another-huge-data.file                         ║
+│   ┌─────────────────────────────────────────────────────╖
 │   │ my-project                                          ║
 │   │   ● package.json                                    ║
 │   │   ┌─────────────────────────────────────────────────────╖
@@ -40,19 +53,14 @@
 │   │   ┌─────────────────────────────────────────────────────╖
 │   │   │ src                                                 ║
 │   │   │   ● main.coffee                                     ║
-│   │   │   ┌─────────────────────────────────────────────────────╖
-│   │   │   │ benchmarks                                          ║
-│   │   │   │   ● main.coffee                                     ║
-│   │   │   │   ● foobar.benchmark.coffee                         ║
-│   │   │   ┌─────────────────────────────────────────────────────╖
-│   │   │   │ tests                                               ║
-│   │   │   │   ● main.coffee                                     ║
-│   │   │   │   ● arithmetic.test.coffee                          ║
-│   │   │   ┌─────────────────────────────────────────────────────╖
-│   │   │   │ lib                                                 ║
-│   │   │   │   ● main.js                                         ║
-│   │   │   │   ● main.js.map                                     ║
-│   │   │   │   ● ...                                             ║
+│   │   │   ● foobar.benchmark.coffee                         ║
+│   │   │   ● silly.benchmark.coffee                          ║
+│   │   │   ● arithmetic.test.coffee                          ║
+│   │   │   ● silly.test.coffee                               ║
+│   │   ┌─────────────────────────────────────────────────────╖
+│   │   │ lib                                                 ║
+│   │   │   ● main.js                                         ║
+│   │   │   ● main.js.map                                     ║
 │   ┌─────────────────────────────────────────────────────╖
 │   │ that-other-project                                  ║
 │   │   ● package.json                                    ║
