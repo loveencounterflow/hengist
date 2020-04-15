@@ -1,16 +1,18 @@
+
+# Hengist
+
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [Hengist](#hengist)
-  - [Multi-App Dev (M.A.D.)](#multi-app-dev-mad)
-  - [App Layout](#app-layout)
+- [Multi-App Dev (M.A.D.)](#multi-app-dev-mad)
+- [App Layout](#app-layout)
+- [_formatted_ **heading** with a](#_formatted_-heading-with-a)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
-
-# Hengist
 
 ## Multi-App Dev (M.A.D.)
 
@@ -59,3 +61,23 @@ my-hengist/
 
 
 ```
+
+
+<details>
+  <summary>Click to expand</summary>
+  whatever
+</details>
+
+
+<details><summary>stuff with *mark* **down**</summary><p>
+
+## _formatted_ **heading** with [a](link)
+
+```
+some code
+```
+
+Collapsible until here.
+</p></details>
+
+
