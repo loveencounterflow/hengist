@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 
+############################################################################################################
+# See
+# * https://github.com/kjkuan/taskit
+
+# Original idea by
+# * https://github.com/adriancooney/Taskfile
+# * https://medium.com/@adrian_cooney/introducing-the-taskfile-5ddfe7ed83bd
+############################################################################################################
+
+
 # A Taskfile is just a bash script that will be sourced and run by taskit.
 #
 # You can also divide your Taskfile into multiple scripts and source them
