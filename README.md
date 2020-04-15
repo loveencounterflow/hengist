@@ -61,3 +61,5 @@ my-hengist/
 │ 
 ```
 
+<pre>trying to get **bold** <em>bold</em> text here</pre>
+
