@@ -20,38 +20,38 @@
 
 
 <pre>
-⦿ <strong>my-hengist/</strong>
-⦿ <strong>.git/...</strong>
++ <strong>my-hengist/</strong>
++ <strong>.git/...</strong>
   package.json
   README.md
-⦿ <strong>node_modules/...</strong>
++ <strong>node_modules/...</strong>
   ———————————————————————————————
-⦿ <strong>apps/</strong>
++ <strong>apps/</strong>
     ➡ ../path/to/my-project/
     ➡ ../other-path/to/that-other-project/
   ———————————————————————————————
-⦿ <strong>my-project/</strong>
++ <strong>my-project/</strong>
     package.json
-    ⦿ <strong>node_modules/...</strong>
-    ⦿ <strong>src/</strong>
-      ⦿ <strong>benchmarks/</strong>
+    + <strong>node_modules/...</strong>
+    + <strong>src/</strong>
+      + <strong>benchmarks/</strong>
         main.coffee
         foobar.benchmark.coffee
-      ⦿ <strong>tests/</strong>
+      + <strong>tests/</strong>
         main.coffee
         arithmetic.test.coffee
       main.coffee
-    ⦿ <strong>lib/</strong>
+    + <strong>lib/</strong>
       main.js
       main.js.map
       ...
   ———————————————————————————————
-⦿ <strong>that-other-project/</strong>
++ <strong>that-other-project/</strong>
     package.json
-    ⦿ <strong>node_modules/...</strong>
-    ⦿ <strong>src/</strong>
+    + <strong>node_modules/...</strong>
+    + <strong>src/</strong>
       main.coffee
-    ⦿ <strong>lib/</strong>
+    + <strong>lib/</strong>
       main.js
       main.js.map
 </pre>
