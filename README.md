@@ -22,49 +22,49 @@
 <pre>
 ┌────────────────────────────────────────────────────┐
 │ <strong>my-hengist/</strong>
-┌────────────────────────────────────────────────────┐
-│ <strong>.git/...</strong>
   package.json
   README.md
-┌────────────────────────────────────────────────────┐
-│ <strong>node_modules/...</strong>
-┌────────────────────────────────────────────────────┐
-│ <strong>apps/</strong>
-  ➡ ../path/to/my-project/
-  ➡ ../other-path/to/that-other-project/
-┌────────────────────────────────────────────────────┐
-│ <strong>my-project/</strong>
-  package.json
+  ┌────────────────────────────────────────────────────┐
+  │ <strong>.git/...</strong>
   ┌────────────────────────────────────────────────────┐
   │ <strong>node_modules/...</strong>
   ┌────────────────────────────────────────────────────┐
-  │ <strong>src/</strong>
-    main.coffee
-    ┌────────────────────────────────────────────────────┐
-    │ <strong>benchmarks/</strong>
-      main.coffee
-      foobar.benchmark.coffee
-    ┌────────────────────────────────────────────────────┐
-    │ <strong>tests/</strong>
-      main.coffee
-      arithmetic.test.coffee
-    ┌────────────────────────────────────────────────────┐
-    │ <strong>lib/</strong>
-      main.js
-      main.js.map
-      ...
-┌────────────────────────────────────────────────────┐
-│ <strong>that-other-project/</strong>
+  │ <strong>apps/</strong>
+    ➡ ../path/to/my-project/
+    ➡ ../other-path/to/that-other-project/
+  ┌────────────────────────────────────────────────────┐
+  │ <strong>my-project/</strong>
     package.json
     ┌────────────────────────────────────────────────────┐
     │ <strong>node_modules/...</strong>
     ┌────────────────────────────────────────────────────┐
     │ <strong>src/</strong>
       main.coffee
-    ┌────────────────────────────────────────────────────┐
-    │ <strong>lib/</strong>
-      main.js
-      main.js.map
+      ┌────────────────────────────────────────────────────┐
+      │ <strong>benchmarks/</strong>
+        main.coffee
+        foobar.benchmark.coffee
+      ┌────────────────────────────────────────────────────┐
+      │ <strong>tests/</strong>
+        main.coffee
+        arithmetic.test.coffee
+      ┌────────────────────────────────────────────────────┐
+      │ <strong>lib/</strong>
+        main.js
+        main.js.map
+        ...
+  ┌────────────────────────────────────────────────────┐
+  │ <strong>that-other-project/</strong>
+      package.json
+      ┌────────────────────────────────────────────────────┐
+      │ <strong>node_modules/...</strong>
+      ┌────────────────────────────────────────────────────┐
+      │ <strong>src/</strong>
+        main.coffee
+      ┌────────────────────────────────────────────────────┐
+      │ <strong>lib/</strong>
+        main.js
+        main.js.map
 </pre>
 
 <pre>trying to get <strong>bold</strong> text here</pre>
