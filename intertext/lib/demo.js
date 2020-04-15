@@ -36,9 +36,9 @@
 
   ({isa} = types);
 
-  warn("^33098^ should use `require '../..` instead of named import for INTERTEXT");
+  warn("^33098^ should use `require '../..` instead of `../../apps/intertext`");
 
-  INTERTEXT = require('intertext');
+  INTERTEXT = require('../../apps/intertext');
 
   ({rpr} = INTERTEXT.export());
 

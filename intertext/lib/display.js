@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var $, $drain, $watch, CND, DATOM, INTERTEXT, SP, alert, assign, badge, debug, echo, freeze, help, info, is_stamped, isa, jr, lets, log, new_datom, rpr, select, type_of, types, urge, validate, warn, whisper,
+  var $, $drain, $watch, CND, DATOM, INTERTEXT, SP, alert, assign, badge, debug, echo, freeze, help, info, is_stamped, isa, jr, lets, log, new_datom, rpr, select, type_of, urge, validate, warn, whisper,
     modulo = function(a, b) { return (+a % (b = +b) + b) % b; },
     indexOf = [].indexOf;
 
@@ -30,11 +30,11 @@
   //...........................................................................................................
   ({assign, jr} = CND);
 
-  types = (require('intertext')).types;
+  // warn "^3763^ using ../../apps/intertext/types, should use ../types"
+  // INTERTEXT                 = require '../../apps/intertext'
+  INTERTEXT = require('intertext');
 
-  warn("^3763^ using intertext/types, should use ../types");
-
-  ({isa, validate, type_of} = types);
+  ({isa, validate, type_of} = INTERTEXT.types);
 
   SP = require('steampipes');
 
@@ -47,8 +47,6 @@
   // stamp
   // wrap_datom
   ({new_datom, is_stamped, lets, freeze, select} = DATOM.export());
-
-  INTERTEXT = require('intertext');
 
   ({rpr} = INTERTEXT.export());
 
@@ -163,8 +161,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.$_show_tokens_as_table = function(settings = null) {
-    var $collect_keys, $filter, $format, $reorder_keys, TBL, colorize, defaults, exclude, include, pipeline;
-    TBL = INTERTEXT.TBL;
+    var $collect_keys, $filter, $format, $reorder_keys, colorize, defaults, exclude, include, pipeline;
+    // debug '^2224^', TBL       = INTERTEXT.TBL
     // last      = Symbol 'last'
     pipeline = [];
     include = ['$key', 'pos', 'name', 'text', '$vnr', '$'];
@@ -264,7 +262,7 @@
     };
     //.........................................................................................................
     // pipeline.push $show()
-    pipeline.push(TBL.$tabulate({
+    pipeline.push(INTERTEXT.TBL.$tabulate({
       format: colorize
     }));
     pipeline.push($watch(function(d) {
