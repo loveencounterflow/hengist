@@ -66,9 +66,3 @@
 │   │   │   ● main.js.map                                     │
 </pre>
 
-```
-abcdefghi
-·•●●
-▸▶
-abcdefghi
-```
