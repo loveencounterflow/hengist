@@ -20,8 +20,8 @@ echo                      = CND.echo.bind CND
   freeze }                = ( new ( require 'datom' ).Datom { dirty: false, } ).export()
 types                     = require './types'
 { isa }                   = types
-warn "^33098^ should use `require '../..` instead of named import for INTERTEXT"
-INTERTEXT                 = require 'intertext'
+warn "^33098^ should use `require '../..` instead of `../../apps/intertext`"
+INTERTEXT                 = require '../../apps/intertext'
 { rpr }                   = INTERTEXT.export()
 DISPLAY                   = require './display'
 

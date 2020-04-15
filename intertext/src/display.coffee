@@ -16,11 +16,12 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 { assign
   jr }                    = CND
-types                     = ( require 'intertext' ).types
-warn "^3763^ using intertext/types, should use ../types"
+# warn "^3763^ using ../../apps/intertext/types, should use ../types"
+# INTERTEXT                 = require '../../apps/intertext'
+INTERTEXT                 = require 'intertext'
 { isa
   validate
-  type_of }               = types
+  type_of }               = INTERTEXT.types
 SP                        = require 'steampipes'
 { $
   $watch
@@ -33,7 +34,6 @@ DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   lets
   freeze
   select }                = DATOM.export()
-INTERTEXT                 = require 'intertext'
 { rpr }                   = INTERTEXT.export()
 
 
@@ -98,7 +98,7 @@ INTERTEXT                 = require 'intertext'
 
 #-----------------------------------------------------------------------------------------------------------
 @$_show_tokens_as_table = ( settings = null ) ->
-  TBL       = INTERTEXT.TBL
+  # debug '^2224^', TBL       = INTERTEXT.TBL
   # last      = Symbol 'last'
   pipeline  = []
   include   = [
@@ -157,7 +157,7 @@ INTERTEXT                 = require 'intertext'
     return R
   #.........................................................................................................
   # pipeline.push $show()
-  pipeline.push TBL.$tabulate { format: colorize, }
+  pipeline.push INTERTEXT.TBL.$tabulate { format: colorize, }
   pipeline.push $watch ( d ) -> echo d.text
   return SP.pull pipeline...
 
