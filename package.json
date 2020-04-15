@@ -11,6 +11,10 @@
   "dependencies": {
     "cnd": "^5.3.1",
     "datom": "^5.0.0",
+    "guy-test": "^2.0.1",
+    "intertext": "^1.6.1",
+    "intertype": "^3.4.0",
+    "multimix": "^2.2.0",
     "steampipes": "^6.1.1"
   }
 }
