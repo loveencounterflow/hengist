@@ -21,49 +21,49 @@
 <pre>
 ┌─────────────────────────────────────────────────────┐
 │ my-hengist                                          │
-│   • package.json                                    │
-│   • README.md                                       │
+│   ● package.json                                    │
+│   ● README.md                                       │
 │   ┌─────────────────────────────────────────────────────┐
 │   │ .git                                                │
 │   ┌─────────────────────────────────────────────────────┐
 │   │ node_modules                                        │
 │   ┌─────────────────────────────────────────────────────┐
 │   │ apps                                                │
-│   │   ▶  ../path/to/my-project                          │
-│   │   ▶  ../other-path/to/that-other-project            │
+│   │   ▸  ../path/to/my-project                          │
+│   │   ▸  ../other-path/to/that-other-project            │
 │   ┌─────────────────────────────────────────────────────┐
 │   │ my-project                                          │
-│   │   • package.json                                    │
+│   │   ● package.json                                    │
 │   │   ┌─────────────────────────────────────────────────────┐
 │   │   │ node_modules                                        │
 │   │   ┌─────────────────────────────────────────────────────┐
 │   │   │ src                                                 │
-│   │   │   • main.coffee                                     │
+│   │   │   ● main.coffee                                     │
 │   │   │   ┌─────────────────────────────────────────────────────┐
 │   │   │   │ benchmarks                                          │
-│   │   │   │   • main.coffee                                     │
-│   │   │   │   • foobar.benchmark.coffee                         │
+│   │   │   │   ● main.coffee                                     │
+│   │   │   │   ● foobar.benchmark.coffee                         │
 │   │   │   ┌─────────────────────────────────────────────────────┐
 │   │   │   │ tests                                               │
-│   │   │   │   • main.coffee                                     │
-│   │   │   │   • arithmetic.test.coffee                          │
+│   │   │   │   ● main.coffee                                     │
+│   │   │   │   ● arithmetic.test.coffee                          │
 │   │   │   ┌─────────────────────────────────────────────────────┐
 │   │   │   │ lib                                                 │
-│   │   │   │   • main.js                                         │
-│   │   │   │   • main.js.map                                     │
-│   │   │   │   • ...                                             │
+│   │   │   │   ● main.js                                         │
+│   │   │   │   ● main.js.map                                     │
+│   │   │   │   ● ...                                             │
 │   ┌─────────────────────────────────────────────────────┐
 │   │ that-other-project                                  │
-│   │   • package.json                                    │
+│   │   ● package.json                                    │
 │   │   ┌─────────────────────────────────────────────────────┐
 │   │   │ node_modules                                        │
 │   │   ┌─────────────────────────────────────────────────────┐
 │   │   │ src                                                 │
-│   │   │   • main.coffee                                     │
+│   │   │   ● main.coffee                                     │
 │   │   ┌─────────────────────────────────────────────────────┐
 │   │   │ lib                                                 │
-│   │   │   • main.js                                         │
-│   │   │   • main.js.map                                     │
+│   │   │   ● main.js                                         │
+│   │   │   ● main.js.map                                     │
 </pre>
 
 ```
