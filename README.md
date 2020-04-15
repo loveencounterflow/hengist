@@ -19,7 +19,7 @@
 
 
 
-```
+<pre>
 my-hengist/
 │ package.json
 │ README.md
@@ -59,7 +59,7 @@ my-hengist/
 │     main.js.map
 │ 
 │ 
-```
+</pre>
 
-<pre>trying to get **bold** <em>bold</em> text here</pre>
+<pre>trying to get <strong>bold</strong> text here</pre>
 
