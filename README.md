@@ -20,43 +20,43 @@
 
 
 <pre>
-<strong>my-hengist/</strong>
-│ package.json
-│ README.md
-│ <strong>apps/</strong>
-│ │ ➡ ../path/to/my-project/
-│ │ ➡ ../other-path/to/that-other-project/
-📂│ <strong>.git/...</strong>
-│ <strong>node_modules/...</strong>
-│ 
-│ ———————————————————————————————
-│ my-project/
-│ │ package.json
-│ │ node_modules/...
-│ │ src/
-│ │ │ benchmarks/
-│ │ │ │ main.coffee
-│ │ │ │ foobar.benchmark.coffee
-│ │ │ tests/
-│ │ │ │ main.coffee
-│ │ │ │ arithmetic.test.coffee
-│ │ │ main.coffee
-│ │ lib/
-│ │ │ main.js
-│ │ │ main.js.map
-│ │ │ ...
-│ 
-│ ———————————————————————————————
-│ that-other-project/
-│   package.json
-│   node_modules/...
-│   src/
-│     main.coffee
-│   lib/
-│     main.js
-│     main.js.map
-│ 
-│ 
+📂<strong>my-hengist/</strong>
+📂<strong>.git/...</strong>
+│ package.json
+│ README.md
+│ <strong>node_modules/...</strong>
+│ ———————————————————————————————
+│ <strong>apps/</strong>
+│ │ ➡ ../path/to/my-project/
+│ │ ➡ ../other-path/to/that-other-project/
+│ ———————————————————————————————
+📂<strong>my-project/</strong>
+│ │ package.json
+│ │ 📂<strong>node_modules/...</strong>
+│ │ 📂<strong>src/</strong>
+│ │ │ 📂<strong>benchmarks/</strong>
+│ │ │ │ main.coffee
+│ │ │ │ foobar.benchmark.coffee
+│ │ │ 📂<strong>tests/</strong>
+│ │ │ │ main.coffee
+│ │ │ │ arithmetic.test.coffee
+│ │ │ main.coffee
+│ │ 📂<strong>lib/</strong>
+│ │ │ main.js
+│ │ │ main.js.map
+│ │ │ ...
+│
+│ ———————————————————————————————
+│ that-other-project/
+│   package.json
+│   node_modules/...
+│   src/
+│     main.coffee
+│   lib/
+│     main.js
+│     main.js.map
+│
+│
 </pre>
 
 <pre>trying to get <strong>bold</strong> text here</pre>
