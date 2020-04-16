@@ -143,8 +143,10 @@ DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   colorize = ( cell_txt, { value, row, is_header, key, idx, } ) =>
     R   = cell_txt
     return CND.white                CND.bold  CND.reverse R   if is_header
+    return CND.cyan   CND.underline CND.bold  CND.reverse R   unless row.$vnr?
     return CND.BASE01 CND.underline CND.bold  CND.reverse R   if ( row.name is 'info' )
     return CND.BLUE   CND.underline CND.bold  CND.reverse R   if ( row.$key is '^raw' )
+    return CND.red                  CND.bold  CND.reverse R   if ( row.$key is '^error' ) # and ( key is 'text' )
     return CND.white                CND.bold  CND.reverse R   if ( row.$key is '^text' ) and ( key is 'text' )
     return CND.blue                 CND.bold  CND.reverse R   if value? and ( key is 'text' )
     switch type_of value
