@@ -75,8 +75,15 @@ new_ref = ( d, $ ) ->
   datoms            = @linearize source, tree
   R                 = [ datoms..., errors..., ]
   R                 = ( @on_after_parse R ) ? R
+  return freeze @_sort_nodes R
+
+#-----------------------------------------------------------------------------------------------------------
+@_sort_nodes = ( nodes ) ->
   ### R.sort ( a, b ) -> according to DATOM/VNR fair sorting ###
-  return freeze R
+  return nodes.sort ( a, b ) ->
+    a = a.$vnr ? [ a.start ? -Infinity, a.stop ? -Infinity, ]
+    b = b.$vnr ? [ b.start ? -Infinity, b.stop ? -Infinity, ]
+    DATOM.VNR.cmp_fair a, b
 
 #-----------------------------------------------------------------------------------------------------------
 @linearize = ( source, tree, level = 0 ) ->
