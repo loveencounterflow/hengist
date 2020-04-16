@@ -132,8 +132,18 @@
     datoms = this.linearize(source, tree);
     R = [...datoms, ...errors];
     R = (ref5 = this.on_after_parse(R)) != null ? ref5 : R;
+    return freeze(this._sort_nodes(R));
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._sort_nodes = function(nodes) {
     /* R.sort ( a, b ) -> according to DATOM/VNR fair sorting */
-    return freeze(R);
+    return nodes.sort(function(a, b) {
+      var ref1, ref2, ref3, ref4, ref5, ref6;
+      a = (ref1 = a.$vnr) != null ? ref1 : [(ref2 = a.start) != null ? ref2 : -2e308, (ref3 = a.stop) != null ? ref3 : -2e308];
+      b = (ref4 = b.$vnr) != null ? ref4 : [(ref5 = b.start) != null ? ref5 : -2e308, (ref6 = b.stop) != null ? ref6 : -2e308];
+      return DATOM.VNR.cmp_fair(a, b);
+    });
   };
 
   //-----------------------------------------------------------------------------------------------------------

@@ -227,11 +227,17 @@
       if (is_header) {
         return CND.white(CND.bold(CND.reverse(R)));
       }
+      if (row.$vnr == null) {
+        return CND.cyan(CND.underline(CND.bold(CND.reverse(R))));
+      }
       if (row.name === 'info') {
         return CND.BASE01(CND.underline(CND.bold(CND.reverse(R))));
       }
       if (row.$key === '^raw') {
         return CND.BLUE(CND.underline(CND.bold(CND.reverse(R))));
+      }
+      if (row.$key === '^error') { // and ( key is 'text' )
+        return CND.red(CND.bold(CND.reverse(R)));
       }
       if ((row.$key === '^text') && (key === 'text')) {
         return CND.white(CND.bold(CND.reverse(R)));
