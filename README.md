@@ -6,7 +6,7 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Multi-App Dev (M.A.D.)](#multi-app-dev-mad)
-- [App Layout](#app-layout)
+- [Hengist Layout](#hengist-layout)
 - [Install Taskit](#install-taskit)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -15,7 +15,7 @@
 
 ## Multi-App Dev (M.A.D.)
 
-## App Layout
+## Hengist Layout
 
 * apps
 * assets
