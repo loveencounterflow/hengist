@@ -27,8 +27,8 @@ types                     = require './types'
   type_of }               = types
 Multimix                  = require 'multimix'
 MAIN                      = @
-warn "^33098^ should use `require '../..` instead of named import for INTERTEXT"
-INTERTEXT                 = require 'intertext'
+warn "^33098^ should use `require '../..` instead of `../../apps/intertext`"
+INTERTEXT                 = require '../../apps/intertext'
 { rpr }                   = INTERTEXT.export()
 is_given                  = ( x ) -> not [ null, undefined, NaN, '', ].includes x
 #-----------------------------------------------------------------------------------------------------------
