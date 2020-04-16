@@ -225,14 +225,17 @@ vocabulary:
     <p>It has been suggested to further the cause.</p>
     <p>This is <i>very</i> desirable indeed.</p>
     """
-  await @parse htmlish_grammar, """
-    <title>A Proposal</title>
-    <![CDATA[
-    <h1 =>Motivation</h1>
-    <p>It has been suggested to further the cause.</p>
-    <UNFINISHED
-    <p a= >This is <i>very</i> desirable indeed.</p>
-    <"""
+  await @parse htmlish_grammar, [
+     0         10        20        30        40        50
+     ├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐
+    "<title>A Proposal</title>"                           # 1
+    "<![CDATA["                                           # 2
+    "<h1 =>Motivation</h1>"                               # 3
+    "<p>It has been suggested to further the cause.</p>"  # 4
+    "<UNFINISHED"                                         # 5
+    "<p a= >This is <i>very</i> desirable indeed.</p>"    # 6
+    "<"                                                   # 7
+    ].join '\n'
   await @parse htmlish_grammar, """<article foo=yes>helo</article>"""
 
 #-----------------------------------------------------------------------------------------------------------
