@@ -60,10 +60,10 @@ new_ref = ( d, $ ) ->
   for _, group of tokenization.groups
     for token in group
       token.$vnr  = [ token.startLine, token.startColumn, ]
-      token.$     = new_ref token, '^Γ3a^'
+      token.$     = new_ref token, '^Γ1^'
   for token in tokenization.tokens
     token.$vnr  = [ token.startLine, token.startColumn, ]
-    token.$     = new_ref token, '^Γ3^'
+    token.$     = new_ref token, '^Γ2^'
   #.........................................................................................................
   @parser.input     = ( @on_before_parse tokenization.tokens, tokenization.groups ) ? tokenization.tokens
   cst               = @parser[ @settings.parser_start ]()
@@ -172,8 +172,8 @@ new_ref = ( d, $ ) ->
     $vnr        = if ( is_given line ) and ( is_given column ) then [ line, column, ] else null
     if message.startsWith 'extraneous' then code = 'extraneous'
     else                                    code = 'other'
-    if $vnr? then R.push { $key, code, origin, message, text, start, stop, $vnr, $: '^Γ15^', }
-    else          R.push { $key, code, origin, message, text, start, stop,       $: '^Γ16^', }
+    if $vnr? then R.push { $key, code, origin, message, text, start, stop, $vnr, $: '^Γ14^', }
+    else          R.push { $key, code, origin, message, text, start, stop,       $: '^Γ15^', }
   return R
 
 #-----------------------------------------------------------------------------------------------------------
@@ -213,8 +213,8 @@ vnr_from_parser_error = ( error ) ->
     start   = 0                                       if isa.not_given start
     stop    = start + ( text?.length ? 0 )            if isa.not_given stop
     text    = source[ start ... stop ]  if isa.not_given text
-    if $vnr? then R.push { $key, code, chvtname, origin, message, text, start, stop, $vnr,  $: '^Γ17^', }
-    else          R.push { $key, code, chvtname, origin, message, text, start, stop,        $: '^Γ18^', }
+    if $vnr? then R.push { $key, code, chvtname, origin, message, text, start, stop, $vnr,  $: '^Γ16^', }
+    else          R.push { $key, code, chvtname, origin, message, text, start, stop,        $: '^Γ17^', }
   return R
 
 # #-----------------------------------------------------------------------------------------------------------
@@ -249,12 +249,12 @@ datom_from_token = ( token ) ->
   start = token.startOffset
   stop  = start + ( text?.length ? 0 )
   $vnr  = null
-  $     = '^Γ19^'
+  $     = '^Γ18^'
   if token.$vnr?
-    $     = '^Γ20^'
+    $     = '^Γ19^'
     $vnr  = token.$vnr
   else if ( is_given line = token.startLine ) and ( is_given column = token.startColumn )
-    $     = '^Γ21^'
+    $     = '^Γ20^'
     $vnr = [ line, column, ]
   $ = new_ref token, $
   if ( name = token.tokenType?.name )?
