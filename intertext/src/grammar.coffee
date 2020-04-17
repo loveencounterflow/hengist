@@ -128,7 +128,6 @@ new_ref = ( d, $ ) ->
   if R.$key is '^node' and R.name is 'document'
     R.$key = '^document'
     delete R.name
-    urge '^334^', rpr R
   return freeze R
 
 #-----------------------------------------------------------------------------------------------------------
