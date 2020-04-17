@@ -185,10 +185,10 @@ match_dedent  = ( text, start, matched_tokens, groups ) -> match_leading_ws text
 # and thus we can check before creating an indentation token that the last token matched was a newline.
 token_defs = [
   # blank   = createToken { name: 'blank',    pattern: match_blank, }
-  newline = createToken { name: 'newline',  pattern: /\n|\r\n?/, group: 'nl', }
-  dedent  = createToken { name: 'dedent',   pattern: match_dedent,  line_breaks: false, }
-  indent  = createToken { name: 'indent',   pattern: match_indent,  line_breaks: false, }
-  line    = createToken { name: 'line',     pattern: /[^\n]+/, }
+  newline = createToken { name: 'T_newline',  pattern: /\n|\r\n?/, group: 'nl', }
+  dedent  = createToken { name: 'T_dedent',   pattern: match_dedent,  line_breaks: false, }
+  indent  = createToken { name: 'T_indent',   pattern: match_indent,  line_breaks: false, }
+  line    = createToken { name: 'T_line',     pattern: /[^\n]+/, }
   ]
 
 #-----------------------------------------------------------------------------------------------------------
@@ -207,27 +207,27 @@ indentation_lexer = new Lexer token_defs, { positionTracking: 'full', ensureOpti
         # { ALT: => @CONSUME t.dedent  }
         # { ALT: => @CONSUME t.indent   }
         # { ALT: => @CONSUME t.line     }
-        # { ALT: => @SUBRULE @nt_indent_line_and_nl }
-        # { ALT: => @SUBRULE @nt_line_and_nl        }
-        { ALT: => @SUBRULE @nt_newline            }
-        { ALT: => @SUBRULE @nt_dedent             }
-        { ALT: => @SUBRULE @nt_indent             }
-        { ALT: => @SUBRULE @nt_line               }
+        # { ALT: => @SUBRULE @P_indent_line_and_nl }
+        # { ALT: => @SUBRULE @P_line_and_nl        }
+        { ALT: => @SUBRULE @P_newline            }
+        { ALT: => @SUBRULE @P_dedent             }
+        { ALT: => @SUBRULE @P_indent             }
+        { ALT: => @SUBRULE @P_line               }
         ]
   #---------------------------------------------------------------------------------------------------------
-  @RULE 'nt_indent_line_and_nl', =>
-    @CONSUME t.indent
-    @CONSUME t.line
-    @CONSUME t.newline
+  @RULE 'P_indent_line_and_nl', =>
+    @CONSUME t.T_indent
+    @CONSUME t.T_line
+    @CONSUME t.T_newline
   #---------------------------------------------------------------------------------------------------------
-  @RULE 'nt_line_and_nl', =>
-    @CONSUME t.line
-    @CONSUME t.newline
+  @RULE 'P_line_and_nl', =>
+    @CONSUME t.T_line
+    @CONSUME t.T_newline
   #---------------------------------------------------------------------------------------------------------
-  @RULE 'nt_newline',  => @CONSUME t.newline
-  @RULE 'nt_dedent',   => @CONSUME t.dedent
-  @RULE 'nt_indent',   => @CONSUME t.indent
-  @RULE 'nt_line',     => @CONSUME t.line
+  @RULE 'P_newline',  => @CONSUME t.T_newline
+  @RULE 'P_dedent',   => @CONSUME t.T_dedent
+  @RULE 'P_indent',   => @CONSUME t.T_indent
+  @RULE 'P_line',     => @CONSUME t.T_line
   return null
 
 #-----------------------------------------------------------------------------------------------------------
