@@ -242,20 +242,16 @@ XXX_DATOM_VNR_append = ( d, nr ) ->
   # if level is 0
   #   for kid in tree.kids
   #     debug '^220998^', rpr kid
-  yield from @get_my_prototype().linearize source, tree, level
+  for d from @get_my_prototype().linearize source, tree, level
+    # debug '^387^', rpr d
+    yield d
   position  = @source.length
-  # info '^i2^', level, rpr tree
-  # info '^i3^', level, rpr ( k for k of tree )
-  base_vnr  = ( tree.kids[ tree.kids.length - 1 ]?.$vnr ) ? null
   nr        = 0
   while indent_stack.length > 1
     indent_stack.pop()
     nr++
-    if base_vnr?
-      $vnr = XXX_DATOM_VNR_append base_vnr, nr
-      yield { $key: '^token', name: 'dedent', start: position, stop: position, text: '', $vnr, $: '^i4^', }
-    else
-      yield { $key: '^token', name: 'dedent', start: position, stop: position, text: '', $: '^i5^', }
+    $vnr = [ +Infinity, -nr, ]
+    yield { $key: '^token', name: 'T_dedent', start: position, stop: position, text: '', $vnr, $: '^i4^', }
   return null
 
 #-----------------------------------------------------------------------------------------------------------
