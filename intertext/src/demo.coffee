@@ -226,8 +226,8 @@ vocabulary:
     <p>This is <i>very</i> desirable indeed.</p>
     """
   await @parse htmlish_grammar, [
-     0         10        20        30        40        50
-     ├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐
+   # 0         10        20        30        40        50
+   # ├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐
     "<title>A Proposal</title>"                           # 1
     "<![CDATA["                                           # 2
     "<h1 =>Motivation</h1>"                               # 3
@@ -237,21 +237,6 @@ vocabulary:
     "<"                                                   # 7
     ].join '\n'
   await @parse htmlish_grammar, """<article foo=yes>helo</article>"""
-
-#-----------------------------------------------------------------------------------------------------------
-@demo_indentation = ->
-  #---------------------------------------------------------------------------------------------------------
-  { indentation_grammar, } = require './indentation.grammar'
-  debug '^3998^', rpr ( k for k of indentation_grammar    )
-  await @parse indentation_grammar, """if 42:\n    43\nelse:\n  44"""
-  await @parse indentation_grammar, """   <!-- xx -->"""
-  await @parse indentation_grammar, """L0\n  L1\n    L2\n  L1"""
-  await @parse indentation_grammar, """\n  \n\nL0\n  L1\n\n    \nOK\n"""
-  await @parse indentation_grammar, """   x = 42"""
-  await @parse indentation_grammar, """L0\n  L1\n    L2\n      L3"""
-  await @parse indentation_grammar, """\n  L0\nL1"""
-  await @parse indentation_grammar, """L0"""
-  await @parse indentation_grammar, """L0\n"""
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_asciisorter = ->
@@ -277,11 +262,26 @@ vocabulary:
   await @parse asciiautosumm, """abc123+456defDEF"""
   await @parse asciisorter,   """abc123+456defDEF"""
 
+#-----------------------------------------------------------------------------------------------------------
+@demo_indentation = ->
+  #---------------------------------------------------------------------------------------------------------
+  { indentation_grammar, } = require './indentation.grammar'
+  debug '^3998^', rpr ( k for k of indentation_grammar    )
+  await @parse indentation_grammar, """if 42:\n    43\nelse:\n  44"""
+  await @parse indentation_grammar, """   <!-- xx -->"""
+  await @parse indentation_grammar, """L0\n  L1\n    L2\n  L1"""
+  await @parse indentation_grammar, """\n  \n\nL0\n  L1\n\n    \nOK\n"""
+  await @parse indentation_grammar, """   x = 42"""
+  await @parse indentation_grammar, """L0\n  L1\n    L2\n      L3"""
+  await @parse indentation_grammar, """\n  L0\nL1"""
+  await @parse indentation_grammar, """L0\n"""
+  await @parse indentation_grammar, """L0"""
+
 ############################################################################################################
 if module is require.main then do =>
-  await @demo_indentation()
   await @demo_htmlish()
   await @demo_asciisorter()
+  await @demo_indentation()
 
 
 
