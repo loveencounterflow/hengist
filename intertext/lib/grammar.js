@@ -107,14 +107,14 @@
       for (i = 0, len = group.length; i < len; i++) {
         token = group[i];
         token.$vnr = [token.startLine, token.startColumn];
-        token.$ = new_ref(token, '^Γ3a^');
+        token.$ = new_ref(token, '^Γ1^');
       }
     }
     ref3 = tokenization.tokens;
     for (j = 0, len1 = ref3.length; j < len1; j++) {
       token = ref3[j];
       token.$vnr = [token.startLine, token.startColumn];
-      token.$ = new_ref(token, '^Γ3^');
+      token.$ = new_ref(token, '^Γ2^');
     }
     //.........................................................................................................
     this.parser.input = (ref4 = this.on_before_parse(tokenization.tokens, tokenization.groups)) != null ? ref4 : tokenization.tokens;
@@ -149,68 +149,66 @@
   //-----------------------------------------------------------------------------------------------------------
   this.linearize = function*(source, tree, level = 0) {
     /* In most cases to be overridden by client grammar. */
-    var $key, $vnr, i, j, kid, len, len1, name, ref1, ref2, start, stop, text;
+    var $key, $vnr, i, kid, len, name, ref1, ref2, ref3, start, stop, text;
     ({$key, name, start, stop, text} = tree);
     //.........................................................................................................
     switch ($key) {
+      //.......................................................................................................
       case '^token':
         yield tree;
         break;
-      case '^node':
-        $vnr = null;
+      //.......................................................................................................
+      case '^document':
+        yield ({
+          $key: '<document',
+          name,
+          start,
+          stop,
+          text,
+          $vnr: [-2e308],
+          $: new_ref(tree, '^Γ4^')
+        });
         ref1 = tree.kids;
         for (i = 0, len = ref1.length; i < len; i++) {
           kid = ref1[i];
-          urge('^Γ9-5^', rpr(kid.$vnr), rpr(kid));
-          $vnr = kid.$vnr;
-          break;
-        }
-        if ($vnr != null) {
-          yield ({
-            $key: '<node',
-            name,
-            start,
-            stop,
-            text,
-            $vnr,
-            $: new_ref(tree, '^Γ10^')
-          });
-        } else {
-          yield ({
-            $key: '<node',
-            name,
-            start,
-            stop,
-            text,
-            $: new_ref(tree, '^Γ11^')
-          });
-        }
-        ref2 = tree.kids;
-        for (j = 0, len1 = ref2.length; j < len1; j++) {
-          kid = ref2[j];
           yield* this.linearize(source, kid, level + 1);
         }
+        yield ({
+          $key: '>document',
+          name,
+          start: stop,
+          stop,
+          $vnr: [+2e308],
+          $: new_ref(tree, '^Γ6^')
+        });
+        break;
+      //.......................................................................................................
+      case '^node':
+        $vnr = (ref2 = (ref3 = tree.kids[0]) != null ? ref3.$vnr : void 0) != null ? ref2 : null;
         if ($vnr != null) {
           yield ({
-            $key: '>node',
+            $key: '^node',
             name,
-            start: stop,
+            start,
             stop,
+            text,
             $vnr,
-            $: new_ref(tree, '^Γ12^')
+            $: new_ref(tree, '^Γ9^')
           });
         } else {
           yield ({
-            $key: '>node',
+            $key: '^node',
             name,
-            start: stop,
+            start,
             stop,
-            $: new_ref(tree, '^Γ13^')
+            text,
+            $: new_ref(tree, '^Γ10^')
           });
         }
         break;
       default:
         if ($key !== '^node') {
+          //.......................................................................................................
           throw new Error(`^445^ unknown $key ${rpr($key)}`);
         }
     }
@@ -222,7 +220,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this._adapt_tree = function(source, cst) {
-    var $key, name, text;
+    var $key, R, name, text;
     if (cst == null) {
       $key = '^node';
       name = 'document';
@@ -235,10 +233,16 @@
         start: 0,
         stop: source.length,
         text,
-        $: '^Γ14^'
+        $: '^Γ13^'
       });
     }
-    return freeze(this._adapt_tree_inner(source, cst));
+    R = this._adapt_tree_inner(source, cst);
+    if (R.$key === '^node' && R.name === 'document') {
+      R.$key = '^document';
+      delete R.name;
+      urge('^334^', rpr(R));
+    }
+    return freeze(R);
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -305,7 +309,7 @@
           start,
           stop,
           $vnr,
-          $: '^Γ15^'
+          $: '^Γ14^'
         });
       } else {
         R.push({
@@ -316,7 +320,7 @@
           text,
           start,
           stop,
-          $: '^Γ16^'
+          $: '^Γ15^'
         });
       }
     }
@@ -401,7 +405,7 @@
           start,
           stop,
           $vnr,
-          $: '^Γ17^'
+          $: '^Γ16^'
         });
       } else {
         R.push({
@@ -413,7 +417,7 @@
           text,
           start,
           stop,
-          $: '^Γ18^'
+          $: '^Γ17^'
         });
       }
     }
@@ -463,12 +467,12 @@
     start = token.startOffset;
     stop = start + ((ref1 = text != null ? text.length : void 0) != null ? ref1 : 0);
     $vnr = null;
-    $ = '^Γ19^';
+    $ = '^Γ18^';
     if (token.$vnr != null) {
-      $ = '^Γ20^';
+      $ = '^Γ19^';
       $vnr = token.$vnr;
     } else if ((is_given(line = token.startLine)) && (is_given(column = token.startColumn))) {
-      $ = '^Γ21^';
+      $ = '^Γ20^';
       $vnr = [line, column];
     }
     $ = new_ref(token, $);

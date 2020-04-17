@@ -266,6 +266,8 @@
 <p>It has been suggested to further the cause.</p>
 <p>This is <i>very</i> desirable indeed.</p>`);
     await this.parse(htmlish_grammar, [
+      // 0         10        20        30        40        50
+      // ├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐
       "<title>A Proposal</title>", // 1
       "<![CDATA[", // 2
       "<h1 =>Motivation</h1>", // 3
@@ -275,30 +277,6 @@
       "<" // 7
     ].join('\n'));
     return (await this.parse(htmlish_grammar, `<article foo=yes>helo</article>`));
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.demo_indentation = async function() {
-    var indentation_grammar, k;
-    //---------------------------------------------------------------------------------------------------------
-    ({indentation_grammar} = require('./indentation.grammar'));
-    debug('^3998^', rpr((function() {
-      var results;
-      results = [];
-      for (k in indentation_grammar) {
-        results.push(k);
-      }
-      return results;
-    })()));
-    await this.parse(indentation_grammar, `if 42:\n    43\nelse:\n  44`);
-    await this.parse(indentation_grammar, `   <!-- xx -->`);
-    await this.parse(indentation_grammar, `L0\n  L1\n    L2\n  L1`);
-    await this.parse(indentation_grammar, `\n  \n\nL0\n  L1\n\n    \nOK\n`);
-    await this.parse(indentation_grammar, `   x = 42`);
-    await this.parse(indentation_grammar, `L0\n  L1\n    L2\n      L3`);
-    await this.parse(indentation_grammar, `\n  L0\nL1`);
-    await this.parse(indentation_grammar, `L0`);
-    return (await this.parse(indentation_grammar, `L0\n`));
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -329,12 +307,36 @@
     return (await this.parse(asciisorter, `abc123+456defDEF`));
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_indentation = async function() {
+    var indentation_grammar, k;
+    //---------------------------------------------------------------------------------------------------------
+    ({indentation_grammar} = require('./indentation.grammar'));
+    debug('^3998^', rpr((function() {
+      var results;
+      results = [];
+      for (k in indentation_grammar) {
+        results.push(k);
+      }
+      return results;
+    })()));
+    await this.parse(indentation_grammar, `if 42:\n    43\nelse:\n  44`);
+    await this.parse(indentation_grammar, `   <!-- xx -->`);
+    await this.parse(indentation_grammar, `L0\n  L1\n    L2\n  L1`);
+    await this.parse(indentation_grammar, `\n  \n\nL0\n  L1\n\n    \nOK\n`);
+    await this.parse(indentation_grammar, `   x = 42`);
+    await this.parse(indentation_grammar, `L0\n  L1\n    L2\n      L3`);
+    await this.parse(indentation_grammar, `\n  L0\nL1`);
+    await this.parse(indentation_grammar, `L0\n`);
+    return (await this.parse(indentation_grammar, `L0`));
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      await this.demo_indentation();
       await this.demo_htmlish();
-      return (await this.demo_asciisorter());
+      await this.demo_asciisorter();
+      return (await this.demo_indentation());
     })();
   }
 
