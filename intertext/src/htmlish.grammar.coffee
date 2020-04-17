@@ -143,7 +143,7 @@ dd = ( d ) ->
         yield dd { $key: '>cdata', start: stop2,   stop,         text: text3, $vnr, $: '^ѱ8^', }
       else yield dd { $key: '^unknown', $value: tree, $vnr, $: '^ѱ9^', }
     return null
-  throw new Error "^445^ unknown $key #{rpr $key}" unless $key is '^node'
+  throw new Error "^445^ unknown $key #{rpr $key}" unless $key in [ '^document', '^node', ]
   #.........................................................................................................
   { ukids } = tree
   ### NOTE we assume that unique kids exist and that values are stored in source order ###
@@ -151,7 +151,7 @@ dd = ( d ) ->
     $vnr = ukid.$vnr
     break
   #.........................................................................................................
-  if token_name is 'document'
+  if $key is '^document'
     yield dd { $key: '<document', start: 0, stop: 0, source, errors: tree.errors, $vnr: [ -Infinity, ], $: '^ѱ10^', }
     for subtree in tree.kids
       yield from @linearize source, subtree, level + 1

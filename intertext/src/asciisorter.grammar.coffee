@@ -168,7 +168,7 @@ match_catchall = ( text, start ) ->
       when 'T_catchalls' then yield dd { $key: '^text',   type: 'other', start, stop, text, $vnr, $: '^α3^', }, tree
       else yield dd { $key: '^unknown', text, start, stop, $value: tree, $vnr, $: '^α4^', }, tree
     return null
-  throw new Error "^445^ unknown $key #{rpr $key}" unless $key is '^node'
+  throw new Error "^445^ unknown $key #{rpr $key}" unless $key in [ '^document', '^node', ]
   #.........................................................................................................
   { ukids } = tree
   ### NOTE we assume that unique kids exist and that values are stored in source order ###
@@ -176,7 +176,7 @@ match_catchall = ( text, start ) ->
     $vnr = ukid.$vnr
     break
   #.........................................................................................................
-  if token_name is 'document'
+  if $key is '^document'
     yield dd { $key: '<document', start: 0, stop: 0, source, errors: tree.errors, $vnr: [ -Infinity, ], $: '^α5^', }
     for subtree in tree.kids
       yield from @linearize source, subtree, level + 1

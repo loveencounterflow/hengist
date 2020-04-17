@@ -95,19 +95,20 @@ new_ref = ( d, $ ) ->
     text } = tree
   #.........................................................................................................
   switch $key
+    #.......................................................................................................
     when '^token' then yield tree
-    when '^node'
-      $vnr = null
-      for kid in tree.kids
-        urge '^Γ9-5^', ( rpr kid.$vnr ), rpr kid
-        $vnr = kid.$vnr
-        break
-      if $vnr? then yield { $key: '<node', name, start, stop, text, $vnr, $: ( new_ref tree, '^Γ10^' ), }
-      else          yield { $key: '<node', name, start, stop, text,       $: ( new_ref tree, '^Γ11^' ), }
+    #.......................................................................................................
+    when '^document'
+      yield { $key: '<document', name, start, stop, text, $vnr: [ -Infinity, ], $: ( new_ref tree, '^Γ4^' ), }
       for kid in tree.kids
         yield from @linearize source, kid, level + 1
-      if $vnr? then yield { $key: '>node', name, start: stop, stop, $vnr, $: ( new_ref tree, '^Γ12^' ), }
-      else          yield { $key: '>node', name, start: stop, stop,       $: ( new_ref tree, '^Γ13^' ), }
+      yield { $key: '>document', name, start: stop, stop, $vnr: [ +Infinity, ], $: ( new_ref tree, '^Γ6^' ), }
+    #.......................................................................................................
+    when '^node'
+      $vnr = tree.kids[ 0 ]?.$vnr ? null
+      if $vnr? then yield { $key: '^node', name, start, stop, text, $vnr, $: ( new_ref tree, '^Γ9^' ), }
+      else          yield { $key: '^node', name, start, stop, text,       $: ( new_ref tree, '^Γ10^' ), }
+    #.......................................................................................................
     else throw new Error "^445^ unknown $key #{rpr $key}" unless $key is '^node'
   #.........................................................................................................
   return null
@@ -122,8 +123,13 @@ new_ref = ( d, $ ) ->
     name  = 'document'
     text  = source
     ### TAINT add VNR ###
-    return freeze { $key, name, kids: [], start: 0, stop: source.length, text, $: '^Γ14^', }
-  return freeze @_adapt_tree_inner source, cst
+    return freeze { $key, name, kids: [], start: 0, stop: source.length, text, $: '^Γ13^', }
+  R = @_adapt_tree_inner source, cst
+  if R.$key is '^node' and R.name is 'document'
+    R.$key = '^document'
+    delete R.name
+    urge '^334^', rpr R
+  return freeze R
 
 #-----------------------------------------------------------------------------------------------------------
 @_adapt_tree_inner = ( source, tree ) ->
