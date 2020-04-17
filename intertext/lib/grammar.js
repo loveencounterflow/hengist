@@ -240,7 +240,6 @@
     if (R.$key === '^node' && R.name === 'document') {
       R.$key = '^document';
       delete R.name;
-      urge('^334^', rpr(R));
     }
     return freeze(R);
   };

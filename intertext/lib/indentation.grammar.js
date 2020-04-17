@@ -233,22 +233,22 @@
   token_defs = [
     // blank   = createToken { name: 'blank',    pattern: match_blank, }
     newline = createToken({
-      name: 'newline',
+      name: 'T_newline',
       pattern: /\n|\r\n?/,
       group: 'nl'
     }),
     dedent = createToken({
-      name: 'dedent',
+      name: 'T_dedent',
       pattern: match_dedent,
       line_breaks: false
     }),
     indent = createToken({
-      name: 'indent',
+      name: 'T_indent',
       pattern: match_indent,
       line_breaks: false
     }),
     line = createToken({
-      name: 'line',
+      name: 'T_line',
       pattern: /[^\n]+/
     })
   ];
@@ -272,53 +272,53 @@
             // { ALT: => @CONSUME t.dedent  }
             // { ALT: => @CONSUME t.indent   }
             // { ALT: => @CONSUME t.line     }
-            // { ALT: => @SUBRULE @nt_indent_line_and_nl }
-            // { ALT: => @SUBRULE @nt_line_and_nl        }
+            // { ALT: => @SUBRULE @P_indent_line_and_nl }
+            // { ALT: => @SUBRULE @P_line_and_nl        }
             ALT: () => {
-              return this.SUBRULE(this.nt_newline);
+              return this.SUBRULE(this.P_newline);
             }
           },
           {
             ALT: () => {
-              return this.SUBRULE(this.nt_dedent);
+              return this.SUBRULE(this.P_dedent);
             }
           },
           {
             ALT: () => {
-              return this.SUBRULE(this.nt_indent);
+              return this.SUBRULE(this.P_indent);
             }
           },
           {
             ALT: () => {
-              return this.SUBRULE(this.nt_line);
+              return this.SUBRULE(this.P_line);
             }
           }
         ]);
       });
     });
     //---------------------------------------------------------------------------------------------------------
-    this.RULE('nt_indent_line_and_nl', () => {
-      this.CONSUME(t.indent);
-      this.CONSUME(t.line);
-      return this.CONSUME(t.newline);
+    this.RULE('P_indent_line_and_nl', () => {
+      this.CONSUME(t.T_indent);
+      this.CONSUME(t.T_line);
+      return this.CONSUME(t.T_newline);
     });
     //---------------------------------------------------------------------------------------------------------
-    this.RULE('nt_line_and_nl', () => {
-      this.CONSUME(t.line);
-      return this.CONSUME(t.newline);
+    this.RULE('P_line_and_nl', () => {
+      this.CONSUME(t.T_line);
+      return this.CONSUME(t.T_newline);
     });
     //---------------------------------------------------------------------------------------------------------
-    this.RULE('nt_newline', () => {
-      return this.CONSUME(t.newline);
+    this.RULE('P_newline', () => {
+      return this.CONSUME(t.T_newline);
     });
-    this.RULE('nt_dedent', () => {
-      return this.CONSUME(t.dedent);
+    this.RULE('P_dedent', () => {
+      return this.CONSUME(t.T_dedent);
     });
-    this.RULE('nt_indent', () => {
-      return this.CONSUME(t.indent);
+    this.RULE('P_indent', () => {
+      return this.CONSUME(t.T_indent);
     });
-    this.RULE('nt_line', () => {
-      return this.CONSUME(t.line);
+    this.RULE('P_line', () => {
+      return this.CONSUME(t.T_line);
     });
     return null;
   };
@@ -332,37 +332,31 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.linearize = function*(source, tree, level = 0) {
-    var $vnr, base_vnr, nr, position, ref, ref1;
-    yield* this.get_my_prototype().linearize(source, tree, level);
+    var $vnr, d, nr, position, ref;
+    ref = this.get_my_prototype().linearize(source, tree, level);
+    // R = [ ( @get_my_prototype().linearize source, tree, level )..., ]
+    // if level is 0
+    //   for kid in tree.kids
+    //     debug '^220998^', rpr kid
+    for (d of ref) {
+      // debug '^387^', rpr d
+      yield d;
+    }
     position = this.source.length;
-    // info '^i2^', level, rpr tree
-    // info '^i3^', level, rpr ( k for k of tree )
-    base_vnr = (ref = ((ref1 = tree.kids[tree.kids.length - 1]) != null ? ref1.$vnr : void 0)) != null ? ref : null;
     nr = 0;
     while (indent_stack.length > 1) {
       indent_stack.pop();
       nr++;
-      if (base_vnr != null) {
-        $vnr = XXX_DATOM_VNR_append(base_vnr, nr);
-        yield ({
-          $key: '^token',
-          name: 'dedent',
-          start: position,
-          stop: position,
-          text: '',
-          $vnr,
-          $: '^i4^'
-        });
-      } else {
-        yield ({
-          $key: '^token',
-          name: 'dedent',
-          start: position,
-          stop: position,
-          text: '',
-          $: '^i5^'
-        });
-      }
+      $vnr = [+2e308, -nr];
+      yield ({
+        $key: '^token',
+        name: 'T_dedent',
+        start: position,
+        stop: position,
+        text: '',
+        $vnr,
+        $: '^i4^'
+      });
     }
     return null;
   };
