@@ -276,6 +276,8 @@ vocabulary:
   await @parse indentation_grammar, """\n  L0\nL1"""
   await @parse indentation_grammar, """L0\n"""
   await @parse indentation_grammar, """L0"""
+  await @parse indentation_grammar, """\tL0"""
+  await @parse indentation_grammar, """ L0"""
 
 ############################################################################################################
 if module is require.main then do =>
