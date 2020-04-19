@@ -18,7 +18,8 @@ echo                      = CND.echo.bind CND
 { jr }                    = CND
 assign                    = Object.assign
 after                     = ( time_s, f ) -> setTimeout f, time_s * 1000
-# nf                        = require 'number-format.js'
+### TAINT use standard JS solution ###
+nf                        = require '/home/flow/jzr/benchmarks/node_modules/number-format.js'
 INTERTEXT                 = require 'intertext'
 #...........................................................................................................
 # H                         = require '../helpers'
@@ -149,11 +150,11 @@ f9    = ( n ) -> ( nf '###,##0.000000000', n ).padStart 24
     warn "µ77812 when trying to run test #{rpr test_name}, an error occurred"
     throw error
   t1ns          = @time_now()
-  cpu1          = process.cpuUsage()
+  # cpu1          = process.cpuUsage()
   console.profile test_name
   count         = await test()
   console.profileEnd test_name
-  cpu2          = process.cpuUsage cpu1
+  # cpu2          = process.cpuUsage cpu1
   t2ns          = @time_now()
   #.........................................................................................................
   dt1ns         = parseInt t1ns - t0ns, 10
@@ -169,8 +170,8 @@ f9    = ( n ) -> ( nf '###,##0.000000000', n ).padStart 24
   count_txt     = f0    count
   ops_txt       = f0l   ops
   nspc_txt      = f0    nspc
-  cpuusr_txt    = f0   cpu2.user   / 1e3
-  cpusys_txt    = f0   cpu2.system / 1e3
+  # cpuusr_txt    = f0   cpu2.user   / 1e3
+  # cpusys_txt    = f0   cpu2.system / 1e3
   echo [
     "#{CND.yellow test_name_txt}"
     # "#{CND.grey dt1s_txt + ' s'}"
@@ -178,8 +179,8 @@ f9    = ( n ) -> ( nf '###,##0.000000000', n ).padStart 24
     "#{count_txt} items"
     "#{CND.green ops_txt}⏶Hz"
     "#{CND.gold nspc_txt}⏷nspc"
-    "#{CND.gold cpuusr_txt}⏷CPU/u"
-    "#{CND.gold cpusys_txt}⏷CPU/s"
+    # "#{CND.gold cpuusr_txt}⏷CPU/u"
+    # "#{CND.gold cpusys_txt}⏷CPU/s"
     ].join ' '
   # debug '^1662^ cpu', cpu2
   @add_result me, test_name, { ops, }
