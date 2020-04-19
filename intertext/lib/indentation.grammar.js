@@ -259,69 +259,40 @@
     ensureOptimizations: false
   });
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.summarize = function(t, grammar) {
-    //---------------------------------------------------------------------------------------------------------
-    this.RULE('document', () => {
-      return this.MANY(() => {
-        return this.OR([
-          {
-            // { ALT: => @SUBRULE @indent_line_and_nl  }
-            // { ALT: => @SUBRULE @line_and_nl  }
-            // { ALT: => @CONSUME t.newline  }
-            // { ALT: => @CONSUME t.dedent  }
-            // { ALT: => @CONSUME t.indent   }
-            // { ALT: => @CONSUME t.line     }
-            // { ALT: => @SUBRULE @P_indent_line_and_nl }
-            // { ALT: => @SUBRULE @P_line_and_nl        }
-            ALT: () => {
-              return this.SUBRULE(this.P_newline);
-            }
-          },
-          {
-            ALT: () => {
-              return this.SUBRULE(this.P_dedent);
-            }
-          },
-          {
-            ALT: () => {
-              return this.SUBRULE(this.P_indent);
-            }
-          },
-          {
-            ALT: () => {
-              return this.SUBRULE(this.P_line);
-            }
-          }
-        ]);
-      });
-    });
-    //---------------------------------------------------------------------------------------------------------
-    this.RULE('P_indent_line_and_nl', () => {
-      this.CONSUME(t.T_indent);
-      this.CONSUME(t.T_line);
-      return this.CONSUME(t.T_newline);
-    });
-    //---------------------------------------------------------------------------------------------------------
-    this.RULE('P_line_and_nl', () => {
-      this.CONSUME(t.T_line);
-      return this.CONSUME(t.T_newline);
-    });
-    //---------------------------------------------------------------------------------------------------------
-    this.RULE('P_newline', () => {
-      return this.CONSUME(t.T_newline);
-    });
-    this.RULE('P_dedent', () => {
-      return this.CONSUME(t.T_dedent);
-    });
-    this.RULE('P_indent', () => {
-      return this.CONSUME(t.T_indent);
-    });
-    this.RULE('P_line', () => {
-      return this.CONSUME(t.T_line);
-    });
-    return null;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // @summarize = ( t, grammar ) ->
+  //   #---------------------------------------------------------------------------------------------------------
+  //   @RULE 'document', =>
+  //     @MANY =>
+  //       @OR [
+  //         # { ALT: => @SUBRULE @indent_line_and_nl  }
+  //         # { ALT: => @SUBRULE @line_and_nl  }
+  //         # { ALT: => @CONSUME t.newline  }
+  //         # { ALT: => @CONSUME t.dedent  }
+  //         # { ALT: => @CONSUME t.indent   }
+  //         # { ALT: => @CONSUME t.line     }
+  //         # { ALT: => @SUBRULE @P_indent_line_and_nl }
+  //         # { ALT: => @SUBRULE @P_line_and_nl        }
+  //         { ALT: => @SUBRULE @P_newline            }
+  //         { ALT: => @SUBRULE @P_dedent             }
+  //         { ALT: => @SUBRULE @P_indent             }
+  //         { ALT: => @SUBRULE @P_line               }
+  //         ]
+  //   #---------------------------------------------------------------------------------------------------------
+  //   @RULE 'P_indent_line_and_nl', =>
+  //     @CONSUME t.T_indent
+  //     @CONSUME t.T_line
+  //     @CONSUME t.T_newline
+  //   #---------------------------------------------------------------------------------------------------------
+  //   @RULE 'P_line_and_nl', =>
+  //     @CONSUME t.T_line
+  //     @CONSUME t.T_newline
+  //   #---------------------------------------------------------------------------------------------------------
+  //   @RULE 'P_newline',  => @CONSUME t.T_newline
+  //   @RULE 'P_dedent',   => @CONSUME t.T_dedent
+  //   @RULE 'P_indent',   => @CONSUME t.T_indent
+  //   @RULE 'P_line',     => @CONSUME t.T_line
+  //   return null
 
   //-----------------------------------------------------------------------------------------------------------
   /* TAINT inplement in `datom/vnr` */

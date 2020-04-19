@@ -1,0 +1,151 @@
+(function() {
+  'use strict';
+  var BM, CND, after, alert, assign, badge, debug, defer, echo, help, info, jr, limit_reached, rpr, timeout, urge, warn, whisper;
+
+  //###########################################################################################################
+  CND = require('cnd');
+
+  rpr = CND.rpr;
+
+  badge = 'INTERTEXT/GRAMMARS/BENCHMARKS';
+
+  debug = CND.get_logger('debug', badge);
+
+  alert = CND.get_logger('alert', badge);
+
+  whisper = CND.get_logger('whisper', badge);
+
+  warn = CND.get_logger('warn', badge);
+
+  help = CND.get_logger('help', badge);
+
+  urge = CND.get_logger('urge', badge);
+
+  info = CND.get_logger('info', badge);
+
+  echo = CND.echo.bind(CND);
+
+  ({jr} = CND);
+
+  assign = Object.assign;
+
+  after = function(time_s, f) {
+    return setTimeout(f, time_s * 1000);
+  };
+
+  defer = setImmediate;
+
+  //...........................................................................................................
+  // types                     = require '../types'
+  // { isa
+  //   validate
+  //   cast
+  //   type_of }               = types
+  //...........................................................................................................
+  BM = require('../../lib/benchmarks');
+
+  // DATA                      = require '../data-providers'
+  //...........................................................................................................
+  timeout = 3 * 1000;
+
+  limit_reached = function(t0) {
+    return Date.now() - t0 > timeout;
+  };
+
+  //===========================================================================================================
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.foobar = function(n, show) {
+    return new Promise((resolve) => {
+      var probes;
+      probes = function*() {
+        var i, j, ref;
+        for (i = j = 1, ref = n; (1 <= ref ? j <= ref : j >= ref); i = 1 <= ref ? ++j : --j) {
+          yield i;
+        }
+      };
+      //.........................................................................................................
+      resolve(() => {
+        var foobar;
+        return new Promise(foobar = (resolve) => {
+          var R, count, probe;
+          R = (function() {
+            var ref, results;
+            ref = probes();
+            results = [];
+            for (probe of ref) {
+              results.push(n ** 2);
+            }
+            return results;
+          })();
+          count = n;
+          resolve(count);
+          return null;
+        });
+      });
+      //.........................................................................................................
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.blah = function(n, show) {
+    return new Promise((resolve) => {
+      //.........................................................................................................
+      resolve(() => {
+        var blah;
+        return new Promise(blah = (resolve) => {
+          var R, count, idx, j, ref;
+          R = '';
+          count = 0;
+          for (idx = j = 0, ref = n; (0 <= ref ? j <= ref : j >= ref); idx = 0 <= ref ? ++j : --j) {
+            count++;
+            R += `${n}`;
+          }
+          resolve(count);
+          return null;
+        });
+      });
+      //.........................................................................................................
+      return null;
+    });
+  };
+
+  //===========================================================================================================
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.benchmark = async function() {
+    var _, bench, j, k, len, n, ref, repetitions, show, test_name, test_names;
+    // always_use_fresh_words    = false
+    bench = BM.new_benchmarks();
+    n = 1e6;
+    // n           = 1e6
+    // n           = 1e4
+    // n           = 10
+    timeout = n / 50e3 * 1000 + (2 * 1000);
+    show = false;
+    show = n < 21;
+    repetitions = 1;
+    // await BM.benchmark n, show, @
+    test_names = ['foobar', 'blah'];
+    for (_ = j = 1, ref = repetitions; (1 <= ref ? j <= ref : j >= ref); _ = 1 <= ref ? ++j : --j) {
+// CND.shuffle test_names
+      for (k = 0, len = test_names.length; k < len; k++) {
+        test_name = test_names[k];
+        await BM.benchmark(bench, n, show, this, test_name);
+      }
+      echo();
+    }
+    BM.show_totals(bench);
+    return null;
+  };
+
+  //###########################################################################################################
+  if (module === require.main) {
+    (async() => {
+      await this.benchmark();
+      return null;
+    })();
+  }
+
+}).call(this);
