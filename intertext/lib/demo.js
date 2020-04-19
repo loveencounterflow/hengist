@@ -328,7 +328,9 @@
     await this.parse(indentation_grammar, `L0\n  L1\n    L2\n      L3`);
     await this.parse(indentation_grammar, `\n  L0\nL1`);
     await this.parse(indentation_grammar, `L0\n`);
-    return (await this.parse(indentation_grammar, `L0`));
+    await this.parse(indentation_grammar, `L0`);
+    await this.parse(indentation_grammar, `\tL0`);
+    return (await this.parse(indentation_grammar, ` L0`));
   };
 
   //###########################################################################################################
