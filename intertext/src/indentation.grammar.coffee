@@ -195,40 +195,40 @@ token_defs = [
 indentation_lexer = new Lexer token_defs, { positionTracking: 'full', ensureOptimizations: false, }
 
 
-#-----------------------------------------------------------------------------------------------------------
-@summarize = ( t, grammar ) ->
-  #---------------------------------------------------------------------------------------------------------
-  @RULE 'document', =>
-    @MANY =>
-      @OR [
-        # { ALT: => @SUBRULE @indent_line_and_nl  }
-        # { ALT: => @SUBRULE @line_and_nl  }
-        # { ALT: => @CONSUME t.newline  }
-        # { ALT: => @CONSUME t.dedent  }
-        # { ALT: => @CONSUME t.indent   }
-        # { ALT: => @CONSUME t.line     }
-        # { ALT: => @SUBRULE @P_indent_line_and_nl }
-        # { ALT: => @SUBRULE @P_line_and_nl        }
-        { ALT: => @SUBRULE @P_newline            }
-        { ALT: => @SUBRULE @P_dedent             }
-        { ALT: => @SUBRULE @P_indent             }
-        { ALT: => @SUBRULE @P_line               }
-        ]
-  #---------------------------------------------------------------------------------------------------------
-  @RULE 'P_indent_line_and_nl', =>
-    @CONSUME t.T_indent
-    @CONSUME t.T_line
-    @CONSUME t.T_newline
-  #---------------------------------------------------------------------------------------------------------
-  @RULE 'P_line_and_nl', =>
-    @CONSUME t.T_line
-    @CONSUME t.T_newline
-  #---------------------------------------------------------------------------------------------------------
-  @RULE 'P_newline',  => @CONSUME t.T_newline
-  @RULE 'P_dedent',   => @CONSUME t.T_dedent
-  @RULE 'P_indent',   => @CONSUME t.T_indent
-  @RULE 'P_line',     => @CONSUME t.T_line
-  return null
+# #-----------------------------------------------------------------------------------------------------------
+# @summarize = ( t, grammar ) ->
+#   #---------------------------------------------------------------------------------------------------------
+#   @RULE 'document', =>
+#     @MANY =>
+#       @OR [
+#         # { ALT: => @SUBRULE @indent_line_and_nl  }
+#         # { ALT: => @SUBRULE @line_and_nl  }
+#         # { ALT: => @CONSUME t.newline  }
+#         # { ALT: => @CONSUME t.dedent  }
+#         # { ALT: => @CONSUME t.indent   }
+#         # { ALT: => @CONSUME t.line     }
+#         # { ALT: => @SUBRULE @P_indent_line_and_nl }
+#         # { ALT: => @SUBRULE @P_line_and_nl        }
+#         { ALT: => @SUBRULE @P_newline            }
+#         { ALT: => @SUBRULE @P_dedent             }
+#         { ALT: => @SUBRULE @P_indent             }
+#         { ALT: => @SUBRULE @P_line               }
+#         ]
+#   #---------------------------------------------------------------------------------------------------------
+#   @RULE 'P_indent_line_and_nl', =>
+#     @CONSUME t.T_indent
+#     @CONSUME t.T_line
+#     @CONSUME t.T_newline
+#   #---------------------------------------------------------------------------------------------------------
+#   @RULE 'P_line_and_nl', =>
+#     @CONSUME t.T_line
+#     @CONSUME t.T_newline
+#   #---------------------------------------------------------------------------------------------------------
+#   @RULE 'P_newline',  => @CONSUME t.T_newline
+#   @RULE 'P_dedent',   => @CONSUME t.T_dedent
+#   @RULE 'P_indent',   => @CONSUME t.T_indent
+#   @RULE 'P_line',     => @CONSUME t.T_line
+#   return null
 
 #-----------------------------------------------------------------------------------------------------------
 ### TAINT inplement in `datom/vnr` ###
