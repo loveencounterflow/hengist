@@ -89,6 +89,14 @@ Task::intertext-interim-tests () {
   nodexh intertext/lib/interim.tests.js || ~/bin/bad
 	}
 
+# 🅘🅝🅣🅔🅡🅣🅔🅧🅣
+# Runs benchmarks
+Task::benchmarks () {
+	: @desc 					"runs benchmarks"
+  : @param project 	"project to run benchmarks for"
+  nodexh lib/cli benchmarks "${_project:-*}"
+	}
+
 
 
 
