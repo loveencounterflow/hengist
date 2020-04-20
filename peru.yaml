@@ -4,7 +4,7 @@ imports:
 
 git module intershop:
     url: https://github.com/loveencounterflow/intershop
-    rev: 77e3e9e9c2a9c726400d916883030814e4ca5dfa
+    rev: db7f7f5e5c818f4cbdcf3ae89b74a9bd5c0cedb5
 
 # git module helloworld:
 #     url: https://github.com/leachim6/hello-world
