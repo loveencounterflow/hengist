@@ -16,9 +16,10 @@ intershop/invariants/autovalidate     ::boolean=         true
 
 
 hengist/path                          ::text/path/folder=   ${intershop/host/path}
-hengist/mirage/parallel-limit         ::U.natural_number=   2
-hengist/mirage/dsk/configuration      ::url=                ptv:${intershop/host/configuration/path}
-hengist/mirage/dsk/pkgjson            ::url=                plain:${hengist/path}/package.json
+intershop/mirage/parallel-limit       ::U.natural_number=   2
+intershop/mirage/dsk/configuration    ::url=                ptv:${intershop/host/configuration/path}
+intershop/mirage/dsk/pkgjson          ::url=                plain:${hengist/path}/package.json
+intershop/mirage/dsk/readme           ::url=                plain:${hengist/path}/README.md
 
 
 
