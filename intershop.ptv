@@ -20,6 +20,7 @@ intershop/mirage/parallel-limit       ::U.natural_number=   2
 intershop/mirage/dsk/configuration    ::url=                ptv:${intershop/host/configuration/path}
 intershop/mirage/dsk/pkgjson          ::url=                plain:${hengist/path}/package.json
 intershop/mirage/dsk/readme           ::url=                plain:${hengist/path}/README.md
+intershop/mirage/dsk/interplot/svg-to-png           ::url=                plain:${hengist/path}/apps/interplot/svg-to-png
 
 
 
