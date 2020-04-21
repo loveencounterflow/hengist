@@ -13,6 +13,7 @@
     "commander": "^5.0.0",
     "datom": "^5.0.0",
     "guy-test": "^2.0.1",
+    "intershop-rpc": "^0.1.1",
     "intertext": "^1.6.1",
     "intertype": "^3.4.0",
     "multimix": "^2.2.0",
