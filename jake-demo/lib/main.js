@@ -47,7 +47,7 @@
 
   ({rpr} = INTERTEXT.export());
 
-  sh = require('exec-sh');
+  sh = (require('exec-sh')).promise;
 
   //-----------------------------------------------------------------------------------------------------------
   invoke = function(name, ...P) {
@@ -101,9 +101,8 @@
   desc("install all npm dependencies");
 
   task('intershop_npm_install', function() {
-    return new Promise((resolve) => {
-      // sh 'ls -AlF'
-      sh(`( cd intershop && npm install && npm audit )`);
+    return new Promise(async(resolve) => {
+      await sh(`( cd intershop && npm install && npm audit )`);
       return resolve();
     });
   });
@@ -112,12 +111,11 @@
   desc("devcycle");
 
   task('devcycle', [], function() {
-    return new Promise((resolve) => {
-      // sh 'ls -AlF'
-      sh(`( cd ~/jzr/intershop && coffee --map -o intershop_modules -c intershop_modules )`);
-      sh(`peru sync`);
-      sh(`intershop refresh-mirage-datasources`);
-      sh(`intershop psql -c "select * from MIRAGE.mirror order by dsk, dsnr, linenr;`);
+    return new Promise(async(resolve) => {
+      await sh(`( cd ~/jzr/intershop && coffee --map -o intershop_modules -c intershop_modules )`);
+      await sh(`peru sync`);
+      await sh(`intershop refresh-mirage-datasources`);
+      await sh(`intershop psql -c "select * from MIRAGE.mirror order by dsk, dsnr, linenr;\"`);
       return resolve();
     });
   });
