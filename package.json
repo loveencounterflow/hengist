@@ -12,9 +12,11 @@
     "cnd": "^5.3.1",
     "commander": "^5.0.0",
     "datom": "^5.0.0",
+    "exec-sh": "^0.3.4",
     "guy-test": "^2.0.1",
     "intertext": "^1.6.1",
     "intertype": "^3.4.0",
+    "jake": "^10.5.2",
     "multimix": "^2.2.0",
     "steampipes": "^6.1.1"
   }
