@@ -28,7 +28,7 @@ JAKE                      = require 'jake'
   task }                  = JAKE
 INTERTEXT                 = require 'intertext'
 { rpr }                   = INTERTEXT.export()
-sh                        = require 'exec-sh'
+sh                        = ( require 'exec-sh' ).promise
 
 #-----------------------------------------------------------------------------------------------------------
 invoke = ( name, P... ) ->
@@ -59,18 +59,16 @@ task 'demo_sync', ->
 #-----------------------------------------------------------------------------------------------------------
 desc "install all npm dependencies"
 task 'intershop_npm_install', -> new Promise ( resolve ) =>
-  # sh 'ls -AlF'
-  sh """( cd intershop && npm install && npm audit )"""
+  await sh """( cd intershop && npm install && npm audit )"""
   resolve()
 
 #-----------------------------------------------------------------------------------------------------------
 desc "devcycle"
 task 'devcycle', [], -> new Promise ( resolve ) =>
-  # sh 'ls -AlF'
-  sh """( cd ~/jzr/intershop && coffee --map -o intershop_modules -c intershop_modules )"""
-  sh """peru sync"""
-  sh """intershop refresh-mirage-datasources"""
-  sh """intershop psql -c "select * from MIRAGE.mirror order by dsk, dsnr, linenr;"""
+  await sh """( cd ~/jzr/intershop && coffee --map -o intershop_modules -c intershop_modules )"""
+  await sh """peru sync"""
+  await sh """intershop refresh-mirage-datasources"""
+  await sh """intershop psql -c "select * from MIRAGE.mirror order by dsk, dsnr, linenr;\""""
   resolve()
 
 #-----------------------------------------------------------------------------------------------------------
