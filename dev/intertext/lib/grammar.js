@@ -32,7 +32,7 @@
 
   warn("^34448^ using 'apps/datom' instead of 'datom'");
 
-  DATOM = new (require('../../apps/datom')).Datom({
+  DATOM = new (require('../../../apps/datom')).Datom({
     dirty: false
   });
 
@@ -48,7 +48,7 @@
 
   warn("^33098^ should use `require '../..` instead of `../../apps/intertext`");
 
-  INTERTEXT = require('../../apps/intertext');
+  INTERTEXT = require('../../../apps/intertext');
 
   ({rpr} = INTERTEXT.export());
 

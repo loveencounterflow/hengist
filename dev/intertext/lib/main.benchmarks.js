@@ -42,7 +42,7 @@
   //   cast
   //   type_of }               = types
   //...........................................................................................................
-  BM = require('../../lib/benchmarks');
+  BM = require('../../../lib/benchmarks');
 
   // DATA                      = require '../data-providers'
   //...........................................................................................................
@@ -119,8 +119,6 @@
     // always_use_fresh_words    = false
     bench = BM.new_benchmarks();
     n = 1e6;
-    // n           = 1e6
-    // n           = 1e4
     // n           = 10
     timeout = n / 50e3 * 1000 + (2 * 1000);
     show = false;
@@ -140,6 +138,7 @@
     return null;
   };
 
+  // commander                          heap-benchmark fontmirror interplot svgttf mingkwai-typesetter
   //###########################################################################################################
   if (module === require.main) {
     (async() => {

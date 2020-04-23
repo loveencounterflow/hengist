@@ -38,7 +38,7 @@
 
   warn("^33098^ should use `require '../..` instead of `../../apps/intertext`");
 
-  INTERTEXT = require('../../apps/intertext');
+  INTERTEXT = require('../../../apps/intertext');
 
   ({rpr} = INTERTEXT.export());
 
