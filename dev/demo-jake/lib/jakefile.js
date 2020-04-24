@@ -143,19 +143,40 @@
     });
   });
 
-  desc('watch-files');
+  desc('git-updates');
 
-  task('watch-files', ['A', 'B'], function() {
+  task('git-updates', function() {
     return new Promise(async function(resolve) {
-      await `cd dev/filewatcher && coffee --map -o lib -c src && node lib/main.js`;
-      help('(H');
-      return (await after(0.5, function() {
-        warn('H)');
-        return resolve();
-      }));
+      await sh(``);
+      return resolve();
     });
   });
 
+  desc('git-update-lib');
+
+  task('git-update-lib', function() {
+    return new Promise(async function(resolve) {
+      await sh(`git add --dry-run --update lib dev/**/lib`);
+      // await sh """git add --update lib dev/**/lib && git commit -m'update'"""
+      return resolve();
+    });
+  });
+
+  desc('git-status');
+
+  task('git-status', function() {
+    return new Promise(async function(resolve) {
+      await sh(`git status`);
+      return resolve();
+    });
+  });
+
+  /*
+  git add lib && git commit -m'update' && git status
+  git add --update lib dev/ ** /lib && git commit -m'update' && git status
+  git add package* && git commit -m'update dependencies'
+  doctoc README* && git add README* && git commit -m'update docs' && git push
+  */
   // #===========================================================================================================
   // #
   // #-----------------------------------------------------------------------------------------------------------
