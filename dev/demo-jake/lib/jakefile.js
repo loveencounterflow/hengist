@@ -193,68 +193,7 @@
   /*
   doctoc README* && git add README* && git commit -m'update docs' && git push
   */
-  // #===========================================================================================================
-  // #
-  // #-----------------------------------------------------------------------------------------------------------
-  // desc "whatever"
-  // task 'default', -> new Promise ( resolve ) =>
-  //   whisper rpr ( k for k of JAKE.Task ).sort()
-  //   await after 0.5, -> resolve 42
-
-  // #-----------------------------------------------------------------------------------------------------------
-  // desc "demo async with await"
-  // task 'demo_async_with_await', sync, ->
-  //   urge "demo_async_with_await"
-  //   await after 0.5, -> new Promise ( resolve ) =>
-  //     info "demo_async_with_await ok"
-  //     resolve()
-
-  // #-----------------------------------------------------------------------------------------------------------
-  // desc "demo async with promise resolve"
-  // task 'demo_async_with_promise_resolve', [], sync, -> new Promise ( resolve ) =>
-  //   urge "demo_async_with_promise_resolve"
-  //   after 0.5, =>
-  //     info "demo_async_with_promise_resolve ok"
-  //     resolve()
-
-  // #-----------------------------------------------------------------------------------------------------------
-  // desc "demo async with promise resolve 2"
-  // task 'demo_async_with_promise_resolve_2', [], -> new Promise ( resolve ) =>
-  //   urge "demo_async_with_promise_resolve_2"
-  //   after 0.5, =>
-  //     info "demo_async_with_promise_resolve_2 ok"
-  //     resolve()
-
-  // #-----------------------------------------------------------------------------------------------------------
-  // desc "demo sync with async dependency"
-  // task 'demo_sync', sync, ->
-  //   await invoke 'demo_async_with_await'
-  //   await invoke 'demo_async_with_promise_resolve'
-  //   await invoke 'demo_async_with_promise_resolve_2'
-  //   await invoke 'f'
-  //   info "demo_sync"
-  //   return null
-
-  // #-----------------------------------------------------------------------------------------------------------
-  // desc "demo sync with async dependency using execute"
-  // task 'demo_sync_using_execute', sync, ->
-  //   await execute 'demo_async_with_await'
-  //   await execute 'demo_async_with_await'
-  //   await execute 'demo_async_with_promise_resolve'
-  //   await execute 'demo_async_with_promise_resolve_2'
-  //   await execute 'f'
-  //   info "demo_sync"
-  //   return null
-
-  // #-----------------------------------------------------------------------------------------------------------
-  // desc "failing demo sync with async dependency"
-  // task 'demo_sync_fails', [ 'demo_async', ], sync, ->
-  //   info "demo_sync_fails"
-  //   return null
-
   //-----------------------------------------------------------------------------------------------------------
-  desc("install all npm dependencies");
-
   task('intershop_npm_install', function() {
     return new Promise(async(resolve) => {
       await sh(`( cd intershop && npm install && npm audit )`);
@@ -263,26 +202,9 @@
   });
 
   //-----------------------------------------------------------------------------------------------------------
-  desc("devcycle");
-
-  task('devcycle', [], function() {
+  task('gitcollector-show-commits', function() {
     return new Promise(async(resolve) => {
-      await sh(`( cd ~/jzr/intershop && coffee --map -o intershop_modules -c intershop_modules )`);
-      await sh(`intershop refresh-mirage-datasources`);
-      await sh(`intershop psql -c "select * from MIRAGE.mirror order by dsk, dsnr, linenr;\"`);
-      return resolve();
-    });
-  });
-
-  //-----------------------------------------------------------------------------------------------------------
-  desc("demo command");
-
-  task('f', [], function() {
-    return new Promise((resolve) => {
-      debug('^33365^', process.argv);
-      invoke('default', 42);
-      // process.argv.pop()
-      // debug '^33365^', process.argv
+      await sh(`nodexh dev/gitcollector/lib/main.js | less -SR#5`);
       return resolve();
     });
   });
