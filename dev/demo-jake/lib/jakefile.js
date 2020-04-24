@@ -152,7 +152,7 @@
   });
 
   //-----------------------------------------------------------------------------------------------------------
-  task('git-updates', ['git-update-lib', 'git-update-readmes', 'git-update-dependencies'], function() {
+  task('git-updates', ['git-update-lib', 'git-update-readmes', 'git-update-dependencies', 'git-status'], function() {
     return new Promise(function(resolve) {
       return resolve();
     });
