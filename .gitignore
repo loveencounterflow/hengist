@@ -107,5 +107,6 @@ dist
 .peru
 intershop
 intershop-peru-copy
+dev/filewatcher
 
 
