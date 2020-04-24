@@ -156,8 +156,7 @@
 
   task('git-update-lib', function() {
     return new Promise(async function(resolve) {
-      await sh(`git add --dry-run --update lib dev/**/lib`);
-      // await sh """git add --update lib dev/**/lib && git commit -m'update'"""
+      await sh(`git add --update lib dev/**/lib && git commit -m'update'`);
       return resolve();
     });
   });
