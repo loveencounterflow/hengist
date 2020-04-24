@@ -143,6 +143,19 @@
     });
   });
 
+  desc('watch-files');
+
+  task('watch-files', ['A', 'B'], function() {
+    return new Promise(async function(resolve) {
+      await `cd dev/filewatcher && coffee --map -o lib -c src && node lib/main.js`;
+      help('(H');
+      return (await after(0.5, function() {
+        warn('H)');
+        return resolve();
+      }));
+    });
+  });
+
   // #===========================================================================================================
   // #
   // #-----------------------------------------------------------------------------------------------------------
