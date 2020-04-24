@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, INTERTEXT, JAKE, after, alert, assign, async, badge, call, debug, defer, desc, echo, execute, help, info, invoke, jr, rpr, sh, sync, task, urge, warn, whisper;
+  var CND, INTERTEXT, JAKE, _sh, after, alert, assign, async, badge, debug, defer, echo, execute, help, info, invoke, jr, rpr, sh, sync, task, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -48,13 +48,24 @@
   //   type_of }               = types
   JAKE = require('jake');
 
-  ({desc, task} = JAKE);
-
   INTERTEXT = require('intertext');
 
   ({rpr} = INTERTEXT.export());
 
-  sh = (require('exec-sh')).promise;
+  _sh = (require('exec-sh')).promise;
+
+  //-----------------------------------------------------------------------------------------------------------
+  sh = async function(...P) {
+    var R, error;
+    try {
+      (R = (await _sh(...P)));
+    } catch (error1) {
+      error = error1;
+      warn('^334^', error.message);
+      return null;
+    }
+    return R;
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   invoke = async function(name, ...P) {
@@ -65,12 +76,13 @@
     return (await JAKE.Task[name].execute(...P));
   };
 
-  call = async function(name, ...P) {
-    return (await JAKE.Task[name](...P));
+  //-----------------------------------------------------------------------------------------------------------
+  task = function(name, ...P) {
+    JAKE.desc(name);
+    return JAKE.task(name, ...P);
   };
 
-  desc('A');
-
+  //-----------------------------------------------------------------------------------------------------------
   task('A', {
     async: true
   }, function() {
@@ -83,8 +95,7 @@
     });
   });
 
-  desc('B');
-
+  //-----------------------------------------------------------------------------------------------------------
   task('B', function() {
     return new Promise(async function(resolve) {
       help('(B');
@@ -95,9 +106,8 @@
     });
   });
 
-  desc('C');
-
-  /* TAINT jake does not wait for completion, must use Promise */  task('C', {
+  //-----------------------------------------------------------------------------------------------------------
+  task('C', {
     async: true
   }, async function() {
     help('(C');
@@ -106,8 +116,7 @@
     }));
   });
 
-  desc('G');
-
+  //-----------------------------------------------------------------------------------------------------------
   task('G', function() {
     return new Promise(async function(resolve) {
       help('(G');
@@ -122,7 +131,6 @@
     });
   });
 
-  // desc 'K'
   // task 'K', -> new Promise ( resolve ) ->
   //   help '(K'
   //   debug rpr ( k for k of JAKE.Task[ 'A' ]); process.exit 1
@@ -131,8 +139,8 @@
   //   await call 'A'
   //   await call 'B'
   //   await after 0.5, -> warn 'K)'; resolve()
-  desc('H');
 
+  //-----------------------------------------------------------------------------------------------------------
   task('H', ['A', 'B'], function() {
     return new Promise(async function(resolve) {
       help('(H');
@@ -143,17 +151,14 @@
     });
   });
 
-  desc('git-updates');
-
-  task('git-updates', function() {
-    return new Promise(async function(resolve) {
-      await sh(``);
+  //-----------------------------------------------------------------------------------------------------------
+  task('git-updates', ['git-update-lib', 'git-update-readmes', 'git-update-dependencies'], function() {
+    return new Promise(function(resolve) {
       return resolve();
     });
   });
 
-  desc('git-update-lib');
-
+  //-----------------------------------------------------------------------------------------------------------
   task('git-update-lib', function() {
     return new Promise(async function(resolve) {
       await sh(`git add --update lib dev/**/lib && git commit -m'update'`);
@@ -161,8 +166,23 @@
     });
   });
 
-  desc('git-status');
+  //-----------------------------------------------------------------------------------------------------------
+  task('git-update-readmes', function() {
+    return new Promise(async function(resolve) {
+      await sh(`git add --update README* dev/**/README* && git commit -m'update docs'`);
+      return resolve();
+    });
+  });
 
+  //-----------------------------------------------------------------------------------------------------------
+  task('git-update-dependencies', function() {
+    return new Promise(async function(resolve) {
+      await sh(`git add package* && git commit -m'update dependencies'`);
+      return resolve();
+    });
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
   task('git-status', function() {
     return new Promise(async function(resolve) {
       await sh(`git status`);
@@ -171,9 +191,6 @@
   });
 
   /*
-  git add lib && git commit -m'update' && git status
-  git add --update lib dev/ ** /lib && git commit -m'update' && git status
-  git add package* && git commit -m'update dependencies'
   doctoc README* && git add README* && git commit -m'update docs' && git push
   */
   // #===========================================================================================================
