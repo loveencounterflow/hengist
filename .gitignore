@@ -106,6 +106,7 @@ dist
 
 .peru
 intershop
-dev/filewatcher
+apps/*
+
 
 
