@@ -28,33 +28,42 @@ sync                      = { concurrency: 1, }
 #   cast
 #   type_of }               = types
 JAKE                      = require 'jake'
-{ desc
-  task }                  = JAKE
 INTERTEXT                 = require 'intertext'
 { rpr }                   = INTERTEXT.export()
-sh                        = ( require 'exec-sh' ).promise
+_sh                       = ( require 'exec-sh' ).promise
+
+#-----------------------------------------------------------------------------------------------------------
+sh = ( P... ) ->
+  try ( R = await _sh P... ) catch error
+    warn '^334^', error.message
+    return null
+  return R
 
 #-----------------------------------------------------------------------------------------------------------
 invoke  = ( name, P... ) -> await ( JAKE.Task[ name ] ).invoke  P...
 execute = ( name, P... ) -> await ( JAKE.Task[ name ] ).execute P...
-call    = ( name, P... ) -> await ( JAKE.Task[ name ] ) P...
 
-desc 'A'
+#-----------------------------------------------------------------------------------------------------------
+task = ( name, P... ) ->
+  JAKE.desc name
+  JAKE.task name, P...
+
+#-----------------------------------------------------------------------------------------------------------
 task 'A', { async: true, }, -> new Promise ( resolve ) ->
   help '(A'
   await after 0.5, -> warn 'A)'; resolve()
 
-desc 'B'
+#-----------------------------------------------------------------------------------------------------------
 task 'B', -> new Promise ( resolve ) ->
   help '(B'
   await after 0.5, -> warn 'B)'; resolve()
 
-desc 'C' ### TAINT jake does not wait for completion, must use Promise ###
+#-----------------------------------------------------------------------------------------------------------
 task 'C', { async: true, }, ->
   help '(C'
   await after 0.5, -> warn 'C)'
 
-desc 'G'
+#-----------------------------------------------------------------------------------------------------------
 task 'G', -> new Promise ( resolve ) ->
   help '(G'
   await execute 'A'
@@ -63,7 +72,6 @@ task 'G', -> new Promise ( resolve ) ->
   await execute 'B'
   await after 0.5, -> warn 'G)'; resolve()
 
-# desc 'K'
 # task 'K', -> new Promise ( resolve ) ->
 #   help '(K'
 #   debug rpr ( k for k of JAKE.Task[ 'A' ]); process.exit 1
@@ -73,10 +81,43 @@ task 'G', -> new Promise ( resolve ) ->
 #   await call 'B'
 #   await after 0.5, -> warn 'K)'; resolve()
 
-desc 'H'
+#-----------------------------------------------------------------------------------------------------------
 task 'H', [ 'A', 'B', ], -> new Promise ( resolve ) ->
   help '(H'
   await after 0.5, -> warn 'H)'; resolve()
+
+#-----------------------------------------------------------------------------------------------------------
+task 'git-updates', [
+  'git-update-lib'
+  'git-update-readmes'
+  'git-update-dependencies'
+  'git-status' ],
+  -> new Promise ( resolve ) -> resolve()
+
+#-----------------------------------------------------------------------------------------------------------
+task 'git-update-lib', -> new Promise ( resolve ) ->
+  await sh """git add --update lib dev/**/lib && git commit -m'update'"""
+  resolve()
+
+#-----------------------------------------------------------------------------------------------------------
+task 'git-update-readmes', -> new Promise ( resolve ) ->
+  await sh """git add --update README* dev/**/README* && git commit -m'update docs'"""
+  resolve()
+
+#-----------------------------------------------------------------------------------------------------------
+task 'git-update-dependencies', -> new Promise ( resolve ) ->
+  await sh """git add package* && git commit -m'update dependencies'"""
+  resolve()
+
+#-----------------------------------------------------------------------------------------------------------
+task 'git-status', -> new Promise ( resolve ) ->
+  await sh """git status"""
+  resolve()
+
+###
+doctoc README* && git add README* && git commit -m'update docs' && git push
+###
+
 
 
 # #===========================================================================================================
