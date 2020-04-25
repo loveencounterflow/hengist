@@ -75,44 +75,14 @@
 │   │   │   ● main.js.map                                     ║
 </pre>
 
-## Install Taskit
-
-To run the tasks listed in `hengist/Taskfile`, install [Taskit](https://github.com/kjkuan/taskit):
-
-```
-curl https://raw.githubusercontent.com/kjkuan/taskit/1.0.0/taskit > /usr/local/bin/taskit && chmod +x /usr/local/bin/taskit
-```
-
-or
-
-```
-curl https://raw.githubusercontent.com/kjkuan/taskit/1.0.0/taskit > ~/bin/taskit && chmod +x ~/bin/taskit
-```
-
-Taskit tasks are just `bash` functions so they shoulkd be reasonably future-proof. Two examples:
-
-```bash
-# 🅘🅝🅣🅔🅡🅣🅔🅧🅣
-# Runs `src/demo.coffee` to show output of some parsers arranged in tables
-Task::intertext-parsers-demo () {
-  : @desc "runs InterText Parsing Demo"
-  nodexh intertext/lib/demo.js 2>&1 | less -SRN#5 +G; }
-
-# 🅘🅝🅣🅔🅡🅣🅔🅧🅣
-# Runs interim tests meant to assist in code refactoring
-Task::intertext-interim-tests () {
-  : @desc "runs InterText Interim Tests"
-  nodexh intertext/lib/interim.tests.js; }
-```
-
-* type `taskit $taskname $key=$value` to run task `taskname` with argument `key` set to `value`,
-  e.g. `taskit count-from-one to=10`
-* type `taskit -t` to list all available tasks;
-* type `taskit -h` for help;
-* type `taskit -h $taskname` for help on `taskname`;
 
 
+# To Do
 
+
+* [ ] Update tree representation: local development under `dev/` (which is included in Hengist git repo);
+  external stuff (for which Hengist only provides tests and/or benchmarks and/or demos, experiments) is
+  symlinked under `apps/` (and not included in Hengist git repo).
 
 
 
