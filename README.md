@@ -5,9 +5,9 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [Multi-App Dev (M.A.D.)](#multi-app-dev-mad)
-- [Hengist Layout](#hengist-layout)
-- [Install Taskit](#install-taskit)
+  - [Multi-App Dev (M.A.D.)](#multi-app-dev-mad)
+  - [Hengist Layout](#hengist-layout)
+- [To Do](#to-do)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
