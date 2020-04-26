@@ -101,7 +101,7 @@ task 'git-update-lib', -> new Promise ( resolve ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 task 'git-update-readmes', -> new Promise ( resolve ) ->
-  await sh """git add --update README* dev/**/README* && git commit -m'update docs'"""
+  await sh """doctoc README* dev/**/README* && git add --update README* dev/**/README* && git commit -m'update docs'"""
   resolve()
 
 #-----------------------------------------------------------------------------------------------------------

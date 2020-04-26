@@ -169,7 +169,7 @@
   //-----------------------------------------------------------------------------------------------------------
   task('git-update-readmes', function() {
     return new Promise(async function(resolve) {
-      await sh(`git add --update README* dev/**/README* && git commit -m'update docs'`);
+      await sh(`doctoc README* dev/**/README* && git add --update README* dev/**/README* && git commit -m'update docs'`);
       return resolve();
     });
   });
