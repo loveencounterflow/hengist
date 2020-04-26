@@ -333,12 +333,36 @@
     return (await this.parse(indentation_grammar, ` L0`));
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_regex_whitespace = async function() {
+    var Rxws_grammar, k, rxws_grammar;
+    //---------------------------------------------------------------------------------------------------------
+    ({Rxws_grammar, rxws_grammar} = require('./regex-whitespace.grammar'));
+    // rxws_grammar = new Rxws_grammar { as_blocks: false, }
+    debug('^3998^', rpr((function() {
+      var results;
+      results = [];
+      for (k in rxws_grammar) {
+        results.push(k);
+      }
+      return results;
+    })()));
+    await this.parse(rxws_grammar, `if 42:\n\r    43\nelse:\n  44`);
+    await this.parse(rxws_grammar, `if 42:\r\n    43\nelse:\n  44`);
+    await this.parse(rxws_grammar, `\nif 42:\n    43\n\nelse:\n  44\n`);
+    await this.parse(rxws_grammar, `if 42:\n    43\n\n  \nelse:\n  44`);
+    await this.parse(rxws_grammar, `one-one\none-two\n\ntwo-one\ntwo-two`);
+    await this.parse(rxws_grammar, `one-one\none-two\n  \ntwo-one\ntwo-two\n`);
+    return (await this.parse(rxws_grammar, `a\n  b\n\n    c`));
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      await this.demo_htmlish();
-      await this.demo_asciisorter();
-      return (await this.demo_indentation());
+      // await @demo_htmlish()
+      // await @demo_asciisorter()
+      await this.demo_indentation();
+      return (await this.demo_regex_whitespace());
     })();
   }
 

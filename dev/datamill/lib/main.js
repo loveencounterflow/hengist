@@ -50,16 +50,22 @@
   ({rpr} = INTERTEXT.export());
 
   //-----------------------------------------------------------------------------------------------------------
-  this.demo = function() {
-    var k;
-    return debug('^4554^', rpr((function() {
-      var results;
-      results = [];
-      for (k in DATAMILL) {
-        results.push(k);
-      }
-      return results;
-    })()));
+  this.demo = async function() {
+    var DISPLAY, grammar, i, len, source, token, tokens;
+    // debug '^4554^', rpr ( k for k of DATAMILL )
+    DISPLAY = require('../../paragate/lib/display');
+    grammar = require('../../../apps/paragate/lib/htmlish.grammar');
+    source = `<title>A Proposal</title>
+<h1>Motivation</h1>
+<p>It has been suggested to further the cause.</p>
+<p>This is <i>very</i> desirable indeed.</p>`;
+    tokens = grammar.parse(source);
+    for (i = 0, len = tokens.length; i < len; i++) {
+      token = tokens[i];
+      info(rpr(token));
+    }
+    await DISPLAY.show_tokens_as_table(tokens);
+    return null;
   };
 
   //###########################################################################################################
