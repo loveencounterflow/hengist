@@ -4,7 +4,7 @@
 
 ############################################################################################################
 CND                       = require 'cnd'
-badge                     = 'INTERTEXT/GRAMMARS/INTERIM-TESTS'
+badge                     = 'PARAGATE/INTERIM-TESTS'
 log                       = CND.get_logger 'plain',     badge
 info                      = CND.get_logger 'info',      badge
 whisper                   = CND.get_logger 'whisper',   badge
@@ -19,9 +19,8 @@ echo                      = CND.echo.bind CND
 test                      = require 'guy-test'
 INTERTEXT                 = require 'intertext'
 { rpr }                   = INTERTEXT.export()
-types                     = require './types'
 { isa
-  type_of }               = types
+  type_of }               = INTERTEXT.types
 { lets }                  = ( require 'datom' ).export()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -69,7 +68,7 @@ delete_refs = ( ds ) ->
 #-----------------------------------------------------------------------------------------------------------
 # @[ "API" ] = ( T, done ) ->
 #   grammar       = require './grammar'
-#   grammar  = require './htmlish.grammar'
+#   grammar  = require './../paragate/lib/htmlish.grammar'
 #   debug '^34334^', rpr ( k for k of grammar )
 #   debug '^34334^', rpr ( k for k of grammar )
 #   # urge grammar.parse """<title>Helo Worlds</title>"""
@@ -77,7 +76,7 @@ delete_refs = ( ds ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "HTML: parse (1)" ] = ( T, done ) ->
-  grammar = require './htmlish.grammar'
+  grammar = require './../paragate/lib/htmlish.grammar'
   probes_and_matchers = [
     [ '<!DOCTYPE html>',    [ { '$key': '<document', start: 0, stop: 0, source: '<!DOCTYPE html>', errors: [], '$vnr': [ -Infinity ] }, { '$key': '^doctype', start: 0, stop: 15, text: '<!DOCTYPE html>', '$vnr': [ 1, 1 ] }, { '$key': '>document', start: 15, stop: 15, '$vnr': [ Infinity ] } ], null ]
     [ '<!DOCTYPE obvious>', [ { '$key': '<document', start: 0, stop: 0, source: '<!DOCTYPE obvious>', errors: [], '$vnr': [ -Infinity ] }, { '$key': '^doctype', start: 0, stop: 18, text: '<!DOCTYPE obvious>', '$vnr': [ 1, 1 ] }, { '$key': '>document', start: 18, stop: 18, '$vnr': [ Infinity ] } ], null ]
@@ -102,7 +101,7 @@ delete_refs = ( ds ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "HTML: parse (1a)" ] = ( T, done ) ->
-  grammar = require './htmlish.grammar'
+  grammar = require './../paragate/lib/htmlish.grammar'
   probes_and_matchers = [
     [ '<!DOCTYPE html>', "$key='^doctype',$vnr=[ 1, 1 ],start=0,stop=15,text='<!DOCTYPE html>'", null ]
     [ '<!DOCTYPE obvious>', "$key='^doctype',$vnr=[ 1, 1 ],start=0,stop=18,text='<!DOCTYPE obvious>'", null ]
@@ -127,7 +126,7 @@ delete_refs = ( ds ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "HTML: parse (dubious)" ] = ( T, done ) ->
-  grammar = require './htmlish.grammar'
+  grammar = require './../paragate/lib/htmlish.grammar'
   probes_and_matchers = [
     [ '< >', "$key='<tag',$vnr=[ 1, 1 ],start=0,stop=3,text='< >',type='otag'#$key='^error',$vnr=[ 1, 3 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=2,stop=3,text='>'", null ]
     [ '< x >', "$key='<tag',$vnr=[ 1, 1 ],name='x',start=0,stop=5,text='< x >',type='otag'", null ]
