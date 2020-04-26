@@ -6,18 +6,22 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loveencounterflow/hengist.git"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cnd": "^5.3.1",
-    "commander": "^5.0.0",
+    "cnd": "^5.3.2",
+    "commander": "^5.1.0",
     "datom": "^5.0.0",
     "exec-sh": "^0.3.4",
     "guy-test": "^2.0.1",
-    "intertext": "^1.6.1",
-    "intertype": "^3.4.0",
-    "jake": "^10.5.2",
-    "multimix": "^2.2.0",
+    "intertext": "^2.0.0",
+    "intertype": "^3.4.1",
+    "jake": "^10.6.1",
+    "multimix": "^2.2.1",
     "steampipes": "^6.1.1"
   }
 }
