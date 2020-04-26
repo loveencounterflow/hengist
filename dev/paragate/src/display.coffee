@@ -3,7 +3,7 @@
 
 ############################################################################################################
 CND                       = require 'cnd'
-badge                     = 'INTERTEXT/PARSERS/DISPLAY'
+badge                     = 'PARAGATE/DISPLAY'
 log                       = CND.get_logger 'plain',     badge
 info                      = CND.get_logger 'info',      badge
 whisper                   = CND.get_logger 'whisper',   badge
@@ -59,8 +59,8 @@ DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
     echo ( ( "#{idx * 10}".padEnd 10, ' ' ) for idx in [ 0 .. 19 ] ).join ''
     echo '├┬┬┬┬┼┬┬┬┐'.repeat 20
     echo escape_text source
-    echo ( colors[ idx %% color_count ] CND.reverse CND.bold escape_text lexeme for lexeme, idx in lexemes ).join ''
-    echo (                                          escape_text lexeme for lexeme, idx in lexemes ).join ''
+    echo ( colors[ idx %% color_count ] CND.reverse CND.bold  escape_text lexeme for lexeme, idx in lexemes ).join ''
+    echo (                                                    escape_text lexeme for lexeme, idx in lexemes ).join ''
     for error in errors
       indent  = ' '.repeat error.start
       stretch = CND.red CND.reverse error.text
