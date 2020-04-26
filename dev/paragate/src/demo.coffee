@@ -279,11 +279,27 @@ vocabulary:
   await @parse indentation_grammar, """\tL0"""
   await @parse indentation_grammar, """ L0"""
 
+#-----------------------------------------------------------------------------------------------------------
+@demo_regex_whitespace = ->
+  #---------------------------------------------------------------------------------------------------------
+  { Rxws_grammar, rxws_grammar, } = require './regex-whitespace.grammar'
+  # rxws_grammar = new Rxws_grammar { as_blocks: false, }
+  debug '^3998^', rpr ( k for k of rxws_grammar    )
+  await @parse rxws_grammar, """if 42:\n\r    43\nelse:\n  44"""
+  await @parse rxws_grammar, """if 42:\r\n    43\nelse:\n  44"""
+  await @parse rxws_grammar, """\nif 42:\n    43\n\nelse:\n  44\n"""
+  await @parse rxws_grammar, """if 42:\n    43\n\n  \nelse:\n  44"""
+  await @parse rxws_grammar, """one-one\none-two\n\ntwo-one\ntwo-two"""
+  await @parse rxws_grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
+  await @parse rxws_grammar, """a\n  b\n\n    c"""
+
+
 ############################################################################################################
 if module is require.main then do =>
-  await @demo_htmlish()
-  await @demo_asciisorter()
+  # await @demo_htmlish()
+  # await @demo_asciisorter()
   await @demo_indentation()
+  await @demo_regex_whitespace()
 
 
 
