@@ -3,7 +3,7 @@
 
 ############################################################################################################
 CND                       = require 'cnd'
-badge                     = 'INTERTEXT/GRAMMARS/DEMO'
+badge                     = 'PARAGATE/DEMO'
 log                       = CND.get_logger 'plain',     badge
 info                      = CND.get_logger 'info',      badge
 whisper                   = CND.get_logger 'whisper',   badge
@@ -18,7 +18,7 @@ echo                      = CND.echo.bind CND
   jr }                    = CND
 { lets
   freeze }                = ( new ( require 'datom' ).Datom { dirty: false, } ).export()
-types                     = require './types'
+types                     = require '../../../apps/paragate/lib/types'
 { isa }                   = types
 warn "^33098^ should use `require '../..` instead of `../../apps/intertext`"
 INTERTEXT                 = require '../../../apps/intertext'
@@ -178,7 +178,7 @@ vocabulary:
 #
 #-----------------------------------------------------------------------------------------------------------
 @demo_htmlish = ->
-  htmlish_grammar = require './htmlish.grammar'
+  htmlish_grammar = require '../../../apps/paragate/lib/htmlish.grammar'
   # urge '^2212^', rpr ( k for k in types.all_keys_of htmlish_grammar when not k.startsWith '__' ).sort()
   # urge '^2212^', rpr ( k for k of htmlish_grammar ).sort()
   # await @parse htmlish_grammar, """<title>Helo Worlds</title>"""
@@ -240,7 +240,7 @@ vocabulary:
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_asciisorter = ->
-  { asciisorter, Asciisorter, } = require './asciisorter.grammar'
+  { asciisorter, Asciisorter, } = require '../../../apps/paragate/lib/asciisorter.grammar'
   # await @parse asciisorter, """if 42:\n    43\nelse:\n  44"""
   # await @parse asciisorter, """   x = 42"""
   # await @parse asciisorter, """abcABC_( )123+!?"""
@@ -265,7 +265,7 @@ vocabulary:
 #-----------------------------------------------------------------------------------------------------------
 @demo_indentation = ->
   #---------------------------------------------------------------------------------------------------------
-  { indentation_grammar, } = require './indentation.grammar'
+  { indentation_grammar, } = require '../../../apps/paragate/lib/indentation.grammar'
   debug '^3998^', rpr ( k for k of indentation_grammar    )
   await @parse indentation_grammar, """if 42:\n    43\nelse:\n  44"""
   await @parse indentation_grammar, """   <!-- xx -->"""

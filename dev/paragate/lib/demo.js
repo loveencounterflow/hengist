@@ -5,7 +5,7 @@
   //###########################################################################################################
   CND = require('cnd');
 
-  badge = 'INTERTEXT/GRAMMARS/DEMO';
+  badge = 'PARAGATE/DEMO';
 
   log = CND.get_logger('plain', badge);
 
@@ -32,7 +32,7 @@
     dirty: false
   })).export());
 
-  types = require('./types');
+  types = require('../../../apps/paragate/lib/types');
 
   ({isa} = types);
 
@@ -220,7 +220,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this.demo_htmlish = async function() {
     var htmlish_grammar;
-    htmlish_grammar = require('./htmlish.grammar');
+    htmlish_grammar = require('../../../apps/paragate/lib/htmlish.grammar');
     // urge '^2212^', rpr ( k for k in types.all_keys_of htmlish_grammar when not k.startsWith '__' ).sort()
     // urge '^2212^', rpr ( k for k of htmlish_grammar ).sort()
     // await @parse htmlish_grammar, """<title>Helo Worlds</title>"""
@@ -282,7 +282,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this.demo_asciisorter = async function() {
     var Asciisorter, asciiautosumm, asciisorter;
-    ({asciisorter, Asciisorter} = require('./asciisorter.grammar'));
+    ({asciisorter, Asciisorter} = require('../../../apps/paragate/lib/asciisorter.grammar'));
     // await @parse asciisorter, """if 42:\n    43\nelse:\n  44"""
     // await @parse asciisorter, """   x = 42"""
     // await @parse asciisorter, """abcABC_( )123+!?"""
@@ -311,7 +311,7 @@
   this.demo_indentation = async function() {
     var indentation_grammar, k;
     //---------------------------------------------------------------------------------------------------------
-    ({indentation_grammar} = require('./indentation.grammar'));
+    ({indentation_grammar} = require('../../../apps/paragate/lib/indentation.grammar'));
     debug('^3998^', rpr((function() {
       var results;
       results = [];
