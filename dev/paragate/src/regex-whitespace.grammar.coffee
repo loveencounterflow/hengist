@@ -72,7 +72,7 @@ Multimix                  = require '../paragate/node_modules/multimix'
     $vnr        = first.$vnr
     level       = first.level ? 0
     linecount   = buffer.length
-    debug '^223^', rpr buffer
+    # debug '^223^', rpr buffer
     if $key is '^block' then  text  = ( (          d.text + d.nl ) for d in buffer ).join ''
     else                      text  = ( ( d.dent + d.text + d.nl ) for d in buffer ).join ''
     return { $key, start, stop, text, level, linecount, $vnr, $: '^r4^', }
@@ -90,13 +90,11 @@ Multimix                  = require '../paragate/node_modules/multimix'
       continue
     if @blank_re.test d.line
       blocks = flush '^block', blocks
-      info '^blank^', rpr d
       blanks.push d
       continue
     ### TAINT account for differing levels ###
     blanks    = flush '^blank', blanks
     blocks    = flush '^block', blocks if prv_level isnt d.level
-    urge '^block^', rpr d
     prv_level = d.level
     blocks.push d
   #.........................................................................................................
