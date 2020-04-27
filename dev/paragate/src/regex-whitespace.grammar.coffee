@@ -49,6 +49,7 @@ Multimix                  = require '../paragate/node_modules/multimix'
     linenr++
     { dent, text, } = ( line.match @dent_re ).groups
     level           = dent.length
+    line           += nl
     R.push { $key: '^dline', start, stop, dent, text, nl, line, level, $vnr: [ linenr, colnr ], $: '^r2^' }
     start           = stop
   start = stop = source.length
@@ -64,15 +65,17 @@ Multimix                  = require '../paragate/node_modules/multimix'
   prv_level   = null
   #.........................................................................................................
   consolidate = ( $key, buffer ) ->
-    first = buffer[ 0 ]
-    last  = buffer[ buffer.length - 1 ]
-    start = first.start
-    stop  = last.stop
-    $vnr  = first.$vnr
-    level = first.level ? 0
-    if $key is '^block' then  text  = ( ( d.text          ) for d in buffer ).join '\n'
-    else                      text  = ( ( d.dent + d.text ) for d in buffer ).join '\n'
-    return { $key, start, stop, text, level, $vnr, $: '^r4^', }
+    first       = buffer[ 0 ]
+    last        = buffer[ buffer.length - 1 ]
+    start       = first.start
+    stop        = last.stop
+    $vnr        = first.$vnr
+    level       = first.level ? 0
+    linecount   = buffer.length
+    debug '^223^', rpr buffer
+    if $key is '^block' then  text  = ( (          d.text + d.nl ) for d in buffer ).join ''
+    else                      text  = ( ( d.dent + d.text + d.nl ) for d in buffer ).join ''
+    return { $key, start, stop, text, level, linecount, $vnr, $: '^r4^', }
   #.........................................................................................................
   flush = ( $key, collection ) ->
     return collection unless collection.length > 0
@@ -87,11 +90,13 @@ Multimix                  = require '../paragate/node_modules/multimix'
       continue
     if @blank_re.test d.line
       blocks = flush '^block', blocks
+      info '^blank^', rpr d
       blanks.push d
       continue
     ### TAINT account for differing levels ###
     blanks    = flush '^blank', blanks
     blocks    = flush '^block', blocks if prv_level isnt d.level
+    urge '^block^', rpr d
     prv_level = d.level
     blocks.push d
   #.........................................................................................................

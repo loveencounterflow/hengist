@@ -283,7 +283,7 @@ vocabulary:
 @demo_regex_whitespace = ->
   #---------------------------------------------------------------------------------------------------------
   { Rxws_grammar, rxws_grammar, } = require './regex-whitespace.grammar'
-  # rxws_grammar = new Rxws_grammar { as_blocks: false, }
+  rxws_grammar = new Rxws_grammar { as_blocks: false, }
   debug '^3998^', rpr ( k for k of rxws_grammar    )
   await @parse rxws_grammar, """if 42:\n\r    43\nelse:\n  44"""
   await @parse rxws_grammar, """if 42:\r\n    43\nelse:\n  44"""
@@ -291,7 +291,7 @@ vocabulary:
   await @parse rxws_grammar, """if 42:\n    43\n\n  \nelse:\n  44"""
   await @parse rxws_grammar, """one-one\none-two\n\ntwo-one\ntwo-two"""
   await @parse rxws_grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
-  await @parse rxws_grammar, """a\n  b\n\n    c"""
+  await @parse rxws_grammar, """a\n  b\n\n\n \n  c\n   d"""
 
 
 ############################################################################################################
