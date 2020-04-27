@@ -128,6 +128,12 @@ task 'gitcollector-show-commits', -> new Promise ( resolve ) =>
   await sh """nodexh dev/gitcollector/lib/main.js | less -SR#5"""
   resolve()
 
+#-----------------------------------------------------------------------------------------------------------
+task 'benchmark', ( P... ) -> new Promise ( resolve ) =>
+  debug '^43^', P
+  # await sh """nodexh dev/gitcollector/lib/main.js | less -SR#5"""
+  resolve()
+
 
 
 ############################################################################################################
