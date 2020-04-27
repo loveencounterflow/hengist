@@ -338,7 +338,9 @@
     var Rxws_grammar, k, rxws_grammar;
     //---------------------------------------------------------------------------------------------------------
     ({Rxws_grammar, rxws_grammar} = require('./regex-whitespace.grammar'));
-    // rxws_grammar = new Rxws_grammar { as_blocks: false, }
+    rxws_grammar = new Rxws_grammar({
+      as_blocks: false
+    });
     debug('^3998^', rpr((function() {
       var results;
       results = [];
@@ -353,7 +355,7 @@
     await this.parse(rxws_grammar, `if 42:\n    43\n\n  \nelse:\n  44`);
     await this.parse(rxws_grammar, `one-one\none-two\n\ntwo-one\ntwo-two`);
     await this.parse(rxws_grammar, `one-one\none-two\n  \ntwo-one\ntwo-two\n`);
-    return (await this.parse(rxws_grammar, `a\n  b\n\n    c`));
+    return (await this.parse(rxws_grammar, `a\n  b\n\n\n \n  c\n   d`));
   };
 
   //###########################################################################################################
