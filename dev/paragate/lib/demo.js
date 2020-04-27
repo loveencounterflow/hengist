@@ -281,7 +281,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_asciisorter = async function() {
-    var Asciisorter, asciiautosumm, asciisorter;
+    var Asciisorter, asciiautosumm, asciisorter, path, probe;
     ({asciisorter, Asciisorter} = require('../../../apps/paragate/lib/asciisorter.grammar'));
     // await @parse asciisorter, """if 42:\n    43\nelse:\n  44"""
     // await @parse asciisorter, """   x = 42"""
@@ -304,7 +304,13 @@
     // await @parse asciiautosumm,           """   <!-- xx -->"""
     await this.parse(asciisorter, `abc123defDEF`);
     await this.parse(asciiautosumm, `abc123+456defDEF`);
-    return (await this.parse(asciisorter, `abc123+456defDEF`));
+    await this.parse(asciisorter, `abc123+456defDEF`);
+    await this.parse(asciisorter, `äöü\n 雜文3`);
+    path = (require('path')).join(__dirname, 'main.benchmarks.js');
+    probe = (require('fs')).readFileSync(path, {
+      encoding: 'utf-8'
+    });
+    return (await this.parse(asciisorter, probe));
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -338,9 +344,7 @@
     var Rxws_grammar, k, rxws_grammar;
     //---------------------------------------------------------------------------------------------------------
     ({Rxws_grammar, rxws_grammar} = require('./regex-whitespace.grammar'));
-    rxws_grammar = new Rxws_grammar({
-      as_blocks: false
-    });
+    // rxws_grammar = new Rxws_grammar { as_blocks: false, }
     debug('^3998^', rpr((function() {
       var results;
       results = [];
@@ -355,17 +359,19 @@
     await this.parse(rxws_grammar, `if 42:\n    43\n\n  \nelse:\n  44`);
     await this.parse(rxws_grammar, `one-one\none-two\n\ntwo-one\ntwo-two`);
     await this.parse(rxws_grammar, `one-one\none-two\n  \ntwo-one\ntwo-two\n`);
-    return (await this.parse(rxws_grammar, `a\n  b\n\n\n \n  c\n   d`));
+    await this.parse(rxws_grammar, `a\n  b\n\n\n \n  c\n   d`);
+    return (await this.parse(rxws_grammar, ''));
   };
 
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
       // await @demo_htmlish()
-      // await @demo_asciisorter()
-      await this.demo_indentation();
-      return (await this.demo_regex_whitespace());
+      return (await this.demo_asciisorter());
     })();
   }
+
+  // await @demo_indentation()
+// await @demo_regex_whitespace()
 
 }).call(this);

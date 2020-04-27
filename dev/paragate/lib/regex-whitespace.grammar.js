@@ -50,7 +50,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this.parse = function(source) {
     var R, colnr, dent, i, idx, level, line, linenr, lines, nl, ref, ref1, start, stop, text;
-    validate.nonempty_text(source);
+    validate.text(source);
     R = [];
     lines = source.split(this.nl_re);
     linenr = 0;
@@ -119,7 +119,7 @@
       $vnr = first.$vnr;
       level = (ref = first.level) != null ? ref : 0;
       linecount = buffer.length;
-      debug('^223^', rpr(buffer));
+      // debug '^223^', rpr buffer
       if ($key === '^block') {
         text = ((function() {
           var i, len, results;
@@ -170,7 +170,6 @@
       }
       if (this.blank_re.test(d.line)) {
         blocks = flush('^block', blocks);
-        info('^blank^', rpr(d));
         blanks.push(d);
         continue;
       }
@@ -178,7 +177,6 @@
       if (prv_level !== d.level) {
         blocks = flush('^block', blocks);
       }
-      urge('^block^', rpr(d));
       prv_level = d.level;
       blocks.push(d);
     }
