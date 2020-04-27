@@ -32,7 +32,7 @@ Multimix                  = require '../paragate/node_modules/multimix'
 
 #-----------------------------------------------------------------------------------------------------------
 @parse = ( source ) ->
-  validate.nonempty_text source
+  validate.text source
   R           = []
   lines       = source.split @nl_re
   linenr      = 0
