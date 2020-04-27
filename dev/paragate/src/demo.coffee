@@ -261,6 +261,10 @@ vocabulary:
   await @parse asciisorter,   """abc123defDEF"""
   await @parse asciiautosumm, """abc123+456defDEF"""
   await @parse asciisorter,   """abc123+456defDEF"""
+  await @parse asciisorter,   """äöü\n 雜文3"""
+  path  = ( require 'path' ).join __dirname, 'main.benchmarks.js'
+  probe = ( require 'fs' ).readFileSync path, { encoding: 'utf-8', }
+  await @parse asciisorter,   probe
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_indentation = ->
