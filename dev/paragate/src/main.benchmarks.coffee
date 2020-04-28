@@ -34,7 +34,7 @@ PATH                      = require 'path'
 INTERTEXT                 = require 'intertext'
 { rpr }                   = INTERTEXT.export()
 #...........................................................................................................
-fixture =
+assets =
   ok:                 false
   probes:             [
     ''
@@ -55,14 +55,14 @@ fixture =
 
 #-----------------------------------------------------------------------------------------------------------
 prepare = -> new Promise ( resolve ) ->
-  return resolve() if fixture.ok
-  for path in fixture.paths
+  return resolve() if assets.ok
+  for path in assets.paths
     path                        = PATH.resolve PATH.join __dirname, path
     probe                       = await FSP.readFile path, { encoding: 'utf-8', }
-    fixture.approx_char_count  += probe.length
-    fixture.line_count         += ( probe.split '\n' ).length
-    fixture.probes.push probe
-  fixture.ok = true
+    assets.approx_char_count  += probe.length
+    assets.line_count         += ( probe.split '\n' ).length
+    assets.probes.push probe
+  assets.ok = true
   resolve()
   return null
 
@@ -100,12 +100,12 @@ prepare = -> new Promise ( resolve ) ->
   #.........................................................................................................
   resolve => new Promise rxws_tokens = ( resolve ) =>
     token_count = 0
-    for probe, idx in fixture.probes
+    for probe, idx in assets.probes
       tokens        = grammar.parse probe
       token_count  += tokens.length
-    resolve fixture.approx_char_count
+    resolve assets.approx_char_count
     # resolve token_count
-    # resolve fixture.line_count
+    # resolve assets.line_count
     return null
   #.........................................................................................................
   return null
@@ -118,7 +118,7 @@ demo_parse = ->
   grammar = new GRAMMAR.Rxws_grammar { as_blocks: false, }
   # GRAMMAR = require '../paragate/lib/indentation.grammar'
   # grammar = GRAMMAR.indentation_grammar
-  for probe in fixture.probes
+  for probe in assets.probes
     urge '^5554^', rpr ( grammar.parse probe ).length
   return null
 
