@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, FSP, INTERTEXT, PATH, after, alert, assign, badge, debug, defer, demo_parse, echo, fixture, help, info, jr, limit_reached, prepare, rpr, timeout, urge, warn, whisper;
+  var BM, CND, FSP, INTERTEXT, PATH, after, alert, assets, assign, badge, debug, defer, demo_parse, echo, help, info, jr, limit_reached, prepare, rpr, timeout, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -59,7 +59,7 @@
   ({rpr} = INTERTEXT.export());
 
   //...........................................................................................................
-  fixture = {
+  assets = {
     ok: false,
     probes: ['', 'x', 'foo\n  bar', '\nxxx'.repeat(20000)],
     approx_char_count: 0,
@@ -71,21 +71,21 @@
   prepare = function() {
     return new Promise(async function(resolve) {
       var i, len, path, probe, ref;
-      if (fixture.ok) {
+      if (assets.ok) {
         return resolve();
       }
-      ref = fixture.paths;
+      ref = assets.paths;
       for (i = 0, len = ref.length; i < len; i++) {
         path = ref[i];
         path = PATH.resolve(PATH.join(__dirname, path));
         probe = (await FSP.readFile(path, {
           encoding: 'utf-8'
         }));
-        fixture.approx_char_count += probe.length;
-        fixture.line_count += (probe.split('\n')).length;
-        fixture.probes.push(probe);
+        assets.approx_char_count += probe.length;
+        assets.line_count += (probe.split('\n')).length;
+        assets.probes.push(probe);
       }
-      fixture.ok = true;
+      assets.ok = true;
       resolve();
       return null;
     });
@@ -151,15 +151,15 @@
         return new Promise(rxws_tokens = (resolve) => {
           var i, idx, len, probe, ref, token_count, tokens;
           token_count = 0;
-          ref = fixture.probes;
+          ref = assets.probes;
           for (idx = i = 0, len = ref.length; i < len; idx = ++i) {
             probe = ref[idx];
             tokens = grammar.parse(probe);
             token_count += tokens.length;
           }
-          resolve(fixture.approx_char_count);
+          resolve(assets.approx_char_count);
           // resolve token_count
-          // resolve fixture.line_count
+          // resolve assets.line_count
           return null;
         });
       });
@@ -177,7 +177,7 @@
     grammar = new GRAMMAR.Rxws_grammar({
       as_blocks: false
     });
-    ref = fixture.probes;
+    ref = assets.probes;
     // GRAMMAR = require '../paragate/lib/indentation.grammar'
     // grammar = GRAMMAR.indentation_grammar
     for (i = 0, len = ref.length; i < len; i++) {
