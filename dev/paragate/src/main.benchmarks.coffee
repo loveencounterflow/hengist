@@ -103,8 +103,8 @@ prepare = -> new Promise ( resolve ) ->
     for probe, idx in assets.probes
       tokens        = grammar.parse probe
       token_count  += tokens.length
-    resolve assets.approx_char_count
-    # resolve token_count
+    # resolve assets.approx_char_count
+    resolve token_count
     # resolve assets.line_count
     return null
   #.........................................................................................................

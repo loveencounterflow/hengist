@@ -26,6 +26,12 @@ INTERTEXT                 = require '../../../apps/intertext'
 DISPLAY                   = require './display'
 
 
+
+#-----------------------------------------------------------------------------------------------------------
+@read_file = ( path ) ->
+  path  = ( require 'path' ).join __dirname, path
+  return ( require 'fs' ).readFileSync path, { encoding: 'utf-8', }
+
 #-----------------------------------------------------------------------------------------------------------
 @parse = ( grammar, source ) ->
   headline = grammar.name + ': ' + ( jr source ).padEnd 108, ' '
@@ -237,6 +243,7 @@ vocabulary:
     "<"                                                   # 7
     ].join '\n'
   await @parse htmlish_grammar, """<article foo=yes>helo</article>"""
+  await @parse htmlish_grammar, @read_file '../../../README.md'
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_asciisorter = ->
@@ -262,9 +269,8 @@ vocabulary:
   await @parse asciiautosumm, """abc123+456defDEF"""
   await @parse asciisorter,   """abc123+456defDEF"""
   await @parse asciisorter,   """äöü\n 雜文3"""
-  path  = ( require 'path' ).join __dirname, 'main.benchmarks.js'
-  probe = ( require 'fs' ).readFileSync path, { encoding: 'utf-8', }
-  await @parse asciisorter,   probe
+  await @parse asciisorter,   @read_file 'main.benchmarks.js'
+  await @parse asciisorter,   @read_file '../../../README.md'
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_indentation = ->
@@ -282,6 +288,7 @@ vocabulary:
   await @parse indentation_grammar, """L0"""
   await @parse indentation_grammar, """\tL0"""
   await @parse indentation_grammar, """ L0"""
+  await @parse indentation_grammar, @read_file '../../../README.md'
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_regex_whitespace = ->
@@ -297,12 +304,13 @@ vocabulary:
   await @parse rxws_grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
   await @parse rxws_grammar, """a\n  b\n\n\n \n  c\n   d"""
   await @parse rxws_grammar, ''
+  await @parse rxws_grammar, @read_file '../../../README.md'
 
 
 ############################################################################################################
 if module is require.main then do =>
-  # await @demo_htmlish()
-  await @demo_asciisorter()
+  await @demo_htmlish()
+  # await @demo_asciisorter()
   # await @demo_indentation()
   # await @demo_regex_whitespace()
 

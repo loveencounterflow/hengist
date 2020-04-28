@@ -45,6 +45,14 @@
   DISPLAY = require('./display');
 
   //-----------------------------------------------------------------------------------------------------------
+  this.read_file = function(path) {
+    path = (require('path')).join(__dirname, path);
+    return (require('fs')).readFileSync(path, {
+      encoding: 'utf-8'
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.parse = async function(grammar, source) {
     var color, headline, i, len, token, tokens;
     headline = grammar.name + ': ' + (jr(source)).padEnd(108, ' ');
@@ -276,12 +284,13 @@
       "<p a= >This is <i>very</i> desirable indeed.</p>", // 6
       "<" // 7
     ].join('\n'));
-    return (await this.parse(htmlish_grammar, `<article foo=yes>helo</article>`));
+    await this.parse(htmlish_grammar, `<article foo=yes>helo</article>`);
+    return (await this.parse(htmlish_grammar, this.read_file('../../../README.md')));
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_asciisorter = async function() {
-    var Asciisorter, asciiautosumm, asciisorter, path, probe;
+    var Asciisorter, asciiautosumm, asciisorter;
     ({asciisorter, Asciisorter} = require('../../../apps/paragate/lib/asciisorter.grammar'));
     // await @parse asciisorter, """if 42:\n    43\nelse:\n  44"""
     // await @parse asciisorter, """   x = 42"""
@@ -306,11 +315,8 @@
     await this.parse(asciiautosumm, `abc123+456defDEF`);
     await this.parse(asciisorter, `abc123+456defDEF`);
     await this.parse(asciisorter, `äöü\n 雜文3`);
-    path = (require('path')).join(__dirname, 'main.benchmarks.js');
-    probe = (require('fs')).readFileSync(path, {
-      encoding: 'utf-8'
-    });
-    return (await this.parse(asciisorter, probe));
+    await this.parse(asciisorter, this.read_file('main.benchmarks.js'));
+    return (await this.parse(asciisorter, this.read_file('../../../README.md')));
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -336,7 +342,8 @@
     await this.parse(indentation_grammar, `L0\n`);
     await this.parse(indentation_grammar, `L0`);
     await this.parse(indentation_grammar, `\tL0`);
-    return (await this.parse(indentation_grammar, ` L0`));
+    await this.parse(indentation_grammar, ` L0`);
+    return (await this.parse(indentation_grammar, this.read_file('../../../README.md')));
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -360,18 +367,19 @@
     await this.parse(rxws_grammar, `one-one\none-two\n\ntwo-one\ntwo-two`);
     await this.parse(rxws_grammar, `one-one\none-two\n  \ntwo-one\ntwo-two\n`);
     await this.parse(rxws_grammar, `a\n  b\n\n\n \n  c\n   d`);
-    return (await this.parse(rxws_grammar, ''));
+    await this.parse(rxws_grammar, '');
+    return (await this.parse(rxws_grammar, this.read_file('../../../README.md')));
   };
 
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      // await @demo_htmlish()
-      return (await this.demo_asciisorter());
+      return (await this.demo_htmlish());
     })();
   }
 
-  // await @demo_indentation()
+  // await @demo_asciisorter()
+// await @demo_indentation()
 // await @demo_regex_whitespace()
 
 }).call(this);
