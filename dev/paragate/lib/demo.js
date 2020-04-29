@@ -373,11 +373,55 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_chrsubsetter = async function() {
-    var Chrsubsetter, grammar;
+    var Chrsubsetter, grammar, grammar_notrack;
     //---------------------------------------------------------------------------------------------------------
     ({Chrsubsetter, grammar} = require('./chrsubsetter.grammar'));
     // g = new Chrsubsetter()
-    return (await this.parse(grammar, `abcäöü\nfoo 123`));
+    grammar_notrack = new Chrsubsetter({
+      track_lines: false
+    });
+    await this.parse(grammar_notrack, `abcäöü 𬻁𬼄𬻺\nfoo ß 123`);
+    return (await this.parse(grammar, `abcäöü 𬻁𬼄𬻺\nfoo ß 123𒁂𒔨𓄟𖠀𝔞𝔟𝔠`));
+  };
+
+  // await @parse grammar, @read_file '../../../README.md'
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_css_blocks = async function() {
+    var Chrsubsetter, grammar;
+    //---------------------------------------------------------------------------------------------------------
+    ({Chrsubsetter} = require('./chrsubsetter.grammar'));
+    grammar = new Chrsubsetter({
+      track_lines: true,
+      preset: 'blocks'
+    });
+    await this.parse(grammar, `abcäöü 𬻁𬼄𬻺Б𐌴≳Ϥ福кайني한굴␓␢⑂⑤ᏓᏔᐃ🨀ㄑㄧㄡ𐆖𐇕𐊅\nß123􏿼￻￼�￾￿\x00｢｣𒁂𒔨𓄟𖠀𝔞𝔟𝔠`);
+    return (await this.parse(grammar, this.read_file('../src/demo.coffee')));
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_css_planes = async function() {
+    var Chrsubsetter, grammar;
+    //---------------------------------------------------------------------------------------------------------
+    ({Chrsubsetter} = require('./chrsubsetter.grammar'));
+    grammar = new Chrsubsetter({
+      track_lines: true,
+      preset: 'planes'
+    });
+    await this.parse(grammar, `\x00\u{10000}\u{20000}\u{30000}\u{40000}\u{50000}\u{f0000}𒁂𒔨𓄟𖠀𝔞𝔟𝔠`);
+    return (await this.parse(grammar, this.read_file('../../../README.md')));
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_css_halfplanes = async function() {
+    var Chrsubsetter, grammar;
+    //---------------------------------------------------------------------------------------------------------
+    ({Chrsubsetter} = require('./chrsubsetter.grammar'));
+    grammar = new Chrsubsetter({
+      track_lines: true,
+      preset: 'halfplanes'
+    });
+    return (await this.parse(grammar, `abc한글龍𠀀黾𮯛𒁂𒔨𓄟𖠀𝔞𝔟𝔠`));
   };
 
   // await @parse grammar, @read_file '../../../README.md'
@@ -385,7 +429,10 @@
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      return (await this.demo_chrsubsetter());
+      await this.demo_chrsubsetter();
+      await this.demo_css_blocks();
+      await this.demo_css_planes();
+      return (await this.demo_css_halfplanes());
     })();
   }
 

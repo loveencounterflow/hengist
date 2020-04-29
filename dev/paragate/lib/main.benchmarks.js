@@ -114,6 +114,18 @@
     return (await this._parse(n, show, 'asciisorter'));
   };
 
+  this.chrsubsetter = async function(n, show) {
+    return (await this._parse(n, show, 'chrsubsetter'));
+  };
+
+  this.chrsubsetter_fast = async function(n, show) {
+    return (await this._parse(n, show, 'chrsubsetter_fast'));
+  };
+
+  this.chrsubsetter_blocks = async function(n, show) {
+    return (await this._parse(n, show, 'chrsubsetter_blocks'));
+  };
+
   //-----------------------------------------------------------------------------------------------------------
   this._parse = function(n, show, name) {
     return new Promise(async(resolve) => {
@@ -140,6 +152,22 @@
         case 'asciisorter':
           GRAMMAR = require('../paragate/lib/asciisorter.grammar');
           grammar = GRAMMAR.asciisorter;
+          break;
+        case 'chrsubsetter':
+          GRAMMAR = require('./chrsubsetter.grammar');
+          grammar = GRAMMAR.grammar;
+          break;
+        case 'chrsubsetter_fast':
+          GRAMMAR = require('./chrsubsetter.grammar');
+          grammar = new GRAMMAR.Chrsubsetter({
+            track_lines: false
+          });
+          break;
+        case 'chrsubsetter_blocks':
+          GRAMMAR = require('./chrsubsetter.grammar');
+          grammar = new GRAMMAR.Chrsubsetter({
+            preset: 'blocks'
+          });
           break;
         default:
           throw new Error(`^44498^ unknown grammar ${rpr(name)}`);
@@ -199,9 +227,14 @@
     timeout = n / 50e3 * 1000 + (2 * 1000);
     show = false;
     show = n < 21;
-    repetitions = 5;
+    repetitions = 1;
     // await BM.benchmark n, show, @
-    test_names = ['htmlish', 'asciisorter', 'chvtindent', 'rxws_tokens', 'rxws_blocks'];
+    test_names = ['chrsubsetter', 'chrsubsetter_fast', 'chrsubsetter_blocks'];
+// 'htmlish'
+// 'asciisorter'
+// 'chvtindent'
+// 'rxws_tokens'
+// 'rxws_blocks'
     for (_ = i = 1, ref = repetitions; (1 <= ref ? i <= ref : i >= ref); _ = 1 <= ref ? ++i : --i) {
       CND.shuffle(test_names);
       for (j = 0, len = test_names.length; j < len; j++) {

@@ -1,11 +1,11 @@
 (function() {
   'use strict';
-  var CND, Chrsubsetter, GRAMMAR, INTERTEXT, MAIN, Multimix, alert, assign, badge, debug, echo, freeze, help, info, isa, jr, lets, log, rpr, space_re, type_of, types, urge, validate, warn, whisper;
+  var CND, Chrsubsetter, GRAMMAR, INTERTEXT, MAIN, Multimix, alert, assign, badge, count_chrs, debug, echo, freeze, help, info, isa, jr, lets, log, rpr, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
 
-  badge = 'PARAGATE/GRAMMARS/REGEXWS';
+  badge = 'PARAGATE/GRAMMARS/CHRSUBSETTER';
 
   log = CND.get_logger('plain', badge);
 
@@ -43,50 +43,114 @@
 
   ({rpr} = INTERTEXT.export());
 
-  space_re = /\x20+/y;
-
   Multimix = require('../paragate/node_modules/multimix');
 
   //-----------------------------------------------------------------------------------------------------------
-  /* TAINT also allow regexes outside of objects? */
-  /* TAINT validate regexes? no anchor, sticky, unicode */
-  this.sets = [
-    {
-      name: 'spaces',
-      match: /\s+/yu
-    },
-    {
-      /* less specific */
-    name: 'punctuations',
-      match: /[=,.;:!?]+/yu
-    },
-    {
-      name: 'signs',
-      match: /[-+]+/yu
-    },
-    {
-      name: 'digits',
-      match: /[0-8]+/yu
-    },
-    {
-      name: 'newlines',
-      match: /\n+/yu
-    },
-    {
-      name: 'ucletters',
-      match: /[A-Z]+/yu
-    },
-    {
-      name: 'lcletters',
-      match: /[a-z]+/yu
-    }
-  ];
+  this._create_preset_default = function(preset) {
+    /* TAINT also allow regexes outside of objects? */
+    /* TAINT validate regexes? no anchor, sticky, unicode */
+    this.sets = [
+      {
+        name: 'spaces',
+        match: /\s+/yu
+      },
+      {
+        /* less specific */
+      name: 'punctuations',
+        match: /[=,.;:!?]+/yu
+      },
+      {
+        name: 'signs',
+        match: /[-+]+/yu
+      },
+      {
+        name: 'digits',
+        match: /[0-8]+/yu
+      },
+      {
+        name: 'newlines',
+        match: /\n+/yu
+      },
+      {
+        name: 'ucletters',
+        match: /[A-Z]+/yu
+      },
+      {
+        name: 'lcletters',
+        match: /[a-z]+/yu
+      }
+    ];
+/* more specific */    return null;
+  };
 
   //-----------------------------------------------------------------------------------------------------------
-  this./* more specific */parse = function(source) {
-    var $0, $key, $vnr, R, chr_idx, colnr, dent, flush_other, found, i, idx, last_cat_idx, last_chr_idx, level, line, linenr, lines, match, nl, other_start, other_stop, ref, ref1, set, set_idx, start, stop, text;
+  this._create_preset_blocks = function(preset) {
+    var first, first_cid_txt, i, last, last_cid_txt, len, match, name, ref;
+    this.sets = [];
+    ref = INTERTEXT.UCD.get_block_list();
+    for (i = 0, len = ref.length; i < len; i++) {
+      ({first, last, name} = ref[i]);
+      first_cid_txt = first.toString(16);
+      last_cid_txt = last.toString(16);
+      match = new RegExp(`[\\u{${first_cid_txt}}-\\u{${last_cid_txt}}]+`, 'yu');
+      name = name.replace(/\s/g, '_');
+      this.sets.push({name, match});
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._create_preset_planes = function(preset) {
+    var first_cid_txt, i, last_cid_txt, match, name, plane, plane_prfx;
+    this.sets = [];
+    for (plane = i = 0x00; i <= 16; plane = ++i) {
+      plane_prfx = (plane.toString(16)).padStart(2, '0');
+      first_cid_txt = `${plane_prfx}0000`;
+      last_cid_txt = `${plane_prfx}ffff`;
+      match = new RegExp(`[\\u{${first_cid_txt}}-\\u{${last_cid_txt}}]+`, 'yu');
+      name = `plane-${plane_prfx}`;
+      this.sets.push({name, match});
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._create_preset_halfplanes = function(preset) {
+    var first_cid_txt, half, i, j, last_cid_txt, len, match, name, plane, plane_prfx, ref, sfx;
+    this.sets = [];
+    for (plane = i = 0x00; i <= 16; plane = ++i) {
+      ref = [0, 1];
+      for (j = 0, len = ref.length; j < len; j++) {
+        half = ref[j];
+        plane_prfx = (plane.toString(16)).padStart(2, '0');
+        if (half === 0) {
+          sfx = 'lo';
+          first_cid_txt = `${plane_prfx}0000`;
+          last_cid_txt = `${plane_prfx}7fff`;
+        } else {
+          sfx = 'hi';
+          first_cid_txt = `${plane_prfx}8000`;
+          last_cid_txt = `${plane_prfx}ffff`;
+        }
+        match = new RegExp(`[\\u{${first_cid_txt}}-\\u{${last_cid_txt}}]+`, 'yu');
+        name = `halfplane-${plane_prfx}.${sfx}`;
+        this.sets.push({name, match});
+      }
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  // count_chrs = ( text ) -> ( text.split   /// . ///u       ).length - 1
+  count_chrs = function(text) {
+    return (text.replace(/./gu, '.')).length;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.parse = function(source) {
+    var $key, $vnr, R1, chr_idx, column, flush_other, found, get_vnr, last_cat_idx, last_chr_idx, line, match, other_start, other_stop, set, set_idx, start, stop, text;
     validate.text(source);
-    R = [];
+    R1 = [];
     chr_idx = 0;
     last_chr_idx = source.length - 1;
     set_idx = null;
@@ -95,16 +159,37 @@
     other_stop = null;
     set = null;
     found = false;
-    $vnr = [0, 0];
+    $vnr = null;
+    line = 1;
+    column = 1;
+    text = null;
     //.........................................................................................................
-    flush_other = function() {
+    get_vnr = () => {
+      var R2, prv_line, ref, ref1;
+      if (!this.track_lines) {
+        return [start];
+      }
+      R2 = [line, column];
+      prv_line = line;
+      line += (ref = (ref1 = text.match(/\n/g)) != null ? ref1.length : void 0) != null ? ref : 0;
+      column = (prv_line === line ? column : 1) + count_chrs((text.match(/[^\n]*$/))[0]);
+      return R2;
+    };
+    //.........................................................................................................
+    flush_other = () => {
+      var start, stop;
       if (other_start == null) {
         return;
       }
-      R.push({
+      start = other_start;
+      stop = other_stop;
+      text = source.slice(start, stop);
+      $vnr = get_vnr();
+      //.......................................................................................................
+      R1.push({
         $key: '^other',
-        start: other_start,
-        stop: other_stop,
+        start,
+        stop,
         text,
         $vnr,
         $: '^Б1^'
@@ -134,14 +219,14 @@
         }
         //.....................................................................................................
         flush_other();
-        [$0] = match;
+        [text] = match;
         start = chr_idx;
-        chr_idx += $0.length;
+        chr_idx += text.length;
         stop = chr_idx;
-        text = source.slice(start, stop);
         found = true;
         $key = '^' + set.name;
-        R.push({
+        $vnr = get_vnr();
+        R1.push({
           $key,
           start,
           stop,
@@ -157,147 +242,12 @@
           other_start = chr_idx;
         }
         other_stop = (other_stop != null ? other_stop : other_start) + 1;
-        urge('^7778^', 'other', source.slice(other_start, other_stop));
         chr_idx += 1;
       }
     }
     //.........................................................................................................
     flush_other();
-    return freeze(R);
-    //#########################################################################################################
-    lines = source.split(this.nl_re);
-    linenr = 0;
-    colnr = 1;
-    nl = '';
-    //.........................................................................................................
-    start = 0;
-    stop = source.length;
-    R.push({
-      $key: '<document',
-      start,
-      stop,
-      source,
-      $vnr: [-2e308],
-      $: '^r1^'
-    });
-    for (idx = i = 0, ref = lines.length; i <= ref; idx = i += 2) {
-      line = lines[idx];
-      nl = (ref1 = lines[idx + 1]) != null ? ref1 : '';
-      stop = start + line.length + nl.length;
-      linenr++;
-      ({dent, text} = (line.match(this.dent_re)).groups);
-      level = dent.length;
-      line += nl;
-      R.push({
-        $key: '^dline',
-        start,
-        stop,
-        dent,
-        text,
-        nl,
-        line,
-        level,
-        $vnr: [linenr, colnr],
-        $: '^r2^'
-      });
-      start = stop;
-    }
-    start = stop = source.length;
-    R.push({
-      $key: '>document',
-      start,
-      stop,
-      $vnr: [+2e308],
-      $: '^r3^'
-    });
-    //.........................................................................................................
-    return freeze(this.as_blocks ? this._as_blocks(R) : R);
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this._as_blocks = function(dlines) {
-    /* TAINT account for differing levels */
-    var R, blanks, blocks, consolidate, d, flush, i, idx, prv_level, ref;
-    R = [];
-    blocks = [];
-    blanks = [];
-    prv_level = null;
-    //.........................................................................................................
-    consolidate = function($key, buffer) {
-      var $vnr, d, first, last, level, linecount, ref, start, stop, text;
-      first = buffer[0];
-      last = buffer[buffer.length - 1];
-      start = first.start;
-      stop = last.stop;
-      $vnr = first.$vnr;
-      level = (ref = first.level) != null ? ref : 0;
-      linecount = buffer.length;
-      // debug '^223^', rpr buffer
-      if ($key === '^block') {
-        text = ((function() {
-          var i, len, results;
-          results = [];
-          for (i = 0, len = buffer.length; i < len; i++) {
-            d = buffer[i];
-            results.push(d.text + d.nl);
-          }
-          return results;
-        })()).join('');
-      } else {
-        text = ((function() {
-          var i, len, results;
-          results = [];
-          for (i = 0, len = buffer.length; i < len; i++) {
-            d = buffer[i];
-            results.push(d.dent + d.text + d.nl);
-          }
-          return results;
-        })()).join('');
-      }
-      return {
-        $key,
-        start,
-        stop,
-        text,
-        level,
-        linecount,
-        $vnr,
-        $: '^r4^'
-      };
-    };
-    //.........................................................................................................
-    flush = function($key, collection) {
-      if (!(collection.length > 0)) {
-        return collection;
-      }
-      R.push(consolidate($key, collection));
-      return [];
-    };
-    //.........................................................................................................
-    R.push(dlines[0]);
-    for (idx = i = 1, ref = dlines.length - 1; (1 <= ref ? i < ref : i > ref); idx = 1 <= ref ? ++i : --i) {
-      d = dlines[idx];
-      if (d.$key !== '^dline') {
-        R.push(d);
-        continue;
-      }
-      if (this.blank_re.test(d.line)) {
-        blocks = flush('^block', blocks);
-        blanks.push(d);
-        continue;
-      }
-      blanks = flush('^blank', blanks);
-      if (prv_level !== d.level) {
-        blocks = flush('^block', blocks);
-      }
-      prv_level = d.level;
-      blocks.push(d);
-    }
-    //.........................................................................................................
-    blanks = flush('^blank', blanks);
-    blocks = flush('^block', blocks);
-    R.push(dlines[dlines.length - 1]);
-    return R;
+    return freeze(R1);
   };
 
   //===========================================================================================================
@@ -312,19 +262,26 @@
         var defaults;
         super();
         defaults = {
-          nl_re: /(\n)//* NOTE might also use `/(\n|\r\n?)/` */,
-          dent_re: /^(?<dent>\x20*)(?<text>.*)/,
-          blank_re: /^\s*$/,
-          name: 'rxws_grammar',
-          as_blocks: true
+          track_lines: true,
+          preset: 'default'
         };
         settings = {...defaults, ...settings};
-        this.name = settings.name;
-        this.nl_re = settings.nl_re;
-        this.dent_re = settings.dent_re;
-        this.blank_re = settings.blank_re;
-        this.as_blocks = settings.as_blocks;
+        validate.boolean(settings.track_lines);
+        validate.nonempty_text(settings.preset);
+        this.track_lines = settings.track_lines;
+        this.preset = settings.preset;
+        this._create_preset();
         return this;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _create_preset() {
+        var method;
+        if (!(method = this[`_create_preset_${this.preset}`])) {
+          throw new Error(`^4487^ unknown preset ${rpr(this.preset)}`);
+        }
+        method.apply(this);
+        return null;
       }
 
     };
