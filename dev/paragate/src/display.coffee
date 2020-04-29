@@ -101,6 +101,7 @@ DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   # debug '^2224^', TBL       = INTERTEXT.TBL
   # last      = Symbol 'last'
   pipeline  = []
+  keys      = new Set()
   include   = [
     '$key',
     'pos', 'name', 'text',
@@ -119,8 +120,10 @@ DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   pipeline.push SP.$collect()
   pipeline.push $collect_keys = $ ( buffer, send ) =>
     for d in buffer
+      keys.add k for k of d
       include.push k for k of d when not ( ( k in include ) or ( k in exclude ) )
       send d
+    include = include.filter ( k ) -> keys.has k
     return  null
   #.........................................................................................................
   pipeline.push $reorder_keys = $ ( d, send ) =>
