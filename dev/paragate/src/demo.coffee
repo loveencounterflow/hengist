@@ -306,10 +306,19 @@ vocabulary:
   await @parse rxws_grammar, ''
   await @parse rxws_grammar, @read_file '../../../README.md'
 
+#-----------------------------------------------------------------------------------------------------------
+@demo_chrsubsetter = ->
+  #---------------------------------------------------------------------------------------------------------
+  { Chrsubsetter, grammar, } = require './chrsubsetter.grammar'
+  # g = new Chrsubsetter()
+  await @parse grammar, """abcäöü\nfoo 123"""
+  # await @parse grammar, @read_file '../../../README.md'
+
 
 ############################################################################################################
 if module is require.main then do =>
-  await @demo_htmlish()
+  await @demo_chrsubsetter()
+  # await @demo_htmlish()
   # await @demo_asciisorter()
   # await @demo_indentation()
   # await @demo_regex_whitespace()
