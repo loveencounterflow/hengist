@@ -311,13 +311,42 @@ vocabulary:
   #---------------------------------------------------------------------------------------------------------
   { Chrsubsetter, grammar, } = require './chrsubsetter.grammar'
   # g = new Chrsubsetter()
-  await @parse grammar, """abcäöü\nfoo 123"""
+  grammar_notrack = new Chrsubsetter { track_lines: false, }
+  await @parse grammar_notrack, """abcäöü 𬻁𬼄𬻺\nfoo ß 123"""
+  await @parse grammar, """abcäöü 𬻁𬼄𬻺\nfoo ß 123𒁂𒔨𓄟𖠀𝔞𝔟𝔠"""
+  # await @parse grammar, @read_file '../../../README.md'
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_css_blocks = ->
+  #---------------------------------------------------------------------------------------------------------
+  { Chrsubsetter, } = require './chrsubsetter.grammar'
+  grammar = new Chrsubsetter { track_lines: true, preset: 'blocks', }
+  await @parse grammar, """abcäöü 𬻁𬼄𬻺Б𐌴≳Ϥ福кайني한굴␓␢⑂⑤ᏓᏔᐃ🨀ㄑㄧㄡ𐆖𐇕𐊅\nß123􏿼￻￼�￾￿\x00｢｣𒁂𒔨𓄟𖠀𝔞𝔟𝔠"""
+  await @parse grammar, @read_file '../src/demo.coffee'
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_css_planes = ->
+  #---------------------------------------------------------------------------------------------------------
+  { Chrsubsetter, } = require './chrsubsetter.grammar'
+  grammar = new Chrsubsetter { track_lines: true, preset: 'planes', }
+  await @parse grammar, """\x00\u{10000}\u{20000}\u{30000}\u{40000}\u{50000}\u{f0000}𒁂𒔨𓄟𖠀𝔞𝔟𝔠"""
+  await @parse grammar, @read_file '../../../README.md'
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_css_halfplanes = ->
+  #---------------------------------------------------------------------------------------------------------
+  { Chrsubsetter, } = require './chrsubsetter.grammar'
+  grammar = new Chrsubsetter { track_lines: true, preset: 'halfplanes', }
+  await @parse grammar, """abc한글龍𠀀黾𮯛𒁂𒔨𓄟𖠀𝔞𝔟𝔠"""
   # await @parse grammar, @read_file '../../../README.md'
 
 
 ############################################################################################################
 if module is require.main then do =>
   await @demo_chrsubsetter()
+  await @demo_css_blocks()
+  await @demo_css_planes()
+  await @demo_css_halfplanes()
   # await @demo_htmlish()
   # await @demo_asciisorter()
   # await @demo_indentation()

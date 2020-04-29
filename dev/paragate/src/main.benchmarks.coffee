@@ -70,11 +70,14 @@ prepare = -> new Promise ( resolve ) ->
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@chvtindent   = ( n, show ) -> await @_parse n, show, 'chvtindent'
-@rxws_tokens  = ( n, show ) -> await @_parse n, show, 'rxws_tokens'
-@rxws_blocks  = ( n, show ) -> await @_parse n, show, 'rxws_blocks'
-@htmlish      = ( n, show ) -> await @_parse n, show, 'htmlish'
-@asciisorter  = ( n, show ) -> await @_parse n, show, 'asciisorter'
+@chvtindent           = ( n, show ) -> await @_parse n, show, 'chvtindent'
+@rxws_tokens          = ( n, show ) -> await @_parse n, show, 'rxws_tokens'
+@rxws_blocks          = ( n, show ) -> await @_parse n, show, 'rxws_blocks'
+@htmlish              = ( n, show ) -> await @_parse n, show, 'htmlish'
+@asciisorter          = ( n, show ) -> await @_parse n, show, 'asciisorter'
+@chrsubsetter         = ( n, show ) -> await @_parse n, show, 'chrsubsetter'
+@chrsubsetter_fast    = ( n, show ) -> await @_parse n, show, 'chrsubsetter_fast'
+@chrsubsetter_blocks  = ( n, show ) -> await @_parse n, show, 'chrsubsetter_blocks'
 
 #-----------------------------------------------------------------------------------------------------------
 @_parse = ( n, show, name ) -> new Promise ( resolve ) =>
@@ -94,6 +97,15 @@ prepare = -> new Promise ( resolve ) ->
     when 'asciisorter'
       GRAMMAR = require '../paragate/lib/asciisorter.grammar'
       grammar = GRAMMAR.asciisorter
+    when 'chrsubsetter'
+      GRAMMAR = require './chrsubsetter.grammar'
+      grammar = GRAMMAR.grammar
+    when 'chrsubsetter_fast'
+      GRAMMAR = require './chrsubsetter.grammar'
+      grammar = new GRAMMAR.Chrsubsetter { track_lines: false, }
+    when 'chrsubsetter_blocks'
+      GRAMMAR = require './chrsubsetter.grammar'
+      grammar = new GRAMMAR.Chrsubsetter { preset: 'blocks', }
     else
       throw new Error "^44498^ unknown grammar #{rpr name}"
   await prepare()
@@ -134,14 +146,17 @@ demo_parse = ->
   timeout     = n / 50e3 * 1000 + ( 2 * 1000 )
   show        = false
   show        = n < 21
-  repetitions = 5
+  repetitions = 1
   # await BM.benchmark n, show, @
   test_names = [
-    'htmlish'
-    'asciisorter'
-    'chvtindent'
-    'rxws_tokens'
-    'rxws_blocks'
+    'chrsubsetter'
+    'chrsubsetter_fast'
+    'chrsubsetter_blocks'
+    # 'htmlish'
+    # 'asciisorter'
+    # 'chvtindent'
+    # 'rxws_tokens'
+    # 'rxws_blocks'
     ]
   for _ in [ 1 .. repetitions ]
     CND.shuffle test_names
