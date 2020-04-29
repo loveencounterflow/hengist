@@ -161,10 +161,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.$_show_tokens_as_table = function(settings = null) {
-    var $collect_keys, $filter, $format, $reorder_keys, colorize, defaults, exclude, include, pipeline;
+    var $collect_keys, $filter, $format, $reorder_keys, colorize, defaults, exclude, include, keys, pipeline;
     // debug '^2224^', TBL       = INTERTEXT.TBL
     // last      = Symbol 'last'
     pipeline = [];
+    keys = new Set();
     include = ['$key', 'pos', 'name', 'text', '$vnr', '$'];
     // exclude   = [ 'source', ]
     // 'type', 'value', 'atrs'
@@ -188,12 +189,18 @@
       for (i = 0, len = buffer.length; i < len; i++) {
         d = buffer[i];
         for (k in d) {
+          keys.add(k);
+        }
+        for (k in d) {
           if (!((indexOf.call(include, k) >= 0) || (indexOf.call(exclude, k) >= 0))) {
             include.push(k);
           }
         }
         send(d);
       }
+      include = include.filter(function(k) {
+        return keys.has(k);
+      });
       return null;
     }));
     //.........................................................................................................

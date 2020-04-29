@@ -371,14 +371,26 @@
     return (await this.parse(rxws_grammar, this.read_file('../../../README.md')));
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_codepointgrouper = async function() {
+    var Chrsubsetter, grammar;
+    //---------------------------------------------------------------------------------------------------------
+    ({Chrsubsetter, grammar} = require('./chrsubsetter.grammar'));
+    // g = new Chrsubsetter()
+    return (await this.parse(grammar, `abcäöü\nfoo 123`));
+  };
+
+  // await @parse grammar, @read_file '../../../README.md'
+
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      return (await this.demo_htmlish());
+      return (await this.demo_codepointgrouper());
     })();
   }
 
-  // await @demo_asciisorter()
+  // await @demo_htmlish()
+// await @demo_asciisorter()
 // await @demo_indentation()
 // await @demo_regex_whitespace()
 
