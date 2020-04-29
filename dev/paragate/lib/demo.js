@@ -372,7 +372,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.demo_codepointgrouper = async function() {
+  this.demo_chrsubsetter = async function() {
     var Chrsubsetter, grammar;
     //---------------------------------------------------------------------------------------------------------
     ({Chrsubsetter, grammar} = require('./chrsubsetter.grammar'));
@@ -385,7 +385,7 @@
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      return (await this.demo_codepointgrouper());
+      return (await this.demo_chrsubsetter());
     })();
   }
 
