@@ -48,9 +48,7 @@ assets =
     'main.benchmarks.js'
     'interim.tests.js'
     '../src/interim.tests.coffee'
-    '../../../README.md'
-    '../../../README.md'
-    '../../../README.md'
+    '../../../assets/larry-wall-on-regexes.html'
     ]
 
 #-----------------------------------------------------------------------------------------------------------
@@ -70,14 +68,17 @@ prepare = -> new Promise ( resolve ) ->
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@chvtindent           = ( n, show ) -> await @_parse n, show, 'chvtindent'
-@rxws_tokens          = ( n, show ) -> await @_parse n, show, 'rxws_tokens'
-@rxws_blocks          = ( n, show ) -> await @_parse n, show, 'rxws_blocks'
-@htmlish              = ( n, show ) -> await @_parse n, show, 'htmlish'
-@asciisorter          = ( n, show ) -> await @_parse n, show, 'asciisorter'
-@chrsubsetter         = ( n, show ) -> await @_parse n, show, 'chrsubsetter'
-@chrsubsetter_fast    = ( n, show ) -> await @_parse n, show, 'chrsubsetter_fast'
-@chrsubsetter_blocks  = ( n, show ) -> await @_parse n, show, 'chrsubsetter_blocks'
+@chvtindent               = ( n, show ) -> await @_parse n, show, 'chvtindent'
+@rxws_tokens              = ( n, show ) -> await @_parse n, show, 'rxws_tokens'
+@rxws_blocks              = ( n, show ) -> await @_parse n, show, 'rxws_blocks'
+@htmlish                  = ( n, show ) -> await @_parse n, show, 'htmlish'
+@asciisorter              = ( n, show ) -> await @_parse n, show, 'asciisorter'
+@chrsubsetter             = ( n, show ) -> await @_parse n, show, 'chrsubsetter'
+@chrsubsetter_fast        = ( n, show ) -> await @_parse n, show, 'chrsubsetter_fast'
+@chrsubsetter_blocks      = ( n, show ) -> await @_parse n, show, 'chrsubsetter_blocks'
+@chrsubsetter_planes      = ( n, show ) -> await @_parse n, show, 'chrsubsetter_planes'
+@chrsubsetter_halfplanes  = ( n, show ) -> await @_parse n, show, 'chrsubsetter_halfplanes'
+@chrsubsetter_words       = ( n, show ) -> await @_parse n, show, 'chrsubsetter_words'
 
 #-----------------------------------------------------------------------------------------------------------
 @_parse = ( n, show, name ) -> new Promise ( resolve ) =>
@@ -106,17 +107,29 @@ prepare = -> new Promise ( resolve ) ->
     when 'chrsubsetter_blocks'
       GRAMMAR = require './chrsubsetter.grammar'
       grammar = new GRAMMAR.Chrsubsetter { preset: 'blocks', }
+    when 'chrsubsetter_planes'
+      GRAMMAR = require './chrsubsetter.grammar'
+      grammar = new GRAMMAR.Chrsubsetter { preset: 'planes', }
+    when 'chrsubsetter_halfplanes'
+      GRAMMAR = require './chrsubsetter.grammar'
+      grammar = new GRAMMAR.Chrsubsetter { preset: 'halfplanes', }
+    when 'chrsubsetter_words'
+      GRAMMAR = require './chrsubsetter.grammar'
+      grammar = new GRAMMAR.Chrsubsetter { preset: 'words', }
     else
       throw new Error "^44498^ unknown grammar #{rpr name}"
   await prepare()
   #.........................................................................................................
   resolve => new Promise rxws_tokens = ( resolve ) =>
-    token_count = 0
+    token_count       = 0
+    approx_char_count = 0
     for probe, idx in assets.probes
-      tokens        = grammar.parse probe
-      token_count  += tokens.length
-    # resolve assets.approx_char_count
-    resolve token_count
+      continue if ( name is 'chvtindent' ) and ( probe.length > 10e3 )
+      approx_char_count  += probe.length
+      tokens              = grammar.parse probe
+      token_count        += tokens.length
+    resolve approx_char_count
+    # resolve token_count
     # resolve assets.line_count
     return null
   #.........................................................................................................
@@ -149,14 +162,17 @@ demo_parse = ->
   repetitions = 1
   # await BM.benchmark n, show, @
   test_names = [
+    'asciisorter'
     'chrsubsetter'
-    'chrsubsetter_fast'
     'chrsubsetter_blocks'
-    # 'htmlish'
-    # 'asciisorter'
-    # 'chvtindent'
-    # 'rxws_tokens'
-    # 'rxws_blocks'
+    'chrsubsetter_fast'
+    'chrsubsetter_halfplanes'
+    'chrsubsetter_planes'
+    'chrsubsetter_words'
+    'chvtindent'
+    'htmlish'
+    'rxws_blocks'
+    'rxws_tokens'
     ]
   for _ in [ 1 .. repetitions ]
     CND.shuffle test_names
