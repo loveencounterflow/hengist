@@ -243,12 +243,13 @@ vocabulary:
     "<"                                                   # 7
     ].join '\n'
   await @parse htmlish_grammar, """<article foo=yes>helo</article>"""
-  await @parse htmlish_grammar, @read_file '../../../README.md'
+  # await @parse htmlish_grammar, @read_file '../../../README.md'
   # await @parse htmlish_grammar, @read_file '../../../assets/larry-wall-on-regexes.html'
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_asciisorter = ->
-  { asciisorter, Asciisorter, } = require '../../../apps/paragate/lib/asciisorter.grammar'
+  { asciisorter, Asciisorter, } = require './old-grammars/asciisorter.grammar'
   # await @parse asciisorter, """if 42:\n    43\nelse:\n  44"""
   # await @parse asciisorter, """   x = 42"""
   # await @parse asciisorter, """abcABC_( )123+!?"""
@@ -270,13 +271,14 @@ vocabulary:
   await @parse asciiautosumm, """abc123+456defDEF"""
   await @parse asciisorter,   """abc123+456defDEF"""
   await @parse asciisorter,   """äöü\n 雜文3"""
-  await @parse asciisorter,   @read_file 'main.benchmarks.js'
-  await @parse asciisorter,   @read_file '../../../README.md'
+  # await @parse asciisorter,   @read_file 'main.benchmarks.js'
+  # await @parse asciisorter,   @read_file '../../../README.md'
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_indentation = ->
   #---------------------------------------------------------------------------------------------------------
-  { indentation_grammar, } = require '../../../apps/paragate/lib/indentation.grammar'
+  { indentation_grammar, } = require './old-grammars/indentation.grammar'
   debug '^3998^', rpr ( k for k of indentation_grammar    )
   await @parse indentation_grammar, """if 42:\n    43\nelse:\n  44"""
   await @parse indentation_grammar, """   <!-- xx -->"""
@@ -289,12 +291,13 @@ vocabulary:
   await @parse indentation_grammar, """L0"""
   await @parse indentation_grammar, """\tL0"""
   await @parse indentation_grammar, """ L0"""
-  await @parse indentation_grammar, @read_file '../../../README.md'
+  # await @parse indentation_grammar, @read_file '../../../README.md'
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_regex_whitespace = ->
   #---------------------------------------------------------------------------------------------------------
-  { Rxws_grammar, rxws_grammar, } = require './regex-whitespace.grammar'
+  { Rxws_grammar, rxws_grammar, } = require '../paragate/lib/regex-whitespace.grammar'
   # rxws_grammar = new Rxws_grammar { as_blocks: false, }
   debug '^3998^', rpr ( k for k of rxws_grammar    )
   await @parse rxws_grammar, """if 42:\n\r    43\nelse:\n  44"""
@@ -305,52 +308,58 @@ vocabulary:
   await @parse rxws_grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
   await @parse rxws_grammar, """a\n  b\n\n\n \n  c\n   d"""
   await @parse rxws_grammar, ''
-  await @parse rxws_grammar, @read_file '../../../README.md'
+  # await @parse rxws_grammar, @read_file '../../../README.md'
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_chrsubsetter = ->
   #---------------------------------------------------------------------------------------------------------
-  { Chrsubsetter, grammar, } = require './chrsubsetter.grammar'
+  { Chrsubsetter, grammar, } = require '../paragate/lib/chrsubsetter.grammar'
   # g = new Chrsubsetter()
   grammar_notrack = new Chrsubsetter { track_lines: false, }
   await @parse grammar_notrack, """abcäöü 𬻁𬼄𬻺\nfoo ß 123"""
   await @parse grammar, """abcäöü 𬻁𬼄𬻺\nfoo ß 123𒁂𒔨𓄟𖠀𝔞𝔟𝔠"""
   # await @parse grammar, @read_file '../../../README.md'
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_css_blocks = ->
   #---------------------------------------------------------------------------------------------------------
-  { Chrsubsetter, } = require './chrsubsetter.grammar'
+  { Chrsubsetter, } = require '../paragate/lib/chrsubsetter.grammar'
   grammar = new Chrsubsetter { track_lines: true, preset: 'blocks', }
   await @parse grammar, """abcäöü 𬻁𬼄𬻺Б𐌴≳Ϥ福кайني한굴␓␢⑂⑤ᏓᏔᐃ🨀ㄑㄧㄡ𐆖𐇕𐊅\nß123􏿼￻￼�￾￿\x00｢｣𒁂𒔨𓄟𖠀𝔞𝔟𝔠"""
-  await @parse grammar, @read_file '../src/demo.coffee'
+  # await @parse grammar, @read_file '../src/demo.coffee'
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_css_planes = ->
   #---------------------------------------------------------------------------------------------------------
-  { Chrsubsetter, } = require './chrsubsetter.grammar'
+  { Chrsubsetter, } = require '../paragate/lib/chrsubsetter.grammar'
   grammar = new Chrsubsetter { track_lines: true, preset: 'planes', }
   await @parse grammar, """\x00\u{10000}\u{20000}\u{30000}\u{40000}\u{50000}\u{f0000}𒁂𒔨𓄟𖠀𝔞𝔟𝔠"""
-  await @parse grammar, @read_file '../../../README.md'
+  # await @parse grammar, @read_file '../../../README.md'
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_css_halfplanes = ->
   #---------------------------------------------------------------------------------------------------------
-  { Chrsubsetter, } = require './chrsubsetter.grammar'
+  { Chrsubsetter, } = require '../paragate/lib/chrsubsetter.grammar'
   grammar = new Chrsubsetter { track_lines: true, preset: 'halfplanes', }
   await @parse grammar, """abc한글龍𠀀黾𮯛𒁂𒔨𓄟𖠀𝔞𝔟𝔠"""
   # await @parse grammar, @read_file '../../../README.md'
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_css_words = ->
   #---------------------------------------------------------------------------------------------------------
-  { Chrsubsetter, } = require './chrsubsetter.grammar'
+  { Chrsubsetter, } = require '../paragate/lib/chrsubsetter.grammar'
   grammar = new Chrsubsetter { track_lines: true, preset: 'words', }
   await @parse grammar, """abc 한글龍𠀀黾𮯛 𒁂𒔨𓄟𖠀 𝔞𝔟𝔠"""
-  tokens  = grammar.parse @read_file '../../../README.md'
-  tokens  = new Set ( d.text.toLowerCase() for d in tokens when d.$key is '^word' )
-  tokens  = [ tokens..., ].sort()
-  urge tokens
+  # tokens  = grammar.parse @read_file '../../../README.md'
+  # tokens  = new Set ( d.text.toLowerCase() for d in tokens when d.$key is '^word' )
+  # tokens  = [ tokens..., ].sort()
+  # urge tokens
+  return null
 
 
 ############################################################################################################
@@ -360,10 +369,10 @@ if module is require.main then do =>
   await @demo_css_planes()
   await @demo_css_halfplanes()
   await @demo_css_words()
-  # await @demo_htmlish()
-  # await @demo_regex_whitespace()
-  # await @demo_asciisorter()
-  # await @demo_indentation()
+  await @demo_htmlish()
+  await @demo_regex_whitespace()
+  await @demo_asciisorter()
+  await @demo_indentation()
 
 
 
