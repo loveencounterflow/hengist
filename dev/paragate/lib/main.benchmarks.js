@@ -64,7 +64,7 @@
     probes: ['', 'x', 'foo\n  bar', '\nxxx'.repeat(20000)],
     approx_char_count: 0,
     line_count: 0,
-    paths: ['main.benchmarks.js', 'interim.tests.js', '../src/interim.tests.coffee', '../../../README.md', '../../../README.md', '../../../README.md']
+    paths: ['main.benchmarks.js', 'interim.tests.js', '../src/interim.tests.coffee', '../../../assets/larry-wall-on-regexes.html']
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -126,6 +126,18 @@
     return (await this._parse(n, show, 'chrsubsetter_blocks'));
   };
 
+  this.chrsubsetter_planes = async function(n, show) {
+    return (await this._parse(n, show, 'chrsubsetter_planes'));
+  };
+
+  this.chrsubsetter_halfplanes = async function(n, show) {
+    return (await this._parse(n, show, 'chrsubsetter_halfplanes'));
+  };
+
+  this.chrsubsetter_words = async function(n, show) {
+    return (await this._parse(n, show, 'chrsubsetter_words'));
+  };
+
   //-----------------------------------------------------------------------------------------------------------
   this._parse = function(n, show, name) {
     return new Promise(async(resolve) => {
@@ -169,6 +181,24 @@
             preset: 'blocks'
           });
           break;
+        case 'chrsubsetter_planes':
+          GRAMMAR = require('./chrsubsetter.grammar');
+          grammar = new GRAMMAR.Chrsubsetter({
+            preset: 'planes'
+          });
+          break;
+        case 'chrsubsetter_halfplanes':
+          GRAMMAR = require('./chrsubsetter.grammar');
+          grammar = new GRAMMAR.Chrsubsetter({
+            preset: 'halfplanes'
+          });
+          break;
+        case 'chrsubsetter_words':
+          GRAMMAR = require('./chrsubsetter.grammar');
+          grammar = new GRAMMAR.Chrsubsetter({
+            preset: 'words'
+          });
+          break;
         default:
           throw new Error(`^44498^ unknown grammar ${rpr(name)}`);
       }
@@ -177,16 +207,21 @@
       resolve(() => {
         var rxws_tokens;
         return new Promise(rxws_tokens = (resolve) => {
-          var i, idx, len, probe, ref, token_count, tokens;
+          var approx_char_count, i, idx, len, probe, ref, token_count, tokens;
           token_count = 0;
+          approx_char_count = 0;
           ref = assets.probes;
           for (idx = i = 0, len = ref.length; i < len; idx = ++i) {
             probe = ref[idx];
+            if ((name === 'chvtindent') && (probe.length > 10e3)) {
+              continue;
+            }
+            approx_char_count += probe.length;
             tokens = grammar.parse(probe);
             token_count += tokens.length;
           }
-          // resolve assets.approx_char_count
-          resolve(token_count);
+          resolve(approx_char_count);
+          // resolve token_count
           // resolve assets.line_count
           return null;
         });
@@ -229,12 +264,7 @@
     show = n < 21;
     repetitions = 1;
     // await BM.benchmark n, show, @
-    test_names = ['chrsubsetter', 'chrsubsetter_fast', 'chrsubsetter_blocks'];
-// 'htmlish'
-// 'asciisorter'
-// 'chvtindent'
-// 'rxws_tokens'
-// 'rxws_blocks'
+    test_names = ['asciisorter', 'chrsubsetter', 'chrsubsetter_blocks', 'chrsubsetter_fast', 'chrsubsetter_halfplanes', 'chrsubsetter_planes', 'chrsubsetter_words', 'chvtindent', 'htmlish', 'rxws_blocks', 'rxws_tokens'];
     for (_ = i = 1, ref = repetitions; (1 <= ref ? i <= ref : i >= ref); _ = 1 <= ref ? ++i : --i) {
       CND.shuffle(test_names);
       for (j = 0, len = test_names.length; j < len; j++) {

@@ -288,6 +288,8 @@
     return (await this.parse(htmlish_grammar, this.read_file('../../../README.md')));
   };
 
+  // await @parse htmlish_grammar, @read_file '../../../assets/larry-wall-on-regexes.html'
+
   //-----------------------------------------------------------------------------------------------------------
   this.demo_asciisorter = async function() {
     var Asciisorter, asciiautosumm, asciisorter;
@@ -426,19 +428,46 @@
 
   // await @parse grammar, @read_file '../../../README.md'
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_css_words = async function() {
+    var Chrsubsetter, d, grammar, tokens;
+    //---------------------------------------------------------------------------------------------------------
+    ({Chrsubsetter} = require('./chrsubsetter.grammar'));
+    grammar = new Chrsubsetter({
+      track_lines: true,
+      preset: 'words'
+    });
+    await this.parse(grammar, `abc 한글龍𠀀黾𮯛 𒁂𒔨𓄟𖠀 𝔞𝔟𝔠`);
+    tokens = grammar.parse(this.read_file('../../../README.md'));
+    tokens = new Set((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = tokens.length; i < len; i++) {
+        d = tokens[i];
+        if (d.$key === '^word') {
+          results.push(d.text.toLowerCase());
+        }
+      }
+      return results;
+    })());
+    tokens = [...tokens].sort();
+    return urge(tokens);
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
       await this.demo_chrsubsetter();
       await this.demo_css_blocks();
       await this.demo_css_planes();
-      return (await this.demo_css_halfplanes());
+      await this.demo_css_halfplanes();
+      return (await this.demo_css_words());
     })();
   }
 
   // await @demo_htmlish()
+// await @demo_regex_whitespace()
 // await @demo_asciisorter()
 // await @demo_indentation()
-// await @demo_regex_whitespace()
 
 }).call(this);

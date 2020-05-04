@@ -141,6 +141,18 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this._create_preset_words = function(preset) {
+    /* thx to https://mathiasbynens.be/notes/es-unicode-property-escapes */
+    this.sets = [
+      {
+        name: 'word',
+        match: /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]+/yu
+      }
+    ];
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   // count_chrs = ( text ) -> ( text.split   /// . ///u       ).length - 1
   count_chrs = function(text) {
     return (text.replace(/./gu, '.')).length;
@@ -262,12 +274,22 @@
         var defaults;
         super();
         defaults = {
+          name: null,
           track_lines: true,
           preset: 'default'
         };
         settings = {...defaults, ...settings};
         validate.boolean(settings.track_lines);
         validate.nonempty_text(settings.preset);
+        if ((settings.name != null) || (settings.preset === 'default')) {
+          if (settings.name == null) {
+            settings.name = 'chrsubsetter';
+          }
+          validate.nonempty_text(settings.name);
+          this.name = settings.name;
+        } else {
+          this.name = `css/${settings.preset}`;
+        }
         this.track_lines = settings.track_lines;
         this.preset = settings.preset;
         this._create_preset();
