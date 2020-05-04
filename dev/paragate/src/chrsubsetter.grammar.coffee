@@ -184,10 +184,16 @@ class Chrsubsetter extends Multimix
   #---------------------------------------------------------------------------------------------------------
   constructor: ( settings = null ) ->
     super()
-    defaults      = { track_lines: true, preset: 'default', }
+    defaults      = { name: null, track_lines: true, preset: 'default', }
     settings      = { defaults..., settings..., }
     validate.boolean        settings.track_lines
     validate.nonempty_text  settings.preset
+    if settings.name? or ( settings.preset is 'default' )
+      settings.name  ?= 'chrsubsetter'
+      validate.nonempty_text settings.name
+      @name           = settings.name
+    else
+      @name           = "css/#{settings.preset}"
     @track_lines  = settings.track_lines
     @preset       = settings.preset
     @_create_preset()
