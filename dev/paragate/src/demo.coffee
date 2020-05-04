@@ -244,6 +244,7 @@ vocabulary:
     ].join '\n'
   await @parse htmlish_grammar, """<article foo=yes>helo</article>"""
   await @parse htmlish_grammar, @read_file '../../../README.md'
+  # await @parse htmlish_grammar, @read_file '../../../assets/larry-wall-on-regexes.html'
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_asciisorter = ->
@@ -340,6 +341,17 @@ vocabulary:
   await @parse grammar, """abc한글龍𠀀黾𮯛𒁂𒔨𓄟𖠀𝔞𝔟𝔠"""
   # await @parse grammar, @read_file '../../../README.md'
 
+#-----------------------------------------------------------------------------------------------------------
+@demo_css_words = ->
+  #---------------------------------------------------------------------------------------------------------
+  { Chrsubsetter, } = require './chrsubsetter.grammar'
+  grammar = new Chrsubsetter { track_lines: true, preset: 'words', }
+  await @parse grammar, """abc 한글龍𠀀黾𮯛 𒁂𒔨𓄟𖠀 𝔞𝔟𝔠"""
+  tokens  = grammar.parse @read_file '../../../README.md'
+  tokens  = new Set ( d.text.toLowerCase() for d in tokens when d.$key is '^word' )
+  tokens  = [ tokens..., ].sort()
+  urge tokens
+
 
 ############################################################################################################
 if module is require.main then do =>
@@ -347,10 +359,11 @@ if module is require.main then do =>
   await @demo_css_blocks()
   await @demo_css_planes()
   await @demo_css_halfplanes()
+  await @demo_css_words()
   # await @demo_htmlish()
+  # await @demo_regex_whitespace()
   # await @demo_asciisorter()
   # await @demo_indentation()
-  # await @demo_regex_whitespace()
 
 
 
