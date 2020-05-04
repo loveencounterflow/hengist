@@ -88,6 +88,20 @@ Multimix                  = require '../paragate/node_modules/multimix'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@_create_preset_words = ( preset ) ->
+  ### thx to https://mathiasbynens.be/notes/es-unicode-property-escapes ###
+  @sets = [
+    { name: 'word', match: /// [
+      \p{Alphabetic}
+      \p{Mark}
+      \p{Decimal_Number}
+      \p{Connector_Punctuation}
+      \p{Join_Control}
+      ]+ ///yu, }
+    ]
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 # count_chrs = ( text ) -> ( text.split   /// . ///u       ).length - 1
 count_chrs = ( text ) -> ( text.replace /// . ///gu, '.' ).length
 
