@@ -370,36 +370,37 @@ vocabulary:
 #-----------------------------------------------------------------------------------------------------------
 @demo_regex_whitespace_regular = ->
   #---------------------------------------------------------------------------------------------------------
-  { Rxws_grammar, rxws_grammar, } = require '../paragate/lib/regex-whitespace.grammar'
-  # rxws_grammar = new Rxws_grammar { as_blocks: false, }
-  debug '^3998^', rpr ( k for k of rxws_grammar    )
-  await @parse rxws_grammar, """if 42:\n\r    43\nelse:\n  44"""
-  await @parse rxws_grammar, """if 42:\r\n    43\nelse:\n  44"""
-  await @parse rxws_grammar, """\nif 42:\n    43\n\nelse:\n  44\n"""
-  await @parse rxws_grammar, """if 42:\n    43\n\n  \nelse:\n  44"""
-  await @parse rxws_grammar, """one-one\none-two\n\ntwo-one\ntwo-two"""
-  await @parse rxws_grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
-  await @parse rxws_grammar, """a\n  b\n\n\n \n  c\n   d"""
-  await @parse rxws_grammar, ''
-  # await @parse rxws_grammar, @read_file '../../../README.md'
+  { Rxws_grammar, grammar, } = require '../paragate/lib/regex-whitespace.grammar'
+  # grammar = new Rxws_grammar { as_blocks: false, }
+  debug '^3998^', rpr ( k for k of grammar    )
+  await @parse grammar, """if 42:\n\r    43\nelse:\n  44"""
+  await @parse grammar, """if 42:\r\n    43\nelse:\n  44"""
+  await @parse grammar, """\nif 42:\n    43\n\nelse:\n  44\n"""
+  await @parse grammar, """if 42:\n    43\n\n  \nelse:\n  44"""
+  await @parse grammar, """one-one\none-two\n\ntwo-one\ntwo-two"""
+  await @parse grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
+  await @parse grammar, """a\n  b\n\n\n \n  c\n   d"""
+  await @parse grammar, ''
+  # await @parse grammar, @read_file '../../../README.md'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_regex_whitespace_streaming = ->
   #---------------------------------------------------------------------------------------------------------
-  { Rxws_grammar, rxws_grammar, } = require '../paragate/lib/regex-whitespace.grammar'
-  # rxws_grammar = new Rxws_grammar { as_blocks: false, }
-  debug '^3998^', rpr ( k for k of rxws_grammar    )
-  # await @parse_streaming rxws_grammar, """if 42:\n\r    43\nelse:\n  44"""
-  # await @parse_streaming rxws_grammar, """if 42:\r\n    43\nelse:\n  44"""
-  # await @parse_streaming rxws_grammar, """\nif 42:\n    43\n\nelse:\n  44\n"""
-  # await @parse_streaming rxws_grammar, """if 42:\n    43\n\n  \nelse:\n  44"""
-  # await @parse_streaming rxws_grammar, """one-one\none-two\n\ntwo-one\ntwo-two"""
-  # await @parse_streaming rxws_grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
-  # await @parse_streaming rxws_grammar, """a\n  b\n\n\n \n  c\n   d"""
-  # await @parse_streaming rxws_grammar, ''
-  # await @parse rxws_grammar, @read_file '../../../README.md'
-  await @parse_streaming rxws_grammar, """abcd\nefgh\nijklmn\nopqrst\nuvwxyz"""
+  { Rxws_grammar, grammar, } = require '../paragate/lib/regex-whitespace.grammar'
+  grammar = new Rxws_grammar { name: '$rxws', }
+  # debug '^3998^', rpr ( k for k of grammar    )
+  # await @parse_streaming grammar, """if 42:\n\r    43\nelse:\n  44"""
+  # await @parse_streaming grammar, """if 42:\r\n    43\nelse:\n  44"""
+  # await @parse_streaming grammar, """\nif 42:\n    43\n\nelse:\n  44\n"""
+  # await @parse_streaming grammar, """if 42:\n    43\n\n  \nelse:\n  44"""
+  # await @parse_streaming grammar, """one-one\none-two\n\ntwo-one\ntwo-two"""
+  # await @parse_streaming grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
+  # await @parse_streaming grammar, """a\n  b\n\n\n \n  c\n   d"""
+  # await @parse_streaming grammar, ''
+  # await @parse grammar, @read_file '../../../README.md'
+  await @parse ( new Rxws_grammar { as_blocks: false, } ),  """abcd\nefgh\nijklmn\nopqrst\nuvwxyz"""
+  await @parse_streaming grammar,       """abcd\nefgh\nijklmn\nopqrst\nuvwxyz"""
   # await @xxx()
   return null
 
