@@ -33,15 +33,37 @@ DISPLAY                   = require './display'
   return ( require 'fs' ).readFileSync path, { encoding: 'utf-8', }
 
 #-----------------------------------------------------------------------------------------------------------
-@parse = ( grammar, source ) ->
+@parse            = ( grammar, source ) -> await @_parse  'regular',    grammar, source
+@parse_streaming  = ( grammar, source ) -> await @_parse  'streaming',  grammar, source
+
+#-----------------------------------------------------------------------------------------------------------
+@_tokens_from_streaming_parse = ( grammar, source ) -> new Promise ( resolve ) =>
+  SP                        = require '../../../apps/paragate/node_modules/steampipes'
+  { $
+    $show
+    $split
+    $watch
+    $drain }                = SP.export()
+  #.........................................................................................................
+  pipeline = []
+  pipeline.push source.split '\n'
+  pipeline.push grammar.$parse()
+  pipeline.push $show { title: '$parse 2', }
+  pipeline.push $drain ( R ) -> resolve R
+  #.........................................................................................................
+  SP.pull pipeline...
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_parse = ( mode, grammar, source ) ->
   headline = grammar.name + ': ' + ( jr source ).padEnd 108, ' '
   echo CND.white CND.reverse CND.bold headline
-  # if isa.function grammar._parsification_from_source
-  #   parsification = grammar._parsification_from_source source
-  #   @show_adapted_tree parsification
-  #   tokens        = grammar._extract_tokens parsification
-  # else
-  tokens  = grammar.parse source
+  #.........................................................................................................
+  switch mode
+    when 'regular'    then tokens = grammar.parse source
+    when 'streaming'  then tokens = await @_tokens_from_streaming_parse grammar, source
+    else throw new Error "^3447^ unknown parsing mode #{rpr mode}"
+  #.........................................................................................................
   await DISPLAY.show_tokens_as_table tokens
   for token in tokens
     # debug '^4443^', rpr token
@@ -54,6 +76,7 @@ DISPLAY                   = require './display'
     else                                    color = CND.orange
     echo color rpr token
   echo CND.grey CND.reverse CND.bold headline
+  #.........................................................................................................
   return null
 
 
@@ -183,6 +206,53 @@ vocabulary:
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
+@demo_old_asciisorter = ->
+  { asciisorter, Asciisorter, } = require './old-grammars/asciisorter.grammar'
+  # await @parse asciisorter, """if 42:\n    43\nelse:\n  44"""
+  # await @parse asciisorter, """   x = 42"""
+  # await @parse asciisorter, """abcABC_( )123+!?"""
+  # await @parse asciisorter, """abcABC123!?+_( xyz )"""
+  # #---------------------------------------------------------------------------------------------------------
+  asciiautosumm = new Asciisorter { use_summarize: false, }
+  # debug '^3998-3^', rpr ( k for k of asciiautosumm = new Asciisorter { use_summarize: false, }    )
+  # debug '^3998-4^', rpr asciisorter.lexer.config.lineTerminatorCharacters
+  # debug '^3998-5^', rpr asciisorter.lexer.config.lineTerminatorsPattern
+  # debug '^3998-6^', rpr asciiautosumm.lexer.config.lineTerminatorCharacters
+  # debug '^3998-7^', rpr asciiautosumm.lexer.config.lineTerminatorsPattern
+  # debug '^3998-8^', rpr asciiautosumm
+  # debug '^3998-9^', rpr asciiautosumm.settings
+  # debug '^3998-10^', rpr asciiautosumm.parse """   x = 42"""
+  # await @parse asciiautosumm, """   )x = 答答42\n答ABC答"""
+  # # await @parse asciisorter, """   <!-- xx -->"""
+  # await @parse asciiautosumm,           """   <!-- xx -->"""
+  await @parse asciisorter,   """abc123defDEF"""
+  await @parse asciiautosumm, """abc123+456defDEF"""
+  await @parse asciisorter,   """abc123+456defDEF"""
+  await @parse asciisorter,   """äöü\n 雜文3"""
+  # await @parse asciisorter,   @read_file 'main.benchmarks.js'
+  # await @parse asciisorter,   @read_file '../../../README.md'
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_old_indentation = ->
+  #---------------------------------------------------------------------------------------------------------
+  { indentation_grammar, } = require './old-grammars/indentation.grammar'
+  debug '^3998^', rpr ( k for k of indentation_grammar    )
+  await @parse indentation_grammar, """if 42:\n    43\nelse:\n  44"""
+  await @parse indentation_grammar, """   <!-- xx -->"""
+  await @parse indentation_grammar, """L0\n  L1\n    L2\n  L1"""
+  await @parse indentation_grammar, """\n  \n\nL0\n  L1\n\n    \nOK\n"""
+  await @parse indentation_grammar, """   x = 42"""
+  await @parse indentation_grammar, """L0\n  L1\n    L2\n      L3"""
+  await @parse indentation_grammar, """\n  L0\nL1"""
+  await @parse indentation_grammar, """L0\n"""
+  await @parse indentation_grammar, """L0"""
+  await @parse indentation_grammar, """\tL0"""
+  await @parse indentation_grammar, """ L0"""
+  # await @parse indentation_grammar, @read_file '../../../README.md'
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @demo_htmlish = ->
   htmlish_grammar = require '../../../apps/paragate/lib/htmlish.grammar'
   # urge '^2212^', rpr ( k for k in types.all_keys_of htmlish_grammar when not k.startsWith '__' ).sort()
@@ -248,70 +318,6 @@ vocabulary:
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@demo_asciisorter = ->
-  { asciisorter, Asciisorter, } = require './old-grammars/asciisorter.grammar'
-  # await @parse asciisorter, """if 42:\n    43\nelse:\n  44"""
-  # await @parse asciisorter, """   x = 42"""
-  # await @parse asciisorter, """abcABC_( )123+!?"""
-  # await @parse asciisorter, """abcABC123!?+_( xyz )"""
-  # #---------------------------------------------------------------------------------------------------------
-  asciiautosumm = new Asciisorter { use_summarize: false, }
-  # debug '^3998-3^', rpr ( k for k of asciiautosumm = new Asciisorter { use_summarize: false, }    )
-  # debug '^3998-4^', rpr asciisorter.lexer.config.lineTerminatorCharacters
-  # debug '^3998-5^', rpr asciisorter.lexer.config.lineTerminatorsPattern
-  # debug '^3998-6^', rpr asciiautosumm.lexer.config.lineTerminatorCharacters
-  # debug '^3998-7^', rpr asciiautosumm.lexer.config.lineTerminatorsPattern
-  # debug '^3998-8^', rpr asciiautosumm
-  # debug '^3998-9^', rpr asciiautosumm.settings
-  # debug '^3998-10^', rpr asciiautosumm.parse """   x = 42"""
-  # await @parse asciiautosumm, """   )x = 答答42\n答ABC答"""
-  # # await @parse asciisorter, """   <!-- xx -->"""
-  # await @parse asciiautosumm,           """   <!-- xx -->"""
-  await @parse asciisorter,   """abc123defDEF"""
-  await @parse asciiautosumm, """abc123+456defDEF"""
-  await @parse asciisorter,   """abc123+456defDEF"""
-  await @parse asciisorter,   """äöü\n 雜文3"""
-  # await @parse asciisorter,   @read_file 'main.benchmarks.js'
-  # await @parse asciisorter,   @read_file '../../../README.md'
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@demo_indentation = ->
-  #---------------------------------------------------------------------------------------------------------
-  { indentation_grammar, } = require './old-grammars/indentation.grammar'
-  debug '^3998^', rpr ( k for k of indentation_grammar    )
-  await @parse indentation_grammar, """if 42:\n    43\nelse:\n  44"""
-  await @parse indentation_grammar, """   <!-- xx -->"""
-  await @parse indentation_grammar, """L0\n  L1\n    L2\n  L1"""
-  await @parse indentation_grammar, """\n  \n\nL0\n  L1\n\n    \nOK\n"""
-  await @parse indentation_grammar, """   x = 42"""
-  await @parse indentation_grammar, """L0\n  L1\n    L2\n      L3"""
-  await @parse indentation_grammar, """\n  L0\nL1"""
-  await @parse indentation_grammar, """L0\n"""
-  await @parse indentation_grammar, """L0"""
-  await @parse indentation_grammar, """\tL0"""
-  await @parse indentation_grammar, """ L0"""
-  # await @parse indentation_grammar, @read_file '../../../README.md'
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@demo_regex_whitespace = ->
-  #---------------------------------------------------------------------------------------------------------
-  { Rxws_grammar, rxws_grammar, } = require '../paragate/lib/regex-whitespace.grammar'
-  # rxws_grammar = new Rxws_grammar { as_blocks: false, }
-  debug '^3998^', rpr ( k for k of rxws_grammar    )
-  await @parse rxws_grammar, """if 42:\n\r    43\nelse:\n  44"""
-  await @parse rxws_grammar, """if 42:\r\n    43\nelse:\n  44"""
-  await @parse rxws_grammar, """\nif 42:\n    43\n\nelse:\n  44\n"""
-  await @parse rxws_grammar, """if 42:\n    43\n\n  \nelse:\n  44"""
-  await @parse rxws_grammar, """one-one\none-two\n\ntwo-one\ntwo-two"""
-  await @parse rxws_grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
-  await @parse rxws_grammar, """a\n  b\n\n\n \n  c\n   d"""
-  await @parse rxws_grammar, ''
-  # await @parse rxws_grammar, @read_file '../../../README.md'
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
 @demo_chrsubsetter = ->
   #---------------------------------------------------------------------------------------------------------
   { Chrsubsetter, grammar, } = require '../paragate/lib/chrsubsetter.grammar'
@@ -361,18 +367,55 @@ vocabulary:
   # urge tokens
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@demo_regex_whitespace_regular = ->
+  #---------------------------------------------------------------------------------------------------------
+  { Rxws_grammar, rxws_grammar, } = require '../paragate/lib/regex-whitespace.grammar'
+  # rxws_grammar = new Rxws_grammar { as_blocks: false, }
+  debug '^3998^', rpr ( k for k of rxws_grammar    )
+  await @parse rxws_grammar, """if 42:\n\r    43\nelse:\n  44"""
+  await @parse rxws_grammar, """if 42:\r\n    43\nelse:\n  44"""
+  await @parse rxws_grammar, """\nif 42:\n    43\n\nelse:\n  44\n"""
+  await @parse rxws_grammar, """if 42:\n    43\n\n  \nelse:\n  44"""
+  await @parse rxws_grammar, """one-one\none-two\n\ntwo-one\ntwo-two"""
+  await @parse rxws_grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
+  await @parse rxws_grammar, """a\n  b\n\n\n \n  c\n   d"""
+  await @parse rxws_grammar, ''
+  # await @parse rxws_grammar, @read_file '../../../README.md'
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_regex_whitespace_streaming = ->
+  #---------------------------------------------------------------------------------------------------------
+  { Rxws_grammar, rxws_grammar, } = require '../paragate/lib/regex-whitespace.grammar'
+  # rxws_grammar = new Rxws_grammar { as_blocks: false, }
+  debug '^3998^', rpr ( k for k of rxws_grammar    )
+  # await @parse_streaming rxws_grammar, """if 42:\n\r    43\nelse:\n  44"""
+  # await @parse_streaming rxws_grammar, """if 42:\r\n    43\nelse:\n  44"""
+  # await @parse_streaming rxws_grammar, """\nif 42:\n    43\n\nelse:\n  44\n"""
+  # await @parse_streaming rxws_grammar, """if 42:\n    43\n\n  \nelse:\n  44"""
+  # await @parse_streaming rxws_grammar, """one-one\none-two\n\ntwo-one\ntwo-two"""
+  # await @parse_streaming rxws_grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
+  # await @parse_streaming rxws_grammar, """a\n  b\n\n\n \n  c\n   d"""
+  # await @parse_streaming rxws_grammar, ''
+  # await @parse rxws_grammar, @read_file '../../../README.md'
+  await @parse_streaming rxws_grammar, """abcd\nefgh\nijklmn\nopqrst\nuvwxyz"""
+  # await @xxx()
+  return null
+
 
 ############################################################################################################
 if module is require.main then do =>
-  await @demo_chrsubsetter()
-  await @demo_css_blocks()
-  await @demo_css_planes()
-  await @demo_css_halfplanes()
-  await @demo_css_words()
-  await @demo_htmlish()
-  await @demo_regex_whitespace()
-  await @demo_asciisorter()
-  await @demo_indentation()
+  # # await @demo_old_asciisorter()
+  # # await @demo_old_indentation()
+  # await @demo_chrsubsetter()
+  # await @demo_css_blocks()
+  # await @demo_css_planes()
+  # await @demo_css_halfplanes()
+  # await @demo_css_words()
+  # await @demo_htmlish()
+  # await @demo_regex_whitespace_regular()
+  await @demo_regex_whitespace_streaming()
 
 
 
