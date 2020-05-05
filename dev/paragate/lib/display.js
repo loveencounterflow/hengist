@@ -205,7 +205,6 @@
           include.push(k);
         }
       }
-      debug('^4443-1^', include);
       ref = (function() {
         var l, len1, ref, results;
         ref = [...seen_keys].sort();
@@ -222,14 +221,12 @@
         k = ref[j];
         include.push(k);
       }
-      debug('^4443-2^', include);
       for (l = 0, len2 = include_last.length; l < len2; l++) {
         k = include_last[l];
         if (seen_keys.has(k)) {
           include.push(k);
         }
       }
-      debug('^4443-3^', include);
       for (m = 0, len3 = buffer.length; m < len3; m++) {
         d = buffer[m];
         e = {};

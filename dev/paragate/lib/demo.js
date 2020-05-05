@@ -487,7 +487,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_regex_whitespace_streaming = async function() {
-    var Rxws_grammar, grammar;
+    var Rxws_grammar, grammar, source;
     //---------------------------------------------------------------------------------------------------------
     ({Rxws_grammar, grammar} = require('../paragate/lib/regex-whitespace.grammar'));
     grammar = new Rxws_grammar({
@@ -503,10 +503,11 @@
     // await @parse_streaming grammar, """a\n  b\n\n\n \n  c\n   d"""
     // await @parse_streaming grammar, ''
     // await @parse grammar, @read_file '../../../README.md'
+    source = `abcd\n  efgh\n  ijklmn\nopqrst\n  uvwxyz`;
     await this.parse(new Rxws_grammar({
       as_blocks: false
-    }), `abcd\nefgh\nijklmn\nopqrst\nuvwxyz`);
-    await this.parse_streaming(grammar, `abcd\nefgh\nijklmn\nopqrst\nuvwxyz`);
+    }), source);
+    await this.parse_streaming(grammar, source);
     // await @xxx()
     return null;
   };
