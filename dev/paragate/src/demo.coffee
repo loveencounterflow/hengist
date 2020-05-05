@@ -48,7 +48,7 @@ DISPLAY                   = require './display'
   pipeline = []
   pipeline.push source.split '\n'
   pipeline.push grammar.$parse()
-  pipeline.push $show { title: '$parse 2', }
+  # pipeline.push $show { title: '$parse 2', }
   pipeline.push $drain ( R ) -> resolve R
   #.........................................................................................................
   SP.pull pipeline...
@@ -399,8 +399,9 @@ vocabulary:
   # await @parse_streaming grammar, """a\n  b\n\n\n \n  c\n   d"""
   # await @parse_streaming grammar, ''
   # await @parse grammar, @read_file '../../../README.md'
-  await @parse ( new Rxws_grammar { as_blocks: false, } ),  """abcd\nefgh\nijklmn\nopqrst\nuvwxyz"""
-  await @parse_streaming grammar,       """abcd\nefgh\nijklmn\nopqrst\nuvwxyz"""
+  source = """abcd\n  efgh\n  ijklmn\nopqrst\n  uvwxyz"""
+  await @parse ( new Rxws_grammar { as_blocks: false, } ),  source
+  await @parse_streaming grammar,                           source
   # await @xxx()
   return null
 

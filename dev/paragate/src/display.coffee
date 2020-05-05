@@ -120,11 +120,8 @@ DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
     include = []
     first_or_last = new Set [ include_first..., include_last..., ]
     include.push k for k in include_first when seen_keys.has k
-    debug '^4443-1^', include
     include.push k for k in ( k for k in [ seen_keys..., ].sort() when not first_or_last.has k )
-    debug '^4443-2^', include
     include.push k for k in include_last  when seen_keys.has k
-    debug '^4443-3^', include
     for d in buffer
       e   = {}
       for k in include
