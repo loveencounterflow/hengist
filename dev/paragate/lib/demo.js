@@ -1,11 +1,13 @@
 (function() {
   'use strict';
-  var CND, DISPLAY, INTERTEXT, alert, assign, badge, debug, echo, freeze, help, info, isa, jr, lets, log, rpr, types, urge, warn, whisper;
+  var CND, DISPLAY, alert, assign, badge, debug, echo, freeze, help, info, isa, jr, lets, log, rpr, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
 
   badge = 'PARAGATE/DEMO';
+
+  rpr = CND.rpr;
 
   log = CND.get_logger('plain', badge);
 
@@ -38,10 +40,7 @@
 
   warn("^33098^ should use `require '../..` instead of `../../apps/intertext`");
 
-  INTERTEXT = require('../../../apps/intertext');
-
-  ({rpr} = INTERTEXT.export());
-
+  // INTERTEXT                 = require '../../../apps/intertext'
   DISPLAY = require('./display');
 
   //-----------------------------------------------------------------------------------------------------------
@@ -54,15 +53,74 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.parse = async function(grammar, source) {
+    return (await this._parse('regular', grammar, source));
+  };
+
+  this.parse_streaming = async function(grammar, source) {
+    return (await this._parse('streaming', grammar, source));
+  };
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // @xxx = -> new Promise ( resolve ) =>
+  //   SP                        = require 'steampipes'
+  //   { $
+  //     $show
+  //     $split
+  //     $watch
+  //     $drain }                = SP.export()
+  //   #.........................................................................................................
+  //   first = Symbol 'first'
+  //   last  = Symbol 'last'
+  //   pipeline = []
+  //   pipeline.push Array.from 'abcde'
+  //   pipeline.push $ { first, last, }, ( d, send ) ->
+  //     debug d
+  //     send d
+  //   pipeline.push $show()
+  //   pipeline.push $drain ( R ) -> resolve R
+  //   #.........................................................................................................
+  //   SP.pull pipeline...
+  //   return null
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._tokens_from_streaming_parse = function(grammar, source) {
+    return new Promise((resolve) => {
+      var $, $drain, $show, $split, $watch, SP, pipeline;
+      SP = require('../../../apps/paragate/node_modules/steampipes');
+      ({$, $show, $split, $watch, $drain} = SP.export());
+      //.........................................................................................................
+      pipeline = [];
+      pipeline.push(source.split('\n'));
+      pipeline.push(grammar.$parse());
+      pipeline.push($show({
+        title: '$parse 2'
+      }));
+      pipeline.push($drain(function(R) {
+        return resolve(R);
+      }));
+      //.........................................................................................................
+      SP.pull(...pipeline);
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._parse = async function(mode, grammar, source) {
     var color, headline, i, len, token, tokens;
     headline = grammar.name + ': ' + (jr(source)).padEnd(108, ' ');
     echo(CND.white(CND.reverse(CND.bold(headline))));
-    // if isa.function grammar._parsification_from_source
-    //   parsification = grammar._parsification_from_source source
-    //   @show_adapted_tree parsification
-    //   tokens        = grammar._extract_tokens parsification
-    // else
-    tokens = grammar.parse(source);
+    //.........................................................................................................
+    switch (mode) {
+      case 'regular':
+        tokens = grammar.parse(source);
+        break;
+      case 'streaming':
+        tokens = (await this._tokens_from_streaming_parse(grammar, source));
+        break;
+      default:
+        throw new Error(`^3447^ unknown parsing mode ${rpr(mode)}`);
+    }
+    //.........................................................................................................
     await DISPLAY.show_tokens_as_table(tokens);
     for (i = 0, len = tokens.length; i < len; i++) {
       token = tokens[i];
@@ -89,6 +147,7 @@
       echo(color(rpr(token)));
     }
     echo(CND.grey(CND.reverse(CND.bold(headline))));
+    //.........................................................................................................
     return null;
   };
 
@@ -226,6 +285,66 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
+  this.demo_old_asciisorter = async function() {
+    var Asciisorter, asciiautosumm, asciisorter;
+    ({asciisorter, Asciisorter} = require('./old-grammars/asciisorter.grammar'));
+    // await @parse asciisorter, """if 42:\n    43\nelse:\n  44"""
+    // await @parse asciisorter, """   x = 42"""
+    // await @parse asciisorter, """abcABC_( )123+!?"""
+    // await @parse asciisorter, """abcABC123!?+_( xyz )"""
+    // #---------------------------------------------------------------------------------------------------------
+    asciiautosumm = new Asciisorter({
+      use_summarize: false
+    });
+    // debug '^3998-3^', rpr ( k for k of asciiautosumm = new Asciisorter { use_summarize: false, }    )
+    // debug '^3998-4^', rpr asciisorter.lexer.config.lineTerminatorCharacters
+    // debug '^3998-5^', rpr asciisorter.lexer.config.lineTerminatorsPattern
+    // debug '^3998-6^', rpr asciiautosumm.lexer.config.lineTerminatorCharacters
+    // debug '^3998-7^', rpr asciiautosumm.lexer.config.lineTerminatorsPattern
+    // debug '^3998-8^', rpr asciiautosumm
+    // debug '^3998-9^', rpr asciiautosumm.settings
+    // debug '^3998-10^', rpr asciiautosumm.parse """   x = 42"""
+    // await @parse asciiautosumm, """   )x = 答答42\n答ABC答"""
+    // # await @parse asciisorter, """   <!-- xx -->"""
+    // await @parse asciiautosumm,           """   <!-- xx -->"""
+    await this.parse(asciisorter, `abc123defDEF`);
+    await this.parse(asciiautosumm, `abc123+456defDEF`);
+    await this.parse(asciisorter, `abc123+456defDEF`);
+    await this.parse(asciisorter, `äöü\n 雜文3`);
+    // await @parse asciisorter,   @read_file 'main.benchmarks.js'
+    // await @parse asciisorter,   @read_file '../../../README.md'
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_old_indentation = async function() {
+    var indentation_grammar, k;
+    //---------------------------------------------------------------------------------------------------------
+    ({indentation_grammar} = require('./old-grammars/indentation.grammar'));
+    debug('^3998^', rpr((function() {
+      var results;
+      results = [];
+      for (k in indentation_grammar) {
+        results.push(k);
+      }
+      return results;
+    })()));
+    await this.parse(indentation_grammar, `if 42:\n    43\nelse:\n  44`);
+    await this.parse(indentation_grammar, `   <!-- xx -->`);
+    await this.parse(indentation_grammar, `L0\n  L1\n    L2\n  L1`);
+    await this.parse(indentation_grammar, `\n  \n\nL0\n  L1\n\n    \nOK\n`);
+    await this.parse(indentation_grammar, `   x = 42`);
+    await this.parse(indentation_grammar, `L0\n  L1\n    L2\n      L3`);
+    await this.parse(indentation_grammar, `\n  L0\nL1`);
+    await this.parse(indentation_grammar, `L0\n`);
+    await this.parse(indentation_grammar, `L0`);
+    await this.parse(indentation_grammar, `\tL0`);
+    await this.parse(indentation_grammar, ` L0`);
+    // await @parse indentation_grammar, @read_file '../../../README.md'
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.demo_htmlish = async function() {
     var htmlish_grammar;
     htmlish_grammar = require('../../../apps/paragate/lib/htmlish.grammar');
@@ -287,92 +406,6 @@
     await this.parse(htmlish_grammar, `<article foo=yes>helo</article>`);
     // await @parse htmlish_grammar, @read_file '../../../README.md'
     // await @parse htmlish_grammar, @read_file '../../../assets/larry-wall-on-regexes.html'
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.demo_asciisorter = async function() {
-    var Asciisorter, asciiautosumm, asciisorter;
-    ({asciisorter, Asciisorter} = require('./old-grammars/asciisorter.grammar'));
-    // await @parse asciisorter, """if 42:\n    43\nelse:\n  44"""
-    // await @parse asciisorter, """   x = 42"""
-    // await @parse asciisorter, """abcABC_( )123+!?"""
-    // await @parse asciisorter, """abcABC123!?+_( xyz )"""
-    // #---------------------------------------------------------------------------------------------------------
-    asciiautosumm = new Asciisorter({
-      use_summarize: false
-    });
-    // debug '^3998-3^', rpr ( k for k of asciiautosumm = new Asciisorter { use_summarize: false, }    )
-    // debug '^3998-4^', rpr asciisorter.lexer.config.lineTerminatorCharacters
-    // debug '^3998-5^', rpr asciisorter.lexer.config.lineTerminatorsPattern
-    // debug '^3998-6^', rpr asciiautosumm.lexer.config.lineTerminatorCharacters
-    // debug '^3998-7^', rpr asciiautosumm.lexer.config.lineTerminatorsPattern
-    // debug '^3998-8^', rpr asciiautosumm
-    // debug '^3998-9^', rpr asciiautosumm.settings
-    // debug '^3998-10^', rpr asciiautosumm.parse """   x = 42"""
-    // await @parse asciiautosumm, """   )x = 答答42\n答ABC答"""
-    // # await @parse asciisorter, """   <!-- xx -->"""
-    // await @parse asciiautosumm,           """   <!-- xx -->"""
-    await this.parse(asciisorter, `abc123defDEF`);
-    await this.parse(asciiautosumm, `abc123+456defDEF`);
-    await this.parse(asciisorter, `abc123+456defDEF`);
-    await this.parse(asciisorter, `äöü\n 雜文3`);
-    // await @parse asciisorter,   @read_file 'main.benchmarks.js'
-    // await @parse asciisorter,   @read_file '../../../README.md'
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.demo_indentation = async function() {
-    var indentation_grammar, k;
-    //---------------------------------------------------------------------------------------------------------
-    ({indentation_grammar} = require('./old-grammars/indentation.grammar'));
-    debug('^3998^', rpr((function() {
-      var results;
-      results = [];
-      for (k in indentation_grammar) {
-        results.push(k);
-      }
-      return results;
-    })()));
-    await this.parse(indentation_grammar, `if 42:\n    43\nelse:\n  44`);
-    await this.parse(indentation_grammar, `   <!-- xx -->`);
-    await this.parse(indentation_grammar, `L0\n  L1\n    L2\n  L1`);
-    await this.parse(indentation_grammar, `\n  \n\nL0\n  L1\n\n    \nOK\n`);
-    await this.parse(indentation_grammar, `   x = 42`);
-    await this.parse(indentation_grammar, `L0\n  L1\n    L2\n      L3`);
-    await this.parse(indentation_grammar, `\n  L0\nL1`);
-    await this.parse(indentation_grammar, `L0\n`);
-    await this.parse(indentation_grammar, `L0`);
-    await this.parse(indentation_grammar, `\tL0`);
-    await this.parse(indentation_grammar, ` L0`);
-    // await @parse indentation_grammar, @read_file '../../../README.md'
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.demo_regex_whitespace = async function() {
-    var Rxws_grammar, k, rxws_grammar;
-    //---------------------------------------------------------------------------------------------------------
-    ({Rxws_grammar, rxws_grammar} = require('../paragate/lib/regex-whitespace.grammar'));
-    // rxws_grammar = new Rxws_grammar { as_blocks: false, }
-    debug('^3998^', rpr((function() {
-      var results;
-      results = [];
-      for (k in rxws_grammar) {
-        results.push(k);
-      }
-      return results;
-    })()));
-    await this.parse(rxws_grammar, `if 42:\n\r    43\nelse:\n  44`);
-    await this.parse(rxws_grammar, `if 42:\r\n    43\nelse:\n  44`);
-    await this.parse(rxws_grammar, `\nif 42:\n    43\n\nelse:\n  44\n`);
-    await this.parse(rxws_grammar, `if 42:\n    43\n\n  \nelse:\n  44`);
-    await this.parse(rxws_grammar, `one-one\none-two\n\ntwo-one\ntwo-two`);
-    await this.parse(rxws_grammar, `one-one\none-two\n  \ntwo-one\ntwo-two\n`);
-    await this.parse(rxws_grammar, `a\n  b\n\n\n \n  c\n   d`);
-    await this.parse(rxws_grammar, '');
-    // await @parse rxws_grammar, @read_file '../../../README.md'
     return null;
   };
 
@@ -450,18 +483,73 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_regex_whitespace_regular = async function() {
+    var Rxws_grammar, k, rxws_grammar;
+    //---------------------------------------------------------------------------------------------------------
+    ({Rxws_grammar, rxws_grammar} = require('../paragate/lib/regex-whitespace.grammar'));
+    // rxws_grammar = new Rxws_grammar { as_blocks: false, }
+    debug('^3998^', rpr((function() {
+      var results;
+      results = [];
+      for (k in rxws_grammar) {
+        results.push(k);
+      }
+      return results;
+    })()));
+    await this.parse(rxws_grammar, `if 42:\n\r    43\nelse:\n  44`);
+    await this.parse(rxws_grammar, `if 42:\r\n    43\nelse:\n  44`);
+    await this.parse(rxws_grammar, `\nif 42:\n    43\n\nelse:\n  44\n`);
+    await this.parse(rxws_grammar, `if 42:\n    43\n\n  \nelse:\n  44`);
+    await this.parse(rxws_grammar, `one-one\none-two\n\ntwo-one\ntwo-two`);
+    await this.parse(rxws_grammar, `one-one\none-two\n  \ntwo-one\ntwo-two\n`);
+    await this.parse(rxws_grammar, `a\n  b\n\n\n \n  c\n   d`);
+    await this.parse(rxws_grammar, '');
+    // await @parse rxws_grammar, @read_file '../../../README.md'
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_regex_whitespace_streaming = async function() {
+    var Rxws_grammar, k, rxws_grammar;
+    //---------------------------------------------------------------------------------------------------------
+    ({Rxws_grammar, rxws_grammar} = require('../paragate/lib/regex-whitespace.grammar'));
+    // rxws_grammar = new Rxws_grammar { as_blocks: false, }
+    debug('^3998^', rpr((function() {
+      var results;
+      results = [];
+      for (k in rxws_grammar) {
+        results.push(k);
+      }
+      return results;
+    })()));
+    // await @parse_streaming rxws_grammar, """if 42:\n\r    43\nelse:\n  44"""
+    // await @parse_streaming rxws_grammar, """if 42:\r\n    43\nelse:\n  44"""
+    // await @parse_streaming rxws_grammar, """\nif 42:\n    43\n\nelse:\n  44\n"""
+    // await @parse_streaming rxws_grammar, """if 42:\n    43\n\n  \nelse:\n  44"""
+    // await @parse_streaming rxws_grammar, """one-one\none-two\n\ntwo-one\ntwo-two"""
+    // await @parse_streaming rxws_grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
+    // await @parse_streaming rxws_grammar, """a\n  b\n\n\n \n  c\n   d"""
+    // await @parse_streaming rxws_grammar, ''
+    // await @parse rxws_grammar, @read_file '../../../README.md'
+    await this.parse_streaming(rxws_grammar, `abcd\nefgh\nijklmn\nopqrst\nuvwxyz`);
+    // await @xxx()
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      await this.demo_chrsubsetter();
-      await this.demo_css_blocks();
-      await this.demo_css_planes();
-      await this.demo_css_halfplanes();
-      await this.demo_css_words();
-      await this.demo_htmlish();
-      await this.demo_regex_whitespace();
-      await this.demo_asciisorter();
-      return (await this.demo_indentation());
+      // # await @demo_old_asciisorter()
+      // # await @demo_old_indentation()
+      // await @demo_chrsubsetter()
+      // await @demo_css_blocks()
+      // await @demo_css_planes()
+      // await @demo_css_halfplanes()
+      // await @demo_css_words()
+      // await @demo_htmlish()
+      // await @demo_regex_whitespace_regular()
+      return (await this.demo_regex_whitespace_streaming());
     })();
   }
 
