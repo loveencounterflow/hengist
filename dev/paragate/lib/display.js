@@ -161,17 +161,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.$_show_tokens_as_table = function(settings = null) {
-    var $collect_keys, $filter, $format, $reorder_keys, colorize, defaults, exclude, include, keys, pipeline;
+    var $add_keys, $filter, $format, $reorder_keys, colorize, defaults, exclude, include, include_first, include_last, pipeline, seen_keys;
     // debug '^2224^', TBL       = INTERTEXT.TBL
     // last      = Symbol 'last'
     pipeline = [];
-    keys = new Set();
-    include = ['$key', 'pos', 'name', 'text', '$vnr', '$'];
-    // exclude   = [ 'source', ]
-    // 'type', 'value', 'atrs'
-    // 'role',
-    // 'txtl', 'tagl', 'tagr', 'atrl'
-    // 'errors', 'source',
+    seen_keys = new Set();
+    include_first = ['$key', 'pos', 'name', 'text'];
+    include_last = ['$vnr', '$'];
+    include = [];
     exclude = [];
     defaults = {
       stamped: false
@@ -183,37 +180,67 @@
         return send(d);
       }
     }));
-    pipeline.push(SP.$collect());
-    pipeline.push($collect_keys = $((buffer, send) => {
-      var d, i, k, len;
-      for (i = 0, len = buffer.length; i < len; i++) {
-        d = buffer[i];
-        for (k in d) {
-          keys.add(k);
+    //.........................................................................................................
+    pipeline.push($add_keys = $watch((d) => {
+      var k, results;
+      results = [];
+      for (k in d) {
+        if (indexOf.call(exclude, k) < 0) {
+          results.push(seen_keys.add(k));
+        } else {
+          results.push(void 0);
         }
-        for (k in d) {
-          if (!((indexOf.call(include, k) >= 0) || (indexOf.call(exclude, k) >= 0))) {
-            include.push(k);
-          }
-        }
-        send(d);
       }
-      include = include.filter(function(k) {
-        return keys.has(k);
-      });
-      return null;
+      return results;
     }));
     //.........................................................................................................
-    pipeline.push($reorder_keys = $((d, send) => {
-      /* TAINT is an option in `$tabulate()` (?) */
-      var e, i, k, len, v;
-      e = {};
-      for (i = 0, len = include.length; i < len; i++) {
-        k = include[i];
-        v = d[k];
-        e[k] = ((v != null) || v === null) ? v : void 0;
+    pipeline.push(SP.$collect());
+    pipeline.push($reorder_keys = $((buffer, send) => {
+      var d, e, first_or_last, i, j, k, l, len, len1, len2, len3, len4, m, n, ref, v;
+      include = [];
+      first_or_last = new Set([...include_first, ...include_last]);
+      for (i = 0, len = include_first.length; i < len; i++) {
+        k = include_first[i];
+        if (seen_keys.has(k)) {
+          include.push(k);
+        }
       }
-      return send(e);
+      debug('^4443-1^', include);
+      ref = (function() {
+        var l, len1, ref, results;
+        ref = [...seen_keys].sort();
+        results = [];
+        for (l = 0, len1 = ref.length; l < len1; l++) {
+          k = ref[l];
+          if (!first_or_last.has(k)) {
+            results.push(k);
+          }
+        }
+        return results;
+      })();
+      for (j = 0, len1 = ref.length; j < len1; j++) {
+        k = ref[j];
+        include.push(k);
+      }
+      debug('^4443-2^', include);
+      for (l = 0, len2 = include_last.length; l < len2; l++) {
+        k = include_last[l];
+        if (seen_keys.has(k)) {
+          include.push(k);
+        }
+      }
+      debug('^4443-3^', include);
+      for (m = 0, len3 = buffer.length; m < len3; m++) {
+        d = buffer[m];
+        e = {};
+        for (n = 0, len4 = include.length; n < len4; n++) {
+          k = include[n];
+          v = d[k];
+          e[k] = ((v != null) || v === null) ? v : void 0/* set missing keys */
+        }
+        send(e);
+      }
+      return null;
     }));
     //.........................................................................................................
     pipeline.push($format = $((d, send) => {

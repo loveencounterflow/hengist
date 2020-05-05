@@ -70,9 +70,7 @@
       pipeline = [];
       pipeline.push(source.split('\n'));
       pipeline.push(grammar.$parse());
-      pipeline.push($show({
-        title: '$parse 2'
-      }));
+      // pipeline.push $show { title: '$parse 2', }
       pipeline.push($drain(function(R) {
         return resolve(R);
       }));
@@ -463,54 +461,52 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_regex_whitespace_regular = async function() {
-    var Rxws_grammar, k, rxws_grammar;
+    var Rxws_grammar, grammar, k;
     //---------------------------------------------------------------------------------------------------------
-    ({Rxws_grammar, rxws_grammar} = require('../paragate/lib/regex-whitespace.grammar'));
-    // rxws_grammar = new Rxws_grammar { as_blocks: false, }
+    ({Rxws_grammar, grammar} = require('../paragate/lib/regex-whitespace.grammar'));
+    // grammar = new Rxws_grammar { as_blocks: false, }
     debug('^3998^', rpr((function() {
       var results;
       results = [];
-      for (k in rxws_grammar) {
+      for (k in grammar) {
         results.push(k);
       }
       return results;
     })()));
-    await this.parse(rxws_grammar, `if 42:\n\r    43\nelse:\n  44`);
-    await this.parse(rxws_grammar, `if 42:\r\n    43\nelse:\n  44`);
-    await this.parse(rxws_grammar, `\nif 42:\n    43\n\nelse:\n  44\n`);
-    await this.parse(rxws_grammar, `if 42:\n    43\n\n  \nelse:\n  44`);
-    await this.parse(rxws_grammar, `one-one\none-two\n\ntwo-one\ntwo-two`);
-    await this.parse(rxws_grammar, `one-one\none-two\n  \ntwo-one\ntwo-two\n`);
-    await this.parse(rxws_grammar, `a\n  b\n\n\n \n  c\n   d`);
-    await this.parse(rxws_grammar, '');
-    // await @parse rxws_grammar, @read_file '../../../README.md'
+    await this.parse(grammar, `if 42:\n\r    43\nelse:\n  44`);
+    await this.parse(grammar, `if 42:\r\n    43\nelse:\n  44`);
+    await this.parse(grammar, `\nif 42:\n    43\n\nelse:\n  44\n`);
+    await this.parse(grammar, `if 42:\n    43\n\n  \nelse:\n  44`);
+    await this.parse(grammar, `one-one\none-two\n\ntwo-one\ntwo-two`);
+    await this.parse(grammar, `one-one\none-two\n  \ntwo-one\ntwo-two\n`);
+    await this.parse(grammar, `a\n  b\n\n\n \n  c\n   d`);
+    await this.parse(grammar, '');
+    // await @parse grammar, @read_file '../../../README.md'
     return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_regex_whitespace_streaming = async function() {
-    var Rxws_grammar, k, rxws_grammar;
+    var Rxws_grammar, grammar;
     //---------------------------------------------------------------------------------------------------------
-    ({Rxws_grammar, rxws_grammar} = require('../paragate/lib/regex-whitespace.grammar'));
-    // rxws_grammar = new Rxws_grammar { as_blocks: false, }
-    debug('^3998^', rpr((function() {
-      var results;
-      results = [];
-      for (k in rxws_grammar) {
-        results.push(k);
-      }
-      return results;
-    })()));
-    // await @parse_streaming rxws_grammar, """if 42:\n\r    43\nelse:\n  44"""
-    // await @parse_streaming rxws_grammar, """if 42:\r\n    43\nelse:\n  44"""
-    // await @parse_streaming rxws_grammar, """\nif 42:\n    43\n\nelse:\n  44\n"""
-    // await @parse_streaming rxws_grammar, """if 42:\n    43\n\n  \nelse:\n  44"""
-    // await @parse_streaming rxws_grammar, """one-one\none-two\n\ntwo-one\ntwo-two"""
-    // await @parse_streaming rxws_grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
-    // await @parse_streaming rxws_grammar, """a\n  b\n\n\n \n  c\n   d"""
-    // await @parse_streaming rxws_grammar, ''
-    // await @parse rxws_grammar, @read_file '../../../README.md'
-    await this.parse_streaming(rxws_grammar, `abcd\nefgh\nijklmn\nopqrst\nuvwxyz`);
+    ({Rxws_grammar, grammar} = require('../paragate/lib/regex-whitespace.grammar'));
+    grammar = new Rxws_grammar({
+      name: '$rxws'
+    });
+    // debug '^3998^', rpr ( k for k of grammar    )
+    // await @parse_streaming grammar, """if 42:\n\r    43\nelse:\n  44"""
+    // await @parse_streaming grammar, """if 42:\r\n    43\nelse:\n  44"""
+    // await @parse_streaming grammar, """\nif 42:\n    43\n\nelse:\n  44\n"""
+    // await @parse_streaming grammar, """if 42:\n    43\n\n  \nelse:\n  44"""
+    // await @parse_streaming grammar, """one-one\none-two\n\ntwo-one\ntwo-two"""
+    // await @parse_streaming grammar, """one-one\none-two\n  \ntwo-one\ntwo-two\n"""
+    // await @parse_streaming grammar, """a\n  b\n\n\n \n  c\n   d"""
+    // await @parse_streaming grammar, ''
+    // await @parse grammar, @read_file '../../../README.md'
+    await this.parse(new Rxws_grammar({
+      as_blocks: false
+    }), `abcd\nefgh\nijklmn\nopqrst\nuvwxyz`);
+    await this.parse_streaming(grammar, `abcd\nefgh\nijklmn\nopqrst\nuvwxyz`);
     // await @xxx()
     return null;
   };
