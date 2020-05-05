@@ -100,39 +100,38 @@ DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
 @$_show_tokens_as_table = ( settings = null ) ->
   # debug '^2224^', TBL       = INTERTEXT.TBL
   # last      = Symbol 'last'
-  pipeline  = []
-  keys      = new Set()
-  include   = [
-    '$key',
-    'pos', 'name', 'text',
-    '$vnr', '$',
-    # 'type', 'value', 'atrs'
-    # 'role',
-    # 'txtl', 'tagl', 'tagr', 'atrl'
-    # 'errors', 'source',
-    ]
-  # exclude   = [ 'source', ]
-  exclude   = []
-  defaults  = { stamped: false, }
-  settings  = { defaults..., settings..., }
+  pipeline      = []
+  seen_keys     = new Set()
+  include_first = [ '$key', 'pos', 'name', 'text', ]
+  include_last  = [ '$vnr', '$', ]
+  include       = []
+  exclude       = []
+  defaults      = { stamped: false, }
+  settings      = { defaults..., settings..., }
   #.........................................................................................................
   pipeline.push $filter = $ ( d, send ) => send d if ( settings.stamped ) or ( not d.$stamped )
-  pipeline.push SP.$collect()
-  pipeline.push $collect_keys = $ ( buffer, send ) =>
-    for d in buffer
-      keys.add k for k of d
-      include.push k for k of d when not ( ( k in include ) or ( k in exclude ) )
-      send d
-    include = include.filter ( k ) -> keys.has k
-    return  null
   #.........................................................................................................
-  pipeline.push $reorder_keys = $ ( d, send ) =>
-    ### TAINT is an option in `$tabulate()` (?) ###
-    e = {}
-    for k in include
-      v       = d[ k ]
-      e[ k ]  = if ( v? or v is null ) then v else undefined
-    send e
+  pipeline.push $add_keys = $watch ( d ) =>
+    for k of d
+      seen_keys.add k unless k in exclude
+  #.........................................................................................................
+  pipeline.push SP.$collect()
+  pipeline.push $reorder_keys = $ ( buffer, send ) =>
+    include = []
+    first_or_last = new Set [ include_first..., include_last..., ]
+    include.push k for k in include_first when seen_keys.has k
+    debug '^4443-1^', include
+    include.push k for k in ( k for k in [ seen_keys..., ].sort() when not first_or_last.has k )
+    debug '^4443-2^', include
+    include.push k for k in include_last  when seen_keys.has k
+    debug '^4443-3^', include
+    for d in buffer
+      e   = {}
+      for k in include
+        v       = d[ k ]
+        e[ k ]  = if ( v? or v is null ) then v else undefined ### set missing keys ###
+      send e
+    return  null
   #.........................................................................................................
   pipeline.push $format = $ ( d, send ) =>
     d.text  = rpr d.text if d.text?
