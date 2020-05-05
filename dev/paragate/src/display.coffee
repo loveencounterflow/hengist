@@ -4,6 +4,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 badge                     = 'PARAGATE/DISPLAY'
+rpr                       = CND.rpr
 log                       = CND.get_logger 'plain',     badge
 info                      = CND.get_logger 'info',      badge
 whisper                   = CND.get_logger 'whisper',   badge
@@ -34,7 +35,6 @@ DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   lets
   freeze
   select }                = DATOM.export()
-{ rpr }                   = INTERTEXT.export()
 
 
 #===========================================================================================================

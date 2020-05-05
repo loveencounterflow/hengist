@@ -4,6 +4,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 badge                     = 'PARAGATE/DEMO'
+rpr                       = CND.rpr
 log                       = CND.get_logger 'plain',     badge
 info                      = CND.get_logger 'info',      badge
 whisper                   = CND.get_logger 'whisper',   badge
@@ -21,8 +22,7 @@ echo                      = CND.echo.bind CND
 types                     = require '../../../apps/paragate/lib/types'
 { isa }                   = types
 warn "^33098^ should use `require '../..` instead of `../../apps/intertext`"
-INTERTEXT                 = require '../../../apps/intertext'
-{ rpr }                   = INTERTEXT.export()
+# INTERTEXT                 = require '../../../apps/intertext'
 DISPLAY                   = require './display'
 
 
