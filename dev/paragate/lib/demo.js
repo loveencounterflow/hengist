@@ -60,28 +60,6 @@
     return (await this._parse('streaming', grammar, source));
   };
 
-  // #-----------------------------------------------------------------------------------------------------------
-  // @xxx = -> new Promise ( resolve ) =>
-  //   SP                        = require 'steampipes'
-  //   { $
-  //     $show
-  //     $split
-  //     $watch
-  //     $drain }                = SP.export()
-  //   #.........................................................................................................
-  //   first = Symbol 'first'
-  //   last  = Symbol 'last'
-  //   pipeline = []
-  //   pipeline.push Array.from 'abcde'
-  //   pipeline.push $ { first, last, }, ( d, send ) ->
-  //     debug d
-  //     send d
-  //   pipeline.push $show()
-  //   pipeline.push $drain ( R ) -> resolve R
-  //   #.........................................................................................................
-  //   SP.pull pipeline...
-  //   return null
-
   //-----------------------------------------------------------------------------------------------------------
   this._tokens_from_streaming_parse = function(grammar, source) {
     return new Promise((resolve) => {
