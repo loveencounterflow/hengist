@@ -1,0 +1,23 @@
+#!/bin/bash
+
+sqlite-browser apps/datamill/db/datamill.db c "select * from main;"
+sqlite-browser apps/datamill/db/datamill.db c "select vnr, stamped, dest, key, text, p from main;"
+sqlite-browser apps/datamill/db/datamill.db c "select lead( dest ) over ( order by vnr_blob ), * from main order by vnr_blob;"
+sqlite-browser apps/datamill/db/datamill.db c "select lead( dest ) over ( order by vnr_blob ) as xxx, * from main where xxx != dest order by vnr_blob;"
+sqlite-browser apps/datamill/db/datamill.db c "select * from main order by ref, vnr_blob;"
+sqlite-browser apps/datamill/db/datamill.db c "select * from main order by key, ref, vnr_blob;"
+sqlite-browser apps/datamill/db/datamill.db c "select * from main where key = '^html' order by vnr_blob;"
+sqlite-browser apps/datamill/db/datamill.db c "select * from main where text is not null order by vnr_blob;"
+sqlite-browser apps/datamill/db/datamill.db c "select * from main where text isnull order by vnr_blob;"
+sqlite-browser apps/datamill/db/datamill.db c "select * from main where text is null order by vnr_blob;"
+sqlite-browser apps/datamill/db/datamill.db c "select * from information_schema;"
+sqlite-browser apps/datamill/db/datamill.db c "pragma table_info( main );"
+sqlite-browser apps/datamill/db/datamill.db c "select * from datamill_copy_realms order by vnr_blob;"
+sqlite-browser apps/datamill/db/datamill.db c "select * from keys;"
+sqlite-browser apps/datamill/db/datamill.db c "insert into realms values ( 'x' );"
+sqlite-browser apps/datamill/db/datamill.db c "select * from main where realm = 'html' order by vnr_blob;"
+sqlite-browser apps/datamill/db/datamill.db c "select * from main where realm = 'html' and stamped = 0 order by vnr_blob;"
+sqlite-browser apps/datamill/db/datamill.db c "select * from main where realm = 'input' order by vnr_blob;"
+sqlite-browser apps/datamill/db/datamill.db c "select * from main order by vnr_blob;"
+sqlite-browser apps/datamill/db/datamill.db c "select * from realms;"
+
