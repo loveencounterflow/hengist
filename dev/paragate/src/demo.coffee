@@ -130,7 +130,7 @@ DISPLAY                   = require './display'
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-  # debug '^3998-1^', rpr ( k for k of htmlish_grammar        )
+  # debug '^3998-1^', rpr ( k for k of grammar        )
   # debug '^3998-2^', rpr ( k for k of asciisorter            )
   # debug '^3998-2^', rpr ( k for k of asciisorter.lexer      )
   # @parse """<a>before<tag>text</tag>after</a>"""
@@ -254,54 +254,54 @@ vocabulary:
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_htmlish = ->
-  htmlish_grammar = require '../../../apps/paragate/lib/htmlish.grammar'
-  # urge '^2212^', rpr ( k for k in types.all_keys_of htmlish_grammar when not k.startsWith '__' ).sort()
-  # urge '^2212^', rpr ( k for k of htmlish_grammar ).sort()
-  # await @parse htmlish_grammar, """<title>Helo Worlds</title>"""
-  # await @parse htmlish_grammar, """<title>Helo <b>Worlds</b><br/></title>"""
-  # await @parse htmlish_grammar, """<title foo=bar>Helo Worlds</title>"""
-  # await @parse htmlish_grammar, """<a>before<tag>text</tag>after</a>"""
-  # await @parse htmlish_grammar, """before<py/ma3ke4dang1/<oyaji/馬克當/<a><b/></c></d>"""
-  # await @parse htmlish_grammar, """<?xml something something?>"""
-  # await @parse htmlish_grammar, """<?xml something something>"""
-  # await @parse htmlish_grammar, """<?dodat blah?>"""
-  # await @parse htmlish_grammar, """before <otag a1=41 a2=42>after"""
-  # await @parse htmlish_grammar, """before <ntag a1=41 a2=42/stm_text/ after"""
-  # await @parse htmlish_grammar, """before <ntag a1=v1 a2=v2/stm_text/ after"""
-  # await @parse htmlish_grammar, """before <otag a1=v1 a2=v2>after"""
-  # await @parse htmlish_grammar, """<br><tag a1 a2=v2 a3 = v3>some text</tag>"""
-  # await @parse htmlish_grammar, """<br><tag a1 a2=v2 p3:a3 = v3>some text</tag>"""
-  # await @parse htmlish_grammar, """<br><tag#c5 a1 a2=v2 p3:a3 = v3>some text</tag>"""
-  # await @parse htmlish_grammar, """<A></B>"""
-  # await @parse htmlish_grammar, """BEFORE <NTAG/STM_TEXT/ AFTER"""
-  # await @parse htmlish_grammar, """<a><!-- COMMENT HERE --><b>"""
-  # await @parse htmlish_grammar, """before <![CDATA[\none\ntwo\n]]>after"""
-  # await @parse htmlish_grammar, """before <![CDATA[x]]>after"""
-  # await @parse htmlish_grammar, """before <![CDATA[x]]>"""
-  await @parse htmlish_grammar, """before <![CDATA[]]>"""
-  await @parse htmlish_grammar, """<!DOCTYPE html>"""
-  await @parse htmlish_grammar, """<otag>"""
-  await @parse htmlish_grammar, """<a b="c"></a><b></b>"""
-  await @parse htmlish_grammar, """<STAG/>"""
-  await @parse htmlish_grammar, """<NTAG/"""
-  await @parse htmlish_grammar, """<UNFINISHED"""
-  await @parse htmlish_grammar, """<?=)(//&%%$§$§"!"""
-  await @parse htmlish_grammar, """<>"""
-  await @parse htmlish_grammar, """<!>"""
-  await @parse htmlish_grammar, """<![CDATA["""
-  await @parse htmlish_grammar, """>"""
-  await @parse htmlish_grammar, """< ="""
-  await @parse htmlish_grammar, """<a b= >"""
-  await @parse htmlish_grammar, """foo bar<a b= >"""
-  await @parse htmlish_grammar, """foo bar<c><a b=4>"""
-  await @parse htmlish_grammar, """foo bar<c><a b= >"""
-  await @parse htmlish_grammar, """
+  { Htmlish_grammar, grammar, } = require '../../../apps/paragate/lib/htmlish.grammar'
+  # urge '^2212^', rpr ( k for k in types.all_keys_of grammar when not k.startsWith '__' ).sort()
+  # urge '^2212^', rpr ( k for k of grammar ).sort()
+  # await @parse grammar, """<title>Helo Worlds</title>"""
+  # await @parse grammar, """<title>Helo <b>Worlds</b><br/></title>"""
+  # await @parse grammar, """<title foo=bar>Helo Worlds</title>"""
+  # await @parse grammar, """<a>before<tag>text</tag>after</a>"""
+  # await @parse grammar, """before<py/ma3ke4dang1/<oyaji/馬克當/<a><b/></c></d>"""
+  # await @parse grammar, """<?xml something something?>"""
+  # await @parse grammar, """<?xml something something>"""
+  # await @parse grammar, """<?dodat blah?>"""
+  # await @parse grammar, """before <otag a1=41 a2=42>after"""
+  # await @parse grammar, """before <ntag a1=41 a2=42/stm_text/ after"""
+  # await @parse grammar, """before <ntag a1=v1 a2=v2/stm_text/ after"""
+  # await @parse grammar, """before <otag a1=v1 a2=v2>after"""
+  # await @parse grammar, """<br><tag a1 a2=v2 a3 = v3>some text</tag>"""
+  # await @parse grammar, """<br><tag a1 a2=v2 p3:a3 = v3>some text</tag>"""
+  # await @parse grammar, """<br><tag#c5 a1 a2=v2 p3:a3 = v3>some text</tag>"""
+  # await @parse grammar, """<A></B>"""
+  # await @parse grammar, """BEFORE <NTAG/STM_TEXT/ AFTER"""
+  # await @parse grammar, """<a><!-- COMMENT HERE --><b>"""
+  # await @parse grammar, """before <![CDATA[\none\ntwo\n]]>after"""
+  # await @parse grammar, """before <![CDATA[x]]>after"""
+  # await @parse grammar, """before <![CDATA[x]]>"""
+  await @parse grammar, """before <![CDATA[]]>"""
+  await @parse grammar, """<!DOCTYPE html>"""
+  await @parse grammar, """<otag>"""
+  await @parse grammar, """<a b="c"></a><b></b>"""
+  await @parse grammar, """<STAG/>"""
+  await @parse grammar, """<NTAG/"""
+  await @parse grammar, """<UNFINISHED"""
+  await @parse grammar, """<?=)(//&%%$§$§"!"""
+  await @parse grammar, """<>"""
+  await @parse grammar, """<!>"""
+  await @parse grammar, """<![CDATA["""
+  await @parse grammar, """>"""
+  await @parse grammar, """< ="""
+  await @parse grammar, """<a b= >"""
+  await @parse grammar, """foo bar<a b= >"""
+  await @parse grammar, """foo bar<c><a b=4>"""
+  await @parse grammar, """foo bar<c><a b= >"""
+  await @parse grammar, """
     <title>A Proposal</title>
     <h1>Motivation</h1>
     <p>It has been suggested to further the cause.</p>
     <p>This is <i>very</i> desirable indeed.</p>
     """
-  await @parse htmlish_grammar, [
+  await @parse grammar, [
    # 0         10        20        30        40        50
    # ├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐├┬┬┬┬┼┬┬┬┐
     "<title>A Proposal</title>"                           # 1
@@ -312,9 +312,9 @@ vocabulary:
     "<p a= >This is <i>very</i> desirable indeed.</p>"    # 6
     "<"                                                   # 7
     ].join '\n'
-  await @parse htmlish_grammar, """<article foo=yes>helo</article>"""
-  # await @parse htmlish_grammar, @read_file '../../../README.md'
-  # await @parse htmlish_grammar, @read_file '../../../assets/larry-wall-on-regexes.html'
+  await @parse grammar, """<article foo=yes>helo</article>"""
+  # await @parse grammar, @read_file '../../../README.md'
+  # await @parse grammar, @read_file '../../../assets/larry-wall-on-regexes.html'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -416,7 +416,7 @@ if module is require.main then do =>
   # await @demo_css_halfplanes()
   # await @demo_css_words()
   # await @demo_htmlish()
-  # await @demo_regex_whitespace_regular()
+  await @demo_regex_whitespace_regular()
   await @demo_regex_whitespace_streaming()
 
 
