@@ -249,6 +249,14 @@ the numerical fields
 * DCK, portions or parts
 * VNR, a one-dimensional array of integer numbers, `integer[]`
 
+<!--
+
+* FRM, Form, Format (was: RLM, Realm)
+* PRT, Part, (was: DCK, Deck)
+
+ -->
+
+
 ```
 name  │ type      │ index │ comment
 ──────┼───────────┼─────────────────────────────────────────────────────────────────────────────────────────
@@ -256,18 +264,12 @@ DOC   │ integer   │         Document ID
 RLM   │ text      │         Realm  (aka 'purpose', such as 'input', 'html', 'pdf', 'presentation')
 DCK   │ text      │         Deck   (aka 'portion', such as 'head', 'main')
 ──────┼───────────┼─────────────────────────────────────────────────────────────────────────────────────────
-VNR   │ integer[] │  0    │ SRC_0     ┐           ┌ Root Source ID
-      │           │  1    │ LNR_0     ├ Root VNR  ┤ Root Line Nr
-      │           │  2    │ CNR_0     ┘           └ Root Column Nr
-      │           │  3    │ SRC_1     ┐
-      │           │  4    │ LNR_1     ├ VNR from first inserted file
-      │           │  5    │ CNR_1     ┘
-      │           │  6    │ SRC_1_1   ┐
-      │           │  7    │ LNR_1_1   ├ VNR from first transitively inserted file
-      │           │  8    │ CNR_1_1   ┘
-      │           │  9    │ SRC_2     ┐
-      │           │ 10    │ LNR_2     ├ VNR from second inserted file
-      │           │ 11    │ CNR_2     ┘
+VNR   │ integer[] │  0    │ LNR_0     ┐ Root VNR  ┌ Line   Nr from Root File
+      │           │  1    │ CNR_0     ┘           └ Column Nr from Root File
+      │           │  2    │ LNR_1     ┐ VNR       ┌ Line   Nr from directly inserted file
+      │           │  3    │ CNR_1     ┘           └ Column Nr from directly inserted file
+      │           │  4    │ LNR_1_1   ┐ VNR       ┌ Line   Nr from transitively inserted file
+      │           │  5    │ CNR_1_1   ┘           └ Column Nr from transitively inserted file
       │           │       │ ...
 ```
 
