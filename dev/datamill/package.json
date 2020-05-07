@@ -1,0 +1,14 @@
+{
+  "name": "datamill",
+  "version": "0.0.1",
+  "description": "<!-- START doctoc generated TOC please keep comment here to allow auto update --> <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE --> **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*",
+  "main": "lib/main.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}
