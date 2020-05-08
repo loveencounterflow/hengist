@@ -23,11 +23,11 @@ async                     = {}
 sync                      = { concurrency: 1, }
 # async                     = { async: true, }
 #...........................................................................................................
-DATAMILL                  = require '../../../apps/datamill'
+types                     = require './types'
 { isa
   validate
   cast
-  type_of }               = DATAMILL.types
+  type_of }               = types
 INTERTEXT                 = require 'intertext'
 { HTML
   RXWS }                  = require '../../../apps/paragate'
