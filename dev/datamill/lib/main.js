@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var $, $drain, $show, $watch, CND, DATAMILL, DATOM, HTML, INTERTEXT, RXWS, SP, after, alert, assign, async, badge, cast, debug, defer, echo, fresh_datom, help, info, isa, jr, new_datom, rpr, select, stamp, sync, type_of, urge, validate, warn, whisper;
+  var $, $drain, $show, $watch, CND, DATOM, HTML, INTERTEXT, RXWS, SP, after, alert, assign, async, badge, cast, debug, defer, echo, fresh_datom, help, info, isa, jr, new_datom, rpr, select, stamp, sync, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -43,9 +43,9 @@
 
   // async                     = { async: true, }
   //...........................................................................................................
-  DATAMILL = require('../../../apps/datamill');
+  types = require('./types');
 
-  ({isa, validate, cast, type_of} = DATAMILL.types);
+  ({isa, validate, cast, type_of} = types);
 
   INTERTEXT = require('intertext');
 
