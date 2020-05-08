@@ -51,16 +51,6 @@ create table DEMO.datoms (
   primary key ( vnr ) );
 
 -- ---------------------------------------------------------------------------------------------------------
-\echo :signal ———{ :filename 4 }———:reset
-create function DEMO.record_has_changed( old record, new record, excludes text[] )
-  returns boolean language plpgsql as $$ begin
-    return ( array_length( akeys( hstore( new ) - hstore( old ) - excludes ), 1 ) > 0 ); end; $$;
-
-create function DEMO.record_has_changed( old record, new record ) returns boolean language plpgsql as $$
-  begin
-    return DEMO.record_has_changed( old, new, array[] ); end; $$;
-
--- ---------------------------------------------------------------------------------------------------------
 \echo :signal ———{ :filename 5 }———:reset
 create function DEMO.on_before_update_datoms() returns trigger language plpgsql as $$ begin
   raise sqlstate 'IMM04' using message = format( 'illegal to update record %s', old ); end; $$;
@@ -72,7 +62,7 @@ create trigger on_before_update_datoms before update on DEMO.datoms
       /* thx to https://stackoverflow.com/a/23792079/7568091 for the hstore thing */
       -- ( array_length( akeys( hstore( new ) - hstore( old ) - array[ 'stamped' ] ), 1 ) > 0 ) ) )
       -- DEMO.record_has_changed( old, new, array[ 'stamped' ] ) ) )
-      DEMO.record_has_changed( old, new ) ) )
+      IMMUTABLE.record_has_changed( old, new ) ) )
   execute procedure DEMO.on_before_update_datoms();
 
 
