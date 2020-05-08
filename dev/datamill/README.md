@@ -260,7 +260,9 @@ the numerical fields
 ```
 name  │ type      │ index │ comment
 ──────┼───────────┼─────────────────────────────────────────────────────────────────────────────────────────
-DOC   │ integer   │         Document ID
+(DOC  │ integer   │         Document ID)
+DSK   │ text      │         Mirage Document Name
+DSNR  │ integer   │         Mirage Datasource Nr
 RLM   │ text      │         Realm  (aka 'purpose', such as 'input', 'html', 'pdf', 'presentation')
 DCK   │ text      │         Deck   (aka 'portion', such as 'head', 'main')
 ──────┼───────────┼─────────────────────────────────────────────────────────────────────────────────────────
