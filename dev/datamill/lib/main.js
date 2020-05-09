@@ -67,7 +67,7 @@
   });
 
   //-----------------------------------------------------------------------------------------------------------
-  this.$headings = function(S) {
+  this.$headings = function(me) {
     /* Recognize heading as any line that starts with a `#` (hash). Current behavior is to
      check whether both prv and nxt lines are blank and if not so issue a warning; this detail may change
      in the future. */
@@ -118,22 +118,18 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.$transform = function(S) {
+  this.$transform = function(me) {
     var pipeline;
     pipeline = [];
-    pipeline.push(this.$headings(S));
+    pipeline.push(this.$headings(me));
     return SP.pull(...pipeline);
   };
 
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.$async_tee_write_to_db_2 = function() {
-    var $buffer, $wait, DEMO_datoms_fields, DEMO_datoms_table, buffer, buffer_size, db_has_ended, first, flush, last, pipeline, stop_waiting, stream_has_ended;
-    buffer = [];
-    stream_has_ended = false;
-    db_has_ended = false;
-    stop_waiting = null;
+  this.$async_tee_write_to_db_2 = function(me) {
+    var $buffer, $guard, DEMO_datoms_fields, DEMO_datoms_table, buffer, buffer_size, flush, last, pipeline;
     DEMO_datoms_table = new PGP.helpers.TableName({
       schema: 'demo',
       table: 'datoms'
@@ -144,60 +140,46 @@
       'atr',
       'stamped' //, table
     ]);
-    pipeline = [];
-    first = Symbol('first');
     last = Symbol('last');
-    buffer_size = 1;
+    buffer = [];
+    buffer_size = 15;
+    pipeline = [];
     //.........................................................................................................
     flush = async function() {
       var sql, values;
       values = field_values_from_datoms(buffer);
       buffer.length = 0;
       sql = PGP.helpers.insert(values, DEMO_datoms_fields, DEMO_datoms_table);
-      debug('^443^', sql);
-      await db.none(sql);
-      if (stream_has_ended) {
-        db_has_ended = true;
-        if (stop_waiting != null) {
-          stop_waiting();
-        }
-      }
+      await me.db.none(sql);
+      whisper('^443^', CND.plum(CND.reverse(`written ${values.length} values`)));
       return null;
     };
     //.........................................................................................................
-    pipeline.push($buffer = $({first, last}, (d, send) => {
-      if (d === first) {
-        null; // init DB
-        return null;
-      }
-      if (d === last) {
-        stream_has_ended = true;
-        if (buffer.length > 0) {
-          flush();
-        }
-        return null;
-      }
-      buffer.push(d);
-      if (buffer.length >= buffer_size) {
-        flush();
-      }
+    pipeline.push($guard = $({last}, (d, send) => {
       return send(d);
     }));
     //.........................................................................................................
-    pipeline.push($wait = $async((d, send, done) => {
-      send(d);
-      if (stream_has_ended && !db_has_ended) {
-        stop_waiting = done;
-        return null;
+    pipeline.push($buffer = $async(async(d, send, done) => {
+      if (d === last) {
+        if (buffer.length > 0) {
+          await flush();
+        }
+      } else {
+        buffer.push(d);
+        if (buffer.length >= buffer_size) {
+          await flush();
+        }
+        send(d);
       }
-      return done();
+      done();
+      return null;
     }));
     //.........................................................................................................
     return SP.pull(...pipeline);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.$tee_write_to_db_1 = function(S) {
+  this.$tee_write_to_db_1 = function(me) {
     var $guard, $write, first, last, pipeline, sql;
     first = Symbol('first');
     last = Symbol('last');
@@ -264,7 +246,7 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  $display = (S) => {
+  $display = (me) => {
     return $watch((d) => {
       var xxx;
       xxx = function(d) {
@@ -317,16 +299,30 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._clear = async function(S) {
+  this._clear = async function(me) {
     debug('^443^', "truncating table DEMO.datoms");
-    await S.db.none("truncate DEMO.datoms cascade;");
+    await me.db.none("truncate DEMO.datoms cascade;");
     return debug('^443^', "ok");
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._list = async function() { // new Promise ( resolve ) =>
+    var me, row, rows;
+    me = {
+      db: this.connect()
+    };
+    rows = (await me.db.any("select * from DEMO.datoms order by vnr;"));
+    for (row of rows) {
+      help('^332^', row);
+    }
+    me.db.$pool.end(); // alternative, see https://github.com/vitaly-t/pg-promise#library-de-initialization
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo = function() {
     return new Promise(async(resolve) => {
-      var DISPLAY, S, pipeline, source, tokens;
+      var DISPLAY, me, pipeline, source, tokens;
       // debug '^4554^', rpr ( k for k of DATAMILL )
       DISPLAY = require('../../paragate/lib/display');
       source = `<title>A Proposal</title>
@@ -350,38 +346,23 @@ some
 code
 \`\`\`
 `;
-      S = {
+      me = {
         db: this.connect()
       };
       pipeline = [];
       tokens = RXWS.grammar.parse(source);
-      await this._clear(S);
+      await this._clear(me);
       pipeline.push(tokens);
-      pipeline.push(this.$transform(S));
-      pipeline.push($display(S));
-      pipeline.push((await this.$async_tee_write_to_db_2(S)));
-      pipeline.push($drain(function() {
-        db.$pool.end(); // alternative, see https://github.com/vitaly-t/pg-promise#library-de-initialization
+      pipeline.push(this.$transform(me));
+      pipeline.push($display(me));
+      pipeline.push((await this.$async_tee_write_to_db_2(me)));
+      pipeline.push($drain(() => {
+        // await DB._pool.end() # unless pool.ended
+        // PGP.end()       # alternative, see https://github.com/vitaly-t/pg-promise#library-de-initialization
+        me.db.$pool.end(); // alternative, see https://github.com/vitaly-t/pg-promise#library-de-initialization
         return resolve();
       }));
       SP.pull(...pipeline);
-      // # tokens  = HTML.parse source
-      // info rpr token for token in tokens
-      // await DISPLAY.show_tokens_as_table tokens
-      // for d in tokens
-      //   echo CND.rainbow d
-      //   switch d.$key
-      //     when '<document' then null
-      //     when '>document' then null
-      //     when '^blank' then null
-      //     when '^block'
-      //       { text, } = d
-      //       echo text
-      //     else throw new Error "^3376^ unknown $key #{rpr d.$key}"
-      // finally
-      // await DB._pool.end() # unless pool.ended
-      //   # PGP.end() # alternative, see https://github.com/vitaly-t/pg-promise#library-de-initialization
-      //   stream_has_ended = true
       return null;
     });
   };
@@ -390,6 +371,7 @@ code
   if (module === require.main) {
     (async() => {
       await this.demo();
+      await this._list();
       // await @demo_inserts()
       return null;
     })();
