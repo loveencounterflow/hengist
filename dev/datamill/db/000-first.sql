@@ -56,13 +56,8 @@ create function DEMO.on_before_update_datoms() returns trigger language plpgsql 
   raise sqlstate 'IMM04' using message = format( 'illegal to update record %s', old ); end; $$;
 
 create trigger on_before_update_datoms before update on DEMO.datoms
-  for each row when (
-    old is distinct from new and (
-      ( old.stamped = true and new.stamped = false ) or
-      /* thx to https://stackoverflow.com/a/23792079/7568091 for the hstore thing */
-      -- ( array_length( akeys( hstore( new ) - hstore( old ) - array[ 'stamped' ] ), 1 ) > 0 ) ) )
-      -- DEMO.record_has_changed( old, new, array[ 'stamped' ] ) ) )
-      IMMUTABLE.record_has_changed( old, new ) ) )
+  for each row when ( old is distinct from new and (
+    ( old.stamped = true and new.stamped = false ) or IMMUTABLE.record_has_changed( old, new ) ) )
   execute procedure DEMO.on_before_update_datoms();
 
 
@@ -70,7 +65,7 @@ create trigger on_before_update_datoms before update on DEMO.datoms
 --
 -- ---------------------------------------------------------------------------------------------------------
 select * from CATALOG.catalog where schema = 'demo';
-
+select * from DEMO.datoms;
 
 /* ###################################################################################################### */
 \echo :red ———{ :filename 15 }———:reset
