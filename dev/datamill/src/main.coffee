@@ -2,7 +2,6 @@
 
 'use strict'
 
-
 ############################################################################################################
 CND                       = require 'cnd'
 badge                     = 'DATAMILL-DEMO'
@@ -33,6 +32,7 @@ INTERTEXT                 = require 'intertext'
   RXWS }                  = require '../../../apps/paragate'
 SP                        = require 'steampipes'
 { $
+  $async
   $drain
   $show
   $watch }                = SP.export()
@@ -41,6 +41,10 @@ DATOM                     = require '../../../apps/datom'
   stamp
   new_datom
   fresh_datom }           = DATOM.export()
+# DB                        = require '../intershop/intershop_modules/db'
+INTERSHOP                 = require '../intershop'
+PGP                       = ( require 'pg-promise' ) { capSQL: false, }
+
 
 #-----------------------------------------------------------------------------------------------------------
 @$headings = ( S ) ->
@@ -79,19 +83,118 @@ DATOM                     = require '../../../apps/datom'
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@$tee_write_to_db = ( S ) ->
-  first = Symbol 'first'
-  last  = Symbol 'last'
-  return $ { first, last, }, ( d, send ) =>
+@$async_tee_write_to_db_2 = ->
+  buffer              = []
+  stream_has_ended    = false
+  db_has_ended        = false
+  stop_waiting        = null
+  DEMO_datoms_table   = new PGP.helpers.TableName { schema: 'demo', table: 'datoms', }
+  DEMO_datoms_fields  = new PGP.helpers.ColumnSet [ 'vnr', 'key', 'atr', 'stamped', ] #, table
+  pipeline            = []
+  first               = Symbol 'first'
+  last                = Symbol 'last'
+  buffer_size         = 1
+  #.........................................................................................................
+  flush = ->
+    values        = field_values_from_datoms buffer
+    buffer.length = 0
+    sql           = PGP.helpers.insert values, DEMO_datoms_fields, DEMO_datoms_table
+    debug '^443^', sql
+    await db.none sql
+    if stream_has_ended
+      db_has_ended = true
+      stop_waiting() if stop_waiting?
+    return null
+  #.........................................................................................................
+  pipeline.push $buffer = $ { first, last, }, ( d, send ) =>
     if d is first
-      null
+      null # init DB
+      return null
     if d is last
-      null
+      stream_has_ended = true
+      flush() if buffer.length > 0
+      return null
+    buffer.push d
+    flush() if buffer.length >= buffer_size
     send d
+  #.........................................................................................................
+  pipeline.push $wait = $async ( d, send, done ) =>
+    send d
+    if stream_has_ended and not db_has_ended
+      stop_waiting = done
+      return null
+    return done()
+  #.........................................................................................................
+  return SP.pull pipeline...
 
+
+#-----------------------------------------------------------------------------------------------------------
+@$tee_write_to_db_1 = ( S ) ->
+  first     = Symbol 'first'
+  last      = Symbol 'last'
+  sql       = "insert into DEMO.datoms ( vnr, key, atr, stamped ) values ( $1, $2, $3, $4 );"
+  pipeline  = []
+  #.........................................................................................................
+  pipeline.push $guard = $ { first, last, }, ( d, send ) =>
+    if d is first
+      help '^807^', "first"
+      return null
+    if d is last
+      help '^807^', "last"
+      return null
+    send d
+  #.........................................................................................................
+  pipeline.push $write = $async ( d, send, done ) =>
+    #.......................................................................................................
+    await DB.query [ sql, ( field_values_from_datoms d )..., ]
+    #.......................................................................................................
+    send d
+    done()
+    return null
+  #.........................................................................................................
+  return SP.pull pipeline...
+
+#-----------------------------------------------------------------------------------------------------------
+field_values_from_datoms = ( ds ) -> ( ( field_values_from_datom d ) for d in ds )
+
+#-----------------------------------------------------------------------------------------------------------
+field_values_from_datom = ( d ) ->
+  stamped = d.stamped ? false
+  vnr     = ( ( if x is Infinity then 999 else if x is -Infinity then -999 else x ) for x in d.$vnr )
+  return { vnr, key: d.$key, atr: null, stamped, }
 
 #===========================================================================================================
 #
+#-----------------------------------------------------------------------------------------------------------
+$display = ( S ) =>
+  return $watch ( d ) =>
+    xxx = ( d ) -> R = {}; R[ k ] = d[ k ] for k in ( Object.keys d ).sort(); return R
+    ### TAINT use datamill display ###
+    switch d.$key
+      when '<document', '>document' then echo CND.grey xxx d
+      when '^blank',    '>document' then echo CND.grey CND.reverse xxx d
+      else
+        switch d.$key[ 0 ]
+          when '<'  then echo CND.lime              xxx d
+          when '>'  then echo CND.red               xxx d
+          when '^'  then echo CND.yellow            xxx d
+          else           echo CND.reverse CND.green xxx d
+    return null
+
+#-----------------------------------------------------------------------------------------------------------
+@connect = ->
+  O                         = INTERSHOP.settings
+  db_user                   = O[ 'intershop/db/user' ].value
+  db_name                   = O[ 'intershop/db/name' ].value
+  connection_string         = "postgres://#{db_user}@localhost/#{db_name}"
+  return PGP connection_string
+
+#-----------------------------------------------------------------------------------------------------------
+@_clear = ( S ) ->
+  debug '^443^', "truncating table DEMO.datoms"
+  await S.db.none "truncate DEMO.datoms cascade;"
+  debug '^443^', "ok"
+
 #-----------------------------------------------------------------------------------------------------------
 @demo = -> new Promise ( resolve ) =>
   # debug '^4554^', rpr ( k for k of DATAMILL )
@@ -119,26 +222,17 @@ DATOM                     = require '../../../apps/datom'
     ```
 
     """
-  S         = {}
+  S         = { db: @connect(), }
   pipeline  = []
   tokens    = RXWS.grammar.parse source
-  xxx = ( d ) -> R = {}; R[ k ] = d[ k ] for k in ( Object.keys d ).sort(); return R
+  await @_clear S
   pipeline.push tokens
   pipeline.push @$transform S
-  pipeline.push $watch ( d ) =>
-    ### TAINT use datamill display ###
-    switch d.$key
-      when '<document', '>document' then echo CND.grey xxx d
-      when '^blank',    '>document' then echo CND.grey CND.reverse xxx d
-      else
-        switch d.$key[ 0 ]
-          when '<'  then echo CND.lime              xxx d
-          when '>'  then echo CND.red               xxx d
-          when '^'  then echo CND.yellow            xxx d
-          else           echo CND.reverse CND.green xxx d
-    return null
-  pipeline.push @$tee_write_to_db S
-  pipeline.push $drain -> resolve()
+  pipeline.push $display S
+  pipeline.push await @$async_tee_write_to_db_2 S
+  pipeline.push $drain ->
+    db.$pool.end() # alternative, see https://github.com/vitaly-t/pg-promise#library-de-initialization
+    resolve()
   SP.pull pipeline...
   # # tokens  = HTML.parse source
   # info rpr token for token in tokens
@@ -153,6 +247,10 @@ DATOM                     = require '../../../apps/datom'
   #       { text, } = d
   #       echo text
   #     else throw new Error "^3376^ unknown $key #{rpr d.$key}"
+    # finally
+  # await DB._pool.end() # unless pool.ended
+    #   # PGP.end() # alternative, see https://github.com/vitaly-t/pg-promise#library-de-initialization
+    #   stream_has_ended = true
   return null
 
 
@@ -160,6 +258,7 @@ DATOM                     = require '../../../apps/datom'
 ############################################################################################################
 if module is require.main then do =>
   await @demo()
+  # await @demo_inserts()
   return null
 
 
