@@ -47,7 +47,7 @@ PGP                       = ( require 'pg-promise' ) { capSQL: false, }
 
 
 #-----------------------------------------------------------------------------------------------------------
-@$headings = ( S ) ->
+@$headings = ( me ) ->
   ### Recognize heading as any line that starts with a `#` (hash). Current behavior is to
   check whether both prv and nxt lines are blank and if not so issue a warning; this detail may change
   in the future. ###
@@ -74,62 +74,48 @@ PGP                       = ( require 'pg-promise' ) { capSQL: false, }
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@$transform = ( S ) ->
+@$transform = ( me ) ->
   pipeline = []
-  pipeline.push @$headings    S
+  pipeline.push @$headings    me
   return SP.pull pipeline...
 
 
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@$async_tee_write_to_db_2 = ->
-  buffer              = []
-  stream_has_ended    = false
-  db_has_ended        = false
-  stop_waiting        = null
+@$async_tee_write_to_db_2 = ( me ) ->
   DEMO_datoms_table   = new PGP.helpers.TableName { schema: 'demo', table: 'datoms', }
   DEMO_datoms_fields  = new PGP.helpers.ColumnSet [ 'vnr', 'key', 'atr', 'stamped', ] #, table
-  pipeline            = []
-  first               = Symbol 'first'
   last                = Symbol 'last'
-  buffer_size         = 1
+  buffer              = []
+  buffer_size         = 15
+  pipeline            = []
   #.........................................................................................................
   flush = ->
     values        = field_values_from_datoms buffer
     buffer.length = 0
     sql           = PGP.helpers.insert values, DEMO_datoms_fields, DEMO_datoms_table
-    debug '^443^', sql
-    await db.none sql
-    if stream_has_ended
-      db_has_ended = true
-      stop_waiting() if stop_waiting?
+    await me.db.none sql
+    whisper '^443^', CND.plum CND.reverse "written #{values.length} values"
     return null
   #.........................................................................................................
-  pipeline.push $buffer = $ { first, last, }, ( d, send ) =>
-    if d is first
-      null # init DB
-      return null
-    if d is last
-      stream_has_ended = true
-      flush() if buffer.length > 0
-      return null
-    buffer.push d
-    flush() if buffer.length >= buffer_size
-    send d
+  pipeline.push $guard = $ { last, }, ( d, send ) => send d
   #.........................................................................................................
-  pipeline.push $wait = $async ( d, send, done ) =>
-    send d
-    if stream_has_ended and not db_has_ended
-      stop_waiting = done
-      return null
-    return done()
+  pipeline.push $buffer = $async ( d, send, done ) =>
+    if d is last
+      await flush() if ( buffer.length > 0 )
+    else
+      buffer.push d
+      await flush() if ( buffer.length >= buffer_size )
+      send d
+    done()
+    return null
   #.........................................................................................................
   return SP.pull pipeline...
 
 
 #-----------------------------------------------------------------------------------------------------------
-@$tee_write_to_db_1 = ( S ) ->
+@$tee_write_to_db_1 = ( me ) ->
   first     = Symbol 'first'
   last      = Symbol 'last'
   sql       = "insert into DEMO.datoms ( vnr, key, atr, stamped ) values ( $1, $2, $3, $4 );"
@@ -166,7 +152,7 @@ field_values_from_datom = ( d ) ->
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-$display = ( S ) =>
+$display = ( me ) =>
   return $watch ( d ) =>
     xxx = ( d ) -> R = {}; R[ k ] = d[ k ] for k in ( Object.keys d ).sort(); return R
     ### TAINT use datamill display ###
@@ -190,10 +176,19 @@ $display = ( S ) =>
   return PGP connection_string
 
 #-----------------------------------------------------------------------------------------------------------
-@_clear = ( S ) ->
+@_clear = ( me ) ->
   debug '^443^', "truncating table DEMO.datoms"
-  await S.db.none "truncate DEMO.datoms cascade;"
+  await me.db.none "truncate DEMO.datoms cascade;"
   debug '^443^', "ok"
+
+#-----------------------------------------------------------------------------------------------------------
+@_list = -> # new Promise ( resolve ) =>
+  me        = { db: @connect(), }
+  rows      = await me.db.any "select * from DEMO.datoms order by vnr;"
+  for row from rows
+    help '^332^', row
+  me.db.$pool.end()  # alternative, see https://github.com/vitaly-t/pg-promise#library-de-initialization
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @demo = -> new Promise ( resolve ) =>
@@ -222,42 +217,27 @@ $display = ( S ) =>
     ```
 
     """
-  S         = { db: @connect(), }
+  me        = { db: @connect(), }
   pipeline  = []
   tokens    = RXWS.grammar.parse source
-  await @_clear S
+  await @_clear me
   pipeline.push tokens
-  pipeline.push @$transform S
-  pipeline.push $display S
-  pipeline.push await @$async_tee_write_to_db_2 S
-  pipeline.push $drain ->
-    db.$pool.end() # alternative, see https://github.com/vitaly-t/pg-promise#library-de-initialization
+  pipeline.push @$transform                     me
+  pipeline.push $display                        me
+  pipeline.push await @$async_tee_write_to_db_2 me
+  pipeline.push $drain =>
+    # await DB._pool.end() # unless pool.ended
+    # PGP.end()       # alternative, see https://github.com/vitaly-t/pg-promise#library-de-initialization
+    me.db.$pool.end()  # alternative, see https://github.com/vitaly-t/pg-promise#library-de-initialization
     resolve()
   SP.pull pipeline...
-  # # tokens  = HTML.parse source
-  # info rpr token for token in tokens
-  # await DISPLAY.show_tokens_as_table tokens
-  # for d in tokens
-  #   echo CND.rainbow d
-  #   switch d.$key
-  #     when '<document' then null
-  #     when '>document' then null
-  #     when '^blank' then null
-  #     when '^block'
-  #       { text, } = d
-  #       echo text
-  #     else throw new Error "^3376^ unknown $key #{rpr d.$key}"
-    # finally
-  # await DB._pool.end() # unless pool.ended
-    #   # PGP.end() # alternative, see https://github.com/vitaly-t/pg-promise#library-de-initialization
-    #   stream_has_ended = true
   return null
-
 
 
 ############################################################################################################
 if module is require.main then do =>
   await @demo()
+  await @_list()
   # await @demo_inserts()
   return null
 
