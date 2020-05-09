@@ -46,7 +46,7 @@ create table DEMO.datoms (
   -- dsnr
   vnr         integer[]   not null,
   key         text        not null,
-  atr         jsonb       not null, -- consider to use hstore
+  atr         jsonb,      -- consider to use hstore
   stamped     boolean     not null default false,
   primary key ( vnr ) );
 
