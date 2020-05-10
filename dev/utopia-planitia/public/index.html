@@ -1,0 +1,30 @@
+<DOCTYPE html>
+<script src='https://unpkg.com/panzoom@9.2.4/dist/panzoom.min.js'></script>
+<body>
+  <svg width=1000 height=1000>
+    <!-- this is the draggable root -->
+    <g id='scene'>
+      <circle cx='10' cy='10' r='5' fill='pink'></circle>
+    </g>
+  </svg>
+<script>
+  const log       = console.log;
+  var   element   = document.querySelector( '#scene' );
+  const on_zoom   = ( e ) => {
+    const t = pz.getTransform();
+    log( '^332^', `(${t.x.toFixed( 1 )},${t.y.toFixed( 1 )}) x ${t.scale.toFixed( 6 )}` ) };
+  const settings  = {
+    smoothScroll:           true,
+    // bounds:                 true,
+    // boundsPadding:          0.1,
+    // maxZoom:                1000,
+    // minZoom: 0.1
+    // zoomDoubleClickSpeed:   2, /* 1 does nothing (x 100%)
+    zoomSpeed:              1, /* percentage as fraction */
+    };
+  const pz        = panzoom( element, settings );
+  pz.on( 'zoom', on_zoom );
+  pz.zoomAbs( 200, -800, 1, ); // x, y, zoom
+  // log( pz.getTransform() );
+  </script>
+</body>
