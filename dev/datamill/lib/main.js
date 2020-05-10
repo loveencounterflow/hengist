@@ -119,9 +119,32 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.$transform = function(me) {
-    var pipeline;
+    var last, pipeline;
+    last = Symbol('last');
     pipeline = [];
     pipeline.push(this.$headings(me));
+    pipeline.push($({last}, $(function(d, send) {
+      if (d === last) {
+        send({
+          $key: '^foo',
+          $vnr: [10, -1]
+        });
+        send({
+          $key: '^foo',
+          $vnr: [10]
+        });
+        send({
+          $key: '^foo',
+          $vnr: [10, 0]
+        });
+        send({
+          $key: '^foo',
+          $vnr: [10, 1]
+        });
+        return null;
+      }
+      return send(d);
+    })));
     return SP.pull(...pipeline);
   };
 
@@ -311,7 +334,7 @@
     me = {
       db: this.connect()
     };
-    rows = (await me.db.any("select * from DEMO.datoms order by vnr;"));
+    rows = (await me.db.any("select * from DEMO.datoms order by vnr using <;"));
     for (row of rows) {
       help('^332^', row);
     }
