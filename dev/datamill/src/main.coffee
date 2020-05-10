@@ -75,8 +75,17 @@ PGP                       = ( require 'pg-promise' ) { capSQL: false, }
 #
 #-----------------------------------------------------------------------------------------------------------
 @$transform = ( me ) ->
-  pipeline = []
+  last      = Symbol 'last'
+  pipeline  = []
   pipeline.push @$headings    me
+  pipeline.push $ { last, }, $ ( d, send ) ->
+    if d is last
+      send { $key: '^foo', $vnr: [ 10, -1, ], }
+      send { $key: '^foo', $vnr: [ 10, ], }
+      send { $key: '^foo', $vnr: [ 10, 0, ], }
+      send { $key: '^foo', $vnr: [ 10, 1, ], }
+      return null
+    send d
   return SP.pull pipeline...
 
 
@@ -184,7 +193,7 @@ $display = ( me ) =>
 #-----------------------------------------------------------------------------------------------------------
 @_list = -> # new Promise ( resolve ) =>
   me        = { db: @connect(), }
-  rows      = await me.db.any "select * from DEMO.datoms order by vnr;"
+  rows      = await me.db.any "select * from DEMO.datoms order by vnr using <;"
   for row from rows
     help '^332^', row
   me.db.$pool.end()  # alternative, see https://github.com/vitaly-t/pg-promise#library-de-initialization
