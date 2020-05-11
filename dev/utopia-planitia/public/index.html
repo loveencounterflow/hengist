@@ -1,6 +1,8 @@
 <DOCTYPE html>
 <script src='https://unpkg.com/panzoom@9.2.4/dist/panzoom.min.js'></script>
 <body>
+  <img id=wappen width=1000 height=1000 src=./Coat_of_arms_of_Berlin.svg>
+  <!-- <img id=embedded src='./map.svg' width=500 height=500><br> -->
   <svg width=1000 height=1000>
     <!-- this is the draggable root -->
     <g id='scene'>
@@ -9,7 +11,9 @@
   </svg>
 <script>
   const log       = console.log;
-  var   element   = document.querySelector( '#scene' );
+  var   element   = document.querySelector( '#wappen' );
+  // var   element   = document.querySelector( '#embedded' );
+  // var   element   = document.querySelector( '#scene' );
   const on_zoom   = ( e ) => {
     const t = pz.getTransform();
     log( '^332^', `(${t.x.toFixed( 1 )},${t.y.toFixed( 1 )}) x ${t.scale.toFixed( 6 )}` ) };
