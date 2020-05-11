@@ -200,32 +200,82 @@ $display = ( me ) =>
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@demo_stream_using_intershop = -> new Promise ( resolve, reject ) =>
+  DB          = require '../intershop/intershop_modules/db'
+  # sql       = "select * from MIRAGE.mirror where dsk = 'proposal' order by linenr;"
+  sql         = "select n from generate_series( 42, 51 ) as x ( n );"
+  source      = await DB.new_query_source sql
+  pipeline    = []
+  pipeline.push source
+  pipeline.push SP.$show()
+  pipeline.push $drain -> do =>
+    help '^445-7^', "stream ended"
+    await DB._pool.end()
+    resolve()
+  SP.pull pipeline...
+  # source.end()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_stream = -> new Promise ( resolve, reject ) =>
+  DB          = require '../intershop/intershop_modules/db'
+  await @_demo_stream()
+  await DB._pool.end()
+  urge '^445-1^', "pool ended"
+  resolve()
+
+#-----------------------------------------------------------------------------------------------------------
+@_demo_stream = -> new Promise ( resolve, reject ) =>
+  urge '^445-2^', "starting"
+  DB          = require '../intershop/intershop_modules/db'
+  Cursor      = require 'pg-cursor'
+  # sql         = "select * from MIRAGE.mirror where dsk = 'proposal' order by linenr;"
+  sql         = "select n from generate_series( 42, 51 ) as x ( n );"
+  settings    = null
+  client      = await DB._pool.connect()
+  cursor      = new Cursor sql
+  cursor      = await client.query cursor
+  source      = SP.new_push_source()
+  # source      = await DB.new_query_source sql #, settings...
+  urge '^445-3^', "starting"
+  limit       = 3
+  #.........................................................................................................
+  # close = -> new Promise ( resolve, reject ) =>
+  #   cursor.close ( error ) => if error? then reject error else resolve()
+  read  = -> new Promise ( resolve, reject ) =>
+    cursor.read limit, ( error, rows ) => if error? then reject error else resolve rows
+  #.........................................................................................................
+  source.start = -> do => ### Note: must be function, not asyncfunction ###
+    urge '^445-4^', "source started"
+    loop
+      urge '^445-5^', "read from cursor"
+      rows = await read()
+      break if rows.length is 0
+      urge '^445-6^', "read #{rows.length} rows"
+      source.send row for row in rows
+      urge '^445-6^', "pushed #{rows.length} rows"
+    # await cursor.close()
+    # urge '^445-8^', "cursor closed"
+    client.release()
+    urge '^445-8^', "client released"
+    source.end()
+    urge '^445-8^', "source ended"
+    return null
+  #.........................................................................................................
+  pipeline      = []
+  pipeline.push source
+  pipeline.push SP.$show()
+  pipeline.push $drain ->
+    help '^445-7^', "stream ended"
+    resolve()
+  SP.pull pipeline...
+  # source.end()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @demo = -> new Promise ( resolve ) =>
   # debug '^4554^', rpr ( k for k of DATAMILL )
   DISPLAY = require '../../paragate/lib/display'
-  source  = """
-    <title>A Proposal</title>
-    <h1>Motivation</h1>
-    <p>It has been suggested to further the cause.</p>
-    <p>This is <i>very</i> desirable indeed.</p>
-
-    # First Things First
-
-    A paragraph on the lowest level
-    (this, hopefully, does not apply to the paragraph's content
-    but only to its position in the manuscript).
-
-      An indented paragraph
-      which may be understood
-      as a blockquote or somesuch.
-
-    ```
-    some
-
-    code
-    ```
-
-    """
   me        = { db: @connect(), }
   pipeline  = []
   tokens    = RXWS.grammar.parse source
@@ -245,9 +295,12 @@ $display = ( me ) =>
 
 ############################################################################################################
 if module is require.main then do =>
-  await @demo()
-  await @_list()
+  # await @demo()
+  # await @_list()
+  # await @demo_stream()
+  await @demo_stream_using_intershop()
   # await @demo_inserts()
+  help 'ok'
   return null
 
 
