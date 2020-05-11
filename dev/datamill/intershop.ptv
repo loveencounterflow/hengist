@@ -21,6 +21,9 @@ intershop/mirage/dsk/configuration          ::url=                ptv:${intersho
 intershop/mirage/dsk/pkgjson                ::url=                plain:${datamill/path}/package.json
 intershop/mirage/dsk/readme                 ::url=                plain:${datamill/path}/README.md
 # intershop/mirage/dsk/interplot/svg-to-png   ::url=                plain:apps/interplot/svg-to-png
+intershop/mirage/dsk/proposal               ::url=                plain:assets/short-proposal.mkts.md
+
+
 
 
 
