@@ -42,6 +42,7 @@ create function DEMO.on_before_update_datoms() returns trigger language plpgsql 
 create trigger on_before_update_datoms
   before update on DEMO.datoms for each row execute procedure DEMO.on_before_update_datoms();
 
+-- select * from MIRAGE.mirror where dsk = 'proposal' order by linenr;
 
 /* ###################################################################################################### */
 \echo :red ———{ :filename 15 }———:reset
