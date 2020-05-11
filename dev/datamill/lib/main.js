@@ -343,32 +343,119 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.demo_stream_using_intershop = function() {
+    return new Promise(async(resolve, reject) => {
+      var DB, pipeline, source, sql;
+      DB = require('../intershop/intershop_modules/db');
+      // sql       = "select * from MIRAGE.mirror where dsk = 'proposal' order by linenr;"
+      sql = "select n from generate_series( 42, 51 ) as x ( n );";
+      source = (await DB.new_query_source(sql));
+      pipeline = [];
+      pipeline.push(source);
+      pipeline.push(SP.$show());
+      pipeline.push($drain(function() {
+        return (async() => {
+          help('^445-7^', "stream ended");
+          await DB._pool.end();
+          return resolve();
+        })();
+      }));
+      SP.pull(...pipeline);
+      // source.end()
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_stream = function() {
+    return new Promise(async(resolve, reject) => {
+      var DB;
+      DB = require('../intershop/intershop_modules/db');
+      await this._demo_stream();
+      await DB._pool.end();
+      urge('^445-1^', "pool ended");
+      return resolve();
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._demo_stream = function() {
+    return new Promise(async(resolve, reject) => {
+      var Cursor, DB, client, cursor, limit, pipeline, read, settings, source, sql;
+      urge('^445-2^', "starting");
+      DB = require('../intershop/intershop_modules/db');
+      Cursor = require('pg-cursor');
+      // sql         = "select * from MIRAGE.mirror where dsk = 'proposal' order by linenr;"
+      sql = "select n from generate_series( 42, 51 ) as x ( n );";
+      settings = null;
+      client = (await DB._pool.connect());
+      cursor = new Cursor(sql);
+      cursor = (await client.query(cursor));
+      source = SP.new_push_source();
+      // source      = await DB.new_query_source sql #, settings...
+      urge('^445-3^', "starting");
+      limit = 3;
+      //.........................................................................................................
+      // close = -> new Promise ( resolve, reject ) =>
+      //   cursor.close ( error ) => if error? then reject error else resolve()
+      read = function() {
+        return new Promise((resolve, reject) => {
+          return cursor.read(limit, (error, rows) => {
+            if (error != null) {
+              return reject(error);
+            } else {
+              return resolve(rows);
+            }
+          });
+        });
+      };
+      //.........................................................................................................
+      source.start = function() {
+        return (async()/* Note: must be function, not asyncfunction */ => {
+          var i, len, row, rows;
+          urge('^445-4^', "source started");
+          while (true) {
+            urge('^445-5^', "read from cursor");
+            rows = (await read());
+            if (rows.length === 0) {
+              break;
+            }
+            urge('^445-6^', `read ${rows.length} rows`);
+            for (i = 0, len = rows.length; i < len; i++) {
+              row = rows[i];
+              source.send(row);
+            }
+            urge('^445-6^', `pushed ${rows.length} rows`);
+          }
+          // await cursor.close()
+          // urge '^445-8^', "cursor closed"
+          client.release();
+          urge('^445-8^', "client released");
+          source.end();
+          urge('^445-8^', "source ended");
+          return null;
+        })();
+      };
+      //.........................................................................................................
+      pipeline = [];
+      pipeline.push(source);
+      pipeline.push(SP.$show());
+      pipeline.push($drain(function() {
+        help('^445-7^', "stream ended");
+        return resolve();
+      }));
+      SP.pull(...pipeline);
+      // source.end()
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.demo = function() {
     return new Promise(async(resolve) => {
-      var DISPLAY, me, pipeline, source, tokens;
+      var DISPLAY, me, pipeline, tokens;
       // debug '^4554^', rpr ( k for k of DATAMILL )
       DISPLAY = require('../../paragate/lib/display');
-      source = `<title>A Proposal</title>
-<h1>Motivation</h1>
-<p>It has been suggested to further the cause.</p>
-<p>This is <i>very</i> desirable indeed.</p>
-
-# First Things First
-
-A paragraph on the lowest level
-(this, hopefully, does not apply to the paragraph's content
-but only to its position in the manuscript).
-
-  An indented paragraph
-  which may be understood
-  as a blockquote or somesuch.
-
-\`\`\`
-some
-
-code
-\`\`\`
-`;
       me = {
         db: this.connect()
       };
@@ -393,9 +480,12 @@ code
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      await this.demo();
-      await this._list();
+      // await @demo()
+      // await @_list()
+      // await @demo_stream()
+      await this.demo_stream_using_intershop();
       // await @demo_inserts()
+      help('ok');
       return null;
     })();
   }
