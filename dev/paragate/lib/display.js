@@ -154,13 +154,13 @@
     var byline;
     byline = [];
     // byline.push $show()
-    byline.push(this.$_show_tokens_as_table(settings));
+    byline.push(this._$show_tokens_as_table(settings));
     byline.push($drain());
     return SP.$tee(SP.pull(...byline));
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.$_show_tokens_as_table = function(settings = null) {
+  this._$show_tokens_as_table = function(settings = null) {
     var $add_keys, $filter, $format, $reorder_keys, colorize, defaults, exclude, include, include_first, include_last, pipeline, seen_keys;
     // debug '^2224^', TBL       = INTERTEXT.TBL
     // last      = Symbol 'last'
