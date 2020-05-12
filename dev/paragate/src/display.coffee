@@ -92,12 +92,12 @@ DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   ### TAINT implement `$tee()` in SteamPipes ###
   byline    = []
   # byline.push $show()
-  byline.push @$_show_tokens_as_table settings
+  byline.push @_$show_tokens_as_table settings
   byline.push $drain()
   return SP.$tee SP.pull byline...
 
 #-----------------------------------------------------------------------------------------------------------
-@$_show_tokens_as_table = ( settings = null ) ->
+@_$show_tokens_as_table = ( settings = null ) ->
   # debug '^2224^', TBL       = INTERTEXT.TBL
   # last      = Symbol 'last'
   pipeline      = []
