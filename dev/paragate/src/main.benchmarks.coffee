@@ -40,16 +40,22 @@ assets =
     ''
     'x'
     'foo\n  bar'
-    '\nxxx'.repeat 20000
+    # '\nxxx'.repeat 20000
     ]
   approx_char_count:  0
   line_count:         0
   paths:              [
     'main.benchmarks.js'
-    'interim.tests.js'
-    '../src/interim.tests.coffee'
-    '../../../assets/larry-wall-on-regexes.html'
+    # 'interim.tests.js'
+    # '../src/interim.tests.coffee'
+    # '../../../assets/larry-wall-on-regexes.html'
     ]
+types                     = require '../paragate/lib/types'
+{ isa
+  validate
+  type_of }               = types
+
+
 
 #-----------------------------------------------------------------------------------------------------------
 prepare = -> new Promise ( resolve ) ->
@@ -88,13 +94,13 @@ prepare = -> new Promise ( resolve ) ->
       grammar = GRAMMAR.indentation_grammar
     when 'rxws_blocks'
       GRAMMAR = require '../paragate/lib/regex-whitespace.grammar'
-      grammar = GRAMMAR.rxws_grammar
+      grammar = GRAMMAR.grammar
     when 'rxws_tokens'
       GRAMMAR = require '../paragate/lib/regex-whitespace.grammar'
       grammar = new GRAMMAR.Rxws_grammar { as_blocks: false, }
     when 'htmlish'
-      grammar = require '../paragate/lib/htmlish.grammar'
-      # grammar = new GRAMMAR.Rxws_grammar { as_blocks: false, }
+      GRAMMAR = require '../paragate/lib/htmlish.grammar'
+      grammar = GRAMMAR.grammar
     when 'asciisorter'
       GRAMMAR = require './old-grammars/asciisorter.grammar'
       grammar = GRAMMAR.asciisorter
@@ -118,6 +124,13 @@ prepare = -> new Promise ( resolve ) ->
       grammar = new GRAMMAR.Chrsubsetter { preset: 'words', }
     else
       throw new Error "^44498^ unknown grammar #{rpr name}"
+  #.........................................................................................................
+  try
+    validate.object   grammar
+    validate.function grammar.parse
+  catch error
+    throw new Error "^339^ not a valid grammar: #{rpr name}; GRAMMAR: #{rpr types.all_keys_of GRAMMAR}"
+  #.........................................................................................................
   await prepare()
   #.........................................................................................................
   resolve => new Promise rxws_tokens = ( resolve ) =>
