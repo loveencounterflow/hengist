@@ -109,6 +109,12 @@ class Arange  extends Array
   constructor: ( P... ) ->
     super P...
     Object.defineProperty @, 'size', get: @_size_of
+    Object.defineProperty @, 'lo',    get: -> @first?[ 0      ] ? null
+    Object.defineProperty @, 'hi',    get: -> @last?[  1      ] ? null
+    Object.defineProperty @, 'first', get: -> @[ 0            ] ? null
+    Object.defineProperty @, 'last',  get: -> @[ @length - 1  ] ? null
+    # return freeze @
+    return @
 
   #---------------------------------------------------------------------------------------------------------
   _size_of:           -> @reduce ( ( sum, segment ) -> sum + segment.size ), 0
