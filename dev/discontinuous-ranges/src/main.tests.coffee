@@ -33,12 +33,33 @@ test                      = require 'guy-test'
     [ [ 20, 10, ], null, "lo boundary must be less than or equal to hi boundary" ]
     [ [ Infinity, 20, ], null, "lo boundary must be less than or equal to hi boundary" ]
     [ [ -Infinity, 20, ], [ [ -Infinity, 20, ], ] ]
+    [ ( -> ( yield x ) for x in [ [ 5, 6, ], [ 7, 8, ], ] )(), [ [ 5, 8, ], ] ]
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
       result = DRA.new_arange probe
       T.ok Object.isFrozen result
       resolve result
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DRA.Arange properties" ] = ( T, done ) ->
+  DRA = require './discontinuous-range-arithmetics'
+  probes_and_matchers = [
+    [ [ [ 10, 20, ], [ 8, 12, ], [ 25, 30, ] ], [ [ [ 8, 20, ], [ 25, 30, ] ], { first: [ 8, 20 ], last: [ 25, 30 ], size: 19, lo: 8, hi: 30 }, ], null, ]
+    [ [ [ -Infinity, 20 ] ], [ [ [ -Infinity, 20 ] ], { first: [ -Infinity, 20 ], last: [ -Infinity, 20 ], size: Infinity, lo: -Infinity, hi: 20 } ], null ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      range                           = DRA.new_arange probe...
+      { first, last, size, lo, hi, }  = range
+      T.ok Object.isFrozen range
+      T.ok Object.isFrozen range.first
+      T.ok Object.isFrozen range.last
+      # range.push "won't work"
+      resolve [ range, { first, last, size, lo, hi, }, ]
   #.........................................................................................................
   done()
   return null
@@ -83,6 +104,27 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "DRA.Arange.from" ] = ( T, done ) ->
+  DRA = require './discontinuous-range-arithmetics'
+  probes_and_matchers = [
+    # [ null,   null, "must be a list" ]
+    # [ 42,     null, "must be a list" ]
+    # [ [ 42, ], null, "length must be 2" ]
+    # [ [ 10, 20, ], [ [ 10, 20, ], ], ]
+    # [ [ 20, 10, ], null, "lo boundary must be less than or equal to hi boundary" ]
+    # [ [ Infinity, 20, ], null, "lo boundary must be less than or equal to hi boundary" ]
+    [ [ -Infinity, 20, ], [ [ -Infinity, 20, ], ] ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      result = DRA.Arange.from probe
+      T.ok Object.isFrozen result
+      resolve result
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "union" ] = ( T, done ) ->
   DRA = require './discontinuous-range-arithmetics'
   probes_and_matchers = [
@@ -116,8 +158,10 @@ test                      = require 'guy-test'
 if module is require.main then do => # await do =>
   # debug ( k for k of ( require '../..' ).HTML ).sort().join ' '
   # await @_demo()
-  test @
-  # test @[ "API" ]
+  # test @
+  # test @[ "DRA.new_arange" ]
+  # test @[ "DRA.Arange.from" ]
+  test @[ "DRA.Arange properties" ]
   # test @[ "HTML: parse (1)" ]
   # test @[ "HTML: parse (1a)" ]
   # test @[ "HTML: parse (dubious)" ]
