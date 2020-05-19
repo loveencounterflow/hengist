@@ -4,7 +4,7 @@
 
 ############################################################################################################
 CND                       = require 'cnd'
-badge                     = 'PARAGATE/INTERIM-TESTS'
+badge                     = 'DISCONTINUOUS-RANGES/TESTS'
 rpr                       = CND.rpr
 log                       = CND.get_logger 'plain',     badge
 info                      = CND.get_logger 'info',      badge
