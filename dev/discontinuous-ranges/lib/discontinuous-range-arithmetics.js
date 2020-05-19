@@ -187,6 +187,32 @@
       Object.defineProperty(this, 'size', {
         get: this._size_of
       });
+      Object.defineProperty(this, 'lo', {
+        get: function() {
+          var ref, ref1;
+          return (ref = (ref1 = this.first) != null ? ref1[0] : void 0) != null ? ref : null;
+        }
+      });
+      Object.defineProperty(this, 'hi', {
+        get: function() {
+          var ref, ref1;
+          return (ref = (ref1 = this.last) != null ? ref1[1] : void 0) != null ? ref : null;
+        }
+      });
+      Object.defineProperty(this, 'first', {
+        get: function() {
+          var ref;
+          return (ref = this[0]) != null ? ref : null;
+        }
+      });
+      Object.defineProperty(this, 'last', {
+        get: function() {
+          var ref;
+          return (ref = this[this.length - 1]) != null ? ref : null;
+        }
+      });
+      // return freeze @
+      return this;
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -217,7 +243,11 @@
   this.new_arange = function(...P) {
     var R, j, len, p;
     R = new DRange();
-// R = ( require 'letsfreezethat' ).freeze new DRange()
+    if (P.length === 1 && isa.generator(P[0])) {
+      // R = ( require 'letsfreezethat' ).freeze new DRange()
+      P = [...P[0]];
+    }
+// debug '^675^', P
     for (j = 0, len = P.length; j < len; j++) {
       p = P[j];
       if (!(p instanceof Segment)) {

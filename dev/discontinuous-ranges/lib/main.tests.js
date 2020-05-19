@@ -7,7 +7,7 @@
   //###########################################################################################################
   CND = require('cnd');
 
-  badge = 'PARAGATE/INTERIM-TESTS';
+  badge = 'DISCONTINUOUS-RANGES/TESTS';
 
   rpr = CND.rpr;
 
@@ -40,7 +40,51 @@
   this["DRA.new_arange"] = async function(T, done) {
     var DRA, error, i, len, matcher, probe, probes_and_matchers;
     DRA = require('./discontinuous-range-arithmetics');
-    probes_and_matchers = [[null, null, "must be a list"], [42, null, "must be a list"], [[42], null, "length must be 2"], [[10, 20], [[10, 20]]], [[20, 10], null, "lo boundary must be less than or equal to hi boundary"], [[2e308, 20], null, "lo boundary must be less than or equal to hi boundary"], [[-2e308, 20], [[-2e308, 20]]]];
+    probes_and_matchers = [
+      [null,
+      null,
+      "must be a list"],
+      [42,
+      null,
+      "must be a list"],
+      [[42],
+      null,
+      "length must be 2"],
+      [[10,
+      20],
+      [[10,
+      20]]],
+      [[20,
+      10],
+      null,
+      "lo boundary must be less than or equal to hi boundary"],
+      [[2e308,
+      20],
+      null,
+      "lo boundary must be less than or equal to hi boundary"],
+      [[-2e308,
+      20],
+      [[-2e308,
+      20]]],
+      [
+        (function*() {
+          var i,
+        len,
+        ref,
+        results,
+        x;
+          ref = [[5, 6], [7, 8]];
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            x = ref[i];
+            results.push((yield x));
+          }
+          return results;
+        })(),
+        [[5,
+        8]]
+      ]
+    ];
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
@@ -49,6 +93,74 @@
           result = DRA.new_arange(probe);
           T.ok(Object.isFrozen(result));
           return resolve(result);
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DRA.Arange properties"] = async function(T, done) {
+    var DRA, error, i, len, matcher, probe, probes_and_matchers;
+    DRA = require('./discontinuous-range-arithmetics');
+    probes_and_matchers = [
+      [
+        [[10,
+        20],
+        [8,
+        12],
+        [25,
+        30]],
+        [
+          [[8,
+          20],
+          [25,
+          30]],
+          {
+            first: [8,
+          20],
+            last: [25,
+          30],
+            size: 19,
+            lo: 8,
+            hi: 30
+          }
+        ],
+        null
+      ],
+      [
+        [[-2e308,
+        20]],
+        [
+          [[-2e308,
+          20]],
+          {
+            first: [-2e308,
+          20],
+            last: [-2e308,
+          20],
+            size: 2e308,
+            lo: -2e308,
+            hi: 20
+          }
+        ],
+        null
+      ]
+    ];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          var first, hi, last, lo, range, size;
+          range = DRA.new_arange(...probe);
+          ({first, last, size, lo, hi} = range);
+          T.ok(Object.isFrozen(range));
+          T.ok(Object.isFrozen(range.first));
+          T.ok(Object.isFrozen(range.last));
+          // range.push "won't work"
+          return resolve([range, {first, last, size, lo, hi}]);
         });
       });
     }
@@ -106,6 +218,33 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["DRA.Arange.from"] = async function(T, done) {
+    var DRA, error, i, len, matcher, probe, probes_and_matchers;
+    DRA = require('./discontinuous-range-arithmetics');
+    // [ null,   null, "must be a list" ]
+    // [ 42,     null, "must be a list" ]
+    // [ [ 42, ], null, "length must be 2" ]
+    // [ [ 10, 20, ], [ [ 10, 20, ], ], ]
+    // [ [ 20, 10, ], null, "lo boundary must be less than or equal to hi boundary" ]
+    // [ [ Infinity, 20, ], null, "lo boundary must be less than or equal to hi boundary" ]
+    probes_and_matchers = [[[-2e308, 20], [[-2e308, 20]]]];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          var result;
+          result = DRA.Arange.from(probe);
+          T.ok(Object.isFrozen(result));
+          return resolve(result);
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["union"] = async function(T, done) {
     var DRA, error, i, len, matcher, probe, probes_and_matchers;
     DRA = require('./discontinuous-range-arithmetics');
@@ -144,12 +283,14 @@
     (() => { // await do =>
       // debug ( k for k of ( require '../..' ).HTML ).sort().join ' '
       // await @_demo()
-      return test(this);
+      // test @
+      // test @[ "DRA.new_arange" ]
+      // test @[ "DRA.Arange.from" ]
+      return test(this["DRA.Arange properties"]);
     })();
   }
 
-  // test @[ "API" ]
-// test @[ "HTML: parse (1)" ]
+  // test @[ "HTML: parse (1)" ]
 // test @[ "HTML: parse (1a)" ]
 // test @[ "HTML: parse (dubious)" ]
 // test @[ "INDENTATION: parse (1)" ]
