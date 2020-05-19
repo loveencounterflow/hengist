@@ -100,24 +100,40 @@ class Segment extends Array
 
   #---------------------------------------------------------------------------------------------------------
   _size_of:           -> @[ 1 ] - @[ 0 ] + 1
-  @from:    ( P...  ) -> new Segment P...
+  # @from:    ( P...  ) -> new Segment P...
+  @from:  -> throw new Error "^778^ `Segment.from()` is not implemented"
 
 #-----------------------------------------------------------------------------------------------------------
 class Arange  extends Array
 
   #---------------------------------------------------------------------------------------------------------
-  constructor: ( P... ) ->
-    super P...
-    Object.defineProperty @, 'size', get: @_size_of
-    Object.defineProperty @, 'lo',    get: -> @first?[ 0      ] ? null
-    Object.defineProperty @, 'hi',    get: -> @last?[  1      ] ? null
-    Object.defineProperty @, 'first', get: -> @[ 0            ] ? null
-    Object.defineProperty @, 'last',  get: -> @[ @length - 1  ] ? null
-    # return freeze @
-    return @
+  constructor: ( segments ) ->
+    super()
+    Object.defineProperty @, 'size',    get: @_size_of
+    Object.defineProperty @, 'lo',      get: -> @first?[ 0      ] ? null
+    Object.defineProperty @, 'hi',      get: -> @last?[  1      ] ? null
+    Object.defineProperty @, 'first',   get: -> @[ 0            ] ? null
+    Object.defineProperty @, 'last',    get: -> @[ @length - 1  ] ? null
+    Object.defineProperty @, '_drange', get: -> drange
+    #.......................................................................................................
+    if segments instanceof DRange
+      drange    = segments
+    else if segments instanceof Arange
+      drange    = segments._drange
+    else
+      drange    = new DRange()
+      segments  = [ segments[ 0 ]..., ] if segments.length is 1 and isa.generator segments[ 0 ]
+      for segment in segments
+        validate.urange_segment segment unless segment instanceof Segment
+        drange.add segment...
+    #.......................................................................................................
+    MAIN._apply_segments_from_drange @, drange
+    return freeze @
 
   #---------------------------------------------------------------------------------------------------------
   _size_of:           -> @reduce ( ( sum, segment ) -> sum + segment.size ), 0
+  @from:  -> throw new Error "^776^ `Arange.from()` is not implemented"
+  # @from:  -> ( P...  ) -> MAIN.arange_from_segments P...
   # @from:    ( P...  ) -> new Arange P...
 
 # npm install @scotttrinh/number-ranges
@@ -128,39 +144,36 @@ class Arange  extends Array
 @Segment  = Segment
 
 #-----------------------------------------------------------------------------------------------------------
-@new_segment = ( lo, hi ) -> new Segment lo, hi
-
-#-----------------------------------------------------------------------------------------------------------
-@new_arange = ( P... ) ->
-  R = new DRange()
-  # R = ( require 'letsfreezethat' ).freeze new DRange()
-  P = [ P[ 0 ]..., ] if P.length is 1 and isa.generator P[ 0 ]
-  # debug '^675^', P
-  for p in P
-    validate.urange_segment p unless p instanceof Segment
-    R.add p...
-  return @_drange_as_arange R
+@segment_from_lohi      = ( lo, hi      ) -> new Segment if hi? then [ lo, hi, ] else [ lo, ]
+@arange_from_segments   = ( segments... ) -> new Arange segments
 
 #-----------------------------------------------------------------------------------------------------------
 @union = ( me, other ) ->
-  me = Arange.from me unless me instanceof Arange
-  validate.urange_segment other unless other instanceof Arange
-  R = new DRange()
-  R = R.add segment... for segment in me
-  R = R.add other...
-  return @_drange_as_arange R
+  ### TAINT also allow `other` to be range ###
+  me      = new Arange  me    unless    me instanceof Arange
+  other   = new Segment other unless other instanceof Segment
+  drange  = me._drange
+  drange  = drange.add segment... for segment in me
+  drange  = drange.add other...
+  return new Arange drange
+
+# #-----------------------------------------------------------------------------------------------------------
+# @_drange_as_arange  = ( drange ) ->
+#   return freeze @_sort Arange.from ( ( new Segment [ r.low, r.high, ] ) for r in drange.ranges )
 
 #-----------------------------------------------------------------------------------------------------------
-@_drange_as_arange  = ( drange ) ->
-  return freeze @_sort Arange.from ( ( new Segment [ r.low, r.high, ] ) for r in drange.ranges )
-
-#-----------------------------------------------------------------------------------------------------------
-@_sort              = ( arange ) -> arange.sort ( a, b ) ->
+@_sort = ( arange ) -> arange.sort ( a, b ) ->
   return -1 if a[ 0 ] < b[ 0 ]
   return +1 if a[ 0 ] > b[ 0 ]
   return -1 if a[ 1 ] < b[ 1 ]
   return +1 if a[ 1 ] > b[ 1 ]
   return  0
+
+#---------------------------------------------------------------------------------------------------------
+@_apply_segments_from_drange = ( me, drange ) ->
+  segments = MAIN._sort ( ( new Segment [ r.low, r.high, ] ) for r in drange.ranges )
+  me.push segment for segment in segments ### TAINT use `splice()` ###
+  return me
 
 
 
