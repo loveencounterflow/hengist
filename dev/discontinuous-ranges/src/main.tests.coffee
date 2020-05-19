@@ -23,6 +23,30 @@ test                      = require 'guy-test'
 #===========================================================================================================
 # TESTS
 #-----------------------------------------------------------------------------------------------------------
+@[ "new DRA.Arange" ] = ( T, done ) ->
+  DRA = require './discontinuous-range-arithmetics'
+  probes_and_matchers = [
+    [ null,                   null, "unable to instantiate from a null" ]
+    [ 42,                     null, "unable to instantiate from a number" ]
+    [ [ 42, ],                null, "must be a list" ]
+    [ [ [ 42, ], ],           null, "length must be 2" ]
+    [ [ [ 20, 10, ], ],       null, "lo boundary must be less than or equal to hi boundary" ]
+    [ [ [ Infinity, 20, ], ], null, "lo boundary must be less than or equal to hi boundary" ]
+    [ ( -> ( yield x ) for x in [ [ 5, 6, ], [ 7, 8, ], ] )(), null, "unable to instantiate from a generator" ]
+    [ [ [ -Infinity, 20, ], ], [ [ -Infinity, 20, ], ] ]
+    [ [], [], ]
+    [ [ [ 10, 20, ], ], [ [ 10, 20, ], ], ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      result = new DRA.Arange probe
+      T.ok Object.isFrozen result
+      resolve result
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DRA.arange_from_segments" ] = ( T, done ) ->
   DRA = require './discontinuous-range-arithmetics'
   probes_and_matchers = [
@@ -132,7 +156,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "union" ] = ( T, done ) ->
+@[ "union with single segment" ] = ( T, done ) ->
   DRA = require './discontinuous-range-arithmetics'
   probes_and_matchers = [
     [ [ [ 10, 20, ], [ 1, 1, ], ], [ [ 1, 1, ], [ 10, 20, ], ], ]
@@ -160,6 +184,41 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "union with multiple segments" ] = ( T, done ) ->
+  DRA = require './discontinuous-range-arithmetics'
+  probes_and_matchers = [
+    [ [ [], [ [ 1, 1, ], [ -3, -1, ], ] ], [ [ -3, -1, ], [ 1, 1, ], ] ]
+    [ [ [], [ [ 1, 1, ], [ -3, 3, ], ] ], [ [ -3, 3, ], ] ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      [ first, segments, ] = probe
+      result = new DRA.Arange first
+      result = DRA.union result, segments...
+      resolve result
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "union with Arange" ] = ( T, done ) ->
+  DRA = require './discontinuous-range-arithmetics'
+  probes_and_matchers = [
+    [ [ [], [ [ 1, 1, ], [ -3, -1, ], ] ], [ [ -3, -1, ], [ 1, 1, ], ] ]
+    [ [ [], [ [ 1, 1, ], [ -3, 3, ], ] ], [ [ -3, 3, ], ] ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      [ first, ranges, ] = probe
+      result  = new DRA.Arange first
+      ranges  = ( ( new DRA.Arange [ range, ] ) for range in ranges )
+      result  = DRA.union result, ranges...
+      resolve result
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 demo_1 = ->
   DRA = require './discontinuous-range-arithmetics'
   info new DRA.Arange           [ [ 1, 3, ], [ 5, 7, ] ]
@@ -175,6 +234,9 @@ if module is require.main then do =>
   # test @[ "DRA.Segment.from" ]
   # test @[ "DRA.Arange.from" ]
   # test @[ "DRA.segment_from_lohi" ]
-  # test @[ "union" ]
+  # test @[ "union with single segment" ]
+  # test @[ "new DRA.Arange" ]
+  # test @[ "union with multiple segments" ]
+  # test @[ "union with Arange" ]
 
 
