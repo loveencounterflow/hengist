@@ -24,3 +24,4 @@ echo                      = CND.echo.bind CND
   playAlert.volume(1.5)
 
 
+pactl list sinks | grep 'Volume: f' | sed -E 's/^.*\s([0-9]+)%.*$/\1/g'

@@ -5,7 +5,7 @@
 
 ## Data Structure
 
-* `Arange`, a derivative of JS `Array`
+* `Interlap`, a derivative of JS `Array`
 * IOW a list
 * whose elements are in turn `Segment`s, another derivative of JS `Array`
 * segments are pairs `[ lo, hi, ]` where both are finite or infinite numbers, `lo <= hi`

@@ -35,8 +35,8 @@ MAIN                      = @
 #===========================================================================================================
 # TYPES
 #-----------------------------------------------------------------------------------------------------------
-declare 'urange_instance',  ( x ) -> x instanceof Urange
-declare 'arange_instance',  ( x ) -> x instanceof Arange
+declare 'urange_instance',    ( x ) -> x instanceof Urange
+declare 'interlap_instance',  ( x ) -> x instanceof Interlap
 
 #-----------------------------------------------------------------------------------------------------------
 declare 'urange_segment', tests:
@@ -104,7 +104,7 @@ class Segment extends Array
   @from:  -> throw new Error "^778^ `Segment.from()` is not implemented"
 
 #-----------------------------------------------------------------------------------------------------------
-class Arange  extends Array
+class Interlap  extends Array
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( segments ) ->
@@ -118,7 +118,7 @@ class Arange  extends Array
     #.......................................................................................................
     if segments instanceof DRange
       drange    = segments
-    else if segments instanceof Arange
+    else if segments instanceof Interlap
       drange    = segments._drange
     else if Array.isArray segments
       drange    = new DRange()
@@ -134,40 +134,40 @@ class Arange  extends Array
 
   #---------------------------------------------------------------------------------------------------------
   _size_of:           -> @reduce ( ( sum, segment ) -> sum + segment.size ), 0
-  @from:  -> throw new Error "^776^ `Arange.from()` is not implemented"
-  # @from:  -> ( P...  ) -> MAIN.arange_from_segments P...
-  # @from:    ( P...  ) -> new Arange P...
+  @from:  -> throw new Error "^776^ `Interlap.from()` is not implemented"
+  # @from:  -> ( P...  ) -> MAIN.interlap_from_segments P...
+  # @from:    ( P...  ) -> new Interlap P...
 
 # npm install @scotttrinh/number-ranges
 # drange-immutable
 
 #-----------------------------------------------------------------------------------------------------------
-@Arange   = Arange
+@Interlap   = Interlap
 @Segment  = Segment
 
 #-----------------------------------------------------------------------------------------------------------
 @segment_from_lohi      = ( lo, hi      ) -> new Segment if hi? then [ lo, hi, ] else [ lo, ]
-@arange_from_segments   = ( segments... ) -> new Arange segments
+@interlap_from_segments   = ( segments... ) -> new Interlap segments
 
 #-----------------------------------------------------------------------------------------------------------
 @union = ( me, others... ) ->
-  me      = new Arange me unless me instanceof Arange
+  me      = new Interlap me unless me instanceof Interlap
   drange  = me._drange
   drange  = drange.add segment... for segment in me
   for other in others
-    if other instanceof Arange
+    if other instanceof Interlap
       drange = drange.add segment... for segment in other
     else
       other   = new Segment other unless other instanceof Segment
       drange  = drange.add other...
-  return new Arange drange
+  return new Interlap drange
 
 # #-----------------------------------------------------------------------------------------------------------
-# @_drange_as_arange  = ( drange ) ->
-#   return freeze @_sort Arange.from ( ( new Segment [ r.low, r.high, ] ) for r in drange.ranges )
+# @_drange_as_interlap  = ( drange ) ->
+#   return freeze @_sort Interlap.from ( ( new Segment [ r.low, r.high, ] ) for r in drange.ranges )
 
 #-----------------------------------------------------------------------------------------------------------
-@_sort = ( arange ) -> arange.sort ( a, b ) ->
+@_sort = ( interlap ) -> interlap.sort ( a, b ) ->
   return -1 if a[ 0 ] < b[ 0 ]
   return +1 if a[ 0 ] > b[ 0 ]
   return -1 if a[ 1 ] < b[ 1 ]

@@ -23,7 +23,7 @@ test                      = require 'guy-test'
 #===========================================================================================================
 # TESTS
 #-----------------------------------------------------------------------------------------------------------
-@[ "new DRA.Arange" ] = ( T, done ) ->
+@[ "new DRA.Interlap" ] = ( T, done ) ->
   DRA = require './discontinuous-range-arithmetics'
   probes_and_matchers = [
     [ null,                   null, "unable to instantiate from a null" ]
@@ -39,7 +39,7 @@ test                      = require 'guy-test'
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      result = new DRA.Arange probe
+      result = new DRA.Interlap probe
       T.ok Object.isFrozen result
       resolve result
   #.........................................................................................................
@@ -47,7 +47,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DRA.arange_from_segments" ] = ( T, done ) ->
+@[ "DRA.interlap_from_segments" ] = ( T, done ) ->
   DRA = require './discontinuous-range-arithmetics'
   probes_and_matchers = [
     [ null,   null, "must be a list" ]
@@ -61,7 +61,7 @@ test                      = require 'guy-test'
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      result = DRA.arange_from_segments probe
+      result = DRA.interlap_from_segments probe
       T.ok Object.isFrozen result
       resolve result
   #.........................................................................................................
@@ -69,7 +69,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DRA.Arange properties" ] = ( T, done ) ->
+@[ "DRA.Interlap properties" ] = ( T, done ) ->
   DRA = require './discontinuous-range-arithmetics'
   probes_and_matchers = [
     [ [ [ 10, 20, ], [ 8, 12, ], [ 25, 30, ] ], [ [ [ 8, 20, ], [ 25, 30, ] ], { first: [ 8, 20 ], last: [ 25, 30 ], size: 19, lo: 8, hi: 30 }, ], null, ]
@@ -77,7 +77,7 @@ test                      = require 'guy-test'
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      range                           = DRA.arange_from_segments probe...
+      range                           = DRA.interlap_from_segments probe...
       { first, last, size, lo, hi, }  = range
       T.ok Object.isFrozen range
       T.ok Object.isFrozen range.first
@@ -142,14 +142,14 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DRA.Arange.from" ] = ( T, done ) ->
+@[ "DRA.Interlap.from" ] = ( T, done ) ->
   DRA = require './discontinuous-range-arithmetics'
   probes_and_matchers = [
     [ null, null, "not implemented" ]
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      result = DRA.Arange.from probe
+      result = DRA.Interlap.from probe
       resolve result
   #.........................................................................................................
   done()
@@ -167,7 +167,7 @@ test                      = require 'guy-test'
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
       [ first, segments..., ] = probe
-      result = DRA.arange_from_segments first
+      result = DRA.interlap_from_segments first
       T.ok Object.isFrozen result
       for segment in segments
         [ lo, hi, ] = segment
@@ -175,7 +175,7 @@ test                      = require 'guy-test'
         T.eq segment.lo, segment[ 0 ]
         next_result = DRA.union result, segment
         T.ok Object.isFrozen next_result
-        T.ok next_result instanceof DRA.Arange
+        T.ok next_result instanceof DRA.Interlap
         T.ok not CND.equals result, next_result
         result = next_result
       resolve result
@@ -193,7 +193,7 @@ test                      = require 'guy-test'
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
       [ first, segments, ] = probe
-      result = new DRA.Arange first
+      result = new DRA.Interlap first
       result = DRA.union result, segments...
       resolve result
   #.........................................................................................................
@@ -201,7 +201,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "union with Arange" ] = ( T, done ) ->
+@[ "union with Interlap" ] = ( T, done ) ->
   DRA = require './discontinuous-range-arithmetics'
   probes_and_matchers = [
     [ [ [], [ [ 1, 1, ], [ -3, -1, ], ] ], [ [ -3, -1, ], [ 1, 1, ], ] ]
@@ -210,8 +210,8 @@ test                      = require 'guy-test'
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
       [ first, ranges, ] = probe
-      result  = new DRA.Arange first
-      ranges  = ( ( new DRA.Arange [ range, ] ) for range in ranges )
+      result  = new DRA.Interlap first
+      ranges  = ( ( new DRA.Interlap [ range, ] ) for range in ranges )
       result  = DRA.union result, ranges...
       resolve result
   #.........................................................................................................
@@ -221,22 +221,23 @@ test                      = require 'guy-test'
 #-----------------------------------------------------------------------------------------------------------
 demo_1 = ->
   DRA = require './discontinuous-range-arithmetics'
-  info new DRA.Arange           [ [ 1, 3, ], [ 5, 7, ] ]
-  info DRA.arange_from_segments   [ 1, 3, ], [ 5, 7, ]
+  info new DRA.Interlap           [ [ 1, 3, ], [ 5, 7, ] ]
+  info DRA.interlap_from_segments   [ 1, 3, ], [ 5, 7, ]
+
 
 ############################################################################################################
 if module is require.main then do =>
   # demo_1()
   test @
-  # test @[ "DRA.arange_from_segments" ]
-  # test @[ "DRA.Arange properties" ]
+  # test @[ "DRA.interlap_from_segments" ]
+  # test @[ "DRA.Interlap properties" ]
   # test @[ "DRA.new_segment" ]
   # test @[ "DRA.Segment.from" ]
-  # test @[ "DRA.Arange.from" ]
+  # test @[ "DRA.Interlap.from" ]
   # test @[ "DRA.segment_from_lohi" ]
   # test @[ "union with single segment" ]
-  # test @[ "new DRA.Arange" ]
+  # test @[ "new DRA.Interlap" ]
   # test @[ "union with multiple segments" ]
-  # test @[ "union with Arange" ]
+  # test @[ "union with Interlap" ]
 
 
