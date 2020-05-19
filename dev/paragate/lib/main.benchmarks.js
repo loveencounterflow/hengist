@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, FSP, INTERTEXT, PATH, after, alert, assets, assign, badge, debug, defer, demo_parse, echo, help, info, jr, limit_reached, prepare, rpr, timeout, urge, warn, whisper;
+  var BM, CND, FSP, INTERTEXT, PATH, after, alert, assets, assign, badge, debug, defer, demo_parse, echo, help, info, isa, jr, limit_reached, prepare, rpr, timeout, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -61,11 +61,19 @@
   //...........................................................................................................
   assets = {
     ok: false,
-    probes: ['', 'x', 'foo\n  bar', '\nxxx'.repeat(20000)],
+    probes: ['', 'x', 'foo\n  bar'],
+    // '\nxxx'.repeat 20000
     approx_char_count: 0,
     line_count: 0,
-    paths: ['main.benchmarks.js', 'interim.tests.js', '../src/interim.tests.coffee', '../../../assets/larry-wall-on-regexes.html']
+    paths: ['main.benchmarks.js']
   };
+
+  // 'interim.tests.js'
+  // '../src/interim.tests.coffee'
+  // '../../../assets/larry-wall-on-regexes.html'
+  types = require('../paragate/lib/types');
+
+  ({isa, validate, type_of} = types);
 
   //-----------------------------------------------------------------------------------------------------------
   prepare = function() {
@@ -141,7 +149,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this._parse = function(n, show, name) {
     return new Promise(async(resolve) => {
-      var GRAMMAR, grammar;
+      var GRAMMAR, error, grammar;
       switch (name) {
         case 'chvtindent':
           GRAMMAR = require('./old-grammars/indentation.grammar');
@@ -149,7 +157,7 @@
           break;
         case 'rxws_blocks':
           GRAMMAR = require('../paragate/lib/regex-whitespace.grammar');
-          grammar = GRAMMAR.rxws_grammar;
+          grammar = GRAMMAR.grammar;
           break;
         case 'rxws_tokens':
           GRAMMAR = require('../paragate/lib/regex-whitespace.grammar');
@@ -158,9 +166,9 @@
           });
           break;
         case 'htmlish':
-          grammar = require('../paragate/lib/htmlish.grammar');
+          GRAMMAR = require('../paragate/lib/htmlish.grammar');
+          grammar = GRAMMAR.grammar;
           break;
-        // grammar = new GRAMMAR.Rxws_grammar { as_blocks: false, }
         case 'asciisorter':
           GRAMMAR = require('./old-grammars/asciisorter.grammar');
           grammar = GRAMMAR.asciisorter;
@@ -202,6 +210,15 @@
         default:
           throw new Error(`^44498^ unknown grammar ${rpr(name)}`);
       }
+      try {
+        //.........................................................................................................
+        validate.object(grammar);
+        validate.function(grammar.parse);
+      } catch (error1) {
+        error = error1;
+        throw new Error(`^339^ not a valid grammar: ${rpr(name)}; GRAMMAR: ${rpr(types.all_keys_of(GRAMMAR))}`);
+      }
+      //.........................................................................................................
       await prepare();
       //.........................................................................................................
       resolve(() => {

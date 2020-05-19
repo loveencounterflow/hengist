@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var $, $STEAMPIPES_chunkify, $async, $concatenate_chunks, $display, $drain, $extract_line, $parse, $show, $watch, CND, DATOM, HTML, INTERSHOP, INTERTEXT, PGP, RXWS, SP, after, alert, assign, async, badge, cast, debug, defer, echo, field_values_from_datom, field_values_from_datoms, fresh_datom, help, info, isa, jr, new_datom, rpr, select, stamp, sync, type_of, types, urge, validate, warn, whisper;
+  var $, $async, $display, $drain, $mark_doc_boundaries, $parse, $show, $watch, CND, DATOM, HTML, INTERSHOP, INTERTEXT, INTERTEXT_show_text_ruler, PGP, RXWS, SP, after, alert, assign, async, badge, cast, debug, defer, echo, escape_text, field_values_from_datom, field_values_from_datoms, freeze, fresh_datom, help, info, isa, jr, lets, new_datom, rpr, select, stamp, sync, type_of, types, urge, validate, warn, whisper,
+    modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
   CND = require('cnd');
@@ -57,7 +58,7 @@
 
   DATOM = require('../../../apps/datom');
 
-  ({select, stamp, new_datom, fresh_datom} = DATOM.export());
+  ({select, stamp, freeze, lets, new_datom, fresh_datom} = DATOM.export());
 
   // DB                        = require '../intershop/intershop_modules/db'
   INTERSHOP = require('../intershop');
@@ -355,52 +356,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  $extract_line = function() {
-    return $(function(d, send) {
-      return send(d.line);
-    });
-  };
-
-  $concatenate_chunks = function() {
-    return $(function(d, send) {
-      return send(d.join('\n'));
-    });
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  $STEAMPIPES_chunkify = function() {
-    var collector, filter, flush, include_separator, last, send;
-    collector = null;
-    include_separator = false;
-    filter = function(d) {
-      return /^\s*$/.test(d);
-    };
-    last = Symbol('last');
-    send = null;
-    flush = function() {
-      if (collector != null) {
-        send(collector);
-      }
-      return collector = null;
-    };
-    //.........................................................................................................
-    return $({last}, function(d, send_) {
-      send = send_;
-      if (d === last) {
-        return flush();
-      }
-      if (filter(d)) {
-        if (include_separator) {
-          (collector != null ? collector : collector = []).push(d);
-        }
-        return flush();
-      }
-      (collector != null ? collector : collector = []).push(d);
-      return null;
-    });
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   $parse = function(grammar) {
     return $(function(source, send) {
       var i, len, ref, results, token;
@@ -415,19 +370,118 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  $mark_doc_boundaries = function() {
+    return SP.window({
+      width: 2,
+      fallback: null
+    }, $(function(cd, send) {
+      var c, d;
+      [c, d] = cd;
+      if (!((c != null) && (d != null))) {
+        return null;
+      }
+      if (d.$key === '<document') {
+        if (c.$key === '>document') {
+          send(freeze({
+            $key: '^boundary'
+          }));
+        }
+      } else if (!(d.$key === '>document')) {
+        send(d);
+      }
+      return null;
+    }));
+  };
+
+  escape_text = function(text) {
+    var R;
+    R = text;
+    R = R.replace(/\n/g, '⏎');
+    R = R.replace(/[\x00-\x1a\x1c-\x1f]/g, function($0) {
+      return String.fromCodePoint(($0.codePointAt(0)) + 0x2400);
+    });
+    R = R.replace(/\x1b(?!\[)/g, '␛');
+    return R;
+  };
+
+  INTERTEXT_show_text_ruler = function(text) {
+    var block_idx, chr, chr_idx, chrs, color, colors, i, idx, j, len, piece, ref, ruler;
+    echo(((function() {
+      var i, results;
+      results = [];
+      for (idx = i = 0; i <= 19; idx = ++i) {
+        results.push(`${idx * 10}`.padEnd(10, ' '));
+      }
+      return results;
+    })()).join(''));
+    // piece = '├┬┬┬┬┼┬┬┬┐'.replace /./g, ( $0, idx ) ->
+    //   return if idx %% 2 is 0 then ( CND.reverse $0 ) else $0
+    colors = [CND.yellow, CND.cyan, CND.pink];
+    piece = ((CND.reverse(CND.yellow(' '))) + '░').repeat(10);
+    piece = '█ ░ ░ ░ ░ ';
+    echo(piece.repeat(20));
+    chrs = [...(escape_text(text))];
+    ruler = '';
+    for (block_idx = i = 0, ref = chrs.length; i < ref; block_idx = i += +10) {
+      color = colors[modulo(block_idx, colors.length)];
+      for (chr_idx = j = 0, len = chrs.length; j < len; chr_idx = ++j) {
+        chr = chrs[chr_idx];
+        ruler += (modulo(chr_idx, 2)) === 0 ? CND.reverse(chr) : chr;
+      }
+    }
+    echo(ruler);
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this._demo_stream = function() {
     return new Promise(async(resolve, reject) => {
-      var DB, pipeline, source, sql;
+      var $concatenate_chunks, $extract_line, DB, chunkify_filter, pipeline, source, sql;
       DB = require('../intershop/intershop_modules/db');
       sql = "select * from MIRAGE.mirror where dsk = 'proposal' order by linenr;";
-      // sql         = "select n from generate_series( 42, 51 ) as x ( n );"
+      //.........................................................................................................
+      $extract_line = function() {
+        return $(function(d, send) {
+          return send(d.line);
+        });
+      };
+      $concatenate_chunks = function() {
+        var linenr, start;
+        start = 0;
+        linenr = 1;
+        return $(function(chunk, send) {
+          var chr_count, line_count, text;
+          line_count = chunk.length;
+          text = chunk.join('\n');
+          chr_count = [...text].length;
+          send(freeze({
+            $key: '^chunk',
+            text,
+            linenr,
+            start,
+            line_count,
+            chr_count
+          }));
+          linenr += line_count;
+          return start += chr_count;
+        });
+      };
+      chunkify_filter = function(d) {
+        return /^\s*$/.test(d);
+      };
+      //.........................................................................................................
       source = (await DB.new_query_source(sql));
       pipeline = [];
       pipeline.push(source);
       pipeline.push($extract_line());
-      pipeline.push($STEAMPIPES_chunkify());
+      pipeline.push(SP.$chunkify_keep(chunkify_filter));
       pipeline.push($concatenate_chunks());
-      pipeline.push($parse(RXWS.grammar));
+      // pipeline.push $watch ( text ) -> urge rpr text
+      pipeline.push($watch(function(d) {
+        return INTERTEXT_show_text_ruler(d.text);
+      }));
+      // pipeline.push $parse RXWS.grammar
+      // pipeline.push $mark_doc_boundaries()
       pipeline.push(SP.$show());
       pipeline.push($drain(function() {
         return (()/* NOTE must be function, not asyncfunction */ => {
