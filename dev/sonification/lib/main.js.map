@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "/home/flow/jzr/hengist/dev/sonification/src/main.coffee"
+  ],
+  "names": [],
+  "mappings": "AACA;EAAA;AAAA,MAAA,GAAA,EAAA,KAAA,EAAA,KAAA,EAAA,KAAA,EAAA,IAAA,EAAA,IAAA,EAAA,IAAA,EAAA,GAAA,EAAA,GAAA,EAAA,IAAA,EAAA,IAAA,EAAA,OAAA;;;;;EAIA,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,KAAA,GAA4B;;EAC5B,GAAA,GAA4B,GAAG,CAAC;;EAChC,GAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,OAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,SAAf,EAA4B,KAA5B;;EAC5B,KAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,KAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,IAAI,CAAC,IAAT,CAAc,GAAd,EAf5B;;;EAkBA,IAAC,CAAA,WAAD,GAAe,QAAA,CAAE,EAAF,CAAA;AACf,QAAA;IAAE,SAAA,GAAY,OAAA,CAAQ,oBAAR;IACZ,SAAA,CAAA,EADF;IAEE,SAAA,CAAU,MAAV;WACA,SAAS,CAAC,MAAV,CAAiB,GAAjB;EAJa;AAlBf",
+  "sourcesContent": [
+    "\n'use strict'\n# coffeelint: disable=max_line_length\n\n############################################################################################################\nCND                       = require 'cnd'\nbadge                     = 'SONIFICATION'\nrpr                       = CND.rpr\nlog                       = CND.get_logger 'plain',     badge\ninfo                      = CND.get_logger 'info',      badge\nwhisper                   = CND.get_logger 'whisper',   badge\nalert                     = CND.get_logger 'alert',     badge\ndebug                     = CND.get_logger 'debug',     badge\nwarn                      = CND.get_logger 'warn',      badge\nhelp                      = CND.get_logger 'help',      badge\nurge                      = CND.get_logger 'urge',      badge\necho                      = CND.echo.bind CND\n\n#-----------------------------------------------------------------------------------------------------------\n@demo_notify = ( me ) ->\n  playAlert = require('alert-sound-notify')\n  playAlert() # Plays default alert \"bottle\"\n  playAlert('purr')\n  playAlert.volume(1.5)\n\n\n"
+  ]
+}
