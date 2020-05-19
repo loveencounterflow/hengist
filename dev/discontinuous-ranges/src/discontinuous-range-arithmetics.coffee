@@ -30,7 +30,7 @@ LFT                       = require 'letsfreezethat'
 # { lets
 #   freeze }                = LFT
 freeze                    = Object.freeze
-
+MAIN                      = @
 
 #===========================================================================================================
 # TYPES
