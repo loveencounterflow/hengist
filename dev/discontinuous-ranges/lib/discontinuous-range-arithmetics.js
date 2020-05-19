@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var Arange, CND, DRange, LFT, MAIN, PATH, Segment, Urange, alert, badge, cast, debug, declare, echo, freeze, help, hex, info, isa, log, merge_ranges, rpr, type_of, urge, validate, warn, whisper;
+  var CND, DRange, Interlap, LFT, MAIN, PATH, Segment, Urange, alert, badge, cast, debug, declare, echo, freeze, help, hex, info, isa, log, merge_ranges, rpr, type_of, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -58,8 +58,8 @@
     return x instanceof Urange;
   });
 
-  declare('arange_instance', function(x) {
-    return x instanceof Arange;
+  declare('interlap_instance', function(x) {
+    return x instanceof Interlap;
   });
 
   //-----------------------------------------------------------------------------------------------------------
@@ -183,7 +183,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  Arange = class Arange extends Array {
+  Interlap = class Interlap extends Array {
     //---------------------------------------------------------------------------------------------------------
     constructor(segments) {
       var drange, j, len, segment;
@@ -223,7 +223,7 @@
       //.......................................................................................................
       if (segments instanceof DRange) {
         drange = segments;
-      } else if (segments instanceof Arange) {
+      } else if (segments instanceof Interlap) {
         drange = segments._drange;
       } else if (Array.isArray(segments)) {
         drange = new DRange();
@@ -253,19 +253,19 @@
     }
 
     static from() {
-      throw new Error("^776^ `Arange.from()` is not implemented");
+      throw new Error("^776^ `Interlap.from()` is not implemented");
     }
 
   };
 
-  // @from:  -> ( P...  ) -> MAIN.arange_from_segments P...
-  // @from:    ( P...  ) -> new Arange P...
+  // @from:  -> ( P...  ) -> MAIN.interlap_from_segments P...
+  // @from:    ( P...  ) -> new Interlap P...
 
   // npm install @scotttrinh/number-ranges
   // drange-immutable
 
   //-----------------------------------------------------------------------------------------------------------
-  this.Arange = Arange;
+  this.Interlap = Interlap;
 
   this.Segment = Segment;
 
@@ -274,15 +274,15 @@
     return new Segment(hi != null ? [lo, hi] : [lo]);
   };
 
-  this.arange_from_segments = function(...segments) {
-    return new Arange(segments);
+  this.interlap_from_segments = function(...segments) {
+    return new Interlap(segments);
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.union = function(me, ...others) {
     var drange, j, k, l, len, len1, len2, other, segment;
-    if (!(me instanceof Arange)) {
-      me = new Arange(me);
+    if (!(me instanceof Interlap)) {
+      me = new Interlap(me);
     }
     drange = me._drange;
     for (j = 0, len = me.length; j < len; j++) {
@@ -291,7 +291,7 @@
     }
     for (k = 0, len1 = others.length; k < len1; k++) {
       other = others[k];
-      if (other instanceof Arange) {
+      if (other instanceof Interlap) {
         for (l = 0, len2 = other.length; l < len2; l++) {
           segment = other[l];
           drange = drange.add(...segment);
@@ -303,16 +303,16 @@
         drange = drange.add(...other);
       }
     }
-    return new Arange(drange);
+    return new Interlap(drange);
   };
 
   // #-----------------------------------------------------------------------------------------------------------
-  // @_drange_as_arange  = ( drange ) ->
-  //   return freeze @_sort Arange.from ( ( new Segment [ r.low, r.high, ] ) for r in drange.ranges )
+  // @_drange_as_interlap  = ( drange ) ->
+  //   return freeze @_sort Interlap.from ( ( new Segment [ r.low, r.high, ] ) for r in drange.ranges )
 
   //-----------------------------------------------------------------------------------------------------------
-  this._sort = function(arange) {
-    return arange.sort(function(a, b) {
+  this._sort = function(interlap) {
+    return interlap.sort(function(a, b) {
       if (a[0] < b[0]) {
         return -1;
       }

@@ -37,7 +37,7 @@
   //===========================================================================================================
   // TESTS
   //-----------------------------------------------------------------------------------------------------------
-  this["new DRA.Arange"] = async function(T, done) {
+  this["new DRA.Interlap"] = async function(T, done) {
     var DRA, error, i, len, matcher, probe, probes_and_matchers;
     DRA = require('./discontinuous-range-arithmetics');
     probes_and_matchers = [
@@ -95,7 +95,7 @@
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
           var result;
-          result = new DRA.Arange(probe);
+          result = new DRA.Interlap(probe);
           T.ok(Object.isFrozen(result));
           return resolve(result);
         });
@@ -107,7 +107,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DRA.arange_from_segments"] = async function(T, done) {
+  this["DRA.interlap_from_segments"] = async function(T, done) {
     var DRA, error, i, len, matcher, probe, probes_and_matchers;
     DRA = require('./discontinuous-range-arithmetics');
     probes_and_matchers = [
@@ -160,7 +160,7 @@
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
           var result;
-          result = DRA.arange_from_segments(probe);
+          result = DRA.interlap_from_segments(probe);
           T.ok(Object.isFrozen(result));
           return resolve(result);
         });
@@ -172,7 +172,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DRA.Arange properties"] = async function(T, done) {
+  this["DRA.Interlap properties"] = async function(T, done) {
     var DRA, error, i, len, matcher, probe, probes_and_matchers;
     DRA = require('./discontinuous-range-arithmetics');
     probes_and_matchers = [
@@ -224,7 +224,7 @@
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
           var first, hi, last, lo, range, size;
-          range = DRA.arange_from_segments(...probe);
+          range = DRA.interlap_from_segments(...probe);
           ({first, last, size, lo, hi} = range);
           T.ok(Object.isFrozen(range));
           T.ok(Object.isFrozen(range.first));
@@ -308,7 +308,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DRA.Arange.from"] = async function(T, done) {
+  this["DRA.Interlap.from"] = async function(T, done) {
     var DRA, error, i, len, matcher, probe, probes_and_matchers;
     DRA = require('./discontinuous-range-arithmetics');
     probes_and_matchers = [[null, null, "not implemented"]];
@@ -317,7 +317,7 @@
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
           var result;
-          result = DRA.Arange.from(probe);
+          result = DRA.Interlap.from(probe);
           return resolve(result);
         });
       });
@@ -338,7 +338,7 @@
         return new Promise(function(resolve) {
           var first, hi, j, len1, lo, next_result, result, segment, segments;
           [first, ...segments] = probe;
-          result = DRA.arange_from_segments(first);
+          result = DRA.interlap_from_segments(first);
           T.ok(Object.isFrozen(result));
           for (j = 0, len1 = segments.length; j < len1; j++) {
             segment = segments[j];
@@ -347,7 +347,7 @@
             T.eq(segment.lo, segment[0]);
             next_result = DRA.union(result, segment);
             T.ok(Object.isFrozen(next_result));
-            T.ok(next_result instanceof DRA.Arange);
+            T.ok(next_result instanceof DRA.Interlap);
             T.ok(!CND.equals(result, next_result));
             result = next_result;
           }
@@ -371,7 +371,7 @@
         return new Promise(function(resolve) {
           var first, result, segments;
           [first, segments] = probe;
-          result = new DRA.Arange(first);
+          result = new DRA.Interlap(first);
           result = DRA.union(result, ...segments);
           return resolve(result);
         });
@@ -383,7 +383,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["union with Arange"] = async function(T, done) {
+  this["union with Interlap"] = async function(T, done) {
     var DRA, error, i, len, matcher, probe, probes_and_matchers;
     DRA = require('./discontinuous-range-arithmetics');
     probes_and_matchers = [[[[], [[1, 1], [-3, -1]]], [[-3, -1], [1, 1]]], [[[], [[1, 1], [-3, 3]]], [[-3, 3]]]];
@@ -393,13 +393,13 @@
         return new Promise(function(resolve) {
           var first, range, ranges, result;
           [first, ranges] = probe;
-          result = new DRA.Arange(first);
+          result = new DRA.Interlap(first);
           ranges = (function() {
             var j, len1, results;
             results = [];
             for (j = 0, len1 = ranges.length; j < len1; j++) {
               range = ranges[j];
-              results.push(new DRA.Arange([range]));
+              results.push(new DRA.Interlap([range]));
             }
             return results;
           })();
@@ -417,8 +417,8 @@
   demo_1 = function() {
     var DRA;
     DRA = require('./discontinuous-range-arithmetics');
-    info(new DRA.Arange([[1, 3], [5, 7]]));
-    return info(DRA.arange_from_segments([1, 3], [5, 7]));
+    info(new DRA.Interlap([[1, 3], [5, 7]]));
+    return info(DRA.interlap_from_segments([1, 3], [5, 7]));
   };
 
   //###########################################################################################################
@@ -429,15 +429,15 @@
     })();
   }
 
-  // test @[ "DRA.arange_from_segments" ]
-// test @[ "DRA.Arange properties" ]
+  // test @[ "DRA.interlap_from_segments" ]
+// test @[ "DRA.Interlap properties" ]
 // test @[ "DRA.new_segment" ]
 // test @[ "DRA.Segment.from" ]
-// test @[ "DRA.Arange.from" ]
+// test @[ "DRA.Interlap.from" ]
 // test @[ "DRA.segment_from_lohi" ]
 // test @[ "union with single segment" ]
-// test @[ "new DRA.Arange" ]
+// test @[ "new DRA.Interlap" ]
 // test @[ "union with multiple segments" ]
-// test @[ "union with Arange" ]
+// test @[ "union with Interlap" ]
 
 }).call(this);
