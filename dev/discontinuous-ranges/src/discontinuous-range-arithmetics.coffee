@@ -128,6 +128,8 @@ class Arange  extends Array
 @new_arange = ( P... ) ->
   R = new DRange()
   # R = ( require 'letsfreezethat' ).freeze new DRange()
+  P = [ P[ 0 ]..., ] if P.length is 1 and isa.generator P[ 0 ]
+  # debug '^675^', P
   for p in P
     validate.urange_segment p unless p instanceof Segment
     R.add p...
