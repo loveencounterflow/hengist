@@ -150,13 +150,16 @@ class Arange  extends Array
 @arange_from_segments   = ( segments... ) -> new Arange segments
 
 #-----------------------------------------------------------------------------------------------------------
-@union = ( me, other ) ->
-  ### TAINT also allow `other` to be range ###
-  me      = new Arange  me    unless    me instanceof Arange
-  other   = new Segment other unless other instanceof Segment
+@union = ( me, others... ) ->
+  me      = new Arange me unless me instanceof Arange
   drange  = me._drange
   drange  = drange.add segment... for segment in me
-  drange  = drange.add other...
+  for other in others
+    if other instanceof Arange
+      drange = drange.add segment... for segment in other
+    else
+      other   = new Segment other unless other instanceof Segment
+      drange  = drange.add other...
   return new Arange drange
 
 # #-----------------------------------------------------------------------------------------------------------
