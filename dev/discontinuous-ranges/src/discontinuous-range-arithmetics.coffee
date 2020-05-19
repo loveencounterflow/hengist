@@ -1,0 +1,223 @@
+
+'use strict'
+
+############################################################################################################
+CND                       = require 'cnd'
+badge                     = 'DISCONTINUOUS-RANGE-ARITHMETICS'
+rpr                       = CND.rpr
+log                       = CND.get_logger 'plain',     badge
+info                      = CND.get_logger 'info',      badge
+whisper                   = CND.get_logger 'whisper',   badge
+alert                     = CND.get_logger 'alert',     badge
+debug                     = CND.get_logger 'debug',     badge
+warn                      = CND.get_logger 'warn',      badge
+help                      = CND.get_logger 'help',      badge
+urge                      = CND.get_logger 'urge',      badge
+echo                      = CND.echo.bind CND
+#...........................................................................................................
+PATH                      = require 'path'
+hex                       = ( n ) -> ( n.toString 16 ).toUpperCase().padStart 4, '0'
+DRange                    = require 'drange'
+merge_ranges              = require 'merge-ranges'
+#...........................................................................................................
+@types                    = new ( require 'intertype' ).Intertype()
+{ isa
+  validate
+  declare
+  cast
+  type_of }               = @types.export()
+LFT                       = require 'letsfreezethat'
+# { lets
+#   freeze }                = LFT
+freeze                    = Object.freeze
+
+
+#===========================================================================================================
+# TYPES
+#-----------------------------------------------------------------------------------------------------------
+declare 'urange_instance',  ( x ) -> x instanceof Urange
+declare 'arange_instance',  ( x ) -> x instanceof Arange
+
+#-----------------------------------------------------------------------------------------------------------
+declare 'urange_segment', tests:
+  "must be a list":                                         ( x ) -> @isa.list x
+  "length must be 2":                                       ( x ) -> x.length is 2
+  "lo boundary must be an infnumber":                       ( x ) -> isa.infnumber x[ 0 ]
+  "lo boundary must be an infnumber":                       ( x ) -> isa.infnumber x[ 1 ]
+  "lo boundary must be less than or equal to hi boundary":  ( x ) -> x[ 0 ] <= x[ 1 ]
+
+
+#===========================================================================================================
+# OOP
+#-----------------------------------------------------------------------------------------------------------
+class Urange
+  ### TAINT add type checking to avoid silent failure of e.g. `new DRange [ 1, 3, ]` ###
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( P... ) ->
+    @d = new DRange()
+    # @d = ( require 'letsfreezethat' ).freeze new DRange()
+    for p in P
+      if isa.urange_instance p
+        @d.add p.d
+      else
+        validate.urange_segment p
+        @d.add p...
+    Object.defineProperty @, 'length', get: -> @d.length
+    return @
+
+  #---------------------------------------------------------------------------------------------------------
+  union: ( other ) ->
+    other = ( new Urange other ) unless isa.urange_instance other
+    @d.add other.d
+    return @
+
+  #---------------------------------------------------------------------------------------------------------
+  difference: ( other ) ->
+    other = ( new Urange other ) unless isa.urange_instance other
+    @d.subtract other.d
+    return @
+
+  #---------------------------------------------------------------------------------------------------------
+  as_lists: -> ( [ r.low, r.high, ] for r in @d.ranges )
+
+@Urange = Urange
+
+
+#===========================================================================================================
+# FUN
+#-----------------------------------------------------------------------------------------------------------
+class Segment extends Array
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( lohi ) ->
+    validate.urange_segment lohi if lohi
+    super lohi[ 0 ], lohi[ 1 ]
+    Object.defineProperty @, 'size',  get: @_size_of
+    Object.defineProperty @, 'lo',    get: -> @[ 0 ]
+    Object.defineProperty @, 'hi',    get: -> @[ 1 ]
+    return freeze @
+
+  #---------------------------------------------------------------------------------------------------------
+  _size_of:           -> @[ 1 ] - @[ 0 ] + 1
+  @from:    ( P...  ) -> new Segment P...
+
+#-----------------------------------------------------------------------------------------------------------
+class Arange  extends Array
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( P... ) ->
+    super P...
+    Object.defineProperty @, 'size', get: @_size_of
+
+  #---------------------------------------------------------------------------------------------------------
+  _size_of:           -> @reduce ( ( sum, segment ) -> sum + segment.size ), 0
+  # @from:    ( P...  ) -> new Arange P...
+
+# npm install @scotttrinh/number-ranges
+# drange-immutable
+
+#-----------------------------------------------------------------------------------------------------------
+@Arange   = Arange
+@Segment  = Segment
+
+#-----------------------------------------------------------------------------------------------------------
+@new_segment = ( lo, hi ) -> new Segment lo, hi
+
+#-----------------------------------------------------------------------------------------------------------
+@new_arange = ( P... ) ->
+  R = new DRange()
+  # R = ( require 'letsfreezethat' ).freeze new DRange()
+  for p in P
+    validate.urange_segment p unless p instanceof Segment
+    R.add p...
+  return @_drange_as_arange R
+
+#-----------------------------------------------------------------------------------------------------------
+@union = ( me, other ) ->
+  me = Arange.from me unless me instanceof Arange
+  validate.urange_segment other unless other instanceof Arange
+  R = new DRange()
+  R = R.add segment... for segment in me
+  R = R.add other...
+  return @_drange_as_arange R
+
+#-----------------------------------------------------------------------------------------------------------
+@_drange_as_arange  = ( drange ) ->
+  return freeze @_sort Arange.from ( ( new Segment [ r.low, r.high, ] ) for r in drange.ranges )
+
+#-----------------------------------------------------------------------------------------------------------
+@_sort              = ( arange ) -> arange.sort ( a, b ) ->
+  return -1 if a[ 0 ] < b[ 0 ]
+  return +1 if a[ 0 ] > b[ 0 ]
+  return -1 if a[ 1 ] < b[ 1 ]
+  return +1 if a[ 1 ] > b[ 1 ]
+  return  0
+
+
+
+
+#===========================================================================================================
+# OTHER
+#-----------------------------------------------------------------------------------------------------------
+@ranges_from_drange   = ( drange ) -> ( [ r.low, r.high, ] for r in drange.ranges )
+@ranges_from_urange   = ( urange ) -> validate.urange_instance urange; return @ranges_from_drange urange.d
+@numbers_from_drange  = ( drange ) -> ( ( drange.index i ) for i in [ 0 ... drange.length ] )
+@numbers_from_urange  = ( urange ) -> validate.urange_instance urange; return @numbers_from_drange urange.d
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_subtract_ranges_DRange = ->
+  super_rng   = new DRange 1, 100
+  blue_rng    = new DRange 13
+  blue_rng    = blue_rng.add 8
+  blue_rng    = blue_rng.add 60, 80 # [8, 13, 60-80]
+  blue_rng    = blue_rng.add 81
+  blue_rng    = blue_rng.add new DRange 27, 55
+  help '^3332^', @ranges_from_drange blue_rng
+  red_rng     = super_rng.clone().subtract blue_rng
+  help '^556^', @ranges_from_drange red_rng
+  help '^556^', red_rng.length
+  info '^334^', @numbers_from_drange red_rng
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_subtract_ranges_Urange = ->
+  super_rng   = new Urange [ 1, 100, ]
+  blue_rng    = new Urange [ 13, 13, ], [ 8, 8, ], ( new Urange [ 60, 80, ] )
+  info ( CND.truth super_rng  instanceof Urange ), super_rng
+  info ( CND.truth blue_rng   instanceof Urange ), blue_rng
+  blue_rng    = blue_rng.union new Urange [ 81, 81, ]
+  blue_rng    = blue_rng.union new Urange [ 27, 55, ]
+  blue_rng    = blue_rng.union [ 27, 55, ]
+  help '^3332^', @ranges_from_urange blue_rng
+  red_rng     = ( new Urange super_rng )
+  red_rng     = red_rng.difference blue_rng
+  help '^556^', @ranges_from_urange red_rng
+  help '^556^', red_rng.length
+  info '^334^', @numbers_from_urange red_rng
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_merge_ranges = ->
+  ranges = [
+    [ 10, 20, ]
+    [ 15, 30, ]
+    [ 30, 32, ]
+    [ 42, 42, ]
+    [ 88, 99, ]
+    ]
+  a = merge_ranges ranges
+  b = @ranges_from_urange new Urange ranges...
+  info 'merging:', a
+  info 'merging:', b
+  validate.true CND.equals a, b
+
+# #-----------------------------------------------------------------------------------------------------------
+# module.exports = { Urange, }
+
+############################################################################################################
+if module is require.main then do =>
+  await @demo_subtract_ranges_DRange()
+  await @demo_subtract_ranges_Urange()
+  await @demo_merge_ranges()
+
+
+
