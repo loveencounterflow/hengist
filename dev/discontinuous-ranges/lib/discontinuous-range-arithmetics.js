@@ -225,7 +225,7 @@
         drange = segments;
       } else if (segments instanceof Arange) {
         drange = segments._drange;
-      } else {
+      } else if (Array.isArray(segments)) {
         drange = new DRange();
         if (segments.length === 1 && isa.generator(segments[0])) {
           segments = [...segments[0]];
@@ -237,6 +237,8 @@
           }
           drange.add(...segment);
         }
+      } else {
+        throw new Error(`^445^ unable to instantiate from a ${type_of(segments)} (${rpr(segments)})`);
       }
       //.......................................................................................................
       MAIN._apply_segments_from_drange(this, drange);
@@ -277,20 +279,30 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.union = function(me, other) {
-    var drange, j, len, segment;
+  this.union = function(me, ...others) {
+    var drange, j, k, l, len, len1, len2, other, segment;
     if (!(me instanceof Arange)) {
       me = new Arange(me);
-    }
-    if (!(other instanceof Segment)) {
-      other = new Segment(other);
     }
     drange = me._drange;
     for (j = 0, len = me.length; j < len; j++) {
       segment = me[j];
       drange = drange.add(...segment);
     }
-    drange = drange.add(...other);
+    for (k = 0, len1 = others.length; k < len1; k++) {
+      other = others[k];
+      if (other instanceof Arange) {
+        for (l = 0, len2 = other.length; l < len2; l++) {
+          segment = other[l];
+          drange = drange.add(...segment);
+        }
+      } else {
+        if (!(other instanceof Segment)) {
+          other = new Segment(other);
+        }
+        drange = drange.add(...other);
+      }
+    }
     return new Arange(drange);
   };
 

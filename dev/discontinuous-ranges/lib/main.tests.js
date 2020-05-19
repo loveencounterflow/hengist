@@ -37,6 +37,76 @@
   //===========================================================================================================
   // TESTS
   //-----------------------------------------------------------------------------------------------------------
+  this["new DRA.Arange"] = async function(T, done) {
+    var DRA, error, i, len, matcher, probe, probes_and_matchers;
+    DRA = require('./discontinuous-range-arithmetics');
+    probes_and_matchers = [
+      [null,
+      null,
+      "unable to instantiate from a null"],
+      [42,
+      null,
+      "unable to instantiate from a number"],
+      [[42],
+      null,
+      "must be a list"],
+      [[[42]],
+      null,
+      "length must be 2"],
+      [[[20,
+      10]],
+      null,
+      "lo boundary must be less than or equal to hi boundary"],
+      [[[2e308,
+      20]],
+      null,
+      "lo boundary must be less than or equal to hi boundary"],
+      [
+        (function*() {
+          var i,
+        len,
+        ref,
+        results,
+        x;
+          ref = [[5, 6], [7, 8]];
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            x = ref[i];
+            results.push((yield x));
+          }
+          return results;
+        })(),
+        null,
+        "unable to instantiate from a generator"
+      ],
+      [[[-2e308,
+      20]],
+      [[-2e308,
+      20]]],
+      [[],
+      []],
+      [[[10,
+      20]],
+      [[10,
+      20]]]
+    ];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          var result;
+          result = new DRA.Arange(probe);
+          T.ok(Object.isFrozen(result));
+          return resolve(result);
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DRA.arange_from_segments"] = async function(T, done) {
     var DRA, error, i, len, matcher, probe, probes_and_matchers;
     DRA = require('./discontinuous-range-arithmetics');
@@ -258,7 +328,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["union"] = async function(T, done) {
+  this["union with single segment"] = async function(T, done) {
     var DRA, error, i, len, matcher, probe, probes_and_matchers;
     DRA = require('./discontinuous-range-arithmetics');
     probes_and_matchers = [[[[10, 20], [1, 1]], [[1, 1], [10, 20]]], [[[10, 20], [1, 1], [5, 5], [18, 24]], [[1, 1], [5, 5], [10, 24]]], [[[100, 2e308], [80, 90]], [[80, 90], [100, 2e308]]], [[[100, 2e308], [80, 100]], [[80, 2e308]]]];
@@ -291,6 +361,59 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["union with multiple segments"] = async function(T, done) {
+    var DRA, error, i, len, matcher, probe, probes_and_matchers;
+    DRA = require('./discontinuous-range-arithmetics');
+    probes_and_matchers = [[[[], [[1, 1], [-3, -1]]], [[-3, -1], [1, 1]]], [[[], [[1, 1], [-3, 3]]], [[-3, 3]]]];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          var first, result, segments;
+          [first, segments] = probe;
+          result = new DRA.Arange(first);
+          result = DRA.union(result, ...segments);
+          return resolve(result);
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["union with Arange"] = async function(T, done) {
+    var DRA, error, i, len, matcher, probe, probes_and_matchers;
+    DRA = require('./discontinuous-range-arithmetics');
+    probes_and_matchers = [[[[], [[1, 1], [-3, -1]]], [[-3, -1], [1, 1]]], [[[], [[1, 1], [-3, 3]]], [[-3, 3]]]];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          var first, range, ranges, result;
+          [first, ranges] = probe;
+          result = new DRA.Arange(first);
+          ranges = (function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = ranges.length; j < len1; j++) {
+              range = ranges[j];
+              results.push(new DRA.Arange([range]));
+            }
+            return results;
+          })();
+          result = DRA.union(result, ...ranges);
+          return resolve(result);
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_1 = function() {
     var DRA;
     DRA = require('./discontinuous-range-arithmetics');
@@ -312,6 +435,9 @@
 // test @[ "DRA.Segment.from" ]
 // test @[ "DRA.Arange.from" ]
 // test @[ "DRA.segment_from_lohi" ]
-// test @[ "union" ]
+// test @[ "union with single segment" ]
+// test @[ "new DRA.Arange" ]
+// test @[ "union with multiple segments" ]
+// test @[ "union with Arange" ]
 
 }).call(this);
