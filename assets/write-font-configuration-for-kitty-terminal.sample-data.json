@@ -1,0 +1,15 @@
+[
+{ "first_cid":32,   	"last_cid":1114111,	"styletag": "+style:ming", "fontnick":"sunexta"          	},
+{ "first_cid":9632, 	"last_cid":9727,   	"styletag": "+style:ming", "fontnick":"babelstonehan"    	},
+{ "first_cid":880,  	"last_cid":1023,   	"styletag": "+style:ming", "fontnick":"babelstonehan"    	},
+{ "first_cid":7936, 	"last_cid":8191,   	"styletag": "+style:ming", "fontnick":"hanaminaotf"      	},
+{ "first_cid":12592,	"last_cid":12687,  	"styletag": "+style:ming", "fontnick":"hanaminbotf"      	},
+{ "first_cid":4352, 	"last_cid":4607,   	"styletag": "+style:ming", "fontnick":"ipamp"            	},
+{ "first_cid":43360,	"last_cid":43391,  	"styletag": "+style:ming", "fontnick":"ipamp"            	},
+{ "first_cid":55216,	"last_cid":55295,  	"styletag": "+style:ming", "fontnick":"jizurathreeb"     	},
+{ "first_cid":44032,	"last_cid":55215,  	"styletag": "+style:ming", "fontnick":"lmromantenregular"	},
+{ "first_cid":592,  	"last_cid":687,    	"styletag": "+style:ming", "fontnick":"lmromantenregular"	},
+{ "first_cid":0,    	"last_cid":127,    	"styletag": "+style:ming", "fontnick":"lmromantenregular"	},
+{ "first_cid":128,  	"last_cid":255,    	"styletag": "+style:ming", "fontnick":"lmromantenregular"	},
+{ "first_cid":256,  	"last_cid":383,    	"styletag": "+style:ming", "fontnick":"lmromantenregular"	}
+]
