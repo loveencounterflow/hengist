@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var Arange, CND, DRange, LFT, PATH, Segment, Urange, alert, badge, cast, debug, declare, echo, freeze, help, hex, info, isa, log, merge_ranges, rpr, type_of, urge, validate, warn, whisper;
+  var Arange, CND, DRange, LFT, MAIN, PATH, Segment, Urange, alert, badge, cast, debug, declare, echo, freeze, help, hex, info, isa, log, merge_ranges, rpr, type_of, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -49,6 +49,8 @@
   //   freeze }                = LFT
   freeze = Object.freeze;
 
+  MAIN = this;
+
   //===========================================================================================================
   // TYPES
   //-----------------------------------------------------------------------------------------------------------
@@ -72,7 +74,7 @@
       "lo boundary must be an infnumber": function(x) {
         return isa.infnumber(x[0]);
       },
-      "lo boundary must be an infnumber": function(x) {
+      "hi boundary must be an infnumber": function(x) {
         return isa.infnumber(x[1]);
       },
       "lo boundary must be less than or equal to hi boundary": function(x) {
@@ -173,8 +175,9 @@
       return this[1] - this[0] + 1;
     }
 
-    static from(...P) {
-      return new Segment(...P);
+    // @from:    ( P...  ) -> new Segment P...
+    static from() {
+      throw new Error("^778^ `Segment.from()` is not implemented");
     }
 
   };
@@ -182,8 +185,9 @@
   //-----------------------------------------------------------------------------------------------------------
   Arange = class Arange extends Array {
     //---------------------------------------------------------------------------------------------------------
-    constructor(...P) {
-      super(...P);
+    constructor(segments) {
+      var drange, j, len, segment;
+      super();
       Object.defineProperty(this, 'size', {
         get: this._size_of
       });
@@ -211,8 +215,32 @@
           return (ref = this[this.length - 1]) != null ? ref : null;
         }
       });
-      // return freeze @
-      return this;
+      Object.defineProperty(this, '_drange', {
+        get: function() {
+          return drange;
+        }
+      });
+      //.......................................................................................................
+      if (segments instanceof DRange) {
+        drange = segments;
+      } else if (segments instanceof Arange) {
+        drange = segments._drange;
+      } else {
+        drange = new DRange();
+        if (segments.length === 1 && isa.generator(segments[0])) {
+          segments = [...segments[0]];
+        }
+        for (j = 0, len = segments.length; j < len; j++) {
+          segment = segments[j];
+          if (!(segment instanceof Segment)) {
+            validate.urange_segment(segment);
+          }
+          drange.add(...segment);
+        }
+      }
+      //.......................................................................................................
+      MAIN._apply_segments_from_drange(this, drange);
+      return freeze(this);
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -222,8 +250,13 @@
       }), 0);
     }
 
+    static from() {
+      throw new Error("^776^ `Arange.from()` is not implemented");
+    }
+
   };
 
+  // @from:  -> ( P...  ) -> MAIN.arange_from_segments P...
   // @from:    ( P...  ) -> new Arange P...
 
   // npm install @scotttrinh/number-ranges
@@ -235,61 +268,35 @@
   this.Segment = Segment;
 
   //-----------------------------------------------------------------------------------------------------------
-  this.new_segment = function(lo, hi) {
-    return new Segment(lo, hi);
+  this.segment_from_lohi = function(lo, hi) {
+    return new Segment(hi != null ? [lo, hi] : [lo]);
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.new_arange = function(...P) {
-    var R, j, len, p;
-    R = new DRange();
-    if (P.length === 1 && isa.generator(P[0])) {
-      // R = ( require 'letsfreezethat' ).freeze new DRange()
-      P = [...P[0]];
-    }
-// debug '^675^', P
-    for (j = 0, len = P.length; j < len; j++) {
-      p = P[j];
-      if (!(p instanceof Segment)) {
-        validate.urange_segment(p);
-      }
-      R.add(...p);
-    }
-    return this._drange_as_arange(R);
+  this.arange_from_segments = function(...segments) {
+    return new Arange(segments);
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.union = function(me, other) {
-    var R, j, len, segment;
+    var drange, j, len, segment;
     if (!(me instanceof Arange)) {
-      me = Arange.from(me);
+      me = new Arange(me);
     }
-    if (!(other instanceof Arange)) {
-      validate.urange_segment(other);
+    if (!(other instanceof Segment)) {
+      other = new Segment(other);
     }
-    R = new DRange();
+    drange = me._drange;
     for (j = 0, len = me.length; j < len; j++) {
       segment = me[j];
-      R = R.add(...segment);
+      drange = drange.add(...segment);
     }
-    R = R.add(...other);
-    return this._drange_as_arange(R);
+    drange = drange.add(...other);
+    return new Arange(drange);
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this._drange_as_arange = function(drange) {
-    var r;
-    return freeze(this._sort(Arange.from((function() {
-      var j, len, ref, results;
-      ref = drange.ranges;
-      results = [];
-      for (j = 0, len = ref.length; j < len; j++) {
-        r = ref[j];
-        results.push(new Segment([r.low, r.high]));
-      }
-      return results;
-    })())));
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // @_drange_as_arange  = ( drange ) ->
+  //   return freeze @_sort Arange.from ( ( new Segment [ r.low, r.high, ] ) for r in drange.ranges )
 
   //-----------------------------------------------------------------------------------------------------------
   this._sort = function(arange) {
@@ -308,6 +315,27 @@
       }
       return 0;
     });
+  };
+
+  //---------------------------------------------------------------------------------------------------------
+  this._apply_segments_from_drange = function(me, drange) {
+    var j, len, r, segment, segments;
+    segments = MAIN._sort((function() {
+      var j, len, ref, results;
+      ref = drange.ranges;
+      results = [];
+      for (j = 0, len = ref.length; j < len; j++) {
+        r = ref[j];
+        results.push(new Segment([r.low, r.high]));
+      }
+      return results;
+    })());
+/* TAINT use `splice()` */
+    for (j = 0, len = segments.length; j < len; j++) {
+      segment = segments[j];
+      me.push(segment);
+    }
+    return me;
   };
 
   //===========================================================================================================
