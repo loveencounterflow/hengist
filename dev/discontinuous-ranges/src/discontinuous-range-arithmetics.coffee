@@ -150,6 +150,13 @@ class Interlap  extends Array
 @interlap_from_segments   = ( segments... ) -> new Interlap segments
 
 #-----------------------------------------------------------------------------------------------------------
+@as_list = ( me ) ->
+  switch ( type = type_of me )
+    when 'segment'  then return [ me..., ]
+    when 'interlap' then return ( [ s..., ] for s in me )
+  throw new Error "^3445^ expected a segment or an interlap, got a #{type}"
+
+#-----------------------------------------------------------------------------------------------------------
 @union = ( me, others... ) ->
   me      = new Interlap me unless me instanceof Interlap
   drange  = me._drange
