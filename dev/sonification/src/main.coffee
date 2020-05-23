@@ -23,5 +23,12 @@ echo                      = CND.echo.bind CND
   playAlert('purr')
   playAlert.volume(1.5)
 
-
+###
+https://github.com/mastilver/linux-vol/blob/master/index.js
+https://github.com/TooTallNate/node-lame
+https://github.com/TooTallNate/node-speaker
+https://github.com/shime/play-sound
+https://github.com/TooTallNate/node-lame
+https://sonic-pi.net/
 pactl list sinks | grep 'Volume: f' | sed -E 's/^.*\s([0-9]+)%.*$/\1/g'
+###
