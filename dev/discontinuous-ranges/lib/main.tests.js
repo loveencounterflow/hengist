@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, alert, badge, debug, demo_1, echo, help, info, jr, log, rpr, test, types, urge, warn, whisper;
+  var CND, alert, badge, debug, demo_1, demo_equality_between_custom_and_basic_values, echo, equals, help, info, isa, jr, log, rpr, test, type_of, types, urge, warn, whisper;
 
   // coffeelint: disable=max_line_length
 
@@ -11,8 +11,6 @@
 
   rpr = CND.rpr;
 
-  // types                     = new ( require 'intertype' ).Intertype()
-  // console.log rpr types.all_keys_of CND
   log = CND.get_logger('plain', badge);
 
   info = CND.get_logger('info', badge);
@@ -38,6 +36,8 @@
 
   types = new (require('intertype')).Intertype();
 
+  ({equals, isa, type_of} = types.export());
+
   //===========================================================================================================
   // TESTS
   //-----------------------------------------------------------------------------------------------------------
@@ -50,7 +50,7 @@
       "unable to instantiate from a null"],
       [42,
       null,
-      "unable to instantiate from a number"],
+      "unable to instantiate from a float"],
       [[42],
       null,
       "must be a list"],
@@ -101,7 +101,7 @@
           var result;
           result = new DRA.Interlap(probe);
           T.ok(Object.isFrozen(result));
-          return resolve(result);
+          return resolve(DRA.as_list(result));
         });
       });
     }
@@ -166,7 +166,7 @@
           var result;
           result = DRA.interlap_from_segments(probe);
           T.ok(Object.isFrozen(result));
-          return resolve(result);
+          return resolve(DRA.as_list(result));
         });
       });
     }
@@ -258,7 +258,7 @@
           T.ok(result instanceof DRA.Segment);
           T.eq(result.lo, result[0]);
           T.eq(result.hi, result[1]);
-          return resolve(result);
+          return resolve(DRA.as_list(result));
         });
       });
     }
@@ -302,7 +302,7 @@
           T.ok(result instanceof DRA.Segment);
           T.eq(result.lo, result[0]);
           T.eq(result.hi, result[1]);
-          return resolve(result);
+          return resolve(DRA.as_list(result));
         });
       });
     }
@@ -352,10 +352,10 @@
             next_result = DRA.union(result, segment);
             T.ok(Object.isFrozen(next_result));
             T.ok(next_result instanceof DRA.Interlap);
-            T.ok(!CND.equals(result, next_result));
+            T.ok(!equals(result, next_result));
             result = next_result;
           }
-          return resolve(result);
+          return resolve(DRA.as_list(result));
         });
       });
     }
@@ -377,7 +377,7 @@
           [first, segments] = probe;
           result = new DRA.Interlap(first);
           result = DRA.union(result, ...segments);
-          return resolve(result);
+          return resolve(DRA.as_list(result));
         });
       });
     }
@@ -408,12 +408,51 @@
             return results;
           })();
           result = DRA.union(result, ...ranges);
-          return resolve(result);
+          return resolve(DRA.as_list(result));
         });
       });
     }
     //.........................................................................................................
     done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_equality_between_custom_and_basic_values = function() {
+    var DRA, d, d0, d1, d1_list;
+    DRA = require('./discontinuous-range-arithmetics');
+    d0 = [[110, 115], [112, 120], [300, 310]];
+    d1 = new DRA.Interlap(d0);
+    d1_list = [[110, 120], [300, 310]];
+    info(d0);
+    info(d1_list);
+    info(d0 === d1);
+    info(equals(d0, d1));
+    info(equals(d1, d1_list));
+    info(d1);
+    info([...d1]);
+    info((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = d1.length; i < len; i++) {
+        d = d1[i];
+        results.push([...d]);
+      }
+      return results;
+    })());
+    info(equals((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = d1.length; i < len; i++) {
+        d = d1[i];
+        results.push([...d]);
+      }
+      return results;
+    })(), d1_list));
+    info(type_of(d0));
+    info(type_of(d1));
+    info(type_of(d1_list));
+    info(equals(DRA.as_list(d1), d1_list));
     return null;
   };
 
@@ -424,13 +463,10 @@
     d0 = [[1, 3], [5, 7]];
     info(d1 = new DRA.Interlap(d0));
     info(d2 = DRA.interlap_from_segments(...d0));
-    info(CND.equals(d1, d2));
-    info(CND.type_of(d1));
-    info(types.type_of(d1));
-    info(typeof d1);
-    info(Object.prototype.toString.call(d1));
-    info(CND.equals(d1, d0));
-    info(CND.equals(d1.size, d0.size));
+    info(equals(d1, d2));
+    info(type_of(d1));
+    info(equals(d1, d0));
+    info(equals(d1.size, d0.size));
     info(d0.size);
     info(d1.size);
     // class Xxxx
@@ -445,12 +481,13 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return demo_1();
+      // demo_1()
+      // demo_equality_between_custom_and_basic_values()
+      return test(this);
     })();
   }
 
-  // test @
-// test @[ "DRA.interlap_from_segments" ]
+  // test @[ "DRA.interlap_from_segments" ]
 // test @[ "DRA.Interlap properties" ]
 // test @[ "DRA.new_segment" ]
 // test @[ "DRA.Segment.from" ]

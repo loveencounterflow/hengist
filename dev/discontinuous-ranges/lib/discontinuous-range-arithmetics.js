@@ -279,6 +279,26 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.as_list = function(me) {
+    var s, type;
+    switch ((type = type_of(me))) {
+      case 'segment':
+        return [...me];
+      case 'interlap':
+        return (function() {
+          var j, len, results;
+          results = [];
+          for (j = 0, len = me.length; j < len; j++) {
+            s = me[j];
+            results.push([...s]);
+          }
+          return results;
+        })();
+    }
+    throw new Error(`^3445^ expected a segment or an interlap, got a ${type}`);
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.union = function(me, ...others) {
     var drange, j, k, l, len, len1, len2, other, segment;
     if (!(me instanceof Interlap)) {
