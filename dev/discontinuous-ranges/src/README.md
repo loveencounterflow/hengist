@@ -26,6 +26,18 @@
 	* in segments of `Interlap` instances it always suffices to compare segments for inequality of their
 		lower bounds
 
+* Discontinuous ranges are expresed by `Interlap` instances ('interlaps')
+* that contain `Segment` instances
+* they are basically just lists (`Array` instances) but
+  * validated (segments must be pairs of numbers and so on) and
+  * frozen (so validity itself becomes invariant as long as identity holds)
+* therefore
+  * we can always turn interlaps into lists, and/but
+  * we can turn *some* suitably shaped lists into interlaps
+  * therefore, although interlaps look like lists and quack like lists, they are not just lists
+  * hence, `equals my_list, my_interlap` must always be `false`
+  * at best, `equals ( as_list my_interlap ), my_list` can hold
+
 ## Coding Principles
 
 * Classes, instances are largely 'passive'
