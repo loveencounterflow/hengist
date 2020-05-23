@@ -314,12 +314,14 @@
   this._sort = function(interlap) {
     return interlap.sort(function(a, b) {
       if (a[0] < b[0]) {
+        /* NOTE correct but only the first two terms are ever needed */
         return -1;
       }
       if (a[0] > b[0]) {
         return +1;
       }
       if (a[1] < b[1]) {
+        /* could raise an internal error if we get here since the above two comparsions must always suffice */
         return -1;
       }
       if (a[1] > b[1]) {

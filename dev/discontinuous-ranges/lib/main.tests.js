@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, alert, badge, debug, demo_1, echo, help, info, jr, log, rpr, test, urge, warn, whisper;
+  var CND, alert, badge, debug, demo_1, echo, help, info, jr, log, rpr, test, types, urge, warn, whisper;
 
   // coffeelint: disable=max_line_length
 
@@ -11,6 +11,8 @@
 
   rpr = CND.rpr;
 
+  // types                     = new ( require 'intertype' ).Intertype()
+  // console.log rpr types.all_keys_of CND
   log = CND.get_logger('plain', badge);
 
   info = CND.get_logger('info', badge);
@@ -33,6 +35,8 @@
 
   //...........................................................................................................
   test = require('guy-test');
+
+  types = new (require('intertype')).Intertype();
 
   //===========================================================================================================
   // TESTS
@@ -415,21 +419,38 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_1 = function() {
-    var DRA;
+    var DRA, d0, d1, d2;
     DRA = require('./discontinuous-range-arithmetics');
-    info(new DRA.Interlap([[1, 3], [5, 7]]));
-    return info(DRA.interlap_from_segments([1, 3], [5, 7]));
+    d0 = [[1, 3], [5, 7]];
+    info(d1 = new DRA.Interlap(d0));
+    info(d2 = DRA.interlap_from_segments(...d0));
+    info(CND.equals(d1, d2));
+    info(CND.type_of(d1));
+    info(types.type_of(d1));
+    info(typeof d1);
+    info(Object.prototype.toString.call(d1));
+    info(CND.equals(d1, d0));
+    info(CND.equals(d1.size, d0.size));
+    info(d0.size);
+    info(d1.size);
+    // class Xxxx
+    // xxxx = new Xxxx()
+    // info CND.type_of           xxxx
+    // info types.type_of         xxxx
+    // info typeof                xxxx
+    // info Object::toString.call xxxx
+    return null;
   };
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // demo_1()
-      return test(this);
+      return demo_1();
     })();
   }
 
-  // test @[ "DRA.interlap_from_segments" ]
+  // test @
+// test @[ "DRA.interlap_from_segments" ]
 // test @[ "DRA.Interlap properties" ]
 // test @[ "DRA.new_segment" ]
 // test @[ "DRA.Segment.from" ]
