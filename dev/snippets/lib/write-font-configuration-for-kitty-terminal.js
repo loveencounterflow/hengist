@@ -109,12 +109,12 @@
 
    */
   'use strict';
-  var CND, Orange, PATH, S, alert, badge, debug, echo, help, hex, info, log, rpr, urge, warn, whisper;
+  var CND, LAP, PATH, S, alert, badge, debug, echo, help, hex, info, log, rpr, to_width, type_of, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
 
-  badge = 'WRITE-FONT-CONFIGURATION-FOR-KITTY-TERMINAL';
+  badge = 'kittyfonts';
 
   rpr = CND.rpr;
 
@@ -143,7 +143,16 @@
     return (n.toString(16)).toUpperCase().padStart(4, '0');
   };
 
-  ({Orange} = require('./discontinuous-range-arithmetics'));
+  LAP = require('../../../apps/interlap');
+
+  ({type_of, validate} = LAP.types.export());
+
+  to_width = function(text, width) {
+    /* TAINT use `to_width` module */
+    validate.text(text);
+    validate.positive_integer(width);
+    return text.slice(0, +width + 1 || 9e9).padEnd(width, ' ');
+  };
 
   //===========================================================================================================
   // PERTAINING TO SPECIFIC SETTINGS / FONT CHOICES
@@ -230,7 +239,7 @@
     ocrs = this._read_overlapping_cid_ranges(settings);
     R = settings.disjunct_cid_ranges = [];
     org_by_fontnicks = {};
-    runner = new Orange(); // R: DisJunct Cid RangeS
+    runner = new Orange();
     for (top_idx = i = ref = ocrs.length - 1; i >= 0; top_idx = i += -1) {
       ocr = ocrs[top_idx];
       dcr = (new Orange([ocr.first_cid, ocr.last_cid])).subtract(runner);
@@ -256,28 +265,17 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      var f, pseudo_css_configuration;
+      var chr_from_cid, disjunct, disjunct_txt, disjuncts, fontnick, fontnick_txt, i, idx, interlap_as_text, j, k, lap, lap_txt, len, len1, overlapping_laps_from_pseudo_css, overlaps, pseudo_css_configuration, ref, runner, runners, segment_as_text, x;
       // await @write_font_configuration_for_kitty_terminal S
       // await @_read_disjunct_cid_ranges S
       // settings =
-      pseudo_css_configuration = {
-        font1: '[B-H] [J] [L] [N-X]          ',
-        font2: '[B-D]                        ',
-        font3: '[G-I]                        ',
-        font4: '[M-Q]                        ',
-        font5: '[M] [O-T]                    ',
-        font6: '[M] [U] [X-Y]                '
-      };
+      pseudo_css_configuration = [['font1', '[B-H] [J] [L] [N-X]          '], ['font2', '[B-D]                        '], ['font3', '[G-I]                        '], ['font4', '[M-Q]                        '], ['font5', '[M] [O-T]                    '], ['font6', '[M] [U] [X-Y]                ']];
       //-----------------------------------------------------------------------------------------------------------
-      f = function(pseudo_css) {
-        /*
-        {"first_cid":8597,"last_cid":8597,"styletag":"+style:ming","fontnick":"jizurathreeb","glyphstyle":"glyph: ''"}
-        */
-        var R, first_chr, first_cid, fontnick, i, last_chr, last_cid, len, match, matches, range_endpoint, range_endpoints, range_literal, range_literals, ranges_txt, ref, styletag;
+      overlapping_laps_from_pseudo_css = function(pseudo_css) {
+        var R, first_chr, fontnick, hi, i, j, lap, last_chr, len, len1, lo, match, matches, range_endpoint, range_endpoints, range_literal, range_literals, ranges_txt, ref, segments;
         R = [];
-        styletag = 'style:ming';
-        for (fontnick in pseudo_css) {
-          ranges_txt = pseudo_css[fontnick];
+        for (i = 0, len = pseudo_css.length; i < len; i++) {
+          [fontnick, ranges_txt] = pseudo_css[i];
           matches = ranges_txt.matchAll(/\[(?<range_literal>[^\]]+)\]/g);
           range_literals = (function() {
             var results;
@@ -288,26 +286,87 @@
             return results;
           })();
           range_endpoints = (function() {
-            var i, len, results;
+            var j, len1, results;
             results = [];
-            for (i = 0, len = range_literals.length; i < len; i++) {
-              range_literal = range_literals[i];
+            for (j = 0, len1 = range_literals.length; j < len1; j++) {
+              range_literal = range_literals[j];
               results.push(range_literal.trim().split(/\s*-\s*/));
             }
             return results;
           })();
-          for (i = 0, len = range_endpoints.length; i < len; i++) {
-            range_endpoint = range_endpoints[i];
+          segments = [];
+          for (j = 0, len1 = range_endpoints.length; j < len1; j++) {
+            range_endpoint = range_endpoints[j];
             first_chr = range_endpoint[0];
             last_chr = (ref = range_endpoint[1]) != null ? ref : first_chr;
-            first_cid = first_chr.codePointAt(0);
-            last_cid = last_chr.codePointAt(0);
-            debug({first_cid, last_cid, styletag, fontnick});
+            lo = first_chr.codePointAt(0);
+            hi = last_chr.codePointAt(0);
+            segments.push([lo, hi]);
           }
+          lap = new LAP.Interlap(segments);
+          R.push([fontnick, lap]);
         }
         return R;
       };
-      return f(pseudo_css_configuration);
+      //.........................................................................................................
+      chr_from_cid = function(cid) {
+        return String.fromCodePoint(cid);
+      };
+      //.........................................................................................................
+      segment_as_text = function(segment) {
+        validate.segment(segment);
+        if (segment.lo === segment.hi) {
+          return `[${chr_from_cid(segment.lo)}]`;
+        }
+        return `[${chr_from_cid(segment.lo)}-${chr_from_cid(segment.hi)}]`;
+      };
+      //.........................................................................................................
+      interlap_as_text = function(interlap) {
+        var s;
+        validate.interlap(interlap);
+        return ((function() {
+          var i, len, results;
+          results = [];
+          for (i = 0, len = interlap.length; i < len; i++) {
+            s = interlap[i];
+            results.push(segment_as_text(s));
+          }
+          return results;
+        })()).join(' ');
+      };
+      //.........................................................................................................
+      overlaps = overlapping_laps_from_pseudo_css(pseudo_css_configuration);
+      for (x of overlaps) {
+        [fontnick, lap] = x;
+        fontnick_txt = to_width(fontnick, 20);
+        lap_txt = to_width(interlap_as_text(lap), 35);
+        info(CND.lime(fontnick_txt), CND.gold(lap_txt));
+      }
+      //.........................................................................................................
+      info();
+      runner = new LAP.Interlap();
+      disjuncts = [];
+      runners = [];
+      for (idx = i = ref = overlaps.length - 1; i >= 0; idx = i += -1) {
+        [fontnick, lap] = overlaps[idx];
+        runner = LAP.union(runner, lap);
+        disjunct = LAP.difference(lap, runner);
+        disjuncts.unshift(disjunct);
+        runners.unshift(runner);
+      }
+      for (j = 0, len = runners.length; j < len; j++) {
+        runner = runners[j];
+        info(CND.yellow(interlap_as_text(runner)));
+      }
+      for (idx = k = 0, len1 = overlaps.length; k < len1; idx = ++k) {
+        [fontnick, lap] = overlaps[idx];
+        disjunct = disjuncts[idx];
+        fontnick_txt = to_width(fontnick, 20);
+        lap_txt = to_width(interlap_as_text(lap), 35);
+        disjunct_txt = to_width(interlap_as_text(disjunct), 35);
+        info(CND.lime(fontnick_txt), CND.gold(lap_txt), CND.blue(disjunct_txt));
+      }
+      return null;
     })();
   }
 
