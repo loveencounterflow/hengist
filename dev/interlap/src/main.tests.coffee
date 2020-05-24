@@ -1,10 +1,10 @@
 
 'use strict'
-# coffeelint: disable=max_line_length
+
 
 ############################################################################################################
 CND                       = require 'cnd'
-badge                     = 'DISCONTINUOUS-RANGES/TESTS'
+badge                     = 'InterLap/tests'
 rpr                       = CND.rpr
 log                       = CND.get_logger 'plain',     badge
 info                      = CND.get_logger 'info',      badge
