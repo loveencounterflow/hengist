@@ -126,7 +126,7 @@ References:
 
 ############################################################################################################
 CND                       = require 'cnd'
-badge                     = 'WRITE-FONT-CONFIGURATION-FOR-KITTY-TERMINAL'
+badge                     = 'kittyfonts'
 rpr                       = CND.rpr
 log                       = CND.get_logger 'plain',     badge
 info                      = CND.get_logger 'info',      badge
@@ -140,8 +140,15 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 PATH                      = require 'path'
 hex                       = ( n ) -> ( n.toString 16 ).toUpperCase().padStart 4, '0'
-{ Orange, }               = require './discontinuous-range-arithmetics'
+LAP                       = require '../../../apps/interlap'
+{ type_of
+  validate }              = LAP.types.export()
 
+to_width = ( text, width ) ->
+  ### TAINT use `to_width` module ###
+  validate.text text
+  validate.positive_integer width
+  return text[ .. width ].padEnd width, ' '
 
 #===========================================================================================================
 # PERTAINING TO SPECIFIC SETTINGS / FONT CHOICES
@@ -207,7 +214,7 @@ S =
   ocrs              = @_read_overlapping_cid_ranges settings
   R                 = settings.disjunct_cid_ranges = []
   org_by_fontnicks  = {}
-  runner            = new Orange() # R: DisJunct Cid RangeS
+  runner            = new Orange()
   for top_idx in [ ocrs.length - 1 .. 0 ] by -1
     ocr     = ocrs[ top_idx ]
     dcr     = ( new Orange [ ocr.first_cid, ocr.last_cid, ] ).subtract runner
@@ -233,33 +240,74 @@ if module is require.main then do =>
 
 
 
-  pseudo_css_configuration =
-    font1:  '[B-H] [J] [L] [N-X]          '
-    font2:  '[B-D]                        '
-    font3:  '[G-I]                        '
-    font4:  '[M-Q]                        '
-    font5:  '[M] [O-T]                    '
-    font6:  '[M] [U] [X-Y]                '
+  pseudo_css_configuration = [
+    [ 'font1', '[B-H] [J] [L] [N-X]          ', ]
+    [ 'font2', '[B-D]                        ', ]
+    [ 'font3', '[G-I]                        ', ]
+    [ 'font4', '[M-Q]                        ', ]
+    [ 'font5', '[M] [O-T]                    ', ]
+    [ 'font6', '[M] [U] [X-Y]                ', ]
+    ]
 
   #-----------------------------------------------------------------------------------------------------------
-  f = ( pseudo_css ) ->
-    ###
-    {"first_cid":8597,"last_cid":8597,"styletag":"+style:ming","fontnick":"jizurathreeb","glyphstyle":"glyph: ''"}
-    ###
-    R         = []
-    styletag  = 'style:ming'
-    for fontnick, ranges_txt of pseudo_css
+  overlapping_laps_from_pseudo_css = ( pseudo_css ) ->
+    R = []
+    for [ fontnick, ranges_txt, ] in pseudo_css
       matches         = ranges_txt.matchAll /// \[ (?<range_literal> [^ \] ]+ ) \]///g
       range_literals  = ( match.groups.range_literal for match from matches )
       range_endpoints = ( range_literal.trim().split /\s*-\s*/ for range_literal in range_literals )
+      segments        = []
       for range_endpoint in range_endpoints
         first_chr = range_endpoint[ 0 ]
         last_chr  = range_endpoint[ 1 ] ? first_chr
-        first_cid = first_chr.codePointAt 0
-        last_cid  = last_chr.codePointAt  0
-        debug { first_cid, last_cid, styletag, fontnick, }
+        lo        = first_chr.codePointAt 0
+        hi        = last_chr.codePointAt  0
+        segments.push [ lo, hi, ]
+      lap = new LAP.Interlap segments
+      R.push [ fontnick, lap, ]
     return R
-  f pseudo_css_configuration
+
+  #.........................................................................................................
+  chr_from_cid = ( cid ) -> String.fromCodePoint cid
+
+  #.........................................................................................................
+  segment_as_text = ( segment ) ->
+    validate.segment segment
+    return "[#{chr_from_cid segment.lo}]" if segment.lo is segment.hi
+    return "[#{chr_from_cid segment.lo}-#{chr_from_cid segment.hi}]"
+
+  #.........................................................................................................
+  interlap_as_text = ( interlap ) ->
+    validate.interlap interlap
+    return ( segment_as_text s for s in interlap ).join ' '
+
+  #.........................................................................................................
+  overlaps = overlapping_laps_from_pseudo_css pseudo_css_configuration
+  for [ fontnick, lap, ] from overlaps
+    fontnick_txt  = to_width fontnick, 20
+    lap_txt       = to_width ( interlap_as_text lap     ), 35
+    info ( CND.lime fontnick_txt ), ( CND.gold lap_txt )
+  #.........................................................................................................
+  info()
+  runner    = new LAP.Interlap()
+  disjuncts = []
+  runners   = []
+  for idx in [ overlaps.length - 1 .. 0 ] by -1
+    [ fontnick, lap, ]  = overlaps[ idx ]
+    runner              = LAP.union       runner, lap
+    disjunct            = LAP.difference  lap, runner
+    disjuncts.unshift disjunct
+    runners.unshift runner
+  for runner in runners
+    info ( CND.yellow interlap_as_text runner )
+  for [ fontnick, lap, ], idx in overlaps
+    disjunct      = disjuncts[ idx ]
+    fontnick_txt  = to_width fontnick, 20
+    lap_txt       = to_width ( interlap_as_text lap       ), 35
+    disjunct_txt  = to_width ( interlap_as_text disjunct  ), 35
+    info ( CND.lime fontnick_txt ), ( CND.gold lap_txt ), ( CND.blue disjunct_txt )
+  return null
+
 
 
 
