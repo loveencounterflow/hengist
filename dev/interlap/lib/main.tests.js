@@ -382,12 +382,12 @@
       [probe, matcher, error] = probes_and_matchers[j];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
-          var first, hi, k, len1, lo, next_result, result, segment, segments;
+          var first, hi, l, len1, lo, next_result, result, segment, segments;
           [first, ...segments] = probe;
           result = LAP.interlap_from_segments(first);
           T.ok(Object.isFrozen(result));
-          for (k = 0, len1 = segments.length; k < len1; k++) {
-            segment = segments[k];
+          for (l = 0, len1 = segments.length; l < len1; l++) {
+            segment = segments[l];
             [lo, hi] = segment;
             segment = LAP.segment_from_lohi(lo, hi);
             T.eq(segment.lo, segment[0]);
@@ -441,10 +441,10 @@
           [first, ranges] = probe;
           result = new LAP.Interlap(first);
           ranges = (function() {
-            var k, len1, results;
+            var l, len1, results;
             results = [];
-            for (k = 0, len1 = ranges.length; k < len1; k++) {
-              range = ranges[k];
+            for (l = 0, len1 = ranges.length; l < len1; l++) {
+              range = ranges[l];
               results.push(new LAP.Interlap([range]));
             }
             return results;
@@ -676,6 +676,32 @@
     return info('^334^', numbers_from_drange(red_rng));
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["InterLap: Object methods"] = function(T, done) {
+    var CAT, Interlap, L, LAP, Segment, d0, d1, difference, k, union;
+    LAP = require('../../../apps/interlap');
+    L = LAP.export().as_list;
+    ({Interlap, Segment, union, difference} = LAP.export());
+    //.........................................................................................................
+    d0 = new Segment([1, 100]);
+    d1 = new Interlap([d0, [120, 125]]);
+    CAT = require('../../../apps/multimix/lib/cataloguing');
+    debug((function() {
+      var results;
+      results = [];
+      for (k in d0) {
+        results.push(k);
+      }
+      return results;
+    })());
+    debug(CAT.all_keys_of(d0));
+    debug(d1.join('*'));
+    // debug Array::map.call d1, ( s ) -> "{#{s.lo}|#{s.hi}}"
+    // debug d1.filter ( s ) -> false # s.lo < 100
+    // debug Array::filter.call d1, ( s ) -> s.lo < 100
+    return done();
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
@@ -685,7 +711,9 @@
     })();
   }
 
-  // test @[ "InterLap: DRange example converted" ]
+  // test @[ "InterLap: Object methods" ]
+// @[ "InterLap: Object methods" ]()
+// test @[ "InterLap: DRange example converted" ]
 // @[ "InterLap: DRange example converted" ]()
 // test @[ "Interlap differences" ]
 // test @[ "InterLap: cast to list" ]
