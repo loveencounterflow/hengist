@@ -22,40 +22,41 @@
 +style:ming,weight:900css     *                         sourcehanserifheavytaiwan
 
 # Use this font for regular weight Ming style:
-+style:ming                   *                         sunexta
+# +style:ming                   *                         sunexta
 
 # Use these fonts for specific codepoint ranges:
+# # +style:ming                   rsg:u-cjk-cmpi1           cwtexqheibold
 +style:ming                   rsg:u-cjk-cmpi1           babelstonehan
 +style:ming                   rsg:u-cjk-xd              babelstonehan
-# +style:ming                   rsg:u-cjk-sym             hanaminaotf
-# +style:ming                   rsg:u-cjk-xc              hanaminbotf
-# +style:ming                   rsg:u-cjk-hira            ipamp
-# +style:ming                   rsg:u-cjk-kata            ipamp
-# +style:ming                   rsg:jzr                   jizurathreeb
-# +style:ming                   rsg:u-cdm                 lmromantenregular
-# +style:ming                   rsg:u-cyrl                lmromantenregular
-# +style:ming                   rsg:u-cyrl-s              lmromantenregular
-# +style:ming                   rsg:u-grek                lmromantenregular
-# +style:ming                   rsg:u-latn                lmromantenregular
-# +style:ming                   rsg:u-latn-a              lmromantenregular
-# +style:ming                   rsg:u-latn-b              lmromantenregular
-# +style:ming                   rsg:u-punct               lmromantenregular
-# +style:ming                   rsg:u-latn-1              lmromantenregular
-# +style:ming                   rsg:u-hang-syl            nanummyeongjo
-# +style:ming                   rsg:u-arrow               sunexta
-# +style:ming                   rsg:u-arrow-b             sunexta
-# +style:ming                   rsg:u-boxdr               sunexta
-# +style:ming                   rsg:u-cjk-cmpf            sunexta
-# +style:ming                   rsg:u-llsym               sunexta
-# # +style:ming                   rsg:u                     sunexta
-# +style:ming                   rsg:u-cjk-strk            sunexta
-# +style:ming                   rsg:u-cjk-xa              sunexta
-# +style:ming                   rsg:u-geoms               sunexta
-# +style:ming                   rsg:u-cjk                 sunexta
-# +style:ming                   rsg:u-cjk-rad2            sunexta
-# # +style:ming                   rsg:u-cjk-xb              sunflowerucjkxb
-# +style:ming                   rsg:u-cjk-xb              thtshynptwo
-# +style:ming                   '·'                       ebgaramondtwelveregular # U+00B7 MIDDLE DOT
++style:ming                   rsg:u-cjk-sym             hanaminaotf
++style:ming                   rsg:u-cjk-xc              hanaminbotf
++style:ming                   rsg:u-cjk-hira            ipamp
++style:ming                   rsg:u-cjk-kata            ipamp
++style:ming                   rsg:jzr                   jizurathreeb
++style:ming                   rsg:u-cdm                 lmromantenregular
++style:ming                   rsg:u-cyrl                lmromantenregular
++style:ming                   rsg:u-cyrl-s              lmromantenregular
++style:ming                   rsg:u-grek                lmromantenregular
++style:ming                   rsg:u-latn                lmromantenregular
++style:ming                   rsg:u-latn-a              lmromantenregular
++style:ming                   rsg:u-latn-b              lmromantenregular
++style:ming                   rsg:u-punct               lmromantenregular
++style:ming                   rsg:u-latn-1              lmromantenregular
++style:ming                   rsg:u-hang-syl            nanummyeongjo
++style:ming                   rsg:u-arrow               sunexta
++style:ming                   rsg:u-arrow-b             sunexta
++style:ming                   rsg:u-boxdr               sunexta
++style:ming                   rsg:u-cjk-cmpf            sunexta
++style:ming                   rsg:u-llsym               sunexta
+# +style:ming                   rsg:u                     sunexta
++style:ming                   rsg:u-cjk-strk            sunexta
++style:ming                   rsg:u-cjk-xa              sunexta
++style:ming                   rsg:u-geoms               sunexta
++style:ming                   rsg:u-cjk                 sunexta
++style:ming                   rsg:u-cjk-rad2            sunexta
+# +style:ming                   rsg:u-cjk-xb              sunflowerucjkxb
++style:ming                   rsg:u-cjk-xb              thtshynptwo
++style:ming                   '·'                       ebgaramondtwelveregular # U+00B7 MIDDLE DOT
 
 # ### Arrows ###
 # +style:ming                   '⤾'                       dejavuserif
