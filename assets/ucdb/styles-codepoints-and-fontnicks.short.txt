@@ -1,0 +1,413 @@
+
+# Mappings from styles to fonts modulo codepoint ranges and individual codepoints.
+
+# The second field of each line will be turned into a CID (codepoint) range `[c1..c2]`; then, in order to
+# find the appropriate font and glyph formatting for a given styletag `tx` and codepoint `cx`, the last
+# record where both the styletag matches the one given and the codepoint is within the range given `c1 <= cx
+# <= c2` yields the fontnick and glyphstyle for that style and codepoint.
+
+# `weight:000css` denotes a [CSS Font Weight
+# Value](https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight); we're using the `css` suffix as an
+# ad-hoc unit so we can later differentiate this from the planned two-axis system (where contrast between
+# broad and thin strokes is more precisely captured).
+
+# `@default` may be used instead of a fontnick to indicate that the default font defined for that
+# style and codepoint range should be taken.
+
+# `+style:ming` and `+style:ming,weight:400css` are equivalent, can use short form:
+# +style:ming = +style:ming,weight:400css
+
+
+# Use this font for all codepoints when the style is heavy (black) Ming:
++style:ming,weight:900css     *                         sourcehanserifheavytaiwan
+
+# Use this font for regular weight Ming style:
++style:ming                   *                         sunexta
+
+# Use these fonts for specific codepoint ranges:
++style:ming                   rsg:u-cjk-cmpi1           babelstonehan
++style:ming                   rsg:u-cjk-xd              babelstonehan
+# +style:ming                   rsg:u-cjk-sym             hanaminaotf
+# +style:ming                   rsg:u-cjk-xc              hanaminbotf
+# +style:ming                   rsg:u-cjk-hira            ipamp
+# +style:ming                   rsg:u-cjk-kata            ipamp
+# +style:ming                   rsg:jzr                   jizurathreeb
+# +style:ming                   rsg:u-cdm                 lmromantenregular
+# +style:ming                   rsg:u-cyrl                lmromantenregular
+# +style:ming                   rsg:u-cyrl-s              lmromantenregular
+# +style:ming                   rsg:u-grek                lmromantenregular
+# +style:ming                   rsg:u-latn                lmromantenregular
+# +style:ming                   rsg:u-latn-a              lmromantenregular
+# +style:ming                   rsg:u-latn-b              lmromantenregular
+# +style:ming                   rsg:u-punct               lmromantenregular
+# +style:ming                   rsg:u-latn-1              lmromantenregular
+# +style:ming                   rsg:u-hang-syl            nanummyeongjo
+# +style:ming                   rsg:u-arrow               sunexta
+# +style:ming                   rsg:u-arrow-b             sunexta
+# +style:ming                   rsg:u-boxdr               sunexta
+# +style:ming                   rsg:u-cjk-cmpf            sunexta
+# +style:ming                   rsg:u-llsym               sunexta
+# # +style:ming                   rsg:u                     sunexta
+# +style:ming                   rsg:u-cjk-strk            sunexta
+# +style:ming                   rsg:u-cjk-xa              sunexta
+# +style:ming                   rsg:u-geoms               sunexta
+# +style:ming                   rsg:u-cjk                 sunexta
+# +style:ming                   rsg:u-cjk-rad2            sunexta
+# # +style:ming                   rsg:u-cjk-xb              sunflowerucjkxb
+# +style:ming                   rsg:u-cjk-xb              thtshynptwo
+# +style:ming                   '·'                       ebgaramondtwelveregular # U+00B7 MIDDLE DOT
+
+# ### Arrows ###
+# +style:ming                   '⤾'                       dejavuserif
+# +style:ming                   '₰'                       sunexta
+
+# ### Ideographic description characters: ###
+# +style:ming                   '↻'                       jizurathreeb      glyph: ''
+# +style:ming                   '↔'                       jizurathreeb      glyph: ''
+# +style:ming                   '↕'                       jizurathreeb      glyph: ''
+# +style:ming                   '●'                       jizurathreeb      glyph: ''
+# +style:ming                   '◰'                       jizurathreeb      glyph: ''
+# +style:ming                   '≈'                       jizurathreeb      glyph: ''
+# +style:ming                   '﹋'                       jizurathreeb      push: -0.35
+# # +style:ming                   '⿰'                       jizurathreeb      glyph: ''
+# # +style:ming                   '⿱'                       jizurathreeb      glyph: ''
+# # +style:ming                   '⿺'                       jizurathreeb      glyph: ''
+# # +style:ming                   '⿸'                       jizurathreeb      glyph: ''
+# # +style:ming                   '⿹'                       jizurathreeb      glyph: ''
+# # +style:ming                   '⿶'                       jizurathreeb      glyph: ''
+# # +style:ming                   '⿷'                       jizurathreeb      glyph: ''
+# # +style:ming                   '⿵'                       jizurathreeb      glyph: ''
+# # +style:ming                   '⿴'                       jizurathreeb      glyph: ''
+# # +style:ming                   '⿻'                       jizurathreeb      glyph: ''
+
+#       # ### 'Late Additions' in upper part of CJK unified ideographs (Unicode v5.2); glyphs are missing
+#       #   from Sun-ExtA but are included in BabelstoneHan: ###
+
+# +style:ming                     0x9fb0..0x9fff             thtshynpzero
+# +style:ming                     0x9feb..0x9fff             unifonttwelve
+# +style:ming                     '龺'                       babelstonehan
+#       # '龻':                                cmd: 'cnxBabel'
+#       # '龼':                                cmd: 'cnxBabel'
+#       # '龽':                                cmd: 'cnxBabel'
+#       # '龾':                                cmd: 'cnxBabel'
+#       # '龿':                                cmd: 'cnxBabel'
+#       # '鿀':                                cmd: 'cnxBabel'
+#       # '鿁':                                cmd: 'cnxBabel'
+#       # '鿂':                                cmd: 'cnxBabel'
+#       # '鿃':                                cmd: 'cnxBabel'
+#       # '鿄':                                cmd: 'cnxBabel'
+#       # '鿅':                                cmd: 'cnxBabel'
+#       # '鿆':                                cmd: 'cnxBabel'
+#       # '鿇':                                cmd: 'cnxBabel'
+#       # '鿈':                                cmd: 'cnxBabel'
+#       # '鿉':                                cmd: 'cnxBabel'
+#       # '鿊':                                cmd: 'cnxBabel'
+#       # '鿋':                                cmd: 'cnxBabel'
+#       # '鿌':                                cmd: 'cnxBabel'
+# #.....................................................................................................
+# ### This glyph is damaged in Sun-ExtA; it happens to be included in HanaMinA: ###
+# +style:ming                   '䗍'           hanaminaotf
+
+#       #.....................................................................................................
+# +style:ming                   '🈻'           thtshynpone
+# +style:ming                   '🉠'           hanaminexatwootf
+# +style:ming                   '🉡'           hanaminexatwootf
+# +style:ming                   '🉢'           hanaminexatwootf
+# +style:ming                   '🉣'           hanaminexatwootf
+# +style:ming                   '🉤'           hanaminexatwootf
+# +style:ming                   '🉥'           hanaminexatwootf
+
+# # #.....................................................................................................
+# # ### Ideographic Space: ###
+# # # '&#x3000;':                         cmd: 'cnjzr',       glyph: ''
+
+# #.....................................................................................................
+# +style:ming                   '▷'           cwtexqheibold
+
+# #.....................................................................................................
+# ### Ideographic Punctuation, Fullwidth Forms: ###
+# +style:ming                   '《'         sunexta    raise: -0.2
+# +style:ming                   '》'         sunexta    raise: -0.2
+# +style:ming                   '《'         nanummyeongjo
+# +style:ming                   '》'         nanummyeongjo
+# +style:ming                   '【'         nanummyeongjo
+# +style:ming                   '】'         nanummyeongjo
+# +style:ming                   '。'         sunexta        push: 0.5, raise: 0.25
+# +style:ming                   '、'         sunexta        push: 0.5, raise: 0.25
+# +style:ming                   '，'         sunexta        push: 0.5, raise: 0.25
+# +style:ming                   '．'         sunexta
+# +style:ming                   '：'         sunexta        push: 0.5, raise: 0.25
+# +style:ming                   '；'         sunexta
+# +style:ming                   '！'         sunexta
+# +style:ming                   '？'         sunexta
+# +style:ming                   '＂'         sunexta
+# +style:ming                   '＇'         sunexta
+# +style:ming                   '｀'         sunexta
+# +style:ming                   '＾'         sunexta
+# +style:ming                   '～'         sunexta
+# +style:ming                   '￣'         sunexta
+# +style:ming                   '＿'         sunexta
+# +style:ming                   '＆'         sunexta
+# +style:ming                   '＠'         sunexta
+# +style:ming                   '＃'         sunexta
+# +style:ming                   '％'         sunexta
+# +style:ming                   '＋'         sunexta
+# +style:ming                   '－'         sunexta
+# +style:ming                   '＊'         sunexta
+# +style:ming                   '＝'         sunexta
+# +style:ming                   '＜'         sunexta
+# +style:ming                   '＞'         sunexta
+# +style:ming                   '（'         sunexta    push: -0.25
+# +style:ming                   '）'         sunexta    push:  0.25
+#       # '［':  null
+#       # '］':  null
+#       # '｛':  null
+#       # '｝':  null
+#       # '｟':  null
+#       # '｠':  null
+#       # '｜':  null
+#       # '￤':  null
+#       # '／':  null
+#       # '＼':  null
+#       # '￢':  null
+#       # '＄':  null
+#       # '￡':  null
+#       # '￠':  null
+#       # '￦':  null
+#       # '￥':  null
+
+# #.....................................................................................................
+# ### TAINT this replacement should only be used in certain environments such as the KWIC index ###
+# +style:ming                   '囗'         jizurathreeb glyph: ''
+# +style:ming                   '扌'         sunexta      push: 0.05
+# +style:ming                   '亻'         sunexta      push: 0.6
+# +style:ming                   '釒'         sunexta      push: 0.5
+# +style:ming                   '钅'         sunexta      push: 0.4
+# +style:ming                   '冫'         sunexta      push: 0.55
+# +style:ming                   '牜'         sunexta      push: 0.5
+# +style:ming                   '飠'         sunexta      push: 0.4
+# +style:ming                   '犭'         sunexta      push: 0.3
+# +style:ming                   '忄'         sunexta      push: 0.5
+# +style:ming                   '礻'         sunexta      push: 0.3
+# +style:ming                   '衤'         sunexta      push: 0.2
+# +style:ming                   '讠'         sunexta      push: 0.5
+# +style:ming                   '卩'         sunexta      push: -0.4
+# +style:ming                   ''         sunexta      push: 0.5, raise: -0.2
+# +style:ming                   '糹'         sunexta      push: 0.4
+# +style:ming                   '纟'         sunexta      push: 0.4
+# +style:ming                   '阝'         sunexta      push: 0.6
+# +style:ming                   '彳'         sunexta      push: 0.15
+# +style:ming                   '𧾷'         thtshynptwo   push: 0.5,
+# +style:ming                   '𩰊'         thtshynptwo   push: -0.25,
+# +style:ming                   '𩰋'         thtshynptwo   push: 0.25,
+# +style:ming                   '𥫗'         thtshynptwo             raise: -0.2,
+# +style:ming                   '䒑'         sunexta                raise: -0.1
+# +style:ming                   '灬'         sunexta                raise: 0.4
+# +style:ming                   '爫'         sunexta                raise: -0.125
+# +style:ming                   '覀'         sunexta                raise: -0.0
+# +style:ming                   '乛'         sunexta                raise: -0.25
+# +style:ming                   '龸'         sunexta                raise: -0.15
+# +style:ming                   '宀'         sunexta                raise: -0.2
+# +style:ming                   '罓'         sunexta                raise: -0.2
+# +style:ming                   '龹'         sunexta                raise: -0.12
+# +style:ming                   '癶'         babelstonehan           raise: -0.2
+# +style:ming                   '龵'         babelstonehan           raise: -0.1
+# +style:ming                   '〇'         babelstonehan           raise: -0.05
+# +style:ming                   ''         jizurathreeb            raise: 0.1
+
+# #.....................................................................................................
+# ### Glyphs represented by other codepoints and/or with other than the standard fonts: ###
+# # +style:ming                   '⺊'         hanaminaotf
+# # +style:ming                   '⺑'         hanaminaotf
+# # +style:ming                   '⺕'         hanaminaotf
+# # +style:ming                   '⺴'         hanaminaotf
+# # +style:ming                   '⺿'         hanaminaotf
+# # +style:ming                   '〆'         hanaminaotf
+# # +style:ming                   '〻'         hanaminaotf
+# # +style:ming                   '㇀'         hanaminaotf
+# # +style:ming                   '㇊'         hanaminaotf
+# # +style:ming                   '㇎'         hanaminaotf
+# # +style:ming                   '㇏'         hanaminaotf
+# # +style:ming                   '丷'         hanaminaotf
+# # +style:ming                   '饣'         hanaminaotf
+# # +style:ming                   '⺀'         hanaminaotf
+# +style:ming                     '⺆'        babelstonehan
+# +style:ming                     '⺼'        babelstonehan
+# +style:ming                     '〓'        babelstonehan
+# +style:ming                     '〧'        babelstonehan
+# +style:ming                     '〨'        babelstonehan
+# +style:ming                     '㇁'        babelstonehan
+# +style:ming                     '㇃'        babelstonehan
+# +style:ming                     '㇄'        babelstonehan
+# +style:ming                     '㇅'        babelstonehan
+# +style:ming                     '㇈'        babelstonehan
+# +style:ming                     '㇋'        babelstonehan
+# +style:ming                     '㓁'        babelstonehan
+# +style:ming                     '齒'        babelstonehan
+# +style:ming                     '龰'        babelstonehan
+# +style:ming                     '𤴔'        babelstonehan
+# +style:ming                     '㐃'        babelstonehan
+# +style:ming                     '⺀'        hanaminaotf
+# +style:ming                     '⺄'        hanaminaotf
+# +style:ming                     '⺌'        hanaminaotf
+# +style:ming                     '⺍'        hanaminaotf
+# +style:ming                     '⺗'        hanaminaotf
+# +style:ming                     '⺝'        hanaminaotf
+# +style:ming                     '⺥'        hanaminaotf
+# +style:ming                     '⺳'        hanaminaotf
+# +style:ming                     '⺻'        hanaminaotf
+# +style:ming                     '㇂'        hanaminaotf
+# +style:ming                     '㇉'        hanaminaotf
+# +style:ming                     '㇌'        hanaminaotf
+# +style:ming                     '㇢'        hanaminaotf
+# +style:ming                     '冖'        hanaminaotf
+# +style:ming                     '刂'        hanaminaotf
+# +style:ming                     '氵'        hanaminaotf
+# +style:ming                     '罒'        hanaminaotf
+# +style:ming                     '龴'        hanaminaotf
+# +style:ming                     '𠂉'        hanaminaotf
+# +style:ming                     '帯'        hanaminaotf
+# +style:ming                     '𠚜'        hanaminbotf
+# +style:ming                     '𠚡'        hanaminbotf
+# +style:ming                     '𠥧'        hanaminbotf
+# +style:ming                     '𠥩'        hanaminbotf
+# +style:ming                     '𠥪'        hanaminbotf
+# +style:ming                     '𠥫'        hanaminbotf
+# +style:ming                     '𠥬'        hanaminbotf
+# +style:ming                     '𧀍'        hanaminbotf
+# +style:ming                     '〢'        sunexta
+# +style:ming                     '〣'        sunexta
+# +style:ming                     '〥'        sunexta
+# +style:ming                     '〽'        sunexta
+# +style:ming                     '𡗗'        hanaminaotf           raise: -0.1, glyph: '𡗗'
+# +style:ming                     '覀'        jizurathreeb                       glyph: ''
+# +style:ming                     '⻗'        jizurathreeb                       glyph: ''
+# +style:ming                     '丿'        jizurathreeb                       glyph: ''
+# +style:ming                     '𠥓'        jizurathreeb                       glyph: ''
+# +style:ming                     '龷'        jizurathreeb                       glyph: ''
+# +style:ming                     '龶'        jizurathreeb                       glyph: ''
+# +style:ming                     '⺶'        umingttcone
+
+# #...........................................................................................................
+# # Mathematical Alphabetic Symbols
+# +style:ming                     0x1d400..0x1d7ff  asanamath
+# +style:ming                     'ℼ'             asanamath
+# +style:ming                     'ℽ'             asanamath
+# +style:ming                     'ℾ'             asanamath
+# +style:ming                     'ℿ'             asanamath
+# +style:ming                     '⅀'             asanamath
+# +style:ming                     'ⅅ'             asanamath
+# +style:ming                     'ⅆ'             asanamath
+# +style:ming                     'ⅇ'             asanamath
+# +style:ming                     'ⅈ'             asanamath
+# +style:ming                     'ⅉ'             asanamath
+
+# +style:ming                     '𝔸'        asanamath
+# +style:ming                     '𝔹'        asanamath
+# +style:ming                     'ℂ'        asanamath
+# +style:ming                     '𝔻'        asanamath
+# +style:ming                     '𝔼'        asanamath
+# +style:ming                     '𝔽'        asanamath
+# +style:ming                     '𝔾'        asanamath
+# +style:ming                     'ℍ'        asanamath
+# +style:ming                     '𝕀'        asanamath
+# +style:ming                     '𝕁'        asanamath
+# +style:ming                     '𝕂'        asanamath
+# +style:ming                     '𝕃'        asanamath
+# +style:ming                     '𝕄'        asanamath
+# +style:ming                     'ℕ'        asanamath
+# +style:ming                     '𝕆'        asanamath
+# +style:ming                     'ℙ'        asanamath
+# +style:ming                     'ℚ'        asanamath
+# +style:ming                     'ℝ'        asanamath
+# +style:ming                     '𝕊'        asanamath
+# +style:ming                     '𝕋'        asanamath
+# +style:ming                     '𝕌'        asanamath
+# +style:ming                     '𝕍'        asanamath
+# +style:ming                     '𝕎'        asanamath
+# +style:ming                     '𝕏'        asanamath
+# +style:ming                     '𝕐'        asanamath
+# +style:ming                     'ℤ'        asanamath
+# +style:ming                     '𝕒'        asanamath
+# +style:ming                     '𝕓'        asanamath
+# +style:ming                     '𝕔'        asanamath
+# +style:ming                     '𝕕'        asanamath
+# +style:ming                     '𝕖'        asanamath
+# +style:ming                     '𝕗'        asanamath
+# +style:ming                     '𝕘'        asanamath
+# +style:ming                     '𝕙'        asanamath
+# +style:ming                     '𝕚'        asanamath
+# +style:ming                     '𝕛'        asanamath
+# +style:ming                     '𝕜'        asanamath
+# +style:ming                     '𝕝'        asanamath
+# +style:ming                     '𝕞'        asanamath
+# +style:ming                     '𝕟'        asanamath
+# +style:ming                     '𝕠'        asanamath
+# +style:ming                     '𝕡'        asanamath
+# +style:ming                     '𝕢'        asanamath
+# +style:ming                     '𝕣'        asanamath
+# +style:ming                     '𝕤'        asanamath
+# +style:ming                     '𝕥'        asanamath
+# +style:ming                     '𝕦'        asanamath
+# +style:ming                     '𝕧'        asanamath
+# +style:ming                     '𝕨'        asanamath
+# +style:ming                     '𝕩'        asanamath
+# +style:ming                     '𝕪'        asanamath
+# +style:ming                     '𝕫'        asanamath
+# +style:ming                     '𝕬'        asanamath
+# +style:ming                     '𝕭'        asanamath
+# +style:ming                     '𝕮'        asanamath
+# +style:ming                     '𝕯'        asanamath
+# +style:ming                     '𝕰'        asanamath
+# +style:ming                     '𝕱'        asanamath
+# +style:ming                     '𝕲'        asanamath
+# +style:ming                     '𝕳'        asanamath
+# +style:ming                     '𝕴'        asanamath
+# +style:ming                     '𝕵'        asanamath
+# +style:ming                     '𝕶'        asanamath
+# +style:ming                     '𝕷'        asanamath
+# +style:ming                     '𝕸'        asanamath
+# +style:ming                     '𝕹'        asanamath
+# +style:ming                     '𝕺'        asanamath
+# +style:ming                     '𝕻'        asanamath
+# +style:ming                     '𝕼'        asanamath
+# +style:ming                     '𝕽'        asanamath
+# +style:ming                     '𝕾'        asanamath
+# +style:ming                     '𝕿'        asanamath
+# +style:ming                     '𝖀'        asanamath
+# +style:ming                     '𝖁'        asanamath
+# +style:ming                     '𝖂'        asanamath
+# +style:ming                     '𝖃'        asanamath
+# +style:ming                     '𝖄'        asanamath
+# +style:ming                     '𝖅'        asanamath
+# +style:ming                     '𝖆'        asanamath
+# +style:ming                     '𝖇'        asanamath
+# +style:ming                     '𝖈'        asanamath
+# +style:ming                     '𝖉'        asanamath
+# +style:ming                     '𝖊'        asanamath
+# +style:ming                     '𝖋'        asanamath
+# +style:ming                     '𝖌'        asanamath
+# +style:ming                     '𝖍'        asanamath
+# +style:ming                     '𝖎'        asanamath
+# +style:ming                     '𝖏'        asanamath
+# +style:ming                     '𝖐'        asanamath
+# +style:ming                     '𝖑'        asanamath
+# +style:ming                     '𝖒'        asanamath
+# +style:ming                     '𝖓'        asanamath
+# +style:ming                     '𝖔'        asanamath
+# +style:ming                     '𝖕'        asanamath
+# +style:ming                     '𝖖'        asanamath
+# +style:ming                     '𝖗'        asanamath
+# +style:ming                     '𝖘'        asanamath
+# +style:ming                     '𝖙'        asanamath
+# +style:ming                     '𝖚'        asanamath
+# +style:ming                     '𝖛'        asanamath
+# +style:ming                     '𝖜'        asanamath
+# +style:ming                     '𝖝'        asanamath
+# +style:ming                     '𝖞'        asanamath
+# +style:ming                     '𝖟'        asanamath
+
+
+
+
+
