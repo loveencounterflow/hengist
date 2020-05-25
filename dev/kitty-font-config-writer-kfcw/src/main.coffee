@@ -22,8 +22,10 @@ FS                        = require 'fs'
 hex                       = ( n ) -> ( n.toString 16 ).toUpperCase().padStart 4, '0'
 LAP                       = require '../../../apps/interlap'
 { type_of
+  isa
   validate
   equals    }             = LAP.types.export()
+
 
 #-----------------------------------------------------------------------------------------------------------
 to_width = ( text, width ) ->
@@ -66,6 +68,28 @@ S =
     # unifonttwelve:              ''
     lastresort:                 'LastResort'
 
+  illegal_codepoints: [ # see https://en.wikipedia.org/wiki/Universal_Character_Set_characters#Special_code_points
+    [   0x0000,   0x0000, ]
+    [   0xd800,   0xdfff, ] # surrogates
+    [   0xfdd0,   0xfdef, ]
+    [   0xfffe,   0xffff, ]
+    [  0x1fffe,  0x1ffff, ]
+    [  0x2fffe,  0x2ffff, ]
+    [  0x3fffe,  0x3ffff, ]
+    [  0x4fffe,  0x4ffff, ]
+    [  0x5fffe,  0x5ffff, ]
+    [  0x6fffe,  0x6ffff, ]
+    [  0x7fffe,  0x7ffff, ]
+    [  0x8fffe,  0x8ffff, ]
+    [  0x9fffe,  0x9ffff, ]
+    [  0xafffe,  0xaffff, ]
+    [  0xbfffe,  0xbffff, ]
+    [  0xcfffe,  0xcffff, ]
+    [  0xdfffe,  0xdffff, ]
+    [  0xefffe,  0xeffff, ]
+    [  0xffffe,  0xfffff, ]
+    [ 0x10fffe, 0x10ffff, ] ]
+
 
 #===========================================================================================================
 # GENERIC STUFF
@@ -97,11 +121,17 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
     R[ rsg ] = segment_from_cid_hex_range_txt cid_range_txt
   return R
 
+# #-----------------------------------------------------------------------------------------------------------
+# @_read_illegal_codepoints = ( settings ) ->
+#   return R if isa.interlap ( R = settings.illegal_codepoints )
+#   R = settings.illegal_codepoints = new LAP.Interlap settings.illegal_codepoints
+#   return R
+
 #-----------------------------------------------------------------------------------------------------------
 @_read_configured_cid_ranges = ( settings ) ->
   return R if ( R = settings.configured_cid_ranges )?
   cid_ranges_by_rsgs  = @_read_cid_ranges_by_rsgs settings
-  R                   = settings.cid_ranges_by_rsgs = []
+  R                   = settings.configured_cid_ranges = []
   source_path         = PATH.resolve PATH.join __dirname, settings.paths.configured_cid_ranges
   lines               = ( FS.readFileSync source_path, { encoding: 'utf-8', } ).split '\n'
   unknown_fontnicks   = new Set()
@@ -127,7 +157,6 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
         warn "unknown fontnick #{rpr fontnick}"
       continue
     #.......................................................................................................
-    debug '^334^', line
     ### TAINT the below as function ###
     #.......................................................................................................
     if cid_literal is '*'
@@ -142,7 +171,6 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
     else if ( cid_literal.startsWith 'rsg:' )
       rsg = cid_literal[ 4 .. ]
       validate.nonempty_text rsg
-      debug '^334^', rsg, cid_ranges_by_rsgs[ rsg ]
       unless ( segment = cid_ranges_by_rsgs[ rsg ] )?
         unknown_rsgs.add rsg
         warn "unknown rsg #{rpr rsg}"
@@ -162,12 +190,10 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
 
 #-----------------------------------------------------------------------------------------------------------
 @_read_disjunct_cid_ranges = ( settings ) ->
-  overlaps          = @_read_configured_cid_ranges settings
-  R                 = settings.disjunct_cid_ranges = []
-  org_by_fontnicks  = {}
-  exclusion         = new LAP.Interlap()
-  disjuncts         = []
-  exclusions        = []
+  overlaps            = @_read_configured_cid_ranges settings
+  R                   = settings.disjunct_cid_ranges = []
+  org_by_fontnicks    = {}
+  exclusion           = new LAP.Interlap settings.illegal_codepoints
   for idx in [ overlaps.length - 1 .. 0 ] by -1
     rule                = overlaps[ idx ]
     { fontnick
@@ -175,22 +201,31 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
       lap       }       = rule
     disjunct            = LAP.difference  lap, exclusion
     exclusion           = LAP.union       lap, exclusion
-    R.unshift [ fontnick, disjunct, ]
+    R.unshift { fontnick, psname, lap: disjunct, }
   return R
 
 #-----------------------------------------------------------------------------------------------------------
 @write_font_configuration_for_kitty_terminal = ( settings ) ->
   fontnicks_and_laps = @_read_disjunct_cid_ranges S
-  for [ fontnick, lap, ] in fontnicks_and_laps
-    psname = settings.psname_by_fontnicks[ fontnick ] ? "UNKNOWN-FONTNICK:#{fontnick}"
-    debug lap
-    for segment in lap
-      # help fontnick, LAP.as_unicode_range lap
-      unicode_range_txt = ( LAP.as_unicode_range segment ).padEnd 30
-      echo "symbol_map      #{unicode_range_txt} #{psname}"
+  # debug '^443^', fontnicks_and_laps
+  for disjunct_range in fontnicks_and_laps
+    { fontnick
+      psname
+      lap     } = disjunct_range
+    # debug lap
+    if lap.size is 0
+      filler = ( '-/-' ).padEnd 30
+      echo "# symbol_map      #{filler} (#{psname})"
+    else
+      for segment in lap
+        # help fontnick, LAP.as_unicode_range lap
+        unicode_range_txt = ( LAP.as_unicode_range segment ).padEnd 30
+        echo "symbol_map      #{unicode_range_txt} #{psname}"
   return null
 
 
+#===========================================================================================================
+#
 #-----------------------------------------------------------------------------------------------------------
 demo = ->
   pseudo_css_configuration = [
@@ -271,8 +306,22 @@ demo = ->
     U+004d-U+004d,U+0055-U+0055,U+0058-U+0059"""
   return null
 
+#===========================================================================================================
+# DATA STRUCTURE DEMOS
+#-----------------------------------------------------------------------------------------------------------
+@demo_cid_ranges_by_rsgs = ->
+  echo CND.steel CND.reverse "CID Ranges by RSGs".padEnd 108
+  for rsg, segment of @_read_cid_ranges_by_rsgs S
+    continue unless /kana|kata|hira/.test rsg
+    rsg_txt   = ( rsg.padEnd 25 )
+    range_txt = LAP.as_unicode_range segment
+    echo ( CND.grey "rsg and CID range" ), ( CND.blue rsg_txt ), ( CND.lime range_txt )
+  return null
+
 #-----------------------------------------------------------------------------------------------------------
 @demo_configured_ranges = ->
+  echo CND.steel CND.reverse "Configured CID Ranges".padEnd 108
+  # debug @_read_configured_cid_ranges S
   for configured_range in @_read_configured_cid_ranges S
     { fontnick
       psname
@@ -284,15 +333,33 @@ demo = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@demo_discontinuous_ranges = ->
-  urge @_read_cid_ranges_by_rsgs S
+@demo_disjunct_ranges = ->
+  echo CND.steel CND.reverse "Disjunct CID Ranges".padEnd 108
+  for disjunct_range in @_read_disjunct_cid_ranges S
+    { fontnick
+      psname
+      lap     } = disjunct_range
+    font_txt  = ( psname.padEnd 25 )
+    if lap.size is 0
+      echo ( CND.grey "disjunct range" ), ( CND.grey font_txt ), ( CND.grey "no codepoints" )
+    else
+      for segment in lap
+        range_txt = LAP.as_unicode_range segment
+        echo ( CND.grey "disjunct range" ), ( CND.yellow font_txt ), ( CND.lime range_txt )
   return null
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_kitty_font_config = ->
+  echo CND.steel CND.reverse "Kitty Font Config".padEnd 108
+  @write_font_configuration_for_kitty_terminal S
 
 
 ############################################################################################################
 if module is require.main then do =>
+  @demo_cid_ranges_by_rsgs()
   @demo_configured_ranges()
-  @demo_discontinuous_ranges()
+  @demo_disjunct_ranges()
+  @demo_kitty_font_config()
   #.........................................................................................................
   # @write_font_configuration_for_kitty_terminal S
   # demo()
