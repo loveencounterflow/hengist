@@ -420,11 +420,35 @@ demo_subtract_ranges_DRange = ->
   help '^556^', red_rng.length
   info '^334^', numbers_from_drange red_rng
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "InterLap: Object methods" ] = ( T, done ) ->
+  LAP             = require '../../../apps/interlap'
+  L               = LAP.export().as_list
+  { Interlap
+    Segment
+    union
+    difference }  = LAP.export()
+  #.........................................................................................................
+  d0    = new Segment [ 1, 100, ]
+  d1    = new Interlap [ d0, [ 120, 125, ], ]
+  CAT = require '../../../apps/multimix/lib/cataloguing'
+  debug ( k for k of d0 )
+  debug CAT.all_keys_of d0
+  debug d1.join '*'
+  # debug Array::map.call d1, ( s ) -> "{#{s.lo}|#{s.hi}}"
+  # debug d1.filter ( s ) -> false # s.lo < 100
+  # debug Array::filter.call d1, ( s ) -> s.lo < 100
+  done()
+
+
+
 ############################################################################################################
 if module is require.main then do =>
   # demo_1()
   # demo_equality_between_custom_and_basic_values()
   test @
+  # test @[ "InterLap: Object methods" ]
+  # @[ "InterLap: Object methods" ]()
   # test @[ "InterLap: DRange example converted" ]
   # @[ "InterLap: DRange example converted" ]()
   # test @[ "Interlap differences" ]
