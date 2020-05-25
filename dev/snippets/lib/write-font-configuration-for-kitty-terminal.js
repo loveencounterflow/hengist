@@ -284,21 +284,30 @@
         continue;
       }
       //.......................................................................................................
+      debug('^334^', line);
+      /* TAINT the below as function */
+      //.......................................................................................................
       if (cid_literal === '*') {
-        first_cid = 0x000000;
-        last_cid = 0x10ffff;
+        segment = new LAP.Segment([0x000000, 0x10ffff]);
+      //.......................................................................................................
       } else if ((cid_literal.startsWith("'")) && (cid_literal.endsWith("'"))) {
         validate.chr(chr = cid_literal.slice(1, cid_literal.length - 1));
-        first_cid = last_cid = chr.codePointAt(0);
+        first_cid = chr.codePointAt(0);
+        last_cid = first_cid;
+        segment = new LAP.Segment([first_cid, last_cid]);
+      //.......................................................................................................
       } else if (cid_literal.startsWith('rsg:')) {
         rsg = cid_literal.slice(4);
         validate.nonempty_text(rsg);
+        debug('^334^', rsg, cid_ranges_by_rsgs[rsg]);
         if ((segment = cid_ranges_by_rsgs[rsg]) == null) {
           unknown_rsgs.add(rsg);
           warn(`unknown rsg ${rpr(rsg)}`);
+          continue;
         }
       } else {
-        [first_cid, last_cid] = parse_cid_hex_range_txt(cid_literal);
+        //.......................................................................................................
+        segment = segment_from_cid_hex_range_txt(cid_literal);
       }
       //.......................................................................................................
       /* NOTE for this particular file format, we could use segments inbstead of laps since there can be only
@@ -306,7 +315,7 @@
          record are allowed, we use laps. */
       /* TAINT consider to use a non-committal name like `cids` instead of `lap`, which is bound to a
          particular data type; allow to use segments and laps for this and similar attributes. */
-      lap = new LAP.Interlap(new LAP.Segment([first_cid, last_cid]));
+      lap = new LAP.Interlap(segment);
       R.push({fontnick, psname, lap});
     }
     return R;
@@ -472,15 +481,37 @@ U+004d-U+004d,U+0055-U+0055,U+0058-U+0059`));
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_configured_ranges = function() {
+    var configured_range, font_txt, fontnick, i, lap, len, psname, range_txt, ref;
+    ref = this._read_configured_cid_ranges(S);
+    for (i = 0, len = ref.length; i < len; i++) {
+      configured_range = ref[i];
+      ({fontnick, psname, lap} = configured_range);
+      font_txt = psname.padEnd(25);
+      range_txt = LAP.as_unicode_range(lap);
+      // echo ( CND.grey "configured range" ), ( CND.yellow configured_range )
+      echo(CND.grey("configured range"), CND.yellow(font_txt), CND.lime(range_txt));
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_discontinuous_ranges = function() {
+    urge(this._read_cid_ranges_by_rsgs(S));
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // urge @_read_cid_ranges_by_rsgs S
-      // urge @_read_configured_cid_ranges S
-      return this.write_font_configuration_for_kitty_terminal(S);
+      this.demo_configured_ranges();
+      return this.demo_discontinuous_ranges();
     })();
   }
 
-  // demo()
+  //.........................................................................................................
+// @write_font_configuration_for_kitty_terminal S
+// demo()
 
 }).call(this);
