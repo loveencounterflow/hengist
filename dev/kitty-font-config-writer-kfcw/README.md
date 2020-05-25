@@ -1,3 +1,15 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Data Sources](#data-sources)
+  - [RSGs and Unicode Codepoint Ranges](#rsgs-and-unicode-codepoint-ranges)
+  - [Styles, CID Ranges, Font Names](#styles-cid-ranges-font-names)
+  - [Disjunct Ranges](#disjunct-ranges)
+- [To Do](#to-do)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 CSS rules in general (and CSS3 Unicode Range rules in particular) work by the 'backwards early worm'
 principle (i.e. who comes late takes the cake), analogous to JS `Object.assign( a, b, c )` where any
@@ -30,7 +42,7 @@ font4                         ┼N┼┼┼││││  ││   │           
 font5                         ┼ OPQRST│  ││   │                                          │
 font6                         M       U  XY   │                                          │ most precedence
 ═════════════════ ══════════════════════════  ══════════════════════════════════════════════════════════════
-superset          ABCDEFGHIJKLMNOPQRSTUVWXYZ  │ Kiitty-like Configuration with Disjunct Ranges
+superset          ABCDEFGHIJKLMNOPQRSTUVWXYZ  │ Kitty-like Configuration with Disjunct Ranges
 ————————————————— ——————————————————————————  ——————————————————————————————————————————————————————————————
 font1                 EF   J L         VW     │ [E-F] [J] [L] [V-W]                      ◮ least precedence
 font2              BCD                        │ [B-D]                                    │
@@ -110,4 +122,125 @@ References:
 * Do not use an all-boxes fallback font such as LastResort as standard font as one could do in CSS; the font
   named under in `font_family` [is used to calculate cell metrics, this happens before any
   fallback](https://github.com/kovidgoyal/kitty/issues/2396#issuecomment-590639250)
+
+
+## Data Sources
+
+The style mappings are generated from two source files: the first data source file introduces some
+convenient abbreviations for some Unicode ranges of interest (my personal interest is in CJK characters so
+those feature prominently).
+
+These 'Range Sigils' (RSGs) can then be used in lieu of concrete numbers in the second file that
+basically tells you what font to use for which codepoints.
+
+### RSGs and Unicode Codepoint Ranges
+
+This is what the first file—`rsgs-and-blocks.txt`—looks like:
+
+```
+# file rsgs-and-blocks.txt
+# IC Group  Range Sigil (RSG)     Kanji  CID-Range                Unicode Block Name
+# ————————  ————————————————————  —————  ———————————————————————  ———————————————————————————————————————
+jzr---      jzr                   true   0x0e000..0x0f8ff         Jizura
+ux0000      u-latn                false  0x00000..0x0007f         Basic Latin
+ux0060      u-arab                false  0x00600..0x006ff         Arabic
+uchira      u-cjk-hira            false  0x03040..0x0309f         Hiragana
+uc0---      u-cjk                 true   0x04e00..0x09fff         CJK Unified Ideographs
+uccmp-      u-cjk-cmp             true   0x03300..0x033ff         CJK Compatibility
+uccmp1      u-cjk-cmpi1           true   0x0f900..0x0faff         CJK Compatibility Ideographs
+uccmp2      u-cjk-cmpi2           true   0x2f800..0x2fa1f         CJK Compatibility Ideographs Supplement
+uccmpf      u-cjk-cmpf            true   0x0fe30..0x0fe4f         CJK Compatibility Forms
+ucelet      u-cjk-enclett         true   0x03200..0x032ff         Enclosed CJK Letters and Months
+ucesup      u-cjk-encsupp         true   0x1f200..0x1f2ff         Enclosed Ideographic Supplement
+uchalf      u-halfull             true   0x0ff00..0x0ffef         Halfwidth and Fullwidth Forms
+uckanb      u-cjk-kanbun          true   0x03190..0x0319f         Kanbun
+ucrad1      u-cjk-rad1            true   0x02f00..0x02fdf         Kangxi Radicals
+```
+
+From this we derive an object whose keys are RSGs and whose values represent CID ranges
+
+```js
+{ 'u-cjk-hira':       Segment(2) [  12352,  12447 ],
+  'u-cjk-kanasupp':   Segment(2) [ 110592, 110847 ],
+  'u-cjk-kata':       Segment(2) [  12448,  12543 ],
+  'u-cjk-kata-x':     Segment(2) [  12784,  12799 ],
+  'u-cjk-kana-xa':    Segment(2) [ 110848, 110895 ] }
+```
+
+
+### Styles, CID Ranges, Font Names
+
+Next, we have a data source file that identifies a style and states, for that style, single code points or
+sets of codepoints for which we want to use a given font (here identified by monikers called 'fontnicks',
+but it could be PostScript font names or any unique identifier):
+
+```
+# file styles-codepoints-and-fontnicks.txt
+# Style Tag                   CID Range                   Font Nick
+# ——————————————————————————  ——————————————————————————  ————————————————————————————————
++style:ming                   *                           sunexta
++style:ming                   rsg:u-cjk-cmpi1             babelstonehan
++style:ming                   rsg:u-cjk-xd                babelstonehan
++style:ming                   '＠'                        sunexta
++style:ming                   0x9fb0..0x9fff              thtshynpzero
++style:ming                   0x9feb..0x9fff              unifonttwelve
+```
+
+CID range literals come in a few flavors:
+* the asterisk `*` marks 'anything in Unicode', so comprises all codepoints between `U+0000` and `U+10ffff`;
+* entries prefixed with `rsg:` use the range sigils (RSGs) as introduced above, so must be looked up in that
+  data structure;
+* entries in quotes use a single character to denote a single codepoint literally;
+* entries that look like `0xNNNN..0xNNNN` spell out a range by giving the first and last CIDs in
+  hexadecimal.
+
+> NOTE we conveniently ignore the style tag for the purpose at hand; these become important when one wants
+> to typeset in different styles—say, use serif fonts of normal weight for running text but sans-serif bold
+> fonts for headings.
+
+This—with the addition of a simple `fontnick -> psname` lookup—gives use a list of ranges and associated
+fonts; note that entries are order in their order of occurrance, which, as we have stated above, means
+earlier ones have less precedence than later ones:
+
+```js
+# configured_ranges:
+[ { fontnick: 'sunexta',       psname: 'Sun-ExtA',      lap: Interlap(1) [ Segment(2) [      0, 1114111 ] ] },
+  { fontnick: 'babelstonehan', psname: 'BabelStoneHan', lap: Interlap(1) [ Segment(2) [  63744,   64255 ] ] },
+  { fontnick: 'babelstonehan', psname: 'BabelStoneHan', lap: Interlap(1) [ Segment(2) [ 177984,  178207 ] ] } ]
+````
+
+
+### Disjunct Ranges
+
+We now know everything to derive a sequence of disjunct discontinuous CID ranges that identifies the font to
+be used for any codepoint. This we do by iterating over the entries in `configured_ranges` in the reverse,
+keeping note of all the codepoints covered so far. For each entry, the disjunct codepoints—those that do not
+overlap with any other range—are those mentioned in the `configured_ranges` entry, minus any codepoints
+mentioned in any entries with higher precedences (that come closer to the bottom of the configuration file).
+
+In this simplified case, we then find (using the Unicode convention for writing CID ranges):
+
+```
+disjunct range Sun-ExtA                  U+0000-U+f8ff
+disjunct range Sun-ExtA                  U+fb00-U+2b73f
+disjunct range Sun-ExtA                  U+2b820-U+10ffff
+disjunct range BabelStoneHan             U+f900-U+faff
+disjunct range BabelStoneHan             U+2b740-U+2b81f
+```
+
+In the general case, any font mentioned anywhere in the configuration
+(`styles-codepoints-and-fontnicks.txt`) *except for the very last entry* might end up not being used at all,
+or its use being split up into any number of non-adjacent ranges. Also observe that because of all ranges
+being disjunct, their relative ordering becomes immaterial.
+
+
+
+## To Do
+
+* [ ] treat asterisk-font special: use it for `font_family`, omit it from `symbol_map` lines
+* [X] exclude non-character codepoints as per https://en.wikipedia.org/wiki/Universal_Character_Set_characters#Special_code_points
+
+
+
+
 
