@@ -1,115 +1,6 @@
 (function() {
-  /*
-
-  CSS rules in general (and CSS3 Unicode Range rules in particular) work by the 'backwards early worm'
-  principle (i.e. who comes late takes the cake), analogous to JS `Object.assign( a, b, c )` where any
-  attribute in the later argument, say `c.x`, will override (shadow) any homonymous attribute in both `a` and
-  `b`.
-
-  > This is the right way to do it: When doing configurations, we want to start with defaults and end with
-  > specific overrides. Linux' Font-Config got this backwars which is one reason it sucks so terribly:
-  > you can't make one of your own rules become effective unless you wrestle against a system that believes
-  > earlier settings must override later ones. Anyhoo.
-
-  ```
-  ═════════════════ ══════════════════════════  ══════════════════════════════════════════════════════════════
-  superset          ABCDEFGHIJKLMNOPQRSTUVWXYZ  │ CSS-like Configuration with Overlapping Ranges
-  ————————————————— ——————————————————————————  ——————————————————————————————————————————————————————————————
-  font1             BCDEFGH J L NOPQRSTUVWX    │ [B-H] [J] [L] [N-X]                      ◮ least precedence
-  font2             BCD                        │ [B-D]                                    │
-  font3                  GHI                   │ [G-I]                                    │
-  font4                        MNOPQ           │ [M-Q]                                    │
-  font5                        M OPQRST        │ [M] [O-T]                                │
-  font6                        M       U  XY   │ [M] [U] [X-Y]                            │ most precedence
-  ═════════════════ ══════════════════════════  ══════════════════════════════════════════════════════════════
-  superset          ABCDEFGHIJKLMNOPQRSTUVWXYZ  │
-  ————————————————— ——————————————————————————  ——————————————————————————————————————————————————————————————
-  font1              ┼┼┼EF┼┼│J L│┼┼┼┼┼┼┼┼VW┼│   │                                          ◮ least precedence
-  font2              BCD  │││   │││││││││  ││   │                                          │
-  font3                   GHI   │││││││││  ││   │                                          │
-  font4                         ┼N┼┼┼││││  ││   │                                          │
-  font5                         ┼ OPQRST│  ││   │                                          │
-  font6                         M       U  XY   │                                          │ most precedence
-  ═════════════════ ══════════════════════════  ══════════════════════════════════════════════════════════════
-  superset          ABCDEFGHIJKLMNOPQRSTUVWXYZ  │ Kiitty-like Configuration with Disjunct Ranges
-  ————————————————— ——————————————————————————  ——————————————————————————————————————————————————————————————
-  font1                 EF   J L         VW     │ [E-F] [J] [L] [V-W]                      ◮ least precedence
-  font2              BCD                        │ [B-D]                                    │
-  font3                   GHI                   │ [G-I]                                    │
-  font4                          N              │ [N]                                      │
-  font5                           OPQRST        │ [O-T]                                    │
-  font6                         M       U  XY   │ [M] [U] [X-Y]                            │ most precedence
-
-  NB
-  * first mentioned => 'most fallback' => least precedence
-  * last  mentioned => 'least fallback' => most precedence
-  ```
-
-  [The Kitty terminal emulator](https://sw.kovidgoyal.net/kitty/index.html) is special for a terminal emulator
-  in that **Kitty allows to configue fonts by codepoints and codepoint ranges** similar to what is possible on
-  web pages using CSS3 Unicode Ranges; in fact, its syntax—example:
-
-  ```
-  symbol_map U+4E00-U+9FFF  HanaMinA Regular
-  symbol_map U+4D00-U+9FFF  EPSON 行書体Ｍ
-  ```
-
-  —is so similar to CSS that one might believe the semantics will likewise be compatible.
-
-  Alas, this is not so, and it also looks like Kitty's interpretation can't possibly have been meant to work
-  the way it does. For example, when I configure
-
-  ```
-   * Note: do *not* use inline comments as shown below, they will not be parsed correctly
-  font_family               IosevkaNerdFontCompleteM-Thin
-  symbol_map U+61-U+7a      Iosevka-Slab-Heavy  # (1) /[a-z]/
-  symbol_map U+51-U+5a      Iosevka-Slab-Heavy  # (2) /[Q-Z]/
-  symbol_map U+61           LastResort          # (3) /[a]/
-  symbol_map U+65           LastResort          # (4) /[e]/
-  symbol_map U+69           LastResort          # (5) /[i]/
-  symbol_map U+6F           LastResort          # (6) /[o]/
-  symbol_map U+75           LastResort          # (7) /[u]/
-  symbol_map U+51-U+53      LastResort          # (8) /[QRS]/
-  symbol_map U+59-U+5a      LastResort          # (9) /[YZ]/
-  ```
-
-  I'd expect the outcome to be as follows:
-
-  * **(1)** Use `IosevkaNerdFontCompleteM-Thin` as default,
-  * **(2)** except for the lower case `[a-z]` range, for which use `Iosevka-Slab-Heavy`,
-  * **(3)** except for the upper case `[Q-Z]` range, for which likewise use `Iosevka-Slab-Heavy`; of these,
-  * **(4-7)** use LastResort for `/[aeiou]/`, overriding **(1)**,
-  * **(8)** use LastResort for `/[QRS]/` overriding **(2)**,
-  * **(9)** use LastResort for `/[YZ]/`, likewise overriding **(2)**.
-
-  What happens in reality is that Kitty applies the only rules **(1)**, **(2)**, **(3)**, **(8)**, but
-  discards **(4)**, **(5)**, **(6)**, **(7)** and **(9)**; it so happens that both the ranges / single
-  codepoints addressed in the shadowing rules that *were* honored (**(3)** and **(8)**), their first
-  codepoints (`a` = `U+61` and `Q` = `U+51`) coincided with the first codepoints of the rules they shadowed.
-  Observe that while e.g. codepoint `e` = `U+65` of rule **(4)** is indeed the first (and only) codepoint of
-  that rule, that is not what matters; what matters is where that shadowing codepoint falls within the rule it
-  is intended to supplant, namely rule **(1)**. Since there it is the 5th, not the 1st codepoint of the range
-  given, it does—erroneuosly, one should think—not succeed.
-
-  This is a somewhat weird and at any rate unexpected behavior that cannot possibly have been the intent of
-  the developers. There is no way users could be expected to follow or profit from such strange rules, so I
-  assume this must be a bug.
-
-  The **solution** to this problematic behavior would seem to consist in **only using disjunct `symbol_map`
-  ranges** by avoiding to mention any codepoint more than once.
-
-  References:
-
-  * [Extension Kitty graphics protocol to support fonts #2259](https://github.com/kovidgoyal/kitty/issues/2259)
-  * [Symbol map problem #1948](https://github.com/kovidgoyal/kitty/issues/1948)
-
-  * Do not use an all-boxes fallback font such as LastResort as standard font as one could do in CSS; the font
-    named under in `font_family` [is used to calculate cell metrics, this happens before any
-    fallback](https://github.com/kovidgoyal/kitty/issues/2396#issuecomment-590639250)
-
-   */
   'use strict';
-  var CND, FS, LAP, PATH, S, alert, badge, cid_range_pattern, debug, demo, echo, equals, help, hex, info, log, parse_cid_hex_range_txt, rpr, segment_from_cid_hex_range_txt, to_width, type_of, urge, validate, warn, whisper;
+  var CND, FS, LAP, PATH, S, alert, badge, cid_range_pattern, debug, demo, echo, equals, help, hex, info, isa, log, parse_cid_hex_range_txt, rpr, segment_from_cid_hex_range_txt, to_width, type_of, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -147,7 +38,7 @@
 
   LAP = require('../../../apps/interlap');
 
-  ({type_of, validate, equals} = LAP.types.export());
+  ({type_of, isa, validate, equals} = LAP.types.export());
 
   //-----------------------------------------------------------------------------------------------------------
   to_width = function(text, width) {
@@ -190,7 +81,51 @@
       // sourcehanserifheavytaiwan:  ''
       // unifonttwelve:              ''
       lastresort: 'LastResort'
-    }
+    },
+    illegal_codepoints: [ // see https://en.wikipedia.org/wiki/Universal_Character_Set_characters#Special_code_points
+      [0x0000,
+      0x0000],
+      [
+        0xd800,
+        0xdfff // surrogates
+      ],
+      [0xfdd0,
+      0xfdef],
+      [0xfffe,
+      0xffff],
+      [0x1fffe,
+      0x1ffff],
+      [0x2fffe,
+      0x2ffff],
+      [0x3fffe,
+      0x3ffff],
+      [0x4fffe,
+      0x4ffff],
+      [0x5fffe,
+      0x5ffff],
+      [0x6fffe,
+      0x6ffff],
+      [0x7fffe,
+      0x7ffff],
+      [0x8fffe,
+      0x8ffff],
+      [0x9fffe,
+      0x9ffff],
+      [0xafffe,
+      0xaffff],
+      [0xbfffe,
+      0xbffff],
+      [0xcfffe,
+      0xcffff],
+      [0xdfffe,
+      0xdffff],
+      [0xefffe,
+      0xeffff],
+      [0xffffe,
+      0xfffff],
+      [0x10fffe,
+      0x10ffff]
+    ]
   };
 
   //===========================================================================================================
@@ -240,6 +175,12 @@
     return R;
   };
 
+  // #-----------------------------------------------------------------------------------------------------------
+  // @_read_illegal_codepoints = ( settings ) ->
+  //   return R if isa.interlap ( R = settings.illegal_codepoints )
+  //   R = settings.illegal_codepoints = new LAP.Interlap settings.illegal_codepoints
+  //   return R
+
   //-----------------------------------------------------------------------------------------------------------
   this._read_configured_cid_ranges = function(settings) {
     var R, chr, cid_literal, cid_ranges_by_rsgs, first_cid, fontnick, glyphstyle, i, lap, last_cid, len, line, lines, psname, rsg, segment, source_path, styletag, unknown_fontnicks, unknown_rsgs;
@@ -247,7 +188,7 @@
       return R;
     }
     cid_ranges_by_rsgs = this._read_cid_ranges_by_rsgs(settings);
-    R = settings.cid_ranges_by_rsgs = [];
+    R = settings.configured_cid_ranges = [];
     source_path = PATH.resolve(PATH.join(__dirname, settings.paths.configured_cid_ranges));
     lines = (FS.readFileSync(source_path, {
       encoding: 'utf-8'
@@ -284,7 +225,6 @@
         continue;
       }
       //.......................................................................................................
-      debug('^334^', line);
       /* TAINT the below as function */
       //.......................................................................................................
       if (cid_literal === '*') {
@@ -299,7 +239,6 @@
       } else if (cid_literal.startsWith('rsg:')) {
         rsg = cid_literal.slice(4);
         validate.nonempty_text(rsg);
-        debug('^334^', rsg, cid_ranges_by_rsgs[rsg]);
         if ((segment = cid_ranges_by_rsgs[rsg]) == null) {
           unknown_rsgs.add(rsg);
           warn(`unknown rsg ${rpr(rsg)}`);
@@ -323,40 +262,50 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this._read_disjunct_cid_ranges = function(settings) {
-    var R, disjunct, disjuncts, exclusion, exclusions, fontnick, i, idx, lap, org_by_fontnicks, overlaps, psname, ref, rule;
+    var R, disjunct, exclusion, fontnick, i, idx, lap, org_by_fontnicks, overlaps, psname, ref, rule;
     overlaps = this._read_configured_cid_ranges(settings);
     R = settings.disjunct_cid_ranges = [];
     org_by_fontnicks = {};
-    exclusion = new LAP.Interlap();
-    disjuncts = [];
-    exclusions = [];
+    exclusion = new LAP.Interlap(settings.illegal_codepoints);
     for (idx = i = ref = overlaps.length - 1; i >= 0; idx = i += -1) {
       rule = overlaps[idx];
       ({fontnick, psname, lap} = rule);
       disjunct = LAP.difference(lap, exclusion);
       exclusion = LAP.union(lap, exclusion);
-      R.unshift([fontnick, disjunct]);
+      R.unshift({
+        fontnick,
+        psname,
+        lap: disjunct
+      });
     }
     return R;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.write_font_configuration_for_kitty_terminal = function(settings) {
-    var fontnick, fontnicks_and_laps, i, j, lap, len, len1, psname, ref, segment, unicode_range_txt;
+    var disjunct_range, filler, fontnick, fontnicks_and_laps, i, j, lap, len, len1, psname, segment, unicode_range_txt;
     fontnicks_and_laps = this._read_disjunct_cid_ranges(S);
+// debug '^443^', fontnicks_and_laps
     for (i = 0, len = fontnicks_and_laps.length; i < len; i++) {
-      [fontnick, lap] = fontnicks_and_laps[i];
-      psname = (ref = settings.psname_by_fontnicks[fontnick]) != null ? ref : `UNKNOWN-FONTNICK:${fontnick}`;
-      debug(lap);
-      for (j = 0, len1 = lap.length; j < len1; j++) {
-        segment = lap[j];
-        // help fontnick, LAP.as_unicode_range lap
-        unicode_range_txt = (LAP.as_unicode_range(segment)).padEnd(30);
-        echo(`symbol_map      ${unicode_range_txt} ${psname}`);
+      disjunct_range = fontnicks_and_laps[i];
+      ({fontnick, psname, lap} = disjunct_range);
+      // debug lap
+      if (lap.size === 0) {
+        filler = '-/-'.padEnd(30);
+        echo(`# symbol_map      ${filler} (${psname})`);
+      } else {
+        for (j = 0, len1 = lap.length; j < len1; j++) {
+          segment = lap[j];
+          // help fontnick, LAP.as_unicode_range lap
+          unicode_range_txt = (LAP.as_unicode_range(segment)).padEnd(30);
+          echo(`symbol_map      ${unicode_range_txt} ${psname}`);
+        }
       }
     }
     return null;
   };
+
+  //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
@@ -481,10 +430,31 @@ U+004d-U+004d,U+0055-U+0055,U+0058-U+0059`));
     return null;
   };
 
+  //===========================================================================================================
+  // DATA STRUCTURE DEMOS
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_cid_ranges_by_rsgs = function() {
+    var range_txt, ref, rsg, rsg_txt, segment;
+    echo(CND.steel(CND.reverse("CID Ranges by RSGs".padEnd(108))));
+    ref = this._read_cid_ranges_by_rsgs(S);
+    for (rsg in ref) {
+      segment = ref[rsg];
+      if (!/kana|kata|hira/.test(rsg)) {
+        continue;
+      }
+      rsg_txt = rsg.padEnd(25);
+      range_txt = LAP.as_unicode_range(segment);
+      echo(CND.grey("rsg and CID range"), CND.blue(rsg_txt), CND.lime(range_txt));
+    }
+    return null;
+  };
+
   //-----------------------------------------------------------------------------------------------------------
   this.demo_configured_ranges = function() {
     var configured_range, font_txt, fontnick, i, lap, len, psname, range_txt, ref;
+    echo(CND.steel(CND.reverse("Configured CID Ranges".padEnd(108))));
     ref = this._read_configured_cid_ranges(S);
+    // debug @_read_configured_cid_ranges S
     for (i = 0, len = ref.length; i < len; i++) {
       configured_range = ref[i];
       ({fontnick, psname, lap} = configured_range);
@@ -497,16 +467,40 @@ U+004d-U+004d,U+0055-U+0055,U+0058-U+0059`));
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.demo_discontinuous_ranges = function() {
-    urge(this._read_cid_ranges_by_rsgs(S));
+  this.demo_disjunct_ranges = function() {
+    var disjunct_range, font_txt, fontnick, i, j, lap, len, len1, psname, range_txt, ref, segment;
+    echo(CND.steel(CND.reverse("Disjunct CID Ranges".padEnd(108))));
+    ref = this._read_disjunct_cid_ranges(S);
+    for (i = 0, len = ref.length; i < len; i++) {
+      disjunct_range = ref[i];
+      ({fontnick, psname, lap} = disjunct_range);
+      font_txt = psname.padEnd(25);
+      if (lap.size === 0) {
+        echo(CND.grey("disjunct range"), CND.grey(font_txt), CND.grey("no codepoints"));
+      } else {
+        for (j = 0, len1 = lap.length; j < len1; j++) {
+          segment = lap[j];
+          range_txt = LAP.as_unicode_range(segment);
+          echo(CND.grey("disjunct range"), CND.yellow(font_txt), CND.lime(range_txt));
+        }
+      }
+    }
     return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_kitty_font_config = function() {
+    echo(CND.steel(CND.reverse("Kitty Font Config".padEnd(108))));
+    return this.write_font_configuration_for_kitty_terminal(S);
   };
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
+      this.demo_cid_ranges_by_rsgs();
       this.demo_configured_ranges();
-      return this.demo_discontinuous_ranges();
+      this.demo_disjunct_ranges();
+      return this.demo_kitty_font_config();
     })();
   }
 
