@@ -68,29 +68,36 @@ S =
     # unifonttwelve:              ''
     lastresort:                 'LastResort'
 
-  illegal_codepoints: [ # see https://en.wikipedia.org/wiki/Universal_Character_Set_characters#Special_code_points
-    [   0x0000,   0x0000, ]
-    [   0x0001,   0x001f, ]
-    [   0xd800,   0xdfff, ] # surrogates
-    [   0xfdd0,   0xfdef, ]
-    [   0xfffe,   0xffff, ]
-    [  0x1fffe,  0x1ffff, ]
-    [  0x2fffe,  0x2ffff, ]
-    [  0x3fffe,  0x3ffff, ]
-    [  0x4fffe,  0x4ffff, ]
-    [  0x5fffe,  0x5ffff, ]
-    [  0x6fffe,  0x6ffff, ]
-    [  0x7fffe,  0x7ffff, ]
-    [  0x8fffe,  0x8ffff, ]
-    [  0x9fffe,  0x9ffff, ]
-    [  0xafffe,  0xaffff, ]
-    [  0xbfffe,  0xbffff, ]
-    [  0xcfffe,  0xcffff, ]
-    [  0xdfffe,  0xdffff, ]
-    [  0xefffe,  0xeffff, ]
-    [  0xffffe,  0xfffff, ]
-    [ 0x10fffe, 0x10ffff, ] ]
+  illegal_codepoints: null
+  # illegal_codepoints: [ # see https://en.wikipedia.org/wiki/Universal_Character_Set_characters#Special_code_points
+  #   [   0x0000,   0x0000, ] # zero
+  #   [   0x0001,   0x001f, ] # lower controls
+  #   [   0x007f,   0x009f, ] # higher controls
+  #   [   0xd800,   0xdfff, ] # surrogates
+  #   [   0xfdd0,   0xfdef, ]
+  #   [   0xfffe,   0xffff, ]
+  #   [  0x1fffe,  0x1ffff, ]
+  #   [  0x2fffe,  0x2ffff, ]
+  #   [  0x3fffe,  0x3ffff, ]
+  #   [  0x4fffe,  0x4ffff, ]
+  #   [  0x5fffe,  0x5ffff, ]
+  #   [  0x6fffe,  0x6ffff, ]
+  #   [  0x7fffe,  0x7ffff, ]
+  #   [  0x8fffe,  0x8ffff, ]
+  #   [  0x9fffe,  0x9ffff, ]
+  #   [  0xafffe,  0xaffff, ]
+  #   [  0xbfffe,  0xbffff, ]
+  #   [  0xcfffe,  0xcffff, ]
+  #   [  0xdfffe,  0xdffff, ]
+  #   [  0xefffe,  0xeffff, ]
+  #   [  0xffffe,  0xfffff, ]
+  #   [ 0x10fffe, 0x10ffff, ] ]
 
+  illegal_codepoint_patterns: [
+    ///^\p{Cc}$///u # Control
+    ///^\p{Cs}$///u # Surrogate
+    # ///^\p{Cn}$///u # Unassigned
+    ]
 
 #===========================================================================================================
 # GENERIC STUFF
@@ -194,7 +201,7 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
   overlaps            = @_read_configured_cid_ranges settings
   R                   = settings.disjunct_cid_ranges = []
   org_by_fontnicks    = {}
-  exclusion           = new LAP.Interlap settings.illegal_codepoints
+  exclusion           = @_read_illegal_codepoints settings
   for idx in [ overlaps.length - 1 .. 0 ] by -1
     rule                = overlaps[ idx ]
     { fontnick
@@ -206,24 +213,55 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-@write_font_configuration_for_kitty_terminal = ( settings ) ->
-  fontnicks_and_laps = @_read_disjunct_cid_ranges S
-  # debug '^443^', fontnicks_and_laps
-  for disjunct_range in fontnicks_and_laps
+@_read_disjunct_cid_segments = ( settings ) ->
+  R = []
+  for disjunct_range in @_read_disjunct_cid_ranges S
     { fontnick
       psname
       lap     } = disjunct_range
-    # debug lap
-    if lap.size is 0
-      filler = ( '-/-' ).padEnd 30
-      echo "# symbol_map      #{filler} (#{psname})"
-    else
-      for segment in lap
-        # help fontnick, LAP.as_unicode_range lap
-        unicode_range_txt = ( LAP.as_unicode_range segment ).padEnd 30
-        sample            = ( String.fromCodePoint c for c in [ segment.lo ... segment.hi ][ .. 30 ] )
-        sample_txt        = sample.join ''
-        echo "symbol_map      #{unicode_range_txt} #{psname} # #{sample_txt}"
+    for segment in lap
+      continue if segment.size is 0 # should never happen
+      R.push { fontnick, psname, segment, }
+  R.sort ( a, b ) ->
+    return -1 if a.segment.lo < b.segment.lo
+    return +1 if a.segment.lo < b.segment.lo
+    return  0
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+@write_font_configuration_for_kitty_terminal = ( settings ) ->
+  fontnicks_and_segments = @_read_disjunct_cid_segments S
+  #.........................................................................................................
+  for disjunct_range in fontnicks_and_segments
+    { fontnick
+      psname
+      segment } = disjunct_range
+    # help fontnick, LAP.as_unicode_range lap
+    unicode_range_txt = ( LAP.as_unicode_range segment ).padEnd 30
+    sample            = ( String.fromCodePoint c for c in [ segment.lo .. segment.hi ][ .. 30 ] )
+    sample_txt        = sample.join ''
+    psname_txt        = psname.padEnd 30
+    echo "# symbol_map      #{unicode_range_txt} #{psname_txt} # #{sample_txt}"
+  #.........................................................................................................
+  for row_cid in [ 0xe000 .. 0xe3a0 ] by 0x10
+    row = []
+    for col_cid in [ 0x00 .. 0x0f ]
+      cid = row_cid + col_cid
+      row.push String.fromCodePoint cid
+    row_cid_txt = "U+#{( row_cid.toString 16 ).padStart 4, '0'}"
+    echo "# #{row_cid_txt} #{row.join ''}"
+  #.........................................................................................................
+  for disjunct_range in fontnicks_and_segments
+    { fontnick
+      psname
+      segment } = disjunct_range
+    ### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ###
+    ### exclude default font: ###
+    continue if psname is 'Iosevka-Slab'
+    ### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ###
+    unicode_range_txt = ( LAP.as_unicode_range segment ).padEnd 30
+    echo "symbol_map      #{unicode_range_txt} #{psname}"
+  #.........................................................................................................
   return null
 
 
@@ -274,17 +312,44 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
   echo CND.steel CND.reverse "Kitty Font Config".padEnd 108
   @write_font_configuration_for_kitty_terminal S
 
+#-----------------------------------------------------------------------------------------------------------
+@_read_illegal_codepoints = ( settings ) ->
+  return R if ( R = settings.illegal_codepoints )?
+  segments = []
+  ranges = [
+    { lo: 0x0000, hi: 0xe000, }
+    { lo: 0xf900, hi: 0xffff, }
+    # { lo: 0x10000, hi: 0x1ffff, }
+    # { lo: 0x20000, hi: 0x2ffff, }
+    # { lo: 0x30000, hi: 0x3ffff, }
+    # { lo: 0x0000, hi: 0x10ffff, }
+    ]
+  for range in ranges
+    prv_cid = null
+    for cid in [ range.lo .. range.hi ]
+      if S.illegal_codepoint_patterns.some ( re ) -> re.test String.fromCodePoint cid
+        segments.push [ cid, cid, ]
+  R = settings.illegal_codepoints = new LAP.Interlap segments
+  help "excluding #{R.size} codepoints"
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_illegal_codepoints = ->
+  lap = @_read_illegal_codepoints S
+  for segment in lap
+    urge LAP.as_unicode_range segment
+  return null
 
 ############################################################################################################
 if module is require.main then do =>
-  @demo_cid_ranges_by_rsgs()
-  @demo_configured_ranges()
-  @demo_disjunct_ranges()
-  @demo_kitty_font_config()
+  # @demo_illegal_codepoints()
+  # @demo_cid_ranges_by_rsgs()
+  # @demo_configured_ranges()
+  # @demo_disjunct_ranges()
+  # @demo_kitty_font_config()
   #.........................................................................................................
-  # @write_font_configuration_for_kitty_terminal S
+  @write_font_configuration_for_kitty_terminal S
   # demo()
-
 
 
 
