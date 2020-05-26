@@ -82,57 +82,40 @@
       // unifonttwelve:              ''
       lastresort: 'LastResort'
     },
-    illegal_codepoints: [ // see https://en.wikipedia.org/wiki/Universal_Character_Set_characters#Special_code_points
-      [0x0000,
-      0x0000],
-      [0x0001,
-      0x001f],
-      [
-        0xd800,
-        0xdfff // surrogates
-      ],
-      [0xfdd0,
-      0xfdef],
-      [0xfffe,
-      0xffff],
-      [0x1fffe,
-      0x1ffff],
-      [0x2fffe,
-      0x2ffff],
-      [0x3fffe,
-      0x3ffff],
-      [0x4fffe,
-      0x4ffff],
-      [0x5fffe,
-      0x5ffff],
-      [0x6fffe,
-      0x6ffff],
-      [0x7fffe,
-      0x7ffff],
-      [0x8fffe,
-      0x8ffff],
-      [0x9fffe,
-      0x9ffff],
-      [0xafffe,
-      0xaffff],
-      [0xbfffe,
-      0xbffff],
-      [0xcfffe,
-      0xcffff],
-      [0xdfffe,
-      0xdffff],
-      [0xefffe,
-      0xeffff],
-      [0xffffe,
-      0xfffff],
-      [0x10fffe,
-      0x10ffff]
+    illegal_codepoints: null,
+    // illegal_codepoints: [ # see https://en.wikipedia.org/wiki/Universal_Character_Set_characters#Special_code_points
+    //   [   0x0000,   0x0000, ] # zero
+    //   [   0x0001,   0x001f, ] # lower controls
+    //   [   0x007f,   0x009f, ] # higher controls
+    //   [   0xd800,   0xdfff, ] # surrogates
+    //   [   0xfdd0,   0xfdef, ]
+    //   [   0xfffe,   0xffff, ]
+    //   [  0x1fffe,  0x1ffff, ]
+    //   [  0x2fffe,  0x2ffff, ]
+    //   [  0x3fffe,  0x3ffff, ]
+    //   [  0x4fffe,  0x4ffff, ]
+    //   [  0x5fffe,  0x5ffff, ]
+    //   [  0x6fffe,  0x6ffff, ]
+    //   [  0x7fffe,  0x7ffff, ]
+    //   [  0x8fffe,  0x8ffff, ]
+    //   [  0x9fffe,  0x9ffff, ]
+    //   [  0xafffe,  0xaffff, ]
+    //   [  0xbfffe,  0xbffff, ]
+    //   [  0xcfffe,  0xcffff, ]
+    //   [  0xdfffe,  0xdffff, ]
+    //   [  0xefffe,  0xeffff, ]
+    //   [  0xffffe,  0xfffff, ]
+    //   [ 0x10fffe, 0x10ffff, ] ]
+    illegal_codepoint_patterns: [
+      /^\p{Cc}$/u, // Control
+      /^\p{Cs}$/u // Surrogate
     ]
   };
 
   //===========================================================================================================
   // GENERIC STUFF
   //-----------------------------------------------------------------------------------------------------------
+  // ///^\p{Cn}$///u # Unassigned
   cid_range_pattern = /^0x(?<first_cid_txt>[0-9a-fA-F]+)\.\.0x(?<last_cid_txt>[0-9a-fA-F]+)$/;
 
   parse_cid_hex_range_txt = function(cid_range_txt) {
@@ -268,7 +251,7 @@
     overlaps = this._read_configured_cid_ranges(settings);
     R = settings.disjunct_cid_ranges = [];
     org_by_fontnicks = {};
-    exclusion = new LAP.Interlap(settings.illegal_codepoints);
+    exclusion = this._read_illegal_codepoints(settings);
     for (idx = i = ref = overlaps.length - 1; i >= 0; idx = i += -1) {
       rule = overlaps[idx];
       ({fontnick, psname, lap} = rule);
@@ -284,41 +267,85 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.write_font_configuration_for_kitty_terminal = function(settings) {
-    var c, disjunct_range, filler, fontnick, fontnicks_and_laps, i, j, lap, len, len1, psname, sample, sample_txt, segment, unicode_range_txt;
-    fontnicks_and_laps = this._read_disjunct_cid_ranges(S);
-// debug '^443^', fontnicks_and_laps
-    for (i = 0, len = fontnicks_and_laps.length; i < len; i++) {
-      disjunct_range = fontnicks_and_laps[i];
+  this._read_disjunct_cid_segments = function(settings) {
+    var R, disjunct_range, fontnick, i, j, lap, len, len1, psname, ref, segment;
+    R = [];
+    ref = this._read_disjunct_cid_ranges(S);
+    for (i = 0, len = ref.length; i < len; i++) {
+      disjunct_range = ref[i];
       ({fontnick, psname, lap} = disjunct_range);
-      // debug lap
-      if (lap.size === 0) {
-        filler = '-/-'.padEnd(30);
-        echo(`# symbol_map      ${filler} (${psname})`);
-      } else {
-        for (j = 0, len1 = lap.length; j < len1; j++) {
-          segment = lap[j];
-          // help fontnick, LAP.as_unicode_range lap
-          unicode_range_txt = (LAP.as_unicode_range(segment)).padEnd(30);
-          sample = (function() {
-            var k, len2, ref, ref1, ref2, results;
-            ref2 = (function() {
-              var results1 = [];
-              for (var l = ref = segment.lo, ref1 = segment.hi; ref <= ref1 ? l < ref1 : l > ref1; ref <= ref1 ? l++ : l--){ results1.push(l); }
-              return results1;
-            }).apply(this).slice(0, 31);
-            results = [];
-            for (k = 0, len2 = ref2.length; k < len2; k++) {
-              c = ref2[k];
-              results.push(String.fromCodePoint(c));
-            }
-            return results;
-          })();
-          sample_txt = sample.join('');
-          echo(`symbol_map      ${unicode_range_txt} ${psname} # ${sample_txt}`);
+      for (j = 0, len1 = lap.length; j < len1; j++) {
+        segment = lap[j];
+        if (segment.size === 0) { // should never happen
+          continue;
         }
+        R.push({fontnick, psname, segment});
       }
     }
+    R.sort(function(a, b) {
+      if (a.segment.lo < b.segment.lo) {
+        return -1;
+      }
+      if (a.segment.lo < b.segment.lo) {
+        return +1;
+      }
+      return 0;
+    });
+    return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.write_font_configuration_for_kitty_terminal = function(settings) {
+    /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+    var c, cid, col_cid, disjunct_range, fontnick, fontnicks_and_segments, i, j, k, l, len, len1, psname, psname_txt, row, row_cid, row_cid_txt, sample, sample_txt, segment, unicode_range_txt;
+    fontnicks_and_segments = this._read_disjunct_cid_segments(S);
+//.........................................................................................................
+    for (i = 0, len = fontnicks_and_segments.length; i < len; i++) {
+      disjunct_range = fontnicks_and_segments[i];
+      ({fontnick, psname, segment} = disjunct_range);
+      // help fontnick, LAP.as_unicode_range lap
+      unicode_range_txt = (LAP.as_unicode_range(segment)).padEnd(30);
+      sample = (function() {
+        var j, len1, ref, ref1, ref2, results;
+        ref2 = (function() {
+          var results1 = [];
+          for (var k = ref = segment.lo, ref1 = segment.hi; ref <= ref1 ? k <= ref1 : k >= ref1; ref <= ref1 ? k++ : k--){ results1.push(k); }
+          return results1;
+        }).apply(this).slice(0, 31);
+        results = [];
+        for (j = 0, len1 = ref2.length; j < len1; j++) {
+          c = ref2[j];
+          results.push(String.fromCodePoint(c));
+        }
+        return results;
+      })();
+      sample_txt = sample.join('');
+      psname_txt = psname.padEnd(30);
+      echo(`# symbol_map      ${unicode_range_txt} ${psname_txt} # ${sample_txt}`);
+    }
+//.........................................................................................................
+    for (row_cid = j = 0xe000; j <= 58272; row_cid = j += 0x10) {
+      row = [];
+      for (col_cid = k = 0x00; k <= 15; col_cid = ++k) {
+        cid = row_cid + col_cid;
+        row.push(String.fromCodePoint(cid));
+      }
+      row_cid_txt = `U+${(row_cid.toString(16)).padStart(4, '0')}`;
+      echo(`# ${row_cid_txt} ${row.join('')}`);
+    }
+//.........................................................................................................
+    for (l = 0, len1 = fontnicks_and_segments.length; l < len1; l++) {
+      disjunct_range = fontnicks_and_segments[l];
+      ({fontnick, psname, segment} = disjunct_range);
+      if (psname === 'Iosevka-Slab') {
+        /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+        /* exclude default font: */
+        continue;
+      }
+      unicode_range_txt = (LAP.as_unicode_range(segment)).padEnd(30);
+      echo(`symbol_map      ${unicode_range_txt} ${psname}`);
+    }
+    //.........................................................................................................
     return null;
   };
 
@@ -386,18 +413,67 @@
     return this.write_font_configuration_for_kitty_terminal(S);
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this._read_illegal_codepoints = function(settings) {
+    var R, cid, i, j, len, prv_cid, range, ranges, ref, ref1, segments;
+    if ((R = settings.illegal_codepoints) != null) {
+      return R;
+    }
+    segments = [];
+    ranges = [
+      {
+        lo: 0x0000,
+        hi: 0xe000
+      },
+      {
+        lo: 0xf900,
+        hi: 0xffff
+      }
+    ];
+// { lo: 0x10000, hi: 0x1ffff, }
+// { lo: 0x20000, hi: 0x2ffff, }
+// { lo: 0x30000, hi: 0x3ffff, }
+// { lo: 0x0000, hi: 0x10ffff, }
+    for (i = 0, len = ranges.length; i < len; i++) {
+      range = ranges[i];
+      prv_cid = null;
+      for (cid = j = ref = range.lo, ref1 = range.hi; (ref <= ref1 ? j <= ref1 : j >= ref1); cid = ref <= ref1 ? ++j : --j) {
+        if (S.illegal_codepoint_patterns.some(function(re) {
+          return re.test(String.fromCodePoint(cid));
+        })) {
+          segments.push([cid, cid]);
+        }
+      }
+    }
+    R = settings.illegal_codepoints = new LAP.Interlap(segments);
+    help(`excluding ${R.size} codepoints`);
+    return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_illegal_codepoints = function() {
+    var i, lap, len, segment;
+    lap = this._read_illegal_codepoints(S);
+    for (i = 0, len = lap.length; i < len; i++) {
+      segment = lap[i];
+      urge(LAP.as_unicode_range(segment));
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      this.demo_cid_ranges_by_rsgs();
-      this.demo_configured_ranges();
-      this.demo_disjunct_ranges();
-      return this.demo_kitty_font_config();
+      // @demo_illegal_codepoints()
+      // @demo_cid_ranges_by_rsgs()
+      // @demo_configured_ranges()
+      // @demo_disjunct_ranges()
+      // @demo_kitty_font_config()
+      //.........................................................................................................
+      return this.write_font_configuration_for_kitty_terminal(S);
     })();
   }
 
-  //.........................................................................................................
-// @write_font_configuration_for_kitty_terminal S
-// demo()
+  // demo()
 
 }).call(this);
