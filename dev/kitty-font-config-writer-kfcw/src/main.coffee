@@ -370,7 +370,20 @@ if module is require.main then do =>
   # @demo_kitty_font_config()
   #.........................................................................................................
   @write_font_configuration_for_kitty_terminal S
+  @write_whisk_character_tunnel S
   # demo()
+  # { freeze } = require 'letsfreezethat'
+  # d = new Map()
+  # d.set 42, { foo: 'bar', }
+  # e = freeze d
+  # info d
+  # debug d is e
+  # debug Object.isFrozen d
+  # debug Object.isFrozen e
+  # # e.set 42, false
+  # info d
+  # info e
+
 
 
 
