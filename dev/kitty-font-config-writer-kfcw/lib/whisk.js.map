@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "/home/flow/jzr/hengist/dev/kitty-font-config-writer-kfcw/src/whisk.coffee"
+  ],
+  "names": [],
+  "mappings": "AAEA;AAAA,MAAA,OAAA,EAAA,QAAA,EAAA;;EAAA,QAAA,GAAY,OAAA,CAAQ,UAAR;;EACZ,OAAA,GAAW,IAAI,MAAJ,CAAa,OAAA,CAAQ,WAAR,CAAb;;EAEX,EAAA,GAAK,QAAQ,CAAC,eAAT,CAAyB;IAC5B,KAAA,EAAS,OAAO,CAAC,KADW;IAE5B,MAAA,EAAS,OAAO,CAAC,MAFW;IAG5B,QAAA,EAAU;EAHkB,CAAzB;;EAKL,EAAE,CAAC,EAAH,CAAM,MAAN,EAAc,CAAE,IAAF,CAAA,GAAA;AACd,QAAA,OAAA;;IACC,OAAA,GAAU,IAAI,CAAC,OAAL,CAAa,oBAAb,EAAmC,KAAnC;WACV,OAAO,CAAC,MAAM,CAAC,KAAf,CAAqB,OAAA,GAAU,IAA/B;EAHa,CAAd;AARA",
+  "sourcesContent": [
+    "\n\nreadline \t= require 'readline'\npattern\t\t= new RegExp ( require './pattern' )\n\nrl = readline.createInterface {\n  input: \t\tprocess.stdin\n  output: \tprocess.stdout\n  terminal: false }\n\nrl.on 'line', ( line ) =>\n\t# process.stdout.write( `line: ${line}\\n` )\n\tescaped = line.replace /([\\ue000-\\uefff])/g, '$1 '\n\tprocess.stdout.write escaped + '\\n'\n\n\n\n\n"
+  ]
+}

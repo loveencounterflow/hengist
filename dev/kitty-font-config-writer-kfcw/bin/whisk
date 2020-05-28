@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+const pattern = /([\ue000-\uefff])/g;
+const rl      = require( 'readline' ).createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: false })
+
+rl.on( 'line', ( line ) => {
+  return process.stdout.write( line.replace( pattern, '$1 \x98helo\x9c\x9fhelo\x9c\x11' ) + '\n' ); } );

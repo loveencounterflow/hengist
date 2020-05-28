@@ -264,6 +264,27 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
   #.........................................................................................................
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@write_whisk_character_tunnel = ( settings ) ->
+  # https://www.aivosto.com/articles/control-characters.html#APC
+  chr_ranges  = "[\\ue000-\\uefff]"
+  source      = """#!/usr/bin/env node
+  const pattern = /(#{chr_ranges})/g;
+  const rl      = require( 'readline' ).createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: false })
+
+  rl.on( 'line', ( line ) => {
+    return process.stdout.write( line.replace( pattern, '$1 ' ) + '\\n' ); } );
+  """
+  echo()
+  echo source
+  echo()
+  # path = ???
+  # FS.writeFileSync path, source
+  return null
+
 
 #===========================================================================================================
 # DATA STRUCTURE DEMOS
