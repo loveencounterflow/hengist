@@ -108,8 +108,12 @@ dist
 intershop
 apps/*
 
-# MyPy caches
+# (D)MyPy temporary files
 .dmypy.json
+dmypy.json
 .mypy_cache
+dmypy.sock
+
+
 
 
