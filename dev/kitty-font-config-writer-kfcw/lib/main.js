@@ -349,6 +349,28 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.write_whisk_character_tunnel = function(settings) {
+    var chr_ranges, source;
+    // https://www.aivosto.com/articles/control-characters.html#APC
+    chr_ranges = "[\\ue000-\\uefff]";
+    source = `#!/usr/bin/env node
+const pattern = /(${chr_ranges})/g;
+const rl      = require( 'readline' ).createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: false })
+
+rl.on( 'line', ( line ) => {
+  return process.stdout.write( line.replace( pattern, '$1 ' ) + '\\n' ); } );`;
+    echo();
+    echo(source);
+    echo();
+    // path = ???
+    // FS.writeFileSync path, source
+    return null;
+  };
+
   //===========================================================================================================
   // DATA STRUCTURE DEMOS
   //-----------------------------------------------------------------------------------------------------------
@@ -470,10 +492,22 @@
       // @demo_disjunct_ranges()
       // @demo_kitty_font_config()
       //.........................................................................................................
-      return this.write_font_configuration_for_kitty_terminal(S);
+      this.write_font_configuration_for_kitty_terminal(S);
+      return this.write_whisk_character_tunnel(S);
     })();
   }
 
   // demo()
+// { freeze } = require 'letsfreezethat'
+// d = new Map()
+// d.set 42, { foo: 'bar', }
+// e = freeze d
+// info d
+// debug d is e
+// debug Object.isFrozen d
+// debug Object.isFrozen e
+// # e.set 42, false
+// info d
+// info e
 
 }).call(this);
