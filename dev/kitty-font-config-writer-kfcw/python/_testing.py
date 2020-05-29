@@ -68,8 +68,7 @@ class Testing:
       me.passes += +1
     else:
       me.fails += +1
-      print( f"{C.bg.red}ref {ref}: fail: received {result}{C.reset}"   )
-      print( f"{C.bg.red}ref {ref}: fail: expected {matcher}{C.reset}"  )
+      print( f"ref {ref}: fail: received {C.fg.red}{result}{C.reset}, expected {C.fg.orange}{matcher}{C.reset}" )
 
   #-----------------------------------------------------------------------------------------------------------
   def ne( me, ref, result, matcher ):
