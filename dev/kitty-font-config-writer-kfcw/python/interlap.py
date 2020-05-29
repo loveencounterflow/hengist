@@ -2,67 +2,84 @@
 
 #-----------------------------------------------------------------------------------------------------------
 from _testing import Testing
-from _testing import C
-from _testing import debug
+# from _testing import C
+# from _testing import debug
 from _testing import urge
-from _testing import help
-from typing import NamedTuple
+# from _testing import help
+# from typing import NamedTuple
 from typing import Union
 from typing import Tuple
 from typing import Iterable
+from typing import List
 from functools import total_ordering
 class Interlap_error( TypeError, ValueError ): pass
 def throw( message: str ) -> None: raise Interlap_error( message )
 # from typing import NewType
-# from typing import Any
-from math import inf
+from typing import Any
+# from math import inf
 
 #-----------------------------------------------------------------------------------------------------------
-def isa( T, x ):
+def isa( T: Any, x: Any ) -> Any:
   ### thx to https://stackoverflow.com/a/49471187/7568091 ###
   ### TAINT This is much more complicated than it should be ###
   if getattr( T, '__origin__', None ) == Union: return isinstance( x, T.__args__ )
   return isinstance( x, T )
 
 #-----------------------------------------------------------------------------------------------------------
+bi_int          = Tuple[ int, int ]
+
+#-----------------------------------------------------------------------------------------------------------
 @total_ordering
 class Segment:
-  def __init__( me, lo, hi ): me.lo = lo; me.hi = hi
-  def __repr__( me ): return f"Segment( {me.lo}, {me.hi} )"
-  def __iter__( me ): return iter( ( me.lo, me.hi ) )
-
-  # #---------------------------------------------------------------------------------------------------------
-  # def __cmp__( me, other ):
-  #   if not isinstance( other, Segment ): throw( f"^786^ unable to compare a Segment with a {type( other )}" )
-  #   if me.lo < other.lo: return -1
-  #   if me.lo > other.lo: return +1
-  #   if me.hi < other.hi: return -1
-  #   if me.hi > other.hi: return +1
-  #   return 0
+  def __init__( me, lo: int, hi: int ) -> None: me.lo = lo; me.hi = hi
+  def __repr__( me ) -> str: return f"Segment( {me.lo}, {me.hi} )"
+  def __iter__( me ) -> Iterable: yield me
 
   #---------------------------------------------------------------------------------------------------------
-  def __lt__( me, other ):
+  def __lt__( me, other: Any ) -> bool:
     if not isinstance( other, Segment ): throw( f"^786^ unable to compare a Segment with a {type( other )}" )
-    return ( me.lo < other.lo ) or ( me.hi < other.hi )
+    return ( me.lo < other.lo ) or ( me.hi < other.hi ) # type: ignore
 
   #---------------------------------------------------------------------------------------------------------
-  def __eq__( me, other ):
+  def __eq__( me, other: Any ) -> bool:
     if not isinstance( other, Segment ): return False
     return ( me.lo == other.lo ) and ( me.hi == other.hi )
 
-# #-----------------------------------------------------------------------------------------------------------
-# class Segment( NamedTuple ):
-#   lo:   int
-#   hi:   int
+#-----------------------------------------------------------------------------------------------------------
+@total_ordering
+class Lap:
+
+  #---------------------------------------------------------------------------------------------------------
+  def __init__( me, segments: Iterable[ Segment, ] = () ):
+    me.segments = tuple( segments )
+
+  #---------------------------------------------------------------------------------------------------------
+  def __repr__(     me            ) -> str:       return f"Lap( {repr( me.segments )} )"
+  def __iter__(     me            ) -> Iterable:  return iter( me.segments )
+  def __len__(      me            ) -> int:       return len( me.segments )
+  def __getitem__(  me, idx: int  ) -> Segment:   return me.segments[ idx ]
+
+  #---------------------------------------------------------------------------------------------------------
+  def __lt__( me, other: Any ) -> bool:
+    if not isinstance( other, Lap ): throw( f"^786^ unable to compare a Lap with a {type( other )}" )
+    if me.segments == other.segments: return False
+    length = min( len( me ), len( other ) )
+    if length == 0:
+      if len( me ) == 0: return True
+      return False
+    for idx in range( 0, length ): # type: ignore
+      if me.segments[ idx ] < other.segments[ idx ]: return True # type: ignore
+    return False
+
+  #---------------------------------------------------------------------------------------------------------
+  def __eq__( me, other: Any ) -> bool:
+    if not isinstance( other, Lap ): return False
+    return me.segments == other.segments
 
 #-----------------------------------------------------------------------------------------------------------
-class Lap( Tuple ): pass
-
-#-----------------------------------------------------------------------------------------------------------
-bi_int          = Tuple[ int, int ]
 gen_segment     = Union[ Segment, bi_int, ]
 # intinf          = Union[ int, inf, ]
-intinf          = Union[ int, str ]
+# intinf          = Union[ int, str ]
 # Lap             = Tuple[ Segment ]
 # opt_gen_segment = Union[ gen_segment, None, ]
 
@@ -85,7 +102,7 @@ def new_segment( lohi: gen_segment ) -> Segment:
 #   return Lap( _segments )
 
 #-----------------------------------------------------------------------------------------------------------
-def new_lap( *P: Iterable[ gen_segment ] ) -> Lap: return merge_segments( *P )
+def new_lap( *P: gen_segment ) -> Lap: return merge_segments( *P ) # type: ignore
 
 #   _segments: Tuple[ Segment ] = [ new_segment( s ) for s in segments ].sort()
 #   return Lap( _segments )
@@ -125,14 +142,14 @@ def _union( me: Segment, other: Segment ) -> Lap:
   return Lap()
 
 #-----------------------------------------------------------------------------------------------------------
-def merge_segments( *P: Tuple[ gen_segment ] ):
+def merge_segments( *P: gen_segment ) -> Lap:
   if len( P ) == 0: return Lap()
-  if len( P ) == 1: return Lap( [ new_segment( P[ 0 ] ), ] )
+  if len( P ) == 1: return Lap( ( new_segment( P[ 0 ] ), ) )
   if len( P ) == 2: return Lap( _merge_two_segments( new_segment( P[ 0 ] ), new_segment( P[ 1 ] ) ) )
   return Lap( _merge_segments( *P ) )
 
 #-----------------------------------------------------------------------------------------------------------
-def _merge_segments( *P: Tuple[ gen_segment ] ):
+def _merge_segments( *P: gen_segment ) -> List[ Segment ]:
   if len( P ) == 0: return []
   if len( P ) == 1: return [ new_segment( P[ 0 ] ), ]
   if len( P ) == 2: return _merge_two_segments( new_segment( P[ 0 ] ), new_segment( P[ 1 ] ) )
@@ -158,7 +175,7 @@ def _merge_segments( *P: Tuple[ gen_segment ] ):
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-def _merge_two_segments( a: gen_segment, b: gen_segment ):
+def _merge_two_segments( a: Segment, b: Segment ) -> List[ Segment ]:
   if a.lo > b.lo: a, b = b, a
   if b.lo > a.hi + 1: return [ a, b, ]
   return [ new_segment( ( a.lo, max( a.hi, b.hi ), ) ), ]
@@ -177,7 +194,7 @@ def test() -> None:
   T.report()
 
 #-----------------------------------------------------------------------------------------------------------
-def test_basics( T ) -> None:
+def test_basics( T: Any ) -> None:
   print( '^332-1^', 'test_basics' )
   T.eq( '^T1^', type( new_segment( ( 42, 48, ) ) ), Segment )
   T.ne( '^T2^', type( new_segment( ( 42, 48, ) ) ), tuple )
@@ -188,12 +205,24 @@ def test_basics( T ) -> None:
   # else:   T.fail( '^T5^', f"should not be acceptable: {r}" )
 
 #-----------------------------------------------------------------------------------------------------------
-def test_sorting( T ) -> None:
+def test_sorting( T: Any ) -> None:
   print( '^332-1^', 'test_sorting' )
-  urge( '^334^', Segment( 3, 4 ) < Segment( 4, 4 ) )
+  urge( '^334^', Segment( 3, 4 ) <  Segment( 4, 4 ) )
+  #.........................................................................................................
+  urge( '^334^', new_lap( ( 3, 4 ) ) <  new_lap( ( 4, 4, ) ) )
+  urge( '^334^', new_lap( ( 3, 4 ) ) == new_lap( ( 4, 4, ) ) )
+  urge( '^334^', new_lap( ( 3, 4 ) ) >  new_lap( ( 4, 4, ) ) )
+  #.........................................................................................................
+  urge( '^334^', new_lap( ( 3, 4 ) ) <  new_lap( ( 3, 5, ) ) )
+  urge( '^334^', new_lap( ( 3, 4 ) ) == new_lap( ( 3, 5, ) ) )
+  urge( '^334^', new_lap( ( 3, 4 ) ) >  new_lap( ( 3, 5, ) ) )
+  #.........................................................................................................
+  urge( '^334^', new_lap( ( 3, 4 ) ) <  new_lap( ( 5, 5, ) ) )
+  urge( '^334^', new_lap( ( 3, 4 ) ) == new_lap( ( 5, 5, ) ) )
+  urge( '^334^', new_lap( ( 3, 4 ) ) >  new_lap( ( 5, 5, ) ) )
 
 #-----------------------------------------------------------------------------------------------------------
-def test_overlaps_disjunct( T ) -> None:
+def test_overlaps_disjunct( T: Any ) -> None:
   print( '^332-1^', 'test_overlaps_disjunct' )
   #.........................................................................................................
   s1 = new_segment( ( 20, 29, ) )
@@ -224,7 +253,7 @@ def test_overlaps_disjunct( T ) -> None:
   T.eq( '^T21^', disjunct( s1, s8 ), True   )
 
 # #-----------------------------------------------------------------------------------------------------------
-# def test_union( T ) -> None:
+# def test_union( T: Any ) -> None:
 #   print( '^332-1^', 'test_union' )
 #   #.........................................................................................................
 #   s1 = new_segment( ( 10, 20, ) )
@@ -246,9 +275,9 @@ def test_overlaps_disjunct( T ) -> None:
 #   print( union( s1, s8 ), '^T29^' )
 
 #-----------------------------------------------------------------------------------------------------------
-def test_merge_two_segments( T ):
+def test_merge_two_segments( T: Any ) -> None:
   print( '^332-1^', 'test_merge_two_segments' )
-  def s( lo, hi ): return Segment( lo, hi )
+  def s( lo, hi ): return Segment( lo, hi ) # type: ignore
   T.eq( '^T30^', _merge_two_segments( s( 20, 29, ), s( 20, 29, ) ), [ s( 20, 29, ),              ] )
   T.eq( '^T31^', _merge_two_segments( s( 20, 29, ), s( 29, 29, ) ), [ s( 20, 29, ),              ] )
   T.eq( '^T32^', _merge_two_segments( s( 20, 29, ), s( 29, 39, ) ), [ s( 20, 39, ),              ] )
@@ -256,9 +285,9 @@ def test_merge_two_segments( T ):
   T.eq( '^T34^', _merge_two_segments( s( 20, 29, ), s( 15, 18, ) ), [ s( 15, 18, ), s( 20, 29, ), ] )
 
 #-----------------------------------------------------------------------------------------------------------
-def test_merge_more_segments( T ):
+def test_merge_more_segments( T: Any ) -> None:
   print( '^332-1^', 'test_merge_segments' )
-  def s( lo, hi ): return Segment( lo, hi )
+  def s( lo, hi ): return Segment( lo, hi ) # type: ignore
   T.eq( '^T35^', _merge_segments(), [] )
   T.eq( '^T36^', _merge_segments(     ( 20, 29, ),             ), [ s( 20, 29, ),              ] )
   T.eq( '^T37^', _merge_segments(     ( 20, 29, ), ( 20, 29, ) ), [ s( 20, 29, ),              ] )
@@ -276,13 +305,13 @@ def test_merge_more_segments( T ):
   # T.eq( _merge_segments( '^T49^', ( 10, float( 'inf' ), ), ( 15, 19, ), ), [ ( 10, float( 'inf' ), ),   ] )
 
 #-----------------------------------------------------------------------------------------------------------
-def test_merge_segments( T ):
+def test_merge_segments( T: Any ) -> None:
   print( '^332-1^', 'test_merge_segments' )
   # try:    _merge_segments()
   # except  Interlap_error as e: T.ok( '^T50^', True )
   # else:   T.fail( '^T51^', "`new_segment()` without arguments should fail" )
-  def S( lo, hi ): return Segment( lo, hi )
-  def L( *P ): return Lap( P )
+  def S( lo, hi ): return Segment( lo, hi ) # type: ignore
+  def L( *P ): return Lap( P ) # type: ignore
   urge( '^T52^', merge_segments() )
   T.eq( '^T52^', merge_segments(), L() )
   T.eq( '^T53^', merge_segments(     ( 20, 29, ),             ), L( S( 20, 29, ),              ) )
@@ -298,14 +327,13 @@ def test_merge_segments( T ):
   T.eq( '^T63^', merge_segments( ( 20, 29, ), ( 40, 49, ), ( 60, 69, ) ), L( S( 20, 29, ), S( 40, 49, ), S( 60, 69, ),   ) )
   T.eq( '^T64^', merge_segments( ( 10, 10, ), ( 11, 11, ), ( 13, 13, ) ), L( S( 10, 11, ), S( 13, 13, ),   ) )
   T.eq( '^T65^', merge_segments( ( 10, 19, ), ( 15, 19, ), ( 11, 13, ) ), L( S( 10, 19, ),    ) )
-  # T.eq( _merge_segments( '^T66^', ( 10, float( 'inf' ), ), ( 15, 19, ), ), ( ( 10, float( 'inf' ), ),   ) )
 
 #-----------------------------------------------------------------------------------------------------------
-def test_new_lap( T ):
+def test_new_lap( T: Any ) -> None:
   print( '^332-1^', 'test_new_lap' )
-  def S( lo, hi ): return Segment( lo, hi )
-  def L( *P ): return Lap( P )
-  T.eq( '^T67^', new_lap(), () )
+  def S( lo: int, hi: int ) -> Segment: return Segment( lo, hi )
+  def L( *P: gen_segment ) -> Lap: return Lap( P ) # type: ignore
+  T.eq( '^T67^', new_lap(), L() )
   T.eq( '^T68^', new_lap(     ( 20, 29, ),             ), L( S( 20, 29, ),              ) )
   T.eq( '^T69^', new_lap(     ( 20, 29, ), ( 20, 29, ) ), L( S( 20, 29, ),              ) )
   T.eq( '^T70^', new_lap(     ( 20, 29, ), ( 29, 29, ) ), L( S( 20, 29, ),              ) )
