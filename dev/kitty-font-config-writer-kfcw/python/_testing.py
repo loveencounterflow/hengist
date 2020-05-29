@@ -1,3 +1,16 @@
+#-----------------------------------------------------------------------------------------------------------
+# from _testing import C
+# from _testing import debug
+# from _testing import urge
+# from _testing import help
+# from typing import NamedTuple
+# from typing import Union
+# from typing import Tuple
+# from typing import Iterable
+# from typing import List
+# from functools import total_ordering
+# from typing import NewType
+from typing import Any
 
 
 #===========================================================================================================
@@ -39,9 +52,9 @@ class C:
     grey        = '\033[47m'
 
 #-----------------------------------------------------------------------------------------------------------
-def debug(  *P ): print( C.fg.purple, end = '' ); print( *P, end = '' ); print( C.reset )
-def urge(   *P ): print( C.fg.orange, end = '' ); print( *P, end = '' ); print( C.reset )
-def help(   *P ): print( C.fg.green,  end = '' ); print( *P, end = '' ); print( C.reset )
+def debug(  *P: Any ) -> None: print( C.fg.purple, end = '' ); print( *P, end = '' ); print( C.reset )
+def urge(   *P: Any ) -> None: print( C.fg.orange, end = '' ); print( *P, end = '' ); print( C.reset )
+def help(   *P: Any ) -> None: print( C.fg.green,  end = '' ); print( *P, end = '' ); print( C.reset )
 
 
 #===========================================================================================================
@@ -50,12 +63,12 @@ def help(   *P ): print( C.fg.green,  end = '' ); print( *P, end = '' ); print( 
 class Testing:
 
   #-----------------------------------------------------------------------------------------------------------
-  def __init__( me ):
+  def __init__( me ) -> None:
     me.passes = 0
     me.fails  = 0
 
   #-----------------------------------------------------------------------------------------------------------
-  def ok( me, ref, result ):
+  def ok( me, ref: str, result: Any ) -> None:
     if result == True:
       me.passes += +1
     else:
@@ -63,7 +76,7 @@ class Testing:
       print( f"{C.bg.red}ref {ref}: fail: not true: {result}{C.reset}" )
 
   #-----------------------------------------------------------------------------------------------------------
-  def eq( me, ref, result, matcher ):
+  def eq( me, ref: str, result: Any, matcher: Any ) -> None:
     if result == matcher:
       me.passes += +1
     else:
@@ -71,7 +84,7 @@ class Testing:
       print( f"ref {ref}: fail: received {C.fg.red}{result}{C.reset}, expected {C.fg.orange}{matcher}{C.reset}" )
 
   #-----------------------------------------------------------------------------------------------------------
-  def ne( me, ref, result, matcher ):
+  def ne( me, ref: str, result: Any, matcher: Any ) -> None:
     if result != matcher:
       me.passes += +1
     else:
@@ -80,12 +93,12 @@ class Testing:
       print( f"{C.bg.red}ref {ref}: fail: expected {matcher}{C.reset}"  )
 
   #-----------------------------------------------------------------------------------------------------------
-  def fail( me, ref, message ):
+  def fail( me, ref: str, message: str ) -> None:
     me.fails += +1
     print( f"{C.bg.red}ref {ref}: fail: {message}{C.reset}" )
 
   #-----------------------------------------------------------------------------------------------------------
-  def report( me ):
+  def report( me ) -> None:
     print( f"{C.fg.lightblue}{C.bold}Test Report{C.reset}" )
     if me.fails == 0:
       print( f"{C.fg.grey   }fails:   {me.fails}{C.reset}"  )
