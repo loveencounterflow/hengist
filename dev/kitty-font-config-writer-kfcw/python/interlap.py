@@ -120,8 +120,15 @@ def overlaps( me: gen_segment, other: gen_segment ) -> bool:
   return _overlaps( new_segment( me ), new_segment( other ) )
 
 #-----------------------------------------------------------------------------------------------------------
-def union( me: gen_segment, other: gen_segment ) -> Lap:
-  return _union( new_segment( me ), new_segment( other ) )
+def adjacent( me: gen_segment, other: gen_segment ) -> bool:
+  return _adjacent( new_segment( me ), new_segment( other ) )
+
+#-----------------------------------------------------------------------------------------------------------
+def merge_segments( *P: gen_segment ) -> Lap:
+  if len( P ) == 0: return Lap()
+  if len( P ) == 1: return Lap( ( new_segment( P[ 0 ] ), ) )
+  if len( P ) == 2: return Lap( _merge_two_segments( new_segment( P[ 0 ] ), new_segment( P[ 1 ] ) ) )
+  return Lap( _merge_segments( *P ) )
 
 
 #===========================================================================================================
@@ -135,17 +142,8 @@ def _overlaps( me: Segment, other: Segment ) -> bool:
   return not ( ( me.hi < other.lo ) or ( other.hi < me.lo ) )
 
 #-----------------------------------------------------------------------------------------------------------
-def _union( me: Segment, other: Segment ) -> Lap:
-  if _disjunct( me, other ): return new_lap( me, other )
-  # return not ( ( me.hi < other.lo ) or ( other.hi < me.lo ) )
-  return Lap()
-
-#-----------------------------------------------------------------------------------------------------------
-def merge_segments( *P: gen_segment ) -> Lap:
-  if len( P ) == 0: return Lap()
-  if len( P ) == 1: return Lap( ( new_segment( P[ 0 ] ), ) )
-  if len( P ) == 2: return Lap( _merge_two_segments( new_segment( P[ 0 ] ), new_segment( P[ 1 ] ) ) )
-  return Lap( _merge_segments( *P ) )
+def _adjacent( me: Segment, other: Segment ) -> bool:
+  return ( me.hi + 1 == other.lo ) or ( other.hi + 1 == me.lo )
 
 #-----------------------------------------------------------------------------------------------------------
 def _merge_segments( *P: gen_segment ) -> List[ Segment ]:
