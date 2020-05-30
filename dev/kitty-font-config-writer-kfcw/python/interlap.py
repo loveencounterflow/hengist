@@ -104,16 +104,8 @@ def new_segment( lohi: gen_segment ) -> Segment:
   #.........................................................................................................
   return Segment( lo, hi, )
 
-# #-----------------------------------------------------------------------------------------------------------
-# def _new_lap( segments: Tup[ gen_segment ] ) -> Lap:
-#   _segments: Tuple[ Segment ] = [ new_segment( s ) for s in segments ].sort()
-#   return Lap( _segments )
-
 #-----------------------------------------------------------------------------------------------------------
 def new_lap( *P: gen_segment ) -> Lap: return merge_segments( *P ) # type: ignore
-
-#   _segments: Tuple[ Segment ] = [ new_segment( s ) for s in segments ].sort()
-#   return Lap( _segments )
 
 
 #===========================================================================================================
@@ -122,14 +114,18 @@ def new_lap( *P: gen_segment ) -> Lap: return merge_segments( *P ) # type: ignor
 # class A:
 # @classmethod ... def segments_are_disjunct( cls, ... )
 def segments_are_disjunct( me: gen_segment, other: gen_segment ) -> bool:
+  """Two segments are disjunct iff they have no point in common."""
   return _segments_are_disjunct( new_segment( me ), new_segment( other ) )
 
 #-----------------------------------------------------------------------------------------------------------
 def segments_overlap( me: gen_segment, other: gen_segment ) -> bool:
+  """Two segments overlap iff they have at least one point in common."""
   return _segments_overlap( new_segment( me ), new_segment( other ) )
 
 #-----------------------------------------------------------------------------------------------------------
 def segments_are_adjacent( me: gen_segment, other: gen_segment ) -> bool:
+  """Two segments are adjacent if the upper bound of the one directly precedes the lower bound of the
+  other."""
   return _segments_are_adjacent( new_segment( me ), new_segment( other ) )
 
 #-----------------------------------------------------------------------------------------------------------
