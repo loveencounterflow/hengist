@@ -46,6 +46,7 @@ def test() -> None:
   test_merge_more_segments( T )
   test_merge_segments( T )
   test_subtract_segments( T )
+  test_size( T )
   test_new_lap( T )
   T.report()
 
@@ -241,7 +242,18 @@ def test_new_lap( T: Any ) -> None:
   T.eq( '^T103^', new_lap( ( 10, 19, ), ( 15, 19, ), ( 11, 13, ) ), L( S( 10, 19, ),    ) )
   # T.eq( _merge_segments( '^T104^', ( 10, float( 'inf' ), ), ( 15, 19, ), ), ( ( 10, float( 'inf' ), ),   ) )
 
-# float( '-inf' ) < float( '+inf' )
+
+#-----------------------------------------------------------------------------------------------------------
+def test_size( T: Any ) -> None:
+  print( '^332-1^', 'test_size' )
+  def S( lo, hi ): return Segment( lo, hi ) # type: ignore
+  def L( *P ): return Lap( P ) # type: ignore
+  #.........................................................................................................
+  T.eq( '^T1^', S( 100, 100 ).size, 1 )
+  T.eq( '^T1^', S( 100, 101 ).size, 2 )
+  T.eq( '^T1^', L( S( 100, 101 ) ).size, 2 )
+  T.eq( '^T1^', L( S( 100, 101 ), S( 110, 119 ) ).size, 12 )
+
 
 ############################################################################################################
 if __name__ == '__main__':

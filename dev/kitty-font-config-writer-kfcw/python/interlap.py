@@ -45,6 +45,10 @@ class Segment:
     if not isinstance( other, Segment ): return False
     return ( me.lo == other.lo ) and ( me.hi == other.hi )
 
+  #---------------------------------------------------------------------------------------------------------
+  @property
+  def size( me ) -> int: return me.hi - me.lo + 1
+
 #-----------------------------------------------------------------------------------------------------------
 @total_ordering
 class Lap:
@@ -75,6 +79,10 @@ class Lap:
   def __eq__( me, other: Any ) -> bool:
     if not isinstance( other, Lap ): return False
     return me.segments == other.segments
+
+  #---------------------------------------------------------------------------------------------------------
+  @property
+  def size( me ) -> int: return sum( ( s.size for s in me.segments ), 0 )
 
 #-----------------------------------------------------------------------------------------------------------
 gen_segment     = Union[ Segment, bi_int, ]
