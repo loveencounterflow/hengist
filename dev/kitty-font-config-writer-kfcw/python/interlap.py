@@ -3,14 +3,15 @@
 #-----------------------------------------------------------------------------------------------------------
 # from _testing import C
 # from _testing import debug
-# from _testing import urge
-# from _testing import help
+from _testing import urge
+from _testing import help
 # from typing import NamedTuple
 from typing import Union
 from typing import Tuple
 from typing import Iterable
 from typing import List
 from typing import Any
+# from typing import NoReturn
 # from typing import NewType
 # from math import inf
 from functools import total_ordering
@@ -89,8 +90,8 @@ def new_segment( lohi: gen_segment ) -> Segment:
     throw( f"expected a tuple of length 2, got one with length {len( lohi )}")
   lo, hi = lohi
   #.........................................................................................................
-  if not isinstance( lo, int ): throw( f"expected an integer, got a {type( lo )}" )
-  if not isinstance( hi, int ): throw( f"expected an integer, got a {type( hi )}" )
+  # if not isinstance( lo, int ): throw( f"expected an integer, got a {type( lo )}" ) # unreachable?
+  # if not isinstance( hi, int ): throw( f"expected an integer, got a {type( hi )}" ) # unreachable?
   if not lo <= hi: throw( f"expected lo <= hi, got {lo} and {hi}" )
   #.........................................................................................................
   return Segment( lo, hi, )
@@ -111,17 +112,17 @@ def new_lap( *P: gen_segment ) -> Lap: return merge_segments( *P ) # type: ignor
 #
 #-----------------------------------------------------------------------------------------------------------
 # class A:
-# @classmethod ... def disjunct( cls, ... )
-def disjunct( me: gen_segment, other: gen_segment ) -> bool:
-  return _disjunct( new_segment( me ), new_segment( other ) )
+# @classmethod ... def segments_are_disjunct( cls, ... )
+def segments_are_disjunct( me: gen_segment, other: gen_segment ) -> bool:
+  return _segments_are_disjunct( new_segment( me ), new_segment( other ) )
 
 #-----------------------------------------------------------------------------------------------------------
-def overlaps( me: gen_segment, other: gen_segment ) -> bool:
-  return _overlaps( new_segment( me ), new_segment( other ) )
+def segments_overlap( me: gen_segment, other: gen_segment ) -> bool:
+  return _segments_overlap( new_segment( me ), new_segment( other ) )
 
 #-----------------------------------------------------------------------------------------------------------
-def adjacent( me: gen_segment, other: gen_segment ) -> bool:
-  return _adjacent( new_segment( me ), new_segment( other ) )
+def segments_are_adjacent( me: gen_segment, other: gen_segment ) -> bool:
+  return _segments_are_adjacent( new_segment( me ), new_segment( other ) )
 
 #-----------------------------------------------------------------------------------------------------------
 def merge_segments( *P: gen_segment ) -> Lap:
@@ -130,19 +131,61 @@ def merge_segments( *P: gen_segment ) -> Lap:
   if len( P ) == 2: return Lap( _merge_two_segments( new_segment( P[ 0 ] ), new_segment( P[ 1 ] ) ) )
   return Lap( _merge_segments( *P ) )
 
+#-----------------------------------------------------------------------------------------------------------
+def subtract_segments( *P: gen_segment ) -> Lap:
+  if len( P ) == 0: return Lap()
+  if len( P ) == 1: return Lap( ( new_segment( P[ 0 ] ), ) )
+  if len( P ) == 2: return Lap( _subtract_two_segments( new_segment( P[ 0 ] ), new_segment( P[ 1 ] ) ) )
+  me, *others               = P
+  me                        = new_segment( me )
+  others: List[ Segment, ]  = _merge_segments( *others ) # type: ignore
+  urge( '^334^', f"others {others}" )
+  # others.sort()
+  R: List[ Segment, ]       = []
+  idx                       = -1
+  last_idx                  = len( others ) - 1
+  while True:
+    idx += +1
+    if idx > last_idx: break
+    other = others[ idx ]
+    leftovers = _subtract_two_segments( me, other )
+    if len( leftovers ) == 0:
+      # return Lap( R )
+      continue
+    if len( leftovers ) == 1:
+      me = leftovers[ 0 ]
+    else:
+      R  += leftovers[ 0 : len( leftovers ) - 1 ] ### TAINT use negative index ###
+      me  = leftovers[ -1 ]
+    help( "^443^", idx, f"me {me}", f"other {other}", f"leftovers {leftovers}", f"R {R}" )
+  R.append( me )
+  R.sort()
+  return Lap( R )
+
+#-----------------------------------------------------------------------------------------------------------
+def _subtract_two_segments( a: Segment, b: Segment ) -> List[ Segment, ]:
+  if segments_are_disjunct( a, b ):  return [ a, ]
+  if a == b:            return []
+  if b.lo <= a.lo:
+    if b.hi >= a.hi: return []
+    return [ Segment( b.hi + 1, a.hi ), ]
+  if b.hi >= a.hi:
+    return [ Segment( a.lo, b.lo - 1 ), ]
+  return [ Segment( a.lo, b.lo - 1 ), Segment( b.hi + 1, a.hi ), ]
+
 
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-def _disjunct( me: Segment, other: Segment ) -> bool:
+def _segments_are_disjunct( me: Segment, other: Segment ) -> bool:
   return ( me.hi < other.lo ) or ( other.hi < me.lo )
 
 #-----------------------------------------------------------------------------------------------------------
-def _overlaps( me: Segment, other: Segment ) -> bool:
+def _segments_overlap( me: Segment, other: Segment ) -> bool:
   return not ( ( me.hi < other.lo ) or ( other.hi < me.lo ) )
 
 #-----------------------------------------------------------------------------------------------------------
-def _adjacent( me: Segment, other: Segment ) -> bool:
+def _segments_are_adjacent( me: Segment, other: Segment ) -> bool:
   return ( me.hi + 1 == other.lo ) or ( other.hi + 1 == me.lo )
 
 #-----------------------------------------------------------------------------------------------------------
