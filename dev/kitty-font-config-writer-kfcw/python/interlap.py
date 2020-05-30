@@ -142,26 +142,26 @@ def subtract_segments( *P: gen_segment ) -> Lap:
   if len( P ) == 2: return Lap( _subtract_two_segments( new_segment( P[ 0 ] ), new_segment( P[ 1 ] ) ) )
   me, *others               = P
   me                        = new_segment( me )
-  others: List[ Segment, ]  = _merge_segments( *others ) # type: ignore
-  urge( '^334^', f"others {others}" )
-  # others.sort()
+  others: List[ Segment, ]  = _merge_segments( *others )
+  # urge( '^334^', f"others {others}" )
   R: List[ Segment, ]       = []
   idx                       = -1
   last_idx                  = len( others ) - 1
+  leftovers:  List[ Segment, ]
+  other:      Segment
   while True:
-    idx += +1
+    idx      += +1
     if idx > last_idx: break
-    other = others[ idx ]
+    other     = others[ idx ]
     leftovers = _subtract_two_segments( me, other )
     if len( leftovers ) == 0:
-      # return Lap( R )
       continue
     if len( leftovers ) == 1:
       me = leftovers[ 0 ]
     else:
       R  += leftovers[ 0 : len( leftovers ) - 1 ] ### TAINT use negative index ###
       me  = leftovers[ -1 ]
-    help( "^443^", idx, f"me {me}", f"other {other}", f"leftovers {leftovers}", f"R {R}" )
+    # help( "^443^", idx, f"me {me}", f"other {other}", f"leftovers {leftovers}", f"R {R}" )
   R.append( me )
   R.sort()
   return Lap( R )
