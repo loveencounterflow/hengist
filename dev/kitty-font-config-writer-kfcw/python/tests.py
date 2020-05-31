@@ -16,9 +16,6 @@ from _testing import debug
 from typing import Any
 # from math import inf
 #...........................................................................................................
-class Interlap_error( TypeError, ValueError ): pass
-def throw( message: str ) -> None: raise Interlap_error( message )
-#...........................................................................................................
 from interlap import Segment
 from interlap import new_segment
 from interlap import Lap
