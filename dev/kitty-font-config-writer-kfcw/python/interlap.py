@@ -3,8 +3,8 @@
 #-----------------------------------------------------------------------------------------------------------
 # from _testing import C
 # from _testing import debug
-from _testing import urge
-from _testing import help
+# from _testing import urge
+# from _testing import help
 # from typing import NamedTuple
 from typing import Union
 from typing import Tuple
@@ -15,8 +15,12 @@ from typing import Any
 # from typing import NewType
 # from math import inf
 from functools import total_ordering
-class Interlap_error( TypeError, ValueError ): pass
-def throw( message: str ) -> None: raise Interlap_error( message )
+
+#-----------------------------------------------------------------------------------------------------------
+class InterlapError( Exception ): pass
+class InterlapKeyError( KeyError, InterlapError ): pass
+class InterlapValueError( ValueError, InterlapError ): pass
+
 
 #-----------------------------------------------------------------------------------------------------------
 def isa( T: Any, x: Any ) -> Any:
@@ -36,31 +40,30 @@ gen_segment     = Union[ 'Segment', bi_int, ]
 
 
 #-----------------------------------------------------------------------------------------------------------
-class _Segment:
-
-  #---------------------------------------------------------------------------------------------------------
-  def __init__( me, lo: int, hi: int ) -> None:
-    me.lo = lo
-    me.hi = hi
+class Immutable:
+  def __setattr__( me, *P: Any ) -> None:
+    raise InterlapKeyError( "^E7653^ forbidden to set attribute on immutable" )
 
 #-----------------------------------------------------------------------------------------------------------
 @total_ordering
-class Segment( _Segment ):
+class Segment( Immutable ):
   # __slots__ = [ 'lo', 'hi', ]
 
   #---------------------------------------------------------------------------------------------------------
   def __init__( me, lo: int, hi: int ) -> None:
+    me.lo: int
+    me.hi: int
     me.__dict__[ 'lo' ] = lo
     me.__dict__[ 'hi' ] = hi
 
   #---------------------------------------------------------------------------------------------------------
-  def __setattr__( me, *P: Any ) -> None: throw( "^334^ forbidden to set attribute on immutable" )
-  def __repr__( me ) -> str: return f"Segment( {me.lo}, {me.hi} )"
   def __iter__( me ) -> Iterable: yield me
+  def __repr__( me ) -> str: return f"{me.__class__.__name__}( {me.lo}, {me.hi} )"
 
   #---------------------------------------------------------------------------------------------------------
   def __lt__( me, other: Any ) -> bool:
-    if not isinstance( other, Segment ): throw( f"^786^ unable to compare a Segment with a {type( other )}" )
+    if not isinstance( other, Segment ):
+      raise InterlapValueError( f"^E3786^ unable to compare a Segment with a {type( other )}" )
     return ( me.lo < other.lo ) or ( me.hi < other.hi ) # type: ignore
 
   #---------------------------------------------------------------------------------------------------------
@@ -75,11 +78,12 @@ class Segment( _Segment ):
 
 #-----------------------------------------------------------------------------------------------------------
 @total_ordering
-class Lap:
+class Lap( Immutable ):
 
   #---------------------------------------------------------------------------------------------------------
   def __init__( me, segments: Iterable[ Segment, ] = () ):
-    me.segments = tuple( segments )
+    me.segments: Tuple[ Segment, ]
+    me.__dict__[ 'segments' ] = tuple( segments )
 
   #---------------------------------------------------------------------------------------------------------
   def __repr__(     me            ) -> str:       return f"Lap( {repr( me.segments )} )"
@@ -89,7 +93,8 @@ class Lap:
 
   #---------------------------------------------------------------------------------------------------------
   def __lt__( me, other: Any ) -> bool:
-    if not isinstance( other, Lap ): throw( f"^786^ unable to compare a Lap with a {type( other )}" )
+    if not isinstance( other, Lap ):
+      raise InterlapValueError( f"^E1732^ unable to compare a Lap with a {type( other )}" )
     if me.segments == other.segments: return False
     length = min( len( me ), len( other ) )
     if length == 0:
@@ -112,12 +117,12 @@ class Lap:
 def new_segment( lohi: gen_segment ) -> Segment:
   if isinstance( lohi, Segment ): return lohi
   if len( lohi ) != 2:
-    throw( f"expected a tuple of length 2, got one with length {len( lohi )}")
+    raise InterlapValueError( f"^E7986^ expected a tuple of length 2, got one with length {len( lohi )}")
   lo, hi = lohi
   #.........................................................................................................
   # if not isinstance( lo, int ): throw( f"expected an integer, got a {type( lo )}" ) # unreachable?
   # if not isinstance( hi, int ): throw( f"expected an integer, got a {type( hi )}" ) # unreachable?
-  if not lo <= hi: throw( f"expected lo <= hi, got {lo} and {hi}" )
+  if not lo <= hi: raise InterlapValueError( f"^E8319^ expected lo <= hi, got {lo} and {hi}" )
   #.........................................................................................................
   return Segment( lo, hi, )
 
