@@ -28,7 +28,7 @@ from interlap import segments_are_disjunct
 from interlap import gen_segment
 from interlap import segments_are_adjacent
 from interlap import subtract_segments
-
+from interlap import Interlap_error
 
 # print( new_segment( ( 'x', 'y', ) ) ) ### TAINT not
 
