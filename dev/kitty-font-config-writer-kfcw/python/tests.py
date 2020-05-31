@@ -3,7 +3,7 @@
 #-----------------------------------------------------------------------------------------------------------
 from _testing import Testing
 # from _testing import C
-# from _testing import debug
+from _testing import debug
 # from _testing import urge
 # from _testing import help
 # from typing import NamedTuple
@@ -48,6 +48,7 @@ def test() -> None:
   test_subtract_segments( T )
   test_size( T )
   test_new_lap( T )
+  test_immutability( T )
   T.report()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -253,6 +254,25 @@ def test_size( T: Any ) -> None:
   T.eq( '^T1^', S( 100, 101 ).size, 2 )
   T.eq( '^T1^', L( S( 100, 101 ) ).size, 2 )
   T.eq( '^T1^', L( S( 100, 101 ), S( 110, 119 ) ).size, 12 )
+
+#-----------------------------------------------------------------------------------------------------------
+def test_immutability( T: Any ) -> None:
+  print( '^332-1^', 'test_immutability' )
+  def S( lo, hi ): return Segment( lo, hi ) # type: ignore
+  def L( *P ): return Lap( P ) # type: ignore
+  s1 = S( 10, 15 )
+  debug( '^T3^', s1 )
+  try:    s1.lo = 11
+  except  Interlap_error: T.ok( '^T74^', True )
+  else:   T.fail( '^T75^', "attempt to mutate segment should fail" )
+  try:    s1.hi = 17
+  except  Interlap_error: T.ok( '^T74^', True )
+  else:   T.fail( '^T75^', "attempt to mutate segment should fail" )
+  # #.........................................................................................................
+  # T.eq( '^T1^', S( 100, 100 ).size, 1 )
+  # T.eq( '^T1^', S( 100, 101 ).size, 2 )
+  # T.eq( '^T1^', L( S( 100, 101 ) ).size, 2 )
+  # T.eq( '^T1^', L( S( 100, 101 ), S( 110, 119 ) ).size, 12 )
 
 
 ############################################################################################################

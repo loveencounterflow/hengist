@@ -31,7 +31,17 @@ bi_int          = Tuple[ int, int ]
 #-----------------------------------------------------------------------------------------------------------
 @total_ordering
 class Segment:
-  def __init__( me, lo: int, hi: int ) -> None: me.lo = lo; me.hi = hi
+  # __slots__ = [ 'lo', 'hi', 'size', ]
+
+  #---------------------------------------------------------------------------------------------------------
+  def __init__( me, lo: int, hi: int ) -> None:
+    object.__setattr__( me, 'lo', lo )
+    object.__setattr__( me, 'hi', hi )
+    me.lo = lo
+    me.hi = hi
+
+  #---------------------------------------------------------------------------------------------------------
+  # def __setattr__( me, *P: Any ) -> None: throw( "^334^ forbidden to set attribute on immutable" )
   def __repr__( me ) -> str: return f"Segment( {me.lo}, {me.hi} )"
   def __iter__( me ) -> Iterable: yield me
 
@@ -48,6 +58,7 @@ class Segment:
   #---------------------------------------------------------------------------------------------------------
   @property
   def size( me ) -> int: return me.hi - me.lo + 1
+
 
 #-----------------------------------------------------------------------------------------------------------
 @total_ordering
@@ -85,6 +96,7 @@ class Lap:
   def size( me ) -> int: return sum( ( s.size for s in me.segments ), 0 )
 
 #-----------------------------------------------------------------------------------------------------------
+### TAINT https://mypy.readthedocs.io/en/latest/cheat_sheet_py3.html#miscellaneous forward reference ###
 gen_segment     = Union[ Segment, bi_int, ]
 # intinf          = Union[ int, inf, ]
 # intinf          = Union[ int, str ]
