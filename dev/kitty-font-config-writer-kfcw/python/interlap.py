@@ -26,7 +26,13 @@ def isa( T: Any, x: Any ) -> Any:
   return isinstance( x, T )
 
 #-----------------------------------------------------------------------------------------------------------
+### TAINT https://mypy.readthedocs.io/en/latest/cheat_sheet_py3.html#miscellaneous forward reference ###
+# intinf          = Union[ int, inf, ]
+# intinf          = Union[ int, str ]
+# Lap             = Tuple[ Segment ]
+# opt_gen_segment = Union[ gen_segment, None, ]
 bi_int          = Tuple[ int, int ]
+gen_segment     = Union[ 'Segment', bi_int, ]
 
 #-----------------------------------------------------------------------------------------------------------
 @total_ordering
@@ -94,14 +100,6 @@ class Lap:
   #---------------------------------------------------------------------------------------------------------
   @property
   def size( me ) -> int: return sum( ( s.size for s in me.segments ), 0 )
-
-#-----------------------------------------------------------------------------------------------------------
-### TAINT https://mypy.readthedocs.io/en/latest/cheat_sheet_py3.html#miscellaneous forward reference ###
-gen_segment     = Union[ Segment, bi_int, ]
-# intinf          = Union[ int, inf, ]
-# intinf          = Union[ int, str ]
-# Lap             = Tuple[ Segment ]
-# opt_gen_segment = Union[ gen_segment, None, ]
 
 #-----------------------------------------------------------------------------------------------------------
 def new_segment( lohi: gen_segment ) -> Segment:
