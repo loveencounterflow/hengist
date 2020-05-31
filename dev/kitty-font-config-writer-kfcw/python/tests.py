@@ -4,7 +4,7 @@
 from _testing import Testing
 # from _testing import C
 from _testing import debug
-# from _testing import urge
+from _testing import urge
 # from _testing import help
 # from typing import NamedTuple
 # from typing import Union
@@ -53,6 +53,8 @@ def test_basics( T: Any ) -> None:
   print( '^332-1^', 'test_basics' )
   T.eq( '^T1^', type( new_segment( ( 42, 48, ) ) ), Segment )
   T.ne( '^T2^', type( new_segment( ( 42, 48, ) ) ), tuple )
+  urge( '^21^', new_segment( ( 42, 48, ) ) )
+  urge( '^21^', Segment( 42, 48, ) )
   T.eq( '^T3^', new_segment( ( 42, 48, ) ), Segment( 42, 48 ) )
   # T.ne( '^T4^', new_segment( ( 1, 1, ) ), ( 1, 1, ) )
   # try:    r = new_segment( ( False, True, ) )
