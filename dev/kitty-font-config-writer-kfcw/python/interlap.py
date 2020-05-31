@@ -34,20 +34,27 @@ def isa( T: Any, x: Any ) -> Any:
 bi_int          = Tuple[ int, int ]
 gen_segment     = Union[ 'Segment', bi_int, ]
 
+
 #-----------------------------------------------------------------------------------------------------------
-@total_ordering
-class Segment:
-  # __slots__ = [ 'lo', 'hi', 'size', ]
+class _Segment:
 
   #---------------------------------------------------------------------------------------------------------
   def __init__( me, lo: int, hi: int ) -> None:
-    object.__setattr__( me, 'lo', lo )
-    object.__setattr__( me, 'hi', hi )
     me.lo = lo
     me.hi = hi
 
+#-----------------------------------------------------------------------------------------------------------
+@total_ordering
+class Segment( _Segment ):
+  # __slots__ = [ 'lo', 'hi', ]
+
   #---------------------------------------------------------------------------------------------------------
-  # def __setattr__( me, *P: Any ) -> None: throw( "^334^ forbidden to set attribute on immutable" )
+  def __init__( me, lo: int, hi: int ) -> None:
+    me.__dict__[ 'lo' ] = lo
+    me.__dict__[ 'hi' ] = hi
+
+  #---------------------------------------------------------------------------------------------------------
+  def __setattr__( me, *P: Any ) -> None: throw( "^334^ forbidden to set attribute on immutable" )
   def __repr__( me ) -> str: return f"Segment( {me.lo}, {me.hi} )"
   def __iter__( me ) -> Iterable: yield me
 
