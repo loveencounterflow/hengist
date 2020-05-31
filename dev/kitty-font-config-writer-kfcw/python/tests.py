@@ -272,26 +272,8 @@ def test_immutability( T: Any ) -> None:
   # T.eq( '^T1^', L( S( 100, 101 ), S( 110, 119 ) ).size, 12 )
 
 
+
 ############################################################################################################
 if __name__ == '__main__':
   test()
-  # urge( '^599^', _merge_segments( ( False, True, ) ) )
-  # help( '^233^', inf )
-  # help( '^233^', intinf )
-  # help( '^233^', type( intinf ) )
-  # help( '^233^', type( intinf ) == Union )
-  # help( '^233^', intinf.__origin__ == Union )
-  # # help( '^233^', getattr( intinf, '__origin__', None ) == Union )
-  # # help( '^233^', getattr( None, '__origin__', None ) == Union )
-  # # help( '^233^', isinstance( intinf, Union ) )
-  # help( '^233^', isa( intinf, 4 ) )
-  # help( '^233^', isa( intinf, '4' ) )
-  # help( '^233^', isa( intinf, False ) )
-  # help( '^233^', isa( int, 4 ) )
-  # help( '^233^', isa( int, '4' ) )
-  # help( '^233^', isinstance( False, int ) ) ### TAINT returns true!!! ###
-  # help( '^233^', isa( int, False ) ) ### TAINT returns true!!! ###
-  # # help( '^233^', isinstance( inf, intinf ) )
-
-
 
