@@ -56,7 +56,7 @@
   // PERTAINING TO SPECIFIC SETTINGS / FONT CHOICES
   //-----------------------------------------------------------------------------------------------------------
   S = {
-    // write_pua_sample: false
+    use_disjunct_ranges: false,
     write_pua_sample: true,
     write_ranges_sample: true,
     // source_path:  '../../../assets/write-font-configuration-for-kitty-terminal.sample-data.json'
@@ -129,7 +129,7 @@
   parse_cid_hex_range_txt = function(cid_range_txt) {
     var first_cid, first_cid_txt, last_cid, last_cid_txt, match;
     if ((match = cid_range_txt.match(cid_range_pattern)) == null) {
-      throw new Error(`^33736^ illegal line ${rpr(line)} (unable to parse CID range ${rpr(cid_range_txt)})`);
+      throw new Error(`^33736^ unable to parse CID range ${rpr(cid_range_txt)}`);
     }
     ({first_cid_txt, last_cid_txt} = match.groups);
     first_cid = parseInt(first_cid_txt, 16);
@@ -144,7 +144,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this._read_cid_ranges_by_rsgs = function(settings) {
-    var R, cid_range_txt, i, icgroup, is_cjk_txt, len, line, lines, range_name, rsg, source_path;
+    var R, cid_range_txt, error, i, icgroup, is_cjk_txt, len, line, line_idx, lines, range_name, rsg, source_path;
     if ((R = settings.cid_ranges_by_rsgs) != null) {
       return R;
     }
@@ -153,8 +153,8 @@
     lines = (FS.readFileSync(source_path, {
       encoding: 'utf-8'
     })).split('\n');
-    for (i = 0, len = lines.length; i < len; i++) {
-      line = lines[i];
+    for (line_idx = i = 0, len = lines.length; i < len; line_idx = ++i) {
+      line = lines[line_idx];
       line = line.replace(/^\s+$/g, '');
       if ((line.length === 0) || (/^\s*#/.test(line))) {
         continue;
@@ -163,7 +163,12 @@
       if (rsg.startsWith('u-x-')) {
         continue;
       }
-      R[rsg] = segment_from_cid_hex_range_txt(cid_range_txt);
+      try {
+        R[rsg] = segment_from_cid_hex_range_txt(cid_range_txt);
+      } catch (error1) {
+        error = error1;
+        throw new Error(`^4445^ illegal line: ${error.message}, linenr: ${line_idx + 1}, line: ${rpr(line)}`);
+      }
     }
     return R;
   };
@@ -176,10 +181,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this._read_configured_cid_ranges = function(settings) {
-    var R, chr, cid_literal, cid_ranges_by_rsgs, first_cid, fontnick, glyphstyle, i, lap, last_cid, len, line, lines, psname, rsg, segment, source_path, styletag, unknown_fontnicks, unknown_rsgs;
-    if ((R = settings.configured_cid_ranges) != null) {
-      return R;
-    }
+    var R, chr, cid_literal, cid_ranges_by_rsgs, error, first_cid, fontnick, glyphstyle, i, lap, last_cid, len, line, line_idx, lines, psname, rsg, segment, source_path, styletag, unknown_fontnicks, unknown_rsgs;
     cid_ranges_by_rsgs = this._read_cid_ranges_by_rsgs(settings);
     R = settings.configured_cid_ranges = [];
     source_path = PATH.resolve(PATH.join(__dirname, settings.paths.configured_cid_ranges));
@@ -188,8 +190,8 @@
     })).split('\n');
     unknown_fontnicks = new Set();
     unknown_rsgs = new Set();
-    for (i = 0, len = lines.length; i < len; i++) {
-      line = lines[i];
+    for (line_idx = i = 0, len = lines.length; i < len; line_idx = ++i) {
+      line = lines[line_idx];
       line = line.replace(/^\s+$/g, '');
       if ((line.length === 0) || (/^\s*#/.test(line))) {
         continue;
@@ -246,8 +248,13 @@
           continue;
         }
       } else {
-        //.......................................................................................................
-        segment = segment_from_cid_hex_range_txt(cid_literal);
+        try {
+          //.......................................................................................................
+          segment = segment_from_cid_hex_range_txt(cid_literal);
+        } catch (error1) {
+          error = error1;
+          throw new Error(`^4445^ illegal line: ${error.message}, linenr: ${line_idx + 1}, line: ${rpr(line)}`);
+        }
       }
       //.......................................................................................................
       /* NOTE for this particular file format, we could use segments instead of laps since there can be only
@@ -257,6 +264,21 @@
          particular data type; allow to use segments and laps for this and similar attributes. */
       lap = new LAP.Interlap(segment);
       R.push({fontnick, psname, lap});
+    }
+    return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._read_configured_cid_ranges_as_laps = function(settings) {
+    var R, fontnick, i, j, lap, len, len1, psname, ref, segment;
+    R = [];
+    ref = this._read_configured_cid_ranges(settings);
+    for (i = 0, len = ref.length; i < len; i++) {
+      ({fontnick, psname, lap} = ref[i]);
+      for (j = 0, len1 = lap.length; j < len1; j++) {
+        segment = lap[j];
+        R.push({fontnick, psname, segment});
+      }
     }
     return R;
   };
@@ -390,13 +412,19 @@
   //-----------------------------------------------------------------------------------------------------------
   this.write_font_configuration_for_kitty_terminal = function(settings) {
     /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
-    var disjunct_range, fontnick, i, len, psname, ref, ref1, ref2, segment, unicode_range_txt, write;
+    var disjunct_range, fontnick, i, len, psname, ref, ref1, ref2, ref3, segment, unicode_range_txt, write;
     write = this._write_method_from_path(settings, settings.paths.kitty_fonts_conf);
-    settings.fontnicks_and_segments = this._read_disjunct_cid_segments(settings);
-    if ((ref = settings.write_ranges_sample) != null ? ref : false) {
+    //.........................................................................................................
+    if ((ref = settings.use_disjunct_ranges) != null ? ref : false) {
+      settings.fontnicks_and_segments = this._read_disjunct_cid_segments(settings);
+    } else {
+      settings.fontnicks_and_segments = this._read_configured_cid_ranges_as_laps(settings);
+    }
+    if ((ref1 = settings.write_ranges_sample) != null ? ref1 : false) {
+      //.........................................................................................................
       this._write_ranges_sample(settings, write);
     }
-    if ((ref1 = settings.write_pua_sample) != null ? ref1 : false) {
+    if ((ref2 = settings.write_pua_sample) != null ? ref2 : false) {
       this._write_pua_sample(settings, write);
     }
     //.........................................................................................................
@@ -410,10 +438,10 @@
       write("italic_font      auto");
       write("bold_italic_font auto");
     }
-    ref2 = settings.fontnicks_and_segments;
+    ref3 = settings.fontnicks_and_segments;
     //.........................................................................................................
-    for (i = 0, len = ref2.length; i < len; i++) {
-      disjunct_range = ref2[i];
+    for (i = 0, len = ref3.length; i < len; i++) {
+      disjunct_range = ref3[i];
       ({fontnick, psname, segment} = disjunct_range);
       if (psname === 'Iosevka-Slab') {
         /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
@@ -585,22 +613,10 @@ rl.on( 'line', ( line ) => {
       // @demo_disjunct_ranges()
       // @demo_kitty_font_config()
       //.........................................................................................................
-      this.write_font_configuration_for_kitty_terminal(S);
-      return this.write_whisk_character_tunnel(S);
+      return this.write_font_configuration_for_kitty_terminal(S);
     })();
   }
 
-  // demo()
-// { freeze } = require 'letsfreezethat'
-// d = new Map()
-// d.set 42, { foo: 'bar', }
-// e = freeze d
-// info d
-// debug d is e
-// debug Object.isFrozen d
-// debug Object.isFrozen e
-// # e.set 42, false
-// info d
-// info e
+  // @write_whisk_character_tunnel S
 
 }).call(this);
