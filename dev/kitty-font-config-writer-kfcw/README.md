@@ -234,6 +234,88 @@ or its use being split up into any number of non-adjacent ranges. Also observe t
 being disjunct, their relative ordering becomes immaterial.
 
 
+## Font Scaling Issue
+
+in `kitty/kitty/core_text.m`, lines 480ff; line 484 contains conditional `if ( allow_resize )`:
+
+```c
+static inline bool
+do_render(CTFontRef ct_font, bool bold, bool italic, hb_glyph_info_t *info, hb_glyph_position_t *hb_positions, unsigned int num_glyphs, pixel *canvas, unsigned int cell_width, unsigned int cell_height, unsigned int num_cells, unsigned int baseline, bool *was_colored, bool allow_resize, FONTS_DATA_HANDLE fg, bool center_glyph) {
+    unsigned int canvas_width = cell_width * num_cells;
+    CGRect br = CTFontGetBoundingRectsForGlyphs(ct_font, kCTFontOrientationHorizontal, glyphs, boxes, num_glyphs);
+    if (allow_resize) { // <-- this
+        // Resize glyphs that would bleed into neighboring cells, by scaling the font size
+        float right = 0;
+        for (unsigned i=0; i < num_glyphs; i++) right = MAX(right, boxes[i].origin.x + boxes[i].size.width);
+        if (!bold && !italic && right > canvas_width + 1) {
+            CGFloat sz = CTFontGetSize(ct_font);
+            sz *= canvas_width / right;
+            CTFontRef new_font = CTFontCreateCopyWithAttributes(ct_font, sz, NULL, NULL);
+            bool ret = do_render(new_font, bold, italic, info, hb_positions, num_glyphs, canvas, cell_width, cell_height, num_cells, baseline, was_colored, false, fg, center_glyph);
+            CFRelease(new_font);
+            return ret;
+        }
+    }
+    for (unsigned i=0; i < num_glyphs; i++) {
+        positions[i].x = MAX(0, -boxes[i].origin.x) + hb_positions[i].x_offset / 64.f;
+        positions[i].y = hb_positions[i].y_offset / 64.f;
+    }
+    if (*was_colored) {
+        render_color_glyph(ct_font, (uint8_t*)canvas, info[0].codepoint, cell_width * num_cells, cell_height, baseline);
+    } else {
+        ensure_render_space(canvas_width, cell_height);
+        render_glyphs(ct_font, canvas_width, cell_height, baseline, num_glyphs);
+        Region src = {.bottom=cell_height, .right=canvas_width}, dest = {.bottom=cell_height, .right=canvas_width};
+        render_alpha_mask(render_buf, canvas, &src, &dest, canvas_width, canvas_width);
+    }
+    if (num_cells && (center_glyph || (num_cells == 2 && *was_colored))) {
+        // center glyphs (two cell emoji, PUA glyphs, ligatures, etc)
+        CGFloat delta = (((CGFloat)canvas_width - br.size.width) / 2.f);
+        // FiraCode ligatures result in negative origins
+        if (br.origin.x > 0) delta -= br.origin.x;
+        if (delta >= 1.f) right_shift_canvas(canvas, canvas_width, cell_height, (unsigned)(delta));
+    }
+    return true;
+}
+```
+
+`do_render()` is called from same file line 522 (reformatted):
+
+```c
+do_render(
+  self->ct_font,
+  bold,
+  italic,
+  info,
+  hb_positions,
+  num_glyphs,
+  canvas,
+  cell_width,
+  cell_height,
+  num_cells,
+  baseline,
+  was_colored,
+  true, // <-- !!!
+  fg,
+  center_glyph);
+```
+
+We can see that apparently the option to switch glyph scaling on and off was being planned for at some
+point, but that option was then made non-optional by using a constant `true` in the relevant call.
+
+**Unfortunately, changing `true` to `false` would not appear to change the observed bahavior, i.e. glyphs
+still get scaled (called 'resized' in the code).**
+
+`changelog.rst`:
+
+> 0.15.0 [2019-11-27]
+>
+> ...
+>
+> When drawing unicode symbols that are followed by spaces, use multiple cells
+> to avoid resized or cut-off glyphs (:iss:`1452`)
+
+
 
 ## To Do
 
