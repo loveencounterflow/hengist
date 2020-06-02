@@ -26,7 +26,8 @@
 
 # Use these fonts for specific codepoint ranges:
 # # +style:ming                   rsg:u-cjk-cmpi1           cwtexqheibold
-+style:ming                   0x0000..0xffff            lmromantenregular
++style:ming                   *                         lmromantenregular
+# +style:ming                   0x0000..0xffff            lmromantenregular
 +style:ming                   rsg:u-cjk-cmpi1           babelstonehan
 +style:ming                   rsg:u-cjk-xd              babelstonehan
 +style:ming                   rsg:u-cjk-sym             hanaminaotf
@@ -59,9 +60,11 @@
 +style:ming                   rsg:u-cjk-xb              thtshynptwo
 +style:ming                   '·'                       ebgaramondtwelveregular # U+00B7 MIDDLE DOT
 
-# ### Arrows ###
-# +style:ming                   '⤾'                       dejavuserif
-# +style:ming                   '₰'                       sunexta
+### Arrows ###
++style:ming                   '⤾'                       dejavuserif
++style:ming                   '₰'                       sunexta
++style:ming                   0x12000..0x123ff          thtshynpone
++style:ming                   0xfb50..0xfdff            thtshynpzero
 
 # ### Ideographic description characters: ###
 # +style:ming                   '↻'                       jizurathreeb      glyph: ''
