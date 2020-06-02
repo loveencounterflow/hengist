@@ -19,6 +19,8 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 PATH                      = require 'path'
 FS                        = require 'fs'
+OS                        = require 'os'
+FS                        = require 'fs'
 hex                       = ( n ) -> ( n.toString 16 ).toUpperCase().padStart 4, '0'
 LAP                       = require '../../../apps/interlap'
 { type_of
@@ -38,11 +40,15 @@ to_width = ( text, width ) ->
 # PERTAINING TO SPECIFIC SETTINGS / FONT CHOICES
 #-----------------------------------------------------------------------------------------------------------
 S =
+  # write_pua_sample: false
+  write_pua_sample:     true
+  write_ranges_sample:  true
   # source_path:  '../../../assets/write-font-configuration-for-kitty-terminal.sample-data.json'
   paths:
     # configured_cid_ranges:  '../../../../ucdb/cfg/styles-codepoints-and-fontnicks.txt'
     configured_cid_ranges:  '../../../assets/ucdb/styles-codepoints-and-fontnicks.short.txt'
     cid_ranges_by_rsgs:     '../../../../ucdb/cfg/rsgs-and-blocks.txt'
+    kitty_fonts_conf:       '~/.config/kitty/kitty-fonts.conf'
 
   psname_by_fontnicks:
     babelstonehan:              'BabelStoneHan'
@@ -168,7 +174,11 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
     ### TAINT the below as function ###
     #.......................................................................................................
     if cid_literal is '*'
-      segment = new LAP.Segment [ 0x000000, 0x10ffff, ]
+      debug '^778^', { styletag, cid_literal, fontnick, }
+      settings.default_fontnick ?= fontnick
+      settings.default_psname   ?= psname
+      continue
+      # segment = new LAP.Segment [ 0x000000, 0x10ffff, ]
     #.......................................................................................................
     else if ( cid_literal.startsWith "'" ) and ( cid_literal.endsWith "'" )
       validate.chr chr  = cid_literal[ 1 ... cid_literal.length - 1 ]
@@ -187,7 +197,7 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
     else
       segment = segment_from_cid_hex_range_txt cid_literal
     #.......................................................................................................
-    ### NOTE for this particular file format, we could use segments inbstead of laps since there can be only
+    ### NOTE for this particular file format, we could use segments instead of laps since there can be only
     one segment per record; however, for consistency with those cases where several disjunct segments per
     record are allowed, we use laps. ###
     ### TAINT consider to use a non-committal name like `cids` instead of `lap`, which is bound to a
@@ -215,7 +225,7 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
 #-----------------------------------------------------------------------------------------------------------
 @_read_disjunct_cid_segments = ( settings ) ->
   R = []
-  for disjunct_range in @_read_disjunct_cid_ranges S
+  for disjunct_range in @_read_disjunct_cid_ranges settings
     { fontnick
       psname
       lap     } = disjunct_range
@@ -229,10 +239,22 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-@write_font_configuration_for_kitty_terminal = ( settings ) ->
-  fontnicks_and_segments = @_read_disjunct_cid_segments S
-  #.........................................................................................................
-  for disjunct_range in fontnicks_and_segments
+@_write_method_from_path = ( settings, path = null ) ->
+  return echo unless path?
+  validate.nonempty_text path
+  path = PATH.join OS.homedir(), path.replace /^~/, ''
+  try FS.statSync path catch error
+    throw error unless error.code is 'ENOENT'
+    warn "^729^target path #{rpr path} does not exist"
+    throw error
+  FS.writeFileSync path, ''
+  return write = ( line ) ->
+    validate.text line
+    FS.appendFileSync path, line + '\n'
+
+#-----------------------------------------------------------------------------------------------------------
+@_write_ranges_sample = ( settings, write ) ->
+  for disjunct_range in settings.fontnicks_and_segments
     { fontnick
       psname
       segment } = disjunct_range
@@ -241,17 +263,42 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
     sample            = ( String.fromCodePoint c for c in [ segment.lo .. segment.hi ][ .. 30 ] )
     sample_txt        = sample.join ''
     psname_txt        = psname.padEnd 30
-    echo "# symbol_map      #{unicode_range_txt} #{psname_txt} # #{sample_txt}"
-  #.........................................................................................................
+    write "# symbol_map      #{unicode_range_txt} #{psname_txt} # #{sample_txt}"
+
+#-----------------------------------------------------------------------------------------------------------
+@_write_pua_sample = ( settings, write ) ->
   for row_cid in [ 0xe000 .. 0xe3a0 ] by 0x10
     row = []
     for col_cid in [ 0x00 .. 0x0f ]
       cid = row_cid + col_cid
       row.push String.fromCodePoint cid
     row_cid_txt = "U+#{( row_cid.toString 16 ).padStart 4, '0'}"
-    echo "# #{row_cid_txt} #{row.join ''}"
+    write "# #{row_cid_txt} #{row.join ''}"
+  @_write_special_interest_sample settings, write
+
+#-----------------------------------------------------------------------------------------------------------
+@_write_special_interest_sample = ( settings, write ) ->
+  write "# x𒇷x"
+  write "# x﷽x"
+
+#-----------------------------------------------------------------------------------------------------------
+@write_font_configuration_for_kitty_terminal = ( settings ) ->
+  write                           = @_write_method_from_path settings, settings.paths.kitty_fonts_conf
+  settings.fontnicks_and_segments = @_read_disjunct_cid_segments settings
+  @_write_ranges_sample settings, write if settings.write_ranges_sample ? false
+  @_write_pua_sample    settings, write if settings.write_pua_sample    ? false
   #.........................................................................................................
-  for disjunct_range in fontnicks_and_segments
+  unless settings.default_psname?
+    warn "^334^ no default font configured"
+    urge "^334^ add settings.default_fontnick"
+    urge "^334^ or add CID range with asterisk in #{PATH.resolve settings.paths.configured_cid_ranges}"
+  else
+    write "font_family      #{settings.default_psname}"
+    write "bold_font        auto"
+    write "italic_font      auto"
+    write "bold_italic_font auto"
+  #.........................................................................................................
+  for disjunct_range in settings.fontnicks_and_segments
     { fontnick
       psname
       segment } = disjunct_range
@@ -260,7 +307,7 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
     continue if psname is 'Iosevka-Slab'
     ### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ###
     unicode_range_txt = ( LAP.as_unicode_range segment ).padEnd 30
-    echo "symbol_map      #{unicode_range_txt} #{psname}"
+    write "symbol_map      #{unicode_range_txt} #{psname}"
   #.........................................................................................................
   return null
 
@@ -278,6 +325,22 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
   rl.on( 'line', ( line ) => {
     return process.stdout.write( line.replace( pattern, '$1 ' ) + '\\n' ); } );
   """
+  # #!/usr/bin/env node
+  # const pattern_2 = /([\ue000-\uefff])/ug;
+  # const pattern_3 = /([\ufb50-\ufdff])/ug;
+  # const pattern_7 = /([\u{12000}-\u{123ff}])/ug;
+  # const rl      = require( 'readline' ).createInterface({
+  #   input: process.stdin,
+  #   output: process.stdout,
+  #   terminal: false })
+
+  # rl.on( 'line', ( line ) => {
+  #   return process.stdout.write(
+  #     line
+  #       .replace( pattern_2, '$1 ' )
+  #       .replace( pattern_3, '$1  ' )
+  #       .replace( pattern_7, '$1      ' )
+  #       + '\n' ); } );
   echo()
   echo source
   echo()
@@ -301,7 +364,6 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
 #-----------------------------------------------------------------------------------------------------------
 @demo_configured_ranges = ->
   echo CND.steel CND.reverse "Configured CID Ranges".padEnd 108
-  # debug @_read_configured_cid_ranges S
   for configured_range in @_read_configured_cid_ranges S
     { fontnick
       psname
@@ -348,7 +410,7 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
   for range in ranges
     prv_cid = null
     for cid in [ range.lo .. range.hi ]
-      if S.illegal_codepoint_patterns.some ( re ) -> re.test String.fromCodePoint cid
+      if settings.illegal_codepoint_patterns.some ( re ) -> re.test String.fromCodePoint cid
         segments.push [ cid, cid, ]
   R = settings.illegal_codepoints = new LAP.Interlap segments
   help "excluding #{R.size} codepoints"
