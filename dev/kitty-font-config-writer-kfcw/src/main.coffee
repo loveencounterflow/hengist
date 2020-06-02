@@ -40,7 +40,7 @@ to_width = ( text, width ) ->
 # PERTAINING TO SPECIFIC SETTINGS / FONT CHOICES
 #-----------------------------------------------------------------------------------------------------------
 S =
-  # write_pua_sample: false
+  use_disjunct_ranges:  false
   write_pua_sample:     true
   write_ranges_sample:  true
   # source_path:  '../../../assets/write-font-configuration-for-kitty-terminal.sample-data.json'
@@ -288,8 +288,13 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
 
 #-----------------------------------------------------------------------------------------------------------
 @write_font_configuration_for_kitty_terminal = ( settings ) ->
-  write                           = @_write_method_from_path settings, settings.paths.kitty_fonts_conf
-  settings.fontnicks_and_segments = @_read_disjunct_cid_segments settings
+  write = @_write_method_from_path settings, settings.paths.kitty_fonts_conf
+  #.........................................................................................................
+  if settings.use_disjunct_ranges ? false
+    settings.fontnicks_and_segments = @_read_disjunct_cid_segments settings
+  else
+    settings.fontnicks_and_segments = @_read_configured_cid_ranges_as_laps settings
+  #.........................................................................................................
   @_write_ranges_sample settings, write if settings.write_ranges_sample ? false
   @_write_pua_sample    settings, write if settings.write_pua_sample    ? false
   #.........................................................................................................
