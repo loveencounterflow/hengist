@@ -111,7 +111,7 @@ S =
 cid_range_pattern = ///^ 0x (?<first_cid_txt> [0-9a-fA-F]+ ) \.\. 0x (?<last_cid_txt> [0-9a-fA-F]+ ) $ ///
 parse_cid_hex_range_txt = ( cid_range_txt ) ->
   unless ( match = cid_range_txt.match cid_range_pattern )?
-    throw new Error "^33736^ illegal line #{rpr line} (unable to parse CID range #{rpr cid_range_txt})"
+    throw new Error "^33736^ unable to parse CID range #{rpr cid_range_txt}"
   { first_cid_txt
     last_cid_txt  } = match.groups
   first_cid         = parseInt first_cid_txt, 16
@@ -127,12 +127,15 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
   R                 = settings.cid_ranges_by_rsgs = {}
   source_path       = PATH.resolve PATH.join __dirname, settings.paths.cid_ranges_by_rsgs
   lines             = ( FS.readFileSync source_path, { encoding: 'utf-8', } ).split '\n'
-  for line in lines
+  for line, line_idx in lines
     line = line.replace /^\s+$/g, ''
     continue if ( line.length is 0 ) or ( /^\s*#/.test line )
     [ icgroup, rsg, is_cjk_txt, cid_range_txt, range_name..., ] = line.split /\s+/
     continue if rsg.startsWith 'u-x-'
-    R[ rsg ] = segment_from_cid_hex_range_txt cid_range_txt
+    try
+      R[ rsg ] = segment_from_cid_hex_range_txt cid_range_txt
+    catch error
+      throw new Error "^4445^ illegal line: #{error.message}, linenr: #{line_idx + 1}, line: #{rpr line}"
   return R
 
 # #-----------------------------------------------------------------------------------------------------------
@@ -143,14 +146,13 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
 
 #-----------------------------------------------------------------------------------------------------------
 @_read_configured_cid_ranges = ( settings ) ->
-  return R if ( R = settings.configured_cid_ranges )?
   cid_ranges_by_rsgs  = @_read_cid_ranges_by_rsgs settings
   R                   = settings.configured_cid_ranges = []
   source_path         = PATH.resolve PATH.join __dirname, settings.paths.configured_cid_ranges
   lines               = ( FS.readFileSync source_path, { encoding: 'utf-8', } ).split '\n'
   unknown_fontnicks   = new Set()
   unknown_rsgs        = new Set()
-  for line in lines
+  for line, line_idx in lines
     line = line.replace /^\s+$/g, ''
     continue if ( line.length is 0 ) or ( /^\s*#/.test line )
     [ styletag, cid_literal, fontnick, glyphstyle..., ] = line.split /\s+/
@@ -195,7 +197,10 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
         continue
     #.......................................................................................................
     else
-      segment = segment_from_cid_hex_range_txt cid_literal
+      try
+        segment = segment_from_cid_hex_range_txt cid_literal
+      catch error
+        throw new Error "^4445^ illegal line: #{error.message}, linenr: #{line_idx + 1}, line: #{rpr line}"
     #.......................................................................................................
     ### NOTE for this particular file format, we could use segments instead of laps since there can be only
     one segment per record; however, for consistency with those cases where several disjunct segments per
