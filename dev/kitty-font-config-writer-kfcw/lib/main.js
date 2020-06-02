@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, LAP, PATH, S, alert, badge, cid_range_pattern, debug, echo, equals, help, hex, info, isa, log, parse_cid_hex_range_txt, rpr, segment_from_cid_hex_range_txt, to_width, type_of, urge, validate, warn, whisper;
+  var CND, FS, LAP, OS, PATH, S, alert, badge, cid_range_pattern, debug, echo, equals, help, hex, info, isa, log, parse_cid_hex_range_txt, rpr, segment_from_cid_hex_range_txt, to_width, type_of, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -32,6 +32,10 @@
 
   FS = require('fs');
 
+  OS = require('os');
+
+  FS = require('fs');
+
   hex = function(n) {
     return (n.toString(16)).toUpperCase().padStart(4, '0');
   };
@@ -52,11 +56,15 @@
   // PERTAINING TO SPECIFIC SETTINGS / FONT CHOICES
   //-----------------------------------------------------------------------------------------------------------
   S = {
+    // write_pua_sample: false
+    write_pua_sample: true,
+    write_ranges_sample: true,
     // source_path:  '../../../assets/write-font-configuration-for-kitty-terminal.sample-data.json'
     paths: {
       // configured_cid_ranges:  '../../../../ucdb/cfg/styles-codepoints-and-fontnicks.txt'
       configured_cid_ranges: '../../../assets/ucdb/styles-codepoints-and-fontnicks.short.txt',
-      cid_ranges_by_rsgs: '../../../../ucdb/cfg/rsgs-and-blocks.txt'
+      cid_ranges_by_rsgs: '../../../../ucdb/cfg/rsgs-and-blocks.txt',
+      kitty_fonts_conf: '~/.config/kitty/kitty-fonts.conf'
     },
     psname_by_fontnicks: {
       babelstonehan: 'BabelStoneHan',
@@ -213,7 +221,15 @@
       /* TAINT the below as function */
       //.......................................................................................................
       if (cid_literal === '*') {
-        segment = new LAP.Segment([0x000000, 0x10ffff]);
+        debug('^778^', {styletag, cid_literal, fontnick});
+        if (settings.default_fontnick == null) {
+          settings.default_fontnick = fontnick;
+        }
+        if (settings.default_psname == null) {
+          settings.default_psname = psname;
+        }
+        continue;
+      // segment = new LAP.Segment [ 0x000000, 0x10ffff, ]
       //.......................................................................................................
       } else if ((cid_literal.startsWith("'")) && (cid_literal.endsWith("'"))) {
         validate.chr(chr = cid_literal.slice(1, cid_literal.length - 1));
@@ -234,7 +250,7 @@
         segment = segment_from_cid_hex_range_txt(cid_literal);
       }
       //.......................................................................................................
-      /* NOTE for this particular file format, we could use segments inbstead of laps since there can be only
+      /* NOTE for this particular file format, we could use segments instead of laps since there can be only
          one segment per record; however, for consistency with those cases where several disjunct segments per
          record are allowed, we use laps. */
       /* TAINT consider to use a non-committal name like `cids` instead of `lap`, which is bound to a
@@ -270,7 +286,7 @@
   this._read_disjunct_cid_segments = function(settings) {
     var R, disjunct_range, fontnick, i, j, lap, len, len1, psname, ref, segment;
     R = [];
-    ref = this._read_disjunct_cid_ranges(S);
+    ref = this._read_disjunct_cid_ranges(settings);
     for (i = 0, len = ref.length; i < len; i++) {
       disjunct_range = ref[i];
       ({fontnick, psname, lap} = disjunct_range);
@@ -295,47 +311,109 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.write_font_configuration_for_kitty_terminal = function(settings) {
-    /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
-    var c, cid, col_cid, disjunct_range, fontnick, fontnicks_and_segments, i, j, k, l, len, len1, psname, psname_txt, row, row_cid, row_cid_txt, sample, sample_txt, segment, unicode_range_txt;
-    fontnicks_and_segments = this._read_disjunct_cid_segments(S);
-//.........................................................................................................
-    for (i = 0, len = fontnicks_and_segments.length; i < len; i++) {
-      disjunct_range = fontnicks_and_segments[i];
+  this._write_method_from_path = function(settings, path = null) {
+    var error, write;
+    if (path == null) {
+      return echo;
+    }
+    validate.nonempty_text(path);
+    path = PATH.join(OS.homedir(), path.replace(/^~/, ''));
+    try {
+      FS.statSync(path);
+    } catch (error1) {
+      error = error1;
+      if (error.code !== 'ENOENT') {
+        throw error;
+      }
+      warn(`^729^target path ${rpr(path)} does not exist`);
+      throw error;
+    }
+    FS.writeFileSync(path, '');
+    return write = function(line) {
+      validate.text(line);
+      return FS.appendFileSync(path, line + '\n');
+    };
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._write_ranges_sample = function(settings, write) {
+    var c, disjunct_range, fontnick, i, len, psname, psname_txt, ref, results, sample, sample_txt, segment, unicode_range_txt;
+    ref = settings.fontnicks_and_segments;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      disjunct_range = ref[i];
       ({fontnick, psname, segment} = disjunct_range);
       // help fontnick, LAP.as_unicode_range lap
       unicode_range_txt = (LAP.as_unicode_range(segment)).padEnd(30);
       sample = (function() {
-        var j, len1, ref, ref1, ref2, results;
-        ref2 = (function() {
-          var results1 = [];
-          for (var k = ref = segment.lo, ref1 = segment.hi; ref <= ref1 ? k <= ref1 : k >= ref1; ref <= ref1 ? k++ : k--){ results1.push(k); }
-          return results1;
+        var j, len1, ref1, ref2, ref3, results1;
+        ref3 = (function() {
+          var results2 = [];
+          for (var k = ref1 = segment.lo, ref2 = segment.hi; ref1 <= ref2 ? k <= ref2 : k >= ref2; ref1 <= ref2 ? k++ : k--){ results2.push(k); }
+          return results2;
         }).apply(this).slice(0, 31);
-        results = [];
-        for (j = 0, len1 = ref2.length; j < len1; j++) {
-          c = ref2[j];
-          results.push(String.fromCodePoint(c));
+        results1 = [];
+        for (j = 0, len1 = ref3.length; j < len1; j++) {
+          c = ref3[j];
+          results1.push(String.fromCodePoint(c));
         }
-        return results;
+        return results1;
       })();
       sample_txt = sample.join('');
       psname_txt = psname.padEnd(30);
-      echo(`# symbol_map      ${unicode_range_txt} ${psname_txt} # ${sample_txt}`);
+      results.push(write(`# symbol_map      ${unicode_range_txt} ${psname_txt} # ${sample_txt}`));
     }
-//.........................................................................................................
-    for (row_cid = j = 0xe000; j <= 58272; row_cid = j += 0x10) {
+    return results;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._write_pua_sample = function(settings, write) {
+    var cid, col_cid, i, j, row, row_cid, row_cid_txt;
+    for (row_cid = i = 0xe000; i <= 58272; row_cid = i += 0x10) {
       row = [];
-      for (col_cid = k = 0x00; k <= 15; col_cid = ++k) {
+      for (col_cid = j = 0x00; j <= 15; col_cid = ++j) {
         cid = row_cid + col_cid;
         row.push(String.fromCodePoint(cid));
       }
       row_cid_txt = `U+${(row_cid.toString(16)).padStart(4, '0')}`;
-      echo(`# ${row_cid_txt} ${row.join('')}`);
+      write(`# ${row_cid_txt} ${row.join('')}`);
     }
-//.........................................................................................................
-    for (l = 0, len1 = fontnicks_and_segments.length; l < len1; l++) {
-      disjunct_range = fontnicks_and_segments[l];
+    return this._write_special_interest_sample(settings, write);
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._write_special_interest_sample = function(settings, write) {
+    write("# x𒇷x");
+    return write("# x﷽x");
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.write_font_configuration_for_kitty_terminal = function(settings) {
+    /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+    var disjunct_range, fontnick, i, len, psname, ref, ref1, ref2, segment, unicode_range_txt, write;
+    write = this._write_method_from_path(settings, settings.paths.kitty_fonts_conf);
+    settings.fontnicks_and_segments = this._read_disjunct_cid_segments(settings);
+    if ((ref = settings.write_ranges_sample) != null ? ref : false) {
+      this._write_ranges_sample(settings, write);
+    }
+    if ((ref1 = settings.write_pua_sample) != null ? ref1 : false) {
+      this._write_pua_sample(settings, write);
+    }
+    //.........................................................................................................
+    if (settings.default_psname == null) {
+      warn("^334^ no default font configured");
+      urge("^334^ add settings.default_fontnick");
+      urge(`^334^ or add CID range with asterisk in ${PATH.resolve(settings.paths.configured_cid_ranges)}`);
+    } else {
+      write(`font_family      ${settings.default_psname}`);
+      write("bold_font        auto");
+      write("italic_font      auto");
+      write("bold_italic_font auto");
+    }
+    ref2 = settings.fontnicks_and_segments;
+    //.........................................................................................................
+    for (i = 0, len = ref2.length; i < len; i++) {
+      disjunct_range = ref2[i];
       ({fontnick, psname, segment} = disjunct_range);
       if (psname === 'Iosevka-Slab') {
         /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
@@ -343,7 +421,7 @@
         continue;
       }
       unicode_range_txt = (LAP.as_unicode_range(segment)).padEnd(30);
-      echo(`symbol_map      ${unicode_range_txt} ${psname}`);
+      write(`symbol_map      ${unicode_range_txt} ${psname}`);
     }
     //.........................................................................................................
     return null;
@@ -363,6 +441,22 @@ const rl      = require( 'readline' ).createInterface({
 
 rl.on( 'line', ( line ) => {
   return process.stdout.write( line.replace( pattern, '$1 ' ) + '\\n' ); } );`;
+    // #!/usr/bin/env node
+    // const pattern_2 = /([\ue000-\uefff])/ug;
+    // const pattern_3 = /([\ufb50-\ufdff])/ug;
+    // const pattern_7 = /([\u{12000}-\u{123ff}])/ug;
+    // const rl      = require( 'readline' ).createInterface({
+    //   input: process.stdin,
+    //   output: process.stdout,
+    //   terminal: false })
+
+    // rl.on( 'line', ( line ) => {
+    //   return process.stdout.write(
+    //     line
+    //       .replace( pattern_2, '$1 ' )
+    //       .replace( pattern_3, '$1  ' )
+    //       .replace( pattern_7, '$1      ' )
+    //       + '\n' ); } );
     echo();
     echo(source);
     echo();
@@ -395,7 +489,6 @@ rl.on( 'line', ( line ) => {
     var configured_range, font_txt, fontnick, i, lap, len, psname, range_txt, ref;
     echo(CND.steel(CND.reverse("Configured CID Ranges".padEnd(108))));
     ref = this._read_configured_cid_ranges(S);
-    // debug @_read_configured_cid_ranges S
     for (i = 0, len = ref.length; i < len; i++) {
       configured_range = ref[i];
       ({fontnick, psname, lap} = configured_range);
@@ -460,7 +553,7 @@ rl.on( 'line', ( line ) => {
       range = ranges[i];
       prv_cid = null;
       for (cid = j = ref = range.lo, ref1 = range.hi; (ref <= ref1 ? j <= ref1 : j >= ref1); cid = ref <= ref1 ? ++j : --j) {
-        if (S.illegal_codepoint_patterns.some(function(re) {
+        if (settings.illegal_codepoint_patterns.some(function(re) {
           return re.test(String.fromCodePoint(cid));
         })) {
           segments.push([cid, cid]);
