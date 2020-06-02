@@ -1,9 +1,16 @@
 #!/usr/bin/env node
-const pattern = /([\ue000-\uefff])/g;
+const pattern_2 = /([\ue000-\uefff])/ug;
+const pattern_3 = /([\ufb50-\ufdff])/ug;
+const pattern_7 = /([\u{12000}-\u{123ff}])/ug;
 const rl      = require( 'readline' ).createInterface({
   input: process.stdin,
   output: process.stdout,
   terminal: false })
 
 rl.on( 'line', ( line ) => {
-  return process.stdout.write( line.replace( pattern, '$1 \x98helo\x9c\x9fhelo\x9c\x11' ) + '\n' ); } );
+  return process.stdout.write(
+    line
+      .replace( pattern_2, '$1 ' )
+      .replace( pattern_3, '$1  ' )
+      .replace( pattern_7, '$1      ' )
+      + '\n' ); } );
