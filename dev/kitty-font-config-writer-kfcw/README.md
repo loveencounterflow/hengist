@@ -6,6 +6,7 @@
   - [RSGs and Unicode Codepoint Ranges](#rsgs-and-unicode-codepoint-ranges)
   - [Styles, CID Ranges, Font Names](#styles-cid-ranges-font-names)
   - [Disjunct Ranges](#disjunct-ranges)
+- [Font Scaling Issue](#font-scaling-issue)
 - [To Do](#to-do)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
