@@ -59,6 +59,7 @@ class Segment( Immutable ):
   #---------------------------------------------------------------------------------------------------------
   def __iter__( me ) -> Iterable: yield me
   def __repr__( me ) -> str: return f"{me.__class__.__name__}( {me.lo}, {me.hi} )"
+  def __hash__( me ) -> int: return hash( ( me.lo, me.hi, ) )
 
   #---------------------------------------------------------------------------------------------------------
   def __lt__( me, other: Any ) -> bool:

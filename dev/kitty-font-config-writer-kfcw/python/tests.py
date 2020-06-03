@@ -41,6 +41,7 @@ def test() -> None:
   T = Testing()
   test_basics( T )
   test_sorting( T )
+  test_hashing( T )
   test_segments_overlap_segments_are_disjunct( T )
   test_segments_are_adjacent( T )
   test_merge_two_segments( T )
@@ -71,6 +72,11 @@ def test_basics( T: Any ) -> None:
   # try:    r = new_segment( ( False, True, ) )
   # except  InterlapKeyError as e: pass
   # else:   T.fail( '^T9^', f"should not be acceptable: {r}" )
+
+#-----------------------------------------------------------------------------------------------------------
+def test_hashing( T: Any ) -> None:
+  print( '^332-1^', 'test_hashing' )
+  T.eq( '^T10^', { Segment( 3, 4 ): 42, }, { Segment( 3, 4 ): 42, } )
 
 #-----------------------------------------------------------------------------------------------------------
 def test_sorting( T: Any ) -> None:
