@@ -56,6 +56,8 @@ S =
     dejavuserif:                'DejaVuSerif'
     hanaminaotf:                'HanaMinA'
     hanaminbotf:                'HanaMinB'
+    hanamina:                   'HanaMinA'
+    hanaminb:                   'HanaMinB'
     ipamp:                      'IPAPMincho'
     jizurathreeb:               'jizura3b'
     nanummyeongjo:              'NanumMyeongjo'
@@ -64,6 +66,7 @@ S =
     thtshynptwo:                'TH-Tshyn-P2'
     thtshynpzero:               'TH-Tshyn-P0'
     umingttcone:                'UMingCN'
+    takaopgothic:               'TakaoGothic'
     # @default
     # asanamath
     # ebgaramondtwelveregular:    ''
