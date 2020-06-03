@@ -14,6 +14,8 @@ from _testing import urge
 # from functools import total_ordering
 # from typing import NewType
 from typing import Any
+from typing import Dict
+from typing import Tuple
 # from math import inf
 #...........................................................................................................
 from interlap import _merge_segments
@@ -48,6 +50,7 @@ def test() -> None:
   test_size( T )
   test_new_lap( T )
   test_immutability( T )
+  test_kitty_font_conf_1( T )
   T.report()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -55,37 +58,42 @@ def test_basics( T: Any ) -> None:
   print( '^332-1^', 'test_basics' )
   T.eq( '^T1^', type( new_segment( ( 42, 48, ) ) ), Segment )
   T.ne( '^T2^', type( new_segment( ( 42, 48, ) ) ), tuple )
-  urge( '^21^', new_segment( ( 42, 48, ) ) )
-  urge( '^21^', Segment( 42, 48, ) )
-  urge( '^21^', Lap( Segment( 42, 48, ) ) )
+  urge( '^21-1^', new_segment( ( 42, 48, ) ) )
+  urge( '^21-2^', Segment( 42, 48, ) )
+  urge( '^21-3^', Lap( Segment( 42, 48, ) ) )
   T.eq( '^T3^', new_segment( ( 42, 48, ) ), Segment( 42, 48 ) )
-  # T.ne( '^T4^', new_segment( ( 1, 1, ) ), ( 1, 1, ) )
+  T.eq( '^T4^', new_segment( lo = 42, hi = 48 ), Segment( 42, 48 ) )
+  try:    new_segment( 42, 48 )
+  except  TypeError: T.ok( '^T5^', True )
+  else:   T.fail( '^T6^', "`new_segment()` with two unnamed arguments should fail" )
+  # T.eq( '^T7-3^', new_segment( 42, 48 ), Segment( 42, 48 ) )
+  # T.ne( '^T8^', new_segment( ( 1, 1, ) ), ( 1, 1, ) )
   # try:    r = new_segment( ( False, True, ) )
   # except  InterlapKeyError as e: pass
-  # else:   T.fail( '^T5^', f"should not be acceptable: {r}" )
+  # else:   T.fail( '^T9^', f"should not be acceptable: {r}" )
 
 #-----------------------------------------------------------------------------------------------------------
 def test_sorting( T: Any ) -> None:
   print( '^332-1^', 'test_sorting' )
-  T.eq( '^T6^', Segment( 3, 4 ) <  Segment( 4, 4 ), True )
-  T.eq( '^T7^', Segment( 5, 8 ) <  Segment( 5, 7 ), False )
-  T.eq( '^T8^', Segment( 5, 8 ) >  Segment( 5, 7 ), True )
+  T.eq( '^T10^', Segment( 3, 4 ) <  Segment( 4, 4 ), True )
+  T.eq( '^T11^', Segment( 5, 8 ) <  Segment( 5, 7 ), False )
+  T.eq( '^T12^', Segment( 5, 8 ) >  Segment( 5, 7 ), True )
   #.........................................................................................................
-  T.eq( '^T9^', new_lap( ( 3, 4 ) ) <  new_lap( ( 1, 1, ) ), False )
-  T.eq( '^T10^', new_lap( ( 3, 4 ) ) == new_lap( ( 1, 1, ) ), False )
-  T.eq( '^T11^', new_lap( ( 3, 4 ) ) >  new_lap( ( 1, 1, ) ), True  )
+  T.eq( '^T13^', new_lap( ( 3, 4 ) ) <  new_lap( ( 1, 1, ) ), False )
+  T.eq( '^T14^', new_lap( ( 3, 4 ) ) == new_lap( ( 1, 1, ) ), False )
+  T.eq( '^T15^', new_lap( ( 3, 4 ) ) >  new_lap( ( 1, 1, ) ), True  )
   #.........................................................................................................
-  T.eq( '^T12^', new_lap( ( 3, 4 ) ) <  new_lap( ( 4, 4, ) ), True  )
-  T.eq( '^T13^', new_lap( ( 3, 4 ) ) == new_lap( ( 4, 4, ) ), False )
-  T.eq( '^T14^', new_lap( ( 3, 4 ) ) >  new_lap( ( 4, 4, ) ), False )
+  T.eq( '^T16^', new_lap( ( 3, 4 ) ) <  new_lap( ( 4, 4, ) ), True  )
+  T.eq( '^T17^', new_lap( ( 3, 4 ) ) == new_lap( ( 4, 4, ) ), False )
+  T.eq( '^T18^', new_lap( ( 3, 4 ) ) >  new_lap( ( 4, 4, ) ), False )
   #.........................................................................................................
-  T.eq( '^T15^', new_lap( ( 3, 4 ) ) <  new_lap( ( 3, 5, ) ), True  )
-  T.eq( '^T16^', new_lap( ( 3, 4 ) ) == new_lap( ( 3, 5, ) ), False )
-  T.eq( '^T17^', new_lap( ( 3, 4 ) ) >  new_lap( ( 3, 5, ) ), False )
+  T.eq( '^T19^', new_lap( ( 3, 4 ) ) <  new_lap( ( 3, 5, ) ), True  )
+  T.eq( '^T20^', new_lap( ( 3, 4 ) ) == new_lap( ( 3, 5, ) ), False )
+  T.eq( '^T21^', new_lap( ( 3, 4 ) ) >  new_lap( ( 3, 5, ) ), False )
   #.........................................................................................................
-  T.eq( '^T18^', new_lap( ( 3, 4 ) ) <  new_lap( ( 5, 5, ) ), True  )
-  T.eq( '^T19^', new_lap( ( 3, 4 ) ) == new_lap( ( 5, 5, ) ), False )
-  T.eq( '^T20^', new_lap( ( 3, 4 ) ) >  new_lap( ( 5, 5, ) ), False )
+  T.eq( '^T22^', new_lap( ( 3, 4 ) ) <  new_lap( ( 5, 5, ) ), True  )
+  T.eq( '^T23^', new_lap( ( 3, 4 ) ) == new_lap( ( 5, 5, ) ), False )
+  T.eq( '^T24^', new_lap( ( 3, 4 ) ) >  new_lap( ( 5, 5, ) ), False )
 
 #-----------------------------------------------------------------------------------------------------------
 def test_segments_overlap_segments_are_disjunct( T: Any ) -> None:
