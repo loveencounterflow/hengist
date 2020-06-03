@@ -15,5 +15,5 @@
 # Use these fonts for specific codepoint ranges:
 +style:ming                   *                         lmromantenregular
 +style:ming                   rsg:u-cjk                 sunexta
-+style:ming                   '丁'                      hanamina
++style:ming                   '丁'                      takaopgothic
 
