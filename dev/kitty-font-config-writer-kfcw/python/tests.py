@@ -304,7 +304,7 @@ def f( x: Dict[ Tuple[ int, int, ], str, ] ) -> Dict[ Tuple[ int, int, ], str, ]
     disjunct  = subtract_segments(  segment, *exclusion )
     exclusion = merge_segments(     segment, *exclusion )
     for disjunct_segment in disjunct:
-      R[ disjunct_segment ] = psname
+      R[ ( disjunct_segment.lo, disjunct_segment.hi, ) ] = psname
   return R
 
 #-----------------------------------------------------------------------------------------------------------
