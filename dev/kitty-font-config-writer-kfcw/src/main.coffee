@@ -148,15 +148,43 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
 #   return R
 
 #-----------------------------------------------------------------------------------------------------------
+@_segment_from_cid_literal = ( settings, cid_literal ) ->
+  cid_ranges_by_rsgs = @_read_cid_ranges_by_rsgs settings
+  #.......................................................................................................
+  if cid_literal is '*'
+    return new LAP.Segment [ 0x000000, 0x10ffff, ]
+  #.......................................................................................................
+  else if ( cid_literal.startsWith "'" ) and ( cid_literal.endsWith "'" )
+    validate.chr chr  = cid_literal[ 1 ... cid_literal.length - 1 ]
+    first_cid         = chr.codePointAt 0
+    last_cid          = first_cid
+    return new LAP.Segment [ first_cid, last_cid, ]
+  #.......................................................................................................
+  else if ( cid_literal.startsWith 'rsg:' )
+    rsg = cid_literal[ 4 .. ]
+    validate.nonempty_text rsg
+    unless ( segment = cid_ranges_by_rsgs[ rsg ] )?
+      throw new Error "^4445^ illegal line: unknown rsg: #{rpr rsg}, line_nr: #{line_nr}, line: #{rpr line}"
+    return segment
+  #.......................................................................................................
+  else
+    try
+      return segment_from_cid_hex_range_txt cid_literal
+    catch error
+      throw new Error "^4445^ illegal line: #{error.message}, line_nr: #{line_nr}, line: #{rpr line}"
+  #.......................................................................................................
+  throw new Error "^4445^ illegal line: unable to parse CID range; line_nr: #{line_nr}, line: #{rpr line}"
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @_read_configured_cid_ranges = ( settings ) ->
-  cid_ranges_by_rsgs  = @_read_cid_ranges_by_rsgs settings
   R                   = settings.configured_cid_ranges = []
   source_path         = PATH.resolve PATH.join __dirname, settings.paths.configured_cid_ranges
   lines               = ( FS.readFileSync source_path, { encoding: 'utf-8', } ).split '\n'
   unknown_fontnicks   = new Set()
-  unknown_rsgs        = new Set()
   for line, line_idx in lines
-    line = line.replace /^\s+$/g, ''
+    line_nr  = line_idx + 1
+    line    = line.replace /^\s+$/g, ''
     continue if ( line.length is 0 ) or ( /^\s*#/.test line )
     [ styletag, cid_literal, fontnick, glyphstyle..., ] = line.split /\s+/
     glyphstyle = glyphstyle.join ' '
@@ -167,43 +195,28 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
     # continue unless fontnick?
     # continue unless first_cid?
     # continue unless last_cid?
-    continue unless styletag is '+style:ming'
-    continue if     glyphstyle? and /\bglyph\b/.test glyphstyle
+    #.......................................................................................................
+    unless styletag is '+style:ming'
+      whisper "^776^ skipping line_nr: #{line_nr} b/c of styletag: #{rpr styletag}"
+      continue
+    #.......................................................................................................
+    if glyphstyle? and /\bglyph\b/.test glyphstyle
+      whisper "^776^ skipping line_nr: #{line_nr} b/c of glyphstyle: #{rpr glyphstyle}"
+      continue
     #.......................................................................................................
     unless ( psname = settings.psname_by_fontnicks[ fontnick ] )?
       unless unknown_fontnicks.has fontnick
         unknown_fontnicks.add fontnick
-        warn "unknown fontnick #{rpr fontnick}"
+        warn "unknown fontnick #{rpr fontnick} on linenr: #{line_nr} (only noting first occurrence)"
       continue
-    #.......................................................................................................
-    ### TAINT the below as function ###
     #.......................................................................................................
     if cid_literal is '*'
       debug '^778^', { styletag, cid_literal, fontnick, }
       settings.default_fontnick ?= fontnick
       settings.default_psname   ?= psname
       continue
-      # segment = new LAP.Segment [ 0x000000, 0x10ffff, ]
     #.......................................................................................................
-    else if ( cid_literal.startsWith "'" ) and ( cid_literal.endsWith "'" )
-      validate.chr chr  = cid_literal[ 1 ... cid_literal.length - 1 ]
-      first_cid         = chr.codePointAt 0
-      last_cid          = first_cid
-      segment           = new LAP.Segment [ first_cid, last_cid, ]
-    #.......................................................................................................
-    else if ( cid_literal.startsWith 'rsg:' )
-      rsg = cid_literal[ 4 .. ]
-      validate.nonempty_text rsg
-      unless ( segment = cid_ranges_by_rsgs[ rsg ] )?
-        unknown_rsgs.add rsg
-        warn "unknown rsg #{rpr rsg}"
-        continue
-    #.......................................................................................................
-    else
-      try
-        segment = segment_from_cid_hex_range_txt cid_literal
-      catch error
-        throw new Error "^4445^ illegal line: #{error.message}, linenr: #{line_idx + 1}, line: #{rpr line}"
+    segment = @_segment_from_cid_literal settings, cid_literal
     #.......................................................................................................
     ### NOTE for this particular file format, we could use segments instead of laps since there can be only
     one segment per record; however, for consistency with those cases where several disjunct segments per
