@@ -138,7 +138,7 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
     try
       R[ rsg ] = segment_from_cid_hex_range_txt cid_range_txt
     catch error
-      throw new Error "^4445^ illegal line: #{error.message}, linenr: #{line_idx + 1}, line: #{rpr line}"
+      throw new Error "^4445^ illegal line: #{error.message}, line_nr: #{line_idx + 1}, line: #{rpr line}"
   return R
 
 # #-----------------------------------------------------------------------------------------------------------
@@ -225,6 +225,14 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
     particular data type; allow to use segments and laps for this and similar attributes. ###
     lap = new LAP.Interlap segment
     R.push { fontnick, psname, lap, }
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+@_read_configured_cid_ranges_as_laps = ( settings ) ->
+  R = []
+  for { fontnick, psname, lap, } in @_read_configured_cid_ranges settings
+    for segment in lap
+      R.push { fontnick, psname, segment, }
   return R
 
 #-----------------------------------------------------------------------------------------------------------
