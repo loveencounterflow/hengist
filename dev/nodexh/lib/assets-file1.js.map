@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/assets-file1.coffee"
+  ],
+  "names": [],
+  "mappings": "AACmF;EAAA;AAAA,MAAA,GAAA,EAAA,GAAA,EAAA,OAAA,EAAA,KAAA,EAAA;;EAEnF,KAAA,GAA4B,IAAI,CAAE,OAAA,CAAQ,WAAR,CAAF,CAAuB,CAAC,SAA5B,CAAA;;EAC5B,CAAA,CAAE,GAAF,EACE,OADF,EAEE,QAFF,CAAA,GAE4B,KAF5B;;EAGA,GAAA,GAA4B,OAAO,CAAC;;EAEpC,IAAC,CAAA,cAAD,GAAkB,QAAA,CAAE,CAAF,CAAA;IAChB,QAAQ,CAAC,KAAT,CAAe,CAAf;IACA,CAAA;AACA,WAAO;EAHS;;EAKlB,IAAC,CAAA,WAAD,GAAe,QAAA,CAAE,CAAF,CAAA;AACf,QAAA;IAAE,IAAO,CAAE,IAAA,GAAO,OAAA,CAAQ,CAAR,CAAT,CAAA,KAAwB,OAA/B;MACE,MAAM,IAAI,KAAJ,CAAU,CAAA,gCAAA,CAAA,CAAmC,IAAnC,CAAA,CAAV,EADR;;IAEA,GAAA,CAAI,OAAJ,EAAa,CAAb;AACA,WAAO,CAAA,IAAK;EAJC;;EAMf,IAAG,MAAA,KAAU,OAAO,CAAC,IAArB;IAAkC,CAAA,CAAA,CAAA,GAAA;aAChC,GAAA,CAAI,OAAJ,EAAa,IAAC,CAAA,WAAD,CAAa,EAAb,CAAb;IADgC,CAAA,IAAlC;;AAnBmF",
+  "sourcesContent": [
+    "\n### This file is needed for testing; when modified, tests must be modified, too ###\n\ntypes                     = new ( require 'intertype' ).Intertype()\n{ isa\n  type_of\n  validate }              = types\nlog                       = console.log\n\n@other_function = ( x ) ->\n  validate.float x\n  x++\n  return x\n\n@my_function = ( x ) ->\n  unless ( type = type_of x ) is 'float'\n    throw new Error \"^79283^ expected a float, got a #{type}\"\n  log '^334^', x\n  return x ** 2\n\nif module is require.main then do =>\n  log '^783^', @my_function 42\n\n\n\n"
+  ]
+}
