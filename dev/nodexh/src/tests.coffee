@@ -75,15 +75,15 @@ provide = ->
     R                       = new @Location()
     R.original              = {}
     R.generated             = {}
-    R.original.line_idx     = p.originalLine
-    R.original.column_idx   = p.originalColumn
     R.original.line_nr      = p.originalLine    + 1
     R.original.column_nr    = p.originalColumn  + 1
+    R.original.line_idx     = p.originalLine
+    R.original.column_idx   = p.originalColumn
     R.original.path         = p.originalSource
+    R.generated.line_nr     = p.generatedLine   + 1
+    R.generated.column_nr   = p.generatedColumn + 1
     R.generated.line_idx    = p.generatedLine
     R.generated.column_idx  = p.generatedColumn
-    R.generated.line_nr     = p.generatedLine    + 1
-    R.generated.column_nr   = p.generatedColumn  + 1
     R.generated.path        = path
     return R
 
@@ -119,18 +119,73 @@ provide = ->
     T.ok Object.isFrozen p1.generated
     T.ok Object.isFrozen p1
     T.eq ( type_of p1 ), 'location'
-    T.eq p1.original.line_idx,      16
-    T.eq p1.original.column_idx,    10
     T.eq p1.original.line_nr,       17
     T.eq p1.original.column_nr,     11
+    T.eq p1.original.line_idx,      16
+    T.eq p1.original.column_idx,    10
     T.eq p1.original.path.endsWith  '/nodexh/src/assets-file1.coffee'
-    T.eq p1.generated.line_idx,     19
-    T.eq p1.generated.column_idx,   12
     T.eq p1.generated.line_nr,      20
     T.eq p1.generated.column_nr,    13
+    T.eq p1.generated.line_idx,     19
+    T.eq p1.generated.column_idx,   12
     T.eq p1.generated.path.endsWith '/nodexh/lib/assets-file1.js'
   unless error?
     T.fail "^776^ expected error, got none"
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "find segments" ] = ( T, done ) ->
+  types                     = new ( require 'intertype' ).Intertype()
+  { isa
+    type_of
+    validate }              = types
+  # SMR                       = require 'source-map-resolve'
+  # SMC                       = require 'source-map'
+  provide.apply NODEXH = {}
+  #.........................................................................................................
+  try require './assets-file2' catch error
+    warn error
+    frames    = NODEXH.frames_from_error error
+    frame     = frames[ 0 ]
+    urge '^336^', frame
+    sourcemap = NODEXH.new_sourcemap  frame, error
+    p1        = NODEXH.map_frame      sourcemap, frame
+    urge '^336^', p1
+    for line_nr in [ 1 .. p1.generated.line_nr ]
+      for column_nr in [ 1 .. 10 ]
+        p2 = NODEXH._map_frame sourcemap, frame.path, line_nr, column_nr
+        # whisper '^77762^', line_nr, column_nr, p2.original
+        debug '^77762^', { line_nr, column_nr, }, '->', { line_nr: p2.original.line_nr, column_nr: p2.original.column_nr, }
+  unless error?
+    T.fail "^776^ expected error, got none"
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "retrieve source code" ] = ( T, done ) ->
+  types                     = new ( require 'intertype' ).Intertype()
+  { isa
+    type_of
+    validate }              = types
+  # SMR                       = require 'source-map-resolve'
+  # SMC                       = require 'source-map'
+  provide.apply NODEXH = {}
+  #.........................................................................................................
+  MODULE = require './assets-file1'
+  T.eq ( MODULE.my_function 42 ), 1764
+  try MODULE.my_function 'helo' catch error
+    error.stack = error.stack.replace /\n.*guy-test[\s\S]*/, ''
+    help error.stack
+    error.stack = ( error.stack + '\n' ).replace /\n\s*->\s+[^\n]+\n/g, '\n'
+    warn error
+    frames    = NODEXH.frames_from_error error
+    for frame in frames
+      ### TAINT can re-use sourcemap from same file ###
+      ### TAINT how to deal with unmapped sources? ###
+      sourcemap = NODEXH.new_sourcemap  frame, error
+      location  = NODEXH.map_frame sourcemap, frame
+      urge '^336^', frame, location
+  #.........................................................................................................
   done()
 
 
