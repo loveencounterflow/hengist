@@ -59,6 +59,7 @@
     use_disjunct_ranges: false,
     write_pua_sample: true,
     write_ranges_sample: true,
+    write_special_interest_sample: true,
     // source_path:  '../../../assets/write-font-configuration-for-kitty-terminal.sample-data.json'
     paths: {
       // configured_cid_ranges:  '../../../../ucdb/cfg/styles-codepoints-and-fontnicks.txt'
@@ -85,7 +86,7 @@
       takaopgothic: 'TakaoGothic',
       // @default
       // asanamath
-      // ebgaramondtwelveregular:    ''
+      ebgaramondtwelveregular: 'Iosevka-Slab',
       // hanaminexatwootf:           ''
       lmromantenregular: 'Iosevka-Slab',
       iosevkaslab: 'Iosevka-Slab',
@@ -399,6 +400,10 @@
         return results1;
       })();
       sample_txt = sample.join('');
+      sample_txt = sample_txt.replace(/[\x00-\x20]+/g, '');
+      sample_txt = sample_txt.replace(/[\x80-\x9f]+/g, '');
+      sample_txt = sample_txt.replace(/[\u2000-\u200f]+/g, '');
+      sample_txt = sample_txt.replace(/\s+/g, '');
       psname_txt = psname.padEnd(30);
       results.push(write(`# symbol_map      ${unicode_range_txt} ${psname_txt} # ${sample_txt}`));
     }
@@ -407,7 +412,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this._write_pua_sample = function(settings, write) {
-    var cid, col_cid, i, j, row, row_cid, row_cid_txt;
+    var cid, col_cid, i, j, results, row, row_cid, row_cid_txt;
+    results = [];
     for (row_cid = i = 0xe000; i <= 58272; row_cid = i += 0x10) {
       row = [];
       for (col_cid = j = 0x00; j <= 15; col_cid = ++j) {
@@ -415,21 +421,38 @@
         row.push(String.fromCodePoint(cid));
       }
       row_cid_txt = `U+${(row_cid.toString(16)).padStart(4, '0')}`;
-      write(`# ${row_cid_txt} ${row.join('')}`);
+      results.push(write(`# ${row_cid_txt} ${row.join('')}`));
     }
-    return this._write_special_interest_sample(settings, write);
+    return results;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this._write_special_interest_sample = function(settings, write) {
-    write("# x𒇷x");
-    return write("# x﷽x");
+    write('# x𒇷x');
+    write('# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^.^.^.^.^.^.^.^.^.^.^.');
+    write('# x﷽x');
+    write('# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^.^.^.^.^.^.^.^.^.^.^.');
+    write('# x𒇷     x');
+    write('# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^.^.^.^.^.^.^.^.^.^.^.');
+    write('# x﷽     x');
+    write('# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^.^.^.^.^.^.^.^.^.^.^.');
+    write('# ');
+    write('# ');
+    write('#  (32 chrs)');
+    write('# | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |');
+    write('# 豈更車賈滑串句龜龜契金喇奈懶癩羅蘿螺裸邏樂洛烙珞落酪駱亂卵欄爛金 (32 chrs)');
+    write('# ■□▢▣▤▥▦▧▨▩▪▫▬▭▮▯▰▱▲');
+    write('# ԀԁԂԃԄԅԆԇԈԉԊԋԌԍԎԏԐԑԒԓԔԕԖԗԘԙԚԛԜԝԞ');
+    write('# ⤀⤁⤂⤃⤄⤅⤆⤇⤈⤉⤊⤋⤌⤍⤎⤏⤐⤑⤒⤓⤔⤕⤖⤗⤘⤙⤚⤛⤜⤝⤞');
+    write('# ℀℁ℂ℃℄℅℆ℇ℈℉ℊℋℌℍℎℏℐℑℒℓ℔ℕ№℗℘ℙℚℛℜℝ℞');
+    write('# ℀℁ℂ℃ ℄℅℆ℇ℈℉ℊℋℌℍℎℏℐℑℒℓ℔ℕ№℗℘ℙℚℛℜℝ℞');
+    return write('# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^.^.^.^.^.^.^.^.^.^.^.');
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.write_font_configuration_for_kitty_terminal = function(settings) {
     /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
-    var disjunct_range, fontnick, i, len, psname, ref, ref1, ref2, ref3, segment, unicode_range_txt, write;
+    var disjunct_range, fontnick, i, len, psname, ref, ref1, ref2, ref3, ref4, segment, unicode_range_txt, write;
     write = this._write_method_from_path(settings, settings.paths.kitty_fonts_conf);
     //.........................................................................................................
     if ((ref = settings.use_disjunct_ranges) != null ? ref : false) {
@@ -437,11 +460,14 @@
     } else {
       settings.fontnicks_and_segments = this._read_configured_cid_ranges_as_laps(settings);
     }
-    if ((ref1 = settings.write_ranges_sample) != null ? ref1 : false) {
+    if ((ref1 = settings.write_special_interest_sample) != null ? ref1 : false) {
       //.........................................................................................................
+      this._write_special_interest_sample(settings, write);
+    }
+    if ((ref2 = settings.write_ranges_sample) != null ? ref2 : false) {
       this._write_ranges_sample(settings, write);
     }
-    if ((ref2 = settings.write_pua_sample) != null ? ref2 : false) {
+    if ((ref3 = settings.write_pua_sample) != null ? ref3 : false) {
       this._write_pua_sample(settings, write);
     }
     //.........................................................................................................
@@ -455,10 +481,10 @@
       write("italic_font      auto");
       write("bold_italic_font auto");
     }
-    ref3 = settings.fontnicks_and_segments;
+    ref4 = settings.fontnicks_and_segments;
     //.........................................................................................................
-    for (i = 0, len = ref3.length; i < len; i++) {
-      disjunct_range = ref3[i];
+    for (i = 0, len = ref4.length; i < len; i++) {
+      disjunct_range = ref4[i];
       ({fontnick, psname, segment} = disjunct_range);
       if (psname === 'Iosevka-Slab') {
         /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
@@ -630,10 +656,25 @@ rl.on( 'line', ( line ) => {
       // @demo_disjunct_ranges()
       // @demo_kitty_font_config()
       //.........................................................................................................
-      return this.write_font_configuration_for_kitty_terminal(S);
+      return this.write_font_configuration_for_kitty_terminal(S); //########################################################################################################
     })();
   }
 
   // @write_whisk_character_tunnel S
+
+  //###########################################################################################################
+/* NOTE original version has problems with these entries:
+ * 3002
+ * symbol_map      U+3000-U+303f                  HanaMinA
+
+ * 2e81
+ * symbol_map      U+2e80-U+2eff                  Sun-ExtA
+
+ * 31c2
+ * symbol_map      U+31c0-U+31ef                  Sun-ExtA
+
+ * 3404
+ * symbol_map      U+3400-U+4dbf                  Sun-ExtA
+ */
 
 }).call(this);
