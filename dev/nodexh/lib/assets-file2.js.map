@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/assets-file2.coffee"
+  ],
+  "names": [],
+  "mappings": "AACmF;EAAA;EAEnF;;AAFmF",
+  "sourcesContent": [
+    "\n### This file is needed for testing; when modified, tests must be modified, too ###\n\nx"
+  ]
+}
