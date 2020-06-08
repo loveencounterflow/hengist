@@ -52,6 +52,7 @@ def test() -> None:
   test_new_lap( T )
   test_immutability( T )
   test_kitty_font_conf_1( T )
+  test_kitty_font_conf_2( T )
   T.report()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -294,18 +295,21 @@ def test_immutability( T: Any ) -> None:
 
 
 #-----------------------------------------------------------------------------------------------------------
-def f( x: Dict[ Tuple[ int, int, ], str, ] ) -> Dict[ Tuple[ int, int, ], str, ]:
-  R: Dict[ Tuple[ int, int, ], str, ]  = {}
-  ranges_tpl              = reversed( list( range_tpl for range_tpl in x ) )
-  exclusion               = new_lap( new_segment( lo = 0x0, hi = 0x0, ), )
-  for range_tpl in ranges_tpl:
-    psname    = x[ range_tpl ]
-    segment   = new_segment( range_tpl )
-    disjunct  = subtract_segments(  segment, *exclusion )
-    exclusion = merge_segments(     segment, *exclusion )
-    for disjunct_segment in disjunct:
-      R[ ( disjunct_segment.lo, disjunct_segment.hi, ) ] = psname
-  return R
+def coalesce_symbol_maps( maps: Dict[ Tuple[ int, int, ], str, ] ) -> Dict[ Tuple[ int, int, ], str, ]:
+    if not maps:
+        return maps
+    R:            Dict[ Tuple[ int, int, ], str, ]
+    R           = {}
+    ranges_tpl  = reversed( list( range_tpl for range_tpl in maps ) )
+    exclusion   = new_lap( new_segment( lo = 0x0, hi = 0x0, ), )
+    for range_tpl in ranges_tpl:
+        psname    = maps[ range_tpl ]
+        segment   = new_segment( range_tpl )
+        disjunct  = subtract_segments(  segment, *exclusion )
+        exclusion = merge_segments(     segment, *exclusion )
+        for disjunct_segment in disjunct:
+            R[ ( disjunct_segment.lo, disjunct_segment.hi, ) ] = psname
+    return R
 
 #-----------------------------------------------------------------------------------------------------------
 def test_kitty_font_conf_1( T: Any ) -> None:
@@ -314,11 +318,25 @@ def test_kitty_font_conf_1( T: Any ) -> None:
   matcher = { ( 0x4e00, 0x4e00, ): 'Sun-ExtA', ( 0x4e02, 0x9fff, ): 'Sun-ExtA',  ( 0x4e01, 0x4e01, ): 'TakaoGothic'}
   debug( f"^443^ probe: {probe}" )
   debug( f"^443^ matcher: {matcher}" )
-  result: Dict[ Tuple[ int, int, ], str, ] = f( probe )
+  result: Dict[ Tuple[ int, int, ], str, ] = coalesce_symbol_maps( probe )
+  T.eq( '^T129^', result, matcher )
+
+#-----------------------------------------------------------------------------------------------------------
+def test_kitty_font_conf_2( T: Any ) -> None:
+  print( '^332-1^', 'test_kitty_font_conf_2' )
+  probe   = { ( 0x4e00, 0x9fff, ): 'Sun-ExtA', ( 0x4e01, 0x4e01, ): 'TakaoGothic', ( 0x9000, 0xa010, ): 'OtherFont', }
+  matcher = { ( 0x4e00, 0x4e00, ): 'Sun-ExtA', ( 0x4e02, 0x8fff, ): 'Sun-ExtA',  ( 0x4e01, 0x4e01, ): 'TakaoGothic', ( 0x9000, 0xa010, ): 'OtherFont', }
+  debug( f"^443^ probe: {probe}" )
+  debug( f"^443^ matcher: {matcher}" )
+  result: Dict[ Tuple[ int, int, ], str, ] = coalesce_symbol_maps( probe )
   T.eq( '^T129^', result, matcher )
 
 
 ############################################################################################################
 if __name__ == '__main__':
-  test()
-
+  # test()
+  non_characters = frozenset(range(0xfffe, 0x10ffff, 0x10000))
+  for cid in non_characters:
+    debug( '^33^', "{:02X}".format( cid ) )
+    width = 8
+    debug( '^33^', f"{cid:0{width}x}" )
