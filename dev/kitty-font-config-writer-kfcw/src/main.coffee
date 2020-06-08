@@ -40,9 +40,10 @@ to_width = ( text, width ) ->
 # PERTAINING TO SPECIFIC SETTINGS / FONT CHOICES
 #-----------------------------------------------------------------------------------------------------------
 S =
-  use_disjunct_ranges:  false
-  write_pua_sample:     true
-  write_ranges_sample:  true
+  use_disjunct_ranges:            false
+  write_pua_sample:               true
+  write_ranges_sample:            true
+  write_special_interest_sample:  true
   # source_path:  '../../../assets/write-font-configuration-for-kitty-terminal.sample-data.json'
   paths:
     # configured_cid_ranges:  '../../../../ucdb/cfg/styles-codepoints-and-fontnicks.txt'
@@ -69,7 +70,7 @@ S =
     takaopgothic:               'TakaoGothic'
     # @default
     # asanamath
-    # ebgaramondtwelveregular:    ''
+    ebgaramondtwelveregular:    'Iosevka-Slab'
     # hanaminexatwootf:           ''
     lmromantenregular:          'Iosevka-Slab'
     iosevkaslab:                'Iosevka-Slab'
@@ -291,6 +292,10 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
     unicode_range_txt = ( LAP.as_unicode_range segment ).padEnd 30
     sample            = ( String.fromCodePoint c for c in [ segment.lo .. segment.hi ][ .. 30 ] )
     sample_txt        = sample.join ''
+    sample_txt        = sample_txt.replace /[\x00-\x20]+/g, ''
+    sample_txt        = sample_txt.replace /[\x80-\x9f]+/g, ''
+    sample_txt        = sample_txt.replace /[\u2000-\u200f]+/g, ''
+    sample_txt        = sample_txt.replace /\s+/g, ''
     psname_txt        = psname.padEnd 30
     write "# symbol_map      #{unicode_range_txt} #{psname_txt} # #{sample_txt}"
 
@@ -303,12 +308,28 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
       row.push String.fromCodePoint cid
     row_cid_txt = "U+#{( row_cid.toString 16 ).padStart 4, '0'}"
     write "# #{row_cid_txt} #{row.join ''}"
-  @_write_special_interest_sample settings, write
 
 #-----------------------------------------------------------------------------------------------------------
 @_write_special_interest_sample = ( settings, write ) ->
-  write "# x𒇷x"
-  write "# x﷽x"
+  write '# x𒇷x'
+  write '# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^.^.^.^.^.^.^.^.^.^.^.'
+  write '# x﷽x'
+  write '# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^.^.^.^.^.^.^.^.^.^.^.'
+  write '# x𒇷     x'
+  write '# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^.^.^.^.^.^.^.^.^.^.^.'
+  write '# x﷽     x'
+  write '# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^.^.^.^.^.^.^.^.^.^.^.'
+  write '# '
+  write '# '
+  write '#  (32 chrs)'
+  write '# | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |'
+  write '# 豈更車賈滑串句龜龜契金喇奈懶癩羅蘿螺裸邏樂洛烙珞落酪駱亂卵欄爛金 (32 chrs)'
+  write '# ■□▢▣▤▥▦▧▨▩▪▫▬▭▮▯▰▱▲'
+  write '# ԀԁԂԃԄԅԆԇԈԉԊԋԌԍԎԏԐԑԒԓԔԕԖԗԘԙԚԛԜԝԞ'
+  write '# ⤀⤁⤂⤃⤄⤅⤆⤇⤈⤉⤊⤋⤌⤍⤎⤏⤐⤑⤒⤓⤔⤕⤖⤗⤘⤙⤚⤛⤜⤝⤞'
+  write '# ℀℁ℂ℃℄℅℆ℇ℈℉ℊℋℌℍℎℏℐℑℒℓ℔ℕ№℗℘ℙℚℛℜℝ℞'
+  write '# ℀℁ℂ℃ ℄℅℆ℇ℈℉ℊℋℌℍℎℏℐℑℒℓ℔ℕ№℗℘ℙℚℛℜℝ℞'
+  write '# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^.^.^.^.^.^.^.^.^.^.^.'
 
 #-----------------------------------------------------------------------------------------------------------
 @write_font_configuration_for_kitty_terminal = ( settings ) ->
@@ -319,8 +340,9 @@ segment_from_cid_hex_range_txt = ( cid_range_txt ) -> new LAP.Segment parse_cid_
   else
     settings.fontnicks_and_segments = @_read_configured_cid_ranges_as_laps settings
   #.........................................................................................................
-  @_write_ranges_sample settings, write if settings.write_ranges_sample ? false
-  @_write_pua_sample    settings, write if settings.write_pua_sample    ? false
+  @_write_special_interest_sample settings, write if settings.write_special_interest_sample ? false
+  @_write_ranges_sample           settings, write if settings.write_ranges_sample           ? false
+  @_write_pua_sample              settings, write if settings.write_pua_sample              ? false
   #.........................................................................................................
   unless settings.default_psname?
     warn "^334^ no default font configured"
@@ -468,6 +490,20 @@ if module is require.main then do =>
   @write_font_configuration_for_kitty_terminal S
   # @write_whisk_character_tunnel S
 
+############################################################################################################
+### NOTE original version has problems with these entries:
+# 3002
+# symbol_map      U+3000-U+303f                  HanaMinA
+
+# 2e81
+# symbol_map      U+2e80-U+2eff                  Sun-ExtA
+
+# 31c2
+# symbol_map      U+31c0-U+31ef                  Sun-ExtA
+
+# 3404
+# symbol_map      U+3400-U+4dbf                  Sun-ExtA
+############################################################################################################
 
 
 
