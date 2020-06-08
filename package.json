@@ -29,6 +29,8 @@
     "panzoom": "^9.2.4",
     "pg": "^8.2.1",
     "pg-cursor": "^2.2.1",
-    "steampipes": "^6.3.0"
+    "source-map-resolve": "file:../../../../tmp/source-map-resolve",
+    "steampipes": "^6.3.0",
+    "tslog": "^2.1.2"
   }
 }
