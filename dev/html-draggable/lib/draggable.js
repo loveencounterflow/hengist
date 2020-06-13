@@ -1,5 +1,5 @@
 (function() {
-  var dragme_dom, provide;
+  var element, i, j, len, len1, provide, ref, ref1;
 
   provide = function() {
     //---------------------------------------------------------------------------------------------------------
@@ -18,31 +18,36 @@
       this._attach_dragover = function() {};
       return null;
     };
+    this._prv_drggable_id = 0;
     //---------------------------------------------------------------------------------------------------------
     return this.make_draggable = function(element) {
-      var on_drag_start, on_drop;
+      var id, on_drag_start, on_drop;
       /* thx to http://jsfiddle.net/robertc/kKuqH/
          https://stackoverflow.com/a/6239882/7568091 */
       this._attach_dragover();
+      this._prv_drggable_id++;
+      id = this._prv_drggable_id;
+      this.set(element, 'draggable', true);
       //.......................................................................................................
       this.on(element, 'dragstart', on_drag_start = function(event) {
         var style, x, y;
+        log('^236^', "dragstart", {element, id});
         style = µ.DOM.get_live_styles(event.target);
         x = (parseInt(style.left, 10)) - event.clientX;
         y = (parseInt(style.top, 10)) - event.clientY;
-        event.dataTransfer.setData('application/json', JSON.stringify({x, y}));
-        return log('^333^', "select:", element);
+        return event.dataTransfer.setData('application/json', JSON.stringify({x, y, id}));
       });
       //.......................................................................................................
       this.on(document.body, 'drop', on_drop = function(event) {
-        var left, top, x, y;
-        ({x, y} = JSON.parse(event.dataTransfer.getData('application/json')));
-        left = event.clientX + x + 'px';
-        top = event.clientY + y + 'px';
-        log('^3332^', event.target);
+        var left, top, transfer;
+        transfer = JSON.parse(event.dataTransfer.getData('application/json'));
+        if (id !== transfer.id) {
+          return;
+        }
+        left = event.clientX + transfer.x + 'px';
+        top = event.clientY + transfer.y + 'px';
         µ.DOM.set_style_rule(element, 'left', left);
         µ.DOM.set_style_rule(element, 'top', top);
-        log('^3334^', {x, y}, {left, top});
         event.preventDefault();
         return false;
       });
@@ -53,15 +58,23 @@
 
   provide.apply(µ.DOM);
 
-  dragme_dom = µ.DOM.select('#dragme');
+  ref = µ.DOM.select_all('ruler');
+  for (i = 0, len = ref.length; i < len; i++) {
+    element = ref[i];
+    // dragme_dom = µ.DOM.select '#dragme'
+    // µ.DOM.make_draggable dragme_dom
+    µ.DOM.make_draggable(element);
+  }
 
-  µ.DOM.make_draggable(dragme_dom);
+  ref1 = µ.DOM.select_all('p');
+  for (j = 0, len1 = ref1.length; j < len1; j++) {
+    element = ref1[j];
+    µ.DOM.make_draggable(element);
+  }
 
-  log('^334^', "dragme_dom.style.left:", µ.rpr(dragme_dom.style.left));
-
-  log('^334^', "µ.DOM.get_style_rule dragme_dom, 'left':", µ.rpr(µ.DOM.get_style_rule(dragme_dom, 'left')));
-
-  log('^334^', "µ.DOM.get_style_rule dragme_dom, 'top':", µ.rpr(µ.DOM.get_style_rule(dragme_dom, 'top')));
+  // log '^334^', "dragme_dom.style.left:", µ.rpr dragme_dom.style.left
+  // log '^334^', "µ.DOM.get_style_rule dragme_dom, 'left':", µ.rpr µ.DOM.get_style_rule dragme_dom, 'left'
+  // log '^334^', "µ.DOM.get_style_rule dragme_dom, 'top':", µ.rpr µ.DOM.get_style_rule dragme_dom, 'top'
 
   // on_dragend = ( event ) ->
   //   { x, y, } = JSON.parse event.dataTransfer.getData 'application/json'
