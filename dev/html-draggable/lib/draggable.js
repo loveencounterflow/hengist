@@ -18,15 +18,15 @@
       this._attach_dragover = function() {};
       return null;
     };
-    this._prv_drggable_id = 0;
+    this._prv_draggable_id = 0;
     //---------------------------------------------------------------------------------------------------------
     return this.make_draggable = function(element) {
       var id, on_drag_start, on_drop;
       /* thx to http://jsfiddle.net/robertc/kKuqH/
          https://stackoverflow.com/a/6239882/7568091 */
       this._attach_dragover();
-      this._prv_drggable_id++;
-      id = this._prv_drggable_id;
+      this._prv_draggable_id++;
+      id = this._prv_draggable_id;
       this.set(element, 'draggable', true);
       //.......................................................................................................
       this.on(element, 'dragstart', on_drag_start = function(event) {
