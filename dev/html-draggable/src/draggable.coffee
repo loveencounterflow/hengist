@@ -14,6 +14,7 @@ provide = ->
     @_attach_dragover = ->
     return null
 
+  #---------------------------------------------------------------------------------------------------------
   @_prv_draggable_id = 0
 
   #---------------------------------------------------------------------------------------------------------
@@ -26,7 +27,6 @@ provide = ->
     @set element, 'draggable', true
     #.......................................................................................................
     @on element, 'dragstart', on_drag_start = ( event ) ->
-      log '^236^', "dragstart", { element, id, }
       style = µ.DOM.get_live_styles event.target
       x     = ( parseInt style.left, 10 ) - event.clientX
       y     = ( parseInt style.top,  10 ) - event.clientY
@@ -49,7 +49,7 @@ provide.apply µ.DOM
 # dragme_dom = µ.DOM.select '#dragme'
 # µ.DOM.make_draggable dragme_dom
 µ.DOM.make_draggable element for element in µ.DOM.select_all 'ruler'
-µ.DOM.make_draggable element for element in µ.DOM.select_all 'p'
+# µ.DOM.make_draggable element for element in µ.DOM.select_all 'p'
 # log '^334^', "dragme_dom.style.left:", µ.rpr dragme_dom.style.left
 # log '^334^', "µ.DOM.get_style_rule dragme_dom, 'left':", µ.rpr µ.DOM.get_style_rule dragme_dom, 'left'
 # log '^334^', "µ.DOM.get_style_rule dragme_dom, 'top':", µ.rpr µ.DOM.get_style_rule dragme_dom, 'top'
@@ -65,14 +65,14 @@ provide.apply µ.DOM
 # document.body.addEventListener  'dragend',    on_dragend,     false
 
 
-document.body.addEventListener( 'drag',      ( ( e ) => log( 'drag'      ) ), false )
-document.body.addEventListener( 'dragstart', ( ( e ) => log( 'dragstart' ) ), false )
-document.body.addEventListener( 'dragend',   ( ( e ) => log( 'dragend'   ) ), false )
-document.body.addEventListener( 'dragexit',  ( ( e ) => log( 'dragexit'  ) ), false )
-# document.body.addEventListener( 'dragenter', ( ( e ) => log( 'dragenter' ) ), false )
-# document.body.addEventListener( 'dragleave', ( ( e ) => log( 'dragleave' ) ), false )
-# document.body.addEventListener( 'dragover',  ( ( e ) => log( 'dragover'  ) ), false )
-document.body.addEventListener( 'drop',      ( ( e ) => log( 'drop'      ) ), false )
+# document.body.addEventListener( 'drag',      ( ( e ) => log( 'drag'      ) ), false )
+# document.body.addEventListener( 'dragstart', ( ( e ) => log( 'dragstart' ) ), false )
+# document.body.addEventListener( 'dragend',   ( ( e ) => log( 'dragend'   ) ), false )
+# document.body.addEventListener( 'dragexit',  ( ( e ) => log( 'dragexit'  ) ), false )
+# # document.body.addEventListener( 'dragenter', ( ( e ) => log( 'dragenter' ) ), false )
+# # document.body.addEventListener( 'dragleave', ( ( e ) => log( 'dragleave' ) ), false )
+# # document.body.addEventListener( 'dragover',  ( ( e ) => log( 'dragover'  ) ), false )
+# document.body.addEventListener( 'drop',      ( ( e ) => log( 'drop'      ) ), false )
 
 
 

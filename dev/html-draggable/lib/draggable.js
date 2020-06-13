@@ -1,5 +1,5 @@
 (function() {
-  var element, i, j, len, len1, provide, ref, ref1;
+  var element, i, len, provide, ref;
 
   provide = function() {
     //---------------------------------------------------------------------------------------------------------
@@ -18,6 +18,7 @@
       this._attach_dragover = function() {};
       return null;
     };
+    //---------------------------------------------------------------------------------------------------------
     this._prv_draggable_id = 0;
     //---------------------------------------------------------------------------------------------------------
     return this.make_draggable = function(element) {
@@ -31,7 +32,6 @@
       //.......................................................................................................
       this.on(element, 'dragstart', on_drag_start = function(event) {
         var style, x, y;
-        log('^236^', "dragstart", {element, id});
         style = µ.DOM.get_live_styles(event.target);
         x = (parseInt(style.left, 10)) - event.clientX;
         y = (parseInt(style.top, 10)) - event.clientY;
@@ -66,47 +66,29 @@
     µ.DOM.make_draggable(element);
   }
 
-  ref1 = µ.DOM.select_all('p');
-  for (j = 0, len1 = ref1.length; j < len1; j++) {
-    element = ref1[j];
-    µ.DOM.make_draggable(element);
-  }
-
-  // log '^334^', "dragme_dom.style.left:", µ.rpr dragme_dom.style.left
-  // log '^334^', "µ.DOM.get_style_rule dragme_dom, 'left':", µ.rpr µ.DOM.get_style_rule dragme_dom, 'left'
-  // log '^334^', "µ.DOM.get_style_rule dragme_dom, 'top':", µ.rpr µ.DOM.get_style_rule dragme_dom, 'top'
+  // µ.DOM.make_draggable element for element in µ.DOM.select_all 'p'
+// log '^334^', "dragme_dom.style.left:", µ.rpr dragme_dom.style.left
+// log '^334^', "µ.DOM.get_style_rule dragme_dom, 'left':", µ.rpr µ.DOM.get_style_rule dragme_dom, 'left'
+// log '^334^', "µ.DOM.get_style_rule dragme_dom, 'top':", µ.rpr µ.DOM.get_style_rule dragme_dom, 'top'
 
   // on_dragend = ( event ) ->
-  //   { x, y, } = JSON.parse event.dataTransfer.getData 'application/json'
-  //   left      = event.clientX + x + 'px'
-  //   top       = event.clientY + y + 'px'
-  //   log '^3332^', "dragend", { left, top, }, event.target
-  // on_drag = ( event ) -> log( '^on_drag@6676^', µ.rpr( event.dataTransfer.getData( 'application/json' ) ) )
-  // dragme_dom.addEventListener('drag',on_drag,false)
+//   { x, y, } = JSON.parse event.dataTransfer.getData 'application/json'
+//   left      = event.clientX + x + 'px'
+//   top       = event.clientY + y + 'px'
+//   log '^3332^', "dragend", { left, top, }, event.target
+// on_drag = ( event ) -> log( '^on_drag@6676^', µ.rpr( event.dataTransfer.getData( 'application/json' ) ) )
+// dragme_dom.addEventListener('drag',on_drag,false)
 
   // document.body.addEventListener  'dragend',    on_dragend,     false
-  document.body.addEventListener('drag', ((e) => {
-    return log('drag');
-  }), false);
 
-  document.body.addEventListener('dragstart', ((e) => {
-    return log('dragstart');
-  }), false);
-
-  document.body.addEventListener('dragend', ((e) => {
-    return log('dragend');
-  }), false);
-
-  document.body.addEventListener('dragexit', ((e) => {
-    return log('dragexit');
-  }), false);
-
-  // document.body.addEventListener( 'dragenter', ( ( e ) => log( 'dragenter' ) ), false )
-  // document.body.addEventListener( 'dragleave', ( ( e ) => log( 'dragleave' ) ), false )
-  // document.body.addEventListener( 'dragover',  ( ( e ) => log( 'dragover'  ) ), false )
-  document.body.addEventListener('drop', ((e) => {
-    return log('drop');
-  }), false);
+  // document.body.addEventListener( 'drag',      ( ( e ) => log( 'drag'      ) ), false )
+// document.body.addEventListener( 'dragstart', ( ( e ) => log( 'dragstart' ) ), false )
+// document.body.addEventListener( 'dragend',   ( ( e ) => log( 'dragend'   ) ), false )
+// document.body.addEventListener( 'dragexit',  ( ( e ) => log( 'dragexit'  ) ), false )
+// # document.body.addEventListener( 'dragenter', ( ( e ) => log( 'dragenter' ) ), false )
+// # document.body.addEventListener( 'dragleave', ( ( e ) => log( 'dragleave' ) ), false )
+// # document.body.addEventListener( 'dragover',  ( ( e ) => log( 'dragover'  ) ), false )
+// document.body.addEventListener( 'drop',      ( ( e ) => log( 'drop'      ) ), false )
 
 }).call(this);
 
