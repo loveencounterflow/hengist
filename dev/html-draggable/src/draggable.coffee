@@ -1,6 +1,4 @@
 
-### thx to http://jsfiddle.net/robertc/kKuqH/
-https://stackoverflow.com/a/6239882/7568091 ###
 
 provide = ->
 
@@ -18,6 +16,8 @@ provide = ->
 
   #---------------------------------------------------------------------------------------------------------
   @make_draggable = ( element ) ->
+    ### thx to http://jsfiddle.net/robertc/kKuqH/
+    https://stackoverflow.com/a/6239882/7568091 ###
     @_attach_dragover()
     #.......................................................................................................
     @on element, 'dragstart', on_drag_start = ( event ) ->

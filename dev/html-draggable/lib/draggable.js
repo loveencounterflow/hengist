@@ -1,6 +1,4 @@
 (function() {
-  /* thx to http://jsfiddle.net/robertc/kKuqH/
-  https://stackoverflow.com/a/6239882/7568091 */
   var dragme_dom, provide;
 
   provide = function() {
@@ -23,6 +21,8 @@
     //---------------------------------------------------------------------------------------------------------
     return this.make_draggable = function(element) {
       var on_drag_start, on_drop;
+      /* thx to http://jsfiddle.net/robertc/kKuqH/
+         https://stackoverflow.com/a/6239882/7568091 */
       this._attach_dragover();
       //.......................................................................................................
       this.on(element, 'dragstart', on_drag_start = function(event) {
