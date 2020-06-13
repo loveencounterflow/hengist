@@ -1,60 +1,67 @@
 (function() {
   /* thx to http://jsfiddle.net/robertc/kKuqH/
   https://stackoverflow.com/a/6239882/7568091 */
-  var dragme_dom, on_drag_over, on_drag_start, on_drop, provide;
+  var dragme_dom, provide;
 
   provide = function() {
-    this.make_draggable = function(selector) {
-      var element, i, len, nodes, ref;
-      ref = nodes = this.select_all(selector);
-      for (i = 0, len = ref.length; i < len; i++) {
-        element = ref[i];
-        this._make_draggable(element);
-      }
-      return nodes.length;
+    //---------------------------------------------------------------------------------------------------------
+    this.on = function(element, name, handler) {
+      /* TAINT add options */
+      return element.addEventListener(name, handler, false);
     };
-    this._make_draggable = function(element) {
-      return log('^333^', "select:", element);
+    //---------------------------------------------------------------------------------------------------------
+    this._attach_dragover = function() {
+      var on_dragover;
+      /* TAINT Apparently need for correct dragging behavior, but what if we wanted to handle this event? */
+      this.on(document.body, 'dragover', on_dragover = function(event) {
+        event.preventDefault();
+        return false;
+      });
+      this._attach_dragover = function() {};
+      return null;
     };
-    return null;
+    //---------------------------------------------------------------------------------------------------------
+    return this.make_draggable = function(element) {
+      var on_drag_start, on_drop;
+      this._attach_dragover();
+      //.......................................................................................................
+      this.on(element, 'dragstart', on_drag_start = function(event) {
+        var style, x, y;
+        style = µ.DOM.get_live_styles(event.target);
+        x = (parseInt(style.left, 10)) - event.clientX;
+        y = (parseInt(style.top, 10)) - event.clientY;
+        event.dataTransfer.setData('application/json', JSON.stringify({x, y}));
+        return log('^333^', "select:", element);
+      });
+      //.......................................................................................................
+      this.on(document.body, 'drop', on_drop = function(event) {
+        var left, top, x, y;
+        ({x, y} = JSON.parse(event.dataTransfer.getData('application/json')));
+        left = event.clientX + x + 'px';
+        top = event.clientY + y + 'px';
+        log('^3332^', event.target);
+        µ.DOM.set_style_rule(element, 'left', left);
+        µ.DOM.set_style_rule(element, 'top', top);
+        log('^3334^', {x, y}, {left, top});
+        event.preventDefault();
+        return false;
+      });
+      //.......................................................................................................
+      return null;
+    };
   };
 
   provide.apply(µ.DOM);
 
-  // log         = console.log;
   dragme_dom = µ.DOM.select('#dragme');
+
+  µ.DOM.make_draggable(dragme_dom);
 
   log('^334^', "dragme_dom.style.left:", µ.rpr(dragme_dom.style.left));
 
   log('^334^', "µ.DOM.get_style_rule dragme_dom, 'left':", µ.rpr(µ.DOM.get_style_rule(dragme_dom, 'left')));
 
   log('^334^', "µ.DOM.get_style_rule dragme_dom, 'top':", µ.rpr(µ.DOM.get_style_rule(dragme_dom, 'top')));
-
-  on_drag_start = function(event) {
-    var style, x, y;
-    style = µ.DOM.get_live_styles(event.target);
-    x = (parseInt(style.left, 10)) - event.clientX;
-    y = (parseInt(style.top, 10)) - event.clientY;
-    return event.dataTransfer.setData('application/json', JSON.stringify({x, y}));
-  };
-
-  on_drag_over = function(event) {
-    event.preventDefault();
-    return false;
-  };
-
-  on_drop = function(event) {
-    var left, top, x, y;
-    ({x, y} = JSON.parse(event.dataTransfer.getData('application/json')));
-    left = event.clientX + x + 'px';
-    top = event.clientY + y + 'px';
-    log('^3332^', event.target);
-    µ.DOM.set_style_rule(dragme_dom, 'left', left);
-    µ.DOM.set_style_rule(dragme_dom, 'top', top);
-    log('^3334^', {x, y}, {left, top});
-    event.preventDefault();
-    return false;
-  };
 
   // on_dragend = ( event ) ->
   //   { x, y, } = JSON.parse event.dataTransfer.getData 'application/json'
@@ -63,11 +70,6 @@
   //   log '^3332^', "dragend", { left, top, }, event.target
   // on_drag = ( event ) -> log( '^on_drag@6676^', µ.rpr( event.dataTransfer.getData( 'application/json' ) ) )
   // dragme_dom.addEventListener('drag',on_drag,false)
-  dragme_dom.addEventListener('dragstart', on_drag_start, false);
-
-  document.body.addEventListener('dragover', on_drag_over, false);
-
-  document.body.addEventListener('drop', on_drop, false);
 
   // document.body.addEventListener  'dragend',    on_dragend,     false
   document.body.addEventListener('drag', ((e) => {
