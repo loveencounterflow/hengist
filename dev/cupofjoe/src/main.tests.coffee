@@ -175,27 +175,6 @@ test                      = require 'guy-test'
   done() if done?
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "CUP demo 3" ] = ( T, done ) ->
-  cupofjoe = new ( require '../../../apps/cupofjoe' ).Cupofjoe()
-  { cram
-    expand
-    expand_async } = cupofjoe.export()
-  #.........................................................................................................
-  sleep   = ( dts ) -> new Promise ( done ) => setTimeout done, dts * 1000
-  request = -> await sleep 0; return 'request complete'
-  #.........................................................................................................
-  cram null, ->
-    cram 'pre'
-    cram 'one', ->
-      cram 'two', await request()
-  # urge rpr CUP.collector
-  ds = await expand_async()
-  info jr ds
-  T.eq ds, [ [ 'pre' ], [ 'one', [ 'two', 'request complete' ] ] ]
-  #.........................................................................................................
-  done() if done?
-
-#-----------------------------------------------------------------------------------------------------------
 @[ "CUP demo reformat" ] = ( T, done ) ->
   cupofjoe = new ( require '../../../apps/cupofjoe' ).Cupofjoe { flatten: true, }
   { cram
@@ -280,6 +259,5 @@ if module is require.main then do =>
   # test @[ "expand()" ]
   # test @[ "CUP configuration" ]
   # test @[ "CUP demo 2" ]
-  # test @[ "CUP demo 3" ]
 
 
