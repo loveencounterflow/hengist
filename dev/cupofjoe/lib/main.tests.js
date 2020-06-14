@@ -318,38 +318,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["CUP demo 3"] = async function(T, done) {
-    var cram, cupofjoe, ds, expand, expand_async, request, sleep;
-    cupofjoe = new (require('../../../apps/cupofjoe')).Cupofjoe();
-    ({cram, expand, expand_async} = cupofjoe.export());
-    //.........................................................................................................
-    sleep = function(dts) {
-      return new Promise((done) => {
-        return setTimeout(done, dts * 1000);
-      });
-    };
-    request = async function() {
-      await sleep(0);
-      return 'request complete';
-    };
-    //.........................................................................................................
-    cram(null, function() {
-      cram('pre');
-      return cram('one', async function() {
-        return cram('two', (await request()));
-      });
-    });
-    // urge rpr CUP.collector
-    ds = (await expand_async());
-    info(jr(ds));
-    T.eq(ds, [['pre'], ['one', ['two', 'request complete']]]);
-    if (done != null) {
-      //.........................................................................................................
-      return done();
-    }
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this["CUP demo reformat"] = function(T, done) {
     var cram, cupofjoe, expand, h, html;
     cupofjoe = new (require('../../../apps/cupofjoe')).Cupofjoe({
@@ -447,7 +415,6 @@
 // test @[ "expand()" ]
 // test @[ "CUP configuration" ]
 // test @[ "CUP demo 2" ]
-// test @[ "CUP demo 3" ]
 
 }).call(this);
 
