@@ -44,7 +44,7 @@
 
   /*
 
-  * You have a function `f()` that may work snychronously or asynchronously, depending on runtime
+  * You have a function `f()` that may work synchronously or asynchronously, depending on runtime
     factors.
   * As such, making it the consumer's responsibility to choose bewteen `f_sync ...` or `await f_async ...` is
     not the problem;
@@ -65,7 +65,10 @@
             list[idx] = element();
             break;
           case 'asyncfunction':
-            throw new Error("unable to resolve asny function snychronously");
+            throw new Error("unable to resolve async function synchronously");
+        }
+        if (isa.promise(list[idx])) {
+          throw new Error(`unable to resolve async function synchronously (item ${idx}): ${rpr(list[idx])}`);
         }
       }
       return list;
@@ -73,20 +76,20 @@
 
     //---------------------------------------------------------------------------------------------------------
     async expand_async(list) {
-      var element, i, idx, len, type, value;
+      var element, i, idx, len, type;
       for (idx = i = 0, len = list.length; i < len; idx = ++i) {
         element = list[idx];
         debug('expand_async', {idx, element});
         switch (type = type_of(element)) {
           case 'function':
-            list[idx] = value = element();
+            list[idx] = element();
             break;
           case 'asyncfunction':
-            list[idx] = value = (await element());
+            list[idx] = (await element());
         }
-        // if type_of value is 'promise' then list[ idx ] = await value
-        if (isa.thenable(value)) {
-          list[idx] = (await value);
+        // if type_of list[ idx ] is 'promise' then list[ idx ] = await list[ idx ]
+        if (isa.promise(list[idx])) {
+          list[idx] = (await list[idx]);
         }
       }
       return list;
@@ -94,29 +97,27 @@
 
     //---------------------------------------------------------------------------------------------------------
     async demo() {
-      var f;
-      info(this.expand_sync([
-        4,
-        (function() {
-          return 42;
-        }),
-        8
-      ]));
-      f = function() {
+      var async_f, error, sync_f;
+      sync_f = function() {
+        return 'sync';
+      };
+      async_f = function() {
         return new Promise(async function(done) {
           await sleep(0);
           return done('async!');
         });
       };
-      debug(f());
-      debug((await f()));
-      info((await this.expand_async([
-        (function() {
-          return 'sync';
-        }),
-        f,
-        8
-      ])));
+      debug('^223^', "type_of async_f:", type_of(async_f));
+      debug('^223^', "async_f():", async_f());
+      debug('^223^', "await async_f():", (await async_f()));
+      info(this.expand_sync([4, sync_f, 8]));
+      try {
+        this.expand_sync([sync_f, async_f, 8]);
+      } catch (error1) {
+        error = error1;
+        warn(CND.reverse(`^3334^ error (ok): ${rpr(error.message)}`));
+      }
+      info((await this.expand_async([sync_f, async_f, 8])));
       return null;
     }
 
