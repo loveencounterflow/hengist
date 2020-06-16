@@ -909,6 +909,12 @@ later = ->
     check
     equals } = intertype.export()
   ### TAINT copy more extensive tests from CND, `js_eq`? ###
+  re = /expected at least 2 arguments/
+  try equals 3 catch error
+    warn error.message
+    if re.test error.message then T.ok true
+    else T.fail "expected error #{rpr re}, got #{rpr error.message}"
+  T.fail "expected error, got none" unless error?
   T.eq ( equals 3, 3 ), true
   T.eq ( equals 3, 4 ), false
   done() if done?
@@ -918,11 +924,12 @@ later = ->
 unless module.parent?
   # test @
   # test @[ "size_of" ]
+  test @[ "equals" ]
   # @[ "equality checks" ]()
   # test @[ "isa.immediate, nowait" ]
   # test @[ "types_of() includes happy, sad" ]
   # test @[ "check(): validation with intermediate results (experiment)" ]
-  test @[ "check(): validation with intermediate results (for reals)" ]
+  # test @[ "check(): validation with intermediate results (for reals)" ]
   # test @[ "types_of" ]
   # test @[ "vnr, int32" ]
   # test @[ "cast" ]
