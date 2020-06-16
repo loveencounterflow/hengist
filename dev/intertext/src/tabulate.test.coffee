@@ -22,13 +22,6 @@ echo                      = CND.echo.bind CND
 # FS                        = require 'fs'
 #...........................................................................................................
 test                      = require 'guy-test'
-#...........................................................................................................
-types                     = ( require '../..' ).types
-{ isa
-  validate
-  cast
-  last_of
-  type_of }               = types
 
 
 
@@ -63,7 +56,7 @@ types                     = ( require '../..' ).types
     $show
     $drain }                = SP.export()
   #...........................................................................................................
-  INTERTEXT           = require '../..'
+  INTERTEXT = require '../../../apps/intertext'
   TBL                 = INTERTEXT.TBL
   probes_and_matchers = [
     [
@@ -102,7 +95,8 @@ types                     = ( require '../..' ).types
     $show
     $drain }                = SP.export()
   #...........................................................................................................
-  TBL                 = ( require '../..' ).TBL
+  INTERTEXT           = require '../../../apps/intertext'
+  TBL                 = INTERTEXT.TBL
   probes_and_matchers = [
     [
       [ { key: 1, value: "helo", }
@@ -141,7 +135,8 @@ types                     = ( require '../..' ).types
     $show
     $drain }                = SP.export()
   #...........................................................................................................
-  TBL                 = ( require '../..' ).TBL
+  INTERTEXT = require '../../../apps/intertext'
+  TBL                 = INTERTEXT.TBL
   probes_and_matchers = [
     [
       [ { key: 1, type: 'normal', value: 123456789 },
@@ -164,7 +159,7 @@ types                     = ( require '../..' ).types
     if is_header
       R = CND.white CND.reverse CND.bold cell_txt
     else
-      switch type_of value
+      switch INTERTEXT.types.type_of value
         when 'boolean'  then  R = CND.yellow  cell_txt
         when 'text'     then  R = CND.blue    cell_txt
         when 'number'   then  R = CND.green   cell_txt
@@ -196,7 +191,8 @@ types                     = ( require '../..' ).types
     $show
     $drain }                = SP.export()
   #...........................................................................................................
-  TBL                 = ( require '../..' ).TBL
+  INTERTEXT = require '../../../apps/intertext'
+  TBL                 = INTERTEXT.TBL
   probes_and_matchers = [
     [
       [ { key: 1, value: "helo", }
@@ -234,7 +230,8 @@ types                     = ( require '../..' ).types
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "widths" ] = ( T, done ) -> new Promise ( resolve ) =>
-  TBL                       = ( require '../..' ).TBL
+  INTERTEXT = require '../../../apps/intertext'
+  TBL                       = INTERTEXT.TBL
   SP                        = require 'steampipes'
   { $
     $async
@@ -267,7 +264,8 @@ types                     = ( require '../..' ).types
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "text representation" ] = ( T, done ) -> new Promise ( resolve ) =>
-  TBL                       = ( require '../..' ).TBL
+  INTERTEXT = require '../../../apps/intertext'
+  TBL                       = INTERTEXT.TBL
   SP                        = require 'steampipes'
   { $
     $async

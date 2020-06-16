@@ -22,7 +22,7 @@ test                      = require 'guy-test'
 # TESTS
 #-----------------------------------------------------------------------------------------------------------
 @[ "BASICS rpr" ] = ( T, done ) ->
-  INTERTEXT                 = require '../..'
+  INTERTEXT                 = require '../../../apps/intertext'
   { rpr }                   = INTERTEXT.export()
   #.........................................................................................................
   probes_and_matchers = [
@@ -42,7 +42,7 @@ test                      = require 'guy-test'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "BASICS camelize" ] = ( T, done ) ->
-  INTERTEXT                 = require '../..'
+  INTERTEXT                 = require '../../../apps/intertext'
   { camelize }              = INTERTEXT.export()
   #.........................................................................................................
   probes_and_matchers = [

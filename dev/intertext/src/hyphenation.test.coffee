@@ -20,26 +20,15 @@ DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
 { new_datom
   lets
   select }                = DATOM.export()
-types                     = require '../types'
-{ isa
-  validate
-  # cast
-  # declare
-  # declare_cast
-  # check
-  # sad
-  # is_sad
-  # is_happy
-  type_of }               = types
 #...........................................................................................................
 test                      = require 'guy-test'
-INTERTEXT                 = require '../..'
 
 
 #===========================================================================================================
 # TESTS
 #-----------------------------------------------------------------------------------------------------------
 @[ "INTERTEXT.HYPH.hyphenate" ] = ( T, done ) ->
+  INTERTEXT = require '../../../apps/intertext'
   probes_and_matchers = [
     ["","",]
     ["lexicographer","lex|i|cog|ra|pher",]
@@ -94,12 +83,14 @@ INTERTEXT                 = require '../..'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "INTERTEXT.HYPH.soft_hyphen_chr" ] = ( T, done ) ->
+  INTERTEXT = require '../../../apps/intertext'
   T.eq INTERTEXT.HYPH.soft_hyphen_chr, '\u00ad'
   done()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "INTERTEXT.HYPH.count_soft_hyphens" ] = ( T, done ) ->
+  INTERTEXT = require '../../../apps/intertext'
   probes_and_matchers = [
     [ "",           0, ]
     ["lex­i­cog­ra­pher",4,]
@@ -119,6 +110,7 @@ INTERTEXT                 = require '../..'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "INTERTEXT.HYPH.reveal_hyphens" ] = ( T, done ) ->
+  INTERTEXT = require '../../../apps/intertext'
   probes_and_matchers = [
     [ "fan\xadtas\xadtic",           "fan-tas-tic", ]
     ]

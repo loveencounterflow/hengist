@@ -20,26 +20,15 @@ DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
 { new_datom
   lets
   select }                = DATOM.export()
-types                     = require '../types'
-{ isa
-  validate
-  # cast
-  # declare
-  # declare_cast
-  # check
-  # sad
-  # is_sad
-  # is_happy
-  type_of }               = types
 #...........................................................................................................
 test                      = require 'guy-test'
-INTERTEXT                 = require '../..'
 
 
 #===========================================================================================================
 # TESTS
 #-----------------------------------------------------------------------------------------------------------
 @[ "INTERTEXT.SLABS.slabs_from_text" ] = ( T, done ) ->
+  INTERTEXT = require '../../../apps/intertext'
   probes_and_matchers = [
     ["",{"slabs":[],"ends":""},null]
     ["a very fine day",{"slabs":["a","very","fine","day"],"ends":"___x"},null]
@@ -61,6 +50,7 @@ INTERTEXT                 = require '../..'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "INTERTEXT.SLABS.assemble (1)" ] = ( T, done ) ->
+  INTERTEXT = require '../../../apps/intertext'
   probes_and_matchers = [
     ["","",null]
     ["a very fine day","a very fine day",null]
@@ -78,6 +68,7 @@ INTERTEXT                 = require '../..'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "INTERTEXT.SLABS.assemble (2)" ] = ( T, done ) ->
+  INTERTEXT = require '../../../apps/intertext'
   probes_and_matchers = [
     ["","",null]
     ["a very fine day","fine day",null]
@@ -97,6 +88,7 @@ INTERTEXT                 = require '../..'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "INTERTEXT.SLABS.assemble (3)" ] = ( T, done ) ->
+  INTERTEXT = require '../../../apps/intertext'
   probe   = "a very fine day for a cro\xadmu\xadlent so\xadlu\xadtion"
   matcher = [
     "a"
@@ -130,6 +122,7 @@ INTERTEXT                 = require '../..'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "INTERTEXT.SLABS.assemble (4)" ] = ( T, done ) ->
+  INTERTEXT = require '../../../apps/intertext'
   probe   = "over-guess\xadti\xadmate"
   matcher = [
     "over-"

@@ -16,22 +16,6 @@ urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 { jr, }                   = CND
 #...........................................................................................................
-DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
-{ new_datom
-  lets
-  select }                = DATOM.export()
-types                     = require '../types'
-{ isa
-  validate
-  # cast
-  # declare
-  # declare_cast
-  # check
-  # sad
-  # is_sad
-  # is_happy
-  type_of }               = types
-#...........................................................................................................
 test                      = require 'guy-test'
 
 
@@ -39,7 +23,7 @@ test                      = require 'guy-test'
 # TESTS
 #-----------------------------------------------------------------------------------------------------------
 @[ "INTERTEXT.UCD.get_block_list" ] = ( T, done ) ->
-  INTERTEXT                 = require '../..'
+  INTERTEXT                 = require '../../../apps/intertext'
   debug INTERTEXT.UCD.get_block_list()
   # probes_and_matchers = []
   # for [ probe, matcher, error, ] in probes_and_matchers
