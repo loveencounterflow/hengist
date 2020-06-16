@@ -51,14 +51,14 @@ test                      = require 'guy-test'
   info rpr ds
   info jr ds.flat Infinity
   # urge '^4443^', ds
-  T.eq ds, [
+  T.eq ds, [ [
     [ 'pre1' ],
     [ 'pre2', 'wat' ],
     [ 'one',
       [ 'two', 42 ],
       [ 'three',
         [ 'four', [ 'five', [ 'six' ] ] ] ] ],
-    [ 'post' ] ]
+    [ 'post' ] ] ]
   #.........................................................................................................
   done() if done?
 
@@ -96,7 +96,7 @@ test                      = require 'guy-test'
   urge rpr cupofjoe.collector
   ds = expand()
   info jr ds
-  T.eq ds, [
+  T.eq ds, [ [
     [ { '$key': '^pre1' } ],
     [ { '$key': '<pre2' }, 'wat', { '$key': '>pre2' } ],
     [ { '$key': '<one' },
@@ -113,7 +113,7 @@ test                      = require 'guy-test'
           { '$key': '>four' } ],
         { '$key': '>three' } ],
       { '$key': '>one' } ],
-    [ { '$key': '^post' } ] ]
+    [ { '$key': '^post' } ] ] ]
   #.........................................................................................................
   done() if done?
 
@@ -203,51 +203,7 @@ test                      = require 'guy-test'
   #.........................................................................................................
   done() if done?
 
-# #-----------------------------------------------------------------------------------------------------------
-# @[ "_CUP cram w/out functions" ] = ( T, done ) ->
-#   # debug ( k for k of ( require '../../../apps/cupofjoe' ) ); process.exit 1
-#   cupofjoe = new ( require '../../../apps/cupofjoe' ).Cupofjoe()
-#   { cram
-#     expand }  = cupofjoe.export()
-#   #.........................................................................................................
-#   cram null
-#   cram null, null
-#   cram 'first'
-#   cram [ 'one', ]
-#   cram 'two', 'three', 'four'
-#   cram undefined, null
-#   cram 'five', 'six', 'seven', 'eight'
-#   result = expand()
-#   urge '^7777^', result
-#   T.eq result, ["first","one",["two","three","four"],["five","six","seven","eight"]]
-#   cram 'ten'
-#   result = expand()
-#   T.eq result, ["first","one",["two","three","four"],["five","six","seven","eight"],["ten"]]
-#   #.........................................................................................................
-#   done() if done?
 
-#-----------------------------------------------------------------------------------------------------------
-@[ "CUP _unwrap" ] = ( T, done ) ->
-  cupofjoe = new ( require '../../../apps/cupofjoe' ).Cupofjoe()
-  { _unwrap
-    expand }  = cupofjoe.export()
-  #.........................................................................................................
-  probes_and_matchers = [
-    [ [], [], null ]
-    [ [ null ], [ null ], null ]
-    [ [ null, null ], [ null, null ], null ]
-    [ [ null, null, undefined ], [ null, null, undefined ], null ]
-    [ [ null, null, [] ], [ null, null, [] ], null ]
-    [ [ null, null, [ [] ] ], [ null, null, [ [] ] ], null ]
-    [ [ [ 'foo' ] ], [ 'foo' ], null ]
-    [ [ 'a', 'b', [ 'c' ] ], [ 'a', 'b', [ 'c' ] ], null ]
-    ]
-  for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      resolve _unwrap probe
-  #.........................................................................................................
-  done()
-  return null
 
 
 
