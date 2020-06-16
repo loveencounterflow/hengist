@@ -198,7 +198,7 @@ test                      = require 'guy-test'
   c = new Cupofdatom()
   urge '^2289^', c
   c.cram 'p', ->
-    c.cram null, "It is very ", ( c.cram 'em', "convenient" ),  " to write"
+    c.cram null, "It is very ", ( -> c.cram 'em', "convenient" ),  " to write"
   ds = c.expand()
   info d for d in ds
   help ds
@@ -218,8 +218,8 @@ test                      = require 'guy-test'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
-  test @[ "DATOM Cupofdatom linear structure" ]
+  test @
+  # test @[ "DATOM Cupofdatom linear structure" ]
   # test @[ "DATOM Cupofdatom 1" ]
   # test @[ "DATOM Cupofdatom complains about non-wellformed names" ]
   # test @[ "DATOM Cupofdatom with templates" ]
