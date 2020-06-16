@@ -35,7 +35,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["BASICS rpr"] = async function(T, done) {
     var INTERTEXT, error, i, len, matcher, probe, probes_and_matchers, rpr;
-    INTERTEXT = require('../..');
+    INTERTEXT = require('../../../apps/intertext');
     ({rpr} = INTERTEXT.export());
     //.........................................................................................................
     probes_and_matchers = [
@@ -82,7 +82,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["BASICS camelize"] = async function(T, done) {
     var INTERTEXT, camelize, error, i, len, matcher, probe, probes_and_matchers;
-    INTERTEXT = require('../..');
+    INTERTEXT = require('../../../apps/intertext');
     ({camelize} = INTERTEXT.export());
     //.........................................................................................................
     probes_and_matchers = [['', ''], ['-', ''], ['--', ''], ['-a-', 'A'], ['-a', 'A'], ['a-', 'a'], ['helo', 'helo'], ['helo-world', 'heloWorld'], ['HELO-WORLD', 'HELOWORLD'], ['µ-DOM', 'µDOM'], ['danish-øre', 'danishØre']];

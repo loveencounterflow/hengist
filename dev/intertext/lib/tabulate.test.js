@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, alert, assign, badge, cast, copy, debug, echo, help, info, is_empty, isa, jr, last_of, log, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var CND, alert, assign, badge, copy, debug, echo, help, info, is_empty, jr, log, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -33,11 +33,6 @@
   // FS                        = require 'fs'
   //...........................................................................................................
   test = require('guy-test');
-
-  //...........................................................................................................
-  types = (require('../..')).types;
-
-  ({isa, validate, cast, last_of, type_of} = types);
 
   //-----------------------------------------------------------------------------------------------------------
   this._xxx_kw_demo = function() {
@@ -77,7 +72,7 @@
       SP = require('steampipes');
       ({$, $async, $watch, $show, $drain} = SP.export());
       //...........................................................................................................
-      INTERTEXT = require('../..');
+      INTERTEXT = require('../../../apps/intertext');
       TBL = INTERTEXT.TBL;
       probes_and_matchers = [
         [
@@ -168,11 +163,12 @@
   //-----------------------------------------------------------------------------------------------------------
   this["multiline text"] = function(T, done) {
     return new Promise(async(resolve) => {
-      var $, $async, $drain, $show, $watch, SP, TBL, error, i, len, matcher, probe, probes_and_matchers;
+      var $, $async, $drain, $show, $watch, INTERTEXT, SP, TBL, error, i, len, matcher, probe, probes_and_matchers;
       SP = require('steampipes');
       ({$, $async, $watch, $show, $drain} = SP.export());
       //...........................................................................................................
-      TBL = (require('../..')).TBL;
+      INTERTEXT = require('../../../apps/intertext');
+      TBL = INTERTEXT.TBL;
       probes_and_matchers = [
         [
           [
@@ -235,11 +231,12 @@
   //-----------------------------------------------------------------------------------------------------------
   this["format callback"] = function(T, done) {
     return new Promise(async(resolve) => {
-      var $, $async, $drain, $show, $watch, SP, TBL, colorize, error, i, len, matcher, probe, probes_and_matchers;
+      var $, $async, $drain, $show, $watch, INTERTEXT, SP, TBL, colorize, error, i, len, matcher, probe, probes_and_matchers;
       SP = require('steampipes');
       ({$, $async, $watch, $show, $drain} = SP.export());
       //...........................................................................................................
-      TBL = (require('../..')).TBL;
+      INTERTEXT = require('../../../apps/intertext');
+      TBL = INTERTEXT.TBL;
       probes_and_matchers = [
         [
           [
@@ -287,7 +284,7 @@
         if (is_header) {
           R = CND.white(CND.reverse(CND.bold(cell_txt)));
         } else {
-          switch (type_of(value)) {
+          switch (INTERTEXT.types.type_of(value)) {
             case 'boolean':
               R = CND.yellow(cell_txt);
               break;
@@ -346,11 +343,12 @@
   //-----------------------------------------------------------------------------------------------------------
   this["demo: autowidth"] = function(T, done) {
     return new Promise(async(resolve) => {
-      var $, $async, $drain, $show, $watch, SP, TBL, error, i, len, matcher, probe, probes_and_matchers;
+      var $, $async, $drain, $show, $watch, INTERTEXT, SP, TBL, error, i, len, matcher, probe, probes_and_matchers;
       SP = require('steampipes');
       ({$, $async, $watch, $show, $drain} = SP.export());
       //...........................................................................................................
-      TBL = (require('../..')).TBL;
+      INTERTEXT = require('../../../apps/intertext');
+      TBL = INTERTEXT.TBL;
       probes_and_matchers = [
         [
           [
@@ -455,8 +453,9 @@
   //-----------------------------------------------------------------------------------------------------------
   this["widths"] = function(T, done) {
     return new Promise(async(resolve) => {
-      var $, $async, $drain, $show, $watch, SP, TBL, doit, rows, settings;
-      TBL = (require('../..')).TBL;
+      var $, $async, $drain, $show, $watch, INTERTEXT, SP, TBL, doit, rows, settings;
+      INTERTEXT = require('../../../apps/intertext');
+      TBL = INTERTEXT.TBL;
       SP = require('steampipes');
       ({$, $async, $watch, $show, $drain} = SP.export());
       //...........................................................................................................
@@ -521,8 +520,9 @@
   //-----------------------------------------------------------------------------------------------------------
   this["text representation"] = function(T, done) {
     return new Promise(async(resolve) => {
-      var $, $async, $drain, $show, $watch, SP, TBL, matcher, result, rows;
-      TBL = (require('../..')).TBL;
+      var $, $async, $drain, $show, $watch, INTERTEXT, SP, TBL, matcher, result, rows;
+      INTERTEXT = require('../../../apps/intertext');
+      TBL = INTERTEXT.TBL;
       SP = require('steampipes');
       ({$, $async, $watch, $show, $drain} = SP.export());
       //...........................................................................................................

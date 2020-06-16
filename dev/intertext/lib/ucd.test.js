@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DATOM, alert, badge, debug, echo, help, info, isa, jr, lets, log, new_datom, rpr, select, test, type_of, types, urge, validate, warn, whisper;
+  var CND, alert, badge, debug, echo, help, info, jr, log, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -30,24 +30,6 @@
   ({jr} = CND);
 
   //...........................................................................................................
-  DATOM = new (require('datom')).Datom({
-    dirty: false
-  });
-
-  ({new_datom, lets, select} = DATOM.export());
-
-  types = require('../types');
-
-  // cast
-  // declare
-  // declare_cast
-  // check
-  // sad
-  // is_sad
-  // is_happy
-  ({isa, validate, type_of} = types);
-
-  //...........................................................................................................
   test = require('guy-test');
 
   //===========================================================================================================
@@ -55,7 +37,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["INTERTEXT.UCD.get_block_list"] = function(T, done) {
     var INTERTEXT;
-    INTERTEXT = require('../..');
+    INTERTEXT = require('../../../apps/intertext');
     debug(INTERTEXT.UCD.get_block_list());
     // probes_and_matchers = []
     // for [ probe, matcher, error, ] in probes_and_matchers
