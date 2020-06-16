@@ -400,160 +400,148 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["CUP demo 2 flat"] = function(T, done) {
-    var DATOM, cram, cupofjoe, ds, expand, h, lets, new_datom, select;
-    cupofjoe = new (require('../../../apps/cupofjoe')).Cupofjoe({
-      flatten: true
-    });
-    ({cram, expand} = cupofjoe.export());
+  this.demo_cupofdatom_1 = function() {
+    var Cupofdatom, Cupofjoe, DATOM, c, collector, d, ds, i, j, k, len, len1, len2, lets, new_datom, select;
+    ({Cupofjoe} = require('../../../apps/cupofjoe'));
     //.........................................................................................................
     DATOM = new (require('datom')).Datom({
       dirty: false
     });
     ({new_datom, lets, select} = DATOM.export());
-    //.........................................................................................................
-    h = function(tagname, ...content) {
-      var d, d1, d2;
-      if (content.length === 0) {
-        d = new_datom(`^${tagname}`);
-        return cram(d, ...content);
-      }
-      d1 = new_datom(`<${tagname}`);
-      d2 = new_datom(`>${tagname}`);
-      return cram(d1, ...content, d2);
-    };
-    //.........................................................................................................
-    cram(null, function() {
-      h('pre1');
-      cram(null);
-      h('pre2', 'wat');
-      h('one', function() {
-        h('two', new_datom('^text', {
-          text: '42'
-        }));
-        return h('three', function() {
-          return h('four', function() {
-            return h('five', function() {
-              return h('six', function() {
-                return cram(new_datom('^text', {
-                  text: 'bottom'
-                }));
-              });
-            });
-          });
-        });
-      });
-      return h('post');
-    });
-    urge(rpr(cupofjoe.collector));
-    ds = expand();
-    info(jr(ds));
-    T.eq(ds, [
-      {
-        '$key': '^pre1'
-      },
-      {
-        '$key': '<pre2'
-      },
-      'wat',
-      {
-        '$key': '>pre2'
-      },
-      {
-        '$key': '<one'
-      },
-      {
-        '$key': '<two'
-      },
-      {
-        text: '42',
-        '$key': '^text'
-      },
-      {
-        '$key': '>two'
-      },
-      {
-        '$key': '<three'
-      },
-      {
-        '$key': '<four'
-      },
-      {
-        '$key': '<five'
-      },
-      {
-        '$key': '<six'
-      },
-      {
-        text: 'bottom',
-        '$key': '^text'
-      },
-      {
-        '$key': '>six'
-      },
-      {
-        '$key': '>five'
-      },
-      {
-        '$key': '>four'
-      },
-      {
-        '$key': '>three'
-      },
-      {
-        '$key': '>one'
-      },
-      {
-        '$key': '^post'
-      }
-    ]);
-    if (done != null) {
+    Cupofdatom = (function() {
       //.........................................................................................................
-      return done();
+      class Cupofdatom extends Cupofjoe {
+        constructor(settings) {
+          var base;
+          super(settings);
+          this.settings = Object.assign(this.settings, this._defaults);
+          if ((base = this.settings).DATOM == null) {
+            base.DATOM = DATOM; // module.exports
+          }
+        }
+
+        cram(name, ...content) {
+          var d1, d2;
+          debug('^332^', name, content);
+          if (!(content.length > 0)) {
+            return super.cram(this.settings.DATOM.new_datom(`^${name}`));
+          }
+          if (name === null) {
+            return super.cram(...content);
+          }
+          d1 = this.settings.DATOM.new_datom(`<${name}`);
+          d2 = this.settings.DATOM.new_datom(`>${name}`);
+          return super.cram(d1, ...content, d2);
+        }
+
+        expand() {
+          var R, i, idx, len, text;
+          debug('^332^', this);
+          R = super.expand();
+          for (idx = i = 0, len = R.length; i < len; idx = ++i) {
+            text = R[idx];
+            if (!isa.text(text)) {
+              continue;
+            }
+            R[idx] = this.settings.DATOM.new_datom('^text', {text});
+          }
+          return R;
+        }
+
+      };
+
+      Cupofdatom.prototype._defaults = {
+        flatten: true,
+        DATOM: null
+      };
+
+      return Cupofdatom;
+
+    }).call(this);
+    //.........................................................................................................
+    whisper('---------------------------------');
+    c = new Cupofdatom();
+    c.cram('helo', 'world');
+    c.cram('foo', function() {
+      return c.cram('bold', function() {
+        return c.cram(null, 'content');
+      });
+    });
+    collector = CND.deep_copy(c.collector);
+    ds = c.expand();
+    if (!equals(collector, ds)) {
+      urge(CND.reverse(collector));
     }
+    for (i = 0, len = ds.length; i < len; i++) {
+      d = ds[i];
+      info(d);
+    }
+    //.........................................................................................................
+    whisper('---------------------------------');
+    c = new Cupofdatom();
+    c.cram('helo', 'world');
+    c.cram('foo', function() {
+      return c.cram('bold', 'content');
+    });
+    collector = CND.deep_copy(c.collector);
+    ds = c.expand();
+    if (!equals(collector, ds)) {
+      urge(CND.reverse(collector));
+    }
+    for (j = 0, len1 = ds.length; j < len1; j++) {
+      d = ds[j];
+      info(d);
+    }
+    //.........................................................................................................
+    whisper('---------------------------------');
+    c = new Cupofdatom();
+    c.cram('helo', 'world');
+    c.cram('foo', function() {
+      return c.cram('bold', function() {
+        return ['this', 'is', 'content'];
+      });
+    });
+    collector = CND.deep_copy(c.collector);
+    ds = c.expand();
+    if (!equals(collector, ds)) {
+      urge(CND.reverse(collector));
+    }
+    for (k = 0, len2 = ds.length; k < len2; k++) {
+      d = ds[k];
+      info(d);
+    }
+    //.........................................................................................................
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["CUP demo reformat"] = function(T, done) {
-    var cram, cupofjoe, expand, h, html;
-    cupofjoe = new (require('../../../apps/cupofjoe')).Cupofjoe({
-      flatten: true
+  this.demo_cupofdatom_2 = function() {
+    var Cupofdatom, DATOM, c, collector, d, ds, i, len, lets, new_datom, select;
+    DATOM = new (require('../../../apps/datom')).Datom({
+      dirty: false
     });
-    ({cram, expand} = cupofjoe.export());
+    ({new_datom, lets, Cupofdatom, select} = DATOM.export());
     //.........................................................................................................
-    h = function(tagname, ...content) {
-      if ((tagname == null) || (tagname === 'text')) {
-        return cram(...content);
-      }
-      if (content.length === 0) {
-        return cram(`<${tagname}/>`);
-      }
-      return cram(`<${tagname}>`, ...content, `</${tagname}>`);
-    };
-    //.........................................................................................................
-    h('paper', function() {
-      h('article', function() {
-        h('title', "Some Thoughts on Nested Data Structures");
-        return h('par', function() {
-          h('text', "A interesting ");
-          h('em', "fact");
-          h('text', " about CupOfJoe is that you ");
-          h('em', "can");
-          return h('text', " nest with both sequences and function calls.");
-        });
-      });
-      return h('conclusion', function() {
-        return h('text', "With CupOfJoe, you don't need brackets.");
+    whisper('---------------------------------');
+    c = new Cupofdatom();
+    debug('^3332^', c);
+    c.cram('helo', 'world');
+    c.cram('foo', function() {
+      return c.cram('bold', function() {
+        return ['this', 'is', 'content'];
       });
     });
-    html = expand().join('|');
-    info(jr(html));
-    // info html
-    T.eq(html, "<paper>|<article>|<title>|Some Thoughts on Nested Data Structures|</title>|<par>|A interesting |<em>|fact|</em>| about CupOfJoe is that you |<em>|can|</em>| nest with both sequences and function calls.|</par>|</article>|<conclusion>|With CupOfJoe, you don't need brackets.|</conclusion>|</paper>");
-    if (done != null) {
-      //.........................................................................................................
-      return done();
+    collector = CND.deep_copy(c.collector);
+    ds = c.expand();
+    if (!equals(collector, ds)) {
+      urge(CND.reverse(collector));
     }
+    for (i = 0, len = ds.length; i < len; i++) {
+      d = ds[i];
+      info(d);
+    }
+    //.........................................................................................................
+    return null;
   };
 
   //###########################################################################################################
@@ -564,7 +552,9 @@
       // @demo_2()
       this.demo_toy_formatter_1();
       this.demo_toy_formatter_2();
-      return this.demo_simple();
+      this.demo_simple();
+      this.demo_cupofdatom_1();
+      return this.demo_cupofdatom_2();
     })();
   }
 
