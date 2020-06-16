@@ -21,7 +21,7 @@
     "drange": "^2.0.0",
     "exec-sh": "^0.3.4",
     "guy-test": "^4.0.1",
-    "intertext": "^2.2.0",
+    "intertext": "^2.3.0",
     "intertype": "^7.0.2",
     "jake": "^10.8.2",
     "merge-ranges": "^1.0.2",
