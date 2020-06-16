@@ -362,6 +362,32 @@
     }
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["Cupofjoe linear structure"] = function(T, done) {
+    var Cupofjoe, c, cram, d, ds, expand, i, len;
+    ({Cupofjoe} = require('../../../apps/cupofjoe'));
+    c = new Cupofjoe({
+      flatten: false
+    });
+    ({cram, expand} = c.export());
+    //.........................................................................................................
+    c.cram('p', function() {
+      return c.cram(null, "It is very ", (function() {
+        return c.cram('em', "convenient");
+      }), " to write");
+    });
+    ds = c.expand();
+    for (i = 0, len = ds.length; i < len; i++) {
+      d = ds[i];
+      info(d);
+    }
+    help(ds);
+    T.eq(ds, [['p', ['It is very ', ['em', 'convenient'], ' to write']]]);
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {

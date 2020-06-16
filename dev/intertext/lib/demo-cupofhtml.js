@@ -33,7 +33,7 @@
     INTERTEXT = require('../../../apps/intertext');
     ({isa, validate} = INTERTEXT.types.export());
     //---------------------------------------------------------------------------------------------------------
-    return this.Cupofhtml = class Cupofhtml extends DATOM.Cupofdatom {
+    return this.Cupofhtml_datoms = class Cupofhtml_datoms extends DATOM.Cupofdatom {
       // @include CUPOFHTML, { overwrite: false, }
       // @extend MAIN, { overwrite: false, }
 
@@ -58,9 +58,7 @@
         //---------------------------------------------------------------------------------------------------------
       tag(name, ...content) {
         validate.intertext_html_tagname;
-        if (isa.nonempty_text(name)) {
-          name = `html:${name}`;
-        }
+        // name = "html:#{name}" if isa.nonempty_text name
         debug('^3536^', {name, content});
         return this.cram(name, ...content);
       }
@@ -75,40 +73,43 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
-    var INTERTEXT, c, cram, d, ds, expand, i, len, results, tag, text;
+    var INTERTEXT, d, ds, h, i, len;
     INTERTEXT = require('../../../apps/intertext');
     provide_new_cupofhtml_implementation.apply(INTERTEXT.HTML);
-    c = new INTERTEXT.HTML.Cupofhtml({
+    h = new INTERTEXT.HTML.Cupofhtml_datoms({
       flatten: true
     });
-    ({cram, expand, tag, text} = c.export());
-    tag('mytag');
-    tag('mytag', {
+    h.tag('mytag');
+    h.tag('mytag', {
       style: "display:block;width:50%;"
     });
-    tag('othertag', {
+    h.tag('othertag', {
       style: "display:block;"
     }, "some ", function() {
-      tag('bold', "content");
-      return text("here indeed.");
+      h.tag('bold', "bold content");
+      return h.text(" here indeed.");
     });
-    tag('p', function() {
-      return text("It is very ", tag('em', "convenient"), " to write");
+    h.tag('p', function() {
+      return h.text("It is very ", (function() {
+        return h.tag('em', "convenient");
+      }), " to write");
     });
-    // tag 'mytag', =>
-    //   tag 'h1', => #, { id: 'c67', }
-    //     tag 'p', "helo world"
-    debug('^3344^', c);
-    ds = expand();
-    results = [];
+    h.tag('p', function() {
+      h.text("It is very ");
+      h.tag('em', "convenient");
+      return h.text(" to write");
+    });
+    // h.tag 'mytag', =>
+    //   h.tag 'h1', => #, { id: 'c67', }
+    //     h.tag 'p', "helo world"
+    debug('^3344^', h);
+    ds = h.expand();
     for (i = 0, len = ds.length; i < len; i++) {
       d = ds[i];
-      results.push(info(d));
+      info(d);
     }
-    return results;
+    return debug('^3344^', INTERTEXT.HTML.html_from_datoms(ds));
   };
-
-  // debug '^3344^', INTERTEXT.HTML.html_from_datoms ds
 
   //###########################################################################################################
   if (module === require.main) {

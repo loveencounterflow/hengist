@@ -372,7 +372,9 @@
     c = new Cupofdatom();
     urge('^2289^', c);
     c.cram('p', function() {
-      return c.cram(null, "It is very ", c.cram('em', "convenient"), " to write");
+      return c.cram(null, "It is very ", (function() {
+        return c.cram('em', "convenient");
+      }), " to write");
     });
     ds = c.expand();
     for (i = 0, len = ds.length; i < len; i++) {
@@ -414,12 +416,12 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      return test(this["DATOM Cupofdatom linear structure"]);
+      return test(this);
     })();
   }
 
-  // test @[ "DATOM Cupofdatom 1" ]
+  // test @[ "DATOM Cupofdatom linear structure" ]
+// test @[ "DATOM Cupofdatom 1" ]
 // test @[ "DATOM Cupofdatom complains about non-wellformed names" ]
 // test @[ "DATOM Cupofdatom with templates" ]
 // test @[ "DATOM Cupofdatom with attributes" ]
