@@ -273,90 +273,93 @@ sleep                     = ( dts ) -> new Promise ( done ) -> after dts, done
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "CUP demo 2 flat" ] = ( T, done ) ->
-  cupofjoe = new ( require '../../../apps/cupofjoe' ).Cupofjoe { flatten: true, }
-  { cram
-    expand }  = cupofjoe.export()
+@demo_cupofdatom_1 = ->
+  { Cupofjoe }  = require '../../../apps/cupofjoe'
   #.........................................................................................................
   DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   { new_datom
     lets
     select }                = DATOM.export()
   #.........................................................................................................
-  h = ( tagname, content... ) ->
-    if content.length is 0
-      d = new_datom "^#{tagname}"
-      return cram d, content...
-    d1 = new_datom "<#{tagname}"
-    d2 = new_datom ">#{tagname}"
-    return cram d1, content..., d2
+  class Cupofdatom extends Cupofjoe
+    _defaults: { flatten: true, DATOM: null, }
+    constructor: ( settings ) ->
+      super settings
+      @settings         = Object.assign @settings, @_defaults
+      @settings.DATOM  ?= DATOM # module.exports
+    cram: ( name, content... ) ->
+      debug '^332^', name, content
+      return super @settings.DATOM.new_datom "^#{name}" unless content.length > 0
+      return super content... if name is null
+      d1 = @settings.DATOM.new_datom "<#{name}"
+      d2 = @settings.DATOM.new_datom ">#{name}"
+      return super d1, content..., d2
+    expand: ->
+      debug '^332^', @
+      R = super()
+      for text, idx in R
+        continue unless isa.text text
+        R[ idx ] = @settings.DATOM.new_datom '^text', { text, }
+      return R
   #.........................................................................................................
-  cram null, ->
-    h 'pre1'
-    cram null
-    h 'pre2', 'wat'
-    h 'one', ->
-      h 'two', ( new_datom '^text', text: '42' )
-      h 'three', ->
-        h 'four', ->
-          h 'five', ->
-            h 'six', ->
-              cram ( new_datom '^text', text: 'bottom' )
-    h 'post'
-  urge rpr cupofjoe.collector
-  ds = expand()
-  info jr ds
-  T.eq ds, [
-    { '$key': '^pre1' }
-    { '$key': '<pre2' }
-    'wat',
-    { '$key': '>pre2' }
-    { '$key': '<one' }
-    { '$key': '<two' }
-    { text: '42', '$key': '^text' }
-    { '$key': '>two' }
-    { '$key': '<three' }
-    { '$key': '<four' }
-    { '$key': '<five' }
-    { '$key': '<six' }
-    { text: 'bottom', '$key': '^text' }
-    { '$key': '>six' }
-    { '$key': '>five' }
-    { '$key': '>four' }
-    { '$key': '>three' }
-    { '$key': '>one' }
-    { '$key': '^post' } ]
+  whisper '---------------------------------'
+  c = new Cupofdatom()
+  c.cram 'helo', 'world'
+  c.cram 'foo', ->
+    c.cram 'bold', ->
+      c.cram null, 'content'
+  collector = CND.deep_copy c.collector
+  ds = c.expand()
+  urge CND.reverse collector if not equals collector, ds
+  for d in ds
+    info d
   #.........................................................................................................
-  done() if done?
+  whisper '---------------------------------'
+  c = new Cupofdatom()
+  c.cram 'helo', 'world'
+  c.cram 'foo', ->
+    c.cram 'bold', 'content'
+  collector = CND.deep_copy c.collector
+  ds = c.expand()
+  urge CND.reverse collector if not equals collector, ds
+  for d in ds
+    info d
+  #.........................................................................................................
+  whisper '---------------------------------'
+  c = new Cupofdatom()
+  c.cram 'helo', 'world'
+  c.cram 'foo', ->
+    c.cram 'bold', -> [ 'this', 'is', 'content' ]
+  collector = CND.deep_copy c.collector
+  ds = c.expand()
+  urge CND.reverse collector if not equals collector, ds
+  for d in ds
+    info d
+  #.........................................................................................................
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "CUP demo reformat" ] = ( T, done ) ->
-  cupofjoe = new ( require '../../../apps/cupofjoe' ).Cupofjoe { flatten: true, }
-  { cram
-    expand } = cupofjoe.export()
+@demo_cupofdatom_2 = ->
+  DATOM                     = new ( require '../../../apps/datom' ).Datom { dirty: false, }
+  { new_datom
+    lets
+    Cupofdatom
+    select }                = DATOM.export()
   #.........................................................................................................
-  h = ( tagname, content... ) ->
-    return cram content...      if ( not tagname? ) or ( tagname is 'text' )
-    return cram "<#{tagname}/>" if content.length is 0
-    return cram "<#{tagname}>", content..., "</#{tagname}>"
+  whisper '---------------------------------'
+  c = new Cupofdatom()
+  debug '^3332^', c
+  c.cram 'helo', 'world'
+  c.cram 'foo', ->
+    c.cram 'bold', -> [ 'this', 'is', 'content' ]
+  collector = CND.deep_copy c.collector
+  ds = c.expand()
+  urge CND.reverse collector if not equals collector, ds
+  for d in ds
+    info d
   #.........................................................................................................
-  h 'paper', ->
-    h 'article', ->
-      h 'title', "Some Thoughts on Nested Data Structures"
-      h 'par', ->
-        h 'text',   "A interesting "
-        h 'em',     "fact"
-        h 'text',   " about CupOfJoe is that you "
-        h 'em',     "can"
-        h 'text',   " nest with both sequences and function calls."
-    h 'conclusion', ->
-      h 'text',   "With CupOfJoe, you don't need brackets."
-  html = expand().join '|'
-  info jr html
-  # info html
-  T.eq html, "<paper>|<article>|<title>|Some Thoughts on Nested Data Structures|</title>|<par>|A interesting |<em>|fact|</em>| about CupOfJoe is that you |<em>|can|</em>| nest with both sequences and function calls.|</par>|</article>|<conclusion>|With CupOfJoe, you don't need brackets.|</conclusion>|</paper>"
-  #.........................................................................................................
-  done() if done?
+  return null
+
 
 
 
@@ -369,5 +372,7 @@ if module is require.main then do =>
   @demo_toy_formatter_1()
   @demo_toy_formatter_2()
   @demo_simple()
+  @demo_cupofdatom_1()
+  @demo_cupofdatom_2()
 
 
