@@ -204,6 +204,24 @@ test                      = require 'guy-test'
   done() if done?
 
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "Cupofjoe linear structure" ] = ( T, done ) ->
+  { Cupofjoe }  = require '../../../apps/cupofjoe'
+  c             = new Cupofjoe { flatten: false, }
+  { cram
+    expand } = c.export()
+  #.........................................................................................................
+  c.cram 'p', ->
+    c.cram null, "It is very ", ( -> c.cram 'em', "convenient" ), " to write"
+  ds = c.expand()
+  info d for d in ds
+  help ds
+  T.eq ds, [ [ 'p', [ 'It is very ', [ 'em', 'convenient' ], ' to write' ] ] ]
+  #.........................................................................................................
+  done()
+  return null
+
+
 
 
 
