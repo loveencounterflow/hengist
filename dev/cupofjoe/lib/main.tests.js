@@ -64,7 +64,7 @@
     info(rpr(ds));
     info(jr(ds.flat(2e308)));
     // urge '^4443^', ds
-    T.eq(ds, [['pre1'], ['pre2', 'wat'], ['one', ['two', 42], ['three', ['four', ['five', ['six']]]]], ['post']]);
+    T.eq(ds, [[['pre1'], ['pre2', 'wat'], ['one', ['two', 42], ['three', ['four', ['five', ['six']]]]], ['post']]]);
     if (done != null) {
       //.........................................................................................................
       return done();
@@ -120,81 +120,83 @@
     info(jr(ds));
     T.eq(ds, [
       [
-        {
-          '$key': '^pre1'
-        }
-      ],
-      [
-        {
-          '$key': '<pre2'
-        },
-        'wat',
-        {
-          '$key': '>pre2'
-        }
-      ],
-      [
-        {
-          '$key': '<one'
-        },
         [
           {
-            '$key': '<two'
-          },
-          {
-            text: '42',
-            '$key': '^text'
-          },
-          {
-            '$key': '>two'
+            '$key': '^pre1'
           }
         ],
         [
           {
-            '$key': '<three'
+            '$key': '<pre2'
+          },
+          'wat',
+          {
+            '$key': '>pre2'
+          }
+        ],
+        [
+          {
+            '$key': '<one'
           },
           [
             {
-              '$key': '<four'
+              '$key': '<two'
+            },
+            {
+              text: '42',
+              '$key': '^text'
+            },
+            {
+              '$key': '>two'
+            }
+          ],
+          [
+            {
+              '$key': '<three'
             },
             [
               {
-                '$key': '<five'
+                '$key': '<four'
               },
               [
                 {
-                  '$key': '<six'
+                  '$key': '<five'
                 },
                 [
                   {
-                    text: 'bottom',
-                    '$key': '^text'
+                    '$key': '<six'
+                  },
+                  [
+                    {
+                      text: 'bottom',
+                      '$key': '^text'
+                    }
+                  ],
+                  {
+                    '$key': '>six'
                   }
                 ],
                 {
-                  '$key': '>six'
+                  '$key': '>five'
                 }
               ],
               {
-                '$key': '>five'
+                '$key': '>four'
               }
             ],
             {
-              '$key': '>four'
+              '$key': '>three'
             }
           ],
           {
-            '$key': '>three'
+            '$key': '>one'
           }
         ],
-        {
-          '$key': '>one'
-        }
-      ],
-      [
-        {
-          '$key': '^post'
-        }
+        [
+          {
+            '$key': '^post'
+          }
+        ]
       ]
     ]);
     if (done != null) {
@@ -358,49 +360,6 @@
       //.........................................................................................................
       return done();
     }
-  };
-
-  // #-----------------------------------------------------------------------------------------------------------
-  // @[ "_CUP cram w/out functions" ] = ( T, done ) ->
-  //   # debug ( k for k of ( require '../../../apps/cupofjoe' ) ); process.exit 1
-  //   cupofjoe = new ( require '../../../apps/cupofjoe' ).Cupofjoe()
-  //   { cram
-  //     expand }  = cupofjoe.export()
-  //   #.........................................................................................................
-  //   cram null
-  //   cram null, null
-  //   cram 'first'
-  //   cram [ 'one', ]
-  //   cram 'two', 'three', 'four'
-  //   cram undefined, null
-  //   cram 'five', 'six', 'seven', 'eight'
-  //   result = expand()
-  //   urge '^7777^', result
-  //   T.eq result, ["first","one",["two","three","four"],["five","six","seven","eight"]]
-  //   cram 'ten'
-  //   result = expand()
-  //   T.eq result, ["first","one",["two","three","four"],["five","six","seven","eight"],["ten"]]
-  //   #.........................................................................................................
-  //   done() if done?
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["CUP _unwrap"] = async function(T, done) {
-    var _unwrap, cupofjoe, error, expand, i, len, matcher, probe, probes_and_matchers;
-    cupofjoe = new (require('../../../apps/cupofjoe')).Cupofjoe();
-    ({_unwrap, expand} = cupofjoe.export());
-    //.........................................................................................................
-    probes_and_matchers = [[[], [], null], [[null], [null], null], [[null, null], [null, null], null], [[null, null, void 0], [null, null, void 0], null], [[null, null, []], [null, null, []], null], [[null, null, [[]]], [null, null, [[]]], null], [[['foo']], ['foo'], null], [['a', 'b', ['c']], ['a', 'b', ['c']], null]];
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher, error] = probes_and_matchers[i];
-      await T.perform(probe, matcher, error, function() {
-        return new Promise(function(resolve) {
-          return resolve(_unwrap(probe));
-        });
-      });
-    }
-    //.........................................................................................................
-    done();
-    return null;
   };
 
   //###########################################################################################################
