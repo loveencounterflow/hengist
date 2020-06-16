@@ -30,10 +30,6 @@ test                      = require 'guy-test'
     lets
     Cupofdatom
     select }                = DATOM.export()
-  # #.........................................................................................................
-  # for [ probe, matcher, error, ] in probes_and_matchers
-  #   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-  #     resolve DATOM.fresh_datom probe...
   #.........................................................................................................
   whisper '---------------------------------'
   c = new Cupofdatom()
@@ -46,14 +42,14 @@ test                      = require 'guy-test'
   # urge CND.reverse collector if not equals collector, ds
   help ds
   T.eq ds, [
-    { '$key': '<helo' },
-    { text: 'world', '$key': '^text' },
-    { '$key': '>helo' },
-    { '$key': '<foo' },
-    { '$key': '<bold' },
-    { text: 'content', '$key': '^text' },
-    { '$key': '>bold' },
-    { '$key': '>foo' } ]
+    { $key: '<helo' },
+    { text: 'world', $key: '^text' },
+    { $key: '>helo' },
+    { $key: '<foo' },
+    { $key: '<bold' },
+    { text: 'content', $key: '^text' },
+    { $key: '>bold' },
+    { $key: '>foo' } ]
   #.........................................................................................................
   whisper '---------------------------------'
   c = new Cupofdatom()
@@ -65,14 +61,14 @@ test                      = require 'guy-test'
   # urge CND.reverse collector if not equals collector, ds
   help ds
   T.eq ds, [
-    { '$key': '<helo' },
-    { text: 'world', '$key': '^text' },
-    { '$key': '>helo' },
-    { '$key': '<foo' },
-    { '$key': '<bold' },
-    { text: 'content', '$key': '^text' },
-    { '$key': '>bold' },
-    { '$key': '>foo' } ]
+    { $key: '<helo' },
+    { text: 'world', $key: '^text' },
+    { $key: '>helo' },
+    { $key: '<foo' },
+    { $key: '<bold' },
+    { text: 'content', $key: '^text' },
+    { $key: '>bold' },
+    { $key: '>foo' } ]
   #.........................................................................................................
   whisper '---------------------------------'
   c = new Cupofdatom()
