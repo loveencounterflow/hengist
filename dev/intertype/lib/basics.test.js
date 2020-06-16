@@ -1040,10 +1040,25 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["equals"] = function(T, done) {
-    var check, equals, intertype, isa;
+    /* TAINT copy more extensive tests from CND, `js_eq`? */
+    var check, equals, error, intertype, isa, re;
     intertype = new Intertype();
     ({isa, check, equals} = intertype.export());
-    /* TAINT copy more extensive tests from CND, `js_eq`? */
+    re = /expected at least 2 arguments/;
+    try {
+      equals(3);
+    } catch (error1) {
+      error = error1;
+      warn(error.message);
+      if (re.test(error.message)) {
+        T.ok(true);
+      } else {
+        T.fail(`expected error ${rpr(re)}, got ${rpr(error.message)}`);
+      }
+    }
+    if (error == null) {
+      T.fail("expected error, got none");
+    }
     T.eq(equals(3, 3), true);
     T.eq(equals(3, 4), false);
     if (done != null) {
@@ -1055,13 +1070,14 @@
   if (module.parent == null) {
     // test @
     // test @[ "size_of" ]
-    // @[ "equality checks" ]()
-    // test @[ "isa.immediate, nowait" ]
-    // test @[ "types_of() includes happy, sad" ]
-    // test @[ "check(): validation with intermediate results (experiment)" ]
-    test(this["check(): validation with intermediate results (for reals)"]);
+    test(this["equals"]);
   }
 
+  // @[ "equality checks" ]()
+  // test @[ "isa.immediate, nowait" ]
+  // test @[ "types_of() includes happy, sad" ]
+  // test @[ "check(): validation with intermediate results (experiment)" ]
+  // test @[ "check(): validation with intermediate results (for reals)" ]
   // test @[ "types_of" ]
   // test @[ "vnr, int32" ]
   // test @[ "cast" ]
@@ -1272,3 +1288,5 @@
   };
 
 }).call(this);
+
+//# sourceMappingURL=basics.test.js.map

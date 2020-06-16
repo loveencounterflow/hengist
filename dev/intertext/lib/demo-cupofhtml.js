@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, INTERTEXT, alert, badge, debug, demo, echo, help, info, log, rpr, urge, warn, whisper;
+  var CND, alert, badge, debug, demo, echo, help, info, log, provide_new_cupofhtml_implementation, rpr, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -27,25 +27,88 @@
 
   echo = CND.echo.bind(CND);
 
-  INTERTEXT = require('../../../apps/intertext');
+  provide_new_cupofhtml_implementation = function() {
+    var DATOM, INTERTEXT, isa, validate;
+    DATOM = require('datom');
+    INTERTEXT = require('../../../apps/intertext');
+    ({isa, validate} = INTERTEXT.types.export());
+    //---------------------------------------------------------------------------------------------------------
+    return this.Cupofhtml = class Cupofhtml extends DATOM.Cupofdatom {
+      // @include CUPOFHTML, { overwrite: false, }
+      // @extend MAIN, { overwrite: false, }
+
+        // #---------------------------------------------------------------------------------------------------------
+      // constructor: ( settings = null) ->
+      //   super { { flatten: true, }..., settings..., }
+      //   return @
+
+        // #---------------------------------------------------------------------------------------------------------
+      // tag: ( tagname, content... ) ->
+      //   return @cram content...      unless tagname?
+      //   ### TAINT allow extended syntax, attributes ###
+      //   return @cram new_datom "^#{tagname}" if content.length is 0
+      //   return @cram ( new_datom "<#{tagname}" ), content..., ( new_datom ">#{tagname}" )
+
+        // #---------------------------------------------------------------------------------------------------------
+      // text:     ( P... ) -> @cram MAIN.text     P...
+      // raw:      ( P... ) -> @cram MAIN.raw      P...
+      // script:   ( P... ) -> @cram MAIN.script   P...
+      // css:      ( P... ) -> @cram MAIN.css      P...
+
+        //---------------------------------------------------------------------------------------------------------
+      tag(name, ...content) {
+        validate.intertext_html_tagname;
+        if (isa.nonempty_text(name)) {
+          name = `html:${name}`;
+        }
+        debug('^3536^', {name, content});
+        return this.cram(name, ...content);
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      text(...content) {
+        return this.tag(null, ...content);
+      }
+
+    };
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
-    var cram, cupofhtml, ds, expand, tag;
-    cupofhtml = new INTERTEXT.HTML.Cupofhtml({
+    var INTERTEXT, c, cram, d, ds, expand, i, len, results, tag, text;
+    INTERTEXT = require('../../../apps/intertext');
+    provide_new_cupofhtml_implementation.apply(INTERTEXT.HTML);
+    c = new INTERTEXT.HTML.Cupofhtml({
       flatten: true
     });
-    ({cram, expand, tag} = cupofhtml.export());
-    tag('mytag', () => {
-      return tag('h1', () => { //, { id: 'c67', }
-        return tag('p', "helo world");
-      });
+    ({cram, expand, tag, text} = c.export());
+    tag('mytag');
+    tag('mytag', {
+      style: "display:block;width:50%;"
     });
-    debug('^3344^', cupofhtml);
+    tag('othertag', {
+      style: "display:block;"
+    }, "some ", function() {
+      tag('bold', "content");
+      return text("here indeed.");
+    });
+    tag('p', function() {
+      return text("It is very ", tag('em', "convenient"), " to write");
+    });
+    // tag 'mytag', =>
+    //   tag 'h1', => #, { id: 'c67', }
+    //     tag 'p', "helo world"
+    debug('^3344^', c);
     ds = expand();
-    debug('^3344^', ds);
-    return debug('^3344^', INTERTEXT.HTML.html_from_datoms(ds));
+    results = [];
+    for (i = 0, len = ds.length; i < len; i++) {
+      d = ds[i];
+      results.push(info(d));
+    }
+    return results;
   };
+
+  // debug '^3344^', INTERTEXT.HTML.html_from_datoms ds
 
   //###########################################################################################################
   if (module === require.main) {
