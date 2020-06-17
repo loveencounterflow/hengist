@@ -141,6 +141,33 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "XXXXXXXXXXXXX DATOM Cupofdatom with attributes" ] = ( T, done ) ->
+  DATOM                     = new ( require '../../../apps/datom' ).Datom { dirty: false, }
+  { new_datom
+    lets
+    Cupofdatom
+    select }                = DATOM.export()
+  #.........................................................................................................
+  whisper '---------------------------------'
+  c = new Cupofdatom()
+  urge '^2289^', c
+  c.cram2 'greeting'
+  # c.cram2 'greeting', 'helo', 'world'
+  # c.cram2 'greeting', '早安', { lang: 'zh_CN', }
+  # c.cram2 'greeting', '早安', { lang: 'unknown', }, { lang: 'zh_CN', 问候: '早安', time_of_day: 'morning', }
+  c.cram2 'greeting', ->
+    c.cram2 'language',    { $value: 'Japanese', }
+    c.cram2 'time_of_day', { $value: 'morning', }
+    c.cram2 null, 'お早うございます'
+    c.cram2 null, true
+    c.cram2 null, 4711
+  #.........................................................................................................
+  debug '^1738^', c.collector
+  info d for d in ds = c.expand()
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DATOM Cupofdatom with attributes" ] = ( T, done ) ->
   DATOM                     = new ( require '../../../apps/datom' ).Datom { dirty: false, }
   { new_datom
@@ -218,7 +245,8 @@ test                      = require 'guy-test'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
+  test @[ "XXXXXXXXXXXXX DATOM Cupofdatom with attributes" ]
   # test @[ "DATOM Cupofdatom linear structure" ]
   # test @[ "DATOM Cupofdatom 1" ]
   # test @[ "DATOM Cupofdatom complains about non-wellformed names" ]
