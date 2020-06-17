@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, alert, badge, debug, demo, echo, help, info, log, provide_new_cupofhtml_implementation, rpr, urge, warn, whisper;
+  var CND, alert, badge, debug, demo, demo_compact_tagnames, echo, help, info, log, provide_new_cupofhtml_implementation, rpr, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -111,10 +111,32 @@
     return debug('^3344^', INTERTEXT.HTML.html_from_datoms(ds));
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_compact_tagnames = function() {
+    var INTERTEXT, d, ds, h, i, len;
+    INTERTEXT = require('../../../apps/intertext');
+    provide_new_cupofhtml_implementation.apply(INTERTEXT.HTML);
+    h = new INTERTEXT.HTML.Cupofhtml_datoms({
+      flatten: true
+    });
+    h.tag('mytag');
+    h.tag('mytag#id8702');
+    h.tag('mytag.flat.draggable');
+    h.tag('mytag#id77787.flat.draggable');
+    debug('^3344^', h);
+    ds = h.expand();
+    for (i = 0, len = ds.length; i < len; i++) {
+      d = ds[i];
+      info(d);
+    }
+    return debug('^3344^', INTERTEXT.HTML.html_from_datoms(ds));
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return demo();
+      demo();
+      return demo_compact_tagnames();
     })();
   }
 
