@@ -81,6 +81,18 @@
       }
     ]);
     //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DATOM Cupofdatom 2"] = function(T, done) {
+    var Cupofdatom, DATOM, c, collector, ds, lets, new_datom, select;
+    DATOM = new (require('../../../apps/datom')).Datom({
+      dirty: false
+    });
+    ({new_datom, lets, Cupofdatom, select} = DATOM.export());
+    //.........................................................................................................
     whisper('---------------------------------');
     c = new Cupofdatom();
     c.cram('helo', 'world');
@@ -120,6 +132,18 @@
       }
     ]);
     //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DATOM Cupofdatom 3"] = function(T, done) {
+    var Cupofdatom, DATOM, c, collector, ds, lets, new_datom, select;
+    DATOM = new (require('../../../apps/datom')).Datom({
+      dirty: false
+    });
+    ({new_datom, lets, Cupofdatom, select} = DATOM.export());
+    //.........................................................................................................
     whisper('---------------------------------');
     c = new Cupofdatom();
     c.cram('helo', 'world');
@@ -132,40 +156,44 @@
     ds = c.expand();
     // urge CND.reverse collector if not equals collector, ds
     help(ds);
+    // T.eq ds, [
+    //   { $key: '<helo' },
+    //   { text: 'world', $key: '^text' },
+    //   { $key: '>helo' },
+    //   { $key: '<foo' },
+    //   { $key: '<bold' },
+    //   { text: 'this', $key: '^text' },
+    //   { text: 'is', $key: '^text' },
+    //   { text: 'content', $key: '^text' },
+    //   { $key: '>bold' },
+    //   { $key: '>foo' } ]
+    //.........................................................................................................
+    /* TAINT should content inserted via return value be subject to same process as `cram()`med content? */
     T.eq(ds, [
       {
-        $key: '<helo'
+        '$key': '<helo'
       },
       {
         text: 'world',
-        $key: '^text'
+        '$key': '^text'
       },
       {
-        $key: '>helo'
+        '$key': '>helo'
       },
       {
-        $key: '<foo'
+        '$key': '<foo'
       },
       {
-        $key: '<bold'
+        '$key': '<bold'
+      },
+      'this',
+      'is',
+      'content',
+      {
+        '$key': '>bold'
       },
       {
-        text: 'this',
-        $key: '^text'
-      },
-      {
-        text: 'is',
-        $key: '^text'
-      },
-      {
-        text: 'content',
-        $key: '^text'
-      },
-      {
-        $key: '>bold'
-      },
-      {
-        $key: '>foo'
+        '$key': '>foo'
       }
     ]);
     //.........................................................................................................
@@ -201,59 +229,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DATOM Cupofdatom with templates"] = async function(T, done) {
-    var Cupofdatom, DATOM, error, i, len, lets, matcher, new_datom, probe, probes_and_matchers, select;
-    DATOM = new (require('../../../apps/datom')).Datom({
-      dirty: false
-    });
-    ({new_datom, lets, Cupofdatom, select} = DATOM.export());
-    //.........................................................................................................
-    probes_and_matchers = [
-      [
-        [
-          {
-            $key: '^greeting',
-            lang: 'zh_CN'
-          },
-          '早安'
-        ],
-        null,
-        "cannot have template and content"
-      ],
-      [
-        [
-          {
-            $key: '^greeting',
-            lang: 'zh_CN'
-          }
-        ],
-        [
-          {
-            lang: 'zh_CN',
-            $key: '^greeting'
-          }
-        ],
-        null
-      ]
-    ];
-//.........................................................................................................
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher, error] = probes_and_matchers[i];
-      await T.perform(probe, matcher, error, function() {
-        return new Promise(function(resolve, reject) {
-          var c;
-          c = new Cupofdatom();
-          c.cram(...probe);
-/* must error */          return resolve(c.expand());
-        });
-      });
-    }
-    //.........................................................................................................
-    done();
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this["XXXXXXXXXXXXX DATOM Cupofdatom with attributes"] = function(T, done) {
     var Cupofdatom, DATOM, c, d, ds, i, len, lets, new_datom, ref, select;
     DATOM = new (require('../../../apps/datom')).Datom({
@@ -264,20 +239,20 @@
     whisper('---------------------------------');
     c = new Cupofdatom();
     urge('^2289^', c);
-    c.cram2('greeting');
-    // c.cram2 'greeting', 'helo', 'world'
-    // c.cram2 'greeting', '早安', { lang: 'zh_CN', }
-    // c.cram2 'greeting', '早安', { lang: 'unknown', }, { lang: 'zh_CN', 问候: '早安', time_of_day: 'morning', }
-    c.cram2('greeting', function() {
-      c.cram2('language', {
+    c.cram('greeting');
+    // c.cram 'greeting', 'helo', 'world'
+    // c.cram 'greeting', '早安', { lang: 'zh_CN', }
+    // c.cram 'greeting', '早安', { lang: 'unknown', }, { lang: 'zh_CN', 问候: '早安', time_of_day: 'morning', }
+    c.cram('greeting', function() {
+      c.cram('language', {
         $value: 'Japanese'
       });
-      c.cram2('time_of_day', {
+      c.cram('time_of_day', {
         $value: 'morning'
       });
-      c.cram2(null, 'お早うございます');
-      c.cram2(null, true);
-      return c.cram2(null, 4711);
+      c.cram(null, 'お早うございます');
+      c.cram(null, true);
+      return c.cram(null, 4711);
     });
     //.........................................................................................................
     debug('^1738^', c.collector);
@@ -305,14 +280,12 @@
     c.cram('greeting', '早安', {
       lang: 'zh_CN'
     });
-    c.cram({
-      $key: '^greeting',
+    c.cram('greeting', {
       lang: 'zh_CN',
       问候: '早安',
       time_of_day: 'morning'
     });
-    c.cram({
-      $key: '^text',
+    c.cram('text', {
       lang: 'hi',
       text: 'नमस्ते'
     });
@@ -453,12 +426,12 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      return test(this["XXXXXXXXXXXXX DATOM Cupofdatom with attributes"]);
+      return test(this);
     })();
   }
 
-  // test @[ "DATOM Cupofdatom linear structure" ]
+  // test @[ "XXXXXXXXXXXXX DATOM Cupofdatom with attributes" ]
+// test @[ "DATOM Cupofdatom linear structure" ]
 // test @[ "DATOM Cupofdatom 1" ]
 // test @[ "DATOM Cupofdatom complains about non-wellformed names" ]
 // test @[ "DATOM Cupofdatom with templates" ]
