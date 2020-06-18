@@ -101,6 +101,7 @@ test                      = require 'guy-test'
   ds = c.expand()
   # urge CND.reverse collector if not equals collector, ds
   help ds
+  info d for d in ds
   # T.eq ds, [
   #   { $key: '<helo' },
   #   { text: 'world', $key: '^text' },
@@ -150,33 +151,6 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "XXXXXXXXXXXXX DATOM Cupofdatom with attributes" ] = ( T, done ) ->
-  DATOM                     = new ( require '../../../apps/datom' ).Datom { dirty: false, }
-  { new_datom
-    lets
-    Cupofdatom
-    select }                = DATOM.export()
-  #.........................................................................................................
-  whisper '---------------------------------'
-  c = new Cupofdatom()
-  urge '^2289^', c
-  c.cram 'greeting'
-  # c.cram 'greeting', 'helo', 'world'
-  # c.cram 'greeting', '早安', { lang: 'zh_CN', }
-  # c.cram 'greeting', '早安', { lang: 'unknown', }, { lang: 'zh_CN', 问候: '早安', time_of_day: 'morning', }
-  c.cram 'greeting', ->
-    c.cram 'language',    { $value: 'Japanese', }
-    c.cram 'time_of_day', { $value: 'morning', }
-    c.cram null, 'お早うございます'
-    c.cram null, true
-    c.cram null, 4711
-  #.........................................................................................................
-  debug '^1738^', c.collector
-  info d for d in ds = c.expand()
-  done()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
 @[ "DATOM Cupofdatom with attributes" ] = ( T, done ) ->
   DATOM                     = new ( require '../../../apps/datom' ).Datom { dirty: false, }
   { new_datom
@@ -195,12 +169,11 @@ test                      = require 'guy-test'
     c.cram 'language',    { $value: 'Japanese', }
     c.cram 'time_of_day', { $value: 'morning', }
     c.cram null, 'お早うございます'
-  # c.cram 'foo', ->
-  #   c.cram 'bold', ->
-  #     c.cram null, 'content'
+  c.cram 'foo', ->
+    c.cram 'bold', ->
+      c.cram null, 'content'
   collector = CND.deep_copy c.collector
   ds = c.expand()
-  # urge CND.reverse collector if not equals collector, ds
   info d for d in ds
   help ds
   T.eq ds, [
@@ -254,10 +227,10 @@ test                      = require 'guy-test'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # test @[ "XXXXXXXXXXXXX DATOM Cupofdatom with attributes" ]
   # test @[ "DATOM Cupofdatom linear structure" ]
-  # test @[ "DATOM Cupofdatom 1" ]
+  test @[ "DATOM Cupofdatom 3" ]
   # test @[ "DATOM Cupofdatom complains about non-wellformed names" ]
   # test @[ "DATOM Cupofdatom with templates" ]
   # test @[ "DATOM Cupofdatom with attributes" ]
