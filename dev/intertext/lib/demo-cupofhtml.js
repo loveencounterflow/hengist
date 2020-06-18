@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var CND, alert, badge, debug, demo, demo_compact_tagnames, echo, help, info, log, provide_new_cupofhtml_implementation, rpr, urge, warn, whisper;
+  var CND, alert, badge, debug, demo, demo_2, demo_compact_tagnames, echo, help, info, log, provide_new_cupofhtml_implementation, rpr, urge, warn, whisper,
+    boundMethodCheck = function(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new Error('Bound instance method accessed before binding'); } };
 
   //###########################################################################################################
   CND = require('cnd');
@@ -28,55 +29,987 @@
   echo = CND.echo.bind(CND);
 
   provide_new_cupofhtml_implementation = function() {
-    var DATOM, INTERTEXT, isa, validate;
-    DATOM = require('datom');
+    var DATOM, INTERTEXT, MAIN, Multimix, _defaults, isa, ref, ref1, type_of, validate;
+    MAIN = this;
+    DATOM = require('../../../apps/datom');
     INTERTEXT = require('../../../apps/intertext');
-    ({isa, validate} = INTERTEXT.types.export());
-    //---------------------------------------------------------------------------------------------------------
-    return this.Cupofhtml_datoms = class Cupofhtml_datoms extends DATOM.Cupofdatom {
-      // @include CUPOFHTML, { overwrite: false, }
-      // @extend MAIN, { overwrite: false, }
+    Multimix = require('../../../apps/multimix');
+    ({isa, type_of, validate} = INTERTEXT.types.export());
+    //-----------------------------------------------------------------------------------------------------------
+    _defaults = Object.freeze({
+      flatten: true,
+      DATOM: null
+    });
+    //===========================================================================================================
 
-        // #---------------------------------------------------------------------------------------------------------
-      // constructor: ( settings = null) ->
-      //   super { { flatten: true, }..., settings..., }
-      //   return @
-
-        // #---------------------------------------------------------------------------------------------------------
-      // tag: ( tagname, content... ) ->
-      //   return @cram content...      unless tagname?
-      //   ### TAINT allow extended syntax, attributes ###
-      //   return @cram new_datom "^#{tagname}" if content.length is 0
-      //   return @cram ( new_datom "<#{tagname}" ), content..., ( new_datom ">#{tagname}" )
-
-        // #---------------------------------------------------------------------------------------------------------
-      // text:     ( P... ) -> @cram MAIN.text     P...
-      // raw:      ( P... ) -> @cram MAIN.raw      P...
-      // script:   ( P... ) -> @cram MAIN.script   P...
-      // css:      ( P... ) -> @cram MAIN.css      P...
-
-        //---------------------------------------------------------------------------------------------------------
-      tag(name, ...content) {
-        validate.intertext_html_tagname;
-        // name = "html:#{name}" if isa.nonempty_text name
-        debug('^3536^', {name, content});
-        return this.cram(name, ...content);
-      }
-
-      //---------------------------------------------------------------------------------------------------------
-      text(...content) {
-        return this.tag(null, ...content);
+    //-----------------------------------------------------------------------------------------------------------
+    this._Targeted_collection = class _Targeted_collection extends Multimix {
+      constructor(target) {
+        super();
+        this._ = target;
       }
 
     };
+    //===========================================================================================================
+
+    //-----------------------------------------------------------------------------------------------------------
+    ref = this._Tags = class _Tags extends this._Targeted_collection {
+      constructor() {
+        super(...arguments);
+        this.address = this.address.bind(this);
+        this.article = this.article.bind(this);
+        this.aside = this.aside.bind(this);
+        this.blockquote = this.blockquote.bind(this);
+        this.dd = this.dd.bind(this);
+        this.details = this.details.bind(this);
+        this.dialog = this.dialog.bind(this);
+        this.div = this.div.bind(this);
+        this.dl = this.dl.bind(this);
+        this.dt = this.dt.bind(this);
+        this.fieldset = this.fieldset.bind(this);
+        this.figcaption = this.figcaption.bind(this);
+        this.figure = this.figure.bind(this);
+        this.footer = this.footer.bind(this);
+        this.form = this.form.bind(this);
+        this.h1 = this.h1.bind(this);
+        this.h2 = this.h2.bind(this);
+        this.h3 = this.h3.bind(this);
+        this.h4 = this.h4.bind(this);
+        this.h5 = this.h5.bind(this);
+        this.h6 = this.h6.bind(this);
+        this.header = this.header.bind(this);
+        this.hgroup = this.hgroup.bind(this);
+        this.hr = this.hr.bind(this);
+        this.li = this.li.bind(this);
+        this.main = this.main.bind(this);
+        this.nav = this.nav.bind(this);
+        this.ol = this.ol.bind(this);
+        this.p = this.p.bind(this);
+        this.pre = this.pre.bind(this);
+        this.section = this.section.bind(this);
+        this.table = this.table.bind(this);
+        this.ul = this.ul.bind(this);
+        //.........................................................................................................
+        this.a = this.a.bind(this);
+        this.abbr = this.abbr.bind(this);
+        this.acronym = this.acronym.bind(this);
+        this.applet = this.applet.bind(this);
+        this.area = this.area.bind(this);
+        this.audio = this.audio.bind(this);
+        this.b = this.b.bind(this);
+        this.base = this.base.bind(this);
+        this.basefont = this.basefont.bind(this);
+        this.bdi = this.bdi.bind(this);
+        this.bdo = this.bdo.bind(this);
+        this.big = this.big.bind(this);
+        this.body = this.body.bind(this);
+        this.br = this.br.bind(this);
+        this.button = this.button.bind(this);
+        this.canvas = this.canvas.bind(this);
+        this.caption = this.caption.bind(this);
+        this.center = this.center.bind(this);
+        this.cite = this.cite.bind(this);
+        this.code = this.code.bind(this);
+        this.col = this.col.bind(this);
+        this.colgroup = this.colgroup.bind(this);
+        this.data = this.data.bind(this);
+        this.datalist = this.datalist.bind(this);
+        this.del = this.del.bind(this);
+        this.dfn = this.dfn.bind(this);
+        this.em = this.em.bind(this);
+        this.embed = this.embed.bind(this);
+        this.font = this.font.bind(this);
+        this.frame = this.frame.bind(this);
+        this.frameset = this.frameset.bind(this);
+        this.head = this.head.bind(this);
+        this.html = this.html.bind(this);
+        this.i = this.i.bind(this);
+        this.iframe = this.iframe.bind(this);
+        this.img = this.img.bind(this);
+        this.input = this.input.bind(this);
+        this.ins = this.ins.bind(this);
+        this.kbd = this.kbd.bind(this);
+        this.keygen = this.keygen.bind(this);
+        this.label = this.label.bind(this);
+        this.legend = this.legend.bind(this);
+        this.link = this.link.bind(this);
+        this.map = this.map.bind(this);
+        this.mark = this.mark.bind(this);
+        this.menu = this.menu.bind(this);
+        this.menuitem = this.menuitem.bind(this);
+        this.meta = this.meta.bind(this);
+        this.meter = this.meter.bind(this);
+        this.noscript = this.noscript.bind(this);
+        this.object = this.object.bind(this);
+        this.optgroup = this.optgroup.bind(this);
+        this.option = this.option.bind(this);
+        this.output = this.output.bind(this);
+        this.param = this.param.bind(this);
+        this.progress = this.progress.bind(this);
+        this.q = this.q.bind(this);
+        this.rb = this.rb.bind(this);
+        this.rp = this.rp.bind(this);
+        this.rt = this.rt.bind(this);
+        this.rtc = this.rtc.bind(this);
+        this.ruby = this.ruby.bind(this);
+        this.s = this.s.bind(this);
+        this.samp = this.samp.bind(this);
+        this.script = this.script.bind(this);
+        this.select = this.select.bind(this);
+        this.small = this.small.bind(this);
+        this.source = this.source.bind(this);
+        this.span = this.span.bind(this);
+        this.strike = this.strike.bind(this);
+        this.strong = this.strong.bind(this);
+        this.style = this.style.bind(this);
+        this.sub = this.sub.bind(this);
+        this.summary = this.summary.bind(this);
+        this.sup = this.sup.bind(this);
+        this.tbody = this.tbody.bind(this);
+        this.td = this.td.bind(this);
+        this.template = this.template.bind(this);
+        this.textarea = this.textarea.bind(this);
+        this.tfoot = this.tfoot.bind(this);
+        this.th = this.th.bind(this);
+        this.thead = this.thead.bind(this);
+        this.time = this.time.bind(this);
+        this.title = this.title.bind(this);
+        this.tr = this.tr.bind(this);
+        this.track = this.track.bind(this);
+        this.u = this.u.bind(this);
+        this.var = this.var.bind(this);
+        this.video = this.video.bind(this);
+        this.wbr = this.wbr.bind(this);
+      }
+
+      address(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('address', {
+          blk: true
+        }, ...P);
+      }
+
+      article(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('article', {
+          blk: true
+        }, ...P);
+      }
+
+      aside(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('aside', {
+          blk: true
+        }, ...P);
+      }
+
+      blockquote(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('blockquote', {
+          blk: true
+        }, ...P);
+      }
+
+      dd(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('dd', {
+          blk: true
+        }, ...P);
+      }
+
+      details(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('details', {
+          blk: true
+        }, ...P);
+      }
+
+      dialog(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('dialog', {
+          blk: true
+        }, ...P);
+      }
+
+      div(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('div', {
+          blk: true
+        }, ...P);
+      }
+
+      dl(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('dl', {
+          blk: true
+        }, ...P);
+      }
+
+      dt(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('dt', {
+          blk: true
+        }, ...P);
+      }
+
+      fieldset(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('fieldset', {
+          blk: true
+        }, ...P);
+      }
+
+      figcaption(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('figcaption', {
+          blk: true
+        }, ...P);
+      }
+
+      figure(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('figure', {
+          blk: true
+        }, ...P);
+      }
+
+      footer(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('footer', {
+          blk: true
+        }, ...P);
+      }
+
+      form(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('form', {
+          blk: true
+        }, ...P);
+      }
+
+      h1(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('h1', {
+          blk: true
+        }, ...P);
+      }
+
+      h2(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('h2', {
+          blk: true
+        }, ...P);
+      }
+
+      h3(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('h3', {
+          blk: true
+        }, ...P);
+      }
+
+      h4(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('h4', {
+          blk: true
+        }, ...P);
+      }
+
+      h5(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('h5', {
+          blk: true
+        }, ...P);
+      }
+
+      h6(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('h6', {
+          blk: true
+        }, ...P);
+      }
+
+      header(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('header', {
+          blk: true
+        }, ...P);
+      }
+
+      hgroup(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('hgroup', {
+          blk: true
+        }, ...P);
+      }
+
+      hr(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('hr', {
+          blk: true
+        }, ...P);
+      }
+
+      li(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('li', {
+          blk: true
+        }, ...P);
+      }
+
+      main(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('main', {
+          blk: true
+        }, ...P);
+      }
+
+      nav(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('nav', {
+          blk: true
+        }, ...P);
+      }
+
+      ol(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('ol', {
+          blk: true
+        }, ...P);
+      }
+
+      p(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('p', {
+          blk: true
+        }, ...P);
+      }
+
+      pre(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('pre', {
+          blk: true
+        }, ...P);
+      }
+
+      section(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('section', {
+          blk: true
+        }, ...P);
+      }
+
+      table(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('table', {
+          blk: true
+        }, ...P);
+      }
+
+      ul(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('ul', {
+          blk: true
+        }, ...P);
+      }
+
+      a(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('a', ...P);
+      }
+
+      abbr(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('abbr', ...P);
+      }
+
+      acronym(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('acronym', ...P);
+      }
+
+      applet(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('applet', ...P);
+      }
+
+      area(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('area', ...P);
+      }
+
+      audio(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('audio', ...P);
+      }
+
+      b(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('b', ...P);
+      }
+
+      base(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('base', ...P);
+      }
+
+      basefont(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('basefont', ...P);
+      }
+
+      bdi(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('bdi', ...P);
+      }
+
+      bdo(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('bdo', ...P);
+      }
+
+      big(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('big', ...P);
+      }
+
+      body(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('body', ...P);
+      }
+
+      br(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('br', ...P);
+      }
+
+      button(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('button', ...P);
+      }
+
+      canvas(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('canvas', ...P);
+      }
+
+      caption(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('caption', ...P);
+      }
+
+      center(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('center', ...P);
+      }
+
+      cite(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('cite', ...P);
+      }
+
+      code(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('code', ...P);
+      }
+
+      col(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('col', ...P);
+      }
+
+      colgroup(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('colgroup', ...P);
+      }
+
+      data(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('data', ...P);
+      }
+
+      datalist(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('datalist', ...P);
+      }
+
+      del(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('del', ...P);
+      }
+
+      dfn(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('dfn', ...P);
+      }
+
+      em(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('em', ...P);
+      }
+
+      embed(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('embed', ...P);
+      }
+
+      font(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('font', ...P);
+      }
+
+      frame(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('frame', ...P);
+      }
+
+      frameset(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('frameset', ...P);
+      }
+
+      head(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('head', ...P);
+      }
+
+      html(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('html', ...P);
+      }
+
+      i(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('i', ...P);
+      }
+
+      iframe(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('iframe', ...P);
+      }
+
+      img(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('img', ...P);
+      }
+
+      input(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('input', ...P);
+      }
+
+      ins(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('ins', ...P);
+      }
+
+      kbd(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('kbd', ...P);
+      }
+
+      keygen(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('keygen', ...P);
+      }
+
+      label(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('label', ...P);
+      }
+
+      legend(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('legend', ...P);
+      }
+
+      link(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('link', ...P);
+      }
+
+      map(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('map', ...P);
+      }
+
+      mark(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('mark', ...P);
+      }
+
+      menu(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('menu', ...P);
+      }
+
+      menuitem(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('menuitem', ...P);
+      }
+
+      meta(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('meta', ...P);
+      }
+
+      meter(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('meter', ...P);
+      }
+
+      noscript(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('noscript', ...P);
+      }
+
+      object(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('object', ...P);
+      }
+
+      optgroup(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('optgroup', ...P);
+      }
+
+      option(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('option', ...P);
+      }
+
+      output(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('output', ...P);
+      }
+
+      param(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('param', ...P);
+      }
+
+      progress(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('progress', ...P);
+      }
+
+      q(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('q', ...P);
+      }
+
+      rb(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('rb', ...P);
+      }
+
+      rp(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('rp', ...P);
+      }
+
+      rt(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('rt', ...P);
+      }
+
+      rtc(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('rtc', ...P);
+      }
+
+      ruby(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('ruby', ...P);
+      }
+
+      s(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('s', ...P);
+      }
+
+      samp(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('samp', ...P);
+      }
+
+      script(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('script', ...P);
+      }
+
+      select(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('select', ...P);
+      }
+
+      small(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('small', ...P);
+      }
+
+      source(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('source', ...P);
+      }
+
+      span(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('span', ...P);
+      }
+
+      strike(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('strike', ...P);
+      }
+
+      strong(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('strong', ...P);
+      }
+
+      style(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('style', ...P);
+      }
+
+      sub(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('sub', ...P);
+      }
+
+      summary(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('summary', ...P);
+      }
+
+      sup(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('sup', ...P);
+      }
+
+      tbody(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('tbody', ...P);
+      }
+
+      td(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('td', ...P);
+      }
+
+      template(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('template', ...P);
+      }
+
+      textarea(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('textarea', ...P);
+      }
+
+      tfoot(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('tfoot', ...P);
+      }
+
+      th(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('th', ...P);
+      }
+
+      thead(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('thead', ...P);
+      }
+
+      time(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('time', ...P);
+      }
+
+      title(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('title', ...P);
+      }
+
+      tr(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('tr', ...P);
+      }
+
+      track(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('track', ...P);
+      }
+
+      u(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('u', ...P);
+      }
+
+      var(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('var', ...P);
+      }
+
+      video(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('video', ...P);
+      }
+
+      wbr(...P) {
+        boundMethodCheck(this, ref);
+        return this._.tag('wbr', ...P);
+      }
+
+    };
+    //===========================================================================================================
+
+    //-----------------------------------------------------------------------------------------------------------
+    ref1 = this._Specials = class _Specials extends this._Targeted_collection {
+      constructor() {
+        super(...arguments);
+        this.doctype = this.doctype.bind(this);
+        this.script = this.script.bind(this);
+        this.img = this.img.bind(this);
+        //---------------------------------------------------------------------------------------------------------
+        this.raw = this.raw.bind(this);
+        this.text = this.text.bind(this);
+        this.comment = this.comment.bind(this);
+        //---------------------------------------------------------------------------------------------------------
+        this._raw = this._raw.bind(this);
+      }
+
+      doctype(...P) {
+        boundMethodCheck(this, ref1);
+        return XXXX(this._.tag('!DOCTYPE', ...P));
+      }
+
+      script(...P) {
+        boundMethodCheck(this, ref1);
+        return XXXX(this._.tag('!–', ...P));
+      }
+
+      img(...P) {
+        boundMethodCheck(this, ref1);
+        return XXXX(this._.tag('!–', ...P));
+      }
+
+      raw(...P) {
+        boundMethodCheck(this, ref1);
+        validate.list_of('text', P);
+        return this._raw('raw', ...P);
+      }
+
+      text(...P) {
+        boundMethodCheck(this, ref1);
+        validate.list_of('text', P);
+        return this._raw('text', ...P);
+      }
+
+      comment(...P) {
+        boundMethodCheck(this, ref1);
+        validate.list_of('text', P);
+        return this._raw('raw', `<!-- ${P.join()} -->`);
+      }
+
+      _raw(name, ...P) {
+        boundMethodCheck(this, ref1);
+        return this._._cram(this._.settings.DATOM.new_datom(`^${name}`, {
+          text: P.join('')
+        }));
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      link_css(href) {
+        /* `<link rel=stylesheet href="../reset.css"/>` */
+        var arity;
+        if ((arity = arguments.length) !== 1) {
+          throw new Error(`^intertext/html/link_css@2935^ expected 1 argument, got ${arity}`);
+        }
+        debug('^3334^', href);
+        validate.nonempty_text(href);
+        return this._._cram(this._.settings.DATOM.new_datom('^link', {
+          rel: 'stylesheet',
+          href
+        }));
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      script(x) {
+        var arity, type;
+        if ((arity = arguments.length) !== 1) {
+          throw new Error(`^intertext//html/link_js@3502^ expected 1 argument, got ${arity}`);
+        }
+        switch (type = type_of(x)) {
+          case 'text':
+            return this._script_src(x);
+          case 'function':
+            return this._script_literal(x);
+        }
+        throw new Error(`^intertext/script@4069^ expected a text or a function, got a ${type}`);
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _script_src(src) {
+        /* `<script type="text/javascript" src="../jquery-3.4.1.js">` */
+        validate.nonempty_text(src);
+        return this._.cram('script', {src});
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _script_literal(f) {
+        /* `<script type="text/javascript"> var a, b; ...;</script>` */
+        return this._.cram('script', this.raw(`(${f.toString()})();`));
+      }
+
+    };
+    //===========================================================================================================
+
+    //-----------------------------------------------------------------------------------------------------------
+    return this.Cupofhtml = (function() {
+      class Cupofhtml extends DATOM.Cupofdatom {
+        //---------------------------------------------------------------------------------------------------------
+        constructor(settings = null) {
+          super({..._defaults, ...settings});
+          // @tag = @constructor.get_keymethod_proxy @, tag
+          // @tags =
+          this.H = new MAIN._Tags(this);
+          this.S = new MAIN._Specials(this);
+          return this;
+        }
+
+        //---------------------------------------------------------------------------------------------------------
+        tag(name, ...content) {
+          if (name !== null) {
+            validate.intertext_html_tagname(name);
+          }
+          return this.cram(name, ...content);
+        }
+
+        //---------------------------------------------------------------------------------------------------------
+        text(...content) {
+          return this.tag(null, ...content);
+        }
+
+      };
+
+      // @include CUPOFHTML, { overwrite: false, }
+      // @extend MAIN, { overwrite: false, }
+      Cupofhtml.prototype._defaults = _defaults;
+
+      return Cupofhtml;
+
+    }).call(this);
   };
 
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
-    var INTERTEXT, d, ds, h, i, len;
+    var INTERTEXT, d, ds, h, i, len, results;
     INTERTEXT = require('../../../apps/intertext');
     provide_new_cupofhtml_implementation.apply(INTERTEXT.HTML);
-    h = new INTERTEXT.HTML.Cupofhtml_datoms({
+    h = new INTERTEXT.HTML.Cupofhtml({
       flatten: true
     });
     h.tag('mytag');
@@ -104,19 +1037,77 @@
     //     h.tag 'p', "helo world"
     debug('^3344^', h);
     ds = h.expand();
+    results = [];
     for (i = 0, len = ds.length; i < len; i++) {
       d = ds[i];
-      info(d);
+      results.push(info(d));
     }
-    return debug('^3344^', INTERTEXT.HTML.html_from_datoms(ds));
+    return results;
   };
+
+  // debug '^3344^', INTERTEXT.HTML.html_from_datoms ds
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_2 = function() {
+    var H, INTERTEXT, S, d, ds, html, i, len, results, tag;
+    INTERTEXT = require('../../../apps/intertext');
+    provide_new_cupofhtml_implementation.apply(INTERTEXT.HTML);
+    html = new INTERTEXT.HTML.Cupofhtml({
+      flatten: true
+    });
+    ({tag, H, S} = html.export());
+    tag('mytag');
+    // urge '^776^', ( k for k of html.tag )
+    // urge '^776^', ( k for k of tag )
+    // tag.yourtag()
+    H.title("A Short Introduction");
+    S.link_css('https://example.com/style.css');
+    S.script('https://example.com/script.js');
+    S.script(function() {
+      return console.log('helo world');
+    });
+    H.h1({
+      id: 'c334'
+    }, "The Importance of Being Earnest");
+    tag('div', {
+      id: 'c334'
+    }, function() {
+      S.comment("just a comment");
+      S.text("foo", "bar");
+      S.raw("foo", "bar");
+      return html.text("helo");
+    });
+    // tag 'mytag', { style: "display:block;width:50%;", }
+    // tag 'othertag', { style: "display:block;", }, "some ", ->
+    //   tag 'bold', "bold content"
+    //   html.text " here indeed."
+    // tag 'p', ->
+    //   html.text "It is very ", ( -> tag 'em', "convenient" ), " to write"
+    // tag 'p', ->
+    //   html.text "It is very "
+    //   tag 'em', "convenient"
+    //   html.text " to write"
+    // tag 'mytag', =>
+    //   tag 'h1', => #, { id: 'c67', }
+    //     tag 'p', "helo world"
+    // debug '^3344^', html
+    ds = html.expand();
+    results = [];
+    for (i = 0, len = ds.length; i < len; i++) {
+      d = ds[i];
+      results.push(info(d));
+    }
+    return results;
+  };
+
+  // debug '^3344^', INTERTEXT.HTML.html_from_datoms ds
 
   //-----------------------------------------------------------------------------------------------------------
   demo_compact_tagnames = function() {
     var INTERTEXT, d, ds, h, i, len;
     INTERTEXT = require('../../../apps/intertext');
     provide_new_cupofhtml_implementation.apply(INTERTEXT.HTML);
-    h = new INTERTEXT.HTML.Cupofhtml_datoms({
+    h = new INTERTEXT.HTML.Cupofhtml({
       flatten: true
     });
     h.tag('mytag');
@@ -135,10 +1126,12 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      demo();
-      return demo_compact_tagnames();
+      // demo()
+      return demo_2();
     })();
   }
+
+  // demo_compact_tagnames()
 
 }).call(this);
 
