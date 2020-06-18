@@ -138,7 +138,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DATOM Cupofdatom 3"] = function(T, done) {
-    var Cupofdatom, DATOM, c, collector, ds, lets, new_datom, select;
+    var Cupofdatom, DATOM, c, collector, d, ds, i, len, lets, new_datom, select;
     DATOM = new (require('../../../apps/datom')).Datom({
       dirty: false
     });
@@ -156,6 +156,10 @@
     ds = c.expand();
     // urge CND.reverse collector if not equals collector, ds
     help(ds);
+    for (i = 0, len = ds.length; i < len; i++) {
+      d = ds[i];
+      info(d);
+    }
     // T.eq ds, [
     //   { $key: '<helo' },
     //   { text: 'world', $key: '^text' },
@@ -229,43 +233,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["XXXXXXXXXXXXX DATOM Cupofdatom with attributes"] = function(T, done) {
-    var Cupofdatom, DATOM, c, d, ds, i, len, lets, new_datom, ref, select;
-    DATOM = new (require('../../../apps/datom')).Datom({
-      dirty: false
-    });
-    ({new_datom, lets, Cupofdatom, select} = DATOM.export());
-    //.........................................................................................................
-    whisper('---------------------------------');
-    c = new Cupofdatom();
-    urge('^2289^', c);
-    c.cram('greeting');
-    // c.cram 'greeting', 'helo', 'world'
-    // c.cram 'greeting', '早安', { lang: 'zh_CN', }
-    // c.cram 'greeting', '早安', { lang: 'unknown', }, { lang: 'zh_CN', 问候: '早安', time_of_day: 'morning', }
-    c.cram('greeting', function() {
-      c.cram('language', {
-        $value: 'Japanese'
-      });
-      c.cram('time_of_day', {
-        $value: 'morning'
-      });
-      c.cram(null, 'お早うございます');
-      c.cram(null, true);
-      return c.cram(null, 4711);
-    });
-    //.........................................................................................................
-    debug('^1738^', c.collector);
-    ref = ds = c.expand();
-    for (i = 0, len = ref.length; i < len; i++) {
-      d = ref[i];
-      info(d);
-    }
-    done();
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this["DATOM Cupofdatom with attributes"] = function(T, done) {
     var Cupofdatom, DATOM, c, collector, d, ds, i, len, lets, new_datom, select;
     DATOM = new (require('../../../apps/datom')).Datom({
@@ -298,14 +265,15 @@
       });
       return c.cram(null, 'お早うございます');
     });
-    // c.cram 'foo', ->
-    //   c.cram 'bold', ->
-    //     c.cram null, 'content'
+    c.cram('foo', function() {
+      return c.cram('bold', function() {
+        return c.cram(null, 'content');
+      });
+    });
     collector = CND.deep_copy(c.collector);
     ds = c.expand();
     for (i = 0, len = ds.length; i < len; i++) {
       d = ds[i];
-      // urge CND.reverse collector if not equals collector, ds
       info(d);
     }
     help(ds);
@@ -426,14 +394,14 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "XXXXXXXXXXXXX DATOM Cupofdatom with attributes" ]
+      // test @[ "DATOM Cupofdatom linear structure" ]
+      return test(this["DATOM Cupofdatom 3"]);
     })();
   }
 
-  // test @[ "XXXXXXXXXXXXX DATOM Cupofdatom with attributes" ]
-// test @[ "DATOM Cupofdatom linear structure" ]
-// test @[ "DATOM Cupofdatom 1" ]
-// test @[ "DATOM Cupofdatom complains about non-wellformed names" ]
+  // test @[ "DATOM Cupofdatom complains about non-wellformed names" ]
 // test @[ "DATOM Cupofdatom with templates" ]
 // test @[ "DATOM Cupofdatom with attributes" ]
 // @[ "DATOM Cupofdatom with attributes" ]()
