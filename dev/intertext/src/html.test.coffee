@@ -439,10 +439,8 @@ test                      = require 'guy-test'
   #.........................................................................................................
   T.eq cupofhtml.settings.flatten, true
   T.ok isa.list cupofhtml.collector
-  T.ok cupofhtml.target is cupofhtml.collector
   T.ok isa.function cupofhtml.cram
   T.ok isa.function cupofhtml.expand
-  T.ok isa.asyncfunction cupofhtml.expand_async
   T.ok isa.function cupofhtml.tag
   T.ok isa.function cupofhtml.css
   T.ok isa.function cupofhtml.script
@@ -459,7 +457,6 @@ test                      = require 'guy-test'
     css }                   = cupofhtml.export()
   T.ok isa.function cram
   T.ok isa.function expand
-  T.ok isa.asyncfunction expand_async
   T.ok isa.function tag
   T.ok isa.function text
   T.ok isa.function raw
