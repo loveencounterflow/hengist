@@ -988,11 +988,6 @@
           return this.cram(name, ...content);
         }
 
-        //---------------------------------------------------------------------------------------------------------
-        text(...content) {
-          return this.tag(null, ...content);
-        }
-
       };
 
       // @include CUPOFHTML, { overwrite: false, }
@@ -1037,7 +1032,7 @@
       S.comment("just a comment");
       S.text("foo", "bar");
       S.raw("foo", "bar");
-      return html.text("helo");
+      return S.text("helo");
     });
     H.p("Some remarks");
     // tag 'mytag', { style: "display:block;width:50%;", }
@@ -1067,24 +1062,22 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_comprehensive_tagnames = function() {
-    var INTERTEXT, d, ds, h, i, len;
+    var INTERTEXT, h;
     INTERTEXT = require('../../../apps/intertext');
     provide_new_cupofhtml_implementation.apply(INTERTEXT.HTML);
     h = new INTERTEXT.HTML.Cupofhtml({
       flatten: true
     });
-    h.tag('mytag');
-    h.tag('mytag#id8702');
-    h.tag('mytag.flat.draggable');
-    h.tag('mytag#id77787.flat.draggable');
-    debug('^3344^', h);
-    ds = h.expand();
-    for (i = 0, len = ds.length; i < len; i++) {
-      d = ds[i];
-      info(d);
-    }
-    return debug('^3344^', INTERTEXT.HTML.html_from_datoms(ds));
+    urge(INTERTEXT.HTML._parse_compact_tagname('mytag'));
+    urge(INTERTEXT.HTML._parse_compact_tagname('mytag#id8702'));
+    urge(INTERTEXT.HTML._parse_compact_tagname('mytag.flat.draggable'));
+    return urge(INTERTEXT.HTML._parse_compact_tagname('mytag#id77787.flat.draggable'));
   };
+
+  // debug '^3344^', h
+  // ds = h.expand()
+  // info d for d in ds
+  // debug '^3344^', INTERTEXT.HTML.html_from_datoms ds
 
   //###########################################################################################################
   if (module === require.main) {
