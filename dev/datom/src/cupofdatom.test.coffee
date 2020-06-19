@@ -24,6 +24,14 @@ test                      = require 'guy-test'
 
 
 #-----------------------------------------------------------------------------------------------------------
+remove_refs = ( ds ) ->
+  DATOM = new ( require '../../../apps/datom' ).Datom { dirty: false, }
+  R = []
+  for d in ds
+    R.push DATOM.lets d, ( d ) -> delete d.$
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DATOM Cupofdatom 1" ] = ( T, done ) ->
   DATOM                     = new ( require '../../../apps/datom' ).Datom { dirty: false, }
   { new_datom
@@ -41,7 +49,7 @@ test                      = require 'guy-test'
   ds = c.expand()
   # urge CND.reverse collector if not equals collector, ds
   help ds
-  T.eq ds, [
+  T.eq ( remove_refs ds ), [
     { $key: '<helo' },
     { text: 'world', $key: '^text' },
     { $key: '>helo' },
@@ -71,7 +79,7 @@ test                      = require 'guy-test'
   ds = c.expand()
   # urge CND.reverse collector if not equals collector, ds
   help ds
-  T.eq ds, [
+  T.eq ( remove_refs ds ), [
     { $key: '<helo' },
     { text: 'world', $key: '^text' },
     { $key: '>helo' },
@@ -99,23 +107,10 @@ test                      = require 'guy-test'
     c.cram 'bold', -> [ 'this', 'is', 'content' ]
   collector = CND.deep_copy c.collector
   ds = c.expand()
-  # urge CND.reverse collector if not equals collector, ds
   help ds
   info d for d in ds
-  # T.eq ds, [
-  #   { $key: '<helo' },
-  #   { text: 'world', $key: '^text' },
-  #   { $key: '>helo' },
-  #   { $key: '<foo' },
-  #   { $key: '<bold' },
-  #   { text: 'this', $key: '^text' },
-  #   { text: 'is', $key: '^text' },
-  #   { text: 'content', $key: '^text' },
-  #   { $key: '>bold' },
-  #   { $key: '>foo' } ]
   #.........................................................................................................
-  ### TAINT should content inserted via return value be subject to same process as `cram()`med content? ###
-  T.eq ds, [
+  T.eq ( remove_refs ds ), [
     { '$key': '<helo' },
     { text: 'world', '$key': '^text' },
     { '$key': '>helo' },
@@ -160,7 +155,6 @@ test                      = require 'guy-test'
   #.........................................................................................................
   whisper '---------------------------------'
   c = new Cupofdatom()
-  urge '^2289^', c
   c.cram 'greeting', 'helo', 'world'
   c.cram 'greeting', '早安', { lang: 'zh_CN', }
   c.cram 'greeting', { lang: 'zh_CN', 问候: '早安', time_of_day: 'morning', }
@@ -174,23 +168,32 @@ test                      = require 'guy-test'
       c.cram null, 'content'
   collector = CND.deep_copy c.collector
   ds = c.expand()
-  info d for d in ds
-  help ds
-  T.eq ds, [
+  ds      = remove_refs ds
+  matcher = [
     { '$key': '<greeting' },
     { '$key': '^text', text: 'helo', },
     { '$key': '^text', text: 'world', },
     { '$key': '>greeting' },
     { lang: 'zh_CN', '$key': '<greeting' },
     { '$key': '^text', text: '早安', },
-    { '$key': '>greeting' },
+    { lang: 'zh_CN', '$key': '>greeting' },
     { '$key': '^greeting', lang: 'zh_CN', '问候': '早安', time_of_day: 'morning', },
     { '$key': '^text', lang: 'hi', text: 'नमस्ते', },
     { '$key': '<greeting' },
     { '$key': '^language',    '$value': 'Japanese', },
     { '$key': '^time_of_day', '$value': 'morning', },
     { '$key': '^text', text: 'お早うございます', },
-    { '$key': '>greeting' } ]
+    { '$key': '>greeting' }
+    { '$key': '<foo' }
+    { '$key': '<bold' }
+    { text: 'content', '$key': '^text' }
+    { '$key': '>bold' }
+    { '$key': '>foo' } ]
+  max_idx = ( Math.max ds.length, matcher.length ) - 1
+  for idx in [ 0 .. max_idx ]
+    info ds[ idx ]
+    urge matcher[ idx ], CND.truth DATOM.types.equals ds[ idx ], matcher[ idx ]
+    T.eq ds[ idx ], matcher[ idx ]
   #.........................................................................................................
   done()
   return null
@@ -210,8 +213,8 @@ test                      = require 'guy-test'
     c.cram null, "It is very ", ( -> c.cram 'em', "convenient" ),  " to write"
   ds = c.expand()
   info d for d in ds
-  help ds
-  T.eq ds, [
+  # help ds
+  T.eq ( remove_refs ds ), [
     { '$key': '<p' },
     { text: 'It is very ', '$key': '^text' },
     { '$key': '<em' },
@@ -227,10 +230,10 @@ test                      = require 'guy-test'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # test @[ "XXXXXXXXXXXXX DATOM Cupofdatom with attributes" ]
   # test @[ "DATOM Cupofdatom linear structure" ]
-  test @[ "DATOM Cupofdatom 3" ]
+  # test @[ "DATOM Cupofdatom 3" ]
   # test @[ "DATOM Cupofdatom complains about non-wellformed names" ]
   # test @[ "DATOM Cupofdatom with templates" ]
   # test @[ "DATOM Cupofdatom with attributes" ]
