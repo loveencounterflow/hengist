@@ -183,7 +183,7 @@ provide_new_cupofhtml_implementation = ->
     newline:  ( P... ) => validate.list_of 'text', P; @_raw 'raw',  "\n"
 
     #---------------------------------------------------------------------------------------------------------
-    _raw: ( name, P... ) => @_._cram @_.settings.DATOM.new_datom "^#{name}", { text: ( P.join '' ), $: 'ð1', }
+    _raw: ( name, P... ) => @_._cram @_.DATOM.new_datom "^#{name}", { text: ( P.join '' ), $: 'ð1', }
 
     #---------------------------------------------------------------------------------------------------------
     link_css: ( href ) ->
@@ -192,7 +192,7 @@ provide_new_cupofhtml_implementation = ->
         throw new Error "^intertext/html/link_css@2935^ expected 1 argument, got #{arity}"
       debug '^3334^', href
       validate.nonempty_text href
-      return @_._cram @_.settings.DATOM.new_datom '^link', { rel: 'stylesheet', href, }
+      return @_._cram @_.DATOM.new_datom '^link', { rel: 'stylesheet', href, }
 
     #---------------------------------------------------------------------------------------------------------
     script: ( x ) ->
