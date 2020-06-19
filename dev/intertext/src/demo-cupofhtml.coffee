@@ -292,14 +292,14 @@ demo_comprehensive_tagnames = ->
   INTERTEXT = require '../../../apps/intertext'
   provide_new_cupofhtml_implementation.apply INTERTEXT.HTML
   h         = new INTERTEXT.HTML.Cupofhtml { flatten: true, }
-  h.tag 'mytag'
-  h.tag 'mytag#id8702'
-  h.tag 'mytag.flat.draggable'
-  h.tag 'mytag#id77787.flat.draggable'
-  debug '^3344^', h
-  ds = h.expand()
-  info d for d in ds
-  debug '^3344^', INTERTEXT.HTML.html_from_datoms ds
+  urge INTERTEXT.HTML._parse_compact_tagname 'mytag'
+  urge INTERTEXT.HTML._parse_compact_tagname 'mytag#id8702'
+  urge INTERTEXT.HTML._parse_compact_tagname 'mytag.flat.draggable'
+  urge INTERTEXT.HTML._parse_compact_tagname 'mytag#id77787.flat.draggable'
+  # debug '^3344^', h
+  # ds = h.expand()
+  # info d for d in ds
+  # debug '^3344^', INTERTEXT.HTML.html_from_datoms ds
 
 
 ############################################################################################################
