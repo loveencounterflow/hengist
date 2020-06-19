@@ -265,7 +265,7 @@ demo_2 = ->
     S.comment "just a comment"
     S.text    "foo", "bar"
     S.raw     "foo", "bar"
-    html.text "helo"
+    S.text    "helo"
   H.p "Some remarks"
 
   # tag 'mytag', { style: "display:block;width:50%;", }
