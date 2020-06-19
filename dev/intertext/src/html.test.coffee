@@ -308,7 +308,7 @@ test                      = require 'guy-test'
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
       d = new_datom probe...
-      resolve HTML.html_from_datoms d
+      resolve ( HTML.html_from_datoms d ).trim()
   #.........................................................................................................
   done()
   return null
@@ -406,117 +406,13 @@ test                      = require 'guy-test'
 #   done()
 #   return null
 
-#-----------------------------------------------------------------------------------------------------------
-@[ "HTML specials" ] = ( T, done ) ->
-  INTERTEXT 								= require '../../../apps/intertext'
-  { html_from_datoms
-    tag }                 = INTERTEXT.HTML.export()
-  #.........................................................................................................
-  probes_and_matchers = [
-    [["script",( -> square = ( ( x ) -> x ** 2 ); console.log square 42 )],[[{"$key":"<script"},{"text":"(function() {\n            var square;\n            square = (function(x) {\n              return x ** 2;\n            });\n            return console.log(square(42));\n          })();","$key":"^raw"},{"$key":">script"}],"<script>(function() {\n            var square;\n            square = (function(x) {\n              return x ** 2;\n            });\n            return console.log(square(42));\n          })();</script>"],null]
-    [["script","path to app.js"],[[{"src":"path to app.js","$key":"^script"}],"<script src='path to app.js'></script>"],null]
-    [["css","path/to/styles.css"],[[{"rel":"stylesheet","href":"path/to/styles.css","$key":"^link"}],"<link href=path/to/styles.css rel=stylesheet>"],null]
-    [["text","a b c < & >"],[[{"text":"a b c < & >","$key":"^text"}],"a b c &lt; &amp; &gt;"],null]
-    [["raw","a b c < & >"],[[{"text":"a b c < & >","$key":"^raw"}],"a b c < & >"],null]
-    ]
-  for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      [ key, P..., ] = probe
-      result  = INTERTEXT.HTML[ key ] P...
-      result  = [ result, ( html_from_datoms result ), ]
-      resolve result
-  #.........................................................................................................
-  done()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "HTML Cupofhtml (1)" ] = ( T, done ) ->
-  INTERTEXT 								= require '../../../apps/intertext'
-  HTML                      = INTERTEXT.HTML
-  cupofhtml                 = new HTML.Cupofhtml()
-  { isa
-    type_of }               = INTERTEXT.types.export()
-  #.........................................................................................................
-  T.eq cupofhtml.settings.flatten, true
-  T.ok isa.list cupofhtml.collector
-  T.ok isa.function cupofhtml.cram
-  T.ok isa.function cupofhtml.expand
-  T.ok isa.function cupofhtml.tag
-  T.ok isa.function cupofhtml.css
-  T.ok isa.function cupofhtml.script
-  T.ok isa.function cupofhtml.raw
-  T.ok isa.function cupofhtml.text
-  #.........................................................................................................
-  { cram
-    expand
-    expand_async
-    tag
-    raw
-    text
-    script
-    css }                   = cupofhtml.export()
-  T.ok isa.function cram
-  T.ok isa.function expand
-  T.ok isa.function tag
-  T.ok isa.function text
-  T.ok isa.function raw
-  T.ok isa.function script
-  T.ok isa.function css
-  #.........................................................................................................
-  done()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "HTML Cupofhtml (2)" ] = ( T, done ) ->
-  INTERTEXT 								= require '../../../apps/intertext'
-  { isa
-    type_of }               = INTERTEXT.types.export()
-  HTML                      = INTERTEXT.HTML
-  cupofhtml                 = new HTML.Cupofhtml()
-  { cram
-    expand
-    expand_async
-    tag
-    raw
-    text
-    script
-    css }                   = cupofhtml.export()
-  { datoms_from_html
-    html_from_datoms }      = HTML.export()
-  #.........................................................................................................
-  # debug '^33343^', ( k for k of cupofhtml )
-  # debug '^33343^', ( k for k of cupofhtml.export() )
-  tag 'paper', ->
-    css     './styles.css'
-    script  './awesome.js'
-    script ->
-      console.log "pretty darn cool"
-    tag 'article', ->
-      tag 'title', "Some Thoughts on Nested Data Structures"
-      tag 'p', ->
-        text        "An interesting "
-        tag   'em', "fact"
-        text        " about CupOfJoe is that you "
-        tag   'em', -> text "can"
-        tag  'strong', " nest", " with both sequences", " and function calls."
-      tag 'p', ->
-        text "Text is escaped before output: <&>, "
-        raw  "but can also be included literally with `raw`: <&>."
-    tag 'conclusion', ->
-      text  "With CupOfJoe, you don't need brackets."
-  datoms = expand()
-  html   = html_from_datoms datoms
-  info datoms
-  urge jr html
-  T.eq html, "<paper><link href=./styles.css rel=stylesheet><script src=./awesome.js></script><script>(function() {\n        return console.log(\"pretty darn cool\");\n      })();</script><article><title>Some Thoughts on Nested Data Structures</title><p>An interesting <em>fact</em> about CupOfJoe is that you <em>can</em><strong> nest with both sequences and function calls.</strong></p><p>Text is escaped before output: &lt;&amp;&gt;, but can also be included literally with `raw`: <&>.</p></article><conclusion>With CupOfJoe, you don't need brackets.</conclusion></paper>"
-  #.........................................................................................................
-  done() if done?
 
 
 ############################################################################################################
 if module is require.main then do => # await do =>
   # debug ( k for k of ( require '../..' ).HTML ).sort().join ' '
   # await @_demo()
-  # test @
+  test @
 	# test @[ "must quote attribute value" ]
 	# test @[ "DATOM.HTML._as_attribute_literal" ]
 	# test @[ "isa.intertext_html_tagname (1)" ]
@@ -534,7 +430,7 @@ if module is require.main then do => # await do =>
 	# test @[ "HTML.html_from_datoms (3)" ]
 	# test @[ "HTML specials" ]
 	# test @[ "HTML demo" ]
-	test @[ "HTML Cupofhtml (1)" ]
+	# test @[ "HTML Cupofhtml (1)" ]
 	# test @[ "HTML Cupofhtml (2)" ]
 
 
