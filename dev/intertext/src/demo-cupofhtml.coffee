@@ -45,18 +45,18 @@ demo_2 = ->
   # tag 'mytag', { style: "display:block;width:50%;", }
   # tag 'othertag', { style: "display:block;", }, "some ", ->
   #   tag 'bold', "bold content"
-  #   html.text " here indeed."
+  #   coh.text " here indeed."
   # tag 'p', ->
-  #   html.text "It is very ", ( -> tag 'em', "convenient" ), " to write"
+  #   coh.text "It is very ", ( -> tag 'em', "convenient" ), " to write"
   # tag 'p', ->
-  #   html.text "It is very "
+  #   coh.text "It is very "
   #   tag 'em', "convenient"
-  #   html.text " to write"
+  #   coh.text " to write"
   # tag 'mytag', =>
   #   tag 'h1', => #, { id: 'c67', }
   #     tag 'p', "helo world"
-  # debug '^3344^', html
-  ds = html.expand()
+  # debug '^3344^', coh
+  ds = coh.expand()
   echo CND.blue d for d in ds
   trim = ( text ) -> text.replace /\s+$/, ''
   urge '^3344^', '\n' + trim INTERTEXT.HTML.html_from_datoms ds
@@ -64,8 +64,7 @@ demo_2 = ->
 #-----------------------------------------------------------------------------------------------------------
 demo_comprehensive_tagnames = ->
   INTERTEXT = require '../../../apps/intertext'
-  provide_new_cupofhtml_implementation.apply INTERTEXT.HTML
-  h         = new INTERTEXT.HTML.Cupofhtml { flatten: true, }
+  html      = new INTERTEXT.CUPOFHTML.Cupofhtml { flatten: true, }
   urge INTERTEXT.HTML._parse_compact_tagname 'mytag'
   urge INTERTEXT.HTML._parse_compact_tagname 'mytag#id8702'
   urge INTERTEXT.HTML._parse_compact_tagname 'mytag.flat.draggable'
