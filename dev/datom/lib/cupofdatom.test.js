@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, badge, debug, echo, help, info, rpr, test, urge, warn, whisper;
+  var CND, badge, debug, echo, help, info, remove_refs, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -33,6 +33,22 @@
   //   type_of }               = types
 
   //-----------------------------------------------------------------------------------------------------------
+  remove_refs = function(ds) {
+    var DATOM, R, d, i, len;
+    DATOM = new (require('../../../apps/datom')).Datom({
+      dirty: false
+    });
+    R = [];
+    for (i = 0, len = ds.length; i < len; i++) {
+      d = ds[i];
+      R.push(DATOM.lets(d, function(d) {
+        return delete d.$;
+      }));
+    }
+    return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DATOM Cupofdatom 1"] = function(T, done) {
     var Cupofdatom, DATOM, c, collector, ds, lets, new_datom, select;
     DATOM = new (require('../../../apps/datom')).Datom({
@@ -52,7 +68,7 @@
     ds = c.expand();
     // urge CND.reverse collector if not equals collector, ds
     help(ds);
-    T.eq(ds, [
+    T.eq(remove_refs(ds), [
       {
         $key: '<helo'
       },
@@ -103,7 +119,7 @@
     ds = c.expand();
     // urge CND.reverse collector if not equals collector, ds
     help(ds);
-    T.eq(ds, [
+    T.eq(remove_refs(ds), [
       {
         $key: '<helo'
       },
@@ -154,26 +170,13 @@
     });
     collector = CND.deep_copy(c.collector);
     ds = c.expand();
-    // urge CND.reverse collector if not equals collector, ds
     help(ds);
     for (i = 0, len = ds.length; i < len; i++) {
       d = ds[i];
       info(d);
     }
-    // T.eq ds, [
-    //   { $key: '<helo' },
-    //   { text: 'world', $key: '^text' },
-    //   { $key: '>helo' },
-    //   { $key: '<foo' },
-    //   { $key: '<bold' },
-    //   { text: 'this', $key: '^text' },
-    //   { text: 'is', $key: '^text' },
-    //   { text: 'content', $key: '^text' },
-    //   { $key: '>bold' },
-    //   { $key: '>foo' } ]
     //.........................................................................................................
-    /* TAINT should content inserted via return value be subject to same process as `cram()`med content? */
-    T.eq(ds, [
+    T.eq(remove_refs(ds), [
       {
         '$key': '<helo'
       },
@@ -234,7 +237,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DATOM Cupofdatom with attributes"] = function(T, done) {
-    var Cupofdatom, DATOM, c, collector, d, ds, i, len, lets, new_datom, select;
+    var Cupofdatom, DATOM, c, collector, ds, i, idx, lets, matcher, max_idx, new_datom, ref, select;
     DATOM = new (require('../../../apps/datom')).Datom({
       dirty: false
     });
@@ -242,7 +245,6 @@
     //.........................................................................................................
     whisper('---------------------------------');
     c = new Cupofdatom();
-    urge('^2289^', c);
     c.cram('greeting', 'helo', 'world');
     c.cram('greeting', '早安', {
       lang: 'zh_CN'
@@ -272,12 +274,8 @@
     });
     collector = CND.deep_copy(c.collector);
     ds = c.expand();
-    for (i = 0, len = ds.length; i < len; i++) {
-      d = ds[i];
-      info(d);
-    }
-    help(ds);
-    T.eq(ds, [
+    ds = remove_refs(ds);
+    matcher = [
       {
         '$key': '<greeting'
       },
@@ -301,6 +299,7 @@
         text: '早安'
       },
       {
+        lang: 'zh_CN',
         '$key': '>greeting'
       },
       {
@@ -331,8 +330,30 @@
       },
       {
         '$key': '>greeting'
+      },
+      {
+        '$key': '<foo'
+      },
+      {
+        '$key': '<bold'
+      },
+      {
+        text: 'content',
+        '$key': '^text'
+      },
+      {
+        '$key': '>bold'
+      },
+      {
+        '$key': '>foo'
       }
-    ]);
+    ];
+    max_idx = (Math.max(ds.length, matcher.length)) - 1;
+    for (idx = i = 0, ref = max_idx; (0 <= ref ? i <= ref : i >= ref); idx = 0 <= ref ? ++i : --i) {
+      info(ds[idx]);
+      urge(matcher[idx], CND.truth(DATOM.types.equals(ds[idx], matcher[idx])));
+      T.eq(ds[idx], matcher[idx]);
+    }
     //.........................................................................................................
     done();
     return null;
@@ -359,8 +380,8 @@
       d = ds[i];
       info(d);
     }
-    help(ds);
-    T.eq(ds, [
+    // help ds
+    T.eq(remove_refs(ds), [
       {
         '$key': '<p'
       },
@@ -394,14 +415,14 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @[ "XXXXXXXXXXXXX DATOM Cupofdatom with attributes" ]
-      // test @[ "DATOM Cupofdatom linear structure" ]
-      return test(this["DATOM Cupofdatom 3"]);
+      return test(this);
     })();
   }
 
-  // test @[ "DATOM Cupofdatom complains about non-wellformed names" ]
+  // test @[ "XXXXXXXXXXXXX DATOM Cupofdatom with attributes" ]
+// test @[ "DATOM Cupofdatom linear structure" ]
+// test @[ "DATOM Cupofdatom 3" ]
+// test @[ "DATOM Cupofdatom complains about non-wellformed names" ]
 // test @[ "DATOM Cupofdatom with templates" ]
 // test @[ "DATOM Cupofdatom with attributes" ]
 // @[ "DATOM Cupofdatom with attributes" ]()
