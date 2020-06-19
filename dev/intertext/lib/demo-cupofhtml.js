@@ -913,7 +913,7 @@
 
       _raw(name, ...P) {
         boundMethodCheck(this, ref1);
-        return this._._cram(this._.settings.DATOM.new_datom(`^${name}`, {
+        return this._._cram(this._.DATOM.new_datom(`^${name}`, {
           text: P.join(''),
           $: 'ð1'
         }));
@@ -928,7 +928,7 @@
         }
         debug('^3334^', href);
         validate.nonempty_text(href);
-        return this._._cram(this._.settings.DATOM.new_datom('^link', {
+        return this._._cram(this._.DATOM.new_datom('^link', {
           rel: 'stylesheet',
           href
         }));
