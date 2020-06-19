@@ -796,7 +796,7 @@ foo:bar foo-bar Foo-bar`.split(/\s+/);
         return new Promise(function(resolve) {
           var d;
           d = new_datom(...probe);
-          return resolve(HTML.html_from_datoms(d));
+          return resolve((HTML.html_from_datoms(d)).trim());
         });
       });
     }
@@ -997,223 +997,34 @@ foo:bar foo-bar Foo-bar`.split(/\s+/);
   //   done()
   //   return null
 
-  //-----------------------------------------------------------------------------------------------------------
-  this["HTML specials"] = async function(T, done) {
-    var INTERTEXT, error, html_from_datoms, i, len, matcher, probe, probes_and_matchers, tag;
-    INTERTEXT = require('../../../apps/intertext');
-    ({html_from_datoms, tag} = INTERTEXT.HTML.export());
-    //.........................................................................................................
-    probes_and_matchers = [
-      [
-        [
-          "script",
-          (function() {
-            var square;
-            square = (function(x) {
-              return x ** 2;
-            });
-            return console.log(square(42));
-          })
-        ],
-        [
-          [
-            {
-              "$key": "<script"
-            },
-            {
-              "text": "(function() {\n            var square;\n            square = (function(x) {\n              return x ** 2;\n            });\n            return console.log(square(42));\n          })();",
-              "$key": "^raw"
-            },
-            {
-              "$key": ">script"
-            }
-          ],
-          "<script>(function() {\n            var square;\n            square = (function(x) {\n              return x ** 2;\n            });\n            return console.log(square(42));\n          })();</script>"
-        ],
-        null
-      ],
-      [
-        ["script",
-        "path to app.js"],
-        [
-          [
-            {
-              "src": "path to app.js",
-              "$key": "^script"
-            }
-          ],
-          "<script src='path to app.js'></script>"
-        ],
-        null
-      ],
-      [
-        ["css",
-        "path/to/styles.css"],
-        [
-          [
-            {
-              "rel": "stylesheet",
-              "href": "path/to/styles.css",
-              "$key": "^link"
-            }
-          ],
-          "<link href=path/to/styles.css rel=stylesheet>"
-        ],
-        null
-      ],
-      [
-        ["text",
-        "a b c < & >"],
-        [
-          [
-            {
-              "text": "a b c < & >",
-              "$key": "^text"
-            }
-          ],
-          "a b c &lt; &amp; &gt;"
-        ],
-        null
-      ],
-      [
-        ["raw",
-        "a b c < & >"],
-        [
-          [
-            {
-              "text": "a b c < & >",
-              "$key": "^raw"
-            }
-          ],
-          "a b c < & >"
-        ],
-        null
-      ]
-    ];
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher, error] = probes_and_matchers[i];
-      await T.perform(probe, matcher, error, function() {
-        return new Promise(function(resolve) {
-          var P, key, result;
-          [key, ...P] = probe;
-          result = INTERTEXT.HTML[key](...P);
-          result = [result, html_from_datoms(result)];
-          return resolve(result);
-        });
-      });
-    }
-    //.........................................................................................................
-    done();
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["HTML Cupofhtml (1)"] = function(T, done) {
-    var HTML, INTERTEXT, cram, css, cupofhtml, expand, expand_async, isa, raw, script, tag, text, type_of;
-    INTERTEXT = require('../../../apps/intertext');
-    HTML = INTERTEXT.HTML;
-    cupofhtml = new HTML.Cupofhtml();
-    ({isa, type_of} = INTERTEXT.types.export());
-    //.........................................................................................................
-    T.eq(cupofhtml.settings.flatten, true);
-    T.ok(isa.list(cupofhtml.collector));
-    T.ok(isa.function(cupofhtml.cram));
-    T.ok(isa.function(cupofhtml.expand));
-    T.ok(isa.function(cupofhtml.tag));
-    T.ok(isa.function(cupofhtml.css));
-    T.ok(isa.function(cupofhtml.script));
-    T.ok(isa.function(cupofhtml.raw));
-    T.ok(isa.function(cupofhtml.text));
-    //.........................................................................................................
-    ({cram, expand, expand_async, tag, raw, text, script, css} = cupofhtml.export());
-    T.ok(isa.function(cram));
-    T.ok(isa.function(expand));
-    T.ok(isa.function(tag));
-    T.ok(isa.function(text));
-    T.ok(isa.function(raw));
-    T.ok(isa.function(script));
-    T.ok(isa.function(css));
-    //.........................................................................................................
-    return done();
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["HTML Cupofhtml (2)"] = function(T, done) {
-    var HTML, INTERTEXT, cram, css, cupofhtml, datoms, datoms_from_html, expand, expand_async, html, html_from_datoms, isa, raw, script, tag, text, type_of;
-    INTERTEXT = require('../../../apps/intertext');
-    ({isa, type_of} = INTERTEXT.types.export());
-    HTML = INTERTEXT.HTML;
-    cupofhtml = new HTML.Cupofhtml();
-    ({cram, expand, expand_async, tag, raw, text, script, css} = cupofhtml.export());
-    ({datoms_from_html, html_from_datoms} = HTML.export());
-    //.........................................................................................................
-    // debug '^33343^', ( k for k of cupofhtml )
-    // debug '^33343^', ( k for k of cupofhtml.export() )
-    tag('paper', function() {
-      css('./styles.css');
-      script('./awesome.js');
-      script(function() {
-        return console.log("pretty darn cool");
-      });
-      tag('article', function() {
-        tag('title', "Some Thoughts on Nested Data Structures");
-        tag('p', function() {
-          text("An interesting ");
-          tag('em', "fact");
-          text(" about CupOfJoe is that you ");
-          tag('em', function() {
-            return text("can");
-          });
-          return tag('strong', " nest", " with both sequences", " and function calls.");
-        });
-        return tag('p', function() {
-          text("Text is escaped before output: <&>, ");
-          return raw("but can also be included literally with `raw`: <&>.");
-        });
-      });
-      return tag('conclusion', function() {
-        return text("With CupOfJoe, you don't need brackets.");
-      });
-    });
-    datoms = expand();
-    html = html_from_datoms(datoms);
-    info(datoms);
-    urge(jr(html));
-    T.eq(html, "<paper><link href=./styles.css rel=stylesheet><script src=./awesome.js></script><script>(function() {\n        return console.log(\"pretty darn cool\");\n      })();</script><article><title>Some Thoughts on Nested Data Structures</title><p>An interesting <em>fact</em> about CupOfJoe is that you <em>can</em><strong> nest with both sequences and function calls.</strong></p><p>Text is escaped before output: &lt;&amp;&gt;, but can also be included literally with `raw`: <&>.</p></article><conclusion>With CupOfJoe, you don't need brackets.</conclusion></paper>");
-    if (done != null) {
-      //.........................................................................................................
-      return done();
-    }
-  };
-
   //###########################################################################################################
   if (module === require.main) {
     (() => { // await do =>
       // debug ( k for k of ( require '../..' ).HTML ).sort().join ' '
       // await @_demo()
-      // test @
-      // test @[ "must quote attribute value" ]
-      // test @[ "DATOM.HTML._as_attribute_literal" ]
-      // test @[ "isa.intertext_html_tagname (1)" ]
-      // test @[ "isa.intertext_html_tagname (2)" ]
-      // test @[ "HTML.html_from_datoms (singular tags)" ]
-      // test @[ "HTML.html_from_datoms (closing tags)" ]
-      // test @[ "HTML.html_from_datoms (opening tags)" ]
-      // test @[ "HTML.html_from_datoms (texts)" ]
-      // test @[ "HTML.html_from_datoms (opening tags w/ $value)" ]
-      // test @[ "HTML.html_from_datoms (system tags)" ]
-      // test @[ "HTML.html_from_datoms (raw pseudo-tag)" ]
-      // test @[ "HTML.html_from_datoms (doctype)" ]
-      // test @[ "HTML.html_from_datoms (1)" ]
-      // test @[ "HTML.html_from_datoms (2)" ]
-      // test @[ "HTML.html_from_datoms (3)" ]
-      // test @[ "HTML specials" ]
-      // test @[ "HTML demo" ]
-      return test(this["HTML Cupofhtml (1)"]);
+      return test(this);
     })();
   }
 
-  // test @[ "HTML Cupofhtml (2)" ]
+  // test @[ "must quote attribute value" ]
+// test @[ "DATOM.HTML._as_attribute_literal" ]
+// test @[ "isa.intertext_html_tagname (1)" ]
+// test @[ "isa.intertext_html_tagname (2)" ]
+// test @[ "HTML.html_from_datoms (singular tags)" ]
+// test @[ "HTML.html_from_datoms (closing tags)" ]
+// test @[ "HTML.html_from_datoms (opening tags)" ]
+// test @[ "HTML.html_from_datoms (texts)" ]
+// test @[ "HTML.html_from_datoms (opening tags w/ $value)" ]
+// test @[ "HTML.html_from_datoms (system tags)" ]
+// test @[ "HTML.html_from_datoms (raw pseudo-tag)" ]
+// test @[ "HTML.html_from_datoms (doctype)" ]
+// test @[ "HTML.html_from_datoms (1)" ]
+// test @[ "HTML.html_from_datoms (2)" ]
+// test @[ "HTML.html_from_datoms (3)" ]
+// test @[ "HTML specials" ]
+// test @[ "HTML demo" ]
+// test @[ "HTML Cupofhtml (1)" ]
+// test @[ "HTML Cupofhtml (2)" ]
 
 }).call(this);
 
