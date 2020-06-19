@@ -173,17 +173,17 @@ provide_new_cupofhtml_implementation = ->
   #
   #-----------------------------------------------------------------------------------------------------------
   class @_Specials extends @_Targeted_collection
-    doctype:      ( P... ) => XXXX @_.tag '!DOCTYPE', P...
-    script:       ( P... ) => XXXX @_.tag '!–', P...
-    img:          ( P... ) => XXXX @_.tag '!–', P...
+    doctype:      ( type = 'html' ) => @_._cram @_raw 'doctype', type
+    # img:          ( P... ) => XXXX @_.tag '!–', P...
 
     #---------------------------------------------------------------------------------------------------------
     raw:      ( P... ) => validate.list_of 'text', P; @_raw 'raw',  P...
     text:     ( P... ) => validate.list_of 'text', P; @_raw 'text', P...
     comment:  ( P... ) => validate.list_of 'text', P; @_raw 'raw',  "<!-- #{P.join()} -->"
+    newline:  ( P... ) => validate.list_of 'text', P; @_raw 'raw',  "\n"
 
     #---------------------------------------------------------------------------------------------------------
-    _raw: ( name, P... ) => @_._cram @_.settings.DATOM.new_datom "^#{name}", { text: P.join '' }
+    _raw: ( name, P... ) => @_._cram @_.settings.DATOM.new_datom "^#{name}", { text: ( P.join '' ), $: 'ð1', }
 
     #---------------------------------------------------------------------------------------------------------
     link_css: ( href ) ->
@@ -212,7 +212,7 @@ provide_new_cupofhtml_implementation = ->
     #---------------------------------------------------------------------------------------------------------
     _script_literal: ( f ) ->
       ### `<script type="text/javascript"> var a, b; ...;</script>` ###
-      @_.cram 'script', @raw "(#{f.toString()})();"
+      @_.cram 'script', => @raw "(#{f.toString()})();"
 
 
   #===========================================================================================================
