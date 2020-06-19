@@ -240,29 +240,11 @@ provide_new_cupofhtml_implementation = ->
     #---------------------------------------------------------------------------------------------------------
     text: ( content... ) -> @tag null, content...
 
-#-----------------------------------------------------------------------------------------------------------
-demo = ->
-  INTERTEXT = require '../../../apps/intertext'
-  provide_new_cupofhtml_implementation.apply INTERTEXT.HTML
-  h         = new INTERTEXT.HTML.Cupofhtml { flatten: true, }
-  h.tag 'mytag'
-  h.tag 'mytag', { style: "display:block;width:50%;", }
-  h.tag 'othertag', { style: "display:block;", }, "some ", ->
-    h.tag 'bold', "bold content"
-    h.text " here indeed."
-  h.tag 'p', ->
-    h.text "It is very ", ( -> h.tag 'em', "convenient" ), " to write"
-  h.tag 'p', ->
-    h.text "It is very "
-    h.tag 'em', "convenient"
-    h.text " to write"
-  # h.tag 'mytag', =>
-  #   h.tag 'h1', => #, { id: 'c67', }
-  #     h.tag 'p', "helo world"
-  debug '^3344^', h
-  ds = h.expand()
-  info d for d in ds
-  # debug '^3344^', INTERTEXT.HTML.html_from_datoms ds
+
+############################################################################################################
+############################################################################################################
+############################################################################################################
+
 
 #-----------------------------------------------------------------------------------------------------------
 demo_2 = ->
@@ -272,20 +254,23 @@ demo_2 = ->
   { tag
     H
     S }     = html.export()
+  S.doctype 'html'
   tag 'mytag'
-  # urge '^776^', ( k for k of html.tag )
-  # urge '^776^', ( k for k of tag )
-  # tag.yourtag()
   H.title "A Short Introduction"
   S.link_css  'https://example.com/style.css'
+  S.newline()
   S.script  'https://example.com/script.js'
+  S.newline()
   S.script  -> console.log 'helo world'
+  S.newline()
   H.h1 { id: 'c334', }, "The Importance of Being Earnest"
-  tag 'div', { id: 'c334', }, ->
+  H.div { id: 'c334', }, ->
     S.comment "just a comment"
     S.text    "foo", "bar"
     S.raw     "foo", "bar"
     html.text "helo"
+  H.p "Some remarks"
+
   # tag 'mytag', { style: "display:block;width:50%;", }
   # tag 'othertag', { style: "display:block;", }, "some ", ->
   #   tag 'bold', "bold content"
@@ -301,11 +286,12 @@ demo_2 = ->
   #     tag 'p', "helo world"
   # debug '^3344^', html
   ds = html.expand()
-  info d for d in ds
-  # debug '^3344^', INTERTEXT.HTML.html_from_datoms ds
+  echo CND.blue d for d in ds
+  trim = ( text ) -> text.replace /\s+$/, ''
+  urge '^3344^', '\n' + trim INTERTEXT.HTML.html_from_datoms ds
 
 #-----------------------------------------------------------------------------------------------------------
-demo_compact_tagnames = ->
+demo_comprehensive_tagnames = ->
   INTERTEXT = require '../../../apps/intertext'
   provide_new_cupofhtml_implementation.apply INTERTEXT.HTML
   h         = new INTERTEXT.HTML.Cupofhtml { flatten: true, }
@@ -323,7 +309,7 @@ demo_compact_tagnames = ->
 if module is require.main then do =>
   # demo()
   demo_2()
-  # demo_compact_tagnames()
+  demo_comprehensive_tagnames()
 
 
 
