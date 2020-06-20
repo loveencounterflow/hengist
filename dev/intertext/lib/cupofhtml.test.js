@@ -195,15 +195,22 @@
     //.........................................................................................................
     // debug '^33343^', ( k for k of cupofhtml )
     // debug '^33343^', ( k for k of cupofhtml.export() )
-    tag('paper', function() {
+    cupofhtml.new_tag('paper', {
+      $blk: true
+    });
+    cupofhtml.new_tag('conclusion', {
+      $blk: true
+    });
+    H.paper(function() {
       S.link_css('./styles.css');
       S.script('./awesome.js');
       S.script(function() {
         return console.log("pretty darn cool");
       });
-      tag('article', function() {
-        tag('title', "Some Thoughts on Nested Data Structures");
-        tag('p', function() {
+      S.newline();
+      H.article(function() {
+        H.h3("Some Thoughts on Nested Data Structures");
+        H.p(function() {
           S.text("An interesting ");
           tag('em', "fact");
           S.text(" about CupOfJoe is that you ");
@@ -212,20 +219,38 @@
           });
           return tag('strong', " nest", " with both sequences", " and function calls.");
         });
-        return tag('p', function() {
+        // H.p ->
+        return H.p(function() {
           S.text("Text is escaped before output: <&>, ");
           return S.raw("but can also be included literally with `raw`: <&>.");
         });
       });
-      return tag('conclusion', function() {
+      return H.conclusion({
+        id: 'c2334',
+        class: 'hilite big'
+      }, function() {
         return S.text("With CupOfJoe, you don't need brackets.");
       });
     });
     datoms = expand();
     html = html_from_datoms(datoms);
     info(datoms);
-    urge(jr(html));
-    T.eq(html, "<paper><link href=./styles.css rel=stylesheet><script src=./awesome.js></script><script>(function() {\n        return console.log(\"pretty darn cool\");\n      })();</script><article><title>Some Thoughts on Nested Data Structures</title><p>An interesting <em>fact</em> about CupOfJoe is that you <em>can</em><strong> nest with both sequences and function calls.</strong></p><p>Text is escaped before output: &lt;&amp;&gt;, but can also be included literally with `raw`: <&>.</p></article><conclusion>With CupOfJoe, you don't need brackets.</conclusion></paper>");
+    urge('\n' + html);
+    // T.eq html, "<paper><link href=./styles.css rel=stylesheet><script src=./awesome.js></script><script>(function() {\n        return console.log(\"pretty darn cool\");\n      })();</script><article><title>Some Thoughts on Nested Data Structures</title><p>An interesting <em>fact</em> about CupOfJoe is that you <em>can</em><strong> nest with both sequences and function calls.</strong></p><p>Text is escaped before output: &lt;&amp;&gt;, but can also be included literally with `raw`: <&>.</p></article><conclusion>With CupOfJoe, you don't need brackets.</conclusion></paper>"
+    T.eq(html.trim(), `<paper><link href=./styles.css rel=stylesheet><script src=./awesome.js></script><script>(function() {
+        return console.log("pretty darn cool");
+      })();</script>
+<article><h3>Some Thoughts on Nested Data Structures</h3>
+
+<p>An interesting <em>fact</em> about CupOfJoe is that you <em>can</em><strong> nest with both sequences and function calls.</strong></p>
+
+<p>Text is escaped before output: &lt;&amp;&gt;, but can also be included literally with \`raw\`: <&>.</p>
+
+</article>
+
+<conclusion class='hilite big' id=c2334>With CupOfJoe, you don't need brackets.</conclusion>
+
+</paper>`);
     if (done != null) {
       //.........................................................................................................
       return done();
