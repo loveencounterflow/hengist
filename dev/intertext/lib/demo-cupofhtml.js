@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, alert, badge, debug, demo_2, demo_comprehensive_tagnames, echo, help, info, log, rpr, urge, warn, whisper;
+  var CND, alert, badge, debug, demo_2, demo_comprehensive_tagnames, demo_cupofhtml_without_newlines, echo, help, info, log, rpr, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -101,12 +101,36 @@
   // info d for d in ds
   // debug '^3344^', INTERTEXT.HTML.html_from_datoms ds
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_cupofhtml_without_newlines = function() {
+    var Cupofhtml, INTERTEXT, cupofhtml;
+    INTERTEXT = require('../../../apps/intertext');
+    ({Cupofhtml} = INTERTEXT.CUPOFHTML);
+    //.........................................................................................................
+    cupofhtml = new Cupofhtml({
+      newlines: false
+    });
+    info(cupofhtml.settings);
+    info(CND.truth(INTERTEXT.types.equals(cupofhtml.settings.newlines, false)));
+    //.........................................................................................................
+    cupofhtml = new Cupofhtml({
+      newlines: true
+    });
+    info(cupofhtml.settings);
+    info(CND.truth(INTERTEXT.types.equals(cupofhtml.settings.newlines, true)));
+    //.........................................................................................................
+    cupofhtml = new Cupofhtml();
+    info(cupofhtml.settings);
+    return info(CND.truth(INTERTEXT.types.equals(cupofhtml.settings.newlines, true)));
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // demo()
       demo_2();
-      return demo_comprehensive_tagnames();
+      demo_comprehensive_tagnames();
+      return demo_cupofhtml_without_newlines();
     })();
   }
 

@@ -35,7 +35,7 @@
   //===========================================================================================================
   // TESTS
   //-----------------------------------------------------------------------------------------------------------
-  this["must quote attribute value"] = async function(T, done) {
+  this["___TMP_NOT_USED_must quote attribute value"] = async function(T, done) {
     var INTERTEXT, error, i, isa, len, matcher, probe, probes_and_matchers, type_of, validate;
     INTERTEXT = require('../../../apps/intertext');
     ({isa, validate, type_of} = INTERTEXT.types.export());
@@ -56,7 +56,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DATOM.HTML._as_attribute_literal"] = async function(T, done) {
+  this["___TMP_NOT_USED_DATOM.HTML._as_attribute_literal"] = async function(T, done) {
     var HTML, INTERTEXT, error, i, len, matcher, probe, probes_and_matchers;
     INTERTEXT = require('../../../apps/intertext');
     ({HTML} = INTERTEXT);
@@ -75,7 +75,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["isa.intertext_html_tagname (1)"] = async function(T, done) {
+  this["___TMP_NOT_USED_isa.intertext_html_tagname (1)"] = async function(T, done) {
     var INTERTEXT, error, i, isa, len, matcher, probe, probes_and_matchers, type_of, validate;
     INTERTEXT = require('../../../apps/intertext');
     ({isa, validate, type_of} = INTERTEXT.types.export());
@@ -94,7 +94,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["isa.intertext_html_tagname (2)"] = async function(T, done) {
+  this["___TMP_NOT_USED_isa.intertext_html_tagname (2)"] = async function(T, done) {
     var INTERTEXT, i, isa, len, probe, probes, type_of, validate;
     INTERTEXT = require('../../../apps/intertext');
     ({isa, validate, type_of} = INTERTEXT.types.export());
@@ -121,7 +121,7 @@ foo:bar foo-bar Foo-bar`.split(/\s+/);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["HTML.html_from_datoms (singular tags)"] = async function(T, done) {
+  this["___TMP_NOT_USED_HTML.html_from_datoms (singular tags)"] = async function(T, done) {
     var DATOM, HTML, INTERTEXT, error, i, len, lets, matcher, new_datom, probe, probes_and_matchers, select;
     DATOM = new (require('datom')).Datom({
       dirty: false
@@ -223,7 +223,7 @@ foo:bar foo-bar Foo-bar`.split(/\s+/);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["HTML.html_from_datoms (closing tags)"] = async function(T, done) {
+  this["___TMP_NOT_USED_HTML.html_from_datoms (closing tags)"] = async function(T, done) {
     var DATOM, HTML, INTERTEXT, error, i, len, lets, matcher, new_datom, probe, probes_and_matchers, select;
     DATOM = new (require('datom')).Datom({
       dirty: false
@@ -325,7 +325,7 @@ foo:bar foo-bar Foo-bar`.split(/\s+/);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["HTML.html_from_datoms (opening tags)"] = async function(T, done) {
+  this["___TMP_NOT_USED_HTML.html_from_datoms (opening tags)"] = async function(T, done) {
     var DATOM, HTML, INTERTEXT, error, i, len, lets, matcher, new_datom, probe, probes_and_matchers, select;
     DATOM = new (require('datom')).Datom({
       dirty: false
@@ -427,7 +427,7 @@ foo:bar foo-bar Foo-bar`.split(/\s+/);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["HTML.html_from_datoms (texts)"] = async function(T, done) {
+  this["___TMP_NOT_USED_HTML.html_from_datoms (texts)"] = async function(T, done) {
     var DATOM, HTML, INTERTEXT, error, i, len, lets, matcher, new_datom, probe, probes_and_matchers, select;
     DATOM = new (require('datom')).Datom({
       dirty: false
@@ -483,7 +483,7 @@ foo:bar foo-bar Foo-bar`.split(/\s+/);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["HTML.html_from_datoms (opening tags w/ $value)"] = async function(T, done) {
+  this["___TMP_NOT_USED_HTML.html_from_datoms (opening tags w/ $value)"] = async function(T, done) {
     var DATOM, HTML, INTERTEXT, error, i, len, lets, matcher, new_datom, probe, probes_and_matchers, select;
     DATOM = new (require('datom')).Datom({
       dirty: false
@@ -609,7 +609,7 @@ foo:bar foo-bar Foo-bar`.split(/\s+/);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["HTML.html_from_datoms (system tags)"] = async function(T, done) {
+  this["___TMP_NOT_USED_HTML.html_from_datoms (system tags)"] = async function(T, done) {
     var DATOM, HTML, INTERTEXT, error, i, len, lets, matcher, new_datom, probe, probes_and_matchers, select;
     DATOM = new (require('datom')).Datom({
       dirty: false
@@ -720,7 +720,7 @@ foo:bar foo-bar Foo-bar`.split(/\s+/);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["HTML.html_from_datoms (raw pseudo-tag)"] = async function(T, done) {
+  this["___TMP_NOT_USED_HTML.html_from_datoms (raw pseudo-tag)"] = async function(T, done) {
     var DATOM, HTML, INTERTEXT, error, i, len, lets, matcher, new_datom, probe, probes_and_matchers, select;
     DATOM = new (require('datom')).Datom({
       dirty: false
@@ -766,7 +766,7 @@ foo:bar foo-bar Foo-bar`.split(/\s+/);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["HTML.html_from_datoms (doctype)"] = async function(T, done) {
+  this["___TMP_NOT_USED_HTML.html_from_datoms (doctype)"] = async function(T, done) {
     var DATOM, HTML, INTERTEXT, error, i, len, lets, matcher, new_datom, probe, probes_and_matchers, select;
     DATOM = new (require('datom')).Datom({
       dirty: false
@@ -806,7 +806,7 @@ foo:bar foo-bar Foo-bar`.split(/\s+/);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["HTML.html_from_datoms (1)"] = async function(T, done) {
+  this["___TMP_NOT_USED_HTML.html_from_datoms (1)"] = async function(T, done) {
     var INTERTEXT, error, html_from_datoms, i, len, matcher, probe, probes_and_matchers, tag;
     INTERTEXT = require('../../../apps/intertext');
     ({html_from_datoms, tag} = INTERTEXT.HTML.export());
@@ -882,7 +882,7 @@ foo:bar foo-bar Foo-bar`.split(/\s+/);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["HTML.html_from_datoms (2)"] = function(T, done) {
+  this["___TMP_NOT_USED_HTML.html_from_datoms (2)"] = function(T, done) {
     var INTERTEXT, ds, html_from_datoms, tag;
     INTERTEXT = require('../../../apps/intertext');
     ({html_from_datoms, tag} = INTERTEXT.HTML.export());
@@ -916,7 +916,7 @@ foo:bar foo-bar Foo-bar`.split(/\s+/);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["HTML.html_from_datoms (3)"] = function(T, done) {
+  this["___TMP_NOT_USED_HTML.html_from_datoms (3)"] = function(T, done) {
     var INTERTEXT, ds, html_from_datoms, tag;
     INTERTEXT = require('../../../apps/intertext');
     ({html_from_datoms, tag} = INTERTEXT.HTML.export());
