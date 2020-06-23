@@ -22,7 +22,7 @@ test                      = require 'guy-test'
 #===========================================================================================================
 # TESTS
 #-----------------------------------------------------------------------------------------------------------
-@[ "must quote attribute value" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_must quote attribute value" ] = ( T, done ) ->
   INTERTEXT 								= require '../../../apps/intertext'
   { isa
     validate
@@ -46,7 +46,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DATOM.HTML._as_attribute_literal" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_DATOM.HTML._as_attribute_literal" ] = ( T, done ) ->
   INTERTEXT 								= require '../../../apps/intertext'
   { HTML, }                 = INTERTEXT
   probes_and_matchers = [
@@ -68,7 +68,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "isa.intertext_html_tagname (1)" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_isa.intertext_html_tagname (1)" ] = ( T, done ) ->
   INTERTEXT 								= require '../../../apps/intertext'
   { isa
     validate
@@ -92,7 +92,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "isa.intertext_html_tagname (2)" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_isa.intertext_html_tagname (2)" ] = ( T, done ) ->
   INTERTEXT 								= require '../../../apps/intertext'
   { isa
     validate
@@ -115,7 +115,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "HTML.html_from_datoms (singular tags)" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_HTML.html_from_datoms (singular tags)" ] = ( T, done ) ->
   DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   { new_datom
     lets
@@ -142,7 +142,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "HTML.html_from_datoms (closing tags)" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_HTML.html_from_datoms (closing tags)" ] = ( T, done ) ->
   DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   { new_datom
     lets
@@ -169,7 +169,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "HTML.html_from_datoms (opening tags)" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_HTML.html_from_datoms (opening tags)" ] = ( T, done ) ->
   DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   { new_datom
     lets
@@ -196,7 +196,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "HTML.html_from_datoms (texts)" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_HTML.html_from_datoms (texts)" ] = ( T, done ) ->
   DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   { new_datom
     lets
@@ -218,7 +218,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "HTML.html_from_datoms (opening tags w/ $value)" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_HTML.html_from_datoms (opening tags w/ $value)" ] = ( T, done ) ->
   DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   { new_datom
     lets
@@ -245,7 +245,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "HTML.html_from_datoms (system tags)" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_HTML.html_from_datoms (system tags)" ] = ( T, done ) ->
   DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   { new_datom
     lets
@@ -272,7 +272,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "HTML.html_from_datoms (raw pseudo-tag)" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_HTML.html_from_datoms (raw pseudo-tag)" ] = ( T, done ) ->
   DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   { new_datom
     lets
@@ -293,7 +293,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "HTML.html_from_datoms (doctype)" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_HTML.html_from_datoms (doctype)" ] = ( T, done ) ->
   DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   { new_datom
     lets
@@ -314,7 +314,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "HTML.html_from_datoms (1)" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_HTML.html_from_datoms (1)" ] = ( T, done ) ->
   INTERTEXT 								= require '../../../apps/intertext'
   { html_from_datoms
     tag }                 = INTERTEXT.HTML.export()
@@ -343,7 +343,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "HTML.html_from_datoms (2)" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_HTML.html_from_datoms (2)" ] = ( T, done ) ->
   INTERTEXT 								= require '../../../apps/intertext'
   { html_from_datoms
     tag }                 = INTERTEXT.HTML.export()
@@ -361,7 +361,7 @@ test                      = require 'guy-test'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "HTML.html_from_datoms (3)" ] = ( T, done ) ->
+@[ "___TMP_NOT_USED_HTML.html_from_datoms (3)" ] = ( T, done ) ->
   INTERTEXT 								= require '../../../apps/intertext'
   { html_from_datoms
     tag }                 = INTERTEXT.HTML.export()
