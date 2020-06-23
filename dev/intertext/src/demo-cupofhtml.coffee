@@ -74,12 +74,30 @@ demo_comprehensive_tagnames = ->
   # info d for d in ds
   # debug '^3344^', INTERTEXT.HTML.html_from_datoms ds
 
+#-----------------------------------------------------------------------------------------------------------
+demo_cupofhtml_without_newlines = ->
+  INTERTEXT                 = require '../../../apps/intertext'
+  { Cupofhtml }             = INTERTEXT.CUPOFHTML
+  #.........................................................................................................
+  cupofhtml                 = new Cupofhtml { newlines: false, }
+  info cupofhtml.settings
+  info CND.truth INTERTEXT.types.equals cupofhtml.settings.newlines, false
+  #.........................................................................................................
+  cupofhtml                 = new Cupofhtml { newlines: true, }
+  info cupofhtml.settings
+  info CND.truth INTERTEXT.types.equals cupofhtml.settings.newlines, true
+  #.........................................................................................................
+  cupofhtml                 = new Cupofhtml()
+  info cupofhtml.settings
+  info CND.truth INTERTEXT.types.equals cupofhtml.settings.newlines, true
+
 
 ############################################################################################################
 if module is require.main then do =>
   # demo()
   demo_2()
   demo_comprehensive_tagnames()
+  demo_cupofhtml_without_newlines()
 
 
 
