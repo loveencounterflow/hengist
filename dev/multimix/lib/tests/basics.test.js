@@ -160,4 +160,54 @@
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["multimix.new()"] = function(T, done) {
+    var A, Multimix, a, b;
+    Multimix = require('../../../../apps/multimix');
+    A = (function() {
+      //.........................................................................................................
+      class A extends Multimix {
+        constructor(settings) {
+          super();
+          this.settings = {...this.defaults, ...settings};
+          return this;
+        }
+
+      };
+
+      A.prototype.defaults = {
+        drab: 'anything'
+      };
+
+      A.prototype.foobar = 42;
+
+      return A;
+
+    }).call(this);
+    //.........................................................................................................
+    a = new A({
+      drab: 'something'
+    });
+    T.eq(a.foobar, 42);
+    T.eq(a.settings.drab, 'something');
+    //.........................................................................................................
+    b = a.new({
+      drab: 'nothing'
+    });
+    T.eq(b.foobar, 42);
+    T.eq(b.settings.drab, 'nothing');
+    //.........................................................................................................
+    return done();
+  };
+
+  //###########################################################################################################
+  if (module === require.main) {
+    (() => {
+      // test @
+      return test(this["multimix.new()"]);
+    })();
+  }
+
 }).call(this);
+
+//# sourceMappingURL=basics.test.js.map
