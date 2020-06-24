@@ -76,7 +76,7 @@ delete_refs = ( ds ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "HTML: parse (1)" ] = ( T, done ) ->
-  grammar = require './../paragate/lib/htmlish.grammar'
+  HTML = require '../../../apps/paragate/lib/htmlish.grammar'
   probes_and_matchers = [
     [ '<!DOCTYPE html>',    [ { '$key': '<document', start: 0, stop: 0, source: '<!DOCTYPE html>', errors: [], '$vnr': [ -Infinity ] }, { '$key': '^doctype', start: 0, stop: 15, text: '<!DOCTYPE html>', '$vnr': [ 1, 1 ] }, { '$key': '>document', start: 15, stop: 15, '$vnr': [ Infinity ] } ], null ]
     [ '<!DOCTYPE obvious>', [ { '$key': '<document', start: 0, stop: 0, source: '<!DOCTYPE obvious>', errors: [], '$vnr': [ -Infinity ] }, { '$key': '^doctype', start: 0, stop: 18, text: '<!DOCTYPE obvious>', '$vnr': [ 1, 1 ] }, { '$key': '>document', start: 18, stop: 18, '$vnr': [ Infinity ] } ], null ]
@@ -94,14 +94,14 @@ delete_refs = ( ds ) ->
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      resolve delete_refs grammar.parse probe
+      resolve delete_refs HTML.grammar.parse probe
   #.........................................................................................................
   done()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "HTML: parse (1a)" ] = ( T, done ) ->
-  grammar = require './../paragate/lib/htmlish.grammar'
+  HTML = require '../../../apps/paragate/lib/htmlish.grammar'
   probes_and_matchers = [
     [ '<!DOCTYPE html>', "$key='^doctype',$vnr=[ 1, 1 ],start=0,stop=15,text='<!DOCTYPE html>'", null ]
     [ '<!DOCTYPE obvious>', "$key='^doctype',$vnr=[ 1, 1 ],start=0,stop=18,text='<!DOCTYPE obvious>'", null ]
@@ -119,14 +119,14 @@ delete_refs = ( ds ) ->
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      resolve condense_tokens grammar.parse probe
+      resolve condense_tokens HTML.grammar.parse probe
   #.........................................................................................................
   done()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "HTML: parse (dubious)" ] = ( T, done ) ->
-  grammar = require './../paragate/lib/htmlish.grammar'
+  HTML = require '../../../apps/paragate/lib/htmlish.grammar'
   probes_and_matchers = [
     [ '< >', "$key='<tag',$vnr=[ 1, 1 ],start=0,stop=3,text='< >',type='otag'#$key='^error',$vnr=[ 1, 3 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=2,stop=3,text='>'", null ]
     [ '< x >', "$key='<tag',$vnr=[ 1, 1 ],name='x',start=0,stop=5,text='< x >',type='otag'", null ]
@@ -141,7 +141,7 @@ delete_refs = ( ds ) ->
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      resolve condense_tokens grammar.parse probe
+      resolve condense_tokens HTML.grammar.parse probe
   #.........................................................................................................
   done()
   return null
@@ -179,7 +179,7 @@ delete_refs = ( ds ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "_INDENTATION: parse (1)" ] = ( T, done ) ->
-  grammar = ( require './indentation.grammar' ).indentation_grammar
+  INDENTATION = ( require './indentation.grammar' ).indentation_grammar
   probes_and_matchers = [
     ["if 42:\n    43\nelse:\n  44",[{"$key":"<node","name":"document","start":0,"stop":24,"text":"if 42:\n    43\nelse:\n  44"},{"$key":"^token","name":"line","text":"if 42:","start":0,"stop":6},{"$key":"^token","name":"indent","text":"    ","start":7,"stop":11},{"$key":"^token","name":"line","text":"43","start":11,"stop":13},{"$key":"^token","name":"line","text":"else:","start":14,"stop":19},{"$key":"^token","name":"dedent","text":"","start":14,"stop":14},{"$key":"^token","name":"indent","text":"  ","start":20,"stop":22},{"$key":"^token","name":"line","text":"44","start":22,"stop":24},{"$key":"^token","name":"dedent","start":24,"stop":24,"text":""},{"$key":">node","name":"document","start":24,"stop":24}],null]
     ["   x = 42",[{"$key":"<node","name":"document","start":0,"stop":9,"text":"   x = 42"},{"$key":"^token","name":"indent","text":"   ","start":0,"stop":3},{"$key":"^token","name":"line","text":"x = 42","start":3,"stop":9},{"$key":"^token","name":"dedent","start":9,"stop":9,"text":""},{"$key":">node","name":"document","start":9,"stop":9}],null]
@@ -190,7 +190,7 @@ delete_refs = ( ds ) ->
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      resolve grammar.parse probe
+      resolve INDENTATION.grammar.parse probe
   #.........................................................................................................
   done()
   return null
