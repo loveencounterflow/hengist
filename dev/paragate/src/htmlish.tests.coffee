@@ -88,6 +88,32 @@ H                         = require './test-helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "HTML: parse bare" ] = ( T, done ) ->
+  HTML = require '../../../apps/paragate/lib/htmlish.grammar'
+  probes_and_matchers = [
+    [ '<!DOCTYPE html>', [ { '$key': '^doctype', start: 0, stop: 15, text: '<!DOCTYPE html>', '$vnr': [ 1, 1 ] } ], null ]
+    [ '<!DOCTYPE obvious>', [ { '$key': '^doctype', start: 0, stop: 18, text: '<!DOCTYPE obvious>', '$vnr': [ 1, 1 ] } ], null ]
+    [ '<title>Helo Worlds</title>', [ { '$key': '<tag', name: 'title', type: 'otag', text: '<title>', start: 0, stop: 7, '$vnr': [ 1, 1 ] }, { '$key': '^text', start: 7, stop: 18, text: 'Helo Worlds', '$vnr': [ 1, 8 ] }, { '$key': '>tag', name: 'title', type: 'ctag', text: '</title>', start: 18, stop: 26, '$vnr': [ 1, 19 ] } ], null ]
+    [ '<img width=200>', [ { '$key': '<tag', name: 'img', type: 'otag', text: '<img width=200>', start: 0, stop: 15, atrs: { width: '200' }, '$vnr': [ 1, 1 ] } ], null ]
+    [ '<foo/>', [ { '$key': '^tag', name: 'foo', type: 'stag', text: '<foo/>', start: 0, stop: 6, '$vnr': [ 1, 1 ] } ], null ]
+    [ '<foo></foo>', [ { '$key': '<tag', name: 'foo', type: 'otag', text: '<foo>', start: 0, stop: 5, '$vnr': [ 1, 1 ] }, { '$key': '>tag', name: 'foo', type: 'ctag', text: '</foo>', start: 5, stop: 11, '$vnr': [ 1, 6 ] } ], null ]
+    [ '<p>here and<br></br>there</p>', [ { '$key': '<tag', name: 'p', type: 'otag', text: '<p>', start: 0, stop: 3, '$vnr': [ 1, 1 ] }, { '$key': '^text', start: 3, stop: 11, text: 'here and', '$vnr': [ 1, 4 ] }, { '$key': '<tag', name: 'br', type: 'otag', text: '<br>', start: 11, stop: 15, '$vnr': [ 1, 12 ] }, { '$key': '>tag', name: 'br', type: 'ctag', text: '</br>', start: 15, stop: 20, '$vnr': [ 1, 16 ] }, { '$key': '^text', start: 20, stop: 25, text: 'there', '$vnr': [ 1, 21 ] }, { '$key': '>tag', name: 'p', type: 'ctag', text: '</p>', start: 25, stop: 29, '$vnr': [ 1, 26 ] } ], null ]
+    [ '<p>here and<br>there', [ { '$key': '<tag', name: 'p', type: 'otag', text: '<p>', start: 0, stop: 3, '$vnr': [ 1, 1 ] }, { '$key': '^text', start: 3, stop: 11, text: 'here and', '$vnr': [ 1, 4 ] }, { '$key': '<tag', name: 'br', type: 'otag', text: '<br>', start: 11, stop: 15, '$vnr': [ 1, 12 ] }, { '$key': '^text', start: 15, stop: 20, text: 'there', '$vnr': [ 1, 16 ] } ], null ]
+    [ '<p>here and<br>there</p>', [ { '$key': '<tag', name: 'p', type: 'otag', text: '<p>', start: 0, stop: 3, '$vnr': [ 1, 1 ] }, { '$key': '^text', start: 3, stop: 11, text: 'here and', '$vnr': [ 1, 4 ] }, { '$key': '<tag', name: 'br', type: 'otag', text: '<br>', start: 11, stop: 15, '$vnr': [ 1, 12 ] }, { '$key': '^text', start: 15, stop: 20, text: 'there', '$vnr': [ 1, 16 ] }, { '$key': '>tag', name: 'p', type: 'ctag', text: '</p>', start: 20, stop: 24, '$vnr': [ 1, 21 ] } ], null ]
+    [ '<p>here and<br x=42/>there</p>', [ { '$key': '<tag', name: 'p', type: 'otag', text: '<p>', start: 0, stop: 3, '$vnr': [ 1, 1 ] }, { '$key': '^text', start: 3, stop: 11, text: 'here and', '$vnr': [ 1, 4 ] }, { '$key': '^tag', name: 'br', type: 'stag', text: '<br x=42/>', start: 11, stop: 21, atrs: { x: '42' }, '$vnr': [ 1, 12 ] }, { '$key': '^text', start: 21, stop: 26, text: 'there', '$vnr': [ 1, 22 ] }, { '$key': '>tag', name: 'p', type: 'ctag', text: '</p>', start: 26, stop: 30, '$vnr': [ 1, 27 ] } ], null ]
+    [ '<p>here and<br/>there</p>', [ { '$key': '<tag', name: 'p', type: 'otag', text: '<p>', start: 0, stop: 3, '$vnr': [ 1, 1 ] }, { '$key': '^text', start: 3, stop: 11, text: 'here and', '$vnr': [ 1, 4 ] }, { '$key': '^tag', name: 'br', type: 'stag', text: '<br/>', start: 11, stop: 16, '$vnr': [ 1, 12 ] }, { '$key': '^text', start: 16, stop: 21, text: 'there', '$vnr': [ 1, 17 ] }, { '$key': '>tag', name: 'p', type: 'ctag', text: '</p>', start: 21, stop: 25, '$vnr': [ 1, 22 ] } ], null ]
+    [ 'just some plain text', [ { '$key': '^text', start: 0, stop: 20, text: 'just some plain text', '$vnr': [ 1, 1 ] } ], null ]
+    [ '<p>one<p>two', [ { '$key': '<tag', name: 'p', type: 'otag', text: '<p>', start: 0, stop: 3, '$vnr': [ 1, 1 ] }, { '$key': '^text', start: 3, stop: 6, text: 'one', '$vnr': [ 1, 4 ] }, { '$key': '<tag', name: 'p', type: 'otag', text: '<p>', start: 6, stop: 9, '$vnr': [ 1, 7 ] }, { '$key': '^text', start: 9, stop: 12, text: 'two', '$vnr': [ 1, 10 ] } ], null ]
+    ]
+  grammar = new HTML.new_grammar { bare: true, }
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      resolve H.delete_refs grammar.parse probe
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "HTML: parse (dubious)" ] = ( T, done ) ->
   HTML = require '../../../apps/paragate/lib/htmlish.grammar'
   probes_and_matchers = [
@@ -540,7 +566,19 @@ H                         = require './test-helpers'
 ############################################################################################################
 ############################################################################################################
 ############################################################################################################
+
+#-----------------------------------------------------------------------------------------------------------
+demo = ->
+  HTML = require '../../../apps/paragate/lib/htmlish.grammar'
+  # grammar = HTML.grammar.new { bare: true, }
+  grammar = new HTML.new_grammar { bare: true, }
+  urge grammar.settings
+  urge grammar.parse """<p>helo</p>"""
+  return null
+
 ############################################################################################################
 if module is require.main then do => # await do =>
   test @
+  # test @[ "HTML: parse bare" ]
+  # demo()
 
