@@ -718,15 +718,458 @@
   this["HTML: parse bare"] = async function(T, done) {
     var HTML, error, grammar, i, len, matcher, probe, probes_and_matchers;
     HTML = require('../../../apps/paragate/lib/htmlish.grammar');
-    probes_and_matchers = [['<!DOCTYPE html>', "$key='^doctype',$vnr=[ 1, 1 ],start=0,stop=15,text='<!DOCTYPE html>'", null], ['<!DOCTYPE obvious>', "$key='^doctype',$vnr=[ 1, 1 ],start=0,stop=18,text='<!DOCTYPE obvious>'", null], ['<title>Helo Worlds</title>', "$key='<tag',$vnr=[ 1, 1 ],name='title',start=0,stop=7,text='<title>',type='otag'#$key='^text',$vnr=[ 1, 8 ],start=7,stop=18,text='Helo Worlds'#$key='>tag',$vnr=[ 1, 19 ],name='title',start=18,stop=26,text='</title>',type='ctag'", null], ['<img width=200>', "$key='<tag',$vnr=[ 1, 1 ],atrs={ width: '200' },name='img',start=0,stop=15,text='<img width=200>',type='otag'", null], ['<foo/>', "$key='^tag',$vnr=[ 1, 1 ],name='foo',start=0,stop=6,text='<foo/>',type='stag'", null], ['<foo></foo>', "$key='<tag',$vnr=[ 1, 1 ],name='foo',start=0,stop=5,text='<foo>',type='otag'#$key='>tag',$vnr=[ 1, 6 ],name='foo',start=5,stop=11,text='</foo>',type='ctag'", null], ['<p>here and<br></br>there</p>', "$key='<tag',$vnr=[ 1, 1 ],name='p',start=0,stop=3,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=11,text='here and'#$key='<tag',$vnr=[ 1, 12 ],name='br',start=11,stop=15,text='<br>',type='otag'#$key='>tag',$vnr=[ 1, 16 ],name='br',start=15,stop=20,text='</br>',type='ctag'#$key='^text',$vnr=[ 1, 21 ],start=20,stop=25,text='there'#$key='>tag',$vnr=[ 1, 26 ],name='p',start=25,stop=29,text='</p>',type='ctag'", null], ['<p>here and<br>there', "$key='<tag',$vnr=[ 1, 1 ],name='p',start=0,stop=3,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=11,text='here and'#$key='<tag',$vnr=[ 1, 12 ],name='br',start=11,stop=15,text='<br>',type='otag'#$key='^text',$vnr=[ 1, 16 ],start=15,stop=20,text='there'", null], ['<p>here and<br>there</p>', "$key='<tag',$vnr=[ 1, 1 ],name='p',start=0,stop=3,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=11,text='here and'#$key='<tag',$vnr=[ 1, 12 ],name='br',start=11,stop=15,text='<br>',type='otag'#$key='^text',$vnr=[ 1, 16 ],start=15,stop=20,text='there'#$key='>tag',$vnr=[ 1, 21 ],name='p',start=20,stop=24,text='</p>',type='ctag'", null], ['<p>here and<br x=42/>there</p>', "$key='<tag',$vnr=[ 1, 1 ],name='p',start=0,stop=3,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=11,text='here and'#$key='^tag',$vnr=[ 1, 12 ],atrs={ x: '42' },name='br',start=11,stop=21,text='<br x=42/>',type='stag'#$key='^text',$vnr=[ 1, 22 ],start=21,stop=26,text='there'#$key='>tag',$vnr=[ 1, 27 ],name='p',start=26,stop=30,text='</p>',type='ctag'", null], ['<p>here and<br/>there</p>', "$key='<tag',$vnr=[ 1, 1 ],name='p',start=0,stop=3,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=11,text='here and'#$key='^tag',$vnr=[ 1, 12 ],name='br',start=11,stop=16,text='<br/>',type='stag'#$key='^text',$vnr=[ 1, 17 ],start=16,stop=21,text='there'#$key='>tag',$vnr=[ 1, 22 ],name='p',start=21,stop=25,text='</p>',type='ctag'", null], ['just some plain text', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=20,text='just some plain text'", null], ['<p>one<p>two', "$key='<tag',$vnr=[ 1, 1 ],name='p',start=0,stop=3,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=6,text='one'#$key='<tag',$vnr=[ 1, 7 ],name='p',start=6,stop=9,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 10 ],start=9,stop=12,text='two'", null]];
-    grammar = HTML.grammar.new({
+    probes_and_matchers = [
+      [
+        '<!DOCTYPE html>',
+        [
+          {
+            '$key': '^doctype',
+            start: 0,
+            stop: 15,
+            text: '<!DOCTYPE html>',
+            '$vnr': [1,
+          1]
+          }
+        ],
+        null
+      ],
+      [
+        '<!DOCTYPE obvious>',
+        [
+          {
+            '$key': '^doctype',
+            start: 0,
+            stop: 18,
+            text: '<!DOCTYPE obvious>',
+            '$vnr': [1,
+          1]
+          }
+        ],
+        null
+      ],
+      [
+        '<title>Helo Worlds</title>',
+        [
+          {
+            '$key': '<tag',
+            name: 'title',
+            type: 'otag',
+            text: '<title>',
+            start: 0,
+            stop: 7,
+            '$vnr': [1,
+          1]
+          },
+          {
+            '$key': '^text',
+            start: 7,
+            stop: 18,
+            text: 'Helo Worlds',
+            '$vnr': [1,
+          8]
+          },
+          {
+            '$key': '>tag',
+            name: 'title',
+            type: 'ctag',
+            text: '</title>',
+            start: 18,
+            stop: 26,
+            '$vnr': [1,
+          19]
+          }
+        ],
+        null
+      ],
+      [
+        '<img width=200>',
+        [
+          {
+            '$key': '<tag',
+            name: 'img',
+            type: 'otag',
+            text: '<img width=200>',
+            start: 0,
+            stop: 15,
+            atrs: {
+              width: '200'
+            },
+            '$vnr': [1,
+          1]
+          }
+        ],
+        null
+      ],
+      [
+        '<foo/>',
+        [
+          {
+            '$key': '^tag',
+            name: 'foo',
+            type: 'stag',
+            text: '<foo/>',
+            start: 0,
+            stop: 6,
+            '$vnr': [1,
+          1]
+          }
+        ],
+        null
+      ],
+      [
+        '<foo></foo>',
+        [
+          {
+            '$key': '<tag',
+            name: 'foo',
+            type: 'otag',
+            text: '<foo>',
+            start: 0,
+            stop: 5,
+            '$vnr': [1,
+          1]
+          },
+          {
+            '$key': '>tag',
+            name: 'foo',
+            type: 'ctag',
+            text: '</foo>',
+            start: 5,
+            stop: 11,
+            '$vnr': [1,
+          6]
+          }
+        ],
+        null
+      ],
+      [
+        '<p>here and<br></br>there</p>',
+        [
+          {
+            '$key': '<tag',
+            name: 'p',
+            type: 'otag',
+            text: '<p>',
+            start: 0,
+            stop: 3,
+            '$vnr': [1,
+          1]
+          },
+          {
+            '$key': '^text',
+            start: 3,
+            stop: 11,
+            text: 'here and',
+            '$vnr': [1,
+          4]
+          },
+          {
+            '$key': '<tag',
+            name: 'br',
+            type: 'otag',
+            text: '<br>',
+            start: 11,
+            stop: 15,
+            '$vnr': [1,
+          12]
+          },
+          {
+            '$key': '>tag',
+            name: 'br',
+            type: 'ctag',
+            text: '</br>',
+            start: 15,
+            stop: 20,
+            '$vnr': [1,
+          16]
+          },
+          {
+            '$key': '^text',
+            start: 20,
+            stop: 25,
+            text: 'there',
+            '$vnr': [1,
+          21]
+          },
+          {
+            '$key': '>tag',
+            name: 'p',
+            type: 'ctag',
+            text: '</p>',
+            start: 25,
+            stop: 29,
+            '$vnr': [1,
+          26]
+          }
+        ],
+        null
+      ],
+      [
+        '<p>here and<br>there',
+        [
+          {
+            '$key': '<tag',
+            name: 'p',
+            type: 'otag',
+            text: '<p>',
+            start: 0,
+            stop: 3,
+            '$vnr': [1,
+          1]
+          },
+          {
+            '$key': '^text',
+            start: 3,
+            stop: 11,
+            text: 'here and',
+            '$vnr': [1,
+          4]
+          },
+          {
+            '$key': '<tag',
+            name: 'br',
+            type: 'otag',
+            text: '<br>',
+            start: 11,
+            stop: 15,
+            '$vnr': [1,
+          12]
+          },
+          {
+            '$key': '^text',
+            start: 15,
+            stop: 20,
+            text: 'there',
+            '$vnr': [1,
+          16]
+          }
+        ],
+        null
+      ],
+      [
+        '<p>here and<br>there</p>',
+        [
+          {
+            '$key': '<tag',
+            name: 'p',
+            type: 'otag',
+            text: '<p>',
+            start: 0,
+            stop: 3,
+            '$vnr': [1,
+          1]
+          },
+          {
+            '$key': '^text',
+            start: 3,
+            stop: 11,
+            text: 'here and',
+            '$vnr': [1,
+          4]
+          },
+          {
+            '$key': '<tag',
+            name: 'br',
+            type: 'otag',
+            text: '<br>',
+            start: 11,
+            stop: 15,
+            '$vnr': [1,
+          12]
+          },
+          {
+            '$key': '^text',
+            start: 15,
+            stop: 20,
+            text: 'there',
+            '$vnr': [1,
+          16]
+          },
+          {
+            '$key': '>tag',
+            name: 'p',
+            type: 'ctag',
+            text: '</p>',
+            start: 20,
+            stop: 24,
+            '$vnr': [1,
+          21]
+          }
+        ],
+        null
+      ],
+      [
+        '<p>here and<br x=42/>there</p>',
+        [
+          {
+            '$key': '<tag',
+            name: 'p',
+            type: 'otag',
+            text: '<p>',
+            start: 0,
+            stop: 3,
+            '$vnr': [1,
+          1]
+          },
+          {
+            '$key': '^text',
+            start: 3,
+            stop: 11,
+            text: 'here and',
+            '$vnr': [1,
+          4]
+          },
+          {
+            '$key': '^tag',
+            name: 'br',
+            type: 'stag',
+            text: '<br x=42/>',
+            start: 11,
+            stop: 21,
+            atrs: {
+              x: '42'
+            },
+            '$vnr': [1,
+          12]
+          },
+          {
+            '$key': '^text',
+            start: 21,
+            stop: 26,
+            text: 'there',
+            '$vnr': [1,
+          22]
+          },
+          {
+            '$key': '>tag',
+            name: 'p',
+            type: 'ctag',
+            text: '</p>',
+            start: 26,
+            stop: 30,
+            '$vnr': [1,
+          27]
+          }
+        ],
+        null
+      ],
+      [
+        '<p>here and<br/>there</p>',
+        [
+          {
+            '$key': '<tag',
+            name: 'p',
+            type: 'otag',
+            text: '<p>',
+            start: 0,
+            stop: 3,
+            '$vnr': [1,
+          1]
+          },
+          {
+            '$key': '^text',
+            start: 3,
+            stop: 11,
+            text: 'here and',
+            '$vnr': [1,
+          4]
+          },
+          {
+            '$key': '^tag',
+            name: 'br',
+            type: 'stag',
+            text: '<br/>',
+            start: 11,
+            stop: 16,
+            '$vnr': [1,
+          12]
+          },
+          {
+            '$key': '^text',
+            start: 16,
+            stop: 21,
+            text: 'there',
+            '$vnr': [1,
+          17]
+          },
+          {
+            '$key': '>tag',
+            name: 'p',
+            type: 'ctag',
+            text: '</p>',
+            start: 21,
+            stop: 25,
+            '$vnr': [1,
+          22]
+          }
+        ],
+        null
+      ],
+      [
+        'just some plain text',
+        [
+          {
+            '$key': '^text',
+            start: 0,
+            stop: 20,
+            text: 'just some plain text',
+            '$vnr': [1,
+          1]
+          }
+        ],
+        null
+      ],
+      [
+        '<p>one<p>two',
+        [
+          {
+            '$key': '<tag',
+            name: 'p',
+            type: 'otag',
+            text: '<p>',
+            start: 0,
+            stop: 3,
+            '$vnr': [1,
+          1]
+          },
+          {
+            '$key': '^text',
+            start: 3,
+            stop: 6,
+            text: 'one',
+            '$vnr': [1,
+          4]
+          },
+          {
+            '$key': '<tag',
+            name: 'p',
+            type: 'otag',
+            text: '<p>',
+            start: 6,
+            stop: 9,
+            '$vnr': [1,
+          7]
+          },
+          {
+            '$key': '^text',
+            start: 9,
+            stop: 12,
+            text: 'two',
+            '$vnr': [1,
+          10]
+          }
+        ],
+        null
+      ]
+    ];
+    grammar = new HTML.new_grammar({
       bare: true
     });
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
-          return resolve(H.condense_tokens(grammar.parse(probe)));
+          return resolve(H.delete_refs(grammar.parse(probe)));
         });
       });
     }
@@ -1197,11 +1640,12 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => { // await do =>
-      // test @
-      // test @[ "HTML: parse bare" ]
-      return demo();
+      return test(this);
     })();
   }
+
+  // test @[ "HTML: parse bare" ]
+// demo()
 
 }).call(this);
 
