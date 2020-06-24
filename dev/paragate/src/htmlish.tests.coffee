@@ -22,45 +22,8 @@ INTERTEXT                 = require 'intertext'
 { isa
   type_of }               = INTERTEXT.types
 { lets }                  = ( require 'datom' ).export()
+H                         = require './test-helpers'
 
-#-----------------------------------------------------------------------------------------------------------
-as_text = ( x ) ->
-  return rpr x
-  switch type_of x
-    when 'text'   then return x
-    when 'object' then return jr x
-    when 'list'   then return jr x
-  return x.toString()
-
-#-----------------------------------------------------------------------------------------------------------
-condense_token = ( token ) ->
-  keys    = ( Object.keys token ).sort()
-  keys    = keys.filter ( x ) -> x not in [ 'message', '$', ]
-  values  = ( ( k + '=' + as_text token[ k ] ) for k in keys )
-  return values.join ','
-  # return as_text values
-
-#-----------------------------------------------------------------------------------------------------------
-condense_tokens = ( tokens ) ->
-  R = []
-  for t in tokens
-    continue if t.$key in [ '<document', '>document', ]
-    R.push condense_token t
-  return R.join '#'
-
-#-----------------------------------------------------------------------------------------------------------
-delete_refs = ( ds ) ->
-  R = []
-  for d in ds
-    R.push lets d, ( d ) -> delete d.$
-  return R
-
-# #-----------------------------------------------------------------------------------------------------------
-# @show_condensed_tokens = ( tokens ) ->
-#   for token in tokens
-#     help @condense_token token
-#   info @condense_tokens tokens
-#   return null
 
 
 #===========================================================================================================
@@ -94,7 +57,7 @@ delete_refs = ( ds ) ->
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      resolve delete_refs HTML.grammar.parse probe
+      resolve H.delete_refs HTML.grammar.parse probe
   #.........................................................................................................
   done()
   return null
@@ -119,7 +82,7 @@ delete_refs = ( ds ) ->
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      resolve condense_tokens HTML.grammar.parse probe
+      resolve H.condense_tokens HTML.grammar.parse probe
   #.........................................................................................................
   done()
   return null
@@ -141,7 +104,7 @@ delete_refs = ( ds ) ->
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      resolve condense_tokens HTML.grammar.parse probe
+      resolve H.condense_tokens HTML.grammar.parse probe
   #.........................................................................................................
   done()
   return null
@@ -175,26 +138,6 @@ delete_refs = ( ds ) ->
 #   SP.pull pipeline...
 #   #.........................................................................................................
 #   return null
-
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "_INDENTATION: parse (1)" ] = ( T, done ) ->
-  INDENTATION = ( require './indentation.grammar' ).indentation_grammar
-  probes_and_matchers = [
-    ["if 42:\n    43\nelse:\n  44",[{"$key":"<node","name":"document","start":0,"stop":24,"text":"if 42:\n    43\nelse:\n  44"},{"$key":"^token","name":"line","text":"if 42:","start":0,"stop":6},{"$key":"^token","name":"indent","text":"    ","start":7,"stop":11},{"$key":"^token","name":"line","text":"43","start":11,"stop":13},{"$key":"^token","name":"line","text":"else:","start":14,"stop":19},{"$key":"^token","name":"dedent","text":"","start":14,"stop":14},{"$key":"^token","name":"indent","text":"  ","start":20,"stop":22},{"$key":"^token","name":"line","text":"44","start":22,"stop":24},{"$key":"^token","name":"dedent","start":24,"stop":24,"text":""},{"$key":">node","name":"document","start":24,"stop":24}],null]
-    ["   x = 42",[{"$key":"<node","name":"document","start":0,"stop":9,"text":"   x = 42"},{"$key":"^token","name":"indent","text":"   ","start":0,"stop":3},{"$key":"^token","name":"line","text":"x = 42","start":3,"stop":9},{"$key":"^token","name":"dedent","start":9,"stop":9,"text":""},{"$key":">node","name":"document","start":9,"stop":9}],null]
-    ["   <!-- xx -->",[{"$key":"<node","name":"document","start":0,"stop":14,"text":"   <!-- xx -->"},{"$key":"^token","name":"indent","text":"   ","start":0,"stop":3},{"$key":"^token","name":"line","text":"<!-- xx -->","start":3,"stop":14},{"$key":"^token","name":"dedent","start":14,"stop":14,"text":""},{"$key":">node","name":"document","start":14,"stop":14}],null]
-    ["L0\n  L1\n    L2\n      L3",[{"$key":"<node","name":"document","start":0,"stop":23,"text":"L0\n  L1\n    L2\n      L3"},{"$key":"^token","name":"line","text":"L0","start":0,"stop":2},{"$key":"^token","name":"indent","text":"  ","start":3,"stop":5},{"$key":"^token","name":"line","text":"L1","start":5,"stop":7},{"$key":"^token","name":"indent","text":"    ","start":8,"stop":12},{"$key":"^token","name":"line","text":"L2","start":12,"stop":14},{"$key":"^token","name":"indent","text":"      ","start":15,"stop":21},{"$key":"^token","name":"line","text":"L3","start":21,"stop":23},{"$key":"^token","name":"dedent","start":23,"stop":23,"text":""},{"$key":"^token","name":"dedent","start":23,"stop":23,"text":""},{"$key":"^token","name":"dedent","start":23,"stop":23,"text":""},{"$key":">node","name":"document","start":23,"stop":23}],null]
-    ["L0\n  L1\n    L2\n  L1",[{"$key":"<node","name":"document","start":0,"stop":19,"text":"L0\n  L1\n    L2\n  L1"},{"$key":"^token","name":"line","text":"L0","start":0,"stop":2},{"$key":"^token","name":"indent","text":"  ","start":3,"stop":5},{"$key":"^token","name":"line","text":"L1","start":5,"stop":7},{"$key":"^token","name":"indent","text":"    ","start":8,"stop":12},{"$key":"^token","name":"line","text":"L2","start":12,"stop":14},{"$key":"^token","name":"dedent","text":"  ","start":15,"stop":17},{"$key":"^token","name":"line","text":"L1","start":17,"stop":19},{"$key":"^token","name":"dedent","start":19,"stop":19,"text":""},{"$key":">node","name":"document","start":19,"stop":19}],null]
-    ["\n  \n\nL0\n  L1\n\n    \nOK\n",[{"$key":"<node","name":"document","start":1,"stop":21,"text":"  \n\nL0\n  L1\n\n    \nOK"},{"$key":"^token","name":"indent","text":"  ","start":1,"stop":3},{"$key":"^token","name":"line","text":"L0","start":5,"stop":7},{"$key":"^token","name":"dedent","text":"","start":5,"stop":5},{"$key":"^token","name":"indent","text":"  ","start":8,"stop":10},{"$key":"^token","name":"line","text":"L1","start":10,"stop":12},{"$key":"^token","name":"indent","text":"    ","start":14,"stop":18},{"$key":"^token","name":"line","text":"OK","start":19,"stop":21},{"$key":"^token","name":"dedent","text":"","start":19,"stop":19},{"$key":"^token","name":"dedent","text":"","start":19,"stop":19},{"$key":">node","name":"document","start":21,"stop":21}],null]
-    ]
-  for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      resolve INDENTATION.grammar.parse probe
-  #.........................................................................................................
-  done()
-  return null
-
 
 
 ############################################################################################################
@@ -278,7 +221,7 @@ delete_refs = ( ds ) ->
 # #     ]
 # #   for [ probe, matcher, error, ] in probes_and_matchers
 # #     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-# #       resolve DEMO.condense_tokens HTML.datoms_from_html probe
+# #       resolve DEMO.H.condense_tokens HTML.datoms_from_html probe
 # #   #.........................................................................................................
 # #   done()
 # #   return null
@@ -599,16 +542,5 @@ delete_refs = ( ds ) ->
 ############################################################################################################
 ############################################################################################################
 if module is require.main then do => # await do =>
-  # debug ( k for k of ( require '../..' ).HTML ).sort().join ' '
-  # await @_demo()
   test @
-  # test @[ "API" ]
-  # test @[ "HTML: parse (1)" ]
-  # test @[ "HTML: parse (1a)" ]
-  # test @[ "HTML: parse (dubious)" ]
-  # test @[ "INDENTATION: parse (1)" ]
-  # test @[ "HTML: parse (2)" ]
-  # test @[ "HTML.html_from_datoms (singular tags)" ]
-  # test @[ "HTML Cupofhtml (1)" ]
-  # test @[ "HTML Cupofhtml (2)" ]
-  # test @[ "HTML._parse_compact_tagname" ]
+
