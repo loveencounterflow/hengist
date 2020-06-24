@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, INTERTEXT, alert, badge, debug, echo, help, info, isa, jr, lets, log, rpr, test, type_of, urge, warn, whisper;
+  var CND, H, INTERTEXT, alert, badge, debug, demo, echo, help, info, isa, jr, lets, log, rpr, test, type_of, urge, warn, whisper;
 
   // coffeelint: disable=max_line_length
 
@@ -715,6 +715,27 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["HTML: parse bare"] = async function(T, done) {
+    var HTML, error, grammar, i, len, matcher, probe, probes_and_matchers;
+    HTML = require('../../../apps/paragate/lib/htmlish.grammar');
+    probes_and_matchers = [['<!DOCTYPE html>', "$key='^doctype',$vnr=[ 1, 1 ],start=0,stop=15,text='<!DOCTYPE html>'", null], ['<!DOCTYPE obvious>', "$key='^doctype',$vnr=[ 1, 1 ],start=0,stop=18,text='<!DOCTYPE obvious>'", null], ['<title>Helo Worlds</title>', "$key='<tag',$vnr=[ 1, 1 ],name='title',start=0,stop=7,text='<title>',type='otag'#$key='^text',$vnr=[ 1, 8 ],start=7,stop=18,text='Helo Worlds'#$key='>tag',$vnr=[ 1, 19 ],name='title',start=18,stop=26,text='</title>',type='ctag'", null], ['<img width=200>', "$key='<tag',$vnr=[ 1, 1 ],atrs={ width: '200' },name='img',start=0,stop=15,text='<img width=200>',type='otag'", null], ['<foo/>', "$key='^tag',$vnr=[ 1, 1 ],name='foo',start=0,stop=6,text='<foo/>',type='stag'", null], ['<foo></foo>', "$key='<tag',$vnr=[ 1, 1 ],name='foo',start=0,stop=5,text='<foo>',type='otag'#$key='>tag',$vnr=[ 1, 6 ],name='foo',start=5,stop=11,text='</foo>',type='ctag'", null], ['<p>here and<br></br>there</p>', "$key='<tag',$vnr=[ 1, 1 ],name='p',start=0,stop=3,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=11,text='here and'#$key='<tag',$vnr=[ 1, 12 ],name='br',start=11,stop=15,text='<br>',type='otag'#$key='>tag',$vnr=[ 1, 16 ],name='br',start=15,stop=20,text='</br>',type='ctag'#$key='^text',$vnr=[ 1, 21 ],start=20,stop=25,text='there'#$key='>tag',$vnr=[ 1, 26 ],name='p',start=25,stop=29,text='</p>',type='ctag'", null], ['<p>here and<br>there', "$key='<tag',$vnr=[ 1, 1 ],name='p',start=0,stop=3,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=11,text='here and'#$key='<tag',$vnr=[ 1, 12 ],name='br',start=11,stop=15,text='<br>',type='otag'#$key='^text',$vnr=[ 1, 16 ],start=15,stop=20,text='there'", null], ['<p>here and<br>there</p>', "$key='<tag',$vnr=[ 1, 1 ],name='p',start=0,stop=3,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=11,text='here and'#$key='<tag',$vnr=[ 1, 12 ],name='br',start=11,stop=15,text='<br>',type='otag'#$key='^text',$vnr=[ 1, 16 ],start=15,stop=20,text='there'#$key='>tag',$vnr=[ 1, 21 ],name='p',start=20,stop=24,text='</p>',type='ctag'", null], ['<p>here and<br x=42/>there</p>', "$key='<tag',$vnr=[ 1, 1 ],name='p',start=0,stop=3,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=11,text='here and'#$key='^tag',$vnr=[ 1, 12 ],atrs={ x: '42' },name='br',start=11,stop=21,text='<br x=42/>',type='stag'#$key='^text',$vnr=[ 1, 22 ],start=21,stop=26,text='there'#$key='>tag',$vnr=[ 1, 27 ],name='p',start=26,stop=30,text='</p>',type='ctag'", null], ['<p>here and<br/>there</p>', "$key='<tag',$vnr=[ 1, 1 ],name='p',start=0,stop=3,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=11,text='here and'#$key='^tag',$vnr=[ 1, 12 ],name='br',start=11,stop=16,text='<br/>',type='stag'#$key='^text',$vnr=[ 1, 17 ],start=16,stop=21,text='there'#$key='>tag',$vnr=[ 1, 22 ],name='p',start=21,stop=25,text='</p>',type='ctag'", null], ['just some plain text', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=20,text='just some plain text'", null], ['<p>one<p>two', "$key='<tag',$vnr=[ 1, 1 ],name='p',start=0,stop=3,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=6,text='one'#$key='<tag',$vnr=[ 1, 7 ],name='p',start=6,stop=9,text='<p>',type='otag'#$key='^text',$vnr=[ 1, 10 ],start=9,stop=12,text='two'", null]];
+    grammar = HTML.grammar.new({
+      bare: true
+    });
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          return resolve(H.condense_tokens(grammar.parse(probe)));
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["HTML: parse (dubious)"] = async function(T, done) {
     var HTML, error, i, len, matcher, probe, probes_and_matchers;
     HTML = require('../../../apps/paragate/lib/htmlish.grammar');
@@ -1159,10 +1180,26 @@
   //###########################################################################################################
   //###########################################################################################################
   //###########################################################################################################
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo = function() {
+    var HTML, grammar;
+    HTML = require('../../../apps/paragate/lib/htmlish.grammar');
+    // grammar = HTML.grammar.new { bare: true, }
+    grammar = new HTML.new_grammar({
+      bare: true
+    });
+    urge(grammar.settings);
+    urge(grammar.parse(`<p>helo</p>`));
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => { // await do =>
-      return test(this);
+      // test @
+      // test @[ "HTML: parse bare" ]
+      return demo();
     })();
   }
 
