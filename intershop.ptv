@@ -23,6 +23,7 @@ intershop/mirage/dsk/readme                 ::url=                plain:${hengis
 intershop/mirage/dsk/interplot/svg-to-png   ::url=                plain:apps/interplot/svg-to-png
 
 
-
+intershop/rpc/host                  ::text=         127.0.0.1
+intershop/rpc/port                  ::integer=      23001
 
 
