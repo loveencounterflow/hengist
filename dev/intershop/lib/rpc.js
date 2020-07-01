@@ -57,13 +57,24 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["INTERSHOP-RPC basics"] = async function(T, done) {
-    var DATOM, DB, Rpc, rpc;
+    var DATOM, DB, Rpc, create_server_one_step, create_server_two_steps, rpc;
     Rpc = require('../../../apps/intershop-rpc');
     DB = require('../../../apps/intershop/intershop_modules/db');
     DATOM = require('../../../apps/datom');
-    rpc = new Rpc(23001);
-    // debug '^hengist@100^', "rpc:" rpc
-    await rpc.start();
+    //.........................................................................................................
+    create_server_two_steps = async function() {
+      var rpc;
+      rpc = new Rpc();
+      await rpc.start();
+      return rpc;
+    };
+    //.........................................................................................................
+    create_server_one_step = async function() {
+      return (await Rpc.create());
+    };
+    //.........................................................................................................
+    // rpc = await create_server_two_steps()
+    rpc = (await create_server_one_step());
     rpc.contract('^add-42', function(d) {
       var ref;
       help('^hengist@101^ contract', d);
@@ -96,14 +107,15 @@
         send: ''
       }
     ]);
-    T.eq((await DB.query(["select IPC.rpc( $1, $2 );", '^add-42', '{"x":1000}'])), [
+    /* TAINT should be `null` */    T.eq((await DB.query(["select IPC.rpc( $1, $2 );", '^add-42', '{"x":1000}'])), [
       {
         rpc: 1042
       }
     ]);
     T.eq((await DB.query_single(["select IPC.server_is_online()"])), true);
     T.eq((await DB.query_single(["select IPC.send( $1, $2 );", '^add-42', '{"x":1000}'])), '');
-    T.eq((await DB.query_single(["select IPC.rpc( $1, $2 );", '^add-42', '{"x":1000}'])), 1042);
+    /* TAINT should be `null` */    T.eq((await DB.query_single(["select IPC.rpc( $1, $2 );", '^add-42', '{"x":1000}'])), 1042);
+    info(rpc.counts);
     // debug '^hengist@112^', await DB.query [ "select * from IPC.send( $1, $2 );", '^add-42', '{"x":1000}' ]
     // debug '^hengist@113^', await DB.query [ "select * from CATALOG.catalog;", $key, ]
     // for row in await DB.query [ "select * from CATALOG.catalog order by schema, name;", ]
