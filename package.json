@@ -21,7 +21,9 @@
     "diff-match-patch": "^1.0.5",
     "drange": "^2.0.0",
     "exec-sh": "^0.3.4",
+    "executive": "^1.6.3",
     "guy-test": "^4.0.1",
+    "intershop-rpc": "^0.1.1",
     "intertext": "^2.3.0",
     "intertype": "^7.0.2",
     "jake": "^10.8.2",
@@ -31,6 +33,7 @@
     "pg": "^8.2.1",
     "pg-cursor": "^2.2.1",
     "stacktracey": "^1.2.127",
-    "steampipes": "^6.3.0"
+    "steampipes": "^6.3.0",
+    "text-metrics": "^2.0.1"
   }
 }
