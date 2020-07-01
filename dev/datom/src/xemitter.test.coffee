@@ -6,7 +6,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'DATOM/TESTS/SELECT'
+badge                     = 'DATOM/TESTS/XEMITTER'
 debug                     = CND.get_logger 'debug',     badge
 warn                      = CND.get_logger 'warn',      badge
 info                      = CND.get_logger 'info',      badge
@@ -18,25 +18,25 @@ echo                      = CND.echo.bind CND
 test                      = require 'guy-test'
 jr                        = JSON.stringify
 
-#-----------------------------------------------------------------------------------------------------------
-@[ "_" ] = ( T, done ) ->
-  DATOM                     = require '../../../apps/datom'
-  { new_datom
-    select }                = DATOM.export()
-  #.........................................................................................................
-  probes_and_matchers = [
-    [['^foo', { time: 1500000, value: "msg#1", }],{"time":1500000,"value":"msg#1","$key":"^foo"},null]
-    ]
-  #.........................................................................................................
-  for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      [ key, value, ] = probe
-      resolve new_datom key, value
-  done()
-  return null
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "_XEMITTER: _" ] = ( T, done ) ->
+#   DATOM                     = require '../../../apps/datom'
+#   { new_datom
+#     select }                = DATOM.export()
+#   #.........................................................................................................
+#   probes_and_matchers = [
+#     [['^foo', { time: 1500000, value: "msg#1", }],{"time":1500000,"value":"msg#1","$key":"^foo"},null]
+#     ]
+#   #.........................................................................................................
+#   for [ probe, matcher, error, ] in probes_and_matchers
+#     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+#       [ key, value, ] = probe
+#       resolve new_datom key, value
+#   done()
+#   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "public API shape" ] = ( T, done ) ->
+@[ "XEMITTER: public API shape" ] = ( T, done ) ->
   DATOM                     = require '../../../apps/datom'
   { new_datom
     new_xemitter
@@ -65,7 +65,7 @@ jr                        = JSON.stringify
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "emit equivalently accepts key, value or datom" ] = ( T, done ) ->
+@[ "XEMITTER: emit equivalently accepts key, value or datom" ] = ( T, done ) ->
   DATOM                     = require '../../../apps/datom'
   { new_datom
     new_xemitter
@@ -78,13 +78,24 @@ jr                        = JSON.stringify
     T.eq d, { $key: '^mykey', $value: 42, }
   await XE.emit '^mykey', 42
   await XE.emit new_datom '^mykey', 42
+  #.........................................................................................................
+  try await XE.emit { $value: 42, } catch error
+    pattern = /expected a text or a datom got a object/
+    if pattern.test error.message
+      T.ok true
+    else
+      T.fail "expected error to match #{pattern}, got #{rpr error.message}"
+      throw error
+  T.ok error?
+  #.........................................................................................................
+  await XE.emit { $key: '^mykey', $value: 42, }
   await XE.emit new_datom '^notmykey', 42
-  T.eq count, 2
+  T.eq count, 3
   done()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "throws when more than one contractor is added for given event key" ] = ( T, done ) ->
+@[ "XEMITTER: throws when more than one contractor is added for given event key" ] = ( T, done ) ->
   DATOM                     = require '../../../apps/datom'
   { new_datom
     new_xemitter
@@ -98,7 +109,7 @@ jr                        = JSON.stringify
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "can listen to events that have no specific listener" ] = ( T, done ) ->
+@[ "XEMITTER: can listen to events that have no specific listener" ] = ( T, done ) ->
   DATOM                     = require '../../../apps/datom'
   { new_datom
     new_xemitter
@@ -111,21 +122,41 @@ jr                        = JSON.stringify
     all:        []
     unheard:    []
   XE.listen_to          '^mykey',     ( d       ) ->  keys.listen   .push d.$key
-  XE.contract           '^otherkey',  ( d       ) ->  keys.contract .push d.$key
+  XE.contract           '^otherkey',  ( d       ) ->  keys.contract .push d.$key; return "some value"
   XE.listen_to_all                    ( key, d  ) ->  keys.all      .push d.$key
   XE.listen_to_unheard                ( key, d  ) ->  keys.unheard  .push d.$key
-  await XE.emit '^mykey'
-  await XE.emit '^otherkey'
-  await XE.emit '^thirdkey'
+  await XE.emit     '^mykey'
+  await XE.emit     '^otherkey'
+  await XE.emit     '^thirdkey'
+  await XE.delegate '^otherkey'
   # debug keys
   T.eq keys, {
-    listen:   [ '^mykey',                           ],
-    contract: [ '^otherkey',                        ],
-    all:      [ '^mykey', '^otherkey', '^thirdkey', ],
-    unheard:  [ '^thirdkey',                        ], }
+    listen:   [ '^mykey'                                        ],
+    contract: [ '^otherkey', '^otherkey'                        ],
+    all:      [ '^mykey', '^otherkey', '^thirdkey', '^otherkey' ],
+    unheard:  [ '^thirdkey'                                     ] }
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "XEMITTER: delegation" ] = ( T, done ) ->
+  DATOM                     = require '../../../apps/datom'
+  { new_datom
+    new_xemitter
+    select }                = DATOM.export()
+  XE                        = new_xemitter()
+  #.........................................................................................................
+  keys = { listen: [], all: [], contract: [] }
+  XE.listen_to          '^log',       ( d       ) ->  keys.listen   .push d.$key; urge d
+  XE.contract           '^add',       ( d       ) ->  keys.contract .push d.$key; return ( d?.a ? 0 ) + ( d?.b ? 0 )
+  XE.contract           '^multiply',  ( d       ) ->  keys.contract .push d.$key; return ( d?.a ? 1 ) * ( d?.b ? 1 )
+  XE.listen_to_all                    ( key, d  ) ->  keys.all      .push d.$key
+  await XE.emit     '^log', "message"
+  T.eq ( await XE.delegate '^add',      { a: 123, b: 456, } ), 579
+  T.eq ( await XE.delegate '^multiply', { a: 123, b: 456, } ), 56088
+  T.eq keys, { listen: [ '^log' ], all: [ '^log', '^add', '^multiply' ], contract: [ '^add', '^multiply' ] }
+  done()
+  return null
 
 
 
@@ -134,6 +165,10 @@ jr                        = JSON.stringify
 if require.main is module then do =>
   test @
   # test @[ "public API shape" ]
+  # test @[ "XEMITTER: can listen to events that have no specific listener" ]
+  # test @[ "XEMITTER: delegation" ]
+  # test @[ "can listen to events that have no specific listener 2" ]
+  # test @[ "emit equivalently accepts key, value or datom" ]
 
 
 
