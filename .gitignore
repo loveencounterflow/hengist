@@ -105,7 +105,8 @@ dist
 
 
 .peru
-intershop
+/intershop
+/dev/datamill/intershop
 apps/*
 
 # (D)MyPy temporary files
