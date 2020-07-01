@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/ops-hengist-experimental.coffee"
+  ],
+  "names": [],
+  "mappings": "AAC4B;EAAA;;AAAA",
+  "sourcesContent": [
+    "\n### extras for interplot ###\n\n\n\n"
+  ]
+}
