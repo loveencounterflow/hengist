@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, INTERTEXT, alert, badge, debug, demo, echo, help, info, isa, jr, lets, log, rpr, test, type_of, urge, warn, whisper;
+  var CND, H, INTERTEXT, alert, badge, debug, demo, demo_streaming, echo, help, info, isa, jr, lets, log, rpr, test, type_of, urge, warn, whisper;
 
   // coffeelint: disable=max_line_length
 
@@ -1179,6 +1179,241 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["HTML: $parse"] = function(T, done) {
+    var HTML, SP, pipeline, source;
+    SP = require('steampipes');
+    HTML = require('../../../apps/paragate/lib/htmlish.grammar');
+    //.........................................................................................................
+    source = ["<title>A Short Document</title>", "<p>The Nemean lion (<ipa>/nɪˈmiːən/</ipa>; Greek: <greek>Νεμέος λέων</greek> Neméos léōn; ", "Latin: Leo Nemeaeus) was a vicious monster in <a href='greek-mythology'>Greek mythology</a> ", "that lived at Nemea.", "</p>"];
+    pipeline = [];
+    pipeline.push(source);
+    pipeline.push(HTML.$parse());
+    pipeline.push(SP.$watch(function(d) {
+      return info(d);
+    }));
+    pipeline.push(SP.$drain(function(ds) {
+      var result;
+      result = H.delete_refs(ds);
+      T.eq(result, [
+        {
+          '$vnr': [1,
+        0],
+          '$key': '^newline'
+        },
+        {
+          '$key': '<tag',
+          name: 'title',
+          type: 'otag',
+          text: '<title>',
+          start: 0,
+          stop: 7,
+          '$vnr': [1,
+        1]
+        },
+        {
+          '$key': '^text',
+          start: 7,
+          stop: 23,
+          text: 'A Short Document',
+          '$vnr': [1,
+        8]
+        },
+        {
+          '$key': '>tag',
+          name: 'title',
+          type: 'ctag',
+          text: '</title>',
+          start: 23,
+          stop: 31,
+          '$vnr': [1,
+        24]
+        },
+        {
+          '$vnr': [2,
+        0],
+          '$key': '^newline'
+        },
+        {
+          '$key': '<tag',
+          name: 'p',
+          type: 'otag',
+          text: '<p>',
+          start: 0,
+          stop: 3,
+          '$vnr': [2,
+        1]
+        },
+        {
+          '$key': '^text',
+          start: 3,
+          stop: 20,
+          text: 'The Nemean lion (',
+          '$vnr': [2,
+        4]
+        },
+        {
+          '$key': '<tag',
+          name: 'ipa',
+          type: 'otag',
+          text: '<ipa>',
+          start: 20,
+          stop: 25,
+          '$vnr': [2,
+        21]
+        },
+        {
+          '$key': '^text',
+          start: 25,
+          stop: 35,
+          text: '/nɪˈmiːən/',
+          '$vnr': [2,
+        26]
+        },
+        {
+          '$key': '>tag',
+          name: 'ipa',
+          type: 'ctag',
+          text: '</ipa>',
+          start: 35,
+          stop: 41,
+          '$vnr': [2,
+        36]
+        },
+        {
+          '$key': '^text',
+          start: 41,
+          stop: 50,
+          text: '; Greek: ',
+          '$vnr': [2,
+        42]
+        },
+        {
+          '$key': '<tag',
+          name: 'greek',
+          type: 'otag',
+          text: '<greek>',
+          start: 50,
+          stop: 57,
+          '$vnr': [2,
+        51]
+        },
+        {
+          '$key': '^text',
+          start: 57,
+          stop: 68,
+          text: 'Νεμέος λέων',
+          '$vnr': [2,
+        58]
+        },
+        {
+          '$key': '>tag',
+          name: 'greek',
+          type: 'ctag',
+          text: '</greek>',
+          start: 68,
+          stop: 76,
+          '$vnr': [2,
+        69]
+        },
+        {
+          '$key': '^text',
+          start: 76,
+          stop: 90,
+          text: ' Neméos léōn; ',
+          '$vnr': [2,
+        77]
+        },
+        {
+          '$vnr': [3,
+        0],
+          '$key': '^newline'
+        },
+        {
+          '$key': '^text',
+          start: 0,
+          stop: 46,
+          text: 'Latin: Leo Nemeaeus) was a vicious monster in ',
+          '$vnr': [3,
+        1]
+        },
+        {
+          '$key': '<tag',
+          name: 'a',
+          type: 'otag',
+          text: "<a href='greek-mythology'>",
+          start: 46,
+          stop: 72,
+          atrs: {
+            href: "'greek-mythology'"
+          },
+          '$vnr': [3,
+        47]
+        },
+        {
+          '$key': '^text',
+          start: 72,
+          stop: 87,
+          text: 'Greek mythology',
+          '$vnr': [3,
+        73]
+        },
+        {
+          '$key': '>tag',
+          name: 'a',
+          type: 'ctag',
+          text: '</a>',
+          start: 87,
+          stop: 91,
+          '$vnr': [3,
+        88]
+        },
+        {
+          '$key': '^text',
+          start: 91,
+          stop: 92,
+          text: ' ',
+          '$vnr': [3,
+        92]
+        },
+        {
+          '$vnr': [4,
+        0],
+          '$key': '^newline'
+        },
+        {
+          '$key': '^text',
+          start: 0,
+          stop: 20,
+          text: 'that lived at Nemea.',
+          '$vnr': [4,
+        1]
+        },
+        {
+          '$vnr': [5,
+        0],
+          '$key': '^newline'
+        },
+        {
+          '$key': '>tag',
+          name: 'p',
+          type: 'ctag',
+          text: '</p>',
+          start: 0,
+          stop: 4,
+          '$vnr': [5,
+        1]
+        }
+      ]);
+      return done();
+    }));
+    SP.pull(...pipeline);
+    return null;
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["HTML: parse (dubious)"] = async function(T, done) {
     var HTML, error, i, len, matcher, probe, probes_and_matchers;
     HTML = require('../../../apps/paragate/lib/htmlish.grammar');
@@ -1637,6 +1872,28 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_streaming = function() {
+    return new Promise(function(resolve) {
+      var HTML, SP, pipeline, source;
+      SP = require('steampipes');
+      HTML = require('../../../apps/paragate/lib/htmlish.grammar');
+      //.........................................................................................................
+      source = ["<title>A Short Document</title>", "<p>The Nemean lion (<ipa>/nɪˈmiːən/</ipa>; Greek: <greek>Νεμέος λέων</greek> Neméos léōn; ", "Latin: Leo Nemeaeus) was a vicious monster in <a href='greek-mythology'>Greek mythology</a> ", "that lived at Nemea.", "</p>"];
+      pipeline = [];
+      pipeline.push(source);
+      pipeline.push(HTML.$parse());
+      pipeline.push(SP.$watch(function(d) {
+        return info(d);
+      }));
+      pipeline.push(SP.$drain(function() {
+        return resolve();
+      }));
+      SP.pull(...pipeline);
+      return null;
+    });
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => { // await do =>
@@ -1646,6 +1903,7 @@
 
   // test @[ "HTML: parse bare" ]
 // demo()
+// await demo_streaming()
 
 }).call(this);
 
