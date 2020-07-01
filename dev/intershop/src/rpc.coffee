@@ -47,9 +47,16 @@ test                      = require 'guy-test'
   Rpc                       = require '../../../apps/intershop-rpc'
   DB                        = require '../../../apps/intershop/intershop_modules/db'
   DATOM                     = require '../../../apps/datom'
-  rpc                       = new Rpc 23001
-  # debug '^hengist@100^', "rpc:" rpc
-  await rpc.start()
+  #.........................................................................................................
+  create_server_two_steps = ->
+    rpc = new Rpc()
+    await rpc.start()
+    return rpc
+  #.........................................................................................................
+  create_server_one_step = -> await Rpc.create()
+  #.........................................................................................................
+  # rpc = await create_server_two_steps()
+  rpc = await create_server_one_step()
   rpc.contract '^add-42', (       d ) -> help '^hengist@101^ contract', d; return ( ( d ? {} ).x ? 0 ) + 42
   rpc.listen_to_all       ( key,  d ) -> urge "^hengist@102^ listen_to_all     ", d
   rpc.listen_to_unheard   ( key,  d ) -> warn "^hengist@103^ listen_to_unheard ", d
@@ -61,11 +68,12 @@ test                      = require 'guy-test'
   T.eq ( await rpc.delegate DATOM.new_datom '^add-42', 123          ), 42
   T.eq ( await rpc.delegate DATOM.new_datom '^add-42', { x: 123, }  ), 165
   T.eq ( await DB.query         [ "select IPC.server_is_online()"                       ] ), [ { server_is_online: true } ]
-  T.eq ( await DB.query         [ "select IPC.send( $1, $2 );", '^add-42', '{"x":1000}' ] ), [ { send: '' } ]
+  T.eq ( await DB.query         [ "select IPC.send( $1, $2 );", '^add-42', '{"x":1000}' ] ), [ { send: '' } ] ### TAINT should be `null` ###
   T.eq ( await DB.query         [ "select IPC.rpc( $1, $2 );", '^add-42', '{"x":1000}'  ] ), [ { rpc: 1042 } ]
   T.eq ( await DB.query_single  [ "select IPC.server_is_online()"                       ] ), true
-  T.eq ( await DB.query_single  [ "select IPC.send( $1, $2 );", '^add-42', '{"x":1000}' ] ), ''
+  T.eq ( await DB.query_single  [ "select IPC.send( $1, $2 );", '^add-42', '{"x":1000}' ] ), '' ### TAINT should be `null` ###
   T.eq ( await DB.query_single  [ "select IPC.rpc( $1, $2 );", '^add-42', '{"x":1000}'  ] ), 1042
+  info rpc.counts
 
 
 
