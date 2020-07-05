@@ -207,12 +207,12 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["_INTERTEXT.SLABS.slabjoints_from_text 2"] = async function(T, done) {
+  this["INTERTEXT.SLABS.slabjoints_from_text 2"] = async function(T, done) {
     var INTERTEXT, error, i, len, matcher, probe, probes_and_matchers;
     INTERTEXT = require('../../../apps/intertext');
     probes_and_matchers = [
       [
-        "A consummation, devoutly to be wished.",
+        "Tis a consummation, devoutly to be wished.",
         {
           segments: [],
           version: '0.0.1',
@@ -230,8 +230,12 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
+          var result;
           probe = INTERTEXT.HYPH.hyphenate(probe);
-          return resolve(INTERTEXT.SLABS.slabjoints_from_text(probe));
+          result = INTERTEXT.SLABS.slabjoints_from_text(probe);
+          debug('^337637^', INTERTEXT.HYPH.reveal_hyphens(probe));
+          help('^337637^', CND.inspect(result));
+          return resolve(result);
         });
       });
     }
@@ -337,12 +341,12 @@
   if (module === require.main) {
     (() => { // await do =>
       // await @_demo()
-      return test(this);
+      // test @
+      return test(this["INTERTEXT.SLABS.slabjoints_from_text 2"]);
     })();
   }
 
-  // test @[ "INTERTEXT.SLABS.slabjoints_from_text 2" ]
-// test @[ "INTERTEXT.SLABS.slabjoints_from_text" ]
+  // test @[ "INTERTEXT.SLABS.slabjoints_from_text 1" ]
 // test @[ "INTERTEXT.SLABS.assemble (3)" ]
 // test @[ "INTERTEXT.SLABS.assemble (4)" ]
 
