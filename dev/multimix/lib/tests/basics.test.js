@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var CND, alert, badge, debug, echo, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper;
+  var CND, alert, badge, debug, echo, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper,
+    boundMethodCheck = function(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new Error('Bound instance method accessed before binding'); } };
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -200,13 +201,139 @@
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["bound methods"] = function(T, done) {
+    var A, B, C, D, Multimix, a, b, c, d, error, fatarrow, frob, k, slimarrow;
+    Multimix = require('../../../../apps/multimix');
+    A = (function() {
+      //.........................................................................................................
+      class A extends Multimix {
+        constructor(settings) {
+          var k;
+          super();
+          debug('^3344^', 'A', (function() {
+            var results;
+            results = [];
+            for (k in this) {
+              results.push(k);
+            }
+            return results;
+          }).call(this));
+        }
+
+        frob() {
+          return echo(`frob: @myprop: ${this.myprop}`);
+        }
+
+      };
+
+      A.prototype.myprop = "a property";
+
+      return A;
+
+    }).call(this);
+    B = (function() {
+      //.........................................................................................................
+      class B extends A {
+        constructor(settings) {
+          var k;
+          super();
+          this.settings = {...this.defaults, ...settings};
+          debug('^3344^', 'B', (function() {
+            var results;
+            results = [];
+            for (k in this) {
+              results.push(k);
+            }
+            return results;
+          }).call(this));
+          debug('^3344^', 'B', (function() {
+            var results;
+            results = [];
+            for (k in this.prototype) {
+              results.push(k);
+            }
+            return results;
+          }).call(this));
+          this.export(this);
+/* <-- should we always bind all methods? */          return this;
+        }
+
+      };
+
+      B.prototype.defaults = {
+        drab: 'anything'
+      };
+
+      B.prototype.foobar = 42;
+
+      return B;
+
+    }).call(this);
+    C = (function() {
+      //.........................................................................................................
+      class C extends Multimix {
+        constructor() {
+          super(...arguments);
+          this.fatarrow = this.fatarrow.bind(this);
+        }
+
+        fatarrow() {
+          boundMethodCheck(this, C);
+          return echo(`@myproperty: ${this.myproperty}`);
+        }
+
+        slimarrow() {
+          return echo(`@myproperty: ${this.myproperty}`);
+        }
+
+      };
+
+      C.prototype.myproperty = "-=(#)=-";
+
+      return C;
+
+    }).call(this);
+    D = class D extends C {};
+    //.........................................................................................................
+    a = new A();
+    b = new B();
+    urge('^458^', (function() {
+      var results;
+      results = [];
+      for (k in b) {
+        results.push(k);
+      }
+      return results;
+    })());
+    b.frob();
+    ({frob} = b);
+    frob();
+    c = new C();
+    ({fatarrow, slimarrow} = c);
+    fatarrow();
+    try {
+      slimarrow();
+    } catch (error1) {
+      error = error1;
+      warn(error.message);
+    }
+    d = new D();
+    urge('^3536^', c.fatarrow === d.fatarrow);
+    urge('^3536^', c.slimarrow === d.slimarrow);
+    //.........................................................................................................
+    return done();
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @
-      return test(this["multimix.new()"]);
+      return test(this);
     })();
   }
+
+  // test @[ "multimix.new()" ]
+// test @[ "bound methods" ]
 
 }).call(this);
 

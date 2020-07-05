@@ -139,14 +139,48 @@
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["inspect"] = function(T, done) {
+    var inspect;
+    inspect = CND.inspect.bind(CND);
+    echo(inspect(42));
+    echo(inspect(42_000_000_000));
+    echo(inspect({
+      foo: 'bar',
+      bar: [true, null, void 0]
+    }));
+    info(inspect(42));
+    info(inspect(42_000_000_000));
+    info(inspect({
+      foo: 'bar',
+      bar: [true, null, void 0]
+    }));
+    echo(rpr(inspect(42)));
+    echo(rpr(inspect(42_000_000_000)));
+    echo(rpr(inspect({
+      foo: 'bar',
+      bar: [true, null, void 0]
+    })));
+    T.eq(inspect(42), '\x1B[33m42\x1B[39m');
+    T.eq(inspect(42_000_000_000), '\x1B[33m42000000000\x1B[39m');
+    T.eq(inspect({
+      foo: 'bar',
+      bar: [true, null, void 0]
+    }), "{\n  foo: \x1B[32m'bar'\x1B[39m,\n  bar: [\n    \x1B[33mtrue\x1B[39m,\n    \x1B[1mnull\x1B[22m,\n    \x1B[90mundefined\x1B[39m\n  ]\n}");
+    return done();
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     test(this, {
-      'timeout': 2500
+      timeout: 2500
     });
   }
 
   // test @[ "path methods" ]
 // test @[ "rpr" ]
+// test @[ "inspect" ]
 
 }).call(this);
+
+//# sourceMappingURL=tests.js.map

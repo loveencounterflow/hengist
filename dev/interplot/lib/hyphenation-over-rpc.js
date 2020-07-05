@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, alert, badge, cast, debug, echo, help, info, isa, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var CND, alert, badge, cast, debug, echo, help, info, isa, psql_run_file, rpr, serve, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -51,13 +51,68 @@
   //   return null
 
   //-----------------------------------------------------------------------------------------------------------
-  this._serve = async function() {
-    var DATOM, DB, Rpc, rpc;
+  serve = async function() {
+    var IX, Rpc, after, hyphenate, rpc, slabs_from_text;
     Rpc = require('../../../apps/intershop-rpc');
-    DB = require('../../../apps/intershop/intershop_modules/db');
-    DATOM = require('../../../apps/datom');
-    rpc = new Rpc(23001);
-    return (await rpc.start());
+    // DB                        = require '../../../apps/intershop/intershop_modules/db'
+    // DATOM                     = require '../../../apps/datom'
+    IX = require('../../../apps/intertext');
+    after = function(time_s, f) {
+      return setTimeout(f, time_s * 1000);
+    };
+    //.........................................................................................................
+    rpc = (await Rpc.create({
+      show_counts: true,
+      count_interval: 1
+    }));
+    //.........................................................................................................
+    rpc.contract('^hyphenate', function(d) {
+      return hyphenate(d.$value);
+    });
+    rpc.contract('^slabs_from_text', function(d) {
+      return slabs_from_text(d.$value);
+    });
+    rpc.contract('^shyphenate', function(d) {
+      return slabs_from_text(hyphenate(d.$value));
+    });
+    // debug '^447^', rpr text
+    //.........................................................................................................
+    hyphenate = function(text) {
+      validate.text(text);
+      return IX.HYPH.hyphenate(text);
+    };
+    //.........................................................................................................
+    return slabs_from_text = function(text) {
+      validate.text(text);
+      return IX.SLABS.slabs_from_text(text);
+    };
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  psql_run_file = function(cwd, path) {
+    return new Promise((resolve, reject) => {
+      /* TAINT must properly escape path literal */
+      var CP, command, cp, settings;
+      CP = require('child_process');
+      command = `psql -U interplot -d interplot -f \"${path}\"`;
+      whisper('^psql_run_file@3366^', path);
+      settings = {
+        cwd: cwd,
+        shell: true,
+        stdio: ['inherit', 'inherit', 'inherit']
+      };
+      cp = CP.spawn(command, null, settings);
+      cp.on('close', function(code) {
+        if (code === 0) {
+          return resolve(0);
+        }
+        return reject(new Error(`^psql_run_file@34478^ processs exited with code ${code}`));
+      });
+      cp.on('error', function(error) {
+        return reject(error);
+      });
+      return null;
+    });
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -126,56 +181,27 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["INTERPLOT hyphenation"] = async function(T, done) {
-    var CP, DATOM, DB, Rpc, after, command, cp, rpc, settings;
-    Rpc = require('../../../apps/intershop-rpc');
-    DB = require('../../../apps/intershop/intershop_modules/db');
-    DATOM = require('../../../apps/datom');
-    CP = require('child_process');
-    after = function(time_s, f) {
-      return setTimeout(f, time_s * 1000);
-    };
-    //.........................................................................................................
-    rpc = (await Rpc.create({
-      show_counts: true,
-      count_interval: 1
-    }));
-    //.........................................................................................................
-    rpc.contract('^hyphenate', function(d) {
-      var text;
-      // debug '^447^', rpr text
-      validate.text(text = d.$value);
-      return (text.split(/\s+/)).join('-');
-    });
-    //.........................................................................................................
-    command = `psql -U interplot -d interplot -f "db/100-harfbuzz.sql" `;
-    settings = {
-      cwd: '/home/flow/jzr/interplot/',
-      shell: true,
-      stdio: ['inherit', 'inherit', 'inherit']
-    };
-    cp = CP.spawn(command, null, settings);
+    await serve();
+    await psql_run_file('/home/flow/jzr/interplot', 'db/080-intertext.sql');
+    await psql_run_file('/home/flow/jzr/interplot', 'db/100-harfbuzz.sql');
     // cp.stdout.on 'data', ( data ) ->
     //   data = data.toString 'utf-8'
     //   help rpr data
     // cp.stdout.on 'error', ( error ) -> warn "stdout.on 'error'  ", rpr error
     // cp.stderr.on 'data',  ( data )  -> warn "stderr.on 'data'   ", rpr data.toString 'utf-8'
     // cp.stderr.on 'error', ( error ) -> warn "stderr.on 'error'  ", rpr error
-    return after(3, function() {
-      help('ok');
-      return done();
-    });
+    return done();
   };
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // test @
-      // @_serve()
-      return test(this["INTERPLOT hyphenation"], {
-        timeout: 5000
-      });
+      return serve();
     })();
   }
+
+  // test @[ "INTERPLOT hyphenation" ], { timeout: 5000, }
 
 }).call(this);
 
