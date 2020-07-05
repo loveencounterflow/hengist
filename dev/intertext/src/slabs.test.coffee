@@ -66,15 +66,18 @@ types                     = new ( require 'intertype' ).Intertype()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "_INTERTEXT.SLABS.slabjoints_from_text 2" ] = ( T, done ) ->
+@[ "INTERTEXT.SLABS.slabjoints_from_text 2" ] = ( T, done ) ->
   INTERTEXT = require '../../../apps/intertext'
   probes_and_matchers = [
-    [ "A consummation, devoutly to be wished.", { segments: [], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 0 }, null ]
+    [ "Tis a consummation, devoutly to be wished.", { segments: [], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 0 }, null ]
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      probe = INTERTEXT.HYPH.hyphenate probe
-      resolve INTERTEXT.SLABS.slabjoints_from_text probe
+      probe   = INTERTEXT.HYPH.hyphenate probe
+      result  = INTERTEXT.SLABS.slabjoints_from_text probe
+      debug '^337637^', INTERTEXT.HYPH.reveal_hyphens probe
+      help '^337637^', CND.inspect result
+      resolve result
   #.........................................................................................................
   done()
   return null
@@ -174,9 +177,9 @@ types                     = new ( require 'intertype' ).Intertype()
 ############################################################################################################
 if module is require.main then do => # await do =>
   # await @_demo()
-  test @
-  # test @[ "INTERTEXT.SLABS.slabjoints_from_text 2" ]
-  # test @[ "INTERTEXT.SLABS.slabjoints_from_text" ]
+  # test @
+  test @[ "INTERTEXT.SLABS.slabjoints_from_text 2" ]
+  # test @[ "INTERTEXT.SLABS.slabjoints_from_text 1" ]
   # test @[ "INTERTEXT.SLABS.assemble (3)" ]
   # test @[ "INTERTEXT.SLABS.assemble (4)" ]
 
