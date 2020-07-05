@@ -137,8 +137,53 @@ test                      = require 'guy-test'
   #.........................................................................................................
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "bound methods" ] = ( T, done ) ->
+  Multimix                  = require '../../../../apps/multimix'
+  #.........................................................................................................
+  class A extends Multimix
+    myprop: "a property"
+    constructor: ( settings ) ->
+      super()
+      debug '^3344^', 'A', ( k for k of @ )
+    frob: -> echo "frob: @myprop: #{@myprop}"
+  #.........................................................................................................
+  class B extends A
+    defaults: { drab: 'anything', }
+    foobar:   42
+    constructor: ( settings ) ->
+      super()
+      @settings = { @defaults..., settings..., }
+      debug '^3344^', 'B', ( k for k of @ )
+      debug '^3344^', 'B', ( k for k of @:: )
+      @export @ ### <-- should we always bind all methods? ###
+      return @
+  #.........................................................................................................
+  class C extends Multimix
+    myproperty: "-=(#)=-"
+    fatarrow:   => echo "@myproperty: #{@myproperty}"
+    slimarrow:  -> echo "@myproperty: #{@myproperty}"
+  class D extends C
+  #.........................................................................................................
+  a = new A()
+  b = new B()
+  urge '^458^', ( k for k of b )
+  b.frob()
+  { frob, } = b
+  frob()
+  c = new C()
+  { fatarrow, slimarrow, } = c
+  fatarrow()
+  try slimarrow() catch error then warn error.message
+  d = new D()
+  urge '^3536^', c.fatarrow is d.fatarrow
+  urge '^3536^', c.slimarrow is d.slimarrow
+  #.........................................................................................................
+  done()
+
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @
-  test @[ "multimix.new()" ]
+  test @
+  # test @[ "multimix.new()" ]
+  # test @[ "bound methods" ]

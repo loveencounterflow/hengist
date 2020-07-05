@@ -100,6 +100,23 @@ test                      = require 'guy-test'
   T.eq ( rpr { foo: 'bar', bar: [ true, null, undefined, ], } ), """{ foo: 'bar', bar: [ true, null, undefined ] }"""
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "inspect" ] = ( T, done ) ->
+  inspect = CND.inspect.bind CND
+  echo inspect 42
+  echo inspect 42_000_000_000
+  echo inspect { foo: 'bar', bar: [ true, null, undefined, ], }
+  info inspect 42
+  info inspect 42_000_000_000
+  info inspect { foo: 'bar', bar: [ true, null, undefined, ], }
+  echo rpr ( inspect 42                                               )
+  echo rpr ( inspect 42_000_000_000                                   )
+  echo rpr ( inspect { foo: 'bar', bar: [ true, null, undefined, ], } )
+  T.eq ( inspect 42                                               ), '\x1B[33m42\x1B[39m'
+  T.eq ( inspect 42_000_000_000                                   ), '\x1B[33m42000000000\x1B[39m'
+  T.eq ( inspect { foo: 'bar', bar: [ true, null, undefined, ], } ), "{\n  foo: \x1B[32m'bar'\x1B[39m,\n  bar: [\n    \x1B[33mtrue\x1B[39m,\n    \x1B[1mnull\x1B[22m,\n    \x1B[90mundefined\x1B[39m\n  ]\n}"
+  done()
+
 
 
 
@@ -108,9 +125,10 @@ test                      = require 'guy-test'
 
 ############################################################################################################
 unless module.parent?
-  test @, 'timeout': 2500
+  test @, { timeout: 2500, }
   # test @[ "path methods" ]
   # test @[ "rpr" ]
+  # test @[ "inspect" ]
 
 
 

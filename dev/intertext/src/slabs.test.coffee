@@ -22,28 +22,59 @@ DATOM                     = new ( require 'datom' ).Datom { dirty: false, }
   select }                = DATOM.export()
 #...........................................................................................................
 test                      = require 'guy-test'
+types                     = new ( require 'intertype' ).Intertype()
+{ isa
+  validate
+  cast
+  type_of }               = types
 
 
 #===========================================================================================================
 # TESTS
 #-----------------------------------------------------------------------------------------------------------
-@[ "INTERTEXT.SLABS.slabs_from_text" ] = ( T, done ) ->
+@[ "INTERTEXT.SLABS API" ] = ( T, done ) ->
+  INTERTEXT = require '../../../apps/intertext'
+  #.........................................................................................................
+  # CAT = require 'multimix/lib/cataloguing'
+  # debug CAT.all_keys_of INTERTEXT.SLABS
+  T.ok isa.undefined  INTERTEXT.SLABS.slabs_from_text
+  T.ok isa.function   INTERTEXT.SLABS.slabjoints_from_text
+  T.ok isa.function   INTERTEXT.SLABS.assemble
+  T.ok isa.object     INTERTEXT.SLABS.settings
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "INTERTEXT.SLABS.slabjoints_from_text 1" ] = ( T, done ) ->
   INTERTEXT = require '../../../apps/intertext'
   probes_and_matchers = [
-    ["",{"slabs":[],"ends":""},null]
-    ["a very fine day",{"slabs":["a","very","fine","day"],"ends":"___x"},null]
-    ["a cro­mu­lent so­lu­tion",{"slabs":["a","cro","mu","lent","so","lu","tion"],"ends":"_||_||x"},null]
-    ["䷾Letterpress printing",{"slabs":["䷾Letterpress","printing"],"ends":"_x"},null]
-    ["ベルリンBerlin",{"slabs":["ベ","ル","リ","ン","Berlin"],"ends":"xxxxx"},null]
-    ["其法用膠泥刻字、薄如錢唇",{"slabs":["其","法","用","膠","泥","刻","字、","薄","如","錢","唇"],"ends":"xxxxxxxxxxx"},null]
-    ["over-guess­ti­mate",{"slabs":["over-","guess","ti","mate"],"ends":"x||x"},null]
+    [ '', { segments: [], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 0 }, null ]
+    [ 'a very fine day', { segments: [ 'a°', 'very°', 'fine°', 'day#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 4 }, null ]
+    [ 'a cro^mu^lent so^lu^tion', { segments: [ 'a°', 'cro=', 'mu=', 'lent°', 'so=', 'lu=', 'tion#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 7 }, null ]
+    [ '䷾Letterpress printing', { segments: [ '䷾Letterpress°', 'printing#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 2 }, null ]
+    [ 'ベルリンBerlin', { segments: [ 'ベ#', 'ル#', 'リ#', 'ン#', 'Berlin#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 5 }, null ]
+    [ '其法用膠泥刻字、薄如錢唇', { segments: [ '其#', '法#', '用#', '膠#', '泥#', '刻#', '字、#', '薄#', '如#', '錢#', '唇#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 11 }, null ]
+    [ 'over-guess^ti^mate', { segments: [ 'over-#', 'guess=', 'ti=', 'mate#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 4 }, null ]
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      # debug '^44453^', INTERTEXT.HYPH.new_hyphenator()
-      # debug '^44453^', INTERTEXT.HYPH.reveal_hyphens INTERTEXT.HYPH.new_hyphenator() 'fantastic'
-      # debug '^777801^', INTERTEXT.SLABS.slabs_from_text probe
-      resolve INTERTEXT.SLABS.slabs_from_text probe
+      probe = probe.replace /\^/g, INTERTEXT.HYPH.soft_hyphen_chr
+      resolve INTERTEXT.SLABS.slabjoints_from_text probe
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "_INTERTEXT.SLABS.slabjoints_from_text 2" ] = ( T, done ) ->
+  INTERTEXT = require '../../../apps/intertext'
+  probes_and_matchers = [
+    [ "A consummation, devoutly to be wished.", { segments: [], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 0 }, null ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      probe = INTERTEXT.HYPH.hyphenate probe
+      resolve INTERTEXT.SLABS.slabjoints_from_text probe
   #.........................................................................................................
   done()
   return null
@@ -61,7 +92,7 @@ test                      = require 'guy-test'
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      resolve INTERTEXT.SLABS.assemble INTERTEXT.SLABS.slabs_from_text probe
+      resolve INTERTEXT.SLABS.assemble INTERTEXT.SLABS.slabjoints_from_text probe
   #.........................................................................................................
   done()
   return null
@@ -72,7 +103,7 @@ test                      = require 'guy-test'
   probes_and_matchers = [
     ["","",null]
     ["a very fine day","fine day",null]
-    ["a cro­mu­lent so­lu­tion","mulent solu-",null]
+    ["a cro^mu^lent so^lu^tion","mulent solu-",null]
     ["䷾Letterpress printing","",null]
     ["ベルリンBerlin","リンBerlin",null]
     ["其法用膠泥刻字、薄如錢唇","用膠泥刻",null]
@@ -80,7 +111,8 @@ test                      = require 'guy-test'
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      slb = INTERTEXT.SLABS.slabs_from_text probe
+      probe = probe.replace /\^/g, INTERTEXT.HYPH.soft_hyphen_chr
+      slb   = INTERTEXT.SLABS.slabjoints_from_text probe
       resolve INTERTEXT.SLABS.assemble slb, 2, 5
   #.........................................................................................................
   done()
@@ -104,14 +136,14 @@ test                      = require 'guy-test'
     "a very fine day for a cromulent solu-"
     "a very fine day for a cromulent solution"
     ]
-  slb     = INTERTEXT.SLABS.slabs_from_text probe
-  info slb
-  result  = ( INTERTEXT.SLABS.assemble slb, 0, idx for idx in [ 0 ... slb.slabs.length ] )
+  slabjoints  = INTERTEXT.SLABS.slabjoints_from_text probe
+  info slabjoints
+  result      = ( INTERTEXT.SLABS.assemble slabjoints, 0, idx for idx in [ 0 ... slabjoints.size ] )
   for line, idx in result
     echo ( CND.white line.padEnd 50 ), idx, line.length
   idx_1 = 11
-  for idx_2 in [ idx_1 ... slb.slabs.length ]
-    line = INTERTEXT.SLABS.assemble slb, idx_1, idx_2
+  for idx_2 in [ idx_1 ... slabjoints.size ]
+    line = INTERTEXT.SLABS.assemble slabjoints, idx_1, idx_2
     idx_1_txt = ( "#{idx_1}".padEnd 5 )
     idx_2_txt = ( "#{idx_2}".padEnd 5 )
     echo ( CND.yellow line.padEnd 50 ), idx_1_txt, idx_2_txt, line.length
@@ -130,8 +162,8 @@ test                      = require 'guy-test'
     "over-guessti-"
     "over-guesstimate"
     ]
-  slb     = INTERTEXT.SLABS.slabs_from_text probe
-  result  = ( INTERTEXT.SLABS.assemble slb, 0, idx for idx in [ 0 ... slb.slabs.length ] )
+  slabjoints  = INTERTEXT.SLABS.slabjoints_from_text probe
+  result      = ( INTERTEXT.SLABS.assemble slabjoints, 0, idx for idx in [ 0 ... slabjoints.size ] )
   help jr result
   T.eq result, matcher
   done()
@@ -143,5 +175,12 @@ test                      = require 'guy-test'
 if module is require.main then do => # await do =>
   # await @_demo()
   test @
-  help 'ok'
-  # test @[ "demo" ]
+  # test @[ "INTERTEXT.SLABS.slabjoints_from_text 2" ]
+  # test @[ "INTERTEXT.SLABS.slabjoints_from_text" ]
+  # test @[ "INTERTEXT.SLABS.assemble (3)" ]
+  # test @[ "INTERTEXT.SLABS.assemble (4)" ]
+
+
+
+
+

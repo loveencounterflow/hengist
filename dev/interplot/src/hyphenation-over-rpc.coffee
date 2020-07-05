@@ -41,12 +41,44 @@ test                      = require 'guy-test'
 #   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@_serve = ->
+serve = ->
   Rpc                       = require '../../../apps/intershop-rpc'
-  DB                        = require '../../../apps/intershop/intershop_modules/db'
-  DATOM                     = require '../../../apps/datom'
-  rpc                       = new Rpc 23001
-  await rpc.start()
+  # DB                        = require '../../../apps/intershop/intershop_modules/db'
+  # DATOM                     = require '../../../apps/datom'
+  IX                        = require '../../../apps/intertext'
+  after                     = ( time_s, f ) -> setTimeout f, time_s * 1000
+  #.........................................................................................................
+  rpc = await Rpc.create { show_counts: true, count_interval: 1, }
+  #.........................................................................................................
+  rpc.contract '^hyphenate',        ( d ) -> hyphenate d.$value
+  rpc.contract '^slabs_from_text',  ( d ) -> slabs_from_text d.$value
+  rpc.contract '^shyphenate',       ( d ) -> slabs_from_text hyphenate d.$value
+    # debug '^447^', rpr text
+  #.........................................................................................................
+  hyphenate = ( text ) ->
+    validate.text text
+    return IX.HYPH.hyphenate text
+  #.........................................................................................................
+  slabs_from_text = ( text ) ->
+    validate.text text
+    return IX.SLABS.slabs_from_text text
+
+#-----------------------------------------------------------------------------------------------------------
+psql_run_file = ( cwd, path ) -> new Promise ( resolve, reject ) =>
+  CP                        = require 'child_process'
+  ### TAINT must properly escape path literal ###
+  command   = "psql -U interplot -d interplot -f \"#{path}\""
+  whisper '^psql_run_file@3366^', path
+  settings  =
+    cwd:    cwd
+    shell:  true
+    stdio:  [ 'inherit', 'inherit', 'inherit', ]
+  cp        = CP.spawn command, null, settings
+  cp.on 'close', ( code   ) ->
+    return resolve 0 if code is 0
+    reject new Error "^psql_run_file@34478^ processs exited with code #{code}"
+  cp.on 'error', ( error  ) -> reject error
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "INTERSHOP-RPC basics" ] = ( T, done ) ->
@@ -84,38 +116,21 @@ test                      = require 'guy-test'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "INTERPLOT hyphenation" ] = ( T, done ) ->
-  Rpc                       = require '../../../apps/intershop-rpc'
-  DB                        = require '../../../apps/intershop/intershop_modules/db'
-  DATOM                     = require '../../../apps/datom'
-  CP                        = require 'child_process'
-  after                     = ( time_s, f ) -> setTimeout f, time_s * 1000
-  #.........................................................................................................
-  rpc = await Rpc.create { show_counts: true, count_interval: 1, }
-  #.........................................................................................................
-  rpc.contract '^hyphenate', ( d ) ->
-    # debug '^447^', rpr text
-    validate.text text = d.$value
-    return ( text.split /\s+/ ).join '-'
-  #.........................................................................................................
-  command   = """psql -U interplot -d interplot -f "db/100-harfbuzz.sql" """
-  settings  =
-    cwd:    '/home/flow/jzr/interplot/'
-    shell:  true
-    stdio:  [ 'inherit', 'inherit', 'inherit', ]
-  cp        = CP.spawn command, null, settings
+  await serve()
+  await psql_run_file '/home/flow/jzr/interplot', 'db/080-intertext.sql'
+  await psql_run_file '/home/flow/jzr/interplot', 'db/100-harfbuzz.sql'
   # cp.stdout.on 'data', ( data ) ->
   #   data = data.toString 'utf-8'
   #   help rpr data
   # cp.stdout.on 'error', ( error ) -> warn "stdout.on 'error'  ", rpr error
   # cp.stderr.on 'data',  ( data )  -> warn "stderr.on 'data'   ", rpr data.toString 'utf-8'
   # cp.stderr.on 'error', ( error ) -> warn "stderr.on 'error'  ", rpr error
-  after 3, -> help 'ok'; done()
-
+  done()
 
 
 ############################################################################################################
 if module is require.main then do =>
   # test @
-  # @_serve()
-  test @[ "INTERPLOT hyphenation" ], { timeout: 5000, }
+  serve()
+  # test @[ "INTERPLOT hyphenation" ], { timeout: 5000, }
 
