@@ -14,7 +14,6 @@ urge                      = CND.get_logger 'urge',      badge
 info                      = CND.get_logger 'info',      badge
 FS                        = require 'fs'
 PATH                      = require 'path'
-SMR                       = require 'source-map-resolve'
 SMC                       = require 'source-map'
 StackTracey               = require 'stacktracey'
 types                     = new ( require 'intertype' ).Intertype()
@@ -26,6 +25,7 @@ read_file_sync = ( path ) -> FS.readFileSync path, { encoding: 'utf-8', }
 
 #-----------------------------------------------------------------------------------------------------------
 demo = ->
+  SMR   = require 'source-map-resolve'
   error = new Error "^hengist/nodexh@4458^ simulated error"
   path  = __filename
   code  = read_file_sync path
@@ -174,7 +174,7 @@ demo_synchronous_await = ->
 ############################################################################################################
 if module is require.main then do =>
   # await demo()
-  await demo_async()
-  # await demo_synchronous_await()
+  # await demo_async()
+  await demo_synchronous_await()
 
 
