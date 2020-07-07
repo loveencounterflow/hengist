@@ -52,7 +52,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   serve = async function() {
-    var IX, Rpc, after, hyphenate, rpc, slabs_from_text;
+    var IX, Rpc, after, hyphenate, rpc, slabjoints_from_text;
     Rpc = require('../../../apps/intershop-rpc');
     // DB                        = require '../../../apps/intershop/intershop_modules/db'
     // DATOM                     = require '../../../apps/datom'
@@ -63,17 +63,18 @@
     //.........................................................................................................
     rpc = (await Rpc.create({
       show_counts: true,
-      count_interval: 1
+      count_interval: 1,
+      logging: true
     }));
     //.........................................................................................................
     rpc.contract('^hyphenate', function(d) {
       return hyphenate(d.$value);
     });
-    rpc.contract('^slabs_from_text', function(d) {
-      return slabs_from_text(d.$value);
+    rpc.contract('^slabjoints_from_text', function(d) {
+      return slabjoints_from_text(d.$value);
     });
     rpc.contract('^shyphenate', function(d) {
-      return slabs_from_text(hyphenate(d.$value));
+      return slabjoints_from_text(hyphenate(d.$value));
     });
     // debug '^447^', rpr text
     //.........................................................................................................
@@ -82,9 +83,9 @@
       return IX.HYPH.hyphenate(text);
     };
     //.........................................................................................................
-    return slabs_from_text = function(text) {
+    return slabjoints_from_text = function(text) {
       validate.text(text);
-      return IX.SLABS.slabs_from_text(text);
+      return IX.SLABS.slabjoints_from_text(text);
     };
   };
 
@@ -197,11 +198,12 @@
   if (module === require.main) {
     (() => {
       // test @
-      return serve();
+      // serve()
+      return test(this["INTERPLOT hyphenation"], {
+        timeout: 5000
+      });
     })();
   }
-
-  // test @[ "INTERPLOT hyphenation" ], { timeout: 5000, }
 
 }).call(this);
 

@@ -245,6 +245,27 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["INTERTEXT.SLABS.text_and_joint_from_segment"] = async function(T, done) {
+    var INTERTEXT, error, i, len, matcher, probe, probes_and_matchers;
+    INTERTEXT = require('../../../apps/intertext');
+    probes_and_matchers = [["foo=", ['foo', '=']]];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var result;
+          result = INTERTEXT.SLABS.text_and_joint_from_segment(probe);
+          help('^337637^', CND.inspect(result));
+          return resolve(result);
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["INTERTEXT.SLABS.assemble (1)"] = async function(T, done) {
     var INTERTEXT, error, i, len, matcher, probe, probes_and_matchers;
     INTERTEXT = require('../../../apps/intertext');
@@ -337,12 +358,34 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["INTERTEXT.SLABS.assemble (4)"] = function(T, done) {
+    var INTERTEXT, idx, matcher, probe, result, slabjoints;
+    INTERTEXT = require('../../../apps/intertext');
+    probe = "over-guess\xadti\xadmate";
+    matcher = ["over-", "over-guess-", "over-guessti-", "over-guesstimate"];
+    slabjoints = INTERTEXT.SLABS.slabjoints_from_text(probe);
+    result = (function() {
+      var i, ref, results;
+      results = [];
+      for (idx = i = 0, ref = slabjoints.size; (0 <= ref ? i < ref : i > ref); idx = 0 <= ref ? ++i : --i) {
+        results.push(INTERTEXT.SLABS.assemble(slabjoints, 0, idx));
+      }
+      return results;
+    })();
+    help(jr(result));
+    T.eq(result, matcher);
+    done();
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => { // await do =>
       // await @_demo()
       // test @
-      return test(this["INTERTEXT.SLABS.slabjoints_from_text 2"]);
+      // test @[ "INTERTEXT.SLABS.slabjoints_from_text 2" ]
+      return test(this["INTERTEXT.SLABS.text_and_joint_from_segment"]);
     })();
   }
 

@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, PATH, SMC, SMR, StackTracey, _demo_async, alert, badge, debug, demo, demo_async, demo_async_handler, demo_stacktracey, demo_synchronous_await, help, info, isa, read_file_sync, rpr, types, urge, validate, warn, whisper;
+  var CND, FS, PATH, SMC, StackTracey, _demo_async, alert, badge, debug, demo, demo_async, demo_async_handler, demo_stacktracey, demo_synchronous_await, help, info, isa, read_file_sync, rpr, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -27,8 +27,6 @@
 
   PATH = require('path');
 
-  SMR = require('source-map-resolve');
-
   SMC = require('source-map');
 
   StackTracey = require('stacktracey');
@@ -46,7 +44,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
-    var bias1, bias2, c, code, column, d, error, i, j, k, line, location, map, path, ref, ref1, ref2;
+    var SMR, bias1, bias2, c, code, column, d, error, i, j, k, line, location, map, path, ref, ref1, ref2;
+    SMR = require('source-map-resolve');
     error = new Error("^hengist/nodexh@4458^ simulated error");
     path = __filename;
     code = read_file_sync(path);
@@ -304,11 +303,10 @@
   if (module === require.main) {
     (async() => {
       // await demo()
-      return (await demo_async());
+      // await demo_async()
+      return (await demo_synchronous_await());
     })();
   }
-
-  // await demo_synchronous_await()
 
 }).call(this);
 

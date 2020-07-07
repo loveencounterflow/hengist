@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, INTERTYPE, Intertype, alert, badge, debug, demo, echo, help, info, intersection_of, later, log, njs_path, praise, rpr, test, urge, warn, whisper,
+  var CND, INTERTYPE, Intertype, alert, badge, debug, echo, help, info, intersection_of, later, log, njs_path, praise, rpr, test, urge, warn, whisper,
     modulo = function(a, b) { return (+a % (b = +b) + b) % b; },
     indexOf = [].indexOf;
 
@@ -101,7 +101,7 @@
     intertype = new Intertype();
     ({isa, validate, type_of, types_of, size_of, declare, all_keys_of} = intertype.export());
     //.........................................................................................................
-    probes_and_matchers = [["isa( 'callable', 'xxx'                                  )", false, null], ["isa( 'callable', function () {}                         )", true, null], ["isa( 'callable', async function () { await 42 }         )", true, null], ["isa( 'callable', function* () { yield 42 }              )", true, null], ["isa( 'callable', ( function* () { yield 42 } )()        )", false, null], ["isa( 'date',          new Date()                        )", true, null], ["isa( 'date',          true                              )", false, null], ["isa( 'date',          'helo'                            )", false, null], ["isa( 'date',          2                                 )", false, null], ["isa( 'date',          Date.now()                        )", false, null], ["isa( 'finite',        123                               )", true, null], ["isa( 'global',        global                            )", true, null], ["isa( 'integer',       123                               )", true, null], ["isa( 'integer',       42                                )", true, null], ["isa( 'number',        123                               )", true, null], ["isa( 'number',        42                                )", true, null], ["isa( 'float',         123                               )", true, null], ["isa( 'float',         42                                )", true, null], ["isa( 'number',        NaN                               )", false, null], ["isa( 'float',         NaN                               )", false, null], ["isa( 'safeinteger',   123                               )", true, null], ["isa( 'text',          'x'                               )", true, null], ["isa( 'text',          NaN                               )", false, null], ["isa.even(             42                                )", true, null], ["isa.finite(           123                               )", true, null], ["isa.integer(          123                               )", true, null], ["isa.integer(          42                                )", true, null], ["isa.weakmap(           new WeakMap()                    )", true, null], ["isa.map(               new Map()                        )", true, null], ["isa.set(               new Set()                        )", true, null], ["isa.date(              new Date()                       )", true, null], ["isa.error(             new Error()                      )", true, null], ["isa.list(              []                               )", true, null], ["isa.boolean(           true                             )", true, null], ["isa.boolean(           false                            )", true, null], ["isa.function(          ( () => {} )                     )", true, null], ["isa.asyncfunction(     ( async () => { await f() } )    )", true, null], ["isa.null(              null                             )", true, null], ["isa.text(              'helo'                           )", true, null], ["isa.chr(               ' '                              )", true, null], ["isa.chr(               'x'                              )", true, null], ["isa.chr(               ''                               )", false, null], ["isa.chr(               'ab'                             )", false, null], ["isa.chr(               '𪜀'                             )", true, null], ["isa.undefined(         undefined                        )", true, null], ["isa.global(            global                           )", true, null], ["isa.regex(             /^xxx$/g                         )", true, null], ["isa.object(            {}                               )", true, null], ["isa.nan(               NaN                              )", true, null], ["isa.infinity(          1 / 0                            )", true, null], ["isa.infinity(          -1 / 0                           )", true, null], ["isa.number(            12345                            )", true, null], ["isa.buffer(            new Buffer( 'xyz' )              )", true, null], ["isa.uint8array(        new Buffer( 'xyz' )              )", true, null]];
+    probes_and_matchers = [["isa( 'callable', 'xxx'                                  )", false, null], ["isa( 'callable', function () {}                         )", true, null], ["isa( 'callable', async function () { await 42 }         )", true, null], ["isa( 'callable', function* () { yield 42 }              )", true, null], ["isa( 'callable', ( function* () { yield 42 } )()        )", false, null], ["isa( 'date',          new Date()                        )", true, null], ["isa( 'date',          true                              )", false, null], ["isa( 'date',          'helo'                            )", false, null], ["isa( 'date',          2                                 )", false, null], ["isa( 'date',          Date.now()                        )", false, null], ["isa( 'finite',        123                               )", true, null], ["isa( 'global',        global                            )", true, null], ["isa( 'integer',       123                               )", true, null], ["isa( 'integer',       42                                )", true, null], ["isa( 'float',        123                               )", true, null], ["isa( 'float',        42                                )", true, null], ["isa( 'float',         123                               )", true, null], ["isa( 'float',         42                                )", true, null], ["isa( 'float',        NaN                               )", false, null], ["isa( 'float',         NaN                               )", false, null], ["isa( 'safeinteger',   123                               )", true, null], ["isa( 'text',          'x'                               )", true, null], ["isa( 'text',          NaN                               )", false, null], ["isa.even(             42                                )", true, null], ["isa.finite(           123                               )", true, null], ["isa.integer(          123                               )", true, null], ["isa.integer(          42                                )", true, null], ["isa.weakmap(           new WeakMap()                    )", true, null], ["isa.map(               new Map()                        )", true, null], ["isa.set(               new Set()                        )", true, null], ["isa.date(              new Date()                       )", true, null], ["isa.error(             new Error()                      )", true, null], ["isa.list(              []                               )", true, null], ["isa.boolean(           true                             )", true, null], ["isa.boolean(           false                            )", true, null], ["isa.function(          ( () => {} )                     )", true, null], ["isa.asyncfunction(     ( async () => { await f() } )    )", true, null], ["isa.null(              null                             )", true, null], ["isa.text(              'helo'                           )", true, null], ["isa.chr(               ' '                              )", true, null], ["isa.chr(               'x'                              )", true, null], ["isa.chr(               ''                               )", false, null], ["isa.chr(               'ab'                             )", false, null], ["isa.chr(               '𪜀'                             )", true, null], ["isa.undefined(         undefined                        )", true, null], ["isa.global(            global                           )", true, null], ["isa.regex(             /^xxx$/g                         )", true, null], ["isa.object(            {}                               )", true, null], ["isa.nan(               NaN                              )", true, null], ["isa.infinity(          1 / 0                            )", true, null], ["isa.infinity(          -1 / 0                           )", true, null], ["isa.float(            12345                            )", true, null], ["isa.buffer(            new Buffer( 'xyz' )              )", true, null], ["isa.uint8array(        new Buffer( 'xyz' )              )", true, null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -151,7 +151,7 @@
     intertype = new Intertype();
     ({isa, validate, type_of, types_of, size_of, declare, all_keys_of} = intertype.export());
     //.........................................................................................................
-    probes_and_matchers = [["validate( 'callable', 'xxx'                                      )", false, 'not a valid callable'], ["validate( 'callable', ( function* () { yield 42 } )()            )", false, 'not a valid callable'], ["validate( 'date',          true                                  )", false, 'not a valid date'], ["validate( 'date',          'helo'                                )", false, 'not a valid date'], ["validate( 'date',          2                                     )", false, 'not a valid date'], ["validate( 'date',          Date.now()                            )", false, 'not a valid date'], ["validate( 'number',        NaN                                   )", false, 'not a valid number'], ["validate( 'number',        NaN                                   )", false, 'not a valid number'], ["validate( 'text',          NaN                                   )", false, 'not a valid text'], ["validate( 'callable', function () {}                             )", true, null], ["validate( 'callable', async function () { await 42 }             )", true, null], ["validate( 'callable', function* () { yield 42 }                  )", true, null], ["validate( 'date',          new Date()                            )", true, null], ["validate( 'finite',        123                                   )", true, null], ["validate( 'global',        global                                )", true, null], ["validate( 'integer',       123                                   )", true, null], ["validate( 'integer',       42                                    )", true, null], ["validate( 'number',        123                                   )", true, null], ["validate( 'number',        42                                    )", true, null], ["validate( 'safeinteger',   123                                   )", true, null], ["validate( 'text',          'x'                                   )", true, null], ["validate.even(             42                                    )", true, null], ["validate.finite(           123                                   )", true, null], ["validate.integer(          123                                   )", true, null], ["validate.integer(          42                                    )", true, null], ["validate.number(           123                                   )", true, null], ["validate.safeinteger(      123                                   )", true, null], ["validate.weakmap(           new WeakMap()                        )", true, null], ["validate.map(               new Map()                            )", true, null], ["validate.set(               new Set()                            )", true, null], ["validate.date(              new Date()                           )", true, null], ["validate.error(             new Error()                          )", true, null], ["validate.list(              []                                   )", true, null], ["validate.boolean(           true                                 )", true, null], ["validate.boolean(           false                                )", true, null], ["validate.function(          ( () => {} )                         )", true, null], ["validate.asyncfunction(     ( async () => { await f() } )        )", true, null], ["validate.null(              null                                 )", true, null], ["validate.text(              'helo'                               )", true, null], ["validate.undefined(         undefined                            )", true, null], ["validate.global(            global                               )", true, null], ["validate.regex(             /^xxx$/g                             )", true, null], ["validate.object(            {}                                   )", true, null], ["validate.nan(               NaN                                  )", true, null], ["validate.infinity(          1 / 0                                )", true, null], ["validate.infinity(          -1 / 0                               )", true, null], ["validate.number(            12345                                )", true, null], ["validate.buffer(            new Buffer( 'xyz' )                  )", true, null], ["validate.uint8array(        new Buffer( 'xyz' )                  )", true, null], ["validate.promise(           new Promise( ( rslv, rjct ) => {} )  )", true, null]];
+    probes_and_matchers = [["validate( 'callable', 'xxx'                                      )", false, 'not a valid callable'], ["validate( 'callable', ( function* () { yield 42 } )()            )", false, 'not a valid callable'], ["validate( 'date',          true                                  )", false, 'not a valid date'], ["validate( 'date',          'helo'                                )", false, 'not a valid date'], ["validate( 'date',          2                                     )", false, 'not a valid date'], ["validate( 'date',          Date.now()                            )", false, 'not a valid date'], ["validate( 'float',        NaN                                   )", false, 'not a valid float'], ["validate( 'float',        NaN                                   )", false, 'not a valid float'], ["validate( 'text',          NaN                                   )", false, 'not a valid text'], ["validate( 'callable', function () {}                             )", true, null], ["validate( 'callable', async function () { await 42 }             )", true, null], ["validate( 'callable', function* () { yield 42 }                  )", true, null], ["validate( 'date',          new Date()                            )", true, null], ["validate( 'finite',        123                                   )", true, null], ["validate( 'global',        global                                )", true, null], ["validate( 'integer',       123                                   )", true, null], ["validate( 'integer',       42                                    )", true, null], ["validate( 'float',        123                                   )", true, null], ["validate( 'float',        42                                    )", true, null], ["validate( 'safeinteger',   123                                   )", true, null], ["validate( 'text',          'x'                                   )", true, null], ["validate.even(             42                                    )", true, null], ["validate.finite(           123                                   )", true, null], ["validate.integer(          123                                   )", true, null], ["validate.integer(          42                                    )", true, null], ["validate.float(           123                                   )", true, null], ["validate.safeinteger(      123                                   )", true, null], ["validate.weakmap(           new WeakMap()                        )", true, null], ["validate.map(               new Map()                            )", true, null], ["validate.set(               new Set()                            )", true, null], ["validate.date(              new Date()                           )", true, null], ["validate.error(             new Error()                          )", true, null], ["validate.list(              []                                   )", true, null], ["validate.boolean(           true                                 )", true, null], ["validate.boolean(           false                                )", true, null], ["validate.function(          ( () => {} )                         )", true, null], ["validate.asyncfunction(     ( async () => { await f() } )        )", true, null], ["validate.null(              null                                 )", true, null], ["validate.text(              'helo'                               )", true, null], ["validate.undefined(         undefined                            )", true, null], ["validate.global(            global                               )", true, null], ["validate.regex(             /^xxx$/g                             )", true, null], ["validate.object(            {}                                   )", true, null], ["validate.nan(               NaN                                  )", true, null], ["validate.infinity(          1 / 0                                )", true, null], ["validate.infinity(          -1 / 0                               )", true, null], ["validate.float(            12345                                )", true, null], ["validate.buffer(            new Buffer( 'xyz' )                  )", true, null], ["validate.uint8array(        new Buffer( 'xyz' )                  )", true, null], ["validate.promise(           new Promise( ( rslv, rjct ) => {} )  )", true, null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -178,7 +178,7 @@
     ({isa, validate, type_of, types_of, size_of, declare, all_keys_of} = intertype.export());
     //.........................................................................................................
     prms = new Promise((rslv, rjct) => {});
-    probes_and_matchers = [[123, ["count", "finite", "frozen", "integer", "nonnegative", "notunset", "float", "number", "numeric", "odd", "positive", "safeinteger", "sealed", "truthy"], null], [124, ["count", "even", "finite", "frozen", "integer", "nonnegative", "notunset", "float", "number", "numeric", "positive", "safeinteger", "sealed", "truthy"], null], [0, ["count", "even", "falsy", "finite", "frozen", "integer", "nonnegative", "nonpositive", "notunset", "float", "number", "numeric", "safeinteger", "sealed", "zero"], null], [true, ["boolean", "frozen", "notunset", "sealed", "truthy"], null], [null, ["falsy", "frozen", "null", "sealed", "unset"], null], [void 0, ["falsy", "frozen", "sealed", "undefined", "unset"], null], [{}, ["empty", "extensible", "notunset", "object", "truthy"], null], [[], ["empty", "extensible", "list", "notunset", "truthy"], null], [prms, ["nativepromise", "promise", "thenable"], null]];
+    probes_and_matchers = [[123, ["count", "finite", "frozen", "integer", "nonnegative", "notunset", "float", "float", "numeric", "odd", "positive", "safeinteger", "sealed", "truthy"], null], [124, ["count", "even", "finite", "frozen", "integer", "nonnegative", "notunset", "float", "float", "numeric", "positive", "safeinteger", "sealed", "truthy"], null], [0, ["count", "even", "falsy", "finite", "frozen", "integer", "nonnegative", "nonpositive", "notunset", "float", "float", "numeric", "safeinteger", "sealed", "zero"], null], [true, ["boolean", "frozen", "notunset", "sealed", "truthy"], null], [null, ["falsy", "frozen", "null", "sealed", "unset"], null], [void 0, ["falsy", "frozen", "sealed", "undefined", "unset"], null], [{}, ["empty", "extensible", "notunset", "object", "truthy"], null], [[], ["empty", "extensible", "list", "notunset", "truthy"], null], [prms, ["nativepromise", "promise", "thenable"], null]];
 //.........................................................................................................
 // debug intersection_of [ 1, 2, 3, ], [ 'a', 3, 1, ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -383,7 +383,7 @@
     intertype = new Intertype();
     ({isa, validate, type_of, types_of, size_of, declare, cast, all_keys_of} = intertype.export());
     //.........................................................................................................
-    probes_and_matchers = [[['number', 'number', 123], 123], [['number', 'integer', 123], 123], [['number', 'integer', 23.9], 24], [['boolean', 'number', true], 1], [['boolean', 'number', false], 0], [['number', 'boolean', 0], false], [['number', 'boolean', 1], true], [['number', 'boolean', -154.7], true], [['number', 'text', 123], '123'], [['boolean', 'text', true], 'true'], [['null', 'text', null], 'null'], [['int10text', 'text', '1245'], '1245'], [['int16text', 'text', '1245'], '1245'], [['int10text', 'number', '1245'], 1245], [['int16text', 'number', '1245'], 4677], [['int16text', 'int2text', '7'], '111'], [['number', 'null', 0], null, 'unable to cast a number as null'], [['number', 'null', 1], null, 'unable to cast a number as null']];
+    probes_and_matchers = [[['float', 'float', 123], 123], [['float', 'integer', 123], 123], [['float', 'integer', 23.9], 24], [['boolean', 'float', true], 1], [['boolean', 'float', false], 0], [['float', 'boolean', 0], false], [['float', 'boolean', 1], true], [['float', 'boolean', -154.7], true], [['float', 'text', 123], '123'], [['boolean', 'text', true], 'true'], [['null', 'text', null], 'null'], [['int10text', 'text', '1245'], '1245'], [['int16text', 'text', '1245'], '1245'], [['int10text', 'float', '1245'], 1245], [['int16text', 'float', '1245'], 4677], [['int16text', 'int2text', '7'], '111'], [['float', 'null', 0], null, 'unable to cast a float as null'], [['float', 'null', 1], null, 'unable to cast a float as null']];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -422,7 +422,7 @@
     intertype = new Intertype();
     ({isa, validate} = intertype.export());
     //.........................................................................................................
-    probes_and_matchers = [[['number', [123]], true], [['integer', [123]], true], [['integer', [1, 2, 3, 123.5]], false]];
+    probes_and_matchers = [[['float', [123]], true], [['integer', [123]], true], [['integer', [1, 2, 3, 123.5]], false]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -447,7 +447,7 @@
     intertype = new Intertype();
     ({isa, isa_list_of, validate} = intertype.export());
     //.........................................................................................................
-    probes_and_matchers = [[['number', [123]], true], [['integer', [123]], true], [['integer', [1, 2, 3, 123.5]], false]];
+    probes_and_matchers = [[['float', [123]], true], [['integer', [123]], true], [['integer', [1, 2, 3, 123.5]], false]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -472,7 +472,7 @@
     intertype = new Intertype();
     ({isa, validate} = intertype.export());
     //.........................................................................................................
-    probes_and_matchers = [[['number', [123]], true], [['integer', [123]], true], [['integer', [1, 2, 3, 123.5]], null, "not a valid list_of"]];
+    probes_and_matchers = [[['float', [123]], true], [['integer', [123]], true], [['integer', [1, 2, 3, 123.5]], null, "not a valid list_of"]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -497,7 +497,7 @@
     intertype = new Intertype();
     ({isa, validate, isa_list_of, validate_list_of} = intertype.export());
     //.........................................................................................................
-    probes_and_matchers = [[['number', [123]], true], [['integer', [123]], true], [['integer', [1, 2, 3, 123.5]], null, "not a valid list_of"]];
+    probes_and_matchers = [[['float', [123]], true], [['integer', [123]], true], [['integer', [1, 2, 3, 123.5]], null, "not a valid list_of"]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -532,10 +532,10 @@
     T.ok(isa.vnr([-2e308]));
     T.ok(isa.vnr([+2e308]));
     T.ok(isa.vnr([+2e308, 1]));
-    T.ok(isa.infnumber(+1234567.665553));
-    T.ok(isa.infnumber(-1234567.665553));
-    T.ok(isa.infnumber(+2e308));
-    T.ok(isa.infnumber(-2e308));
+    T.ok(isa.infloat(+1234567.665553));
+    T.ok(isa.infloat(-1234567.665553));
+    T.ok(isa.infloat(+2e308));
+    T.ok(isa.infloat(-2e308));
     T.ok(!isa.vnr(Int32Array.from([-1234])));
     done();
     return null;
@@ -756,7 +756,7 @@
     // declare 'fs_stats', tests:
     //   'x is an object':         ( x ) -> @isa.object  x
     //   'x.size is a count':      ( x ) -> @isa.count   x.size
-    //   'x.atimeMs is a number':  ( x ) -> @isa.number  x.atimeMs
+    //   'x.atimeMs is a float':  ( x ) -> @isa.float  x.atimeMs
     //   'x.atime is a date':      ( x ) -> @isa.date    x.atime
     // #.........................................................................................................
     // ### NOTE: will throw error unless path exists, error is implicitly caught, represents sad path ###
@@ -809,15 +809,15 @@
     probes_and_matchers = [
       [123,
       ['happy',
-      'number'],
+      'float'],
       null],
       [124,
       ['happy',
-      'number'],
+      'float'],
       null],
       [0,
       ['happy',
-      'number'],
+      'float'],
       null],
       [true,
       ['boolean',
@@ -867,6 +867,7 @@
 // debug intersection_of [ 1, 2, 3, ], [ 'a', 3, 1, ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
+      matcher.sort();
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           var result;
@@ -1066,226 +1067,109 @@
     }
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["numerical types"] = async function(T, done) {
+    var check, equals, error, i, intertype, isa, j, len, len1, matcher, pairs, probe, probes_and_matchers, type, type_of, value;
+    intertype = new Intertype();
+    ({isa, type_of, check, equals} = intertype.export());
+    //.........................................................................................................
+    probes_and_matchers = [['nan', [23, false]], ['finite', [23, true]], ['integer', [23, true]], ['safeinteger', [23, true]], ['numeric', [23, true]], ['even', [23, false]], ['odd', [23, true]], ['count', [23, true]], ['nonnegative', [23, true]], ['positive', [23, true]], ['positive_integer', [23, true]], ['negative_integer', [23, false]], ['zero', [23, false]], ['infinity', [23, false]], ['infloat', [23, true]], ['nonpositive', [23, false]], ['negative', [23, false]], ['positive_float', [23, true]], ['negative_float', [23, false]]];
+    //.........................................................................................................
+    error = null;
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [type, ...pairs] = probes_and_matchers[i];
+      for (j = 0, len1 = pairs.length; j < len1; j++) {
+        [value, matcher] = pairs[j];
+        probe = [type, value];
+        await T.perform(probe, matcher, error, function() {
+          return new Promise(function(resolve, reject) {
+            resolve(isa[type](value));
+            return null;
+          });
+        });
+      }
+    }
+    if (done != null) {
+      //.........................................................................................................
+      return done();
+    }
+  };
+
+  // type_of 1e32            ), 'float'
+  // [ 'float',           [ 23, false ], ]
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["real-life example"] = function(T, done) {
+    var _defaults, check, equals, isa, type_of, types, types_of, validate;
+    types = new Intertype();
+    ({isa, type_of, types_of, validate, check, equals} = types.export());
+    //.........................................................................................................
+    types.declare('intershop_rpc_settings', {
+      tests: {
+        "x is a object": function(x) {
+          return this.isa.object(x);
+        },
+        "x.host is a nonempty_text": function(x) {
+          return this.isa.nonempty_text(x.host);
+        },
+        "x.port is a count": function(x) {
+          return this.isa.count(x.port);
+        },
+        "x.show_counts is a boolean": function(x) {
+          return this.isa.boolean(x.show_counts);
+        },
+        "x.count_interval is a positive_integer": function(x) {
+          return this.isa.positive_integer(x.count_interval);
+        },
+        "x.socket_log_all is a boolean": function(x) {
+          return this.isa.boolean(x.socket_log_all);
+        },
+        "x.socketserver_log_all is a boolean": function(x) {
+          return this.isa.boolean(x.socketserver_log_all);
+        },
+        "x.logging is a boolean or a function": function(x) {
+          return (this.isa.boolean(x.logging)) || (this.isa.function(x.logging));
+        }
+      }
+    });
+    //.........................................................................................................
+    _defaults = Object.freeze({
+      host: 'localhost',
+      port: 23001,
+      show_counts: true,
+      count_interval: 1000,
+      socket_log_all: false,
+      socketserver_log_all: false,
+      logging: true
+    });
+    //.........................................................................................................
+    debug(types_of(_defaults.count_interval));
+    T.ok(isa.intershop_rpc_settings(_defaults));
+    return done();
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // test @
     // test @[ "size_of" ]
-    test(this["equals"]);
+    // test @[ "numerical types" ]
+    test(this["real-life example"]);
   }
 
-  // @[ "equality checks" ]()
-  // test @[ "isa.immediate, nowait" ]
-  // test @[ "types_of() includes happy, sad" ]
-  // test @[ "check(): validation with intermediate results (experiment)" ]
-  // test @[ "check(): validation with intermediate results (for reals)" ]
-  // test @[ "types_of" ]
-  // test @[ "vnr, int32" ]
-  // test @[ "cast" ]
-  // test @[ "isa.list_of A" ]
-  // test @[ "isa.list_of B" ]
-  // test @[ "validate.list_of A" ]
-  // test @[ "validate.list_of B" ]
-  demo = function() {
-    var all_keys_of, declare, error, i, intertype, isa, len, nr, result, size_of, tests, type_of, types_of, validate;
-    intertype = new Intertype();
-    ({isa, validate, type_of, types_of, size_of, declare, all_keys_of} = intertype.export());
-    urge(size_of('𣁬𡉜𠑹𠅁', 'codepoints'));
-    intertype.declare('point', {
-      size: 2,
-      tests: {
-        '? is an object': function(x) {
-          return this.isa.object(x);
-        },
-        '?.x is set': function(x) {
-          return this.has_key(x, 'x');
-        },
-        '?.y is set': function(x) {
-          return this.has_key(x, 'y');
-        },
-        '?.x is a float': function(x) {
-          return this.isa.float(x.x);
-        },
-        '?.y is a float': function(x) {
-          return this.isa.float(x.x);
-        }
-      }
-    });
-    intertype.declare('vector', {
-      size: 2,
-      tests: {
-        '? is a list': function(x) {
-          return this.isa.list(x);
-        },
-        'size of ? is 2': function(x) {
-          return (this.size_of(x)) === 2;
-        },
-        '?[ 0 ] is a float': function(x) {
-          return this.isa.float(x[0]);
-        },
-        '?[ 1 ] is a float': function(x) {
-          return this.isa.float(x[1]);
-        }
-      }
-    });
-    info(isa.point(42));
-    info(isa.point({
-      x: 42,
-      y: 108
-    }));
-    info(isa.point({
-      x: 2e308,
-      y: 108
-    }));
-    tests = [
-      [
-        1,
-        (function() {
-          return validate.number(42);
-        })
-      ],
-      [
-        1,
-        (function() {
-          return validate.float(42);
-        })
-      ],
-      [
-        2,
-        (function() {
-          return validate.integer(42);
-        })
-      ],
-      [
-        3,
-        (function() {
-          return validate.even(42);
-        })
-      ],
-      [
-        4,
-        (function() {
-          return validate.number(42.5);
-        })
-      ],
-      [
-        4,
-        (function() {
-          return validate.float(42.5);
-        })
-      ],
-      [
-        5,
-        (function() {
-          return validate.integer(42.5);
-        })
-      ],
-      [
-        6,
-        (function() {
-          return validate.even(42.5);
-        })
-      ],
-      [
-        7,
-        (function() {
-          return validate.point(42);
-        })
-      ],
-      [
-        8,
-        (function() {
-          return validate.point({
-            x: 42,
-            y: 108
-          });
-        })
-      ],
-      [
-        9,
-        (function() {
-          return validate.point({
-            y: 108
-          });
-        })
-      ],
-      [
-        10,
-        (function() {
-          return validate.point({
-            x: 2e308,
-            y: 108
-          });
-        })
-      ],
-      [
-        11,
-        (function() {
-          return validate.vector(null);
-        })
-      ],
-      [
-        12,
-        (function() {
-          return validate.vector([2]);
-        })
-      ],
-      [
-        13,
-        (function() {
-          return validate.vector([2,
-        3]);
-        })
-      ],
-      [
-        14,
-        (function() {
-          return validate.regex([2,
-        3]);
-        })
-      ],
-      [
-        15,
-        (function() {
-          return validate.regex(/x/);
-        })
-      ],
-      [
-        16,
-        (function() {
-          return validate.regex(/^x$/g);
-        })
-      ],
-      [
-        17,
-        (function() {
-          return isa.regex(/x/);
-        })
-      ],
-      [
-        18,
-        (function() {
-          return isa.regex(/^x$/g);
-        })
-      ]
-    ];
-    for (i = 0, len = tests.length; i < len; i++) {
-      [nr, test] = tests[i];
-      try {
-        result = test();
-      } catch (error1) {
-        error = error1;
-        warn(nr, error.message);
-        // throw error
-        continue;
-      }
-      info(nr, result);
-    }
-    help(isa.number(42));
-    help(isa.number(new Number(42)));
-    help(types_of(42));
-    help(types_of(new Number(42)));
-    return debug('µ12233', types_of([]));
-  };
+  // test @[ "equals" ]
+// @[ "equality checks" ]()
+// test @[ "isa.immediate, nowait" ]
+// test @[ "types_of() includes happy, sad" ]
+// @[ "types_of() includes happy, sad" ]()
+// test @[ "check(): validation with intermediate results (experiment)" ]
+// test @[ "check(): validation with intermediate results (for reals)" ]
+// test @[ "types_of" ]
+// test @[ "vnr, int32" ]
+// test @[ "cast" ]
+// test @[ "isa.list_of A" ]
+// test @[ "isa.list_of B" ]
+// test @[ "validate.list_of A" ]
+// test @[ "validate.list_of B" ]
 
 }).call(this);
 
