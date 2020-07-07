@@ -83,6 +83,21 @@ types                     = new ( require 'intertype' ).Intertype()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "INTERTEXT.SLABS.text_and_joint_from_segment" ] = ( T, done ) ->
+  INTERTEXT = require '../../../apps/intertext'
+  probes_and_matchers = [
+    [ "foo=", [ 'foo', '=', ] ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      result  = INTERTEXT.SLABS.text_and_joint_from_segment probe
+      help '^337637^', CND.inspect result
+      resolve result
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "INTERTEXT.SLABS.assemble (1)" ] = ( T, done ) ->
   INTERTEXT = require '../../../apps/intertext'
   probes_and_matchers = [
@@ -172,13 +187,31 @@ types                     = new ( require 'intertype' ).Intertype()
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "INTERTEXT.SLABS.assemble (4)" ] = ( T, done ) ->
+  INTERTEXT = require '../../../apps/intertext'
+  probe   = "over-guess\xadti\xadmate"
+  matcher = [
+    "over-"
+    "over-guess-"
+    "over-guessti-"
+    "over-guesstimate"
+    ]
+  slabjoints  = INTERTEXT.SLABS.slabjoints_from_text probe
+  result      = ( INTERTEXT.SLABS.assemble slabjoints, 0, idx for idx in [ 0 ... slabjoints.size ] )
+  help jr result
+  T.eq result, matcher
+  done()
+  return null
+
 
 
 ############################################################################################################
 if module is require.main then do => # await do =>
   # await @_demo()
   # test @
-  test @[ "INTERTEXT.SLABS.slabjoints_from_text 2" ]
+  # test @[ "INTERTEXT.SLABS.slabjoints_from_text 2" ]
+  test @[ "INTERTEXT.SLABS.text_and_joint_from_segment" ]
   # test @[ "INTERTEXT.SLABS.slabjoints_from_text 1" ]
   # test @[ "INTERTEXT.SLABS.assemble (3)" ]
   # test @[ "INTERTEXT.SLABS.assemble (4)" ]

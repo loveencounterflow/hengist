@@ -103,11 +103,11 @@ INTERTYPE                 = require '../../../apps/intertype'
     [ "isa( 'global',        global                            )", true,                  null, ]
     [ "isa( 'integer',       123                               )", true,                  null, ]
     [ "isa( 'integer',       42                                )", true,                  null, ]
-    [ "isa( 'number',        123                               )", true,                  null, ]
-    [ "isa( 'number',        42                                )", true,                  null, ]
+    [ "isa( 'float',        123                               )", true,                  null, ]
+    [ "isa( 'float',        42                                )", true,                  null, ]
     [ "isa( 'float',         123                               )", true,                  null, ]
     [ "isa( 'float',         42                                )", true,                  null, ]
-    [ "isa( 'number',        NaN                               )", false,                 null, ]
+    [ "isa( 'float',        NaN                               )", false,                 null, ]
     [ "isa( 'float',         NaN                               )", false,                 null, ]
     [ "isa( 'safeinteger',   123                               )", true,                  null, ]
     [ "isa( 'text',          'x'                               )", true,                  null, ]
@@ -140,7 +140,7 @@ INTERTYPE                 = require '../../../apps/intertype'
     [ "isa.nan(               NaN                              )", true,                  null, ]
     [ "isa.infinity(          1 / 0                            )", true,                  null, ]
     [ "isa.infinity(          -1 / 0                           )", true,                  null, ]
-    [ "isa.number(            12345                            )", true,                  null, ]
+    [ "isa.float(            12345                            )", true,                  null, ]
     [ "isa.buffer(            new Buffer( 'xyz' )              )", true,                  null, ]
     [ "isa.uint8array(        new Buffer( 'xyz' )              )", true,                  null, ]
     ]
@@ -245,8 +245,8 @@ INTERTYPE                 = require '../../../apps/intertype'
     [ "validate( 'date',          'helo'                                )", false, 'not a valid date',        ]
     [ "validate( 'date',          2                                     )", false, 'not a valid date',        ]
     [ "validate( 'date',          Date.now()                            )", false, 'not a valid date',        ]
-    [ "validate( 'number',        NaN                                   )", false, 'not a valid number',      ]
-    [ "validate( 'number',        NaN                                   )", false, 'not a valid number',      ]
+    [ "validate( 'float',        NaN                                   )", false, 'not a valid float',      ]
+    [ "validate( 'float',        NaN                                   )", false, 'not a valid float',      ]
     [ "validate( 'text',          NaN                                   )", false, 'not a valid text',        ]
     [ "validate( 'callable', function () {}                             )", true,                  null, ]
     [ "validate( 'callable', async function () { await 42 }             )", true,                  null, ]
@@ -256,15 +256,15 @@ INTERTYPE                 = require '../../../apps/intertype'
     [ "validate( 'global',        global                                )", true,                  null, ]
     [ "validate( 'integer',       123                                   )", true,                  null, ]
     [ "validate( 'integer',       42                                    )", true,                  null, ]
-    [ "validate( 'number',        123                                   )", true,                  null, ]
-    [ "validate( 'number',        42                                    )", true,                  null, ]
+    [ "validate( 'float',        123                                   )", true,                  null, ]
+    [ "validate( 'float',        42                                    )", true,                  null, ]
     [ "validate( 'safeinteger',   123                                   )", true,                  null, ]
     [ "validate( 'text',          'x'                                   )", true,                  null, ]
     [ "validate.even(             42                                    )", true,                  null, ]
     [ "validate.finite(           123                                   )", true,                  null, ]
     [ "validate.integer(          123                                   )", true,                  null, ]
     [ "validate.integer(          42                                    )", true,                  null, ]
-    [ "validate.number(           123                                   )", true,                  null, ]
+    [ "validate.float(           123                                   )", true,                  null, ]
     [ "validate.safeinteger(      123                                   )", true,                  null, ]
     [ "validate.weakmap(           new WeakMap()                        )", true,                  null, ]
     [ "validate.map(               new Map()                            )", true,                  null, ]
@@ -285,7 +285,7 @@ INTERTYPE                 = require '../../../apps/intertype'
     [ "validate.nan(               NaN                                  )", true,                  null, ]
     [ "validate.infinity(          1 / 0                                )", true,                  null, ]
     [ "validate.infinity(          -1 / 0                               )", true,                  null, ]
-    [ "validate.number(            12345                                )", true,                  null, ]
+    [ "validate.float(            12345                                )", true,                  null, ]
     [ "validate.buffer(            new Buffer( 'xyz' )                  )", true,                  null, ]
     [ "validate.uint8array(        new Buffer( 'xyz' )                  )", true,                  null, ]
     [ "validate.promise(           new Promise( ( rslv, rjct ) => {} )  )", true,                  null, ]
@@ -315,9 +315,9 @@ INTERTYPE                 = require '../../../apps/intertype'
   #.........................................................................................................
   prms = new Promise ( rslv, rjct ) => return
   probes_and_matchers = [
-    [123,       ["count","finite","frozen","integer","nonnegative","notunset","float","number","numeric","odd","positive","safeinteger","sealed","truthy"],null]
-    [124,       ["count","even","finite","frozen","integer","nonnegative","notunset","float","number","numeric","positive","safeinteger","sealed","truthy"],null]
-    [0,         ["count","even","falsy","finite","frozen","integer","nonnegative","nonpositive","notunset","float","number","numeric","safeinteger","sealed","zero"],null]
+    [123,       ["count","finite","frozen","integer","nonnegative","notunset","float","float","numeric","odd","positive","safeinteger","sealed","truthy"],null]
+    [124,       ["count","even","finite","frozen","integer","nonnegative","notunset","float","float","numeric","positive","safeinteger","sealed","truthy"],null]
+    [0,         ["count","even","falsy","finite","frozen","integer","nonnegative","nonpositive","notunset","float","float","numeric","safeinteger","sealed","zero"],null]
     [true,      ["boolean","frozen","notunset","sealed","truthy"],null]
     [null,      ["falsy","frozen","null","sealed","unset"],null]
     [undefined, ["falsy","frozen","sealed","undefined","unset"],null]
@@ -440,24 +440,24 @@ later = ->
     all_keys_of } = intertype.export()
   #.........................................................................................................
   probes_and_matchers = [
-    [[ 'number',    'number',     123,    ], 123,     ]
-    [[ 'number',    'integer',    123,    ], 123,     ]
-    [[ 'number',    'integer',    23.9,   ], 24,      ]
-    [[ 'boolean',   'number',     true,   ], 1,       ]
-    [[ 'boolean',   'number',     false,  ], 0,       ]
-    [[ 'number',    'boolean',    0,      ], false,   ]
-    [[ 'number',    'boolean',    1,      ], true,    ]
-    [[ 'number',    'boolean',    -154.7, ], true,    ]
-    [[ 'number',    'text',       123,    ], '123',   ]
+    [[ 'float',    'float',     123,    ], 123,     ]
+    [[ 'float',    'integer',    123,    ], 123,     ]
+    [[ 'float',    'integer',    23.9,   ], 24,      ]
+    [[ 'boolean',   'float',     true,   ], 1,       ]
+    [[ 'boolean',   'float',     false,  ], 0,       ]
+    [[ 'float',    'boolean',    0,      ], false,   ]
+    [[ 'float',    'boolean',    1,      ], true,    ]
+    [[ 'float',    'boolean',    -154.7, ], true,    ]
+    [[ 'float',    'text',       123,    ], '123',   ]
     [[ 'boolean',   'text',       true,   ], 'true',  ]
     [[ 'null',      'text',       null,   ], 'null',  ]
     [[ 'int10text', 'text',      '1245',  ], '1245',  ]
     [[ 'int16text', 'text',      '1245',  ], '1245',  ]
-    [[ 'int10text', 'number',    '1245',  ], 1245,    ]
-    [[ 'int16text', 'number',    '1245',  ], 4677,    ]
+    [[ 'int10text', 'float',    '1245',  ], 1245,    ]
+    [[ 'int16text', 'float',    '1245',  ], 4677,    ]
     [[ 'int16text', 'int2text',  '7',     ], '111',   ]
-    [[ 'number',    'null',       0,      ], null,'unable to cast a number as null', ]
-    [[ 'number',    'null',       1,      ], null,'unable to cast a number as null', ]
+    [[ 'float',    'null',       0,      ], null,'unable to cast a float as null', ]
+    [[ 'float',    'null',       1,      ], null,'unable to cast a float as null', ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -485,7 +485,7 @@ later = ->
     validate } = intertype.export()
   #.........................................................................................................
   probes_and_matchers = [
-    [[ 'number',     [ 123, ],    ], true,     ]
+    [[ 'float',     [ 123, ],    ], true,     ]
     [[ 'integer',    [ 123, ],    ], true,     ]
     [[ 'integer',    [ 1,2,3,123.5, ],    ], false,     ]
     ]
@@ -508,7 +508,7 @@ later = ->
     validate } = intertype.export()
   #.........................................................................................................
   probes_and_matchers = [
-    [[ 'number',     [ 123, ],    ], true,     ]
+    [[ 'float',     [ 123, ],    ], true,     ]
     [[ 'integer',    [ 123, ],    ], true,     ]
     [[ 'integer',    [ 1,2,3,123.5, ],    ], false,     ]
     ]
@@ -530,7 +530,7 @@ later = ->
     validate } = intertype.export()
   #.........................................................................................................
   probes_and_matchers = [
-    [[ 'number',     [ 123, ],    ], true,     ]
+    [[ 'float',     [ 123, ],    ], true,     ]
     [[ 'integer',    [ 123, ],    ], true,     ]
     [[ 'integer',    [ 1,2,3,123.5, ],    ], null, "not a valid list_of"     ]
     ]
@@ -554,7 +554,7 @@ later = ->
     validate_list_of } = intertype.export()
   #.........................................................................................................
   probes_and_matchers = [
-    [[ 'number',     [ 123, ],    ], true,     ]
+    [[ 'float',     [ 123, ],    ], true,     ]
     [[ 'integer',    [ 123, ],    ], true,     ]
     [[ 'integer',    [ 1,2,3,123.5, ],    ], null, "not a valid list_of"     ]
     ]
@@ -588,10 +588,10 @@ later = ->
   T.ok isa.vnr [ -Infinity, ]
   T.ok isa.vnr [ +Infinity, ]
   T.ok isa.vnr [ +Infinity, 1, ]
-  T.ok isa.infnumber +1234567.665553
-  T.ok isa.infnumber -1234567.665553
-  T.ok isa.infnumber +Infinity
-  T.ok isa.infnumber -Infinity
+  T.ok isa.infloat +1234567.665553
+  T.ok isa.infloat -1234567.665553
+  T.ok isa.infloat +Infinity
+  T.ok isa.infloat -Infinity
   T.ok not isa.vnr Int32Array.from [ -1234, ]
   done()
   return null
@@ -746,7 +746,7 @@ later = ->
   # declare 'fs_stats', tests:
   #   'x is an object':         ( x ) -> @isa.object  x
   #   'x.size is a count':      ( x ) -> @isa.count   x.size
-  #   'x.atimeMs is a number':  ( x ) -> @isa.number  x.atimeMs
+  #   'x.atimeMs is a float':  ( x ) -> @isa.float  x.atimeMs
   #   'x.atime is a date':      ( x ) -> @isa.date    x.atime
   # #.........................................................................................................
   # ### NOTE: will throw error unless path exists, error is implicitly caught, represents sad path ###
@@ -803,9 +803,9 @@ later = ->
     all_keys_of } = intertype.export()
   #.........................................................................................................
   probes_and_matchers = [
-    [ 123,                        [             'happy',    'number',     ],  null, ]
-    [ 124,                        [             'happy',    'number',     ],  null, ]
-    [ 0,                          [             'happy',    'number',     ],  null, ]
+    [ 123,                        [             'happy',    'float',      ],  null, ]
+    [ 124,                        [             'happy',    'float',      ],  null, ]
+    [ 0,                          [             'happy',    'float',      ],  null, ]
     [ true,                       [ 'boolean',  'happy',                  ],  null, ]
     [ null,                       [             'happy',    'null',       ],  null, ]
     [ undefined,                  [             'happy',    'undefined',  ],  null, ]
@@ -819,6 +819,7 @@ later = ->
   #.........................................................................................................
   # debug intersection_of [ 1, 2, 3, ], [ 'a', 3, 1, ]
   for [ probe, matcher, error, ] in probes_and_matchers
+    matcher.sort()
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       result = intersection_of matcher, types_of probe
       # log rpr [ probe, result, ]
@@ -919,15 +920,98 @@ later = ->
   T.eq ( equals 3, 4 ), false
   done() if done?
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "numerical types" ] = ( T, done ) ->
+  intertype = new Intertype()
+  { isa
+    type_of
+    check
+    equals } = intertype.export()
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'nan',              [ 23, false ], ]
+    [ 'finite',           [ 23, true  ], ]
+    [ 'integer',          [ 23, true  ], ]
+    [ 'safeinteger',      [ 23, true  ], ]
+    [ 'numeric',          [ 23, true  ], ]
+    [ 'even',             [ 23, false ], ]
+    [ 'odd',              [ 23, true  ], ]
+    [ 'count',            [ 23, true  ], ]
+    [ 'nonnegative',      [ 23, true  ], ]
+    [ 'positive',         [ 23, true  ], ]
+    [ 'positive_integer', [ 23, true  ], ]
+    [ 'negative_integer', [ 23, false ], ]
+    [ 'zero',             [ 23, false ], ]
+    [ 'infinity',         [ 23, false ], ]
+    [ 'infloat',        [ 23, true  ], ]
+    [ 'nonpositive',      [ 23, false ], ]
+    [ 'negative',         [ 23, false ], ]
+    [ 'positive_float',   [ 23, true  ], ]
+    [ 'negative_float',   [ 23, false ], ]
+    ]
+  #.........................................................................................................
+  error = null
+  for [ type, pairs..., ] in probes_and_matchers
+    for [ value, matcher, ] in pairs
+      probe = [ type, value, ]
+      await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+        resolve isa[ type ] value
+        return null
+  #.........................................................................................................
+  done() if done?
+    # type_of 1e32            ), 'float'
+    # [ 'float',           [ 23, false ], ]
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "real-life example" ] = ( T, done ) ->
+  types = new Intertype()
+  { isa
+    type_of
+    types_of
+    validate
+    check
+    equals } = types.export()
+  #.........................................................................................................
+  types.declare 'intershop_rpc_settings',
+    tests:
+      "x is a object":                          ( x ) -> @isa.object x
+      "x.host is a nonempty_text":              ( x ) -> @isa.nonempty_text x.host
+      "x.port is a count":                      ( x ) -> @isa.count x.port
+      "x.show_counts is a boolean":             ( x ) -> @isa.boolean x.show_counts
+      "x.count_interval is a positive_integer": ( x ) -> @isa.positive_integer x.count_interval
+      "x.socket_log_all is a boolean":          ( x ) -> @isa.boolean x.socket_log_all
+      "x.socketserver_log_all is a boolean":    ( x ) -> @isa.boolean x.socketserver_log_all
+      "x.logging is a boolean or a function":   ( x ) -> ( @isa.boolean x.logging ) or ( @isa.function x.logging )
+  #.........................................................................................................
+  _defaults                 = Object.freeze
+    host:                     'localhost'
+    port:                     23001
+    show_counts:              true
+    count_interval:           1000
+    socket_log_all:           false
+    socketserver_log_all:     false
+    logging:                  true
+  #.........................................................................................................
+  debug types_of _defaults.count_interval
+  T.ok isa.intershop_rpc_settings _defaults
+  done()
+
+
+
+
+
 
 ############################################################################################################
 unless module.parent?
   # test @
   # test @[ "size_of" ]
-  test @[ "equals" ]
+  # test @[ "numerical types" ]
+  test @[ "real-life example" ]
+  # test @[ "equals" ]
   # @[ "equality checks" ]()
   # test @[ "isa.immediate, nowait" ]
   # test @[ "types_of() includes happy, sad" ]
+  # @[ "types_of() includes happy, sad" ]()
   # test @[ "check(): validation with intermediate results (experiment)" ]
   # test @[ "check(): validation with intermediate results (for reals)" ]
   # test @[ "types_of" ]
@@ -937,74 +1021,4 @@ unless module.parent?
   # test @[ "isa.list_of B" ]
   # test @[ "validate.list_of A" ]
   # test @[ "validate.list_of B" ]
-
-
-
-demo = ->
-  intertype = new Intertype()
-  { isa
-    validate
-    type_of
-    types_of
-    size_of
-    declare
-    all_keys_of } = intertype.export()
-  urge size_of '𣁬𡉜𠑹𠅁', 'codepoints'
-
-  intertype.declare 'point',
-    size:   2
-    tests:
-      '? is an object':   ( x ) -> @isa.object x
-      '?.x is set':       ( x ) -> @has_key    x, 'x'
-      '?.y is set':       ( x ) -> @has_key    x, 'y'
-      '?.x is a float':   ( x ) -> @isa.float  x.x
-      '?.y is a float':   ( x ) -> @isa.float  x.x
-  intertype.declare 'vector',
-    size:   2
-    tests:
-      '? is a list':        ( x ) -> @isa.list   x
-      'size of ? is 2':     ( x ) -> ( @size_of x ) is 2
-      '?[ 0 ] is a float':  ( x ) -> @isa.float x[ 0 ]
-      '?[ 1 ] is a float':  ( x ) -> @isa.float x[ 1 ]
-  info isa.point 42
-  info isa.point { x: 42, y: 108, }
-  info isa.point { x: Infinity, y: 108, }
-
-  tests = [
-    [ 1,  ( -> validate.number    42                         ), ]
-    [ 1,  ( -> validate.float     42                         ), ]
-    [ 2,  ( -> validate.integer   42                         ), ]
-    [ 3,  ( -> validate.even      42                         ), ]
-    [ 4,  ( -> validate.number    42.5                       ), ]
-    [ 4,  ( -> validate.float     42.5                       ), ]
-    [ 5,  ( -> validate.integer   42.5                       ), ]
-    [ 6,  ( -> validate.even      42.5                       ), ]
-    [ 7,  ( -> validate.point     42                         ), ]
-    [ 8,  ( -> validate.point     { x: 42, y: 108, }         ), ]
-    [ 9,  ( -> validate.point     { y: 108, }                ), ]
-    [ 10, ( -> validate.point     { x: Infinity, y: 108, }  ), ]
-    [ 11, ( -> validate.vector    null                      ), ]
-    [ 12, ( -> validate.vector    [ 2, ]                    ), ]
-    [ 13, ( -> validate.vector    [ 2, 3, ]                 ), ]
-    [ 14, ( -> validate.regex     [ 2, 3, ]                 ), ]
-    [ 15, ( -> validate.regex     /x/                       ), ]
-    [ 16, ( -> validate.regex     /^x$/g                    ), ]
-    [ 17, ( -> isa.regex          /x/                       ), ]
-    [ 18, ( -> isa.regex          /^x$/g                    ), ]
-    ]
-  for [ nr, test, ] in tests
-    try
-      result = test()
-    catch error
-      warn nr, error.message
-      # throw error
-      continue
-    info nr, result
-
-  help isa.number 42
-  help isa.number new Number 42
-  help types_of 42
-  help types_of new Number 42
-  debug 'µ12233', types_of []
-
 

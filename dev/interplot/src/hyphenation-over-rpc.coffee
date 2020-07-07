@@ -48,20 +48,20 @@ serve = ->
   IX                        = require '../../../apps/intertext'
   after                     = ( time_s, f ) -> setTimeout f, time_s * 1000
   #.........................................................................................................
-  rpc = await Rpc.create { show_counts: true, count_interval: 1, }
+  rpc = await Rpc.create { show_counts: true, count_interval: 1, logging: true, }
   #.........................................................................................................
-  rpc.contract '^hyphenate',        ( d ) -> hyphenate d.$value
-  rpc.contract '^slabs_from_text',  ( d ) -> slabs_from_text d.$value
-  rpc.contract '^shyphenate',       ( d ) -> slabs_from_text hyphenate d.$value
+  rpc.contract '^hyphenate',            ( d ) -> hyphenate d.$value
+  rpc.contract '^slabjoints_from_text', ( d ) -> slabjoints_from_text d.$value
+  rpc.contract '^shyphenate',           ( d ) -> slabjoints_from_text hyphenate d.$value
     # debug '^447^', rpr text
   #.........................................................................................................
   hyphenate = ( text ) ->
     validate.text text
     return IX.HYPH.hyphenate text
   #.........................................................................................................
-  slabs_from_text = ( text ) ->
+  slabjoints_from_text = ( text ) ->
     validate.text text
-    return IX.SLABS.slabs_from_text text
+    return IX.SLABS.slabjoints_from_text text
 
 #-----------------------------------------------------------------------------------------------------------
 psql_run_file = ( cwd, path ) -> new Promise ( resolve, reject ) =>
@@ -131,6 +131,6 @@ psql_run_file = ( cwd, path ) -> new Promise ( resolve, reject ) =>
 ############################################################################################################
 if module is require.main then do =>
   # test @
-  serve()
-  # test @[ "INTERPLOT hyphenation" ], { timeout: 5000, }
+  # serve()
+  test @[ "INTERPLOT hyphenation" ], { timeout: 5000, }
 
