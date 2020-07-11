@@ -73,7 +73,8 @@ test                      = require 'guy-test'
   info rpc.counts
   await DB.query [ """select IPC.send( '^log', '"send message #1"' );""", ]
   # await DB.query [ """select IPC.rpc( '^log', '"RPC message #2"' );""", ]
-  await DB.query [ """select log( 'helo' )""", ]
+  await DB.query [ """select log( 'helo' );""", ]
+  info "^2337^ server address:", await DB.query_single [ """select IPC.get_server_address();""", ]
   info rpc.counts
   # debug '^hengist@18^', await DB.query [ "select * from IPC.send( $1, $2 );", '^add-42', '{"x":1000}' ]
   # debug '^hengist@19^', await DB.query [ "select * from CATALOG.catalog;", $key, ]
