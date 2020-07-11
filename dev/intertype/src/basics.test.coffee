@@ -9,7 +9,7 @@ njs_path                  = require 'path'
 #...........................................................................................................
 CND                       = require 'cnd'
 rpr                       = CND.rpr.bind CND
-badge                     = 'INTERTYPE/tests/main'
+badge                     = 'INTERTYPE/tests/basics'
 log                       = CND.get_logger 'plain',     badge
 info                      = CND.get_logger 'info',      badge
 whisper                   = CND.get_logger 'whisper',   badge
@@ -963,7 +963,7 @@ later = ->
     # [ 'float',           [ 23, false ], ]
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "real-life example" ] = ( T, done ) ->
+@[ "real-life example 1" ] = ( T, done ) ->
   types = new Intertype()
   { isa
     type_of
@@ -995,6 +995,40 @@ later = ->
   debug types_of _defaults.count_interval
   T.ok isa.intershop_rpc_settings _defaults
   done()
+    # [ 'float',           [ 23, false ], ]
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "real-life example 2" ] = ( T, done ) ->
+  types = new Intertype()
+  { isa
+    declare
+    type_of
+    types_of
+    validate
+    check
+    equals } = types.export()
+  #.........................................................................................................
+  declare 'intershop_cli_psql_run_selector', tests:
+    "x is a nonempty_text":                     ( x ) -> @isa.nonempty_text x
+    "x must be '-c' or '-f'":                   ( x ) -> x in [ '-c', '-f', ]
+  #.........................................................................................................
+  # debug types_of '-c'
+  # debug types_of '-x'
+  T.eq ( isa.intershop_cli_psql_run_selector '-f'   ), true
+  T.eq ( isa.intershop_cli_psql_run_selector '-c'   ), true
+  T.eq ( isa.intershop_cli_psql_run_selector 'xxx'  ), false
+  T.eq ( isa.intershop_cli_psql_run_selector ''     ), false
+  try
+    validate.intershop_cli_psql_run_selector '-f'
+    T.ok true
+  catch error
+    T.fail error.message
+  try
+    validate.some_unknown_type '-f'
+    T.fail "expected an error, but statement passed"
+  catch error
+    T.ok /violates.*is a known type/.test error.message
+  done()
 
 
 
@@ -1006,7 +1040,7 @@ unless module.parent?
   # test @
   # test @[ "size_of" ]
   # test @[ "numerical types" ]
-  test @[ "real-life example" ]
+  test @[ "real-life example 2" ]
   # test @[ "equals" ]
   # @[ "equality checks" ]()
   # test @[ "isa.immediate, nowait" ]
