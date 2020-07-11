@@ -48,7 +48,7 @@
     //.........................................................................................................
     rpc = (await Rpc.create({
       show_counts: true,
-      count_interval: 1,
+      count_interval: 100,
       logging: true
     }));
     //.........................................................................................................
@@ -79,17 +79,17 @@
   //-----------------------------------------------------------------------------------------------------------
   this.psql_run_file = function(cwd, path) {
     return new Promise((resolve, reject) => {
-      /* TAINT must properly escape path literal */
-      var CP, command, cp, settings;
+      /* TAINT must properly escape path literal or not use shell */
+      var CP, cmdline, cp, settings;
       CP = require('child_process');
-      command = `psql -U interplot -d interplot -f \"${path}\"`;
+      cmdline = `psql -U interplot -d interplot -f \"${path}\"`;
       whisper('^psql_run_file@3366^', path);
       settings = {
         cwd: cwd,
         shell: true,
         stdio: ['inherit', 'inherit', 'inherit']
       };
-      cp = CP.spawn(command, null, settings);
+      cp = CP.spawn(cmdline, null, settings);
       cp.on('close', function(code) {
         if (code === 0) {
           return resolve(0);
@@ -104,17 +104,30 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.demo = async function() {
-    var rpc;
-    rpc = (await this.serve());
-    // T.eq ( await DB.query_single  [ "select IPC.rpc( $1, $2 );", '^add-42', '{"x":1000}'  ] ), 1042
-    await this.psql_run_file('/home/flow/jzr/interplot', 'db/080-intertext.sql');
-    await this.psql_run_file('/home/flow/jzr/interplot', 'db/100-harfbuzz.sql');
-    await this.psql_run_file('/home/flow/jzr/interplot', 'db/tests/080-intertext.tests.sql');
-    debug('^3334^', process.argv);
-    info(rpc.counts);
-    await rpc.stop();
-    return null;
+  this.psql_run_command = function(cwd, command) {
+    return new Promise((resolve, reject) => {
+      /* TAINT must properly escape command literal or not use shell */
+      var CP, cmdline, cp, settings;
+      CP = require('child_process');
+      cmdline = `psql -U interplot -d interplot -c \"${command}\"`;
+      whisper('^psql_run_file@3367^', cmdline);
+      settings = {
+        cwd: cwd,
+        shell: true,
+        stdio: ['inherit', 'inherit', 'inherit']
+      };
+      cp = CP.spawn(cmdline, null, settings);
+      cp.on('close', function(code) {
+        if (code === 0) {
+          return resolve(0);
+        }
+        return reject(new Error(`^psql_run_file@34479^ processs exited with code ${code}`));
+      });
+      cp.on('error', function(error) {
+        return reject(error);
+      });
+      return null;
+    });
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -124,19 +137,27 @@
     //.........................................................................................................
     // program.action ( { logger, } ) => logger.info "Hello, world!"
     //.........................................................................................................
-    program.name('intershop').command('psql', "run psql").option('-f --file <file>', "read commands from file rather than standard input; may be combined, repeated").option('-c --command <command>', "execute the given command string; may be combined, repeated").action(async(d) => { //, collect, [] //, collect, []
-      var file_path, has_command, project_path, ref, ref1, ref2;
-      has_command = true;
+    //.......................................................................................................
+    program.name('intershop').command('start-rpc-server', "start RPC server (to be accessed from psql scripts)").action((d) => {
+      return setTimeout((function() {}), 1e6);
+    //.......................................................................................................
+    }).command('psql', "run psql").option('-f --file <file>', "read commands from file rather than standard input; may be combined, repeated").option('-c --command <command>', "execute the given command string; may be combined, repeated").action(async(d) => { //, collect, [] //, collect, []
+      var command, file_path, project_path, ref, ref1, ref2, ref3;
+      // has_command = true
       // info "^556^ #{rpr ( key for key of d )}"
       // info "^556^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', 'logger', 'program', 'command' ]
       // info "^556^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', ]
       file_path = (ref = d.options.file) != null ? ref : null;
-      project_path = (ref1 = (ref2 = d.options.p) != null ? ref2 : d.options.project) != null ? ref1 : process.cwd();
+      command = (ref1 = d.options.command) != null ? ref1 : null;
+      project_path = (ref2 = (ref3 = d.options.p) != null ? ref3 : d.options.project) != null ? ref2 : process.cwd();
       info(`^556^ file_path: ${rpr(file_path)}`);
       info(`^556^ project_path: ${rpr(project_path)}`);
-      // info "^556^ running psql with #{rpr { file: d.file, command: d.command, }}"
       if (file_path != null) {
-        return (await this.psql_run_file(project_path, file_path));
+        // info "^556^ running psql with #{rpr { file: d.file, command: d.command, }}"
+        await this.psql_run_file(project_path, file_path);
+      }
+      if (command != null) {
+        return (await this.psql_run_command(project_path, command));
       }
     });
     //.........................................................................................................
@@ -147,14 +168,51 @@
     return (await program.run());
   };
 
+  // #-----------------------------------------------------------------------------------------------------------
+  // @demo = ->
+  //   rpc = await @serve()
+  //   # T.eq ( await DB.query_single  [ "select IPC.rpc( $1, $2 );", '^add-42', '{"x":1000}'  ] ), 1042
+  //   await @psql_run_file '/home/flow/jzr/interplot', 'db/080-intertext.sql'
+  //   await @psql_run_file '/home/flow/jzr/interplot', 'db/100-harfbuzz.sql'
+  //   await @psql_run_file '/home/flow/jzr/interplot', 'db/tests/080-intertext.tests.sql'
+  //   debug '^3334^', process.argv
+  //   info rpc.counts
+  //   await rpc.stop()
+  //   return null
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_intershop_object = function() {
+    var INTERSHOP, PATH, k, project_path;
+    PATH = require('path');
+    project_path = PATH.resolve(PATH.join(__dirname, '../../../../hengist'));
+    project_path = PATH.resolve(PATH.join(__dirname, '../../../../interplot'));
+    INTERSHOP = (require('intershop')).new_intershop(project_path);
+    debug('^334^', (function() {
+      var results;
+      results = [];
+      for (k in INTERSHOP) {
+        results.push(k);
+      }
+      return results;
+    })());
+// debug '^334^', INTERSHOP.PTV_READER
+    for (k in INTERSHOP.settings) {
+      if (k.startsWith('os/')) {
+        continue;
+      }
+      echo(CND.gold(k.padEnd(42)), CND.lime(INTERSHOP.settings[k].value));
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
-    (async() => {
-      var rpc;
+    (() => {
       // await @demo()
-      rpc = (await this.serve());
-      await this.cli();
-      return (await rpc.stop());
+      // rpc = await @serve()
+      // await @cli()
+      // await rpc.stop()
+      return this.demo_intershop_object();
     })();
   }
 
