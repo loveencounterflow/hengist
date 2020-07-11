@@ -42,22 +42,33 @@
 
   // #-----------------------------------------------------------------------------------------------------------
   // @[ "test VNR._first_nonzero_is_negative()" ] = ( T, done ) ->
-  //   VNR                       = require '../../../apps/datom/lib/vnr'
+  //   PATH          = require 'path'
+  //   project_path  = PATH.resolve PATH.join ( require.resolve 'intershop' ), '../../'
+  //   debug '^443^', project_path
+  //   intershop     = ( require 'intershop' ).new_intershop project_path
+  //   intershop.variables.my_boolean  = { value: 'true', type: 'boolean',           }
+  //   intershop.variables.my_int      = { value: '4445', type: 'int',               }
+  //   intershop.variables.my_integer  = { value: '' type: 'integer',           }
+  //   intershop.variables.my_json     = { value: '' type: 'json',              }
+  //   intershop.variables.my_text     = { value: type: 'text',              }
+  //   intershop.variables.my_U        = { value: type: 'U.natural_number',  }
   //   #.........................................................................................................
+  //   # [ [ 'boolean']]
+  //   # [ [ 'int']]
+  //   # [ [ 'integer']]
+  //   # [ [ 'json'               ]]
+  //   # [ [ 'text'               ]]
+  //   # [ [ 'U.natural_number']]
+
   //   probes_and_matchers = [
-  //     [[ [3,4,0,0,],        2, ], false, ]
-  //     [[ [3,4,0,-1,],       2, ], true, ]
-  //     [[ [3,4,0,-1,0,0,],   2, ], true, ]
-  //     [[ [3,4,0,1,-1,0,0,], 2, ], false, ]
-  //     [[ [3,4,0,1,-1,0,0,], 0, ], false, ]
-  //     [[ [3,4,0,0,],        3, ], false, ]
   //     [[ [3,4,0,0,],        4, ], false, ]
   //     ]
   //   #.........................................................................................................
-  //   for [ probe, matcher, error, ] in probes_and_matchers
-  //     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-  //       [ list, first_idx, ] = probe
-  //       resolve VNR._first_nonzero_is_negative list, first_idx
+  //   debug '^443^', intershop
+  //   # for [ probe, matcher, error, ] in probes_and_matchers
+  //   #   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+  //   #     [ list, first_idx, ] = probe
+  //   #     resolve VNR._first_nonzero_is_negative list, first_idx
   //   done()
   //   return null
 

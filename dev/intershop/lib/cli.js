@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, alert, badge, cast, debug, echo, help, info, isa, rpr, type_of, types, urge, validate, warn, whisper;
+  var CND, CP, alert, badge, cast, debug, echo, help, info, isa, rpr, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -26,9 +26,11 @@
   echo = CND.echo.bind(CND);
 
   //...........................................................................................................
-  types = new (require('intertype')).Intertype();
+  types = (require('intershop')).types;
 
   ({isa, validate, cast, type_of} = types.export());
+
+  CP = require('child_process');
 
   /* TAINT
 
@@ -77,46 +79,42 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.psql_run_file = function(cwd, path) {
-    return new Promise((resolve, reject) => {
-      /* TAINT must properly escape path literal or not use shell */
-      var CP, cmdline, cp, settings;
-      CP = require('child_process');
-      cmdline = `psql -U interplot -d interplot -f \"${path}\"`;
-      whisper('^psql_run_file@3366^', path);
-      settings = {
-        cwd: cwd,
-        shell: true,
-        stdio: ['inherit', 'inherit', 'inherit']
-      };
-      cp = CP.spawn(cmdline, null, settings);
-      cp.on('close', function(code) {
-        if (code === 0) {
-          return resolve(0);
-        }
-        return reject(new Error(`^psql_run_file@34478^ processs exited with code ${code}`));
-      });
-      cp.on('error', function(error) {
-        return reject(error);
-      });
-      return null;
-    });
+  this.new_intershop_runner = function(project_path) {
+    return (require('intershop')).new_intershop(project_path);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.psql_run_command = function(cwd, command) {
+  this._prepare_commandline = function(me) {
+    var cwd, db_name, db_user;
+    cwd = me.get('intershop/host/path');
+    db_name = me.get('intershop/db/name');
+    db_user = me.get('intershop/db/user');
+    return {cwd, db_user, db_name};
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.psql_run_file = function(me, path) {
+    return this._psql_run(me, '-f', path);
+  };
+
+  this.psql_run_command = function(me, command) {
+    return this._psql_run(me, '-c', command);
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._psql_run = function(me, selector, pargument) {
     return new Promise((resolve, reject) => {
-      /* TAINT must properly escape command literal or not use shell */
-      var CP, cmdline, cp, settings;
-      CP = require('child_process');
-      cmdline = `psql -U interplot -d interplot -c \"${command}\"`;
-      whisper('^psql_run_file@3367^', cmdline);
+      var cmd, cp, parameters, settings;
+      validate.intershop_cli_psql_run_selector(selector);
+      cmd = this._prepare_commandline(me);
+      parameters = ['-U', cmd.db_user, '-d', cmd.db_name, selector, pargument];
+      whisper('^psql_run_file@3367^', `psql ${parameters.join(' ')}`);
       settings = {
-        cwd: cwd,
-        shell: true,
+        cwd: cmd.cwd,
+        shell: false,
         stdio: ['inherit', 'inherit', 'inherit']
       };
-      cp = CP.spawn(cmdline, null, settings);
+      cp = CP.spawn('psql', parameters, settings);
       cp.on('close', function(code) {
         if (code === 0) {
           return resolve(0);
@@ -142,7 +140,7 @@
       return setTimeout((function() {}), 1e6);
     //.......................................................................................................
     }).command('psql', "run psql").option('-f --file <file>', "read commands from file rather than standard input; may be combined, repeated").option('-c --command <command>', "execute the given command string; may be combined, repeated").action(async(d) => { //, collect, [] //, collect, []
-      var command, file_path, project_path, ref, ref1, ref2, ref3;
+      var command, file_path, me, project_path, ref, ref1, ref2, ref3;
       // has_command = true
       // info "^556^ #{rpr ( key for key of d )}"
       // info "^556^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', 'logger', 'program', 'command' ]
@@ -152,13 +150,15 @@
       project_path = (ref2 = (ref3 = d.options.p) != null ? ref3 : d.options.project) != null ? ref2 : process.cwd();
       info(`^556^ file_path: ${rpr(file_path)}`);
       info(`^556^ project_path: ${rpr(project_path)}`);
+      me = this.new_intershop_runner(project_path);
       if (file_path != null) {
         // info "^556^ running psql with #{rpr { file: d.file, command: d.command, }}"
-        await this.psql_run_file(project_path, file_path);
+        await this.psql_run_file(me, file_path);
       }
       if (command != null) {
-        return (await this.psql_run_command(project_path, command));
+        await this.psql_run_command(me, command);
       }
+      return null;
     });
     //.........................................................................................................
     program.option('-p --project <project>', "set path to InterShop project (only needed if not current directory)", {
@@ -207,14 +207,16 @@
 
   //###########################################################################################################
   if (module === require.main) {
-    (() => {
+    (async() => {
+      var rpc;
       // await @demo()
-      // rpc = await @serve()
-      // await @cli()
-      // await rpc.stop()
-      return this.demo_intershop_object();
+      rpc = (await this.serve());
+      await this.cli();
+      return (await rpc.stop());
     })();
   }
+
+  // @demo_intershop_object()
 
 }).call(this);
 

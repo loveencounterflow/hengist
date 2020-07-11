@@ -14,7 +14,7 @@
 
   rpr = CND.rpr.bind(CND);
 
-  badge = 'INTERTYPE/tests/main';
+  badge = 'INTERTYPE/tests/basics';
 
   log = CND.get_logger('plain', badge);
 
@@ -1099,7 +1099,7 @@
   // [ 'float',           [ 23, false ], ]
 
   //-----------------------------------------------------------------------------------------------------------
-  this["real-life example"] = function(T, done) {
+  this["real-life example 1"] = function(T, done) {
     var _defaults, check, equals, isa, type_of, types, types_of, validate;
     types = new Intertype();
     ({isa, type_of, types_of, validate, check, equals} = types.export());
@@ -1148,12 +1148,54 @@
     return done();
   };
 
+  // [ 'float',           [ 23, false ], ]
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["real-life example 2"] = function(T, done) {
+    var check, declare, equals, error, isa, type_of, types, types_of, validate;
+    types = new Intertype();
+    ({isa, declare, type_of, types_of, validate, check, equals} = types.export());
+    //.........................................................................................................
+    declare('intershop_cli_psql_run_selector', {
+      tests: {
+        "x is a nonempty_text": function(x) {
+          return this.isa.nonempty_text(x);
+        },
+        "x must be '-c' or '-f'": function(x) {
+          return x === '-c' || x === '-f';
+        }
+      }
+    });
+    //.........................................................................................................
+    // debug types_of '-c'
+    // debug types_of '-x'
+    T.eq(isa.intershop_cli_psql_run_selector('-f'), true);
+    T.eq(isa.intershop_cli_psql_run_selector('-c'), true);
+    T.eq(isa.intershop_cli_psql_run_selector('xxx'), false);
+    T.eq(isa.intershop_cli_psql_run_selector(''), false);
+    try {
+      validate.intershop_cli_psql_run_selector('-f');
+      T.ok(true);
+    } catch (error1) {
+      error = error1;
+      T.fail(error.message);
+    }
+    try {
+      validate.some_unknown_type('-f');
+      T.fail("expected an error, but statement passed");
+    } catch (error1) {
+      error = error1;
+      T.ok(/violates.*is a known type/.test(error.message));
+    }
+    return done();
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // test @
     // test @[ "size_of" ]
     // test @[ "numerical types" ]
-    test(this["real-life example"]);
+    test(this["real-life example 2"]);
   }
 
   // test @[ "equals" ]
