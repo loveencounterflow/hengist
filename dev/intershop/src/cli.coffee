@@ -15,11 +15,12 @@ urge                      = CND.get_logger 'urge',      badge
 info                      = CND.get_logger 'info',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
-types                     = new ( require 'intertype' ).Intertype()
+types                     = ( require 'intershop' ).types
 { isa
   validate
   cast
   type_of }               = types.export()
+CP                        = require 'child_process'
 
 ### TAINT
 
@@ -55,33 +56,31 @@ consider to move to https://caporal.io
   return rpc
 
 #-----------------------------------------------------------------------------------------------------------
-@psql_run_file = ( cwd, path ) -> new Promise ( resolve, reject ) =>
-  CP                        = require 'child_process'
-  ### TAINT must properly escape path literal or not use shell ###
-  cmdline   = "psql -U interplot -d interplot -f \"#{path}\""
-  whisper '^psql_run_file@3366^', path
-  settings  =
-    cwd:    cwd
-    shell:  true
-    stdio:  [ 'inherit', 'inherit', 'inherit', ]
-  cp        = CP.spawn cmdline, null, settings
-  cp.on 'close', ( code   ) ->
-    return resolve 0 if code is 0
-    reject new Error "^psql_run_file@34478^ processs exited with code #{code}"
-  cp.on 'error', ( error  ) -> reject error
-  return null
+@new_intershop_runner = ( project_path ) ->
+  return ( require 'intershop' ).new_intershop project_path
 
 #-----------------------------------------------------------------------------------------------------------
-@psql_run_command = ( cwd, command ) -> new Promise ( resolve, reject ) =>
-  CP                        = require 'child_process'
-  ### TAINT must properly escape command literal or not use shell ###
-  cmdline   = "psql -U interplot -d interplot -c \"#{command}\""
-  whisper '^psql_run_file@3367^', cmdline
-  settings  =
-    cwd:    cwd
-    shell:  true
+@_prepare_commandline = ( me ) ->
+  cwd       = me.get 'intershop/host/path'
+  db_name   = me.get 'intershop/db/name'
+  db_user   = me.get 'intershop/db/user'
+  return { cwd, db_user, db_name, }
+
+#-----------------------------------------------------------------------------------------------------------
+@psql_run_file    = ( me, path    ) -> @_psql_run me, '-f', path
+@psql_run_command = ( me, command ) -> @_psql_run me, '-c', command
+
+#-----------------------------------------------------------------------------------------------------------
+@_psql_run = ( me, selector, pargument ) -> new Promise ( resolve, reject ) =>
+  validate.intershop_cli_psql_run_selector selector
+  cmd         = @_prepare_commandline me
+  parameters  = [ '-U', cmd.db_user, '-d', cmd.db_name, selector, pargument, ]
+  whisper '^psql_run_file@3367^', "psql #{parameters.join ' '}"
+  settings    =
+    cwd:    cmd.cwd
+    shell:  false
     stdio:  [ 'inherit', 'inherit', 'inherit', ]
-  cp        = CP.spawn cmdline, null, settings
+  cp        = CP.spawn 'psql', parameters, settings
   cp.on 'close', ( code   ) ->
     return resolve 0 if code is 0
     reject new Error "^psql_run_file@34479^ processs exited with code #{code}"
@@ -113,9 +112,11 @@ consider to move to https://caporal.io
       project_path  = d.options.p ? d.options.project ? process.cwd()
       info "^556^ file_path: #{rpr file_path}"
       info "^556^ project_path: #{rpr project_path}"
+      me            = @new_intershop_runner project_path
       # info "^556^ running psql with #{rpr { file: d.file, command: d.command, }}"
-      await @psql_run_file project_path, file_path  if file_path?
-      await @psql_run_command project_path, command if command?
+      await @psql_run_file    me, file_path if file_path?
+      await @psql_run_command me, command   if command?
+      return null
   #.........................................................................................................
   program
     .option '-p --project <project>', "set path to InterShop project (only needed if not current directory)", { global: true, }
@@ -150,10 +151,10 @@ consider to move to https://caporal.io
 ############################################################################################################
 if module is require.main then do =>
   # await @demo()
-  # rpc = await @serve()
-  # await @cli()
-  # await rpc.stop()
-  @demo_intershop_object()
+  rpc = await @serve()
+  await @cli()
+  await rpc.stop()
+  # @demo_intershop_object()
 
 
 
