@@ -49,13 +49,13 @@ types                     = new ( require 'intertype' ).Intertype()
 @[ "INTERTEXT.SLABS.slabjoints_from_text 1" ] = ( T, done ) ->
   INTERTEXT = require '../../../apps/intertext'
   probes_and_matchers = [
-    [ '', { segments: [], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 0 }, null ]
-    [ 'a very fine day', { segments: [ 'a°', 'very°', 'fine°', 'day#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 4 }, null ]
-    [ 'a cro^mu^lent so^lu^tion', { segments: [ 'a°', 'cro=', 'mu=', 'lent°', 'so=', 'lu=', 'tion#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 7 }, null ]
-    [ '䷾Letterpress printing', { segments: [ '䷾Letterpress°', 'printing#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 2 }, null ]
-    [ 'ベルリンBerlin', { segments: [ 'ベ#', 'ル#', 'リ#', 'ン#', 'Berlin#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 5 }, null ]
-    [ '其法用膠泥刻字、薄如錢唇', { segments: [ '其#', '法#', '用#', '膠#', '泥#', '刻#', '字、#', '薄#', '如#', '錢#', '唇#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 11 }, null ]
-    [ 'over-guess^ti^mate', { segments: [ 'over-#', 'guess=', 'ti=', 'mate#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 4 }, null ]
+    [ '', { segments: [], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 0, cursor: 0 }, null ]
+    [ 'a very fine day', { segments: [ 'a°', 'very°', 'fine°', 'day#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 4, cursor: 0 }, null ]
+    [ 'a cro^mu^lent so^lu^tion', { segments: [ 'a°', 'cro-=', 'mu-=', 'lent°', 'so-=', 'lu-=', 'tion#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 7, cursor: 0 }, null ]
+    [ '䷾Letterpress printing', { segments: [ '䷾Letterpress°', 'printing#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 2, cursor: 0 }, null ]
+    [ 'ベルリンBerlin', { segments: [ 'ベ#', 'ル#', 'リ#', 'ン#', 'Berlin#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 5, cursor: 0 }, null ]
+    [ '其法用膠泥刻字、薄如錢唇', { segments: [ '其#', '法#', '用#', '膠#', '泥#', '刻#', '字、#', '薄#', '如#', '錢#', '唇#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 11, cursor: 0 }, null ]
+    [ 'over-guess^ti^mate', { segments: [ 'over-#', 'guess-=', 'ti-=', 'mate#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 4, cursor: 0 }, null ]
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
@@ -69,7 +69,7 @@ types                     = new ( require 'intertype' ).Intertype()
 @[ "INTERTEXT.SLABS.slabjoints_from_text 2" ] = ( T, done ) ->
   INTERTEXT = require '../../../apps/intertext'
   probes_and_matchers = [
-    [ "Tis a consummation, devoutly to be wished.", { segments: [], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 0 }, null ]
+    [ 'Tis a consummation, devoutly to be wished.', { segments: [ 'Tis°', 'a°', 'con-=', 'sum-=', 'ma-=', 'tion,°', 'de-=', 'voutly°', 'to°', 'be°', 'wished.#' ], version: '0.0.1', joints: { blunt: '#', shy: '=', space: '°' }, size: 11, cursor: 0 }, null ]
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
@@ -209,9 +209,9 @@ types                     = new ( require 'intertype' ).Intertype()
 ############################################################################################################
 if module is require.main then do => # await do =>
   # await @_demo()
-  # test @
+  test @
   # test @[ "INTERTEXT.SLABS.slabjoints_from_text 2" ]
-  test @[ "INTERTEXT.SLABS.text_and_joint_from_segment" ]
+  # test @[ "INTERTEXT.SLABS.text_and_joint_from_segment" ]
   # test @[ "INTERTEXT.SLABS.slabjoints_from_text 1" ]
   # test @[ "INTERTEXT.SLABS.assemble (3)" ]
   # test @[ "INTERTEXT.SLABS.assemble (4)" ]
