@@ -76,7 +76,8 @@
             shy: '=',
             space: '°'
           },
-          size: 0
+          size: 0,
+          cursor: 0
         },
         null
       ],
@@ -93,7 +94,8 @@
             shy: '=',
             space: '°'
           },
-          size: 4
+          size: 4,
+          cursor: 0
         },
         null
       ],
@@ -101,11 +103,11 @@
         'a cro^mu^lent so^lu^tion',
         {
           segments: ['a°',
-        'cro=',
-        'mu=',
+        'cro-=',
+        'mu-=',
         'lent°',
-        'so=',
-        'lu=',
+        'so-=',
+        'lu-=',
         'tion#'],
           version: '0.0.1',
           joints: {
@@ -113,7 +115,8 @@
             shy: '=',
             space: '°'
           },
-          size: 7
+          size: 7,
+          cursor: 0
         },
         null
       ],
@@ -128,7 +131,8 @@
             shy: '=',
             space: '°'
           },
-          size: 2
+          size: 2,
+          cursor: 0
         },
         null
       ],
@@ -146,7 +150,8 @@
             shy: '=',
             space: '°'
           },
-          size: 5
+          size: 5,
+          cursor: 0
         },
         null
       ],
@@ -170,7 +175,8 @@
             shy: '=',
             space: '°'
           },
-          size: 11
+          size: 11,
+          cursor: 0
         },
         null
       ],
@@ -178,8 +184,8 @@
         'over-guess^ti^mate',
         {
           segments: ['over-#',
-        'guess=',
-        'ti=',
+        'guess-=',
+        'ti-=',
         'mate#'],
           version: '0.0.1',
           joints: {
@@ -187,7 +193,8 @@
             shy: '=',
             space: '°'
           },
-          size: 4
+          size: 4,
+          cursor: 0
         },
         null
       ]
@@ -212,16 +219,27 @@
     INTERTEXT = require('../../../apps/intertext');
     probes_and_matchers = [
       [
-        "Tis a consummation, devoutly to be wished.",
+        'Tis a consummation, devoutly to be wished.',
         {
-          segments: [],
+          segments: ['Tis°',
+        'a°',
+        'con-=',
+        'sum-=',
+        'ma-=',
+        'tion,°',
+        'de-=',
+        'voutly°',
+        'to°',
+        'be°',
+        'wished.#'],
           version: '0.0.1',
           joints: {
             blunt: '#',
             shy: '=',
             space: '°'
           },
-          size: 0
+          size: 11,
+          cursor: 0
         },
         null
       ]
@@ -383,13 +401,13 @@
   if (module === require.main) {
     (() => { // await do =>
       // await @_demo()
-      // test @
-      // test @[ "INTERTEXT.SLABS.slabjoints_from_text 2" ]
-      return test(this["INTERTEXT.SLABS.text_and_joint_from_segment"]);
+      return test(this);
     })();
   }
 
-  // test @[ "INTERTEXT.SLABS.slabjoints_from_text 1" ]
+  // test @[ "INTERTEXT.SLABS.slabjoints_from_text 2" ]
+// test @[ "INTERTEXT.SLABS.text_and_joint_from_segment" ]
+// test @[ "INTERTEXT.SLABS.slabjoints_from_text 1" ]
 // test @[ "INTERTEXT.SLABS.assemble (3)" ]
 // test @[ "INTERTEXT.SLABS.assemble (4)" ]
 
