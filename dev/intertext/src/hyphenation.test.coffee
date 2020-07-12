@@ -121,13 +121,35 @@ test                      = require 'guy-test'
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo = ->
+  INTERTEXT = require '../../../apps/intertext'
+  text = """Some people prefer to have the right edge of their text look ‘solid’, by setting periods,
+    commas, and other punctuation marks (including inserted hyphens) in the right-hand margin. For example,
+    this practice is occasionally used in contemporary advertising. It is easy to get inserted hyphens into
+    the margin: We simply let the width of the corresponding penalty item be zero. And it is almost as easy
+    to do the same for periods and other symbols, by putting every such character in a box of width zero and
+    adding the actual symbol width to the glue that follows. If no break occurs at this glue, the
+    accumulated width is the same as before; and if a break does occur, the line will be justified as if the
+    period or other symbol were not present. By varying the line width for a paragraph it is possible to
+    flow the text around illustrations, asides, quotes and such. The example below leaves a gap for an
+    illustration by setting the line widths temporarily shorter and then reverting. You can also see that
+    the algorithm chose to hyphenate certain words to achieve acceptable line breaking. The following
+    example is set ragged right. Ragged right is not simply justified text with fixed width inter-word
+    spacing. Instead the algorithm tries to minimize the amount of white space at the end of each sentence
+    over the whole paragraph. It also attempts to reduce the number of words that are "sticking out" of the
+    margin."""
+  hytext = INTERTEXT.HYPH.hyphenate text
+  echo INTERTEXT.HYPH.reveal_hyphens hytext, '&shy;'
+  return null
 
 
 ############################################################################################################
 if module is require.main then do => # await do =>
   # await @_demo()
-  test @
-  help 'ok'
+  # test @
+  # help 'ok'
+  await demo()
   # test @[ "demo" ]
   # test @[ "hyphenate" ]
 
