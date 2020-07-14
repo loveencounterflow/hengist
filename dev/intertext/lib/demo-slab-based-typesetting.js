@@ -1,7 +1,8 @@
 (function() {
-  //###########################################################################################################
+  'use strict';
   var $, $async, $drain, $show, $watch, CND, INTERTEXT, SP, badge, cast, compute_naive_ascii_monospace_width, debug, echo, help, info, isa, jr, rpr, type_of, types, urge, validate, warn;
 
+  //###########################################################################################################
   CND = require('cnd');
 
   rpr = CND.rpr;
