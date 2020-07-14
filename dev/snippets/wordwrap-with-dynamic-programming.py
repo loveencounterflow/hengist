@@ -28,6 +28,8 @@ def solveWordWrap ( word_lengths, word_count, line_width ):
   #.........................................................................................................
   # * extras[ i ][ j ] will have number of extra spaces if words from i to j are put in a single line
   # * lc[ i ][ j ] will have cost of a line which has words from i to j
+  # define two square matrix extraSpace and lineCost of order (size + 1)
+  # define two array totalCost and solution of size (size + 1)
   extras  = [ [ 0 for i in range( word_count + 1 ) ] for i in range( word_count + 1 ) ]
   lc      = [ [ 0 for i in range( word_count + 1 ) ] for i in range( word_count + 1 ) ]
   #.........................................................................................................
@@ -94,11 +96,19 @@ def printSolution( words, line_width, p, word_count ):
 def demo():
   import re
   text            = "Tushar Roy likes to code"
+  text            = "Geeks for Geeks presents word wrap problem"
+  text            = """a b c d e
+                    f g h i j
+                    k l m n o
+                    p
+                    qqqqqqqqq"""
+  text            = re.sub( '\n', ' ', text )
+  text            = re.sub( '\s+', ' ', text )
   words           = re.split( '\s+', text )
   print( "^786^ words:", words )
   word_lengths    = list( len( word ) for word in words )
   word_count      = len( word_lengths )
-  line_width      = 10
+  line_width      = 9
   p               = solveWordWrap( word_lengths, word_count, line_width )
   printSolution( words, line_width, p, word_count )
 
