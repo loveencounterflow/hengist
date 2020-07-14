@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, INTERTEXT, badge, cast, compute_naive_ascii_monospace_width, debug, echo, help, info, isa, jr, rpr, type_of, types, urge, validate, warn;
+  var CND, INTERTEXT, badge, cast, debug, echo, help, info, isa, jr, rpr, type_of, types, urge, validate, warn;
 
   /*
 
@@ -20,7 +20,7 @@
 
   rpr = CND.rpr;
 
-  badge = 'HENGIST/DEV/INTERTEXT/DEMO-SLAB-BASED-TYPESETTING';
+  badge = 'HENGIST/DEV/SNIPPETS/DP-LINE-BREAKING';
 
   debug = CND.get_logger('debug', badge);
 
@@ -50,185 +50,109 @@
   //   $drain }                = SP.export()
   INTERTEXT = require('../../../apps/intertext');
 
-  //-----------------------------------------------------------------------------------------------------------
-  compute_naive_ascii_monospace_width = function(metrics, slab) {
-    /* NOTE Implementation of a very crude estimate of visual string width that assigns each codepoint a
-     width of `1` (which is OK for much of unaccented Latin, Cyrillic, Greek and so on but wrong for
-     combining marks, CJK, Indic Scripts and so on). For demonstration purposes, we iterate over single
-     characters and add up their individual lengths; more precise algorithms might use e.g. Harfbuzz and
-     arrive at values per slab, ignoring the individual character widths altogether which may or may
-     not add up to the resulting width because of diacritics, ligatures, kerning and so on. */
-    var base, base1, chr, chrs, fragment, i, idx, len, ref, width;
-    width = 0;
-    fragment = '';
-    ref = chrs = Array.from(slab);
-    for (idx = i = 0, len = ref.length; i < len; idx = ++i) {
-      chr = ref[idx];
-      fragment += chr;
-      width += ((base = metrics.widths)[chr] != null ? base[chr] : base[chr] = 1);
-      if ((base1 = metrics.widths)[chr] == null) {
-        base1[chr] = width;
-      }
-    }
-    // metrics.widths[ slab ] = width ### NOTE setting of slab width done implicitly ###
-    return width;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // package com.interview.dynamic;
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.demo_looping = function(text) {
-    return new Promise((resolve, reject) => {
-      var base, crib, get_next_line, get_width, i, joint, len, line, metrics, msegment, ref, segment, sjs, slab, width;
-      //.........................................................................................................
-      text = INTERTEXT.HYPH.hyphenate(text);
-      sjs = INTERTEXT.SLABS.slabjoints_from_text(text);
-      //.........................................................................................................
-      /* NOTES
+  // # Date 05/07/2015
+  // # @author tusroy
+  // #
+  // # Video link - https://youtu.be/RORuwHiblPc
+  // #
+  // # Given a sequence of words, and a limit on the number of characters that can be put
+  // # in one line (line width). Put line breaks in the given sequence such that the
+  // # lines are printed neatly
+  // #
+  // # Solution:
+  // # Badness - We define badness has square of empty spaces in every line. So 2 empty space
+  // # on one line gets penalized as 4 (2^2) while 1 each empty space on 2 lines gets
+  // # penalized as 2(1 + 1). So we prefer 1 empty space on different lines over 2 empty space on
+  // # one line.
+  // #
+  // # For every range i,j(words from i to j) find the cost of putting them on one line. If words
+  // # from i to j cannot fit in one line cost will be infinite. Cost is calculated as square of
+  // # empty space left in line after fitting words from i to j.
+  // #
+  // # Then apply this formula to get places where words need to be going on new line.
+  // # minCost[i] = minCost[j] + cost[i][j-1]
+  // # Above formula will try every value of j from i to len and see which one gives minimum
+  // # cost to split words from i to len.
+  // #
+  // # Space complexity is O(n^2)
+  // # Time complexity is O(n^2)
+  //  *
+  //  * References:
+  //  * http://www.geeksforgeeks.org/dynamic-programming-set-18-word-wrap/
+  //  */
+  // public class TextJustification {
 
-      * The widths in `metrics.widths` are to be filled by `compute_width()`;
-      * the catalog may be DB-backed to avoid re-computation of known metrics.
-      * `metrics.line_width` is the wiidth of the line to be typeset next; its units are arbitrary but must be
-        identical to those used in `metrics.widths` in order to make sense.
+  //     public String justify(String words[], int width) {
 
-       */
-      metrics = {
-        compute_width: compute_naive_ascii_monospace_width,
-        line_width: 20,
-        widths: {
-          'a': 1
-        }
-      };
-      //.........................................................................................................
-      /* The crib is where the preset lines go; it may be modified later when it is found that width estimates
-       were incorrect: */
-      crib = {
-        segments: {},
-        lineup: [],
-        galley: []
-      };
-      //.........................................................................................................
-      get_width = function(metrics, slab) {
-        var base;
-        return (base = metrics.widths)[slab] != null ? base[slab] : base[slab] = metrics.compute_width(metrics, slab);
-      };
-      ref = sjs.segments;
-      //.........................................................................................................
-      /* Collecting slab lengths: */
-      for (i = 0, len = ref.length; i < len; i++) {
-        segment = ref[i];
-        [slab, joint] = INTERTEXT.SLABS.text_and_joint_from_segment(segment);
-        width = get_width(metrics, slab);
-        debug(slab.padEnd(10), width);
-        switch (joint) {
-          case '=':
-            if ((msegment = crib.segments[segment]) == null) {
-              msegment = {
-                joint,
-                '#': {slab, width}
-              };
-              slab += '-';
-              width = get_width(metrics, slab);
-              msegment['-'] = {slab, width};
-              crib.segments[segment] = msegment;
-            }
-            break;
-          case '#':
-          case '°':
-            msegment = (base = crib.segments)[segment] != null ? base[segment] : base[segment] = {
-              joint,
-              slab,
-              [joint]: {slab, width}
-            };
-            break;
-          default:
-            throw new Error(`^xxx/demo@4459^ unknown joint ${rpr(joint)}`);
-        }
-        debug(msegment);
-        // cribslab          = new_cribslab crib, slab, joint, width
-        // crib.segments[ segments ] =
-        crib.lineup.push(msegment);
-      }
-      //.........................................................................................................
-      get_next_line = function(crib, current_line = null) {
-        if ((current_line != null) && current_line.segments.length > 0) {
-          crib.galley.push(current_line);
-        }
-        return {
-          $key: '^line',
-          width: 0,
-          segments: []
-        };
-      };
-      //.........................................................................................................
-      /* Distributing lineup over lines: */
-      line = get_next_line(crib);
-      while (true) {
-        if ((msegment = crib.lineup.shift()) == null) {
-          break;
-        }
-        switch (msegment.joint) {
-          case '#':
-            /* TAINT code duplication */
-            if (line.width + msegment['#'].width <= metrics.line_width) {
-              line.segments.push(msegment);
-              line.width += msegment['#'].width;
-            } else {
-              line = get_next_line(crib, line);
-              line.segments.push(msegment);
-              line.width += msegment['#'].width;
-            }
-            break;
-          case '°':
-            /* TAINT code duplication */
-            if (line.width + msegment['°'].width <= metrics.line_width) {
-              line.segments.push(msegment);
-              line.width += msegment['°'].width;
-            } else {
-              line = get_next_line(crib, line);
-              line.segments.push(msegment);
-              line.width += msegment['°'].width;
-            }
-            break;
-          default:
-            warn(`^xxx/demo@4460^ unknown joint ${rpr(msegment, joint)}`);
-        }
-      }
-      // throw new Error "^xxx/demo@4460^ unknown joint #{rpr msegment,joint}"
-      get_next_line(crib, line);
-      //.........................................................................................................
-      help('^337637^', CND.inspect(sjs));
-      help('^337637^', CND.inspect(crib.segments));
-      help('^337637^', CND.inspect(crib));
-      help('^337637^', rpr(metrics));
-      // for slab, width of metrics.widths
-      //   help '^337637^', ( slab.padEnd 20 ), width
-      //.........................................................................................................
-      return null;
-    });
-  };
+  //         int cost[][] = new int[words.length][words.length];
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.demo_piping = function(text) {
-    return new Promise((resolve, reject) => {
-      var pipeline, source;
-      //.........................................................................................................
-      source = [text];
-      pipeline = [];
-      pipeline.push(source);
-      pipeline.push($(function(text, send) {
-        return send(INTERTEXT.HYPH.hyphenate(text));
-      }));
-      pipeline.push($(function(text, send) {
-        return send(INTERTEXT.SLABS.slabjoints_from_text(text));
-      }));
-      pipeline.push($show());
-      pipeline.push($drain(function() {
-        return resolve();
-      }));
-      //.........................................................................................................
-      SP.pull(...pipeline);
-      return null;
-    });
-  };
+  //         //next 2 for loop is used to calculate cost of putting words from
+  //         //i to j in one line. If words don't fit in one line then we put
+  //         //Integer.MAX_VALUE there.
+  //         for(int i=0 ; i < words.length; i++){
+  //             cost[i][i] = width - words[i].length();
+  //             for(int j=i+1; j < words.length; j++){
+  //                 cost[i][j] = cost[i][j-1] - words[j].length() - 1;
+  //             }
+  //         }
+
+  //         for(int i=0; i < words.length; i++){
+  //             for(int j=i; j < words.length; j++){
+  //                 if(cost[i][j] < 0){
+  //                     cost[i][j] = Integer.MAX_VALUE;
+  //                 }else{
+  //                     cost[i][j] = (int)Math.pow(cost[i][j], 2);
+  //                 }
+  //             }
+  //         }
+
+  //         //minCost from i to len is found by trying
+  //         //j between i to len and checking which
+  //         //one has min value
+  //         int minCost[] = new int[words.length];
+  //         int result[] = new int[words.length];
+  //         for(int i = words.length-1; i >= 0 ; i--){
+  //             minCost[i] = cost[i][words.length-1];
+  //             result[i] = words.length;
+  //             for(int j=words.length-1; j > i; j--){
+  //                 if(cost[i][j-1] == Integer.MAX_VALUE){
+  //                     continue;
+  //                 }
+  //                 if(minCost[i] > minCost[j] + cost[i][j-1]){
+  //                     minCost[i] = minCost[j] + cost[i][j-1];
+  //                     result[i] = j;
+  //                 }
+  //             }
+  //         }
+  //         int i = 0;
+  //         int j;
+
+  //         System.out.println("Minimum cost is " + minCost[0]);
+  //         System.out.println("\n");
+  //         //finally put all words with new line added in
+  //         //string buffer and print it.
+  //         StringBuilder builder = new StringBuilder();
+  //         do{
+  //             j = result[i];
+  //             for(int k=i; k < j; k++){
+  //                 builder.append(words[k] + " ");
+  //             }
+  //             builder.append("\n");
+  //             i = j;
+  //         }while(j < words.length);
+
+  //         return builder.toString();
+  //     }
+
+  //     public static void main(String args[]){
+  //         String words1[] = {"Tushar","likes","to","write","code","at", "free", "time"};
+  //         TextJustification awl = new TextJustification();
+  //         System.out.println(awl.justify(words1, 12));
+  //     }
+  // }
 
   //###########################################################################################################
   if (module === require.main) {
