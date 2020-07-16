@@ -66,10 +66,8 @@ def demo():
                     qqqqqqqqq"""
   text            = 'x ' * 200
   text            = "aaaaaa bbb ccccc dd eeee"
-  text            = "000000 111 22222 33 4444 55"
   text            = "000000 111 22222 33 4444 5555555555"
   text            = "aaaaaa bbb ccccc dd eeee xxxxxxxxxxx"
-  text            = "aaaaaa bbb cccccccccc dd eeee xx"
   text            = "aaaaaa bbb ccccccccccc dd eeee xx"
   text            = """Hercules (/ˈhɜːrkjuliːz, -jə-/) is a Roman hero and god. He was the Roman equivalent
                       of the Greek divine hero Heracles, who was the son of Zeus (Roman equivalent Jupiter)
@@ -160,16 +158,19 @@ def demo():
                       your little golden plate nearer to me that we may eat together."
                       """
   # text            = "the im- mediately following week"
-  # text            = "Tushar Roy likes to code"
   # text            = "xxxx x xxxx xxxxx xx xx xxxxx x xx xxxxxxx xxxxx xxx xxxx xxx xxxxx x x xxx xxxx xxx xx xx xxxxxxx x xxxx xx xxxx xxx xxx xx"
-  text            = "supercalifragilistic is a song from the film Mary Poppins, written by the Sherman Brothers."
+  # text            = "aaaaaa bbb cccccccccc dd eeee xx"
+  # text            = "000000 111 22222 33 4444 55"
+  # text            = "000000 111 22222"
+  # text            = "Tushar Roy likes to code"
+  # text            = "supercalifragilistic is a song from the film Mary Poppins, written by the Sherman Brothers."
   text            = re.sub( r'\n', ' ', text )
   text            = re.sub( r'\x20+', ' ', text )
   text            = text.strip()
   _words          = re.split( r'\x20+', text )
   words           = []
   # print( "^786^ words:", words )
-  line_width      = 32
+  line_width      = 25
   for word in _words:
     word_length = len( word )
     if word_length > line_width:

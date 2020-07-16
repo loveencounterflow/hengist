@@ -17,10 +17,8 @@
 infinity = float( 'inf' )
 
 #-----------------------------------------------------------------------------------------------------------
-def get_badness( line_width, local_word_count, extraspace_count ):
-  return extraspace_count # ** 3
-  # return extraspace_count ** 2
-  # return extraspace_count ** 3
+def get_demerit( line_width, local_word_count, extra_spc_count ):
+  return extra_spc_count ** 3
 
 #-----------------------------------------------------------------------------------------------------------
 def new_matrix( x, y = None, value = 0 ):
