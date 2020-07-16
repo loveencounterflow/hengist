@@ -80,7 +80,7 @@ def wrap_monospaced_dp( word_lengths, word_count, line_width ):
   return p
 
 #-----------------------------------------------------------------------------------------------------------
-def get_lines( words, line_width, line_breaks ):
+def lines_from_line_breaks( words, line_breaks ):
   R         = []
   last_idx  = len( words )
   idxs      = list( i - 1 for i in line_breaks )
