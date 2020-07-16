@@ -35,46 +35,54 @@ def new_vector( x, value = 0 ):
 def wrap_monospaced_dp( word_lengths, word_count, line_width ):
   # For simplicity, 1 extra space is used in all below arrays.
   #.........................................................................................................
-  # * `extras[ i ][ j ]` will have number of extra spaces if words from `i` to `j` are put in a single line
+  # * `demerits[ i ][ j ]` will have number of extra spaces if words from `i` to `j` are put in a single
+  #   line
   # * `lc[ i ][ j ]` will have cost of a line which has words from `i` to `j`
-  extras  = new_matrix( word_count, value = 0 )
-  lc      = new_matrix( word_count, value = 0 )
+  demerits          = new_matrix( word_count, value = 0 )
+  extra_spc_counts  = new_matrix( word_count, value = 0 )
+  lc                = new_matrix( word_count, value = 0 )
   #.........................................................................................................
-  # * `c[ i ]` will have total cost of optimal arrangement of words from `1` to `i`
+  # * `optimal_costs[ i ]` will have total cost of optimal arrangement of words from `1` to `i`
   # * `line_breaks[]` contains indexes into `word_lengths`
-  c           = new_vector( word_count, value = 0 )
-  line_breaks = new_vector( word_count, value = 0 )
+  optimal_costs     = new_vector( word_count, value = 0 )
+  line_breaks       = new_vector( word_count, value = 0 )
   #.........................................................................................................
-  # calculate extra spaces in a single line. The value `extras[ i ][ j ]` indicates extra spaces if words
+  # calculate extra spaces in a single line. The value `demerits[ i ][ j ]` indicates extra spaces if words
   # from word number `i` to `j` are placed in a single line
   for i in range( word_count + 1 ):
-    local_word_count  = 1
-    extras[ i ][ i ]  = get_badness( line_width, local_word_count, line_width - word_lengths[ i - 1 ] )
+    extra_spc_counts[ i ][ i ] = line_width - word_lengths[ i - 1 ]
     for j in range( i + 1, word_count + 1 ):
-      local_word_count  = j + 1
-      extraspace_count  = extras[ i ][ j - 1 ] - word_lengths[ j - 1 ] - 1
-      extras[ i ][ j ]  = get_badness( line_width, local_word_count, extraspace_count )
+      extra_spc_counts[ i ][ j ] = extra_spc_counts[ i ][ j - 1 ] - word_lengths[ j - 1 ] - 1
+  #.........................................................................................................
+  # Calculate demerits
+  for i in range( word_count + 1 ):
+    local_word_count    = 1
+    demerits[ i ][ i ]  = get_demerit( line_width, local_word_count, line_width - word_lengths[ i - 1 ] )
+    for j in range( i + 1, word_count + 1 ):
+      local_word_count    = j + 1
+      demerits[ i ][ j ]  = get_demerit( line_width, local_word_count, extra_spc_counts[ i ][ j ] )
   #.........................................................................................................
   # Calculate line cost corresponding to the above calculated extra spaces. The value `lc[ i ][ j ]`
   # indicates cost of putting words from word number `i` to `j` in a single line
   for i in range( word_count + 1 ):
     for j in range( i, word_count + 1 ):
-      if extras[ i ][ j ] < 0:                        lc[ i ][ j ] = infinity
-      elif j == word_count and extras[ i ][ j ] >= 0: lc[ i ][ j ] = 0
-      else:                                           lc[ i ][ j ] = ( extras[ i ][ j ] * extras[ i ][ j ] )
+      demerit = demerits[ i ][ j ]
+      if demerit < 0:                         lc[ i ][ j ] = infinity
+      elif j == word_count and demerit >= 0:  lc[ i ][ j ] = 0
+      else:                                   lc[ i ][ j ] = demerit
   #.........................................................................................................
-  # Calculate minimum cost and find minimum cost arrangement. The value `c[ j ]` indicates optimized cost to
-  # arrange words from word number `1` to `j`.
-  c[ 0 ] = 0
+  # Calculate minimum cost and find minimum cost arrangement. The value `optimal_costs[ j ]` indicates
+  # optimized cost to arrange words from word number `1` to `j`.
+  optimal_costs[ 0 ] = 0
   for j in range( 1, word_count + 1 ):
-    c[ j ] = infinity
+    optimal_costs[ j ] = infinity
     for i in range( 1, j + 1 ):
-      if c[ i - 1 ]   == infinity: continue
-      if lc[ i ][ j ] == infinity: continue
-      xxx = c[ i - 1 ] + lc[ i ][ j ]
-      if xxx >= c[ j ]: continue
-      c[ j ] = xxx
-      line_breaks[ j ] = i
+      if optimal_costs[ i - 1 ]   == infinity: continue
+      if lc[ i ][ j ]             == infinity: continue
+      optimal_cost = optimal_costs[ i - 1 ] + lc[ i ][ j ]
+      if optimal_cost >= optimal_costs[ j ]: continue
+      optimal_costs[  j ] = optimal_cost
+      line_breaks[    j ] = i
   return line_breaks
 
 #-----------------------------------------------------------------------------------------------------------
@@ -82,14 +90,11 @@ def lines_from_line_breaks( words, line_breaks ):
   R         = []
   last_idx  = len( words )
   idxs      = list( i - 1 for i in line_breaks )
-  # print( '^27^', f"line_breaks:   {line_breaks}" )
-  # print( '^27^', f"idxs:          {idxs}" )
   while True:
     if last_idx < 1: break
     first_idx = idxs[ last_idx ]
     line      = words[ first_idx : last_idx ]
     last_idx  = first_idx
-    # print( '^2223^', line, first_idx, last_idx )
     R.append( line )
   R.reverse()
   return R
