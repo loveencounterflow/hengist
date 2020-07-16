@@ -18,26 +18,35 @@ infinity = float( 'inf' )
 import random as _RND
 
 #-----------------------------------------------------------------------------------------------------------
-def get_badness ( line_width, local_word_count, extraspace_count ):
-  return extraspace_count
+def get_badness( line_width, local_word_count, extraspace_count ):
+  return extraspace_count # ** 3
   # return extraspace_count ** 2
   # return extraspace_count ** 3
 
 #-----------------------------------------------------------------------------------------------------------
-def solveWordWrap ( word_lengths, word_count, line_width ):
+def new_matrix( x, y = None, value = 0 ):
+  if y == None: y = x
+  return [ [ value for i in range( x + 1 ) ] for j in range( y + 1 ) ]
+
+#-----------------------------------------------------------------------------------------------------------
+def new_vector( x, value = 0 ):
+  return [ value for i in range( x + 1 ) ]
+
+#-----------------------------------------------------------------------------------------------------------
+def wrap_monospaced_dp( word_lengths, word_count, line_width ):
   # For simplicity, 1 extra space is used in all below arrays.
   #.........................................................................................................
   # * extras[ i ][ j ] will have number of extra spaces if words from i to j are put in a single line
   # * lc[ i ][ j ] will have cost of a line which has words from i to j
   # define two square matrix extraSpace and lineCost of order (size + 1)
   # define two array totalCost and solution of size (size + 1)
-  extras  = [ [ 0 for i in range( word_count + 1 ) ] for i in range( word_count + 1 ) ]
-  lc      = [ [ 0 for i in range( word_count + 1 ) ] for i in range( word_count + 1 ) ]
+  extras  = new_matrix( word_count, value = 0 )
+  lc      = new_matrix( word_count, value = 0 )
   #.........................................................................................................
   # * c[ i ] will have total cost of optimal arrangement of words from 1 to i
   # * p[] is used to print the solution.
-  c       = [ 0, ] * ( word_count + 1 )
-  p       = [ 0, ] * ( word_count + 1 )
+  c       = new_vector( word_count, value = 0 )
+  p       = new_vector( word_count, value = 0 )
   #.........................................................................................................
   # calculate extra spaces in a single line. The value extra[ i ][ j ] indicates extra spaces if words from
   # word number i to j are placed in a single line
@@ -53,16 +62,9 @@ def solveWordWrap ( word_lengths, word_count, line_width ):
   # cost of putting words from word number i to j in a single line
   for i in range( word_count + 1 ):
     for j in range( i, word_count + 1 ):
-      if extras[ i ][ j ] < 0:
-        lc[ i ][ j ] = infinity
-      elif j == word_count and extras[ i ][ j ] >= 0:
-        lc[ i ][ j ] = 0
-      else:
-        lc[ i ][ j ] = ( extras[ i ][ j ] * extras[ i ][ j ] )
-  # for x in extras:
-  #   print( "^2227^ extras:", x )
-  # for x in lc:
-  #   print( "^2227^ lc:", x )
+      if extras[ i ][ j ] < 0:                        lc[ i ][ j ] = infinity
+      elif j == word_count and extras[ i ][ j ] >= 0: lc[ i ][ j ] = 0
+      else:                                           lc[ i ][ j ] = ( extras[ i ][ j ] * extras[ i ][ j ] )
   #.........................................................................................................
   # Calculate minimum cost and find minimum cost arrangement. The value c[ j ] indicates optimized cost to
   # arrange words from word number 1 to j.
@@ -79,7 +81,7 @@ def solveWordWrap ( word_lengths, word_count, line_width ):
   return p
 
 #-----------------------------------------------------------------------------------------------------------
-def justify( words, line_width ):
+def justify_monospaced( words, line_width ):
   #.........................................................................................................
   word_count = len( words )
   if word_count == 0: raise ValueError( "^3322^ expected list with at least 1 element, got empty list" )
@@ -107,18 +109,24 @@ def justify( words, line_width ):
   return ' '.join( words )
 
 #-----------------------------------------------------------------------------------------------------------
-def printSolution( words, line_width, line_breaks ):
+def print_monospaced_paragraph( words, line_width, line_breaks ):
+  reverse   = "\x1b[7m"
+  yellow    = "\x1b[38;05;226m"
+  reset     = "\x1b[0m"
+  #.........................................................................................................
   lines     = get_lines( words, line_width, line_breaks )
   last_idx  = len( lines ) - 1
   print()
+  print( f"{reverse+yellow}   {' ':{line_width}}   {reset}" )
   for idx, line in enumerate( lines ):
     if idx == last_idx:
       line_txt = ' '.join( line )
     else:
-      line_txt = justify( line, line_width )
+      line_txt = justify_monospaced( line, line_width )
     # line_nr = idx + 1
     # print( f"{line_nr:20}|{line_txt:{line_width}}|" )
-    print( f"{'':20} {line_txt:{line_width}}" )
+    print( f"{reverse+yellow} │ {line_txt:{line_width}} │ {reset}" )
+  print( f"{reverse+yellow}   {' ':{line_width}}   {reset}" )
   print()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -154,7 +162,6 @@ def demo():
   text            = "aaaaaa bbb ccccc dd eeee xxxxxxxxxxx"
   text            = "aaaaaa bbb cccccccccc dd eeee xx"
   text            = "aaaaaa bbb ccccccccccc dd eeee xx"
-  text            = "supercalifragilistic is a song from the film Mary Poppins, written by the Sherman Brothers."
   text            = """Hercules (/ˈhɜːrkjuliːz, -jə-/) is a Roman hero and god. He was the Roman equivalent
                       of the Greek divine hero Heracles, who was the son of Zeus (Roman equivalent Jupiter)
                       and the mortal Alcmene. In classical mythology, Hercules is famous for his strength
@@ -243,9 +250,10 @@ def demo():
                       chair he wanted to be on the table, and when he was on the table he said, "Now, push
                       your little golden plate nearer to me that we may eat together."
                       """
-  text            = "the im- mediately following week"
-  text            = "Tushar Roy likes to code"
-  text            = "xxxx x xxxx xxxxx xx xx xxxxx x xx xxxxxxx xxxxx xxx xxxx xxx xxxxx x x xxx xxxx xxx xx xx xxxxxxx x xxxx xx xxxx xxx xxx xx"
+  # text            = "the im- mediately following week"
+  # text            = "Tushar Roy likes to code"
+  # text            = "xxxx x xxxx xxxxx xx xx xxxxx x xx xxxxxxx xxxxx xxx xxxx xxx xxxxx x x xxx xxxx xxx xx xx xxxxxxx x xxxx xx xxxx xxx xxx xx"
+  text            = "supercalifragilistic is a song from the film Mary Poppins, written by the Sherman Brothers."
   text            = re.sub( r'\n', ' ', text )
   text            = re.sub( r'\x20+', ' ', text )
   text            = text.strip()
@@ -262,8 +270,8 @@ def demo():
       words.append( word )
   word_lengths    = list( len( word ) for word in words )
   word_count      = len( word_lengths )
-  p               = solveWordWrap( word_lengths, word_count, line_width )
-  printSolution( words, line_width, p )
+  p               = wrap_monospaced_dp( word_lengths, word_count, line_width )
+  print_monospaced_paragraph( words, line_width, p )
   # print( get_lines( words, line_width, p ) )
 
 ############################################################################################################
