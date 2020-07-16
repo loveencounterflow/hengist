@@ -108,10 +108,18 @@ def justify( words, line_width ):
 
 #-----------------------------------------------------------------------------------------------------------
 def printSolution( words, line_width, line_breaks ):
-  for idx, line in enumerate( get_lines( words, line_width, line_breaks ) ):
-    line_txt = justify( line, line_width )
-    line_nr = idx + 1
-    print( f"{line_nr:20}|{line_txt:{line_width}}|" )
+  lines     = get_lines( words, line_width, line_breaks )
+  last_idx  = len( lines ) - 1
+  print()
+  for idx, line in enumerate( lines ):
+    if idx == last_idx:
+      line_txt = ' '.join( line )
+    else:
+      line_txt = justify( line, line_width )
+    # line_nr = idx + 1
+    # print( f"{line_nr:20}|{line_txt:{line_width}}|" )
+    print( f"{'':20} {line_txt:{line_width}}" )
+  print()
 
 #-----------------------------------------------------------------------------------------------------------
 def get_lines( words, line_width, line_breaks ):
