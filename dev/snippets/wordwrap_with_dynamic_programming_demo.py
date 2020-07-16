@@ -40,7 +40,7 @@ def print_monospaced_paragraph( words, line_width, line_breaks ):
   yellow    = "\x1b[38;05;226m"
   reset     = "\x1b[0m"
   #.........................................................................................................
-  lines     = lines_from_line_breaks( words, line_width, line_breaks )
+  lines     = lines_from_line_breaks( words, line_breaks )
   last_idx  = len( lines ) - 1
   print()
   print( f"{reverse+yellow}   {' ':{line_width}}   {reset}" )
@@ -181,7 +181,7 @@ def demo():
   word_count      = len( word_lengths )
   p               = wrap_monospaced_dp( word_lengths, word_count, line_width )
   print_monospaced_paragraph( words, line_width, p )
-  # print( lines_from_line_breaks( words, line_width, p ) )
+  # print( lines_from_line_breaks( words, p ) )
 
 ############################################################################################################
 if __name__ == '__main__':
