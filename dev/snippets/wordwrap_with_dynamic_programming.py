@@ -30,7 +30,8 @@ def new_vector( x, value = 0 ):
   return [ value for i in range( x + 1 ) ]
 
 #-----------------------------------------------------------------------------------------------------------
-def wrap_monospaced_dp( word_lengths, word_count, line_width ):
+def wrap_monospaced_dp( word_lengths, line_width ):
+  word_count = len( word_lengths )
   # For simplicity, 1 extra space is used in all below arrays.
   #.........................................................................................................
   # * `demerits[ i ][ j ]` will have number of extra spaces if words from `i` to `j` are put in a single
