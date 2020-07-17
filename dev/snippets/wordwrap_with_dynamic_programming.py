@@ -30,6 +30,86 @@ def new_vector( x, value = 0 ):
   return [ value for i in range( x + 1 ) ]
 
 #-----------------------------------------------------------------------------------------------------------
+def wrap_monospaced_greedy_plusminus( words, word_lengths, line_width, avg_spc_width = 2 ):
+  """Greedy algorithm but with a twist: spaces can vary around an average and thus become wider *and*
+  narrower."""
+  R                   = []
+  first_idx           = 0
+  last_idx            = -1
+  stop_idx            = len( word_lengths ) - 1
+  #.........................................................................................................
+  solid_width         = None
+  spc_width           = None
+  this_line_width     = None
+  spc_count           = None
+  #.........................................................................................................
+  def reset():
+    nonlocal solid_width, spc_width, this_line_width, spc_count
+    solid_width         = 0
+    spc_width           = -avg_spc_width
+    this_line_width     = 0
+    spc_count           = -1
+  reset()
+  #.........................................................................................................
+  while True:
+    last_idx         += +1
+    if last_idx > stop_idx: break
+    spc_count        += +1
+    solid_width      += word_lengths[ last_idx ]
+    spc_width        += avg_spc_width
+    this_line_width   = solid_width + spc_width
+    # print( '^2228^', words )
+    # print( '^22287-1^', solid_width, spc_width, this_line_width, last_idx, repr( words[ last_idx ] ), repr( '  '.join( words[ first_idx : last_idx + 1 ] ) ) )
+    #.......................................................................................................
+    if this_line_width < line_width:
+      # print( '^47836-1^' )
+      continue
+    #.......................................................................................................
+    if this_line_width == line_width:
+      R.append( { 'first_idx': first_idx, 'last_idx': last_idx, 'delta': 0, 'too_long': False, } )
+      reset()
+      first_idx = last_idx + 1
+      # print( '^47836-2^' )
+      continue
+    #.......................................................................................................
+    # `this_line_width` exceeds `line_width`, see if we can make do by reducing spaces:
+    if spc_count < 1:
+      R.append( { 'first_idx': first_idx, 'last_idx': last_idx, 'delta': 0, 'too_long': True, } )
+      reset()
+      first_idx = last_idx + 1
+      # print( '^47836-3^' )
+      continue
+    #.......................................................................................................
+    # See whether spaces could be made narrower to accommodate for solid width:
+    delta       = this_line_width - line_width
+    free_width  = spc_count * ( avg_spc_width - 1 )
+    if delta <= free_width:
+      R.append( { 'first_idx': first_idx, 'last_idx': last_idx, 'delta': delta, 'too_long': False, } )
+      # print( '^5576^', f"free_width: {free_width}, delta: {delta}", repr( '  '.join( words[ first_idx : last_idx + 1 ] ) ) )
+      reset()
+      first_idx = last_idx + 1
+      continue
+    #.......................................................................................................
+    # no way to squeeze material onto current line, so remove last segment from line:
+    # print( '^227^', "line width", solid_width + spc_width )
+    spc_count        += -1
+    solid_width      += -word_lengths[ last_idx ]
+    spc_width        += -avg_spc_width
+    this_line_width   = solid_width + spc_width
+    delta             = line_width - this_line_width
+    last_idx         += -1
+    # print( '^22287-2^', solid_width, spc_width, this_line_width, last_idx, repr( '  '.join( words[ first_idx : last_idx + 1 ] ) ) )
+    R.append( { 'first_idx': first_idx, 'last_idx': last_idx, 'delta': delta, 'too_long': False, } )
+    reset()
+    first_idx = last_idx + 1
+    # print( '^47836-4^', R )
+  #.........................................................................................................
+  # last_idx += -1
+  if last_idx - first_idx > 0:
+    R.append( { 'first_idx': first_idx, 'last_idx': last_idx, 'delta': None, 'too_long': False, } )
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
 def wrap_monospaced_dp( word_lengths, line_width ):
   word_count = len( word_lengths )
   # For simplicity, 1 extra space is used in all below arrays.
