@@ -3,6 +3,7 @@
 #-----------------------------------------------------------------------------------------------------------
 from wordwrap_with_dynamic_programming import lines_from_line_breaks
 from wordwrap_with_dynamic_programming import wrap_monospaced_dp
+from wordwrap_with_dynamic_programming import wrap_monospaced_greedy_plusminus
 import random as _RND
 
 
@@ -43,7 +44,7 @@ def print_monospaced_paragraph( words, line_width, line_breaks ):
   lines     = lines_from_line_breaks( words, line_breaks )
   last_idx  = len( lines ) - 1
   print()
-  print( f"{reverse+yellow}   {' ':{line_width}}   {reset}" )
+  print( f"   {reverse+yellow}   {' ':{line_width}}   {reset}" )
   for idx, line in enumerate( lines ):
     if idx == last_idx:
       line_txt = ' '.join( line )
@@ -51,8 +52,34 @@ def print_monospaced_paragraph( words, line_width, line_breaks ):
       line_txt = justify_monospaced( line, line_width )
     # line_nr = idx + 1
     # print( f"{line_nr:20}|{line_txt:{line_width}}|" )
-    print( f"{reverse+yellow} │ {line_txt:{line_width}} │ {reset}" )
-  print( f"{reverse+yellow}   {' ':{line_width}}   {reset}" )
+    print( f"{idx+1:3}{reverse+yellow} │ {line_txt:{line_width}} │ {reset}" )
+  print( f"   {reverse+yellow}   {' ':{line_width}}   {reset}" )
+  print()
+
+#-----------------------------------------------------------------------------------------------------------
+def print_monospaced_paragraph_2( words, line_width, ds ):
+  reverse   = "\x1b[7m"
+  yellow    = "\x1b[38;05;226m"
+  reset     = "\x1b[0m"
+  #.........................................................................................................
+  # line_txt = '  '.join( words[ d[ 'first_idx' ] : d[ 'last_idx' ] + 1 ] )
+  # print( '^337^', f"|{line_txt:{line_width}}|", d )
+  # print( lines_from_line_breaks( words, p ) )
+  #.........................................................................................................
+  last_idx  = len( ds ) - 1
+  print()
+  print( f"   {reverse+yellow}   {' ':{line_width}}   {reset}" )
+  for idx, d in enumerate( ds ):
+    # print( '^3335^', d )
+    line_words = words[ d[ 'first_idx' ] : d[ 'last_idx' ] + 1 ]
+    if idx == last_idx:
+      line_txt = ' '.join( line_words )
+    else:
+      line_txt = justify_monospaced( line_words, line_width )
+    # line_nr = idx + 1
+    # print( f"{line_nr:20}|{line_txt:{line_width}}|" )
+    print( f"{idx+1:3}{reverse+yellow} │ {line_txt:{line_width}} │ {reset}" )
+  print( f"   {reverse+yellow}   {' ':{line_width}}   {reset}" )
   print()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -157,20 +184,36 @@ def demo():
                       chair he wanted to be on the table, and when he was on the table he said, "Now, push
                       your little golden plate nearer to me that we may eat together."
                       """
-  # text            = "the im- mediately following week"
+  text            = """__In olden times when wishing still helped one, there lived a king whose daughters were
+                      all beautiful, but the youngest was so beautiful that the sun itself, which has seen so
+                      much, was astonished whenever it shone in her face.
+
+                      Close by the king's castle lay a great dark forest, and under an old lime-tree in the
+                      forest was a well, and when the day was very warm, the king's child went out into the
+                      forest and sat down by the side of the cool fountain, and when she was bored she took
+                      a golden ball, and threw it up on high and caught it, and this ball was her favorite
+                      plaything.
+                      """
+  # text            = "one two three four five six seven eight nine ten eleven twelve"
   # text            = "xxxx x xxxx xxxxx xx xx xxxxx x xx xxxxxxx xxxxx xxx xxxx xxx xxxxx x x xxx xxxx xxx xx xx xxxxxxx x xxxx xx xxxx xxx xxx xx"
   # text            = "aaaaaa bbb cccccccccc dd eeee xx"
   # text            = "000000 111 22222 33 4444 55"
   # text            = "000000 111 22222"
   # text            = "Tushar Roy likes to code"
   # text            = "supercalifragilistic is a song from the film Mary Poppins, written by the Sherman Brothers."
+  # text            = "supercalifragilistic is a song"
+  text            = """In the early 1990s, the programming lan- guages research com- munity was in an op- timistic mood.
+                      In the recent past, two of its paradigmatic languages —- Scheme and ML —- had for-
+                      malized their seman- tics. For ML, it took the form of a whole book by Mil- ner, et al.
+                      Scheme provided a denota- tional semantics in its standard. Sure- ly, it seemed, it was only a matter of time before all languages went in this direction. What went wrong?"""
   text            = re.sub( r'\n', ' ', text )
   text            = re.sub( r'\x20+', ' ', text )
   text            = text.strip()
   _words          = re.split( r'\x20+', text )
   words           = []
   # print( "^786^ words:", words )
-  line_width      = 25
+  line_width      = 20
+  #.........................................................................................................
   for word in _words:
     word_length = len( word )
     if word_length > line_width:
@@ -179,10 +222,12 @@ def demo():
     else:
       words.append( word )
   word_lengths    = list( len( word ) for word in words )
-  word_count      = len( word_lengths )
-  p               = wrap_monospaced_dp( word_lengths, word_count, line_width )
+  #.........................................................................................................
+  p               = wrap_monospaced_dp( word_lengths, line_width )
   print_monospaced_paragraph( words, line_width, p )
-  # print( lines_from_line_breaks( words, p ) )
+  #.........................................................................................................
+  p               = wrap_monospaced_greedy_plusminus( words, word_lengths, line_width, 2 )
+  print_monospaced_paragraph_2( words, line_width, p )
 
 ############################################################################################################
 if __name__ == '__main__':
