@@ -66,7 +66,7 @@ def wrap_monospaced_greedy_plusminus( words, word_lengths, line_width, avg_spc_w
       continue
     #.......................................................................................................
     if this_line_width == line_width:
-      R.append( { 'first_idx': first_idx, 'last_idx': last_idx, 'delta': 0, 'too_long': False, } )
+      R.append( { 'first_idx': first_idx, 'last_idx': last_idx, } )
       reset()
       first_idx = last_idx + 1
       # print( '^47836-2^' )
@@ -74,7 +74,7 @@ def wrap_monospaced_greedy_plusminus( words, word_lengths, line_width, avg_spc_w
     #.......................................................................................................
     # `this_line_width` exceeds `line_width`, see if we can make do by reducing spaces:
     if spc_count < 1:
-      R.append( { 'first_idx': first_idx, 'last_idx': last_idx, 'delta': 0, 'too_long': True, } )
+      R.append( { 'first_idx': first_idx, 'last_idx': last_idx, } )
       reset()
       first_idx = last_idx + 1
       # print( '^47836-3^' )
@@ -84,7 +84,7 @@ def wrap_monospaced_greedy_plusminus( words, word_lengths, line_width, avg_spc_w
     delta       = this_line_width - line_width
     free_width  = spc_count * ( avg_spc_width - 1 )
     if delta <= free_width:
-      R.append( { 'first_idx': first_idx, 'last_idx': last_idx, 'delta': delta, 'too_long': False, } )
+      R.append( { 'first_idx': first_idx, 'last_idx': last_idx, } )
       # print( '^5576^', f"free_width: {free_width}, delta: {delta}", repr( '  '.join( words[ first_idx : last_idx + 1 ] ) ) )
       reset()
       first_idx = last_idx + 1
@@ -96,17 +96,16 @@ def wrap_monospaced_greedy_plusminus( words, word_lengths, line_width, avg_spc_w
     solid_width      += -word_lengths[ last_idx ]
     spc_width        += -avg_spc_width
     this_line_width   = solid_width + spc_width
-    delta             = line_width - this_line_width
     last_idx         += -1
     # print( '^22287-2^', solid_width, spc_width, this_line_width, last_idx, repr( '  '.join( words[ first_idx : last_idx + 1 ] ) ) )
-    R.append( { 'first_idx': first_idx, 'last_idx': last_idx, 'delta': delta, 'too_long': False, } )
+    R.append( { 'first_idx': first_idx, 'last_idx': last_idx, } )
     reset()
     first_idx = last_idx + 1
     # print( '^47836-4^', R )
   #.........................................................................................................
   # last_idx += -1
   if last_idx - first_idx > 0:
-    R.append( { 'first_idx': first_idx, 'last_idx': last_idx, 'delta': None, 'too_long': False, } )
+    R.append( { 'first_idx': first_idx, 'last_idx': last_idx, } )
   return R
 
 #-----------------------------------------------------------------------------------------------------------
