@@ -41,7 +41,9 @@ OT                        = require 'opentype.js'
 
 #-----------------------------------------------------------------------------------------------------------
 @pathelement_from_glyphidx = ( me, glyph_idx, size = null, transform ) ->
-  @_pathelement_from_pathdata me, ( @pathdata_from_glyphidx me, glyph_idx, size ), transform
+  pathdata = @pathdata_from_glyphidx me, glyph_idx, size
+  return null if ( not pathdata? ) or ( pathdata is '' )
+  @_pathelement_from_pathdata me, pathdata, transform
 
 #-----------------------------------------------------------------------------------------------------------
 @pathdata_from_glyphidx = ( me, glyph_idx, size = null ) ->
@@ -99,7 +101,8 @@ OT                        = require 'opentype.js'
     transform   = [ [ 'translate', x, y, ], ]
     ### TAINT figure out relationship between size and upem ###
     x          += sort.x_advance * size
-    R.push '\n' + "<!--gid:#{sort.gid}-->" + @pathelement_from_glyphidx me, sort.gid, size, transform
+    if ( pathelement = @pathelement_from_glyphidx me, sort.gid, size, transform )?
+      R.push '\n' + "<!--gid:#{sort.gid}-->" + pathelement
   R.push '\n'
   return @_get_svg me, 0, -800, x, 1000, R
 
