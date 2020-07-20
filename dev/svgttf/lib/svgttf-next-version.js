@@ -74,7 +74,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.pathelement_from_glyphidx = function(me, glyph_idx, size = null, transform) {
-    return this._pathelement_from_pathdata(me, this.pathdata_from_glyphidx(me, glyph_idx, size), transform);
+    var pathdata;
+    pathdata = this.pathdata_from_glyphidx(me, glyph_idx, size);
+    if ((pathdata == null) || (pathdata === '')) {
+      return null;
+    }
+    return this._pathelement_from_pathdata(me, pathdata, transform);
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -142,7 +147,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.svg_from_harfbuzz_linotype = function(me, harfbuzz_linotype, size) {
-    var R, i, len, sort, transform, x, y;
+    var R, i, len, pathelement, sort, transform, x, y;
     /* TAINT code duplication */
     validate.svgttf_harfbuzz_linotype(harfbuzz_linotype);
     x = 0;
@@ -153,7 +158,9 @@
       transform = [['translate', x, y]];
       /* TAINT figure out relationship between size and upem */
       x += sort.x_advance * size;
-      R.push('\n' + `<!--gid:${sort.gid}-->` + this.pathelement_from_glyphidx(me, sort.gid, size, transform));
+      if ((pathelement = this.pathelement_from_glyphidx(me, sort.gid, size, transform)) != null) {
+        R.push('\n' + `<!--gid:${sort.gid}-->` + pathelement);
+      }
     }
     R.push('\n');
     return this._get_svg(me, 0, -800, x, 1000, R);

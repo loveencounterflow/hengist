@@ -203,6 +203,194 @@
         x_advance: 0.562
       }
     ];
+    harfbuzz_linotype = [
+      {
+        upem: 1000,
+        gid: 81,
+        cluster: 0,
+        x_advance: 0.511
+      },
+      {
+        upem: 1000,
+        gid: 103,
+        cluster: 1,
+        x_advance: 0.358
+      },
+      {
+        upem: 1000,
+        gid: 105,
+        cluster: 2,
+        x_advance: 0.332
+      },
+      {
+        upem: 1000,
+        gid: 50,
+        cluster: 3,
+        x_advance: 0.46
+      },
+      {
+        upem: 1000,
+        gid: 75,
+        cluster: 4,
+        x_advance: 0.818
+      },
+      {
+        upem: 1000,
+        gid: 84,
+        cluster: 5,
+        x_advance: 0.46
+      },
+      {
+        upem: 1000,
+        gid: 81,
+        cluster: 6,
+        x_advance: 0.511
+      },
+      {
+        upem: 1000,
+        gid: 96,
+        cluster: 7,
+        x_advance: 0.371
+      },
+      {
+        upem: 1000,
+        gid: 50,
+        cluster: 8,
+        x_advance: 0.46
+      },
+      {
+        upem: 1000,
+        gid: 98,
+        cluster: 9,
+        x_advance: 0.409
+      },
+      {
+        upem: 1000,
+        gid: 103,
+        cluster: 10,
+        x_advance: 0.358
+      },
+      {
+        upem: 1000,
+        gid: 81,
+        cluster: 11,
+        x_advance: 0.511
+      },
+      {
+        upem: 1000,
+        gid: 103,
+        cluster: 12,
+        x_advance: 0.358
+      },
+      {
+        upem: 1000,
+        gid: 75,
+        cluster: 13,
+        x_advance: 0.818
+      },
+      {
+        upem: 1000,
+        gid: 81,
+        cluster: 14,
+        x_advance: 0.511
+      },
+      {
+        upem: 1000,
+        gid: 96,
+        cluster: 15,
+        x_advance: 0.371
+      },
+      {
+        upem: 1000,
+        gid: 50,
+        cluster: 16,
+        x_advance: 0.46
+      },
+      {
+        upem: 1000,
+        gid: 98,
+        cluster: 17,
+        x_advance: 0.409
+      },
+      {
+        upem: 1000,
+        gid: 103,
+        cluster: 18,
+        x_advance: 0.358
+      },
+      {
+        upem: 1000,
+        gid: 90,
+        cluster: 19,
+        x_advance: 0.767
+      },
+      {
+        upem: 1000,
+        gid: 109,
+        cluster: 20,
+        x_advance: 0.537
+      },
+      {
+        upem: 1000,
+        gid: 28,
+        cluster: 21,
+        x_advance: 0.511
+      },
+      {
+        upem: 1000,
+        gid: 72,
+        cluster: 22,
+        x_advance: 0.256
+      },
+      {
+        upem: 1000,
+        gid: 66,
+        cluster: 23,
+        x_advance: 0.307
+      },
+      {
+        upem: 1000,
+        gid: 125,
+        cluster: 24,
+        x_advance: 0.562
+      },
+      {
+        upem: 1000,
+        gid: 43,
+        cluster: 26,
+        x_advance: 0.409
+      },
+      {
+        upem: 1000,
+        gid: 28,
+        cluster: 27,
+        x_advance: 0.511
+      },
+      {
+        upem: 1000,
+        gid: 77,
+        cluster: 28,
+        x_advance: 0.562
+      },
+      {
+        upem: 1000,
+        gid: 47,
+        cluster: 29,
+        x_advance: 0.511
+      },
+      {
+        upem: 1000,
+        gid: 109,
+        cluster: 30,
+        x_advance: 0.537
+      },
+      {
+        upem: 1000,
+        gid: 96,
+        cluster: 31,
+        x_advance: 0.422
+      }
+    ];
     //.........................................................................................................
     // echo()
     echo(SVGTTF.svg_from_harfbuzz_linotype(font, harfbuzz_linotype, 1000));
