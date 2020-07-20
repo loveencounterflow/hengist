@@ -29,6 +29,7 @@
     "jake": "^10.8.2",
     "merge-ranges": "^1.0.2",
     "multimix": "^4.1.0",
+    "opentype.js": "^1.3.3",
     "panzoom": "^9.2.5",
     "pg": "^8.3.0",
     "pg-cursor": "^2.3.0",
