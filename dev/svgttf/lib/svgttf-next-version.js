@@ -99,7 +99,7 @@
     x = 0;
     y = 0;
     glyph = me.otjsfont.glyphs.glyphs[glyph_idx];
-    size = me.otjsfont.unitsPerEm;
+    size = size != null ? size : me.otjsfont.unitsPerEm;
     path = glyph.getPath(x, y, size);
     return path.toPathData(path_precision);
   };
@@ -165,6 +165,9 @@
     R.push('\n');
     return this._get_svg(me, 0, -800, x, 1000, R);
   };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.get_svg_symbol_font = function(me) {};
 
   //===========================================================================================================
 
