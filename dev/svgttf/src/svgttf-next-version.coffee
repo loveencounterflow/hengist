@@ -58,7 +58,7 @@ OT                        = require 'opentype.js'
   x               = 0
   y               = 0
   glyph           = me.otjsfont.glyphs.glyphs[ glyph_idx ]
-  size            = me.otjsfont.unitsPerEm
+  size            = size ? me.otjsfont.unitsPerEm
   path            = glyph.getPath x, y, size
   return path.toPathData path_precision
 
