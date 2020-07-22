@@ -105,7 +105,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._pathelement_from_pathdata = function(me, pathdata, transform) {
+  this._pathelement_from_pathdata = function(me, pathdata, transform = null) {
     var tf_txt;
     if ((tf_txt = this._transform_as_text(transform)) != null) {
       return `<path ${tf_txt} d='${pathdata}'/>`;
@@ -122,7 +122,10 @@
     validate.float(y2);
     R = [];
     R.push("<?xml version='1.0' standalone='no'?>");
-    R.push(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='${x1} ${y1} ${x2} ${y2}'>`);
+    R.push("<svg xmlns='http://www.w3.org/2000/svg' ");
+    /* TAINT make optional to adapt to SVG v2, see https://css-tricks.com/on-xlinkhref-being-deprecated-in-svg/ */
+    R.push("xmlns:xlink='http://www.w3.org/1999/xlink' ");
+    R.push(`viewBox='${x1} ${y1} ${x2} ${y2}'>`);
     switch (type = type_of(content)) {
       case 'text':
         R.push(content);
@@ -143,6 +146,26 @@
     pathelement = this.pathelement_from_glyphidx(me, glyph_idx, size); //, transform
     /* TAINT derive coordinates from metrics */
     return this._get_svg(me, 0, -800, 1000, 1000, pathelement);
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._get_coordinate_hints = function(me) {
+    var R;
+    R = [];
+    R.push("<circle cx='0' cy='0' r='20' style='fill:red;'/>");
+    R.push("<circle cx='0' cy='0' r='100' style='fill-opacity:0;stroke:red;stroke-width:10;'/>");
+    R.push("<circle cx='0' cy='0' r='200' style='fill-opacity:0;stroke:red;stroke-width:10;'/>");
+    R.push("<circle cx='0' cy='0' r='300' style='fill-opacity:0;stroke:red;stroke-width:10;'/>");
+    R.push("<circle cx='0' cy='0' r='400' style='fill-opacity:0;stroke:red;stroke-width:10;'/>");
+    R.push("<circle cx='0' cy='0' r='500' style='fill-opacity:0;stroke:red;stroke-width:20;'/>");
+    R.push("<circle cx='0' cy='0' r='600' style='fill-opacity:0;stroke:red;stroke-width:10;'/>");
+    R.push("<circle cx='0' cy='0' r='700' style='fill-opacity:0;stroke:red;stroke-width:10;'/>");
+    R.push("<circle cx='0' cy='0' r='800' style='fill-opacity:0;stroke:red;stroke-width:10;'/>");
+    R.push("<circle cx='0' cy='0' r='900' style='fill-opacity:0;stroke:red;stroke-width:10;'/>");
+    R.push("<circle cx='0' cy='0' r='1000' style='fill-opacity:0;stroke:red;stroke-width:20;'/>");
+    R.push("<line x1='0' y1='0' x2='950' y2='950' style='stroke:red;stroke-width:10;'/>");
+    R.push("<rect x='0' y='0' width='1000' height='1000' style='fill-opacity:0;stroke:red;stroke-width:10;'/>");
+    return R;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -167,7 +190,50 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.get_svg_symbol_font = function(me) {};
+  this.get_svg_symbol_font = function(me) {
+    var R, cid, cid_hex, glyph, glyph_idx, id, name, pathdata, ref, ref1, sfncr, uglyph, vbx_txt, x1, x2, y1, y2;
+    // debug '^33431^', ( k for k of me.otjsfont.glyphs.glyphs ) #.glyphs[ glyph_idx ]
+    // debug '^33431^', ( type_of me.otjsfont.glyphs.glyphs ) #.glyphs[ glyph_idx ]
+    R = [];
+    ref = me.otjsfont.glyphs.glyphs;
+    for (glyph_idx in ref) {
+      glyph = ref[glyph_idx];
+      // continue unless 12 < glyph_idx < 22 ### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ###
+      // debug glyph_idx, glyph
+      /* TAINT must derive bounding box from outline */
+      // glyph.advanceWidth
+      // glyph.leftSideBearing
+      x1 = 0;
+      y1 = -800;
+      x2 = 1000;
+      y2 = 1000;
+      vbx_txt = `'${x1},${y1},${x2},${y2}'`;
+      name = (ref1 = glyph.name) != null ? ref1 : 'UNKNOWN';
+      id = `g${glyph_idx}`;
+      /* TAINT set width, height; */
+      // width='1000' height='1000' viewBox='0,-800,1000,1000'
+      R.push(`<symbol id='${id}' viewBox=${vbx_txt}>`);
+      if ((cid = glyph.unicode) != null) {
+        // glyph.unicodes
+        cid_hex = (cid.toString(16)).padStart(4, '0');
+        sfncr = `u/${cid_hex}`;
+        uglyph = String.fromCodePoint(cid);
+        R.push(`<!-- ${sfncr} ${uglyph} -->`);
+      } else {
+        R.push(`<!-- ${name} -->`);
+      }
+      pathdata = this._fast_pathdata_from_glyphidx(me, glyph_idx, null);
+      /* TAINT might consider to leave out glyphs without outline altogether, but OTOH symbol should not
+         cause 404 not found when requested, so we leave those in FTM: */
+      if ((pathdata != null) && (pathdata !== '')) {
+        R.push(this._pathelement_from_pathdata(me, pathdata));
+      }
+      R.push("</symbol>\n");
+    }
+    /* TAINT we don't need a bounding box at all for an SVG with only symbols */
+    /* TAINT alternatively, may display some sample glyphs in font symbol SVG so to have visual feedback on opening */
+    return this._get_svg(me, 0, 0, 10000, 10000, R);
+  };
 
   //===========================================================================================================
 
