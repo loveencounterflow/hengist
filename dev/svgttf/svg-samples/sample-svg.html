@@ -1,0 +1,24 @@
+<!doctype html>
+
+<style>
+  body {
+    background-color:  #cf68;
+  }
+</style>
+
+<h1>SVG</h1>
+
+<p>thx to https://vecta.io/blog/best-way-to-embed-svg for pointing out that in order to reference SVG
+sample-symbolsfrom an external SVG file, you need to use <tt>&lt;object&gt;</tt> tags instead of &lt;img&gt;
+tags because the latter do not allow references to any extra resources for reasons of security.</p>
+
+<hr><div><tt>./sample-glyph.svg   </tt><br><object type='image/svg+xml' data='./sample-glyph.svg'   style='width:250mm'>(Fallback for SVG here)</object></div>
+<hr><div><tt>./sample-symbols.svg </tt><br><object type='image/svg+xml' data='./sample-symbols.svg' style='width:250mm'>(Fallback for SVG here)</object></div>
+<hr><div><tt>./sample-font.svg    </tt><br><object type='image/svg+xml' data='./sample-font.svg'    style='width:250mm'>(Fallback for SVG here)</object></div>
+
+
+<!--
+<hr><div><tt>./sample-glyph.svg   </tt><br><img src='./sample-glyph.svg'   style='width:250mm'></div>
+<hr><div><tt>./sample-symbols.svg </tt><br><img src='./sample-symbols.svg' style='width:250mm'></div>
+<hr><div><tt>./sample-font.svg    </tt><br><img src='./sample-font.svg'    style='width:250mm'></div>
+ -->
