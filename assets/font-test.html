@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<meta charset=utf8><title>Font Test</title>
+<link href=./reset.css rel=stylesheet>
+<link href=./styles.css rel=stylesheet>
+<style>
+
+@font-face { font-family: 'lmroman10italic';  src: url( './fonts/lmroman10-italic.otf'      ); unicode-range: U+00000-10ffff; }
+@font-face { font-family: 'sunexta1';         src: url( './fonts/sun-exta.ttf'              ); unicode-range: U+00000-10ffff; }
+@font-face { font-family: 'sunexta2';         src: url( './fonts/sun-exta-rewritten.ttf'    ); unicode-range: U+00000-10ffff; }
+@font-face { font-family: 'sunexta3';         src: url( './fonts/sunflower-exta-201903.ttf' ); unicode-range: U+00000-10ffff; }
+/*@font-face { font-family: 'arabic';           src: url( './fonts/DejaVuSerif.ttf'           ); unicode-range: U+00600-0006ff; }*/
+@font-face { font-family: 'arabic';           src: url( './fonts/DejaVuSans.ttf'            ); unicode-range: U+00600-0006ff; }
+
+  html * {
+    /*font-family: 'flow', 'fallback';*/
+    /*font-family: 'lmroman10italic', 'fallback';*/
+    font-family: 'arabic', 'sunexta3', 'fallback';
+    }
+</style>
+
+
+<p><span>affix</span></p>
+<p><span>这个东西</span></p>
+<p><span>xحرف‌بازx</span></p>
+<p><span>حرف‌بازx</span></p>
+
+
