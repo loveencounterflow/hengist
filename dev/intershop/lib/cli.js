@@ -104,10 +104,13 @@
   //-----------------------------------------------------------------------------------------------------------
   this._psql_run = function(me, selector, pargument) {
     return new Promise((resolve, reject) => {
+      /* TAINT how to respect `sudo -u postgres` and similar? */
       var cmd, cp, parameters, settings;
       validate.intershop_cli_psql_run_selector(selector);
       cmd = this._prepare_commandline(me);
       parameters = ['-U', cmd.db_user, '-d', cmd.db_name, selector, pargument];
+      // parameters  = [ '-d', cmd.db_name, selector, pargument, ]
+      debug('^37363^', parameters);
       whisper('^psql_run_file@3367^', `psql ${parameters.join(' ')}`);
       settings = {
         cwd: cmd.cwd,
