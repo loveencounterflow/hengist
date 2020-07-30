@@ -51,7 +51,8 @@ CP                        = require 'child_process'
 
 #-----------------------------------------------------------------------------------------------------------
 @new_intershop_runner = ( project_path ) ->
-  return ( require 'intershop' ).new_intershop project_path
+  INTERSHOP = require 'intershop/lib/intershop'
+  return INTERSHOP.new_intershop project_path
 
 #-----------------------------------------------------------------------------------------------------------
 @_prepare_commandline = ( me ) ->
@@ -68,8 +69,11 @@ CP                        = require 'child_process'
 @_psql_run = ( me, selector, pargument ) -> new Promise ( resolve, reject ) =>
   validate.intershop_cli_psql_run_selector selector
   cmd         = @_prepare_commandline me
+  ### TAINT how to respect `sudo -u postgres` and similar? ###
   parameters  = [ '-U', cmd.db_user, '-d', cmd.db_name, selector, pargument, ]
-  whisper '^psql_run_file@3367^', "psql #{parameters.join ' '}"
+  # parameters  = [ '-d', cmd.db_name, selector, pargument, ]
+  # debug '^37363^', parameters
+  whisper '^psql_run@@3367^', "psql #{parameters.join ' '}"
   settings    =
     cwd:    cmd.cwd
     shell:  false
@@ -98,16 +102,18 @@ CP                        = require 'child_process'
     .option '-c --command <command>', "execute the given command string; may be combined, repeated" #, collect, []
     .action ( d ) =>
       # has_command = true
-      # info "^556^ #{rpr ( key for key of d )}"
-      # info "^556^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', 'logger', 'program', 'command' ]
-      # info "^556^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', ]
+      # info "^5561^ #{rpr ( key for key of d )}"
+      # info "^5562^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', 'logger', 'program', 'command' ]
+      # info "^5563^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', ]
       file_path     = d.options.file    ? null
       command       = d.options.command ? null
       project_path  = d.options.p ? d.options.project ? process.cwd()
-      info "^556^ file_path: #{rpr file_path}"
-      info "^556^ project_path: #{rpr project_path}"
+      info "^5564^ file_path: #{rpr file_path}"
+      info "^5565^ project_path: #{rpr project_path}"
+      # debug '^2223^', rpr command
+      # debug '^2223^', rpr project_path
       me            = @new_intershop_runner project_path
-      # info "^556^ running psql with #{rpr { file: d.file, command: d.command, }}"
+      # info "^5566^ running psql with #{rpr { file: d.file, command: d.command, }}"
       await @psql_run_file    me, file_path if file_path?
       await @psql_run_command me, command   if command?
       return null
@@ -134,13 +140,18 @@ CP                        = require 'child_process'
   PATH          = require 'path'
   project_path  = PATH.resolve PATH.join __dirname, '../../../../hengist'
   project_path  = PATH.resolve PATH.join __dirname, '../../../../interplot'
-  INTERSHOP     = ( require 'intershop' ).new_intershop project_path
-  debug '^334^', ( k for k of INTERSHOP )
-  # debug '^334^', INTERSHOP.PTV_READER
-  for k of INTERSHOP.settings
-    continue if k.startsWith 'os/'
-    echo ( CND.gold k.padEnd 42 ), ( CND.lime INTERSHOP.settings[ k ].value )
+  debug '^3335-1^'
+  INTERSHOP     = require 'intershop/lib/intershop'
+  debug '^3335-2^'
+  shop          = INTERSHOP.new_intershop project_path
+  debug '^3335-3^'
+  keys          = ( k for k of shop.settings ).sort()
+  for key in keys
+    continue if key.startsWith 'os/'
+    setting = shop.settings[ key ]
+    echo ( CND.gold key.padEnd 42 ), ( CND.lime setting.value )
   return null
+
 
 ############################################################################################################
 if module is require.main then do =>
@@ -149,9 +160,5 @@ if module is require.main then do =>
   await @cli()
   await rpc.stop()
   # @demo_intershop_object()
-
-
-
-
 
 
