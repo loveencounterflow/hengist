@@ -7,7 +7,7 @@
 
   rpr = CND.rpr;
 
-  badge = 'HENGIST/DEV/SVGTTF';
+  badge = 'SVGTTF/MAIN';
 
   debug = CND.get_logger('debug', badge);
 
