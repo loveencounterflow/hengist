@@ -626,17 +626,18 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // await @_demo_opentypejs()
-      // test @[ "VNR sort 2" ]
-      // test @[ "VNR sort 3" ]
-      // @[ "VNR sort 3" ]()
-      // test @[ "test VNR._first_nonzero_is_negative()" ]
-      // @[ "SVGTTF.svg_from_glyphidx()" ]()
-      // @[ "SVGTTF.svg_from_harfbuzz_linotype()" ]()
-      return this["SVGTTF.svg_from_harfbuzz_linotype() (using CJK font)"]();
+      return test(this);
     })();
   }
+
+  // await @_demo_opentypejs()
+// test @[ "VNR sort 2" ]
+// test @[ "VNR sort 3" ]
+// @[ "VNR sort 3" ]()
+// test @[ "test VNR._first_nonzero_is_negative()" ]
+// @[ "SVGTTF.svg_from_glyphidx()" ]()
+// @[ "SVGTTF.svg_from_harfbuzz_linotype()" ]()
+// @[ "SVGTTF.svg_from_harfbuzz_linotype() (using CJK font)" ]()
 
 }).call(this);
 

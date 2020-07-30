@@ -245,17 +245,8 @@
     return {path, otjsfont};
   };
 
-  //###########################################################################################################
-  if (require.main === module) {
-    (() => {})();
-  }
-
-  // test @
-// await @_demo_opentypejs()
-// test @[ "VNR sort 2" ]
-// test @[ "VNR sort 3" ]
-// @[ "VNR sort 3" ]()
-// test @[ "test VNR._first_nonzero_is_negative()" ]
+  // ############################################################################################################
+// if require.main is module then do =>
 
 }).call(this);
 

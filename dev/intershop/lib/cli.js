@@ -32,11 +32,6 @@
 
   CP = require('child_process');
 
-  /* TAINT
-
-  consider to move to https://caporal.io
-
-  */
   //-----------------------------------------------------------------------------------------------------------
   this.serve = async function() {
     var IX, Rpc, after, hyphenate, rpc, slabjoints_from_text;
@@ -80,7 +75,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.new_intershop_runner = function(project_path) {
-    return (require('intershop')).new_intershop(project_path);
+    var INTERSHOP;
+    INTERSHOP = require('intershop/lib/intershop');
+    return INTERSHOP.new_intershop(project_path);
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -110,8 +107,8 @@
       cmd = this._prepare_commandline(me);
       parameters = ['-U', cmd.db_user, '-d', cmd.db_name, selector, pargument];
       // parameters  = [ '-d', cmd.db_name, selector, pargument, ]
-      debug('^37363^', parameters);
-      whisper('^psql_run_file@3367^', `psql ${parameters.join(' ')}`);
+      // debug '^37363^', parameters
+      whisper('^psql_run@@3367^', `psql ${parameters.join(' ')}`);
       settings = {
         cwd: cmd.cwd,
         shell: false,
@@ -145,17 +142,19 @@
     }).command('psql', "run psql").option('-f --file <file>', "read commands from file rather than standard input; may be combined, repeated").option('-c --command <command>', "execute the given command string; may be combined, repeated").action(async(d) => { //, collect, [] //, collect, []
       var command, file_path, me, project_path, ref, ref1, ref2, ref3;
       // has_command = true
-      // info "^556^ #{rpr ( key for key of d )}"
-      // info "^556^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', 'logger', 'program', 'command' ]
-      // info "^556^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', ]
+      // info "^5561^ #{rpr ( key for key of d )}"
+      // info "^5562^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', 'logger', 'program', 'command' ]
+      // info "^5563^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', ]
       file_path = (ref = d.options.file) != null ? ref : null;
       command = (ref1 = d.options.command) != null ? ref1 : null;
       project_path = (ref2 = (ref3 = d.options.p) != null ? ref3 : d.options.project) != null ? ref2 : process.cwd();
-      info(`^556^ file_path: ${rpr(file_path)}`);
-      info(`^556^ project_path: ${rpr(project_path)}`);
+      info(`^5564^ file_path: ${rpr(file_path)}`);
+      info(`^5565^ project_path: ${rpr(project_path)}`);
+      // debug '^2223^', rpr command
+      // debug '^2223^', rpr project_path
       me = this.new_intershop_runner(project_path);
       if (file_path != null) {
-        // info "^556^ running psql with #{rpr { file: d.file, command: d.command, }}"
+        // info "^5566^ running psql with #{rpr { file: d.file, command: d.command, }}"
         await this.psql_run_file(me, file_path);
       }
       if (command != null) {
@@ -185,25 +184,30 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_intershop_object = function() {
-    var INTERSHOP, PATH, k, project_path;
+    var INTERSHOP, PATH, i, k, key, keys, len, project_path, setting, shop;
     PATH = require('path');
     project_path = PATH.resolve(PATH.join(__dirname, '../../../../hengist'));
     project_path = PATH.resolve(PATH.join(__dirname, '../../../../interplot'));
-    INTERSHOP = (require('intershop')).new_intershop(project_path);
-    debug('^334^', (function() {
+    debug('^3335-1^');
+    INTERSHOP = require('intershop/lib/intershop');
+    debug('^3335-2^');
+    shop = INTERSHOP.new_intershop(project_path);
+    debug('^3335-3^');
+    keys = ((function() {
       var results;
       results = [];
-      for (k in INTERSHOP) {
+      for (k in shop.settings) {
         results.push(k);
       }
       return results;
-    })());
-// debug '^334^', INTERSHOP.PTV_READER
-    for (k in INTERSHOP.settings) {
-      if (k.startsWith('os/')) {
+    })()).sort();
+    for (i = 0, len = keys.length; i < len; i++) {
+      key = keys[i];
+      if (key.startsWith('os/')) {
         continue;
       }
-      echo(CND.gold(k.padEnd(42)), CND.lime(INTERSHOP.settings[k].value));
+      setting = shop.settings[key];
+      echo(CND.gold(key.padEnd(42)), CND.lime(setting.value));
     }
     return null;
   };
