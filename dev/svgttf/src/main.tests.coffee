@@ -195,7 +195,7 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # await @_demo_opentypejs()
   # test @[ "VNR sort 2" ]
   # test @[ "VNR sort 3" ]
@@ -203,7 +203,7 @@ if require.main is module then do =>
   # test @[ "test VNR._first_nonzero_is_negative()" ]
   # @[ "SVGTTF.svg_from_glyphidx()" ]()
   # @[ "SVGTTF.svg_from_harfbuzz_linotype()" ]()
-  @[ "SVGTTF.svg_from_harfbuzz_linotype() (using CJK font)" ]()
+  # @[ "SVGTTF.svg_from_harfbuzz_linotype() (using CJK font)" ]()
 
 
 
