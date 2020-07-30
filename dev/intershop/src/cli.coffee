@@ -22,12 +22,6 @@ types                     = ( require 'intershop' ).types
   type_of }               = types.export()
 CP                        = require 'child_process'
 
-### TAINT
-
-consider to move to https://caporal.io
-
-###
-
 
 
 #-----------------------------------------------------------------------------------------------------------
