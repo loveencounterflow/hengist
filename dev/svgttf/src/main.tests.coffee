@@ -30,7 +30,7 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
 #-----------------------------------------------------------------------------------------------------------
 @[ "SVGTTF types" ] = ( T, done ) ->
   # SVGTTF = require resolve_project_path 'apps/svgttf'
-  SVGTTF = require './svgttf-next-version'
+  SVGTTF = require '../../../apps/svgttf'
   #.........................................................................................................
   probes_and_matchers = [
     # [ [ 'svgttf_svg_transform_fn', 1, ], "translate(1)", ]
@@ -54,7 +54,7 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
 #-----------------------------------------------------------------------------------------------------------
 @[ "SVGTTF._transform_fn_as_text()" ] = ( T, done ) ->
   # SVGTTF = require resolve_project_path 'apps/svgttf'
-  SVGTTF = require './svgttf-next-version'
+  SVGTTF = require '../../../apps/svgttf'
   #.........................................................................................................
   probes_and_matchers = [
     [ [ 'translate', 1, ], "translate(1)", ]
@@ -74,7 +74,7 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
 #-----------------------------------------------------------------------------------------------------------
 @[ "SVGTTF._transform_as_text" ] = ( T, done ) ->
   # SVGTTF = require resolve_project_path 'apps/svgttf'
-  SVGTTF = require './svgttf-next-version'
+  SVGTTF = require '../../../apps/svgttf'
   #.........................................................................................................
   probes_and_matchers = [
     [ null, null, ]
@@ -92,7 +92,7 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
 #-----------------------------------------------------------------------------------------------------------
 @[ "SVGTTF.pathelement_from_glyphidx()" ] = ( T, done ) ->
   # SVGTTF = require resolve_project_path 'apps/svgttf'
-  SVGTTF  = require './svgttf-next-version'
+  SVGTTF  = require '../../../apps/svgttf'
   font    = SVGTTF.font_from_path resolve_project_path 'assets/svgttf/lmroman10-italic.otf'
   #.........................................................................................................
   # debug SVGTTF.pathelement_from_glyphidx font, 23, 1000
@@ -105,7 +105,7 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
 #-----------------------------------------------------------------------------------------------------------
 @[ "SVGTTF.svg_from_glyphidx()" ] = ( T, done ) ->
   # SVGTTF = require resolve_project_path 'apps/svgttf'
-  SVGTTF  = require './svgttf-next-version'
+  SVGTTF  = require '../../../apps/svgttf'
   font    = SVGTTF.font_from_path resolve_project_path 'assets/svgttf/lmroman10-italic.otf'
   #.........................................................................................................
   echo()
@@ -120,7 +120,7 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
 #-----------------------------------------------------------------------------------------------------------
 @[ "SVGTTF.svg_from_harfbuzz_linotype()" ] = ( T, done ) ->
   # SVGTTF = require resolve_project_path 'apps/svgttf'
-  SVGTTF      = require './svgttf-next-version'
+  SVGTTF      = require '../../../apps/svgttf'
   font        = SVGTTF.font_from_path resolve_project_path 'assets/svgttf/lmroman10-italic.otf'
   glyph_idxs  = []
   #.........................................................................................................
@@ -148,7 +148,7 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
 #-----------------------------------------------------------------------------------------------------------
 @[ "SVGTTF.svg_from_harfbuzz_linotype() (using CJK font)" ] = ( T, done ) ->
   # SVGTTF = require resolve_project_path 'apps/svgttf'
-  SVGTTF      = require './svgttf-next-version'
+  SVGTTF      = require '../../../apps/svgttf'
   # font        = SVGTTF.font_from_path resolve_project_path 'assets/jizura-fonts/FandolKai-Regular.otf'
   font        = SVGTTF.font_from_path resolve_project_path 'assets/jizura-fonts/HanaMinA.otf'
   glyph_idxs  = []
@@ -167,7 +167,7 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
 
 #-----------------------------------------------------------------------------------------------------------
 @_demo_opentypejs = ->
-  SVGTTFv1            = require './svgttf-next-version'
+  SVGTTFv1            = require '../../../apps/svgttf'
   font_path           = resolve_project_path 'assets/jizura-fonts/lmroman10-italic.otf'
   glyph_idx           = 23
   font                = SVGTTFv1.font_from_path font_path
