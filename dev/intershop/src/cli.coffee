@@ -26,18 +26,45 @@ CP                        = require 'child_process'
 
 #-----------------------------------------------------------------------------------------------------------
 @serve = ->
-  Rpc                       = require '../../../apps/intershop-rpc'
-  # DB                        = require '../../../apps/intershop/intershop_modules/db'
-  # DATOM                     = require '../../../apps/datom'
-  IX                        = require '../../../apps/intertext'
-  after                     = ( time_s, f ) -> setTimeout f, time_s * 1000
+  PATH                      = require 'path'
+  INTERSHOP                 = require 'intershop/lib/intershop'
+  RPC                       = require '../../../apps/intershop-rpc'
+  project_path              = PATH.resolve PATH.join __dirname, '../../../../hengist'
+  shop                      = INTERSHOP.new_intershop project_path
+  ### TAINT in the future `db`, `rpc` will be delivered with `new_intershop()` ###
+  # shop.db                   = require '../../../apps/intershop/intershop_modules/db'
+  shop.db                   = require 'intershop/lib/db'
+  shop.rpc                  = await RPC.create { show_counts: true, count_interval: 100, logging: true, }
   #.........................................................................................................
-  rpc = await Rpc.create { show_counts: true, count_interval: 100, logging: true, }
+  rpc_keys  = []
+  rpc_keys  = [ rpc_keys..., ( await @_contract_registered_rpc_methods  shop )..., ]
+  rpc_keys  = [ rpc_keys..., ( await @_contract_demo_rpc_methods        shop )..., ]
+  whisper '-'.repeat 108
+  urge "^4576^ registered RPC keys:"
+  info "^4576^   #{rpc_key}" for rpc_key in rpc_keys
+  whisper '-'.repeat 108
   #.........................................................................................................
-  rpc.contract '^hyphenate',            ( d ) -> hyphenate d.$value
-  rpc.contract '^slabjoints_from_text', ( d ) -> slabjoints_from_text d.$value
-  rpc.contract '^shyphenate',           ( d ) -> slabjoints_from_text hyphenate d.$value
-    # debug '^447^', rpr text
+  return shop
+
+#-----------------------------------------------------------------------------------------------------------
+@_contract_registered_rpc_methods = ( shop ) ->
+  R   = []
+  sql = "select aoid, path from ADDONS.files where target = 'rpc' order by aoid, path;"
+  for addon from await shop.db.query [ sql, ]
+    module        = require addon.path
+    method_names  = ( Object.keys module ).sort()
+    for method_name in method_names
+      do ( module, method_name ) =>
+        rpc_key = "^#{addon.aoid}/#{method_name}"
+        R.push rpc_key
+        shop.rpc.contract rpc_key, ( d ) -> module[ method_name ] d.$value
+        return null
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+@_contract_demo_rpc_methods = ( shop ) ->
+  IX  = require '../../../apps/intertext'
+  R   = []
   #.........................................................................................................
   hyphenate = ( text ) ->
     validate.text text
@@ -47,7 +74,15 @@ CP                        = require 'child_process'
     validate.text text
     return IX.SLABS.slabjoints_from_text text
   #.........................................................................................................
-  return rpc
+  contract = ( key, method ) =>
+    shop.rpc.contract key, method
+    R.push key
+    return null
+  #.........................................................................................................
+  contract '^hyphenate',            ( d ) -> hyphenate d.$value
+  contract '^slabjoints_from_text', ( d ) -> slabjoints_from_text d.$value
+  contract '^shyphenate',           ( d ) -> slabjoints_from_text hyphenate d.$value
+  return R
 
 #-----------------------------------------------------------------------------------------------------------
 @new_intershop_runner = ( project_path ) ->
@@ -87,6 +122,13 @@ CP                        = require 'child_process'
 
 #-----------------------------------------------------------------------------------------------------------
 @cli = ->
+  shop = await @serve()
+  await @_cli()
+  await shop.rpc.stop()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_cli = ->
   { program } = require '@caporal/core'
   #.........................................................................................................
   # program.action ( { logger, } ) => logger.info "Hello, world!"
@@ -140,11 +182,8 @@ CP                        = require 'child_process'
   PATH          = require 'path'
   project_path  = PATH.resolve PATH.join __dirname, '../../../../hengist'
   project_path  = PATH.resolve PATH.join __dirname, '../../../../interplot'
-  debug '^3335-1^'
   INTERSHOP     = require 'intershop/lib/intershop'
-  debug '^3335-2^'
   shop          = INTERSHOP.new_intershop project_path
-  debug '^3335-3^'
   keys          = ( k for k of shop.settings ).sort()
   for key in keys
     continue if key.startsWith 'os/'
@@ -152,13 +191,38 @@ CP                        = require 'child_process'
     echo ( CND.gold key.padEnd 42 ), ( CND.lime setting.value )
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@demo_query_addons = ->
+  PATH          = require 'path'
+  project_path  = PATH.resolve PATH.join __dirname, '../../../../hengist'
+  INTERSHOP     = require 'intershop/lib/intershop'
+  shop          = INTERSHOP.new_intershop project_path
+  ### TAINT in the future `db` will be delivered with `new_intershop()` ###
+  shop.db       = require 'intershop/lib/db'
+  RPC           = require '../../../apps/intershop-rpc'
+  rpc           = await RPC.create { show_counts: true, count_interval: 100, logging: true, }
+  debug ( k for k of shop.db ).sort()
+  # for addon from await shop.db.query [ "select * from ADDONS.addons;", ]
+  #   info addon.aoid
+  #   for file from await shop.db.query [ "select * from ADDONS.files where aoid = $1;", addon.aoid, ]
+  #     urge '  ', ( CND.blue file.target ), ( CND.yellow file.path )
+  sql = "select * from ADDONS.files where target = 'rpc' order by aoid;"
+  for addon from await shop.db.query [ sql, ]
+    module = require addon.path
+    for method_name of module
+      do ( module, method_name ) =>
+        rpc_name = "^#{addon.aoid}/#{method_name}"
+        debug '^3334^', rpc_name
+        rpc.contract rpc_name, ( d ) -> module[ method_name ] d.$value
+        return null
+  return null
+
 
 ############################################################################################################
 if module is require.main then do =>
   # await @demo()
-  rpc = await @serve()
   await @cli()
-  await rpc.stop()
+  # await @demo_query_addons()
   # @demo_intershop_object()
 
 
