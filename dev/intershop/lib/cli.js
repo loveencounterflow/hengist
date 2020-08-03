@@ -34,31 +34,65 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.serve = async function() {
-    var IX, Rpc, after, hyphenate, rpc, slabjoints_from_text;
-    Rpc = require('../../../apps/intershop-rpc');
-    // DB                        = require '../../../apps/intershop/intershop_modules/db'
-    // DATOM                     = require '../../../apps/datom'
-    IX = require('../../../apps/intertext');
-    after = function(time_s, f) {
-      return setTimeout(f, time_s * 1000);
-    };
-    //.........................................................................................................
-    rpc = (await Rpc.create({
+    var INTERSHOP, PATH, RPC, i, len, project_path, rpc_key, rpc_keys, shop;
+    PATH = require('path');
+    INTERSHOP = require('intershop/lib/intershop');
+    RPC = require('../../../apps/intershop-rpc');
+    project_path = PATH.resolve(PATH.join(__dirname, '../../../../hengist'));
+    shop = INTERSHOP.new_intershop(project_path);
+    /* TAINT in the future `db`, `rpc` will be delivered with `new_intershop()` */
+    // shop.db                   = require '../../../apps/intershop/intershop_modules/db'
+    shop.db = require('intershop/lib/db');
+    shop.rpc = (await RPC.create({
       show_counts: true,
       count_interval: 100,
       logging: true
     }));
     //.........................................................................................................
-    rpc.contract('^hyphenate', function(d) {
-      return hyphenate(d.$value);
-    });
-    rpc.contract('^slabjoints_from_text', function(d) {
-      return slabjoints_from_text(d.$value);
-    });
-    rpc.contract('^shyphenate', function(d) {
-      return slabjoints_from_text(hyphenate(d.$value));
-    });
-    // debug '^447^', rpr text
+    rpc_keys = [];
+    rpc_keys = [...rpc_keys, ...((await this._contract_registered_rpc_methods(shop)))];
+    rpc_keys = [...rpc_keys, ...((await this._contract_demo_rpc_methods(shop)))];
+    whisper('-'.repeat(108));
+    urge("^4576^ registered RPC keys:");
+    for (i = 0, len = rpc_keys.length; i < len; i++) {
+      rpc_key = rpc_keys[i];
+      info(`^4576^   ${rpc_key}`);
+    }
+    whisper('-'.repeat(108));
+    //.........................................................................................................
+    return shop;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._contract_registered_rpc_methods = async function(shop) {
+    var R, addon, i, len, method_name, method_names, module, ref, sql;
+    R = [];
+    sql = "select aoid, path from ADDONS.files where target = 'rpc' order by aoid, path;";
+    ref = (await shop.db.query([sql]));
+    for (addon of ref) {
+      module = require(addon.path);
+      method_names = (Object.keys(module)).sort();
+      for (i = 0, len = method_names.length; i < len; i++) {
+        method_name = method_names[i];
+        ((module, method_name) => {
+          var rpc_key;
+          rpc_key = `^${addon.aoid}/${method_name}`;
+          R.push(rpc_key);
+          shop.rpc.contract(rpc_key, function(d) {
+            return module[method_name](d.$value);
+          });
+          return null;
+        })(module, method_name);
+      }
+    }
+    return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._contract_demo_rpc_methods = function(shop) {
+    var IX, R, contract, hyphenate, slabjoints_from_text;
+    IX = require('../../../apps/intertext');
+    R = [];
     //.........................................................................................................
     hyphenate = function(text) {
       validate.text(text);
@@ -70,7 +104,22 @@
       return IX.SLABS.slabjoints_from_text(text);
     };
     //.........................................................................................................
-    return rpc;
+    contract = (key, method) => {
+      shop.rpc.contract(key, method);
+      R.push(key);
+      return null;
+    };
+    //.........................................................................................................
+    contract('^hyphenate', function(d) {
+      return hyphenate(d.$value);
+    });
+    contract('^slabjoints_from_text', function(d) {
+      return slabjoints_from_text(d.$value);
+    });
+    contract('^shyphenate', function(d) {
+      return slabjoints_from_text(hyphenate(d.$value));
+    });
+    return R;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -130,6 +179,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.cli = async function() {
+    var shop;
+    shop = (await this.serve());
+    await this._cli();
+    await shop.rpc.stop();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._cli = async function() {
     var program;
     ({program} = require('@caporal/core'));
     //.........................................................................................................
@@ -188,11 +246,8 @@
     PATH = require('path');
     project_path = PATH.resolve(PATH.join(__dirname, '../../../../hengist'));
     project_path = PATH.resolve(PATH.join(__dirname, '../../../../interplot'));
-    debug('^3335-1^');
     INTERSHOP = require('intershop/lib/intershop');
-    debug('^3335-2^');
     shop = INTERSHOP.new_intershop(project_path);
-    debug('^3335-3^');
     keys = ((function() {
       var results;
       results = [];
@@ -212,18 +267,62 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_query_addons = async function() {
+    var INTERSHOP, PATH, RPC, addon, k, method_name, module, project_path, ref, rpc, shop, sql;
+    PATH = require('path');
+    project_path = PATH.resolve(PATH.join(__dirname, '../../../../hengist'));
+    INTERSHOP = require('intershop/lib/intershop');
+    shop = INTERSHOP.new_intershop(project_path);
+    /* TAINT in the future `db` will be delivered with `new_intershop()` */
+    shop.db = require('intershop/lib/db');
+    RPC = require('../../../apps/intershop-rpc');
+    rpc = (await RPC.create({
+      show_counts: true,
+      count_interval: 100,
+      logging: true
+    }));
+    debug(((function() {
+      var results;
+      results = [];
+      for (k in shop.db) {
+        results.push(k);
+      }
+      return results;
+    })()).sort());
+    // for addon from await shop.db.query [ "select * from ADDONS.addons;", ]
+    //   info addon.aoid
+    //   for file from await shop.db.query [ "select * from ADDONS.files where aoid = $1;", addon.aoid, ]
+    //     urge '  ', ( CND.blue file.target ), ( CND.yellow file.path )
+    sql = "select * from ADDONS.files where target = 'rpc' order by aoid;";
+    ref = (await shop.db.query([sql]));
+    for (addon of ref) {
+      module = require(addon.path);
+      for (method_name in module) {
+        ((module, method_name) => {
+          var rpc_name;
+          rpc_name = `^${addon.aoid}/${method_name}`;
+          debug('^3334^', rpc_name);
+          rpc.contract(rpc_name, function(d) {
+            return module[method_name](d.$value);
+          });
+          return null;
+        })(module, method_name);
+      }
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      var rpc;
       // await @demo()
-      rpc = (await this.serve());
-      await this.cli();
-      return (await rpc.stop());
+      return (await this.cli());
     })();
   }
 
-  // @demo_intershop_object()
+  // await @demo_query_addons()
+// @demo_intershop_object()
 
 }).call(this);
 

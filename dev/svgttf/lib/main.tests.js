@@ -45,7 +45,7 @@
   this["SVGTTF types"] = async function(T, done) {
     var SVGTTF, error, i, len, matcher, probe, probes_and_matchers;
     // SVGTTF = require resolve_project_path 'apps/svgttf'
-    SVGTTF = require('./svgttf-next-version');
+    SVGTTF = require('../../../apps/svgttf');
     //.........................................................................................................
     // [ [ 'svgttf_svg_transform_fn', 1, ], "translate(1)", ]
     probes_and_matchers = [[['svgttf_svg_transform_name', 'translate'], true], [['svgttf_svg_transform_name', 'skewX'], true], [['svgttf_svg_transform_name', 'rotate'], true], [['svgttf_svg_transform_name', 'xxxtranslate'], false], [['svgttf_svg_transform_name', 42], false], [['svgttf_svg_transform_value', 42], true], [['svgttf_svg_transform_value', [42]], true], [['svgttf_svg_transform_value', 'something'], true]];
@@ -68,7 +68,7 @@
   this["SVGTTF._transform_fn_as_text()"] = async function(T, done) {
     var SVGTTF, error, i, len, matcher, probe, probes_and_matchers;
     // SVGTTF = require resolve_project_path 'apps/svgttf'
-    SVGTTF = require('./svgttf-next-version');
+    SVGTTF = require('../../../apps/svgttf');
     //.........................................................................................................
     probes_and_matchers = [[['translate', 1], "translate(1)"], [['translate', 1, 2], "translate(1,2)"], [['xxxtranslate', 1, 2], null, 'not a valid svgttf_svg_transform_fn']];
 //.........................................................................................................
@@ -91,7 +91,7 @@
   this["SVGTTF._transform_as_text"] = async function(T, done) {
     var SVGTTF, error, i, len, matcher, probe, probes_and_matchers;
     // SVGTTF = require resolve_project_path 'apps/svgttf'
-    SVGTTF = require('./svgttf-next-version');
+    SVGTTF = require('../../../apps/svgttf');
     //.........................................................................................................
     probes_and_matchers = [[null, null], [[], null], [[['translate', 1]], "transform='translate(1)'"], [[['translate', 1], ['rotate', 45]], "transform='translate(1) rotate(45)'"]];
 //.........................................................................................................
@@ -111,7 +111,7 @@
   this["SVGTTF.pathelement_from_glyphidx()"] = function(T, done) {
     var SVGTTF, font;
     // SVGTTF = require resolve_project_path 'apps/svgttf'
-    SVGTTF = require('./svgttf-next-version');
+    SVGTTF = require('../../../apps/svgttf');
     font = SVGTTF.font_from_path(resolve_project_path('assets/svgttf/lmroman10-italic.otf'));
     //.........................................................................................................
     // debug SVGTTF.pathelement_from_glyphidx font, 23, 1000
@@ -126,7 +126,7 @@
   this["SVGTTF.svg_from_glyphidx()"] = function(T, done) {
     var SVGTTF, font;
     // SVGTTF = require resolve_project_path 'apps/svgttf'
-    SVGTTF = require('./svgttf-next-version');
+    SVGTTF = require('../../../apps/svgttf');
     font = SVGTTF.font_from_path(resolve_project_path('assets/svgttf/lmroman10-italic.otf'));
     //.........................................................................................................
     echo();
@@ -145,7 +145,7 @@
   this["SVGTTF.svg_from_harfbuzz_linotype()"] = function(T, done) {
     var SVGTTF, font, glyph_idxs, harfbuzz_linotype;
     // SVGTTF = require resolve_project_path 'apps/svgttf'
-    SVGTTF = require('./svgttf-next-version');
+    SVGTTF = require('../../../apps/svgttf');
     font = SVGTTF.font_from_path(resolve_project_path('assets/svgttf/lmroman10-italic.otf'));
     glyph_idxs = [];
     //.........................................................................................................
@@ -410,7 +410,7 @@
   this["SVGTTF.svg_from_harfbuzz_linotype() (using CJK font)"] = function(T, done) {
     var SVGTTF, font, glyph_idxs, harfbuzz_linotype;
     // SVGTTF = require resolve_project_path 'apps/svgttf'
-    SVGTTF = require('./svgttf-next-version');
+    SVGTTF = require('../../../apps/svgttf');
     // font        = SVGTTF.font_from_path resolve_project_path 'assets/jizura-fonts/FandolKai-Regular.otf'
     font = SVGTTF.font_from_path(resolve_project_path('assets/jizura-fonts/HanaMinA.otf'));
     glyph_idxs = [];
@@ -596,7 +596,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this._demo_opentypejs = function() {
     var SVGTTFv1, font, font_path, glyph_idx, output_path, svg_symbol_font_txt;
-    SVGTTFv1 = require('./svgttf-next-version');
+    SVGTTFv1 = require('../../../apps/svgttf');
     font_path = resolve_project_path('assets/jizura-fonts/lmroman10-italic.otf');
     glyph_idx = 23;
     font = SVGTTFv1.font_from_path(font_path);
