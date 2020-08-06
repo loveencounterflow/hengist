@@ -119,7 +119,6 @@
       if (!d.endsWith('\n')) {
         d += '\n';
       }
-      debug('^36635^', path, rpr(d));
       FS.writeSync(fd, d);
       // stream.write d
       return null;
