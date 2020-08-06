@@ -26,7 +26,7 @@
 
 # for line in tailer.follow( file ):
 
-import sys
+# import sys
 import os
 import json
 my_pid = os.getpid()

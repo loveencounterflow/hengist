@@ -77,7 +77,6 @@ tee_write_lines_to_file = ( path ) ->
       return null
     d   = rpr d unless isa.text d
     d  += '\n' unless d.endsWith '\n'
-    debug '^36635^', path, rpr d
     FS.writeSync fd, d
     # stream.write d
     return null
