@@ -57,7 +57,13 @@ CP                        = require 'child_process'
       do ( module, method_name ) =>
         rpc_key = "^#{addon.aoid}/#{method_name}"
         R.push rpc_key
-        shop.rpc.contract rpc_key, ( d ) -> module[ method_name ] d.$value
+        ### TAINT in upcoming intershop-rpc version, all calls must pass a single list with arguments
+        to be applied to the contractor; this will then be done in `shop.rpc.contract(). For the
+        time being, we're applying arguments right here: ###
+        shop.rpc.contract rpc_key, ( d ) ->
+          unless ( type = type_of d.$value ) is 'list'
+            throw new Error "^intershop/cli@3376^ in RPC call to #{rpc_key}, expected a list for d.$value, got a #{type}"
+          module[ method_name ] d.$value...
         return null
   return R
 
