@@ -78,8 +78,15 @@
           var rpc_key;
           rpc_key = `^${addon.aoid}/${method_name}`;
           R.push(rpc_key);
+          /* TAINT in upcoming intershop-rpc version, all calls must pass a single list with arguments
+                 to be applied to the contractor; this will then be done in `shop.rpc.contract(). For the
+                 time being, we're applying arguments right here: */
           shop.rpc.contract(rpc_key, function(d) {
-            return module[method_name](d.$value);
+            var type;
+            if ((type = type_of(d.$value)) !== 'list') {
+              throw new Error(`^intershop/cli@3376^ in RPC call to ${rpc_key}, expected a list for d.$value, got a ${type}`);
+            }
+            return module[method_name](...d.$value);
           });
           return null;
         })(module, method_name);
