@@ -240,14 +240,35 @@ test                      = require 'guy-test'
   #.........................................................................................................
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "HTML _html_from_datom" ] = ( T, done ) ->
+  INTERTEXT                 = require '../../../apps/intertext'
+  { Cupofhtml }             = INTERTEXT.CUPOFHTML
+  settings                  = { newlines: false, }
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ { '$key': '^div' }, '<div></div>', null ]
+    [ { '$key': '<div' }, '<div>', null ]
+    [ { '$key': '>div' }, '</div>', null ]
+    [ { '$key': '^div', foo: 'bar', x: 1234 }, '<div foo=bar x=1234></div>', null ]
+    [ { '$key': '^text', text: "some text here", }, "some text here", null ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      resolve INTERTEXT.CUPOFHTML._html_from_datom settings, probe
+  #.........................................................................................................
+  done()
+  return null
+
 
 ############################################################################################################
-if module is require.main then do => # await do =>
+if module is require.main then do =>
   # debug ( k for k of ( require '../..' ).HTML ).sort().join ' '
   # await @_demo()
   # test @
   # test @[ "CUPOFHTML w/ new tags, specials by way of subclassing" ]
-  test @[ "CUPOFHTML tag with literal text" ]
+  # test @[ "CUPOFHTML tag with literal text" ]
+  test @[ "HTML _html_from_datom" ]
   # test @[ "HTML specials" ]
   # test @[ "CUPOFHTML (1)" ]
   # test @[ "CUPOFHTML (2)" ]
