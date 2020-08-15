@@ -436,14 +436,77 @@
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["HTML _html_from_datom"] = async function(T, done) {
+    var Cupofhtml, INTERTEXT, error, i, len, matcher, probe, probes_and_matchers, settings;
+    INTERTEXT = require('../../../apps/intertext');
+    ({Cupofhtml} = INTERTEXT.CUPOFHTML);
+    settings = {
+      newlines: false
+    };
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        {
+          '$key': '^div'
+        },
+        '<div></div>',
+        null
+      ],
+      [
+        {
+          '$key': '<div'
+        },
+        '<div>',
+        null
+      ],
+      [
+        {
+          '$key': '>div'
+        },
+        '</div>',
+        null
+      ],
+      [
+        {
+          '$key': '^div',
+          foo: 'bar',
+          x: 1234
+        },
+        '<div foo=bar x=1234></div>',
+        null
+      ],
+      [
+        {
+          '$key': '^text',
+          text: "some text here"
+        },
+        "some text here",
+        null
+      ]
+    ];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          return resolve(INTERTEXT.CUPOFHTML._html_from_datom(settings, probe));
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
-    (() => { // await do =>
+    (() => {
       // debug ( k for k of ( require '../..' ).HTML ).sort().join ' '
       // await @_demo()
       // test @
       // test @[ "CUPOFHTML w/ new tags, specials by way of subclassing" ]
-      return test(this["CUPOFHTML tag with literal text"]);
+      // test @[ "CUPOFHTML tag with literal text" ]
+      return test(this["HTML _html_from_datom"]);
     })();
   }
 

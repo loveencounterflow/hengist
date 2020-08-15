@@ -389,7 +389,7 @@
   this.demo_chrsubsetter = async function() {
     var Chrsubsetter, grammar, grammar_notrack;
     //---------------------------------------------------------------------------------------------------------
-    ({Chrsubsetter, grammar} = require('../paragate/lib/chrsubsetter.grammar'));
+    ({Chrsubsetter, grammar} = require('../../../apps/paragate/lib/chrsubsetter.grammar'));
     // g = new Chrsubsetter()
     grammar_notrack = new Chrsubsetter({
       track_lines: false
@@ -404,7 +404,7 @@
   this.demo_css_blocks = async function() {
     var Chrsubsetter, grammar;
     //---------------------------------------------------------------------------------------------------------
-    ({Chrsubsetter} = require('../paragate/lib/chrsubsetter.grammar'));
+    ({Chrsubsetter} = require('../../../apps/paragate/lib/chrsubsetter.grammar'));
     grammar = new Chrsubsetter({
       track_lines: true,
       preset: 'blocks'
@@ -418,7 +418,7 @@
   this.demo_css_planes = async function() {
     var Chrsubsetter, grammar;
     //---------------------------------------------------------------------------------------------------------
-    ({Chrsubsetter} = require('../paragate/lib/chrsubsetter.grammar'));
+    ({Chrsubsetter} = require('../../../apps/paragate/lib/chrsubsetter.grammar'));
     grammar = new Chrsubsetter({
       track_lines: true,
       preset: 'planes'
@@ -432,7 +432,7 @@
   this.demo_css_halfplanes = async function() {
     var Chrsubsetter, grammar;
     //---------------------------------------------------------------------------------------------------------
-    ({Chrsubsetter} = require('../paragate/lib/chrsubsetter.grammar'));
+    ({Chrsubsetter} = require('../../../apps/paragate/lib/chrsubsetter.grammar'));
     grammar = new Chrsubsetter({
       track_lines: true,
       preset: 'halfplanes'
@@ -446,7 +446,7 @@
   this.demo_css_words = async function() {
     var Chrsubsetter, grammar;
     //---------------------------------------------------------------------------------------------------------
-    ({Chrsubsetter} = require('../paragate/lib/chrsubsetter.grammar'));
+    ({Chrsubsetter} = require('../../../apps/paragate/lib/chrsubsetter.grammar'));
     grammar = new Chrsubsetter({
       track_lines: true,
       preset: 'words'
@@ -463,7 +463,7 @@
   this.demo_regex_whitespace_regular = async function() {
     var Rxws_grammar, grammar, k;
     //---------------------------------------------------------------------------------------------------------
-    ({Rxws_grammar, grammar} = require('../paragate/lib/regex-whitespace.grammar'));
+    ({Rxws_grammar, grammar} = require('../../../apps/paragate/lib/regex-whitespace.grammar'));
     // grammar = new Rxws_grammar { as_blocks: false, }
     debug('^3998^', rpr((function() {
       var results;
@@ -489,7 +489,7 @@
   this.demo_regex_whitespace_streaming = async function() {
     var Rxws_grammar, grammar, source;
     //---------------------------------------------------------------------------------------------------------
-    ({Rxws_grammar, grammar} = require('../paragate/lib/regex-whitespace.grammar'));
+    ({Rxws_grammar, grammar} = require('../../../apps/paragate/lib/regex-whitespace.grammar'));
     grammar = new Rxws_grammar({
       name: '$rxws'
     });
@@ -522,10 +522,13 @@
       // await @demo_css_planes()
       // await @demo_css_halfplanes()
       // await @demo_css_words()
-      // await @demo_htmlish()
-      await this.demo_regex_whitespace_regular();
-      return (await this.demo_regex_whitespace_streaming());
+      return (await this.demo_htmlish());
     })();
   }
 
+  // await @demo_regex_whitespace_regular()
+// await @demo_regex_whitespace_streaming()
+
 }).call(this);
+
+//# sourceMappingURL=demo.js.map

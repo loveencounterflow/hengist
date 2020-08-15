@@ -202,11 +202,7 @@
     //.........................................................................................................
     //.......................................................................................................
     program.name('intershop').command('start-rpc-server', "start RPC server (to be accessed from psql scripts)").action((d) => {
-      return new Promise((done) => {
-        return setTimeout((function() {
-          return done();
-        }), 1e6);
-      });
+      return new Promise((done) => {}); // setTimeout ( -> done() ), 1e26
     //.......................................................................................................
     }).command('psql', "run psql").option('-f --file <file>', "read commands from file rather than standard input; may be combined, repeated").option('-c --command <command>', "execute the given command string; may be combined, repeated").action(async(d) => { //, collect, [] //, collect, []
       var command, file_path, me, project_path, ref, ref1, ref2, ref3;
