@@ -123,6 +123,33 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["SVGTTF.pathelement_from_glyphidx()"] = async function(T, done) {
+    var SVGTTF, error, font, i, len, matcher, metrics, probe, probes_and_matchers;
+    SVGTTF = require('../../../apps/svgttf');
+    font = SVGTTF.font_from_path(resolve_project_path('assets/svgttf/lmroman10-italic.otf'));
+    metrics = SVGTTF.get_metrics(font);
+    // ['ascender',             1125, ]
+    // ['baseline',             710, ]
+    // ['defaultWidthX',        511, ]
+    // ['descender',            -290, ]
+    // ['nominalWidthX',        669, ]
+    // ['numGlyphs',            821, ]
+    // ['unitsPerEm',           1000, ]
+    probes_and_matchers = [['ascent', 806], ['upm', 1000], ['baseline', 806], ['descent', 194]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          return resolve(metrics[probe]);
+        });
+      });
+    }
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["SVGTTF.svg_from_glyphidx()"] = function(T, done) {
     var SVGTTF, font;
     // SVGTTF = require resolve_project_path 'apps/svgttf'
@@ -595,12 +622,74 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this._demo_opentypejs = function() {
-    var SVGTTFv1, font, font_path, glyph_idx, output_path, svg_symbol_font_txt;
+    var SVGTTFv1, font, font_path, glyph_idx, i, j, k, ks, len, len1, output_path, svg_symbol_font_txt;
     SVGTTFv1 = require('../../../apps/svgttf');
     font_path = resolve_project_path('assets/jizura-fonts/lmroman10-italic.otf');
     glyph_idx = 23;
     font = SVGTTFv1.font_from_path(font_path);
     // debug SVGTTFv1.pathdata_from_glyphidx font, glyph_idx, 1000
+    echo('-'.repeat(108));
+    // 'encoding'
+    // 'glyphNames'
+    // 'glyphs'
+    // 'names'
+    // 'outlinesFormat'
+    // 'position'
+    // 'substitution'
+    // 'numberOfHMetrics'
+    // 'numGlyphs'
+    ks = ['ascender', 'descender', 'defaultWidthX', 'nominalWidthX', 'unitsPerEm'];
+    for (i = 0, len = ks.length; i < len; i++) {
+      k = ks[i];
+      echo('^3334^', CND.white(k.padEnd(20)), CND.yellow(font.otjsfont[k]));
+    }
+    echo('-'.repeat(108));
+    // 'achVendID'
+    // 'fsSelection'
+    // 'fsType'
+    // 'panose'
+    // 'sFamilyClass'
+    // 'ulCodePageRange1'
+    // 'ulCodePageRange2'
+    // 'ulUnicodeRange1'
+    // 'ulUnicodeRange2'
+    // 'ulUnicodeRange3'
+    // 'ulUnicodeRange4'
+    // 'usBreakChar'
+    // 'usDefaultChar'
+    // 'usFirstCharIndex'
+    // 'usLastCharIndex'
+    // 'usMaxContent'
+    // 'version'
+    ks = ['sCapHeight', 'sTypoAscender', 'sTypoDescender', 'sTypoLineGap', 'sxHeight', 'usWeightClass', 'usWidthClass', 'usWinAscent', 'usWinDescent', 'xAvgCharWidth', 'yStrikeoutPosition', 'yStrikeoutSize', 'ySubscriptXOffset', 'ySubscriptXSize', 'ySubscriptYOffset', 'ySubscriptYSize', 'ySuperscriptXOffset', 'ySuperscriptXSize', 'ySuperscriptYOffset', 'ySuperscriptYSize'];
+    for (j = 0, len1 = ks.length; j < len1; j++) {
+      k = ks[j];
+      echo('^3334^', CND.white(k.padEnd(20)), CND.yellow(font.otjsfont.tables.os2[k]));
+    }
+    debug('^23237^', (function() {
+      var results;
+      results = [];
+      for (k in font.otjsfont) {
+        results.push(k);
+      }
+      return results;
+    })());
+    debug('^23237^', (function() {
+      var results;
+      results = [];
+      for (k in font.otjsfont.tables) {
+        results.push(k);
+      }
+      return results;
+    })());
+    debug('^23237^', (function() {
+      var results;
+      results = [];
+      for (k in font.otjsfont.tables.os2) {
+        results.push(k);
+      }
+      return results;
+    })());
     svg_symbol_font_txt = SVGTTFv1.get_svg_symbol_font(font);
     output_path = '/tmp/sample-font.svg';
     FS.writeFileSync(output_path, svg_symbol_font_txt);
