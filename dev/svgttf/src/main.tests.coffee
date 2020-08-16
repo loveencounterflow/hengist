@@ -103,6 +103,31 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "SVGTTF.get_metrics()" ] = ( T, done ) ->
+  SVGTTF                = require '../../../apps/svgttf'
+  font                  = SVGTTF.font_from_path resolve_project_path 'assets/svgttf/lmroman10-italic.otf'
+  metrics               = SVGTTF.get_metrics font
+  probes_and_matchers   = [
+    # ['ascender',             1125, ]
+    # ['baseline',             710, ]
+    # ['defaultWidthX',        511, ]
+    # ['descender',            -290, ]
+    # ['nominalWidthX',        669, ]
+    # ['numGlyphs',            821, ]
+    # ['unitsPerEm',           1000, ]
+    ['ascent',                806, ]
+    ['upm',                   1000, ]
+    ['baseline',              806, ]
+    ['descent',               194, ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      resolve metrics[ probe ]
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "SVGTTF.svg_from_glyphidx()" ] = ( T, done ) ->
   # SVGTTF = require resolve_project_path 'apps/svgttf'
   SVGTTF  = require '../../../apps/svgttf'
@@ -172,6 +197,70 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
   glyph_idx           = 23
   font                = SVGTTFv1.font_from_path font_path
   # debug SVGTTFv1.pathdata_from_glyphidx font, glyph_idx, 1000
+  echo '-'.repeat 108
+  ks = [
+    # 'encoding'
+    # 'glyphNames'
+    # 'glyphs'
+    # 'names'
+    # 'outlinesFormat'
+    # 'position'
+    # 'substitution'
+    # 'numberOfHMetrics'
+    # 'numGlyphs'
+    'ascender'
+    'descender'
+    'defaultWidthX'
+    'nominalWidthX'
+    'unitsPerEm'
+    ]
+  for k in ks
+    echo '^3334^', ( CND.white k.padEnd 20 ), ( CND.yellow font.otjsfont[ k ] )
+  echo '-'.repeat 108
+  ks = [
+    # 'achVendID'
+    # 'fsSelection'
+    # 'fsType'
+    # 'panose'
+    # 'sFamilyClass'
+    # 'ulCodePageRange1'
+    # 'ulCodePageRange2'
+    # 'ulUnicodeRange1'
+    # 'ulUnicodeRange2'
+    # 'ulUnicodeRange3'
+    # 'ulUnicodeRange4'
+    # 'usBreakChar'
+    # 'usDefaultChar'
+    # 'usFirstCharIndex'
+    # 'usLastCharIndex'
+    # 'usMaxContent'
+    # 'version'
+    'sCapHeight'
+    'sTypoAscender'
+    'sTypoDescender'
+    'sTypoLineGap'
+    'sxHeight'
+    'usWeightClass'
+    'usWidthClass'
+    'usWinAscent'
+    'usWinDescent'
+    'xAvgCharWidth'
+    'yStrikeoutPosition'
+    'yStrikeoutSize'
+    'ySubscriptXOffset'
+    'ySubscriptXSize'
+    'ySubscriptYOffset'
+    'ySubscriptYSize'
+    'ySuperscriptXOffset'
+    'ySuperscriptXSize'
+    'ySuperscriptYOffset'
+    'ySuperscriptYSize'
+    ]
+  for k in ks
+    echo '^3334^', ( CND.white k.padEnd 20 ), ( CND.yellow font.otjsfont.tables.os2[ k ] )
+  debug '^23237^', ( k for k of font.otjsfont )
+  debug '^23237^', ( k for k of font.otjsfont.tables )
+  debug '^23237^', ( k for k of font.otjsfont.tables.os2 )
   svg_symbol_font_txt = SVGTTFv1.get_svg_symbol_font font
   output_path         = '/tmp/sample-font.svg'
   FS.writeFileSync output_path, svg_symbol_font_txt
