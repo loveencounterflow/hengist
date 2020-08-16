@@ -123,7 +123,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["SVGTTF.pathelement_from_glyphidx()"] = async function(T, done) {
+  this["SVGTTF.get_metrics()"] = async function(T, done) {
     var SVGTTF, error, font, i, len, matcher, metrics, probe, probes_and_matchers;
     SVGTTF = require('../../../apps/svgttf');
     font = SVGTTF.font_from_path(resolve_project_path('assets/svgttf/lmroman10-italic.otf'));
