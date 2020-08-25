@@ -25,11 +25,12 @@ CP                        = require 'child_process'
 
 
 #-----------------------------------------------------------------------------------------------------------
-@serve = ->
+@serve = ( project_path = null ) ->
   PATH                      = require 'path'
   INTERSHOP                 = require 'intershop/lib/intershop'
   RPC                       = require '../../../apps/intershop-rpc'
-  project_path              = PATH.resolve PATH.join __dirname, '../../../../hengist'
+  project_path             ?= PATH.resolve PATH.join __dirname, '../../../../hengist'
+  process.chdir project_path
   shop                      = INTERSHOP.new_intershop project_path
   ### TAINT in the future `db`, `rpc` will be delivered with `new_intershop()` ###
   # shop.db                   = require '../../../apps/intershop/intershop_modules/db'
@@ -128,9 +129,9 @@ CP                        = require 'child_process'
 
 #-----------------------------------------------------------------------------------------------------------
 @cli = ->
-  shop = await @serve()
+  # shop = await @serve()
   await @_cli()
-  await shop.rpc.stop()
+  # await shop.rpc.stop()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -156,14 +157,17 @@ CP                        = require 'child_process'
       file_path     = d.options.file    ? null
       command       = d.options.command ? null
       project_path  = d.options.p ? d.options.project ? process.cwd()
+      info "^5564^ d.options: #{rpr d.options}"
       info "^5564^ file_path: #{rpr file_path}"
       info "^5565^ project_path: #{rpr project_path}"
+      shop = await @serve project_path
       # debug '^2223^', rpr command
       # debug '^2223^', rpr project_path
       me            = @new_intershop_runner project_path
       # info "^5566^ running psql with #{rpr { file: d.file, command: d.command, }}"
       await @psql_run_file    me, file_path if file_path?
       await @psql_run_command me, command   if command?
+      await shop.rpc.stop()
       return null
   #.........................................................................................................
   program
