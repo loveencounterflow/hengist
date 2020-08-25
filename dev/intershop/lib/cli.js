@@ -33,12 +33,15 @@
   CP = require('child_process');
 
   //-----------------------------------------------------------------------------------------------------------
-  this.serve = async function() {
-    var INTERSHOP, PATH, RPC, i, len, project_path, rpc_key, rpc_keys, shop;
+  this.serve = async function(project_path = null) {
+    var INTERSHOP, PATH, RPC, i, len, rpc_key, rpc_keys, shop;
     PATH = require('path');
     INTERSHOP = require('intershop/lib/intershop');
     RPC = require('../../../apps/intershop-rpc');
-    project_path = PATH.resolve(PATH.join(__dirname, '../../../../hengist'));
+    if (project_path == null) {
+      project_path = PATH.resolve(PATH.join(__dirname, '../../../../hengist'));
+    }
+    process.chdir(project_path);
     shop = INTERSHOP.new_intershop(project_path);
     /* TAINT in the future `db`, `rpc` will be delivered with `new_intershop()` */
     // shop.db                   = require '../../../apps/intershop/intershop_modules/db'
@@ -186,10 +189,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.cli = async function() {
-    var shop;
-    shop = (await this.serve());
+    // shop = await @serve()
     await this._cli();
-    await shop.rpc.stop();
+    // await shop.rpc.stop()
     return null;
   };
 
@@ -205,7 +207,7 @@
       return new Promise((done) => {}); // setTimeout ( -> done() ), 1e26
     //.......................................................................................................
     }).command('psql', "run psql").option('-f --file <file>', "read commands from file rather than standard input; may be combined, repeated").option('-c --command <command>', "execute the given command string; may be combined, repeated").action(async(d) => { //, collect, [] //, collect, []
-      var command, file_path, me, project_path, ref, ref1, ref2, ref3;
+      var command, file_path, me, project_path, ref, ref1, ref2, ref3, shop;
       // has_command = true
       // info "^5561^ #{rpr ( key for key of d )}"
       // info "^5562^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', 'logger', 'program', 'command' ]
@@ -213,8 +215,10 @@
       file_path = (ref = d.options.file) != null ? ref : null;
       command = (ref1 = d.options.command) != null ? ref1 : null;
       project_path = (ref2 = (ref3 = d.options.p) != null ? ref3 : d.options.project) != null ? ref2 : process.cwd();
+      info(`^5564^ d.options: ${rpr(d.options)}`);
       info(`^5564^ file_path: ${rpr(file_path)}`);
       info(`^5565^ project_path: ${rpr(project_path)}`);
+      shop = (await this.serve(project_path));
       // debug '^2223^', rpr command
       // debug '^2223^', rpr project_path
       me = this.new_intershop_runner(project_path);
@@ -225,6 +229,7 @@
       if (command != null) {
         await this.psql_run_command(me, command);
       }
+      await shop.rpc.stop();
       return null;
     });
     //.........................................................................................................
