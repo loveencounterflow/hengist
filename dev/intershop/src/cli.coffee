@@ -97,7 +97,7 @@ CP                        = require 'child_process'
   return INTERSHOP.new_intershop project_path
 
 #-----------------------------------------------------------------------------------------------------------
-@_prepare_commandline = ( me ) ->
+@_prepare_psql_commandline = ( me ) ->
   cwd       = me.get 'intershop/host/path'
   db_name   = me.get 'intershop/db/name'
   db_user   = me.get 'intershop/db/user'
@@ -110,7 +110,7 @@ CP                        = require 'child_process'
 #-----------------------------------------------------------------------------------------------------------
 @_psql_run = ( me, selector, pargument ) -> new Promise ( resolve, reject ) =>
   validate.intershop_cli_psql_run_selector selector
-  cmd         = @_prepare_commandline me
+  cmd         = @_prepare_psql_commandline me
   ### TAINT how to respect `sudo -u postgres` and similar? ###
   parameters  = [ '-U', cmd.db_user, '-d', cmd.db_name, selector, pargument, ]
   # parameters  = [ '-d', cmd.db_name, selector, pargument, ]
@@ -128,11 +128,29 @@ CP                        = require 'child_process'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@nodexh_run_file = ( project_path, file_path ) -> new Promise ( resolve, reject ) =>
+  parameters  = [ file_path, ]
+  whisper '^psql_run@@3367^', "psql #{parameters.join ' '}"
+  settings    =
+    cwd:    project_path
+    shell:  false
+    stdio:  [ 'inherit', 'inherit', 'inherit', ]
+  cp        = CP.spawn 'nodexh', parameters, settings
+  cp.on 'close', ( code   ) ->
+    return resolve 0 if code is 0
+    reject new Error "^nodexh_run_file@34479^ processs exited with code #{code}"
+  cp.on 'error', ( error  ) -> reject error
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @cli = ->
   # shop = await @serve()
   await @_cli()
   # await shop.rpc.stop()
   return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_cli_get_project_path = ( d ) -> d.options.p ? d.options.project ? process.cwd()
 
 #-----------------------------------------------------------------------------------------------------------
 @_cli = ->
@@ -144,7 +162,9 @@ CP                        = require 'child_process'
     .name 'intershop'
     #.......................................................................................................
     .command 'start-rpc-server', "start RPC server (to be accessed from psql scripts)"
-    .action ( d ) => new Promise ( done ) => # setTimeout ( -> done() ), 1e26
+    .action ( d ) => new Promise ( done ) =>
+      project_path  = d.options.p ? d.options.project ? process.cwd()
+      shop          = await @serve project_path
     #.......................................................................................................
     .command 'psql', "run psql"
     .option '-f --file <file>',       "read commands from file rather than standard input; may be combined, repeated" #, collect, []
@@ -156,7 +176,7 @@ CP                        = require 'child_process'
       # info "^5563^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', ]
       file_path     = d.options.file    ? null
       command       = d.options.command ? null
-      project_path  = d.options.p ? d.options.project ? process.cwd()
+      project_path  = @_cli_get_project_path d
       info "^5564^ d.options: #{rpr d.options}"
       info "^5564^ file_path: #{rpr file_path}"
       info "^5565^ project_path: #{rpr project_path}"
@@ -167,6 +187,18 @@ CP                        = require 'child_process'
       # info "^5566^ running psql with #{rpr { file: d.file, command: d.command, }}"
       await @psql_run_file    me, file_path if file_path?
       await @psql_run_command me, command   if command?
+      await shop.rpc.stop()
+      return null
+    #.......................................................................................................
+    .command 'nodexh', "run nodexh"
+    .argument '<file>', "file to run"
+    .action ( d ) =>
+      file_path     = d.args.file
+      project_path  = @_cli_get_project_path d
+      info "^5565^ file_path:     #{rpr file_path}"
+      info "^5565^ project_path:  #{rpr project_path}"
+      shop          = await @serve project_path
+      await @nodexh_run_file project_path, file_path
       await shop.rpc.stop()
       return null
   #.........................................................................................................
