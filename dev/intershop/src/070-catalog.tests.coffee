@@ -28,26 +28,32 @@ FS                        = require 'fs'
 resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..', path
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "SVGTTF types" ] = ( T, done ) ->
-  # SVGTTF = require resolve_project_path 'apps/svgttf'
-  SVGTTF = require '../../../apps/svgttf'
+@[ "CATALOG.parse_object_identifier" ] = ( T, done ) ->
+  db = require 'intershop/lib/db'
   #.........................................................................................................
   probes_and_matchers = [
-    # [ [ 'svgttf_svg_transform_fn', 1, ], "translate(1)", ]
-    [ [ 'svgttf_svg_transform_name', 'translate', ], true, ]
-    [ [ 'svgttf_svg_transform_name', 'skewX', ], true, ]
-    [ [ 'svgttf_svg_transform_name', 'rotate', ], true, ]
-    [ [ 'svgttf_svg_transform_name', 'xxxtranslate', ], false, ]
-    [ [ 'svgttf_svg_transform_name', 42, ], false, ]
-    [ [ 'svgttf_svg_transform_value', 42, ], true, ]
-    [ [ 'svgttf_svg_transform_value', [ 42, ], ], true, ]
-    [ [ 'svgttf_svg_transform_value', 'something', ], true, ]
+    [ 'x.foo',      { ucschema: 'X',    name: 'foo',      fqname: 'X.foo', }, ]
+    [ 'X.foo',      { ucschema: 'X',    name: 'foo',      fqname: 'X.foo', }, ]
+    [ '"X.foo"',    { ucschema: null,   name: '"X.foo"',  fqname: '"X.foo"', }, ]
+    [ 'X',          { ucschema: null,   name: 'x',        fqname: 'x', }, ]
+    [ 'X."20"',     { ucschema: 'X',    name: '"20"',     fqname: 'X."20"', }, ]
+    [ 'all',            null, 'CAT22 reserved word',                  ]
+    [ 'select',         null, "CAT22 reserved word: 'select'"         ]
+    [ 'select.x',       null, "CAT22 reserved word: 'select'"         ]
+    [ 'x.select',       null, "CAT22 reserved word: 'select'"         ]
+    [ 'X.with space',   null, 'string is not a valid identifier'      ]
+    [ 'X.""',           null, 'string is not a valid identifier'      ]
+    [ 'X.SCHEMA.F',     null, "expected a text with at most one dot"  ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      [ type, value, ] = probe
-      resolve SVGTTF.types.isa type, value
+      # debug '^766^', { error, }
+      ### TAINT why do we have to do explicit error handling here? ###
+      try
+        result = await db.query_one [ """select * from CATALOG.parse_object_identifier( $1 );""", probe, ]
+      catch error then return reject new Error error.message
+      resolve result
   done()
   return null
 
