@@ -42,21 +42,88 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["SVGTTF types"] = async function(T, done) {
-    var SVGTTF, error, i, len, matcher, probe, probes_and_matchers;
-    // SVGTTF = require resolve_project_path 'apps/svgttf'
-    SVGTTF = require('../../../apps/svgttf');
+  this["CATALOG.parse_object_identifier"] = async function(T, done) {
+    var db, error, i, len, matcher, probe, probes_and_matchers;
+    db = require('intershop/lib/db');
     //.........................................................................................................
-    // [ [ 'svgttf_svg_transform_fn', 1, ], "translate(1)", ]
-    probes_and_matchers = [[['svgttf_svg_transform_name', 'translate'], true], [['svgttf_svg_transform_name', 'skewX'], true], [['svgttf_svg_transform_name', 'rotate'], true], [['svgttf_svg_transform_name', 'xxxtranslate'], false], [['svgttf_svg_transform_name', 42], false], [['svgttf_svg_transform_value', 42], true], [['svgttf_svg_transform_value', [42]], true], [['svgttf_svg_transform_value', 'something'], true]];
+    probes_and_matchers = [
+      [
+        'x.foo',
+        {
+          ucschema: 'X',
+          name: 'foo',
+          fqname: 'X.foo'
+        }
+      ],
+      [
+        'X.foo',
+        {
+          ucschema: 'X',
+          name: 'foo',
+          fqname: 'X.foo'
+        }
+      ],
+      [
+        '"X.foo"',
+        {
+          ucschema: null,
+          name: '"X.foo"',
+          fqname: '"X.foo"'
+        }
+      ],
+      [
+        'X',
+        {
+          ucschema: null,
+          name: 'x',
+          fqname: 'x'
+        }
+      ],
+      [
+        'X."20"',
+        {
+          ucschema: 'X',
+          name: '"20"',
+          fqname: 'X."20"'
+        }
+      ],
+      ['all',
+      null,
+      'CAT22 reserved word'],
+      ['select',
+      null,
+      "CAT22 reserved word: 'select'"],
+      ['select.x',
+      null,
+      "CAT22 reserved word: 'select'"],
+      ['x.select',
+      null,
+      "CAT22 reserved word: 'select'"],
+      ['X.with space',
+      null,
+      'string is not a valid identifier'],
+      ['X.""',
+      null,
+      'string is not a valid identifier'],
+      ['X.SCHEMA.F',
+      null,
+      "expected a text with at most one dot"]
+    ];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
-        return new Promise(function(resolve, reject) {
-          var type, value;
-          [type, value] = probe;
-          return resolve(SVGTTF.types.isa(type, value));
+        return new Promise(async function(resolve, reject) {
+          var result;
+          try {
+            // debug '^766^', { error, }
+            /* TAINT why do we have to do explicit error handling here? */
+            result = (await db.query_one([`select * from CATALOG.parse_object_identifier( $1 );`, probe]));
+          } catch (error1) {
+            error = error1;
+            return reject(new Error(error.message));
+          }
+          return resolve(result);
         });
       });
     }

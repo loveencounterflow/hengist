@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, CP, alert, badge, cast, debug, echo, help, info, isa, rpr, type_of, types, urge, validate, warn, whisper;
+  var CND, CP, alert, badge, cast, debug, defer, echo, help, info, isa, rpr, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -31,6 +31,8 @@
   ({isa, validate, cast, type_of} = types.export());
 
   CP = require('child_process');
+
+  defer = setImmediate;
 
   //-----------------------------------------------------------------------------------------------------------
   this.serve = async function(project_path = null) {
@@ -276,6 +278,9 @@
       shop = (await this.serve(project_path));
       await this.nodexh_run_file(project_path, file_path);
       await shop.rpc.stop();
+      await defer(function() {
+        return process.exit();
+      });
       return null;
     });
     //.........................................................................................................
