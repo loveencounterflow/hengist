@@ -21,7 +21,7 @@ types                     = ( require 'intershop' ).types
   cast
   type_of }               = types.export()
 CP                        = require 'child_process'
-
+defer                     = setImmediate
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -200,6 +200,7 @@ CP                        = require 'child_process'
       shop          = await @serve project_path
       await @nodexh_run_file project_path, file_path
       await shop.rpc.stop()
+      await defer -> process.exit()
       return null
   #.........................................................................................................
   program
