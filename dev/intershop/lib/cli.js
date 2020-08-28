@@ -140,7 +140,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._prepare_commandline = function(me) {
+  this._prepare_psql_commandline = function(me) {
     var cwd, db_name, db_user;
     cwd = me.get('intershop/host/path');
     db_name = me.get('intershop/db/name');
@@ -163,7 +163,7 @@
       /* TAINT how to respect `sudo -u postgres` and similar? */
       var cmd, cp, parameters, settings;
       validate.intershop_cli_psql_run_selector(selector);
-      cmd = this._prepare_commandline(me);
+      cmd = this._prepare_psql_commandline(me);
       parameters = ['-U', cmd.db_user, '-d', cmd.db_name, selector, pargument];
       // parameters  = [ '-d', cmd.db_name, selector, pargument, ]
       // debug '^37363^', parameters
@@ -188,11 +188,42 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.nodexh_run_file = function(project_path, file_path) {
+    return new Promise((resolve, reject) => {
+      var cp, parameters, settings;
+      parameters = [file_path];
+      whisper('^psql_run@@3367^', `psql ${parameters.join(' ')}`);
+      settings = {
+        cwd: project_path,
+        shell: false,
+        stdio: ['inherit', 'inherit', 'inherit']
+      };
+      cp = CP.spawn('nodexh', parameters, settings);
+      cp.on('close', function(code) {
+        if (code === 0) {
+          return resolve(0);
+        }
+        return reject(new Error(`^nodexh_run_file@34479^ processs exited with code ${code}`));
+      });
+      cp.on('error', function(error) {
+        return reject(error);
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.cli = async function() {
     // shop = await @serve()
     await this._cli();
     // await shop.rpc.stop()
     return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._cli_get_project_path = function(d) {
+    var ref, ref1;
+    return (ref = (ref1 = d.options.p) != null ? ref1 : d.options.project) != null ? ref : process.cwd();
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -204,17 +235,21 @@
     //.........................................................................................................
     //.......................................................................................................
     program.name('intershop').command('start-rpc-server', "start RPC server (to be accessed from psql scripts)").action((d) => {
-      return new Promise((done) => {}); // setTimeout ( -> done() ), 1e26
+      return new Promise(async(done) => {
+        var project_path, ref, ref1, shop;
+        project_path = (ref = (ref1 = d.options.p) != null ? ref1 : d.options.project) != null ? ref : process.cwd();
+        return shop = (await this.serve(project_path));
+      });
     //.......................................................................................................
     }).command('psql', "run psql").option('-f --file <file>', "read commands from file rather than standard input; may be combined, repeated").option('-c --command <command>', "execute the given command string; may be combined, repeated").action(async(d) => { //, collect, [] //, collect, []
-      var command, file_path, me, project_path, ref, ref1, ref2, ref3, shop;
+      var command, file_path, me, project_path, ref, ref1, shop;
       // has_command = true
       // info "^5561^ #{rpr ( key for key of d )}"
       // info "^5562^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', 'logger', 'program', 'command' ]
       // info "^5563^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', ]
       file_path = (ref = d.options.file) != null ? ref : null;
       command = (ref1 = d.options.command) != null ? ref1 : null;
-      project_path = (ref2 = (ref3 = d.options.p) != null ? ref3 : d.options.project) != null ? ref2 : process.cwd();
+      project_path = this._cli_get_project_path(d);
       info(`^5564^ d.options: ${rpr(d.options)}`);
       info(`^5564^ file_path: ${rpr(file_path)}`);
       info(`^5565^ project_path: ${rpr(project_path)}`);
@@ -229,6 +264,17 @@
       if (command != null) {
         await this.psql_run_command(me, command);
       }
+      await shop.rpc.stop();
+      return null;
+    //.......................................................................................................
+    }).command('nodexh', "run nodexh").argument('<file>', "file to run").action(async(d) => {
+      var file_path, project_path, shop;
+      file_path = d.args.file;
+      project_path = this._cli_get_project_path(d);
+      info(`^5565^ file_path:     ${rpr(file_path)}`);
+      info(`^5565^ project_path:  ${rpr(project_path)}`);
+      shop = (await this.serve(project_path));
+      await this.nodexh_run_file(project_path, file_path);
       await shop.rpc.stop();
       return null;
     });
