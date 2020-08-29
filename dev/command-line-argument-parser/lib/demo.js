@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, alert, badge, debug, defer, echo, get_cmd_literal, help, info, misfit, parse_argv, pluck, rpr, show_help_and_exit, show_help_for_command_and_exit, urge, warn, whisper;
+  var CND, PATH, alert, badge, debug, defer, echo, get_cmd_literal, help, info, misfit, parse_argv, pluck, relpath, rpr, show_help_and_exit, show_help_for_topic_and_exit, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -39,16 +39,21 @@
   // cnd_parse                 = require 'cnd/parse-command-line'
   misfit = Symbol('misfit');
 
+  PATH = require('path');
+
+  relpath = PATH.relative(process.cwd(), __filename);
+
   //-----------------------------------------------------------------------------------------------------------
   pluck = function(d, name, fallback = misfit) {
     var R;
-    if ((R = d[name]) == null) {
+    R = d[name];
+    delete d[name];
+    if (R == null) {
       if (fallback !== misfit) {
         return fallback;
       }
       throw new Error(`^cli@5477^ no such attribute: ${rpr(name)}`);
     }
-    delete d[name];
     return R;
   };
 
@@ -61,27 +66,30 @@
   get_cmd_literal = function(cmd, argv) {
     var parameters;
     if ((parameters = CND.shellescape(argv)).length === 0) {
-      return `\`${cmd}\``;
+      return CND.lime(`${cmd}`);
     }
-    return `\`${cmd} ${parameters}\``;
+    return CND.lime(`${cmd} ${parameters}`);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  show_help_for_command_and_exit = function(p, argv) {
-    var command;
+  show_help_for_topic_and_exit = function(q, argv) {
     if (argv.length > 0) {
       return show_help_and_exit(113, `^cli@5478^ extraneous arguments ${rpr(argv)}`);
     }
-    if ((command = pluck(p, 'command', null)) == null) {
-      return show_help_and_exit(0);
-    }
-    switch (command) {
+    switch (q.parameters.topic) {
+      case null:
+      case void 0:
+        return show_help_and_exit(0);
+      case 'topics':
+        echo(CND.blue("(this should be a list of topics)"));
+        process.exit(0);
+        break;
       case 'help':
         /* TAINT use custom function to output help */
-        echo(CND.blue(`\n\`node ${__filename} help [command]\`:\nget help about \`command\`\n`));
+        echo(CND.blue(`\n\`node ${relpath} help [topic]\`:\nget help about \`topic\`\n`));
         process.exit(0);
     }
-    return show_help_and_exit(120, `^cli@5887^ unknown help topic ${rpr(command)}`);
+    return show_help_and_exit(120, `^cli@5887^ unknown help topic ${rpr(q.parameters.topic)}`);
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -92,10 +100,11 @@
   metaflags:
     --help      -h      show this help
     --trace     -t      show CLI parsing trace
-    --cwd       -d      change to directory before running command
+    --cd        -d      change to directory before running command
 
   internal commands:
-    help [command]      help on commands
+    help                general help
+    help [topic]        help on topic; run \`help topics\` to see a list
 
   external commands:
     psql                run SQL with psql
@@ -112,17 +121,17 @@
   //-----------------------------------------------------------------------------------------------------------
   this.cli = function(argv = null) {
     return new Promise(function(resolve, reject) {
-      var cmd, d, flag, p, q, ref, ref1, s;
+      var d, flag, p, q, ref, s;
       //---------------------------------------------------------------------------------------------------------
       q = {
         trace: false,
         help: false,
         testing: argv != null,
         cmd: null,
-        parameters: null
+        parameters: {}
       };
       //---------------------------------------------------------------------------------------------------------
-      // Stage: Pre-Command
+      // Stage: Metaflags
       //.........................................................................................................
       argv = argv != null ? argv : process.argv;
       d = [
@@ -130,6 +139,11 @@
           name: 'help',
           alias: 'h',
           type: Boolean
+        },
+        {
+          name: 'cd',
+          alias: 'd',
+          type: String
         },
         {
           name: 'trace',
@@ -142,26 +156,29 @@
         stopAtFirstUnknown: true
       };
       p = parse_argv(d, s);
-      if (p.trace) {
-        whisper(p);
-      }
       argv = pluck(p, '_unknown', []);
       q.help = pluck(p, 'help', false);
       q.trace = pluck(p, 'trace', false);
-      //.........................................................................................................
+      q.cd = pluck(p, 'cd', null);
       if (q.trace) {
-        urge("Stage: Pre-Command      ", rpr(q));
+        urge("Stage: Metaflags", {q, argv});
       }
       if (q.help) {
-        //.........................................................................................................
         return show_help_and_exit(0);
       }
       if ((ref = (flag = argv[0])) != null ? ref.startsWith('-') : void 0) {
-        //---------------------------------------------------------------------------------------------------------
-        // Stage: Command
-        //.........................................................................................................
-        return show_help_and_exit(112, `extraneous flag ${rpr(flag)}`);
+        return show_help_and_exit(112, `^cli@5598^ extraneous flag ${rpr(flag)}`);
       }
+      //---------------------------------------------------------------------------------------------------------
+      if (q.cd != null) {
+        process.chdir(q.cd);
+      }
+      if (q.trace) {
+        urge(CND.yellow(`current working directory is now ${process.cwd()}`));
+      }
+      //---------------------------------------------------------------------------------------------------------
+      // Stage: Internal Commands
+      // Internal commands must parse their specific flags and other arguments.
       //.........................................................................................................
       d = {
         name: 'cmd',
@@ -171,32 +188,31 @@
         argv,
         stopAtFirstUnknown: true
       });
+      q.cmd = pluck(p, 'cmd', null);
       argv = pluck(p, '_unknown', []);
       if (q.trace) {
-        whisper(p);
-        urge("Stage: Command          ", 'cmd', (ref1 = p.cmd) != null ? ref1 : 'UNKNOWN');
+        urge("Stage: Commands", {q, argv});
       }
-      //---------------------------------------------------------------------------------------------------------
-      // Stage: Internal Commands
+      if (q.cmd == null) {
+        return show_help_and_exit(114, "^cli@5479^ missing command");
+      }
       //.........................................................................................................
-      // Internal commands must parse their specific flags and other arguments.
-      //.........................................................................................................
-      switch (p.cmd) {
+      switch (q.cmd) {
         case 'help':
           d = {
-            name: 'command',
+            name: 'topic',
             defaultOption: true
           };
           p = parse_argv(d, {
             argv,
             stopAtFirstUnknown: true
           });
+          q.parameters.topic = pluck(p, 'topic', null);
           argv = pluck(p, '_unknown', []);
           if (q.trace) {
-            whisper(p);
-            urge("Stage: internal command `help`", {p, argv});
+            urge("running internal command `help`", {q, argv});
           }
-          return show_help_for_command_and_exit(p, argv);
+          return show_help_for_topic_and_exit(q, argv);
       }
       //---------------------------------------------------------------------------------------------------------
       // Stage: External Commands
@@ -204,42 +220,40 @@
       // External commands call a child process that is passed the remaing command line arguments, so those
       // can be dealt with summarily.
       //.........................................................................................................
-      cmd = p.cmd;
-      if (cmd == null) {
-        return show_help_and_exit(114, "^cli@5479^ missing command");
-      }
       p = parse_argv([], {
         argv,
         stopAtFirstUnknown: true
       });
       argv = pluck(p, '_unknown', []);
+      q.parameters.argv = argv.slice(0);
+      if (q.trace) {
+        urge("Stage: External Commands", {q, argv});
+      }
       //.........................................................................................................
-      switch (cmd) {
+      switch (q.cmd) {
         //-------------------------------------------------------------------------------------------------------
         case 'psql':
-          whisper(argv);
           if (q.trace) {
-            urge(`Stage: Command: running ${get_cmd_literal(cmd, argv)}`);
+            urge(`running external command ${get_cmd_literal(q.cmd, argv)}`);
           }
           return resolve();
         //-------------------------------------------------------------------------------------------------------
         case 'nodexh':
         case 'node':
-          whisper(argv);
           if (q.trace) {
-            urge(`Stage: Command: running ${get_cmd_literal(cmd, argv)}`);
+            urge(`running external command ${get_cmd_literal(q.cmd, argv)}`);
           }
           return resolve();
       }
       //.........................................................................................................
-      return show_help_and_exit(115, `^cli@5480^ Unknown command ${CND.reverse(rpr(p.cmd))}`);
+      return show_help_and_exit(115, `^cli@5480^ Unknown command ${CND.reverse(rpr(q.cmd))}`);
     });
   };
 
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      return debug((await this.cli()));
+      return debug('^3387^', (await this.cli()));
     })();
   }
 
