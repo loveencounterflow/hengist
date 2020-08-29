@@ -11,6 +11,8 @@
 
   debug = CND.get_logger('debug', badge);
 
+  debug('^76483-1^');
+
   warn = CND.get_logger('warn', badge);
 
   info = CND.get_logger('info', badge);
@@ -121,6 +123,7 @@
             result = (await db.query_one([`select * from CATALOG.parse_object_identifier( $1 );`, probe]));
           } catch (error1) {
             error = error1;
+            // warn error.message
             return reject(new Error(error.message));
           }
           return resolve(result);

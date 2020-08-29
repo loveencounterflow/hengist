@@ -11,6 +11,8 @@
 
   debug = CND.get_logger('debug', badge);
 
+  debug('^76483-1^', Date.now() / 1000);
+
   alert = CND.get_logger('alert', badge);
 
   whisper = CND.get_logger('whisper', badge);
@@ -33,6 +35,8 @@
   CP = require('child_process');
 
   defer = setImmediate;
+
+  debug('^76483-2^', Date.now() / 1000);
 
   //-----------------------------------------------------------------------------------------------------------
   this.serve = async function(project_path = null) {
@@ -231,7 +235,9 @@
   //-----------------------------------------------------------------------------------------------------------
   this._cli = async function() {
     var program;
+    debug('^76483-3^', Date.now() / 1000);
     ({program} = require('@caporal/core'));
+    debug('^76483-4^', Date.now() / 1000);
     //.........................................................................................................
     // program.action ( { logger, } ) => logger.info "Hello, world!"
     //.........................................................................................................
