@@ -25,14 +25,16 @@ defer                     = setImmediate
 parse_argv                = require 'command-line-args'
 # cnd_parse                 = require 'cnd/parse-command-line'
 misfit                    = Symbol 'misfit'
-
+PATH                      = require 'path'
+relpath                   = PATH.relative process.cwd(), __filename
 
 #-----------------------------------------------------------------------------------------------------------
 pluck = ( d, name, fallback = misfit ) ->
-  unless ( R = d[ name ] )?
+  R = d[ name ]
+  delete d[ name ]
+  unless R?
     return fallback unless fallback is misfit
     throw new Error "^cli@5477^ no such attribute: #{rpr name}"
-  delete d[ name ]
   return R
 
 # #-----------------------------------------------------------------------------------------------------------
@@ -42,21 +44,24 @@ pluck = ( d, name, fallback = misfit ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 get_cmd_literal = ( cmd, argv ) ->
-  return "`#{cmd}`" if ( parameters = CND.shellescape argv ).length is 0
-  return "`#{cmd} #{parameters}`"
+  return CND.lime "#{cmd}" if ( parameters = CND.shellescape argv ).length is 0
+  return CND.lime "#{cmd} #{parameters}"
 
 #-----------------------------------------------------------------------------------------------------------
-show_help_for_command_and_exit = ( p, argv ) ->
+show_help_for_topic_and_exit = ( q, argv ) ->
   if argv.length > 0
     return show_help_and_exit 113, "^cli@5478^ extraneous arguments #{rpr argv}"
-  unless ( command = pluck p, 'command', null )?
-    return show_help_and_exit 0
-  switch command
+  switch q.parameters.topic
+    when null, undefined
+      return show_help_and_exit 0
+    when 'topics'
+      echo CND.blue "(this should be a list of topics)"
+      process.exit 0
     when 'help'
       ### TAINT use custom function to output help ###
-      echo CND.blue """\n`node #{__filename} help [command]`:\nget help about `command`\n"""
+      echo CND.blue """\n`node #{relpath} help [topic]`:\nget help about `topic`\n"""
       process.exit 0
-  show_help_and_exit 120, "^cli@5887^ unknown help topic #{rpr command}"
+  show_help_and_exit 120, "^cli@5887^ unknown help topic #{rpr q.parameters.topic}"
 
 #-----------------------------------------------------------------------------------------------------------
 show_help_and_exit = ( code = 0, message = null ) ->
@@ -66,10 +71,11 @@ show_help_and_exit = ( code = 0, message = null ) ->
       metaflags:
         --help      -h      show this help
         --trace     -t      show CLI parsing trace
-        --cwd       -d      change to directory before running command
+        --cd        -d      change to directory before running command
 
       internal commands:
-        help [command]      help on commands
+        help                general help
+        help [topic]        help on topic; run `help topics` to see a list
 
       external commands:
         psql                run SQL with psql
@@ -84,79 +90,77 @@ show_help_and_exit = ( code = 0, message = null ) ->
 #-----------------------------------------------------------------------------------------------------------
 @cli = ( argv = null ) -> new Promise ( resolve, reject ) ->
   #---------------------------------------------------------------------------------------------------------
-  q = { trace: false, help: false, testing: argv?, cmd: null, parameters: null, }
+  q =
+    trace:        false
+    help:         false
+    testing:      argv?
+    cmd:          null
+    parameters:   {}
   #---------------------------------------------------------------------------------------------------------
-  # Stage: Pre-Command
+  # Stage: Metaflags
   #.........................................................................................................
   argv    = argv ? process.argv
   d       = [
     { name: 'help',   alias: 'h', type: Boolean, }
+    { name: 'cd',     alias: 'd', type: String, }
     { name: 'trace',  alias: 't', type: Boolean, } ]
   s       = { argv, stopAtFirstUnknown: true, }
   p       = parse_argv d, s
-  if p.trace
-    whisper p
   argv    = pluck p, '_unknown', []
   q.help  = pluck p, 'help',  false
   q.trace = pluck p, 'trace', false
-  #.........................................................................................................
-  if q.trace
-    urge "Stage: Pre-Command      ", rpr q
-  #.........................................................................................................
+  q.cd    = pluck p, 'cd',    null
+  urge "Stage: Metaflags", { q, argv, } if q.trace
   return show_help_and_exit 0 if q.help
+  return show_help_and_exit 112, "^cli@5598^ extraneous flag #{rpr flag}" if ( flag = argv[ 0 ] )?.startsWith '-'
   #---------------------------------------------------------------------------------------------------------
-  # Stage: Command
-  #.........................................................................................................
-  return show_help_and_exit 112, "extraneous flag #{rpr flag}" if ( flag = argv[ 0 ] )?.startsWith '-'
+  if q.cd? then process.chdir q.cd
+  urge CND.yellow "current working directory is now #{process.cwd()}" if q.trace
+  #---------------------------------------------------------------------------------------------------------
+  # Stage: Internal Commands
+  # Internal commands must parse their specific flags and other arguments.
   #.........................................................................................................
   d     = { name: 'cmd', defaultOption: true, }
   p     = parse_argv d, { argv, stopAtFirstUnknown: true, }
+  q.cmd = pluck p, 'cmd', null
   argv  = pluck p, '_unknown', []
-  if q.trace
-    whisper p
-    urge "Stage: Command          ", 'cmd', p.cmd ? 'UNKNOWN'
-  #---------------------------------------------------------------------------------------------------------
-  # Stage: Internal Commands
+  urge "Stage: Commands", { q, argv, } if q.trace
+  return show_help_and_exit 114, "^cli@5479^ missing command" unless q.cmd?
   #.........................................................................................................
-  # Internal commands must parse their specific flags and other arguments.
-  #.........................................................................................................
-  switch p.cmd
+  switch q.cmd
     when 'help'
-      d     = { name: 'command', defaultOption: true, }
-      p     = parse_argv d, { argv, stopAtFirstUnknown: true, }
-      argv  = pluck p, '_unknown', []
-      if q.trace
-        whisper p
-        urge "Stage: internal command `help`", { p, argv, }
-      return show_help_for_command_and_exit p, argv
+      d                   = { name: 'topic', defaultOption: true, }
+      p                   = parse_argv d, { argv, stopAtFirstUnknown: true, }
+      q.parameters.topic  = pluck p, 'topic', null
+      argv                = pluck p, '_unknown', []
+      urge "running internal command `help`", { q, argv, } if q.trace
+      return show_help_for_topic_and_exit q, argv
   #---------------------------------------------------------------------------------------------------------
   # Stage: External Commands
   #.........................................................................................................
   # External commands call a child process that is passed the remaing command line arguments, so those
   # can be dealt with summarily.
   #.........................................................................................................
-  cmd   = p.cmd
-  return show_help_and_exit 114, "^cli@5479^ missing command" unless cmd?
-  p     = parse_argv [], { argv, stopAtFirstUnknown: true, }
-  argv  = pluck p, '_unknown', []
+  p                   = parse_argv [], { argv, stopAtFirstUnknown: true, }
+  argv                = pluck p, '_unknown', []
+  q.parameters.argv   = argv[ .. ]
+  urge "Stage: External Commands", { q, argv, } if q.trace
   #.........................................................................................................
-  switch cmd
+  switch q.cmd
     #-------------------------------------------------------------------------------------------------------
     when 'psql'
-      whisper argv
-      urge "Stage: Command: running #{get_cmd_literal cmd, argv}" if q.trace
+      urge "running external command #{get_cmd_literal q.cmd, argv}" if q.trace
       return resolve()
     #-------------------------------------------------------------------------------------------------------
     when 'nodexh', 'node'
-      whisper argv
-      urge "Stage: Command: running #{get_cmd_literal cmd, argv}" if q.trace
+      urge "running external command #{get_cmd_literal q.cmd, argv}" if q.trace
       return resolve()
   #.........................................................................................................
-  return show_help_and_exit 115, "^cli@5480^ Unknown command #{CND.reverse rpr p.cmd}"
+  return show_help_and_exit 115, "^cli@5480^ Unknown command #{CND.reverse rpr q.cmd}"
 
 
 ############################################################################################################
 if module is require.main then do =>
-  debug await @cli()
+  debug '^3387^', await @cli()
   # debug await @cli [ '-t', null, '-t', ]
 
