@@ -48,6 +48,31 @@ get_cmd_literal = ( cmd, argv ) ->
   return CND.lime "#{cmd} #{parameters}"
 
 #-----------------------------------------------------------------------------------------------------------
+generate_documentation = ->
+  commandLineUsage = require 'command-line-usage'
+  doc_settings = []
+  # for stage, fields of X.fields
+  doc_settings.push {
+    header: "Usage", content: """
+      node #{relpath} [meta] command [parameters]
+
+      [meta]:       optional general flags
+      command:      internal or external command to run (obligatory)
+      [parameters]: parameters to be passed to internal or external command;
+      * for internal flags, see below
+      * for external flags, refer to the documentation of the respective command
+      """, }
+  doc_settings.push { header: "meta", optionList: X.fields.meta, }
+  for cmd, fields of X.fields.internal
+    doc_settings.push { header: "Internal command: #{cmd}", optionList: fields, }
+  if ( Object.keys X.fields.external ).length > 0
+    descriptions = []
+    for cmd, description of X.fields.external
+      descriptions.push { content: "#{cmd}: #{description}", }
+    doc_settings.push { header: "External commands: ", content: descriptions, }
+  return '\n' + commandLineUsage doc_settings
+
+#-----------------------------------------------------------------------------------------------------------
 show_help_for_topic_and_exit = ( q, argv ) ->
   if argv.length > 0
     return show_help_and_exit 113, "^cli@5478^ extraneous arguments #{rpr argv}"
@@ -65,25 +90,9 @@ show_help_for_topic_and_exit = ( q, argv ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 show_help_and_exit = ( code = 0, message = null ) ->
-  usage = """
-    node demo.js [metaflags] <command> [flags] p...
-
-      metaflags:
-        --help      -h      show this help
-        --trace     -t      show CLI parsing trace
-        --cd        -d      change to directory before running command
-
-      internal commands:
-        help                general help
-        help [topic]        help on topic; run `help topics` to see a list
-
-      external commands:
-        psql                run SQL with psql
-        node                run JS with node
-        nodexh              run JS with node (enhanced stacktraces)
-  """
-  usage   = '\n' + ( CND.blue usage ) + '\n'
-  usage  += '\n' + ( CND.red message ) + '\n' if message?
+  usage   = generate_documentation()
+  usage   = '\n' + ( CND.blue usage   ) + '\n'
+  usage  += '\n' + ( CND.red  message ) + '\n' if message?
   echo usage
   process.exit code
 
@@ -100,10 +109,7 @@ show_help_and_exit = ( code = 0, message = null ) ->
   # Stage: Metaflags
   #.........................................................................................................
   argv    = argv ? process.argv
-  d       = [
-    { name: 'help',   alias: 'h', type: Boolean, }
-    { name: 'cd',     alias: 'd', type: String, }
-    { name: 'trace',  alias: 't', type: Boolean, } ]
+  d       = X.fields.meta
   s       = { argv, stopAtFirstUnknown: true, }
   p       = parse_argv d, s
   argv    = pluck p, '_unknown', []
@@ -129,7 +135,7 @@ show_help_and_exit = ( code = 0, message = null ) ->
   #.........................................................................................................
   switch q.cmd
     when 'help'
-      d                   = { name: 'topic', defaultOption: true, }
+      d                   = X.fields.internal.help
       p                   = parse_argv d, { argv, stopAtFirstUnknown: true, }
       q.parameters.topic  = pluck p, 'topic', null
       argv                = pluck p, '_unknown', []
@@ -158,9 +164,29 @@ show_help_and_exit = ( code = 0, message = null ) ->
   #.........................................................................................................
   return show_help_and_exit 115, "^cli@5480^ Unknown command #{CND.reverse rpr q.cmd}"
 
+#-----------------------------------------------------------------------------------------------------------
+X =
+  fields:
+    meta: [
+      { name: 'help',   alias: 'h', type: Boolean, description: "show help", }
+      { name: 'cd',     alias: 'd', type: String,  description: "change to directory", }
+      { name: 'trace',  alias: 't', type: Boolean, description: "trace options parsing (for debugging)", } ]
+    internal:
+      help: { name: 'topic', defaultOption: true, description: "help topic (implicit; optional); use `help topics` to see a list of topics", }
+    external:
+      psql:   "use `psql` to run SQL"
+      node:   "use `node` to run JS"
+      nodexh: "use `nodexh` to run JS"
 
 ############################################################################################################
 if module is require.main then do =>
   debug '^3387^', await @cli()
   # debug await @cli [ '-t', null, '-t', ]
 
+    # {
+    #   header: 'Typical Example',
+    #   content: 'A simple example demonstrating typical usage.'
+    # },
+    # {
+    #   content: 'Project home: {underline https://github.com/me/example}'
+    # }
