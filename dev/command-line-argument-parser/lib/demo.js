@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, PATH, X, alert, badge, debug, defer, echo, generate_documentation, get_cmd_literal, help, info, misfit, parse_argv, pluck, relpath, rpr, show_help_and_exit, show_help_for_topic_and_exit, urge, warn, whisper;
+  var CND, PATH, X, alert, badge, cast, compile_settings, debug, default_settings, defer, echo, freeze, generate_documentation, get_cmd_literal, help, info, isa, lets, misfit, parse_argv, pluck, relpath, rpr, show_help_and_exit, show_help_for_topic_and_exit, type_of, types, urge, user_settings, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -26,11 +26,10 @@
   echo = CND.echo.bind(CND);
 
   //...........................................................................................................
-  // types                     = ( require 'intershop' ).types
-  // { isa
-  //   validate
-  //   cast
-  //   type_of }               = types.export()
+  types = new (require('intertype')).Intertype();
+
+  ({isa, validate, cast, type_of} = types.export());
+
   // CP                        = require 'child_process'
   defer = setImmediate;
 
@@ -42,6 +41,8 @@
   PATH = require('path');
 
   relpath = PATH.relative(process.cwd(), __filename);
+
+  ({freeze, lets} = require('letsfreezethat'));
 
   //-----------------------------------------------------------------------------------------------------------
   pluck = function(d, name, fallback = misfit) {
@@ -73,10 +74,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   generate_documentation = function() {
-    var cmd, commandLineUsage, description, descriptions, doc_settings, fields, ref, ref1;
+    var cmd, commandLineUsage, descriptions, doc_settings, i, j, len, len1, ref, ref1, ref2;
     commandLineUsage = require('command-line-usage');
     doc_settings = [];
-    // for stage, fields of X.fields
     doc_settings.push({
       header: "Usage",
       content: `node ${relpath} [meta] command [parameters]
@@ -84,28 +84,28 @@
 [meta]:       optional general flags
 command:      internal or external command to run (obligatory)
 [parameters]: parameters to be passed to internal or external command;
-* for internal flags, see below
-* for external flags, refer to the documentation of the respective command`
+* for internal parameters and flags, see below
+* for external parameters and flags, refer to the documentation of the respective command`
     });
     doc_settings.push({
       header: "meta",
-      optionList: X.fields.meta
+      optionList: X.meta
     });
-    ref = X.fields.internal;
-    for (cmd in ref) {
-      fields = ref[cmd];
+    ref = X.internals;
+    for (i = 0, len = ref.length; i < len; i++) {
+      cmd = ref[i];
       doc_settings.push({
-        header: `Internal command: ${cmd}`,
-        optionList: fields
+        header: `Internal command: ${cmd.name}`,
+        optionList: cmd
       });
     }
-    if ((Object.keys(X.fields.external)).length > 0) {
+    if ((Object.keys(X.externals)).length > 0) {
       descriptions = [];
-      ref1 = X.fields.external;
-      for (cmd in ref1) {
-        description = ref1[cmd];
+      ref1 = X.externals;
+      for (j = 0, len1 = ref1.length; j < len1; j++) {
+        cmd = ref1[j];
         descriptions.push({
-          content: `${cmd}: ${description}`
+          content: `${cmd.name}: ${(ref2 = cmd.description) != null ? ref2 : '???'}`
         });
       }
       doc_settings.push({
@@ -165,7 +165,7 @@ command:      internal or external command to run (obligatory)
       // Stage: Metaflags
       //.........................................................................................................
       argv = argv != null ? argv : process.argv;
-      d = X.fields.meta;
+      d = X.meta;
       s = {
         argv,
         stopAtFirstUnknown: true
@@ -214,7 +214,7 @@ command:      internal or external command to run (obligatory)
       //.........................................................................................................
       switch (q.cmd) {
         case 'help':
-          d = X.fields.internal.help;
+          d = X.internals.help;
           p = parse_argv(d, {
             argv,
             stopAtFirstUnknown: true
@@ -263,42 +263,103 @@ command:      internal or external command to run (obligatory)
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  X = {
-    fields: {
-      meta: [
-        {
-          name: 'help',
-          alias: 'h',
-          type: Boolean,
-          description: "show help"
-        },
-        {
-          name: 'cd',
-          alias: 'd',
-          type: String,
-          description: "change to directory"
-        },
-        {
-          name: 'trace',
-          alias: 't',
-          type: Boolean,
-          description: "trace options parsing (for debugging)"
-        }
-      ],
-      internal: {
-        help: {
-          name: 'topic',
-          defaultOption: true,
-          description: "help topic (implicit; optional); use `help topics` to see a list of topics"
-        }
-      },
-      external: {
-        psql: "use `psql` to run SQL",
-        node: "use `node` to run JS",
-        nodexh: "use `nodexh` to run JS"
+  compile_settings = function(dft, usr) {
+    var R, description, e, externals, internals, is_external, meta, name, ref, ref1;
+    meta = [];
+    internals = [];
+    externals = [];
+    R = {meta, internals, externals};
+    if (usr.meta != null) {
+      //.........................................................................................................
+      validate.object(usr.meta);
+    }
+    ref = Object.assign({}, dft.meta, usr.meta);
+    for (name in ref) {
+      description = ref[name];
+      if (description.name != null) {
+        throw Error(`^cli@5587^ must not have attribute name, got ${rpr(description)}`);
+      }
+      meta.push(lets(description, function(d) {
+        return d.name = name;
+      }));
+    }
+    if (usr.commands != null) {
+      //.........................................................................................................
+      validate.object(usr.commands);
+    }
+    ref1 = Object.assign({}, dft.commands, usr.commands);
+    for (name in ref1) {
+      description = ref1[name];
+      if (description.name != null) {
+        throw Error(`^cli@5588^ must not have attribute name, got ${rpr(description)}`);
+      }
+      is_external = false;
+      e = lets(description, function(d) {
+        d.name = name;
+        return is_external = pluck(d, 'external', false);
+      });
+      if (is_external) {
+        externals.push(e);
+      } else {
+        internals.push(e);
       }
     }
+    //.........................................................................................................
+    return freeze(R);
   };
+
+  //-----------------------------------------------------------------------------------------------------------
+  default_settings = freeze({
+    meta: {
+      help: {
+        alias: 'h',
+        type: Boolean,
+        description: "show help and exit"
+      },
+      cd: {
+        alias: 'd',
+        type: String,
+        description: "change to directory before running command"
+      },
+      trace: {
+        alias: 't',
+        type: Boolean,
+        description: "trace options parsing (for debugging)"
+      }
+    },
+    commands: {
+      cow: {
+        description: "draw a cow"
+      },
+      version: {
+        description: "show project version and exit"
+      }
+    }
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
+  user_settings = freeze({
+    // meta:
+    // internal:
+    commands: {
+      psql: {
+        external: true,
+        description: "use `psql` to run SQL"
+      },
+      node: {
+        external: true,
+        description: "use `node` to run JS"
+      },
+      nodexh: {
+        external: true,
+        description: "use `nodexh` to run JS"
+      }
+    }
+  });
+
+  X = compile_settings(default_settings, user_settings);
+
+  debug('^6767^', JSON.stringify(X, null, '  '));
 
   //###########################################################################################################
   if (module === require.main) {
