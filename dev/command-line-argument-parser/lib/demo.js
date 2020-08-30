@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, PATH, alert, badge, debug, defer, echo, get_cmd_literal, help, info, misfit, parse_argv, pluck, relpath, rpr, show_help_and_exit, show_help_for_topic_and_exit, urge, warn, whisper;
+  var CND, PATH, X, alert, badge, debug, defer, echo, generate_documentation, get_cmd_literal, help, info, misfit, parse_argv, pluck, relpath, rpr, show_help_and_exit, show_help_for_topic_and_exit, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -72,6 +72,51 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  generate_documentation = function() {
+    var cmd, commandLineUsage, description, descriptions, doc_settings, fields, ref, ref1;
+    commandLineUsage = require('command-line-usage');
+    doc_settings = [];
+    // for stage, fields of X.fields
+    doc_settings.push({
+      header: "Usage",
+      content: `node ${relpath} [meta] command [parameters]
+
+[meta]:       optional general flags
+command:      internal or external command to run (obligatory)
+[parameters]: parameters to be passed to internal or external command;
+* for internal flags, see below
+* for external flags, refer to the documentation of the respective command`
+    });
+    doc_settings.push({
+      header: "meta",
+      optionList: X.fields.meta
+    });
+    ref = X.fields.internal;
+    for (cmd in ref) {
+      fields = ref[cmd];
+      doc_settings.push({
+        header: `Internal command: ${cmd}`,
+        optionList: fields
+      });
+    }
+    if ((Object.keys(X.fields.external)).length > 0) {
+      descriptions = [];
+      ref1 = X.fields.external;
+      for (cmd in ref1) {
+        description = ref1[cmd];
+        descriptions.push({
+          content: `${cmd}: ${description}`
+        });
+      }
+      doc_settings.push({
+        header: "External commands: ",
+        content: descriptions
+      });
+    }
+    return '\n' + commandLineUsage(doc_settings);
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   show_help_for_topic_and_exit = function(q, argv) {
     if (argv.length > 0) {
       return show_help_and_exit(113, `^cli@5478^ extraneous arguments ${rpr(argv)}`);
@@ -95,21 +140,7 @@
   //-----------------------------------------------------------------------------------------------------------
   show_help_and_exit = function(code = 0, message = null) {
     var usage;
-    usage = `node demo.js [metaflags] <command> [flags] p...
-
-  metaflags:
-    --help      -h      show this help
-    --trace     -t      show CLI parsing trace
-    --cd        -d      change to directory before running command
-
-  internal commands:
-    help                general help
-    help [topic]        help on topic; run \`help topics\` to see a list
-
-  external commands:
-    psql                run SQL with psql
-    node                run JS with node
-    nodexh              run JS with node (enhanced stacktraces)`;
+    usage = generate_documentation();
     usage = '\n' + (CND.blue(usage)) + '\n';
     if (message != null) {
       usage += '\n' + (CND.red(message)) + '\n';
@@ -134,23 +165,7 @@
       // Stage: Metaflags
       //.........................................................................................................
       argv = argv != null ? argv : process.argv;
-      d = [
-        {
-          name: 'help',
-          alias: 'h',
-          type: Boolean
-        },
-        {
-          name: 'cd',
-          alias: 'd',
-          type: String
-        },
-        {
-          name: 'trace',
-          alias: 't',
-          type: Boolean
-        }
-      ];
+      d = X.fields.meta;
       s = {
         argv,
         stopAtFirstUnknown: true
@@ -199,10 +214,7 @@
       //.........................................................................................................
       switch (q.cmd) {
         case 'help':
-          d = {
-            name: 'topic',
-            defaultOption: true
-          };
+          d = X.fields.internal.help;
           p = parse_argv(d, {
             argv,
             stopAtFirstUnknown: true
@@ -250,6 +262,44 @@
     });
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  X = {
+    fields: {
+      meta: [
+        {
+          name: 'help',
+          alias: 'h',
+          type: Boolean,
+          description: "show help"
+        },
+        {
+          name: 'cd',
+          alias: 'd',
+          type: String,
+          description: "change to directory"
+        },
+        {
+          name: 'trace',
+          alias: 't',
+          type: Boolean,
+          description: "trace options parsing (for debugging)"
+        }
+      ],
+      internal: {
+        help: {
+          name: 'topic',
+          defaultOption: true,
+          description: "help topic (implicit; optional); use `help topics` to see a list of topics"
+        }
+      },
+      external: {
+        psql: "use `psql` to run SQL",
+        node: "use `node` to run JS",
+        nodexh: "use `nodexh` to run JS"
+      }
+    }
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
@@ -258,6 +308,14 @@
   }
 
   // debug await @cli [ '-t', null, '-t', ]
+
+  // {
+//   header: 'Typical Example',
+//   content: 'A simple example demonstrating typical usage.'
+// },
+// {
+//   content: 'Project home: {underline https://github.com/me/example}'
+// }
 
 }).call(this);
 
