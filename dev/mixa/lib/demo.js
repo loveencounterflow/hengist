@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, PATH, X, alert, badge, cast, compile_settings, debug, default_settings, defer, echo, freeze, generate_documentation, get_cmd_literal, help, info, isa, lets, misfit, parse_argv, pluck, relpath, rpr, show_help_and_exit, show_help_for_topic_and_exit, type_of, types, urge, user_settings, validate, warn, whisper;
+  var CND, PATH, X, alert, badge, cast, compile_settings, debug, default_settings, defer, echo, freeze, generate_documentation, get_cmd_literal, help, info, isa, lets, misfit, parse_argv, pluck, relpath, rpr, run_external_command, show_cat_and_exit, show_help_and_exit, show_help_for_topic_and_exit, type_of, types, urge, user_settings, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -150,117 +150,149 @@ command:      internal or external command to run (obligatory)
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.cli = function(argv = null) {
-    return new Promise(function(resolve, reject) {
-      var d, flag, p, q, ref, s;
-      //---------------------------------------------------------------------------------------------------------
-      q = {
-        trace: false,
-        help: false,
-        testing: argv != null,
-        cmd: null,
-        parameters: {}
-      };
-      //---------------------------------------------------------------------------------------------------------
-      // Stage: Metaflags
-      //.........................................................................................................
-      argv = argv != null ? argv : process.argv;
-      d = X.meta;
-      s = {
-        argv,
-        stopAtFirstUnknown: true
-      };
-      p = parse_argv(d, s);
-      argv = pluck(p, '_unknown', []);
-      q.help = pluck(p, 'help', false);
-      q.trace = pluck(p, 'trace', false);
-      q.cd = pluck(p, 'cd', null);
-      if (q.trace) {
-        urge("Stage: Metaflags", {q, argv});
-      }
-      if (q.help) {
-        return show_help_and_exit(0);
-      }
-      if ((ref = (flag = argv[0])) != null ? ref.startsWith('-') : void 0) {
-        return show_help_and_exit(112, `^cli@5598^ extraneous flag ${rpr(flag)}`);
-      }
-      //---------------------------------------------------------------------------------------------------------
-      if (q.cd != null) {
-        process.chdir(q.cd);
-      }
-      if (q.trace) {
-        urge(CND.yellow(`current working directory is now ${process.cwd()}`));
-      }
-      //---------------------------------------------------------------------------------------------------------
-      // Stage: Internal Commands
-      // Internal commands must parse their specific flags and other arguments.
-      //.........................................................................................................
-      d = {
-        name: 'cmd',
-        defaultOption: true
-      };
-      p = parse_argv(d, {
-        argv,
-        stopAtFirstUnknown: true
-      });
-      q.cmd = pluck(p, 'cmd', null);
-      argv = pluck(p, '_unknown', []);
-      if (q.trace) {
-        urge("Stage: Commands", {q, argv});
-      }
-      if (q.cmd == null) {
-        return show_help_and_exit(114, "^cli@5479^ missing command");
-      }
-      //.........................................................................................................
-      switch (q.cmd) {
-        case 'help':
-          d = X.internals.help;
-          p = parse_argv(d, {
-            argv,
-            stopAtFirstUnknown: true
-          });
-          q.parameters.topic = pluck(p, 'topic', null);
-          argv = pluck(p, '_unknown', []);
-          if (q.trace) {
-            urge("running internal command `help`", {q, argv});
-          }
-          return show_help_for_topic_and_exit(q, argv);
-      }
-      //---------------------------------------------------------------------------------------------------------
-      // Stage: External Commands
-      //.........................................................................................................
-      // External commands call a child process that is passed the remaing command line arguments, so those
-      // can be dealt with summarily.
-      //.........................................................................................................
-      p = parse_argv([], {
-        argv,
-        stopAtFirstUnknown: true
-      });
-      argv = pluck(p, '_unknown', []);
-      q.parameters.argv = argv.slice(0);
-      if (q.trace) {
-        urge("Stage: External Commands", {q, argv});
-      }
-      //.........................................................................................................
-      switch (q.cmd) {
-        //-------------------------------------------------------------------------------------------------------
-        case 'psql':
-          if (q.trace) {
-            urge(`running external command ${get_cmd_literal(q.cmd, argv)}`);
-          }
-          return resolve();
-        //-------------------------------------------------------------------------------------------------------
-        case 'nodexh':
-        case 'node':
-          if (q.trace) {
-            urge(`running external command ${get_cmd_literal(q.cmd, argv)}`);
-          }
-          return resolve();
-      }
-      //.........................................................................................................
-      return show_help_and_exit(115, `^cli@5480^ Unknown command ${CND.reverse(rpr(q.cmd))}`);
-    });
+  show_help_and_exit = function(code = 0, message = null) {
+    var usage;
+    usage = generate_documentation();
+    usage = '\n' + (CND.blue(usage)) + '\n';
+    if (message != null) {
+      usage += '\n' + (CND.red(message)) + '\n';
+    }
+    echo(usage);
+    return process.exit(code);
   };
+
+  //-----------------------------------------------------------------------------------------------------------
+  show_cat_and_exit = function() {
+    echo();
+    echo(CND.white(CND.reverse(CND.bold(`       |\\      _,,,---,,_              `))));
+    echo(CND.white(CND.reverse(CND.bold(` ZZZzz /,\`.-'\`'    -.  ;-;;,_          `))));
+    echo(CND.white(CND.reverse(CND.bold(`      |,4-  ) )-,_. ,\\ (  \`'-'         `))));
+    echo(CND.white(CND.reverse(CND.bold(`     '---''(_/--'  \`-'\\_)  Felix Lee   `))));
+    echo();
+    return process.exit(0);
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.cli = function(argv = null) {
+    var d, flag, p, q, ref, ref1, s;
+    //---------------------------------------------------------------------------------------------------------
+    q = {
+      trace: false, // place under `meta`
+      help: false, // place under `meta`
+      testing: argv != null, // place under `meta`
+      stage: null,
+      cmd: null,
+      parameters: {}
+    };
+    //---------------------------------------------------------------------------------------------------------
+    // Stage: Metaflags
+    //.........................................................................................................
+    q.stage = 'meta';
+    argv = argv != null ? argv : process.argv;
+    d = X.meta;
+    s = {
+      argv,
+      stopAtFirstUnknown: true
+    };
+    p = parse_argv(d, s);
+    argv = pluck(p, '_unknown', []);
+    q.help = pluck(p, 'help', false);
+    q.trace = pluck(p, 'trace', false);
+    q.cd = pluck(p, 'cd', null);
+    if (q.trace) {
+      urge("Stage: Metaflags", {q, argv});
+    }
+    if (q.help) {
+      return show_help_and_exit(0);
+    }
+    if ((ref = (flag = argv[0])) != null ? ref.startsWith('-') : void 0) {
+      return show_help_and_exit(112, `^cli@5598^ extraneous flag ${rpr(flag)}`);
+    }
+    //---------------------------------------------------------------------------------------------------------
+    if (q.cd != null) {
+      process.chdir(q.cd);
+      if (q.trace) {
+        urge(CND.yellow(`working directory is now ${process.cwd()}`));
+      }
+    }
+    //---------------------------------------------------------------------------------------------------------
+    // Stage: Internal Commands
+    // Internal commands must parse their specific flags and other arguments.
+    //.........................................................................................................
+    q.stage = 'internal';
+    d = {
+      name: 'cmd',
+      defaultOption: true
+    };
+    p = parse_argv(d, {
+      argv,
+      stopAtFirstUnknown: true
+    });
+    q.cmd = pluck(p, 'cmd', null);
+    argv = pluck(p, '_unknown', []);
+    if (q.trace) {
+      urge("Stage: Commands", {q, argv});
+    }
+    if (q.cmd == null) {
+      return show_help_and_exit(114, "^cli@5479^ missing command");
+    }
+    //.........................................................................................................
+    switch (q.cmd) {
+      case 'help':
+        d = X.internals.help;
+        p = parse_argv(d, {
+          argv,
+          stopAtFirstUnknown: true
+        });
+        q.parameters.topic = pluck(p, 'topic', null);
+        argv = pluck(p, '_unknown', []);
+        if (q.trace) {
+          urge("running internal command `help`", {q, argv});
+        }
+        return show_help_for_topic_and_exit(q, argv);
+      case 'cat':
+        return show_cat_and_exit();
+    }
+    //---------------------------------------------------------------------------------------------------------
+    // Stage: External Commands
+    //.........................................................................................................
+    // External commands call a child process that is passed the remaing command line arguments, so those
+    // can be dealt with summarily.
+    //.........................................................................................................
+    q.stage = 'external';
+    p = parse_argv([], {
+      argv,
+      stopAtFirstUnknown: true
+    });
+    argv = pluck(p, '_unknown', []);
+    q.parameters.argv = argv.slice(0);
+    if (q.trace) {
+      urge("Stage: External Commands", {q, argv});
+    }
+    /* TAINT derive list from settings */
+    if ((ref1 = q.cmd) === 'psql' || ref1 === 'node' || ref1 === 'nodexh') {
+      return q;
+    }
+    return q.error = {
+      code: 115,
+      message: `^cli@5480^ Unknown command ${CND.reverse(rpr(q.cmd))}`
+    };
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  run_external_command = function() {};
+
+  // #.........................................................................................................
+  // switch q.cmd
+  //   #-------------------------------------------------------------------------------------------------------
+  //   when 'psql'
+  //     urge "running external command #{get_cmd_literal q.cmd, argv}" if q.trace
+  //     return resolve()
+  //   #-------------------------------------------------------------------------------------------------------
+  //   when 'nodexh', 'node'
+  //     urge "running external command #{get_cmd_literal q.cmd, argv}" if q.trace
+  //     return resolve()
+  //.........................................................................................................
 
   //-----------------------------------------------------------------------------------------------------------
   compile_settings = function(dft, usr) {
@@ -328,8 +360,8 @@ command:      internal or external command to run (obligatory)
       }
     },
     commands: {
-      cow: {
-        description: "draw a cow"
+      cat: {
+        description: "draw a cat"
       },
       version: {
         description: "show project version and exit"

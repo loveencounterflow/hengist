@@ -98,17 +98,37 @@ show_help_and_exit = ( code = 0, message = null ) ->
   process.exit code
 
 #-----------------------------------------------------------------------------------------------------------
-@cli = ( argv = null ) -> new Promise ( resolve, reject ) ->
+show_help_and_exit = ( code = 0, message = null ) ->
+  usage   = generate_documentation()
+  usage   = '\n' + ( CND.blue usage   ) + '\n'
+  usage  += '\n' + ( CND.red  message ) + '\n' if message?
+  echo usage
+  process.exit code
+
+#-----------------------------------------------------------------------------------------------------------
+show_cat_and_exit = ->
+  echo()
+  echo CND.white CND.reverse CND.bold """       |\\      _,,,---,,_              """
+  echo CND.white CND.reverse CND.bold """ ZZZzz /,`.-'`'    -.  ;-;;,_          """
+  echo CND.white CND.reverse CND.bold """      |,4-  ) )-,_. ,\\ (  `'-'         """
+  echo CND.white CND.reverse CND.bold """     '---''(_/--'  `-'\\_)  Felix Lee   """
+  echo()
+  process.exit 0
+
+#-----------------------------------------------------------------------------------------------------------
+@cli = ( argv = null ) ->
   #---------------------------------------------------------------------------------------------------------
   q =
-    trace:        false
-    help:         false
-    testing:      argv?
+    trace:        false # place under `meta`
+    help:         false # place under `meta`
+    testing:      argv? # place under `meta`
+    stage:        null
     cmd:          null
     parameters:   {}
   #---------------------------------------------------------------------------------------------------------
   # Stage: Metaflags
   #.........................................................................................................
+  q.stage = 'meta'
   argv    = argv ? process.argv
   d       = X.meta
   s       = { argv, stopAtFirstUnknown: true, }
@@ -121,16 +141,18 @@ show_help_and_exit = ( code = 0, message = null ) ->
   return show_help_and_exit 0 if q.help
   return show_help_and_exit 112, "^cli@5598^ extraneous flag #{rpr flag}" if ( flag = argv[ 0 ] )?.startsWith '-'
   #---------------------------------------------------------------------------------------------------------
-  if q.cd? then process.chdir q.cd
-  urge CND.yellow "current working directory is now #{process.cwd()}" if q.trace
+  if q.cd?
+    process.chdir q.cd
+    urge CND.yellow "working directory is now #{process.cwd()}" if q.trace
   #---------------------------------------------------------------------------------------------------------
   # Stage: Internal Commands
   # Internal commands must parse their specific flags and other arguments.
   #.........................................................................................................
-  d     = { name: 'cmd', defaultOption: true, }
-  p     = parse_argv d, { argv, stopAtFirstUnknown: true, }
-  q.cmd = pluck p, 'cmd', null
-  argv  = pluck p, '_unknown', []
+  q.stage = 'internal'
+  d       = { name: 'cmd', defaultOption: true, }
+  p       = parse_argv d, { argv, stopAtFirstUnknown: true, }
+  q.cmd   = pluck p, 'cmd', null
+  argv    = pluck p, '_unknown', []
   urge "Stage: Commands", { q, argv, } if q.trace
   return show_help_and_exit 114, "^cli@5479^ missing command" unless q.cmd?
   #.........................................................................................................
@@ -142,28 +164,37 @@ show_help_and_exit = ( code = 0, message = null ) ->
       argv                = pluck p, '_unknown', []
       urge "running internal command `help`", { q, argv, } if q.trace
       return show_help_for_topic_and_exit q, argv
+    when 'cat'
+      return show_cat_and_exit()
   #---------------------------------------------------------------------------------------------------------
   # Stage: External Commands
   #.........................................................................................................
   # External commands call a child process that is passed the remaing command line arguments, so those
   # can be dealt with summarily.
   #.........................................................................................................
+  q.stage             = 'external'
   p                   = parse_argv [], { argv, stopAtFirstUnknown: true, }
   argv                = pluck p, '_unknown', []
   q.parameters.argv   = argv[ .. ]
   urge "Stage: External Commands", { q, argv, } if q.trace
+  ### TAINT derive list from settings ###
+  if q.cmd in [ 'psql', 'node', 'nodexh', ]
+    return q
+  q.error = { code: 115, message: "^cli@5480^ Unknown command #{CND.reverse rpr q.cmd}", }
+
+#-----------------------------------------------------------------------------------------------------------
+run_external_command = ->
+  # #.........................................................................................................
+  # switch q.cmd
+  #   #-------------------------------------------------------------------------------------------------------
+  #   when 'psql'
+  #     urge "running external command #{get_cmd_literal q.cmd, argv}" if q.trace
+  #     return resolve()
+  #   #-------------------------------------------------------------------------------------------------------
+  #   when 'nodexh', 'node'
+  #     urge "running external command #{get_cmd_literal q.cmd, argv}" if q.trace
+  #     return resolve()
   #.........................................................................................................
-  switch q.cmd
-    #-------------------------------------------------------------------------------------------------------
-    when 'psql'
-      urge "running external command #{get_cmd_literal q.cmd, argv}" if q.trace
-      return resolve()
-    #-------------------------------------------------------------------------------------------------------
-    when 'nodexh', 'node'
-      urge "running external command #{get_cmd_literal q.cmd, argv}" if q.trace
-      return resolve()
-  #.........................................................................................................
-  return show_help_and_exit 115, "^cli@5480^ Unknown command #{CND.reverse rpr q.cmd}"
 
 #-----------------------------------------------------------------------------------------------------------
 compile_settings = ( dft, usr ) ->
@@ -181,13 +212,11 @@ compile_settings = ( dft, usr ) ->
   for name, description of Object.assign {}, dft.commands, usr.commands
     throw Error "^cli@5588^ must not have attribute name, got #{rpr description}" if description.name?
     is_external = false
-    e           = lets description, ( d ) ->
+    e = lets description, ( d ) ->
       d.name      = name
       is_external = pluck d, 'external', false
-    if is_external
-      externals.push e
-    else
-      internals.push e
+    if is_external then externals.push e
+    else                internals.push e
   #.........................................................................................................
   return freeze R
 
@@ -198,9 +227,11 @@ default_settings = freeze {
     cd:     { alias: 'd', type: String,  description: "change to directory before running command", }
     trace:  { alias: 't', type: Boolean, description: "trace options parsing (for debugging)", }
   commands:
-    cow:      { description: "draw a cow", }
+    cat:      { description: "draw a cat", }
     version:  { description: "show project version and exit", }
   }
+
+
 
 #-----------------------------------------------------------------------------------------------------------
 user_settings = freeze {

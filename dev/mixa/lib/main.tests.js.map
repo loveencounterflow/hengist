@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/main.tests.coffee"
+  ],
+  "names": [],
+  "mappings": "AAAA;;AAAA",
+  "sourcesContent": [
+    "\n\n\n\n"
+  ]
+}
