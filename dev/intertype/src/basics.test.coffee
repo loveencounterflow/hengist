@@ -315,9 +315,9 @@ INTERTYPE                 = require '../../../apps/intertype'
   #.........................................................................................................
   prms = new Promise ( rslv, rjct ) => return
   probes_and_matchers = [
-    [123,       ["count","finite","frozen","integer","nonnegative","notunset","float","float","numeric","odd","positive","safeinteger","sealed","truthy"],null]
-    [124,       ["count","even","finite","frozen","integer","nonnegative","notunset","float","float","numeric","positive","safeinteger","sealed","truthy"],null]
-    [0,         ["count","even","falsy","finite","frozen","integer","nonnegative","nonpositive","notunset","float","float","numeric","safeinteger","sealed","zero"],null]
+    [123,       ["cardinal","finite","frozen","integer","nonnegative","notunset","float","float","numeric","odd","positive","safeinteger","sealed","truthy"],null]
+    [124,       ["cardinal","even","finite","frozen","integer","nonnegative","notunset","float","float","numeric","positive","safeinteger","sealed","truthy"],null]
+    [0,         ["cardinal","even","falsy","finite","frozen","integer","nonnegative","nonpositive","notunset","float","float","numeric","safeinteger","sealed","zero"],null]
     [true,      ["boolean","frozen","notunset","sealed","truthy"],null]
     [null,      ["falsy","frozen","null","sealed","unset"],null]
     [undefined, ["falsy","frozen","sealed","undefined","unset"],null]
@@ -474,6 +474,49 @@ later = ->
       result = cast[ type_a ] type_b, x
       resolve result
       return null
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "isa_optional" ] = ( T, done ) ->
+  #.........................................................................................................
+  intertype = new Intertype()
+  { isa_optional
+    validate_optional } = intertype.export()
+  #.........................................................................................................
+  T.eq ( isa_optional.integer null        ), true
+  T.eq ( isa_optional.integer 1234        ), true
+  T.eq ( isa_optional.integer '1234'      ), false
+  T.eq ( isa_optional.integer true        ), false
+  T.eq ( isa_optional.integer false       ), false
+  T.eq ( isa_optional.integer undefined   ), true
+  T.eq ( isa_optional.integer new Date()  ), false
+  T.eq ( isa_optional.integer []          ), false
+  #.........................................................................................................
+  try
+    validate_optional.nonempty_text null
+    T.ok true
+  catch error
+    T.fail 'testcase-434653746'
+  #.........................................................................................................
+  try
+    validate_optional.nonempty_text 'yes'
+    T.ok true
+  catch error
+    T.fail 'testcase-434653747'
+  #.........................................................................................................
+  try
+    validate_optional.nonempty_text 12.4
+    T.fail 'testcase-434653748'
+  catch error
+    T.ok true
+  #.........................................................................................................
+  try
+    validate_optional.nonempty_text false
+    T.fail 'testcase-434653749'
+  catch error
+    T.ok true
+  #.........................................................................................................
   done()
   return null
 
@@ -745,7 +788,7 @@ later = ->
   # #.........................................................................................................
   # declare 'fs_stats', tests:
   #   'x is an object':         ( x ) -> @isa.object  x
-  #   'x.size is a count':      ( x ) -> @isa.count   x.size
+  #   'x.size is a cardinal':      ( x ) -> @isa.cardinal   x.size
   #   'x.atimeMs is a float':  ( x ) -> @isa.float  x.atimeMs
   #   'x.atime is a date':      ( x ) -> @isa.date    x.atime
   # #.........................................................................................................
@@ -936,7 +979,7 @@ later = ->
     [ 'numeric',          [ 23, true  ], ]
     [ 'even',             [ 23, false ], ]
     [ 'odd',              [ 23, true  ], ]
-    [ 'count',            [ 23, true  ], ]
+    [ 'cardinal',            [ 23, true  ], ]
     [ 'nonnegative',      [ 23, true  ], ]
     [ 'positive',         [ 23, true  ], ]
     [ 'positive_integer', [ 23, true  ], ]
@@ -976,7 +1019,7 @@ later = ->
     tests:
       "x is a object":                          ( x ) -> @isa.object x
       "x.host is a nonempty_text":              ( x ) -> @isa.nonempty_text x.host
-      "x.port is a count":                      ( x ) -> @isa.count x.port
+      "x.port is a cardinal":                      ( x ) -> @isa.cardinal x.port
       "x.show_counts is a boolean":             ( x ) -> @isa.boolean x.show_counts
       "x.count_interval is a positive_integer": ( x ) -> @isa.positive_integer x.count_interval
       "x.socket_log_all is a boolean":          ( x ) -> @isa.boolean x.socket_log_all
