@@ -283,7 +283,7 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
 
 
 ############################################################################################################
-if require.main is module then do =>
+if module is require.main then do =>
   test @
   # await @_demo_opentypejs()
   # test @[ "VNR sort 2" ]
