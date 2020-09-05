@@ -1,5 +1,4 @@
 
-
 'use strict'
 
 
@@ -8,6 +7,7 @@ CND                       = require 'cnd'
 rpr                       = CND.rpr
 badge                     = 'INTERSHOP/TESTS/070-CATALOG'
 debug                     = CND.get_logger 'debug',     badge
+debug '^76483-1^'
 warn                      = CND.get_logger 'warn',      badge
 info                      = CND.get_logger 'info',      badge
 urge                      = CND.get_logger 'urge',      badge
@@ -52,7 +52,9 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
       ### TAINT why do we have to do explicit error handling here? ###
       try
         result = await db.query_one [ """select * from CATALOG.parse_object_identifier( $1 );""", probe, ]
-      catch error then return reject new Error error.message
+      catch error
+        # warn error.message
+        return reject new Error error.message
       resolve result
   done()
   return null
