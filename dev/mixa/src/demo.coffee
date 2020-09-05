@@ -231,8 +231,6 @@ default_settings = freeze {
     version:  { description: "show project version and exit", }
   }
 
-
-
 #-----------------------------------------------------------------------------------------------------------
 user_settings = freeze {
   # meta:
@@ -249,7 +247,7 @@ debug '^6767^', JSON.stringify X, null, '  '
 
 ############################################################################################################
 if module is require.main then do =>
-  debug '^3387^', await @cli()
+  debug '^3387^', @cli()
   # debug await @cli [ '-t', null, '-t', ]
 
     # {
