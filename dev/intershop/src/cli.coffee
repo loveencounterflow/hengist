@@ -7,6 +7,7 @@ CND                       = require 'cnd'
 rpr                       = CND.rpr
 badge                     = 'HENGIST/DEV/INTERSHOP/INTERSHOP-CLI-NG'
 debug                     = CND.get_logger 'debug',     badge
+debug '^76483-1^', Date.now() / 1000
 alert                     = CND.get_logger 'alert',     badge
 whisper                   = CND.get_logger 'whisper',   badge
 warn                      = CND.get_logger 'warn',      badge
@@ -22,6 +23,7 @@ types                     = ( require 'intershop' ).types
   type_of }               = types.export()
 CP                        = require 'child_process'
 defer                     = setImmediate
+debug '^76483-2^', Date.now() / 1000
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -154,59 +156,64 @@ defer                     = setImmediate
 
 #-----------------------------------------------------------------------------------------------------------
 @_cli = ->
-  { program } = require '@caporal/core'
+  debug '^76483-3^', Date.now() / 1000
+  MIXA = require '../../../apps/mixa'
+  debug '^76483-4^', Date.now() / 1000
   #.........................................................................................................
   # program.action ( { logger, } ) => logger.info "Hello, world!"
   #.........................................................................................................
-  program
-    .name 'intershop'
+  jobdef =
+    # .name 'intershop'
     #.......................................................................................................
-    .command 'start-rpc-server', "start RPC server (to be accessed from psql scripts)"
-    .action ( d ) => new Promise ( done ) =>
-      project_path  = d.options.p ? d.options.project ? process.cwd()
-      shop          = await @serve project_path
-    #.......................................................................................................
-    .command 'psql', "run psql"
-    .option '-f --file <file>',       "read commands from file rather than standard input; may be combined, repeated" #, collect, []
-    .option '-c --command <command>', "execute the given command string; may be combined, repeated" #, collect, []
-    .action ( d ) =>
-      # has_command = true
-      # info "^5561^ #{rpr ( key for key of d )}"
-      # info "^5562^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', 'logger', 'program', 'command' ]
-      # info "^5563^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', ]
-      file_path     = d.options.file    ? null
-      command       = d.options.command ? null
-      project_path  = @_cli_get_project_path d
-      info "^5564^ d.options: #{rpr d.options}"
-      info "^5564^ file_path: #{rpr file_path}"
-      info "^5565^ project_path: #{rpr project_path}"
-      shop = await @serve project_path
-      # debug '^2223^', rpr command
-      # debug '^2223^', rpr project_path
-      me            = @new_intershop_runner project_path
-      # info "^5566^ running psql with #{rpr { file: d.file, command: d.command, }}"
-      await @psql_run_file    me, file_path if file_path?
-      await @psql_run_command me, command   if command?
-      await shop.rpc.stop()
-      return null
-    #.......................................................................................................
-    .command 'nodexh', "run nodexh"
-    .argument '<file>', "file to run"
-    .action ( d ) =>
-      file_path     = d.args.file
-      project_path  = @_cli_get_project_path d
-      info "^5565^ file_path:     #{rpr file_path}"
-      info "^5565^ project_path:  #{rpr project_path}"
-      shop          = await @serve project_path
-      await @nodexh_run_file project_path, file_path
-      await shop.rpc.stop()
-      await defer -> process.exit()
-      return null
+    commands
+      'start-rpc-server':
+        description:        "start RPC server (to be accessed from psql scripts)"
+        allow_extra:        true
+        runner:             ( d ) => new Promise ( done ) =>
+          project_path  = d.verdict.cd ? process.cwd()
+          shop          = await @serve project_path
+      #.....................................................................................................
+      'psql':
+        description:        "run psql"
+        allow_extra:        true
+        runner:             ( d ) => new Promise ( done ) =>
+          project_path  = d.verdict.cd ? process.cwd()
+          shop          = await @serve project_path
+          ### TAINT ###
+          project_path  = @_cli_get_project_path d
+          info "^5564^ d.options: #{rpr d.options}"
+          info "^5564^ file_path: #{rpr file_path}"
+          info "^5565^ project_path: #{rpr project_path}"
+          shop = await @serve project_path
+          # debug '^2223^', rpr command
+          # debug '^2223^', rpr project_path
+          me            = @new_intershop_runner project_path
+          # info "^5566^ running psql with #{rpr { file: d.file, command: d.command, }}"
+          await @psql_run_file    me, file_path if file_path?
+          await @psql_run_command me, command   if command?
+          await shop.rpc.stop()
+          return null
+      #.....................................................................................................
+      'nodexh':
+        description:        "run nodexh"
+        allow_extra:        false
+        flags:
+          'file':
+            alias:            'f'
+            description:      "file to run"
+        runner:             ( d ) => new Promise ( done ) =>
+          ### TAINT ###
+          file_path     = d.args.file
+          project_path  = @_cli_get_project_path d
+          info "^5565^ file_path:     #{rpr file_path}"
+          info "^5565^ project_path:  #{rpr project_path}"
+          shop          = await @serve project_path
+          await @nodexh_run_file project_path, file_path
+          await shop.rpc.stop()
+          await defer -> process.exit()
+          return null
   #.........................................................................................................
-  program
-    .option '-p --project <project>', "set path to InterShop project (only needed if not current directory)", { global: true, }
-  #.........................................................................................................
-  await program.run()
+  return await MIXA.run jobdef, process.argv()
 
 # #-----------------------------------------------------------------------------------------------------------
 # @demo = ->
