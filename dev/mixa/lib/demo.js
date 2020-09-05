@@ -395,8 +395,8 @@ command:      internal or external command to run (obligatory)
 
   //###########################################################################################################
   if (module === require.main) {
-    (async() => {
-      return debug('^3387^', (await this.cli()));
+    (() => {
+      return debug('^3387^', this.cli());
     })();
   }
 

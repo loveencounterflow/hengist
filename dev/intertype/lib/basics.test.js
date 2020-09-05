@@ -178,7 +178,7 @@
     ({isa, validate, type_of, types_of, size_of, declare, all_keys_of} = intertype.export());
     //.........................................................................................................
     prms = new Promise((rslv, rjct) => {});
-    probes_and_matchers = [[123, ["count", "finite", "frozen", "integer", "nonnegative", "notunset", "float", "float", "numeric", "odd", "positive", "safeinteger", "sealed", "truthy"], null], [124, ["count", "even", "finite", "frozen", "integer", "nonnegative", "notunset", "float", "float", "numeric", "positive", "safeinteger", "sealed", "truthy"], null], [0, ["count", "even", "falsy", "finite", "frozen", "integer", "nonnegative", "nonpositive", "notunset", "float", "float", "numeric", "safeinteger", "sealed", "zero"], null], [true, ["boolean", "frozen", "notunset", "sealed", "truthy"], null], [null, ["falsy", "frozen", "null", "sealed", "unset"], null], [void 0, ["falsy", "frozen", "sealed", "undefined", "unset"], null], [{}, ["empty", "extensible", "notunset", "object", "truthy"], null], [[], ["empty", "extensible", "list", "notunset", "truthy"], null], [prms, ["nativepromise", "promise", "thenable"], null]];
+    probes_and_matchers = [[123, ["cardinal", "finite", "frozen", "integer", "nonnegative", "notunset", "float", "float", "numeric", "odd", "positive", "safeinteger", "sealed", "truthy"], null], [124, ["cardinal", "even", "finite", "frozen", "integer", "nonnegative", "notunset", "float", "float", "numeric", "positive", "safeinteger", "sealed", "truthy"], null], [0, ["cardinal", "even", "falsy", "finite", "frozen", "integer", "nonnegative", "nonpositive", "notunset", "float", "float", "numeric", "safeinteger", "sealed", "zero"], null], [true, ["boolean", "frozen", "notunset", "sealed", "truthy"], null], [null, ["falsy", "frozen", "null", "sealed", "unset"], null], [void 0, ["falsy", "frozen", "sealed", "undefined", "unset"], null], [{}, ["empty", "extensible", "notunset", "object", "truthy"], null], [[], ["empty", "extensible", "list", "notunset", "truthy"], null], [prms, ["nativepromise", "promise", "thenable"], null]];
 //.........................................................................................................
 // debug intersection_of [ 1, 2, 3, ], [ 'a', 3, 1, ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -416,6 +416,58 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["isa_optional"] = function(T, done) {
+    var error, intertype, isa_optional, validate_optional;
+    //.........................................................................................................
+    intertype = new Intertype();
+    ({isa_optional, validate_optional} = intertype.export());
+    //.........................................................................................................
+    T.eq(isa_optional.integer(null), true);
+    T.eq(isa_optional.integer(1234), true);
+    T.eq(isa_optional.integer('1234'), false);
+    T.eq(isa_optional.integer(true), false);
+    T.eq(isa_optional.integer(false), false);
+    T.eq(isa_optional.integer(void 0), true);
+    T.eq(isa_optional.integer(new Date()), false);
+    T.eq(isa_optional.integer([]), false);
+    try {
+      //.........................................................................................................
+      validate_optional.nonempty_text(null);
+      T.ok(true);
+    } catch (error1) {
+      error = error1;
+      T.fail('testcase-434653746');
+    }
+    try {
+      //.........................................................................................................
+      validate_optional.nonempty_text('yes');
+      T.ok(true);
+    } catch (error1) {
+      error = error1;
+      T.fail('testcase-434653747');
+    }
+    try {
+      //.........................................................................................................
+      validate_optional.nonempty_text(12.4);
+      T.fail('testcase-434653748');
+    } catch (error1) {
+      error = error1;
+      T.ok(true);
+    }
+    try {
+      //.........................................................................................................
+      validate_optional.nonempty_text(false);
+      T.fail('testcase-434653749');
+    } catch (error1) {
+      error = error1;
+      T.ok(true);
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["isa.list_of A"] = async function(T, done) {
     var error, i, intertype, isa, len, matcher, probe, probes_and_matchers, validate;
     //.........................................................................................................
@@ -466,6 +518,62 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["isa_object_of B"] = async function(T, done) {
+    var error, i, intertype, isa, isa_object_of, len, matcher, probe, probes_and_matchers, validate;
+    //.........................................................................................................
+    intertype = new Intertype();
+    ({isa, isa_object_of, validate} = intertype.export());
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        [
+          'float',
+          {
+            x: 123
+          }
+        ],
+        true
+      ],
+      [
+        [
+          'integer',
+          {
+            x: 123
+          }
+        ],
+        true
+      ],
+      [
+        [
+          'integer',
+          {
+            x: 1,
+            y: 2,
+            a: 3,
+            c: 123.5
+          }
+        ],
+        false
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var result, type, x;
+          [type, x] = probe;
+          result = isa_object_of[type](x);
+          resolve(result);
+          return null;
+        });
+      });
+    }
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["validate.list_of A"] = async function(T, done) {
     var error, i, intertype, isa, len, matcher, probe, probes_and_matchers, validate;
     //.........................................................................................................
@@ -506,6 +614,63 @@
           var result, type, x;
           [type, x] = probe;
           result = validate_list_of(type, x);
+          resolve(result);
+          return null;
+        });
+      });
+    }
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["validate.object_of B"] = async function(T, done) {
+    var error, i, intertype, isa, isa_object_of, len, matcher, probe, probes_and_matchers, validate, validate_object_of;
+    //.........................................................................................................
+    intertype = new Intertype();
+    ({isa, validate, isa_object_of, validate_object_of} = intertype.export());
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        [
+          'float',
+          {
+            x: 123
+          }
+        ],
+        true
+      ],
+      [
+        [
+          'integer',
+          {
+            x: 123
+          }
+        ],
+        true
+      ],
+      [
+        [
+          'integer',
+          {
+            x: 1,
+            y: 2,
+            a: 3,
+            c: 123.5
+          }
+        ],
+        null,
+        "not a valid object_of"
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var result, type, x;
+          [type, x] = probe;
+          result = validate_object_of(type, x);
           resolve(result);
           return null;
         });
@@ -755,7 +920,7 @@
     // #.........................................................................................................
     // declare 'fs_stats', tests:
     //   'x is an object':         ( x ) -> @isa.object  x
-    //   'x.size is a count':      ( x ) -> @isa.count   x.size
+    //   'x.size is a cardinal':      ( x ) -> @isa.cardinal   x.size
     //   'x.atimeMs is a float':  ( x ) -> @isa.float  x.atimeMs
     //   'x.atime is a date':      ( x ) -> @isa.date    x.atime
     // #.........................................................................................................
@@ -1073,7 +1238,7 @@
     intertype = new Intertype();
     ({isa, type_of, check, equals} = intertype.export());
     //.........................................................................................................
-    probes_and_matchers = [['nan', [23, false]], ['finite', [23, true]], ['integer', [23, true]], ['safeinteger', [23, true]], ['numeric', [23, true]], ['even', [23, false]], ['odd', [23, true]], ['count', [23, true]], ['nonnegative', [23, true]], ['positive', [23, true]], ['positive_integer', [23, true]], ['negative_integer', [23, false]], ['zero', [23, false]], ['infinity', [23, false]], ['infloat', [23, true]], ['nonpositive', [23, false]], ['negative', [23, false]], ['positive_float', [23, true]], ['negative_float', [23, false]]];
+    probes_and_matchers = [['nan', [23, false]], ['finite', [23, true]], ['integer', [23, true]], ['safeinteger', [23, true]], ['numeric', [23, true]], ['even', [23, false]], ['odd', [23, true]], ['cardinal', [23, true]], ['nonnegative', [23, true]], ['positive', [23, true]], ['positive_integer', [23, true]], ['negative_integer', [23, false]], ['zero', [23, false]], ['infinity', [23, false]], ['infloat', [23, true]], ['nonpositive', [23, false]], ['negative', [23, false]], ['positive_float', [23, true]], ['negative_float', [23, false]]];
     //.........................................................................................................
     error = null;
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -1112,8 +1277,8 @@
         "x.host is a nonempty_text": function(x) {
           return this.isa.nonempty_text(x.host);
         },
-        "x.port is a count": function(x) {
-          return this.isa.count(x.port);
+        "x.port is a cardinal": function(x) {
+          return this.isa.cardinal(x.port);
         },
         "x.show_counts is a boolean": function(x) {
           return this.isa.boolean(x.show_counts);
@@ -1192,13 +1357,13 @@
 
   //###########################################################################################################
   if (module.parent == null) {
-    // test @
-    // test @[ "size_of" ]
-    // test @[ "numerical types" ]
-    test(this["real-life example 2"]);
+    test(this);
   }
 
-  // test @[ "equals" ]
+  // test @[ "size_of" ]
+// test @[ "numerical types" ]
+// test @[ "real-life example 2" ]
+// test @[ "equals" ]
 // @[ "equality checks" ]()
 // test @[ "isa.immediate, nowait" ]
 // test @[ "types_of() includes happy, sad" ]
@@ -1210,6 +1375,8 @@
 // test @[ "cast" ]
 // test @[ "isa.list_of A" ]
 // test @[ "isa.list_of B" ]
+// test @[ "isa_object_of B" ]
+// test @[ "validate.object_of B" ]
 // test @[ "validate.list_of A" ]
 // test @[ "validate.list_of B" ]
 

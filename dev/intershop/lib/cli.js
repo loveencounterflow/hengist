@@ -234,67 +234,88 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this._cli = async function() {
-    var program;
+    var MIXA, jobdef;
     debug('^76483-3^', Date.now() / 1000);
-    ({program} = require('@caporal/core'));
+    MIXA = require('../../../apps/mixa');
     debug('^76483-4^', Date.now() / 1000);
     //.........................................................................................................
     // program.action ( { logger, } ) => logger.info "Hello, world!"
     //.........................................................................................................
+    // .name 'intershop'
     //.......................................................................................................
-    program.name('intershop').command('start-rpc-server', "start RPC server (to be accessed from psql scripts)").action((d) => {
-      return new Promise(async(done) => {
-        var project_path, ref, ref1, shop;
-        project_path = (ref = (ref1 = d.options.p) != null ? ref1 : d.options.project) != null ? ref : process.cwd();
-        return shop = (await this.serve(project_path));
-      });
-    //.......................................................................................................
-    }).command('psql', "run psql").option('-f --file <file>', "read commands from file rather than standard input; may be combined, repeated").option('-c --command <command>', "execute the given command string; may be combined, repeated").action(async(d) => { //, collect, [] //, collect, []
-      var command, file_path, me, project_path, ref, ref1, shop;
-      // has_command = true
-      // info "^5561^ #{rpr ( key for key of d )}"
-      // info "^5562^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', 'logger', 'program', 'command' ]
-      // info "^5563^ #{rpr key}: #{rpr d[ key ]}" for key in [ 'args', 'options', 'ddash', ]
-      file_path = (ref = d.options.file) != null ? ref : null;
-      command = (ref1 = d.options.command) != null ? ref1 : null;
-      project_path = this._cli_get_project_path(d);
-      info(`^5564^ d.options: ${rpr(d.options)}`);
-      info(`^5564^ file_path: ${rpr(file_path)}`);
-      info(`^5565^ project_path: ${rpr(project_path)}`);
-      shop = (await this.serve(project_path));
-      // debug '^2223^', rpr command
-      // debug '^2223^', rpr project_path
-      me = this.new_intershop_runner(project_path);
-      if (file_path != null) {
-        // info "^5566^ running psql with #{rpr { file: d.file, command: d.command, }}"
-        await this.psql_run_file(me, file_path);
+    jobdef = commands({
+      'start-rpc-server': {
+        description: "start RPC server (to be accessed from psql scripts)",
+        allow_extra: true,
+        runner: (d) => {
+          return new Promise(async(done) => {
+            var project_path, ref, shop;
+            project_path = (ref = d.verdict.cd) != null ? ref : process.cwd();
+            return shop = (await this.serve(project_path));
+          });
+        }
+      },
+      //.....................................................................................................
+      'psql': {
+        description: "run psql",
+        allow_extra: true,
+        runner: (d) => {
+          return new Promise(async(done) => {
+            /* TAINT */
+            var me, project_path, ref, shop;
+            project_path = (ref = d.verdict.cd) != null ? ref : process.cwd();
+            shop = (await this.serve(project_path));
+            project_path = this._cli_get_project_path(d);
+            info(`^5564^ d.options: ${rpr(d.options)}`);
+            info(`^5564^ file_path: ${rpr(file_path)}`);
+            info(`^5565^ project_path: ${rpr(project_path)}`);
+            shop = (await this.serve(project_path));
+            // debug '^2223^', rpr command
+            // debug '^2223^', rpr project_path
+            me = this.new_intershop_runner(project_path);
+            if (typeof file_path !== "undefined" && file_path !== null) {
+              // info "^5566^ running psql with #{rpr { file: d.file, command: d.command, }}"
+              await this.psql_run_file(me, file_path);
+            }
+            if (typeof command !== "undefined" && command !== null) {
+              await this.psql_run_command(me, command);
+            }
+            await shop.rpc.stop();
+            return null;
+          });
+        }
+      },
+      //.....................................................................................................
+      'nodexh': {
+        description: "run nodexh",
+        allow_extra: false,
+        flags: {
+          'file': {
+            alias: 'f',
+            description: "file to run"
+          }
+        },
+        runner: (d) => {
+          return new Promise(async(done) => {
+            /* TAINT */
+            var file_path, project_path, shop;
+            file_path = d.args.file;
+            project_path = this._cli_get_project_path(d);
+            info(`^5565^ file_path:     ${rpr(file_path)}`);
+            info(`^5565^ project_path:  ${rpr(project_path)}`);
+            shop = (await this.serve(project_path));
+            await this.nodexh_run_file(project_path, file_path);
+            await shop.rpc.stop();
+            await defer(function() {
+              return process.exit();
+            });
+            return null;
+          });
+        }
       }
-      if (command != null) {
-        await this.psql_run_command(me, command);
-      }
-      await shop.rpc.stop();
-      return null;
-    //.......................................................................................................
-    }).command('nodexh', "run nodexh").argument('<file>', "file to run").action(async(d) => {
-      var file_path, project_path, shop;
-      file_path = d.args.file;
-      project_path = this._cli_get_project_path(d);
-      info(`^5565^ file_path:     ${rpr(file_path)}`);
-      info(`^5565^ project_path:  ${rpr(project_path)}`);
-      shop = (await this.serve(project_path));
-      await this.nodexh_run_file(project_path, file_path);
-      await shop.rpc.stop();
-      await defer(function() {
-        return process.exit();
-      });
-      return null;
     });
     //.........................................................................................................
-    program.option('-p --project <project>', "set path to InterShop project (only needed if not current directory)", {
-      global: true
-    });
-    //.........................................................................................................
-    return (await program.run());
+    return (await MIXA.run(jobdef, process.argv()));
   };
 
   // #-----------------------------------------------------------------------------------------------------------
