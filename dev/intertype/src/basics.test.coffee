@@ -566,6 +566,29 @@ later = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "isa_object_of B" ] = ( T, done ) ->
+  #.........................................................................................................
+  intertype = new Intertype()
+  { isa
+    isa_object_of
+    validate } = intertype.export()
+  #.........................................................................................................
+  probes_and_matchers = [
+    [[ 'float',     { x: 123, },                        ], true,     ]
+    [[ 'integer',   { x: 123, },                        ], true,     ]
+    [[ 'integer',   { x: 1, y: 2, a: 3, c: 123.5, },    ], false,     ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      [ type, x, ] = probe
+      result = isa_object_of[ type ] x
+      resolve result
+      return null
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "validate.list_of A" ] = ( T, done ) ->
   #.........................................................................................................
   intertype = new Intertype()
@@ -606,6 +629,30 @@ later = ->
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       [ type, x, ] = probe
       result = validate_list_of type, x
+      resolve result
+      return null
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "validate.object_of B" ] = ( T, done ) ->
+  #.........................................................................................................
+  intertype = new Intertype()
+  { isa
+    validate
+    isa_object_of
+    validate_object_of } = intertype.export()
+  #.........................................................................................................
+  probes_and_matchers = [
+    [[ 'float',     { x: 123, },                        ], true,     ]
+    [[ 'integer',   { x: 123, },                        ], true,     ]
+    [[ 'integer',   { x: 1, y: 2, a: 3, c: 123.5, },    ], null, "not a valid object_of",    ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      [ type, x, ] = probe
+      result = validate_object_of type, x
       resolve result
       return null
   done()
@@ -1080,10 +1127,10 @@ later = ->
 
 ############################################################################################################
 unless module.parent?
-  # test @
+  test @
   # test @[ "size_of" ]
   # test @[ "numerical types" ]
-  test @[ "real-life example 2" ]
+  # test @[ "real-life example 2" ]
   # test @[ "equals" ]
   # @[ "equality checks" ]()
   # test @[ "isa.immediate, nowait" ]
@@ -1096,6 +1143,8 @@ unless module.parent?
   # test @[ "cast" ]
   # test @[ "isa.list_of A" ]
   # test @[ "isa.list_of B" ]
+  # test @[ "isa_object_of B" ]
+  # test @[ "validate.object_of B" ]
   # test @[ "validate.list_of A" ]
   # test @[ "validate.list_of B" ]
 
