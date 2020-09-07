@@ -1,6 +1,7 @@
 
 'use strict'
 
+t0 = process.hrtime.bigint()
 
 ############################################################################################################
 CND                       = require 'cnd'
@@ -165,7 +166,7 @@ debug '^76483-2^', Date.now() / 1000
   jobdef =
     # .name 'intershop'
     #.......................................................................................................
-    commands
+    commands:
       'start-rpc-server':
         description:        "start RPC server (to be accessed from psql scripts)"
         allow_extra:        true
@@ -192,28 +193,25 @@ debug '^76483-2^', Date.now() / 1000
           await @psql_run_file    me, file_path if file_path?
           await @psql_run_command me, command   if command?
           await shop.rpc.stop()
+          done()
           return null
       #.....................................................................................................
       'nodexh':
         description:        "run nodexh"
-        allow_extra:        false
-        flags:
-          'file':
-            alias:            'f'
-            description:      "file to run"
-        runner:             ( d ) => new Promise ( done ) =>
-          ### TAINT ###
-          file_path     = d.args.file
-          project_path  = @_cli_get_project_path d
-          info "^5565^ file_path:     #{rpr file_path}"
-          info "^5565^ project_path:  #{rpr project_path}"
-          shop          = await @serve project_path
-          await @nodexh_run_file project_path, file_path
-          await shop.rpc.stop()
-          await defer -> process.exit()
-          return null
+        allow_extra:        true
+        runner:             MIXA.runners.execSync
+      #.....................................................................................................
+      'node':
+        description:        "run node"
+        allow_extra:        true
+        runner:             MIXA.runners.execSync
   #.........................................................................................................
-  return await MIXA.run jobdef, process.argv()
+  whisper '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', CND.format_number ( process.hrtime.bigint() - t0 ) # / 1000000000n
+  debug '^33344^', MIXA.parse jobdef, process.argv
+  whisper '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', CND.format_number ( process.hrtime.bigint() - t0 ) # / 1000000000n
+  R = await MIXA.run jobdef, process.argv
+  whisper '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', CND.format_number ( process.hrtime.bigint() - t0 ) # / 1000000000n
+  return R
 
 # #-----------------------------------------------------------------------------------------------------------
 # @demo = ->
