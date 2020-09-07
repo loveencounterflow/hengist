@@ -397,6 +397,31 @@ resolve_recursively = ( x, path ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "MIXA --cd changes process directory" ] = ( T, done ) ->
+  MIXA = require '../../../apps/mixa'
+  #.........................................................................................................
+  jobdef =
+    commands:
+      foo:
+        runner: ( d ) ->
+          help '^223392^', d
+          urge process.cwd()
+          urge dpath
+          T.eq process.cwd(), dpath
+  #.........................................................................................................
+  opath   = process.cwd()
+  dpath   = __dirname
+  if dpath is opath
+    process.chdir '..'
+  # result  = MIXA.run jobdef, [ 'foo', ]
+  result  = MIXA.run jobdef, [ '--cd', dpath, 'foo', ]
+  T.eq result.verdict.cd, dpath
+  process.chdir opath
+  #.........................................................................................................
+  done() if done?
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 demo_3 = ->
   jobdef =
     commands:
