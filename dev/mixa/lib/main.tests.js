@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, _strip_ansi, badge, debug, demo_1, demo_2, demo_3, demo_run_1, echo, freeze, help, info, lets, resolve_recursively, rpr, strip_ansi, test, types, urge, warn, whisper;
+  var CND, PATH, _strip_ansi, badge, debug, demo_1, demo_2, demo_3, demo_generator, demo_run_1, echo, freeze, help, info, lets, resolve_recursively, rpr, strip_ansi, test, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -26,7 +26,8 @@
   //...........................................................................................................
   test = require('guy-test');
 
-  // PATH                      = require 'path'
+  PATH = require('path');
+
   // FS                        = require 'fs'
   _strip_ansi = require('strip-ansi');
 
@@ -45,23 +46,23 @@
         return _strip_ansi(x);
       case 'object':
         return lets(x, function(x) {
-          var k, results, v;
-          results = [];
+          var k, results1, v;
+          results1 = [];
           for (k in x) {
             v = x[k];
-            results.push(x[k] = strip_ansi(v));
+            results1.push(x[k] = strip_ansi(v));
           }
-          return results;
+          return results1;
         });
       case 'list':
         return lets(x, function(x) {
-          var i, k, len, results, v;
-          results = [];
+          var i, k, len, results1, v;
+          results1 = [];
           for (v = i = 0, len = x.length; i < len; v = ++i) {
             k = x[v];
-            results.push(x[k] = strip_ansi(v));
+            results1.push(x[k] = strip_ansi(v));
           }
-          return results;
+          return results1;
         });
     }
     return x;
@@ -1067,6 +1068,40 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["MIXA --cd changes process directory"] = function(T, done) {
+    var MIXA, dpath, jobdef, opath, result;
+    MIXA = require('../../../apps/mixa');
+    //.........................................................................................................
+    jobdef = {
+      commands: {
+        foo: {
+          runner: function(d) {
+            help('^223392^', d);
+            urge(process.cwd());
+            urge(dpath);
+            return T.eq(process.cwd(), dpath);
+          }
+        }
+      }
+    };
+    //.........................................................................................................
+    opath = process.cwd();
+    dpath = __dirname;
+    if (dpath === opath) {
+      process.chdir('..');
+    }
+    // result  = MIXA.run jobdef, [ 'foo', ]
+    result = MIXA.run(jobdef, ['--cd', dpath, 'foo']);
+    T.eq(result.verdict.cd, dpath);
+    process.chdir(opath);
+    if (done != null) {
+      //.........................................................................................................
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_3 = function() {
     var MIXA, compiled_settings, jobdef, result;
     jobdef = {
@@ -1206,7 +1241,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_run_1 = function() {
-    var MIXA, PATH, jobdef, line, output, path, ref, ref1, ref2, result;
+    var MIXA, jobdef, line, output, path, ref, ref1, ref2, result;
     MIXA = require('../../../apps/mixa');
     jobdef = {
       exit_on_error: false,
@@ -1244,14 +1279,14 @@
     urge('^21226^', result);
     if ((output = (ref = result.output) != null ? ref.ok : void 0) != null) {
       (function() {
-        var i, len, ref1, results;
+        var i, len, ref1, results1;
         ref1 = output.split('\n');
-        results = [];
+        results1 = [];
         for (i = 0, len = ref1.length; i < len; i++) {
           line = ref1[i];
-          results.push(help(line));
+          results1.push(help(line));
         }
-        return results;
+        return results1;
       })();
     }
     //.........................................................................................................
@@ -1260,14 +1295,14 @@
     urge('^21226^', result);
     if ((output = (ref1 = result.output) != null ? ref1.ok : void 0) != null) {
       (function() {
-        var i, len, ref2, results;
+        var i, len, ref2, results1;
         ref2 = output.split('\n');
-        results = [];
+        results1 = [];
         for (i = 0, len = ref2.length; i < len; i++) {
           line = ref2[i];
-          results.push(help(line));
+          results1.push(help(line));
         }
-        return results;
+        return results1;
       })();
     }
     //.........................................................................................................
@@ -1276,27 +1311,120 @@
     urge('^21226^', result);
     if ((output = (ref2 = result.output) != null ? ref2.ok : void 0) != null) {
       (function() {
-        var i, len, ref3, results;
+        var i, len, ref3, results1;
         ref3 = output.split('\n');
-        results = [];
+        results1 = [];
         for (i = 0, len = ref3.length; i < len; i++) {
           line = ref3[i];
-          results.push(help(line));
+          results1.push(help(line));
         }
-        return results;
+        return results1;
       })();
     }
     //.........................................................................................................
+    echo('-'.repeat(108));
+    debug('^2233^', process.argv);
+    help((MIXA.parse(jobdef, ['--cd', path, 'list'])).verdict);
+    help((MIXA.parse(jobdef, ['node', '--cd', path, 'list'])).verdict);
+    help((MIXA.parse(jobdef, ['/usr/local/bin/node', '--cd', path, 'list'])).verdict);
+    help((MIXA.parse(jobdef, ['/usr/local/bin/node', '/path/to/file', '--cd', path, 'list'])).verdict);
+    help((MIXA.parse(jobdef, process.argv)).verdict);
+    help((MIXA.parse(jobdef, process.argv.slice(0))).verdict);
     return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_generator = function() {
+    return new Promise(async(done) => {
+      var $, $drain, $watch, SP, g, pipeline, ref, source, x;
+      //---------------------------------------------------------------------------------------------------------
+      g = async function*() {
+        /* thx to https://stackoverflow.com/a/59347615/7568091 */
+        var cp, new_catcher, promise, resolve, results, results1, spawn, x;
+        ({spawn} = require('child_process'));
+        results = [];
+        resolve = () => {
+          return null;
+        };
+        promise = new Promise((r) => {
+          return resolve = r;
+        });
+        done = false;
+        // cp         = spawn 'ls', [ '-AlF', ]
+        // cp         = spawn 'cat', [ __filename, ]
+        cp = spawn('node', [PATH.join(__dirname, '_generator.js')]);
+        // cp.stdout.setEncoding 'utf-8'
+        // cp.stderr.setEncoding 'utf-8'
+        //.......................................................................................................
+        new_catcher = function($key) {
+          return (data) => {
+            var $value, i, len, ref;
+            if (types.isa.buffer(data)) {
+              data = data.toString();
+            }
+            data = data.replace(/\n$/, '');
+            ref = data.split('\n');
+            for (i = 0, len = ref.length; i < len; i++) {
+              $value = ref[i];
+              results.push(Object.freeze({$key, $value}));
+            }
+            resolve();
+            return promise = new Promise((r) => {
+              return resolve = r;
+            });
+          };
+        };
+        //.......................................................................................................
+        cp.stdout.on('data', new_catcher('^stdout'));
+        cp.stderr.on('data', new_catcher('^stderr'));
+        cp.on('error', new_catcher('^error'));
+        //.......................................................................................................
+        cp.on('close', () => {
+          return done = true;
+        });
+        results1 = [];
+        //.......................................................................................................
+        while (!done) {
+          await promise;
+// debug '^334455^', rpr results
+          for (x of results) {
+            yield x;
+          }
+          results1.push(results = []);
+        }
+        return results1;
+      };
+      //---------------------------------------------------------------------------------------------------------
+      debug('^3334^');
+      SP = require('steampipes');
+      ({$, $watch, $drain} = SP.export());
+      source = SP.new_push_source();
+      pipeline = [];
+      pipeline.push(source);
+      // pipeline.push SP.$split()
+      pipeline.push($watch(function(d) {
+        return urge(d);
+      }));
+      pipeline.push($drain(function() {
+        return done();
+      }));
+      SP.pull(...pipeline);
+      ref = g();
+      for await (x of ref) {
+        source.send(x);
+      }
+      return null;
+    });
   };
 
   //###########################################################################################################
   if (module === require.main) {
-    (() => {
+    (async() => {
       // MIXA = require '../../../apps/mixa'
       // debug '^4445^', MIXA.parse null, [ '--cd', 'some/place', 'ls', ]
       // debug '^4445^', MIXA.parse null, [ 'cats!' ]
       // test @
+      // test @[ "MIXA --cd changes process directory" ]
       // test @[ "MIXA parse with defaults" ]
       // test @[ "MIXA settings validation 2" ]
       // test @[ "MIXA types" ]
@@ -1306,7 +1434,8 @@
       // test @[ "MIXA parse with settings 4" ]
       // test @[ "MIXA inhibitor avoids rewriting of single-dash flags" ]
       // demo_3()
-      return demo_run_1();
+      // demo_run_1()
+      return (await demo_generator());
     })();
   }
 

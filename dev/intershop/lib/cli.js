@@ -1,6 +1,8 @@
 (function() {
   'use strict';
-  var CND, CP, alert, badge, cast, debug, defer, echo, help, info, isa, rpr, type_of, types, urge, validate, warn, whisper;
+  var CND, CP, alert, badge, cast, debug, defer, echo, help, info, isa, rpr, t0, type_of, types, urge, validate, warn, whisper;
+
+  t0 = process.hrtime.bigint();
 
   //###########################################################################################################
   CND = require('cnd');
@@ -234,88 +236,80 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this._cli = async function() {
-    var MIXA, jobdef;
+    var MIXA, R, jobdef;
     debug('^76483-3^', Date.now() / 1000);
     MIXA = require('../../../apps/mixa');
     debug('^76483-4^', Date.now() / 1000);
     //.........................................................................................................
     // program.action ( { logger, } ) => logger.info "Hello, world!"
     //.........................................................................................................
-    // .name 'intershop'
-    //.......................................................................................................
-    jobdef = commands({
-      'start-rpc-server': {
-        description: "start RPC server (to be accessed from psql scripts)",
-        allow_extra: true,
-        runner: (d) => {
-          return new Promise(async(done) => {
-            var project_path, ref, shop;
-            project_path = (ref = d.verdict.cd) != null ? ref : process.cwd();
-            return shop = (await this.serve(project_path));
-          });
-        }
-      },
-      //.....................................................................................................
-      'psql': {
-        description: "run psql",
-        allow_extra: true,
-        runner: (d) => {
-          return new Promise(async(done) => {
-            /* TAINT */
-            var me, project_path, ref, shop;
-            project_path = (ref = d.verdict.cd) != null ? ref : process.cwd();
-            shop = (await this.serve(project_path));
-            project_path = this._cli_get_project_path(d);
-            info(`^5564^ d.options: ${rpr(d.options)}`);
-            info(`^5564^ file_path: ${rpr(file_path)}`);
-            info(`^5565^ project_path: ${rpr(project_path)}`);
-            shop = (await this.serve(project_path));
-            // debug '^2223^', rpr command
-            // debug '^2223^', rpr project_path
-            me = this.new_intershop_runner(project_path);
-            if (typeof file_path !== "undefined" && file_path !== null) {
-              // info "^5566^ running psql with #{rpr { file: d.file, command: d.command, }}"
-              await this.psql_run_file(me, file_path);
-            }
-            if (typeof command !== "undefined" && command !== null) {
-              await this.psql_run_command(me, command);
-            }
-            await shop.rpc.stop();
-            return null;
-          });
-        }
-      },
-      //.....................................................................................................
-      'nodexh': {
-        description: "run nodexh",
-        allow_extra: false,
-        flags: {
-          'file': {
-            alias: 'f',
-            description: "file to run"
+    jobdef = {
+      // .name 'intershop'
+      //.......................................................................................................
+      commands: {
+        'start-rpc-server': {
+          description: "start RPC server (to be accessed from psql scripts)",
+          allow_extra: true,
+          runner: (d) => {
+            return new Promise(async(done) => {
+              var project_path, ref, shop;
+              project_path = (ref = d.verdict.cd) != null ? ref : process.cwd();
+              return shop = (await this.serve(project_path));
+            });
           }
         },
-        runner: (d) => {
-          return new Promise(async(done) => {
-            /* TAINT */
-            var file_path, project_path, shop;
-            file_path = d.args.file;
-            project_path = this._cli_get_project_path(d);
-            info(`^5565^ file_path:     ${rpr(file_path)}`);
-            info(`^5565^ project_path:  ${rpr(project_path)}`);
-            shop = (await this.serve(project_path));
-            await this.nodexh_run_file(project_path, file_path);
-            await shop.rpc.stop();
-            await defer(function() {
-              return process.exit();
+        //.....................................................................................................
+        'psql': {
+          description: "run psql",
+          allow_extra: true,
+          runner: (d) => {
+            return new Promise(async(done) => {
+              /* TAINT */
+              var me, project_path, ref, shop;
+              project_path = (ref = d.verdict.cd) != null ? ref : process.cwd();
+              shop = (await this.serve(project_path));
+              project_path = this._cli_get_project_path(d);
+              info(`^5564^ d.options: ${rpr(d.options)}`);
+              info(`^5564^ file_path: ${rpr(file_path)}`);
+              info(`^5565^ project_path: ${rpr(project_path)}`);
+              shop = (await this.serve(project_path));
+              // debug '^2223^', rpr command
+              // debug '^2223^', rpr project_path
+              me = this.new_intershop_runner(project_path);
+              if (typeof file_path !== "undefined" && file_path !== null) {
+                // info "^5566^ running psql with #{rpr { file: d.file, command: d.command, }}"
+                await this.psql_run_file(me, file_path);
+              }
+              if (typeof command !== "undefined" && command !== null) {
+                await this.psql_run_command(me, command);
+              }
+              await shop.rpc.stop();
+              done();
+              return null;
             });
-            return null;
-          });
+          }
+        },
+        //.....................................................................................................
+        'nodexh': {
+          description: "run nodexh",
+          allow_extra: true,
+          runner: MIXA.runners.execSync
+        },
+        //.....................................................................................................
+        'node': {
+          description: "run node",
+          allow_extra: true,
+          runner: MIXA.runners.execSync
         }
       }
-    });
+    };
     //.........................................................................................................
-    return (await MIXA.run(jobdef, process.argv()));
+    whisper('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', CND.format_number(process.hrtime.bigint() - t0)); // / 1000000000n
+    debug('^33344^', MIXA.parse(jobdef, process.argv));
+    whisper('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', CND.format_number(process.hrtime.bigint() - t0)); // / 1000000000n
+    R = (await MIXA.run(jobdef, process.argv));
+    whisper('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', CND.format_number(process.hrtime.bigint() - t0)); // / 1000000000n
+    return R;
   };
 
   // #-----------------------------------------------------------------------------------------------------------
