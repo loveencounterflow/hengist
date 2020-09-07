@@ -528,7 +528,71 @@ demo_run_1 = ->
   urge '^21226^', result
   ( help line for line in output.split '\n' ) if ( output = result.output?.ok )?
   #.........................................................................................................
+  echo '-'.repeat 108
+  debug '^2233^', process.argv
+  help ( MIXA.parse jobdef, [ '--cd', path, 'list', ] ).verdict
+  help ( MIXA.parse jobdef, [ 'node', '--cd', path, 'list', ] ).verdict
+  help ( MIXA.parse jobdef, [ '/usr/local/bin/node', '--cd', path, 'list', ] ).verdict
+  help ( MIXA.parse jobdef, [ '/usr/local/bin/node', '/path/to/file', '--cd', path, 'list', ] ).verdict
+  help ( MIXA.parse jobdef, process.argv ).verdict
+  help ( MIXA.parse jobdef, process.argv[ .. ] ).verdict
   return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_generator = -> new Promise ( done ) =>
+  #---------------------------------------------------------------------------------------------------------
+  g = ->
+    ### thx to https://stackoverflow.com/a/59347615/7568091 ###
+    { spawn } = require 'child_process'
+    results   = []
+    resolve   = () => null
+    promise   = new Promise ( r ) => resolve = r
+    done      = false
+    # cp         = spawn 'ls', [ '-AlF', ]
+    # cp         = spawn 'cat', [ __filename, ]
+    cp         = spawn 'node', [ ( PATH.join __dirname, '_generator.js' ), ]
+    # cp.stdout.setEncoding 'utf-8'
+    # cp.stderr.setEncoding 'utf-8'
+    #.......................................................................................................
+    new_catcher = ( $key ) -> ( data ) =>
+      ### TAINT method to obtain lines from buffers not correct, lines could span buffers ###
+      data = data.toString() if types.isa.buffer data
+      data = data.replace /\n$/, ''
+      for $value in data.split '\n'
+        results.push Object.freeze { $key, $value, }
+      resolve()
+      promise = new Promise ( r ) => resolve = r
+    #.......................................................................................................
+    cp.stdout.on  'data',   new_catcher '^stdout'
+    cp.stderr.on  'data',   new_catcher '^stderr'
+    cp.on         'error',  new_catcher '^error'
+    #.......................................................................................................
+    cp.on 'close', =>
+      done = true
+    #.......................................................................................................
+    while not done
+      await promise
+      # debug '^334455^', rpr results
+      for x from results
+        yield x
+      results = []
+  #---------------------------------------------------------------------------------------------------------
+  debug '^3334^'
+  SP = require 'steampipes'
+  { $
+    $watch
+    $drain }  = SP.export()
+  source      = SP.new_push_source()
+  pipeline    = []
+  pipeline.push source
+  # pipeline.push SP.$split()
+  pipeline.push $watch ( d ) -> urge d
+  pipeline.push $drain -> done()
+  SP.pull pipeline...
+  for await x from g()
+    source.send x
+  return null
+
 
 
 ############################################################################################################
@@ -537,6 +601,7 @@ if module is require.main then do =>
   # debug '^4445^', MIXA.parse null, [ '--cd', 'some/place', 'ls', ]
   # debug '^4445^', MIXA.parse null, [ 'cats!' ]
   # test @
+  # test @[ "MIXA --cd changes process directory" ]
   # test @[ "MIXA parse with defaults" ]
   # test @[ "MIXA settings validation 2" ]
   # test @[ "MIXA types" ]
