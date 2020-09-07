@@ -18,7 +18,7 @@ whisper                   = CND.get_logger 'whisper',   badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
 test                      = require 'guy-test'
-# PATH                      = require 'path'
+PATH                      = require 'path'
 # FS                        = require 'fs'
 _strip_ansi               = require 'strip-ansi'
 types                     = new ( require 'intertype' ).Intertype()
@@ -636,5 +636,5 @@ if module is require.main then do =>
   # test @[ "MIXA parse with settings 4" ]
   # test @[ "MIXA inhibitor avoids rewriting of single-dash flags" ]
   # demo_3()
-  demo_run_1()
-
+  # demo_run_1()
+  await demo_generator()
