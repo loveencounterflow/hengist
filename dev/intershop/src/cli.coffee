@@ -107,18 +107,10 @@ debug '^76483-2^', Date.now() / 1000
   return { cwd, db_user, db_name, }
 
 #-----------------------------------------------------------------------------------------------------------
-@psql_run_file    = ( me, path    ) -> @_psql_run me, '-f', path
-@psql_run_command = ( me, command ) -> @_psql_run me, '-c', command
-
-#-----------------------------------------------------------------------------------------------------------
-@_psql_run = ( me, selector, pargument ) -> new Promise ( resolve, reject ) =>
-  validate.intershop_cli_psql_run_selector selector
+@psql_run = ( me, settings ) -> new Promise ( resolve, reject ) =>
   cmd         = @_prepare_psql_commandline me
-  ### TAINT how to respect `sudo -u postgres` and similar? ###
-  parameters  = [ '-U', cmd.db_user, '-d', cmd.db_name, selector, pargument, ]
-  # parameters  = [ '-d', cmd.db_name, selector, pargument, ]
-  # debug '^37363^', parameters
-  whisper '^psql_run@@3367^', "psql #{parameters.join ' '}"
+  parameters  = [ '-U', cmd.db_user, '-d', cmd.db_name, settings.verdict.argv..., ]
+  whisper '^psql_run@@3367^', "psql #{CND.shellescape parameters}"
   settings    =
     cwd:    cmd.cwd
     shell:  false
@@ -153,7 +145,7 @@ debug '^76483-2^', Date.now() / 1000
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@_cli_get_project_path = ( d ) -> d.options.p ? d.options.project ? process.cwd()
+@_cli_get_project_path = ( d ) -> d.verdict.cd ? process.cwd()
 
 #-----------------------------------------------------------------------------------------------------------
 @_cli = ->
@@ -171,27 +163,23 @@ debug '^76483-2^', Date.now() / 1000
         description:        "start RPC server (to be accessed from psql scripts)"
         allow_extra:        true
         runner:             ( d ) => new Promise ( done ) =>
-          project_path  = d.verdict.cd ? process.cwd()
+          project_path  = @_cli_get_project_path d
           shop          = await @serve project_path
       #.....................................................................................................
       'psql':
         description:        "run psql"
         allow_extra:        true
         runner:             ( d ) => new Promise ( done ) =>
-          project_path  = d.verdict.cd ? process.cwd()
+          project_path  = @_cli_get_project_path d
           shop          = await @serve project_path
           ### TAINT ###
-          project_path  = @_cli_get_project_path d
-          info "^5564^ d.options: #{rpr d.options}"
-          info "^5564^ file_path: #{rpr file_path}"
+          info "^5564^ d.verdict: #{rpr d.verdict}"
           info "^5565^ project_path: #{rpr project_path}"
-          shop = await @serve project_path
           # debug '^2223^', rpr command
           # debug '^2223^', rpr project_path
-          me            = @new_intershop_runner project_path
+          me = @new_intershop_runner project_path
           # info "^5566^ running psql with #{rpr { file: d.file, command: d.command, }}"
-          await @psql_run_file    me, file_path if file_path?
-          await @psql_run_command me, command   if command?
+          await @psql_run me, d
           await shop.rpc.stop()
           done()
           return null
