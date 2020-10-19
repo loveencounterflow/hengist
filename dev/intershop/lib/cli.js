@@ -157,25 +157,12 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.psql_run_file = function(me, path) {
-    return this._psql_run(me, '-f', path);
-  };
-
-  this.psql_run_command = function(me, command) {
-    return this._psql_run(me, '-c', command);
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this._psql_run = function(me, selector, pargument) {
+  this.psql_run = function(me, settings) {
     return new Promise((resolve, reject) => {
-      /* TAINT how to respect `sudo -u postgres` and similar? */
-      var cmd, cp, parameters, settings;
-      validate.intershop_cli_psql_run_selector(selector);
+      var cmd, cp, parameters;
       cmd = this._prepare_psql_commandline(me);
-      parameters = ['-U', cmd.db_user, '-d', cmd.db_name, selector, pargument];
-      // parameters  = [ '-d', cmd.db_name, selector, pargument, ]
-      // debug '^37363^', parameters
-      whisper('^psql_run@@3367^', `psql ${parameters.join(' ')}`);
+      parameters = ['-U', cmd.db_user, '-d', cmd.db_name, ...settings.verdict.argv];
+      whisper('^psql_run@@3367^', `psql ${CND.shellescape(parameters)}`);
       settings = {
         cwd: cmd.cwd,
         shell: false,
@@ -230,8 +217,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this._cli_get_project_path = function(d) {
-    var ref, ref1;
-    return (ref = (ref1 = d.options.p) != null ? ref1 : d.options.project) != null ? ref : process.cwd();
+    var ref;
+    return (ref = d.verdict.cd) != null ? ref : process.cwd();
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -252,8 +239,8 @@
           allow_extra: true,
           runner: (d) => {
             return new Promise(async(done) => {
-              var project_path, ref, shop;
-              project_path = (ref = d.verdict.cd) != null ? ref : process.cwd();
+              var project_path, shop;
+              project_path = this._cli_get_project_path(d);
               return shop = (await this.serve(project_path));
             });
           }
@@ -264,25 +251,17 @@
           allow_extra: true,
           runner: (d) => {
             return new Promise(async(done) => {
-              /* TAINT */
-              var me, project_path, ref, shop;
-              project_path = (ref = d.verdict.cd) != null ? ref : process.cwd();
-              shop = (await this.serve(project_path));
+              var me, project_path, shop;
               project_path = this._cli_get_project_path(d);
-              info(`^5564^ d.options: ${rpr(d.options)}`);
-              info(`^5564^ file_path: ${rpr(file_path)}`);
-              info(`^5565^ project_path: ${rpr(project_path)}`);
               shop = (await this.serve(project_path));
+              /* TAINT */
+              info(`^5564^ d.verdict: ${rpr(d.verdict)}`);
+              info(`^5565^ project_path: ${rpr(project_path)}`);
               // debug '^2223^', rpr command
               // debug '^2223^', rpr project_path
               me = this.new_intershop_runner(project_path);
-              if (typeof file_path !== "undefined" && file_path !== null) {
-                // info "^5566^ running psql with #{rpr { file: d.file, command: d.command, }}"
-                await this.psql_run_file(me, file_path);
-              }
-              if (typeof command !== "undefined" && command !== null) {
-                await this.psql_run_command(me, command);
-              }
+              // info "^5566^ running psql with #{rpr { file: d.file, command: d.command, }}"
+              await this.psql_run(me, d);
               await shop.rpc.stop();
               done();
               return null;
