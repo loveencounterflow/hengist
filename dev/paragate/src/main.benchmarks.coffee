@@ -50,7 +50,7 @@ assets =
     # '../src/interim.tests.coffee'
     # '../../../assets/larry-wall-on-regexes.html'
     ]
-types                     = require '../paragate/lib/types'
+types                     = require '../../../apps/paragate/lib/types'
 { isa
   validate
   type_of }               = types
@@ -93,34 +93,34 @@ prepare = -> new Promise ( resolve ) ->
       GRAMMAR = require './old-grammars/indentation.grammar'
       grammar = GRAMMAR.indentation_grammar
     when 'rxws_blocks'
-      GRAMMAR = require '../paragate/lib/regex-whitespace.grammar'
+      GRAMMAR = require '../../../apps/paragate/lib/regex-whitespace.grammar'
       grammar = GRAMMAR.grammar
     when 'rxws_tokens'
-      GRAMMAR = require '../paragate/lib/regex-whitespace.grammar'
+      GRAMMAR = require '../../../apps/paragate/lib/regex-whitespace.grammar'
       grammar = new GRAMMAR.Rxws_grammar { as_blocks: false, }
     when 'htmlish'
-      GRAMMAR = require '../paragate/lib/htmlish.grammar'
+      GRAMMAR = require '../../../apps/paragate/lib/htmlish.grammar'
       grammar = GRAMMAR.grammar
     when 'asciisorter'
       GRAMMAR = require './old-grammars/asciisorter.grammar'
       grammar = GRAMMAR.asciisorter
     when 'chrsubsetter'
-      GRAMMAR = require '../paragate/lib/chrsubsetter.grammar'
+      GRAMMAR = require '../../../apps/paragate/lib/chrsubsetter.grammar'
       grammar = GRAMMAR.grammar
     when 'chrsubsetter_fast'
-      GRAMMAR = require '../paragate/lib/chrsubsetter.grammar'
+      GRAMMAR = require '../../../apps/paragate/lib/chrsubsetter.grammar'
       grammar = new GRAMMAR.Chrsubsetter { track_lines: false, }
     when 'chrsubsetter_blocks'
-      GRAMMAR = require '../paragate/lib/chrsubsetter.grammar'
+      GRAMMAR = require '../../../apps/paragate/lib/chrsubsetter.grammar'
       grammar = new GRAMMAR.Chrsubsetter { preset: 'blocks', }
     when 'chrsubsetter_planes'
-      GRAMMAR = require '../paragate/lib/chrsubsetter.grammar'
+      GRAMMAR = require '../../../apps/paragate/lib/chrsubsetter.grammar'
       grammar = new GRAMMAR.Chrsubsetter { preset: 'planes', }
     when 'chrsubsetter_halfplanes'
-      GRAMMAR = require '../paragate/lib/chrsubsetter.grammar'
+      GRAMMAR = require '../../../apps/paragate/lib/chrsubsetter.grammar'
       grammar = new GRAMMAR.Chrsubsetter { preset: 'halfplanes', }
     when 'chrsubsetter_words'
-      GRAMMAR = require '../paragate/lib/chrsubsetter.grammar'
+      GRAMMAR = require '../../../apps/paragate/lib/chrsubsetter.grammar'
       grammar = new GRAMMAR.Chrsubsetter { preset: 'words', }
     else
       throw new Error "^44498^ unknown grammar #{rpr name}"

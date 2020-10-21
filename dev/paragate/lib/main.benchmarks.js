@@ -71,7 +71,7 @@
   // 'interim.tests.js'
   // '../src/interim.tests.coffee'
   // '../../../assets/larry-wall-on-regexes.html'
-  types = require('../paragate/lib/types');
+  types = require('../../../apps/paragate/lib/types');
 
   ({isa, validate, type_of} = types);
 
@@ -156,17 +156,17 @@
           grammar = GRAMMAR.indentation_grammar;
           break;
         case 'rxws_blocks':
-          GRAMMAR = require('../paragate/lib/regex-whitespace.grammar');
+          GRAMMAR = require('../../../apps/paragate/lib/regex-whitespace.grammar');
           grammar = GRAMMAR.grammar;
           break;
         case 'rxws_tokens':
-          GRAMMAR = require('../paragate/lib/regex-whitespace.grammar');
+          GRAMMAR = require('../../../apps/paragate/lib/regex-whitespace.grammar');
           grammar = new GRAMMAR.Rxws_grammar({
             as_blocks: false
           });
           break;
         case 'htmlish':
-          GRAMMAR = require('../paragate/lib/htmlish.grammar');
+          GRAMMAR = require('../../../apps/paragate/lib/htmlish.grammar');
           grammar = GRAMMAR.grammar;
           break;
         case 'asciisorter':
@@ -174,35 +174,35 @@
           grammar = GRAMMAR.asciisorter;
           break;
         case 'chrsubsetter':
-          GRAMMAR = require('../paragate/lib/chrsubsetter.grammar');
+          GRAMMAR = require('../../../apps/paragate/lib/chrsubsetter.grammar');
           grammar = GRAMMAR.grammar;
           break;
         case 'chrsubsetter_fast':
-          GRAMMAR = require('../paragate/lib/chrsubsetter.grammar');
+          GRAMMAR = require('../../../apps/paragate/lib/chrsubsetter.grammar');
           grammar = new GRAMMAR.Chrsubsetter({
             track_lines: false
           });
           break;
         case 'chrsubsetter_blocks':
-          GRAMMAR = require('../paragate/lib/chrsubsetter.grammar');
+          GRAMMAR = require('../../../apps/paragate/lib/chrsubsetter.grammar');
           grammar = new GRAMMAR.Chrsubsetter({
             preset: 'blocks'
           });
           break;
         case 'chrsubsetter_planes':
-          GRAMMAR = require('../paragate/lib/chrsubsetter.grammar');
+          GRAMMAR = require('../../../apps/paragate/lib/chrsubsetter.grammar');
           grammar = new GRAMMAR.Chrsubsetter({
             preset: 'planes'
           });
           break;
         case 'chrsubsetter_halfplanes':
-          GRAMMAR = require('../paragate/lib/chrsubsetter.grammar');
+          GRAMMAR = require('../../../apps/paragate/lib/chrsubsetter.grammar');
           grammar = new GRAMMAR.Chrsubsetter({
             preset: 'halfplanes'
           });
           break;
         case 'chrsubsetter_words':
-          GRAMMAR = require('../paragate/lib/chrsubsetter.grammar');
+          GRAMMAR = require('../../../apps/paragate/lib/chrsubsetter.grammar');
           grammar = new GRAMMAR.Chrsubsetter({
             preset: 'words'
           });
@@ -305,3 +305,5 @@
   }
 
 }).call(this);
+
+//# sourceMappingURL=main.benchmarks.js.map
