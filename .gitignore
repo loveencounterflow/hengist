@@ -107,7 +107,7 @@ dist
 .peru
 /intershop
 /dev/datamill/intershop
-apps/*
+# apps/*
 
 # (D)MyPy temporary files
 .dmypy.json
