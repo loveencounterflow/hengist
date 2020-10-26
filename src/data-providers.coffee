@@ -19,9 +19,6 @@ echo                      = CND.echo.bind CND
 assign                    = Object.assign
 after                     = ( time_s, f ) -> setTimeout f, time_s * 1000
 #...........................................................................................................
-HOLLERITH                 = require 'hollerith-codec'
-@as_hollerith             = ( x ) => HOLLERITH.encode x
-@from_hollerith           = ( x ) => HOLLERITH.decode x
 nf                        = require 'number-format.js'
 #...........................................................................................................
 # H                         = require '../helpers'
@@ -78,6 +75,9 @@ FS                        = require 'fs'
 
 #-----------------------------------------------------------------------------------------------------------
 @get_random_datoms = ( n = 10, path = null ) ->
+  HOLLERITH                 = require 'hollerith-codec'
+  @as_hollerith             = ( x ) => HOLLERITH.encode x
+  @from_hollerith           = ( x ) => HOLLERITH.decode x
   PD        = require 'pipedreams11'
   path     ?= '/usr/share/dict/portuguese'
   cachekey  = @_get_key 'get_random_datoms', arguments...

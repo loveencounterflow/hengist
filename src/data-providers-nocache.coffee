@@ -18,14 +18,8 @@ echo                      = CND.echo.bind CND
 { jr }                    = CND
 assign                    = Object.assign
 after                     = ( time_s, f ) -> setTimeout f, time_s * 1000
-#...........................................................................................................
-HOLLERITH                 = require 'hollerith-codec'
-@as_hollerith             = ( x ) => HOLLERITH.encode x
-@from_hollerith           = ( x ) => HOLLERITH.decode x
 nf                        = require 'number-format.js'
 #...........................................................................................................
-# H                         = require '../helpers'
-# DATAMILL                  = require '../..'
 @types                    = require './types'
 { isa
   validate
@@ -90,25 +84,25 @@ FS                        = require 'fs'
     R         = [ R..., ( @get_cjk_chr n - R.length )..., ]
   return CND.shuffle R
 
-#-----------------------------------------------------------------------------------------------------------
-@get_random_datoms = ( n = 10, path = null ) ->
-  PD        = require 'pipedreams11'
-  path     ?= '/usr/share/dict/portuguese'
-  cachekey  = @_get_key 'get_random_datoms', arguments...
-  return R if ( R = @_cache[ cachekey ] )?
-  words     = @get_random_words n, path
-  nr        = 0
-  R         = []
-  keys      = [ '^word', '^fun', '^text', '^something', ]
-  last_idx  = keys.length - 1
-  for word in words
-    nr++
-    $vnr      = [ nr, ]
-    vnr_blob  = @as_hollerith $vnr
-    $vnr_hex  = vnr_blob.toString 'hex'
-    key       = keys[ CND.random_integer 0, last_idx ]
-    if Math.random() > 0.75 then  R.push PD.new_datom key, word, { $vnr, $vnr_hex, $stamped: true, }
-    else                          R.push PD.new_datom key, word, { $vnr, $vnr_hex, }
-  CND.shuffle R
-  return @_cache[ cachekey ] = R
+# #-----------------------------------------------------------------------------------------------------------
+# @get_random_datoms = ( n = 10, path = null ) ->
+#   PD        = require 'pipedreams11'
+#   path     ?= '/usr/share/dict/portuguese'
+#   cachekey  = @_get_key 'get_random_datoms', arguments...
+#   return R if ( R = @_cache[ cachekey ] )?
+#   words     = @get_random_words n, path
+#   nr        = 0
+#   R         = []
+#   keys      = [ '^word', '^fun', '^text', '^something', ]
+#   last_idx  = keys.length - 1
+#   for word in words
+#     nr++
+#     $vnr      = [ nr, ]
+#     vnr_blob  = @as_hollerith $vnr
+#     $vnr_hex  = vnr_blob.toString 'hex'
+#     key       = keys[ CND.random_integer 0, last_idx ]
+#     if Math.random() > 0.75 then  R.push PD.new_datom key, word, { $vnr, $vnr_hex, $stamped: true, }
+#     else                          R.push PD.new_datom key, word, { $vnr, $vnr_hex, }
+#   CND.shuffle R
+#   return @_cache[ cachekey ] = R
 
