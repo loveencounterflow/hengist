@@ -42,39 +42,53 @@ PATH                      = require 'path'
 FS                        = require 'fs'
 
 #-----------------------------------------------------------------------------------------------------------
-@_cache = {}
-@_get_key = ( name ) -> name + ' ' + jr [ arguments..., ][ 1 .. ]
+@get_values = ( n = 10 ) ->
+  validate.cardinal n
+  providers = [
+    @get_integers.bind  @
+    @get_booleans.bind  @
+    @get_words.bind     @
+    @get_cjk_chr.bind   @
+    ]
+  #.........................................................................................................
+  idxs = @get_integers n, 0, providers.length
+  return ( ( providers[ idx ] 1 )[ 0 ] for idx in idxs )
+
+#-----------------------------------------------------------------------------------------------------------
+@get_integers = ( n = 10, min = -1000, max = +1000 ) ->
+  validate.cardinal n
+  validate.integer  min
+  validate.integer  max
+  return ( ( CND.random_integer min, max ) for _ in [ 1 .. n ] )
+
+#-----------------------------------------------------------------------------------------------------------
+@get_booleans = ( n = 10 ) ->
+  validate.cardinal n
+  return ( ( ( CND.random_integer 0, 2 ) is 0 ) for _ in [ 1 .. n ] )
+
+#-----------------------------------------------------------------------------------------------------------
+@get_cjk_chr = ( n = 10 ) ->
+  validate.cardinal n
+  R = []
+  for _ in [ 1 .. n ]
+    R.push switch CND.random_integer 0, 2
+      when 0 then String.fromCodePoint CND.random_integer 0x04e00, 0x09f00
+      when 1 then String.fromCodePoint CND.random_integer 0x20000, 0x2a6d7
+  return R
 
 
 #-----------------------------------------------------------------------------------------------------------
-@get_integer_numbers = ( n = 10 ) ->
-  cachekey  = @_get_key 'get_integer_numbers', arguments...
-  return R if ( R = @_cache[ cachekey ] )?
+@get_words = ( n = 10 ) ->
   validate.cardinal n
-  return @_cache[ cachekey ] = [ 1 .. n ]
-
-#-----------------------------------------------------------------------------------------------------------
-@get_random_words = ( n = 10, path = null, fresh = false ) ->
-  path     ?= '/usr/share/dict/portuguese'
-  cachekey  = @_get_key 'get_random_words', arguments...
-  delete @_cache[ cachekey ] if fresh
-  return R if ( R = @_cache[ cachekey ] )?
-  validate.cardinal n
+  m         = Math.ceil n / 2
+  path      = '/usr/share/dict/french'
   CP        = require 'child_process'
-  R         = ( ( CP.execSync "shuf -n #{n} #{path}" ).toString 'utf-8' ).split '\n'
+  R         = ( ( CP.execSync "shuf -n #{m} #{path}" ).toString 'utf-8' ).split '\n'
   R         = ( word.replace /'s$/g, '' for word in R )
   R         = ( word for word in R when word isnt '' )
-  return @_cache[ cachekey ] = R
-
-#-----------------------------------------------------------------------------------------------------------
-@get_random_text = ( n = 10, path = null ) ->
-  path     ?= '/usr/share/dict/portuguese'
-  cachekey  = @_get_key 'get_random_text', arguments...
-  return R if ( R = @_cache[ cachekey ] )?
-  R         = @get_random_words n, path
-  R         = ( ( if Math.random() > 0.7 then '' else word ) for word in R )
-  R         = R.join '\n'
-  return @_cache[ cachekey ] = R
+  if R.length < n
+    R         = [ R..., ( @get_cjk_chr n - R.length )..., ]
+  return CND.shuffle R
 
 #-----------------------------------------------------------------------------------------------------------
 @get_random_datoms = ( n = 10, path = null ) ->
@@ -97,27 +111,4 @@ FS                        = require 'fs'
     else                          R.push PD.new_datom key, word, { $vnr, $vnr_hex, }
   CND.shuffle R
   return @_cache[ cachekey ] = R
-
-#-----------------------------------------------------------------------------------------------------------
-@get_svg_pathdata = ->
-  return ( FS.readFileSync ( PATH.join __dirname, '../src/tests/svgttf-test-data.txt' ), 'utf-8' ).split /\n/
-
-#-----------------------------------------------------------------------------------------------------------
-@get_random_nested_objects = ( n = 10, path = null, fresh = false ) ->
-  cachekey  = @_get_key 'get_random_datoms', arguments...
-  delete @_cache[ cachekey ] if fresh
-  return R if ( R = @_cache[ cachekey ] )?
-  fresh     = true
-  words     = @get_random_words word_count, null, fresh
-  R = []
-  for _ in [ 1 .. n ]
-    CND.shuffle words
-    word_count      = CND.random_integer 3, 7
-    subset_of_words = words[ 1 .. word_count ]
-    entry           = {}
-    for word in subset_of_words
-      entry[ word ] = 42
-    R.push entry
-  return @_cache[ cachekey ] = R
-
 
