@@ -28,6 +28,7 @@
     "executive": "^1.6.3",
     "get-source": "^2.0.11",
     "guy-test": "^4.0.1",
+    "intershop": "file:../intershop",
     "intershop-intertext": "file:../intershop-intertext",
     "intertext": "^5.0.0",
     "intertext-splitlines": "^1.2.0",
