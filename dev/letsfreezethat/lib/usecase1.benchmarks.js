@@ -44,12 +44,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.get_data = function(cfg) {
-    var _, i, idx, j, k, key, key_idx, keys, l, len, len1, len2, lists_of_facet_keys, lists_of_facet_values, lists_of_key_value_pairs, lists_of_keys, lists_of_values, providers, ref, set_idx, values;
+    var _, i, idx, j, k, key, key_idx, keys, l, len, len1, len2, lists_of_facet_keys, lists_of_facet_values, lists_of_key_value_pairs, lists_of_keys, lists_of_values, ref, set_idx, values;
     if (data_cache != null) {
       return data_cache;
     }
     // @types.validate.hengist_dataprv_cfg cfg
-    providers = [DATA.get_integers.bind(DATA), DATA.get_booleans.bind(DATA), DATA.get_words.bind(DATA), DATA.get_cjk_chr.bind(DATA)];
     //.........................................................................................................
     lists_of_values = [];
     for (_ = i = 1, ref = cfg.set_count; (1 <= ref ? i <= ref : i >= ref); _ = 1 <= ref ? ++i : --i) {
@@ -369,10 +368,10 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_ltfng_assign_lets = function(cfg) {
+  this.using_ltfngrc2_assign_lets = function(cfg) {
     return new Promise((resolve) => {
       var LFT, count, data;
-      LFT = require('./letsfreezethat-NG');
+      LFT = require('./letsfreezethat-NG-rc2');
       // @types.validate.hengist_dataprv_cfg cfg
       data = this.get_data(cfg);
       count = 0;
@@ -405,10 +404,10 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._using_ltfng_thaw_freeze = function(cfg, lft_cfg) {
+  this._using_ltfngrc2_thaw_freeze = function(cfg, lft_cfg) {
     return new Promise((resolve) => {
       var LFT, count, data;
-      LFT = (require('./letsfreezethat-NG')).new(lft_cfg);
+      LFT = (require('./letsfreezethat-NG-rc2')).new(lft_cfg);
       // @types.validate.hengist_dataprv_cfg cfg
       data = this.get_data(cfg);
       count = 0;
@@ -438,22 +437,22 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_ltfng_thaw_freeze_cyfy = function(cfg) {
-    return this._using_ltfng_thaw_freeze(cfg, {
+  this.using_ltfngrc2_thaw_freeze_cyfy = function(cfg) {
+    return this._using_ltfngrc2_thaw_freeze(cfg, {
       copy: true,
       freeze: true
     });
   };
 
-  this.using_ltfng_thaw_freeze_cyfn = function(cfg) {
-    return this._using_ltfng_thaw_freeze(cfg, {
+  this.using_ltfngrc2_thaw_freeze_cyfn = function(cfg) {
+    return this._using_ltfngrc2_thaw_freeze(cfg, {
       copy: true,
       freeze: false
     });
   };
 
-  this.using_ltfng_thaw_freeze_cnfn = function(cfg) {
-    return this._using_ltfng_thaw_freeze(cfg, {
+  this.using_ltfngrc2_thaw_freeze_cnfn = function(cfg) {
+    return this._using_ltfngrc2_thaw_freeze(cfg, {
       copy: false,
       freeze: false
     });
@@ -464,14 +463,14 @@
     var _, bench, cfg, i, j, len, ref, ref1, repetitions, test_name, test_names;
     bench = BM.new_benchmarks();
     // n           = 100000
+    // cfg         = { set_count: 100, datom_length: 5, change_facet_count: 3, }
     cfg = {
-      set_count: 100,
-      datom_length: 5,
-      change_facet_count: 3
+      set_count: 3,
+      datom_length: 2,
+      change_facet_count: 1
     };
-    // cfg         = { set_count: 3, datom_length: 2, change_facet_count: 1, }
     repetitions = 3;
-    test_names = ['using_immer', 'using_letsfreezethat_standard', 'using_letsfreezethat_nofreeze', 'using_ltfng_assign_lets', 'using_ltfng_thaw_freeze_cyfy', 'using_ltfng_thaw_freeze_cyfn', 'using_ltfng_thaw_freeze_cnfn', 'using_immutable', 'using_hamt', 'using_mori', 'using_plainjs_mutable', 'using_plainjs_immutable'];
+    test_names = ['using_immer', 'using_letsfreezethat_standard', 'using_letsfreezethat_nofreeze', 'using_ltfngrc2_assign_lets', 'using_ltfngrc2_thaw_freeze_cyfy', 'using_ltfngrc2_thaw_freeze_cyfn', 'using_ltfngrc2_thaw_freeze_cnfn', 'using_immutable', 'using_hamt', 'using_mori', 'using_plainjs_mutable', 'using_plainjs_immutable'];
     ref = CND.shuffle(test_names);
     // for _ in [ 1 .. repetitions ]
     //   whisper '-'.repeat 108
@@ -505,11 +504,11 @@
 
 cfg: { set_count: 100, datom_length: 5, change_facet_count: 3, }
 00:09 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                             31,481 Hz   100.0 % │████████████▌│
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfng_thaw_freeze_cnfn                      26,939 Hz    85.6 % │██████████▊  │
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfng_thaw_freeze_cyfn                      22,900 Hz    72.7 % │█████████▏   │
+00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_cnfn                   26,939 Hz    85.6 % │██████████▊  │
+00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_cyfn                   22,900 Hz    72.7 % │█████████▏   │
 00:09 HENGIST/BENCHMARKS  ▶  using_plainjs_immutable                           20,245 Hz    64.3 % │████████     │
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfng_thaw_freeze_cyfy                      14,796 Hz    47.0 % │█████▉       │
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfng_assign_lets                           12,472 Hz    39.6 % │█████        │
+00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_cyfy                   14,796 Hz    47.0 % │█████▉       │
+00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_assign_lets                        12,472 Hz    39.6 % │█████        │
 00:09 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_nofreeze                      9,634 Hz    30.6 % │███▉         │
 00:09 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_standard                      7,971 Hz    25.3 % │███▏         │
 00:09 HENGIST/BENCHMARKS  ▶  using_immutable                                    5,045 Hz    16.0 % │██           │

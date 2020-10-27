@@ -329,7 +329,7 @@
   this.using_ltfng_single = function(n, show) {
     return new Promise((resolve) => {
       var LFT, count, probes_A, probes_B;
-      LFT = require('./letsfreezethat-NG');
+      LFT = require('./letsfreezethat-NG-rc2');
       count = 0;
       ({probes_A, probes_B} = this.get_data(n));
       resolve(() => {
@@ -364,7 +364,7 @@
   this.using_ltfng_assign_lets = function(n, show) {
     return new Promise((resolve) => {
       var LFT, count, lengths, probe_B, probes_A, probes_B;
-      LFT = require('./letsfreezethat-NG');
+      LFT = require('./letsfreezethat-NG-rc2');
       count = 0;
       ({probes_A, probes_B} = this.get_data(n));
       lengths = (function() {
@@ -407,7 +407,7 @@
   this.using_ltfng_thaw_freeze = function(n, show) {
     return new Promise((resolve) => {
       var LFT, count, lengths, probe_B, probes_A, probes_B;
-      LFT = require('./letsfreezethat-NG');
+      LFT = require('./letsfreezethat-NG-rc2');
       count = 0;
       ({probes_A, probes_B} = this.get_data(n));
       lengths = (function() {
@@ -517,7 +517,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this.demo_letsfreezethat_new_api = function() {
     var LFT, d1, d2, d3, k;
-    LFT = require('./letsfreezethat-NG');
+    LFT = require('./letsfreezethat-NG-rc2');
     d1 = LFT.new_object({
       first: 1
     }, {

@@ -47,7 +47,7 @@
       copy: true,
       freeze: true
     };
-    LFT = (require('./letsfreezethat-NG')).new(lft_cfg);
+    LFT = (require('./letsfreezethat-NG-rc2')).new(lft_cfg);
     //.........................................................................................................
     T.eq('function', type_of(LFT.new_object));
     T.eq(0, LFT.new_object.length);
@@ -69,9 +69,9 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["LFTNG freeze, thaw"] = function(T, done) {
+  this["LFTNG lets, set, get"] = function(T, done) {
     var LFT_CNFY, LFT_DFLT;
-    LFT_DFLT = require('./letsfreezethat-NG');
+    LFT_DFLT = require('./letsfreezethat-NG-rc2');
     //.........................................................................................................
     urge('^33738-1^');
     LFT_CNFY = null;
@@ -159,10 +159,92 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["LFTNG freeze, thaw"] = function(T, done) {
+    var LFT, d1, d2, d3, freeze, lets, thaw;
+    LFT = require('./letsfreezethat-NG-rc2');
+    ({lets, freeze, thaw} = LFT.export());
+    //.........................................................................................................
+    d1 = lets({
+      a: 42,
+      b: 'helo'
+    });
+    T.ok(isa.frozen(d1));
+    d2 = thaw(d1);
+    T.ok(isa.frozen(d1));
+    T.ok(!isa.frozen(d2));
+    d2.a += +1;
+    d2.b += ' world';
+    d3 = freeze(d2);
+    T.ok(isa.frozen(d2));
+    T.ok(isa.frozen(d3));
+    T.ok(d2 === d3);
+    T.eq(d3, {
+      a: 43,
+      b: 'helo world'
+    });
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["LFTNG lets makes a copy on entry, not on exit"] = function(T, done) {
+    var LFT, d1, d2_ref, d3, freeze, lets, thaw;
+    LFT = require('./letsfreezethat-NG-rc2');
+    ({lets, freeze, thaw} = LFT.export());
+    //.........................................................................................................
+    d1 = {
+      a: 42,
+      b: 'helo'
+    };
+    d2_ref = null;
+    d3 = lets(d1, function(d2) {
+      d2_ref = d2;
+      return d2.c = 'value';
+    });
+    T.ok(!isa.frozen(d1));
+    T.ok(isa.frozen(d3));
+    T.ok(d1 !== d2_ref);
+    T.ok(d1 !== d3);
+    T.ok(d3 === d2_ref);
+    T.eq(d3.a, 42);
+    T.eq(d3.b, 'helo');
+    T.eq(d3.c, 'value');
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["LFTNG thaw makes a copy, freeze does not"] = function(T, done) {
+    var LFT, d1, d2, d3, d4, freeze, lets, thaw;
+    LFT = require('./letsfreezethat-NG-rc2');
+    ({lets, freeze, thaw} = LFT.export());
+    //.........................................................................................................
+    d1 = {
+      a: 42,
+      b: 'helo'
+    };
+    d2 = thaw(d1);
+    d3 = freeze(d2);
+    d4 = thaw(d3);
+    T.ok(d2 !== d1);
+    T.ok(d3 === d2);
+    T.ok(d4 !== d3);
+    T.ok(!isa.frozen(d1));
+    T.ok(isa.frozen(d2));
+    T.ok(isa.frozen(d3));
+    T.ok(!isa.frozen(d4));
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   // #-----------------------------------------------------------------------------------------------------------
   // @[ "LFTNG API" ] = ( T, done ) ->
   //   lft_cfg       = { copy: true, freeze: true, }
-  //   LFT           = ( require './letsfreezethat-NG' ).new lft_cfg
+  //   LFT           = ( require './letsfreezethat-NG-rc2' ).new lft_cfg
   //   #.........................................................................................................
   //   probes_and_matchers = []
   //     ]
