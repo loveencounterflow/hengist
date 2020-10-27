@@ -189,7 +189,7 @@ data_cache                = null
 
 #-----------------------------------------------------------------------------------------------------------
 @using_ltfng_single = ( n, show ) -> new Promise ( resolve ) =>
-  LFT           = require './letsfreezethat-NG'
+  LFT           = require './letsfreezethat-NG-rc2'
   count         = 0
   { probes_A
     probes_B }  = @get_data n
@@ -210,7 +210,7 @@ data_cache                = null
 
 #-----------------------------------------------------------------------------------------------------------
 @using_ltfng_assign_lets = ( n, show ) -> new Promise ( resolve ) =>
-  LFT           = require './letsfreezethat-NG'
+  LFT           = require './letsfreezethat-NG-rc2'
   count         = 0
   { probes_A
     probes_B }  = @get_data n
@@ -232,7 +232,7 @@ data_cache                = null
 
 #-----------------------------------------------------------------------------------------------------------
 @using_ltfng_thaw_freeze = ( n, show ) -> new Promise ( resolve ) =>
-  LFT           = require './letsfreezethat-NG'
+  LFT           = require './letsfreezethat-NG-rc2'
   count         = 0
   { probes_A
     probes_B }  = @get_data n
@@ -313,7 +313,7 @@ data_cache                = null
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_letsfreezethat_new_api = ->
-  LFT           = require './letsfreezethat-NG'
+  LFT           = require './letsfreezethat-NG-rc2'
   d1      = LFT.new_object { first: 1, }, { second: 2, }
   d2      = LFT.set d1, 'foo', 42
   d3      = LFT.assign d2, { foo: 108, bar: 'baz', }, { gnu: 'gnat', }

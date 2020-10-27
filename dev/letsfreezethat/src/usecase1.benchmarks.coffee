@@ -28,12 +28,6 @@ data_cache                = null
 @get_data = ( cfg ) ->
   return data_cache if data_cache?
   # @types.validate.hengist_dataprv_cfg cfg
-  providers = [
-    DATA.get_integers.bind  DATA
-    DATA.get_booleans.bind  DATA
-    DATA.get_words.bind     DATA
-    DATA.get_cjk_chr.bind   DATA
-    ]
   #.........................................................................................................
   lists_of_values = []
   for _ in [ 1 .. cfg.set_count ]
@@ -207,8 +201,8 @@ data_cache                = null
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@using_ltfng_assign_lets = ( cfg ) -> new Promise ( resolve ) =>
-  LFT           = require './letsfreezethat-NG'
+@using_ltfngrc2_assign_lets = ( cfg ) -> new Promise ( resolve ) =>
+  LFT           = require './letsfreezethat-NG-rc2'
   # @types.validate.hengist_dataprv_cfg cfg
   data          = @get_data cfg
   count         = 0
@@ -228,8 +222,8 @@ data_cache                = null
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@_using_ltfng_thaw_freeze = ( cfg, lft_cfg ) -> new Promise ( resolve ) =>
-  LFT           = ( require './letsfreezethat-NG' ).new lft_cfg
+@_using_ltfngrc2_thaw_freeze = ( cfg, lft_cfg ) -> new Promise ( resolve ) =>
+  LFT           = ( require './letsfreezethat-NG-rc2' ).new lft_cfg
   # @types.validate.hengist_dataprv_cfg cfg
   data          = @get_data cfg
   count         = 0
@@ -248,26 +242,26 @@ data_cache                = null
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@using_ltfng_thaw_freeze_cyfy = ( cfg ) -> @_using_ltfng_thaw_freeze cfg, { copy: true,   freeze: true,  }
-@using_ltfng_thaw_freeze_cyfn = ( cfg ) -> @_using_ltfng_thaw_freeze cfg, { copy: true,   freeze: false, }
-@using_ltfng_thaw_freeze_cnfn = ( cfg ) -> @_using_ltfng_thaw_freeze cfg, { copy: false,  freeze: false, }
+@using_ltfngrc2_thaw_freeze_cyfy = ( cfg ) -> @_using_ltfngrc2_thaw_freeze cfg, { copy: true,   freeze: true,  }
+@using_ltfngrc2_thaw_freeze_cyfn = ( cfg ) -> @_using_ltfngrc2_thaw_freeze cfg, { copy: true,   freeze: false, }
+@using_ltfngrc2_thaw_freeze_cnfn = ( cfg ) -> @_using_ltfngrc2_thaw_freeze cfg, { copy: false,  freeze: false, }
 
 
 #-----------------------------------------------------------------------------------------------------------
 @run_benchmarks = ->
   bench       = BM.new_benchmarks()
   # n           = 100000
-  cfg         = { set_count: 100, datom_length: 5, change_facet_count: 3, }
-  # cfg         = { set_count: 3, datom_length: 2, change_facet_count: 1, }
+  # cfg         = { set_count: 100, datom_length: 5, change_facet_count: 3, }
+  cfg         = { set_count: 3, datom_length: 2, change_facet_count: 1, }
   repetitions = 3
   test_names  = [
     'using_immer'
     'using_letsfreezethat_standard'
     'using_letsfreezethat_nofreeze'
-    'using_ltfng_assign_lets'
-    'using_ltfng_thaw_freeze_cyfy'
-    'using_ltfng_thaw_freeze_cyfn'
-    'using_ltfng_thaw_freeze_cnfn'
+    'using_ltfngrc2_assign_lets'
+    'using_ltfngrc2_thaw_freeze_cyfy'
+    'using_ltfngrc2_thaw_freeze_cyfn'
+    'using_ltfngrc2_thaw_freeze_cnfn'
     'using_immutable'
     'using_hamt'
     'using_mori'
@@ -300,11 +294,11 @@ if require.main is module then do =>
 
 cfg: { set_count: 100, datom_length: 5, change_facet_count: 3, }
 00:09 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                             31,481 Hz   100.0 % │████████████▌│
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfng_thaw_freeze_cnfn                      26,939 Hz    85.6 % │██████████▊  │
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfng_thaw_freeze_cyfn                      22,900 Hz    72.7 % │█████████▏   │
+00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_cnfn                   26,939 Hz    85.6 % │██████████▊  │
+00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_cyfn                   22,900 Hz    72.7 % │█████████▏   │
 00:09 HENGIST/BENCHMARKS  ▶  using_plainjs_immutable                           20,245 Hz    64.3 % │████████     │
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfng_thaw_freeze_cyfy                      14,796 Hz    47.0 % │█████▉       │
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfng_assign_lets                           12,472 Hz    39.6 % │█████        │
+00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_cyfy                   14,796 Hz    47.0 % │█████▉       │
+00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_assign_lets                        12,472 Hz    39.6 % │█████        │
 00:09 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_nofreeze                      9,634 Hz    30.6 % │███▉         │
 00:09 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_standard                      7,971 Hz    25.3 % │███▏         │
 00:09 HENGIST/BENCHMARKS  ▶  using_immutable                                    5,045 Hz    16.0 % │██           │

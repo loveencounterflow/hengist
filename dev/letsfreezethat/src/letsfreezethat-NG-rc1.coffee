@@ -21,6 +21,7 @@ types                     = new ( require 'intertype' ).Intertype()
 frozen                    = Object.isFrozen
 assign                    = Object.assign
 
+
 #===========================================================================================================
 types.declare 'mutable', ( x ) -> ( @isa.object x ) or ( @isa.list x )
 
@@ -41,7 +42,6 @@ defaults =
 copy_y_freeze_y$set = ( me, k, v ) ->
   R       = assign {}, me
   R[ k ]  = v
-  ### TAINT must honor deep freezing ###
   return Object.freeze R
 
 #-----------------------------------------------------------------------------------------------------------
@@ -56,13 +56,11 @@ copy_n_freeze_n$set = ( me, k, v ) ->
   return me
 
 #===========================================================================================================
-### TAINT must honor deep freezing ###
 copy_y_freeze_y$new_object  = ( P... ) -> Object.freeze assign {}, P...
 copy_y_freeze_n$new_object  = ( P... ) ->               assign {}, P...
 copy_n_freeze_n$new_object  = copy_y_freeze_n$new_object
 
 #===========================================================================================================
-### TAINT must honor deep freezing ###
 copy_y_freeze_y$assign      = ( me, P... ) -> Object.freeze assign {}, me, P...
 copy_y_freeze_n$assign      = ( me, P... ) ->               assign {}, me, P...
 copy_n_freeze_n$assign      = ( me, P... ) ->               assign     me, P...
@@ -71,7 +69,6 @@ copy_n_freeze_n$assign      = ( me, P... ) ->               assign     me, P...
 copy_y_freeze_y$lets = ( original, modifier ) ->
   draft = @thaw original
   modifier draft if modifier?
-  ### TAINT must honor deep freezing ###
   return Object.freeze draft
 
 #-----------------------------------------------------------------------------------------------------------
@@ -88,10 +85,10 @@ copy_n_freeze_n$lets = ( original, modifier ) ->
 
 
 #===========================================================================================================
-copy_y_freeze_y$freeze = ( me ) -> Object.freeze assign {}, me
+copy_y_freeze_y$freeze = ( me ) -> Object.freeze me
 
 #-----------------------------------------------------------------------------------------------------------
-copy_y_freeze_n$freeze = ( me ) -> assign {}, me
+copy_y_freeze_n$freeze = ( me ) -> me
 copy_n_freeze_n$freeze = ( me ) -> me
 
 #===========================================================================================================
@@ -145,6 +142,7 @@ class Lft extends Multimix
 
   #---------------------------------------------------------------------------------------------------------
   get: ( me, k ) -> me[ k ]
+
 
 
 ############################################################################################################
