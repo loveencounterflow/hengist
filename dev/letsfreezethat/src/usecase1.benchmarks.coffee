@@ -148,31 +148,26 @@ data_cache                = null
     resolve count
   return null
 
-# #-----------------------------------------------------------------------------------------------------------
-# @using_immer = ( n, show ) -> new Promise ( resolve ) =>
-#   IMMER         = require 'immer'
-#   { produce, }  = IMMER
-#   count         = 0
-#   { probes_A
-#     probes_B }  = @get_data n
-#   resolve => new Promise ( resolve ) =>
-#     for probe, idx in probes_A
-#       # whisper '^331^', jr probe
-#       keys    = Object.keys probe
-#       probe   = produce probe, ( probe ) -> probe
-#       count  += keys.length
-#       for k, v of probes_B[ idx ]
-#         probe = produce probe, ( probe ) ->
-#           count++
-#           probe[ k ] = v
-#           return probe
-#       for k in keys
-#         probe = produce probe, ( probe ) ->
-#           count++
-#           probe[ k ] = 1234
-#           return probe
-#     resolve count
-#   return null
+#-----------------------------------------------------------------------------------------------------------
+@using_immer = ( cfg ) -> new Promise ( resolve ) =>
+  IMMER         = require 'immer'
+  { produce, }  = IMMER
+  data          = @get_data cfg
+  count         = 0
+  resolve => new Promise ( resolve ) =>
+    for key_value_pairs, datom_idx in data.lists_of_key_value_pairs
+      facet_keys    = data.lists_of_facet_keys[   datom_idx ]
+      facet_values  = data.lists_of_facet_values[ datom_idx ]
+      probe         = produce ( Object.fromEntries key_value_pairs ), ( probe ) -> probe
+      # whisper '^331^', probe
+      probe         = produce probe, ( probe ) ->
+        for key, key_idx in facet_keys
+          probe[ key ]  = facet_values[ key_idx ]
+        return undefined
+      # whisper '^331^', probe
+      count++ ### NOTE counting datoms, not facets ###
+    resolve count
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @using_plainjs_immutable = ( cfg ) -> new Promise ( resolve ) =>
@@ -266,7 +261,7 @@ data_cache                = null
   # cfg         = { set_count: 3, datom_length: 2, change_facet_count: 1, }
   repetitions = 3
   test_names  = [
-    # 'using_immer'
+    'using_immer'
     'using_letsfreezethat_standard'
     'using_letsfreezethat_nofreeze'
     'using_ltfng_assign_lets'
