@@ -18,7 +18,7 @@ echo                      = CND.echo.bind CND
 test                      = require 'guy-test'
 PATH                      = require 'path'
 FS                        = require 'fs'
-# #...........................................................................................................
+#...........................................................................................................
 types                     = new ( require 'intertype' ).Intertype()
 { isa
   validate
@@ -31,7 +31,6 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
 @[ "LFTNG API" ] = ( T, done ) ->
   lft_cfg       = { copy: true, freeze: true, }
   LFT           = ( require './letsfreezethat-NG' ).new lft_cfg
-  types         =
   #.........................................................................................................
   T.eq 'function', type_of LFT.new_object;  T.eq 0, LFT.new_object.length ### NOTE actually splat argument ###
   T.eq 'function', type_of LFT.assign;      T.eq 1, LFT.assign.length ### NOTE actually splat argument ###
@@ -40,6 +39,77 @@ resolve_project_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../..',
   T.eq 'function', type_of LFT.lets;        T.eq 2, LFT.lets.length
   T.eq 'function', type_of LFT.get;         T.eq 2, LFT.get.length
   T.eq 'function', type_of LFT.set;         T.eq 3, LFT.set.length
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "LFTNG freeze, thaw" ] = ( T, done ) ->
+  LFT_DFLT      = require './letsfreezethat-NG'
+  #.........................................................................................................
+  urge '^33738-1^'
+  LFT_CNFY      = null
+  T.throws /not a valid.*cfg/, -> LFT_CNFY = LFT_DFLT.new { copy: false, freeze: true, }
+  T.eq LFT_CNFY, null
+  #.........................................................................................................
+  do =>
+    urge '^33738-2^'
+    LFT = LFT_DFLT
+    d1 = {}
+    d2 = LFT.lets d1
+    T.ok d1 isnt d2
+    T.ok isa.frozen d2
+    d3 = LFT.set d2, 'key', 'value'
+    T.eq ( LFT.get d3, 'key' ), 'value'
+    T.eq d3.key, 'value'
+    T.ok d2 isnt d3
+    T.eq ( LFT.get d2, 'key' ), undefined
+    T.eq d2.key, undefined
+  #.........................................................................................................
+  do =>
+    urge '^33738-3^'
+    LFT = LFT_DFLT.new { copy: true,  freeze: true,   }
+    d1 = {}
+    d2 = LFT.lets d1
+    T.ok d1 isnt d2
+    T.ok isa.frozen d2
+    d3 = LFT.set d2, 'key', 'value'
+    T.ok isa.frozen d3
+    T.eq ( LFT.get d3, 'key' ), 'value'
+    T.eq d3.key, 'value'
+    T.ok d2 isnt d3
+    T.eq ( LFT.get d2, 'key' ), undefined
+    T.eq d2.key, undefined
+  #.........................................................................................................
+  do =>
+    LFT = LFT_DFLT.new { copy: true,  freeze: false,  }
+    urge '^33738-4^'
+    d1 = {}
+    d2 = LFT.lets d1
+    T.ok d1 isnt d2
+    T.ok not isa.frozen d2
+    d3 = LFT.set d2, 'key', 'value'
+    T.ok not isa.frozen d3
+    T.eq ( LFT.get d3, 'key' ), 'value'
+    T.eq d3.key, 'value'
+    T.ok d2 isnt d3
+    T.eq ( LFT.get d2, 'key' ), undefined
+    T.eq d2.key, undefined
+  #.........................................................................................................
+  do =>
+    LFT = LFT_DFLT.new { copy: false, freeze: false,  }
+    urge '^33738-5^'
+    d1 = {}
+    d2 = LFT.lets d1
+    T.ok d1 is d2
+    T.ok not isa.frozen d2
+    d3 = LFT.set d2, 'key', 'value'
+    T.ok not isa.frozen d3
+    T.eq ( LFT.get d3, 'key' ), 'value'
+    T.eq d3.key, 'value'
+    T.ok d2 is d3
+    T.eq ( LFT.get d2, 'key' ), 'value'
+    T.eq d2.key, 'value'
   #.........................................................................................................
   done()
   return null
