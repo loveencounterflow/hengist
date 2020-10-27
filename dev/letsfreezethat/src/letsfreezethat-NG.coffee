@@ -18,6 +18,8 @@ echo                      = CND.echo.bind CND
 Multimix                  = require 'multimix'
 #...........................................................................................................
 types                     = new ( require 'intertype' ).Intertype()
+frozen                    = Object.isFrozen
+assign                    = Object.assign
 
 #===========================================================================================================
 types.declare 'mutable', ( x ) -> ( @isa.object x ) or ( @isa.list x )
@@ -37,14 +39,14 @@ defaults =
 
 #===========================================================================================================
 copy_y_freeze_y$set = ( me, k, v ) ->
-  R       = Object.assign {}, me
+  R       = assign {}, me
   R[ k ]  = v
   ### TAINT must honor deep freezing ###
   return Object.freeze R
 
 #-----------------------------------------------------------------------------------------------------------
 copy_y_freeze_n$set = ( me, k, v ) ->
-  R       = Object.assign {}, me
+  R       = assign {}, me
   R[ k ]  = v
   return R
 
@@ -55,15 +57,15 @@ copy_n_freeze_n$set = ( me, k, v ) ->
 
 #===========================================================================================================
 ### TAINT must honor deep freezing ###
-copy_y_freeze_y$new_object  = ( P... ) -> Object.freeze Object.assign {}, P...
-copy_y_freeze_n$new_object  = ( P... ) ->               Object.assign {}, P...
+copy_y_freeze_y$new_object  = ( P... ) -> Object.freeze assign {}, P...
+copy_y_freeze_n$new_object  = ( P... ) ->               assign {}, P...
 copy_n_freeze_n$new_object  = copy_y_freeze_n$new_object
 
 #===========================================================================================================
 ### TAINT must honor deep freezing ###
-copy_y_freeze_y$assign      = ( me, P... ) -> Object.freeze Object.assign {}, me, P...
-copy_y_freeze_n$assign      = ( me, P... ) ->               Object.assign {}, me, P...
-copy_n_freeze_n$assign      = ( me, P... ) ->               Object.assign     me, P...
+copy_y_freeze_y$assign      = ( me, P... ) -> Object.freeze assign {}, me, P...
+copy_y_freeze_n$assign      = ( me, P... ) ->               assign {}, me, P...
+copy_n_freeze_n$assign      = ( me, P... ) ->               assign     me, P...
 
 #===========================================================================================================
 copy_y_freeze_y$lets = ( original, modifier ) ->
@@ -74,26 +76,30 @@ copy_y_freeze_y$lets = ( original, modifier ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 copy_y_freeze_n$lets = ( original, modifier ) ->
-  draft = @thaw original if Object.isFrozen original
+  draft = if ( frozen original ) then ( @thaw original ) else original
+  modifier draft if modifier?
+  return assign {}, draft
+
+#-----------------------------------------------------------------------------------------------------------
+copy_n_freeze_n$lets = ( original, modifier ) ->
+  draft = if ( frozen original ) then ( @thaw original ) else original
   modifier draft if modifier?
   return draft
 
-#-----------------------------------------------------------------------------------------------------------
-copy_n_freeze_n$lets = copy_y_freeze_n$lets
 
 #===========================================================================================================
-copy_y_freeze_y$freeze = ( me ) -> Object.freeze Object.assign {}, me
+copy_y_freeze_y$freeze = ( me ) -> Object.freeze assign {}, me
 
 #-----------------------------------------------------------------------------------------------------------
-copy_y_freeze_n$freeze = ( me ) -> Object.assign {}, me
+copy_y_freeze_n$freeze = ( me ) -> assign {}, me
 copy_n_freeze_n$freeze = ( me ) -> me
 
 #===========================================================================================================
 ### NOTE with `{ copy: false, }` the `thaw()` method will still make a copy as there is no `Object.thaw()` ###
-copy_y_freeze_y$thaw = ( me ) -> Object.assign {}, me
+copy_y_freeze_y$thaw = ( me ) -> assign {}, me
 
 #-----------------------------------------------------------------------------------------------------------
-copy_y_freeze_n$thaw  = ( me ) -> Object.assign {}, me
+copy_y_freeze_n$thaw  = ( me ) -> assign {}, me
 copy_n_freeze_n$thaw  = ( me ) -> me
 
 
@@ -143,7 +149,7 @@ class Lft extends Multimix
 
 ############################################################################################################
 module.exports = LFT = new Lft()
-Object.assign LFT, { Lft, }
+assign LFT, { Lft, }
 
 
 
