@@ -30,7 +30,7 @@
 
   FS = require('fs');
 
-  // #...........................................................................................................
+  //...........................................................................................................
   types = new (require('intertype')).Intertype();
 
   ({isa, validate, type_of} = types.export());
@@ -49,7 +49,7 @@
     };
     LFT = (require('./letsfreezethat-NG')).new(lft_cfg);
     //.........................................................................................................
-    types = T.eq('function', type_of(LFT.new_object));
+    T.eq('function', type_of(LFT.new_object));
     T.eq(0, LFT.new_object.length);
     /* NOTE actually splat argument */    T.eq('function', type_of(LFT.assign));
     T.eq(1, LFT.assign.length);
@@ -63,6 +63,97 @@
     T.eq(2, LFT.get.length);
     T.eq('function', type_of(LFT.set));
     T.eq(3, LFT.set.length);
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["LFTNG freeze, thaw"] = function(T, done) {
+    var LFT_CNFY, LFT_DFLT;
+    LFT_DFLT = require('./letsfreezethat-NG');
+    //.........................................................................................................
+    urge('^33738-1^');
+    LFT_CNFY = null;
+    T.throws(/not a valid.*cfg/, function() {
+      return LFT_CNFY = LFT_DFLT.new({
+        copy: false,
+        freeze: true
+      });
+    });
+    T.eq(LFT_CNFY, null);
+    (() => {      //.........................................................................................................
+      var LFT, d1, d2, d3;
+      urge('^33738-2^');
+      LFT = LFT_DFLT;
+      d1 = {};
+      d2 = LFT.lets(d1);
+      T.ok(d1 !== d2);
+      T.ok(isa.frozen(d2));
+      d3 = LFT.set(d2, 'key', 'value');
+      T.eq(LFT.get(d3, 'key'), 'value');
+      T.eq(d3.key, 'value');
+      T.ok(d2 !== d3);
+      T.eq(LFT.get(d2, 'key'), void 0);
+      return T.eq(d2.key, void 0);
+    })();
+    (() => {      //.........................................................................................................
+      var LFT, d1, d2, d3;
+      urge('^33738-3^');
+      LFT = LFT_DFLT.new({
+        copy: true,
+        freeze: true
+      });
+      d1 = {};
+      d2 = LFT.lets(d1);
+      T.ok(d1 !== d2);
+      T.ok(isa.frozen(d2));
+      d3 = LFT.set(d2, 'key', 'value');
+      T.ok(isa.frozen(d3));
+      T.eq(LFT.get(d3, 'key'), 'value');
+      T.eq(d3.key, 'value');
+      T.ok(d2 !== d3);
+      T.eq(LFT.get(d2, 'key'), void 0);
+      return T.eq(d2.key, void 0);
+    })();
+    (() => {      //.........................................................................................................
+      var LFT, d1, d2, d3;
+      LFT = LFT_DFLT.new({
+        copy: true,
+        freeze: false
+      });
+      urge('^33738-4^');
+      d1 = {};
+      d2 = LFT.lets(d1);
+      T.ok(d1 !== d2);
+      T.ok(!isa.frozen(d2));
+      d3 = LFT.set(d2, 'key', 'value');
+      T.ok(!isa.frozen(d3));
+      T.eq(LFT.get(d3, 'key'), 'value');
+      T.eq(d3.key, 'value');
+      T.ok(d2 !== d3);
+      T.eq(LFT.get(d2, 'key'), void 0);
+      return T.eq(d2.key, void 0);
+    })();
+    (() => {      //.........................................................................................................
+      var LFT, d1, d2, d3;
+      LFT = LFT_DFLT.new({
+        copy: false,
+        freeze: false
+      });
+      urge('^33738-5^');
+      d1 = {};
+      d2 = LFT.lets(d1);
+      T.ok(d1 === d2);
+      T.ok(!isa.frozen(d2));
+      d3 = LFT.set(d2, 'key', 'value');
+      T.ok(!isa.frozen(d3));
+      T.eq(LFT.get(d3, 'key'), 'value');
+      T.eq(d3.key, 'value');
+      T.ok(d2 === d3);
+      T.eq(LFT.get(d2, 'key'), 'value');
+      return T.eq(d2.key, 'value');
+    })();
     //.........................................................................................................
     done();
     return null;

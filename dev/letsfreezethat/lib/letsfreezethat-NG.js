@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, LFT, Lft, Multimix, alert, badge, copy_n_freeze_n$assign, copy_n_freeze_n$freeze, copy_n_freeze_n$lets, copy_n_freeze_n$new_object, copy_n_freeze_n$set, copy_n_freeze_n$thaw, copy_y_freeze_n$assign, copy_y_freeze_n$freeze, copy_y_freeze_n$lets, copy_y_freeze_n$new_object, copy_y_freeze_n$set, copy_y_freeze_n$thaw, copy_y_freeze_y$assign, copy_y_freeze_y$freeze, copy_y_freeze_y$lets, copy_y_freeze_y$new_object, copy_y_freeze_y$set, copy_y_freeze_y$thaw, debug, defaults, echo, help, info, log, rpr, types, urge, warn, whisper;
+  var CND, LFT, Lft, Multimix, alert, assign, badge, copy_n_freeze_n$assign, copy_n_freeze_n$freeze, copy_n_freeze_n$lets, copy_n_freeze_n$new_object, copy_n_freeze_n$set, copy_n_freeze_n$thaw, copy_y_freeze_n$assign, copy_y_freeze_n$freeze, copy_y_freeze_n$lets, copy_y_freeze_n$new_object, copy_y_freeze_n$set, copy_y_freeze_n$thaw, copy_y_freeze_y$assign, copy_y_freeze_y$freeze, copy_y_freeze_y$lets, copy_y_freeze_y$new_object, copy_y_freeze_y$set, copy_y_freeze_y$thaw, debug, defaults, echo, frozen, help, info, log, rpr, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -31,6 +31,10 @@
 
   //...........................................................................................................
   types = new (require('intertype')).Intertype();
+
+  frozen = Object.isFrozen;
+
+  assign = Object.assign;
 
   //===========================================================================================================
   types.declare('mutable', function(x) {
@@ -70,7 +74,7 @@
   //===========================================================================================================
   copy_y_freeze_y$set = function(me, k, v) {
     var R;
-    R = Object.assign({}, me);
+    R = assign({}, me);
     R[k] = v;
     /* TAINT must honor deep freezing */
     return Object.freeze(R);
@@ -79,7 +83,7 @@
   //-----------------------------------------------------------------------------------------------------------
   copy_y_freeze_n$set = function(me, k, v) {
     var R;
-    R = Object.assign({}, me);
+    R = assign({}, me);
     R[k] = v;
     return R;
   };
@@ -93,11 +97,11 @@
   //===========================================================================================================
   /* TAINT must honor deep freezing */
   copy_y_freeze_y$new_object = function(...P) {
-    return Object.freeze(Object.assign({}, ...P));
+    return Object.freeze(assign({}, ...P));
   };
 
   copy_y_freeze_n$new_object = function(...P) {
-    return Object.assign({}, ...P);
+    return assign({}, ...P);
   };
 
   copy_n_freeze_n$new_object = copy_y_freeze_n$new_object;
@@ -105,15 +109,15 @@
   //===========================================================================================================
   /* TAINT must honor deep freezing */
   copy_y_freeze_y$assign = function(me, ...P) {
-    return Object.freeze(Object.assign({}, me, ...P));
+    return Object.freeze(assign({}, me, ...P));
   };
 
   copy_y_freeze_n$assign = function(me, ...P) {
-    return Object.assign({}, me, ...P);
+    return assign({}, me, ...P);
   };
 
   copy_n_freeze_n$assign = function(me, ...P) {
-    return Object.assign(me, ...P);
+    return assign(me, ...P);
   };
 
   //===========================================================================================================
@@ -130,26 +134,31 @@
   //-----------------------------------------------------------------------------------------------------------
   copy_y_freeze_n$lets = function(original, modifier) {
     var draft;
-    if (Object.isFrozen(original)) {
-      draft = this.thaw(original);
+    draft = (frozen(original)) ? this.thaw(original) : original;
+    if (modifier != null) {
+      modifier(draft);
     }
+    return assign({}, draft);
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  copy_n_freeze_n$lets = function(original, modifier) {
+    var draft;
+    draft = (frozen(original)) ? this.thaw(original) : original;
     if (modifier != null) {
       modifier(draft);
     }
     return draft;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  copy_n_freeze_n$lets = copy_y_freeze_n$lets;
-
   //===========================================================================================================
   copy_y_freeze_y$freeze = function(me) {
-    return Object.freeze(Object.assign({}, me));
+    return Object.freeze(assign({}, me));
   };
 
   //-----------------------------------------------------------------------------------------------------------
   copy_y_freeze_n$freeze = function(me) {
-    return Object.assign({}, me);
+    return assign({}, me);
   };
 
   copy_n_freeze_n$freeze = function(me) {
@@ -159,12 +168,12 @@
   //===========================================================================================================
   /* NOTE with `{ copy: false, }` the `thaw()` method will still make a copy as there is no `Object.thaw()` */
   copy_y_freeze_y$thaw = function(me) {
-    return Object.assign({}, me);
+    return assign({}, me);
   };
 
   //-----------------------------------------------------------------------------------------------------------
   copy_y_freeze_n$thaw = function(me) {
-    return Object.assign({}, me);
+    return assign({}, me);
   };
 
   copy_n_freeze_n$thaw = function(me) {
@@ -229,7 +238,7 @@
   //###########################################################################################################
   module.exports = LFT = new Lft();
 
-  Object.assign(LFT, {Lft});
+  assign(LFT, {Lft});
 
 }).call(this);
 
