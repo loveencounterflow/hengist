@@ -267,31 +267,43 @@
     });
   };
 
-  // #-----------------------------------------------------------------------------------------------------------
-  // @using_immer = ( n, show ) -> new Promise ( resolve ) =>
-  //   IMMER         = require 'immer'
-  //   { produce, }  = IMMER
-  //   count         = 0
-  //   { probes_A
-  //     probes_B }  = @get_data n
-  //   resolve => new Promise ( resolve ) =>
-  //     for probe, idx in probes_A
-  //       # whisper '^331^', jr probe
-  //       keys    = Object.keys probe
-  //       probe   = produce probe, ( probe ) -> probe
-  //       count  += keys.length
-  //       for k, v of probes_B[ idx ]
-  //         probe = produce probe, ( probe ) ->
-  //           count++
-  //           probe[ k ] = v
-  //           return probe
-  //       for k in keys
-  //         probe = produce probe, ( probe ) ->
-  //           count++
-  //           probe[ k ] = 1234
-  //           return probe
-  //     resolve count
-  //   return null
+  //-----------------------------------------------------------------------------------------------------------
+  this.using_immer = function(cfg) {
+    return new Promise((resolve) => {
+      var IMMER, count, data, produce;
+      IMMER = require('immer');
+      ({produce} = IMMER);
+      data = this.get_data(cfg);
+      count = 0;
+      resolve(() => {
+        return new Promise((resolve) => {
+          var datom_idx, facet_keys, facet_values, i, key_value_pairs, len, probe, ref;
+          ref = data.lists_of_key_value_pairs;
+          for (datom_idx = i = 0, len = ref.length; i < len; datom_idx = ++i) {
+            key_value_pairs = ref[datom_idx];
+            facet_keys = data.lists_of_facet_keys[datom_idx];
+            facet_values = data.lists_of_facet_values[datom_idx];
+            probe = produce(Object.fromEntries(key_value_pairs), function(probe) {
+              return probe;
+            });
+            // whisper '^331^', probe
+            probe = produce(probe, function(probe) {
+              var j, key, key_idx, len1;
+              for (key_idx = j = 0, len1 = facet_keys.length; j < len1; key_idx = ++j) {
+                key = facet_keys[key_idx];
+                probe[key] = facet_values[key_idx];
+              }
+              return void 0;
+            });
+            // whisper '^331^', probe
+            count++;
+          }
+/* NOTE counting datoms, not facets */          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this.using_plainjs_immutable = function(cfg) {
@@ -459,8 +471,7 @@
     };
     // cfg         = { set_count: 3, datom_length: 2, change_facet_count: 1, }
     repetitions = 3;
-    // 'using_immer'
-    test_names = ['using_letsfreezethat_standard', 'using_letsfreezethat_nofreeze', 'using_ltfng_assign_lets', 'using_ltfng_thaw_freeze_cyfy', 'using_ltfng_thaw_freeze_cyfn', 'using_ltfng_thaw_freeze_cnfn', 'using_immutable', 'using_hamt', 'using_mori', 'using_plainjs_mutable', 'using_plainjs_immutable'];
+    test_names = ['using_immer', 'using_letsfreezethat_standard', 'using_letsfreezethat_nofreeze', 'using_ltfng_assign_lets', 'using_ltfng_thaw_freeze_cyfy', 'using_ltfng_thaw_freeze_cyfn', 'using_ltfng_thaw_freeze_cnfn', 'using_immutable', 'using_hamt', 'using_mori', 'using_plainjs_mutable', 'using_plainjs_immutable'];
     ref = CND.shuffle(test_names);
     // for _ in [ 1 .. repetitions ]
     //   whisper '-'.repeat 108
