@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, LFT, Lft, Multimix, alert, assign, badge, copy, copy_n_freeze_n$assign, copy_n_freeze_n$freeze, copy_n_freeze_n$lets, copy_n_freeze_n$new_object, copy_n_freeze_n$set, copy_n_freeze_n$thaw, copy_y_freeze_n$assign, copy_y_freeze_n$freeze, copy_y_freeze_n$lets, copy_y_freeze_n$new_object, copy_y_freeze_n$set, copy_y_freeze_n$thaw, copy_y_freeze_y$assign, copy_y_freeze_y$freeze, copy_y_freeze_y$lets, copy_y_freeze_y$new_object, copy_y_freeze_y$set, copy_y_freeze_y$thaw, debug, defaults, echo, frozen, help, info, log, rpr, types, urge, warn, whisper;
+  var CND, LFT, Lft, Multimix, alert, assign, badge, copy_y_freeze_n$assign, copy_y_freeze_n$freeze, copy_y_freeze_n$lets, copy_y_freeze_n$set, copy_y_freeze_n$thaw, copy_y_freeze_y$assign, copy_y_freeze_y$freeze, copy_y_freeze_y$lets, copy_y_freeze_y$set, copy_y_freeze_y$thaw, debug, deep_copy, deep_freeze, defaults, echo, frozen, help, info, log, rpr, shallow_copy, shallow_freeze, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -36,8 +36,14 @@
 
   assign = Object.assign;
 
+  shallow_freeze = Object.freeze;
+
+  shallow_copy = function(x) {
+    return assign((Array.isArray(x) ? [] : {}), x);
+  };
+
   ({
-    klona: copy
+    klona: deep_copy
   } = require('klona/json'));
 
   //===========================================================================================================
@@ -51,77 +57,93 @@
       "x is an object": function(x) {
         return this.isa.object(x);
       },
-      "x.copy is a boolean": function(x) {
-        return this.isa.boolean(x.copy);
-      },
       "x.freeze is a boolean": function(x) {
         return this.isa.boolean(x.freeze);
       },
-      "x.copy: false implies x.freeze false": function(x) {
-        if (!x.copy) {
-          return !x.freeze;
-        } else {
-          return true;
-        }
+      "x.copy must not be used": function(x) {
+        return x.copy == null;
       }
     }
   });
 
+  // "x.freeze is a boolean":                ( x ) -> @isa.boolean x.freeze
+  // "x.copy: false implies x.freeze false": ( x ) -> if not x.copy then not x.freeze else true
+
   //-----------------------------------------------------------------------------------------------------------
   defaults = {
     cfg: {
-      copy: true,
+      // copy:   true
       freeze: true
     }
   };
 
   //===========================================================================================================
+  deep_freeze = function(d) {
+    var k, v;
+    if ((!d) || d === true) {
+      /* immediately return for zero, empty string, null, undefined, NaN, false, true: */
+      return d;
+    }
+    /* thx to https://github.com/lukeed/klona/blob/master/src/json.js */
+    switch (Object.prototype.toString.call(d)) {
+      case '[object Array]':
+        k = d.length;
+        while (k--) {
+          if (!(((v = d[k]) != null) && ((typeof v) === 'object'))) {
+            continue;
+          }
+          d[k] = deep_freeze(v);
+        }
+        return shallow_freeze(d);
+      case '[object Object]':
+        for (k in d) {
+          v = d[k];
+          if (!((v != null) && ((typeof v) === 'object'))) {
+            continue;
+          }
+          d[k] = deep_freeze(v);
+        }
+        return shallow_freeze(d);
+    }
+    return d;
+  };
+
+  //===========================================================================================================
   copy_y_freeze_y$set = function(me, k, v) {
     var R;
-    R = copy(me);
+    R = shallow_copy(me);
     R[k] = v;
-    return Object.freeze(R);
+    return shallow_freeze(R);
   };
 
   //-----------------------------------------------------------------------------------------------------------
   copy_y_freeze_n$set = function(me, k, v) {
     var R;
-    R = copy(me);
+    R = shallow_copy(me);
     R[k] = v;
     return R;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  copy_n_freeze_n$set = function(me, k, v) {
-    me[k] = v;
-    return me;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // copy_n_freeze_n$set = ( me, k, v ) ->
+  //   me[ k ] = v
+  //   return me
 
   //===========================================================================================================
-  copy_y_freeze_y$new_object = function(...P) {
-    return Object.freeze(copy(assign({}, ...P)));
-  };
-
-  copy_y_freeze_n$new_object = function(...P) {
-    return copy(assign({}, ...P));
-  };
-
-  copy_n_freeze_n$new_object = function(...P) {
-    return assign({}, ...P);
-  };
+  // copy_y_freeze_y$new_object  = ( P...     ) -> deep_freeze deep_copy assign {}, P...
+  // copy_y_freeze_n$new_object  = ( P...     ) ->             deep_copy assign {}, P...
+  // copy_n_freeze_n$new_object  = ( P...     ) ->                       assign {}, P...
 
   //===========================================================================================================
   copy_y_freeze_y$assign = function(me, ...P) {
-    return Object.freeze(copy(assign({}, me, ...P)));
+    return deep_freeze(deep_copy(assign({}, me, ...P)));
   };
 
   copy_y_freeze_n$assign = function(me, ...P) {
-    return copy(assign({}, me, ...P));
+    return deep_copy(assign({}, me, ...P));
   };
 
-  copy_n_freeze_n$assign = function(me, ...P) {
-    return assign(me, ...P);
-  };
+  // copy_n_freeze_n$assign      = ( me, P... ) ->                       assign     me, P...
 
   //===========================================================================================================
   copy_y_freeze_y$lets = function(original, modifier) {
@@ -130,7 +152,7 @@
     if (modifier != null) {
       modifier(draft);
     }
-    return Object.freeze(draft);
+    return deep_freeze(draft);
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -140,88 +162,75 @@
     if (modifier != null) {
       modifier(draft);
     }
-    return copy(draft);
+    return deep_copy(draft);
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  copy_n_freeze_n$lets = function(original, modifier) {
-    var draft;
-    draft = this.thaw(original);
-    if (modifier != null) {
-      modifier(draft);
-    }
-    return draft;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // copy_n_freeze_n$lets = ( original, modifier ) ->
+  //   draft = @thaw original
+  //   modifier draft if modifier?
+  //   return draft
 
   //===========================================================================================================
   copy_y_freeze_y$freeze = function(me) {
-    return Object.freeze(me);
+    return deep_freeze(me);
   };
 
   copy_y_freeze_n$freeze = function(me) {
     return me;
   };
 
-  copy_n_freeze_n$freeze = function(me) {
-    return me;
-  };
+  // copy_n_freeze_n$freeze  = ( me ) -> me
 
   //===========================================================================================================
-  /* NOTE with `{ copy: false, }` the `thaw()` method will still make a copy if value is frozen */
   copy_y_freeze_y$thaw = function(me) {
-    return copy(me);
+    return deep_copy(me);
   };
 
   copy_y_freeze_n$thaw = function(me) {
-    return copy(me);
-  };
-
-  copy_n_freeze_n$thaw = function(me) {
-    if (frozen(me)) {
-      return copy(me);
-    } else {
-      return me;
-    }
+    return deep_copy(me);
   };
 
   Lft = (function() {
-    //===========================================================================================================
+    /* NOTE with `{ copy: false, }` the `thaw()` method will still make a copy if value is frozen */
+    /* TAINT may fail if some properties are frozen, not object itself */
+    // copy_n_freeze_n$thaw    = ( me ) -> if ( frozen me ) then deep_copy me else me
+
+      //===========================================================================================================
 
     //-----------------------------------------------------------------------------------------------------------
     class Lft extends Multimix {
       //---------------------------------------------------------------------------------------------------------
       constructor(cfg) {
         super();
-        types.validate.lft_cfg(this.cfg = Object.freeze({...defaults.cfg, ...cfg}));
-        if (this.cfg.copy) {
-          if (this.cfg.freeze) {
-            this.new_object = copy_y_freeze_y$new_object;
-            this.set = copy_y_freeze_y$set;
-            this.assign = copy_y_freeze_y$assign;
-            this.lets = copy_y_freeze_y$lets;
-            this.freeze = copy_y_freeze_y$freeze;
-            this.thaw = copy_y_freeze_y$thaw;
-          } else {
-            this.new_object = copy_y_freeze_n$new_object;
-            this.set = copy_y_freeze_n$set;
-            this.assign = copy_y_freeze_n$assign;
-            this.lets = copy_y_freeze_n$lets;
-            this.freeze = copy_y_freeze_n$freeze;
-            this.thaw = copy_y_freeze_n$thaw;
-          }
+        types.validate.lft_cfg(this.cfg = shallow_freeze({...defaults.cfg, ...cfg}));
+        // if @cfg.copy
+        if (this.cfg.freeze) {
+          // @new_object = copy_y_freeze_y$new_object
+          this.set = copy_y_freeze_y$set;
+          this.assign = copy_y_freeze_y$assign;
+          this.lets = copy_y_freeze_y$lets;
+          this.freeze = copy_y_freeze_y$freeze;
+          this.thaw = copy_y_freeze_y$thaw;
         } else {
-          if (this.cfg.freeze) {
-            /* TAINT move to `types.validate.lft_settings cfg` */
-            throw new Error("^3446^ cannot use { copy: false, } with { freeze: true, }");
-          } else {
-            this.new_object = copy_n_freeze_n$new_object;
-            this.set = copy_n_freeze_n$set;
-            this.assign = copy_n_freeze_n$assign;
-            this.lets = copy_n_freeze_n$lets;
-            this.freeze = copy_n_freeze_n$freeze;
-            this.thaw = copy_n_freeze_n$thaw;
-          }
+          // @new_object = copy_y_freeze_n$new_object
+          this.set = copy_y_freeze_n$set;
+          this.assign = copy_y_freeze_n$assign;
+          this.lets = copy_y_freeze_n$lets;
+          this.freeze = copy_y_freeze_n$freeze;
+          this.thaw = copy_y_freeze_n$thaw;
         }
+        // else
+        //   if @cfg.freeze
+        //     ### TAINT move to `types.validate.lft_settings cfg` ###
+        //     throw new Error "^3446^ cannot use { copy: false, } with { freeze: true, }"
+        //   else
+        //     # # @new_object = copy_n_freeze_n$new_object
+        //     # @set        = copy_n_freeze_n$set
+        //     # @assign     = copy_n_freeze_n$assign
+        //     # @lets       = copy_n_freeze_n$lets
+        //     # @freeze     = copy_n_freeze_n$freeze
+        //     # @thaw       = copy_n_freeze_n$thaw
         return this;
       }
 

@@ -304,13 +304,13 @@
             d = ref[i];
             e = copy(d);
             if (e === d) {
-              throw new Error('^445-7^ identical');
+              throw new Error('^445-10^ identical');
             }
             if (Object.isFrozen(e)) {
-              throw new Error('^445-8^ not thawed');
+              throw new Error('^445-11^ not thawed');
             }
             if (Object.isFrozen(e.$vnr)) {
-              throw new Error('^445-9^ not thawed');
+              throw new Error('^445-12^ not thawed');
             }
             count++;
           }
@@ -351,13 +351,13 @@
             d = ref[i];
             e = copy(d);
             if (e === d) {
-              throw new Error('^445-7^ identical');
+              throw new Error('^445-13^ identical');
             }
             if (Object.isFrozen(e)) {
-              throw new Error('^445-8^ not thawed');
+              throw new Error('^445-14^ not thawed');
             }
             if (Object.isFrozen(e.$vnr)) {
-              throw new Error('^445-9^ not thawed');
+              throw new Error('^445-15^ not thawed');
             }
             count++;
           }
@@ -365,6 +365,124 @@
         });
       });
       return null;
+    });
+  };
+
+  //===========================================================================================================
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._freeze___lftrc2 = function(cfg, lft_cfg) {
+    return new Promise((resolve) => {
+      var LFT, count, data, freeze, lets, thaw;
+      LFT = (require('./letsfreezethat-NG-rc2')).new(lft_cfg);
+      ({lets, freeze, thaw} = LFT);
+      data = this.get_data(cfg);
+      count = 0;
+      if (global.gc != null) {
+        global.gc();
+      }
+      /* TAINT consider to do this in BM moduke */      resolve(() => {
+        return new Promise((resolve) => {
+          var d, e, i, len, ref;
+          ref = data.datoms;
+          for (i = 0, len = ref.length; i < len; i++) {
+            d = ref[i];
+            e = freeze(d);
+            if (e !== d) {
+              throw new Error('^445-16^ not identical');
+            }
+            if (lft_cfg.freeze) {
+              if (!Object.isFrozen(e)) {
+                throw new Error('^445-17^ not frozen');
+              }
+              if (!Object.isFrozen(e.$vnr)) {
+                throw new Error('^445-18^ not frozen');
+              }
+            } else {
+              if (Object.isFrozen(e)) {
+                throw new Error('^445-19^ frozen');
+              }
+              if (Object.isFrozen(e.$vnr)) {
+                throw new Error('^445-20^ frozen');
+              }
+            }
+            count++;
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._thaw_____lftrc2 = function(cfg, lft_cfg) {
+    return new Promise((resolve) => {
+      var LFT, count, d, data, freeze, lets, thaw;
+      LFT = (require('./letsfreezethat-NG-rc2')).new(lft_cfg);
+      ({lets, freeze, thaw} = LFT);
+      data = this.get_data(cfg);
+      data.datoms = (function() {
+        var i, len, ref, results;
+        ref = data.datoms;
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          d = ref[i];
+          results.push(freeze(d));
+        }
+        return results;
+      })();
+      count = 0;
+      if (global.gc != null) {
+        global.gc();
+      }
+      /* TAINT consider to do this in BM moduke */      resolve(() => {
+        return new Promise((resolve) => {
+          var e, i, len, ref;
+          ref = data.datoms;
+          for (i = 0, len = ref.length; i < len; i++) {
+            d = ref[i];
+            e = thaw(d);
+            if (e === d) {
+              throw new Error('^445-21^ identical');
+            }
+            if (Object.isFrozen(e)) {
+              throw new Error('^445-22^ not thawed');
+            }
+            if (Object.isFrozen(e.$vnr)) {
+              throw new Error('^445-23^ not thawed');
+            }
+            count++;
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.freeze___lftrc2_cyfy = function(cfg) {
+    return this._freeze___lftrc2(cfg, {
+      freeze: true
+    });
+  };
+
+  this.freeze___lftrc2_cyfn = function(cfg) {
+    return this._freeze___lftrc2(cfg, {
+      freeze: false
+    });
+  };
+
+  this.thaw_____lftrc2_cyfy = function(cfg) {
+    return this._thaw_____lftrc2(cfg, {
+      freeze: true
+    });
+  };
+
+  this.thaw_____lftrc2_cyfn = function(cfg) {
+    return this._thaw_____lftrc2(cfg, {
+      freeze: false
     });
   };
 
@@ -388,13 +506,13 @@
             d = ref[i];
             e = freeze(d);
             if (e !== d) {
-              throw new /* freezes in-place */Error('^445-10^ not identical');
+              throw new /* freezes in-place */Error('^445-24^ not identical');
             }
             if (!Object.isFrozen(e)) {
-              throw new Error('^445-11^ not frozen');
+              throw new Error('^445-25^ not frozen');
             }
             if (!Object.isFrozen(e.$vnr)) {
-              throw new Error('^445-12^ not frozen');
+              throw new Error('^445-26^ not frozen');
             }
             count++;
           }
@@ -425,13 +543,13 @@
             d = ref[i];
             e = deepFreeze(d, true);
             if (e !== d) {
-              throw new /* NOTE use `true` to avoid copying */Error('^445-13^ not identical');
+              throw new /* NOTE use `true` to avoid copying */Error('^445-27^ not identical');
             }
             if (!Object.isFrozen(e)) {
-              throw new Error('^445-14^ not frozen');
+              throw new Error('^445-28^ not frozen');
             }
             if (!Object.isFrozen(e.$vnr)) {
-              throw new Error('^445-15^ not frozen');
+              throw new Error('^445-29^ not frozen');
             }
             count++;
           }
@@ -470,13 +588,13 @@
             d = ref[i];
             e = deepThaw(d, true);
             if (e === d) {
-              throw new /* NOTE use `true` to avoid copying */Error('^445-16^ identical');
+              throw new /* NOTE use `true` to avoid copying */Error('^445-30^ identical');
             }
             if (Object.isFrozen(e)) {
-              throw new Error('^445-17^ frozen');
+              throw new Error('^445-31^ frozen');
             }
             if (Object.isFrozen(e.$vnr)) {
-              throw new Error('^445-18^ frozen');
+              throw new Error('^445-32^ frozen');
             }
             count++;
           }
@@ -507,13 +625,13 @@
             d = ref[i];
             e = freeze(d, true);
             if (e !== d) {
-              throw new /* NOTE use `true` to avoid copying */Error('^445-19^ not identical');
+              throw new /* NOTE use `true` to avoid copying */Error('^445-33^ not identical');
             }
             if (!Object.isFrozen(e)) {
-              throw new Error('^445-20^ not frozen');
+              throw new Error('^445-34^ not frozen');
             }
             if (Object.isFrozen(e.$vnr)) {
-              throw new Error('^445-21^ is frozen');
+              throw new Error('^445-35^ is frozen');
             }
             count++;
           }
@@ -552,13 +670,13 @@
             d = ref[i];
             e = Object.assign({}, d);
             if (e === d) {
-              throw new Error('^445-22^ identical');
+              throw new Error('^445-36^ identical');
             }
             if (Object.isFrozen(e)) {
-              throw new Error('^445-23^ frozen');
+              throw new Error('^445-37^ frozen');
             }
             if (Object.isFrozen(e.$vnr)) {
-              throw new Error('^445-24^ is frozen');
+              throw new Error('^445-38^ is frozen');
             }
             count++;
           }
@@ -569,13 +687,10 @@
     });
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.copy_____shallow_native = this.thaw_____shallow_native;
-
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.copy_____fast_copy = function(cfg) {
+  this.thaw_____fast_copy = function(cfg) {
     return new Promise((resolve) => {
       var copy, count, d, data;
       // debug require 'fast-copy'
@@ -605,13 +720,13 @@
             d = ref[i];
             e = copy(d);
             if (e === d) {
-              throw new Error('^445-25^ identical');
+              throw new Error('^445-39^ identical');
             }
             if (Object.isFrozen(e)) {
-              throw new Error('^445-26^ frozen');
+              throw new Error('^445-40^ frozen');
             }
             if (Object.isFrozen(e.$vnr)) {
-              throw new Error('^445-27^ is frozen');
+              throw new Error('^445-41^ is frozen');
             }
             count++;
           }
@@ -623,7 +738,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.copy_____fast_copy_strict = function(cfg) {
+  this.thaw_____fast_copy_strict = function(cfg) {
     return new Promise((resolve) => {
       var copy, count, d, data;
       // debug require 'fast-copy'
@@ -653,13 +768,13 @@
             d = ref[i];
             e = copy.strict(d);
             if (e === d) {
-              throw new Error('^445-28^ identical');
+              throw new Error('^445-42^ identical');
             }
             if (Object.isFrozen(e)) {
-              throw new Error('^445-29^ frozen');
+              throw new Error('^445-43^ frozen');
             }
             if (Object.isFrozen(e.$vnr)) {
-              throw new Error('^445-30^ is frozen');
+              throw new Error('^445-44^ is frozen');
             }
             count++;
           }
@@ -673,7 +788,7 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.copy_____klona = function(cfg) {
+  this.thaw_____klona = function(cfg) {
     return new Promise((resolve) => {
       var count, d, data, klona;
       ({klona} = require('klona/json'));
@@ -700,13 +815,13 @@
             d = ref[i];
             e = klona(d);
             if (e === d) {
-              throw new Error('^445-31^ identical');
+              throw new Error('^445-45^ identical');
             }
             if (Object.isFrozen(e)) {
-              throw new Error('^445-32^ frozen');
+              throw new Error('^445-46^ frozen');
             }
             if (Object.isFrozen(e.$vnr)) {
-              throw new Error('^445-33^ is frozen');
+              throw new Error('^445-47^ is frozen');
             }
             count++;
           }
@@ -720,7 +835,7 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.copy_____deepcopy = function(cfg) {
+  this.thaw_____deepcopy = function(cfg) {
     return new Promise((resolve) => {
       var count, d, data, deepcopy;
       deepcopy = require('deepcopy');
@@ -747,13 +862,13 @@
             d = ref[i];
             e = deepcopy(d);
             if (e === d) {
-              throw new Error('^445-34^ identical');
+              throw new Error('^445-48^ identical');
             }
             if (Object.isFrozen(e)) {
-              throw new Error('^445-35^ frozen');
+              throw new Error('^445-49^ frozen');
             }
             if (Object.isFrozen(e.$vnr)) {
-              throw new Error('^445-36^ is frozen');
+              throw new Error('^445-50^ is frozen');
             }
             count++;
           }
@@ -799,11 +914,11 @@
     };
     cfg = {
       repetitions: 3,
-      set_count: 1000
+      set_count: 1
     };
     cfg = {
       repetitions: 3,
-      set_count: 1
+      set_count: 10000
     };
     cfg = {
       repetitions: 3,
@@ -811,20 +926,11 @@
     };
     cfg = {
       repetitions: 3,
-      set_count: 10000
+      set_count: 1000
     };
-    test_names = ['thaw_____letsfreezethat', 'copy_____klona', 'copy_____lft_xxx_1', 'copy_____lft_xxx_2', 'copy_____lft_xxx_3', 'copy_____fast_copy'];
+    test_names = ['thaw_____letsfreezethat', 'thaw_____klona', 'copy_____lft_xxx_1', 'copy_____lft_xxx_2', 'copy_____lft_xxx_3', 'thaw_____fast_copy', 'thaw_____lftrc2_cyfy', 'thaw_____deepfreezer', 'thaw_____shallow_native', 'thaw_____fast_copy_strict', 'thaw_____deepcopy', 'thaw_____lftrc2_cyfn', 'freeze___lftrc2_cyfn', 'freeze___lftrc2_cyfy', 'freeze___lftrc2_cyfn', 'freeze___letsfreezethat', 'freeze___deepfreeze', 'freeze___deepfreezer', 'freeze___shallow_native'];
     if (global.gc != null) {
       // await BM.benchmark bench, cfg, false, @, '_prewarm'
-      // 'copy_____shallow_native'
-      // 'freeze___letsfreezethat'
-      // 'freeze___deepfreeze'
-      // 'freeze___deepfreezer'
-      // 'thaw_____deepfreezer'
-      // 'freeze___shallow_native'
-      // 'thaw_____shallow_native'
-      // 'copy_____fast_copy_strict'
-      // 'copy_____deepcopy'
       global.gc();
     }
     ref = CND.shuffle(test_names);

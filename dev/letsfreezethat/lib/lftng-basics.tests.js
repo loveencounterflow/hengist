@@ -44,14 +44,11 @@
   this["LFTNG API"] = function(T, done) {
     var LFT, lft_cfg;
     lft_cfg = {
-      copy: true,
       freeze: true
     };
     LFT = (require('./letsfreezethat-NG-rc2')).new(lft_cfg);
     //.........................................................................................................
-    T.eq('function', type_of(LFT.new_object));
-    T.eq(0, LFT.new_object.length);
-    /* NOTE actually splat argument */    T.eq('function', type_of(LFT.assign));
+    T.eq('function', type_of(LFT.assign));
     T.eq(1, LFT.assign.length);
     /* NOTE actually splat argument */    T.eq('function', type_of(LFT.freeze));
     T.eq(1, LFT.freeze.length);
@@ -70,19 +67,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["LFTNG lets, set, get"] = function(T, done) {
-    var LFT_CNFY, LFT_DFLT;
+    var LFT_DFLT;
     LFT_DFLT = require('./letsfreezethat-NG-rc2');
-    //.........................................................................................................
-    urge('^33738-1^');
-    LFT_CNFY = null;
-    T.throws(/not a valid.*cfg/, function() {
-      return LFT_CNFY = LFT_DFLT.new({
-        copy: false,
-        freeze: true
-      });
-    });
-    T.eq(LFT_CNFY, null);
-    (() => {      //.........................................................................................................
+    (() => {      // #.........................................................................................................
+      // urge '^33738-1^'
+      // LFT_CNFY      = null
+      // T.throws /not a valid.*cfg/, -> LFT_CNFY = LFT_DFLT.new { copy: false, freeze: true, }
+      // T.eq LFT_CNFY, null
+      //.........................................................................................................
       var LFT, d1, d2, d3;
       urge('^33738-2^');
       LFT = LFT_DFLT;
@@ -101,7 +93,6 @@
       var LFT, d1, d2, d3;
       urge('^33738-3^');
       LFT = LFT_DFLT.new({
-        copy: true,
         freeze: true
       });
       d1 = {};
@@ -119,7 +110,6 @@
     (() => {      //.........................................................................................................
       var LFT, d1, d2, d3;
       LFT = LFT_DFLT.new({
-        copy: true,
         freeze: false
       });
       urge('^33738-4^');
@@ -135,32 +125,13 @@
       T.eq(LFT.get(d2, 'key'), void 0);
       return T.eq(d2.key, void 0);
     })();
-    (() => {      //.........................................................................................................
-      var LFT, d1, d2, d3;
-      LFT = LFT_DFLT.new({
-        copy: false,
-        freeze: false
-      });
-      urge('^33738-5^');
-      d1 = {};
-      d2 = LFT.lets(d1);
-      T.ok(d1 === d2);
-      T.ok(!isa.frozen(d2));
-      d3 = LFT.set(d2, 'key', 'value');
-      T.ok(!isa.frozen(d3));
-      T.eq(LFT.get(d3, 'key'), 'value');
-      T.eq(d3.key, 'value');
-      T.ok(d2 === d3);
-      T.eq(LFT.get(d2, 'key'), 'value');
-      return T.eq(d2.key, 'value');
-    })();
     //.........................................................................................................
     done();
     return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["LFTNG freeze, thaw"] = function(T, done) {
+  this["LFTNG freeze, thaw (shallow)"] = function(T, done) {
     var LFT, d1, d2, d3, freeze, lets, thaw;
     LFT = require('./letsfreezethat-NG-rc2');
     ({lets, freeze, thaw} = LFT.export());
@@ -183,6 +154,78 @@
       a: 43,
       b: 'helo world'
     });
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["LFTNG freeze, thaw (deep)"] = function(T, done) {
+    var LFT, d1, d2, freeze, lets, thaw;
+    LFT = require('./letsfreezethat-NG-rc2');
+    ({lets, freeze, thaw} = LFT.export());
+    //.........................................................................................................
+    d1 = lets({
+      $key: '^a-list',
+      $value: [
+        1,
+        2,
+        {
+          $key: '^another',
+          $value: ['c',
+        'd']
+        }
+      ]
+    });
+    T.ok(isa.frozen(d1));
+    T.ok(isa.frozen(d1.$value));
+    T.ok(isa.frozen(d1.$value[2]));
+    T.ok(isa.frozen(d1.$value[2].$value));
+    T.eq(d1, {
+      $key: '^a-list',
+      $value: [
+        1,
+        2,
+        {
+          $key: '^another',
+          $value: ['c',
+        'd']
+        }
+      ]
+    });
+    d2 = thaw(d1);
+    T.eq(d1, {
+      $key: '^a-list',
+      $value: [
+        1,
+        2,
+        {
+          $key: '^another',
+          $value: ['c',
+        'd']
+        }
+      ]
+    });
+    T.eq(d2, {
+      $key: '^a-list',
+      $value: [
+        1,
+        2,
+        {
+          $key: '^another',
+          $value: ['c',
+        'd']
+        }
+      ]
+    });
+    T.ok(isa.frozen(d1));
+    T.ok(isa.frozen(d1.$value));
+    T.ok(isa.frozen(d1.$value[2]));
+    T.ok(isa.frozen(d1.$value[2].$value));
+    T.ok(!isa.frozen(d2));
+    T.ok(!isa.frozen(d2.$value));
+    T.ok(!isa.frozen(d2.$value[2]));
+    T.ok(!isa.frozen(d2.$value[2].$value));
     //.........................................................................................................
     done();
     return null;

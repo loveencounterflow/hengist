@@ -20,7 +20,9 @@ Multimix                  = require 'multimix'
 types                     = new ( require 'intertype' ).Intertype()
 frozen                    = Object.isFrozen
 assign                    = Object.assign
-{ klona: copy, }          = require 'klona/json'
+shallow_freeze            = Object.freeze
+shallow_copy              = ( x ) -> assign ( if Array.isArray x then [] else {} ), x
+{ klona: deep_copy, }     = require 'klona/json'
 
 
 #===========================================================================================================
@@ -29,72 +31,94 @@ types.declare 'mutable', ( x ) -> ( @isa.object x ) or ( @isa.list x )
 #-----------------------------------------------------------------------------------------------------------
 types.declare 'lft_cfg', tests:
   "x is an object":                       ( x ) -> @isa.object x
-  "x.copy is a boolean":                  ( x ) -> @isa.boolean x.copy
   "x.freeze is a boolean":                ( x ) -> @isa.boolean x.freeze
-  "x.copy: false implies x.freeze false": ( x ) -> if not x.copy then not x.freeze else true
+  "x.copy must not be used":              ( x ) -> not x.copy?
+  # "x.freeze is a boolean":                ( x ) -> @isa.boolean x.freeze
+  # "x.copy: false implies x.freeze false": ( x ) -> if not x.copy then not x.freeze else true
 
 #-----------------------------------------------------------------------------------------------------------
 defaults =
   cfg:
-    copy:   true
+    # copy:   true
     freeze: true
 
 #===========================================================================================================
+deep_freeze = ( d ) ->
+  ### immediately return for zero, empty string, null, undefined, NaN, false, true: ###
+  return d if ( not d ) or d is true
+  ### thx to https://github.com/lukeed/klona/blob/master/src/json.js ###
+  switch ( Object::toString.call d )
+    when '[object Array]'
+      k = d.length
+      while ( k-- )
+        continue unless ( v = d[ k ] )? and ( ( typeof v ) is 'object' )
+        d[ k ] = deep_freeze v
+      return shallow_freeze d
+    when '[object Object]'
+      for k, v of d
+        continue unless v? and ( ( typeof v ) is 'object' )
+        d[ k ] = deep_freeze v
+      return shallow_freeze d
+  return d
+
+
+#===========================================================================================================
 copy_y_freeze_y$set = ( me, k, v ) ->
-  R       = copy me
+  R       = shallow_copy me
   R[ k ]  = v
-  return Object.freeze R
+  return shallow_freeze R
 
 #-----------------------------------------------------------------------------------------------------------
 copy_y_freeze_n$set = ( me, k, v ) ->
-  R       = copy me
+  R       = shallow_copy me
   R[ k ]  = v
   return R
 
-#-----------------------------------------------------------------------------------------------------------
-copy_n_freeze_n$set = ( me, k, v ) ->
-  me[ k ] = v
-  return me
+# #-----------------------------------------------------------------------------------------------------------
+# copy_n_freeze_n$set = ( me, k, v ) ->
+#   me[ k ] = v
+#   return me
 
 #===========================================================================================================
-copy_y_freeze_y$new_object  = ( P... ) -> Object.freeze copy assign {}, P...
-copy_y_freeze_n$new_object  = ( P... ) ->               copy assign {}, P...
-copy_n_freeze_n$new_object  = ( P... ) ->                    assign {}, P...
+# copy_y_freeze_y$new_object  = ( P...     ) -> deep_freeze deep_copy assign {}, P...
+# copy_y_freeze_n$new_object  = ( P...     ) ->             deep_copy assign {}, P...
+# copy_n_freeze_n$new_object  = ( P...     ) ->                       assign {}, P...
 
 #===========================================================================================================
-copy_y_freeze_y$assign      = ( me, P... ) -> Object.freeze copy assign {}, me, P...
-copy_y_freeze_n$assign      = ( me, P... ) ->               copy assign {}, me, P...
-copy_n_freeze_n$assign      = ( me, P... ) ->                    assign     me, P...
+copy_y_freeze_y$assign      = ( me, P... ) -> deep_freeze deep_copy assign {}, me, P...
+copy_y_freeze_n$assign      = ( me, P... ) ->             deep_copy assign {}, me, P...
+# copy_n_freeze_n$assign      = ( me, P... ) ->                       assign     me, P...
 
 #===========================================================================================================
 copy_y_freeze_y$lets = ( original, modifier ) ->
   draft = @thaw original
   modifier draft if modifier?
-  return Object.freeze draft
+  return deep_freeze draft
 
 #-----------------------------------------------------------------------------------------------------------
 copy_y_freeze_n$lets = ( original, modifier ) ->
   draft = @thaw original
   modifier draft if modifier?
-  return copy draft
+  return deep_copy draft
 
-#-----------------------------------------------------------------------------------------------------------
-copy_n_freeze_n$lets = ( original, modifier ) ->
-  draft = @thaw original
-  modifier draft if modifier?
-  return draft
+# #-----------------------------------------------------------------------------------------------------------
+# copy_n_freeze_n$lets = ( original, modifier ) ->
+#   draft = @thaw original
+#   modifier draft if modifier?
+#   return draft
 
 
 #===========================================================================================================
-copy_y_freeze_y$freeze  = ( me ) -> Object.freeze me
+copy_y_freeze_y$freeze  = ( me ) -> deep_freeze me
 copy_y_freeze_n$freeze  = ( me ) -> me
-copy_n_freeze_n$freeze  = ( me ) -> me
+# copy_n_freeze_n$freeze  = ( me ) -> me
 
 #===========================================================================================================
+copy_y_freeze_y$thaw    = ( me ) -> deep_copy me
+copy_y_freeze_n$thaw    = ( me ) -> deep_copy me
 ### NOTE with `{ copy: false, }` the `thaw()` method will still make a copy if value is frozen ###
-copy_y_freeze_y$thaw    = ( me ) -> copy me
-copy_y_freeze_n$thaw    = ( me ) -> copy me
-copy_n_freeze_n$thaw    = ( me ) -> if ( frozen me ) then copy me else me
+### TAINT may fail if some properties are frozen, not object itself ###
+# copy_n_freeze_n$thaw    = ( me ) -> if ( frozen me ) then deep_copy me else me
 
 
 #===========================================================================================================
@@ -108,33 +132,33 @@ class Lft extends Multimix
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     super()
-    types.validate.lft_cfg @cfg = Object.freeze { defaults.cfg..., cfg..., }
-    if @cfg.copy
-      if @cfg.freeze
-        @new_object = copy_y_freeze_y$new_object
-        @set        = copy_y_freeze_y$set
-        @assign     = copy_y_freeze_y$assign
-        @lets       = copy_y_freeze_y$lets
-        @freeze     = copy_y_freeze_y$freeze
-        @thaw       = copy_y_freeze_y$thaw
-      else
-        @new_object = copy_y_freeze_n$new_object
-        @set        = copy_y_freeze_n$set
-        @assign     = copy_y_freeze_n$assign
-        @lets       = copy_y_freeze_n$lets
-        @freeze     = copy_y_freeze_n$freeze
-        @thaw       = copy_y_freeze_n$thaw
+    types.validate.lft_cfg @cfg = shallow_freeze { defaults.cfg..., cfg..., }
+    # if @cfg.copy
+    if @cfg.freeze
+      # @new_object = copy_y_freeze_y$new_object
+      @set        = copy_y_freeze_y$set
+      @assign     = copy_y_freeze_y$assign
+      @lets       = copy_y_freeze_y$lets
+      @freeze     = copy_y_freeze_y$freeze
+      @thaw       = copy_y_freeze_y$thaw
     else
-      if @cfg.freeze
-        ### TAINT move to `types.validate.lft_settings cfg` ###
-        throw new Error "^3446^ cannot use { copy: false, } with { freeze: true, }"
-      else
-        @new_object = copy_n_freeze_n$new_object
-        @set        = copy_n_freeze_n$set
-        @assign     = copy_n_freeze_n$assign
-        @lets       = copy_n_freeze_n$lets
-        @freeze     = copy_n_freeze_n$freeze
-        @thaw       = copy_n_freeze_n$thaw
+      # @new_object = copy_y_freeze_n$new_object
+      @set        = copy_y_freeze_n$set
+      @assign     = copy_y_freeze_n$assign
+      @lets       = copy_y_freeze_n$lets
+      @freeze     = copy_y_freeze_n$freeze
+      @thaw       = copy_y_freeze_n$thaw
+    # else
+    #   if @cfg.freeze
+    #     ### TAINT move to `types.validate.lft_settings cfg` ###
+    #     throw new Error "^3446^ cannot use { copy: false, } with { freeze: true, }"
+    #   else
+    #     # # @new_object = copy_n_freeze_n$new_object
+    #     # @set        = copy_n_freeze_n$set
+    #     # @assign     = copy_n_freeze_n$assign
+    #     # @lets       = copy_n_freeze_n$lets
+    #     # @freeze     = copy_n_freeze_n$freeze
+    #     # @thaw       = copy_n_freeze_n$thaw
     return @
 
   #---------------------------------------------------------------------------------------------------------

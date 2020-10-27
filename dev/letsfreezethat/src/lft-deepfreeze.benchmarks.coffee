@@ -109,6 +109,7 @@ provide_LFT_candidate = ->
     resolve count
   return null
 
+
 #-----------------------------------------------------------------------------------------------------------
 @thaw_____letsfreezethat = ( cfg ) -> new Promise ( resolve ) =>
   LFT           = require '../../../apps/letsfreezethat'
@@ -160,9 +161,9 @@ provide_LFT_candidate = ->
   resolve => new Promise ( resolve ) =>
     for d in data.datoms
       e = copy d
-      throw new Error '^445-7^ identical' if e is d
-      throw new Error '^445-8^ not thawed' if Object.isFrozen e
-      throw new Error '^445-9^ not thawed' if Object.isFrozen e.$vnr
+      throw new Error '^445-10^ identical' if e is d
+      throw new Error '^445-11^ not thawed' if Object.isFrozen e
+      throw new Error '^445-12^ not thawed' if Object.isFrozen e.$vnr
       count++
     resolve count
   return null
@@ -179,12 +180,64 @@ provide_LFT_candidate = ->
   resolve => new Promise ( resolve ) =>
     for d in data.datoms
       e = copy d
-      throw new Error '^445-7^ identical' if e is d
-      throw new Error '^445-8^ not thawed' if Object.isFrozen e
-      throw new Error '^445-9^ not thawed' if Object.isFrozen e.$vnr
+      throw new Error '^445-13^ identical' if e is d
+      throw new Error '^445-14^ not thawed' if Object.isFrozen e
+      throw new Error '^445-15^ not thawed' if Object.isFrozen e.$vnr
       count++
     resolve count
   return null
+
+
+#===========================================================================================================
+#
+#-----------------------------------------------------------------------------------------------------------
+@_freeze___lftrc2 = ( cfg, lft_cfg ) -> new Promise ( resolve ) =>
+  LFT           = ( require './letsfreezethat-NG-rc2' ).new lft_cfg
+  { lets
+    freeze
+    thaw }      = LFT
+  data          = @get_data cfg
+  count         = 0
+  global.gc() if global.gc? ### TAINT consider to do this in BM moduke ###
+  resolve => new Promise ( resolve ) =>
+    for d in data.datoms
+      e = freeze d
+      throw new Error '^445-16^ not identical' unless e is d
+      if lft_cfg.freeze
+        throw new Error '^445-17^ not frozen' unless Object.isFrozen e
+        throw new Error '^445-18^ not frozen' unless Object.isFrozen e.$vnr
+      else
+        throw new Error '^445-19^ frozen' if Object.isFrozen e
+        throw new Error '^445-20^ frozen' if Object.isFrozen e.$vnr
+      count++
+    resolve count
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_thaw_____lftrc2 = ( cfg, lft_cfg ) -> new Promise ( resolve ) =>
+  LFT           = ( require './letsfreezethat-NG-rc2' ).new lft_cfg
+  { lets
+    freeze
+    thaw }      = LFT
+  data          = @get_data cfg
+  data.datoms   = ( ( freeze d ) for d in data.datoms )
+  count         = 0
+  global.gc() if global.gc? ### TAINT consider to do this in BM moduke ###
+  resolve => new Promise ( resolve ) =>
+    for d in data.datoms
+      e = thaw d
+      throw new Error '^445-21^ identical' if e is d
+      throw new Error '^445-22^ not thawed' if Object.isFrozen e
+      throw new Error '^445-23^ not thawed' if Object.isFrozen e.$vnr
+      count++
+    resolve count
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@freeze___lftrc2_cyfy = ( cfg ) -> @_freeze___lftrc2 cfg, { freeze: true,  }
+@freeze___lftrc2_cyfn = ( cfg ) -> @_freeze___lftrc2 cfg, { freeze: false, }
+@thaw_____lftrc2_cyfy = ( cfg ) -> @_thaw_____lftrc2 cfg, { freeze: true,  }
+@thaw_____lftrc2_cyfn = ( cfg ) -> @_thaw_____lftrc2 cfg, { freeze: false, }
 
 
 #===========================================================================================================
@@ -198,9 +251,9 @@ provide_LFT_candidate = ->
   resolve => new Promise ( resolve ) =>
     for d in data.datoms
       e = freeze d ### freezes in-place ###
-      throw new Error '^445-10^ not identical' unless e is d
-      throw new Error '^445-11^ not frozen' unless Object.isFrozen e
-      throw new Error '^445-12^ not frozen' unless Object.isFrozen e.$vnr
+      throw new Error '^445-24^ not identical' unless e is d
+      throw new Error '^445-25^ not frozen' unless Object.isFrozen e
+      throw new Error '^445-26^ not frozen' unless Object.isFrozen e.$vnr
       count++
     resolve count
   return null
@@ -220,9 +273,9 @@ provide_LFT_candidate = ->
   resolve => new Promise ( resolve ) =>
     for d in data.datoms
       e = deepFreeze d, true ### NOTE use `true` to avoid copying ###
-      throw new Error '^445-13^ not identical' unless e is d
-      throw new Error '^445-14^ not frozen' unless Object.isFrozen e
-      throw new Error '^445-15^ not frozen' unless Object.isFrozen e.$vnr
+      throw new Error '^445-27^ not identical' unless e is d
+      throw new Error '^445-28^ not frozen' unless Object.isFrozen e
+      throw new Error '^445-29^ not frozen' unless Object.isFrozen e.$vnr
       count++
     resolve count
   return null
@@ -240,9 +293,9 @@ provide_LFT_candidate = ->
   resolve => new Promise ( resolve ) =>
     for d in data.datoms
       e = deepThaw d, true ### NOTE use `true` to avoid copying ###
-      throw new Error '^445-16^ identical' if e is d
-      throw new Error '^445-17^ frozen' if Object.isFrozen e
-      throw new Error '^445-18^ frozen' if Object.isFrozen e.$vnr
+      throw new Error '^445-30^ identical' if e is d
+      throw new Error '^445-31^ frozen' if Object.isFrozen e
+      throw new Error '^445-32^ frozen' if Object.isFrozen e.$vnr
       count++
     resolve count
   return null
@@ -259,9 +312,9 @@ provide_LFT_candidate = ->
   resolve => new Promise ( resolve ) =>
     for d in data.datoms
       e = freeze d, true ### NOTE use `true` to avoid copying ###
-      throw new Error '^445-19^ not identical' unless e is d
-      throw new Error '^445-20^ not frozen' unless Object.isFrozen e
-      throw new Error '^445-21^ is frozen' if Object.isFrozen e.$vnr
+      throw new Error '^445-33^ not identical' unless e is d
+      throw new Error '^445-34^ not frozen' unless Object.isFrozen e
+      throw new Error '^445-35^ is frozen' if Object.isFrozen e.$vnr
       count++
     resolve count
   return null
@@ -276,21 +329,18 @@ provide_LFT_candidate = ->
   resolve => new Promise ( resolve ) =>
     for d in data.datoms
       e = Object.assign {}, d
-      throw new Error '^445-22^ identical' if e is d
-      throw new Error '^445-23^ frozen' if Object.isFrozen e
-      throw new Error '^445-24^ is frozen' if Object.isFrozen e.$vnr
+      throw new Error '^445-36^ identical' if e is d
+      throw new Error '^445-37^ frozen' if Object.isFrozen e
+      throw new Error '^445-38^ is frozen' if Object.isFrozen e.$vnr
       count++
     resolve count
   return null
-
-#-----------------------------------------------------------------------------------------------------------
-@copy_____shallow_native = @thaw_____shallow_native
 
 
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@copy_____fast_copy = ( cfg ) -> new Promise ( resolve ) =>
+@thaw_____fast_copy = ( cfg ) -> new Promise ( resolve ) =>
   # debug require 'fast-copy'
   # debug ( require 'fast-copy').copy
   # debug ( require 'fast-copy').strict
@@ -302,15 +352,15 @@ provide_LFT_candidate = ->
   resolve => new Promise ( resolve ) =>
     for d in data.datoms
       e = copy d
-      throw new Error '^445-25^ identical' if e is d
-      throw new Error '^445-26^ frozen' if Object.isFrozen e
-      throw new Error '^445-27^ is frozen' if Object.isFrozen e.$vnr
+      throw new Error '^445-39^ identical' if e is d
+      throw new Error '^445-40^ frozen' if Object.isFrozen e
+      throw new Error '^445-41^ is frozen' if Object.isFrozen e.$vnr
       count++
     resolve count
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@copy_____fast_copy_strict = ( cfg ) -> new Promise ( resolve ) =>
+@thaw_____fast_copy_strict = ( cfg ) -> new Promise ( resolve ) =>
   # debug require 'fast-copy'
   # debug ( require 'fast-copy').copy
   # debug ( require 'fast-copy').strict
@@ -322,9 +372,9 @@ provide_LFT_candidate = ->
   resolve => new Promise ( resolve ) =>
     for d in data.datoms
       e = copy.strict d
-      throw new Error '^445-28^ identical' if e is d
-      throw new Error '^445-29^ frozen' if Object.isFrozen e
-      throw new Error '^445-30^ is frozen' if Object.isFrozen e.$vnr
+      throw new Error '^445-42^ identical' if e is d
+      throw new Error '^445-43^ frozen' if Object.isFrozen e
+      throw new Error '^445-44^ is frozen' if Object.isFrozen e.$vnr
       count++
     resolve count
   return null
@@ -333,7 +383,7 @@ provide_LFT_candidate = ->
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@copy_____klona = ( cfg ) -> new Promise ( resolve ) =>
+@thaw_____klona = ( cfg ) -> new Promise ( resolve ) =>
   { klona }     = require 'klona/json'
   data          = @get_data cfg
   count         = 0
@@ -342,9 +392,9 @@ provide_LFT_candidate = ->
   resolve => new Promise ( resolve ) =>
     for d in data.datoms
       e = klona d
-      throw new Error '^445-31^ identical' if e is d
-      throw new Error '^445-32^ frozen' if Object.isFrozen e
-      throw new Error '^445-33^ is frozen' if Object.isFrozen e.$vnr
+      throw new Error '^445-45^ identical' if e is d
+      throw new Error '^445-46^ frozen' if Object.isFrozen e
+      throw new Error '^445-47^ is frozen' if Object.isFrozen e.$vnr
       count++
     resolve count
   return null
@@ -353,7 +403,7 @@ provide_LFT_candidate = ->
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@copy_____deepcopy = ( cfg ) -> new Promise ( resolve ) =>
+@thaw_____deepcopy = ( cfg ) -> new Promise ( resolve ) =>
   deepcopy      = require 'deepcopy'
   data          = @get_data cfg
   count         = 0
@@ -362,9 +412,9 @@ provide_LFT_candidate = ->
   resolve => new Promise ( resolve ) =>
     for d in data.datoms
       e = deepcopy d
-      throw new Error '^445-34^ identical' if e is d
-      throw new Error '^445-35^ frozen' if Object.isFrozen e
-      throw new Error '^445-36^ is frozen' if Object.isFrozen e.$vnr
+      throw new Error '^445-48^ identical' if e is d
+      throw new Error '^445-49^ frozen' if Object.isFrozen e
+      throw new Error '^445-50^ is frozen' if Object.isFrozen e.$vnr
       count++
     resolve count
   return null
@@ -389,27 +439,31 @@ provide_LFT_candidate = ->
   bench       = BM.new_benchmarks()
   # n           = 100000
   cfg         = { repetitions: 3, set_count: 100, }
-  cfg         = { repetitions: 3, set_count: 1000, }
   cfg         = { repetitions: 3, set_count: 1, }
-  cfg         = { repetitions: 3, set_count: 10, }
   cfg         = { repetitions: 3, set_count: 10000, }
+  cfg         = { repetitions: 3, set_count: 10, }
+  cfg         = { repetitions: 3, set_count: 1000, }
   test_names  = [
     'thaw_____letsfreezethat'
-    'copy_____klona'
+    'thaw_____klona'
     'copy_____lft_xxx_1'
     'copy_____lft_xxx_2'
     'copy_____lft_xxx_3'
-    'copy_____fast_copy'
+    'thaw_____fast_copy'
+    'thaw_____lftrc2_cyfy'
+    'thaw_____deepfreezer'
+    'thaw_____shallow_native'
+    'thaw_____fast_copy_strict'
+    'thaw_____deepcopy'
+    'thaw_____lftrc2_cyfn'
 
-    # 'copy_____shallow_native'
-    # 'freeze___letsfreezethat'
-    # 'freeze___deepfreeze'
-    # 'freeze___deepfreezer'
-    # 'thaw_____deepfreezer'
-    # 'freeze___shallow_native'
-    # 'thaw_____shallow_native'
-    # 'copy_____fast_copy_strict'
-    # 'copy_____deepcopy'
+    'freeze___lftrc2_cyfn'
+    'freeze___lftrc2_cyfy'
+    'freeze___lftrc2_cyfn'
+    'freeze___letsfreezethat'
+    'freeze___deepfreeze'
+    'freeze___deepfreezer'
+    'freeze___shallow_native'
     ]
   # await BM.benchmark bench, cfg, false, @, '_prewarm'
   global.gc() if global.gc?

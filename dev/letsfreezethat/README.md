@@ -23,7 +23,19 @@ to make working with immutable objects in JavaScript less of a chore.
   overhead of making an additional copy when either `freeze()` is called or a call to `lets d, ( d ) -> ...`
   has finished.
 
-* with `{ copy: false, }` the `thaw()` method will still make a copy if value is frozen
+* LFT comes in two configurable flavors: `LFT = ( require 'letsfreezethat' ).new { freeze: true, }` (which
+  is the same as `LFT = require 'letsfreezethat'`) and `LFT = ( require 'letsfreezethat' ).new { freeze:
+  false, }` which forgoes freezing (but not copying).
+
+* The non-freezing configuration is a tad faster on `thaw()` and ≈5 times faster on `freeze()`.
+
+* The `thaw()` method will always make a copy even when `{ freeze: false, }` is given; otherwise it is
+  hardly conceivable how an application could switch from the slower `{ freeze: true, }` configuration to
+  the faster `{ freeze: false, }` without breaking.
+
+* In the case a list or an object originates from the outside and other places might still hold references
+  to that value or one of its properties, one can use `thaw()` to make sure any mutations will not be
+  visible from the outside. In this regard, `thaw()` could have been called `deep_copy()`.
 
 # To Do
 
