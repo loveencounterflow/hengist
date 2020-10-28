@@ -383,7 +383,7 @@
             key_value_pairs = ref[datom_idx];
             facet_keys = data.lists_of_facet_keys[datom_idx];
             facet_values = data.lists_of_facet_values[datom_idx];
-            probe = LFT.new_object(Object.fromEntries(key_value_pairs));
+            probe = LFT.assign(Object.fromEntries(key_value_pairs));
             // whisper '^331^', probe
             probe = LFT.lets(probe, function(probe) {
               var j, key, key_idx, len1;
@@ -419,7 +419,7 @@
             key_value_pairs = ref[datom_idx];
             facet_keys = data.lists_of_facet_keys[datom_idx];
             facet_values = data.lists_of_facet_values[datom_idx];
-            probe = LFT.new_object(Object.fromEntries(key_value_pairs));
+            probe = LFT.assign(Object.fromEntries(key_value_pairs));
             // whisper '^331^', probe
             probe = LFT.thaw(probe);
             for (key_idx = j = 0, len1 = facet_keys.length; j < len1; key_idx = ++j) {
@@ -437,23 +437,14 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_ltfngrc2_thaw_freeze_cyfy = function(cfg) {
+  this.using_ltfngrc2_thaw_freeze_f1 = function(cfg) {
     return this._using_ltfngrc2_thaw_freeze(cfg, {
-      copy: true,
       freeze: true
     });
   };
 
-  this.using_ltfngrc2_thaw_freeze_cyfn = function(cfg) {
+  this.using_ltfngrc2_thaw_freeze_f0 = function(cfg) {
     return this._using_ltfngrc2_thaw_freeze(cfg, {
-      copy: true,
-      freeze: false
-    });
-  };
-
-  this.using_ltfngrc2_thaw_freeze_cnfn = function(cfg) {
-    return this._using_ltfngrc2_thaw_freeze(cfg, {
-      copy: false,
       freeze: false
     });
   };
@@ -470,7 +461,7 @@
       change_facet_count: 1
     };
     repetitions = 3;
-    test_names = ['using_immer', 'using_letsfreezethat_standard', 'using_letsfreezethat_nofreeze', 'using_ltfngrc2_assign_lets', 'using_ltfngrc2_thaw_freeze_cyfy', 'using_ltfngrc2_thaw_freeze_cyfn', 'using_ltfngrc2_thaw_freeze_cnfn', 'using_immutable', 'using_hamt', 'using_mori', 'using_plainjs_mutable', 'using_plainjs_immutable'];
+    test_names = ['using_immer', 'using_letsfreezethat_standard', 'using_letsfreezethat_nofreeze', 'using_ltfngrc2_assign_lets', 'using_ltfngrc2_thaw_freeze_f1', 'using_ltfngrc2_thaw_freeze_f0', 'using_immutable', 'using_hamt', 'using_mori', 'using_plainjs_mutable', 'using_plainjs_immutable'];
     ref = CND.shuffle(test_names);
     // for _ in [ 1 .. repetitions ]
     //   whisper '-'.repeat 108
@@ -504,10 +495,9 @@
 
 cfg: { set_count: 100, datom_length: 5, change_facet_count: 3, }
 00:09 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                             31,481 Hz   100.0 % │████████████▌│
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_cnfn                   26,939 Hz    85.6 % │██████████▊  │
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_cyfn                   22,900 Hz    72.7 % │█████████▏   │
+00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_f0                     22,900 Hz    72.7 % │█████████▏   │
 00:09 HENGIST/BENCHMARKS  ▶  using_plainjs_immutable                           20,245 Hz    64.3 % │████████     │
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_cyfy                   14,796 Hz    47.0 % │█████▉       │
+00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_f1                     14,796 Hz    47.0 % │█████▉       │
 00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_assign_lets                        12,472 Hz    39.6 % │█████        │
 00:09 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_nofreeze                      9,634 Hz    30.6 % │███▉         │
 00:09 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_standard                      7,971 Hz    25.3 % │███▏         │

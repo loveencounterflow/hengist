@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, LFT, Lft, Multimix, alert, assign, badge, copy_y_freeze_n$assign, copy_y_freeze_n$freeze, copy_y_freeze_n$lets, copy_y_freeze_n$set, copy_y_freeze_n$thaw, copy_y_freeze_y$assign, copy_y_freeze_y$freeze, copy_y_freeze_y$lets, copy_y_freeze_y$set, copy_y_freeze_y$thaw, debug, deep_copy, deep_freeze, defaults, echo, frozen, help, info, log, rpr, shallow_copy, shallow_freeze, types, urge, warn, whisper;
+  var CND, LFT, Lft, Multimix, alert, assign, badge, debug, deep_copy, deep_freeze, defaults, echo, f0_assign, f0_freeze, f0_lets, f0_set, f0_thaw, f1_assign, f1_freeze, f1_lets, f1_set, f1_thaw, frozen, help, info, log, rpr, shallow_copy, shallow_freeze, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -106,7 +106,7 @@
   };
 
   //===========================================================================================================
-  copy_y_freeze_y$set = function(me, k, v) {
+  f1_set = function(me, k, v) {
     var R;
     R = shallow_copy(me);
     R[k] = v;
@@ -114,36 +114,24 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  copy_y_freeze_n$set = function(me, k, v) {
+  f0_set = function(me, k, v) {
     var R;
     R = shallow_copy(me);
     R[k] = v;
     return R;
   };
 
-  // #-----------------------------------------------------------------------------------------------------------
-  // copy_n_freeze_n$set = ( me, k, v ) ->
-  //   me[ k ] = v
-  //   return me
-
   //===========================================================================================================
-  // copy_y_freeze_y$new_object  = ( P...     ) -> deep_freeze deep_copy assign {}, P...
-  // copy_y_freeze_n$new_object  = ( P...     ) ->             deep_copy assign {}, P...
-  // copy_n_freeze_n$new_object  = ( P...     ) ->                       assign {}, P...
-
-  //===========================================================================================================
-  copy_y_freeze_y$assign = function(me, ...P) {
+  f1_assign = function(me, ...P) {
     return deep_freeze(deep_copy(assign({}, me, ...P)));
   };
 
-  copy_y_freeze_n$assign = function(me, ...P) {
+  f0_assign = function(me, ...P) {
     return deep_copy(assign({}, me, ...P));
   };
 
-  // copy_n_freeze_n$assign      = ( me, P... ) ->                       assign     me, P...
-
   //===========================================================================================================
-  copy_y_freeze_y$lets = function(original, modifier) {
+  f1_lets = function(original, modifier) {
     var draft;
     draft = this.thaw(original);
     if (modifier != null) {
@@ -153,47 +141,36 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  copy_y_freeze_n$lets = function(original, modifier) {
+  f0_lets = function(original, modifier) {
     var draft;
     draft = this.thaw(original);
     if (modifier != null) {
       modifier(draft);
     }
+    /* TAINT do not copy */
     return deep_copy(draft);
   };
 
-  // #-----------------------------------------------------------------------------------------------------------
-  // copy_n_freeze_n$lets = ( original, modifier ) ->
-  //   draft = @thaw original
-  //   modifier draft if modifier?
-  //   return draft
-
   //===========================================================================================================
-  copy_y_freeze_y$freeze = function(me) {
+  f1_freeze = function(me) {
     return deep_freeze(me);
   };
 
-  copy_y_freeze_n$freeze = function(me) {
+  f0_freeze = function(me) {
     return me;
   };
 
-  // copy_n_freeze_n$freeze  = ( me ) -> me
-
   //===========================================================================================================
-  copy_y_freeze_y$thaw = function(me) {
+  f1_thaw = function(me) {
     return deep_copy(me);
   };
 
-  copy_y_freeze_n$thaw = function(me) {
+  f0_thaw = function(me) {
     return deep_copy(me);
   };
 
   Lft = (function() {
-    /* NOTE with `{ copy: false, }` the `thaw()` method will still make a copy if value is frozen */
-    /* TAINT may fail if some properties are frozen, not object itself */
-    // copy_n_freeze_n$thaw    = ( me ) -> if ( frozen me ) then deep_copy me else me
-
-      //===========================================================================================================
+    //===========================================================================================================
 
     //-----------------------------------------------------------------------------------------------------------
     class Lft extends Multimix {
@@ -201,33 +178,19 @@
       constructor(cfg) {
         super();
         types.validate.lft_cfg(this.cfg = shallow_freeze({...defaults.cfg, ...cfg}));
-        // if @cfg.copy
         if (this.cfg.freeze) {
-          // @new_object = copy_y_freeze_y$new_object
-          this.set = copy_y_freeze_y$set;
-          this.assign = copy_y_freeze_y$assign;
-          this.lets = copy_y_freeze_y$lets;
-          this.freeze = copy_y_freeze_y$freeze;
-          this.thaw = copy_y_freeze_y$thaw;
+          this.set = f1_set;
+          this.assign = f1_assign;
+          this.lets = f1_lets;
+          this.freeze = f1_freeze;
+          this.thaw = f1_thaw;
         } else {
-          // @new_object = copy_y_freeze_n$new_object
-          this.set = copy_y_freeze_n$set;
-          this.assign = copy_y_freeze_n$assign;
-          this.lets = copy_y_freeze_n$lets;
-          this.freeze = copy_y_freeze_n$freeze;
-          this.thaw = copy_y_freeze_n$thaw;
+          this.set = f0_set;
+          this.assign = f0_assign;
+          this.lets = f0_lets;
+          this.freeze = f0_freeze;
+          this.thaw = f0_thaw;
         }
-        // else
-        //   if @cfg.freeze
-        //     ### TAINT move to `types.validate.lft_settings cfg` ###
-        //     throw new Error "^3446^ cannot use { copy: false, } with { freeze: true, }"
-        //   else
-        //     # # @new_object = copy_n_freeze_n$new_object
-        //     # @set        = copy_n_freeze_n$set
-        //     # @assign     = copy_n_freeze_n$assign
-        //     # @lets       = copy_n_freeze_n$lets
-        //     # @freeze     = copy_n_freeze_n$freeze
-        //     # @thaw       = copy_n_freeze_n$thaw
         return this;
       }
 
