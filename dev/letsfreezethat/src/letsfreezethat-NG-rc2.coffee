@@ -59,64 +59,42 @@ deep_freeze = ( d ) ->
       return shallow_freeze d
   return d
 
-
 #===========================================================================================================
-copy_y_freeze_y$set = ( me, k, v ) ->
+f1_set = ( me, k, v ) ->
   R       = shallow_copy me
   R[ k ]  = v
   return shallow_freeze R
 
 #-----------------------------------------------------------------------------------------------------------
-copy_y_freeze_n$set = ( me, k, v ) ->
+f0_set = ( me, k, v ) ->
   R       = shallow_copy me
   R[ k ]  = v
   return R
 
-# #-----------------------------------------------------------------------------------------------------------
-# copy_n_freeze_n$set = ( me, k, v ) ->
-#   me[ k ] = v
-#   return me
+#===========================================================================================================
+f1_assign = ( me, P... ) -> deep_freeze deep_copy assign {}, me, P...
+f0_assign = ( me, P... ) ->             deep_copy assign {}, me, P...
 
 #===========================================================================================================
-# copy_y_freeze_y$new_object  = ( P...     ) -> deep_freeze deep_copy assign {}, P...
-# copy_y_freeze_n$new_object  = ( P...     ) ->             deep_copy assign {}, P...
-# copy_n_freeze_n$new_object  = ( P...     ) ->                       assign {}, P...
-
-#===========================================================================================================
-copy_y_freeze_y$assign      = ( me, P... ) -> deep_freeze deep_copy assign {}, me, P...
-copy_y_freeze_n$assign      = ( me, P... ) ->             deep_copy assign {}, me, P...
-# copy_n_freeze_n$assign      = ( me, P... ) ->                       assign     me, P...
-
-#===========================================================================================================
-copy_y_freeze_y$lets = ( original, modifier ) ->
+f1_lets = ( original, modifier ) ->
   draft = @thaw original
   modifier draft if modifier?
   return deep_freeze draft
 
 #-----------------------------------------------------------------------------------------------------------
-copy_y_freeze_n$lets = ( original, modifier ) ->
+f0_lets = ( original, modifier ) ->
   draft = @thaw original
   modifier draft if modifier?
+  ### TAINT do not copy ###
   return deep_copy draft
 
-# #-----------------------------------------------------------------------------------------------------------
-# copy_n_freeze_n$lets = ( original, modifier ) ->
-#   draft = @thaw original
-#   modifier draft if modifier?
-#   return draft
-
+#===========================================================================================================
+f1_freeze  = ( me ) -> deep_freeze me
+f0_freeze  = ( me ) -> me
 
 #===========================================================================================================
-copy_y_freeze_y$freeze  = ( me ) -> deep_freeze me
-copy_y_freeze_n$freeze  = ( me ) -> me
-# copy_n_freeze_n$freeze  = ( me ) -> me
-
-#===========================================================================================================
-copy_y_freeze_y$thaw    = ( me ) -> deep_copy me
-copy_y_freeze_n$thaw    = ( me ) -> deep_copy me
-### NOTE with `{ copy: false, }` the `thaw()` method will still make a copy if value is frozen ###
-### TAINT may fail if some properties are frozen, not object itself ###
-# copy_n_freeze_n$thaw    = ( me ) -> if ( frozen me ) then deep_copy me else me
+f1_thaw    = ( me ) -> deep_copy me
+f0_thaw    = ( me ) -> deep_copy me
 
 
 #===========================================================================================================
@@ -131,32 +109,18 @@ class Lft extends Multimix
   constructor: ( cfg ) ->
     super()
     types.validate.lft_cfg @cfg = shallow_freeze { defaults.cfg..., cfg..., }
-    # if @cfg.copy
     if @cfg.freeze
-      # @new_object = copy_y_freeze_y$new_object
-      @set        = copy_y_freeze_y$set
-      @assign     = copy_y_freeze_y$assign
-      @lets       = copy_y_freeze_y$lets
-      @freeze     = copy_y_freeze_y$freeze
-      @thaw       = copy_y_freeze_y$thaw
+      @set        = f1_set
+      @assign     = f1_assign
+      @lets       = f1_lets
+      @freeze     = f1_freeze
+      @thaw       = f1_thaw
     else
-      # @new_object = copy_y_freeze_n$new_object
-      @set        = copy_y_freeze_n$set
-      @assign     = copy_y_freeze_n$assign
-      @lets       = copy_y_freeze_n$lets
-      @freeze     = copy_y_freeze_n$freeze
-      @thaw       = copy_y_freeze_n$thaw
-    # else
-    #   if @cfg.freeze
-    #     ### TAINT move to `types.validate.lft_settings cfg` ###
-    #     throw new Error "^3446^ cannot use { copy: false, } with { freeze: true, }"
-    #   else
-    #     # # @new_object = copy_n_freeze_n$new_object
-    #     # @set        = copy_n_freeze_n$set
-    #     # @assign     = copy_n_freeze_n$assign
-    #     # @lets       = copy_n_freeze_n$lets
-    #     # @freeze     = copy_n_freeze_n$freeze
-    #     # @thaw       = copy_n_freeze_n$thaw
+      @set        = f0_set
+      @assign     = f0_assign
+      @lets       = f0_lets
+      @freeze     = f0_freeze
+      @thaw       = f0_thaw
     return @
 
   #---------------------------------------------------------------------------------------------------------
