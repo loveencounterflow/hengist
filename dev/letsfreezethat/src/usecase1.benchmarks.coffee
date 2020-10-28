@@ -210,7 +210,7 @@ data_cache                = null
     for key_value_pairs, datom_idx in data.lists_of_key_value_pairs
       facet_keys    = data.lists_of_facet_keys[   datom_idx ]
       facet_values  = data.lists_of_facet_values[ datom_idx ]
-      probe         = LFT.new_object Object.fromEntries key_value_pairs
+      probe         = LFT.assign Object.fromEntries key_value_pairs
       # whisper '^331^', probe
       probe         = LFT.lets probe, ( probe ) ->
         for key, key_idx in facet_keys
@@ -231,7 +231,7 @@ data_cache                = null
     for key_value_pairs, datom_idx in data.lists_of_key_value_pairs
       facet_keys    = data.lists_of_facet_keys[   datom_idx ]
       facet_values  = data.lists_of_facet_values[ datom_idx ]
-      probe         = LFT.new_object Object.fromEntries key_value_pairs
+      probe         = LFT.assign Object.fromEntries key_value_pairs
       # whisper '^331^', probe
       probe         = LFT.thaw probe
       for key, key_idx in facet_keys
@@ -242,9 +242,8 @@ data_cache                = null
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@using_ltfngrc2_thaw_freeze_cyfy = ( cfg ) -> @_using_ltfngrc2_thaw_freeze cfg, { copy: true,   freeze: true,  }
-@using_ltfngrc2_thaw_freeze_cyfn = ( cfg ) -> @_using_ltfngrc2_thaw_freeze cfg, { copy: true,   freeze: false, }
-@using_ltfngrc2_thaw_freeze_cnfn = ( cfg ) -> @_using_ltfngrc2_thaw_freeze cfg, { copy: false,  freeze: false, }
+@using_ltfngrc2_thaw_freeze_f1 = ( cfg ) -> @_using_ltfngrc2_thaw_freeze cfg, { freeze: true,  }
+@using_ltfngrc2_thaw_freeze_f0 = ( cfg ) -> @_using_ltfngrc2_thaw_freeze cfg, { freeze: false, }
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -259,9 +258,8 @@ data_cache                = null
     'using_letsfreezethat_standard'
     'using_letsfreezethat_nofreeze'
     'using_ltfngrc2_assign_lets'
-    'using_ltfngrc2_thaw_freeze_cyfy'
-    'using_ltfngrc2_thaw_freeze_cyfn'
-    'using_ltfngrc2_thaw_freeze_cnfn'
+    'using_ltfngrc2_thaw_freeze_f1'
+    'using_ltfngrc2_thaw_freeze_f0'
     'using_immutable'
     'using_hamt'
     'using_mori'
@@ -294,10 +292,9 @@ if require.main is module then do =>
 
 cfg: { set_count: 100, datom_length: 5, change_facet_count: 3, }
 00:09 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                             31,481 Hz   100.0 % │████████████▌│
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_cnfn                   26,939 Hz    85.6 % │██████████▊  │
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_cyfn                   22,900 Hz    72.7 % │█████████▏   │
+00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_f0                     22,900 Hz    72.7 % │█████████▏   │
 00:09 HENGIST/BENCHMARKS  ▶  using_plainjs_immutable                           20,245 Hz    64.3 % │████████     │
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_cyfy                   14,796 Hz    47.0 % │█████▉       │
+00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_f1                     14,796 Hz    47.0 % │█████▉       │
 00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_assign_lets                        12,472 Hz    39.6 % │█████        │
 00:09 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_nofreeze                      9,634 Hz    30.6 % │███▉         │
 00:09 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_standard                      7,971 Hz    25.3 % │███▏         │
