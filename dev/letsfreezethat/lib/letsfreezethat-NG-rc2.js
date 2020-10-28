@@ -60,19 +60,16 @@
       "x.freeze is a boolean": function(x) {
         return this.isa.boolean(x.freeze);
       },
+      /* NOTE the following restriction is only there to help API transition and will be omitted in the realease version */
       "x.copy must not be used": function(x) {
         return x.copy == null;
       }
     }
   });
 
-  // "x.freeze is a boolean":                ( x ) -> @isa.boolean x.freeze
-  // "x.copy: false implies x.freeze false": ( x ) -> if not x.copy then not x.freeze else true
-
   //-----------------------------------------------------------------------------------------------------------
   defaults = {
     cfg: {
-      // copy:   true
       freeze: true
     }
   };
