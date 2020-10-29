@@ -59,22 +59,13 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_letsfreezethat = function(n, show, sublibrary) {
+  this._letsfreezethat_v3 = function(n, show, lft_cfg) {
     return new Promise((resolve) => {
-      var LFT, count, lets, probes_A, probes_B;
-      LFT = require('../../../apps/letsfreezethat');
-      switch (sublibrary) {
-        case 'standard':
-          ({lets} = LFT);
-          break;
-        case 'nofreeze':
-          ({lets} = LFT.nofreeze);
-          break;
-        case 'partial':
-          ({lets} = LFT.partial);
-          break;
-        default:
-          throw new Error(`^bm/lft@223 unknown sublibrary ${rpr(sublibrary)}`);
+      var count, lets, probes_A, probes_B;
+      if (lft_cfg.freeze) {
+        lets = require('../../../apps/letsfreezethat/freeze');
+      } else {
+        lets = require('../../../apps/letsfreezethat/nofreeze');
       }
       count = 0;
       ({probes_A, probes_B} = this.get_data(n));
@@ -111,6 +102,19 @@
         });
       });
       return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.letsfreezethat_v3_f1 = function(n, show) {
+    return this._letsfreezethat_v3(n, show, {
+      freeze: true
+    });
+  };
+
+  this.letsfreezethat_v3_f0 = function(n, show) {
+    return this._letsfreezethat_v3(n, show, {
+      freeze: false
     });
   };
 
@@ -313,23 +317,10 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_letsfreezethat_standard = function(n, show) {
-    return this.using_letsfreezethat(n, show, 'standard');
-  };
-
-  this.using_letsfreezethat_nofreeze = function(n, show) {
-    return this.using_letsfreezethat(n, show, 'nofreeze');
-  };
-
-  this.using_letsfreezethat_partial = function(n, show) {
-    return this.using_letsfreezethat(n, show, 'partial');
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this.using_ltfng_single = function(n, show) {
     return new Promise((resolve) => {
-      var LFT, count, probes_A, probes_B;
-      LFT = require('./letsfreezethat-NG-rc2');
+      var count, lets, probes_A, probes_B;
+      lets = require('../../../apps/letsfreezethat');
       count = 0;
       ({probes_A, probes_B} = this.get_data(n));
       resolve(() => {
@@ -339,18 +330,18 @@
             probe = probes_A[idx];
             // whisper '^331^', jr probe
             keys = Object.keys(probe);
-            probe = LFT.new_object(probes_A);
+            probe = lets(probes_A);
             count += keys.length;
             ref = probes_B[idx];
             for (k in ref) {
               v = ref[k];
               count++;
-              probe = LFT.set(probe, k, v);
+              probe = lets.set(probe, k, v);
             }
             for (j = 0, len1 = keys.length; j < len1; j++) {
               k = keys[j];
               count++;
-              probe = LFT.set(probe, k, 1234);
+              probe = lets.set(probe, k, 1234);
             }
           }
           return resolve(count);
@@ -363,8 +354,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this.using_ltfng_assign_lets = function(n, show) {
     return new Promise((resolve) => {
-      var LFT, count, lengths, probe_B, probes_A, probes_B;
-      LFT = require('./letsfreezethat-NG-rc2');
+      var count, lengths, lets, probe_B, probes_A, probes_B;
+      lets = require('../../../apps/letsfreezethat');
       count = 0;
       ({probes_A, probes_B} = this.get_data(n));
       lengths = (function() {
@@ -382,11 +373,11 @@
           for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
             probe = probes_A[idx];
             keys = Object.keys(probe);
-            probe = LFT.new_object(probes_A);
+            probe = lets(probes_A);
             count += keys.length;
-            probe = LFT.assign(probe, probes_B[idx]);
+            probe = lets.assign(probe, probes_B[idx]);
             count += lengths[idx];
-            probe = LFT.lets(probe, function(probe) {
+            probe = lets(probe, function(probe) {
               var j, k, len1;
               for (j = 0, len1 = keys.length; j < len1; j++) {
                 k = keys[j];
@@ -406,8 +397,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this.using_ltfng_thaw_freeze = function(n, show) {
     return new Promise((resolve) => {
-      var LFT, count, lengths, probe_B, probes_A, probes_B;
-      LFT = require('./letsfreezethat-NG-rc2');
+      var count, lengths, lets, probe_B, probes_A, probes_B;
+      lets = require('../../../apps/letsfreezethat');
       count = 0;
       ({probes_A, probes_B} = this.get_data(n));
       lengths = (function() {
@@ -425,9 +416,9 @@
           for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
             probe = probes_A[idx];
             keys = Object.keys(probe);
-            probe = LFT.new_object(probes_A);
+            probe = lets(probes_A);
             count += keys.length;
-            probe = LFT.thaw(probe);
+            probe = lets.thaw(probe);
             Object.assign(probe, probes_B[idx]);
             count += lengths[idx];
             for (j = 0, len1 = keys.length; j < len1; j++) {
@@ -435,7 +426,7 @@
               count++;
               probe[k] = 1234;
             }
-            probe = LFT.freeze(probe);
+            probe = lets.freeze(probe);
           }
           return resolve(count);
         });
@@ -516,15 +507,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_letsfreezethat_new_api = function() {
-    var LFT, d1, d2, d3, k;
-    LFT = require('./letsfreezethat-NG-rc2');
-    d1 = LFT.new_object({
+    var d1, d2, d3, k, lets;
+    lets = require('../../../apps/letsfreezethat');
+    d1 = lets({
       first: 1
     }, {
       second: 2
     });
-    d2 = LFT.set(d1, 'foo', 42);
-    d3 = LFT.assign(d2, {
+    d2 = lets.set(d1, 'foo', 42);
+    d3 = lets.assign(d2, {
       foo: 108,
       bar: 'baz'
     }, {
@@ -537,8 +528,8 @@
     help(d2);
     help(d3);
     urge(d1 === d2);
-    urge(LFT.get(d1, 'foo'));
-    urge(LFT.get(d2, 'foo'));
+    urge(lets.get(d1, 'foo'));
+    urge(lets.get(d2, 'foo'));
     urge(Object.keys(d2));
     urge((function() {
       var results;
@@ -557,22 +548,10 @@
     var _, bench, i, j, len, n, ref, ref1, repetitions, show, test_name, test_names;
     bench = BM.new_benchmarks();
     // n           = 100000
-    n = 100;
+    n = 1000;
     show = false;
     repetitions = 3;
-    test_names = [
-      'using_immer',
-      'using_letsfreezethat_standard',
-      'using_letsfreezethat_nofreeze',
-      // 'using_letsfreezethat_partial'
-      'using_ltfng_single',
-      'using_ltfng_assign_lets',
-      'using_ltfng_thaw_freeze',
-      'using_immutable',
-      'using_hamt',
-      'using_mori',
-      'using_plainjs_mutable'
-    ];
+    test_names = ['using_immer', 'letsfreezethat_v3_f1', 'letsfreezethat_v3_f0', 'using_ltfng_single', 'using_ltfng_assign_lets', 'using_ltfng_thaw_freeze', 'using_immutable', 'using_hamt', 'using_mori', 'using_plainjs_mutable'];
     for (_ = i = 1, ref = repetitions; (1 <= ref ? i <= ref : i >= ref); _ = 1 <= ref ? ++i : --i) {
       whisper('-'.repeat(108));
       ref1 = CND.shuffle(test_names);
@@ -591,12 +570,7 @@
     })();
   }
 
-  // await @demo_letsfreezethat_new_api()
-// await @demo_immutable()
-// await @demo_hamt()
-// await @demo_mori()
-// require 'hamt'
-/*
+  /*
 
  * To Do
 
@@ -609,8 +583,8 @@
 
 n: 10, count: 143
 00:01 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                            928,465 Hz   100.0 % │████████████▌│
-00:01 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_nofreeze                    149,161 Hz    16.1 % │██           │
-00:01 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_standard                     36,536 Hz     3.9 % │▌            │
+00:01 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0                    149,161 Hz    16.1 % │██           │
+00:01 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1                     36,536 Hz     3.9 % │▌            │
 00:01 HENGIST/BENCHMARKS  ▶  using_immutable                                   35,932 Hz     3.9 % │▌            │
 00:01 HENGIST/BENCHMARKS  ▶  using_hamt                                        25,408 Hz     2.7 % │▍            │
 00:01 HENGIST/BENCHMARKS  ▶  using_mori                                        10,344 Hz     1.1 % │▏            │
@@ -619,10 +593,10 @@ n: 10, count: 143
 
 n: 100, count: 1313
 00:02 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                          1,623,933 Hz   100.0 % │████████████▌│
-00:02 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_nofreeze                    339,169 Hz    20.9 % │██▋          │
+00:02 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0                    339,169 Hz    20.9 % │██▋          │
 00:02 HENGIST/BENCHMARKS  ▶  using_immutable                                  119,138 Hz     7.3 % │▉            │
 00:02 HENGIST/BENCHMARKS  ▶  using_hamt                                       111,030 Hz     6.8 % │▉            │
-00:02 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_standard                     93,930 Hz     5.8 % │▊            │
+00:02 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1                     93,930 Hz     5.8 % │▊            │
 00:02 HENGIST/BENCHMARKS  ▶  using_mori                                        29,827 Hz     1.8 % │▎            │
 00:02 HENGIST/BENCHMARKS  ▶  using_immer                                       16,342 Hz     1.0 % │▏            │
 00:02 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_partial                      15,471 Hz     1.0 % │▏            │
@@ -631,9 +605,9 @@ n: 10'000, count: 134'491
 00:43 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                            547,914 Hz   100.0 % │████████████▌│
 00:43 HENGIST/BENCHMARKS  ▶  using_immutable                                  328,788 Hz    60.0 % │███████▌     │
 00:43 HENGIST/BENCHMARKS  ▶  using_hamt                                       277,877 Hz    50.7 % │██████▍      │
-00:43 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_nofreeze                    272,873 Hz    49.8 % │██████▎      │
+00:43 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0                    272,873 Hz    49.8 % │██████▎      │
 00:43 HENGIST/BENCHMARKS  ▶  using_mori                                       108,792 Hz    19.9 % │██▌          │
-00:43 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_standard                     65,763 Hz    12.0 % │█▌           │
+00:43 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1                     65,763 Hz    12.0 % │█▌           │
 00:43 HENGIST/BENCHMARKS  ▶  using_immer                                       18,940 Hz     3.5 % │▍            │
 00:43 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_partial                      14,840 Hz     2.7 % │▍            │
 
@@ -641,9 +615,9 @@ n: 100'000, count: 1'349'766
 07:13 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                            499,935 Hz   100.0 % │████████████▌│
 07:13 HENGIST/BENCHMARKS  ▶  using_immutable                                  444,554 Hz    88.9 % │███████████▏ │
 07:13 HENGIST/BENCHMARKS  ▶  using_hamt                                       356,847 Hz    71.4 % │████████▉    │
-07:13 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_nofreeze                    195,966 Hz    39.2 % │████▉        │
+07:13 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0                    195,966 Hz    39.2 % │████▉        │
 07:13 HENGIST/BENCHMARKS  ▶  using_mori                                       128,844 Hz    25.8 % │███▎         │
-07:13 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_standard                     59,905 Hz    12.0 % │█▌           │
+07:13 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1                     59,905 Hz    12.0 % │█▌           │
 07:13 HENGIST/BENCHMARKS  ▶  using_immer                                       18,180 Hz     3.6 % │▌            │
 07:13 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_partial                      14,707 Hz     2.9 % │▍            │
 

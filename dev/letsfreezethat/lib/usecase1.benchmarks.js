@@ -106,15 +106,15 @@
     // info '^776^', v for v in lists_of_facet_values
     //.........................................................................................................
     data_cache = {lists_of_keys, lists_of_values, lists_of_facet_keys, lists_of_facet_values, lists_of_key_value_pairs};
-    data_cache = (require('letsfreezethat')).freeze(data_cache);
+    data_cache = (require('../../../apps/letsfreezethat')).freeze(data_cache);
     return data_cache;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_letsfreezethat = function(cfg, sublibrary) {
+  this.letsfreezethat_v2 = function(cfg, sublibrary) {
     return new Promise((resolve) => {
       var LFT, count, data, lets;
-      LFT = require('../../../apps/letsfreezethat');
+      LFT = require('../letsfreezethat@2.2.5');
       switch (sublibrary) {
         case 'standard':
           ({lets} = LFT);
@@ -156,16 +156,16 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_letsfreezethat_standard = function(cfg) {
-    return this.using_letsfreezethat(cfg, 'standard');
+  this.letsfreezethat_v2_standard = function(cfg) {
+    return this.letsfreezethat_v2(cfg, 'standard');
   };
 
-  this.using_letsfreezethat_nofreeze = function(cfg) {
-    return this.using_letsfreezethat(cfg, 'nofreeze');
+  this.letsfreezethat_v2_nofreeze = function(cfg) {
+    return this.letsfreezethat_v2(cfg, 'nofreeze');
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_immutable = function(cfg) {
+  this.immutable = function(cfg) {
     return new Promise((resolve) => {
       var Map, count, data;
       ({Map} = require('immutable'));
@@ -194,7 +194,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_hamt = function(cfg) {
+  this.hamt = function(cfg) {
     return new Promise((resolve) => {
       var HAMT, count, data;
       HAMT = require('hamt');
@@ -227,7 +227,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_mori = function(cfg) {
+  this.mori = function(cfg) {
     return new Promise((resolve) => {
       var M, count, d, data, key_value_pairs;
       M = require('mori');
@@ -267,7 +267,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_immer = function(cfg) {
+  this.immer = function(cfg) {
     return new Promise((resolve) => {
       var IMMER, count, data, produce;
       IMMER = require('immer');
@@ -305,7 +305,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_plainjs_immutable = function(cfg) {
+  this.plainjs_immutable = function(cfg) {
     return new Promise((resolve) => {
       var count, data;
       // @types.validate.hengist_dataprv_cfg cfg
@@ -338,7 +338,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_plainjs_mutable = function(cfg) {
+  this.plainjs_mutable = function(cfg) {
     return new Promise((resolve) => {
       var count, data;
       // @types.validate.hengist_dataprv_cfg cfg
@@ -368,11 +368,14 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_ltfngrc2_assign_lets = function(cfg) {
+  this._letsfreezethat_v3_lets = function(cfg, lft_cfg) {
     return new Promise((resolve) => {
       var LFT, count, data;
-      LFT = require('./letsfreezethat-NG-rc2');
-      // @types.validate.hengist_dataprv_cfg cfg
+      if (lft_cfg.freeze) {
+        LFT = require('../../../apps/letsfreezethat/freeze');
+      } else {
+        LFT = require('../../../apps/letsfreezethat/nofreeze');
+      }
       data = this.get_data(cfg);
       count = 0;
       resolve(() => {
@@ -404,11 +407,27 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._using_ltfngrc2_thaw_freeze = function(cfg, lft_cfg) {
+  this.letsfreezethat_v3_lets_f1 = function(cfg) {
+    return this._letsfreezethat_v3_lets(cfg, {
+      freeze: true
+    });
+  };
+
+  this.letsfreezethat_v3_lets_f0 = function(cfg) {
+    return this._letsfreezethat_v3_lets(cfg, {
+      freeze: false
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._letsfreezethat_v3_thaw_freeze = function(cfg, lft_cfg) {
     return new Promise((resolve) => {
       var LFT, count, data;
-      LFT = (require('./letsfreezethat-NG-rc2')).new(lft_cfg);
-      // @types.validate.hengist_dataprv_cfg cfg
+      if (lft_cfg.freeze) {
+        LFT = require('../../../apps/letsfreezethat/freeze');
+      } else {
+        LFT = require('../../../apps/letsfreezethat/nofreeze');
+      }
       data = this.get_data(cfg);
       count = 0;
       resolve(() => {
@@ -437,14 +456,14 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_ltfngrc2_thaw_freeze_f1 = function(cfg) {
-    return this._using_ltfngrc2_thaw_freeze(cfg, {
+  this.letsfreezethat_v3_thaw_freeze_f1 = function(cfg) {
+    return this._letsfreezethat_v3_thaw_freeze(cfg, {
       freeze: true
     });
   };
 
-  this.using_ltfngrc2_thaw_freeze_f0 = function(cfg) {
-    return this._using_ltfngrc2_thaw_freeze(cfg, {
+  this.letsfreezethat_v3_thaw_freeze_f0 = function(cfg) {
+    return this._letsfreezethat_v3_thaw_freeze(cfg, {
       freeze: false
     });
   };
@@ -453,7 +472,6 @@
   this.run_benchmarks = async function() {
     var _, bench, cfg, i, j, len, ref, ref1, repetitions, test_name, test_names;
     bench = BM.new_benchmarks();
-    // n           = 100000
     // cfg         = { set_count: 100, datom_length: 5, change_facet_count: 3, }
     cfg = {
       set_count: 3,
@@ -461,18 +479,19 @@
       change_facet_count: 1
     };
     repetitions = 3;
-    test_names = ['using_immer', 'using_letsfreezethat_standard', 'using_letsfreezethat_nofreeze', 'using_ltfngrc2_assign_lets', 'using_ltfngrc2_thaw_freeze_f1', 'using_ltfngrc2_thaw_freeze_f0', 'using_immutable', 'using_hamt', 'using_mori', 'using_plainjs_mutable', 'using_plainjs_immutable'];
+    test_names = ['immer', 'letsfreezethat_v2_standard', 'letsfreezethat_v2_nofreeze', 'letsfreezethat_v3_lets_f1', 'letsfreezethat_v3_lets_f0', 'letsfreezethat_v3_thaw_freeze_f1', 'letsfreezethat_v3_thaw_freeze_f0', 'immutable', 'hamt', 'mori', 'plainjs_mutable', 'plainjs_immutable'];
+    if (global.gc != null) {
+      global.gc();
+    }
     ref = CND.shuffle(test_names);
-    // for _ in [ 1 .. repetitions ]
-    //   whisper '-'.repeat 108
-    //   data_cache = null
-    //   for test_name in CND.shuffle test_names
-    //     await BM.benchmark bench, cfg, false, @, test_name
     for (i = 0, len = ref.length; i < len; i++) {
       test_name = ref[i];
       whisper('-'.repeat(108));
       for (_ = j = 1, ref1 = repetitions; (1 <= ref1 ? j <= ref1 : j >= ref1); _ = 1 <= ref1 ? ++j : --j) {
         data_cache = null;
+        if (global.gc != null) {
+          global.gc();
+        }
         await BM.benchmark(bench, cfg, false, this, test_name);
       }
     }
@@ -486,24 +505,20 @@
     })();
   }
 
-  // await @demo_letsfreezethat_new_api()
-// await @demo_immutable()
-// await @demo_hamt()
-// await @demo_mori()
-// require 'hamt'
-/*
+  /*
 
-cfg: { set_count: 100, datom_length: 5, change_facet_count: 3, }
-00:09 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                             31,481 Hz   100.0 % │████████████▌│
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_f0                     22,900 Hz    72.7 % │█████████▏   │
-00:09 HENGIST/BENCHMARKS  ▶  using_plainjs_immutable                           20,245 Hz    64.3 % │████████     │
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_thaw_freeze_f1                     14,796 Hz    47.0 % │█████▉       │
-00:09 HENGIST/BENCHMARKS  ▶  using_ltfngrc2_assign_lets                        12,472 Hz    39.6 % │█████        │
-00:09 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_nofreeze                      9,634 Hz    30.6 % │███▉         │
-00:09 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_standard                      7,971 Hz    25.3 % │███▏         │
-00:09 HENGIST/BENCHMARKS  ▶  using_immutable                                    5,045 Hz    16.0 % │██           │
-00:09 HENGIST/BENCHMARKS  ▶  using_mori                                         4,939 Hz    15.7 % │██           │
-00:09 HENGIST/BENCHMARKS  ▶  using_hamt                                         3,395 Hz    10.8 % │█▍           │
+00:07 HENGIST/BENCHMARKS  ▶  plainjs_mutable                                    8,268 Hz   100.0 % │████████████▌│
+00:07 HENGIST/BENCHMARKS  ▶  plainjs_immutable                                  4,933 Hz    59.7 % │███████▌     │
+00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_thaw_freeze_f0                   4,682 Hz    56.6 % │███████▏     │
+00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v2_standard                         4,464 Hz    54.0 % │██████▊      │
+00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_lets_f0                          4,444 Hz    53.8 % │██████▊      │
+00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_lets_f1                          4,213 Hz    51.0 % │██████▍      │
+00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_thaw_freeze_f1                   4,034 Hz    48.8 % │██████▏      │
+00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v2_nofreeze                         2,143 Hz    25.9 % │███▎         │
+00:07 HENGIST/BENCHMARKS  ▶  immutable                                          1,852 Hz    22.4 % │██▊          │
+00:07 HENGIST/BENCHMARKS  ▶  mori                                               1,779 Hz    21.5 % │██▊          │
+00:07 HENGIST/BENCHMARKS  ▶  hamt                                               1,752 Hz    21.2 % │██▋          │
+00:07 HENGIST/BENCHMARKS  ▶  immer                                              1,352 Hz    16.3 % │██           │
 
 */
 

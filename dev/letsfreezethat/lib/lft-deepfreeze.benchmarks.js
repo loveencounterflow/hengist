@@ -61,10 +61,10 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.freeze___letsfreezethat = function(cfg) {
+  this.freeze___letsfreezethat_v2 = function(cfg) {
     return new Promise((resolve) => {
       var LFT, count, data, freeze, lets, thaw;
-      LFT = require('../../../apps/letsfreezethat');
+      LFT = require('../letsfreezethat@2.2.5');
       ({lets, freeze, thaw} = LFT);
       data = this.get_data(cfg);
       count = 0;
@@ -97,10 +97,10 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.thaw_____letsfreezethat = function(cfg) {
+  this.thaw_____letsfreezethat_v2 = function(cfg) {
     return new Promise((resolve) => {
       var LFT, count, d, data, freeze, lets, thaw;
-      LFT = require('../../../apps/letsfreezethat');
+      LFT = require('../letsfreezethat@2.2.5');
       ({lets, freeze, thaw} = LFT);
       data = this.get_data(cfg);
       data.datoms = (function() {
@@ -145,10 +145,14 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this._freeze___lftrc2 = function(cfg, lft_cfg) {
+  this._freeze___letsfreezethat_v3 = function(cfg, lft_cfg) {
     return new Promise((resolve) => {
       var LFT, count, data, freeze, lets, thaw;
-      LFT = (require('./letsfreezethat-NG-rc2')).new(lft_cfg);
+      if (lft_cfg.freeze) {
+        LFT = require('../../../apps/letsfreezethat/freeze');
+      } else {
+        LFT = require('../../../apps/letsfreezethat/nofreeze');
+      }
       ({lets, freeze, thaw} = LFT);
       data = this.get_data(cfg);
       count = 0;
@@ -190,10 +194,14 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._thaw_____lftrc2 = function(cfg, lft_cfg) {
+  this._thaw_____letsfreezethat_v3 = function(cfg, lft_cfg) {
     return new Promise((resolve) => {
       var LFT, count, d, data, freeze, lets, thaw;
-      LFT = (require('./letsfreezethat-NG-rc2')).new(lft_cfg);
+      if (lft_cfg.freeze) {
+        LFT = require('../../../apps/letsfreezethat/freeze');
+      } else {
+        LFT = require('../../../apps/letsfreezethat/nofreeze');
+      }
       ({lets, freeze, thaw} = LFT);
       data = this.get_data(cfg);
       data.datoms = (function() {
@@ -236,26 +244,26 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.freeze___lftrc2_cyfy = function(cfg) {
-    return this._freeze___lftrc2(cfg, {
+  this.freeze___letsfreezethat_v3_f1 = function(cfg) {
+    return this._freeze___letsfreezethat_v3(cfg, {
       freeze: true
     });
   };
 
-  this.freeze___lftrc2_cyfn = function(cfg) {
-    return this._freeze___lftrc2(cfg, {
+  this.freeze___letsfreezethat_v3_f0 = function(cfg) {
+    return this._freeze___letsfreezethat_v3(cfg, {
       freeze: false
     });
   };
 
-  this.thaw_____lftrc2_cyfy = function(cfg) {
-    return this._thaw_____lftrc2(cfg, {
+  this.thaw_____letsfreezethat_v3_f1 = function(cfg) {
+    return this._thaw_____letsfreezethat_v3(cfg, {
       freeze: true
     });
   };
 
-  this.thaw_____lftrc2_cyfn = function(cfg) {
-    return this._thaw_____lftrc2(cfg, {
+  this.thaw_____letsfreezethat_v3_f0 = function(cfg) {
+    return this._thaw_____letsfreezethat_v3(cfg, {
       freeze: false
     });
   };
@@ -692,17 +700,17 @@
     };
     cfg = {
       repetitions: 3,
-      set_count: 10000
-    };
-    cfg = {
-      repetitions: 3,
       set_count: 10
     };
     cfg = {
       repetitions: 3,
       set_count: 1000
     };
-    test_names = ['thaw_____letsfreezethat', 'thaw_____klona', 'thaw_____fast_copy', 'thaw_____lftrc2_cyfy', 'thaw_____deepfreezer', 'thaw_____shallow_native', 'thaw_____fast_copy_strict', 'thaw_____deepcopy', 'thaw_____lftrc2_cyfn', 'freeze___lftrc2_cyfn', 'freeze___lftrc2_cyfy', 'freeze___lftrc2_cyfn', 'freeze___letsfreezethat', 'freeze___deepfreeze', 'freeze___deepfreezer', 'freeze___shallow_native'];
+    cfg = {
+      repetitions: 3,
+      set_count: 10000
+    };
+    test_names = ['thaw_____letsfreezethat_v2', 'freeze___letsfreezethat_v2', 'thaw_____klona', 'thaw_____fast_copy', 'thaw_____letsfreezethat_v3_f1', 'thaw_____deepfreezer', 'thaw_____shallow_native', 'thaw_____fast_copy_strict', 'thaw_____deepcopy', 'thaw_____letsfreezethat_v3_f0', 'freeze___letsfreezethat_v3_f0', 'freeze___letsfreezethat_v3_f1', 'freeze___letsfreezethat_v3_f0', 'freeze___deepfreeze', 'freeze___deepfreezer', 'freeze___shallow_native'];
     if (global.gc != null) {
       // await BM.benchmark bench, cfg, false, @, '_prewarm'
       global.gc();
@@ -727,6 +735,26 @@
       return (await this.run_benchmarks());
     })();
   }
+
+  /*
+
+00:15 HENGIST/BENCHMARKS  ▶  thaw_____shallow_native                          829,171 Hz   100.0 % │████████████▌│
+00:15 HENGIST/BENCHMARKS  ▶  freeze___letsfreezethat_v3_f0                    745,781 Hz    89.9 % │███████████▎ │
+00:15 HENGIST/BENCHMARKS  ▶  freeze___shallow_native                          665,340 Hz    80.2 % │██████████   │
+00:15 HENGIST/BENCHMARKS  ▶  thaw_____klona                                   347,483 Hz    41.9 % │█████▎       │
+00:15 HENGIST/BENCHMARKS  ▶  thaw_____letsfreezethat_v3_f0                    330,089 Hz    39.8 % │█████        │
+00:15 HENGIST/BENCHMARKS  ▶  thaw_____letsfreezethat_v3_f1                    242,111 Hz    29.2 % │███▋         │
+00:15 HENGIST/BENCHMARKS  ▶  freeze___letsfreezethat_v3_f1                    201,651 Hz    24.3 % │███          │
+00:15 HENGIST/BENCHMARKS  ▶  thaw_____fast_copy                               176,418 Hz    21.3 % │██▋          │
+00:15 HENGIST/BENCHMARKS  ▶  thaw_____letsfreezethat_v2                        93,441 Hz    11.3 % │█▍           │
+00:15 HENGIST/BENCHMARKS  ▶  freeze___letsfreezethat_v2                        70,091 Hz     8.5 % │█            │
+00:15 HENGIST/BENCHMARKS  ▶  freeze___deepfreeze                               59,320 Hz     7.2 % │▉            │
+00:15 HENGIST/BENCHMARKS  ▶  thaw_____deepfreezer                              50,249 Hz     6.1 % │▊            │
+00:15 HENGIST/BENCHMARKS  ▶  freeze___deepfreezer                              37,352 Hz     4.5 % │▋            │
+00:15 HENGIST/BENCHMARKS  ▶  thaw_____deepcopy                                 31,608 Hz     3.8 % │▌            │
+00:15 HENGIST/BENCHMARKS  ▶  thaw_____fast_copy_strict                         17,539 Hz     2.1 % │▎            │
+
+*/
 
 }).call(this);
 
