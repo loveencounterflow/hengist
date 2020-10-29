@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, PATH, alert, badge, debug, echo, help, info, jr, log, provide_LFT_candidate, rpr, test, urge, warn, whisper;
+  var BM, CND, DATA, FS, PATH, alert, badge, debug, echo, help, info, jr, log, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -39,91 +39,6 @@
   ({jr} = CND);
 
   BM = require('../../../lib/benchmarks');
-
-  //===========================================================================================================
-
-  //-----------------------------------------------------------------------------------------------------------
-  provide_LFT_candidate = function() {
-    this.copy_1 = function(d) {
-      var R, k, v;
-      switch (Object.prototype.toString.call(d)) {
-        case '[object Array]':
-          return (function() {
-            var i, len, results;
-            results = [];
-            for (i = 0, len = d.length; i < len; i++) {
-              v = d[i];
-              results.push(this.copy_1(v));
-            }
-            return results;
-          }).call(this);
-        case '[object Object]':
-          R = {};
-          for (k in d) {
-            v = d[k];
-            R[k] = this.copy_1(v);
-          }
-          return R;
-      }
-      return d;
-    };
-    this.copy_2 = function(d) {
-      var R, k, v;
-      if ((!d) || d === true) {
-        /* immediately return for zero, empty string, null, undefined, NaN, false, true: */
-        return d;
-      }
-      /* thx to https://github.com/lukeed/klona/blob/master/src/json.js */
-      switch (Object.prototype.toString.call(d)) {
-        case '[object Array]':
-          R = Array((k = d.length));
-          while (k--) {
-            R[k] = ((v = d[k]) != null) && ((typeof v) === 'object') ? this.copy_2(v) : v;
-          }
-          return R;
-        case '[object Object]':
-          R = {};
-          for (k in d) {
-            if (k === '__proto__') {
-              /* TAINT do we ever need this? */
-              Object.defineProperty(R, k, {
-                value: this.copy_2(d[k]),
-                configurable: true,
-                enumerable: true,
-                writable: true
-              });
-            } else {
-              R[k] = ((v = d[k]) != null) && ((typeof v) === 'object') ? this.copy_2(v) : v;
-            }
-          }
-          return R;
-      }
-      return d;
-    };
-    return this.copy_3 = function(d) {
-      var R, k, v;
-      if ((!d) || d === true) {
-        /* immediately return for zero, empty string, null, undefined, NaN, false, true: */
-        return d;
-      }
-      /* thx to https://github.com/lukeed/klona/blob/master/src/json.js */
-      if (Array.isArray(d)) {
-        R = Array((k = d.length | 0));
-        while ((k--) | 0) {
-          R[k] = ((v = d[k]) != null) && ((typeof v) === 'object') ? this.copy_2(v) : v;
-        }
-        return R;
-      }
-      if (typeof d !== 'object') {
-        return d;
-      }
-      R = {};
-      for (k in d) {
-        R[k] = ((v = d[k]) != null) && ((typeof v) === 'object') ? this.copy_2(v) : v;
-      }
-      return R;
-    };
-  };
 
   //===========================================================================================================
 

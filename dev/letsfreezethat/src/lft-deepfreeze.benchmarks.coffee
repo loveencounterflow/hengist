@@ -24,57 +24,7 @@ test                      = require 'guy-test'
 BM                        = require '../../../lib/benchmarks'
 
 
-#===========================================================================================================
-#
-#-----------------------------------------------------------------------------------------------------------
-provide_LFT_candidate = ->
-  @copy_1 = ( d ) ->
-    switch ( Object::toString.call d )
-      when '[object Array]'
-        return ( @copy_1 v for v in d )
-      when '[object Object]'
-        R = {}
-        R[ k ] = @copy_1 v for k, v of d
-        return R
-    return d
-  @copy_2 = ( d ) ->
-    ### immediately return for zero, empty string, null, undefined, NaN, false, true: ###
-    return d if ( not d ) or d is true
-    ### thx to https://github.com/lukeed/klona/blob/master/src/json.js ###
-    switch ( Object::toString.call d )
-      when '[object Array]'
-        R = Array ( k = d.length )
-        while ( k-- )
-          R[ k ] = if ( v = d[ k ] )? and ( ( typeof v ) is 'object' ) then ( @copy_2 v ) else v
-        return R
-      when '[object Object]'
-        R = {}
-        for k of d
-          if k == '__proto__'
-            ### TAINT do we ever need this? ###
-            Object.defineProperty R, k, {
-              value:        @copy_2 d[ k ]
-              configurable: true
-              enumerable:   true
-              writable:     true }
-          else
-            R[ k ] = if ( v = d[ k ] )? and ( ( typeof v ) is 'object' ) then ( @copy_2 v ) else v
-        return R
-    return d
-  @copy_3 = ( d ) ->
-    ### immediately return for zero, empty string, null, undefined, NaN, false, true: ###
-    return d if ( not d ) or d is true
-    ### thx to https://github.com/lukeed/klona/blob/master/src/json.js ###
-    if Array.isArray d
-      R = Array ( k = d.length | 0 )
-      while ( k-- ) | 0
-        R[ k ] = if ( v = d[ k ] )? and ( ( typeof v ) is 'object' ) then ( @copy_2 v ) else v
-      return R
-    return d unless typeof d is 'object'
-    R = {}
-    for k of d
-      R[ k ] = if ( v = d[ k ] )? and ( ( typeof v ) is 'object' ) then ( @copy_2 v ) else v
-    return R
+
 
 #===========================================================================================================
 #
@@ -126,63 +76,6 @@ provide_LFT_candidate = ->
       throw new Error '^445-4^ identical' if e is d
       throw new Error '^445-5^ not thawed' if Object.isFrozen e
       throw new Error '^445-6^ not thawed' if Object.isFrozen e.$vnr
-      count++
-    resolve count
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@copy_____lft_xxx_1 = ( cfg ) -> new Promise ( resolve ) =>
-  provide_LFT_candidate.apply LFT = {}
-  copy          = LFT.copy_1.bind LFT
-  data          = @get_data cfg
-  { freeze }    = require 'letsfreezethat'
-  data.datoms   = ( ( freeze d ) for d in data.datoms )
-  count         = 0
-  global.gc() if global.gc? ### TAINT consider to do this in BM moduke ###
-  resolve => new Promise ( resolve ) =>
-    for d in data.datoms
-      e = copy d
-      throw new Error '^445-7^ identical' if e is d
-      throw new Error '^445-8^ not thawed' if Object.isFrozen e
-      throw new Error '^445-9^ not thawed' if Object.isFrozen e.$vnr
-      count++
-    resolve count
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@copy_____lft_xxx_2 = ( cfg ) -> new Promise ( resolve ) =>
-  provide_LFT_candidate.apply LFT = {}
-  copy          = LFT.copy_2.bind LFT
-  data          = @get_data cfg
-  { freeze }    = require 'letsfreezethat'
-  data.datoms   = ( ( freeze d ) for d in data.datoms )
-  count         = 0
-  global.gc() if global.gc? ### TAINT consider to do this in BM moduke ###
-  resolve => new Promise ( resolve ) =>
-    for d in data.datoms
-      e = copy d
-      throw new Error '^445-10^ identical' if e is d
-      throw new Error '^445-11^ not thawed' if Object.isFrozen e
-      throw new Error '^445-12^ not thawed' if Object.isFrozen e.$vnr
-      count++
-    resolve count
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@copy_____lft_xxx_3 = ( cfg ) -> new Promise ( resolve ) =>
-  provide_LFT_candidate.apply LFT = {}
-  copy          = LFT.copy_3.bind LFT
-  data          = @get_data cfg
-  { freeze }    = require 'letsfreezethat'
-  data.datoms   = ( ( freeze d ) for d in data.datoms )
-  count         = 0
-  global.gc() if global.gc? ### TAINT consider to do this in BM moduke ###
-  resolve => new Promise ( resolve ) =>
-    for d in data.datoms
-      e = copy d
-      throw new Error '^445-13^ identical' if e is d
-      throw new Error '^445-14^ not thawed' if Object.isFrozen e
-      throw new Error '^445-15^ not thawed' if Object.isFrozen e.$vnr
       count++
     resolve count
   return null
@@ -446,9 +339,6 @@ provide_LFT_candidate = ->
   test_names  = [
     'thaw_____letsfreezethat'
     'thaw_____klona'
-    'copy_____lft_xxx_1'
-    'copy_____lft_xxx_2'
-    'copy_____lft_xxx_3'
     'thaw_____fast_copy'
     'thaw_____lftrc2_cyfy'
     'thaw_____deepfreezer'
