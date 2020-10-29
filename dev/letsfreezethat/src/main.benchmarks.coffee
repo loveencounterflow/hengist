@@ -37,13 +37,9 @@ data_cache                = null
   return data_cache
 
 #-----------------------------------------------------------------------------------------------------------
-@using_letsfreezethat = ( n, show, sublibrary ) -> new Promise ( resolve ) =>
-  LFT = require '../../../apps/letsfreezethat'
-  switch sublibrary
-    when 'standard' then { lets, } = LFT
-    when 'nofreeze' then { lets, } = LFT.nofreeze
-    when 'partial'  then { lets, } = LFT.partial
-    else throw new Error "^bm/lft@223 unknown sublibrary #{rpr sublibrary}"
+@_letsfreezethat_v3 = ( n, show, lft_cfg ) -> new Promise ( resolve ) =>
+  if lft_cfg.freeze then  lets = require '../../../apps/letsfreezethat/freeze'
+  else                    lets = require '../../../apps/letsfreezethat/nofreeze'
   count         = 0
   { probes_A
     probes_B }  = @get_data n
@@ -67,6 +63,10 @@ data_cache                = null
       # help '^331^', jr probe
     resolve count
   return null
+
+#-----------------------------------------------------------------------------------------------------------
+@letsfreezethat_v3_f1 = ( n, show ) -> @_letsfreezethat_v3 n, show, { freeze: true,  }
+@letsfreezethat_v3_f0 = ( n, show ) -> @_letsfreezethat_v3 n, show, { freeze: false, }
 
 #-----------------------------------------------------------------------------------------------------------
 @using_immutable = ( n, show ) -> new Promise ( resolve ) =>
@@ -182,14 +182,10 @@ data_cache                = null
     resolve count
   return null
 
-#-----------------------------------------------------------------------------------------------------------
-@using_letsfreezethat_standard    = ( n, show ) -> @using_letsfreezethat n, show, 'standard'
-@using_letsfreezethat_nofreeze    = ( n, show ) -> @using_letsfreezethat n, show, 'nofreeze'
-@using_letsfreezethat_partial     = ( n, show ) -> @using_letsfreezethat n, show, 'partial'
 
 #-----------------------------------------------------------------------------------------------------------
 @using_ltfng_single = ( n, show ) -> new Promise ( resolve ) =>
-  LFT           = require './letsfreezethat-NG-rc2'
+  lets          = require '../../../apps/letsfreezethat'
   count         = 0
   { probes_A
     probes_B }  = @get_data n
@@ -197,20 +193,20 @@ data_cache                = null
     for probe, idx in probes_A
       # whisper '^331^', jr probe
       keys        = Object.keys probe
-      probe       = LFT.new_object probes_A
+      probe       = lets probes_A
       count      += keys.length
       for k, v of probes_B[ idx ]
         count++
-        probe = LFT.set probe, k, v
+        probe = lets.set probe, k, v
       for k in keys
         count++
-        probe = LFT.set probe, k, 1234
+        probe = lets.set probe, k, 1234
     resolve count
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @using_ltfng_assign_lets = ( n, show ) -> new Promise ( resolve ) =>
-  LFT           = require './letsfreezethat-NG-rc2'
+  lets          = require '../../../apps/letsfreezethat'
   count         = 0
   { probes_A
     probes_B }  = @get_data n
@@ -218,11 +214,11 @@ data_cache                = null
   resolve => new Promise ( resolve ) =>
     for probe, idx in probes_A
       keys        = Object.keys probe
-      probe       = LFT.new_object probes_A
+      probe       = lets probes_A
       count      += keys.length
-      probe       = LFT.assign probe, probes_B[ idx ]
+      probe       = lets.assign probe, probes_B[ idx ]
       count      += lengths[ idx ]
-      probe       = LFT.lets probe, ( probe ) ->
+      probe       = lets probe, ( probe ) ->
         for k in keys
           count++
           probe[ k ] = 1234
@@ -232,7 +228,7 @@ data_cache                = null
 
 #-----------------------------------------------------------------------------------------------------------
 @using_ltfng_thaw_freeze = ( n, show ) -> new Promise ( resolve ) =>
-  LFT           = require './letsfreezethat-NG-rc2'
+  lets          = require '../../../apps/letsfreezethat'
   count         = 0
   { probes_A
     probes_B }  = @get_data n
@@ -240,15 +236,15 @@ data_cache                = null
   resolve => new Promise ( resolve ) =>
     for probe, idx in probes_A
       keys        = Object.keys probe
-      probe       = LFT.new_object probes_A
+      probe       = lets probes_A
       count      += keys.length
-      probe       = LFT.thaw probe
+      probe       = lets.thaw probe
       Object.assign probe, probes_B[ idx ]
       count      += lengths[ idx ]
       for k in keys
         count++
         probe[ k ] = 1234
-      probe       = LFT.freeze probe
+      probe       = lets.freeze probe
     resolve count
   return null
 
@@ -313,10 +309,10 @@ data_cache                = null
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_letsfreezethat_new_api = ->
-  LFT           = require './letsfreezethat-NG-rc2'
-  d1      = LFT.new_object { first: 1, }, { second: 2, }
-  d2      = LFT.set d1, 'foo', 42
-  d3      = LFT.assign d2, { foo: 108, bar: 'baz', }, { gnu: 'gnat', }
+  lets    = require '../../../apps/letsfreezethat'
+  d1      = lets { first: 1, }, { second: 2, }
+  d2      = lets.set d1, 'foo', 42
+  d3      = lets.assign d2, { foo: 108, bar: 'baz', }, { gnu: 'gnat', }
   urge Object.isFrozen d1
   urge Object.isFrozen d2
   urge Object.isFrozen d3
@@ -324,8 +320,8 @@ data_cache                = null
   help d2
   help d3
   urge d1 is d2
-  urge LFT.get d1, 'foo'
-  urge LFT.get d2, 'foo'
+  urge lets.get d1, 'foo'
+  urge lets.get d2, 'foo'
   urge Object.keys d2
   urge ( k for k of d2 )
   urge Object.keys d3
@@ -335,14 +331,13 @@ data_cache                = null
 @run_benchmarks = ->
   bench       = BM.new_benchmarks()
   # n           = 100000
-  n           = 100
+  n           = 1000
   show        = false
   repetitions = 3
   test_names  = [
     'using_immer'
-    'using_letsfreezethat_standard'
-    'using_letsfreezethat_nofreeze'
-    # 'using_letsfreezethat_partial'
+    'letsfreezethat_v3_f1'
+    'letsfreezethat_v3_f0'
     'using_ltfng_single'
     'using_ltfng_assign_lets'
     'using_ltfng_thaw_freeze'
@@ -361,11 +356,6 @@ data_cache                = null
 ############################################################################################################
 if require.main is module then do =>
   await @run_benchmarks()
-  # await @demo_letsfreezethat_new_api()
-  # await @demo_immutable()
-  # await @demo_hamt()
-  # await @demo_mori()
-  # require 'hamt'
 
 ###
 
@@ -384,8 +374,8 @@ if require.main is module then do =>
 
 n: 10, count: 143
 00:01 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                            928,465 Hz   100.0 % │████████████▌│
-00:01 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_nofreeze                    149,161 Hz    16.1 % │██           │
-00:01 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_standard                     36,536 Hz     3.9 % │▌            │
+00:01 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0                    149,161 Hz    16.1 % │██           │
+00:01 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1                     36,536 Hz     3.9 % │▌            │
 00:01 HENGIST/BENCHMARKS  ▶  using_immutable                                   35,932 Hz     3.9 % │▌            │
 00:01 HENGIST/BENCHMARKS  ▶  using_hamt                                        25,408 Hz     2.7 % │▍            │
 00:01 HENGIST/BENCHMARKS  ▶  using_mori                                        10,344 Hz     1.1 % │▏            │
@@ -394,10 +384,10 @@ n: 10, count: 143
 
 n: 100, count: 1313
 00:02 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                          1,623,933 Hz   100.0 % │████████████▌│
-00:02 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_nofreeze                    339,169 Hz    20.9 % │██▋          │
+00:02 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0                    339,169 Hz    20.9 % │██▋          │
 00:02 HENGIST/BENCHMARKS  ▶  using_immutable                                  119,138 Hz     7.3 % │▉            │
 00:02 HENGIST/BENCHMARKS  ▶  using_hamt                                       111,030 Hz     6.8 % │▉            │
-00:02 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_standard                     93,930 Hz     5.8 % │▊            │
+00:02 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1                     93,930 Hz     5.8 % │▊            │
 00:02 HENGIST/BENCHMARKS  ▶  using_mori                                        29,827 Hz     1.8 % │▎            │
 00:02 HENGIST/BENCHMARKS  ▶  using_immer                                       16,342 Hz     1.0 % │▏            │
 00:02 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_partial                      15,471 Hz     1.0 % │▏            │
@@ -406,9 +396,9 @@ n: 10'000, count: 134'491
 00:43 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                            547,914 Hz   100.0 % │████████████▌│
 00:43 HENGIST/BENCHMARKS  ▶  using_immutable                                  328,788 Hz    60.0 % │███████▌     │
 00:43 HENGIST/BENCHMARKS  ▶  using_hamt                                       277,877 Hz    50.7 % │██████▍      │
-00:43 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_nofreeze                    272,873 Hz    49.8 % │██████▎      │
+00:43 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0                    272,873 Hz    49.8 % │██████▎      │
 00:43 HENGIST/BENCHMARKS  ▶  using_mori                                       108,792 Hz    19.9 % │██▌          │
-00:43 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_standard                     65,763 Hz    12.0 % │█▌           │
+00:43 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1                     65,763 Hz    12.0 % │█▌           │
 00:43 HENGIST/BENCHMARKS  ▶  using_immer                                       18,940 Hz     3.5 % │▍            │
 00:43 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_partial                      14,840 Hz     2.7 % │▍            │
 
@@ -416,9 +406,9 @@ n: 100'000, count: 1'349'766
 07:13 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                            499,935 Hz   100.0 % │████████████▌│
 07:13 HENGIST/BENCHMARKS  ▶  using_immutable                                  444,554 Hz    88.9 % │███████████▏ │
 07:13 HENGIST/BENCHMARKS  ▶  using_hamt                                       356,847 Hz    71.4 % │████████▉    │
-07:13 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_nofreeze                    195,966 Hz    39.2 % │████▉        │
+07:13 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0                    195,966 Hz    39.2 % │████▉        │
 07:13 HENGIST/BENCHMARKS  ▶  using_mori                                       128,844 Hz    25.8 % │███▎         │
-07:13 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_standard                     59,905 Hz    12.0 % │█▌           │
+07:13 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1                     59,905 Hz    12.0 % │█▌           │
 07:13 HENGIST/BENCHMARKS  ▶  using_immer                                       18,180 Hz     3.6 % │▌            │
 07:13 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_partial                      14,707 Hz     2.9 % │▍            │
 
