@@ -31,6 +31,43 @@ npm install letsfreezethat
 
 ## Usage
 
+`require`ing the module imports a method `lets()`:
+
+```coffee
+lets = require 'letsfreezethat'
+```
+
+This method is best explained by having a look at its definition which is in essence approximately three
+lines long: it takes an `original` value (a JS object or array) and am optional `modifier` callback
+function. It then `thaw()`s that value, which entails making a deep copy of it. Next, it calls the
+`modifier()` (if given), ignoring the return value of that call. Step 3 consists of freezing the draft
+version (in-place, i.e. without copying it) and returning it:
+
+```coffee
+lets = ( original, modifier = null ) ->
+  draft = freeze_lets.thaw original
+  modifier draft if modifier?
+  return deep_freeze draft
+```
+
+The way this is intended to simplify your life is as follows: you have a function that accepts and returns
+an object (or array). Within that function, you want to perform some computation and update the object the
+functional way (no side effects, no mutations). In order to be on the safe side, you want to work with
+deep-frozen objects (at least in development, but we'll come to that) to prevent any slipups. LetsFreezeThat
+gives you two styles to accomplish that goal, the 'safer' variant being `lets()`, like in the below:
+
+```coffee
+lets = require 'letsfreezethat'
+
+set_balance = ( account, amount ) ->
+  account = lets account, ( d ) ->
+    d.balance += amount
+    return null # <- just for clarity but recommended to avoid accidental return value
+  return account
+```
+
+
+
 ## Notes
 
 * LFT does not copy objects on explicit or implicit `freeze()`. That should be fine for most use cases since
