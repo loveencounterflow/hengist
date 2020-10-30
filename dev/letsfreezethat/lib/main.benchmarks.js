@@ -55,11 +55,11 @@
     // debug '^3342^', probes_C
     /* NOTE could count number of actual properties in nested objects */
     data_cache = {probes_A, probes_B};
-    return data_cache;
+    return (require('../../../apps/letsfreezethat')).freeze(data_cache);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._letsfreezethat_v3 = function(n, show, lft_cfg) {
+  this._letsfreezethat_v3_lets = function(n, show, lft_cfg) {
     return new Promise((resolve) => {
       var count, lets, probes_A, probes_B;
       if (lft_cfg.freeze) {
@@ -71,33 +71,21 @@
       ({probes_A, probes_B} = this.get_data(n));
       resolve(() => {
         return new Promise((resolve) => {
-          var i, idx, j, k, keys, len, len1, probe, ref, v;
+          var i, idx, len, probe;
           for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
             probe = probes_A[idx];
-            // whisper '^331^', jr probe
-            keys = Object.keys(probe);
-            probe = lets(probe); //, ( probe ) -> null
-            count += keys.length;
-            ref = probes_B[idx];
-            for (k in ref) {
-              v = ref[k];
-              probe = lets(probe, function(probe) {
-                // whisper '^556^', k, jr v
-                count++;
+            probe = lets(probe);
+            probe = lets(probe, function(probe) {
+              var k, ref, v;
+              ref = probes_B[idx];
+              for (k in ref) {
+                v = ref[k];
                 probe[k] = v;
-                return null;
-              });
-            }
-            for (j = 0, len1 = keys.length; j < len1; j++) {
-              k = keys[j];
-              probe = lets(probe, function(probe) {
-                count++;
-                probe[k] = 1234;
-                return null;
-              });
-            }
+              }
+              return null;
+            });
+            count++;
           }
-          // help '^331^', jr probe
           return resolve(count);
         });
       });
@@ -106,20 +94,163 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.letsfreezethat_v3_f1 = function(n, show) {
-    return this._letsfreezethat_v3(n, show, {
+  this.letsfreezethat_v3_f1_lets = function(n, show) {
+    return this._letsfreezethat_v3_lets(n, show, {
       freeze: true
     });
   };
 
-  this.letsfreezethat_v3_f0 = function(n, show) {
-    return this._letsfreezethat_v3(n, show, {
+  this.letsfreezethat_v3_f0_lets = function(n, show) {
+    return this._letsfreezethat_v3_lets(n, show, {
       freeze: false
     });
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_immutable = function(n, show) {
+  this._letsfreezethat_v3_freezethaw = function(n, show, lft_cfg) {
+    return new Promise((resolve) => {
+      var count, freeze, lets, probes_A, probes_B, thaw;
+      if (lft_cfg.freeze) {
+        lets = require('../../../apps/letsfreezethat/freeze');
+      } else {
+        lets = require('../../../apps/letsfreezethat/nofreeze');
+      }
+      ({thaw, freeze} = lets);
+      count = 0;
+      ({probes_A, probes_B} = this.get_data(n));
+      resolve(() => {
+        return new Promise((resolve) => {
+          var i, idx, k, len, probe, ref, v;
+          for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
+            probe = probes_A[idx];
+            probe = thaw(probe);
+            ref = probes_B[idx];
+            for (k in ref) {
+              v = ref[k];
+              probe[k] = v;
+            }
+            probe = freeze(probe);
+            count++;
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.letsfreezethat_v3_f1_freezethaw = function(n, show) {
+    return this._letsfreezethat_v3_freezethaw(n, show, {
+      freeze: true
+    });
+  };
+
+  this.letsfreezethat_v3_f0_freezethaw = function(n, show) {
+    return this._letsfreezethat_v3_freezethaw(n, show, {
+      freeze: false
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._letsfreezethat_v2_lets = function(n, show, lft_cfg) {
+    return new Promise((resolve) => {
+      var LFT, count, lets, probes_A, probes_B;
+      LFT = require('../letsfreezethat@2.2.5');
+      if (lft_cfg.freeze) {
+        ({lets} = LFT);
+      } else {
+        ({lets} = LFT.nofreeze);
+      }
+      count = 0;
+      ({probes_A, probes_B} = this.get_data(n));
+      resolve(() => {
+        return new Promise((resolve) => {
+          var i, idx, len, probe;
+          for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
+            probe = probes_A[idx];
+            probe = lets(probe);
+            probe = lets(probe, function(probe) {
+              var k, ref, v;
+              ref = probes_B[idx];
+              for (k in ref) {
+                v = ref[k];
+                probe[k] = v;
+              }
+              return null;
+            });
+            count++;
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.letsfreezethat_v2_f1_lets = function(n, show) {
+    return this._letsfreezethat_v2_lets(n, show, {
+      freeze: true
+    });
+  };
+
+  this.letsfreezethat_v2_f0_lets = function(n, show) {
+    return this._letsfreezethat_v2_lets(n, show, {
+      freeze: false
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._letsfreezethat_v2_freezethaw = function(n, show, lft_cfg) {
+    return new Promise((resolve) => {
+      /* Bug (or feature?) of LFTv2: in nofreeze mode, `thaw()` does not copy object */
+      var LFT, count, freeze, probes_A, probes_B, thaw;
+      LFT = require('../letsfreezethat@2.2.5');
+      if (lft_cfg.freeze) {
+        ({freeze} = LFT);
+      } else {
+        ({freeze} = LFT.nofreeze);
+      }
+      ({thaw} = LFT);
+      count = 0;
+      ({probes_A, probes_B} = this.get_data(n));
+      resolve(() => {
+        return new Promise((resolve) => {
+          var i, idx, k, len, probe, ref, v;
+          for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
+            probe = probes_A[idx];
+            probe = thaw(probe);
+            ref = probes_B[idx];
+            for (k in ref) {
+              v = ref[k];
+              probe[k] = v;
+            }
+            probe = freeze(probe);
+            count++;
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.letsfreezethat_v2_f1_freezethaw = function(n, show) {
+    return this._letsfreezethat_v2_freezethaw(n, show, {
+      freeze: true
+    });
+  };
+
+  this.letsfreezethat_v2_f0_freezethaw = function(n, show) {
+    return this._letsfreezethat_v2_freezethaw(n, show, {
+      freeze: false
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.immutable = function(n, show) {
     return new Promise((resolve) => {
       var Map, count, probes_A, probes_B;
       ({Map} = require('immutable'));
@@ -127,26 +258,17 @@
       ({probes_A, probes_B} = this.get_data(n));
       resolve(() => {
         return new Promise((resolve) => {
-          var i, idx, j, k, keys, len, len1, probe, ref, v;
+          var i, idx, k, len, probe, ref, v;
           for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
             probe = probes_A[idx];
-            // whisper '^331^', jr probe
-            keys = Object.keys(probe);
             probe = Map(probe);
-            count += keys.length;
             ref = probes_B[idx];
             for (k in ref) {
               v = ref[k];
               probe = probe.set(k, v);
-              count++;
             }
-            for (j = 0, len1 = keys.length; j < len1; j++) {
-              k = keys[j];
-              probe = probe.set(k, 1234);
-              count++;
-            }
+            count++;
           }
-          // help '^331^', jr probe
           return resolve(count);
         });
       });
@@ -155,7 +277,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_hamt = function(n, show) {
+  this.hamt = function(n, show) {
     return new Promise((resolve) => {
       var count, hamt, probes_A, probes_B;
       hamt = require('hamt');
@@ -163,30 +285,22 @@
       ({probes_A, probes_B} = this.get_data(n));
       resolve(() => {
         return new Promise((resolve) => {
-          var i, idx, j, k, keys, len, len1, probe, ref, v;
+          var i, idx, k, len, probe, ref, v;
           for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
             probe = probes_A[idx];
-            // whisper '^331^', jr probe
-            keys = Object.keys(probe);
             probe = hamt.empty;
+/* NOTE must always iterate over facets, no bulk `set()` */
             for (k in probe) {
               v = probe[k];
               probe = probe.set(k, v);
             }
-            count += keys.length;
             ref = probes_B[idx];
             for (k in ref) {
               v = ref[k];
               probe = probe.set(k, v);
-              count++;
             }
-            for (j = 0, len1 = keys.length; j < len1; j++) {
-              k = keys[j];
-              probe = probe.set(k, 1234);
-              count++;
-            }
+            count++;
           }
-          // help '^331^', jr probe
           return resolve(count);
         });
       });
@@ -195,36 +309,37 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_mori = function(n, show) {
+  this.mori = function(n, show) {
     return new Promise((resolve) => {
-      var M, count, probes_A, probes_B;
+      var M, count, i, k, len, probe, probes_A, probes_A_entries, probes_B, v;
       M = require('mori');
       count = 0;
       ({probes_A, probes_B} = this.get_data(n));
+      probes_A_entries = [];
+      for (i = 0, len = probes_A.length; i < len; i++) {
+        probe = probes_A[i];
+        probes_A_entries.push((function() {
+          var results;
+          results = [];
+          for (k in probe) {
+            v = probe[k];
+            results.push([k, v]);
+          }
+          return results;
+        })());
+      }
       resolve(() => {
         return new Promise((resolve) => {
-          var i, idx, j, k, keys, len, len1, probe, ref, v;
-          for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
-            probe = probes_A[idx];
-            // whisper '^331^', jr probe
-            keys = Object.keys(probe);
-            probe = M.hashMap();
-            for (k in probe) {
-              v = probe[k];
-              probe = M.assoc(probe, k, v);
-            }
-            count += keys.length;
+          var idx, j, len1, ref;
+          for (idx = j = 0, len1 = probes_A_entries.length; j < len1; idx = ++j) {
+            probe = probes_A_entries[idx];
+            probe = M.hashMap(...probe);
             ref = probes_B[idx];
             for (k in ref) {
               v = ref[k];
               probe = M.assoc(probe, k, v);
-              count++;
             }
-            for (j = 0, len1 = keys.length; j < len1; j++) {
-              k = keys[j];
-              probe = M.assoc(probe, k, 1234);
-              count++;
-            }
+            count++;
           }
           return resolve(count);
         });
@@ -234,7 +349,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_immer = function(n, show) {
+  this.immer = function(n, show) {
     return new Promise((resolve) => {
       var IMMER, count, probes_A, probes_B, produce;
       IMMER = require('immer');
@@ -243,32 +358,22 @@
       ({probes_A, probes_B} = this.get_data(n));
       resolve(() => {
         return new Promise((resolve) => {
-          var i, idx, j, k, keys, len, len1, probe, ref, v;
+          var i, idx, len, probe;
           for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
             probe = probes_A[idx];
-            // whisper '^331^', jr probe
-            keys = Object.keys(probe);
             probe = produce(probe, function(probe) {
               return probe;
             });
-            count += keys.length;
-            ref = probes_B[idx];
-            for (k in ref) {
-              v = ref[k];
-              probe = produce(probe, function(probe) {
-                count++;
+            probe = produce(probe, function(probe) {
+              var k, ref, v;
+              ref = probes_B[idx];
+              for (k in ref) {
+                v = ref[k];
                 probe[k] = v;
-                return probe;
-              });
-            }
-            for (j = 0, len1 = keys.length; j < len1; j++) {
-              k = keys[j];
-              probe = produce(probe, function(probe) {
-                count++;
-                probe[k] = 1234;
-                return probe;
-              });
-            }
+              }
+              return probe;
+            });
+            count++;
           }
           return resolve(count);
         });
@@ -278,155 +383,23 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.using_plainjs_mutable = function(n, show) {
+  this.plainjs_mutable = function(n, show) {
     return new Promise((resolve) => {
       var count, probes_A, probes_B;
       count = 0;
       ({probes_A, probes_B} = this.get_data(n));
       resolve(() => {
         return new Promise((resolve) => {
-          var i, idx, j, k, keys, len, len1, probe, ref, ref1, v;
+          var i, idx, k, len, probe, ref, v;
           for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
             probe = probes_A[idx];
-            // whisper '^331^', jr probe
-            keys = Object.keys(probe);
-            probe = {};
-            ref = probes_A[idx];
-            for (k in ref) {
-              v = ref[k];
-              probe[k] = v;
-            }
-            count += keys.length;
-            ref1 = probes_B[idx];
-            for (k in ref1) {
-              v = ref1[k];
-              count++;
-              probe[k] = v;
-            }
-            for (j = 0, len1 = keys.length; j < len1; j++) {
-              k = keys[j];
-              count++;
-              probe[k] = 1234;
-            }
-          }
-          return resolve(count);
-        });
-      });
-      return null;
-    });
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.using_ltfng_single = function(n, show) {
-    return new Promise((resolve) => {
-      var count, lets, probes_A, probes_B;
-      lets = require('../../../apps/letsfreezethat');
-      count = 0;
-      ({probes_A, probes_B} = this.get_data(n));
-      resolve(() => {
-        return new Promise((resolve) => {
-          var i, idx, j, k, keys, len, len1, probe, ref, v;
-          for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
-            probe = probes_A[idx];
-            // whisper '^331^', jr probe
-            keys = Object.keys(probe);
-            probe = lets(probes_A);
-            count += keys.length;
+            probe = Object.assign({}, probe);
             ref = probes_B[idx];
             for (k in ref) {
               v = ref[k];
-              count++;
-              probe = lets.set(probe, k, v);
+              probe[k] = v;
             }
-            for (j = 0, len1 = keys.length; j < len1; j++) {
-              k = keys[j];
-              count++;
-              probe = lets.set(probe, k, 1234);
-            }
-          }
-          return resolve(count);
-        });
-      });
-      return null;
-    });
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.using_ltfng_assign_lets = function(n, show) {
-    return new Promise((resolve) => {
-      var count, lengths, lets, probe_B, probes_A, probes_B;
-      lets = require('../../../apps/letsfreezethat');
-      count = 0;
-      ({probes_A, probes_B} = this.get_data(n));
-      lengths = (function() {
-        var i, len, results;
-        results = [];
-        for (i = 0, len = probes_B.length; i < len; i++) {
-          probe_B = probes_B[i];
-          results.push((Object.keys(probe_B)).length);
-        }
-        return results;
-      })();
-      resolve(() => {
-        return new Promise((resolve) => {
-          var i, idx, keys, len, probe;
-          for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
-            probe = probes_A[idx];
-            keys = Object.keys(probe);
-            probe = lets(probes_A);
-            count += keys.length;
-            probe = lets.assign(probe, probes_B[idx]);
-            count += lengths[idx];
-            probe = lets(probe, function(probe) {
-              var j, k, len1;
-              for (j = 0, len1 = keys.length; j < len1; j++) {
-                k = keys[j];
-                count++;
-                probe[k] = 1234;
-              }
-              return null;
-            });
-          }
-          return resolve(count);
-        });
-      });
-      return null;
-    });
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.using_ltfng_thaw_freeze = function(n, show) {
-    return new Promise((resolve) => {
-      var count, lengths, lets, probe_B, probes_A, probes_B;
-      lets = require('../../../apps/letsfreezethat');
-      count = 0;
-      ({probes_A, probes_B} = this.get_data(n));
-      lengths = (function() {
-        var i, len, results;
-        results = [];
-        for (i = 0, len = probes_B.length; i < len; i++) {
-          probe_B = probes_B[i];
-          results.push((Object.keys(probe_B)).length);
-        }
-        return results;
-      })();
-      resolve(() => {
-        return new Promise((resolve) => {
-          var i, idx, j, k, keys, len, len1, probe;
-          for (idx = i = 0, len = probes_A.length; i < len; idx = ++i) {
-            probe = probes_A[idx];
-            keys = Object.keys(probe);
-            probe = lets(probes_A);
-            count += keys.length;
-            probe = lets.thaw(probe);
-            Object.assign(probe, probes_B[idx]);
-            count += lengths[idx];
-            for (j = 0, len1 = keys.length; j < len1; j++) {
-              k = keys[j];
-              count++;
-              probe[k] = 1234;
-            }
-            probe = lets.freeze(probe);
+            count++;
           }
           return resolve(count);
         });
@@ -548,15 +521,24 @@
     var _, bench, i, j, len, n, ref, ref1, repetitions, show, test_name, test_names;
     bench = BM.new_benchmarks();
     // n           = 100000
+    n = 100;
+    n = 10;
     n = 1000;
     show = false;
     repetitions = 3;
-    test_names = ['using_immer', 'letsfreezethat_v3_f1', 'letsfreezethat_v3_f0', 'using_ltfng_single', 'using_ltfng_assign_lets', 'using_ltfng_thaw_freeze', 'using_immutable', 'using_hamt', 'using_mori', 'using_plainjs_mutable'];
+    test_names = ['immer', 'letsfreezethat_v3_f1_lets', 'letsfreezethat_v3_f0_lets', 'letsfreezethat_v2_f1_lets', 'letsfreezethat_v2_f0_lets', 'letsfreezethat_v3_f1_freezethaw', 'letsfreezethat_v3_f0_freezethaw', 'letsfreezethat_v2_f1_freezethaw', 'letsfreezethat_v2_f0_freezethaw', 'immutable', 'hamt', 'mori', 'plainjs_mutable'];
+    if (global.gc != null) {
+      global.gc();
+    }
     for (_ = i = 1, ref = repetitions; (1 <= ref ? i <= ref : i >= ref); _ = 1 <= ref ? ++i : --i) {
       whisper('-'.repeat(108));
       ref1 = CND.shuffle(test_names);
       for (j = 0, len = ref1.length; j < len; j++) {
         test_name = ref1[j];
+        data_cache = null;
+        if (global.gc != null) {
+          global.gc();
+        }
         await BM.benchmark(bench, n, show, this, test_name);
       }
     }
@@ -581,45 +563,19 @@
  */
 /*
 
-n: 10, count: 143
-00:01 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                            928,465 Hz   100.0 % │████████████▌│
-00:01 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0                    149,161 Hz    16.1 % │██           │
-00:01 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1                     36,536 Hz     3.9 % │▌            │
-00:01 HENGIST/BENCHMARKS  ▶  using_immutable                                   35,932 Hz     3.9 % │▌            │
-00:01 HENGIST/BENCHMARKS  ▶  using_hamt                                        25,408 Hz     2.7 % │▍            │
-00:01 HENGIST/BENCHMARKS  ▶  using_mori                                        10,344 Hz     1.1 % │▏            │
-00:01 HENGIST/BENCHMARKS  ▶  using_immer                                        9,069 Hz     1.0 % │▏            │
-00:01 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_partial                       8,914 Hz     1.0 % │▏            │
-
-n: 100, count: 1313
-00:02 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                          1,623,933 Hz   100.0 % │████████████▌│
-00:02 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0                    339,169 Hz    20.9 % │██▋          │
-00:02 HENGIST/BENCHMARKS  ▶  using_immutable                                  119,138 Hz     7.3 % │▉            │
-00:02 HENGIST/BENCHMARKS  ▶  using_hamt                                       111,030 Hz     6.8 % │▉            │
-00:02 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1                     93,930 Hz     5.8 % │▊            │
-00:02 HENGIST/BENCHMARKS  ▶  using_mori                                        29,827 Hz     1.8 % │▎            │
-00:02 HENGIST/BENCHMARKS  ▶  using_immer                                       16,342 Hz     1.0 % │▏            │
-00:02 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_partial                      15,471 Hz     1.0 % │▏            │
-
-n: 10'000, count: 134'491
-00:43 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                            547,914 Hz   100.0 % │████████████▌│
-00:43 HENGIST/BENCHMARKS  ▶  using_immutable                                  328,788 Hz    60.0 % │███████▌     │
-00:43 HENGIST/BENCHMARKS  ▶  using_hamt                                       277,877 Hz    50.7 % │██████▍      │
-00:43 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0                    272,873 Hz    49.8 % │██████▎      │
-00:43 HENGIST/BENCHMARKS  ▶  using_mori                                       108,792 Hz    19.9 % │██▌          │
-00:43 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1                     65,763 Hz    12.0 % │█▌           │
-00:43 HENGIST/BENCHMARKS  ▶  using_immer                                       18,940 Hz     3.5 % │▍            │
-00:43 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_partial                      14,840 Hz     2.7 % │▍            │
-
-n: 100'000, count: 1'349'766
-07:13 HENGIST/BENCHMARKS  ▶  using_plainjs_mutable                            499,935 Hz   100.0 % │████████████▌│
-07:13 HENGIST/BENCHMARKS  ▶  using_immutable                                  444,554 Hz    88.9 % │███████████▏ │
-07:13 HENGIST/BENCHMARKS  ▶  using_hamt                                       356,847 Hz    71.4 % │████████▉    │
-07:13 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0                    195,966 Hz    39.2 % │████▉        │
-07:13 HENGIST/BENCHMARKS  ▶  using_mori                                       128,844 Hz    25.8 % │███▎         │
-07:13 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1                     59,905 Hz    12.0 % │█▌           │
-07:13 HENGIST/BENCHMARKS  ▶  using_immer                                       18,180 Hz     3.6 % │▌            │
-07:13 HENGIST/BENCHMARKS  ▶  using_letsfreezethat_partial                      14,707 Hz     2.9 % │▍            │
+00:11 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0_freezethaw                  116,513 Hz   100.0 % │████████████▌│
+00:11 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1_freezethaw                   97,101 Hz    83.3 % │██████████▍  │
+00:11 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f0_lets                         93,101 Hz    79.9 % │██████████   │
+00:11 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_f1_lets                         76,045 Hz    65.3 % │████████▏    │
+00:11 HENGIST/BENCHMARKS  ▶  plainjs_mutable                                   28,035 Hz    24.1 % │███          │
+00:11 HENGIST/BENCHMARKS  ▶  letsfreezethat_v2_f0_lets                         22,410 Hz    19.2 % │██▍          │
+00:11 HENGIST/BENCHMARKS  ▶  letsfreezethat_v2_f0_freezethaw                   16,854 Hz    14.5 % │█▊           │
+00:11 HENGIST/BENCHMARKS  ▶  letsfreezethat_v2_f1_freezethaw                   16,443 Hz    14.1 % │█▊           │
+00:11 HENGIST/BENCHMARKS  ▶  letsfreezethat_v2_f1_lets                         13,648 Hz    11.7 % │█▌           │
+00:11 HENGIST/BENCHMARKS  ▶  immutable                                          8,359 Hz     7.2 % │▉            │
+00:11 HENGIST/BENCHMARKS  ▶  mori                                               7,845 Hz     6.7 % │▉            │
+00:11 HENGIST/BENCHMARKS  ▶  hamt                                               7,449 Hz     6.4 % │▊            │
+00:11 HENGIST/BENCHMARKS  ▶  immer                                              4,943 Hz     4.2 % │▌            │
 
 */
 
