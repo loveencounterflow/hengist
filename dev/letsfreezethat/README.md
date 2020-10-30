@@ -295,9 +295,9 @@ benchmarks shown above.
 
 ### `klona`, `deepfreeze`, `deepfreezer`, `fast-copy`
 
-In search for a fast solution that would only provide deep-copying (i.e. no copy-on-write / structural
-sharing) and/or deep-freezing capabilities I found [`klona`](https://github.com/lukeed/klona),
-[`fast-copy`](https://github.com/planttheidea/fast-copy),
+**most deep-copy algos too slow**—In search for a fast solution that would only provide deep-copying (i.e.
+no copy-on-write / structural sharing) and/or deep-freezing capabilities I found
+[`klona`](https://github.com/lukeed/klona), [`fast-copy`](https://github.com/planttheidea/fast-copy),
 [`deepfreeze`](https://github.com/serapath/deepfreeze), and [`deepfreezer` (a.k.a.
 DeepFreezerJS)](https://github.com/TOGoS/DeepFreezerJS). Of these, [benchmarks](#benchmarks) convinced me
 that only `klona` was likely to bring speedups to the next version of LetsFreezeThat so I did not consider
