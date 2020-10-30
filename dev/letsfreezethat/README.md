@@ -29,15 +29,26 @@ to make working with immutable objects in JavaScript less of a chore.
   overhead of making an additional copy when either `freeze()` is called or a call to `lets d, ( d ) -> ...`
   has finished.
 
-* LFT comes in two configurable flavors: `LFT = ( require 'letsfreezethat' ).new { freeze: true, }` (which
-  is the same as `LFT = require 'letsfreezethat'`) and `LFT = ( require 'letsfreezethat' ).new { freeze:
-  false, }` which forgoes freezing (but not copying).
+* LFT comes in two configurable flavors:
+
+  * `lets = require 'letsfreezethat'` which indeed deep-freezes objects and arrays, and
+  * `lets = ( require 'letsfreezethat' ).nofreeze` which forgoes freezing (but not copying).
+
+* The idea is that you can switch to the more performant `nofreeze` flavor in production:
+
+  ```coffee
+  if running_in_dev_mode then { lets, freeze, thaw } =   require 'letsfreezethat'
+  else                        { lets, freeze, thaw } = ( require 'letsfreezethat' ).nofreeze
+  ```
+
+  once you have made it sufficiently plausible that no part of your code performs unintended mutation of
+  values chalked up as immutable. Yes, it's all about probabilities rather than proof of correctness.
 
 * The non-freezing configuration is a tad faster on `thaw()` and ≈5 times faster on `freeze()`.
 
-* The `thaw()` method will always make a copy even when `{ freeze: false, }` is given; otherwise it is
-  hardly conceivable how an application could switch from the slower `{ freeze: true, }` configuration to
-  the faster `{ freeze: false, }` without breaking.
+* Observe that the `thaw()` method will always make a copy even with the `nofreeze` flavor;
+  otherwise it is hardly conceivable how an application could switch from the slower `{ freeze: true, }`
+  configuration to the faster `{ freeze: false, }` without breaking.
 
 * In the case a list or an object originates from the outside and other places might still hold references
   to that value or one of its properties, one can use `thaw()` to make sure any mutations will not be
@@ -101,7 +112,12 @@ copy as fast as you can without asking questions turns out to be quite efficient
 assume that it will be somehow-acceptable space-wise, too, because garbage collection. It would still be
 nice to have some memory consumption for the various libraries, so maybe sometime.
 
-
+**what to learn from the benchmarks**—The overall trend is clear. Barring any dumb blunders in my
+benchmarking code what clearly stands out is that structural sharing (as provided by `immutable.js`,
+`immer`, `HAMT`, and `mori`) does not pay out *in terms of time costs* and *provided you have many
+small-ish, flat-tish objects*. It's just not worth the trouble. These are well thought-out, tested and honed
+libraries that go a long way to prevent unwarranted duplication of data, yet their demands in terms of CPU
+cycles is non-trivial when compared to stupid copying.
 
 ```
 # hengist/dev/letsfreezethat/src/lft-deepfreeze.benchmarks.coffee
@@ -176,7 +192,7 @@ and, last but not least,
 
 The key idea of `immer` is that in order to achieve immutability in JavaScript, instead of inventing one's
 own data structures and APIs, it is much simpler to just recursively make use of `Object.freeze()` and
-`Object.assign()` and give the programmer a convenience function—I called it `lets()` but `immer` called it
+`Object.assign()` and give the programmer a convenience function—in LetsFreezeThat: `lets()`; in `immer`:
 `produce()`—that allows to perform mutation within the confines of a callback function.
 
 `immer` aims at reducing memory usage by providing structural sharing. I have not looked into its
