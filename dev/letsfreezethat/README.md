@@ -13,6 +13,7 @@ to make working with immutable objects in JavaScript less of a chore.
 - [Implementation](#implementation)
 - [Benchmarks](#benchmarks)
 - [Other Libraries, or: Should I COW?](#other-libraries-or-should-i-cow)
+  - [`immer`](#immer)
   - [mori](#mori)
 - [To Do](#to-do)
 
@@ -44,47 +45,62 @@ to make working with immutable objects in JavaScript less of a chore.
 
 # Implementation
 
-The improvements seen when going from LetsFreezeThat v2 to v3 are almost entirely due to the code used by
-the [klona](https://github.com/lukeed/klona) library, specifically its
+The performance gains seen when going from LetsFreezeThat v2 to v3 are almost entirely due to the code used
+by the [`klona`](https://github.com/lukeed/klona) library, specifically its
 [JSON](https://github.com/lukeed/klona/blob/master/src/json.js) module. The code is simple, straightforward,
 and fast—mostly because it's a well-written piece that does something very specific, name only concerning
 itself with (JSON, JS) objects and arrays.
 
 LetsFreezeThat has a similar focus and forgoes freezing RegExps, Dates, Int32Arrays or anything but plain
 objects and lists, so that's a perfect fit. I totally just copied the code of the linked module to avoid the
-dependency on whatever else it is that klona has in store (it's a lot got check it out).
+dependency on whatever else it is that `klona` has in store (it's a lot got check it out).
 
 # Benchmarks
 
-The code that produced the below benchmarks is available in
+**where to find the code**—The code that produced the below benchmarks is available in
 [𐌷𐌴𐌽𐌲𐌹𐍃𐍄](https://github.com/loveencounterflow/hengist/tree/master/dev/letsfreezethat/src) (which is my
-workbench of sorts to develop, test and benchmark my software). In each case, thousands of small-ish JS objects
-were frozen, manipulated, and thawed, as the case may be, using a number of approaches and a number of
-software packages.
+workbench of sorts to develop, test and benchmark my software). In each case, thousands of small-ish JS
+objects were frozen, manipulated, and thawed, as the case may be, using a number of approaches and a number
+of software packages.
 
-`letsfreezethat_v{2|3}_f{0|1}` is to be read as: '`letsfreezethat` using { legacy v2.2.5 | code for upcoming
-v3 in the present state } with freezing turned { off | on }'.
+**how to read the tags**—`letsfreezethat_v{2|3}_f{0|1}` is to be read as: '`letsfreezethat` using { legacy
+v2.2.5 | code for upcoming v3 in the present state } with freezing turned { off | on }'.
 
-Absolute numbers are cycles per second (Hz) where mulling through the tasks for a single object is counted
-as one cycle, and the number and nature of tasks is identical for all libraries tested, as far as possible.
-To obtain a baseline for comparison, JavaScript's `Object.freeze()` have been used for freezing and
-`Object.assign()` for thawing, but keep in mind that both methods are shallow in the sense that neither
-method would affect the nested list in a value like `{ x: [ 1, 2, 3, ], }`. LetsFreezeThat does do deep
-freezing and deep thawing, though (and some of the other libraries do so too; others don't), so the
-comparison is slightly in favor of JavaScript native methods (because they get as much credit for each cycle
-although less gets done).
+**how to understand the numbers**—Absolute numbers are cycles per second (Hz) where mulling through the
+tasks for a single object is counted as one cycle, and the number and nature of tasks is identical for all
+libraries tested, as far as possible. To obtain a baseline for comparison, JavaScript's `Object.freeze()`
+have been used for freezing and `Object.assign()` for thawing, but keep in mind that both methods are
+shallow in the sense that neither method would affect the nested list in a value like `{ x: [ 1, 2, 3, ],
+}`. LetsFreezeThat does do deep freezing and deep thawing, though (and some of the other libraries do so
+too; others don't), so the comparison is slightly in favor of JavaScript native methods (because they get as
+much credit for each cycle although less gets done).
 
-One would fully expect JS native methods to be always on top of the scores but this is not the case. For one
-thing `letsfreezethat.nofreeze.freeze()` does not actually do anything, its literally just the `id()`
-function: `nofreeze_lets.freeze = ( me ) -> me`, bam. Deep freezing without the part where you deep-freeze
-is indeed faster than shallow freezing, of course. Also, although care has been taken to run garbage
-collection explicitly and to perform any computation that is external to each test such that it does not
-affect the timings, there's always an observable and, sadly, unavoidable jitter in performance which can add
-up to as much as 10 or even 20 per cent of the figures shown. Each test case has been run with hundreds or
-thousands of values and a few (3 to 5) repeated runs, some of them in shuffled order, to minimize such
-effects. I hope to provide error bars in future editions but for now please understand that `100,00Hz` means
-something close to `between 80,000Hz and 120,000Hz` and `50%` is really `maybe something around 40% to 60%`
-of the best performing solution.
+**why native JS looks slow in comparison**—One would fully expect JS native methods to be always on top of
+the scores but this is not the case. For one thing `letsfreezethat.nofreeze.freeze()` does not actually do
+anything, its literally just the `id()` function: `nofreeze_lets.freeze = ( me ) -> me`, bam. Deep freezing
+without the part where you deep-freeze is indeed faster than shallow freezing, of course. Also, although
+care has been taken to run garbage collection explicitly and to perform any computation that is external to
+each test such that it does not affect the timings, there's always an observable and, sadly, unavoidable
+jitter in performance which can add up to as much as 10 or even 20 per cent of the figures shown. Each test
+case has been run with hundreds or thousands of values and a few (3 to 5) repeated runs, some of them in
+shuffled order, to minimize such effects. I hope to provide error bars in future editions but for now please
+understand that `100,00Hz` means something close to `between 80,000Hz and 120,000Hz` and `50%` is really
+`maybe something around 40% to 60%` of the best performing solution.
+
+**only temporal, no spatial benchmarks**—So far I have not looked at RAM consumption figures for the various
+test cases. This is in part because the intended use case for LetsFreezeThat is in passing around lots of
+small-ish objects that are not very deeply nested ([`datom`s to be more
+precise](https://github.com/loveencounterflow/datom)). I do not expect any copy-on-write (COW)
+implementation to be very space- and time-efficient in JavaScript *for this particular use cae* except for
+the hypothetical case where we have something like [Hash Array Mapped Tries
+(HAMTs)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie) built right into the language like Clojure
+has. The story might well be different in the case where you have deeply nested, larg-ish objects where once
+in while you want to modify-but-not-mutate this or that attribute in a tree. I did not test for that in the
+current iteration. Since the memory consumption of each individual piece of data is so small, just making a
+copy as fast as you can without asking questions turns out to be quite efficient time-wise, and I just
+assume that it will be somehow-acceptable space-wise, too, because garbage collection. It would still be
+nice to have some memory consumption for the various libraries, so maybe sometime.
+
 
 
 ```
@@ -148,18 +164,29 @@ of the best performing solution.
 During the implementation of LetsFreezeThat I realized there's quite a few packages available that do
 immutability in JavaScript, e.g.
 
-* [HAMT](https://github.com/mattbierner/hamt)
-* [mori](https://swannodette.github.io/mori/)
-* [immutable.js](https://immutable-js.github.io/immutable-js/)
+* [`HAMT`](https://github.com/mattbierner/hamt)
+* [`mori`](https://swannodette.github.io/mori/)
+* [`immutable.js`](https://immutable-js.github.io/immutable-js/)
 
 and, last but not least,
 
-* [immer](https://immerjs.github.io/immer/docs/introduction).
+* [`immer`](https://immerjs.github.io/immer/docs/introduction).
 
+## `immer`
 
+The key idea of `immer` is that in order to achieve immutability in JavaScript, instead of inventing one's
+own data structures and APIs, it is much simpler to just recursively make use of `Object.freeze()` and
+`Object.assign()` and give the programmer a convenience function—I called it `lets()` but `immer` called it
+`produce()`—that allows to perform mutation within the confines of a callback function.
+
+`immer` aims at reducing memory usage by providing structural sharing. I have not looked into its
+implementation and did not collect any figures on RAM consumption, so I'll leave the reader with the time
+benchmarks shown above.
 
 
 ## mori
+
+`mori` is a standalone library that brings some ClojureScript goodness to JS programs.
 
 * [mori](https://swannodette.github.io/mori/) ([also on GitHub](https://github.com/swannodette/mori))
 
