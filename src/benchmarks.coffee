@@ -147,7 +147,7 @@ f9    = ( n ) -> ( nf '###,##0.000000000', n ).padStart 24
   try
     test = await parent[ test_name ] n, show
   catch error
-    warn "µ77812 when trying to run test #{rpr test_name}, an error occurred"
+    error.message = "µ77812 when trying to run test #{rpr test_name}, an error occurred: #{rpr error.message}"
     throw error
   t1ns          = @time_now()
   # cpu1          = process.cpuUsage()
