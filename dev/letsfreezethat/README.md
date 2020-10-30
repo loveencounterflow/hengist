@@ -38,7 +38,7 @@ lets = require 'letsfreezethat'
 ```
 
 This method is best explained by having a look at its definition which is in essence approximately three
-lines long: it takes an `original` value (a JS object or array) and am optional `modifier` callback
+lines long: it takes an `original` value (a JS object or array) and an optional `modifier` callback
 function. It then `thaw()`s that value, which entails making a deep copy of it. Next, it calls the
 `modifier()` (if given), ignoring the return value of that call. Step 3 consists of freezing the draft
 version (in-place, i.e. without copying it) and returning it:
@@ -66,6 +66,11 @@ set_balance = ( account, amount ) ->
   return account
 ```
 
+At the point in time `account` is set to the return value of the `lets()` call, it becomes bound to a
+faithful copy of the value passed in to `set_balance()`. Whatever you name the second argument to `lets()`
+(I chose `d` here for `draft`, `data` or `datom`, whichever you prefer)—that name (binding) cannot leak out
+of the modifier function, so you're pretty much on the safe side here. And that's it. No new API to learn
+and nothing (well, less) to worry about. Keep calm and `lets()` freeze that!
 
 
 ## Notes
