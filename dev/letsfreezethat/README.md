@@ -309,11 +309,13 @@ these.
 
 ### Should I COW?
 
-Copy-On-Write is a (not new) technique to eschew 'speculative', avoidable memory consumption. One Phil
-Bagwell proposed a technique how to do that efficiently for trees of data in [a paper titled *Ideal Hash
-Trees* (Lausanne, 2000)](http://infoscience.epfl.ch/record/64398/files/idealhashtrees.pdf); subsequentially,
-his technique was used by the [Clojure](https://clojure.org/) community to get more memory-efficient and
-performant COW semantics into the language.
+**HAMT a solution for COW, *but***—Copy-On-Write is a (not new) technique to eschew 'speculative', avoidable
+memory consumption. One Phil Bagwell proposed a technique how to do that efficiently for trees of data in [a
+paper titled *Ideal Hash Trees* (Lausanne,
+2000)](http://infoscience.epfl.ch/record/64398/files/idealhashtrees.pdf); subsequentially, his technique was
+used by the [Clojure](https://clojure.org/) community to get more memory-efficient and performant COW
+semantics into the language. Q: What's not to like?—A: It's still not as fast in JS to justify the effort
+when your data items are small; again, see the [benchmarks](#benchmarks).
 
 ## To Do
 
