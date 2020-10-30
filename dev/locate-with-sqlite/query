@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# q=$(sed 's/'"$1"'/"/""/g')
+q=$(sed "s/$1/'/''/g")
+echo "$q"
+DB='.locatedb.sqlite'
+# FIXME: quoting
+sqlite3 "$DB" "select path from paths where path match '$q' order by path;"
