@@ -20,8 +20,6 @@ to make working with immutable objects in JavaScript less of a chore.
 - [Implementation](#implementation)
 - [Benchmarks](#benchmarks)
 - [Other Libraries, or: Should I COW?](#other-libraries-or-should-i-cow)
-  - [`immer`](#immer)
-  - [`mori`](#mori)
   - [`klona`, `deepfreeze`, `deepfreezer`, `fast-copy`](#klona-deepfreeze-deepfreezer-fast-copy)
   - [Should I COW?](#should-i-cow)
 - [To Do](#to-do)
@@ -269,28 +267,21 @@ and, last but not least,
 
 * [`immer`](https://immerjs.github.io/immer/docs/introduction).
 
-### `immer`
+**`immer` provided the inspiration**—The key idea of `immer` is that in order to achieve immutability in
+JavaScript, instead of inventing one's own data structures and APIs, it is much simpler to just recursively
+make use of `Object.freeze()` and `Object.assign()` and give the programmer a convenience function—in
+LetsFreezeThat: `lets()`; in `immer`: `produce()`—that allows to perform mutation within the confines of a
+callback function. `immer` aims at reducing memory usage by providing structural sharing. I have not looked
+into its implementation and did not collect any figures on RAM consumption, so I'll leave the reader with
+the [benchmarks](#benchmarks).
 
-The key idea of `immer` is that in order to achieve immutability in JavaScript, instead of inventing one's
-own data structures and APIs, it is much simpler to just recursively make use of `Object.freeze()` and
-`Object.assign()` and give the programmer a convenience function—in LetsFreezeThat: `lets()`; in `immer`:
-`produce()`—that allows to perform mutation within the confines of a callback function.
-
-`immer` aims at reducing memory usage by providing structural sharing. I have not looked into its
-implementation and did not collect any figures on RAM consumption, so I'll leave the reader with the time
-benchmarks shown above.
-
-
-### `mori`
-
-`mori` is a standalone library that brings some ClojureScript goodness to JS programs.
-
-* [mori](https://swannodette.github.io/mori/) ([also on GitHub](https://github.com/swannodette/mori))
-
-* API is a bit un-JS but does provide some interesting functionality
-
-* cannot initialize from plain JS object, only from sequence of key/value pairs; when doing so, must
-  explicitly take care of nested objects and lists
+**`mori` is tempting, but not convincing for my use case**—`mori` is a standalone library that brings some
+ClojureScript goodness to JS programs. Its API is a bit un-JS-ish but does provide some interesting
+functionality. On the downside, it cannot initialize `HashMap`s from plain JS objects, only from sequence of
+key/value pairs, and when doing so, must explicitly take care of nested objects and lists. What you then get
+is data structures that internally look very unlike plain JS objects so even to get a meaningful ouput when
+debugging you can never just `console.log( myvalue )`, you must always convert back to plain JS. These two
+considerations pretty much precluded using `mori` under the hood; also, the [benchmarks](#benchmarks).
 
 
 ### `klona`, `deepfreeze`, `deepfreezer`, `fast-copy`
@@ -314,8 +305,8 @@ memory consumption. One Phil Bagwell proposed a technique how to do that efficie
 paper titled *Ideal Hash Trees* (Lausanne,
 2000)](http://infoscience.epfl.ch/record/64398/files/idealhashtrees.pdf); subsequentially, his technique was
 used by the [Clojure](https://clojure.org/) community to get more memory-efficient and performant COW
-semantics into the language. Q: What's not to like?—A: It's still not as fast in JS to justify the effort
-when your data items are small; again, see the [benchmarks](#benchmarks).
+semantics into the language. **Q**: What's not to like?—**A**: It's *still* not as fast in JS to justify the
+effort when your data items are small; again, see the [benchmarks](#benchmarks).
 
 ## To Do
 
