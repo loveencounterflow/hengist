@@ -11,6 +11,8 @@ to make working with immutable objects in JavaScript less of a chore.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
+- [Installation](#installation)
+- [Usage](#usage)
 - [Notes](#notes)
 - [Implementation](#implementation)
 - [Benchmarks](#benchmarks)
@@ -21,9 +23,15 @@ to make working with immutable objects in JavaScript less of a chore.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+## Installation
 
+```sh
+npm install letsfreezethat
+```
 
-# Notes
+## Usage
+
+## Notes
 
 * LFT does not copy objects on explicit or implicit `freeze()`. That should be fine for most use cases since
   what one usually wants to do is either create or thaw a given value (which implies making a copy),
@@ -57,7 +65,7 @@ to make working with immutable objects in JavaScript less of a chore.
   to that value or one of its properties, one can use `thaw()` to make sure any mutations will not be
   visible from the outside. In this regard, `thaw()` could have been called `deep_copy()`.
 
-# Implementation
+## Implementation
 
 The performance gains seen when going from LetsFreezeThat v2 to v3 are almost entirely due to the code used
 by the [`klona`](https://github.com/lukeed/klona) library, specifically its
@@ -69,7 +77,7 @@ LetsFreezeThat has a similar focus and forgoes freezing RegExps, Dates, Int32Arr
 objects and lists, so that's a perfect fit. I totally just copied the code of the linked module to avoid the
 dependency on whatever else it is that `klona` has in store (it's a lot got check it out).
 
-# Benchmarks
+## Benchmarks
 
 **where to find the code**—The code that produced the below benchmarks is available in
 [𐌷𐌴𐌽𐌲𐌹𐍃𐍄](https://github.com/loveencounterflow/hengist/tree/master/dev/letsfreezethat/src) (which is my
@@ -178,7 +186,7 @@ cycles is non-trivial when compared to stupid copying.
   immer                                              4,943 Hz     4.2 % │▌            │
 ```
 
-# Other Libraries, or: Should I COW?
+## Other Libraries, or: Should I COW?
 
 During the implementation of LetsFreezeThat I realized there's quite a few packages available that do
 immutability in JavaScript, e.g.
@@ -191,7 +199,7 @@ and, last but not least,
 
 * [`immer`](https://immerjs.github.io/immer/docs/introduction).
 
-## `immer`
+### `immer`
 
 The key idea of `immer` is that in order to achieve immutability in JavaScript, instead of inventing one's
 own data structures and APIs, it is much simpler to just recursively make use of `Object.freeze()` and
@@ -203,7 +211,7 @@ implementation and did not collect any figures on RAM consumption, so I'll leave
 benchmarks shown above.
 
 
-## mori
+### mori
 
 `mori` is a standalone library that brings some ClojureScript goodness to JS programs.
 
@@ -215,7 +223,7 @@ benchmarks shown above.
   explicitly take care of nested objects and lists
 
 
-# To Do
+## To Do
 
 * [ ] preserve symbol attributes when freezing
 * [ ] consider to offer an implementation of HAMT
