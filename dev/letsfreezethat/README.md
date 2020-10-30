@@ -15,7 +15,8 @@ to make working with immutable objects in JavaScript less of a chore.
 - [Usage](#usage)
   - [Using `lets()`](#using-lets)
   - [Using `thaw()` and `freeze()`](#using-thaw-and-freeze)
-  - [Moving to Production](#moving-to-production)
+  - [`get()` and `set()`](#get-and-set)
+  - [API, and Moving to Production](#api-and-moving-to-production)
 - [Notes](#notes)
 - [Implementation](#implementation)
 - [Benchmarks](#benchmarks)
@@ -95,9 +96,37 @@ set_balance = ( d, amount ) ->
 And that's it, a little bit simpler than the code for `lets()` if you will but also a little bit more open
 to accidental slips. YMMV.
 
-### Moving to Production
+### `get()` and `set()`
 
+`get()` and `set()` are available FTTB but not necessarily recommended. `set()` takes a data object, a key,
+and a value; it will produce a draft copy of the data object, set the key to the value given, freeze the
+data object and return it. If you have a single attribute to set, that's one way to do it:
 
+```coffee
+{ thaw, freeze, get, set, } = require 'letsfreezethat'
+d = freeze d
+d = set d, 'key', value
+w = get d, 'key'
+```
+
+### API, and Moving to Production
+
+LetsFreezeThat comes in two configurable flavors, one that does indeed freeze and thaw (and, thereby,
+implicitly copies) objects, and one that skips the freezing and thawing (but not the copying).
+`require()`ing either flavor returns a method `lets()` as discussed above:
+
+* `lets = require 'letsfreezethat'` which indeed deep-freezes objects and arrays, and
+* `lets = ( require 'letsfreezethat' ).nofreeze` which forgoes freezing (but not copying).
+
+The `lets()` method has a number of attributes which are callable by themselves (no JS tear-off /
+`this`-juggling here):
+
+* **`lets   = ( d, modifier = null ) ->`**—copy of the same method.
+* **`assign = ( d, P... ) ->`**—bulk-assign, semantics like `Object.assign()`, returns copy of `d`.
+* **`freeze = ( d ) ->`**—deep-freeze in-place; a no-op with `nofreeze`.
+* **`thaw   = ( d ) ->`**—thaw a deep copy (in the `freeze` flavor) of `d` and return it;
+* **`get    = ( d, key ) ->`**—return value of an attribute of `d`.
+* **`set    = ( d, key, value ) ->`**—set an attribute of a copy of d, return the copy.
 
 ## Notes
 
@@ -108,10 +137,6 @@ to accidental slips. YMMV.
   overhead of making an additional copy when either `freeze()` is called or a call to `lets d, ( d ) -> ...`
   has finished.
 
-* LFT comes in two configurable flavors:
-
-  * `lets = require 'letsfreezethat'` which indeed deep-freezes objects and arrays, and
-  * `lets = ( require 'letsfreezethat' ).nofreeze` which forgoes freezing (but not copying).
 
 * The idea is that you can switch to the more performant `nofreeze` flavor in production:
 
