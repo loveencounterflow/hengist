@@ -1,5 +1,7 @@
 
 
+![let's keep calm and freeze that](./artwork/letskeepcalmandfreezethat.png)
+
 # Let's Freeze That!
 
 [LetsFreezeThat](https://github.com/loveencounterflow/letsfreezethat) is an unapologetically minimal library
@@ -18,6 +20,7 @@ to make working with immutable objects in JavaScript less of a chore.
 - [To Do](#to-do)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 
 # Notes
