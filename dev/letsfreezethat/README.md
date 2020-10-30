@@ -13,12 +13,17 @@ to make working with immutable objects in JavaScript less of a chore.
 
 - [Installation](#installation)
 - [Usage](#usage)
+  - [Using `lets()`](#using-lets)
+  - [Using `thaw()` and `freeze()`](#using-thaw-and-freeze)
+  - [Moving to Production](#moving-to-production)
 - [Notes](#notes)
 - [Implementation](#implementation)
 - [Benchmarks](#benchmarks)
 - [Other Libraries, or: Should I COW?](#other-libraries-or-should-i-cow)
   - [`immer`](#immer)
-  - [mori](#mori)
+  - [`mori`](#mori)
+  - [`klona`, `deepfreeze`, `deepfreezer`, `fast-copy`](#klona-deepfreeze-deepfreezer-fast-copy)
+  - [Should I COW?](#should-i-cow)
 - [To Do](#to-do)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -50,6 +55,8 @@ lets = ( original, modifier = null ) ->
   return deep_freeze draft
 ```
 
+### Using `lets()`
+
 The way this is intended to simplify your life is as follows: you have a function that accepts and returns
 an object (or array). Within that function, you want to perform some computation and update the object the
 functional way (no side effects, no mutations). In order to be on the safe side, you want to work with
@@ -71,6 +78,27 @@ faithful copy of the value passed in to `set_balance()`. Whatever you name the s
 (I chose `d` here for `draft`, `data` or `datom`, whichever you prefer)—that name (binding) cannot leak out
 of the modifier function, so you're pretty much on the safe side here. And that's it. No new API to learn
 and nothing (well, less) to worry about. Keep calm and `lets()` freeze that!
+
+### Using `thaw()` and `freeze()`
+
+Using `lets()` is fine but the act of calling a function only to get called back adds a bit of computational
+overhead. You can shave off a few percent (maybe 10% or so) by using `thaw()` and `freeze()` expöicitly,
+like so (using `d` as name for the business data object):
+
+```coffee
+{ thaw, freeze, } = require 'letsfreezethat'
+
+set_balance = ( d, amount ) ->
+  d = thaw d
+  d.balance += amount
+  return freeze d
+```
+
+And that's it, a little bit simpler than the code for `lets()` if you will but also a little bit more open
+to accidental slips. YMMV.
+
+### Moving to Production
+
 
 
 ## Notes
@@ -115,9 +143,9 @@ by the [`klona`](https://github.com/lukeed/klona) library, specifically its
 and fast—mostly because it's a well-written piece that does something very specific, name only concerning
 itself with (JSON, JS) objects and arrays.
 
-LetsFreezeThat has a similar focus and forgoes freezing RegExps, Dates, Int32Arrays or anything but plain
-objects and lists, so that's a perfect fit. I totally just copied the code of the linked module to avoid the
-dependency on whatever else it is that `klona` has in store (it's a lot got check it out).
+LetsFreezeThat has a similar focus and forgoes freezing `RegExp`s, `Date`s, `Int32Array`s or anything but
+plain `Object`s and `Array`s, so that's a perfect fit. I totally just copied the code of the linked module
+to avoid the dependency on whatever else it is that `klona` has in store (it's a lot got check it out).
 
 ## Benchmarks
 
@@ -253,7 +281,7 @@ implementation and did not collect any figures on RAM consumption, so I'll leave
 benchmarks shown above.
 
 
-### mori
+### `mori`
 
 `mori` is a standalone library that brings some ClojureScript goodness to JS programs.
 
@@ -264,6 +292,28 @@ benchmarks shown above.
 * cannot initialize from plain JS object, only from sequence of key/value pairs; when doing so, must
   explicitly take care of nested objects and lists
 
+
+### `klona`, `deepfreeze`, `deepfreezer`, `fast-copy`
+
+In search for a fast solution that would only provide deep-copying (i.e. no copy-on-write / structural
+sharing) and/or deep-freezing capabilities I found [`klona`](https://github.com/lukeed/klona),
+[`fast-copy`](https://github.com/planttheidea/fast-copy),
+[`deepfreeze`](https://github.com/serapath/deepfreeze), and [`deepfreezer` (a.k.a.
+DeepFreezerJS)](https://github.com/TOGoS/DeepFreezerJS). Of these, [benchmarks](#benchmarks) convinced me
+that only `klona` was likely to bring speedups to the next version of LetsFreezeThat so I did not consider
+the rest any more. Deep-freezing nested compound values in-situ is almost exactly the same as deep-copying
+nested compound values so I used `klona`'s approach for both chores. Be it said though that I did not
+evaluate other possibly interesting aspects of any of these packages, so if your use cases involves copying
+or freezing JS `Date` objects, `Int32Array`s, `RegExp`s, I encourage you to have a second look at any of
+these.
+
+### Should I COW?
+
+Copy-On-Write is a (not new) technique to eschew 'speculative', avoidable memory consumption. One Phil
+Bagwell proposed a technique how to do that efficiently for trees of data in [a paper titled *Ideal Hash
+Trees* (Lausanne, 2000)](http://infoscience.epfl.ch/record/64398/files/idealhashtrees.pdf); subsequentially,
+his technique was used by the [Clojure](https://clojure.org/) community to get more memory-efficient and
+performant COW semantics into the language.
 
 ## To Do
 
