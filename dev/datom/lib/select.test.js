@@ -828,25 +828,13 @@
       x: 42,
       y: 108
     });
-    T.eq(DATOM_DIRTY.lets(d, function(d) {
-      return delete d.x;
-    }), {
-      $key: '^foo',
-      y: 108,
-      $dirty: true
-    });
-    T.eq(DATOM_NODIRTY.lets(d, function(d) {
-      return delete d.x;
-    }), {
-      $key: '^foo',
-      y: 108
-    });
-    T.eq(DATOM_DEFAULT.lets(d, function(d) {
-      return delete d.x;
-    }), {
-      $key: '^foo',
-      y: 108
-    });
+    debug(d);
+    debug(DATOM_DEFAULT.lets(d, function(d) {
+      return null;
+    }));
+    // T.eq ( DATOM_DIRTY.lets d,    ( d ) -> delete d.x ), { $key: '^foo', y: 108, $dirty: true,  }
+    // T.eq ( DATOM_NODIRTY.lets d,  ( d ) -> delete d.x ), { $key: '^foo', y: 108,                }
+    // T.eq ( DATOM_DEFAULT.lets d,  ( d ) -> delete d.x ), { $key: '^foo', y: 108,                }
     done();
     return null;
   };
