@@ -25,7 +25,7 @@ jr                        = JSON.stringify
 
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "fresh_datom" ] = ( T, done ) ->
+@[ "fresh_datom (freeze)" ] = ( T, done ) ->
   DATOM = require '../../../apps/datom'
   probes_and_matchers = [
     [ [ '^foo' ], { '$fresh': true, '$key': '^foo' }, null ]
@@ -36,7 +36,28 @@ jr                        = JSON.stringify
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      resolve DATOM.fresh_datom probe...
+      d = DATOM.fresh_datom probe...
+      T.ok Object.isFrozen d
+      resolve d
+      return null
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "fresh_datom (nofreeze)" ] = ( T, done ) ->
+  DATOM = ( require '../../../apps/datom' ).new { freeze: false, }
+  probes_and_matchers = [
+    [ [ '^foo' ], { '$fresh': true, '$key': '^foo' }, null ]
+    [ [ '^foo', { foo: 'bar' } ], { foo: 'bar', '$fresh': true, '$key': '^foo' }, null ]
+    [ [ '^foo', 42 ], { '$value': 42, '$fresh': true, '$key': '^foo' }, null ]
+    [ [ '^foo', 42, { '$fresh': false } ], { '$value': 42, '$fresh': true, '$key': '^foo' }, null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      d = DATOM.fresh_datom probe...
+      T.ok not Object.isFrozen d
+      resolve d
       return null
   done()
   return null
@@ -46,8 +67,9 @@ jr                        = JSON.stringify
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
-  test @[ "fresh_datom" ]
+  test @
+  # test @[ "fresh_datom (freeze)" ]
+  # test @[ "fresh_datom (nofreeze)" ]
   # test @[ "wrap_datom" ]
   # test @[ "new_datom complains when value has `$key`" ]
   # test @[ "selector keypatterns" ]

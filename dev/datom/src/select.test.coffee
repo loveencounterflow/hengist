@@ -287,9 +287,11 @@ jr                        = JSON.stringify
   DATOM_DEFAULT                       = new ( require '../../../apps/datom' ).Datom()
   #.........................................................................................................
   d = DATOM_DEFAULT.new_datom '^foo', { x: 42, y: 108, }
-  T.eq ( DATOM_DIRTY.lets d,    ( d ) -> delete d.x ), { $key: '^foo', y: 108, $dirty: true,  }
-  T.eq ( DATOM_NODIRTY.lets d,  ( d ) -> delete d.x ), { $key: '^foo', y: 108,                }
-  T.eq ( DATOM_DEFAULT.lets d,  ( d ) -> delete d.x ), { $key: '^foo', y: 108,                }
+  debug d
+  debug DATOM_DEFAULT.lets d, ( d ) -> null
+  # T.eq ( DATOM_DIRTY.lets d,    ( d ) -> delete d.x ), { $key: '^foo', y: 108, $dirty: true,  }
+  # T.eq ( DATOM_NODIRTY.lets d,  ( d ) -> delete d.x ), { $key: '^foo', y: 108,                }
+  # T.eq ( DATOM_DEFAULT.lets d,  ( d ) -> delete d.x ), { $key: '^foo', y: 108,                }
   done()
   return null
 
