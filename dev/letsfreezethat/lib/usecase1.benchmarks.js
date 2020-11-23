@@ -472,26 +472,26 @@
   this.run_benchmarks = async function() {
     var _, bench, cfg, i, j, len, ref, ref1, repetitions, test_name, test_names;
     bench = BM.new_benchmarks();
-    // cfg         = { set_count: 100, datom_length: 5, change_facet_count: 3, }
     cfg = {
-      set_count: 3,
-      datom_length: 2,
-      change_facet_count: 1
+      set_count: 100,
+      datom_length: 5,
+      change_facet_count: 3
     };
+    // cfg         = { set_count: 3, datom_length: 2, change_facet_count: 1, }
     repetitions = 3;
     test_names = ['immer', 'letsfreezethat_v2_standard', 'letsfreezethat_v2_nofreeze', 'letsfreezethat_v3_lets_f1', 'letsfreezethat_v3_lets_f0', 'letsfreezethat_v3_thaw_freeze_f1', 'letsfreezethat_v3_thaw_freeze_f0', 'immutable', 'hamt', 'mori', 'plainjs_mutable', 'plainjs_immutable'];
     if (global.gc != null) {
       global.gc();
     }
-    ref = CND.shuffle(test_names);
-    for (i = 0, len = ref.length; i < len; i++) {
-      test_name = ref[i];
+    for (_ = i = 1, ref = repetitions; (1 <= ref ? i <= ref : i >= ref); _ = 1 <= ref ? ++i : --i) {
+      data_cache = null;
+      if (global.gc != null) {
+        global.gc();
+      }
       whisper('-'.repeat(108));
-      for (_ = j = 1, ref1 = repetitions; (1 <= ref1 ? j <= ref1 : j >= ref1); _ = 1 <= ref1 ? ++j : --j) {
-        data_cache = null;
-        if (global.gc != null) {
-          global.gc();
-        }
+      ref1 = CND.shuffle(test_names);
+      for (j = 0, len = ref1.length; j < len; j++) {
+        test_name = ref1[j];
         await BM.benchmark(bench, cfg, false, this, test_name);
       }
     }

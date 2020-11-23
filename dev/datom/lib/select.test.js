@@ -601,6 +601,8 @@
           var d, key, value;
           [key, value] = probe;
           d = new_datom(key, value);
+          debug('^33398^', d);
+          debug('^33398^', wrap_datom('^wrapper', d));
           return resolve(wrap_datom('^wrapper', d));
         });
       });
@@ -828,13 +830,27 @@
       x: 42,
       y: 108
     });
-    debug(d);
-    debug(DATOM_DEFAULT.lets(d, function(d) {
-      return null;
-    }));
-    // T.eq ( DATOM_DIRTY.lets d,    ( d ) -> delete d.x ), { $key: '^foo', y: 108, $dirty: true,  }
-    // T.eq ( DATOM_NODIRTY.lets d,  ( d ) -> delete d.x ), { $key: '^foo', y: 108,                }
-    // T.eq ( DATOM_DEFAULT.lets d,  ( d ) -> delete d.x ), { $key: '^foo', y: 108,                }
+    // debug d
+    // debug DATOM_DEFAULT.lets d, ( d ) -> null
+    T.eq(DATOM_DIRTY.lets(d, function(d) {
+      return delete d.x;
+    }), {
+      $key: '^foo',
+      y: 108,
+      $dirty: true
+    });
+    T.eq(DATOM_NODIRTY.lets(d, function(d) {
+      return delete d.x;
+    }), {
+      $key: '^foo',
+      y: 108
+    });
+    T.eq(DATOM_DEFAULT.lets(d, function(d) {
+      return delete d.x;
+    }), {
+      $key: '^foo',
+      y: 108
+    });
     done();
     return null;
   };
@@ -842,12 +858,12 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      return test(this["dirty"]);
+      return test(this);
     })();
   }
 
-  // test @[ "wrap_datom" ]
+  // test @[ "dirty" ]
+// test @[ "wrap_datom" ]
 // test @[ "new_datom complains when value has `$key`" ]
 // test @[ "selector keypatterns" ]
 // test @[ "select 2" ]

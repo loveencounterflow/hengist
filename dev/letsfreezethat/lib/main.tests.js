@@ -724,6 +724,84 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["LFTNG can freeze frozen object, attribute"] = function(T, done) {
+    (() => {      //.........................................................................................................
+      var d, e, error, freeze;
+      try {
+        ({freeze} = require(lft_path));
+        d = {
+          a: 42,
+          b: {
+            c: ['X', 'Y']
+          }
+        };
+        d.b.c = freeze(d.b.c);
+        T.eq(d, {
+          a: 42,
+          b: {
+            c: ['X', 'Y']
+          }
+        });
+        e = freeze(d);
+        return T.ok(d === e);
+      } catch (error1) {
+        error = error1;
+        return T.fail(error.message);
+      }
+    })();
+    (() => {      //.........................................................................................................
+      var d, e, error, freeze;
+      try {
+        ({freeze} = require(lft_path));
+        d = {
+          a: 42,
+          b: {
+            c: ['X', 'Y']
+          }
+        };
+        d.b = freeze(d.b);
+        T.eq(d, {
+          a: 42,
+          b: {
+            c: ['X', 'Y']
+          }
+        });
+        e = freeze(d);
+        return T.ok(d === e);
+      } catch (error1) {
+        error = error1;
+        return T.fail(error.message);
+      }
+    })();
+    (() => {      //.........................................................................................................
+      var d, e, error, freeze;
+      try {
+        ({freeze} = require(lft_path));
+        d = {
+          a: 42,
+          b: {
+            c: ['X', 'Y']
+          }
+        };
+        e = freeze(d);
+        T.eq(d, {
+          a: 42,
+          b: {
+            c: ['X', 'Y']
+          }
+        });
+        return T.ok(d === e);
+      } catch (error1) {
+        error = error1;
+        return T.fail(error.message);
+      }
+    })();
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -731,7 +809,8 @@
     })();
   }
 
-  // test @[ "freeze, modify object copy" ]
+  // test @[ "LFTNG can freeze frozen object, attribute" ]
+// test @[ "freeze, modify object copy" ]
 // test @[ "null, primitive values are kept as-is" ]
 // test @[ "use nofreeze option for speedup" ]
 // test @[ "circular references cause custom error" ]
