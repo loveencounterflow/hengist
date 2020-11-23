@@ -253,8 +253,8 @@ data_cache                = null
 #-----------------------------------------------------------------------------------------------------------
 @run_benchmarks = ->
   bench       = BM.new_benchmarks()
-  # cfg         = { set_count: 100, datom_length: 5, change_facet_count: 3, }
-  cfg         = { set_count: 3, datom_length: 2, change_facet_count: 1, }
+  cfg         = { set_count: 100, datom_length: 5, change_facet_count: 3, }
+  # cfg         = { set_count: 3, datom_length: 2, change_facet_count: 1, }
   repetitions = 3
   test_names  = [
     'immer'
@@ -271,11 +271,11 @@ data_cache                = null
     'plainjs_immutable'
     ]
   global.gc() if global.gc?
-  for test_name in CND.shuffle test_names
+  for _ in [ 1 .. repetitions ]
+    data_cache = null
+    global.gc() if global.gc?
     whisper '-'.repeat 108
-    for _ in [ 1 .. repetitions ]
-      data_cache = null
-      global.gc() if global.gc?
+    for test_name in CND.shuffle test_names
       await BM.benchmark bench, cfg, false, @, test_name
   BM.show_totals bench
 

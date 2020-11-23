@@ -562,10 +562,49 @@ test                      = require 'guy-test'
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "LFTNG can freeze frozen object, attribute" ] = ( T, done ) ->
+  #.........................................................................................................
+  do =>
+    try
+      { freeze, } = require lft_path
+      d           = { a: 42, b: { c: [ 'X', 'Y', ], }, }
+      d.b.c       = freeze d.b.c
+      T.eq d, { a: 42, b: { c: [ 'X', 'Y', ], }, }
+      e           = freeze d
+      T.ok d is e
+    catch error
+      T.fail error.message
+  #.........................................................................................................
+  do =>
+    try
+      { freeze, } = require lft_path
+      d           = { a: 42, b: { c: [ 'X', 'Y', ], }, }
+      d.b         = freeze d.b
+      T.eq d, { a: 42, b: { c: [ 'X', 'Y', ], }, }
+      e           = freeze d
+      T.ok d is e
+    catch error
+      T.fail error.message
+  #.........................................................................................................
+  do =>
+    try
+      { freeze, } = require lft_path
+      d           = { a: 42, b: { c: [ 'X', 'Y', ], }, }
+      e           = freeze d
+      T.eq d, { a: 42, b: { c: [ 'X', 'Y', ], }, }
+      T.ok d is e
+    catch error
+      T.fail error.message
+  #.........................................................................................................
+  done()
+  return null
+
 
 ############################################################################################################
 if require.main is module then do =>
   test @
+  # test @[ "LFTNG can freeze frozen object, attribute" ]
   # test @[ "freeze, modify object copy" ]
   # test @[ "null, primitive values are kept as-is" ]
   # test @[ "use nofreeze option for speedup" ]

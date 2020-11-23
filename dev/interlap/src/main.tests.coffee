@@ -162,7 +162,7 @@ id_of = do =>
   LAP = require '../../../apps/interlap'
   probes_and_matchers = [
     [ [ 1, 5, ],      [ 1, 5, ], ]
-    [ [ 1, NaN, ],    null, 'hi boundary must be an infnumber', ]
+    [ [ 1, NaN, ],    null, 'hi boundary must be an infloat', ]
     [ [ 1, ],         null, 'length must be 2', ]
     [ [ 100, -100, ], null, 'lo boundary must be less than or equal to hi boundary', ]
     ]

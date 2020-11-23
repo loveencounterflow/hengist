@@ -230,6 +230,8 @@ jr                        = JSON.stringify
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       [ key, value, ] = probe
       d               = new_datom key, value
+      debug '^33398^', d
+      debug '^33398^', wrap_datom '^wrapper', d
       resolve wrap_datom '^wrapper', d
   done()
   return null
@@ -287,11 +289,11 @@ jr                        = JSON.stringify
   DATOM_DEFAULT                       = new ( require '../../../apps/datom' ).Datom()
   #.........................................................................................................
   d = DATOM_DEFAULT.new_datom '^foo', { x: 42, y: 108, }
-  debug d
-  debug DATOM_DEFAULT.lets d, ( d ) -> null
-  # T.eq ( DATOM_DIRTY.lets d,    ( d ) -> delete d.x ), { $key: '^foo', y: 108, $dirty: true,  }
-  # T.eq ( DATOM_NODIRTY.lets d,  ( d ) -> delete d.x ), { $key: '^foo', y: 108,                }
-  # T.eq ( DATOM_DEFAULT.lets d,  ( d ) -> delete d.x ), { $key: '^foo', y: 108,                }
+  # debug d
+  # debug DATOM_DEFAULT.lets d, ( d ) -> null
+  T.eq ( DATOM_DIRTY.lets d,    ( d ) -> delete d.x ), { $key: '^foo', y: 108, $dirty: true,  }
+  T.eq ( DATOM_NODIRTY.lets d,  ( d ) -> delete d.x ), { $key: '^foo', y: 108,                }
+  T.eq ( DATOM_DEFAULT.lets d,  ( d ) -> delete d.x ), { $key: '^foo', y: 108,                }
   done()
   return null
 
@@ -300,8 +302,8 @@ jr                        = JSON.stringify
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
-  test @[ "dirty" ]
+  test @
+  # test @[ "dirty" ]
   # test @[ "wrap_datom" ]
   # test @[ "new_datom complains when value has `$key`" ]
   # test @[ "selector keypatterns" ]
