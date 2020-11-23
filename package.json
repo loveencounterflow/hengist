@@ -43,6 +43,7 @@
     "intertext-splitlines": "^1.2.0",
     "intertype": "^7.4.0",
     "jake": "^10.8.2",
+    "javascript-state-machine": "^3.1.0",
     "jfee": "0.0.2",
     "klona": "^2.0.4",
     "load-source-map": "^2.0.0",
