@@ -47,7 +47,7 @@ class Compound_fsm extends Multimix
     # eq:           ( a, b ) -> ...
     # freeze:       ( x ) -> ...
     name:         'grabmode'
-    # transitions: [
+    # triggers: [
     #   'start      -> markscroll'
     #   'foobar     -> stop'
     #   'panzoom    -- toggle         -> markscroll'
@@ -56,7 +56,7 @@ class Compound_fsm extends Multimix
     #   'panzoom    -- setPanzoom     -> panzoom'
     #   'markscroll -- setMarkscroll  -> markscroll'
     #   'panzoom    -- setMarkscroll  -> markscroll' ],
-    transitions: [
+    triggers: [
       [ 'void',       'start',          'markscroll', ]
       [ '*',          'reset',          'void', ]
       # [ 'foobar',     'stop',           void          ] # ???
@@ -67,7 +67,7 @@ class Compound_fsm extends Multimix
       [ 'markscroll', 'setMarkscroll',  'markscroll', ]
       [ 'panzoom',    'setMarkscroll',  'markscroll', ], ]
     before:
-      transition: ( s ) -> info "before transition  ",  s
+      trigger:    ( s ) -> info "before trigger     ",  s
       change:     ( s ) -> info "before change      ",  s
       state:      ( s ) -> info "before state       ",  s
       start:      ( s ) -> info "before start       ",  s
@@ -87,7 +87,7 @@ class Compound_fsm extends Multimix
       panzoom:    ( s ) -> info "leave panzoom      ",  s
       markscroll: ( s ) -> info "leave markscroll   ",  s
     after:
-      transition: ( s ) -> info "after transition   ",  s
+      trigger:    ( s ) -> info "after trigger      ",  s
       change:     ( s ) -> info "after change       ",  s
       state:      ( s ) -> info "after state        ",  s
       start:      ( s ) -> info "after start        ",  s
@@ -113,7 +113,7 @@ class Compound_fsm extends Multimix
   require '../../../apps/mkts-gui-toolbox-fsm/lib/interstate' ### NOTE exports to global namespace FTTB ###
   fsm = new Interstate @get_fsmd()
   # debug '^34766^', JSON.stringify fsm, null, '  '
-  debug '^34766^', JSON.stringify fsm.transitions, null, '  '
+  debug '^34766^', JSON.stringify fsm.triggers, null, '  '
   debug '^347-1^', 'start --------------------------------------'
   debug '^347-2^', fsm.start()
   debug '^347-3^', 'toggle --------------------------------------'

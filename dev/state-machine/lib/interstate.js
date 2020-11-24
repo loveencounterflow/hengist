@@ -56,7 +56,7 @@
       // eq:           ( a, b ) -> ...
       // freeze:       ( x ) -> ...
       name: 'grabmode',
-      // transitions: [
+      // triggers: [
       //   'start      -> markscroll'
       //   'foobar     -> stop'
       //   'panzoom    -- toggle         -> markscroll'
@@ -65,7 +65,7 @@
       //   'panzoom    -- setPanzoom     -> panzoom'
       //   'markscroll -- setMarkscroll  -> markscroll'
       //   'panzoom    -- setMarkscroll  -> markscroll' ],
-      transitions: [
+      triggers: [
         ['void',
         'start',
         'markscroll'],
@@ -93,8 +93,8 @@
         'markscroll']
       ],
       before: {
-        transition: function(s) {
-          return info("before transition  ", s);
+        trigger: function(s) {
+          return info("before trigger     ", s);
         },
         change: function(s) {
           return info("before change      ", s);
@@ -149,8 +149,8 @@
         }
       },
       after: {
-        transition: function(s) {
-          return info("after transition   ", s);
+        trigger: function(s) {
+          return info("after trigger      ", s);
         },
         change: function(s) {
           return info("after change       ", s);
@@ -195,7 +195,7 @@
     require('../../../apps/mkts-gui-toolbox-fsm/lib/interstate');
     fsm = new Interstate(this.get_fsmd());
     // debug '^34766^', JSON.stringify fsm, null, '  '
-    debug('^34766^', JSON.stringify(fsm.transitions, null, '  '));
+    debug('^34766^', JSON.stringify(fsm.triggers, null, '  '));
     debug('^347-1^', 'start --------------------------------------');
     debug('^347-2^', fsm.start());
     debug('^347-3^', 'toggle --------------------------------------');
