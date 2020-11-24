@@ -71,6 +71,7 @@ do =>
 
 #-----------------------------------------------------------------------------------------------------------
 @FDQ = ( cfg ) -> @_benchmark_by_name cfg, 'FDQ'
+@FDE = ( cfg ) -> @_benchmark_by_name cfg, 'FDE'
 @JKR = ( cfg ) -> @_benchmark_by_name cfg, 'JKR'
 
 
@@ -84,6 +85,7 @@ do =>
   repetitions = 3
   test_names  = [
     'FDQ'
+    'FDE'
     'JKR'
     ]
   global.gc() if global.gc?
@@ -102,17 +104,24 @@ if require.main is module then do =>
 
 ###
 
-00:07 HENGIST/BENCHMARKS  ▶  plainjs_mutable                                    8,268 Hz   100.0 % │████████████▌│
-00:07 HENGIST/BENCHMARKS  ▶  plainjs_immutable                                  4,933 Hz    59.7 % │███████▌     │
-00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_thaw_freeze_f0                   4,682 Hz    56.6 % │███████▏     │
-00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v2_standard                         4,464 Hz    54.0 % │██████▊      │
-00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_lets_f0                          4,444 Hz    53.8 % │██████▊      │
-00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_lets_f1                          4,213 Hz    51.0 % │██████▍      │
-00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_thaw_freeze_f1                   4,034 Hz    48.8 % │██████▏      │
-00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v2_nofreeze                         2,143 Hz    25.9 % │███▎         │
-00:07 HENGIST/BENCHMARKS  ▶  immutable                                          1,852 Hz    22.4 % │██▊          │
-00:07 HENGIST/BENCHMARKS  ▶  mori                                               1,779 Hz    21.5 % │██▊          │
-00:07 HENGIST/BENCHMARKS  ▶  hamt                                               1,752 Hz    21.2 % │██▋          │
-00:07 HENGIST/BENCHMARKS  ▶  immer                                              1,352 Hz    16.3 % │██           │
+ ~/jzr/jseq  master !3  ~/jzr/nodexh/bin/nodexh ~/jzr/hengist/dev/jseq/lib/usecase1.benchmarks.js                                                         INT ✘  12s
+00:00 JSEQ  ▶  ------------------------------------------------------------------------------------------------------------
+JKR                                        0.766 s          99,812 items         130,373⏶Hz           7,670⏷nspc
+FDQ                                        0.212 s          99,812 items         471,069⏶Hz           2,123⏷nspc
+FDE                                        0.208 s          99,812 items         479,546⏶Hz           2,085⏷nspc
+00:05 JSEQ  ▶  ------------------------------------------------------------------------------------------------------------
+FDE                                        0.330 s         100,334 items         304,451⏶Hz           3,285⏷nspc
+JKR                                        0.744 s         100,334 items         134,934⏶Hz           7,411⏷nspc
+FDQ                                        0.214 s         100,334 items         469,278⏶Hz           2,131⏷nspc
+00:10 JSEQ  ▶  ------------------------------------------------------------------------------------------------------------
+JKR                                        0.833 s         100,168 items         120,311⏶Hz           8,312⏷nspc
+FDQ                                        0.202 s         100,168 items         495,247⏶Hz           2,019⏷nspc
+FDE                                        0.200 s         100,168 items         500,233⏶Hz           1,999⏷nspc
+00:14 HENGIST/BENCHMARKS  ▶  FDQ                                              478,531 Hz   100.0 % │████████████▌│
+00:14 HENGIST/BENCHMARKS  ▶  FDE                                              428,077 Hz    89.5 % │███████████▏ │
+00:14 HENGIST/BENCHMARKS  ▶  JKR                                              128,539 Hz    26.9 % │███▍         │
+
 
 ###
+
+
