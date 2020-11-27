@@ -127,6 +127,21 @@
     ({result, register} = new_register());
     Intermatic = require('../../../apps/intermatic');
     fsm = new Intermatic(fsmd);
+    info('^44455^', JSON.stringify(fsm.triggers, null, 2));
+    T.eq(fsm.triggers, {
+      "start": {
+        "void": "lit"
+      },
+      "toggle": {
+        "lit": "dark",
+        "dark": "lit"
+      },
+      "reset": {
+        "void": "void",
+        "lit": "void",
+        "dark": "void"
+      }
+    });
     fsm.start();
     fsm.toggle();
     fsm.reset();
@@ -172,7 +187,7 @@
     ({result, register} = new_register());
     Intermatic = require('../../../apps/intermatic');
     fsm = new Intermatic(fsmd);
-    T.eq(Object.keys(fsm), ['reserved', 'fsmd', 'triggers', '_state', 'before', 'enter', 'stay', 'leave', 'after', 'my', 'our', 'starts_with', 'start', 'toggle', 'reset', 'goto']);
+    T.eq(Object.keys(fsm), ['_covered_names', 'reserved', 'fsmd', 'triggers', '_state', 'before', 'enter', 'stay', 'leave', 'after', 'my', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail']);
     fsm.start();
     fsm.toggle();
     fsm.reset();
@@ -187,22 +202,41 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["_________________________ Intermatic cFsm"] = function(T, done) {
-    var Intermatic, button_fsm, fsmd, register, result;
+  this["Intermatic cFsm"] = function(T, done) {
+    var Intermatic, button, fsmd, register, result, srpr;
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       //.......................................................................................................
-      meta_btn: {
-        triggers: [['void', 'start', 'released'], ['*', 'reset', 'void'], ['released', 'press', 'pressed'], ['pressed', 'release', 'released']],
-        enter: {
-          'pressed': function(s) {
-            return this.fsms.meta_lamp.light();
-          },
-          'released': function(s) {
-            return this.fsms.meta_lamp.goto('dark');
-          }
+      triggers: [['void', 'start', 'released'], ['*', 'reset', 'void'], ['released', 'press', 'pressed'], ['pressed', 'release', 'released']],
+      enter: {
+        pressed: function(s) {
+          this.my.lamp.goto('lit');
+          return register(`button: enter pressed: ${srpr(s)}`);
+        },
+        released: function(s) {
+          this.my.lamp.goto('dark');
+          return register(`button: enter released: ${srpr(s)}`);
         }
       },
+      stay: {
+        pressed: function(s) {
+          return register(`button: stay pressed: ${srpr(s)}`);
+        },
+        released: function(s) {
+          return register(`button: stay released: ${srpr(s)}`);
+        }
+      },
+      after: {
+        start: function(s) {
+          return this.my.lamp.start();
+        }
+      },
+      before: {
+        trigger: function(s) {
+          return register(`button: before *: ${srpr(s)}`);
+        }
+      },
+      goto: '*',
       //.......................................................................................................
       my: {
         //.....................................................................................................
@@ -210,34 +244,79 @@
           triggers: [['void', 'start', 'lit'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit']],
           after: {
             change: function(s) {
-              return register(`after change:  ${rpr(s)}`);
+              return register(`lamp: after change:  ${srpr(s)}`);
             }
           },
           enter: {
             dark: function(s) {
-              return register(`enter dark:    ${rpr(s)}`);
+              this.up.goto('released');
+              return register(`lamp: enter dark: ${srpr(s)}`);
             },
             lit: function(s) {
-              return register(`enter lit:     ${rpr(s)}`);
+              this.up.goto('pressed');
+              return register(`lamp: enter lit: ${srpr(s)}`);
             }
           },
-          goto: '*'
+          stay: {
+            dark: function(s) {
+              return register(`lamp: stay dark: ${srpr(s)}`);
+            },
+            lit: function(s) {
+              return register(`lamp: stay lit: ${srpr(s)}`);
+            }
+          },
+          before: {
+            trigger: function(s) {
+              return register(`lamp: before *: ${srpr(s)}`);
+            }
+          },
+          goto: '*',
+          bar: 108
         }
       },
       //.......................................................................................................
       after: {
         change: function(s) {
-          return register("ima.change");
+          return register("root_fsm.change");
         }
-      }
+      },
+      foo: 42
     };
     //---------------------------------------------------------------------------------------------------------
+    srpr = function(s) {
+      return `${s.from}--${s.via}->${s.to}`;
+    };
     ({result, register} = new_register());
+    //---------------------------------------------------------------------------------------------------------
     Intermatic = require('../../../apps/intermatic');
-    button_fsm = new Intermatic({
-      meta_btn: fsmd.meta_btn
+    button = new Intermatic(fsmd);
+    T.eq(button.foo, 42);
+    T.eq(button.my.lamp.bar, 108);
+    info(button.triggers);
+    // info button.my.lamp.up
+    // debug '^3334^', button
+    // debug '^3334^', button.my
+    info({
+      button: {
+        me: button.state,
+        lamp: button.my.lamp.state
+      }
     });
-    button_fsm.start();
+    button.start();
+    info({
+      button: {
+        me: button.state,
+        lamp: button.my.lamp.state
+      }
+    });
+    button.press();
+    info({
+      button: {
+        me: button.state,
+        lamp: button.my.lamp.state
+      }
+    });
+    T.eq(result, ['button: before *: void--start->released', 'lamp: before *: void--goto->dark', 'button: before *: released--goto->released', 'button: stay released: released--goto->released', 'lamp: enter dark: void--goto->dark', 'lamp: after change:  void--goto->dark', 'button: enter released: void--start->released', 'root_fsm.change', 'button: before *: released--press->pressed', 'lamp: before *: dark--goto->lit', 'button: before *: pressed--goto->pressed', 'button: stay pressed: pressed--goto->pressed', 'lamp: enter lit: dark--goto->lit', 'lamp: after change:  dark--goto->lit', 'button: enter pressed: released--press->pressed', 'root_fsm.change']);
     //---------------------------------------------------------------------------------------------------------
     return done();
   };
