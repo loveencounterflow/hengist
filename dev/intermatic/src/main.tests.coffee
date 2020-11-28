@@ -148,9 +148,7 @@ new_register = ->
     register }    = new_register()
   Intermatic      = require '../../../apps/intermatic'
   fsm             = new Intermatic fsmd
-  T.eq ( Object.keys fsm ),  [ '_covered_names', 'reserved', 'fsmd', 'triggers', '_state', 'before',
-  'enter', 'stay', 'leave', 'after', 'my', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name',
-  'fail' ]
+  T.eq ( Object.keys fsm ),  [ '_covered_names', 'reserved', 'fsmd', 'triggers', 'subfsm_names', 'has_subfsms', '_state', 'before', 'enter', 'stay', 'leave', 'after', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail' ]
   fsm.start()
   fsm.toggle()
   fsm.reset()
@@ -175,7 +173,7 @@ new_register = ->
 
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "Intermatic cFsm" ] = ( T, done ) ->
+@[ "Intermatic cFsm 1" ] = ( T, done ) ->
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     #.......................................................................................................
@@ -185,18 +183,18 @@ new_register = ->
       [ 'released', 'press',    'pressed',    ]
       [ 'pressed',  'release',  'released',   ] ]
     enter:
-      pressed:  ( s ) -> @my.lamp.goto 'lit';   register "button: enter pressed: #{srpr s}"
-      released: ( s ) -> @my.lamp.goto 'dark';  register "button: enter released: #{srpr s}"
+      pressed:  ( s ) -> @lamp.goto 'lit';   register "button: enter pressed: #{srpr s}"
+      released: ( s ) -> @lamp.goto 'dark';  register "button: enter released: #{srpr s}"
     stay:
       pressed:  ( s ) -> register "button: stay pressed: #{srpr s}"
       released: ( s ) -> register "button: stay released: #{srpr s}"
     after:
-      start: ( s ) -> @my.lamp.start()
+      start: ( s ) -> @lamp.start()
     before:
       trigger: ( s ) -> register "button: before *: #{srpr s}"
     goto: '*'
     #.......................................................................................................
-    my:
+    subs:
       #.....................................................................................................
       lamp:
         triggers: [
@@ -227,16 +225,25 @@ new_register = ->
   Intermatic      = require '../../../apps/intermatic'
   button          = new Intermatic fsmd
   T.eq button.foo,         42
-  T.eq button.my.lamp.bar, 108
+  T.eq button.lamp.bar, 108
   info button.triggers
-  # info button.my.lamp.up
-  # debug '^3334^', button
-  # debug '^3334^', button.my
-  info { button: { me: button.state, lamp: button.my.lamp.state, }, }
+  info { button: { $value: button.state, lamp: button.lamp.state, }, }
+  urge { button: button.state, 'button/lamp': button.lamp.state, }
+  urge { button: button.state, button_lamp: button.lamp.state, }
+  urge { root: button.state, lamp: button.lamp.state, }
+  help [ "°button:^#{button.state}", "°button/lamp:^#{button.lamp.state}", ]
   button.start()
-  info { button: { me: button.state, lamp: button.my.lamp.state, }, }
+  info { button: { $value: button.state, lamp: button.lamp.state, }, }
+  urge { button: button.state, 'button/lamp': button.lamp.state, }
+  urge { button: button.state, button_lamp: button.lamp.state, }
+  urge { root: button.state, lamp: button.lamp.state, }
+  help [ "°button:^#{button.state}", "°button/lamp:^#{button.lamp.state}", ]
   button.press()
-  info { button: { me: button.state, lamp: button.my.lamp.state, }, }
+  info { button: { $value: button.state, lamp: button.lamp.state, }, }
+  urge { button: button.state, 'button/lamp': button.lamp.state, }
+  urge { button: button.state, button_lamp: button.lamp.state, }
+  urge { root: button.state, lamp: button.lamp.state, }
+  help [ "°button:^#{button.state}", "°button/lamp:^#{button.lamp.state}", ]
   T.eq result, [
     'button: before *: void--start->released'
     'lamp: before *: void--goto->dark'
@@ -254,6 +261,183 @@ new_register = ->
     'lamp: after change:  dark--goto->lit'
     'button: enter pressed: released--press->pressed'
     'root_fsm.change' ]
+  #---------------------------------------------------------------------------------------------------------
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Intermatic cFsm 2" ] = ( T, done ) ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    subs:
+      alpha_btn:
+        #.......................................................................................................
+        triggers: [
+          [ 'void',     'start',    'released',   ]
+          [ '*',        'reset',    'void',       ]
+          [ 'released', 'press',    'pressed',    ]
+          [ 'pressed',  'release',  'released',   ] ]
+        # enter:
+        #   pressed:  ( s ) ->
+        #   released: ( s ) ->
+        before:
+          start:    ( s ) -> @lamp.start()
+        after:
+          change:   ( s ) ->
+            @lamp.toggle()
+            register { from: s.from, via: s.via, alpha_btn: @state, lamp: @lamp.state, color: @color.state, }
+        #.......................................................................................................
+        subs:
+          #.....................................................................................................
+          color:
+            triggers: [
+              [ 'red', 'toggle', 'green', ]
+              [ 'green', 'toggle', 'red', ] ]
+            after:
+              change:   ( s ) -> register { from: s.from, via: s.via, alpha_btn_color: @state, }
+          #.....................................................................................................
+          lamp:
+            triggers: [
+              [ 'void',   'start',  'lit',  ]
+              [ 'lit',    'toggle', 'dark', ]
+              [ 'dark',   'toggle', 'lit',  ] ]
+            before:
+              start:    ( s ) -> @up.color.start()
+            enter:
+              dark:     ( s ) -> @up.color.toggle()
+            after:
+              change:   ( s ) -> register { from: s.from, via: s.via, alpha_btn_lamp: @state, }
+  #---------------------------------------------------------------------------------------------------------
+  srpr            = ( s ) -> "#{s.from}--#{s.via}->#{s.to}"
+  { result
+    register }    = new_register()
+  #---------------------------------------------------------------------------------------------------------
+  Intermatic      = require '../../../apps/intermatic'
+  fsm             = new Intermatic fsmd
+  # debug '^898922^', fsm
+  # debug '^898922^', ( k for k of fsm )
+  whisper '-----------'
+  whisper 'start'
+  fsm.alpha_btn.start()
+  whisper '-----------'
+  whisper 'press'
+  fsm.alpha_btn.press()
+  whisper '-----------'
+  whisper 'release'
+  fsm.alpha_btn.release()
+  whisper '-----------'
+  whisper 'press'
+  fsm.alpha_btn.press()
+  whisper '-----------'
+  whisper 'release'
+  fsm.alpha_btn.release()
+  whisper '-----------'
+  debug result
+  T.eq result, [
+    { from: 'void', via: 'start', alpha_btn_color: 'green' }
+    { from: 'void', via: 'start', alpha_btn_lamp: 'lit' }
+    { from: 'green', via: 'toggle', alpha_btn_color: 'red' }
+    { from: 'lit', via: 'toggle', alpha_btn_lamp: 'dark' }
+    { from: 'void', via: 'start', alpha_btn: 'released', lamp: 'dark', color: 'red' }
+    { from: 'dark', via: 'toggle', alpha_btn_lamp: 'lit' }
+    { from: 'released', via: 'press', alpha_btn: 'pressed', lamp: 'lit', color: 'red' }
+    { from: 'red', via: 'toggle', alpha_btn_color: 'green' }
+    { from: 'lit', via: 'toggle', alpha_btn_lamp: 'dark' }
+    { from: 'pressed', via: 'release', alpha_btn: 'released', lamp: 'dark', color: 'green' }
+    { from: 'dark', via: 'toggle', alpha_btn_lamp: 'lit' }
+    { from: 'released', via: 'press', alpha_btn: 'pressed', lamp: 'lit', color: 'green' }
+    { from: 'green', via: 'toggle', alpha_btn_color: 'red' }
+    { from: 'lit', via: 'toggle', alpha_btn_lamp: 'dark' }
+    { from: 'pressed', via: 'release', alpha_btn: 'released', lamp: 'dark', color: 'red' } ]
+  #---------------------------------------------------------------------------------------------------------
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Intermatic cFsm 3" ] = ( T, done ) ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    triggers: [
+      [ 'void', 'start', 'running', ]
+      [ 'running', 'stop', 'stopped', ]
+      ]
+    before:
+      start: ( s ) ->
+        @meta_btn.start()
+        # @alt_btn.start()
+      stop: ( s ) ->
+        @meta_btn.stop()
+    subs:
+      meta_btn:
+        #.......................................................................................................
+        triggers: [
+          [ 'void',     'start',    'released',   ]
+          [ '*',        'stop',     'void',       ]
+          [ 'released', 'toggle',   'pressed',    ]
+          [ 'pressed',  'toggle',   'released',   ]
+          [ 'released', 'press',    'pressed',    ]
+          [ 'pressed',  'release',  'released',   ] ]
+        before:
+          start:    ( s ) ->
+            @lamp.start()
+            @color.start()
+            @text.start()
+          stop:    ( s ) ->
+            @lamp.stop()
+            @color.stop()
+            @text.stop()
+        after:
+          change:   ( s ) ->
+            # @lamp.tryto.toggle()
+            # @lamp.tryto 'toggle'
+            @lamp.toggle()
+            @color.toggle()
+            @text.toggle()
+            whisper '^444332^', @cstate
+            change s.via, @name, '_', @state
+        #.......................................................................................................
+        subs:
+          #.....................................................................................................
+          color:
+            triggers: [
+              [ 'red',    'toggle', 'green', ]
+              [ 'green',  'toggle', 'red', ]
+              [ '*',      'stop',   'void', ] ]
+            after:
+              change: ( s ) -> change s.via, @up.name, 'color', @state
+            fail: ( s ) -> whisper s
+          #.....................................................................................................
+          text:
+            triggers: [
+              [ 'halt',   'toggle', 'go',   ]
+              [ 'go',     'toggle', 'halt', ]
+              [ '*',      'stop',   'void', ] ]
+            after:
+              change: ( s ) -> change s.via, @up.name, 'text', @state
+            fail: ( s ) -> whisper s
+          #.....................................................................................................
+          lamp:
+            triggers: [
+              [ 'void',   'start',  'dark', ]
+              [ 'lit',    'toggle', 'dark', ]
+              [ 'dark',   'toggle', 'lit',  ]
+              [ '*',      'stop',   'void', ] ]
+            after:
+              change: ( s ) -> change s.via, @up.name, 'lamp', @state
+            fail: ( s ) -> whisper s
+
+  #---------------------------------------------------------------------------------------------------------
+  gstate  = {}
+  change  = ( via, fname, sub_fname, state ) ->
+    # gstate  = { gstate..., }
+    gstate.via = via
+    ( gstate[ fname ] ?= {} )[ sub_fname ] = state
+    info gstate
+  #---------------------------------------------------------------------------------------------------------
+  Intermatic      = require '../../../apps/intermatic'
+  fsm             = new Intermatic fsmd
+  urge '^3334^', "FSM #{rpr fsm.meta_btn.name} has sub-FSMs #{( rpr n for n in fsm.meta_btn.subfsm_names ).join ', '}"
+  fsm.start()
+  fsm.meta_btn.press()
+  fsm.stop()
   #---------------------------------------------------------------------------------------------------------
   done()
 
