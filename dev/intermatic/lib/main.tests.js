@@ -45,7 +45,9 @@
   new_register = function() {
     var register, result;
     result = [];
-    register = function(x) {
+    register = function(...P) {
+      var x;
+      x = P.length === 1 ? P[0] : P;
       whisper('^2321^', rpr(x));
       return result.push(x);
     };
@@ -58,6 +60,7 @@
   this["Intermatic empty FSM"] = function(T, done) {
     var Intermatic, fsm;
     Intermatic = require('../../../apps/intermatic');
+    Intermatic._tid = 0;
     fsm = new Intermatic({});
     T.eq(fsm.triggers, {
       start: {
@@ -65,7 +68,7 @@
       }
     });
     T.eq(fsm.start(), null);
-    T.eq(fsm.state, 'void');
+    T.eq(fsm.lstate, 'void');
     return done();
   };
 
@@ -88,9 +91,10 @@
       }
     };
     //---------------------------------------------------------------------------------------------------------
+    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     T.eq(fsm.start(), null);
-    T.eq(fsm.state, 'void');
+    T.eq(fsm.lstate, 'void');
     T.eq(result, ['before start', 'after start']);
     //---------------------------------------------------------------------------------------------------------
     return done();
@@ -126,6 +130,7 @@
     //---------------------------------------------------------------------------------------------------------
     ({result, register} = new_register());
     Intermatic = require('../../../apps/intermatic');
+    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     info('^44455^', JSON.stringify(fsm.triggers, null, 2));
     T.eq(fsm.triggers, {
@@ -150,7 +155,7 @@
     // fsm.goto 'lit'
     // fsm.goto 'dark'
     echo(result);
-    T.eq(result, ["after change:  { '$key': '^trigger', from: 'void', via: 'start', to: 'lit', changed: true }", "leave lit      { '$key': '^trigger', from: 'lit', via: 'toggle', to: 'dark', changed: true }", "enter dark:    { '$key': '^trigger', from: 'lit', via: 'toggle', to: 'dark', changed: true }", "after change:  { '$key': '^trigger', from: 'lit', via: 'toggle', to: 'dark', changed: true }", "after change:  { '$key': '^trigger', from: 'dark', via: 'reset', to: 'void', changed: true }", "failed: { '$key': '^trigger', failed: true, from: 'void', via: 'toggle' }"]);
+    T.eq(result, ["after change:  { '$key': '^trigger', id: 't1', from: 'void', via: 'start', to: 'lit', changed: true }", "leave lit      { '$key': '^trigger', id: 't2', from: 'lit', via: 'toggle', to: 'dark', changed: true }", "enter dark:    { '$key': '^trigger', id: 't2', from: 'lit', via: 'toggle', to: 'dark', changed: true }", "after change:  { '$key': '^trigger', id: 't2', from: 'lit', via: 'toggle', to: 'dark', changed: true }", "after change:  { '$key': '^trigger', id: 't3', from: 'dark', via: 'reset', to: 'void', changed: true }", "failed: { '$key': '^trigger', id: 't4', failed: true, from: 'void', via: 'toggle' }"]);
     //---------------------------------------------------------------------------------------------------------
     return done();
   };
@@ -165,29 +170,30 @@
       // [ 'void',   'toggle', 'lit',  ]
       after: {
         change: function(s) {
-          return register(`after change:  ${rpr(s)}`);
+          return register('after change', s);
         }
       },
       enter: {
         dark: function(s) {
-          return register(`enter dark:    ${rpr(s)}`);
+          return register('enter dark', s);
         }
       },
       leave: {
         lit: function(s) {
-          return register(`leave lit      ${rpr(s)}`);
+          return register('leave lit', s);
         }
       },
       goto: '*',
       fail: function(s) {
-        return register(`failed: ${rpr(s)}`);
+        return register('failed', s);
       }
     };
     //---------------------------------------------------------------------------------------------------------
     ({result, register} = new_register());
     Intermatic = require('../../../apps/intermatic');
+    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
-    T.eq(Object.keys(fsm), ['_covered_names', 'reserved', 'fsmd', 'triggers', 'subfsm_names', 'has_subfsms', '_state', 'before', 'enter', 'stay', 'leave', 'after', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail']);
+    // T.eq ( Object.keys fsm ),  [ 'reserved', 'fsmd', 'triggers', 'subfsm_names', 'has_subfsms', '_lstate', 'before', 'enter', 'stay', 'leave', 'after', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail' ]
     fsm.start();
     fsm.toggle();
     fsm.reset();
@@ -196,7 +202,239 @@
     fsm.goto('lit');
     fsm.goto('dark');
     echo(result);
-    T.eq(result, ["after change:  { '$key': '^trigger', from: 'void', via: 'start', to: 'lit', changed: true }", "leave lit      { '$key': '^trigger', from: 'lit', via: 'toggle', to: 'dark', changed: true }", "enter dark:    { '$key': '^trigger', from: 'lit', via: 'toggle', to: 'dark', changed: true }", "after change:  { '$key': '^trigger', from: 'lit', via: 'toggle', to: 'dark', changed: true }", "after change:  { '$key': '^trigger', from: 'dark', via: 'reset', to: 'void', changed: true }", "failed: { '$key': '^trigger', failed: true, from: 'void', via: 'toggle' }", "after change:  { '$key': '^trigger', from: 'void', via: 'goto', to: 'lit', changed: true }", "leave lit      { '$key': '^trigger', from: 'lit', via: 'goto', to: 'dark', changed: true }", "enter dark:    { '$key': '^trigger', from: 'lit', via: 'goto', to: 'dark', changed: true }", "after change:  { '$key': '^trigger', from: 'lit', via: 'goto', to: 'dark', changed: true }"]);
+    T.eq(result, [
+      [
+        'after change',
+        {
+          '$key': '^trigger',
+          id: 't1',
+          from: 'void',
+          via: 'start',
+          to: 'lit',
+          changed: true
+        }
+      ],
+      [
+        'leave lit',
+        {
+          '$key': '^trigger',
+          id: 't2',
+          from: 'lit',
+          via: 'toggle',
+          to: 'dark',
+          changed: true
+        }
+      ],
+      [
+        'enter dark',
+        {
+          '$key': '^trigger',
+          id: 't2',
+          from: 'lit',
+          via: 'toggle',
+          to: 'dark',
+          changed: true
+        }
+      ],
+      [
+        'after change',
+        {
+          '$key': '^trigger',
+          id: 't2',
+          from: 'lit',
+          via: 'toggle',
+          to: 'dark',
+          changed: true
+        }
+      ],
+      [
+        'after change',
+        {
+          '$key': '^trigger',
+          id: 't3',
+          from: 'dark',
+          via: 'reset',
+          to: 'void',
+          changed: true
+        }
+      ],
+      [
+        'failed',
+        {
+          '$key': '^trigger',
+          id: 't4',
+          failed: true,
+          from: 'void',
+          via: 'toggle'
+        }
+      ],
+      [
+        'after change',
+        {
+          '$key': '^trigger',
+          id: 't5',
+          from: 'void',
+          via: 'goto',
+          to: 'lit',
+          changed: true
+        }
+      ],
+      [
+        'leave lit',
+        {
+          '$key': '^trigger',
+          id: 't7',
+          from: 'lit',
+          via: 'goto',
+          to: 'dark',
+          changed: true
+        }
+      ],
+      [
+        'enter dark',
+        {
+          '$key': '^trigger',
+          id: 't7',
+          from: 'lit',
+          via: 'goto',
+          to: 'dark',
+          changed: true
+        }
+      ],
+      [
+        'after change',
+        {
+          '$key': '^trigger',
+          id: 't7',
+          from: 'lit',
+          via: 'goto',
+          to: 'dark',
+          changed: true
+        }
+      ]
+    ]);
+    //---------------------------------------------------------------------------------------------------------
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["Intermatic cyclers 1"] = function(T, done) {
+    var Intermatic, fsm, fsmd, register, result;
+    //---------------------------------------------------------------------------------------------------------
+    fsmd = {
+      name: 'switch',
+      triggers: [['void', 'start', 'off']],
+      cyclers: {
+        toggle: ['on', 'off'],
+        step: ['bar', 'baz', 'gnu', 'doe']
+      },
+      goto: '*',
+      after: {
+        change: function(s) {
+          return register(s);
+        }
+      },
+      fail: function(s) {
+        return register(s);
+      }
+    };
+    //---------------------------------------------------------------------------------------------------------
+    ({result, register} = new_register());
+    Intermatic = require('../../../apps/intermatic');
+    Intermatic._tid = 0;
+    fsm = new Intermatic(fsmd);
+    fsm.start();
+    fsm.toggle();
+    fsm.toggle();
+    fsm.step();
+    fsm.goto('doe');
+    fsm.step();
+    fsm.step();
+    fsm.step();
+    fsm.step();
+    fsm.step();
+    echo(result);
+    T.eq(result, [
+      {
+        '$key': '^trigger',
+        id: 't1',
+        from: 'void',
+        via: 'start',
+        to: 'off',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't2',
+        from: 'off',
+        via: 'toggle',
+        to: 'on',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't3',
+        from: 'on',
+        via: 'toggle',
+        to: 'off',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't4',
+        failed: true,
+        from: 'off',
+        via: 'step'
+      },
+      {
+        '$key': '^trigger',
+        id: 't5',
+        from: 'off',
+        via: 'goto',
+        to: 'doe',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't6',
+        from: 'doe',
+        via: 'step',
+        to: 'bar',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't7',
+        from: 'bar',
+        via: 'step',
+        to: 'baz',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't8',
+        from: 'baz',
+        via: 'step',
+        to: 'gnu',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't9',
+        from: 'gnu',
+        via: 'step',
+        to: 'doe',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't10',
+        from: 'doe',
+        via: 'step',
+        to: 'bar',
+        changed: true
+      }
+    ]);
     //---------------------------------------------------------------------------------------------------------
     return done();
   };
@@ -289,69 +527,70 @@
     ({result, register} = new_register());
     //---------------------------------------------------------------------------------------------------------
     Intermatic = require('../../../apps/intermatic');
+    Intermatic._tid = 0;
     button = new Intermatic(fsmd);
     T.eq(button.foo, 42);
     T.eq(button.lamp.bar, 108);
     info(button.triggers);
     info({
       button: {
-        $value: button.state,
-        lamp: button.lamp.state
+        $value: button.lstate,
+        lamp: button.lamp.lstate
       }
     });
     urge({
-      button: button.state,
-      'button/lamp': button.lamp.state
+      button: button.lstate,
+      'button/lamp': button.lamp.lstate
     });
     urge({
-      button: button.state,
-      button_lamp: button.lamp.state
+      button: button.lstate,
+      button_lamp: button.lamp.lstate
     });
     urge({
-      root: button.state,
-      lamp: button.lamp.state
+      root: button.lstate,
+      lamp: button.lamp.lstate
     });
-    help([`°button:^${button.state}`, `°button/lamp:^${button.lamp.state}`]);
+    help([`°button:^${button.lstate}`, `°button/lamp:^${button.lamp.lstate}`]);
     button.start();
     info({
       button: {
-        $value: button.state,
-        lamp: button.lamp.state
+        $value: button.lstate,
+        lamp: button.lamp.lstate
       }
     });
     urge({
-      button: button.state,
-      'button/lamp': button.lamp.state
+      button: button.lstate,
+      'button/lamp': button.lamp.lstate
     });
     urge({
-      button: button.state,
-      button_lamp: button.lamp.state
+      button: button.lstate,
+      button_lamp: button.lamp.lstate
     });
     urge({
-      root: button.state,
-      lamp: button.lamp.state
+      root: button.lstate,
+      lamp: button.lamp.lstate
     });
-    help([`°button:^${button.state}`, `°button/lamp:^${button.lamp.state}`]);
+    help([`°button:^${button.lstate}`, `°button/lamp:^${button.lamp.lstate}`]);
     button.press();
     info({
       button: {
-        $value: button.state,
-        lamp: button.lamp.state
+        $value: button.lstate,
+        lamp: button.lamp.lstate
       }
     });
     urge({
-      button: button.state,
-      'button/lamp': button.lamp.state
+      button: button.lstate,
+      'button/lamp': button.lamp.lstate
     });
     urge({
-      button: button.state,
-      button_lamp: button.lamp.state
+      button: button.lstate,
+      button_lamp: button.lamp.lstate
     });
     urge({
-      root: button.state,
-      lamp: button.lamp.state
+      root: button.lstate,
+      lamp: button.lamp.lstate
     });
-    help([`°button:^${button.state}`, `°button/lamp:^${button.lamp.state}`]);
+    help([`°button:^${button.lstate}`, `°button/lamp:^${button.lamp.lstate}`]);
     T.eq(result, ['button: before *: void--start->released', 'lamp: before *: void--goto->dark', 'button: before *: released--goto->released', 'button: stay released: released--goto->released', 'lamp: enter dark: void--goto->dark', 'lamp: after change:  void--goto->dark', 'button: enter released: void--start->released', 'root_fsm.change', 'button: before *: released--press->pressed', 'lamp: before *: dark--goto->lit', 'button: before *: pressed--goto->pressed', 'button: stay pressed: pressed--goto->pressed', 'lamp: enter lit: dark--goto->lit', 'lamp: after change:  dark--goto->lit', 'button: enter pressed: released--press->pressed', 'root_fsm.change']);
     //---------------------------------------------------------------------------------------------------------
     return done();
@@ -380,9 +619,9 @@
               return register({
                 from: s.from,
                 via: s.via,
-                alpha_btn: this.state,
-                lamp: this.lamp.state,
-                color: this.color.state
+                alpha_btn: this.lstate,
+                lamp: this.lamp.lstate,
+                color: this.color.lstate
               });
             }
           },
@@ -396,7 +635,7 @@
                   return register({
                     from: s.from,
                     via: s.via,
-                    alpha_btn_color: this.state
+                    alpha_btn_color: this.lstate
                   });
                 }
               }
@@ -419,7 +658,7 @@
                   return register({
                     from: s.from,
                     via: s.via,
-                    alpha_btn_lamp: this.state
+                    alpha_btn_lamp: this.lstate
                   });
                 }
               }
@@ -435,6 +674,7 @@
     ({result, register} = new_register());
     //---------------------------------------------------------------------------------------------------------
     Intermatic = require('../../../apps/intermatic');
+    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     // debug '^898922^', fsm
     // debug '^898922^', ( k for k of fsm )
@@ -548,7 +788,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["Intermatic cFsm 3"] = function(T, done) {
-    var Intermatic, change, fsm, fsmd, gstate, n;
+    var Intermatic, change2, fsm, fsmd, n;
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       triggers: [['void', 'start', 'running'], ['running', 'stop', 'stopped']],
@@ -560,6 +800,9 @@
         stop: function(s) {
           return this.meta_btn.stop();
         }
+      },
+      xxx: function() {
+        return info(this.cstate);
       },
       subs: {
         meta_btn: {
@@ -585,8 +828,12 @@
               this.color.toggle();
               this.text.toggle();
               whisper('^444332^', this.cstate);
-              return change(s.via, this.name, '_', this.state);
+              change2(this, s);
+              return this.up.xxx();
             }
+          },
+          xxx: function() {
+            return this.up.xxx();
           },
           //.......................................................................................................
           subs: {
@@ -595,11 +842,14 @@
               triggers: [['red', 'toggle', 'green'], ['green', 'toggle', 'red'], ['*', 'stop', 'void']],
               after: {
                 change: function(s) {
-                  return change(s.via, this.up.name, 'color', this.state);
+                  return change2(this, s); //; @xxx()
                 }
               },
               fail: function(s) {
                 return whisper(s);
+              },
+              xxx: function() {
+                return this.up.xxx();
               }
             },
             //.....................................................................................................
@@ -607,7 +857,7 @@
               triggers: [['halt', 'toggle', 'go'], ['go', 'toggle', 'halt'], ['*', 'stop', 'void']],
               after: {
                 change: function(s) {
-                  return change(s.via, this.up.name, 'text', this.state);
+                  return change2(this, s);
                 }
               },
               fail: function(s) {
@@ -619,7 +869,7 @@
               triggers: [['void', 'start', 'dark'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit'], ['*', 'stop', 'void']],
               after: {
                 change: function(s) {
-                  return change(s.via, this.up.name, 'lamp', this.state);
+                  return change2(this, s);
                 }
               },
               fail: function(s) {
@@ -631,15 +881,199 @@
       }
     };
     //---------------------------------------------------------------------------------------------------------
-    gstate = {};
-    change = function(via, fname, sub_fname, state) {
+    // gstate  = {}
+    change2 = function(fsm, s) {
+      var cstate, from, id, via;
       // gstate  = { gstate..., }
-      gstate.via = via;
-      (gstate[fname] != null ? gstate[fname] : gstate[fname] = {})[sub_fname] = state;
-      return info(gstate);
+      ({from, via, id} = s);
+      if (isa.text((cstate = fsm.cstate))) {
+        help({
+          [fsm.name]: cstate,
+          from,
+          via,
+          id
+        });
+        return warn(s);
+      } else {
+        // info "#{fsm.name}:#{cstate}?from:#{from},via:#{via}"
+        return urge({
+          [fsm.name]: {...cstate},
+          from,
+          via,
+          id
+        });
+      }
     };
+    /* TAINT should be done recursively */
+    // state_txt = 'xxxx'
+    // info "#{fsm.name}:#{cstate._}/#{state_txt}/?from:#{from},via:#{via}"
     //---------------------------------------------------------------------------------------------------------
     Intermatic = require('../../../apps/intermatic');
+    Intermatic._tid = 0;
+    fsm = new Intermatic(fsmd);
+    urge('^3334^', `FSM ${rpr(fsm.meta_btn.name)} has sub-FSMs ${((function() {
+      var i, len, ref, results;
+      ref = fsm.meta_btn.subfsm_names;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        n = ref[i];
+        results.push(rpr(n));
+      }
+      return results;
+    })()).join(', ')}`);
+    fsm.start();
+    fsm.meta_btn.press();
+    fsm.stop();
+    //---------------------------------------------------------------------------------------------------------
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["Intermatic toolbox"] = function(T, done) {
+    var Intermatic, change2, fsm, fsmd, n, new_button_fsmd;
+    //---------------------------------------------------------------------------------------------------------
+    declare('toolbox_button_cfg', {
+      tests: {
+        "x is an object": function(x) {
+          return this.isa.object(x);
+        }
+      }
+    });
+    //---------------------------------------------------------------------------------------------------------
+    new_button_fsmd = function(cfg) {
+      var R, defaults;
+      defaults = {};
+      cfg = {...defaults, ...cfg};
+      validate.toolbox_button_cfg(cfg);
+      //.......................................................................................................
+      return R = {
+        triggers: [['void', 'start', 'released'], ['*', 'stop', 'void'], ['released', 'toggle', 'pressed'], ['pressed', 'toggle', 'released'], ['released', 'press', 'pressed'], ['pressed', 'release', 'released']],
+        cyclers: {
+          toggle: ['released', 'pressed']
+        }
+      };
+    };
+    //---------------------------------------------------------------------------------------------------------
+    fsmd = {
+      triggers: [['void', 'start', 'running'], ['running', 'stop', 'stopped']],
+      before: {
+        start: function(s) {
+          return this.meta_btn.start();
+        },
+        // @alt_btn.start()
+        stop: function(s) {
+          return this.meta_btn.stop();
+        }
+      },
+      xxx: function() {
+        return info(this.cstate);
+      },
+      subs: {
+        meta_btn: {
+          //.......................................................................................................
+          triggers: [['void', 'start', 'released'], ['*', 'stop', 'void'], ['released', 'toggle', 'pressed'], ['pressed', 'toggle', 'released'], ['released', 'press', 'pressed'], ['pressed', 'release', 'released']],
+          before: {
+            start: function(s) {
+              this.lamp.start();
+              this.color.start();
+              return this.text.start();
+            },
+            stop: function(s) {
+              this.lamp.stop();
+              this.color.stop();
+              return this.text.stop();
+            }
+          },
+          after: {
+            change: function(s) {
+              // @lamp.tryto.toggle()
+              // @lamp.tryto 'toggle'
+              this.lamp.toggle();
+              this.color.toggle();
+              this.text.toggle();
+              whisper('^444332^', this.cstate);
+              change2(this, s);
+              return this.up.xxx();
+            }
+          },
+          xxx: function() {
+            return this.up.xxx();
+          },
+          //.......................................................................................................
+          subs: {
+            //.....................................................................................................
+            color: {
+              triggers: [['red', 'toggle', 'green'], ['green', 'toggle', 'red'], ['*', 'stop', 'void']],
+              after: {
+                change: function(s) {
+                  return change2(this, s); //; @xxx()
+                }
+              },
+              fail: function(s) {
+                return whisper(s);
+              },
+              xxx: function() {
+                return this.up.xxx();
+              }
+            },
+            //.....................................................................................................
+            text: {
+              triggers: [['halt', 'toggle', 'go'], ['go', 'toggle', 'halt'], ['*', 'stop', 'void']],
+              after: {
+                change: function(s) {
+                  return change2(this, s);
+                }
+              },
+              fail: function(s) {
+                return whisper(s);
+              }
+            },
+            //.....................................................................................................
+            lamp: {
+              triggers: [['void', 'start', 'dark'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit'], ['*', 'stop', 'void']],
+              after: {
+                change: function(s) {
+                  return change2(this, s);
+                }
+              },
+              fail: function(s) {
+                return whisper(s);
+              }
+            }
+          }
+        }
+      }
+    };
+    //---------------------------------------------------------------------------------------------------------
+    // gstate  = {}
+    change2 = function(fsm, s) {
+      var cstate, from, id, via;
+      // gstate  = { gstate..., }
+      ({from, via, id} = s);
+      if (isa.text((cstate = fsm.cstate))) {
+        help({
+          [fsm.name]: cstate,
+          from,
+          via,
+          id
+        });
+        return warn(s);
+      } else {
+        // info "#{fsm.name}:#{cstate}?from:#{from},via:#{via}"
+        return urge({
+          [fsm.name]: {...cstate},
+          from,
+          via,
+          id
+        });
+      }
+    };
+    /* TAINT should be done recursively */
+    // state_txt = 'xxxx'
+    // info "#{fsm.name}:#{cstate._}/#{state_txt}/?from:#{from},via:#{via}"
+    //---------------------------------------------------------------------------------------------------------
+    Intermatic = require('../../../apps/intermatic');
+    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     urge('^3334^', `FSM ${rpr(fsm.meta_btn.name)} has sub-FSMs ${((function() {
       var i, len, ref, results;
@@ -667,7 +1101,9 @@
     })();
   }
 
-  // test @[ "Intermatic cFsm" ]
+  // test @[ "Intermatic cyclers 1" ]
+// test @[ "Intermatic cFsm 3" ]
+// test @[ "Intermatic cFsm" ]
 // test @[ "Intermatic empty FSM" ]
 // test @[ "Intermatic before.start(), after.start()" ]
 // @[ "Intermatic empty FSM" ]()
