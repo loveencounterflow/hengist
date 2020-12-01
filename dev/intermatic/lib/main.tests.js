@@ -193,13 +193,13 @@
     Intermatic = require('../../../apps/intermatic');
     Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
-    // T.eq ( Object.keys fsm ),  [ 'reserved', 'fsmd', 'triggers', 'subfsm_names', 'has_subfsms', '_lstate', 'before', 'enter', 'stay', 'leave', 'after', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail' ]
+    // T.eq ( Object.keys fsm ),  [ 'reserved', 'fsmd', 'triggers', 'fsm_names', 'has_subfsms', '_lstate', 'before', 'enter', 'stay', 'leave', 'after', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail' ]
     fsm.start();
     fsm.toggle();
     fsm.reset();
     fsm.toggle();
     fsm.goto('lit');
-    fsm.goto('lit');
+    fsm.goto.lit();
     fsm.goto('dark');
     echo(result);
     T.eq(result, [
@@ -283,7 +283,7 @@
         'leave lit',
         {
           '$key': '^trigger',
-          id: 't7',
+          id: 't6',
           from: 'lit',
           via: 'goto',
           to: 'dark',
@@ -294,7 +294,7 @@
         'enter dark',
         {
           '$key': '^trigger',
-          id: 't7',
+          id: 't6',
           from: 'lit',
           via: 'goto',
           to: 'dark',
@@ -305,7 +305,7 @@
         'after change',
         {
           '$key': '^trigger',
-          id: 't7',
+          id: 't6',
           from: 'lit',
           via: 'goto',
           to: 'dark',
@@ -440,6 +440,340 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["Intermatic catchalls 1"] = function(T, done) {
+    var Intermatic, fsm, fsmd, register, result;
+    //---------------------------------------------------------------------------------------------------------
+    fsmd = {
+      name: 'knob',
+      triggers: [['void', 'start', 'bar']],
+      cyclers: {
+        step: ['bar', 'baz', 'gnu', 'doe']
+      },
+      goto: '*',
+      before: {
+        any: function(s) {
+          return register('before any', fsm.lstate, s);
+        }
+      },
+      enter: {
+        any: function(s) {
+          return register('enter any', fsm.lstate, s);
+        }
+      },
+      stay: {
+        any: function(s) {
+          return register('stay any', fsm.lstate, s);
+        }
+      },
+      leave: {
+        any: function(s) {
+          return register('leave any', fsm.lstate, s);
+        }
+      },
+      after: {
+        any: function(s) {
+          return register('after any', fsm.lstate, s);
+        }
+      },
+      fail: function(s) {
+        return register('fail', fsm.lstate, s);
+      }
+    };
+    //---------------------------------------------------------------------------------------------------------
+    ({result, register} = new_register());
+    Intermatic = require('../../../apps/intermatic');
+    Intermatic._tid = 0;
+    fsm = new Intermatic(fsmd);
+    info("fsm.start()     ———");
+    fsm.start();
+    info("fsm.step()      ———");
+    fsm.step();
+    info(`fsm.goto.${fsm.lstate}()  ———`);
+    fsm.goto(fsm.lstate);
+    echo(result);
+    T.eq(result, [
+      [
+        'before any',
+        'void',
+        {
+          '$key': '^trigger',
+          id: 't1',
+          from: 'void',
+          via: 'start',
+          to: 'bar',
+          changed: true
+        }
+      ],
+      [
+        'leave any',
+        'void',
+        {
+          '$key': '^trigger',
+          id: 't1',
+          from: 'void',
+          via: 'start',
+          to: 'bar',
+          changed: true
+        }
+      ],
+      [
+        'enter any',
+        'bar',
+        {
+          '$key': '^trigger',
+          id: 't1',
+          from: 'void',
+          via: 'start',
+          to: 'bar',
+          changed: true
+        }
+      ],
+      [
+        'after any',
+        'bar',
+        {
+          '$key': '^trigger',
+          id: 't1',
+          from: 'void',
+          via: 'start',
+          to: 'bar',
+          changed: true
+        }
+      ],
+      [
+        'before any',
+        'bar',
+        {
+          '$key': '^trigger',
+          id: 't2',
+          from: 'bar',
+          via: 'step',
+          to: 'baz',
+          changed: true
+        }
+      ],
+      [
+        'leave any',
+        'bar',
+        {
+          '$key': '^trigger',
+          id: 't2',
+          from: 'bar',
+          via: 'step',
+          to: 'baz',
+          changed: true
+        }
+      ],
+      [
+        'enter any',
+        'baz',
+        {
+          '$key': '^trigger',
+          id: 't2',
+          from: 'bar',
+          via: 'step',
+          to: 'baz',
+          changed: true
+        }
+      ],
+      [
+        'after any',
+        'baz',
+        {
+          '$key': '^trigger',
+          id: 't2',
+          from: 'bar',
+          via: 'step',
+          to: 'baz',
+          changed: true
+        }
+      ],
+      [
+        'before any',
+        'baz',
+        {
+          '$key': '^trigger',
+          id: 't3',
+          from: 'baz',
+          via: 'goto',
+          to: 'baz',
+          changed: false
+        }
+      ],
+      [
+        'stay any',
+        'baz',
+        {
+          '$key': '^trigger',
+          id: 't3',
+          from: 'baz',
+          via: 'goto',
+          to: 'baz',
+          changed: false
+        }
+      ],
+      [
+        'after any',
+        'baz',
+        {
+          '$key': '^trigger',
+          id: 't3',
+          from: 'baz',
+          via: 'goto',
+          to: 'baz',
+          changed: false
+        }
+      ]
+    ]);
+    //---------------------------------------------------------------------------------------------------------
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["Intermatic tryto 1"] = function(T, done) {
+    var Intermatic, fsm, fsmd, register, result;
+    //---------------------------------------------------------------------------------------------------------
+    fsmd = {
+      name: 'oneway_switch',
+      triggers: [['void', 'start', 'off'], ['off', 'toggle', 'on']],
+      after: {
+        change: function(s) {
+          return register(s);
+        }
+      },
+      fail: function(s) {
+        return register(s);
+      }
+    };
+    //---------------------------------------------------------------------------------------------------------
+    ({result, register} = new_register());
+    Intermatic = require('../../../apps/intermatic');
+    Intermatic._tid = 0;
+    fsm = new Intermatic(fsmd);
+    fsm.start();
+    T.eq(true, fsm.can.toggle());
+    T.eq(true, fsm.tryto.toggle());
+    T.eq(false, fsm.can('toggle'));
+    T.eq(false, fsm.tryto('toggle'));
+    T.throws(/unknown trigger "nonexisting_trigger"/, function() {
+      return fsm.can('nonexisting_trigger');
+    });
+    echo(result);
+    T.eq(result, [
+      {
+        '$key': '^trigger',
+        id: 't1',
+        from: 'void',
+        via: 'start',
+        to: 'off',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't2',
+        from: 'off',
+        via: 'toggle',
+        to: 'on',
+        changed: true
+      }
+    ]);
+    //---------------------------------------------------------------------------------------------------------
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["Intermatic tryto 2"] = function(T, done) {
+    var Intermatic, fsm, fsmd, register, result;
+    //---------------------------------------------------------------------------------------------------------
+    fsmd = {
+      name: 'oneway_switch',
+      triggers: [['void', 'start', 'one']],
+      cyclers: {
+        step: ['one', 'two', 'three']
+      },
+      after: {
+        change: function(s) {
+          return register(s);
+        }
+      },
+      // step:       ( s ) -> @step()
+      fail: function(s) {
+        return register(s);
+      }
+    };
+    //---------------------------------------------------------------------------------------------------------
+    ({result, register} = new_register());
+    Intermatic = require('../../../apps/intermatic');
+    Intermatic._tid = 0;
+    fsm = new Intermatic(fsmd);
+    info('fsm.start()       ------------');
+    info(CND.truth(fsm.start()));
+    info('fsm.step()        ------------');
+    info(CND.truth(fsm.step()));
+    info('fsm.tryto.step()  ------------');
+    info(CND.truth(fsm.tryto.step()));
+    info('fsm.step()        ------------');
+    info(CND.truth(fsm.step()));
+    info('fsm.tryto.step()  ------------');
+    info(CND.truth(fsm.tryto.step()));
+    info('fsm.tryto.start() ------------');
+    info(CND.truth(fsm.tryto.start()));
+    echo(result);
+    T.eq(result, [
+      {
+        '$key': '^trigger',
+        id: 't1',
+        from: 'void',
+        via: 'start',
+        to: 'one',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't2',
+        from: 'one',
+        via: 'step',
+        to: 'two',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't3',
+        from: 'two',
+        via: 'step',
+        to: 'three',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't4',
+        from: 'three',
+        via: 'step',
+        to: 'one',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't5',
+        from: 'one',
+        via: 'step',
+        to: 'two',
+        changed: true
+      },
+      {
+        '$key': '^trigger',
+        id: 't6',
+        from: 'two',
+        via: 'step',
+        to: 'three',
+        changed: true
+      }
+    ]);
+    //---------------------------------------------------------------------------------------------------------
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["Intermatic cFsm 1"] = function(T, done) {
     var Intermatic, button, fsmd, register, result, srpr;
     //---------------------------------------------------------------------------------------------------------
@@ -476,7 +810,7 @@
       },
       goto: '*',
       //.......................................................................................................
-      subs: {
+      fsms: {
         //.....................................................................................................
         lamp: {
           triggers: [['void', 'start', 'lit'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit']],
@@ -591,7 +925,7 @@
       lamp: button.lamp.lstate
     });
     help([`°button:^${button.lstate}`, `°button/lamp:^${button.lamp.lstate}`]);
-    T.eq(result, ['button: before *: void--start->released', 'lamp: before *: void--goto->dark', 'button: before *: released--goto->released', 'button: stay released: released--goto->released', 'lamp: enter dark: void--goto->dark', 'lamp: after change:  void--goto->dark', 'button: enter released: void--start->released', 'root_fsm.change', 'button: before *: released--press->pressed', 'lamp: before *: dark--goto->lit', 'button: before *: pressed--goto->pressed', 'button: stay pressed: pressed--goto->pressed', 'lamp: enter lit: dark--goto->lit', 'lamp: after change:  dark--goto->lit', 'button: enter pressed: released--press->pressed', 'root_fsm.change']);
+    T.eq(result, ['button: stay released: released--goto->released', 'lamp: enter dark: void--goto->dark', 'lamp: after change:  void--goto->dark', 'button: enter released: void--start->released', 'root_fsm.change', 'button: stay pressed: pressed--goto->pressed', 'lamp: enter lit: dark--goto->lit', 'lamp: after change:  dark--goto->lit', 'button: enter pressed: released--press->pressed', 'root_fsm.change']);
     //---------------------------------------------------------------------------------------------------------
     return done();
   };
@@ -601,7 +935,7 @@
     var Intermatic, fsm, fsmd, register, result, srpr;
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
-      subs: {
+      fsms: {
         alpha_btn: {
           //.......................................................................................................
           triggers: [['void', 'start', 'released'], ['*', 'reset', 'void'], ['released', 'press', 'pressed'], ['pressed', 'release', 'released']],
@@ -626,7 +960,7 @@
             }
           },
           //.......................................................................................................
-          subs: {
+          fsms: {
             //.....................................................................................................
             color: {
               triggers: [['red', 'toggle', 'green'], ['green', 'toggle', 'red']],
@@ -694,7 +1028,7 @@
     whisper('release');
     fsm.alpha_btn.release();
     whisper('-----------');
-    debug(result);
+    // debug result
     T.eq(result, [
       {
         from: 'void',
@@ -786,312 +1120,6 @@
     return done();
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this["Intermatic cFsm 3"] = function(T, done) {
-    var Intermatic, change2, fsm, fsmd, n;
-    //---------------------------------------------------------------------------------------------------------
-    fsmd = {
-      triggers: [['void', 'start', 'running'], ['running', 'stop', 'stopped']],
-      before: {
-        start: function(s) {
-          return this.meta_btn.start();
-        },
-        // @alt_btn.start()
-        stop: function(s) {
-          return this.meta_btn.stop();
-        }
-      },
-      xxx: function() {
-        return info(this.cstate);
-      },
-      subs: {
-        meta_btn: {
-          //.......................................................................................................
-          triggers: [['void', 'start', 'released'], ['*', 'stop', 'void'], ['released', 'toggle', 'pressed'], ['pressed', 'toggle', 'released'], ['released', 'press', 'pressed'], ['pressed', 'release', 'released']],
-          before: {
-            start: function(s) {
-              this.lamp.start();
-              this.color.start();
-              return this.text.start();
-            },
-            stop: function(s) {
-              this.lamp.stop();
-              this.color.stop();
-              return this.text.stop();
-            }
-          },
-          after: {
-            change: function(s) {
-              // @lamp.tryto.toggle()
-              // @lamp.tryto 'toggle'
-              this.lamp.toggle();
-              this.color.toggle();
-              this.text.toggle();
-              whisper('^444332^', this.cstate);
-              change2(this, s);
-              return this.up.xxx();
-            }
-          },
-          xxx: function() {
-            return this.up.xxx();
-          },
-          //.......................................................................................................
-          subs: {
-            //.....................................................................................................
-            color: {
-              triggers: [['red', 'toggle', 'green'], ['green', 'toggle', 'red'], ['*', 'stop', 'void']],
-              after: {
-                change: function(s) {
-                  return change2(this, s); //; @xxx()
-                }
-              },
-              fail: function(s) {
-                return whisper(s);
-              },
-              xxx: function() {
-                return this.up.xxx();
-              }
-            },
-            //.....................................................................................................
-            text: {
-              triggers: [['halt', 'toggle', 'go'], ['go', 'toggle', 'halt'], ['*', 'stop', 'void']],
-              after: {
-                change: function(s) {
-                  return change2(this, s);
-                }
-              },
-              fail: function(s) {
-                return whisper(s);
-              }
-            },
-            //.....................................................................................................
-            lamp: {
-              triggers: [['void', 'start', 'dark'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit'], ['*', 'stop', 'void']],
-              after: {
-                change: function(s) {
-                  return change2(this, s);
-                }
-              },
-              fail: function(s) {
-                return whisper(s);
-              }
-            }
-          }
-        }
-      }
-    };
-    //---------------------------------------------------------------------------------------------------------
-    // gstate  = {}
-    change2 = function(fsm, s) {
-      var cstate, from, id, via;
-      // gstate  = { gstate..., }
-      ({from, via, id} = s);
-      if (isa.text((cstate = fsm.cstate))) {
-        help({
-          [fsm.name]: cstate,
-          from,
-          via,
-          id
-        });
-        return warn(s);
-      } else {
-        // info "#{fsm.name}:#{cstate}?from:#{from},via:#{via}"
-        return urge({
-          [fsm.name]: {...cstate},
-          from,
-          via,
-          id
-        });
-      }
-    };
-    /* TAINT should be done recursively */
-    // state_txt = 'xxxx'
-    // info "#{fsm.name}:#{cstate._}/#{state_txt}/?from:#{from},via:#{via}"
-    //---------------------------------------------------------------------------------------------------------
-    Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
-    fsm = new Intermatic(fsmd);
-    urge('^3334^', `FSM ${rpr(fsm.meta_btn.name)} has sub-FSMs ${((function() {
-      var i, len, ref, results;
-      ref = fsm.meta_btn.subfsm_names;
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        n = ref[i];
-        results.push(rpr(n));
-      }
-      return results;
-    })()).join(', ')}`);
-    fsm.start();
-    fsm.meta_btn.press();
-    fsm.stop();
-    //---------------------------------------------------------------------------------------------------------
-    return done();
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["Intermatic toolbox"] = function(T, done) {
-    var Intermatic, change2, fsm, fsmd, n, new_button_fsmd;
-    //---------------------------------------------------------------------------------------------------------
-    declare('toolbox_button_cfg', {
-      tests: {
-        "x is an object": function(x) {
-          return this.isa.object(x);
-        }
-      }
-    });
-    //---------------------------------------------------------------------------------------------------------
-    new_button_fsmd = function(cfg) {
-      var R, defaults;
-      defaults = {};
-      cfg = {...defaults, ...cfg};
-      validate.toolbox_button_cfg(cfg);
-      //.......................................................................................................
-      return R = {
-        triggers: [['void', 'start', 'released'], ['*', 'stop', 'void'], ['released', 'toggle', 'pressed'], ['pressed', 'toggle', 'released'], ['released', 'press', 'pressed'], ['pressed', 'release', 'released']],
-        cyclers: {
-          toggle: ['released', 'pressed']
-        }
-      };
-    };
-    //---------------------------------------------------------------------------------------------------------
-    fsmd = {
-      triggers: [['void', 'start', 'running'], ['running', 'stop', 'stopped']],
-      before: {
-        start: function(s) {
-          return this.meta_btn.start();
-        },
-        // @alt_btn.start()
-        stop: function(s) {
-          return this.meta_btn.stop();
-        }
-      },
-      xxx: function() {
-        return info(this.cstate);
-      },
-      subs: {
-        meta_btn: {
-          //.......................................................................................................
-          triggers: [['void', 'start', 'released'], ['*', 'stop', 'void'], ['released', 'toggle', 'pressed'], ['pressed', 'toggle', 'released'], ['released', 'press', 'pressed'], ['pressed', 'release', 'released']],
-          before: {
-            start: function(s) {
-              this.lamp.start();
-              this.color.start();
-              return this.text.start();
-            },
-            stop: function(s) {
-              this.lamp.stop();
-              this.color.stop();
-              return this.text.stop();
-            }
-          },
-          after: {
-            change: function(s) {
-              // @lamp.tryto.toggle()
-              // @lamp.tryto 'toggle'
-              this.lamp.toggle();
-              this.color.toggle();
-              this.text.toggle();
-              whisper('^444332^', this.cstate);
-              change2(this, s);
-              return this.up.xxx();
-            }
-          },
-          xxx: function() {
-            return this.up.xxx();
-          },
-          //.......................................................................................................
-          subs: {
-            //.....................................................................................................
-            color: {
-              triggers: [['red', 'toggle', 'green'], ['green', 'toggle', 'red'], ['*', 'stop', 'void']],
-              after: {
-                change: function(s) {
-                  return change2(this, s); //; @xxx()
-                }
-              },
-              fail: function(s) {
-                return whisper(s);
-              },
-              xxx: function() {
-                return this.up.xxx();
-              }
-            },
-            //.....................................................................................................
-            text: {
-              triggers: [['halt', 'toggle', 'go'], ['go', 'toggle', 'halt'], ['*', 'stop', 'void']],
-              after: {
-                change: function(s) {
-                  return change2(this, s);
-                }
-              },
-              fail: function(s) {
-                return whisper(s);
-              }
-            },
-            //.....................................................................................................
-            lamp: {
-              triggers: [['void', 'start', 'dark'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit'], ['*', 'stop', 'void']],
-              after: {
-                change: function(s) {
-                  return change2(this, s);
-                }
-              },
-              fail: function(s) {
-                return whisper(s);
-              }
-            }
-          }
-        }
-      }
-    };
-    //---------------------------------------------------------------------------------------------------------
-    // gstate  = {}
-    change2 = function(fsm, s) {
-      var cstate, from, id, via;
-      // gstate  = { gstate..., }
-      ({from, via, id} = s);
-      if (isa.text((cstate = fsm.cstate))) {
-        help({
-          [fsm.name]: cstate,
-          from,
-          via,
-          id
-        });
-        return warn(s);
-      } else {
-        // info "#{fsm.name}:#{cstate}?from:#{from},via:#{via}"
-        return urge({
-          [fsm.name]: {...cstate},
-          from,
-          via,
-          id
-        });
-      }
-    };
-    /* TAINT should be done recursively */
-    // state_txt = 'xxxx'
-    // info "#{fsm.name}:#{cstate._}/#{state_txt}/?from:#{from},via:#{via}"
-    //---------------------------------------------------------------------------------------------------------
-    Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
-    fsm = new Intermatic(fsmd);
-    urge('^3334^', `FSM ${rpr(fsm.meta_btn.name)} has sub-FSMs ${((function() {
-      var i, len, ref, results;
-      ref = fsm.meta_btn.subfsm_names;
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        n = ref[i];
-        results.push(rpr(n));
-      }
-      return results;
-    })()).join(', ')}`);
-    fsm.start();
-    fsm.meta_btn.press();
-    fsm.stop();
-    //---------------------------------------------------------------------------------------------------------
-    return done();
-  };
-
   //###########################################################################################################
   if (module === require.main) {
     (() => {
@@ -1101,8 +1129,12 @@
     })();
   }
 
-  // test @[ "Intermatic cyclers 1" ]
-// test @[ "Intermatic cFsm 3" ]
+  // test @[ "Intermatic catchalls 1" ]
+// test @[ "Intermatic toolbox" ]
+// test @[ "Intermatic tryto 1" ]
+// test @[ "Intermatic tryto 2" ]
+// test @[ "Intermatic cyclers 1" ]
+// test @[ "Intermatic cFsm 1" ]
 // test @[ "Intermatic cFsm" ]
 // test @[ "Intermatic empty FSM" ]
 // test @[ "Intermatic before.start(), after.start()" ]
