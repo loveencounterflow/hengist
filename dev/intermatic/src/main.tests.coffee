@@ -152,13 +152,13 @@ new_register = ->
   Intermatic      = require '../../../apps/intermatic'
   Intermatic._tid = 0
   fsm             = new Intermatic fsmd
-  # T.eq ( Object.keys fsm ),  [ 'reserved', 'fsmd', 'triggers', 'subfsm_names', 'has_subfsms', '_lstate', 'before', 'enter', 'stay', 'leave', 'after', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail' ]
+  # T.eq ( Object.keys fsm ),  [ 'reserved', 'fsmd', 'triggers', 'fsm_names', 'has_subfsms', '_lstate', 'before', 'enter', 'stay', 'leave', 'after', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail' ]
   fsm.start()
   fsm.toggle()
   fsm.reset()
   fsm.toggle()
   fsm.goto 'lit'
-  fsm.goto 'lit'
+  fsm.goto.lit()
   fsm.goto 'dark'
   echo result
   T.eq result, [
@@ -169,9 +169,9 @@ new_register = ->
     [ 'after change', { '$key': '^trigger', id: 't3', from: 'dark', via: 'reset', to: 'void', changed: true } ],
     [ 'failed', { '$key': '^trigger', id: 't4', failed: true, from: 'void', via: 'toggle' } ],
     [ 'after change', { '$key': '^trigger', id: 't5', from: 'void', via: 'goto', to: 'lit', changed: true } ],
-    [ 'leave lit', { '$key': '^trigger', id: 't7', from: 'lit', via: 'goto', to: 'dark', changed: true } ],
-    [ 'enter dark', { '$key': '^trigger', id: 't7', from: 'lit', via: 'goto', to: 'dark', changed: true } ],
-    [ 'after change', { '$key': '^trigger', id: 't7', from: 'lit', via: 'goto', to: 'dark', changed: true } ] ]
+    [ 'leave lit', { '$key': '^trigger', id: 't6', from: 'lit', via: 'goto', to: 'dark', changed: true } ],
+    [ 'enter dark', { '$key': '^trigger', id: 't6', from: 'lit', via: 'goto', to: 'dark', changed: true } ],
+    [ 'after change', { '$key': '^trigger', id: 't6', from: 'lit', via: 'goto', to: 'dark', changed: true } ] ]
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -221,6 +221,115 @@ new_register = ->
   #---------------------------------------------------------------------------------------------------------
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "Intermatic catchalls 1" ] = ( T, done ) ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    name: 'knob'
+    triggers: [
+      [ 'void', 'start', 'bar', ]
+      ]
+    cyclers:
+      step:   [ 'bar', 'baz', 'gnu', 'doe', ]
+    goto: '*'
+    before: any: ( s ) -> register 'before any',  fsm.lstate, s
+    enter:  any: ( s ) -> register 'enter any',   fsm.lstate, s
+    stay:   any: ( s ) -> register 'stay any',    fsm.lstate, s
+    leave:  any: ( s ) -> register 'leave any',   fsm.lstate, s
+    after:  any: ( s ) -> register 'after any',   fsm.lstate, s
+    fail:        ( s ) -> register 'fail',        fsm.lstate, s
+  #---------------------------------------------------------------------------------------------------------
+  { result
+    register }    = new_register()
+  Intermatic      = require '../../../apps/intermatic'
+  Intermatic._tid = 0
+  fsm             = new Intermatic fsmd
+  info "fsm.start()     ———"; fsm.start()
+  info "fsm.step()      ———"; fsm.step()
+  info "fsm.goto.#{fsm.lstate}()  ———"; fsm.goto fsm.lstate
+  echo result
+  T.eq result, [
+    [ 'before any', 'void', { '$key': '^trigger', id: 't1', from: 'void', via: 'start', to: 'bar', changed: true } ],
+    [ 'leave any', 'void', { '$key': '^trigger', id: 't1', from: 'void', via: 'start', to: 'bar', changed: true } ],
+    [ 'enter any', 'bar', { '$key': '^trigger', id: 't1', from: 'void', via: 'start', to: 'bar', changed: true } ],
+    [ 'after any', 'bar', { '$key': '^trigger', id: 't1', from: 'void', via: 'start', to: 'bar', changed: true } ],
+    [ 'before any', 'bar', { '$key': '^trigger', id: 't2', from: 'bar', via: 'step', to: 'baz', changed: true } ],
+    [ 'leave any', 'bar', { '$key': '^trigger', id: 't2', from: 'bar', via: 'step', to: 'baz', changed: true } ],
+    [ 'enter any', 'baz', { '$key': '^trigger', id: 't2', from: 'bar', via: 'step', to: 'baz', changed: true } ],
+    [ 'after any', 'baz', { '$key': '^trigger', id: 't2', from: 'bar', via: 'step', to: 'baz', changed: true } ],
+    [ 'before any', 'baz', { '$key': '^trigger', id: 't3', from: 'baz', via: 'goto', to: 'baz', changed: false } ],
+    [ 'stay any', 'baz', { '$key': '^trigger', id: 't3', from: 'baz', via: 'goto', to: 'baz', changed: false } ],
+    [ 'after any', 'baz', { '$key': '^trigger', id: 't3', from: 'baz', via: 'goto', to: 'baz', changed: false } ] ]
+  #---------------------------------------------------------------------------------------------------------
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Intermatic tryto 1" ] = ( T, done ) ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    name: 'oneway_switch'
+    triggers: [
+      [ 'void', 'start',  'off', ]
+      [ 'off',  'toggle', 'on', ]
+      ]
+    after:
+      change:     ( s ) -> register s
+    fail:         ( s ) -> register s
+  #---------------------------------------------------------------------------------------------------------
+  { result
+    register }    = new_register()
+  Intermatic      = require '../../../apps/intermatic'
+  Intermatic._tid = 0
+  fsm             = new Intermatic fsmd
+  fsm.start()
+  T.eq true,  fsm.can.toggle()
+  T.eq true,  fsm.tryto.toggle()
+  T.eq false, fsm.can   'toggle'
+  T.eq false, fsm.tryto 'toggle'
+  T.throws /unknown trigger "nonexisting_trigger"/, -> fsm.can 'nonexisting_trigger'
+  echo result
+  T.eq result, [
+    { '$key': '^trigger', id: 't1', from: 'void', via: 'start', to: 'off', changed: true },
+    { '$key': '^trigger', id: 't2', from: 'off', via: 'toggle', to: 'on', changed: true } ]
+  #---------------------------------------------------------------------------------------------------------
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Intermatic tryto 2" ] = ( T, done ) ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    name: 'oneway_switch'
+    triggers: [
+      [ 'void', 'start',  'one', ]
+      ]
+    cyclers:
+      step: [ 'one', 'two', 'three', ]
+    after:
+      change:     ( s ) -> register s
+      # step:       ( s ) -> @step()
+    fail:         ( s ) -> register s
+  #---------------------------------------------------------------------------------------------------------
+  { result
+    register }    = new_register()
+  Intermatic      = require '../../../apps/intermatic'
+  Intermatic._tid = 0
+  fsm             = new Intermatic fsmd
+  info 'fsm.start()       ------------'; info CND.truth fsm.start()
+  info 'fsm.step()        ------------'; info CND.truth fsm.step()
+  info 'fsm.tryto.step()  ------------'; info CND.truth fsm.tryto.step()
+  info 'fsm.step()        ------------'; info CND.truth fsm.step()
+  info 'fsm.tryto.step()  ------------'; info CND.truth fsm.tryto.step()
+  info 'fsm.tryto.start() ------------'; info CND.truth fsm.tryto.start()
+  echo result
+  T.eq result, [
+    { '$key': '^trigger', id: 't1', from: 'void', via: 'start', to: 'one', changed: true },
+    { '$key': '^trigger', id: 't2', from: 'one', via: 'step', to: 'two', changed: true },
+    { '$key': '^trigger', id: 't3', from: 'two', via: 'step', to: 'three', changed: true },
+    { '$key': '^trigger', id: 't4', from: 'three', via: 'step', to: 'one', changed: true },
+    { '$key': '^trigger', id: 't5', from: 'one', via: 'step', to: 'two', changed: true },
+    { '$key': '^trigger', id: 't6', from: 'two', via: 'step', to: 'three', changed: true } ]
+  #---------------------------------------------------------------------------------------------------------
+  done()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "Intermatic cFsm 1" ] = ( T, done ) ->
@@ -244,7 +353,7 @@ new_register = ->
       trigger: ( s ) -> register "button: before *: #{srpr s}"
     goto: '*'
     #.......................................................................................................
-    subs:
+    fsms:
       #.....................................................................................................
       lamp:
         triggers: [
@@ -296,21 +405,15 @@ new_register = ->
   urge { root: button.lstate, lamp: button.lamp.lstate, }
   help [ "°button:^#{button.lstate}", "°button/lamp:^#{button.lamp.lstate}", ]
   T.eq result, [
-    'button: before *: void--start->released'
-    'lamp: before *: void--goto->dark'
-    'button: before *: released--goto->released'
-    'button: stay released: released--goto->released'
-    'lamp: enter dark: void--goto->dark'
-    'lamp: after change:  void--goto->dark'
-    'button: enter released: void--start->released'
-    'root_fsm.change'
-    'button: before *: released--press->pressed'
-    'lamp: before *: dark--goto->lit'
-    'button: before *: pressed--goto->pressed'
-    'button: stay pressed: pressed--goto->pressed'
-    'lamp: enter lit: dark--goto->lit'
-    'lamp: after change:  dark--goto->lit'
-    'button: enter pressed: released--press->pressed'
+    'button: stay released: released--goto->released',
+    'lamp: enter dark: void--goto->dark',
+    'lamp: after change:  void--goto->dark',
+    'button: enter released: void--start->released',
+    'root_fsm.change',
+    'button: stay pressed: pressed--goto->pressed',
+    'lamp: enter lit: dark--goto->lit',
+    'lamp: after change:  dark--goto->lit',
+    'button: enter pressed: released--press->pressed',
     'root_fsm.change' ]
   #---------------------------------------------------------------------------------------------------------
   done()
@@ -319,7 +422,7 @@ new_register = ->
 @[ "Intermatic cFsm 2" ] = ( T, done ) ->
   #---------------------------------------------------------------------------------------------------------
   fsmd =
-    subs:
+    fsms:
       alpha_btn:
         #.......................................................................................................
         triggers: [
@@ -337,7 +440,7 @@ new_register = ->
             @lamp.toggle()
             register { from: s.from, via: s.via, alpha_btn: @lstate, lamp: @lamp.lstate, color: @color.lstate, }
         #.......................................................................................................
-        subs:
+        fsms:
           #.....................................................................................................
           color:
             triggers: [
@@ -383,7 +486,7 @@ new_register = ->
   whisper 'release'
   fsm.alpha_btn.release()
   whisper '-----------'
-  debug result
+  # debug result
   T.eq result, [
     { from: 'void', via: 'start', alpha_btn_color: 'green' }
     { from: 'void', via: 'start', alpha_btn_lamp: 'lit' }
@@ -403,236 +506,18 @@ new_register = ->
   #---------------------------------------------------------------------------------------------------------
   done()
 
-#-----------------------------------------------------------------------------------------------------------
-@[ "Intermatic cFsm 3" ] = ( T, done ) ->
-  #---------------------------------------------------------------------------------------------------------
-  fsmd =
-    triggers: [
-      [ 'void', 'start', 'running', ]
-      [ 'running', 'stop', 'stopped', ]
-      ]
-    before:
-      start: ( s ) ->
-        @meta_btn.start()
-        # @alt_btn.start()
-      stop: ( s ) ->
-        @meta_btn.stop()
-    xxx: -> info @cstate
-    subs:
-      meta_btn:
-        #.......................................................................................................
-        triggers: [
-          [ 'void',     'start',    'released',   ]
-          [ '*',        'stop',     'void',       ]
-          [ 'released', 'toggle',   'pressed',    ]
-          [ 'pressed',  'toggle',   'released',   ]
-          [ 'released', 'press',    'pressed',    ]
-          [ 'pressed',  'release',  'released',   ] ]
-        before:
-          start:    ( s ) ->
-            @lamp.start()
-            @color.start()
-            @text.start()
-          stop:    ( s ) ->
-            @lamp.stop()
-            @color.stop()
-            @text.stop()
-        after:
-          change:   ( s ) ->
-            # @lamp.tryto.toggle()
-            # @lamp.tryto 'toggle'
-            @lamp.toggle()
-            @color.toggle()
-            @text.toggle()
-            whisper '^444332^', @cstate
-            change2 @, s
-            @up.xxx()
-        xxx: -> @up.xxx()
-        #.......................................................................................................
-        subs:
-          #.....................................................................................................
-          color:
-            triggers: [
-              [ 'red',    'toggle', 'green', ]
-              [ 'green',  'toggle', 'red', ]
-              [ '*',      'stop',   'void', ] ]
-            after:
-              change: ( s ) -> change2 @, s #; @xxx()
-            fail: ( s ) -> whisper s
-            xxx: -> @up.xxx()
-          #.....................................................................................................
-          text:
-            triggers: [
-              [ 'halt',   'toggle', 'go',   ]
-              [ 'go',     'toggle', 'halt', ]
-              [ '*',      'stop',   'void', ] ]
-            after:
-              change: ( s ) -> change2 @, s
-            fail: ( s ) -> whisper s
-          #.....................................................................................................
-          lamp:
-            triggers: [
-              [ 'void',   'start',  'dark', ]
-              [ 'lit',    'toggle', 'dark', ]
-              [ 'dark',   'toggle', 'lit',  ]
-              [ '*',      'stop',   'void', ] ]
-            after:
-              change: ( s ) -> change2 @, s
-            fail: ( s ) -> whisper s
-
-  #---------------------------------------------------------------------------------------------------------
-  # gstate  = {}
-  change2  = ( fsm, s ) ->
-    # gstate  = { gstate..., }
-    { from, via, id, } = s
-    if isa.text ( cstate = fsm.cstate )
-      help { [fsm.name]: cstate, from, via, id, }
-      warn s
-      # info "#{fsm.name}:#{cstate}?from:#{from},via:#{via}"
-    else
-      urge { [fsm.name]: { cstate..., }, from, via, id, }
-      ### TAINT should be done recursively ###
-      # state_txt = 'xxxx'
-      # info "#{fsm.name}:#{cstate._}/#{state_txt}/?from:#{from},via:#{via}"
-  #---------------------------------------------------------------------------------------------------------
-  Intermatic      = require '../../../apps/intermatic'
-  Intermatic._tid = 0
-  fsm             = new Intermatic fsmd
-  urge '^3334^', "FSM #{rpr fsm.meta_btn.name} has sub-FSMs #{( rpr n for n in fsm.meta_btn.subfsm_names ).join ', '}"
-  fsm.start()
-  fsm.meta_btn.press()
-  fsm.stop()
-  #---------------------------------------------------------------------------------------------------------
-  done()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "Intermatic toolbox" ] = ( T, done ) ->
-  #---------------------------------------------------------------------------------------------------------
-  declare 'toolbox_button_cfg', tests:
-    "x is an object": ( x ) -> @isa.object x
-  #---------------------------------------------------------------------------------------------------------
-  new_button_fsmd = ( cfg ) ->
-    defaults  = {}
-    cfg       = { defaults..., cfg..., }
-    validate.toolbox_button_cfg cfg
-    #.......................................................................................................
-    R =
-      triggers: [
-        [ 'void',     'start',    'released',   ]
-        [ '*',        'stop',     'void',       ]
-        [ 'released', 'toggle',   'pressed',    ]
-        [ 'pressed',  'toggle',   'released',   ]
-        [ 'released', 'press',    'pressed',    ]
-        [ 'pressed',  'release',  'released',   ] ]
-      cyclers:
-        toggle: [ 'released', 'pressed', ]
-  #---------------------------------------------------------------------------------------------------------
-  fsmd =
-    triggers: [
-      [ 'void', 'start', 'running', ]
-      [ 'running', 'stop', 'stopped', ]
-      ]
-    before:
-      start: ( s ) ->
-        @meta_btn.start()
-        # @alt_btn.start()
-      stop: ( s ) ->
-        @meta_btn.stop()
-    xxx: -> info @cstate
-    subs:
-      meta_btn:
-        #.......................................................................................................
-        triggers: [
-          [ 'void',     'start',    'released',   ]
-          [ '*',        'stop',     'void',       ]
-          [ 'released', 'toggle',   'pressed',    ]
-          [ 'pressed',  'toggle',   'released',   ]
-          [ 'released', 'press',    'pressed',    ]
-          [ 'pressed',  'release',  'released',   ] ]
-        before:
-          start:    ( s ) ->
-            @lamp.start()
-            @color.start()
-            @text.start()
-          stop:    ( s ) ->
-            @lamp.stop()
-            @color.stop()
-            @text.stop()
-        after:
-          change:   ( s ) ->
-            # @lamp.tryto.toggle()
-            # @lamp.tryto 'toggle'
-            @lamp.toggle()
-            @color.toggle()
-            @text.toggle()
-            whisper '^444332^', @cstate
-            change2 @, s
-            @up.xxx()
-        xxx: -> @up.xxx()
-        #.......................................................................................................
-        subs:
-          #.....................................................................................................
-          color:
-            triggers: [
-              [ 'red',    'toggle', 'green', ]
-              [ 'green',  'toggle', 'red', ]
-              [ '*',      'stop',   'void', ] ]
-            after:
-              change: ( s ) -> change2 @, s #; @xxx()
-            fail: ( s ) -> whisper s
-            xxx: -> @up.xxx()
-          #.....................................................................................................
-          text:
-            triggers: [
-              [ 'halt',   'toggle', 'go',   ]
-              [ 'go',     'toggle', 'halt', ]
-              [ '*',      'stop',   'void', ] ]
-            after:
-              change: ( s ) -> change2 @, s
-            fail: ( s ) -> whisper s
-          #.....................................................................................................
-          lamp:
-            triggers: [
-              [ 'void',   'start',  'dark', ]
-              [ 'lit',    'toggle', 'dark', ]
-              [ 'dark',   'toggle', 'lit',  ]
-              [ '*',      'stop',   'void', ] ]
-            after:
-              change: ( s ) -> change2 @, s
-            fail: ( s ) -> whisper s
-
-  #---------------------------------------------------------------------------------------------------------
-  # gstate  = {}
-  change2  = ( fsm, s ) ->
-    # gstate  = { gstate..., }
-    { from, via, id, } = s
-    if isa.text ( cstate = fsm.cstate )
-      help { [fsm.name]: cstate, from, via, id, }
-      warn s
-      # info "#{fsm.name}:#{cstate}?from:#{from},via:#{via}"
-    else
-      urge { [fsm.name]: { cstate..., }, from, via, id, }
-      ### TAINT should be done recursively ###
-      # state_txt = 'xxxx'
-      # info "#{fsm.name}:#{cstate._}/#{state_txt}/?from:#{from},via:#{via}"
-  #---------------------------------------------------------------------------------------------------------
-  Intermatic      = require '../../../apps/intermatic'
-  Intermatic._tid = 0
-  fsm             = new Intermatic fsmd
-  urge '^3334^', "FSM #{rpr fsm.meta_btn.name} has sub-FSMs #{( rpr n for n in fsm.meta_btn.subfsm_names ).join ', '}"
-  fsm.start()
-  fsm.meta_btn.press()
-  fsm.stop()
-  #---------------------------------------------------------------------------------------------------------
-  done()
 
 ############################################################################################################
 if module is require.main then do =>
   # @demo_2()
   # @toolbox_demo()
   test @
+  # test @[ "Intermatic catchalls 1" ]
+  # test @[ "Intermatic toolbox" ]
+  # test @[ "Intermatic tryto 1" ]
+  # test @[ "Intermatic tryto 2" ]
   # test @[ "Intermatic cyclers 1" ]
-  # test @[ "Intermatic cFsm 3" ]
+  # test @[ "Intermatic cFsm 1" ]
   # test @[ "Intermatic cFsm" ]
   # test @[ "Intermatic empty FSM" ]
   # test @[ "Intermatic before.start(), after.start()" ]
