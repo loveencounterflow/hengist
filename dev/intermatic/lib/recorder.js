@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, PATH, Recorder, badge, debug, declare, echo, freeze, help, info, isa, lets, log, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var CND, PATH, Recorder, badge, debug, declare, echo, freeze, help, info, isa, lets, log, rpr, test, to_width, type_of, types, urge, validate, warn, whisper, width_of;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -36,6 +36,9 @@
 
   ({freeze, lets} = require('letsfreezethat'));
 
+  // ITX                       = require '../../../apps/intertext'
+  ({to_width, width_of} = require('to-width'));
+
   //-----------------------------------------------------------------------------------------------------------
   // declare
 
@@ -48,50 +51,48 @@
       var tnames;
       // validate.fsm fsm
       this.fsm = fsm;
-      debug('^3334^', this.fsm.triggers);
       tnames = Object.keys(this.fsm.triggers);
-      debug('^3334^', tnames);
-      debug('^3334^', this.fsm.lstates);
-      debug('^3334^', this.fsm.fsm_names);
-      this._compile_handlers();
+      this.cstate = {...this.fsm.cstate};
+      this._compile_state_handlers(this.fsm);
       return null;
     }
 
     //---------------------------------------------------------------------------------------------------------
-    _compile_handlers() {
-      // @_compile_trigger_handlers()
-      this._compile_state_handlers();
-      return null;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    _compile_state_handlers() {
-      var entry_point, handler, i, len, lstate, original_handler, ref, target, xxx_show;
-      entry_point = 'enter';
-      target = this.fsm[entry_point];
-      xxx_show = function(s, ...P) {
-        return debug('^27776^', s);
-      };
-      /* TAINT where/when to call so we get a line to represent state at recorder initialization? */
-      xxx_show({
-        $key: '???',
-        to: this.fsm.lstate
-      });
-      ref = this.fsm.lstates;
+    _compile_state_handlers(fsm) {
+      var i, len, ref, sub_fsm;
+      this._compile_state_handler(fsm);
+      ref = fsm.fsms;
       for (i = 0, len = ref.length; i < len; i++) {
-        lstate = ref[i];
-        if ((original_handler = target[lstate]) != null) {
-          handler = function(s, ...P) {
-            original_handler(s, ...P);
-            return xxx_show(s, ...P);
-          };
-        } else {
-          handler = function(s, ...P) {
-            return xxx_show(s, ...P);
-          };
-        }
-        target[lstate] = handler.bind(this.fsm);
+        sub_fsm = ref[i];
+        this._compile_state_handlers(sub_fsm);
       }
+      return null;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    _compile_state_handler(fsm) {
+      var handler, original_handler, self;
+      // is_first    = true
+      self = this;
+      if ((original_handler = fsm.enter.any) != null) {
+        handler = function(s, ...P) {
+          original_handler(s, ...P);
+          return self.render_state(this.path, s, ...P);
+        };
+      } else {
+        handler = function(s, ...P) {
+          return self.render_state(this.path, s, ...P);
+        };
+      }
+      fsm.enter.any = handler.bind(fsm);
+      return null;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    render_state(path, s, ...P) {
+      this.cstate = {...this.fsm.cstate};
+      whisper('^27776^', path, s.via, this.fsm.cstate);
+      debug(this.cstate);
       return null;
     }
 

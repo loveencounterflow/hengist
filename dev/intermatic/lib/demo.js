@@ -692,12 +692,56 @@
   //---------------------------------------------------------------------------------------------------------
   // done()
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.basics_demo = function() {
+    var Intermatic, fsm, fsmd;
+    //---------------------------------------------------------------------------------------------------------
+    fsmd = {
+      name: 'meta_lamp',
+      triggers: [['void', 'start', 'lit'], ['*', 'reset', 'void'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit']],
+      // [ 'void',   'toggle', 'lit',  ]
+      after: {
+        change: function(s) {
+          return urge(`after change:  ${rpr(s)}`);
+        }
+      },
+      enter: {
+        dark: function(s) {
+          return urge(`enter dark:    ${rpr(s)}`);
+        }
+      },
+      leave: {
+        lit: function(s) {
+          return urge(`leave lit      ${rpr(s)}`);
+        }
+      },
+      fail: function(s) {
+        return urge(`failed: ${rpr(s)}`);
+      }
+    };
+    //---------------------------------------------------------------------------------------------------------
+    Intermatic = require('../../../apps/intermatic');
+    Intermatic._tid = 0;
+    fsm = new Intermatic(fsmd);
+    info('^44455^', JSON.stringify(fsm.triggers, null, 2));
+    fsm.start();
+    fsm.toggle();
+    fsm.reset();
+    fsm.toggle();
+    // fsm.goto 'lit'
+    // fsm.goto 'lit'
+    // fsm.goto 'dark'
+    //---------------------------------------------------------------------------------------------------------
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
-    (() => {
-      this.demo_2();
-      this.toolbox_demo();
-      return this.compound_fsm_demo();
+    (async() => {
+      await this.demo_2();
+      await this.toolbox_demo();
+      await this.compound_fsm_demo();
+      return (await this.basics_demo());
     })();
   }
 

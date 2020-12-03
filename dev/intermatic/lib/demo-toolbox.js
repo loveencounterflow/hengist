@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Intermatic, PATH, Recorder, badge, debug, declare, demo, echo, freeze, help, info, isa, lets, log, new_button_fsmd, new_color_fsmd, new_lamp_fsmd, new_register, new_text_fsmd, new_toolbox_fsm, pluck, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var CND, Intermatic, PATH, Recorder, badge, debug, declare, demo, demo_2, echo, freeze, help, info, isa, lets, log, new_button_fsmd, new_color_fsmd, new_lamp_fsmd, new_register, new_text_fsmd, new_toolbox_fsm, pluck, rpr, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -169,66 +169,48 @@
     ({result, register} = new_register());
     //---------------------------------------------------------------------------------------------------------
     main_btn = new_button_fsmd({
+      goto: '*',
       enter: {
         pressed: function(s) {
-          echo(`${this.up.name}.${this.name}:${this.lstate}`, CND.yellow('🔒'));
-          return this.up.meta_btn.lamp.tryto.turn_on();
+          return echo(`${this.up.name}.${this.name}:${this.lstate}`, CND.yellow('🔒'));
         },
+        // @up.meta_btn.lamp.tryto.turn_on()
         released: function(s) {
-          echo(`${this.up.name}.${this.name}:${this.lstate}`, CND.yellow('🔓💡🔅🔆❌⏻⏼⏽✓✅⤴⤵⏺'));
-          return this.up.meta_btn.lamp.tryto.turn_off();
-        }
-      },
-      before: {
-        change: function(s) {
-          return register('<fsm.main_btn.before.change', s);
-        }
-      },
-      after: {
-        change: function(s) {
-          return register('>fsm.main_btn.after.change', s);
+          return echo(`${this.up.name}.${this.name}:${this.lstate}`, CND.yellow('🔓💡🔅🔆❌⏻⏼⏽✓✅⤴⤵⏺'));
         }
       }
     });
+    // @up.meta_btn.lamp.tryto.turn_off()
+    // before:
+    //   change: ( s ) -> register '<fsm.main_btn.before.change', s
+    // after:
+    //   change: ( s ) -> register '>fsm.main_btn.after.change', s
+
     //---------------------------------------------------------------------------------------------------------
     meta_btn = new_button_fsmd({
+      goto: '*',
       enter: {
         pressed: function(s) {
           register('<fsm.meta_btn.enter.pressed', s);
-          debug('^333443^', this.color.can.toggle(), this.text.can.toggle());
+          // debug '^333443^', @color.can.toggle(), @text.can.toggle()
           this.color.tryto.toggle();
           return this.text.tryto.toggle();
         }
       },
-      before: {
-        change: function(s) {
-          echo(`${this.up.name}.${this.name}:${this.lstate}`, CND.white(CND.reverse(`[${this.lstate}]`)));
-          return register('<fsm.meta_btn.before.change', s);
-        },
-        start: function(s) {
-          register('<fsm.meta_btn.before.start', s);
-          return this.fsms.forEach(function(sub_fsm) {
-            return sub_fsm.start();
-          });
-        },
-        stop: function(s) {
-          register('<fsm.meta_btn.before.stop', s);
-          return this.fsms.forEach(function(sub_fsm) {
-            return sub_fsm.stop();
-          });
-        }
-      },
-      after: {
-        change: function(s) {
-          return register('>fsm.meta_btn.after.change', s);
-        },
-        start: function(s) {
-          return register('>fsm.meta_btn.after.start', s);
-        },
-        stop: function(s) {
-          return register('>fsm.meta_btn.after.stop', s);
-        }
-      },
+      // before:
+      //   change: ( s ) ->
+      //     echo "#{@up.name}.#{@name}:#{@lstate}", CND.white CND.reverse "[#{@lstate}]"
+      //     register '<fsm.meta_btn.before.change', s
+      //   start: ( s ) ->
+      //     register '<fsm.meta_btn.before.start', s
+      //     @fsms.forEach ( sub_fsm ) -> sub_fsm.start()
+      //   stop: ( s ) ->
+      //     register '<fsm.meta_btn.before.stop', s
+      //     @fsms.forEach ( sub_fsm ) -> sub_fsm.stop()
+      // after:
+      //   change: ( s ) -> register '>fsm.meta_btn.after.change', s
+      //   start:  ( s ) -> register '>fsm.meta_btn.after.start', s
+      //   stop:   ( s ) -> register '>fsm.meta_btn.after.stop', s
       click: function() {
         this.press();
         return this.release();
@@ -237,86 +219,64 @@
       fsms: {
         //.....................................................................................................
         color: new_color_fsmd({
-          colors: ['red', 'green'],
-          before: {
-            change: function(s) {
-              var ref;
-              register('<fsm.meta_btn.color.before.change', s);
-              return echo(`${this.up.name}.${this.name}:${this.lstate}`, ((ref = CND[this.lstate]) != null ? ref : CND.grey)('██'));
-            }
-          },
-          after: {
-            change: function(s) {
-              return register('>fsm.meta_btn.color.after.change', s);
-            }
-          },
-          goto: '*'
+          goto: '*',
+          colors: ['red', 'green']
         }),
+        // before:
+        //   change: ( s ) ->
+        //     register '<fsm.meta_btn.color.before.change', s
+        //     echo "#{@up.name}.#{@name}:#{@lstate}", ( CND[ @lstate ] ? CND.grey )  '██'
+        // after:
+        //   change: ( s ) -> register '>fsm.meta_btn.color.after.change', s
         //.....................................................................................................
         text: new_text_fsmd({
-          texts: ['wait', 'go'],
-          before: {
-            change: function(s) {
-              register('<fsm.meta_btn.text.before.change', s);
-              return echo(`${this.up.name}.${this.name}:${this.lstate}`, CND.white(CND.reverse(`[${this.lstate}]`)));
-            }
-          },
-          after: {
-            change: function(s) {
-              return register('>fsm.meta_btn.text.after.change', s);
-            }
-          },
-          goto: '*'
+          goto: '*',
+          texts: ['wait', 'go']
         }),
+        // before:
+        //   change: ( s ) ->
+        //     register '<fsm.meta_btn.text.before.change', s
+        //     echo "#{@up.name}.#{@name}:#{@lstate}", CND.white CND.reverse "[#{@lstate}]"
+        // after:
+        //   change: ( s ) -> register '>fsm.meta_btn.text.after.change', s
         //.....................................................................................................
         lamp: new_lamp_fsmd({
-          enter: {
-            lit: function(s) {
-              return echo(`${this.up.name}.${this.name}:${this.lstate}`, CND.yellow('██'));
-            },
-            dark: function(s) {
-              return echo(`${this.up.name}.${this.name}:${this.lstate}`, CND.grey('██'));
-            }
-          },
-          before: {
-            change: function(s) {
-              return register('<fsm.meta_btn.lamp.before.change', s);
-            }
-          },
-          after: {
-            change: function(s) {
-              return register('>fsm.meta_btn.lamp.after.change', s);
-            }
-          },
           goto: '*'
         })
       }
     });
+    // enter:
+    //   lit:    ( s ) -> echo "#{@up.name}.#{@name}:#{@lstate}", CND.yellow  '██'
+    //   dark:   ( s ) -> echo "#{@up.name}.#{@name}:#{@lstate}", CND.grey    '██'
+    // before:
+    //   change: ( s ) -> register '<fsm.meta_btn.lamp.before.change', s
+    // after:
+    //   change: ( s ) -> register '>fsm.meta_btn.lamp.after.change', s
+
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
+      name: 'toolbox',
       triggers: [['void', 'start', 'running'], ['running', 'stop', 'stopped']],
       before: {
         start: function(s) {
-          register('<fsm.before.start', s);
+          // register '<fsm.before.start', s
           return this.fsms.forEach(function(sub_fsm) {
             return sub_fsm.start();
           });
         },
         stop: function(s) {
-          register('<fsm.before.stop', s);
+          // register '<fsm.before.stop', s
           return this.fsms.forEach(function(sub_fsm) {
             return sub_fsm.stop();
           });
         }
       },
       after: {
-        start: function(s) {
-          return register('>fsm.after.start', s);
-        },
-        stop: function(s) {
-          return register('>fsm.after.stop', s);
-        }
+        start: function(s) {},
+        // register '>fsm.after.start', s
+        stop: function(s) {}
       },
+      // register '>fsm.after.stop', s
       fsms: {meta_btn, main_btn}
     };
     //---------------------------------------------------------------------------------------------------------
@@ -341,8 +301,10 @@
       }
       return results;
     })()).join(', ')}`);
-    info('fsm.start()             ------');
+    info('fsm.start()');
     fsm.start();
+    info('fsm.main_btn.goto.released()');
+    fsm.main_btn.goto.released();
     // info 'fsm.meta_btn.press()    ------'; fsm.meta_btn.press()
     // info 'fsm.meta_btn.release()  ------'; fsm.meta_btn.release()
     // info 'fsm.meta_btn.click()    ------'; fsm.meta_btn.click()
@@ -358,10 +320,89 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_2 = function() {
+    var fsm, fsmd, recorder;
+    fsmd = {
+      name: 'simple',
+      triggers: [['void', 'start', 'first']],
+      cyclers: {
+        step: ['first', 'second', 'third']
+      },
+      before: {
+        any: function(s) {
+          return urge(`█ ${this.path}:${s.via}`);
+        },
+        start: function(s) {
+          return this.lamp.start();
+        }
+      },
+      after: {
+        any: function(s) {
+          return whisper(this.cstate);
+        }
+      },
+      enter: {
+        second: function(s) {
+          return this.lamp.toggle();
+        }
+      },
+      fsms: {
+        //.....................................................................................................
+        lamp: {
+          triggers: [['void', 'start', 'on']],
+          cyclers: {
+            toggle: ['on', 'off']
+          },
+          enter: {
+            on: function(s) {
+              return this.counter.tick();
+            }
+          },
+          /* TAINT totally contrived */before: {
+            start: function(s) {
+              return this.counter.start();
+            },
+            any: function(s) {
+              return urge(`${this.path}:${s.via}`);
+            }
+          },
+          //...................................................................................................
+          fsms: {
+            counter: {
+              _XXX_count: 0,
+              triggers: [['void', 'start', 'active']],
+              cyclers: {
+                tick: ['active']
+              },
+              stay: {
+                active: function(s) {
+                  debug(this);
+                  return this._XXX_count++;
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+    //.........................................................................................................
+    fsm = new Intermatic(fsmd);
+    recorder = new Recorder(fsm);
+    fsm.start();
+    fsm.step();
+    fsm.step();
+    fsm.step();
+    fsm.step();
+    fsm.step();
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      return (await demo());
+      await demo();
+      return (await demo_2());
     })();
   }
 
