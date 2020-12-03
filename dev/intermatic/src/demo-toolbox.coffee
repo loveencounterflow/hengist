@@ -128,40 +128,42 @@ new_toolbox_fsm = ->
     register }    = new_register()
   #---------------------------------------------------------------------------------------------------------
   main_btn = new_button_fsmd
+    goto: '*'
     enter:
       pressed:  ( s ) ->
         echo "#{@up.name}.#{@name}:#{@lstate}", CND.yellow  '🔒'
-        @up.meta_btn.lamp.tryto.turn_on()
+        # @up.meta_btn.lamp.tryto.turn_on()
       released: ( s ) ->
         echo "#{@up.name}.#{@name}:#{@lstate}", CND.yellow  '🔓💡🔅🔆❌⏻⏼⏽✓✅⤴⤵⏺'
-        @up.meta_btn.lamp.tryto.turn_off()
-    before:
-      change: ( s ) -> register '<fsm.main_btn.before.change', s
-    after:
-      change: ( s ) -> register '>fsm.main_btn.after.change', s
+        # @up.meta_btn.lamp.tryto.turn_off()
+    # before:
+    #   change: ( s ) -> register '<fsm.main_btn.before.change', s
+    # after:
+    #   change: ( s ) -> register '>fsm.main_btn.after.change', s
 
   #---------------------------------------------------------------------------------------------------------
   meta_btn = new_button_fsmd
+    goto: '*'
     enter:
       pressed: ( s ) ->
         register '<fsm.meta_btn.enter.pressed', s
-        debug '^333443^', @color.can.toggle(), @text.can.toggle()
+        # debug '^333443^', @color.can.toggle(), @text.can.toggle()
         @color.tryto.toggle()
         @text.tryto.toggle()
-    before:
-      change: ( s ) ->
-        echo "#{@up.name}.#{@name}:#{@lstate}", CND.white CND.reverse "[#{@lstate}]"
-        register '<fsm.meta_btn.before.change', s
-      start: ( s ) ->
-        register '<fsm.meta_btn.before.start', s
-        @fsms.forEach ( sub_fsm ) -> sub_fsm.start()
-      stop: ( s ) ->
-        register '<fsm.meta_btn.before.stop', s
-        @fsms.forEach ( sub_fsm ) -> sub_fsm.stop()
-    after:
-      change: ( s ) -> register '>fsm.meta_btn.after.change', s
-      start:  ( s ) -> register '>fsm.meta_btn.after.start', s
-      stop:   ( s ) -> register '>fsm.meta_btn.after.stop', s
+    # before:
+    #   change: ( s ) ->
+    #     echo "#{@up.name}.#{@name}:#{@lstate}", CND.white CND.reverse "[#{@lstate}]"
+    #     register '<fsm.meta_btn.before.change', s
+    #   start: ( s ) ->
+    #     register '<fsm.meta_btn.before.start', s
+    #     @fsms.forEach ( sub_fsm ) -> sub_fsm.start()
+    #   stop: ( s ) ->
+    #     register '<fsm.meta_btn.before.stop', s
+    #     @fsms.forEach ( sub_fsm ) -> sub_fsm.stop()
+    # after:
+    #   change: ( s ) -> register '>fsm.meta_btn.after.change', s
+    #   start:  ( s ) -> register '>fsm.meta_btn.after.start', s
+    #   stop:   ( s ) -> register '>fsm.meta_btn.after.stop', s
     click: ->
       @press()
       @release()
@@ -169,53 +171,54 @@ new_toolbox_fsm = ->
     fsms:
       #.....................................................................................................
       color: new_color_fsmd
-        colors: [ 'red', 'green', ]
-        before:
-          change: ( s ) ->
-            register '<fsm.meta_btn.color.before.change', s
-            echo "#{@up.name}.#{@name}:#{@lstate}", ( CND[ @lstate ] ? CND.grey )  '██'
-        after:
-          change: ( s ) -> register '>fsm.meta_btn.color.after.change', s
         goto: '*'
+        colors: [ 'red', 'green', ]
+        # before:
+        #   change: ( s ) ->
+        #     register '<fsm.meta_btn.color.before.change', s
+        #     echo "#{@up.name}.#{@name}:#{@lstate}", ( CND[ @lstate ] ? CND.grey )  '██'
+        # after:
+        #   change: ( s ) -> register '>fsm.meta_btn.color.after.change', s
       #.....................................................................................................
       text: new_text_fsmd
-        texts: [ 'wait', 'go', ]
-        before:
-          change: ( s ) ->
-            register '<fsm.meta_btn.text.before.change', s
-            echo "#{@up.name}.#{@name}:#{@lstate}", CND.white CND.reverse "[#{@lstate}]"
-        after:
-          change: ( s ) -> register '>fsm.meta_btn.text.after.change', s
         goto: '*'
+        texts: [ 'wait', 'go', ]
+        # before:
+        #   change: ( s ) ->
+        #     register '<fsm.meta_btn.text.before.change', s
+        #     echo "#{@up.name}.#{@name}:#{@lstate}", CND.white CND.reverse "[#{@lstate}]"
+        # after:
+        #   change: ( s ) -> register '>fsm.meta_btn.text.after.change', s
       #.....................................................................................................
       lamp: new_lamp_fsmd
-        enter:
-          lit:    ( s ) -> echo "#{@up.name}.#{@name}:#{@lstate}", CND.yellow  '██'
-          dark:   ( s ) -> echo "#{@up.name}.#{@name}:#{@lstate}", CND.grey    '██'
-        before:
-          change: ( s ) -> register '<fsm.meta_btn.lamp.before.change', s
-        after:
-          change: ( s ) -> register '>fsm.meta_btn.lamp.after.change', s
         goto: '*'
+        # enter:
+        #   lit:    ( s ) -> echo "#{@up.name}.#{@name}:#{@lstate}", CND.yellow  '██'
+        #   dark:   ( s ) -> echo "#{@up.name}.#{@name}:#{@lstate}", CND.grey    '██'
+        # before:
+        #   change: ( s ) -> register '<fsm.meta_btn.lamp.before.change', s
+        # after:
+        #   change: ( s ) -> register '>fsm.meta_btn.lamp.after.change', s
 
   #---------------------------------------------------------------------------------------------------------
   fsmd =
+    name: 'toolbox'
     triggers: [
       [ 'void',     'start',  'running', ]
       [ 'running',  'stop',   'stopped', ]
       ]
     before:
       start: ( s ) ->
-        register '<fsm.before.start', s
+        # register '<fsm.before.start', s
         @fsms.forEach ( sub_fsm ) -> sub_fsm.start()
       stop: ( s ) ->
-        register '<fsm.before.stop', s
+        # register '<fsm.before.stop', s
         @fsms.forEach ( sub_fsm ) -> sub_fsm.stop()
     after:
       start: ( s ) ->
-        register '>fsm.after.start', s
+        # register '>fsm.after.start', s
       stop: ( s ) ->
-        register '>fsm.after.stop', s
+        # register '>fsm.after.stop', s
     fsms: { meta_btn, main_btn, }
 
   #---------------------------------------------------------------------------------------------------------
@@ -229,7 +232,8 @@ demo = ->
   recorder  = new Recorder fsm
   # echo '^33376^', ( require 'util' ).inspect fsm
   urge '^3334^', "FSM #{rpr fsm.meta_btn.name} has sub-FSMs #{( rpr n for n in fsm.meta_btn.fsm_names ).join ', '}"
-  info 'fsm.start()             ------'; fsm.start()
+  info 'fsm.start()';                   fsm.start()
+  info 'fsm.main_btn.goto.released()';  fsm.main_btn.goto.released()
   # info 'fsm.meta_btn.press()    ------'; fsm.meta_btn.press()
   # info 'fsm.meta_btn.release()  ------'; fsm.meta_btn.release()
   # info 'fsm.meta_btn.click()    ------'; fsm.meta_btn.click()
@@ -244,7 +248,63 @@ demo = ->
   #---------------------------------------------------------------------------------------------------------
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_2 = ->
+  fsmd =
+    name: 'simple'
+    triggers: [
+      [ 'void', 'start', 'first' ] ]
+    cyclers:
+      step: [ 'first', 'second', 'third', ]
+    before:
+      any:    ( s ) -> urge "█ #{@path}:#{s.via}"
+      start:  ( s ) -> @lamp.start()
+    after:
+      any: ( s ) -> whisper @cstate
+    enter:
+      second: ( s ) -> @lamp.toggle()
+    fsms:
+      #.....................................................................................................
+      lamp:
+        triggers: [
+          [ 'void', 'start', 'on' ] ]
+        cyclers:
+          toggle: [ 'on', 'off', ]
+        enter:
+          on:     ( s ) -> @counter.tick() ### TAINT totally contrived ###
+        before:
+          start:  ( s ) -> @counter.start()
+          any:    ( s ) -> urge "#{@path}:#{s.via}"
+        #...................................................................................................
+        fsms:
+          counter:
+            _XXX_count: 0
+            triggers: [
+              [ 'void', 'start', 'active' ] ]
+            cyclers:
+              tick: [ 'active', ]
+            stay:
+              active: ( s ) ->
+                debug @
+                @_XXX_count++
+  #.........................................................................................................
+  fsm       = new Intermatic fsmd
+  recorder  = new Recorder fsm
+  fsm.start()
+  fsm.step()
+  fsm.step()
+  fsm.step()
+  fsm.step()
+  fsm.step()
+  return null
+
+
 
 ############################################################################################################
 if module is require.main then do =>
   await demo()
+  await demo_2()
+
+
+
+

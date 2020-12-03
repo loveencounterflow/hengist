@@ -24,6 +24,9 @@ types                     = new ( require 'intertype' ).Intertype()
   type_of }               = types.export()
 { freeze
   lets }                  = require 'letsfreezethat'
+# ITX                       = require '../../../apps/intertext'
+{ to_width
+  width_of }              = require 'to-width'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -37,37 +40,37 @@ class Recorder
   #---------------------------------------------------------------------------------------------------------
   constructor: ( fsm ) ->
     # validate.fsm fsm
-    @fsm = fsm
-    debug '^3334^', @fsm.triggers
-    tnames = Object.keys @fsm.triggers
-    debug '^3334^', tnames
-    debug '^3334^', @fsm.lstates
-    debug '^3334^', @fsm.fsm_names
-    @_compile_handlers()
+    @fsm    = fsm
+    tnames  = Object.keys @fsm.triggers
+    @cstate = { @fsm.cstate..., }
+    @_compile_state_handlers @fsm
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _compile_handlers: ->
-    # @_compile_trigger_handlers()
-    @_compile_state_handlers()
+  _compile_state_handlers: ( fsm ) ->
+    @_compile_state_handler fsm
+    @_compile_state_handlers sub_fsm for sub_fsm in fsm.fsms
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _compile_state_handlers: ->
-    entry_point = 'enter'
-    target      = @fsm[ entry_point ]
-    xxx_show    = ( s, P... ) -> debug '^27776^', s
-    ### TAINT where/when to call so we get a line to represent state at recorder initialization? ###
-    xxx_show { $key: '???', to: @fsm.lstate, }
-    for lstate in @fsm.lstates
-      if ( original_handler = target[ lstate ] )?
-        handler = ( s, P... ) ->
-          original_handler s, P...
-          xxx_show s, P...
-      else
-        handler = ( s, P... ) ->
-          xxx_show s, P...
-      target[ lstate ] = handler.bind @fsm
+  _compile_state_handler: ( fsm ) ->
+    # is_first    = true
+    self = @
+    if ( original_handler = fsm.enter.any )?
+      handler = ( s, P... ) ->
+        original_handler s, P...
+        self.render_state @path, s, P...
+    else
+      handler = ( s, P... ) ->
+        self.render_state @path, s, P...
+    fsm.enter.any = handler.bind fsm
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  render_state: ( path, s, P... ) ->
+    @cstate = { @fsm.cstate..., }
+    whisper '^27776^', path, s.via, @fsm.cstate
+    debug @cstate
     return null
 
 

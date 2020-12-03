@@ -383,9 +383,44 @@ class Compound_fsm extends Multimix
   #---------------------------------------------------------------------------------------------------------
   # done()
 
+#-----------------------------------------------------------------------------------------------------------
+@basics_demo = ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    name: 'meta_lamp'
+    triggers: [
+      [ 'void',   'start',  'lit',  ]
+      [ '*',      'reset',  'void', ]
+      [ 'lit',    'toggle', 'dark', ]
+      [ 'dark',   'toggle', 'lit',  ]
+      # [ 'void',   'toggle', 'lit',  ]
+      ]
+    after:
+      change:     ( s ) -> urge "after change:  #{rpr s}"
+    enter:
+      dark:       ( s ) -> urge "enter dark:    #{rpr s}"
+    leave:
+      lit:        ( s ) -> urge "leave lit      #{rpr s}"
+    fail:         ( s ) -> urge "failed: #{rpr s}"
+  #---------------------------------------------------------------------------------------------------------
+  Intermatic      = require '../../../apps/intermatic'
+  Intermatic._tid = 0
+  fsm             = new Intermatic fsmd
+  info '^44455^', JSON.stringify fsm.triggers, null, 2
+  fsm.start()
+  fsm.toggle()
+  fsm.reset()
+  fsm.toggle()
+  # fsm.goto 'lit'
+  # fsm.goto 'lit'
+  # fsm.goto 'dark'
+  #---------------------------------------------------------------------------------------------------------
+  return null
+
+
 ############################################################################################################
 if module is require.main then do =>
-  @demo_2()
-  @toolbox_demo()
-  @compound_fsm_demo()
-
+  await @demo_2()
+  await @toolbox_demo()
+  await @compound_fsm_demo()
+  await @basics_demo()
