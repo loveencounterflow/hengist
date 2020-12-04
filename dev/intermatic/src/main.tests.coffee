@@ -21,6 +21,7 @@ types                     = new ( require 'intertype' ).Intertype()
 { isa
   validate
   declare
+  equals
   type_of }               = types.export()
 { freeze
   lets }                  = require 'letsfreezethat'
@@ -498,22 +499,33 @@ new_register = ->
   Intermatic      = require '../../../apps/intermatic'
   Intermatic._tid = 0
   fsm             = new Intermatic fsmd
-  T.eq true, CND.truth fsm.can.start()
-  info 'fsm.start()       ------------'; info CND.truth fsm.start()
-  T.eq false, CND.truth fsm.can.start()
-  info 'fsm.step()        ------------'; info CND.truth fsm.step()
-  info 'fsm.tryto.step()  ------------'; info CND.truth fsm.tryto.step()
-  info 'fsm.step()        ------------'; info CND.truth fsm.step()
-  info 'fsm.tryto.step()  ------------'; info CND.truth fsm.tryto.step()
-  info 'fsm.tryto.start() ------------'; info CND.truth fsm.tryto.start()
+  eq = ( ref, test, outcome ) ->
+    if isa.function test
+      ref  += ' ' + test.toString().replace /\n/g, ' '
+      test  = test()
+    if equals test, outcome then T.ok true
+    else                T.fail "test #{rpr ref} failed"
+  debug ( k for k of CND ).sort()
+  eq '^tt2@1',  ( -> fsm.lstate           ), 'void'
+  eq '^tt2@2',  ( -> fsm.triggers.start   ), { void: 'one', }
+  eq '^tt2@3',  ( -> fsm.can.start()      ), true
+  eq '^tt2@4',  ( -> fsm.can 'start'      ), true
+  eq '^tt2@5',  ( -> fsm.start()          ), null               # one
+  eq '^tt2@6',  ( -> fsm.lstate           ), 'one'
+  eq '^tt2@7',  ( -> fsm.can.start()      ), false
+  eq '^tt2@8',  ( -> fsm.can 'start'      ), false
+  eq '^tt2@9',  ( -> fsm.step()           ), null               # two
+  eq '^tt2@10', ( -> fsm.tryto.step()     ), true               # three
+  eq '^tt2@11', ( -> fsm.step()           ), null               # one
+  eq '^tt2@12', ( -> fsm.tryto.step()     ), true               # two
+  eq '^tt2@13', ( -> fsm.tryto.start()    ), false
   show_result()
   T.eq result, [
     { path: 'oneway_switch', lstate: 'one', verb: 'start', dpar: 'void', dest: 'one', changed: true }
     { path: 'oneway_switch', lstate: 'two', verb: 'step', dpar: 'one', dest: 'two', changed: true }
     { path: 'oneway_switch', lstate: 'three', verb: 'step', dpar: 'two', dest: 'three', changed: true }
     { path: 'oneway_switch', lstate: 'one', verb: 'step', dpar: 'three', dest: 'one', changed: true }
-    { path: 'oneway_switch', lstate: 'two', verb: 'step', dpar: 'one', dest: 'two', changed: true }
-    { path: 'oneway_switch', lstate: 'three', verb: 'step', dpar: 'two', dest: 'three', changed: true } ]
+    { path: 'oneway_switch', lstate: 'two', verb: 'step', dpar: 'one', dest: 'two', changed: true } ]
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -711,9 +723,9 @@ if module is require.main then do =>
   # test @[ "Intermatic attribute freezing" ]
   # test @[ "Intermatic toolbox" ]
   # test @[ "Intermatic tryto 1" ]
-  test @[ "Intermatic tryto 2" ]
+  # test @[ "Intermatic tryto 2" ]
   # test @[ "Intermatic cFsm 1" ]
-  # test @[ "Intermatic cFsm 2" ]
+  test @[ "Intermatic cFsm 2" ]
   # test @[ "Intermatic cFsm" ]
   # test @[ "Intermatic empty FSM" ]
   # test @[ "Intermatic before.start(), after.start()" ]
