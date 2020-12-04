@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/main.coffee"
+  ],
+  "names": [],
+  "mappings": "AAE6C;EAAA;AAAA,MAAA,GAAA,EAAA,GAAA,EAAA,IAAA,EAAA,GAAA,EAAA;;EAC7C,CAAA;IAAE,OAAA,EAAS;EAAX,CAAA,GAA4B,OAAA,CAAQ,wEAAR,CAA5B;;EACA,CAAA;IAAE,OAAA,EAAS;EAAX,CAAA,GAA4B,OAAA,CAAQ,+BAAR,CAA5B;;EACA,QAAA,GAA4B,OAAA,CAAQ,2BAAR;;EAC5B,GAAA,GAA4B,OAAO,CAAC;;EACpC,GAAA,CAAI,GAAJ;;EAEA,IAAA,GAAO;;EAAS,GAAA,CAAM,GAAA,CAAI,IAAJ,CAAN,EAAoB,GAAA,CAAI,QAAA,CAAS,IAAT,CAAJ,CAApB;;EAChB,IAAA,GAAO;;EAAS,GAAA,CAAM,GAAA,CAAI,IAAJ,CAAN,EAAoB,GAAA,CAAI,QAAA,CAAS,IAAT,CAAJ,CAApB;;EAChB,IAAA,GAAO;;EAAS,GAAA,CAAM,GAAA,CAAI,IAAJ,CAAN,EAAoB,GAAA,CAAI,QAAA,CAAS,IAAT,CAAJ,CAApB;;EAChB,IAAA,GAAO;;EAAS,GAAA,CAAM,GAAA,CAAI,IAAJ,CAAN,EAAoB,GAAA,CAAI,QAAA,CAAS,IAAT,CAAJ,CAApB;;EAChB,IAAA,GAAO;;EAAO,GAAA,CAAM,GAAA,CAAI,IAAJ,CAAN,EAAoB,GAAA,CAAI,QAAA,CAAS,IAAT,CAAJ,CAApB;;EAGd,GAAA,CAAI,GAAA,CAAI,CAAE,IAAF,EAAQ,IAAR,EAAc,MAAd,EAAyB,CAAA,CAAzB,EAA6B,CAAE,GAAF,CAA7B,EAAuC,IAAI,GAAJ,CAAA,CAAvC,EAAkD,MAAM,CAAC,IAAP,CAAY,KAAZ,CAAlD,CAAJ,CAAJ;AAd6C",
+  "sourcesContent": [
+    "\n\n# { inspect: rpr, }         = require 'loupe'\n{ inspect: rpr, }         = require '/home/flow/temp/svelte-and-sapper-for-print/app2-fresh/static/loupe.js'\n{ inspect: foo, }         = require '../node-and-browser-module.js'\nvalidate                  = require 'validate-npm-package-name'\nlog                       = console.log\nlog rpr\n\nname = 'abc';   log ( rpr name ), ( rpr validate name )\nname = 'ABC';   log ( rpr name ), ( rpr validate name )\nname = 'µ';     log ( rpr name ), ( rpr validate name )\nname = 'micro'; log ( rpr name ), ( rpr validate name )\nname = '偉大';  log ( rpr name ), ( rpr validate name )\n\n\nlog foo [ true, null, undefined, {}, [ 'a', ], new Set(), Buffer.from 'abc' ]\n\n\n\n\n"
+  ]
+}

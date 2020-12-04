@@ -879,6 +879,35 @@ later = ->
   done()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "check(): complain on name collision" ] = ( T, done ) ->
+  #.........................................................................................................
+  PATH                      = require 'path'
+  FS                        = require 'fs'
+  intertype                 = new Intertype()
+  { isa
+    validate
+    check
+    sad
+    is_sad
+    is_happy
+    sadden
+    type_of
+    types_of
+    declare
+    declare_check }         = intertype.export()
+  #.........................................................................................................
+  declare_check 'dvsbl_2_3', ( x ) ->
+    validate.even x
+    return x %% 3 is 0
+  #.........................................................................................................
+  T.throws /check 'dvsbl_2_3' already declared/, ->
+    declare_check 'dvsbl_2_3', ( x ) ->
+      validate.even x
+      return x %% 3 is 0
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "types_of() includes happy, sad" ] = ( T, done ) ->
   #.........................................................................................................
   intertype = new Intertype()
@@ -1128,6 +1157,8 @@ later = ->
 ############################################################################################################
 unless module.parent?
   test @
+  # test @[ "check(): complain on name collision" ]
+  @[ "check(): complain on name collision" ]()
   # test @[ "size_of" ]
   # test @[ "numerical types" ]
   # test @[ "real-life example 2" ]
