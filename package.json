@@ -22,7 +22,7 @@
     "commander": "^6.2.0",
     "convert-source-map": "^1.7.0",
     "cupofjoe": "^0.1.1",
-    "datom": "^7.0.3",
+    "datom": "^8.0.0",
     "deepcopy": "^2.1.0",
     "deepfreeze": "^2.0.0",
     "deepfreezer": "^1.2.2",
@@ -41,16 +41,17 @@
     "intershop-intertext": "file:../intershop-intertext",
     "intertext": "^5.0.0",
     "intertext-splitlines": "^1.2.0",
-    "intertype": "^7.4.0",
+    "intertype": "^7.5.0",
     "jake": "^10.8.2",
     "javascript-state-machine": "^3.1.0",
     "jfee": "0.0.2",
     "klona": "^2.0.4",
     "load-source-map": "^2.0.0",
+    "loupe": "^1.0.2",
     "merge-ranges": "^1.0.2",
     "mixa": "^0.1.1",
     "mori": "^0.3.2",
-    "multimix": "^4.1.0",
+    "multimix": "^5.0.0",
     "npm": "^7.0.0-beta.6",
     "npm-logical-tree": "^1.2.1",
     "number-format.js": "^2.0.9",
@@ -65,6 +66,7 @@
     "stacktracey": "^2.0.15",
     "steampipes": "^6.4.0",
     "strip-ansi": "^6.0.0",
-    "text-metrics": "^2.0.2"
+    "text-metrics": "^2.0.2",
+    "validate-npm-package-name": "^3.0.0"
   }
 }
