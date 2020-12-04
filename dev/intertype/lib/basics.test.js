@@ -965,6 +965,30 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["check(): complain on name collision"] = function(T, done) {
+    var FS, PATH, check, declare, declare_check, intertype, is_happy, is_sad, isa, sad, sadden, type_of, types_of, validate;
+    //.........................................................................................................
+    PATH = require('path');
+    FS = require('fs');
+    intertype = new Intertype();
+    ({isa, validate, check, sad, is_sad, is_happy, sadden, type_of, types_of, declare, declare_check} = intertype.export());
+    //.........................................................................................................
+    declare_check('dvsbl_2_3', function(x) {
+      validate.even(x);
+      return modulo(x, 3) === 0;
+    });
+    //.........................................................................................................
+    T.throws(/check 'dvsbl_2_3' already declared/, function() {
+      return declare_check('dvsbl_2_3', function(x) {
+        validate.even(x);
+        return modulo(x, 3) === 0;
+      });
+    });
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["types_of() includes happy, sad"] = async function(T, done) {
     var all_keys_of, declare, error, i, intertype, isa, len, matcher, probe, probes_and_matchers, sad, sadden, size_of, type_of, types_of, validate;
     //.........................................................................................................
@@ -1358,6 +1382,8 @@
   //###########################################################################################################
   if (module.parent == null) {
     test(this);
+    // test @[ "check(): complain on name collision" ]
+    this["check(): complain on name collision"]();
   }
 
   // test @[ "size_of" ]

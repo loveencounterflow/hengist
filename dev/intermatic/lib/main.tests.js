@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, PATH, badge, debug, declare, echo, freeze, help, info, isa, lets, log, new_register, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var CND, PATH, badge, debug, declare, echo, equals, freeze, help, info, isa, lets, log, new_register, rpr, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -32,7 +32,7 @@
 
   types = new (require('intertype')).Intertype();
 
-  ({isa, validate, declare, type_of} = types.export());
+  ({isa, validate, declare, equals, type_of} = types.export());
 
   ({freeze, lets} = require('letsfreezethat'));
 
@@ -964,7 +964,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["Intermatic tryto 2"] = function(T, done) {
-    var Intermatic, fsm, fsmd, register, result, show_result;
+    var Intermatic, eq, fsm, fsmd, k, register, result, show_result;
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'oneway_switch',
@@ -987,20 +987,66 @@
     Intermatic = require('../../../apps/intermatic');
     Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
-    T.eq(true, CND.truth(fsm.can.start()));
-    info('fsm.start()       ------------');
-    info(CND.truth(fsm.start()));
-    T.eq(false, CND.truth(fsm.can.start()));
-    info('fsm.step()        ------------');
-    info(CND.truth(fsm.step()));
-    info('fsm.tryto.step()  ------------');
-    info(CND.truth(fsm.tryto.step()));
-    info('fsm.step()        ------------');
-    info(CND.truth(fsm.step()));
-    info('fsm.tryto.step()  ------------');
-    info(CND.truth(fsm.tryto.step()));
-    info('fsm.tryto.start() ------------');
-    info(CND.truth(fsm.tryto.start()));
+    eq = function(ref, test, outcome) {
+      if (isa.function(test)) {
+        ref += ' ' + test.toString().replace(/\n/g, ' ');
+        test = test();
+      }
+      if (equals(test, outcome)) {
+        return T.ok(true);
+      } else {
+        return T.fail(`test ${rpr(ref)} failed`);
+      }
+    };
+    debug(((function() {
+      var results;
+      results = [];
+      for (k in CND) {
+        results.push(k);
+      }
+      return results;
+    })()).sort());
+    eq('^tt2@1', (function() {
+      return fsm.lstate;
+    }), 'void');
+    eq('^tt2@2', (function() {
+      return fsm.triggers.start;
+    }), {
+      void: 'one'
+    });
+    eq('^tt2@3', (function() {
+      return fsm.can.start();
+    }), true);
+    eq('^tt2@4', (function() {
+      return fsm.can('start');
+    }), true);
+    eq('^tt2@5', (function() {
+      return fsm.start();
+    }), null); // one
+    eq('^tt2@6', (function() {
+      return fsm.lstate;
+    }), 'one');
+    eq('^tt2@7', (function() {
+      return fsm.can.start();
+    }), false);
+    eq('^tt2@8', (function() {
+      return fsm.can('start');
+    }), false);
+    eq('^tt2@9', (function() {
+      return fsm.step();
+    }), null); // two
+    eq('^tt2@10', (function() {
+      return fsm.tryto.step();
+    }), true); // three
+    eq('^tt2@11', (function() {
+      return fsm.step();
+    }), null); // one
+    eq('^tt2@12', (function() {
+      return fsm.tryto.step();
+    }), true); // two
+    eq('^tt2@13', (function() {
+      return fsm.tryto.start();
+    }), false);
     show_result();
     T.eq(result, [
       {
@@ -1041,14 +1087,6 @@
         verb: 'step',
         dpar: 'one',
         dest: 'two',
-        changed: true
-      },
-      {
-        path: 'oneway_switch',
-        lstate: 'three',
-        verb: 'step',
-        dpar: 'two',
-        dest: 'three',
         changed: true
       }
     ]);
@@ -1437,13 +1475,13 @@
       // test @[ "Intermatic attribute freezing" ]
       // test @[ "Intermatic toolbox" ]
       // test @[ "Intermatic tryto 1" ]
-      return test(this["Intermatic tryto 2"]);
+      // test @[ "Intermatic tryto 2" ]
+      // test @[ "Intermatic cFsm 1" ]
+      return test(this["Intermatic cFsm 2"]);
     })();
   }
 
-  // test @[ "Intermatic cFsm 1" ]
-// test @[ "Intermatic cFsm 2" ]
-// test @[ "Intermatic cFsm" ]
+  // test @[ "Intermatic cFsm" ]
 // test @[ "Intermatic empty FSM" ]
 // test @[ "Intermatic before.start(), after.start()" ]
 // @[ "Intermatic empty FSM" ]()
