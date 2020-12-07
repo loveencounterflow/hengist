@@ -48,11 +48,8 @@
   Recorder = class Recorder {
     //---------------------------------------------------------------------------------------------------------
     constructor(fsm) {
-      var tnames;
       // validate.fsm fsm
       this.fsm = fsm;
-      tnames = Object.keys(this.fsm.triggers);
-      this.cstate = {...this.fsm.cstate};
       this._compile_state_handlers(this.fsm);
       return null;
     }
@@ -75,24 +72,26 @@
       // is_first    = true
       self = this;
       if ((original_handler = fsm.enter.any) != null) {
-        handler = function(s, ...P) {
-          original_handler(s, ...P);
-          return self.render_state(this.path, s, ...P);
+        handler = function(...P) {
+          original_handler(...P);
+          return self.render_state(this.path, ...P);
         };
       } else {
-        handler = function(s, ...P) {
-          return self.render_state(this.path, s, ...P);
+        handler = function(...P) {
+          return self.render_state(this.path, ...P);
         };
       }
       fsm.enter.any = handler.bind(fsm);
+      fsm.stay.any = handler.bind(fsm);
+      fsm.before.any = function() {
+        return info('^recorder@3337^', fsm.move);
+      };
       return null;
     }
 
     //---------------------------------------------------------------------------------------------------------
-    render_state(path, s, ...P) {
-      this.cstate = {...this.fsm.cstate};
-      whisper('^27776^', path, s.via, this.fsm.cstate);
-      debug(this.cstate);
+    render_state(path, ...P) {
+      urge('^recorder/render_state@3337^', this.fsm.EXP_dstate);
       return null;
     }
 

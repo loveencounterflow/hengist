@@ -99,7 +99,6 @@
   this["Intermatic empty FSM"] = function(T, done) {
     var Intermatic, fsm;
     Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
     fsm = new Intermatic({});
     T.eq(fsm.triggers, {
       start: {
@@ -130,7 +129,6 @@
       }
     };
     //---------------------------------------------------------------------------------------------------------
-    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     T.eq(fsm.start(), null);
     T.eq(fsm.lstate, 'void');
@@ -169,7 +167,6 @@
     //---------------------------------------------------------------------------------------------------------
     ({result, register} = new_register());
     Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     info('^44455^', JSON.stringify(fsm.triggers, null, 2));
     T.eq(fsm.triggers, {
@@ -434,7 +431,6 @@
     //---------------------------------------------------------------------------------------------------------
     ({result, register, show_result} = new_register());
     Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     // T.eq ( Object.keys fsm ),  [ 'reserved', 'fsmd', 'triggers', 'fsm_names', 'has_subfsms', '_lstate', 'before', 'enter', 'stay', 'leave', 'after', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail' ]
     fsm.start('M1');
@@ -571,7 +567,6 @@
     //---------------------------------------------------------------------------------------------------------
     ({result, register, show_result} = new_register());
     Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     fsm.start('X1');
     fsm.toggle('X2');
@@ -749,7 +744,6 @@
     };
     ({result, register} = new_register());
     Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     T.eq(fsm.data, {
       counter: 42
@@ -815,7 +809,6 @@
     //---------------------------------------------------------------------------------------------------------
     ({result, register, show_result} = new_register());
     Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     info("fsm.start()     ———");
     fsm.start('A1');
@@ -856,7 +849,6 @@
     //---------------------------------------------------------------------------------------------------------
     ({result, register, show_result} = new_register());
     Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     register('first', fsm.cstate);
     info("fsm.start()     ———");
@@ -946,7 +938,6 @@
     //---------------------------------------------------------------------------------------------------------
     ({result, register, show_result} = new_register());
     Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     fsm.start();
     T.eq(true, fsm.can.toggle());
@@ -985,7 +976,6 @@
     //---------------------------------------------------------------------------------------------------------
     ({result, register, show_result} = new_register());
     Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     eq = function(ref, test, outcome) {
       if (isa.function(test)) {
@@ -1179,7 +1169,6 @@
     ({result, register, show_result} = new_register());
     //---------------------------------------------------------------------------------------------------------
     Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
     button = new Intermatic(fsmd);
     T.eq(button.foo, 42);
     T.eq(button.lamp.bar, 108);
@@ -1262,11 +1251,9 @@
           // enter:
           //   pressed:  ( P... ) ->
           //   released: ( P... ) ->
-          before: {
-            start: function(...P) {
-              return this.lamp.start();
-            }
-          },
+          // before:
+          //   start:    ( P... ) -> @lamp.start()
+          cascades: ['start'],
           after: {
             change: function(...P) {
               this.lamp.toggle();
@@ -1287,11 +1274,6 @@
             //.....................................................................................................
             lamp: {
               triggers: [['void', 'start', 'lit'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit']],
-              before: {
-                start: function(...P) {
-                  return this.up.color.start();
-                }
-              },
               enter: {
                 dark: function(...P) {
                   return this.up.color.toggle();
@@ -1311,7 +1293,6 @@
     ({result, register, show_result} = new_register());
     //---------------------------------------------------------------------------------------------------------
     Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     // debug '^898922^', fsm
     // debug '^898922^', ( k for k of fsm )
@@ -1458,30 +1439,130 @@
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["Intermatic AAL style FSMDs 1"] = function(T, done) {
+    var Intermatic, fsm, fsmd, register, result, show_result;
+    //---------------------------------------------------------------------------------------------------------
+    fsmd = {
+      name: 'φ',
+      moves: {
+        start: 'a',
+        step: ['a', 'b', 'c', 'c'],
+        stop: ['c', 'void']
+      },
+      before: {
+        start: [
+          (function() {
+            return debug('^7776^',
+          "start.before 1");
+          }),
+          (function() {
+            return debug('^7776^',
+          "start.before 2");
+          }),
+          (function() {
+            return register("start.before");
+          })
+        ],
+        step: function() {
+          return register("step.before");
+        },
+        stop: function() {
+          return register("stop.before");
+        }
+      },
+      after: {
+        start: function() {
+          return register("start.after");
+        },
+        step: function() {
+          return register("step.after");
+        },
+        stop: function() {
+          return register("stop.after");
+        }
+      },
+      enter: {
+        void: function() {
+          return register("void.enter");
+        },
+        a: function() {
+          return register("a.enter");
+        },
+        b: function() {
+          return register("b.enter");
+        },
+        c: function() {
+          return register("c.enter");
+        }
+      },
+      leave: {
+        void: function() {
+          return register("void.leave");
+        },
+        a: function() {
+          return register("a.leave");
+        },
+        b: function() {
+          return register("b.leave");
+        },
+        c: function() {
+          return register("c.leave");
+        }
+      },
+      stay: {
+        c: function() {
+          return register("c.stay");
+        }
+      }
+    };
+    //---------------------------------------------------------------------------------------------------------
+    ({result, register, show_result} = new_register());
+    //---------------------------------------------------------------------------------------------------------
+    Intermatic = require('../../../apps/intermatic');
+    fsm = new Intermatic(fsmd);
+    echo('^4455^', CND.inspect(fsm));
+    urge('^4455^', fsmd.moves);
+    help('^4455^', fsm.moves);
+    fsm.start();
+    // fsm.step()
+    // fsm.step()
+    // fsm.step()
+    // fsm.stop()
+    show_result();
+    if (done != null) {
+      // T.eq result, [
+      //---------------------------------------------------------------------------------------------------------
+      return done();
+    }
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // @demo_2()
       // @toolbox_demo()
       // test @
-      // test @[ "Intermatic observables during moves 1" ]
-      // test @[ "Intermatic catchalls 1" ]
-      // test @[ "Intermatic cyclers 1" ]
-      // test @[ "Intermatic goto 1" ]
-      // test @[ "Intermatic cancel moves" ]
-      // test @[ "Intermatic history" ]
-      // test @[ "Intermatic data attribute 1" ]
-      // @[ "Intermatic data attribute 1" ]()
-      // test @[ "Intermatic attribute freezing" ]
-      // test @[ "Intermatic toolbox" ]
-      // test @[ "Intermatic tryto 1" ]
-      // test @[ "Intermatic tryto 2" ]
-      // test @[ "Intermatic cFsm 1" ]
-      return test(this["Intermatic cFsm 2"]);
+      // test @[ "Intermatic AAL style FSMDs 1" ]
+      return this["Intermatic AAL style FSMDs 1"]();
     })();
   }
 
-  // test @[ "Intermatic cFsm" ]
+  // test @[ "Intermatic observables during moves 1" ]
+// test @[ "Intermatic catchalls 1" ]
+// test @[ "Intermatic cyclers 1" ]
+// test @[ "Intermatic goto 1" ]
+// test @[ "Intermatic cancel moves" ]
+// test @[ "Intermatic history" ]
+// test @[ "Intermatic data attribute 1" ]
+// @[ "Intermatic data attribute 1" ]()
+// test @[ "Intermatic attribute freezing" ]
+// test @[ "Intermatic toolbox" ]
+// test @[ "Intermatic tryto 1" ]
+// test @[ "Intermatic tryto 2" ]
+// test @[ "Intermatic cFsm 1" ]
+// test @[ "Intermatic cFsm 2" ]
+// test @[ "Intermatic cFsm" ]
 // test @[ "Intermatic empty FSM" ]
 // test @[ "Intermatic before.start(), after.start()" ]
 // @[ "Intermatic empty FSM" ]()

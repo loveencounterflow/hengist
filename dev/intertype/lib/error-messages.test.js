@@ -63,7 +63,8 @@
       error = error1;
       echo(error.message);
       echo(rpr(error.message));
-      T.ok(/not a valid intershop_addon_location \(violates "x must be 'guest' or 'host'"\): 'guestX'/.test(error.message));
+      // echo CND.escape_regex error.message
+      T.ok(/not a valid intershop_addon_location \(violates.*x must be.*guest.*or.*host.*'guestX'/.test(error.message));
     }
     //.........................................................................................................
     done();
@@ -72,10 +73,9 @@
 
   //###########################################################################################################
   if (module.parent == null) {
-    test(this);
+    // test @
+    test(this["INTERTYPE validation error message"]);
   }
-
-  // test @[ "size_of" ]
 
 }).call(this);
 

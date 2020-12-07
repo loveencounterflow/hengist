@@ -171,46 +171,25 @@
     main_btn = new_button_fsmd({
       goto: '*',
       enter: {
-        pressed: function(s) {
+        pressed: function(...P) {
           return echo(`${this.up.name}.${this.name}:${this.lstate}`, CND.yellow('🔒'));
         },
         // @up.meta_btn.lamp.tryto.turn_on()
-        released: function(s) {
+        released: function(...P) {
           return echo(`${this.up.name}.${this.name}:${this.lstate}`, CND.yellow('🔓💡🔅🔆❌⏻⏼⏽✓✅⤴⤵⏺'));
         }
       }
     });
-    // @up.meta_btn.lamp.tryto.turn_off()
-    // before:
-    //   change: ( s ) -> register '<fsm.main_btn.before.change', s
-    // after:
-    //   change: ( s ) -> register '>fsm.main_btn.after.change', s
-
     //---------------------------------------------------------------------------------------------------------
     meta_btn = new_button_fsmd({
       goto: '*',
       enter: {
-        pressed: function(s) {
-          register('<fsm.meta_btn.enter.pressed', s);
-          // debug '^333443^', @color.can.toggle(), @text.can.toggle()
+        pressed: function(...P) {
+          register('<fsm.meta_btn.enter.pressed');
           this.color.tryto.toggle();
           return this.text.tryto.toggle();
         }
       },
-      // before:
-      //   change: ( s ) ->
-      //     echo "#{@up.name}.#{@name}:#{@lstate}", CND.white CND.reverse "[#{@lstate}]"
-      //     register '<fsm.meta_btn.before.change', s
-      //   start: ( s ) ->
-      //     register '<fsm.meta_btn.before.start', s
-      //     @fsms.forEach ( sub_fsm ) -> sub_fsm.start()
-      //   stop: ( s ) ->
-      //     register '<fsm.meta_btn.before.stop', s
-      //     @fsms.forEach ( sub_fsm ) -> sub_fsm.stop()
-      // after:
-      //   change: ( s ) -> register '>fsm.meta_btn.after.change', s
-      //   start:  ( s ) -> register '>fsm.meta_btn.after.start', s
-      //   stop:   ( s ) -> register '>fsm.meta_btn.after.stop', s
       click: function() {
         this.press();
         return this.release();
@@ -222,61 +201,36 @@
           goto: '*',
           colors: ['red', 'green']
         }),
-        // before:
-        //   change: ( s ) ->
-        //     register '<fsm.meta_btn.color.before.change', s
-        //     echo "#{@up.name}.#{@name}:#{@lstate}", ( CND[ @lstate ] ? CND.grey )  '██'
-        // after:
-        //   change: ( s ) -> register '>fsm.meta_btn.color.after.change', s
         //.....................................................................................................
         text: new_text_fsmd({
           goto: '*',
           texts: ['wait', 'go']
         }),
-        // before:
-        //   change: ( s ) ->
-        //     register '<fsm.meta_btn.text.before.change', s
-        //     echo "#{@up.name}.#{@name}:#{@lstate}", CND.white CND.reverse "[#{@lstate}]"
-        // after:
-        //   change: ( s ) -> register '>fsm.meta_btn.text.after.change', s
         //.....................................................................................................
         lamp: new_lamp_fsmd({
           goto: '*'
         })
       }
     });
-    // enter:
-    //   lit:    ( s ) -> echo "#{@up.name}.#{@name}:#{@lstate}", CND.yellow  '██'
-    //   dark:   ( s ) -> echo "#{@up.name}.#{@name}:#{@lstate}", CND.grey    '██'
-    // before:
-    //   change: ( s ) -> register '<fsm.meta_btn.lamp.before.change', s
-    // after:
-    //   change: ( s ) -> register '>fsm.meta_btn.lamp.after.change', s
-
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'toolbox',
       triggers: [['void', 'start', 'running'], ['running', 'stop', 'stopped']],
       before: {
-        start: function(s) {
-          // register '<fsm.before.start', s
+        start: function(...P) {
           return this.fsms.forEach(function(sub_fsm) {
             return sub_fsm.start();
           });
         },
-        stop: function(s) {
-          // register '<fsm.before.stop', s
+        stop: function(...P) {
           return this.fsms.forEach(function(sub_fsm) {
             return sub_fsm.stop();
           });
         }
       },
-      after: {
-        start: function(s) {},
-        // register '>fsm.after.start', s
-        stop: function(s) {}
-      },
-      // register '>fsm.after.stop', s
+      // after:
+      //   start: ( P... ) ->
+      //   stop: ( P... ) ->
       fsms: {meta_btn, main_btn}
     };
     //---------------------------------------------------------------------------------------------------------
@@ -330,20 +284,20 @@
         step: ['first', 'second', 'third']
       },
       before: {
-        any: function(s) {
-          return urge(`█ ${this.path}:${s.via}`);
+        any: function(...P) {
+          return urge(`█ ${this.path}:${this.verb}`);
         },
-        start: function(s) {
+        start: function(...P) {
           return this.lamp.start();
         }
       },
       after: {
-        any: function(s) {
+        any: function(...P) {
           return whisper(this.cstate);
         }
       },
       enter: {
-        second: function(s) {
+        second: function(...P) {
           return this.lamp.toggle();
         }
       },
@@ -355,30 +309,32 @@
             toggle: ['on', 'off']
           },
           enter: {
-            on: function(s) {
+            on: function(...P) {
               return this.counter.tick();
             }
           },
           /* TAINT totally contrived */before: {
-            start: function(s) {
+            start: function(...P) {
               return this.counter.start();
             },
-            any: function(s) {
-              return urge(`${this.path}:${s.via}`);
+            any: function(...P) {
+              return urge(`${this.path}:${this.verb}`);
             }
           },
           //...................................................................................................
           fsms: {
             counter: {
-              _XXX_count: 0,
+              data: {
+                _XXX_count: 0
+              },
               triggers: [['void', 'start', 'active']],
               cyclers: {
                 tick: ['active']
               },
               stay: {
-                active: function(s) {
-                  debug(this);
-                  return this._XXX_count++;
+                active: function(...P) {
+                  // debug '^33387^', @
+                  return this.data._XXX_count++;
                 }
               }
             }
