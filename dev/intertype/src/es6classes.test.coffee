@@ -52,6 +52,34 @@ test                      = require 'guy-test'
   done()
   return null
 
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "undeclared types can be used if known to `type_of()` XXX" ] = ( T, done ) ->
+#   #.........................................................................................................
+#   INTERTYPE                 = require '../../../apps/intertype'
+#   { Intertype, }            = INTERTYPE
+#   intertype = new Intertype()
+#   { isa
+#     validate
+#     type_of
+#     types_of
+#     size_of
+#     declare
+#     all_keys_of } = intertype.export()
+#   #.........................................................................................................
+#   probes_and_matchers = [
+#     [ [ 1n, 'bigint', ], true, null, ]
+#     [ [ 1n, 'XXXX',   ], false, "not a valid XXXX", ]
+#     ]
+#   #.........................................................................................................
+#   for [ probe, matcher, error, ] in probes_and_matchers
+#     [ value, type, ] = probe
+#     result = isa[ type ] value
+#     validate[ type ] value
+#   #   T.ok true
+#   #   resolve result
+#   # done()
+#   return null
+
 #-----------------------------------------------------------------------------------------------------------
 get_probes_and_matchers = ->
   #.........................................................................................................
@@ -303,6 +331,8 @@ demo = ->
 ############################################################################################################
 if module is require.main then do =>
   # demo_test_for_generator()
-  test @
+  # test @
+  test @[  "undeclared types can be used if known to `type_of()`" ]
+  # @[ "undeclared types can be used if known to `type_of()` XXX" ]()
   # test @[ "undeclared but implement types can be used" ]
 

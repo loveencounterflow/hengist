@@ -44,7 +44,8 @@ INTERTYPE                 = require '../../../apps/intertype'
   try validate.intershop_addon_location 'guestX' catch error
     echo error.message
     echo rpr error.message
-    T.ok /not a valid intershop_addon_location \(violates "x must be 'guest' or 'host'"\): 'guestX'/.test error.message
+    # echo CND.escape_regex error.message
+    T.ok /not a valid intershop_addon_location \(violates.*x must be.*guest.*or.*host.*'guestX'/.test error.message
   #.........................................................................................................
   done()
   return null
@@ -52,5 +53,5 @@ INTERTYPE                 = require '../../../apps/intertype'
 
 ############################################################################################################
 unless module.parent?
-  test @
-  # test @[ "size_of" ]
+  # test @
+  test @[ "INTERTYPE validation error message" ]
