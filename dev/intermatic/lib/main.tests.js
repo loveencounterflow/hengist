@@ -100,31 +100,30 @@
     var Intermatic, fsm;
     Intermatic = require('../../../apps/intermatic');
     fsm = new Intermatic({});
-    T.eq(fsm.triggers, {
-      start: {
-        void: 'void'
-      }
-    });
-    T.eq(fsm.start(), null);
+    T.eq(fsm.moves, {});
+    T.eq(fsm.start, void 0);
     T.eq(fsm.lstate, 'void');
     return done();
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this["Intermatic before.start(), after.start()"] = function(T, done) {
-    var Intermatic, fsm, fsmd, register, result;
-    ({result, register} = new_register());
+    var Intermatic, fsm, fsmd, register, result, show_result;
+    ({result, show_result, register} = new_register());
     Intermatic = require('../../../apps/intermatic');
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
+      moves: {
+        start: 'void'
+      },
       before: {
         start: function() {
-          return register("before start");
+          return register("before start", this.move);
         }
       },
       after: {
         start: function() {
-          return register("after start");
+          return register("after start", this.move);
         }
       }
     };
@@ -132,32 +131,55 @@
     fsm = new Intermatic(fsmd);
     T.eq(fsm.start(), null);
     T.eq(fsm.lstate, 'void');
-    T.eq(result, ['before start', 'after start']);
+    show_result();
+    T.eq(result, [
+      [
+        'before start',
+        {
+          stage: 'before',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'void'
+        }
+      ],
+      [
+        'after start',
+        {
+          stage: 'after',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'void'
+        }
+      ]
+    ]);
     //---------------------------------------------------------------------------------------------------------
     return done();
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this["Intermatic basics"] = function(T, done) {
-    var Intermatic, fsm, fsmd, register, result;
+    var Intermatic, fsm, fsmd, register, result, show_result;
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'meta_lamp',
-      triggers: [['void', 'start', 'lit'], ['*', 'reset', 'void'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit']],
-      // [ 'void',   'toggle', 'lit',  ]
+      moves: {
+        start: ['void', 'lit'],
+        reset: ['any', 'void'],
+        toggle: ['lit', 'dark', 'lit']
+      },
       after: {
         change: function() {
           return register("after change", this.cstate);
         }
       },
-      enter: {
+      entering: {
         dark: function() {
-          return register("enter dark", this.cstate);
+          return register("entering dark", this.cstate);
         }
       },
-      leave: {
+      leaving: {
         lit: function() {
-          return register("leave lit", this.cstate);
+          return register("leaving lit", this.cstate);
         }
       },
       fail: function() {
@@ -165,96 +187,96 @@
       }
     };
     //---------------------------------------------------------------------------------------------------------
-    ({result, register} = new_register());
+    ({result, show_result, register} = new_register());
     Intermatic = require('../../../apps/intermatic');
     fsm = new Intermatic(fsmd);
-    info('^44455^', JSON.stringify(fsm.triggers, null, 2));
-    T.eq(fsm.triggers, {
-      "start": {
-        "void": "lit"
+    // info '^44455^', JSON.stringify fsm.moves, null, 2
+    T.eq(fsm.moves, {
+      start: {
+        void: 'lit'
       },
-      "toggle": {
-        "lit": "dark",
-        "dark": "lit"
+      reset: {
+        any: 'void'
       },
-      "reset": {
-        "void": "void",
-        "lit": "void",
-        "dark": "void"
+      toggle: {
+        lit: 'dark',
+        dark: 'lit'
       }
     });
     fsm.start();
     fsm.toggle();
     fsm.reset();
     fsm.toggle();
-    // fsm.goto 'lit'
-    // fsm.goto 'lit'
-    // fsm.goto 'dark'
-    echo(result);
+    show_result();
     T.eq(result, [
       [
         'after change',
         {
-          lstate: 'lit',
-          path: 'meta_lamp',
+          stage: 'after',
           verb: 'start',
           dpar: 'void',
           dest: 'lit',
-          changed: true
+          changed: true,
+          path: 'meta_lamp',
+          lstate: 'lit'
         }
       ],
       [
-        'leave lit',
+        'leaving lit',
         {
-          lstate: 'lit',
-          path: 'meta_lamp',
+          stage: 'leaving',
           verb: 'toggle',
           dpar: 'lit',
           dest: 'dark',
-          changed: true
+          changed: true,
+          path: 'meta_lamp',
+          lstate: 'lit'
         }
       ],
       [
-        'enter dark',
+        'entering dark',
         {
-          lstate: 'dark',
-          path: 'meta_lamp',
+          stage: 'entering',
           verb: 'toggle',
           dpar: 'lit',
           dest: 'dark',
-          changed: true
+          changed: true,
+          path: 'meta_lamp',
+          lstate: 'dark'
         }
       ],
       [
         'after change',
         {
-          lstate: 'dark',
-          path: 'meta_lamp',
+          stage: 'after',
           verb: 'toggle',
           dpar: 'lit',
           dest: 'dark',
-          changed: true
+          changed: true,
+          path: 'meta_lamp',
+          lstate: 'dark'
         }
       ],
       [
         'after change',
         {
-          lstate: 'void',
-          path: 'meta_lamp',
+          stage: 'after',
           verb: 'reset',
           dpar: 'dark',
           dest: 'void',
-          changed: true
+          changed: true,
+          path: 'meta_lamp',
+          lstate: 'void'
         }
       ],
       [
         'failed',
         {
-          lstate: 'void',
-          path: 'meta_lamp',
           verb: 'toggle',
           dpar: 'void',
-          failed: true
+          failed: true,
+          path: 'meta_lamp',
+          lstate: 'void'
         }
       ]
     ]);
@@ -268,7 +290,12 @@
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'meta_lamp',
-      triggers: [['void', 'start', 'lit'], ['*', 'reset', 'void'], ['*', 'flash', 'flashing'], ['flashing', 'toggle', 'dark'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit']],
+      moves: {
+        start: 'lit',
+        reset: ['any', 'void'],
+        flash: ['any', 'flashing'],
+        toggle: [['lit', 'dark', 'lit'], ['flashing', 'dark']]
+      },
       after: {
         change: function(...P) {
           return register(this.history);
@@ -278,7 +305,6 @@
     //---------------------------------------------------------------------------------------------------------
     ({result, register} = new_register());
     Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
     fsm.history_length = 3;
     fsm.start();
@@ -363,44 +389,77 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["Intermatic cancel moves"] = function(T, done) {
-    var Intermatic, boiler, fsmd, register, result;
+  this["__ Intermatic cancel moves"] = function(T, done) {
+    var Intermatic, fsmd;
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'boiler',
       // cascades:
-      //   # start: '*' ### TAINT all FSMs in tree? all sibling FSMs? parent FSMs? ###
+      //   # start: 'any' ### TAINT all FSMs in tree? all sibling FSMs? parent FSMs? ###
       //   start: [ 'heater', ]
+      moves: {
+        start: 'operating'
+      },
       before: {
         start: function(...P) {
+          this.register('boiler.before.start', this.move);
           return this.heater.start(...P);
         }
       },
       after: {
         change: function(...P) {
-          return register(this.cstate);
+          return this.register('boiler.after.change', this.move);
         }
       },
       fsms: {
         heater: {
           data: {
+            enabled: true,
             temparature: 20
           },
-          triggers: [['void', 'start', 'idle'], ['heating', 'switch_off', 'idle'], ['idle', 'switch_on', 'heating']]
+          moves: {
+            start: ['void', 'idle'],
+            switch_off: ['heating', 'idle'],
+            switch_on: ['idle', 'heating']
+          },
+          // before:
+          //   any:      -> @register 'heater.before.any', @move, @data
+          entering: {
+            heating: function() {
+              if (!this.data.enabled) {
+                warn('^3334^', "heater not enabled; cancelling");
+                this.cancel();
+              }
+              debug('^445554^', this.lstate);
+              debug('^445554^', this.move);
+              return this.up.register('heater.entering.heating', this.lstate, this.move, this.data);
+            }
+          }
         }
       }
     };
-    // after:
-    //   change: ( P... ) -> @up.
     //---------------------------------------------------------------------------------------------------------
-    ({result, register} = new_register());
     Intermatic = require('../../../apps/intermatic');
-    Intermatic._tid = 0;
-    boiler = new Intermatic(fsmd);
-    boiler.start();
-    boiler.heater.switch_on();
-    // boiler.thermo.
-    // T.eq result,
+    (() => {
+      var boiler, register, result, show_result;
+      ({result, show_result, register} = new_register());
+      boiler = new Intermatic(fsmd);
+      boiler.register = register;
+      boiler.heater.data.enabled = true;
+      boiler.start();
+      boiler.heater.switch_on();
+      return show_result();
+    })();
+    (() => {
+      var boiler, register, result, show_result;
+      ({result, show_result, register} = new_register());
+      boiler = new Intermatic(fsmd);
+      boiler.register = register;
+      boiler.heater.data.enabled = false;
+      boiler.start();
+      boiler.heater.switch_on();
+      return show_result();
+    })();
     //---------------------------------------------------------------------------------------------------------
     return done();
   };
@@ -411,8 +470,11 @@
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'meta_lamp',
-      triggers: [['void', 'start', 'lit'], ['*', 'reset', 'void'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit']],
-      // [ 'void',   'toggle', 'lit',  ]
+      moves: {
+        start: 'lit',
+        reset: ['any', 'void'],
+        toggle: ['lit', 'dark', 'lit']
+      },
       before: {
         any: function(...P) {
           return register('before.any', this.cstate, P);
@@ -420,10 +482,10 @@
       },
       // after:
       //   change:     ( P... ) -> register 'after.change',  @cstate
-      // enter:
-      //   dark:       ( P... ) -> register 'enter.dark',    @cstate
-      //   lit:        ( P... ) -> register 'enter.lit',     @cstate
-      goto: '*',
+      // entering:
+      //   dark:       ( P... ) -> register 'entering.dark',    @cstate
+      //   lit:        ( P... ) -> register 'entering.lit',     @cstate
+      goto: 'any',
       fail: function(...P) {
         return register('failed', this.cstate, P);
       }
@@ -432,7 +494,7 @@
     ({result, register, show_result} = new_register());
     Intermatic = require('../../../apps/intermatic');
     fsm = new Intermatic(fsmd);
-    // T.eq ( Object.keys fsm ),  [ 'reserved', 'fsmd', 'triggers', 'fsm_names', 'has_subfsms', '_lstate', 'before', 'enter', 'stay', 'leave', 'after', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail' ]
+    // T.eq ( Object.keys fsm ),  [ 'reserved', 'fsmd', 'moves', 'fsm_names', 'has_subfsms', '_lstate', 'before', 'entering', 'keeping', 'leaving', 'after', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail' ]
     fsm.start('M1');
     fsm.toggle('M2');
     fsm.goto('lit', 'M3');
@@ -446,95 +508,104 @@
       [
         'before.any',
         {
-          path: 'meta_lamp',
-          lstate: 'void',
+          stage: 'before',
           verb: 'start',
           dpar: 'void',
           dest: 'lit',
-          changed: true
+          changed: true,
+          lstate: 'void',
+          path: 'meta_lamp'
         },
         ['M1']
       ],
       [
         'before.any',
         {
-          path: 'meta_lamp',
-          lstate: 'lit',
+          stage: 'before',
           verb: 'toggle',
           dpar: 'lit',
           dest: 'dark',
-          changed: true
+          changed: true,
+          lstate: 'lit',
+          path: 'meta_lamp'
         },
         ['M2']
       ],
       [
         'before.any',
         {
-          path: 'meta_lamp',
-          lstate: 'dark',
+          stage: 'before',
           verb: 'goto',
           dpar: 'dark',
           dest: 'lit',
-          changed: true
+          changed: true,
+          lstate: 'dark',
+          path: 'meta_lamp'
         },
         ['M3']
       ],
       [
         'before.any',
         {
-          path: 'meta_lamp',
-          lstate: 'lit',
+          stage: 'before',
           verb: 'goto',
           dpar: 'lit',
-          dest: 'lit'
+          dest: 'lit',
+          changed: false,
+          lstate: 'lit',
+          path: 'meta_lamp'
         },
         ['M4']
       ],
       [
         'before.any',
         {
-          path: 'meta_lamp',
-          lstate: 'lit',
+          stage: 'before',
           verb: 'goto',
           dpar: 'lit',
           dest: 'dark',
-          changed: true
+          changed: true,
+          lstate: 'lit',
+          path: 'meta_lamp'
         },
         ['M5']
       ],
       [
         'before.any',
         {
-          path: 'meta_lamp',
-          lstate: 'dark',
+          stage: 'before',
           verb: 'toggle',
           dpar: 'dark',
           dest: 'lit',
-          changed: true
+          changed: true,
+          lstate: 'dark',
+          path: 'meta_lamp'
         },
         ['M6']
       ],
       [
         'before.any',
         {
-          path: 'meta_lamp',
-          lstate: 'lit',
+          stage: 'before',
           verb: 'toggle',
           dpar: 'lit',
           dest: 'dark',
-          changed: true
+          changed: true,
+          lstate: 'lit',
+          path: 'meta_lamp'
         },
         ['M7']
       ],
       [
         'before.any',
         {
-          path: 'meta_lamp',
-          lstate: 'dark',
+          stage: 'before',
           verb: 'toggle',
           dpar: 'dark',
           dest: 'lit',
-          changed: true
+          changed: true,
+          lstate: 'dark',
+          path: 'meta_lamp'
         },
         ['M8']
       ]
@@ -544,175 +615,24 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["Intermatic cyclers 1"] = function(T, done) {
-    var Intermatic, fsm, fsmd, register, result, show_result;
-    //---------------------------------------------------------------------------------------------------------
-    fsmd = {
-      name: 'switch',
-      triggers: [['void', 'start', 'off']],
-      cyclers: {
-        toggle: ['on', 'off'],
-        step: ['bar', 'baz', 'gnu', 'doe']
-      },
-      goto: '*',
-      after: {
-        change: function(ref) {
-          return register(this.cstate, ref);
-        }
-      },
-      fail: function(ref) {
-        return register(this.cstate, ref);
-      }
-    };
-    //---------------------------------------------------------------------------------------------------------
-    ({result, register, show_result} = new_register());
-    Intermatic = require('../../../apps/intermatic');
-    fsm = new Intermatic(fsmd);
-    fsm.start('X1');
-    fsm.toggle('X2');
-    fsm.toggle('X3');
-    fsm.step('X4');
-    fsm.goto('doe', 'X5');
-    fsm.step('X6');
-    fsm.step('X7');
-    fsm.step('X8');
-    fsm.step('X9');
-    fsm.step('X10');
-    show_result();
-    T.eq(result, [
-      [
-        {
-          path: 'switch',
-          lstate: 'off',
-          verb: 'start',
-          dpar: 'void',
-          dest: 'off',
-          changed: true
-        },
-        'X1'
-      ],
-      [
-        {
-          path: 'switch',
-          lstate: 'on',
-          verb: 'toggle',
-          dpar: 'off',
-          dest: 'on',
-          changed: true
-        },
-        'X2'
-      ],
-      [
-        {
-          path: 'switch',
-          lstate: 'off',
-          verb: 'toggle',
-          dpar: 'on',
-          dest: 'off',
-          changed: true
-        },
-        'X3'
-      ],
-      [
-        {
-          path: 'switch',
-          lstate: 'off',
-          verb: 'step',
-          dpar: 'off',
-          failed: true
-        },
-        'X4'
-      ],
-      [
-        {
-          path: 'switch',
-          lstate: 'doe',
-          verb: 'goto',
-          dpar: 'off',
-          dest: 'doe',
-          changed: true
-        },
-        'X5'
-      ],
-      [
-        {
-          path: 'switch',
-          lstate: 'bar',
-          verb: 'step',
-          dpar: 'doe',
-          dest: 'bar',
-          changed: true
-        },
-        'X6'
-      ],
-      [
-        {
-          path: 'switch',
-          lstate: 'baz',
-          verb: 'step',
-          dpar: 'bar',
-          dest: 'baz',
-          changed: true
-        },
-        'X7'
-      ],
-      [
-        {
-          path: 'switch',
-          lstate: 'gnu',
-          verb: 'step',
-          dpar: 'baz',
-          dest: 'gnu',
-          changed: true
-        },
-        'X8'
-      ],
-      [
-        {
-          path: 'switch',
-          lstate: 'doe',
-          verb: 'step',
-          dpar: 'gnu',
-          dest: 'doe',
-          changed: true
-        },
-        'X9'
-      ],
-      [
-        {
-          path: 'switch',
-          lstate: 'bar',
-          verb: 'step',
-          dpar: 'doe',
-          dest: 'bar',
-          changed: true
-        },
-        'X10'
-      ]
-    ]);
-    //---------------------------------------------------------------------------------------------------------
-    return done();
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this["Intermatic data attribute 1"] = function(T, done) {
-    var Intermatic, d, fsm, fsmd, i, len, register, result;
+    var Intermatic, fsm, fsmd, register, result, show_result;
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'simple',
       data: {
         counter: 42
       },
-      triggers: [['void', 'start', 'first']],
-      cyclers: {
-        step: ['first', 'second']
+      moves: {
+        start: 'first',
+        step: ['first', 'second', 'first']
       },
       before: {
         start: function(...P) {
           return this.sub.start();
         }
       },
-      enter: {
+      entering: {
         first: function(...P) {
           T.ok(this.data.counter != null);
           this.data.counter++;
@@ -729,11 +649,11 @@
           data: {
             frobs: 0
           },
-          triggers: [['void', 'start', 'dub']],
-          cyclers: {
-            toggle: ['dub', 'frob']
+          moves: {
+            start: 'dub',
+            toggle: ['dub', 'frob', 'dub']
           },
-          leave: {
+          leaving: {
             frob: function(...P) {
               this.data.frobs++;
               return help(this.data.frobs);
@@ -742,7 +662,7 @@
         }
       }
     };
-    ({result, register} = new_register());
+    ({result, show_result, register} = new_register());
     Intermatic = require('../../../apps/intermatic');
     fsm = new Intermatic(fsmd);
     T.eq(fsm.data, {
@@ -756,12 +676,87 @@
     urge(fsm.cstate, fsm.data.counter, fsm.sub.data.frobs);
     fsm.step();
     urge(fsm.cstate, fsm.data.counter, fsm.sub.data.frobs);
-    for (i = 0, len = result.length; i < len; i++) {
-      d = result[i];
-      // fsm.step();   urge fsm.cstate, fsm.data.counter, fsm.sub.data.frobs
-      // fsm.step();   urge fsm.cstate, fsm.data.counter, fsm.sub.data.frobs
-      info(d);
-    }
+    // fsm.step();   urge fsm.cstate, fsm.data.counter, fsm.sub.data.frobs
+    // fsm.step();   urge fsm.cstate, fsm.data.counter, fsm.sub.data.frobs
+    show_result();
+    T.eq(result, [
+      {
+        stage: 'entering',
+        verb: 'start',
+        dpar: 'void',
+        dest: 'first',
+        changed: true,
+        lstate: 'first',
+        path: 'simple',
+        data: {
+          counter: 43
+        },
+        sub: {
+          lstate: 'dub',
+          path: 'simple/sub',
+          data: {
+            frobs: 0
+          }
+        }
+      },
+      {
+        stage: 'entering',
+        verb: 'step',
+        dpar: 'first',
+        dest: 'second',
+        changed: true,
+        lstate: 'second',
+        path: 'simple',
+        data: {
+          counter: 43
+        },
+        sub: {
+          lstate: 'frob',
+          path: 'simple/sub',
+          data: {
+            frobs: 0
+          }
+        }
+      },
+      {
+        stage: 'entering',
+        verb: 'step',
+        dpar: 'second',
+        dest: 'first',
+        changed: true,
+        lstate: 'first',
+        path: 'simple',
+        data: {
+          counter: 44
+        },
+        sub: {
+          lstate: 'frob',
+          path: 'simple/sub',
+          data: {
+            frobs: 0
+          }
+        }
+      },
+      {
+        stage: 'entering',
+        verb: 'step',
+        dpar: 'first',
+        dest: 'second',
+        changed: true,
+        lstate: 'second',
+        path: 'simple',
+        data: {
+          counter: 44
+        },
+        sub: {
+          lstate: 'dub',
+          path: 'simple/sub',
+          data: {
+            frobs: 1
+          }
+        }
+      }
+    ]);
     //---------------------------------------------------------------------------------------------------------
     return done();
   };
@@ -772,38 +767,44 @@
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'knob',
-      triggers: [['void', 'start', 'bar']],
-      cyclers: {
-        step: ['bar', 'baz', 'gnu', 'doe']
+      moves: {
+        start: 'bar',
+        step: ['bar', 'baz', 'gnu', 'doe', 'bar']
       },
-      goto: '*',
+      goto: 'any',
       before: {
         any: function(ref) {
-          return register('before any', this.lstate, this.verb, ref);
+          return register('before.any', this.move, ref);
+        },
+        change: function(ref) {
+          return register('before.change', this.move, ref);
         }
       },
-      enter: {
+      entering: {
         any: function(ref) {
-          return register('enter any', this.lstate, this.verb, ref);
+          return register('entering.any', this.move, ref);
         }
       },
-      stay: {
+      keeping: {
         any: function(ref) {
-          return register('stay any', this.lstate, this.verb, ref);
+          return register('keeping.any', this.move, ref);
         }
       },
-      leave: {
+      leaving: {
         any: function(ref) {
-          return register('leave any', this.lstate, this.verb, ref);
+          return register('leaving.any', this.move, ref);
         }
       },
       after: {
         any: function(ref) {
-          return register('after any', this.lstate, this.verb, ref);
+          return register('after.any', this.move, ref);
+        },
+        change: function(ref) {
+          return register('after.change', this.move, ref);
         }
       },
       fail: function(ref) {
-        return register('fail', this.lstate, this.verb, ref);
+        return register('fail', this.move, ref);
       }
     };
     //---------------------------------------------------------------------------------------------------------
@@ -817,7 +818,188 @@
     info(`fsm.goto.${fsm.lstate}()  ———`);
     fsm.goto(fsm.lstate, 'A3');
     show_result();
-    T.eq(result, [['before any', 'void', 'start', 'A1'], ['leave any', 'void', 'start', 'A1'], ['enter any', 'bar', 'start', 'A1'], ['after any', 'bar', 'start', 'A1'], ['before any', 'bar', 'step', 'A2'], ['leave any', 'bar', 'step', 'A2'], ['enter any', 'baz', 'step', 'A2'], ['after any', 'baz', 'step', 'A2'], ['before any', 'baz', 'goto', 'A3'], ['stay any', 'baz', 'goto', 'A3'], ['after any', 'baz', 'goto', 'A3']]);
+    T.eq(result, [
+      [
+        'before.any',
+        {
+          stage: 'before',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'bar',
+          changed: true,
+          lstate: 'void'
+        },
+        'A1'
+      ],
+      [
+        'before.change',
+        {
+          stage: 'before',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'bar',
+          changed: true,
+          lstate: 'void'
+        },
+        'A1'
+      ],
+      [
+        'leaving.any',
+        {
+          stage: 'leaving',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'bar',
+          changed: true,
+          lstate: 'void'
+        },
+        'A1'
+      ],
+      [
+        'entering.any',
+        {
+          stage: 'entering',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'bar',
+          changed: true,
+          lstate: 'bar'
+        },
+        'A1'
+      ],
+      [
+        'after.any',
+        {
+          stage: 'after',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'bar',
+          changed: true,
+          lstate: 'bar'
+        },
+        'A1'
+      ],
+      [
+        'after.change',
+        {
+          stage: 'after',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'bar',
+          changed: true,
+          lstate: 'bar'
+        },
+        'A1'
+      ],
+      [
+        'before.any',
+        {
+          stage: 'before',
+          verb: 'step',
+          dpar: 'bar',
+          dest: 'baz',
+          changed: true,
+          lstate: 'bar'
+        },
+        'A2'
+      ],
+      [
+        'before.change',
+        {
+          stage: 'before',
+          verb: 'step',
+          dpar: 'bar',
+          dest: 'baz',
+          changed: true,
+          lstate: 'bar'
+        },
+        'A2'
+      ],
+      [
+        'leaving.any',
+        {
+          stage: 'leaving',
+          verb: 'step',
+          dpar: 'bar',
+          dest: 'baz',
+          changed: true,
+          lstate: 'bar'
+        },
+        'A2'
+      ],
+      [
+        'entering.any',
+        {
+          stage: 'entering',
+          verb: 'step',
+          dpar: 'bar',
+          dest: 'baz',
+          changed: true,
+          lstate: 'baz'
+        },
+        'A2'
+      ],
+      [
+        'after.any',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'bar',
+          dest: 'baz',
+          changed: true,
+          lstate: 'baz'
+        },
+        'A2'
+      ],
+      [
+        'after.change',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'bar',
+          dest: 'baz',
+          changed: true,
+          lstate: 'baz'
+        },
+        'A2'
+      ],
+      [
+        'before.any',
+        {
+          stage: 'before',
+          verb: 'goto',
+          dpar: 'baz',
+          dest: 'baz',
+          changed: false,
+          lstate: 'baz'
+        },
+        'A3'
+      ],
+      [
+        'keeping.any',
+        {
+          stage: 'keeping',
+          verb: 'goto',
+          dpar: 'baz',
+          dest: 'baz',
+          changed: false,
+          lstate: 'baz'
+        },
+        'A3'
+      ],
+      [
+        'after.any',
+        {
+          stage: 'after',
+          verb: 'goto',
+          dpar: 'baz',
+          dest: 'baz',
+          changed: false,
+          lstate: 'baz'
+        },
+        'A3'
+      ]
+    ]);
     //---------------------------------------------------------------------------------------------------------
     return done();
   };
@@ -828,93 +1010,133 @@
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'knob',
-      triggers: [['void', 'start', 'bar']],
-      cyclers: {
-        step: ['bar', 'baz', 'gnu', 'doe']
+      moves: {
+        start: 'bar',
+        step: ['bar', 'baz', 'gnu', 'doe', 'bar']
       },
-      goto: '*',
+      goto: 'any',
       before: {
         any: function(...P) {
-          return register('before any', fsm.cstate);
+          return register('before any', fsm.move);
         }
       },
-      // enter:  any: ( P... ) -> register 'enter any',   fsm.cstate
-      // stay:   any: ( P... ) -> register 'stay any',    fsm.cstate
-      // leave:  any: ( P... ) -> register 'leave any',   fsm.cstate
-      // after:  any: ( P... ) -> register 'after any',   fsm.cstate
       fail: function(...P) {
-        return register('fail', fsm.cstate);
+        return register('fail', fsm.move);
       }
     };
     //---------------------------------------------------------------------------------------------------------
     ({result, register, show_result} = new_register());
     Intermatic = require('../../../apps/intermatic');
     fsm = new Intermatic(fsmd);
-    register('first', fsm.cstate);
-    info("fsm.start()     ———");
+    //.........................................................................................................
+    register('first', fsm.move);
+    info("fsm.start()");
     fsm.start();
-    register('mid1', fsm.cstate);
-    info("fsm.step()      ———");
+    //.........................................................................................................
+    register('mid1', fsm.move);
+    info("fsm.step()");
     fsm.step();
-    info(`fsm.goto.${fsm.lstate}()  ———`);
+    //.........................................................................................................
+    register('mid2', fsm.move);
     fsm.goto(fsm.lstate);
-    register('last', fsm.cstate);
+    //.........................................................................................................
+    register('last', fsm.move);
+    //.........................................................................................................
     show_result();
     T.eq(result, [
       [
         'first',
         {
-          path: 'knob',
           lstate: 'void'
         }
       ],
       [
         'before any',
         {
-          path: 'knob',
-          lstate: 'void',
+          stage: 'before',
           verb: 'start',
           dpar: 'void',
           dest: 'bar',
-          changed: true
+          changed: true,
+          lstate: 'void'
         }
       ],
       [
         'mid1',
         {
-          path: 'knob',
           lstate: 'bar'
         }
       ],
       [
         'before any',
         {
-          path: 'knob',
-          lstate: 'bar',
+          stage: 'before',
           verb: 'step',
           dpar: 'bar',
           dest: 'baz',
-          changed: true
+          changed: true,
+          lstate: 'bar'
+        }
+      ],
+      [
+        'mid2',
+        {
+          lstate: 'baz'
         }
       ],
       [
         'before any',
         {
-          path: 'knob',
-          lstate: 'baz',
+          stage: 'before',
           verb: 'goto',
           dpar: 'baz',
-          dest: 'baz'
+          dest: 'baz',
+          changed: false,
+          lstate: 'baz'
         }
       ],
       [
         'last',
         {
-          path: 'knob',
           lstate: 'baz'
         }
       ]
     ]);
+    //---------------------------------------------------------------------------------------------------------
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["Intermatic can 1"] = function(T, done) {
+    var Intermatic, fsm, fsmd, register, result, show_result;
+    //---------------------------------------------------------------------------------------------------------
+    fsmd = {
+      name: 'oneway_switch',
+      moves: {
+        start: 'off',
+        toggle: ['off', 'on']
+      }
+    };
+    //---------------------------------------------------------------------------------------------------------
+    ({result, register, show_result} = new_register());
+    Intermatic = require('../../../apps/intermatic');
+    fsm = new Intermatic(fsmd);
+    T.eq(true, fsm.can.start());
+    T.eq(true, fsm.can('start'));
+    fsm.start();
+    T.eq(false, fsm.can.start());
+    T.eq(false, fsm.can('start'));
+    T.eq(true, fsm.can('toggle'));
+    T.eq(true, fsm.can.toggle());
+    fsm.toggle();
+    T.eq(false, fsm.can('toggle'));
+    T.eq(false, fsm.can.toggle());
+    T.throws(/unknown verb "nonexisting_trigger"/, function() {
+      return fsm.can('nonexisting_trigger');
+    });
+    T.throws(/unknown verb "nonexisting_trigger"/, function() {
+      return fsm.can.nonexisting_trigger();
+    });
     //---------------------------------------------------------------------------------------------------------
     return done();
   };
@@ -925,161 +1147,30 @@
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'oneway_switch',
-      triggers: [['void', 'start', 'off'], ['off', 'toggle', 'on']],
-      after: {
-        change: function(...P) {
-          return register(`success: ${this.dpar}>-${this.verb}->${this.dest}`);
-        }
+      moves: {
+        start: 'off',
+        toggle: ['off', 'on']
       },
-      fail: function(...P) {
-        return register(`failure: ${this.dpar}>-${this.verb}->?`);
-      }
+      goto: 'any'
     };
     //---------------------------------------------------------------------------------------------------------
     ({result, register, show_result} = new_register());
     Intermatic = require('../../../apps/intermatic');
     fsm = new Intermatic(fsmd);
-    fsm.start();
-    T.eq(true, fsm.can.toggle());
+    T.eq(true, fsm.tryto.start());
+    fsm.goto('void');
+    T.eq(true, fsm.tryto('start'));
+    T.eq(true, fsm.tryto('toggle'));
+    fsm.goto('off');
     T.eq(true, fsm.tryto.toggle());
-    T.eq(false, fsm.can('toggle'));
     T.eq(false, fsm.tryto('toggle'));
-    T.throws(/unknown trigger "nonexisting_trigger"/, function() {
-      return fsm.can('nonexisting_trigger');
+    T.eq(false, fsm.tryto.toggle());
+    T.throws(/unknown verb "nonexisting_trigger"/, function() {
+      return fsm.tryto('nonexisting_trigger');
     });
-    show_result();
-    T.eq(result, ['success: void>-start->off', 'success: off>-toggle->on']);
-    //---------------------------------------------------------------------------------------------------------
-    return done();
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["Intermatic tryto 2"] = function(T, done) {
-    var Intermatic, eq, fsm, fsmd, k, register, result, show_result;
-    //---------------------------------------------------------------------------------------------------------
-    fsmd = {
-      name: 'oneway_switch',
-      triggers: [['void', 'start', 'one']],
-      cyclers: {
-        step: ['one', 'two', 'three']
-      },
-      after: {
-        change: function(...P) {
-          return register(this.cstate);
-        }
-      },
-      // step:       ( P... ) -> @step()
-      fail: function(...P) {
-        return register(this.cstate);
-      }
-    };
-    //---------------------------------------------------------------------------------------------------------
-    ({result, register, show_result} = new_register());
-    Intermatic = require('../../../apps/intermatic');
-    fsm = new Intermatic(fsmd);
-    eq = function(ref, test, outcome) {
-      if (isa.function(test)) {
-        ref += ' ' + test.toString().replace(/\n/g, ' ');
-        test = test();
-      }
-      if (equals(test, outcome)) {
-        return T.ok(true);
-      } else {
-        return T.fail(`test ${rpr(ref)} failed`);
-      }
-    };
-    debug(((function() {
-      var results;
-      results = [];
-      for (k in CND) {
-        results.push(k);
-      }
-      return results;
-    })()).sort());
-    eq('^tt2@1', (function() {
-      return fsm.lstate;
-    }), 'void');
-    eq('^tt2@2', (function() {
-      return fsm.triggers.start;
-    }), {
-      void: 'one'
+    T.throws(/unknown verb "nonexisting_trigger"/, function() {
+      return fsm.can.nonexisting_trigger();
     });
-    eq('^tt2@3', (function() {
-      return fsm.can.start();
-    }), true);
-    eq('^tt2@4', (function() {
-      return fsm.can('start');
-    }), true);
-    eq('^tt2@5', (function() {
-      return fsm.start();
-    }), null); // one
-    eq('^tt2@6', (function() {
-      return fsm.lstate;
-    }), 'one');
-    eq('^tt2@7', (function() {
-      return fsm.can.start();
-    }), false);
-    eq('^tt2@8', (function() {
-      return fsm.can('start');
-    }), false);
-    eq('^tt2@9', (function() {
-      return fsm.step();
-    }), null); // two
-    eq('^tt2@10', (function() {
-      return fsm.tryto.step();
-    }), true); // three
-    eq('^tt2@11', (function() {
-      return fsm.step();
-    }), null); // one
-    eq('^tt2@12', (function() {
-      return fsm.tryto.step();
-    }), true); // two
-    eq('^tt2@13', (function() {
-      return fsm.tryto.start();
-    }), false);
-    show_result();
-    T.eq(result, [
-      {
-        path: 'oneway_switch',
-        lstate: 'one',
-        verb: 'start',
-        dpar: 'void',
-        dest: 'one',
-        changed: true
-      },
-      {
-        path: 'oneway_switch',
-        lstate: 'two',
-        verb: 'step',
-        dpar: 'one',
-        dest: 'two',
-        changed: true
-      },
-      {
-        path: 'oneway_switch',
-        lstate: 'three',
-        verb: 'step',
-        dpar: 'two',
-        dest: 'three',
-        changed: true
-      },
-      {
-        path: 'oneway_switch',
-        lstate: 'one',
-        verb: 'step',
-        dpar: 'three',
-        dest: 'one',
-        changed: true
-      },
-      {
-        path: 'oneway_switch',
-        lstate: 'two',
-        verb: 'step',
-        dpar: 'one',
-        dest: 'two',
-        changed: true
-      }
-    ]);
     //---------------------------------------------------------------------------------------------------------
     return done();
   };
@@ -1090,23 +1181,28 @@
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       //.......................................................................................................
-      triggers: [['void', 'start', 'released'], ['*', 'reset', 'void'], ['released', 'press', 'pressed'], ['pressed', 'release', 'released']],
-      enter: {
+      moves: {
+        start: 'released',
+        reset: ['any', 'void'],
+        press: ['released', 'pressed'],
+        release: ['pressed', 'released']
+      },
+      entering: {
         pressed: function(...P) {
           this.lamp.goto('lit');
-          return register("button: enter pressed", this.lstate);
+          return register("button: entering pressed", this.lstate);
         },
         released: function(...P) {
           this.lamp.goto('dark');
-          return register("button: enter released", this.lstate);
+          return register("button: entering released", this.lstate);
         }
       },
-      stay: {
+      keeping: {
         pressed: function(...P) {
-          return register("button: stay pressed", this.lstate);
+          return register("button: keeping pressed", this.lstate);
         },
         released: function(...P) {
-          return register("button: stay released", this.lstate);
+          return register("button: keeping released", this.lstate);
         }
       },
       after: {
@@ -1119,33 +1215,36 @@
           return register("button: before *", this.lstate);
         }
       },
-      goto: '*',
+      goto: 'any',
       //.......................................................................................................
       fsms: {
         //.....................................................................................................
         lamp: {
-          triggers: [['void', 'start', 'lit'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit']],
+          moves: {
+            start: 'lit',
+            toggle: ['lit', 'dark', 'lit']
+          },
           after: {
             change: function(...P) {
               return register("lamp: after change", this.lstate);
             }
           },
-          enter: {
+          entering: {
             dark: function(...P) {
               this.up.goto('released');
-              return register("lamp: enter dark", this.lstate);
+              return register("lamp: entering dark", this.lstate);
             },
             lit: function(...P) {
               this.up.goto('pressed');
-              return register("lamp: enter lit", this.lstate);
+              return register("lamp: entering lit", this.lstate);
             }
           },
-          stay: {
+          keeping: {
             dark: function(...P) {
-              return register("lamp: stay dark", this.lstate);
+              return register("lamp: keeping dark", this.lstate);
             },
             lit: function(...P) {
-              return register("lamp: stay lit", this.lstate);
+              return register("lamp: keeping lit", this.lstate);
             }
           },
           before: {
@@ -1153,7 +1252,7 @@
               return register("lamp: before *", this.lstate);
             }
           },
-          goto: '*',
+          goto: 'any',
           bar: 108
         }
       },
@@ -1172,7 +1271,7 @@
     button = new Intermatic(fsmd);
     T.eq(button.foo, 42);
     T.eq(button.lamp.bar, 108);
-    info(button.triggers);
+    info(button.moves);
     info({
       button: {
         $value: button.lstate,
@@ -1233,7 +1332,7 @@
     });
     help([`°button:^${button.lstate}`, `°button/lamp:^${button.lamp.lstate}`]);
     show_result();
-    T.eq(result, [['button: stay released', 'released'], ['lamp: enter dark', 'dark'], ['lamp: after change', 'dark'], ['button: enter released', 'released'], ['root_fsm.change', 'released'], ['button: stay pressed', 'pressed'], ['lamp: enter lit', 'lit'], ['lamp: after change', 'lit'], ['button: enter pressed', 'pressed'], ['root_fsm.change', 'pressed']]);
+    T.eq(result, [['button: keeping released', 'released'], ['lamp: entering dark', 'dark'], ['lamp: after change', 'dark'], ['button: entering released', 'released'], ['root_fsm.change', 'released'], ['button: keeping pressed', 'pressed'], ['lamp: entering lit', 'lit'], ['lamp: after change', 'lit'], ['button: entering pressed', 'pressed'], ['root_fsm.change', 'pressed']]);
     //---------------------------------------------------------------------------------------------------------
     return done();
   };
@@ -1247,41 +1346,47 @@
       fsms: {
         alpha_btn: {
           //.......................................................................................................
-          triggers: [['void', 'start', 'released'], ['*', 'reset', 'void'], ['released', 'press', 'pressed'], ['pressed', 'release', 'released']],
-          // enter:
-          //   pressed:  ( P... ) ->
-          //   released: ( P... ) ->
-          // before:
-          //   start:    ( P... ) -> @lamp.start()
+          moves: {
+            start: 'released',
+            reset: ['any', 'void'],
+            press: ['released', 'pressed'],
+            release: ['pressed', 'released']
+          },
           cascades: ['start'],
           after: {
             change: function(...P) {
               this.lamp.toggle();
-              return register("alpha_btn.after.change", this.EXP_cstate);
+              return register("alpha_btn.after.change", this.cstate);
             }
           },
           //.......................................................................................................
           fsms: {
             //.....................................................................................................
             color: {
-              triggers: [['red', 'toggle', 'green'], ['green', 'toggle', 'red']],
+              moves: {
+                start: 'red',
+                toggle: ['red', 'green', 'red']
+              },
               after: {
                 change: function(...P) {
-                  return register("color.after.change", this.EXP_cstate);
+                  return register("color.after.change", this.cstate);
                 }
               }
             },
             //.....................................................................................................
             lamp: {
-              triggers: [['void', 'start', 'lit'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit']],
-              enter: {
+              moves: {
+                start: 'lit',
+                toggle: ['lit', 'dark', 'lit']
+              },
+              entering: {
                 dark: function(...P) {
                   return this.up.color.toggle();
                 }
               },
               after: {
                 change: function(...P) {
-                  return register("lamp.after.change", this.EXP_cstate);
+                  return register("lamp.after.change", this.cstate);
                 }
               }
             }
@@ -1441,7 +1546,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["Intermatic AAL style FSMDs 1"] = function(T, done) {
-    var Intermatic, fsm, fsmd, register, result, show_result;
+    var Intermatic, before_any, before_change, before_start_1, before_start_2, before_start_3, before_step, before_stop, fsm, fsmd, register, result, show_result;
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'φ',
@@ -1451,69 +1556,96 @@
         stop: ['c', 'void']
       },
       before: {
+        any: before_any = function() {
+          return register("before.any", this.move);
+        },
+        change: before_change = function() {
+          return register("before.change", this.move);
+        },
         start: [
-          (function() {
+          (before_start_1 = function() {
             return debug('^7776^',
-          "start.before 1");
+          "before.start 1",
+          this.move);
           }),
-          (function() {
+          (before_start_2 = function() {
             return debug('^7776^',
-          "start.before 2");
+          "before.start 2",
+          this.move);
           }),
-          (function() {
-            return register("start.before");
+          (before_start_3 = function() {
+            return register("before.start",
+          this.move);
           })
         ],
-        step: function() {
-          return register("step.before");
+        step: before_step = function() {
+          return register("before.step", this.move);
         },
-        stop: function() {
-          return register("stop.before");
+        stop: before_stop = function() {
+          return register("before.stop", this.move);
         }
       },
       after: {
+        any: function() {
+          return register("after.any", this.move);
+        },
+        change: function() {
+          return register("after.change", this.move);
+        },
         start: function() {
-          return register("start.after");
+          return register("after.start", this.move);
         },
         step: function() {
-          return register("step.after");
+          return register("after.step", this.move);
         },
         stop: function() {
-          return register("stop.after");
+          return register("after.stop", this.move);
         }
       },
-      enter: {
+      entering: {
+        any: function() {
+          return register("entering.any", this.move);
+        },
         void: function() {
-          return register("void.enter");
+          return register("entering.void", this.move);
         },
         a: function() {
-          return register("a.enter");
+          return register("entering.a", this.move);
         },
         b: function() {
-          return register("b.enter");
+          return register("entering.b", this.move);
         },
         c: function() {
-          return register("c.enter");
+          return register("entering.c", this.move);
         }
       },
-      leave: {
+      leaving: {
+        any: function() {
+          return register("leaving.any", this.move);
+        },
         void: function() {
-          return register("void.leave");
+          return register("leaving.void", this.move);
         },
         a: function() {
-          return register("a.leave");
+          return register("leaving.a", this.move);
         },
         b: function() {
-          return register("b.leave");
+          return register("leaving.b", this.move);
         },
         c: function() {
-          return register("c.leave");
+          return register("leaving.c", this.move);
         }
       },
-      stay: {
+      keeping: {
+        any: function() {
+          return register("keeping.any", this.move);
+        },
         c: function() {
-          return register("c.stay");
+          return register("keeping.c", this.move);
         }
+      },
+      fail: function() {
+        return register("fail", this.move);
       }
     };
     //---------------------------------------------------------------------------------------------------------
@@ -1525,13 +1657,355 @@
     urge('^4455^', fsmd.moves);
     help('^4455^', fsm.moves);
     fsm.start();
-    // fsm.step()
-    // fsm.step()
-    // fsm.step()
-    // fsm.stop()
+    fsm.step();
+    fsm.step();
+    fsm.step();
+    fsm.stop();
+    fsm.step();
     show_result();
+    T.eq(result, [
+      [
+        'before.any',
+        {
+          stage: 'before',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'a'
+        }
+      ],
+      [
+        'before.change',
+        {
+          stage: 'before',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'a'
+        }
+      ],
+      [
+        'before.start',
+        {
+          stage: 'before',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'a'
+        }
+      ],
+      [
+        'leaving.void',
+        {
+          stage: 'leaving',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'a'
+        }
+      ],
+      [
+        'entering.a',
+        {
+          stage: 'entering',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'a'
+        }
+      ],
+      [
+        'after.start',
+        {
+          stage: 'after',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'a'
+        }
+      ],
+      [
+        'after.change',
+        {
+          stage: 'after',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'a'
+        }
+      ],
+      [
+        'after.any',
+        {
+          stage: 'after',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'a'
+        }
+      ],
+      [
+        'before.any',
+        {
+          stage: 'before',
+          verb: 'step',
+          dpar: 'a',
+          dest: 'b'
+        }
+      ],
+      [
+        'before.change',
+        {
+          stage: 'before',
+          verb: 'step',
+          dpar: 'a',
+          dest: 'b'
+        }
+      ],
+      [
+        'before.step',
+        {
+          stage: 'before',
+          verb: 'step',
+          dpar: 'a',
+          dest: 'b'
+        }
+      ],
+      [
+        'leaving.a',
+        {
+          stage: 'leaving',
+          verb: 'step',
+          dpar: 'a',
+          dest: 'b'
+        }
+      ],
+      [
+        'entering.b',
+        {
+          stage: 'entering',
+          verb: 'step',
+          dpar: 'a',
+          dest: 'b'
+        }
+      ],
+      [
+        'after.step',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'a',
+          dest: 'b'
+        }
+      ],
+      [
+        'after.change',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'a',
+          dest: 'b'
+        }
+      ],
+      [
+        'after.any',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'a',
+          dest: 'b'
+        }
+      ],
+      [
+        'before.any',
+        {
+          stage: 'before',
+          verb: 'step',
+          dpar: 'b',
+          dest: 'c'
+        }
+      ],
+      [
+        'before.change',
+        {
+          stage: 'before',
+          verb: 'step',
+          dpar: 'b',
+          dest: 'c'
+        }
+      ],
+      [
+        'before.step',
+        {
+          stage: 'before',
+          verb: 'step',
+          dpar: 'b',
+          dest: 'c'
+        }
+      ],
+      [
+        'leaving.b',
+        {
+          stage: 'leaving',
+          verb: 'step',
+          dpar: 'b',
+          dest: 'c'
+        }
+      ],
+      [
+        'entering.c',
+        {
+          stage: 'entering',
+          verb: 'step',
+          dpar: 'b',
+          dest: 'c'
+        }
+      ],
+      [
+        'after.step',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'b',
+          dest: 'c'
+        }
+      ],
+      [
+        'after.change',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'b',
+          dest: 'c'
+        }
+      ],
+      [
+        'after.any',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'b',
+          dest: 'c'
+        }
+      ],
+      [
+        'before.any',
+        {
+          stage: 'before',
+          verb: 'step',
+          dpar: 'c',
+          dest: 'c'
+        }
+      ],
+      [
+        'before.step',
+        {
+          stage: 'before',
+          verb: 'step',
+          dpar: 'c',
+          dest: 'c'
+        }
+      ],
+      [
+        'keeping.c',
+        {
+          stage: 'keeping',
+          verb: 'step',
+          dpar: 'c',
+          dest: 'c'
+        }
+      ],
+      [
+        'after.step',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'c',
+          dest: 'c'
+        }
+      ],
+      [
+        'after.any',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'c',
+          dest: 'c'
+        }
+      ],
+      [
+        'before.any',
+        {
+          stage: 'before',
+          verb: 'stop',
+          dpar: 'c',
+          dest: 'void'
+        }
+      ],
+      [
+        'before.change',
+        {
+          stage: 'before',
+          verb: 'stop',
+          dpar: 'c',
+          dest: 'void'
+        }
+      ],
+      [
+        'before.stop',
+        {
+          stage: 'before',
+          verb: 'stop',
+          dpar: 'c',
+          dest: 'void'
+        }
+      ],
+      [
+        'leaving.c',
+        {
+          stage: 'leaving',
+          verb: 'stop',
+          dpar: 'c',
+          dest: 'void'
+        }
+      ],
+      [
+        'entering.void',
+        {
+          stage: 'entering',
+          verb: 'stop',
+          dpar: 'c',
+          dest: 'void'
+        }
+      ],
+      [
+        'after.stop',
+        {
+          stage: 'after',
+          verb: 'stop',
+          dpar: 'c',
+          dest: 'void'
+        }
+      ],
+      [
+        'after.change',
+        {
+          stage: 'after',
+          verb: 'stop',
+          dpar: 'c',
+          dest: 'void'
+        }
+      ],
+      [
+        'after.any',
+        {
+          stage: 'after',
+          verb: 'stop',
+          dpar: 'c',
+          dest: 'void'
+        }
+      ],
+      [
+        'fail',
+        {
+          verb: 'step',
+          dpar: 'void'
+        }
+      ]
+    ]);
     if (done != null) {
-      // T.eq result, [
       //---------------------------------------------------------------------------------------------------------
       return done();
     }
@@ -1543,29 +2017,24 @@
       // @demo_2()
       // @toolbox_demo()
       // test @
-      // test @[ "Intermatic AAL style FSMDs 1" ]
-      return this["Intermatic AAL style FSMDs 1"]();
+      // test @[ "___ Intermatic attribute freezing"        ]
+      // test @[ "Intermatic empty FSM"                     ]
+      // test @[ "Intermatic before.start(), after.start()" ]
+      // test @[ "Intermatic basics" ]
+      // test @[ "Intermatic history" ]
+      // @[ "Intermatic cancel moves" ]()
+      // test @[ "Intermatic cancel moves" ]
+      // test @[ "Intermatic goto 1" ]
+      // test @[ "Intermatic data attribute 1" ]
+      // test @[ "Intermatic catchalls 1" ]
+      // test @[ "Intermatic observables during moves 1" ]
+      // test @[ "Intermatic can 1" ]
+      // test @[ "Intermatic tryto 1" ]
+      // test @[ "Intermatic cFsm 1" ]
+      test(this["Intermatic cFsm 2"]);
+      return test(this["Intermatic AAL style FSMDs 1"]);
     })();
   }
-
-  // test @[ "Intermatic observables during moves 1" ]
-// test @[ "Intermatic catchalls 1" ]
-// test @[ "Intermatic cyclers 1" ]
-// test @[ "Intermatic goto 1" ]
-// test @[ "Intermatic cancel moves" ]
-// test @[ "Intermatic history" ]
-// test @[ "Intermatic data attribute 1" ]
-// @[ "Intermatic data attribute 1" ]()
-// test @[ "Intermatic attribute freezing" ]
-// test @[ "Intermatic toolbox" ]
-// test @[ "Intermatic tryto 1" ]
-// test @[ "Intermatic tryto 2" ]
-// test @[ "Intermatic cFsm 1" ]
-// test @[ "Intermatic cFsm 2" ]
-// test @[ "Intermatic cFsm" ]
-// test @[ "Intermatic empty FSM" ]
-// test @[ "Intermatic before.start(), after.start()" ]
-// @[ "Intermatic empty FSM" ]()
 
 }).call(this);
 
