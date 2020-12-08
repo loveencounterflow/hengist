@@ -66,30 +66,34 @@ new_register = ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "Intermatic empty FSM" ] = ( T, done ) ->
   Intermatic      = require '../../../apps/intermatic'
-  Intermatic._tid = 0
   fsm             = new Intermatic {}
-  T.eq fsm.triggers, { start: { void: 'void' } }
-  T.eq fsm.start(), null
-  T.eq fsm.lstate,   'void'
+  T.eq fsm.moves,   {}
+  T.eq fsm.start,   undefined
+  T.eq fsm.lstate,  'void'
   done()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "Intermatic before.start(), after.start()" ] = ( T, done ) ->
   { result
+    show_result
     register }    = new_register()
   Intermatic      = require '../../../apps/intermatic'
   #---------------------------------------------------------------------------------------------------------
   fsmd =
+    moves:
+      start: 'void'
     before:
-      start: -> register "before start"
+      start: -> register "before start", @move
     after:
-      start: -> register "after start"
+      start: -> register "after start", @move
   #---------------------------------------------------------------------------------------------------------
-  Intermatic._tid = 0
   fsm = new Intermatic fsmd
   T.eq fsm.start(), null
   T.eq fsm.lstate,  'void'
-  T.eq result,      [ 'before start', 'after start' ]
+  show_result()
+  T.eq result, [
+    [ 'before start', { stage: 'before', verb: 'start', dpar: 'void', dest: 'void' } ]
+    [ 'after start', { stage: 'after', verb: 'start', dpar: 'void', dest: 'void' } ] ]
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -98,52 +102,37 @@ new_register = ->
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     name: 'meta_lamp'
-    triggers: [
-      [ 'void',   'start',  'lit',  ]
-      [ '*',      'reset',  'void', ]
-      [ 'lit',    'toggle', 'dark', ]
-      [ 'dark',   'toggle', 'lit',  ]
-      # [ 'void',   'toggle', 'lit',  ]
-      ]
+    moves:
+      start:  [ 'void', 'lit',  ]
+      reset:  [ 'any',  'void', ]
+      toggle: [ 'lit',  'dark', 'lit', ]
     after:
       change:     -> register "after change", @cstate
-    enter:
-      dark:       -> register "enter dark", @cstate
-    leave:
-      lit:        -> register "leave lit", @cstate
+    entering:
+      dark:       -> register "entering dark", @cstate
+    leaving:
+      lit:        -> register "leaving lit", @cstate
     fail:         -> register "failed", @cstate
   #---------------------------------------------------------------------------------------------------------
   { result
+    show_result
     register }    = new_register()
   Intermatic      = require '../../../apps/intermatic'
-  Intermatic._tid = 0
   fsm             = new Intermatic fsmd
-  info '^44455^', JSON.stringify fsm.triggers, null, 2
-  T.eq fsm.triggers,
-    "start":
-      "void": "lit"
-    "toggle":
-      "lit": "dark",
-      "dark": "lit"
-    "reset":
-      "void": "void",
-      "lit": "void",
-      "dark": "void"
+  # info '^44455^', JSON.stringify fsm.moves, null, 2
+  T.eq fsm.moves, { start: { void: 'lit' }, reset: { any: 'void' }, toggle: { lit: 'dark', dark: 'lit' } }
   fsm.start()
   fsm.toggle()
   fsm.reset()
   fsm.toggle()
-  # fsm.goto 'lit'
-  # fsm.goto 'lit'
-  # fsm.goto 'dark'
-  echo result
+  show_result()
   T.eq result, [
-    [ 'after change', { lstate: 'lit', path: 'meta_lamp', verb: 'start', dpar: 'void', dest: 'lit', changed: true } ],
-    [ 'leave lit', { lstate: 'lit', path: 'meta_lamp', verb: 'toggle', dpar: 'lit', dest: 'dark', changed: true } ],
-    [ 'enter dark', { lstate: 'dark', path: 'meta_lamp', verb: 'toggle', dpar: 'lit', dest: 'dark', changed: true } ],
-    [ 'after change', { lstate: 'dark', path: 'meta_lamp', verb: 'toggle', dpar: 'lit', dest: 'dark', changed: true } ],
-    [ 'after change', { lstate: 'void', path: 'meta_lamp', verb: 'reset', dpar: 'dark', dest: 'void', changed: true } ],
-    [ 'failed', { lstate: 'void', path: 'meta_lamp', verb: 'toggle', dpar: 'void', failed: true, } ] ]
+    [ 'after change', { stage: 'after', verb: 'start', dpar: 'void', dest: 'lit', changed: true, path: 'meta_lamp', lstate: 'lit' } ]
+    [ 'leaving lit', { stage: 'leaving', verb: 'toggle', dpar: 'lit', dest: 'dark', changed: true, path: 'meta_lamp', lstate: 'lit' } ]
+    [ 'entering dark', { stage: 'entering', verb: 'toggle', dpar: 'lit', dest: 'dark', changed: true, path: 'meta_lamp', lstate: 'dark' } ]
+    [ 'after change', { stage: 'after', verb: 'toggle', dpar: 'lit', dest: 'dark', changed: true, path: 'meta_lamp', lstate: 'dark' } ]
+    [ 'after change', { stage: 'after', verb: 'reset', dpar: 'dark', dest: 'void', changed: true, path: 'meta_lamp', lstate: 'void' } ]
+    [ 'failed', { verb: 'toggle', dpar: 'void', failed: true, path: 'meta_lamp', lstate: 'void' } ] ]
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -152,21 +141,20 @@ new_register = ->
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     name: 'meta_lamp'
-    triggers: [
-      [ 'void',     'start',  'lit',  ]
-      [ '*',        'reset',  'void', ]
-      [ '*',        'flash',  'flashing', ]
-      [ 'flashing', 'toggle', 'dark', ]
-      [ 'lit',      'toggle', 'dark', ]
-      [ 'dark',     'toggle', 'lit',  ]
-      ]
+    moves:
+      start:  'lit'
+      reset:  [ 'any', 'void',     ]
+      flash:  [ 'any', 'flashing', ]
+      toggle: [
+        [ 'lit',      'dark',     'lit',  ]
+        [ 'flashing', 'dark',             ]
+        ]
     after:
       change:     ( P... ) -> register @history
   #---------------------------------------------------------------------------------------------------------
   { result
     register }        = new_register()
   Intermatic          = require '../../../apps/intermatic'
-  Intermatic._tid     = 0
   fsm                 = new Intermatic fsmd
   fsm.history_length  = 3
   fsm.start()
@@ -184,36 +172,58 @@ new_register = ->
   done()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "Intermatic cancel moves" ] = ( T, done ) ->
+@[ "__ Intermatic cancel moves" ] = ( T, done ) ->
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     name: 'boiler'
     # cascades:
-    #   # start: '*' ### TAINT all FSMs in tree? all sibling FSMs? parent FSMs? ###
+    #   # start: 'any' ### TAINT all FSMs in tree? all sibling FSMs? parent FSMs? ###
     #   start: [ 'heater', ]
+    moves:
+      start:  'operating'
     before:
-      start: ( P... ) -> @heater.start P...
+      start:  ( P... ) -> @register 'boiler.before.start', @move; @heater.start P...
     after:
-      change:     ( P... ) -> register @cstate
+      change: ( P... ) -> @register 'boiler.after.change', @move
     fsms:
       heater:
-        data: { temparature: 20, }
-        triggers: [
-          [ 'void',     'start',      'idle',     ]
-          [ 'heating',  'switch_off', 'idle',     ]
-          [ 'idle',     'switch_on',  'heating',  ] ]
-        # after:
-        #   change: ( P... ) -> @up.
+        data: { enabled: true, temparature: 20, }
+        moves:
+          start:      [ 'void',     'idle',     ]
+          switch_off: [ 'heating',  'idle',     ]
+          switch_on:  [ 'idle',     'heating',  ]
+        # before:
+        #   any:      -> @register 'heater.before.any', @move, @data
+        entering:
+          heating:  ->
+            if not @data.enabled
+              warn '^3334^', "heater not enabled; cancelling"
+              @cancel()
+            debug '^445554^', @lstate
+            debug '^445554^', @move
+            @up.register 'heater.entering.heating', @lstate, @move, @data
   #---------------------------------------------------------------------------------------------------------
-  { result
-    register }        = new_register()
   Intermatic          = require '../../../apps/intermatic'
-  Intermatic._tid     = 0
-  boiler                 = new Intermatic fsmd
-  boiler.start()
-  boiler.heater.switch_on()
-  # boiler.thermo.
-  # T.eq result,
+  do =>
+    { result
+      show_result
+      register }        = new_register()
+    boiler = new Intermatic fsmd
+    boiler.register = register
+    boiler.heater.data.enabled = true
+    boiler.start()
+    boiler.heater.switch_on()
+    show_result()
+  do =>
+    { result
+      show_result
+      register }        = new_register()
+    boiler = new Intermatic fsmd
+    boiler.register = register
+    boiler.heater.data.enabled = false
+    boiler.start()
+    boiler.heater.switch_on()
+    show_result()
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -222,30 +232,26 @@ new_register = ->
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     name: 'meta_lamp'
-    triggers: [
-      [ 'void',   'start', 'lit',   ]
-      [ '*',      'reset', 'void',  ]
-      [ 'lit',    'toggle', 'dark', ]
-      [ 'dark',   'toggle', 'lit',  ]
-      # [ 'void',   'toggle', 'lit',  ]
-      ]
+    moves:
+      start: 'lit'
+      reset:  [ 'any',  'void',         ]
+      toggle: [ 'lit',  'dark', 'lit',  ]
     before:
       any:        ( P... ) -> register 'before.any',  @cstate, P
     # after:
     #   change:     ( P... ) -> register 'after.change',  @cstate
-    # enter:
-    #   dark:       ( P... ) -> register 'enter.dark',    @cstate
-    #   lit:        ( P... ) -> register 'enter.lit',     @cstate
-    goto:         '*'
+    # entering:
+    #   dark:       ( P... ) -> register 'entering.dark',    @cstate
+    #   lit:        ( P... ) -> register 'entering.lit',     @cstate
+    goto:         'any'
     fail:         ( P... ) -> register 'failed',        @cstate, P
   #---------------------------------------------------------------------------------------------------------
   { result
     register
     show_result } = new_register()
   Intermatic      = require '../../../apps/intermatic'
-  Intermatic._tid = 0
   fsm             = new Intermatic fsmd
-  # T.eq ( Object.keys fsm ),  [ 'reserved', 'fsmd', 'triggers', 'fsm_names', 'has_subfsms', '_lstate', 'before', 'enter', 'stay', 'leave', 'after', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail' ]
+  # T.eq ( Object.keys fsm ),  [ 'reserved', 'fsmd', 'moves', 'fsm_names', 'has_subfsms', '_lstate', 'before', 'entering', 'keeping', 'leaving', 'after', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail' ]
   fsm.start         'M1'
   fsm.toggle        'M2'
   fsm.goto 'lit',   'M3'
@@ -256,61 +262,14 @@ new_register = ->
   fsm.toggle        'M8'
   show_result()
   T.eq result, [
-    [ 'before.any', { path: 'meta_lamp', lstate: 'void', verb: 'start', dpar: 'void', dest: 'lit', changed: true }, [ 'M1' ] ]
-    [ 'before.any', { path: 'meta_lamp', lstate: 'lit', verb: 'toggle', dpar: 'lit', dest: 'dark', changed: true }, [ 'M2' ] ]
-    [ 'before.any', { path: 'meta_lamp', lstate: 'dark', verb: 'goto', dpar: 'dark', dest: 'lit', changed: true }, [ 'M3' ] ]
-    [ 'before.any', { path: 'meta_lamp', lstate: 'lit', verb: 'goto', dpar: 'lit', dest: 'lit' }, [ 'M4' ] ]
-    [ 'before.any', { path: 'meta_lamp', lstate: 'lit', verb: 'goto', dpar: 'lit', dest: 'dark', changed: true }, [ 'M5' ] ]
-    [ 'before.any', { path: 'meta_lamp', lstate: 'dark', verb: 'toggle', dpar: 'dark', dest: 'lit', changed: true }, [ 'M6' ] ]
-    [ 'before.any', { path: 'meta_lamp', lstate: 'lit', verb: 'toggle', dpar: 'lit', dest: 'dark', changed: true }, [ 'M7' ] ]
-    [ 'before.any', { path: 'meta_lamp', lstate: 'dark', verb: 'toggle', dpar: 'dark', dest: 'lit', changed: true }, [ 'M8' ] ] ]
-  #---------------------------------------------------------------------------------------------------------
-  done()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "Intermatic cyclers 1" ] = ( T, done ) ->
-  #---------------------------------------------------------------------------------------------------------
-  fsmd =
-    name: 'switch'
-    triggers: [
-      [ 'void', 'start', 'off', ]
-      ]
-    cyclers:
-      toggle: [ 'on', 'off', ]
-      step:   [ 'bar', 'baz', 'gnu', 'doe', ]
-    goto: '*'
-    after:
-      change:     ( ref ) -> register @cstate, ref
-    fail:         ( ref ) -> register @cstate, ref
-  #---------------------------------------------------------------------------------------------------------
-  { result
-    register
-    show_result } = new_register()
-  Intermatic      = require '../../../apps/intermatic'
-  Intermatic._tid = 0
-  fsm             = new Intermatic fsmd
-  fsm.start       'X1'
-  fsm.toggle      'X2'
-  fsm.toggle      'X3'
-  fsm.step        'X4'
-  fsm.goto 'doe', 'X5'
-  fsm.step        'X6'
-  fsm.step        'X7'
-  fsm.step        'X8'
-  fsm.step        'X9'
-  fsm.step        'X10'
-  show_result()
-  T.eq result, [
-    [ { path: 'switch', lstate: 'off', verb: 'start', dpar: 'void', dest: 'off', changed: true }, 'X1' ]
-    [ { path: 'switch', lstate: 'on', verb: 'toggle', dpar: 'off', dest: 'on', changed: true }, 'X2' ]
-    [ { path: 'switch', lstate: 'off', verb: 'toggle', dpar: 'on', dest: 'off', changed: true }, 'X3' ]
-    [ { path: 'switch', lstate: 'off', verb: 'step', dpar: 'off', failed: true }, 'X4' ]
-    [ { path: 'switch', lstate: 'doe', verb: 'goto', dpar: 'off', dest: 'doe', changed: true }, 'X5' ]
-    [ { path: 'switch', lstate: 'bar', verb: 'step', dpar: 'doe', dest: 'bar', changed: true }, 'X6' ]
-    [ { path: 'switch', lstate: 'baz', verb: 'step', dpar: 'bar', dest: 'baz', changed: true }, 'X7' ]
-    [ { path: 'switch', lstate: 'gnu', verb: 'step', dpar: 'baz', dest: 'gnu', changed: true }, 'X8' ]
-    [ { path: 'switch', lstate: 'doe', verb: 'step', dpar: 'gnu', dest: 'doe', changed: true }, 'X9' ]
-    [ { path: 'switch', lstate: 'bar', verb: 'step', dpar: 'doe', dest: 'bar', changed: true }, 'X10' ] ]
+    [ 'before.any', { stage: 'before', verb: 'start', dpar: 'void', dest: 'lit', changed: true, lstate: 'void', path: 'meta_lamp' }, [ 'M1' ] ]
+    [ 'before.any', { stage: 'before', verb: 'toggle', dpar: 'lit', dest: 'dark', changed: true, lstate: 'lit', path: 'meta_lamp' }, [ 'M2' ] ]
+    [ 'before.any', { stage: 'before', verb: 'goto', dpar: 'dark', dest: 'lit', changed: true, lstate: 'dark', path: 'meta_lamp' }, [ 'M3' ] ]
+    [ 'before.any', { stage: 'before', verb: 'goto', dpar: 'lit', dest: 'lit', changed: false, lstate: 'lit', path: 'meta_lamp' }, [ 'M4' ] ]
+    [ 'before.any', { stage: 'before', verb: 'goto', dpar: 'lit', dest: 'dark', changed: true, lstate: 'lit', path: 'meta_lamp' }, [ 'M5' ] ]
+    [ 'before.any', { stage: 'before', verb: 'toggle', dpar: 'dark', dest: 'lit', changed: true, lstate: 'dark', path: 'meta_lamp' }, [ 'M6' ] ]
+    [ 'before.any', { stage: 'before', verb: 'toggle', dpar: 'lit', dest: 'dark', changed: true, lstate: 'lit', path: 'meta_lamp' }, [ 'M7' ] ]
+    [ 'before.any', { stage: 'before', verb: 'toggle', dpar: 'dark', dest: 'lit', changed: true, lstate: 'dark', path: 'meta_lamp' }, [ 'M8' ] ] ]
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -321,13 +280,12 @@ new_register = ->
     name: 'simple'
     data:
       counter: 42
-    triggers: [
-      [ 'void', 'start', 'first' ] ]
-    cyclers:
-      step: [ 'first', 'second', ]
+    moves:
+      start:  'first'
+      step:   [ 'first', 'second', 'first', ]
     before:
       start: ( P... ) -> @sub.start()
-    enter:
+    entering:
       first: ( P... ) ->
         T.ok @data.counter?
         @data.counter++
@@ -340,18 +298,17 @@ new_register = ->
       sub:
         data:
           frobs: 0
-        triggers: [
-          [ 'void', 'start', 'dub' ] ]
-        cyclers:
-          toggle: [ 'dub', 'frob' ]
-        leave:
+        moves:
+          start:  'dub'
+          toggle: [ 'dub', 'frob', 'dub', ]
+        leaving:
           frob: ( P... ) ->
             @data.frobs++
             help @data.frobs
   { result
+    show_result
     register }    = new_register()
   Intermatic      = require '../../../apps/intermatic'
-  Intermatic._tid = 0
   fsm             = new Intermatic fsmd
   T.eq fsm.data, { counter: 42, }
   fsm.start();  urge fsm.cstate, fsm.data.counter, fsm.sub.data.frobs
@@ -360,7 +317,12 @@ new_register = ->
   fsm.step();   urge fsm.cstate, fsm.data.counter, fsm.sub.data.frobs
   # fsm.step();   urge fsm.cstate, fsm.data.counter, fsm.sub.data.frobs
   # fsm.step();   urge fsm.cstate, fsm.data.counter, fsm.sub.data.frobs
-  info d for d in result
+  show_result()
+  T.eq result, [
+    { stage: 'entering', verb: 'start', dpar: 'void', dest: 'first', changed: true, lstate: 'first', path: 'simple', data: { counter: 43 }, sub: { lstate: 'dub', path: 'simple/sub', data: { frobs: 0 } } }
+    { stage: 'entering', verb: 'step', dpar: 'first', dest: 'second', changed: true, lstate: 'second', path: 'simple', data: { counter: 43 }, sub: { lstate: 'frob', path: 'simple/sub', data: { frobs: 0 } } }
+    { stage: 'entering', verb: 'step', dpar: 'second', dest: 'first', changed: true, lstate: 'first', path: 'simple', data: { counter: 44 }, sub: { lstate: 'frob', path: 'simple/sub', data: { frobs: 0 } } }
+    { stage: 'entering', verb: 'step', dpar: 'first', dest: 'second', changed: true, lstate: 'second', path: 'simple', data: { counter: 44 }, sub: { lstate: 'dub', path: 'simple/sub', data: { frobs: 1 } } } ]
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -369,41 +331,49 @@ new_register = ->
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     name: 'knob'
-    triggers: [
-      [ 'void', 'start', 'bar', ]
-      ]
-    cyclers:
-      step:   [ 'bar', 'baz', 'gnu', 'doe', ]
-    goto: '*'
-    before: any: ( ref ) -> register 'before any',  @lstate, @verb, ref
-    enter:  any: ( ref ) -> register 'enter any',   @lstate, @verb, ref
-    stay:   any: ( ref ) -> register 'stay any',    @lstate, @verb, ref
-    leave:  any: ( ref ) -> register 'leave any',   @lstate, @verb, ref
-    after:  any: ( ref ) -> register 'after any',   @lstate, @verb, ref
-    fail:        ( ref ) -> register 'fail',        @lstate, @verb, ref
+    moves:
+      start:  'bar'
+      step:   [ 'bar', 'baz', 'gnu', 'doe', 'bar', ]
+    goto: 'any'
+    before:
+      any:         ( ref ) -> register 'before.any',    @move, ref
+      change:      ( ref ) -> register 'before.change', @move, ref
+    entering:
+      any:         ( ref ) -> register 'entering.any',  @move, ref
+    keeping:
+      any:         ( ref ) -> register 'keeping.any',   @move, ref
+    leaving:
+      any:         ( ref ) -> register 'leaving.any',   @move, ref
+    after:
+      any:         ( ref ) -> register 'after.any',     @move, ref
+      change:      ( ref ) -> register 'after.change',  @move, ref
+    fail:          ( ref ) -> register 'fail',          @move, ref
   #---------------------------------------------------------------------------------------------------------
   { result
     register
     show_result } = new_register()
   Intermatic      = require '../../../apps/intermatic'
-  Intermatic._tid = 0
   fsm             = new Intermatic fsmd
   info "fsm.start()     ———";           fsm.start             'A1'
   info "fsm.step()      ———";           fsm.step              'A2'
   info "fsm.goto.#{fsm.lstate}()  ———"; fsm.goto fsm.lstate,  'A3'
   show_result()
   T.eq result, [
-    [ 'before any', 'void', 'start', 'A1' ]
-    [ 'leave any', 'void', 'start', 'A1' ]
-    [ 'enter any', 'bar', 'start', 'A1' ]
-    [ 'after any', 'bar', 'start', 'A1' ]
-    [ 'before any', 'bar', 'step', 'A2' ]
-    [ 'leave any', 'bar', 'step', 'A2' ]
-    [ 'enter any', 'baz', 'step', 'A2' ]
-    [ 'after any', 'baz', 'step', 'A2' ]
-    [ 'before any', 'baz', 'goto', 'A3' ]
-    [ 'stay any', 'baz', 'goto', 'A3' ]
-    [ 'after any', 'baz', 'goto', 'A3' ] ]
+    [ 'before.any',    { stage: 'before',   verb: 'start', dpar: 'void', dest: 'bar', changed: true,  lstate: 'void' }, 'A1' ]
+    [ 'before.change', { stage: 'before',   verb: 'start', dpar: 'void', dest: 'bar', changed: true,  lstate: 'void' }, 'A1' ]
+    [ 'leaving.any',   { stage: 'leaving',  verb: 'start', dpar: 'void', dest: 'bar', changed: true,  lstate: 'void' }, 'A1' ]
+    [ 'entering.any',  { stage: 'entering', verb: 'start', dpar: 'void', dest: 'bar', changed: true,  lstate: 'bar'  }, 'A1' ]
+    [ 'after.any',     { stage: 'after',    verb: 'start', dpar: 'void', dest: 'bar', changed: true,  lstate: 'bar'  }, 'A1' ]
+    [ 'after.change',  { stage: 'after',    verb: 'start', dpar: 'void', dest: 'bar', changed: true,  lstate: 'bar'  }, 'A1' ]
+    [ 'before.any',    { stage: 'before',   verb: 'step',  dpar: 'bar',  dest: 'baz', changed: true,  lstate: 'bar'  }, 'A2' ]
+    [ 'before.change', { stage: 'before',   verb: 'step',  dpar: 'bar',  dest: 'baz', changed: true,  lstate: 'bar'  }, 'A2' ]
+    [ 'leaving.any',   { stage: 'leaving',  verb: 'step',  dpar: 'bar',  dest: 'baz', changed: true,  lstate: 'bar'  }, 'A2' ]
+    [ 'entering.any',  { stage: 'entering', verb: 'step',  dpar: 'bar',  dest: 'baz', changed: true,  lstate: 'baz'  }, 'A2' ]
+    [ 'after.any',     { stage: 'after',    verb: 'step',  dpar: 'bar',  dest: 'baz', changed: true,  lstate: 'baz'  }, 'A2' ]
+    [ 'after.change',  { stage: 'after',    verb: 'step',  dpar: 'bar',  dest: 'baz', changed: true,  lstate: 'baz'  }, 'A2' ]
+    [ 'before.any',    { stage: 'before',   verb: 'goto',  dpar: 'baz',  dest: 'baz', changed: false, lstate: 'baz'  }, 'A3' ]
+    [ 'keeping.any',   { stage: 'keeping',  verb: 'goto',  dpar: 'baz',  dest: 'baz', changed: false, lstate: 'baz'  }, 'A3' ]
+    [ 'after.any',     { stage: 'after',    verb: 'goto',  dpar: 'baz',  dest: 'baz', changed: false, lstate: 'baz'  }, 'A3' ] ]
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -412,39 +382,70 @@ new_register = ->
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     name: 'knob'
-    triggers: [
-      [ 'void', 'start', 'bar', ]
-      ]
-    cyclers:
-      step:   [ 'bar', 'baz', 'gnu', 'doe', ]
-    goto: '*'
-    before: any: ( P... ) -> register 'before any',  fsm.cstate
-    # enter:  any: ( P... ) -> register 'enter any',   fsm.cstate
-    # stay:   any: ( P... ) -> register 'stay any',    fsm.cstate
-    # leave:  any: ( P... ) -> register 'leave any',   fsm.cstate
-    # after:  any: ( P... ) -> register 'after any',   fsm.cstate
-    fail:        ( P... ) -> register 'fail',        fsm.cstate
+    moves:
+      start:  'bar'
+      step:   [ 'bar', 'baz', 'gnu', 'doe', 'bar', ]
+    goto: 'any'
+    before: any: ( P... ) -> register 'before any',  fsm.move
+    fail:        ( P... ) -> register 'fail',        fsm.move
   #---------------------------------------------------------------------------------------------------------
   { result
     register
     show_result } = new_register()
   Intermatic      = require '../../../apps/intermatic'
-  Intermatic._tid = 0
   fsm             = new Intermatic fsmd
-  register 'first', fsm.cstate
-  info "fsm.start()     ———"; fsm.start()
-  register 'mid1', fsm.cstate
-  info "fsm.step()      ———"; fsm.step()
-  info "fsm.goto.#{fsm.lstate}()  ———"; fsm.goto fsm.lstate
-  register 'last', fsm.cstate
+  #.........................................................................................................
+  register 'first', fsm.move
+  info "fsm.start()"
+  fsm.start()
+  #.........................................................................................................
+  register 'mid1', fsm.move
+  info "fsm.step()"
+  fsm.step()
+  #.........................................................................................................
+  register 'mid2', fsm.move
+  fsm.goto fsm.lstate
+  #.........................................................................................................
+  register 'last', fsm.move
+  #.........................................................................................................
   show_result()
   T.eq result, [
-    [ 'first', { path: 'knob', lstate: 'void' } ]
-    [ 'before any', { path: 'knob', lstate: 'void', verb: 'start', dpar: 'void', dest: 'bar', changed: true } ]
-    [ 'mid1', { path: 'knob', lstate: 'bar' } ]
-    [ 'before any', { path: 'knob', lstate: 'bar', verb: 'step', dpar: 'bar', dest: 'baz', changed: true } ]
-    [ 'before any', { path: 'knob', lstate: 'baz', verb: 'goto', dpar: 'baz', dest: 'baz' } ]
-    [ 'last', { path: 'knob', lstate: 'baz' } ] ]
+    [ 'first', { lstate: 'void' } ]
+    [ 'before any', { stage: 'before', verb: 'start', dpar: 'void', dest: 'bar', changed: true, lstate: 'void' } ]
+    [ 'mid1', { lstate: 'bar' } ]
+    [ 'before any', { stage: 'before', verb: 'step', dpar: 'bar', dest: 'baz', changed: true, lstate: 'bar' } ]
+    [ 'mid2', { lstate: 'baz' } ]
+    [ 'before any', { stage: 'before', verb: 'goto', dpar: 'baz', dest: 'baz', changed: false, lstate: 'baz' } ]
+    [ 'last', { lstate: 'baz' } ] ]
+  #---------------------------------------------------------------------------------------------------------
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Intermatic can 1" ] = ( T, done ) ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    name: 'oneway_switch'
+    moves:
+      start:  'off'
+      toggle: [ 'off', 'on', ]
+  #---------------------------------------------------------------------------------------------------------
+  { result
+    register
+    show_result } = new_register()
+  Intermatic      = require '../../../apps/intermatic'
+  fsm             = new Intermatic fsmd
+  T.eq true,  fsm.can.start()
+  T.eq true,  fsm.can 'start'
+  fsm.start()
+  T.eq false, fsm.can.start()
+  T.eq false, fsm.can 'start'
+  T.eq true,  fsm.can 'toggle'
+  T.eq true,  fsm.can.toggle()
+  fsm.toggle()
+  T.eq false, fsm.can   'toggle'
+  T.eq false, fsm.can.toggle()
+  T.throws /unknown verb "nonexisting_trigger"/, -> fsm.can 'nonexisting_trigger'
+  T.throws /unknown verb "nonexisting_trigger"/, -> fsm.can.nonexisting_trigger()
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -453,79 +454,26 @@ new_register = ->
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     name: 'oneway_switch'
-    triggers: [
-      [ 'void', 'start',  'off', ]
-      [ 'off',  'toggle', 'on', ]
-      ]
-    after:
-      change:     ( P... ) -> register "success: #{@dpar}>-#{@verb}->#{@dest}"
-    fail:         ( P... ) -> register "failure: #{@dpar}>-#{@verb}->?"
+    moves:
+      start:  'off'
+      toggle: [ 'off', 'on', ]
+    goto: 'any'
   #---------------------------------------------------------------------------------------------------------
   { result
     register
     show_result } = new_register()
   Intermatic      = require '../../../apps/intermatic'
-  Intermatic._tid = 0
   fsm             = new Intermatic fsmd
-  fsm.start()
-  T.eq true,  fsm.can.toggle()
+  T.eq true,  fsm.tryto.start()
+  fsm.goto 'void'
+  T.eq true,  fsm.tryto 'start'
+  T.eq true,  fsm.tryto 'toggle'
+  fsm.goto 'off'
   T.eq true,  fsm.tryto.toggle()
-  T.eq false, fsm.can   'toggle'
   T.eq false, fsm.tryto 'toggle'
-  T.throws /unknown trigger "nonexisting_trigger"/, -> fsm.can 'nonexisting_trigger'
-  show_result()
-  T.eq result, [ 'success: void>-start->off', 'success: off>-toggle->on' ]
-  #---------------------------------------------------------------------------------------------------------
-  done()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "Intermatic tryto 2" ] = ( T, done ) ->
-  #---------------------------------------------------------------------------------------------------------
-  fsmd =
-    name: 'oneway_switch'
-    triggers: [
-      [ 'void', 'start',  'one', ]
-      ]
-    cyclers:
-      step: [ 'one', 'two', 'three', ]
-    after:
-      change:     ( P... ) -> register @cstate
-      # step:       ( P... ) -> @step()
-    fail:         ( P... ) -> register @cstate
-  #---------------------------------------------------------------------------------------------------------
-  { result
-    register
-    show_result } = new_register()
-  Intermatic      = require '../../../apps/intermatic'
-  Intermatic._tid = 0
-  fsm             = new Intermatic fsmd
-  eq = ( ref, test, outcome ) ->
-    if isa.function test
-      ref  += ' ' + test.toString().replace /\n/g, ' '
-      test  = test()
-    if equals test, outcome then T.ok true
-    else                T.fail "test #{rpr ref} failed"
-  debug ( k for k of CND ).sort()
-  eq '^tt2@1',  ( -> fsm.lstate           ), 'void'
-  eq '^tt2@2',  ( -> fsm.triggers.start   ), { void: 'one', }
-  eq '^tt2@3',  ( -> fsm.can.start()      ), true
-  eq '^tt2@4',  ( -> fsm.can 'start'      ), true
-  eq '^tt2@5',  ( -> fsm.start()          ), null               # one
-  eq '^tt2@6',  ( -> fsm.lstate           ), 'one'
-  eq '^tt2@7',  ( -> fsm.can.start()      ), false
-  eq '^tt2@8',  ( -> fsm.can 'start'      ), false
-  eq '^tt2@9',  ( -> fsm.step()           ), null               # two
-  eq '^tt2@10', ( -> fsm.tryto.step()     ), true               # three
-  eq '^tt2@11', ( -> fsm.step()           ), null               # one
-  eq '^tt2@12', ( -> fsm.tryto.step()     ), true               # two
-  eq '^tt2@13', ( -> fsm.tryto.start()    ), false
-  show_result()
-  T.eq result, [
-    { path: 'oneway_switch', lstate: 'one', verb: 'start', dpar: 'void', dest: 'one', changed: true }
-    { path: 'oneway_switch', lstate: 'two', verb: 'step', dpar: 'one', dest: 'two', changed: true }
-    { path: 'oneway_switch', lstate: 'three', verb: 'step', dpar: 'two', dest: 'three', changed: true }
-    { path: 'oneway_switch', lstate: 'one', verb: 'step', dpar: 'three', dest: 'one', changed: true }
-    { path: 'oneway_switch', lstate: 'two', verb: 'step', dpar: 'one', dest: 'two', changed: true } ]
+  T.eq false, fsm.tryto.toggle()
+  T.throws /unknown verb "nonexisting_trigger"/, -> fsm.tryto 'nonexisting_trigger'
+  T.throws /unknown verb "nonexisting_trigger"/, -> fsm.can.nonexisting_trigger()
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -534,41 +482,40 @@ new_register = ->
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     #.......................................................................................................
-    triggers: [
-      [ 'void',     'start',    'released',   ]
-      [ '*',        'reset',    'void',       ]
-      [ 'released', 'press',    'pressed',    ]
-      [ 'pressed',  'release',  'released',   ] ]
-    enter:
-      pressed:  ( P... ) -> @lamp.goto 'lit';   register "button: enter pressed", @lstate
-      released: ( P... ) -> @lamp.goto 'dark';  register "button: enter released", @lstate
-    stay:
-      pressed:  ( P... ) -> register "button: stay pressed", @lstate
-      released: ( P... ) -> register "button: stay released", @lstate
+    moves:
+      start:    'released'
+      reset:    [ 'any',       'void',       ]
+      press:    [ 'released',  'pressed',    ]
+      release:  [ 'pressed',   'released',   ]
+    entering:
+      pressed:  ( P... ) -> @lamp.goto 'lit';   register "button: entering pressed",  @lstate
+      released: ( P... ) -> @lamp.goto 'dark';  register "button: entering released", @lstate
+    keeping:
+      pressed:  ( P... ) -> register "button: keeping pressed",  @lstate
+      released: ( P... ) -> register "button: keeping released", @lstate
     after:
       start: ( P... ) -> @lamp.start()
     before:
       trigger: ( P... ) -> register "button: before *", @lstate
-    goto: '*'
+    goto: 'any'
     #.......................................................................................................
     fsms:
       #.....................................................................................................
       lamp:
-        triggers: [
-          [ 'void',   'start',  'lit',  ]
-          [ 'lit',    'toggle', 'dark', ]
-          [ 'dark',   'toggle', 'lit',  ] ]
+        moves:
+          start:    'lit'
+          toggle:   [ 'lit', 'dark', 'lit', ]
         after:
           change:     ( P... ) -> register "lamp: after change", @lstate
-        enter:
-          dark:       ( P... ) -> @up.goto 'released';  register "lamp: enter dark", @lstate
-          lit:        ( P... ) -> @up.goto 'pressed';   register "lamp: enter lit", @lstate
-        stay:
-          dark:       ( P... ) -> register "lamp: stay dark", @lstate
-          lit:        ( P... ) -> register "lamp: stay lit", @lstate
+        entering:
+          dark:       ( P... ) -> @up.goto 'released';  register "lamp: entering dark", @lstate
+          lit:        ( P... ) -> @up.goto 'pressed';   register "lamp: entering lit", @lstate
+        keeping:
+          dark:       ( P... ) -> register "lamp: keeping dark", @lstate
+          lit:        ( P... ) -> register "lamp: keeping lit", @lstate
         before:
           trigger: ( P... ) -> register "lamp: before *", @lstate
-        goto: '*'
+        goto: 'any'
         bar:  108
     #.......................................................................................................
     after:
@@ -580,11 +527,10 @@ new_register = ->
     show_result } = new_register()
   #---------------------------------------------------------------------------------------------------------
   Intermatic      = require '../../../apps/intermatic'
-  Intermatic._tid = 0
   button          = new Intermatic fsmd
   T.eq button.foo,         42
   T.eq button.lamp.bar, 108
-  info button.triggers
+  info button.moves
   info { button: { $value: button.lstate, lamp: button.lamp.lstate, }, }
   urge { button: button.lstate, 'button/lamp': button.lamp.lstate, }
   urge { button: button.lstate, button_lamp: button.lamp.lstate, }
@@ -604,15 +550,15 @@ new_register = ->
   help [ "°button:^#{button.lstate}", "°button/lamp:^#{button.lamp.lstate}", ]
   show_result()
   T.eq result, [
-    [ 'button: stay released', 'released' ]
-    [ 'lamp: enter dark', 'dark' ]
+    [ 'button: keeping released', 'released' ]
+    [ 'lamp: entering dark', 'dark' ]
     [ 'lamp: after change', 'dark' ]
-    [ 'button: enter released', 'released' ]
+    [ 'button: entering released', 'released' ]
     [ 'root_fsm.change', 'released' ]
-    [ 'button: stay pressed', 'pressed' ]
-    [ 'lamp: enter lit', 'lit' ]
+    [ 'button: keeping pressed', 'pressed' ]
+    [ 'lamp: entering lit', 'lit' ]
     [ 'lamp: after change', 'lit' ]
-    [ 'button: enter pressed', 'pressed' ]
+    [ 'button: entering pressed', 'pressed' ]
     [ 'root_fsm.change', 'pressed' ] ]
   #---------------------------------------------------------------------------------------------------------
   done()
@@ -625,48 +571,40 @@ new_register = ->
     fsms:
       alpha_btn:
         #.......................................................................................................
-        triggers: [
-          [ 'void',     'start',    'released',   ]
-          [ '*',        'reset',    'void',       ]
-          [ 'released', 'press',    'pressed',    ]
-          [ 'pressed',  'release',  'released',   ] ]
-        # enter:
-        #   pressed:  ( P... ) ->
-        #   released: ( P... ) ->
-        before:
-          start:    ( P... ) -> @lamp.start()
+        moves:
+          start:    'released'
+          reset:    [ 'any',       'void',       ]
+          press:    [ 'released',  'pressed',    ]
+          release:  [ 'pressed',   'released',   ]
+        cascades: [ 'start', ]
         after:
           change:   ( P... ) ->
             @lamp.toggle()
-            register "alpha_btn.after.change", @EXP_cstate
+            register "alpha_btn.after.change", @cstate
         #.......................................................................................................
         fsms:
           #.....................................................................................................
           color:
-            triggers: [
-              [ 'red', 'toggle', 'green', ]
-              [ 'green', 'toggle', 'red', ] ]
+            moves:
+              start:  'red'
+              toggle: [ 'red', 'green', 'red', ]
             after:
-              change:   ( P... ) -> register "color.after.change", @EXP_cstate
+              change:   ( P... ) -> register "color.after.change", @cstate
           #.....................................................................................................
           lamp:
-            triggers: [
-              [ 'void',   'start',  'lit',  ]
-              [ 'lit',    'toggle', 'dark', ]
-              [ 'dark',   'toggle', 'lit',  ] ]
-            before:
-              start:    ( P... ) -> @up.color.start()
-            enter:
+            moves:
+              start:    'lit'
+              toggle:   [ 'lit', 'dark', 'lit', ]
+            entering:
               dark:     ( P... ) -> @up.color.toggle()
             after:
-              change:   ( P... ) -> register "lamp.after.change", @EXP_cstate
+              change:   ( P... ) -> register "lamp.after.change", @cstate
   #---------------------------------------------------------------------------------------------------------
   { result
     register
     show_result } = new_register()
   #---------------------------------------------------------------------------------------------------------
   Intermatic      = require '../../../apps/intermatic'
-  Intermatic._tid = 0
   fsm             = new Intermatic fsmd
   # debug '^898922^', fsm
   # debug '^898922^', ( k for k of fsm )
@@ -706,30 +644,124 @@ new_register = ->
   #---------------------------------------------------------------------------------------------------------
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "Intermatic AAL style FSMDs 1" ] = ( T, done ) ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    name: 'φ'
+    moves:
+      start:    'a'
+      step:     [ 'a', 'b', 'c', 'c', ]
+      stop:     [ 'c', 'void', ]
+    before:
+      any:      before_any    = -> register "before.any",     @move
+      change:   before_change = -> register "before.change",  @move
+      start: [
+              ( before_start_1 = -> debug '^7776^', "before.start 1", @move )
+              ( before_start_2 = -> debug '^7776^', "before.start 2", @move )
+              ( before_start_3 = -> register "before.start",          @move ) ]
+      step:     before_step = -> register "before.step", @move
+      stop:     before_stop = -> register "before.stop", @move
+    after:
+      any:      -> register "after.any",          @move
+      change:   -> register "after.change",       @move
+      start:    -> register "after.start",        @move
+      step:     -> register "after.step",         @move
+      stop:     -> register "after.stop",         @move
+    entering:
+      any:      -> register "entering.any",       @move
+      void:     -> register "entering.void",      @move
+      a:        -> register "entering.a",         @move
+      b:        -> register "entering.b",         @move
+      c:        -> register "entering.c",         @move
+    leaving:
+      any:      -> register "leaving.any",        @move
+      void:     -> register "leaving.void",       @move
+      a:        -> register "leaving.a",          @move
+      b:        -> register "leaving.b",          @move
+      c:        -> register "leaving.c",          @move
+    keeping:
+      any:      -> register "keeping.any",        @move
+      c:        -> register "keeping.c",          @move
+    fail:       -> register "fail",               @move
+  #---------------------------------------------------------------------------------------------------------
+  { result
+    register
+    show_result } = new_register()
+  #---------------------------------------------------------------------------------------------------------
+  Intermatic      = require '../../../apps/intermatic'
+  fsm             = new Intermatic fsmd
+  echo '^4455^', CND.inspect fsm
+  urge '^4455^', fsmd.moves
+  help '^4455^', fsm.moves
+  fsm.start()
+  fsm.step()
+  fsm.step()
+  fsm.step()
+  fsm.stop()
+  fsm.step()
+  show_result()
+  T.eq result, [
+    [ 'before.any', { stage: 'before', verb: 'start', dpar: 'void', dest: 'a' } ]
+    [ 'before.change', { stage: 'before', verb: 'start', dpar: 'void', dest: 'a' } ]
+    [ 'before.start', { stage: 'before', verb: 'start', dpar: 'void', dest: 'a' } ]
+    [ 'leaving.void', { stage: 'leaving', verb: 'start', dpar: 'void', dest: 'a' } ]
+    [ 'entering.a', { stage: 'entering', verb: 'start', dpar: 'void', dest: 'a' } ]
+    [ 'after.start', { stage: 'after', verb: 'start', dpar: 'void', dest: 'a' } ]
+    [ 'after.change', { stage: 'after', verb: 'start', dpar: 'void', dest: 'a' } ]
+    [ 'after.any', { stage: 'after', verb: 'start', dpar: 'void', dest: 'a' } ]
+    [ 'before.any', { stage: 'before', verb: 'step', dpar: 'a', dest: 'b' } ]
+    [ 'before.change', { stage: 'before', verb: 'step', dpar: 'a', dest: 'b' } ]
+    [ 'before.step', { stage: 'before', verb: 'step', dpar: 'a', dest: 'b' } ]
+    [ 'leaving.a', { stage: 'leaving', verb: 'step', dpar: 'a', dest: 'b' } ]
+    [ 'entering.b', { stage: 'entering', verb: 'step', dpar: 'a', dest: 'b' } ]
+    [ 'after.step', { stage: 'after', verb: 'step', dpar: 'a', dest: 'b' } ]
+    [ 'after.change', { stage: 'after', verb: 'step', dpar: 'a', dest: 'b' } ]
+    [ 'after.any', { stage: 'after', verb: 'step', dpar: 'a', dest: 'b' } ]
+    [ 'before.any', { stage: 'before', verb: 'step', dpar: 'b', dest: 'c' } ]
+    [ 'before.change', { stage: 'before', verb: 'step', dpar: 'b', dest: 'c' } ]
+    [ 'before.step', { stage: 'before', verb: 'step', dpar: 'b', dest: 'c' } ]
+    [ 'leaving.b', { stage: 'leaving', verb: 'step', dpar: 'b', dest: 'c' } ]
+    [ 'entering.c', { stage: 'entering', verb: 'step', dpar: 'b', dest: 'c' } ]
+    [ 'after.step', { stage: 'after', verb: 'step', dpar: 'b', dest: 'c' } ]
+    [ 'after.change', { stage: 'after', verb: 'step', dpar: 'b', dest: 'c' } ]
+    [ 'after.any', { stage: 'after', verb: 'step', dpar: 'b', dest: 'c' } ]
+    [ 'before.any', { stage: 'before', verb: 'step', dpar: 'c', dest: 'c' } ]
+    [ 'before.step', { stage: 'before', verb: 'step', dpar: 'c', dest: 'c' } ]
+    [ 'keeping.c', { stage: 'keeping', verb: 'step', dpar: 'c', dest: 'c' } ]
+    [ 'after.step', { stage: 'after', verb: 'step', dpar: 'c', dest: 'c' } ]
+    [ 'after.any', { stage: 'after', verb: 'step', dpar: 'c', dest: 'c' } ]
+    [ 'before.any', { stage: 'before', verb: 'stop', dpar: 'c', dest: 'void' } ]
+    [ 'before.change', { stage: 'before', verb: 'stop', dpar: 'c', dest: 'void' } ]
+    [ 'before.stop', { stage: 'before', verb: 'stop', dpar: 'c', dest: 'void' } ]
+    [ 'leaving.c', { stage: 'leaving', verb: 'stop', dpar: 'c', dest: 'void' } ]
+    [ 'entering.void', { stage: 'entering', verb: 'stop', dpar: 'c', dest: 'void' } ]
+    [ 'after.stop', { stage: 'after', verb: 'stop', dpar: 'c', dest: 'void' } ]
+    [ 'after.change', { stage: 'after', verb: 'stop', dpar: 'c', dest: 'void' } ]
+    [ 'after.any', { stage: 'after', verb: 'stop', dpar: 'c', dest: 'void' } ]
+    [ 'fail', { verb: 'step', dpar: 'void' } ] ]
+  #---------------------------------------------------------------------------------------------------------
+  done() if done?
+
 
 ############################################################################################################
 if module is require.main then do =>
   # @demo_2()
   # @toolbox_demo()
   # test @
-  # test @[ "Intermatic observables during moves 1" ]
-  # test @[ "Intermatic catchalls 1" ]
-  # test @[ "Intermatic cyclers 1" ]
-  # test @[ "Intermatic goto 1" ]
-  # test @[ "Intermatic cancel moves" ]
+  # test @[ "___ Intermatic attribute freezing"        ]
+  # test @[ "Intermatic empty FSM"                     ]
+  # test @[ "Intermatic before.start(), after.start()" ]
+  # test @[ "Intermatic basics" ]
   # test @[ "Intermatic history" ]
+  # @[ "Intermatic cancel moves" ]()
+  # test @[ "Intermatic cancel moves" ]
+  # test @[ "Intermatic goto 1" ]
   # test @[ "Intermatic data attribute 1" ]
-  # @[ "Intermatic data attribute 1" ]()
-  # test @[ "Intermatic attribute freezing" ]
-  # test @[ "Intermatic toolbox" ]
+  # test @[ "Intermatic catchalls 1" ]
+  # test @[ "Intermatic observables during moves 1" ]
+  # test @[ "Intermatic can 1" ]
   # test @[ "Intermatic tryto 1" ]
-  # test @[ "Intermatic tryto 2" ]
   # test @[ "Intermatic cFsm 1" ]
   test @[ "Intermatic cFsm 2" ]
-  # test @[ "Intermatic cFsm" ]
-  # test @[ "Intermatic empty FSM" ]
-  # test @[ "Intermatic before.start(), after.start()" ]
-  # @[ "Intermatic empty FSM" ]()
-
-
-
+  test @[ "Intermatic AAL style FSMDs 1" ]

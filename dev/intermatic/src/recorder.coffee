@@ -41,8 +41,6 @@ class Recorder
   constructor: ( fsm ) ->
     # validate.fsm fsm
     @fsm    = fsm
-    tnames  = Object.keys @fsm.triggers
-    @cstate = { @fsm.cstate..., }
     @_compile_state_handlers @fsm
     return null
 
@@ -57,20 +55,20 @@ class Recorder
     # is_first    = true
     self = @
     if ( original_handler = fsm.enter.any )?
-      handler = ( s, P... ) ->
-        original_handler s, P...
-        self.render_state @path, s, P...
+      handler = ( P... ) ->
+        original_handler P...
+        self.render_state @path, P...
     else
-      handler = ( s, P... ) ->
-        self.render_state @path, s, P...
-    fsm.enter.any = handler.bind fsm
+      handler = ( P... ) ->
+        self.render_state @path, P...
+    fsm.enter.any   = handler.bind fsm
+    fsm.stay.any    = handler.bind fsm
+    fsm.before.any  = -> info '^recorder@3337^', fsm.move
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  render_state: ( path, s, P... ) ->
-    @cstate = { @fsm.cstate..., }
-    whisper '^27776^', path, s.via, @fsm.cstate
-    debug @cstate
+  render_state: ( path, P... ) ->
+    urge '^recorder/render_state@3337^', @fsm.EXP_dstate
     return null
 
 
