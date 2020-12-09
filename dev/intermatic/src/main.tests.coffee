@@ -92,8 +92,8 @@ new_register = ->
   T.eq fsm.lstate,  'void'
   show_result()
   T.eq result, [
-    [ 'before start', { stage: 'before', verb: 'start', dpar: 'void', dest: 'void' } ]
-    [ 'after start', { stage: 'after', verb: 'start', dpar: 'void', dest: 'void' } ] ]
+    [ 'before start', { stage: 'before', verb: 'start', dpar: 'void', dest: 'void', lstate: 'void' } ]
+    [ 'after start', { stage: 'after', verb: 'start', dpar: 'void', dest: 'void', lstate: 'void' } ] ]
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -265,7 +265,7 @@ new_register = ->
     [ 'before.any', { stage: 'before', verb: 'start', dpar: 'void', dest: 'lit', changed: true, lstate: 'void', path: 'meta_lamp' }, [ 'M1' ] ]
     [ 'before.any', { stage: 'before', verb: 'toggle', dpar: 'lit', dest: 'dark', changed: true, lstate: 'lit', path: 'meta_lamp' }, [ 'M2' ] ]
     [ 'before.any', { stage: 'before', verb: 'goto', dpar: 'dark', dest: 'lit', changed: true, lstate: 'dark', path: 'meta_lamp' }, [ 'M3' ] ]
-    [ 'before.any', { stage: 'before', verb: 'goto', dpar: 'lit', dest: 'lit', changed: false, lstate: 'lit', path: 'meta_lamp' }, [ 'M4' ] ]
+    [ 'before.any', { stage: 'before', verb: 'goto', dpar: 'lit', dest: 'lit', lstate: 'lit', path: 'meta_lamp' }, [ 'M4' ] ]
     [ 'before.any', { stage: 'before', verb: 'goto', dpar: 'lit', dest: 'dark', changed: true, lstate: 'lit', path: 'meta_lamp' }, [ 'M5' ] ]
     [ 'before.any', { stage: 'before', verb: 'toggle', dpar: 'dark', dest: 'lit', changed: true, lstate: 'dark', path: 'meta_lamp' }, [ 'M6' ] ]
     [ 'before.any', { stage: 'before', verb: 'toggle', dpar: 'lit', dest: 'dark', changed: true, lstate: 'lit', path: 'meta_lamp' }, [ 'M7' ] ]
@@ -275,11 +275,17 @@ new_register = ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "Intermatic data attribute 1" ] = ( T, done ) ->
+  mydata          = { counter: 42, }
+  Object.defineProperties mydata,
+    computed:
+      enumerable: true
+      get: -> 'helo'
+  debug '^55567^', mydata
+  debug '^55567^', mydata.computed
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     name: 'simple'
-    data:
-      counter: 42
+    data: mydata
     moves:
       start:  'first'
       step:   [ 'first', 'second', 'first', ]
@@ -310,7 +316,7 @@ new_register = ->
     register }    = new_register()
   Intermatic      = require '../../../apps/intermatic'
   fsm             = new Intermatic fsmd
-  T.eq fsm.data, { counter: 42, }
+  T.eq fsm.data, { counter: 42, computed: 'helo', }
   fsm.start();  urge fsm.cstate, fsm.data.counter, fsm.sub.data.frobs
   fsm.step();   urge fsm.cstate, fsm.data.counter, fsm.sub.data.frobs
   fsm.step();   urge fsm.cstate, fsm.data.counter, fsm.sub.data.frobs
@@ -319,10 +325,10 @@ new_register = ->
   # fsm.step();   urge fsm.cstate, fsm.data.counter, fsm.sub.data.frobs
   show_result()
   T.eq result, [
-    { stage: 'entering', verb: 'start', dpar: 'void', dest: 'first', changed: true, lstate: 'first', path: 'simple', data: { counter: 43 }, sub: { lstate: 'dub', path: 'simple/sub', data: { frobs: 0 } } }
-    { stage: 'entering', verb: 'step', dpar: 'first', dest: 'second', changed: true, lstate: 'second', path: 'simple', data: { counter: 43 }, sub: { lstate: 'frob', path: 'simple/sub', data: { frobs: 0 } } }
-    { stage: 'entering', verb: 'step', dpar: 'second', dest: 'first', changed: true, lstate: 'first', path: 'simple', data: { counter: 44 }, sub: { lstate: 'frob', path: 'simple/sub', data: { frobs: 0 } } }
-    { stage: 'entering', verb: 'step', dpar: 'first', dest: 'second', changed: true, lstate: 'second', path: 'simple', data: { counter: 44 }, sub: { lstate: 'dub', path: 'simple/sub', data: { frobs: 1 } } } ]
+    { stage: 'entering', verb: 'start', dpar: 'void', dest: 'first', changed: true, lstate: 'first', path: 'simple', data: { counter: 43, computed: 'helo' }, sub: { lstate: 'dub', path: 'simple/sub', data: { frobs: 0 } } }
+    { stage: 'entering', verb: 'step', dpar: 'first', dest: 'second', changed: true, lstate: 'second', path: 'simple', data: { counter: 43, computed: 'helo' }, sub: { lstate: 'frob', path: 'simple/sub', data: { frobs: 0 } } }
+    { stage: 'entering', verb: 'step', dpar: 'second', dest: 'first', changed: true, lstate: 'first', path: 'simple', data: { counter: 44, computed: 'helo' }, sub: { lstate: 'frob', path: 'simple/sub', data: { frobs: 0 } } }
+    { stage: 'entering', verb: 'step', dpar: 'first', dest: 'second', changed: true, lstate: 'second', path: 'simple', data: { counter: 44, computed: 'helo' }, sub: { lstate: 'dub', path: 'simple/sub', data: { frobs: 1 } } } ]
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -371,9 +377,9 @@ new_register = ->
     [ 'entering.any',  { stage: 'entering', verb: 'step',  dpar: 'bar',  dest: 'baz', changed: true,  lstate: 'baz'  }, 'A2' ]
     [ 'after.any',     { stage: 'after',    verb: 'step',  dpar: 'bar',  dest: 'baz', changed: true,  lstate: 'baz'  }, 'A2' ]
     [ 'after.change',  { stage: 'after',    verb: 'step',  dpar: 'bar',  dest: 'baz', changed: true,  lstate: 'baz'  }, 'A2' ]
-    [ 'before.any',    { stage: 'before',   verb: 'goto',  dpar: 'baz',  dest: 'baz', changed: false, lstate: 'baz'  }, 'A3' ]
-    [ 'keeping.any',   { stage: 'keeping',  verb: 'goto',  dpar: 'baz',  dest: 'baz', changed: false, lstate: 'baz'  }, 'A3' ]
-    [ 'after.any',     { stage: 'after',    verb: 'goto',  dpar: 'baz',  dest: 'baz', changed: false, lstate: 'baz'  }, 'A3' ] ]
+    [ 'before.any',    { stage: 'before',   verb: 'goto',  dpar: 'baz',  dest: 'baz', lstate: 'baz'  }, 'A3' ]
+    [ 'keeping.any',   { stage: 'keeping',  verb: 'goto',  dpar: 'baz',  dest: 'baz', lstate: 'baz'  }, 'A3' ]
+    [ 'after.any',     { stage: 'after',    verb: 'goto',  dpar: 'baz',  dest: 'baz', lstate: 'baz'  }, 'A3' ] ]
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -415,7 +421,7 @@ new_register = ->
     [ 'mid1', { lstate: 'bar' } ]
     [ 'before any', { stage: 'before', verb: 'step', dpar: 'bar', dest: 'baz', changed: true, lstate: 'bar' } ]
     [ 'mid2', { lstate: 'baz' } ]
-    [ 'before any', { stage: 'before', verb: 'goto', dpar: 'baz', dest: 'baz', changed: false, lstate: 'baz' } ]
+    [ 'before any', { stage: 'before', verb: 'goto', dpar: 'baz', dest: 'baz', lstate: 'baz' } ]
     [ 'last', { lstate: 'baz' } ] ]
   #---------------------------------------------------------------------------------------------------------
   done()
@@ -567,38 +573,41 @@ new_register = ->
 @[ "Intermatic cFsm 2" ] = ( T, done ) ->
   #---------------------------------------------------------------------------------------------------------
   fsmd =
-    name: 'cfsm2'
+    cascades: [ 'start', ]
+    name:     'cfsm2'
+    moves:
+      start:  'active'
     fsms:
+      #.....................................................................................................
       alpha_btn:
-        #.......................................................................................................
+        cascades: [ 'start', ]
         moves:
           start:    'released'
           reset:    [ 'any',       'void',       ]
           press:    [ 'released',  'pressed',    ]
           release:  [ 'pressed',   'released',   ]
-        cascades: [ 'start', ]
-        after:
-          change:   ( P... ) ->
-            @lamp.toggle()
-            register "alpha_btn.after.change", @cstate
-        #.......................................................................................................
+        # after:
+        #   change:   ( P... ) ->
+        #     @lamp.toggle()
+        #     register "alpha_btn.after.change", @cstate
+        # #.......................................................................................................
         fsms:
           #.....................................................................................................
           color:
             moves:
               start:  'red'
               toggle: [ 'red', 'green', 'red', ]
-            after:
-              change:   ( P... ) -> register "color.after.change", @cstate
+            # after:
+            #   change:   ( P... ) -> register "color.after.change", @cstate
           #.....................................................................................................
           lamp:
             moves:
               start:    'lit'
               toggle:   [ 'lit', 'dark', 'lit', ]
-            entering:
-              dark:     ( P... ) -> @up.color.toggle()
-            after:
-              change:   ( P... ) -> register "lamp.after.change", @cstate
+            # entering:
+            #   dark:     ( P... ) -> @up.color.toggle()
+            # after:
+            #   change:   ( P... ) -> register "lamp.after.change", @cstate
   #---------------------------------------------------------------------------------------------------------
   { result
     register
@@ -606,41 +615,13 @@ new_register = ->
   #---------------------------------------------------------------------------------------------------------
   Intermatic      = require '../../../apps/intermatic'
   fsm             = new Intermatic fsmd
-  # debug '^898922^', fsm
-  # debug '^898922^', ( k for k of fsm )
-  whisper '-----------'
-  whisper 'start'
-  fsm.alpha_btn.start()
-  whisper '-----------'
-  whisper 'press'
-  fsm.alpha_btn.press()
-  whisper '-----------'
-  whisper 'release'
-  fsm.alpha_btn.release()
-  whisper '-----------'
-  whisper 'press'
-  fsm.alpha_btn.press()
-  whisper '-----------'
-  whisper 'release'
-  fsm.alpha_btn.release()
-  whisper '-----------'
+  register fsm.cstate
+  fsm.start()
+  register fsm.cstate
   show_result()
   T.eq result, [
-    [ 'color.after.change', { lstate: 'green' } ]
-    [ 'lamp.after.change', { lstate: 'lit' } ]
-    [ 'color.after.change', { lstate: 'red' } ]
-    [ 'lamp.after.change', { lstate: 'dark' } ]
-    [ 'alpha_btn.after.change', { lstate: 'released', color: { lstate: 'red' }, lamp: { lstate: 'dark' } } ]
-    [ 'lamp.after.change', { lstate: 'lit' } ]
-    [ 'alpha_btn.after.change', { lstate: 'pressed', color: { lstate: 'red' }, lamp: { lstate: 'lit' } } ]
-    [ 'color.after.change', { lstate: 'green' } ]
-    [ 'lamp.after.change', { lstate: 'dark' } ]
-    [ 'alpha_btn.after.change', { lstate: 'released', color: { lstate: 'green' }, lamp: { lstate: 'dark' } } ]
-    [ 'lamp.after.change', { lstate: 'lit' } ]
-    [ 'alpha_btn.after.change', { lstate: 'pressed', color: { lstate: 'green' }, lamp: { lstate: 'lit' } } ]
-    [ 'color.after.change', { lstate: 'red' } ]
-    [ 'lamp.after.change', { lstate: 'dark' } ]
-    [ 'alpha_btn.after.change', { lstate: 'released', color: { lstate: 'red' }, lamp: { lstate: 'dark' } } ] ]
+    { lstate: 'void', path: 'cfsm2', alpha_btn: { lstate: 'void', path: 'cfsm2/alpha_btn', color: { lstate: 'void', path: 'cfsm2/alpha_btn/color' }, lamp: { lstate: 'void', path: 'cfsm2/alpha_btn/lamp' } } }
+    { lstate: 'active', path: 'cfsm2', alpha_btn: { lstate: 'released', path: 'cfsm2/alpha_btn', color: { lstate: 'red', path: 'cfsm2/alpha_btn/color' }, lamp: { lstate: 'lit', path: 'cfsm2/alpha_btn/lamp' } } } ]
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -702,44 +683,53 @@ new_register = ->
   fsm.step()
   show_result()
   T.eq result, [
-    [ 'before.any', { stage: 'before', verb: 'start', dpar: 'void', dest: 'a' } ]
-    [ 'before.change', { stage: 'before', verb: 'start', dpar: 'void', dest: 'a' } ]
-    [ 'before.start', { stage: 'before', verb: 'start', dpar: 'void', dest: 'a' } ]
-    [ 'leaving.void', { stage: 'leaving', verb: 'start', dpar: 'void', dest: 'a' } ]
-    [ 'entering.a', { stage: 'entering', verb: 'start', dpar: 'void', dest: 'a' } ]
-    [ 'after.start', { stage: 'after', verb: 'start', dpar: 'void', dest: 'a' } ]
-    [ 'after.change', { stage: 'after', verb: 'start', dpar: 'void', dest: 'a' } ]
-    [ 'after.any', { stage: 'after', verb: 'start', dpar: 'void', dest: 'a' } ]
-    [ 'before.any', { stage: 'before', verb: 'step', dpar: 'a', dest: 'b' } ]
-    [ 'before.change', { stage: 'before', verb: 'step', dpar: 'a', dest: 'b' } ]
-    [ 'before.step', { stage: 'before', verb: 'step', dpar: 'a', dest: 'b' } ]
-    [ 'leaving.a', { stage: 'leaving', verb: 'step', dpar: 'a', dest: 'b' } ]
-    [ 'entering.b', { stage: 'entering', verb: 'step', dpar: 'a', dest: 'b' } ]
-    [ 'after.step', { stage: 'after', verb: 'step', dpar: 'a', dest: 'b' } ]
-    [ 'after.change', { stage: 'after', verb: 'step', dpar: 'a', dest: 'b' } ]
-    [ 'after.any', { stage: 'after', verb: 'step', dpar: 'a', dest: 'b' } ]
-    [ 'before.any', { stage: 'before', verb: 'step', dpar: 'b', dest: 'c' } ]
-    [ 'before.change', { stage: 'before', verb: 'step', dpar: 'b', dest: 'c' } ]
-    [ 'before.step', { stage: 'before', verb: 'step', dpar: 'b', dest: 'c' } ]
-    [ 'leaving.b', { stage: 'leaving', verb: 'step', dpar: 'b', dest: 'c' } ]
-    [ 'entering.c', { stage: 'entering', verb: 'step', dpar: 'b', dest: 'c' } ]
-    [ 'after.step', { stage: 'after', verb: 'step', dpar: 'b', dest: 'c' } ]
-    [ 'after.change', { stage: 'after', verb: 'step', dpar: 'b', dest: 'c' } ]
-    [ 'after.any', { stage: 'after', verb: 'step', dpar: 'b', dest: 'c' } ]
-    [ 'before.any', { stage: 'before', verb: 'step', dpar: 'c', dest: 'c' } ]
-    [ 'before.step', { stage: 'before', verb: 'step', dpar: 'c', dest: 'c' } ]
-    [ 'keeping.c', { stage: 'keeping', verb: 'step', dpar: 'c', dest: 'c' } ]
-    [ 'after.step', { stage: 'after', verb: 'step', dpar: 'c', dest: 'c' } ]
-    [ 'after.any', { stage: 'after', verb: 'step', dpar: 'c', dest: 'c' } ]
-    [ 'before.any', { stage: 'before', verb: 'stop', dpar: 'c', dest: 'void' } ]
-    [ 'before.change', { stage: 'before', verb: 'stop', dpar: 'c', dest: 'void' } ]
-    [ 'before.stop', { stage: 'before', verb: 'stop', dpar: 'c', dest: 'void' } ]
-    [ 'leaving.c', { stage: 'leaving', verb: 'stop', dpar: 'c', dest: 'void' } ]
-    [ 'entering.void', { stage: 'entering', verb: 'stop', dpar: 'c', dest: 'void' } ]
-    [ 'after.stop', { stage: 'after', verb: 'stop', dpar: 'c', dest: 'void' } ]
-    [ 'after.change', { stage: 'after', verb: 'stop', dpar: 'c', dest: 'void' } ]
-    [ 'after.any', { stage: 'after', verb: 'stop', dpar: 'c', dest: 'void' } ]
-    [ 'fail', { verb: 'step', dpar: 'void' } ] ]
+    [ 'before.any', { stage: 'before', verb: 'start', dpar: 'void', dest: 'a', changed: true, lstate: 'void' } ]
+    [ 'before.change', { stage: 'before', verb: 'start', dpar: 'void', dest: 'a', changed: true, lstate: 'void' } ]
+    [ 'before.start', { stage: 'before', verb: 'start', dpar: 'void', dest: 'a', changed: true, lstate: 'void' } ]
+    [ 'leaving.any', { stage: 'leaving', verb: 'start', dpar: 'void', dest: 'a', changed: true, lstate: 'void' } ]
+    [ 'leaving.void', { stage: 'leaving', verb: 'start', dpar: 'void', dest: 'a', changed: true, lstate: 'void' } ]
+    [ 'entering.any', { stage: 'entering', verb: 'start', dpar: 'void', dest: 'a', changed: true, lstate: 'a' } ]
+    [ 'entering.a', { stage: 'entering', verb: 'start', dpar: 'void', dest: 'a', changed: true, lstate: 'a' } ]
+    [ 'after.any', { stage: 'after', verb: 'start', dpar: 'void', dest: 'a', changed: true, lstate: 'a' } ]
+    [ 'after.change', { stage: 'after', verb: 'start', dpar: 'void', dest: 'a', changed: true, lstate: 'a' } ]
+    [ 'after.start', { stage: 'after', verb: 'start', dpar: 'void', dest: 'a', changed: true, lstate: 'a' } ]
+    [ 'before.any', { stage: 'before', verb: 'step', dpar: 'a', dest: 'b', changed: true, lstate: 'a' } ]
+    [ 'before.change', { stage: 'before', verb: 'step', dpar: 'a', dest: 'b', changed: true, lstate: 'a' } ]
+    [ 'before.step', { stage: 'before', verb: 'step', dpar: 'a', dest: 'b', changed: true, lstate: 'a' } ]
+    [ 'leaving.any', { stage: 'leaving', verb: 'step', dpar: 'a', dest: 'b', changed: true, lstate: 'a' } ]
+    [ 'leaving.a', { stage: 'leaving', verb: 'step', dpar: 'a', dest: 'b', changed: true, lstate: 'a' } ]
+    [ 'entering.any', { stage: 'entering', verb: 'step', dpar: 'a', dest: 'b', changed: true, lstate: 'b' } ]
+    [ 'entering.b', { stage: 'entering', verb: 'step', dpar: 'a', dest: 'b', changed: true, lstate: 'b' } ]
+    [ 'after.any', { stage: 'after', verb: 'step', dpar: 'a', dest: 'b', changed: true, lstate: 'b' } ]
+    [ 'after.change', { stage: 'after', verb: 'step', dpar: 'a', dest: 'b', changed: true, lstate: 'b' } ]
+    [ 'after.step', { stage: 'after', verb: 'step', dpar: 'a', dest: 'b', changed: true, lstate: 'b' } ]
+    [ 'before.any', { stage: 'before', verb: 'step', dpar: 'b', dest: 'c', changed: true, lstate: 'b' } ]
+    [ 'before.change', { stage: 'before', verb: 'step', dpar: 'b', dest: 'c', changed: true, lstate: 'b' } ]
+    [ 'before.step', { stage: 'before', verb: 'step', dpar: 'b', dest: 'c', changed: true, lstate: 'b' } ]
+    [ 'leaving.any', { stage: 'leaving', verb: 'step', dpar: 'b', dest: 'c', changed: true, lstate: 'b' } ]
+    [ 'leaving.b', { stage: 'leaving', verb: 'step', dpar: 'b', dest: 'c', changed: true, lstate: 'b' } ]
+    [ 'entering.any', { stage: 'entering', verb: 'step', dpar: 'b', dest: 'c', changed: true, lstate: 'c' } ]
+    [ 'entering.c', { stage: 'entering', verb: 'step', dpar: 'b', dest: 'c', changed: true, lstate: 'c' } ]
+    [ 'after.any', { stage: 'after', verb: 'step', dpar: 'b', dest: 'c', changed: true, lstate: 'c' } ]
+    [ 'after.change', { stage: 'after', verb: 'step', dpar: 'b', dest: 'c', changed: true, lstate: 'c' } ]
+    [ 'after.step', { stage: 'after', verb: 'step', dpar: 'b', dest: 'c', changed: true, lstate: 'c' } ]
+    [ 'before.any', { stage: 'before', verb: 'step', dpar: 'c', dest: 'c', lstate: 'c' } ]
+    [ 'before.step', { stage: 'before', verb: 'step', dpar: 'c', dest: 'c', lstate: 'c' } ]
+    [ 'keeping.any', { stage: 'keeping', verb: 'step', dpar: 'c', dest: 'c', lstate: 'c' } ]
+    [ 'keeping.c', { stage: 'keeping', verb: 'step', dpar: 'c', dest: 'c', lstate: 'c' } ]
+    [ 'after.any', { stage: 'after', verb: 'step', dpar: 'c', dest: 'c', lstate: 'c' } ]
+    [ 'after.step', { stage: 'after', verb: 'step', dpar: 'c', dest: 'c', lstate: 'c' } ]
+    [ 'before.any', { stage: 'before', verb: 'stop', dpar: 'c', dest: 'void', changed: true, lstate: 'c' } ]
+    [ 'before.change', { stage: 'before', verb: 'stop', dpar: 'c', dest: 'void', changed: true, lstate: 'c' } ]
+    [ 'before.stop', { stage: 'before', verb: 'stop', dpar: 'c', dest: 'void', changed: true, lstate: 'c' } ]
+    [ 'leaving.any', { stage: 'leaving', verb: 'stop', dpar: 'c', dest: 'void', changed: true, lstate: 'c' } ]
+    [ 'leaving.c', { stage: 'leaving', verb: 'stop', dpar: 'c', dest: 'void', changed: true, lstate: 'c' } ]
+    [ 'entering.any', { stage: 'entering', verb: 'stop', dpar: 'c', dest: 'void', changed: true, lstate: 'void' } ]
+    [ 'entering.void', { stage: 'entering', verb: 'stop', dpar: 'c', dest: 'void', changed: true, lstate: 'void' } ]
+    [ 'after.any', { stage: 'after', verb: 'stop', dpar: 'c', dest: 'void', changed: true, lstate: 'void' } ]
+    [ 'after.change', { stage: 'after', verb: 'stop', dpar: 'c', dest: 'void', changed: true, lstate: 'void' } ]
+    [ 'after.stop', { stage: 'after', verb: 'stop', dpar: 'c', dest: 'void', changed: true, lstate: 'void' } ]
+    [ 'fail', { verb: 'step', dpar: 'void', lstate: 'void', failed: true } ] ]
   #---------------------------------------------------------------------------------------------------------
   done() if done?
 
@@ -748,7 +738,7 @@ new_register = ->
 if module is require.main then do =>
   # @demo_2()
   # @toolbox_demo()
-  # test @
+  test @
   # test @[ "___ Intermatic attribute freezing"        ]
   # test @[ "Intermatic empty FSM"                     ]
   # test @[ "Intermatic before.start(), after.start()" ]
@@ -763,5 +753,5 @@ if module is require.main then do =>
   # test @[ "Intermatic can 1" ]
   # test @[ "Intermatic tryto 1" ]
   # test @[ "Intermatic cFsm 1" ]
-  test @[ "Intermatic cFsm 2" ]
-  test @[ "Intermatic AAL style FSMDs 1" ]
+  # test @[ "Intermatic cFsm 2" ]
+  # test @[ "Intermatic AAL style FSMDs 1" ]
