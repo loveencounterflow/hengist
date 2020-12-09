@@ -139,7 +139,8 @@
           stage: 'before',
           verb: 'start',
           dpar: 'void',
-          dest: 'void'
+          dest: 'void',
+          lstate: 'void'
         }
       ],
       [
@@ -148,7 +149,8 @@
           stage: 'after',
           verb: 'start',
           dpar: 'void',
-          dest: 'void'
+          dest: 'void',
+          lstate: 'void'
         }
       ]
     ]);
@@ -551,7 +553,6 @@
           verb: 'goto',
           dpar: 'lit',
           dest: 'lit',
-          changed: false,
           lstate: 'lit',
           path: 'meta_lamp'
         },
@@ -616,13 +617,24 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["Intermatic data attribute 1"] = function(T, done) {
-    var Intermatic, fsm, fsmd, register, result, show_result;
+    var Intermatic, fsm, fsmd, mydata, register, result, show_result;
+    mydata = {
+      counter: 42
+    };
+    Object.defineProperties(mydata, {
+      computed: {
+        enumerable: true,
+        get: function() {
+          return 'helo';
+        }
+      }
+    });
+    debug('^55567^', mydata);
+    debug('^55567^', mydata.computed);
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'simple',
-      data: {
-        counter: 42
-      },
+      data: mydata,
       moves: {
         start: 'first',
         step: ['first', 'second', 'first']
@@ -666,7 +678,8 @@
     Intermatic = require('../../../apps/intermatic');
     fsm = new Intermatic(fsmd);
     T.eq(fsm.data, {
-      counter: 42
+      counter: 42,
+      computed: 'helo'
     });
     fsm.start();
     urge(fsm.cstate, fsm.data.counter, fsm.sub.data.frobs);
@@ -689,7 +702,8 @@
         lstate: 'first',
         path: 'simple',
         data: {
-          counter: 43
+          counter: 43,
+          computed: 'helo'
         },
         sub: {
           lstate: 'dub',
@@ -708,7 +722,8 @@
         lstate: 'second',
         path: 'simple',
         data: {
-          counter: 43
+          counter: 43,
+          computed: 'helo'
         },
         sub: {
           lstate: 'frob',
@@ -727,7 +742,8 @@
         lstate: 'first',
         path: 'simple',
         data: {
-          counter: 44
+          counter: 44,
+          computed: 'helo'
         },
         sub: {
           lstate: 'frob',
@@ -746,7 +762,8 @@
         lstate: 'second',
         path: 'simple',
         data: {
-          counter: 44
+          counter: 44,
+          computed: 'helo'
         },
         sub: {
           lstate: 'dub',
@@ -970,7 +987,6 @@
           verb: 'goto',
           dpar: 'baz',
           dest: 'baz',
-          changed: false,
           lstate: 'baz'
         },
         'A3'
@@ -982,7 +998,6 @@
           verb: 'goto',
           dpar: 'baz',
           dest: 'baz',
-          changed: false,
           lstate: 'baz'
         },
         'A3'
@@ -994,7 +1009,6 @@
           verb: 'goto',
           dpar: 'baz',
           dest: 'baz',
-          changed: false,
           lstate: 'baz'
         },
         'A3'
@@ -1091,7 +1105,6 @@
           verb: 'goto',
           dpar: 'baz',
           dest: 'baz',
-          changed: false,
           lstate: 'baz'
         }
       ],
@@ -1342,203 +1355,93 @@
     var Intermatic, fsm, fsmd, register, result, show_result;
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
+      cascades: ['start'],
       name: 'cfsm2',
+      moves: {
+        start: 'active'
+      },
       fsms: {
+        //.....................................................................................................
         alpha_btn: {
-          //.......................................................................................................
+          cascades: ['start'],
           moves: {
             start: 'released',
             reset: ['any', 'void'],
             press: ['released', 'pressed'],
             release: ['pressed', 'released']
           },
-          cascades: ['start'],
-          after: {
-            change: function(...P) {
-              this.lamp.toggle();
-              return register("alpha_btn.after.change", this.cstate);
-            }
-          },
-          //.......................................................................................................
+          // after:
+          //   change:   ( P... ) ->
+          //     @lamp.toggle()
+          //     register "alpha_btn.after.change", @cstate
+          // #.......................................................................................................
           fsms: {
             //.....................................................................................................
             color: {
               moves: {
                 start: 'red',
                 toggle: ['red', 'green', 'red']
-              },
-              after: {
-                change: function(...P) {
-                  return register("color.after.change", this.cstate);
-                }
               }
             },
+            // after:
+            //   change:   ( P... ) -> register "color.after.change", @cstate
             //.....................................................................................................
             lamp: {
               moves: {
                 start: 'lit',
                 toggle: ['lit', 'dark', 'lit']
-              },
-              entering: {
-                dark: function(...P) {
-                  return this.up.color.toggle();
-                }
-              },
-              after: {
-                change: function(...P) {
-                  return register("lamp.after.change", this.cstate);
-                }
               }
             }
           }
         }
       }
     };
+    // entering:
+    //   dark:     ( P... ) -> @up.color.toggle()
+    // after:
+    //   change:   ( P... ) -> register "lamp.after.change", @cstate
     //---------------------------------------------------------------------------------------------------------
     ({result, register, show_result} = new_register());
     //---------------------------------------------------------------------------------------------------------
     Intermatic = require('../../../apps/intermatic');
     fsm = new Intermatic(fsmd);
-    // debug '^898922^', fsm
-    // debug '^898922^', ( k for k of fsm )
-    whisper('-----------');
-    whisper('start');
-    fsm.alpha_btn.start();
-    whisper('-----------');
-    whisper('press');
-    fsm.alpha_btn.press();
-    whisper('-----------');
-    whisper('release');
-    fsm.alpha_btn.release();
-    whisper('-----------');
-    whisper('press');
-    fsm.alpha_btn.press();
-    whisper('-----------');
-    whisper('release');
-    fsm.alpha_btn.release();
-    whisper('-----------');
+    register(fsm.cstate);
+    fsm.start();
+    register(fsm.cstate);
     show_result();
     T.eq(result, [
-      [
-        'color.after.change',
-        {
-          lstate: 'green'
+      {
+        lstate: 'void',
+        path: 'cfsm2',
+        alpha_btn: {
+          lstate: 'void',
+          path: 'cfsm2/alpha_btn',
+          color: {
+            lstate: 'void',
+            path: 'cfsm2/alpha_btn/color'
+          },
+          lamp: {
+            lstate: 'void',
+            path: 'cfsm2/alpha_btn/lamp'
+          }
         }
-      ],
-      [
-        'lamp.after.change',
-        {
-          lstate: 'lit'
-        }
-      ],
-      [
-        'color.after.change',
-        {
-          lstate: 'red'
-        }
-      ],
-      [
-        'lamp.after.change',
-        {
-          lstate: 'dark'
-        }
-      ],
-      [
-        'alpha_btn.after.change',
-        {
+      },
+      {
+        lstate: 'active',
+        path: 'cfsm2',
+        alpha_btn: {
           lstate: 'released',
+          path: 'cfsm2/alpha_btn',
           color: {
-            lstate: 'red'
+            lstate: 'red',
+            path: 'cfsm2/alpha_btn/color'
           },
           lamp: {
-            lstate: 'dark'
+            lstate: 'lit',
+            path: 'cfsm2/alpha_btn/lamp'
           }
         }
-      ],
-      [
-        'lamp.after.change',
-        {
-          lstate: 'lit'
-        }
-      ],
-      [
-        'alpha_btn.after.change',
-        {
-          lstate: 'pressed',
-          color: {
-            lstate: 'red'
-          },
-          lamp: {
-            lstate: 'lit'
-          }
-        }
-      ],
-      [
-        'color.after.change',
-        {
-          lstate: 'green'
-        }
-      ],
-      [
-        'lamp.after.change',
-        {
-          lstate: 'dark'
-        }
-      ],
-      [
-        'alpha_btn.after.change',
-        {
-          lstate: 'released',
-          color: {
-            lstate: 'green'
-          },
-          lamp: {
-            lstate: 'dark'
-          }
-        }
-      ],
-      [
-        'lamp.after.change',
-        {
-          lstate: 'lit'
-        }
-      ],
-      [
-        'alpha_btn.after.change',
-        {
-          lstate: 'pressed',
-          color: {
-            lstate: 'green'
-          },
-          lamp: {
-            lstate: 'lit'
-          }
-        }
-      ],
-      [
-        'color.after.change',
-        {
-          lstate: 'red'
-        }
-      ],
-      [
-        'lamp.after.change',
-        {
-          lstate: 'dark'
-        }
-      ],
-      [
-        'alpha_btn.after.change',
-        {
-          lstate: 'released',
-          color: {
-            lstate: 'red'
-          },
-          lamp: {
-            lstate: 'dark'
-          }
-        }
-      ]
+      }
     ]);
     //---------------------------------------------------------------------------------------------------------
     return done();
@@ -1670,7 +1573,9 @@
           stage: 'before',
           verb: 'start',
           dpar: 'void',
-          dest: 'a'
+          dest: 'a',
+          changed: true,
+          lstate: 'void'
         }
       ],
       [
@@ -1679,7 +1584,9 @@
           stage: 'before',
           verb: 'start',
           dpar: 'void',
-          dest: 'a'
+          dest: 'a',
+          changed: true,
+          lstate: 'void'
         }
       ],
       [
@@ -1688,7 +1595,20 @@
           stage: 'before',
           verb: 'start',
           dpar: 'void',
-          dest: 'a'
+          dest: 'a',
+          changed: true,
+          lstate: 'void'
+        }
+      ],
+      [
+        'leaving.any',
+        {
+          stage: 'leaving',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'a',
+          changed: true,
+          lstate: 'void'
         }
       ],
       [
@@ -1697,7 +1617,20 @@
           stage: 'leaving',
           verb: 'start',
           dpar: 'void',
-          dest: 'a'
+          dest: 'a',
+          changed: true,
+          lstate: 'void'
+        }
+      ],
+      [
+        'entering.any',
+        {
+          stage: 'entering',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'a',
+          changed: true,
+          lstate: 'a'
         }
       ],
       [
@@ -1706,7 +1639,31 @@
           stage: 'entering',
           verb: 'start',
           dpar: 'void',
-          dest: 'a'
+          dest: 'a',
+          changed: true,
+          lstate: 'a'
+        }
+      ],
+      [
+        'after.any',
+        {
+          stage: 'after',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'a',
+          changed: true,
+          lstate: 'a'
+        }
+      ],
+      [
+        'after.change',
+        {
+          stage: 'after',
+          verb: 'start',
+          dpar: 'void',
+          dest: 'a',
+          changed: true,
+          lstate: 'a'
         }
       ],
       [
@@ -1715,25 +1672,9 @@
           stage: 'after',
           verb: 'start',
           dpar: 'void',
-          dest: 'a'
-        }
-      ],
-      [
-        'after.change',
-        {
-          stage: 'after',
-          verb: 'start',
-          dpar: 'void',
-          dest: 'a'
-        }
-      ],
-      [
-        'after.any',
-        {
-          stage: 'after',
-          verb: 'start',
-          dpar: 'void',
-          dest: 'a'
+          dest: 'a',
+          changed: true,
+          lstate: 'a'
         }
       ],
       [
@@ -1742,7 +1683,9 @@
           stage: 'before',
           verb: 'step',
           dpar: 'a',
-          dest: 'b'
+          dest: 'b',
+          changed: true,
+          lstate: 'a'
         }
       ],
       [
@@ -1751,7 +1694,9 @@
           stage: 'before',
           verb: 'step',
           dpar: 'a',
-          dest: 'b'
+          dest: 'b',
+          changed: true,
+          lstate: 'a'
         }
       ],
       [
@@ -1760,7 +1705,20 @@
           stage: 'before',
           verb: 'step',
           dpar: 'a',
-          dest: 'b'
+          dest: 'b',
+          changed: true,
+          lstate: 'a'
+        }
+      ],
+      [
+        'leaving.any',
+        {
+          stage: 'leaving',
+          verb: 'step',
+          dpar: 'a',
+          dest: 'b',
+          changed: true,
+          lstate: 'a'
         }
       ],
       [
@@ -1769,7 +1727,20 @@
           stage: 'leaving',
           verb: 'step',
           dpar: 'a',
-          dest: 'b'
+          dest: 'b',
+          changed: true,
+          lstate: 'a'
+        }
+      ],
+      [
+        'entering.any',
+        {
+          stage: 'entering',
+          verb: 'step',
+          dpar: 'a',
+          dest: 'b',
+          changed: true,
+          lstate: 'b'
         }
       ],
       [
@@ -1778,25 +1749,9 @@
           stage: 'entering',
           verb: 'step',
           dpar: 'a',
-          dest: 'b'
-        }
-      ],
-      [
-        'after.step',
-        {
-          stage: 'after',
-          verb: 'step',
-          dpar: 'a',
-          dest: 'b'
-        }
-      ],
-      [
-        'after.change',
-        {
-          stage: 'after',
-          verb: 'step',
-          dpar: 'a',
-          dest: 'b'
+          dest: 'b',
+          changed: true,
+          lstate: 'b'
         }
       ],
       [
@@ -1805,7 +1760,31 @@
           stage: 'after',
           verb: 'step',
           dpar: 'a',
-          dest: 'b'
+          dest: 'b',
+          changed: true,
+          lstate: 'b'
+        }
+      ],
+      [
+        'after.change',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'a',
+          dest: 'b',
+          changed: true,
+          lstate: 'b'
+        }
+      ],
+      [
+        'after.step',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'a',
+          dest: 'b',
+          changed: true,
+          lstate: 'b'
         }
       ],
       [
@@ -1814,7 +1793,9 @@
           stage: 'before',
           verb: 'step',
           dpar: 'b',
-          dest: 'c'
+          dest: 'c',
+          changed: true,
+          lstate: 'b'
         }
       ],
       [
@@ -1823,7 +1804,9 @@
           stage: 'before',
           verb: 'step',
           dpar: 'b',
-          dest: 'c'
+          dest: 'c',
+          changed: true,
+          lstate: 'b'
         }
       ],
       [
@@ -1832,7 +1815,20 @@
           stage: 'before',
           verb: 'step',
           dpar: 'b',
-          dest: 'c'
+          dest: 'c',
+          changed: true,
+          lstate: 'b'
+        }
+      ],
+      [
+        'leaving.any',
+        {
+          stage: 'leaving',
+          verb: 'step',
+          dpar: 'b',
+          dest: 'c',
+          changed: true,
+          lstate: 'b'
         }
       ],
       [
@@ -1841,7 +1837,20 @@
           stage: 'leaving',
           verb: 'step',
           dpar: 'b',
-          dest: 'c'
+          dest: 'c',
+          changed: true,
+          lstate: 'b'
+        }
+      ],
+      [
+        'entering.any',
+        {
+          stage: 'entering',
+          verb: 'step',
+          dpar: 'b',
+          dest: 'c',
+          changed: true,
+          lstate: 'c'
         }
       ],
       [
@@ -1850,25 +1859,9 @@
           stage: 'entering',
           verb: 'step',
           dpar: 'b',
-          dest: 'c'
-        }
-      ],
-      [
-        'after.step',
-        {
-          stage: 'after',
-          verb: 'step',
-          dpar: 'b',
-          dest: 'c'
-        }
-      ],
-      [
-        'after.change',
-        {
-          stage: 'after',
-          verb: 'step',
-          dpar: 'b',
-          dest: 'c'
+          dest: 'c',
+          changed: true,
+          lstate: 'c'
         }
       ],
       [
@@ -1877,7 +1870,31 @@
           stage: 'after',
           verb: 'step',
           dpar: 'b',
-          dest: 'c'
+          dest: 'c',
+          changed: true,
+          lstate: 'c'
+        }
+      ],
+      [
+        'after.change',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'b',
+          dest: 'c',
+          changed: true,
+          lstate: 'c'
+        }
+      ],
+      [
+        'after.step',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'b',
+          dest: 'c',
+          changed: true,
+          lstate: 'c'
         }
       ],
       [
@@ -1886,7 +1903,8 @@
           stage: 'before',
           verb: 'step',
           dpar: 'c',
-          dest: 'c'
+          dest: 'c',
+          lstate: 'c'
         }
       ],
       [
@@ -1895,7 +1913,18 @@
           stage: 'before',
           verb: 'step',
           dpar: 'c',
-          dest: 'c'
+          dest: 'c',
+          lstate: 'c'
+        }
+      ],
+      [
+        'keeping.any',
+        {
+          stage: 'keeping',
+          verb: 'step',
+          dpar: 'c',
+          dest: 'c',
+          lstate: 'c'
         }
       ],
       [
@@ -1904,7 +1933,18 @@
           stage: 'keeping',
           verb: 'step',
           dpar: 'c',
-          dest: 'c'
+          dest: 'c',
+          lstate: 'c'
+        }
+      ],
+      [
+        'after.any',
+        {
+          stage: 'after',
+          verb: 'step',
+          dpar: 'c',
+          dest: 'c',
+          lstate: 'c'
         }
       ],
       [
@@ -1913,16 +1953,8 @@
           stage: 'after',
           verb: 'step',
           dpar: 'c',
-          dest: 'c'
-        }
-      ],
-      [
-        'after.any',
-        {
-          stage: 'after',
-          verb: 'step',
-          dpar: 'c',
-          dest: 'c'
+          dest: 'c',
+          lstate: 'c'
         }
       ],
       [
@@ -1931,7 +1963,9 @@
           stage: 'before',
           verb: 'stop',
           dpar: 'c',
-          dest: 'void'
+          dest: 'void',
+          changed: true,
+          lstate: 'c'
         }
       ],
       [
@@ -1940,7 +1974,9 @@
           stage: 'before',
           verb: 'stop',
           dpar: 'c',
-          dest: 'void'
+          dest: 'void',
+          changed: true,
+          lstate: 'c'
         }
       ],
       [
@@ -1949,7 +1985,20 @@
           stage: 'before',
           verb: 'stop',
           dpar: 'c',
-          dest: 'void'
+          dest: 'void',
+          changed: true,
+          lstate: 'c'
+        }
+      ],
+      [
+        'leaving.any',
+        {
+          stage: 'leaving',
+          verb: 'stop',
+          dpar: 'c',
+          dest: 'void',
+          changed: true,
+          lstate: 'c'
         }
       ],
       [
@@ -1958,7 +2007,20 @@
           stage: 'leaving',
           verb: 'stop',
           dpar: 'c',
-          dest: 'void'
+          dest: 'void',
+          changed: true,
+          lstate: 'c'
+        }
+      ],
+      [
+        'entering.any',
+        {
+          stage: 'entering',
+          verb: 'stop',
+          dpar: 'c',
+          dest: 'void',
+          changed: true,
+          lstate: 'void'
         }
       ],
       [
@@ -1967,25 +2029,9 @@
           stage: 'entering',
           verb: 'stop',
           dpar: 'c',
-          dest: 'void'
-        }
-      ],
-      [
-        'after.stop',
-        {
-          stage: 'after',
-          verb: 'stop',
-          dpar: 'c',
-          dest: 'void'
-        }
-      ],
-      [
-        'after.change',
-        {
-          stage: 'after',
-          verb: 'stop',
-          dpar: 'c',
-          dest: 'void'
+          dest: 'void',
+          changed: true,
+          lstate: 'void'
         }
       ],
       [
@@ -1994,14 +2040,40 @@
           stage: 'after',
           verb: 'stop',
           dpar: 'c',
-          dest: 'void'
+          dest: 'void',
+          changed: true,
+          lstate: 'void'
+        }
+      ],
+      [
+        'after.change',
+        {
+          stage: 'after',
+          verb: 'stop',
+          dpar: 'c',
+          dest: 'void',
+          changed: true,
+          lstate: 'void'
+        }
+      ],
+      [
+        'after.stop',
+        {
+          stage: 'after',
+          verb: 'stop',
+          dpar: 'c',
+          dest: 'void',
+          changed: true,
+          lstate: 'void'
         }
       ],
       [
         'fail',
         {
           verb: 'step',
-          dpar: 'void'
+          dpar: 'void',
+          lstate: 'void',
+          failed: true
         }
       ]
     ]);
@@ -2016,25 +2088,26 @@
     (() => {
       // @demo_2()
       // @toolbox_demo()
-      // test @
-      // test @[ "___ Intermatic attribute freezing"        ]
-      // test @[ "Intermatic empty FSM"                     ]
-      // test @[ "Intermatic before.start(), after.start()" ]
-      // test @[ "Intermatic basics" ]
-      // test @[ "Intermatic history" ]
-      // @[ "Intermatic cancel moves" ]()
-      // test @[ "Intermatic cancel moves" ]
-      // test @[ "Intermatic goto 1" ]
-      // test @[ "Intermatic data attribute 1" ]
-      // test @[ "Intermatic catchalls 1" ]
-      // test @[ "Intermatic observables during moves 1" ]
-      // test @[ "Intermatic can 1" ]
-      // test @[ "Intermatic tryto 1" ]
-      // test @[ "Intermatic cFsm 1" ]
-      test(this["Intermatic cFsm 2"]);
-      return test(this["Intermatic AAL style FSMDs 1"]);
+      return test(this);
     })();
   }
+
+  // test @[ "___ Intermatic attribute freezing"        ]
+// test @[ "Intermatic empty FSM"                     ]
+// test @[ "Intermatic before.start(), after.start()" ]
+// test @[ "Intermatic basics" ]
+// test @[ "Intermatic history" ]
+// @[ "Intermatic cancel moves" ]()
+// test @[ "Intermatic cancel moves" ]
+// test @[ "Intermatic goto 1" ]
+// test @[ "Intermatic data attribute 1" ]
+// test @[ "Intermatic catchalls 1" ]
+// test @[ "Intermatic observables during moves 1" ]
+// test @[ "Intermatic can 1" ]
+// test @[ "Intermatic tryto 1" ]
+// test @[ "Intermatic cFsm 1" ]
+// test @[ "Intermatic cFsm 2" ]
+// test @[ "Intermatic AAL style FSMDs 1" ]
 
 }).call(this);
 
