@@ -65,7 +65,7 @@ new_register = ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "Intermatic empty FSM" ] = ( T, done ) ->
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   fsm             = new Intermatic {}
   T.eq fsm.moves,   {}
   T.eq fsm.start,   undefined
@@ -73,11 +73,35 @@ new_register = ->
   done()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "Intermatic fairly minimal FSM without moves" ] = ( T, done ) ->
+
+  { Intermatic, } = require '../../../apps/intermatic'
+  fsmd =
+    name:     'toolbox'
+    cascades: [ 'start', ]
+    moves:
+      start:    'active'
+    before:
+      start: -> log '^IMATC@13344^', "IMATC.toolbox_fsm.before.start", @cstate
+  fsm             = new Intermatic fsmd
+  # debug '^3334^', fsm.moves
+  T.eq fsm.moves,   { start: { void: 'active' } }
+  T.eq fsm.lstate,  'void'
+  #.........................................................................................................
+  try validate.function fsm.start catch error
+    T.fail error.message
+  T.ok error is undefined
+  #.........................................................................................................
+  fsm.start()
+  T.eq fsm.lstate,  'active'
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "Intermatic before.start(), after.start()" ] = ( T, done ) ->
   { result
     show_result
     register }    = new_register()
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     moves:
@@ -117,7 +141,7 @@ new_register = ->
   { result
     show_result
     register }    = new_register()
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   fsm             = new Intermatic fsmd
   # info '^44455^', JSON.stringify fsm.moves, null, 2
   T.eq fsm.moves, { start: { void: 'lit' }, reset: { any: 'void' }, toggle: { lit: 'dark', dark: 'lit' } }
@@ -154,7 +178,7 @@ new_register = ->
   #---------------------------------------------------------------------------------------------------------
   { result
     register }        = new_register()
-  Intermatic          = require '../../../apps/intermatic'
+  { Intermatic, }     = require '../../../apps/intermatic'
   fsm                 = new Intermatic fsmd
   fsm.history_length  = 3
   fsm.start()
@@ -185,23 +209,22 @@ new_register = ->
       start:  ( P... ) -> @register 'boiler.before.start', @move; @heater.start P...
     after:
       change: ( P... ) -> @register 'boiler.after.change', @move
-    fsms:
-      heater:
-        data: { enabled: true, temparature: 20, }
-        moves:
-          start:      [ 'void',     'idle',     ]
-          switch_off: [ 'heating',  'idle',     ]
-          switch_on:  [ 'idle',     'heating',  ]
-        # before:
-        #   any:      -> @register 'heater.before.any', @move, @data
-        entering:
-          heating:  ->
-            if not @data.enabled
-              warn '^3334^', "heater not enabled; cancelling"
-              @cancel()
-            debug '^445554^', @lstate
-            debug '^445554^', @move
-            @up.register 'heater.entering.heating', @lstate, @move, @data
+    heater:
+      data: { enabled: true, temparature: 20, }
+      moves:
+        start:      [ 'void',     'idle',     ]
+        switch_off: [ 'heating',  'idle',     ]
+        switch_on:  [ 'idle',     'heating',  ]
+      # before:
+      #   any:      -> @register 'heater.before.any', @move, @data
+      entering:
+        heating:  ->
+          if not @data.enabled
+            warn '^3334^', "heater not enabled; cancelling"
+            @cancel()
+          debug '^445554^', @lstate
+          debug '^445554^', @move
+          @up.register 'heater.entering.heating', @lstate, @move, @data
   #---------------------------------------------------------------------------------------------------------
   Intermatic          = require '../../../apps/intermatic'
   do =>
@@ -249,7 +272,7 @@ new_register = ->
   { result
     register
     show_result } = new_register()
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   fsm             = new Intermatic fsmd
   # T.eq ( Object.keys fsm ),  [ 'reserved', 'fsmd', 'moves', 'fsm_names', 'has_subfsms', '_lstate', 'before', 'entering', 'keeping', 'leaving', 'after', 'up', 'starts_with', 'start', 'toggle', 'reset', 'goto', 'name', 'fail' ]
   fsm.start         'M1'
@@ -300,21 +323,20 @@ new_register = ->
       second: ( P... ) ->
         @sub.toggle()
         register @cstate
-    fsms:
-      sub:
-        data:
-          frobs: 0
-        moves:
-          start:  'dub'
-          toggle: [ 'dub', 'frob', 'dub', ]
-        leaving:
-          frob: ( P... ) ->
-            @data.frobs++
-            help @data.frobs
+    sub:
+      data:
+        frobs: 0
+      moves:
+        start:  'dub'
+        toggle: [ 'dub', 'frob', 'dub', ]
+      leaving:
+        frob: ( P... ) ->
+          @data.frobs++
+          help @data.frobs
   { result
     show_result
     register }    = new_register()
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   fsm             = new Intermatic fsmd
   T.eq fsm.data, { counter: 42, computed: 'helo', }
   fsm.start();  urge fsm.cstate, fsm.data.counter, fsm.sub.data.frobs
@@ -358,7 +380,7 @@ new_register = ->
   { result
     register
     show_result } = new_register()
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   fsm             = new Intermatic fsmd
   info "fsm.start()     ———";           fsm.start             'A1'
   info "fsm.step()      ———";           fsm.step              'A2'
@@ -398,7 +420,7 @@ new_register = ->
   { result
     register
     show_result } = new_register()
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   fsm             = new Intermatic fsmd
   #.........................................................................................................
   register 'first', fsm.move
@@ -438,7 +460,7 @@ new_register = ->
   { result
     register
     show_result } = new_register()
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   fsm             = new Intermatic fsmd
   T.eq true,  fsm.can.start()
   T.eq true,  fsm.can 'start'
@@ -468,7 +490,7 @@ new_register = ->
   { result
     register
     show_result } = new_register()
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   fsm             = new Intermatic fsmd
   T.eq true,  fsm.tryto.start()
   fsm.goto 'void'
@@ -505,24 +527,22 @@ new_register = ->
       trigger: ( P... ) -> register "button: before *", @lstate
     goto: 'any'
     #.......................................................................................................
-    fsms:
-      #.....................................................................................................
-      lamp:
-        moves:
-          start:    'lit'
-          toggle:   [ 'lit', 'dark', 'lit', ]
-        after:
-          change:     ( P... ) -> register "lamp: after change", @lstate
-        entering:
-          dark:       ( P... ) -> @up.goto 'released';  register "lamp: entering dark", @lstate
-          lit:        ( P... ) -> @up.goto 'pressed';   register "lamp: entering lit", @lstate
-        keeping:
-          dark:       ( P... ) -> register "lamp: keeping dark", @lstate
-          lit:        ( P... ) -> register "lamp: keeping lit", @lstate
-        before:
-          trigger: ( P... ) -> register "lamp: before *", @lstate
-        goto: 'any'
-        bar:  108
+    lamp:
+      moves:
+        start:    'lit'
+        toggle:   [ 'lit', 'dark', 'lit', ]
+      after:
+        change:     ( P... ) -> register "lamp: after change", @lstate
+      entering:
+        dark:       ( P... ) -> @up.goto 'released';  register "lamp: entering dark", @lstate
+        lit:        ( P... ) -> @up.goto 'pressed';   register "lamp: entering lit", @lstate
+      keeping:
+        dark:       ( P... ) -> register "lamp: keeping dark", @lstate
+        lit:        ( P... ) -> register "lamp: keeping lit", @lstate
+      before:
+        trigger: ( P... ) -> register "lamp: before *", @lstate
+      goto: 'any'
+      bar:  108
     #.......................................................................................................
     after:
       change: ( P... ) -> register "root_fsm.change", @lstate
@@ -532,7 +552,7 @@ new_register = ->
     register
     show_result } = new_register()
   #---------------------------------------------------------------------------------------------------------
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   button          = new Intermatic fsmd
   T.eq button.foo,         42
   T.eq button.lamp.bar, 108
@@ -577,43 +597,30 @@ new_register = ->
     name:     'cfsm2'
     moves:
       start:  'active'
-    fsms:
+    #.....................................................................................................
+    alpha_btn:
+      cascades: [ 'start', ]
+      moves:
+        start:    'released'
+        reset:    [ 'any',       'void',       ]
+        press:    [ 'released',  'pressed',    ]
+        release:  [ 'pressed',   'released',   ]
       #.....................................................................................................
-      alpha_btn:
-        cascades: [ 'start', ]
+      color:
         moves:
-          start:    'released'
-          reset:    [ 'any',       'void',       ]
-          press:    [ 'released',  'pressed',    ]
-          release:  [ 'pressed',   'released',   ]
-        # after:
-        #   change:   ( P... ) ->
-        #     @lamp.toggle()
-        #     register "alpha_btn.after.change", @cstate
-        # #.......................................................................................................
-        fsms:
-          #.....................................................................................................
-          color:
-            moves:
-              start:  'red'
-              toggle: [ 'red', 'green', 'red', ]
-            # after:
-            #   change:   ( P... ) -> register "color.after.change", @cstate
-          #.....................................................................................................
-          lamp:
-            moves:
-              start:    'lit'
-              toggle:   [ 'lit', 'dark', 'lit', ]
-            # entering:
-            #   dark:     ( P... ) -> @up.color.toggle()
-            # after:
-            #   change:   ( P... ) -> register "lamp.after.change", @cstate
+          start:  'red'
+          toggle: [ 'red', 'green', 'red', ]
+      #.....................................................................................................
+      lamp:
+        moves:
+          start:    'lit'
+          toggle:   [ 'lit', 'dark', 'lit', ]
   #---------------------------------------------------------------------------------------------------------
   { result
     register
     show_result } = new_register()
   #---------------------------------------------------------------------------------------------------------
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   fsm             = new Intermatic fsmd
   register fsm.cstate
   fsm.start()
@@ -622,6 +629,317 @@ new_register = ->
   T.eq result, [
     { lstate: 'void', path: 'cfsm2', alpha_btn: { lstate: 'void', path: 'cfsm2/alpha_btn', color: { lstate: 'void', path: 'cfsm2/alpha_btn/color' }, lamp: { lstate: 'void', path: 'cfsm2/alpha_btn/lamp' } } }
     { lstate: 'active', path: 'cfsm2', alpha_btn: { lstate: 'released', path: 'cfsm2/alpha_btn', color: { lstate: 'red', path: 'cfsm2/alpha_btn/color' }, lamp: { lstate: 'lit', path: 'cfsm2/alpha_btn/lamp' } } } ]
+  #---------------------------------------------------------------------------------------------------------
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Intermatic cFsm event bubbling" ] = ( T, done ) ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    cascades: [ 'start', ]
+    name:     'cfsm2'
+    moves:
+      start:  'active'
+    #.....................................................................................................
+    get_states: -> { btn: @alpha_btn.lstate, color: @alpha_btn.color.lstate, lamp: @alpha_btn.lamp.lstate, }
+    #.....................................................................................................
+    after:
+      any:            -> register 'after.any',     @get_states()
+      # change:         -> register 'after.change',  @get_states()
+      EXP_any_change: ( changed_fsm ) -> register "EXP_any_change #{changed_fsm.name}: #{changed_fsm.lstate}",
+    #.....................................................................................................
+    alpha_btn:
+      cascades: [ 'start', ]
+      moves:
+        start:    'released'
+        reset:    [ 'any',       'void',       ]
+        press:    [ 'released',  'pressed',    ]
+        release:  [ 'pressed',   'released',   ]
+      #.....................................................................................................
+      entering:
+        pressed:  -> @lamp.tryto.on();  @color.step()
+        released: -> @lamp.tryto.off()
+      #.....................................................................................................
+      color:
+        moves:
+          start:  'red'
+          step:   [ 'red', 'amber', 'green', 'red', ]
+      #.....................................................................................................
+      lamp:
+        moves:
+          start:    'dark'
+          toggle:   [ 'lit', 'dark', 'lit', ]
+          on:       [ 'dark', 'lit',  ]
+          off:      [ 'lit',  'dark', ]
+  #---------------------------------------------------------------------------------------------------------
+  { result
+    register
+    show_result } = new_register()
+  #---------------------------------------------------------------------------------------------------------
+  { Intermatic, } = require '../../../apps/intermatic'
+  fsm             = new Intermatic fsmd
+  info 'fsm.start()';               fsm.start()
+  urge fsm.get_states()
+  info 'fsm.alpha_btn.press()';     fsm.alpha_btn.press()
+  urge fsm.get_states()
+  info 'fsm.alpha_btn.release()';   fsm.alpha_btn.release()
+  urge fsm.get_states()
+  info 'fsm.alpha_btn.press()';     fsm.alpha_btn.press()
+  urge fsm.get_states()
+  show_result()
+  T.eq result, [
+    'EXP_any_change color: red'
+    'EXP_any_change lamp: dark'
+    'EXP_any_change alpha_btn: released'
+    [ 'after.any', { btn: 'released', color: 'red', lamp: 'dark' } ]
+    'EXP_any_change lamp: lit'
+    'EXP_any_change color: amber'
+    'EXP_any_change alpha_btn: pressed'
+    'EXP_any_change lamp: dark'
+    'EXP_any_change alpha_btn: released'
+    'EXP_any_change lamp: lit'
+    'EXP_any_change color: green'
+    'EXP_any_change alpha_btn: pressed' ]
+  #---------------------------------------------------------------------------------------------------------
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Intermatic cFsm root_fsm" ] = ( T, done ) ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    cascades: [ 'start', ]
+    name:     'cfsm2'
+    moves:
+      start:  'active'
+    #.....................................................................................................
+    alpha_btn:
+      cascades: [ 'start', ]
+      moves:
+        start:    'released'
+      #.....................................................................................................
+      color:
+        moves:
+          start:  'red'
+  #---------------------------------------------------------------------------------------------------------
+  { result
+    register
+    show_result } = new_register()
+  #---------------------------------------------------------------------------------------------------------
+  { Intermatic, } = require '../../../apps/intermatic'
+  fsm             = new Intermatic fsmd
+  T.eq fsm.root_fsm,                  null
+  T.eq fsm.alpha_btn.root_fsm,        fsm
+  T.eq fsm.alpha_btn.color.root_fsm,  fsm
+  #---------------------------------------------------------------------------------------------------------
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Intermatic custom paths 1" ] = ( T, done ) ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    cascades:         [ 'start', ]
+    moves:
+      start:  'active'
+    #.....................................................................................................
+    switch:
+      cascades: [ 'start', ]
+      moves:
+        start:    'released'
+      #.....................................................................................................
+      lamp:
+        cascades: [ 'start', ]
+        moves:
+          start:    'dark'
+          toggle:   [ 'lit', 'dark', 'lit', ]
+          on:       [ 'dark', 'lit',  ]
+          off:      [ 'lit',  'dark', ]
+        #...................................................................................................
+        color:
+          moves:
+            start:  'red'
+  #---------------------------------------------------------------------------------------------------------
+  { result
+    register
+    show_result } = new_register()
+  #---------------------------------------------------------------------------------------------------------
+  { Intermatic, } = require '../../../apps/intermatic'
+  fsm             = new Intermatic fsmd
+  # urge fsm.omit_root_name,              false
+  # urge fsm.switch.omit_root_name,       false
+  # urge fsm.switch.lamp.omit_root_name,  false
+  # urge fsm.path_separator,              '/'
+  # urge fsm.switch.path_separator,       '/'
+  # urge fsm.switch.lamp.path_separator,  '/'
+  # urge fsm.breadcrumbs,                 [ 'FSM', ]
+  # urge fsm.switch.breadcrumbs,          [ 'FSM',  'switch', ]
+  # urge fsm.switch.lamp.breadcrumbs,     [ 'FSM',  'switch', 'lamp', ]
+  # urge fsm.path,                        'FSM'
+  # urge fsm.switch.path,                 'FSM/switch'
+  # urge fsm.switch.lamp.path,            'FSM/switch/lamp'
+  T.eq fsm.omit_root_name,              false
+  T.eq fsm.switch.omit_root_name,       false
+  T.eq fsm.switch.lamp.omit_root_name,  false
+  T.eq fsm.path_separator,              '/'
+  T.eq fsm.switch.path_separator,       '/'
+  T.eq fsm.switch.lamp.path_separator,  '/'
+  T.eq fsm.breadcrumbs,                 [ 'FSM', ]
+  T.eq fsm.switch.breadcrumbs,          [ 'FSM',  'switch', ]
+  T.eq fsm.switch.lamp.breadcrumbs,     [ 'FSM',  'switch', 'lamp', ]
+  T.eq fsm.path,                        'FSM'
+  T.eq fsm.switch.path,                 'FSM/switch'
+  T.eq fsm.switch.lamp.path,            'FSM/switch/lamp'
+  #---------------------------------------------------------------------------------------------------------
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Intermatic custom paths 2" ] = ( T, done ) ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    cascades:         [ 'start', ]
+    name:             'cfsm2'
+    omit_root_name:   true
+    path_separator:   '#'
+    moves:
+      start:  'active'
+    #.....................................................................................................
+    switch:
+      cascades: [ 'start', ]
+      moves:
+        start:    'released'
+      #.....................................................................................................
+      lamp:
+        cascades: [ 'start', ]
+        moves:
+          start:    'dark'
+          toggle:   [ 'lit', 'dark', 'lit', ]
+          on:       [ 'dark', 'lit',  ]
+          off:      [ 'lit',  'dark', ]
+        #...................................................................................................
+        color:
+          moves:
+            start:  'red'
+  #---------------------------------------------------------------------------------------------------------
+  { result
+    register
+    show_result } = new_register()
+  #---------------------------------------------------------------------------------------------------------
+  { Intermatic, } = require '../../../apps/intermatic'
+  fsm             = new Intermatic fsmd
+  # urge fsm.omit_root_name,              true
+  # urge fsm.switch.omit_root_name,       true
+  # urge fsm.switch.lamp.omit_root_name,  true
+  # urge fsm.path_separator,              '#'
+  # urge fsm.switch.path_separator,       '#'
+  # urge fsm.switch.lamp.path_separator,  '#'
+  # urge fsm.breadcrumbs,                 []
+  # urge fsm.switch.breadcrumbs,          [ 'switch', ]
+  # urge fsm.switch.lamp.breadcrumbs,     [ 'switch', 'lamp', ]
+  # urge fsm.path,                        'cfsm2'
+  # urge fsm.switch.path,                 'switch'
+  # urge fsm.switch.lamp.path,            'switch#lamp'
+  T.eq fsm.omit_root_name,              true
+  T.eq fsm.switch.omit_root_name,       true
+  T.eq fsm.switch.lamp.omit_root_name,  true
+  T.eq fsm.path_separator,              '#'
+  T.eq fsm.switch.path_separator,       '#'
+  T.eq fsm.switch.lamp.path_separator,  '#'
+  T.eq fsm.breadcrumbs,                 []
+  T.eq fsm.switch.breadcrumbs,          [ 'switch', ]
+  T.eq fsm.switch.lamp.breadcrumbs,     [ 'switch', 'lamp', ]
+  T.eq fsm.path,                        'cfsm2'
+  T.eq fsm.switch.path,                 'switch'
+  T.eq fsm.switch.lamp.path,            'switch#lamp'
+  #---------------------------------------------------------------------------------------------------------
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "____ Intermatic custom paths 2" ] = ( T, done ) ->
+  ### TAINT overwriting inheritables is under consideration; might re-write implementation to simplify code ###
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    cascades:         [ 'start', ]
+    name:             'cfsm2'
+    omit_root_name: true
+    moves:
+      start:  'active'
+    #.....................................................................................................
+    switch:
+      cascades: [ 'start', ]
+      path_separator:   '='
+      moves:
+        start:    'released'
+      #.....................................................................................................
+      lamp:
+        cascades: [ 'start', ]
+        moves:
+          start:    'dark'
+          toggle:   [ 'lit', 'dark', 'lit', ]
+          on:       [ 'dark', 'lit',  ]
+          off:      [ 'lit',  'dark', ]
+        #...................................................................................................
+        color:
+          moves:
+            start:  'red'
+  #---------------------------------------------------------------------------------------------------------
+  { result
+    register
+    show_result } = new_register()
+  #---------------------------------------------------------------------------------------------------------
+  { Intermatic, } = require '../../../apps/intermatic'
+  fsm             = new Intermatic fsmd
+  T.eq fsm.omit_root_name,              true
+  T.eq fsm.switch.omit_root_name,       true
+  T.eq fsm.switch.lamp.omit_root_name,  true
+  T.eq fsm.path_separator,                '#'
+  T.eq fsm.switch.path_separator,         '#'
+  T.eq fsm.switch.lamp.path_separator,    '#'
+  T.eq fsm.path,                          'cfsm2'
+  T.eq fsm.switch.path,                   'cfsm2#switch'
+  T.eq fsm.switch.lamp.path,              'cfsm2#switch#lamp'
+  #---------------------------------------------------------------------------------------------------------
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Intermatic reserved keys" ] = ( T, done ) ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+    cascades: [ 'start', ]
+    name:     'cfsm2'
+    moves:
+      start:  'active'
+  #---------------------------------------------------------------------------------------------------------
+  { Intermatic, } = require '../../../apps/intermatic'
+  fsm             = new Intermatic fsmd
+  urge '^788345^', fsm._reserved_keys
+  # '_cancelled'
+  # '_lstate'
+  # '_nxt_dest'
+  # '_nxt_dpar'
+  # '_nxt_verb'
+  # '_path'
+  # '_prv_lstates'
+  # '_prv_verbs'
+  # '_reserved_keys'
+  # '_stage'
+  # '_state_stages'
+  # '_tmp'
+  # '_trigger_stages'
+  T.ok fsm._reserved_keys.has 'after'
+  T.ok fsm._reserved_keys.has 'before'
+  T.ok fsm._reserved_keys.has 'cascades'
+  T.ok fsm._reserved_keys.has 'cstate'
+  T.ok fsm._reserved_keys.has 'data'
+  T.ok fsm._reserved_keys.has 'entering'
+  T.ok fsm._reserved_keys.has 'EXP_dstate'
+  T.ok fsm._reserved_keys.has 'fsm_names'
+  T.ok fsm._reserved_keys.has 'has_subfsms'
+  T.ok fsm._reserved_keys.has 'history_length'
+  T.ok fsm._reserved_keys.has 'keeping'
+  T.ok fsm._reserved_keys.has 'leaving'
+  T.ok fsm._reserved_keys.has 'lstate'
+  T.ok fsm._reserved_keys.has 'lstates'
+  T.ok fsm._reserved_keys.has 'moves'
+  T.ok fsm._reserved_keys.has 'up'
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -670,7 +988,7 @@ new_register = ->
     register
     show_result } = new_register()
   #---------------------------------------------------------------------------------------------------------
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   fsm             = new Intermatic fsmd
   echo '^4455^', CND.inspect fsm
   urge '^4455^', fsmd.moves
@@ -739,8 +1057,16 @@ if module is require.main then do =>
   # @demo_2()
   # @toolbox_demo()
   test @
+  # test @[ "Intermatic custom paths 1" ]
+  # test @[ "Intermatic custom paths 2" ]
+  # @[ "Intermatic custom paths 1" ]()
+  # test @[ "Intermatic cFsm root_fsm" ]
+  # @[ "Intermatic cFsm root_fsm" ]()
+  # test @[ "Intermatic cFsm event bubbling" ]
+  # test @[ "Intermatic reserved keys" ]
   # test @[ "___ Intermatic attribute freezing"        ]
   # test @[ "Intermatic empty FSM"                     ]
+  # test @[ "Intermatic fairly minimal FSM without moves" ]
   # test @[ "Intermatic before.start(), after.start()" ]
   # test @[ "Intermatic basics" ]
   # test @[ "Intermatic history" ]
@@ -755,3 +1081,11 @@ if module is require.main then do =>
   # test @[ "Intermatic cFsm 1" ]
   # test @[ "Intermatic cFsm 2" ]
   # test @[ "Intermatic AAL style FSMDs 1" ]
+
+
+
+
+
+
+
+

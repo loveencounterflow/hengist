@@ -184,7 +184,7 @@ new_toolbox_fsm = ->
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-demo = ->
+demo_1 = ->
   fsm       = new_toolbox_fsm()
   recorder  = new Recorder fsm
   # echo '^33376^', ( require 'util' ).inspect fsm
@@ -255,6 +255,149 @@ demo_2 = ->
   fsm.step()
   fsm.step()
   return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_3 = ->
+  #---------------------------------------------------------------------------------------------------------
+  fsmd =
+
+    #=======================================================================================================
+    # ACTUATABLE BUTTONS
+    #-------------------------------------------------------------------------------------------------------
+    grabmode_btn:
+      init: 'markscroll'
+      transitions: [
+        { name: 'toggle',   from: 'panzoom',    to: 'markscroll', }
+        { name: 'toggle',   from: 'markscroll', to: 'panzoom',    } ]
+      methods:
+        onEnterMarkscroll:  ->
+          mkts._panzoom_instance?.pause?()
+          @scrldir_lamp.goto 'lit'
+        onEnterPanzoom:     ->
+          mkts._panzoom_instance?.resume?()
+          @scrldir_lamp.goto 'dark'
+    #.......................................................................................................
+    grabmode_lamp:
+      init: 'lit'
+
+    #-------------------------------------------------------------------------------------------------------
+    scrldir_btn:
+      init: 'vert'
+      transitions: [
+        { name: 'toggle',   from: 'vert',     to: 'horz', }
+        { name: 'toggle',   from: 'horz',     to: 'vert', } ]
+      methods:
+        onEnterVert:        -> log '^334-5^', 'scrldir_btn: onEnterVert'; @grabmode_btn.goto 'markscroll'
+        onEnterHorz:        -> log '^334-6^', 'scrldir_btn: onEnterHorz'; @grabmode_btn.goto 'markscroll'
+    #.......................................................................................................
+    scrldir_lamp:
+      init: 'lit'
+      transitions: [
+        { name: 'toggle',   from: 'lit',    to: 'dark', }
+        { name: 'toggle',   from: 'dark',   to: 'lit',  } ]
+      methods:
+        onEnterLit:         -> log '^334-8^', 'scrldir_lamp: onEnterLit'
+        onEnterDark:        -> log '^334-9^', 'scrldir_lamp: onEnterDark'
+
+    #=======================================================================================================
+    # PASSIVE BUTTONS (i.e. lamps only); observe their descriptions could be much simpler
+    #-------------------------------------------------------------------------------------------------------
+    shift_btn:
+      init: 'released'
+      transitions: [
+        { name: 'toggle', from: 'released', to: 'pressed',  }
+        { name: 'toggle', from: 'pressed',  to: 'released', } ]
+      methods:
+        onEnterReleased:  -> @shift_lamp.goto 'dark'
+        onEnterPressed:   -> @shift_lamp.goto 'lit'
+    #.......................................................................................................
+    shift_lamp:
+      init: 'dark'
+      transitions: [
+        { name: 'toggle',   from: 'lit',    to: 'dark', }
+        { name: 'toggle',   from: 'dark',   to: 'lit',  } ]
+
+    #-------------------------------------------------------------------------------------------------------
+    capslock_btn:
+      init: 'released'
+      transitions: [
+        { name: 'toggle', from: 'released', to: 'pressed',  }
+        { name: 'toggle', from: 'pressed',  to: 'released', } ]
+      methods:
+        onEnterReleased:  -> @capslock_lamp.goto 'dark'
+        onEnterPressed:   -> @capslock_lamp.goto 'lit'
+    #.......................................................................................................
+    capslock_lamp:
+      init: 'dark'
+      transitions: [
+        { name: 'toggle',   from: 'lit',    to: 'dark', }
+        { name: 'toggle',   from: 'dark',   to: 'lit',  } ]
+
+    #-------------------------------------------------------------------------------------------------------
+    alt_btn:
+      init: 'released'
+      transitions: [
+        { name: 'toggle', from: 'released', to: 'pressed',  }
+        { name: 'toggle', from: 'pressed',  to: 'released', } ]
+      methods:
+        onEnterReleased:  -> @alt_lamp.goto 'dark'
+        onEnterPressed:   -> @alt_lamp.goto 'lit'
+    #.......................................................................................................
+    alt_lamp:
+      init: 'dark'
+      transitions: [
+        { name: 'toggle',   from: 'lit',    to: 'dark', }
+        { name: 'toggle',   from: 'dark',   to: 'lit',  } ]
+
+    #-------------------------------------------------------------------------------------------------------
+    altgraph_btn:
+      init: 'released'
+      transitions: [
+        { name: 'toggle', from: 'released', to: 'pressed',  }
+        { name: 'toggle', from: 'pressed',  to: 'released', } ]
+      methods:
+        onEnterReleased:  -> @altgraph_lamp.goto 'dark'
+        onEnterPressed:   -> _XXX_TMP_toolbox_colors.altgraph_btn = 'red'; @altgraph_lamp.goto 'lit'
+                         ### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ###
+    #.......................................................................................................
+    altgraph_lamp:
+      init: 'dark'
+      transitions: [
+        { name: 'toggle',   from: 'lit',    to: 'dark', }
+        { name: 'toggle',   from: 'dark',   to: 'lit',  } ]
+
+    #-------------------------------------------------------------------------------------------------------
+    control_btn:
+      init: 'released'
+      transitions: [
+        { name: 'toggle', from: 'released', to: 'pressed',  }
+        { name: 'toggle', from: 'pressed',  to: 'released', } ]
+      methods:
+        onEnterReleased:  -> @control_lamp.goto 'dark'
+        onEnterPressed:   -> @control_lamp.goto 'lit'
+    #.......................................................................................................
+    control_lamp:
+      init: 'dark'
+      transitions: [
+        { name: 'toggle',   from: 'lit',    to: 'dark', }
+        { name: 'toggle',   from: 'dark',   to: 'lit',  } ]
+
+    #-------------------------------------------------------------------------------------------------------
+    meta_btn:
+      init: 'released'
+      transitions: [
+        { name: 'toggle', from: 'released', to: 'pressed',  }
+        { name: 'toggle', from: 'pressed',  to: 'released', } ]
+      methods:
+        onEnterReleased:  -> @meta_lamp.goto 'dark'
+        onEnterPressed:   -> @meta_lamp.goto 'lit'
+    #.......................................................................................................
+    meta_lamp:
+      init: 'dark'
+      transitions: [
+        { name: 'toggle',   from: 'lit',    to: 'dark', }
+        { name: 'toggle',   from: 'dark',   to: 'lit',  } ]
+
 
 
 
