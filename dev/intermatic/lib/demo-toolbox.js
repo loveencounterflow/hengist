@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Intermatic, PATH, Recorder, badge, debug, declare, demo, demo_2, echo, freeze, help, info, isa, lets, log, new_button_fsmd, new_color_fsmd, new_lamp_fsmd, new_register, new_text_fsmd, new_toolbox_fsm, pluck, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var CND, Intermatic, PATH, Recorder, badge, debug, declare, demo_1, demo_2, demo_3, echo, freeze, help, info, isa, lets, log, new_button_fsmd, new_color_fsmd, new_lamp_fsmd, new_register, new_text_fsmd, new_toolbox_fsm, pluck, rpr, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -240,7 +240,7 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  demo = function() {
+  demo_1 = function() {
     var fsm, n, recorder;
     fsm = new_toolbox_fsm();
     recorder = new Recorder(fsm);
@@ -352,6 +352,350 @@
     fsm.step();
     fsm.step();
     return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_3 = function() {
+    var fsmd;
+    //---------------------------------------------------------------------------------------------------------
+    return fsmd = {
+      //=======================================================================================================
+      // ACTUATABLE BUTTONS
+      //-------------------------------------------------------------------------------------------------------
+      grabmode_btn: {
+        init: 'markscroll',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'panzoom',
+            to: 'markscroll'
+          },
+          {
+            name: 'toggle',
+            from: 'markscroll',
+            to: 'panzoom'
+          }
+        ],
+        methods: {
+          onEnterMarkscroll: function() {
+            var ref;
+            if ((ref = mkts._panzoom_instance) != null) {
+              if (typeof ref.pause === "function") {
+                ref.pause();
+              }
+            }
+            return this.scrldir_lamp.goto('lit');
+          },
+          onEnterPanzoom: function() {
+            var ref;
+            if ((ref = mkts._panzoom_instance) != null) {
+              if (typeof ref.resume === "function") {
+                ref.resume();
+              }
+            }
+            return this.scrldir_lamp.goto('dark');
+          }
+        }
+      },
+      //.......................................................................................................
+      grabmode_lamp: {
+        init: 'lit'
+      },
+      //-------------------------------------------------------------------------------------------------------
+      scrldir_btn: {
+        init: 'vert',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'vert',
+            to: 'horz'
+          },
+          {
+            name: 'toggle',
+            from: 'horz',
+            to: 'vert'
+          }
+        ],
+        methods: {
+          onEnterVert: function() {
+            log('^334-5^', 'scrldir_btn: onEnterVert');
+            return this.grabmode_btn.goto('markscroll');
+          },
+          onEnterHorz: function() {
+            log('^334-6^', 'scrldir_btn: onEnterHorz');
+            return this.grabmode_btn.goto('markscroll');
+          }
+        }
+      },
+      //.......................................................................................................
+      scrldir_lamp: {
+        init: 'lit',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'lit',
+            to: 'dark'
+          },
+          {
+            name: 'toggle',
+            from: 'dark',
+            to: 'lit'
+          }
+        ],
+        methods: {
+          onEnterLit: function() {
+            return log('^334-8^', 'scrldir_lamp: onEnterLit');
+          },
+          onEnterDark: function() {
+            return log('^334-9^', 'scrldir_lamp: onEnterDark');
+          }
+        }
+      },
+      //=======================================================================================================
+      // PASSIVE BUTTONS (i.e. lamps only); observe their descriptions could be much simpler
+      //-------------------------------------------------------------------------------------------------------
+      shift_btn: {
+        init: 'released',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'released',
+            to: 'pressed'
+          },
+          {
+            name: 'toggle',
+            from: 'pressed',
+            to: 'released'
+          }
+        ],
+        methods: {
+          onEnterReleased: function() {
+            return this.shift_lamp.goto('dark');
+          },
+          onEnterPressed: function() {
+            return this.shift_lamp.goto('lit');
+          }
+        }
+      },
+      //.......................................................................................................
+      shift_lamp: {
+        init: 'dark',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'lit',
+            to: 'dark'
+          },
+          {
+            name: 'toggle',
+            from: 'dark',
+            to: 'lit'
+          }
+        ]
+      },
+      //-------------------------------------------------------------------------------------------------------
+      capslock_btn: {
+        init: 'released',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'released',
+            to: 'pressed'
+          },
+          {
+            name: 'toggle',
+            from: 'pressed',
+            to: 'released'
+          }
+        ],
+        methods: {
+          onEnterReleased: function() {
+            return this.capslock_lamp.goto('dark');
+          },
+          onEnterPressed: function() {
+            return this.capslock_lamp.goto('lit');
+          }
+        }
+      },
+      //.......................................................................................................
+      capslock_lamp: {
+        init: 'dark',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'lit',
+            to: 'dark'
+          },
+          {
+            name: 'toggle',
+            from: 'dark',
+            to: 'lit'
+          }
+        ]
+      },
+      //-------------------------------------------------------------------------------------------------------
+      alt_btn: {
+        init: 'released',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'released',
+            to: 'pressed'
+          },
+          {
+            name: 'toggle',
+            from: 'pressed',
+            to: 'released'
+          }
+        ],
+        methods: {
+          onEnterReleased: function() {
+            return this.alt_lamp.goto('dark');
+          },
+          onEnterPressed: function() {
+            return this.alt_lamp.goto('lit');
+          }
+        }
+      },
+      //.......................................................................................................
+      alt_lamp: {
+        init: 'dark',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'lit',
+            to: 'dark'
+          },
+          {
+            name: 'toggle',
+            from: 'dark',
+            to: 'lit'
+          }
+        ]
+      },
+      //-------------------------------------------------------------------------------------------------------
+      altgraph_btn: {
+        init: 'released',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'released',
+            to: 'pressed'
+          },
+          {
+            name: 'toggle',
+            from: 'pressed',
+            to: 'released'
+          }
+        ],
+        methods: {
+          onEnterReleased: function() {
+            return this.altgraph_lamp.goto('dark');
+          },
+          onEnterPressed: function() {
+            _XXX_TMP_toolbox_colors.altgraph_btn = 'red';
+            return this.altgraph_lamp.goto('lit');
+          }
+        }
+      },
+      /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+      //.......................................................................................................
+      altgraph_lamp: {
+        init: 'dark',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'lit',
+            to: 'dark'
+          },
+          {
+            name: 'toggle',
+            from: 'dark',
+            to: 'lit'
+          }
+        ]
+      },
+      //-------------------------------------------------------------------------------------------------------
+      control_btn: {
+        init: 'released',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'released',
+            to: 'pressed'
+          },
+          {
+            name: 'toggle',
+            from: 'pressed',
+            to: 'released'
+          }
+        ],
+        methods: {
+          onEnterReleased: function() {
+            return this.control_lamp.goto('dark');
+          },
+          onEnterPressed: function() {
+            return this.control_lamp.goto('lit');
+          }
+        }
+      },
+      //.......................................................................................................
+      control_lamp: {
+        init: 'dark',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'lit',
+            to: 'dark'
+          },
+          {
+            name: 'toggle',
+            from: 'dark',
+            to: 'lit'
+          }
+        ]
+      },
+      //-------------------------------------------------------------------------------------------------------
+      meta_btn: {
+        init: 'released',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'released',
+            to: 'pressed'
+          },
+          {
+            name: 'toggle',
+            from: 'pressed',
+            to: 'released'
+          }
+        ],
+        methods: {
+          onEnterReleased: function() {
+            return this.meta_lamp.goto('dark');
+          },
+          onEnterPressed: function() {
+            return this.meta_lamp.goto('lit');
+          }
+        }
+      },
+      //.......................................................................................................
+      meta_lamp: {
+        init: 'dark',
+        transitions: [
+          {
+            name: 'toggle',
+            from: 'lit',
+            to: 'dark'
+          },
+          {
+            name: 'toggle',
+            from: 'dark',
+            to: 'lit'
+          }
+        ]
+      }
+    };
   };
 
   //###########################################################################################################
