@@ -1,0 +1,36 @@
+
+body {
+  background-color:       grey; }
+
+.btn {
+  /*width:                  10mm;*/
+  /*height:                 10mm;*/
+  padding:                3mm;
+  margin:                 3mm;
+  border:                 1px solid black;
+ }
+
+ .btn.false {
+  background-color:       transparent; }
+
+ .btn.true {
+  background-color:       lime; }
+
+/* ====================================================================================================== */
+/* TAINT doesn't work yet, use JS `CSS.registerProperty()`
+@property --stop-color {
+  syntax: '<color>';
+  inherits: false;
+  initialValue: 'blue'; } */
+
+button {
+  /*--stop-color: red;*/
+  background-color:  var(--stop-color);
+  transition: --stop-color 1s;
+  /*transition: background-color 1s;*/
+}
+
+button:hover {
+  --stop-color: green;
+}
+
