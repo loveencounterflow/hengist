@@ -2697,8 +2697,6 @@ var types = exports.types = {
   // 'ScrollLock',
   // 'SymbolLock',
   this.Kb = (function() {
-    var _XXX_initialized;
-
     class Kb {
       //---------------------------------------------------------------------------------------------------------
       constructor(cfg) {
@@ -2718,9 +2716,22 @@ var types = exports.types = {
 
         //---------------------------------------------------------------------------------------------------------
         this._set_capslock_state = this._set_capslock_state.bind(this);
-        this._listen_to_key = this._listen_to_key.bind(this);
+        // #---------------------------------------------------------------------------------------------------------
+        // on_push: ( keynames, handler ) =>
+        // keynames  = [ keynames, ] unless isa.list keynames
+        // types     = [ types,    ] unless isa.list types
+        // validate.keywatch_keynames  keynames
+        // validate.keywatch_types     types
+
         //---------------------------------------------------------------------------------------------------------
         this.XXXXXXXXXXXX_foobar = this.XXXXXXXXXXXX_foobar.bind(this);
+        //---------------------------------------------------------------------------------------------------------
+        // µ_DOM_detect_doublekey_events { event_name: 'µKB_doublekey', dt: 350, }
+        this._detect_doublekey_events = this._detect_doublekey_events.bind(this);
+        //---------------------------------------------------------------------------------------------------------
+        this._listen_to_key = this._listen_to_key.bind(this);
+        //---------------------------------------------------------------------------------------------------------
+        this._call_handlers = this._call_handlers.bind(this);
         this.cfg = {...defaults, ...cfg};
         ref = this.cfg.modifier_names;
         for (i = 0, len = ref.length; i < len; i++) {
@@ -2763,54 +2774,6 @@ var types = exports.types = {
           }
         });
         return null;
-      }
-
-      _listen_to_key(name, type, listener) {
-        (() => {
-          var listeners, registry, tag;
-          if (name != null) {
-            validate.keywatch_keyname(name);
-          } else {
-            name = '';
-          }
-          if (type != null) {
-            validate.keywatch_keytype(type);
-          } else {
-            type = '';
-          }
-          // debug '^90009^', name + "\x00" + type
-          tag = `${type}:${name}`;
-          registry = this._registry != null ? this._registry : this._registry = {};
-          listeners = registry[tag] != null ? registry[tag] : registry[tag] = [];
-          return listeners.push(listener);
-        })();
-        if (_XXX_initialized) {
-          //.......................................................................................................
-          // throw new Error '^493841^' unless type is 'down'
-          return null;
-        }
-        _XXX_initialized = true;
-        debug('^2252^', "binding keydown");
-        //.......................................................................................................
-        µ.DOM.on(document, 'keydown', (event) => {
-          var d, i, j, len, len1, listeners, ref, tag;
-          name = event.key;
-          type = 'down';
-          d = freeze({name, type, event});
-          ref = [`${type}:${name}`, `${type}:`, `:${event.key}`, ":"];
-          for (i = 0, len = ref.length; i < len; i++) {
-            tag = ref[i];
-            if ((listeners = this._registry[tag]) == null) {
-              continue;
-            }
-            for (j = 0, len1 = listeners.length; j < len1; j++) {
-              listener = listeners[j];
-              listener(d);
-            }
-          }
-          return null;
-        });
-        return null/* NOTE may return a `remove_listener` method ITF */;
       }
 
       XXXXXXXXXXXX_foobar() {
@@ -2857,24 +2820,148 @@ var types = exports.types = {
         return null;
       }
 
+      _detect_doublekey_events(cfg, handler) {
+        var get_double_key, push, shift, shreg;
+        defaults = {
+          dt: 350
+        };
+        cfg = {...defaults, ...cfg};
+        shreg = [];
+        //.......................................................................................................
+        get_double_key = function() {
+          var R, ref, ref1, ref10, ref11, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
+          if (!((Date.now() - ((ref = (ref1 = shreg[0]) != null ? ref1.t : void 0) != null ? ref : 0)) < cfg.dt)) {
+            return false;
+          }
+          if (((ref2 = shreg[0]) != null ? ref2.dir : void 0) !== 'down') {
+            return false;
+          }
+          if (((ref3 = shreg[1]) != null ? ref3.dir : void 0) !== 'up') {
+            return false;
+          }
+          if (((ref4 = shreg[2]) != null ? ref4.dir : void 0) !== 'down') {
+            return false;
+          }
+          if (((ref5 = shreg[3]) != null ? ref5.dir : void 0) !== 'up') {
+            return false;
+          }
+          if (((((ref8 = shreg[0]) != null ? ref8.name : void 0) !== (ref7 = (ref9 = shreg[1]) != null ? ref9.name : void 0) || ref7 !== (ref6 = (ref10 = shreg[2]) != null ? ref10.name : void 0)) || ref6 !== ((ref11 = shreg[3]) != null ? ref11.name : void 0))) {
+            return false;
+          }
+          R = shreg[3].name;
+          shreg.length = 0;
+          return R;
+        };
+        //.......................................................................................................
+        shift = function() {
+          return shreg.shift();
+        };
+        push = function(dir, event) {
+          var name;
+          name = event.key;
+          shreg.push({
+            dir,
+            name,
+            t: Date.now()
+          });
+          while (shreg.length > 4) {
+            shreg.shift();
+          }
+          if (name = get_double_key()) {
+            handler(event);
+          }
+          return null;
+        };
+        //.......................................................................................................
+        µ.DOM.on(document, 'keydown', (event) => {
+          return push('down', event);
+        });
+        µ.DOM.on(document, 'keyup', (event) => {
+          return push('up', event);
+        });
+        return null;
+      }
+
+      _listen_to_key(name, type, handler) {
+        var base, handlers, tag;
+        /* NOTE catch-all bindings to be implemented later */
+        // if name? then validate.keywatch_keyname name else name = ''
+        // if type? then validate.keywatch_keytype type else type = ''
+        validate.keywatch_keyname(name);
+        validate.keywatch_keytype(type);
+        tag = `${type}:${name}`;
+        handlers = (base = this._registry)[tag] != null ? base[tag] : base[tag] = [];
+        handlers.push(handler);
+        this._add_listener_for_type(type);
+        //.......................................................................................................
+        return null/* NOTE may return a `remove_listener` method ITF */;
+      }
+
+      _call_handlers(type, event) {
+        var d, handler, handlers, i, j, len, len1, name, ref, tag;
+        name = event.key;
+        d = freeze({name, type, event});
+        ref = [`${type}:${event.key}`];
+        /* TAINT avoid to iterate over tags like `':'`, `'down:'` if they are known not to be used */
+        // for tag in [ "#{type}:#{name}", "#{type}:", ":#{event.key}", ":", ]
+        for (i = 0, len = ref.length; i < len; i++) {
+          tag = ref[i];
+          if ((handlers = this._registry[tag]) == null) {
+            continue;
+          }
+          for (j = 0, len1 = handlers.length; j < len1; j++) {
+            handler = handlers[j];
+            handler(d);
+          }
+        }
+        return null;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _add_listener_for_type(type) {
+        var event_name;
+        if (this._initialized_types[type]) {
+          return null;
+        }
+        this._initialized_types[type] = true;
+        debug('^2252^', `binding type ${type}`);
+        //.......................................................................................................
+        switch (type) {
+          case 'up':
+          case 'down':
+            event_name = `key${type}`;
+            µ.DOM.on(document, event_name, (event) => {
+              return this._call_handlers(type, event);
+            });
+            break;
+          case 'double':
+            this._detect_doublekey_events(null, (event) => {
+              return this._call_handlers(type, event);
+            });
+            break;
+          default:
+            µ.DOM.warn(`^4453^ unknown key event type: ${µ.TEXT.rpr(type)}`);
+        }
+        return null/* NOTE may return a `remove_listener` method ITF */;
+      }
+
     };
 
     Kb.prototype._prv_modifiers = {};
 
     Kb.prototype._capslock_active = false;
 
-    //---------------------------------------------------------------------------------------------------------
-    Kb._registry = null;
-
-    // #---------------------------------------------------------------------------------------------------------
-    // on_push: ( keynames, handler ) =>
-    // keynames  = [ keynames, ] unless isa.list keynames
-    // types     = [ types,    ] unless isa.list types
-    // validate.keywatch_keynames  keynames
-    // validate.keywatch_types     types
+    //#########################################################################################################
+    //#########################################################################################################
+    //#########################################################################################################
+    //#########################################################################################################
+    //#########################################################################################################
+    //#########################################################################################################
 
     //---------------------------------------------------------------------------------------------------------
-    _XXX_initialized = false;
+    Kb.prototype._registry = {};
+
+    Kb.prototype._initialized_types = {};
 
     return Kb;
 
@@ -7667,10 +7754,16 @@ function hasOwnProperty(obj, prop) {
       // WARNINGS, NOTIFICATIONS
       //---------------------------------------------------------------------------------------------------------
       _notify(message) {
-        var id, message_box, message_p, style;
+        var body, id, message_box, message_p, style;
         id = 'msgbx49573';
         message_box = this.select(`${id}`, null);
         if (message_box === null) {
+          body = this.select('body', null);
+          /* TAINT body element cannot be found when method is called before document ready, but we could still
+               construct element immediately, append it on document ready */
+          if (body == null) {
+            return;
+          }
           style = "background:#18171d;";
           style += "position:fixed;";
           style += "bottom:0mm;";
@@ -7686,7 +7779,7 @@ function hasOwnProperty(obj, prop) {
           style += "max-height:30mm;";
           style += "overflow-y:scroll;";
           message_box = this.parse_one(`<div id=${id} style='${style}'></div>`);
-          this.append(this.select('body'), message_box);
+          this.append(body, message_box);
         }
         message_p = "<p style='padding-top:3mm;'>";
         message_p += "⚠️&nbsp;<strong>";
