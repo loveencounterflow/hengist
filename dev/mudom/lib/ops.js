@@ -1,5 +1,5 @@
 (function() {
-  var CND, INTERTYPE, Intermatic, log, rpr;
+  var CND, INTERTYPE, Intermatic, handler, log, rpr;
 
   globalThis.µ = require('mudom');
 
@@ -41,21 +41,27 @@
         else µ.DOM.insert_as_last btn, rpr value
     return null
   */
-  µ.KB._listen_to_key('Alt', 'down', (d) => {
-    return log("^22209^ 'Alt', 'down', ", d);
-  });
+  handler = (d) => {
+    return log("^22209^", d);
+  };
 
-  µ.KB._listen_to_key('Alt', null, (d) => {
-    return log("^22209^ 'Alt', null,   ", d);
-  });
+  µ.KB._listen_to_key('Alt', 'down', handler);
 
-  µ.KB._listen_to_key(null, 'down', (d) => {
-    return log("^22209^ null, 'down',  ", d);
-  });
+  µ.KB._listen_to_key('ä', 'down', handler);
 
-  µ.KB._listen_to_key(null, null, (d) => {
-    return log("^22209^ null, null,    ", d);
-  });
+  µ.KB._listen_to_key('Shift', 'up', handler);
+
+  µ.KB._listen_to_key('Shift', 'down', handler);
+
+  µ.KB._listen_to_key('Shift', 'double', handler);
+
+  µ.KB._listen_to_key('Alt', 'double', handler);
+
+  µ.KB._listen_to_key('AltGraph', 'double', handler);
+
+  // µ.KB._listen_to_key 'Alt', null,   ( d ) => log "^22209^ 'Alt', null,   ", d
+// µ.KB._listen_to_key null, 'down',  ( d ) => log "^22209^ null, 'down',  ", d
+// µ.KB._listen_to_key null, null,    ( d ) => log "^22209^ null, null,    ", d
 
 }).call(this);
 
