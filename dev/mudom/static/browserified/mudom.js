@@ -819,7 +819,7 @@ var types = exports.types = {
 
 
 }).call(this,require("buffer").Buffer)
-},{"./checks":3,"./helpers":6,"buffer":16,"fs":14,"path":19}],5:[function(require,module,exports){
+},{"./checks":3,"./helpers":6,"buffer":17,"fs":15,"path":20}],5:[function(require,module,exports){
 (function (Buffer){
 (function() {
   'use strict';
@@ -1105,7 +1105,7 @@ var types = exports.types = {
 
 
 }).call(this,{"isBuffer":require("../../../../../../../../../usr/local/lib/node_modules/browserify/node_modules/is-buffer/index.js")})
-},{"../../../../../../../../../usr/local/lib/node_modules/browserify/node_modules/is-buffer/index.js":18,"./helpers":6}],6:[function(require,module,exports){
+},{"../../../../../../../../../usr/local/lib/node_modules/browserify/node_modules/is-buffer/index.js":19,"./helpers":6}],6:[function(require,module,exports){
 (function() {
   'use strict';
   var inspect, rpr,
@@ -1188,7 +1188,7 @@ var types = exports.types = {
 }).call(this);
 
 
-},{"../loupe.js":9,"util":23}],7:[function(require,module,exports){
+},{"../loupe.js":9,"util":24}],7:[function(require,module,exports){
 (function() {
   'use strict';
   var Multimix, assign, cast, check, declarations, get_rprs_of_tprs, isa, isa_list_of, isa_object_of, isa_optional, jk_equals, jr, js_type_of, rpr, sad, validate, validate_list_of, validate_object_of, validate_optional, xrpr;
@@ -1359,7 +1359,7 @@ var types = exports.types = {
 }).call(this);
 
 
-},{"../deps/jkroso-equals":1,"./checks":3,"./declarations":4,"./declaring":5,"./helpers":6,"./sizing":8,"multimix":13}],8:[function(require,module,exports){
+},{"../deps/jkroso-equals":1,"./checks":3,"./declarations":4,"./declaring":5,"./helpers":6,"./sizing":8,"multimix":14}],8:[function(require,module,exports){
 (function() {
   'use strict';
   var assign, jr, js_type_of, xrpr;
@@ -2640,13 +2640,13 @@ var types = exports.types = {
 })));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"_process":20,"buffer":16,"util":23}],10:[function(require,module,exports){
+},{"_process":21,"buffer":17,"util":24}],10:[function(require,module,exports){
 (function() {
   //-----------------------------------------------------------------------------------------------------------
 
   //===========================================================================================================
   'use strict';
-  var debug, defaults, freeze, log, µ;
+  var debug, defaults, freeze, isa, log, types, validate, validate_optional, µ;
 
   µ = require('./main');
 
@@ -2655,6 +2655,8 @@ var types = exports.types = {
   debug = console.debug;
 
   freeze = Object.freeze;
+
+  ({types, isa, validate, validate_optional} = require('./types'));
 
   //-----------------------------------------------------------------------------------------------------------
   defaults = {
@@ -2695,6 +2697,8 @@ var types = exports.types = {
   // 'ScrollLock',
   // 'SymbolLock',
   this.Kb = (function() {
+    var _XXX_initialized;
+
     class Kb {
       //---------------------------------------------------------------------------------------------------------
       constructor(cfg) {
@@ -2714,6 +2718,7 @@ var types = exports.types = {
 
         //---------------------------------------------------------------------------------------------------------
         this._set_capslock_state = this._set_capslock_state.bind(this);
+        this._listen_to_key = this._listen_to_key.bind(this);
         //---------------------------------------------------------------------------------------------------------
         this.XXXXXXXXXXXX_foobar = this.XXXXXXXXXXXX_foobar.bind(this);
         this.cfg = {...defaults, ...cfg};
@@ -2760,13 +2765,60 @@ var types = exports.types = {
         return null;
       }
 
+      _listen_to_key(name, type, listener) {
+        (() => {
+          var listeners, registry, tag;
+          if (name != null) {
+            validate.keywatch_keyname(name);
+          } else {
+            name = '';
+          }
+          if (type != null) {
+            validate.keywatch_keytype(type);
+          } else {
+            type = '';
+          }
+          // debug '^90009^', name + "\x00" + type
+          tag = `${type}:${name}`;
+          registry = this._registry != null ? this._registry : this._registry = {};
+          listeners = registry[tag] != null ? registry[tag] : registry[tag] = [];
+          return listeners.push(listener);
+        })();
+        if (_XXX_initialized) {
+          //.......................................................................................................
+          // throw new Error '^493841^' unless type is 'down'
+          return null;
+        }
+        _XXX_initialized = true;
+        debug('^2252^', "binding keydown");
+        //.......................................................................................................
+        µ.DOM.on(document, 'keydown', (event) => {
+          var d, i, j, len, len1, listeners, ref, tag;
+          name = event.key;
+          type = 'down';
+          d = freeze({name, type, event});
+          ref = [`${type}:${name}`, `${type}:`, `:${event.key}`, ":"];
+          for (i = 0, len = ref.length; i < len; i++) {
+            tag = ref[i];
+            if ((listeners = this._registry[tag]) == null) {
+              continue;
+            }
+            for (j = 0, len1 = listeners.length; j < len1; j++) {
+              listener = listeners[j];
+              listener(d);
+            }
+          }
+          return null;
+        });
+        return null/* NOTE may return a `remove_listener` method ITF */;
+      }
+
       XXXXXXXXXXXX_foobar() {
         var event_name, handle_kblike_event, i, len, ref;
         //.......................................................................................................
         handle_kblike_event = (event) => {
           var modifier_state;
           modifier_state = this.get_changed_kb_modifier_state(event);
-          // debug '^2287001^', { modifier_state, }
           if (modifier_state !== null) {
             µ.DOM.emit_custom_event('µ_kb_modifier_changed', {
               detail: modifier_state
@@ -2783,8 +2835,9 @@ var types = exports.types = {
         }
         //.......................................................................................................
         µ.DOM.on(document, 'keydown', (event) => {
+          handle_kblike_event(event);
           /* TAINT logic is questionable */
-          if (event.key === 'CapsLock') {
+          if (/* !!!!!!!!!!!!!!!!!!!!!! */event.key === 'CapsLock') {
             this._set_capslock_state(!this._capslock_active);
           } else {
             this._set_capslock_state(event.getModifierState('CapsLock'));
@@ -2793,9 +2846,10 @@ var types = exports.types = {
         });
         //.......................................................................................................
         µ.DOM.on(document, 'keyup', (event) => {
+          handle_kblike_event(event);
           if (event.key === 'CapsLock') {
-            /* TAINT logic is questionable */
-            return null;
+/* TAINT logic is questionable */
+/* !!!!!!!!!!!!!!!!!!!!!! */            return null;
           }
           this._set_capslock_state(event.getModifierState('CapsLock'));
           return null;
@@ -2809,6 +2863,19 @@ var types = exports.types = {
 
     Kb.prototype._capslock_active = false;
 
+    //---------------------------------------------------------------------------------------------------------
+    Kb._registry = null;
+
+    // #---------------------------------------------------------------------------------------------------------
+    // on_push: ( keynames, handler ) =>
+    // keynames  = [ keynames, ] unless isa.list keynames
+    // types     = [ types,    ] unless isa.list types
+    // validate.keywatch_keynames  keynames
+    // validate.keywatch_types     types
+
+    //---------------------------------------------------------------------------------------------------------
+    _XXX_initialized = false;
+
     return Kb;
 
   }).call(this);
@@ -2816,7 +2883,55 @@ var types = exports.types = {
 }).call(this);
 
 
-},{"./main":"mudom"}],11:[function(require,module,exports){
+},{"./main":"mudom","./types":11}],11:[function(require,module,exports){
+(function() {
+  'use strict';
+  this.types = new (require('intertype')).Intertype();
+
+  Object.assign(this, this.types.export());
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // @declare 'keywatch_keytypes', tests:
+  //   "x is a list of keywatch_keytype":     ( x ) -> @isa.list_of 'keywatch_keytype', x
+  //   "x is not empty":                   ( x ) -> not @isa.empty x
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.declare('keywatch_keytype', {
+    tests: {
+      "x is one of 'push', 'toggle', 'double', 'up', 'down": function(x) {
+        return x === 'push' || x === 'toggle' || x === 'double' || x === 'up' || x === 'down';
+      }
+    }
+  });
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // @declare 'keywatch_keynames', tests:
+  //   "x is a list of keywatch_keyname":  ( x ) -> @isa.list_of 'keywatch_keyname', x
+  //   "x is not empty":                   ( x ) -> not @isa.empty x
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.declare('keywatch_keyname', {
+    tests: {
+      "x is a nonempty_text": function(x) {
+        return this.isa.nonempty_text(x);
+      }
+    }
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
+  /* TAINT probably not correct to only check for Element, at least in some cases could be Node as well */
+  this.declare('delement', function(x) {
+    return (x === document) || (x instanceof Element);
+  });
+
+  this.declare('element', function(x) {
+    return x instanceof Element;
+  });
+
+}).call(this);
+
+
+},{"intertype":7}],12:[function(require,module,exports){
 (function (process,global,Buffer){
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -4014,7 +4129,7 @@ var types = exports.types = {
 })));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"_process":20,"buffer":16,"util":23}],12:[function(require,module,exports){
+},{"_process":21,"buffer":17,"util":24}],13:[function(require,module,exports){
 (function() {
   'use strict';
   //===========================================================================================================
@@ -4158,7 +4273,7 @@ var types = exports.types = {
 }).call(this);
 
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function() {
   'use strict';
   var Multimix, module_keywords,
@@ -4287,9 +4402,9 @@ var types = exports.types = {
 }).call(this);
 
 
-},{"./cataloguing":12}],14:[function(require,module,exports){
+},{"./cataloguing":13}],15:[function(require,module,exports){
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -4443,7 +4558,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function (Buffer){
 /*!
  * The buffer module from node.js, for the browser.
@@ -6224,7 +6339,7 @@ function numberIsNaN (obj) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"base64-js":15,"buffer":16,"ieee754":17}],17:[function(require,module,exports){
+},{"base64-js":16,"buffer":17,"ieee754":18}],18:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -6310,7 +6425,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -6333,7 +6448,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 (function (process){
 // .dirname, .basename, and .extname methods are extracted from Node.js v8.11.1,
 // backported and transplited with Babel, with backwards-compat fixes
@@ -6639,7 +6754,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":20}],20:[function(require,module,exports){
+},{"_process":21}],21:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -6825,7 +6940,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -6850,14 +6965,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -7447,20 +7562,18 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":22,"_process":20,"inherits":21}],"mudom":[function(require,module,exports){
+},{"./support/isBuffer":23,"_process":21,"inherits":22}],"mudom":[function(require,module,exports){
 (function() {
   'use strict';
-  var Dom, Text, debug, declare, isa, loupe, misfit, name_of_match_method, types, validate;
+  var Dom, Text, debug, isa, loupe, misfit, name_of_match_method, types, validate;
 
   loupe = require('../loupe.js');
 
   misfit = Symbol('misfit');
 
-  types = new (require('intertype')).Intertype();
-
   debug = console.debug;
 
-  ({isa, validate, declare} = types.export());
+  ({types, isa, validate} = require('./types'));
 
   //-----------------------------------------------------------------------------------------------------------
   name_of_match_method = (function() {
@@ -7476,18 +7589,6 @@ function hasOwnProperty(obj, prop) {
     }
     return null;
   })();
-
-  //===========================================================================================================
-  // TYPES
-  //-----------------------------------------------------------------------------------------------------------
-  /* TAINT probably not correct to only check for Element, at least in some cases could be Node as well */
-  declare('delement', function(x) {
-    return (x === document) || (x instanceof Element);
-  });
-
-  declare('element', function(x) {
-    return x instanceof Element;
-  });
 
   //===========================================================================================================
 
@@ -7701,6 +7802,12 @@ function hasOwnProperty(obj, prop) {
       toggle_class(element, name) {
         validate.element(element);
         return element.classList.toggle(name);
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      swap_class(element, old_name, new_name) {
+        element.classList.remove(old_name);
+        return element.classList.add(new_name);
       }
 
       //---------------------------------------------------------------------------------------------------------
@@ -8037,4 +8144,4 @@ $("#mydiv").append(frag);
 }).call(this);
 
 
-},{"../loupe.js":11,"./kb":10,"intertype":7}]},{},[]);
+},{"../loupe.js":12,"./kb":10,"./types":11}]},{},[]);

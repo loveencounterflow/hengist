@@ -1,0 +1,18 @@
+
+body {
+  background-color:       grey; }
+
+.btn {
+  /*width:                  10mm;*/
+  /*height:                 10mm;*/
+  padding:                3mm;
+  margin:                 3mm;
+  border:                 1px solid black;
+ }
+
+ .btn.false {
+  background-color:       transparent; }
+
+ .btn.true {
+  background-color:       lime; }
+

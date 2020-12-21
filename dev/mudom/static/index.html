@@ -2,27 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-
   <script src='browserified/cnd.js'></script>
   <!-- <script src='browserified/util.js'></script> -->
   <script src='browserified/intertype.js'></script>
   <script src='browserified/intermatic.js'></script>
-  <script>
-    const CND         = require( 'cnd' );
-    const INTERTYPE   = require( 'intertype' );
-    const Intermatic  = require( 'intermatic' );
-    const log         = console.log;
-    log( { Intermatic, } );
-    // log( { INTERTYPE, } );
-    // log( new INTERTYPE.Intertype() );
-    // log( CND.rpr( Array.from( 'abcd' ) ) );
-    log( Array.from( 'abcd' ) );
-    // ### NOTE `require` with local file *must* use file extension
-  </script>
+  <script src='browserified/mudom.js'></script>
+  <script src='ops.js'></script>
+  <link rel="stylesheet" href="reset.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-<h2>* * * * * * * * * * * * * *</h2>
+<div class='btn false' name=Alt>Alt</div>
+<div class='btn false' name=AltGraph>AltGraph</div>
+<div class='btn false' name=Control>Control</div>
+<div class='btn false' name=Meta>Meta</div>
+<div class='btn false' name=Shift>Shift</div>
+<div class='btn false' name=CapsLock>CapsLock</div>
 
 </body>
 </html>
