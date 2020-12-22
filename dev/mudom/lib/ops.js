@@ -60,21 +60,20 @@
       (function(button) {
         var keyname;
         keyname = µ.DOM.get(button, 'name');
-        //.....................................................................................................
         µ.KB._listen_to_key(keyname, 'down', function(d) {
           return update_button(button, keyname, d.state);
         });
-        //.....................................................................................................
         µ.KB._listen_to_key(keyname, 'up', function(d) {
           return update_button(button, keyname, d.state);
         });
-        //.....................................................................................................
-        return µ.KB._listen_to_key(keyname, 'double', function(d) {
+        µ.KB._listen_to_key(keyname, 'double', function(d) {
           return update_button(button, keyname, d.state);
         });
+        //.....................................................................................................
+        return null;
       })(button);
     }
-    log('^44454^', µ.KB._registry);
+    // log '^44454^', µ.KB._registry
     return null;
   });
 
