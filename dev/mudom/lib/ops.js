@@ -1,5 +1,5 @@
 (function() {
-  var CND, INTERTYPE, Intermatic, handler, log, rpr;
+  var CND, INTERTYPE, Intermatic, after, handler, log, rpr, sleep;
 
   globalThis.µ = require('mudom');
 
@@ -12,6 +12,16 @@
   log = console.log;
 
   rpr = CND.rpr;
+
+  after = function(dts, f) {
+    return setTimeout(f, dts * 1000);
+  };
+
+  sleep = function(dts) {
+    return new Promise(function(done) {
+      return after(dts, done);
+    });
+  };
 
   log({Intermatic});
 
