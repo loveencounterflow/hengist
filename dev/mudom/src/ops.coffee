@@ -41,16 +41,12 @@ log Array.from 'abcd'
   for button in µ.DOM.select_all '.btn'
     do ( button ) ->
       keyname = µ.DOM.get button, 'name'
+      µ.KB._listen_to_key keyname, 'down',    ( d ) -> update_button button, keyname, d.state
+      µ.KB._listen_to_key keyname, 'up',      ( d ) -> update_button button, keyname, d.state
+      µ.KB._listen_to_key keyname, 'double',  ( d ) -> update_button button, keyname, d.state
       #.....................................................................................................
-      µ.KB._listen_to_key keyname, 'down', ( d ) ->
-        update_button button, keyname, d.state
-      #.....................................................................................................
-      µ.KB._listen_to_key keyname, 'up', ( d ) ->
-        update_button button, keyname, d.state
-      #.....................................................................................................
-      µ.KB._listen_to_key keyname, 'double', ( d ) ->
-        update_button button, keyname, d.state
-  log '^44454^', µ.KB._registry
+      return null
+  # log '^44454^', µ.KB._registry
   return null
 
 #-----------------------------------------------------------------------------------------------------------
