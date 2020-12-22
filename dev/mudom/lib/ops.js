@@ -41,6 +41,41 @@
         else µ.DOM.insert_as_last btn, rpr value
     return null
   */
+  //-----------------------------------------------------------------------------------------------------------
+  µ.DOM.ready(function() {
+    var button, i, latches, len, ref;
+    latches = {};
+    ref = µ.DOM.select_all('.btn');
+    for (i = 0, len = ref.length; i < len; i++) {
+      button = ref[i];
+      (function(button) {
+        var keyname;
+        keyname = µ.DOM.get(button, 'name');
+        latches[keyname] = false;
+        if (keyname !== ' ') {
+          µ.KB._listen_to_key(keyname, 'down', function(event) {
+            return µ.DOM.swap_class(button, 'false', 'true');
+          });
+          µ.KB._listen_to_key(keyname, 'up', function(event) {
+            return µ.DOM.swap_class(button, 'true', 'false');
+          });
+        }
+        return µ.KB._listen_to_key(keyname, 'double', function(event) {
+          var latched;
+          latched = latches[keyname] = !latches[keyname];
+          if (latched) {
+            µ.DOM.swap_class(button, 'false', 'true');
+          } else {
+            µ.DOM.swap_class(button, 'true', 'false');
+          }
+          return null;
+        });
+      })(button);
+    }
+    return null;
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
   handler = (d) => {
     return log("^22209^", d);
   };
@@ -61,7 +96,8 @@
 
   // µ.KB._listen_to_key 'Alt', null,   ( d ) => log "^22209^ 'Alt', null,   ", d
 // µ.KB._listen_to_key null, 'down',  ( d ) => log "^22209^ null, 'down',  ", d
-// µ.KB._listen_to_key null, null,    ( d ) => log "^22209^ null, null,    ", d
+
+  // µ.KB._listen_to_key null, null,    ( d ) => log "^22209^ null, null,    ", d
 
 }).call(this);
 
