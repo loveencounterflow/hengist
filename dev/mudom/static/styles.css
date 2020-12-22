@@ -10,9 +10,11 @@ body {
   border:                 1px solid black;
  }
 
- .btn.false {
+.btn.up {
   background-color:       transparent; }
 
- .btn.true {
+.btn.down {
   background-color:       lime; }
 
+.btn.double {
+  border:                 2px solid red; }

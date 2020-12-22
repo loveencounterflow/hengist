@@ -38,32 +38,39 @@ log Array.from 'abcd'
 
 #-----------------------------------------------------------------------------------------------------------
 µ.DOM.ready ->
-  latches = {}
   for button in µ.DOM.select_all '.btn'
     do ( button ) ->
-      keyname             = µ.DOM.get button, 'name'
-      latches[ keyname ]  = false
-      if keyname isnt ' '
-        µ.KB._listen_to_key keyname, 'down',    ( event ) -> µ.DOM.swap_class button, 'false', 'true'
-        µ.KB._listen_to_key keyname, 'up',      ( event ) -> µ.DOM.swap_class button, 'true', 'false'
-      µ.KB._listen_to_key keyname, 'double',  ( event ) ->
-        latched = latches[ keyname ] = not latches[ keyname ]
-        if latched  then  µ.DOM.swap_class button, 'false', 'true'
-        else              µ.DOM.swap_class button, 'true',  'false'
-        return null
+      keyname = µ.DOM.get button, 'name'
+      #.....................................................................................................
+      µ.KB._listen_to_key keyname, 'down', ( d ) ->
+        update_button button, keyname, d.state
+      #.....................................................................................................
+      µ.KB._listen_to_key keyname, 'up', ( d ) ->
+        update_button button, keyname, d.state
+      #.....................................................................................................
+      µ.KB._listen_to_key keyname, 'double', ( d ) ->
+        update_button button, keyname, d.state
+  log '^44454^', µ.KB._registry
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-handler = ( d ) => log "^22209^", d
-µ.KB._listen_to_key 'Alt',      'down',   handler
-µ.KB._listen_to_key 'ä',        'down',   handler
-µ.KB._listen_to_key 'Shift',    'up',     handler
-µ.KB._listen_to_key 'Shift',    'down',   handler
-µ.KB._listen_to_key 'Shift',    'double', handler
-µ.KB._listen_to_key 'Alt',      'double', handler
-µ.KB._listen_to_key 'AltGraph', 'double', handler
-# µ.KB._listen_to_key 'Alt', null,   ( d ) => log "^22209^ 'Alt', null,   ", d
-# µ.KB._listen_to_key null, 'down',  ( d ) => log "^22209^ null, 'down',  ", d
+update_button = ( button, name, state ) =>
+  text    = "#{name} "
+  text   += ( k for k, v of state when v ).join ' '
+  classes = "btn #{text}"
+  µ.DOM.set button, 'class', classes
+  button.innerHTML = text
+  return null
+
+# µ.KB._listen_to_key 'Alt',      'down',   handler
+# µ.KB._listen_to_key 'ä',        'down',   handler
+# µ.KB._listen_to_key 'Shift',    'up',     handler
+# µ.KB._listen_to_key 'Shift',    'down',   handler
+# µ.KB._listen_to_key 'Shift',    'double', handler
+# µ.KB._listen_to_key 'Alt',      'double', handler
+# µ.KB._listen_to_key 'AltGraph', 'double', handler
+# # µ.KB._listen_to_key 'Alt', null,   ( d ) => log "^22209^ 'Alt', null,   ", d
+# # µ.KB._listen_to_key null, 'down',  ( d ) => log "^22209^ null, 'down',  ", d
 
 
 # µ.KB._listen_to_key null, null,    ( d ) => log "^22209^ null, null,    ", d
