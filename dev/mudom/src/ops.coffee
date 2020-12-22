@@ -5,6 +5,9 @@ INTERTYPE                 = require 'intertype'
 Intermatic                = require 'intermatic'
 log                       = console.log;
 rpr                       = CND.rpr
+after                     = ( dts, f ) -> setTimeout f, dts * 1000
+sleep                     = ( dts ) -> new Promise ( done ) -> after dts, done
+
 
 log { Intermatic, }
 # log { INTERTYPE, }
@@ -64,5 +67,7 @@ handler = ( d ) => log "^22209^", d
 
 
 # µ.KB._listen_to_key null, null,    ( d ) => log "^22209^ null, null,    ", d
+
+
 
 
