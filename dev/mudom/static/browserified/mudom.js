@@ -2924,11 +2924,7 @@ var types = exports.types = {
             break;
           case 'slatch':
             slatch = (state.slatch != null ? state.slatch : state.slatch = false);
-            log('^298^', {
-              slatch,
-              type: event.type,
-              skip_next_keyup: entry.skip_next_keyup
-            });
+            // log '^298^', xxx_count, { slatch, type: event.type, skip_next_keyup: entry.skip_next_keyup, }
             if ((event.type === 'keydown') && (slatch === false)) {
               state.slatch = true;
               entry.skip_next_keyup = true;
