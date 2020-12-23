@@ -2661,6 +2661,11 @@ var types = exports.types = {
   //-----------------------------------------------------------------------------------------------------------
   defaults = {
     //---------------------------------------------------------------------------------------------------------
+    latch: {
+      dt: 350 // time in milliseconds between first and last key event to trigger latching
+    },
+    
+    //---------------------------------------------------------------------------------------------------------
     kblike_eventnames: [
       // ### TAINT not all of these events are needed
       'click',
@@ -2726,8 +2731,7 @@ var types = exports.types = {
         //---------------------------------------------------------------------------------------------------------
         this.XXXXXXXXXXXX_foobar = this.XXXXXXXXXXXX_foobar.bind(this);
         //---------------------------------------------------------------------------------------------------------
-        // µ_DOM_detect_doublekey_events { event_name: 'µKB_doublekey', dt: 350, }
-        this._detect_doublekey_events = this._detect_doublekey_events.bind(this);
+        this._detect_tlatch_events = this._detect_tlatch_events.bind(this);
         //---------------------------------------------------------------------------------------------------------
         this._listen_to_key = this._listen_to_key.bind(this);
         //---------------------------------------------------------------------------------------------------------
@@ -2820,54 +2824,50 @@ var types = exports.types = {
         return null;
       }
 
-      _detect_doublekey_events(cfg, callback) {
-        var get_double_key, push, shift, shreg;
-        defaults = {
-          dt: 350
-        };
-        cfg = {...defaults, ...cfg};
-        shreg = [];
-        //.......................................................................................................
-        get_double_key = function() {
-          var R, ref, ref1, ref10, ref11, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
-          if (!((Date.now() - ((ref = (ref1 = shreg[0]) != null ? ref1.t : void 0) != null ? ref : 0)) < cfg.dt)) {
-            return null;
-          }
-          if (((ref2 = shreg[0]) != null ? ref2.dir : void 0) !== 'down') {
-            return null;
-          }
-          if (((ref3 = shreg[1]) != null ? ref3.dir : void 0) !== 'up') {
-            return null;
-          }
-          if (((ref4 = shreg[2]) != null ? ref4.dir : void 0) !== 'down') {
-            return null;
-          }
-          if (((ref5 = shreg[3]) != null ? ref5.dir : void 0) !== 'up') {
-            return null;
-          }
-          if (((((ref8 = shreg[0]) != null ? ref8.name : void 0) !== (ref7 = (ref9 = shreg[1]) != null ? ref9.name : void 0) || ref7 !== (ref6 = (ref10 = shreg[2]) != null ? ref10.name : void 0)) || ref6 !== ((ref11 = shreg[3]) != null ? ref11.name : void 0))) {
-            return null;
-          }
-          R = shreg[3].name;
-          shreg.length = 0;
-          return R;
-        };
-        //.......................................................................................................
+      //---------------------------------------------------------------------------------------------------------
+      _get_double_key() {
+        var R, ref, ref1, ref10, ref11, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
+        if (!((Date.now() - ((ref = (ref1 = this._shreg[0]) != null ? ref1.t : void 0) != null ? ref : 0)) < this.cfg.latch.dt)) {
+          return null;
+        }
+        if (((ref2 = this._shreg[0]) != null ? ref2.dir : void 0) !== 'down') {
+          return null;
+        }
+        if (((ref3 = this._shreg[1]) != null ? ref3.dir : void 0) !== 'up') {
+          return null;
+        }
+        if (((ref4 = this._shreg[2]) != null ? ref4.dir : void 0) !== 'down') {
+          return null;
+        }
+        if (((ref5 = this._shreg[3]) != null ? ref5.dir : void 0) !== 'up') {
+          return null;
+        }
+        if (((((ref8 = this._shreg[0]) != null ? ref8.name : void 0) !== (ref7 = (ref9 = this._shreg[1]) != null ? ref9.name : void 0) || ref7 !== (ref6 = (ref10 = this._shreg[2]) != null ? ref10.name : void 0)) || ref6 !== ((ref11 = this._shreg[3]) != null ? ref11.name : void 0))) {
+          return null;
+        }
+        R = this._shreg[3].name;
+        this._shreg.length = 0;
+        return R;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _detect_latch_events(callback) {
+        var push, shift;
         shift = function() {
-          return shreg.shift();
+          return this._shreg.shift();
         };
-        push = function(dir, event) {
+        push = (dir, event) => {
           var name;
           name = event.key;
-          shreg.push({
+          this._shreg.push({
             dir,
             name,
             t: Date.now()
           });
-          while (shreg.length > 4) {
-            shreg.shift();
+          while (this._shreg.length > 4) {
+            this._shreg.shift();
           }
-          if (name === get_double_key()) {
+          if (name === this._get_double_key(this._shreg)) {
             callback(event);
           }
           return null;
@@ -2878,6 +2878,19 @@ var types = exports.types = {
         });
         µ.DOM.on(document, 'keyup', (event) => {
           return push('up', event);
+        });
+        return null;
+      }
+
+      _detect_tlatch_events(name, callback) {
+        var base, entry, state;
+        entry = (base = this._registry)[name] != null ? base[name] : base[name] = {};
+        state = entry.state != null ? entry.state : entry.state = {};
+        µ.DOM.on(document, 'keydown', (event) => {
+          return state.tlatch = !state.latch;
+        });
+        µ.DOM.on(document, 'keyup', (event) => {
+          return state.tlatch = state.latch;
         });
         return null;
       }
@@ -2893,7 +2906,7 @@ var types = exports.types = {
         state = entry.state != null ? entry.state : entry.state = {};
         handlers = entry[behavior] != null ? entry[behavior] : entry[behavior] = [];
         handlers.push(handler);
-        this._add_listener_for_behavior(behavior);
+        this._add_listener_for_behavior(behavior, name);
         //.......................................................................................................
         return null/* NOTE may return a `remove_listener` method ITF */;
       }
@@ -2924,7 +2937,6 @@ var types = exports.types = {
             break;
           case 'toggle':
             toggle = (state.toggle != null ? state.toggle : state.toggle = false);
-            // log '^298^', xxx_count, { toggle, type: event.type, skip_next_keyup: entry.skip_next_keyup, }
             if ((event.type === 'keydown') && (toggle === false)) {
               state.toggle = true;
               entry.skip_next_keyup = true;
@@ -2949,13 +2961,12 @@ var types = exports.types = {
       }
 
       //---------------------------------------------------------------------------------------------------------
-      _add_listener_for_behavior(behavior) {
+      _add_listener_for_behavior(behavior, keyname) {
         var event_name;
         if (this._initialized_types[behavior]) {
           return null;
         }
         this._initialized_types[behavior] = true;
-        debug('^2252^', `binding behavior ${behavior}`);
         //.......................................................................................................
         switch (behavior) {
           case 'up':
@@ -2966,7 +2977,12 @@ var types = exports.types = {
             });
             break;
           case 'latch':
-            this._detect_doublekey_events(null, (event) => {
+            this._detect_latch_events((event) => {
+              return this._call_handlers(behavior, event);
+            });
+            break;
+          case 'tlatch':
+            this._detect_tlatch_events(keyname, (event) => {
               return this._call_handlers(behavior, event);
             });
             break;
@@ -3002,6 +3018,8 @@ var types = exports.types = {
 
     Kb.prototype._initialized_types = {};
 
+    Kb.prototype._shreg = [];
+
     return Kb;
 
   }).call(this);
@@ -3024,8 +3042,8 @@ var types = exports.types = {
   //-----------------------------------------------------------------------------------------------------------
   this.declare('keywatch_keytype', {
     tests: {
-      "x is one of 'toggle', 'latch', 'up', 'down": function(x) {
-        return x === 'toggle' || x === 'latch' || x === 'up' || x === 'down';
+      "x is one of 'toggle', 'latch', 'tlatch', 'up', 'down": function(x) {
+        return x === 'toggle' || x === 'latch' || x === 'tlatch' || x === 'up' || x === 'down';
       }
     }
   });

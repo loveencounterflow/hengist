@@ -84,8 +84,10 @@
                   case 'both':
                     keys = ['up', 'down', 'toggle', 'latch'];
                     break;
+                  case 'tlatch':
+                    keys = ['up', 'down', 'tlatch'];
+                    break;
                   default:
-                    // when 'tlatch' then  keys = [ 'up', 'down', 'tlatch', ]
                     keys = ['up', 'down'];
                 }
                 update_button(button, keyname, d.state, keys);
