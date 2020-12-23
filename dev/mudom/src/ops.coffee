@@ -41,7 +41,7 @@ sleep                     = ( dts ) -> new Promise ( done ) -> after dts, done
                 when 'toggle' then  keys = [ 'up', 'down', 'toggle', ]
                 when 'latch'  then  keys = [ 'up', 'down', 'latch', ]
                 when 'both'   then  keys = [ 'up', 'down', 'toggle', 'latch', ]
-                # when 'tlatch' then  keys = [ 'up', 'down', 'tlatch', ]
+                when 'tlatch' then  keys = [ 'up', 'down', 'tlatch', ]
                 else                keys = [ 'up', 'down', ]
               update_button button, keyname, d.state, keys
             return null
