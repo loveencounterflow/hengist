@@ -64,7 +64,7 @@
 //.......................................................................................................
       for (i = 0, len = keynames.length; i < len; i++) {
         keyname = keynames[i];
-        ref = ['up', 'down', 'slatch', 'dlatch'];
+        ref = ['up', 'down', 'toggle', 'dlatch'];
         for (j = 0, len1 = ref.length; j < len1; j++) {
           behavior = ref[j];
           ((keyname, behavior) => {
@@ -78,14 +78,14 @@
                   case 'none':
                     keys = ['up', 'down'];
                     break;
-                  case 'slatch':
-                    keys = ['up', 'down', 'slatch'];
+                  case 'toggle':
+                    keys = ['up', 'down', 'toggle'];
                     break;
                   case 'dlatch':
                     keys = ['up', 'down', 'dlatch'];
                     break;
                   case 'both':
-                    keys = ['up', 'down', 'slatch', 'dlatch'];
+                    keys = ['up', 'down', 'toggle', 'dlatch'];
                 }
                 update_button(button, keyname, d.state, keys);
               }

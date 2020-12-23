@@ -2899,7 +2899,7 @@ var types = exports.types = {
       }
 
       _call_handlers(behavior, event) {
-        var d, entry, handler, handlers, i, len, name, slatch, state;
+        var d, entry, handler, handlers, i, len, name, state, toggle;
         name = event.key;
         entry = this._registry[name];
         if (entry == null) {
@@ -2922,17 +2922,17 @@ var types = exports.types = {
           case 'dlatch':
             state.dlatch = !state.dlatch;
             break;
-          case 'slatch':
-            slatch = (state.slatch != null ? state.slatch : state.slatch = false);
-            // log '^298^', xxx_count, { slatch, type: event.type, skip_next_keyup: entry.skip_next_keyup, }
-            if ((event.type === 'keydown') && (slatch === false)) {
-              state.slatch = true;
+          case 'toggle':
+            toggle = (state.toggle != null ? state.toggle : state.toggle = false);
+            // log '^298^', xxx_count, { toggle, type: event.type, skip_next_keyup: entry.skip_next_keyup, }
+            if ((event.type === 'keydown') && (toggle === false)) {
+              state.toggle = true;
               entry.skip_next_keyup = true;
-            } else if ((event.type === 'keyup') && (slatch === true)) {
+            } else if ((event.type === 'keyup') && (toggle === true)) {
               if (entry.skip_next_keyup) {
                 entry.skip_next_keyup = false;
               } else {
-                state.slatch = false;
+                state.toggle = false;
               }
             }
         }
@@ -2970,7 +2970,7 @@ var types = exports.types = {
               return this._call_handlers(behavior, event);
             });
             break;
-          case 'slatch':
+          case 'toggle':
             µ.DOM.on(document, 'keyup', (event) => {
               return this._call_handlers(behavior, event);
             });
@@ -3024,8 +3024,8 @@ var types = exports.types = {
   //-----------------------------------------------------------------------------------------------------------
   this.declare('keywatch_keytype', {
     tests: {
-      "x is one of 'slatch', 'dlatch', 'up', 'down": function(x) {
-        return x === 'slatch' || x === 'dlatch' || x === 'up' || x === 'down';
+      "x is one of 'toggle', 'dlatch', 'up', 'down": function(x) {
+        return x === 'toggle' || x === 'dlatch' || x === 'up' || x === 'down';
       }
     }
   });
