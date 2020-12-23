@@ -1,40 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>µDOM/KB Keyboard Events Demo</title>
+  <meta charset="utf-8">
+  <script src='browserified/cnd.js'></script>
+  <!-- <script src='browserified/util.js'></script> -->
+  <script src='browserified/intertype.js'></script>
+  <script src='browserified/intermatic.js'></script>
+  <script src='browserified/mudom.js'></script>
+  <script src='ops.js'></script>
+  <link rel="stylesheet" href="reset.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<h1>µDOM/KB Keyboard Events Demo</h1>
+<ol>
 
-# Yo.
+  <li>Hit any of the below indicated keys.</li>
 
-## Welcome to GitHub Pages
+  <li>A red border is shown for the <code class=down>down</code> state as long as a key is pressed.</li>
 
-You can use the [editor on GitHub](https://github.com/loveencounterflow/hengist/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+  <li>When the key is released, a grey border is shown for the <code class=up>up</code> state.</li>
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+  <li>Each key has a 'single latch' state (<code class=slatch>slatch</code>) which is indicated by a yellow
+    glow. Single latches work like the CapsLock key: when off, pressing a key once will turn it on until the
+    same key is pressed again.</li>
 
-### Markdown
+  <li>Each key also has a 'double latch' (<code class=dlatch>dlatch</code>) state which is activated when a
+  key is rapidly tapped twice.</li>
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+  <li>No effort has been made to cleanly separate the single and double latch behaviors; as it stands, an
+  element using both will temporarily switch to the opposite single latch state whenever a double latch is
+  toggled, before then returning to its original single latch (and the opposite double latch) state. This is
+  probably too confusing for most uses; therefore, prefer to either use single or double latching, but not
+  both at the same time.</li>
 
-```markdown
-Syntax highlighted code block
+  <li>Observe though that the way single and double latching work, they do mimik the behavior of the
+  CapsLock key; thus, the CapsLock status of the keyboard should always be in lockstep with the single latch
+  status of the CapsLock row below; now you can go and switch something else by doing a double-tap on that
+  key.</li>
 
-# Header 1
-## Header 2
-### Header 3
+</ol>
 
-- Bulleted
-- List
+<table>
+<tr><th>None</th><th>Single Latch</th><th>Double Latch</th><th>Both</th></tr>
+<tr><td id=b10 class='btn up' latching=none name=Alt>Alt           </td><td id=b11 class='btn up' latching=slatch name=Alt>Alt           </td><td id=b12 class='btn up' latching=dlatch name=Alt>Alt           </td><td id=b13 class='btn up' latching=both name=Alt>Alt           </td></tr>
+<tr><td id=b14 class='btn up' latching=none name=AltGraph>AltGraph </td><td id=b15 class='btn up' latching=slatch name=AltGraph>AltGraph </td><td id=b16 class='btn up' latching=dlatch name=AltGraph>AltGraph </td><td id=b17 class='btn up' latching=both name=AltGraph>AltGraph </td></tr>
+<tr><td id=b18 class='btn up' latching=none name=Control>Control   </td><td id=b19 class='btn up' latching=slatch name=Control>Control   </td><td id=b20 class='btn up' latching=dlatch name=Control>Control   </td><td id=b21 class='btn up' latching=both name=Control>Control   </td></tr>
+<tr><td id=b22 class='btn up' latching=none name=Meta>Meta         </td><td id=b23 class='btn up' latching=slatch name=Meta>Meta         </td><td id=b24 class='btn up' latching=dlatch name=Meta>Meta         </td><td id=b25 class='btn up' latching=both name=Meta>Meta         </td></tr>
+<tr><td id=b26 class='btn up' latching=none name=Shift>Shift       </td><td id=b27 class='btn up' latching=slatch name=Shift>Shift       </td><td id=b28 class='btn up' latching=dlatch name=Shift>Shift       </td><td id=b29 class='btn up' latching=both name=Shift>Shift       </td></tr>
+<tr><td id=b30 class='btn up' latching=none name=CapsLock>CapsLock </td><td id=b31 class='btn up' latching=slatch name=CapsLock>CapsLock </td><td id=b32 class='btn up' latching=dlatch name=CapsLock>CapsLock </td><td id=b33 class='btn up' latching=both name=CapsLock>CapsLock </td></tr>
+<tr><td id=b34 class='btn up' latching=none name=Space>Space       </td><td id=b35 class='btn up' latching=slatch name=Space>Space       </td><td id=b36 class='btn up' latching=dlatch name=Space>Space       </td><td id=b37 class='btn up' latching=both name=Space>Space       </td></tr>
+</table>
 
-1. Numbered
-2. List
+</body>
+</html>
 
-**Bold** and _Italic_ and `Code` text
 
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/loveencounterflow/hengist/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
