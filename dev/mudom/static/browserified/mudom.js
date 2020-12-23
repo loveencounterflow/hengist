@@ -2919,8 +2919,8 @@ var types = exports.types = {
             state.up = false;
             state.down = true;
             break;
-          case 'dlatch':
-            state.dlatch = !state.dlatch;
+          case 'latch':
+            state.latch = !state.latch;
             break;
           case 'toggle':
             toggle = (state.toggle != null ? state.toggle : state.toggle = false);
@@ -2965,7 +2965,7 @@ var types = exports.types = {
               return this._call_handlers(behavior, event);
             });
             break;
-          case 'dlatch':
+          case 'latch':
             this._detect_doublekey_events(null, (event) => {
               return this._call_handlers(behavior, event);
             });
@@ -3024,8 +3024,8 @@ var types = exports.types = {
   //-----------------------------------------------------------------------------------------------------------
   this.declare('keywatch_keytype', {
     tests: {
-      "x is one of 'toggle', 'dlatch', 'up', 'down": function(x) {
-        return x === 'toggle' || x === 'dlatch' || x === 'up' || x === 'down';
+      "x is one of 'toggle', 'latch', 'up', 'down": function(x) {
+        return x === 'toggle' || x === 'latch' || x === 'up' || x === 'down';
       }
     }
   });
