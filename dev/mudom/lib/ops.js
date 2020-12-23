@@ -75,9 +75,6 @@
               for (k = 0, len2 = ref1.length; k < len2; k++) {
                 button = ref1[k];
                 switch (µ.DOM.get(button, 'latching')) {
-                  case 'none':
-                    keys = ['up', 'down'];
-                    break;
                   case 'toggle':
                     keys = ['up', 'down', 'toggle'];
                     break;
@@ -86,6 +83,10 @@
                     break;
                   case 'both':
                     keys = ['up', 'down', 'toggle', 'latch'];
+                    break;
+                  default:
+                    // when 'tlatch' then  keys = [ 'up', 'down', 'tlatch', ]
+                    keys = ['up', 'down'];
                 }
                 update_button(button, keyname, d.state, keys);
               }
