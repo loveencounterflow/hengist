@@ -66,7 +66,10 @@
         µ.KB._listen_to_key(keyname, 'up', function(d) {
           return update_button(button, keyname, d.state);
         });
-        µ.KB._listen_to_key(keyname, 'double', function(d) {
+        µ.KB._listen_to_key(keyname, 'dlatch', function(d) {
+          return update_button(button, keyname, d.state);
+        });
+        µ.KB._listen_to_key(keyname, 'slatch', function(d) {
           return update_button(button, keyname, d.state);
         });
         //.....................................................................................................
@@ -102,9 +105,9 @@
 // µ.KB._listen_to_key 'ä',        'down',   handler
 // µ.KB._listen_to_key 'Shift',    'up',     handler
 // µ.KB._listen_to_key 'Shift',    'down',   handler
-// µ.KB._listen_to_key 'Shift',    'double', handler
-// µ.KB._listen_to_key 'Alt',      'double', handler
-// µ.KB._listen_to_key 'AltGraph', 'double', handler
+// µ.KB._listen_to_key 'Shift',    'dlatch', handler
+// µ.KB._listen_to_key 'Alt',      'dlatch', handler
+// µ.KB._listen_to_key 'AltGraph', 'dlatch', handler
 // # µ.KB._listen_to_key 'Alt', null,   ( d ) => log "^22209^ 'Alt', null,   ", d
 // # µ.KB._listen_to_key null, 'down',  ( d ) => log "^22209^ null, 'down',  ", d
 

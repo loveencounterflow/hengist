@@ -2899,12 +2899,14 @@ var types = exports.types = {
       }
 
       _call_handlers(behavior, event) {
-        var d, entry, handler, handlers, i, len, name, state;
+        var d, entry, handler, handlers, i, len, name, slatch, state;
         name = event.key;
-        if ((entry = this._registry[name]) == null) {
+        entry = this._registry[name];
+        if (entry == null) {
           return null;
         }
-        if ((handlers = entry[behavior]) == null) {
+        handlers = entry[behavior];
+        if (handlers == null) {
           return null;
         }
         state = entry.state;
@@ -2917,9 +2919,28 @@ var types = exports.types = {
             state.up = false;
             state.down = true;
             break;
-          case 'double':
-            state.double = !state.double;
+          case 'dlatch':
+            state.dlatch = !state.dlatch;
+            break;
+          case 'slatch':
+            slatch = (state.slatch != null ? state.slatch : state.slatch = false);
+            log('^298^', {
+              slatch,
+              type: event.type,
+              skip_next_keyup: entry.skip_next_keyup
+            });
+            if ((event.type === 'keydown') && (slatch === false)) {
+              state.slatch = true;
+              entry.skip_next_keyup = true;
+            } else if ((event.type === 'keyup') && (slatch === true)) {
+              if (entry.skip_next_keyup) {
+                entry.skip_next_keyup = false;
+              } else {
+                state.slatch = false;
+              }
+            }
         }
+        //.......................................................................................................
         state = freeze({...state});
         d = freeze({name, behavior, state, event});
         for (i = 0, len = handlers.length; i < len; i++) {
@@ -2948,8 +2969,16 @@ var types = exports.types = {
               return this._call_handlers(behavior, event);
             });
             break;
-          case 'double':
+          case 'dlatch':
             this._detect_doublekey_events(null, (event) => {
+              return this._call_handlers(behavior, event);
+            });
+            break;
+          case 'slatch':
+            µ.DOM.on(document, 'keyup', (event) => {
+              return this._call_handlers(behavior, event);
+            });
+            µ.DOM.on(document, 'keydown', (event) => {
               return this._call_handlers(behavior, event);
             });
             break;
@@ -2999,8 +3028,8 @@ var types = exports.types = {
   //-----------------------------------------------------------------------------------------------------------
   this.declare('keywatch_keytype', {
     tests: {
-      "x is one of 'push', 'toggle', 'double', 'up', 'down": function(x) {
-        return x === 'push' || x === 'toggle' || x === 'double' || x === 'up' || x === 'down';
+      "x is one of 'slatch', 'dlatch', 'up', 'down": function(x) {
+        return x === 'slatch' || x === 'dlatch' || x === 'up' || x === 'down';
       }
     }
   });
