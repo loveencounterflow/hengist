@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# home="$(realpath "$(realpath "${BASH_SOURCE[0]}" | xargs dirname)"/.)"
+# cd "$home"
+# set -x
+
+watchndo ~/jzr/mudom/lib '( cd ~/jzr/mudom && yalc push ) && browserify -r ''mudom'' -o ''static/browserified/mudom.js'''
+
+
+
