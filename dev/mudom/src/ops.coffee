@@ -43,7 +43,8 @@ log Array.from 'abcd'
       keyname = µ.DOM.get button, 'name'
       µ.KB._listen_to_key keyname, 'down',    ( d ) -> update_button button, keyname, d.state
       µ.KB._listen_to_key keyname, 'up',      ( d ) -> update_button button, keyname, d.state
-      µ.KB._listen_to_key keyname, 'double',  ( d ) -> update_button button, keyname, d.state
+      µ.KB._listen_to_key keyname, 'dlatch',  ( d ) -> update_button button, keyname, d.state
+      µ.KB._listen_to_key keyname, 'slatch',  ( d ) -> update_button button, keyname, d.state
       #.....................................................................................................
       return null
   # log '^44454^', µ.KB._registry
@@ -62,9 +63,9 @@ update_button = ( button, name, state ) =>
 # µ.KB._listen_to_key 'ä',        'down',   handler
 # µ.KB._listen_to_key 'Shift',    'up',     handler
 # µ.KB._listen_to_key 'Shift',    'down',   handler
-# µ.KB._listen_to_key 'Shift',    'double', handler
-# µ.KB._listen_to_key 'Alt',      'double', handler
-# µ.KB._listen_to_key 'AltGraph', 'double', handler
+# µ.KB._listen_to_key 'Shift',    'dlatch', handler
+# µ.KB._listen_to_key 'Alt',      'dlatch', handler
+# µ.KB._listen_to_key 'AltGraph', 'dlatch', handler
 # # µ.KB._listen_to_key 'Alt', null,   ( d ) => log "^22209^ 'Alt', null,   ", d
 # # µ.KB._listen_to_key null, 'down',  ( d ) => log "^22209^ null, 'down',  ", d
 

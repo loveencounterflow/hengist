@@ -7,14 +7,17 @@ body {
   /*height:                 10mm;*/
   padding:                3mm;
   margin:                 3mm;
-  border:                 1px solid black;
- }
+  border:                 5px solid #0005; }
 
 .btn.up {
   background-color:       transparent; }
 
 .btn.down {
+  border-color:           red; }
+
+.btn.dlatch {
   background-color:       lime; }
 
-.btn.double {
-  border:                 2px solid red; }
+.btn.slatch {
+  box-shadow:             inset 0 0 20px 2px #ffff00, 0 0 20px 10px #ffff00; }
+
