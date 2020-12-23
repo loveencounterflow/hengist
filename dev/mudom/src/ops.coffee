@@ -38,10 +38,11 @@ sleep                     = ( dts ) -> new Promise ( done ) -> after dts, done
           µ.KB._listen_to_key keyname, behavior, ( d ) =>
             for button in µ.DOM.select_all ".btn[name=#{keyname}]"
               switch µ.DOM.get button, 'latching'
-                when 'none'   then  keys = [ 'up', 'down', ]
                 when 'toggle' then  keys = [ 'up', 'down', 'toggle', ]
                 when 'latch'  then  keys = [ 'up', 'down', 'latch', ]
                 when 'both'   then  keys = [ 'up', 'down', 'toggle', 'latch', ]
+                # when 'tlatch' then  keys = [ 'up', 'down', 'tlatch', ]
+                else                keys = [ 'up', 'down', ]
               update_button button, keyname, d.state, keys
             return null
           #.................................................................................................
