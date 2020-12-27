@@ -50,17 +50,12 @@ sleep                     = ( dts ) -> new Promise ( done ) -> after dts, done
           when 'toggle'     then buttons.filter ( x ) => ( µ.DOM.get x, 'latching' ) in [ 'both', 'toggle', ]
           when 'latch'      then buttons.filter ( x ) => ( µ.DOM.get x, 'latching' ) in [ 'both', 'latch',  ]
           when 'tlatch'     then buttons.filter ( x ) => ( µ.DOM.get x, 'latching' ) is 'tlatch'
-        # debug '^ops@338^', { keyname, behavior, buttons, }
         for button in buttons
           do ( keyname, behavior, button ) =>
-            #...............................................................................................
             µ.KB._listen_to_key keyname, behavior, ( d ) =>
-              if behavior is 'latch'
-                debug '^ops@338^', { keyname, behavior, state: d.state, d, }
               update_button button, keyname, behavior, d.state
               return null
             return null
-          #.................................................................................................
     return null
   #.........................................................................................................
   return null
