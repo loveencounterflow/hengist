@@ -2646,7 +2646,8 @@ var types = exports.types = {
 
   //===========================================================================================================
   'use strict';
-  var debug, defaults, freeze, isa, log, types, validate, validate_optional, µ;
+  var debug, defaults, freeze, isa, log, ref, types, validate, validate_optional, µ,
+    boundMethodCheck = function(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new Error('Bound instance method accessed before binding'); } };
 
   µ = require('./main');
 
@@ -2701,8 +2702,8 @@ var types = exports.types = {
   // 'NumLock',
   // 'ScrollLock',
   // 'SymbolLock',
-  this.Kb = (function() {
-    class Kb {
+  this._Kb = (function() {
+    class _Kb {
       //---------------------------------------------------------------------------------------------------------
       constructor(cfg) {
         var i, len, modifier_name, ref;
@@ -2733,9 +2734,9 @@ var types = exports.types = {
         //---------------------------------------------------------------------------------------------------------
         this._detect_tlatch_events = this._detect_tlatch_events.bind(this);
         //---------------------------------------------------------------------------------------------------------
-        this._listen_to_key = this._listen_to_key.bind(this);
-        //---------------------------------------------------------------------------------------------------------
         this._call_handlers = this._call_handlers.bind(this);
+        //---------------------------------------------------------------------------------------------------------
+        this._listen_to_key = this._listen_to_key.bind(this);
         this.cfg = {...defaults, ...cfg};
         ref = this.cfg.modifier_names;
         for (i = 0, len = ref.length; i < len; i++) {
@@ -2781,7 +2782,7 @@ var types = exports.types = {
       }
 
       XXXXXXXXXXXX_foobar() {
-        var event_name, handle_kblike_event, i, len, ref;
+        var eventname, handle_kblike_event, i, len, ref;
         //.......................................................................................................
         handle_kblike_event = (event) => {
           var modifier_state;
@@ -2797,8 +2798,8 @@ var types = exports.types = {
         ref = this.cfg.kblike_eventnames;
         //.......................................................................................................
         for (i = 0, len = ref.length; i < len; i++) {
-          event_name = ref[i];
-          µ.DOM.on(document, event_name, handle_kblike_event);
+          eventname = ref[i];
+          µ.DOM.on(document, eventname, handle_kblike_event);
         }
         //.......................................................................................................
         µ.DOM.on(document, 'keydown', (event) => {
@@ -2825,61 +2826,20 @@ var types = exports.types = {
       }
 
       //---------------------------------------------------------------------------------------------------------
-      _get_double_key() {
-        var R, ref, ref1, ref10, ref11, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
-        if (!((Date.now() - ((ref = (ref1 = this._shreg[0]) != null ? ref1.t : void 0) != null ? ref : 0)) < this.cfg.latch.dt)) {
-          return null;
-        }
-        if (((ref2 = this._shreg[0]) != null ? ref2.dir : void 0) !== 'down') {
-          return null;
-        }
-        if (((ref3 = this._shreg[1]) != null ? ref3.dir : void 0) !== 'up') {
-          return null;
-        }
-        if (((ref4 = this._shreg[2]) != null ? ref4.dir : void 0) !== 'down') {
-          return null;
-        }
-        if (((ref5 = this._shreg[3]) != null ? ref5.dir : void 0) !== 'up') {
-          return null;
-        }
-        if (((((ref8 = this._shreg[0]) != null ? ref8.name : void 0) !== (ref7 = (ref9 = this._shreg[1]) != null ? ref9.name : void 0) || ref7 !== (ref6 = (ref10 = this._shreg[2]) != null ? ref10.name : void 0)) || ref6 !== ((ref11 = this._shreg[3]) != null ? ref11.name : void 0))) {
-          return null;
-        }
-        R = this._shreg[3].name;
-        this._shreg.length = 0;
-        return R;
-      }
-
-      //---------------------------------------------------------------------------------------------------------
-      _detect_latch_events(callback) {
-        var push, shift;
-        shift = function() {
-          return this._shreg.shift();
-        };
-        push = (dir, event) => {
-          var name;
-          name = event.key;
-          this._shreg.push({
-            dir,
-            name,
-            t: Date.now()
-          });
-          while (this._shreg.length > 4) {
-            this._shreg.shift();
-          }
-          if (name === this._get_double_key(this._shreg)) {
+      _add_dom_kb_event_listener(keyname, eventname, callback) {
+        /* Given a `keyname`, an `eventname` (such as `'keydown'` or `'keyup'`) and a `callback`, add an event
+           listener such that `callback` will be called with an `event` as argument whenever a DOM event for that
+           specific key and event name is triggered. */
+        validate.keywatch_keyname(name);
+        validate.nonempty_text(eventname);
+        validate.function(callback);
+        µ.DOM.on(document, eventname, (event) => {
+          if (event.key === keyname) {
             callback(event);
           }
-          return null;
-        };
-        //.......................................................................................................
-        µ.DOM.on(document, 'keydown', (event) => {
-          return push('down', event);
+          return true;
         });
-        µ.DOM.on(document, 'keyup', (event) => {
-          return push('up', event);
-        });
-        return null;
+        return null/* TAINT may return listener reference ITF */;
       }
 
       _detect_tlatch_events(name, callback) {
@@ -2898,23 +2858,6 @@ var types = exports.types = {
           return callback(event);
         });
         return null;
-      }
-
-      _listen_to_key(name, behavior, handler) {
-        var base, entry, handlers, state;
-        if (name === 'Space') {
-          name = ' ';
-        }
-        validate.keywatch_keyname(name);
-        validate.keywatch_keytype(behavior);
-        entry = (base = this._registry)[name] != null ? base[name] : base[name] = {};
-        state = entry.state != null ? entry.state : entry.state = {};
-        handlers = entry[behavior] != null ? entry[behavior] : entry[behavior] = [];
-        handlers.push(handler);
-        debug('^_listen_to_key@1112^', {name, behavior});
-        this._add_listener_for_behavior(behavior, name);
-        //.......................................................................................................
-        return null/* NOTE may return a `remove_listener` method ITF */;
       }
 
       _call_handlers(behavior, event) {
@@ -2968,7 +2911,7 @@ var types = exports.types = {
 
       //---------------------------------------------------------------------------------------------------------
       _add_listener_for_behavior(behavior, keyname) {
-        var event_name;
+        var eventname;
         if (this._initialized_types[behavior]) {
           return null;
         }
@@ -2977,8 +2920,8 @@ var types = exports.types = {
         switch (behavior) {
           case 'up':
           case 'down':
-            event_name = `key${behavior}`;
-            µ.DOM.on(document, event_name, (event) => {
+            eventname = `key${behavior}`;
+            µ.DOM.on(document, eventname, (event) => {
               return this._call_handlers(behavior, event);
             });
             break;
@@ -3006,11 +2949,28 @@ var types = exports.types = {
         return null/* NOTE may return a `remove_listener` method ITF */;
       }
 
+      _listen_to_key(name, behavior, handler) {
+        var base, entry, handlers, state;
+        if (name === 'Space') {
+          name = ' ';
+        }
+        validate.keywatch_keyname(name);
+        validate.keywatch_keytype(behavior);
+        entry = (base = this._registry)[name] != null ? base[name] : base[name] = {};
+        state = entry.state != null ? entry.state : entry.state = {};
+        handlers = entry[behavior] != null ? entry[behavior] : entry[behavior] = [];
+        handlers.push(handler);
+        debug('^_listen_to_key@1112^', {name, behavior});
+        this._add_listener_for_behavior(behavior, name);
+        //.......................................................................................................
+        return null/* NOTE may return a `remove_listener` method ITF */;
+      }
+
     };
 
-    Kb.prototype._prv_modifiers = {};
+    _Kb.prototype._prv_modifiers = {};
 
-    Kb.prototype._capslock_active = false;
+    _Kb.prototype._capslock_active = false;
 
     //#########################################################################################################
     //#########################################################################################################
@@ -3020,11 +2980,198 @@ var types = exports.types = {
     //#########################################################################################################
 
     //---------------------------------------------------------------------------------------------------------
-    Kb.prototype._registry = {};
+    _Kb.prototype._registry = {};
 
-    Kb.prototype._initialized_types = {};
+    _Kb.prototype._initialized_types = {};
 
+    return _Kb;
+
+  }).call(this);
+
+  ref = this.Kb = (function() {
+    class Kb extends this._Kb {
+      constructor() {
+        super(...arguments);
+        //---------------------------------------------------------------------------------------------------------
+        this._listen_to_key = this._listen_to_key.bind(this);
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _get_latching_keyname() {
+        var R, ref1, ref10, ref11, ref12, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
+        if (!((Date.now() - ((ref1 = (ref2 = this._shreg[0]) != null ? ref2.t : void 0) != null ? ref1 : 0)) < this.cfg.latch.dt)) {
+          return null;
+        }
+        if (((ref3 = this._shreg[0]) != null ? ref3.dir : void 0) !== 'down') {
+          return null;
+        }
+        if (((ref4 = this._shreg[1]) != null ? ref4.dir : void 0) !== 'up') {
+          return null;
+        }
+        if (((ref5 = this._shreg[2]) != null ? ref5.dir : void 0) !== 'down') {
+          return null;
+        }
+        if (((ref6 = this._shreg[3]) != null ? ref6.dir : void 0) !== 'up') {
+          return null;
+        }
+        if (((((ref9 = this._shreg[0]) != null ? ref9.name : void 0) !== (ref8 = (ref10 = this._shreg[1]) != null ? ref10.name : void 0) || ref8 !== (ref7 = (ref11 = this._shreg[2]) != null ? ref11.name : void 0)) || ref7 !== ((ref12 = this._shreg[3]) != null ? ref12.name : void 0))) {
+          return null;
+        }
+        R = this._shreg[3].name;
+        return R;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _initialized_latching() {
+        var push;
+        if (this._latching_initialized) {
+          return null;
+        }
+        this._latching_initialized = true;
+        push = (dir, event) => {
+          var name;
+          name = event.key;
+          this._shreg.push({
+            dir,
+            name,
+            t: Date.now()
+          });
+          while (this._shreg.length > 4) {
+            this._shreg.shift();
+          }
+          return true;
+        };
+        µ.DOM.on(document, 'keydown', (event) => {
+          return push('down', event);
+        });
+        µ.DOM.on(document, 'keyup', (event) => {
+          return push('up', event);
+        });
+        return null;
+      }
+
+      _listen_to_key(keyname, behavior, handler) {
+        var entry;
+        boundMethodCheck(this, ref);
+        if (keyname === 'Space') {
+          keyname = ' ';
+        }
+        validate.keywatch_keyname(keyname);
+        validate.keywatch_keytype(behavior);
+        entry = {
+          state: false
+        };
+        // entry   = @_registry[ keyname ]  ?= {}
+        // state   = entry.state            ?= { @_defaults.state..., }
+        //.......................................................................................................
+        ((entry) => {
+          // debug '^@Kb2._listen_to_key@30^', { keyname, behavior, }
+          switch (behavior) {
+            //...................................................................................................
+            case 'push':
+              µ.DOM.on(document, 'keydown', (event) => {
+                if (event.key !== keyname) {
+                  return true;
+                }
+                entry.state = true;
+                handler(freeze({
+                  keyname,
+                  behavior,
+                  state: entry.state,
+                  event
+                }));
+                return true;
+              });
+              µ.DOM.on(document, 'keyup', (event) => {
+                if (event.key !== keyname) {
+                  return true;
+                }
+                entry.state = false;
+                handler(freeze({
+                  keyname,
+                  behavior,
+                  state: entry.state,
+                  event
+                }));
+                return true;
+              });
+              break;
+            //...................................................................................................
+            case 'toggle':
+              µ.DOM.on(document, 'keydown', (event) => {
+                if (event.key !== keyname) {
+                  return true;
+                }
+                if (entry.state) {
+                  return true;
+                }
+                entry.state = true;
+                entry.skip_next_keyup = true;
+                // debug '^_listen_to_key@223^', 'keydown', { keyname, behavior, entry, }
+                handler(freeze({
+                  keyname,
+                  behavior,
+                  state: entry.state,
+                  event
+                }));
+                return true;
+              });
+              µ.DOM.on(document, 'keyup', (event) => {
+                if (event.key !== keyname) {
+                  return true;
+                }
+                if (!entry.state) {
+                  return true;
+                }
+                if (entry.skip_next_keyup) {
+                  entry.skip_next_keyup = false;
+                } else {
+                  entry.state = false;
+                }
+                // debug '^_listen_to_key@223^', 'toggle/keyup', { keyname, behavior, entry, }
+                handler(freeze({
+                  keyname,
+                  behavior,
+                  state: entry.state,
+                  event
+                }));
+                return true;
+              });
+              break;
+            //...................................................................................................
+            case 'latch':
+              this._initialized_latching();
+              µ.DOM.on(document, 'keyup', (event) => {
+                if (keyname === this._get_latching_keyname()) {
+                  entry.state = !entry.state;
+                  handler(freeze({
+                    keyname,
+                    behavior,
+                    state: entry.state,
+                    event
+                  }));
+                }
+                return true;
+              });
+          }
+          //...................................................................................................
+          return null;
+        })(entry);
+        //.......................................................................................................
+        return null/* NOTE may return a `remove_listener` method ITF */;
+      }
+
+    };
+
+    // #---------------------------------------------------------------------------------------------------------
+    // _defaults: freeze {
+    //   state: freeze { down: false, up: false, toggle: false, latch: false, tlatch: false, }
+    //   }
+
+    //---------------------------------------------------------------------------------------------------------
     Kb.prototype._shreg = [];
+
+    Kb.prototype._latching_initialized = false;
 
     return Kb;
 
@@ -3048,8 +3195,8 @@ var types = exports.types = {
   //-----------------------------------------------------------------------------------------------------------
   this.declare('keywatch_keytype', {
     tests: {
-      "x is one of 'toggle', 'latch', 'tlatch', 'up', 'down": function(x) {
-        return x === 'toggle' || x === 'latch' || x === 'tlatch' || x === 'up' || x === 'down';
+      "x is one of 'toggle', 'latch', 'tlatch', 'push'": function(x) {
+        return x === 'toggle' || x === 'latch' || x === 'tlatch' || x === 'push';
       }
     }
   });
