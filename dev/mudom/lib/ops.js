@@ -71,7 +71,7 @@
       all_buttons = [...(µ.DOM.select_all('.btn'))];
       for (i = 0, len = keynames.length; i < len; i++) {
         keyname = keynames[i];
-        ref = ['push', 'toggle', 'latch', 'tlatch'];
+        ref = ['push', 'toggle', 'latch', 'tlatch', 'ptlatch', 'ntlatch'];
         for (j = 0, len1 = ref.length; j < len1; j++) {
           behavior = ref[j];
           // debug '^ops@4453^', { keyname, behavior, }
@@ -95,6 +95,14 @@
               case 'tlatch':
                 return buttons.filter((x) => {
                   return (µ.DOM.get(x, 'latching')) === 'tlatch';
+                });
+              case 'ptlatch':
+                return buttons.filter((x) => {
+                  return (µ.DOM.get(x, 'latching')) === 'ptlatch';
+                });
+              case 'ntlatch':
+                return buttons.filter((x) => {
+                  return (µ.DOM.get(x, 'latching')) === 'ntlatch';
                 });
             }
           }).call(this);

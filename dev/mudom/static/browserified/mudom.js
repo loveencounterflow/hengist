@@ -2993,7 +2993,6 @@ var types = exports.types = {
         is_latched = false;
         //.......................................................................................................
         this._listen_to_key(keyname, 'latch', (d) => {
-          debug('^_listen_to_key_tlatch', d);
           return is_latched = d.state;
         });
         //.......................................................................................................
@@ -3011,6 +3010,82 @@ var types = exports.types = {
             return true;
           }
           state = is_latched;
+          handler(freeze({keyname, behavior, state, event}));
+          return true;
+        });
+        //.......................................................................................................
+        return null;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _listen_to_key_ptlatch(keyname, handler) {
+        var behavior, is_latched, state;
+        state = false;
+        behavior = 'ptlatch';
+        is_latched = false;
+        //.......................................................................................................
+        this._listen_to_key(keyname, 'latch', (d) => {
+          return is_latched = d.state;
+        });
+        //.......................................................................................................
+        µ.DOM.on(document, 'keydown', (event) => {
+          if (event.key !== keyname) {
+            return true;
+          }
+          if (is_latched) {
+            return true;
+          }
+          state = true;
+          handler(freeze({keyname, behavior, state, event}));
+          return true;
+        });
+        //.......................................................................................................
+        µ.DOM.on(document, 'keyup', (event) => {
+          if (event.key !== keyname) {
+            return true;
+          }
+          if (is_latched) {
+            return true;
+          }
+          state = false;
+          handler(freeze({keyname, behavior, state, event}));
+          return true;
+        });
+        //.......................................................................................................
+        return null;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _listen_to_key_ntlatch(keyname, handler) {
+        var behavior, is_latched, state;
+        state = false;
+        behavior = 'ntlatch';
+        is_latched = false;
+        //.......................................................................................................
+        this._listen_to_key(keyname, 'latch', (d) => {
+          return is_latched = d.state;
+        });
+        //.......................................................................................................
+        µ.DOM.on(document, 'keydown', (event) => {
+          if (event.key !== keyname) {
+            return true;
+          }
+          if (!is_latched) {
+            return true;
+          }
+          state = false;
+          handler(freeze({keyname, behavior, state, event}));
+          return true;
+        });
+        //.......................................................................................................
+        µ.DOM.on(document, 'keyup', (event) => {
+          if (event.key !== keyname) {
+            return true;
+          }
+          if (!is_latched) {
+            return true;
+          }
+          state = true;
           handler(freeze({keyname, behavior, state, event}));
           return true;
         });
@@ -3038,6 +3113,12 @@ var types = exports.types = {
             break;
           case 'tlatch':
             this._listen_to_key_tlatch(keyname, handler);
+            break;
+          case 'ntlatch':
+            this._listen_to_key_ntlatch(keyname, handler);
+            break;
+          case 'ptlatch':
+            this._listen_to_key_ptlatch(keyname, handler);
         }
         //.......................................................................................................
         return null/* NOTE may return a `remove_listener` method ITF */;
@@ -3077,8 +3158,8 @@ var types = exports.types = {
   //-----------------------------------------------------------------------------------------------------------
   this.declare('keywatch_keytype', {
     tests: {
-      "x is one of 'toggle', 'latch', 'tlatch', 'push'": function(x) {
-        return x === 'toggle' || x === 'latch' || x === 'tlatch' || x === 'push';
+      "x is one of 'toggle', 'latch', 'tlatch', 'ptlatch', 'ntlatch', 'push'": function(x) {
+        return x === 'toggle' || x === 'latch' || x === 'tlatch' || x === 'ptlatch' || x === 'ntlatch' || x === 'push';
       }
     }
   });
