@@ -2,7 +2,10 @@
 :root {
   --blue-lighter:         #2637c4;
   --blue-darker:          #1c2993;
-  --blue-darkest:         #0e1447; }
+  --blue-darkest:         #0e1447;
+  --blue:                 #61cff7;
+  --red:                  #ff7575;
+  --orange:               orange; }
 
 body {
   padding:                3mm;
@@ -25,7 +28,13 @@ body {
   background-color:       lime; }
 
 .tlatch {
-  background-color:       var(--blue-lighter); }
+  background-color:       var(--blue); }
+
+.ptlatch {
+  background-color:       var(--orange); }
+
+.ntlatch {
+  background-color:       var(--red); }
 
 .toggle {
   box-shadow:             inset 0 0 20px 2px #ffff00bb, 0 0 20px 10px #ffff00bb; }

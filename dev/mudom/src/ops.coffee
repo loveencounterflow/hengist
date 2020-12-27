@@ -42,14 +42,16 @@ sleep                     = ( dts ) -> new Promise ( done ) -> after dts, done
     # debug '^3646346^', µ.DOM.select_all '.btn'
     all_buttons = [ ( µ.DOM.select_all '.btn' )..., ]
     for keyname in keynames
-      for behavior in [ 'push', 'toggle', 'latch', 'tlatch', ]
+      for behavior in [ 'push', 'toggle', 'latch', 'tlatch', 'ptlatch', 'ntlatch', ]
           # debug '^ops@4453^', { keyname, behavior, }
         buttons = all_buttons.filter ( x ) => keyname is µ.DOM.get x, 'name'
         buttons = switch behavior
-          when 'push'       then buttons
-          when 'toggle'     then buttons.filter ( x ) => ( µ.DOM.get x, 'latching' ) in [ 'both', 'toggle', ]
-          when 'latch'      then buttons.filter ( x ) => ( µ.DOM.get x, 'latching' ) in [ 'both', 'latch',  ]
-          when 'tlatch'     then buttons.filter ( x ) => ( µ.DOM.get x, 'latching' ) is 'tlatch'
+          when 'push'     then buttons
+          when 'toggle'   then buttons.filter ( x ) => ( µ.DOM.get x, 'latching' ) in [ 'both', 'toggle', ]
+          when 'latch'    then buttons.filter ( x ) => ( µ.DOM.get x, 'latching' ) in [ 'both', 'latch',  ]
+          when 'tlatch'   then buttons.filter ( x ) => ( µ.DOM.get x, 'latching' ) is 'tlatch'
+          when 'ptlatch'  then buttons.filter ( x ) => ( µ.DOM.get x, 'latching' ) is 'ptlatch'
+          when 'ntlatch'  then buttons.filter ( x ) => ( µ.DOM.get x, 'latching' ) is 'ntlatch'
         for button in buttons
           do ( keyname, behavior, button ) =>
             µ.KB._listen_to_key keyname, behavior, ( d ) =>

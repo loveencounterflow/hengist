@@ -43,20 +43,16 @@
 </ol>
 
 <table>
-<tr><th>none</th><th>toggle</th><th>both</th><th>latch</th><th>tlatch</th></tr>
-<tr><td class='btn up' latching=none name=Alt>Alt           </td><td class='btn up' latching=toggle name=Alt>Alt           </td><td class='btn up' latching=both name=Alt>Alt           </td><td class='btn up' latching=latch name=Alt>Alt           </td><td class='btn up' latching=tlatch name=Alt>Alt           </td></tr>
-<tr><td class='btn up' latching=none name=AltGraph>AltGraph </td><td class='btn up' latching=toggle name=AltGraph>AltGraph </td><td class='btn up' latching=both name=AltGraph>AltGraph </td><td class='btn up' latching=latch name=AltGraph>AltGraph </td><td class='btn up' latching=tlatch name=AltGraph>AltGraph </td></tr>
-<tr><td class='btn up' latching=none name=Control>Control   </td><td class='btn up' latching=toggle name=Control>Control   </td><td class='btn up' latching=both name=Control>Control   </td><td class='btn up' latching=latch name=Control>Control   </td><td class='btn up' latching=tlatch name=Control>Control   </td></tr>
-<tr><td class='btn up' latching=none name=Meta>Meta         </td><td class='btn up' latching=toggle name=Meta>Meta         </td><td class='btn up' latching=both name=Meta>Meta         </td><td class='btn up' latching=latch name=Meta>Meta         </td><td class='btn up' latching=tlatch name=Meta>Meta         </td></tr>
-<tr><td class='btn up' latching=none name=Shift>Shift       </td><td class='btn up' latching=toggle name=Shift>Shift       </td><td class='btn up' latching=both name=Shift>Shift       </td><td class='btn up' latching=latch name=Shift>Shift       </td><td class='btn up' latching=tlatch name=Shift>Shift       </td></tr>
-<tr><td class='btn up' latching=none name=CapsLock>CapsLock </td><td class='btn up' latching=toggle name=CapsLock>CapsLock </td><td class='btn up' latching=both name=CapsLock>CapsLock </td><td class='btn up' latching=latch name=CapsLock>CapsLock </td><td class='btn up' latching=tlatch name=CapsLock>CapsLock </td></tr>
-<tr><td class='btn up' latching=none name=Space>Space       </td><td class='btn up' latching=toggle name=Space>Space       </td><td class='btn up' latching=both name=Space>Space       </td><td class='btn up' latching=latch name=Space>Space       </td><td class='btn up' latching=tlatch name=Space>Space       </td></tr>
+<tr><!-- <th>none</th> --><th>toggle</th><!-- <th>both</th> --><th>latch</th><th>ptlatch</th><th>tlatch</th><th>ntlatch</th></tr>
+<tr><!-- <td class='btn' latching=none name=Alt>Alt           </td> --><td class='btn' latching=toggle name=Alt>Alt           </td><!-- <td class='btn' latching=both name=Alt>Alt           </td> --><td class='btn' latching=latch name=Alt>Alt           </td><td class='btn' latching=ptlatch name=Alt>Alt           </td><td class='btn' latching=tlatch name=Alt>Alt           </td><td class='btn' latching=ntlatch name=Alt>Alt           </td></tr>
+<tr><!-- <td class='btn' latching=none name=AltGraph>AltGraph </td> --><td class='btn' latching=toggle name=AltGraph>AltGraph </td><!-- <td class='btn' latching=both name=AltGraph>AltGraph </td> --><td class='btn' latching=latch name=AltGraph>AltGraph </td><td class='btn' latching=ptlatch name=AltGraph>AltGraph </td><td class='btn' latching=tlatch name=AltGraph>AltGraph </td><td class='btn' latching=ntlatch name=AltGraph>AltGraph </td></tr>
+<tr><!-- <td class='btn' latching=none name=Control>Control   </td> --><td class='btn' latching=toggle name=Control>Control   </td><!-- <td class='btn' latching=both name=Control>Control   </td> --><td class='btn' latching=latch name=Control>Control   </td><td class='btn' latching=ptlatch name=Control>Control   </td><td class='btn' latching=tlatch name=Control>Control   </td><td class='btn' latching=ntlatch name=Control>Control   </td></tr>
+<tr><!-- <td class='btn' latching=none name=Meta>Meta         </td> --><td class='btn' latching=toggle name=Meta>Meta         </td><!-- <td class='btn' latching=both name=Meta>Meta         </td> --><td class='btn' latching=latch name=Meta>Meta         </td><td class='btn' latching=ptlatch name=Meta>Meta         </td><td class='btn' latching=tlatch name=Meta>Meta         </td><td class='btn' latching=ntlatch name=Meta>Meta         </td></tr>
+<tr><!-- <td class='btn' latching=none name=Shift>Shift       </td> --><td class='btn' latching=toggle name=Shift>Shift       </td><!-- <td class='btn' latching=both name=Shift>Shift       </td> --><td class='btn' latching=latch name=Shift>Shift       </td><td class='btn' latching=ptlatch name=Shift>Shift       </td><td class='btn' latching=tlatch name=Shift>Shift       </td><td class='btn' latching=ntlatch name=Shift>Shift       </td></tr>
+<tr><!-- <td class='btn' latching=none name=CapsLock>CapsLock </td> --><td class='btn' latching=toggle name=CapsLock>CapsLock </td><!-- <td class='btn' latching=both name=CapsLock>CapsLock </td> --><td class='btn' latching=latch name=CapsLock>CapsLock </td><td class='btn' latching=ptlatch name=CapsLock>CapsLock </td><td class='btn' latching=tlatch name=CapsLock>CapsLock </td><td class='btn' latching=ntlatch name=CapsLock>CapsLock </td></tr>
+<tr><!-- <td class='btn' latching=none name=Space>Space       </td> --><td class='btn' latching=toggle name=Space>Space       </td><!-- <td class='btn' latching=both name=Space>Space       </td> --><td class='btn' latching=latch name=Space>Space       </td><td class='btn' latching=ptlatch name=Space>Space       </td><td class='btn' latching=tlatch name=Space>Space       </td><td class='btn' latching=ntlatch name=Space>Space       </td></tr>
 </table>
 
-
-<h2>To Do</h2>
-<ul>
-  <li>implement mode t-latch where pressing key inverts latched mode</li></ul>
 
 
 </body>
