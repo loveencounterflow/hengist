@@ -2,7 +2,7 @@
   "version": "v1",
   "packages": {
     "mudom": {
-      "signature": "7300c10270a18b9f99275449092aaf87",
+      "signature": "e85800fe129c05052899b9fec99a0b08",
       "file": true
     },
     "intertype": {

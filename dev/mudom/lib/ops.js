@@ -1,5 +1,5 @@
 (function() {
-  var CND, INTERTYPE, Intermatic, after, log, rpr, sleep;
+  var CND, INTERTYPE, Intermatic, after, debug, log, rpr, sleep;
 
   globalThis.µ = require('mudom');
 
@@ -10,6 +10,8 @@
   Intermatic = require('intermatic');
 
   log = console.log;
+
+  debug = console.debug;
 
   rpr = CND.rpr;
 
@@ -25,14 +27,29 @@
 
   //-----------------------------------------------------------------------------------------------------------
   µ.DOM.ready(function() {
-    var keynames, update_button;
+    var _keys_from_button, keynames, update_button;
     //---------------------------------------------------------------------------------------------------------
-    update_button = (button, name, state, keys) => {
-      var classes, i, key, len, ref, text;
+    _keys_from_button = function(button) {
+      switch (µ.DOM.get(button, 'latching')) {
+        case 'toggle':
+          return ['up', 'down', 'toggle'];
+        case 'latch':
+          return ['up', 'down', 'latch'];
+        case 'both':
+          return ['up', 'down', 'toggle', 'latch'];
+        case 'tlatch':
+          return ['up', 'down', 'tlatch'];
+      }
+      return ['up', 'down'];
+    };
+    //---------------------------------------------------------------------------------------------------------
+    update_button = (button, name, state) => {
+      var classes, i, key, len, ref, ref1, text;
       text = `${name} `;
-      for (i = 0, len = keys.length; i < len; i++) {
-        key = keys[i];
-        if (!((ref = state[key]) != null ? ref : false)) {
+      ref = _keys_from_button(button);
+      for (i = 0, len = ref.length; i < len; i++) {
+        key = ref[i];
+        if (!((ref1 = state[key]) != null ? ref1 : false)) {
           continue;
         }
         text += `${key} `;
@@ -64,33 +81,18 @@
 //.......................................................................................................
       for (i = 0, len = keynames.length; i < len; i++) {
         keyname = keynames[i];
-        ref = ['up', 'down', 'toggle', 'latch'];
+        ref = ['up', 'down', 'toggle', 'latch', 'tlatch'];
         for (j = 0, len1 = ref.length; j < len1; j++) {
           behavior = ref[j];
           ((keyname, behavior) => {
             //.................................................................................................
+            debug('^ops@4453^', {keyname, behavior});
             µ.KB._listen_to_key(keyname, behavior, (d) => {
-              var button, k, keys, len2, ref1;
+              var button, k, len2, ref1;
               ref1 = µ.DOM.select_all(`.btn[name=${keyname}]`);
               for (k = 0, len2 = ref1.length; k < len2; k++) {
                 button = ref1[k];
-                switch (µ.DOM.get(button, 'latching')) {
-                  case 'toggle':
-                    keys = ['up', 'down', 'toggle'];
-                    break;
-                  case 'latch':
-                    keys = ['up', 'down', 'latch'];
-                    break;
-                  case 'both':
-                    keys = ['up', 'down', 'toggle', 'latch'];
-                    break;
-                  case 'tlatch':
-                    keys = ['up', 'down', 'tlatch'];
-                    break;
-                  default:
-                    keys = ['up', 'down'];
-                }
-                update_button(button, keyname, d.state, keys);
+                update_button(button, keyname, d.state);
               }
               return null;
             });
