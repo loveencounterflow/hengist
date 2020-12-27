@@ -98,20 +98,10 @@
                 });
             }
           }).call(this);
-// debug '^ops@338^', { keyname, behavior, buttons, }
           for (k = 0, len2 = buttons.length; k < len2; k++) {
             button = buttons[k];
             ((keyname, behavior, button) => {
-              //...............................................................................................
               µ.KB._listen_to_key(keyname, behavior, (d) => {
-                if (behavior === 'latch') {
-                  debug('^ops@338^', {
-                    keyname,
-                    behavior,
-                    state: d.state,
-                    d
-                  });
-                }
                 update_button(button, keyname, behavior, d.state);
                 return null;
               });
@@ -120,7 +110,6 @@
           }
         }
       }
-      //.................................................................................................
       return null;
     })();
     //.........................................................................................................
