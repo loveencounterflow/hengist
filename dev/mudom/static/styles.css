@@ -9,7 +9,8 @@
 
 body {
   padding:                3mm;
-  background-color:       #a3d0c5; }
+  background-color:       #a3d0c5;
+  font-family:            'Noto Serif', serif; }
 
 .btn {
   /*width:                  10mm;*/
@@ -50,7 +51,6 @@ h1 {
   font-weight:            bold; }
 
 p, ol, ul {
-  font-family:            serif;
   font-style:             italic;
   margin-bottom:          3mm; }
 

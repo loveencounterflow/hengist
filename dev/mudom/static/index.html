@@ -13,9 +13,46 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<h1>µDOM/KB Keyboard Events Demo</h1>
-<ol>
 
+<h1>µDOM/KB Keyboard Events Demo</h1>
+
+<p>µDOM/KB offers higher order keyboard event detection for specific keys.</p>
+
+<p>All behaviors are boolean, i.e. their corresponding state is always true (on) or false (off).</p>
+
+<p>Implemented behaviors include:</p>
+
+  <ul>
+
+    <li><code class=push>push</code>, corresponding to the <code>keyup</code> and <code>keydown</code> DOM
+    events. This state switches to on when the key is pressed and to off when it is released; the only
+    difference to the DOM events is that the callback is called not when any key is pressed or released, but
+    only when the key specified is pressed or released.</li>
+
+    <li>A <code class=toggle>toggle</code> switches to on when its state is off and the key is pressed; it
+    switches back to off when it is on and the key is pressed and released.</li>
+
+    <li>A <code class=latch>latch</code> switches between on and off when the key is pressed twice in rapid
+    succession. It is unaffected by single key presses.</li>
+
+    <li>A <code class=tlatch>tlatch</code> ('toggling latch') is like a latch, but it temporarily switches
+    to the opposite state whenever the key is pressed and back again when the key is released, that is, when
+    the state is latched, the state 'takes a break' (set to off) as long a the key is pressed; conversely,
+    when the state is unlatched and the key is pressed, the state is momentarily set to on.</li>
+
+    <li>A <code class=ptlatch>ptlatch</code> ('positive toggling latch') is a toggling latch that only
+    switches to the on state; it does not switch temporarily off.</li>
+
+    <li>A <code class=ntlatch>ntlatch</code> ('negative toggling latch') is a toggling latch that can only
+    be paused; it does not switch temporarily on.</li>
+  </ul>
+
+<p>The callback associated with a given key and behavior will be called when the corresponding state has
+changed. They will be called with a single argument, a frozen object <code>{ keyname, behavior, state,
+event, }</code>. The <code>state</code> attribute is either <code>true</code> or <code>false</code>; the
+<code>event</code> attribute contains the most recent event that triggered the event.</p>
+
+<!--
   <li>Hit any of the below indicated keys.</li>
 
   <li>A red border is shown for the <code class=down>down</code> state as long as a key is pressed.</li>
@@ -41,6 +78,8 @@
   CapsLock row below.</li>
 
 </ol>
+-->
+
 
 <table>
 <tr><!-- <th>none</th> --><th>toggle</th><!-- <th>both</th> --><th>latch</th><th>ptlatch</th><th>tlatch</th><th>ntlatch</th></tr>
