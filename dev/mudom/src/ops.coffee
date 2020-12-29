@@ -24,10 +24,10 @@ sleep                     = ( dts ) -> new Promise ( done ) -> after dts, done
   #---------------------------------------------------------------------------------------------------------
   update_button = ( button, keyname, behavior, state ) =>
     if state
-      button.innerHTML = "#{keyname} #{behavior}"
+      # button.innerHTML = "#{keyname} #{behavior}"
       µ.DOM.add_class     button, behavior
     else
-      button.innerHTML = "#{keyname} <strike>#{behavior}</strike>"
+      # button.innerHTML = "#{keyname} <strike>#{behavior}</strike>"
       µ.DOM.remove_class  button, behavior
     return null
 
@@ -38,6 +38,7 @@ sleep                     = ( dts ) -> new Promise ( done ) -> after dts, done
     keynames  = [ ( new Set keynames )..., ]
   #.........................................................................................................
   do =>
+    µ.KB.XXXXXXXXXXXX_foobar()
     #.......................................................................................................
     # debug '^3646346^', µ.DOM.select_all '.btn'
     all_buttons = [ ( µ.DOM.select_all '.btn' )..., ]
