@@ -40,10 +40,10 @@
     //---------------------------------------------------------------------------------------------------------
     update_button = (button, keyname, behavior, state) => {
       if (state) {
-        button.innerHTML = `${keyname} ${behavior}`;
+        // button.innerHTML = "#{keyname} #{behavior}"
         µ.DOM.add_class(button, behavior);
       } else {
-        button.innerHTML = `${keyname} <strike>${behavior}</strike>`;
+        // button.innerHTML = "#{keyname} <strike>#{behavior}</strike>"
         µ.DOM.remove_class(button, behavior);
       }
       return null;
@@ -66,6 +66,7 @@
     })();
     (() => {      //.........................................................................................................
       var all_buttons, behavior, button, buttons, i, j, k, keyname, len, len1, len2, ref;
+      µ.KB.XXXXXXXXXXXX_foobar();
       //.......................................................................................................
       // debug '^3646346^', µ.DOM.select_all '.btn'
       all_buttons = [...(µ.DOM.select_all('.btn'))];
