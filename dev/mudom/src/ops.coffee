@@ -12,39 +12,36 @@ sleep                     = ( dts ) -> new Promise ( done ) -> after dts, done
 #-----------------------------------------------------------------------------------------------------------
 µ.DOM.ready ->
 
-  # #---------------------------------------------------------------------------------------------------------
-  # _keys_from_button = ( button ) ->
-  #   switch µ.DOM.get button, 'latching'
-  #     when 'toggle' then  return  [ 'up', 'down', 'toggle', ]
-  #     when 'latch'  then  return  [ 'up', 'down', 'latch', ]
-  #     when 'both'   then  return  [ 'up', 'down', 'toggle', 'latch', ]
-  #     when 'tlatch' then  return  [ 'up', 'down', 'tlatch', ]
-  #   return                        [ 'up', 'down', ]
+  #---------------------------------------------------------------------------------------------------------
+  keynames = null
 
   #---------------------------------------------------------------------------------------------------------
-  update_button = ( button, keyname, behavior, state ) =>
-    if state
-      # button.innerHTML = "#{keyname} #{behavior}"
-      µ.DOM.add_class     button, behavior
-    else
-      # button.innerHTML = "#{keyname} <strike>#{behavior}</strike>"
-      µ.DOM.remove_class  button, behavior
+  get_mbmcd_state = -> ( µ.DOM.select '#mbmcd' ).checked
+
+  #---------------------------------------------------------------------------------------------------------
+  setup = =>
+    keynames    = ( µ.DOM.get button, 'name' for button in µ.DOM.select_all '.btn' )
+    keynames    = [ ( new Set keynames )..., ]
+    # switchbox   = µ.DOM.select '.switchbox'
+    # target      = µ.DOM.select '.switchbox input'
+    # µ.DOM.on switchbox, 'click', ( event ) =>
+    #   log '^33342^', target.checked
+    #   # log '^33342^', target.value
+    #   return null
+      # event.detail ?= {}
+    #   event.detail.count = ( event.detail.count ? 0 ) + 1
+    #   log '^3336^ event.target        ', event.target
+    #   log '^3336^ event.detail.count  ', event.detail.count
+    #   log '^3336^ target              ', target
+    #   # target.click() if event.target isnt target
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  keynames  = null
-  do =>
-    keynames  = ( µ.DOM.get button, 'name' for button in µ.DOM.select_all '.btn' )
-    keynames  = [ ( new Set keynames )..., ]
-  #.........................................................................................................
-  do =>
-    µ.KB.XXXXXXXXXXXX_foobar()
-    #.......................................................................................................
-    # debug '^3646346^', µ.DOM.select_all '.btn'
+  demo_toggling_etc = =>
     all_buttons = [ ( µ.DOM.select_all '.btn' )..., ]
+    behaviors   = [ 'push', 'toggle', 'latch', 'tlatch', 'ptlatch', 'ntlatch', ]
     for keyname in keynames
-      for behavior in [ 'push', 'toggle', 'latch', 'tlatch', 'ptlatch', 'ntlatch', ]
-          # debug '^ops@4453^', { keyname, behavior, }
+      for behavior in behaviors
         buttons = all_buttons.filter ( x ) => keyname is µ.DOM.get x, 'name'
         buttons = switch behavior
           when 'push'     then buttons
@@ -59,7 +56,54 @@ sleep                     = ( dts ) -> new Promise ( done ) -> after dts, done
               update_button button, keyname, behavior, d.state
               return null
             return null
+
+  #---------------------------------------------------------------------------------------------------------
+  use_event_names = ->
+    ### Demo for using event names instead of callbacks: ###
+    for keyname in keynames # "y Y Space Alt AltGraph Control Meta Shift CapsLock".split /\s+/
+      µ.KB._listen_to_key keyname, 'toggle', 'pushed_key_y'
+    eventdetail_div = µ.DOM.select '#eventdetail'
+    µ.DOM.on document, 'pushed_key_y', ( event ) =>
+      eventdetail_div.innerHTML = µ.TEXT._escape "event.detail: #{rpr event.detail}"
+      return null
     return null
+
+  #---------------------------------------------------------------------------------------------------------
+  watch_modifiers = =>
+    modblink_div = µ.DOM.select '#modblink'
+    µ.KB._listen_to_modifiers ( d ) ->
+      # log '^9801^', d
+      # log '^9801^', µ.KB._prv_modifiers
+      µ.DOM.add_class modblink_div, 'hilite'
+      after 0.25, => µ.DOM.remove_class modblink_div, 'hilite'
+      # µ.DOM.on document, 'keydown'
+      use_mbmcd = get_mbmcd_state()
+      for key, state of d
+        continue if key is '_type'
+        if use_mbmcd
+          eventname = if state then 'keydown' else 'keyup'
+          document.dispatchEvent new KeyboardEvent eventname, { key, }
+        key_div = µ.DOM.select ".lamp[name=#{key}]"
+        if state then µ.DOM.add_class     key_div, 'push'
+        else          µ.DOM.remove_class  key_div, 'push'
+      return null
+
+  #---------------------------------------------------------------------------------------------------------
+  update_button = ( button, keyname, behavior, state ) =>
+    if state
+      # button.innerHTML = "#{keyname} #{behavior}"
+      µ.DOM.add_class     button, behavior
+    else
+      # button.innerHTML = "#{keyname} <strike>#{behavior}</strike>"
+      µ.DOM.remove_class  button, behavior
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  setup()
+  demo_toggling_etc()
+  use_event_names()
+  watch_modifiers()
+
   #.........................................................................................................
   return null
 
