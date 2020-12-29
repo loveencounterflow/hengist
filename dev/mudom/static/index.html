@@ -24,27 +24,34 @@
 
   <ul>
 
-    <li><code class=push>push</code>, corresponding to the <code>keyup</code> and <code>keydown</code> DOM
+    <li><p><code class=push>push</code>, corresponding to the <code>keyup</code> and <code>keydown</code> DOM
     events. This state switches to on when the key is pressed and to off when it is released; the only
     difference to the DOM events is that the callback is called not when any key is pressed or released, but
-    only when the key specified is pressed or released.</li>
+    only when the key specified is pressed or released.</p></li>
 
-    <li>A <code class=toggle>toggle</code> switches to on when its state is off and the key is pressed; it
-    switches back to off when it is on and the key is pressed and released.</li>
+    <li><p>A <code class=toggle>toggle</code> switches to on when its state is off and the key is pressed; it
+    switches back to off when it is on and the key is pressed and released.</p></li>
 
-    <li>A <code class=latch>latch</code> switches between on and off when the key is pressed twice in rapid
-    succession. It is unaffected by single key presses.</li>
+    <li><p>A <code class=latch>latch</code> switches between on and off when the key is pressed twice in rapid
+    succession. It is unaffected by single key presses.</p></li>
 
-    <li>A <code class=tlatch>tlatch</code> ('toggling latch') is like a latch, but it temporarily switches
+    <li><p>A <code class=tlatch>tlatch</code> ('toggling latch') is like a latch, but it temporarily switches
     to the opposite state whenever the key is pressed and back again when the key is released, that is, when
     the state is latched, the state 'takes a break' (set to off) as long a the key is pressed; conversely,
-    when the state is unlatched and the key is pressed, the state is momentarily set to on.</li>
+    when the state is unlatched and the key is pressed, the state is momentarily set to on.</p>
 
-    <li>A <code class=ptlatch>ptlatch</code> ('positive toggling latch') is a toggling latch that only
-    switches to the on state; it does not switch temporarily off.</li>
+    <p>Toggling latches therefore allow to implement a CapsLock-like functionality with a single key, say,
+    the Shift key: when it is pressed once and held while pressing another key, that will select the
+    corresponding uppercase letter (or symbol on a numeric key). When it is pressed twice, that shift state
+    is latched, so one can effortlessly write IN SCREAMING CAPS. That state can then temporarily paused by
+    pressing the Shift key to insert digits or lowercase letters; to get back to the 'ground' state, Shift
+    must be tapped twice in succession.</p></li>
 
-    <li>A <code class=ntlatch>ntlatch</code> ('negative toggling latch') is a toggling latch that can only
-    be paused; it does not switch temporarily on.</li>
+    <li><p>A <code class=ptlatch>ptlatch</code> ('positive toggling latch') is a toggling latch that only
+    switches to the on state; it does not switch temporarily off.</p></li>
+
+    <li><p>A <code class=ntlatch>ntlatch</code> ('negative toggling latch') is a toggling latch that can only
+    be paused; it does not switch temporarily on.</p></li>
   </ul>
 
 <p>The callback associated with a given key and behavior will be called when the corresponding state has
@@ -53,43 +60,45 @@ event, }</code>. The <code>state</code> attribute is either <code>true</code> or
 <code>event</code> attribute contains the most recent event that triggered the event.</p>
 
 <!--
-  <li>Hit any of the below indicated keys.</li>
+  <li><p>Hit any of the below indicated keys.</p></li>
 
-  <li>A red border is shown for the <code class=down>down</code> state as long as a key is pressed.</li>
+  <li><p>A red border is shown for the <code class=down>down</code> state as long as a key is pressed.</p></li>
 
-  <li>When the key is released, a grey border is shown for the <code class=up>up</code> state.</li>
+  <li><p>When the key is released, a grey border is shown for the <code class=up>up</code> state.</p></li>
 
-  <li>Each key has a so-called <code class=toggle>toggle</code> state (indicated by a yellow glow in the
+  <li><p>Each key has a so-called <code class=toggle>toggle</code> state (indicated by a yellow glow in the
   below table). Toggles work like the CapsLock key: when off, pressing a key once will turn it on (as soon
   as the key is pressed); when on, the toggle is switched off when the same key is pressed and released
-  again.</li>
+  again.</p></li>
 
-  <li>Each key also has a <code class=latch>latch</code> state which is activated when a key is tapped twice
-  in rapid succession.</li>
+  <li><p>Each key also has a <code class=latch>latch</code> state which is activated when a key is tapped twice
+  in rapid succession.</p></li>
 
-  <li>No effort has been made to cleanly separate the toggling and latching behaviors; as it stands, an
+  <li><p>No effort has been made to cleanly separate the toggling and latching behaviors; as it stands, an
   element using both will temporarily switch to the opposite toggle state whenever a latch is switched on or
   off, before then returning to its original toggle (and the opposite latch) state. This is probably too
   confusing for most uses; therefore, prefer to either use toggling or latching, but not both at the same
-  time.</li>
+  time.</p></li>
 
-  <li>Observe though that the way toggling and latching work, they do mimik the behavior of the CapsLock
+  <li><p>Observe though that the way toggling and latching work, they do mimik the behavior of the CapsLock
   key; thus, the CapsLock status of the keyboard should always be in lockstep with the toggle status of the
-  CapsLock row below.</li>
+  CapsLock row below.</p></li>
 
 </ol>
 -->
 
 
 <table>
-<tr><!-- <th>none</th> --><th>toggle</th><!-- <th>both</th> --><th>latch</th><th>ptlatch</th><th>tlatch</th><th>ntlatch</th></tr>
-<tr><!-- <td class='btn' latching=none name=Alt>Alt           </td> --><td class='btn' latching=toggle name=Alt>Alt           </td><!-- <td class='btn' latching=both name=Alt>Alt           </td> --><td class='btn' latching=latch name=Alt>Alt           </td><td class='btn' latching=ptlatch name=Alt>Alt           </td><td class='btn' latching=tlatch name=Alt>Alt           </td><td class='btn' latching=ntlatch name=Alt>Alt           </td></tr>
-<tr><!-- <td class='btn' latching=none name=AltGraph>AltGraph </td> --><td class='btn' latching=toggle name=AltGraph>AltGraph </td><!-- <td class='btn' latching=both name=AltGraph>AltGraph </td> --><td class='btn' latching=latch name=AltGraph>AltGraph </td><td class='btn' latching=ptlatch name=AltGraph>AltGraph </td><td class='btn' latching=tlatch name=AltGraph>AltGraph </td><td class='btn' latching=ntlatch name=AltGraph>AltGraph </td></tr>
-<tr><!-- <td class='btn' latching=none name=Control>Control   </td> --><td class='btn' latching=toggle name=Control>Control   </td><!-- <td class='btn' latching=both name=Control>Control   </td> --><td class='btn' latching=latch name=Control>Control   </td><td class='btn' latching=ptlatch name=Control>Control   </td><td class='btn' latching=tlatch name=Control>Control   </td><td class='btn' latching=ntlatch name=Control>Control   </td></tr>
-<tr><!-- <td class='btn' latching=none name=Meta>Meta         </td> --><td class='btn' latching=toggle name=Meta>Meta         </td><!-- <td class='btn' latching=both name=Meta>Meta         </td> --><td class='btn' latching=latch name=Meta>Meta         </td><td class='btn' latching=ptlatch name=Meta>Meta         </td><td class='btn' latching=tlatch name=Meta>Meta         </td><td class='btn' latching=ntlatch name=Meta>Meta         </td></tr>
-<tr><!-- <td class='btn' latching=none name=Shift>Shift       </td> --><td class='btn' latching=toggle name=Shift>Shift       </td><!-- <td class='btn' latching=both name=Shift>Shift       </td> --><td class='btn' latching=latch name=Shift>Shift       </td><td class='btn' latching=ptlatch name=Shift>Shift       </td><td class='btn' latching=tlatch name=Shift>Shift       </td><td class='btn' latching=ntlatch name=Shift>Shift       </td></tr>
-<tr><!-- <td class='btn' latching=none name=CapsLock>CapsLock </td> --><td class='btn' latching=toggle name=CapsLock>CapsLock </td><!-- <td class='btn' latching=both name=CapsLock>CapsLock </td> --><td class='btn' latching=latch name=CapsLock>CapsLock </td><td class='btn' latching=ptlatch name=CapsLock>CapsLock </td><td class='btn' latching=tlatch name=CapsLock>CapsLock </td><td class='btn' latching=ntlatch name=CapsLock>CapsLock </td></tr>
-<tr><!-- <td class='btn' latching=none name=Space>Space       </td> --><td class='btn' latching=toggle name=Space>Space       </td><!-- <td class='btn' latching=both name=Space>Space       </td> --><td class='btn' latching=latch name=Space>Space       </td><td class='btn' latching=ptlatch name=Space>Space       </td><td class='btn' latching=tlatch name=Space>Space       </td><td class='btn' latching=ntlatch name=Space>Space       </td></tr>
+<tr><th class=omit></th><!-- <th class=none>none</th> --><th class=toggle>toggle</th><!-- <th class=both>both</th> --><th class=latch>latch</th><th class=ptlatch>ptlatch</th><th class=tlatch>tlatch</th><th class=ntlatch>ntlatch</th></tr>
+<tr><td class=lamp name=Alt>Alt           </td><!-- <td class='btn' latching=none name=Alt>Alt           </td> --><td class='btn' latching=toggle name=Alt>Alt           </td><!-- <td class='btn' latching=both name=Alt>Alt           </td> --><td class='btn' latching=latch name=Alt>Alt           </td><td class='btn' latching=ptlatch name=Alt>Alt           </td><td class='btn' latching=tlatch name=Alt>Alt           </td><td class='btn' latching=ntlatch name=Alt>Alt           </td></tr>
+<tr><td class=lamp name=AltGraph>AltGraph </td><!-- <td class='btn' latching=none name=AltGraph>AltGraph </td> --><td class='btn' latching=toggle name=AltGraph>AltGraph </td><!-- <td class='btn' latching=both name=AltGraph>AltGraph </td> --><td class='btn' latching=latch name=AltGraph>AltGraph </td><td class='btn' latching=ptlatch name=AltGraph>AltGraph </td><td class='btn' latching=tlatch name=AltGraph>AltGraph </td><td class='btn' latching=ntlatch name=AltGraph>AltGraph </td></tr>
+<tr><td class=lamp name=Control>Control   </td><!-- <td class='btn' latching=none name=Control>Control   </td> --><td class='btn' latching=toggle name=Control>Control   </td><!-- <td class='btn' latching=both name=Control>Control   </td> --><td class='btn' latching=latch name=Control>Control   </td><td class='btn' latching=ptlatch name=Control>Control   </td><td class='btn' latching=tlatch name=Control>Control   </td><td class='btn' latching=ntlatch name=Control>Control   </td></tr>
+<tr><td class=lamp name=Meta>Meta         </td><!-- <td class='btn' latching=none name=Meta>Meta         </td> --><td class='btn' latching=toggle name=Meta>Meta         </td><!-- <td class='btn' latching=both name=Meta>Meta         </td> --><td class='btn' latching=latch name=Meta>Meta         </td><td class='btn' latching=ptlatch name=Meta>Meta         </td><td class='btn' latching=tlatch name=Meta>Meta         </td><td class='btn' latching=ntlatch name=Meta>Meta         </td></tr>
+<tr><td class=lamp name=Shift>Shift       </td><!-- <td class='btn' latching=none name=Shift>Shift       </td> --><td class='btn' latching=toggle name=Shift>Shift       </td><!-- <td class='btn' latching=both name=Shift>Shift       </td> --><td class='btn' latching=latch name=Shift>Shift       </td><td class='btn' latching=ptlatch name=Shift>Shift       </td><td class='btn' latching=tlatch name=Shift>Shift       </td><td class='btn' latching=ntlatch name=Shift>Shift       </td></tr>
+<tr><td class=lamp name=CapsLock>CapsLock </td><!-- <td class='btn' latching=none name=CapsLock>CapsLock </td> --><td class='btn' latching=toggle name=CapsLock>CapsLock </td><!-- <td class='btn' latching=both name=CapsLock>CapsLock </td> --><td class='btn' latching=latch name=CapsLock>CapsLock </td><td class='btn' latching=ptlatch name=CapsLock>CapsLock </td><td class='btn' latching=tlatch name=CapsLock>CapsLock </td><td class='btn' latching=ntlatch name=CapsLock>CapsLock </td></tr>
+<tr><td class=lamp name=Space>Space       </td><!-- <td class='btn' latching=none name=Space>Space       </td> --><td class='btn' latching=toggle name=Space>Space       </td><!-- <td class='btn' latching=both name=Space>Space       </td> --><td class='btn' latching=latch name=Space>Space       </td><td class='btn' latching=ptlatch name=Space>Space       </td><td class='btn' latching=tlatch name=Space>Space       </td><td class='btn' latching=ntlatch name=Space>Space       </td></tr>
+<tr><td class=lamp name=y>y               </td><!-- <td class='btn' latching=none name=y>y               </td> --><td class='btn' latching=toggle name=y>y               </td><!-- <td class='btn' latching=both name=y>y               </td> --><td class='btn' latching=latch name=y>y               </td><td class='btn' latching=ptlatch name=y>y               </td><td class='btn' latching=tlatch name=y>y               </td><td class='btn' latching=ntlatch name=y>y               </td></tr>
+<tr><td class=lamp name=Y>Y               </td><!-- <td class='btn' latching=none name=Y>Y               </td> --><td class='btn' latching=toggle name=Y>Y               </td><!-- <td class='btn' latching=both name=Y>Y               </td> --><td class='btn' latching=latch name=Y>Y               </td><td class='btn' latching=ptlatch name=Y>Y               </td><td class='btn' latching=tlatch name=Y>Y               </td><td class='btn' latching=ntlatch name=Y>Y               </td></tr>
 </table>
 
 
