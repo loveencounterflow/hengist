@@ -59,33 +59,30 @@ changed. They will be called with a single argument, a frozen object <code>{ key
 event, }</code>. The <code>state</code> attribute is either <code>true</code> or <code>false</code>; the
 <code>event</code> attribute contains the most recent event that triggered the event.</p>
 
-<!--
-  <li><p>Hit any of the below indicated keys.</p></li>
+<p>Browsers can only detect keyboard events while they are the focused (active) application (otherwise, each
+website in the world could be a potential key logger). Therefore, when you press keys such as Alt, Shift or
+CapsLock, there's no way to detect that (and update the below display) based on keyboard events unless this
+page is in focus. However, <em>mouse</em> events (and the more modern pointer events) are still detected
+<em>as long as the mouse (pointer) is over the content section of the browser</em>, and it turns out once you
+receive such a mouse event, you <em>can</em> query it for the modifier key status (and only the modifier keys such
+as Alt, AltGraph, Shift and so on).</p>
 
-  <li><p>A red border is shown for the <code class=down>down</code> state as long as a key is pressed.</p></li>
+<p>Based on this, µDOM/KB offers Mouse-Based Modifier Change Detection (MBMCD). With MBMCD, you can receive
+events that detail changes in the current status of modifier keys; these then can be used to generate
+<code>keydown</code> and <code>keyup</code> events that work exactly as if you had pressed the respective keys
+with the application in focus.</p>
 
-  <li><p>When the key is released, a grey border is shown for the <code class=up>up</code> state.</p></li>
+<p>The MBMCD switch below allows you to select whether to use mouse-based updates to the right-hand part of
+the table. The leftmost column (with rounded corners) always shows the effects of MBMCD events with a red
+border where a modifier is pressed, and a grey border when it is released. To observe the effect, move the
+mouse pointer out of the content area (e.g. to over the application menu) and press a modifier key such as
+Control or Shift. Then, while holding that key, move the mouse pointer back. As soon as the mouse re-enters
+the content area, the respective cells will be updated as if the key action had just occurred. This feature,
+therefore, can make key-based state management a bit more reliable.</p>
 
-  <li><p>Each key has a so-called <code class=toggle>toggle</code> state (indicated by a yellow glow in the
-  below table). Toggles work like the CapsLock key: when off, pressing a key once will turn it on (as soon
-  as the key is pressed); when on, the toggle is switched off when the same key is pressed and released
-  again.</p></li>
-
-  <li><p>Each key also has a <code class=latch>latch</code> state which is activated when a key is tapped twice
-  in rapid succession.</p></li>
-
-  <li><p>No effort has been made to cleanly separate the toggling and latching behaviors; as it stands, an
-  element using both will temporarily switch to the opposite toggle state whenever a latch is switched on or
-  off, before then returning to its original toggle (and the opposite latch) state. This is probably too
-  confusing for most uses; therefore, prefer to either use toggling or latching, but not both at the same
-  time.</p></li>
-
-  <li><p>Observe though that the way toggling and latching work, they do mimik the behavior of the CapsLock
-  key; thus, the CapsLock status of the keyboard should always be in lockstep with the toggle status of the
-  CapsLock row below.</p></li>
-
-</ol>
--->
+<label class=switchbox for=mbmcd><div id=modblink>MBMCD event</div><label class=switch><input
+type=checkbox id=mbmcd><span class='slider round'></span></label><div class=text>Use mouse-based modifier
+change detection (MBMCD)</div></label>
 
 
 <table>
@@ -101,7 +98,7 @@ event, }</code>. The <code>state</code> attribute is either <code>true</code> or
 <tr><td class=lamp name=Y>Y               </td><!-- <td class='btn' latching=none name=Y>Y               </td> --><td class='btn' latching=toggle name=Y>Y               </td><!-- <td class='btn' latching=both name=Y>Y               </td> --><td class='btn' latching=latch name=Y>Y               </td><td class='btn' latching=ptlatch name=Y>Y               </td><td class='btn' latching=tlatch name=Y>Y               </td><td class='btn' latching=ntlatch name=Y>Y               </td></tr>
 </table>
 
-
+<div id=eventdetail>&nbsp;</div>
 
 </body>
 </html>
