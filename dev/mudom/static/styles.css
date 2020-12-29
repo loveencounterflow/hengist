@@ -3,17 +3,20 @@
   --blue-lighter:         #2637c4;
   --blue-darker:          #1c2993;
   --blue-darkest:         #0e1447;
+  --black:                #000000;
   --blue:                 #61cff7;
   --pink:                 #ff7575;
   --red:                  #ff0000;
   --lime:                 #00ff00;
   --orange:               #ffa500;
-  --yellow-light:         #ffff00bb;
+  --yellow:               #ffff00ff;
+  --yellow-light:         #ffff00dd;
   --glowing:              inset 0 0 20px 2px var(--yellow-light), 0 0 20px 10px var(--yellow-light); }
 
 body {
   padding:                3mm;
-  background-color:       #a3d0c5;
+  margin-bottom:          10mm;
+  background-color:       #d9ffe1;
   font-family:            'Noto Serif', serif; }
 
 table {
@@ -60,7 +63,7 @@ h1 {
   font-weight:            bold; }
 
 p, ol, ul {
-  font-style:             italic;
+  /*font-style:             italic;*/
   margin-bottom:          3mm; }
 
 ol, ul {
@@ -77,4 +80,110 @@ li::before {
   content:                counter(my-awesome-counter) ". ";
   font-weight:            bold;
   color:                  #ff0000; }
+
+#eventdetail {
+  font-family:            monospace;
+  font-size:              75%;
+  width:                  100%;
+  padding:                3mm;
+  border:                 3px solid white; }
+
+#modblink {
+  width:                  50mm;
+  height:                 10mm;
+  border:                 3px solid grey;
+  color:                  grey;
+  font-family:            sans-serif;
+  padding:                3mm;
+  margin:                 3mm;
+  /*opacity:                50%;*/
+  overflow:               hidden;
+  /* thx to https://stackoverflow.com/a/5703632/256361 */
+  display:                flex;
+  justify-content:        center;
+  align-items:            center; }
+
+#modblink.hilite {
+  background-color:       var(--blue);
+  border-color:           var(--black);
+  color:                  var(--black); }
+
+/*--------------------------------------------------------------------------------------------------------*/
+.switchbox {
+  display:                flex;
+  justify-content:        center;
+  align-items:            center;
+  cursor:                 pointer; }
+
+.switchbox .text {
+  overflow:               hidden;
+  font-family:            sans-serif;
+  font-size:              75%;
+  padding:                3mm; }
+
+/* thx to https://www.w3schools.com/howto/howto_css_switch.asp */
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
 
