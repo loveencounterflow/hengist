@@ -2726,11 +2726,11 @@ var types = exports.types = {
         // on_push: ( keynames, handler ) =>
         // keynames  = [ keynames, ] unless isa.list keynames
         // types     = [ types,    ] unless isa.list types
-        // validate.keywatch_keynames  keynames
-        // validate.keywatch_types     types
+        // validate.kb_keynames  keynames
+        // validate.kb_types     types
 
         //---------------------------------------------------------------------------------------------------------
-        this.XXXXXXXXXXXX_foobar = this.XXXXXXXXXXXX_foobar.bind(this);
+        this._listen_to_modifiers = this._listen_to_modifiers.bind(this);
         this.cfg = {...defaults, ...cfg};
         ref = this.cfg.modifier_names;
         for (i = 0, len = ref.length; i < len; i++) {
@@ -2742,22 +2742,30 @@ var types = exports.types = {
       }
 
       get_changed_kb_modifier_state() {
-        var crt_modifiers, has_changed, i, len, modifier_name, ref, state;
+        var any_has_changed, changed_modifiers, crt_modifiers, i, len, modifier_name, ref, state, this_has_changed;
         /* Return keyboard modifier state if it has changed since the last call, or `null` if it hasn't changed. */
         // log( '^33988^', { event, } )
         crt_modifiers = {
           _type: event.type
         };
-        has_changed = false;
+        changed_modifiers = {
+          _type: event.type
+        };
+        any_has_changed = false;
         ref = this.cfg.modifier_names;
         for (i = 0, len = ref.length; i < len; i++) {
           modifier_name = ref[i];
           state = event.getModifierState(modifier_name);
-          has_changed = has_changed || (this._prv_modifiers[modifier_name] !== state);
+          this_has_changed = this._prv_modifiers[modifier_name] !== state;
+          any_has_changed = any_has_changed || this_has_changed;
           crt_modifiers[modifier_name] = state;
+          if (this_has_changed) {
+            changed_modifiers[modifier_name] = state;
+          }
         }
-        if (has_changed) {
-          return this._prv_modifiers = freeze(crt_modifiers);
+        if (any_has_changed) {
+          this._prv_modifiers = freeze(crt_modifiers);
+          return changed_modifiers;
         }
         return null;
       }
@@ -2775,16 +2783,16 @@ var types = exports.types = {
         return null;
       }
 
-      XXXXXXXXXXXX_foobar() {
-        var eventname, handle_kblike_event, i, len, ref;
+      _listen_to_modifiers(watcher) {
+        /* NOTE could use null watcher to auto-correct modifier states for `_listen_to_key()` */
+        var eventname, handle_kblike_event, handler, i, len, ref;
+        handler = this._handler_from_watcher(watcher);
         //.......................................................................................................
         handle_kblike_event = (event) => {
           var modifier_state;
           modifier_state = this.get_changed_kb_modifier_state(event);
           if (modifier_state !== null) {
-            µ.DOM.emit_custom_event('µ_kb_modifier_changed', {
-              detail: modifier_state
-            });
+            watcher(modifier_state);
           }
           this._set_capslock_state(event.getModifierState('CapsLock'));
           return null;
@@ -2797,9 +2805,9 @@ var types = exports.types = {
         }
         //.......................................................................................................
         µ.DOM.on(document, 'keydown', (event) => {
-          handle_kblike_event(event);
+          // handle_kblike_event event ### !!!!!!!!!!!!!!!!!!!!!! ###
           /* TAINT logic is questionable */
-          if (/* !!!!!!!!!!!!!!!!!!!!!! */event.key === 'CapsLock') {
+          if (event.key === 'CapsLock') {
             this._set_capslock_state(!this._capslock_active);
           } else {
             this._set_capslock_state(event.getModifierState('CapsLock'));
@@ -2808,10 +2816,10 @@ var types = exports.types = {
         });
         //.......................................................................................................
         µ.DOM.on(document, 'keyup', (event) => {
-          handle_kblike_event(event);
           if (event.key === 'CapsLock') {
-/* TAINT logic is questionable */
-/* !!!!!!!!!!!!!!!!!!!!!! */            return null;
+            // handle_kblike_event event ### !!!!!!!!!!!!!!!!!!!!!! ###
+            /* TAINT logic is questionable */
+            return null;
           }
           this._set_capslock_state(event.getModifierState('CapsLock'));
           return null;
@@ -2839,6 +2847,8 @@ var types = exports.types = {
     class Kb extends this._Kb {
       constructor() {
         super(...arguments);
+        //---------------------------------------------------------------------------------------------------------
+        this._handler_from_watcher = this._handler_from_watcher.bind(this);
         //---------------------------------------------------------------------------------------------------------
         this._listen_to_key = this._listen_to_key.bind(this);
       }
@@ -3093,13 +3103,29 @@ var types = exports.types = {
         return null;
       }
 
-      _listen_to_key(keyname, behavior, handler) {
+      _handler_from_watcher(watcher) {
+        boundMethodCheck(this, ref);
+        /* TAINT could use single function for all handlers that emit the same event */
+        validate.kb_watcher(watcher);
+        if (isa.function(watcher)) {
+          return watcher;
+        }
+        return function(d) {
+          return µ.DOM.emit_custom_event(watcher, {
+            detail: d
+          });
+        };
+      }
+
+      _listen_to_key(keyname, behavior, watcher) {
+        var handler;
         boundMethodCheck(this, ref);
         if (keyname === 'Space') {
           keyname = ' ';
         }
-        validate.keywatch_keyname(keyname);
-        validate.keywatch_keytype(behavior);
+        validate.kb_keyname(keyname);
+        validate.kb_keytype(behavior);
+        handler = this._handler_from_watcher(watcher);
         //.......................................................................................................
         switch (behavior) {
           case 'push':
@@ -3151,12 +3177,12 @@ var types = exports.types = {
   Object.assign(this, this.types.export());
 
   // #-----------------------------------------------------------------------------------------------------------
-  // @declare 'keywatch_keytypes', tests:
-  //   "x is a list of keywatch_keytype":     ( x ) -> @isa.list_of 'keywatch_keytype', x
+  // @declare 'kb_keytypes', tests:
+  //   "x is a list of kb_keytype":     ( x ) -> @isa.list_of 'kb_keytype', x
   //   "x is not empty":                   ( x ) -> not @isa.empty x
 
   //-----------------------------------------------------------------------------------------------------------
-  this.declare('keywatch_keytype', {
+  this.declare('kb_keytype', {
     tests: {
       "x is one of 'toggle', 'latch', 'tlatch', 'ptlatch', 'ntlatch', 'push'": function(x) {
         return x === 'toggle' || x === 'latch' || x === 'tlatch' || x === 'ptlatch' || x === 'ntlatch' || x === 'push';
@@ -3165,15 +3191,24 @@ var types = exports.types = {
   });
 
   // #-----------------------------------------------------------------------------------------------------------
-  // @declare 'keywatch_keynames', tests:
-  //   "x is a list of keywatch_keyname":  ( x ) -> @isa.list_of 'keywatch_keyname', x
+  // @declare 'kb_keynames', tests:
+  //   "x is a list of kb_keyname":  ( x ) -> @isa.list_of 'kb_keyname', x
   //   "x is not empty":                   ( x ) -> not @isa.empty x
 
   //-----------------------------------------------------------------------------------------------------------
-  this.declare('keywatch_keyname', {
+  this.declare('kb_keyname', {
     tests: {
       "x is a nonempty_text": function(x) {
         return this.isa.nonempty_text(x);
+      }
+    }
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.declare('kb_watcher', {
+    tests: {
+      "x is a function or a nonempty_text": function(x) {
+        return (this.isa.function(x)) || (this.isa.nonempty_text(x));
       }
     }
   });
