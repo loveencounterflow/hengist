@@ -52,7 +52,9 @@ sleep                     = ( dts ) -> new Promise ( done ) -> after dts, done
       µ.KB._listen_to_key keyname, 'toggle', 'pushed_key_y'
     eventdetail_div = µ.DOM.select '#eventdetail'
     µ.DOM.on document, 'pushed_key_y', ( event ) =>
-      eventdetail_div.innerHTML = µ.TEXT._escape "event.detail: #{rpr event.detail}"
+      detail_txt                = rpr event.detail
+      detail_txt                = detail_txt.replace 'event: { isTrusted: [Getter] }', 'event: ...'
+      eventdetail_div.innerHTML = µ.TEXT._escape "event.detail: #{detail_txt}"
       return null
     return null
 
