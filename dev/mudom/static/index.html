@@ -74,11 +74,11 @@ with the application in focus.</p>
 
 <p>The MBMCD switch below allows you to select whether to use mouse-based updates to the right-hand part of
 the table. The leftmost column (with rounded corners) always shows the effects of MBMCD events with a red
-border where a modifier is pressed, and a grey border when it is released. To observe the effect, move the
-mouse pointer out of the content area (e.g. to over the application menu) and press a modifier key such as
-Control or Shift. Then, while holding that key, move the mouse pointer back. As soon as the mouse re-enters
-the content area, the respective cells will be updated as if the key action had just occurred. This feature,
-therefore, can make key-based state management a bit more reliable.</p>
+border where a modifier is pressed, and a grey border when it is released. To observe the effect, focus the
+window of another application (or the browser's dev tools) and press a modifier key such as Control or
+Shift. Then, while holding that key, move the mouse pointer back. As soon as the mouse re-enters the content
+area, the respective cells will be updated as if the key action had just occurred. This feature, therefore,
+can make key-based state management a bit more reliable.</p>
 
 <label class=switchbox for=mbmcd><div id=modblink>MBMCD event</div><label class=switch><input
 type=checkbox id=mbmcd><span class='slider round'></span></label><div class=text>Use mouse-based modifier
@@ -97,6 +97,8 @@ change detection (MBMCD)</div></label>
 <tr><td class=lamp name=y>y               </td><!-- <td class='btn' latching=none name=y>y               </td> --><td class='btn' latching=toggle name=y>y               </td><!-- <td class='btn' latching=both name=y>y               </td> --><td class='btn' latching=latch name=y>y               </td><td class='btn' latching=ptlatch name=y>y               </td><td class='btn' latching=tlatch name=y>y               </td><td class='btn' latching=ntlatch name=y>y               </td></tr>
 <tr><td class=lamp name=Y>Y               </td><!-- <td class='btn' latching=none name=Y>Y               </td> --><td class='btn' latching=toggle name=Y>Y               </td><!-- <td class='btn' latching=both name=Y>Y               </td> --><td class='btn' latching=latch name=Y>Y               </td><td class='btn' latching=ptlatch name=Y>Y               </td><td class='btn' latching=tlatch name=Y>Y               </td><td class='btn' latching=ntlatch name=Y>Y               </td></tr>
 </table>
+
+<p>Latest <code class=toggle>toggle</code> event:</p>
 
 <div id=eventdetail>&nbsp;</div>
 
