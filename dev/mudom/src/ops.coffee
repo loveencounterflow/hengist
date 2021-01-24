@@ -22,18 +22,6 @@ sleep                     = ( dts ) -> new Promise ( done ) -> after dts, done
   setup = =>
     keynames    = ( µ.DOM.get button, 'name' for button in µ.DOM.select_all '.btn' )
     keynames    = [ ( new Set keynames )..., ]
-    # switchbox   = µ.DOM.select '.switchbox'
-    # target      = µ.DOM.select '.switchbox input'
-    # µ.DOM.on switchbox, 'click', ( event ) =>
-    #   log '^33342^', target.checked
-    #   # log '^33342^', target.value
-    #   return null
-      # event.detail ?= {}
-    #   event.detail.count = ( event.detail.count ? 0 ) + 1
-    #   log '^3336^ event.target        ', event.target
-    #   log '^3336^ event.detail.count  ', event.detail.count
-    #   log '^3336^ target              ', target
-    #   # target.click() if event.target isnt target
     return null
 
   #---------------------------------------------------------------------------------------------------------
