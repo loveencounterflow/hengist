@@ -48,18 +48,6 @@
         return results;
       })();
       keynames = [...(new Set(keynames))];
-      // switchbox   = µ.DOM.select '.switchbox'
-      // target      = µ.DOM.select '.switchbox input'
-      // µ.DOM.on switchbox, 'click', ( event ) =>
-      //   log '^33342^', target.checked
-      //   # log '^33342^', target.value
-      //   return null
-      // event.detail ?= {}
-      //   event.detail.count = ( event.detail.count ? 0 ) + 1
-      //   log '^3336^ event.target        ', event.target
-      //   log '^3336^ event.detail.count  ', event.detail.count
-      //   log '^3336^ target              ', target
-      //   # target.click() if event.target isnt target
       return null;
     };
     //---------------------------------------------------------------------------------------------------------
@@ -138,7 +126,10 @@
       }
       eventdetail_div = µ.DOM.select('#eventdetail');
       µ.DOM.on(document, 'pushed_key_y', (event) => {
-        eventdetail_div.innerHTML = µ.TEXT._escape(`event.detail: ${rpr(event.detail)}`);
+        var detail_txt;
+        detail_txt = rpr(event.detail);
+        detail_txt = detail_txt.replace('event: { isTrusted: [Getter] }', 'event: ...');
+        eventdetail_div.innerHTML = µ.TEXT._escape(`event.detail: ${detail_txt}`);
         return null;
       });
       return null;
