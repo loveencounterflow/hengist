@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, help, info, jr, log, rpr, test, urge, warn, whisper;
+  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, rpr, show_result, test, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -42,58 +42,67 @@
 
   data_cache = null;
 
+  gcfg = {
+    verbose: false
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  show_result = function(name, result) {
+    info('-----------------------------------------------');
+    urge(name);
+    whisper(result);
+    info('-----------------------------------------------');
+    return null;
+  };
+
   //-----------------------------------------------------------------------------------------------------------
   this.get_data = function(cfg) {
-    var DATOM;
+    var DATOM, font, texts;
     if (data_cache != null) {
       return data_cache;
     }
     DATOM = require('../../../apps/datom');
     //.........................................................................................................
-    DATA.get_cjk_chr;
-    debug(DATA.get_words(cfg.words_per_line));
+    texts = DATA.get_text_lines(cfg);
+    font = {
+      path: 'EBGaramond12-Italic.otf',
+      /* TAINT use single type/format for features */
+      features: 'liga,clig,dlig,hlig',
+      features_obj: {
+        liga: true,
+        clig: true,
+        dlig: true,
+        hlig: true
+      }
+    };
+    font.path = PATH.resolve(PATH.join(__dirname, '../../../assets/jizura-fonts', font.path));
     //.........................................................................................................
-    data_cache = {};
+    data_cache = {texts, font};
     data_cache = DATOM.freeze(data_cache);
     return data_cache;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._datom_thaw_freeze = function(cfg, datom_cfg) {
+  this.harfbuzz_shaping = function(cfg) {
     return new Promise((resolve) => {
-      var DATOM, count, data, freeze, thaw;
-      switch (datom_cfg.version) {
-        case '7':
-          DATOM = (require('../datom@7.0.3')).new(datom_cfg);
-          break;
-        case '8':
-          DATOM = (require('../../../apps/datom')).new(datom_cfg);
-          break;
-        default:
-          throw new Error(`^464^ unknown version in datom_cfg: ${rpr(datom_cfg)}`);
-      }
-      ({thaw, freeze} = DATOM.export());
+      var HB, count, data, font, texts;
+      HB = require('../../../apps/glyphshapes-and-typesetting-with-harfbuzz');
+      // HB.ensure_harfbuzz_version() ### NOTE: optional diagnostic ###
       data = this.get_data(cfg);
       count = 0;
+      ({texts, font} = data);
       resolve(() => {
-        return new Promise((resolve) => {
-          var facet_keys, facet_values, i, j, key, key_idx, len, len1, probe, probe_idx, ref;
-          ref = data.datoms;
-          for (probe_idx = i = 0, len = ref.length; i < len; probe_idx = ++i) {
-            probe = ref[probe_idx];
-            facet_keys = data.lists_of_facet_keys[probe_idx];
-            facet_values = data.lists_of_facet_values[probe_idx];
-            probe = thaw(probe);
-            whisper('^331^', probe, Object.isFrozen(probe));
-            for (key_idx = j = 0, len1 = facet_keys.length; j < len1; key_idx = ++j) {
-              key = facet_keys[key_idx];
-              probe[key] = facet_values[key_idx];
+        return new Promise(async(resolve) => {
+          var i, len, result, text;
+          for (i = 0, len = texts.length; i < len; i++) {
+            text = texts[i];
+            result = (await HB.shape_text({text, font}));
+            if (gcfg.verbose) {
+              show_result('harfbuzz_shaping', result);
             }
-            probe = freeze(probe);
-            // whisper '^331^', probe
-            count++;
+            count += text.length/* NOTE counting approximate number of glyphs */
           }
-/* NOTE counting datoms, not facets */          return resolve(count);
+          return resolve(count);
         });
       });
       return null;
@@ -101,47 +110,149 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.datom_v7_thaw_freeze_f1 = function(cfg) {
-    return this._datom_thaw_freeze(cfg, {
-      version: '7',
-      freeze: true
-    });
-  };
-
-  this.datom_v7_thaw_freeze_f0 = function(cfg) {
-    return this._datom_thaw_freeze(cfg, {
-      version: '7',
-      freeze: false
-    });
-  };
-
-  this.datom_v8_thaw_freeze_f1 = function(cfg) {
-    return this._datom_thaw_freeze(cfg, {
-      version: '8',
-      freeze: true
-    });
-  };
-
-  this.datom_v8_thaw_freeze_f0 = function(cfg) {
-    return this._datom_thaw_freeze(cfg, {
-      version: '8',
-      freeze: false
+  this.harfbuzzjs_shaping = function(cfg) {
+    return new Promise((resolve) => {
+      var HB, count, data, font, fs, texts;
+      HB = require('../../../apps/glyphshapes-and-typesetting-with-harfbuzz/lib/demo-harfbuzzjs');
+      // HB.ensure_harfbuzz_version() ### NOTE: optional diagnostic ###
+      data = this.get_data(cfg);
+      count = 0;
+      ({texts, font} = data);
+      fs = HB.new_fontshaper(font.path, font.features_obj);
+      resolve(() => {
+        return new Promise(async(resolve) => {
+          var i, len, result, text;
+          for (i = 0, len = texts.length; i < len; i++) {
+            text = texts[i];
+            result = (await HB.shape_text(fs, text));
+            if (gcfg.verbose) {
+              show_result('harfbuzzjs_shaping', result);
+            }
+            count += text.length/* NOTE counting approximate number of glyphs */
+          }
+          return resolve(count);
+        });
+      });
+      return null;
     });
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.opentypejs_shaping = function(cfg) {
+    return new Promise(async(resolve) => {
+      var OT, count, data, font, otfont, texts;
+      OT = require('../../../apps/glyphshapes-and-typesetting-with-harfbuzz/lib/demo-opentypejs');
+      data = this.get_data(cfg);
+      count = 0;
+      ({texts, font} = data);
+      otfont = (await OT.otfont_from_path(font.path)); //, font.features_obj
+      resolve(() => {
+        return new Promise((resolve) => {
+          var i, len, result, text;
+          for (i = 0, len = texts.length; i < len; i++) {
+            text = texts[i];
+            result = OT.shape_text(otfont, text);
+            if (gcfg.verbose) {
+              show_result('opentypejs_shaping', result);
+            }
+            count += text.length/* NOTE counting approximate number of glyphs */
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.fontkit_shaping = function(cfg) {
+    return new Promise(async(resolve) => {
+      var FK, count, data, fkfont, font, texts;
+      FK = require('../../../apps/glyphshapes-and-typesetting-with-harfbuzz/lib/demo-fontkit');
+      data = this.get_data(cfg);
+      count = 0;
+      ({texts, font} = data);
+      fkfont = (await FK.fkfont_from_path(font.path)); //, font.features_obj
+      resolve(() => {
+        return new Promise((resolve) => {
+          var i, len, result, text;
+          for (i = 0, len = texts.length; i < len; i++) {
+            text = texts[i];
+            result = FK.shape_text(fkfont, text);
+            if (gcfg.verbose) {
+              show_result('fontkit_shaping', result);
+            }
+            count += text.length/* NOTE counting approximate number of glyphs */
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._rustybuzz_wasm_shaping = function(cfg, format) {
+    return new Promise((resolve) => {
+      var RBW, count, data, font, font_bytes, font_bytes_hex, texts;
+      RBW = require('../../../apps/rustybuzz-wasm/pkg');
+      data = this.get_data(cfg);
+      count = 0;
+      ({texts, font} = data);
+      if (!RBW.has_font_bytes()) {
+        whisper(`^44766^ sending ${font.path} to rustybuzz-wasm...`);
+        font_bytes = FS.readFileSync(font.path);
+        font_bytes_hex = font_bytes.toString('hex');
+        RBW.set_font_bytes(font_bytes_hex);
+        whisper("^44766^ done");
+      }
+      // format          = 'json'
+      // format          = 'short'
+      // format          = 'rusty'
+      resolve(() => {
+        return new Promise((resolve) => {
+          var i, len, result, text;
+          for (i = 0, len = texts.length; i < len; i++) {
+            text = texts[i];
+            result = RBW.shape_text({format, text});
+            if (gcfg.verbose) {
+              show_result('rustybuzz_wasm_shaping', result);
+            }
+            count += text.length/* NOTE counting approximate number of glyphs */
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.rustybuzz_wasm_json_shaping = function(cfg) {
+    return this._rustybuzz_wasm_shaping(cfg, 'json');
+  };
+
+  this.rustybuzz_wasm_short_shaping = function(cfg) {
+    return this._rustybuzz_wasm_shaping(cfg, 'short');
+  };
+
+  this.rustybuzz_wasm_rusty_shaping = function(cfg) {
+    return this._rustybuzz_wasm_shaping(cfg, 'rusty');
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.run_benchmarks = async function() {
-    var _, bench, cfg, i, j, len, ref, ref1, repetitions, test_name, test_names;
+    var _, bench, cfg, i, j, len, n, ref, ref1, repetitions, test_name, test_names;
+    // gcfg.verbose  = true
     bench = BM.new_benchmarks();
-    // cfg         = { set_count: 100, datom_length: 5, change_facet_count: 3, }
-    // cfg         = { set_count: 20, datom_length: 5, change_facet_count: 3, }
+    n = 100;
+    gcfg.verbose = n === 1;
     cfg = {
-      set_count: 3,
-      datom_length: 5,
-      change_facet_count: 3
+      line_count: n,
+      word_count: n
     };
-    repetitions = 10;
-    test_names = ['datom_v8_thaw_freeze_f1'];
+    repetitions = 2;
+    test_names = ['harfbuzz_shaping', 'harfbuzzjs_shaping', 'opentypejs_shaping', 'fontkit_shaping', 'rustybuzz_wasm_json_shaping', 'rustybuzz_wasm_short_shaping', 'rustybuzz_wasm_rusty_shaping'];
     if (global.gc != null) {
       global.gc();
     }
@@ -162,13 +273,8 @@
 
   //###########################################################################################################
   if (require.main === module) {
-    (() => {
-      var cfg;
-      // await @run_benchmarks()
-      cfg = {
-        words_per_line: 3
-      };
-      return debug(this.get_data(cfg));
+    (async() => {
+      return (await this.run_benchmarks());
     })();
   }
 
