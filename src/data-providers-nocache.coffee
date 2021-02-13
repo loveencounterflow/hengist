@@ -70,7 +70,6 @@ FS                        = require 'fs'
       when 1 then String.fromCodePoint CND.random_integer 0x20000, 0x2a6d7
   return R
 
-
 #-----------------------------------------------------------------------------------------------------------
 @get_words = ( n = 10 ) ->
   validate.cardinal n
@@ -83,6 +82,11 @@ FS                        = require 'fs'
   if R.length < n
     R         = [ R..., ( @get_cjk_chr n - R.length )..., ]
   return CND.shuffle R
+
+#-----------------------------------------------------------------------------------------------------------
+@get_text_lines = ( settings ) ->
+  settings = { line_count: 10, word_count: 10, settings..., }
+  return ( ( ( @get_words settings.word_count ).join ' ' ) for _ in [ 1 .. settings.line_count ] )
 
 #-----------------------------------------------------------------------------------------------------------
 @get_random_datoms = ( n = 10 ) ->

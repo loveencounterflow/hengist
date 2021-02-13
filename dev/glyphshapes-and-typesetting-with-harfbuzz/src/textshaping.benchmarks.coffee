@@ -23,59 +23,143 @@ test                      = require 'guy-test'
 { jr }                    = CND
 BM                        = require '../../../lib/benchmarks'
 data_cache                = null
+gcfg                      = { verbose: false, }
+
+#-----------------------------------------------------------------------------------------------------------
+show_result = ( name, result ) ->
+  info '-----------------------------------------------'
+  urge name
+  whisper result
+  info '-----------------------------------------------'
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @get_data = ( cfg ) ->
   return data_cache if data_cache?
   DATOM = require '../../../apps/datom'
   #.........................................................................................................
-  DATA.get_cjk_chr
-  debug DATA.get_words cfg.words_per_line
+  texts       = DATA.get_text_lines cfg
+  font        =
+    path:       'EBGaramond12-Italic.otf'
+    ### TAINT use single type/format for features ###
+    features:   'liga,clig,dlig,hlig'
+    features_obj: { liga: true, clig: true, dlig: true, hlig: true, }
+  font.path   = PATH.resolve PATH.join __dirname, '../../../assets/jizura-fonts', font.path
   #.........................................................................................................
-  data_cache  = {}
+  data_cache  = { texts, font, }
   data_cache  = DATOM.freeze data_cache
   return data_cache
 
 #-----------------------------------------------------------------------------------------------------------
-@_datom_thaw_freeze = ( cfg, datom_cfg ) -> new Promise ( resolve ) =>
-  switch datom_cfg.version
-    when '7' then  DATOM = ( require '../datom@7.0.3' ).new datom_cfg
-    when '8' then  DATOM = ( require '../../../apps/datom' ).new datom_cfg
-    else throw new Error "^464^ unknown version in datom_cfg: #{rpr datom_cfg}"
-  { thaw
-    freeze }    = DATOM.export()
+@harfbuzz_shaping = ( cfg ) -> new Promise ( resolve ) =>
+  HB            = require '../../../apps/glyphshapes-and-typesetting-with-harfbuzz'
+  # HB.ensure_harfbuzz_version() ### NOTE: optional diagnostic ###
   data          = @get_data cfg
   count         = 0
+  { texts
+    font }      = data
   resolve => new Promise ( resolve ) =>
-    for probe, probe_idx in data.datoms
-      facet_keys    = data.lists_of_facet_keys[   probe_idx ]
-      facet_values  = data.lists_of_facet_values[ probe_idx ]
-      probe         = thaw probe
-      whisper '^331^', probe, Object.isFrozen probe
-      for key, key_idx in facet_keys
-        probe[ key ]  = facet_values[ key_idx ]
-      probe         = freeze probe
-      # whisper '^331^', probe
-      count++ ### NOTE counting datoms, not facets ###
+    for text in texts
+      result  = await HB.shape_text { text, font, }
+      show_result 'harfbuzz_shaping', result if gcfg.verbose
+      count  += text.length ### NOTE counting approximate number of glyphs ###
     resolve count
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@datom_v7_thaw_freeze_f1 = ( cfg ) -> @_datom_thaw_freeze cfg, { version: '7', freeze: true,  }
-@datom_v7_thaw_freeze_f0 = ( cfg ) -> @_datom_thaw_freeze cfg, { version: '7', freeze: false, }
-@datom_v8_thaw_freeze_f1 = ( cfg ) -> @_datom_thaw_freeze cfg, { version: '8', freeze: true,  }
-@datom_v8_thaw_freeze_f0 = ( cfg ) -> @_datom_thaw_freeze cfg, { version: '8', freeze: false, }
+@harfbuzzjs_shaping = ( cfg ) -> new Promise ( resolve ) =>
+  HB            = require '../../../apps/glyphshapes-and-typesetting-with-harfbuzz/lib/demo-harfbuzzjs'
+  # HB.ensure_harfbuzz_version() ### NOTE: optional diagnostic ###
+  data          = @get_data cfg
+  count         = 0
+  { texts
+    font }      = data
+  fs            = HB.new_fontshaper font.path, font.features_obj
+  resolve => new Promise ( resolve ) =>
+    for text in texts
+      result  = await HB.shape_text fs, text
+      show_result 'harfbuzzjs_shaping', result if gcfg.verbose
+      count  += text.length ### NOTE counting approximate number of glyphs ###
+    resolve count
+  return null
 
+#-----------------------------------------------------------------------------------------------------------
+@opentypejs_shaping = ( cfg ) -> new Promise ( resolve ) =>
+  OT            = require '../../../apps/glyphshapes-and-typesetting-with-harfbuzz/lib/demo-opentypejs'
+  data          = @get_data cfg
+  count         = 0
+  { texts
+    font }      = data
+  otfont        = await OT.otfont_from_path font.path #, font.features_obj
+  resolve => new Promise ( resolve ) =>
+    for text in texts
+      result  = OT.shape_text otfont, text
+      show_result 'opentypejs_shaping', result if gcfg.verbose
+      count  += text.length ### NOTE counting approximate number of glyphs ###
+    resolve count
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@fontkit_shaping = ( cfg ) -> new Promise ( resolve ) =>
+  FK            = require '../../../apps/glyphshapes-and-typesetting-with-harfbuzz/lib/demo-fontkit'
+  data          = @get_data cfg
+  count         = 0
+  { texts
+    font }      = data
+  fkfont        = await FK.fkfont_from_path font.path #, font.features_obj
+  resolve => new Promise ( resolve ) =>
+    for text in texts
+      result  = FK.shape_text fkfont, text
+      show_result 'fontkit_shaping', result if gcfg.verbose
+      count  += text.length ### NOTE counting approximate number of glyphs ###
+    resolve count
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_rustybuzz_wasm_shaping = ( cfg, format ) -> new Promise ( resolve ) =>
+  RBW             = require '../../../apps/rustybuzz-wasm/pkg'
+  data            = @get_data cfg
+  count           = 0
+  { texts
+    font }        = data
+  unless RBW.has_font_bytes()
+    whisper "^44766^ sending #{font.path} to rustybuzz-wasm..."
+    font_bytes      = FS.readFileSync font.path
+    font_bytes_hex  = font_bytes.toString 'hex'
+    RBW.set_font_bytes font_bytes_hex
+    whisper "^44766^ done"
+  # format          = 'json'
+  # format          = 'short'
+  # format          = 'rusty'
+  resolve => new Promise ( resolve ) =>
+    for text in texts
+      result  = RBW.shape_text { format, text, }
+      show_result 'rustybuzz_wasm_shaping', result if gcfg.verbose
+      count  += text.length ### NOTE counting approximate number of glyphs ###
+    resolve count
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@rustybuzz_wasm_json_shaping  = ( cfg ) -> @_rustybuzz_wasm_shaping cfg, 'json'
+@rustybuzz_wasm_short_shaping = ( cfg ) -> @_rustybuzz_wasm_shaping cfg, 'short'
+@rustybuzz_wasm_rusty_shaping = ( cfg ) -> @_rustybuzz_wasm_shaping cfg, 'rusty'
 
 #-----------------------------------------------------------------------------------------------------------
 @run_benchmarks = ->
-  bench       = BM.new_benchmarks()
-  # cfg         = { set_count: 100, datom_length: 5, change_facet_count: 3, }
-  # cfg         = { set_count: 20, datom_length: 5, change_facet_count: 3, }
-  cfg         = { set_count: 3, datom_length: 5, change_facet_count: 3, }
-  repetitions = 10
-  test_names  = [
-    'datom_v8_thaw_freeze_f1'
+  # gcfg.verbose  = true
+  bench         = BM.new_benchmarks()
+  n             = 100
+  gcfg.verbose  = ( n is 1 )
+  cfg           = { line_count: n, word_count: n, }
+  repetitions   = 2
+  test_names    = [
+    'harfbuzz_shaping'
+    'harfbuzzjs_shaping'
+    'opentypejs_shaping'
+    'fontkit_shaping'
+    'rustybuzz_wasm_json_shaping'
+    'rustybuzz_wasm_short_shaping'
+    'rustybuzz_wasm_rusty_shaping'
     ]
   global.gc() if global.gc?
   data_cache = null
@@ -89,9 +173,7 @@ data_cache                = null
 
 ############################################################################################################
 if require.main is module then do =>
-  # await @run_benchmarks()
-  cfg         = { words_per_line: 3, }
-  debug @get_data cfg
+  await @run_benchmarks()
 
 
 
