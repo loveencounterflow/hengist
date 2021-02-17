@@ -163,7 +163,7 @@ if module is require.main then do =>
   text = "Zentral/Dezentral, Innenorientierung/Kundenzentrierung und Fremdsteuerung/Selbstverantwortung"
   text = text.replace /\n/g, ' '
   text = text.replace /\s+/g, ' '
-  # await @demo_looping text
+  await @demo_looping text
   await @demo_piping text
 
 
