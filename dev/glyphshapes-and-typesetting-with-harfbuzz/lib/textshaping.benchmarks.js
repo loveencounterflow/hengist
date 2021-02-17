@@ -245,7 +245,7 @@
     var _, bench, cfg, i, j, len, n, ref, ref1, repetitions, test_name, test_names;
     // gcfg.verbose  = true
     bench = BM.new_benchmarks();
-    n = 500;
+    n = 10;
     gcfg.verbose = n === 1;
     cfg = {
       line_count: n,

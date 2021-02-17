@@ -226,7 +226,7 @@ classical mythology, Hercules is famous for his strength and for his numerous fa
       text = "Zentral/Dezentral, Innenorientierung/Kundenzentrierung und Fremdsteuerung/Selbstverantwortung";
       text = text.replace(/\n/g, ' ');
       text = text.replace(/\s+/g, ' ');
-      // await @demo_looping text
+      await this.demo_looping(text);
       return (await this.demo_piping(text));
     })();
   }
