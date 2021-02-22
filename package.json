@@ -60,6 +60,7 @@
     "panzoom": "^9.4.1",
     "pg": "^8.5.1",
     "pg-cursor": "^2.5.2",
+    "pg-mem": "^1.7.6",
     "random-ext": "^2.6.3",
     "readable-stream": "^3.6.0",
     "source-map": "^0.7.3",
