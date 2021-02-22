@@ -5,7 +5,7 @@ dependencies:
   cnd: 9.2.1
   command-line-args: 5.1.1
   command-line-usage: 6.1.1
-  commander: 6.2.1
+  commander: 7.1.0
   convert-source-map: 1.7.0
   cupofjoe: 0.1.1
   datom: 8.0.0
@@ -21,7 +21,7 @@ dependencies:
   guy-test: 4.0.1
   hamt: 2.2.2
   hollerith-codec: 2.0.0
-  immer: 7.0.15
+  immer: 8.0.1
   immutable: 4.0.0-rc.12
   intershop: link:../intershop
   intershop-intertext: link:../intershop-intertext
@@ -30,10 +30,10 @@ dependencies:
   intertype: 7.6.3
   jake: 10.8.2
   javascript-state-machine: 3.1.0
-  jfee: 0.0.2
+  jfee: 0.1.3
   klona: 2.0.4
   load-source-map: 2.0.0
-  loupe: 1.0.5
+  loupe: 2.0.3
   merge-ranges: 1.0.2
   mixa: 0.1.1
   mori: 0.3.2
@@ -390,12 +390,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
-  /commander/6.2.1:
+  /commander/7.1.0:
     dev: false
     engines:
-      node: '>= 6'
+      node: '>= 10'
     resolution:
-      integrity: sha512-U7VdrJFnJgo4xjrHpTzu0yrHPGImdsmD95ZlgYSEajAn2JKzDhDTPG9kBTefmObL2w/ngeZnilk+OV9CG3d7UA==
+      integrity: sha512-pRxBna3MJe6HKnBGsDyMv8ETbptw3axEdYHoqNh7gu5oDcew8fs0xnivZGm06Ogk8zGAJ9VX+OPEr2GXEQK4dg==
   /concat-map/0.0.1:
     dev: false
     resolution:
@@ -777,10 +777,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==
-  /immer/7.0.15:
+  /immer/8.0.1:
     dev: false
     resolution:
-      integrity: sha512-yM7jo9+hvYgvdCQdqvhCNRRio0SCXc8xDPzA25SvKWa7b1WVPjLwQs1VYU5JPXjcJPTqAa5NP5dqpORGYBQ2AA==
+      integrity: sha512-aqXhGP7//Gui2+UrEtvxZxSquQVXTpZ7KDxfCcKAF3Vysvw0CViVaW9RZ1j1xlIYqaaaipBoqdqeibkc18PNvA==
   /immutable/4.0.0-rc.12:
     dev: false
     resolution:
@@ -874,13 +874,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-BwhYxQ1OPenBPXC735RgfB+ZUG8H3kjsx8hrYTgWnoy6TPipEy4fiicyhT2lxRKAXq9pG7CfFT8a2HLr6Hmwxg==
-  /jfee/0.0.2:
-    dependencies:
-      cnd: 9.2.1
-      intertype: 7.6.3
-    dev: false
-    resolution:
-      integrity: sha512-uTIeeY4kDmX4rciTl6zIT6hdwRjoP2K9B73xAk8lqo0XKw0rZhfHAOtnUWCmYC4U8YF7FgJWeKypNLUpbg1pmw==
   /jfee/0.1.3:
     dependencies:
       cnd: 9.2.1
@@ -947,13 +940,13 @@ packages:
       node: '>=10'
     resolution:
       integrity: sha512-FN8JBzLx6CzeMrB0tg6pqlGU1wCrXW+ZXGH481kfsBqer0hToTIiHdjH4Mq8xJUbvATujKCvaREGWpGUionraA==
-  /loupe/1.0.5:
+  /loupe/2.0.3:
     dependencies:
       get-function-name: 0.0.1
       type-detect: 4.0.8
     dev: false
     resolution:
-      integrity: sha512-x1DKw8NBoUM859Ul5rBvybT5SIheB3t8ClJohCxsiQZTCNbNKgJZGO5zfB6MHqe4cY/ZiuhFUfOrhCjHSrSTwA==
+      integrity: sha512-EO23oee3x9JYZVQM41VrrNhWYC3gpn3gvXhNvDzX4MUK2v2lrJUNpbt3G25SASqW50nlltu7NLc/ERJTtoCWDw==
   /lru-cache/4.1.5:
     dependencies:
       pseudomap: 1.0.2
@@ -1811,7 +1804,7 @@ specifiers:
   cnd: ^9.2.1
   command-line-args: ^5.1.1
   command-line-usage: ^6.1.0
-  commander: ^6.2.0
+  commander: 7.1.0
   convert-source-map: ^1.7.0
   cupofjoe: ^0.1.1
   datom: ^8.0.0
@@ -1827,7 +1820,7 @@ specifiers:
   guy-test: ^4.0.1
   hamt: ^2.2.2
   hollerith-codec: ^2.0.0
-  immer: ^7.0.14
+  immer: 8.0.1
   immutable: ^4.0.0-rc.12
   intershop: file:../intershop
   intershop-intertext: file:../intershop-intertext
@@ -1836,10 +1829,10 @@ specifiers:
   intertype: ^7.6.3
   jake: ^10.8.2
   javascript-state-machine: ^3.1.0
-  jfee: 0.0.2
+  jfee: 0.1.3
   klona: ^2.0.4
   load-source-map: ^2.0.0
-  loupe: ^1.0.2
+  loupe: 2.0.3
   merge-ranges: ^1.0.2
   mixa: ^0.1.1
   mori: ^0.3.2
