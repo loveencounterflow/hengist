@@ -85,6 +85,7 @@ FS                        = require 'fs'
 
 #-----------------------------------------------------------------------------------------------------------
 @get_text_lines = ( settings ) ->
+  ### TAINT takes inordinately long for large `line_count`s ###
   settings = { line_count: 10, word_count: 10, settings..., }
   return ( ( ( @get_words settings.word_count ).join ' ' ) for _ in [ 1 .. settings.line_count ] )
 
