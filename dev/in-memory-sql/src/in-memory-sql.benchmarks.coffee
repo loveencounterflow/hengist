@@ -241,7 +241,7 @@ show_result = ( name, result ) ->
   gcfg.verbose  = true
   gcfg.verbose  = false
   bench         = BM.new_benchmarks()
-  cfg           = { word_count: 10, }
+  cfg           = { word_count: 1000, }
   repetitions   = 3
   test_names    = [
     'pgmem'
@@ -265,27 +265,27 @@ show_result = ( name, result ) ->
 ############################################################################################################
 if require.main is module then do =>
   await @run_benchmarks()
-  fractions = ->
-    Fraction = require 'fraction.js'
-    ε = 0.1
-    ε = 1
-    ε = 0.01
-    for a in [
-      1
-      2
-      3
-      4
-      5
-      6
-      7
-      8
-      9
-      10
-      ]
-      f = new Fraction 10 / a
-      urge f
-      debug a, rpr f.toFraction true
-      debug a, rpr f.toFraction false
-      debug a, rpr ( f.simplify ε ).toFraction false
+  # fractions = ->
+  #   Fraction = require 'fraction.js'
+  #   ε = 0.1
+  #   ε = 1
+  #   ε = 0.01
+  #   for a in [
+  #     1
+  #     2
+  #     3
+  #     4
+  #     5
+  #     6
+  #     7
+  #     8
+  #     9
+  #     10
+  #     ]
+  #     f = new Fraction 10 / a
+  #     urge f
+  #     debug a, rpr f.toFraction true
+  #     debug a, rpr f.toFraction false
+  #     debug a, rpr ( f.simplify ε ).toFraction false
 
 
