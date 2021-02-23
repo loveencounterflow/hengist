@@ -18,6 +18,7 @@ dependencies:
   exec-sh: 0.3.4
   executive: 1.6.3
   fast-copy: 2.1.1
+  fraction.js: 4.0.13
   get-source: 2.0.11
   guy-test: 4.0.1
   hamt: 2.2.2
@@ -48,6 +49,7 @@ dependencies:
   pg: 8.5.1
   pg-cursor: 2.5.2
   pg-mem: 1.7.6
+  postgres: 1.0.2
   random-ext: 2.6.3
   readable-stream: 3.6.0
   source-map: 0.7.3
@@ -788,6 +790,10 @@ packages:
       node: '>=4.0.0'
     resolution:
       integrity: sha512-6Tb2myMioCAgv5kfvP5/PkZZ/ntTpVK39fHY7WkWBgvbeE+VHd/tZuZ4mrC+bxh4cfOZeYKVPaJIZtZXV7GNCQ==
+  /fraction.js/4.0.13:
+    dev: false
+    resolution:
+      integrity: sha512-E1fz2Xs9ltlUp+qbiyx9wmt2n9dRzPsS11Jtdb8D2o+cC7wr9xkkKsVKJuBX0ST+LVS+LhLO+SbLJNtfWcJvXA==
   /fs-constants/1.0.0:
     dev: false
     resolution:
@@ -1540,6 +1546,10 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==
+  /postgres/1.0.2:
+    dev: false
+    resolution:
+      integrity: sha512-zeLgt42KSUNgX/uvo+gbVxTAYwgSY6MIKuU/a8YWuObX4rtGuKrVWopvEAqIAPSO0FeHS1TsSKnqPjoufPy8NA==
   /prebuild-install/5.3.6:
     dependencies:
       detect-libc: 1.0.3
@@ -2147,6 +2157,7 @@ specifiers:
   exec-sh: ^0.3.4
   executive: ^1.6.3
   fast-copy: ^2.1.0
+  fraction.js: ^4.0.13
   get-source: ^2.0.11
   guy-test: ^4.0.1
   hamt: ^2.2.2
@@ -2177,6 +2188,7 @@ specifiers:
   pg: ^8.5.1
   pg-cursor: ^2.5.2
   pg-mem: ^1.7.6
+  postgres: ^1.0.2
   random-ext: ^2.6.3
   readable-stream: ^3.6.0
   source-map: ^0.7.3
