@@ -354,7 +354,7 @@
     gcfg.verbose = false;
     bench = BM.new_benchmarks();
     cfg = {
-      word_count: 10
+      word_count: 1000
     };
     repetitions = 3;
     test_names = ['pgmem', 'bettersqlite3_memory', 'bettersqlite3_backup', 'bettersqlite3_file', 'sqljs', 'porsagerpostgres', 'briancpg'];
@@ -379,28 +379,32 @@
   //###########################################################################################################
   if (require.main === module) {
     (async() => {
-      var fractions;
-      await this.run_benchmarks();
-      return fractions = function() {
-        var Fraction, a, f, i, len, ref, results, ε;
-        Fraction = require('fraction.js');
-        ε = 0.1;
-        ε = 1;
-        ε = 0.01;
-        ref = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          a = ref[i];
-          f = new Fraction(10 / a);
-          urge(f);
-          debug(a, rpr(f.toFraction(true)));
-          debug(a, rpr(f.toFraction(false)));
-          results.push(debug(a, rpr((f.simplify(ε)).toFraction(false))));
-        }
-        return results;
-      };
+      return (await this.run_benchmarks());
     })();
   }
+
+  // fractions = ->
+//   Fraction = require 'fraction.js'
+//   ε = 0.1
+//   ε = 1
+//   ε = 0.01
+//   for a in [
+//     1
+//     2
+//     3
+//     4
+//     5
+//     6
+//     7
+//     8
+//     9
+//     10
+//     ]
+//     f = new Fraction 10 / a
+//     urge f
+//     debug a, rpr f.toFraction true
+//     debug a, rpr f.toFraction false
+//     debug a, rpr ( f.simplify ε ).toFraction false
 
 }).call(this);
 
