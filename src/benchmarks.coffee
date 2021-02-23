@@ -114,17 +114,19 @@ bar_from_percentage = ( n ) ->
   for record in records
     { test_name
       ops }       = record
+    xxx_txt       =  '≙' + ( " 1÷#{f0a ( best_ops / ops )}".padStart 8 )
     rops          = ( ops / best_ops ) * 100
     ### TAINT code duplication ###
     test_name_txt = test_name.padEnd 40
     ops_txt       = f0l   ops
     rops_txt      = f1s   rops
     bar           = bar_from_percentage Math.round rops
-    info test_name_txt, ops_txt, 'Hz', rops_txt, '%', bar
+    info test_name_txt, ops_txt, 'Hz', xxx_txt, rops_txt, '%', bar
 
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
+f0a   = ( n ) -> ( nf '###,##0.',          n )
 f0    = ( n ) -> ( nf '###,##0.',          n ).padStart 15
 f0l   = ( n ) -> ( nf '###,##0.',          n ).padStart 15
 f1s   = ( n ) -> ( nf '###,##0.0',         n ).padStart  7
