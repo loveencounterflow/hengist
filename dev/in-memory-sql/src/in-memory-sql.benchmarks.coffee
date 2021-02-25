@@ -94,6 +94,10 @@ show_result = ( name, result ) ->
   data          = @get_data cfg
   count         = 0
   #.........................................................................................................
+  # db.unsafeMode true
+  # db.pragma 'cache_size = 32000'
+  db.pragma 'synchronous = OFF' # makes file-based DBs much faster
+  #.........................................................................................................
   db.exec """drop table if exists test;"""
   db.exec """
     create table test(
@@ -122,6 +126,74 @@ show_result = ( name, result ) ->
 @bettersqlite3_memory = ( cfg ) => @_bettersqlite3 cfg, ':memory:'
 @bettersqlite3_backup = ( cfg ) => @_bettersqlite3 cfg, ':memory:', true
 @bettersqlite3_file   = ( cfg ) => @_bettersqlite3 cfg, '/tmp/hengist-in-memory-sql.benchmarks.db'
+
+#-----------------------------------------------------------------------------------------------------------
+@bettersqlite3_memory_noprepare = ( cfg ) -> new Promise ( resolve ) =>
+  Db            = require 'better-sqlite3'
+  # db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
+  db_cfg        = null
+  db            = new Db ':memory:', db_cfg
+  data          = @get_data cfg
+  count         = 0
+  #.........................................................................................................
+  # db.unsafeMode true
+  # db.pragma 'cache_size = 32000'
+  db.pragma 'synchronous = OFF' # makes file-based DBs much faster
+  #.........................................................................................................
+  db.exec """drop table if exists test;"""
+  db.exec """
+    create table test(
+      id    integer primary key,
+      nr    integer not null,
+      text  text );"""
+  #.........................................................................................................
+  resolve => new Promise ( resolve ) =>
+    nr      = 0
+    for text in data.texts
+      nr++
+      insert = db.prepare """insert into test ( nr, text ) values ( ?, ? );"""
+      insert.run [ nr, text, ]
+    retrieve  = db.prepare """select * from test order by text;"""
+    result    = retrieve.all()
+    count    += result.length
+    show_result 'bettersqlite3', result if gcfg.verbose
+    db.close()
+    resolve count
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_bettersqlite3_memory_icql = ( cfg, icql_version ) -> new Promise ( resolve ) =>
+  Db            = require 'better-sqlite3'
+  icql_path     = PATH.resolve PATH.join __dirname, '../demo-frp.icql'
+  ICQL          = require switch icql_version
+    when 'icql_latest'  then '../../../apps/icql'
+    when 'icql515'      then 'icql515'
+    else throw new Error "^45458^ unknown icql_version: #{rpr icql_version}"
+  icql_cfg =
+    connector:    Db
+    db_path:      ':memory:'
+    icql_path:    icql_path
+  db = ICQL.bind icql_cfg
+  db.create_table_test()
+  data          = @get_data cfg
+  count         = 0
+  #.........................................................................................................
+  resolve => new Promise ( resolve ) =>
+    nr      = 0
+    for text in data.texts
+      nr++
+      db.insert_text { nr, text, }
+    result  = db.$.all_rows db.get_all_texts()
+    count  += result.length
+    show_result 'bettersqlite3_memory_icql', result if gcfg.verbose
+    db.$.db.close()
+    resolve count
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@bettersqlite3_memory_icql515     = ( cfg ) -> @_bettersqlite3_memory_icql cfg, 'icql515'
+@bettersqlite3_memory_icql_latest = ( cfg ) -> @_bettersqlite3_memory_icql cfg, 'icql_latest'
+
 
 #-----------------------------------------------------------------------------------------------------------
 @sqljs = ( cfg ) -> new Promise ( resolve ) =>
@@ -246,6 +318,9 @@ show_result = ( name, result ) ->
   test_names    = [
     'pgmem'
     'bettersqlite3_memory'
+    'bettersqlite3_memory_icql_latest'
+    'bettersqlite3_memory_icql515'
+    'bettersqlite3_memory_noprepare'
     'bettersqlite3_backup'
     'bettersqlite3_file'
     'sqljs'
@@ -265,27 +340,3 @@ show_result = ( name, result ) ->
 ############################################################################################################
 if require.main is module then do =>
   await @run_benchmarks()
-  # fractions = ->
-  #   Fraction = require 'fraction.js'
-  #   ε = 0.1
-  #   ε = 1
-  #   ε = 0.01
-  #   for a in [
-  #     1
-  #     2
-  #     3
-  #     4
-  #     5
-  #     6
-  #     7
-  #     8
-  #     9
-  #     10
-  #     ]
-  #     f = new Fraction 10 / a
-  #     urge f
-  #     debug a, rpr f.toFraction true
-  #     debug a, rpr f.toFraction false
-  #     debug a, rpr ( f.simplify ε ).toFraction false
-
-
