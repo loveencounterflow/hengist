@@ -23,6 +23,8 @@ dependencies:
   guy-test: 4.0.1
   hamt: 2.2.2
   hollerith-codec: 2.0.0
+  icql: 5.1.6
+  icql515: /icql/5.1.5
   immer: 8.0.1
   immutable: 4.0.0-rc.12
   intershop: link:../intershop
@@ -522,6 +524,17 @@ packages:
     dev: false
     resolution:
       integrity: sha512-sEcFHTEq2GJq2WUyJ+nOCvT3rHY3kalKmMyFg2z/DI2zFqh/ylJWsHHZphKM937vVEcxXvi0/UDSBI+s2B2I0A==
+  /datom/8.0.2:
+    dependencies:
+      cnd: 9.2.1
+      cupofjoe: 0.1.1
+      emittery: 0.6.0
+      intertype: 7.6.3
+      letsfreezethat: 3.1.0
+      multimix: 5.0.0
+    dev: false
+    resolution:
+      integrity: sha512-vKLmQvQ3UMV7wfLBilFUrq74kQBTeahsw4FQa3drBXLpRYAM08TWDH4QXOsh9+bl2w3FtKUAtjAlaDTUQTQPlw==
   /debug/4.3.1:
     dependencies:
       ms: 2.1.2
@@ -891,6 +904,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-PehfxxSk2EAmUUah019RqJjZvZ1QjhjAyeQvsKacOyVIn267xO3u12ao58pBu3Y121PIFS39LiK6VXIn9S4aFQ==
+  /hollerith-codec/3.0.0:
+    dependencies:
+      cnd: 9.2.1
+      intertype: 7.6.3
+    dev: false
+    resolution:
+      integrity: sha512-+UkBxWNuahBevOuza6In2DrV8MH3wE7EflkBMYrAcoEZprU1edRHjb7v9ZphU8zkB6Nxkc33ZyrCi1X9MZJSSQ==
   /hookit/1.1.3:
     dev: false
     resolution:
@@ -901,6 +921,28 @@ packages:
       node: '>=10.0.0'
     resolution:
       integrity: sha512-cAc1QhxE2wB7aCv8uGi23vFzGcoRGbgaLH3NNcnrjw9NlYdf/STS6bIH5XyEkQzXspkbLJKHe6W+qTHex2yuNg==
+  /icql/5.1.5:
+    dependencies:
+      better-sqlite3: 7.1.2
+      cnd: 9.2.1
+      hollerith-codec: 3.0.0
+      intercourse: 7.0.0
+      intertype: 7.6.3
+      ltsort: 1.2.4
+    dev: false
+    resolution:
+      integrity: sha512-6BeSLNmZ11HSU4mjPQ+xMkvMKmzBvZ+5Yjy0Q588xdulrk7PJcOTBTBIk2I+yL31mIsrID5QJ+/10uhTkr24xw==
+  /icql/5.1.6:
+    dependencies:
+      better-sqlite3: 7.1.2
+      cnd: 9.2.1
+      hollerith-codec: 3.0.0
+      intercourse: 7.0.0
+      intertype: 7.6.3
+      ltsort: 1.2.4
+    dev: false
+    resolution:
+      integrity: sha512-8PsFMQ6rFeIWYzkaxzltPKW5ZxGR0pntxBDqj08Nymis1aG2sfQ4dtMeoxegA4UXu/zlqUNdrgXpfVuX2jECjA==
   /ieee754/1.2.1:
     dev: false
     resolution:
@@ -926,6 +968,15 @@ packages:
     dev: false
     resolution:
       integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==
+  /intercourse/7.0.0:
+    dependencies:
+      cnd: 9.2.1
+      datom: 8.0.2
+      intertype: 7.6.3
+      steampipes: 6.7.0
+    dev: false
+    resolution:
+      integrity: sha512-w4u24wmLsrG8x16Ra2+rpdkvNqxmY7uYmovXZ0op7cwcdj9KBh3XtPVCtQUqxk0wTwFRb5YeVJZGkN052192Lg==
   /intertext-splitlines/1.2.0:
     dependencies:
       cnd: 9.2.1
@@ -1035,6 +1086,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-Ckrod5Pcp056zgpEZNEk8P+m7QqHWLOU7NwoCLdSpJutdDvE8MIUPVYIUZpewbHZKFS6hfOCcbk3E4AC7fu4hg==
+  /letsfreezethat/3.1.0:
+    dev: false
+    resolution:
+      integrity: sha512-jJ1nvvQi6unW0WifjNPMIb64Byom0EXzSKWFYA++EpyjK3qv1J2pqeSoEJ61tGJoNG0GoNjPoeLYhxW16riZaA==
   /levn/0.3.0:
     dependencies:
       prelude-ls: 1.1.2
@@ -1102,6 +1157,12 @@ packages:
       node: '>=10'
     resolution:
       integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
+  /ltsort/1.2.4:
+    dependencies:
+      cnd: 4.9.0
+    dev: false
+    resolution:
+      integrity: sha512-6unvcv1u5dOtufuyyMDnuduohhd6ogxfNe8N+6YCV2SzIBmvzULEHwqsH9/RZXzQVpptQ8j666a2iBPIMfcQ3w==
   /magic-string/0.25.1:
     dependencies:
       sourcemap-codec: 1.4.8
@@ -2162,6 +2223,8 @@ specifiers:
   guy-test: ^4.0.1
   hamt: ^2.2.2
   hollerith-codec: ^2.0.0
+  icql: 5.1.6
+  icql515: npm:icql@5.1.5
   immer: 8.0.1
   immutable: ^4.0.0-rc.12
   intershop: file:../intershop
