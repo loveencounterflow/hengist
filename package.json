@@ -37,6 +37,8 @@
     "guy-test": "^4.0.1",
     "hamt": "^2.2.2",
     "hollerith-codec": "^2.0.0",
+    "icql": "5.1.6",
+    "icql515": "npm:icql@5.1.5",
     "immer": "8.0.1",
     "immutable": "^4.0.0-rc.12",
     "intershop": "file:../intershop",
