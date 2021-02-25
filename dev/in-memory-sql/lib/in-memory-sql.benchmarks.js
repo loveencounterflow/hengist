@@ -134,6 +134,10 @@
       data = this.get_data(cfg);
       count = 0;
       //.........................................................................................................
+      // db.unsafeMode true
+      // db.pragma 'cache_size = 32000'
+      db.pragma('synchronous = OFF'); // makes file-based DBs much faster
+      //.........................................................................................................
       db.exec(`drop table if exists test;`);
       db.exec(`create table test(
   id    integer primary key,
@@ -180,6 +184,110 @@
 
   this.bettersqlite3_file = (cfg) => {
     return this._bettersqlite3(cfg, '/tmp/hengist-in-memory-sql.benchmarks.db');
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.bettersqlite3_memory_noprepare = function(cfg) {
+    return new Promise((resolve) => {
+      var Db, count, data, db, db_cfg;
+      Db = require('better-sqlite3');
+      // db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
+      db_cfg = null;
+      db = new Db(':memory:', db_cfg);
+      data = this.get_data(cfg);
+      count = 0;
+      //.........................................................................................................
+      // db.unsafeMode true
+      // db.pragma 'cache_size = 32000'
+      db.pragma('synchronous = OFF'); // makes file-based DBs much faster
+      //.........................................................................................................
+      db.exec(`drop table if exists test;`);
+      db.exec(`create table test(
+  id    integer primary key,
+  nr    integer not null,
+  text  text );`);
+      //.........................................................................................................
+      resolve(() => {
+        return new Promise((resolve) => {
+          var i, insert, len, nr, ref, result, retrieve, text;
+          nr = 0;
+          ref = data.texts;
+          for (i = 0, len = ref.length; i < len; i++) {
+            text = ref[i];
+            nr++;
+            insert = db.prepare(`insert into test ( nr, text ) values ( ?, ? );`);
+            insert.run([nr, text]);
+          }
+          retrieve = db.prepare(`select * from test order by text;`);
+          result = retrieve.all();
+          count += result.length;
+          if (gcfg.verbose) {
+            show_result('bettersqlite3', result);
+          }
+          db.close();
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._bettersqlite3_memory_icql = function(cfg, icql_version) {
+    return new Promise((resolve) => {
+      var Db, ICQL, count, data, db, icql_cfg, icql_path;
+      Db = require('better-sqlite3');
+      icql_path = PATH.resolve(PATH.join(__dirname, '../demo-frp.icql'));
+      ICQL = require((function() {
+        switch (icql_version) {
+          case 'icql_latest':
+            return '../../../apps/icql';
+          case 'icql515':
+            return 'icql515';
+          default:
+            throw new Error(`^45458^ unknown icql_version: ${rpr(icql_version)}`);
+        }
+      })());
+      icql_cfg = {
+        connector: Db,
+        db_path: ':memory:',
+        icql_path: icql_path
+      };
+      db = ICQL.bind(icql_cfg);
+      db.create_table_test();
+      data = this.get_data(cfg);
+      count = 0;
+      //.........................................................................................................
+      resolve(() => {
+        return new Promise((resolve) => {
+          var i, len, nr, ref, result, text;
+          nr = 0;
+          ref = data.texts;
+          for (i = 0, len = ref.length; i < len; i++) {
+            text = ref[i];
+            nr++;
+            db.insert_text({nr, text});
+          }
+          result = db.$.all_rows(db.get_all_texts());
+          count += result.length;
+          if (gcfg.verbose) {
+            show_result('bettersqlite3_memory_icql', result);
+          }
+          db.$.db.close();
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.bettersqlite3_memory_icql515 = function(cfg) {
+    return this._bettersqlite3_memory_icql(cfg, 'icql515');
+  };
+
+  this.bettersqlite3_memory_icql_latest = function(cfg) {
+    return this._bettersqlite3_memory_icql(cfg, 'icql_latest');
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -357,7 +465,7 @@
       word_count: 1000
     };
     repetitions = 3;
-    test_names = ['pgmem', 'bettersqlite3_memory', 'bettersqlite3_backup', 'bettersqlite3_file', 'sqljs', 'porsagerpostgres', 'briancpg'];
+    test_names = ['pgmem', 'bettersqlite3_memory', 'bettersqlite3_memory_icql_latest', 'bettersqlite3_memory_icql515', 'bettersqlite3_memory_noprepare', 'bettersqlite3_backup', 'bettersqlite3_file', 'sqljs', 'porsagerpostgres', 'briancpg'];
     if (global.gc != null) {
       global.gc();
     }
@@ -382,29 +490,6 @@
       return (await this.run_benchmarks());
     })();
   }
-
-  // fractions = ->
-//   Fraction = require 'fraction.js'
-//   ε = 0.1
-//   ε = 1
-//   ε = 0.01
-//   for a in [
-//     1
-//     2
-//     3
-//     4
-//     5
-//     6
-//     7
-//     8
-//     9
-//     10
-//     ]
-//     f = new Fraction 10 / a
-//     urge f
-//     debug a, rpr f.toFraction true
-//     debug a, rpr f.toFraction false
-//     debug a, rpr ( f.simplify ε ).toFraction false
 
 }).call(this);
 
