@@ -24,7 +24,7 @@ echo                      = CND.echo.bind CND
 test                      = require 'guy-test'
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "undeclared types can be used if known to `type_of()`" ] = ( T, done ) ->
+@[ "undeclared types cause correct error (loupe breakage fix)" ] = ( T, done ) ->
   #.........................................................................................................
   INTERTYPE                 = require '../../../apps/intertype'
   { Intertype, }            = INTERTYPE
@@ -38,8 +38,10 @@ test                      = require 'guy-test'
     all_keys_of } = intertype.export()
   #.........................................................................................................
   probes_and_matchers = [
-    [ [ 1n, 'bigint', ], true, null, ]
+    [ [ true,  'XXXX',   ], false, "not a valid XXXX", ]
     [ [ 1n, 'XXXX',   ], false, "not a valid XXXX", ]
+    [ [ 1n, 'bigint', ], true, null, ] ### NOTE `1n` used to cause breakage in unpatched `loupe.js`, see https://github.com/chaijs/loupe/issues/40 ###
+    [ [ 1,  'XXXX',   ], false, "not a valid XXXX", ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -53,7 +55,7 @@ test                      = require 'guy-test'
   return null
 
 # #-----------------------------------------------------------------------------------------------------------
-# @[ "undeclared types can be used if known to `type_of()` XXX" ] = ( T, done ) ->
+# @[ "undeclared types cause correct error (loupe breakage fix) XXX" ] = ( T, done ) ->
 #   #.........................................................................................................
 #   INTERTYPE                 = require '../../../apps/intertype'
 #   { Intertype, }            = INTERTYPE
@@ -331,8 +333,8 @@ demo = ->
 ############################################################################################################
 if module is require.main then do =>
   # demo_test_for_generator()
-  # test @
-  test @[  "undeclared types can be used if known to `type_of()`" ]
-  # @[ "undeclared types can be used if known to `type_of()` XXX" ]()
+  test @
+  # test @[  "undeclared types cause correct error (loupe breakage fix)" ]
+  # @[ "undeclared types cause correct error (loupe breakage fix)" ]()
   # test @[ "undeclared but implement types can be used" ]
 
