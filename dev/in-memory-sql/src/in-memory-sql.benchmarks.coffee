@@ -173,7 +173,7 @@ show_result = ( name, result ) ->
     connector:    Db
     db_path:      ':memory:'
     icql_path:    icql_path
-  db = ICQL.bind icql_cfg
+  db            = ICQL.bind icql_cfg
   db.create_table_test()
   data          = @get_data cfg
   count         = 0
@@ -316,16 +316,16 @@ show_result = ( name, result ) ->
   cfg           = { word_count: 1000, }
   repetitions   = 3
   test_names    = [
-    'pgmem'
     'bettersqlite3_memory'
     'bettersqlite3_memory_icql_latest'
     'bettersqlite3_memory_icql515'
-    'bettersqlite3_memory_noprepare'
-    'bettersqlite3_backup'
-    'bettersqlite3_file'
-    'sqljs'
-    'porsagerpostgres'
-    'briancpg'
+    # 'bettersqlite3_memory_noprepare'
+    # 'bettersqlite3_backup'
+    # 'bettersqlite3_file'
+    # 'pgmem'
+    # 'sqljs'
+    # 'porsagerpostgres'
+    # 'briancpg'
     ]
   global.gc() if global.gc?
   data_cache = null
