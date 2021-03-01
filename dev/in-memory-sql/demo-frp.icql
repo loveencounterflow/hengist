@@ -14,20 +14,21 @@ query sqlite_index_infos():
     where type = 'index'
     order by name;
 
+-- =========================================================================================================
+--
 -- ---------------------------------------------------------------------------------------------------------
-procedure create_table_test():
-  create table test(
-    id    integer primary key,
-    nr    integer not null,
-    text  text );
+procedure create_table_text():
+  create table text(
+    linenr  integer primary key,
+    line    text );
 
 -- ---------------------------------------------------------------------------------------------------------
-procedure insert_text( nr, text ):
-  insert into test ( nr, text ) values ( $nr, $text );
+procedure insert_line( linenr, line ):
+  insert into text ( linenr, line ) values ( $linenr, $line );
 
 -- ---------------------------------------------------------------------------------------------------------
 query get_all_texts():
-  select * from test order by text;
+  select * from text order by line;
 
 
 -- create table settings (

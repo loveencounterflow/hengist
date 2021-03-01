@@ -35,71 +35,43 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 PATH                      = require 'path'
 FS                        = require 'fs'
-DATA                      = require '../../../lib/data-providers-nocache'
-{ jr }                    = CND
-data_cache                = null
-gcfg                      = { verbose: false, }
+RBW                       = require '../../../apps/rustybuzz-wasm/demo-nodejs-using-wasm'
+ICQL                      = require '../../../apps/icql'
+connector                 = require 'better-sqlite3'
+icql_path                 = PATH.resolve PATH.join __dirname, '../demo-frp.icql'
+db_path                   = ':memory:'
+
 
 #-----------------------------------------------------------------------------------------------------------
-show_result = ( name, result ) ->
-  info '-----------------------------------------------'
-  urge name
-  whisper result
-  info '-----------------------------------------------'
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@get_data = ( cfg ) ->
-  return data_cache if data_cache?
-  whisper "retrieving test data..."
-  DATOM = require '../../../apps/datom'
-  #.........................................................................................................
-  texts       = DATA.get_words cfg.word_count
-  #.........................................................................................................
-  data_cache  = { texts, }
-  data_cache  = DATOM.freeze data_cache
-  whisper "...done"
-  return data_cache
-
-#-----------------------------------------------------------------------------------------------------------
-@demo_frp = ( cfg ) -> new Promise ( resolve ) =>
-  RBW           = require '../../../apps/rustybuzz-wasm/demo-nodejs-using-wasm'
-  Db            = require 'better-sqlite3'
-  # db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
-  db_cfg        = null
-  db            = new Db cfg.db_path, db_cfg
-  data          = @get_data { word_count: 10, }
-  #.........................................................................................................
-  icql_path     = PATH.resolve PATH.join __dirname, '../demo-frp.icql'
-  ICQL          = require '../../../apps/icql'
-  icql_cfg =
-    connector:    Db
-    db_path:      ':memory:'
-    icql_path:    icql_path
-  db = ICQL.bind icql_cfg
-  # debug '^3334^', db.sql
-  # info k, v for k, v of db.sql
-  db.create_table_test()
-  debug '^3334^', d for d from db.sqlite_index_infos()
-  db.insert_text { nr: 42, text: "a good number", }
-  #.........................................................................................................
-  # db.unsafeMode true
+@new_db = ( cfg ) ->
+  db = ICQL.bind { connector, db_path, icql_path, }
   # db.pragma 'cache_size = 32000'
-  db.$.db.pragma 'synchronous = OFF' # makes file-based DBs much faster
-  db.$.db.loadExtension PATH.resolve PATH.join __dirname, '../json1.so'
+  # db.pragma 'synchronous = OFF' # makes file-based DBs much faster
+  return db
+
+#-----------------------------------------------------------------------------------------------------------
+@create_tables = ( cfg ) ->
+  cfg.db.create_table_text()
+
+#-----------------------------------------------------------------------------------------------------------
+@insert_text = ( cfg ) ->
+  linenr = 0
+  for line in cfg.text.split /\n/
+    linenr++
+    cfg.db.insert_line { linenr, line, }
+  return linenr
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_frp = ( cfg ) ->
+  cfg    ?= {}
+  cfg.db  = @new_db cfg
+  @create_tables  cfg
+  @insert_text    cfg
+  debug '^3334^', d for d from cfg.db.sqlite_index_infos()
   #.........................................................................................................
-  insert        = db.$.db.prepare """insert into test ( nr, text ) values ( ?, ? );"""
-  retrieve      = db.$.db.prepare """select * from test order by text;"""
-  #.........................................................................................................
-  nr      = 0
-  for text in data.texts
-    nr++
-    insert.run [ nr, text, ]
-  result  = retrieve.all()
-  show_result 'bettersqlite3', result
-  # if do_backup
-  #   await db.backup "/tmp/hengist-in-memory-sql.benchmarks.backup-#{Date.now()}.db"
-  db.$.db.close()
+  for row from cfg.db.get_all_texts()
+    info row
+  cfg.db.$.close()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -112,6 +84,11 @@ show_result = ( name, result ) ->
 ############################################################################################################
 if require.main is module then do =>
   cfg =
-    db_path: ':memory:'
+    db_path:  ':memory:'
+    text:     """Knuth–Liang hyphenation operates at the level of individual words, but there can be
+      ambiguity as to what constitutes a word. All hyphenation dictionaries handle the expected set of
+      word-forming graphemes"""
+
+
   await @demo_frp cfg
 
