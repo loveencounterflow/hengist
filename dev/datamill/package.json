@@ -12,6 +12,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "pg-promise": "^10.5.3"
+    "pg-promise": "10.9.2"
   }
 }
