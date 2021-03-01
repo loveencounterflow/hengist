@@ -41,6 +41,7 @@
     "icql515": "npm:icql@5.1.5",
     "immer": "8.0.1",
     "immutable": "^4.0.0-rc.12",
+    "intermatic": "^0.5.3",
     "intershop": "file:../intershop",
     "intershop-intertext": "file:../intershop-intertext",
     "intertext": "^5.0.0",

@@ -27,6 +27,7 @@ dependencies:
   icql515: /icql/5.1.5
   immer: 8.0.1
   immutable: 4.0.0-rc.12
+  intermatic: 0.5.3
   intershop: link:../intershop
   intershop-intertext: link:../intershop-intertext
   intertext: 5.0.0
@@ -996,6 +997,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-aMsRD7+2tJZvBt90N4NS4FfFlhRIQo4TWK2CONtD6C7lLLU2/ICvCOsSKtz2nx4fp52idrzFQhhVpGeEksbBPw==
+  /intermatic/0.5.3:
+    dependencies:
+      intertype: 7.6.5
+    dev: false
+    resolution:
+      integrity: sha512-ecKA7MPDa+vUU7zIDUuH7BhObAhEVA0hnzNZJFrq7mQhDZo+J80PQZ4M/EECCYx1sfhwlqZaWBvg346A4wdhzg==
   /intertext-splitlines/1.2.0:
     dependencies:
       cnd: 9.2.1
@@ -2225,6 +2232,7 @@ specifiers:
   icql515: npm:icql@5.1.5
   immer: 8.0.1
   immutable: ^4.0.0-rc.12
+  intermatic: ^0.5.3
   intershop: file:../intershop
   intershop-intertext: file:../intershop-intertext
   intertext: ^5.0.0
