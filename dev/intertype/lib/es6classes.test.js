@@ -38,7 +38,7 @@
   test = require('guy-test');
 
   //-----------------------------------------------------------------------------------------------------------
-  this["undeclared types can be used if known to `type_of()`"] = async function(T, done) {
+  this["undeclared types cause correct error (loupe breakage fix)"] = async function(T, done) {
     var INTERTYPE, Intertype, all_keys_of, declare, error, i, intertype, isa, len, matcher, probe, probes_and_matchers, size_of, type_of, types_of, validate;
     //.........................................................................................................
     INTERTYPE = require('../../../apps/intertype');
@@ -46,7 +46,7 @@
     intertype = new Intertype();
     ({isa, validate, type_of, types_of, size_of, declare, all_keys_of} = intertype.export());
     //.........................................................................................................
-    probes_and_matchers = [[[1n, 'bigint'], true, null], [[1n, 'XXXX'], false, "not a valid XXXX"]];
+    probes_and_matchers = [[[true, 'XXXX'], false, "not a valid XXXX"], [[1n, 'XXXX'], false, "not a valid XXXX"], [[1n, 'bigint'], true, null], [[/* NOTE `1n` used to cause breakage in unpatched `loupe.js`, see https://github.com/chaijs/loupe/issues/40 */ 1, 'XXXX'], false, "not a valid XXXX"]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -66,7 +66,7 @@
   };
 
   // #-----------------------------------------------------------------------------------------------------------
-  // @[ "undeclared types can be used if known to `type_of()` XXX" ] = ( T, done ) ->
+  // @[ "undeclared types cause correct error (loupe breakage fix) XXX" ] = ( T, done ) ->
   //   #.........................................................................................................
   //   INTERTYPE                 = require '../../../apps/intertype'
   //   { Intertype, }            = INTERTYPE
@@ -492,12 +492,12 @@
   if (module === require.main) {
     (() => {
       // demo_test_for_generator()
-      // test @
-      return test(this["undeclared types can be used if known to `type_of()`"]);
+      return test(this);
     })();
   }
 
-  // @[ "undeclared types can be used if known to `type_of()` XXX" ]()
+  // test @[  "undeclared types cause correct error (loupe breakage fix)" ]
+// @[ "undeclared types cause correct error (loupe breakage fix)" ]()
 // test @[ "undeclared but implement types can be used" ]
 
 }).call(this);

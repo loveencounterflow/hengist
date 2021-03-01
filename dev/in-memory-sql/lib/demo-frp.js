@@ -15,7 +15,7 @@
 
    */
   'use strict';
-  var CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, rpr, show_result, urge, warn, whisper;
+  var CND, FS, ICQL, PATH, RBW, alert, badge, connector, db_path, debug, echo, help, icql_path, info, log, rpr, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -47,97 +47,63 @@
 
   FS = require('fs');
 
-  DATA = require('../../../lib/data-providers-nocache');
+  RBW = require('../../../apps/rustybuzz-wasm/demo-nodejs-using-wasm');
 
-  ({jr} = CND);
+  ICQL = require('../../../apps/icql');
 
-  data_cache = null;
+  connector = require('better-sqlite3');
 
-  gcfg = {
-    verbose: false
+  icql_path = PATH.resolve(PATH.join(__dirname, '../demo-frp.icql'));
+
+  db_path = ':memory:';
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.new_db = function(cfg) {
+    var db;
+    db = ICQL.bind({connector, db_path, icql_path});
+    // db.pragma 'cache_size = 32000'
+    // db.pragma 'synchronous = OFF' # makes file-based DBs much faster
+    return db;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  show_result = function(name, result) {
-    info('-----------------------------------------------');
-    urge(name);
-    whisper(result);
-    info('-----------------------------------------------');
-    return null;
+  this.create_tables = function(cfg) {
+    return cfg.db.create_table_text();
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.get_data = function(cfg) {
-    var DATOM, texts;
-    if (data_cache != null) {
-      return data_cache;
+  this.insert_text = function(cfg) {
+    var i, len, line, linenr, ref;
+    linenr = 0;
+    ref = cfg.text.split(/\n/);
+    for (i = 0, len = ref.length; i < len; i++) {
+      line = ref[i];
+      linenr++;
+      cfg.db.insert_text({linenr, line});
     }
-    whisper("retrieving test data...");
-    DATOM = require('../../../apps/datom');
-    //.........................................................................................................
-    texts = DATA.get_words(cfg.word_count);
-    //.........................................................................................................
-    data_cache = {texts};
-    data_cache = DATOM.freeze(data_cache);
-    whisper("...done");
-    return data_cache;
+    return linenr;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_frp = function(cfg) {
-    return new Promise((resolve) => {
-      var Db, ICQL, RBW, d, data, db, db_cfg, i, icql_cfg, icql_path, insert, len, nr, ref, ref1, result, retrieve, text;
-      RBW = require('../../../apps/rustybuzz-wasm/demo-nodejs-using-wasm');
-      Db = require('better-sqlite3');
-      // db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
-      db_cfg = null;
-      db = new Db(cfg.db_path, db_cfg);
-      data = this.get_data({
-        word_count: 10
-      });
-      //.........................................................................................................
-      icql_path = PATH.resolve(PATH.join(__dirname, '../demo-frp.icql'));
-      ICQL = require('../../../apps/icql');
-      icql_cfg = {
-        connector: Db,
-        db_path: ':memory:',
-        icql_path: icql_path
-      };
-      db = ICQL.bind(icql_cfg);
-      // debug '^3334^', db.sql
-      // info k, v for k, v of db.sql
-      db.create_table_test();
-      ref = db.sqlite_index_infos();
-      for (d of ref) {
-        debug('^3334^', d);
-      }
-      db.insert_text({
-        nr: 42,
-        text: "a good number"
-      });
-      //.........................................................................................................
-      // db.unsafeMode true
-      // db.pragma 'cache_size = 32000'
-      db.$.db.pragma('synchronous = OFF'); // makes file-based DBs much faster
-      db.$.db.loadExtension(PATH.resolve(PATH.join(__dirname, '../json1.so')));
-      //.........................................................................................................
-      insert = db.$.db.prepare(`insert into test ( nr, text ) values ( ?, ? );`);
-      retrieve = db.$.db.prepare(`select * from test order by text;`);
-      //.........................................................................................................
-      nr = 0;
-      ref1 = data.texts;
-      for (i = 0, len = ref1.length; i < len; i++) {
-        text = ref1[i];
-        nr++;
-        insert.run([nr, text]);
-      }
-      result = retrieve.all();
-      show_result('bettersqlite3', result);
-      // if do_backup
-      //   await db.backup "/tmp/hengist-in-memory-sql.benchmarks.backup-#{Date.now()}.db"
-      db.$.db.close();
-      return null;
-    });
+    var d, ref, ref1, row;
+    if (cfg == null) {
+      cfg = {};
+    }
+    cfg.db = this.new_db(cfg);
+    this.create_tables(cfg);
+    this.insert_text(cfg);
+    ref = cfg.db.sqlite_index_infos();
+    for (d of ref) {
+      debug('^3334^', d);
+    }
+    ref1 = cfg.db.get_all_texts();
+    //.........................................................................................................
+    for (row of ref1) {
+      info(row);
+    }
+    cfg.db.$.close();
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -158,7 +124,10 @@
     (async() => {
       var cfg;
       cfg = {
-        db_path: ':memory:'
+        db_path: ':memory:',
+        text: `Knuth–Liang hyphenation operates at the level of individual words, but there can be
+ambiguity as to what constitutes a word. All hyphenation dictionaries handle the expected set of
+word-forming graphemes`
       };
       return (await this.demo_frp(cfg));
     })();

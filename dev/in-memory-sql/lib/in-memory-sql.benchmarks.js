@@ -465,8 +465,15 @@
       word_count: 1000
     };
     repetitions = 3;
-    test_names = ['pgmem', 'bettersqlite3_memory', 'bettersqlite3_memory_icql_latest', 'bettersqlite3_memory_icql515', 'bettersqlite3_memory_noprepare', 'bettersqlite3_backup', 'bettersqlite3_file', 'sqljs', 'porsagerpostgres', 'briancpg'];
+    test_names = ['bettersqlite3_memory', 'bettersqlite3_memory_icql_latest', 'bettersqlite3_memory_icql515'];
     if (global.gc != null) {
+      // 'bettersqlite3_memory_noprepare'
+      // 'bettersqlite3_backup'
+      // 'bettersqlite3_file'
+      // 'pgmem'
+      // 'sqljs'
+      // 'porsagerpostgres'
+      // 'briancpg'
       global.gc();
     }
     data_cache = null;
