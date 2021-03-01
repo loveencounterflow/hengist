@@ -79,7 +79,7 @@
     for (i = 0, len = ref.length; i < len; i++) {
       line = ref[i];
       linenr++;
-      cfg.db.insert_text({linenr, line});
+      cfg.db.insert_line({linenr, line});
     }
     return linenr;
   };
