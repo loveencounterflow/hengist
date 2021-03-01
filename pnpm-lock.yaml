@@ -8,8 +8,8 @@ dependencies:
   command-line-usage: 6.1.1
   commander: 7.1.0
   convert-source-map: 1.7.0
-  cupofjoe: 0.1.1
-  datom: 8.0.2
+  cupofjoe: 0.2.1
+  datom: 8.0.3
   deepcopy: 2.1.0
   deepfreeze: 2.0.0
   deepfreezer: 1.2.2
@@ -22,8 +22,8 @@ dependencies:
   get-source: 2.0.11
   guy-test: 4.0.1
   hamt: 2.2.2
-  hollerith-codec: 3.0.0
-  icql: 5.1.6
+  hollerith-codec: 3.0.1
+  icql: 5.2.1
   icql515: /icql/5.1.5
   immer: 8.0.1
   immutable: 4.0.0-rc.12
@@ -31,7 +31,7 @@ dependencies:
   intershop-intertext: link:../intershop-intertext
   intertext: 5.0.0
   intertext-splitlines: 1.2.0
-  intertype: 7.6.3
+  intertype: 7.6.5
   jake: 10.8.2
   javascript-state-machine: 3.1.0
   jfee: 0.1.3
@@ -42,7 +42,7 @@ dependencies:
   mixa: 0.1.1
   mori: 0.3.2
   multimix: 5.0.0
-  npm: 7.5.6
+  npm: 7.6.0
   npm-logical-tree: 1.2.1
   number-format.js: 2.0.9
   opentype.js: 1.3.3
@@ -50,9 +50,9 @@ dependencies:
   panzoom: 9.4.1
   pg: 8.5.1
   pg-cursor: 2.5.2
-  pg-mem: 1.7.8
+  pg-mem: 1.8.1
   postgres: 1.0.2
-  random-ext: 2.6.3
+  random-ext: 2.6.4
   readable-stream: 3.6.0
   source-map: 0.7.3
   source-map-resolve: 0.6.0
@@ -355,15 +355,6 @@ packages:
       node: '>=0.8'
     resolution:
       integrity: sha1-2jCcwmPfFZlMaIypAheco8fNfH4=
-  /cnd/4.9.0:
-    dependencies:
-      mkdirp: 0.5.5
-      stackman: 4.0.1
-      trycatch: 1.5.21
-    dev: false
-    hasBin: true
-    resolution:
-      integrity: sha512-87P86V5a2/PKQ1FU6weIXA1jcj2D/hlhY1TBrqgqciJFbXlaMhFKMIjSdUmV0U1BHFY9l+/hBUuTZHVeyHdPFQ==
   /cnd/5.3.2:
     dependencies:
       mkdirp: 1.0.4
@@ -482,11 +473,19 @@ packages:
   /cupofjoe/0.1.1:
     dependencies:
       cnd: 9.2.1
-      intertype: 7.6.3
+      intertype: 7.6.5
       multimix: 4.1.0
     dev: false
     resolution:
       integrity: sha512-lNapdhUmwN0y94FGYvGubow+ZznI/A8+AlETPRli5+N4WkSnCys9Md1MiG8ZFPhjpS5Z+/NYC8nWdu+sLOOd/Q==
+  /cupofjoe/0.2.1:
+    dependencies:
+      cnd: 9.2.1
+      intertype: 7.6.5
+      multimix: 5.0.0
+    dev: false
+    resolution:
+      integrity: sha512-kZHlb3DmPu2jV0rmZvqsGwI8OEy+VEyN+50bUFp95HrD1buun7G9BVpf286UiL+sNfjXEn4EdbAFHASkxibSHQ==
   /d/1.0.1:
     dependencies:
       es5-ext: 0.10.53
@@ -535,6 +534,17 @@ packages:
     dev: false
     resolution:
       integrity: sha512-vKLmQvQ3UMV7wfLBilFUrq74kQBTeahsw4FQa3drBXLpRYAM08TWDH4QXOsh9+bl2w3FtKUAtjAlaDTUQTQPlw==
+  /datom/8.0.3:
+    dependencies:
+      cnd: 9.2.1
+      cupofjoe: 0.2.1
+      emittery: 0.6.0
+      intertype: 7.6.5
+      letsfreezethat: 3.1.0
+      multimix: 5.0.0
+    dev: false
+    resolution:
+      integrity: sha512-brh+I+TIC89r891ekwWtzaO6zvQu/hgyEdfm3gs8WOF3jJ+nCpwnoF2/96jUZibaKCfFjxpqQbQu3K7/SkA64g==
   /debug/4.3.1:
     dependencies:
       ms: 2.1.2
@@ -904,6 +914,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-+UkBxWNuahBevOuza6In2DrV8MH3wE7EflkBMYrAcoEZprU1edRHjb7v9ZphU8zkB6Nxkc33ZyrCi1X9MZJSSQ==
+  /hollerith-codec/3.0.1:
+    dependencies:
+      cnd: 9.2.1
+      intertype: 7.6.5
+    dev: false
+    resolution:
+      integrity: sha512-n5RohCykMVDvx/dPJdIb6z1NUfprkVAg8Q5nuPAFutJ92741aeNyWisK1GKs3bzxGGOxUsz8XwYK9vg/CglT6A==
   /hookit/1.1.3:
     dev: false
     resolution:
@@ -921,21 +938,21 @@ packages:
       hollerith-codec: 3.0.0
       intercourse: 7.0.0
       intertype: 7.6.3
-      ltsort: 1.2.4
+      ltsort: 1.3.0
     dev: false
     resolution:
       integrity: sha512-6BeSLNmZ11HSU4mjPQ+xMkvMKmzBvZ+5Yjy0Q588xdulrk7PJcOTBTBIk2I+yL31mIsrID5QJ+/10uhTkr24xw==
-  /icql/5.1.6:
+  /icql/5.2.1:
     dependencies:
       better-sqlite3: 7.1.2
       cnd: 9.2.1
-      hollerith-codec: 3.0.0
-      intercourse: 7.0.0
-      intertype: 7.6.3
-      ltsort: 1.2.4
+      hollerith-codec: 3.0.1
+      intercourse: 7.0.1
+      intertype: 7.6.5
+      ltsort: 1.3.0
     dev: false
     resolution:
-      integrity: sha512-8PsFMQ6rFeIWYzkaxzltPKW5ZxGR0pntxBDqj08Nymis1aG2sfQ4dtMeoxegA4UXu/zlqUNdrgXpfVuX2jECjA==
+      integrity: sha512-9T4O7vzO96hCSo53its8iIO3QSQZ//tibDPHCL8164O0KMaN+RKDI5Sm5efQLmUYiMhrGZxLqMgRjUzl8TgR0Q==
   /ieee754/1.2.1:
     dev: false
     resolution:
@@ -970,6 +987,15 @@ packages:
     dev: false
     resolution:
       integrity: sha512-w4u24wmLsrG8x16Ra2+rpdkvNqxmY7uYmovXZ0op7cwcdj9KBh3XtPVCtQUqxk0wTwFRb5YeVJZGkN052192Lg==
+  /intercourse/7.0.1:
+    dependencies:
+      cnd: 9.2.1
+      datom: 8.0.3
+      intertype: 7.6.5
+      steampipes: 6.7.0
+    dev: false
+    resolution:
+      integrity: sha512-aMsRD7+2tJZvBt90N4NS4FfFlhRIQo4TWK2CONtD6C7lLLU2/ICvCOsSKtz2nx4fp52idrzFQhhVpGeEksbBPw==
   /intertext-splitlines/1.2.0:
     dependencies:
       cnd: 9.2.1
@@ -1000,6 +1026,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-77FmgaqGydWBc5OIde+geMj4+dGZ1i5UIFXM4C9QHiEIBjh+Gojycsb7XtRYYLNhNJepa+jotHXfAGPngHatzw==
+  /intertype/7.6.5:
+    dependencies:
+      multimix: 5.0.0
+    dev: false
+    resolution:
+      integrity: sha512-763YK3ezLYy9FkX+cTTg/qwGHteqlaTMiec9a2sVAKm7kXp9e7QkzbyYS6u4CcbLxx12L8bcRbe3SFsPeaJCMA==
   /is-core-module/2.2.0:
     dependencies:
       has: 1.0.3
@@ -1136,12 +1168,13 @@ packages:
       node: '>=10'
     resolution:
       integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
-  /ltsort/1.2.4:
+  /ltsort/1.3.0:
     dependencies:
-      cnd: 4.9.0
+      cnd: 9.2.1
+      intertype: 7.6.5
     dev: false
     resolution:
-      integrity: sha512-6unvcv1u5dOtufuyyMDnuduohhd6ogxfNe8N+6YCV2SzIBmvzULEHwqsH9/RZXzQVpptQ8j666a2iBPIMfcQ3w==
+      integrity: sha512-2foOFVbFE+ZV7PWtRrfNoqV4s+hbDw/12h06Z1YsfSQmwhtQ4TuIy6NxjusH6L50aNSlthZaOrzWrzir8br/eQ==
   /magic-string/0.25.1:
     dependencies:
       sourcemap-codec: 1.4.8
@@ -1211,13 +1244,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==
-  /mkdirp/0.5.5:
-    dependencies:
-      minimist: 1.2.5
-    dev: false
-    hasBin: true
-    resolution:
-      integrity: sha512-NKmAlESf6jMGym1++R0Ra7wvhV+wFW63FaSOFPwRahvea0gMUcGUhVeAg/0BC0wiv9ih5NYPB1Wn1UEI1/L+xQ==
   /mkdirp/1.0.4:
     dev: false
     engines:
@@ -1289,7 +1315,7 @@ packages:
     dev: false
     resolution:
       integrity: sha512-AJI/qxDB2PWI4LG1CYN579AY1vCiNyWfkiquCsJWqntRu/WwimVrC8yXeILBFHDwxfOejxewlmnvW9XXjMlYIg==
-  /npm/7.5.6:
+  /npm/7.6.0:
     bundledDependencies:
       - '@npmcli/arborist'
       - '@npmcli/ci-detect'
@@ -1362,7 +1388,7 @@ packages:
       node: '>=10'
     hasBin: true
     resolution:
-      integrity: sha512-l9o94uRgIwRDpz4CSX9BUWL/Igc2jbuyAT7CC25r0lxIy4odsuVbXKFQorxZy/9m3JulVJzq4322kZgo4dXEAg==
+      integrity: sha512-1Jexc9EoGJEMEdWWLQMs2a7a5nNtD0INmBY4Gzv+RI727VZO05kruXhL8NnHtsvBfVn+eoMmBJKzy1exJRfymQ==
   /npmlog/4.1.2:
     dependencies:
       are-we-there-yet: 1.1.5
@@ -1486,17 +1512,17 @@ packages:
       node: '>=4.0.0'
     resolution:
       integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==
-  /pg-mem/1.7.8:
+  /pg-mem/1.8.1:
     dependencies:
       functional-red-black-tree: 1.0.1
       immutable: 4.0.0-rc.12
       lru-cache: 6.0.0
       moment: 2.29.1
       object-hash: 2.1.1
-      pgsql-ast-parser: 5.1.2
+      pgsql-ast-parser: 6.3.2
     dev: false
     resolution:
-      integrity: sha512-Fud7CuIKdknOHM+oWd52rOW3HskRDoqnEL3q8b1Gz20egue22pylTDjsH1/nz0qYZVVfwP5nB/CfyULxzwUIhg==
+      integrity: sha512-PwuoCcCvfKjxe6zwN3oyn5Rv+t8TTcCyhgUULyR9m6Nvb/Wed2OXQfOxaYCZHSj49vF9i2PXZdKB7EQ2Krv8AA==
   /pg-pool/3.2.2_pg@8.5.1:
     dependencies:
       pg: 8.5.1
@@ -1546,13 +1572,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-YmuA56alyBq7M59vxVBfPJrGSozru8QAdoNlWuW3cz8l+UX3cWge0vTvjKhsSHSJpo3Bom8/Mm6hf0TR5GY0+w==
-  /pgsql-ast-parser/5.1.2:
+  /pgsql-ast-parser/6.3.2:
     dependencies:
       moo: 0.5.1
       nearley: 2.20.1
     dev: false
     resolution:
-      integrity: sha512-Iri92c3GXSR+DtJ0G7Jh6CxPmfx+dx7NiJkO6bTQXRY0jyOdcBwjlbNu6BM7dHiQKn5LHH/LrJoZ/73/JvI8Cg==
+      integrity: sha512-25G57vKnOdAgkFuBz7TC0/Qg3dtJtyu+UrSIzpTEFny9/C4Ol8W30RPWge+h42ag/maqhaUVzWfTk8BWiIheUA==
   /postgres-array/2.0.0:
     dev: false
     engines:
@@ -1653,10 +1679,10 @@ packages:
       node: '>=0.12'
     resolution:
       integrity: sha512-80WNmd9DA0tmZrw9qQa62GPPWfuXJknrmVmLcxvq4uZBdYqb1wYoKTmnlGUchvVWe0XiLupYkBoXVOxz3C8DYQ==
-  /random-ext/2.6.3:
+  /random-ext/2.6.4:
     dev: false
     resolution:
-      integrity: sha512-AUAHmfFspg7hiOyd/Fczo+gp0clCuSE0q6vwb37KVU+7b/BWYFBELUpOmDCZz/irXjFvLxdvRUdJmi40IqDiOw==
+      integrity: sha512-uMUsHNP24Uq8NwzXOKKplc5hEHvoLCFW4RkzVlsYUUUWZrIVIim4F103XukXYtWqD/04OtR1Oo8wpUlZVN7JOQ==
   /rc/1.2.8:
     dependencies:
       deep-extend: 0.6.0
@@ -2180,8 +2206,8 @@ specifiers:
   command-line-usage: ^6.1.0
   commander: 7.1.0
   convert-source-map: ^1.7.0
-  cupofjoe: ^0.1.1
-  datom: 8.0.2
+  cupofjoe: 0.2.1
+  datom: 8.0.3
   deepcopy: ^2.1.0
   deepfreeze: ^2.0.0
   deepfreezer: ^1.2.2
@@ -2194,8 +2220,8 @@ specifiers:
   get-source: ^2.0.11
   guy-test: ^4.0.1
   hamt: ^2.2.2
-  hollerith-codec: 3.0.0
-  icql: 5.1.6
+  hollerith-codec: 3.0.1
+  icql: 5.2.1
   icql515: npm:icql@5.1.5
   immer: 8.0.1
   immutable: ^4.0.0-rc.12
@@ -2203,7 +2229,7 @@ specifiers:
   intershop-intertext: file:../intershop-intertext
   intertext: ^5.0.0
   intertext-splitlines: ^1.2.0
-  intertype: ^7.6.3
+  intertype: 7.6.5
   jake: ^10.8.2
   javascript-state-machine: ^3.1.0
   jfee: 0.1.3
@@ -2214,7 +2240,7 @@ specifiers:
   mixa: ^0.1.1
   mori: ^0.3.2
   multimix: ^5.0.0
-  npm: 7.5.6
+  npm: 7.6.0
   npm-logical-tree: ^1.2.1
   number-format.js: ^2.0.9
   opentype.js: ^1.3.3
@@ -2222,9 +2248,9 @@ specifiers:
   panzoom: ^9.4.1
   pg: ^8.5.1
   pg-cursor: ^2.5.2
-  pg-mem: 1.7.8
+  pg-mem: 1.8.1
   postgres: ^1.0.2
-  random-ext: ^2.6.3
+  random-ext: 2.6.4
   readable-stream: ^3.6.0
   source-map: ^0.7.3
   source-map-resolve: ^0.6.0
