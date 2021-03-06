@@ -57,7 +57,7 @@
     R = {};
     R.connector = require('better-sqlite3');
     R.db_path = '/tmp/icql.db';
-    R.icql_path = PATH.resolve(PATH.join(__dirname, '../../data/test.icql'));
+    R.icql_path = PATH.resolve(PATH.join(__dirname, '../../../../assets/icql/test.icql'));
     if (remove_db) {
       try {
         (require('fs')).unlinkSync(R.db_path);
