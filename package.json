@@ -51,6 +51,7 @@
     "javascript-state-machine": "^3.1.0",
     "jfee": "0.1.3",
     "klona": "^2.0.4",
+    "letsfreezethat": "^3.1.0",
     "load-source-map": "^2.0.0",
     "loupe": "2.0.3",
     "merge-ranges": "^1.0.2",
@@ -76,6 +77,7 @@
     "steampipes": "^6.4.0",
     "strip-ansi": "^6.0.0",
     "text-metrics": "^2.0.2",
+    "to-width": "^1.1.0",
     "validate-npm-package-name": "^3.0.0"
   }
 }
