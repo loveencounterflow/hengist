@@ -1,4 +1,5 @@
-﻿
+PRAGMA journal_mode = OFF; PRAGMA synchronous = OFF;
+
 /*******************************************************************************
    Chinook Database - Version 1.4
    Script: Chinook_Sqlite_AutoIncrementPKs.sql
@@ -68,7 +69,7 @@ CREATE TABLE [Album]
     [AlbumId] INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     [Title] NVARCHAR(160)  NOT NULL,
     [ArtistId] INTEGER  NOT NULL,
-    FOREIGN KEY ([ArtistId]) REFERENCES [Artist] ([ArtistId]) 
+    FOREIGN KEY ([ArtistId]) REFERENCES [Artist] ([ArtistId])
 		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
@@ -93,7 +94,7 @@ CREATE TABLE [Customer]
     [Fax] NVARCHAR(24),
     [Email] NVARCHAR(60)  NOT NULL,
     [SupportRepId] INTEGER,
-    FOREIGN KEY ([SupportRepId]) REFERENCES [Employee] ([EmployeeId]) 
+    FOREIGN KEY ([SupportRepId]) REFERENCES [Employee] ([EmployeeId])
 		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
@@ -114,7 +115,7 @@ CREATE TABLE [Employee]
     [Phone] NVARCHAR(24),
     [Fax] NVARCHAR(24),
     [Email] NVARCHAR(60),
-    FOREIGN KEY ([ReportsTo]) REFERENCES [Employee] ([EmployeeId]) 
+    FOREIGN KEY ([ReportsTo]) REFERENCES [Employee] ([EmployeeId])
 		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
@@ -135,7 +136,7 @@ CREATE TABLE [Invoice]
     [BillingCountry] NVARCHAR(40),
     [BillingPostalCode] NVARCHAR(10),
     [Total] NUMERIC(10,2)  NOT NULL,
-    FOREIGN KEY ([CustomerId]) REFERENCES [Customer] ([CustomerId]) 
+    FOREIGN KEY ([CustomerId]) REFERENCES [Customer] ([CustomerId])
 		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
@@ -146,9 +147,9 @@ CREATE TABLE [InvoiceLine]
     [TrackId] INTEGER  NOT NULL,
     [UnitPrice] NUMERIC(10,2)  NOT NULL,
     [Quantity] INTEGER  NOT NULL,
-    FOREIGN KEY ([InvoiceId]) REFERENCES [Invoice] ([InvoiceId]) 
+    FOREIGN KEY ([InvoiceId]) REFERENCES [Invoice] ([InvoiceId])
 		ON DELETE NO ACTION ON UPDATE NO ACTION,
-    FOREIGN KEY ([TrackId]) REFERENCES [Track] ([TrackId]) 
+    FOREIGN KEY ([TrackId]) REFERENCES [Track] ([TrackId])
 		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
@@ -169,9 +170,9 @@ CREATE TABLE [PlaylistTrack]
     [PlaylistId] INTEGER  NOT NULL,
     [TrackId] INTEGER  NOT NULL,
     CONSTRAINT [PK_PlaylistTrack] PRIMARY KEY  ([PlaylistId], [TrackId]),
-    FOREIGN KEY ([PlaylistId]) REFERENCES [Playlist] ([PlaylistId]) 
+    FOREIGN KEY ([PlaylistId]) REFERENCES [Playlist] ([PlaylistId])
 		ON DELETE NO ACTION ON UPDATE NO ACTION,
-    FOREIGN KEY ([TrackId]) REFERENCES [Track] ([TrackId]) 
+    FOREIGN KEY ([TrackId]) REFERENCES [Track] ([TrackId])
 		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
@@ -186,11 +187,11 @@ CREATE TABLE [Track]
     [Milliseconds] INTEGER  NOT NULL,
     [Bytes] INTEGER,
     [UnitPrice] NUMERIC(10,2)  NOT NULL,
-    FOREIGN KEY ([AlbumId]) REFERENCES [Album] ([AlbumId]) 
+    FOREIGN KEY ([AlbumId]) REFERENCES [Album] ([AlbumId])
 		ON DELETE NO ACTION ON UPDATE NO ACTION,
-    FOREIGN KEY ([GenreId]) REFERENCES [Genre] ([GenreId]) 
+    FOREIGN KEY ([GenreId]) REFERENCES [Genre] ([GenreId])
 		ON DELETE NO ACTION ON UPDATE NO ACTION,
-    FOREIGN KEY ([MediaTypeId]) REFERENCES [MediaType] ([MediaTypeId]) 
+    FOREIGN KEY ([MediaTypeId]) REFERENCES [MediaType] ([MediaTypeId])
 		ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
