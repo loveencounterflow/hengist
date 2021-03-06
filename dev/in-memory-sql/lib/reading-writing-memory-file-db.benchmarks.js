@@ -109,8 +109,6 @@
     return this._cli_pipe(cfg, 'big');
   };
 
-  // @cli_pipe_bignp   = ( cfg ) => @_cli_pipe cfg, 'bignp'
-
   //-----------------------------------------------------------------------------------------------------------
   this._bettersqlite3 = function(cfg) {
     return new Promise((resolve) => {
@@ -170,8 +168,7 @@
       },
       sql: {
         small: resolve_path('assets/icql/small-datamill.sql'),
-        big: resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql'),
-        bignp: resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.no-pragmas.sql')
+        big: resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql')
       }
     };
     // use: 'small'
