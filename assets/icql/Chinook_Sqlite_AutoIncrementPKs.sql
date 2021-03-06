@@ -1,4 +1,3 @@
-PRAGMA journal_mode = OFF; PRAGMA synchronous = OFF;
 
 /*******************************************************************************
    Chinook Database - Version 1.4
@@ -70,7 +69,7 @@ CREATE TABLE [Album]
     [Title] NVARCHAR(160)  NOT NULL,
     [ArtistId] INTEGER  NOT NULL,
     FOREIGN KEY ([ArtistId]) REFERENCES [Artist] ([ArtistId])
-		ON DELETE NO ACTION ON UPDATE NO ACTION
+    ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 CREATE TABLE [Artist]
@@ -95,7 +94,7 @@ CREATE TABLE [Customer]
     [Email] NVARCHAR(60)  NOT NULL,
     [SupportRepId] INTEGER,
     FOREIGN KEY ([SupportRepId]) REFERENCES [Employee] ([EmployeeId])
-		ON DELETE NO ACTION ON UPDATE NO ACTION
+    ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 CREATE TABLE [Employee]
@@ -116,7 +115,7 @@ CREATE TABLE [Employee]
     [Fax] NVARCHAR(24),
     [Email] NVARCHAR(60),
     FOREIGN KEY ([ReportsTo]) REFERENCES [Employee] ([EmployeeId])
-		ON DELETE NO ACTION ON UPDATE NO ACTION
+    ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 CREATE TABLE [Genre]
@@ -137,7 +136,7 @@ CREATE TABLE [Invoice]
     [BillingPostalCode] NVARCHAR(10),
     [Total] NUMERIC(10,2)  NOT NULL,
     FOREIGN KEY ([CustomerId]) REFERENCES [Customer] ([CustomerId])
-		ON DELETE NO ACTION ON UPDATE NO ACTION
+    ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 CREATE TABLE [InvoiceLine]
@@ -148,9 +147,9 @@ CREATE TABLE [InvoiceLine]
     [UnitPrice] NUMERIC(10,2)  NOT NULL,
     [Quantity] INTEGER  NOT NULL,
     FOREIGN KEY ([InvoiceId]) REFERENCES [Invoice] ([InvoiceId])
-		ON DELETE NO ACTION ON UPDATE NO ACTION,
+    ON DELETE NO ACTION ON UPDATE NO ACTION,
     FOREIGN KEY ([TrackId]) REFERENCES [Track] ([TrackId])
-		ON DELETE NO ACTION ON UPDATE NO ACTION
+    ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 CREATE TABLE [MediaType]
@@ -171,9 +170,9 @@ CREATE TABLE [PlaylistTrack]
     [TrackId] INTEGER  NOT NULL,
     CONSTRAINT [PK_PlaylistTrack] PRIMARY KEY  ([PlaylistId], [TrackId]),
     FOREIGN KEY ([PlaylistId]) REFERENCES [Playlist] ([PlaylistId])
-		ON DELETE NO ACTION ON UPDATE NO ACTION,
+    ON DELETE NO ACTION ON UPDATE NO ACTION,
     FOREIGN KEY ([TrackId]) REFERENCES [Track] ([TrackId])
-		ON DELETE NO ACTION ON UPDATE NO ACTION
+    ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 CREATE TABLE [Track]
@@ -188,11 +187,11 @@ CREATE TABLE [Track]
     [Bytes] INTEGER,
     [UnitPrice] NUMERIC(10,2)  NOT NULL,
     FOREIGN KEY ([AlbumId]) REFERENCES [Album] ([AlbumId])
-		ON DELETE NO ACTION ON UPDATE NO ACTION,
+    ON DELETE NO ACTION ON UPDATE NO ACTION,
     FOREIGN KEY ([GenreId]) REFERENCES [Genre] ([GenreId])
-		ON DELETE NO ACTION ON UPDATE NO ACTION,
+    ON DELETE NO ACTION ON UPDATE NO ACTION,
     FOREIGN KEY ([MediaTypeId]) REFERENCES [MediaType] ([MediaTypeId])
-		ON DELETE NO ACTION ON UPDATE NO ACTION
+    ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 

@@ -68,7 +68,6 @@ show_result = ( name, result ) ->
 #-----------------------------------------------------------------------------------------------------------
 @cli_pipe_small   = ( cfg ) => @_cli_pipe cfg, 'small'
 @cli_pipe_big     = ( cfg ) => @_cli_pipe cfg, 'big'
-# @cli_pipe_bignp   = ( cfg ) => @_cli_pipe cfg, 'bignp'
 
 #-----------------------------------------------------------------------------------------------------------
 @_bettersqlite3 = ( cfg ) -> new Promise ( resolve ) =>
@@ -121,7 +120,6 @@ show_result = ( name, result ) ->
     sql:
       small:  resolve_path 'assets/icql/small-datamill.sql'
       big:    resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql'
-      bignp:  resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.no-pragmas.sql'
     # use: 'small'
     # use: [ 'big', 'small', ]
     # use: 'bignp'
