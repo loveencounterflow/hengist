@@ -377,6 +377,3 @@ CREATE VIEW dest_changes_forward as select
   from main
   where not stamped;
 COMMIT;
-INSERT INTO "table" VALUES('[1]',1,'ignore',1,'input','stop','^line','','null',X'4d3ff00000000000004c');
-INSERT INTO "table" VALUES('[2]',1,'ignore',1,'input','stop','^line','This part will be ignored','null',X'4d40000000000000004c');
-INSERT INTO "table" VALUES('[3]',1,'ignore',1,'input','stop','^line','','null',X'4d40080000000000004c');
