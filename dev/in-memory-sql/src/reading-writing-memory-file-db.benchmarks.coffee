@@ -29,6 +29,13 @@ gcfg                      = { verbose: false, }
 resolve_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../../', path
 
 #-----------------------------------------------------------------------------------------------------------
+try_to_remove_file = ( path ) ->
+  try FS.unlinkSync path catch error
+    return if error.code is 'ENOENT'
+    throw error
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 show_result = ( name, result ) ->
   info '-----------------------------------------------'
   urge name
@@ -49,25 +56,82 @@ show_result = ( name, result ) ->
   whisper "...done"
   return data_cache
 
+# #-----------------------------------------------------------------------------------------------------------
+# backup_to_memory = =>
+#   ### TAINT should escape command line strings ###
+#   CP            = require 'child_process'
+#   sql_path      = cfg.readsql[ sql_key ]
+#   db_path       = cfg.db[ sql_key ]
+#   pragmas       = 'PRAGMA journal_mode = OFF; PRAGMA synchronous = OFF;'
+#   resolve readsql_clipipe_fn = => new Promise ( resolve ) =>
+#     try_to_remove_file db_path
+#     CP.execSync "( echo '#{pragmas}' ; cat #{sql_path} ) | sqlite3 #{db_path}"
+#     resolve ( FS.statSync sql_path ).size
+#   return null
+
 #-----------------------------------------------------------------------------------------------------------
-@_cli_pipe = ( cfg, sql_key ) -> new Promise ( resolve ) =>
+@_readsql_clipipe = ( cfg, sql_key ) -> new Promise ( resolve ) =>
   ### TAINT should escape command line strings ###
   CP            = require 'child_process'
-  sql_path      = cfg.sql[ sql_key ]
-  db_path       = cfg.db.path
-  file_length   = ( FS.statSync sql_path ).size
-  count         = 0
+  sql_path      = cfg.readsql[ sql_key ]
+  db_path       = cfg.db[ sql_key ]
   pragmas       = 'PRAGMA journal_mode = OFF; PRAGMA synchronous = OFF;'
-  resolve cli_pipe_fn = => new Promise ( resolve ) =>
-    FS.unlinkSync db_path
+  resolve readsql_clipipe_fn = => new Promise ( resolve ) =>
+    try_to_remove_file db_path
     CP.execSync "( echo '#{pragmas}' ; cat #{sql_path} ) | sqlite3 #{db_path}"
-    count = file_length
-    resolve count
+    resolve ( FS.statSync sql_path ).size
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@cli_pipe_small   = ( cfg ) => @_cli_pipe cfg, 'small'
-@cli_pipe_big     = ( cfg ) => @_cli_pipe cfg, 'big'
+@_readsql_bsqlt3 = ( cfg, sql_key, fsmode ) -> new Promise ( resolve ) =>
+  Db            = require 'better-sqlite3'
+  db_cfg        = null
+  db            = new Db ':memory:', db_cfg
+  sql_path      = cfg.readsql[ sql_key ]
+  FSP           = require 'fs/promises'
+  resolve readsql_bsqlt3 = => new Promise ( resolve ) =>
+    db.pragma 'journal_mode = OFF;'
+    db.pragma 'synchronous = OFF;'
+    switch fsmode
+      when 'sync'
+        sql = FS.readFileSync     sql_path, { encoding: 'utf-8', }
+        db.exec sql
+        return resolve sql.length
+      when 'promise'
+        sql = await FSP.readFile  sql_path, { encoding: 'utf-8', }
+        db.exec sql
+        return resolve sql.length
+      when 'callback'
+        FS.readFile sql_path, { encoding: 'utf-8', }, ( error, sql ) =>
+          throw error if error?
+          db.exec sql
+          return resolve sql.length
+        return
+    throw new Error "^_readsql_bsqlt3@5587^ unknown fsmode #{rpr fsmode}"
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_writesql_clipipe = ( cfg, sql_key ) -> new Promise ( resolve ) =>
+  ### TAINT should escape command line strings ###
+  CP            = require 'child_process'
+  sql_path      = cfg.writesql[ sql_key ]
+  db_path       = cfg.db[ sql_key ]
+  resolve readsql_clipipe_fn = => new Promise ( resolve ) =>
+    CP.execSync "sqlite3 #{db_path} -cmd '.dump' > #{sql_path}"
+    resolve ( FS.statSync sql_path ).size
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@readsql_clipipe_small          = ( cfg ) => @_readsql_clipipe   cfg, 'small'
+@readsql_clipipe_big            = ( cfg ) => @_readsql_clipipe   cfg, 'big'
+@readsql_bsqlt3_small_promise   = ( cfg ) => @_readsql_bsqlt3    cfg, 'small',  'promise'
+@readsql_bsqlt3_big_promise     = ( cfg ) => @_readsql_bsqlt3    cfg, 'big',    'promise'
+@readsql_bsqlt3_small_sync      = ( cfg ) => @_readsql_bsqlt3    cfg, 'small',  'sync'
+@readsql_bsqlt3_big_sync        = ( cfg ) => @_readsql_bsqlt3    cfg, 'big',    'sync'
+@readsql_bsqlt3_small_callback  = ( cfg ) => @_readsql_bsqlt3    cfg, 'small',  'callback'
+@readsql_bsqlt3_big_callback    = ( cfg ) => @_readsql_bsqlt3    cfg, 'big',    'callback'
+@writesql_clipipe_small         = ( cfg ) => @_writesql_clipipe  cfg, 'small'
+@writesql_clipipe_big           = ( cfg ) => @_writesql_clipipe  cfg, 'big'
 
 #-----------------------------------------------------------------------------------------------------------
 @_bettersqlite3 = ( cfg ) -> new Promise ( resolve ) =>
@@ -116,30 +180,74 @@ show_result = ( name, result ) ->
   bench         = BM.new_benchmarks()
   cfg           =
     db:
-      path:   resolve_path 'data/icql/reading-writing-memory-file-db.db'
-    sql:
+      small:  resolve_path 'data/icql/small-datamill.db'
+      big:    resolve_path 'data/icql/Chinook_Sqlite_AutoIncrementPKs.db'
+    readsql:
       small:  resolve_path 'assets/icql/small-datamill.sql'
       big:    resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql'
+    writesql:
+      small:  resolve_path 'data/icql/small-datamill.sql'
+      big:    resolve_path 'data/icql/Chinook_Sqlite_AutoIncrementPKs.sql'
     # use: 'small'
     # use: [ 'big', 'small', ]
     # use: 'bignp'
   repetitions   = 3
+  #.........................................................................................................
+  run_phase = ( test_names ) =>
+    global.gc() if global.gc?
+    data_cache = null
+    for _ in [ 1 .. repetitions ]
+      whisper '-'.repeat 108
+      for test_name in CND.shuffle test_names
+        global.gc() if global.gc?
+        await BM.benchmark bench, cfg, false, @, test_name
+    BM.show_totals bench
+    return null
+  # #.........................................................................................................
+  # test_names    = [
+  #   'readsql_clipipe_small'
+  #   'readsql_clipipe_big'
+  #   ]
+  # await run_phase test_names
+  #.........................................................................................................
   test_names    = [
-    'cli_pipe_small'
-    'cli_pipe_big'
-    # 'cli_pipe_bignp'
-    # '_bettersqlite3'
+    'readsql_bsqlt3_small_promise'
+    'readsql_bsqlt3_big_promise'
+    'readsql_bsqlt3_small_sync'
+    'readsql_bsqlt3_big_sync'
+    'readsql_bsqlt3_small_callback'
+    'readsql_bsqlt3_big_callback'
     ]
-  global.gc() if global.gc?
-  data_cache = null
-  for _ in [ 1 .. repetitions ]
-    whisper '-'.repeat 108
-    for test_name in CND.shuffle test_names
-      global.gc() if global.gc?
-      await BM.benchmark bench, cfg, false, @, test_name
-  BM.show_totals bench
+  await run_phase test_names
+  # #.........................................................................................................
+  # test_names    = [
+  #   'writesql_clipipe_small'
+  #   'writesql_clipipe_big'
+  #   ]
+  # await run_phase test_names
+  #.........................................................................................................
+  # await run_phase [ 'readsql_bsqlt3_small_promise', ]
+  return null
 
 
 ############################################################################################################
 if require.main is module then do =>
   await @run_benchmarks()
+  xxx = ->
+    Db            = require 'better-sqlite3'
+    db_cfg        = null
+    db            = new Db '/tmp/foo.db', db_cfg
+    db.exec "drop table if exists x;"
+    db.exec "create table x ( n integer );"
+    for n in [ 1 .. 10 ]
+      db.exec "insert into x ( n ) values ( #{n} );"
+    # db.exec "vacuum into '/tmp/foo2.db';"
+    db.exec "vacuum into ':memory:';"
+    for n in [ 11 .. 20 ]
+      db.exec "insert into x ( n ) values ( #{n} );"
+    debug '^333344^', db.memory = true
+    debug '^333344^', db.memory
+    return null
+  return null
+
+

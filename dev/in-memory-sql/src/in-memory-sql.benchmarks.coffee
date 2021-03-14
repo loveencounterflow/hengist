@@ -26,6 +26,13 @@ data_cache                = null
 gcfg                      = { verbose: false, }
 
 #-----------------------------------------------------------------------------------------------------------
+try_to_remove_file = ( path ) ->
+  try FS.unlinkSync path catch error
+    return if error.code is 'ENOENT'
+    throw error
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 show_result = ( name, result ) ->
   info '-----------------------------------------------'
   urge name
@@ -86,19 +93,66 @@ show_result = ( name, result ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@_bettersqlite3 = ( cfg, db_path, do_backup = false ) -> new Promise ( resolve ) =>
+@bettersqlite3_membacked = ( cfg, use_membacked = true ) -> new Promise ( resolve ) =>
   Db            = require 'better-sqlite3'
   # db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
+  #.........................................................................................................
+  do populate_file = =>
+    db_cfg        = null
+    db_path       = "/tmp/hengist-in-memory-sql.benchmarks.membacked.db"
+    filedb        = new Db db_path, db_cfg
+    data          = @get_data cfg
+    count         = 0
+    #.........................................................................................................
+    # filedb.unsafeMode true
+    # filedb.pragma 'cache_size = 32000'
+    filedb.pragma 'synchronous = OFF' # makes file-based DBs much faster
+    #.........................................................................................................
+    filedb.exec """drop table if exists test;"""
+    filedb.exec """
+      create table test(
+        id    integer primary key,
+        nr    integer not null,
+        text  text );"""
+    # debug '^22233^', filedb.exec """insert into test ( nr, text ) values ( 1, '2' );"""
+    insert        = filedb.prepare """insert into test ( nr, text ) values ( ?, ? );"""
+    retrieve      = filedb.prepare """select * from test order by text;"""
+    nr      = 0
+    for text in data.texts
+      nr++
+      insert.run [ nr, text, ]
+    filedb.backup ':memory:'
+    return null
+  #.........................................................................................................
+  resolve => new Promise ( resolve ) =>
+    result  = retrieve.all()
+    count  += result.length
+    show_result 'bettersqlite3', result if gcfg.verbose
+    if do_backup
+      await db.backup ':memory:'
+    db.close()
+    resolve count
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_bettersqlite3 = ( cfg ) -> new Promise ( resolve ) =>
+  Db            = require 'better-sqlite3'
+  # db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
+  defaults      = { do_backup: false, pragmas: [], }
+  cfg           = { defaults..., cfg..., }
   db_cfg        = null
-  db            = new Db db_path, db_cfg
+  try_to_remove_file cfg.db_path if cfg.db_path isnt ':memory:'
+  db            = new Db cfg.db_path, db_cfg
   data          = @get_data cfg
   count         = 0
   #.........................................................................................................
   # db.unsafeMode true
   # db.pragma 'cache_size = 32000'
   db.pragma 'synchronous = OFF' # makes file-based DBs much faster
+  for pragma in cfg.pragmas
+    db.pragma pragma
   #.........................................................................................................
-  db.exec """drop table if exists test;"""
+  # db.exec """drop table if exists test;"""
   db.exec """
     create table test(
       id    integer primary key,
@@ -107,25 +161,37 @@ show_result = ( name, result ) ->
   # debug '^22233^', db.exec """insert into test ( nr, text ) values ( 1, '2' );"""
   insert        = db.prepare """insert into test ( nr, text ) values ( ?, ? );"""
   retrieve      = db.prepare """select * from test order by text;"""
+  retrieve.raw true
   #.........................................................................................................
   resolve => new Promise ( resolve ) =>
     nr      = 0
+    # db.transaction =>
     for text in data.texts
       nr++
       insert.run [ nr, text, ]
     result  = retrieve.all()
     count  += result.length
     show_result 'bettersqlite3', result if gcfg.verbose
-    if do_backup
+    if cfg.do_backup
       await db.backup "/tmp/hengist-in-memory-sql.benchmarks.backup-#{Date.now()}.db"
     db.close()
     resolve count
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@bettersqlite3_memory = ( cfg ) => @_bettersqlite3 cfg, ':memory:'
-@bettersqlite3_backup = ( cfg ) => @_bettersqlite3 cfg, ':memory:', true
-@bettersqlite3_file   = ( cfg ) => @_bettersqlite3 cfg, '/tmp/hengist-in-memory-sql.benchmarks.db'
+@bettersqlite3_memory = ( cfg ) => @_bettersqlite3 { cfg..., db_path: ':memory:', }
+@bettersqlite3_backup = ( cfg ) => @_bettersqlite3 { cfg..., db_path: ':memory:', do_backup: true, }
+@bettersqlite3_file   = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.benchmarks.db', }
+#...........................................................................................................
+@bettersqlite3_jmdel    = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.jmdel.benchmarks.db',   pragmas: [ 'journal_mode = DELETE;', ] }
+@bettersqlite3_jmtrunc  = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.jmtrunc.benchmarks.db', pragmas: [ 'journal_mode = TRUNCATE;', ] }
+@bettersqlite3_jmpers   = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.jmpers.benchmarks.db',  pragmas: [ 'journal_mode = PERSIST;', ] }
+@bettersqlite3_jmmem    = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.jmmem.benchmarks.db',   pragmas: [ 'journal_mode = MEMORY;', ] }
+@bettersqlite3_jmwal    = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.jmwal.benchmarks.db',   pragmas: [ 'journal_mode = WAL;', ] }
+@bettersqlite3_jmoff    = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.jmoff.benchmarks.db',   pragmas: [ 'journal_mode = OFF;', ] }
+@bettersqlite3_mmap     = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.mmap.benchmarks.db',    pragmas: [ 'mmap_size = 2147418112;', ] }
+@bettersqlite3_tmpm     = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.tmpm.benchmarks.db',    pragmas: [ 'temp_store = MEMORY;', ] }
+@bettersqlite3_thrds    = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.thrds.benchmarks.db',   pragmas: [ 'threads = 4;', ] }
 
 #-----------------------------------------------------------------------------------------------------------
 @bettersqlite3_memory_noprepare = ( cfg ) -> new Promise ( resolve ) =>
@@ -174,15 +240,15 @@ show_result = ( name, result ) ->
     db_path:      ':memory:'
     icql_path:    icql_path
   db            = ICQL.bind icql_cfg
-  db.create_table_test()
+  db.create_table_text()
   data          = @get_data cfg
   count         = 0
   #.........................................................................................................
   resolve => new Promise ( resolve ) =>
-    nr      = 0
-    for text in data.texts
-      nr++
-      db.insert_text { nr, text, }
+    linenr = 0
+    for line in data.texts
+      linenr++
+      db.insert_line { linenr, line, }
     result  = db.$.all_rows db.get_all_texts()
     count  += result.length
     show_result 'bettersqlite3_memory_icql', result if gcfg.verbose
@@ -316,12 +382,21 @@ show_result = ( name, result ) ->
   cfg           = { word_count: 1000, }
   repetitions   = 3
   test_names    = [
+    'bettersqlite3_jmdel'
+    'bettersqlite3_jmtrunc'
+    'bettersqlite3_jmpers'
+    'bettersqlite3_jmmem'
+    'bettersqlite3_jmwal'
+    'bettersqlite3_jmoff'
+    'bettersqlite3_mmap'
     'bettersqlite3_memory'
     'bettersqlite3_memory_icql_latest'
     'bettersqlite3_memory_icql515'
-    # 'bettersqlite3_memory_noprepare'
-    # 'bettersqlite3_backup'
-    # 'bettersqlite3_file'
+    'bettersqlite3_backup'
+    'bettersqlite3_file'
+    'bettersqlite3_memory_noprepare'
+    'bettersqlite3_tmpm'
+    'bettersqlite3_thrds'
     # 'pgmem'
     # 'sqljs'
     # 'porsagerpostgres'
