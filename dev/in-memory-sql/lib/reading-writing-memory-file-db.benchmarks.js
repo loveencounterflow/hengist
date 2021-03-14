@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, resolve_path, rpr, show_result, test, urge, warn, whisper;
+  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, resolve_path, rpr, show_result, test, try_to_remove_file, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -52,6 +52,21 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  try_to_remove_file = function(path) {
+    var error;
+    try {
+      FS.unlinkSync(path);
+    } catch (error1) {
+      error = error1;
+      if (error.code === 'ENOENT') {
+        return;
+      }
+      throw error;
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   show_result = function(name, result) {
     info('-----------------------------------------------');
     urge(name);
@@ -77,23 +92,33 @@
     return data_cache;
   };
 
+  // #-----------------------------------------------------------------------------------------------------------
+  // backup_to_memory = =>
+  //   ### TAINT should escape command line strings ###
+  //   CP            = require 'child_process'
+  //   sql_path      = cfg.readsql[ sql_key ]
+  //   db_path       = cfg.db[ sql_key ]
+  //   pragmas       = 'PRAGMA journal_mode = OFF; PRAGMA synchronous = OFF;'
+  //   resolve readsql_clipipe_fn = => new Promise ( resolve ) =>
+  //     try_to_remove_file db_path
+  //     CP.execSync "( echo '#{pragmas}' ; cat #{sql_path} ) | sqlite3 #{db_path}"
+  //     resolve ( FS.statSync sql_path ).size
+  //   return null
+
   //-----------------------------------------------------------------------------------------------------------
-  this._cli_pipe = function(cfg, sql_key) {
+  this._readsql_clipipe = function(cfg, sql_key) {
     return new Promise((resolve) => {
       /* TAINT should escape command line strings */
-      var CP, cli_pipe_fn, count, db_path, file_length, pragmas, sql_path;
+      var CP, db_path, pragmas, readsql_clipipe_fn, sql_path;
       CP = require('child_process');
-      sql_path = cfg.sql[sql_key];
-      db_path = cfg.db.path;
-      file_length = (FS.statSync(sql_path)).size;
-      count = 0;
+      sql_path = cfg.readsql[sql_key];
+      db_path = cfg.db[sql_key];
       pragmas = 'PRAGMA journal_mode = OFF; PRAGMA synchronous = OFF;';
-      resolve(cli_pipe_fn = () => {
+      resolve(readsql_clipipe_fn = () => {
         return new Promise((resolve) => {
-          FS.unlinkSync(db_path);
+          try_to_remove_file(db_path);
           CP.execSync(`( echo '${pragmas}' ; cat ${sql_path} ) | sqlite3 ${db_path}`);
-          count = file_length;
-          return resolve(count);
+          return resolve((FS.statSync(sql_path)).size);
         });
       });
       return null;
@@ -101,12 +126,108 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.cli_pipe_small = (cfg) => {
-    return this._cli_pipe(cfg, 'small');
+  this._readsql_bsqlt3 = function(cfg, sql_key, fsmode) {
+    return new Promise((resolve) => {
+      var Db, FSP, db, db_cfg, readsql_bsqlt3, sql_path;
+      Db = require('better-sqlite3');
+      db_cfg = null;
+      db = new Db(':memory:', db_cfg);
+      sql_path = cfg.readsql[sql_key];
+      FSP = require('fs/promises');
+      resolve(readsql_bsqlt3 = () => {
+        return new Promise(async(resolve) => {
+          var sql;
+          db.pragma('journal_mode = OFF;');
+          db.pragma('synchronous = OFF;');
+          switch (fsmode) {
+            case 'sync':
+              sql = FS.readFileSync(sql_path, {
+                encoding: 'utf-8'
+              });
+              db.exec(sql);
+              return resolve(sql.length);
+            case 'promise':
+              sql = (await FSP.readFile(sql_path, {
+                encoding: 'utf-8'
+              }));
+              db.exec(sql);
+              return resolve(sql.length);
+            case 'callback':
+              FS.readFile(sql_path, {
+                encoding: 'utf-8'
+              }, (error, sql) => {
+                if (error != null) {
+                  throw error;
+                }
+                db.exec(sql);
+                return resolve(sql.length);
+              });
+              return;
+          }
+          throw new Error(`^_readsql_bsqlt3@5587^ unknown fsmode ${rpr(fsmode)}`);
+        });
+      });
+      return null;
+    });
   };
 
-  this.cli_pipe_big = (cfg) => {
-    return this._cli_pipe(cfg, 'big');
+  //-----------------------------------------------------------------------------------------------------------
+  this._writesql_clipipe = function(cfg, sql_key) {
+    return new Promise((resolve) => {
+      /* TAINT should escape command line strings */
+      var CP, db_path, readsql_clipipe_fn, sql_path;
+      CP = require('child_process');
+      sql_path = cfg.writesql[sql_key];
+      db_path = cfg.db[sql_key];
+      resolve(readsql_clipipe_fn = () => {
+        return new Promise((resolve) => {
+          CP.execSync(`sqlite3 ${db_path} -cmd '.dump' > ${sql_path}`);
+          return resolve((FS.statSync(sql_path)).size);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.readsql_clipipe_small = (cfg) => {
+    return this._readsql_clipipe(cfg, 'small');
+  };
+
+  this.readsql_clipipe_big = (cfg) => {
+    return this._readsql_clipipe(cfg, 'big');
+  };
+
+  this.readsql_bsqlt3_small_promise = (cfg) => {
+    return this._readsql_bsqlt3(cfg, 'small', 'promise');
+  };
+
+  this.readsql_bsqlt3_big_promise = (cfg) => {
+    return this._readsql_bsqlt3(cfg, 'big', 'promise');
+  };
+
+  this.readsql_bsqlt3_small_sync = (cfg) => {
+    return this._readsql_bsqlt3(cfg, 'small', 'sync');
+  };
+
+  this.readsql_bsqlt3_big_sync = (cfg) => {
+    return this._readsql_bsqlt3(cfg, 'big', 'sync');
+  };
+
+  this.readsql_bsqlt3_small_callback = (cfg) => {
+    return this._readsql_bsqlt3(cfg, 'small', 'callback');
+  };
+
+  this.readsql_bsqlt3_big_callback = (cfg) => {
+    return this._readsql_bsqlt3(cfg, 'big', 'callback');
+  };
+
+  this.writesql_clipipe_small = (cfg) => {
+    return this._writesql_clipipe(cfg, 'small');
+  };
+
+  this.writesql_clipipe_big = (cfg) => {
+    return this._writesql_clipipe(cfg, 'big');
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -158,48 +279,94 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.run_benchmarks = async function() {
-    var _, bench, cfg, i, j, len, ref, ref1, repetitions, test_name, test_names;
+    var bench, cfg, repetitions, run_phase, test_names;
     gcfg.verbose = true;
     gcfg.verbose = false;
     bench = BM.new_benchmarks();
     cfg = {
       db: {
-        path: resolve_path('data/icql/reading-writing-memory-file-db.db')
+        small: resolve_path('data/icql/small-datamill.db'),
+        big: resolve_path('data/icql/Chinook_Sqlite_AutoIncrementPKs.db')
       },
-      sql: {
+      readsql: {
         small: resolve_path('assets/icql/small-datamill.sql'),
         big: resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql')
+      },
+      writesql: {
+        small: resolve_path('data/icql/small-datamill.sql'),
+        big: resolve_path('data/icql/Chinook_Sqlite_AutoIncrementPKs.sql')
       }
     };
     // use: 'small'
     // use: [ 'big', 'small', ]
     // use: 'bignp'
     repetitions = 3;
-    test_names = ['cli_pipe_small', 'cli_pipe_big'];
-    if (global.gc != null) {
-      // 'cli_pipe_bignp'
-      // '_bettersqlite3'
-      global.gc();
-    }
-    data_cache = null;
-    for (_ = i = 1, ref = repetitions; (1 <= ref ? i <= ref : i >= ref); _ = 1 <= ref ? ++i : --i) {
-      whisper('-'.repeat(108));
-      ref1 = CND.shuffle(test_names);
-      for (j = 0, len = ref1.length; j < len; j++) {
-        test_name = ref1[j];
-        if (global.gc != null) {
-          global.gc();
-        }
-        await BM.benchmark(bench, cfg, false, this, test_name);
+    //.........................................................................................................
+    run_phase = async(test_names) => {
+      var _, i, j, len, ref, ref1, test_name;
+      if (global.gc != null) {
+        global.gc();
       }
-    }
-    return BM.show_totals(bench);
+      data_cache = null;
+      for (_ = i = 1, ref = repetitions; (1 <= ref ? i <= ref : i >= ref); _ = 1 <= ref ? ++i : --i) {
+        whisper('-'.repeat(108));
+        ref1 = CND.shuffle(test_names);
+        for (j = 0, len = ref1.length; j < len; j++) {
+          test_name = ref1[j];
+          if (global.gc != null) {
+            global.gc();
+          }
+          await BM.benchmark(bench, cfg, false, this, test_name);
+        }
+      }
+      BM.show_totals(bench);
+      return null;
+    };
+    // #.........................................................................................................
+    // test_names    = [
+    //   'readsql_clipipe_small'
+    //   'readsql_clipipe_big'
+    //   ]
+    // await run_phase test_names
+    //.........................................................................................................
+    test_names = ['readsql_bsqlt3_small_promise', 'readsql_bsqlt3_big_promise', 'readsql_bsqlt3_small_sync', 'readsql_bsqlt3_big_sync', 'readsql_bsqlt3_small_callback', 'readsql_bsqlt3_big_callback'];
+    await run_phase(test_names);
+    // #.........................................................................................................
+    // test_names    = [
+    //   'writesql_clipipe_small'
+    //   'writesql_clipipe_big'
+    //   ]
+    // await run_phase test_names
+    //.........................................................................................................
+    // await run_phase [ 'readsql_bsqlt3_small_promise', ]
+    return null;
   };
 
   //###########################################################################################################
   if (require.main === module) {
     (async() => {
-      return (await this.run_benchmarks());
+      var xxx;
+      await this.run_benchmarks();
+      xxx = function() {
+        var Db, db, db_cfg, i, j, n;
+        Db = require('better-sqlite3');
+        db_cfg = null;
+        db = new Db('/tmp/foo.db', db_cfg);
+        db.exec("drop table if exists x;");
+        db.exec("create table x ( n integer );");
+        for (n = i = 1; i <= 10; n = ++i) {
+          db.exec(`insert into x ( n ) values ( ${n} );`);
+        }
+        // db.exec "vacuum into '/tmp/foo2.db';"
+        db.exec("vacuum into ':memory:';");
+        for (n = j = 11; j <= 20; n = ++j) {
+          db.exec(`insert into x ( n ) values ( ${n} );`);
+        }
+        debug('^333344^', db.memory = true);
+        debug('^333344^', db.memory);
+        return null;
+      };
+      return null;
     })();
   }
 

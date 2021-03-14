@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, rpr, show_result, test, urge, warn, whisper;
+  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, rpr, show_result, test, try_to_remove_file, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -44,6 +44,21 @@
 
   gcfg = {
     verbose: false
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  try_to_remove_file = function(path) {
+    var error;
+    try {
+      FS.unlinkSync(path);
+    } catch (error1) {
+      error = error1;
+      if (error.code === 'ENOENT') {
+        return;
+      }
+      throw error;
+    }
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -124,21 +139,91 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._bettersqlite3 = function(cfg, db_path, do_backup = false) {
+  this.bettersqlite3_membacked = function(cfg, use_membacked = true) {
     return new Promise((resolve) => {
-      var Db, count, data, db, db_cfg, insert, retrieve;
+      var Db, populate_file;
       Db = require('better-sqlite3');
       // db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
+      //.........................................................................................................
+      (populate_file = () => {
+        var count, data, db_cfg, db_path, filedb, i, insert, len, nr, ref, retrieve, text;
+        db_cfg = null;
+        db_path = "/tmp/hengist-in-memory-sql.benchmarks.membacked.db";
+        filedb = new Db(db_path, db_cfg);
+        data = this.get_data(cfg);
+        count = 0;
+        //.........................................................................................................
+        // filedb.unsafeMode true
+        // filedb.pragma 'cache_size = 32000'
+        filedb.pragma('synchronous = OFF'); // makes file-based DBs much faster
+        //.........................................................................................................
+        filedb.exec(`drop table if exists test;`);
+        filedb.exec(`create table test(
+  id    integer primary key,
+  nr    integer not null,
+  text  text );`);
+        // debug '^22233^', filedb.exec """insert into test ( nr, text ) values ( 1, '2' );"""
+        insert = filedb.prepare(`insert into test ( nr, text ) values ( ?, ? );`);
+        retrieve = filedb.prepare(`select * from test order by text;`);
+        nr = 0;
+        ref = data.texts;
+        for (i = 0, len = ref.length; i < len; i++) {
+          text = ref[i];
+          nr++;
+          insert.run([nr, text]);
+        }
+        filedb.backup(':memory:');
+        return null;
+      })();
+      //.........................................................................................................
+      resolve(() => {
+        return new Promise(async(resolve) => {
+          var result;
+          result = retrieve.all();
+          count += result.length;
+          if (gcfg.verbose) {
+            show_result('bettersqlite3', result);
+          }
+          if (do_backup) {
+            await db.backup(':memory:');
+          }
+          db.close();
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._bettersqlite3 = function(cfg) {
+    return new Promise((resolve) => {
+      var Db, count, data, db, db_cfg, defaults, i, insert, len, pragma, ref, retrieve;
+      Db = require('better-sqlite3');
+      // db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
+      defaults = {
+        do_backup: false,
+        pragmas: []
+      };
+      cfg = {...defaults, ...cfg};
       db_cfg = null;
-      db = new Db(db_path, db_cfg);
+      if (cfg.db_path !== ':memory:') {
+        try_to_remove_file(cfg.db_path);
+      }
+      db = new Db(cfg.db_path, db_cfg);
       data = this.get_data(cfg);
       count = 0;
       //.........................................................................................................
       // db.unsafeMode true
       // db.pragma 'cache_size = 32000'
       db.pragma('synchronous = OFF'); // makes file-based DBs much faster
+      ref = cfg.pragmas;
+      for (i = 0, len = ref.length; i < len; i++) {
+        pragma = ref[i];
+        db.pragma(pragma);
+      }
       //.........................................................................................................
-      db.exec(`drop table if exists test;`);
+      // db.exec """drop table if exists test;"""
       db.exec(`create table test(
   id    integer primary key,
   nr    integer not null,
@@ -146,14 +231,16 @@
       // debug '^22233^', db.exec """insert into test ( nr, text ) values ( 1, '2' );"""
       insert = db.prepare(`insert into test ( nr, text ) values ( ?, ? );`);
       retrieve = db.prepare(`select * from test order by text;`);
+      retrieve.raw(true);
       //.........................................................................................................
       resolve(() => {
         return new Promise(async(resolve) => {
-          var i, len, nr, ref, result, text;
+          var j, len1, nr, ref1, result, text;
           nr = 0;
-          ref = data.texts;
-          for (i = 0, len = ref.length; i < len; i++) {
-            text = ref[i];
+          ref1 = data.texts;
+          // db.transaction =>
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            text = ref1[j];
             nr++;
             insert.run([nr, text]);
           }
@@ -162,7 +249,7 @@
           if (gcfg.verbose) {
             show_result('bettersqlite3', result);
           }
-          if (do_backup) {
+          if (cfg.do_backup) {
             await db.backup(`/tmp/hengist-in-memory-sql.benchmarks.backup-${Date.now()}.db`);
           }
           db.close();
@@ -175,15 +262,98 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.bettersqlite3_memory = (cfg) => {
-    return this._bettersqlite3(cfg, ':memory:');
+    return this._bettersqlite3({
+      ...cfg,
+      db_path: ':memory:'
+    });
   };
 
   this.bettersqlite3_backup = (cfg) => {
-    return this._bettersqlite3(cfg, ':memory:', true);
+    return this._bettersqlite3({
+      ...cfg,
+      db_path: ':memory:',
+      do_backup: true
+    });
   };
 
   this.bettersqlite3_file = (cfg) => {
-    return this._bettersqlite3(cfg, '/tmp/hengist-in-memory-sql.benchmarks.db');
+    return this._bettersqlite3({
+      ...cfg,
+      db_path: '/tmp/hengist-in-memory-sql.benchmarks.db'
+    });
+  };
+
+  //...........................................................................................................
+  this.bettersqlite3_jmdel = (cfg) => {
+    return this._bettersqlite3({
+      ...cfg,
+      db_path: '/tmp/hengist-in-memory-sql.jmdel.benchmarks.db',
+      pragmas: ['journal_mode = DELETE;']
+    });
+  };
+
+  this.bettersqlite3_jmtrunc = (cfg) => {
+    return this._bettersqlite3({
+      ...cfg,
+      db_path: '/tmp/hengist-in-memory-sql.jmtrunc.benchmarks.db',
+      pragmas: ['journal_mode = TRUNCATE;']
+    });
+  };
+
+  this.bettersqlite3_jmpers = (cfg) => {
+    return this._bettersqlite3({
+      ...cfg,
+      db_path: '/tmp/hengist-in-memory-sql.jmpers.benchmarks.db',
+      pragmas: ['journal_mode = PERSIST;']
+    });
+  };
+
+  this.bettersqlite3_jmmem = (cfg) => {
+    return this._bettersqlite3({
+      ...cfg,
+      db_path: '/tmp/hengist-in-memory-sql.jmmem.benchmarks.db',
+      pragmas: ['journal_mode = MEMORY;']
+    });
+  };
+
+  this.bettersqlite3_jmwal = (cfg) => {
+    return this._bettersqlite3({
+      ...cfg,
+      db_path: '/tmp/hengist-in-memory-sql.jmwal.benchmarks.db',
+      pragmas: ['journal_mode = WAL;']
+    });
+  };
+
+  this.bettersqlite3_jmoff = (cfg) => {
+    return this._bettersqlite3({
+      ...cfg,
+      db_path: '/tmp/hengist-in-memory-sql.jmoff.benchmarks.db',
+      pragmas: ['journal_mode = OFF;']
+    });
+  };
+
+  this.bettersqlite3_mmap = (cfg) => {
+    return this._bettersqlite3({
+      ...cfg,
+      db_path: '/tmp/hengist-in-memory-sql.mmap.benchmarks.db',
+      pragmas: ['mmap_size = 2147418112;']
+    });
+  };
+
+  this.bettersqlite3_tmpm = (cfg) => {
+    return this._bettersqlite3({
+      ...cfg,
+      db_path: '/tmp/hengist-in-memory-sql.tmpm.benchmarks.db',
+      pragmas: ['temp_store = MEMORY;']
+    });
+  };
+
+  this.bettersqlite3_thrds = (cfg) => {
+    return this._bettersqlite3({
+      ...cfg,
+      db_path: '/tmp/hengist-in-memory-sql.thrds.benchmarks.db',
+      pragmas: ['threads = 4;']
+    });
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -254,19 +424,19 @@
         icql_path: icql_path
       };
       db = ICQL.bind(icql_cfg);
-      db.create_table_test();
+      db.create_table_text();
       data = this.get_data(cfg);
       count = 0;
       //.........................................................................................................
       resolve(() => {
         return new Promise((resolve) => {
-          var i, len, nr, ref, result, text;
-          nr = 0;
+          var i, len, line, linenr, ref, result;
+          linenr = 0;
           ref = data.texts;
           for (i = 0, len = ref.length; i < len; i++) {
-            text = ref[i];
-            nr++;
-            db.insert_text({nr, text});
+            line = ref[i];
+            linenr++;
+            db.insert_line({linenr, line});
           }
           result = db.$.all_rows(db.get_all_texts());
           count += result.length;
@@ -465,11 +635,8 @@
       word_count: 1000
     };
     repetitions = 3;
-    test_names = ['bettersqlite3_memory', 'bettersqlite3_memory_icql_latest', 'bettersqlite3_memory_icql515'];
+    test_names = ['bettersqlite3_jmdel', 'bettersqlite3_jmtrunc', 'bettersqlite3_jmpers', 'bettersqlite3_jmmem', 'bettersqlite3_jmwal', 'bettersqlite3_jmoff', 'bettersqlite3_mmap', 'bettersqlite3_memory', 'bettersqlite3_memory_icql_latest', 'bettersqlite3_memory_icql515', 'bettersqlite3_backup', 'bettersqlite3_file', 'bettersqlite3_memory_noprepare', 'bettersqlite3_tmpm', 'bettersqlite3_thrds'];
     if (global.gc != null) {
-      // 'bettersqlite3_memory_noprepare'
-      // 'bettersqlite3_backup'
-      // 'bettersqlite3_file'
       // 'pgmem'
       // 'sqljs'
       // 'porsagerpostgres'

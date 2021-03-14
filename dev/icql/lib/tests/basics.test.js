@@ -570,22 +570,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["mirror DB to memory"] = function(T, done) {
-    var ICQL, db, rows, settings;
-    ICQL = require('../../../../apps/icql');
-    settings = get_icql_settings(true);
-    db = ICQL.bind(settings);
-    db.create_tables_with_foreign_key();
-    db.populate_tables_with_foreign_key();
-    rows = db.$.all_rows(db.select_from_tables_with_foreign_key());
-    T.eq(db.$.get_toposort(), []);
-    db.$.clear();
-    T.eq(db.$.get_toposort(), []);
-    // db.drop_tables_with_foreign_key()
-    return done();
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this["_error messages"] = function(T, done) {
     /* demo to show that printout gets limited for long statements */
     var ICQL, db, error, settings, sql;
@@ -605,9 +589,10 @@
 
   //###########################################################################################################
   if (module.parent == null) {
-    // test @
-    test(this["mirror DB to memory"]);
+    test(this);
   }
+
+  // test @[ "mirror DB to memory" ]
 
 }).call(this);
 
