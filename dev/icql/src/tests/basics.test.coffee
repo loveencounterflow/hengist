@@ -243,20 +243,6 @@ get_icql_settings = ( remove_db = false ) ->
   done()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "mirror DB to memory" ] = ( T, done ) ->
-  ICQL              = require '../../../../apps/icql'
-  settings          = get_icql_settings true
-  db                = ICQL.bind settings
-  db.create_tables_with_foreign_key()
-  db.populate_tables_with_foreign_key()
-  rows              = db.$.all_rows db.select_from_tables_with_foreign_key()
-  T.eq db.$.get_toposort(), []
-  db.$.clear()
-  T.eq db.$.get_toposort(), []
-  # db.drop_tables_with_foreign_key()
-  done()
-
-#-----------------------------------------------------------------------------------------------------------
 @[ "_error messages" ] = ( T, done ) ->
   ### demo to show that printout gets limited for long statements ###
   ICQL              = require '../../../../apps/icql'
@@ -293,7 +279,7 @@ get_icql_settings = ( remove_db = false ) ->
 
 ############################################################################################################
 unless module.parent?
-  # test @
-  test @[ "mirror DB to memory" ]
+  test @
+  # test @[ "mirror DB to memory" ]
 
 
