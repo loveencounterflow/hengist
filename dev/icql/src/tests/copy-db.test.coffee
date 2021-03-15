@@ -29,17 +29,24 @@ H                         = require './helpers'
 @[ "_mirror DB to memory" ] = ( T, done ) ->
   ICQL              = require '../../../../apps/icql'
   settings          = H.get_icql_settings true
+  settings.echo     = true
   db                = ICQL.bind settings
-  #################################
-  provide_copy_methods.apply db.$
-  db.$.copy_to_memory db, 'd2'
-  #################################
+  from_schema       = 'main'
+  to_schema         = 'd2'
   db.create_tables_with_foreign_key()
   db.populate_tables_with_foreign_key()
-  rows              = db.$.all_rows db.select_from_tables_with_foreign_key()
-  debug '^3485^', rows
+  db.$.attach ':memory:', to_schema
+  db.$.copy_schema from_schema, to_schema
+  df1 = db.$.all_rows db.$.query "select * from #{db.$.as_identifier from_schema}.t1 order by key;"
+  df2 = db.$.all_rows db.$.query "select * from #{db.$.as_identifier from_schema}.t2 order by id;"
+  dt1 = db.$.all_rows db.$.query "select * from #{db.$.as_identifier to_schema}.t1 order by key;"
+  dt2 = db.$.all_rows db.$.query "select * from #{db.$.as_identifier to_schema}.t2 order by id;"
+  T.eq df1, dt1
+  T.eq df2, dt2
+  # rows              = db.$.all_rows db.select_from_tables_with_foreign_key()
+  # debug '^3485^', rows
   # T.eq db.$.get_toposort(), []
-  db.$.clear()
+  # db.$.clear()
   # T.eq db.$.get_toposort(), []
   # db.drop_tables_with_foreign_key()
   done() if done?
@@ -49,7 +56,7 @@ H                         = require './helpers'
 ############################################################################################################
 unless module.parent?
   # test @
-  # test @[ "_mirror DB to memory" ]
-  @[ "_mirror DB to memory" ]()
+  test @[ "_mirror DB to memory" ]
+  # @[ "_mirror DB to memory" ]()
 
 
