@@ -24,31 +24,6 @@ xrpr2                     = ( x ) -> inspect x, { colors: yes, breakLength: 20, 
 PATH                      = require 'path'
 H                         = require './helpers'
 
-#-----------------------------------------------------------------------------------------------------------
-provide_copy_methods = ->
-
-  #-----------------------------------------------------------------------------------------------------------
-  @copy_to_memory = ( me, schema ) ->
-    # debug '^3334^', ( k for k of me )
-    # debug '^3334^', ( k for k of me.$.db )
-    debug '^3334^', ( k for k of me.$ )
-    debug '^3334^', me.$.db.attach
-    @attach me, ':memory:', schema
-    urge '^64656^', me.$.get_toposort()
-    # for table in
-    me.$.db.exec "create table #{schema}.a ( n integer );"
-    urge '^64656^', "get_toposort 'main'", me.$.get_toposort 'main'
-    urge '^64656^', "get_toposort schema", me.$.get_toposort schema
-    urge '^64656^', me.$.all_rows me.$.catalog()
-    help '^64656^', me.$.all_rows me.$.list_objects 'main'
-    help '^64656^', me.$.all_rows me.$.list_objects schema
-    urge '^64656^', me.$.all_rows me.$.list_schemas()
-    info '^67888^', me.$.all_rows me.$.query "select * from #{schema}.a;"
-    info '^67888^', me.$.all_rows me.$.query "select * from #{schema}.sqlite_schema;"
-    # me.$.db.
-    return null
-
-  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "_mirror DB to memory" ] = ( T, done ) ->
