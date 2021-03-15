@@ -28,12 +28,6 @@ H                         = require './helpers'
 provide_copy_methods = ->
 
   #-----------------------------------------------------------------------------------------------------------
-  ### TAINT must escape path, schema ###
-  @attach = ( me, path, schema ) ->
-    debug '^334445^', "attach #{@as_sql path} as [#{schema}];"
-    me.$.db.exec "attach '#{path}' as [#{schema}];"
-
-  #-----------------------------------------------------------------------------------------------------------
   @copy_to_memory = ( me, schema ) ->
     # debug '^3334^', ( k for k of me )
     # debug '^3334^', ( k for k of me.$.db )
