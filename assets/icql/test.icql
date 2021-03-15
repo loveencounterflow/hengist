@@ -163,6 +163,15 @@ procedure create_tables_with_foreign_key():
     key     text  not null         references t1 ( key ) );
 
 -- ---------------------------------------------------------------------------------------------------------
+-- ### TAINT using ad-hoc syntax for compile-time interpolation
+fragment create_tables_with_foreign_key_frg():
+  create table {schema}.table_one (
+    key     text  not null  unique primary key );
+  create table {schema}.table_two (
+    id      text  not null  unique primary key,
+    key     text  not null         references table_one ( key ) );
+
+-- ---------------------------------------------------------------------------------------------------------
 procedure populate_tables_with_foreign_key():
   insert into t1 values
     ( 'foo'   ),
