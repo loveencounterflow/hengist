@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, badge, debug, echo, help, info, inspect, jr, provide_copy_methods, rpr, test, urge, warn, whisper, xrpr, xrpr2;
+  var CND, H, PATH, badge, debug, echo, help, info, inspect, jr, rpr, test, urge, warn, whisper, xrpr, xrpr2;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -54,56 +54,29 @@
   H = require('./helpers');
 
   //-----------------------------------------------------------------------------------------------------------
-  provide_copy_methods = function() {
-    //-----------------------------------------------------------------------------------------------------------
-    this.copy_to_memory = function(me, schema) {
-      var k;
-      // debug '^3334^', ( k for k of me )
-      // debug '^3334^', ( k for k of me.$.db )
-      debug('^3334^', (function() {
-        var results;
-        results = [];
-        for (k in me.$) {
-          results.push(k);
-        }
-        return results;
-      })());
-      debug('^3334^', me.$.db.attach);
-      this.attach(me, ':memory:', schema);
-      urge('^64656^', me.$.get_toposort());
-      // for table in
-      me.$.db.exec(`create table ${schema}.a ( n integer );`);
-      urge('^64656^', "get_toposort 'main'", me.$.get_toposort('main'));
-      urge('^64656^', "get_toposort schema", me.$.get_toposort(schema));
-      urge('^64656^', me.$.all_rows(me.$.catalog()));
-      help('^64656^', me.$.all_rows(me.$.list_objects('main')));
-      help('^64656^', me.$.all_rows(me.$.list_objects(schema)));
-      urge('^64656^', me.$.all_rows(me.$.list_schemas()));
-      info('^67888^', me.$.all_rows(me.$.query(`select * from ${schema}.a;`)));
-      info('^67888^', me.$.all_rows(me.$.query(`select * from ${schema}.sqlite_schema;`)));
-      // me.$.db.
-      return null;
-    };
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this["_mirror DB to memory"] = function(T, done) {
-    var ICQL, db, rows, settings;
+    var ICQL, db, df1, df2, dt1, dt2, from_schema, settings, to_schema;
     ICQL = require('../../../../apps/icql');
     settings = H.get_icql_settings(true);
+    settings.echo = true;
     db = ICQL.bind(settings);
-    //################################
-    provide_copy_methods.apply(db.$);
-    db.$.copy_to_memory(db, 'd2');
-    //################################
+    from_schema = 'main';
+    to_schema = 'd2';
     db.create_tables_with_foreign_key();
     db.populate_tables_with_foreign_key();
-    rows = db.$.all_rows(db.select_from_tables_with_foreign_key());
-    debug('^3485^', rows);
-    // T.eq db.$.get_toposort(), []
-    db.$.clear();
+    db.$.attach(':memory:', to_schema);
+    db.$.copy_schema(from_schema, to_schema);
+    df1 = db.$.all_rows(db.$.query(`select * from ${db.$.as_identifier(from_schema)}.t1 order by key;`));
+    df2 = db.$.all_rows(db.$.query(`select * from ${db.$.as_identifier(from_schema)}.t2 order by id;`));
+    dt1 = db.$.all_rows(db.$.query(`select * from ${db.$.as_identifier(to_schema)}.t1 order by key;`));
+    dt2 = db.$.all_rows(db.$.query(`select * from ${db.$.as_identifier(to_schema)}.t2 order by id;`));
+    T.eq(df1, dt1);
+    T.eq(df2, dt2);
     if (done != null) {
+      // rows              = db.$.all_rows db.select_from_tables_with_foreign_key()
+      // debug '^3485^', rows
+      // T.eq db.$.get_toposort(), []
+      // db.$.clear()
       // T.eq db.$.get_toposort(), []
       // db.drop_tables_with_foreign_key()
       return done();
@@ -113,9 +86,10 @@
   //###########################################################################################################
   if (module.parent == null) {
     // test @
-    // test @[ "_mirror DB to memory" ]
-    this["_mirror DB to memory"]();
+    test(this["_mirror DB to memory"]);
   }
+
+  // @[ "_mirror DB to memory" ]()
 
 }).call(this);
 
