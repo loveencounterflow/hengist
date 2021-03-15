@@ -221,6 +221,7 @@ get_icql_settings = ( remove_db = false ) ->
 @[ "foreign keys" ] = ( T, done ) ->
   ICQL              = require '../../../../apps/icql'
   settings          = get_icql_settings true
+  settings.echo     = true
   db                = ICQL.bind settings
   db.create_tables_with_foreign_key()
   db.populate_tables_with_foreign_key()
@@ -240,6 +241,45 @@ get_icql_settings = ( remove_db = false ) ->
   db.$.clear()
   T.eq db.$.get_toposort(), []
   # db.drop_tables_with_foreign_key()
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "toposort with schema" ] = ( T, done ) ->
+  ICQL              = require '../../../../apps/icql'
+  settings          = get_icql_settings true
+  settings.echo     = true
+  db                = ICQL.bind settings
+  schema            = 'subdb'
+  db.$.attach ':memory:', schema
+  #.........................................................................................................
+  T.eq db.$.list_schemas(), [
+    { seq: 0, name: 'main', file: '/tmp/icql.db' },
+    { seq: 2, name: 'subdb', file: '' } ]
+  T.eq ( db.$.get_toposort schema ), []
+  #.........................................................................................................
+  template          = db.create_tables_with_foreign_key_frg()
+  ### TAINT use compile-time interpolation as soon as available ###
+  sql               = template.replace /\{schema\}/g, db.$.as_identifier schema
+  db.$.execute sql
+  #.........................................................................................................
+  do =>
+    d                 = db.$.list_objects()
+    T.eq d, []
+  #.........................................................................................................
+  do =>
+    d                 = db.$.list_objects schema
+    d                 = ( e for e in d when e.type is 'table' )
+    for e in d
+      delete e.sql
+    T.eq d, [ { type: 'table', name: 'table_one' }, { type: 'table', name: 'table_two' } ]
+  #.........................................................................................................
+  T.eq ( db.$.get_toposort() ), []
+  T.eq ( db.$.get_toposort schema ), [
+    { name: 'table_one', type: 'table' },
+    { name: 'table_two', type: 'table' },
+    { name: 'sqlite_autoindex_table_one_1', type: 'index' },
+    { name: 'sqlite_autoindex_table_two_1', type: 'index' } ]
+  #.........................................................................................................
   done()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -280,6 +320,8 @@ get_icql_settings = ( remove_db = false ) ->
 ############################################################################################################
 unless module.parent?
   test @
-  # test @[ "mirror DB to memory" ]
+  # test @[ "foreign keys" ]
+  # test @[ "toposort with schema" ]
+  # @[ "toposort with schema" ]()
 
 
