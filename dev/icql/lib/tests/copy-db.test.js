@@ -56,12 +56,6 @@
   //-----------------------------------------------------------------------------------------------------------
   provide_copy_methods = function() {
     //-----------------------------------------------------------------------------------------------------------
-    /* TAINT must escape path, schema */
-    this.attach = function(me, path, schema) {
-      debug('^334445^', `attach ${this.as_sql(path)} as [${schema}];`);
-      return me.$.db.exec(`attach '${path}' as [${schema}];`);
-    };
-    //-----------------------------------------------------------------------------------------------------------
     this.copy_to_memory = function(me, schema) {
       var k;
       // debug '^3334^', ( k for k of me )

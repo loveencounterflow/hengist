@@ -496,6 +496,7 @@
     var ICQL, db, rows, settings;
     ICQL = require('../../../../apps/icql');
     settings = get_icql_settings(true);
+    settings.echo = true;
     db = ICQL.bind(settings);
     db.create_tables_with_foreign_key();
     db.populate_tables_with_foreign_key();
@@ -570,6 +571,92 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["toposort with schema"] = function(T, done) {
+    /* TAINT use compile-time interpolation as soon as available */
+    var ICQL, db, schema, settings, sql, template;
+    ICQL = require('../../../../apps/icql');
+    settings = get_icql_settings(true);
+    settings.echo = true;
+    db = ICQL.bind(settings);
+    schema = 'subdb';
+    db.$.attach(':memory:', schema);
+    //.........................................................................................................
+    T.eq(db.$.list_schemas(), [
+      {
+        seq: 0,
+        name: 'main',
+        file: '/tmp/icql.db'
+      },
+      {
+        seq: 2,
+        name: 'subdb',
+        file: ''
+      }
+    ]);
+    T.eq(db.$.get_toposort(schema), []);
+    //.........................................................................................................
+    template = db.create_tables_with_foreign_key_frg();
+    sql = template.replace(/\{schema\}/g, db.$.as_identifier(schema));
+    db.$.execute(sql);
+    (() => {      //.........................................................................................................
+      var d;
+      d = db.$.list_objects();
+      return T.eq(d, []);
+    })();
+    (() => {      //.........................................................................................................
+      var d, e, i, len;
+      d = db.$.list_objects(schema);
+      d = (function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = d.length; i < len; i++) {
+          e = d[i];
+          if (e.type === 'table') {
+            results.push(e);
+          }
+        }
+        return results;
+      })();
+      for (i = 0, len = d.length; i < len; i++) {
+        e = d[i];
+        delete e.sql;
+      }
+      return T.eq(d, [
+        {
+          type: 'table',
+          name: 'table_one'
+        },
+        {
+          type: 'table',
+          name: 'table_two'
+        }
+      ]);
+    })();
+    //.........................................................................................................
+    T.eq(db.$.get_toposort(), []);
+    T.eq(db.$.get_toposort(schema), [
+      {
+        name: 'table_one',
+        type: 'table'
+      },
+      {
+        name: 'table_two',
+        type: 'table'
+      },
+      {
+        name: 'sqlite_autoindex_table_one_1',
+        type: 'index'
+      },
+      {
+        name: 'sqlite_autoindex_table_two_1',
+        type: 'index'
+      }
+    ]);
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["_error messages"] = function(T, done) {
     /* demo to show that printout gets limited for long statements */
     var ICQL, db, error, settings, sql;
@@ -592,7 +679,9 @@
     test(this);
   }
 
-  // test @[ "mirror DB to memory" ]
+  // test @[ "foreign keys" ]
+// test @[ "toposort with schema" ]
+// @[ "toposort with schema" ]()
 
 }).call(this);
 
