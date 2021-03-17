@@ -26,6 +26,42 @@ data_cache                = null
 gcfg                      = { verbose: false, }
 
 #-----------------------------------------------------------------------------------------------------------
+paths =
+  fle:          '/tmp/hengist-in-memory-sql.benchmarks.db',
+  fle_jmdel:    '/tmp/hengist-in-memory-sql.jmdel.benchmarks.db'
+  fle_jmtrunc:  '/tmp/hengist-in-memory-sql.jmtrunc.benchmarks.db'
+  fle_jmpers:   '/tmp/hengist-in-memory-sql.jmpers.benchmarks.db'
+  fle_jmmem:    '/tmp/hengist-in-memory-sql.jmmem.benchmarks.db'
+  fle_jmwal:    '/tmp/hengist-in-memory-sql.jmwal.benchmarks.db'
+  fle_jmoff:    '/tmp/hengist-in-memory-sql.jmoff.benchmarks.db'
+  fle_mmap:     '/tmp/hengist-in-memory-sql.mmap.benchmarks.db'
+  fle_tmpm:     '/tmp/hengist-in-memory-sql.tmpm.benchmarks.db'
+  fle_pgsze:    '/tmp/hengist-in-memory-sql.tmpm.benchmarks.db'
+  fle_thrds:    '/tmp/hengist-in-memory-sql.thrds.benchmarks.db'
+  fle_qtforum1: '/tmp/hengist-in-memory-sql.qtforum1.benchmarks.db'
+  fle_qtforum2: '/tmp/hengist-in-memory-sql.qtforum2.benchmarks.db'
+
+#-----------------------------------------------------------------------------------------------------------
+pragmas =
+  #.........................................................................................................
+  ### thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 ###
+  qtforum1: [
+    'page_size = 4096'
+    'cache_size = 16384'
+    'temp_store = MEMORY'
+    'journal_mode = OFF'
+    'locking_mode = EXCLUSIVE'
+    'synchronous = OFF' ]
+  qtforum2: [
+    'page_size = 4096'
+    'cache_size = 16384'
+    'temp_store = MEMORY'
+    'journal_mode = WAL'
+    'locking_mode = EXCLUSIVE'
+    'synchronous = OFF' ]
+  #.........................................................................................................
+
+#-----------------------------------------------------------------------------------------------------------
 try_to_remove_file = ( path ) ->
   try FS.unlinkSync path catch error
     return if error.code is 'ENOENT'
@@ -135,7 +171,7 @@ show_result = ( name, result ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@_bettersqlite3 = ( cfg ) -> new Promise ( resolve ) =>
+@_btsql3 = ( cfg ) -> new Promise ( resolve ) =>
   Db            = require 'better-sqlite3'
   # db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
   defaults      = { do_backup: false, pragmas: [], }
@@ -179,22 +215,27 @@ show_result = ( name, result ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@bettersqlite3_memory = ( cfg ) => @_bettersqlite3 { cfg..., db_path: ':memory:', }
-@bettersqlite3_backup = ( cfg ) => @_bettersqlite3 { cfg..., db_path: ':memory:', do_backup: true, }
-@bettersqlite3_file   = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.benchmarks.db', }
+@bettersqlite3_mem          = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', }
+@bettersqlite3_mem_thrds    = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'threads = 4;', ] }
+@bettersqlite3_mem_jmoff    = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'journal_mode = OFF;', ], }
+@bettersqlite3_mem_backup   = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', do_backup: true, }
 #...........................................................................................................
-@bettersqlite3_jmdel    = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.jmdel.benchmarks.db',   pragmas: [ 'journal_mode = DELETE;', ] }
-@bettersqlite3_jmtrunc  = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.jmtrunc.benchmarks.db', pragmas: [ 'journal_mode = TRUNCATE;', ] }
-@bettersqlite3_jmpers   = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.jmpers.benchmarks.db',  pragmas: [ 'journal_mode = PERSIST;', ] }
-@bettersqlite3_jmmem    = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.jmmem.benchmarks.db',   pragmas: [ 'journal_mode = MEMORY;', ] }
-@bettersqlite3_jmwal    = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.jmwal.benchmarks.db',   pragmas: [ 'journal_mode = WAL;', ] }
-@bettersqlite3_jmoff    = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.jmoff.benchmarks.db',   pragmas: [ 'journal_mode = OFF;', ] }
-@bettersqlite3_mmap     = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.mmap.benchmarks.db',    pragmas: [ 'mmap_size = 2147418112;', ] }
-@bettersqlite3_tmpm     = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.tmpm.benchmarks.db',    pragmas: [ 'temp_store = MEMORY;', ] }
-@bettersqlite3_thrds    = ( cfg ) => @_bettersqlite3 { cfg..., db_path: '/tmp/hengist-in-memory-sql.thrds.benchmarks.db',   pragmas: [ 'threads = 4;', ] }
+@bettersqlite3_fle          = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle }
+@bettersqlite3_fle_jmdel    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmdel,     pragmas: [ 'journal_mode = DELETE;', ] }
+@bettersqlite3_fle_jmtrunc  = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmtrunc,   pragmas: [ 'journal_mode = TRUNCATE;', ] }
+@bettersqlite3_fle_jmpers   = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmpers,    pragmas: [ 'journal_mode = PERSIST;', ] }
+@bettersqlite3_fle_jmmem    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmmem,     pragmas: [ 'journal_mode = MEMORY;', ] }
+@bettersqlite3_fle_jmwal    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmwal,     pragmas: [ 'journal_mode = WAL;', ] }
+@bettersqlite3_fle_jmoff    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmoff,     pragmas: [ 'journal_mode = OFF;', ] }
+@bettersqlite3_fle_mmap     = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_mmap,      pragmas: [ 'mmap_size = 30000000000;', ] }
+@bettersqlite3_fle_tmpm     = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_tmpm,      pragmas: [ 'temp_store = MEMORY;', ] }
+@bettersqlite3_fle_pgsze    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_pgsze,     pragmas: [ 'page_size = 32768;', ] }
+@bettersqlite3_fle_thrds    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_thrds,     pragmas: [ 'threads = 4;', ] }
+@bettersqlite3_fle_qtforum1 = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_qtforum1,  pragmas: pragmas.qtforum1 }
+@bettersqlite3_fle_qtforum2 = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_qtforum2,  pragmas: pragmas.qtforum2 }
 
 #-----------------------------------------------------------------------------------------------------------
-@bettersqlite3_memory_noprepare = ( cfg ) -> new Promise ( resolve ) =>
+@bettersqlite3_mem_noprepare = ( cfg ) -> new Promise ( resolve ) =>
   Db            = require 'better-sqlite3'
   # db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
   db_cfg        = null
@@ -257,8 +298,8 @@ show_result = ( name, result ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@bettersqlite3_memory_icql515     = ( cfg ) -> @_bettersqlite3_memory_icql cfg, 'icql515'
-@bettersqlite3_memory_icql_latest = ( cfg ) -> @_bettersqlite3_memory_icql cfg, 'icql_latest'
+@bettersqlite3_mem_icql515     = ( cfg ) -> @_bettersqlite3_memory_icql cfg, 'icql515'
+@bettersqlite3_mem_icql_latest = ( cfg ) -> @_bettersqlite3_memory_icql cfg, 'icql_latest'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -379,24 +420,28 @@ show_result = ( name, result ) ->
   gcfg.verbose  = true
   gcfg.verbose  = false
   bench         = BM.new_benchmarks()
-  cfg           = { word_count: 1000, }
+  cfg           = { word_count: 10000, }
   repetitions   = 3
   test_names    = [
-    'bettersqlite3_jmdel'
-    'bettersqlite3_jmtrunc'
-    'bettersqlite3_jmpers'
-    'bettersqlite3_jmmem'
-    'bettersqlite3_jmwal'
-    'bettersqlite3_jmoff'
-    'bettersqlite3_mmap'
-    'bettersqlite3_memory'
-    'bettersqlite3_memory_icql_latest'
-    'bettersqlite3_memory_icql515'
-    'bettersqlite3_backup'
-    'bettersqlite3_file'
-    'bettersqlite3_memory_noprepare'
-    'bettersqlite3_tmpm'
-    'bettersqlite3_thrds'
+    'bettersqlite3_mem'
+    'bettersqlite3_mem_jmoff'
+    'bettersqlite3_mem_icql_latest'
+    'bettersqlite3_mem_icql515'
+    'bettersqlite3_mem_backup'
+    'bettersqlite3_mem_noprepare'
+    'bettersqlite3_fle'
+    'bettersqlite3_fle_mmap'
+    'bettersqlite3_fle_tmpm'
+    'bettersqlite3_fle_thrds'
+    'bettersqlite3_fle_pgsze'
+    'bettersqlite3_fle_jmwal'
+    'bettersqlite3_fle_jmdel'
+    # 'bettersqlite3_fle_jmtrunc' ### NOTE does not produce correct DB file ###
+    # 'bettersqlite3_fle_jmpers'  ### NOTE does not produce correct DB file ###
+    'bettersqlite3_fle_jmmem'
+    'bettersqlite3_fle_jmoff'
+    'bettersqlite3_fle_qtforum1'
+    'bettersqlite3_fle_qtforum2'
     # 'pgmem'
     # 'sqljs'
     # 'porsagerpostgres'
