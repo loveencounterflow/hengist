@@ -231,53 +231,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._bettersqlite3 = function(cfg) {
-    return new Promise((resolve) => {
-      var Db, count, data, db, db_cfg, sql_path;
-      Db = require('better-sqlite3');
-      // db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
-      db_cfg = null;
-      db = new Db(':memory:', db_cfg);
-      data = this.get_data(cfg);
-      count = 0;
-      sql_path = cfg.sql[cfg.use];
-      debug('^96833^', {sql_path});
-      //.........................................................................................................
-      // db.unsafeMode true
-      // db.pragma 'cache_size = 32000'
-      db.pragma('synchronous = OFF'); // makes file-based DBs much faster
-      //.........................................................................................................
-      // db.exec """drop table if exists test;"""
-      // db.exec """
-      //   create table test(
-      //     id    integer primary key,
-      //     nr    integer not null,
-      //     text  text );"""
-      // # debug '^22233^', db.exec """insert into test ( nr, text ) values ( 1, '2' );"""
-      // insert        = db.prepare """insert into test ( nr, text ) values ( ?, ? );"""
-      // retrieve      = db.prepare """select * from test order by text;"""
-      //.........................................................................................................
-      resolve(() => {
-        return new Promise((resolve) => {
-          db.exec(`.read ${sql_path}`);
-          // nr      = 0
-          // for text in data.texts
-          //   nr++
-          //   insert.run [ nr, text, ]
-          // result  = retrieve.all()
-          // count  += result.length
-          // show_result 'bettersqlite3', result if gcfg.verbose
-          // if do_backup
-          //   await db.backup "/tmp/hengist-in-memory-sql.benchmarks.backup-#{Date.now()}.db"
-          // db.close()
-          return resolve(1); // count
-        });
-      });
-      return null;
-    });
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this.run_benchmarks = async function() {
     var bench, cfg, repetitions, run_phase, test_names;
     gcfg.verbose = true;
@@ -322,12 +275,9 @@
       BM.show_totals(bench);
       return null;
     };
-    // #.........................................................................................................
-    // test_names    = [
-    //   'readsql_clipipe_small'
-    //   'readsql_clipipe_big'
-    //   ]
-    // await run_phase test_names
+    //.........................................................................................................
+    test_names = ['readsql_clipipe_small', 'readsql_clipipe_big'];
+    await run_phase(test_names);
     //.........................................................................................................
     test_names = ['readsql_bsqlt3_small_promise', 'readsql_bsqlt3_big_promise', 'readsql_bsqlt3_small_sync', 'readsql_bsqlt3_big_sync', 'readsql_bsqlt3_small_callback', 'readsql_bsqlt3_big_callback'];
     await run_phase(test_names);

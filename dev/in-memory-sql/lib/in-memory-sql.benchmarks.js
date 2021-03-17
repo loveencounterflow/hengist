@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, rpr, show_result, test, try_to_remove_file, urge, warn, whisper;
+  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, paths, pragmas, rpr, show_result, test, try_to_remove_file, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -45,6 +45,33 @@
   gcfg = {
     verbose: false
   };
+
+  //-----------------------------------------------------------------------------------------------------------
+  paths = {
+    fle: '/tmp/hengist-in-memory-sql.benchmarks.db',
+    fle_jmdel: '/tmp/hengist-in-memory-sql.jmdel.benchmarks.db',
+    fle_jmtrunc: '/tmp/hengist-in-memory-sql.jmtrunc.benchmarks.db',
+    fle_jmpers: '/tmp/hengist-in-memory-sql.jmpers.benchmarks.db',
+    fle_jmmem: '/tmp/hengist-in-memory-sql.jmmem.benchmarks.db',
+    fle_jmwal: '/tmp/hengist-in-memory-sql.jmwal.benchmarks.db',
+    fle_jmoff: '/tmp/hengist-in-memory-sql.jmoff.benchmarks.db',
+    fle_mmap: '/tmp/hengist-in-memory-sql.mmap.benchmarks.db',
+    fle_tmpm: '/tmp/hengist-in-memory-sql.tmpm.benchmarks.db',
+    fle_pgsze: '/tmp/hengist-in-memory-sql.tmpm.benchmarks.db',
+    fle_thrds: '/tmp/hengist-in-memory-sql.thrds.benchmarks.db',
+    fle_qtforum1: '/tmp/hengist-in-memory-sql.qtforum1.benchmarks.db',
+    fle_qtforum2: '/tmp/hengist-in-memory-sql.qtforum2.benchmarks.db'
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  pragmas = {
+    //.........................................................................................................
+    /* thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 */
+    qtforum1: ['page_size = 4096', 'cache_size = 16384', 'temp_store = MEMORY', 'journal_mode = OFF', 'locking_mode = EXCLUSIVE', 'synchronous = OFF'],
+    qtforum2: ['page_size = 4096', 'cache_size = 16384', 'temp_store = MEMORY', 'journal_mode = WAL', 'locking_mode = EXCLUSIVE', 'synchronous = OFF']
+  };
+
+  //.........................................................................................................
 
   //-----------------------------------------------------------------------------------------------------------
   try_to_remove_file = function(path) {
@@ -196,7 +223,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._bettersqlite3 = function(cfg) {
+  this._btsql3 = function(cfg) {
     return new Promise((resolve) => {
       var Db, count, data, db, db_cfg, defaults, i, insert, len, pragma, ref, retrieve;
       Db = require('better-sqlite3');
@@ -261,103 +288,143 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.bettersqlite3_memory = (cfg) => {
-    return this._bettersqlite3({
+  this.bettersqlite3_mem = (cfg) => {
+    return this._btsql3({
       ...cfg,
       db_path: ':memory:'
     });
   };
 
-  this.bettersqlite3_backup = (cfg) => {
-    return this._bettersqlite3({
+  this.bettersqlite3_mem_thrds = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: ':memory:',
+      pragmas: ['threads = 4;']
+    });
+  };
+
+  this.bettersqlite3_mem_jmoff = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: ':memory:',
+      pragmas: ['journal_mode = OFF;']
+    });
+  };
+
+  this.bettersqlite3_mem_backup = (cfg) => {
+    return this._btsql3({
       ...cfg,
       db_path: ':memory:',
       do_backup: true
     });
   };
 
-  this.bettersqlite3_file = (cfg) => {
-    return this._bettersqlite3({
+  //...........................................................................................................
+  this.bettersqlite3_fle = (cfg) => {
+    return this._btsql3({
       ...cfg,
-      db_path: '/tmp/hengist-in-memory-sql.benchmarks.db'
+      db_path: paths.fle
     });
   };
 
-  //...........................................................................................................
-  this.bettersqlite3_jmdel = (cfg) => {
-    return this._bettersqlite3({
+  this.bettersqlite3_fle_jmdel = (cfg) => {
+    return this._btsql3({
       ...cfg,
-      db_path: '/tmp/hengist-in-memory-sql.jmdel.benchmarks.db',
+      db_path: paths.fle_jmdel,
       pragmas: ['journal_mode = DELETE;']
     });
   };
 
-  this.bettersqlite3_jmtrunc = (cfg) => {
-    return this._bettersqlite3({
+  this.bettersqlite3_fle_jmtrunc = (cfg) => {
+    return this._btsql3({
       ...cfg,
-      db_path: '/tmp/hengist-in-memory-sql.jmtrunc.benchmarks.db',
+      db_path: paths.fle_jmtrunc,
       pragmas: ['journal_mode = TRUNCATE;']
     });
   };
 
-  this.bettersqlite3_jmpers = (cfg) => {
-    return this._bettersqlite3({
+  this.bettersqlite3_fle_jmpers = (cfg) => {
+    return this._btsql3({
       ...cfg,
-      db_path: '/tmp/hengist-in-memory-sql.jmpers.benchmarks.db',
+      db_path: paths.fle_jmpers,
       pragmas: ['journal_mode = PERSIST;']
     });
   };
 
-  this.bettersqlite3_jmmem = (cfg) => {
-    return this._bettersqlite3({
+  this.bettersqlite3_fle_jmmem = (cfg) => {
+    return this._btsql3({
       ...cfg,
-      db_path: '/tmp/hengist-in-memory-sql.jmmem.benchmarks.db',
+      db_path: paths.fle_jmmem,
       pragmas: ['journal_mode = MEMORY;']
     });
   };
 
-  this.bettersqlite3_jmwal = (cfg) => {
-    return this._bettersqlite3({
+  this.bettersqlite3_fle_jmwal = (cfg) => {
+    return this._btsql3({
       ...cfg,
-      db_path: '/tmp/hengist-in-memory-sql.jmwal.benchmarks.db',
+      db_path: paths.fle_jmwal,
       pragmas: ['journal_mode = WAL;']
     });
   };
 
-  this.bettersqlite3_jmoff = (cfg) => {
-    return this._bettersqlite3({
+  this.bettersqlite3_fle_jmoff = (cfg) => {
+    return this._btsql3({
       ...cfg,
-      db_path: '/tmp/hengist-in-memory-sql.jmoff.benchmarks.db',
+      db_path: paths.fle_jmoff,
       pragmas: ['journal_mode = OFF;']
     });
   };
 
-  this.bettersqlite3_mmap = (cfg) => {
-    return this._bettersqlite3({
+  this.bettersqlite3_fle_mmap = (cfg) => {
+    return this._btsql3({
       ...cfg,
-      db_path: '/tmp/hengist-in-memory-sql.mmap.benchmarks.db',
-      pragmas: ['mmap_size = 2147418112;']
+      db_path: paths.fle_mmap,
+      pragmas: ['mmap_size = 30000000000;']
     });
   };
 
-  this.bettersqlite3_tmpm = (cfg) => {
-    return this._bettersqlite3({
+  this.bettersqlite3_fle_tmpm = (cfg) => {
+    return this._btsql3({
       ...cfg,
-      db_path: '/tmp/hengist-in-memory-sql.tmpm.benchmarks.db',
+      db_path: paths.fle_tmpm,
       pragmas: ['temp_store = MEMORY;']
     });
   };
 
-  this.bettersqlite3_thrds = (cfg) => {
-    return this._bettersqlite3({
+  this.bettersqlite3_fle_pgsze = (cfg) => {
+    return this._btsql3({
       ...cfg,
-      db_path: '/tmp/hengist-in-memory-sql.thrds.benchmarks.db',
+      db_path: paths.fle_pgsze,
+      pragmas: ['page_size = 32768;']
+    });
+  };
+
+  this.bettersqlite3_fle_thrds = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: paths.fle_thrds,
       pragmas: ['threads = 4;']
     });
   };
 
+  this.bettersqlite3_fle_qtforum1 = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: paths.fle_qtforum1,
+      pragmas: pragmas.qtforum1
+    });
+  };
+
+  this.bettersqlite3_fle_qtforum2 = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: paths.fle_qtforum2,
+      pragmas: pragmas.qtforum2
+    });
+  };
+
   //-----------------------------------------------------------------------------------------------------------
-  this.bettersqlite3_memory_noprepare = function(cfg) {
+  this.bettersqlite3_mem_noprepare = function(cfg) {
     return new Promise((resolve) => {
       var Db, count, data, db, db_cfg;
       Db = require('better-sqlite3');
@@ -452,11 +519,11 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.bettersqlite3_memory_icql515 = function(cfg) {
+  this.bettersqlite3_mem_icql515 = function(cfg) {
     return this._bettersqlite3_memory_icql(cfg, 'icql515');
   };
 
-  this.bettersqlite3_memory_icql_latest = function(cfg) {
+  this.bettersqlite3_mem_icql_latest = function(cfg) {
     return this._bettersqlite3_memory_icql(cfg, 'icql_latest');
   };
 
@@ -632,10 +699,30 @@
     gcfg.verbose = false;
     bench = BM.new_benchmarks();
     cfg = {
-      word_count: 1000
+      word_count: 10000
     };
     repetitions = 3;
-    test_names = ['bettersqlite3_jmdel', 'bettersqlite3_jmtrunc', 'bettersqlite3_jmpers', 'bettersqlite3_jmmem', 'bettersqlite3_jmwal', 'bettersqlite3_jmoff', 'bettersqlite3_mmap', 'bettersqlite3_memory', 'bettersqlite3_memory_icql_latest', 'bettersqlite3_memory_icql515', 'bettersqlite3_backup', 'bettersqlite3_file', 'bettersqlite3_memory_noprepare', 'bettersqlite3_tmpm', 'bettersqlite3_thrds'];
+    test_names = [
+      'bettersqlite3_mem',
+      'bettersqlite3_mem_jmoff',
+      'bettersqlite3_mem_icql_latest',
+      'bettersqlite3_mem_icql515',
+      'bettersqlite3_mem_backup',
+      'bettersqlite3_mem_noprepare',
+      'bettersqlite3_fle',
+      'bettersqlite3_fle_mmap',
+      'bettersqlite3_fle_tmpm',
+      'bettersqlite3_fle_thrds',
+      'bettersqlite3_fle_pgsze',
+      'bettersqlite3_fle_jmwal',
+      'bettersqlite3_fle_jmdel',
+      // 'bettersqlite3_fle_jmtrunc' ### NOTE does not produce correct DB file ###
+      // 'bettersqlite3_fle_jmpers'  ### NOTE does not produce correct DB file ###
+      'bettersqlite3_fle_jmmem',
+      'bettersqlite3_fle_jmoff',
+      'bettersqlite3_fle_qtforum1',
+      'bettersqlite3_fle_qtforum2'
+    ];
     if (global.gc != null) {
       // 'pgmem'
       // 'sqljs'
