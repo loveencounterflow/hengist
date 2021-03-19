@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, PATH, badge, debug, echo, help, info, rpr, urge, warn, whisper;
+  var CND, FS, PATH, badge, debug, echo, help, info, rpr, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -32,6 +32,8 @@
   //...........................................................................................................
   PATH = require('path');
 
+  FS = require('fs');
+
   //-----------------------------------------------------------------------------------------------------------
   this.get_icql_settings = function(remove_db = false) {
     var R, error;
@@ -50,6 +52,21 @@
       }
     }
     return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.try_to_remove_file = function(path) {
+    var error;
+    try {
+      FS.unlinkSync(path);
+    } catch (error1) {
+      error = error1;
+      if (error.code === 'ENOENT') {
+        return;
+      }
+      throw error;
+    }
+    return null;
   };
 
 }).call(this);

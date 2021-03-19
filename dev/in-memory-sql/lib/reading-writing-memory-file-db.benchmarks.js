@@ -281,14 +281,11 @@
     //.........................................................................................................
     test_names = ['readsql_bsqlt3_small_promise', 'readsql_bsqlt3_big_promise', 'readsql_bsqlt3_small_sync', 'readsql_bsqlt3_big_sync', 'readsql_bsqlt3_small_callback', 'readsql_bsqlt3_big_callback'];
     await run_phase(test_names);
-    // #.........................................................................................................
-    // test_names    = [
-    //   'writesql_clipipe_small'
-    //   'writesql_clipipe_big'
-    //   ]
-    // await run_phase test_names
     //.........................................................................................................
-    // await run_phase [ 'readsql_bsqlt3_small_promise', ]
+    test_names = ['writesql_clipipe_small', 'writesql_clipipe_big'];
+    await run_phase(test_names);
+    //.........................................................................................................
+    await run_phase(['readsql_bsqlt3_small_promise']);
     return null;
   };
 

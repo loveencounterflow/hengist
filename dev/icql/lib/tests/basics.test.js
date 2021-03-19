@@ -528,20 +528,24 @@
     //---------------------------------------------------------------------------------------------------------
     T.eq(db.$.get_toposort(), [
       {
-        "name": "t2",
-        "type": "table"
+        name: 't2',
+        type: 'table',
+        sql: 'CREATE TABLE t2 (\n  id      text  not null  unique primary key,\n  key     text  not null         references t1 ( key ) )'
       },
       {
-        "name": "t1",
-        "type": "table"
+        name: 't1',
+        type: 'table',
+        sql: 'CREATE TABLE t1 (\n  key     text  not null  unique primary key )'
       },
       {
-        "name": "sqlite_autoindex_t1_1",
-        "type": "index"
+        name: 'sqlite_autoindex_t1_1',
+        type: 'index',
+        sql: null
       },
       {
-        "name": "sqlite_autoindex_t2_1",
-        "type": "index"
+        name: 'sqlite_autoindex_t2_1',
+        type: 'index',
+        sql: null
       }
     ]);
     //---------------------------------------------------------------------------------------------------------
@@ -637,19 +641,23 @@
     T.eq(db.$.get_toposort(schema), [
       {
         name: 'table_one',
-        type: 'table'
+        type: 'table',
+        sql: 'CREATE TABLE table_one (\n  key     text  not null  unique primary key )'
       },
       {
         name: 'table_two',
-        type: 'table'
+        type: 'table',
+        sql: 'CREATE TABLE table_two (\n  id      text  not null  unique primary key,\n  key     text  not null         references table_one ( key ) )'
       },
       {
         name: 'sqlite_autoindex_table_one_1',
-        type: 'index'
+        type: 'index',
+        sql: null
       },
       {
         name: 'sqlite_autoindex_table_two_1',
-        type: 'index'
+        type: 'index',
+        sql: null
       }
     ]);
     //.........................................................................................................
