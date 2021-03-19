@@ -41,6 +41,13 @@ try_to_remove_file = ( path ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@is_new = ( x ) ->
+  R = not @is_new.cache.has x
+  @is_new.cache.set x, true
+  return R
+@is_new.cache = new Map()
+
+#-----------------------------------------------------------------------------------------------------------
 show_result = ( name, result ) ->
   info '-----------------------------------------------'
   urge name
@@ -80,12 +87,18 @@ show_result = ( name, result ) ->
     help "^44433^ work      DB:", db_work_path
     help "^44433^ target    DB:", db_target_path
   try_to_remove_file db_target_path
+  try_to_remove_file db_work_path unless db_work_path is ':memory:'
   await FSP.copyFile db_template_path, db_target_path
   #.........................................................................................................
   resolve => new Promise ( resolve ) => # ^777854^
     _icql             = { ( require '../../../apps/icql' )._local_methods..., }
     #=======================================================================================================
     db              = new Db db_target_path, db_cfg
+    debug '^644-1^', CND.truth @is_new Db
+    debug '^644-2^', CND.truth @is_new db
+    debug '^644-3^', CND.truth @is_new _icql
+    debug '^644-4^', CND.truth @is_new defaults
+    debug '^47785^', db
     _icql.settings  = { echo: gcfg.echo ? false, verbose: gcfg.verbose ? false, }
     _icql.db        = db
     fle_schema      = 'main'
@@ -94,6 +107,7 @@ show_result = ( name, result ) ->
     try
       _icql.copy_schema fle_schema, work_schema
     catch error
+      warn '^68683^', db
       throw error unless error.code is 'SQLITE_ERROR'
       warn '^68683^', CND.reverse error.message
     info '^338373^', { size: cfg.size, db_template_path, db_target_path, }
@@ -127,8 +141,8 @@ show_result = ( name, result ) ->
         fle:    'data/icql/copy-schemas-work-${0}.db'
   repetitions   = 1
   test_names    = [
-    'btsql3_mem_big'
-    'btsql3_mem_small'
+    # 'btsql3_mem_big'
+    # 'btsql3_mem_small'
     'btsql3_fle_big'
     'btsql3_fle_small'
     ]
