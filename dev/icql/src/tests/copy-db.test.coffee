@@ -26,7 +26,7 @@ H                         = require './helpers'
 chance                    = new ( require 'chance' )()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "_reuse memory DB" ] = ( T, done ) ->
+@[ "reuse memory DB" ] = ( T, done ) ->
   ICQL              = require '../../../../apps/icql'
   settings          = H.get_icql_settings true
   settings.echo     = true
@@ -45,7 +45,8 @@ chance                    = new ( require 'chance' )()
   done()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "_mirror DB to memory" ] = ( T, done ) ->
+@[ "mirror DB to memory" ] = ( T, done ) ->
+  T.halt_on_error()
   ICQL              = require '../../../../apps/icql'
   settings          = H.get_icql_settings true
   debug '^78445^', settings
@@ -94,14 +95,16 @@ chance                    = new ( require 'chance' )()
   # db.$.clear()
   # T.eq db.$.get_toposort(), []
   # db.drop_tables_with_foreign_key()
+  # db.$.query "xxx"
+  # throw new Error '^intentional-error@348374^'
   done() if done?
 
 
 
 ############################################################################################################
 unless module.parent?
-  # test @
-  # test @[ "_mirror DB to memory" ]
-  test @[ "_reuse memory DB" ]
-  # @[ "_mirror DB to memory" ]()
+  test @
+  # test @[ "reuse memory DB" ]
+  # test @[ "mirror DB to memory" ]
+  # @[ "mirror DB to memory" ]()
 
