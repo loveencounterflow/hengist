@@ -22,6 +22,7 @@ echo                      = CND.echo.bind CND
 # xrpr2                     = ( x ) -> inspect x, { colors: yes, breakLength: 20, maxArrayLength: Infinity, depth: Infinity, }
 #...........................................................................................................
 PATH                      = require 'path'
+FS                        = require 'fs'
 
 #-----------------------------------------------------------------------------------------------------------
 @get_icql_settings = ( remove_db = false ) ->
@@ -35,5 +36,12 @@ PATH                      = require 'path'
     catch error
       throw error unless ( error.code is 'ENOENT' )
   return R
+
+#-----------------------------------------------------------------------------------------------------------
+@try_to_remove_file = ( path ) ->
+  try FS.unlinkSync path catch error
+    return if error.code is 'ENOENT'
+    throw error
+  return null
 
 
