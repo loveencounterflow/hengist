@@ -16,7 +16,7 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 PATH                      = require 'path'
 FS                        = require 'fs'
-test                      = require 'guy-test'
+test                      = require '../../../../apps/guy-test'
 
 
 
