@@ -24,7 +24,7 @@
   echo = CND.echo.bind(CND);
 
   //...........................................................................................................
-  test = require('guy-test');
+  test = require('../../../../apps/guy-test');
 
   jr = JSON.stringify;
 

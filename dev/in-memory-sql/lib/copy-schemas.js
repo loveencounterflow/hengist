@@ -75,6 +75,16 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.is_new = function(x) {
+    var R;
+    R = !this.is_new.cache.has(x);
+    this.is_new.cache.set(x, true);
+    return R;
+  };
+
+  this.is_new.cache = new Map();
+
+  //-----------------------------------------------------------------------------------------------------------
   show_result = function(name, result) {
     info('-----------------------------------------------');
     urge(name);
@@ -125,6 +135,9 @@
         help("^44433^ target    DB:", db_target_path);
       }
       try_to_remove_file(db_target_path);
+      if (db_work_path !== ':memory:') {
+        try_to_remove_file(db_work_path);
+      }
       await FSP.copyFile(db_template_path, db_target_path);
       //.........................................................................................................
       resolve(() => {
@@ -133,6 +146,11 @@
           _icql = {...(require('../../../apps/icql'))._local_methods};
           //=======================================================================================================
           db = new Db(db_target_path, db_cfg);
+          debug('^644-1^', CND.truth(this.is_new(Db)));
+          debug('^644-2^', CND.truth(this.is_new(db)));
+          debug('^644-3^', CND.truth(this.is_new(_icql)));
+          debug('^644-4^', CND.truth(this.is_new(defaults)));
+          debug('^47785^', db);
           _icql.settings = {
             echo: (ref = gcfg.echo) != null ? ref : false,
             verbose: (ref1 = gcfg.verbose) != null ? ref1 : false
@@ -145,6 +163,7 @@
             _icql.copy_schema(fle_schema, work_schema);
           } catch (error1) {
             error = error1;
+            warn('^68683^', db);
             if (error.code !== 'SQLITE_ERROR') {
               throw error;
             }
@@ -226,7 +245,9 @@
       }
     };
     repetitions = 1;
-    test_names = ['btsql3_mem_big', 'btsql3_mem_small', 'btsql3_fle_big', 'btsql3_fle_small'];
+    // 'btsql3_mem_big'
+    // 'btsql3_mem_small'
+    test_names = ['btsql3_fle_big', 'btsql3_fle_small'];
     if (global.gc != null) {
       global.gc();
     }

@@ -24,7 +24,7 @@
   echo = CND.echo.bind(CND);
 
   //...........................................................................................................
-  test = require('guy-test');
+  test = require('../../../../apps/guy-test');
 
   jr = JSON.stringify;
 
@@ -56,7 +56,7 @@
   chance = new (require('chance'))();
 
   //-----------------------------------------------------------------------------------------------------------
-  this["_reuse memory DB"] = function(T, done) {
+  this["reuse memory DB"] = function(T, done) {
     var ICQL, db, doit, settings;
     ICQL = require('../../../../apps/icql');
     settings = H.get_icql_settings(true);
@@ -79,8 +79,9 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["_mirror DB to memory"] = function(T, done) {
+  this["mirror DB to memory"] = function(T, done) {
     var ICQL, _, db, df1, df2, dt1, dt2, field_name, field_name_x, from_schema, get_name, i, id, j, k, len, length, n, names, pool, settings, table_name, table_name_x, to_schema;
+    T.halt_on_error();
     ICQL = require('../../../../apps/icql');
     settings = H.get_icql_settings(true);
     debug('^78445^', settings);
@@ -143,18 +144,20 @@
       // db.$.clear()
       // T.eq db.$.get_toposort(), []
       // db.drop_tables_with_foreign_key()
+      // db.$.query "xxx"
+      // throw new Error '^intentional-error@348374^'
       return done();
     }
   };
 
   //###########################################################################################################
   if (module.parent == null) {
-    // test @
-    // test @[ "_mirror DB to memory" ]
-    test(this["_reuse memory DB"]);
+    test(this);
   }
 
-  // @[ "_mirror DB to memory" ]()
+  // test @[ "reuse memory DB" ]
+// test @[ "mirror DB to memory" ]
+// @[ "mirror DB to memory" ]()
 
 }).call(this);
 
