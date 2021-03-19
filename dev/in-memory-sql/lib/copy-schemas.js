@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, FSP, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, isa, jr, log, resolve_path, rpr, show_result, test, try_to_remove_file, types, urge, validate, warn, whisper;
+  var BM, CND, DATA, FS, FSP, LFT, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, isa, jr, log, resolve_path, rpr, show_result, test, try_to_remove_file, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -53,6 +53,8 @@
     verbose: false,
     echo: false
   };
+
+  LFT = require('letsfreezethat');
 
   //-----------------------------------------------------------------------------------------------------------
   resolve_path = function(path) {
@@ -113,9 +115,9 @@
   //-----------------------------------------------------------------------------------------------------------
   this._btsql3 = function(cfg) {
     return new Promise(async(resolve) => {
-      var Db, count, db_cfg, db_target_path, db_template_path, db_work_path, defaults;
+      var Db, _icql, count, data, db_cfg, db_target_path, db_template_path, db_work_path, defaults;
       // data          = @get_data cfg
-      count = 0;
+      _icql = (LFT._deep_copy(require('../../../apps/icql')))._local_methods;
       Db = require('better-sqlite3');
       defaults = {
         pragmas: [],
@@ -129,6 +131,9 @@
       validate.nonempty_text(db_template_path);
       validate.nonempty_text(db_target_path);
       db_cfg = null;
+      // db_size           = ( FS.statSync db_template_path ).size
+      count = 0;
+      data = this.get_data(cfg);
       if (gcfg.verbose) {
         help("^44433^ template  DB:", db_template_path);
         help("^44433^ work      DB:", db_work_path);
@@ -142,40 +147,40 @@
       //.........................................................................................................
       resolve(() => {
         return new Promise((resolve) => { // ^777854^
-          var _icql, db, error, fle_schema, ref, ref1, work_schema;
-          _icql = {...(require('../../../apps/icql'))._local_methods};
+          var db, fle_schema, i, insert, len, nr, ref, ref1, ref2, result, retrieve, text, work_schema, work_schema_x;
           //=======================================================================================================
           db = new Db(db_target_path, db_cfg);
-          debug('^644-1^', CND.truth(this.is_new(Db)));
-          debug('^644-2^', CND.truth(this.is_new(db)));
-          debug('^644-3^', CND.truth(this.is_new(_icql)));
-          debug('^644-4^', CND.truth(this.is_new(defaults)));
-          debug('^47785^', db);
           _icql.settings = {
             echo: (ref = gcfg.echo) != null ? ref : false,
             verbose: (ref1 = gcfg.verbose) != null ? ref1 : false
           };
           _icql.db = db;
+          _icql.pragma('synchronous = OFF'); // makes file-based DBs much faster
           fle_schema = 'main';
           work_schema = 'x';
+          work_schema_x = _icql.as_identifier('x');
           _icql.attach(db_work_path, work_schema);
-          try {
-            _icql.copy_schema(fle_schema, work_schema);
-          } catch (error1) {
-            error = error1;
-            warn('^68683^', db);
-            if (error.code !== 'SQLITE_ERROR') {
-              throw error;
-            }
-            warn('^68683^', CND.reverse(error.message));
+          _icql.copy_schema(fle_schema, work_schema);
+          //-------------------------------------------------------------------------------------------------------
+          db.exec(`drop table if exists ${work_schema_x}.test;`);
+          db.exec(`create table ${work_schema_x}.test(
+  id    integer primary key,
+  nr    integer not null,
+  text  text );`);
+          insert = db.prepare(`insert into ${work_schema_x}.test ( nr, text ) values ( ?, ? );`);
+          nr = 0;
+          ref2 = data.texts;
+          for (i = 0, len = ref2.length; i < len; i++) {
+            text = ref2[i];
+            nr++;
+            insert.run([nr, text]);
           }
-          info('^338373^', {
-            size: cfg.size,
-            db_template_path,
-            db_target_path
-          });
+          retrieve = db.prepare(`select * from ${work_schema_x}.test order by text;`);
+          result = retrieve.all();
+          count = result.length;
+          //-------------------------------------------------------------------------------------------------------
           _icql.close();
-          return resolve(1);
+          return resolve(count);
         });
       });
       // resolve count
@@ -229,6 +234,7 @@
     gcfg.verbose = false;
     bench = BM.new_benchmarks();
     cfg = {
+      word_count: 1000,
       db: {
         templates: {
           small: resolve_path('assets/icql/small-datamill.db'),
@@ -244,10 +250,8 @@
         }
       }
     };
-    repetitions = 1;
-    // 'btsql3_mem_big'
-    // 'btsql3_mem_small'
-    test_names = ['btsql3_fle_big', 'btsql3_fle_small'];
+    repetitions = 3;
+    test_names = ['btsql3_mem_big', 'btsql3_mem_small', 'btsql3_fle_big', 'btsql3_fle_small'];
     if (global.gc != null) {
       global.gc();
     }

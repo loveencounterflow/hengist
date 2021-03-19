@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, badge, chance, debug, echo, help, info, inspect, jr, rpr, test, urge, warn, whisper, xrpr, xrpr2;
+  var CND, H, PATH, badge, chance, debug, echo, help, info, inspect, is_new, jr, rpr, test, urge, warn, whisper, xrpr, xrpr2;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -54,6 +54,16 @@
   H = require('./helpers');
 
   chance = new (require('chance'))();
+
+  //-----------------------------------------------------------------------------------------------------------
+  is_new = function(x) {
+    var R;
+    R = !is_new.cache.has(x);
+    is_new.cache.set(x, true);
+    return R;
+  };
+
+  is_new.cache = new Map();
 
   //-----------------------------------------------------------------------------------------------------------
   this["reuse memory DB"] = function(T, done) {
