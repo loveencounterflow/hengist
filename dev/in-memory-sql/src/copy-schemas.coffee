@@ -89,7 +89,7 @@ show_result = ( name, result ) ->
   # data          = @get_data cfg
   _icql             = ( LFT._deep_copy require '../../../apps/icql' )._local_methods
   Db                = require 'better-sqlite3'
-  defaults          = { pragmas: [], size: 'small', }
+  defaults          = { pragmas: [], size: 'small', save: null, }
   cfg               = { defaults..., cfg..., }
   db_work_path      = cfg.db.work[ cfg.mode ].replaceAll '${0}', cfg.ref
   validate.nonempty_text cfg.ref
@@ -140,10 +140,17 @@ show_result = ( name, result ) ->
     result    = retrieve.all()
     count     = result.length
     #-------------------------------------------------------------------------------------------------------
-    temp_schema     = 't'
-    # temp_schema_x   = _icql.as_identifier 'x'
-    _icql.attach db_temp_path, temp_schema
-    _icql.copy_schema fle_schema, temp_schema
+    if cfg.mode is 'mem'
+      ### TAINT must unlink original DB file, replace withtemp file ###
+      switch cfg.save
+        when 'copy'
+          temp_schema = 't'
+          # temp_schema_x   = _icql.as_identifier 'x'
+          _icql.attach db_temp_path, temp_schema
+          _icql.copy_schema fle_schema, temp_schema
+        when 'backup'
+          await _icql.backup db_temp_path
+        else throw new Error "^44747^ unknown value for `cfg.save`: #{rpr cfg.save}"
     #-------------------------------------------------------------------------------------------------------
     _icql.close()
     return resolve count
@@ -151,8 +158,10 @@ show_result = ( name, result ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@btsql3_mem_small          = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'mem', size: 'small', pragmas: pragmas.mem, }
-@btsql3_mem_big            = ( cfg ) => @_btsql3 { cfg..., ref: 'big',   mode: 'mem', size: 'big',   pragmas: pragmas.mem, }
+@btsql3_mem_small_backup   = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'mem', size: 'small', pragmas: pragmas.mem, save: 'backup', }
+@btsql3_mem_big_backup     = ( cfg ) => @_btsql3 { cfg..., ref: 'big',   mode: 'mem', size: 'big',   pragmas: pragmas.mem, save: 'backup', }
+@btsql3_mem_small_copy     = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'mem', size: 'small', pragmas: pragmas.mem, save: 'copy', }
+@btsql3_mem_big_copy       = ( cfg ) => @_btsql3 { cfg..., ref: 'big',   mode: 'mem', size: 'big',   pragmas: pragmas.mem, save: 'copy', }
 @btsql3_fle_small          = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'fle', size: 'small', pragmas: pragmas.fle, }
 @btsql3_fle_big            = ( cfg ) => @_btsql3 { cfg..., ref: 'big',   mode: 'fle', size: 'big',   pragmas: pragmas.fle, }
 @btsql3_fle_small_bare     = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'fle', size: 'small', pragmas: pragmas.bare, }
@@ -184,8 +193,10 @@ show_result = ( name, result ) ->
   repetitions   = 3
   test_names    = [
     'btsql3_fle_small'
-    'btsql3_mem_big'
-    'btsql3_mem_small'
+    'btsql3_mem_small_backup'
+    'btsql3_mem_big_backup'
+    'btsql3_mem_small_copy'
+    'btsql3_mem_big_copy'
     'btsql3_fle_big'
     'btsql3_fle_small_bare'
     'btsql3_fle_big_bare'
