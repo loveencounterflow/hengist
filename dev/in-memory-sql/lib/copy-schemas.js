@@ -220,6 +220,7 @@
                 _icql.copy_schema(fle_schema, temp_schema);
                 break;
               case 'backup':
+                throw new Error("^844483^ save method 'backup' deprecated");
                 await _icql.backup(db_temp_path);
                 break;
               case 'vacuum':
