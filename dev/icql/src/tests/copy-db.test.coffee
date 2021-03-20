@@ -26,6 +26,14 @@ H                         = require './helpers'
 chance                    = new ( require 'chance' )()
 
 #-----------------------------------------------------------------------------------------------------------
+is_new = ( x ) ->
+  R = not is_new.cache.has x
+  is_new.cache.set x, true
+  return R
+is_new.cache = new Map()
+
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "reuse memory DB" ] = ( T, done ) ->
   ICQL              = require '../../../../apps/icql'
   settings          = H.get_icql_settings true
