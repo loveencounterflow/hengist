@@ -71,7 +71,6 @@ show_result = ( name, result ) ->
 #-----------------------------------------------------------------------------------------------------------
 @_btsql3 = ( cfg ) -> new Promise ( resolve ) =>
   # data          = @get_data cfg
-  count             = 0
   _icql             = ( LFT._deep_copy require '../../../apps/icql' )._local_methods
   Db                = require 'better-sqlite3'
   defaults          = { pragmas: [], size: 'small', }
@@ -94,25 +93,12 @@ show_result = ( name, result ) ->
   resolve => new Promise ( resolve ) => # ^777854^
     #=======================================================================================================
     db              = new Db db_target_path, db_cfg
-    debug '^644-1^', CND.truth @is_new Db
-    debug '^644-2^', CND.truth @is_new db
-    debug '^644-3^', CND.truth @is_new _icql
-    debug '^644-4^', CND.truth @is_new defaults
-    debug '^47785^', db
     _icql.settings  = { echo: gcfg.echo ? false, verbose: gcfg.verbose ? false, }
     _icql.db        = db
     fle_schema      = 'main'
     work_schema     = 'x'
     _icql.attach db_work_path, work_schema
-    try
-      _icql.copy_schema fle_schema, work_schema
-    catch error
-      warn '^68683^', db
-      throw error unless error.code is 'SQLITE_ERROR'
-      warn '^68683^', CND.reverse error.message
-    info '^338373^', { size: cfg.size, db_template_path, db_target_path, }
     _icql.close()
-    return resolve 1
     # resolve count
   return null
 
@@ -139,10 +125,8 @@ show_result = ( name, result ) ->
       work:
         mem:    ':memory:'
         fle:    'data/icql/copy-schemas-work-${0}.db'
-  repetitions   = 1
+  repetitions   = 3
   test_names    = [
-    # 'btsql3_mem_big'
-    # 'btsql3_mem_small'
     'btsql3_fle_big'
     'btsql3_fle_small'
     ]
