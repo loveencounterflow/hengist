@@ -196,14 +196,14 @@ show_result = ( name, result ) ->
         big:    resolve_path 'data/icql/copy-schemas-benchmarks-temp-{ref}-{save}.db'
   repetitions   = 3
   test_names    = [
-    'btsql3_fle_small'
     'btsql3_mem_small_backup'
     'btsql3_mem_big_backup'
-    'btsql3_mem_small_copy'
-    'btsql3_mem_big_copy'
+    'btsql3_fle_small'
     'btsql3_fle_big'
-    'btsql3_fle_small_bare'
-    'btsql3_fle_big_bare'
+    # 'btsql3_mem_small_copy'
+    # 'btsql3_mem_big_copy'
+    # 'btsql3_fle_small_bare'
+    # 'btsql3_fle_big_bare'
     ]
   global.gc() if global.gc?
   data_cache = null
