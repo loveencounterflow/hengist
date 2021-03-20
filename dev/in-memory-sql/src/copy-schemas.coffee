@@ -91,14 +91,13 @@ show_result = ( name, result ) ->
   Db                = require 'better-sqlite3'
   defaults          = { pragmas: [], size: 'small', save: null, }
   cfg               = { defaults..., cfg..., }
-  db_work_path      = cfg.db.work[ cfg.mode ].replaceAll '{ref}', cfg.ref
-  validate.nonempty_text cfg.ref
   #.........................................................................................................
   ### TAINT use proper string interpolation ###
+  validate.nonempty_text cfg.ref
+  db_work_path      = cfg.db.work[      cfg.mode ].replaceAll '{ref}',  cfg.ref
   db_template_path  = cfg.db.templates[ cfg.size ].replaceAll '{ref}',  cfg.ref
   db_target_path    = cfg.db.target[    cfg.size ].replaceAll '{ref}',  cfg.ref
   db_temp_path      = cfg.db.temp[      cfg.size ].replaceAll '{ref}',  cfg.ref
-  db_temp_path      = db_temp_path.replaceAll                 '{save}', cfg.save
   #.........................................................................................................
   validate.nonempty_text db_template_path
   validate.nonempty_text db_target_path
@@ -162,14 +161,14 @@ show_result = ( name, result ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@btsql3_mem_small_backup   = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'mem', size: 'small', pragmas: pragmas.mem, save: 'backup', }
-@btsql3_mem_big_backup     = ( cfg ) => @_btsql3 { cfg..., ref: 'big',   mode: 'mem', size: 'big',   pragmas: pragmas.mem, save: 'backup', }
-@btsql3_mem_small_copy     = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'mem', size: 'small', pragmas: pragmas.mem, save: 'copy', }
-@btsql3_mem_big_copy       = ( cfg ) => @_btsql3 { cfg..., ref: 'big',   mode: 'mem', size: 'big',   pragmas: pragmas.mem, save: 'copy', }
-@btsql3_fle_small          = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'fle', size: 'small', pragmas: pragmas.fle, }
-@btsql3_fle_big            = ( cfg ) => @_btsql3 { cfg..., ref: 'big',   mode: 'fle', size: 'big',   pragmas: pragmas.fle, }
-@btsql3_fle_small_bare     = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'fle', size: 'small', pragmas: pragmas.bare, }
-@btsql3_fle_big_bare       = ( cfg ) => @_btsql3 { cfg..., ref: 'big',   mode: 'fle', size: 'big',   pragmas: pragmas.bare, }
+@btsql3_mem_small_backup   = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_small_backup', mode: 'mem', size: 'small', pragmas: pragmas.mem, save: 'backup', }
+@btsql3_mem_big_backup     = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_big_backup',   mode: 'mem', size: 'big',   pragmas: pragmas.mem, save: 'backup', }
+@btsql3_mem_small_copy     = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_small_copy',   mode: 'mem', size: 'small', pragmas: pragmas.mem, save: 'copy', }
+@btsql3_mem_big_copy       = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_big_copy',     mode: 'mem', size: 'big',   pragmas: pragmas.mem, save: 'copy', }
+@btsql3_fle_small          = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_small',        mode: 'fle', size: 'small', pragmas: pragmas.fle, }
+@btsql3_fle_big            = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_big',          mode: 'fle', size: 'big',   pragmas: pragmas.fle, }
+@btsql3_fle_small_bare     = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_small_bare',   mode: 'fle', size: 'small', pragmas: pragmas.bare, }
+@btsql3_fle_big_bare       = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_big_bare',     mode: 'fle', size: 'big',   pragmas: pragmas.bare, }
 # @btsql3_mem_thrds    = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'threads = 4;', ] }
 
 #-----------------------------------------------------------------------------------------------------------
@@ -192,8 +191,8 @@ show_result = ( name, result ) ->
         mem:    ':memory:'
         fle:    'data/icql/copy-schemas-work-{ref}.db'
       temp:
-        small:  resolve_path 'data/icql/copy-schemas-benchmarks-temp-{ref}-{save}.db'
-        big:    resolve_path 'data/icql/copy-schemas-benchmarks-temp-{ref}-{save}.db'
+        small:  resolve_path 'data/icql/copy-schemas-benchmarks-temp-{ref}.db'
+        big:    resolve_path 'data/icql/copy-schemas-benchmarks-temp-{ref}.db'
   repetitions   = 3
   test_names    = [
     'btsql3_mem_small_backup'
