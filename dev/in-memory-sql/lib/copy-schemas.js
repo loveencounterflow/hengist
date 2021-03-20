@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, FSP, LFT, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, isa, jr, log, resolve_path, rpr, show_result, test, try_to_remove_file, types, urge, validate, warn, whisper;
+  var BM, CND, DATA, FS, FSP, LFT, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, isa, jr, log, pragmas, resolve_path, rpr, show_result, test, try_to_remove_file, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -55,6 +55,16 @@
   };
 
   LFT = require('letsfreezethat');
+
+  //-----------------------------------------------------------------------------------------------------------
+  pragmas = {
+    //.........................................................................................................
+    /* thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 */
+    fle: ['page_size = 4096', 'cache_size = 16384', 'temp_store = MEMORY', 'journal_mode = WAL', 'locking_mode = EXCLUSIVE', 'synchronous = OFF'],
+    //.........................................................................................................
+    mem: [],
+    bare: []
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   resolve_path = function(path) {
@@ -115,7 +125,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this._btsql3 = function(cfg) {
     return new Promise(async(resolve) => {
-      var Db, _icql, count, data, db_cfg, db_target_path, db_template_path, db_work_path, defaults;
+      var Db, _icql, count, data, db_cfg, db_target_path, db_temp_path, db_template_path, db_work_path, defaults;
       // data          = @get_data cfg
       _icql = (LFT._deep_copy(require('../../../apps/icql')))._local_methods;
       Db = require('better-sqlite3');
@@ -128,8 +138,10 @@
       validate.nonempty_text(cfg.ref);
       db_template_path = cfg.db.templates[cfg.size].replaceAll('${0}', cfg.ref);
       db_target_path = cfg.db.target[cfg.size].replaceAll('${0}', cfg.ref);
+      db_temp_path = cfg.db.temp[cfg.size].replaceAll('${0}', cfg.ref);
       validate.nonempty_text(db_template_path);
       validate.nonempty_text(db_target_path);
+      validate.nonempty_text(db_temp_path);
       db_cfg = null;
       // db_size           = ( FS.statSync db_template_path ).size
       count = 0;
@@ -138,8 +150,10 @@
         help("^44433^ template  DB:", db_template_path);
         help("^44433^ work      DB:", db_work_path);
         help("^44433^ target    DB:", db_target_path);
+        help("^44433^ temp      DB:", db_temp_path);
       }
       try_to_remove_file(db_target_path);
+      try_to_remove_file(db_temp_path);
       if (db_work_path !== ':memory:') {
         try_to_remove_file(db_work_path);
       }
@@ -147,7 +161,7 @@
       //.........................................................................................................
       resolve(() => {
         return new Promise((resolve) => { // ^777854^
-          var db, fle_schema, i, insert, len, nr, ref, ref1, ref2, result, retrieve, text, work_schema, work_schema_x;
+          var db, fle_schema, i, insert, j, len, len1, nr, pragma, ref, ref1, ref2, ref3, result, retrieve, temp_schema, text, work_schema, work_schema_x;
           //=======================================================================================================
           db = new Db(db_target_path, db_cfg);
           _icql.settings = {
@@ -155,7 +169,11 @@
             verbose: (ref1 = gcfg.verbose) != null ? ref1 : false
           };
           _icql.db = db;
-          _icql.pragma('synchronous = OFF'); // makes file-based DBs much faster
+          ref2 = cfg.pragmas;
+          for (i = 0, len = ref2.length; i < len; i++) {
+            pragma = ref2[i];
+            _icql.pragma(pragma);
+          }
           fle_schema = 'main';
           work_schema = 'x';
           work_schema_x = _icql.as_identifier('x');
@@ -169,15 +187,20 @@
   text  text );`);
           insert = db.prepare(`insert into ${work_schema_x}.test ( nr, text ) values ( ?, ? );`);
           nr = 0;
-          ref2 = data.texts;
-          for (i = 0, len = ref2.length; i < len; i++) {
-            text = ref2[i];
+          ref3 = data.texts;
+          for (j = 0, len1 = ref3.length; j < len1; j++) {
+            text = ref3[j];
             nr++;
             insert.run([nr, text]);
           }
           retrieve = db.prepare(`select * from ${work_schema_x}.test order by text;`);
           result = retrieve.all();
           count = result.length;
+          //-------------------------------------------------------------------------------------------------------
+          temp_schema = 't';
+          // temp_schema_x   = _icql.as_identifier 'x'
+          _icql.attach(db_temp_path, temp_schema);
+          _icql.copy_schema(fle_schema, temp_schema);
           //-------------------------------------------------------------------------------------------------------
           _icql.close();
           return resolve(count);
@@ -194,7 +217,8 @@
       ...cfg,
       ref: 'small',
       mode: 'mem',
-      size: 'small'
+      size: 'small',
+      pragmas: pragmas.mem
     });
   };
 
@@ -203,7 +227,8 @@
       ...cfg,
       ref: 'big',
       mode: 'mem',
-      size: 'big'
+      size: 'big',
+      pragmas: pragmas.mem
     });
   };
 
@@ -212,7 +237,8 @@
       ...cfg,
       ref: 'small',
       mode: 'fle',
-      size: 'small'
+      size: 'small',
+      pragmas: pragmas.fle
     });
   };
 
@@ -221,7 +247,28 @@
       ...cfg,
       ref: 'big',
       mode: 'fle',
-      size: 'big'
+      size: 'big',
+      pragmas: pragmas.fle
+    });
+  };
+
+  this.btsql3_fle_small_bare = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'small',
+      mode: 'fle',
+      size: 'small',
+      pragmas: pragmas.bare
+    });
+  };
+
+  this.btsql3_fle_big_bare = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'big',
+      mode: 'fle',
+      size: 'big',
+      pragmas: pragmas.bare
     });
   };
 
@@ -232,6 +279,8 @@
     var _, bench, cfg, i, j, len, ref, ref1, repetitions, test_name, test_names;
     gcfg.verbose = true;
     gcfg.verbose = false;
+    gcfg.echo = true;
+    gcfg.echo = false;
     bench = BM.new_benchmarks();
     cfg = {
       word_count: 1000,
@@ -247,11 +296,15 @@
         work: {
           mem: ':memory:',
           fle: 'data/icql/copy-schemas-work-${0}.db'
+        },
+        temp: {
+          small: resolve_path('data/icql/copy-schemas-benchmarks-temp-${0}.db'),
+          big: resolve_path('data/icql/copy-schemas-benchmarks-temp-${0}.db')
         }
       }
     };
     repetitions = 3;
-    test_names = ['btsql3_mem_big', 'btsql3_mem_small', 'btsql3_fle_big', 'btsql3_fle_small'];
+    test_names = ['btsql3_fle_small', 'btsql3_mem_big', 'btsql3_mem_small', 'btsql3_fle_big', 'btsql3_fle_small_bare', 'btsql3_fle_big_bare'];
     if (global.gc != null) {
       global.gc();
     }
