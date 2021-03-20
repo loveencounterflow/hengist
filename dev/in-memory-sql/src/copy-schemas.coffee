@@ -32,6 +32,21 @@ gcfg                      = { verbose: false, echo: false, }
 LFT                       = require 'letsfreezethat'
 
 #-----------------------------------------------------------------------------------------------------------
+pragmas =
+  #.........................................................................................................
+  ### thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 ###
+  fle: [
+    'page_size = 4096'
+    'cache_size = 16384'
+    'temp_store = MEMORY'
+    'journal_mode = WAL'
+    'locking_mode = EXCLUSIVE'
+    'synchronous = OFF' ]
+  #.........................................................................................................
+  mem: []
+  bare: []
+
+#-----------------------------------------------------------------------------------------------------------
 resolve_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../../', path
 
 #-----------------------------------------------------------------------------------------------------------
@@ -79,9 +94,11 @@ show_result = ( name, result ) ->
   db_work_path      = cfg.db.work[ cfg.mode ].replaceAll '${0}', cfg.ref
   validate.nonempty_text cfg.ref
   db_template_path  = cfg.db.templates[ cfg.size ].replaceAll '${0}', cfg.ref
-  db_target_path    = cfg.db.target[      cfg.size ].replaceAll '${0}', cfg.ref
+  db_target_path    = cfg.db.target[    cfg.size ].replaceAll '${0}', cfg.ref
+  db_temp_path      = cfg.db.temp[      cfg.size ].replaceAll '${0}', cfg.ref
   validate.nonempty_text db_template_path
   validate.nonempty_text db_target_path
+  validate.nonempty_text db_temp_path
   db_cfg            = null
   # db_size           = ( FS.statSync db_template_path ).size
   count             = 0
@@ -90,7 +107,9 @@ show_result = ( name, result ) ->
     help "^44433^ template  DB:", db_template_path
     help "^44433^ work      DB:", db_work_path
     help "^44433^ target    DB:", db_target_path
+    help "^44433^ temp      DB:", db_temp_path
   try_to_remove_file db_target_path
+  try_to_remove_file db_temp_path
   try_to_remove_file db_work_path unless db_work_path is ':memory:'
   await FSP.copyFile db_template_path, db_target_path
   #.........................................................................................................
@@ -99,7 +118,7 @@ show_result = ( name, result ) ->
     db              = new Db db_target_path, db_cfg
     _icql.settings  = { echo: gcfg.echo ? false, verbose: gcfg.verbose ? false, }
     _icql.db        = db
-    _icql.pragma 'synchronous = OFF' # makes file-based DBs much faster
+    _icql.pragma pragma for pragma in cfg.pragmas
     fle_schema      = 'main'
     work_schema     = 'x'
     work_schema_x   = _icql.as_identifier 'x'
@@ -121,22 +140,31 @@ show_result = ( name, result ) ->
     result    = retrieve.all()
     count     = result.length
     #-------------------------------------------------------------------------------------------------------
+    temp_schema     = 't'
+    # temp_schema_x   = _icql.as_identifier 'x'
+    _icql.attach db_temp_path, temp_schema
+    _icql.copy_schema fle_schema, temp_schema
+    #-------------------------------------------------------------------------------------------------------
     _icql.close()
     return resolve count
     # resolve count
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@btsql3_mem_small          = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'mem', size: 'small', }
-@btsql3_mem_big            = ( cfg ) => @_btsql3 { cfg..., ref: 'big',   mode: 'mem', size: 'big',   }
-@btsql3_fle_small          = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'fle', size: 'small', }
-@btsql3_fle_big            = ( cfg ) => @_btsql3 { cfg..., ref: 'big',   mode: 'fle', size: 'big',   }
+@btsql3_mem_small          = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'mem', size: 'small', pragmas: pragmas.mem, }
+@btsql3_mem_big            = ( cfg ) => @_btsql3 { cfg..., ref: 'big',   mode: 'mem', size: 'big',   pragmas: pragmas.mem, }
+@btsql3_fle_small          = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'fle', size: 'small', pragmas: pragmas.fle, }
+@btsql3_fle_big            = ( cfg ) => @_btsql3 { cfg..., ref: 'big',   mode: 'fle', size: 'big',   pragmas: pragmas.fle, }
+@btsql3_fle_small_bare     = ( cfg ) => @_btsql3 { cfg..., ref: 'small', mode: 'fle', size: 'small', pragmas: pragmas.bare, }
+@btsql3_fle_big_bare       = ( cfg ) => @_btsql3 { cfg..., ref: 'big',   mode: 'fle', size: 'big',   pragmas: pragmas.bare, }
 # @btsql3_mem_thrds    = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'threads = 4;', ] }
 
 #-----------------------------------------------------------------------------------------------------------
 @run_benchmarks = ->
   gcfg.verbose  = true
   gcfg.verbose  = false
+  gcfg.echo     = true
+  gcfg.echo     = false
   bench         = BM.new_benchmarks()
   cfg           =
     word_count: 1000
@@ -150,12 +178,17 @@ show_result = ( name, result ) ->
       work:
         mem:    ':memory:'
         fle:    'data/icql/copy-schemas-work-${0}.db'
+      temp:
+        small:  resolve_path 'data/icql/copy-schemas-benchmarks-temp-${0}.db'
+        big:    resolve_path 'data/icql/copy-schemas-benchmarks-temp-${0}.db'
   repetitions   = 3
   test_names    = [
+    'btsql3_fle_small'
     'btsql3_mem_big'
     'btsql3_mem_small'
     'btsql3_fle_big'
-    'btsql3_fle_small'
+    'btsql3_fle_small_bare'
+    'btsql3_fle_big_bare'
     ]
   global.gc() if global.gc?
   data_cache = null
