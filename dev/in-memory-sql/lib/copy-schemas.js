@@ -211,7 +211,7 @@
           count = result.length;
           //-------------------------------------------------------------------------------------------------------
           if (cfg.mode === 'mem') {
-            /* TAINT must unlink original DB file, replace withtemp file */
+            /* TAINT must unlink original DB file, replace with temp file */
             switch (cfg.save) {
               case 'copy':
                 temp_schema = 't';
@@ -221,6 +221,9 @@
                 break;
               case 'backup':
                 await _icql.backup(db_temp_path);
+                break;
+              case 'vacuum':
+                _icql.execute(`vacuum ${work_schema_x} into ${_icql.as_sql(db_temp_path)};`);
                 break;
               default:
                 throw new Error(`^44747^ unknown value for \`cfg.save\`: ${rpr(cfg.save)}`);
@@ -256,6 +259,28 @@
       size: 'big',
       pragmas: pragmas.mem,
       save: 'backup'
+    });
+  };
+
+  this.btsql3_mem_small_vacuum = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'mem_small_vacuum',
+      mode: 'mem',
+      size: 'small',
+      pragmas: pragmas.mem,
+      save: 'vacuum'
+    });
+  };
+
+  this.btsql3_mem_big_vacuum = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'mem_big_vacuum',
+      mode: 'mem',
+      size: 'big',
+      pragmas: pragmas.mem,
+      save: 'vacuum'
     });
   };
 
@@ -332,7 +357,8 @@
     gcfg.echo = false;
     bench = BM.new_benchmarks();
     cfg = {
-      word_count: 100_000,
+      word_count: 10_000,
+      // word_count: 10
       db: {
         templates: {
           small: resolve_path('assets/icql/small-datamill.db'),
@@ -353,7 +379,7 @@
       }
     };
     repetitions = 3;
-    test_names = ['btsql3_mem_small_backup', 'btsql3_mem_big_backup', 'btsql3_fle_small', 'btsql3_fle_big'];
+    test_names = ['btsql3_mem_small_backup', 'btsql3_mem_big_backup', 'btsql3_mem_small_vacuum', 'btsql3_mem_big_vacuum', 'btsql3_fle_small', 'btsql3_fle_big'];
     if (global.gc != null) {
       // 'btsql3_mem_small_copy'
       // 'btsql3_mem_big_copy'
