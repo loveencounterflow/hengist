@@ -218,3 +218,54 @@ show_result = ( name, result ) ->
 ############################################################################################################
 if require.main is module then do =>
   await @run_benchmarks()
+
+
+###
+
+ ~/jzr/hengist  master !3  nodexh ~/jzr/hengist/dev/in-memory-sql/lib/copy-schemas.js                                                            ✔
+00:00 IN-MEMORY-SQL  ▶  ------------------------------------------------------------------------------------------------------------
+00:01 IN-MEMORY-SQL  ▶  retrieving test data...
+00:01 IN-MEMORY-SQL  ▶  ...done
+btsql3_fle_big                             0.640 s          10,000 items          15,622⏶Hz          64,012⏷nspc
+btsql3_fle_small                           0.643 s          10,000 items          15,551⏶Hz          64,303⏷nspc
+btsql3_mem_small_backup                    0.386 s          10,000 items          25,934⏶Hz          38,560⏷nspc
+btsql3_mem_big_backup                      0.420 s          10,000 items          23,796⏶Hz          42,024⏷nspc
+00:03 IN-MEMORY-SQL  ▶  ------------------------------------------------------------------------------------------------------------
+btsql3_fle_small                           0.649 s          10,000 items          15,417⏶Hz          64,865⏷nspc
+btsql3_mem_big_backup                      0.422 s          10,000 items          23,672⏶Hz          42,245⏷nspc
+btsql3_fle_big                             0.630 s          10,000 items          15,884⏶Hz          62,955⏷nspc
+btsql3_mem_small_backup                    0.364 s          10,000 items          27,478⏶Hz          36,393⏷nspc
+00:05 IN-MEMORY-SQL  ▶  ------------------------------------------------------------------------------------------------------------
+btsql3_mem_big_backup                      0.425 s          10,000 items          23,509⏶Hz          42,536⏷nspc
+btsql3_fle_big                             0.630 s          10,000 items          15,870⏶Hz          63,012⏷nspc
+btsql3_mem_small_backup                    0.371 s          10,000 items          26,937⏶Hz          37,124⏷nspc
+btsql3_fle_small                           0.635 s          10,000 items          15,742⏶Hz          63,525⏷nspc
+00:07 HENGIST/BENCHMARKS  ▶  btsql3_mem_small_backup                           26,783 Hz ≙ 1 ÷ 1.0       100.0 % │████████████▌│
+00:07 HENGIST/BENCHMARKS  ▶  btsql3_mem_big_backup                             23,659 Hz ≙ 1 ÷ 1.1        88.3 % │███████████  │
+00:07 HENGIST/BENCHMARKS  ▶  btsql3_fle_big                                    15,792 Hz ≙ 1 ÷ 1.7        59.0 % │███████▍     │
+00:07 HENGIST/BENCHMARKS  ▶  btsql3_fle_small                                  15,570 Hz ≙ 1 ÷ 1.7        58.1 % │███████▎     │
+
+ ~/jzr/hengist  master !3  nodexh ~/jzr/hengist/dev/in-memory-sql/lib/copy-schemas.js                                                       ✔  8s
+00:00 IN-MEMORY-SQL  ▶  ------------------------------------------------------------------------------------------------------------
+00:01 IN-MEMORY-SQL  ▶  retrieving test data...
+00:01 IN-MEMORY-SQL  ▶  ...done
+btsql3_mem_big_backup                      3.453 s         100,000 items          28,961⏶Hz          34,529⏷nspc
+btsql3_fle_big                             5.991 s         100,000 items          16,692⏶Hz          59,909⏷nspc
+btsql3_mem_small_backup                    3.410 s         100,000 items          29,328⏶Hz          34,097⏷nspc
+btsql3_fle_small                           5.904 s         100,000 items          16,937⏶Hz          59,043⏷nspc
+00:20 IN-MEMORY-SQL  ▶  ------------------------------------------------------------------------------------------------------------
+btsql3_fle_big                             5.914 s         100,000 items          16,908⏶Hz          59,142⏷nspc
+btsql3_fle_small                           5.927 s         100,000 items          16,872⏶Hz          59,271⏷nspc
+btsql3_mem_big_backup                      3.495 s         100,000 items          28,611⏶Hz          34,952⏷nspc
+btsql3_mem_small_backup                    3.406 s         100,000 items          29,363⏶Hz          34,056⏷nspc
+00:39 IN-MEMORY-SQL  ▶  ------------------------------------------------------------------------------------------------------------
+btsql3_mem_big_backup                      3.482 s         100,000 items          28,717⏶Hz          34,823⏷nspc
+btsql3_fle_big                             5.905 s         100,000 items          16,935⏶Hz          59,050⏷nspc
+btsql3_mem_small_backup                    3.421 s         100,000 items          29,234⏶Hz          34,207⏷nspc
+btsql3_fle_small                           5.921 s         100,000 items          16,889⏶Hz          59,211⏷nspc
+00:58 HENGIST/BENCHMARKS  ▶  btsql3_mem_small_backup                           29,309 Hz ≙ 1 ÷ 1.0       100.0 % │████████████▌│
+00:58 HENGIST/BENCHMARKS  ▶  btsql3_mem_big_backup                             28,763 Hz ≙ 1 ÷ 1.0        98.1 % │████████████▎│
+00:58 HENGIST/BENCHMARKS  ▶  btsql3_fle_small                                  16,899 Hz ≙ 1 ÷ 1.7        57.7 % │███████▎     │
+00:58 HENGIST/BENCHMARKS  ▶  btsql3_fle_big                                    16,845 Hz ≙ 1 ÷ 1.7        57.5 % │███████▏     │
+
+###
