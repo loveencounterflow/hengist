@@ -123,10 +123,16 @@ show_result = ( name, result ) ->
     _icql.db        = db
     _icql.pragma pragma for pragma in cfg.pragmas
     fle_schema      = 'main'
-    work_schema     = 'x'
-    work_schema_x   = _icql.as_identifier 'x'
-    _icql.attach db_work_path, work_schema
-    _icql.copy_schema fle_schema, work_schema
+    switch cfg.mode
+      when 'mem'
+        work_schema     = 'x'
+        work_schema_x   = _icql.as_identifier work_schema
+        _icql.attach db_work_path, work_schema
+        _icql.copy_schema fle_schema, work_schema
+      when 'fle'
+        work_schema     = 'main'
+        work_schema_x   = _icql.as_identifier work_schema
+      else throw new Error "^44788^ unknown value for `cfg.mode`: #{rpr cfg.mode}"
     #-------------------------------------------------------------------------------------------------------
     db.exec """drop table if exists #{work_schema_x}.test;"""
     db.exec """
