@@ -29,6 +29,7 @@ types                     = new ( require 'intertype' ).Intertype
   validate }              = types.export()
 #-----------------------------------------------------------------------------------------------------------
 gcfg                      = { verbose: false, echo: false, }
+LFT                       = require 'letsfreezethat'
 
 #-----------------------------------------------------------------------------------------------------------
 resolve_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../../', path
@@ -82,6 +83,9 @@ show_result = ( name, result ) ->
   validate.nonempty_text db_template_path
   validate.nonempty_text db_target_path
   db_cfg            = null
+  # db_size           = ( FS.statSync db_template_path ).size
+  count             = 0
+  data              = @get_data cfg
   if gcfg.verbose
     help "^44433^ template  DB:", db_template_path
     help "^44433^ work      DB:", db_work_path
@@ -95,10 +99,30 @@ show_result = ( name, result ) ->
     db              = new Db db_target_path, db_cfg
     _icql.settings  = { echo: gcfg.echo ? false, verbose: gcfg.verbose ? false, }
     _icql.db        = db
+    _icql.pragma 'synchronous = OFF' # makes file-based DBs much faster
     fle_schema      = 'main'
     work_schema     = 'x'
+    work_schema_x   = _icql.as_identifier 'x'
     _icql.attach db_work_path, work_schema
+    _icql.copy_schema fle_schema, work_schema
+    #-------------------------------------------------------------------------------------------------------
+    db.exec """drop table if exists #{work_schema_x}.test;"""
+    db.exec """
+      create table #{work_schema_x}.test(
+        id    integer primary key,
+        nr    integer not null,
+        text  text );"""
+    insert  = db.prepare """insert into #{work_schema_x}.test ( nr, text ) values ( ?, ? );"""
+    nr      = 0
+    for text in data.texts
+      nr++
+      insert.run [ nr, text, ]
+    retrieve  = db.prepare """select * from #{work_schema_x}.test order by text;"""
+    result    = retrieve.all()
+    count     = result.length
+    #-------------------------------------------------------------------------------------------------------
     _icql.close()
+    return resolve count
     # resolve count
   return null
 
@@ -115,6 +139,7 @@ show_result = ( name, result ) ->
   gcfg.verbose  = false
   bench         = BM.new_benchmarks()
   cfg           =
+    word_count: 1000
     db:
       templates:
         small:  resolve_path 'assets/icql/small-datamill.db'
@@ -127,6 +152,8 @@ show_result = ( name, result ) ->
         fle:    'data/icql/copy-schemas-work-${0}.db'
   repetitions   = 3
   test_names    = [
+    'btsql3_mem_big'
+    'btsql3_mem_small'
     'btsql3_fle_big'
     'btsql3_fle_small'
     ]
