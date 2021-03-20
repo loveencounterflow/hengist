@@ -150,7 +150,7 @@ show_result = ( name, result ) ->
     count     = result.length
     #-------------------------------------------------------------------------------------------------------
     if cfg.mode is 'mem'
-      ### TAINT must unlink original DB file, replace withtemp file ###
+      ### TAINT must unlink original DB file, replace with temp file ###
       switch cfg.save
         when 'copy'
           temp_schema = 't'
@@ -159,6 +159,8 @@ show_result = ( name, result ) ->
           _icql.copy_schema fle_schema, temp_schema
         when 'backup'
           await _icql.backup db_temp_path
+        when 'vacuum'
+          _icql.execute "vacuum #{work_schema_x} into #{_icql.as_sql db_temp_path};"
         else throw new Error "^44747^ unknown value for `cfg.save`: #{rpr cfg.save}"
     #-------------------------------------------------------------------------------------------------------
     _icql.close()
@@ -169,6 +171,8 @@ show_result = ( name, result ) ->
 #-----------------------------------------------------------------------------------------------------------
 @btsql3_mem_small_backup   = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_small_backup', mode: 'mem', size: 'small', pragmas: pragmas.mem, save: 'backup', }
 @btsql3_mem_big_backup     = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_big_backup',   mode: 'mem', size: 'big',   pragmas: pragmas.mem, save: 'backup', }
+@btsql3_mem_small_vacuum   = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_small_vacuum', mode: 'mem', size: 'small', pragmas: pragmas.mem, save: 'vacuum', }
+@btsql3_mem_big_vacuum     = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_big_vacuum',   mode: 'mem', size: 'big',   pragmas: pragmas.mem, save: 'vacuum', }
 @btsql3_mem_small_copy     = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_small_copy',   mode: 'mem', size: 'small', pragmas: pragmas.mem, save: 'copy', }
 @btsql3_mem_big_copy       = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_big_copy',     mode: 'mem', size: 'big',   pragmas: pragmas.mem, save: 'copy', }
 @btsql3_fle_small          = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_small',        mode: 'fle', size: 'small', pragmas: pragmas.fle, }
@@ -185,7 +189,8 @@ show_result = ( name, result ) ->
   gcfg.echo     = false
   bench         = BM.new_benchmarks()
   cfg           =
-    word_count: 100_000
+    word_count: 10_000
+    # word_count: 10
     db:
       templates:
         small:  resolve_path 'assets/icql/small-datamill.db'
@@ -203,6 +208,8 @@ show_result = ( name, result ) ->
   test_names    = [
     'btsql3_mem_small_backup'
     'btsql3_mem_big_backup'
+    'btsql3_mem_small_vacuum'
+    'btsql3_mem_big_vacuum'
     'btsql3_fle_small'
     'btsql3_fle_big'
     # 'btsql3_mem_small_copy'
