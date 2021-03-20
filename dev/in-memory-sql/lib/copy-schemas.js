@@ -131,7 +131,8 @@
       Db = require('better-sqlite3');
       defaults = {
         pragmas: [],
-        size: 'small'
+        size: 'small',
+        save: null
       };
       cfg = {...defaults, ...cfg};
       db_work_path = cfg.db.work[cfg.mode].replaceAll('${0}', cfg.ref);
@@ -160,7 +161,7 @@
       await FSP.copyFile(db_template_path, db_target_path);
       //.........................................................................................................
       resolve(() => {
-        return new Promise((resolve) => { // ^777854^
+        return new Promise(async(resolve) => { // ^777854^
           var db, fle_schema, i, insert, j, len, len1, nr, pragma, ref, ref1, ref2, ref3, result, retrieve, temp_schema, text, work_schema, work_schema_x;
           //=======================================================================================================
           db = new Db(db_target_path, db_cfg);
@@ -197,10 +198,22 @@
           result = retrieve.all();
           count = result.length;
           //-------------------------------------------------------------------------------------------------------
-          temp_schema = 't';
-          // temp_schema_x   = _icql.as_identifier 'x'
-          _icql.attach(db_temp_path, temp_schema);
-          _icql.copy_schema(fle_schema, temp_schema);
+          if (cfg.mode === 'mem') {
+            /* TAINT must unlink original DB file, replace withtemp file */
+            switch (cfg.save) {
+              case 'copy':
+                temp_schema = 't';
+                // temp_schema_x   = _icql.as_identifier 'x'
+                _icql.attach(db_temp_path, temp_schema);
+                _icql.copy_schema(fle_schema, temp_schema);
+                break;
+              case 'backup':
+                await _icql.backup(db_temp_path);
+                break;
+              default:
+                throw new Error(`^44747^ unknown value for \`cfg.save\`: ${rpr(cfg.save)}`);
+            }
+          }
           //-------------------------------------------------------------------------------------------------------
           _icql.close();
           return resolve(count);
@@ -212,23 +225,47 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.btsql3_mem_small = (cfg) => {
+  this.btsql3_mem_small_backup = (cfg) => {
     return this._btsql3({
       ...cfg,
       ref: 'small',
       mode: 'mem',
       size: 'small',
-      pragmas: pragmas.mem
+      pragmas: pragmas.mem,
+      save: 'backup'
     });
   };
 
-  this.btsql3_mem_big = (cfg) => {
+  this.btsql3_mem_big_backup = (cfg) => {
     return this._btsql3({
       ...cfg,
       ref: 'big',
       mode: 'mem',
       size: 'big',
-      pragmas: pragmas.mem
+      pragmas: pragmas.mem,
+      save: 'backup'
+    });
+  };
+
+  this.btsql3_mem_small_copy = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'small',
+      mode: 'mem',
+      size: 'small',
+      pragmas: pragmas.mem,
+      save: 'copy'
+    });
+  };
+
+  this.btsql3_mem_big_copy = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'big',
+      mode: 'mem',
+      size: 'big',
+      pragmas: pragmas.mem,
+      save: 'copy'
     });
   };
 
@@ -304,7 +341,7 @@
       }
     };
     repetitions = 3;
-    test_names = ['btsql3_fle_small', 'btsql3_mem_big', 'btsql3_mem_small', 'btsql3_fle_big', 'btsql3_fle_small_bare', 'btsql3_fle_big_bare'];
+    test_names = ['btsql3_fle_small', 'btsql3_mem_small_backup', 'btsql3_mem_big_backup', 'btsql3_mem_small_copy', 'btsql3_mem_big_copy', 'btsql3_fle_big', 'btsql3_fle_small_bare', 'btsql3_fle_big_bare'];
     if (global.gc != null) {
       global.gc();
     }
