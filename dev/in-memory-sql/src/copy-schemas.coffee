@@ -185,7 +185,7 @@ show_result = ( name, result ) ->
   gcfg.echo     = false
   bench         = BM.new_benchmarks()
   cfg           =
-    word_count: 1000
+    word_count: 100_000
     db:
       templates:
         small:  resolve_path 'assets/icql/small-datamill.db'
