@@ -158,6 +158,7 @@ show_result = ( name, result ) ->
           _icql.attach db_temp_path, temp_schema
           _icql.copy_schema fle_schema, temp_schema
         when 'backup'
+          throw new Error "^844483^ save method 'backup' deprecated"
           await _icql.backup db_temp_path
         when 'vacuum'
           _icql.execute "vacuum #{work_schema_x} into #{_icql.as_sql db_temp_path};"
