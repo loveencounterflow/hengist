@@ -72,6 +72,7 @@ show_result = ( name, result ) ->
 @_btsql3 = ( cfg ) -> new Promise ( resolve ) =>
   # data          = @get_data cfg
   count             = 0
+  _icql             = ( LFT._deep_copy require '../../../apps/icql' )._local_methods
   Db                = require 'better-sqlite3'
   defaults          = { pragmas: [], size: 'small', }
   cfg               = { defaults..., cfg..., }
@@ -91,7 +92,6 @@ show_result = ( name, result ) ->
   await FSP.copyFile db_template_path, db_target_path
   #.........................................................................................................
   resolve => new Promise ( resolve ) => # ^777854^
-    _icql             = { ( require '../../../apps/icql' )._local_methods..., }
     #=======================================================================================================
     db              = new Db db_target_path, db_cfg
     debug '^644-1^', CND.truth @is_new Db
