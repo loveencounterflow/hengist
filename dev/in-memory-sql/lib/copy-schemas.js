@@ -135,11 +135,15 @@
         save: null
       };
       cfg = {...defaults, ...cfg};
-      db_work_path = cfg.db.work[cfg.mode].replaceAll('${0}', cfg.ref);
+      db_work_path = cfg.db.work[cfg.mode].replaceAll('{ref}', cfg.ref);
       validate.nonempty_text(cfg.ref);
-      db_template_path = cfg.db.templates[cfg.size].replaceAll('${0}', cfg.ref);
-      db_target_path = cfg.db.target[cfg.size].replaceAll('${0}', cfg.ref);
-      db_temp_path = cfg.db.temp[cfg.size].replaceAll('${0}', cfg.ref);
+      //.........................................................................................................
+      /* TAINT use proper string interpolation */
+      db_template_path = cfg.db.templates[cfg.size].replaceAll('{ref}', cfg.ref);
+      db_target_path = cfg.db.target[cfg.size].replaceAll('{ref}', cfg.ref);
+      db_temp_path = cfg.db.temp[cfg.size].replaceAll('{ref}', cfg.ref);
+      db_temp_path = db_temp_path.replaceAll('{save}', cfg.save);
+      //.........................................................................................................
       validate.nonempty_text(db_template_path);
       validate.nonempty_text(db_target_path);
       validate.nonempty_text(db_temp_path);
@@ -327,16 +331,16 @@
           big: resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.db')
         },
         target: {
-          small: resolve_path('data/icql/copy-schemas-benchmarks-${0}.db'),
-          big: resolve_path('data/icql/copy-schemas-benchmarks-${0}.db')
+          small: resolve_path('data/icql/copy-schemas-benchmarks-{ref}.db'),
+          big: resolve_path('data/icql/copy-schemas-benchmarks-{ref}.db')
         },
         work: {
           mem: ':memory:',
-          fle: 'data/icql/copy-schemas-work-${0}.db'
+          fle: 'data/icql/copy-schemas-work-{ref}.db'
         },
         temp: {
-          small: resolve_path('data/icql/copy-schemas-benchmarks-temp-${0}.db'),
-          big: resolve_path('data/icql/copy-schemas-benchmarks-temp-${0}.db')
+          small: resolve_path('data/icql/copy-schemas-benchmarks-temp-{ref}-{save}.db'),
+          big: resolve_path('data/icql/copy-schemas-benchmarks-temp-{ref}-{save}.db')
         }
       }
     };
