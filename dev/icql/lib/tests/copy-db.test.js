@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FSP, H, PATH, badge, chance, debug, echo, get_cfg, help, info, inspect, is_new, isa, jr, rpr, test, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FSP, H, LFT, PATH, badge, chance, debug, echo, get_cfg, help, info, inspect, is_new, isa, jr, rpr, test, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -36,6 +36,8 @@
   FSP = require('fs/promises');
 
   H = require('./helpers');
+
+  LFT = require('letsfreezethat');
 
   chance = new (require('chance'))();
 
@@ -272,12 +274,27 @@
       if (T != null) {
         T.eq(result, matcher);
       }
+      db.$.execute(`vacuum ${work_schema_x} into ${db.$.as_sql(db_temp_path)};`);
       return null;
     };
     //.........................................................................................................
     part_3_reread_db = function() {
-      var db;
+      var db, fle_schema_x, result, retrieve, row;
+      icql_cfg = LFT._deep_copy(icql_cfg);
+      icql_cfg.db_path = db_temp_path;
       db = ICQL.bind(icql_cfg);
+      fle_schema_x = db.$.as_identifier(fle_schema);
+      retrieve = db.$.prepare(`select * from ${fle_schema_x}.test order by text;`);
+      result = (function() {
+        var ref, results;
+        ref = retrieve.iterate();
+        results = [];
+        for (row of ref) {
+          results.push(row.text);
+        }
+        return results;
+      })();
+      debug('^40598^', result);
       return null;
     };
     //.........................................................................................................
