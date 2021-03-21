@@ -144,70 +144,84 @@ get_cfg = ->
   done() if done?
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "use API to do CRUD in memory" ] = ( T, done ) ->
+@[ "use API to do CRUD in memory (raw)" ] = ( T, done ) ->
+  ICQL              = require '../../../../apps/icql'
   T.halt_on_error() if T?
   #.........................................................................................................
   word_count        = 10
   probe             = ( H.get_data { word_count, } ).texts
   matcher           = [ probe..., ].sort()
-  #.........................................................................................................
-  ICQL              = require '../../../../apps/icql'
   icql_cfg          = H.get_icql_settings true
-  # H.try_to_remove_file icql_cfg.db_path
-  # return done()
   icql_cfg.echo     = true
   test_cfg          = get_cfg()
-  db                = ICQL.bind icql_cfg
   test_cfg.mode     = 'mem'
   # test_cfg.size     = 'big'
   test_cfg.size     = 'small'
   test_cfg.ref      = 'crud-in-mem'
   test_cfg.pragmas  = 'fle'
-  #.........................................................................................................
-  pragmas           = test_cfg.pragma_sets[ test_cfg.pragmas ]
-  validate_list_of.nonempty_text pragmas
-  #.........................................................................................................
-  validate.nonempty_text test_cfg.ref
-  db_work_path      = H.interpolate test_cfg.db.work[      test_cfg.mode ], test_cfg
-  db_template_path  = H.interpolate test_cfg.db.templates[ test_cfg.size ], test_cfg
-  db_target_path    = H.interpolate test_cfg.db.target[    test_cfg.size ], test_cfg
-  db_temp_path      = H.interpolate test_cfg.db.temp[      test_cfg.size ], test_cfg
-  #.........................................................................................................
-  validate.nonempty_text db_template_path
-  validate.nonempty_text db_target_path
-  validate.nonempty_text db_temp_path
-  #.........................................................................................................
-  # if gcfg.verbose
-  help "^44433^ template  DB:", db_template_path
-  help "^44433^ work      DB:", db_work_path
-  help "^44433^ target    DB:", db_target_path
-  help "^44433^ temp      DB:", db_temp_path
-  H.try_to_remove_file db_target_path
-  H.try_to_remove_file db_temp_path
-  H.try_to_remove_file db_work_path unless db_work_path is ':memory:'
-  await FSP.copyFile db_template_path, db_target_path
-  #.........................................................................................................
+  pragmas           = null
+  db_work_path      = null
+  db_template_path  = null
+  db_target_path    = null
+  db_temp_path      = null
   fle_schema        = 'main'
   work_schema       = 'x'
-  work_schema_x     = db.$.as_identifier work_schema
-  db.$.attach db_work_path, work_schema
-  db.$.copy_schema fle_schema, work_schema
   #.........................................................................................................
-  db.$.execute """drop table if exists #{work_schema_x}.test;"""
-  db.$.execute """
-    create table #{work_schema_x}.test(
-      id    integer primary key,
-      nr    integer not null,
-      text  text );"""
-  insert  = db.$.prepare """insert into #{work_schema_x}.test ( nr, text ) values ( ?, ? );"""
-  nr      = 0
-  for text in probe
-    nr++
-    insert.run [ nr, text, ]
-  retrieve  = db.$.prepare """select * from #{work_schema_x}.test order by text;"""
-  result    = ( row.text for row from retrieve.iterate() )
-  T.eq result, matcher if T?
+  part_1_scaffold_db_files = ->
+    #.......................................................................................................
+    pragmas           = test_cfg.pragma_sets[ test_cfg.pragmas ]
+    validate_list_of.nonempty_text pragmas
+    #.......................................................................................................
+    validate.nonempty_text test_cfg.ref
+    db_work_path      = H.interpolate test_cfg.db.work[      test_cfg.mode ], test_cfg
+    db_template_path  = H.interpolate test_cfg.db.templates[ test_cfg.size ], test_cfg
+    db_target_path    = H.interpolate test_cfg.db.target[    test_cfg.size ], test_cfg
+    db_temp_path      = H.interpolate test_cfg.db.temp[      test_cfg.size ], test_cfg
+    #.......................................................................................................
+    validate.nonempty_text db_template_path
+    validate.nonempty_text db_target_path
+    validate.nonempty_text db_temp_path
+    #.......................................................................................................
+    # if gcfg.verbose
+    help "^44433^ template  DB:", db_template_path
+    help "^44433^ work      DB:", db_work_path
+    help "^44433^ target    DB:", db_target_path
+    help "^44433^ temp      DB:", db_temp_path
+    H.try_to_remove_file db_target_path
+    H.try_to_remove_file db_temp_path
+    H.try_to_remove_file db_work_path unless db_work_path is ':memory:'
+    await FSP.copyFile db_template_path, db_target_path
+    return null
   #.........................................................................................................
+  part_2_crud = ->
+    db                = ICQL.bind icql_cfg
+    work_schema_x     = db.$.as_identifier work_schema
+    db.$.attach db_work_path, work_schema
+    db.$.copy_schema fle_schema, work_schema
+    #.......................................................................................................
+    db.$.execute """drop table if exists #{work_schema_x}.test;"""
+    db.$.execute """
+      create table #{work_schema_x}.test(
+        id    integer primary key,
+        nr    integer not null,
+        text  text );"""
+    insert  = db.$.prepare """insert into #{work_schema_x}.test ( nr, text ) values ( ?, ? );"""
+    nr      = 0
+    for text in probe
+      nr++
+      insert.run [ nr, text, ]
+    retrieve  = db.$.prepare """select * from #{work_schema_x}.test order by text;"""
+    result    = ( row.text for row from retrieve.iterate() )
+    T.eq result, matcher if T?
+    return null
+  #.........................................................................................................
+  part_3_reread_db = ->
+    db = ICQL.bind icql_cfg
+    return null
+  #.........................................................................................................
+  await part_1_scaffold_db_files()
+  await part_2_crud()
+  await part_3_reread_db()
   done() if done?
 
 
@@ -217,7 +231,7 @@ unless module.parent?
   # test @
   # test @[ "reuse memory DB" ]
   # test @[ "mirror DB to memory" ]
-  # test @[ "use API to do CRUD in memory" ]
-  @[ "use API to do CRUD in memory" ]()
+  test @[ "use API to do CRUD in memory (raw)" ]
+  # @[ "use API to do CRUD in memory (raw)" ]()
   # @[ "mirror DB to memory" ]()
 
