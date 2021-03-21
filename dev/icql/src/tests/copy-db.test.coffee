@@ -20,6 +20,7 @@ jr                        = JSON.stringify
 { inspect, }              = require 'util'
 #...........................................................................................................
 PATH                      = require 'path'
+FSP                       = require 'fs/promises'
 H                         = require './helpers'
 chance                    = new ( require 'chance' )()
 types                     = new ( require 'intertype' ).Intertype
@@ -34,6 +35,39 @@ is_new = ( x ) ->
   return R
 is_new.cache = new Map()
 
+
+#-----------------------------------------------------------------------------------------------------------
+get_cfg = ->
+  R =
+    # word_count: 10_000
+    word_count: 10
+    db:
+      templates:
+        small:  H.resolve_path 'assets/icql/small-datamill.db'
+        big:    H.resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.db'
+      target:
+        small:  H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}.db'
+        big:    H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}.db'
+      work:
+        mem:    ':memory:'
+        fle:    'data/icql/copy-schemas-work-{ref}-{size}.db'
+      temp:
+        small:  H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}-temp.db'
+        big:    H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}-temp.db'
+    pragma_sets:
+      #.....................................................................................................
+      ### thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 ###
+      fle: [
+        'page_size = 4096'
+        'cache_size = 16384'
+        'temp_store = MEMORY'
+        'journal_mode = WAL'
+        'locking_mode = EXCLUSIVE'
+        'synchronous = OFF' ]
+      #.....................................................................................................
+      mem: []
+      bare: []
+  return R
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "reuse memory DB" ] = ( T, done ) ->
@@ -109,12 +143,81 @@ is_new.cache = new Map()
   # throw new Error '^intentional-error@348374^'
   done() if done?
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "use API to do CRUD in memory" ] = ( T, done ) ->
+  T.halt_on_error() if T?
+  #.........................................................................................................
+  word_count        = 10
+  probe             = ( H.get_data { word_count, } ).texts
+  matcher           = [ probe..., ].sort()
+  #.........................................................................................................
+  ICQL              = require '../../../../apps/icql'
+  icql_cfg          = H.get_icql_settings true
+  # H.try_to_remove_file icql_cfg.db_path
+  # return done()
+  icql_cfg.echo     = true
+  test_cfg          = get_cfg()
+  db                = ICQL.bind icql_cfg
+  test_cfg.mode     = 'mem'
+  # test_cfg.size     = 'big'
+  test_cfg.size     = 'small'
+  test_cfg.ref      = 'crud-in-mem'
+  test_cfg.pragmas  = 'fle'
+  #.........................................................................................................
+  pragmas           = test_cfg.pragma_sets[ test_cfg.pragmas ]
+  validate_list_of.nonempty_text pragmas
+  #.........................................................................................................
+  validate.nonempty_text test_cfg.ref
+  db_work_path      = H.interpolate test_cfg.db.work[      test_cfg.mode ], test_cfg
+  db_template_path  = H.interpolate test_cfg.db.templates[ test_cfg.size ], test_cfg
+  db_target_path    = H.interpolate test_cfg.db.target[    test_cfg.size ], test_cfg
+  db_temp_path      = H.interpolate test_cfg.db.temp[      test_cfg.size ], test_cfg
+  #.........................................................................................................
+  validate.nonempty_text db_template_path
+  validate.nonempty_text db_target_path
+  validate.nonempty_text db_temp_path
+  #.........................................................................................................
+  # if gcfg.verbose
+  help "^44433^ template  DB:", db_template_path
+  help "^44433^ work      DB:", db_work_path
+  help "^44433^ target    DB:", db_target_path
+  help "^44433^ temp      DB:", db_temp_path
+  H.try_to_remove_file db_target_path
+  H.try_to_remove_file db_temp_path
+  H.try_to_remove_file db_work_path unless db_work_path is ':memory:'
+  await FSP.copyFile db_template_path, db_target_path
+  #.........................................................................................................
+  fle_schema        = 'main'
+  work_schema       = 'x'
+  work_schema_x     = db.$.as_identifier work_schema
+  db.$.attach db_work_path, work_schema
+  db.$.copy_schema fle_schema, work_schema
+  #.........................................................................................................
+  db.$.execute """drop table if exists #{work_schema_x}.test;"""
+  db.$.execute """
+    create table #{work_schema_x}.test(
+      id    integer primary key,
+      nr    integer not null,
+      text  text );"""
+  insert  = db.$.prepare """insert into #{work_schema_x}.test ( nr, text ) values ( ?, ? );"""
+  nr      = 0
+  for text in probe
+    nr++
+    insert.run [ nr, text, ]
+  retrieve  = db.$.prepare """select * from #{work_schema_x}.test order by text;"""
+  result    = ( row.text for row from retrieve.iterate() )
+  T.eq result, matcher if T?
+  #.........................................................................................................
+  done() if done?
+
 
 
 ############################################################################################################
 unless module.parent?
-  test @
+  # test @
   # test @[ "reuse memory DB" ]
   # test @[ "mirror DB to memory" ]
+  # test @[ "use API to do CRUD in memory" ]
+  @[ "use API to do CRUD in memory" ]()
   # @[ "mirror DB to memory" ]()
 
