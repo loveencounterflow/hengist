@@ -23,6 +23,19 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 PATH                      = require 'path'
 FS                        = require 'fs'
+types                     = new ( require 'intertype' ).Intertype
+{ isa
+  validate
+  validate_list_of }      = types.export()
+DATA                      = require '../../../../lib/data-providers-nocache'
+DATOM                     = require 'datom'
+
+#-----------------------------------------------------------------------------------------------------------
+types.declare 'interpolatable_value', ( x ) ->
+  return true if @isa.text x
+  return true if @isa.float x
+  return true if @isa.boolean x
+  return false
 
 #-----------------------------------------------------------------------------------------------------------
 @get_icql_settings = ( remove_db = false ) ->
@@ -44,4 +57,32 @@ FS                        = require 'fs'
     throw error
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@resolve_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../../../', path
 
+#-----------------------------------------------------------------------------------------------------------
+@interpolate  = ( template, namespace ) ->
+  validate.text template
+  validate.object namespace
+  R = template
+  for name, value of namespace
+    continue unless ( R.indexOf ( pattern = "{#{name}}" ) ) > -1
+    validate.interpolatable_value value
+    R = R.replaceAll pattern, value
+  if ( match = R.match /(?<!\\)\{/ )
+    throw new Error "unresolved curly bracket in template #{rpr template}"
+  R = R.replaceAll '\\{', '{'
+  R = R.replaceAll '\\}', '}'
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+@get_data = ( cfg ) ->
+  return data_cache if data_cache?
+  whisper "retrieving test data..."
+  #.........................................................................................................
+  texts       = DATA.get_words cfg.word_count
+  #.........................................................................................................
+  data_cache  = { texts, }
+  data_cache  = DATOM.freeze data_cache
+  whisper "...done"
+  return data_cache
