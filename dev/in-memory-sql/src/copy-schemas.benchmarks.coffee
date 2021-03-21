@@ -236,7 +236,7 @@ show_result = ( name, result ) ->
 ############################################################################################################
 if require.main is module then do =>
   await @run_benchmarks()
-
+  warn "^3442342^ add benchmarks to test clearing and copying back of data?"
 
 ###
 
