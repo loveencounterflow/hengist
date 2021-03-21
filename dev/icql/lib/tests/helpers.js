@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, PATH, badge, debug, echo, help, info, rpr, urge, warn, whisper;
+  var CND, DATA, DATOM, FS, PATH, badge, debug, echo, help, info, isa, rpr, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -33,6 +33,28 @@
   PATH = require('path');
 
   FS = require('fs');
+
+  types = new (require('intertype')).Intertype();
+
+  ({isa, validate, validate_list_of} = types.export());
+
+  DATA = require('../../../../lib/data-providers-nocache');
+
+  DATOM = require('datom');
+
+  //-----------------------------------------------------------------------------------------------------------
+  types.declare('interpolatable_value', function(x) {
+    if (this.isa.text(x)) {
+      return true;
+    }
+    if (this.isa.float(x)) {
+      return true;
+    }
+    if (this.isa.boolean(x)) {
+      return true;
+    }
+    return false;
+  });
 
   //-----------------------------------------------------------------------------------------------------------
   this.get_icql_settings = function(remove_db = false) {
@@ -67,6 +89,49 @@
       throw error;
     }
     return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.resolve_path = function(path) {
+    return PATH.resolve(PATH.join(__dirname, '../../../../', path));
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.interpolate = function(template, namespace) {
+    var R, match, name, pattern, value;
+    validate.text(template);
+    validate.object(namespace);
+    R = template;
+    for (name in namespace) {
+      value = namespace[name];
+      if (!((R.indexOf((pattern = `{${name}}`))) > -1)) {
+        continue;
+      }
+      validate.interpolatable_value(value);
+      R = R.replaceAll(pattern, value);
+    }
+    if ((match = R.match(/(?<!\\)\{/))) {
+      throw new Error(`unresolved curly bracket in template ${rpr(template)}`);
+    }
+    R = R.replaceAll('\\{', '{');
+    R = R.replaceAll('\\}', '}');
+    return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.get_data = function(cfg) {
+    var data_cache, texts;
+    if (typeof data_cache !== "undefined" && data_cache !== null) {
+      return data_cache;
+    }
+    whisper("retrieving test data...");
+    //.........................................................................................................
+    texts = DATA.get_words(cfg.word_count);
+    //.........................................................................................................
+    data_cache = {texts};
+    data_cache = DATOM.freeze(data_cache);
+    whisper("...done");
+    return data_cache;
   };
 
 }).call(this);

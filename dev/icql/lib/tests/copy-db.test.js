@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, badge, chance, debug, echo, help, info, inspect, is_new, jr, rpr, test, urge, warn, whisper, xrpr, xrpr2;
+  var CND, FSP, H, PATH, badge, chance, debug, echo, get_cfg, help, info, inspect, is_new, isa, jr, rpr, test, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -30,30 +30,18 @@
 
   ({inspect} = require('util'));
 
-  xrpr = function(x) {
-    return inspect(x, {
-      colors: true,
-      breakLength: 2e308,
-      maxArrayLength: 2e308,
-      depth: 2e308
-    });
-  };
-
-  xrpr2 = function(x) {
-    return inspect(x, {
-      colors: true,
-      breakLength: 20,
-      maxArrayLength: 2e308,
-      depth: 2e308
-    });
-  };
-
   //...........................................................................................................
   PATH = require('path');
+
+  FSP = require('fs/promises');
 
   H = require('./helpers');
 
   chance = new (require('chance'))();
+
+  types = new (require('intertype')).Intertype();
+
+  ({isa, validate, validate_list_of} = types.export());
 
   //-----------------------------------------------------------------------------------------------------------
   is_new = function(x) {
@@ -64,6 +52,42 @@
   };
 
   is_new.cache = new Map();
+
+  //-----------------------------------------------------------------------------------------------------------
+  get_cfg = function() {
+    var R;
+    R = {
+      // word_count: 10_000
+      word_count: 10,
+      db: {
+        templates: {
+          small: H.resolve_path('assets/icql/small-datamill.db'),
+          big: H.resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.db')
+        },
+        target: {
+          small: H.resolve_path('data/icql/icql-copy-db-{ref}-{size}.db'),
+          big: H.resolve_path('data/icql/icql-copy-db-{ref}-{size}.db')
+        },
+        work: {
+          mem: ':memory:',
+          fle: 'data/icql/copy-schemas-work-{ref}-{size}.db'
+        },
+        temp: {
+          small: H.resolve_path('data/icql/icql-copy-db-{ref}-{size}-temp.db'),
+          big: H.resolve_path('data/icql/icql-copy-db-{ref}-{size}-temp.db')
+        }
+      },
+      pragma_sets: {
+        //.....................................................................................................
+        /* thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 */
+        fle: ['page_size = 4096', 'cache_size = 16384', 'temp_store = MEMORY', 'journal_mode = WAL', 'locking_mode = EXCLUSIVE', 'synchronous = OFF'],
+        //.....................................................................................................
+        mem: [],
+        bare: []
+      }
+    };
+    return R;
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this["reuse memory DB"] = function(T, done) {
@@ -160,14 +184,102 @@
     }
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["use API to do CRUD in memory"] = async function(T, done) {
+    var ICQL, db, db_target_path, db_temp_path, db_template_path, db_work_path, fle_schema, i, icql_cfg, insert, len, matcher, nr, pragmas, probe, result, retrieve, row, test_cfg, text, word_count, work_schema, work_schema_x;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    //.........................................................................................................
+    word_count = 10;
+    probe = (H.get_data({word_count})).texts;
+    matcher = [...probe].sort();
+    //.........................................................................................................
+    ICQL = require('../../../../apps/icql');
+    icql_cfg = H.get_icql_settings(true);
+    // H.try_to_remove_file icql_cfg.db_path
+    // return done()
+    icql_cfg.echo = true;
+    test_cfg = get_cfg();
+    db = ICQL.bind(icql_cfg);
+    test_cfg.mode = 'mem';
+    // test_cfg.size     = 'big'
+    test_cfg.size = 'small';
+    test_cfg.ref = 'crud-in-mem';
+    test_cfg.pragmas = 'fle';
+    //.........................................................................................................
+    pragmas = test_cfg.pragma_sets[test_cfg.pragmas];
+    validate_list_of.nonempty_text(pragmas);
+    //.........................................................................................................
+    validate.nonempty_text(test_cfg.ref);
+    db_work_path = H.interpolate(test_cfg.db.work[test_cfg.mode], test_cfg);
+    db_template_path = H.interpolate(test_cfg.db.templates[test_cfg.size], test_cfg);
+    db_target_path = H.interpolate(test_cfg.db.target[test_cfg.size], test_cfg);
+    db_temp_path = H.interpolate(test_cfg.db.temp[test_cfg.size], test_cfg);
+    //.........................................................................................................
+    validate.nonempty_text(db_template_path);
+    validate.nonempty_text(db_target_path);
+    validate.nonempty_text(db_temp_path);
+    //.........................................................................................................
+    // if gcfg.verbose
+    help("^44433^ template  DB:", db_template_path);
+    help("^44433^ work      DB:", db_work_path);
+    help("^44433^ target    DB:", db_target_path);
+    help("^44433^ temp      DB:", db_temp_path);
+    H.try_to_remove_file(db_target_path);
+    H.try_to_remove_file(db_temp_path);
+    if (db_work_path !== ':memory:') {
+      H.try_to_remove_file(db_work_path);
+    }
+    await FSP.copyFile(db_template_path, db_target_path);
+    //.........................................................................................................
+    fle_schema = 'main';
+    work_schema = 'x';
+    work_schema_x = db.$.as_identifier(work_schema);
+    db.$.attach(db_work_path, work_schema);
+    db.$.copy_schema(fle_schema, work_schema);
+    //.........................................................................................................
+    db.$.execute(`drop table if exists ${work_schema_x}.test;`);
+    db.$.execute(`create table ${work_schema_x}.test(
+  id    integer primary key,
+  nr    integer not null,
+  text  text );`);
+    insert = db.$.prepare(`insert into ${work_schema_x}.test ( nr, text ) values ( ?, ? );`);
+    nr = 0;
+    for (i = 0, len = probe.length; i < len; i++) {
+      text = probe[i];
+      nr++;
+      insert.run([nr, text]);
+    }
+    retrieve = db.$.prepare(`select * from ${work_schema_x}.test order by text;`);
+    result = (function() {
+      var ref, results;
+      ref = retrieve.iterate();
+      results = [];
+      for (row of ref) {
+        results.push(row.text);
+      }
+      return results;
+    })();
+    if (T != null) {
+      T.eq(result, matcher);
+    }
+    if (done != null) {
+      //.........................................................................................................
+      return done();
+    }
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
-    test(this);
+    // test @
+    // test @[ "reuse memory DB" ]
+    // test @[ "mirror DB to memory" ]
+    // test @[ "use API to do CRUD in memory" ]
+    this["use API to do CRUD in memory"]();
   }
 
-  // test @[ "reuse memory DB" ]
-// test @[ "mirror DB to memory" ]
-// @[ "mirror DB to memory" ]()
+  // @[ "mirror DB to memory" ]()
 
 }).call(this);
 
