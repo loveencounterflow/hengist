@@ -22,6 +22,10 @@ jr                        = JSON.stringify
 PATH                      = require 'path'
 H                         = require './helpers'
 chance                    = new ( require 'chance' )()
+types                     = new ( require 'intertype' ).Intertype
+{ isa
+  validate
+  validate_list_of }      = types.export()
 
 #-----------------------------------------------------------------------------------------------------------
 is_new = ( x ) ->
