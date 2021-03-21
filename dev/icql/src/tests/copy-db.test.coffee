@@ -22,6 +22,7 @@ jr                        = JSON.stringify
 PATH                      = require 'path'
 FSP                       = require 'fs/promises'
 H                         = require './helpers'
+LFT                       = require 'letsfreezethat'
 chance                    = new ( require 'chance' )()
 types                     = new ( require 'intertype' ).Intertype
 { isa
@@ -210,13 +211,20 @@ get_cfg = ->
     for text in probe
       nr++
       insert.run [ nr, text, ]
-    retrieve  = db.$.prepare """select * from #{work_schema_x}.test order by text;"""
-    result    = ( row.text for row from retrieve.iterate() )
+    retrieve          = db.$.prepare """select * from #{work_schema_x}.test order by text;"""
+    result            = ( row.text for row from retrieve.iterate() )
     T.eq result, matcher if T?
+    db.$.execute "vacuum #{work_schema_x} into #{db.$.as_sql db_temp_path};"
     return null
   #.........................................................................................................
   part_3_reread_db = ->
-    db = ICQL.bind icql_cfg
+    icql_cfg          = LFT._deep_copy icql_cfg
+    icql_cfg.db_path  = db_temp_path
+    db                = ICQL.bind icql_cfg
+    fle_schema_x      = db.$.as_identifier fle_schema
+    retrieve          = db.$.prepare """select * from #{fle_schema_x}.test order by text;"""
+    result            = ( row.text for row from retrieve.iterate() )
+    debug '^40598^', result
     return null
   #.........................................................................................................
   await part_1_scaffold_db_files()
