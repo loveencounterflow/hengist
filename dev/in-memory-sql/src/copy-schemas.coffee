@@ -26,25 +26,12 @@ BM                        = require '../../../lib/benchmarks'
 data_cache                = null
 types                     = new ( require 'intertype' ).Intertype
 { isa
-  validate }              = types.export()
+  validate
+  validate_list_of }      = types.export()
 #-----------------------------------------------------------------------------------------------------------
 gcfg                      = { verbose: false, echo: false, }
 LFT                       = require 'letsfreezethat'
 
-#-----------------------------------------------------------------------------------------------------------
-pragmas =
-  #.........................................................................................................
-  ### thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 ###
-  fle: [
-    'page_size = 4096'
-    'cache_size = 16384'
-    'temp_store = MEMORY'
-    'journal_mode = WAL'
-    'locking_mode = EXCLUSIVE'
-    'synchronous = OFF' ]
-  #.........................................................................................................
-  mem: []
-  bare: []
 
 #-----------------------------------------------------------------------------------------------------------
 resolve_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../../', path
@@ -102,6 +89,10 @@ show_result = ( name, result ) ->
   validate.nonempty_text db_template_path
   validate.nonempty_text db_target_path
   validate.nonempty_text db_temp_path
+  #.........................................................................................................
+  pragmas           = cfg.pragma_sets[ cfg.pragmas ]
+  validate_list_of.nonempty_text pragmas
+  #.........................................................................................................
   db_cfg            = null
   # db_size           = ( FS.statSync db_template_path ).size
   count             = 0
@@ -126,14 +117,13 @@ show_result = ( name, result ) ->
     switch cfg.mode
       when 'mem'
         work_schema     = 'x'
-        work_schema_x   = _icql.as_identifier work_schema
         _icql.attach db_work_path, work_schema
         _icql.copy_schema fle_schema, work_schema
       when 'fle'
         work_schema     = 'main'
-        work_schema_x   = _icql.as_identifier work_schema
       else throw new Error "^44788^ unknown value for `cfg.mode`: #{rpr cfg.mode}"
     #-------------------------------------------------------------------------------------------------------
+    work_schema_x = _icql.as_identifier work_schema
     db.exec """drop table if exists #{work_schema_x}.test;"""
     db.exec """
       create table #{work_schema_x}.test(
@@ -170,16 +160,16 @@ show_result = ( name, result ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@btsql3_mem_small_backup   = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_small_backup', mode: 'mem', size: 'small', pragmas: pragmas.mem, save: 'backup', }
-@btsql3_mem_big_backup     = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_big_backup',   mode: 'mem', size: 'big',   pragmas: pragmas.mem, save: 'backup', }
-@btsql3_mem_small_vacuum   = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_small_vacuum', mode: 'mem', size: 'small', pragmas: pragmas.mem, save: 'vacuum', }
-@btsql3_mem_big_vacuum     = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_big_vacuum',   mode: 'mem', size: 'big',   pragmas: pragmas.mem, save: 'vacuum', }
-@btsql3_mem_small_copy     = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_small_copy',   mode: 'mem', size: 'small', pragmas: pragmas.mem, save: 'copy', }
-@btsql3_mem_big_copy       = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_big_copy',     mode: 'mem', size: 'big',   pragmas: pragmas.mem, save: 'copy', }
-@btsql3_fle_small          = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_small',        mode: 'fle', size: 'small', pragmas: pragmas.fle, }
-@btsql3_fle_big            = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_big',          mode: 'fle', size: 'big',   pragmas: pragmas.fle, }
-@btsql3_fle_small_bare     = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_small_bare',   mode: 'fle', size: 'small', pragmas: pragmas.bare, }
-@btsql3_fle_big_bare       = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_big_bare',     mode: 'fle', size: 'big',   pragmas: pragmas.bare, }
+@btsql3_mem_small_backup   = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_small_backup', mode: 'mem', size: 'small', pragmas: 'mem', save: 'backup', }
+@btsql3_mem_big_backup     = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_big_backup',   mode: 'mem', size: 'big',   pragmas: 'mem', save: 'backup', }
+@btsql3_mem_small_vacuum   = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_small_vacuum', mode: 'mem', size: 'small', pragmas: 'mem', save: 'vacuum', }
+@btsql3_mem_big_vacuum     = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_big_vacuum',   mode: 'mem', size: 'big',   pragmas: 'mem', save: 'vacuum', }
+@btsql3_mem_small_copy     = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_small_copy',   mode: 'mem', size: 'small', pragmas: 'mem', save: 'copy', }
+@btsql3_mem_big_copy       = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_big_copy',     mode: 'mem', size: 'big',   pragmas: 'mem', save: 'copy', }
+@btsql3_fle_small          = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_small',        mode: 'fle', size: 'small', pragmas: 'fle', }
+@btsql3_fle_big            = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_big',          mode: 'fle', size: 'big',   pragmas: 'fle', }
+@btsql3_fle_small_bare     = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_small_bare',   mode: 'fle', size: 'small', pragmas: 'bare', }
+@btsql3_fle_big_bare       = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_big_bare',     mode: 'fle', size: 'big',   pragmas: 'bare', }
 # @btsql3_mem_thrds    = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'threads = 4;', ] }
 
 #-----------------------------------------------------------------------------------------------------------
@@ -189,9 +179,10 @@ show_result = ( name, result ) ->
   gcfg.echo     = true
   gcfg.echo     = false
   bench         = BM.new_benchmarks()
+  #.........................................................................................................
   cfg           =
-    word_count: 10_000
-    # word_count: 10
+    # word_count: 10_000
+    word_count: 10
     db:
       templates:
         small:  resolve_path 'assets/icql/small-datamill.db'
@@ -205,18 +196,32 @@ show_result = ( name, result ) ->
       temp:
         small:  resolve_path 'data/icql/copy-schemas-benchmarks-temp-{ref}.db'
         big:    resolve_path 'data/icql/copy-schemas-benchmarks-temp-{ref}.db'
+    pragma_sets:
+      #.....................................................................................................
+      ### thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 ###
+      fle: [
+        'page_size = 4096'
+        'cache_size = 16384'
+        'temp_store = MEMORY'
+        'journal_mode = WAL'
+        'locking_mode = EXCLUSIVE'
+        'synchronous = OFF' ]
+      #.....................................................................................................
+      mem: []
+      bare: []
+  #.........................................................................................................
   repetitions   = 3
   test_names    = [
-    'btsql3_mem_small_backup'
-    'btsql3_mem_big_backup'
+    # 'btsql3_mem_small_backup'
+    # 'btsql3_mem_big_backup'
     'btsql3_mem_small_vacuum'
     'btsql3_mem_big_vacuum'
     'btsql3_fle_small'
     'btsql3_fle_big'
     # 'btsql3_mem_small_copy'
     # 'btsql3_mem_big_copy'
-    # 'btsql3_fle_small_bare'
-    # 'btsql3_fle_big_bare'
+    'btsql3_fle_small_bare'
+    'btsql3_fle_big_bare'
     ]
   global.gc() if global.gc?
   data_cache = null
