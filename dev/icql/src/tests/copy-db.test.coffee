@@ -18,8 +18,6 @@ echo                      = CND.echo.bind CND
 test                      = require '../../../../apps/guy-test'
 jr                        = JSON.stringify
 { inspect, }              = require 'util'
-xrpr                      = ( x ) -> inspect x, { colors: yes, breakLength: Infinity, maxArrayLength: Infinity, depth: Infinity, }
-xrpr2                     = ( x ) -> inspect x, { colors: yes, breakLength: 20, maxArrayLength: Infinity, depth: Infinity, }
 #...........................................................................................................
 PATH                      = require 'path'
 H                         = require './helpers'
