@@ -185,8 +185,9 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["use API to do CRUD in memory"] = async function(T, done) {
-    var ICQL, db, db_target_path, db_temp_path, db_template_path, db_work_path, fle_schema, i, icql_cfg, insert, len, matcher, nr, pragmas, probe, result, retrieve, row, test_cfg, text, word_count, work_schema, work_schema_x;
+  this["use API to do CRUD in memory (raw)"] = async function(T, done) {
+    var ICQL, db_target_path, db_temp_path, db_template_path, db_work_path, fle_schema, icql_cfg, matcher, part_1_scaffold_db_files, part_2_crud, part_3_reread_db, pragmas, probe, test_cfg, word_count, work_schema;
+    ICQL = require('../../../../apps/icql');
     if (T != null) {
       T.halt_on_error();
     }
@@ -194,78 +195,96 @@
     word_count = 10;
     probe = (H.get_data({word_count})).texts;
     matcher = [...probe].sort();
-    //.........................................................................................................
-    ICQL = require('../../../../apps/icql');
     icql_cfg = H.get_icql_settings(true);
-    // H.try_to_remove_file icql_cfg.db_path
-    // return done()
     icql_cfg.echo = true;
     test_cfg = get_cfg();
-    db = ICQL.bind(icql_cfg);
     test_cfg.mode = 'mem';
     // test_cfg.size     = 'big'
     test_cfg.size = 'small';
     test_cfg.ref = 'crud-in-mem';
     test_cfg.pragmas = 'fle';
-    //.........................................................................................................
-    pragmas = test_cfg.pragma_sets[test_cfg.pragmas];
-    validate_list_of.nonempty_text(pragmas);
-    //.........................................................................................................
-    validate.nonempty_text(test_cfg.ref);
-    db_work_path = H.interpolate(test_cfg.db.work[test_cfg.mode], test_cfg);
-    db_template_path = H.interpolate(test_cfg.db.templates[test_cfg.size], test_cfg);
-    db_target_path = H.interpolate(test_cfg.db.target[test_cfg.size], test_cfg);
-    db_temp_path = H.interpolate(test_cfg.db.temp[test_cfg.size], test_cfg);
-    //.........................................................................................................
-    validate.nonempty_text(db_template_path);
-    validate.nonempty_text(db_target_path);
-    validate.nonempty_text(db_temp_path);
-    //.........................................................................................................
-    // if gcfg.verbose
-    help("^44433^ template  DB:", db_template_path);
-    help("^44433^ work      DB:", db_work_path);
-    help("^44433^ target    DB:", db_target_path);
-    help("^44433^ temp      DB:", db_temp_path);
-    H.try_to_remove_file(db_target_path);
-    H.try_to_remove_file(db_temp_path);
-    if (db_work_path !== ':memory:') {
-      H.try_to_remove_file(db_work_path);
-    }
-    await FSP.copyFile(db_template_path, db_target_path);
-    //.........................................................................................................
+    pragmas = null;
+    db_work_path = null;
+    db_template_path = null;
+    db_target_path = null;
+    db_temp_path = null;
     fle_schema = 'main';
     work_schema = 'x';
-    work_schema_x = db.$.as_identifier(work_schema);
-    db.$.attach(db_work_path, work_schema);
-    db.$.copy_schema(fle_schema, work_schema);
     //.........................................................................................................
-    db.$.execute(`drop table if exists ${work_schema_x}.test;`);
-    db.$.execute(`create table ${work_schema_x}.test(
+    part_1_scaffold_db_files = async function() {
+      //.......................................................................................................
+      pragmas = test_cfg.pragma_sets[test_cfg.pragmas];
+      validate_list_of.nonempty_text(pragmas);
+      //.......................................................................................................
+      validate.nonempty_text(test_cfg.ref);
+      db_work_path = H.interpolate(test_cfg.db.work[test_cfg.mode], test_cfg);
+      db_template_path = H.interpolate(test_cfg.db.templates[test_cfg.size], test_cfg);
+      db_target_path = H.interpolate(test_cfg.db.target[test_cfg.size], test_cfg);
+      db_temp_path = H.interpolate(test_cfg.db.temp[test_cfg.size], test_cfg);
+      //.......................................................................................................
+      validate.nonempty_text(db_template_path);
+      validate.nonempty_text(db_target_path);
+      validate.nonempty_text(db_temp_path);
+      //.......................................................................................................
+      // if gcfg.verbose
+      help("^44433^ template  DB:", db_template_path);
+      help("^44433^ work      DB:", db_work_path);
+      help("^44433^ target    DB:", db_target_path);
+      help("^44433^ temp      DB:", db_temp_path);
+      H.try_to_remove_file(db_target_path);
+      H.try_to_remove_file(db_temp_path);
+      if (db_work_path !== ':memory:') {
+        H.try_to_remove_file(db_work_path);
+      }
+      await FSP.copyFile(db_template_path, db_target_path);
+      return null;
+    };
+    //.........................................................................................................
+    part_2_crud = function() {
+      var db, i, insert, len, nr, result, retrieve, row, text, work_schema_x;
+      db = ICQL.bind(icql_cfg);
+      work_schema_x = db.$.as_identifier(work_schema);
+      db.$.attach(db_work_path, work_schema);
+      db.$.copy_schema(fle_schema, work_schema);
+      //.......................................................................................................
+      db.$.execute(`drop table if exists ${work_schema_x}.test;`);
+      db.$.execute(`create table ${work_schema_x}.test(
   id    integer primary key,
   nr    integer not null,
   text  text );`);
-    insert = db.$.prepare(`insert into ${work_schema_x}.test ( nr, text ) values ( ?, ? );`);
-    nr = 0;
-    for (i = 0, len = probe.length; i < len; i++) {
-      text = probe[i];
-      nr++;
-      insert.run([nr, text]);
-    }
-    retrieve = db.$.prepare(`select * from ${work_schema_x}.test order by text;`);
-    result = (function() {
-      var ref, results;
-      ref = retrieve.iterate();
-      results = [];
-      for (row of ref) {
-        results.push(row.text);
+      insert = db.$.prepare(`insert into ${work_schema_x}.test ( nr, text ) values ( ?, ? );`);
+      nr = 0;
+      for (i = 0, len = probe.length; i < len; i++) {
+        text = probe[i];
+        nr++;
+        insert.run([nr, text]);
       }
-      return results;
-    })();
-    if (T != null) {
-      T.eq(result, matcher);
-    }
+      retrieve = db.$.prepare(`select * from ${work_schema_x}.test order by text;`);
+      result = (function() {
+        var ref, results;
+        ref = retrieve.iterate();
+        results = [];
+        for (row of ref) {
+          results.push(row.text);
+        }
+        return results;
+      })();
+      if (T != null) {
+        T.eq(result, matcher);
+      }
+      return null;
+    };
+    //.........................................................................................................
+    part_3_reread_db = function() {
+      var db;
+      db = ICQL.bind(icql_cfg);
+      return null;
+    };
+    //.........................................................................................................
+    await part_1_scaffold_db_files();
+    await part_2_crud();
+    await part_3_reread_db();
     if (done != null) {
-      //.........................................................................................................
       return done();
     }
   };
@@ -275,11 +294,11 @@
     // test @
     // test @[ "reuse memory DB" ]
     // test @[ "mirror DB to memory" ]
-    // test @[ "use API to do CRUD in memory" ]
-    this["use API to do CRUD in memory"]();
+    test(this["use API to do CRUD in memory (raw)"]);
   }
 
-  // @[ "mirror DB to memory" ]()
+  // @[ "use API to do CRUD in memory (raw)" ]()
+// @[ "mirror DB to memory" ]()
 
 }).call(this);
 
