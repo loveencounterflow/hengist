@@ -129,7 +129,7 @@
     // Create tables, indexes:
     dba.execute("create table main.k1 ( id integer primary key, fk_k2 integer unique references k2 ( id ) );");
     dba.execute("create table main.k2 ( id integer primary key, fk_k1 integer unique references k1 ( id ) );");
-    ref = dba.list_objects();
+    ref = dba.walk_objects();
     //.........................................................................................................
     for (d of ref) {
       info("^557-300^", {
@@ -151,7 +151,7 @@
     //.........................................................................................................
     debug('^544734^', (function() {
       var ref1, results;
-      ref1 = dba.list_objects();
+      ref1 = dba.walk_objects();
       results = [];
       for (d of ref1) {
         results.push(d.name);
@@ -160,14 +160,14 @@
     })());
     T.eq((function() {
       var ref1, results;
-      ref1 = dba.list_objects();
+      ref1 = dba.walk_objects();
       results = [];
       for (d of ref1) {
         results.push(d.name);
       }
       return results;
     })(), ['sqlite_autoindex_k1_1', 'sqlite_autoindex_k2_1', 'k1', 'k2']);
-    T.eq(dba.all_rows(dba.query("select * from k1 join k2 on ( k1.fk_k2 = k2.id );")), [
+    T.eq(dba.list(dba.query("select * from k1 join k2 on ( k1.fk_k2 = k2.id );")), [
       {
         id: 1,
         fk_k2: 1,
@@ -218,7 +218,7 @@
     dba.clear();
     T.eq((function() {
       var ref1, results;
-      ref1 = dba.list_objects();
+      ref1 = dba.walk_objects();
       results = [];
       for (d of ref1) {
         results.push(d.name);
@@ -247,12 +247,12 @@
     H.copy_over(db_template_path, db_work_path);
     dba = new ICQLDBA.Dba({path});
     //.........................................................................................................
-    T.eq(type_of((s = dba.list_objects())), 'statementiterator');
+    T.eq(type_of((s = dba.walk_objects())), 'statementiterator');
     ignore = [...s];
     debug(ignore);
     objects = (function() {
       var ref, results;
-      ref = dba.list_objects({
+      ref = dba.walk_objects({
         schema: 'main'
       });
       results = [];
@@ -268,13 +268,13 @@
 
   //###########################################################################################################
   if (module.parent == null) {
-    // test @
-    // test @[ "DBA: as_sql" ]
-    // test @[ "DBA: interpolate" ]
-    test(this["DBA: clear()"]);
+    test(this);
   }
 
-  // test @[ "toposort with schema" ]
+  // test @[ "DBA: as_sql" ]
+// test @[ "DBA: interpolate" ]
+// test @[ "DBA: clear()" ]
+// test @[ "toposort with schema" ]
 // @[ "toposort with schema" ]()
 
 }).call(this);
