@@ -115,7 +115,7 @@ show_result = ( name, result ) ->
     _icql.pragma pragma for pragma in cfg.pragmas
     fle_schema      = 'main'
     switch cfg.mode
-      when 'mem'
+      when 'mem', 'tmp'
         work_schema     = 'x'
         _icql.attach db_work_path, work_schema
         _icql.copy_schema fle_schema, work_schema
@@ -160,6 +160,12 @@ show_result = ( name, result ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@btsql3_tmp_small_backup   = ( cfg ) => @_btsql3 { cfg..., ref: 'tmp_small_backup', mode: 'tmp', size: 'small', pragmas: 'tmp', save: 'backup', }
+@btsql3_tmp_big_backup     = ( cfg ) => @_btsql3 { cfg..., ref: 'tmp_big_backup',   mode: 'tmp', size: 'big',   pragmas: 'tmp', save: 'backup', }
+@btsql3_tmp_small_vacuum   = ( cfg ) => @_btsql3 { cfg..., ref: 'tmp_small_vacuum', mode: 'tmp', size: 'small', pragmas: 'tmp', save: 'vacuum', }
+@btsql3_tmp_big_vacuum     = ( cfg ) => @_btsql3 { cfg..., ref: 'tmp_big_vacuum',   mode: 'tmp', size: 'big',   pragmas: 'tmp', save: 'vacuum', }
+@btsql3_tmp_small_copy     = ( cfg ) => @_btsql3 { cfg..., ref: 'tmp_small_copy',   mode: 'tmp', size: 'small', pragmas: 'tmp', save: 'copy', }
+@btsql3_tmp_big_copy       = ( cfg ) => @_btsql3 { cfg..., ref: 'tmp_big_copy',     mode: 'tmp', size: 'big',   pragmas: 'tmp', save: 'copy', }
 @btsql3_mem_small_backup   = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_small_backup', mode: 'mem', size: 'small', pragmas: 'mem', save: 'backup', }
 @btsql3_mem_big_backup     = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_big_backup',   mode: 'mem', size: 'big',   pragmas: 'mem', save: 'backup', }
 @btsql3_mem_small_vacuum   = ( cfg ) => @_btsql3 { cfg..., ref: 'mem_small_vacuum', mode: 'mem', size: 'small', pragmas: 'mem', save: 'vacuum', }
@@ -181,8 +187,10 @@ show_result = ( name, result ) ->
   bench         = BM.new_benchmarks()
   #.........................................................................................................
   cfg           =
-    # word_count: 10_000
-    word_count: 10
+    # word_count: 100_000
+    word_count: 10_000
+    # word_count: 1_000
+    # word_count: 10
     db:
       templates:
         small:  resolve_path 'assets/icql/small-datamill.db'
@@ -191,6 +199,7 @@ show_result = ( name, result ) ->
         small:  resolve_path 'data/icql/copy-schemas-benchmarks-{ref}.db'
         big:    resolve_path 'data/icql/copy-schemas-benchmarks-{ref}.db'
       work:
+        tmp:    ''
         mem:    ':memory:'
         fle:    'data/icql/copy-schemas-work-{ref}.db'
       temp:
@@ -207,21 +216,28 @@ show_result = ( name, result ) ->
         'locking_mode = EXCLUSIVE'
         'synchronous = OFF' ]
       #.....................................................................................................
-      mem: []
+      tmp:  [ 'temp_store = file;', ]
+      mem:  []
       bare: []
   #.........................................................................................................
   repetitions   = 3
   test_names    = [
-    # 'btsql3_mem_small_backup'
-    # 'btsql3_mem_big_backup'
+    'btsql3_tmp_small_vacuum'
+    'btsql3_tmp_big_vacuum'
     'btsql3_mem_small_vacuum'
     'btsql3_mem_big_vacuum'
-    'btsql3_fle_small'
-    'btsql3_fle_big'
-    # 'btsql3_mem_small_copy'
-    # 'btsql3_mem_big_copy'
-    'btsql3_fle_small_bare'
-    'btsql3_fle_big_bare'
+    # 'btsql3_fle_small'
+    # 'btsql3_fle_big'
+    # 'btsql3_fle_small_bare'
+    # 'btsql3_fle_big_bare'
+    # # 'btsql3_tmp_small_backup'
+    # # 'btsql3_tmp_big_backup'
+    # # 'btsql3_tmp_small_copy'
+    # # 'btsql3_tmp_big_copy'
+    # # 'btsql3_mem_small_backup'
+    # # 'btsql3_mem_big_backup'
+    # # 'btsql3_mem_small_copy'
+    # # 'btsql3_mem_big_copy'
     ]
   global.gc() if global.gc?
   data_cache = null
