@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FSP, H, LFT, PATH, badge, chance, debug, echo, get_cfg, help, info, inspect, is_new, isa, jr, rpr, test, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FSP, H, LFT, PATH, badge, chance, debug, echo, get_cfg, help, info, inspect, is_new, isa, jr, rpr, test, to_width, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -45,6 +45,8 @@
 
   ({isa, validate, validate_list_of} = types.export());
 
+  ({to_width} = require('to-width'));
+
   //-----------------------------------------------------------------------------------------------------------
   is_new = function(x) {
     var R;
@@ -77,6 +79,10 @@
         temp: {
           small: H.resolve_path('data/icql/icql-copy-db-{ref}-{size}-temp.db'),
           big: H.resolve_path('data/icql/icql-copy-db-{ref}-{size}-temp.db')
+        },
+        old: {
+          small: H.resolve_path('data/icql/icql-copy-db-{ref}-{size}-old.db'),
+          big: H.resolve_path('data/icql/icql-copy-db-{ref}-{size}-old.db')
         }
       },
       pragma_sets: {
@@ -188,7 +194,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["use API to do CRUD in memory (raw)"] = async function(T, done) {
-    var ICQL, db_target_path, db_temp_path, db_template_path, db_work_path, fle_schema, icql_cfg, matcher, part_1_scaffold_db_files, part_2_crud, part_3_reread_db, pragmas, probe, test_cfg, word_count, work_schema;
+    var ICQL, db_old_path, db_target_path, db_temp_path, db_template_path, db_work_path, fle_schema, icql_cfg, matcher, part_1_scaffold_db_files, part_2_crud, part_3_reread_db, pragmas, probe, test_cfg, word_count, work_schema;
     ICQL = require('../../../../apps/icql');
     if (T != null) {
       T.halt_on_error();
@@ -199,6 +205,7 @@
     matcher = [...probe].sort();
     icql_cfg = H.get_icql_settings(true);
     icql_cfg.echo = true;
+    icql_cfg.echo = false;
     test_cfg = get_cfg();
     test_cfg.mode = 'mem';
     // test_cfg.size     = 'big'
@@ -210,6 +217,7 @@
     db_template_path = null;
     db_target_path = null;
     db_temp_path = null;
+    db_old_path = null;
     fle_schema = 'main';
     work_schema = 'x';
     //.........................................................................................................
@@ -223,16 +231,17 @@
       db_template_path = H.interpolate(test_cfg.db.templates[test_cfg.size], test_cfg);
       db_target_path = H.interpolate(test_cfg.db.target[test_cfg.size], test_cfg);
       db_temp_path = H.interpolate(test_cfg.db.temp[test_cfg.size], test_cfg);
+      db_old_path = H.interpolate(test_cfg.db.old[test_cfg.size], test_cfg);
       //.......................................................................................................
       validate.nonempty_text(db_template_path);
       validate.nonempty_text(db_target_path);
       validate.nonempty_text(db_temp_path);
       //.......................................................................................................
       // if gcfg.verbose
-      help("^44433^ template  DB:", db_template_path);
-      help("^44433^ work      DB:", db_work_path);
-      help("^44433^ target    DB:", db_target_path);
-      help("^44433^ temp      DB:", db_temp_path);
+      help("^43-300^ template  DB:", db_template_path);
+      help("^43-301^ work      DB:", db_work_path);
+      help("^43-302^ target    DB:", db_target_path);
+      help("^43-303^ temp      DB:", db_temp_path);
       H.try_to_remove_file(db_target_path);
       H.try_to_remove_file(db_temp_path);
       if (db_work_path !== ':memory:') {
@@ -242,18 +251,23 @@
       return null;
     };
     //.........................................................................................................
-    part_2_crud = function() {
-      var db, i, insert, len, nr, result, retrieve, row, text, work_schema_x;
+    part_2_crud = async function() {
+      var db, i, insert, j, k, len, len1, len2, nr, object, ref, ref1, result, retrieve, row, schema, text, work_schema_x;
       db = ICQL.bind(icql_cfg);
       work_schema_x = db.$.as_identifier(work_schema);
+      //.......................................................................................................
+      // Attach and populate memory DB:
       db.$.attach(db_work_path, work_schema);
       db.$.copy_schema(fle_schema, work_schema);
       //.......................................................................................................
+      // Create new table:
       db.$.execute(`drop table if exists ${work_schema_x}.test;`);
       db.$.execute(`create table ${work_schema_x}.test(
   id    integer primary key,
   nr    integer not null,
   text  text );`);
+      //.......................................................................................................
+      // Insert data into new table:
       insert = db.$.prepare(`insert into ${work_schema_x}.test ( nr, text ) values ( ?, ? );`);
       nr = 0;
       for (i = 0, len = probe.length; i < len; i++) {
@@ -261,6 +275,8 @@
         nr++;
         insert.run([nr, text]);
       }
+      //.......................................................................................................
+      // Read data to ensure it was written:
       retrieve = db.$.prepare(`select * from ${work_schema_x}.test order by text;`);
       result = (function() {
         var ref, results;
@@ -274,16 +290,42 @@
       if (T != null) {
         T.eq(result, matcher);
       }
+      //.......................................................................................................
+      debug('^76667^', db.$.list_schema_names());
+      ref = db.$.list_schema_names();
+      for (j = 0, len1 = ref.length; j < len1; j++) {
+        schema = ref[j];
+        info(`schema ${rpr(schema)}`);
+        ref1 = db.$.list_objects(schema);
+        for (k = 0, len2 = ref1.length; k < len2; k++) {
+          object = ref1[k];
+          urge(' ', object.name, to_width(rpr(object.sql), 50));
+        }
+      }
+      //.......................................................................................................
+      // Export data, swap DB file to get additions into new DB at old path:
       db.$.execute(`vacuum ${work_schema_x} into ${db.$.as_sql(db_temp_path)};`);
+      db.$.close();
+      help(`^43-304^ removing ${db_old_path}`);
+      H.try_to_remove_file(db_old_path);
+      help(`^43-305^ renaming ${db_target_path} -> ${db_old_path}`);
+      await FSP.rename(db_target_path, db_old_path);
+      help(`^43-306^ renaming ${db_temp_path} -> ${db_target_path}`);
+      await FSP.rename(db_temp_path, db_target_path);
       return null;
     };
     //.........................................................................................................
     part_3_reread_db = function() {
       var db, fle_schema_x, result, retrieve, row;
+      //.......................................................................................................
+      // Re-open DB:
       icql_cfg = LFT._deep_copy(icql_cfg);
-      icql_cfg.db_path = db_temp_path;
+      // icql_cfg.db_path  = db_temp_path
+      icql_cfg.db_path = db_target_path;
       db = ICQL.bind(icql_cfg);
       fle_schema_x = db.$.as_identifier(fle_schema);
+      //.......................................................................................................
+      // Re-read data:
       retrieve = db.$.prepare(`select * from ${fle_schema_x}.test order by text;`);
       result = (function() {
         var ref, results;
@@ -299,9 +341,9 @@
     };
     //.........................................................................................................
     await part_1_scaffold_db_files();
-    await part_2_crud();
-    await part_3_reread_db();
     if (done != null) {
+      // await part_2_crud()
+      // await part_3_reread_db()
       return done();
     }
   };

@@ -174,6 +174,7 @@
           fle_schema = 'main';
           switch (cfg.mode) {
             case 'mem':
+            case 'tmp':
               work_schema = 'x';
               _icql.attach(db_work_path, work_schema);
               _icql.copy_schema(fle_schema, work_schema);
@@ -234,6 +235,72 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.btsql3_tmp_small_backup = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'tmp_small_backup',
+      mode: 'tmp',
+      size: 'small',
+      pragmas: 'tmp',
+      save: 'backup'
+    });
+  };
+
+  this.btsql3_tmp_big_backup = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'tmp_big_backup',
+      mode: 'tmp',
+      size: 'big',
+      pragmas: 'tmp',
+      save: 'backup'
+    });
+  };
+
+  this.btsql3_tmp_small_vacuum = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'tmp_small_vacuum',
+      mode: 'tmp',
+      size: 'small',
+      pragmas: 'tmp',
+      save: 'vacuum'
+    });
+  };
+
+  this.btsql3_tmp_big_vacuum = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'tmp_big_vacuum',
+      mode: 'tmp',
+      size: 'big',
+      pragmas: 'tmp',
+      save: 'vacuum'
+    });
+  };
+
+  this.btsql3_tmp_small_copy = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'tmp_small_copy',
+      mode: 'tmp',
+      size: 'small',
+      pragmas: 'tmp',
+      save: 'copy'
+    });
+  };
+
+  this.btsql3_tmp_big_copy = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'tmp_big_copy',
+      mode: 'tmp',
+      size: 'big',
+      pragmas: 'tmp',
+      save: 'copy'
+    });
+  };
+
   this.btsql3_mem_small_backup = (cfg) => {
     return this._btsql3({
       ...cfg,
@@ -352,8 +419,10 @@
     bench = BM.new_benchmarks();
     //.........................................................................................................
     cfg = {
-      // word_count: 10_000
-      word_count: 10,
+      // word_count: 100_000
+      word_count: 10_000,
+      // word_count: 1_000
+      // word_count: 10
       db: {
         templates: {
           small: resolve_path('assets/icql/small-datamill.db'),
@@ -364,6 +433,7 @@
           big: resolve_path('data/icql/copy-schemas-benchmarks-{ref}.db')
         },
         work: {
+          tmp: '',
           mem: ':memory:',
           fle: 'data/icql/copy-schemas-work-{ref}.db'
         },
@@ -377,25 +447,27 @@
         /* thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 */
         fle: ['page_size = 4096', 'cache_size = 16384', 'temp_store = MEMORY', 'journal_mode = WAL', 'locking_mode = EXCLUSIVE', 'synchronous = OFF'],
         //.....................................................................................................
+        tmp: ['temp_store = file;'],
         mem: [],
         bare: []
       }
     };
     //.........................................................................................................
     repetitions = 3;
-    test_names = [
-      // 'btsql3_mem_small_backup'
-      // 'btsql3_mem_big_backup'
-      'btsql3_mem_small_vacuum',
-      'btsql3_mem_big_vacuum',
-      'btsql3_fle_small',
-      'btsql3_fle_big',
-      // 'btsql3_mem_small_copy'
-      // 'btsql3_mem_big_copy'
-      'btsql3_fle_small_bare',
-      'btsql3_fle_big_bare'
-    ];
+    test_names = ['btsql3_tmp_small_vacuum', 'btsql3_tmp_big_vacuum', 'btsql3_mem_small_vacuum', 'btsql3_mem_big_vacuum'];
     if (global.gc != null) {
+      // 'btsql3_fle_small'
+      // 'btsql3_fle_big'
+      // 'btsql3_fle_small_bare'
+      // 'btsql3_fle_big_bare'
+      // # 'btsql3_tmp_small_backup'
+      // # 'btsql3_tmp_big_backup'
+      // # 'btsql3_tmp_small_copy'
+      // # 'btsql3_tmp_big_copy'
+      // # 'btsql3_mem_small_backup'
+      // # 'btsql3_mem_big_backup'
+      // # 'btsql3_mem_small_copy'
+      // # 'btsql3_mem_big_copy'
       global.gc();
     }
     data_cache = null;
