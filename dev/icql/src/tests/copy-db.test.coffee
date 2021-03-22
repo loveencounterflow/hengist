@@ -162,7 +162,7 @@ is_new.cache = new Map()
     help "^43-303^ temp      DB:", db_temp_path
     H.try_to_remove_file db_target_path
     H.try_to_remove_file db_temp_path
-    H.try_to_remove_file db_work_path unless db_work_path is ':memory:'
+    H.try_to_remove_file db_work_path unless db_work_path in [ ':memory:', '', ]
     await FSP.copyFile db_template_path, db_target_path
     return null
   #.........................................................................................................
