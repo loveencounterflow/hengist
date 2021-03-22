@@ -23,6 +23,7 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 PATH                      = require 'path'
 FS                        = require 'fs'
+FSP                       = require 'fs/promises'
 types                     = new ( require 'intertype' ).Intertype
 { isa
   validate
@@ -86,3 +87,39 @@ types.declare 'interpolatable_value', ( x ) ->
   data_cache  = DATOM.freeze data_cache
   whisper "...done"
   return data_cache
+
+#-----------------------------------------------------------------------------------------------------------
+@get_cfg = ->
+  R =
+    # word_count: 10_000
+    word_count: 10
+    db:
+      templates:
+        small:  @resolve_path 'assets/icql/small-datamill.db'
+        big:    @resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.db'
+      target:
+        small:  @resolve_path 'data/icql/icql-{ref}-{size}.db'
+        big:    @resolve_path 'data/icql/icql-{ref}-{size}.db'
+      work:
+        mem:    ':memory:'
+        fle:    @resolve_path 'data/icql/icql-{ref}-{size}.db'
+      temp:
+        small:  @resolve_path 'data/icql/icql-{ref}-{size}-temp.db'
+        big:    @resolve_path 'data/icql/icql-{ref}-{size}-temp.db'
+      old:
+        small:  @resolve_path 'data/icql/icql-{ref}-{size}-old.db'
+        big:    @resolve_path 'data/icql/icql-{ref}-{size}-old.db'
+    pragma_sets:
+      #.....................................................................................................
+      ### thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 ###
+      fle: [
+        'page_size = 4096'
+        'cache_size = 16384'
+        'temp_store = MEMORY'
+        'journal_mode = WAL'
+        'locking_mode = EXCLUSIVE'
+        'synchronous = OFF' ]
+      #.....................................................................................................
+      mem: []
+      bare: []
+  return R

@@ -38,41 +38,6 @@ is_new = ( x ) ->
 is_new.cache = new Map()
 
 
-#-----------------------------------------------------------------------------------------------------------
-get_cfg = ->
-  R =
-    # word_count: 10_000
-    word_count: 10
-    db:
-      templates:
-        small:  H.resolve_path 'assets/icql/small-datamill.db'
-        big:    H.resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.db'
-      target:
-        small:  H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}.db'
-        big:    H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}.db'
-      work:
-        mem:    ':memory:'
-        fle:    'data/icql/copy-schemas-work-{ref}-{size}.db'
-      temp:
-        small:  H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}-temp.db'
-        big:    H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}-temp.db'
-      old:
-        small:  H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}-old.db'
-        big:    H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}-old.db'
-    pragma_sets:
-      #.....................................................................................................
-      ### thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 ###
-      fle: [
-        'page_size = 4096'
-        'cache_size = 16384'
-        'temp_store = MEMORY'
-        'journal_mode = WAL'
-        'locking_mode = EXCLUSIVE'
-        'synchronous = OFF' ]
-      #.....................................................................................................
-      mem: []
-      bare: []
-  return R
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "reuse memory DB" ] = ( T, done ) ->
@@ -159,7 +124,7 @@ get_cfg = ->
   icql_cfg          = H.get_icql_settings true
   icql_cfg.echo     = true
   icql_cfg.echo     = false
-  test_cfg          = get_cfg()
+  test_cfg          = H.get_cfg()
   test_cfg.mode     = 'mem'
   # test_cfg.size     = 'big'
   test_cfg.size     = 'small'
