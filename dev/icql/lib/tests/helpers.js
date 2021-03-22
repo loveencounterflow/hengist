@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DATA, DATOM, FS, PATH, badge, debug, echo, help, info, isa, rpr, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DATA, DATOM, FS, FSP, PATH, badge, debug, echo, help, info, isa, rpr, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -33,6 +33,8 @@
   PATH = require('path');
 
   FS = require('fs');
+
+  FSP = require('fs/promises');
 
   types = new (require('intertype')).Intertype();
 
@@ -97,6 +99,15 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.copy_over = async function(from_path, to_path) {
+    if (to_path !== ':memory:' && to_path !== '') {
+      this.try_to_remove_file(to_path);
+    }
+    await FSP.copyFile(from_path, to_path);
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.interpolate = function(template, namespace) {
     var R, match, name, pattern, value;
     validate.text(template);
@@ -132,6 +143,46 @@
     data_cache = DATOM.freeze(data_cache);
     whisper("...done");
     return data_cache;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.get_cfg = function() {
+    var R;
+    R = {
+      // word_count: 10_000
+      word_count: 10,
+      db: {
+        templates: {
+          small: this.resolve_path('assets/icql/small-datamill.db'),
+          big: this.resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.db')
+        },
+        target: {
+          small: this.resolve_path('data/icql/icql-{ref}-{size}.db'),
+          big: this.resolve_path('data/icql/icql-{ref}-{size}.db')
+        },
+        work: {
+          mem: ':memory:',
+          fle: this.resolve_path('data/icql/icql-{ref}-{size}.db')
+        },
+        temp: {
+          small: this.resolve_path('data/icql/icql-{ref}-{size}-temp.db'),
+          big: this.resolve_path('data/icql/icql-{ref}-{size}-temp.db')
+        },
+        old: {
+          small: this.resolve_path('data/icql/icql-{ref}-{size}-old.db'),
+          big: this.resolve_path('data/icql/icql-{ref}-{size}-old.db')
+        }
+      },
+      pragma_sets: {
+        //.....................................................................................................
+        /* thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 */
+        fle: ['page_size = 4096', 'cache_size = 16384', 'temp_store = MEMORY', 'journal_mode = WAL', 'locking_mode = EXCLUSIVE', 'synchronous = OFF'],
+        //.....................................................................................................
+        mem: [],
+        bare: []
+      }
+    };
+    return R;
   };
 
 }).call(this);

@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, PATH, badge, debug, echo, help, info, rpr, test, urge, warn, whisper;
+  var CND, H, PATH, badge, debug, echo, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -27,6 +27,12 @@
   test = require('../../../../apps/guy-test');
 
   PATH = require('path');
+
+  H = require('./helpers');
+
+  types = new (require('intertype')).Intertype();
+
+  ({isa, type_of, validate, validate_list_of} = types.export());
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: as_sql"] = async function(T, done) {
@@ -115,8 +121,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: clear()"] = function(T, done) {
-    var ICQLDBA, d, dba, i, id, j, len, ref;
-    // T.halt_on_error()
+    var ICQLDBA, d, dba, i, id, ref;
+    T.halt_on_error();
     ICQLDBA = require('../../../../apps/icql/dba');
     dba = new ICQLDBA.Dba();
     //.........................................................................................................
@@ -125,8 +131,7 @@
     dba.execute("create table main.k2 ( id integer primary key, fk_k1 integer unique references k1 ( id ) );");
     ref = dba.list_objects();
     //.........................................................................................................
-    for (i = 0, len = ref.length; i < len; i++) {
-      d = ref[i];
+    for (d of ref) {
       info("^557-300^", {
         type: d.type,
         name: d.name
@@ -137,19 +142,27 @@
     T.eq(dba.get_foreign_key_state(), true);
     dba.set_foreign_key_state(false);
     T.eq(dba.get_foreign_key_state(), false);
-    for (id = j = 1; j <= 9; id = ++j) {
+    for (id = i = 1; i <= 9; id = ++i) {
       dba.execute(`insert into main.k1 values ( ${id}, ${id} );`);
       dba.execute(`insert into main.k2 values ( ${id}, ${id} );`);
     }
     dba.set_foreign_key_state(true);
     T.eq(dba.get_foreign_key_state(), true);
     //.........................................................................................................
-    T.eq((function() {
-      var k, len1, ref1, results;
+    debug('^544734^', (function() {
+      var ref1, results;
       ref1 = dba.list_objects();
       results = [];
-      for (k = 0, len1 = ref1.length; k < len1; k++) {
-        d = ref1[k];
+      for (d of ref1) {
+        results.push(d.name);
+      }
+      return results;
+    })());
+    T.eq((function() {
+      var ref1, results;
+      ref1 = dba.list_objects();
+      results = [];
+      for (d of ref1) {
         results.push(d.name);
       }
       return results;
@@ -204,15 +217,51 @@
     //.........................................................................................................
     dba.clear();
     T.eq((function() {
-      var k, len1, ref1, results;
+      var ref1, results;
       ref1 = dba.list_objects();
       results = [];
-      for (k = 0, len1 = ref1.length; k < len1; k++) {
-        d = ref1[k];
+      for (d of ref1) {
         results.push(d.name);
       }
       return results;
     })(), []);
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: open from DB file"] = function(T, done) {
+    var ICQLDBA, d, db_template_path, db_work_path, dba, ignore, objects, path, s, test_cfg;
+    T.halt_on_error();
+    ICQLDBA = require('../../../../apps/icql/dba');
+    test_cfg = H.get_cfg();
+    test_cfg.size = 'small';
+    test_cfg.mode = 'fle';
+    test_cfg.ref = 'dba-open-from-file';
+    test_cfg.pragmas = 'fle';
+    db_template_path = H.interpolate(test_cfg.db.templates[test_cfg.size], test_cfg);
+    db_work_path = H.interpolate(test_cfg.db.work[test_cfg.mode], test_cfg);
+    path = db_work_path;
+    help("^77-300^ db_template_path:  ", db_template_path);
+    help("^77-300^ db_work_path:      ", db_work_path);
+    H.copy_over(db_template_path, db_work_path);
+    dba = new ICQLDBA.Dba({path});
+    //.........................................................................................................
+    T.eq(type_of((s = dba.list_objects())), 'statementiterator');
+    ignore = [...s];
+    debug(ignore);
+    objects = (function() {
+      var ref, results;
+      ref = dba.list_objects({
+        schema: 'main'
+      });
+      results = [];
+      for (d of ref) {
+        results.push(`${d.type}:${d.name}`);
+      }
+      return results;
+    })();
+    T.eq(objects, ['index:sqlite_autoindex_keys_1', 'index:sqlite_autoindex_realms_1', 'index:sqlite_autoindex_sources_1', 'table:keys', 'table:main', 'table:realms', 'table:sources', 'view:dest_changes_backward', 'view:dest_changes_forward']);
     //.........................................................................................................
     return done();
   };
