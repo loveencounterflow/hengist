@@ -130,7 +130,7 @@ types                     = new ( require 'intertype' ).Intertype
   path              = db_work_path
   help "^77-300^ db_template_path:  ", db_template_path
   help "^77-300^ db_work_path:      ", db_work_path
-  H.copy_over db_template_path, db_work_path
+  await H.copy_over db_template_path, db_work_path
   dba               = new ICQLDBA.Dba { path, }
   #.........................................................................................................
   T.eq ( type_of ( s = dba.walk_objects() ) ), 'statementiterator'
