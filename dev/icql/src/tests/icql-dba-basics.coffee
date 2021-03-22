@@ -85,7 +85,7 @@ types                     = new ( require 'intertype' ).Intertype
   dba.execute "create table main.k1 ( id integer primary key, fk_k2 integer unique references k2 ( id ) );"
   dba.execute "create table main.k2 ( id integer primary key, fk_k1 integer unique references k1 ( id ) );"
   #.........................................................................................................
-  for d from dba.list_objects()
+  for d from dba.walk_objects()
     info "^557-300^", { type: d.type, name: d.name, }
   #.........................................................................................................
   # Insert rows:
@@ -98,9 +98,9 @@ types                     = new ( require 'intertype' ).Intertype
   dba.set_foreign_key_state on
   T.eq dba.get_foreign_key_state(), true
   #.........................................................................................................
-  debug '^544734^', ( d.name for d from dba.list_objects() )
-  T.eq ( d.name for d from dba.list_objects() ), [ 'sqlite_autoindex_k1_1', 'sqlite_autoindex_k2_1', 'k1', 'k2' ]
-  T.eq ( dba.all_rows dba.query "select * from k1 join k2 on ( k1.fk_k2 = k2.id );" ), [
+  debug '^544734^', ( d.name for d from dba.walk_objects() )
+  T.eq ( d.name for d from dba.walk_objects() ), [ 'sqlite_autoindex_k1_1', 'sqlite_autoindex_k2_1', 'k1', 'k2' ]
+  T.eq ( dba.list dba.query "select * from k1 join k2 on ( k1.fk_k2 = k2.id );" ), [
     { id: 1, fk_k2: 1, fk_k1: 1 },
     { id: 2, fk_k2: 2, fk_k1: 2 },
     { id: 3, fk_k2: 3, fk_k1: 3 },
@@ -112,7 +112,7 @@ types                     = new ( require 'intertype' ).Intertype
     { id: 9, fk_k2: 9, fk_k1: 9 } ]
   #.........................................................................................................
   dba.clear()
-  T.eq ( d.name for d from dba.list_objects() ), []
+  T.eq ( d.name for d from dba.walk_objects() ), []
   #.........................................................................................................
   done()
 
@@ -133,10 +133,10 @@ types                     = new ( require 'intertype' ).Intertype
   H.copy_over db_template_path, db_work_path
   dba               = new ICQLDBA.Dba { path, }
   #.........................................................................................................
-  T.eq ( type_of ( s = dba.list_objects() ) ), 'statementiterator'
+  T.eq ( type_of ( s = dba.walk_objects() ) ), 'statementiterator'
   ignore            = [ s..., ]
   debug ignore
-  objects           = ( "#{d.type}:#{d.name}" for d from dba.list_objects { schema: 'main', } )
+  objects           = ( "#{d.type}:#{d.name}" for d from dba.walk_objects { schema: 'main', } )
   T.eq objects, [ 'index:sqlite_autoindex_keys_1', 'index:sqlite_autoindex_realms_1', 'index:sqlite_autoindex_sources_1', 'table:keys', 'table:main', 'table:realms', 'table:sources', 'view:dest_changes_backward', 'view:dest_changes_forward' ]
   #.........................................................................................................
   done()
@@ -145,10 +145,10 @@ types                     = new ( require 'intertype' ).Intertype
 
 ############################################################################################################
 unless module.parent?
-  # test @
+  test @
   # test @[ "DBA: as_sql" ]
   # test @[ "DBA: interpolate" ]
-  test @[ "DBA: clear()" ]
+  # test @[ "DBA: clear()" ]
   # test @[ "toposort with schema" ]
   # @[ "toposort with schema" ]()
 
