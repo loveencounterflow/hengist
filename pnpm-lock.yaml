@@ -7,7 +7,7 @@ dependencies:
   cnd: 9.2.1
   command-line-args: 5.1.1
   command-line-usage: 6.1.1
-  commander: 7.1.0
+  commander: 7.2.0
   convert-source-map: 1.7.0
   cupofjoe: 0.2.1
   datom: 8.0.3
@@ -16,7 +16,7 @@ dependencies:
   deepfreezer: 1.2.2
   diff-match-patch: 1.0.5
   drange: 2.0.1
-  exec-sh: 0.3.4
+  exec-sh: 0.3.5
   execall: 2.0.0
   executive: 1.6.3
   fast-copy: 2.1.1
@@ -27,21 +27,21 @@ dependencies:
   hollerith-codec: 3.0.1
   icql: 5.3.0
   icql515: /icql/5.1.5
-  immer: 9.0.0
+  immer: 9.0.1
   immutable: 4.0.0-rc.12
   intermatic: 0.5.4
   intershop: link:../intershop
   intershop-intertext: link:../intershop-intertext
   intertext: 5.0.0
   intertext-splitlines: 1.2.1
-  intertype: 7.6.6
+  intertype: 7.6.7
   jake: 10.8.2
   javascript-state-machine: 3.1.0
   jfee: 0.1.4
   klona: 2.0.4
   letsfreezethat: 3.1.0
   load-source-map: 2.0.0
-  loupe: 2.0.3
+  loupe: 2.1.1
   merge-ranges: 1.0.2
   mixa: 0.1.2
   mori: 0.3.2
@@ -508,12 +508,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
-  /commander/7.1.0:
+  /commander/7.2.0:
     dev: false
     engines:
       node: '>= 10'
     resolution:
-      integrity: sha512-pRxBna3MJe6HKnBGsDyMv8ETbptw3axEdYHoqNh7gu5oDcew8fs0xnivZGm06Ogk8zGAJ9VX+OPEr2GXEQK4dg==
+      integrity: sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==
   /concat-map/0.0.1:
     dev: false
     resolution:
@@ -546,7 +546,7 @@ packages:
   /cupofjoe/0.1.1:
     dependencies:
       cnd: 9.2.1
-      intertype: 7.6.6
+      intertype: 7.6.7
       multimix: 4.1.0
     dev: false
     resolution:
@@ -856,10 +856,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-34xp7vFkeSPHFXuc6DhAYQsCzDk=
-  /exec-sh/0.3.4:
+  /exec-sh/0.3.5:
     dev: false
     resolution:
-      integrity: sha512-sEFIkc61v75sWeOe72qyrqg2Qg0OuLESziUDk/O/z2qgS15y2gWVFrI6f2Qn/qw/0/NCfCEsmNA4zOjkwEZT1A==
+      integrity: sha512-0hzpaUazv4mEccxdn3TXC+HWNeVXNKMCJRK6E7Xyg+LwGAYI3yFag6jTkd4injV+kChYDQS1ftqDhnDVWNhU8A==
   /execall/2.0.0:
     dependencies:
       clone-regexp: 2.2.0
@@ -998,12 +998,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-mBBwmeGTrxEMO4pMaaf/uUEFHnYtwr8FTe8Y/mer4rcV/bye0qGm6pw1bGZFGStxC5O76c5ZAVBGnqHmOaJpdQ==
-  /get-function-name/0.0.1:
+  /get-func-name/2.0.0:
     dev: false
-    engines:
-      node: 0.x
     resolution:
-      integrity: sha1-bWL5dza1BOac+seryF1QILWZjcc=
+      integrity: sha1-6td0q+5y4gQJQzoGY2YCPdaIekE=
   /get-source/2.0.11:
     dependencies:
       data-uri-to-buffer: 2.0.2
@@ -1150,10 +1148,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==
-  /immer/9.0.0:
+  /immer/9.0.1:
     dev: false
     resolution:
-      integrity: sha512-/L68D6hSjuQoeymW42UQLTMHvRZCapuSBBm0CfKbIyoqMDH+p8PHg9Cti3eBQA+tCRAOUOSBgn8Ji70YXWmBkw==
+      integrity: sha512-7CCw1DSgr8kKYXTYOI1qMM/f5qxT5vIVMeGLDCDX8CSxsggr1Sjdoha4OhsP0AZ1UvWbyZlILHvLjaynuu02Mg==
   /immutable/4.0.0-rc.12:
     dev: false
     resolution:
@@ -1256,6 +1254,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-iqUMhx+WLwg9CwffvYbLDkM3CDiYSVGI3dPEe+uHtNp3ZheRgG2406DHckhfwaI4zW6OE1WnNAZyF6XbRlwUCA==
+  /intertype/7.6.7:
+    dependencies:
+      multimix: 5.0.0
+    dev: false
+    resolution:
+      integrity: sha512-vBgYabqxX3fLa9f0Z3QeXgYszadAGdAHXdLcdQc5ZxZSG5CmbJCdYcudZLYtgmNo8epQag8zzyg7wwx+OD5J8g==
   /is-core-module/2.2.0:
     dependencies:
       has: 1.0.3
@@ -1429,13 +1433,13 @@ packages:
       node: '>=10'
     resolution:
       integrity: sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg==
-  /loupe/2.0.3:
+  /loupe/2.1.1:
     dependencies:
-      get-function-name: 0.0.1
+      get-func-name: 2.0.0
       type-detect: 4.0.8
     dev: false
     resolution:
-      integrity: sha512-EO23oee3x9JYZVQM41VrrNhWYC3gpn3gvXhNvDzX4MUK2v2lrJUNpbt3G25SASqW50nlltu7NLc/ERJTtoCWDw==
+      integrity: sha512-C6Hqvejc5VLgz6L4gf1Dl1bBLZ1OTkNG70K4jtQkV/+y2JJlJKHGxe8roH0+hsO2wgZGo1p28IlMyFFtF1UUQQ==
   /lru-cache/4.1.5:
     dependencies:
       pseudomap: 1.0.2
@@ -2712,7 +2716,7 @@ specifiers:
   cnd: ^9.2.1
   command-line-args: ^5.1.1
   command-line-usage: ^6.1.0
-  commander: 7.1.0
+  commander: 7.2.0
   convert-source-map: ^1.7.0
   cupofjoe: 0.2.1
   datom: 8.0.3
@@ -2721,7 +2725,7 @@ specifiers:
   deepfreezer: ^1.2.2
   diff-match-patch: ^1.0.5
   drange: ^2.0.1
-  exec-sh: ^0.3.4
+  exec-sh: 0.3.5
   execall: ^2.0.0
   executive: ^1.6.3
   fast-copy: ^2.1.0
@@ -2732,21 +2736,21 @@ specifiers:
   hollerith-codec: 3.0.1
   icql: 5.3.0
   icql515: npm:icql@5.1.5
-  immer: 9.0.0
+  immer: 9.0.1
   immutable: ^4.0.0-rc.12
   intermatic: 0.5.4
   intershop: file:../intershop
   intershop-intertext: file:../intershop-intertext
   intertext: ^5.0.0
   intertext-splitlines: 1.2.1
-  intertype: 7.6.6
+  intertype: 7.6.7
   jake: ^10.8.2
   javascript-state-machine: ^3.1.0
   jfee: 0.1.4
   klona: ^2.0.4
   letsfreezethat: ^3.1.0
   load-source-map: ^2.0.0
-  loupe: 2.0.3
+  loupe: 2.1.1
   merge-ranges: ^1.0.2
   mixa: 0.1.2
   mori: ^0.3.2
