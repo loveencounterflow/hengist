@@ -38,7 +38,7 @@
   this["DBA: as_sql"] = async function(T, done) {
     var ICQLDBA, dba, error, i, len, matcher, probe, probes_and_matchers;
     T.halt_on_error();
-    ICQLDBA = require('../../../../apps/icql/dba');
+    ICQLDBA = require('../../../../apps/icql-dba');
     dba = new ICQLDBA.Dba();
     probes_and_matchers = [[true, '1'], [false, '0'], [42, '42'], ['text', "'text'"], ["text with 'quotes'", "'text with ''quotes'''"], [[1, 2, 3], "'[1,2,3]'"], [[], "'[]'"]];
 //.........................................................................................................
@@ -57,7 +57,7 @@
   this["DBA: interpolate"] = async function(T, done) {
     var ICQLDBA, dba, error, i, len, matcher, probe, probes_and_matchers;
     T.halt_on_error();
-    ICQLDBA = require('../../../../apps/icql/dba');
+    ICQLDBA = require('../../../../apps/icql-dba');
     dba = new ICQLDBA.Dba();
     probes_and_matchers = [
       [
@@ -107,7 +107,7 @@
   this["DBA: toposort is removed"] = function(T, done) {
     var ICQLDBA, dba;
     T.halt_on_error();
-    ICQLDBA = require('../../../../apps/icql/dba');
+    ICQLDBA = require('../../../../apps/icql-dba');
     dba = new ICQLDBA.Dba();
     T.eq(dba.get_toposort, void 0);
     /* removed b/c stops working when tables refer to each other cyclical fashion:
@@ -123,7 +123,7 @@
   this["DBA: clear()"] = function(T, done) {
     var ICQLDBA, d, dba, i, id, ref;
     T.halt_on_error();
-    ICQLDBA = require('../../../../apps/icql/dba');
+    ICQLDBA = require('../../../../apps/icql-dba');
     dba = new ICQLDBA.Dba();
     //.........................................................................................................
     // Create tables, indexes:
@@ -230,10 +230,10 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: open from DB file"] = function(T, done) {
+  this["DBA: open from DB file"] = async function(T, done) {
     var ICQLDBA, d, db_template_path, db_work_path, dba, ignore, objects, path, s, test_cfg;
     T.halt_on_error();
-    ICQLDBA = require('../../../../apps/icql/dba');
+    ICQLDBA = require('../../../../apps/icql-dba');
     test_cfg = H.get_cfg();
     test_cfg.size = 'small';
     test_cfg.mode = 'fle';
@@ -244,7 +244,7 @@
     path = db_work_path;
     help("^77-300^ db_template_path:  ", db_template_path);
     help("^77-300^ db_work_path:      ", db_work_path);
-    H.copy_over(db_template_path, db_work_path);
+    await H.copy_over(db_template_path, db_work_path);
     dba = new ICQLDBA.Dba({path});
     //.........................................................................................................
     T.eq(type_of((s = dba.walk_objects())), 'statementiterator');
