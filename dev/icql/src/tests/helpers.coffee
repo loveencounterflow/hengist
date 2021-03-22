@@ -62,6 +62,12 @@ types.declare 'interpolatable_value', ( x ) ->
 @resolve_path = ( path ) -> PATH.resolve PATH.join __dirname, '../../../../', path
 
 #-----------------------------------------------------------------------------------------------------------
+@copy_over = ( from_path, to_path ) ->
+  @try_to_remove_file to_path unless to_path in [ ':memory:', '', ]
+  await FSP.copyFile from_path, to_path
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @interpolate  = ( template, namespace ) ->
   validate.text template
   validate.object namespace
