@@ -27,7 +27,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: as_sql" ] = ( T, done ) ->
   T.halt_on_error()
-  ICQLDBA           = require '../../../../apps/icql/dba'
+  ICQLDBA           = require '../../../../apps/icql-dba'
   dba               = new ICQLDBA.Dba()
   probes_and_matchers = [
     [true,'1',]
@@ -47,7 +47,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: interpolate" ] = ( T, done ) ->
   T.halt_on_error()
-  ICQLDBA           = require '../../../../apps/icql/dba'
+  ICQLDBA           = require '../../../../apps/icql-dba'
   dba               = new ICQLDBA.Dba()
   probes_and_matchers = [
     [["foo, $bar, baz",{bar:42,}],"foo, 42, baz"]
@@ -64,7 +64,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: toposort is removed" ] = ( T, done ) ->
   T.halt_on_error()
-  ICQLDBA           = require '../../../../apps/icql/dba'
+  ICQLDBA           = require '../../../../apps/icql-dba'
   dba               = new ICQLDBA.Dba()
   T.eq dba.get_toposort, undefined
   ### removed b/c stops working when tables refer to each other cyclical fashion:
@@ -78,7 +78,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: clear()" ] = ( T, done ) ->
   T.halt_on_error()
-  ICQLDBA           = require '../../../../apps/icql/dba'
+  ICQLDBA           = require '../../../../apps/icql-dba'
   dba               = new ICQLDBA.Dba()
   #.........................................................................................................
   # Create tables, indexes:
@@ -119,7 +119,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open from DB file" ] = ( T, done ) ->
   T.halt_on_error()
-  ICQLDBA           = require '../../../../apps/icql/dba'
+  ICQLDBA           = require '../../../../apps/icql-dba'
   test_cfg          = H.get_cfg()
   test_cfg.size     = 'small'
   test_cfg.mode     = 'fle'
