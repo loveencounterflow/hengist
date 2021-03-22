@@ -28,6 +28,7 @@ types                     = new ( require 'intertype' ).Intertype
 { isa
   validate
   validate_list_of }      = types.export()
+{ to_width }              = require 'to-width'
 
 #-----------------------------------------------------------------------------------------------------------
 is_new = ( x ) ->
@@ -55,6 +56,9 @@ get_cfg = ->
       temp:
         small:  H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}-temp.db'
         big:    H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}-temp.db'
+      old:
+        small:  H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}-old.db'
+        big:    H.resolve_path 'data/icql/icql-copy-db-{ref}-{size}-old.db'
     pragma_sets:
       #.....................................................................................................
       ### thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 ###
@@ -154,6 +158,7 @@ get_cfg = ->
   matcher           = [ probe..., ].sort()
   icql_cfg          = H.get_icql_settings true
   icql_cfg.echo     = true
+  icql_cfg.echo     = false
   test_cfg          = get_cfg()
   test_cfg.mode     = 'mem'
   # test_cfg.size     = 'big'
@@ -165,6 +170,7 @@ get_cfg = ->
   db_template_path  = null
   db_target_path    = null
   db_temp_path      = null
+  db_old_path       = null
   fle_schema        = 'main'
   work_schema       = 'x'
   #.........................................................................................................
@@ -178,16 +184,17 @@ get_cfg = ->
     db_template_path  = H.interpolate test_cfg.db.templates[ test_cfg.size ], test_cfg
     db_target_path    = H.interpolate test_cfg.db.target[    test_cfg.size ], test_cfg
     db_temp_path      = H.interpolate test_cfg.db.temp[      test_cfg.size ], test_cfg
+    db_old_path       = H.interpolate test_cfg.db.old[       test_cfg.size ], test_cfg
     #.......................................................................................................
     validate.nonempty_text db_template_path
     validate.nonempty_text db_target_path
     validate.nonempty_text db_temp_path
     #.......................................................................................................
     # if gcfg.verbose
-    help "^44433^ template  DB:", db_template_path
-    help "^44433^ work      DB:", db_work_path
-    help "^44433^ target    DB:", db_target_path
-    help "^44433^ temp      DB:", db_temp_path
+    help "^43-300^ template  DB:", db_template_path
+    help "^43-301^ work      DB:", db_work_path
+    help "^43-302^ target    DB:", db_target_path
+    help "^43-303^ temp      DB:", db_temp_path
     H.try_to_remove_file db_target_path
     H.try_to_remove_file db_temp_path
     H.try_to_remove_file db_work_path unless db_work_path is ':memory:'
@@ -197,39 +204,66 @@ get_cfg = ->
   part_2_crud = ->
     db                = ICQL.bind icql_cfg
     work_schema_x     = db.$.as_identifier work_schema
+    #.......................................................................................................
+    # Attach and populate memory DB:
     db.$.attach db_work_path, work_schema
     db.$.copy_schema fle_schema, work_schema
     #.......................................................................................................
+    # Create new table:
     db.$.execute """drop table if exists #{work_schema_x}.test;"""
     db.$.execute """
       create table #{work_schema_x}.test(
         id    integer primary key,
         nr    integer not null,
         text  text );"""
+    #.......................................................................................................
+    # Insert data into new table:
     insert  = db.$.prepare """insert into #{work_schema_x}.test ( nr, text ) values ( ?, ? );"""
     nr      = 0
     for text in probe
       nr++
       insert.run [ nr, text, ]
+    #.......................................................................................................
+    # Read data to ensure it was written:
     retrieve          = db.$.prepare """select * from #{work_schema_x}.test order by text;"""
     result            = ( row.text for row from retrieve.iterate() )
     T.eq result, matcher if T?
+    #.......................................................................................................
+    debug '^76667^', db.$.list_schema_names()
+    for schema in db.$.list_schema_names()
+      info "schema #{rpr schema}"
+      for object in db.$.list_objects schema
+        urge ' ', object.name, to_width ( rpr object.sql ), 50
+    #.......................................................................................................
+    # Export data, swap DB file to get additions into new DB at old path:
     db.$.execute "vacuum #{work_schema_x} into #{db.$.as_sql db_temp_path};"
+    db.$.close()
+    help "^43-304^ removing #{db_old_path}"
+    H.try_to_remove_file db_old_path
+    help "^43-305^ renaming #{db_target_path} -> #{db_old_path}"
+    await FSP.rename db_target_path, db_old_path
+    help "^43-306^ renaming #{db_temp_path} -> #{db_target_path}"
+    await FSP.rename db_temp_path, db_target_path
     return null
   #.........................................................................................................
   part_3_reread_db = ->
+    #.......................................................................................................
+    # Re-open DB:
     icql_cfg          = LFT._deep_copy icql_cfg
-    icql_cfg.db_path  = db_temp_path
+    # icql_cfg.db_path  = db_temp_path
+    icql_cfg.db_path  = db_target_path
     db                = ICQL.bind icql_cfg
     fle_schema_x      = db.$.as_identifier fle_schema
+    #.......................................................................................................
+    # Re-read data:
     retrieve          = db.$.prepare """select * from #{fle_schema_x}.test order by text;"""
     result            = ( row.text for row from retrieve.iterate() )
     debug '^40598^', result
     return null
   #.........................................................................................................
   await part_1_scaffold_db_files()
-  await part_2_crud()
-  await part_3_reread_db()
+  # await part_2_crud()
+  # await part_3_reread_db()
   done() if done?
 
 
