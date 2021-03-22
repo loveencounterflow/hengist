@@ -17,7 +17,12 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 test                      = require '../../../../apps/guy-test'
 PATH                      = require 'path'
-
+H                         = require './helpers'
+types                     = new ( require 'intertype' ).Intertype
+{ isa
+  type_of
+  validate
+  validate_list_of }      = types.export()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: as_sql" ] = ( T, done ) ->
@@ -72,7 +77,7 @@ PATH                      = require 'path'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: clear()" ] = ( T, done ) ->
-  # T.halt_on_error()
+  T.halt_on_error()
   ICQLDBA           = require '../../../../apps/icql/dba'
   dba               = new ICQLDBA.Dba()
   #.........................................................................................................
@@ -80,7 +85,7 @@ PATH                      = require 'path'
   dba.execute "create table main.k1 ( id integer primary key, fk_k2 integer unique references k2 ( id ) );"
   dba.execute "create table main.k2 ( id integer primary key, fk_k1 integer unique references k1 ( id ) );"
   #.........................................................................................................
-  for d in dba.list_objects()
+  for d from dba.list_objects()
     info "^557-300^", { type: d.type, name: d.name, }
   #.........................................................................................................
   # Insert rows:
@@ -93,7 +98,8 @@ PATH                      = require 'path'
   dba.set_foreign_key_state on
   T.eq dba.get_foreign_key_state(), true
   #.........................................................................................................
-  T.eq ( d.name for d in dba.list_objects() ), [ 'sqlite_autoindex_k1_1', 'sqlite_autoindex_k2_1', 'k1', 'k2' ]
+  debug '^544734^', ( d.name for d from dba.list_objects() )
+  T.eq ( d.name for d from dba.list_objects() ), [ 'sqlite_autoindex_k1_1', 'sqlite_autoindex_k2_1', 'k1', 'k2' ]
   T.eq ( dba.all_rows dba.query "select * from k1 join k2 on ( k1.fk_k2 = k2.id );" ), [
     { id: 1, fk_k2: 1, fk_k1: 1 },
     { id: 2, fk_k2: 2, fk_k1: 2 },
@@ -106,7 +112,32 @@ PATH                      = require 'path'
     { id: 9, fk_k2: 9, fk_k1: 9 } ]
   #.........................................................................................................
   dba.clear()
-  T.eq ( d.name for d in dba.list_objects() ), []
+  T.eq ( d.name for d from dba.list_objects() ), []
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: open from DB file" ] = ( T, done ) ->
+  T.halt_on_error()
+  ICQLDBA           = require '../../../../apps/icql/dba'
+  test_cfg          = H.get_cfg()
+  test_cfg.size     = 'small'
+  test_cfg.mode     = 'fle'
+  test_cfg.ref      = 'dba-open-from-file'
+  test_cfg.pragmas  = 'fle'
+  db_template_path  = H.interpolate test_cfg.db.templates[  test_cfg.size ], test_cfg
+  db_work_path      = H.interpolate test_cfg.db.work[       test_cfg.mode ], test_cfg
+  path              = db_work_path
+  help "^77-300^ db_template_path:  ", db_template_path
+  help "^77-300^ db_work_path:      ", db_work_path
+  H.copy_over db_template_path, db_work_path
+  dba               = new ICQLDBA.Dba { path, }
+  #.........................................................................................................
+  T.eq ( type_of ( s = dba.list_objects() ) ), 'statementiterator'
+  ignore            = [ s..., ]
+  debug ignore
+  objects           = ( "#{d.type}:#{d.name}" for d from dba.list_objects { schema: 'main', } )
+  T.eq objects, [ 'index:sqlite_autoindex_keys_1', 'index:sqlite_autoindex_realms_1', 'index:sqlite_autoindex_sources_1', 'table:keys', 'table:main', 'table:realms', 'table:sources', 'view:dest_changes_backward', 'view:dest_changes_forward' ]
   #.........................................................................................................
   done()
 
