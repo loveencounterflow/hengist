@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, badge, debug, echo, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, badge, debug, echo, help, info, isa, rpr, show_schemas_and_objects, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -121,7 +121,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: clear()"] = function(T, done) {
-    var ICQLDBA, d, dba, i, id, ref;
+    var ICQLDBA, d, dba, i, id, ref1;
     T.halt_on_error();
     ICQLDBA = require('../../../../apps/icql-dba');
     dba = new ICQLDBA.Dba();
@@ -129,9 +129,9 @@
     // Create tables, indexes:
     dba.execute("create table main.k1 ( id integer primary key, fk_k2 integer unique references k2 ( id ) );");
     dba.execute("create table main.k2 ( id integer primary key, fk_k1 integer unique references k1 ( id ) );");
-    ref = dba.walk_objects();
+    ref1 = dba.walk_objects();
     //.........................................................................................................
-    for (d of ref) {
+    for (d of ref1) {
       info("^557-300^", {
         type: d.type,
         name: d.name
@@ -150,19 +150,19 @@
     T.eq(dba.get_foreign_key_state(), true);
     //.........................................................................................................
     debug('^544734^', (function() {
-      var ref1, results;
-      ref1 = dba.walk_objects();
+      var ref2, results;
+      ref2 = dba.walk_objects();
       results = [];
-      for (d of ref1) {
+      for (d of ref2) {
         results.push(d.name);
       }
       return results;
     })());
     T.eq((function() {
-      var ref1, results;
-      ref1 = dba.walk_objects();
+      var ref2, results;
+      ref2 = dba.walk_objects();
       results = [];
-      for (d of ref1) {
+      for (d of ref2) {
         results.push(d.name);
       }
       return results;
@@ -217,10 +217,10 @@
     //.........................................................................................................
     dba.clear();
     T.eq((function() {
-      var ref1, results;
-      ref1 = dba.walk_objects();
+      var ref2, results;
+      ref2 = dba.walk_objects();
       results = [];
-      for (d of ref1) {
+      for (d of ref2) {
         results.push(d.name);
       }
       return results;
@@ -250,12 +250,12 @@
     T.eq(type_of((s = dba.walk_objects())), 'statementiterator');
     ignore = [...s];
     objects = (function() {
-      var ref, results;
-      ref = dba.walk_objects({
+      var ref1, results;
+      ref1 = dba.walk_objects({
         schema: 'main'
       });
       results = [];
-      for (d of ref) {
+      for (d of ref1) {
         results.push(`${d.type}:${d.name}`);
       }
       return results;
@@ -267,7 +267,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["_DBA: copy file DB to memory"] = async function(T, done) {
-    var ICQLDBA, cfg, d, dba, path, ref;
+    var ICQLDBA, cfg, d, dba, path, ref1;
     T.halt_on_error();
     ICQLDBA = require('../../../../apps/icql-dba');
     cfg = H.get_cfg();
@@ -294,8 +294,8 @@
       schema: cfg.mem_schema
     });
     debug('^302^', dba.get_schemas());
-    ref = dba.walk_objects();
-    for (d of ref) {
+    ref1 = dba.walk_objects();
+    for (d of ref1) {
       debug('^303^', `${d.type}:${d.name}`);
     }
     dba.copy_schema({
@@ -306,8 +306,26 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  show_schemas_and_objects = function(ref, dba) {
+    var count, d, ref1, schema;
+    for (schema in dba.get_schemas()) {
+      urge(`${ref} schema: ${schema}`);
+      count = 0;
+      ref1 = dba.walk_objects({schema});
+      for (d of ref1) {
+        count++;
+        info(`${ref}    ${schema}/${d.type}:${d.name}`);
+      }
+      if (count === 0) {
+        whisper(`${ref}    (empty)`);
+      }
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DBA: copy file DB to memory"] = async function(T, done) {
-    var ICQLDBA, cfg, d, dba, dba_cfg, ref;
+    var ICQLDBA, cfg, count, d, dba, dba_cfg, i, len, obj_name_x, result, schema_x, sql, to_schema_objects;
     T.halt_on_error();
     ICQLDBA = require('../../../../apps/icql-dba');
     //.........................................................................................................
@@ -328,31 +346,52 @@
     // dba_cfg               = { path: cfg.db_work_path, echo: true, debug: true, }
     dba = new ICQLDBA.Dba(dba_cfg);
     //.........................................................................................................
-    debug('^301^', dba.get_schemas());
     dba.attach({
       path: ':memory:',
       schema: cfg.mem_schema
     });
-    debug('^302^', dba.get_schemas());
-    ref = dba.walk_objects();
-    for (d of ref) {
-      debug('^303^', `${d.type}:${d.name}`);
-    }
+    show_schemas_and_objects('^754-2^', dba);
     dba.copy_schema({
+      from_schema: 'main',
       to_schema: cfg.mem_schema
     });
-    // #.........................................................................................................
-    // objects               = ( "#{d.type}:#{d.name}" for d from dba.walk_objects { schema: cfg.mem_schema, } )
-    // T.eq objects, [
-    //   'index:sqlite_autoindex_keys_1',
-    //   'index:sqlite_autoindex_realms_1',
-    //   'index:sqlite_autoindex_sources_1',
-    //   'table:keys',
-    //   'table:main',
-    //   'table:realms',
-    //   'table:sources',
-    //   'view:dest_changes_backward',
-    //   'view:dest_changes_forward' ]
+    show_schemas_and_objects('^754-3^', dba);
+    //.........................................................................................................
+    to_schema_objects = dba.list(dba.walk_objects({
+      schema: cfg.mem_schema
+    }));
+    schema_x = dba.as_identifier(cfg.mem_schema);
+    result = {};
+    for (i = 0, len = to_schema_objects.length; i < len; i++) {
+      d = to_schema_objects[i];
+      obj_name_x = dba.as_identifier(d.name);
+      switch (d.type) {
+        case 'index':
+          result[d.name] = 'index';
+          break;
+        case 'table':
+        case 'view':
+          sql = `select count(*) from ${schema_x}.${obj_name_x};`;
+          count = dba.single_value(dba.query(sql));
+          debug(d.name, count);
+          result[d.name] = `${d.type}|${count}`;
+          break;
+        default:
+          throw new Error(`^45687^ unknown DB object type ${rpr(d.type)}`);
+      }
+    }
+    debug('^448978^', result);
+    T.eq(result, {
+      sqlite_autoindex_keys_1: 'index',
+      sqlite_autoindex_realms_1: 'index',
+      sqlite_autoindex_sources_1: 'index',
+      keys: 'table|15',
+      main: 'table|327',
+      realms: 'table|2',
+      sources: 'table|1',
+      dest_changes_backward: 'view|320',
+      dest_changes_forward: 'view|320'
+    });
     //.........................................................................................................
     return done();
   };
