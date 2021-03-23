@@ -398,11 +398,11 @@
 
   //###########################################################################################################
   if (module.parent == null) {
-    // test @
-    test(this["DBA: copy file DB to memory"]);
+    test(this);
   }
 
-  // test @[ "DBA: as_sql" ]
+  // test @[ "DBA: copy file DB to memory" ]
+// test @[ "DBA: as_sql" ]
 // test @[ "DBA: interpolate" ]
 // test @[ "DBA: clear()" ]
 // test @[ "toposort with schema" ]
