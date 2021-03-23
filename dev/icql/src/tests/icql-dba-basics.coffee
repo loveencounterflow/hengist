@@ -177,6 +177,18 @@ types                     = new ( require 'intertype' ).Intertype
   done()
 
 #-----------------------------------------------------------------------------------------------------------
+show_schemas_and_objects = ( ref, dba ) ->
+  for schema of dba.get_schemas()
+    urge "#{ref} schema: #{schema}"
+    count = 0
+    for d from dba.walk_objects { schema, }
+      count++
+      info "#{ref}    #{schema}/#{d.type}:#{d.name}"
+    if count is 0
+      whisper "#{ref}    (empty)"
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBA: copy file DB to memory" ] = ( T, done ) ->
   T.halt_on_error()
   ICQLDBA               = require '../../../../apps/icql-dba'
@@ -201,24 +213,36 @@ types                     = new ( require 'intertype' ).Intertype
   # dba_cfg               = { path: cfg.db_work_path, echo: true, debug: true, }
   dba                   = new ICQLDBA.Dba dba_cfg
   #.........................................................................................................
-  debug '^301^', dba.get_schemas()
   dba.attach { path: ':memory:', schema: cfg.mem_schema, }
-  debug '^302^', dba.get_schemas()
-  for d from dba.walk_objects()
-    debug '^303^', "#{d.type}:#{d.name}"
-  dba.copy_schema { to_schema: cfg.mem_schema, }
-  # #.........................................................................................................
-  # objects               = ( "#{d.type}:#{d.name}" for d from dba.walk_objects { schema: cfg.mem_schema, } )
-  # T.eq objects, [
-  #   'index:sqlite_autoindex_keys_1',
-  #   'index:sqlite_autoindex_realms_1',
-  #   'index:sqlite_autoindex_sources_1',
-  #   'table:keys',
-  #   'table:main',
-  #   'table:realms',
-  #   'table:sources',
-  #   'view:dest_changes_backward',
-  #   'view:dest_changes_forward' ]
+  show_schemas_and_objects '^754-2^', dba
+  dba.copy_schema { from_schema: 'main', to_schema: cfg.mem_schema, }
+  show_schemas_and_objects '^754-3^', dba
+  #.........................................................................................................
+  to_schema_objects     = dba.list dba.walk_objects { schema: cfg.mem_schema, }
+  schema_x              = dba.as_identifier cfg.mem_schema
+  result                = {}
+  for d in to_schema_objects
+    obj_name_x            = dba.as_identifier d.name
+    switch d.type
+      when 'index'
+        result[ d.name ] = 'index'
+      when 'table', 'view'
+        sql                   = "select count(*) from #{schema_x}.#{obj_name_x};"
+        count                 = dba.single_value dba.query sql
+        debug d.name, count
+        result[ d.name ] = "#{d.type}|#{count}"
+      else throw new Error "^45687^ unknown DB object type #{rpr d.type}"
+  debug '^448978^', result
+  T.eq result, {
+    sqlite_autoindex_keys_1:    'index'
+    sqlite_autoindex_realms_1:  'index'
+    sqlite_autoindex_sources_1: 'index'
+    keys:                       'table|15'
+    main:                       'table|327'
+    realms:                     'table|2'
+    sources:                    'table|1'
+    dest_changes_backward:      'view|320'
+    dest_changes_forward:       'view|320' }
   #.........................................................................................................
   done()
 
