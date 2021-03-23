@@ -150,7 +150,7 @@ types                     = new ( require 'intertype' ).Intertype
   done()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: copy file DB to memory" ] = ( T, done ) ->
+@[ "_DBA: copy file DB to memory" ] = ( T, done ) ->
   T.halt_on_error()
   ICQLDBA               = require '../../../../apps/icql-dba'
   cfg                   = H.get_cfg()
@@ -163,14 +163,50 @@ types                     = new ( require 'intertype' ).Intertype
   path                  = cfg.db_work_path
   await H.copy_over cfg.db_template_path, cfg.db_work_path
   cfg.mem_schema        = 'x'
+  info JSON.stringify cfg, null, '  '
   dba                   = new ICQLDBA.Dba { path, echo: true, debug: true, }
   #.........................................................................................................
-  debug '^4485^', dba.get_schemas()
-  dba.attach { path: cfg.db_work_path, schema: cfg.mem_schema, }
-  debug '^4485^', dba.get_schemas()
+  debug '^300^', cfg
+  debug '^301^', dba.get_schemas()
+  dba.attach { path: ':memory:', schema: cfg.mem_schema, }
+  debug '^302^', dba.get_schemas()
   for d from dba.walk_objects()
-    debug '^4485^', "#{d.type}:#{d.name}"
-  # dba.copy_schema { to_schema: cfg.mem_schema, }
+    debug '^303^', "#{d.type}:#{d.name}"
+  dba.copy_schema { to_schema: cfg.mem_schema, }
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: copy file DB to memory" ] = ( T, done ) ->
+  T.halt_on_error()
+  ICQLDBA               = require '../../../../apps/icql-dba'
+  #.........................................................................................................
+  cfg                   =
+    pragmas: [
+      'page_size = 4096'
+      'cache_size = 16384'
+      'temp_store = MEMORY'
+      'journal_mode = WAL'
+      'locking_mode = EXCLUSIVE'
+      'synchronous = OFF' ]
+    db_template_path: H.resolve_path 'assets/icql/small-datamill.db'
+    db_work_path:     H.resolve_path 'data/icql/icql-dba-copy-schema.db'
+    mem_schema:       'x'
+  #.........................................................................................................
+  help '^3387^', "cfg.db_template_path: ", cfg.db_template_path
+  help '^3387^', "cfg.db_work_path:     ", cfg.db_work_path
+  await H.copy_over cfg.db_template_path, cfg.db_work_path
+  #.........................................................................................................
+  dba_cfg               = { path: cfg.db_work_path, }
+  # dba_cfg               = { path: cfg.db_work_path, echo: true, debug: true, }
+  dba                   = new ICQLDBA.Dba dba_cfg
+  #.........................................................................................................
+  debug '^301^', dba.get_schemas()
+  dba.attach { path: ':memory:', schema: cfg.mem_schema, }
+  debug '^302^', dba.get_schemas()
+  for d from dba.walk_objects()
+    debug '^303^', "#{d.type}:#{d.name}"
+  dba.copy_schema { to_schema: cfg.mem_schema, }
   # #.........................................................................................................
   # objects               = ( "#{d.type}:#{d.name}" for d from dba.walk_objects { schema: cfg.mem_schema, } )
   # T.eq objects, [
@@ -190,7 +226,8 @@ types                     = new ( require 'intertype' ).Intertype
 
 ############################################################################################################
 unless module.parent?
-  test @
+  # test @
+  test @[ "DBA: copy file DB to memory" ]
   # test @[ "DBA: as_sql" ]
   # test @[ "DBA: interpolate" ]
   # test @[ "DBA: clear()" ]
