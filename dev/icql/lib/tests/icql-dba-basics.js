@@ -231,25 +231,24 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open from DB file"] = async function(T, done) {
-    var ICQLDBA, d, db_template_path, db_work_path, dba, ignore, objects, path, s, test_cfg;
+    var ICQLDBA, cfg, d, dba, ignore, objects, path, s;
     T.halt_on_error();
     ICQLDBA = require('../../../../apps/icql-dba');
-    test_cfg = H.get_cfg();
-    test_cfg.size = 'small';
-    test_cfg.mode = 'fle';
-    test_cfg.ref = 'dba-open-from-file';
-    test_cfg.pragmas = 'fle';
-    db_template_path = H.interpolate(test_cfg.db.templates[test_cfg.size], test_cfg);
-    db_work_path = H.interpolate(test_cfg.db.work[test_cfg.mode], test_cfg);
-    path = db_work_path;
-    help("^77-300^ db_template_path:  ", db_template_path);
-    help("^77-300^ db_work_path:      ", db_work_path);
-    await H.copy_over(db_template_path, db_work_path);
+    cfg = H.get_cfg();
+    cfg.size = 'small';
+    cfg.mode = 'fle';
+    cfg.ref = 'dba-open-from-file';
+    cfg.pragmas = 'fle';
+    cfg.db_template_path = H.interpolate(cfg.db.templates[cfg.size], cfg);
+    cfg.db_work_path = H.interpolate(cfg.db.work[cfg.mode], cfg);
+    path = cfg.db_work_path;
+    help("^77-300^ cfg.db_template_path:  ", cfg.db_template_path);
+    help("^77-300^ cfg.db_work_path:      ", cfg.db_work_path);
+    await H.copy_over(cfg.db_template_path, cfg.db_work_path);
     dba = new ICQLDBA.Dba({path});
     //.........................................................................................................
     T.eq(type_of((s = dba.walk_objects())), 'statementiterator');
     ignore = [...s];
-    debug(ignore);
     objects = (function() {
       var ref, results;
       ref = dba.walk_objects({
@@ -262,6 +261,54 @@
       return results;
     })();
     T.eq(objects, ['index:sqlite_autoindex_keys_1', 'index:sqlite_autoindex_realms_1', 'index:sqlite_autoindex_sources_1', 'table:keys', 'table:main', 'table:realms', 'table:sources', 'view:dest_changes_backward', 'view:dest_changes_forward']);
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: copy file DB to memory"] = async function(T, done) {
+    var ICQLDBA, cfg, d, dba, path, ref;
+    T.halt_on_error();
+    ICQLDBA = require('../../../../apps/icql-dba');
+    cfg = H.get_cfg();
+    cfg.size = 'small';
+    cfg.mode = 'fle';
+    cfg.ref = 'dba-open-from-file';
+    cfg.pragmas = 'fle';
+    cfg.db_template_path = H.interpolate(cfg.db.templates[cfg.size], cfg);
+    cfg.db_work_path = H.interpolate(cfg.db.work[cfg.mode], cfg);
+    path = cfg.db_work_path;
+    await H.copy_over(cfg.db_template_path, cfg.db_work_path);
+    cfg.mem_schema = 'x';
+    dba = new ICQLDBA.Dba({
+      path,
+      echo: true,
+      debug: true
+    });
+    //.........................................................................................................
+    debug('^4485^', dba.get_schemas());
+    dba.attach({
+      path: cfg.db_work_path,
+      schema: cfg.mem_schema
+    });
+    debug('^4485^', dba.get_schemas());
+    ref = dba.walk_objects();
+    for (d of ref) {
+      debug('^4485^', `${d.type}:${d.name}`);
+    }
+    // dba.copy_schema { to_schema: cfg.mem_schema, }
+    // #.........................................................................................................
+    // objects               = ( "#{d.type}:#{d.name}" for d from dba.walk_objects { schema: cfg.mem_schema, } )
+    // T.eq objects, [
+    //   'index:sqlite_autoindex_keys_1',
+    //   'index:sqlite_autoindex_realms_1',
+    //   'index:sqlite_autoindex_sources_1',
+    //   'table:keys',
+    //   'table:main',
+    //   'table:realms',
+    //   'table:sources',
+    //   'view:dest_changes_backward',
+    //   'view:dest_changes_forward' ]
     //.........................................................................................................
     return done();
   };
