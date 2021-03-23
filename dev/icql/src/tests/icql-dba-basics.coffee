@@ -250,8 +250,8 @@ show_schemas_and_objects = ( ref, dba ) ->
 
 ############################################################################################################
 unless module.parent?
-  # test @
-  test @[ "DBA: copy file DB to memory" ]
+  test @
+  # test @[ "DBA: copy file DB to memory" ]
   # test @[ "DBA: as_sql" ]
   # test @[ "DBA: interpolate" ]
   # test @[ "DBA: clear()" ]
