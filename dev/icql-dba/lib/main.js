@@ -41,7 +41,7 @@
     paths = FS.readdirSync(__dirname);
     for (i = 0, len = paths.length; i < len; i++) {
       path = paths[i];
-      if (!path.endsWith('.test.js')) {
+      if (!path.endsWith('.tests.js')) {
         continue;
       }
       path = PATH.join(__dirname, path);
