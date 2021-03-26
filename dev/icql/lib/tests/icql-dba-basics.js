@@ -331,29 +331,36 @@
     //.........................................................................................................
     cfg = {
       pragmas: ['page_size = 4096', 'cache_size = 16384', 'temp_store = MEMORY', 'journal_mode = WAL', 'locking_mode = EXCLUSIVE', 'synchronous = OFF'],
-      db_template_path: H.resolve_path('assets/icql/small-datamill.db'),
-      db_work_path: H.resolve_path('data/icql/icql-dba-copy-schema.db'),
-      mem_schema: 'x'
+      template_path: H.resolve_path('assets/icql/small-datamill.db'),
+      work_path: H.resolve_path('data/icql/icql-dba-copy-schema.db'),
+      // mem_schema:       'x'
+      // mem_path:         ':memory:'
+      // { schema: 'main', path: ( H.resolve_path 'data/icql/icql-dba-copy-schema.db' ), }
+      // { schema: 'q',    path: ':memory:', }
+      schemas: {
+        main: H.resolve_path('data/icql/icql-dba-copy-schema.db'),
+        q: ':memory:'
+      }
     };
     //.........................................................................................................
-    help('^3387^', "cfg.db_template_path: ", cfg.db_template_path);
-    help('^3387^', "cfg.db_work_path:     ", cfg.db_work_path);
-    await H.copy_over(cfg.db_template_path, cfg.db_work_path);
+    help('^3387^', "cfg.template_path: ", cfg.template_path);
+    help('^3387^', "cfg.work_path:     ", cfg.work_path);
+    await H.copy_over(cfg.template_path, cfg.work_path);
     //.........................................................................................................
     dba_cfg = {
-      path: cfg.db_work_path
+      path: cfg.mem_path
     };
-    // dba_cfg               = { path: cfg.db_work_path, echo: true, debug: true, }
+    // dba_cfg               = { path: cfg.work_path, echo: true, debug: true, }
     dba = new ICQLDBA.Dba(dba_cfg);
     //.........................................................................................................
     dba.attach({
-      path: ':memory:',
+      path: cfg.work_path,
       schema: cfg.mem_schema
     });
     show_schemas_and_objects('^754-2^', dba);
     dba.copy_schema({
-      from_schema: 'main',
-      to_schema: cfg.mem_schema
+      from_schema: cfg.mem_schema,
+      to_schema: 'main'
     });
     show_schemas_and_objects('^754-3^', dba);
     //.........................................................................................................
@@ -381,7 +388,7 @@
       }
     }
     debug('^448978^', result);
-    T.eq(result, {
+    return T.eq(result, {
       sqlite_autoindex_keys_1: 'index',
       sqlite_autoindex_realms_1: 'index',
       sqlite_autoindex_sources_1: 'index',
@@ -392,17 +399,72 @@
       dest_changes_backward: 'view|320',
       dest_changes_forward: 'view|320'
     });
+  };
+
+  //.........................................................................................................
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: in-memory DB API"] = function(T, done) {
+    var Dba, ICQLDBA;
+    T.halt_on_error();
+    ICQLDBA = require('../../../../apps/icql-dba');
+    ({isa, validate} = ICQLDBA.types.export());
+    //-----------------------------------------------------------------------------------------------------------
+    Dba = class Dba extends ICQLDBA.Dba {
+      //---------------------------------------------------------------------------------------------------------
+      copy_db(cfg) {
+        var from_path, from_schema, to_path, to_schema;
+        from_path = pick(cfg, 'from_path', null);
+        from_schema = pick(cfg, 'from_schema', 'file');
+        to_path = pick(cfg, 'to_path', null);
+        to_schema = pick(cfg, 'to_schema', 'file');
+        // validate.icqldba_file_path
+        // validate.icqldba_db_path
+        validate.icqldba_path(from_path);
+        validate.icqldba_path(to_path);
+        this._copy_db(from_path, from_schema, to_path, to_schema);
+        return null;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _copy_db(from_path, from_schema, to_path, to_schema) {
+        this.attach({
+          path: from_path,
+          schema: from_schema
+        });
+        this.copy_schema({from_schema, to_schema});
+        return null;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      move_db(cfg) {
+        var from_path, from_schema, to_path, to_schema;
+        from_path = pick(cfg, 'from_path', null);
+        from_schema = pick(cfg, 'from_schema', 'file');
+        to_path = pick(cfg, 'to_path', null);
+        to_schema = pick(cfg, 'to_schema', 'file');
+        validate.icqldba_path(from_path);
+        validate.icqldba_path(to_path);
+        this._copy_db(from_path, from_schema, to_path, to_schema);
+        this.detach({
+          schema: from_schema
+        });
+        return null;
+      }
+
+    };
     //.........................................................................................................
     return done();
   };
 
   //###########################################################################################################
   if (module.parent == null) {
-    test(this);
+    // test @
+    // test @[ "DBA: copy file DB to memory" ]
+    test(this["DBA: in-memory DB API"]);
   }
 
-  // test @[ "DBA: copy file DB to memory" ]
-// test @[ "DBA: as_sql" ]
+  // test @[ "DBA: as_sql" ]
 // test @[ "DBA: interpolate" ]
 // test @[ "DBA: clear()" ]
 // test @[ "toposort with schema" ]

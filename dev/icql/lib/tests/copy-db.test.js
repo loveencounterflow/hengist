@@ -264,7 +264,7 @@
       }
       //.......................................................................................................
       // Export data, swap DB file to get additions into new DB at old path:
-      db.$.execute(`vacuum ${work_schema_x} into ${db.$.as_sql(db_temp_path)};`);
+      db.$.run(`vacuum ${work_schema_x} into ?;`, [db_temp_path]);
       db.$.close();
       help(`^43-304^ removing ${db_old_path}`);
       H.try_to_remove_file(db_old_path);
@@ -301,9 +301,9 @@
     };
     //.........................................................................................................
     await part_1_scaffold_db_files();
+    await part_2_crud();
+    await part_3_reread_db();
     if (done != null) {
-      // await part_2_crud()
-      // await part_3_reread_db()
       return done();
     }
   };
