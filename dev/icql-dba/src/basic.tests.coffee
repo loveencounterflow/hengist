@@ -6,7 +6,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'ICQL-DBA/TESTS'
+badge                     = 'ICQL-DBA/TESTS/BASICS'
 debug                     = CND.get_logger 'debug',     badge
 warn                      = CND.get_logger 'warn',      badge
 info                      = CND.get_logger 'info',      badge
@@ -15,7 +15,7 @@ help                      = CND.get_logger 'help',      badge
 whisper                   = CND.get_logger 'whisper',   badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
-test                      = require '../../../../apps/guy-test'
+test                      = require '../../../apps/guy-test'
 PATH                      = require 'path'
 H                         = require './helpers'
 types                     = new ( require 'intertype' ).Intertype
@@ -27,7 +27,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: as_sql" ] = ( T, done ) ->
   T.halt_on_error()
-  ICQLDBA           = require '../../../../apps/icql-dba'
+  ICQLDBA           = require '../../../apps/icql-dba'
   dba               = new ICQLDBA.Dba()
   probes_and_matchers = [
     [true,'1',]
@@ -47,7 +47,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: interpolate" ] = ( T, done ) ->
   T.halt_on_error()
-  ICQLDBA           = require '../../../../apps/icql-dba'
+  ICQLDBA           = require '../../../apps/icql-dba'
   dba               = new ICQLDBA.Dba()
   probes_and_matchers = [
     [["foo, $bar, baz",{bar:42,}],"foo, 42, baz"]
@@ -64,7 +64,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: toposort is removed" ] = ( T, done ) ->
   T.halt_on_error()
-  ICQLDBA           = require '../../../../apps/icql-dba'
+  ICQLDBA           = require '../../../apps/icql-dba'
   dba               = new ICQLDBA.Dba()
   T.eq dba.get_toposort, undefined
   ### removed b/c stops working when tables refer to each other cyclical fashion:
@@ -78,7 +78,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: clear()" ] = ( T, done ) ->
   T.halt_on_error()
-  ICQLDBA           = require '../../../../apps/icql-dba'
+  ICQLDBA           = require '../../../apps/icql-dba'
   dba               = new ICQLDBA.Dba()
   #.........................................................................................................
   # Create tables, indexes:
@@ -119,7 +119,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open from DB file" ] = ( T, done ) ->
   T.halt_on_error()
-  ICQLDBA               = require '../../../../apps/icql-dba'
+  ICQLDBA               = require '../../../apps/icql-dba'
   cfg                   = H.get_cfg()
   cfg.size              = 'small'
   cfg.mode              = 'fle'
@@ -152,7 +152,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "_DBA: copy file DB to memory" ] = ( T, done ) ->
   T.halt_on_error()
-  ICQLDBA               = require '../../../../apps/icql-dba'
+  ICQLDBA               = require '../../../apps/icql-dba'
   cfg                   = H.get_cfg()
   cfg.size              = 'small'
   cfg.mode              = 'fle'
@@ -191,7 +191,7 @@ show_schemas_and_objects = ( ref, dba ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: copy file DB to memory" ] = ( T, done ) ->
   T.halt_on_error()
-  ICQLDBA               = require '../../../../apps/icql-dba'
+  ICQLDBA               = require '../../../apps/icql-dba'
   #.........................................................................................................
   cfg                   =
     pragmas: [
@@ -254,7 +254,7 @@ show_schemas_and_objects = ( ref, dba ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: in-memory DB API" ] = ( T, done ) ->
   T.halt_on_error()
-  ICQLDBA               = require '../../../../apps/icql-dba'
+  ICQLDBA               = require '../../../apps/icql-dba'
   { isa
     validate }          = ICQLDBA.types.export()
   #-----------------------------------------------------------------------------------------------------------
