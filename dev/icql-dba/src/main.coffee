@@ -25,7 +25,7 @@ L = @
 do ->
   paths = FS.readdirSync __dirname
   for path in paths
-    continue unless path.endsWith '.test.js'
+    continue unless path.endsWith '.tests.js'
     path = PATH.join __dirname, path
     module = require path
     for key, value of module
