@@ -201,21 +201,27 @@ show_schemas_and_objects = ( ref, dba ) ->
       'journal_mode = WAL'
       'locking_mode = EXCLUSIVE'
       'synchronous = OFF' ]
-    db_template_path: H.resolve_path 'assets/icql/small-datamill.db'
-    db_work_path:     H.resolve_path 'data/icql/icql-dba-copy-schema.db'
-    mem_schema:       'x'
+    template_path:    H.resolve_path 'assets/icql/small-datamill.db'
+    work_path:        H.resolve_path 'data/icql/icql-dba-copy-schema.db'
+    # mem_schema:       'x'
+    # mem_path:         ':memory:'
+    # { schema: 'main', path: ( H.resolve_path 'data/icql/icql-dba-copy-schema.db' ), }
+    # { schema: 'q',    path: ':memory:', }
+    schemas:
+      main:   ( H.resolve_path 'data/icql/icql-dba-copy-schema.db' )
+      q:      ':memory:'
   #.........................................................................................................
-  help '^3387^', "cfg.db_template_path: ", cfg.db_template_path
-  help '^3387^', "cfg.db_work_path:     ", cfg.db_work_path
-  await H.copy_over cfg.db_template_path, cfg.db_work_path
+  help '^3387^', "cfg.template_path: ", cfg.template_path
+  help '^3387^', "cfg.work_path:     ", cfg.work_path
+  await H.copy_over cfg.template_path, cfg.work_path
   #.........................................................................................................
-  dba_cfg               = { path: cfg.db_work_path, }
-  # dba_cfg               = { path: cfg.db_work_path, echo: true, debug: true, }
+  dba_cfg               = { path: cfg.mem_path, }
+  # dba_cfg               = { path: cfg.work_path, echo: true, debug: true, }
   dba                   = new ICQLDBA.Dba dba_cfg
   #.........................................................................................................
-  dba.attach { path: ':memory:', schema: cfg.mem_schema, }
+  dba.attach { path: cfg.work_path, schema: cfg.mem_schema, }
   show_schemas_and_objects '^754-2^', dba
-  dba.copy_schema { from_schema: 'main', to_schema: cfg.mem_schema, }
+  dba.copy_schema { from_schema: cfg.mem_schema, to_schema: 'main', }
   show_schemas_and_objects '^754-3^', dba
   #.........................................................................................................
   to_schema_objects     = dba.list dba.walk_objects { schema: cfg.mem_schema, }
