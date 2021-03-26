@@ -250,14 +250,57 @@ show_schemas_and_objects = ( ref, dba ) ->
     dest_changes_backward:      'view|320'
     dest_changes_forward:       'view|320' }
   #.........................................................................................................
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: in-memory DB API" ] = ( T, done ) ->
+  T.halt_on_error()
+  ICQLDBA               = require '../../../../apps/icql-dba'
+  { isa
+    validate }          = ICQLDBA.types.export()
+  #-----------------------------------------------------------------------------------------------------------
+  class Dba extends ICQLDBA.Dba
+
+    #---------------------------------------------------------------------------------------------------------
+    copy_db: ( cfg ) ->
+      from_path         = pick cfg, 'from_path',    null
+      from_schema       = pick cfg, 'from_schema',  'file'
+      to_path           = pick cfg, 'to_path',      null
+      to_schema         = pick cfg, 'to_schema',    'file'
+      # validate.icqldba_file_path
+      # validate.icqldba_db_path
+      validate.icqldba_path from_path
+      validate.icqldba_path to_path
+      @_copy_db from_path, from_schema, to_path, to_schema
+      return null
+
+    #---------------------------------------------------------------------------------------------------------
+    _copy_db: ( from_path, from_schema, to_path, to_schema ) ->
+      @attach { path: from_path, schema: from_schema, }
+      @copy_schema { from_schema, to_schema, }
+      return null
+
+    #---------------------------------------------------------------------------------------------------------
+    move_db: ( cfg ) ->
+      from_path         = pick cfg, 'from_path',    null
+      from_schema       = pick cfg, 'from_schema',  'file'
+      to_path           = pick cfg, 'to_path',      null
+      to_schema         = pick cfg, 'to_schema',    'file'
+      validate.icqldba_path from_path
+      validate.icqldba_path to_path
+      @_copy_db from_path, from_schema, to_path, to_schema
+      @detach { schema: from_schema, }
+      return null
+
+  #.........................................................................................................
   done()
 
 
 
 ############################################################################################################
 unless module.parent?
-  test @
+  # test @
   # test @[ "DBA: copy file DB to memory" ]
+  test @[ "DBA: in-memory DB API" ]
   # test @[ "DBA: as_sql" ]
   # test @[ "DBA: interpolate" ]
   # test @[ "DBA: clear()" ]
