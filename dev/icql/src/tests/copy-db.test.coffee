@@ -227,8 +227,8 @@ is_new.cache = new Map()
     return null
   #.........................................................................................................
   await part_1_scaffold_db_files()
-  # await part_2_crud()
-  # await part_3_reread_db()
+  await part_2_crud()
+  await part_3_reread_db()
   done() if done?
 
 
