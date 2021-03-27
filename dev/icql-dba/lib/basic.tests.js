@@ -35,6 +35,158 @@
   ({isa, type_of, validate, validate_list_of} = types.export());
 
   //-----------------------------------------------------------------------------------------------------------
+  this["DBA: open()"] = async function(T, done) {
+    var DBA, DBAX, L, cfg, template_path_1, template_path_2, work_path_1, work_path_2;
+    T.halt_on_error();
+    DBA = L = require('../../../apps/icql-dba');
+    //.........................................................................................................
+    DBAX = class DBAX extends DBA.Dba {
+      static open(cfg) {
+        var R, path, schema;
+        path = L.pick(cfg, 'path', null, 'ic_path');
+        schema = L.pick(cfg, 'schema', 'main', 'ic_schema');
+        if (schema === 'main') {
+          R = new this({path});
+        } else {
+          R = new this({
+            path: ''
+          });
+          R.attach({path, schema});
+        }
+        return R;
+      }
+
+      open(cfg) {
+        var path, schema;
+        path = L.pick(cfg, 'path', null, 'ic_path');
+        schema = L.pick(cfg, 'schema', 'main', 'ic_schema');
+        if (this.has({schema})) {
+          if (!this.is_empty({schema})) {
+            throw new Error(`^icql-dba.open@445^ schema ${rpr(schema)} not empty`);
+          }
+          if (schema === 'main') {
+            throw new Error(`^icql-dba.open@445^ cannot open schema ${rpr(schema)} (yet)`);
+          }
+          this.detach({schema});
+        }
+        this.attach({path, schema});
+        return null;
+      }
+
+    };
+    //.........................................................................................................
+    cfg = H.get_cfg();
+    cfg.ref = 'multicon';
+    //.........................................................................................................
+    cfg.size = 'small';
+    cfg.mode = 'fle';
+    template_path_1 = H.interpolate(cfg.db.templates[cfg.size], cfg);
+    work_path_1 = H.interpolate(cfg.db.work[cfg.mode], cfg);
+    help("^77-300^ work_path_1:  ", work_path_1);
+    //.........................................................................................................
+    cfg.size = 'big';
+    cfg.mode = 'fle';
+    template_path_2 = H.interpolate(cfg.db.templates[cfg.size], cfg);
+    work_path_2 = H.interpolate(cfg.db.work[cfg.mode], cfg);
+    help("^77-300^ work_path_2:  ", work_path_2);
+    await (async() => {      //.........................................................................................................
+      var d, dba, path, schema;
+      path = work_path_1;
+      schema = null;
+      await H.copy_over(template_path_1, path);
+      dba = DBAX.open({path, schema});
+      T.eq(dba.get_schemas(), {
+        main: path
+      });
+      T.eq(dba.is_empty(), false);
+      return T.eq((function() {
+        var ref1, results;
+        ref1 = dba.walk_objects({schema});
+        results = [];
+        for (d of ref1) {
+          results.push(d.name);
+        }
+        return results;
+      })(), ['sqlite_autoindex_keys_1', 'sqlite_autoindex_realms_1', 'sqlite_autoindex_sources_1', 'keys', 'main', 'realms', 'sources', 'dest_changes_backward', 'dest_changes_forward']);
+    })();
+    await (async() => {      //.........................................................................................................
+      var d, dba, path, schema;
+      path = work_path_1;
+      schema = 'foo';
+      await H.copy_over(template_path_1, path);
+      dba = DBAX.open({path, schema});
+      // help dba.get_schemas()
+      T.eq(dba.get_schemas(), {
+        main: '',
+        [schema]: path
+      });
+      T.eq(dba.is_empty({
+        schema: 'main'
+      }, true));
+      T.eq(dba.is_empty({schema}, false));
+      return T.eq((function() {
+        var ref1, results;
+        ref1 = dba.walk_objects({schema});
+        results = [];
+        for (d of ref1) {
+          results.push(d.name);
+        }
+        return results;
+      })(), ['sqlite_autoindex_keys_1', 'sqlite_autoindex_realms_1', 'sqlite_autoindex_sources_1', 'keys', 'main', 'realms', 'sources', 'dest_changes_backward', 'dest_changes_forward']);
+    })();
+    await (async() => {      //.........................................................................................................
+      var d, dba, k, schema_1, schema_2;
+      schema_1 = 'datamill';
+      schema_2 = 'chinook';
+      await H.copy_over(template_path_1, work_path_1);
+      await H.copy_over(template_path_2, work_path_2);
+      dba = DBAX.open({
+        path: work_path_1,
+        schema: schema_1
+      });
+      debug('^567^', dba);
+      debug('^567^', (function() {
+        var results;
+        results = [];
+        for (k in dba) {
+          results.push(k);
+        }
+        return results;
+      })());
+      debug('^567^', dba.open({
+        path: work_path_2,
+        schema: schema_2
+      }));
+      help('^58733^', dba.get_schemas());
+      // T.eq dba.get_schemas(), { main: '', [schema]: path, }
+      T.eq(dba.is_empty({
+        schema: 'main'
+      }, true));
+      T.eq(dba.is_empty({
+        schema: schema_1
+      }, false));
+      T.eq(dba.is_empty({
+        schema: schema_2
+      }, false));
+      return T.eq((function() {
+        var ref1, results;
+        ref1 = dba.walk_objects({
+          schema: schema_1
+        });
+        results = [];
+        for (d of ref1) {
+          results.push(d.name);
+        }
+        return results;
+      })(), ['sqlite_autoindex_keys_1', 'sqlite_autoindex_realms_1', 'sqlite_autoindex_sources_1', 'keys', 'main', 'realms', 'sources', 'dest_changes_backward', 'dest_changes_forward']);
+    })();
+    // dba.exec "create table t ( id integer );"
+    // dba.exec "insert into t values ( #{n} );" for n in [ 1 .. 9 ]
+    // statement_1           = dba.prepare "select * from t;"
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DBA: as_sql"] = async function(T, done) {
     var ICQLDBA, dba, error, i, len, matcher, probe, probes_and_matchers;
     T.halt_on_error();
@@ -353,6 +505,10 @@
     // dba_cfg               = { path: cfg.work_path, echo: true, debug: true, }
     dba = new ICQLDBA.Dba(dba_cfg);
     //.........................................................................................................
+    debug('^43474^', {
+      path: cfg.work_path,
+      schema: cfg.mem_schema
+    });
     dba.attach({
       path: cfg.work_path,
       schema: cfg.mem_schema
@@ -461,10 +617,12 @@
   if (module.parent == null) {
     // test @
     // test @[ "DBA: copy file DB to memory" ]
-    test(this["DBA: in-memory DB API"]);
+    test(this["DBA: open()"]);
   }
 
-  // test @[ "DBA: as_sql" ]
+  // @[ "DBA: open()" ]()
+// test @[ "DBA: in-memory DB API" ]
+// test @[ "DBA: as_sql" ]
 // test @[ "DBA: interpolate" ]
 // test @[ "DBA: clear()" ]
 // test @[ "toposort with schema" ]
