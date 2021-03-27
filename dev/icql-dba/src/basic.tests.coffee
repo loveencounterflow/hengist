@@ -24,6 +24,87 @@ types                     = new ( require 'intertype' ).Intertype
   validate
   validate_list_of }      = types.export()
 
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: open()" ] = ( T, done ) ->
+  T.halt_on_error()
+  DBA               = L = require '../../../apps/icql-dba'
+  #.........................................................................................................
+  class DBAX extends DBA.Dba
+    @open: ( cfg ) ->
+      path        = L.pick cfg, 'path',   null,   'ic_path'
+      schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
+      if schema is 'main'
+        R = new @ { path, }
+      else
+        R = new @ { path: '', }
+        R.attach { path, schema, }
+      return R
+    open: ( cfg ) ->
+      path        = L.pick cfg, 'path',   null,   'ic_path'
+      schema      = L.pick cfg, 'schema', 'main', 'ic_schema'
+      if @has { schema, }
+        throw new Error "^icql-dba.open@445^ schema #{rpr schema} not empty" unless @is_empty { schema, }
+        throw new Error "^icql-dba.open@445^ cannot open schema #{rpr schema} (yet)" if schema is 'main'
+        @detach { schema, }
+      @attach { path, schema, }
+      return null
+  #.........................................................................................................
+  cfg               = H.get_cfg()
+  cfg.ref           = 'multicon'
+  #.........................................................................................................
+  cfg.size          = 'small'
+  cfg.mode          = 'fle'
+  template_path_1   = H.interpolate cfg.db.templates[ cfg.size ], cfg
+  work_path_1       = H.interpolate cfg.db.work[      cfg.mode ], cfg
+  help "^77-300^ work_path_1:  ", work_path_1
+  #.........................................................................................................
+  cfg.size          = 'big'
+  cfg.mode          = 'fle'
+  template_path_2   = H.interpolate cfg.db.templates[ cfg.size ], cfg
+  work_path_2       = H.interpolate cfg.db.work[      cfg.mode ], cfg
+  help "^77-300^ work_path_2:  ", work_path_2
+  #.........................................................................................................
+  await do =>
+    path    = work_path_1
+    schema  = null
+    await H.copy_over template_path_1, path
+    dba     = DBAX.open { path, schema, }
+    T.eq dba.get_schemas(), { main: path, }
+    T.eq dba.is_empty(), false
+    T.eq ( d.name for d from dba.walk_objects { schema, } ), [ 'sqlite_autoindex_keys_1', 'sqlite_autoindex_realms_1', 'sqlite_autoindex_sources_1', 'keys', 'main', 'realms', 'sources', 'dest_changes_backward', 'dest_changes_forward' ]
+  #.........................................................................................................
+  await do =>
+    path    = work_path_1
+    schema  = 'foo'
+    await H.copy_over template_path_1, path
+    dba     = DBAX.open { path, schema, }
+    # help dba.get_schemas()
+    T.eq dba.get_schemas(), { main: '', [schema]: path, }
+    T.eq dba.is_empty { schema: 'main', }, true
+    T.eq dba.is_empty { schema, }, false
+    T.eq ( d.name for d from dba.walk_objects { schema, } ), [ 'sqlite_autoindex_keys_1', 'sqlite_autoindex_realms_1', 'sqlite_autoindex_sources_1', 'keys', 'main', 'realms', 'sources', 'dest_changes_backward', 'dest_changes_forward' ]
+  #.........................................................................................................
+  await do =>
+    schema_1  = 'datamill'
+    schema_2  = 'chinook'
+    await H.copy_over template_path_1, work_path_1
+    await H.copy_over template_path_2, work_path_2
+    dba       = DBAX.open { path: work_path_1, schema: schema_1, }
+    debug '^567^', dba
+    debug '^567^', ( k for k of dba )
+    debug '^567^', dba.open { path: work_path_2, schema: schema_2, }
+    help '^58733^', dba.get_schemas()
+    # T.eq dba.get_schemas(), { main: '', [schema]: path, }
+    T.eq dba.is_empty { schema: 'main', }, true
+    T.eq dba.is_empty { schema: schema_1, }, false
+    T.eq dba.is_empty { schema: schema_2, }, false
+    T.eq ( d.name for d from dba.walk_objects { schema: schema_1, } ), [ 'sqlite_autoindex_keys_1', 'sqlite_autoindex_realms_1', 'sqlite_autoindex_sources_1', 'keys', 'main', 'realms', 'sources', 'dest_changes_backward', 'dest_changes_forward' ]
+  # dba.exec "create table t ( id integer );"
+  # dba.exec "insert into t values ( #{n} );" for n in [ 1 .. 9 ]
+  # statement_1           = dba.prepare "select * from t;"
+  done()
+
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: as_sql" ] = ( T, done ) ->
   T.halt_on_error()
@@ -219,6 +300,7 @@ show_schemas_and_objects = ( ref, dba ) ->
   # dba_cfg               = { path: cfg.work_path, echo: true, debug: true, }
   dba                   = new ICQLDBA.Dba dba_cfg
   #.........................................................................................................
+  debug '^43474^', { path: cfg.work_path, schema: cfg.mem_schema, }
   dba.attach { path: cfg.work_path, schema: cfg.mem_schema, }
   show_schemas_and_objects '^754-2^', dba
   dba.copy_schema { from_schema: cfg.mem_schema, to_schema: 'main', }
@@ -300,7 +382,9 @@ show_schemas_and_objects = ( ref, dba ) ->
 unless module.parent?
   # test @
   # test @[ "DBA: copy file DB to memory" ]
-  test @[ "DBA: in-memory DB API" ]
+  test @[ "DBA: open()" ]
+  # @[ "DBA: open()" ]()
+  # test @[ "DBA: in-memory DB API" ]
   # test @[ "DBA: as_sql" ]
   # test @[ "DBA: interpolate" ]
   # test @[ "DBA: clear()" ]
