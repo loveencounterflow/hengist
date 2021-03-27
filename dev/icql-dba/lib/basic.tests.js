@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, badge, debug, echo, help, info, isa, rpr, show_schemas_and_objects, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, badge, debug, echo, help, info, isa, rpr, show_schemas_and_objects, test, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -34,10 +34,12 @@
 
   ({isa, type_of, validate, validate_list_of} = types.export());
 
+  ({to_width} = require('to-width'));
+
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open()"] = async function(T, done) {
     var DBA, DBAX, L, cfg, template_path_1, template_path_2, work_path_1, work_path_2, work_path_3;
-    T.halt_on_error();
+    // T.halt_on_error()
     DBA = L = require('../../../apps/icql-dba');
     //.........................................................................................................
     DBAX = class DBAX extends DBA.Dba {};
@@ -218,7 +220,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["_DBA: _create_icqldba_schema()"] = async function(T, done) {
+  this["DBA: _walk_all_objects()"] = async function(T, done) {
     var Dba, cfg, template_path_1, template_path_2, work_path_1, work_path_2;
     T.halt_on_error();
     ({Dba} = require('../../../apps/icql-dba'));
@@ -238,7 +240,7 @@
     work_path_2 = H.interpolate(cfg.db.work[cfg.mode], cfg);
     help("^77-300^ work_path_2:  ", work_path_2);
     await (async() => {      //.........................................................................................................
-      var dba, ref1, results, row;
+      var dba, ref1, result, row;
       await H.copy_over(template_path_1, work_path_1);
       await H.copy_over(template_path_2, work_path_2);
       dba = Dba.open({
@@ -250,18 +252,210 @@
         schema: 'd2'
       });
       debug('^44433^', dba.get_schemas());
-      debug('^44433^', dba._create_icqldba_schema());
-      ref1 = dba.query("select * from temp.icqldba_schema;");
-      results = [];
+      result = [];
+      ref1 = dba.walk_objects();
       for (row of ref1) {
-        results.push(info('^44433^', row));
+        row.sql = to_width(row.sql, 20);
+        info('^44433^', row);
+        delete row.sql;
+        result.push(row);
       }
-      return results;
+      debug('^33443^', result);
+      return T.eq(result, [
+        {
+          seq: 2,
+          schema: 'd1',
+          name: 'sqlite_autoindex_keys_1',
+          type: 'index'
+        },
+        {
+          seq: 2,
+          schema: 'd1',
+          name: 'sqlite_autoindex_realms_1',
+          type: 'index'
+        },
+        {
+          seq: 2,
+          schema: 'd1',
+          name: 'sqlite_autoindex_sources_1',
+          type: 'index'
+        },
+        {
+          seq: 2,
+          schema: 'd1',
+          name: 'keys',
+          type: 'table'
+        },
+        {
+          seq: 2,
+          schema: 'd1',
+          name: 'main',
+          type: 'table'
+        },
+        {
+          seq: 2,
+          schema: 'd1',
+          name: 'realms',
+          type: 'table'
+        },
+        {
+          seq: 2,
+          schema: 'd1',
+          name: 'sources',
+          type: 'table'
+        },
+        {
+          seq: 2,
+          schema: 'd1',
+          name: 'dest_changes_backward',
+          type: 'view'
+        },
+        {
+          seq: 2,
+          schema: 'd1',
+          name: 'dest_changes_forward',
+          type: 'view'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'IFK_AlbumArtistId',
+          type: 'index'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'IFK_CustomerSupportRepId',
+          type: 'index'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'IFK_EmployeeReportsTo',
+          type: 'index'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'IFK_InvoiceCustomerId',
+          type: 'index'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'IFK_InvoiceLineInvoiceId',
+          type: 'index'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'IFK_InvoiceLineTrackId',
+          type: 'index'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'IFK_PlaylistTrackTrackId',
+          type: 'index'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'IFK_TrackAlbumId',
+          type: 'index'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'IFK_TrackGenreId',
+          type: 'index'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'IFK_TrackMediaTypeId',
+          type: 'index'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'sqlite_autoindex_PlaylistTrack_1',
+          type: 'index'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'Album',
+          type: 'table'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'Artist',
+          type: 'table'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'Customer',
+          type: 'table'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'Employee',
+          type: 'table'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'Genre',
+          type: 'table'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'Invoice',
+          type: 'table'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'InvoiceLine',
+          type: 'table'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'MediaType',
+          type: 'table'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'Playlist',
+          type: 'table'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'PlaylistTrack',
+          type: 'table'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'Track',
+          type: 'table'
+        },
+        {
+          seq: 3,
+          schema: 'd2',
+          name: 'sqlite_sequence',
+          type: 'table'
+        }
+      ]);
     })();
-    // continue if row.type is 'index'
-    // schema_id = dba.as_identifier row.schema
-    // for row from dba.query "select count(*) as count from #{schema_id}.#{dba.as_identifier row.name};"
-    //   info '^44433^', row
     //.........................................................................................................
     return done();
   };
@@ -700,13 +894,13 @@
 
   //###########################################################################################################
   if (module.parent == null) {
-    // test @
+    test(this);
     // test @[ "DBA: copy file DB to memory" ]
-    test(this["DBA: open()"]);
+    // test @[ "DBA: open()" ]
+    test(this["DBA: _walk_all_objects()"]);
   }
 
-  // test @[ "_DBA: _create_icqldba_schema()" ]
-// @[ "DBA: open()" ]()
+  // @[ "DBA: open()" ]()
 // test @[ "DBA: in-memory DB API" ]
 // test @[ "DBA: as_sql" ]
 // test @[ "DBA: interpolate" ]
