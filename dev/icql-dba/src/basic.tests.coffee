@@ -27,7 +27,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open()" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   DBA               = L = require '../../../apps/icql-dba'
   #.........................................................................................................
   class DBAX extends DBA.Dba
@@ -79,7 +79,7 @@ types                     = new ( require 'intertype' ).Intertype
     schema  = 'foo'
     await H.copy_over template_path_1, path
     dba     = DBAX.open { path, schema, }
-    # help dba.get_schemas()
+    help '^298789^', dba.get_schemas()
     T.eq dba.get_schemas(), { main: '', [schema]: path, }
     T.eq dba.is_empty { schema: 'main', }, true
     T.eq dba.is_empty { schema, }, false
@@ -291,20 +291,22 @@ show_schemas_and_objects = ( ref, dba ) ->
     schemas:
       main:   ( H.resolve_path 'data/icql/icql-dba-copy-schema.db' )
       q:      ':memory:'
+    mem_schema: 'q'
   #.........................................................................................................
-  help '^3387^', "cfg.template_path: ", cfg.template_path
-  help '^3387^', "cfg.work_path:     ", cfg.work_path
+  help '^754-1^', "cfg.mem_schema:    ", cfg.mem_schema
+  help '^754-2^', "cfg.template_path: ", cfg.template_path
+  help '^754-3^', "cfg.work_path:     ", cfg.work_path
   await H.copy_over cfg.template_path, cfg.work_path
   #.........................................................................................................
   dba_cfg               = { path: cfg.mem_path, }
   # dba_cfg               = { path: cfg.work_path, echo: true, debug: true, }
   dba                   = new ICQLDBA.Dba dba_cfg
   #.........................................................................................................
-  debug '^43474^', { path: cfg.work_path, schema: cfg.mem_schema, }
+  info '^754-4^', { path: cfg.work_path, schema: cfg.mem_schema, }
   dba.attach { path: cfg.work_path, schema: cfg.mem_schema, }
-  show_schemas_and_objects '^754-2^', dba
+  show_schemas_and_objects '^754-5^', dba
   dba.copy_schema { from_schema: cfg.mem_schema, to_schema: 'main', }
-  show_schemas_and_objects '^754-3^', dba
+  show_schemas_and_objects '^754-6^', dba
   #.........................................................................................................
   to_schema_objects     = dba.list dba.walk_objects { schema: cfg.mem_schema, }
   schema_x              = dba.as_identifier cfg.mem_schema
@@ -317,10 +319,10 @@ show_schemas_and_objects = ( ref, dba ) ->
       when 'table', 'view'
         sql                   = "select count(*) from #{schema_x}.#{obj_name_x};"
         count                 = dba.single_value dba.query sql
-        debug d.name, count
+        debug '^33432^', { name: d.name, count, }
         result[ d.name ] = "#{d.type}|#{count}"
       else throw new Error "^45687^ unknown DB object type #{rpr d.type}"
-  debug '^448978^', result
+  # debug '^448978^', result
   T.eq result, {
     sqlite_autoindex_keys_1:    'index'
     sqlite_autoindex_realms_1:  'index'
@@ -332,6 +334,7 @@ show_schemas_and_objects = ( ref, dba ) ->
     dest_changes_backward:      'view|320'
     dest_changes_forward:       'view|320' }
   #.........................................................................................................
+  done()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: in-memory DB API" ] = ( T, done ) ->
