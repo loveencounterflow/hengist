@@ -37,7 +37,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open()"] = async function(T, done) {
     var DBA, DBAX, L, cfg, template_path_1, template_path_2, work_path_1, work_path_2;
-    T.halt_on_error();
+    // T.halt_on_error()
     DBA = L = require('../../../apps/icql-dba');
     //.........................................................................................................
     DBAX = class DBAX extends DBA.Dba {
@@ -115,7 +115,7 @@
       schema = 'foo';
       await H.copy_over(template_path_1, path);
       dba = DBAX.open({path, schema});
-      // help dba.get_schemas()
+      help('^298789^', dba.get_schemas());
       T.eq(dba.get_schemas(), {
         main: '',
         [schema]: path
@@ -492,11 +492,13 @@
       schemas: {
         main: H.resolve_path('data/icql/icql-dba-copy-schema.db'),
         q: ':memory:'
-      }
+      },
+      mem_schema: 'q'
     };
     //.........................................................................................................
-    help('^3387^', "cfg.template_path: ", cfg.template_path);
-    help('^3387^', "cfg.work_path:     ", cfg.work_path);
+    help('^754-1^', "cfg.mem_schema:    ", cfg.mem_schema);
+    help('^754-2^', "cfg.template_path: ", cfg.template_path);
+    help('^754-3^', "cfg.work_path:     ", cfg.work_path);
     await H.copy_over(cfg.template_path, cfg.work_path);
     //.........................................................................................................
     dba_cfg = {
@@ -505,7 +507,7 @@
     // dba_cfg               = { path: cfg.work_path, echo: true, debug: true, }
     dba = new ICQLDBA.Dba(dba_cfg);
     //.........................................................................................................
-    debug('^43474^', {
+    info('^754-4^', {
       path: cfg.work_path,
       schema: cfg.mem_schema
     });
@@ -513,12 +515,12 @@
       path: cfg.work_path,
       schema: cfg.mem_schema
     });
-    show_schemas_and_objects('^754-2^', dba);
+    show_schemas_and_objects('^754-5^', dba);
     dba.copy_schema({
       from_schema: cfg.mem_schema,
       to_schema: 'main'
     });
-    show_schemas_and_objects('^754-3^', dba);
+    show_schemas_and_objects('^754-6^', dba);
     //.........................................................................................................
     to_schema_objects = dba.list(dba.walk_objects({
       schema: cfg.mem_schema
@@ -536,15 +538,18 @@
         case 'view':
           sql = `select count(*) from ${schema_x}.${obj_name_x};`;
           count = dba.single_value(dba.query(sql));
-          debug(d.name, count);
+          debug('^33432^', {
+            name: d.name,
+            count
+          });
           result[d.name] = `${d.type}|${count}`;
           break;
         default:
           throw new Error(`^45687^ unknown DB object type ${rpr(d.type)}`);
       }
     }
-    debug('^448978^', result);
-    return T.eq(result, {
+    // debug '^448978^', result
+    T.eq(result, {
       sqlite_autoindex_keys_1: 'index',
       sqlite_autoindex_realms_1: 'index',
       sqlite_autoindex_sources_1: 'index',
@@ -555,9 +560,9 @@
       dest_changes_backward: 'view|320',
       dest_changes_forward: 'view|320'
     });
+    //.........................................................................................................
+    return done();
   };
-
-  //.........................................................................................................
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: in-memory DB API"] = function(T, done) {
