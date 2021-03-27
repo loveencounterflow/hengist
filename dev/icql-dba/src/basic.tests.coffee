@@ -23,11 +23,11 @@ types                     = new ( require 'intertype' ).Intertype
   type_of
   validate
   validate_list_of }      = types.export()
-
+{ to_width }              = require 'to-width'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open()" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   DBA               = L = require '../../../apps/icql-dba'
   #.........................................................................................................
   class DBAX extends DBA.Dba
@@ -121,7 +121,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "_DBA: _create_icqldba_schema()" ] = ( T, done ) ->
+@[ "DBA: _walk_all_objects()" ] = ( T, done ) ->
   T.halt_on_error()
   { Dba, }          = require '../../../apps/icql-dba'
   #.........................................................................................................
@@ -146,13 +146,46 @@ types                     = new ( require 'intertype' ).Intertype
     dba     = Dba.open { path: work_path_1, schema: 'd1', }
     dba.open { path: work_path_2, schema: 'd2', }
     debug '^44433^', dba.get_schemas()
-    debug '^44433^', dba._create_icqldba_schema()
-    for row from dba.query "select * from temp.icqldba_schema;"
+    result = []
+    for row from dba.walk_objects()
+      row.sql = to_width row.sql, 20
       info '^44433^', row
-      # continue if row.type is 'index'
-      # schema_id = dba.as_identifier row.schema
-      # for row from dba.query "select count(*) as count from #{schema_id}.#{dba.as_identifier row.name};"
-      #   info '^44433^', row
+      delete row.sql
+      result.push row
+    debug '^33443^', result
+    T.eq result, [
+      { seq: 2, schema: 'd1', name: 'sqlite_autoindex_keys_1', type: 'index' },
+      { seq: 2, schema: 'd1', name: 'sqlite_autoindex_realms_1', type: 'index' },
+      { seq: 2, schema: 'd1', name: 'sqlite_autoindex_sources_1', type: 'index' },
+      { seq: 2, schema: 'd1', name: 'keys', type: 'table' },
+      { seq: 2, schema: 'd1', name: 'main', type: 'table' },
+      { seq: 2, schema: 'd1', name: 'realms', type: 'table' },
+      { seq: 2, schema: 'd1', name: 'sources', type: 'table' },
+      { seq: 2, schema: 'd1', name: 'dest_changes_backward', type: 'view' },
+      { seq: 2, schema: 'd1', name: 'dest_changes_forward', type: 'view' },
+      { seq: 3, schema: 'd2', name: 'IFK_AlbumArtistId', type: 'index' },
+      { seq: 3, schema: 'd2', name: 'IFK_CustomerSupportRepId', type: 'index' },
+      { seq: 3, schema: 'd2', name: 'IFK_EmployeeReportsTo', type: 'index' },
+      { seq: 3, schema: 'd2', name: 'IFK_InvoiceCustomerId', type: 'index' },
+      { seq: 3, schema: 'd2', name: 'IFK_InvoiceLineInvoiceId', type: 'index' },
+      { seq: 3, schema: 'd2', name: 'IFK_InvoiceLineTrackId', type: 'index' },
+      { seq: 3, schema: 'd2', name: 'IFK_PlaylistTrackTrackId', type: 'index' },
+      { seq: 3, schema: 'd2', name: 'IFK_TrackAlbumId', type: 'index' },
+      { seq: 3, schema: 'd2', name: 'IFK_TrackGenreId', type: 'index' },
+      { seq: 3, schema: 'd2', name: 'IFK_TrackMediaTypeId', type: 'index' },
+      { seq: 3, schema: 'd2', name: 'sqlite_autoindex_PlaylistTrack_1', type: 'index' },
+      { seq: 3, schema: 'd2', name: 'Album', type: 'table' },
+      { seq: 3, schema: 'd2', name: 'Artist', type: 'table' },
+      { seq: 3, schema: 'd2', name: 'Customer', type: 'table' },
+      { seq: 3, schema: 'd2', name: 'Employee', type: 'table' },
+      { seq: 3, schema: 'd2', name: 'Genre', type: 'table' },
+      { seq: 3, schema: 'd2', name: 'Invoice', type: 'table' },
+      { seq: 3, schema: 'd2', name: 'InvoiceLine', type: 'table' },
+      { seq: 3, schema: 'd2', name: 'MediaType', type: 'table' },
+      { seq: 3, schema: 'd2', name: 'Playlist', type: 'table' },
+      { seq: 3, schema: 'd2', name: 'PlaylistTrack', type: 'table' },
+      { seq: 3, schema: 'd2', name: 'Track', type: 'table' },
+      { seq: 3, schema: 'd2', name: 'sqlite_sequence', type: 'table' } ]
   #.........................................................................................................
   done()
 
@@ -434,10 +467,10 @@ show_schemas_and_objects = ( ref, dba ) ->
 
 ############################################################################################################
 unless module.parent?
-  # test @
+  test @
   # test @[ "DBA: copy file DB to memory" ]
-  test @[ "DBA: open()" ]
-  # test @[ "_DBA: _create_icqldba_schema()" ]
+  # test @[ "DBA: open()" ]
+  test @[ "DBA: _walk_all_objects()" ]
   # @[ "DBA: open()" ]()
   # test @[ "DBA: in-memory DB API" ]
   # test @[ "DBA: as_sql" ]
