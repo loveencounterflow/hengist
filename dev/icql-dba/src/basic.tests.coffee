@@ -152,7 +152,7 @@ types                     = new ( require 'intertype' ).Intertype
       info '^44433^', row
       delete row.sql
       result.push row
-    debug '^33443^', result
+    # debug '^33443^', result
     T.eq result, [
       { seq: 2, schema: 'd1', name: 'sqlite_autoindex_keys_1', type: 'index' },
       { seq: 2, schema: 'd1', name: 'sqlite_autoindex_realms_1', type: 'index' },
