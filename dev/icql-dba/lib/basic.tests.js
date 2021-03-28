@@ -260,7 +260,7 @@
         delete row.sql;
         result.push(row);
       }
-      debug('^33443^', result);
+      // debug '^33443^', result
       return T.eq(result, [
         {
           seq: 2,
