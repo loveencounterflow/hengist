@@ -47,6 +47,7 @@ dependencies:
   mixa: 0.1.2
   mori: 0.3.2
   multimix: 5.0.0
+  node-icecream: 1.0.0
   npm: 7.6.3
   npm-logical-tree: 1.2.1
   number-format.js: 2.0.9
@@ -151,6 +152,13 @@ packages:
       node: '>=0.4.0'
     resolution:
       integrity: sha512-OPdCF6GsMIP+Az+aWfAAOEt2/+iVDKE7oy6lJ098aoe59oAmK76qV6Gw60SbZ8jHuG2wH058GF4pLFbYamYrVA==
+  /acorn/5.7.4:
+    dev: false
+    engines:
+      node: '>=0.4.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-1D++VG7BhrtvQpNbBzovKNc1FLGGEE/oGe7b9xJm/RFHMBeUaUGpluV9RLjZa47YFdPcDAenEYuq9pQPcMdLJg==
   /acorn/7.4.1:
     dev: false
     engines:
@@ -221,6 +229,12 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==
+  /app-root-path/2.2.1:
+    dev: false
+    engines:
+      node: '>= 6.0.0'
+    resolution:
+      integrity: sha512-91IFKeKk7FjfmezPKkwtaRvSpnUc4gDwPAjA1YZ9Gn0q0PPeW+vbeUsZuyDwjI7+QTHhcLen2v25fi/AmhvbJA==
   /aproba/1.2.0:
     dev: false
     resolution:
@@ -307,6 +321,11 @@ packages:
       node: '>=0.8'
     resolution:
       integrity: sha1-8S4PPF13sLHN2RRpQuTpbB5N1SU=
+  /astring/1.7.0:
+    dev: false
+    hasBin: true
+    resolution:
+      integrity: sha512-43bervUZNvahG1v74a+POdGlAWcOUGSvP9fJVj6sywzM/SquwDkA+CdP938e8tWHUV77fStCiqzaQHAt0u6MVA==
   /async-cache/1.1.0:
     dependencies:
       lru-cache: 4.1.5
@@ -439,6 +458,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-y5T662HIaWRR2zZTThQi+U8K7og=
+  /callsite/1.0.0:
+    dev: false
+    resolution:
+      integrity: sha1-KAOY5dZkvXQDi28JBRU+borxvCA=
   /caseless/0.12.0:
     dev: false
     resolution:
@@ -1951,6 +1974,17 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-CbpcIo7C3eMu3dL1c3d0xw449fHIGALIJsRP4DDPHpyiW8vcriNY7ubh9TE4zEKfSxscY7PjeFnshE7h75ynjQ==
+  /node-icecream/1.0.0:
+    dependencies:
+      acorn: 5.7.4
+      app-root-path: 2.2.1
+      astring: 1.7.0
+      callsite: 1.0.0
+    dev: false
+    engines:
+      node: '>=6.0.0'
+    resolution:
+      integrity: sha1-j/0GhZUceaONd2bIm5eRcPYGqU4=
   /noop-logger/0.1.1:
     dev: false
     resolution:
@@ -3302,6 +3336,7 @@ specifiers:
   mixa: 0.1.2
   mori: ^0.3.2
   multimix: ^5.0.0
+  node-icecream: ^1.0.0
   npm: 7.6.3
   npm-logical-tree: ^1.2.1
   number-format.js: ^2.0.9
