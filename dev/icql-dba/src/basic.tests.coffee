@@ -24,13 +24,13 @@ types                     = new ( require 'intertype' ).Intertype
   validate
   validate_list_of }      = types.export()
 { to_width }              = require 'to-width'
+ic                        = ( require 'node-icecream' ) { outputFunction: help, }
+
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open()" ] = ( T, done ) ->
-  # T.halt_on_error()
-  DBA               = L = require '../../../apps/icql-dba'
-  #.........................................................................................................
-  class DBAX extends DBA.Dba
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
   #.........................................................................................................
   cfg               = H.get_cfg()
   cfg.ref           = 'multicon'
@@ -54,18 +54,21 @@ types                     = new ( require 'intertype' ).Intertype
   #.........................................................................................................
   await do =>
     path    = work_path_1
-    schema  = null
+    schema  = 's1'
     await H.copy_over template_path_1, path
-    dba     = DBAX.open { path, schema, }
-    T.eq dba.get_schemas(), { main: path, }
-    T.eq dba.is_empty(), false
+    dba     = new Dba()
+    dba.open { path, schema, }
+    T.eq dba.get_schemas(), { main: '', s1: path, }
+    T.eq ( dba.is_empty { schema: 'main', } ), true
+    T.eq ( dba.is_empty { schema: 's1', } ), false
     T.eq ( d.name for d from dba.walk_objects { schema, } ), [ 'sqlite_autoindex_keys_1', 'sqlite_autoindex_realms_1', 'sqlite_autoindex_sources_1', 'keys', 'main', 'realms', 'sources', 'dest_changes_backward', 'dest_changes_forward' ]
   #.........................................................................................................
   await do =>
     path    = work_path_1
     schema  = 'foo'
     await H.copy_over template_path_1, path
-    dba     = DBAX.open { path, schema, }
+    dba     = new Dba()
+    dba.open { path, schema, }
     help '^298789^', dba.get_schemas()
     T.eq dba.get_schemas(), { main: '', [schema]: path, }
     T.eq dba.is_empty { schema: 'main', }, true
@@ -77,7 +80,7 @@ types                     = new ( require 'intertype' ).Intertype
     schema_2  = 'chinook'
     await H.copy_over template_path_1, work_path_1
     await H.copy_over template_path_2, work_path_2
-    dba       = DBAX.open { path: work_path_1, schema: schema_1, }
+    dba       = new Dba { path: work_path_1, schema: schema_1, }
     debug '^567^', dba
     debug '^567^', ( k for k of dba )
     debug '^567^', dba.open { path: work_path_2, schema: schema_2, }
@@ -96,7 +99,7 @@ types                     = new ( require 'intertype' ).Intertype
     await H.copy_over template_path_1, work_path_1
     await H.copy_over template_path_2, work_path_2
     await H.try_to_remove_file work_path_3
-    dba       = DBAX.open()
+    dba       = new Dba()
     dba.open { path: work_path_1, schema: schema_1, }
     dba.open { path: work_path_2, schema: schema_2, }
     dba.open { path: work_path_3, schema: schema_3, }
@@ -113,7 +116,7 @@ types                     = new ( require 'intertype' ).Intertype
   await do =>
     ### test whether data from previous test was persisted ###
     schema_3  = 'new'
-    dba       = DBAX.open()
+    dba       = new Dba()
     dba.open { path: work_path_3, schema: schema_3, }
     T.eq ( dba.list dba.first_values dba.query "select * from new.t;" ), [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
   #.........................................................................................................
@@ -139,12 +142,63 @@ types                     = new ( require 'intertype' ).Intertype
   template_path_2   = H.interpolate cfg.db.templates[ cfg.size ], cfg
   work_path_2       = H.interpolate cfg.db.work[      cfg.mode ], cfg
   help "^77-300^ work_path_2:  ", work_path_2
+  objects_matcher = [
+    { seq: 1, schema: 'temp', name: 'temp1', type: 'table' }
+    { seq: 2, schema: 'd1', name: 'sqlite_autoindex_keys_1', type: 'index' },
+    { seq: 2, schema: 'd1', name: 'sqlite_autoindex_realms_1', type: 'index' },
+    { seq: 2, schema: 'd1', name: 'sqlite_autoindex_sources_1', type: 'index' },
+    { seq: 2, schema: 'd1', name: 'keys', type: 'table' },
+    { seq: 2, schema: 'd1', name: 'main', type: 'table' },
+    { seq: 2, schema: 'd1', name: 'realms', type: 'table' },
+    { seq: 2, schema: 'd1', name: 'sources', type: 'table' },
+    { seq: 2, schema: 'd1', name: 'dest_changes_backward', type: 'view' },
+    { seq: 2, schema: 'd1', name: 'dest_changes_forward', type: 'view' },
+    { seq: 3, schema: 'd2', name: 'IFK_AlbumArtistId', type: 'index' },
+    { seq: 3, schema: 'd2', name: 'IFK_CustomerSupportRepId', type: 'index' },
+    { seq: 3, schema: 'd2', name: 'IFK_EmployeeReportsTo', type: 'index' },
+    { seq: 3, schema: 'd2', name: 'IFK_InvoiceCustomerId', type: 'index' },
+    { seq: 3, schema: 'd2', name: 'IFK_InvoiceLineInvoiceId', type: 'index' },
+    { seq: 3, schema: 'd2', name: 'IFK_InvoiceLineTrackId', type: 'index' },
+    { seq: 3, schema: 'd2', name: 'IFK_PlaylistTrackTrackId', type: 'index' },
+    { seq: 3, schema: 'd2', name: 'IFK_TrackAlbumId', type: 'index' },
+    { seq: 3, schema: 'd2', name: 'IFK_TrackGenreId', type: 'index' },
+    { seq: 3, schema: 'd2', name: 'IFK_TrackMediaTypeId', type: 'index' },
+    { seq: 3, schema: 'd2', name: 'sqlite_autoindex_PlaylistTrack_1', type: 'index' },
+    { seq: 3, schema: 'd2', name: 'Album', type: 'table' },
+    { seq: 3, schema: 'd2', name: 'Artist', type: 'table' },
+    { seq: 3, schema: 'd2', name: 'Customer', type: 'table' },
+    { seq: 3, schema: 'd2', name: 'Employee', type: 'table' },
+    { seq: 3, schema: 'd2', name: 'Genre', type: 'table' },
+    { seq: 3, schema: 'd2', name: 'Invoice', type: 'table' },
+    { seq: 3, schema: 'd2', name: 'InvoiceLine', type: 'table' },
+    { seq: 3, schema: 'd2', name: 'MediaType', type: 'table' },
+    { seq: 3, schema: 'd2', name: 'Playlist', type: 'table' },
+    { seq: 3, schema: 'd2', name: 'PlaylistTrack', type: 'table' },
+    { seq: 3, schema: 'd2', name: 'Track', type: 'table' },
+    { seq: 3, schema: 'd2', name: 'sqlite_sequence', type: 'table' } ]
+  # #.........................................................................................................
+  # await do =>
+  #   await H.copy_over template_path_1, work_path_1
+  #   await H.copy_over template_path_2, work_path_2
+  #   dba     = Dba.open { path: work_path_1, schema: 'd1', }
+  #   dba.open { path: work_path_2, schema: 'd2', }
+  #   dba.execute "create temporary table temp1 ( id integer primary key, name text );"
+  #   debug '^44433^', dba.get_schemas()
+  #   result = []
+  #   for row from dba.walk_objects()
+  #     row.sql = to_width row.sql, 20
+  #     delete row.sql
+  #     result.push row
+  #   T.eq result, objects_matcher
+  #   # debug '^33443^', result
   #.........................................................................................................
   await do =>
     await H.copy_over template_path_1, work_path_1
     await H.copy_over template_path_2, work_path_2
-    dba     = Dba.open { path: work_path_1, schema: 'd1', }
+    dba     = new Dba()
+    dba.open { path: work_path_1, schema: 'd1', }
     dba.open { path: work_path_2, schema: 'd2', }
+    dba.execute "create temporary table temp1 ( id integer primary key, name text );"
     debug '^44433^', dba.get_schemas()
     result = []
     for row from dba.walk_objects()
@@ -152,40 +206,8 @@ types                     = new ( require 'intertype' ).Intertype
       info '^44433^', row
       delete row.sql
       result.push row
+    T.eq result, objects_matcher
     # debug '^33443^', result
-    T.eq result, [
-      { seq: 2, schema: 'd1', name: 'sqlite_autoindex_keys_1', type: 'index' },
-      { seq: 2, schema: 'd1', name: 'sqlite_autoindex_realms_1', type: 'index' },
-      { seq: 2, schema: 'd1', name: 'sqlite_autoindex_sources_1', type: 'index' },
-      { seq: 2, schema: 'd1', name: 'keys', type: 'table' },
-      { seq: 2, schema: 'd1', name: 'main', type: 'table' },
-      { seq: 2, schema: 'd1', name: 'realms', type: 'table' },
-      { seq: 2, schema: 'd1', name: 'sources', type: 'table' },
-      { seq: 2, schema: 'd1', name: 'dest_changes_backward', type: 'view' },
-      { seq: 2, schema: 'd1', name: 'dest_changes_forward', type: 'view' },
-      { seq: 3, schema: 'd2', name: 'IFK_AlbumArtistId', type: 'index' },
-      { seq: 3, schema: 'd2', name: 'IFK_CustomerSupportRepId', type: 'index' },
-      { seq: 3, schema: 'd2', name: 'IFK_EmployeeReportsTo', type: 'index' },
-      { seq: 3, schema: 'd2', name: 'IFK_InvoiceCustomerId', type: 'index' },
-      { seq: 3, schema: 'd2', name: 'IFK_InvoiceLineInvoiceId', type: 'index' },
-      { seq: 3, schema: 'd2', name: 'IFK_InvoiceLineTrackId', type: 'index' },
-      { seq: 3, schema: 'd2', name: 'IFK_PlaylistTrackTrackId', type: 'index' },
-      { seq: 3, schema: 'd2', name: 'IFK_TrackAlbumId', type: 'index' },
-      { seq: 3, schema: 'd2', name: 'IFK_TrackGenreId', type: 'index' },
-      { seq: 3, schema: 'd2', name: 'IFK_TrackMediaTypeId', type: 'index' },
-      { seq: 3, schema: 'd2', name: 'sqlite_autoindex_PlaylistTrack_1', type: 'index' },
-      { seq: 3, schema: 'd2', name: 'Album', type: 'table' },
-      { seq: 3, schema: 'd2', name: 'Artist', type: 'table' },
-      { seq: 3, schema: 'd2', name: 'Customer', type: 'table' },
-      { seq: 3, schema: 'd2', name: 'Employee', type: 'table' },
-      { seq: 3, schema: 'd2', name: 'Genre', type: 'table' },
-      { seq: 3, schema: 'd2', name: 'Invoice', type: 'table' },
-      { seq: 3, schema: 'd2', name: 'InvoiceLine', type: 'table' },
-      { seq: 3, schema: 'd2', name: 'MediaType', type: 'table' },
-      { seq: 3, schema: 'd2', name: 'Playlist', type: 'table' },
-      { seq: 3, schema: 'd2', name: 'PlaylistTrack', type: 'table' },
-      { seq: 3, schema: 'd2', name: 'Track', type: 'table' },
-      { seq: 3, schema: 'd2', name: 'sqlite_sequence', type: 'table' } ]
   #.........................................................................................................
   done()
 
@@ -382,7 +404,7 @@ show_schemas_and_objects = ( ref, dba ) ->
   help '^754-3^', "cfg.work_path:     ", cfg.work_path
   await H.copy_over cfg.template_path, cfg.work_path
   #.........................................................................................................
-  dba_cfg               = { path: cfg.mem_path, }
+  dba_cfg               = { path: ':memory:', }
   # dba_cfg               = { path: cfg.work_path, echo: true, debug: true, }
   dba                   = new ICQLDBA.Dba dba_cfg
   #.........................................................................................................
