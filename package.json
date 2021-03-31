@@ -61,6 +61,7 @@
     "mixa": "0.1.2",
     "mori": "^0.3.2",
     "multimix": "^5.0.0",
+    "node-icecream": "^1.0.0",
     "npm": "7.6.3",
     "npm-logical-tree": "^1.2.1",
     "number-format.js": "^2.0.9",
