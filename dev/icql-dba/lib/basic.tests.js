@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, badge, debug, echo, help, info, isa, rpr, show_schemas_and_objects, test, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, badge, debug, echo, help, ic, info, isa, rpr, show_schemas_and_objects, test, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -36,13 +36,15 @@
 
   ({to_width} = require('to-width'));
 
+  ic = (require('node-icecream'))({
+    outputFunction: help
+  });
+
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open()"] = async function(T, done) {
-    var DBA, DBAX, L, cfg, template_path_1, template_path_2, work_path_1, work_path_2, work_path_3;
-    // T.halt_on_error()
-    DBA = L = require('../../../apps/icql-dba');
-    //.........................................................................................................
-    DBAX = class DBAX extends DBA.Dba {};
+    var Dba, cfg, template_path_1, template_path_2, work_path_1, work_path_2, work_path_3;
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
     //.........................................................................................................
     cfg = H.get_cfg();
     cfg.ref = 'multicon';
@@ -66,13 +68,20 @@
     await (async() => {      //.........................................................................................................
       var d, dba, path, schema;
       path = work_path_1;
-      schema = null;
+      schema = 's1';
       await H.copy_over(template_path_1, path);
-      dba = DBAX.open({path, schema});
+      dba = new Dba();
+      dba.open({path, schema});
       T.eq(dba.get_schemas(), {
-        main: path
+        main: '',
+        s1: path
       });
-      T.eq(dba.is_empty(), false);
+      T.eq(dba.is_empty({
+        schema: 'main'
+      }), true);
+      T.eq(dba.is_empty({
+        schema: 's1'
+      }), false);
       return T.eq((function() {
         var ref1, results;
         ref1 = dba.walk_objects({schema});
@@ -88,7 +97,8 @@
       path = work_path_1;
       schema = 'foo';
       await H.copy_over(template_path_1, path);
-      dba = DBAX.open({path, schema});
+      dba = new Dba();
+      dba.open({path, schema});
       help('^298789^', dba.get_schemas());
       T.eq(dba.get_schemas(), {
         main: '',
@@ -114,7 +124,7 @@
       schema_2 = 'chinook';
       await H.copy_over(template_path_1, work_path_1);
       await H.copy_over(template_path_2, work_path_2);
-      dba = DBAX.open({
+      dba = new Dba({
         path: work_path_1,
         schema: schema_1
       });
@@ -163,7 +173,7 @@
       await H.copy_over(template_path_1, work_path_1);
       await H.copy_over(template_path_2, work_path_2);
       await H.try_to_remove_file(work_path_3);
-      dba = DBAX.open();
+      dba = new Dba();
       dba.open({
         path: work_path_1,
         schema: schema_1
@@ -208,7 +218,7 @@
       /* test whether data from previous test was persisted */
       var dba, schema_3;
       schema_3 = 'new';
-      dba = DBAX.open();
+      dba = new Dba();
       dba.open({
         path: work_path_3,
         schema: schema_3
@@ -221,7 +231,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: _walk_all_objects()"] = async function(T, done) {
-    var Dba, cfg, template_path_1, template_path_2, work_path_1, work_path_2;
+    var Dba, cfg, objects_matcher, template_path_1, template_path_2, work_path_1, work_path_2;
     T.halt_on_error();
     ({Dba} = require('../../../apps/icql-dba'));
     //.........................................................................................................
@@ -239,11 +249,227 @@
     template_path_2 = H.interpolate(cfg.db.templates[cfg.size], cfg);
     work_path_2 = H.interpolate(cfg.db.work[cfg.mode], cfg);
     help("^77-300^ work_path_2:  ", work_path_2);
-    await (async() => {      //.........................................................................................................
+    objects_matcher = [
+      {
+        seq: 1,
+        schema: 'temp',
+        name: 'temp1',
+        type: 'table'
+      },
+      {
+        seq: 2,
+        schema: 'd1',
+        name: 'sqlite_autoindex_keys_1',
+        type: 'index'
+      },
+      {
+        seq: 2,
+        schema: 'd1',
+        name: 'sqlite_autoindex_realms_1',
+        type: 'index'
+      },
+      {
+        seq: 2,
+        schema: 'd1',
+        name: 'sqlite_autoindex_sources_1',
+        type: 'index'
+      },
+      {
+        seq: 2,
+        schema: 'd1',
+        name: 'keys',
+        type: 'table'
+      },
+      {
+        seq: 2,
+        schema: 'd1',
+        name: 'main',
+        type: 'table'
+      },
+      {
+        seq: 2,
+        schema: 'd1',
+        name: 'realms',
+        type: 'table'
+      },
+      {
+        seq: 2,
+        schema: 'd1',
+        name: 'sources',
+        type: 'table'
+      },
+      {
+        seq: 2,
+        schema: 'd1',
+        name: 'dest_changes_backward',
+        type: 'view'
+      },
+      {
+        seq: 2,
+        schema: 'd1',
+        name: 'dest_changes_forward',
+        type: 'view'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'IFK_AlbumArtistId',
+        type: 'index'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'IFK_CustomerSupportRepId',
+        type: 'index'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'IFK_EmployeeReportsTo',
+        type: 'index'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'IFK_InvoiceCustomerId',
+        type: 'index'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'IFK_InvoiceLineInvoiceId',
+        type: 'index'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'IFK_InvoiceLineTrackId',
+        type: 'index'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'IFK_PlaylistTrackTrackId',
+        type: 'index'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'IFK_TrackAlbumId',
+        type: 'index'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'IFK_TrackGenreId',
+        type: 'index'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'IFK_TrackMediaTypeId',
+        type: 'index'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'sqlite_autoindex_PlaylistTrack_1',
+        type: 'index'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'Album',
+        type: 'table'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'Artist',
+        type: 'table'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'Customer',
+        type: 'table'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'Employee',
+        type: 'table'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'Genre',
+        type: 'table'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'Invoice',
+        type: 'table'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'InvoiceLine',
+        type: 'table'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'MediaType',
+        type: 'table'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'Playlist',
+        type: 'table'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'PlaylistTrack',
+        type: 'table'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'Track',
+        type: 'table'
+      },
+      {
+        seq: 3,
+        schema: 'd2',
+        name: 'sqlite_sequence',
+        type: 'table'
+      }
+    ];
+    await (async() => {      // #.........................................................................................................
+      // await do =>
+      //   await H.copy_over template_path_1, work_path_1
+      //   await H.copy_over template_path_2, work_path_2
+      //   dba     = Dba.open { path: work_path_1, schema: 'd1', }
+      //   dba.open { path: work_path_2, schema: 'd2', }
+      //   dba.execute "create temporary table temp1 ( id integer primary key, name text );"
+      //   debug '^44433^', dba.get_schemas()
+      //   result = []
+      //   for row from dba.walk_objects()
+      //     row.sql = to_width row.sql, 20
+      //     delete row.sql
+      //     result.push row
+      //   T.eq result, objects_matcher
+      //   # debug '^33443^', result
+      //.........................................................................................................
       var dba, ref1, result, row;
       await H.copy_over(template_path_1, work_path_1);
       await H.copy_over(template_path_2, work_path_2);
-      dba = Dba.open({
+      dba = new Dba();
+      dba.open({
         path: work_path_1,
         schema: 'd1'
       });
@@ -251,6 +477,7 @@
         path: work_path_2,
         schema: 'd2'
       });
+      dba.execute("create temporary table temp1 ( id integer primary key, name text );");
       debug('^44433^', dba.get_schemas());
       result = [];
       ref1 = dba.walk_objects();
@@ -260,202 +487,9 @@
         delete row.sql;
         result.push(row);
       }
-      // debug '^33443^', result
-      return T.eq(result, [
-        {
-          seq: 2,
-          schema: 'd1',
-          name: 'sqlite_autoindex_keys_1',
-          type: 'index'
-        },
-        {
-          seq: 2,
-          schema: 'd1',
-          name: 'sqlite_autoindex_realms_1',
-          type: 'index'
-        },
-        {
-          seq: 2,
-          schema: 'd1',
-          name: 'sqlite_autoindex_sources_1',
-          type: 'index'
-        },
-        {
-          seq: 2,
-          schema: 'd1',
-          name: 'keys',
-          type: 'table'
-        },
-        {
-          seq: 2,
-          schema: 'd1',
-          name: 'main',
-          type: 'table'
-        },
-        {
-          seq: 2,
-          schema: 'd1',
-          name: 'realms',
-          type: 'table'
-        },
-        {
-          seq: 2,
-          schema: 'd1',
-          name: 'sources',
-          type: 'table'
-        },
-        {
-          seq: 2,
-          schema: 'd1',
-          name: 'dest_changes_backward',
-          type: 'view'
-        },
-        {
-          seq: 2,
-          schema: 'd1',
-          name: 'dest_changes_forward',
-          type: 'view'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'IFK_AlbumArtistId',
-          type: 'index'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'IFK_CustomerSupportRepId',
-          type: 'index'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'IFK_EmployeeReportsTo',
-          type: 'index'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'IFK_InvoiceCustomerId',
-          type: 'index'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'IFK_InvoiceLineInvoiceId',
-          type: 'index'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'IFK_InvoiceLineTrackId',
-          type: 'index'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'IFK_PlaylistTrackTrackId',
-          type: 'index'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'IFK_TrackAlbumId',
-          type: 'index'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'IFK_TrackGenreId',
-          type: 'index'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'IFK_TrackMediaTypeId',
-          type: 'index'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'sqlite_autoindex_PlaylistTrack_1',
-          type: 'index'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'Album',
-          type: 'table'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'Artist',
-          type: 'table'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'Customer',
-          type: 'table'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'Employee',
-          type: 'table'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'Genre',
-          type: 'table'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'Invoice',
-          type: 'table'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'InvoiceLine',
-          type: 'table'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'MediaType',
-          type: 'table'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'Playlist',
-          type: 'table'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'PlaylistTrack',
-          type: 'table'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'Track',
-          type: 'table'
-        },
-        {
-          seq: 3,
-          schema: 'd2',
-          name: 'sqlite_sequence',
-          type: 'table'
-        }
-      ]);
+      return T.eq(result, objects_matcher);
     })();
+    // debug '^33443^', result
     //.........................................................................................................
     return done();
   };
@@ -776,7 +810,7 @@
     await H.copy_over(cfg.template_path, cfg.work_path);
     //.........................................................................................................
     dba_cfg = {
-      path: cfg.mem_path
+      path: ':memory:'
     };
     // dba_cfg               = { path: cfg.work_path, echo: true, debug: true, }
     dba = new ICQLDBA.Dba(dba_cfg);
