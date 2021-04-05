@@ -24,7 +24,6 @@ types                     = new ( require 'intertype' ).Intertype
   validate
   validate_list_of }      = types.export()
 { to_width }              = require 'to-width'
-ic                        = ( require 'node-icecream' ) { outputFunction: help, }
 
 
 #-----------------------------------------------------------------------------------------------------------
