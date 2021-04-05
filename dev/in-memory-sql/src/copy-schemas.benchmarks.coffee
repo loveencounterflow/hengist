@@ -148,8 +148,10 @@ show_result = ( name, result ) ->
           _icql.attach db_temp_path, temp_schema
           _icql.copy_schema fle_schema, temp_schema
         when 'backup'
-          throw new Error "^844483^ save method 'backup' deprecated"
-          await _icql.backup db_temp_path
+          ### TAINT use `{ attached: schema, }` (see https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#backupdestination-options---promise) ###
+          # progress = ( d ) -> info '^557744^', "backup progress:", d; return 1000
+          progress = null
+          await _icql.backup db_temp_path, { attached: work_schema, progress, }
         when 'vacuum'
           _icql.execute "vacuum #{work_schema_x} into #{_icql.as_sql db_temp_path};"
         else throw new Error "^44747^ unknown value for `cfg.save`: #{rpr cfg.save}"
@@ -222,20 +224,20 @@ show_result = ( name, result ) ->
   #.........................................................................................................
   repetitions   = 3
   test_names    = [
-    'btsql3_tmp_small_vacuum'
-    'btsql3_tmp_big_vacuum'
-    'btsql3_mem_small_vacuum'
+    'btsql3_mem_big_backup'
     'btsql3_mem_big_vacuum'
+    'btsql3_mem_small_backup'
+    'btsql3_mem_small_vacuum'
+    'btsql3_tmp_big_backup'
+    'btsql3_tmp_big_vacuum'
+    'btsql3_tmp_small_backup'
+    'btsql3_tmp_small_vacuum'
     # 'btsql3_fle_small'
     # 'btsql3_fle_big'
     # 'btsql3_fle_small_bare'
     # 'btsql3_fle_big_bare'
-    # # 'btsql3_tmp_small_backup'
-    # # 'btsql3_tmp_big_backup'
     # # 'btsql3_tmp_small_copy'
     # # 'btsql3_tmp_big_copy'
-    # # 'btsql3_mem_small_backup'
-    # # 'btsql3_mem_big_backup'
     # # 'btsql3_mem_small_copy'
     # # 'btsql3_mem_big_copy'
     ]
