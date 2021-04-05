@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, badge, debug, echo, help, ic, info, isa, rpr, show_schemas_and_objects, test, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, badge, debug, echo, help, info, isa, rpr, show_schemas_and_objects, test, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -35,10 +35,6 @@
   ({isa, type_of, validate, validate_list_of} = types.export());
 
   ({to_width} = require('to-width'));
-
-  ic = (require('node-icecream'))({
-    outputFunction: help
-  });
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open()"] = async function(T, done) {
