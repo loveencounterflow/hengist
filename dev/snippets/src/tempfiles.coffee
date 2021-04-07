@@ -23,32 +23,54 @@ time_now = ->
   return "#{t[ 0 ]}" + "#{t[ 1 ]}".padStart 9, '0'
 
 #-----------------------------------------------------------------------------------------------------------
-demo_tempy = ->
+demo_tempy_directory = ->
   trash       = require 'trash'
   TMP         = require 'tempy'
-  tmpdir_path = null
-  # debug path = TMP.file { name: 'abc.db', }
-  # debug path = TMP.file { name: 'abc.db', }
-  # debug path = TMP.file { name: 'abc.db', }
+  prefix      = 'TEMPFILES-DEMO-'
   do_work = ( tmpdir_path ) ->
     info { tmpdir_path, }
     FS.writeFileSync ( PATH.join tmpdir_path, 'somefile.db' ), 'text'
     info glob.sync PATH.join tmpdir_path, '**'
     return 42
-  try
-    help 'before'
+  do =>
+    try
+      tmpdir_path = null
+      help 'before'
+      debug tmpdir_path = TMP.directory { name: 'abc.db', prefix, }
+      help do_work tmpdir_path
+      help 'after'
+    finally
+      info '^4484^', glob.sync PATH.join tmpdir_path, '**'
+      warn "removing #{tmpdir_path}"
+      await trash tmpdir_path ### NOTE `trash` command is async, consider to `await` ###
+      info '^4484^', glob.sync PATH.join tmpdir_path, '**'
+    return null
+  return null
 
-    debug tmpdir_path = TMP.directory { name: 'abc.db', }
-    help do_work tmpdir_path
-    help 'after'
-  finally
-    warn "removing #{tmpdir_path}"
-    trash tmpdir_path ### NOTE `trash` command is async, consider to `await` ###
-  return tmpdir_path
+#-----------------------------------------------------------------------------------------------------------
+demo_tempy_file = ->
+  trash       = require 'trash'
+  TMP         = require 'tempy'
+  extension   = 'db'
+  do =>
+    try
+      tmpfile_path = null
+      help 'before'
+      debug tmpfile_path = TMP.file { extension, }
+      # debug tmpfile_path = TMP.file { name: 'fgsjdh.xy', }
+      # help do_work tmpfile_path
+      help 'after'
+    finally
+      # info '^4484^', glob.sync PATH.join tmpfile_path, '**'
+      warn "removing #{tmpfile_path}"
+      await trash tmpfile_path ### NOTE `trash` command is async, consider to `await` ###
+      # info '^4484^', glob.sync PATH.join tmpfile_path, '**'
+    return null
+  return null
 
 
 ############################################################################################################
 if module is require.main then do =>
-  debug tmpdir_path = demo_tempy()
-  info glob.sync PATH.join tmpdir_path, '**'
+  # await demo_tempy_directory()
+  await demo_tempy_file()
 
