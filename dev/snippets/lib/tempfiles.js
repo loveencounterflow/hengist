@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, PATH, badge, debug, demo_tempy, echo, glob, help, info, rpr, time_now, urge, warn, whisper;
+  var CND, FS, PATH, badge, debug, demo_tempy_directory, demo_tempy_file, echo, glob, help, info, rpr, time_now, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -38,40 +38,70 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_tempy = function() {
-    var TMP, do_work, tmpdir_path, trash;
+  demo_tempy_directory = function() {
+    var TMP, do_work, prefix, trash;
     trash = require('trash');
     TMP = require('tempy');
-    tmpdir_path = null;
-    // debug path = TMP.file { name: 'abc.db', }
-    // debug path = TMP.file { name: 'abc.db', }
-    // debug path = TMP.file { name: 'abc.db', }
+    prefix = 'TEMPFILES-DEMO-';
     do_work = function(tmpdir_path) {
       info({tmpdir_path});
       FS.writeFileSync(PATH.join(tmpdir_path, 'somefile.db'), 'text');
       info(glob.sync(PATH.join(tmpdir_path, '**')));
       return 42;
     };
-    try {
-      help('before');
-      debug(tmpdir_path = TMP.directory({
-        name: 'abc.db'
-      }));
-      help(do_work(tmpdir_path));
-      help('after');
-    } finally {
-      warn(`removing ${tmpdir_path}`);
-      trash(tmpdir_path);
-    }
-/* NOTE `trash` command is async, consider to `await` */    return tmpdir_path;
+    (async() => {
+      var tmpdir_path;
+      try {
+        tmpdir_path = null;
+        help('before');
+        debug(tmpdir_path = TMP.directory({
+          name: 'abc.db',
+          prefix
+        }));
+        help(do_work(tmpdir_path));
+        help('after');
+      } finally {
+        info('^4484^', glob.sync(PATH.join(tmpdir_path, '**')));
+        warn(`removing ${tmpdir_path}`);
+        await trash(tmpdir_path);
+        /* NOTE `trash` command is async, consider to `await` */        info('^4484^', glob.sync(PATH.join(tmpdir_path, '**')));
+      }
+      return null;
+    })();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_tempy_file = function() {
+    var TMP, extension, trash;
+    trash = require('trash');
+    TMP = require('tempy');
+    extension = 'db';
+    (async() => {
+      var tmpfile_path;
+      try {
+        tmpfile_path = null;
+        help('before');
+        debug(tmpfile_path = TMP.file({extension}));
+        // debug tmpfile_path = TMP.file { name: 'fgsjdh.xy', }
+        // help do_work tmpfile_path
+        help('after');
+      } finally {
+        // info '^4484^', glob.sync PATH.join tmpfile_path, '**'
+        warn(`removing ${tmpfile_path}`);
+        await trash(tmpfile_path);
+      }
+// info '^4484^', glob.sync PATH.join tmpfile_path, '**'
+/* NOTE `trash` command is async, consider to `await` */      return null;
+    })();
+    return null;
   };
 
   //###########################################################################################################
   if (module === require.main) {
-    (() => {
-      var tmpdir_path;
-      debug(tmpdir_path = demo_tempy());
-      return info(glob.sync(PATH.join(tmpdir_path, '**')));
+    (async() => {
+      // await demo_tempy_directory()
+      return (await demo_tempy_file());
     })();
   }
 
