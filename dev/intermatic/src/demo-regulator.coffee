@@ -25,7 +25,7 @@ types                     = new ( require 'intertype' ).Intertype()
   type_of }               = types.export()
 { freeze
   lets }                  = require 'letsfreezethat'
-Intermatic                = require '../../../apps/intermatic'
+{ Intermatic, }           = require '../../../apps/intermatic'
 Recorder                  = require './recorder'
 after                     = ( dts, f ) -> setTimeout  f, dts * 1000
 every                     = ( dts, f ) -> setInterval f, dts * 1000

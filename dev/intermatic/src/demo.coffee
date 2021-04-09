@@ -47,25 +47,15 @@ class Compound_fsm extends Multimix
     # eq:           ( a, b ) -> ...
     # freeze:       ( x ) -> ...
     name:         'grabmode'
-    # triggers: [
-    #   'start      -> markscroll'
-    #   'foobar     -> stop'
-    #   'panzoom    -- toggle         -> markscroll'
-    #   'markscroll -- toggle         -> panzoom'
-    #   'markscroll -- setPanzoom     -> panzoom'
-    #   'panzoom    -- setPanzoom     -> panzoom'
-    #   'markscroll -- setMarkscroll  -> markscroll'
-    #   'panzoom    -- setMarkscroll  -> markscroll' ],
-    triggers: [
-      [ 'void',       'start',          'markscroll', ]
-      [ '*',          'reset',          'void',       ]
-      # [ 'foobar',     'stop',           void          ] # ???
-      [ 'panzoom',    'toggle',         'markscroll', ]
-      [ 'markscroll', 'toggle',         'panzoom',    ]
-      [ 'markscroll', 'setPanzoom',     'panzoom',    ]
-      [ 'panzoom',    'setPanzoom',     'panzoom',    ]
-      [ 'markscroll', 'setMarkscroll',  'markscroll', ]
-      [ 'panzoom',    'setMarkscroll',  'markscroll', ], ]
+    moves:
+      start:          [ 'void',         'markscroll', ]
+      reset:          [ 'any',          'void',       ]
+      toggle:         [ 'panzoom',      'markscroll', ]
+      toggle:         [ 'markscroll',   'panzoom',    ]
+      setPanzoom:     [ 'markscroll',   'panzoom',    ]
+      setPanzoom:     [ 'panzoom',      'panzoom',    ]
+      setMarkscroll:  [ 'markscroll',   'markscroll', ]
+      setMarkscroll:  [ 'panzoom',      'markscroll', ]
     before:
       trigger:    ( s ) -> info "before trigger     ",  s
       change:     ( s ) -> info "before change      ",  s
@@ -110,10 +100,10 @@ class Compound_fsm extends Multimix
   globalThis.echo     = echo
   globalThis.log      = log
   globalThis.rpr      = rpr
-  Intermatic          = require '../../../apps/intermatic'
-  fsm = new Intermatic @get_fsmd()
-  # debug '^34766^', JSON.stringify fsm, null, '  '
-  urge '^34766^', JSON.stringify fsm.triggers, null, '  '
+  { Intermatic, }     = require '../../../apps/intermatic'
+  fsm                 = new Intermatic @get_fsmd()
+  # debug '^34766^', rpr @get_fsmd()
+  debug '^34766^', "moves:", rpr fsm.moves
   urge '^347-1^', 'start --------------------------------------'
   urge '^347-2^', fsm.start()
   urge '^347-3^', 'toggle --------------------------------------'
@@ -300,24 +290,21 @@ class Compound_fsm extends Multimix
         onEnterPressed:   -> @meta_lamp.goto 'lit'
     #.......................................................................................................
     meta_lamp:
-      triggers: [
-        [ 'void',   'start', 'lit',   ]
-        [ '*',      'reset', 'void',  ]
-        [ 'lit',    'toggle', 'dark', ]
-        [ 'dark',   'toggle', 'lit',  ]
-        # [ 'void',   'toggle', 'lit',  ]
-        ]
+      moves:
+        start:  [ 'void',   'lit',   ]
+        reset:  [ 'any',    'void',  ]
+        toggle: [ 'lit',    'dark', 'lit', ]
       after:
         trigger:    ( s ) -> whisper s
         change:     ( s ) -> info "after change: #{rpr s}"
       fail:         ( s ) -> whisper s
-      goto:         '*'
+      goto:         'any'
   #---------------------------------------------------------------------------------------------------------
-  Intermatic    = require '../../../apps/intermatic'
-  fsmd          = { fsmds.meta_lamp..., }
+  { Intermatic, } = require '../../../apps/intermatic'
+  fsmd            = { fsmds.meta_lamp..., }
   ### TAINT should not be necessary ###
-  fsmd.name     = 'meta_lamp'
-  metalamp_fsm  = new Intermatic fsmd
+  fsmd.name       = 'meta_lamp'
+  metalamp_fsm    = new Intermatic fsmd
   urge '^445-1^', "start";        metalamp_fsm.start()
   urge '^445-1^', "toggle";       metalamp_fsm.toggle()
   urge '^445-1^', "reset";        metalamp_fsm.reset()
@@ -339,28 +326,28 @@ class Compound_fsm extends Multimix
   cfsmd =
     #.......................................................................................................
     meta_btn:
-      triggers: [
-        [ 'void',     'start',                'released',     ]
-        [ '*',        'reset',                'void',         ]
-        [ 'released', 'press',                'pressed',      ]
-        [ 'pressed',  'release',              'released',     ]
-        [ '*',        '_report_broken_lamp',  'lamp_broken',  ]
-        [ '*',        'break_lamp',           'lamp_broken',  ] ]
+      moves:
+        start:                [ 'void',     'released',     ]
+        reset:                [ 'any',      'void',         ]
+        press:                [ 'released', 'pressed',      ]
+        release:              [ 'pressed',  'released',     ]
+        _report_broken_lamp:  [ 'any',      'lamp_broken',  ]
+        break_lamp:           [ 'any',      'lamp_broken',  ]
       enter:
         'pressed':      ( s ) -> register "enter pressed: #{rpr s}";      @my.lamp.light()
         'released':     ( s ) -> register "enter released: #{rpr s}";     @my.lamp.goto 'dark'
       after:
         '_report_broken_lamp':  ( s ) -> register "after _report_broken_lamp: #{rpr s}"
         'break_lamp':           ( s ) -> register "after break_lamp: #{rpr s}"; @my.lamp.break()
-      goto:         '*'
+      goto:         'any'
       #.....................................................................................................
       my:
         lamp:
-          triggers: [
-            [ 'void',   'start',  'lit',    ]
-            [ 'lit',    'toggle', 'dark',   ]
-            [ 'dark',   'toggle', 'lit',    ]
-            [ '*',      'break',  'broken', ] ]
+          moves:
+            start:  [ 'void',   'lit',    ]
+            toggle: [ 'lit',    'dark',   ]
+            toggle: [ 'dark',   'lit',    ]
+            break:  [ 'any',    'broken', ]
           after:
             change:     ( s ) -> register "after change:  #{rpr s}"
           enter:
@@ -369,12 +356,12 @@ class Compound_fsm extends Multimix
             broken:     ( s ) ->
               register "lamp broken, switching off"
               @we._report_broken_lamp()
-          goto:         '*'
+          goto:         'any'
     #.......................................................................................................
     after:
       change: ( s ) -> register "ima.change"
   #---------------------------------------------------------------------------------------------------------
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   fsm             = new Intermatic cfsmd
   # debug '^33478^', fsm
   # debug '^33478^', ( k for k of fsm )
@@ -388,13 +375,10 @@ class Compound_fsm extends Multimix
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     name: 'meta_lamp'
-    triggers: [
-      [ 'void',   'start',  'lit',  ]
-      [ '*',      'reset',  'void', ]
-      [ 'lit',    'toggle', 'dark', ]
-      [ 'dark',   'toggle', 'lit',  ]
-      # [ 'void',   'toggle', 'lit',  ]
-      ]
+    moves:
+      start:  [ 'void', 'lit',  ]
+      reset:  [ 'any',  'void', ]
+      toggle: [ 'lit',  'dark', 'lit', ]
     after:
       change:     ( s ) -> urge "after change:  #{rpr s}"
     enter:
@@ -403,10 +387,10 @@ class Compound_fsm extends Multimix
       lit:        ( s ) -> urge "leave lit      #{rpr s}"
     fail:         ( s ) -> urge "failed: #{rpr s}"
   #---------------------------------------------------------------------------------------------------------
-  Intermatic      = require '../../../apps/intermatic'
+  { Intermatic, } = require '../../../apps/intermatic'
   Intermatic._tid = 0
   fsm             = new Intermatic fsmd
-  info '^44455^', JSON.stringify fsm.triggers, null, 2
+  info '^44455^', fsm.moves
   fsm.start()
   fsm.toggle()
   fsm.reset()

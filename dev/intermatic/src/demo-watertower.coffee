@@ -25,7 +25,7 @@ types                     = new ( require 'intertype' ).Intertype()
   type_of }               = types.export()
 { freeze
   lets }                  = require 'letsfreezethat'
-Intermatic                = require '../../../apps/intermatic'
+{ Intermatic, }           = require '../../../apps/intermatic'
 Recorder                  = require './recorder'
 after                     = ( dts, f ) -> setTimeout  f, dts * 1000
 every                     = ( dts, f ) -> setInterval f, dts * 1000
@@ -44,27 +44,27 @@ sleep                     = ( dts ) -> new Promise ( done ) -> after dts, done
 new_watertower_fsm = ->
   #---------------------------------------------------------------------------------------------------------
   barrel =
-    triggers: [
-      [ 'void',     'start',  'active', ]
-      [ 'active',  'stop',   'stopped', ] ]
+    moves:
+      start:  [ 'void',   'active', ]
+      stop:   [ 'active', 'stopped', ]
     data:
       max_level:  110 # maximum fill level in ℓ
       min_level:   90 # minimum fill level in ℓ
       level:        0 # current fill level in ℓ
   #---------------------------------------------------------------------------------------------------------
   inlet =
-    triggers: [
-      [ 'void',     'start',  'active', ]
-      [ 'active',  'stop',   'stopped', ] ]
+    moves:
+      start:  [ 'void',   'active', ]
+      stop:   [ 'active', 'stopped', ]
     data:
       max_rate:   10 # maximum water filling rate in ℓ / s
       min_rate:    0 # minimum water filling rate in ℓ / s
       rate:        0 # current water filling rate in ℓ / s
   #---------------------------------------------------------------------------------------------------------
   outlet =
-    triggers: [
-      [ 'void',     'start',  'active', ]
-      [ 'active',  'stop',   'stopped', ] ]
+    moves:
+      start:  [ 'void',   'active', ]
+      stop:   [ 'active', 'stopped', ]
     data:
       max_rate:   20 # maximum water outflow rate in ℓ / s
       min_rate:    0 # minimum water outflow rate in ℓ / s
@@ -72,9 +72,9 @@ new_watertower_fsm = ->
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     name: 'tower'
-    triggers: [
-      [ 'void',     'start',  'active', ]
-      [ 'active',  'stop',   'stopped', ] ]
+    moves:
+      start:  [ 'void',   'active', ]
+      stop:   [ 'active', 'stopped', ]
     cascades: [ 'start', 'stop', ]
     fsms: { barrel, inlet, outlet, }
   #---------------------------------------------------------------------------------------------------------
@@ -105,19 +105,19 @@ new_regulator_fsm = ->
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     name: 'regulator'
-    triggers: [
-      [ 'void',         'start',  'idle',         ]
-      [ 'idle',         'stop',   'stopped',      ]
-      [ 'idle',         'tick',   'idle',         ]
-      [ 'growing',      'tick',   'growing',      ]
-      [ 'declare',      'tick',   'declare',      ]
-      [ 'idle',         'set',    'idle',         ]
-      [ 'idle',         'inc',    'growing',      ]
-      [ 'growing',      'inc',    'growing',      ]
-      [ 'growing',      'set',    'idle',         ]
-      [ 'idle',         'dec',    'shrinking',    ]
-      [ 'shrinking',    'dec',    'shrinking',    ]
-      [ '*',            'chill',  'idle',         ] ]
+    moves:
+      start:  [ 'void',       'idle',         ]
+      stop:   [ 'idle',       'stopped',      ]
+      tick:   [ 'idle',       'idle',         ]
+      tick:   [ 'growing',    'growing',      ]
+      tick:   [ 'declare',    'declare',      ]
+      set:    [ 'idle',       'idle',         ]
+      inc:    [ 'idle',       'growing',      ]
+      # inc:    [ 'growing',    'growing',      ]
+      set:    [ 'growing',    'idle',         ]
+      dec:    [ 'idle',       'shrinking',    ]
+      # dec:    [ 'shrinking',  'shrinking',    ]
+      chill:  [ 'any',        'idle',         ]
     #.......................................................................................................
     data:
       tps:        5 # ticks per second
@@ -190,8 +190,8 @@ demo_regulator = ->
 
 ############################################################################################################
 if module is require.main then do =>
-  # await demo_watertower()
-  await demo_regulator()
+  await demo_watertower()
+  # await demo_regulator()
 
 
 
