@@ -132,7 +132,8 @@ types                     = new ( require 'intertype' ).Intertype
   TMP               = require 'tempy'
   { Dba }           = require '../../../apps/icql-dba'
   #.........................................................................................................
-  do =>
+  help "#1"
+  await do =>
     try
       path = TMP.file { extension: 'db', }
       help "^4758^ opening DB at #{rpr path}"
@@ -145,44 +146,32 @@ types                     = new ( require 'intertype' ).Intertype
       warn "... done removing #{path}"
     return null
   #.........................................................................................................
-  do =>
+  help "#2"
+  await do =>
     path  = ''
     dba   = new Dba { path, }
     debug '^868943^', dba
     T.eq dba._schemas.main.path, path
     return null
   #.........................................................................................................
-  do =>
+  help "#3"
+  await do =>
+    cfg               = H.get_cfg()
+    cfg.ref           = 'save-export'
+    cfg.size          = 'small'
+    cfg.mode          = 'fle'
+    template_path_1   = H.interpolate cfg.db.templates[ cfg.size ], cfg
+    work_path_1       = H.interpolate cfg.db.work[      cfg.mode ], cfg
+    await H.copy_over template_path_1, work_path_1
+    # debug '^868943^', cfg
     path  = ':memory:'
     dba   = new Dba { path, }
-    debug '^868943^', dba
+    dba.open { path: work_path_1, schema: 'datamill', }
+    debug '^868943^', dba._schemas
     T.eq dba._schemas.main.path, path
     return null
   #.........................................................................................................
   done()
-
-#-----------------------------------------------------------------------------------------------------------
-demo_tempy = ->
-  trash       = require 'trash'
-  TMP         = require 'tempy'
-  tmpdir_path = null
-  # debug path = TMP.file { name: 'abc.db', }
-  # debug path = TMP.file { name: 'abc.db', }
-  # debug path = TMP.file { name: 'abc.db', }
-  do_work = ( tmpdir_path ) ->
-    info { tmpdir_path, }
-    FS.writeFileSync ( PATH.join tmpdir_path, 'somefile.db' ), 'text'
-    info glob.sync PATH.join tmpdir_path, '**'
-    return 42
-  try
-    help 'before'
-    debug tmpdir_path = TMP.directory { name: 'abc.db', }
-    help do_work tmpdir_path
-    help 'after'
-  finally
-    warn "removing #{tmpdir_path}"
-    trash tmpdir_path ### NOTE `trash` command is async, consider to `await` ###
-  return tmpdir_path
 
 
 ############################################################################################################

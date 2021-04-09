@@ -121,6 +121,33 @@ types                     = new ( require 'intertype' ).Intertype
   #.........................................................................................................
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: import()" ] = ( T, done ) ->
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  #.........................................................................................................
+  cfg               = H.get_cfg()
+  cfg.ref           = 'multicon'
+  #.........................................................................................................
+  cfg.size          = 'small'
+  cfg.mode          = 'fle'
+  template_path_1   = H.interpolate cfg.db.templates[ cfg.size ], cfg
+  work_path_1       = H.interpolate cfg.db.work[      cfg.mode ], cfg
+  help "^77-300^ work_path_1:  ", work_path_1
+  #.........................................................................................................
+  await do =>
+    path    = work_path_1
+    schema  = 's1'
+    await H.copy_over template_path_1, path
+    dba     = new Dba()
+    dba.import { path, schema, }
+    T.eq dba.get_schemas(), { main: '', s1: path, }
+    T.eq ( dba.is_empty { schema: 'main', } ), true
+    T.eq ( dba.is_empty { schema: 's1', } ), false
+    T.eq ( d.name for d from dba.walk_objects { schema, } ), [ 'sqlite_autoindex_keys_1', 'sqlite_autoindex_realms_1', 'sqlite_autoindex_sources_1', 'keys', 'main', 'realms', 'sources', 'dest_changes_backward', 'dest_changes_forward' ]
+  #.........................................................................................................
+  done()
+
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: _walk_all_objects()" ] = ( T, done ) ->
@@ -354,7 +381,7 @@ types                     = new ( require 'intertype' ).Intertype
   #.........................................................................................................
   debug '^300^', cfg
   debug '^301^', dba.get_schemas()
-  dba.attach { path: ':memory:', schema: cfg.mem_schema, }
+  dba._attach { path: ':memory:', schema: cfg.mem_schema, }
   debug '^302^', dba.get_schemas()
   for d from dba.walk_objects()
     debug '^303^', "#{d.type}:#{d.name}"
@@ -408,7 +435,7 @@ show_schemas_and_objects = ( ref, dba ) ->
   dba                   = new ICQLDBA.Dba dba_cfg
   #.........................................................................................................
   info '^754-4^', { path: cfg.work_path, schema: cfg.mem_schema, }
-  dba.attach { path: cfg.work_path, schema: cfg.mem_schema, }
+  dba._attach { path: cfg.work_path, schema: cfg.mem_schema, }
   show_schemas_and_objects '^754-5^', dba
   dba.copy_schema { from_schema: cfg.mem_schema, to_schema: 'main', }
   show_schemas_and_objects '^754-6^', dba
@@ -465,7 +492,7 @@ show_schemas_and_objects = ( ref, dba ) ->
 
     #---------------------------------------------------------------------------------------------------------
     _copy_db: ( from_path, from_schema, to_path, to_schema ) ->
-      @attach { path: from_path, schema: from_schema, }
+      @_attach { path: from_path, schema: from_schema, }
       @copy_schema { from_schema, to_schema, }
       return null
 
@@ -478,7 +505,7 @@ show_schemas_and_objects = ( ref, dba ) ->
       validate.icqldba_path from_path
       validate.icqldba_path to_path
       @_copy_db from_path, from_schema, to_path, to_schema
-      @detach { schema: from_schema, }
+      @_detach { schema: from_schema, }
       return null
 
   #.........................................................................................................
@@ -488,10 +515,11 @@ show_schemas_and_objects = ( ref, dba ) ->
 
 ############################################################################################################
 unless module.parent?
-  test @
+  # test @
   # test @[ "DBA: copy file DB to memory" ]
   # test @[ "DBA: open()" ]
-  test @[ "DBA: _walk_all_objects()" ]
+  # test @[ "DBA: _walk_all_objects()" ]
+  test @[ "DBA: import()" ]
   # @[ "DBA: open()" ]()
   # test @[ "DBA: in-memory DB API" ]
   # test @[ "DBA: as_sql" ]
