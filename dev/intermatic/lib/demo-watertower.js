@@ -36,7 +36,7 @@
 
   ({freeze, lets} = require('letsfreezethat'));
 
-  Intermatic = require('../../../apps/intermatic');
+  ({Intermatic} = require('../../../apps/intermatic'));
 
   Recorder = require('./recorder');
 
@@ -67,7 +67,10 @@
     var barrel, fsmd, inlet, outlet;
     //---------------------------------------------------------------------------------------------------------
     barrel = {
-      triggers: [['void', 'start', 'active'], ['active', 'stop', 'stopped']],
+      moves: {
+        start: ['void', 'active'],
+        stop: ['active', 'stopped']
+      },
       data: {
         max_level: 110, // maximum fill level in ℓ
         min_level: 90, // minimum fill level in ℓ
@@ -76,7 +79,10 @@
     };
     //---------------------------------------------------------------------------------------------------------
     inlet = {
-      triggers: [['void', 'start', 'active'], ['active', 'stop', 'stopped']],
+      moves: {
+        start: ['void', 'active'],
+        stop: ['active', 'stopped']
+      },
       data: {
         max_rate: 10, // maximum water filling rate in ℓ / s
         min_rate: 0, // minimum water filling rate in ℓ / s
@@ -85,7 +91,10 @@
     };
     //---------------------------------------------------------------------------------------------------------
     outlet = {
-      triggers: [['void', 'start', 'active'], ['active', 'stop', 'stopped']],
+      moves: {
+        start: ['void', 'active'],
+        stop: ['active', 'stopped']
+      },
       data: {
         max_rate: 20, // maximum water outflow rate in ℓ / s
         min_rate: 0, // minimum water outflow rate in ℓ / s
@@ -95,7 +104,10 @@
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'tower',
-      triggers: [['void', 'start', 'active'], ['active', 'stop', 'stopped']],
+      moves: {
+        start: ['void', 'active'],
+        stop: ['active', 'stopped']
+      },
       cascades: ['start', 'stop'],
       fsms: {barrel, inlet, outlet}
     };
@@ -130,7 +142,20 @@
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'regulator',
-      triggers: [['void', 'start', 'idle'], ['idle', 'stop', 'stopped'], ['idle', 'tick', 'idle'], ['growing', 'tick', 'growing'], ['declare', 'tick', 'declare'], ['idle', 'set', 'idle'], ['idle', 'inc', 'growing'], ['growing', 'inc', 'growing'], ['growing', 'set', 'idle'], ['idle', 'dec', 'shrinking'], ['shrinking', 'dec', 'shrinking'], ['*', 'chill', 'idle']],
+      moves: {
+        start: ['void', 'idle'],
+        stop: ['idle', 'stopped'],
+        tick: ['idle', 'idle'],
+        tick: ['growing', 'growing'],
+        tick: ['declare', 'declare'],
+        set: ['idle', 'idle'],
+        inc: ['idle', 'growing'],
+        // inc:    [ 'growing',    'growing',      ]
+        set: ['growing', 'idle'],
+        dec: ['idle', 'shrinking'],
+        // dec:    [ 'shrinking',  'shrinking',    ]
+        chill: ['any', 'idle']
+      },
       //.......................................................................................................
       data: {
         tps: 5, // ticks per second
@@ -237,10 +262,11 @@
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      // await demo_watertower()
-      return (await demo_regulator());
+      return (await demo_watertower());
     })();
   }
+
+  // await demo_regulator()
 
 }).call(this);
 

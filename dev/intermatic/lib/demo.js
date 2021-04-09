@@ -55,42 +55,16 @@
       // eq:           ( a, b ) -> ...
       // freeze:       ( x ) -> ...
       name: 'grabmode',
-      // triggers: [
-      //   'start      -> markscroll'
-      //   'foobar     -> stop'
-      //   'panzoom    -- toggle         -> markscroll'
-      //   'markscroll -- toggle         -> panzoom'
-      //   'markscroll -- setPanzoom     -> panzoom'
-      //   'panzoom    -- setPanzoom     -> panzoom'
-      //   'markscroll -- setMarkscroll  -> markscroll'
-      //   'panzoom    -- setMarkscroll  -> markscroll' ],
-      triggers: [
-        ['void',
-        'start',
-        'markscroll'],
-        ['*',
-        'reset',
-        'void'],
-        // [ 'foobar',     'stop',           void          ] # ???
-        ['panzoom',
-        'toggle',
-        'markscroll'],
-        ['markscroll',
-        'toggle',
-        'panzoom'],
-        ['markscroll',
-        'setPanzoom',
-        'panzoom'],
-        ['panzoom',
-        'setPanzoom',
-        'panzoom'],
-        ['markscroll',
-        'setMarkscroll',
-        'markscroll'],
-        ['panzoom',
-        'setMarkscroll',
-        'markscroll']
-      ],
+      moves: {
+        start: ['void', 'markscroll'],
+        reset: ['any', 'void'],
+        toggle: ['panzoom', 'markscroll'],
+        toggle: ['markscroll', 'panzoom'],
+        setPanzoom: ['markscroll', 'panzoom'],
+        setPanzoom: ['panzoom', 'panzoom'],
+        setMarkscroll: ['markscroll', 'markscroll'],
+        setMarkscroll: ['panzoom', 'markscroll']
+      },
       before: {
         trigger: function(s) {
           return info("before trigger     ", s);
@@ -191,10 +165,10 @@
     globalThis.echo = echo;
     globalThis.log = log;
     globalThis.rpr = rpr;
-    Intermatic = require('../../../apps/intermatic');
+    ({Intermatic} = require('../../../apps/intermatic'));
     fsm = new Intermatic(this.get_fsmd());
-    // debug '^34766^', JSON.stringify fsm, null, '  '
-    urge('^34766^', JSON.stringify(fsm.triggers, null, '  '));
+    // debug '^34766^', rpr @get_fsmd()
+    debug('^34766^', "moves:", rpr(fsm.moves));
     urge('^347-1^', 'start --------------------------------------');
     urge('^347-2^', fsm.start());
     urge('^347-3^', 'toggle --------------------------------------');
@@ -572,8 +546,11 @@
       },
       //.......................................................................................................
       meta_lamp: {
-        triggers: [['void', 'start', 'lit'], ['*', 'reset', 'void'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit']],
-        // [ 'void',   'toggle', 'lit',  ]
+        moves: {
+          start: ['void', 'lit'],
+          reset: ['any', 'void'],
+          toggle: ['lit', 'dark', 'lit']
+        },
         after: {
           trigger: function(s) {
             return whisper(s);
@@ -585,11 +562,11 @@
         fail: function(s) {
           return whisper(s);
         },
-        goto: '*'
+        goto: 'any'
       }
     };
     //---------------------------------------------------------------------------------------------------------
-    Intermatic = require('../../../apps/intermatic');
+    ({Intermatic} = require('../../../apps/intermatic'));
     fsmd = {...fsmds.meta_lamp};
     /* TAINT should not be necessary */
     fsmd.name = 'meta_lamp';
@@ -627,7 +604,14 @@
     cfsmd = {
       //.......................................................................................................
       meta_btn: {
-        triggers: [['void', 'start', 'released'], ['*', 'reset', 'void'], ['released', 'press', 'pressed'], ['pressed', 'release', 'released'], ['*', '_report_broken_lamp', 'lamp_broken'], ['*', 'break_lamp', 'lamp_broken']],
+        moves: {
+          start: ['void', 'released'],
+          reset: ['any', 'void'],
+          press: ['released', 'pressed'],
+          release: ['pressed', 'released'],
+          _report_broken_lamp: ['any', 'lamp_broken'],
+          break_lamp: ['any', 'lamp_broken']
+        },
         enter: {
           'pressed': function(s) {
             register(`enter pressed: ${rpr(s)}`);
@@ -647,11 +631,16 @@
             return this.my.lamp.break();
           }
         },
-        goto: '*',
+        goto: 'any',
         //.....................................................................................................
         my: {
           lamp: {
-            triggers: [['void', 'start', 'lit'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit'], ['*', 'break', 'broken']],
+            moves: {
+              start: ['void', 'lit'],
+              toggle: ['lit', 'dark'],
+              toggle: ['dark', 'lit'],
+              break: ['any', 'broken']
+            },
             after: {
               change: function(s) {
                 return register(`after change:  ${rpr(s)}`);
@@ -669,7 +658,7 @@
                 return this.we._report_broken_lamp();
               }
             },
-            goto: '*'
+            goto: 'any'
           }
         }
       },
@@ -681,7 +670,7 @@
       }
     };
     //---------------------------------------------------------------------------------------------------------
-    Intermatic = require('../../../apps/intermatic');
+    ({Intermatic} = require('../../../apps/intermatic'));
     return fsm = new Intermatic(cfsmd);
   };
 
@@ -698,8 +687,11 @@
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'meta_lamp',
-      triggers: [['void', 'start', 'lit'], ['*', 'reset', 'void'], ['lit', 'toggle', 'dark'], ['dark', 'toggle', 'lit']],
-      // [ 'void',   'toggle', 'lit',  ]
+      moves: {
+        start: ['void', 'lit'],
+        reset: ['any', 'void'],
+        toggle: ['lit', 'dark', 'lit']
+      },
       after: {
         change: function(s) {
           return urge(`after change:  ${rpr(s)}`);
@@ -720,10 +712,10 @@
       }
     };
     //---------------------------------------------------------------------------------------------------------
-    Intermatic = require('../../../apps/intermatic');
+    ({Intermatic} = require('../../../apps/intermatic'));
     Intermatic._tid = 0;
     fsm = new Intermatic(fsmd);
-    info('^44455^', JSON.stringify(fsm.triggers, null, 2));
+    info('^44455^', fsm.moves);
     fsm.start();
     fsm.toggle();
     fsm.reset();

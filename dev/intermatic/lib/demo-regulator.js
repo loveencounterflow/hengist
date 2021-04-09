@@ -36,7 +36,7 @@
 
   ({freeze, lets} = require('letsfreezethat'));
 
-  Intermatic = require('../../../apps/intermatic');
+  ({Intermatic} = require('../../../apps/intermatic'));
 
   Recorder = require('./recorder');
 

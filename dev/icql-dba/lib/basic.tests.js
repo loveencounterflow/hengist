@@ -226,6 +226,51 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["DBA: import()"] = async function(T, done) {
+    var Dba, cfg, template_path_1, work_path_1;
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    //.........................................................................................................
+    cfg = H.get_cfg();
+    cfg.ref = 'multicon';
+    //.........................................................................................................
+    cfg.size = 'small';
+    cfg.mode = 'fle';
+    template_path_1 = H.interpolate(cfg.db.templates[cfg.size], cfg);
+    work_path_1 = H.interpolate(cfg.db.work[cfg.mode], cfg);
+    help("^77-300^ work_path_1:  ", work_path_1);
+    await (async() => {      //.........................................................................................................
+      var d, dba, path, schema;
+      path = work_path_1;
+      schema = 's1';
+      await H.copy_over(template_path_1, path);
+      dba = new Dba();
+      dba.import({path, schema});
+      T.eq(dba.get_schemas(), {
+        main: '',
+        s1: path
+      });
+      T.eq(dba.is_empty({
+        schema: 'main'
+      }), true);
+      T.eq(dba.is_empty({
+        schema: 's1'
+      }), false);
+      return T.eq((function() {
+        var ref1, results;
+        ref1 = dba.walk_objects({schema});
+        results = [];
+        for (d of ref1) {
+          results.push(d.name);
+        }
+        return results;
+      })(), ['sqlite_autoindex_keys_1', 'sqlite_autoindex_realms_1', 'sqlite_autoindex_sources_1', 'keys', 'main', 'realms', 'sources', 'dest_changes_backward', 'dest_changes_forward']);
+    })();
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DBA: _walk_all_objects()"] = async function(T, done) {
     var Dba, cfg, objects_matcher, template_path_1, template_path_2, work_path_1, work_path_2;
     T.halt_on_error();
@@ -745,7 +790,7 @@
     //.........................................................................................................
     debug('^300^', cfg);
     debug('^301^', dba.get_schemas());
-    dba.attach({
+    dba._attach({
       path: ':memory:',
       schema: cfg.mem_schema
     });
@@ -815,7 +860,7 @@
       path: cfg.work_path,
       schema: cfg.mem_schema
     });
-    dba.attach({
+    dba._attach({
       path: cfg.work_path,
       schema: cfg.mem_schema
     });
@@ -893,7 +938,7 @@
 
       //---------------------------------------------------------------------------------------------------------
       _copy_db(from_path, from_schema, to_path, to_schema) {
-        this.attach({
+        this._attach({
           path: from_path,
           schema: from_schema
         });
@@ -911,7 +956,7 @@
         validate.icqldba_path(from_path);
         validate.icqldba_path(to_path);
         this._copy_db(from_path, from_schema, to_path, to_schema);
-        this.detach({
+        this._detach({
           schema: from_schema
         });
         return null;
@@ -924,10 +969,11 @@
 
   //###########################################################################################################
   if (module.parent == null) {
-    test(this);
+    // test @
     // test @[ "DBA: copy file DB to memory" ]
     // test @[ "DBA: open()" ]
-    test(this["DBA: _walk_all_objects()"]);
+    // test @[ "DBA: _walk_all_objects()" ]
+    test(this["DBA: import()"]);
   }
 
   // @[ "DBA: open()" ]()
