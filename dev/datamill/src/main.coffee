@@ -35,10 +35,12 @@ SP                        = require 'steampipes'
   $async
   $drain
   $show
-  $watch }                = SP.export()
+  $watch  }               = SP.export()
 DATOM                     = require '../../../apps/datom'
 { select
   stamp
+  freeze
+  lets
   new_datom
   fresh_datom }           = DATOM.export()
 # DB                        = require '../intershop/intershop_modules/db'
@@ -200,23 +202,6 @@ $display = ( me ) =>
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@demo_stream_using_intershop = -> new Promise ( resolve, reject ) =>
-  DB          = require '../intershop/intershop_modules/db'
-  # sql       = "select * from MIRAGE.mirror where dsk = 'proposal' order by linenr;"
-  sql         = "select n from generate_series( 42, 51 ) as x ( n );"
-  source      = await DB.new_query_source sql
-  pipeline    = []
-  pipeline.push source
-  pipeline.push SP.$show()
-  pipeline.push $drain -> do =>
-    help '^445-7^', "stream ended"
-    await DB._pool.end()
-    resolve()
-  SP.pull pipeline...
-  # source.end()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
 @demo_stream = -> new Promise ( resolve, reject ) =>
   DB          = require '../intershop/intershop_modules/db'
   await @_demo_stream()
@@ -225,47 +210,80 @@ $display = ( me ) =>
   resolve()
 
 #-----------------------------------------------------------------------------------------------------------
-@_demo_stream = -> new Promise ( resolve, reject ) =>
-  urge '^445-2^', "starting"
-  DB          = require '../intershop/intershop_modules/db'
-  Cursor      = require 'pg-cursor'
-  # sql         = "select * from MIRAGE.mirror where dsk = 'proposal' order by linenr;"
-  sql         = "select n from generate_series( 42, 51 ) as x ( n );"
-  settings    = null
-  client      = await DB._pool.connect()
-  cursor      = new Cursor sql
-  cursor      = await client.query cursor
-  source      = SP.new_push_source()
-  # source      = await DB.new_query_source sql #, settings...
-  urge '^445-3^', "starting"
-  limit       = 3
-  #.........................................................................................................
-  # close = -> new Promise ( resolve, reject ) =>
-  #   cursor.close ( error ) => if error? then reject error else resolve()
-  read  = -> new Promise ( resolve, reject ) =>
-    cursor.read limit, ( error, rows ) => if error? then reject error else resolve rows
-  #.........................................................................................................
-  source.start = -> do => ### Note: must be function, not asyncfunction ###
-    urge '^445-4^', "source started"
-    loop
-      urge '^445-5^', "read from cursor"
-      rows = await read()
-      break if rows.length is 0
-      urge '^445-6^', "read #{rows.length} rows"
-      source.send row for row in rows
-      urge '^445-6^', "pushed #{rows.length} rows"
-    # await cursor.close()
-    # urge '^445-8^', "cursor closed"
-    client.release()
-    urge '^445-8^', "client released"
-    source.end()
-    urge '^445-8^', "source ended"
+$parse = ( grammar ) -> $ ( source, send ) ->
+  send token for token in grammar.parse source
+
+#-----------------------------------------------------------------------------------------------------------
+$mark_doc_boundaries = ->
+  return SP.window { width: 2, fallback: null, }, $ ( cd, send ) ->
+    [ c, d, ] = cd
+    return null unless ( c? and d? )
+    if ( d.$key is '<document' )
+      if ( c.$key is '>document' )
+        send freeze { $key: '^boundary', }
+    else unless ( d.$key is '>document' )
+      send d
     return null
+
+
+escape_text = ( text ) ->
+  R = text
+  R = R.replace /\n/g, '⏎'
+  R = R.replace /[\x00-\x1a\x1c-\x1f]/g, ( $0 ) -> String.fromCodePoint ( $0.codePointAt 0 ) + 0x2400
+  R = R.replace /\x1b(?!\[)/g, '␛'
+  return R
+
+INTERTEXT_show_text_ruler = ( text ) ->
+  echo ( ( "#{idx * 10}".padEnd 10, ' ' ) for idx in [ 0 .. 19 ] ).join ''
+  # piece = '├┬┬┬┬┼┬┬┬┐'.replace /./g, ( $0, idx ) ->
+  #   return if idx %% 2 is 0 then ( CND.reverse $0 ) else $0
+  colors = [
+    CND.yellow
+    CND.cyan
+    CND.pink
+    ]
+  piece = ( ( CND.reverse CND.yellow ' ' ) + '░' ).repeat 10
+  piece = '█ ░ ░ ░ ░ '
+  echo piece.repeat 20
+  chrs  = [ ( escape_text text )..., ]
+  ruler = ''
+  for block_idx in [ 0 ... chrs.length ] by +10
+    color = colors[ block_idx %% colors.length ]
+    for chr, chr_idx in chrs
+      ruler += if ( chr_idx %% 2 ) is 0 then ( CND.reverse chr ) else chr
+  echo ruler
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_demo_stream = -> new Promise ( resolve, reject ) =>
+  DB                  = require '../intershop/intershop_modules/db'
+  sql                 = "select * from MIRAGE.mirror where dsk = 'proposal' order by linenr;"
   #.........................................................................................................
-  pipeline      = []
+  $extract_line       = -> $ ( d, send ) -> send d.line
+  $concatenate_chunks = ->
+    start   = 0
+    linenr  = 1
+    return $ ( chunk, send ) ->
+      line_count    = chunk.length
+      text          = chunk.join '\n'
+      chr_count     = [ text..., ].length
+      send freeze { $key: '^chunk', text, linenr, start, line_count, chr_count, }
+      linenr += line_count
+      start  += chr_count
+  chunkify_filter     = ( d     ) -> /^\s*$/.test d
+  #.........................................................................................................
+  source              = await DB.new_query_source sql
+  pipeline            = []
   pipeline.push source
+  pipeline.push $extract_line()
+  pipeline.push SP.$chunkify_keep chunkify_filter
+  pipeline.push $concatenate_chunks()
+  # pipeline.push $watch ( text ) -> urge rpr text
+  pipeline.push $watch ( d ) -> INTERTEXT_show_text_ruler d.text
+  # pipeline.push $parse RXWS.grammar
+  # pipeline.push $mark_doc_boundaries()
   pipeline.push SP.$show()
-  pipeline.push $drain ->
+  pipeline.push $drain -> do => ### NOTE must be function, not asyncfunction ###
     help '^445-7^', "stream ended"
     resolve()
   SP.pull pipeline...
@@ -297,8 +315,7 @@ $display = ( me ) =>
 if module is require.main then do =>
   # await @demo()
   # await @_list()
-  # await @demo_stream()
-  await @demo_stream_using_intershop()
+  await @demo_stream()
   # await @demo_inserts()
   help 'ok'
   return null
