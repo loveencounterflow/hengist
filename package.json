@@ -26,6 +26,6 @@
     "panzoom": "^9.2.4",
     "pg": "^8.1.0",
     "pg-cursor": "^2.1.11",
-    "steampipes": "^6.2.0"
+    "steampipes": "^6.3.0"
   }
 }
