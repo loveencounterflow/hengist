@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/font-outlines.coffee"
+  ],
+  "names": [],
+  "mappings": "AACA;EAAA;AAAA,MAAA,GAAA,EAAA,KAAA,EAAA,KAAA,EAAA,KAAA,EAAA,IAAA,EAAA,IAAA,EAAA,IAAA,EAAA,GAAA,EAAA,GAAA,EAAA,IAAA,EAAA,IAAA,EAAA,OAAA;;;EAGA,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,GAAA,GAA4B,GAAG,CAAC;;EAChC,KAAA,GAA4B;;EAC5B,GAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,OAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,SAAf,EAA4B,KAA5B;;EAC5B,KAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,KAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,IAAI,CAAC,IAAT,CAAc,GAAd,EAd5B;;;EAkBA,IAAC,CAAA,qBAAD,GAAyB,MAAA,QAAA,CAAE,EAAF,EAAM,IAAN,EAAY,GAAZ,CAAA;AACzB,QAAA,GAAA;;;;;;;;;;IASE,GAAA,GAAM;WACN,KAAA,CAAM,QAAN,EAAgB,CAAA,MAAM,EAAE,CAAC,SAAH,CAAa,CAAE,GAAF,CAAb,CAAN,CAAhB;EAXuB;AAlBzB",
+  "sourcesContent": [
+    "\n'use strict'\n\n############################################################################################################\nCND                       = require 'cnd'\nrpr                       = CND.rpr\nbadge                     = 'HENGIST/DEV/UCDB/FONT-OUTLINES'\nlog                       = CND.get_logger 'plain',     badge\ninfo                      = CND.get_logger 'info',      badge\nwhisper                   = CND.get_logger 'whisper',   badge\nalert                     = CND.get_logger 'alert',     badge\ndebug                     = CND.get_logger 'debug',     badge\nwarn                      = CND.get_logger 'warn',      badge\nhelp                      = CND.get_logger 'help',      badge\nurge                      = CND.get_logger 'urge',      badge\necho                      = CND.echo.bind CND\n\n\n#-----------------------------------------------------------------------------------------------------------\n@svg_pathdata_from_gid = ( db, font, gid ) ->\n  # sql = \"\"\"\n  #   select\n  #       *\n  #     from svgttf.outlines\n  #     where true\n  #       and font  = $1\n  #       and gid   = $2\n  #   \"\"\"\n  # debug '^3334^', db.query [ sql, [ font, gid, ], ]\n  sql = \"select * from U.variables where key = 'intershop/db/name';\"\n  debug '^3334^', await db.query_one [ sql, ]\n\n\n\n"
+  ]
+}

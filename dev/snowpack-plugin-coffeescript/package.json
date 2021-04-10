@@ -1,0 +1,18 @@
+{
+  "name": "snowpack-plugin-coffeescript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "snowpack dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@snowpack/plugin-coffeescript": "file:../../../../3rd-party-repos/snowpack/plugins/plugin-coffeescript",
+    "@snowpack/plugin-typescript": "file:../../../../3rd-party-repos/snowpack/plugins/plugin-typescript",
+    "snowpack": "^3.0.11"
+  }
+}

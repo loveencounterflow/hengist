@@ -320,7 +320,7 @@ vocabulary:
 #-----------------------------------------------------------------------------------------------------------
 @demo_chrsubsetter = ->
   #---------------------------------------------------------------------------------------------------------
-  { Chrsubsetter, grammar, } = require '../paragate/lib/chrsubsetter.grammar'
+  { Chrsubsetter, grammar, } = require '../../../apps/paragate/lib/chrsubsetter.grammar'
   # g = new Chrsubsetter()
   grammar_notrack = new Chrsubsetter { track_lines: false, }
   await @parse grammar_notrack, """abcäöü 𬻁𬼄𬻺\nfoo ß 123"""
@@ -331,7 +331,7 @@ vocabulary:
 #-----------------------------------------------------------------------------------------------------------
 @demo_css_blocks = ->
   #---------------------------------------------------------------------------------------------------------
-  { Chrsubsetter, } = require '../paragate/lib/chrsubsetter.grammar'
+  { Chrsubsetter, } = require '../../../apps/paragate/lib/chrsubsetter.grammar'
   grammar = new Chrsubsetter { track_lines: true, preset: 'blocks', }
   await @parse grammar, """abcäöü 𬻁𬼄𬻺Б𐌴≳Ϥ福кайني한굴␓␢⑂⑤ᏓᏔᐃ🨀ㄑㄧㄡ𐆖𐇕𐊅\nß123􏿼￻￼�￾￿\x00｢｣𒁂𒔨𓄟𖠀𝔞𝔟𝔠"""
   # await @parse grammar, @read_file '../src/demo.coffee'
@@ -340,7 +340,7 @@ vocabulary:
 #-----------------------------------------------------------------------------------------------------------
 @demo_css_planes = ->
   #---------------------------------------------------------------------------------------------------------
-  { Chrsubsetter, } = require '../paragate/lib/chrsubsetter.grammar'
+  { Chrsubsetter, } = require '../../../apps/paragate/lib/chrsubsetter.grammar'
   grammar = new Chrsubsetter { track_lines: true, preset: 'planes', }
   await @parse grammar, """\x00\u{10000}\u{20000}\u{30000}\u{40000}\u{50000}\u{f0000}𒁂𒔨𓄟𖠀𝔞𝔟𝔠"""
   # await @parse grammar, @read_file '../../../README.md'
@@ -349,7 +349,7 @@ vocabulary:
 #-----------------------------------------------------------------------------------------------------------
 @demo_css_halfplanes = ->
   #---------------------------------------------------------------------------------------------------------
-  { Chrsubsetter, } = require '../paragate/lib/chrsubsetter.grammar'
+  { Chrsubsetter, } = require '../../../apps/paragate/lib/chrsubsetter.grammar'
   grammar = new Chrsubsetter { track_lines: true, preset: 'halfplanes', }
   await @parse grammar, """abc한글龍𠀀黾𮯛𒁂𒔨𓄟𖠀𝔞𝔟𝔠"""
   # await @parse grammar, @read_file '../../../README.md'
@@ -358,7 +358,7 @@ vocabulary:
 #-----------------------------------------------------------------------------------------------------------
 @demo_css_words = ->
   #---------------------------------------------------------------------------------------------------------
-  { Chrsubsetter, } = require '../paragate/lib/chrsubsetter.grammar'
+  { Chrsubsetter, } = require '../../../apps/paragate/lib/chrsubsetter.grammar'
   grammar = new Chrsubsetter { track_lines: true, preset: 'words', }
   await @parse grammar, """abc 한글龍𠀀黾𮯛 𒁂𒔨𓄟𖠀 𝔞𝔟𝔠"""
   # tokens  = grammar.parse @read_file '../../../README.md'
@@ -370,7 +370,7 @@ vocabulary:
 #-----------------------------------------------------------------------------------------------------------
 @demo_regex_whitespace_regular = ->
   #---------------------------------------------------------------------------------------------------------
-  { Rxws_grammar, grammar, } = require '../paragate/lib/regex-whitespace.grammar'
+  { Rxws_grammar, grammar, } = require '../../../apps/paragate/lib/regex-whitespace.grammar'
   # grammar = new Rxws_grammar { as_blocks: false, }
   debug '^3998^', rpr ( k for k of grammar    )
   await @parse grammar, """if 42:\n\r    43\nelse:\n  44"""
@@ -387,7 +387,7 @@ vocabulary:
 #-----------------------------------------------------------------------------------------------------------
 @demo_regex_whitespace_streaming = ->
   #---------------------------------------------------------------------------------------------------------
-  { Rxws_grammar, grammar, } = require '../paragate/lib/regex-whitespace.grammar'
+  { Rxws_grammar, grammar, } = require '../../../apps/paragate/lib/regex-whitespace.grammar'
   grammar = new Rxws_grammar { name: '$rxws', }
   # debug '^3998^', rpr ( k for k of grammar    )
   # await @parse_streaming grammar, """if 42:\n\r    43\nelse:\n  44"""
@@ -415,9 +415,9 @@ if module is require.main then do =>
   # await @demo_css_planes()
   # await @demo_css_halfplanes()
   # await @demo_css_words()
-  # await @demo_htmlish()
-  await @demo_regex_whitespace_regular()
-  await @demo_regex_whitespace_streaming()
+  await @demo_htmlish()
+  # await @demo_regex_whitespace_regular()
+  # await @demo_regex_whitespace_streaming()
 
 
 

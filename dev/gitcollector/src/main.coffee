@@ -14,29 +14,29 @@ help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 info                      = CND.get_logger 'info',      badge
 echo                      = CND.echo.bind CND
-INTERTEXT 								= require 'intertext'
-{ rpr }										= INTERTEXT.export()
-gitlog 										= ( require 'gitlog' ).gitlogPromise
+INTERTEXT                 = require 'intertext'
+{ rpr }                   = INTERTEXT.export()
+gitlog                    = ( require 'gitlog' ).gitlogPromise
 
 
 ############################################################################################################
 if module is require.main then do =>
-	d =
-		repo: 		'.'
-		number:		1e6
-		all:			true
-	for entry in await gitlog d
-		{ abbrevHash
-			subject
-			authorDate
-			files
-			status 	} = entry
-		date 				= authorDate
-		status			= "#{files.length} #{status.join ''}"
-		id 					= abbrevHash
-		subject 		= subject[ ... 50 ].padEnd 50
-		echo [ id, date, subject, status, ].join ' '
-	return null
+  d =
+    repo:     '.'
+    number:   1e6
+    all:      true
+  for entry in await gitlog d
+    { abbrevHash
+      subject
+      authorDate
+      files
+      status  } = entry
+    date        = authorDate
+    status      = "#{files.length} #{status.join ''}"
+    id          = abbrevHash
+    subject     = subject[ ... 50 ].padEnd 50
+    echo [ id, date, subject, status, ].join ' '
+  return null
 
 
 

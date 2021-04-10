@@ -19,11 +19,11 @@ echo                      = CND.echo.bind CND
 # CHVTN                     = require 'chevrotain'
 { lets
   freeze }                = ( new ( require 'datom' ).Datom { dirty: false, } ).export()
-types                     = require '../../paragate/lib/types'
+types                     = require '../../../../apps/paragate/lib/types'
 { isa
   type_of
   validate }              = types
-GRAMMAR                   = require '../../paragate/lib/grammar'
+GRAMMAR                   = require '../../../../apps/paragate/lib/grammar'
 INTERTEXT                 = require 'intertext'
 { rpr }                   = INTERTEXT.export()
 space_re                  = /\x20+/y
@@ -50,7 +50,7 @@ space_re                  = /\x20+/y
 
 { createToken
   createTokenInstance
-  Lexer }                 = require '../../paragate/node_modules/chevrotain'
+  Lexer }                 = require '../../../../apps/paragate/node_modules/chevrotain'
 
 # State required for matching the indentations
 indent_stack = [ 0, ]

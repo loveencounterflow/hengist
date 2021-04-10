@@ -1,0 +1,19 @@
+#!/bin/bash
+set -euo pipefail
+
+# Update the db, given a pathlist:
+home="$(realpath "$(realpath "${BASH_SOURCE[0]}" | xargs dirname)"/.)"
+cd "$home"
+
+settings_path='./locatedb.cfg'
+source "$settings_path"
+
+sed 's/"/""/g; s/^/"/; s/$/"/' "$PATHLIST" > "$PATHLIST_CSV"
+
+rm -f "$DB_TMP"
+sqlite3 "$DB_TMP" 'create virtual table paths using FTS5(path);'
+sqlite3 "$DB_TMP" '.mode csv' ".import $PATHLIST_CSV paths"
+rm -f "$PATHLIST_CSV"
+mv "$DB_TMP" "$DB"
+
+

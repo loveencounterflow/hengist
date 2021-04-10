@@ -19,9 +19,6 @@ echo                      = CND.echo.bind CND
 assign                    = Object.assign
 after                     = ( time_s, f ) -> setTimeout f, time_s * 1000
 #...........................................................................................................
-HOLLERITH                 = require 'hollerith-codec'
-@as_hollerith             = ( x ) => HOLLERITH.encode x
-@from_hollerith           = ( x ) => HOLLERITH.decode x
 nf                        = require 'number-format.js'
 #...........................................................................................................
 # H                         = require '../helpers'
@@ -50,7 +47,7 @@ FS                        = require 'fs'
 @get_integer_numbers = ( n = 10 ) ->
   cachekey  = @_get_key 'get_integer_numbers', arguments...
   return R if ( R = @_cache[ cachekey ] )?
-  validate.count n
+  validate.cardinal n
   return @_cache[ cachekey ] = [ 1 .. n ]
 
 #-----------------------------------------------------------------------------------------------------------
@@ -59,7 +56,7 @@ FS                        = require 'fs'
   cachekey  = @_get_key 'get_random_words', arguments...
   delete @_cache[ cachekey ] if fresh
   return R if ( R = @_cache[ cachekey ] )?
-  validate.count n
+  validate.cardinal n
   CP        = require 'child_process'
   R         = ( ( CP.execSync "shuf -n #{n} #{path}" ).toString 'utf-8' ).split '\n'
   R         = ( word.replace /'s$/g, '' for word in R )
@@ -78,6 +75,9 @@ FS                        = require 'fs'
 
 #-----------------------------------------------------------------------------------------------------------
 @get_random_datoms = ( n = 10, path = null ) ->
+  HOLLERITH                 = require 'hollerith-codec'
+  @as_hollerith             = ( x ) => HOLLERITH.encode x
+  @from_hollerith           = ( x ) => HOLLERITH.decode x
   PD        = require 'pipedreams11'
   path     ?= '/usr/share/dict/portuguese'
   cachekey  = @_get_key 'get_random_datoms', arguments...

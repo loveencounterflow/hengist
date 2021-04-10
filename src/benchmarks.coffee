@@ -114,17 +114,20 @@ bar_from_percentage = ( n ) ->
   for record in records
     { test_name
       ops }       = record
+    xxx_txt       =  '≙' + ( " 1 ÷ #{f01a ( best_ops / ops )}".padStart 8 ).padEnd 12
     rops          = ( ops / best_ops ) * 100
     ### TAINT code duplication ###
     test_name_txt = test_name.padEnd 40
     ops_txt       = f0l   ops
     rops_txt      = f1s   rops
     bar           = bar_from_percentage Math.round rops
-    info test_name_txt, ops_txt, 'Hz', rops_txt, '%', bar
+    info test_name_txt, ops_txt, 'Hz', xxx_txt, rops_txt, '%', bar
 
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
+f0a   = ( n ) -> ( nf '###,##0.',          n )
+f01a  = ( n ) -> ( nf '###,##0.0',         n )
 f0    = ( n ) -> ( nf '###,##0.',          n ).padStart 15
 f0l   = ( n ) -> ( nf '###,##0.',          n ).padStart 15
 f1s   = ( n ) -> ( nf '###,##0.0',         n ).padStart  7
@@ -147,7 +150,7 @@ f9    = ( n ) -> ( nf '###,##0.000000000', n ).padStart 24
   try
     test = await parent[ test_name ] n, show
   catch error
-    warn "µ77812 when trying to run test #{rpr test_name}, an error occurred"
+    error.message = "µ77812 when trying to run test #{rpr test_name}, an error occurred: #{rpr error.message}"
     throw error
   t1ns          = @time_now()
   # cpu1          = process.cpuUsage()

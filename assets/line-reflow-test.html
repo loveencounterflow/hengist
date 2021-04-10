@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<meta charset=utf8><title>Line Reflow Test</title>
+<link href=./reset.css rel=stylesheet>
+<link href=./styles.css rel=stylesheet>
+<style>
+
+@font-face { font-family: 'lmroman10regular'; src: url( './fonts/lmroman10-regular.otf'      ); unicode-range: U+00000-10ffff; }
+@font-face { font-family: 'lmroman10italic';  src: url( './fonts/lmroman10-italic.otf'      ); unicode-range: U+00000-10ffff; }
+@font-face { font-family: 'sunexta1';         src: url( './fonts/sun-exta.ttf'              ); unicode-range: U+00000-10ffff; }
+@font-face { font-family: 'sunexta2';         src: url( './fonts/sun-exta-rewritten.ttf'    ); unicode-range: U+00000-10ffff; }
+@font-face { font-family: 'sunexta3';         src: url( './fonts/sunflower-exta-201903.ttf' ); unicode-range: U+00000-10ffff; }
+/*@font-face { font-family: 'arabic';           src: url( './fonts/DejaVuSerif.ttf'           ); unicode-range: U+00600-0006ff; }*/
+@font-face { font-family: 'arabic';           src: url( './fonts/DejaVuSans.ttf'            ); unicode-range: U+00600-0006ff; }
+
+html * {
+  /*font-family: 'flow', 'fallback';*/
+  /*font-family:            'lmroman10italic', 'fallback';*/
+  font-family:            'lmroman10regular', 'sunexta3', 'fallback';
+  /*font-family: 'arabic', 'sunexta3', 'fallback';*/
+  font-size:              10mm;
+  line-height:            10mm;
+  /*text-rendering:         optimizeSpeed;*/
+  /*text-rendering:         optimizeLegibility;*/
+  text-rendering:         geometricPrecision;
+  }
+
+body {
+  padding:                10mm;
+}
+
+p {
+  outline:                1px solid red;
+  --column-width:         100mm;
+  min-width:              var(--column-width);
+  max-width:              var(--column-width);
+  width:                  var(--column-width);
+  text-align:             left;
+
+}
+
+x { background-color: red; }
+eol { background-color: green; }
+
+</style>
+
+
+<p>笔画排字法始于字彙与史不符或源于王太篇海汉字笔画系统形成的过程与机制文化常识中国书法艺术文艺常识钢笔画傅以新山水画展在中国园林博物馆开幕字迹最大的对联黑白之间的梦想</p>
+
+<p>Some peo&shy;ple pre&shy;fer to <x>have</x> the right edge of their text look ‘solid’, by set&shy;ting
+pe&shy;ri&shy;ods, com&shy;mas, and other punc&shy;tu&shy;a&shy;tion marks (in&shy;clud&shy;ing
+in&shy;serted hy&shy;phens) in the right-hand mar&shy;gin. For ex&shy;am&shy;ple, this prac&shy;tice is
+oc&shy;ca&shy;sion&shy;ally used in con&shy;tem&shy;po&shy;rary ad&shy;ver&shy;tis&shy;ing.
+Su&shy;per&shy;ca&shy;li&shy;fra&shy;gi&shy;lis&shy;tic&shy;ex&shy;pi&shy;a&shy;li&shy;go&shy;ri&shy;cal&shy;es&shy;tab&shy;lish&shy;ment&shy;ari&shy;an&shy;ism
+It is easy to
+get in&shy;serted hy&shy;phens into <x>the</x> mar&shy;gin: We sim&shy;ply let the width of the
+cor&shy;re&shy;spond&shy;ing penalty item be zero. And it is al&shy;most as easy to do the same for
+pe&shy;ri&shy;ods and other sym&shy;bols, by putting every such char&shy;ac&shy;ter in a box of width zero
+and adding the ac&shy;tual sym&shy;bol width to the glue that fol&shy;lows. If no <eol>break</eol> oc&shy;curs at this
+glue, the ac&shy;cu&shy;mu&shy;lated width is the same as be&shy;fore; and if a break does oc&shy;cur, the
+line will be jus&shy;ti&shy;fied as if the pe&shy;riod or other sym&shy;bol were not present. By
+vary&shy;ing the line width for a para&shy;graph it is pos&shy;si&shy;ble to flow the text around
+il&shy;lus&shy;tra&shy;tions, asides, quotes and such. The ex&shy;am&shy;ple be&shy;low leaves a gap for an
+il&shy;lus&shy;tra&shy;tion by set&shy;ting <x>the</x> line widths tem&shy;porar&shy;ily shorter and then
+re&shy;vert&shy;ing. You can also see that the al&shy;go&shy;rithm chose to hy&shy;phen&shy;ate cer&shy;tain
+words to achieve ac&shy;cept&shy;able line break&shy;ing. The fol&shy;low&shy;ing ex&shy;am&shy;ple is set
+ragged right. Ragged right is not sim&shy;ply jus&shy;ti&shy;fied text with fixed width in&shy;ter-word
+spac&shy;ing. In&shy;stead the al&shy;go&shy;rithm tries to min&shy;i&shy;mize the amount of white space at
+the end of each sen&shy;tence over the whole para&shy;graph. It also at&shy;tempts to re&shy;duce the
+num&shy;ber of <x>words</x> that are "stick&shy;ing out" of the mar&shy;gin. </p>
+
+

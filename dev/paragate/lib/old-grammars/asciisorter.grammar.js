@@ -33,11 +33,11 @@
     dirty: false
   })).export());
 
-  types = require('../../paragate/lib/types');
+  types = require('../../../../apps/paragate/lib/types');
 
   ({isa, type_of, validate} = types);
 
-  GRAMMAR = require('../../paragate/lib/grammar');
+  GRAMMAR = require('../../../../apps/paragate/lib/grammar');
 
   INTERTEXT = require('intertext');
 
@@ -465,3 +465,5 @@
   module.exports = {asciisorter, Asciisorter};
 
 }).call(this);
+
+//# sourceMappingURL=asciisorter.grammar.js.map

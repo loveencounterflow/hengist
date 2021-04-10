@@ -27,7 +27,7 @@ create table DEMO.datoms (
   key         text        not null,
   atr         jsonb,      -- consider to use hstore
   stamped     boolean     not null default false,
-  _vnr0       VNR.vnr     unique generated always as ( VNR.push_zero( vnr ) ) stored,
+  _vnr0       VNR.vnr     unique generated always as ( VNR.push( vnr, 0 ) ) stored,
   primary key ( vnr ) );
 
 -- ---------------------------------------------------------------------------------------------------------

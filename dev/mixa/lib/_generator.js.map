@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/_generator.coffee"
+  ],
+  "names": [],
+  "mappings": "AACA;AAAA,MAAA,KAAA,EAAA;;EAAA,KAAA,GAAQ,QAAA,CAAE,GAAF,CAAA;WAAW,IAAI,OAAJ,CAAY,CAAE,IAAF,CAAA,GAAA;aAAY,UAAA,CAAW,IAAX,EAAiB,GAAA,GAAM,IAAvB;IAAZ,CAAZ;EAAX;;EACR,IAAA,GAAQ,CAAA,qBAAA;;EAER,IAAG,MAAA,KAAU,OAAO,CAAC,IAArB;IAAkC,CAAA,CAAA,CAAA,GAAA;AAClC,UAAA,CAAA,EAAA,GAAA,EAAA,IAAA,EAAA;MAAE,OAAO,CAAC,GAAR,CAAY,MAAZ;MACA,KAAA,GAAQ,IAAI,CAAC,KAAL,CAAW,KAAX;MACR,OAAO,CAAC,GAAR,CAAY,KAAZ;MACA,KAAA,uCAAA;;QACE,OAAO,CAAC,GAAR,CAAY,IAAZ;MADF,CAHF;;aAME,OAAO,CAAC,MAAM,CAAC,KAAf,CAAqB,qCAArB;IAPgC,CAAA,IAAlC;;AAHA",
+  "sourcesContent": [
+    "\nsleep = ( dts ) -> new Promise ( done ) => setTimeout done, dts * 1000\ntext  = \"\"\"just a generator demo\"\"\"\n\nif module is require.main then do =>\n  console.log 'helo'\n  words = text.split /\\s+/\n  console.log words\n  for word in words\n    console.log word\n    # await sleep 0.1\n  process.stderr.write \"and hello over the other channel!\\n\"\n\n"
+  ]
+}

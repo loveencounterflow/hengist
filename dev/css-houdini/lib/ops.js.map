@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/ops.coffee"
+  ],
+  "names": [],
+  "mappings": "AACA;AAAA,MAAA,GAAA,EAAA,SAAA,EAAA,UAAA,EAAA,GAAA,EAAA;;EAAA,UAAU,CAAC,CAAX,GAA4B,OAAA,CAAQ,OAAR;;EAC5B,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,SAAA,GAA4B,OAAA,CAAQ,WAAR;;EAC5B,UAAA,GAA4B,OAAA,CAAQ,YAAR;;EAC5B,GAAA,GAA4B,OAAO,CAAC;;EACpC,GAAA,GAA4B,GAAG,CAAC;;EAEhC,GAAA,CAAI,CAAE,UAAF,CAAJ,EAPA;;;;;EAWA,GAAA,CAAI,KAAK,CAAC,IAAN,CAAW,MAAX,CAAJ,EAXA;;;;;;;;;;;;;;;;;;;;;;;EAkCA,CAAC,CAAC,EAAE,CAAC,cAAL,CAAoB,KAApB,EAA2B,MAA3B,EAAmC,CAAE,KAAF,CAAA,GAAA;IACjC,GAAA,CAAI,SAAJ,EAAe,KAAf,EAAsB,KAAtB,EAAF;AACE,WAAO;EAF0B,CAAnC;AAlCA",
+  "sourcesContent": [
+    "\nglobalThis.µ              = require 'mudom'\nCND                       = require 'cnd'\nINTERTYPE                 = require 'intertype'\nIntermatic                = require 'intermatic'\nlog                       = console.log;\nrpr                       = CND.rpr\n\nlog { Intermatic, }\n# log { INTERTYPE, }\n# log new INTERTYPE.Intertype()\n# log CND.rpr( Array.from( 'abcd' ) )\nlog Array.from 'abcd'\n# ### NOTE `require` with local file *must* use file extension\n###\nµ.KB.XXXXXXXXXXXX_foobar()\nµ.DOM.on document, 'µ_kb_capslock_changed', ( event ) =>\n  log '^33334^', \"µ_kb_capslock_changed\", event.detail\n  return null\n\nµ.DOM.on document, 'µ_kb_modifier_changed', ( event ) =>\n  log '^33334^', \"µ_kb_modifier_changed\", event.detail\n  for key, value of event.detail\n    continue if key.startsWith '_'\n    selector  = \"[name=#{key}]\"\n    btn       = µ.DOM.select selector, null\n    continue unless btn?\n    log '^344^', key, rpr value, selector\n    switch value\n      when true then  µ.DOM.swap_class btn, 'false', 'true'\n      when false then µ.DOM.swap_class btn, 'true',  'false'\n      else µ.DOM.insert_as_last btn, rpr value\n  return null\n###\n\nµ.KB._listen_to_key 'Alt', 'down', ( event ) =>\n  log '^22209^', \"OPS\", event #.detail\n  return null\n\n\n\n"
+  ]
+}

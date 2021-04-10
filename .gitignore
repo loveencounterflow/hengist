@@ -105,8 +105,24 @@ dist
 
 
 .peru
-intershop
-apps/*
+/intershop
+/dev/datamill/intershop
+# apps/*
+
+# (D)MyPy temporary files
+.dmypy.json
+dmypy.json
+.mypy_cache
+dmypy.sock
 
 
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
 
+# C extensions
+*.so
+
+.yalc
+
+/data

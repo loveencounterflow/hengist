@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/debugging-with-icecream.coffee"
+  ],
+  "names": [],
+  "mappings": "AAEA;EAAA;AAAA,MAAA,GAAA,EAAA,CAAA,EAAA,KAAA,EAAA,KAAA,EAAA,IAAA,EAAA,IAAA,EAAA,EAAA,EAAA,IAAA,EAAA,GAAA,EAAA,IAAA,EAAA,IAAA,EAAA,OAAA,EAAA,CAAA;;;EAGA,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,GAAA,GAA4B,GAAG,CAAC;;EAChC,KAAA,GAA4B;;EAC5B,KAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,OAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,SAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,IAAI,CAAC,IAAT,CAAc,GAAd,EAZ5B;;;EAcA,EAAA,GAAK,CAAE,OAAA,CAAQ,eAAR,CAAF,CAAA,CAAA;;EAEC,IAAN,MAAA,EAAA;IACE,GAAK,CAAA,CAAA;aAAG;IAAH;;IACL,GAAK,CAAE,CAAF,CAAA;aAAS,CAAA,IAAK;IAAd;;EAFP;;EAIA,CAAA,GAAI,IAAI,CAAJ,CAAA;;EAEJ,IAAA,CAAK,EAAA,CAAG,CAAC,CAAC,GAAF,CAAA,CAAH,EAAY,EAAZ,EAAgB,CAAC,CAAC,GAAF,CAAM,EAAN,CAAhB,CAAL;;EACA,EAAA,CAAA;;EACA,IAAA,CAAK,UAAL;;EAAiB,EAAA,CAAG,SAAH;;EAEjB,EAAA,GAAK,CAAE,OAAA,CAAQ,eAAR,CAAF,CAAA,CAA4B;IAAE,MAAA,EAAQ,EAAV;IAAc,cAAA,EAAgB;EAA9B,CAA5B;;EACL,EAAA,CAAG,CAAC,CAAC,GAAF,CAAA,CAAH,EAAY,CAAC,CAAC,GAAF,CAAA,CAAZ;AA3BA",
+  "sourcesContent": [
+    "\n\n'use strict'\n\n############################################################################################################\nCND                       = require 'cnd'\nrpr                       = CND.rpr\nbadge                     = 'ICQL/DBA'\ndebug                     = CND.get_logger 'debug',     badge\nwarn                      = CND.get_logger 'warn',      badge\ninfo                      = CND.get_logger 'info',      badge\nurge                      = CND.get_logger 'urge',      badge\nhelp                      = CND.get_logger 'help',      badge\nwhisper                   = CND.get_logger 'whisper',   badge\necho                      = CND.echo.bind CND\n#...........................................................................................................\nic = ( require 'node-icecream' )()\n\nclass X\n  foo: -> 'bar'\n  gnu: ( x ) -> x ** x\n\nx = new X()\n\ninfo ic x.foo(), 42, x.gnu 36\nic()\ninfo '^454554^'; ic 'eertert'\n\nic = ( require 'node-icecream' ) { prefix: '', outputFunction: debug, }\nic x.foo(), x.gnu()\n\n"
+  ]
+}
