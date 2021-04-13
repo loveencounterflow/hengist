@@ -9,6 +9,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "gitlog": "^4.0.0"
+    "gitlog": "^4.0.4"
   }
 }
