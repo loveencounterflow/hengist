@@ -117,6 +117,7 @@ is_new.cache = new Map()
 @[ "use API to do CRUD in memory (raw)" ] = ( T, done ) ->
   ICQL              = require '../../../../apps/icql'
   T.halt_on_error() if T?
+  # debug '^457493^', "early return"; return done()
   #.........................................................................................................
   word_count        = 10
   probe             = ( H.get_data { word_count, } ).texts
@@ -155,7 +156,6 @@ is_new.cache = new Map()
     validate.nonempty_text db_target_path
     validate.nonempty_text db_temp_path
     #.......................................................................................................
-    # if gcfg.verbose
     help "^43-300^ template  DB:", db_template_path
     help "^43-301^ work      DB:", db_work_path
     help "^43-302^ target    DB:", db_target_path
@@ -163,7 +163,7 @@ is_new.cache = new Map()
     H.try_to_remove_file db_target_path
     H.try_to_remove_file db_temp_path
     H.try_to_remove_file db_work_path unless db_work_path in [ ':memory:', '', ]
-    await FSP.copyFile db_template_path, db_target_path
+    await H.copy_over db_template_path, db_target_path
     return null
   #.........................................................................................................
   part_2_crud = ->
