@@ -99,6 +99,9 @@ types.declare 'interpolatable_value', ( x ) ->
   R =
     # word_count: 10_000
     word_count: 10
+    sql:
+      small:  @resolve_path 'assets/icql/small-datamill.sql'
+      big:    @resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql'
     db:
       templates:
         small:  @resolve_path 'assets/icql/small-datamill.db'
