@@ -683,43 +683,92 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.basics_demo = function() {
-    var Intermatic, fsm, fsmd;
+    var Intermatic, count, cstate_ansi, fsm, fsmd;
+    //---------------------------------------------------------------------------------------------------------
+    cstate_ansi = function() {
+      var parts;
+      parts = [];
+      parts.push(this.stage);
+      parts.push(this.verb);
+      parts.push((this.dpar === this.lstate) ? CND.reverse(this.dpar) : this.dpar);
+      parts.push('▶');
+      parts.push((this.dest === this.lstate) ? CND.reverse(this.dest) : this.dest);
+      if (this.failed) {
+        parts.push(CND.reverse("failed A"));
+      }
+      if (this.dest === null) {
+        parts.push(CND.reverse("failed B"));
+      }
+      if (!this.changed) {
+        parts.push("(unchanged)");
+      }
+      return parts.join(' ');
+    };
     //---------------------------------------------------------------------------------------------------------
     fsmd = {
       name: 'meta_lamp',
       moves: {
         start: ['void', 'lit'],
         reset: ['any', 'void'],
-        toggle: ['lit', 'dark', 'lit']
+        toggle: ['lit', 'dark', 'lit'],
+        brighten: ['lit', 'lit']
+      },
+      // noop:   'any'
+      before: {
+        any: function(d) {
+          return info(`#${d.count}`, this.cstate_ansi());
+        },
+        change: function(d) {
+          return info(`#${d.count}`, this.cstate_ansi());
+        }
       },
       after: {
-        change: function(s) {
-          return urge(`after change:  ${rpr(s)}`);
+        any: function(d) {
+          return help(`#${d.count}`, this.cstate_ansi());
+        },
+        change: function(d) {
+          return help(`#${d.count}`, this.cstate_ansi());
         }
       },
-      enter: {
-        dark: function(s) {
-          return urge(`enter dark:    ${rpr(s)}`);
+      entering: {
+        dark: function(d) {
+          return urge(`#${d.count}`, this.cstate_ansi());
         }
       },
-      leave: {
-        lit: function(s) {
-          return urge(`leave lit      ${rpr(s)}`);
+      leaving: {
+        lit: function(d) {
+          return urge(`#${d.count}`, this.cstate_ansi());
         }
       },
-      fail: function(s) {
-        return urge(`failed: ${rpr(s)}`);
+      fail: function(d) {
+        return warn(`#${d.count}`, this.cstate_ansi());
       }
     };
     //---------------------------------------------------------------------------------------------------------
     ({Intermatic} = require('../../../apps/intermatic'));
-    Intermatic._tid = 0;
+    count = 0;
     fsm = new Intermatic(fsmd);
+    fsm.cstate_ansi = cstate_ansi;
     info('^44455^', fsm.moves);
-    fsm.start();
-    fsm.toggle();
-    fsm.reset();
-    fsm.toggle();
+    fsm.start({
+      count: ++count
+    });
+    fsm.brighten({
+      count: ++count
+    });
+    fsm.toggle({
+      count: ++count
+    });
+    // fsm.noop      { count: ++count, }
+    fsm.brighten({
+      count: ++count
+    });
+    fsm.reset({
+      count: ++count
+    });
+    fsm.toggle({
+      count: ++count
+    });
     // fsm.goto 'lit'
     // fsm.goto 'lit'
     // fsm.goto 'dark'
@@ -730,9 +779,9 @@
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      await this.demo_2();
-      await this.toolbox_demo();
-      await this.compound_fsm_demo();
+      // await @demo_2()
+      // await @toolbox_demo()
+      // await @compound_fsm_demo()
       return (await this.basics_demo());
     })();
   }

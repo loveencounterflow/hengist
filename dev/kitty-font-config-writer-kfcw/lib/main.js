@@ -1,4 +1,5 @@
 (function() {
+  // portals!
   'use strict';
   var CND, FS, LAP, OS, PATH, S, alert, badge, cid_range_pattern, debug, echo, equals, help, hex, info, isa, log, parse_cid_hex_range_txt, rpr, segment_from_cid_hex_range_txt, to_width, type_of, urge, validate, warn, whisper;
 
@@ -678,3 +679,5 @@ rl.on( 'line', ( line ) => {
  */
 
 }).call(this);
+
+//# sourceMappingURL=main.js.map

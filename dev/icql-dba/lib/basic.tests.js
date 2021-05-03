@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var CND, H, PATH, badge, debug, echo, help, info, isa, rpr, show_schemas_and_objects, test, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, badge, debug, echo, help, info, isa, rpr, show_schemas_and_objects, test, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper,
+    modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
   CND = require('cnd');
@@ -226,9 +227,71 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: import()"] = async function(T, done) {
-    var Dba, cfg, template_path_1, work_path_1;
+  this["DBA: _list_temp_schema_numbers()"] = async function(T, done) {
+    var Dba, cfg;
     T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    //.........................................................................................................
+    cfg = H.get_cfg();
+    cfg.ref = 'foo';
+    await (() => {      //.........................................................................................................
+      var after_free_schema, before_free_schema, dba, detach_schemas, error, i, j, len, n, path, prefix, results, schema;
+      dba = new Dba();
+      path = '';
+      prefix = dba.cfg._temp_prefix;
+      detach_schemas = [];
+      error = null;
+      // debug '^4962^', dba._list_temp_schema_numbers()
+      // debug '^4962^', dba._max_temp_schema_number()
+      T.eq(dba._list_temp_schema_numbers(), []);
+      T.eq(dba._max_temp_schema_number(), 0);
+      try {
+        for (n = i = 1; i <= 11; n = ++i) {
+          schema = `${prefix}${n}`;
+          before_free_schema = `${prefix}${n}`;
+          after_free_schema = `${prefix}${n + 1}`;
+          if (modulo(n, 2) === 0) {
+            detach_schemas.unshift(schema);
+          }
+          T.eq(dba._get_free_temp_schema(), before_free_schema);
+          dba._attach({schema, path});
+          // debug '^4962^', dba._list_temp_schema_numbers()
+          // debug '^4962^', dba._max_temp_schema_number()
+          T.eq(dba._get_free_temp_schema(), after_free_schema);
+          T.eq(dba._list_temp_schema_numbers(), (function() {
+            var results = [];
+            for (var j = 1; 1 <= n ? j <= n : j >= n; 1 <= n ? j++ : j--){ results.push(j); }
+            return results;
+          }).apply(this));
+          T.eq(dba._max_temp_schema_number(), n);
+        }
+      } catch (error1) {
+        error = error1;
+        if (!/too many attached databases/.test(error.message)) {
+          throw error;
+        }
+        T.ok(true);
+      }
+      if (error == null) {
+        T.fail("expected error (too many attached DBs), got none");
+      }
+      results = [];
+      for (j = 0, len = detach_schemas.length; j < len; j++) {
+        schema = detach_schemas[j];
+        dba._detach({schema});
+        // debug '^4962^', dba._list_temp_schema_numbers()
+        results.push(T.eq(dba._max_temp_schema_number(), 9));
+      }
+      return results;
+    })();
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: import { format: 'db', }"] = async function(T, done) {
+    var Dba, cfg, template_path_1, work_path_1;
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     //.........................................................................................................
     cfg = H.get_cfg();
@@ -238,17 +301,18 @@
     cfg.mode = 'fle';
     template_path_1 = H.interpolate(cfg.db.templates[cfg.size], cfg);
     work_path_1 = H.interpolate(cfg.db.work[cfg.mode], cfg);
-    help("^77-300^ work_path_1:  ", work_path_1);
-    await (async() => {      //.........................................................................................................
+    await (async() => {      // help "^77-300^ work_path_1:  ", work_path_1
+      //.........................................................................................................
       var d, dba, path, schema;
       path = work_path_1;
       schema = 's1';
       await H.copy_over(template_path_1, path);
       dba = new Dba();
       dba.import({path, schema});
+      dba.list_schemas();
       T.eq(dba.get_schemas(), {
         main: '',
-        s1: path
+        s1: ''
       });
       T.eq(dba.is_empty({
         schema: 'main'
@@ -256,7 +320,7 @@
       T.eq(dba.is_empty({
         schema: 's1'
       }), false);
-      return T.eq((function() {
+      T.eq((function() {
         var ref1, results;
         ref1 = dba.walk_objects({schema});
         results = [];
@@ -265,7 +329,42 @@
         }
         return results;
       })(), ['sqlite_autoindex_keys_1', 'sqlite_autoindex_realms_1', 'sqlite_autoindex_sources_1', 'keys', 'main', 'realms', 'sources', 'dest_changes_backward', 'dest_changes_forward']);
+      // for name in [ 'keys', 'main', 'realms', 'sources', ]
+      //   debug '^34534^', dba.list dba.query "select * from #{name}"
+      return T.eq(dba.list(dba.query("select * from realms;")), [
+        {
+          realm: 'input'
+        },
+        {
+          realm: 'html'
+        }
+      ]);
     })();
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: import { format: 'sql', }"] = async function(T, done) {
+    var Dba, cfg;
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    cfg = H.get_cfg();
+    await (() => {      //.........................................................................................................
+      var dba, path, schema;
+      path = cfg.sql.small;
+      schema = 'datamill';
+      dba = new Dba();
+      dba.import({path, schema});
+      return dba.list_schemas();
+    })();
+    // T.eq dba.get_schemas(), { main: '', s1: '', }
+    // T.eq ( dba.is_empty { schema: 'main', } ), true
+    // T.eq ( dba.is_empty { schema: 's1', } ), false
+    // T.eq ( d.name for d from dba.walk_objects { schema, } ), [ 'sqlite_autoindex_keys_1', 'sqlite_autoindex_realms_1', 'sqlite_autoindex_sources_1', 'keys', 'main', 'realms', 'sources', 'dest_changes_backward', 'dest_changes_forward' ]
+    // # for name in [ 'keys', 'main', 'realms', 'sources', ]
+    // #   debug '^34534^', dba.list dba.query "select * from #{name}"
+    // T.eq ( dba.list dba.query "select * from realms;" ), [ { realm: 'input' }, { realm: 'html' }, ]
     //.........................................................................................................
     return done();
   };
@@ -973,10 +1072,12 @@
     // test @[ "DBA: copy file DB to memory" ]
     // test @[ "DBA: open()" ]
     // test @[ "DBA: _walk_all_objects()" ]
-    test(this["DBA: import()"]);
+    // test @[ "DBA: import { format: 'db', }" ]
+    test(this["DBA: import { format: 'sql', }"]);
   }
 
-  // @[ "DBA: open()" ]()
+  // test @[ "DBA: _list_temp_schema_numbers()" ]
+// @[ "DBA: open()" ]()
 // test @[ "DBA: in-memory DB API" ]
 // test @[ "DBA: as_sql" ]
 // test @[ "DBA: interpolate" ]

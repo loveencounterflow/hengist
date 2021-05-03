@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, resolve_path, rpr, show_result, test, try_to_remove_file, urge, warn, whisper;
+  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, resolve_path, rpr, show_result, test, try_to_remove_file, urge, walk_batches, walk_lines, walk_statements, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -190,6 +190,150 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  walk_statements = function*(sql_path) {
+    /* Given a path, iterate over SQL statements which are signalled by semicolons (`;`) that appear outside
+     of literals and comments (and the end of input). */
+    /* thx to https://stackabuse.com/reading-a-file-line-by-line-in-node-js/ */
+    /* thx to https://github.com/nacholibre/node-readlines */
+    var cfg, collector, cur_idx, flush, i, len, line, readlines, ref, stream, token, tokenize;
+    readlines = new (require('n-readlines'))(sql_path);
+    //.........................................................................................................
+    cfg = {
+      regExp: require('mysql-tokenizer/lib/regexp-sql92')
+    };
+    tokenize = (require('mysql-tokenizer'))(cfg);
+    collector = null;
+    stream = FS.createReadStream(sql_path);
+    //.........................................................................................................
+    flush = function() {
+      var R;
+      R = collector.join('');
+      collector = null;
+      return R;
+    };
+    //.........................................................................................................
+    while ((line = readlines.next()) !== false) {
+      ref = tokenize(line + '\n');
+      for (cur_idx = i = 0, len = ref.length; i < len; cur_idx = ++i) {
+        token = ref[cur_idx];
+        if (token === ';') {
+          (collector != null ? collector : collector = []).push(token);
+          yield flush();
+          continue;
+        }
+        // if token.startsWith '--'
+        //   continue
+        (collector != null ? collector : collector = []).push(token);
+      }
+    }
+    if (collector != null) {
+      yield flush();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  walk_lines = function*(sql_path) {
+    /* This method iterates over lines instead of tokenizing and re-collecting them into statement-sized
+     chunks; it exists so we can compare its performance with that of `walk_statements()` to get an idea how
+     much the SQL tokenizer is contributing. */
+    var line, readlines;
+    readlines = new (require('n-readlines'))(sql_path);
+    //.........................................................................................................
+    while ((line = readlines.next()) !== false) {
+      yield line;
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  walk_batches = function*(iterator, batch_size = 1) {
+    /* Given an iterator and a batch size, iterate over lists of values yielded by the iterator. */
+    var batch, d;
+    batch = null;
+    for (d of iterator) {
+      (batch != null ? batch : batch = []).push(d);
+      if (batch.length >= batch_size) {
+        yield batch;
+        batch = null;
+      }
+    }
+    if (batch != null) {
+      yield batch;
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._parse_sql_stream_msqlt = (cfg, sql_key) => {
+    return new Promise((resolve) => {
+      var Db, batch_size, count, db, db_cfg, parse_sql, sql_path;
+      sql_path = cfg.readsql[sql_key];
+      batch_size = 100;
+      count = 0;
+      Db = require('better-sqlite3');
+      db_cfg = null;
+      db = new Db(':memory:', db_cfg);
+      return resolve(parse_sql = () => {
+        return new Promise((resolve) => {
+          var compound_statement, ref, statements;
+          ref = walk_batches(walk_statements(sql_path), batch_size);
+          for (statements of ref) {
+            compound_statement = statements.join('');
+            count += compound_statement.length;
+            db.exec(compound_statement);
+          }
+          return resolve(count);
+        });
+      });
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._parse_sql_stream_msqlt_nodb = (cfg, sql_key) => {
+    return new Promise((resolve) => {
+      var batch_size, count, parse_sql, sql_path;
+      sql_path = cfg.readsql[sql_key];
+      batch_size = 100;
+      count = 0;
+      return resolve(parse_sql = () => {
+        return new Promise((resolve) => {
+          var compound_statement, ref, statements;
+          ref = walk_batches(walk_statements(sql_path), batch_size);
+          for (statements of ref) {
+            compound_statement = statements.join('');
+            count += compound_statement.length;
+          }
+          // info '^4844^', '\n' + statements.join ''
+          return resolve(count);
+        });
+      });
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._read_lines_nodb = (cfg, sql_key) => {
+    return new Promise((resolve) => {
+      var batch_size, count, parse_sql, sql_path;
+      sql_path = cfg.readsql[sql_key];
+      batch_size = 3;
+      count = 0;
+      return resolve(parse_sql = () => {
+        return new Promise((resolve) => {
+          var chunks, compound_chunk, ref;
+          ref = walk_batches(walk_lines(sql_path), batch_size);
+          for (chunks of ref) {
+            compound_chunk = chunks.join('');
+            count += compound_chunk.length;
+          }
+          // info '^4844^', '\n' + statements.join ''
+          return resolve(count);
+        });
+      });
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.readsql_clipipe_small = (cfg) => {
     return this._readsql_clipipe(cfg, 'small');
   };
@@ -222,12 +366,50 @@
     return this._readsql_bsqlt3(cfg, 'big', 'callback');
   };
 
+  //...........................................................................................................
   this.writesql_clipipe_small = (cfg) => {
     return this._writesql_clipipe(cfg, 'small');
   };
 
   this.writesql_clipipe_big = (cfg) => {
     return this._writesql_clipipe(cfg, 'big');
+  };
+
+  //...........................................................................................................
+  this.parse_sql_mysqlt_tiny = (cfg) => {
+    return this._parse_sql_stream_msqlt(cfg, 'tiny');
+  };
+
+  this.parse_sql_mysqlt_small = (cfg) => {
+    return this._parse_sql_stream_msqlt(cfg, 'small');
+  };
+
+  this.parse_sql_mysqlt_big = (cfg) => {
+    return this._parse_sql_stream_msqlt(cfg, 'big');
+  };
+
+  this.parse_sql_mysqlt_nodb_tiny = (cfg) => {
+    return this._parse_sql_stream_msqlt_nodb(cfg, 'tiny');
+  };
+
+  this.parse_sql_mysqlt_nodb_small = (cfg) => {
+    return this._parse_sql_stream_msqlt_nodb(cfg, 'small');
+  };
+
+  this.parse_sql_mysqlt_nodb_big = (cfg) => {
+    return this._parse_sql_stream_msqlt_nodb(cfg, 'big');
+  };
+
+  this.read_lines_nodb_tiny = (cfg) => {
+    return this._read_lines_nodb(cfg, 'tiny');
+  };
+
+  this.read_lines_nodb_small = (cfg) => {
+    return this._read_lines_nodb(cfg, 'small');
+  };
+
+  this.read_lines_nodb_big = (cfg) => {
+    return this._read_lines_nodb(cfg, 'big');
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -242,6 +424,7 @@
         big: resolve_path('data/icql/Chinook_Sqlite_AutoIncrementPKs.db')
       },
       readsql: {
+        tiny: resolve_path('assets/icql/tiny-datamill.sql'),
         small: resolve_path('assets/icql/small-datamill.sql'),
         big: resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql')
       },
@@ -275,17 +458,41 @@
       BM.show_totals(bench);
       return null;
     };
+    // #.........................................................................................................
+    // test_names    = [
+    //   'readsql_clipipe_small'
+    //   'readsql_clipipe_big'
+    //   ]
+    // await run_phase test_names
     //.........................................................................................................
-    test_names = ['readsql_clipipe_small', 'readsql_clipipe_big'];
+    test_names = ['readsql_bsqlt3_big_sync'];
+    // 'readsql_bsqlt3_big_promise'
+    // 'readsql_bsqlt3_big_callback'
+    // 'readsql_bsqlt3_small_promise'
+    // 'readsql_bsqlt3_small_sync'
+    // 'readsql_bsqlt3_small_callback'
+    await run_phase(test_names);
+    // #.........................................................................................................
+    // test_names    = [
+    //   'writesql_clipipe_small'
+    //   'writesql_clipipe_big'
+    //   ]
+    // await run_phase test_names
+    //.........................................................................................................
+    test_names = [
+      // 'parse_sql_mysqlt_tiny'
+      // 'parse_sql_mysqlt_small'
+      'parse_sql_mysqlt_big',
+      // 'parse_sql_mysqlt_nodb_tiny'
+      // 'parse_sql_mysqlt_nodb_small'
+      'parse_sql_mysqlt_nodb_big',
+      // 'read_lines_nodb_tiny'
+      // 'read_lines_nodb_small'
+      'read_lines_nodb_big'
+    ];
     await run_phase(test_names);
     //.........................................................................................................
-    test_names = ['readsql_bsqlt3_small_promise', 'readsql_bsqlt3_big_promise', 'readsql_bsqlt3_small_sync', 'readsql_bsqlt3_big_sync', 'readsql_bsqlt3_small_callback', 'readsql_bsqlt3_big_callback'];
-    await run_phase(test_names);
-    //.........................................................................................................
-    test_names = ['writesql_clipipe_small', 'writesql_clipipe_big'];
-    await run_phase(test_names);
-    //.........................................................................................................
-    await run_phase(['readsql_bsqlt3_small_promise']);
+    // await run_phase [ 'readsql_bsqlt3_small_promise', ]
     return null;
   };
 
