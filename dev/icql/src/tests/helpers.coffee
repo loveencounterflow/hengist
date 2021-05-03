@@ -30,6 +30,8 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 DATA                      = require '../../../../lib/data-providers-nocache'
 DATOM                     = require 'datom'
+mkdirp                    = require 'mkdirp'
+
 
 #-----------------------------------------------------------------------------------------------------------
 types.declare 'interpolatable_value', ( x ) ->
@@ -63,7 +65,11 @@ types.declare 'interpolatable_value', ( x ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @copy_over = ( from_path, to_path ) ->
+  whisper '^234787-1^', "try_to_remove_file #{to_path}"
   @try_to_remove_file to_path unless to_path in [ ':memory:', '', ]
+  whisper '^234787-2^', "mkdirp #{to_path}"
+  await mkdirp PATH.dirname to_path
+  whisper '^234787-3^', "copyFile #{from_path}, #{to_path}"
   await FSP.copyFile from_path, to_path
   return null
 

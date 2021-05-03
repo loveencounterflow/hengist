@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DATA, DATOM, FS, FSP, PATH, badge, debug, echo, help, info, isa, rpr, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DATA, DATOM, FS, FSP, PATH, badge, debug, echo, help, info, isa, mkdirp, rpr, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -43,6 +43,8 @@
   DATA = require('../../../../lib/data-providers-nocache');
 
   DATOM = require('datom');
+
+  mkdirp = require('mkdirp');
 
   //-----------------------------------------------------------------------------------------------------------
   types.declare('interpolatable_value', function(x) {
@@ -100,9 +102,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.copy_over = async function(from_path, to_path) {
+    whisper('^234787-1^', `try_to_remove_file ${to_path}`);
     if (to_path !== ':memory:' && to_path !== '') {
       this.try_to_remove_file(to_path);
     }
+    whisper('^234787-2^', `mkdirp ${to_path}`);
+    await mkdirp(PATH.dirname(to_path));
+    whisper('^234787-3^', `copyFile ${from_path}, ${to_path}`);
     await FSP.copyFile(from_path, to_path);
     return null;
   };
