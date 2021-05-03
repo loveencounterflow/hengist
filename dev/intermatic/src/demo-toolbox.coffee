@@ -24,7 +24,7 @@ types                     = new ( require 'intertype' ).Intertype()
   type_of }               = types.export()
 { freeze
   lets }                  = require 'letsfreezethat'
-Intermatic                = require '../../../apps/intermatic'
+{ Intermatic, }           = require '../../../apps/intermatic'
 Recorder                  = require './recorder'
 
 
@@ -58,11 +58,11 @@ new_button_fsmd = ( cfg ) ->
   #.........................................................................................................
   cfg      ?= {}
   defaults  =
-    triggers: [
-      [ 'void',     'start',    'released',   ]
-      [ '*',        'stop',     'void',       ]
-      [ 'released', 'press',    'pressed',    ]
-      [ 'pressed',  'release',  'released',   ] ]
+    moves:
+      start:    'released'
+      stop:     [ 'any',      'void',       ]
+      press:    [ 'released', 'pressed',    ]
+      release:  [ 'pressed',  'released',   ]
     cyclers:
       toggle: [ 'released', 'pressed', ]
   #.........................................................................................................
@@ -76,9 +76,9 @@ new_color_fsmd = ( cfg ) ->
   #.........................................................................................................
   cfg      ?= {}
   defaults  =
-    triggers: [
+    moves:
       [ 'void',   'start',    null,   ]
-      [ '*',      'stop',     'void', ] ]
+      [ 'any',      'stop',     'void', ] ]
   #.........................................................................................................
   R                           = { defaults..., cfg..., }
   colors                      = pluck R, 'colors'
@@ -93,9 +93,9 @@ new_text_fsmd = ( cfg ) ->
   #.........................................................................................................
   cfg      ?= {}
   defaults  =
-    triggers: [
+    moves:
       [ 'void',   'start',    null,   ]
-      [ '*',      'stop',     'void', ] ]
+      [ 'any',      'stop',     'void', ] ]
   #.........................................................................................................
   R                           = { defaults..., cfg..., }
   texts                       = pluck R, 'texts'
@@ -110,9 +110,9 @@ new_lamp_fsmd = ( cfg ) ->
   #.........................................................................................................
   cfg      ?= {}
   defaults  =
-    triggers: [
+    moves:
       [ 'void', 'start',    'dark', ]
-      [ '*',    'stop',     'void', ]
+      [ 'any',    'stop',     'void', ]
       [ 'dark', 'turn_on',  'lit',  ]
       [ 'lit',  'turn_off', 'dark', ]
       ]
@@ -128,7 +128,7 @@ new_toolbox_fsm = ->
     register }    = new_register()
   #---------------------------------------------------------------------------------------------------------
   main_btn = new_button_fsmd
-    goto: '*'
+    goto: 'any'
     enter:
       pressed:  ( P... ) ->
         echo "#{@up.name}.#{@name}:#{@lstate}", CND.yellow  '🔒'
@@ -138,7 +138,7 @@ new_toolbox_fsm = ->
 
   #---------------------------------------------------------------------------------------------------------
   meta_btn = new_button_fsmd
-    goto: '*'
+    goto: 'any'
     enter:
       pressed: ( P... ) ->
         register '<fsm.meta_btn.enter.pressed'
@@ -151,20 +151,20 @@ new_toolbox_fsm = ->
     fsms:
       #.....................................................................................................
       color: new_color_fsmd
-        goto: '*'
+        goto: 'any'
         colors: [ 'red', 'green', ]
       #.....................................................................................................
       text: new_text_fsmd
-        goto: '*'
+        goto: 'any'
         texts: [ 'wait', 'go', ]
       #.....................................................................................................
       lamp: new_lamp_fsmd
-        goto: '*'
+        goto: 'any'
 
   #---------------------------------------------------------------------------------------------------------
   fsmd =
     name: 'toolbox'
-    triggers: [
+    moves:
       [ 'void',     'start',  'running', ]
       [ 'running',  'stop',   'stopped', ]
       ]
@@ -209,7 +209,7 @@ demo_1 = ->
 demo_2 = ->
   fsmd =
     name: 'simple'
-    triggers: [
+    moves:
       [ 'void', 'start', 'first' ] ]
     cyclers:
       step: [ 'first', 'second', 'third', ]
@@ -223,7 +223,7 @@ demo_2 = ->
     fsms:
       #.....................................................................................................
       lamp:
-        triggers: [
+        moves:
           [ 'void', 'start', 'on' ] ]
         cyclers:
           toggle: [ 'on', 'off', ]
@@ -237,7 +237,7 @@ demo_2 = ->
           counter:
             data:
               _XXX_count: 0
-            triggers: [
+            moves:
               [ 'void', 'start', 'active' ] ]
             cyclers:
               tick: [ 'active', ]
@@ -403,7 +403,7 @@ demo_3 = ->
 
 ############################################################################################################
 if module is require.main then do =>
-  await demo()
+  # await demo()
   await demo_2()
 
 

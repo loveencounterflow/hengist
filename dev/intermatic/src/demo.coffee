@@ -373,28 +373,50 @@ class Compound_fsm extends Multimix
 #-----------------------------------------------------------------------------------------------------------
 @basics_demo = ->
   #---------------------------------------------------------------------------------------------------------
+  cstate_ansi = ->
+    parts = []
+    parts.push @stage
+    parts.push @verb
+    parts.push if ( @dpar is @lstate ) then ( CND.reverse @dpar ) else @dpar
+    parts.push '▶'
+    parts.push if ( @dest is @lstate ) then ( CND.reverse @dest ) else @dest
+    parts.push ( CND.reverse "failed A" ) if @failed
+    parts.push ( CND.reverse "failed B" ) if ( @dest is null )
+    parts.push "(unchanged)" unless @changed
+    return parts.join ' '
+  #---------------------------------------------------------------------------------------------------------
   fsmd =
     name: 'meta_lamp'
     moves:
-      start:  [ 'void', 'lit',  ]
-      reset:  [ 'any',  'void', ]
-      toggle: [ 'lit',  'dark', 'lit', ]
+      start:    [ 'void', 'lit',  ]
+      reset:    [ 'any',  'void', ]
+      toggle:   [ 'lit',  'dark', 'lit', ]
+      brighten: [ 'lit', 'lit', ]
+      # noop:   'any'
+    before:
+      any:        ( d ) -> info "##{d.count}", @cstate_ansi()
+      change:     ( d ) -> info "##{d.count}", @cstate_ansi()
     after:
-      change:     ( s ) -> urge "after change:  #{rpr s}"
-    enter:
-      dark:       ( s ) -> urge "enter dark:    #{rpr s}"
-    leave:
-      lit:        ( s ) -> urge "leave lit      #{rpr s}"
-    fail:         ( s ) -> urge "failed: #{rpr s}"
+      any:        ( d ) -> help "##{d.count}", @cstate_ansi()
+      change:     ( d ) -> help "##{d.count}", @cstate_ansi()
+    entering:
+      dark:       ( d ) -> urge "##{d.count}", @cstate_ansi()
+    leaving:
+      lit:        ( d ) -> urge "##{d.count}", @cstate_ansi()
+    fail:         ( d ) -> warn "##{d.count}", @cstate_ansi()
   #---------------------------------------------------------------------------------------------------------
   { Intermatic, } = require '../../../apps/intermatic'
-  Intermatic._tid = 0
+  count           = 0
   fsm             = new Intermatic fsmd
+  fsm.cstate_ansi = cstate_ansi
   info '^44455^', fsm.moves
-  fsm.start()
-  fsm.toggle()
-  fsm.reset()
-  fsm.toggle()
+  fsm.start     { count: ++count, }
+  fsm.brighten  { count: ++count, }
+  fsm.toggle    { count: ++count, }
+  # fsm.noop      { count: ++count, }
+  fsm.brighten  { count: ++count, }
+  fsm.reset     { count: ++count, }
+  fsm.toggle    { count: ++count, }
   # fsm.goto 'lit'
   # fsm.goto 'lit'
   # fsm.goto 'dark'
@@ -404,7 +426,7 @@ class Compound_fsm extends Multimix
 
 ############################################################################################################
 if module is require.main then do =>
-  await @demo_2()
-  await @toolbox_demo()
-  await @compound_fsm_demo()
+  # await @demo_2()
+  # await @toolbox_demo()
+  # await @compound_fsm_demo()
   await @basics_demo()
