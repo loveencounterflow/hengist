@@ -122,8 +122,51 @@ types                     = new ( require 'intertype' ).Intertype
   done()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: import()" ] = ( T, done ) ->
+@[ "DBA: _list_temp_schema_numbers()" ] = ( T, done ) ->
   T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  #.........................................................................................................
+  cfg               = H.get_cfg()
+  cfg.ref           = 'foo'
+  #.........................................................................................................
+  await do =>
+    dba             = new Dba()
+    path            = ''
+    prefix          = dba.cfg._temp_prefix
+    detach_schemas  = []
+    error           = null
+    # debug '^4962^', dba._list_temp_schema_numbers()
+    # debug '^4962^', dba._max_temp_schema_number()
+    T.eq dba._list_temp_schema_numbers(), []
+    T.eq dba._max_temp_schema_number(), 0
+    try
+      for n in [ 1 .. 11 ]
+        schema              = "#{prefix}#{n}"
+        before_free_schema  = "#{prefix}#{n}"
+        after_free_schema   = "#{prefix}#{n + 1}"
+        detach_schemas.unshift schema if n %% 2 is 0
+        T.eq dba._get_free_temp_schema(), before_free_schema
+        dba._attach { schema, path }
+        # debug '^4962^', dba._list_temp_schema_numbers()
+        # debug '^4962^', dba._max_temp_schema_number()
+        T.eq dba._get_free_temp_schema(), after_free_schema
+        T.eq dba._list_temp_schema_numbers(), [ 1 .. n ]
+        T.eq dba._max_temp_schema_number(), n
+    catch error
+      throw error unless /too many attached databases/.test error.message
+      T.ok true
+    unless error?
+      T.fail "expected error (too many attached DBs), got none"
+    for schema in detach_schemas
+      dba._detach { schema }
+      # debug '^4962^', dba._list_temp_schema_numbers()
+      T.eq dba._max_temp_schema_number(), 9
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: import { format: 'db', }" ] = ( T, done ) ->
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   #.........................................................................................................
   cfg               = H.get_cfg()
@@ -133,7 +176,7 @@ types                     = new ( require 'intertype' ).Intertype
   cfg.mode          = 'fle'
   template_path_1   = H.interpolate cfg.db.templates[ cfg.size ], cfg
   work_path_1       = H.interpolate cfg.db.work[      cfg.mode ], cfg
-  help "^77-300^ work_path_1:  ", work_path_1
+  # help "^77-300^ work_path_1:  ", work_path_1
   #.........................................................................................................
   await do =>
     path    = work_path_1
@@ -141,10 +184,36 @@ types                     = new ( require 'intertype' ).Intertype
     await H.copy_over template_path_1, path
     dba     = new Dba()
     dba.import { path, schema, }
-    T.eq dba.get_schemas(), { main: '', s1: path, }
+    dba.list_schemas()
+    T.eq dba.get_schemas(), { main: '', s1: '', }
     T.eq ( dba.is_empty { schema: 'main', } ), true
     T.eq ( dba.is_empty { schema: 's1', } ), false
     T.eq ( d.name for d from dba.walk_objects { schema, } ), [ 'sqlite_autoindex_keys_1', 'sqlite_autoindex_realms_1', 'sqlite_autoindex_sources_1', 'keys', 'main', 'realms', 'sources', 'dest_changes_backward', 'dest_changes_forward' ]
+    # for name in [ 'keys', 'main', 'realms', 'sources', ]
+    #   debug '^34534^', dba.list dba.query "select * from #{name}"
+    T.eq ( dba.list dba.query "select * from realms;" ), [ { realm: 'input' }, { realm: 'html' }, ]
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: import { format: 'sql', }" ] = ( T, done ) ->
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  cfg               = H.get_cfg()
+  #.........................................................................................................
+  await do =>
+    path    = cfg.sql.small
+    schema  = 'datamill'
+    dba     = new Dba()
+    dba.import { path, schema, }
+    dba.list_schemas()
+    # T.eq dba.get_schemas(), { main: '', s1: '', }
+    # T.eq ( dba.is_empty { schema: 'main', } ), true
+    # T.eq ( dba.is_empty { schema: 's1', } ), false
+    # T.eq ( d.name for d from dba.walk_objects { schema, } ), [ 'sqlite_autoindex_keys_1', 'sqlite_autoindex_realms_1', 'sqlite_autoindex_sources_1', 'keys', 'main', 'realms', 'sources', 'dest_changes_backward', 'dest_changes_forward' ]
+    # # for name in [ 'keys', 'main', 'realms', 'sources', ]
+    # #   debug '^34534^', dba.list dba.query "select * from #{name}"
+    # T.eq ( dba.list dba.query "select * from realms;" ), [ { realm: 'input' }, { realm: 'html' }, ]
   #.........................................................................................................
   done()
 
@@ -519,7 +588,9 @@ unless module.parent?
   # test @[ "DBA: copy file DB to memory" ]
   # test @[ "DBA: open()" ]
   # test @[ "DBA: _walk_all_objects()" ]
-  test @[ "DBA: import()" ]
+  # test @[ "DBA: import { format: 'db', }" ]
+  test @[ "DBA: import { format: 'sql', }" ]
+  # test @[ "DBA: _list_temp_schema_numbers()" ]
   # @[ "DBA: open()" ]()
   # test @[ "DBA: in-memory DB API" ]
   # test @[ "DBA: as_sql" ]
