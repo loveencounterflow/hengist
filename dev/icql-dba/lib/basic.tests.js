@@ -355,8 +355,9 @@
       path = cfg.sql.small;
       schema = 'datamill';
       dba = new Dba();
+      // debug '^44474^', dba.execute ".mode columns"
       dba.import({path, schema});
-      return dba.list_schemas();
+      return debug('^44474^', dba.list_schemas());
     })();
     // T.eq dba.get_schemas(), { main: '', s1: '', }
     // T.eq ( dba.is_empty { schema: 'main', } ), true

@@ -1484,6 +1484,8 @@
       //.....................................................................................................
       after: {
         any: function() {
+          debug('^223423^ fsm.after.any()');
+          // debug '^4222^', ( k for k of @ )
           return register('after.any', this.get_states());
         },
         // change:         -> register 'after.change',  @get_states()
@@ -1494,6 +1496,11 @@
       //.....................................................................................................
       alpha_btn: {
         cascades: ['start'],
+        after: {
+          any: function() {
+            return debug('^223424^ fsm.alpha_btn.after.any()', this.lstate);
+          }
+        },
         moves: {
           start: 'released',
           reset: ['any', 'void'],
@@ -1738,6 +1745,8 @@
     T.eq(fsm.path, 'cfsm2');
     T.eq(fsm.switch.path, 'switch');
     T.eq(fsm.switch.lamp.path, 'switch#lamp');
+    // debug ( d for d of fsm )
+    // debug fsm.lamp.on()
     //---------------------------------------------------------------------------------------------------------
     return done();
   };
@@ -2486,17 +2495,17 @@
     (() => {
       // @demo_2()
       // @toolbox_demo()
-      return test(this);
+      // test @
+      // test @[ "Intermatic custom paths 1" ]
+      // test @[ "Intermatic custom paths 2" ]
+      // @[ "Intermatic custom paths 1" ]()
+      // test @[ "Intermatic cFsm root_fsm" ]
+      // @[ "Intermatic cFsm root_fsm" ]()
+      return test(this["Intermatic cFsm event bubbling"]);
     })();
   }
 
-  // test @[ "Intermatic custom paths 1" ]
-// test @[ "Intermatic custom paths 2" ]
-// @[ "Intermatic custom paths 1" ]()
-// test @[ "Intermatic cFsm root_fsm" ]
-// @[ "Intermatic cFsm root_fsm" ]()
-// test @[ "Intermatic cFsm event bubbling" ]
-// test @[ "Intermatic reserved keys" ]
+  // test @[ "Intermatic reserved keys" ]
 // test @[ "___ Intermatic attribute freezing"        ]
 // test @[ "Intermatic empty FSM"                     ]
 // test @[ "Intermatic fairly minimal FSM without moves" ]

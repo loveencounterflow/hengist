@@ -417,73 +417,6 @@
     return done();
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this["_demo 2"] = async function(T, done) {
-    var ICQL, db, ref, ref1, ref2, ref3, ref4, ref5, row, settings;
-    ICQL = require('../../../../apps/icql');
-    settings = this.get_settings();
-    db = (await ICQL.bind(settings));
-    db.load(join_path(settings.sqlitemk_path, 'extensions/amatch.so'));
-    db.load(join_path(settings.sqlitemk_path, 'extensions/csv.so'));
-    // R.$.db.exec """select load_extension( 'fts5' );"""
-    db.import_table_texnames();
-    db.create_token_tables();
-    db.populate_token_tables();
-    // # whisper '-'.repeat 108
-    // # info row for row from db.fetch_texnames()
-    whisper('-'.repeat(108));
-    urge('fetch_texnames');
-    ref = db.fetch_texnames({
-      limit: 100
-    });
-    for (row of ref) {
-      info(xrpr(row));
-    }
-    // urge 'fetch_rows_of_txftsci'; info xrpr row for row from db.fetch_rows_of_txftsci { limit: 5, }
-    // urge 'fetch_rows_of_txftscs'; info xrpr row for row from db.fetch_rows_of_txftscs { limit: 5, }
-    urge('fetch_stats');
-    ref1 = db.fetch_stats();
-    for (row of ref1) {
-      info(xrpr(row));
-    }
-    whisper('-'.repeat(108));
-    urge('fetch_token_matches');
-    whisper('-'.repeat(108));
-    ref2 = db.fetch_token_matches({
-      q: 'Iota',
-      limit: 10
-    });
-    for (row of ref2) {
-      info(xrpr(row));
-    }
-    whisper('-'.repeat(108));
-    ref3 = db.fetch_token_matches({
-      q: 'acute',
-      limit: 10
-    });
-    for (row of ref3) {
-      info(xrpr(row));
-    }
-    whisper('-'.repeat(108));
-    ref4 = db.fetch_token_matches({
-      q: 'u',
-      limit: 10
-    });
-    for (row of ref4) {
-      info(xrpr(row));
-    }
-    whisper('-'.repeat(108));
-    ref5 = limit(3, db.fetch_token_matches({
-      q: 'mathbb',
-      limit: 10
-    }));
-    for (row of ref5) {
-      info(xrpr(row));
-    }
-    // debug ( k for k of iterator )
-    return null;
-  };
-
   // #-----------------------------------------------------------------------------------------------------------
   // @[ "x" ] = ( T, done ) ->
   //   T.eq 42, 42
@@ -687,7 +620,8 @@
     test(this);
   }
 
-  // test @[ "foreign keys" ]
+  // test @[ "load_extension" ]
+// test @[ "foreign keys" ]
 // test @[ "toposort with schema" ]
 // @[ "toposort with schema" ]()
 
