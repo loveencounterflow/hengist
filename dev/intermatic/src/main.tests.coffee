@@ -644,12 +644,17 @@ new_register = ->
     get_states: -> { btn: @alpha_btn.lstate, color: @alpha_btn.color.lstate, lamp: @alpha_btn.lamp.lstate, }
     #.....................................................................................................
     after:
-      any:            -> register 'after.any',     @get_states()
+      any: ->
+        debug '^223423^ fsm.after.any()'
+        # debug '^4222^', ( k for k of @ )
+        register 'after.any', @get_states()
       # change:         -> register 'after.change',  @get_states()
       EXP_any_change: ( changed_fsm ) -> register "EXP_any_change #{changed_fsm.name}: #{changed_fsm.lstate}",
     #.....................................................................................................
     alpha_btn:
       cascades: [ 'start', ]
+      after:
+        any:            -> debug '^223424^ fsm.alpha_btn.after.any()', @lstate
       moves:
         start:    'released'
         reset:    [ 'any',       'void',       ]
@@ -849,6 +854,8 @@ new_register = ->
   T.eq fsm.path,                        'cfsm2'
   T.eq fsm.switch.path,                 'switch'
   T.eq fsm.switch.lamp.path,            'switch#lamp'
+  # debug ( d for d of fsm )
+  # debug fsm.lamp.on()
   #---------------------------------------------------------------------------------------------------------
   done()
 
@@ -1056,13 +1063,13 @@ new_register = ->
 if module is require.main then do =>
   # @demo_2()
   # @toolbox_demo()
-  test @
+  # test @
   # test @[ "Intermatic custom paths 1" ]
   # test @[ "Intermatic custom paths 2" ]
   # @[ "Intermatic custom paths 1" ]()
   # test @[ "Intermatic cFsm root_fsm" ]
   # @[ "Intermatic cFsm root_fsm" ]()
-  # test @[ "Intermatic cFsm event bubbling" ]
+  test @[ "Intermatic cFsm event bubbling" ]
   # test @[ "Intermatic reserved keys" ]
   # test @[ "___ Intermatic attribute freezing"        ]
   # test @[ "Intermatic empty FSM"                     ]
