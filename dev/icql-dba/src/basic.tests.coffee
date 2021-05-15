@@ -205,8 +205,9 @@ types                     = new ( require 'intertype' ).Intertype
     path    = cfg.sql.small
     schema  = 'datamill'
     dba     = new Dba()
+    # debug '^44474^', dba.execute ".mode columns"
     dba.import { path, schema, }
-    dba.list_schemas()
+    debug '^44474^', dba.list_schemas()
     # T.eq dba.get_schemas(), { main: '', s1: '', }
     # T.eq ( dba.is_empty { schema: 'main', } ), true
     # T.eq ( dba.is_empty { schema: 's1', } ), false
