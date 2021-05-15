@@ -4,7 +4,7 @@ specifiers:
   '@ef-carbon/deep-freeze': ^1.0.1
   '@scotttrinh/number-ranges': ^2.1.0
   argparse: ^2.0.1
-  better-sqlite3: ^7.1.2
+  better-sqlite3: ^7.3.1
   chance: ^1.1.7
   cnd: ^9.2.1
   command-line-args: ^5.1.1
@@ -48,6 +48,7 @@ specifiers:
   loupe: 2.1.1
   merge-ranges: ^1.0.2
   mixa: 0.1.2
+  mkdirp: ^1.0.4
   mori: ^0.3.2
   multimix: ^5.0.0
   mysql-tokenizer: ^1.0.7
@@ -83,7 +84,7 @@ dependencies:
   '@ef-carbon/deep-freeze': 1.0.1
   '@scotttrinh/number-ranges': 2.1.0
   argparse: 2.0.1
-  better-sqlite3: 7.1.2
+  better-sqlite3: 7.3.1
   chance: 1.1.7
   cnd: 9.2.1
   command-line-args: 5.1.1
@@ -127,6 +128,7 @@ dependencies:
   loupe: 2.1.1
   merge-ranges: 1.0.2
   mixa: 0.1.2
+  mkdirp: 1.0.4
   mori: 0.3.2
   multimix: 5.0.0
   mysql-tokenizer: 1.0.7
@@ -452,8 +454,8 @@ packages:
       tar: 6.1.0
     dev: false
 
-  /better-sqlite3/7.1.5:
-    resolution: {integrity: sha512-HX5dN0zLllJLQOJP2tXqV42bvjXPnbe/Nl5o6nD1jj99h0148B39zbfGZVoJBLtDAd/CJc4Zdm8K+GhHIq84IQ==}
+  /better-sqlite3/7.3.1:
+    resolution: {integrity: sha512-Io0eWFWEtHsA7KS7Ehm45AGwi5SHeCD1hIHd+b1nj26Tf7rFTBqMltuVDimNMNMJ6f+Oy29RT7XWinv3yWKvIQ==}
     requiresBuild: true
     dependencies:
       bindings: 1.5.0
@@ -1458,7 +1460,7 @@ packages:
   /icql/5.1.5:
     resolution: {integrity: sha512-6BeSLNmZ11HSU4mjPQ+xMkvMKmzBvZ+5Yjy0Q588xdulrk7PJcOTBTBIk2I+yL31mIsrID5QJ+/10uhTkr24xw==}
     dependencies:
-      better-sqlite3: 7.1.5
+      better-sqlite3: 7.3.1
       cnd: 9.2.1
       hollerith-codec: 3.0.0
       intercourse: 7.0.0
