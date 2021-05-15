@@ -1,0 +1,34 @@
+lockfileVersion: 5.3
+
+specifiers:
+  '@assemblyscript/loader': ^0.18.31
+  assemblyscript: ^0.18.31
+
+dependencies:
+  '@assemblyscript/loader': 0.18.31
+
+devDependencies:
+  assemblyscript: 0.18.31
+
+packages:
+
+  /@assemblyscript/loader/0.18.31:
+    resolution: {integrity: sha512-BrPyjojTj7ReaDUiDzfbm0Ei/2OoF2ZimcvxTGSQ7IrVKld/c/7w1DcFJjaLj1eBaartP2TBEzaf7iky+UiDYA==}
+    dev: false
+
+  /assemblyscript/0.18.31:
+    resolution: {integrity: sha512-4MtKf1nnmY0eh+v4PKVnIjT8HPTRBqJqACW3kXQoDztyFBLHN1WxGSgZ9iPsLbm/6xKNYD0l6j9y03PoMv+Qog==}
+    hasBin: true
+    dependencies:
+      binaryen: 100.0.0-nightly.20210413
+      long: 4.0.0
+    dev: true
+
+  /binaryen/100.0.0-nightly.20210413:
+    resolution: {integrity: sha512-EeGLIxQmJS0xnYl+SH34mNBqVMoixKd9nsE7S7z+CtS9A4eoWn3Qjav+XElgunUgXIHAI5yLnYT2TUGnLX2f1w==}
+    hasBin: true
+    dev: true
+
+  /long/4.0.0:
+    resolution: {integrity: sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==}
+    dev: true

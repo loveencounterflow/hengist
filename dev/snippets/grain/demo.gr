@@ -1,0 +1,33 @@
+
+import List from "list"
+
+
+//----------------------------------------------------------------------------------------------------------
+print( "helo grain" )
+
+//----------------------------------------------------------------------------------------------------------
+let empty = []
+let numbers = [1, 2, 3]
+let strings = ["foo", "bar", "baz"]
+print( strings );
+
+print( List.length( [4, 5, 6] ) )
+
+print( List.map((n) => n + 3, [1, 2, 3]) ) // [4, 5, 6]
+//----------------------------------------------------------------------------------------------------------
+
+enum CabbageColor { Red, Green }
+enum Veggie {
+  Squash,
+  Cabbage( CabbageColor ),
+  Broccoli, }
+
+let redCabbage = Cabbage( Red )
+print( redCabbage )
+
+//----------------------------------------------------------------------------------------------------------
+record Person { name: String, age: Number }
+
+let name = "Klaus Teuber"
+let user = { name, age: 42 }
+print( user )
