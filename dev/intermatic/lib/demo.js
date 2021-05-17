@@ -776,13 +776,37 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.icql_dba = function() {
+    var Intermatic, fsm, fsmd;
+    //---------------------------------------------------------------------------------------------------------
+    fsmd = {
+      name: 'dbinstance',
+      moves: {
+        start: 'empty',
+        open: ['empty', 'opening']
+      }
+    };
+    //---------------------------------------------------------------------------------------------------------
+    ({Intermatic} = require('../../../apps/intermatic'));
+    fsm = new Intermatic(fsmd);
+    info(fsm.move);
+    fsm.start();
+    info(fsm.move);
+    fsm.open();
+    info(fsm.move);
+    //---------------------------------------------------------------------------------------------------------
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
       // await @demo_2()
       // await @toolbox_demo()
       // await @compound_fsm_demo()
-      return (await this.basics_demo());
+      // await @basics_demo()
+      return (await this.icql_dba());
     })();
   }
 
