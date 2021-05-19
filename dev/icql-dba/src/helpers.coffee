@@ -137,6 +137,19 @@ DATOM                     = require 'datom'
   return R
 
 #-----------------------------------------------------------------------------------------------------------
+@file_exists = ( path ) ->
+  try ( stat = FS.statSync path ) catch error
+    return false if error.code is 'ENOENT'
+    throw error
+  return true if stat.isFile()
+  throw new Error "^434534^ not a file: #{rpr path}\n#{rpr stat}"
+
+#-----------------------------------------------------------------------------------------------------------
+@ensure_file_exists = ( path ) ->
+  throw new Error "^434534^ not a file: #{rpr path}" unless @file_exists path
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @try_to_remove_file = ( path ) ->
   try FS.unlinkSync path catch error
     return if error.code is 'ENOENT'
@@ -189,6 +202,7 @@ DATOM                     = require 'datom'
       big:    @resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql'
     db:
       templates:
+        micro:  @resolve_path 'assets/icql/micro.db'
         small:  @resolve_path 'assets/icql/small-datamill.db'
         big:    @resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.db'
       target:
@@ -217,3 +231,21 @@ DATOM                     = require 'datom'
       mem: []
       bare: []
   return R
+
+#-----------------------------------------------------------------------------------------------------------
+@procure_db = ( cfg ) ->
+  cfg           = { reuse: false, cfg..., }
+  validate.procure_db_cfg cfg
+  xcfg          = @get_cfg()
+  template_path = @interpolate xcfg.db.templates[ cfg.size ], cfg
+  @ensure_file_exists template_path
+  # work_path     = @interpolate xcfg.db.work[      cfg.mode ], cfg
+  work_path     = @interpolate xcfg.db.work.fle, cfg
+  unless cfg.reuse and @file_exists work_path
+    help "^4341^ procuring DB #{work_path}"
+    await @copy_over template_path, work_path
+  else
+    warn "^4341^ skipping DB file creation (#{work_path} already exists)"
+  return { template_path, work_path, }
+
+
