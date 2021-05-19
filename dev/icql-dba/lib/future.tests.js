@@ -40,7 +40,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open()"] = async function(T, done) {
     var Dba, dba, schemas;
-    // T.halt_on_error()
+    T.halt_on_error();
     ({Dba} = require('../../../apps/icql-dba'));
     dba = new Dba();
     schemas = {};
@@ -144,7 +144,7 @@
           id: 3
         }
       ]);
-      return T.eq(dba.list(dba.query("select * from dm2.extra order by id;")), [
+      T.eq(dba.list(dba.query("select * from dm2.extra order by id;")), [
         {
           id: 1
         },
@@ -155,9 +155,10 @@
           id: 3
         }
       ]);
+      return T.ok(!dba.is_ram_db({schema}));
     })();
     await (async() => {      //.........................................................................................................
-      var schema, template_path, work_path;
+      var error, schema, template_path, work_path;
       ({template_path, work_path} = (await H.procure_db({
         size: 'small',
         ref: 'F-open'
@@ -165,12 +166,23 @@
       schema = 'dm1';
       // schemas[ schema ] = { path: work_path, }
       urge('^344-2^', {template_path, work_path, schema});
-      return T.throws(/schema 'dm1' already exists/, () => {
+      try {
+        dba.open({
+          path: work_path,
+          schema
+        });
+      } catch (error1) {
+        error = error1;
+        warn('^3234^', error);
+        warn('^3234^', error.message);
+      }
+      T.throws(/schema 'dm1' already exists/, () => {
         return dba.open({
           path: work_path,
           schema
         });
       });
+      return T.ok(!dba.is_ram_db({schema}));
     })();
     await (async() => {      //.........................................................................................................
       var schema, template_path, work_path;
@@ -188,7 +200,8 @@
         schema
       });
       T.ok(!H.types.isa.datamill_db_lookalike({dba, schema}));
-      return T.ok(H.types.isa.chinook_db_lookalike({dba, schema}));
+      T.ok(H.types.isa.chinook_db_lookalike({dba, schema}));
+      return T.ok(!dba.is_ram_db({schema}));
     })();
     await (async() => {      //.........................................................................................................
       var schema, template_path, work_path;
@@ -206,7 +219,8 @@
         schema
       });
       T.ok(!H.types.isa.datamill_db_lookalike({dba, schema}));
-      return T.ok(H.types.isa.micro_db_lookalike({dba, schema}));
+      T.ok(H.types.isa.micro_db_lookalike({dba, schema}));
+      return T.ok(!dba.is_ram_db({schema}));
     })();
     //.........................................................................................................
     T.eq(dba._schemas, schemas);
@@ -223,7 +237,7 @@
     schemas = {};
     await (async() => {      //.........................................................................................................
       /* Opening a RAM DB from file */
-      var d, db_path, ref, schema, template_path, work_path;
+      var db_path, schema, template_path, work_path;
       ({template_path, work_path} = (await H.procure_db({
         size: 'small',
         ref: 'F-open-2'
@@ -244,16 +258,35 @@
         ram: true
       });
       T.ok(H.types.isa.datamill_db_lookalike({dba, schema}));
-      help('^43451^', dba.list(dba.query("select * from ramdb.sqlite_schema;")));
-      ref = dba.query("select * from pragma_database_list order by seq;");
-      for (d of ref) {
-        info(d);
-      }
+      // help '^43451^', dba.list dba.query "select * from ramdb.sqlite_schema;"
+      // info d for d from dba.query "select * from pragma_database_list order by seq;"
       db_path = dba.first_value(dba.query("select file from pragma_database_list where name = ?;", [schema]));
       T.eq(db_path, '');
-      return T.ok;
+      return T.ok(dba.is_ram_db({schema}));
     })();
-    // info '^43451^', ( rpr k ), dba.sqlt[ k ] for k of dba.sqlt
+    await (() => {      //.........................................................................................................
+      /* Opening an empty RAM DB */
+      var db_path, ram, schema;
+      schema = 'r2';
+      ram = true;
+      schemas[schema] = {
+        path: null
+      };
+      dba.open({schema, ram});
+      // help '^43451^', dba.list dba.query "select * from ramdb.sqlite_schema;"
+      // info d for d from dba.query "select * from pragma_database_list order by seq;"
+      db_path = dba.first_value(dba.query("select file from pragma_database_list where name = ?;", [schema]));
+      T.eq(db_path, '');
+      return T.ok(dba.is_ram_db({schema}));
+    })();
+    await (() => {      //.........................................................................................................
+      // dba.is_ram_db { schema: 'nosuchschema', }
+      return T.throws(/schema 'nosuchschema' does not exist/, () => {
+        return dba.is_ram_db({
+          schema: 'nosuchschema'
+        });
+      });
+    })();
     //.........................................................................................................
     info('^35345^', dba._schemas);
     T.eq(dba._schemas, schemas);
