@@ -196,7 +196,7 @@ types                     = new ( require 'intertype' ).Intertype
   done()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: import { format: 'sql', }" ] = ( T, done ) ->
+@[ "___ DBA: import { format: 'sql', }" ] = ( T, done ) ->
   T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   cfg               = H.get_cfg()
@@ -585,12 +585,12 @@ show_schemas_and_objects = ( ref, dba ) ->
 
 ############################################################################################################
 unless module.parent?
-  # test @
+  test @
   # test @[ "DBA: copy file DB to memory" ]
   # test @[ "DBA: open()" ]
   # test @[ "DBA: _walk_all_objects()" ]
   # test @[ "DBA: import { format: 'db', }" ]
-  test @[ "DBA: import { format: 'sql', }" ]
+  # test @[ "DBA: import { format: 'sql', }" ]
   # test @[ "DBA: _list_temp_schema_numbers()" ]
   # @[ "DBA: open()" ]()
   # test @[ "DBA: in-memory DB API" ]
