@@ -24,20 +24,105 @@ echo                      = CND.echo.bind CND
 PATH                      = require 'path'
 FS                        = require 'fs'
 FSP                       = require 'fs/promises'
-types                     = new ( require 'intertype' ).Intertype
+dba_types                 = require '../../../apps/icql-dba/lib/types'
+@types                    = new ( require 'intertype' ).Intertype
 { isa
   validate
-  validate_list_of }      = types.export()
+  validate_list_of
+  equals }                = @types.export()
 DATA                      = require '../../../lib/data-providers-nocache'
 DATOM                     = require 'datom'
+{ Dba }                   = require '../../../apps/icql-dba'
+
 
 #-----------------------------------------------------------------------------------------------------------
-types.declare 'interpolatable_value', ( x ) ->
+@types.declare 'interpolatable_value', ( x ) ->
   return true if @isa.text x
   return true if @isa.float x
   return true if @isa.boolean x
   return false
 
+#-----------------------------------------------------------------------------------------------------------
+@types.declare 'procure_db_cfg', tests:
+  "@isa.object x":                      ( x ) -> @isa.object x
+  "@isa.nonempty_text x.ref":           ( x ) -> @isa.nonempty_text x.ref
+  "@isa.nonempty_text x.size":          ( x ) -> @isa.nonempty_text x.size
+  "@isa.boolean x.reuse":               ( x ) -> @isa.boolean x.reuse
+
+#-----------------------------------------------------------------------------------------------------------
+@types.declare 'looks_like_db_cfg', tests:
+  "@isa.object x":                      ( x ) -> @isa.object x
+  "dba_types.isa.dba x.dba":            ( x ) -> dba_types.isa.dba x.dba
+  "dba_types.isa.ic_schema x.schema":   ( x ) -> dba_types.isa.ic_schema x.schema
+
+#-----------------------------------------------------------------------------------------------------------
+@types.declare 'datamill_db_lookalike', ( cfg ) ->
+  @validate.looks_like_db_cfg cfg
+  { dba, schema, }  = cfg
+  schema_i          = dba.as_identifier schema
+  try
+    return false unless ( dba.first_value dba.query "select count(*) from #{schema_i}.main;" ) is 327
+    debug '^35354^', dba.list dba.query "select * from #{schema_i}.main order by vnr_blob limit 3;"
+  catch error
+    throw error unless error.code is 'SQLITE_ERROR'
+    return false
+  return true
+
+#-----------------------------------------------------------------------------------------------------------
+@types.declare 'chinook_db_lookalike', ( cfg ) ->
+  @validate.looks_like_db_cfg cfg
+  { dba, schema, }  = cfg
+  schema_i          = dba.as_identifier schema
+  try
+    db_objects = dba.list dba.query "select type, name from #{schema_i}.sqlite_schema where true or type is 'table' order by name;"
+    info db_objects
+    return false unless equals db_objects, [
+      { type: 'table', name: 'Album',                             }
+      { type: 'table', name: 'Artist',                            }
+      { type: 'table', name: 'Customer',                          }
+      { type: 'table', name: 'Employee',                          }
+      { type: 'table', name: 'Genre',                             }
+      { type: 'index', name: 'IFK_AlbumArtistId',                 }
+      { type: 'index', name: 'IFK_CustomerSupportRepId',          }
+      { type: 'index', name: 'IFK_EmployeeReportsTo',             }
+      { type: 'index', name: 'IFK_InvoiceCustomerId',             }
+      { type: 'index', name: 'IFK_InvoiceLineInvoiceId',          }
+      { type: 'index', name: 'IFK_InvoiceLineTrackId',            }
+      { type: 'index', name: 'IFK_PlaylistTrackTrackId',          }
+      { type: 'index', name: 'IFK_TrackAlbumId',                  }
+      { type: 'index', name: 'IFK_TrackGenreId',                  }
+      { type: 'index', name: 'IFK_TrackMediaTypeId',              }
+      { type: 'table', name: 'Invoice',                           }
+      { type: 'table', name: 'InvoiceLine',                       }
+      { type: 'table', name: 'MediaType',                         }
+      { type: 'table', name: 'Playlist',                          }
+      { type: 'table', name: 'PlaylistTrack',                     }
+      { type: 'table', name: 'Track',                             }
+      { type: 'index', name: 'sqlite_autoindex_PlaylistTrack_1',  }
+      { type: 'table', name: 'sqlite_sequence',                   } ]
+  catch error
+    throw error unless error.code is 'SQLITE_ERROR'
+    return false
+  return true
+
+#-----------------------------------------------------------------------------------------------------------
+@types.declare 'micro_db_lookalike', ( cfg ) ->
+  @validate.looks_like_db_cfg cfg
+  { dba, schema, }  = cfg
+  schema_i          = dba.as_identifier schema
+  try
+    db_objects = dba.list dba.query "select type, name from #{schema_i}.sqlite_schema order by name;"
+    info db_objects
+    return false unless equals db_objects, [
+      { type: 'table', name: 'main',                   } ]
+  catch error
+    throw error unless error.code is 'SQLITE_ERROR'
+    return false
+  return true
+
+
+#===========================================================================================================
+#
 #-----------------------------------------------------------------------------------------------------------
 @get_icql_settings = ( remove_db = false ) ->
   R                 = {}
