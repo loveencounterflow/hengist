@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DATA, DATOM, FS, FSP, PATH, badge, debug, echo, help, info, isa, rpr, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DATA, DATOM, Dba, FS, FSP, PATH, badge, dba_types, debug, echo, equals, help, info, isa, rpr, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -36,16 +36,20 @@
 
   FSP = require('fs/promises');
 
-  types = new (require('intertype')).Intertype();
+  dba_types = require('../../../apps/icql-dba/lib/types');
 
-  ({isa, validate, validate_list_of} = types.export());
+  this.types = new (require('intertype')).Intertype();
+
+  ({isa, validate, validate_list_of, equals} = this.types.export());
 
   DATA = require('../../../lib/data-providers-nocache');
 
   DATOM = require('datom');
 
+  ({Dba} = require('../../../apps/icql-dba'));
+
   //-----------------------------------------------------------------------------------------------------------
-  types.declare('interpolatable_value', function(x) {
+  this.types.declare('interpolatable_value', function(x) {
     if (this.isa.text(x)) {
       return true;
     }
@@ -57,6 +61,204 @@
     }
     return false;
   });
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types.declare('procure_db_cfg', {
+    tests: {
+      "@isa.object x": function(x) {
+        return this.isa.object(x);
+      },
+      "@isa.nonempty_text x.ref": function(x) {
+        return this.isa.nonempty_text(x.ref);
+      },
+      "@isa.nonempty_text x.size": function(x) {
+        return this.isa.nonempty_text(x.size);
+      },
+      "@isa.boolean x.reuse": function(x) {
+        return this.isa.boolean(x.reuse);
+      }
+    }
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types.declare('looks_like_db_cfg', {
+    tests: {
+      "@isa.object x": function(x) {
+        return this.isa.object(x);
+      },
+      "dba_types.isa.dba x.dba": function(x) {
+        return dba_types.isa.dba(x.dba);
+      },
+      "dba_types.isa.ic_schema x.schema": function(x) {
+        return dba_types.isa.ic_schema(x.schema);
+      }
+    }
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types.declare('datamill_db_lookalike', function(cfg) {
+    var dba, error, schema, schema_i;
+    this.validate.looks_like_db_cfg(cfg);
+    ({dba, schema} = cfg);
+    schema_i = dba.as_identifier(schema);
+    try {
+      if ((dba.first_value(dba.query(`select count(*) from ${schema_i}.main;`))) !== 327) {
+        return false;
+      }
+      debug('^35354^', dba.list(dba.query(`select * from ${schema_i}.main order by vnr_blob limit 3;`)));
+    } catch (error1) {
+      error = error1;
+      if (error.code !== 'SQLITE_ERROR') {
+        throw error;
+      }
+      return false;
+    }
+    return true;
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types.declare('chinook_db_lookalike', function(cfg) {
+    var db_objects, dba, error, schema, schema_i;
+    this.validate.looks_like_db_cfg(cfg);
+    ({dba, schema} = cfg);
+    schema_i = dba.as_identifier(schema);
+    try {
+      db_objects = dba.list(dba.query(`select type, name from ${schema_i}.sqlite_schema where true or type is 'table' order by name;`));
+      info(db_objects);
+      if (!equals(db_objects, [
+        {
+          type: 'table',
+          name: 'Album'
+        },
+        {
+          type: 'table',
+          name: 'Artist'
+        },
+        {
+          type: 'table',
+          name: 'Customer'
+        },
+        {
+          type: 'table',
+          name: 'Employee'
+        },
+        {
+          type: 'table',
+          name: 'Genre'
+        },
+        {
+          type: 'index',
+          name: 'IFK_AlbumArtistId'
+        },
+        {
+          type: 'index',
+          name: 'IFK_CustomerSupportRepId'
+        },
+        {
+          type: 'index',
+          name: 'IFK_EmployeeReportsTo'
+        },
+        {
+          type: 'index',
+          name: 'IFK_InvoiceCustomerId'
+        },
+        {
+          type: 'index',
+          name: 'IFK_InvoiceLineInvoiceId'
+        },
+        {
+          type: 'index',
+          name: 'IFK_InvoiceLineTrackId'
+        },
+        {
+          type: 'index',
+          name: 'IFK_PlaylistTrackTrackId'
+        },
+        {
+          type: 'index',
+          name: 'IFK_TrackAlbumId'
+        },
+        {
+          type: 'index',
+          name: 'IFK_TrackGenreId'
+        },
+        {
+          type: 'index',
+          name: 'IFK_TrackMediaTypeId'
+        },
+        {
+          type: 'table',
+          name: 'Invoice'
+        },
+        {
+          type: 'table',
+          name: 'InvoiceLine'
+        },
+        {
+          type: 'table',
+          name: 'MediaType'
+        },
+        {
+          type: 'table',
+          name: 'Playlist'
+        },
+        {
+          type: 'table',
+          name: 'PlaylistTrack'
+        },
+        {
+          type: 'table',
+          name: 'Track'
+        },
+        {
+          type: 'index',
+          name: 'sqlite_autoindex_PlaylistTrack_1'
+        },
+        {
+          type: 'table',
+          name: 'sqlite_sequence'
+        }
+      ])) {
+        return false;
+      }
+    } catch (error1) {
+      error = error1;
+      if (error.code !== 'SQLITE_ERROR') {
+        throw error;
+      }
+      return false;
+    }
+    return true;
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types.declare('micro_db_lookalike', function(cfg) {
+    var db_objects, dba, error, schema, schema_i;
+    this.validate.looks_like_db_cfg(cfg);
+    ({dba, schema} = cfg);
+    schema_i = dba.as_identifier(schema);
+    try {
+      db_objects = dba.list(dba.query(`select type, name from ${schema_i}.sqlite_schema order by name;`));
+      info(db_objects);
+      if (!equals(db_objects, [
+        {
+          type: 'table',
+          name: 'main'
+        }
+      ])) {
+        return false;
+      }
+    } catch (error1) {
+      error = error1;
+      if (error.code !== 'SQLITE_ERROR') {
+        throw error;
+      }
+      return false;
+    }
+    return true;
+  });
+
+  //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
   this.get_icql_settings = function(remove_db = false) {
@@ -76,6 +278,32 @@
       }
     }
     return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.file_exists = function(path) {
+    var error, stat;
+    try {
+      (stat = FS.statSync(path));
+    } catch (error1) {
+      error = error1;
+      if (error.code === 'ENOENT') {
+        return false;
+      }
+      throw error;
+    }
+    if (stat.isFile()) {
+      return true;
+    }
+    throw new Error(`^434534^ not a file: ${rpr(path)}\n${rpr(stat)}`);
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.ensure_file_exists = function(path) {
+    if (!this.file_exists(path)) {
+      throw new Error(`^434534^ not a file: ${rpr(path)}`);
+    }
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -157,6 +385,7 @@
       },
       db: {
         templates: {
+          micro: this.resolve_path('assets/icql/micro.db'),
           small: this.resolve_path('assets/icql/small-datamill.db'),
           big: this.resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.db')
         },
@@ -187,6 +416,28 @@
       }
     };
     return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.procure_db = async function(cfg) {
+    var template_path, work_path, xcfg;
+    cfg = {
+      reuse: false,
+      ...cfg
+    };
+    validate.procure_db_cfg(cfg);
+    xcfg = this.get_cfg();
+    template_path = this.interpolate(xcfg.db.templates[cfg.size], cfg);
+    this.ensure_file_exists(template_path);
+    // work_path     = @interpolate xcfg.db.work[      cfg.mode ], cfg
+    work_path = this.interpolate(xcfg.db.work.fle, cfg);
+    if (!(cfg.reuse && this.file_exists(work_path))) {
+      help(`^4341^ procuring DB ${work_path}`);
+      await this.copy_over(template_path, work_path);
+    } else {
+      warn(`^4341^ skipping DB file creation (${work_path} already exists)`);
+    }
+    return {template_path, work_path};
   };
 
 }).call(this);

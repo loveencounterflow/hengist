@@ -345,7 +345,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: import { format: 'sql', }"] = async function(T, done) {
+  this["___ DBA: import { format: 'sql', }"] = async function(T, done) {
     var Dba, cfg;
     T.halt_on_error();
     ({Dba} = require('../../../apps/icql-dba'));
@@ -1069,15 +1069,15 @@
 
   //###########################################################################################################
   if (module.parent == null) {
-    // test @
-    // test @[ "DBA: copy file DB to memory" ]
-    // test @[ "DBA: open()" ]
-    // test @[ "DBA: _walk_all_objects()" ]
-    // test @[ "DBA: import { format: 'db', }" ]
-    test(this["DBA: import { format: 'sql', }"]);
+    test(this);
   }
 
-  // test @[ "DBA: _list_temp_schema_numbers()" ]
+  // test @[ "DBA: copy file DB to memory" ]
+// test @[ "DBA: open()" ]
+// test @[ "DBA: _walk_all_objects()" ]
+// test @[ "DBA: import { format: 'db', }" ]
+// test @[ "DBA: import { format: 'sql', }" ]
+// test @[ "DBA: _list_temp_schema_numbers()" ]
 // @[ "DBA: open()" ]()
 // test @[ "DBA: in-memory DB API" ]
 // test @[ "DBA: as_sql" ]
