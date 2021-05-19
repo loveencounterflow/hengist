@@ -28,7 +28,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open()" ] = ( T, done ) ->
-  # T.halt_on_error()
+  T.halt_on_error()
   { Dba } = require '../../../apps/icql-dba'
   dba     = new Dba()
   schemas = {}
@@ -67,6 +67,7 @@ types                     = new ( require 'intertype' ).Intertype
     T.ok 'extra' in ( d.name for d from ( dba.walk_objects { schema: 'dm2', } ) )
     T.eq ( dba.list dba.query "select * from dm1.extra order by id;" ), [ { id: 1, }, { id: 2, }, { id: 3, }, ]
     T.eq ( dba.list dba.query "select * from dm2.extra order by id;" ), [ { id: 1, }, { id: 2, }, { id: 3, }, ]
+    T.ok not dba.is_ram_db { schema, }
   #.........................................................................................................
   await do =>
     { template_path
@@ -74,7 +75,11 @@ types                     = new ( require 'intertype' ).Intertype
     schema            = 'dm1'
     # schemas[ schema ] = { path: work_path, }
     urge '^344-2^', { template_path, work_path, schema, }
+    try dba.open { path: work_path, schema, } catch error
+      warn '^3234^', error
+      warn '^3234^', error.message
     T.throws /schema 'dm1' already exists/, => dba.open { path: work_path, schema, }
+    T.ok not dba.is_ram_db { schema, }
   #.........................................................................................................
   await do =>
     { template_path
@@ -85,6 +90,7 @@ types                     = new ( require 'intertype' ).Intertype
     dba.open { path: work_path, schema, }
     T.ok not H.types.isa.datamill_db_lookalike { dba, schema, }
     T.ok H.types.isa.chinook_db_lookalike { dba, schema, }
+    T.ok not dba.is_ram_db { schema, }
   #.........................................................................................................
   await do =>
     { template_path
@@ -95,6 +101,7 @@ types                     = new ( require 'intertype' ).Intertype
     dba.open { path: work_path, schema, }
     T.ok not H.types.isa.datamill_db_lookalike { dba, schema, }
     T.ok H.types.isa.micro_db_lookalike { dba, schema, }
+    T.ok not dba.is_ram_db { schema, }
   #.........................................................................................................
   T.eq dba._schemas, schemas
   #.........................................................................................................
@@ -116,12 +123,27 @@ types                     = new ( require 'intertype' ).Intertype
     urge '^344-3^', { template_path, work_path, schema, ram: true, }
     dba.open { path: work_path, schema, ram: true, }
     T.ok H.types.isa.datamill_db_lookalike { dba, schema, }
-    help '^43451^', dba.list dba.query "select * from ramdb.sqlite_schema;"
-    info d for d from dba.query "select * from pragma_database_list order by seq;"
+    # help '^43451^', dba.list dba.query "select * from ramdb.sqlite_schema;"
+    # info d for d from dba.query "select * from pragma_database_list order by seq;"
     db_path           = dba.first_value dba.query "select file from pragma_database_list where name = ?;", [ schema, ]
     T.eq db_path, ''
-    T.ok
-    # info '^43451^', ( rpr k ), dba.sqlt[ k ] for k of dba.sqlt
+    T.ok dba.is_ram_db { schema, }
+  #.........................................................................................................
+  await do =>
+    ### Opening an empty RAM DB ###
+    schema            = 'r2'
+    ram               = true
+    schemas[ schema ] = { path: null, }
+    dba.open { schema, ram, }
+    # help '^43451^', dba.list dba.query "select * from ramdb.sqlite_schema;"
+    # info d for d from dba.query "select * from pragma_database_list order by seq;"
+    db_path           = dba.first_value dba.query "select file from pragma_database_list where name = ?;", [ schema, ]
+    T.eq db_path, ''
+    T.ok dba.is_ram_db { schema, }
+  #.........................................................................................................
+  await do =>
+    # dba.is_ram_db { schema: 'nosuchschema', }
+    T.throws /schema 'nosuchschema' does not exist/, => dba.is_ram_db { schema: 'nosuchschema', }
   #.........................................................................................................
   info '^35345^', dba._schemas
   T.eq dba._schemas, schemas
