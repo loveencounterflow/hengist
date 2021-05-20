@@ -25,15 +25,14 @@ types                     = new ( require 'intertype' ).Intertype
 class X_error extends Error
   constructor: ( ref, message ) ->
     # super ( CND.grey ref ) + ' ' + ( CND.red CND.reverse message )
-    super ref + ' ' + message
+    super()
+    @message  = "#{ref} (#{@constructor.name}) #{message}"
     @ref      = ref
-    @_message = message
-    @type     = @constructor.name.toLowerCase()
     return undefined ### always return `undefined` from constructor ###
 
 #-----------------------------------------------------------------------------------------------------------
 class X_snytax_error extends X_error
-
+  # constructor:
 #-----------------------------------------------------------------------------------------------------------
 demo = ->
   for clasz in [ X_error, X_snytax_error, ]
@@ -42,8 +41,6 @@ demo = ->
     catch error
       info()
       info '^1345^', "message:      ", error.message
-      info '^1345^', "_message:     ", error._message
-      info '^1345^', "type:         ", error.type
       info '^1345^', "type_of:      ", type_of error
   return null
 
