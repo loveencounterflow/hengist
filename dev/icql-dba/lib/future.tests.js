@@ -262,6 +262,7 @@
       // info d for d from dba.query "select * from pragma_database_list order by seq;"
       db_path = dba.first_value(dba.query("select file from pragma_database_list where name = ?;", [schema]));
       T.eq(db_path, '');
+      T.eq(db_path, dba._path_of_schema(schema));
       return T.ok(dba.is_ram_db({schema}));
     })();
     await (() => {      //.........................................................................................................
@@ -290,6 +291,71 @@
     //.........................................................................................................
     info('^35345^', dba._schemas);
     T.eq(dba._schemas, schemas);
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: save() RAM DB"] = async function(T, done) {
+    var Dba, matcher, ramdb_path;
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    ramdb_path = null;
+    matcher = null;
+    await (async() => {      //.........................................................................................................
+      /* Opening a RAM DB from file */
+      var dba, digest_1, digest_2, digest_3, i, id, schema, template_path, work_path;
+      dba = new Dba();
+      ({template_path, work_path} = (await H.procure_db({
+        size: 'micro',
+        ref: 'F-save-1'
+      })));
+      schema = 'ramdb';
+      ramdb_path = work_path;
+      digest_1 = CND.id_from_route(work_path);
+      dba.open({
+        path: work_path,
+        schema,
+        ram: true
+      });
+      debug('^422423^', dba._schemas);
+      T.ok(dba.is_ram_db({schema}));
+      //.......................................................................................................
+      dba.execute("create table ramdb.d ( id integer, t text );");
+      for (id = i = 1; i <= 9; id = ++i) {
+        dba.run("insert into d values ( ?, ? );", [id, `line Nr. ${id}`]);
+      }
+      matcher = dba.list(dba.query("select * from ramdb.d order by id;"));
+      //.......................................................................................................
+      digest_2 = CND.id_from_route(work_path);
+      T.eq(digest_1, digest_2);
+      T.throws(/\(Dba_argument_not_allowed\) argument path not allowed/, () => {
+        return dba.save({
+          path: '/tmp/x',
+          schema: 'xxx'
+        });
+      });
+      dba.save({schema});
+      //.......................................................................................................
+      digest_3 = CND.id_from_route(work_path);
+      T.ok(!types.equals(digest_1, digest_3));
+      //.......................................................................................................
+      T.ok(dba.is_ram_db({schema}));
+      return null;
+    })();
+    await (() => {      //.........................................................................................................
+      /* Check whether file DB was updated by `dba.save()` */
+      var dba, probe, schema;
+      dba = new Dba();
+      schema = 'filedb';
+      dba.open({
+        path: ramdb_path,
+        schema,
+        ram: false
+      });
+      probe = dba.list(dba.query("select * from filedb.d order by id;"));
+      return T.eq(probe, matcher);
+    })();
     //.........................................................................................................
     return done();
   };
