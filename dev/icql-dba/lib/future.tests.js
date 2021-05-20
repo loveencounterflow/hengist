@@ -281,7 +281,7 @@
     })();
     await (() => {      //.........................................................................................................
       // dba.is_ram_db { schema: 'nosuchschema', }
-      return T.throws(/schema 'nosuchschema' does not exist/, () => {
+      return T.throws(/\(Dba_schema_unknown\) schema 'nosuchschema' does not exist/, () => {
         return dba.is_ram_db({
           schema: 'nosuchschema'
         });

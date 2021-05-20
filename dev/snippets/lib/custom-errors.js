@@ -31,10 +31,9 @@
   X_error = class X_error extends Error {
     constructor(ref, message) {
       // super ( CND.grey ref ) + ' ' + ( CND.red CND.reverse message )
-      super(ref + ' ' + message);
+      super();
+      this.message = `${ref} (${this.constructor.name}) ${message}`;
       this.ref = ref;
-      this._message = message;
-      this.type = this.constructor.name.toLowerCase();
       return void 0/* always return `undefined` from constructor */;
     }
 
@@ -43,6 +42,7 @@
   //-----------------------------------------------------------------------------------------------------------
   X_snytax_error = class X_snytax_error extends X_error {};
 
+  // constructor:
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
     var clasz, error, i, len, ref1;
@@ -55,8 +55,6 @@
         error = error1;
         info();
         info('^1345^', "message:      ", error.message);
-        info('^1345^', "_message:     ", error._message);
-        info('^1345^', "type:         ", error.type);
         info('^1345^', "type_of:      ", type_of(error));
       }
     }
