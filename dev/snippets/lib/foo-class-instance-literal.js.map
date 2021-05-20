@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/foo-class-instance-literal.coffee"
+  ],
+  "names": [],
+  "mappings": "AAAA;AAAA,MAAA,GAAA,EAAA;;EAAM,MAAN,MAAA,IAAA;IACE,WAAa,CAAE,CAAF,EAAK,CAAL,CAAA;MACX,IAAC,CAAA,CAAD,GAAK;MACL,IAAC,CAAA,CAAD,GAAK;IAFM;;EADf;;EAIA,CAAA,GAAI,IAAI,GAAJ,CAAQ,EAAR,EAAY,MAAZ;;EACJ,OAAO,CAAC,GAAR,CAAY,CAAZ;;EALA;AAAA",
+  "sourcesContent": [
+    "class Foo\n  constructor: ( a, b ) ->\n    @a = a\n    @b = b\nf = new Foo 42, 'helo'\nconsole.log f\n# <__main__.Foo object at 0x7fdb3ba7cd00>\n\n"
+  ]
+}
