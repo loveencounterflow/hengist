@@ -143,7 +143,7 @@ types                     = new ( require 'intertype' ).Intertype
   #.........................................................................................................
   await do =>
     # dba.is_ram_db { schema: 'nosuchschema', }
-    T.throws /schema 'nosuchschema' does not exist/, => dba.is_ram_db { schema: 'nosuchschema', }
+    T.throws /\(Dba_schema_unknown\) schema 'nosuchschema' does not exist/, => dba.is_ram_db { schema: 'nosuchschema', }
   #.........................................................................................................
   info '^35345^', dba._schemas
   T.eq dba._schemas, schemas
