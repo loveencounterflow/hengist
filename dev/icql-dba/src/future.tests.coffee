@@ -127,6 +127,7 @@ types                     = new ( require 'intertype' ).Intertype
     # info d for d from dba.query "select * from pragma_database_list order by seq;"
     db_path           = dba.first_value dba.query "select file from pragma_database_list where name = ?;", [ schema, ]
     T.eq db_path, ''
+    T.eq db_path, dba._path_of_schema schema
     T.ok dba.is_ram_db { schema, }
   #.........................................................................................................
   await do =>
@@ -147,6 +148,52 @@ types                     = new ( require 'intertype' ).Intertype
   #.........................................................................................................
   info '^35345^', dba._schemas
   T.eq dba._schemas, schemas
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: save() RAM DB" ] = ( T, done ) ->
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  ramdb_path        = null
+  matcher           = null
+  #.........................................................................................................
+  await do =>
+    ### Opening a RAM DB from file ###
+    dba               = new Dba()
+    { template_path
+      work_path }     = await H.procure_db { size: 'micro', ref: 'F-save-1', }
+    schema            = 'ramdb'
+    ramdb_path        = work_path
+    digest_1          = CND.id_from_route work_path
+    dba.open { path: work_path, schema, ram: true, }
+    debug '^422423^', dba._schemas
+    T.ok dba.is_ram_db { schema, }
+    #.......................................................................................................
+    dba.execute "create table ramdb.d ( id integer, t text );"
+    for id in [ 1 .. 9 ]
+      dba.run "insert into d values ( ?, ? );", [ id, "line Nr. #{id}", ]
+    matcher           = dba.list dba.query "select * from ramdb.d order by id;"
+    #.......................................................................................................
+    digest_2          = CND.id_from_route work_path
+    T.eq digest_1, digest_2
+    T.throws /\(Dba_argument_not_allowed\) argument path not allowed/, =>
+      dba.save { path: '/tmp/x', schema: 'xxx' }
+    dba.save { schema, }
+    #.......................................................................................................
+    digest_3          = CND.id_from_route work_path
+    T.ok not types.equals digest_1, digest_3
+    #.......................................................................................................
+    T.ok dba.is_ram_db { schema, }
+    return null
+  #.........................................................................................................
+  await do =>
+    ### Check whether file DB was updated by `dba.save()` ###
+    dba               = new Dba()
+    schema            = 'filedb'
+    dba.open { path: ramdb_path, schema, ram: false, }
+    probe             = dba.list dba.query "select * from filedb.d order by id;"
+    T.eq probe, matcher
   #.........................................................................................................
   done()
 
