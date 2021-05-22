@@ -200,6 +200,8 @@ DATOM                     = require 'datom'
     sql:
       small:  @resolve_path 'assets/icql/small-datamill.sql'
       big:    @resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql'
+    csv:
+      small:  @resolve_path 'assets/icql/chineselexicaldatabase2.1.small.txt'
     db:
       templates:
         micro:  @resolve_path 'assets/icql/micro.db'

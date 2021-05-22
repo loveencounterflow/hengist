@@ -235,11 +235,39 @@ types                     = new ( require 'intertype' ).Intertype
   #.........................................................................................................
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: import() CSV" ] = ( T, done ) ->
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  # ramdb_path        = null
+  matcher           = null
+  export_path       = H.nonexistant_path_from_ref 'import-csv'
+  #.........................................................................................................
+  await do =>
+    ### Opening a RAM DB from file ###
+    dba               = new Dba()
+    import_path       = H.get_cfg().csv.small
+    schema            = 'chlex'
+    transform         = ( row ) ->
+      R       = {}
+      R[ k ]  = ( if v is 'NA' then null else v ) for k, v of row
+      return R
+    dba.import { path: import_path, format: 'csv', schema, ram: true, transform, }
+    matcher           = dba.list dba.query "select * from chlex.main order by 1, 2, 3;"
+    debug '^44433^', matcher
+    dba.export { schema, path: export_path, }
+  #.........................................................................................................
+  done()
+
 
 ############################################################################################################
 unless module.parent?
   # test @
   # test @[ "DBA: open()" ]
   # test @[ "DBA: open() RAM DB" ]
-  test @[ "DBA: export() RAM DB" ]
+  # test @[ "DBA: export() RAM DB" ]
+  test @[ "DBA: import() CSV" ]
+
+
+
 
