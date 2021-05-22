@@ -419,6 +419,17 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.nonexistant_path_from_ref = function(ref) {
+    var R;
+    R = this.interpolate(this.get_cfg().db.work.fle, {
+      ref,
+      size: 'any'
+    });
+    this.try_to_remove_file(R);
+    return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.procure_db = async function(cfg) {
     var template_path, work_path, xcfg;
     cfg = {

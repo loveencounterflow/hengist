@@ -360,13 +360,68 @@
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: export() RAM DB"] = async function(T, done) {
+    var Dba, export_path, matcher, ramdb_path;
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    ramdb_path = null;
+    matcher = null;
+    export_path = H.nonexistant_path_from_ref('export-ram-db');
+    await (async() => {      //.........................................................................................................
+      /* Opening a RAM DB from file */
+      var dba, i, id, schema, template_path, work_path;
+      dba = new Dba();
+      ({template_path, work_path} = (await H.procure_db({
+        size: 'micro',
+        ref: 'F-save-1'
+      })));
+      schema = 'ramdb';
+      ramdb_path = work_path;
+      dba.open({
+        path: work_path,
+        schema,
+        ram: true
+      });
+      //.......................................................................................................
+      dba.execute("create table ramdb.d ( id integer, t text );");
+      for (id = i = 1; i <= 9; id = ++i) {
+        dba.run("insert into d values ( ?, ? );", [id, `line Nr. ${id}`]);
+      }
+      matcher = dba.list(dba.query("select * from ramdb.d order by id;"));
+      //.......................................................................................................
+      T.throws(/\(Dba_argument_not_allowed\) argument path not allowed/, () => {
+        return dba.save({
+          path: '/tmp/x',
+          schema: 'xxx'
+        });
+      });
+      dba.export({
+        schema,
+        path: export_path
+      });
+      //.......................................................................................................
+      return null;
+    })();
+    // #.........................................................................................................
+    // await do =>
+    //   ### Check whether file DB was updated by `dba.save()` ###
+    //   dba               = new Dba()
+    //   schema            = 'filedb'
+    //   dba.open { path: ramdb_path, schema, ram: false, }
+    //   probe             = dba.list dba.query "select * from filedb.d order by id;"
+    //   T.eq probe, matcher
+    //.........................................................................................................
+    return done();
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
-    test(this);
+    // test @
+    // test @[ "DBA: open()" ]
+    // test @[ "DBA: open() RAM DB" ]
+    test(this["DBA: export() RAM DB"]);
   }
-
-  // test @[ "DBA: open()" ]
-// test @[ "DBA: open() RAM DB" ]
 
 }).call(this);
 
