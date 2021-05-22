@@ -383,6 +383,9 @@
         small: this.resolve_path('assets/icql/small-datamill.sql'),
         big: this.resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql')
       },
+      csv: {
+        small: this.resolve_path('assets/icql/chineselexicaldatabase2.1.small.txt')
+      },
       db: {
         templates: {
           micro: this.resolve_path('assets/icql/micro.db'),

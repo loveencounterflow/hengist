@@ -415,12 +415,54 @@
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: import() CSV"] = async function(T, done) {
+    var Dba, export_path, matcher;
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    // ramdb_path        = null
+    matcher = null;
+    export_path = H.nonexistant_path_from_ref('import-csv');
+    await (() => {      //.........................................................................................................
+      /* Opening a RAM DB from file */
+      var dba, import_path, schema, transform;
+      dba = new Dba();
+      import_path = H.get_cfg().csv.small;
+      schema = 'chlex';
+      transform = function(row) {
+        var R, k, v;
+        R = {};
+        for (k in row) {
+          v = row[k];
+          R[k] = (v === 'NA' ? null : v);
+        }
+        return R;
+      };
+      dba.import({
+        path: import_path,
+        format: 'csv',
+        schema,
+        ram: true,
+        transform
+      });
+      matcher = dba.list(dba.query("select * from chlex.main order by 1, 2, 3;"));
+      debug('^44433^', matcher);
+      return dba.export({
+        schema,
+        path: export_path
+      });
+    })();
+    //.........................................................................................................
+    return done();
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // test @
     // test @[ "DBA: open()" ]
     // test @[ "DBA: open() RAM DB" ]
-    test(this["DBA: export() RAM DB"]);
+    // test @[ "DBA: export() RAM DB" ]
+    test(this["DBA: import() CSV"]);
   }
 
 }).call(this);
