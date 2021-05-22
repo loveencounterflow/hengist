@@ -233,6 +233,12 @@ DATOM                     = require 'datom'
   return R
 
 #-----------------------------------------------------------------------------------------------------------
+@nonexistant_path_from_ref = ( ref ) ->
+  R = @interpolate @get_cfg().db.work.fle, { ref, size: 'any', }
+  @try_to_remove_file R
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
 @procure_db = ( cfg ) ->
   cfg           = { reuse: false, cfg..., }
   validate.procure_db_cfg cfg

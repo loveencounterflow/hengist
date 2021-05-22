@@ -197,10 +197,49 @@ types                     = new ( require 'intertype' ).Intertype
   #.........................................................................................................
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: export() RAM DB" ] = ( T, done ) ->
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  ramdb_path        = null
+  matcher           = null
+  export_path       = H.nonexistant_path_from_ref 'export-ram-db'
+  #.........................................................................................................
+  await do =>
+    ### Opening a RAM DB from file ###
+    dba               = new Dba()
+    { template_path
+      work_path }     = await H.procure_db { size: 'micro', ref: 'F-save-1', }
+    schema            = 'ramdb'
+    ramdb_path        = work_path
+    dba.open { path: work_path, schema, ram: true, }
+    #.......................................................................................................
+    dba.execute "create table ramdb.d ( id integer, t text );"
+    for id in [ 1 .. 9 ]
+      dba.run "insert into d values ( ?, ? );", [ id, "line Nr. #{id}", ]
+    matcher           = dba.list dba.query "select * from ramdb.d order by id;"
+    #.......................................................................................................
+    T.throws /\(Dba_argument_not_allowed\) argument path not allowed/, =>
+      dba.save { path: '/tmp/x', schema: 'xxx' }
+    dba.export { schema, path: export_path, }
+    #.......................................................................................................
+    return null
+  # #.........................................................................................................
+  # await do =>
+  #   ### Check whether file DB was updated by `dba.save()` ###
+  #   dba               = new Dba()
+  #   schema            = 'filedb'
+  #   dba.open { path: ramdb_path, schema, ram: false, }
+  #   probe             = dba.list dba.query "select * from filedb.d order by id;"
+  #   T.eq probe, matcher
+  #.........................................................................................................
+  done()
+
 
 ############################################################################################################
 unless module.parent?
-  test @
+  # test @
   # test @[ "DBA: open()" ]
   # test @[ "DBA: open() RAM DB" ]
+  test @[ "DBA: export() RAM DB" ]
 
