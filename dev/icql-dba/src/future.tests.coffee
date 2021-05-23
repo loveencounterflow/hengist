@@ -78,6 +78,7 @@ types                     = new ( require 'intertype' ).Intertype
     try dba.open { path: work_path, schema, } catch error
       warn '^3234^', error
       warn '^3234^', error.message
+    # dba.open { path: work_path, schema, }
     T.throws /schema 'dm1' already exists/, => dba.open { path: work_path, schema, }
     T.ok not dba.is_ram_db { schema, }
   #.........................................................................................................
@@ -248,13 +249,318 @@ types                     = new ( require 'intertype' ).Intertype
     dba               = new Dba()
     import_path       = H.get_cfg().csv.small
     schema            = 'chlex'
-    transform         = ( row ) ->
-      R       = {}
-      R[ k ]  = ( if v is 'NA' then null else v ) for k, v of row
-      return R
+    columns           = null
+    seen_chrs         = new Set()
+    transform         = ( d ) ->
+      if d.columns?
+        columns = [
+          # 'Word'
+          'C1'
+          # 'C2'
+          # 'C3'
+          # 'C4'
+          # 'Length'
+          # 'C1Structure'
+          # 'C2Structure'
+          # 'C3Structure'
+          # 'C4Structure'
+          'C1Type'
+          # 'C2Type'
+          # 'C3Type'
+          # 'C4Type'
+          # 'Pinyin'
+          'C1Pinyin'
+          # 'C2Pinyin'
+          # 'C3Pinyin'
+          # 'C4Pinyin'
+          # 'IPA'
+          # 'C1IPA'
+          # 'C2IPA'
+          # 'C3IPA'
+          # 'C4IPA'
+          # 'InitialPhoneme'
+          # 'FinalPhoneme'
+          'C1PRPinyin'
+          # 'C2PRPinyin'
+          # 'C3PRPinyin'
+          # 'C4PRPinyin'
+          # 'Phonemes'
+          # 'C1Phonemes'
+          # 'C2Phonemes'
+          # 'C3Phonemes'
+          # 'C4Phonemes'
+          # 'C1Tone'
+          # 'C2Tone'
+          # 'C3Tone'
+          # 'C4Tone'
+          # 'Frequency'
+          # 'C1Frequency'
+          # 'C2Frequency'
+          # 'C3Frequency'
+          # 'C4Frequency'
+          # 'FrequencyRaw'
+          # 'C1FrequencyRaw'
+          # 'C2FrequencyRaw'
+          # 'C3FrequencyRaw'
+          # 'C4FrequencyRaw'
+          # 'FrequencySUBTL'
+          # 'C1FrequencySUBTL'
+          # 'C2FrequencySUBTL'
+          # 'C3FrequencySUBTL'
+          # 'C4FrequencySUBTL'
+          # 'FrequencyRawSUBTL'
+          # 'C1FrequencyRawSUBTL'
+          # 'C2FrequencyRawSUBTL'
+          # 'C3FrequencyRawSUBTL'
+          # 'C4FrequencyRawSUBTL'
+          # 'FrequencyWeibo'
+          # 'C1FrequencyWeibo'
+          # 'C2FrequencyWeibo'
+          # 'C3FrequencyWeibo'
+          # 'C4FrequencyWeibo'
+          # 'FrequencyRawWeibo'
+          # 'C1FrequencyRawWeibo'
+          # 'C2FrequencyRawWeibo'
+          # 'C3FrequencyRawWeibo'
+          # 'C4FrequencyRawWeibo'
+          # 'PhonologicalFrequency'
+          # 'C1PhonologicalFrequency'
+          # 'C2PhonologicalFrequency'
+          # 'C3PhonologicalFrequency'
+          # 'C4PhonologicalFrequency'
+          # 'C1FamilySize'
+          # 'C2FamilySize'
+          # 'C3FamilySize'
+          # 'C4FamilySize'
+          # 'C1FamilyFrequency'
+          # 'C2FamilyFrequency'
+          # 'C3FamilyFrequency'
+          # 'C4FamilyFrequency'
+          # 'Strokes'
+          'C1Strokes'
+          # 'C2Strokes'
+          # 'C3Strokes'
+          # 'C4Strokes'
+          'C1Pixels'
+          # 'C2Pixels'
+          # 'C3Pixels'
+          # 'C4Pixels'
+          'C1PictureSize'
+          # 'complexity'
+          # 'C2PictureSize'
+          # 'C3PictureSize'
+          # 'C4PictureSize'
+          # 'C1OLDPixels'
+          # 'C2OLDPixels'
+          # 'C3OLDPixels'
+          # 'C4OLDPixels'
+          # 'PhonologicalN'
+          # 'C1PhonologicalN'
+          # 'C2PhonologicalN'
+          # 'C3PhonologicalN'
+          # 'C4PhonologicalN'
+          # 'PLD'
+          # 'C1PLD'
+          # 'C2PLD'
+          # 'C3PLD'
+          # 'C4PLD'
+          'C1SR'
+          # 'C2SR'
+          # 'C3SR'
+          # 'C4SR'
+          # 'C1SRFrequency'
+          # 'C2SRFrequency'
+          # 'C3SRFrequency'
+          # 'C4SRFrequency'
+          # 'C1SRFamilySize'
+          # 'C2SRFamilySize'
+          # 'C3SRFamilySize'
+          # 'C4SRFamilySize'
+          # 'C1SRStrokes'
+          # 'C2SRStrokes'
+          # 'C3SRStrokes'
+          # 'C4SRStrokes'
+          'C1PR'
+          # 'C2PR'
+          # 'C3PR'
+          # 'C4PR'
+          # 'C1PRFrequency'
+          # 'C2PRFrequency'
+          # 'C3PRFrequency'
+          # 'C4PRFrequency'
+          # 'C1PRFamilySize'
+          # 'C2PRFamilySize'
+          # 'C3PRFamilySize'
+          # 'C4PRFamilySize'
+          # 'C1PRStrokes'
+          # 'C2PRStrokes'
+          # 'C3PRStrokes'
+          # 'C4PRStrokes'
+          # 'C1PRRegularity'
+          # 'C2PRRegularity'
+          # 'C3PRRegularity'
+          # 'C4PRRegularity'
+          # 'C1PRFriends'
+          # 'C2PRFriends'
+          # 'C3PRFriends'
+          # 'C4PRFriends'
+          # 'C1PREnemiesTypes'
+          # 'C2PREnemiesTypes'
+          # 'C3PREnemiesTypes'
+          # 'C4PREnemiesTypes'
+          # 'C1PREnemiesTokens'
+          # 'C2PREnemiesTokens'
+          # 'C3PREnemiesTokens'
+          # 'C4PREnemiesTokens'
+          # 'C1PRFriendsFrequency'
+          # 'C2PRFriendsFrequency'
+          # 'C3PRFriendsFrequency'
+          # 'C4PRFriendsFrequency'
+          # 'C1PREnemiesFrequency'
+          # 'C2PREnemiesFrequency'
+          # 'C3PREnemiesFrequency'
+          # 'C4PREnemiesFrequency'
+          # 'C1PRBackwardEnemiesTypes'
+          # 'C2PRBackwardEnemiesTypes'
+          # 'C3PRBackwardEnemiesTypes'
+          # 'C4PRBackwardEnemiesTypes'
+          # 'C1PRBackwardEnemiesTokens'
+          # 'C2PRBackwardEnemiesTokens'
+          # 'C3PRBackwardEnemiesTokens'
+          # 'C4PRBackwardEnemiesTokens'
+          # 'C1PRBackwardEnemiesFrequency'
+          # 'C2PRBackwardEnemiesFrequency'
+          # 'C3PRBackwardEnemiesFrequency'
+          # 'C4PRBackwardEnemiesFrequency'
+          # 'MeanPhonemeFrequency'
+          # 'C1MeanPhonemeFrequency'
+          # 'C2MeanPhonemeFrequency'
+          # 'C3MeanPhonemeFrequency'
+          # 'C4MeanPhonemeFrequency'
+          # 'MinPhonemeFrequency'
+          # 'C1MinPhonemeFrequency'
+          # 'C2MinPhonemeFrequency'
+          # 'C3MinPhonemeFrequency'
+          # 'C4MinPhonemeFrequency'
+          # 'MaxPhonemeFrequency'
+          # 'C1MaxPhonemeFrequency'
+          # 'C2MaxPhonemeFrequency'
+          # 'C3MaxPhonemeFrequency'
+          # 'C4MaxPhonemeFrequency'
+          # 'C1InitialPhonemeFrequency'
+          # 'C2InitialPhonemeFrequency'
+          # 'C3InitialPhonemeFrequency'
+          # 'C4InitialPhonemeFrequency'
+          # 'MeanDiphoneFrequency'
+          # 'C1MeanDiphoneFrequency'
+          # 'C2MeanDiphoneFrequency'
+          # 'C3MeanDiphoneFrequency'
+          # 'C4MeanDiphoneFrequency'
+          # 'MinDiphoneFrequency'
+          # 'C1MinDiphoneFrequency'
+          # 'C2MinDiphoneFrequency'
+          # 'C3MinDiphoneFrequency'
+          # 'C4MinDiphoneFrequency'
+          # 'MaxDiphoneFrequency'
+          # 'C1MaxDiphoneFrequency'
+          # 'C2MaxDiphoneFrequency'
+          # 'C3MaxDiphoneFrequency'
+          # 'C4MaxDiphoneFrequency'
+          # 'C1InitialDiphoneFrequency'
+          # 'C2InitialDiphoneFrequency'
+          # 'C3InitialDiphoneFrequency'
+          # 'C4InitialDiphoneFrequency'
+          # 'TransitionalDiphone1Frequency'
+          # 'TransitionalDiphone2Frequency'
+          # 'TransitionalDiphone3Frequency'
+          # 'C1Friends'
+          # 'C2Friends'
+          # 'C3Friends'
+          # 'C4Friends'
+          # 'C1HomographTypes'
+          # 'C2HomographTypes'
+          # 'C3HomographTypes'
+          # 'C4HomographTypes'
+          # 'C1HomographTokens'
+          # 'C2HomographTokens'
+          # 'C3HomographTokens'
+          # 'C4HomographTokens'
+          # 'C1FriendsFrequency'
+          # 'C2FriendsFrequency'
+          # 'C3FriendsFrequency'
+          # 'C4FriendsFrequency'
+          # 'C1HomographsFrequency'
+          # 'C2HomographsFrequency'
+          # 'C3HomographsFrequency'
+          # 'C4HomographsFrequency'
+          # 'C1HomophoneTypes'
+          # 'C2HomophoneTypes'
+          # 'C3HomophoneTypes'
+          # 'C4HomophoneTypes'
+          # 'C1HomophoneTokens'
+          # 'C2HomophoneTokens'
+          # 'C3HomophoneTokens'
+          # 'C4HomophoneTokens'
+          # 'C1HomophonesFrequency'
+          # 'C2HomophonesFrequency'
+          # 'C3HomophonesFrequency'
+          # 'C4HomophonesFrequency'
+          # 'C1Entropy'
+          # 'C12Entropy'
+          # 'C123Entropy'
+          # 'C1BackwardEntropy'
+          # 'C12BackwardEntropy'
+          # 'C123BackwardEntropy'
+          # 'C1RE'
+          # 'C2RE'
+          # 'PMI'
+          # 'PSPMI'
+          # 'TScore'
+          # 'PSTScore'
+          # 'C1ConditionalProbability'
+          # 'C12ConditionalProbability'
+          # 'C123ConditionalProbability'
+          # 'C1BackwardConditionalProbability'
+          # 'C12BackwardConditionalProbability'
+          # 'C123BackwardConditionalProbability'
+          # 'EntropyCharacterFrequencies'
+          ]
+        return columns
+      #.....................................................................................................
+      return [] if seen_chrs.has d.row.C1
+      seen_chrs.add d.row.C1
+      row       = {}
+      for column in columns
+        value         = d.row[ column ]
+        value         = if value is 'NA' then null else value
+        # debug '^4448^', column, value, r
+        # switch column
+        #   # when 'C1Pixels'       then ( parseFloat value ) / 1000
+        #   # when 'C1PictureSize'  then ( parseFloat value ) / 1000
+        #   when 'complexity'
+        #     value = ( parseFloat row.C1Pixels ) * ( parseFloat row.C1PictureSize ) * ( parseFloat row.C1Strokes )
+        #     value = value / 1e6
+        #     value = Math.max value, 1
+        #     value = value.toFixed 0
+        #     value = value.padStart 5, '0'
+        #   else null
+        row[ column ] = value
+      return [ row, ]
+    #.......................................................................................................
     dba.import { path: import_path, format: 'csv', schema, ram: true, transform, }
-    matcher           = dba.list dba.query "select * from chlex.main order by 1, 2, 3;"
-    debug '^44433^', matcher
+    #.......................................................................................................
+    dba.execute "alter table chlex.main add column cpx_raw integer;"
+    dba.execute "alter table chlex.main add column cpx integer;"
+    dba.execute "update chlex.main set cpx_raw = C1Strokes * C1Pixels * C1PictureSize;"
+    cpx_max = dba.single_value dba.query "select max( cpx_raw ) from chlex.main;"
+    debug '^7946^', { cpx_max, }
+    update  = dba.prepare "update chlex.main set cpx = max( round( cpx_raw / ? * 99, 0 ), 1 );"
+    # update  = dba.prepare "update chlex.main set cpx = cpx_raw / ?;"
+    update.run [ cpx_max, ]
+    #.......................................................................................................
+    matcher           = dba.list dba.query """select "C1", cpx from chlex.main order by cpx, cpx_raw asc;"""
+    # for row in matcher
+    console.table matcher
     dba.export { schema, path: export_path, }
   #.........................................................................................................
   done()
@@ -262,11 +568,11 @@ types                     = new ( require 'intertype' ).Intertype
 
 ############################################################################################################
 unless module.parent?
-  # test @
+  test @
   # test @[ "DBA: open()" ]
   # test @[ "DBA: open() RAM DB" ]
   # test @[ "DBA: export() RAM DB" ]
-  test @[ "DBA: import() CSV" ]
+  # test @[ "DBA: import() CSV" ]
 
 
 
