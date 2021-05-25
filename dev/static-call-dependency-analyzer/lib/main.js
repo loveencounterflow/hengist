@@ -115,10 +115,11 @@ create table ${this._schema_i}.paths (
 create table ${this._schema_i}.occurrences (
     short_path  text    not null,
     lnr         integer not null,
+    cnr         integer not null,
     type        text not null,
     role        text not null,
     name        text not null,
-  primary key ( short_path, lnr ) );`);
+  primary key ( short_path, lnr, cnr ) );`);
     }
 
     // -- ---------------------------------------------------------------------------------------------------
@@ -159,10 +160,10 @@ create table ${this._schema_i}.occurrences (
       /* TAINT short_path might not be unique */
       /* TAINT code duplication */
       /* TAINT use prepared statement */
-      var lnr, name, role, short_path, type;
-      ({short_path, lnr, type, role, name} = cfg);
-      this.dba.run(`insert into ${this._schema_i}.occurrences ( short_path, lnr, type, role, name )
-  values ( $short_path, $lnr, $type, $role, $name );`, {short_path, lnr, type, role, name});
+      var cnr, lnr, name, role, short_path, type;
+      ({short_path, lnr, cnr, type, role, name} = cfg);
+      this.dba.run(`insert into ${this._schema_i}.occurrences ( short_path, lnr, cnr, type, role, name )
+  values ( $short_path, $lnr, $cnr, $type, $role, $name );`, {short_path, lnr, cnr, type, role, name});
       return null;
     }
 
@@ -211,7 +212,7 @@ create table ${this._schema_i}.occurrences (
               if (this.cfg.ignore_names.has(name)) {
                 continue;
               }
-              this.add_occurrence({short_path, lnr, type, role, name});
+              this.add_occurrence({short_path, lnr, cnr, type, role, name});
             }
           } catch (error1) {
             //...................................................................................................

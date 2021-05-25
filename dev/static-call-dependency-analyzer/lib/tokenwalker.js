@@ -88,7 +88,7 @@
 
       //-----------------------------------------------------------------------------------------------------------
       * match_tokenline(tokenline) {
-        var count, d, i, len, match, pattern, pattern_idx, ref, role, tnr;
+        var count, d, i, len, match, pattern, pattern_idx, ref, ref1, role, tnr;
         // debug '^434324^', { tokenline, }
         count = 0;
         if (this.cfg.verbose) {
@@ -103,7 +103,7 @@
           count++;
           tnr = parseInt(match.groups.tnr, 10);
           d = this.registry[tnr];
-          if (d.text === '@') {
+          if ((ref1 = d.text) === '@' || ref1 === '.') {
             d = this.registry[tnr + 1];
           }
           d = {...d};
