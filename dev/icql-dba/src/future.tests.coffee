@@ -318,7 +318,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 
 ############################################################################################################
-unless module.parent?
+if module is require.main then do =>
   test @
   # test @[ "DBA: open()" ]
   # test @[ "DBA: open() RAM DB" ]
