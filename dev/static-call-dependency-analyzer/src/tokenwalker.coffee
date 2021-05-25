@@ -56,12 +56,12 @@ class @Tokenwalker
 
   #---------------------------------------------------------------------------------------------------------
   patterns: [
-    [ 'def',  /#(?<tnr>\d+):(?:@|\.)#\d+:property#\d+:=#\d+:(?:->|=>)#/,    ]
-    [ 'def',  /#(?<tnr>\d+):(?:@|\.)#\d+:property#\d+:=#\d+:param_start#/,  ]
-    [ 'def',  /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/,               ]
-    [ 'def',  /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/,             ]
-    [ 'call', /#(?<tnr>\d+):(?:@|\.)#\d+:property#\d+:call_start#/,         ]
-    [ 'call', /#(?<tnr>\d+):identifier#\d+:call_start#/,                    ]
+    [ 'def',  /#(?<tnr>\d+):property#\d+:(?:=|:)#\d+:(?:->|=>)#/,   ]
+    [ 'def',  /#(?<tnr>\d+):property#\d+:(?:=|:)#\d+:param_start#/, ]
+    [ 'def',  /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/,       ]
+    [ 'def',  /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/,     ]
+    [ 'call', /#(?<tnr>\d+):property#\d+:call_start#/,              ]
+    [ 'call', /#(?<tnr>\d+):identifier#\d+:call_start#/,            ]
     ]
 
   #-----------------------------------------------------------------------------------------------------------
@@ -74,7 +74,6 @@ class @Tokenwalker
       count++
       tnr     = parseInt match.groups.tnr, 10
       d       = @registry[ tnr ]
-      d       = @registry[ tnr + 1 ] if d.text in [ '@', '.', ]
       d       = { d..., }
       d.name  = d.text
       d.role  = role
