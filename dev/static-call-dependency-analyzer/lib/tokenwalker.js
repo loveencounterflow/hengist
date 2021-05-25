@@ -68,7 +68,7 @@
       
         //---------------------------------------------------------------------------------------------------------
       constructor(cfg) {
-        this.cfg = {...types.defaults.tw_cfg, ...cfg};
+        this.cfg = {...defaults.tw_cfg, ...cfg};
         validate.tw_cfg(this.cfg);
         def(this.cfg, 'source', {
           enumerable: false,
@@ -165,7 +165,7 @@
     };
 
     //---------------------------------------------------------------------------------------------------------
-    Tokenwalker.prototype.patterns = [['definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:(?:->|=>)#/], ['definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:param_start#/], ['definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/], ['definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/], ['call', /#(?<tnr>\d+):@#\d+:property#\d+:call_start#/], ['call', /#(?<tnr>\d+):identifier#\d+:call_start#/]];
+    Tokenwalker.prototype.patterns = [['def', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:(?:->|=>)#/], ['def', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:param_start#/], ['def', /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/], ['def', /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/], ['call', /#(?<tnr>\d+):@#\d+:property#\d+:call_start#/], ['call', /#(?<tnr>\d+):identifier#\d+:call_start#/]];
 
     return Tokenwalker;
 
