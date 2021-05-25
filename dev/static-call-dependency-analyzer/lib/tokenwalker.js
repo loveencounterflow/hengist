@@ -53,13 +53,17 @@
       },
       "@isa.text x.source": function(x) {
         return this.isa.text(x.source);
+      },
+      "@isa.boolean x.verbose": function(x) {
+        return this.isa.boolean(x.verbose);
       }
     }
   });
 
   //-----------------------------------------------------------------------------------------------------------
   defaults.tw_cfg = {
-    lnr: 0
+    lnr: 0,
+    verbose: false
   };
 
   //===========================================================================================================
@@ -84,16 +88,19 @@
 
       //-----------------------------------------------------------------------------------------------------------
       * match_tokenline(tokenline) {
-        var d, i, len, match, pattern, pattern_idx, ref, role, tnr;
-        ref = this.patterns;
+        var count, d, i, len, match, pattern, pattern_idx, ref, role, tnr;
         // debug '^434324^', { tokenline, }
-        // count = 0
+        count = 0;
+        if (this.cfg.verbose) {
+          debug('^345^', tokenline);
+        }
+        ref = this.patterns;
         for (pattern_idx = i = 0, len = ref.length; i < len; pattern_idx = ++i) {
           [role, pattern] = ref[pattern_idx];
           if ((match = tokenline.match(pattern)) == null) {
             continue;
           }
-          // count++
+          count++;
           tnr = parseInt(match.groups.tnr, 10);
           d = this.registry[tnr];
           if (d.text === '@') {
@@ -105,12 +112,13 @@
           delete d.text;
           yield d;
         }
+        if (this.cfg.verbose && count === 0) {
+          warn(CND.reverse(" no match "));
+        }
         return null;
       }
 
-      // warn CND.reverse " no match " if count is 0
-
-        //-----------------------------------------------------------------------------------------------------------
+      //-----------------------------------------------------------------------------------------------------------
       register(d) {
         this.registry.push(d);
         return this.registry.length - 1;
@@ -165,7 +173,7 @@
     };
 
     //---------------------------------------------------------------------------------------------------------
-    Tokenwalker.prototype.patterns = [['def', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:(?:->|=>)#/], ['def', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:param_start#/], ['def', /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/], ['def', /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/], ['call', /#(?<tnr>\d+):@#\d+:property#\d+:call_start#/], ['call', /#(?<tnr>\d+):identifier#\d+:call_start#/]];
+    Tokenwalker.prototype.patterns = [['def', /#(?<tnr>\d+):(?:@|\.)#\d+:property#\d+:=#\d+:(?:->|=>)#/], ['def', /#(?<tnr>\d+):(?:@|\.)#\d+:property#\d+:=#\d+:param_start#/], ['def', /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/], ['def', /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/], ['call', /#(?<tnr>\d+):(?:@|\.)#\d+:property#\d+:call_start#/], ['call', /#(?<tnr>\d+):identifier#\d+:call_start#/]];
 
     return Tokenwalker;
 

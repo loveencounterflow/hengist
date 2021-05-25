@@ -108,10 +108,13 @@ foo value, ( @bar value ), value
 foo value, ( blah.bar value ), value
 @foo = -> 42
 foo value
-foo value, value, value; bar = ->`;
+foo value, value, value; bar = ->
+some.object.f = -> x
+some.object.f x`;
     tokenwalker = new Tokenwalker({
       lnr: 0,
-      source
+      source,
+      verbose: true
     });
     ref = tokenwalker.walk();
     // debug '^4433^', tokenwalker
