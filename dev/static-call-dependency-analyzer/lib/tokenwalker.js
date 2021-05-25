@@ -103,7 +103,6 @@
           count++;
           tnr = parseInt(match.groups.tnr, 10);
           d = this.registry[tnr];
-          // d       = @registry[ tnr + 1 ] if d.text in [ '@', '.', ]
           d = {...d};
           d.name = d.text;
           d.role = role;
