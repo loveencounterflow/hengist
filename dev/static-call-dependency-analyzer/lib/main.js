@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dba, PATH, Readlines, Scdadba, badge, debug, echo, freeze, glob, help, info, isa, lets, rpr, type_of, types, urge, validate, warn, whisper;
+  var CND, Dba, PATH, Readlines, Scdadba, Tokenwalker, badge, debug, echo, freeze, glob, help, info, isa, lets, rpr, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -34,9 +34,11 @@
 
   ({freeze, lets} = require('letsfreezethat'));
 
-  types = new (require('intertype')).Intertype();
+  types = require('./types');
 
   ({isa, type_of, validate} = types.export());
+
+  ({Tokenwalker} = require('./tokenwalker'));
 
   //===========================================================================================================
   Scdadba = class Scdadba extends Dba {
@@ -203,10 +205,121 @@ create table ${schema_i}.defs (
     return null;
   };
 
+  // #-----------------------------------------------------------------------------------------------------------
+  // @demo_lexer = ->
+  //   CS = require 'coffeescript'
+  //   source = """
+  //     @foo = -> 42
+  //     @foo = f = -> 42
+  //     @foo = => 42
+  //     @foo = () -> 42
+  //     @foo = () => 42
+  //     @foo = ( x ) -> x * x
+  //     @foo = ( x ) => x * x
+  //     @foo = ( x = 42 ) => x * x
+  //     @foo = ( x = f 42 ) => x * x
+  //     @foo = ( x, y ) -> x * y
+  //     @foo = ( x, f = ( a ) -> a ) -> f x
+  //     @foo()
+  //     @foo value
+  //     @foo value, value, value
+  //     @foo value, @bar value
+  //     @foo value, ( @bar value ), value
+  //     @foo value, ( blah.bar value ), value
+  //     foo = -> 42
+  //     foo = f = -> 42
+  //     foo = => 42
+  //     foo = () -> 42
+  //     foo = () => 42
+  //     foo = ( x ) -> x * x
+  //     foo = ( x ) => x * x
+  //     foo = ( x = 42 ) => x * x
+  //     foo = ( x = f 42 ) => x * x
+  //     foo = ( x, y ) -> x * y
+  //     foo = ( x, f = ( a ) -> a ) -> f x
+  //     foo()
+  //     foo value
+  //     foo value, value, value
+  //     foo value, @bar value
+  //     foo value, ( @bar value ), value
+  //     foo value, ( blah.bar value ), value
+  //     """
+  //     # @foo = ( x )
+  //     # @foo 42
+  //     # @foo g 42
+  //     # f 3
+
+  //   # source = "a = 42"
+  //   # source = "a = -> 42"
+  //   # source = "@a 42"
+  //   #-----------------------------------------------------------------------------------------------------------
+  //   lines     = source.split /\n/
+  //   lnr       = null
+  //   collector = null
+  //   registry  = []
+  //   patterns  = [
+  //     [ 'definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:(?:->|=>)#/,   ]
+  //     [ 'definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:param_start#/, ]
+  //     [ 'definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/,       ]
+  //     [ 'definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/,     ]
+  //     [ 'call',       /#(?<tnr>\d+):@#\d+:property#\d+:call_start#/,        ]
+  //     [ 'call',       /#(?<tnr>\d+):identifier#\d+:call_start#/,            ]
+  //     ]
+  //   #-----------------------------------------------------------------------------------------------------------
+  //   match_tokenline = ( tokenline ) ->
+  //     count = 0
+  //     for [ tag, pattern, ], pattern_idx in patterns
+  //       continue unless ( match = tokenline.match pattern )?
+  //       count++
+  //       tnr = parseInt match.groups.tnr, 10
+  //       d0 = registry[ tnr ]
+  //       d1 = registry[ tnr + 1 ]
+  //       if d0.text is '@'
+  //         name = d0.text + d1.text
+  //       else
+  //         name = d0.text
+  //       help pattern_idx, CND.reverse " #{tag} #{name} "
+  //     warn CND.reverse " no match " if count is 0
+  //       # break
+  //   #-----------------------------------------------------------------------------------------------------------
+  //   register = ( d ) ->
+  //     registry.push d
+  //     return registry.length - 1
+  //   #-----------------------------------------------------------------------------------------------------------
+  //   push = ( d ) ->
+  //     tnr       = register d
+  //     ( collector ?= [] ).push "#{tnr}:#{d.name}"
+  //     return null
+  //   #-----------------------------------------------------------------------------------------------------------
+  //   flush = ->
+  //     return null unless ( collector?.length ? 0 ) > 0
+  //     tokenline = '#' + ( collector.join '#' ) + '#'
+  //     help rpr lines[ lnr - 1 ]
+  //     urge tokenline
+  //     match_tokenline tokenline
+  //     collector = null
+  //     return null
+  //   #-----------------------------------------------------------------------------------------------------------
+  //   for [ name, text, d, ] in CS.tokens source
+  //     # { range: [ 0, 1 ], first_line: 0, first_column: 0, last_line: 0, last_column: 0, last_line_exclusive: 0, last_column_exclusive: 1 }
+  //     lnr   = d.first_line    + 1
+  //     cnr   = d.first_column  + 1
+  //     name  = name.toLowerCase()
+  //     switch name
+  //       when 'indent', 'outdent'
+  //         null
+  //       when 'terminator'
+  //         flush()
+  //         info()
+  //       else
+  //         push { lnr, cnr, name, text, }
+  //         # info lnr, { name, text, }
+  //   flush()
+  //   return null
+
   //-----------------------------------------------------------------------------------------------------------
-  this.demo_lexer = function() {
-    var CS, cnr, collector, d, flush, i, len, lines, lnr, match_tokenline, name, patterns, push, ref, register, registry, source, text;
-    CS = require('coffeescript');
+  this.demo_tokenwalker = function() {
+    var d, ref, source, tokenwalker;
     source = `@foo = -> 42
 @foo = f = -> 42
 @foo = => 42
@@ -240,94 +353,20 @@ foo value
 foo value, value, value
 foo value, @bar value
 foo value, ( @bar value ), value
-foo value, ( blah.bar value ), value`;
-    // @foo = ( x )
-    // @foo 42
-    // @foo g 42
-    // f 3
-
-    // source = "a = 42"
-    // source = "a = -> 42"
-    // source = "@a 42"
-    //-----------------------------------------------------------------------------------------------------------
-    lines = source.split(/\n/);
-    lnr = null;
-    collector = null;
-    registry = [];
-    patterns = [['definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:(?:->|=>)#/], ['definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:param_start#/], ['definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/], ['definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/], ['call', /#(?<tnr>\d+):@#\d+:property#\d+:call_start#/], ['call', /#(?<tnr>\d+):identifier#\d+:call_start#/]];
-    //-----------------------------------------------------------------------------------------------------------
-    match_tokenline = function(tokenline) {
-      var count, d0, d1, i, len, match, name, pattern, pattern_idx, tag, tnr;
-      count = 0;
-      for (pattern_idx = i = 0, len = patterns.length; i < len; pattern_idx = ++i) {
-        [tag, pattern] = patterns[pattern_idx];
-        if ((match = tokenline.match(pattern)) == null) {
-          continue;
-        }
-        count++;
-        tnr = parseInt(match.groups.tnr, 10);
-        d0 = registry[tnr];
-        d1 = registry[tnr + 1];
-        if (d0.text === '@') {
-          name = d0.text + d1.text;
-        } else {
-          name = d0.text;
-        }
-        help(pattern_idx, CND.reverse(` ${tag} ${name} `));
-      }
-      if (count === 0) {
-        return warn(CND.reverse(" no match "));
-      }
-    };
-    // break
-    //-----------------------------------------------------------------------------------------------------------
-    register = function(d) {
-      registry.push(d);
-      return registry.length - 1;
-    };
-    //-----------------------------------------------------------------------------------------------------------
-    push = function(d) {
-      var tnr;
-      tnr = register(d);
-      (collector != null ? collector : collector = []).push(`${tnr}:${d.name}`);
-      return null;
-    };
-    //-----------------------------------------------------------------------------------------------------------
-    flush = function() {
-      var ref, tokenline;
-      if (!(((ref = collector != null ? collector.length : void 0) != null ? ref : 0) > 0)) {
-        return null;
-      }
-      tokenline = '#' + (collector.join('#')) + '#';
-      help(rpr(lines[lnr - 1]));
-      urge(tokenline);
-      match_tokenline(tokenline);
-      collector = null;
-      return null;
-    };
-    ref = CS.tokens(source);
-    //-----------------------------------------------------------------------------------------------------------
-    for (i = 0, len = ref.length; i < len; i++) {
-      [name, text, d] = ref[i];
-      // { range: [ 0, 1 ], first_line: 0, first_column: 0, last_line: 0, last_column: 0, last_line_exclusive: 0, last_column_exclusive: 1 }
-      lnr = d.first_line + 1;
-      cnr = d.first_column + 1;
-      name = name.toLowerCase();
-      switch (name) {
-        case 'indent':
-        case 'outdent':
-          null;
-          break;
-        case 'terminator':
-          flush();
-          info();
-          break;
-        default:
-          push({lnr, name, text});
-      }
+foo value, ( blah.bar value ), value
+@foo = -> 42
+foo value
+foo value, value, value; bar = ->`;
+    tokenwalker = new Tokenwalker({
+      lnr: 0,
+      source
+    });
+    debug('^4433^', tokenwalker);
+    ref = tokenwalker.walk();
+    for (d of ref) {
+      // whisper '^333443^', tokenwalker
+      info('^333443^', d);
     }
-    // info lnr, { name, text, }
-    flush();
     return null;
   };
 
@@ -335,7 +374,8 @@ foo value, ( blah.bar value ), value`;
   if (module === require.main) {
     (() => {
       // await @demo()
-      return this.demo_lexer();
+      // @demo_lexer()
+      return this.demo_tokenwalker();
     })();
   }
 
