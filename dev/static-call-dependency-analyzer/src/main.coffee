@@ -20,11 +20,11 @@ Readlines                 = require 'n-readlines'
 glob                      = require 'glob'
 { freeze
   lets }                  = require 'letsfreezethat'
-types                     = new ( require 'intertype' ).Intertype()
+types                     = require './types'
 { isa
   type_of
   validate }              = types.export()
-
+{ Tokenwalker }           = require './tokenwalker'
 
 #===========================================================================================================
 class Scdadba extends Dba
@@ -166,9 +166,120 @@ class Scdadba extends Dba
   return null
 
 
+# #-----------------------------------------------------------------------------------------------------------
+# @demo_lexer = ->
+#   CS = require 'coffeescript'
+#   source = """
+#     @foo = -> 42
+#     @foo = f = -> 42
+#     @foo = => 42
+#     @foo = () -> 42
+#     @foo = () => 42
+#     @foo = ( x ) -> x * x
+#     @foo = ( x ) => x * x
+#     @foo = ( x = 42 ) => x * x
+#     @foo = ( x = f 42 ) => x * x
+#     @foo = ( x, y ) -> x * y
+#     @foo = ( x, f = ( a ) -> a ) -> f x
+#     @foo()
+#     @foo value
+#     @foo value, value, value
+#     @foo value, @bar value
+#     @foo value, ( @bar value ), value
+#     @foo value, ( blah.bar value ), value
+#     foo = -> 42
+#     foo = f = -> 42
+#     foo = => 42
+#     foo = () -> 42
+#     foo = () => 42
+#     foo = ( x ) -> x * x
+#     foo = ( x ) => x * x
+#     foo = ( x = 42 ) => x * x
+#     foo = ( x = f 42 ) => x * x
+#     foo = ( x, y ) -> x * y
+#     foo = ( x, f = ( a ) -> a ) -> f x
+#     foo()
+#     foo value
+#     foo value, value, value
+#     foo value, @bar value
+#     foo value, ( @bar value ), value
+#     foo value, ( blah.bar value ), value
+#     """
+#     # @foo = ( x )
+#     # @foo 42
+#     # @foo g 42
+#     # f 3
+
+#   # source = "a = 42"
+#   # source = "a = -> 42"
+#   # source = "@a 42"
+#   #-----------------------------------------------------------------------------------------------------------
+#   lines     = source.split /\n/
+#   lnr       = null
+#   collector = null
+#   registry  = []
+#   patterns  = [
+#     [ 'definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:(?:->|=>)#/,   ]
+#     [ 'definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:param_start#/, ]
+#     [ 'definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/,       ]
+#     [ 'definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/,     ]
+#     [ 'call',       /#(?<tnr>\d+):@#\d+:property#\d+:call_start#/,        ]
+#     [ 'call',       /#(?<tnr>\d+):identifier#\d+:call_start#/,            ]
+#     ]
+#   #-----------------------------------------------------------------------------------------------------------
+#   match_tokenline = ( tokenline ) ->
+#     count = 0
+#     for [ tag, pattern, ], pattern_idx in patterns
+#       continue unless ( match = tokenline.match pattern )?
+#       count++
+#       tnr = parseInt match.groups.tnr, 10
+#       d0 = registry[ tnr ]
+#       d1 = registry[ tnr + 1 ]
+#       if d0.text is '@'
+#         name = d0.text + d1.text
+#       else
+#         name = d0.text
+#       help pattern_idx, CND.reverse " #{tag} #{name} "
+#     warn CND.reverse " no match " if count is 0
+#       # break
+#   #-----------------------------------------------------------------------------------------------------------
+#   register = ( d ) ->
+#     registry.push d
+#     return registry.length - 1
+#   #-----------------------------------------------------------------------------------------------------------
+#   push = ( d ) ->
+#     tnr       = register d
+#     ( collector ?= [] ).push "#{tnr}:#{d.name}"
+#     return null
+#   #-----------------------------------------------------------------------------------------------------------
+#   flush = ->
+#     return null unless ( collector?.length ? 0 ) > 0
+#     tokenline = '#' + ( collector.join '#' ) + '#'
+#     help rpr lines[ lnr - 1 ]
+#     urge tokenline
+#     match_tokenline tokenline
+#     collector = null
+#     return null
+#   #-----------------------------------------------------------------------------------------------------------
+#   for [ name, text, d, ] in CS.tokens source
+#     # { range: [ 0, 1 ], first_line: 0, first_column: 0, last_line: 0, last_column: 0, last_line_exclusive: 0, last_column_exclusive: 1 }
+#     lnr   = d.first_line    + 1
+#     cnr   = d.first_column  + 1
+#     name  = name.toLowerCase()
+#     switch name
+#       when 'indent', 'outdent'
+#         null
+#       when 'terminator'
+#         flush()
+#         info()
+#       else
+#         push { lnr, cnr, name, text, }
+#         # info lnr, { name, text, }
+#   flush()
+#   return null
+
 #-----------------------------------------------------------------------------------------------------------
-@demo_lexer = ->
-  CS = require 'coffeescript'
+@demo_tokenwalker = ->
   source = """
     @foo = -> 42
     @foo = f = -> 42
@@ -204,84 +315,22 @@ class Scdadba extends Dba
     foo value, @bar value
     foo value, ( @bar value ), value
     foo value, ( blah.bar value ), value
-    """
-    # @foo = ( x )
-    # @foo 42
-    # @foo g 42
-    # f 3
-
-  # source = "a = 42"
-  # source = "a = -> 42"
-  # source = "@a 42"
-  #-----------------------------------------------------------------------------------------------------------
-  lines     = source.split /\n/
-  lnr       = null
-  collector = null
-  registry  = []
-  patterns  = [
-    [ 'definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:(?:->|=>)#/,   ]
-    [ 'definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:param_start#/, ]
-    [ 'definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/,       ]
-    [ 'definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/,     ]
-    [ 'call',       /#(?<tnr>\d+):@#\d+:property#\d+:call_start#/,        ]
-    [ 'call',       /#(?<tnr>\d+):identifier#\d+:call_start#/,            ]
-    ]
-  #-----------------------------------------------------------------------------------------------------------
-  match_tokenline = ( tokenline ) ->
-    count = 0
-    for [ tag, pattern, ], pattern_idx in patterns
-      continue unless ( match = tokenline.match pattern )?
-      count++
-      tnr = parseInt match.groups.tnr, 10
-      d0 = registry[ tnr ]
-      d1 = registry[ tnr + 1 ]
-      if d0.text is '@'
-        name = d0.text + d1.text
-      else
-        name = d0.text
-      help pattern_idx, CND.reverse " #{tag} #{name} "
-    warn CND.reverse " no match " if count is 0
-      # break
-  #-----------------------------------------------------------------------------------------------------------
-  register = ( d ) ->
-    registry.push d
-    return registry.length - 1
-  #-----------------------------------------------------------------------------------------------------------
-  push = ( d ) ->
-    tnr       = register d
-    ( collector ?= [] ).push "#{tnr}:#{d.name}"
-    return null
-  #-----------------------------------------------------------------------------------------------------------
-  flush = ->
-    return null unless ( collector?.length ? 0 ) > 0
-    tokenline = '#' + ( collector.join '#' ) + '#'
-    help rpr lines[ lnr - 1 ]
-    urge tokenline
-    match_tokenline tokenline
-    collector = null
-    return null
-  #-----------------------------------------------------------------------------------------------------------
-  for [ name, text, d, ] in CS.tokens source
-    # { range: [ 0, 1 ], first_line: 0, first_column: 0, last_line: 0, last_column: 0, last_line_exclusive: 0, last_column_exclusive: 1 }
-    lnr   = d.first_line    + 1
-    cnr   = d.first_column  + 1
-    name  = name.toLowerCase()
-    switch name
-      when 'indent', 'outdent'
-        null
-      when 'terminator'
-        flush()
-        info()
-      else
-        push { lnr, name, text, }
-        # info lnr, { name, text, }
-  flush()
+    @foo = -> 42
+    foo value
+    foo value, value, value; bar = ->"""
+  tokenwalker = new Tokenwalker { lnr: 0, source, }
+  debug '^4433^', tokenwalker
+  for d from tokenwalker.walk()
+    # whisper '^333443^', tokenwalker
+    info    '^333443^', d
   return null
-
-
 
 
 ############################################################################################################
 if module is require.main then do =>
   # await @demo()
-  @demo_lexer()
+  # @demo_lexer()
+  @demo_tokenwalker()
+
+
+
