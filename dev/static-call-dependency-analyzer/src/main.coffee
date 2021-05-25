@@ -169,8 +169,6 @@ class Scdadba extends Dba
 #-----------------------------------------------------------------------------------------------------------
 @demo_lexer = ->
   CS = require 'coffeescript'
-  debug ( k for k of require 'coffeescript' )
-  lex = ( require 'coffee-lex' ).default
   source = """
     @foo = -> 42
     @foo = f = -> 42
@@ -221,27 +219,27 @@ class Scdadba extends Dba
   collector = null
   registry  = []
   patterns  = [
-    # [ 'methoddef',  2, /#@#property#=#param_start#param_end#(?:->|=>)#/, ]
-    # [ 'methoddef',  3, /#@#property#=#param_start#identifier(?:#|(?:#,#identifier)*)#param_end#(?:->|=>)#/, ]
-    # [ 'methoddef',  5, /#@#property#=#param_start#/, ]
-    # [ 'methodcall', 1, /#@#property#call_start#call_end#/, ]
-    # [ 'methodcall', 2, /#@#property#call_start#identifier#call_end#/, ]
-    # [ 'methodcall', 3, /#@#property#call_start#identifier#,#identifier#,#identifier#call_end#/, ]
-    [ 'methoddef',  /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:(?:->|=>)#/, ]
-    [ 'methoddef',  /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:param_start#/, ]
-    [ 'fndef',      /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/, ]
-    [ 'fndef',      /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/, ]
-    [ 'methodcall', /#(?<tnr>\d+):@#\d+:property#\d+:call_start#/, ]
-    [ 'fncall',     /#(?<tnr>\d+):identifier#\d+:call_start#/, ]
+    [ 'definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:(?:->|=>)#/,   ]
+    [ 'definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:param_start#/, ]
+    [ 'definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/,       ]
+    [ 'definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/,     ]
+    [ 'call',       /#(?<tnr>\d+):@#\d+:property#\d+:call_start#/,        ]
+    [ 'call',       /#(?<tnr>\d+):identifier#\d+:call_start#/,            ]
     ]
   #-----------------------------------------------------------------------------------------------------------
   match_tokenline = ( tokenline ) ->
     count = 0
-    for [ tag, pattern, ], idx in patterns
+    for [ tag, pattern, ], pattern_idx in patterns
       continue unless ( match = tokenline.match pattern )?
       count++
-      debug parseInt match.groups.tnr, 10
-      help CND.reverse " #{tag} #{idx + 1} "
+      tnr = parseInt match.groups.tnr, 10
+      d0 = registry[ tnr ]
+      d1 = registry[ tnr + 1 ]
+      if d0.text is '@'
+        name = d0.text + d1.text
+      else
+        name = d0.text
+      help pattern_idx, CND.reverse " #{tag} #{name} "
     warn CND.reverse " no match " if count is 0
       # break
   #-----------------------------------------------------------------------------------------------------------
@@ -281,84 +279,9 @@ class Scdadba extends Dba
   return null
 
 
-#-----------------------------------------------------------------------------------------------------------
-@demo_ast_walker = ->
-  CS = require 'coffeescript'
-  xrpr = ( x ) -> ( rpr x )[ .. 100 ]
-  #-----------------------------------------------------------------------------------------------------------
-  walk_ast = ( tree ) ->
-    whisper '^38^', '-'.repeat 108
-    urge '^38^', tree.children, CND.steel xrpr tree
-    switch tree_type = type_of tree
-      #.....................................................................................................
-      when 'root'
-        yield { name: 'root', }
-        yield from walk_ast tree.body
-      #.....................................................................................................
-      when 'block'
-        yield { name: 'block', }
-        for childname in tree.children
-          debug '^39^', childname, xrpr tree[ childname ]
-          yield from walk_ast tree[ childname ]
-      #.....................................................................................................
-      when 'list'
-        for element in tree
-          yield from walk_ast element
-      #.....................................................................................................
-      else
-        whisper "^54^ unknown tree_type: #{rpr tree_type}"
-    #.......................................................................................................
-    return null
-    # #.......................................................................................................
-    # whisper '^35345-1^', 'type:', type_of tree
-    # # whisper '^35345-2^', 'type:', type_of tree
-    # for childname in tree.children
-    #   whisper '^35345-3^', childname
-    #   switch childname
-    #     when 'variable'
-    #       debug '^6456-1^', 'variable:                     ', xrpr tree.variable
-    #       debug '^6456-1^', 'variable.children:            ', xrpr tree.variable.children
-    #       debug '^6456-1^', 'variable.base:                ', xrpr tree.variable.base
-    #       debug '^6456-1^', 'variable.base.children:       ', xrpr tree.variable.base.children
-    #       debug '^6456-1^', 'variable.properties:          ', xrpr tree.variable.properties
-    #       debug '^6456-1^', 'variable.properties.children: ', xrpr tree.variable.properties.children
-    #       null
-    #     when 'value'
-    #       debug '^6456-1^', 'value:                        ', xrpr tree.value
-    #       debug '^6456-1^', 'value.children:               ', xrpr tree.value.children
-    #       debug '^6456-1^', 'value.params:                 ', xrpr tree.value.params
-    #       debug '^6456-1^', 'value.params.children:        ', xrpr tree.value.params.children
-    #       debug '^6456-1^', 'value.body:                   ', xrpr tree.value.body
-    #       debug '^6456-1^', 'value.body.children:          ', xrpr tree.value.body.children
-    #       null
-    #     when 'expressions'
-    #       for node in tree.expressions
-    #         whisper '^35345-4^', 'type:', type_of node
-    #         delete node.locationData
-    #         info  '^6456-2^', node.children
-    #         # switch node_type = type_of node
-    #         #   when 'assign'
-    #         #     null
-    #         #   when 'variable'
-    #         #     null
-    #         #   when 'value'
-    #         #     null
-    #         #   else throw new Error "unknown node type #{node_type}"
-    #         walk_ast node
-    #     else throw new Error "unknown node type #{rpr childname}"
-    # return null
-  #.........................................................................................................
-  source = """
-    @foo = ( x ) -> x * x
-    bar = -> 42
-    """
-  for d from walk_ast CS.nodes source
-    info '^54^', d
-  #.........................................................................................................
-  return null
+
 
 ############################################################################################################
 if module is require.main then do =>
   # await @demo()
-  # @demo_ast_walker()
   @demo_lexer()
