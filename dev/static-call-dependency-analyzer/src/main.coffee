@@ -21,95 +21,162 @@ glob                      = require 'glob'
 { freeze
   lets }                  = require 'letsfreezethat'
 types                     = require './types'
-{ isa
+{ declare
+  defaults
+  isa
   type_of
   validate }              = types.export()
 { Tokenwalker }           = require './tokenwalker'
+def                       = Object.defineProperty
+
 
 #===========================================================================================================
-class Scdadba extends Dba
+declare 'sc_cfg', tests:
+  "@isa.object x":                        ( x ) -> @isa.object x
+  "@isa.nonempty_text x.schema":          ( x ) -> @isa.nonempty_text x.schema
+  "@isa_optional.nonempty_text x.prefix": ( x ) -> @isa_optional.nonempty_text x.prefix
+  "@isa.list x.ignore_names":             ( x ) -> @isa.list x.ignore_names
+  "@isa.list x.ignore_short_paths":       ( x ) -> @isa.list x.ignore_short_paths
+
+#-----------------------------------------------------------------------------------------------------------
+defaults.sc_cfg =
+  schema:             'scda'
+  ignore_names:       []
+  ignore_short_paths: []
+
+
+#===========================================================================================================
+class @Scda
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
-    super()
+    # super()
     ### TAINT add validation, defaults ###
+    @cfg = { defaults.sc_cfg..., cfg..., }
+    validate.sc_cfg @cfg
     { schema
-      prefix }  = cfg
-    schema_i    = @as_identifier schema
-    prefix     += '/' unless prefix.endsWith '/'
-    @cfg        = freeze { @cfg..., schema, schema_i, prefix, }
-    #.......................................................................................................
-    @open { schema, ram: true, }
-    ### TAINT short_path might not be unique ###
-    ### TAINT use mirage schema with VNRs, refs ###
-    @execute """
-      -- ---------------------------------------------------------------------------------------------------
-      create table #{schema_i}.paths (
-          short_path  text unique not null,
-          path        text primary key );
-      -- ---------------------------------------------------------------------------------------------------
-      create table #{schema_i}.lines (
-          short_path  text    not null,
-          lnr         integer not null,
-          line        text    not null,
-        primary key ( short_path, lnr ) );
-      -- ---------------------------------------------------------------------------------------------------
-      create table #{schema_i}.defs (
-          short_path  text    not null,
-          lnr         integer not null,
-          tag         text not null,
-          atsign      text,
-          name        text not null,
-          tail        text,
-        primary key ( short_path, lnr ) );
-      """
+      prefix }              = cfg
+    prefix                  = "#{prefix}/" if prefix? and not prefix.endsWith '/'
+    ### TAINT make globbing configurable ###
+    ### TAINT allow to pass in list of paths ###
+    @_source_glob           = PATH.join prefix, '*.coffee'
+    @cfg.ignore_names       = new Set @cfg.ignore_names
+    @cfg.ignore_short_paths = new Set @cfg.ignore_short_paths
+    @cfg                    = freeze { @cfg..., schema, prefix, }
+    def @, 'dba', enumerable: false, value: new Dba()
+    @dba.open { schema, ram: true, }
+    @_schema_i              = @dba.as_identifier schema
+    @init_db()
     #.......................................................................................................
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
-  $add_path: ( cfg ) ->
+  init_db: ->
+    ### TAINT short_path might not be unique ###
+    ### TAINT use mirage schema with VNRs, refs ###
+    @dba.execute """
+      -- ---------------------------------------------------------------------------------------------------
+      create table #{@_schema_i}.paths (
+          short_path  text unique not null,
+          path        text primary key );
+      -- ---------------------------------------------------------------------------------------------------
+      create table #{@_schema_i}.occurrences (
+          short_path  text    not null,
+          lnr         integer not null,
+          type        text not null,
+          role        text not null,
+          name        text not null,
+        primary key ( short_path, lnr ) );
+      """
+      # -- ---------------------------------------------------------------------------------------------------
+      # create table #{@_schema_i}.lines (
+      #     short_path  text    not null,
+      #     lnr         integer not null,
+      #     line        text    not null,
+      #   primary key ( short_path, lnr ) );
+
+  #---------------------------------------------------------------------------------------------------------
+  add_path: ( cfg ) ->
     { path, }   = cfg
-    short_path  = path[ @cfg.prefix.length... ] if path.startsWith @cfg.prefix
-    @run """
-      insert into #{@cfg.schema_i}.paths ( short_path, path ) values ( $short_path, $path );""", \
+    short_path  = path[ @cfg.prefix.length... ] if @cfg.prefix? and path.startsWith @cfg.prefix
+    return null if @cfg.ignore_short_paths.has short_path
+    @dba.run """
+      insert into #{@_schema_i}.paths ( short_path, path ) values ( $short_path, $path );""", \
       { short_path, path, }
     return short_path
 
+  # #---------------------------------------------------------------------------------------------------------
+  # $add_line: ( cfg ) ->
+  #   ### TAINT short_path might not be unique ###
+  #   { short_path
+  #     lnr
+  #     line } = cfg
+  #   @dba.run """
+  #     insert into #{@_schema_i}.lines ( short_path, lnr, line )
+  #       values ( $short_path, $lnr, $line );""", \
+  #     { short_path, lnr, line, }
+  #   return null
+
   #---------------------------------------------------------------------------------------------------------
-  $add_line: ( cfg ) ->
+  add_occurrence: ( cfg ) ->
     ### TAINT short_path might not be unique ###
+    ### TAINT code duplication ###
+    ### TAINT use prepared statement ###
     { short_path
       lnr
-      line } = cfg
-    @run """
-      insert into #{@cfg.schema_i}.lines ( short_path, lnr, line )
-        values ( $short_path, $lnr, $line );""", \
-      { short_path, lnr, line, }
+      type
+      role
+      name } = cfg
+    @dba.run """
+      insert into #{@_schema_i}.occurrences ( short_path, lnr, type, role, name )
+        values ( $short_path, $lnr, $type, $role, $name );""", \
+      { short_path, lnr, type, role, name, }
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  $add_def: ( cfg ) ->
-    ### TAINT short_path might not be unique ###
-    { short_path
-      lnr
-      tag
-      atsign
-      name
-      tail } = cfg
-    @run """
-      insert into #{@cfg.schema_i}.defs ( short_path, lnr, tag, atsign, name, tail )
-        values ( $short_path, $lnr, $tag, $atsign, $name, $tail );""", \
-      { short_path, lnr, tag, atsign, name, tail, }
+  add_sources: -> @_add_sources_line_by_line()
+
+  #---------------------------------------------------------------------------------------------------------
+  _add_sources_line_by_line: ->
+    source_paths  = glob.sync @_source_glob
+    #.......................................................................................................
+    for path in source_paths
+      short_path  = @add_path { path, }
+      continue unless short_path?
+      debug '^4445^', path
+      readlines   = new Readlines path
+      lnr         = 0
+      #.....................................................................................................
+      while ( line = readlines.next() ) isnt false
+        lnr++
+        line = line.toString 'utf-8'
+        #...................................................................................................
+        continue if /^\s*$/.test line # exclude blank lines
+        continue if /^\s*#/.test line # exclude some comments
+        # @$add_line { short_path, lnr, line, }
+        tokenwalker = new Tokenwalker { lnr, source: line, }
+        # debug '^4433^', tokenwalker
+        #...................................................................................................
+        try
+          for d from tokenwalker.walk()
+            debug '^33343^', d
+            { lnr
+              cnr
+              type
+              name
+              role } = d
+            continue if @.cfg.ignore_names.has name
+            @add_occurrence { short_path, lnr, type, role, name, }
+        #...................................................................................................
+        catch error
+          throw error unless error.name is 'SyntaxError'
+          ### TAINT add to table `errors` or similar ###
+          warn "^4476^ skipping line #{lnr} of #{short_path} because of syntax error: #{rpr line}"
+          continue
+    #.......................................................................................................
     return null
 
 
-
-
-############################################################################################################
-if module is require.main then do =>
-  # await @demo()
-  # @demo_lexer()
-  # @demo_tokenwalker()
 
 
 
