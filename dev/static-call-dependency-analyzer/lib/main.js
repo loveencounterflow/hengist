@@ -205,7 +205,7 @@ create table ${schema_i}.defs (
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_lexer = function() {
-    var CS, cnr, collector, d, flush, i, k, len, lex, lines, lnr, match_tokenline, name, patterns, push, ref, source, text;
+    var CS, cnr, collector, d, flush, i, k, len, lex, lines, lnr, match_tokenline, name, patterns, push, ref, register, registry, source, text;
     CS = require('coffeescript');
     debug((function() {
       var results;
@@ -232,7 +232,24 @@ create table ${schema_i}.defs (
 @foo value, value, value
 @foo value, @bar value
 @foo value, ( @bar value ), value
-@foo value, ( blah.bar value ), value`;
+@foo value, ( blah.bar value ), value
+foo = -> 42
+foo = f = -> 42
+foo = => 42
+foo = () -> 42
+foo = () => 42
+foo = ( x ) -> x * x
+foo = ( x ) => x * x
+foo = ( x = 42 ) => x * x
+foo = ( x = f 42 ) => x * x
+foo = ( x, y ) -> x * y
+foo = ( x, f = ( a ) -> a ) -> f x
+foo()
+foo value
+foo value, value, value
+foo value, @bar value
+foo value, ( @bar value ), value
+foo value, ( blah.bar value ), value`;
     // @foo = ( x )
     // @foo 42
     // @foo g 42
@@ -245,18 +262,26 @@ create table ${schema_i}.defs (
     lines = source.split(/\n/);
     lnr = null;
     collector = null;
-    patterns = [['methoddef', 1, /#@#property#=#(?:->|=>)#/], ['methoddef', 2, /#@#property#=#param_start#param_end#(?:->|=>)#/], ['methoddef', 3, /#@#property#=#param_start#identifier(?:#|(?:#,#identifier)*)#param_end#(?:->|=>)#/], ['methoddef', 4, /#@#property#=#param_start#.*#param_end#(?:->|=>)#/], ['methodcall', 1, /#@#property#call_start#call_end#/], ['methodcall', 2, /#@#property#call_start#identifier#call_end#/], ['methodcall', 3, /#@#property#call_start#identifier#,#identifier#,#identifier#call_end#/]];
+    registry = [];
+    // [ 'methoddef',  2, /#@#property#=#param_start#param_end#(?:->|=>)#/, ]
+    // [ 'methoddef',  3, /#@#property#=#param_start#identifier(?:#|(?:#,#identifier)*)#param_end#(?:->|=>)#/, ]
+    // [ 'methoddef',  5, /#@#property#=#param_start#/, ]
+    // [ 'methodcall', 1, /#@#property#call_start#call_end#/, ]
+    // [ 'methodcall', 2, /#@#property#call_start#identifier#call_end#/, ]
+    // [ 'methodcall', 3, /#@#property#call_start#identifier#,#identifier#,#identifier#call_end#/, ]
+    patterns = [['methoddef', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:(?:->|=>)#/], ['methoddef', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:param_start#/], ['fndef', /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/], ['fndef', /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/], ['methodcall', /#(?<tnr>\d+):@#\d+:property#\d+:call_start#/], ['fncall', /#(?<tnr>\d+):identifier#\d+:call_start#/]];
     //-----------------------------------------------------------------------------------------------------------
     match_tokenline = function(tokenline) {
-      var count, i, len, match, nr, pattern, tag;
+      var count, i, idx, len, match, pattern, tag;
       count = 0;
-      for (i = 0, len = patterns.length; i < len; i++) {
-        [tag, nr, pattern] = patterns[i];
+      for (idx = i = 0, len = patterns.length; i < len; idx = ++i) {
+        [tag, pattern] = patterns[idx];
         if ((match = tokenline.match(pattern)) == null) {
           continue;
         }
         count++;
-        help(CND.reverse(` ${tag} ${nr} `));
+        debug(parseInt(match.groups.tnr, 10));
+        help(CND.reverse(` ${tag} ${idx + 1} `));
       }
       if (count === 0) {
         return warn(CND.reverse(" no match "));
@@ -264,20 +289,29 @@ create table ${schema_i}.defs (
     };
     // break
     //-----------------------------------------------------------------------------------------------------------
-    push = function(x) {
-      return (collector != null ? collector : collector = []).push(x);
+    register = function(d) {
+      registry.push(d);
+      return registry.length - 1;
+    };
+    //-----------------------------------------------------------------------------------------------------------
+    push = function(d) {
+      var tnr;
+      tnr = register(d);
+      (collector != null ? collector : collector = []).push(`${tnr}:${d.name}`);
+      return null;
     };
     //-----------------------------------------------------------------------------------------------------------
     flush = function() {
       var ref, tokenline;
       if (!(((ref = collector != null ? collector.length : void 0) != null ? ref : 0) > 0)) {
-        return;
+        return null;
       }
       tokenline = '#' + (collector.join('#')) + '#';
       help(rpr(lines[lnr - 1]));
       urge(tokenline);
       match_tokenline(tokenline);
-      return collector = null;
+      collector = null;
+      return null;
     };
     ref = CS.tokens(source);
     //-----------------------------------------------------------------------------------------------------------
@@ -297,7 +331,7 @@ create table ${schema_i}.defs (
           info();
           break;
         default:
-          push(name);
+          push({lnr, name, text});
       }
     }
     // info lnr, { name, text, }
