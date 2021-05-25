@@ -92,8 +92,10 @@ types                     = require './types'
     foo value, ( blah.bar value ), value
     @foo = -> 42
     foo value
-    foo value, value, value; bar = ->"""
-  tokenwalker = new Tokenwalker { lnr: 0, source, }
+    foo value, value, value; bar = ->
+    some.object.f = -> x
+    some.object.f x"""
+  tokenwalker = new Tokenwalker { lnr: 0, source, verbose: true, }
   # debug '^4433^', tokenwalker
   for d from tokenwalker.walk()
     # whisper '^333443^', tokenwalker

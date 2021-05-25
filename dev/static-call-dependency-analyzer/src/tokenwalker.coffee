@@ -32,14 +32,15 @@ def                       = Object.defineProperty
 
 #===========================================================================================================
 declare 'tw_cfg', tests:
-  "@isa.object x":        ( x ) -> @isa.object x
-  "@isa.cardinal x.lnr":  ( x ) -> @isa.cardinal x.lnr
-  "@isa.text x.source":  ( x ) -> @isa.text x.source
+  "@isa.object x":          ( x ) -> @isa.object x
+  "@isa.cardinal x.lnr":    ( x ) -> @isa.cardinal x.lnr
+  "@isa.text x.source":     ( x ) -> @isa.text x.source
+  "@isa.boolean x.verbose": ( x ) -> @isa.boolean x.verbose
 
 #-----------------------------------------------------------------------------------------------------------
 defaults.tw_cfg =
-  lnr: 0
-
+  lnr:      0
+  verbose:  false
 
 #===========================================================================================================
 class @Tokenwalker 
@@ -66,10 +67,11 @@ class @Tokenwalker
   #-----------------------------------------------------------------------------------------------------------
   match_tokenline: ( tokenline ) ->
     # debug '^434324^', { tokenline, }
-    # count = 0
+    count = 0
+    debug '^345^', tokenline if @cfg.verbose
     for [ role, pattern, ], pattern_idx in @patterns
       continue unless ( match = tokenline.match pattern )?
-      # count++
+      count++
       tnr     = parseInt match.groups.tnr, 10
       d       = @registry[ tnr ]
       d       = @registry[ tnr + 1 ] if d.text is '@'
@@ -78,8 +80,8 @@ class @Tokenwalker
       d.role  = role
       delete d.text
       yield d
+    warn CND.reverse " no match " if @cfg.verbose and count is 0
     return null
-    # warn CND.reverse " no match " if count is 0
 
   #-----------------------------------------------------------------------------------------------------------
   register: ( d ) ->
