@@ -83,10 +83,11 @@ class @Scda
       create table #{@_schema_i}.occurrences (
           short_path  text    not null,
           lnr         integer not null,
+          cnr         integer not null,
           type        text not null,
           role        text not null,
           name        text not null,
-        primary key ( short_path, lnr ) );
+        primary key ( short_path, lnr, cnr ) );
       """
       # -- ---------------------------------------------------------------------------------------------------
       # create table #{@_schema_i}.lines (
@@ -124,13 +125,14 @@ class @Scda
     ### TAINT use prepared statement ###
     { short_path
       lnr
+      cnr
       type
       role
       name } = cfg
     @dba.run """
-      insert into #{@_schema_i}.occurrences ( short_path, lnr, type, role, name )
-        values ( $short_path, $lnr, $type, $role, $name );""", \
-      { short_path, lnr, type, role, name, }
+      insert into #{@_schema_i}.occurrences ( short_path, lnr, cnr, type, role, name )
+        values ( $short_path, $lnr, $cnr, $type, $role, $name );""", \
+      { short_path, lnr, cnr, type, role, name, }
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -166,7 +168,7 @@ class @Scda
               name
               role } = d
             continue if @.cfg.ignore_names.has name
-            @add_occurrence { short_path, lnr, type, role, name, }
+            @add_occurrence { short_path, lnr, cnr, type, role, name, }
         #...................................................................................................
         catch error
           throw error unless error.name is 'SyntaxError'
