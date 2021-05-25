@@ -46,7 +46,7 @@ class @Tokenwalker
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
-    @cfg = { types.defaults.tw_cfg..., cfg..., }
+    @cfg        = { defaults.tw_cfg..., cfg..., }
     validate.tw_cfg @cfg
     def @cfg, 'source',   enumerable: false, value: @cfg.source
     def @,    'registry', enumerable: false, value: []
@@ -55,12 +55,12 @@ class @Tokenwalker
 
   #---------------------------------------------------------------------------------------------------------
   patterns: [
-    [ 'definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:(?:->|=>)#/,   ]
-    [ 'definition', /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:param_start#/, ]
-    [ 'definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/,       ]
-    [ 'definition', /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/,     ]
-    [ 'call',       /#(?<tnr>\d+):@#\d+:property#\d+:call_start#/,        ]
-    [ 'call',       /#(?<tnr>\d+):identifier#\d+:call_start#/,            ]
+    [ 'def',  /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:(?:->|=>)#/,   ]
+    [ 'def',  /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:param_start#/, ]
+    [ 'def',  /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/,       ]
+    [ 'def',  /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/,     ]
+    [ 'call', /#(?<tnr>\d+):@#\d+:property#\d+:call_start#/,        ]
+    [ 'call', /#(?<tnr>\d+):identifier#\d+:call_start#/,            ]
     ]
 
   #-----------------------------------------------------------------------------------------------------------
