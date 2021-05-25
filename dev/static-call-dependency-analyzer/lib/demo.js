@@ -48,9 +48,15 @@
     schema = 'scda';
     prefix = PATH.resolve(PATH.join(__dirname, '../../../../icql-dba/src'));
     // prefix            = PATH.resolve PATH.join __dirname, '../src'
-    ignore_names = ['rpr', 'require'];
+    ignore_names = ['rpr', 'get_logger', 'require', 'isa', 'type_of', 'text', 'list', 'nonempty_text', 'object', 'cardinal', 'bind'];
     ignore_short_paths = ['types.coffee', 'common.coffee', 'errors.coffee'];
-    scda = new Scda({schema, prefix, ignore_names, ignore_short_paths});
+    scda = new Scda({
+      schema,
+      prefix,
+      ignore_names,
+      ignore_short_paths,
+      verbose: false
+    });
     info('^334^', scda);
     //.........................................................................................................
     scda.add_sources();
@@ -64,7 +70,8 @@
     // console.table [ ( scda.dba.query "select short_path, lnr, name from scda.defs order by name;" )..., ]
     // console.table [ ( scda.dba.query "select short_path, lnr, type, role, name from scda.occurrences order by name;" )..., ]
     // console.table [ ( scda.dba.query "select * from scda.occurrences order by name;" )..., ]
-    console.table([...(scda.dba.query("select * from scda.occurrences order by 1, 2, 3, 4;"))]);
+    console.table([...(scda.dba.query("select * from scda.occurrences where role = 'call' order by 1, 2, 3, 4;"))]);
+    console.table([...(scda.dba.query("select * from scda.occurrences where role = 'def' order by 1, 2, 3, 4;"))]);
     //.........................................................................................................
     return null;
   };
@@ -110,7 +117,9 @@ foo value, ( blah.bar value ), value
 foo value
 foo value, value, value; bar = ->
 some.object.f = -> x
-some.object.f x`;
+some.object.f x
+foo: ->
+foo: ( x ) ->`;
     tokenwalker = new Tokenwalker({
       lnr: 0,
       source,
@@ -128,7 +137,6 @@ some.object.f x`;
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // @demo_lexer()
       return this.demo_scda();
     })();
   }

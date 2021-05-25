@@ -88,7 +88,7 @@
 
       //-----------------------------------------------------------------------------------------------------------
       * match_tokenline(tokenline) {
-        var count, d, i, len, match, pattern, pattern_idx, ref, ref1, role, tnr;
+        var count, d, i, len, match, pattern, pattern_idx, ref, role, tnr;
         // debug '^434324^', { tokenline, }
         count = 0;
         if (this.cfg.verbose) {
@@ -103,9 +103,7 @@
           count++;
           tnr = parseInt(match.groups.tnr, 10);
           d = this.registry[tnr];
-          if ((ref1 = d.text) === '@' || ref1 === '.') {
-            d = this.registry[tnr + 1];
-          }
+          // d       = @registry[ tnr + 1 ] if d.text in [ '@', '.', ]
           d = {...d};
           d.name = d.text;
           d.role = role;
@@ -173,7 +171,7 @@
     };
 
     //---------------------------------------------------------------------------------------------------------
-    Tokenwalker.prototype.patterns = [['def', /#(?<tnr>\d+):(?:@|\.)#\d+:property#\d+:=#\d+:(?:->|=>)#/], ['def', /#(?<tnr>\d+):(?:@|\.)#\d+:property#\d+:=#\d+:param_start#/], ['def', /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/], ['def', /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/], ['call', /#(?<tnr>\d+):(?:@|\.)#\d+:property#\d+:call_start#/], ['call', /#(?<tnr>\d+):identifier#\d+:call_start#/]];
+    Tokenwalker.prototype.patterns = [['def', /#(?<tnr>\d+):property#\d+:(?:=|:)#\d+:(?:->|=>)#/], ['def', /#(?<tnr>\d+):property#\d+:(?:=|:)#\d+:param_start#/], ['def', /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/], ['def', /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/], ['call', /#(?<tnr>\d+):property#\d+:call_start#/], ['call', /#(?<tnr>\d+):identifier#\d+:call_start#/]];
 
     return Tokenwalker;
 

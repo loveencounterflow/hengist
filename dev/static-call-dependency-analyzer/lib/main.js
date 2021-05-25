@@ -59,6 +59,9 @@
       },
       "@isa.list x.ignore_short_paths": function(x) {
         return this.isa.list(x.ignore_short_paths);
+      },
+      "@isa.boolean x.verbose": function(x) {
+        return this.isa.boolean(x.verbose);
       }
     }
   });
@@ -67,7 +70,8 @@
   defaults.sc_cfg = {
     schema: 'scda',
     ignore_names: [],
-    ignore_short_paths: []
+    ignore_short_paths: [],
+    verbose: false
   };
 
   //===========================================================================================================
@@ -174,7 +178,7 @@ create table ${this._schema_i}.occurrences (
 
     //---------------------------------------------------------------------------------------------------------
     _add_sources_line_by_line() {
-      var cnr, d, error, i, len, line, lnr, name, path, readlines, ref, role, short_path, source_paths, tokenwalker, type;
+      var cnr, d, error, i, len, line, lnr, name, outer_lnr, path, readlines, ref, role, short_path, source_paths, tokenwalker, type;
       source_paths = glob.sync(this._source_glob);
 //.......................................................................................................
       for (i = 0, len = source_paths.length; i < len; i++) {
@@ -185,10 +189,10 @@ create table ${this._schema_i}.occurrences (
         }
         debug('^4445^', path);
         readlines = new Readlines(path);
-        lnr = 0;
+        outer_lnr = 0;
         //.....................................................................................................
         while ((line = readlines.next()) !== false) {
-          lnr++;
+          outer_lnr++;
           line = line.toString('utf-8');
           if (/^\s*$/.test(line)) { // exclude blank lines
             //...................................................................................................
@@ -199,8 +203,9 @@ create table ${this._schema_i}.occurrences (
           }
           // @$add_line { short_path, lnr, line, }
           tokenwalker = new Tokenwalker({
-            lnr,
-            source: line
+            lnr: outer_lnr,
+            source: line,
+            verbose: this.cfg.verbose
           });
           try {
             ref = tokenwalker.walk();
