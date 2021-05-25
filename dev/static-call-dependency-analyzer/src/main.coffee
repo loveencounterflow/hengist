@@ -189,6 +189,23 @@ class Scdadba extends Dba
     @foo value, @bar value
     @foo value, ( @bar value ), value
     @foo value, ( blah.bar value ), value
+    foo = -> 42
+    foo = f = -> 42
+    foo = => 42
+    foo = () -> 42
+    foo = () => 42
+    foo = ( x ) -> x * x
+    foo = ( x ) => x * x
+    foo = ( x = 42 ) => x * x
+    foo = ( x = f 42 ) => x * x
+    foo = ( x, y ) -> x * y
+    foo = ( x, f = ( a ) -> a ) -> f x
+    foo()
+    foo value
+    foo value, value, value
+    foo value, @bar value
+    foo value, ( @bar value ), value
+    foo value, ( blah.bar value ), value
     """
     # @foo = ( x )
     # @foo 42
@@ -202,35 +219,49 @@ class Scdadba extends Dba
   lines     = source.split /\n/
   lnr       = null
   collector = null
+  registry  = []
   patterns  = [
-    [ 'methoddef',  1, /#@#property#=#(?:->|=>)#/, ]
-    [ 'methoddef',  2, /#@#property#=#param_start#param_end#(?:->|=>)#/, ]
-    [ 'methoddef',  3, /#@#property#=#param_start#identifier(?:#|(?:#,#identifier)*)#param_end#(?:->|=>)#/, ]
-    [ 'methoddef',  4, /#@#property#=#param_start#.*#param_end#(?:->|=>)#/, ]
-    [ 'methodcall', 1, /#@#property#call_start#call_end#/, ]
-    [ 'methodcall', 2, /#@#property#call_start#identifier#call_end#/, ]
-    [ 'methodcall', 3, /#@#property#call_start#identifier#,#identifier#,#identifier#call_end#/, ]
+    # [ 'methoddef',  2, /#@#property#=#param_start#param_end#(?:->|=>)#/, ]
+    # [ 'methoddef',  3, /#@#property#=#param_start#identifier(?:#|(?:#,#identifier)*)#param_end#(?:->|=>)#/, ]
+    # [ 'methoddef',  5, /#@#property#=#param_start#/, ]
+    # [ 'methodcall', 1, /#@#property#call_start#call_end#/, ]
+    # [ 'methodcall', 2, /#@#property#call_start#identifier#call_end#/, ]
+    # [ 'methodcall', 3, /#@#property#call_start#identifier#,#identifier#,#identifier#call_end#/, ]
+    [ 'methoddef',  /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:(?:->|=>)#/, ]
+    [ 'methoddef',  /#(?<tnr>\d+):@#\d+:property#\d+:=#\d+:param_start#/, ]
+    [ 'fndef',      /#(?<tnr>\d+):identifier#\d+:=#\d+:(?:->|=>)#/, ]
+    [ 'fndef',      /#(?<tnr>\d+):identifier#\d+:=#\d+:param_start#/, ]
+    [ 'methodcall', /#(?<tnr>\d+):@#\d+:property#\d+:call_start#/, ]
+    [ 'fncall',     /#(?<tnr>\d+):identifier#\d+:call_start#/, ]
     ]
   #-----------------------------------------------------------------------------------------------------------
   match_tokenline = ( tokenline ) ->
     count = 0
-    for [ tag, nr, pattern, ] in patterns
+    for [ tag, pattern, ], idx in patterns
       continue unless ( match = tokenline.match pattern )?
       count++
-      help CND.reverse " #{tag} #{nr} "
+      debug parseInt match.groups.tnr, 10
+      help CND.reverse " #{tag} #{idx + 1} "
     warn CND.reverse " no match " if count is 0
       # break
   #-----------------------------------------------------------------------------------------------------------
-  push = ( x ) ->
-    ( collector ?= [] ).push x
+  register = ( d ) ->
+    registry.push d
+    return registry.length - 1
+  #-----------------------------------------------------------------------------------------------------------
+  push = ( d ) ->
+    tnr       = register d
+    ( collector ?= [] ).push "#{tnr}:#{d.name}"
+    return null
   #-----------------------------------------------------------------------------------------------------------
   flush = ->
-    return unless ( collector?.length ? 0 ) > 0
+    return null unless ( collector?.length ? 0 ) > 0
     tokenline = '#' + ( collector.join '#' ) + '#'
     help rpr lines[ lnr - 1 ]
     urge tokenline
     match_tokenline tokenline
     collector = null
+    return null
   #-----------------------------------------------------------------------------------------------------------
   for [ name, text, d, ] in CS.tokens source
     # { range: [ 0, 1 ], first_line: 0, first_column: 0, last_line: 0, last_column: 0, last_line_exclusive: 0, last_column_exclusive: 1 }
@@ -244,7 +275,7 @@ class Scdadba extends Dba
         flush()
         info()
       else
-        push name
+        push { lnr, name, text, }
         # info lnr, { name, text, }
   flush()
   return null
