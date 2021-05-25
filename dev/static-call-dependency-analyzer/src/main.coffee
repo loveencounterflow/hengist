@@ -147,16 +147,16 @@ class @Scda
       continue unless short_path?
       debug '^4445^', path
       readlines   = new Readlines path
-      lnr         = 0
+      outer_lnr   = 0
       #.....................................................................................................
       while ( line = readlines.next() ) isnt false
-        lnr++
+        outer_lnr++
         line = line.toString 'utf-8'
         #...................................................................................................
         continue if /^\s*$/.test line # exclude blank lines
         continue if /^\s*#/.test line # exclude some comments
         # @$add_line { short_path, lnr, line, }
-        tokenwalker = new Tokenwalker { lnr, source: line, }
+        tokenwalker = new Tokenwalker { lnr: outer_lnr, source: line, verbose: @cfg.verbose, }
         # debug '^4433^', tokenwalker
         #...................................................................................................
         try
