@@ -19,6 +19,8 @@
     "better-sqlite3": "^7.3.1",
     "chance": "^1.1.7",
     "cnd": "^9.2.1",
+    "coffee-lex": "^9.1.5",
+    "coffeescript": "^2.5.1",
     "command-line-args": "^5.1.1",
     "command-line-usage": "^6.1.0",
     "commander": "7.2.0",
