@@ -37,12 +37,14 @@ declare 'sc_cfg', tests:
   "@isa_optional.nonempty_text x.prefix": ( x ) -> @isa_optional.nonempty_text x.prefix
   "@isa.list x.ignore_names":             ( x ) -> @isa.list x.ignore_names
   "@isa.list x.ignore_short_paths":       ( x ) -> @isa.list x.ignore_short_paths
+  "@isa.boolean x.verbose":               ( x ) -> @isa.boolean x.verbose
 
 #-----------------------------------------------------------------------------------------------------------
 defaults.sc_cfg =
   schema:             'scda'
   ignore_names:       []
   ignore_short_paths: []
+  verbose:            false
 
 
 #===========================================================================================================
