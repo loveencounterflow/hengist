@@ -61,8 +61,25 @@ types                     = require './types'
   # console.table [ ( scda.dba.query "select short_path, lnr, name from scda.defs order by name;" )..., ]
   # console.table [ ( scda.dba.query "select short_path, lnr, type, role, name from scda.occurrences order by name;" )..., ]
   # console.table [ ( scda.dba.query "select * from scda.occurrences order by name;" )..., ]
-  console.table [ ( scda.dba.query "select * from scda.occurrences where role = 'call' order by 1, 2, 3, 4;" )..., ]
-  console.table [ ( scda.dba.query "select * from scda.occurrences where role = 'def' order by 1, 2, 3, 4;" )..., ]
+  console.table [ ( scda.dba.query "select * from scda.occurrences where role = 'call' order by name, short_path, lnr, cnr;" )..., ]
+  console.table [ ( scda.dba.query "select * from scda.occurrences where role = 'def' order by name, short_path, lnr, cnr;" )..., ]
+  sql = """
+    select
+        t1.short_path as def_short_path,
+        t1.lnr        as def_lnr,
+        t2.short_path as call_short_path,
+        t2.lnr        as call_lnr,
+        -- t1.cnr        as cnr,
+        t1.name       as name
+      from scda.occurrences as t1
+      join scda.occurrences as t2 on ( t1.name = t2.name )
+      where true
+        and ( t1.role = 'def' )
+        and ( t2.role = 'call' )
+        and ( t1.short_path != t2.short_path )
+      order by 1, 2, 3, 4;
+    """
+  console.table [ ( scda.dba.query sql )..., ]
   #.........................................................................................................
   return null
 
