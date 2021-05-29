@@ -316,15 +316,147 @@ types                     = new ( require 'intertype' ).Intertype
   #.........................................................................................................
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "___ DBA: import() (big file)" ] = ( T, done ) ->
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  # ramdb_path        = null
+  matcher           = null
+  export_path       = H.nonexistant_path_from_ref 'import-csv'
+  #.........................................................................................................
+  await do =>
+    ### Opening a RAM DB from file ###
+    dba               = new Dba()
+    import_path       = PATH.resolve PATH.join __dirname, '../../../assets/jizura-datasources/data/flat-files/shape/shape-strokeorder-zhaziwubifa.txt'
+    # import_path       = PATH.resolve PATH.join __dirname, '../../../assets/icql/ncrglyphwbf.tsv'
+    schema            = 'wbf'
+    columns           = null
+    seen_chrs         = new Set()
+    count             = 0
+    transform         = null
+    #.......................................................................................................
+    transform         = ( d ) ->
+      count++
+      { ncr
+        glyph
+        wbf } = d.row
+      return null if ( not ncr? ) or ( not glyph? ) or ( not wbf? )
+      return null unless ( match = wbf.match /^<(?<wbf>[0-9]+)>$/ )?
+      { wbf, } = match.groups
+      return d.stop if count > 1000
+      return { ncr, glyph, wbf, }
+    #.......................................................................................................
+    _extra =
+      delimiter:                '\t'
+      # columns:                  [ 'ncr', 'glyph', 'wbf', ]
+      relax_column_count:       true
+      # relax_column_count_less:  true
+      # relax_column_count_more:  true
+    columns = [ 'ncr', 'glyph', 'wbf', ]
+    t0 = Date.now()
+    dba.import { path: import_path, format: 'csv', schema, ram: true, transform, _extra, columns, }
+    t1 = Date.now()
+    debug '^44545^', "dt:", ( t1 - t0 ) / 1000
+    matcher = dba.list dba.query """select * from wbf.main order by wbf limit 1000;"""
+    for row in matcher
+      info row
+    #.......................................................................................................
+    sql = """
+      select
+        glyph as glyph,
+        cast( substring( wbf, 1, 1 ) as integer ) +
+          cast( substring( wbf, -1, 1 ) as integer ) as wbfs
+      from wbf.main
+      order by wbfs;
+      """
+    for row from dba.query sql
+      info row
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "___ DBA: import() (four corner)" ] = ( T, done ) ->
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  # ramdb_path        = null
+  matcher           = null
+  export_path       = H.nonexistant_path_from_ref 'import-csv'
+  #.........................................................................................................
+  await do =>
+    ### Opening a RAM DB from file ###
+    dba               = new Dba()
+    import_path       = PATH.resolve PATH.join __dirname, '../../../../../io/mingkwai-rack/jizura-datasources/data/flat-files/shape/shape-fourcorner-wikipedia.txt'
+    # import_path       = PATH.resolve PATH.join __dirname, '../../../assets/icql/ncrglyphwbf.tsv'
+    schema            = 'fc'
+    columns           = null
+    seen_chrs         = new Set()
+    count             = 0
+    transform         = null
+    #.......................................................................................................
+    transform         = ( d ) ->
+      # debug '^44554^', d
+      count++
+      # return d.stop if count > 100
+      ### TAINT must specify columns for source, target separately ###
+      { fc4
+        fcx } = d.row
+      { lnr } = d
+      return null if ( not fc4? ) or ( not fcx? )
+      fc      = fc4
+      glyphs  = fcx
+      glyphs  = Array.from glyphs
+      unless ( match = fc.match /^(?<fc4>[0-9]+)(-(?<fcx>[0-9]))?$/ )?
+        warn "^334^ omitted: #{rpr d}"
+        return null
+      { fc4
+        fcx } = match.groups
+      return ( { fc4, fcx, glyph, } for glyph in glyphs )
+    #.......................................................................................................
+    _extra =
+      delimiter:                '\t'
+      # columns:                  [ 'ncr', 'glyph', 'wbf', ]
+      relax_column_count:       true
+      # relax_column_count_less:  true
+      # relax_column_count_more:  true
+    ### TAINT must specify columns for source, target separately ###
+    columns = [ 'fc4', 'fcx', 'glyph', ]
+    t0 = Date.now()
+    dba.import { path: import_path, format: 'csv', schema, ram: true, transform, _extra, columns, }
+    t1 = Date.now()
+    debug '^44545^', "dt:", ( t1 - t0 ) / 1000
+    #.......................................................................................................
+    matcher = dba.list dba.query """select * from fc.main where fc4 like '_3__' order by fc4, fcx limit 10;"""
+    for row in matcher
+      info "#{row.fc4} #{row.glyph}"
+    #.......................................................................................................
+    clauses       = []
+    with_clauses  = []
+    for idx in [ 0 .. 3 ]
+      for digit in [ 0 .. 9 ]
+        position  = idx + 1
+        pattern   = ( '_'.repeat idx ) + ( "#{digit}" ) + ( '_'.repeat 3 - idx )
+        with_clauses.push "v#{position}#{digit} as ( select count(*) as c from fc.main where fc4 like '#{pattern}' )"
+    clauses.push "with #{with_clauses.join ',\n'}\n"
+    clauses.push """select null as c, null as p1, null as p2, null as p3, null as p4 where false union all"""
+    for digit in [ 0 .. 9 ]
+      clauses.push """select #{digit}, v1#{digit}.c, v2#{digit}.c, v3#{digit}.c, v4#{digit}.c from v1#{digit}, v2#{digit}, v3#{digit}, v4#{digit} union all"""
+    clauses.push """select null, null, null, null, null where false;"""
+    sql = clauses.join '\n'
+    # debug '^348^', sql
+    for row from dba.query sql
+      info row
+  #.........................................................................................................
+  done()
+
 
 ############################################################################################################
 if module is require.main then do =>
-  test @
-  # test @[ "DBA: open()" ]
+  # test @
+  # test @[ "___ DBA: import() (four corner)" ]
+  test @[ "___ DBA: import() (big file)" ]
   # test @[ "DBA: open() RAM DB" ]
   # test @[ "DBA: export() RAM DB" ]
   # test @[ "DBA: import() CSV" ]
-
 
 
 
