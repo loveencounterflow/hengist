@@ -503,15 +503,202 @@
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["___ DBA: import() (big file)"] = async function(T, done) {
+    var Dba, export_path, matcher;
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    // ramdb_path        = null
+    matcher = null;
+    export_path = H.nonexistant_path_from_ref('import-csv');
+    await (() => {      //.........................................................................................................
+      /* Opening a RAM DB from file */
+      var _extra, columns, count, dba, i, import_path, len, ref, results, row, schema, seen_chrs, sql, t0, t1, transform;
+      dba = new Dba();
+      import_path = PATH.resolve(PATH.join(__dirname, '../../../assets/jizura-datasources/data/flat-files/shape/shape-strokeorder-zhaziwubifa.txt'));
+      // import_path       = PATH.resolve PATH.join __dirname, '../../../assets/icql/ncrglyphwbf.tsv'
+      schema = 'wbf';
+      columns = null;
+      seen_chrs = new Set();
+      count = 0;
+      transform = null;
+      //.......................................................................................................
+      transform = function(d) {
+        var glyph, match, ncr, wbf;
+        count++;
+        ({ncr, glyph, wbf} = d.row);
+        if ((ncr == null) || (glyph == null) || (wbf == null)) {
+          return null;
+        }
+        if ((match = wbf.match(/^<(?<wbf>[0-9]+)>$/)) == null) {
+          return null;
+        }
+        ({wbf} = match.groups);
+        if (count > 1000) {
+          return d.stop;
+        }
+        return {ncr, glyph, wbf};
+      };
+      //.......................................................................................................
+      _extra = {
+        delimiter: '\t',
+        // columns:                  [ 'ncr', 'glyph', 'wbf', ]
+        relax_column_count: true
+      };
+      // relax_column_count_less:  true
+      // relax_column_count_more:  true
+      columns = ['ncr', 'glyph', 'wbf'];
+      t0 = Date.now();
+      dba.import({
+        path: import_path,
+        format: 'csv',
+        schema,
+        ram: true,
+        transform,
+        _extra,
+        columns
+      });
+      t1 = Date.now();
+      debug('^44545^', "dt:", (t1 - t0) / 1000);
+      matcher = dba.list(dba.query(`select * from wbf.main order by wbf limit 1000;`));
+      for (i = 0, len = matcher.length; i < len; i++) {
+        row = matcher[i];
+        info(row);
+      }
+      //.......................................................................................................
+      sql = `select
+  glyph as glyph,
+  cast( substring( wbf, 1, 1 ) as integer ) +
+    cast( substring( wbf, -1, 1 ) as integer ) as wbfs
+from wbf.main
+order by wbfs;`;
+      ref = dba.query(sql);
+      results = [];
+      for (row of ref) {
+        results.push(info(row));
+      }
+      return results;
+    })();
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["___ DBA: import() (four corner)"] = async function(T, done) {
+    var Dba, export_path, matcher;
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    // ramdb_path        = null
+    matcher = null;
+    export_path = H.nonexistant_path_from_ref('import-csv');
+    await (() => {      //.........................................................................................................
+      /* Opening a RAM DB from file */
+      var _extra, clauses, columns, count, dba, digit, i, idx, import_path, j, k, l, len, pattern, position, ref, results, row, schema, seen_chrs, sql, t0, t1, transform, with_clauses;
+      dba = new Dba();
+      import_path = PATH.resolve(PATH.join(__dirname, '../../../../../io/mingkwai-rack/jizura-datasources/data/flat-files/shape/shape-fourcorner-wikipedia.txt'));
+      // import_path       = PATH.resolve PATH.join __dirname, '../../../assets/icql/ncrglyphwbf.tsv'
+      schema = 'fc';
+      columns = null;
+      seen_chrs = new Set();
+      count = 0;
+      transform = null;
+      //.......................................................................................................
+      transform = function(d) {
+        var fc, fc4, fcx, glyph, glyphs, lnr, match;
+        // debug '^44554^', d
+        count++;
+        // return d.stop if count > 100
+        /* TAINT must specify columns for source, target separately */
+        ({fc4, fcx} = d.row);
+        ({lnr} = d);
+        if ((fc4 == null) || (fcx == null)) {
+          return null;
+        }
+        fc = fc4;
+        glyphs = fcx;
+        glyphs = Array.from(glyphs);
+        if ((match = fc.match(/^(?<fc4>[0-9]+)(-(?<fcx>[0-9]))?$/)) == null) {
+          warn(`^334^ omitted: ${rpr(d)}`);
+          return null;
+        }
+        ({fc4, fcx} = match.groups);
+        return (function() {
+          var i, len, results;
+          results = [];
+          for (i = 0, len = glyphs.length; i < len; i++) {
+            glyph = glyphs[i];
+            results.push({fc4, fcx, glyph});
+          }
+          return results;
+        })();
+      };
+      //.......................................................................................................
+      _extra = {
+        delimiter: '\t',
+        // columns:                  [ 'ncr', 'glyph', 'wbf', ]
+        relax_column_count: true
+      };
+      // relax_column_count_less:  true
+      // relax_column_count_more:  true
+      /* TAINT must specify columns for source, target separately */
+      columns = ['fc4', 'fcx', 'glyph'];
+      t0 = Date.now();
+      dba.import({
+        path: import_path,
+        format: 'csv',
+        schema,
+        ram: true,
+        transform,
+        _extra,
+        columns
+      });
+      t1 = Date.now();
+      debug('^44545^', "dt:", (t1 - t0) / 1000);
+      //.......................................................................................................
+      matcher = dba.list(dba.query(`select * from fc.main where fc4 like '_3__' order by fc4, fcx limit 10;`));
+      for (i = 0, len = matcher.length; i < len; i++) {
+        row = matcher[i];
+        info(`${row.fc4} ${row.glyph}`);
+      }
+      //.......................................................................................................
+      clauses = [];
+      with_clauses = [];
+      for (idx = j = 0; j <= 3; idx = ++j) {
+        for (digit = k = 0; k <= 9; digit = ++k) {
+          position = idx + 1;
+          pattern = ('_'.repeat(idx)) + `${digit}` + ('_'.repeat(3 - idx));
+          with_clauses.push(`v${position}${digit} as ( select count(*) as c from fc.main where fc4 like '${pattern}' )`);
+        }
+      }
+      clauses.push(`with ${with_clauses.join(',\n')}\n`);
+      clauses.push(`select null as c, null as p1, null as p2, null as p3, null as p4 where false union all`);
+      for (digit = l = 0; l <= 9; digit = ++l) {
+        clauses.push(`select ${digit}, v1${digit}.c, v2${digit}.c, v3${digit}.c, v4${digit}.c from v1${digit}, v2${digit}, v3${digit}, v4${digit} union all`);
+      }
+      clauses.push(`select null, null, null, null, null where false;`);
+      sql = clauses.join('\n');
+      ref = dba.query(sql);
+      // debug '^348^', sql
+      results = [];
+      for (row of ref) {
+        results.push(info(row));
+      }
+      return results;
+    })();
+    //.........................................................................................................
+    return done();
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "___ DBA: import() (four corner)" ]
+      return test(this["___ DBA: import() (big file)"]);
     })();
   }
 
-  // test @[ "DBA: open()" ]
-// test @[ "DBA: open() RAM DB" ]
+  // test @[ "DBA: open() RAM DB" ]
 // test @[ "DBA: export() RAM DB" ]
 // test @[ "DBA: import() CSV" ]
 
