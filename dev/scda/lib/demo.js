@@ -34,7 +34,7 @@
 
   ({freeze, lets} = require('letsfreezethat'));
 
-  types = require('./types');
+  types = require('../../../apps/scda/lib/types');
 
   ({isa, type_of, validate} = types.export());
 
@@ -44,17 +44,19 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_scda = function() {
-    var ignore_names, ignore_spaths, prefix, scda, schema, sql;
+    var dependencies, ignore_names, ignore_spaths, prefix, scda, schema, sql;
     schema = 'scda';
     prefix = PATH.resolve(PATH.join(__dirname, '../../../../icql-dba/src'));
     // prefix            = PATH.resolve PATH.join __dirname, '../src'
     ignore_names = ['rpr', 'get_logger', 'require', 'isa', 'type_of', 'text', 'list', 'nonempty_text', 'object', 'cardinal', 'bind'];
     ignore_spaths = ['types.coffee', 'common.coffee', 'errors.coffee'];
+    dependencies = ['import-export-mixin.coffee', 'main.coffee'];
     scda = new Scda({
       schema,
       prefix,
       ignore_names,
       ignore_spaths,
+      dependencies,
       verbose: false
     });
     // info '^334^', scda
@@ -63,6 +65,7 @@
     // console.table [ ( scda.dba.query "select * from scda.paths order by path;" )..., ]
     // console.table [ ( scda.dba.query "select * from scda.occurrences where role = 'call' order by name, spath, lnr, cnr;" )..., ]
     // console.table [ ( scda.dba.query "select * from scda.occurrences where role = 'def' order by name, spath, lnr, cnr;" )..., ]
+    console.table([...(scda.dba.query("select * from scda.dependencies;"))]);
     sql = `select
     t1.spath      as def_spath,
     t1.lnr        as def_lnr,
@@ -76,6 +79,11 @@
     and ( t1.role = 'def' )
     and ( t2.role = 'call' )
     and ( t1.spath != t2.spath )
+    and not exists ( select 1 from scda.dependencies as d
+      where true
+        and d.provider_spath  = t1.spath
+        and d.consumer_spath  = t2.spath
+      limit 1 )
   order by 1, 2, 3, 4;`;
     console.table([...(scda.dba.query(sql))]);
     //.........................................................................................................
