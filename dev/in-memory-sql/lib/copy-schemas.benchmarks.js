@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, FSP, LFT, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, isa, jr, log, resolve_path, rpr, show_result, try_to_remove_file, types, urge, validate, validate_list_of, warn, whisper;
+  var BM, CND, DATA, FS, FSP, LFT, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, isa, jr, log, mkdirp, resolve_path, rpr, show_result, try_to_remove_file, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -54,6 +54,8 @@
   };
 
   LFT = require('letsfreezethat');
+
+  mkdirp = require('mkdirp');
 
   //-----------------------------------------------------------------------------------------------------------
   resolve_path = function(path) {
@@ -180,6 +182,7 @@
               _icql.copy_schema(fle_schema, work_schema);
               break;
             case 'fle':
+            case 'ram':
               work_schema = 'main';
               break;
             default:
@@ -412,16 +415,45 @@
     });
   };
 
+  // @btsql3_ram_small_backup   = ( cfg ) => @_btsql3 { cfg..., ref: 'ram_small_backup', mode: 'ram', size: 'small', pragmas: 'ram', save: 'backup', }
+  // @btsql3_ram_big_backup     = ( cfg ) => @_btsql3 { cfg..., ref: 'ram_big_backup',   mode: 'ram', size: 'big',   pragmas: 'ram', save: 'backup', }
+  this.btsql3_ram_small_vacuum = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'ram_small_vacuum',
+      mode: 'ram',
+      size: 'small',
+      pragmas: 'ram',
+      save: 'vacuum'
+    });
+  };
+
+  this.btsql3_ram_big_vacuum = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      ref: 'ram_big_vacuum',
+      mode: 'ram',
+      size: 'big',
+      pragmas: 'ram',
+      save: 'vacuum'
+    });
+  };
+
+  // @btsql3_ram_small_copy     = ( cfg ) => @_btsql3 { cfg..., ref: 'ram_small_copy',   mode: 'ram', size: 'small', pragmas: 'ram', save: 'copy', }
+  // @btsql3_ram_big_copy       = ( cfg ) => @_btsql3 { cfg..., ref: 'ram_big_copy',     mode: 'ram', size: 'big',   pragmas: 'ram', save: 'copy', }
+
   // @btsql3_mem_thrds    = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'threads = 4;', ] }
 
   //-----------------------------------------------------------------------------------------------------------
   this.run_benchmarks = async function() {
     var _, bench, cfg, i, j, len, ref, ref1, repetitions, test_name, test_names;
-    gcfg.verbose = true;
+    // gcfg.verbose  = true
     gcfg.verbose = false;
     gcfg.echo = true;
     gcfg.echo = false;
     bench = BM.new_benchmarks();
+    /* TAINT user ID might be different */
+    mkdirp.sync('/run/user/1000/hengist-icql-benchmarks');
     //.........................................................................................................
     cfg = {
       // word_count: 100_000
@@ -440,7 +472,8 @@
         work: {
           tmp: '',
           mem: ':memory:',
-          fle: 'data/icql/copy-schemas-work-{ref}.db'
+          fle: 'data/icql/copy-schemas-work-{ref}.db',
+          ram: '/run/user/1000/hengist-icql-benchmarks/copy-schemas-work-{ref}.db'
         },
         temp: {
           small: resolve_path('data/icql/copy-schemas-benchmarks-temp-{ref}.db'),
@@ -454,13 +487,26 @@
         //.....................................................................................................
         tmp: ['temp_store = file;'],
         mem: [],
-        bare: []
+        bare: [],
+        ram: ['page_size = 4096', 'cache_size = 16384', 'temp_store = MEMORY', 'journal_mode = WAL', 'locking_mode = EXCLUSIVE', 'synchronous = OFF']
       }
     };
     //.........................................................................................................
     repetitions = 3;
+    // test_names    = [
+    //   'btsql3_mem_big_vacuum'
+    //   # 'btsql3_ram_big_vacuum'
+    //   'btsql3_ram_small_vacuum'
+    //   ]
     test_names = ['btsql3_mem_big_backup', 'btsql3_mem_big_vacuum', 'btsql3_mem_small_backup', 'btsql3_mem_small_vacuum', 'btsql3_tmp_big_backup', 'btsql3_tmp_big_vacuum', 'btsql3_tmp_small_backup', 'btsql3_tmp_small_vacuum'];
     if (global.gc != null) {
+      // 'btsql3_ram_small_backup'
+      // 'btsql3_ram_big_backup'
+      // 'btsql3_ram_small_vacuum'
+      // 'btsql3_ram_big_vacuum'
+      // 'btsql3_ram_small_copy'
+      // 'btsql3_ram_big_copy'
+
       // 'btsql3_fle_small'
       // 'btsql3_fle_big'
       // 'btsql3_fle_small_bare'
