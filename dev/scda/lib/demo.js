@@ -38,9 +38,9 @@
 
   ({isa, type_of, validate} = types.export());
 
-  ({Tokenwalker} = require('./tokenwalker'));
+  ({Tokenwalker} = require('../../../apps/scda/lib/tokenwalker'));
 
-  ({Scda} = require('..'));
+  ({Scda} = require('../../../apps/scda'));
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_scda = function() {

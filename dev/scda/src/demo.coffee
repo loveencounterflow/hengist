@@ -24,8 +24,8 @@ types                     = require './types'
 { isa
   type_of
   validate }              = types.export()
-{ Tokenwalker }           = require './tokenwalker'
-{ Scda }                  = require '..'
+{ Tokenwalker }           = require '../../../apps/scda/lib/tokenwalker'
+{ Scda }                  = require '../../../apps/scda'
 
 
 #-----------------------------------------------------------------------------------------------------------
