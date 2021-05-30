@@ -31,6 +31,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 gcfg                      = { verbose: false, echo: false, }
 LFT                       = require 'letsfreezethat'
+mkdirp                    = require 'mkdirp'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -119,7 +120,7 @@ show_result = ( name, result ) ->
         work_schema     = 'x'
         _icql.attach db_work_path, work_schema
         _icql.copy_schema fle_schema, work_schema
-      when 'fle'
+      when 'fle', 'ram'
         work_schema     = 'main'
       else throw new Error "^44788^ unknown value for `cfg.mode`: #{rpr cfg.mode}"
     #-------------------------------------------------------------------------------------------------------
@@ -178,15 +179,24 @@ show_result = ( name, result ) ->
 @btsql3_fle_big            = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_big',          mode: 'fle', size: 'big',   pragmas: 'fle', }
 @btsql3_fle_small_bare     = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_small_bare',   mode: 'fle', size: 'small', pragmas: 'bare', }
 @btsql3_fle_big_bare       = ( cfg ) => @_btsql3 { cfg..., ref: 'fle_big_bare',     mode: 'fle', size: 'big',   pragmas: 'bare', }
+# @btsql3_ram_small_backup   = ( cfg ) => @_btsql3 { cfg..., ref: 'ram_small_backup', mode: 'ram', size: 'small', pragmas: 'ram', save: 'backup', }
+# @btsql3_ram_big_backup     = ( cfg ) => @_btsql3 { cfg..., ref: 'ram_big_backup',   mode: 'ram', size: 'big',   pragmas: 'ram', save: 'backup', }
+@btsql3_ram_small_vacuum   = ( cfg ) => @_btsql3 { cfg..., ref: 'ram_small_vacuum', mode: 'ram', size: 'small', pragmas: 'ram', save: 'vacuum', }
+@btsql3_ram_big_vacuum     = ( cfg ) => @_btsql3 { cfg..., ref: 'ram_big_vacuum',   mode: 'ram', size: 'big',   pragmas: 'ram', save: 'vacuum', }
+# @btsql3_ram_small_copy     = ( cfg ) => @_btsql3 { cfg..., ref: 'ram_small_copy',   mode: 'ram', size: 'small', pragmas: 'ram', save: 'copy', }
+# @btsql3_ram_big_copy       = ( cfg ) => @_btsql3 { cfg..., ref: 'ram_big_copy',     mode: 'ram', size: 'big',   pragmas: 'ram', save: 'copy', }
+
 # @btsql3_mem_thrds    = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'threads = 4;', ] }
 
 #-----------------------------------------------------------------------------------------------------------
 @run_benchmarks = ->
-  gcfg.verbose  = true
+  # gcfg.verbose  = true
   gcfg.verbose  = false
   gcfg.echo     = true
   gcfg.echo     = false
   bench         = BM.new_benchmarks()
+  ### TAINT user ID might be different ###
+  mkdirp.sync '/run/user/1000/hengist-icql-benchmarks'
   #.........................................................................................................
   cfg           =
     # word_count: 100_000
@@ -204,6 +214,7 @@ show_result = ( name, result ) ->
         tmp:    ''
         mem:    ':memory:'
         fle:    'data/icql/copy-schemas-work-{ref}.db'
+        ram:    '/run/user/1000/hengist-icql-benchmarks/copy-schemas-work-{ref}.db'
       temp:
         small:  resolve_path 'data/icql/copy-schemas-benchmarks-temp-{ref}.db'
         big:    resolve_path 'data/icql/copy-schemas-benchmarks-temp-{ref}.db'
@@ -221,8 +232,20 @@ show_result = ( name, result ) ->
       tmp:  [ 'temp_store = file;', ]
       mem:  []
       bare: []
+      ram:  [
+        'page_size = 4096'
+        'cache_size = 16384'
+        'temp_store = MEMORY'
+        'journal_mode = WAL'
+        'locking_mode = EXCLUSIVE'
+        'synchronous = OFF' ]
   #.........................................................................................................
   repetitions   = 3
+  # test_names    = [
+  #   'btsql3_mem_big_vacuum'
+  #   # 'btsql3_ram_big_vacuum'
+  #   'btsql3_ram_small_vacuum'
+  #   ]
   test_names    = [
     'btsql3_mem_big_backup'
     'btsql3_mem_big_vacuum'
@@ -232,6 +255,13 @@ show_result = ( name, result ) ->
     'btsql3_tmp_big_vacuum'
     'btsql3_tmp_small_backup'
     'btsql3_tmp_small_vacuum'
+    # 'btsql3_ram_small_backup'
+    # 'btsql3_ram_big_backup'
+    # 'btsql3_ram_small_vacuum'
+    # 'btsql3_ram_big_vacuum'
+    # 'btsql3_ram_small_copy'
+    # 'btsql3_ram_big_copy'
+
     # 'btsql3_fle_small'
     # 'btsql3_fle_big'
     # 'btsql3_fle_small_bare'
