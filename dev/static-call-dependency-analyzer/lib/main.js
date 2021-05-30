@@ -57,8 +57,8 @@
       "@isa.list x.ignore_names": function(x) {
         return this.isa.list(x.ignore_names);
       },
-      "@isa.list x.ignore_short_paths": function(x) {
-        return this.isa.list(x.ignore_short_paths);
+      "@isa.list x.ignore_spaths": function(x) {
+        return this.isa.list(x.ignore_spaths);
       },
       "@isa.boolean x.verbose": function(x) {
         return this.isa.boolean(x.verbose);
@@ -70,7 +70,7 @@
   defaults.sc_cfg = {
     schema: 'scda',
     ignore_names: [],
-    ignore_short_paths: [],
+    ignore_spaths: [],
     verbose: false
   };
 
@@ -91,7 +91,7 @@
       /* TAINT allow to pass in list of paths */
       this._source_glob = PATH.join(prefix, '*.coffee');
       this.cfg.ignore_names = new Set(this.cfg.ignore_names);
-      this.cfg.ignore_short_paths = new Set(this.cfg.ignore_short_paths);
+      this.cfg.ignore_spaths = new Set(this.cfg.ignore_spaths);
       this.cfg = freeze({...this.cfg, schema, prefix});
       def(this, 'dba', {
         enumerable: false,
@@ -109,65 +109,69 @@
 
     //---------------------------------------------------------------------------------------------------------
     init_db() {
-      /* TAINT short_path might not be unique */
+      /* TAINT spath might not be unique */
       /* TAINT use mirage schema with VNRs, refs */
       return this.dba.execute(`-- ---------------------------------------------------------------------------------------------------
 create table ${this._schema_i}.paths (
-    short_path  text unique not null,
-    path        text primary key );
+    spath       text unique not null primary key,
+    path        text unique not null );
 -- ---------------------------------------------------------------------------------------------------
 create table ${this._schema_i}.occurrences (
-    short_path  text    not null,
+    spath       text    not null,
     lnr         integer not null,
     cnr         integer not null,
     type        text not null,
     role        text not null,
     name        text not null,
-  primary key ( short_path, lnr, cnr ) );`);
+  primary key ( spath, lnr, cnr ) );`);
     }
 
     // -- ---------------------------------------------------------------------------------------------------
+    // create table #{@_schema_i}.directories (
+    //     id          integer primary key,
+    //     path        text unique not null );
+    // -- ---------------------------------------------------------------------------------------------------
     // create table #{@_schema_i}.lines (
-    //     short_path  text    not null,
+    //     spath  text    not null,
     //     lnr         integer not null,
     //     line        text    not null,
-    //   primary key ( short_path, lnr ) );
+    //   primary key ( spath, lnr ) );
 
       //---------------------------------------------------------------------------------------------------------
     add_path(cfg) {
-      var path, short_path;
+      var path, spath;
       ({path} = cfg);
       if ((this.cfg.prefix != null) && path.startsWith(this.cfg.prefix)) {
-        short_path = path.slice(this.cfg.prefix.length);
+        spath = path.slice(this.cfg.prefix.length);
       }
-      if (this.cfg.ignore_short_paths.has(short_path)) {
+      if (this.cfg.ignore_spaths.has(spath)) {
         return null;
       }
-      this.dba.run(`insert into ${this._schema_i}.paths ( short_path, path ) values ( $short_path, $path );`, {short_path, path});
-      return short_path;
+      this.dba.run(`insert into ${this._schema_i}.paths ( spath, path ) values ( $spath, $path );`, {spath, path});
+      return spath;
     }
 
     // #---------------------------------------------------------------------------------------------------------
     // $add_line: ( cfg ) ->
-    //   ### TAINT short_path might not be unique ###
-    //   { short_path
+    //   ### TAINT spath might not be unique ###
+    //   { spath
     //     lnr
     //     line } = cfg
     //   @dba.run """
-    //     insert into #{@_schema_i}.lines ( short_path, lnr, line )
-    //       values ( $short_path, $lnr, $line );""", \
-    //     { short_path, lnr, line, }
+    //     insert into #{@_schema_i}.lines ( spath, lnr, line )
+    //       values ( $spath, $lnr, $line );""", \
+    //     { spath, lnr, line, }
     //   return null
 
       //---------------------------------------------------------------------------------------------------------
     add_occurrence(cfg) {
-      /* TAINT short_path might not be unique */
+      /* TAINT spath might not be unique */
       /* TAINT code duplication */
       /* TAINT use prepared statement */
-      var cnr, lnr, name, role, short_path, type;
-      ({short_path, lnr, cnr, type, role, name} = cfg);
-      this.dba.run(`insert into ${this._schema_i}.occurrences ( short_path, lnr, cnr, type, role, name )
-  values ( $short_path, $lnr, $cnr, $type, $role, $name );`, {short_path, lnr, cnr, type, role, name});
+      var cnr, lnr, name, role, spath, type;
+      ({spath, lnr, cnr, type, role, name} = cfg);
+      this.dba.run(`insert into ${this._schema_i}.occurrences ( spath, lnr, cnr, type, role, name )
+  values ( $spath, $lnr, $cnr, $type, $role, $name );`, {spath, lnr, cnr, type, role, name});
       return null;
     }
 
@@ -178,13 +182,13 @@ create table ${this._schema_i}.occurrences (
 
     //---------------------------------------------------------------------------------------------------------
     _add_sources_line_by_line() {
-      var cnr, d, error, i, len, line, lnr, name, outer_lnr, path, readlines, ref, role, short_path, source_paths, tokenwalker, type;
+      var cnr, d, error, i, len, line, lnr, name, outer_lnr, path, readlines, ref, role, source_paths, spath, tokenwalker, type;
       source_paths = glob.sync(this._source_glob);
 //.......................................................................................................
       for (i = 0, len = source_paths.length; i < len; i++) {
         path = source_paths[i];
-        short_path = this.add_path({path});
-        if (short_path == null) {
+        spath = this.add_path({path});
+        if (spath == null) {
           continue;
         }
         debug('^4445^', path);
@@ -201,7 +205,7 @@ create table ${this._schema_i}.occurrences (
           if (/^\s*#/.test(line)) { // exclude some comments
             continue;
           }
-          // @$add_line { short_path, lnr, line, }
+          // @$add_line { spath, lnr, line, }
           tokenwalker = new Tokenwalker({
             lnr: outer_lnr,
             source: line,
@@ -212,12 +216,12 @@ create table ${this._schema_i}.occurrences (
             // debug '^4433^', tokenwalker
             //...................................................................................................
             for (d of ref) {
-              debug('^33343^', d);
+              // debug '^33343^', d
               ({lnr, cnr, type, name, role} = d);
               if (this.cfg.ignore_names.has(name)) {
                 continue;
               }
-              this.add_occurrence({short_path, lnr, cnr, type, role, name});
+              this.add_occurrence({spath, lnr, cnr, type, role, name});
             }
           } catch (error1) {
             //...................................................................................................
@@ -226,7 +230,7 @@ create table ${this._schema_i}.occurrences (
               throw error;
             }
             /* TAINT add to table `errors` or similar */
-            warn(`^4476^ skipping line ${lnr} of ${short_path} because of syntax error: ${rpr(line)}`);
+            warn(`^4476^ skipping line ${lnr} of ${spath} because of syntax error: ${rpr(line)}`);
             continue;
           }
         }

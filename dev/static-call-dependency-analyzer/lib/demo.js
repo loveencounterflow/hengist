@@ -44,38 +44,29 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_scda = function() {
-    var ignore_names, ignore_short_paths, prefix, scda, schema, sql;
+    var ignore_names, ignore_spaths, prefix, scda, schema, sql;
     schema = 'scda';
     prefix = PATH.resolve(PATH.join(__dirname, '../../../../icql-dba/src'));
     // prefix            = PATH.resolve PATH.join __dirname, '../src'
     ignore_names = ['rpr', 'get_logger', 'require', 'isa', 'type_of', 'text', 'list', 'nonempty_text', 'object', 'cardinal', 'bind'];
-    ignore_short_paths = ['types.coffee', 'common.coffee', 'errors.coffee'];
+    ignore_spaths = ['types.coffee', 'common.coffee', 'errors.coffee'];
     scda = new Scda({
       schema,
       prefix,
       ignore_names,
-      ignore_short_paths,
+      ignore_spaths,
       verbose: false
     });
-    info('^334^', scda);
+    // info '^334^', scda
     //.........................................................................................................
     scda.add_sources();
-    console.table([...(scda.dba.query("select * from scda.paths order by path;"))]);
-    // help '^3344^', row for row from scda.dba.query """
-    //   select * from scda.lines
-    //   where true
-    //     -- and ( lnr between 111 and 123 )
-    //     -- and ( line != '' )
-    //   order by short_path, lnr;"""
-    // console.table [ ( scda.dba.query "select short_path, lnr, name from scda.defs order by name;" )..., ]
-    // console.table [ ( scda.dba.query "select short_path, lnr, type, role, name from scda.occurrences order by name;" )..., ]
-    // console.table [ ( scda.dba.query "select * from scda.occurrences order by name;" )..., ]
-    console.table([...(scda.dba.query("select * from scda.occurrences where role = 'call' order by name, short_path, lnr, cnr;"))]);
-    console.table([...(scda.dba.query("select * from scda.occurrences where role = 'def' order by name, short_path, lnr, cnr;"))]);
+    // console.table [ ( scda.dba.query "select * from scda.paths order by path;" )..., ]
+    // console.table [ ( scda.dba.query "select * from scda.occurrences where role = 'call' order by name, spath, lnr, cnr;" )..., ]
+    // console.table [ ( scda.dba.query "select * from scda.occurrences where role = 'def' order by name, spath, lnr, cnr;" )..., ]
     sql = `select
-    t1.short_path as def_short_path,
+    t1.spath      as def_spath,
     t1.lnr        as def_lnr,
-    t2.short_path as call_short_path,
+    t2.spath      as call_spath,
     t2.lnr        as call_lnr,
     -- t1.cnr        as cnr,
     t1.name       as name
@@ -84,7 +75,7 @@
   where true
     and ( t1.role = 'def' )
     and ( t2.role = 'call' )
-    and ( t1.short_path != t2.short_path )
+    and ( t1.spath != t2.spath )
   order by 1, 2, 3, 4;`;
     console.table([...(scda.dba.query(sql))]);
     //.........................................................................................................
