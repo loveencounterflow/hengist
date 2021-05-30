@@ -36,14 +36,14 @@ declare 'sc_cfg', tests:
   "@isa.nonempty_text x.schema":          ( x ) -> @isa.nonempty_text x.schema
   "@isa_optional.nonempty_text x.prefix": ( x ) -> @isa_optional.nonempty_text x.prefix
   "@isa.list x.ignore_names":             ( x ) -> @isa.list x.ignore_names
-  "@isa.list x.ignore_short_paths":       ( x ) -> @isa.list x.ignore_short_paths
+  "@isa.list x.ignore_spaths":            ( x ) -> @isa.list x.ignore_spaths
   "@isa.boolean x.verbose":               ( x ) -> @isa.boolean x.verbose
 
 #-----------------------------------------------------------------------------------------------------------
 defaults.sc_cfg =
   schema:             'scda'
   ignore_names:       []
-  ignore_short_paths: []
+  ignore_spaths: []
   verbose:            false
 
 
@@ -63,7 +63,7 @@ class @Scda
     ### TAINT allow to pass in list of paths ###
     @_source_glob           = PATH.join prefix, '*.coffee'
     @cfg.ignore_names       = new Set @cfg.ignore_names
-    @cfg.ignore_short_paths = new Set @cfg.ignore_short_paths
+    @cfg.ignore_spaths = new Set @cfg.ignore_spaths
     @cfg                    = freeze { @cfg..., schema, prefix, }
     def @, 'dba', enumerable: false, value: new Dba()
     @dba.open { schema, ram: true, }
@@ -74,67 +74,71 @@ class @Scda
 
   #---------------------------------------------------------------------------------------------------------
   init_db: ->
-    ### TAINT short_path might not be unique ###
+    ### TAINT spath might not be unique ###
     ### TAINT use mirage schema with VNRs, refs ###
     @dba.execute """
       -- ---------------------------------------------------------------------------------------------------
       create table #{@_schema_i}.paths (
-          short_path  text unique not null,
-          path        text primary key );
+          spath       text unique not null primary key,
+          path        text unique not null );
       -- ---------------------------------------------------------------------------------------------------
       create table #{@_schema_i}.occurrences (
-          short_path  text    not null,
+          spath       text    not null,
           lnr         integer not null,
           cnr         integer not null,
           type        text not null,
           role        text not null,
           name        text not null,
-        primary key ( short_path, lnr, cnr ) );
+        primary key ( spath, lnr, cnr ) );
       """
       # -- ---------------------------------------------------------------------------------------------------
+      # create table #{@_schema_i}.directories (
+      #     id          integer primary key,
+      #     path        text unique not null );
+      # -- ---------------------------------------------------------------------------------------------------
       # create table #{@_schema_i}.lines (
-      #     short_path  text    not null,
+      #     spath  text    not null,
       #     lnr         integer not null,
       #     line        text    not null,
-      #   primary key ( short_path, lnr ) );
+      #   primary key ( spath, lnr ) );
 
   #---------------------------------------------------------------------------------------------------------
   add_path: ( cfg ) ->
     { path, }   = cfg
-    short_path  = path[ @cfg.prefix.length... ] if @cfg.prefix? and path.startsWith @cfg.prefix
-    return null if @cfg.ignore_short_paths.has short_path
+    spath  = path[ @cfg.prefix.length... ] if @cfg.prefix? and path.startsWith @cfg.prefix
+    return null if @cfg.ignore_spaths.has spath
     @dba.run """
-      insert into #{@_schema_i}.paths ( short_path, path ) values ( $short_path, $path );""", \
-      { short_path, path, }
-    return short_path
+      insert into #{@_schema_i}.paths ( spath, path ) values ( $spath, $path );""", \
+      { spath, path, }
+    return spath
 
   # #---------------------------------------------------------------------------------------------------------
   # $add_line: ( cfg ) ->
-  #   ### TAINT short_path might not be unique ###
-  #   { short_path
+  #   ### TAINT spath might not be unique ###
+  #   { spath
   #     lnr
   #     line } = cfg
   #   @dba.run """
-  #     insert into #{@_schema_i}.lines ( short_path, lnr, line )
-  #       values ( $short_path, $lnr, $line );""", \
-  #     { short_path, lnr, line, }
+  #     insert into #{@_schema_i}.lines ( spath, lnr, line )
+  #       values ( $spath, $lnr, $line );""", \
+  #     { spath, lnr, line, }
   #   return null
 
   #---------------------------------------------------------------------------------------------------------
   add_occurrence: ( cfg ) ->
-    ### TAINT short_path might not be unique ###
+    ### TAINT spath might not be unique ###
     ### TAINT code duplication ###
     ### TAINT use prepared statement ###
-    { short_path
+    { spath
       lnr
       cnr
       type
       role
       name } = cfg
     @dba.run """
-      insert into #{@_schema_i}.occurrences ( short_path, lnr, cnr, type, role, name )
-        values ( $short_path, $lnr, $cnr, $type, $role, $name );""", \
-      { short_path, lnr, cnr, type, role, name, }
+      insert into #{@_schema_i}.occurrences ( spath, lnr, cnr, type, role, name )
+        values ( $spath, $lnr, $cnr, $type, $role, $name );""", \
+      { spath, lnr, cnr, type, role, name, }
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -145,8 +149,8 @@ class @Scda
     source_paths  = glob.sync @_source_glob
     #.......................................................................................................
     for path in source_paths
-      short_path  = @add_path { path, }
-      continue unless short_path?
+      spath  = @add_path { path, }
+      continue unless spath?
       debug '^4445^', path
       readlines   = new Readlines path
       outer_lnr   = 0
@@ -157,25 +161,25 @@ class @Scda
         #...................................................................................................
         continue if /^\s*$/.test line # exclude blank lines
         continue if /^\s*#/.test line # exclude some comments
-        # @$add_line { short_path, lnr, line, }
+        # @$add_line { spath, lnr, line, }
         tokenwalker = new Tokenwalker { lnr: outer_lnr, source: line, verbose: @cfg.verbose, }
         # debug '^4433^', tokenwalker
         #...................................................................................................
         try
           for d from tokenwalker.walk()
-            debug '^33343^', d
+            # debug '^33343^', d
             { lnr
               cnr
               type
               name
               role } = d
             continue if @.cfg.ignore_names.has name
-            @add_occurrence { short_path, lnr, cnr, type, role, name, }
+            @add_occurrence { spath, lnr, cnr, type, role, name, }
         #...................................................................................................
         catch error
           throw error unless error.name is 'SyntaxError'
           ### TAINT add to table `errors` or similar ###
-          warn "^4476^ skipping line #{lnr} of #{short_path} because of syntax error: #{rpr line}"
+          warn "^4476^ skipping line #{lnr} of #{spath} because of syntax error: #{rpr line}"
           continue
     #.......................................................................................................
     return null
