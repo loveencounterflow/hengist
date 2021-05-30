@@ -20,7 +20,7 @@ Readlines                 = require 'n-readlines'
 glob                      = require 'glob'
 { freeze
   lets }                  = require 'letsfreezethat'
-types                     = require './types'
+types                     = require '../../../apps/scda/lib/types'
 { isa
   type_of
   validate }              = types.export()
@@ -47,13 +47,15 @@ types                     = require './types'
     'bind'
     ]
   ignore_spaths       = [ 'types.coffee', 'common.coffee', 'errors.coffee', ]
-  scda                = new Scda { schema, prefix, ignore_names, ignore_spaths, verbose: false, }
+  dependencies        = [ 'import-export-mixin.coffee', 'main.coffee', ]
+  scda                = new Scda { schema, prefix, ignore_names, ignore_spaths, dependencies, verbose: false, }
   # info '^334^', scda
   #.........................................................................................................
   scda.add_sources()
   # console.table [ ( scda.dba.query "select * from scda.paths order by path;" )..., ]
   # console.table [ ( scda.dba.query "select * from scda.occurrences where role = 'call' order by name, spath, lnr, cnr;" )..., ]
   # console.table [ ( scda.dba.query "select * from scda.occurrences where role = 'def' order by name, spath, lnr, cnr;" )..., ]
+  console.table [ ( scda.dba.query "select * from scda.dependencies;" )..., ]
   sql = """
     select
         t1.spath      as def_spath,
@@ -68,6 +70,11 @@ types                     = require './types'
         and ( t1.role = 'def' )
         and ( t2.role = 'call' )
         and ( t1.spath != t2.spath )
+        and not exists ( select 1 from scda.dependencies as d
+          where true
+            and d.provider_spath  = t1.spath
+            and d.consumer_spath  = t2.spath
+          limit 1 )
       order by 1, 2, 3, 4;
     """
   console.table [ ( scda.dba.query sql )..., ]
