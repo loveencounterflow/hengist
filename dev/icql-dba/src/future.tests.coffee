@@ -238,7 +238,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import() CSV" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   # ramdb_path        = null
   matcher           = null
@@ -251,23 +251,22 @@ types                     = new ( require 'intertype' ).Intertype
     schema            = 'chlex'
     columns           = null
     seen_chrs         = new Set()
+    columns           = [
+      'C1'
+      'C1Type'
+      'C1Pinyin'
+      'C1PRPinyin'
+      'C1Strokes'
+      'C1Pixels'
+      'C1PictureSize'
+      'C1SR'
+      'C1PR'
+      ]
     transform         = ( d ) ->
-      if d.columns?
-        columns = [
-          'C1'
-          'C1Type'
-          'C1Pinyin'
-          'C1PRPinyin'
-          'C1Strokes'
-          'C1Pixels'
-          'C1PictureSize'
-          'C1SR'
-          'C1PR'
-          ]
-        return columns
-      #.....................................................................................................
       return [] if seen_chrs.has d.row.C1
       seen_chrs.add d.row.C1
+      return d.stop if seen_chrs.size > 10
+      debug '^4454^', d.row
       row       = {}
       for column in columns
         value         = d.row[ column ]
@@ -286,7 +285,15 @@ types                     = new ( require 'intertype' ).Intertype
         row[ column ] = value
       return [ row, ]
     #.......................................................................................................
-    dba.import { path: import_path, format: 'csv', schema, ram: true, transform, }
+    cfg =
+      schema:         schema
+      transform:      transform
+      path:           import_path
+      format:         'csv'
+      input_columns:  false
+      skip_first:     true
+      ram:            true
+    dba.import cfg
     #.......................................................................................................
     dba.execute "alter table chlex.main add column cpx_raw integer;"
     dba.execute "alter table chlex.main add column cpx integer;"
@@ -309,7 +316,8 @@ types                     = new ( require 'intertype' ).Intertype
     # update  = dba.prepare "update chlex.main set cpx = cpx_raw / ?;"
     update.run { cpxr_min, cpxr_max, cpxr_delta, cpx_min, cpx_max, cpx_delta, precision, }
     #.......................................................................................................
-    matcher = dba.list dba.query """select C1Type, C1, C1SR, C1PR, cpx from chlex.main order by cpx, cpx_raw asc;"""
+    # matcher = dba.list dba.query """select C1Type, C1, C1SR, C1PR, cpx from chlex.main order by cpx, cpx_raw asc;"""
+    matcher = dba.list dba.query """select * from chlex.main order by cpx, cpx_raw asc;"""
     # for row in matcher
     console.table matcher
     dba.export { schema, path: export_path, }
@@ -449,14 +457,124 @@ types                     = new ( require 'intertype' ).Intertype
   done()
 
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: import TSV; cfg variants" ] = ( T, done ) ->
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  matcher           = null
+  import_path       = H.get_cfg().tsv.micro
+  #.........................................................................................................
+  await do =>
+    whisper '-'.repeat 108
+    dba               = new Dba()
+    schema            = 'tsv'
+    input_columns     = null
+    table_columns     = null
+    transform         = null
+    is_first          = true
+    #.......................................................................................................
+    transform         = ( d ) ->
+      debug '^5847^', d
+      [ ncr, glyph, wbf, ] = d.row
+      if is_first
+        is_first = false
+        T.eq d.row, [ 'ncr', 'glyph', 'wbf', ]
+      T.eq ( type_of d.row ), 'list'
+      return null if ( not ncr? ) or ( not glyph? ) or ( not wbf? )
+      return null unless ( match = wbf.match /^<(?<wbf>[0-9]+)>$/ )?
+      wbf = match.groups.wbf
+      return { c1: ncr, c2: glyph, c3: wbf, }
+      # return { ncr, glyph, wbf, }
+    #.......................................................................................................
+    cfg =
+      schema:         schema
+      transform:      transform
+      path:           import_path
+      format:         'csv'
+      input_columns:  false
+      # columns = [ 'ncr', 'glyph', 'wbf', ]
+      skip_first:     true
+      ram:            true
+      _extra:
+        delimiter:                '\t'
+        # columns:                  [ 'ncr', 'glyph', 'wbf', ]
+        # quotes:                   false ?????????
+        relax_column_count:       true
+    dba.import cfg
+    #.......................................................................................................
+    matcher = dba.list dba.query """select * from tsv.main order by 1, 2, 3;"""
+    # debug '^5697^', matcher
+    console.table matcher
+    T.eq matcher.length,      12
+    T.eq matcher[ 0 ].c1,     'u-cjk-xa-3413'
+    T.eq matcher[ 0 ].c2,     '㐓'
+    T.eq matcher[ 0 ].c3,     '125125'
+    # T.eq matcher[ 0 ].ncr,    'u-cjk-xa-3413'
+    # T.eq matcher[ 0 ].glyph,  '㐓'
+    # T.eq matcher[ 0 ].wbf,    '125125'
+    #.......................................................................................................
+    return null
+  #.........................................................................................................
+  await do =>
+    whisper '-'.repeat 108
+    dba               = new Dba()
+    schema            = 'tsv'
+    transform         = null
+    is_first          = true
+    #.......................................................................................................
+    transform         = ( d ) ->
+      debug '^5847^', d.row
+      { ncr, glyph, wbf, } = d.row
+      if is_first
+        is_first = false
+        T.eq d.row, { ncr: '', }
+      T.eq ( type_of d.row ), 'object'
+      return null if ( not ncr? ) or ( not glyph? ) or ( not wbf? )
+      return null unless ( match = wbf.match /^<(?<wbf>[0-9]+)>$/ )?
+      wbf = match.groups.wbf
+      return { c1: ncr, c2: glyph, c3: wbf, }
+    #.......................................................................................................
+    cfg =
+      schema:         schema
+      transform:      transform
+      path:           import_path
+      format:         'csv'
+      input_columns:  true
+      table_columns:  null
+      # columns = [ 'ncr', 'glyph', 'wbf', ]
+      skip_first:     true
+      ram:            true
+      _extra:
+        delimiter:                '\t'
+        # columns:                  [ 'ncr', 'glyph', 'wbf', ]
+        # quotes:                   false ?????????
+        relax_column_count:       true
+    dba.import cfg
+    #.......................................................................................................
+    # matcher = dba.list dba.query """select * from tsv.main order by 1, 2, 3;"""
+    matcher = dba.list dba.query """select * from tsv.main;"""
+    # debug '^5697^', matcher
+    console.table matcher
+    # T.eq matcher.length,      12
+    # T.eq matcher[ 0 ].ncr,    'u-cjk-xa-3413'
+    # T.eq matcher[ 0 ].glyph,  '㐓'
+    # T.eq matcher[ 0 ].wbf,    '125125'
+    #.......................................................................................................
+    return null
+  #.........................................................................................................
+  done()
+
+
 ############################################################################################################
 if module is require.main then do =>
   # test @
+  test @[ "DBA: import TSV; cfg variants" ]
   # test @[ "___ DBA: import() (four corner)" ]
-  test @[ "___ DBA: import() (big file)" ]
+  # test @[ "___ DBA: import() (big file)" ]
   # test @[ "DBA: open() RAM DB" ]
   # test @[ "DBA: export() RAM DB" ]
   # test @[ "DBA: import() CSV" ]
+  # @[ "DBA: import() CSV" ]()
 
 
 
