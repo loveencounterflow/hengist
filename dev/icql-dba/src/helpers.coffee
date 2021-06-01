@@ -202,6 +202,8 @@ DATOM                     = require 'datom'
       big:    @resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql'
     csv:
       small:  @resolve_path 'assets/icql/chineselexicaldatabase2.1.small.txt'
+    tsv:
+      micro:  @resolve_path 'assets/icql/ncrglyphwbf.tsv'
     db:
       templates:
         micro:  @resolve_path 'assets/icql/micro.db'
