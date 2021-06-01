@@ -25,6 +25,7 @@
     "command-line-usage": "^6.1.0",
     "commander": "7.2.0",
     "convert-source-map": "^1.7.0",
+    "csvtojson": "^2.0.10",
     "cupofjoe": "0.2.1",
     "datom": "8.0.3",
     "deepcopy": "^2.1.0",
