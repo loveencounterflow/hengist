@@ -386,6 +386,9 @@
       csv: {
         small: this.resolve_path('assets/icql/chineselexicaldatabase2.1.small.txt')
       },
+      tsv: {
+        micro: this.resolve_path('assets/icql/ncrglyphwbf.tsv')
+      },
       db: {
         templates: {
           micro: this.resolve_path('assets/icql/micro.db'),
