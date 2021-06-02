@@ -561,7 +561,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import TSV; cfg variants 2" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   matcher           = null
   import_path       = H.get_cfg().tsv.micro
@@ -573,10 +573,11 @@ types                     = new ( require 'intertype' ).Intertype
   is_first          = true
   #.........................................................................................................
   transform         = ( d ) ->
-    # debug '^58472^', d.row
+    urge '^58472^', d.row
     { ncr, glyph, wbf, } = d.row
     T.eq ( type_of d.row ), 'object'
-    return null if ( not ncr? ) or ( not glyph? ) or ( not wbf? )
+    # return null if ( not ncr? ) or ( not glyph? ) or ( not wbf? )
+    if not wbf? then T.fail "^3455^ invalid row #{rpr d.row}"; return null
     return null unless ( match = wbf.match /^<(?<wbf>[0-9]+)>$/ )?
     wbf = match.groups.wbf
     return { c1: ncr, c2: glyph, c3: wbf, }
@@ -639,8 +640,8 @@ types                     = new ( require 'intertype' ).Intertype
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
-  # test @[ "DBA: import TSV; cfg variants 2" ]
+  # test @, { timeout: 10e3, }
+  test @[ "DBA: import TSV; cfg variants 2" ]
   # await @_demo_csv_parser()
   # test @[ "___ DBA: import() (four corner)" ]
   # test @[ "___ DBA: import() (big file)" ]
