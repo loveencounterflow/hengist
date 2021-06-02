@@ -828,7 +828,7 @@ order by wbfs;`;
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: import TSV; cfg variants 2"] = async function(T, done) {
     var Dba, cfg, dba, import_path, is_first, matcher, schema, transform;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     matcher = null;
     import_path = H.get_cfg().tsv.micro;
@@ -841,10 +841,12 @@ order by wbfs;`;
     //.........................................................................................................
     transform = function(d) {
       var glyph, match, ncr, wbf;
-      // debug '^58472^', d.row
+      urge('^58472^', d.row);
       ({ncr, glyph, wbf} = d.row);
       T.eq(type_of(d.row), 'object');
-      if ((ncr == null) || (glyph == null) || (wbf == null)) {
+      // return null if ( not ncr? ) or ( not glyph? ) or ( not wbf? )
+      if (wbf == null) {
+        T.fail(`^3455^ invalid row ${rpr(d.row)}`);
         return null;
       }
       if ((match = wbf.match(/^<(?<wbf>[0-9]+)>$/)) == null) {
@@ -930,14 +932,12 @@ order by wbfs;`;
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      return test(this["DBA: import TSV; cfg variants 2"]);
     })();
   }
 
-  // test @[ "DBA: import TSV; cfg variants 2" ]
-// await @_demo_csv_parser()
+  // await @_demo_csv_parser()
 // test @[ "___ DBA: import() (four corner)" ]
 // test @[ "___ DBA: import() (big file)" ]
 // test @[ "DBA: open() RAM DB" ]
