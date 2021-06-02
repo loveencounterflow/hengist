@@ -419,33 +419,33 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: import() CSV"] = async function(T, done) {
     var Dba, export_path, matcher;
-    // T.halt_on_error()
+    T.halt_on_error();
     ({Dba} = require('../../../apps/icql-dba'));
     // ramdb_path        = null
     matcher = null;
     export_path = H.nonexistant_path_from_ref('import-csv');
-    await (() => {      //.........................................................................................................
+    await (async() => {      //.........................................................................................................
       /* Opening a RAM DB from file */
-      var cfg, columns, cpx_delta, cpx_max, cpx_min, cpxr_delta, cpxr_max, cpxr_min, dba, import_path, precision, schema, seen_chrs, transform, update;
+      var cfg, columns, cpx_delta, cpx_max, cpx_min, cpxr_delta, cpxr_max, cpxr_min, dba, import_path, precision, schema, seen_chrs, table_columns, transform, update;
       dba = new Dba();
       import_path = H.get_cfg().csv.small;
       schema = 'chlex';
       columns = null;
       seen_chrs = new Set();
-      columns = ['C1', 'C1Type', 'C1Pinyin', 'C1PRPinyin', 'C1Strokes', 'C1Pixels', 'C1PictureSize', 'C1SR', 'C1PR'];
+      table_columns = ['C1', 'C1Type', 'C1Pinyin', 'C1PRPinyin', 'C1Strokes', 'C1Pixels', 'C1PictureSize', 'C1SR', 'C1PR'];
       transform = function(d) {
         var column, i, len, row, value;
         if (seen_chrs.has(d.row.C1)) {
           return [];
         }
         seen_chrs.add(d.row.C1);
-        if (seen_chrs.size > 10) {
+        if (seen_chrs.size > 100) {
           return d.stop;
         }
-        debug('^4454^', d.row);
+        // debug '^4454^', d.row
         row = {};
-        for (i = 0, len = columns.length; i < len; i++) {
-          column = columns[i];
+        for (i = 0, len = table_columns.length; i < len; i++) {
+          column = table_columns[i];
           value = d.row[column];
           value = value === 'NA' ? null : value;
           // debug '^4448^', column, value, r
@@ -469,11 +469,12 @@
         transform: transform,
         path: import_path,
         format: 'csv',
-        input_columns: false,
+        input_columns: true,
+        table_columns: table_columns,
         skip_first: true,
         ram: true
       };
-      dba.import(cfg);
+      await dba.import(cfg);
       //.......................................................................................................
       dba.execute("alter table chlex.main add column cpx_raw integer;");
       dba.execute("alter table chlex.main add column cpx integer;");
@@ -481,7 +482,8 @@
       cpxr_max = dba.single_value(dba.query("select max( cpx_raw ) from chlex.main;"));
       cpxr_min = dba.single_value(dba.query("select min( cpx_raw ) from chlex.main;"));
       cpxr_delta = cpxr_max - cpxr_min;
-      cpx_min = 10;
+      // cpx_min     = 10
+      cpx_min = 0;
       cpx_max = 99;
       precision = 0;
       cpx_delta = cpx_max - cpx_min;
@@ -495,8 +497,65 @@
       update.run({cpxr_min, cpxr_max, cpxr_delta, cpx_min, cpx_max, cpx_delta, precision});
       //.......................................................................................................
       // matcher = dba.list dba.query """select C1Type, C1, C1SR, C1PR, cpx from chlex.main order by cpx, cpx_raw asc;"""
-      matcher = dba.list(dba.query(`select * from chlex.main order by cpx, cpx_raw asc;`));
+      matcher = dba.list(dba.query(`select C1Type, C1, cpx from chlex.main order by cpx, cpx_raw asc;`));
+      // matcher = dba.list dba.query """select * from chlex.main order by cpx, cpx_raw asc;"""
       // for row in matcher
+      console.table(matcher);
+      return dba.export({
+        schema,
+        path: export_path
+      });
+    })();
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: import() TSV"] = async function(T, done) {
+    var Dba, export_path, matcher;
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    // ramdb_path        = null
+    matcher = null;
+    export_path = H.nonexistant_path_from_ref('import-tcsv');
+    await (async() => {      //.........................................................................................................
+      /* Opening a RAM DB from file */
+      var cfg, dba, import_path, schema, transform;
+      dba = new Dba();
+      import_path = H.get_cfg().tsv.micro;
+      schema = 'tsv';
+      transform = function(d) {
+        var row;
+        // return d.stop if seen_chrs.size > 10
+        ({row} = d);
+        info('^4454^', row);
+        if (!((row.ncr != null) && (row.glyph != null) && (row.wbf != null))) {
+          return null;
+        }
+        row.wbf = row.wbf.replace(/^<(.*)>$/, '$1');
+        return row;
+      };
+      //.......................................................................................................
+      cfg = {
+        schema: schema,
+        transform: transform,
+        path: import_path,
+        format: 'csv',
+        input_columns: true,
+        // input_columns:  [ 'a', 'b', 'c', ]
+        // table_columns:  [ 'a', 'b', 'c', ]
+        // table_columns:  { a: 'integer', b: 'integer', c: 'text', }
+        skip_first: true,
+        ram: true,
+        _extra: {
+          // headers:    true
+          separator: '\t'
+        }
+      };
+      // mapHeaders: ( { header, index, } ) -> header.toUpperCase()
+      urge('^22432^', (await dba.import(cfg)));
+      //.......................................................................................................
+      matcher = dba.list(dba.query(`select * from tsv.main order by 1, 2, 3;`));
       console.table(matcher);
       return dba.export({
         schema,
@@ -694,157 +753,197 @@ order by wbfs;`;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: import TSV; cfg variants"] = async function(T, done) {
-    var Dba, import_path, matcher;
+  this["DBA: import TSV; cfg variants 1"] = async function(T, done) {
+    var Dba, cfg, dba, import_path, is_first, matcher, schema, table_columns, transform;
+    // T.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
+    matcher = null;
+    import_path = H.get_cfg().tsv.micro;
+    //.........................................................................................................
+    whisper('-'.repeat(108));
+    dba = new Dba();
+    schema = 'tsv';
+    // input_columns     = null
+    table_columns = ['c1', 'c2', 'c3'];
+    transform = null;
+    is_first = true;
+    //.........................................................................................................
+    transform = function(d) {
+      var glyph, match, ncr, wbf;
+      debug('^58471^', d.row);
+      T.eq(type_of(d.row), 'object');
+      ({ncr, glyph, wbf} = d.row);
+      if ((ncr == null) || (glyph == null) || (wbf == null)) {
+        return null;
+      }
+      if ((match = wbf.match(/^<(?<wbf>[0-9]+)>$/)) == null) {
+        return null;
+      }
+      wbf = match.groups.wbf;
+      return {
+        c1: ncr,
+        c2: glyph,
+        c3: wbf
+      };
+    };
+    // return { ncr, glyph, wbf, }
+    //.........................................................................................................
+    cfg = {
+      schema: schema,
+      transform: transform,
+      path: import_path,
+      format: 'csv',
+      input_columns: true,
+      table_columns: {
+        c1: 'text',
+        c2: 'text',
+        c3: 'text'
+      },
+      // columns = [ 'ncr', 'glyph', 'wbf', ]
+      // skip_first:     true
+      ram: true,
+      _extra: {
+        separator: '\t'
+      }
+    };
+    // columns:                  [ 'ncr', 'glyph', 'wbf', ]
+    // quotes:                   false ?????????
+    // relax_column_count:       true
+    await dba.import(cfg);
+    //.........................................................................................................
+    matcher = dba.list(dba.query(`select * from tsv.main order by 1, 2, 3;`));
+    // debug '^5697^', matcher
+    console.table(matcher);
+    T.eq(matcher.length, 12);
+    T.eq(matcher[0].c1, 'u-cjk-xa-3413');
+    T.eq(matcher[0].c2, '㐓');
+    T.eq(matcher[0].c3, '125125');
+    // T.eq matcher[ 0 ].ncr,    'u-cjk-xa-3413'
+    // T.eq matcher[ 0 ].glyph,  '㐓'
+    // T.eq matcher[ 0 ].wbf,    '125125'
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: import TSV; cfg variants 2"] = async function(T, done) {
+    var Dba, cfg, dba, import_path, is_first, matcher, schema, transform;
     T.halt_on_error();
     ({Dba} = require('../../../apps/icql-dba'));
     matcher = null;
     import_path = H.get_cfg().tsv.micro;
-    await (() => {      //.........................................................................................................
-      var cfg, dba, input_columns, is_first, schema, table_columns, transform;
-      whisper('-'.repeat(108));
-      dba = new Dba();
-      schema = 'tsv';
-      input_columns = null;
-      table_columns = null;
-      transform = null;
-      is_first = true;
-      //.......................................................................................................
-      transform = function(d) {
-        var glyph, match, ncr, wbf;
-        debug('^5847^', d);
-        [ncr, glyph, wbf] = d.row;
-        if (is_first) {
-          is_first = false;
-          T.eq(d.row, ['ncr', 'glyph', 'wbf']);
-        }
-        T.eq(type_of(d.row), 'list');
-        if ((ncr == null) || (glyph == null) || (wbf == null)) {
-          return null;
-        }
-        if ((match = wbf.match(/^<(?<wbf>[0-9]+)>$/)) == null) {
-          return null;
-        }
-        wbf = match.groups.wbf;
-        return {
-          c1: ncr,
-          c2: glyph,
-          c3: wbf
-        };
+    //.........................................................................................................
+    whisper('-'.repeat(108));
+    dba = new Dba();
+    schema = 'tsv';
+    transform = null;
+    is_first = true;
+    //.........................................................................................................
+    transform = function(d) {
+      var glyph, match, ncr, wbf;
+      // debug '^58472^', d.row
+      ({ncr, glyph, wbf} = d.row);
+      T.eq(type_of(d.row), 'object');
+      if ((ncr == null) || (glyph == null) || (wbf == null)) {
+        return null;
+      }
+      if ((match = wbf.match(/^<(?<wbf>[0-9]+)>$/)) == null) {
+        return null;
+      }
+      wbf = match.groups.wbf;
+      return {
+        c1: ncr,
+        c2: glyph,
+        c3: wbf
       };
-      // return { ncr, glyph, wbf, }
-      //.......................................................................................................
-      cfg = {
-        schema: schema,
-        transform: transform,
-        path: import_path,
-        format: 'csv',
-        input_columns: false,
-        // columns = [ 'ncr', 'glyph', 'wbf', ]
-        skip_first: true,
-        ram: true,
-        _extra: {
-          delimiter: '\t',
-          // columns:                  [ 'ncr', 'glyph', 'wbf', ]
-          // quotes:                   false ?????????
-          relax_column_count: true
-        }
-      };
-      dba.import(cfg);
-      //.......................................................................................................
-      matcher = dba.list(dba.query(`select * from tsv.main order by 1, 2, 3;`));
-      // debug '^5697^', matcher
-      console.table(matcher);
-      T.eq(matcher.length, 12);
-      T.eq(matcher[0].c1, 'u-cjk-xa-3413');
-      T.eq(matcher[0].c2, '㐓');
-      T.eq(matcher[0].c3, '125125');
-      // T.eq matcher[ 0 ].ncr,    'u-cjk-xa-3413'
-      // T.eq matcher[ 0 ].glyph,  '㐓'
-      // T.eq matcher[ 0 ].wbf,    '125125'
-      //.......................................................................................................
-      return null;
-    })();
-    await (() => {      //.........................................................................................................
-      var cfg, dba, is_first, schema, transform;
-      whisper('-'.repeat(108));
-      dba = new Dba();
-      schema = 'tsv';
-      transform = null;
-      is_first = true;
-      //.......................................................................................................
-      transform = function(d) {
-        var glyph, match, ncr, wbf;
-        debug('^5847^', d.row);
-        ({ncr, glyph, wbf} = d.row);
-        if (is_first) {
-          is_first = false;
-          T.eq(d.row, {
-            ncr: ''
-          });
-        }
-        T.eq(type_of(d.row), 'object');
-        if ((ncr == null) || (glyph == null) || (wbf == null)) {
-          return null;
-        }
-        if ((match = wbf.match(/^<(?<wbf>[0-9]+)>$/)) == null) {
-          return null;
-        }
-        wbf = match.groups.wbf;
-        return {
-          c1: ncr,
-          c2: glyph,
-          c3: wbf
-        };
-      };
-      //.......................................................................................................
-      cfg = {
-        schema: schema,
-        transform: transform,
-        path: import_path,
-        format: 'csv',
-        input_columns: true,
-        table_columns: null,
-        // columns = [ 'ncr', 'glyph', 'wbf', ]
-        skip_first: true,
-        ram: true,
-        _extra: {
-          delimiter: '\t',
-          // columns:                  [ 'ncr', 'glyph', 'wbf', ]
-          // quotes:                   false ?????????
-          relax_column_count: true
-        }
-      };
-      dba.import(cfg);
-      //.......................................................................................................
-      // matcher = dba.list dba.query """select * from tsv.main order by 1, 2, 3;"""
-      matcher = dba.list(dba.query(`select * from tsv.main;`));
-      // debug '^5697^', matcher
-      console.table(matcher);
-      // T.eq matcher.length,      12
-      // T.eq matcher[ 0 ].ncr,    'u-cjk-xa-3413'
-      // T.eq matcher[ 0 ].glyph,  '㐓'
-      // T.eq matcher[ 0 ].wbf,    '125125'
-      //.......................................................................................................
-      return null;
-    })();
+    };
+    //.........................................................................................................
+    cfg = {
+      schema: schema,
+      transform: transform,
+      path: import_path,
+      format: 'tsv',
+      skip_any_null: true,
+      // skip_all_null:  true
+      input_columns: true,
+      table_columns: {
+        c1: 'text',
+        c2: 'text',
+        c3: 'text'
+      },
+      ram: true
+    };
+    await dba.import(cfg);
+    //.........................................................................................................
+    // matcher = dba.list dba.query """select * from tsv.main order by 1, 2, 3;"""
+    matcher = dba.list(dba.query(`select * from tsv.main;`));
+    // debug '^5697^', matcher
+    console.table(matcher);
+    T.eq(matcher.length, 12);
+    T.eq(matcher[0].c1, 'u-cjk-xa-3413');
+    T.eq(matcher[0].c2, '㐓');
+    T.eq(matcher[0].c3, '125125');
+    T.eq(matcher[11].c1, 'u-cjk-xa-3566');
+    T.eq(matcher[11].c2, '㕦');
+    T.eq(matcher[11].c3, '251134');
     //.........................................................................................................
     return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._demo_csv_parser = function() {
+    return new Promise((resolve) => {
+      var Dba, csv, csv_cfg, dba, fs, import_path, rows, tcfg;
+      ({Dba} = require('../../../apps/icql-dba'));
+      dba = new Dba();
+      //.........................................................................................................
+      csv = require('csv-parser');
+      fs = require('fs');
+      tcfg = H.get_cfg();
+      import_path = tcfg.tsv.micro;
+      rows = [];
+      csv_cfg = {
+        separator: '\t',
+        escape: '"',
+        headers: ['foo', 'gnat', 'gnu', 'blah'],
+        // raw:        true
+        skipComments: '#'
+      };
+      // strict:       true
+      csv_cfg = {...dba.types.defaults.dba_import_cfg_csv_extra, ...csv_cfg};
+      debug('^4458577^', csv_cfg);
+      // .pipe csv()
+      fs.createReadStream(import_path).pipe(csv(csv_cfg)).on('data', (d) => {
+        return rows.push(d);
+      }).on('end', () => {
+        var i, len, row;
+        for (i = 0, len = rows.length; i < len; i++) {
+          row = rows[i];
+          info('^54596^', row);
+        }
+        return resolve();
+      });
+      return null;
+    });
   };
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @
-      return test(this["DBA: import TSV; cfg variants"]);
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // test @[ "___ DBA: import() (four corner)" ]
+  // test @[ "DBA: import TSV; cfg variants 2" ]
+// await @_demo_csv_parser()
+// test @[ "___ DBA: import() (four corner)" ]
 // test @[ "___ DBA: import() (big file)" ]
 // test @[ "DBA: open() RAM DB" ]
 // test @[ "DBA: export() RAM DB" ]
 // test @[ "DBA: import() CSV" ]
+// test @[ "DBA: import() TSV" ]
 // @[ "DBA: import() CSV" ]()
 
 }).call(this);
