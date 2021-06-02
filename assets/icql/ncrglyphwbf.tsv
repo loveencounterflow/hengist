@@ -1,7 +1,8 @@
 ncr	glyph	wbf
 
-this line to be discarded
+# this line to be discarded
 
+"a line with \"quotes\""	nothing	empty
 u-cjk-xa-3413	㐓	<125125>
 u-cjk-xa-3414	㐔	<412515>
 u-cjk-xa-3415	㐕	<251215>
