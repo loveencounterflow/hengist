@@ -4,7 +4,7 @@ specifiers:
   '@ef-carbon/deep-freeze': ^1.0.1
   '@scotttrinh/number-ranges': ^2.1.0
   argparse: ^2.0.1
-  better-sqlite3: ^7.3.1
+  better-sqlite3: 7.4.0
   chance: ^1.1.7
   cnd: ^9.2.1
   coffee-lex: ^9.1.5
@@ -13,6 +13,7 @@ specifiers:
   command-line-usage: ^6.1.0
   commander: 7.2.0
   convert-source-map: ^1.7.0
+  csv-parser: ^3.0.0
   cupofjoe: 0.2.1
   datom: 8.0.3
   deepcopy: ^2.1.0
@@ -86,7 +87,7 @@ dependencies:
   '@ef-carbon/deep-freeze': 1.0.1
   '@scotttrinh/number-ranges': 2.1.0
   argparse: 2.0.1
-  better-sqlite3: 7.3.1
+  better-sqlite3: 7.4.0
   chance: 1.1.7
   cnd: 9.2.1
   coffee-lex: 9.1.5
@@ -95,6 +96,7 @@ dependencies:
   command-line-usage: 6.1.1
   commander: 7.2.0
   convert-source-map: 1.7.0
+  csv-parser: 3.0.0
   cupofjoe: 0.2.1
   datom: 8.0.3
   deepcopy: 2.1.0
@@ -458,15 +460,6 @@ packages:
       tar: 6.1.0
     dev: false
 
-  /better-sqlite3/7.3.1:
-    resolution: {integrity: sha512-Io0eWFWEtHsA7KS7Ehm45AGwi5SHeCD1hIHd+b1nj26Tf7rFTBqMltuVDimNMNMJ6f+Oy29RT7XWinv3yWKvIQ==}
-    requiresBuild: true
-    dependencies:
-      bindings: 1.5.0
-      prebuild-install: 6.1.2
-      tar: 6.1.0
-    dev: false
-
   /better-sqlite3/7.4.0:
     resolution: {integrity: sha512-hXwwaFvtYwRfjBSGP6+woB95qbwSnfpXyy/kDFzgOMoDttzyaWsBGcU3FGuRbzhbRv0qpKRCJQ6Hru2pQ8adxg==}
     requiresBuild: true
@@ -784,6 +777,14 @@ packages:
   /crypto-random-string/2.0.0:
     resolution: {integrity: sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==}
     engines: {node: '>=8'}
+    dev: false
+
+  /csv-parser/3.0.0:
+    resolution: {integrity: sha512-s6OYSXAK3IdKqYO33y09jhypG/bSDHPuyCme/IdEHfWpLf/jKcpitVFyOC6UemgGk8v7Q5u2XE0vvwmanxhGlQ==}
+    engines: {node: '>= 10'}
+    hasBin: true
+    dependencies:
+      minimist: 1.2.5
     dev: false
 
   /cupofjoe/0.1.1:
