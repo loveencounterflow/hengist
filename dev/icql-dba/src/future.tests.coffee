@@ -751,6 +751,105 @@ types                     = new ( require 'intertype' ).Intertype
   done()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "___ DBA: safe eventual persistency" ] = ( T, done ) ->
+  # T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  matcher           = null
+  import_path       = H.get_cfg().csv.holes
+  #.........................................................................................................
+  dba               = new Dba()
+  schema            = 'csv'
+  transform         = null
+  is_first          = true
+  #.........................................................................................................
+  transform         = ( d ) ->
+    urge '^58472^', d.row
+    { lnr, ncr, glyph, wbf, } = d.row
+    lnr = parseInt lnr, 10
+    return { lnr, ncr, glyph, wbf, }
+  #.........................................................................................................
+  cfg =
+    schema:         schema
+    transform:      transform
+    path:           import_path
+    # skip_all_null:  true
+    skip_comments:  true
+    default_value:  null
+    input_columns:  true
+    table_columns:  { lnr: 'integer', ncr: 'text', glyph: 'text', wbf: 'text', }
+    ram:            true
+  await dba.import cfg
+  #.........................................................................................................
+  matcher = dba.list dba.query """select * from csv.main order by 1, 2, 3;"""
+  # matcher = dba.list dba.query """select * from csv.main;"""
+  debug '^5697^', matcher
+  console.table matcher
+  process.once 'uncaughtException',  exit_handler
+  process.once 'unhandledRejection', exit_handler
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: virtual tables" ] = ( T, done ) ->
+  ### new in 7.4.0, see https://github.com/JoshuaWise/better-sqlite3/issues/581 ###
+  # T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  FS                = require 'fs'
+  #.........................................................................................................
+  dba               = new Dba()
+  # schema            = 'csv'
+  # schema_i          = dba.as_identifier schema
+  transform         = null
+  is_first          = true
+  #.........................................................................................................
+  cfg =
+    columns: [ 'path', 'data', ],
+    rows: ->
+      for filename in FS.readdirSync __dirname
+        path  = PATH.resolve PATH.join __dirname, filename
+        data  = ( FS.readFileSync path, { encoding: 'utf-8', } ).trim()[ .. 50 ]
+        yield { path, data }
+      return null
+  dba.sqlt.table "files", cfg
+  matcher = dba.list dba.query "select * from files order by data;"
+  console.table matcher
+  #.........................................................................................................
+  cfg =
+    columns: [ 'match', 'capture', ]
+    parameters: [ 'pattern', 'text', ]
+    rows: ( pattern, text ) ->
+      regex = new RegExp pattern, 'g'
+      while ( match = regex.exec text )?
+        yield [ match[ 0 ], match[ 1 ], ]
+      return null
+  dba.sqlt.table 're_matches', cfg
+  sql     = "select pattern, text, match, capture from re_matches( ?, ? ) order by 1, 2, 3, 4;"
+  matcher = dba.list dba.query sql, [ '€([-,.0-9]+)', "between €30,-- and €40,--", ]
+  console.table matcher
+  #.........................................................................................................
+  cfg = ( filename, P... ) ->
+    urge '^46456^', { filename, P, }
+    columns: [ 'path', 'lnr', 'line', ],
+    rows: ->
+      path  = PATH.resolve PATH.join __dirname, '../../../assets/icql', filename
+      lines = ( FS.readFileSync path, { encoding: 'utf-8', } ).split '\n'
+      for line, line_idx in lines
+        yield { path, lnr: line_idx + 1, line, }
+      return null
+  dba.sqlt.table 'file_contents', cfg
+  dba.execute "create virtual table contents_of_wbftsv using file_contents( ncrglyphwbf.tsv, any stuff goes here, and more here );"
+  sql     = "select * from contents_of_wbftsv order by 1, 2, 3;"
+  matcher = dba.list dba.query sql
+  console.table matcher
+  #.........................................................................................................
+  export_path       = H.nonexistant_path_from_ref 'export-virtual-tables'
+  schema            = 'main'
+  dba.export { schema, path: export_path, }
+  urge "^35345^ schema #{rpr schema} exported to #{export_path}"
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
 @_demo_csv_parser = -> new Promise ( resolve ) =>
   { Dba }     = require '../../../apps/icql-dba'
   dba         = new Dba()
@@ -782,7 +881,8 @@ types                     = new ( require 'intertype' ).Intertype
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
+  # test @, { timeout: 10e3, }
+  test @[ "DBA: virtual tables" ]
   # test @[ "DBA: import TSV; cfg variants 2" ]
   # test @[ "DBA: import TSV; cfg variants 2" ]
   # test @[ "DBA: import TSV; cfg variants 3" ]
