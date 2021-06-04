@@ -72,8 +72,8 @@ types                     = require '../../../apps/scda/lib/types'
         and ( t1.spath != t2.spath )
         and not exists ( select 1 from scda.dependencies as d
           where true
-            and d.consumer_spath  = t1.spath
-            and d.provider_spath  = t2.spath
+            and d.provider_spath  = t1.spath
+            and d.consumer_spath  = t2.spath
           limit 1 )
       order by 1, 2, 3, 4;
     """
