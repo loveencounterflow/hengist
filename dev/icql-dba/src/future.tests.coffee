@@ -561,7 +561,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import TSV; cfg variants 2" ] = ( T, done ) ->
-  # T.halt_on_error()
+  T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   matcher           = null
   import_path       = H.get_cfg().tsv.micro
@@ -709,13 +709,44 @@ types                     = new ( require 'intertype' ).Intertype
     { lnr: 15, ncr: 'u-cjk-xa-3565', glyph: '㕥', wbf: '<25134>' }
     { lnr: 16, ncr: 'u-cjk-xa-3566', glyph: '㕦', wbf: '<251134>' }
     { lnr: 17, ncr: 'EMPTY', glyph: 'EMPTY', wbf: 'EMPTY' } ]
-  # T.eq matcher.length,      12
-  # T.eq matcher[ 0  ].ncr,   'u-cjk-xa-3413'
-  # T.eq matcher[ 0  ].glyph, '㐓'
-  # T.eq matcher[ 0  ].wbf,   '125125'
-  # T.eq matcher[ 11 ].ncr,   'u-cjk-xa-3566'
-  # T.eq matcher[ 11 ].glyph, '㕦'
-  # T.eq matcher[ 11 ].wbf,   '251134'
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: import CSV; cfg variants 5" ] = ( T, done ) ->
+  # T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  matcher           = null
+  import_path       = H.get_cfg().csv.holes
+  #.........................................................................................................
+  whisper '-'.repeat 108
+  dba               = new Dba()
+  schema            = 'csv'
+  transform         = null
+  is_first          = true
+  #.........................................................................................................
+  transform         = ( d ) ->
+    urge '^58472^', d.row
+    { lnr, ncr, glyph, wbf, } = d.row
+    lnr = parseInt lnr, 10
+    return { lnr, ncr, glyph, wbf, }
+  #.........................................................................................................
+  cfg =
+    schema:         schema
+    transform:      transform
+    path:           import_path
+    # skip_all_null:  true
+    skip_comments:  true
+    default_value:  null
+    input_columns:  true
+    table_columns:  { lnr: 'integer', ncr: 'text', glyph: 'text', wbf: 'text', }
+    ram:            true
+  await dba.import cfg
+  #.........................................................................................................
+  matcher = dba.list dba.query """select * from csv.main order by 1, 2, 3;"""
+  # matcher = dba.list dba.query """select * from csv.main;"""
+  debug '^5697^', matcher
+  console.table matcher
   #.........................................................................................................
   done()
 
@@ -751,10 +782,12 @@ types                     = new ( require 'intertype' ).Intertype
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
+  test @, { timeout: 10e3, }
+  # test @[ "DBA: import TSV; cfg variants 2" ]
   # test @[ "DBA: import TSV; cfg variants 2" ]
   # test @[ "DBA: import TSV; cfg variants 3" ]
-  test @[ "DBA: import TSV; cfg variants 4" ]
+  # test @[ "DBA: import TSV; cfg variants 4" ]
+  # test @[ "DBA: import CSV; cfg variants 5" ]
   # await @_demo_csv_parser()
   # test @[ "___ DBA: import() (four corner)" ]
   # test @[ "___ DBA: import() (big file)" ]

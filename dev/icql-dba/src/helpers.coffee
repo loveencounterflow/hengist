@@ -202,6 +202,7 @@ DATOM                     = require 'datom'
       big:    @resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql'
     csv:
       small:  @resolve_path 'assets/icql/chineselexicaldatabase2.1.small.txt'
+      holes:  @resolve_path 'assets/icql/ncrglyphwbf-with-holes.csv'
     tsv:
       micro:  @resolve_path 'assets/icql/ncrglyphwbf.tsv'
       holes:  @resolve_path 'assets/icql/ncrglyphwbf-with-holes.tsv'

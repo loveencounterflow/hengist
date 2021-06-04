@@ -1,0 +1,6 @@
+lnr,ncr,glyph,wbf
+1
+#, this line to be discarded
+2,""," "
+3,"a line with ""quotes""",nothing,empty
+4," first field ","  second\tfield", "third field"
