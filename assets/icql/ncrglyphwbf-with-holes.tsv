@@ -1,0 +1,18 @@
+lnr	ncr	glyph	wbf
+1
+2	# this line to be discarded
+3
+4	"a line with \"quotes\""	nothing	empty
+5	u-cjk-xa-3413	㐓	<125125>
+6	u-cjk-xa-3414	㐔	<412515>
+7	u-cjk-xa-3415	㐕	<251215>
+8	u-cjk-xa-3416	㐖	<1212515>
+9		㐗	<1213355>
+10	u-cjk-xa-34ab		<121135>
+11	u-cjk-xa-342a	㐪		extra field
+12	u-cjk-xa-342b	㐫	<413452>
+13	u-cjk-xa-3563	㕣	<34251>
+14	u-cjk-xa-3564	㕤	<25135>
+15	u-cjk-xa-3565	㕥	<25134>
+16	u-cjk-xa-3566	㕦	<251134>
+17

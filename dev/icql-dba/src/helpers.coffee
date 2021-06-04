@@ -204,6 +204,7 @@ DATOM                     = require 'datom'
       small:  @resolve_path 'assets/icql/chineselexicaldatabase2.1.small.txt'
     tsv:
       micro:  @resolve_path 'assets/icql/ncrglyphwbf.tsv'
+      holes:  @resolve_path 'assets/icql/ncrglyphwbf-with-holes.tsv'
     db:
       templates:
         micro:  @resolve_path 'assets/icql/micro.db'
