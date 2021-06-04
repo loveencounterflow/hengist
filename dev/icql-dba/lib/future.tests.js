@@ -948,6 +948,165 @@ order by wbfs;`;
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["DBA: import TSV; cfg variants 4"] = async function(T, done) {
+    var Dba, cfg, dba, import_path, is_first, matcher, schema, transform;
+    // T.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
+    matcher = null;
+    import_path = H.get_cfg().tsv.holes;
+    //.........................................................................................................
+    whisper('-'.repeat(108));
+    dba = new Dba();
+    schema = 'tsv';
+    transform = null;
+    is_first = true;
+    //.........................................................................................................
+    transform = function(d) {
+      var glyph, lnr, ncr, wbf;
+      urge('^58472^', d.row);
+      ({lnr, ncr, glyph, wbf} = d.row);
+      lnr = parseInt(lnr, 10);
+      return {lnr, ncr, glyph, wbf};
+    };
+    //.........................................................................................................
+    cfg = {
+      schema: schema,
+      transform: transform,
+      path: import_path,
+      // skip_all_null:  true
+      skip_comments: false,
+      default_value: 'EMPTY',
+      input_columns: true,
+      table_columns: {
+        lnr: 'integer',
+        ncr: 'text',
+        glyph: 'text',
+        wbf: 'text'
+      },
+      ram: true
+    };
+    await dba.import(cfg);
+    //.........................................................................................................
+    matcher = dba.list(dba.query(`select * from tsv.main order by 1, 2, 3;`));
+    // matcher = dba.list dba.query """select * from tsv.main;"""
+    debug('^5697^', matcher);
+    console.table(matcher);
+    T.eq(matcher, [
+      {
+        lnr: 1,
+        ncr: 'EMPTY',
+        glyph: 'EMPTY',
+        wbf: 'EMPTY'
+      },
+      {
+        lnr: 2,
+        ncr: '# this line to be discarded',
+        glyph: 'EMPTY',
+        wbf: 'EMPTY'
+      },
+      {
+        lnr: 3,
+        ncr: 'EMPTY',
+        glyph: 'EMPTY',
+        wbf: 'EMPTY'
+      },
+      {
+        lnr: 4,
+        ncr: '"a line with \\"quotes\\""',
+        glyph: 'nothing',
+        wbf: 'empty'
+      },
+      {
+        lnr: 5,
+        ncr: 'u-cjk-xa-3413',
+        glyph: '㐓',
+        wbf: '<125125>'
+      },
+      {
+        lnr: 6,
+        ncr: 'u-cjk-xa-3414',
+        glyph: '㐔',
+        wbf: '<412515>'
+      },
+      {
+        lnr: 7,
+        ncr: 'u-cjk-xa-3415',
+        glyph: '㐕',
+        wbf: '<251215>'
+      },
+      {
+        lnr: 8,
+        ncr: 'u-cjk-xa-3416',
+        glyph: '㐖',
+        wbf: '<1212515>'
+      },
+      {
+        lnr: 9,
+        ncr: 'EMPTY',
+        glyph: '㐗',
+        wbf: '<1213355>'
+      },
+      {
+        lnr: 10,
+        ncr: 'u-cjk-xa-34ab',
+        glyph: 'EMPTY',
+        wbf: '<121135>'
+      },
+      {
+        lnr: 11,
+        ncr: 'u-cjk-xa-342a',
+        glyph: '㐪',
+        wbf: 'EMPTY'
+      },
+      {
+        lnr: 12,
+        ncr: 'u-cjk-xa-342b',
+        glyph: '㐫',
+        wbf: '<413452>'
+      },
+      {
+        lnr: 13,
+        ncr: 'u-cjk-xa-3563',
+        glyph: '㕣',
+        wbf: '<34251>'
+      },
+      {
+        lnr: 14,
+        ncr: 'u-cjk-xa-3564',
+        glyph: '㕤',
+        wbf: '<25135>'
+      },
+      {
+        lnr: 15,
+        ncr: 'u-cjk-xa-3565',
+        glyph: '㕥',
+        wbf: '<25134>'
+      },
+      {
+        lnr: 16,
+        ncr: 'u-cjk-xa-3566',
+        glyph: '㕦',
+        wbf: '<251134>'
+      },
+      {
+        lnr: 17,
+        ncr: 'EMPTY',
+        glyph: 'EMPTY',
+        wbf: 'EMPTY'
+      }
+    ]);
+    // T.eq matcher.length,      12
+    // T.eq matcher[ 0  ].ncr,   'u-cjk-xa-3413'
+    // T.eq matcher[ 0  ].glyph, '㐓'
+    // T.eq matcher[ 0  ].wbf,   '125125'
+    // T.eq matcher[ 11 ].ncr,   'u-cjk-xa-3566'
+    // T.eq matcher[ 11 ].glyph, '㕦'
+    // T.eq matcher[ 11 ].wbf,   '251134'
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this._demo_csv_parser = function() {
     return new Promise((resolve) => {
       var Dba, csv, csv_cfg, dba, fs, import_path, rows, tcfg;
@@ -989,7 +1148,8 @@ order by wbfs;`;
     (() => {
       // test @, { timeout: 10e3, }
       // test @[ "DBA: import TSV; cfg variants 2" ]
-      return test(this["DBA: import TSV; cfg variants 3"]);
+      // test @[ "DBA: import TSV; cfg variants 3" ]
+      return test(this["DBA: import TSV; cfg variants 4"]);
     })();
   }
 

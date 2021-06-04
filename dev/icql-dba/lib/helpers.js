@@ -387,7 +387,8 @@
         small: this.resolve_path('assets/icql/chineselexicaldatabase2.1.small.txt')
       },
       tsv: {
-        micro: this.resolve_path('assets/icql/ncrglyphwbf.tsv')
+        micro: this.resolve_path('assets/icql/ncrglyphwbf.tsv'),
+        holes: this.resolve_path('assets/icql/ncrglyphwbf-with-holes.tsv')
       },
       db: {
         templates: {
