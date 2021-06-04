@@ -932,12 +932,14 @@ order by wbfs;`;
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      return test(this["DBA: import TSV; cfg variants 2"]);
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // await @_demo_csv_parser()
+  // test @[ "DBA: import TSV; cfg variants 2" ]
+// await @_demo_csv_parser()
 // test @[ "___ DBA: import() (four corner)" ]
 // test @[ "___ DBA: import() (big file)" ]
 // test @[ "DBA: open() RAM DB" ]
