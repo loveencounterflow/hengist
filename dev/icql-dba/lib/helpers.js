@@ -384,7 +384,8 @@
         big: this.resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql')
       },
       csv: {
-        small: this.resolve_path('assets/icql/chineselexicaldatabase2.1.small.txt')
+        small: this.resolve_path('assets/icql/chineselexicaldatabase2.1.small.txt'),
+        holes: this.resolve_path('assets/icql/ncrglyphwbf-with-holes.csv')
       },
       tsv: {
         micro: this.resolve_path('assets/icql/ncrglyphwbf.tsv'),
