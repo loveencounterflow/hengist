@@ -577,7 +577,7 @@ types                     = new ( require 'intertype' ).Intertype
     { ncr, glyph, wbf, } = d.row
     T.eq ( type_of d.row ), 'object'
     # return null if ( not ncr? ) or ( not glyph? ) or ( not wbf? )
-    if not wbf? then T.fail "^3455^ invalid row #{rpr d.row}"; return null
+    # if not wbf? then T.fail "^3455^ invalid row #{rpr d.row}"; return null
     return null unless ( match = wbf.match /^<(?<wbf>[0-9]+)>$/ )?
     wbf = match.groups.wbf
     return { c1: ncr, c2: glyph, c3: wbf, }
@@ -594,8 +594,8 @@ types                     = new ( require 'intertype' ).Intertype
     ram:            true
   await dba.import cfg
   #.........................................................................................................
-  # matcher = dba.list dba.query """select * from tsv.main order by 1, 2, 3;"""
-  matcher = dba.list dba.query """select * from tsv.main;"""
+  matcher = dba.list dba.query """select * from tsv.main order by 1, 2, 3;"""
+  # matcher = dba.list dba.query """select * from tsv.main;"""
   # debug '^5697^', matcher
   console.table matcher
   T.eq matcher.length,      12
@@ -605,6 +605,54 @@ types                     = new ( require 'intertype' ).Intertype
   T.eq matcher[ 11 ].c1,    'u-cjk-xa-3566'
   T.eq matcher[ 11 ].c2,    '㕦'
   T.eq matcher[ 11 ].c3,    '251134'
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: import TSV; cfg variants 3" ] = ( T, done ) ->
+  # T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  matcher           = null
+  import_path       = H.get_cfg().tsv.micro
+  #.........................................................................................................
+  whisper '-'.repeat 108
+  dba               = new Dba()
+  schema            = 'tsv'
+  transform         = null
+  is_first          = true
+  #.........................................................................................................
+  transform         = ( d ) ->
+    urge '^58472^', d.row
+    { ncr, glyph, wbf, } = d.row
+    T.eq ( type_of d.row ), 'object'
+    # return null if ( not ncr? ) or ( not glyph? ) or ( not wbf? )
+    if not wbf? then T.fail "^3455^ invalid row #{rpr d.row}"; return null
+    return null unless ( match = wbf.match /^<(?<wbf>[0-9]+)>$/ )?
+    wbf = match.groups.wbf
+    return { ncr, glyph, wbf, }
+  #.........................................................................................................
+  cfg =
+    schema:         schema
+    transform:      transform
+    path:           import_path
+    format:         'tsv'
+    skip_all_null:  true
+    skip_comments:  true
+    input_columns:  true
+    ram:            true
+  await dba.import cfg
+  #.........................................................................................................
+  matcher = dba.list dba.query """select * from tsv.main order by 1, 2, 3;"""
+  # matcher = dba.list dba.query """select * from tsv.main;"""
+  # debug '^5697^', matcher
+  console.table matcher
+  T.eq matcher.length,      12
+  T.eq matcher[ 0  ].ncr,   'u-cjk-xa-3413'
+  T.eq matcher[ 0  ].glyph, '㐓'
+  T.eq matcher[ 0  ].wbf,   '125125'
+  T.eq matcher[ 11 ].ncr,   'u-cjk-xa-3566'
+  T.eq matcher[ 11 ].glyph, '㕦'
+  T.eq matcher[ 11 ].wbf,   '251134'
   #.........................................................................................................
   done()
 
@@ -640,8 +688,9 @@ types                     = new ( require 'intertype' ).Intertype
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
+  # test @, { timeout: 10e3, }
   # test @[ "DBA: import TSV; cfg variants 2" ]
+  test @[ "DBA: import TSV; cfg variants 3" ]
   # await @_demo_csv_parser()
   # test @[ "___ DBA: import() (four corner)" ]
   # test @[ "___ DBA: import() (big file)" ]
