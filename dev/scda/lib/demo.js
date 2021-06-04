@@ -50,7 +50,7 @@
     // prefix            = PATH.resolve PATH.join __dirname, '../src'
     ignore_names = ['rpr', 'get_logger', 'require', 'isa', 'type_of', 'text', 'list', 'nonempty_text', 'object', 'cardinal', 'bind'];
     ignore_spaths = ['types.coffee', 'common.coffee', 'errors.coffee'];
-    dependencies = ['import-export-mixin.coffee', 'main.coffee'];
+    dependencies = ['main.coffee', 'import-export-mixin.coffee', 'sql-mixin.coffee'];
     scda = new Scda({
       schema,
       prefix,
@@ -81,8 +81,8 @@
     and ( t1.spath != t2.spath )
     and not exists ( select 1 from scda.dependencies as d
       where true
-        and d.provider_spath  = t1.spath
-        and d.consumer_spath  = t2.spath
+        and d.consumer_spath  = t1.spath
+        and d.provider_spath  = t2.spath
       limit 1 )
   order by 1, 2, 3, 4;`;
     console.table([...(scda.dba.query(sql))]);
