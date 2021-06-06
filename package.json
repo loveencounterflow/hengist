@@ -36,6 +36,7 @@
     "exec-sh": "0.3.5",
     "execall": "^2.0.0",
     "executive": "^1.6.3",
+    "exit-hook": "^2.2.1",
     "fast-copy": "^2.1.0",
     "fraction.js": "^4.0.13",
     "get-source": "^2.0.11",
@@ -91,6 +92,7 @@
     "strip-ansi": "^6.0.0",
     "tempy": "^1.0.1",
     "text-metrics": "^2.0.2",
+    "through2": "^4.0.2",
     "to-width": "^1.1.0",
     "trash": "^7.1.1",
     "validate-npm-package-name": "^3.0.0"
