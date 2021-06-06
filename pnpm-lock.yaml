@@ -24,6 +24,7 @@ specifiers:
   exec-sh: 0.3.5
   execall: ^2.0.0
   executive: ^1.6.3
+  exit-hook: ^2.2.1
   fast-copy: ^2.1.0
   fraction.js: ^4.0.13
   get-source: ^2.0.11
@@ -79,6 +80,7 @@ specifiers:
   strip-ansi: ^6.0.0
   tempy: ^1.0.1
   text-metrics: ^2.0.2
+  through2: ^4.0.2
   to-width: ^1.1.0
   trash: ^7.1.1
   validate-npm-package-name: ^3.0.0
@@ -107,6 +109,7 @@ dependencies:
   exec-sh: 0.3.5
   execall: 2.0.0
   executive: 1.6.3
+  exit-hook: 2.2.1
   fast-copy: 2.1.1
   fraction.js: 4.0.13
   get-source: 2.0.11
@@ -162,6 +165,7 @@ dependencies:
   strip-ansi: 6.0.0
   tempy: 1.0.1
   text-metrics: 2.0.3
+  through2: 4.0.2
   to-width: 1.1.0
   trash: 7.1.1
   validate-npm-package-name: 3.0.0
@@ -1166,6 +1170,11 @@ packages:
   /executive/1.6.3:
     resolution: {integrity: sha512-rXF6Kkqsyw6MDh8iYMGykA7b6awkXiMfoXcByWK3Fjvyw4xWCvkAU9qyKNOjLUt2NGl6RXjdJXQGw2dgPid8dQ==}
     engines: {node: '>=6.0.0'}
+    dev: false
+
+  /exit-hook/2.2.1:
+    resolution: {integrity: sha512-eNTPlAD67BmP31LDINZ3U7HSF8l57TxOY2PmBJ1shpCvpnxBF93mWCE8YHBnXs8qiUZJc9WDcWIeC3a2HIAMfw==}
+    engines: {node: '>=6'}
     dev: false
 
   /expand-template/2.0.3:
@@ -3344,6 +3353,12 @@ packages:
     dependencies:
       readable-stream: 2.3.7
       xtend: 4.0.2
+    dev: false
+
+  /through2/4.0.2:
+    resolution: {integrity: sha512-iOqSav00cVxEEICeD7TjLB1sueEL+81Wpzp2bY17uZjZN0pWZPuo4suZ/61VujxmqSGFfgOcNuTZ85QJwNZQpw==}
+    dependencies:
+      readable-stream: 3.6.0
     dev: false
 
   /timsort/0.3.0:
