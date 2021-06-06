@@ -1,7 +1,8 @@
 (function() {
   'use strict';
-  var CND, H, PATH, badge, debug, echo, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
-    indexOf = [].indexOf;
+  var CND, H, PATH, badge, debug, echo, help, info, isa, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
+    indexOf = [].indexOf,
+    modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
   CND = require('cnd');
@@ -36,6 +37,13 @@
   ({isa, type_of, validate, validate_list_of} = types.export());
 
   // { to_width }              = require 'to-width'
+  on_process_exit = require('exit-hook');
+
+  sleep = function(dts) {
+    return new Promise((done) => {
+      return setTimeout(done, dts * 1000);
+    });
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open()"] = async function(T, done) {
@@ -1148,6 +1156,64 @@ order by wbfs;`;
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["DBA: import TSV; big file"] = async function(T, done) {
+    var Dba, cfg, count, dba, import_path, is_first, matcher, schema, transform;
+    // T.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
+    matcher = null;
+    import_path = '../../../assets/jzrds/shape/shape-breakdown-formula-v2.txt';
+    import_path = PATH.resolve(PATH.join(__dirname, import_path));
+    debug('^343^', import_path);
+    //.........................................................................................................
+    whisper('-'.repeat(108));
+    dba = new Dba();
+    schema = 'formulas';
+    transform = null;
+    is_first = true;
+    count = 0;
+    //.........................................................................................................
+    transform = async function(d) {
+      if (modulo(count, 10_000) === 0) {
+        // return d.stop if count > 100_000
+        urge('^45543^', count);
+      }
+      if (d.row.glyph === '&cb#x3320;') {
+        urge('^45543^', count, d.row);
+      }
+      count++;
+      echo('transform', d.row);
+      await sleep(0);
+      // { ncr, glyph, formula, } = d.row
+      // return d.row
+      return null;
+    };
+    // on_process_exit ->
+    //   for glyph, cpunt of xxxx_seen_glyphs
+    //     debug '^334^', glyph, count unless count is 1
+    //.........................................................................................................
+    cfg = {
+      schema: schema,
+      transform: transform,
+      format: 'tsv',
+      path: import_path,
+      // skip_all_null:  true
+      skip_comments: true,
+      default_value: null,
+      input_columns: ['ncr', 'glyph', 'formula'],
+      // table_columns:  { lnr: 'integer', ncr: 'text', glyph: 'text', wbf: 'text', }
+      ram: true
+    };
+    await dba.import(cfg);
+    //.........................................................................................................
+    matcher = dba.list(dba.query(`select * from formulas.main order by 1, 2, 3;`));
+    // matcher = dba.list dba.query """select * from csv.main;"""
+    debug('^5697^', matcher);
+    console.table(matcher);
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["___ DBA: safe eventual persistency"] = async function(T, done) {
     var Dba, cfg, dba, import_path, is_first, matcher, schema, transform;
     // T.halt_on_error()
@@ -1198,9 +1264,9 @@ order by wbfs;`;
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: virtual tables"] = function(T, done) {
-    var Dba, FS, cfg, dba, export_path, is_first, matcher, schema, sql, transform;
+    var Dba, FS, cfg, dba, export_path, is_first, matcher, path, schema, sql, transform;
     /* new in 7.4.0, see https://github.com/JoshuaWise/better-sqlite3/issues/581 */
-    // T.halt_on_error()
+    T.halt_on_error();
     ({Dba} = require('../../../apps/icql-dba'));
     FS = require('fs');
     //.........................................................................................................
@@ -1275,6 +1341,62 @@ order by wbfs;`;
     matcher = dba.list(dba.query(sql));
     console.table(matcher);
     //.........................................................................................................
+    cfg = {
+      columns: ['n'],
+      parameters: ['start', 'stop', 'step'],
+      rows: function*(start, stop, step = null) {
+        var n;
+        if (stop == null) {
+          stop = start;
+        }
+        if (step == null) {
+          step = 1;
+        }
+        n = start;
+        while (true) {
+          if (n > stop) {
+            break;
+          }
+          // if n %% 2 is 0 then yield [ "*#{n}*", ]
+          // else                yield [ n, ]
+          yield [n];
+          n += step;
+        }
+        return null;
+      }
+    };
+    dba.sqlt.table('generate_series', cfg);
+    console.table(dba.list(dba.query("select * from generate_series( ?, ? )", [1, 5])));
+    console.table(dba.list(dba.query("select * from generate_series( ?, ?, ? )", [1, 10, 2])));
+    console.table(dba.list(dba.query("select * from generate_series( ?, ?, ? ) limit 10;", [500, 2e308, 1234])));
+    //.........................................................................................................
+    cfg = {
+      columns: ['path', 'vnr', 'line', 'vnr_h'],
+      parameters: ['_path'],
+      rows: function*(path) {
+        var bytes, line, lnr, readlines, vnr, vnr_h, vnr_json;
+        readlines = new (require('n-readlines'))(path);
+        lnr = 0;
+        while ((bytes = readlines.next()) !== false) {
+          lnr++;
+          vnr = [lnr];
+          vnr_json = JSON.stringify(vnr);
+          line = bytes.toString('utf-8');
+          vnr_h = dba.as_hollerith(vnr);
+          yield [path, vnr_json, line, vnr_h];
+        }
+        return null;
+      }
+    };
+    dba.sqlt.table('readlines', cfg);
+    path = H.get_cfg().tsv.micro;
+    urge(`^44558^ reading from ${path}`);
+    dba.execute("create table foolines ( path text, vnr json, line text, vnr_h bytea );");
+    // dba.execute "insert into foolines select * from readlines( ? );", [ path, ]
+    dba.execute(`insert into foolines select * from readlines( ${dba.as_sql(path)} );`);
+    // console.table dba.list dba.query "select * from readlines( ? ) order by vnr_h;", [ path, ]
+    console.table(dba.list(dba.query("select * from foolines;")));
+    //.........................................................................................................
     export_path = H.nonexistant_path_from_ref('export-virtual-tables');
     schema = 'main';
     dba.export({
@@ -1327,11 +1449,14 @@ order by wbfs;`;
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      return test(this["DBA: virtual tables"]);
+      return test(this["DBA: import TSV; big file"], {
+        timeout: 60e3
+      });
     })();
   }
 
-  // test @[ "DBA: import TSV; cfg variants 2" ]
+  // test @[ "DBA: virtual tables" ]
+// test @[ "DBA: import TSV; cfg variants 2" ]
 // test @[ "DBA: import TSV; cfg variants 2" ]
 // test @[ "DBA: import TSV; cfg variants 3" ]
 // test @[ "DBA: import TSV; cfg variants 4" ]
