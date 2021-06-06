@@ -767,17 +767,18 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
   transform         = null
   is_first          = true
   count             = 0
-  #.........................................................................................................
-  transform         = ( d ) ->
-    # return d.stop if count > 100_000
-    urge '^45543^', count if count %% 10_000 is 0
-    urge '^45543^', count, d.row if d.row.glyph is '&cb#x3320;'
-    count++
-    echo 'transform', d.row
-    await sleep 0
-    # { ncr, glyph, formula, } = d.row
-    # return d.row
-    return null
+  transform         = null
+  # #.........................................................................................................
+  # transform         = ( d ) ->
+  #   # return d.stop if count > 100_000
+  #   urge '^45543^', count if count %% 10_000 is 0
+  #   urge '^45543^', count, d.row if d.row.glyph is '&cb#x3320;'
+  #   count++
+  #   echo 'transform', d.row
+  #   await sleep 0
+  #   # { ncr, glyph, formula, } = d.row
+  #   return d.row
+    # return null
   # on_process_exit ->
   #   for glyph, cpunt of xxxx_seen_glyphs
   #     debug '^334^', glyph, count unless count is 1
@@ -795,10 +796,24 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
     ram:            true
   await dba.import cfg
   #.........................................................................................................
-  matcher = dba.list dba.query """select * from formulas.main order by 1, 2, 3;"""
+  matcher = dba.list dba.query """
+    select
+        *
+      from formulas.main
+      where true
+        and ( glyph not like '&%' )
+        and ( formula not in ( '∅', '▽', '●' ) )
+        and ( formula not like '%(%' )
+        and ( formula not like '%&%' )
+      order by formula
+      limit 300;"""
   # matcher = dba.list dba.query """select * from csv.main;"""
-  debug '^5697^', matcher
+  # debug '^5697^', matcher
   console.table matcher
+  formula_count     = dba.first_value dba.query """select count(*) from formulas.main;"""
+  export_path       = H.nonexistant_path_from_ref 'export-formulas'
+  help "^343589^ exporting #{formula_count} rows to #{export_path}"
+  dba.export { schema, path: export_path, }
   #.........................................................................................................
   done()
 
