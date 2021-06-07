@@ -1,7 +1,8 @@
 (function() {
   'use strict';
   var CND, H, PATH, badge, debug, echo, help, info, isa, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
-    indexOf = [].indexOf;
+    indexOf = [].indexOf,
+    modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
   CND = require('cnd');
@@ -1175,11 +1176,12 @@ order by wbfs;`;
     transform = function(d) {
       var elements, formula, glyph, ncr;
       count++;
-      if (count < 15_000) {
-        return null;
-      }
       if (count > 15_100) {
+        // return null if count < 15_000
         return d.stop;
+      }
+      if (modulo(count, 1000) === 0) {
+        urge('^346664^', count);
       }
       ({ncr, glyph, formula} = d.row);
       elements = null;
@@ -1210,32 +1212,74 @@ order by wbfs;`;
     //.........................................................................................................
     non_components = new Set(Array.from("()[]§'≈'●⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻〓≈ ↻↔ ↕ ▽"));
     spread_cfg = {
-      columns: ['nr', 'component'],
+      columns: ['nr', 'element'],
       parameters: ['elements'],
       rows: function*(elements) {
-        var component, components, i, idx, len;
+        var element, i, idx, len;
         elements = JSON.parse(elements);
-        components = elements;
 // components  = ( d for d in components when not non_components.has d )
-        for (idx = i = 0, len = components.length; i < len; idx = ++i) {
-          component = components[idx];
-          yield [idx + 1, component];
+        for (idx = i = 0, len = elements.length; i < len; idx = ++i) {
+          element = elements[idx];
+          yield [idx + 1, element];
         }
         return null;
       }
     };
     dba.sqlt.table('spread', spread_cfg);
     // console.table dba.list dba.query """select glyph, formula, spread( elements ) from main;"""
-    console.table(dba.list(dba.query(`select
-    v1.ncr,
-    v1.glyph,
-    v1.formula,
-    v2.nr,
-    v2.component
+    dba.execute(`create table formulas.elements (
+glyph text    not null,
+nr1   integer not null,
+nr2   integer default 0,
+nr3   integer default 0,
+nr4   integer default 0,
+nr5   integer default 0,
+nr6   integer default 0,
+e1    text    not null,
+e2    text,
+e3    text,
+e4    text,
+e5    text,
+e6    text );`);
+    urge('^4486^', "inserting elements level 1");
+    dba.execute(`insert into formulas.elements ( glyph, nr1, e1 ) select
+    v1.glyph    as glyph,
+    v2.nr       as nr1,
+    v2.element  as e1
   from
     main                  as v1,
     spread( v1.elements ) as v2
-  limit 500;`)));
+  -- limit 500
+  ;`);
+    urge('^4486^', "inserting elements level 2");
+    dba.execute(`insert into formulas.elements ( glyph, nr1, nr2, e1, e2 ) select
+    v1.glyph    as glyph,
+    v1.nr1      as nr1,
+    v2.nr1      as nr2,
+    v1.e1       as e1,
+    v2.e1       as e2
+  from
+    formulas.elements     as v1
+  join
+    formulas.elements     as v2
+    on ( true
+      and ( v1.glyph  = v2.glyph  )
+      and ( v1.nr1    = v2.nr1    ) )
+  limit 500
+  ;`);
+    console.table(dba.list(dba.query(`select * from formulas.elements limit 10;`)));
+    console.table(dba.list(dba.query(`select * from formulas.elements where glyph in ( '凁', '凂', '一', '凃', '丁', '凄', '丂', '凲', '並' );`)));
+    // console.table dba.list dba.query """
+    //   select
+    //       v1.ncr,
+    //       v1.glyph,
+    //       v1.formula,
+    //       v2.nr,
+    //       v2.element
+    //     from
+    //       main                  as v1,
+    //       spread( v1.elements ) as v2
+    //     limit 500;"""
     // dba.execute """
     //   create view formulas.occurrences as select 1;"""
     // dba.execute """update formulas.main set xformula0 = glyph || '[' || formula || ']';"""
@@ -1255,7 +1299,7 @@ order by wbfs;`;
     // debug '^5697^', matcher
     formula_count = dba.first_value(dba.query(`select count(*) from formulas.main;`));
     export_path = H.nonexistant_path_from_ref('export-formulas');
-    help(`^343589^ exporting ${formula_count} rows to ${export_path}`);
+    help(`^343589^ exporting ${formula_count} formulas to ${export_path}`);
     dba.export({
       schema,
       path: export_path
