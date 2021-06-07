@@ -1156,7 +1156,7 @@ order by wbfs;`;
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: import TSV; big file"] = async function(T, done) {
-    var Dba, cfg, count, dba, export_path, formula_count, import_path, is_first, matcher, schema, transform;
+    var Dba, count, dba, export_path, formula_count, import_cfg, import_path, is_first, matcher, non_components, schema, spread_cfg, transform;
     // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     matcher = null;
@@ -1171,22 +1171,26 @@ order by wbfs;`;
     is_first = true;
     count = 0;
     transform = null;
-    // #.........................................................................................................
-    // transform         = ( d ) ->
-    //   # return d.stop if count > 100_000
-    //   urge '^45543^', count if count %% 10_000 is 0
-    //   urge '^45543^', count, d.row if d.row.glyph is '&cb#x3320;'
-    //   count++
-    //   echo 'transform', d.row
-    //   await sleep 0
-    //   # { ncr, glyph, formula, } = d.row
-    //   return d.row
-    // return null
-    // on_process_exit ->
-    //   for glyph, cpunt of xxxx_seen_glyphs
-    //     debug '^334^', glyph, count unless count is 1
     //.........................................................................................................
-    cfg = {
+    transform = function(d) {
+      var elements, formula, glyph, ncr;
+      count++;
+      if (count < 15_000) {
+        return null;
+      }
+      if (count > 15_100) {
+        return d.stop;
+      }
+      ({ncr, glyph, formula} = d.row);
+      elements = null;
+      elements = formula.replace(/(&[a-z0-9\x23]+;|.)/gu, '"$1",');
+      elements = elements.slice(0, elements.length - 1);
+      elements = `[${elements}]`;
+      // debug '^4697^', { ncr, glyph, formula, elements, }
+      return {ncr, glyph, formula, elements};
+    };
+    //.........................................................................................................
+    import_cfg = {
       schema: schema,
       transform: transform,
       format: 'tsv',
@@ -1195,24 +1199,60 @@ order by wbfs;`;
       skip_comments: true,
       default_value: null,
       input_columns: ['ncr', 'glyph', 'formula'],
+      table_columns: ['ncr', 'glyph', 'formula', 'elements'],
       // table_columns:  { lnr: 'integer', ncr: 'text', glyph: 'text', wbf: 'text', }
       ram: true
     };
-    await dba.import(cfg);
+    await dba.import(import_cfg);
+    console.table(dba.list(dba.query(`select * from formulas.main limit 10;`)));
     //.........................................................................................................
-    matcher = dba.list(dba.query(`select
-    *
-  from formulas.main
-  where true
-    and ( glyph not like '&%' )
-    and ( formula not in ( '∅', '▽', '●' ) )
-    and ( formula not like '%(%' )
-    and ( formula not like '%&%' )
-  order by formula
-  limit 300;`));
-    // matcher = dba.list dba.query """select * from csv.main;"""
+    urge('^4486^', "updating...");
+    //.........................................................................................................
+    non_components = new Set(Array.from("()[]§'≈'●⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻〓≈ ↻↔ ↕ ▽"));
+    spread_cfg = {
+      columns: ['nr', 'component'],
+      parameters: ['elements'],
+      rows: function*(elements) {
+        var component, components, i, idx, len;
+        elements = JSON.parse(elements);
+        components = elements;
+// components  = ( d for d in components when not non_components.has d )
+        for (idx = i = 0, len = components.length; i < len; idx = ++i) {
+          component = components[idx];
+          yield [idx + 1, component];
+        }
+        return null;
+      }
+    };
+    dba.sqlt.table('spread', spread_cfg);
+    // console.table dba.list dba.query """select glyph, formula, spread( elements ) from main;"""
+    console.table(dba.list(dba.query(`select
+    v1.ncr,
+    v1.glyph,
+    v1.formula,
+    v2.nr,
+    v2.component
+  from
+    main                  as v1,
+    spread( v1.elements ) as v2
+  limit 500;`)));
+    // dba.execute """
+    //   create view formulas.occurrences as select 1;"""
+    // dba.execute """update formulas.main set xformula0 = glyph || '[' || formula || ']';"""
+    // dba.execute """update formulas.main set xformula = glyph || '[' || formula || ']';"""
+    //.........................................................................................................
+    // matcher = dba.list dba.query """
+    //   select
+    //       *
+    //     from formulas.main
+    //     where true
+    //       and ( glyph not like '&%' )
+    //       and ( formula not in ( '∅', '▽', '●' ) )
+    //       and ( formula not like '%(%' )
+    //       and ( formula not like '%&%' )
+    //     order by formula
+    //     limit 300;"""
     // debug '^5697^', matcher
-    console.table(matcher);
     formula_count = dba.first_value(dba.query(`select count(*) from formulas.main;`));
     export_path = H.nonexistant_path_from_ref('export-formulas');
     help(`^343589^ exporting ${formula_count} rows to ${export_path}`);
@@ -1357,9 +1397,7 @@ order by wbfs;`;
       parameters: ['start', 'stop', 'step'],
       rows: function*(start, stop, step = null) {
         var n;
-        if (stop == null) {
-          stop = start;
-        }
+        // stop ?= start
         if (step == null) {
           step = 1;
         }
