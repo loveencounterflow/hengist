@@ -1,5 +1,6 @@
 
 
+'use strict'
 
 
 ############################################################################################################
@@ -16,16 +17,17 @@ help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
-TAP                       = require 'tap'
-{ IDL, IDLX, }            = require '../..'
+test                      = require 'guy-test'
+{ IDL, IDLX, }            = require '../../../apps/mojikura-idl'
+types                     = new ( require 'intertype' ).Intertype()
 { isa
   type_of
   validate
-  equals   }              = require '../types'
+  equals   }              = types.export()
 
 
 #-----------------------------------------------------------------------------------------------------------
-TAP.test "(IDLX) solitaires", ( T ) ->
+@[ "(IDLX) solitaires" ] = ( T, done ) ->
   probes_and_matchers = [
     [ '↻', 'unary_operator',   ]
     [ '〓', 'proxy',            ]
@@ -42,11 +44,11 @@ TAP.test "(IDLX) solitaires", ( T ) ->
     urge ( CND.truth equals result, matcher ), JSON.stringify [ probe, result, ]
     T.ok equals result, matcher
   #.........................................................................................................
-  T.end()
+  done()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-TAP.test "(IDLX) get_formula", ( T ) ->
+@[ "(IDLX) get_formula" ] = ( T, done ) ->
   probes_and_matchers = [
     [ '⿱⿰天天⿰天天',                '⿱⿰天天⿰天天',                ]
     [ '⿰(⿱一八土)⿱山电',          '⿰(⿱一八土)⿱山电'              ]
@@ -66,7 +68,7 @@ TAP.test "(IDLX) get_formula", ( T ) ->
     urge ( CND.truth equals result, matcher ), JSON.stringify [ probe, result, ]
     T.ok equals result, matcher
   #.........................................................................................................
-  T.end()
+  done()
   return null
 
 ###
@@ -100,6 +102,11 @@ info ( CND.yellow '⿱⿱𫝀口㐄'    ), ( CND.blue @IDLX.normalize_formula '�
 info ( CND.yellow '⿱𫝀⿱口㐄'    ), ( CND.blue @IDLX.normalize_formula '⿱𫝀⿱口㐄'                       )
 info ( CND.yellow '⿰韋(⿱白大十)' ), ( CND.blue @IDLX.normalize_formula '⿰韋(⿱白大十)'                    )
 ###
+
+############################################################################################################
+if module is require.main then do =>
+  test @
+
 
 
 
