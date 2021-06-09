@@ -137,22 +137,147 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo = function() {
-    var _, d, element, formula, formulas, glyph, i, idx, j, len, len1, registry;
+    var registry;
     // debug '^4575^', new @X '㭹', [ '⿰杛玄', '⿰木弦', ]
-    registry = [];
-    // registry[ '㭹' ]  = new @Glyph '㭹', ( @Formula.from '⿰杛玄' ), ( @Formula.from '⿰木弦' )
-    // registry[ '弦' ]  = new @Glyph '弦', ( @Formula.from '⿰弓玄' )
-    // registry[ '杛' ]  = new @Glyph '杛', ( @Formula.from '⿰木弓' )
-    // registry[ '玄' ]  = new @Glyph '玄', ( @Formula.from '⿱亠幺' ), ( @Formula.from '⿱丶𢆰' ), ( @Formula.from '⿰𤣥丶' )
+    return registry = [];
+  };
+
+  // registry[ '㭹' ]  = new @Glyph '㭹', ( @Formula.from '⿰杛玄' ), ( @Formula.from '⿰木弦' )
+  // registry[ '弦' ]  = new @Glyph '弦', ( @Formula.from '⿰弓玄' )
+  // registry[ '杛' ]  = new @Glyph '杛', ( @Formula.from '⿰木弓' )
+  // registry[ '玄' ]  = new @Glyph '玄', ( @Formula.from '⿱亠幺' ), ( @Formula.from '⿱丶𢆰' ), ( @Formula.from '⿰𤣥丶' )
+  // registry[ '㭹' ]  = new @Glyph '㭹', new @Formulas ( @Formula.from '⿰杛玄' ), ( @Formula.from '⿰木弦' )
+  // registry[ '弦' ]  = new @Glyph '弦', new @Formulas ( @Formula.from '⿰弓玄' )
+  // registry[ '杛' ]  = new @Glyph '杛', new @Formulas ( @Formula.from '⿰木弓' )
+  // registry[ '玄' ]  = new @Glyph '玄', new @Formulas ( @Formula.from '⿱亠幺' ), ( @Formula.from '⿱丶𢆰' ), ( @Formula.from '⿰𤣥丶' )
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.string_demo = function() {
+    var IDLX, cformula, chr, chrs, component, components, count, glyph, i, idx, j, k, len, len1, non_components, rcformula, ref, ref1, ref2, registry;
+    IDLX = require('../../../../../io/mingkwai-rack/mojikura-idl');
+    non_components = new Set(Array.from("|()[]{}§'≈'●⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻〓≈ ↻↔ ↕ ▽"));
+    registry = {};
+    registry['弦'] = '{弦|⿰弓玄}';
+    registry['杛'] = '{杛|⿰木弓}';
+    registry['木'] = '{木|⿻十人}';
+    registry['㭹'] = '{㭹|⿰杛玄|⿰木弦}';
+    registry['十'] = '{十|⿻一丨}';
+    registry['人'] = '{人|⿰丿㇏}';
+    registry['玄'] = '{玄|⿱亠幺|⿱丶𢆰|⿰𤣥丶}';
+    for (glyph in registry) {
+      cformula = registry[glyph];
+      chrs = Array.from(cformula);
+      while (true) {
+        // info '^558^', glyph, cformula
+        count = 0;
+        for (idx = i = 3, ref = chrs.length - 1; (3 <= ref ? i < ref : i > ref); idx = 3 <= ref ? ++i : --i) {
+          chr = chrs[idx];
+          if (non_components.has(chr)) {
+            continue;
+          }
+          if ((rcformula = registry[chr]) == null) {
+            continue;
+          }
+          count++;
+          chrs.splice(idx, 1, Array.from(rcformula));
+        }
+        if (count === 0) {
+          break;
+        }
+      }
+      registry[glyph] = chrs = chrs.flat().join('');
+    }
+    for (glyph in registry) {
+      cformula = registry[glyph];
+      urge('^443^', glyph, cformula);
+      components = new Set();
+      ref1 = this.SFX_expand(glyph, cformula);
+      for (j = 0, len = ref1.length; j < len; j++) {
+        rcformula = ref1[j];
+        ref2 = [...cformula];
+        for (k = 0, len1 = ref2.length; k < len1; k++) {
+          component = ref2[k];
+          if (component === glyph) {
+            continue;
+          }
+          if (non_components.has(component)) {
+            continue;
+          }
+          components.add(component);
+        }
+        help('^443^', glyph, rcformula);
+      }
+      info('^4568^', glyph, [...components].join(''));
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.SFX_expand = function(glyph, cformula) {
+    var cformulas, choice, choices, collector, hint, i, j, len, len1, match, new_formula, position, prefix, ref, suffix, term, term_pattern;
+    // declare
+    collector = null; // text[];
+    cformulas = [cformula]; // text[]  :=  array[ cformula ];
+    term_pattern = /(?<term>\{[^{}]+\})/u; // text    :=  '\{[^{}}]+\}';
+    match = null;
+    term = null; // text;
+    position = null; // integer;
+    prefix = null; // text;
+    suffix = null; // text;
+    choice = null; // text;
+    choices = null; // text[];
+    hint = ''; // text    :=  '';
+    new_formula = null; // text;
+    while (true) {
+      //.........................................................................................................
+      // begin
+      collector = [];
+//.......................................................................................................
+      for (i = 0, len = cformulas.length; i < len; i++) {
+        cformula = cformulas[i];
+        //.....................................................................................................
+        if ((match = cformula.match(term_pattern)) != null) {
+          term = match.groups.term;
+          // debug '^222^', rpr term
+          position = cformula.indexOf(term);
+          prefix = position === 0 ? '' : cformula.slice(0, +(position - 1) + 1 || 9e9);
+          suffix = (ref = cformula.slice(position + term.length)) != null ? ref : '';
+          choices = term.slice(1, +(term.length - 2) + 1 || 9e9).split('|');
+// urge '^44472^', { cformula, position, }
+// urge '^44472^', { prefix, term, suffix, }
+// urge '^44472^', { choices, }
+//...................................................................................................
+          for (j = 0, len1 = choices.length; j < len1; j++) {
+            choice = choices[j];
+            new_formula = prefix + choice + suffix;
+            // debug '^33423^', glyph, new_formula
+            // debug '^33423^', glyph, collector
+            // if not array[ new_formula ] <@ collector then
+            // if false
+            collector.push(new_formula);
+          }
+        }
+      }
+      //.......................................................................................................
+      if (collector.length === 0) {
+        return Array.from(new Set(cformulas));
+      }
+      //.......................................................................................................
+      // cformulas = U.array_unique( collector );
+      cformulas = Array.from(new Set(collector));
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.list_demo = function() {
+    var _, d, element, formula, formulas, glyph, i, idx, j, len, len1, registry;
+    registry = {};
     registry['㭹'] = ['㭹', [...'⿰杛玄'], [...'⿰木弦']];
     registry['弦'] = ['弦', [...'⿰弓玄']];
     registry['杛'] = ['杛', [...'⿰木弓']];
     registry['玄'] = ['玄', [...'⿱亠幺'], [...'⿱丶𢆰'], [...'⿰𤣥丶']];
     registry['木'] = ['木', [...'⿻十人']];
-// registry[ '㭹' ]  = new @Glyph '㭹', new @Formulas ( @Formula.from '⿰杛玄' ), ( @Formula.from '⿰木弦' )
-// registry[ '弦' ]  = new @Glyph '弦', new @Formulas ( @Formula.from '⿰弓玄' )
-// registry[ '杛' ]  = new @Glyph '杛', new @Formulas ( @Formula.from '⿰木弓' )
-// registry[ '玄' ]  = new @Glyph '玄', new @Formulas ( @Formula.from '⿱亠幺' ), ( @Formula.from '⿱丶𢆰' ), ( @Formula.from '⿰𤣥丶' )
     for (glyph in registry) {
       d = registry[glyph];
       [_, ...formulas] = d;
@@ -180,7 +305,8 @@
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
-      return (await this.demo());
+      // await @list_demo()
+      return (await this.string_demo());
     })();
   }
 
