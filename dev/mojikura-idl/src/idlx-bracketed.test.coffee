@@ -1,5 +1,6 @@
 
 
+'use strict'
 
 
 ############################################################################################################
@@ -16,18 +17,19 @@ help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
-TAP                       = require 'tap'
-{ IDL, IDLX, }            = require '../..'
+test                      = require '../../../apps/guy-test'
+{ IDL, IDLX, }            = require '../../../apps/mojikura-idl'
+types                     = new ( require 'intertype' ).Intertype()
 { isa
   type_of
   validate
-  equals   }              = require '../types'
+  equals   }              = types.export()
 
 
 #===========================================================================================================
 # TESTS (IDLX)
 #-----------------------------------------------------------------------------------------------------------
-TAP.test "(IDLX) bracketed formulas (simple)", ( T ) ->
+@[ "(IDLX) bracketed formulas (simple)" ] = ( T, done ) ->
   probes_and_matchers = [
     ["(⿰亻聿式)",["⿰","亻","聿","式"]]
     ["(⿱北㓁允)",["⿱","北","㓁","允"]]
@@ -42,11 +44,11 @@ TAP.test "(IDLX) bracketed formulas (simple)", ( T ) ->
     T.ok equals result, matcher
     # T.ok true
   #.........................................................................................................
-  T.end()
+  done()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-TAP.test "(IDLX) bracketed formulas (advanced)", ( T ) ->
+@[ "(IDLX) bracketed formulas (advanced)" ] = ( T, done ) ->
   probes_and_matchers = [
     ["(⿱&jzr#xe223;一八⿰(⿱&jzr#xe223;一八)(⿱&jzr#xe223;一八))",["⿱","","一","八",["⿰",["⿱","","一","八"],["⿱","","一","八"]]]]
     ["(⿱(⿰亻聿式)一口)",["⿱",["⿰","亻","聿","式"],"一","口"]]
@@ -68,18 +70,19 @@ TAP.test "(IDLX) bracketed formulas (advanced)", ( T ) ->
     T.ok equals result, matcher
     # T.ok true
   #.........................................................................................................
-  T.end()
+  done()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-TAP.test "(IDLX) reject bogus formulas", ( T ) ->
+@[ "(IDLX) reject bogus formulas" ] = ( T, done ) ->
+  # T.halt_on_error()
   probes_and_matchers = [
-    ["⿲木木木","invalid syntax at index 0 (⿲木木木)\nUnexpected \"⿲\"\n"]
-    ["木","invalid syntax at index 0 (木)\nUnexpected \"木\"\n"]
-    [42,"expected a text, got a number"]
+    ["⿲木木木",'Syntax error at index 0 (⿲木木木)\nUnexpected "⿲".']
+    ["木",'Syntax error at index 0 (木)\nUnexpected "木".']
+    [42,'expected a text, got a float']
     ["","expected a non-empty text, got an empty text"]
-    ["⿱⿰亻式⿱目八木木木","invalid syntax at index 7 (⿱⿰亻式⿱目八木木木)\nUnexpected \"木\"\n"]
-    ["⿺廴聿123","invalid syntax at index 3 (⿺廴聿123)\nUnexpected \"1\"\n"]
+    ["⿱⿰亻式⿱目八木木木",'Syntax error at index 7 (⿱⿰亻式⿱目八木木木)\nUnexpected "木".']
+    ["⿺廴聿123",'Syntax error at index 3 (⿺廴聿123)\nUnexpected "1".']
     ["⿺","Syntax Error: '⿺'"]
     ["⿺⿺⿺⿺","Syntax Error: '⿺⿺⿺⿺'"]
 #     ["()","IDLX: unexpected right bracket [ ( ✘ ) ✘  ]"]
@@ -101,13 +104,25 @@ TAP.test "(IDLX) reject bogus formulas", ( T ) ->
       T.fail "expected an exception, got result #{rpr result}"
     catch error
       { message, } = error
-      urge JSON.stringify [ probe, message, ]
-     T.ok equals message, matcher
+      unless message.startsWith matcher
+        urge '^334^', "probe:             ", rpr probe
+        warn '^334^', "expected message:  ", ( rpr matcher )[ ... 100 ]
+        help '^334^', "got message:       ", ( rpr message )[ ... 100 ]
+        message = ( rpr message )[ ... 100 ]
+        T.fail "message #{rpr message} doesn't start with #{rpr matcher}"
+      else
+        T.ok true
   #.........................................................................................................
-  T.end()
+  done()
   return null
 
 ###
 ###
+
+
+############################################################################################################
+if module is require.main then do =>
+  test @
+  # test @[ "(IDLX) reject bogus formulas" ]
 
 

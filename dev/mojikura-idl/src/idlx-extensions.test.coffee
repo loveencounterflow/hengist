@@ -1,4 +1,6 @@
 
+'use strict'
+
 
 
 
@@ -16,30 +18,21 @@ help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
-TAP                       = require 'tap'
-{ IDL, IDLX, }            = require '../..'
+test                      = require '../../../apps/guy-test'
+{ IDL, IDLX, }            = require '../../../apps/mojikura-idl'
+types                     = new ( require 'intertype' ).Intertype()
 { isa
   type_of
   validate
-  equals   }              = require '../types'
+  equals   }              = types.export()
 
 
-#===========================================================================================================
-# TESTS (IDLX)
 #-----------------------------------------------------------------------------------------------------------
-TAP.test "(IDLX) simple formulas", ( T ) ->
+@[ "(IDLX) extra solitaires" ] = ( T, done ) ->
   probes_and_matchers = [
-    ["⿱刀口",["⿱","刀","口"]]
-    ["⿱癶⿰弓貝",["⿱","癶",["⿰","弓","貝"]]]
-    ["⿱⿰亻式貝",["⿱",["⿰","亻","式"],"貝"]]
-    ["⿱⿰亻式⿱目八",["⿱",["⿰","亻","式"],["⿱","目","八"]]]
-    ["⿺辶言",["⿺","辶","言"]]
-    ["⿰ab",["⿰","a","b"]]
-    ["⿰⿰abc",["⿰",["⿰","a","b"],"c"]]
-    ["⿱⿱刀口乙",["⿱",["⿱","刀","口"],"乙"]]
-    ["⿱⿱刀口乙",["⿱",["⿱","刀","口"],"乙"]]
-    ["⿱&jzr#xe24a;&jzr#xe11d;",["⿱","",""]]
-    ["⿰𠁣𠃛",["⿰","𠁣","𠃛"]]
+    ["●","●"]
+    ["▽","▽"]
+    ["∅","∅"]
     ]
   for [ probe, matcher, ] in probes_and_matchers
     # result = resume_next T, -> IDLX.parse probe
@@ -48,11 +41,40 @@ TAP.test "(IDLX) simple formulas", ( T ) ->
     # urge ( rpr probe ), result
     T.ok equals result, matcher
   #.........................................................................................................
-  T.end()
+  done()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-TAP.test "(IDLX) reject bogus formulas", ( T ) ->
+@[ "(IDLX) extensions" ] = ( T, done ) ->
+  probes_and_matchers = [
+    [ '⿱〓〓', [ '⿱', '〓', '〓' ]]
+    [ '⿺走⿹◰口〓日', [ '⿺', '走', [ '⿹', [ '◰', '口', '〓' ], '日' ] ], ]
+    ["⿱丶⿵𠘨§",["⿱","丶",["⿵","𠘨","§"]]]
+    [ '↻正', [ '↻', '正', ], ]
+    [ '↔≈匕', [ '↔', [ '≈', '匕' ] ], ]
+    [ '≈正', [ '≈', '正', ], ]
+    [ '<正', [ '<', '正', ], ]
+    [ '>正', [ '>', '正', ], ]
+    [ '?正', [ '?', '正', ], ]
+    [ '↻正', [ '↻', '正', ], ]
+    [ '↔正', [ '↔', '正', ], ]
+    [ '↕正', [ '↕', '正', ], ]
+    [ '≈𪜀', [ '≈', '𪜀', ], ]
+    ["≈〇",["≈","〇"]]
+    ]
+  for [ probe, matcher, ] in probes_and_matchers
+    # result = resume_next T, -> IDLX.parse probe
+    result = IDLX.parse probe
+    urge ( CND.truth equals result, matcher ), JSON.stringify [ probe, result, ]
+    # urge ( rpr probe ), result
+    T.ok equals result, matcher
+  #.........................................................................................................
+  done()
+  return null
+
+###
+#-----------------------------------------------------------------------------------------------------------
+@[ "(IDLX) reject bogus formulas" ] = ( T, done ) ->
   probes_and_matchers = [
     ["⿲木木木","invalid syntax at index 0 (⿲木木木)\nUnexpected \"⿲\"\n"]
     ["木","invalid syntax at index 0 (木)\nUnexpected \"木\"\n"]
@@ -76,6 +98,12 @@ TAP.test "(IDLX) reject bogus formulas", ( T ) ->
   #.........................................................................................................
   T.end()
   return null
+###
 
+
+
+############################################################################################################
+if module is require.main then do =>
+  test @
 
 

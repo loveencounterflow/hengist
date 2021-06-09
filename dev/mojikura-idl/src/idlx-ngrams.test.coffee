@@ -16,7 +16,7 @@ help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
-test                      = require 'guy-test'
+test                      = require '../../../apps/guy-test'
 { IDL, IDLX, }            = require '../../../apps/mojikura-idl'
 types                     = new ( require 'intertype' ).Intertype()
 { isa
