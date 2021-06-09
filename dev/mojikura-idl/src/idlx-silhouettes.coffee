@@ -16,12 +16,17 @@ help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
-TAP                       = require 'tap'
-{ IDLX, }                 = require '../..'
+test                      = require 'guy-test'
+{ IDL, IDLX, }            = require '../../../apps/mojikura-idl'
+types                     = new ( require 'intertype' ).Intertype()
+{ isa
+  type_of
+  validate
+  equals   }              = types.export()
 
 
 #-----------------------------------------------------------------------------------------------------------
-TAP.test "(IDLX) silhouettes", ( T ) ->
+@[ "(IDLX) silhouettes" ] = ( T, done ) ->
   probes_and_matchers = [
     ["⿱⿰⿵𠘨䖝⿵𠘨䖝⿰⿵𠘨䖝⿵𠘨䖝","bbb..b..bb..b.."]
     ["⿱⿰⿵&#123;䖝⿵𠘨䖝⿰⿵𠘨䖝⿵𠘨䖝","bbb..b..bb..b.."]
@@ -45,7 +50,14 @@ TAP.test "(IDLX) silhouettes", ( T ) ->
     debug JSON.stringify [ probe, result, ]
     if result == matcher then T.ok true
     else T.fail "#{rpr probe}: expected #{rpr matcher}, got #{rpr result}"
-  T.end()
+  done()
+
+
+
+############################################################################################################
+if module is require.main then do =>
+  test @
+
 
 
 
