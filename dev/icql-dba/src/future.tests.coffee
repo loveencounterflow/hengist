@@ -854,7 +854,7 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
       limit 500
       ;"""
   console.table dba.list dba.query """select * from formulas.elements limit 10;"""
-  console.table dba.list dba.query """select * from formulas.elements where glyph in ( '凁', '凂', '一', '凃', '丁', '凄', '丂', '凲', '並' );"""
+  console.table dba.list dba.query """select * from formulas.elements where glyph in ( '凁', '凂', '一', '凃', '丁', '凄', '丂', '凲', '並' ) order by nr1, nr2;"""
   # console.table dba.list dba.query """
   #   select
   #       v1.ncr,
