@@ -1,7 +1,8 @@
 (function() {
-  //###########################################################################################################
-  var CND, IDL, IDLX, TAP, alert, badge, debug, echo, equals, help, info, isa, log, rpr, type_of, urge, validate, warn, whisper;
+  'use strict';
+  var CND, IDL, IDLX, alert, badge, debug, echo, equals, help, info, isa, log, rpr, test, type_of, types, urge, validate, warn, whisper;
 
+  //###########################################################################################################
   CND = require('cnd');
 
   rpr = CND.rpr;
@@ -27,14 +28,16 @@
   echo = CND.echo.bind(CND);
 
   //...........................................................................................................
-  TAP = require('tap');
+  test = require('guy-test');
 
-  ({IDL, IDLX} = require('../..'));
+  ({IDL, IDLX} = require('../../../apps/mojikura-idl'));
 
-  ({isa, type_of, validate, equals} = require('../types'));
+  types = new (require('intertype')).Intertype();
+
+  ({isa, type_of, validate, equals} = types.export());
 
   //-----------------------------------------------------------------------------------------------------------
-  TAP.test("(IDLX) solitaires", function(T) {
+  this["(IDLX) solitaires"] = function(T, done) {
     var i, len, matcher, probe, probes_and_matchers, result;
     probes_and_matchers = [["●", "●"], ["▽", "▽"], ["∅", "∅"]];
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -46,12 +49,12 @@
       T.ok(equals(result, matcher));
     }
     //.........................................................................................................
-    T.end();
+    done();
     return null;
-  });
+  };
 
   //-----------------------------------------------------------------------------------------------------------
-  TAP.test("(IDLX) extensions", function(T) {
+  this["(IDLX) extensions"] = function(T, done) {
     var i, len, matcher, probe, probes_and_matchers, result;
     probes_and_matchers = [['⿱〓〓', ['⿱', '〓', '〓']], ['⿺走⿹◰口〓日', ['⿺', '走', ['⿹', ['◰', '口', '〓'], '日']]], ["⿱丶⿵𠘨§", ["⿱", "丶", ["⿵", "𠘨", "§"]]], ['↻正', ['↻', '正']], ['↔≈匕', ['↔', ['≈', '匕']]], ['≈正', ['≈', '正']], ['<正', ['<', '正']], ['>正', ['>', '正']], ['?正', ['?', '正']], ['↻正', ['↻', '正']], ['↔正', ['↔', '正']], ['↕正', ['↕', '正']], ['≈𪜀', ['≈', '𪜀']], ["≈〇", ["≈", "〇"]]];
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -63,37 +66,43 @@
       T.ok(equals(result, matcher));
     }
     //.........................................................................................................
-    T.end();
+    done();
     return null;
-  });
+  };
 
   /*
-#-----------------------------------------------------------------------------------------------------------
-TAP.test "(IDLX) reject bogus formulas", ( T ) ->
-  probes_and_matchers = [
-    ["⿲木木木","invalid syntax at index 0 (⿲木木木)\nUnexpected \"⿲\"\n"]
-    ["木","invalid syntax at index 0 (木)\nUnexpected \"木\"\n"]
-    [42,"expected a text, got a number"]
-    ["","expected a non-empty text, got an empty text"]
-    ["⿱⿰亻式⿱目八木木木","invalid syntax at index 7 (⿱⿰亻式⿱目八木木木)\nUnexpected \"木\"\n"]
-    ["⿺廴聿123","invalid syntax at index 3 (⿺廴聿123)\nUnexpected \"1\"\n"]
-    ["⿺","Syntax Error: '⿺'"]
-    ["⿺⿺⿺⿺","Syntax Error: '⿺⿺⿺⿺'"]
-    ]
-  for [ probe, matcher, ] in probes_and_matchers
-    try
-      result = IDLX.parse probe
-      debug ( rpr probe ), ( rpr result )
-      warn "expected an exception, got result #{rpr result}"
-      T.fail "expected an exception, got result #{rpr result}"
-    catch error
-      { message, } = error
-      urge JSON.stringify [ probe, message, ]
-     T.ok equals message, matcher
-  #.........................................................................................................
-  T.end()
-  return null
- */
+  #-----------------------------------------------------------------------------------------------------------
+  @[ "(IDLX) reject bogus formulas" ] = ( T, done ) ->
+    probes_and_matchers = [
+      ["⿲木木木","invalid syntax at index 0 (⿲木木木)\nUnexpected \"⿲\"\n"]
+      ["木","invalid syntax at index 0 (木)\nUnexpected \"木\"\n"]
+      [42,"expected a text, got a number"]
+      ["","expected a non-empty text, got an empty text"]
+      ["⿱⿰亻式⿱目八木木木","invalid syntax at index 7 (⿱⿰亻式⿱目八木木木)\nUnexpected \"木\"\n"]
+      ["⿺廴聿123","invalid syntax at index 3 (⿺廴聿123)\nUnexpected \"1\"\n"]
+      ["⿺","Syntax Error: '⿺'"]
+      ["⿺⿺⿺⿺","Syntax Error: '⿺⿺⿺⿺'"]
+      ]
+    for [ probe, matcher, ] in probes_and_matchers
+      try
+        result = IDLX.parse probe
+        debug ( rpr probe ), ( rpr result )
+        warn "expected an exception, got result #{rpr result}"
+        T.fail "expected an exception, got result #{rpr result}"
+      catch error
+        { message, } = error
+        urge JSON.stringify [ probe, message, ]
+       T.ok equals message, matcher
+    #.........................................................................................................
+    T.end()
+    return null
+   */
+  //###########################################################################################################
+  if (module === require.main) {
+    (() => {
+      return test(this);
+    })();
+  }
 
 }).call(this);
 
