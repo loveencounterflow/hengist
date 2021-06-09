@@ -128,15 +128,104 @@ class @Formula extends @XXX
   # registry[ '弦' ]  = new @Glyph '弦', ( @Formula.from '⿰弓玄' )
   # registry[ '杛' ]  = new @Glyph '杛', ( @Formula.from '⿰木弓' )
   # registry[ '玄' ]  = new @Glyph '玄', ( @Formula.from '⿱亠幺' ), ( @Formula.from '⿱丶𢆰' ), ( @Formula.from '⿰𤣥丶' )
+  # registry[ '㭹' ]  = new @Glyph '㭹', new @Formulas ( @Formula.from '⿰杛玄' ), ( @Formula.from '⿰木弦' )
+  # registry[ '弦' ]  = new @Glyph '弦', new @Formulas ( @Formula.from '⿰弓玄' )
+  # registry[ '杛' ]  = new @Glyph '杛', new @Formulas ( @Formula.from '⿰木弓' )
+  # registry[ '玄' ]  = new @Glyph '玄', new @Formulas ( @Formula.from '⿱亠幺' ), ( @Formula.from '⿱丶𢆰' ), ( @Formula.from '⿰𤣥丶' )
+
+#-----------------------------------------------------------------------------------------------------------
+@string_demo = ->
+  IDLX              = require '../../../../../io/mingkwai-rack/mojikura-idl'
+  non_components    = new Set Array.from "|()[]{}§'≈'●⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻〓≈ ↻↔ ↕ ▽"
+  registry          = {}
+  registry[ '弦' ]  = '{弦|⿰弓玄}'
+  registry[ '杛' ]  = '{杛|⿰木弓}'
+  registry[ '木' ]  = '{木|⿻十人}'
+  registry[ '㭹' ]  = '{㭹|⿰杛玄|⿰木弦}'
+  registry[ '十' ]  = '{十|⿻一丨}'
+  registry[ '人' ]  = '{人|⿰丿㇏}'
+  registry[ '玄' ]  = '{玄|⿱亠幺|⿱丶𢆰|⿰𤣥丶}'
+  for glyph, cformula of registry
+    chrs = Array.from cformula
+    # info '^558^', glyph, cformula
+    loop
+      count = 0
+      for idx in [ 3 ... chrs.length - 1 ]
+        chr = chrs[ idx ]
+        continue if non_components.has chr
+        continue unless ( rcformula = registry[ chr ] )?
+        count++
+        chrs.splice idx, 1, Array.from rcformula
+      break if count is 0
+    registry[ glyph ] = chrs = chrs.flat().join ''
+  for glyph, cformula of registry
+    urge '^443^', glyph, cformula
+    components = new Set()
+    for rcformula in @SFX_expand glyph, cformula
+      for component in [ cformula..., ]
+        continue if component is glyph
+        continue if non_components.has component
+        components.add component
+      help '^443^', glyph, rcformula
+    info '^4568^', glyph, [ components..., ].join ''
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@SFX_expand = ( glyph, cformula ) ->
+  # declare
+  collector      = null                  # text[];
+  cformulas      = [ cformula, ]        # text[]  :=  array[ cformula ];
+  term_pattern   = ///(?<term>\{[^{}]+\})///u   # text    :=  '\{[^{}}]+\}';
+  match           = null
+  term           = null                  # text;
+  position       = null                  # integer;
+  prefix         = null                  # text;
+  suffix         = null                  # text;
+  choice         = null                  # text;
+  choices        = null                  # text[];
+  hint           = ''                    # text    :=  '';
+  new_formula    = null                  # text;
+  #.........................................................................................................
+  # begin
+  loop
+    collector = []
+    #.......................................................................................................
+    for cformula in cformulas
+      #.....................................................................................................
+      if ( match = cformula.match term_pattern )?
+        term         = match.groups.term
+        # debug '^222^', rpr term
+        position     = cformula.indexOf term
+        prefix       = if position is 0 then '' else cformula[ 0 .. position - 1 ]
+        suffix       = cformula[ position + term.length .. ] ? ''
+        choices      = term[ 1 .. term.length - 2 ].split '|'
+        # urge '^44472^', { cformula, position, }
+        # urge '^44472^', { prefix, term, suffix, }
+        # urge '^44472^', { choices, }
+        #...................................................................................................
+        for choice in choices
+          new_formula  = prefix + choice + suffix
+          # debug '^33423^', glyph, new_formula
+          # debug '^33423^', glyph, collector
+          # if not array[ new_formula ] <@ collector then
+          # if false
+          collector.push new_formula
+    #.......................................................................................................
+    if collector.length is 0
+      return Array.from new Set cformulas
+    #.......................................................................................................
+    # cformulas = U.array_unique( collector );
+    cformulas = Array.from new Set collector
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@list_demo = ->
+  registry          = {}
   registry[ '㭹' ]  = [ '㭹', [ '⿰杛玄'..., ], [ '⿰木弦'..., ], ]
   registry[ '弦' ]  = [ '弦', [ '⿰弓玄'..., ], ]
   registry[ '杛' ]  = [ '杛', [ '⿰木弓'..., ], ]
   registry[ '玄' ]  = [ '玄', [ '⿱亠幺'..., ], [ '⿱丶𢆰'..., ], [ '⿰𤣥丶'..., ], ]
   registry[ '木' ]  = [ '木', [ '⿻十人'..., ], ]
-  # registry[ '㭹' ]  = new @Glyph '㭹', new @Formulas ( @Formula.from '⿰杛玄' ), ( @Formula.from '⿰木弦' )
-  # registry[ '弦' ]  = new @Glyph '弦', new @Formulas ( @Formula.from '⿰弓玄' )
-  # registry[ '杛' ]  = new @Glyph '杛', new @Formulas ( @Formula.from '⿰木弓' )
-  # registry[ '玄' ]  = new @Glyph '玄', new @Formulas ( @Formula.from '⿱亠幺' ), ( @Formula.from '⿱丶𢆰' ), ( @Formula.from '⿰𤣥丶' )
   for glyph, d of registry
     [ _, formulas..., ] = d
     urge '^589^', glyph
@@ -155,7 +244,8 @@ class @Formula extends @XXX
 
 ############################################################################################################
 if module is require.main then do =>
-  await @demo()
+  # await @list_demo()
+  await @string_demo()
 
 
 
