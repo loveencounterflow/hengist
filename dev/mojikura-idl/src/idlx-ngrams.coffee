@@ -1,5 +1,5 @@
 
-
+'use strict'
 
 
 ############################################################################################################
@@ -16,12 +16,13 @@ help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
-TAP                       = require 'tap'
-{ IDLX, }                 = require '../..'
+test                      = require 'guy-test'
+{ IDL, IDLX, }            = require '../../../apps/mojikura-idl'
+types                     = new ( require 'intertype' ).Intertype()
 { isa
   type_of
   validate
-  equals   }              = require '../types'
+  equals   }              = types.export()
 
 
 ###
@@ -43,7 +44,7 @@ conflate = ( bigrams ) ->
   return R.join ','
 
 #-----------------------------------------------------------------------------------------------------------
-TAP.test "(IDLX) bigrams", ( T ) ->
+@[ "(IDLX) bigrams" ] = ( T, done ) ->
   ### !!!!!!!!!!!!!!!!!!!! ###
   [ '䨻:⿱⿰⿱⻗田⿱⻗田⿰⿱⻗田⿱⻗田' ] ### TAINT not normalized? ###
   [ '𩙡:⿱⿰⿵𠘨䖝⿵𠘨䖝⿰⿵𠘨䖝⿵𠘨䖝' ] ### TAINT not normalized? ###
@@ -100,10 +101,10 @@ TAP.test "(IDLX) bigrams", ( T ) ->
       continue
     if result == matcher then T.ok true
     else T.fail "expected #{matcher}, got #{result}"
-  T.end()
+  done()
 
 #-----------------------------------------------------------------------------------------------------------
-TAP.test "(IDLX) cached bigrams with indices", ( T ) ->
+@[ "(IDLX) cached bigrams with indices" ] = ( T, done ) ->
   probes_and_matchers = [
     ["乳:⿰⿱爫子乚","⿱⊚爫,⿱爫子,⿰子乚,⿰乚⊚"]
     ["鐓:(⿰金(⿱亠口子)夊)","⿰⊚金,⿰金亠,⿱亠口,⿱口子,⿰子夊,⿰夊⊚"]
@@ -123,10 +124,10 @@ TAP.test "(IDLX) cached bigrams with indices", ( T ) ->
     # debug '22020', JSON.stringify [ probe, result, ]
     if result == matcher then T.ok true
     else T.fail "expected #{matcher}, got #{result}"
-  T.end()
+  done()
 
 #-----------------------------------------------------------------------------------------------------------
-TAP.test "(IDLX) bigrams as lists of texts", ( T ) ->
+@[ "(IDLX) bigrams as lists of texts" ] = ( T, done ) ->
   probes_and_matchers = [
     ["乳:⿰⿱爫子乚",["⿱⊚爫","⿱爫子","⿰子乚","⿰乚⊚"]]
     ["鐓:(⿰金(⿱亠口子)夊)",["⿰⊚金","⿰金亠","⿱亠口","⿱口子","⿰子夊","⿰夊⊚"]]
@@ -143,6 +144,9 @@ TAP.test "(IDLX) bigrams as lists of texts", ( T ) ->
     # debug '32321', JSON.stringify [ probe, result, ]
     if ( equals result, matcher ) then T.ok true
     else T.fail "expected #{matcher}, got #{result}"
-  T.end()
+  done()
 
 
+############################################################################################################
+if module is require.main then do =>
+  test @
