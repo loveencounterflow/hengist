@@ -1,7 +1,8 @@
 (function() {
-  //###########################################################################################################
-  var CND, IDLX, TAP, alert, badge, conflate, debug, echo, equals, help, info, isa, log, rpr, type_of, urge, validate, warn, whisper;
+  'use strict';
+  var CND, IDL, IDLX, alert, badge, conflate, debug, echo, equals, help, info, isa, log, rpr, test, type_of, types, urge, validate, warn, whisper;
 
+  //###########################################################################################################
   CND = require('cnd');
 
   rpr = CND.rpr;
@@ -27,11 +28,13 @@
   echo = CND.echo.bind(CND);
 
   //...........................................................................................................
-  TAP = require('tap');
+  test = require('guy-test');
 
-  ({IDLX} = require('../..'));
+  ({IDL, IDLX} = require('../../../apps/mojikura-idl'));
 
-  ({isa, type_of, validate, equals} = require('../types'));
+  types = new (require('intertype')).Intertype();
+
+  ({isa, type_of, validate, equals} = types.export());
 
   /*
   Ngrams with Relations:
@@ -63,7 +66,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  TAP.test("(IDLX) bigrams", function(T) {
+  this["(IDLX) bigrams"] = function(T, done) {
     /* !!!!!!!!!!!!!!!!!!!! */
     var bigrams, error, formula, glyph, i, len, matcher, probe, probes_and_matchers/* TAINT not normalized? */, result;
     [/* !!!!!!!!!!!!!!!!!!!! */ '䨻:⿱⿰⿱⻗田⿱⻗田⿰⿱⻗田⿱⻗田'];
@@ -90,11 +93,11 @@
         T.fail(`expected ${matcher}, got ${result}`);
       }
     }
-    return T.end();
-  });
+    return done();
+  };
 
   //-----------------------------------------------------------------------------------------------------------
-  TAP.test("(IDLX) cached bigrams with indices", function(T) {
+  this["(IDLX) cached bigrams with indices"] = function(T, done) {
     var bigram, bigrams, bigrams_as_indices, formula, glyph, i, len, matcher, parts, probe, probes_and_matchers, result;
     probes_and_matchers = [["乳:⿰⿱爫子乚", "⿱⊚爫,⿱爫子,⿰子乚,⿰乚⊚"], ["鐓:(⿰金(⿱亠口子)夊)", "⿰⊚金,⿰金亠,⿱亠口,⿱口子,⿰子夊,⿰夊⊚"], ["孔:⿰子乚", "⿰⊚子,⿰子乚,⿰乚⊚"], ["𠃨:⿹⺄&cdp#x88c6;", "⿹⊚⺄,⿹⺄&cdp#x88c6;,⿹&cdp#x88c6;⊚"], ["𠄋:⿰(⿱&cdp#x855e;日丂)乞", "⿱⊚&cdp#x855e;,⿱&cdp#x855e;日,⿱日丂,⿰丂乞,⿰乞⊚"], ["𠄋:⿰酉⿱日𤴓", "⿰⊚酉,⿰酉日,⿱日𤴓,⿱𤴓⊚"]];
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -121,11 +124,11 @@
         T.fail(`expected ${matcher}, got ${result}`);
       }
     }
-    return T.end();
-  });
+    return done();
+  };
 
   //-----------------------------------------------------------------------------------------------------------
-  TAP.test("(IDLX) bigrams as lists of texts", function(T) {
+  this["(IDLX) bigrams as lists of texts"] = function(T, done) {
     var formula, glyph, i, len, matcher, probe, probes_and_matchers, result;
     probes_and_matchers = [["乳:⿰⿱爫子乚", ["⿱⊚爫", "⿱爫子", "⿰子乚", "⿰乚⊚"]], ["鐓:(⿰金(⿱亠口子)夊)", ["⿰⊚金", "⿰金亠", "⿱亠口", "⿱口子", "⿰子夊", "⿰夊⊚"]], ["孔:⿰子乚", ["⿰⊚子", "⿰子乚", "⿰乚⊚"]], ["𠃨:⿹⺄&cdp#x88c6;", ["⿹⊚⺄", "⿹⺄&cdp#x88c6;", "⿹&cdp#x88c6;⊚"]], ["𠄋:⿰(⿱&cdp#x855e;日丂)乞", ["⿱⊚&cdp#x855e;", "⿱&cdp#x855e;日", "⿱日丂", "⿰丂乞", "⿰乞⊚"]], ["𠄋:⿰酉⿱日𤴓", ["⿰⊚酉", "⿰酉日", "⿱日𤴓", "⿱𤴓⊚"]], ["𠕄:↻凹", []], ["孝:⿱耂子", ["⿱⊚耂", "⿱耂子", "⿱子⊚"]]];
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -139,8 +142,15 @@
         T.fail(`expected ${matcher}, got ${result}`);
       }
     }
-    return T.end();
-  });
+    return done();
+  };
+
+  //###########################################################################################################
+  if (module === require.main) {
+    (() => {
+      return test(this);
+    })();
+  }
 
 }).call(this);
 

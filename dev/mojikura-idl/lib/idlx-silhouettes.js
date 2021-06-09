@@ -1,7 +1,8 @@
 (function() {
-  //###########################################################################################################
+  'use strict';
   var CND, IDL, IDLX, alert, badge, debug, echo, equals, help, info, isa, log, rpr, test, type_of, types, urge, validate, warn, whisper;
 
+  //###########################################################################################################
   CND = require('cnd');
 
   rpr = CND.rpr;
