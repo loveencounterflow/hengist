@@ -135,7 +135,9 @@ class @Formula extends @XXX
 
 #-----------------------------------------------------------------------------------------------------------
 @string_demo = ->
-  IDLX              = require '../../../../../io/mingkwai-rack/mojikura-idl'
+  { IDL, IDLX, }    = require '../../../apps/mojikura-idl'
+  # IDLX              = require '../../../apps/mojikura-idl/lib/main'
+  # IDLX              = require 'mojikura-idl'
   non_components    = new Set Array.from "|()[]{}§'≈'●⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻〓≈ ↻↔ ↕ ▽"
   registry          = {}
   registry[ '弦' ]  = '{弦|⿰弓玄}'
@@ -145,6 +147,10 @@ class @Formula extends @XXX
   registry[ '十' ]  = '{十|⿻一丨}'
   registry[ '人' ]  = '{人|⿰丿㇏}'
   registry[ '玄' ]  = '{玄|⿱亠幺|⿱丶𢆰|⿰𤣥丶}'
+  # registry[ '丶' ]  = '{丶|●}'
+  registry[ '幺' ]  = '{幺|⿱𠃋⿰𠃋丶}'
+  registry[ '𢆰' ]  = '{𢆰|⿱一幺}'
+  registry[ '𤣥' ]  = '{𤣥|⿱亠&jzr#xe10e;}'
   for glyph, cformula of registry
     chrs = Array.from cformula
     # info '^558^', glyph, cformula
@@ -158,6 +164,7 @@ class @Formula extends @XXX
         chrs.splice idx, 1, Array.from rcformula
       break if count is 0
     registry[ glyph ] = chrs = chrs.flat().join ''
+  #.........................................................................................................
   for glyph, cformula of registry
     urge '^443^', glyph, cformula
     components = new Set()
@@ -166,8 +173,20 @@ class @Formula extends @XXX
         continue if component is glyph
         continue if non_components.has component
         components.add component
-      help '^443^', glyph, rcformula
+      error = null
+      #.....................................................................................................
+      try
+        ### TAINT no need to minimize short formulas ###
+        mrcformula = IDLX.minimize_formula rcformula
+      catch error
+        throw error unless error.message.startsWith 'Syntax error at index 0'
+      #.....................................................................................................
+      if ( not error? ) and ( mrcformula isnt rcformula )
+        help '^443^', glyph, ( CND.lime mrcformula ), ( CND.grey rcformula )
+      else
+        help '^443^', glyph, rcformula
     info '^4568^', glyph, [ components..., ].join ''
+  #.........................................................................................................
   return null
 
 #-----------------------------------------------------------------------------------------------------------
