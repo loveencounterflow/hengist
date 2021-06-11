@@ -153,8 +153,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.string_demo = function() {
-    var IDLX, cformula, chr, chrs, component, components, count, glyph, i, idx, j, k, len, len1, non_components, rcformula, ref, ref1, ref2, registry;
-    IDLX = require('../../../../../io/mingkwai-rack/mojikura-idl');
+    var IDL, IDLX, cformula, chr, chrs, component, components, count, error, glyph, i, idx, j, k, len, len1, mrcformula, non_components, rcformula, ref, ref1, ref2, registry;
+    ({IDL, IDLX} = require('../../../apps/mojikura-idl'));
+    // IDLX              = require '../../../apps/mojikura-idl/lib/main'
+    // IDLX              = require 'mojikura-idl'
     non_components = new Set(Array.from("|()[]{}§'≈'●⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻〓≈ ↻↔ ↕ ▽"));
     registry = {};
     registry['弦'] = '{弦|⿰弓玄}';
@@ -164,6 +166,10 @@
     registry['十'] = '{十|⿻一丨}';
     registry['人'] = '{人|⿰丿㇏}';
     registry['玄'] = '{玄|⿱亠幺|⿱丶𢆰|⿰𤣥丶}';
+    // registry[ '丶' ]  = '{丶|●}'
+    registry['幺'] = '{幺|⿱𠃋⿰𠃋丶}';
+    registry['𢆰'] = '{𢆰|⿱一幺}';
+    registry['𤣥'] = '{𤣥|⿱亠&jzr#xe10e;}';
     for (glyph in registry) {
       cformula = registry[glyph];
       chrs = Array.from(cformula);
@@ -187,6 +193,7 @@
       }
       registry[glyph] = chrs = chrs.flat().join('');
     }
+//.........................................................................................................
     for (glyph in registry) {
       cformula = registry[glyph];
       urge('^443^', glyph, cformula);
@@ -205,10 +212,27 @@
           }
           components.add(component);
         }
-        help('^443^', glyph, rcformula);
+        error = null;
+        try {
+          /* TAINT no need to minimize short formulas */
+          //.....................................................................................................
+          mrcformula = IDLX.minimize_formula(rcformula);
+        } catch (error1) {
+          error = error1;
+          if (!error.message.startsWith('Syntax error at index 0')) {
+            throw error;
+          }
+        }
+        //.....................................................................................................
+        if ((error == null) && (mrcformula !== rcformula)) {
+          help('^443^', glyph, CND.lime(mrcformula), CND.grey(rcformula));
+        } else {
+          help('^443^', glyph, rcformula);
+        }
       }
       info('^4568^', glyph, [...components].join(''));
     }
+    //.........................................................................................................
     return null;
   };
 
