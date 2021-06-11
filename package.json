@@ -65,6 +65,7 @@
     "merge-ranges": "^1.0.2",
     "mixa": "0.1.2",
     "mkdirp": "^1.0.4",
+    "mojikura-idl": "^2.0.0",
     "mori": "^0.3.2",
     "multimix": "^5.0.0",
     "mysql-tokenizer": "^1.0.7",
