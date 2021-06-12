@@ -153,66 +153,93 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.string_demo = function() {
-    var IDL, IDLX, cformula, chr, chrs, component, components, count, error, glyph, i, idx, j, k, len, len1, mrcformula, non_components, rcformula, ref, ref1, ref2, registry;
+    var IDL, IDLX, _, c, cformula, chr, chrs, components, error, glyph, i, idx, inner_count, j, k, len, len1, local_components, mrcformula, non_components, outer_count, rcf_idx, rcf_nr, rcformula, ref, registry;
     ({IDL, IDLX} = require('../../../apps/mojikura-idl'));
     // IDLX              = require '../../../apps/mojikura-idl/lib/main'
     // IDLX              = require 'mojikura-idl'
     non_components = new Set(Array.from("|()[]{}§'≈'●⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻〓≈ ↻↔ ↕ ▽"));
     registry = {};
-    registry['弦'] = '{弦|⿰弓玄}';
-    registry['杛'] = '{杛|⿰木弓}';
     registry['木'] = '{木|⿻十人}';
-    registry['㭹'] = '{㭹|⿰杛玄|⿰木弦}';
     registry['十'] = '{十|⿻一丨}';
     registry['人'] = '{人|⿰丿㇏}';
-    registry['玄'] = '{玄|⿱亠幺|⿱丶𢆰|⿰𤣥丶}';
-    // registry[ '丶' ]  = '{丶|●}'
-    registry['幺'] = '{幺|⿱𠃋⿰𠃋丶}';
-    registry['𢆰'] = '{𢆰|⿱一幺}';
-    registry['𤣥'] = '{𤣥|⿱亠&jzr#xe10e;}';
-    for (glyph in registry) {
-      cformula = registry[glyph];
-      chrs = Array.from(cformula);
-      while (true) {
-        // info '^558^', glyph, cformula
-        count = 0;
-        for (idx = i = 3, ref = chrs.length - 1; (3 <= ref ? i < ref : i > ref); idx = 3 <= ref ? ++i : --i) {
-          chr = chrs[idx];
-          if (non_components.has(chr)) {
-            continue;
-          }
-          if ((rcformula = registry[chr]) == null) {
-            continue;
-          }
-          count++;
-          chrs.splice(idx, 1, Array.from(rcformula));
+// registry[ '來' ]  = '{來|⿻木从}'
+// registry[ '从' ]  = '{从|⿰人人}'
+// registry[ '玄' ]  = '{玄|⿱亠幺|⿱丶𢆰|⿰𤣥丶}'
+// # registry[ '丶' ]  = '{丶|●}'
+// registry[ '幺' ]  = '{幺|⿰&jzr#xe10e;丶}'
+// registry[ '' ]  = '{|⿱𠃋𠃋}'
+// registry[ '𢆰' ]  = '{𢆰|⿱一幺}'
+// registry[ '𤣥' ]  = '{𤣥|⿱亠&jzr#xe10e;}'
+// registry[ '亠' ]  = '{亠|⿱丶一}'
+// registry[ '弓' ]  = '{弓|⿱&jzr#xe139;㇉}'
+// registry[ '' ]  = '{|⿱𠃌一}'
+// registry[ '弦' ]  = '{弦|⿰弓玄}'
+// registry[ '杛' ]  = '{杛|⿰木弓}'
+// registry[ '㭹' ]  = '{㭹|⿰杛玄|⿰木弦}'
+//.........................................................................................................
+    for (_ = i = 1; i <= 4; _ = ++i) {
+      outer_count = 0;
+      // outer_count--
+      whisper('^335^', '-'.repeat(50));
+      for (glyph in registry) {
+        cformula = registry[glyph];
+        chrs = Array.from(cformula);
+        if (glyph === '木') {
+          debug('^558^', glyph, cformula);
+          debug('^558^', glyph, chrs);
         }
-        if (count === 0) {
+        while (true) {
+          inner_count = 0;
+          idx = 2;
+          while (true) {
+            idx++;
+            if (idx >= chrs.length - 1) {
+              break;
+            }
+            chr = chrs[idx];
+            if ((chrs[idx - 1] === '{') && (chrs[idx + 1] === '|')) {
+              // if glyph is '木' then debug '^33376^', chrs, chrs[ idx - 1 ] is '{' and chrs[ idx + 1 ] is '|'
+              continue;
+            }
+            if (non_components.has(chr)) {
+              continue;
+            }
+            if ((rcformula = registry[chr]) == null) {
+              continue;
+            }
+            inner_count++;
+            outer_count++;
+            chrs.splice(idx, 1, ...(Array.from(rcformula)));
+          }
+          // break if inner_count is 0
           break;
         }
+        debug('^3342^', chrs);
+        registry[glyph] = chrs = chrs.flat().join('');
+        if (glyph === '木') {
+          debug('^558^', inner_count, outer_count, glyph, CND.lime(chrs));
+        }
       }
-      registry[glyph] = chrs = chrs.flat().join('');
     }
+    // break
+    return null;
 //.........................................................................................................
     for (glyph in registry) {
       cformula = registry[glyph];
+      whisper('-'.repeat(50));
       urge('^443^', glyph, cformula);
       components = new Set();
-      ref1 = this.SFX_expand(glyph, cformula);
-      for (j = 0, len = ref1.length; j < len; j++) {
-        rcformula = ref1[j];
-        ref2 = [...cformula];
-        for (k = 0, len1 = ref2.length; k < len1; k++) {
-          component = ref2[k];
-          if (component === glyph) {
-            continue;
-          }
-          if (non_components.has(component)) {
-            continue;
-          }
-          components.add(component);
-        }
+      ref = this.SFX_expand(glyph, cformula);
+      for (rcf_idx = j = 0, len = ref.length; j < len; rcf_idx = ++j) {
+        rcformula = ref[rcf_idx];
+        rcf_nr = rcf_idx + 1;
+        // for component in [ cformula..., ]
+        //   continue if component is glyph
+        //   continue if non_components.has component
+        //   # debug '^4477^', component, IDLX._text_with_jzr_glyphs_as_uchrs component
+        //   components.add component
         error = null;
+        mrcformula = null;
         try {
           /* TAINT no need to minimize short formulas */
           //.....................................................................................................
@@ -225,12 +252,31 @@
         }
         //.....................................................................................................
         if ((error == null) && (mrcformula !== rcformula)) {
-          help('^443^', glyph, CND.lime(mrcformula), CND.grey(rcformula));
+          help('^443^', rcf_nr, glyph, CND.lime(mrcformula), CND.grey(rcformula));
         } else {
-          help('^443^', glyph, rcformula);
+          help('^443^', rcf_nr, glyph, rcformula);
+        }
+        local_components = (function() {
+          var k, len1, ref1, results;
+          ref1 = [...(mrcformula != null ? mrcformula : '')];
+          results = [];
+          for (k = 0, len1 = ref1.length; k < len1; k++) {
+            c = ref1[k];
+            if (!non_components.has(c)) {
+              results.push(c);
+            }
+          }
+          return results;
+        })();
+        for (k = 0, len1 = local_components.length; k < len1; k++) {
+          c = local_components[k];
+          components.add(c);
         }
       }
-      info('^4568^', glyph, [...components].join(''));
+      components = [...components];
+      components = components.sort();
+      components = components.join('');
+      info('^4568^', glyph, components);
     }
     //.........................................................................................................
     return null;
