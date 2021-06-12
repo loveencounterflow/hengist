@@ -153,84 +153,92 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.string_demo = function() {
-    var IDL, IDLX, _, c, cformula, chr, chrs, components, error, glyph, i, idx, inner_count, j, k, len, len1, local_components, mrcformula, non_components, outer_count, rcf_idx, rcf_nr, rcformula, ref, registry;
-    ({IDL, IDLX} = require('../../../apps/mojikura-idl'));
+    var IDL, IDLX, _NCR, c, cformula, chr, chrs, components, error, glyph, i, idx, j, len, len1, local_components, mrcformula, new_cformula, non_components, old_cformula, outer_count, rcf_idx, rcf_nr, rcformula, ref, registry;
+    ({IDL, IDLX, _NCR} = require('../../../apps/mojikura-idl'));
     // IDLX              = require '../../../apps/mojikura-idl/lib/main'
     // IDLX              = require 'mojikura-idl'
     non_components = new Set(Array.from("|()[]{}§'≈'●⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻〓≈ ↻↔ ↕ ▽"));
+    //.........................................................................................................
+    /* establish registry */
     registry = {};
+    registry['來'] = '{來|⿻木从}';
     registry['木'] = '{木|⿻十人}';
     registry['十'] = '{十|⿻一丨}';
     registry['人'] = '{人|⿰丿㇏}';
-// registry[ '來' ]  = '{來|⿻木从}'
-// registry[ '从' ]  = '{从|⿰人人}'
-// registry[ '玄' ]  = '{玄|⿱亠幺|⿱丶𢆰|⿰𤣥丶}'
 // # registry[ '丶' ]  = '{丶|●}'
+// registry[ '弓' ]  = '{弓|⿱&jzr#xe139;㇉}'
+// registry[ '' ]  = '{|⿱𠃌一}'
+// registry[ '从' ]  = '{从|⿰人人}'
 // registry[ '幺' ]  = '{幺|⿰&jzr#xe10e;丶}'
-// registry[ '' ]  = '{|⿱𠃋𠃋}'
+// registry[ '&jzr#xe10e;' ]  = '{&jzr#xe10e;|⿱𠃋𠃋}'
 // registry[ '𢆰' ]  = '{𢆰|⿱一幺}'
 // registry[ '𤣥' ]  = '{𤣥|⿱亠&jzr#xe10e;}'
 // registry[ '亠' ]  = '{亠|⿱丶一}'
-// registry[ '弓' ]  = '{弓|⿱&jzr#xe139;㇉}'
-// registry[ '' ]  = '{|⿱𠃌一}'
-// registry[ '弦' ]  = '{弦|⿰弓玄}'
-// registry[ '杛' ]  = '{杛|⿰木弓}'
+// registry[ '玄' ]  = '{玄|⿱亠幺|⿱丶𢆰|⿰𤣥丶}'
 // registry[ '㭹' ]  = '{㭹|⿰杛玄|⿰木弦}'
+// registry[ '杛' ]  = '{杛|⿰木弓}'
+// registry[ '弦' ]  = '{弦|⿰弓玄}'
 //.........................................................................................................
-    for (_ = i = 1; i <= 4; _ = ++i) {
+/* normalize registry */
+    for (glyph in registry) {
+      cformula = registry[glyph];
+      if (glyph.startsWith('&')) {
+        delete registry[glyph];
+        glyph = _NCR.jzr_as_uchr(glyph);
+        registry[glyph] = cformula;
+      }
+      cformula = cformula.replace(/&[^;]+;/g, function($0) {
+        return _NCR.jzr_as_uchr($0);
+      });
+      registry[glyph] = cformula;
+    }
+    while (true) {
+      //.........................................................................................................
+      /* expand cFormulas */
       outer_count = 0;
-      // outer_count--
       whisper('^335^', '-'.repeat(50));
       for (glyph in registry) {
-        cformula = registry[glyph];
-        chrs = Array.from(cformula);
-        if (glyph === '木') {
-          debug('^558^', glyph, cformula);
-          debug('^558^', glyph, chrs);
-        }
+        old_cformula = registry[glyph];
+        chrs = Array.from(old_cformula);
+        idx = 2;
         while (true) {
-          inner_count = 0;
-          idx = 2;
-          while (true) {
-            idx++;
-            if (idx >= chrs.length - 1) {
-              break;
-            }
-            chr = chrs[idx];
-            if ((chrs[idx - 1] === '{') && (chrs[idx + 1] === '|')) {
-              // if glyph is '木' then debug '^33376^', chrs, chrs[ idx - 1 ] is '{' and chrs[ idx + 1 ] is '|'
-              continue;
-            }
-            if (non_components.has(chr)) {
-              continue;
-            }
-            if ((rcformula = registry[chr]) == null) {
-              continue;
-            }
-            inner_count++;
-            outer_count++;
-            chrs.splice(idx, 1, ...(Array.from(rcformula)));
+          idx++;
+          if (idx >= chrs.length - 1) {
+            break;
           }
-          // break if inner_count is 0
-          break;
+          chr = chrs[idx];
+          if ((chrs[idx - 1] === '{') && (chrs[idx + 1] === '|')) {
+            continue;
+          }
+          if (non_components.has(chr)) {
+            continue;
+          }
+          if ((rcformula = registry[chr]) == null) {
+            continue;
+          }
+          chrs.splice(idx, 1, ...(Array.from(rcformula)));
         }
-        debug('^3342^', chrs);
-        registry[glyph] = chrs = chrs.flat().join('');
-        if (glyph === '木') {
-          debug('^558^', inner_count, outer_count, glyph, CND.lime(chrs));
+        new_cformula = chrs.join('');
+        if (new_cformula !== old_cformula) {
+          outer_count++;
+          registry[glyph] = new_cformula;
         }
+        debug('^558^', outer_count, glyph, CND.grey(old_cformula), CND.lime(new_cformula));
+      }
+      if (outer_count === 0) {
+        /* TAINT maybe looping never needed? */
+        break;
       }
     }
-    // break
-    return null;
 //.........................................................................................................
     for (glyph in registry) {
       cformula = registry[glyph];
       whisper('-'.repeat(50));
       urge('^443^', glyph, cformula);
+      // continue if glyph is '㭹' ### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ###
       components = new Set();
       ref = this.SFX_expand(glyph, cformula);
-      for (rcf_idx = j = 0, len = ref.length; j < len; rcf_idx = ++j) {
+      for (rcf_idx = i = 0, len = ref.length; i < len; rcf_idx = ++i) {
         rcformula = ref[rcf_idx];
         rcf_nr = rcf_idx + 1;
         // for component in [ cformula..., ]
@@ -257,19 +265,19 @@
           help('^443^', rcf_nr, glyph, rcformula);
         }
         local_components = (function() {
-          var k, len1, ref1, results;
+          var j, len1, ref1, results;
           ref1 = [...(mrcformula != null ? mrcformula : '')];
           results = [];
-          for (k = 0, len1 = ref1.length; k < len1; k++) {
-            c = ref1[k];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            c = ref1[j];
             if (!non_components.has(c)) {
               results.push(c);
             }
           }
           return results;
         })();
-        for (k = 0, len1 = local_components.length; k < len1; k++) {
-          c = local_components[k];
+        for (j = 0, len1 = local_components.length; j < len1; j++) {
+          c = local_components[j];
           components.add(c);
         }
       }
@@ -284,7 +292,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.SFX_expand = function(glyph, cformula) {
-    var cformulas, choice, choices, collector, hint, i, j, len, len1, match, new_formula, position, prefix, ref, suffix, term, term_pattern;
+    var cformulas, choice, choices, collector, count, i, j, len, len1, match, new_formula, position, prefix, ref, suffix, term, term_pattern;
     // declare
     collector = null; // text[];
     cformulas = [cformula]; // text[]  :=  array[ cformula ];
@@ -296,23 +304,26 @@
     suffix = null; // text;
     choice = null; // text;
     choices = null; // text[];
-    hint = ''; // text    :=  '';
     new_formula = null; // text;
+    //.........................................................................................................
+    // begin
+    count = 0;
     while (true) {
-      //.........................................................................................................
-      // begin
-      collector = [];
+      collector = new Set();
 //.......................................................................................................
       for (i = 0, len = cformulas.length; i < len; i++) {
         cformula = cformulas[i];
+        count++;
         //.....................................................................................................
         if ((match = cformula.match(term_pattern)) != null) {
           term = match.groups.term;
-          // debug '^222^', rpr term
-          position = cformula.indexOf(term);
+          // position     = cformula.indexOf term
+          position = match.index;
           prefix = position === 0 ? '' : cformula.slice(0, +(position - 1) + 1 || 9e9);
           suffix = (ref = cformula.slice(position + term.length)) != null ? ref : '';
           choices = term.slice(1, +(term.length - 2) + 1 || 9e9).split('|');
+          debug('^3344^', glyph, [position, term, prefix, suffix]);
+// debug '^3344^', glyph, choices
 // urge '^44472^', { cformula, position, }
 // urge '^44472^', { prefix, term, suffix, }
 // urge '^44472^', { choices, }
@@ -320,21 +331,24 @@
           for (j = 0, len1 = choices.length; j < len1; j++) {
             choice = choices[j];
             new_formula = prefix + choice + suffix;
-            // debug '^33423^', glyph, new_formula
+            urge('^3342^', {glyph, new_formula});
             // debug '^33423^', glyph, collector
             // if not array[ new_formula ] <@ collector then
             // if false
-            collector.push(new_formula);
+            collector.add(new_formula);
           }
         }
       }
       //.......................................................................................................
-      if (collector.length === 0) {
-        return Array.from(new Set(cformulas));
+      // debug '^3343^', collector
+      if (collector.size === 0) {
+        // return Array.from cformulas
+        debug('^334^', {glyph, count});
+        return cformulas;
       }
       //.......................................................................................................
       // cformulas = U.array_unique( collector );
-      cformulas = Array.from(new Set(collector));
+      cformulas = Array.from(collector);
     }
     return null;
   };
