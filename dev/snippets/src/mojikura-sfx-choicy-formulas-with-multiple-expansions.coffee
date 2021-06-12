@@ -135,61 +135,67 @@ class @Formula extends @XXX
 
 #-----------------------------------------------------------------------------------------------------------
 @string_demo = ->
-  { IDL, IDLX, }    = require '../../../apps/mojikura-idl'
+  { IDL, IDLX, _NCR, } = require '../../../apps/mojikura-idl'
   # IDLX              = require '../../../apps/mojikura-idl/lib/main'
   # IDLX              = require 'mojikura-idl'
   non_components    = new Set Array.from "|()[]{}§'≈'●⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻〓≈ ↻↔ ↕ ▽"
+  #.........................................................................................................
+  ### establish registry ###
   registry          = {}
+  registry[ '來' ]  = '{來|⿻木从}'
   registry[ '木' ]  = '{木|⿻十人}'
   registry[ '十' ]  = '{十|⿻一丨}'
   registry[ '人' ]  = '{人|⿰丿㇏}'
-  # registry[ '來' ]  = '{來|⿻木从}'
-  # registry[ '从' ]  = '{从|⿰人人}'
-  # registry[ '玄' ]  = '{玄|⿱亠幺|⿱丶𢆰|⿰𤣥丶}'
   # # registry[ '丶' ]  = '{丶|●}'
+  # registry[ '弓' ]  = '{弓|⿱&jzr#xe139;㇉}'
+  # registry[ '' ]  = '{|⿱𠃌一}'
+  # registry[ '从' ]  = '{从|⿰人人}'
   # registry[ '幺' ]  = '{幺|⿰&jzr#xe10e;丶}'
-  # registry[ '' ]  = '{|⿱𠃋𠃋}'
+  # registry[ '&jzr#xe10e;' ]  = '{&jzr#xe10e;|⿱𠃋𠃋}'
   # registry[ '𢆰' ]  = '{𢆰|⿱一幺}'
   # registry[ '𤣥' ]  = '{𤣥|⿱亠&jzr#xe10e;}'
   # registry[ '亠' ]  = '{亠|⿱丶一}'
-  # registry[ '弓' ]  = '{弓|⿱&jzr#xe139;㇉}'
-  # registry[ '' ]  = '{|⿱𠃌一}'
-  # registry[ '弦' ]  = '{弦|⿰弓玄}'
-  # registry[ '杛' ]  = '{杛|⿰木弓}'
+  # registry[ '玄' ]  = '{玄|⿱亠幺|⿱丶𢆰|⿰𤣥丶}'
   # registry[ '㭹' ]  = '{㭹|⿰杛玄|⿰木弦}'
+  # registry[ '杛' ]  = '{杛|⿰木弓}'
+  # registry[ '弦' ]  = '{弦|⿰弓玄}'
   #.........................................................................................................
-  for _ in [ 1 .. 4 ]
+  ### normalize registry ###
+  for glyph, cformula of registry
+    if glyph.startsWith '&'
+      delete registry[ glyph ]
+      glyph             = _NCR.jzr_as_uchr glyph
+      registry[ glyph ] = cformula
+    cformula          = cformula.replace /&[^;]+;/g, ( $0 ) -> _NCR.jzr_as_uchr $0
+    registry[ glyph ] = cformula
+  #.........................................................................................................
+  ### expand cFormulas ###
+  loop
     outer_count = 0
-    # outer_count--
     whisper '^335^', '-'.repeat 50
-    for glyph, cformula of registry
-      chrs = Array.from cformula
-      if glyph is '木' then debug '^558^', glyph, cformula; debug '^558^', glyph, chrs
+    for glyph, old_cformula of registry
+      chrs = Array.from old_cformula
+      idx = 2
       loop
-        inner_count = 0
-        idx = 2
-        loop
-          idx++
-          break if idx >= chrs.length - 1
-          chr = chrs[ idx ]
-          # if glyph is '木' then debug '^33376^', chrs, chrs[ idx - 1 ] is '{' and chrs[ idx + 1 ] is '|'
-          continue if ( chrs[ idx - 1 ] is '{' ) and ( chrs[ idx + 1 ] is '|' )
-          continue if non_components.has chr
-          continue unless ( rcformula = registry[ chr ] )?
-          inner_count++
-          outer_count++
-          chrs.splice idx, 1, ( Array.from rcformula )...
-        # break if inner_count is 0
-        break
-      debug '^3342^', chrs
-      registry[ glyph ] = chrs = chrs.flat().join ''
-      if glyph is '木' then debug '^558^', inner_count, outer_count, glyph, ( CND.lime chrs )
-    # break
-  return null
+        idx++
+        break if idx >= chrs.length - 1
+        chr = chrs[ idx ]
+        continue if ( chrs[ idx - 1 ] is '{' ) and ( chrs[ idx + 1 ] is '|' )
+        continue if non_components.has chr
+        continue unless ( rcformula = registry[ chr ] )?
+        chrs.splice idx, 1, ( Array.from rcformula )...
+      new_cformula = chrs.join ''
+      if new_cformula != old_cformula
+        outer_count++
+        registry[ glyph ] = new_cformula
+      debug '^558^', outer_count, glyph, ( CND.grey old_cformula ), ( CND.lime new_cformula )
+    ### TAINT maybe looping never needed? ###
+    break if outer_count is 0
   #.........................................................................................................
   for glyph, cformula of registry
     whisper '-'.repeat 50
     urge '^443^', glyph, cformula
+    # continue if glyph is '㭹' ### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ###
     components = new Set()
     for rcformula, rcf_idx in @SFX_expand glyph, cformula
       rcf_nr = rcf_idx + 1
@@ -233,39 +239,45 @@ class @Formula extends @XXX
   suffix         = null                  # text;
   choice         = null                  # text;
   choices        = null                  # text[];
-  hint           = ''                    # text    :=  '';
   new_formula    = null                  # text;
   #.........................................................................................................
   # begin
+  count = 0
   loop
-    collector = []
+    collector = new Set()
     #.......................................................................................................
     for cformula in cformulas
+      count++
       #.....................................................................................................
       if ( match = cformula.match term_pattern )?
         term         = match.groups.term
-        # debug '^222^', rpr term
-        position     = cformula.indexOf term
+        # position     = cformula.indexOf term
+        position     = match.index
         prefix       = if position is 0 then '' else cformula[ 0 .. position - 1 ]
         suffix       = cformula[ position + term.length .. ] ? ''
         choices      = term[ 1 .. term.length - 2 ].split '|'
+        debug '^3344^', glyph, [ position, term, prefix, suffix, ]
+        # debug '^3344^', glyph, choices
         # urge '^44472^', { cformula, position, }
         # urge '^44472^', { prefix, term, suffix, }
         # urge '^44472^', { choices, }
         #...................................................................................................
         for choice in choices
           new_formula  = prefix + choice + suffix
-          # debug '^33423^', glyph, new_formula
+          urge '^3342^', { glyph, new_formula, }
           # debug '^33423^', glyph, collector
           # if not array[ new_formula ] <@ collector then
           # if false
-          collector.push new_formula
+          collector.add new_formula
     #.......................................................................................................
-    if collector.length is 0
-      return Array.from new Set cformulas
+    # debug '^3343^', collector
+    if collector.size is 0
+      # return Array.from cformulas
+      debug '^334^', { glyph, count, }
+      return cformulas
     #.......................................................................................................
     # cformulas = U.array_unique( collector );
-    cformulas = Array.from new Set collector
+    cformulas = Array.from collector
   return null
 
 #-----------------------------------------------------------------------------------------------------------
