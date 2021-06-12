@@ -140,40 +140,66 @@ class @Formula extends @XXX
   # IDLX              = require 'mojikura-idl'
   non_components    = new Set Array.from "|()[]{}§'≈'●⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻〓≈ ↻↔ ↕ ▽"
   registry          = {}
-  registry[ '弦' ]  = '{弦|⿰弓玄}'
-  registry[ '杛' ]  = '{杛|⿰木弓}'
   registry[ '木' ]  = '{木|⿻十人}'
-  registry[ '㭹' ]  = '{㭹|⿰杛玄|⿰木弦}'
   registry[ '十' ]  = '{十|⿻一丨}'
   registry[ '人' ]  = '{人|⿰丿㇏}'
-  registry[ '玄' ]  = '{玄|⿱亠幺|⿱丶𢆰|⿰𤣥丶}'
-  # registry[ '丶' ]  = '{丶|●}'
-  registry[ '幺' ]  = '{幺|⿱𠃋⿰𠃋丶}'
-  registry[ '𢆰' ]  = '{𢆰|⿱一幺}'
-  registry[ '𤣥' ]  = '{𤣥|⿱亠&jzr#xe10e;}'
-  for glyph, cformula of registry
-    chrs = Array.from cformula
-    # info '^558^', glyph, cformula
-    loop
-      count = 0
-      for idx in [ 3 ... chrs.length - 1 ]
-        chr = chrs[ idx ]
-        continue if non_components.has chr
-        continue unless ( rcformula = registry[ chr ] )?
-        count++
-        chrs.splice idx, 1, Array.from rcformula
-      break if count is 0
-    registry[ glyph ] = chrs = chrs.flat().join ''
+  # registry[ '來' ]  = '{來|⿻木从}'
+  # registry[ '从' ]  = '{从|⿰人人}'
+  # registry[ '玄' ]  = '{玄|⿱亠幺|⿱丶𢆰|⿰𤣥丶}'
+  # # registry[ '丶' ]  = '{丶|●}'
+  # registry[ '幺' ]  = '{幺|⿰&jzr#xe10e;丶}'
+  # registry[ '' ]  = '{|⿱𠃋𠃋}'
+  # registry[ '𢆰' ]  = '{𢆰|⿱一幺}'
+  # registry[ '𤣥' ]  = '{𤣥|⿱亠&jzr#xe10e;}'
+  # registry[ '亠' ]  = '{亠|⿱丶一}'
+  # registry[ '弓' ]  = '{弓|⿱&jzr#xe139;㇉}'
+  # registry[ '' ]  = '{|⿱𠃌一}'
+  # registry[ '弦' ]  = '{弦|⿰弓玄}'
+  # registry[ '杛' ]  = '{杛|⿰木弓}'
+  # registry[ '㭹' ]  = '{㭹|⿰杛玄|⿰木弦}'
+  #.........................................................................................................
+  for _ in [ 1 .. 4 ]
+    outer_count = 0
+    # outer_count--
+    whisper '^335^', '-'.repeat 50
+    for glyph, cformula of registry
+      chrs = Array.from cformula
+      if glyph is '木' then debug '^558^', glyph, cformula; debug '^558^', glyph, chrs
+      loop
+        inner_count = 0
+        idx = 2
+        loop
+          idx++
+          break if idx >= chrs.length - 1
+          chr = chrs[ idx ]
+          # if glyph is '木' then debug '^33376^', chrs, chrs[ idx - 1 ] is '{' and chrs[ idx + 1 ] is '|'
+          continue if ( chrs[ idx - 1 ] is '{' ) and ( chrs[ idx + 1 ] is '|' )
+          continue if non_components.has chr
+          continue unless ( rcformula = registry[ chr ] )?
+          inner_count++
+          outer_count++
+          chrs.splice idx, 1, ( Array.from rcformula )...
+        # break if inner_count is 0
+        break
+      debug '^3342^', chrs
+      registry[ glyph ] = chrs = chrs.flat().join ''
+      if glyph is '木' then debug '^558^', inner_count, outer_count, glyph, ( CND.lime chrs )
+    # break
+  return null
   #.........................................................................................................
   for glyph, cformula of registry
+    whisper '-'.repeat 50
     urge '^443^', glyph, cformula
     components = new Set()
-    for rcformula in @SFX_expand glyph, cformula
-      for component in [ cformula..., ]
-        continue if component is glyph
-        continue if non_components.has component
-        components.add component
-      error = null
+    for rcformula, rcf_idx in @SFX_expand glyph, cformula
+      rcf_nr = rcf_idx + 1
+      # for component in [ cformula..., ]
+      #   continue if component is glyph
+      #   continue if non_components.has component
+      #   # debug '^4477^', component, IDLX._text_with_jzr_glyphs_as_uchrs component
+      #   components.add component
+      error       = null
+      mrcformula  = null
       #.....................................................................................................
       try
         ### TAINT no need to minimize short formulas ###
@@ -182,10 +208,15 @@ class @Formula extends @XXX
         throw error unless error.message.startsWith 'Syntax error at index 0'
       #.....................................................................................................
       if ( not error? ) and ( mrcformula isnt rcformula )
-        help '^443^', glyph, ( CND.lime mrcformula ), ( CND.grey rcformula )
+        help '^443^', rcf_nr, glyph, ( CND.lime mrcformula ), ( CND.grey rcformula )
       else
-        help '^443^', glyph, rcformula
-    info '^4568^', glyph, [ components..., ].join ''
+        help '^443^', rcf_nr, glyph, rcformula
+      local_components = ( c for c in [ ( mrcformula ? '' )..., ] when not non_components.has c )
+      components.add c for c in local_components
+    components = [ components..., ]
+    components = components.sort()
+    components = components.join ''
+    info '^4568^', glyph, components
   #.........................................................................................................
   return null
 
