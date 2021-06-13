@@ -1157,7 +1157,7 @@ order by wbfs;`;
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: VNRs"] = function(T, done) {
-    var Dba, dba, error, i, idx, len, matcher, nr, schema, use_probe, values, vnr, vnr_json, vnrs;
+    var Dba, dba, error, hollerith_tng, i, idx, len, matcher, nr, schema, use_probe, values, vnr, vnr_json, vnrs;
     T.halt_on_error();
     ({Dba} = require('../../../apps/icql-dba'));
     matcher = null;
@@ -1193,15 +1193,14 @@ order by wbfs;`;
       return dba.as_hollerith(vnr);
     });
     //.........................................................................................................
-    dba.function('hollerith_tng', {
-      deterministic: true,
-      varargs: false
-    }, function(vnr_json) {
-      var R, i, idx, offset, ref, ref1, ref2, sign_delta, u32_width, vnr, vnr_width;
+    hollerith_tng = function(vnr_json) {
+      var R, i, idx, nr_max, nr_min, offset, ref, ref1, ref2, sign_delta, u32_width, vnr, vnr_width;
+      sign_delta = 0x80000000/* used to lift negative numbers to non-negative */
+      u32_width = 4/* bytes per element */
+      vnr_width = 5/* maximum elements in VNR vector */
+      nr_min = -0x80000000/* smallest possible VNR element */
+      nr_max = +0x7fffffff/* largest possible VNR element */
       vnr = JSON.parse(vnr_json);
-      sign_delta = 0x80000000;
-      u32_width = 4;
-      vnr_width = 5;
       if (!((0 < (ref = vnr.length) && ref <= vnr_width))) {
         throw new Error(`^44798^ expected VNR to be between 1 and ${vnr_width} elements long, got length ${vnr.length}`);
       }
@@ -1211,7 +1210,11 @@ order by wbfs;`;
         R.writeUInt32BE(((ref2 = vnr[idx]) != null ? ref2 : 0) + sign_delta, (offset += u32_width));
       }
       return R;
-    });
+    };
+    dba.function('hollerith_tng', {
+      deterministic: true,
+      varargs: false
+    }, hollerith_tng);
     //.........................................................................................................
     dba.execute(`create table v.main (
     total_nr  int   unique not null,
