@@ -775,11 +775,13 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
     debug '^3338^', rpr vnr
     return dba.as_hollerith vnr
   #.........................................................................................................
-  dba.function 'hollerith_tng', { deterministic: true, varargs: false, }, ( vnr_json ) ->
+  hollerith_tng = ( vnr_json ) ->
+    sign_delta  = 0x80000000  ### used to lift negative numbers to non-negative ###
+    u32_width   = 4           ### bytes per element ###
+    vnr_width   = 5           ### maximum elements in VNR vector ###
+    nr_min      = -0x80000000 ### smallest possible VNR element ###
+    nr_max      = +0x7fffffff ### largest possible VNR element ###
     vnr         = JSON.parse vnr_json
-    sign_delta  = 0x80000000
-    u32_width   = 4
-    vnr_width   = 5
     unless 0 < vnr.length <= vnr_width
       throw new Error "^44798^ expected VNR to be between 1 and #{vnr_width} elements long, got length #{vnr.length}"
     R           = Buffer.alloc vnr_width * u32_width, 0x00
@@ -787,6 +789,7 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
     for idx in [ 0 ... vnr_width ]
       R.writeUInt32BE ( vnr[ idx ] ? 0 ) + sign_delta, ( offset += u32_width )
     return R
+  dba.function 'hollerith_tng', { deterministic: true, varargs: false, }, hollerith_tng
   #.........................................................................................................
   dba.execute """
     create table v.main (
