@@ -777,18 +777,16 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
   #.........................................................................................................
   dba.function 'hollerith_tng', { deterministic: true, varargs: false, }, ( vnr_json ) ->
     vnr         = JSON.parse vnr_json
-    # vnr.push 0 while vnr.length < 5 ### TAINT use `.splice()` ###
-    R           = Buffer.allocUnsafe 5 * 4
-    # sign_delta  = 0x7fffffff
     sign_delta  = 0x80000000
+    u32_width   = 4
     vnr_width   = 5
-    offset      = -4
+    unless 0 < vnr.length <= vnr_width
+      throw new Error "^44798^ expected VNR to be between 1 and #{vnr_width} elements long, got length #{vnr.length}"
+    R           = Buffer.alloc vnr_width * u32_width, 0x00
+    offset      = -u32_width
     for idx in [ 0 ... vnr_width ]
-      R.writeUInt32BE ( vnr[ idx ] ? 0 ) + sign_delta, ( offset += 4 )
+      R.writeUInt32BE ( vnr[ idx ] ? 0 ) + sign_delta, ( offset += u32_width )
     return R
-  #.........................................................................................................
-  dba.function 'reverse', { deterministic: true, varargs: false, }, ( vnr_json ) ->
-    return JSON.stringify ( JSON.parse vnr_json ).reverse()
   #.........................................................................................................
   dba.execute """
     create table v.main (
@@ -796,48 +794,53 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
         vnr       json  unique not null,
         -- vnr_r     json  generated always as ( reverse( vnr ) ) stored,
         -- vnr_h     blob  generated always as ( hollerith_classic( vnr ) ) stored,
-        vnr_htng     blob  generated always as ( hollerith_tng( vnr ) ) stored,
+        vnr_htng  blob  generated always as ( hollerith_tng( vnr ) ) stored,
       primary key ( total_nr ) );"""
   #.........................................................................................................
-  dba.execute """create unique index v.vnr_fair on main ( hollerith_classic( vnr ) );"""
-  # #.........................................................................................................
-  # vnrs = [
-  #   [ -8, ]
-  #   [ -7, ]
-  #   [ -6, ]
-  #   [ -5, ]
-  #   [ -4, ]
-  #   [ -3, ]
-  #   [ -2, ]
-  #   [ -1, ]
-  #   [ 0, ]
-  #   [ 1, ]
-  #   [ 2, ]
-  #   [ 3, ]
-  #   [ 4, ]
-  #   [ 5, ]
-  #   [ 6, ]
-  #   [ 7, ]
-  #   ]
+  dba.execute """create unique index v.main_vnr_hollerith on main ( hollerith_tng( vnr ) );"""
+  use_probe = 2
   #.........................................................................................................
-  vnrs = [
-    [ 0, -1, ]
-    # []
-    [ 0, ]
-    [ 0, 1, -1 ]
-    [ 0, 1, ]
-    [ 0, 1, 1 ]
-    [ 1, -1, -1, ]
-    [ 1, -1, 0, ]
-    # [ 1, -1, ]
-    [ 1, 0, -1, ]
-    [ 1, ]
-    # [ 1, 0, ]
-    [ 2, ]
-    [ 3, 5, 8, -1, ]
-    [ 3, 5, 8, 0, -11, ]
-    [ 3, 5, 8, ]
-    ]
+  switch use_probe
+    when 1
+      vnrs = [
+        [ -8, ]
+        [ -7, ]
+        [ -6, ]
+        [ -5, ]
+        [ -4, ]
+        [ -3, ]
+        [ -2, ]
+        [ -1, ]
+        [ 0, ]
+        [ 1, ]
+        [ 2, ]
+        [ 3, ]
+        [ 4, ]
+        [ 5, ]
+        [ 6, ]
+        [ 7, ]
+        ]
+  #.........................................................................................................
+    when 2
+      vnrs = [
+        [ 0, -1, ]
+        # []
+        [ 0, ]
+        [ 0, 1, -1 ]
+        [ 0, 1, ]
+        [ 0, 1, 1 ]
+        [ 1, -1, -1, ]
+        [ 1, -1, 0, ]
+        # [ 1, -1, ]
+        [ 1, 0, -1, ]
+        [ 1, ]
+        # [ 1, 0, ]
+        [ 2, ]
+        [ 3, 5, 8, -1, ]
+        # [ 3, 5, 8, 0, -11, -1, ]
+        [ 3, 5, 8, 0, -11, ]
+        [ 3, 5, 8, ]
+        ]
   for vnr, idx in vnrs
     nr        = idx + 1
     vnr_json  = JSON.stringify vnr
@@ -848,20 +851,11 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
       warn "when trying to insert values #{rpr values}, an error occurred: #{error.message}"
       throw error
   #.........................................................................................................
-  matcher = dba.list dba.query """explain query plan select * from v.main order by hollerith_classic( vnr );"""
+  matcher = dba.list dba.query """explain query plan select * from v.main order by hollerith_tng( vnr );"""
   console.table matcher
   #.........................................................................................................
-  matcher = dba.list dba.query """select
-      *
-    from v.main
-    order by hollerith_tng( vnr );"""
+  matcher = dba.list dba.query """select * from v.main order by hollerith_tng( vnr );"""
   console.table matcher
-  # #.........................................................................................................
-  # matcher = dba.list dba.query """select
-  #     *
-  #   from v.main
-  #   order by foo( vnr_r ) desc;"""
-  # console.table matcher
   #.........................................................................................................
   done()
 
