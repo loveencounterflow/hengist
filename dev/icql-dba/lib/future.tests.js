@@ -1156,6 +1156,169 @@ order by wbfs;`;
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["DBA: VNRs"] = function(T, done) {
+    var Dba, dba, error, i, idx, len, matcher, nr, schema, values, vnr, vnr_json, vnrs;
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    matcher = null;
+    //.........................................................................................................
+    whisper('-'.repeat(108));
+    schema = 'v';
+    dba = new Dba();
+    dba._attach({
+      schema,
+      ram: true
+    });
+    //.........................................................................................................
+    /* TAINT by using a generated column with a UDF we are also forced to convert the VNR to JSON and
+     then parse that value vefore Hollerith-encoding the value: */
+    dba.function('hollerith_encode', {
+      deterministic: true,
+      varargs: false
+    }, function(vnr_json) {
+      debug('^3338^', rpr(vnr_json));
+      return dba.as_hollerith(JSON.parse(vnr_json));
+    });
+    //.........................................................................................................
+    dba.function('hollerith_classic', {
+      deterministic: true,
+      varargs: false
+    }, function(vnr_json) {
+      var vnr;
+      vnr = JSON.parse(vnr_json);
+      while (vnr.length < 5) {
+        vnr.push(0);
+      }
+      debug('^3338^', rpr(vnr));
+      return dba.as_hollerith(vnr);
+    });
+    //.........................................................................................................
+    dba.function('hollerith_tng', {
+      deterministic: true,
+      varargs: false
+    }, function(vnr_json) {
+      var R, i, idx, offset, ref, ref1, sign_delta, vnr, vnr_width;
+      vnr = JSON.parse(vnr_json);
+      // vnr.push 0 while vnr.length < 5 ### TAINT use `.splice()` ###
+      R = Buffer.allocUnsafe(5 * 4);
+      // sign_delta  = 0x7fffffff
+      sign_delta = 0x80000000;
+      vnr_width = 5;
+      offset = -4;
+      for (idx = i = 0, ref = vnr_width; (0 <= ref ? i < ref : i > ref); idx = 0 <= ref ? ++i : --i) {
+        R.writeUInt32BE(((ref1 = vnr[idx]) != null ? ref1 : 0) + sign_delta, (offset += 4));
+      }
+      return R;
+    });
+    //.........................................................................................................
+    dba.function('reverse', {
+      deterministic: true,
+      varargs: false
+    }, function(vnr_json) {
+      return JSON.stringify((JSON.parse(vnr_json)).reverse());
+    });
+    //.........................................................................................................
+    dba.execute(`create table v.main (
+    total_nr  int   unique not null,
+    vnr       json  unique not null,
+    -- vnr_r     json  generated always as ( reverse( vnr ) ) stored,
+    -- vnr_h     blob  generated always as ( hollerith_classic( vnr ) ) stored,
+    vnr_htng     blob  generated always as ( hollerith_tng( vnr ) ) stored,
+  primary key ( total_nr ) );`);
+    //.........................................................................................................
+    dba.execute(`create unique index v.vnr_fair on main ( hollerith_classic( vnr ) );`);
+    // #.........................................................................................................
+    // vnrs = [
+    //   [ -8, ]
+    //   [ -7, ]
+    //   [ -6, ]
+    //   [ -5, ]
+    //   [ -4, ]
+    //   [ -3, ]
+    //   [ -2, ]
+    //   [ -1, ]
+    //   [ 0, ]
+    //   [ 1, ]
+    //   [ 2, ]
+    //   [ 3, ]
+    //   [ 4, ]
+    //   [ 5, ]
+    //   [ 6, ]
+    //   [ 7, ]
+    //   ]
+    //.........................................................................................................
+    vnrs = [
+      [0,
+      -1],
+      // []
+      [0],
+      [0,
+      1,
+      -1],
+      [0,
+      1],
+      [0,
+      1,
+      1],
+      [1,
+      -1,
+      -1],
+      [1,
+      -1,
+      0],
+      // [ 1, -1, ]
+      [1,
+      0,
+      -1],
+      [1],
+      // [ 1, 0, ]
+      [2],
+      [3,
+      5,
+      8,
+      -1],
+      [3,
+      5,
+      8,
+      0,
+      -11],
+      [3,
+      5,
+      8]
+    ];
+    for (idx = i = 0, len = vnrs.length; i < len; idx = ++i) {
+      vnr = vnrs[idx];
+      nr = idx + 1;
+      vnr_json = JSON.stringify(vnr);
+      values = [nr, vnr_json];
+      try {
+        dba.run("insert into v.main ( total_nr, vnr ) values ( ?, ? )", values);
+      } catch (error1) {
+        error = error1;
+        warn(`when trying to insert values ${rpr(values)}, an error occurred: ${error.message}`);
+        throw error;
+      }
+    }
+    //.........................................................................................................
+    matcher = dba.list(dba.query(`explain query plan select * from v.main order by hollerith_classic( vnr );`));
+    console.table(matcher);
+    //.........................................................................................................
+    matcher = dba.list(dba.query(`select
+  *
+from v.main
+order by hollerith_tng( vnr );`));
+    console.table(matcher);
+    // #.........................................................................................................
+    // matcher = dba.list dba.query """select
+    //     *
+    //   from v.main
+    //   order by foo( vnr_r ) desc;"""
+    // console.table matcher
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DBA: import TSV; big file"] = async function(T, done) {
     var Dba, count, dba, export_path, formula_count, import_cfg, import_path, is_first, matcher, non_components, schema, spread_cfg, transform;
     // T.halt_on_error()
@@ -1542,13 +1705,14 @@ e6    text );`);
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      return test(this["DBA: import TSV; big file"], {
-        timeout: 60e3
+      return test(this["DBA: VNRs"], {
+        timeout: 5e3
       });
     })();
   }
 
-  // test @[ "DBA: virtual tables" ]
+  // test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
+// test @[ "DBA: virtual tables" ]
 // test @[ "DBA: import TSV; cfg variants 2" ]
 // test @[ "DBA: import TSV; cfg variants 2" ]
 // test @[ "DBA: import TSV; cfg variants 3" ]
