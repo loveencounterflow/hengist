@@ -753,6 +753,119 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
   done()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "DBA: VNRs" ] = ( T, done ) ->
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  matcher           = null
+  #.........................................................................................................
+  whisper '-'.repeat 108
+  schema            = 'v'
+  dba               = new Dba()
+  dba._attach { schema, ram: true, }
+  #.........................................................................................................
+  ### TAINT by using a generated column with a UDF we are also forced to convert the VNR to JSON and
+  then parse that value vefore Hollerith-encoding the value: ###
+  dba.function 'hollerith_encode', { deterministic: true, varargs: false, }, ( vnr_json ) ->
+    debug '^3338^', rpr vnr_json
+    return dba.as_hollerith JSON.parse vnr_json
+  #.........................................................................................................
+  dba.function 'hollerith_classic', { deterministic: true, varargs: false, }, ( vnr_json ) ->
+    vnr = JSON.parse vnr_json
+    vnr.push 0 while vnr.length < 5
+    debug '^3338^', rpr vnr
+    return dba.as_hollerith vnr
+  #.........................................................................................................
+  dba.function 'hollerith_tng', { deterministic: true, varargs: false, }, ( vnr_json ) ->
+    vnr         = JSON.parse vnr_json
+    # vnr.push 0 while vnr.length < 5 ### TAINT use `.splice()` ###
+    R           = Buffer.allocUnsafe 5 * 4
+    # sign_delta  = 0x7fffffff
+    sign_delta  = 0x80000000
+    vnr_width   = 5
+    offset      = -4
+    for idx in [ 0 ... vnr_width ]
+      R.writeUInt32BE ( vnr[ idx ] ? 0 ) + sign_delta, ( offset += 4 )
+    return R
+  #.........................................................................................................
+  dba.function 'reverse', { deterministic: true, varargs: false, }, ( vnr_json ) ->
+    return JSON.stringify ( JSON.parse vnr_json ).reverse()
+  #.........................................................................................................
+  dba.execute """
+    create table v.main (
+        total_nr  int   unique not null,
+        vnr       json  unique not null,
+        -- vnr_r     json  generated always as ( reverse( vnr ) ) stored,
+        -- vnr_h     blob  generated always as ( hollerith_classic( vnr ) ) stored,
+        vnr_htng     blob  generated always as ( hollerith_tng( vnr ) ) stored,
+      primary key ( total_nr ) );"""
+  #.........................................................................................................
+  dba.execute """create unique index v.vnr_fair on main ( hollerith_classic( vnr ) );"""
+  # #.........................................................................................................
+  # vnrs = [
+  #   [ -8, ]
+  #   [ -7, ]
+  #   [ -6, ]
+  #   [ -5, ]
+  #   [ -4, ]
+  #   [ -3, ]
+  #   [ -2, ]
+  #   [ -1, ]
+  #   [ 0, ]
+  #   [ 1, ]
+  #   [ 2, ]
+  #   [ 3, ]
+  #   [ 4, ]
+  #   [ 5, ]
+  #   [ 6, ]
+  #   [ 7, ]
+  #   ]
+  #.........................................................................................................
+  vnrs = [
+    [ 0, -1, ]
+    # []
+    [ 0, ]
+    [ 0, 1, -1 ]
+    [ 0, 1, ]
+    [ 0, 1, 1 ]
+    [ 1, -1, -1, ]
+    [ 1, -1, 0, ]
+    # [ 1, -1, ]
+    [ 1, 0, -1, ]
+    [ 1, ]
+    # [ 1, 0, ]
+    [ 2, ]
+    [ 3, 5, 8, -1, ]
+    [ 3, 5, 8, 0, -11, ]
+    [ 3, 5, 8, ]
+    ]
+  for vnr, idx in vnrs
+    nr        = idx + 1
+    vnr_json  = JSON.stringify vnr
+    values    = [ nr, vnr_json, ]
+    try
+      dba.run "insert into v.main ( total_nr, vnr ) values ( ?, ? )", values
+    catch error
+      warn "when trying to insert values #{rpr values}, an error occurred: #{error.message}"
+      throw error
+  #.........................................................................................................
+  matcher = dba.list dba.query """explain query plan select * from v.main order by hollerith_classic( vnr );"""
+  console.table matcher
+  #.........................................................................................................
+  matcher = dba.list dba.query """select
+      *
+    from v.main
+    order by hollerith_tng( vnr );"""
+  console.table matcher
+  # #.........................................................................................................
+  # matcher = dba.list dba.query """select
+  #     *
+  #   from v.main
+  #   order by foo( vnr_r ) desc;"""
+  # console.table matcher
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import TSV; big file" ] = ( T, done ) ->
   # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
@@ -1064,7 +1177,8 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
 ############################################################################################################
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
-  test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
+  test @[ "DBA: VNRs" ], { timeout: 5e3, }
+  # test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
   # test @[ "DBA: virtual tables" ]
   # test @[ "DBA: import TSV; cfg variants 2" ]
   # test @[ "DBA: import TSV; cfg variants 2" ]
