@@ -1157,7 +1157,7 @@ order by wbfs;`;
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: VNRs"] = function(T, done) {
-    var Dba, dba, error, i, idx, len, matcher, nr, schema, values, vnr, vnr_json, vnrs;
+    var Dba, dba, error, i, idx, len, matcher, nr, schema, use_probe, values, vnr, vnr_json, vnrs;
     T.halt_on_error();
     ({Dba} = require('../../../apps/icql-dba'));
     matcher = null;
@@ -1197,25 +1197,20 @@ order by wbfs;`;
       deterministic: true,
       varargs: false
     }, function(vnr_json) {
-      var R, i, idx, offset, ref, ref1, sign_delta, vnr, vnr_width;
+      var R, i, idx, offset, ref, ref1, ref2, sign_delta, u32_width, vnr, vnr_width;
       vnr = JSON.parse(vnr_json);
-      // vnr.push 0 while vnr.length < 5 ### TAINT use `.splice()` ###
-      R = Buffer.allocUnsafe(5 * 4);
-      // sign_delta  = 0x7fffffff
       sign_delta = 0x80000000;
+      u32_width = 4;
       vnr_width = 5;
-      offset = -4;
-      for (idx = i = 0, ref = vnr_width; (0 <= ref ? i < ref : i > ref); idx = 0 <= ref ? ++i : --i) {
-        R.writeUInt32BE(((ref1 = vnr[idx]) != null ? ref1 : 0) + sign_delta, (offset += 4));
+      if (!((0 < (ref = vnr.length) && ref <= vnr_width))) {
+        throw new Error(`^44798^ expected VNR to be between 1 and ${vnr_width} elements long, got length ${vnr.length}`);
+      }
+      R = Buffer.alloc(vnr_width * u32_width, 0x00);
+      offset = -u32_width;
+      for (idx = i = 0, ref1 = vnr_width; (0 <= ref1 ? i < ref1 : i > ref1); idx = 0 <= ref1 ? ++i : --i) {
+        R.writeUInt32BE(((ref2 = vnr[idx]) != null ? ref2 : 0) + sign_delta, (offset += u32_width));
       }
       return R;
-    });
-    //.........................................................................................................
-    dba.function('reverse', {
-      deterministic: true,
-      varargs: false
-    }, function(vnr_json) {
-      return JSON.stringify((JSON.parse(vnr_json)).reverse());
     });
     //.........................................................................................................
     dba.execute(`create table v.main (
@@ -1223,69 +1218,59 @@ order by wbfs;`;
     vnr       json  unique not null,
     -- vnr_r     json  generated always as ( reverse( vnr ) ) stored,
     -- vnr_h     blob  generated always as ( hollerith_classic( vnr ) ) stored,
-    vnr_htng     blob  generated always as ( hollerith_tng( vnr ) ) stored,
+    vnr_htng  blob  generated always as ( hollerith_tng( vnr ) ) stored,
   primary key ( total_nr ) );`);
     //.........................................................................................................
-    dba.execute(`create unique index v.vnr_fair on main ( hollerith_classic( vnr ) );`);
-    // #.........................................................................................................
-    // vnrs = [
-    //   [ -8, ]
-    //   [ -7, ]
-    //   [ -6, ]
-    //   [ -5, ]
-    //   [ -4, ]
-    //   [ -3, ]
-    //   [ -2, ]
-    //   [ -1, ]
-    //   [ 0, ]
-    //   [ 1, ]
-    //   [ 2, ]
-    //   [ 3, ]
-    //   [ 4, ]
-    //   [ 5, ]
-    //   [ 6, ]
-    //   [ 7, ]
-    //   ]
+    dba.execute(`create unique index v.main_vnr_hollerith on main ( hollerith_tng( vnr ) );`);
+    use_probe = 2;
     //.........................................................................................................
-    vnrs = [
-      [0,
-      -1],
-      // []
-      [0],
-      [0,
-      1,
-      -1],
-      [0,
-      1],
-      [0,
-      1,
-      1],
-      [1,
-      -1,
-      -1],
-      [1,
-      -1,
-      0],
-      // [ 1, -1, ]
-      [1,
-      0,
-      -1],
-      [1],
-      // [ 1, 0, ]
-      [2],
-      [3,
-      5,
-      8,
-      -1],
-      [3,
-      5,
-      8,
-      0,
-      -11],
-      [3,
-      5,
-      8]
-    ];
+    switch (use_probe) {
+      case 1:
+        vnrs = [[-8], [-7], [-6], [-5], [-4], [-3], [-2], [-1], [0], [1], [2], [3], [4], [5], [6], [7]];
+        break;
+      //.........................................................................................................
+      case 2:
+        vnrs = [
+          [0,
+          -1],
+          // []
+          [0],
+          [0,
+          1,
+          -1],
+          [0,
+          1],
+          [0,
+          1,
+          1],
+          [1,
+          -1,
+          -1],
+          [1,
+          -1,
+          0],
+          // [ 1, -1, ]
+          [1,
+          0,
+          -1],
+          [1],
+          // [ 1, 0, ]
+          [2],
+          [3,
+          5,
+          8,
+          -1],
+          // [ 3, 5, 8, 0, -11, -1, ]
+          [3,
+          5,
+          8,
+          0,
+          -11],
+          [3,
+          5,
+          8]
+        ];
+    }
     for (idx = i = 0, len = vnrs.length; i < len; idx = ++i) {
       vnr = vnrs[idx];
       nr = idx + 1;
@@ -1300,20 +1285,11 @@ order by wbfs;`;
       }
     }
     //.........................................................................................................
-    matcher = dba.list(dba.query(`explain query plan select * from v.main order by hollerith_classic( vnr );`));
+    matcher = dba.list(dba.query(`explain query plan select * from v.main order by hollerith_tng( vnr );`));
     console.table(matcher);
     //.........................................................................................................
-    matcher = dba.list(dba.query(`select
-  *
-from v.main
-order by hollerith_tng( vnr );`));
+    matcher = dba.list(dba.query(`select * from v.main order by hollerith_tng( vnr );`));
     console.table(matcher);
-    // #.........................................................................................................
-    // matcher = dba.list dba.query """select
-    //     *
-    //   from v.main
-    //   order by foo( vnr_r ) desc;"""
-    // console.table matcher
     //.........................................................................................................
     return done();
   };
