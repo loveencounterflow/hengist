@@ -100,7 +100,8 @@ contexts:
 
   #---------------------------------------------------------------------------------------------------------
   script-pgsql:
-    - match: (^\s*%%%.sql\s+[-=#]*$)
+    # - match: (^\s*%%%.sql\s+[-=#]*$)
+    - match: '(sqlx""")'
       captures:
         0: language-marker.icql
       scope: embed.pgsql.icql
@@ -117,3 +118,20 @@ contexts:
   #       - script-javascript
   #       # - tag-generic-attribute-meta
   #       # - tag-generic-attribute-value
+
+
+  #---------------------------------------------------------------------------------------------------------
+  string-quoted-double-block:
+    # Triple-quoted capital R raw string, unicode or not, no syntax embedding
+    - match: '([uU]?R)(""")'
+      captures:
+        1: storage.type.string.python
+        2: meta.string.python string.quoted.double.block.python punctuation.definition.string.begin.python
+      push:
+        - meta_content_scope: meta.string.python string.quoted.double.block.python
+        - match: '"""'
+          scope: punctuation.definition.string.end.python
+          #set: after-expression
+        - include: escaped-unicode-char
+
+
