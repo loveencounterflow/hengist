@@ -814,72 +814,90 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
   #.........................................................................................................
   dba.execute """
     create table v.main (
-        total_nr  int   unique not null,
-        vnr       json  unique not null,
-        -- vnr_r     json  generated always as ( reverse( vnr ) ) stored,
-        -- vnr_h     blob  generated always as ( hollerith_classic( vnr ) ) stored,
-        vnr_htng  blob  generated always as ( hollerith_tng( vnr ) ) stored,
-      primary key ( total_nr ) );"""
+        nr                int   unique not null,
+        vnr               json  unique not null,
+        vnr_hollerith_tng blob  generated always as ( hollerith_tng(  vnr ) ) stored,
+        vnr_bcd           blob  generated always as ( bcd(            vnr ) ) stored,
+      primary key ( nr ) );"""
   #.........................................................................................................
-  dba.execute """create unique index v.main_vnr_hollerith on main ( hollerith_tng( vnr ) );"""
+  dba.execute """create unique index v.main_vnr_hollerith_tng on main ( hollerith_tng( vnr ) );"""
+  dba.execute """create unique index v.main_vnr_bcd on main ( bcd( vnr ) );"""
   use_probe = 2
   #.........................................................................................................
-  switch use_probe
-    when 1
-      vnrs = [
-        [ -8, ]
-        [ -7, ]
-        [ -6, ]
-        [ -5, ]
-        [ -4, ]
-        [ -3, ]
-        [ -2, ]
-        [ -1, ]
-        [ 0, ]
-        [ 1, ]
-        [ 2, ]
-        [ 3, ]
-        [ 4, ]
-        [ 5, ]
-        [ 6, ]
-        [ 7, ]
-        ]
+  do =>
+    switch use_probe
+      when 1
+        vnrs = [
+          [ -8, ]
+          [ -7, ]
+          [ -6, ]
+          [ -5, ]
+          [ -4, ]
+          [ -3, ]
+          [ -2, ]
+          [ -1, ]
+          [ 0, ]
+          [ 1, ]
+          [ 2, ]
+          [ 3, ]
+          [ 4, ]
+          [ 5, ]
+          [ 6, ]
+          [ 7, ]
+          ]
+    #.........................................................................................................
+      when 2
+        vnrs = [
+          [ 0, -1, ]
+          # []
+          [ 0, ]
+          [ 0, 1, -1 ]
+          [ 0, 1, ]
+          [ 0, 1, 1 ]
+          [ 1, -1, -1, ]
+          [ 1, -1, 0, ]
+          # [ 1, -1, ]
+          [ 1, 0, -1, ]
+          [ 1, ]
+          # [ 1, 0, ]
+          [ 2, ]
+          [ 3, 5, 8, -1, ]
+          # [ 3, 5, 8, 0, -11, -1, ]
+          [ 3, 5, 8, 0, -11, ]
+          [ 3, 5, 8, ]
+          [ 10003, 10005, 10008, ]
+          ]
+    vnrs  = ( [ idx + 1, vnr ] for vnr, idx in vnrs )
+    vnrs  = CND.shuffle vnrs
+    for [ nr, vnr, ] in vnrs
+      vnr_json  = JSON.stringify vnr
+      values    = [ nr, vnr_json, ]
+      try
+        dba.run "insert into v.main ( nr, vnr ) values ( ?, ? )", values
+      catch error
+        warn "when trying to insert values #{rpr values}, an error occurred: #{error.message}"
+        throw error
   #.........................................................................................................
-    when 2
-      vnrs = [
-        [ 0, -1, ]
-        # []
-        [ 0, ]
-        [ 0, 1, -1 ]
-        [ 0, 1, ]
-        [ 0, 1, 1 ]
-        [ 1, -1, -1, ]
-        [ 1, -1, 0, ]
-        # [ 1, -1, ]
-        [ 1, 0, -1, ]
-        [ 1, ]
-        # [ 1, 0, ]
-        [ 2, ]
-        [ 3, 5, 8, -1, ]
-        # [ 3, 5, 8, 0, -11, -1, ]
-        [ 3, 5, 8, 0, -11, ]
-        [ 3, 5, 8, ]
-        ]
-  for vnr, idx in vnrs
-    nr        = idx + 1
-    vnr_json  = JSON.stringify vnr
-    values    = [ nr, vnr_json, ]
-    try
-      dba.run "insert into v.main ( total_nr, vnr ) values ( ?, ? )", values
-    catch error
-      warn "when trying to insert values #{rpr values}, an error occurred: #{error.message}"
-      throw error
-  #.........................................................................................................
-  matcher = dba.list dba.query """explain query plan select * from v.main order by hollerith_tng( vnr );"""
-  console.table matcher
-  #.........................................................................................................
-  matcher = dba.list dba.query """select * from v.main order by hollerith_tng( vnr );"""
-  console.table matcher
+  # matcher = dba.list dba.query """select * from v.main order by hollerith_tng( vnr );"""
+  # console.table dba.list dba.query """explain query plan select * from v.main order by vnr_bcd;"""
+  # console.table dba.list dba.query """explain query plan select * from v.main order by bcd( vnr );"""
+  # console.table dba.list dba.query """explain query plan select * from v.main order by hollerith_tng( vnr );"""
+  SQL = ( parts, expressions... ) ->
+    # debug '^345^', parts
+    # debug '^345^', parts.raw
+    # debug '^345^', expressions
+    R = parts[ 0 ]
+    for expression, idx in expressions
+      R += expression.toUpperCase() + parts[ idx + 1 ]
+    # debug '^334^', rpr R
+    return R
+  name = 'world'
+  debug '^23423^', SQL"select 'helo #{name}!!'"
+  debug '^23423^', String.raw"select 'helo #{name}!!'"
+  SQL = String.raw
+  sql = SQL"""select nr, vnr, to_hex( hollerith_tng( vnr ) ) as hollerith_tng_hex, vnr_bcd from v.main order by $order_by$;"""
+  help '^345^', SQL"order by hollerith_tng( vnr )"; console.table dba.list dba.query sql.replace '$order_by$', 'hollerith_tng( vnr )'
+  help '^345^', SQL"order by bcd( vnr )";           console.table dba.list dba.query sql.replace '$order_by$', 'bcd( vnr )'
   #.........................................................................................................
   done()
 
