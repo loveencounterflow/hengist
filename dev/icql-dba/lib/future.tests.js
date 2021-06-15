@@ -1157,7 +1157,7 @@ order by wbfs;`;
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: VNRs"] = function(T, done) {
-    var Dba, dba, error, hollerith_tng, i, idx, len, matcher, nr, schema, use_probe, values, vnr, vnr_json, vnrs;
+    var Dba, SQL, bcd, dba, hollerith_tng, matcher, name, schema, sql, to_hex, use_probe;
     T.halt_on_error();
     ({Dba} = require('../../../apps/icql-dba'));
     matcher = null;
@@ -1193,14 +1193,13 @@ order by wbfs;`;
       return dba.as_hollerith(vnr);
     });
     //.........................................................................................................
-    hollerith_tng = function(vnr_json) {
-      var R, i, idx, nr_max, nr_min, offset, ref, ref1, ref2, sign_delta, u32_width, vnr, vnr_width;
+    hollerith_tng = function(vnr) {
+      var R, i, idx, nr_max, nr_min, offset, ref, ref1, ref2, sign_delta, u32_width, vnr_width;
       sign_delta = 0x80000000/* used to lift negative numbers to non-negative */
       u32_width = 4/* bytes per element */
       vnr_width = 5/* maximum elements in VNR vector */
       nr_min = -0x80000000/* smallest possible VNR element */
       nr_max = +0x7fffffff/* largest possible VNR element */
-      vnr = JSON.parse(vnr_json);
       if (!((0 < (ref = vnr.length) && ref <= vnr_width))) {
         throw new Error(`^44798^ expected VNR to be between 1 and ${vnr_width} elements long, got length ${vnr.length}`);
       }
@@ -1211,88 +1210,160 @@ order by wbfs;`;
       }
       return R;
     };
+    //.........................................................................................................
+    bcd = function(vnr) {
+      var R, base, dpe, i, idx, minus, nr, padder, plus, ref, ref1, sign, vnr_width;
+      vnr_width = 5/* maximum elements in VNR vector */
+      dpe = 4/* digits per element */
+      base = 36;
+      plus = '+';
+      minus = '!';
+      padder = '.';
+      R = [];
+      for (idx = i = 0, ref = vnr_width; (0 <= ref ? i < ref : i > ref); idx = 0 <= ref ? ++i : --i) {
+        nr = (ref1 = vnr[idx]) != null ? ref1 : 0;
+        sign = nr >= 0 ? plus : minus;
+        R.push(sign + ((Math.abs(nr)).toString(base)).padStart(dpe, padder));
+      }
+      R = R.join(',');
+      return R;
+    };
+    //.........................................................................................................
     dba.function('hollerith_tng', {
       deterministic: true,
       varargs: false
-    }, hollerith_tng);
+    }, function(vnr_json) {
+      return hollerith_tng(JSON.parse(vnr_json));
+    });
+    dba.function('bcd', {
+      deterministic: true,
+      varargs: false
+    }, function(vnr_json) {
+      return bcd(JSON.parse(vnr_json));
+    });
+    //.........................................................................................................
+    to_hex = function(blob) {
+      return blob.toString('hex');
+    };
+    dba.function('to_hex', {
+      deterministic: true,
+      varargs: false
+    }, to_hex);
     //.........................................................................................................
     dba.execute(`create table v.main (
-    total_nr  int   unique not null,
-    vnr       json  unique not null,
-    -- vnr_r     json  generated always as ( reverse( vnr ) ) stored,
-    -- vnr_h     blob  generated always as ( hollerith_classic( vnr ) ) stored,
-    vnr_htng  blob  generated always as ( hollerith_tng( vnr ) ) stored,
-  primary key ( total_nr ) );`);
+    nr                int   unique not null,
+    vnr               json  unique not null,
+    vnr_hollerith_tng blob  generated always as ( hollerith_tng(  vnr ) ) stored,
+    vnr_bcd           blob  generated always as ( bcd(            vnr ) ) stored,
+  primary key ( nr ) );`);
     //.........................................................................................................
-    dba.execute(`create unique index v.main_vnr_hollerith on main ( hollerith_tng( vnr ) );`);
+    dba.execute(`create unique index v.main_vnr_hollerith_tng on main ( hollerith_tng( vnr ) );`);
+    dba.execute(`create unique index v.main_vnr_bcd on main ( bcd( vnr ) );`);
     use_probe = 2;
-    //.........................................................................................................
-    switch (use_probe) {
-      case 1:
-        vnrs = [[-8], [-7], [-6], [-5], [-4], [-3], [-2], [-1], [0], [1], [2], [3], [4], [5], [6], [7]];
-        break;
-      //.........................................................................................................
-      case 2:
-        vnrs = [
-          [0,
-          -1],
-          // []
-          [0],
-          [0,
-          1,
-          -1],
-          [0,
-          1],
-          [0,
-          1,
-          1],
-          [1,
-          -1,
-          -1],
-          [1,
-          -1,
-          0],
-          // [ 1, -1, ]
-          [1,
-          0,
-          -1],
-          [1],
-          // [ 1, 0, ]
-          [2],
-          [3,
-          5,
-          8,
-          -1],
-          // [ 3, 5, 8, 0, -11, -1, ]
-          [3,
-          5,
-          8,
-          0,
-          -11],
-          [3,
-          5,
-          8]
-        ];
-    }
-    for (idx = i = 0, len = vnrs.length; i < len; idx = ++i) {
-      vnr = vnrs[idx];
-      nr = idx + 1;
-      vnr_json = JSON.stringify(vnr);
-      values = [nr, vnr_json];
-      try {
-        dba.run("insert into v.main ( total_nr, vnr ) values ( ?, ? )", values);
-      } catch (error1) {
-        error = error1;
-        warn(`when trying to insert values ${rpr(values)}, an error occurred: ${error.message}`);
-        throw error;
+    (() => {      //.........................................................................................................
+      var error, i, idx, len, nr, results, values, vnr, vnr_json, vnrs;
+      switch (use_probe) {
+        case 1:
+          vnrs = [[-8], [-7], [-6], [-5], [-4], [-3], [-2], [-1], [0], [1], [2], [3], [4], [5], [6], [7]];
+          break;
+        //.........................................................................................................
+        case 2:
+          vnrs = [
+            [0,
+            -1],
+            // []
+            [0],
+            [0,
+            1,
+            -1],
+            [0,
+            1],
+            [0,
+            1,
+            1],
+            [1,
+            -1,
+            -1],
+            [1,
+            -1,
+            0],
+            // [ 1, -1, ]
+            [1,
+            0,
+            -1],
+            [1],
+            // [ 1, 0, ]
+            [2],
+            [3,
+            5,
+            8,
+            -1],
+            // [ 3, 5, 8, 0, -11, -1, ]
+            [3,
+            5,
+            8,
+            0,
+            -11],
+            [3,
+            5,
+            8],
+            [10003,
+            10005,
+            10008]
+          ];
       }
-    }
+      vnrs = (function() {
+        var i, len, results;
+        results = [];
+        for (idx = i = 0, len = vnrs.length; i < len; idx = ++i) {
+          vnr = vnrs[idx];
+          results.push([idx + 1, vnr]);
+        }
+        return results;
+      })();
+      vnrs = CND.shuffle(vnrs);
+      results = [];
+      for (i = 0, len = vnrs.length; i < len; i++) {
+        [nr, vnr] = vnrs[i];
+        vnr_json = JSON.stringify(vnr);
+        values = [nr, vnr_json];
+        try {
+          results.push(dba.run("insert into v.main ( nr, vnr ) values ( ?, ? )", values));
+        } catch (error1) {
+          error = error1;
+          warn(`when trying to insert values ${rpr(values)}, an error occurred: ${error.message}`);
+          throw error;
+        }
+      }
+      return results;
+    })();
     //.........................................................................................................
-    matcher = dba.list(dba.query(`explain query plan select * from v.main order by hollerith_tng( vnr );`));
-    console.table(matcher);
-    //.........................................................................................................
-    matcher = dba.list(dba.query(`select * from v.main order by hollerith_tng( vnr );`));
-    console.table(matcher);
+    // matcher = dba.list dba.query """select * from v.main order by hollerith_tng( vnr );"""
+    // console.table dba.list dba.query """explain query plan select * from v.main order by vnr_bcd;"""
+    // console.table dba.list dba.query """explain query plan select * from v.main order by bcd( vnr );"""
+    // console.table dba.list dba.query """explain query plan select * from v.main order by hollerith_tng( vnr );"""
+    SQL = function(parts, ...expressions) {
+      var R, expression, i, idx, len;
+      // debug '^345^', parts
+      // debug '^345^', parts.raw
+      // debug '^345^', expressions
+      R = parts[0];
+      for (idx = i = 0, len = expressions.length; i < len; idx = ++i) {
+        expression = expressions[idx];
+        R += expression.toUpperCase() + parts[idx + 1];
+      }
+      // debug '^334^', rpr R
+      return R;
+    };
+    name = 'world';
+    debug('^23423^', SQL`select 'helo ${name}!!'`);
+    debug('^23423^', String.raw`select 'helo ${name}!!'`);
+    SQL = String.raw;
+    sql = SQL`select nr, vnr, to_hex( hollerith_tng( vnr ) ) as hollerith_tng_hex, vnr_bcd from v.main order by $order_by$;`;
+    help('^345^', SQL`order by hollerith_tng( vnr )`);
+    console.table(dba.list(dba.query(sql.replace('$order_by$', 'hollerith_tng( vnr )'))));
+    help('^345^', SQL`order by bcd( vnr )`);
+    console.table(dba.list(dba.query(sql.replace('$order_by$', 'bcd( vnr )'))));
     //.........................................................................................................
     return done();
   };
