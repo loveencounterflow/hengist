@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/icql-multiple-syntax-manually-transpiled-demo.icql.coffee"
+  ],
+  "names": [],
+  "mappings": "AACA;EAAA;AAAA,MAAA,GAAA,EAAA,SAAA,EAAA,UAAA,EAAA,GAAA,EAAA,GAAA,EAAA;;EACA,CAAA,CAAE,GAAF,CAAA,GAAoB,OAAA,CAAQ,wBAAR,CAApB;;EACA,GAAA,GAAoB,IAAI,GAAJ,CAAA;;EACpB,MAAA,GAAoB;;EACpB,GAAG,CAAC,OAAJ,CAAY;IAAE,MAAF;IAAU,GAAA,EAAK;EAAf,CAAZ,EAJA;;;;;EAUA,UAAA,GAAa,GAAG,CAAC,KAAJ,CAAU,CAAA,mCAAA,CAAV;;EAGb,KAAA,uBAAA;IACE,OAAO,CAAC,GAAR,CAAY,SAAZ;EADF,CAbA;;;EAmBA,GAAA,GAAM,OAAO,CAAC;;EACd,GAAA,CAAI,QAAJ,EAAc,wBAAd;;EAGA;;;;;;EAvBA;AAAA",
+  "sourcesContent": [
+    "\n'use strict'\n{ Dba }           = require '../../../apps/icql-dba'\ndba               = new Dba()\nschema            = 'v'\ndba._attach { schema, ram: true, }\n\n# which syntax is this?\n\n# %%%.sql\n\n_icql_rows = dba.query \"\"\"\nselect 'helo from sql' as greeting;\n\"\"\"\nfor _icql_row from _icql_rows\n  console.log _icql_row\n\n\n# %%%.coffee\n\nlog = console.log \nlog '^1333^', \"helo from coffeescript\"\n\n# %%%.js\n```\nlog( `helo from JS` );\n\n```\n# %%%.coffee\n\n\n\n\n"
+  ]
+}

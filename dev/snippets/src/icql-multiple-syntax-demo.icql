@@ -1,0 +1,62 @@
+
+'use strict'
+
+class X extends Foo
+  constructor: ->
+    return undefined
+f = ( a, b ) -> a * b
+
+
+sqlx"""
+select 'helo world';
+select count(*) over ( order by y ) from foo order by f( x );
+
+
+"""
+
+
+
+%%%.coffee
+
+class X extends Foo
+  constructor: ->
+    return undefined
+f = ( a, b ) -> a * b
+
+%%%.sql
+
+class X extends Foo
+  constructor: ->
+    return undefined
+f = ( a, b ) -> a * b
+
+
+
+
+
+%%%.coffee
+
+
+
+
+select 'helo from sql' as greeting;
+      
+
+%%%.coffee
+
+log = console.log 
+log '^1333^', "helo from coffeescript"
+
+%%%.js
+
+log( `helo from JS` );
+
+%%%.coffee
+
+f = ( field_name ) ->
+  return <sql>select 42 as <var i=field_name>;</sql>
+
+<script>
+  console.log( `helo` );
+  const d = class X extends Array {};
+</script>
