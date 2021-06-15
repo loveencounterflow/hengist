@@ -775,13 +775,12 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
     debug '^3338^', rpr vnr
     return dba.as_hollerith vnr
   #.........................................................................................................
-  hollerith_tng = ( vnr_json ) ->
+  hollerith_tng = ( vnr ) ->
     sign_delta  = 0x80000000  ### used to lift negative numbers to non-negative ###
     u32_width   = 4           ### bytes per element ###
     vnr_width   = 5           ### maximum elements in VNR vector ###
     nr_min      = -0x80000000 ### smallest possible VNR element ###
     nr_max      = +0x7fffffff ### largest possible VNR element ###
-    vnr         = JSON.parse vnr_json
     unless 0 < vnr.length <= vnr_width
       throw new Error "^44798^ expected VNR to be between 1 and #{vnr_width} elements long, got length #{vnr.length}"
     R           = Buffer.alloc vnr_width * u32_width, 0x00
@@ -789,7 +788,29 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
     for idx in [ 0 ... vnr_width ]
       R.writeUInt32BE ( vnr[ idx ] ? 0 ) + sign_delta, ( offset += u32_width )
     return R
-  dba.function 'hollerith_tng', { deterministic: true, varargs: false, }, hollerith_tng
+  #.........................................................................................................
+  bcd = ( vnr ) ->
+    vnr_width   = 5           ### maximum elements in VNR vector ###
+    dpe         = 4           ### digits per element ###
+    base        = 36
+    plus        = '+'
+    minus       = '!'
+    padder      = '.'
+    R           = []
+    for idx in [ 0 ... vnr_width ]
+      nr    = vnr[ idx ] ? 0
+      sign  = if nr >= 0 then plus else minus
+      R.push sign + ( ( Math.abs nr ).toString base ).padStart dpe, padder
+    R           = R.join ','
+    return R
+  #.........................................................................................................
+  dba.function 'hollerith_tng', { deterministic: true, varargs: false, }, ( vnr_json ) ->
+    return hollerith_tng JSON.parse vnr_json
+  dba.function 'bcd', { deterministic: true, varargs: false, }, ( vnr_json ) ->
+    return bcd JSON.parse vnr_json
+  #.........................................................................................................
+  to_hex = ( blob ) -> blob.toString 'hex'
+  dba.function 'to_hex', { deterministic: true, varargs: false, }, to_hex
   #.........................................................................................................
   dba.execute """
     create table v.main (
