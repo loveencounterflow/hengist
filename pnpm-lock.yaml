@@ -75,6 +75,7 @@ specifiers:
   readable-stream: ^3.6.0
   source-map: ^0.7.3
   source-map-resolve: ^0.6.0
+  sql-template: ^1.2.2
   sql.js: 1.5.0
   sqlite-parser: ^1.0.1
   stacktracey: 2.0.18
@@ -162,6 +163,7 @@ dependencies:
   readable-stream: 3.6.0
   source-map: 0.7.3
   source-map-resolve: 0.6.0
+  sql-template: 1.2.2
   sql.js: 1.5.0
   sqlite-parser: 1.0.1
   stacktracey: 2.0.18
@@ -3263,6 +3265,10 @@ packages:
     resolution: {integrity: sha512-9NThjpgZnifTkJpzTZ7Eue85S49QwpNhZTq6GRJwObb6jnLFNGB7Qm73V5HewTROPyxD0C29xqmaI68bQtV+hg==}
     dependencies:
       readable-stream: 3.6.0
+    dev: false
+
+  /sql-template/1.2.2:
+    resolution: {integrity: sha512-xyfIOhjgg2trrU/hm1HycVzhVab+fkoaijdi6Nzofq8oGceMox1kbzwOth48WbsOm7MjKe8Ozi2dvsSishVRBw==}
     dev: false
 
   /sql.js/1.5.0:
