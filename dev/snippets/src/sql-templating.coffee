@@ -36,12 +36,12 @@ echo                      = CND.echo.bind CND
     joinSQLValues } = SQL
   SQL = SQL.default
   #.........................................................................................................
-  limit = 10
-  query = SQL"""SELECT id FROM users WHERE name=#{'toto'} #{
-    if limit? then sqlPart"LIMIT #{limit}" else emptySQLPart
-  }"""
-  query2 = SQL"""SELECT id FROM #{escapeSQLIdentifier('table')}"""
-  query3 = SQL"""SELECT id FROM users WHERE id IN #{joinSQLValues([1, 2])}}"""
+  limit     = null
+  limit     = 10
+  limit_sql = if limit? then sqlPart"LIMIT #{limit}" else emptySQLPart
+  query     = SQL"""SELECT id FROM users WHERE name=#{'toto'} #{limit_sql}"""
+  query2    = SQL"""SELECT id FROM #{escapeSQLIdentifier('table')}"""
+  query3    = SQL"""SELECT id FROM users WHERE id IN #{joinSQLValues([1, 2])}"""
   mergedQuery = SQL"""
   #{query}
   UNION
@@ -49,16 +49,99 @@ echo                      = CND.echo.bind CND
   UNION
   #{query3}
   """
-  info '^337^', query
-  info '^337^', query2
-  info '^337^', query3
-  info '^337^', mergedQuery
+  { text, values, } = query;        info '^337^', { text, values, }
+  { text, values, } = query2;       info '^337^', { text, values, }
+  { text, values, } = query3;       info '^337^', { text, values, }
+  { text, values, } = mergedQuery;  info '^337^', { text, values, }
 
+#-----------------------------------------------------------------------------------------------------------
+@demo_sql_template = ->
+  SQL = require 'sql-template'
+  show = ( fragment ) -> help ( rpr fragment.text ), ( CND.gold rpr fragment.values )
+  show SQL"select * from foo"
+  show SQL"select * from foo where age > #{22}"
+  conditions = { name:'John Doe', }
+  show SQL"select * from foo $where#{conditions}"
+  conditions = { id: [ 1, 2, 3, ], type:'snow', }
+  show SQL"select * from foo $where#{conditions}"
+  show SQL"update foo $set#{ {joe: 22, bar: 'ok'} }"
+  show SQL"insert into foo $keys#{["joe", "bar"]} values (#{22}, #{'ok'})}"
+  show SQL"insert into foo ( joe, bar ) $values#{ {joe: 22, bar: 'ok'} }"
+  obj = { first: 'John', last: 'Doe', }
+  show SQL"insert into foo $keys#{Object.keys(obj)} $values#{obj}"
+  show SQL"select * from $id#{'foo'}"
+  show SQL"select * from $id#{'foo'} where id $in#{[1,2,3]}"
+  return null
+
+
+#=========================================================================================================
+class Sql
+
+  #-------------------------------------------------------------------------------------------------------
+  constructor: ( cfg ) ->
+    # super()
+    @types  = new ( require 'intertype' ).Intertype()
+    @cfg    = cfg ### TAINT freeze ###
+    return undefined
+
+  #-------------------------------------------------------------------------------------------------------
+  SQL: String.raw
+  # SQL: ( parts, values... ) =>
+  #   debug '^557^', [ parts, values, @cfg, ]
+  #   return "your SQL string: #{rpr parts}, values: #{rpr values}"
+
+  #-------------------------------------------------------------------------------------------------------
+  I: ( name ) => '"' + ( name.replace /"/g, '""' ) + '"'
+
+  #-------------------------------------------------------------------------------------------------------
+  L: ( x ) =>
+    return 'null' unless x?
+    switch type = @types.type_of x
+      when 'text'       then return  "'" + ( x.replace /'/g, "''" ) + "'"
+      # when 'list'       then return "'#{@list_as_json x}'"
+      when 'float'      then return x.toString()
+      when 'boolean'    then return ( if x then '1' else '0' )
+      when 'list'
+        throw new Error "^dba@23^ use `X()` for lists"
+    throw new Error '^dba@323^', type, x
+    # throw new E.Dba_sql_value_error '^dba@323^', type, x
+
+  #-------------------------------------------------------------------------------------------------------
+  X: ( x ) =>
+    throw new Error "^dba@132^ expected a list, got a #{type}" unless ( type = @types.type_of x ) is 'list'
+    return '( ' + ( ( @L e for e in x ).join ', ' ) + ' )'
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_Xxx = ->
+  sql       = new Sql { this_setting: true, that_setting: 123, }
+  { SQL
+    I
+    L
+    X }     = sql
+  table     = 'that other "table"'
+  a_max     = 123
+  limit     = 10
+  truth     = true
+  strange   = "strange 'value'%"
+  selection = [ 'the', 'one', 'or', 'other', ]
+  info '^3344^\n', SQL"""
+    select
+        a, b, c
+      from #{I table}
+      where #{truth}
+        and ( a > #{L a_max} )
+        and ( b like #{L strange} )
+        and ( c in #{X selection} )
+      limit #{L limit};
+    """
+  return null
 
 
 ############################################################################################################
 if module is require.main then do =>
   # @demo_sql_tokenizer()
-  @demo_sql_templating_pgsqwell()
+  # @demo_sql_templating_pgsqwell()
+  # @demo_sql_template()
+  @demo_Xxx()
 
   
