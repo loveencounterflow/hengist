@@ -55,7 +55,7 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
     { template_path
       work_path }     = await H.procure_db { size: 'small', ref: 'F-open', reuse: true, }
     schema            = 'dm2'
-    schema_i          = dba.as_identifier schema
+    schema_i          = dba.sql.I schema
     schemas[ schema ] = { path: work_path, }
     urge '^344-1^', { template_path, work_path, schema, }
     dba.open { path: work_path, schema, }
@@ -1087,7 +1087,7 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
   #.........................................................................................................
   dba               = new Dba()
   # schema            = 'csv'
-  # schema_i          = dba.as_identifier schema
+  # schema_i          = dba.sql.I schema
   transform         = null
   is_first          = true
   #.........................................................................................................
@@ -1169,7 +1169,7 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
   urge "^44558^ reading from #{path}"
   dba.execute "create table foolines ( path text, vnr json, line text, vnr_h bytea );"
   # dba.execute "insert into foolines select * from readlines( ? );", [ path, ]
-  dba.execute "insert into foolines select * from readlines( #{dba.as_sql path} );"
+  dba.execute "insert into foolines select * from readlines( #{dba.sql.L path} );"
   # console.table dba.list dba.query "select * from readlines( ? ) order by vnr_h;", [ path, ]
   console.table dba.list dba.query "select * from foolines;"
   #.........................................................................................................
@@ -1212,8 +1212,8 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
-  test @[ "DBA: VNRs" ], { timeout: 5e3, }
+  test @, { timeout: 10e3, }
+  # test @[ "DBA: VNRs" ], { timeout: 5e3, }
   # test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
   # test @[ "DBA: virtual tables" ]
   # test @[ "DBA: import TSV; cfg variants 2" ]

@@ -59,10 +59,10 @@ DATOM                     = require 'datom'
 @types.declare 'datamill_db_lookalike', ( cfg ) ->
   @validate.looks_like_db_cfg cfg
   { dba, schema, }  = cfg
-  schema_i          = dba.as_identifier schema
+  schema_i          = dba.sql.I schema
   try
     return false unless ( dba.first_value dba.query "select count(*) from #{schema_i}.main;" ) is 327
-    debug '^35354^', dba.list dba.query "select * from #{schema_i}.main order by vnr_blob limit 3;"
+    # debug '^35354^', dba.list dba.query "select * from #{schema_i}.main order by vnr_blob limit 3;"
   catch error
     throw error unless error.code is 'SQLITE_ERROR'
     return false
@@ -72,7 +72,7 @@ DATOM                     = require 'datom'
 @types.declare 'chinook_db_lookalike', ( cfg ) ->
   @validate.looks_like_db_cfg cfg
   { dba, schema, }  = cfg
-  schema_i          = dba.as_identifier schema
+  schema_i          = dba.sql.I schema
   try
     db_objects = dba.list dba.query "select type, name from #{schema_i}.sqlite_schema where true or type is 'table' order by name;"
     info db_objects
@@ -109,7 +109,7 @@ DATOM                     = require 'datom'
 @types.declare 'micro_db_lookalike', ( cfg ) ->
   @validate.looks_like_db_cfg cfg
   { dba, schema, }  = cfg
-  schema_i          = dba.as_identifier schema
+  schema_i          = dba.sql.I schema
   try
     db_objects = dba.list dba.query "select type, name from #{schema_i}.sqlite_schema order by name;"
     info db_objects
