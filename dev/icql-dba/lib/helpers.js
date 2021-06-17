@@ -100,13 +100,13 @@
     var dba, error, schema, schema_i;
     this.validate.looks_like_db_cfg(cfg);
     ({dba, schema} = cfg);
-    schema_i = dba.as_identifier(schema);
+    schema_i = dba.sql.I(schema);
     try {
       if ((dba.first_value(dba.query(`select count(*) from ${schema_i}.main;`))) !== 327) {
         return false;
       }
-      debug('^35354^', dba.list(dba.query(`select * from ${schema_i}.main order by vnr_blob limit 3;`)));
     } catch (error1) {
+      // debug '^35354^', dba.list dba.query "select * from #{schema_i}.main order by vnr_blob limit 3;"
       error = error1;
       if (error.code !== 'SQLITE_ERROR') {
         throw error;
@@ -121,7 +121,7 @@
     var db_objects, dba, error, schema, schema_i;
     this.validate.looks_like_db_cfg(cfg);
     ({dba, schema} = cfg);
-    schema_i = dba.as_identifier(schema);
+    schema_i = dba.sql.I(schema);
     try {
       db_objects = dba.list(dba.query(`select type, name from ${schema_i}.sqlite_schema where true or type is 'table' order by name;`));
       info(db_objects);
@@ -236,7 +236,7 @@
     var db_objects, dba, error, schema, schema_i;
     this.validate.looks_like_db_cfg(cfg);
     ({dba, schema} = cfg);
-    schema_i = dba.as_identifier(schema);
+    schema_i = dba.sql.I(schema);
     try {
       db_objects = dba.list(dba.query(`select type, name from ${schema_i}.sqlite_schema order by name;`));
       info(db_objects);

@@ -84,7 +84,7 @@
         reuse: true
       })));
       schema = 'dm2';
-      schema_i = dba.as_identifier(schema);
+      schema_i = dba.sql.I(schema);
       schemas[schema] = {
         path: work_path
       };
@@ -1580,7 +1580,7 @@ e6    text );`);
     //.........................................................................................................
     dba = new Dba();
     // schema            = 'csv'
-    // schema_i          = dba.as_identifier schema
+    // schema_i          = dba.sql.I schema
     transform = null;
     is_first = true;
     //.........................................................................................................
@@ -1699,7 +1699,7 @@ e6    text );`);
     urge(`^44558^ reading from ${path}`);
     dba.execute("create table foolines ( path text, vnr json, line text, vnr_h bytea );");
     // dba.execute "insert into foolines select * from readlines( ? );", [ path, ]
-    dba.execute(`insert into foolines select * from readlines( ${dba.as_sql(path)} );`);
+    dba.execute(`insert into foolines select * from readlines( ${dba.sql.L(path)} );`);
     // console.table dba.list dba.query "select * from readlines( ? ) order by vnr_h;", [ path, ]
     console.table(dba.list(dba.query("select * from foolines;")));
     //.........................................................................................................
@@ -1754,14 +1754,14 @@ e6    text );`);
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      return test(this["DBA: VNRs"], {
-        timeout: 5e3
+      return test(this, {
+        timeout: 10e3
       });
     })();
   }
 
-  // test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
+  // test @[ "DBA: VNRs" ], { timeout: 5e3, }
+// test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
 // test @[ "DBA: virtual tables" ]
 // test @[ "DBA: import TSV; cfg variants 2" ]
 // test @[ "DBA: import TSV; cfg variants 2" ]
