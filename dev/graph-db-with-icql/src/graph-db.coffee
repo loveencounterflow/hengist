@@ -1,17 +1,39 @@
 
 
+
+'use strict'
+
+############################################################################################################
+CND                       = require 'cnd'
+rpr                       = CND.rpr
+badge                     = 'GRAPHDB'
+debug                     = CND.get_logger 'debug',     badge
+warn                      = CND.get_logger 'warn',      badge
+info                      = CND.get_logger 'info',      badge
+urge                      = CND.get_logger 'urge',      badge
+help                      = CND.get_logger 'help',      badge
+whisper                   = CND.get_logger 'whisper',   badge
+echo                      = CND.echo.bind CND
+{ Dba }                   = require '../../../apps/icql-dba'
+def                       = Object.defineProperty
+
+
 #===========================================================================================================
-class Graphdb
+class @Graphdb
 
   #---------------------------------------------------------------------------------------------------------
-  constructor: ->
+  constructor: ( cfg ) ->
     # super()
+    validate.gdb_constructor_cfg ( cfg = { @types.defaults.gdb_constructor_cfg..., cfg..., } )
+    def @, 'dba', enumerable: false, value: new Dba()
+    @init_db()
     return undefined
+
 
   #=========================================================================================================
   # SCHEMA
   #---------------------------------------------------------------------------------------------------------
-  create_schema: () ->
+  init_db: () ->
     ### TAINT edges are modelled as uniquely given by `( node_id_a, node_id_b )` with arbitrary data
     attached, but could conceivably link two given nodes with any number of edges ###
     sql = SQL"""
