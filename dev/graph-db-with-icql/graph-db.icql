@@ -1,0 +1,129 @@
+
+
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure create_schema()
+  create table if not exists nodes (
+      body json,
+      id   text generated always as ( json_extract( body, '$.id' ) ) virtual not null unique
+    );
+
+  -- .......................................................................................................
+  create table if not exists edges (
+      source     text,
+      target     text,
+      properties json,
+    foreign key( source ) references nodes( id ),
+    foreign key( target ) references nodes( id )
+    );
+
+  -- .......................................................................................................
+  create index if not exists id_idx on nodes(id);
+  create index if not exists source_idx on edges(source);
+  create index if not exists target_idx on edges(target);
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure delete_edge( a, b )
+  DELETE FROM edges WHERE source = $a OR target = $b
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure delete_node( id )
+  delete from nodes where id = $id
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure insert_edge( source, target, properties )
+  insert into edges values( $source, $target, json( $properties ) )
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure insert_node( body )
+  insert into nodes ( body ) values ( json( $body ) )
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure search_edges_inbound()
+  SELECT * FROM edges WHERE source = ?
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure search_edges_outbound()
+  SELECT * FROM edges WHERE target = ?
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure search_edges()
+  SELECT * FROM edges WHERE source = ?
+  UNION
+  SELECT * FROM edges WHERE target = ?
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure search_node_by_id()
+  SELECT body FROM nodes WHERE json_extract(body, '$.id') = ?
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure search_node()
+  SELECT body FROM nodes WHERE
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure traverse_inbound()
+  WITH RECURSIVE traverse(id) AS (
+    SELECT ?
+    UNION
+    SELECT source FROM edges JOIN traverse ON target = id
+  ) SELECT id FROM traverse;
+
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure traverse_outbound()
+  WITH RECURSIVE traverse(id) AS (
+    SELECT ?
+    UNION
+    SELECT target FROM edges JOIN traverse ON source = id
+  ) SELECT id FROM traverse;
+
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure traverse()
+  WITH RECURSIVE traverse(id) AS (
+    SELECT ?
+    UNION
+    SELECT source FROM edges JOIN traverse ON target = id
+    UNION
+    SELECT target FROM edges JOIN traverse ON source = id
+  ) SELECT id FROM traverse;
+
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure traverse_with_bodies_inbound()
+  WITH RECURSIVE traverse(x, y, obj) AS (
+    SELECT ?, ?, ?
+    UNION
+    SELECT id, '()', body FROM nodes JOIN traverse ON id = x
+    UNION
+    SELECT source, '<-', properties FROM edges JOIN traverse ON target = x
+  ) SELECT x, y, obj FROM traverse;
+
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure traverse_with_bodies_outbound()
+  WITH RECURSIVE traverse(x, y, obj) AS (
+    SELECT ?, ?, ?
+    UNION
+    SELECT id, '()', body FROM nodes JOIN traverse ON id = x
+    UNION
+    SELECT target, '->', properties FROM edges JOIN traverse ON source = x
+  ) SELECT x, y, obj FROM traverse;
+
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure traverse_with_bodies()
+  WITH RECURSIVE traverse(x, y, obj) AS (
+    SELECT ?, ?, ?
+    UNION
+    SELECT id, '()', body FROM nodes JOIN traverse ON id = x
+    UNION
+    SELECT source, '<-', properties FROM edges JOIN traverse ON target = x
+    UNION
+    SELECT target, '->', properties FROM edges JOIN traverse ON source = x
+  ) SELECT x, y, obj FROM traverse;
+
+
+-- ---------------------------------------------------------------------------------------------------------
+procedure update_node()
+  UPDATE nodes SET body = json(?) WHERE id = ?
