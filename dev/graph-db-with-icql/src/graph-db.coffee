@@ -16,6 +16,8 @@ whisper                   = CND.get_logger 'whisper',   badge
 echo                      = CND.echo.bind CND
 { Dba }                   = require '../../../apps/icql-dba'
 def                       = Object.defineProperty
+types                     = require './types'
+SQL                       = String.raw
 
 
 #===========================================================================================================
@@ -24,8 +26,11 @@ class @Graphdb
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     # super()
-    validate.gdb_constructor_cfg ( cfg = { @types.defaults.gdb_constructor_cfg..., cfg..., } )
-    def @, 'dba', enumerable: false, value: new Dba()
+    def @, 'types', enumerable: false, value: types
+    @types.validate.gdb_constructor_cfg ( cfg = { @types.defaults.gdb_constructor_cfg..., cfg..., } )
+    @cfg      = cfg
+    { path }  = @cfg
+    def @, 'dba', enumerable: false, value: new Dba { path, }
     @init_db()
     return undefined
 
@@ -53,6 +58,8 @@ class @Graphdb
       create index if not exists id_idx on nodes(id);
       create index if not exists source_idx on edges(source);
       create index if not exists target_idx on edges(target);"""
+    @dba.execute sql
+    return null
 
 
   #=========================================================================================================

@@ -30,7 +30,8 @@ types                     = new ( require 'intertype' ).Intertype
 @[ "Graphdb: create" ] = ( T, done ) ->
   T.halt_on_error()
   { Graphdb } = require './graph-db'
-  gdb         = new Graphdb()
+  path        = '/tmp/icql-graph.db'
+  gdb         = new Graphdb { path, }
   #.........................................................................................................
   debug '^4454^', gdb
   #.........................................................................................................
