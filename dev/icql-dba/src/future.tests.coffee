@@ -1210,11 +1210,52 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
   return null
 
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: open() DB in schema main" ] = ( T, done ) ->
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  schemas           = {}
+  { template_path
+    work_path }     = await H.procure_db { size: 'small', ref: 'F-open-in-main', }
+  schema            = 'main'
+  #.........................................................................................................
+  await do =>
+    ### Opening a RAM DB from file ###
+    urge '^344-3^', { template_path, work_path, schema, }
+    # dba     = new Dba()
+    dba = new Dba()
+    dba.open { path: work_path, }
+    T.ok H.types.isa.datamill_db_lookalike { dba, schema, }
+    # help '^43451^', dba.list dba.query "select * from ramdb.sqlite_schema;"
+    info d for d from dba.query "select * from pragma_database_list order by seq;"
+    db_path = dba.first_value dba.query "select file from pragma_database_list where name = ?;", [ schema, ]
+    T.eq db_path, work_path
+    T.eq db_path, dba._path_of_schema schema
+    T.ok not dba.is_ram_db { schema, }
+    info '^35345^', dba._schemas
+    dba.execute "create table main.x ( id int primary key ); insert into x ( id ) values ( 123 );"
+    return null
+  #.........................................................................................................
+  await do =>
+    ### Opening a RAM DB from file ###
+    urge '^344-3^', { template_path, work_path, schema, }
+    # dba     = new Dba()
+    dba = new Dba()
+    dba.open { path: work_path, }
+    info '^35345^', dba._schemas
+    info '^334^', "#{d.type}:#{d.schema}.#{d.name}" for d in dba.list dba.walk_objects { schema, }
+    T.eq ( dba.list dba.query "select * from main.x;" ), [ { id: 123, }, ]
+    debug '^3334^', dba
+  #.........................................................................................................
+  done()
+
+
 ############################################################################################################
 if module is require.main then do =>
   test @, { timeout: 10e3, }
   # test @[ "DBA: VNRs" ], { timeout: 5e3, }
   # test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
+  # test @[ "DBA: open() DB in schema main" ]
   # test @[ "DBA: virtual tables" ]
   # test @[ "DBA: import TSV; cfg variants 2" ]
   # test @[ "DBA: import TSV; cfg variants 2" ]
