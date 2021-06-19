@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dba, badge, debug, def, echo, help, info, rpr, urge, warn, whisper;
+  var CND, Dba, SQL, badge, debug, def, echo, help, info, rpr, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -27,15 +27,26 @@
 
   def = Object.defineProperty;
 
+  types = require('./types');
+
+  SQL = String.raw;
+
   //===========================================================================================================
   this.Graphdb = class Graphdb {
     //---------------------------------------------------------------------------------------------------------
     constructor(cfg) {
+      var path;
       // super()
-      validate.gdb_constructor_cfg((cfg = {...this.types.defaults.gdb_constructor_cfg, ...cfg}));
+      def(this, 'types', {
+        enumerable: false,
+        value: types
+      });
+      this.types.validate.gdb_constructor_cfg((cfg = {...this.types.defaults.gdb_constructor_cfg, ...cfg}));
+      this.cfg = cfg;
+      ({path} = this.cfg);
       def(this, 'dba', {
         enumerable: false,
-        value: new Dba()
+        value: new Dba({path})
       });
       this.init_db();
       return void 0;
@@ -48,7 +59,7 @@
       /* TAINT edges are modelled as uniquely given by `( node_id_a, node_id_b )` with arbitrary data
          attached, but could conceivably link two given nodes with any number of edges */
       var sql;
-      return sql = SQL`create table if not exists nodes (
+      sql = SQL`create table if not exists nodes (
     body json,
     id   text generated always as ( json_extract( body, '$.id' ) ) virtual not null unique
   );
@@ -64,6 +75,8 @@ create table if not exists edges (
 create index if not exists id_idx on nodes(id);
 create index if not exists source_idx on edges(source);
 create index if not exists target_idx on edges(target);`;
+      this.dba.execute(sql);
+      return null;
     }
 
     //=========================================================================================================

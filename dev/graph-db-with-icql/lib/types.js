@@ -37,8 +37,8 @@
       "@isa.object x": function(x) {
         return this.isa.object(x);
       },
-      "@isa.nonempty_text x.db_path": function(x) {
-        return this.isa.nonempty_text(x.db_path);
+      "@isa.nonempty_text x.path": function(x) {
+        return this.isa.nonempty_text(x.path);
       },
       "@isa_optional.boolean x.echo": function(x) {
         return this.isa_optional.boolean(x.echo);
