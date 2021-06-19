@@ -1276,13 +1276,17 @@ SQL                       = String.raw
 @[ "DBA: open() empty RAM DB in schema main" ] = ( T, done ) ->
   # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
+  schema            = 'main'
   #.........................................................................................................
   await do =>
     ### Opening an empty RAM DB ###
     dba = new Dba()
     dba.open { ram: true, }
-    info '^35345^', dba._schemas
-    # info '^334^', "#{d.type}:#{d.schema}.#{d.name}" for d in dba.list dba.walk_objects { schema, }
+    T.eq dba._schemas, { main: { path: null } }
+    T.eq ( dba.list dba.walk_objects { schema, } ), []
+    dba.execute SQL"create table main.x ( id int primary key ); insert into x ( id ) values ( 123 );"
+    info '^443^', dba.list dba.walk_objects { schema, }
+    T.eq ( dba.list dba.walk_objects { schema, } ), [ { seq: 0, schema: 'main', name: 'sqlite_autoindex_x_1', type: 'index', sql: null }, { seq: 0, schema: 'main', name: 'x', type: 'table', sql: 'CREATE TABLE x ( id int primary key )' } ]
     debug '^3334^', dba
   #.........................................................................................................
   done()
