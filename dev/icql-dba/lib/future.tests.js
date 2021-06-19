@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, badge, debug, echo, help, info, isa, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
+  var CND, H, PATH, SQL, badge, debug, echo, help, info, isa, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
     indexOf = [].indexOf,
     modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
@@ -44,6 +44,8 @@
       return setTimeout(done, dts * 1000);
     });
   };
+
+  SQL = String.raw;
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open()"] = async function(T, done) {
@@ -1157,7 +1159,7 @@ order by wbfs;`;
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: VNRs"] = function(T, done) {
-    var Dba, SQL, bcd, dba, hollerith_tng, matcher, name, schema, sql, to_hex, use_probe;
+    var Dba, bcd, dba, hollerith_tng, matcher, name, schema, sql, to_hex, use_probe;
     T.halt_on_error();
     ({Dba} = require('../../../apps/icql-dba'));
     matcher = null;
@@ -1752,7 +1754,7 @@ e6    text );`);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: open() DB in schema main"] = async function(T, done) {
+  this["DBA: open() file DB in schema main"] = async function(T, done) {
     var Dba, schema, schemas, template_path, work_path;
     T.halt_on_error();
     ({Dba} = require('../../../apps/icql-dba'));
@@ -1764,7 +1766,6 @@ e6    text );`);
     schema = 'main';
     await (() => {      //.........................................................................................................
       var d, db_path, dba, ref;
-      /* Opening a RAM DB from file */
       urge('^344-3^', {template_path, work_path, schema});
       // dba     = new Dba()
       dba = new Dba();
@@ -1772,24 +1773,21 @@ e6    text );`);
         path: work_path
       });
       T.ok(H.types.isa.datamill_db_lookalike({dba, schema}));
-      ref = dba.query("select * from pragma_database_list order by seq;");
+      ref = dba.query(SQL`select * from pragma_database_list order by seq;`);
       for (d of ref) {
         // help '^43451^', dba.list dba.query "select * from ramdb.sqlite_schema;"
         info(d);
       }
-      db_path = dba.first_value(dba.query("select file from pragma_database_list where name = ?;", [schema]));
+      db_path = dba.first_value(dba.query(SQL`select file from pragma_database_list where name = ?;`, [schema]));
       T.eq(db_path, work_path);
       T.eq(db_path, dba._path_of_schema(schema));
       T.ok(!dba.is_ram_db({schema}));
       info('^35345^', dba._schemas);
-      dba.execute("create table main.x ( id int primary key ); insert into x ( id ) values ( 123 );");
+      dba.execute(SQL`create table main.x ( id int primary key ); insert into x ( id ) values ( 123 );`);
       return null;
     })();
     await (() => {      //.........................................................................................................
       var d, dba, i, len, ref;
-      /* Opening a RAM DB from file */
-      urge('^344-3^', {template_path, work_path, schema});
-      // dba     = new Dba()
       dba = new Dba();
       dba.open({
         path: work_path
@@ -1800,11 +1798,70 @@ e6    text );`);
         d = ref[i];
         info('^334^', `${d.type}:${d.schema}.${d.name}`);
       }
-      T.eq(dba.list(dba.query("select * from main.x;")), [
+      T.eq(dba.list(dba.query(SQL`select * from main.x;`)), [
         {
           id: 123
         }
       ]);
+      return debug('^3334^', dba);
+    })();
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: open() RAM DB from file in schema main"] = async function(T, done) {
+    var Dba, schema, schemas, template_path, work_path;
+    // T.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
+    schemas = {};
+    ({template_path, work_path} = (await H.procure_db({
+      size: 'small',
+      ref: 'F-open-in-main'
+    })));
+    schema = 'main';
+    await (() => {      //.........................................................................................................
+      var d, db_path, dba, ref, ref1, ref2;
+      /* Opening a RAM DB from file */
+      urge('^344-3^', {template_path, work_path, schema});
+      // dba     = new Dba()
+      dba = new Dba();
+      dba.open({
+        path: work_path,
+        ram: true
+      });
+      T.ok(H.types.isa.datamill_db_lookalike({dba, schema}));
+      ref = dba.query(SQL`select * from pragma_database_list order by seq;`);
+      for (d of ref) {
+        // help '^43451^', dba.list dba.query "select * from ramdb.sqlite_schema;"
+        info(d);
+      }
+      db_path = dba.first_value(dba.query(SQL`select file from pragma_database_list where name = ?;`, [schema]));
+      T.eq(db_path, '');
+      T.ok(dba.is_ram_db({schema}));
+      db_path = dba.first_value(dba.query(SQL`select file from pragma_database_list where name = ?;`, [schema]));
+      T.ok((ref1 = dba._schemas.main) != null ? (ref2 = ref1.path) != null ? ref2.endsWith('data/icql/icql-F-open-in-main-small.db') : void 0 : void 0);
+      T.eq(dba.first_value(dba.query(SQL`select count(*) from main.main;`)), 327);
+      return null;
+    })();
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: open() empty RAM DB in schema main"] = async function(T, done) {
+    var Dba;
+    // T.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
+    await (() => {      //.........................................................................................................
+      /* Opening an empty RAM DB */
+      var dba;
+      dba = new Dba();
+      dba.open({
+        ram: true
+      });
+      info('^35345^', dba._schemas);
+      // info '^334^', "#{d.type}:#{d.schema}.#{d.name}" for d in dba.list dba.walk_objects { schema, }
       return debug('^3334^', dba);
     })();
     //.........................................................................................................
@@ -1822,7 +1879,9 @@ e6    text );`);
 
   // test @[ "DBA: VNRs" ], { timeout: 5e3, }
 // test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
-// test @[ "DBA: open() DB in schema main" ]
+// test @[ "DBA: open() file DB in schema main" ]
+// test @[ "DBA: open() RAM DB from file in schema main" ]
+// test @[ "DBA: open() empty RAM DB in schema main" ]
 // test @[ "DBA: virtual tables" ]
 // test @[ "DBA: import TSV; cfg variants 2" ]
 // test @[ "DBA: import TSV; cfg variants 2" ]
