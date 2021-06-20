@@ -17,7 +17,8 @@ echo                      = CND.echo.bind CND
 { Dba }                   = require '../../../apps/icql-dba'
 def                       = Object.defineProperty
 types                     = require './types'
-SQL                       = String.raw
+{ SQL, I, L, X, }         = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
+jr                        = JSON.stringify
 
 
 #===========================================================================================================
@@ -28,9 +29,16 @@ class @Graphdb
     # super()
     def @, 'types', enumerable: false, value: types
     @types.validate.gdb_constructor_cfg ( cfg = { @types.defaults.gdb_constructor_cfg..., cfg..., } )
-    @cfg      = cfg
-    { path }  = @cfg
-    def @, 'dba', enumerable: false, value: new Dba { path, }
+    @cfg        = cfg
+    { schema
+      ram
+      path    } = @cfg
+    def @, 'dba', enumerable: false, value: new Dba()
+    dba_cfg     = {}
+    dba_cfg.schema  = schema  if schema?
+    dba_cfg.ram     = ram     if ram?
+    dba_cfg.path    = path    if path?
+    @dba.open dba_cfg
     @init_db()
     return undefined
 
@@ -42,12 +50,12 @@ class @Graphdb
     ### TAINT edges are modelled as uniquely given by `( node_id_a, node_id_b )` with arbitrary data
     attached, but could conceivably link two given nodes with any number of edges ###
     sql = SQL"""
-      create table if not exists nodes (
+      create table if not exists #{I @cfg.schema}.nodes (
           body json,
           id   text generated always as ( json_extract( body, '$.id' ) ) virtual not null unique
         );
       -- ...................................................................................................
-      create table if not exists edges (
+      create table if not exists #{I @cfg.schema}.edges (
           source     text,
           target     text,
           properties json,
@@ -55,9 +63,9 @@ class @Graphdb
         foreign key( target ) references nodes( id )
         );
       -- ...................................................................................................
-      create index if not exists id_idx on nodes(id);
-      create index if not exists source_idx on edges(source);
-      create index if not exists target_idx on edges(target);"""
+      create index if not exists #{I @cfg.schema}.id_idx on nodes(id);
+      create index if not exists #{I @cfg.schema}.source_idx on edges(source);
+      create index if not exists #{I @cfg.schema}.target_idx on edges(target);"""
     @dba.execute sql
     return null
 
@@ -75,12 +83,13 @@ class @Graphdb
   #---------------------------------------------------------------------------------------------------------
   insert_edge: ( source, target, properties ) ->
     sql = SQL"insert into edges ( source, target, properties ) values ( ?, ?, ? )"
-    [ source, target, jr properties, ]
+    return @dba.run sql, [ source, target, ( jr properties ), ]
 
   #---------------------------------------------------------------------------------------------------------
   insert_node: ( body ) ->
+    @types.validate.gdb_node_body body
     sql = SQL"insert into nodes ( body ) values ( ? )"
-    [ jr body, ]
+    return @dba.run sql, [ ( jr body ), ]
 
   #---------------------------------------------------------------------------------------------------------
   update_node: () ->

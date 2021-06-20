@@ -24,8 +24,13 @@ Dba                       = null
 @declare 'gdb_constructor_cfg',
   tests:
     "@isa.object x":                        ( x ) -> @isa.object x
-    "@isa.nonempty_text x.path":            ( x ) -> @isa.nonempty_text x.path
-    "@isa_optional.boolean x.echo":         ( x ) -> @isa_optional.boolean x.echo
+
+#-----------------------------------------------------------------------------------------------------------
+@declare 'gdb_node_body',
+  tests:
+    "@isa.object x":                        ( x ) -> @isa.object x
+    "@isa.nonempty_text x.id":              ( x ) -> @isa.nonempty_text x.id
+    # "@isa_optional.boolean x.echo":         ( x ) -> @isa_optional.boolean x.echo
 
 #-----------------------------------------------------------------------------------------------------------
 @defaults =
@@ -36,6 +41,7 @@ Dba                       = null
     # create:       true
     # overwrite:    false
     # timeout:      5000
+    schema:     'main'
     path:       null
     echo:       false
 
