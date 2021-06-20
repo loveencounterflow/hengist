@@ -36,15 +36,23 @@
     tests: {
       "@isa.object x": function(x) {
         return this.isa.object(x);
-      },
-      "@isa.nonempty_text x.path": function(x) {
-        return this.isa.nonempty_text(x.path);
-      },
-      "@isa_optional.boolean x.echo": function(x) {
-        return this.isa_optional.boolean(x.echo);
       }
     }
   });
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.declare('gdb_node_body', {
+    tests: {
+      "@isa.object x": function(x) {
+        return this.isa.object(x);
+      },
+      "@isa.nonempty_text x.id": function(x) {
+        return this.isa.nonempty_text(x.id);
+      }
+    }
+  });
+
+  // "@isa_optional.boolean x.echo":         ( x ) -> @isa_optional.boolean x.echo
 
   //-----------------------------------------------------------------------------------------------------------
   this.defaults = {
@@ -55,6 +63,7 @@
       // create:       true
       // overwrite:    false
       // timeout:      5000
+      schema: 'main',
       path: null,
       echo: false
     }

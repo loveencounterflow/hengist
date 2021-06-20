@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dba, SQL, badge, debug, def, echo, help, info, rpr, types, urge, warn, whisper;
+  var CND, Dba, I, L, SQL, X, badge, debug, def, echo, help, info, jr, rpr, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -29,13 +29,15 @@
 
   types = require('./types');
 
-  SQL = String.raw;
+  ({SQL, I, L, X} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
+
+  jr = JSON.stringify;
 
   //===========================================================================================================
   this.Graphdb = class Graphdb {
     //---------------------------------------------------------------------------------------------------------
     constructor(cfg) {
-      var path;
+      var dba_cfg, path, ram, schema;
       // super()
       def(this, 'types', {
         enumerable: false,
@@ -43,11 +45,22 @@
       });
       this.types.validate.gdb_constructor_cfg((cfg = {...this.types.defaults.gdb_constructor_cfg, ...cfg}));
       this.cfg = cfg;
-      ({path} = this.cfg);
+      ({schema, ram, path} = this.cfg);
       def(this, 'dba', {
         enumerable: false,
-        value: new Dba({path})
+        value: new Dba()
       });
+      dba_cfg = {};
+      if (schema != null) {
+        dba_cfg.schema = schema;
+      }
+      if (ram != null) {
+        dba_cfg.ram = ram;
+      }
+      if (path != null) {
+        dba_cfg.path = path;
+      }
+      this.dba.open(dba_cfg);
       this.init_db();
       return void 0;
     }
@@ -59,12 +72,12 @@
       /* TAINT edges are modelled as uniquely given by `( node_id_a, node_id_b )` with arbitrary data
          attached, but could conceivably link two given nodes with any number of edges */
       var sql;
-      sql = SQL`create table if not exists nodes (
+      sql = SQL`create table if not exists ${I(this.cfg.schema)}.nodes (
     body json,
     id   text generated always as ( json_extract( body, '$.id' ) ) virtual not null unique
   );
 -- ...................................................................................................
-create table if not exists edges (
+create table if not exists ${I(this.cfg.schema)}.edges (
     source     text,
     target     text,
     properties json,
@@ -72,9 +85,9 @@ create table if not exists edges (
   foreign key( target ) references nodes( id )
   );
 -- ...................................................................................................
-create index if not exists id_idx on nodes(id);
-create index if not exists source_idx on edges(source);
-create index if not exists target_idx on edges(target);`;
+create index if not exists ${I(this.cfg.schema)}.id_idx on nodes(id);
+create index if not exists ${I(this.cfg.schema)}.source_idx on edges(source);
+create index if not exists ${I(this.cfg.schema)}.target_idx on edges(target);`;
       this.dba.execute(sql);
       return null;
     }
@@ -97,14 +110,15 @@ create index if not exists target_idx on edges(target);`;
     insert_edge(source, target, properties) {
       var sql;
       sql = SQL`insert into edges ( source, target, properties ) values ( ?, ?, ? )`;
-      return [source, target, jr(properties)];
+      return this.dba.run(sql, [source, target, jr(properties)]);
     }
 
     //---------------------------------------------------------------------------------------------------------
     insert_node(body) {
       var sql;
+      this.types.validate.gdb_node_body(body);
       sql = SQL`insert into nodes ( body ) values ( ? )`;
-      return [jr(body)];
+      return this.dba.run(sql, [jr(body)]);
     }
 
     //---------------------------------------------------------------------------------------------------------
