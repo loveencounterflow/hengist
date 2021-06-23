@@ -59,6 +59,7 @@ class @Graphdb
           source     text,
           target     text,
           properties json,
+        primary key ( source, target )
         foreign key( source ) references nodes( id ),
         foreign key( target ) references nodes( id )
         );
@@ -73,27 +74,80 @@ class @Graphdb
   #=========================================================================================================
   # INSERT, UPDATE, DELETE
   #---------------------------------------------------------------------------------------------------------
-  delete_edge: ( a, b ) ->
-    sql = SQL"delete from edges where source = $a or target = $b"
+  delete_edges: ( source = null, target = null ) ->
+    if source is null
+      if target is null then  sql = SQL"delete from edges;"
+      else                    sql = SQL"delete from edges where target is $target;"
+    else
+      if target is null then  sql = SQL"delete from edges where source = $source;"
+      else                    sql = SQL"delete from edges where source = $source and target = $target;"
+    return @dba.run sql, { source, target, }
 
-  #---------------------------------------------------------------------------------------------------------
-  delete_node: ( id ) ->
-    sql = SQL"delete from nodes where id = $id"
-
-  #---------------------------------------------------------------------------------------------------------
+  #=========================================================================================================
   insert_edge: ( source, target, properties ) ->
     sql = SQL"insert into edges ( source, target, properties ) values ( ?, ?, ? )"
     return @dba.run sql, [ source, target, ( jr properties ), ]
 
   #---------------------------------------------------------------------------------------------------------
+  upsert_edge: ( source, target, properties ) ->
+    @types.validate.gdb_edge_properties properties
+    sql = SQL"""
+      insert into edges ( source, target, properties )
+        values ( $source, $target, $properties )
+        on conflict ( source, target ) do update set properties = $properties;"""
+    return @dba.run sql, { source, target, properties: ( jr properties ), }
+
+  #---------------------------------------------------------------------------------------------------------
+  upmerge_edge: ( source, target, properties ) ->
+    @types.validate.gdb_edge_properties properties
+    sql = SQL"""
+      insert into edges as e ( source, target, properties )
+        values ( $source, $target, $properties )
+        on conflict ( source, target ) do update set properties = json_patch( e.properties, $properties );"""
+    return @dba.run sql, { source, target, properties: ( jr properties ), }
+
+  #---------------------------------------------------------------------------------------------------------
+  update_edge: ( source, target, properties ) ->
+    @types.validate.gdb_edge_properties properties
+    sql = SQL"update edges set properties = json( $properties ) where source = $source and target = $target;"
+    return @dba.run sql, { source, target, properties: ( jr properties ), }
+
+  #=========================================================================================================
   insert_node: ( body ) ->
     @types.validate.gdb_node_body body
     sql = SQL"insert into nodes ( body ) values ( ? )"
     return @dba.run sql, [ ( jr body ), ]
 
   #---------------------------------------------------------------------------------------------------------
-  update_node: () ->
-    sql = SQL"update nodes set body = json(?) where id = ?"
+  upsert_node: ( body ) ->
+    ### Inserts or updates a node with a given `body`, replacing all existing atrs. ###
+    @types.validate.gdb_node_body body
+    sql = SQL"""
+      insert into nodes ( body )
+        values ( $body )
+        on conflict ( id ) do update set body = $body;"""
+    return @dba.run sql, { body: jr body, }
+
+  #---------------------------------------------------------------------------------------------------------
+  upmerge_node: ( body ) ->
+    ### Inserts or merges a node with a given `body`, using [SQLite `json_patch()`
+    function](https://www.sqlite.org/json1.html#jpatch) which is an implementation of [the RFC-7396
+    MergePatch algorithm](https://tools.ietf.org/html/rfc7396). ###
+    @types.validate.gdb_node_body body
+    sql = SQL"""
+      insert into nodes as n ( body )
+        values ( $body )
+        on conflict ( id ) do update set body = json_patch( n.body, $body );"""
+    return @dba.run sql, { body: jr body, }
+
+  #---------------------------------------------------------------------------------------------------------
+  update_node: ( body ) ->
+    sql = SQL"update nodes set body = json( $body ) where id = $id;"
+    return @dba.run sql, { body: ( jr body ), id: body.id, }
+
+  #---------------------------------------------------------------------------------------------------------
+  delete_node: ( id ) ->
+    sql = SQL"delete from nodes where id = $id"
 
   #=========================================================================================================
   search_edges_inbound: () ->
