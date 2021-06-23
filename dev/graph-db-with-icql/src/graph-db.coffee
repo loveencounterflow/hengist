@@ -147,14 +147,17 @@ class @Graphdb
 
   #---------------------------------------------------------------------------------------------------------
   delete_node: ( id ) ->
+    throw new Error "not yet implemented"
     sql = SQL"delete from nodes where id = $id"
 
   #=========================================================================================================
   search_edges_inbound: () ->
+    throw new Error "not yet implemented"
     sql = SQL"select * from edges where source = ?"
 
   #---------------------------------------------------------------------------------------------------------
   search_edges_outbound: () ->
+    throw new Error "not yet implemented"
     sql = SQL"select * from edges where target = ?"
 
 
@@ -162,6 +165,7 @@ class @Graphdb
   # SEARCH
   #---------------------------------------------------------------------------------------------------------
   search_edges: () ->
+    throw new Error "not yet implemented"
     sql = SQL"""
       select * from edges where source = ?
       union
@@ -169,11 +173,13 @@ class @Graphdb
 
   #---------------------------------------------------------------------------------------------------------
   search_node_by_id: () ->
+    throw new Error "not yet implemented"
     ### TAINT instead of 'json_extract(body, '$.id')', use virtual field(?) ###
     sql = SQL"select body from nodes where json_extract(body, '$.id') = ?"
 
   #---------------------------------------------------------------------------------------------------------
   search_node: () ->
+    throw new Error "not yet implemented"
     sql = SQL"select body from nodes where"
 
 
@@ -181,6 +187,7 @@ class @Graphdb
   # TRAVERSE
   #---------------------------------------------------------------------------------------------------------
   traverse_inbound: () ->
+    throw new Error "not yet implemented"
     sql = SQL"""
       with recursive traverse(id) as (
         select ?
@@ -190,6 +197,7 @@ class @Graphdb
 
   #---------------------------------------------------------------------------------------------------------
   traverse_outbound: () ->
+    throw new Error "not yet implemented"
     sql = SQL"""
       with recursive traverse(id) as (
         select ?
@@ -199,6 +207,7 @@ class @Graphdb
 
   #---------------------------------------------------------------------------------------------------------
   traverse: () ->
+    throw new Error "not yet implemented"
     sql = SQL"""
       with recursive traverse(id) as (
         select ?
@@ -210,17 +219,19 @@ class @Graphdb
 
   #---------------------------------------------------------------------------------------------------------
   traverse_with_bodies_inbound: () ->
-      sql = SQL"""
-      with recursive traverse(x, y, obj) as (
-        select ?, ?, ?
-        union
-        select id, '()', body from nodes join traverse on id = x
-        union
-        select source, '<-', properties from edges join traverse on target = x
-      ) select x, y, obj from traverse;"""
+    throw new Error "not yet implemented"
+    sql = SQL"""
+    with recursive traverse(x, y, obj) as (
+      select ?, ?, ?
+      union
+      select id, '()', body from nodes join traverse on id = x
+      union
+      select source, '<-', properties from edges join traverse on target = x
+    ) select x, y, obj from traverse;"""
 
   #---------------------------------------------------------------------------------------------------------
   traverse_with_bodies_outbound: () ->
+    throw new Error "not yet implemented"
     sql = SQL"""
       with recursive traverse(x, y, obj) as (
         select ?, ?, ?
@@ -232,6 +243,7 @@ class @Graphdb
 
   #---------------------------------------------------------------------------------------------------------
   traverse_with_bodies: () ->
+    throw new Error "not yet implemented"
     sql = SQL"""
       with recursive traverse(x, y, obj) as (
         select ?, ?, ?
