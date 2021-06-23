@@ -210,18 +210,21 @@ create index if not exists ${I(this.cfg.schema)}.target_idx on edges(target);`;
     //---------------------------------------------------------------------------------------------------------
     delete_node(id) {
       var sql;
+      throw new Error("not yet implemented");
       return sql = SQL`delete from nodes where id = $id`;
     }
 
     //=========================================================================================================
     search_edges_inbound() {
       var sql;
+      throw new Error("not yet implemented");
       return sql = SQL`select * from edges where source = ?`;
     }
 
     //---------------------------------------------------------------------------------------------------------
     search_edges_outbound() {
       var sql;
+      throw new Error("not yet implemented");
       return sql = SQL`select * from edges where target = ?`;
     }
 
@@ -230,6 +233,7 @@ create index if not exists ${I(this.cfg.schema)}.target_idx on edges(target);`;
     //---------------------------------------------------------------------------------------------------------
     search_edges() {
       var sql;
+      throw new Error("not yet implemented");
       return sql = SQL`select * from edges where source = ?
 union
 select * from edges where target = ?`;
@@ -239,12 +243,14 @@ select * from edges where target = ?`;
     search_node_by_id() {
       /* TAINT instead of 'json_extract(body, '$.id')', use virtual field(?) */
       var sql;
+      throw new Error("not yet implemented");
       return sql = SQL`select body from nodes where json_extract(body, '$.id') = ?`;
     }
 
     //---------------------------------------------------------------------------------------------------------
     search_node() {
       var sql;
+      throw new Error("not yet implemented");
       return sql = SQL`select body from nodes where`;
     }
 
@@ -253,6 +259,7 @@ select * from edges where target = ?`;
     //---------------------------------------------------------------------------------------------------------
     traverse_inbound() {
       var sql;
+      throw new Error("not yet implemented");
       return sql = SQL`with recursive traverse(id) as (
   select ?
   union
@@ -263,6 +270,7 @@ select * from edges where target = ?`;
     //---------------------------------------------------------------------------------------------------------
     traverse_outbound() {
       var sql;
+      throw new Error("not yet implemented");
       return sql = SQL`with recursive traverse(id) as (
   select ?
   union
@@ -273,6 +281,7 @@ select * from edges where target = ?`;
     //---------------------------------------------------------------------------------------------------------
     traverse() {
       var sql;
+      throw new Error("not yet implemented");
       return sql = SQL`with recursive traverse(id) as (
   select ?
   union
@@ -285,6 +294,7 @@ select * from edges where target = ?`;
     //---------------------------------------------------------------------------------------------------------
     traverse_with_bodies_inbound() {
       var sql;
+      throw new Error("not yet implemented");
       return sql = SQL`with recursive traverse(x, y, obj) as (
   select ?, ?, ?
   union
@@ -297,6 +307,7 @@ select * from edges where target = ?`;
     //---------------------------------------------------------------------------------------------------------
     traverse_with_bodies_outbound() {
       var sql;
+      throw new Error("not yet implemented");
       return sql = SQL`with recursive traverse(x, y, obj) as (
   select ?, ?, ?
   union
@@ -309,6 +320,7 @@ select * from edges where target = ?`;
     //---------------------------------------------------------------------------------------------------------
     traverse_with_bodies() {
       var sql;
+      throw new Error("not yet implemented");
       return sql = SQL`with recursive traverse(x, y, obj) as (
   select ?, ?, ?
   union

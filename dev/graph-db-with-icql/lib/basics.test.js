@@ -46,7 +46,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["Graphdb: create"] = function(T, done) {
     var Graphdb, d, gdb, path, schema;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Graphdb} = require('./graph-db'));
     path = '/tmp/icql-graph.db';
     schema = 'main';
@@ -63,7 +63,7 @@
         results.push(d.name);
       }
       return results;
-    })()).sort(), ['edges', 'id_idx', 'nodes', 'source_idx', 'sqlite_autoindex_nodes_1', 'target_idx']);
+    })()).sort(), ['edges', 'id_idx', 'nodes', 'source_idx', 'sqlite_autoindex_edges_1', 'sqlite_autoindex_nodes_1', 'target_idx']);
     //.........................................................................................................
     return done();
   };
@@ -128,6 +128,7 @@
       d = jp(edge.properties);
       urge('^3343^', d.a, d.type, d.b);
     }
+    T.eq(edge_count, 54);
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -264,7 +265,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["Graphdb: bfsvtab"] = function(T, done) {
+  this["___ Graphdb: bfsvtab"] = function(T, done) {
     var Graphdb, edge, edges, gdb, i, nr_max, path, ref, ref1, row, schema, source, sql, target;
     /* https://github.com/abetlen/sqlite3-bfsvtab-ext */
     // T.halt_on_error()
@@ -324,12 +325,14 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      return test(this["Graphdb: {update, upsert, upmerge} {node, edge} atrs"]);
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // test @[ "Graphdb: deleting edges and nodes" ]
+  // test @[ "Graphdb: {update, upsert, upmerge} {node, edge} atrs" ]
+// test @[ "Graphdb: deleting edges and nodes" ]
 // test @[ "Graphdb: insert_node()" ]
 // test @[ "Graphdb: insert_edge()" ]
 // @[ "Graphdb: insert_node()" ]()
