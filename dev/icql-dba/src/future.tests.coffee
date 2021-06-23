@@ -1291,6 +1291,34 @@ SQL                       = String.raw
   #.........................................................................................................
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: writing while reading" ] = ( T, done ) ->
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  schema            = 'main'
+  new_bsqlt3        = require '../../../apps/icql-dba/node_modules/better-sqlite3'
+  dba               = new Dba()
+  #.........................................................................................................
+  await do =>
+    dba.execute SQL"create table main.x ( n int primary key, locked boolean not null default false );"
+    for n in [ 1 .. 10 ]
+      dba.run SQL"insert into x ( n ) values ( ? );", [ n, ]
+  #.........................................................................................................
+  await do =>
+    dba.execute SQL"update x set locked = true;"
+    dba.sqlt.unsafeMode true
+    for row from dba.query SQL"select * from x where locked;"
+      # info '^44555^', row
+      dba.run SQL"insert into x ( n ) values ( ? );", [ row.n + 100, ]
+    dba.sqlt.unsafeMode false
+  #.........................................................................................................
+  await do =>
+    # for row from dba.query SQL"select * from x;"
+    #   info '^44555^', row
+    T.eq ( d.n for d from dba.query SQL"select * from x;" ), [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110 ]
+  #.........................................................................................................
+  done()
+
 
 ############################################################################################################
 if module is require.main then do =>
@@ -1298,6 +1326,7 @@ if module is require.main then do =>
   # test @[ "DBA: VNRs" ], { timeout: 5e3, }
   # test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
   # test @[ "DBA: open() file DB in schema main" ]
+  # test @[ "DBA: writing while reading" ]
   # test @[ "DBA: open() RAM DB from file in schema main" ]
   # test @[ "DBA: open() empty RAM DB in schema main" ]
   # test @[ "DBA: virtual tables" ]
