@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, I, L, PATH, SQL, X, badge, debug, echo, help, info, insert_arithmetic_edges, isa, jr, reinitialize_db, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, I, L, PATH, SQL, X, badge, debug, echo, help, info, isa, jp, jr, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -37,57 +37,11 @@
 
   jr = JSON.stringify;
 
+  jp = JSON.parse;
+
   PATH = require('path');
 
-  //-----------------------------------------------------------------------------------------------------------
-  insert_arithmetic_edges = function(gdb, nr_max) {
-    var i, id_1, id_2, j, k, nr, nr_1, nr_2, ref, ref1, ref2, value;
-    for (nr = i = 1, ref = nr_max; (1 <= ref ? i <= ref : i >= ref); nr = 1 <= ref ? ++i : --i) {
-      gdb.insert_node({
-        id: `node${nr}`,
-        nr,
-        text: `<${nr}>`
-      });
-    }
-    for (nr_1 = j = 1, ref1 = nr_max; (1 <= ref1 ? j <= ref1 : j >= ref1); nr_1 = 1 <= ref1 ? ++j : --j) {
-      for (nr_2 = k = 1, ref2 = nr_max; (1 <= ref2 ? k <= ref2 : k >= ref2); nr_2 = 1 <= ref2 ? ++k : --k) {
-        id_1 = `node${nr_1}`;
-        id_2 = `node${nr_2}`;
-        if ((nr_1 !== 1) && (nr_1 !== nr_2) && ((value = nr_2 / nr_1) === (Math.floor(nr_2 / nr_1)))) {
-          gdb.insert_edge(id_1, id_2, {
-            type: 'is_divider_of',
-            a: nr_1,
-            b: nr_2,
-            value
-          });
-          // if ( nr_2 isnt 1 ) and ( nr_1 isnt nr_2 ) and ( ( value = nr_1 / nr_2 ) is ( nr_1 // nr_2 ) )
-          gdb.insert_edge(id_2, id_1, {
-            type: 'is_divided_by',
-            a: nr_2,
-            b: nr_1,
-            value
-          });
-        }
-      }
-    }
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  reinitialize_db = function(gdb) {
-    /* TAINT implement `clear-schema()` */
-    gdb.dba.pragma(SQL`foreign_keys = off;`);
-    gdb.dba.execute(SQL`drop index if exists id_idx`);
-    gdb.dba.execute(SQL`drop index if exists source_idx`);
-    // gdb.dba.execute SQL"drop index if exists sqlite_autoindex_nodes_1"
-    gdb.dba.execute(SQL`drop index if exists target_idx`);
-    gdb.dba.execute(SQL`drop table if exists edges`);
-    gdb.dba.execute(SQL`drop table if exists nodes`);
-    gdb.dba.execute(SQL`drop table if exists edges_g;`);
-    gdb.dba.pragma(SQL`foreign_keys = on;`);
-    gdb.init_db();
-    return null;
-  };
+  H = require('./test-helpers');
 
   //-----------------------------------------------------------------------------------------------------------
   this["Graphdb: create"] = function(T, done) {
@@ -139,7 +93,7 @@
       var results;
       results = [];
       for (d of result) {
-        results.push([d.id, (JSON.parse(d.body)).text]);
+        results.push([d.id, (jp(d.body)).text]);
       }
       return results;
     })();
@@ -162,7 +116,7 @@
     nr_max = 20;
     //.........................................................................................................
     // gdb.dba.run SQL"insert into nodes ( body ) values ( ? )", [ ( jr { id: '123', } ), ]
-    insert_arithmetic_edges(gdb, nr_max);
+    H.insert_arithmetic_edges(gdb, nr_max);
     ref = gdb.dba.query(SQL`select * from nodes order by id;`);
     for (node of ref) {
       urge('^3343^', node);
@@ -171,9 +125,141 @@
     ref1 = gdb.dba.query(SQL`select * from edges order by source, target;`);
     for (edge of ref1) {
       edge_count++;
-      d = JSON.parse(edge.properties);
+      d = jp(edge.properties);
       urge('^3343^', d.a, d.type, d.b);
     }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["Graphdb: {update, upsert, upmerge} {node, edge} atrs"] = function(T, done) {
+    var Graphdb, gdb, get_edge, get_edge_atr, get_node_atr, nr_max, schema, show_edges, show_nodes;
+    // T.halt_on_error()
+    ({Graphdb} = require('./graph-db'));
+    // path          = '/tmp/icql-graph.db'
+    schema = 'main';
+    gdb = new Graphdb({
+      schema,
+      ram: true
+    });
+    nr_max = 20;
+    get_node_atr = function(id) {
+      return jp(gdb.dba.first_value(gdb.dba.query(SQL`select * from nodes where id = ?;`, [id])));
+    };
+    get_edge = function(s, t) {
+      return gdb.dba.first_row(gdb.dba.query(SQL`select * from edges where source = ? and target = ?;`, [s, t]));
+    };
+    get_edge_atr = function(s, t) {
+      return jp((get_edge(s, t)).properties);
+    };
+    show_nodes = function() {
+      return urge('^44554^', gdb.dba.list(gdb.dba.query(SQL`select * from nodes;`)));
+    };
+    show_edges = function() {
+      return urge('^44554^', gdb.dba.list(gdb.dba.query(SQL`select * from edges;`)));
+    };
+    //.........................................................................................................
+    gdb.insert_node({
+      id: '1',
+      en: 'one',
+      zh: '一'
+    });
+    show_nodes();
+    T.eq(get_node_atr('1'), {
+      id: '1',
+      en: 'one',
+      zh: '一'
+    });
+    gdb.upsert_node({
+      id: '1',
+      fr: 'un'
+    });
+    show_nodes();
+    T.eq(get_node_atr('1'), {
+      id: '1',
+      fr: 'un'
+    });
+    gdb.upmerge_node({
+      id: '1',
+      de: 'eins'
+    });
+    show_nodes();
+    T.eq(get_node_atr('1'), {
+      id: '1',
+      de: 'eins',
+      fr: 'un'
+    });
+    //.........................................................................................................
+    gdb.insert_node({
+      id: '2',
+      en: 'two',
+      zh: '二'
+    });
+    show_nodes();
+    T.eq(get_node_atr('2'), {
+      id: '2',
+      en: 'two',
+      zh: '二'
+    });
+    gdb.update_node({
+      id: '2',
+      fr: 'deux'
+    });
+    show_nodes();
+    T.eq(get_node_atr('2'), {
+      id: '2',
+      fr: 'deux'
+    });
+    gdb.upmerge_node({
+      id: '2',
+      de: 'zwei'
+    });
+    show_nodes();
+    T.eq(get_node_atr('2'), {
+      id: '2',
+      de: 'zwei',
+      fr: 'deux'
+    });
+    //.........................................................................................................
+    gdb.upsert_node({
+      id: '3',
+      fr: 'trois'
+    });
+    show_nodes();
+    T.eq(get_node_atr('3'), {
+      id: '3',
+      fr: 'trois'
+    });
+    //.........................................................................................................
+    gdb.insert_edge('1', '3', {
+      d: '13'
+    });
+    show_edges();
+    T.eq(get_edge_atr('1', '3'), {
+      d: '13'
+    });
+    gdb.update_edge('1', '3', {
+      e: '13'
+    });
+    show_edges();
+    T.eq(get_edge_atr('1', '3'), {
+      e: '13'
+    });
+    gdb.upsert_edge('1', '2', {
+      e: '12'
+    });
+    show_edges();
+    T.eq(get_edge_atr('1', '2'), {
+      e: '12'
+    });
+    gdb.upmerge_edge('1', '2', {
+      d: '12'
+    });
+    show_edges();
+    T.eq(get_edge_atr('1', '2'), {
+      e: '12',
+      d: '12'
+    });
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -188,10 +274,10 @@
     gdb = new Graphdb({path, schema});
     nr_max = 20;
     //.........................................................................................................
-    reinitialize_db(gdb);
+    H.reinitialize_db(gdb);
     //.........................................................................................................
     gdb.dba.load_extension(PATH.resolve(PATH.join(__dirname, '../bfsvtab.so')));
-    insert_arithmetic_edges(gdb, nr_max);
+    H.insert_arithmetic_edges(gdb, nr_max);
     gdb.dba.execute(SQL`create table edges_g ( source integer, target integer );`);
     edges = [...(gdb.dba.query(SQL`select * from edges;`))];
     for (edge of edges) {
@@ -206,14 +292,16 @@
     }
     //.........................................................................................................
     sql = SQL`select
-    b.root            as source,
-    b.id              as target,
+    -- b.root            as source,
+    -- b.id              as target,
+    n2.body           as source_node,
     b.distance        as distance,
     b.shortest_path   as shortest_path,
-    b.parent          as parent,
-    n.body            as target_node
+    -- b.parent          as parent,
+    n1.body           as target_node
   from bfsvtab as b
-  left join nodes as n on ( n.id = 'node' || b.id )
+  left join nodes as n1 on ( n1.id = 'node' || b.id )
+  left join nodes as n2 on ( n2.id = 'node' || b.root )
   where true
     and tablename  = 'edges_g'
     and fromcolumn = 'source'
@@ -225,7 +313,9 @@
       whisper('^665^', '-'.repeat(108));
       ref1 = gdb.dba.query(sql, [source]);
       for (row of ref1) {
-        info('^665^', row);
+        row.source_node = jp(row.source_node);
+        row.target_node = jp(row.target_node);
+        info('^665^', `${row.source_node.text} ${row.shortest_path} ${row.target_node.text}`);
       }
     }
     return typeof done === "function" ? done() : void 0;
@@ -235,12 +325,15 @@
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      // test @[ "Graphdb: insert_node()" ]
-      // test @[ "Graphdb: insert_edge()" ]
-      // @[ "Graphdb: insert_node()" ]()
-      return test(this["Graphdb: bfsvtab"]);
+      return test(this["Graphdb: {update, upsert, upmerge} {node, edge} atrs"]);
     })();
   }
+
+  // test @[ "Graphdb: deleting edges and nodes" ]
+// test @[ "Graphdb: insert_node()" ]
+// test @[ "Graphdb: insert_edge()" ]
+// @[ "Graphdb: insert_node()" ]()
+// test @[ "Graphdb: bfsvtab" ]
 
 }).call(this);
 

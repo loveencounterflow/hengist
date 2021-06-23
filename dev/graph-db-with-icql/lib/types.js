@@ -55,6 +55,17 @@
   // "@isa_optional.boolean x.echo":         ( x ) -> @isa_optional.boolean x.echo
 
   //-----------------------------------------------------------------------------------------------------------
+  this.declare('gdb_edge_properties', {
+    tests: {
+      "@isa.object x": function(x) {
+        return this.isa.object(x);
+      }
+    }
+  });
+
+  // "@isa.nonempty_text x.id":              ( x ) -> @isa.nonempty_text x.id
+
+  //-----------------------------------------------------------------------------------------------------------
   this.defaults = {
     //.........................................................................................................
     gdb_constructor_cfg: {

@@ -81,6 +81,7 @@ create table if not exists ${I(this.cfg.schema)}.edges (
     source     text,
     target     text,
     properties json,
+  primary key ( source, target )
   foreign key( source ) references nodes( id ),
   foreign key( target ) references nodes( id )
   );
@@ -95,18 +96,25 @@ create index if not exists ${I(this.cfg.schema)}.target_idx on edges(target);`;
     //=========================================================================================================
     // INSERT, UPDATE, DELETE
     //---------------------------------------------------------------------------------------------------------
-    delete_edge(a, b) {
+    delete_edges(source = null, target = null) {
       var sql;
-      return sql = SQL`delete from edges where source = $a or target = $b`;
+      if (source === null) {
+        if (target === null) {
+          sql = SQL`delete from edges;`;
+        } else {
+          sql = SQL`delete from edges where target is $target;`;
+        }
+      } else {
+        if (target === null) {
+          sql = SQL`delete from edges where source = $source;`;
+        } else {
+          sql = SQL`delete from edges where source = $source and target = $target;`;
+        }
+      }
+      return this.dba.run(sql, {source, target});
     }
 
-    //---------------------------------------------------------------------------------------------------------
-    delete_node(id) {
-      var sql;
-      return sql = SQL`delete from nodes where id = $id`;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
+    //=========================================================================================================
     insert_edge(source, target, properties) {
       var sql;
       sql = SQL`insert into edges ( source, target, properties ) values ( ?, ?, ? )`;
@@ -114,6 +122,46 @@ create index if not exists ${I(this.cfg.schema)}.target_idx on edges(target);`;
     }
 
     //---------------------------------------------------------------------------------------------------------
+    upsert_edge(source, target, properties) {
+      var sql;
+      this.types.validate.gdb_edge_properties(properties);
+      sql = SQL`insert into edges ( source, target, properties )
+  values ( $source, $target, $properties )
+  on conflict ( source, target ) do update set properties = $properties;`;
+      return this.dba.run(sql, {
+        source,
+        target,
+        properties: jr(properties)
+      });
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    upmerge_edge(source, target, properties) {
+      var sql;
+      this.types.validate.gdb_edge_properties(properties);
+      sql = SQL`insert into edges as e ( source, target, properties )
+  values ( $source, $target, $properties )
+  on conflict ( source, target ) do update set properties = json_patch( e.properties, $properties );`;
+      return this.dba.run(sql, {
+        source,
+        target,
+        properties: jr(properties)
+      });
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    update_edge(source, target, properties) {
+      var sql;
+      this.types.validate.gdb_edge_properties(properties);
+      sql = SQL`update edges set properties = json( $properties ) where source = $source and target = $target;`;
+      return this.dba.run(sql, {
+        source,
+        target,
+        properties: jr(properties)
+      });
+    }
+
+    //=========================================================================================================
     insert_node(body) {
       var sql;
       this.types.validate.gdb_node_body(body);
@@ -122,9 +170,47 @@ create index if not exists ${I(this.cfg.schema)}.target_idx on edges(target);`;
     }
 
     //---------------------------------------------------------------------------------------------------------
-    update_node() {
+    upsert_node(body) {
       var sql;
-      return sql = SQL`update nodes set body = json(?) where id = ?`;
+      /* Inserts or updates a node with a given `body`, replacing all existing atrs. */
+      this.types.validate.gdb_node_body(body);
+      sql = SQL`insert into nodes ( body )
+  values ( $body )
+  on conflict ( id ) do update set body = $body;`;
+      return this.dba.run(sql, {
+        body: jr(body)
+      });
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    upmerge_node(body) {
+      var sql;
+      /* Inserts or merges a node with a given `body`, using [SQLite `json_patch()`
+         function](https://www.sqlite.org/json1.html#jpatch) which is an implementation of [the RFC-7396
+         MergePatch algorithm](https://tools.ietf.org/html/rfc7396). */
+      this.types.validate.gdb_node_body(body);
+      sql = SQL`insert into nodes as n ( body )
+  values ( $body )
+  on conflict ( id ) do update set body = json_patch( n.body, $body );`;
+      return this.dba.run(sql, {
+        body: jr(body)
+      });
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    update_node(body) {
+      var sql;
+      sql = SQL`update nodes set body = json( $body ) where id = $id;`;
+      return this.dba.run(sql, {
+        body: jr(body),
+        id: body.id
+      });
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    delete_node(id) {
+      var sql;
+      return sql = SQL`delete from nodes where id = $id`;
     }
 
     //=========================================================================================================
