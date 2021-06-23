@@ -32,13 +32,13 @@ H                         = require './test-helpers'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "Graphdb: create" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Graphdb } = require './graph-db'
   path        = '/tmp/icql-graph.db'
   schema      = 'main'
   gdb         = new Graphdb { ram: true, schema, }
   #.........................................................................................................
-  T.eq ( d.name for d from gdb.dba.walk_objects { schema, } ).sort(), [ 'edges', 'id_idx', 'nodes', 'source_idx', 'sqlite_autoindex_nodes_1', 'target_idx' ]
+  T.eq ( d.name for d from gdb.dba.walk_objects { schema, } ).sort(), [ 'edges', 'id_idx', 'nodes', 'source_idx', 'sqlite_autoindex_edges_1', 'sqlite_autoindex_nodes_1', 'target_idx' ]
   #.........................................................................................................
   done()
 
@@ -77,7 +77,7 @@ H                         = require './test-helpers'
     edge_count++
     d = jp edge.properties
     urge '^3343^', d.a, d.type, d.b
-  # T.eq edge_count, 27
+  T.eq edge_count, 54
   #.........................................................................................................
   done?()
 
@@ -113,7 +113,7 @@ H                         = require './test-helpers'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "Graphdb: bfsvtab" ] = ( T, done ) ->
+@[ "___ Graphdb: bfsvtab" ] = ( T, done ) ->
   ### https://github.com/abetlen/sqlite3-bfsvtab-ext ###
   # T.halt_on_error()
   { Graphdb } = require './graph-db'
@@ -168,8 +168,8 @@ H                         = require './test-helpers'
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
-  test @[ "Graphdb: {update, upsert, upmerge} {node, edge} atrs" ]
+  test @, { timeout: 10e3, }
+  # test @[ "Graphdb: {update, upsert, upmerge} {node, edge} atrs" ]
   # test @[ "Graphdb: deleting edges and nodes" ]
   # test @[ "Graphdb: insert_node()" ]
   # test @[ "Graphdb: insert_edge()" ]
