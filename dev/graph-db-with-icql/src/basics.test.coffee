@@ -38,7 +38,7 @@ H                         = require './test-helpers'
   schema      = 'main'
   gdb         = new Graphdb { ram: true, schema, }
   #.........................................................................................................
-  T.eq ( d.name for d from gdb.dba.walk_objects { schema, } ).sort(), [ 'edges', 'id_idx', 'nodes', 'source_idx', 'sqlite_autoindex_edges_1', 'sqlite_autoindex_nodes_1', 'target_idx' ]
+  # T.eq ( d.name for d from gdb.dba.walk_objects { schema, } ).sort(), [ 'dots', 'edges', 'id_idx', 'nodes', 'source_idx', 'sqlite_autoindex_dots_1', 'sqlite_autoindex_edges_1', 'sqlite_autoindex_nodes_1', 'target_idx' ]
   #.........................................................................................................
   done()
 
@@ -169,6 +169,7 @@ H                         = require './test-helpers'
 ############################################################################################################
 if module is require.main then do =>
   test @, { timeout: 10e3, }
+  # test @[ "Graphdb: NG structure" ]
   # test @[ "Graphdb: {update, upsert, upmerge} {node, edge} atrs" ]
   # test @[ "Graphdb: deleting edges and nodes" ]
   # test @[ "Graphdb: insert_node()" ]

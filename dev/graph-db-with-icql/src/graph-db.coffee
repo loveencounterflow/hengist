@@ -40,6 +40,7 @@ class @Graphdb
     dba_cfg.path    = path    if path?
     @dba.open dba_cfg
     @init_db()
+    @NG_init_db()
     return undefined
 
 
@@ -67,6 +68,32 @@ class @Graphdb
       create index if not exists #{I @cfg.schema}.id_idx on nodes(id);
       create index if not exists #{I @cfg.schema}.source_idx on edges(source);
       create index if not exists #{I @cfg.schema}.target_idx on edges(target);"""
+    @dba.execute sql
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  NG_init_db: () ->
+    sql = SQL"""
+      -- ...................................................................................................
+      create table if not exists #{I @cfg.schema}.phrases (
+          s       text not null,
+          p       text not null,
+          o       text not null,
+          a       json,
+        primary key ( s, p, o ),
+        foreign key ( p ) references predicates ( p ) );
+      -- ...................................................................................................
+      create table if not exists #{I @cfg.schema}.derivatives (
+          s       text not null,
+          p       text not null,
+          o       text not null,
+          a       json,
+        primary key ( s, p, o ) );
+      -- ...................................................................................................
+      create table if not exists #{I @cfg.schema}.predicates (
+          p             text not null,
+          is_transitive boolean not null,
+        primary key ( p ) );"""
     @dba.execute sql
     return null
 
