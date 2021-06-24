@@ -62,6 +62,7 @@
       }
       this.dba.open(dba_cfg);
       this.init_db();
+      this.NG_init_db();
       return void 0;
     }
 
@@ -89,6 +90,33 @@ create table if not exists ${I(this.cfg.schema)}.edges (
 create index if not exists ${I(this.cfg.schema)}.id_idx on nodes(id);
 create index if not exists ${I(this.cfg.schema)}.source_idx on edges(source);
 create index if not exists ${I(this.cfg.schema)}.target_idx on edges(target);`;
+      this.dba.execute(sql);
+      return null;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    NG_init_db() {
+      var sql;
+      sql = SQL`-- ...................................................................................................
+create table if not exists ${I(this.cfg.schema)}.phrases (
+    s       text not null,
+    p       text not null,
+    o       text not null,
+    a       json,
+  primary key ( s, p, o ),
+  foreign key ( p ) references predicates ( p ) );
+-- ...................................................................................................
+create table if not exists ${I(this.cfg.schema)}.derivatives (
+    s       text not null,
+    p       text not null,
+    o       text not null,
+    a       json,
+  primary key ( s, p, o ) );
+-- ...................................................................................................
+create table if not exists ${I(this.cfg.schema)}.predicates (
+    p             text not null,
+    is_transitive boolean not null,
+  primary key ( p ) );`;
       this.dba.execute(sql);
       return null;
     }

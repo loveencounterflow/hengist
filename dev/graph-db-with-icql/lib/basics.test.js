@@ -45,7 +45,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["Graphdb: create"] = function(T, done) {
-    var Graphdb, d, gdb, path, schema;
+    var Graphdb, gdb, path, schema;
     // T.halt_on_error()
     ({Graphdb} = require('./graph-db'));
     path = '/tmp/icql-graph.db';
@@ -55,15 +55,7 @@
       schema
     });
     //.........................................................................................................
-    T.eq(((function() {
-      var ref, results;
-      ref = gdb.dba.walk_objects({schema});
-      results = [];
-      for (d of ref) {
-        results.push(d.name);
-      }
-      return results;
-    })()).sort(), ['edges', 'id_idx', 'nodes', 'source_idx', 'sqlite_autoindex_edges_1', 'sqlite_autoindex_nodes_1', 'target_idx']);
+    // T.eq ( d.name for d from gdb.dba.walk_objects { schema, } ).sort(), [ 'dots', 'edges', 'id_idx', 'nodes', 'source_idx', 'sqlite_autoindex_dots_1', 'sqlite_autoindex_edges_1', 'sqlite_autoindex_nodes_1', 'target_idx' ]
     //.........................................................................................................
     return done();
   };
@@ -331,7 +323,8 @@
     })();
   }
 
-  // test @[ "Graphdb: {update, upsert, upmerge} {node, edge} atrs" ]
+  // test @[ "Graphdb: NG structure" ]
+// test @[ "Graphdb: {update, upsert, upmerge} {node, edge} atrs" ]
 // test @[ "Graphdb: deleting edges and nodes" ]
 // test @[ "Graphdb: insert_node()" ]
 // test @[ "Graphdb: insert_edge()" ]
