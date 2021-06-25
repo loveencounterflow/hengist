@@ -81,23 +81,13 @@ class @Graphdb
         primary key ( p ) );
       -- ...................................................................................................
       create table if not exists #{I @cfg.schema}.phrases (
-          -- nr      integer not null
           s       text not null,
           p       text not null,
           o       text not null,
           a       json,
           nr      integer /* not null */,
           vnr     json /* not null */,
-        primary key ( s, p, o ),
-        foreign key ( p ) references predicates ( p ) );
-      -- ...................................................................................................
-      create table if not exists #{I @cfg.schema}.derivatives (
-          s       text not null,
-          p       text not null,
-          o       text not null,
-          a       json,
-          nr      integer /* not null */,
-          vnr     json /* not null */,
+          lck     boolean not null default false,
         primary key ( s, p, o ),
         foreign key ( p ) references predicates ( p ) );
       """
