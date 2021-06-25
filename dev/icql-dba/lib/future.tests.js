@@ -1892,7 +1892,7 @@ e6    text );`);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: writing while reading"] = async function(T, done) {
+  this["DBA: writing while reading 1"] = async function(T, done) {
     var Dba, dba, new_bsqlt3, schema;
     T.halt_on_error();
     ({Dba} = require('../../../apps/icql-dba'));
@@ -1937,6 +1937,54 @@ e6    text );`);
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: writing while reading 2"] = async function(T, done) {
+    var Dba, dba, new_bsqlt3, schema;
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    schema = 'main';
+    new_bsqlt3 = require('../../../apps/icql-dba/node_modules/better-sqlite3');
+    dba = new Dba();
+    await (() => {      //.........................................................................................................
+      var i, n, results;
+      dba.execute(SQL`create table main.x ( n int primary key, locked boolean not null default false );`);
+      results = [];
+      for (n = i = 1; i <= 10; n = ++i) {
+        results.push(dba.run(SQL`insert into x ( n ) values ( ? );`, [n]));
+      }
+      return results;
+    })();
+    await (() => {      //.........................................................................................................
+      dba.execute(SQL`update x set locked = true;`);
+      return dba.do_unsafe(() => {
+        var ref, results, row;
+        ref = dba.query(SQL`select * from x where locked;`);
+        results = [];
+        for (row of ref) {
+          // info '^44555^', row
+          results.push(dba.run(SQL`insert into x ( n ) values ( ? );`, [row.n + 100]));
+        }
+        return results;
+      });
+    })();
+    await (() => {      //.........................................................................................................
+      var d;
+      // for row from dba.query SQL"select * from x;"
+      //   info '^44555^', row
+      return T.eq((function() {
+        var ref, results;
+        ref = dba.query(SQL`select * from x;`);
+        results = [];
+        for (d of ref) {
+          results.push(d.n);
+        }
+        return results;
+      })(), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]);
+    })();
+    //.........................................................................................................
+    return done();
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
@@ -1949,7 +1997,7 @@ e6    text );`);
   // test @[ "DBA: VNRs" ], { timeout: 5e3, }
 // test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
 // test @[ "DBA: open() file DB in schema main" ]
-// test @[ "DBA: writing while reading" ]
+// test @[ "DBA: writing while reading 2" ]
 // test @[ "DBA: open() RAM DB from file in schema main" ]
 // test @[ "DBA: open() empty RAM DB in schema main" ]
 // test @[ "DBA: virtual tables" ]

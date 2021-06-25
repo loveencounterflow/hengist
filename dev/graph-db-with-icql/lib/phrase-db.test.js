@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, I, L, PATH, SQL, X, badge, copy_derivatives_to_phrases, debug, derive_phrases, echo, help, info, insert_kanji_phrases, isa, jp, jr, rpr, show_phrase, show_phrases_table, show_phrases_with_first_derivatives, show_predicates_table, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, I, L, PATH, SQL, X, badge, debug, derive_phrases, echo, help, info, insert_kanji_phrases, isa, jp, jr, rpr, show_phrase, show_phrases_table, show_phrases_with_first_derivatives, show_predicates_table, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -92,7 +92,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   show_phrases_table = function(gdb) {
-    return console.table(gdb.dba.list(gdb.dba.query(SQL`select s, p, o, a, nr, vnr from phrases
+    return console.table(gdb.dba.list(gdb.dba.query(SQL`select s, p, o, a, nr, vnr, lck from phrases
   order by
     s,
     -- nr
@@ -132,20 +132,10 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  copy_derivatives_to_phrases = function(gdb) {
-    /* NOTE `where true` clause b/c of [parsing ambiguity](https://sqlite.org/lang_upsert.html) */
-    var changes;
-    ({changes} = gdb.dba.run(SQL`insert into phrases as p1 ( s, p, o, a, nr, vnr )
-  /* ( */ select distinct s, p, o, a, nr, vnr from derivatives as ir where true /* ) */
-  on conflict do nothing;`));
-    return changes;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   derive_phrases = function(gdb) {
     var changes, max_nr;
-    gdb.dba.execute(SQL`delete from derivatives;`);
-    ({changes} = gdb.dba.run(SQL`insert into derivatives as ir ( s, p, o, a, nr, vnr )
+    gdb.dba.execute(SQL`update phrases set lck = true;`);
+    ({changes} = gdb.dba.run(SQL`insert into phrases ( s, p, o, a, nr, vnr )
   select -- distinct
       p1.s                                                  as s,
       p2.p                                                  as p,
@@ -157,13 +147,12 @@
       vnr_deepen( p1.vnr, json_extract( p2.vnr, '$[0]' ) )  as vnr
     from phrases    as p1
     join predicates as pr on ( ( p1.p = pr.p ) and pr.is_transitive )
-    join phrases    as p2 on ( ( p1.p = p2.p ) and ( p1.o = p2.s ) )
-    where true
+    join phrases    as p2 on ( p2.lck and ( p1.p = p2.p ) and ( p1.o = p2.s ) )
+    where p1.lck
     on conflict do nothing;`));
-    // urge CND.reverse ' '.repeat 20
     // console.table gdb.dba.list gdb.dba.query SQL"select * from derivatives;"
-    max_nr = gdb.dba.first_value(gdb.dba.query(SQL`select max( nr ) from phrases;`));
-    gdb.dba.run(SQL`update derivatives as d set nr = nr + ?;`, [max_nr]);
+    max_nr = gdb.dba.first_value(gdb.dba.query(SQL`select max( nr ) from phrases where lck;`));
+    gdb.dba.run(SQL`update phrases set nr = nr + ? where not lck;`, [max_nr]);
     // console.table gdb.dba.list gdb.dba.query SQL"select * from derivatives;"
     // urge CND.reverse ' '.repeat 20
     return changes;
@@ -173,8 +162,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["Graphdb: phrase DB"] = function(T, done) {
-    var Graphdb, d, derivative_count, gdb, lap_count, new_phrase_count, prv_row_count, ref, schema;
-    T.halt_on_error();
+    var Graphdb, d, gdb, lap_count, ref, schema;
+    if (T != null) {
+      T.halt_on_error();
+    }
     ({Graphdb} = require('./graph-db'));
     // path          = '/tmp/icql-graph.db'
     schema = 'main';
@@ -194,19 +185,28 @@
     show_predicates_table(gdb);
     //.........................................................................................................
     lap_count = 0;
-    while (true) {
-      whisper('-'.repeat(108));
-      show_phrases_table(gdb);
-      //.......................................................................................................
-      lap_count++;
-      prv_row_count = gdb.dba.first_value(gdb.dba.query(SQL`select count(*) from phrases;`));
-      derivative_count = derive_phrases(gdb);
-      new_phrase_count = copy_derivatives_to_phrases(gdb);
-      info('^587^', {lap_count, prv_row_count, derivative_count, new_phrase_count});
-      if (new_phrase_count === 0) {
-        break;
+    gdb.dba.do_unsafe(() => {
+      var derivative_count, phrase_count, results;
+      results = [];
+      while (true) {
+        whisper('-'.repeat(108));
+        show_phrases_table(gdb);
+        //.......................................................................................................
+        lap_count++;
+        if (lap_count > 10) {
+          break;
+        }
+        derivative_count = derive_phrases(gdb);
+        phrase_count = gdb.dba.first_value(gdb.dba.query(SQL`select count(*) from phrases;`));
+        info('^587^', {lap_count, derivative_count, phrase_count});
+        if (derivative_count === 0) {
+          break;
+        } else {
+          results.push(void 0);
+        }
       }
-    }
+      return results;
+    });
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -214,7 +214,8 @@
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      return test(this["Graphdb: phrase DB"]);
+      // test @[ "Graphdb: phrase DB" ]
+      return this["Graphdb: phrase DB"]();
     })();
   }
 
