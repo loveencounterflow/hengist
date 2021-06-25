@@ -75,11 +75,19 @@ class @Graphdb
   NG_init_db: () ->
     sql = SQL"""
       -- ...................................................................................................
+      create table if not exists #{I @cfg.schema}.predicates (
+          p             text not null,
+          is_transitive boolean not null,
+        primary key ( p ) );
+      -- ...................................................................................................
       create table if not exists #{I @cfg.schema}.phrases (
+          -- nr      integer not null
           s       text not null,
           p       text not null,
           o       text not null,
           a       json,
+          nr      integer /* not null */,
+          vnr     json /* not null */,
         primary key ( s, p, o ),
         foreign key ( p ) references predicates ( p ) );
       -- ...................................................................................................
@@ -88,15 +96,41 @@ class @Graphdb
           p       text not null,
           o       text not null,
           a       json,
-        primary key ( s, p, o ) );
-      -- ...................................................................................................
-      create table if not exists #{I @cfg.schema}.predicates (
-          p             text not null,
-          is_transitive boolean not null,
-        primary key ( p ) );"""
+          nr      integer /* not null */,
+          vnr     json /* not null */,
+        primary key ( s, p, o ),
+        foreign key ( p ) references predicates ( p ) );
+      """
     @dba.execute sql
+    #.......................................................................................................
+    @dba.function 'vnr_as_hollerith', { deterministic: true, varargs: false, }, ( vnr_json ) =>
+      return @vnr_as_hollerith JSON.parse vnr_json
+    @dba.function 'vnr_deepen', { deterministic: true, varargs: true, }, ( vnr_json, extra = 0 ) =>
+      # debug '^8776^', [ vnr_json, extra, ]
+      return JSON.stringify @vnr_deepen ( JSON.parse vnr_json ), extra
+    #.......................................................................................................
     return null
 
+
+  #=========================================================================================================
+  # VNRs
+  #---------------------------------------------------------------------------------------------------------
+  vnr_as_hollerith: ( vnr ) ->
+    sign_delta  = 0x80000000  ### used to lift negative numbers to non-negative ###
+    u32_width   = 4           ### bytes per element ###
+    vnr_width   = 5           ### maximum elements in VNR vector ###
+    nr_min      = -0x80000000 ### smallest possible VNR element ###
+    nr_max      = +0x7fffffff ### largest possible VNR element ###
+    unless 0 < vnr.length <= vnr_width
+      throw new Error "^44798^ expected VNR to be between 1 and #{vnr_width} elements long, got length #{vnr.length}"
+    R           = Buffer.alloc vnr_width * u32_width, 0x00
+    offset      = -u32_width
+    for idx in [ 0 ... vnr_width ]
+      R.writeUInt32BE ( vnr[ idx ] ? 0 ) + sign_delta, ( offset += u32_width )
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  vnr_deepen: ( vnr, extra = 0 ) -> [ vnr..., extra, ]
 
   #=========================================================================================================
   # INSERT, UPDATE, DELETE
