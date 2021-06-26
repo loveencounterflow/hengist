@@ -158,17 +158,16 @@ derive_phrases = ( gdb ) ->
   show_predicates_table gdb
   #.........................................................................................................
   lap_count     = 0
-  gdb.dba.do_unsafe =>
-    loop
-      whisper '-'.repeat 108
-      show_phrases_table gdb
-      #.......................................................................................................
-      lap_count++
-      break if lap_count > 10
-      derivative_count  = derive_phrases gdb
-      phrase_count      = gdb.dba.first_value gdb.dba.query SQL"""select count(*) from phrases;"""
-      info '^587^', { lap_count, derivative_count, phrase_count, }
-      break if derivative_count is 0
+  loop
+    show_phrases_table gdb
+    #.......................................................................................................
+    lap_count++
+    break if lap_count > 10
+    derivative_count  = derive_phrases gdb
+    phrase_count      = gdb.dba.first_value gdb.dba.query SQL"""select count(*) from phrases;"""
+    whisper '-'.repeat 108
+    info '^587^', { lap_count, derivative_count, phrase_count, }
+    break if derivative_count is 0
   #.........................................................................................................
   done?()
 
