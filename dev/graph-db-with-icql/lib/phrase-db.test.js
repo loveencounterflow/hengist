@@ -135,6 +135,7 @@
   derive_phrases = function(gdb) {
     var changes, max_nr;
     gdb.dba.execute(SQL`update phrases set lck = true;`);
+    max_nr = gdb.dba.first_value(gdb.dba.query(SQL`select max( nr ) from phrases;`));
     ({changes} = gdb.dba.run(SQL`insert into phrases ( s, p, o, a, nr, vnr )
   select -- distinct
       p1.s                                                  as s,
@@ -142,19 +143,15 @@
       p2.o                                                  as o,
       p2.a                                                  as a,
       -- max( p1.nr ) + 1                                      as nr,
-      row_number() over ()                                  as nr,
+      row_number() over () + $max_nr                        as nr,
       -- row_number() over ()                                  as nr,
       vnr_deepen( p1.vnr, json_extract( p2.vnr, '$[0]' ) )  as vnr
     from phrases    as p1
     join predicates as pr on ( ( p1.p = pr.p ) and pr.is_transitive )
     join phrases    as p2 on ( p2.lck and ( p1.p = p2.p ) and ( p1.o = p2.s ) )
     where p1.lck
-    on conflict do nothing;`));
-    // console.table gdb.dba.list gdb.dba.query SQL"select * from derivatives;"
-    max_nr = gdb.dba.first_value(gdb.dba.query(SQL`select max( nr ) from phrases where lck;`));
-    gdb.dba.run(SQL`update phrases set nr = nr + ? where not lck;`, [max_nr]);
-    // console.table gdb.dba.list gdb.dba.query SQL"select * from derivatives;"
-    // urge CND.reverse ' '.repeat 20
+    on conflict do nothing;`, {max_nr}));
+    // gdb.dba.run SQL"update phrases set nr = nr + ? where not lck;", [ max_nr, ]
     return changes;
   };
 
@@ -162,7 +159,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["Graphdb: phrase DB"] = function(T, done) {
-    var Graphdb, d, gdb, lap_count, ref, schema;
+    var Graphdb, d, derivative_count, gdb, lap_count, phrase_count, ref, schema;
     if (T != null) {
       T.halt_on_error();
     }
@@ -185,28 +182,21 @@
     show_predicates_table(gdb);
     //.........................................................................................................
     lap_count = 0;
-    gdb.dba.do_unsafe(() => {
-      var derivative_count, phrase_count, results;
-      results = [];
-      while (true) {
-        whisper('-'.repeat(108));
-        show_phrases_table(gdb);
-        //.......................................................................................................
-        lap_count++;
-        if (lap_count > 10) {
-          break;
-        }
-        derivative_count = derive_phrases(gdb);
-        phrase_count = gdb.dba.first_value(gdb.dba.query(SQL`select count(*) from phrases;`));
-        info('^587^', {lap_count, derivative_count, phrase_count});
-        if (derivative_count === 0) {
-          break;
-        } else {
-          results.push(void 0);
-        }
+    while (true) {
+      show_phrases_table(gdb);
+      //.......................................................................................................
+      lap_count++;
+      if (lap_count > 10) {
+        break;
       }
-      return results;
-    });
+      derivative_count = derive_phrases(gdb);
+      phrase_count = gdb.dba.first_value(gdb.dba.query(SQL`select count(*) from phrases;`));
+      whisper('-'.repeat(108));
+      info('^587^', {lap_count, derivative_count, phrase_count});
+      if (derivative_count === 0) {
+        break;
+      }
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
