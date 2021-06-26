@@ -108,8 +108,8 @@ create table if not exists ${I(this.cfg.schema)}.phrases (
     p       text not null,
     o       text not null,
     a       json,
-    nr      integer /* not null */,
-    vnr     json /* not null */,
+    nr      integer not null,
+    vnr     json    not null,
     lck     boolean not null default false,
   primary key ( s, p, o ),
   foreign key ( p ) references predicates ( p ) );`;
