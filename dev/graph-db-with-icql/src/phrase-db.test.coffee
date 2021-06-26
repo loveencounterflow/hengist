@@ -117,6 +117,7 @@ show_phrases_with_first_derivatives = ( gdb ) ->
 #-----------------------------------------------------------------------------------------------------------
 derive_phrases = ( gdb ) ->
   gdb.dba.execute SQL"""update phrases set lck = true;"""
+  max_nr = gdb.dba.first_value gdb.dba.query SQL"select max( nr ) from phrases;"
   { changes, } = gdb.dba.run SQL"""
     insert into phrases ( s, p, o, a, nr, vnr )
       select -- distinct
@@ -125,7 +126,7 @@ derive_phrases = ( gdb ) ->
           p2.o                                                  as o,
           p2.a                                                  as a,
           -- max( p1.nr ) + 1                                      as nr,
-          row_number() over ()                                  as nr,
+          row_number() over () + $max_nr                        as nr,
           -- row_number() over ()                                  as nr,
           vnr_deepen( p1.vnr, json_extract( p2.vnr, '$[0]' ) )  as vnr
         from phrases    as p1
@@ -133,12 +134,8 @@ derive_phrases = ( gdb ) ->
         join phrases    as p2 on ( p2.lck and ( p1.p = p2.p ) and ( p1.o = p2.s ) )
         where p1.lck
         on conflict do nothing;
-      """
-  # console.table gdb.dba.list gdb.dba.query SQL"select * from derivatives;"
-  max_nr = gdb.dba.first_value gdb.dba.query SQL"select max( nr ) from phrases where lck;"
-  gdb.dba.run SQL"update phrases set nr = nr + ? where not lck;", [ max_nr, ]
-  # console.table gdb.dba.list gdb.dba.query SQL"select * from derivatives;"
-  # urge CND.reverse ' '.repeat 20
+      """, { max_nr, }
+  # gdb.dba.run SQL"update phrases set nr = nr + ? where not lck;", [ max_nr, ]
   return changes
 
 
