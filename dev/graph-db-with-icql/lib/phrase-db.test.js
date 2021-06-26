@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, I, L, PATH, SQL, X, badge, debug, derive_phrases, echo, help, info, insert_kanji_phrases, isa, jp, jr, rpr, show_phrase, show_phrases_table, show_phrases_with_first_derivatives, show_predicates_table, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, I, L, PATH, SQL, X, _get_containment_formula, badge, debug, derive_phrases, echo, help, info, insert_kanji_phrases, isa, jp, jr, rpr, show_phrase, show_phrases_table, show_phrases_with_derivation, show_phrases_with_first_derivatives, show_predicates_table, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -45,7 +45,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   insert_kanji_phrases = function(gdb) {
-    var component, containment, containments, glyph, glyphs, i, insert_containment, insert_phrase, j, k, len, len1, len2, nr, vnr;
+    var component, containment, containments, glyph, glyphs, i, insert_containment, insert_phrase, j, k, len, len1, len2, nr, ref;
     gdb.dba.execute(SQL`insert into predicates ( p, is_transitive ) values ( 'isa',       false );`);
     gdb.dba.execute(SQL`insert into predicates ( p, is_transitive ) values ( 'contains',  true );`);
     //.........................................................................................................
@@ -61,25 +61,25 @@
     }
     glyphs = Array.from(glyphs);
     //.........................................................................................................
-    insert_phrase = SQL`insert into phrases ( s, p, o, nr, vnr )
+    insert_phrase = SQL`insert into phrases ( s, p, o, nr, ref )
   values ( ?, 'isa', 'glyph', ?, ? );`;
     //.........................................................................................................
-    insert_containment = SQL`insert into phrases ( s, p, o, nr, vnr )
+    insert_containment = SQL`insert into phrases ( s, p, o, nr, ref )
   values ( ?, 'contains', ?, ?, ? );`;
 //.........................................................................................................
     for (j = 0, len1 = glyphs.length; j < len1; j++) {
       glyph = glyphs[j];
       nr++;
-      vnr = jr([nr]);
-      gdb.dba.run(insert_phrase, [glyph, nr, vnr]);
+      ref = jr(nr);
+      gdb.dba.run(insert_phrase, [glyph, nr, ref]);
     }
 //.........................................................................................................
     for (k = 0, len2 = containments.length; k < len2; k++) {
       containment = containments[k];
       nr++;
-      vnr = jr([nr]);
+      ref = jr(nr);
       [glyph, component] = Array.from(containment);
-      gdb.dba.run(insert_containment, [glyph, component, nr, vnr]);
+      gdb.dba.run(insert_containment, [glyph, component, nr, ref]);
     }
     //.........................................................................................................
     return null;
@@ -92,11 +92,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   show_phrases_table = function(gdb) {
-    return console.table(gdb.dba.list(gdb.dba.query(SQL`select s, p, o, a, nr, vnr, lck from phrases
+    return console.table(gdb.dba.list(gdb.dba.query(SQL`select s, p, o, a, nr, ref, lck from phrases
   order by
     s,
-    -- nr
-    vnr_as_hollerith( vnr )
+    nr
+    -- vnr_as_hollerith( vnr )
   ;`)));
   };
 
@@ -114,8 +114,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   show_phrases_with_first_derivatives = function(gdb) {
-    var d, ref;
-    ref = gdb.dba.query(SQL`select distinct
+    var d, ref1;
+    ref1 = gdb.dba.query(SQL`select distinct
     p1.s as s1,
     p1.p as p1,
     p1.o as o1,
@@ -124,9 +124,40 @@
     p2.o as o2
   from phrases as p1
   left join phrases as p2 on ( p1.o = p2.s );`);
-    for (d of ref) {
+    for (d of ref1) {
       // debug '^767^', d
       show_phrase(gdb, d);
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  _get_containment_formula = function(row) {
+    return `${row.s}∋${row.o}`;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  show_phrases_with_derivation = function(gdb) {
+    var d, derivation, ref1;
+    ref1 = gdb.dba.query(SQL`select * from phrases order by s, p, nr;`);
+    for (d of ref1) {
+      if (d.p !== 'contains') {
+        continue;
+      }
+      derivation = '';
+      if ((type_of(jp(d.ref))) === 'list') {
+        derivation = d.ref.replace(/[0-9]+/g, ($0) => {
+          var nr, sub_phrase;
+          nr = jp($0);
+          sub_phrase = gdb.dba.first_row(gdb.dba.query(SQL`select * from phrases where nr = ?;`, [nr]));
+          return _get_containment_formula(sub_phrase);
+        });
+        derivation = derivation.replace(/\[/g, '( ');
+        derivation = derivation.replace(/\]/g, ' )');
+        derivation = derivation.replace(/,/g, ' ∧ ');
+        derivation = '⇐ ' + derivation;
+      }
+      info(_get_containment_formula(d), derivation);
     }
     return null;
   };
@@ -136,7 +167,7 @@
     var changes, max_nr;
     gdb.dba.execute(SQL`update phrases set lck = true;`);
     max_nr = gdb.dba.first_value(gdb.dba.query(SQL`select max( nr ) from phrases;`));
-    ({changes} = gdb.dba.run(SQL`insert into phrases ( s, p, o, a, nr, vnr )
+    ({changes} = gdb.dba.run(SQL`insert into phrases ( s, p, o, a, nr, ref )
   select -- distinct
       p1.s                                                  as s,
       p2.p                                                  as p,
@@ -145,7 +176,7 @@
       -- max( p1.nr ) + 1                                      as nr,
       row_number() over () + $max_nr                        as nr,
       -- row_number() over ()                                  as nr,
-      vnr_deepen( p1.vnr, json_extract( p2.vnr, '$[0]' ) )  as vnr
+      ref_push( p1.ref, p2.ref )                            as ref
     from phrases    as p1
     join predicates as pr on ( ( p1.p = pr.p ) and pr.is_transitive )
     join phrases    as p2 on ( p2.lck and ( p1.p = p2.p ) and ( p1.o = p2.s ) )
@@ -159,7 +190,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["Graphdb: phrase DB"] = function(T, done) {
-    var Graphdb, d, derivative_count, gdb, lap_count, phrase_count, ref, schema;
+    var Graphdb, d, derivative_count, gdb, lap_count, phrase_count, ref1, schema;
     if (T != null) {
       T.halt_on_error();
     }
@@ -173,8 +204,8 @@
     //.........................................................................................................
     insert_kanji_phrases(gdb);
     whisper('-'.repeat(108));
-    ref = gdb.dba.query(SQL`select * from phrases;`);
-    for (d of ref) {
+    ref1 = gdb.dba.query(SQL`select * from phrases;`);
+    for (d of ref1) {
       show_phrase(gdb, d);
     }
     whisper('-'.repeat(108));
@@ -197,6 +228,8 @@
         break;
       }
     }
+    //.........................................................................................................
+    show_phrases_with_derivation(gdb);
     return typeof done === "function" ? done() : void 0;
   };
 

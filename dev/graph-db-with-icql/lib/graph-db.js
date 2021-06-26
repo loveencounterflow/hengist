@@ -109,7 +109,7 @@ create table if not exists ${I(this.cfg.schema)}.phrases (
     o       text not null,
     a       json,
     nr      integer not null,
-    vnr     json    not null,
+    ref     json    not null,
     lck     boolean not null default false,
   primary key ( s, p, o ),
   foreign key ( p ) references predicates ( p ) );`;
@@ -128,6 +128,15 @@ create table if not exists ${I(this.cfg.schema)}.phrases (
         // debug '^8776^', [ vnr_json, extra, ]
         return JSON.stringify(this.vnr_deepen(JSON.parse(vnr_json), extra));
       });
+      this.dba.function('ref_push', {
+        deterministic: true,
+        varargs: false
+      }, (ref1_json, ref2_json) => {
+        var ref1, ref2;
+        ref1 = JSON.parse(ref1_json); //; ref1 = if ref1.length is 1 then ref1[ 0 ] else ref1
+        ref2 = JSON.parse(ref2_json); //; ref2 = if ref1.length is 1 then ref2[ 0 ] else ref2
+        return JSON.stringify([ref1, ref2]);
+      });
       //.......................................................................................................
       return null;
     }
@@ -136,7 +145,7 @@ create table if not exists ${I(this.cfg.schema)}.phrases (
     // VNRs
     //---------------------------------------------------------------------------------------------------------
     vnr_as_hollerith(vnr) {
-      var R, i, idx, nr_max, nr_min, offset, ref, ref1, ref2, sign_delta, u32_width, vnr_width;
+      var R, i, idx, nr_max, nr_min, offset, ref, ref3, ref4, sign_delta, u32_width, vnr_width;
       sign_delta = 0x80000000/* used to lift negative numbers to non-negative */
       u32_width = 4/* bytes per element */
       vnr_width = 5/* maximum elements in VNR vector */
@@ -147,8 +156,8 @@ create table if not exists ${I(this.cfg.schema)}.phrases (
       }
       R = Buffer.alloc(vnr_width * u32_width, 0x00);
       offset = -u32_width;
-      for (idx = i = 0, ref1 = vnr_width; (0 <= ref1 ? i < ref1 : i > ref1); idx = 0 <= ref1 ? ++i : --i) {
-        R.writeUInt32BE(((ref2 = vnr[idx]) != null ? ref2 : 0) + sign_delta, (offset += u32_width));
+      for (idx = i = 0, ref3 = vnr_width; (0 <= ref3 ? i < ref3 : i > ref3); idx = 0 <= ref3 ? ++i : --i) {
+        R.writeUInt32BE(((ref4 = vnr[idx]) != null ? ref4 : 0) + sign_delta, (offset += u32_width));
       }
       return R;
     }
