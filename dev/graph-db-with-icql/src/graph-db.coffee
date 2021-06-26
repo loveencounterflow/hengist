@@ -86,7 +86,7 @@ class @Graphdb
           o       text not null,
           a       json,
           nr      integer not null,
-          vnr     json    not null,
+          ref     json    not null,
           lck     boolean not null default false,
         primary key ( s, p, o ),
         foreign key ( p ) references predicates ( p ) );
@@ -98,6 +98,10 @@ class @Graphdb
     @dba.function 'vnr_deepen', { deterministic: true, varargs: true, }, ( vnr_json, extra = 0 ) =>
       # debug '^8776^', [ vnr_json, extra, ]
       return JSON.stringify @vnr_deepen ( JSON.parse vnr_json ), extra
+    @dba.function 'ref_push', { deterministic: true, varargs: false, }, ( ref1_json, ref2_json ) =>
+      ref1 = JSON.parse ref1_json #; ref1 = if ref1.length is 1 then ref1[ 0 ] else ref1
+      ref2 = JSON.parse ref2_json #; ref2 = if ref1.length is 1 then ref2[ 0 ] else ref2
+      return JSON.stringify [ ref1, ref2, ]
     #.......................................................................................................
     return null
 

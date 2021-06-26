@@ -54,23 +54,23 @@ insert_kanji_phrases = ( gdb ) ->
   glyphs  = Array.from glyphs
   #.........................................................................................................
   insert_phrase = SQL"""
-    insert into phrases ( s, p, o, nr, vnr )
+    insert into phrases ( s, p, o, nr, ref )
       values ( ?, 'isa', 'glyph', ?, ? );"""
   #.........................................................................................................
   insert_containment = SQL"""
-    insert into phrases ( s, p, o, nr, vnr )
+    insert into phrases ( s, p, o, nr, ref )
       values ( ?, 'contains', ?, ?, ? );"""
   #.........................................................................................................
   for glyph in glyphs
     nr++
-    vnr = jr [ nr, ]
-    gdb.dba.run insert_phrase, [ glyph, nr, vnr, ]
+    ref = jr nr
+    gdb.dba.run insert_phrase, [ glyph, nr, ref, ]
   #.........................................................................................................
   for containment in containments
     nr++
-    vnr = jr [ nr, ]
+    ref = jr nr
     [ glyph, component, ] = Array.from containment
-    gdb.dba.run insert_containment, [ glyph, component, nr, vnr, ]
+    gdb.dba.run insert_containment, [ glyph, component, nr, ref, ]
   #.........................................................................................................
   return null
 
@@ -81,11 +81,11 @@ show_predicates_table = ( gdb ) ->
 #-----------------------------------------------------------------------------------------------------------
 show_phrases_table = ( gdb ) ->
   console.table gdb.dba.list gdb.dba.query SQL"""
-    select s, p, o, a, nr, vnr, lck from phrases
+    select s, p, o, a, nr, ref, lck from phrases
       order by
         s,
-        -- nr
-        vnr_as_hollerith( vnr )
+        nr
+        -- vnr_as_hollerith( vnr )
       ;"""
 
 #-----------------------------------------------------------------------------------------------------------
@@ -115,11 +115,31 @@ show_phrases_with_first_derivatives = ( gdb ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+_get_containment_formula = ( row ) -> "#{row.s}∋#{row.o}"
+
+#-----------------------------------------------------------------------------------------------------------
+show_phrases_with_derivation = ( gdb ) ->
+  for d from gdb.dba.query SQL"""select * from phrases order by s, p, nr;"""
+    continue unless d.p is 'contains'
+    derivation = ''
+    if ( type_of jp d.ref ) is 'list'
+      derivation = d.ref.replace /[0-9]+/g, ( $0 ) =>
+        nr          = jp $0
+        sub_phrase  = gdb.dba.first_row gdb.dba.query SQL"select * from phrases where nr = ?;", [ nr, ]
+        return _get_containment_formula sub_phrase
+      derivation = derivation.replace /\[/g, '( '
+      derivation = derivation.replace /\]/g, ' )'
+      derivation = derivation.replace /,/g, ' ∧ '
+      derivation = '⇐ ' + derivation
+    info ( _get_containment_formula d ), derivation
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 derive_phrases = ( gdb ) ->
   gdb.dba.execute SQL"""update phrases set lck = true;"""
   max_nr = gdb.dba.first_value gdb.dba.query SQL"select max( nr ) from phrases;"
   { changes, } = gdb.dba.run SQL"""
-    insert into phrases ( s, p, o, a, nr, vnr )
+    insert into phrases ( s, p, o, a, nr, ref )
       select -- distinct
           p1.s                                                  as s,
           p2.p                                                  as p,
@@ -128,7 +148,7 @@ derive_phrases = ( gdb ) ->
           -- max( p1.nr ) + 1                                      as nr,
           row_number() over () + $max_nr                        as nr,
           -- row_number() over ()                                  as nr,
-          vnr_deepen( p1.vnr, json_extract( p2.vnr, '$[0]' ) )  as vnr
+          ref_push( p1.ref, p2.ref )                            as ref
         from phrases    as p1
         join predicates as pr on ( ( p1.p = pr.p ) and pr.is_transitive )
         join phrases    as p2 on ( p2.lck and ( p1.p = p2.p ) and ( p1.o = p2.s ) )
@@ -166,6 +186,7 @@ derive_phrases = ( gdb ) ->
     info '^587^', { lap_count, derivative_count, phrase_count, }
     break if derivative_count is 0
   #.........................................................................................................
+  show_phrases_with_derivation gdb
   done?()
 
 
