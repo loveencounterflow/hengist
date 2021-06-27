@@ -73,6 +73,16 @@ class @Graphdb
 
   #---------------------------------------------------------------------------------------------------------
   NG_init_db: () ->
+    @dba.function 'vnr_as_hollerith', { deterministic: true, varargs: false, }, ( vnr_json ) =>
+      return @vnr_as_hollerith JSON.parse vnr_json
+    @dba.function 'vnr_deepen', { deterministic: true, varargs: true, }, ( vnr_json, extra = 0 ) =>
+      # debug '^8776^', [ vnr_json, extra, ]
+      return JSON.stringify @vnr_deepen ( JSON.parse vnr_json ), extra
+    @dba.function 'concat_refs', { deterministic: true, varargs: false, }, ( ref1_json, ref2_json ) =>
+      ref1 = JSON.parse ref1_json #; ref1 = if ref1.length is 1 then ref1[ 0 ] else ref1
+      ref2 = JSON.parse ref2_json #; ref2 = if ref1.length is 1 then ref2[ 0 ] else ref2
+      return JSON.stringify [ ref1..., ref2..., ]
+    #.......................................................................................................
     sql = SQL"""
       -- ...................................................................................................
       create table if not exists #{I @cfg.schema}.predicates (
@@ -92,16 +102,6 @@ class @Graphdb
         foreign key ( p ) references predicates ( p ) );
       """
     @dba.execute sql
-    #.......................................................................................................
-    @dba.function 'vnr_as_hollerith', { deterministic: true, varargs: false, }, ( vnr_json ) =>
-      return @vnr_as_hollerith JSON.parse vnr_json
-    @dba.function 'vnr_deepen', { deterministic: true, varargs: true, }, ( vnr_json, extra = 0 ) =>
-      # debug '^8776^', [ vnr_json, extra, ]
-      return JSON.stringify @vnr_deepen ( JSON.parse vnr_json ), extra
-    @dba.function 'ref_push', { deterministic: true, varargs: false, }, ( ref1_json, ref2_json ) =>
-      ref1 = JSON.parse ref1_json #; ref1 = if ref1.length is 1 then ref1[ 0 ] else ref1
-      ref2 = JSON.parse ref2_json #; ref2 = if ref1.length is 1 then ref2[ 0 ] else ref2
-      return JSON.stringify [ ref1, ref2, ]
     #.......................................................................................................
     return null
 
