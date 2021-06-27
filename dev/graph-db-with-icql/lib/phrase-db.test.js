@@ -70,14 +70,14 @@
     for (j = 0, len1 = glyphs.length; j < len1; j++) {
       glyph = glyphs[j];
       nr++;
-      ref = jr(nr);
+      ref = jr([nr]);
       gdb.dba.run(insert_phrase, [glyph, nr, ref]);
     }
 //.........................................................................................................
     for (k = 0, len2 = containments.length; k < len2; k++) {
       containment = containments[k];
       nr++;
-      ref = jr(nr);
+      ref = jr([nr]);
       [glyph, component] = Array.from(containment);
       gdb.dba.run(insert_containment, [glyph, component, nr, ref]);
     }
@@ -93,11 +93,7 @@
   //-----------------------------------------------------------------------------------------------------------
   show_phrases_table = function(gdb) {
     return console.table(gdb.dba.list(gdb.dba.query(SQL`select s, p, o, a, nr, ref, lck from phrases
-  order by
-    s,
-    nr
-    -- vnr_as_hollerith( vnr )
-  ;`)));
+  order by s, _ref;`)));
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -139,13 +135,13 @@
   //-----------------------------------------------------------------------------------------------------------
   show_phrases_with_derivation = function(gdb) {
     var d, derivation, ref1;
-    ref1 = gdb.dba.query(SQL`select * from phrases order by s, p, nr;`);
+    ref1 = gdb.dba.query(SQL`select * from phrases order by s, p, _ref;`);
     for (d of ref1) {
       if (d.p !== 'contains') {
         continue;
       }
       derivation = '';
-      if ((type_of(jp(d.ref))) === 'list') {
+      if ((jp(d.ref)).length > 1) {
         derivation = d.ref.replace(/[0-9]+/g, ($0) => {
           var nr, sub_phrase;
           nr = jp($0);
@@ -176,7 +172,7 @@
       -- max( p1.nr ) + 1                                      as nr,
       row_number() over () + $max_nr                        as nr,
       -- row_number() over ()                                  as nr,
-      ref_push( p1.ref, p2.ref )                            as ref
+      concat_refs( p1.ref, p2.ref )                         as ref
     from phrases    as p1
     join predicates as pr on ( ( p1.p = pr.p ) and pr.is_transitive )
     join phrases    as p2 on ( p2.lck and ( p1.p = p2.p ) and ( p1.o = p2.s ) )
