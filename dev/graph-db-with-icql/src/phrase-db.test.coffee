@@ -63,12 +63,12 @@ insert_kanji_phrases = ( gdb ) ->
   #.........................................................................................................
   for glyph in glyphs
     nr++
-    ref = jr nr
+    ref = jr [ nr, ]
     gdb.dba.run insert_phrase, [ glyph, nr, ref, ]
   #.........................................................................................................
   for containment in containments
     nr++
-    ref = jr nr
+    ref = jr [ nr, ]
     [ glyph, component, ] = Array.from containment
     gdb.dba.run insert_containment, [ glyph, component, nr, ref, ]
   #.........................................................................................................
@@ -82,11 +82,7 @@ show_predicates_table = ( gdb ) ->
 show_phrases_table = ( gdb ) ->
   console.table gdb.dba.list gdb.dba.query SQL"""
     select s, p, o, a, nr, ref, lck from phrases
-      order by
-        s,
-        nr
-        -- vnr_as_hollerith( vnr )
-      ;"""
+      order by s, _ref;"""
 
 #-----------------------------------------------------------------------------------------------------------
 show_phrase = ( gdb, row ) ->
@@ -119,10 +115,10 @@ _get_containment_formula = ( row ) -> "#{row.s}∋#{row.o}"
 
 #-----------------------------------------------------------------------------------------------------------
 show_phrases_with_derivation = ( gdb ) ->
-  for d from gdb.dba.query SQL"""select * from phrases order by s, p, nr;"""
+  for d from gdb.dba.query SQL"""select * from phrases order by s, p, _ref;"""
     continue unless d.p is 'contains'
     derivation = ''
-    if ( type_of jp d.ref ) is 'list'
+    if ( jp d.ref ).length > 1
       derivation = d.ref.replace /[0-9]+/g, ( $0 ) =>
         nr          = jp $0
         sub_phrase  = gdb.dba.first_row gdb.dba.query SQL"select * from phrases where nr = ?;", [ nr, ]
@@ -148,7 +144,7 @@ derive_phrases = ( gdb ) ->
           -- max( p1.nr ) + 1                                      as nr,
           row_number() over () + $max_nr                        as nr,
           -- row_number() over ()                                  as nr,
-          ref_push( p1.ref, p2.ref )                            as ref
+          concat_refs( p1.ref, p2.ref )                         as ref
         from phrases    as p1
         join predicates as pr on ( ( p1.p = pr.p ) and pr.is_transitive )
         join phrases    as p2 on ( p2.lck and ( p1.p = p2.p ) and ( p1.o = p2.s ) )
