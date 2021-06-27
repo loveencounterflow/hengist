@@ -98,8 +98,11 @@ class @Graphdb
           nr      integer not null,
           ref     json    not null,
           lck     boolean not null default false,
-        primary key ( s, p, o ),
+          _ref    blob generated always as ( vnr_as_hollerith( ref ) ) virtual not null unique,
+        primary key ( s, p, o, ref ),
+        -- unique ( s, p, o, ref ),
         foreign key ( p ) references predicates ( p ) );
+      create index #{I @cfg.schema}.phrase_ref_hollerith_index on phrases ( ref );
       """
     @dba.execute sql
     #.......................................................................................................
