@@ -459,6 +459,16 @@
     return {template_path, work_path};
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.procure_file = async function(cfg) {
+    var name, path, work_path;
+    ({path, name} = cfg);
+    this.ensure_file_exists(path);
+    work_path = this.resolve_path(PATH.join('data/icql', name));
+    await this.copy_over(path, work_path);
+    return work_path;
+  };
+
 }).call(this);
 
 //# sourceMappingURL=helpers.js.map
