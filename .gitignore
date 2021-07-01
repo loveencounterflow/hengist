@@ -120,8 +120,8 @@ dmypy.sock
 __pycache__/
 *.py[cod]
 
-# C extensions
-*.so
+# # C extensions
+# *.so
 
 .yalc
 
