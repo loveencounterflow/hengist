@@ -257,19 +257,22 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["___ Graphdb: bfsvtab"] = function(T, done) {
+  this["Graphdb: bfsvtab"] = function(T, done) {
     var Graphdb, edge, edges, gdb, i, nr_max, path, ref, ref1, row, schema, source, sql, target;
     /* https://github.com/abetlen/sqlite3-bfsvtab-ext */
-    // T.halt_on_error()
+    if (T != null) {
+      T.halt_on_error();
+    }
     ({Graphdb} = require('./graph-db'));
     path = '/tmp/icql-graph.db';
+    H.try_to_remove_file(path);
     schema = 'main';
     gdb = new Graphdb({path, schema});
     nr_max = 20;
     //.........................................................................................................
-    H.reinitialize_db(gdb);
+    // H.reinitialize_db gdb
     //.........................................................................................................
-    gdb.dba.load_extension(PATH.resolve(PATH.join(__dirname, '../bfsvtab.so')));
+    gdb.dba.load_extension(PATH.resolve(PATH.join(__dirname, '../../../assets/sqlite-extensions/bfsvtab.so')));
     H.insert_arithmetic_edges(gdb, nr_max);
     gdb.dba.execute(SQL`create table edges_g ( source integer, target integer );`);
     edges = [...(gdb.dba.query(SQL`select * from edges;`))];
@@ -323,7 +326,9 @@
     })();
   }
 
-  // test @[ "Graphdb: NG structure" ]
+  // test @[ "Graphdb: bfsvtab" ]
+// @[ "Graphdb: bfsvtab" ]()
+// test @[ "Graphdb: NG structure" ]
 // test @[ "Graphdb: {update, upsert, upmerge} {node, edge} atrs" ]
 // test @[ "Graphdb: deleting edges and nodes" ]
 // test @[ "Graphdb: insert_node()" ]

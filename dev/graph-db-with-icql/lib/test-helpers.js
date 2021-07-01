@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, I, L, PATH, SQL, X, badge, debug, echo, help, info, isa, jr, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, I, L, PATH, SQL, X, badge, debug, echo, help, info, isa, jr, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -37,6 +37,8 @@
   jr = JSON.stringify;
 
   PATH = require('path');
+
+  FS = require('fs');
 
   //-----------------------------------------------------------------------------------------------------------
   this.insert_arithmetic_edges = function(gdb, nr_max) {
@@ -138,6 +140,7 @@
     gdb.dba.pragma(SQL`foreign_keys = off;`);
     gdb.dba.execute(SQL`drop index if exists id_idx`);
     gdb.dba.execute(SQL`drop index if exists source_idx`);
+    gdb.dba.execute(SQL`drop index if exists phrase_ref_hollerith_index`);
     // gdb.dba.execute SQL"drop index if exists sqlite_autoindex_nodes_1"
     gdb.dba.execute(SQL`drop index if exists target_idx`);
     gdb.dba.execute(SQL`drop table if exists edges`);
@@ -145,6 +148,21 @@
     gdb.dba.execute(SQL`drop table if exists edges_g;`);
     gdb.dba.pragma(SQL`foreign_keys = on;`);
     gdb.init_db();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.try_to_remove_file = function(path) {
+    var error;
+    try {
+      FS.unlinkSync(path);
+    } catch (error1) {
+      error = error1;
+      if (error.code === 'ENOENT') {
+        return;
+      }
+      throw error;
+    }
     return null;
   };
 
