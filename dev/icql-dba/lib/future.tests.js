@@ -1993,7 +1993,7 @@ e6    text );`);
     ({Dba} = require('../../../apps/icql-dba'));
     schema = 'main';
     dba = new Dba();
-    extension_path = PATH.resolve(PATH.join(__dirname, '..', 'vsv.so'));
+    extension_path = PATH.resolve(PATH.join(__dirname, '../../../assets/sqlite-extensions/vsv.so'));
     csv_path = H.get_cfg().csv.holes;
     work_path = (await H.procure_file({
       path: csv_path,
