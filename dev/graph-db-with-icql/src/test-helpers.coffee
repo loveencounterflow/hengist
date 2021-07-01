@@ -26,6 +26,7 @@ types                     = new ( require 'intertype' ).Intertype
 { SQL, I, L, X, }         = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
 jr                        = JSON.stringify
 PATH                      = require 'path'
+FS                        = require 'fs'
 
 
 
@@ -77,6 +78,7 @@ PATH                      = require 'path'
   gdb.dba.pragma SQL"foreign_keys = off;"
   gdb.dba.execute SQL"drop index if exists id_idx"
   gdb.dba.execute SQL"drop index if exists source_idx"
+  gdb.dba.execute SQL"drop index if exists phrase_ref_hollerith_index"
   # gdb.dba.execute SQL"drop index if exists sqlite_autoindex_nodes_1"
   gdb.dba.execute SQL"drop index if exists target_idx"
   gdb.dba.execute SQL"drop table if exists edges"
@@ -86,3 +88,9 @@ PATH                      = require 'path'
   gdb.init_db()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@try_to_remove_file = ( path ) ->
+  try FS.unlinkSync path catch error
+    return if error.code is 'ENOENT'
+    throw error
+  return null
