@@ -260,4 +260,13 @@ DATOM                     = require 'datom'
     warn "^4341^ skipping DB file creation (#{work_path} already exists)"
   return { template_path, work_path, }
 
+#-----------------------------------------------------------------------------------------------------------
+@procure_file = ( cfg ) ->
+  { path
+    name  }     = cfg
+  @ensure_file_exists path
+  work_path     = @resolve_path PATH.join 'data/icql', name
+  await @copy_over path, work_path
+  return work_path
+
 
