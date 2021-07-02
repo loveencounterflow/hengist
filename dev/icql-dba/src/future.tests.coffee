@@ -1395,6 +1395,16 @@ jp                        = JSON.parse
   #.........................................................................................................
   await do =>
     #.......................................................................................................
+    mutations_allowed = 0
+    dba.function 'mutations_allowed', { deterministic: false, varargs: true, }, ( value = null ) ->
+      # debug '^mutations_allowed@334^', { value, }
+      ### TAINT consider to use `validate()` ###
+      throw new Error "^3446^ expected null, 0 or 1, got #{rpr value}" unless value in [ null, 0, 1, ]
+      return mutations_allowed unless value?
+      return mutations_allowed = value
+      # if value?
+      #   mutations_allowed = if val
+    #.......................................................................................................
     dba.execute SQL"""
       create table multiples (
         n         integer unique not null primary key,
@@ -1409,24 +1419,46 @@ jp                        = JSON.parse
       create index multiples_idx_multiple_idx on multiples_idx ( multiple );
       -- ...................................................................................................
       create trigger multiple_after_insert after insert on multiples begin
+        select mutations_allowed( true );
         insert into multiples_idx( n, idx, multiple )
           select new.n, j.key, j.value from json_each( new.multiples ) as j;
+        select mutations_allowed( false );
         end;
       -- ...................................................................................................
       create trigger multiple_after_delete after delete on multiples begin
+        select mutations_allowed( true );
         delete from multiples_idx where n = old.n;
+        select mutations_allowed( false );
         end;
       -- ...................................................................................................
       create trigger multiple_after_update after update on multiples begin
+        select mutations_allowed( true );
         delete from multiples_idx where n = old.n;
         insert into multiples_idx( n, idx, multiple )
           select new.n, j.key, j.value from json_each( new.multiples ) as j;
+        select mutations_allowed( false );
+        end;
+      -- ...................................................................................................
+      create trigger multiples_idx_before_insert before insert on multiples_idx begin
+        select raise( abort, '^376^ mutations of multiples_idx not allowed' )
+          where not ( select mutations_allowed() );
+        end;
+      -- ...................................................................................................
+      create trigger multiples_idx_before_delete before delete on multiples_idx begin
+        select raise( abort, '^376^ mutations of multiples_idx not allowed' )
+          where not ( select mutations_allowed() );
+        end;
+      -- ...................................................................................................
+      create trigger multiples_idx_before_update before update on multiples_idx begin
+        select raise( abort, '^376^ mutations of multiples_idx not allowed' )
+          where not ( select mutations_allowed() );
         end;
       """
     #.......................................................................................................
-    for n in [ 1 .. 3 ]
+    for n in [ 1 .. 5 ]
       multiples = jr ( n * k for k in [ 0 .. 9 ] )
       dba.run SQL"insert into multiples values ( $n, $multiples )", { n, multiples, }
+    dba.execute SQL"delete from multiples where n = 4;"
     for row from dba.query SQL"select * from multiples;"
       info '^5554^', row
     for row from dba.query SQL"select * from multiples_idx;"
@@ -1575,9 +1607,9 @@ jp                        = JSON.parse
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # test @[ "DBA: sqlean vsv extension" ]
-  # test @[ "DBA: indexing JSON lists (de-constructing method)" ]
+  test @[ "DBA: indexing JSON lists (de-constructing method)" ]
   # test @[ "DBA: indexing JSON lists (constructing method)" ]
-  test @[ "DBA: User-Defined Window Function" ]
+  # test @[ "DBA: User-Defined Window Function" ]
   # test @[ "DBA: VNRs" ], { timeout: 5e3, }
   # test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
   # test @[ "DBA: open() file DB in schema main" ]
