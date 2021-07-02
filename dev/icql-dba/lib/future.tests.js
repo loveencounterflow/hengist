@@ -2044,7 +2044,25 @@ e6    text );`);
     dba.load_extension(PATH.resolve(PATH.join(__dirname, '../../../assets/sqlite-extensions/json1.so')));
     ({I, L, X} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
     await (() => {      //.........................................................................................................
-      var i, k, multiples, n, ref, ref1, row;
+      var i, k, multiples, mutations_allowed, n, ref, ref1, row;
+      //.......................................................................................................
+      mutations_allowed = 0;
+      dba.function('mutations_allowed', {
+        deterministic: false,
+        varargs: true
+      }, function(value = null) {
+        if (value !== null && value !== 0 && value !== 1) {
+          // debug '^mutations_allowed@334^', { value, }
+          /* TAINT consider to use `validate()` */
+          throw new Error(`^3446^ expected null, 0 or 1, got ${rpr(value)}`);
+        }
+        if (value == null) {
+          return mutations_allowed;
+        }
+        return mutations_allowed = value;
+      });
+      // if value?
+      //   mutations_allowed = if val
       //.......................................................................................................
       dba.execute(SQL`create table multiples (
   n         integer unique not null primary key,
@@ -2059,21 +2077,42 @@ create table multiples_idx (
 create index multiples_idx_multiple_idx on multiples_idx ( multiple );
 -- ...................................................................................................
 create trigger multiple_after_insert after insert on multiples begin
+  select mutations_allowed( true );
   insert into multiples_idx( n, idx, multiple )
     select new.n, j.key, j.value from json_each( new.multiples ) as j;
+  select mutations_allowed( false );
   end;
 -- ...................................................................................................
 create trigger multiple_after_delete after delete on multiples begin
+  select mutations_allowed( true );
   delete from multiples_idx where n = old.n;
+  select mutations_allowed( false );
   end;
 -- ...................................................................................................
 create trigger multiple_after_update after update on multiples begin
+  select mutations_allowed( true );
   delete from multiples_idx where n = old.n;
   insert into multiples_idx( n, idx, multiple )
     select new.n, j.key, j.value from json_each( new.multiples ) as j;
+  select mutations_allowed( false );
+  end;
+-- ...................................................................................................
+create trigger multiples_idx_before_insert before insert on multiples_idx begin
+  select raise( abort, '^376^ mutations of multiples_idx not allowed' )
+    where not ( select mutations_allowed() );
+  end;
+-- ...................................................................................................
+create trigger multiples_idx_before_delete before delete on multiples_idx begin
+  select raise( abort, '^376^ mutations of multiples_idx not allowed' )
+    where not ( select mutations_allowed() );
+  end;
+-- ...................................................................................................
+create trigger multiples_idx_before_update before update on multiples_idx begin
+  select raise( abort, '^376^ mutations of multiples_idx not allowed' )
+    where not ( select mutations_allowed() );
   end;`);
 //.......................................................................................................
-      for (n = i = 1; i <= 3; n = ++i) {
+      for (n = i = 1; i <= 5; n = ++i) {
         multiples = jr((function() {
           var j, results;
           results = [];
@@ -2084,6 +2123,7 @@ create trigger multiple_after_update after update on multiples begin
         })());
         dba.run(SQL`insert into multiples values ( $n, $multiples )`, {n, multiples});
       }
+      dba.execute(SQL`delete from multiples where n = 4;`);
       ref = dba.query(SQL`select * from multiples;`);
       for (row of ref) {
         info('^5554^', row);
@@ -2263,13 +2303,13 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     (() => {
       // test @, { timeout: 10e3, }
       // test @[ "DBA: sqlean vsv extension" ]
-      // test @[ "DBA: indexing JSON lists (de-constructing method)" ]
-      // test @[ "DBA: indexing JSON lists (constructing method)" ]
-      return test(this["DBA: User-Defined Window Function"]);
+      return test(this["DBA: indexing JSON lists (de-constructing method)"]);
     })();
   }
 
-  // test @[ "DBA: VNRs" ], { timeout: 5e3, }
+  // test @[ "DBA: indexing JSON lists (constructing method)" ]
+// test @[ "DBA: User-Defined Window Function" ]
+// test @[ "DBA: VNRs" ], { timeout: 5e3, }
 // test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
 // test @[ "DBA: open() file DB in schema main" ]
 // test @[ "DBA: writing while reading 2" ]
