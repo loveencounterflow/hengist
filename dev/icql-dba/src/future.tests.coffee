@@ -26,7 +26,8 @@ types                     = new ( require 'intertype' ).Intertype
 on_process_exit           = require 'exit-hook'
 sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, dts * 1000
 SQL                       = String.raw
-
+jr                        = JSON.stringify
+jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open()" ] = ( T, done ) ->
@@ -1382,11 +1383,181 @@ SQL                       = String.raw
   #.........................................................................................................
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: indexing JSON lists (de-constructing method)" ] = ( T, done ) ->
+  ### see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md ###
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  schema            = 'main'
+  dba               = new Dba()
+  dba.load_extension PATH.resolve PATH.join __dirname, '../../../assets/sqlite-extensions/json1.so'
+  { I, L, X, }      = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
+  #.........................................................................................................
+  await do =>
+    #.......................................................................................................
+    dba.execute SQL"""
+      create table multiples (
+        n         integer unique not null primary key,
+        multiples json not null );
+      -- ...................................................................................................
+      -- ### see https://sqlite.org/forum/forumpost/9f06fedaa5 ###
+      create table multiples_idx (
+        n         integer not null,
+        idx       integer not null,
+        multiple  integer not null,
+        primary key ( n, idx ) );
+      create index multiples_idx_multiple_idx on multiples_idx ( multiple );
+      -- ...................................................................................................
+      create trigger multiple_after_insert after insert on multiples begin
+        insert into multiples_idx( n, idx, multiple )
+          select new.n, j.key, j.value from json_each( new.multiples ) as j;
+        end;
+      -- ...................................................................................................
+      create trigger multiple_after_delete after delete on multiples begin
+        delete from multiples_idx where n = old.n;
+        end;
+      -- ...................................................................................................
+      create trigger multiple_after_update after update on multiples begin
+        delete from multiples_idx where n = old.n;
+        insert into multiples_idx( n, idx, multiple )
+          select new.n, j.key, j.value from json_each( new.multiples ) as j;
+        end;
+      """
+    #.......................................................................................................
+    for n in [ 1 .. 3 ]
+      multiples = jr ( n * k for k in [ 0 .. 9 ] )
+      dba.run SQL"insert into multiples values ( $n, $multiples )", { n, multiples, }
+    for row from dba.query SQL"select * from multiples;"
+      info '^5554^', row
+    for row from dba.query SQL"select * from multiples_idx;"
+      info '^5554^', row
+    #.......................................................................................................
+    console.table dba.list dba.query SQL"explain query plan select * from multiples;"
+    console.table dba.list dba.query SQL"explain query plan select * from multiples_idx where multiple > 3;"
+    # console.table dba.list dba.query SQL"explain query plan select * from multiples where json_array_at( multiples, 3 ) > 10;"
+    #.......................................................................................................
+    # dba.execute SQL"create index multiples_array_idx on json_array_at( multiples, 3 );"
+    # console.table dba.list dba.query SQL"explain query plan select * from multiples where json_array_at( multiples, 3 ) > 10;"
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: indexing JSON lists (constructing method)" ] = ( T, done ) ->
+  ### see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md ###
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  schema            = 'main'
+  dba               = new Dba()
+  dba.load_extension PATH.resolve PATH.join __dirname, '../../../assets/sqlite-extensions/json1.so'
+  # dba.sqlt.unsafeMode true
+  { I, L, X, }      = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
+  #.........................................................................................................
+  await do =>
+    #.......................................................................................................
+    dba.execute SQL"""
+      create view multiples as select distinct
+          n                                     as n,
+          json_group_array( multiple ) over w   as multiples
+        from multiples_idx
+        window w as ( partition by n order by idx range between unbounded preceding and unbounded following )
+        order by n;
+      -- ...................................................................................................
+      -- ### see https://sqlite.org/forum/forumpost/9f06fedaa5 ###
+      create table multiples_idx (
+        n         integer not null,
+        idx       integer not null,
+        multiple  integer not null,
+        primary key ( n, idx ) );
+      create index multiples_idx_multiple_idx on multiples_idx ( multiple );
+      """
+    #.......................................................................................................
+    for n in [ 1 .. 3 ]
+      for idx in [ 0 .. 9 ]
+        multiple = n * idx
+        continue if multiple > 10
+        dba.run SQL"""insert into multiples_idx ( n, idx, multiple )
+          values ( $n, $idx, $multiple )""", { n, idx, multiple, }
+    for row from dba.query SQL"select * from multiples;"
+      info '^5554^', row
+    for row from dba.query SQL"select * from multiples_idx;"
+      info '^5554^', row
+    #.......................................................................................................
+    for row from dba.query SQL"""select * from multiples;"""
+      info '^5554^', row
+    #.......................................................................................................
+    console.table dba.list dba.query SQL"explain query plan select * from multiples;"
+    console.table dba.list dba.query SQL"explain query plan select * from multiples_idx where multiple > 3;"
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: User-Defined Window Function" ] = ( T, done ) ->
+  ### see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md ###
+  T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  schema            = 'main'
+  dba               = new Dba()
+  dba.load_extension PATH.resolve PATH.join __dirname, '../../../assets/sqlite-extensions/json1.so'
+  # dba.sqlt.unsafeMode true
+  { I, L, X, }      = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
+  #.........................................................................................................
+  dba.aggregate 'udf_json_array_agg',
+    varargs:        false
+    deterministic:  true
+    start:          -> [] # must be new object for each partition, therefore use function, not constant
+    step:           ( total, element ) ->
+      urge '^step@564^', { total, element, }
+      total.push element # total = [ total..., element, ]
+      return total
+    inverse:        ( total, dropped ) ->
+      urge '^inverse@564^', { total, dropped, }
+      total.pop()
+      return total
+    result:         ( total ) -> jr total
+  #.........................................................................................................
+  await do =>
+    #.......................................................................................................
+    dba.execute SQL"""
+      create view multiples as select distinct
+          n                                               as n,
+          udf_json_array_agg( multiple ) over w           as multiples
+        from multiples_idx
+        window w as ( partition by n order by idx range between unbounded preceding and unbounded following )
+        order by n;
+      -- ...................................................................................................
+      create table multiples_idx (
+        n         integer not null,
+        idx       integer not null,
+        multiple  integer not null,
+        primary key ( n, idx ) );
+      create index multiples_idx_multiple_idx on multiples_idx ( multiple );
+      """
+    #.......................................................................................................
+    for n in [ 1 .. 3 ]
+      for idx in [ 0 .. 9 ]
+        multiple = n * idx
+        continue if multiple > 10
+        dba.run SQL"""insert into multiples_idx ( n, idx, multiple )
+          values ( $n, $idx, $multiple )""", { n, idx, multiple, }
+    for row from dba.query SQL"select * from multiples;"
+      info '^5554^', row
+    for row from dba.query SQL"select * from multiples_idx;"
+      info '^5554^', row
+    #.......................................................................................................
+    console.table dba.list dba.query SQL"""select * from multiples;"""
+    console.table dba.list dba.query SQL"explain query plan select * from multiples;"
+    console.table dba.list dba.query SQL"explain query plan select * from multiples_idx where multiple > 3;"
+  #.........................................................................................................
+  done()
+
 
 ############################################################################################################
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
-  test @[ "DBA: sqlean vsv extension" ]
+  # test @[ "DBA: sqlean vsv extension" ]
+  # test @[ "DBA: indexing JSON lists (de-constructing method)" ]
+  # test @[ "DBA: indexing JSON lists (constructing method)" ]
+  test @[ "DBA: User-Defined Window Function" ]
   # test @[ "DBA: VNRs" ], { timeout: 5e3, }
   # test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
   # test @[ "DBA: open() file DB in schema main" ]
