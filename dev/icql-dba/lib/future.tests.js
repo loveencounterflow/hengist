@@ -2116,7 +2116,7 @@ create trigger multiple_after_update after update on multiples begin
     // dba.sqlt.unsafeMode true
     ({I, L, X} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
     await (() => {      //.........................................................................................................
-      var i, idx, j, multiple, n, ref, ref1, ref2, row;
+      var i, idx, j, multiple, n, ref, ref1, row;
       //.......................................................................................................
       dba.execute(SQL`create view multiples as select distinct
     n                                     as n,
@@ -2143,21 +2143,18 @@ create index multiples_idx_multiple_idx on multiples_idx ( multiple );`);
 values ( $n, $idx, $multiple )`, {n, idx, multiple});
         }
       }
-      ref = dba.query(SQL`select * from multiples;`);
+      ref = dba.query(SQL`select * from multiples_idx;`);
+      //.......................................................................................................
       for (row of ref) {
         info('^5554^', row);
       }
-      ref1 = dba.query(SQL`select * from multiples_idx;`);
+      ref1 = dba.query(SQL`select * from multiples;`);
       for (row of ref1) {
-        info('^5554^', row);
-      }
-      ref2 = dba.query(SQL`select * from multiples;`);
-      //.......................................................................................................
-      for (row of ref2) {
         info('^5554^', row);
       }
       //.......................................................................................................
       console.table(dba.list(dba.query(SQL`explain query plan select * from multiples;`)));
+      console.table(dba.list(dba.query(SQL`explain query plan select * from multiples_idx where idx > 3;`)));
       return console.table(dba.list(dba.query(SQL`explain query plan select * from multiples_idx where multiple > 3;`)));
     })();
     //.........................................................................................................
@@ -2211,7 +2208,23 @@ create table multiples_idx (
   idx       integer not null,
   multiple  integer not null,
   primary key ( n, idx ) );
-create index multiples_idx_multiple_idx on multiples_idx ( multiple );`);
+create index multiples_idx_idx_idx on multiples_idx ( idx );
+create index multiples_idx_multiple_idx on multiples_idx ( multiple );
+-- ...................................................................................................
+create trigger multiple_instead_insert instead of insert on multiples begin
+  insert into multiples_idx( n, idx, multiple )
+    select new.n, j.key, j.value from json_each( new.multiples ) as j;
+  end;
+-- ...................................................................................................
+create trigger multiple_instead_delete instead of delete on multiples begin
+  delete from multiples_idx where n = old.n;
+  end;
+-- ...................................................................................................
+create trigger multiple_instead_update instead of update on multiples begin
+  delete from multiples_idx where n = old.n;
+  insert into multiples_idx( n, idx, multiple )
+    select new.n, j.key, j.value from json_each( new.multiples ) as j;
+  end;`);
 //.......................................................................................................
       for (n = i = 1; i <= 3; n = ++i) {
         for (idx = j = 0; j <= 9; idx = ++j) {
@@ -2223,7 +2236,11 @@ create index multiples_idx_multiple_idx on multiples_idx ( multiple );`);
 values ( $n, $idx, $multiple )`, {n, idx, multiple});
         }
       }
+      //.......................................................................................................
+      dba.execute(SQL`insert into multiples ( n, multiples ) values ( 5, '[0,5,10,15,20]' );`);
       ref = dba.query(SQL`select * from multiples;`);
+      // dba.execute SQL"delete from multiples_idx where n = 2 and idx = 1;"
+      //.......................................................................................................
       for (row of ref) {
         info('^5554^', row);
       }
@@ -2234,6 +2251,7 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
       //.......................................................................................................
       console.table(dba.list(dba.query(SQL`select * from multiples;`)));
       console.table(dba.list(dba.query(SQL`explain query plan select * from multiples;`)));
+      console.table(dba.list(dba.query(SQL`explain query plan select * from multiples_idx where idx > 3;`)));
       return console.table(dba.list(dba.query(SQL`explain query plan select * from multiples_idx where multiple > 3;`)));
     })();
     //.........................................................................................................
