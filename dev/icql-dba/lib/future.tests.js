@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, help, info, isa, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
+  var CND, H, PATH, SQL, badge, debug, echo, help, info, isa, jp, jr, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
     indexOf = [].indexOf,
     modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
@@ -46,6 +46,10 @@
   };
 
   SQL = String.raw;
+
+  jr = JSON.stringify;
+
+  jp = JSON.parse;
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open()"] = async function(T, done) {
@@ -666,7 +670,7 @@ order by wbfs;`;
     export_path = H.nonexistant_path_from_ref('import-csv');
     await (() => {      //.........................................................................................................
       /* Opening a RAM DB from file */
-      var _extra, clauses, columns, count, dba, digit, i, idx, import_path, j, k, l, len, pattern, position, ref, results, row, schema, seen_chrs, sql, t0, t1, transform, with_clauses;
+      var _extra, clauses, columns, count, dba, digit, i, idx, import_path, j, l, len, m, pattern, position, ref, results, row, schema, seen_chrs, sql, t0, t1, transform, with_clauses;
       dba = new Dba();
       import_path = PATH.resolve(PATH.join(__dirname, '../../../../../io/mingkwai-rack/jizura-datasources/data/flat-files/shape/shape-fourcorner-wikipedia.txt'));
       // import_path       = PATH.resolve PATH.join __dirname, '../../../assets/icql/ncrglyphwbf.tsv'
@@ -737,7 +741,7 @@ order by wbfs;`;
       clauses = [];
       with_clauses = [];
       for (idx = j = 0; j <= 3; idx = ++j) {
-        for (digit = k = 0; k <= 9; digit = ++k) {
+        for (digit = l = 0; l <= 9; digit = ++l) {
           position = idx + 1;
           pattern = ('_'.repeat(idx)) + `${digit}` + ('_'.repeat(3 - idx));
           with_clauses.push(`v${position}${digit} as ( select count(*) as c from fc.main where fc4 like '${pattern}' )`);
@@ -745,7 +749,7 @@ order by wbfs;`;
       }
       clauses.push(`with ${with_clauses.join(',\n')}\n`);
       clauses.push(`select null as c, null as p1, null as p2, null as p3, null as p4 where false union all`);
-      for (digit = l = 0; l <= 9; digit = ++l) {
+      for (digit = m = 0; m <= 9; digit = ++m) {
         clauses.push(`select ${digit}, v1${digit}.c, v2${digit}.c, v3${digit}.c, v4${digit}.c from v1${digit}, v2${digit}, v3${digit}, v4${digit} union all`);
       }
       clauses.push(`select null, null, null, null, null where false;`);
@@ -2029,11 +2033,221 @@ e6    text );`);
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: indexing JSON lists (de-constructing method)"] = async function(T, done) {
+    var Dba, I, L, X, dba, schema;
+    /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    schema = 'main';
+    dba = new Dba();
+    dba.load_extension(PATH.resolve(PATH.join(__dirname, '../../../assets/sqlite-extensions/json1.so')));
+    ({I, L, X} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
+    await (() => {      //.........................................................................................................
+      var i, k, multiples, n, ref, ref1, row;
+      //.......................................................................................................
+      dba.execute(SQL`create table multiples (
+  n         integer unique not null primary key,
+  multiples json not null );
+-- ...................................................................................................
+-- ### see https://sqlite.org/forum/forumpost/9f06fedaa5 ###
+create table multiples_idx (
+  n         integer not null,
+  idx       integer not null,
+  multiple  integer not null,
+  primary key ( n, idx ) );
+create index multiples_idx_multiple_idx on multiples_idx ( multiple );
+-- ...................................................................................................
+create trigger multiple_after_insert after insert on multiples begin
+  insert into multiples_idx( n, idx, multiple )
+    select new.n, j.key, j.value from json_each( new.multiples ) as j;
+  end;
+-- ...................................................................................................
+create trigger multiple_after_delete after delete on multiples begin
+  delete from multiples_idx where n = old.n;
+  end;
+-- ...................................................................................................
+create trigger multiple_after_update after update on multiples begin
+  delete from multiples_idx where n = old.n;
+  insert into multiples_idx( n, idx, multiple )
+    select new.n, j.key, j.value from json_each( new.multiples ) as j;
+  end;`);
+//.......................................................................................................
+      for (n = i = 1; i <= 3; n = ++i) {
+        multiples = jr((function() {
+          var j, results;
+          results = [];
+          for (k = j = 0; j <= 9; k = ++j) {
+            results.push(n * k);
+          }
+          return results;
+        })());
+        dba.run(SQL`insert into multiples values ( $n, $multiples )`, {n, multiples});
+      }
+      ref = dba.query(SQL`select * from multiples;`);
+      for (row of ref) {
+        info('^5554^', row);
+      }
+      ref1 = dba.query(SQL`select * from multiples_idx;`);
+      for (row of ref1) {
+        info('^5554^', row);
+      }
+      //.......................................................................................................
+      console.table(dba.list(dba.query(SQL`explain query plan select * from multiples;`)));
+      return console.table(dba.list(dba.query(SQL`explain query plan select * from multiples_idx where multiple > 3;`)));
+    })();
+    // console.table dba.list dba.query SQL"explain query plan select * from multiples where json_array_at( multiples, 3 ) > 10;"
+    //.......................................................................................................
+    // dba.execute SQL"create index multiples_array_idx on json_array_at( multiples, 3 );"
+    // console.table dba.list dba.query SQL"explain query plan select * from multiples where json_array_at( multiples, 3 ) > 10;"
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: indexing JSON lists (constructing method)"] = async function(T, done) {
+    var Dba, I, L, X, dba, schema;
+    /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    schema = 'main';
+    dba = new Dba();
+    dba.load_extension(PATH.resolve(PATH.join(__dirname, '../../../assets/sqlite-extensions/json1.so')));
+    // dba.sqlt.unsafeMode true
+    ({I, L, X} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
+    await (() => {      //.........................................................................................................
+      var i, idx, j, multiple, n, ref, ref1, ref2, row;
+      //.......................................................................................................
+      dba.execute(SQL`create view multiples as select distinct
+    n                                     as n,
+    json_group_array( multiple ) over w   as multiples
+  from multiples_idx
+  window w as ( partition by n order by idx range between unbounded preceding and unbounded following )
+  order by n;
+-- ...................................................................................................
+-- ### see https://sqlite.org/forum/forumpost/9f06fedaa5 ###
+create table multiples_idx (
+  n         integer not null,
+  idx       integer not null,
+  multiple  integer not null,
+  primary key ( n, idx ) );
+create index multiples_idx_multiple_idx on multiples_idx ( multiple );`);
+//.......................................................................................................
+      for (n = i = 1; i <= 3; n = ++i) {
+        for (idx = j = 0; j <= 9; idx = ++j) {
+          multiple = n * idx;
+          if (multiple > 10) {
+            continue;
+          }
+          dba.run(SQL`insert into multiples_idx ( n, idx, multiple )
+values ( $n, $idx, $multiple )`, {n, idx, multiple});
+        }
+      }
+      ref = dba.query(SQL`select * from multiples;`);
+      for (row of ref) {
+        info('^5554^', row);
+      }
+      ref1 = dba.query(SQL`select * from multiples_idx;`);
+      for (row of ref1) {
+        info('^5554^', row);
+      }
+      ref2 = dba.query(SQL`select * from multiples;`);
+      //.......................................................................................................
+      for (row of ref2) {
+        info('^5554^', row);
+      }
+      //.......................................................................................................
+      console.table(dba.list(dba.query(SQL`explain query plan select * from multiples;`)));
+      return console.table(dba.list(dba.query(SQL`explain query plan select * from multiples_idx where multiple > 3;`)));
+    })();
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: User-Defined Window Function"] = async function(T, done) {
+    var Dba, I, L, X, dba, schema;
+    /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
+    T.halt_on_error();
+    ({Dba} = require('../../../apps/icql-dba'));
+    schema = 'main';
+    dba = new Dba();
+    dba.load_extension(PATH.resolve(PATH.join(__dirname, '../../../assets/sqlite-extensions/json1.so')));
+    // dba.sqlt.unsafeMode true
+    ({I, L, X} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
+    //.........................................................................................................
+    dba.aggregate('udf_json_array_agg', {
+      varargs: false,
+      deterministic: true,
+      start: function() { // must be new object for each partition, therefore use function, not constant
+        return [];
+      },
+      step: function(total, element) {
+        urge('^step@564^', {total, element});
+        total.push(element); // total = [ total..., element, ]
+        return total;
+      },
+      inverse: function(total, dropped) {
+        urge('^inverse@564^', {total, dropped});
+        total.pop();
+        return total;
+      },
+      result: function(total) {
+        return jr(total);
+      }
+    });
+    await (() => {      //.........................................................................................................
+      var i, idx, j, multiple, n, ref, ref1, row;
+      //.......................................................................................................
+      dba.execute(SQL`create view multiples as select distinct
+    n                                               as n,
+    udf_json_array_agg( multiple ) over w           as multiples
+  from multiples_idx
+  window w as ( partition by n order by idx range between unbounded preceding and unbounded following )
+  order by n;
+-- ...................................................................................................
+create table multiples_idx (
+  n         integer not null,
+  idx       integer not null,
+  multiple  integer not null,
+  primary key ( n, idx ) );
+create index multiples_idx_multiple_idx on multiples_idx ( multiple );`);
+//.......................................................................................................
+      for (n = i = 1; i <= 3; n = ++i) {
+        for (idx = j = 0; j <= 9; idx = ++j) {
+          multiple = n * idx;
+          if (multiple > 10) {
+            continue;
+          }
+          dba.run(SQL`insert into multiples_idx ( n, idx, multiple )
+values ( $n, $idx, $multiple )`, {n, idx, multiple});
+        }
+      }
+      ref = dba.query(SQL`select * from multiples;`);
+      for (row of ref) {
+        info('^5554^', row);
+      }
+      ref1 = dba.query(SQL`select * from multiples_idx;`);
+      for (row of ref1) {
+        info('^5554^', row);
+      }
+      //.......................................................................................................
+      console.table(dba.list(dba.query(SQL`select * from multiples;`)));
+      console.table(dba.list(dba.query(SQL`explain query plan select * from multiples;`)));
+      return console.table(dba.list(dba.query(SQL`explain query plan select * from multiples_idx where multiple > 3;`)));
+    })();
+    //.........................................................................................................
+    return done();
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      return test(this["DBA: sqlean vsv extension"]);
+      // test @[ "DBA: sqlean vsv extension" ]
+      // test @[ "DBA: indexing JSON lists (de-constructing method)" ]
+      // test @[ "DBA: indexing JSON lists (constructing method)" ]
+      return test(this["DBA: User-Defined Window Function"]);
     })();
   }
 
