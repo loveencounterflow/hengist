@@ -1536,14 +1536,8 @@ jp                        = JSON.parse
     varargs:        false
     deterministic:  true
     start:          -> [] # must be new object for each partition, therefore use function, not constant
-    step:           ( total, element ) ->
-      urge '^step@564^', { total, element, }
-      total.push element # total = [ total..., element, ]
-      return total
-    inverse:        ( total, dropped ) ->
-      urge '^inverse@564^', { total, dropped, }
-      total.pop()
-      return total
+    step:           ( total, element ) -> total.push element; total
+    inverse:        ( total, dropped ) -> total.pop(); total
     result:         ( total ) -> jr total
   #.........................................................................................................
   await do =>
