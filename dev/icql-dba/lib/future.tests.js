@@ -2220,12 +2220,10 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
         return [];
       },
       step: function(total, element) {
-        urge('^step@564^', {total, element});
-        total.push(element); // total = [ total..., element, ]
+        total.push(element);
         return total;
       },
       inverse: function(total, dropped) {
-        urge('^inverse@564^', {total, dropped});
         total.pop();
         return total;
       },
