@@ -1575,24 +1575,14 @@ jp                        = JSON.parse
       """
     #.......................................................................................................
     for n in [ 1 .. 3 ]
-      for idx in [ 0 .. 9 ]
-        multiple = n * idx
-        continue if multiple > 10
-        dba.run SQL"""insert into multiples_idx ( n, idx, multiple )
-          values ( $n, $idx, $multiple )""", { n, idx, multiple, }
-    #.......................................................................................................
+      multiples = jr ( n * idx for idx in [ 0 .. 9 ] )
+      dba.run SQL"""insert into multiples ( n, multiples ) values ( $n, $multiples )""", { n, multiples, }
     dba.execute SQL"insert into multiples ( n, multiples ) values ( 5, '[0,5,10,15,20]' );"
-    # dba.execute SQL"delete from multiples_idx where n = 2 and idx = 1;"
     #.......................................................................................................
-    for row from dba.query SQL"select * from multiples;"
-      info '^5554^', row
-    for row from dba.query SQL"select * from multiples_idx;"
-      info '^5554^', row
-    #.......................................................................................................
-    console.table dba.list dba.query SQL"""select * from multiples;"""
-    console.table dba.list dba.query SQL"explain query plan select * from multiples;"
-    console.table dba.list dba.query SQL"explain query plan select * from multiples_idx where idx > 3;"
-    console.table dba.list dba.query SQL"explain query plan select * from multiples_idx where multiple > 3;"
+    console.table dba.list dba.query SQL"select * from multiples_idx;"
+    console.table dba.list dba.query SQL"select * from multiples;"
+    T.eq ( dba.list dba.query SQL"select * from multiples_idx order by n, idx;" ), [ { n: 1, idx: 0, multiple: 0 }, { n: 1, idx: 1, multiple: 1 }, { n: 1, idx: 2, multiple: 2 }, { n: 1, idx: 3, multiple: 3 }, { n: 1, idx: 4, multiple: 4 }, { n: 1, idx: 5, multiple: 5 }, { n: 1, idx: 6, multiple: 6 }, { n: 1, idx: 7, multiple: 7 }, { n: 1, idx: 8, multiple: 8 }, { n: 1, idx: 9, multiple: 9 }, { n: 2, idx: 0, multiple: 0 }, { n: 2, idx: 1, multiple: 2 }, { n: 2, idx: 2, multiple: 4 }, { n: 2, idx: 3, multiple: 6 }, { n: 2, idx: 4, multiple: 8 }, { n: 2, idx: 5, multiple: 10 }, { n: 2, idx: 6, multiple: 12 }, { n: 2, idx: 7, multiple: 14 }, { n: 2, idx: 8, multiple: 16 }, { n: 2, idx: 9, multiple: 18 }, { n: 3, idx: 0, multiple: 0 }, { n: 3, idx: 1, multiple: 3 }, { n: 3, idx: 2, multiple: 6 }, { n: 3, idx: 3, multiple: 9 }, { n: 3, idx: 4, multiple: 12 }, { n: 3, idx: 5, multiple: 15 }, { n: 3, idx: 6, multiple: 18 }, { n: 3, idx: 7, multiple: 21 }, { n: 3, idx: 8, multiple: 24 }, { n: 3, idx: 9, multiple: 27 }, { n: 5, idx: 0, multiple: 0 }, { n: 5, idx: 1, multiple: 5 }, { n: 5, idx: 2, multiple: 10 }, { n: 5, idx: 3, multiple: 15 }, { n: 5, idx: 4, multiple: 20 } ]
+    T.eq ( dba.list dba.query SQL"select * from multiples order by n;" ), [ { n: 1, multiples: '[0,1,2,3,4,5,6,7,8,9]' }, { n: 2, multiples: '[0,2,4,6,8,10,12,14,16,18]' }, { n: 3, multiples: '[0,3,6,9,12,15,18,21,24,27]' }, { n: 5, multiples: '[0,5,10,15,20]' } ]
   #.........................................................................................................
   done()
 
@@ -1601,9 +1591,9 @@ jp                        = JSON.parse
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # test @[ "DBA: sqlean vsv extension" ]
-  test @[ "DBA: indexing JSON lists (de-constructing method)" ]
+  # test @[ "DBA: indexing JSON lists (de-constructing method)" ]
   # test @[ "DBA: indexing JSON lists (constructing method)" ]
-  # test @[ "DBA: User-Defined Window Function" ]
+  test @[ "DBA: User-Defined Window Function" ]
   # test @[ "DBA: VNRs" ], { timeout: 5e3, }
   # test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
   # test @[ "DBA: open() file DB in schema main" ]
