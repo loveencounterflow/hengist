@@ -1544,7 +1544,8 @@ jp                        = JSON.parse
   # dba.sqlt.unsafeMode true
   { I, L, X, }      = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
   #.........................................................................................................
-  dba.aggregate 'udf_json_array_agg',
+  dba.create_window_function
+    name:           'udf_json_array_agg'
     varargs:        false
     deterministic:  true
     start:          -> [] # must be new object for each partition, therefore use function, not constant
@@ -1659,14 +1660,38 @@ jp                        = JSON.parse
       # T.eq result, matcher
   #.........................................................................................................
   await do =>
-    # ### window function ###
-    # dba.aggregate 'udf_json_array_agg',
-    #   varargs:        false
-    #   deterministic:  true
-    #   start:          -> [] # must be new object for each partition, therefore use function, not constant
-    #   step:           ( total, element ) -> total.push element; total
-    #   inverse:        ( total, dropped ) -> total.pop(); total
-    #   result:         ( total ) -> jr total
+    ### window function ###
+    dba.create_window_function
+      name:           'array_agg'
+      varargs:        false
+      deterministic:  true
+      start:          -> [] # must be new object for each partition, therefore use function, not constant
+      step:           ( total, element ) -> total.push element; total
+      inverse:        ( total, dropped ) -> total.pop(); total
+      result:         ( total ) -> jr total
+    #.......................................................................................................
+    do =>
+      result  = dba.list dba.query SQL"select array_agg( t ) as names from nnt;"
+      console.table result
+      matcher = [ '["naught","one","one point five","two","two point three","three","three point one","four","five","six","seven","eight","nine","ten","eleven","twelve"]' ]
+      result  = ( row.names for row in result )
+      T.eq result, matcher
+    #.......................................................................................................
+    do =>
+      result  = dba.list dba.query SQL"""
+        select distinct
+            array_agg( t ) over w as names
+          from nnt
+          window w as (
+            partition by substring( t, 1, 1 )
+            order by t
+            range between unbounded preceding and unbounded following
+            );"""
+      console.table result
+      matcher = [ '["eight","eleven"]', '["five","four"]', '["naught","nine"]', '["one","one point five"]', '["seven","six"]', '["ten","three","three point one","twelve","two","two point three"]' ]
+      result  = ( row.names for row in result )
+      debug '^878^', result
+      T.eq result, matcher
   #.........................................................................................................
   await do =>
     ### table-valued function ###
