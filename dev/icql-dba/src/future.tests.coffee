@@ -1695,6 +1695,41 @@ jp                        = JSON.parse
   #.........................................................................................................
   await do =>
     ### table-valued function ###
+    dba.create_table_function
+      name:         're_matches'
+      columns:      [ 'match', 'capture', ]
+      parameters:   [ 'text', 'pattern', ]
+      rows: ( text, pattern ) ->
+        regex = new RegExp pattern, 'g'
+        while ( match = regex.exec text )?
+          yield [ match[ 0 ], match[ 1 ], ]
+        return null
+    await do =>
+      result  = dba.list dba.query SQL"""
+        select
+            *
+          from
+            nnt,
+            re_matches( t, '^.*([aeiou].e).*$' ) as rx
+          order by rx.match;"""
+      console.table result
+      matcher = [ 'eleven:eve', 'five:ive', 'nine:ine', 'one:one', 'one point five:ive', 'seven:eve', 'three point one:one' ]
+      result  = ( "#{row.t}:#{row.capture}" for row in result )
+      debug '^984^', result
+      T.eq result, matcher
+    await do =>
+      result  = dba.list dba.query SQL"""
+        select
+            *
+          from
+            nnt,
+            re_matches( t, 'o' ) as rx
+          order by t;"""
+      console.table result
+      matcher = [ 'four', 'one', 'one point five', 'one point five', 'three point one', 'three point one', 'two', 'two point three', 'two point three' ]
+      result  = ( row.t for row in result )
+      debug '^984^', result
+      T.eq result, matcher
   #.........................................................................................................
   await do =>
     ### virtual table ###
