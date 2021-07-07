@@ -1601,19 +1601,19 @@ jp                        = JSON.parse
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: window functions etc." ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba } = require '../../../apps/icql-dba'
-  dba     = new Dba()
-  schema  = 'main'
+  { Dba }           = require '../../../apps/icql-dba'
+  dba               = new Dba()
+  schema            = 'main'
   { template_path
     work_path }     = await H.procure_db { size: 'nnt', ref: 'fn', }
   debug { template_path, work_path, }
   dba.open { path: work_path, schema, }
+  numbers           = dba.all_first_values dba.query SQL"select n from nnt order by n;"
   # console.table dba.list dba.walk_objects { schema, }
   #.........................................................................................................
   await do =>
     ### single-valued function ###
     dba.create_function name: 'square', deterministic: true, varargs: false, call: ( n ) -> n ** 2
-    numbers = dba.all_first_values dba.query SQL"select n from nnt order by n;"
     matcher = ( ( n * n ) for n in numbers )
     result  = dba.list dba.query SQL"select *, square( n ) as square from nnt order by square;"
     console.table result
@@ -1621,16 +1621,58 @@ jp                        = JSON.parse
     T.eq result, matcher
   #.........................................................................................................
   await do =>
+    ### aggregate function ###
+    dba.create_aggregate_function
+      name:           'product'
+      start:          -> null
+      step:           ( total, element ) -> debug '^4476^', { total, element, }; ( total ? 1 ) * element
+      # inverse:        ( total, dropped ) -> total.pop(); total
+      # result:         ( total ) -> total
+    # matcher = ( ( n * n ) for n in numbers )
+    #.......................................................................................................
+    do =>
+      result  = dba.list dba.query SQL"select product( n ) as product from nnt where n != 0;"
+      console.table result
+      matcher = [ 5122922112, ]
+      result  = ( row.product for row in result )
+      T.eq result, matcher
+    #.......................................................................................................
+    do =>
+      result  = dba.list dba.query SQL"select product( n ) as product from nnt where n > 100;"
+      console.table result
+      matcher = [ null, ]
+      result  = ( row.product for row in result )
+      T.eq result, matcher
+    #.......................................................................................................
+    do =>
+      try
+        dba.query SQL"select product( n ) over () as product from nnt;"
+      catch error
+        T.eq error.code, 'SQLITE_ERROR'
+        T.eq error.name, 'SqliteError'
+        T.eq error.message, 'product() may not be used as a window function'
+      unless error?
+        T.fail "expected error"
+      # console.table result
+      # matcher = [ null, ]
+      # result  = ( row.product for row in result )
+      # T.eq result, matcher
+  #.........................................................................................................
+  await do =>
+    # ### window function ###
+    # dba.aggregate 'udf_json_array_agg',
+    #   varargs:        false
+    #   deterministic:  true
+    #   start:          -> [] # must be new object for each partition, therefore use function, not constant
+    #   step:           ( total, element ) -> total.push element; total
+    #   inverse:        ( total, dropped ) -> total.pop(); total
+    #   result:         ( total ) -> jr total
+  #.........................................................................................................
+  await do =>
     ### table-valued function ###
   #.........................................................................................................
   await do =>
-    ### window function ###
-  #.........................................................................................................
-  await do =>
     ### virtual table ###
-  #.........................................................................................................
-  await do =>
-    ### aggregate function ###
   #.........................................................................................................
   done()
 
@@ -1641,8 +1683,8 @@ jp                        = JSON.parse
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
-  # test @[ "DBA: window functions etc." ]
+  # test @, { timeout: 10e3, }
+  test @[ "DBA: window functions etc." ]
   # test @[ "DBA: sqlean vsv extension" ]
   # test @[ "DBA: indexing JSON lists (de-constructing method)" ]
   # test @[ "DBA: indexing JSON lists (constructing method)" ]
