@@ -54,7 +54,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open()"] = async function(T, done) {
     var Dba, dba, schemas;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     dba = new Dba();
     schemas = {};
@@ -246,7 +246,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open() RAM DB"] = async function(T, done) {
     var Dba, dba, schemas;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     dba = new Dba();
     schemas = {};
@@ -313,7 +313,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: save() RAM DB"] = async function(T, done) {
     var Dba, matcher, ramdb_path;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     ramdb_path = null;
     matcher = null;
@@ -378,7 +378,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: export() RAM DB"] = async function(T, done) {
     var Dba, export_path, matcher, ramdb_path;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     ramdb_path = null;
     matcher = null;
@@ -433,7 +433,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: import() CSV"] = async function(T, done) {
     var Dba, export_path, matcher;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     // ramdb_path        = null
     matcher = null;
@@ -527,7 +527,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: import() TSV"] = async function(T, done) {
     var Dba, export_path, matcher;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     // ramdb_path        = null
     matcher = null;
@@ -583,7 +583,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["___ DBA: import() (big file)"] = async function(T, done) {
     var Dba, export_path, matcher;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     // ramdb_path        = null
     matcher = null;
@@ -663,7 +663,7 @@ order by wbfs;`;
   //-----------------------------------------------------------------------------------------------------------
   this["___ DBA: import() (four corner)"] = async function(T, done) {
     var Dba, export_path, matcher;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     // ramdb_path        = null
     matcher = null;
@@ -842,7 +842,7 @@ order by wbfs;`;
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: import TSV; cfg variants 2"] = async function(T, done) {
     var Dba, cfg, dba, import_path, is_first, matcher, schema, transform;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     matcher = null;
     import_path = H.get_cfg().tsv.micro;
@@ -1164,7 +1164,7 @@ order by wbfs;`;
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: VNRs"] = function(T, done) {
     var Dba, bcd, dba, hollerith_tng, matcher, name, schema, sql, to_hex, use_probe;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     matcher = null;
     //.........................................................................................................
@@ -1178,25 +1178,29 @@ order by wbfs;`;
     //.........................................................................................................
     /* TAINT by using a generated column with a UDF we are also forced to convert the VNR to JSON and
      then parse that value vefore Hollerith-encoding the value: */
-    dba.function('hollerith_encode', {
+    dba.create_function({
+      name: 'hollerith_encode',
       deterministic: true,
-      varargs: false
-    }, function(vnr_json) {
-      debug('^3338^', rpr(vnr_json));
-      return dba.as_hollerith(JSON.parse(vnr_json));
+      varargs: false,
+      call: function(vnr_json) {
+        debug('^3338^', rpr(vnr_json));
+        return dba.as_hollerith(JSON.parse(vnr_json));
+      }
     });
     //.........................................................................................................
-    dba.function('hollerith_classic', {
+    dba.create_function({
+      name: 'hollerith_classic',
       deterministic: true,
-      varargs: false
-    }, function(vnr_json) {
-      var vnr;
-      vnr = JSON.parse(vnr_json);
-      while (vnr.length < 5) {
-        vnr.push(0);
+      varargs: false,
+      call: function(vnr_json) {
+        var vnr;
+        vnr = JSON.parse(vnr_json);
+        while (vnr.length < 5) {
+          vnr.push(0);
+        }
+        debug('^3338^', rpr(vnr));
+        return dba.as_hollerith(vnr);
       }
-      debug('^3338^', rpr(vnr));
-      return dba.as_hollerith(vnr);
     });
     //.........................................................................................................
     hollerith_tng = function(vnr) {
@@ -1235,26 +1239,28 @@ order by wbfs;`;
       return R;
     };
     //.........................................................................................................
-    dba.function('hollerith_tng', {
-      deterministic: true,
-      varargs: false
-    }, function(vnr_json) {
-      return hollerith_tng(JSON.parse(vnr_json));
+    dba.create_function({
+      name: 'hollerith_tng',
+      call: function(vnr_json) {
+        return hollerith_tng(JSON.parse(vnr_json));
+      }
     });
-    dba.function('bcd', {
-      deterministic: true,
-      varargs: false
-    }, function(vnr_json) {
-      return bcd(JSON.parse(vnr_json));
+    dba.create_function({
+      name: 'bcd',
+      call: function(vnr_json) {
+        return bcd(JSON.parse(vnr_json));
+      }
     });
     //.........................................................................................................
     to_hex = function(blob) {
       return blob.toString('hex');
     };
-    dba.function('to_hex', {
+    dba.create_function({
+      name: 'to_hex',
       deterministic: true,
-      varargs: false
-    }, to_hex);
+      varargs: false,
+      call: to_hex
+    });
     //.........................................................................................................
     dba.execute(`create table v.main (
     nr                int   unique not null,
@@ -1580,7 +1586,7 @@ e6    text );`);
   this["DBA: virtual tables"] = function(T, done) {
     var Dba, FS, cfg, dba, export_path, is_first, matcher, path, schema, sql, transform;
     /* new in 7.4.0, see https://github.com/JoshuaWise/better-sqlite3/issues/581 */
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     FS = require('fs');
     //.........................................................................................................
@@ -1760,7 +1766,7 @@ e6    text );`);
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open() file DB in schema main"] = async function(T, done) {
     var Dba, schema, schemas, template_path, work_path;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     schemas = {};
     ({template_path, work_path} = (await H.procure_db({
@@ -1898,7 +1904,7 @@ e6    text );`);
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: writing while reading 1"] = async function(T, done) {
     var Dba, dba, new_bsqlt3, schema;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     schema = 'main';
     new_bsqlt3 = require('../../../apps/icql-dba/node_modules/better-sqlite3');
@@ -1944,7 +1950,7 @@ e6    text );`);
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: writing while reading 2"] = async function(T, done) {
     var Dba, dba, new_bsqlt3, schema;
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     schema = 'main';
     new_bsqlt3 = require('../../../apps/icql-dba/node_modules/better-sqlite3');
@@ -1993,7 +1999,7 @@ e6    text );`);
   this["DBA: sqlean vsv extension"] = async function(T, done) {
     var Dba, I, L, X, csv_path, dba, extension_path, schema, work_path;
     /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     schema = 'main';
     dba = new Dba();
@@ -2037,7 +2043,7 @@ e6    text );`);
   this["DBA: indexing JSON lists (de-constructing method)"] = async function(T, done) {
     var Dba, I, L, X, dba, schema;
     /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     schema = 'main';
     dba = new Dba();
@@ -2047,19 +2053,20 @@ e6    text );`);
       var i, k, multiples, mutations_allowed, n, ref, ref1, row;
       //.......................................................................................................
       mutations_allowed = 0;
-      dba.function('mutations_allowed', {
-        deterministic: false,
-        varargs: true
-      }, function(value = null) {
-        if (value !== null && value !== 0 && value !== 1) {
-          // debug '^mutations_allowed@334^', { value, }
-          /* TAINT consider to use `validate()` */
-          throw new Error(`^3446^ expected null, 0 or 1, got ${rpr(value)}`);
+      dba.create_function({
+        name: 'mutations_allowed',
+        varargs: true,
+        call: function(value = null) {
+          if (value !== null && value !== 0 && value !== 1) {
+            // debug '^mutations_allowed@334^', { value, }
+            /* TAINT consider to use `validate()` */
+            throw new Error(`^3446^ expected null, 0 or 1, got ${rpr(value)}`);
+          }
+          if (value == null) {
+            return mutations_allowed;
+          }
+          return mutations_allowed = value;
         }
-        if (value == null) {
-          return mutations_allowed;
-        }
-        return mutations_allowed = value;
       });
       // if value?
       //   mutations_allowed = if val
@@ -2148,7 +2155,7 @@ create trigger multiples_idx_before_update before update on multiples_idx begin
   this["DBA: indexing JSON lists (constructing method)"] = async function(T, done) {
     var Dba, I, L, X, dba, schema;
     /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     schema = 'main';
     dba = new Dba();
@@ -2205,7 +2212,7 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
   this["DBA: User-Defined Window Function"] = async function(T, done) {
     var Dba, I, L, X, dba, schema;
     /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
-    T.halt_on_error();
+    // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     schema = 'main';
     dba = new Dba();
@@ -2479,20 +2486,86 @@ create trigger multiple_instead_update instead of update on multiples begin
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: window functions etc."] = async function(T, done) {
+    var Dba, dba, schema, template_path, work_path;
+    // T.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
+    dba = new Dba();
+    schema = 'main';
+    ({template_path, work_path} = (await H.procure_db({
+      size: 'nnt',
+      ref: 'fn'
+    })));
+    debug({template_path, work_path});
+    dba.open({
+      path: work_path,
+      schema
+    });
+    await (() => {      // console.table dba.list dba.walk_objects { schema, }
+      //.........................................................................................................
+      var matcher, n, numbers, result, row;
+      /* single-valued function */
+      dba.create_function({
+        name: 'square',
+        deterministic: true,
+        varargs: false,
+        call: function(n) {
+          return n ** 2;
+        }
+      });
+      numbers = dba.all_first_values(dba.query(SQL`select n from nnt order by n;`));
+      matcher = (function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = numbers.length; i < len; i++) {
+          n = numbers[i];
+          results.push(n * n);
+        }
+        return results;
+      })();
+      result = dba.list(dba.query(SQL`select *, square( n ) as square from nnt order by square;`));
+      console.table(result);
+      result = (function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = result.length; i < len; i++) {
+          row = result[i];
+          results.push(row.square);
+        }
+        return results;
+      })();
+      return T.eq(result, matcher);
+    })();
+    await (() => {})();    //.........................................................................................................
+    await (() => {})();    /* table-valued function */
+    //.........................................................................................................
+    await (() => {})();    /* window function */
+    //.........................................................................................................
+    await (() => {})();    /* virtual table */
+    //.........................................................................................................
+    /* aggregate function */
+    //.........................................................................................................
+    return done();
+  };
+
   // use table valued functions to do joins over 2+ dba instances
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      // test @[ "DBA: sqlean vsv extension" ]
-      // test @[ "DBA: indexing JSON lists (de-constructing method)" ]
-      // test @[ "DBA: indexing JSON lists (constructing method)" ]
-      return test(this["DBA: User-Defined Window Function"]);
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // test @[ "DBA: VNRs" ], { timeout: 5e3, }
+  // test @[ "DBA: window functions etc." ]
+// test @[ "DBA: sqlean vsv extension" ]
+// test @[ "DBA: indexing JSON lists (de-constructing method)" ]
+// test @[ "DBA: indexing JSON lists (constructing method)" ]
+// test @[ "DBA: User-Defined Window Function" ]
+// test @[ "DBA: VNRs" ], { timeout: 5e3, }
 // test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
 // test @[ "DBA: open() file DB in schema main" ]
 // test @[ "DBA: writing while reading 2" ]

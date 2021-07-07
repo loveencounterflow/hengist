@@ -393,6 +393,7 @@
       },
       db: {
         templates: {
+          nnt: this.resolve_path('assets/icql/numbersandtexts.db'),
           micro: this.resolve_path('assets/icql/micro.db'),
           small: this.resolve_path('assets/icql/small-datamill.db'),
           big: this.resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.db')
