@@ -2220,7 +2220,8 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     // dba.sqlt.unsafeMode true
     ({I, L, X} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
     //.........................................................................................................
-    dba.aggregate('udf_json_array_agg', {
+    dba.create_window_function({
+      name: 'udf_json_array_agg',
       varargs: false,
       deterministic: true,
       start: function() { // must be new object for each partition, therefore use function, not constant
@@ -2599,20 +2600,73 @@ create trigger multiple_instead_update instead of update on multiples begin
         }
       })();
     })();
-    await (() => {})();    // console.table result
-    // matcher = [ null, ]
-    // result  = ( row.product for row in result )
-    // T.eq result, matcher
-    //.........................................................................................................
-    await (() => {})();    // ### window function ###
-    // dba.aggregate 'udf_json_array_agg',
-    //   varargs:        false
-    //   deterministic:  true
-    //   start:          -> [] # must be new object for each partition, therefore use function, not constant
-    //   step:           ( total, element ) -> total.push element; total
-    //   inverse:        ( total, dropped ) -> total.pop(); total
-    //   result:         ( total ) -> jr total
-    //.........................................................................................................
+    await (() => {      // console.table result
+      // matcher = [ null, ]
+      // result  = ( row.product for row in result )
+      // T.eq result, matcher
+      //.........................................................................................................
+      /* window function */
+      dba.create_window_function({
+        name: 'array_agg',
+        varargs: false,
+        deterministic: true,
+        start: function() { // must be new object for each partition, therefore use function, not constant
+          return [];
+        },
+        step: function(total, element) {
+          total.push(element);
+          return total;
+        },
+        inverse: function(total, dropped) {
+          total.pop();
+          return total;
+        },
+        result: function(total) {
+          return jr(total);
+        }
+      });
+      (() => {        //.......................................................................................................
+        var matcher, result, row;
+        result = dba.list(dba.query(SQL`select array_agg( t ) as names from nnt;`));
+        console.table(result);
+        matcher = ['["naught","one","one point five","two","two point three","three","three point one","four","five","six","seven","eight","nine","ten","eleven","twelve"]'];
+        result = (function() {
+          var i, len, results;
+          results = [];
+          for (i = 0, len = result.length; i < len; i++) {
+            row = result[i];
+            results.push(row.names);
+          }
+          return results;
+        })();
+        return T.eq(result, matcher);
+      })();
+      return (() => {        //.......................................................................................................
+        var matcher, result, row;
+        result = dba.list(dba.query(SQL`select distinct
+    array_agg( t ) over w as names
+  from nnt
+  window w as (
+    partition by substring( t, 1, 1 )
+    order by t
+    range between unbounded preceding and unbounded following
+    );`));
+        console.table(result);
+        matcher = ['["eight","eleven"]', '["five","four"]', '["naught","nine"]', '["one","one point five"]', '["seven","six"]', '["ten","three","three point one","twelve","two","two point three"]'];
+        result = (function() {
+          var i, len, results;
+          results = [];
+          for (i = 0, len = result.length; i < len; i++) {
+            row = result[i];
+            results.push(row.names);
+          }
+          return results;
+        })();
+        debug('^878^', result);
+        return T.eq(result, matcher);
+      })();
+    })();
+    await (() => {})();    //.........................................................................................................
     await (() => {})();    /* table-valued function */
     //.........................................................................................................
     /* virtual table */
