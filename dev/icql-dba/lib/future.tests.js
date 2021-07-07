@@ -2780,7 +2780,7 @@ create trigger multiple_instead_update instead of update on multiples begin
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: view with UDF"] = async function(T, done) {
-    var Dba, dba, matcher, n, numbers, result, schema, template_path, work_path;
+    var Dba, dba, matcher, numbers, result, row, schema, template_path, work_path;
     // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     dba = new Dba();
@@ -2803,20 +2803,21 @@ create trigger multiple_instead_update instead of update on multiples begin
         return n ** 2;
       }
     });
-    dba.execute(SQL`create view squares as select n, square( n ) from nnt order by n;`);
-    matcher = (function() {
+    dba.execute(SQL`create view squares as select n, square( n ) as square from nnt order by n;`);
+    matcher = [0, 1, 2.25, 4, 5.289999999999999, 9, 9.610000000000001, 16, 25, 36, 49, 64, 81, 100, 121, 144];
+    result = dba.list(dba.query(SQL`select * from squares;`));
+    console.table(result);
+    result = (function() {
       var i, len, results;
       results = [];
-      for (i = 0, len = numbers.length; i < len; i++) {
-        n = numbers[i];
-        results.push(n * n);
+      for (i = 0, len = result.length; i < len; i++) {
+        row = result[i];
+        results.push(row.square);
       }
       return results;
     })();
-    result = dba.list(dba.query(SQL`select * from squares;`));
-    console.table(result);
-    // result  = ( row.square for row in result )
-    // T.eq result, matcher
+    debug('^984^', result);
+    T.eq(result, matcher);
     //.........................................................................................................
     return done();
   };
@@ -2826,13 +2827,15 @@ create trigger multiple_instead_update instead of update on multiples begin
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      // test @[ "DBA: window functions etc." ]
-      return test(this["DBA: view with UDF"]);
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // test @[ "DBA: sqlean vsv extension" ]
+  // test @[ "DBA: window functions etc." ]
+// test @[ "DBA: view with UDF" ]
+// test @[ "DBA: sqlean vsv extension" ]
 // test @[ "DBA: indexing JSON lists (de-constructing method)" ]
 // test @[ "DBA: indexing JSON lists (constructing method)" ]
 // test @[ "DBA: User-Defined Window Function" ]
