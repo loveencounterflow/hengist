@@ -2488,7 +2488,7 @@ create trigger multiple_instead_update instead of update on multiples begin
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: window functions etc."] = async function(T, done) {
-    var Dba, dba, schema, template_path, work_path;
+    var Dba, dba, numbers, schema, template_path, work_path;
     // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     dba = new Dba();
@@ -2502,9 +2502,10 @@ create trigger multiple_instead_update instead of update on multiples begin
       path: work_path,
       schema
     });
+    numbers = dba.all_first_values(dba.query(SQL`select n from nnt order by n;`));
     await (() => {      // console.table dba.list dba.walk_objects { schema, }
       //.........................................................................................................
-      var matcher, n, numbers, result, row;
+      var matcher, n, result, row;
       /* single-valued function */
       dba.create_function({
         name: 'square',
@@ -2514,7 +2515,6 @@ create trigger multiple_instead_update instead of update on multiples begin
           return n ** 2;
         }
       });
-      numbers = dba.all_first_values(dba.query(SQL`select n from nnt order by n;`));
       matcher = (function() {
         var i, len, results;
         results = [];
@@ -2537,14 +2537,85 @@ create trigger multiple_instead_update instead of update on multiples begin
       })();
       return T.eq(result, matcher);
     })();
-    await (() => {})();    //.........................................................................................................
+    await (() => {      //.........................................................................................................
+      /* aggregate function */
+      dba.create_aggregate_function({
+        name: 'product',
+        start: function() {
+          return null;
+        },
+        step: function(total, element) {
+          debug('^4476^', {total, element});
+          return (total != null ? total : 1) * element;
+        }
+      });
+      (() => {        // inverse:        ( total, dropped ) -> total.pop(); total
+        // result:         ( total ) -> total
+        // matcher = ( ( n * n ) for n in numbers )
+        //.......................................................................................................
+        var matcher, result, row;
+        result = dba.list(dba.query(SQL`select product( n ) as product from nnt where n != 0;`));
+        console.table(result);
+        matcher = [5122922112];
+        result = (function() {
+          var i, len, results;
+          results = [];
+          for (i = 0, len = result.length; i < len; i++) {
+            row = result[i];
+            results.push(row.product);
+          }
+          return results;
+        })();
+        return T.eq(result, matcher);
+      })();
+      (() => {        //.......................................................................................................
+        var matcher, result, row;
+        result = dba.list(dba.query(SQL`select product( n ) as product from nnt where n > 100;`));
+        console.table(result);
+        matcher = [null];
+        result = (function() {
+          var i, len, results;
+          results = [];
+          for (i = 0, len = result.length; i < len; i++) {
+            row = result[i];
+            results.push(row.product);
+          }
+          return results;
+        })();
+        return T.eq(result, matcher);
+      })();
+      return (() => {        //.......................................................................................................
+        var error;
+        try {
+          dba.query(SQL`select product( n ) over () as product from nnt;`);
+        } catch (error1) {
+          error = error1;
+          T.eq(error.code, 'SQLITE_ERROR');
+          T.eq(error.name, 'SqliteError');
+          T.eq(error.message, 'product() may not be used as a window function');
+        }
+        if (error == null) {
+          return T.fail("expected error");
+        }
+      })();
+    })();
+    await (() => {})();    // console.table result
+    // matcher = [ null, ]
+    // result  = ( row.product for row in result )
+    // T.eq result, matcher
+    //.........................................................................................................
+    await (() => {})();    // ### window function ###
+    // dba.aggregate 'udf_json_array_agg',
+    //   varargs:        false
+    //   deterministic:  true
+    //   start:          -> [] # must be new object for each partition, therefore use function, not constant
+    //   step:           ( total, element ) -> total.push element; total
+    //   inverse:        ( total, dropped ) -> total.pop(); total
+    //   result:         ( total ) -> jr total
+    //.........................................................................................................
     await (() => {})();    /* table-valued function */
     //.........................................................................................................
-    await (() => {})();    /* window function */
-    //.........................................................................................................
-    await (() => {})();    /* virtual table */
-    //.........................................................................................................
-    /* aggregate function */
+    /* virtual table */
     //.........................................................................................................
     return done();
   };
@@ -2554,14 +2625,12 @@ create trigger multiple_instead_update instead of update on multiples begin
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      return test(this["DBA: window functions etc."]);
     })();
   }
 
-  // test @[ "DBA: window functions etc." ]
-// test @[ "DBA: sqlean vsv extension" ]
+  // test @[ "DBA: sqlean vsv extension" ]
 // test @[ "DBA: indexing JSON lists (de-constructing method)" ]
 // test @[ "DBA: indexing JSON lists (constructing method)" ]
 // test @[ "DBA: User-Defined Window Function" ]
