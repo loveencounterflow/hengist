@@ -2479,6 +2479,8 @@ create trigger multiple_instead_update instead of update on multiples begin
     return done();
   };
 
+  // use table valued functions to do joins over 2+ dba instances
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
