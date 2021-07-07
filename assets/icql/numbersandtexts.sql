@@ -1,0 +1,17 @@
+create table nnt ( n float primary key, t text );
+insert into nnt values ( 0, 'naught' );
+insert into nnt values ( 1, 'one' );
+insert into nnt values ( 1.5, 'one point five' );
+insert into nnt values ( 2, 'two' );
+insert into nnt values ( 2.3, 'two point three' );
+insert into nnt values ( 3, 'three' );
+insert into nnt values ( 3.1, 'three point one' );
+insert into nnt values ( 4, 'four' );
+insert into nnt values ( 5, 'five' );
+insert into nnt values ( 6, 'six' );
+insert into nnt values ( 7, 'seven' );
+insert into nnt values ( 8, 'eight' );
+insert into nnt values ( 9, 'nine' );
+insert into nnt values ( 10, 'ten' );
+insert into nnt values ( 11, 'eleven' );
+insert into nnt values ( 12, 'twelve' );
