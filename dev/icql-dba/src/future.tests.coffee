@@ -1759,6 +1759,26 @@ jp                        = JSON.parse
   #.........................................................................................................
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: view with UDF" ] = ( T, done ) ->
+  # T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  dba               = new Dba()
+  schema            = 'main'
+  { template_path
+    work_path }     = await H.procure_db { size: 'nnt', ref: 'fnsquareview', }
+  dba.open { path: work_path, schema, }
+  numbers           = dba.all_first_values dba.query SQL"select n from nnt order by n;"
+  #.........................................................................................................
+  dba.create_function name: 'square', deterministic: true, varargs: false, call: ( n ) -> n ** 2
+  dba.execute SQL"create view squares as select n, square( n ) from nnt order by n;"
+  matcher = ( ( n * n ) for n in numbers )
+  result  = dba.list dba.query SQL"select * from squares;"
+  console.table result
+  # result  = ( row.square for row in result )
+  # T.eq result, matcher
+  #.........................................................................................................
+  done()
 
 
 # use table valued functions to do joins over 2+ dba instances
@@ -1767,7 +1787,8 @@ jp                        = JSON.parse
 ############################################################################################################
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
-  test @[ "DBA: window functions etc." ]
+  # test @[ "DBA: window functions etc." ]
+  test @[ "DBA: view with UDF" ]
   # test @[ "DBA: sqlean vsv extension" ]
   # test @[ "DBA: indexing JSON lists (de-constructing method)" ]
   # test @[ "DBA: indexing JSON lists (constructing method)" ]
