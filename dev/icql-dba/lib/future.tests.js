@@ -2666,9 +2666,67 @@ create trigger multiple_instead_update instead of update on multiples begin
         return T.eq(result, matcher);
       })();
     })();
+    await (async() => {      //.........................................................................................................
+      /* table-valued function */
+      dba.create_table_function({
+        name: 're_matches',
+        columns: ['match', 'capture'],
+        parameters: ['text', 'pattern'],
+        rows: function*(text, pattern) {
+          var match, regex;
+          regex = new RegExp(pattern, 'g');
+          while ((match = regex.exec(text)) != null) {
+            yield [match[0], match[1]];
+          }
+          return null;
+        }
+      });
+      await (() => {
+        var matcher, result, row;
+        result = dba.list(dba.query(SQL`select
+    *
+  from
+    nnt,
+    re_matches( t, '^.*([aeiou].e).*$' ) as rx
+  order by rx.match;`));
+        console.table(result);
+        matcher = ['eleven:eve', 'five:ive', 'nine:ine', 'one:one', 'one point five:ive', 'seven:eve', 'three point one:one'];
+        result = (function() {
+          var i, len, results;
+          results = [];
+          for (i = 0, len = result.length; i < len; i++) {
+            row = result[i];
+            results.push(`${row.t}:${row.capture}`);
+          }
+          return results;
+        })();
+        debug('^984^', result);
+        return T.eq(result, matcher);
+      })();
+      return (await (() => {
+        var matcher, result, row;
+        result = dba.list(dba.query(SQL`select
+    *
+  from
+    nnt,
+    re_matches( t, 'o' ) as rx
+  order by t;`));
+        console.table(result);
+        matcher = ['four', 'one', 'one point five', 'one point five', 'three point one', 'three point one', 'two', 'two point three', 'two point three'];
+        result = (function() {
+          var i, len, results;
+          results = [];
+          for (i = 0, len = result.length; i < len; i++) {
+            row = result[i];
+            results.push(row.t);
+          }
+          return results;
+        })();
+        debug('^984^', result);
+        return T.eq(result, matcher);
+      })());
+    })();
     await (() => {})();    //.........................................................................................................
-    await (() => {})();    /* table-valued function */
-    //.........................................................................................................
     /* virtual table */
     //.........................................................................................................
     return done();
