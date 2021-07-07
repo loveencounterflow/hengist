@@ -1771,12 +1771,13 @@ jp                        = JSON.parse
   numbers           = dba.all_first_values dba.query SQL"select n from nnt order by n;"
   #.........................................................................................................
   dba.create_function name: 'square', deterministic: true, varargs: false, call: ( n ) -> n ** 2
-  dba.execute SQL"create view squares as select n, square( n ) from nnt order by n;"
-  matcher = ( ( n * n ) for n in numbers )
+  dba.execute SQL"create view squares as select n, square( n ) as square from nnt order by n;"
+  matcher = [ 0, 1, 2.25, 4, 5.289999999999999, 9, 9.610000000000001, 16, 25, 36, 49, 64, 81, 100, 121, 144 ]
   result  = dba.list dba.query SQL"select * from squares;"
   console.table result
-  # result  = ( row.square for row in result )
-  # T.eq result, matcher
+  result  = ( row.square for row in result )
+  debug '^984^', result
+  T.eq result, matcher
   #.........................................................................................................
   done()
 
@@ -1786,9 +1787,9 @@ jp                        = JSON.parse
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
+  test @, { timeout: 10e3, }
   # test @[ "DBA: window functions etc." ]
-  test @[ "DBA: view with UDF" ]
+  # test @[ "DBA: view with UDF" ]
   # test @[ "DBA: sqlean vsv extension" ]
   # test @[ "DBA: indexing JSON lists (de-constructing method)" ]
   # test @[ "DBA: indexing JSON lists (constructing method)" ]
