@@ -2778,13 +2778,57 @@ create trigger multiple_instead_update instead of update on multiples begin
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: view with UDF"] = async function(T, done) {
+    var Dba, dba, matcher, n, numbers, result, schema, template_path, work_path;
+    // T.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
+    dba = new Dba();
+    schema = 'main';
+    ({template_path, work_path} = (await H.procure_db({
+      size: 'nnt',
+      ref: 'fnsquareview'
+    })));
+    dba.open({
+      path: work_path,
+      schema
+    });
+    numbers = dba.all_first_values(dba.query(SQL`select n from nnt order by n;`));
+    //.........................................................................................................
+    dba.create_function({
+      name: 'square',
+      deterministic: true,
+      varargs: false,
+      call: function(n) {
+        return n ** 2;
+      }
+    });
+    dba.execute(SQL`create view squares as select n, square( n ) from nnt order by n;`);
+    matcher = (function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = numbers.length; i < len; i++) {
+        n = numbers[i];
+        results.push(n * n);
+      }
+      return results;
+    })();
+    result = dba.list(dba.query(SQL`select * from squares;`));
+    console.table(result);
+    // result  = ( row.square for row in result )
+    // T.eq result, matcher
+    //.........................................................................................................
+    return done();
+  };
+
   // use table valued functions to do joins over 2+ dba instances
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      return test(this["DBA: window functions etc."]);
+      // test @[ "DBA: window functions etc." ]
+      return test(this["DBA: view with UDF"]);
     })();
   }
 
