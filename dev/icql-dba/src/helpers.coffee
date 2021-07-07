@@ -208,6 +208,7 @@ DATOM                     = require 'datom'
       holes:  @resolve_path 'assets/icql/ncrglyphwbf-with-holes.tsv'
     db:
       templates:
+        nnt:    @resolve_path 'assets/icql/numbersandtexts.db'
         micro:  @resolve_path 'assets/icql/micro.db'
         small:  @resolve_path 'assets/icql/small-datamill.db'
         big:    @resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.db'

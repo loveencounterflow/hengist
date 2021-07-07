@@ -31,7 +31,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open()" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba } = require '../../../apps/icql-dba'
   dba     = new Dba()
   schemas = {}
@@ -113,7 +113,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open() RAM DB" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba } = require '../../../apps/icql-dba'
   dba     = new Dba()
   schemas = {}
@@ -157,7 +157,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: save() RAM DB" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   ramdb_path        = null
   matcher           = null
@@ -203,7 +203,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: export() RAM DB" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   ramdb_path        = null
   matcher           = null
@@ -241,7 +241,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import() CSV" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   # ramdb_path        = null
   matcher           = null
@@ -332,7 +332,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import() TSV" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   # ramdb_path        = null
   matcher           = null
@@ -376,7 +376,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "___ DBA: import() (big file)" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   # ramdb_path        = null
   matcher           = null
@@ -434,7 +434,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "___ DBA: import() (four corner)" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   # ramdb_path        = null
   matcher           = null
@@ -564,7 +564,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import TSV; cfg variants 2" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   matcher           = null
   import_path       = H.get_cfg().tsv.micro
@@ -755,7 +755,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: VNRs" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   matcher           = null
   #.........................................................................................................
@@ -766,15 +766,23 @@ jp                        = JSON.parse
   #.........................................................................................................
   ### TAINT by using a generated column with a UDF we are also forced to convert the VNR to JSON and
   then parse that value vefore Hollerith-encoding the value: ###
-  dba.function 'hollerith_encode', { deterministic: true, varargs: false, }, ( vnr_json ) ->
-    debug '^3338^', rpr vnr_json
-    return dba.as_hollerith JSON.parse vnr_json
+  dba.create_function
+    name:           'hollerith_encode',
+    deterministic:  true,
+    varargs:        false,
+    call:           ( vnr_json ) ->
+      debug '^3338^', rpr vnr_json
+      return dba.as_hollerith JSON.parse vnr_json
   #.........................................................................................................
-  dba.function 'hollerith_classic', { deterministic: true, varargs: false, }, ( vnr_json ) ->
-    vnr = JSON.parse vnr_json
-    vnr.push 0 while vnr.length < 5
-    debug '^3338^', rpr vnr
-    return dba.as_hollerith vnr
+  dba.create_function
+    name:           'hollerith_classic',
+    deterministic:  true,
+    varargs:        false,
+    call:           ( vnr_json ) ->
+      vnr = JSON.parse vnr_json
+      vnr.push 0 while vnr.length < 5
+      debug '^3338^', rpr vnr
+      return dba.as_hollerith vnr
   #.........................................................................................................
   hollerith_tng = ( vnr ) ->
     sign_delta  = 0x80000000  ### used to lift negative numbers to non-negative ###
@@ -805,13 +813,17 @@ jp                        = JSON.parse
     R           = R.join ','
     return R
   #.........................................................................................................
-  dba.function 'hollerith_tng', { deterministic: true, varargs: false, }, ( vnr_json ) ->
-    return hollerith_tng JSON.parse vnr_json
-  dba.function 'bcd', { deterministic: true, varargs: false, }, ( vnr_json ) ->
-    return bcd JSON.parse vnr_json
+  dba.create_function
+    name:             'hollerith_tng'
+    call:             ( vnr_json ) ->
+      return hollerith_tng JSON.parse vnr_json
+  dba.create_function
+    name:             'bcd'
+    call:             ( vnr_json ) ->
+      return bcd JSON.parse vnr_json
   #.........................................................................................................
   to_hex = ( blob ) -> blob.toString 'hex'
-  dba.function 'to_hex', { deterministic: true, varargs: false, }, to_hex
+  dba.create_function name: 'to_hex', deterministic: true, varargs: false, call: to_hex
   #.........................................................................................................
   dba.execute """
     create table v.main (
@@ -1082,7 +1094,7 @@ jp                        = JSON.parse
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: virtual tables" ] = ( T, done ) ->
   ### new in 7.4.0, see https://github.com/JoshuaWise/better-sqlite3/issues/581 ###
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   FS                = require 'fs'
   #.........................................................................................................
@@ -1212,7 +1224,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open() file DB in schema main" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   schemas           = {}
   { template_path
@@ -1294,7 +1306,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: writing while reading 1" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   schema            = 'main'
   new_bsqlt3        = require '../../../apps/icql-dba/node_modules/better-sqlite3'
@@ -1322,7 +1334,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: writing while reading 2" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   schema            = 'main'
   new_bsqlt3        = require '../../../apps/icql-dba/node_modules/better-sqlite3'
@@ -1350,7 +1362,7 @@ jp                        = JSON.parse
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: sqlean vsv extension" ] = ( T, done ) ->
   ### see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md ###
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   schema            = 'main'
   dba               = new Dba()
@@ -1386,7 +1398,7 @@ jp                        = JSON.parse
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: indexing JSON lists (de-constructing method)" ] = ( T, done ) ->
   ### see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md ###
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   schema            = 'main'
   dba               = new Dba()
@@ -1396,7 +1408,7 @@ jp                        = JSON.parse
   await do =>
     #.......................................................................................................
     mutations_allowed = 0
-    dba.function 'mutations_allowed', { deterministic: false, varargs: true, }, ( value = null ) ->
+    dba.create_function name: 'mutations_allowed', varargs: true, call: ( value = null ) ->
       # debug '^mutations_allowed@334^', { value, }
       ### TAINT consider to use `validate()` ###
       throw new Error "^3446^ expected null, 0 or 1, got #{rpr value}" unless value in [ null, 0, 1, ]
@@ -1476,7 +1488,7 @@ jp                        = JSON.parse
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: indexing JSON lists (constructing method)" ] = ( T, done ) ->
   ### see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md ###
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   schema            = 'main'
   dba               = new Dba()
@@ -1524,7 +1536,7 @@ jp                        = JSON.parse
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: User-Defined Window Function" ] = ( T, done ) ->
   ### see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md ###
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   schema            = 'main'
   dba               = new Dba()
@@ -1586,16 +1598,55 @@ jp                        = JSON.parse
   #.........................................................................................................
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: window functions etc." ] = ( T, done ) ->
+  # T.halt_on_error()
+  { Dba } = require '../../../apps/icql-dba'
+  dba     = new Dba()
+  schema  = 'main'
+  { template_path
+    work_path }     = await H.procure_db { size: 'nnt', ref: 'fn', }
+  debug { template_path, work_path, }
+  dba.open { path: work_path, schema, }
+  # console.table dba.list dba.walk_objects { schema, }
+  #.........................................................................................................
+  await do =>
+    ### single-valued function ###
+    dba.create_function name: 'square', deterministic: true, varargs: false, call: ( n ) -> n ** 2
+    numbers = dba.all_first_values dba.query SQL"select n from nnt order by n;"
+    matcher = ( ( n * n ) for n in numbers )
+    result  = dba.list dba.query SQL"select *, square( n ) as square from nnt order by square;"
+    console.table result
+    result  = ( row.square for row in result )
+    T.eq result, matcher
+  #.........................................................................................................
+  await do =>
+    ### table-valued function ###
+  #.........................................................................................................
+  await do =>
+    ### window function ###
+  #.........................................................................................................
+  await do =>
+    ### virtual table ###
+  #.........................................................................................................
+  await do =>
+    ### aggregate function ###
+  #.........................................................................................................
+  done()
+
+
+
 # use table valued functions to do joins over 2+ dba instances
 
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
+  test @, { timeout: 10e3, }
+  # test @[ "DBA: window functions etc." ]
   # test @[ "DBA: sqlean vsv extension" ]
   # test @[ "DBA: indexing JSON lists (de-constructing method)" ]
   # test @[ "DBA: indexing JSON lists (constructing method)" ]
-  test @[ "DBA: User-Defined Window Function" ]
+  # test @[ "DBA: User-Defined Window Function" ]
   # test @[ "DBA: VNRs" ], { timeout: 5e3, }
   # test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
   # test @[ "DBA: open() file DB in schema main" ]
