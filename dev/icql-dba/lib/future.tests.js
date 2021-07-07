@@ -2726,8 +2726,54 @@ create trigger multiple_instead_update instead of update on multiples begin
         return T.eq(result, matcher);
       })());
     })();
-    await (() => {})();    //.........................................................................................................
-    /* virtual table */
+    await (() => {      //.........................................................................................................
+      /* virtual table */
+      var FS, matcher, result, row;
+      FS = require('fs');
+      dba.create_virtual_table({
+        name: 'file_contents',
+        create: function(filename, ...P) {
+          var R;
+          urge('^46456^', {filename, P});
+          R = {
+            columns: ['path', 'lnr', 'line'],
+            rows: function*() {
+              var i, len, line, line_idx, lines, path;
+              path = PATH.resolve(PATH.join(__dirname, '../../../assets/icql', filename));
+              lines = (FS.readFileSync(path, {
+                encoding: 'utf-8'
+              })).split('\n');
+              for (line_idx = i = 0, len = lines.length; i < len; line_idx = ++i) {
+                line = lines[line_idx];
+                yield ({
+                  path,
+                  lnr: line_idx + 1,
+                  line
+                });
+              }
+              return null;
+            }
+          };
+          return R;
+        }
+      });
+      dba.execute(SQL`create virtual table contents_of_wbftsv
+  using file_contents( ncrglyphwbf.tsv, any stuff goes here, and more here );`);
+      result = dba.list(dba.query(SQL`select * from contents_of_wbftsv where lnr between 10 and 14 order by 1, 2, 3;`));
+      console.table(result);
+      matcher = ['u-cjk-xa-3417\t㐗\t<1213355>', '', 'u-cjk-xa-34ab\t㒫\t<121135>', 'u-cjk-xa-342a\t㐪\t<415234>', 'u-cjk-xa-342b\t㐫\t<413452>'];
+      result = (function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = result.length; i < len; i++) {
+          row = result[i];
+          results.push(row.line);
+        }
+        return results;
+      })();
+      debug('^984^', result);
+      return T.eq(result, matcher);
+    })();
     //.........................................................................................................
     return done();
   };
