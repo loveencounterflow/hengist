@@ -2822,14 +2822,59 @@ create trigger multiple_instead_update instead of update on multiples begin
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: typing"] = async function(T, done) {
+    var Dba, d, dba, iterator, schema, statement, template_path, work_path;
+    // T.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
+    dba = new Dba();
+    schema = 'main';
+    ({template_path, work_path} = (await H.procure_db({
+      size: 'small',
+      ref: 'typing'
+    })));
+    dba.open({
+      path: work_path,
+      schema
+    });
+    //.........................................................................................................
+    statement = dba.sqlt.prepare(SQL`select ( stamped and not stamped ) as d from main;`);
+    iterator = statement.iterate([]);
+    debug('^34445^', (function() {
+      var i, len, ref, results;
+      ref = statement.columns();
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        d = ref[i];
+        results.push([d.name, d.type]);
+      }
+      return results;
+    })());
+    statement = dba.sqlt.prepare(SQL`select cast( stamped and not stamped as boolean ) as d from main;`);
+    iterator = statement.iterate([]);
+    debug('^34445^', (function() {
+      var i, len, ref, results;
+      ref = statement.columns();
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        d = ref[i];
+        results.push([d.name, d.type]);
+      }
+      return results;
+    })());
+    // for row from iterator
+    //   debug '^4587^', row
+    //.........................................................................................................
+    return done();
+  };
+
   // use table valued functions to do joins over 2+ dba instances
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      return test(this["DBA: typing"]);
     })();
   }
 

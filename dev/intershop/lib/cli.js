@@ -108,8 +108,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this._contract_demo_rpc_methods = function(shop) {
-    var IX, R, contract, hyphenate, slabjoints_from_text;
+    var IX, M3, R, contract, hyphenate, slabjoints_from_text;
     IX = require('../../../apps/intertext');
+    M3 = require('../../../apps/mojikura3-model/intershop_modules/rpc');
     R = [];
     //.........................................................................................................
     hyphenate = function(text) {
