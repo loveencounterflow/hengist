@@ -2824,7 +2824,7 @@ create trigger multiple_instead_update instead of update on multiples begin
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: typing"] = async function(T, done) {
-    var Dba, d, dba, iterator, schema, statement, template_path, work_path;
+    var Dba, as_boolean, d/* NOTE: consume iterator to free connection */, dba, error, iterator, schema, statement, template_path, work_path;
     // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     dba = new Dba();
@@ -2838,9 +2838,27 @@ create trigger multiple_instead_update instead of update on multiples begin
       schema
     });
     //.........................................................................................................
+    /* In 'simple' cases, there's meaningful type information present: */
+    statement = dba.sqlt.prepare(SQL`select stamped as d from main;`);
+    iterator = statement.iterate([]);
+    [...iterator];
+    d = (function() {
+      var i, len, ref, results;
+      ref = statement.columns();
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        d = ref[i];
+        results.push([d.name, d.type]);
+      }
+      return results;
+    })();
+    T.eq(d, [['d', 'boolean']]);
+    //.........................................................................................................
+    /* But as soon as any operation is done on data: that typing information vanishes: */
     statement = dba.sqlt.prepare(SQL`select ( stamped and not stamped ) as d from main;`);
     iterator = statement.iterate([]);
-    debug('^34445^', (function() {
+    [...iterator];
+    /* NOTE: consume iterator to free connection */    d = (function() {
       var i, len, ref, results;
       ref = statement.columns();
       results = [];
@@ -2849,10 +2867,14 @@ create trigger multiple_instead_update instead of update on multiples begin
         results.push([d.name, d.type]);
       }
       return results;
-    })());
+    })();
+    T.eq(d, [['d', null]]);
+    //.........................................................................................................
+    /* We can even explicitly cast results but that does not bring back typing: */
     statement = dba.sqlt.prepare(SQL`select cast( stamped and not stamped as boolean ) as d from main;`);
     iterator = statement.iterate([]);
-    debug('^34445^', (function() {
+    [...iterator];
+    /* NOTE: consume iterator to free connection */    d = (function() {
       var i, len, ref, results;
       ref = statement.columns();
       results = [];
@@ -2861,9 +2883,39 @@ create trigger multiple_instead_update instead of update on multiples begin
         results.push([d.name, d.type]);
       }
       return results;
-    })());
-    // for row from iterator
-    //   debug '^4587^', row
+    })();
+    T.eq(d, [['d', null]]);
+    //.........................................................................................................
+    /* We can enforce better type checking in SQLite by using `check` constraints and UDFs: */
+    as_boolean = function(d) {
+      if (d) {
+        return 1;
+      } else {
+        return 0;
+      }
+    };
+    dba.create_function({
+      name: 'validate_integer',
+      call: function(n) {
+        debug('^534^', `validating ${rpr(n)}`);
+        return as_boolean(types.isa.integer(n));
+      }
+    });
+    dba.execute(SQL`create table x( n integer, check ( validate_integer( n ) ) );`);
+    dba.execute(SQL`insert into x ( n ) values ( 42 );`);
+    T.ok(true);
+    try {
+      dba.execute(SQL`insert into x ( n ) values ( 1.23 );`);
+    } catch (error1) {
+      error = error1;
+      T.ok(error.message === "CHECK constraint failed: validate_integer( n )");
+    }
+    try {
+      dba.execute(SQL`insert into x ( n ) values ( 'foobar' );`);
+    } catch (error1) {
+      error = error1;
+      T.ok(error.message === "CHECK constraint failed: validate_integer( n )");
+    }
     //.........................................................................................................
     return done();
   };
