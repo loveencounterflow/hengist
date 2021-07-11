@@ -1997,7 +1997,7 @@ e6    text );`);
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: sqlean vsv extension"] = async function(T, done) {
-    var Dba, I, L, X, csv_path, dba, extension_path, schema, work_path;
+    var Dba, I, L, V, csv_path, dba, extension_path, schema, work_path;
     /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
     // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
@@ -2010,7 +2010,7 @@ e6    text );`);
       name: 'vsv-sample.csv'
     }));
     // debug '^857^', { csv_path, work_path, }
-    ({I, L, X} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
+    ({I, L, V} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
     await (() => {      //.........................................................................................................
       var ref, results, row;
       dba.load_extension(extension_path);
@@ -2041,14 +2041,14 @@ e6    text );`);
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: indexing JSON lists (de-constructing method)"] = async function(T, done) {
-    var Dba, I, L, X, dba, schema;
+    var Dba, I, L, V, dba, schema;
     /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
     // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
     schema = 'main';
     dba = new Dba();
     dba.load_extension(PATH.resolve(PATH.join(__dirname, '../../../assets/sqlite-extensions/json1.so')));
-    ({I, L, X} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
+    ({I, L, V} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
     await (() => {      //.........................................................................................................
       var i, k, multiples, mutations_allowed, n, ref, ref1, row;
       //.......................................................................................................
@@ -2153,7 +2153,7 @@ create trigger multiples_idx_before_update before update on multiples_idx begin
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: indexing JSON lists (constructing method)"] = async function(T, done) {
-    var Dba, I, L, X, dba, schema;
+    var Dba, I, L, V, dba, schema;
     /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
     // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
@@ -2161,7 +2161,7 @@ create trigger multiples_idx_before_update before update on multiples_idx begin
     dba = new Dba();
     dba.load_extension(PATH.resolve(PATH.join(__dirname, '../../../assets/sqlite-extensions/json1.so')));
     // dba.sqlt.unsafeMode true
-    ({I, L, X} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
+    ({I, L, V} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
     await (() => {      //.........................................................................................................
       var i, idx, j, multiple, n, ref, ref1, row;
       //.......................................................................................................
@@ -2210,7 +2210,7 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: User-Defined Window Function"] = async function(T, done) {
-    var Dba, I, L, X, dba, schema;
+    var Dba, I, L, V, dba, schema;
     /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
     // T.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
@@ -2218,7 +2218,7 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     dba = new Dba();
     dba.load_extension(PATH.resolve(PATH.join(__dirname, '../../../assets/sqlite-extensions/json1.so')));
     // dba.sqlt.unsafeMode true
-    ({I, L, X} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
+    ({I, L, V} = new (require('../../../apps/icql-dba/lib/sql')).Sql());
     //.........................................................................................................
     dba.create_window_function({
       name: 'udf_json_array_agg',
@@ -2920,17 +2920,54 @@ create trigger multiple_instead_update instead of update on multiples begin
     return done();
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: advanced interpolation"] = function(T, done) {
+    var Dba, E, dba;
+    ({Dba} = require('../../../apps/icql-dba'));
+    E = require('../../../apps/icql-dba/lib/errors');
+    dba = new Dba();
+    (() => { //...................................................................................................
+      var d, result, sql;
+      sql = SQL`select $:col_a, $:col_b where $:col_b in $V:choices`;
+      d = {
+        col_a: 'foo',
+        col_b: 'bar',
+        choices: [1, 2, 3]
+      };
+      result = dba.sql.interpolate(sql, d);
+      info('^23867^', result);
+      return T.eq(result, `select "foo", "bar" where "bar" in ( 1, 2, 3 )`);
+    })();
+    (() => { //...................................................................................................
+      var d, result, sql;
+      sql = SQL`select ?:, ?: where ?: in ?V:`;
+      d = ['foo', 'bar', 'bar', [1, 2, 3]];
+      result = dba.sql.interpolate(sql, d);
+      info('^23867^', result);
+      return T.eq(result, `select "foo", "bar" where "bar" in ( 1, 2, 3 )`);
+    })();
+    T.throws(/unknown interpolation format 'X'/, () => { //.........................................................
+      var d, result, sql;
+      sql = SQL`select ?:, ?X: where ?: in ?V:`;
+      d = ['foo', 'bar', 'bar', [1, 2, 3]];
+      return result = dba.sql.interpolate(sql, d);
+    });
+    return done(); //..................................................................................................
+  };
+
+  
   // use table valued functions to do joins over 2+ dba instances
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      return test(this["DBA: typing"]);
+      return test(this["DBA: advanced interpolation"]);
     })();
   }
 
-  // test @[ "DBA: window functions etc." ]
+  // test @[ "DBA: typing" ]
+// test @[ "DBA: window functions etc." ]
 // test @[ "DBA: view with UDF" ]
 // test @[ "DBA: sqlean vsv extension" ]
 // test @[ "DBA: indexing JSON lists (de-constructing method)" ]
