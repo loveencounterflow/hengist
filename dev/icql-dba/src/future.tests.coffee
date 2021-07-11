@@ -1370,7 +1370,7 @@ jp                        = JSON.parse
   csv_path          = H.get_cfg().csv.holes
   work_path         = await H.procure_file { path: csv_path, name: 'vsv-sample.csv', }
   # debug '^857^', { csv_path, work_path, }
-  { I, L, X, }      = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
+  { I, L, V, }      = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
   #.........................................................................................................
   await do =>
     dba.load_extension extension_path
@@ -1403,7 +1403,7 @@ jp                        = JSON.parse
   schema            = 'main'
   dba               = new Dba()
   dba.load_extension PATH.resolve PATH.join __dirname, '../../../assets/sqlite-extensions/json1.so'
-  { I, L, X, }      = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
+  { I, L, V, }      = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
   #.........................................................................................................
   await do =>
     #.......................................................................................................
@@ -1494,7 +1494,7 @@ jp                        = JSON.parse
   dba               = new Dba()
   dba.load_extension PATH.resolve PATH.join __dirname, '../../../assets/sqlite-extensions/json1.so'
   # dba.sqlt.unsafeMode true
-  { I, L, X, }      = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
+  { I, L, V, }      = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
   #.........................................................................................................
   await do =>
     #.......................................................................................................
@@ -1542,7 +1542,7 @@ jp                        = JSON.parse
   dba               = new Dba()
   dba.load_extension PATH.resolve PATH.join __dirname, '../../../assets/sqlite-extensions/json1.so'
   # dba.sqlt.unsafeMode true
-  { I, L, X, }      = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
+  { I, L, V, }      = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
   #.........................................................................................................
   dba.create_window_function
     name:           'udf_json_array_agg'
@@ -1824,6 +1824,28 @@ jp                        = JSON.parse
   #.........................................................................................................
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: advanced interpolation" ] = ( T, done ) ->
+  { Dba }           = require '../../../apps/icql-dba'
+  E                 = require '../../../apps/icql-dba/lib/errors'
+  dba               = new Dba()
+  do => #...................................................................................................
+    sql     = SQL"select $:col_a, $:col_b where $:col_b in $V:choices"
+    d       = { col_a: 'foo', col_b: 'bar', choices: [ 1, 2, 3, ], }
+    result  = dba.sql.interpolate sql, d
+    info '^23867^', result
+    T.eq result, """select "foo", "bar" where "bar" in ( 1, 2, 3 )"""
+  do => #...................................................................................................
+    sql     = SQL"select ?:, ?: where ?: in ?V:"
+    d       = [ 'foo', 'bar', 'bar', [ 1, 2, 3, ], ]
+    result  = dba.sql.interpolate sql, d
+    info '^23867^', result
+    T.eq result, """select "foo", "bar" where "bar" in ( 1, 2, 3 )"""
+  T.throws /unknown interpolation format 'X'/, => #.........................................................
+    sql     = SQL"select ?:, ?X: where ?: in ?V:"
+    d       = [ 'foo', 'bar', 'bar', [ 1, 2, 3, ], ]
+    result  = dba.sql.interpolate sql, d
+  done() #..................................................................................................
 
 # use table valued functions to do joins over 2+ dba instances
 
@@ -1831,7 +1853,8 @@ jp                        = JSON.parse
 ############################################################################################################
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
-  test @[ "DBA: typing" ]
+  test @[ "DBA: advanced interpolation" ]
+  # test @[ "DBA: typing" ]
   # test @[ "DBA: window functions etc." ]
   # test @[ "DBA: view with UDF" ]
   # test @[ "DBA: sqlean vsv extension" ]
