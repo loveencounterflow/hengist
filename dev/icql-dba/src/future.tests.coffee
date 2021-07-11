@@ -1781,13 +1781,35 @@ jp                        = JSON.parse
   #.........................................................................................................
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: typing" ] = ( T, done ) ->
+  # T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  dba               = new Dba()
+  schema            = 'main'
+  { template_path
+    work_path }     = await H.procure_db { size: 'small', ref: 'typing', }
+  dba.open { path: work_path, schema, }
+  #.........................................................................................................
+  statement = dba.sqlt.prepare SQL"select ( stamped and not stamped ) as d from main;"
+  iterator  = statement.iterate []
+  debug '^34445^', ( [ d.name, d.type, ] for d in statement.columns() )
+  statement = dba.sqlt.prepare SQL"select cast( stamped and not stamped as boolean ) as d from main;"
+  iterator  = statement.iterate []
+  debug '^34445^', ( [ d.name, d.type, ] for d in statement.columns() )
+  # for row from iterator
+  #   debug '^4587^', row
+  #.........................................................................................................
+  done()
+
 
 # use table valued functions to do joins over 2+ dba instances
 
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
+  # test @, { timeout: 10e3, }
+  test @[ "DBA: typing" ]
   # test @[ "DBA: window functions etc." ]
   # test @[ "DBA: view with UDF" ]
   # test @[ "DBA: sqlean vsv extension" ]
