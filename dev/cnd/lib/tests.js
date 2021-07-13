@@ -2,6 +2,7 @@
   'use strict';
   var CND, alert, badge, debug, echo, help, info, log, rpr, test, urge, warn, whisper;
 
+  // delete globalThis.Intl
   CND = require('../../../apps/cnd');
 
   // console.log '^3332^', ( k for k of CND )
@@ -109,6 +110,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["format_number"] = function(T, done) {
+    info('^3474^', CND.format_number(42000.1234));
     T.eq(CND.format_number(42), '42');
     T.eq(CND.format_number(42000), '42,000');
     T.eq(CND.format_number(42000.1234), '42,000.123');
@@ -172,14 +174,15 @@
 
   //###########################################################################################################
   if (module.parent == null) {
-    test(this, {
-      timeout: 2500
-    });
+    // test @, { timeout: 2500, }
+    test(this["format_number"]);
   }
 
-  // test @[ "path methods" ]
-// test @[ "rpr" ]
+  // test @[ "rpr" ]
 // test @[ "inspect" ]
+
+  // debug '^33376^', require 'jsx-number-format'
+// debug '^33474^', format_number 123456789.12345
 
 }).call(this);
 

@@ -79,9 +79,34 @@
         // debug '27821', IDLX.list_tokens formula, { all_brackets: yes, }
         bigrams = IDLX.get_relational_bigrams_as_tokens(formula);
         // urge  '93209', formula
-        // urge  '93209', bigrams
         result = conflate(bigrams);
+        (() => {          //.....................................................................................................
+          /* NOTE: as used in MojiKura RPC call */
+          var R, rbgram, rbgrams, token;
+          rbgrams = bigrams;
+          R = (function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = rbgrams.length; j < len1; j++) {
+              rbgram = rbgrams[j];
+              results.push((function() {
+                var k, len2, results1;
+                results1 = [];
+                for (k = 0, len2 = rbgram.length; k < len2; k++) {
+                  token = rbgram[k];
+                  results1.push(token.s);
+                }
+                return results1;
+              })());
+            }
+            return results;
+          })();
+          R = R.slice(1, R.length - 1);
+          return urge('93209', R);
+        })();
       } catch (error1) {
+        //.....................................................................................................
+        // urge  '93209', result
         // debug JSON.stringify [ probe, result, ]
         error = error1;
         T.fail(`${probe} failed with ${rpr(error.message)}`);
@@ -135,7 +160,7 @@
       [probe, matcher] = probes_and_matchers[i];
       [glyph, formula] = probe.split(':');
       result = IDLX.get_relational_bigrams(formula);
-      // debug '32321', JSON.stringify [ probe, result, ]
+      debug('32321', JSON.stringify(result));
       if (equals(result, matcher)) {
         T.ok(true);
       } else {
