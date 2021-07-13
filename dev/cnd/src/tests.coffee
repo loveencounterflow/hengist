@@ -2,6 +2,7 @@
 
 'use strict'
 
+# delete globalThis.Intl
 CND                       = require '../../../apps/cnd'
 # console.log '^3332^', ( k for k of CND )
 # console.log '^3332^', CND.get_logger
@@ -81,6 +82,7 @@ test                      = require 'guy-test'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "format_number" ] = ( T, done ) ->
+  info '^3474^', CND.format_number 42000.1234
   T.eq ( CND.format_number 42         ), '42'
   T.eq ( CND.format_number 42000      ), '42,000'
   T.eq ( CND.format_number 42000.1234 ), '42,000.123'
@@ -125,12 +127,12 @@ test                      = require 'guy-test'
 
 ############################################################################################################
 unless module.parent?
-  test @, { timeout: 2500, }
-  # test @[ "path methods" ]
+  # test @, { timeout: 2500, }
+  test @[ "format_number" ]
   # test @[ "rpr" ]
   # test @[ "inspect" ]
 
-
-
+  # debug '^33376^', require 'jsx-number-format'
+  # debug '^33474^', format_number 123456789.12345
 
 
