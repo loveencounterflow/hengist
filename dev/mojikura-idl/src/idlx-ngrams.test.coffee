@@ -93,8 +93,16 @@ conflate = ( bigrams ) ->
     try
       bigrams = IDLX.get_relational_bigrams_as_tokens formula
       # urge  '93209', formula
-      # urge  '93209', bigrams
       result  = conflate bigrams
+      #.....................................................................................................
+      ### NOTE: as used in MojiKura RPC call ###
+      do =>
+        rbgrams = bigrams
+        R = ( ( token.s for token in rbgram ) for rbgram in rbgrams )
+        R = R[ 1 ... R.length - 1 ]
+        urge  '93209', R
+      #.....................................................................................................
+      # urge  '93209', result
       # debug JSON.stringify [ probe, result, ]
     catch error
       T.fail "#{probe} failed with #{rpr error.message}"
@@ -141,7 +149,7 @@ conflate = ( bigrams ) ->
   for [ probe, matcher, ] in probes_and_matchers
     [ glyph, formula, ] = probe.split ':'
     result              = IDLX.get_relational_bigrams formula
-    # debug '32321', JSON.stringify [ probe, result, ]
+    debug '32321', JSON.stringify result
     if ( equals result, matcher ) then T.ok true
     else T.fail "expected #{matcher}, got #{result}"
   done()

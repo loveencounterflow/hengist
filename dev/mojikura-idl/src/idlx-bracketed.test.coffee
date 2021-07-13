@@ -77,12 +77,12 @@ types                     = new ( require 'intertype' ).Intertype()
 @[ "(IDLX) reject bogus formulas" ] = ( T, done ) ->
   # T.halt_on_error()
   probes_and_matchers = [
-    ["⿲木木木",'Syntax error at index 0 (⿲木木木)\nUnexpected "⿲".']
-    ["木",'Syntax error at index 0 (木)\nUnexpected "木".']
+    ["⿲木木木",'invalid syntax at index 0 (⿲木木木)\nUnexpected "⿲"\n']
+    ["木",'invalid syntax at index 0 (木)\nUnexpected "木"\n']
     [42,'expected a text, got a float']
     ["","expected a non-empty text, got an empty text"]
-    ["⿱⿰亻式⿱目八木木木",'Syntax error at index 7 (⿱⿰亻式⿱目八木木木)\nUnexpected "木".']
-    ["⿺廴聿123",'Syntax error at index 3 (⿺廴聿123)\nUnexpected "1".']
+    ["⿱⿰亻式⿱目八木木木",'invalid syntax at index 7 (⿱⿰亻式⿱目八木木木)\nUnexpected "木"\n']
+    ["⿺廴聿123",'invalid syntax at index 3 (⿺廴聿123)\nUnexpected "1"\n']
     ["⿺","Syntax Error: '⿺'"]
     ["⿺⿺⿺⿺","Syntax Error: '⿺⿺⿺⿺'"]
 #     ["()","IDLX: unexpected right bracket [ ( ✘ ) ✘  ]"]
