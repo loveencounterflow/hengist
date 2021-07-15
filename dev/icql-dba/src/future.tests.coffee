@@ -1853,10 +1853,11 @@ jp                        = JSON.parse
 ############################################################################################################
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
-  test @[ "DBA: advanced interpolation" ]
+  # debug f '𠖏'
+  # test @[ "DBA: advanced interpolation" ]
   # test @[ "DBA: typing" ]
   # test @[ "DBA: window functions etc." ]
-  # test @[ "DBA: view with UDF" ]
+  test @[ "DBA: view with UDF" ]
   # test @[ "DBA: sqlean vsv extension" ]
   # test @[ "DBA: indexing JSON lists (de-constructing method)" ]
   # test @[ "DBA: indexing JSON lists (constructing method)" ]

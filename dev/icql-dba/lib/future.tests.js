@@ -2962,14 +2962,15 @@ create trigger multiple_instead_update instead of update on multiples begin
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      return test(this["DBA: advanced interpolation"]);
+      // debug f '𠖏'
+      // test @[ "DBA: advanced interpolation" ]
+      // test @[ "DBA: typing" ]
+      // test @[ "DBA: window functions etc." ]
+      return test(this["DBA: view with UDF"]);
     })();
   }
 
-  // test @[ "DBA: typing" ]
-// test @[ "DBA: window functions etc." ]
-// test @[ "DBA: view with UDF" ]
-// test @[ "DBA: sqlean vsv extension" ]
+  // test @[ "DBA: sqlean vsv extension" ]
 // test @[ "DBA: indexing JSON lists (de-constructing method)" ]
 // test @[ "DBA: indexing JSON lists (constructing method)" ]
 // test @[ "DBA: User-Defined Window Function" ]
