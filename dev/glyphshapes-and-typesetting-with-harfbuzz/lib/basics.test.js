@@ -36,7 +36,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["HB.shape_text() fails on nonexisting font file"] = async function(T, done) {
-    var HB, error, i, len, matcher, probe, probes_and_matchers;
+    var HB, error, i, k, len, matcher, probe, probes_and_matchers;
     HB = require('../../../apps/glyphshapes-and-typesetting-with-harfbuzz');
     probes_and_matchers = [
       [
@@ -47,10 +47,18 @@
           }
         },
         null,
-        "hb-view: Couldn't read or find nosuchfile, or it was empty."
+        "hb-shape: Couldn't read or find nosuchfile, or it was empty."
       ]
     ];
-//.........................................................................................................
+    //.........................................................................................................
+    debug('^3344^', (function() {
+      var results;
+      results = [];
+      for (k in HB) {
+        results.push(k);
+      }
+      return results;
+    })());
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
