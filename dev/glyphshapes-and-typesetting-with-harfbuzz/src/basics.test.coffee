@@ -28,9 +28,10 @@ jr                        = JSON.stringify
 @[ "HB.shape_text() fails on nonexisting font file" ] = ( T, done ) ->
   HB = require '../../../apps/glyphshapes-and-typesetting-with-harfbuzz'
   probes_and_matchers = [
-    [ { text: 'x', font: { path: 'nosuchfile', }, }, null, "hb-view: Couldn't read or find nosuchfile, or it was empty.", ]
+    [ { text: 'x', font: { path: 'nosuchfile', }, }, null, "hb-shape: Couldn't read or find nosuchfile, or it was empty.", ]
     ]
   #.........................................................................................................
+  debug '^3344^', ( k for k of HB )
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       d = HB.shape_text probe
