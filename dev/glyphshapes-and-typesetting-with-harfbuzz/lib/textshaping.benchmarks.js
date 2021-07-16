@@ -194,16 +194,18 @@
   //-----------------------------------------------------------------------------------------------------------
   this._rustybuzz_wasm_shaping = function(cfg, format) {
     return new Promise((resolve) => {
-      var RBW, count, data, font, font_bytes, font_bytes_hex, texts;
+      var RBW, count, data, font, font_bytes, font_bytes_hex, font_idx, texts;
       RBW = require('../../../apps/rustybuzz-wasm/pkg');
       data = this.get_data(cfg);
+      font_idx = 15/* 0 <= font_idx:cardinal <= 15 */
       count = 0;
       ({texts, font} = data);
-      if (!RBW.has_font_bytes()) {
+      //.........................................................................................................
+      if (RBW.font_register_is_free(font_idx)) {
         whisper(`^44766^ sending ${font.path} to rustybuzz-wasm...`);
         font_bytes = FS.readFileSync(font.path);
         font_bytes_hex = font_bytes.toString('hex');
-        RBW.set_font_bytes(font_bytes_hex);
+        RBW.register_font(font_idx, font_bytes_hex);
         whisper("^44766^ done");
       }
       // format          = 'json'
@@ -214,7 +216,7 @@
           var i, len, result, text;
           for (i = 0, len = texts.length; i < len; i++) {
             text = texts[i];
-            result = RBW.shape_text({format, text});
+            result = RBW.shape_text({format, text, font_idx});
             if (gcfg.verbose) {
               show_result('rustybuzz_wasm_shaping', result);
             }
@@ -252,15 +254,11 @@
       word_count: n
     };
     repetitions = 2;
-    test_names = [
-      'harfbuzz_shaping',
-      // 'harfbuzzjs_shaping'
-      'opentypejs_shaping',
-      'fontkit_shaping',
-      'rustybuzz_wasm_json_shaping',
-      'rustybuzz_wasm_short_shaping',
-      'rustybuzz_wasm_rusty_shaping'
-    ];
+    // 'harfbuzz_shaping'
+    // # 'harfbuzzjs_shaping'
+    // 'opentypejs_shaping'
+    // 'fontkit_shaping'
+    test_names = ['rustybuzz_wasm_json_shaping', 'rustybuzz_wasm_short_shaping', 'rustybuzz_wasm_rusty_shaping'];
     if (global.gc != null) {
       global.gc();
     }

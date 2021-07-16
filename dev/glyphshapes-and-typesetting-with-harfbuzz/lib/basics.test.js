@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, badge, debug, echo, help, info, jr, rpr, test, urge, warn, whisper;
+  var CND, FS, PATH, badge, debug, echo, help, info, jr, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -29,6 +29,10 @@
   jr = JSON.stringify;
 
   //...........................................................................................................
+  PATH = require('path');
+
+  FS = require('fs');
+
   // types                     = require '../types'
   // { isa
   //   validate
@@ -74,10 +78,100 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["RBW.register_font(), RBW.font_register_is_free()"] = function(T, done) {
+    var RBW, check_font_registers, font, register_font;
+    RBW = require('../../../apps/rustybuzz-wasm/pkg');
+    font = {};
+    // font.path       = 'Ubuntu-R.ttf'
+    font.path = 'EBGaramond12-Italic.otf';
+    font.path = PATH.resolve(PATH.join(__dirname, '../../../assets/jizura-fonts', font.path));
+    font.idx = 12;
+    //.........................................................................................................
+    (register_font = () => {
+      var font_bytes, font_bytes_hex, matcher, result;
+      font_bytes = FS.readFileSync(font.path);
+      font_bytes_hex = font_bytes.toString('hex');
+      result = RBW.register_font(font.idx, font_bytes_hex);
+      matcher = void 0;
+      return T.eq(result, matcher);
+    })();
+    //.........................................................................................................
+    (check_font_registers = () => {
+      /* TAINT result will depend on not using font indexes 10 and 13 in this test suite as RBW is stateful */
+      var idx, matcher, result;
+      result = (function() {
+        var i, ref, ref1, results;
+        results = [];
+        for (idx = i = ref = font.idx - 1, ref1 = font.idx + 1; (ref <= ref1 ? i <= ref1 : i >= ref1); idx = ref <= ref1 ? ++i : --i) {
+          results.push(RBW.font_register_is_free(idx));
+        }
+        return results;
+      })();
+      matcher = [true, false, true];
+      debug('^7483^', result);
+      return T.eq(result, matcher);
+    })();
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["RBW.shape_text()"] = function(T, done) {
+    var RBW, font, register_font, shape_text_json, text;
+    T.halt_on_error();
+    RBW = require('../../../apps/rustybuzz-wasm/pkg');
+    font = {};
+    // font.path       = 'Ubuntu-R.ttf'
+    font.path = 'EBGaramond12-Italic.otf';
+    font.path = PATH.resolve(PATH.join(__dirname, '../../../assets/jizura-fonts', font.path));
+    font.idx = 12;
+    text = "Jack jumped over the lazy fox";
+    //.........................................................................................................
+    (register_font = () => {
+      var font_bytes, font_bytes_hex;
+      font_bytes = FS.readFileSync(font.path);
+      font_bytes_hex = font_bytes.toString('hex');
+      return RBW.register_font(font.idx, font_bytes_hex);
+    })();
+    //.........................................................................................................
+    (shape_text_json = () => {
+      var format, result;
+      format = 'json';
+      result = RBW.shape_text({
+        format,
+        text,
+        font_idx: font.idx
+      });
+      return debug('^4456^', format, result);
+    })();
+    // T.eq result, matcher
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // @[ "RBW.register_font()" ] = ( T, done ) ->
+  //   RBW             = require '../../../apps/rustybuzz-wasm/pkg'
+  //   font            = {}
+  //   font.path       = PATH.resolve PATH.join __dirname, '../../../assets/jizura-fonts/Ubuntu-R.ttf'
+  //   font.idx        = 12
+  //   font_bytes      = FS.readFileSync font.path
+  //   font_bytes_hex  = font_bytes.toString 'hex'
+  //   result          = RBW.register_font font.idx, font_bytes_hex
+  //   matcher         = undefined
+  //   T.eq result, matcher
+  //   done()
+  //   return null
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "RBW.register_font(), RBW.font_register_is_free()" ]
+      return test(this["RBW.shape_text()"]);
     })();
   }
 

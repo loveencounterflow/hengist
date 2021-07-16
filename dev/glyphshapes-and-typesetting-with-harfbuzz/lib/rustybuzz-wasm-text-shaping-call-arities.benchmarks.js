@@ -94,7 +94,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this._rustybuzz_wasm_shaping = function(cfg, format, batchsize_name) {
     return new Promise((resolve) => {
-      var RBW, avg_batchsize, batch, batches, batchsize, batchsizes, count, data, font, font_bytes, font_bytes_hex, i, len, word, words;
+      var RBW, avg_batchsize, batch, batches, batchsize, batchsizes, count, data, font, font_bytes, font_bytes_hex, font_idx, i, len, word, words;
       batchsize = gcfg.batchsizes[batchsize_name];
       if (batchsize == null) {
         throw new Error(`^34347^ unknown batchsize_name ${rpr(batchsize_name)}`);
@@ -106,6 +106,11 @@
       batches = [];
       words = (data.texts.join(' ')).split(/\s+/);
       batch = null;
+      font_idx = 3;
+      if (globalThis.alert == null) {
+        globalThis.alert = alert;
+      }
+//.........................................................................................................
       for (i = 0, len = words.length; i < len; i++) {
         word = words[i];
         if (batch == null) {
@@ -139,11 +144,12 @@
         return results;
       })();
       //.........................................................................................................
-      if (!RBW.has_font_bytes()) {
+      // debug '^440020^', ( k for k of RBW )
+      if (RBW.font_register_is_free(font_idx)) {
         whisper(`^44766^ sending ${font.path} to rustybuzz-wasm...`);
         font_bytes = FS.readFileSync(font.path);
         font_bytes_hex = font_bytes.toString('hex');
-        RBW.set_font_bytes(font_bytes_hex);
+        RBW.register_font(font_idx, font_bytes_hex);
         whisper("^44766^ done");
       }
       //.........................................................................................................
@@ -152,7 +158,7 @@
           var j, len1, result, text, word_count;
           for (j = 0, len1 = batches.length; j < len1; j++) {
             [word_count, text] = batches[j];
-            result = RBW.shape_text({format, text});
+            result = RBW.shape_text({format, text, font_idx});
             if (gcfg.verbose) {
               show_result('rustybuzz_wasm_shaping', result);
             }
@@ -187,7 +193,7 @@
     var _, bench, cfg, i, j, len, n, ref, ref1, repetitions, test_name, test_names;
     // gcfg.verbose  = true
     bench = BM.new_benchmarks();
-    n = 100;
+    n = 10;
     // n             = 1
     gcfg.verbose = n === 1;
     gcfg.batchsizes.singlebatch = 1;
