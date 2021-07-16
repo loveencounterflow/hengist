@@ -18,6 +18,8 @@ echo                      = CND.echo.bind CND
 test                      = require 'guy-test'
 jr                        = JSON.stringify
 #...........................................................................................................
+PATH                      = require 'path'
+FS                        = require 'fs'
 # types                     = require '../types'
 # { isa
 #   validate
@@ -40,11 +42,78 @@ jr                        = JSON.stringify
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "RBW.register_font(), RBW.font_register_is_free()" ] = ( T, done ) ->
+  RBW             = require '../../../apps/rustybuzz-wasm/pkg'
+  font            = {}
+  # font.path       = 'Ubuntu-R.ttf'
+  font.path       = 'EBGaramond12-Italic.otf'
+  font.path       = PATH.resolve PATH.join __dirname, '../../../assets/jizura-fonts', font.path
+  font.idx        = 12
+  #.........................................................................................................
+  do register_font = =>
+    font_bytes      = FS.readFileSync font.path
+    font_bytes_hex  = font_bytes.toString 'hex'
+    result          = RBW.register_font font.idx, font_bytes_hex
+    matcher         = undefined
+    T.eq result, matcher
+  #.........................................................................................................
+  do check_font_registers = =>
+    ### TAINT result will depend on not using font indexes 10 and 13 in this test suite as RBW is stateful ###
+    result          = ( ( RBW.font_register_is_free idx ) for idx in [ font.idx - 1 .. font.idx + 1 ] )
+    matcher         = [ true, false, true, ]
+    debug '^7483^', result
+    T.eq result, matcher
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "RBW.shape_text()" ] = ( T, done ) ->
+  T.halt_on_error()
+  RBW             = require '../../../apps/rustybuzz-wasm/pkg'
+  font            = {}
+  # font.path       = 'Ubuntu-R.ttf'
+  font.path       = 'EBGaramond12-Italic.otf'
+  font.path       = PATH.resolve PATH.join __dirname, '../../../assets/jizura-fonts', font.path
+  font.idx        = 12
+  text            = "Jack jumped over the lazy fox"
+  #.........................................................................................................
+  do register_font = =>
+    font_bytes      = FS.readFileSync font.path
+    font_bytes_hex  = font_bytes.toString 'hex'
+    RBW.register_font font.idx, font_bytes_hex
+  #.........................................................................................................
+  do shape_text_json = =>
+    format          = 'json'
+    result          = RBW.shape_text { format, text, font_idx: font.idx, }
+    debug '^4456^', format, result
+    # T.eq result, matcher
+  #.........................................................................................................
+  done()
+  return null
+
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "RBW.register_font()" ] = ( T, done ) ->
+#   RBW             = require '../../../apps/rustybuzz-wasm/pkg'
+#   font            = {}
+#   font.path       = PATH.resolve PATH.join __dirname, '../../../assets/jizura-fonts/Ubuntu-R.ttf'
+#   font.idx        = 12
+#   font_bytes      = FS.readFileSync font.path
+#   font_bytes_hex  = font_bytes.toString 'hex'
+#   result          = RBW.register_font font.idx, font_bytes_hex
+#   matcher         = undefined
+#   T.eq result, matcher
+#   done()
+#   return null
+
 
 
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
+  # test @[ "RBW.register_font(), RBW.font_register_is_free()" ]
+  test @[ "RBW.shape_text()" ]
 
