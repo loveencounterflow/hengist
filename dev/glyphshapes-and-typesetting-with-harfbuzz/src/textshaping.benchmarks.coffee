@@ -119,21 +119,23 @@ show_result = ( name, result ) ->
 @_rustybuzz_wasm_shaping = ( cfg, format ) -> new Promise ( resolve ) =>
   RBW             = require '../../../apps/rustybuzz-wasm/pkg'
   data            = @get_data cfg
+  font_idx        = 15 ### 0 <= font_idx:cardinal <= 15 ###
   count           = 0
   { texts
     font }        = data
-  unless RBW.has_font_bytes()
+  #.........................................................................................................
+  if RBW.font_register_is_free font_idx
     whisper "^44766^ sending #{font.path} to rustybuzz-wasm..."
     font_bytes      = FS.readFileSync font.path
     font_bytes_hex  = font_bytes.toString 'hex'
-    RBW.set_font_bytes font_bytes_hex
+    RBW.register_font font_idx, font_bytes_hex
     whisper "^44766^ done"
   # format          = 'json'
   # format          = 'short'
   # format          = 'rusty'
   resolve => new Promise ( resolve ) =>
     for text in texts
-      result  = RBW.shape_text { format, text, }
+      result  = RBW.shape_text { format, text, font_idx, }
       show_result 'rustybuzz_wasm_shaping', result if gcfg.verbose
       count  += text.length ### NOTE counting approximate number of glyphs ###
     resolve count
@@ -153,10 +155,10 @@ show_result = ( name, result ) ->
   cfg           = { line_count: n, word_count: n, }
   repetitions   = 2
   test_names    = [
-    'harfbuzz_shaping'
-    # 'harfbuzzjs_shaping'
-    'opentypejs_shaping'
-    'fontkit_shaping'
+    # 'harfbuzz_shaping'
+    # # 'harfbuzzjs_shaping'
+    # 'opentypejs_shaping'
+    # 'fontkit_shaping'
     'rustybuzz_wasm_json_shaping'
     'rustybuzz_wasm_short_shaping'
     'rustybuzz_wasm_rusty_shaping'

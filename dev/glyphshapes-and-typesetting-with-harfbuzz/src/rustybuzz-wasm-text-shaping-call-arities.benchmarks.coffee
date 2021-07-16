@@ -61,15 +61,18 @@ show_result = ( name, result ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @_rustybuzz_wasm_shaping = ( cfg, format, batchsize_name ) -> new Promise ( resolve ) =>
-  batchsize       = gcfg.batchsizes[ batchsize_name ]
+  batchsize         = gcfg.batchsizes[ batchsize_name ]
   throw new Error "^34347^ unknown batchsize_name #{rpr batchsize_name}" unless batchsize?
-  RBW             = require '../../../apps/rustybuzz-wasm/pkg'
-  data            = @get_data cfg
-  count           = 0
-  { font }        = data
-  batches         = []
-  words           = ( data.texts.join ' ' ).split /\s+/
-  batch           = null
+  RBW               = require '../../../apps/rustybuzz-wasm/pkg'
+  data              = @get_data cfg
+  count             = 0
+  { font }          = data
+  batches           = []
+  words             = ( data.texts.join ' ' ).split /\s+/
+  batch             = null
+  font_idx          = 3
+  globalThis.alert ?= alert
+  #.........................................................................................................
   for word in words
     ( batches.push batch = [] ) unless batch?
     batch.push word
@@ -79,16 +82,17 @@ show_result = ( name, result ) ->
   info "average batchsize is #{avg_batchsize}"
   batches         = ( [ batch.length, batch.join ' ' ] for batch in batches )
   #.........................................................................................................
-  unless RBW.has_font_bytes()
+  # debug '^440020^', ( k for k of RBW )
+  if RBW.font_register_is_free font_idx
     whisper "^44766^ sending #{font.path} to rustybuzz-wasm..."
     font_bytes      = FS.readFileSync font.path
     font_bytes_hex  = font_bytes.toString 'hex'
-    RBW.set_font_bytes font_bytes_hex
+    RBW.register_font font_idx, font_bytes_hex
     whisper "^44766^ done"
   #.........................................................................................................
   resolve => new Promise ( resolve ) =>
     for [ word_count, text, ] in batches
-      result  = RBW.shape_text { format, text, }
+      result  = RBW.shape_text { format, text, font_idx, }
       show_result 'rustybuzz_wasm_shaping', result if gcfg.verbose
       count += word_count ### NOTE counting texts ("slabs", although they're words in this case) ###
     resolve count
@@ -104,7 +108,7 @@ show_result = ( name, result ) ->
 @run_benchmarks = ->
   # gcfg.verbose  = true
   bench         = BM.new_benchmarks()
-  n             = 100
+  n             = 10
   # n             = 1
   gcfg.verbose  = ( n is 1 )
   gcfg.batchsizes.singlebatch = 1
