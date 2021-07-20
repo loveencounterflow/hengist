@@ -193,8 +193,8 @@
     var _, bench, cfg, i, j, len, n, ref, ref1, repetitions, test_name, test_names;
     // gcfg.verbose  = true
     bench = BM.new_benchmarks();
+    // n             = 100
     n = 10;
-    // n             = 1
     gcfg.verbose = n === 1;
     gcfg.batchsizes.singlebatch = 1;
     gcfg.batchsizes.smallbatch = Math.floor(n / 10);
