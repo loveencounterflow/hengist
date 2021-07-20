@@ -20,10 +20,10 @@ jr                        = JSON.stringify
 #...........................................................................................................
 PATH                      = require 'path'
 FS                        = require 'fs'
-# types                     = require '../types'
-# { isa
-#   validate
-#   type_of }               = types
+types                     = new ( require 'intertype' ).Intertype()
+{ isa
+  validate
+  type_of }               = types.export()
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -72,7 +72,6 @@ FS                        = require 'fs'
 @[ "RBW.shape_text()" ] = ( T, done ) ->
   T.halt_on_error()
   RBW             = require '../../../apps/rustybuzz-wasm/pkg'
-  # RBW             = require '/tmp/rustybuzz-npm/node_modules/.pnpm/rustybuzz-wasm@0.1.2/node_modules/rustybuzz-wasm'
   font            = {}
   # font.path       = 'Ubuntu-R.ttf'
   font.path       = 'EBGaramond12-Italic.otf'
@@ -110,11 +109,39 @@ FS                        = require 'fs'
 
 
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "RBW use npm package" ] = ( T, done ) ->
+  # RBW             = require '/tmp/rustybuzz-npm/node_modules/.pnpm/rustybuzz-wasm@0.1.2/node_modules/rustybuzz-wasm'
+  #.........................................................................................................
+  install_with_cli_and_require = ( package_name ) ->
+    CP      = require 'child_process'
+    command = "pnpm install #{package_name}"
+    CP.execSync command, { stdio: 'inherit', }
+    return require package_name
+  #.........................................................................................................
+  # await install_with_npm 'rustybuzz-wasm'
+  RBW = install_with_cli_and_require 'rustybuzz-wasm'
+  for k, v of RBW
+    continue if k.startsWith '_'
+    continue unless isa.function v
+    info k
+  #.........................................................................................................
+  T.ok isa.function RBW.register_font
+  T.ok isa.function RBW.font_register_is_free
+  T.ok isa.function RBW.shape_text
+  T.ok isa.function RBW.glyph_to_svg_pathdata
+  T.ok isa.function RBW.wrap_text_with_arbitrary_slabs
+  T.ok isa.function RBW.find_line_break_positions
+  #.........................................................................................................
+  done()
+  return null
+
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # test @[ "RBW.register_font(), RBW.font_register_is_free()" ]
   # test @[ "RBW.shape_text()" ]
+  test @[ "RBW use npm package" ], { timeout: 50e3, }
 
