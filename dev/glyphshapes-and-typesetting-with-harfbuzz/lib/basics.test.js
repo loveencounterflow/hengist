@@ -121,8 +121,8 @@
   this["RBW.shape_text()"] = function(T, done) {
     var RBW, font, register_font, shape_text_json, text;
     T.halt_on_error();
-    // RBW             = require '../../../apps/rustybuzz-wasm/pkg'
-    RBW = require('/tmp/rustybuzz-npm/node_modules/.pnpm/rustybuzz-wasm@0.1.2/node_modules/rustybuzz-wasm');
+    RBW = require('../../../apps/rustybuzz-wasm/pkg');
+    // RBW             = require '/tmp/rustybuzz-npm/node_modules/.pnpm/rustybuzz-wasm@0.1.2/node_modules/rustybuzz-wasm'
     font = {};
     // font.path       = 'Ubuntu-R.ttf'
     font.path = 'EBGaramond12-Italic.otf';
