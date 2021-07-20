@@ -74,6 +74,7 @@ specifiers:
   random-ext: 2.6.4
   re2: ^1.15.9
   readable-stream: ^3.6.0
+  rustybuzz-wasm: ^0.1.2
   source-map: ^0.7.3
   source-map-resolve: ^0.6.0
   sql-template: ^1.2.2
@@ -163,6 +164,7 @@ dependencies:
   random-ext: 2.6.4
   re2: 1.15.9
   readable-stream: 3.6.0
+  rustybuzz-wasm: 0.1.2
   source-map: 0.7.3
   source-map-resolve: 0.6.0
   sql-template: 1.2.2
@@ -3114,6 +3116,10 @@ packages:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
     dependencies:
       queue-microtask: 1.2.3
+    dev: false
+
+  /rustybuzz-wasm/0.1.2:
+    resolution: {integrity: sha512-/6NjTMSbEH7tCIxJPP1GPonNtB+0hDpp/eC7JMehYn6aDB9UZp62hQt0Mnid4oXoUP5iQy+J1lw6fgqwmBPLtw==}
     dev: false
 
   /safe-buffer/5.1.2:
