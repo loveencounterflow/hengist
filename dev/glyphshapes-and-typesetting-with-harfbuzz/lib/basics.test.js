@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, PATH, badge, debug, echo, help, info, jr, rpr, test, urge, warn, whisper;
+  var CND, FS, PATH, badge, debug, echo, help, info, isa, jr, rpr, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -33,10 +33,9 @@
 
   FS = require('fs');
 
-  // types                     = require '../types'
-  // { isa
-  //   validate
-  //   type_of }               = types
+  types = new (require('intertype')).Intertype();
+
+  ({isa, validate, type_of} = types.export());
 
   //-----------------------------------------------------------------------------------------------------------
   this["HB.shape_text() fails on nonexisting font file"] = async function(T, done) {
@@ -122,7 +121,6 @@
     var RBW, font, register_font, shape_text_json, text;
     T.halt_on_error();
     RBW = require('../../../apps/rustybuzz-wasm/pkg');
-    // RBW             = require '/tmp/rustybuzz-npm/node_modules/.pnpm/rustybuzz-wasm@0.1.2/node_modules/rustybuzz-wasm'
     font = {};
     // font.path       = 'Ubuntu-R.ttf'
     font.path = 'EBGaramond12-Italic.otf';
@@ -167,15 +165,56 @@
   //   done()
   //   return null
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["RBW use npm package"] = function(T, done) {
+    var RBW, install_with_cli_and_require, k, v;
+    // RBW             = require '/tmp/rustybuzz-npm/node_modules/.pnpm/rustybuzz-wasm@0.1.2/node_modules/rustybuzz-wasm'
+    //.........................................................................................................
+    install_with_cli_and_require = function(package_name) {
+      var CP, command;
+      CP = require('child_process');
+      command = `pnpm install ${package_name}`;
+      CP.execSync(command, {
+        stdio: 'inherit'
+      });
+      return require(package_name);
+    };
+    //.........................................................................................................
+    // await install_with_npm 'rustybuzz-wasm'
+    RBW = install_with_cli_and_require('rustybuzz-wasm');
+    for (k in RBW) {
+      v = RBW[k];
+      if (k.startsWith('_')) {
+        continue;
+      }
+      if (!isa.function(v)) {
+        continue;
+      }
+      info(k);
+    }
+    //.........................................................................................................
+    T.ok(isa.function(RBW.register_font));
+    T.ok(isa.function(RBW.font_register_is_free));
+    T.ok(isa.function(RBW.shape_text));
+    T.ok(isa.function(RBW.glyph_to_svg_pathdata));
+    T.ok(isa.function(RBW.wrap_text_with_arbitrary_slabs));
+    T.ok(isa.function(RBW.find_line_break_positions));
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "RBW.register_font(), RBW.font_register_is_free()" ]
+      // test @[ "RBW.shape_text()" ]
+      return test(this["RBW use npm package"], {
+        timeout: 50e3
+      });
     })();
   }
-
-  // test @[ "RBW.register_font(), RBW.font_register_is_free()" ]
-// test @[ "RBW.shape_text()" ]
 
 }).call(this);
 
