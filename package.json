@@ -86,6 +86,7 @@
     "random-ext": "2.6.4",
     "re2": "^1.15.9",
     "readable-stream": "^3.6.0",
+    "rustybuzz-wasm": "^0.1.2",
     "source-map": "^0.7.3",
     "source-map-resolve": "^0.6.0",
     "sql-template": "^1.2.2",
