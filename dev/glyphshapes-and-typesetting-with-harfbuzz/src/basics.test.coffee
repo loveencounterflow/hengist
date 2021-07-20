@@ -72,6 +72,7 @@ FS                        = require 'fs'
 @[ "RBW.shape_text()" ] = ( T, done ) ->
   T.halt_on_error()
   RBW             = require '../../../apps/rustybuzz-wasm/pkg'
+  # RBW             = require '/tmp/rustybuzz-npm/node_modules/.pnpm/rustybuzz-wasm@0.1.2/node_modules/rustybuzz-wasm'
   font            = {}
   # font.path       = 'Ubuntu-R.ttf'
   font.path       = 'EBGaramond12-Italic.otf'
@@ -113,7 +114,7 @@ FS                        = require 'fs'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # test @[ "RBW.register_font(), RBW.font_register_is_free()" ]
-  test @[ "RBW.shape_text()" ]
+  # test @[ "RBW.shape_text()" ]
 
