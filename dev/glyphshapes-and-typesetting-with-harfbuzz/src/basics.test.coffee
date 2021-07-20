@@ -112,6 +112,7 @@ types                     = new ( require 'intertype' ).Intertype()
 #-----------------------------------------------------------------------------------------------------------
 @[ "RBW use npm package" ] = ( T, done ) ->
   # RBW             = require '/tmp/rustybuzz-npm/node_modules/.pnpm/rustybuzz-wasm@0.1.2/node_modules/rustybuzz-wasm'
+  SEMVER = require 'semver'
   #.........................................................................................................
   install_with_cli_and_require = ( package_name ) ->
     CP      = require 'child_process'
@@ -132,6 +133,7 @@ types                     = new ( require 'intertype' ).Intertype()
   T.ok isa.function RBW.glyph_to_svg_pathdata
   T.ok isa.function RBW.wrap_text_with_arbitrary_slabs
   T.ok isa.function RBW.find_line_break_positions
+  T.ok SEMVER.satisfies ( require 'rustybuzz-wasm/package.json' ).version, '>=0.1.2'
   #.........................................................................................................
   done()
   return null
