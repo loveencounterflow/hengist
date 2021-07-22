@@ -110,6 +110,7 @@ types                     = new ( require 'intertype' ).Intertype()
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      debug '^38970^', INTERTEXT.SLABS.slabjoints_from_text probe
       resolve INTERTEXT.SLABS.assemble INTERTEXT.SLABS.slabjoints_from_text probe
   #.........................................................................................................
   done()
@@ -207,11 +208,12 @@ types                     = new ( require 'intertype' ).Intertype()
 
 ############################################################################################################
 if module is require.main then do => # await do =>
-  # await @_demo()
-  test @
+  # test @
+  # test @[ "INTERTEXT.SLABS API" ]
+  # test @[ "INTERTEXT.SLABS.slabjoints_from_text 1" ]
   # test @[ "INTERTEXT.SLABS.slabjoints_from_text 2" ]
   # test @[ "INTERTEXT.SLABS.text_and_joint_from_segment" ]
-  # test @[ "INTERTEXT.SLABS.slabjoints_from_text 1" ]
+  test @[ "INTERTEXT.SLABS.assemble (1)" ]
   # test @[ "INTERTEXT.SLABS.assemble (3)" ]
   # test @[ "INTERTEXT.SLABS.assemble (4)" ]
 
