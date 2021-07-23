@@ -150,15 +150,15 @@ show_result = ( name, result ) ->
 @run_benchmarks = ->
   # gcfg.verbose  = true
   bench         = BM.new_benchmarks()
-  n             = 10
+  n             = 100
   gcfg.verbose  = ( n is 1 )
   cfg           = { line_count: n, word_count: n, }
-  repetitions   = 2
+  repetitions   = 3
   test_names    = [
-    # 'harfbuzz_shaping'
+    'harfbuzz_shaping'
     # # 'harfbuzzjs_shaping'
-    # 'opentypejs_shaping'
-    # 'fontkit_shaping'
+    'opentypejs_shaping'
+    'fontkit_shaping'
     'rustybuzz_wasm_json_shaping'
     'rustybuzz_wasm_short_shaping'
     'rustybuzz_wasm_rusty_shaping'
