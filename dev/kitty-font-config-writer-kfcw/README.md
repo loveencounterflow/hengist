@@ -18,7 +18,7 @@ attribute in the later argument, say `c.x`, will override (shadow) any homonymou
 `b`.
 
 > This is the right way to do it: When doing configurations, we want to start with defaults and end with
-> specific overrides. Linux' Font-Config got this backwars which is one reason it sucks so terribly:
+> specific overrides. Linux' Font-Config got this backwards which is one reason it sucks so terribly:
 > you can't make one of your own rules become effective unless you wrestle against a system that believes
 > earlier settings must override later ones. Anyhoo.
 
