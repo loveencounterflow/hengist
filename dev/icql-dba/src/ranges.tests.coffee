@@ -122,16 +122,19 @@ jp                        = JSON.parse
     insert into css_ranges ( nr, cid_lo, cid_hi, setting )
       values ( $nr, $cid_lo, $cid_hi, $setting )"""
   rules = [
-    [ '=font:superset', [ 'A', 'Z', ],                                      ]
-    [ '=font:font1',    [ 'B', 'H', ], [ 'J', ], [ 'L', ], [ 'N', 'X', ],   ]
-    [ '=font:font2',    [ 'B', 'D', ],                                      ]
-    [ '=font:font3',    [ 'G', 'I', ],                                      ]
-    [ '=font:font4',    [ 'M', 'Q', ],                                      ]
-    [ '=font:font5',    [ 'M', ], [ 'O', 'T', ],                            ]
-    [ '=font:font6',    [ 'M', ], [ 'U', ], [ 'X', 'Y', ],                  ]
+    [ '=font:superset', 'A..Z',               ]
+    [ '=font:font1',    'B..H, J, L, N..X',   ]
+    [ '=font:font2',    'B..D',               ]
+    [ '=font:font3',    'G..I',               ]
+    [ '=font:font4',    'M..Q',               ]
+    [ '=font:font5',    'M, O..T',            ]
+    [ '=font:font6',    'M, U, X..Y',         ]
+    [ '+shape:pointy',  'A, V',               ]
+    [ '+shape:crossed', 'X',                  ]
+    [ '+shape:laddar',  'A, H',               ]
     ]
   nr = 0
-  for [ setting, ranges..., ] in rules
+  for [ setting, ranges, ] in rules
     dba.run insert_setting, { setting, }
     for [ chr_lo, chr_hi, ] in ranges
       chr_hi ?= chr_lo
