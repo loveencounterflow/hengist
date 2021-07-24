@@ -42,15 +42,53 @@ jp                        = JSON.parse
   first_cid         = cid_from_chr 'A'
   last_cid          = cid_from_chr 'Z'
   #.........................................................................................................
+  dba.create_table_function
+    name:         'generate_series'
+    columns:      [ 'n', ]
+    parameters:   [ 'start', 'stop', 'step', ]
+    rows: ( start, stop, step = null ) ->
+      step ?= 1
+      n     = start
+      loop
+        break if n > stop
+        yield [ n, ]
+        n += step
+      return null
+  #.........................................................................................................
   dba.execute SQL"""
+    create table settings ( setting text unique not null primary key );
     create table css_ranges (
         nr      integer not null primary key,
         cid_lo  integer not null,
         cid_hi  integer not null,
         chr_lo  text generated always as ( chr_from_cid( cid_lo ) ) virtual not null,
         chr_hi  text generated always as ( chr_from_cid( cid_hi ) ) virtual not null,
-        setting text    not null );
+        setting text    not null references settings ( setting ) );
     create index cidlohi_idx on css_ranges ( cid_lo, cid_hi );
+    create index cidhi_idx on   css_ranges ( cid_hi );
+    """
+  #.........................................................................................................
+  dba.execute SQL"""
+    create view settings_by_id as
+      with
+      v1 as ( select min( cid_lo ) as first_cid from css_ranges ),
+      v2 as ( select max( cid_hi ) as last_cid  from css_ranges )
+      select
+        r1.n                      as cid,
+        chr_from_cid( r1.n )      as chr,
+        r2.nr                     as nr,
+        r2.cid_lo                 as cid_lo,
+        r2.cid_hi                 as cid_hi,
+        r2.chr_lo                 as chr_lo,
+        r2.chr_hi                 as chr_hi,
+        r2.setting                as setting
+      from
+        v1,
+        v2,
+        generate_series( v1.first_cid, v2.last_cid ) as r1
+        left join css_ranges as r2 on ( r1.n between r2.cid_lo and r2.cid_hi )
+      order by r1.n, r2.nr
+      ;
     """
   #.........................................................................................................
   settings_from_cid = ( cid ) ->
@@ -76,26 +114,31 @@ jp                        = JSON.parse
     return dba.first_value dba.query sql, { cid, }
   dba.create_function name: 'setting_from_cid', call: setting_from_cid
   #.........................................................................................................
-  insert = SQL"""
+  insert_setting = SQL"""
+    insert into settings ( setting )
+      values ( $setting )
+      on conflict ( setting ) do nothing;"""
+  insert_range = SQL"""
     insert into css_ranges ( nr, cid_lo, cid_hi, setting )
       values ( $nr, $cid_lo, $cid_hi, $setting )"""
   rules = [
-    [ 'superset', [ 'A', 'Z', ],                                      ]
-    [ 'font1',    [ 'B', 'H', ], [ 'J', ], [ 'L', ], [ 'N', 'X', ],   ]
-    [ 'font2',    [ 'B', 'D', ],                                      ]
-    [ 'font3',    [ 'G', 'I', ],                                      ]
-    [ 'font4',    [ 'M', 'Q', ],                                      ]
-    [ 'font5',    [ 'M', ], [ 'O', 'T', ],                            ]
-    [ 'font6',    [ 'M', ], [ 'U', ], [ 'X', 'Y', ],                  ]
+    [ '=font:superset', [ 'A', 'Z', ],                                      ]
+    [ '=font:font1',    [ 'B', 'H', ], [ 'J', ], [ 'L', ], [ 'N', 'X', ],   ]
+    [ '=font:font2',    [ 'B', 'D', ],                                      ]
+    [ '=font:font3',    [ 'G', 'I', ],                                      ]
+    [ '=font:font4',    [ 'M', 'Q', ],                                      ]
+    [ '=font:font5',    [ 'M', ], [ 'O', 'T', ],                            ]
+    [ '=font:font6',    [ 'M', ], [ 'U', ], [ 'X', 'Y', ],                  ]
     ]
   nr = 0
   for [ setting, ranges..., ] in rules
+    dba.run insert_setting, { setting, }
     for [ chr_lo, chr_hi, ] in ranges
       chr_hi ?= chr_lo
       cid_lo  = cid_from_chr chr_lo
       cid_hi  = cid_from_chr chr_hi
       nr++
-      dba.run insert, { nr, setting, cid_lo, cid_hi, }
+      dba.run insert_range, { nr, setting, cid_lo, cid_hi, }
   #.........................................................................................................
   console.table dba.list dba.query SQL"""
     select
@@ -105,6 +148,8 @@ jp                        = JSON.parse
         chr_hi                  as chr_hi
       from css_ranges
       order by nr;"""
+  console.table dba.list dba.query SQL"""select * from settings order by setting;"""
+  console.table dba.list dba.query SQL"""select * from settings_by_id;"""
   #.........................................................................................................
   for cid in [ first_cid .. last_cid ]
     chr       = String.fromCodePoint cid
