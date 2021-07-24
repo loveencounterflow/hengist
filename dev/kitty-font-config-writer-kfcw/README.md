@@ -27,12 +27,12 @@ attribute in the later argument, say `c.x`, will override (shadow) any homonymou
 ═════════════════ ══════════════════════════  ══════════════════════════════════════════════════════════════
 superset          ABCDEFGHIJKLMNOPQRSTUVWXYZ  │ CSS-like Configuration with Overlapping Ranges
 ————————————————— ——————————————————————————  ——————————————————————————————————————————————————————————————
-font1             BCDEFGH J L NOPQRSTUVWX    │ [B-H] [J] [L] [N-X]                      ◮ least precedence
-font2             BCD                        │ [B-D]                                    │
-font3                  GHI                   │ [G-I]                                    │
-font4                        MNOPQ           │ [M-Q]                                    │
-font5                        M OPQRST        │ [M] [O-T]                                │
-font6                        M       U  XY   │ [M] [U] [X-Y]                            │ most precedence
+font1              BCDEFGH J L NOPQRSTUVWX    │ [B-H] [J] [L] [N-X]                      ◮ least precedence
+font2              BCD                        │ [B-D]                                    │
+font3                   GHI                   │ [G-I]                                    │
+font4                         MNOPQ           │ [M-Q]                                    │
+font5                         M OPQRST        │ [M] [O-T]                                │
+font6                         M       U  XY   │ [M] [U] [X-Y]                            │ most precedence
 ═════════════════ ══════════════════════════  ══════════════════════════════════════════════════════════════
 superset          ABCDEFGHIJKLMNOPQRSTUVWXYZ  │
 ————————————————— ——————————————————————————  ——————————————————————————————————————————————————————————————
@@ -58,8 +58,8 @@ NB
 ```
 
 [The Kitty terminal emulator](https://sw.kovidgoyal.net/kitty/index.html) is special for a terminal emulator
-in that **Kitty allows to configue fonts by codepoints and codepoint ranges** similar to what is possible on
-web pages using CSS3 Unicode Ranges; in fact, its syntax—example:
+in that **Kitty allows to configure fonts by codepoints and codepoint ranges** similar to what is possible
+on web pages using CSS3 Unicode Ranges; in fact, its syntax—example:
 
 ```
 symbol_map U+4E00-U+9FFF  HanaMinA Regular
