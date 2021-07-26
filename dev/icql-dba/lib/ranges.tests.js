@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, NCR, Ncr, PATH, SQL, TAGS, Tags, badge, debug, echo, help, info, isa, jp, jr, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Dbatags, H, NCR, Ncr, PATH, SQL, badge, dba_path, debug, echo, freeze, help, info, isa, jp, jr, lets, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -49,9 +49,76 @@
 
   jp = JSON.parse;
 
-  Tags = (function() {
+  dba_path = '../../../apps/icql-dba';
+
+  ({lets, freeze} = require('letsfreezethat'));
+
+  //===========================================================================================================
+  types.declare('tags_constructor_cfg', {
+    tests: {
+      '@isa.object x': function(x) {
+        return this.isa.object(x);
+      },
+      'x.prefix is a prefix': function(x) {
+        if (!this.isa.text(x.prefix)) {
+          return false;
+        }
+        if (x.prefix === '') {
+          return true;
+        }
+        return /^[_a-z][_a-z0-9]*$/.test(x.prefix);
+      }
+    }
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
+  types.defaults = {
+    tags_constructor_cfg: {
+      dba: null,
+      prefix: 't_'
+    }
+  };
+
+  Dbatags = (function() {
     //===========================================================================================================
-    class Tags {
+    class Dbatags {
+      //---------------------------------------------------------------------------------------------------------
+      constructor(cfg) {
+        validate.tags_constructor_cfg(this.cfg = {...types.defaults.tags_constructor_cfg, ...cfg});
+        if (this.cfg.dba != null) {
+          this.dba = this.cfg.dba;
+          delete this.cfg.dba;
+        } else {
+          this.dba = new (require(dba_path)).Dba();
+        }
+        this.cfg = freeze(this.cfg);
+        this._create_db_structure();
+        return void 0;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _create_db_structure() {
+        var x;
+        x = this.cfg.prefix;
+        this.dba.execute(SQL`create table if not exists ${x}tags ( tag text unique not null primary key );
+create table if not exists ${x}tagged_cid_ranges (
+    nr      integer not null primary key,
+    cid_lo  integer not null,
+    cid_hi  integer not null,
+    -- chr_lo  text generated always as ( chr_from_cid( cid_lo ) ) virtual not null,
+    -- chr_hi  text generated always as ( chr_from_cid( cid_hi ) ) virtual not null,
+    tag     text    not null references ${x}tags ( tag ) );
+create index if not exists ${x}cidlohi_idx on ${x}tagged_cid_ranges ( cid_lo, cid_hi );
+create index if not exists ${x}cidhi_idx on   ${x}tagged_cid_ranges ( cid_hi );
+create table if not exists ${x}tagged_cids (
+    cid     integer not null,
+    -- chr     text    not null,
+    tag     text    not null,
+    value   json    not null,
+  primary key ( cid, tag ) );`);
+        return null;
+      }
+
       //---------------------------------------------------------------------------------------------------------
       tags_from_tagchain(tagchain) {
         var R, i, key, len, match, mode, ref, tag_expression, value;
@@ -85,13 +152,12 @@
 
     };
 
-    Tags.prototype.tag_pattern = /^(?<mode>[-+])(?<key>[a-zA-Z_\/\$][-a-zA-Z0-9_\/\$]*)(:(?<value>[^-+]+|'.*'|".*"))?$/;
+    //---------------------------------------------------------------------------------------------------------
+    Dbatags.prototype.tag_pattern = /^(?<mode>[-+])(?<key>[a-zA-Z_\/\$][-a-zA-Z0-9_\/\$]*)(:(?<value>[^-+]+|'.*'|".*"))?$/;
 
-    return Tags;
+    return Dbatags;
 
   }).call(this);
-
-  TAGS = new Tags();
 
   //===========================================================================================================
   Ncr = class Ncr {
@@ -124,8 +190,8 @@
   NCR = new Ncr();
 
   //###########################################################################################################
-  this["TAGS: tags_from_tagchain"] = async function(T, done) {
-    var error, i, len, matcher, probe, probes_and_matchers;
+  this["tags: tags_from_tagchain"] = async function(T, done) {
+    var dbatags, error, i, len, matcher, probe, probes_and_matchers;
     if (T != null) {
       T.halt_on_error();
     }
@@ -186,12 +252,13 @@
         }
       ]
     ];
+    dbatags = new Dbatags();
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
           var result;
-          result = TAGS.tags_from_tagchain(probe);
+          result = dbatags.tags_from_tagchain(probe);
           return resolve(result);
         });
       });
@@ -201,13 +268,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: ranges (1)"] = function(T, done) {
-    var Dba, E, chr, chr_from_cid, cid, cid_from_chr, cid_hi, cid_lo, dba, first_cid, i, insert_range, insert_tag, j, k, last_cid, len, len1, nr, ranges, ref, ref1, ref2, rules, tag, tag_from_cid, tags, tags_from_cid, value;
+    var Dba, E, chr, chr_from_cid, cid, cid_from_chr, cid_hi, cid_lo, dba, dbatags, first_cid, i, insert_range, insert_tag, j, k, last_cid, len, len1, nr, prefix, ranges, ref, ref1, ref2, rules, tag, tags, tags_from_cid, value;
     if (T != null) {
       T.halt_on_error();
     }
     ({Dba} = require('../../../apps/icql-dba'));
     E = require('../../../apps/icql-dba/lib/errors');
+    prefix = 't_';
     dba = new Dba();
+    dbatags = new Dbatags({dba, prefix});
     cid_from_chr = function(chr) {
       return chr.codePointAt(0);
     };
@@ -241,51 +310,36 @@
         return null;
       }
     });
-    //.........................................................................................................
-    dba.execute(SQL`create table tags ( tag text unique not null primary key );
-create table tagged_cid_ranges (
-    nr      integer not null primary key,
-    cid_lo  integer not null,
-    cid_hi  integer not null,
-    chr_lo  text generated always as ( chr_from_cid( cid_lo ) ) virtual not null,
-    chr_hi  text generated always as ( chr_from_cid( cid_hi ) ) virtual not null,
-    tag     text    not null references tags ( tag ) );
-create index cidlohi_idx on tagged_cid_ranges ( cid_lo, cid_hi );
-create index cidhi_idx on   tagged_cid_ranges ( cid_hi );
-create table tagged_cids (
-    cid     integer not null,
-    chr     text    not null,
-    tag     text    not null,
-    value   json    not null,
-  primary key ( cid, tag ) );`);
-    //.........................................................................................................
-    dba.execute(SQL`create view tags_by_id as
-  with
-  v1 as ( select min( cid_lo ) as first_cid from tagged_cid_ranges ),
-  v2 as ( select max( cid_hi ) as last_cid  from tagged_cid_ranges )
-  select
-    r1.n                      as cid,
-    chr_from_cid( r1.n )      as chr,
-    r2.nr                     as nr,
-    r2.cid_lo                 as cid_lo,
-    r2.cid_hi                 as cid_hi,
-    r2.chr_lo                 as chr_lo,
-    r2.chr_hi                 as chr_hi,
-    r2.tag                    as tag
-  from
-    v1,
-    v2,
-    generate_series( v1.first_cid, v2.last_cid ) as r1
-    left join tagged_cid_ranges as r2 on ( r1.n between r2.cid_lo and r2.cid_hi )
-  order by r1.n, r2.nr
-  ;`);
+    // #.........................................................................................................
+    // dba.execute SQL"""
+    //   create view tags_by_id as
+    //     with
+    //     v1 as ( select min( cid_lo ) as first_cid from tagged_cid_ranges ),
+    //     v2 as ( select max( cid_hi ) as last_cid  from tagged_cid_ranges )
+    //     select
+    //       r1.n                      as cid,
+    //       chr_from_cid( r1.n )      as chr,
+    //       r2.nr                     as nr,
+    //       r2.cid_lo                 as cid_lo,
+    //       r2.cid_hi                 as cid_hi,
+    //       -- r2.chr_lo                 as chr_lo,
+    //       -- r2.chr_hi                 as chr_hi,
+    //       r2.tag                    as tag
+    //     from
+    //       v1,
+    //       v2,
+    //       generate_series( v1.first_cid, v2.last_cid ) as r1
+    //       left join tagged_cid_ranges as r2 on ( r1.n between r2.cid_lo and r2.cid_hi )
+    //     order by r1.n, r2.nr
+    //     ;
+    //   """
     //.........................................................................................................
     tags_from_cid = function(cid) {
       var R, ref, row, sql;
       R = [];
       sql = SQL`select
     tag
-  from tagged_cid_ranges
+  from ${prefix}tagged_cid_ranges
   where $cid between cid_lo and cid_hi
   order by nr asc;`;
       ref = dba.query(sql, {cid});
@@ -295,29 +349,14 @@ create table tagged_cids (
       return R;
     };
     dba.create_function({
-      name: 'tags_from_cid',
+      name: `${prefix}tags_from_cid`,
       call: tags_from_cid
     });
     //.........................................................................................................
-    tag_from_cid = function(cid) {
-      var sql;
-      sql = SQL`select
-    tag
-  from tagged_cid_ranges
-  where $cid between cid_lo and cid_hi
-  order by nr desc
-  limit 1;`;
-      return dba.first_value(dba.query(sql, {cid}));
-    };
-    dba.create_function({
-      name: 'tag_from_cid',
-      call: tag_from_cid
-    });
-    //.........................................................................................................
-    insert_tag = SQL`insert into tags ( tag )
+    insert_tag = SQL`insert into ${prefix}tags ( tag )
   values ( $tag )
   on conflict ( tag ) do nothing;`;
-    insert_range = SQL`insert into tagged_cid_ranges ( nr, cid_lo, cid_hi, tag )
+    insert_range = SQL`insert into ${prefix}tagged_cid_ranges ( nr, cid_lo, cid_hi, tag )
   values ( $nr, $cid_lo, $cid_hi, $tag )`;
     rules = [
       // [ '+superset',      'A..Z',               ]
@@ -363,25 +402,25 @@ create table tagged_cids (
     console.table(dba.list(dba.query(SQL`select
     nr                      as nr,
     tag                     as tag,
-    chr_lo                  as chr_lo,
-    chr_hi                  as chr_hi
-  from tagged_cid_ranges
+    chr_from_cid( cid_lo )  as chr_lo,
+    chr_from_cid( cid_hi )  as chr_hi
+  from ${prefix}tagged_cid_ranges
   order by nr;`)));
-    console.table(dba.list(dba.query(SQL`select * from tags order by tag;`)));
-    console.table(dba.list(dba.query(SQL`select * from tags_by_id order by tag, cid, nr;`)));
+    console.table(dba.list(dba.query(SQL`select * from ${prefix}tags order by tag;`)));
+// console.table dba.list dba.query SQL"""select * from #{prefix}tags_by_id order by tag, cid, nr;"""
 //.........................................................................................................
     for (cid = k = ref1 = first_cid, ref2 = last_cid; (ref1 <= ref2 ? k <= ref2 : k >= ref2); cid = ref1 <= ref2 ? ++k : --k) {
       chr = String.fromCodePoint(cid);
-      tags = TAGS.tags_from_tagchain(tags_from_cid(cid));
+      tags = dbatags.tags_from_tagchain(tags_from_cid(cid));
       info(CND.gold(chr), CND.blue(tags));
       for (tag in tags) {
         value = tags[tag];
         value = JSON.stringify(value);
-        dba.run(SQL`insert into tagged_cids ( cid, chr, tag, value )
-  values ( $cid, $chr, $tag, $value );`, {cid, chr, tag, value});
+        dba.run(SQL`insert into ${prefix}tagged_cids ( cid, tag, value )
+  values ( $cid, $tag, $value );`, {cid, tag, value});
       }
     }
-    console.table(dba.list(dba.query(SQL`select * from tagged_cids order by cid, tag;`)));
+    console.table(dba.list(dba.query(SQL`select * from ${prefix}tagged_cids order by cid, tag;`)));
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -391,7 +430,7 @@ create table tagged_cids (
     (() => {
       // test @, { timeout: 10e3, }
       // test @[ "DBA: ranges (1)" ]
-      // test @[ "TAGS: tags_from_tagchain" ]
+      // test @[ "tags: tags_from_tagchain" ]
       return this["DBA: ranges (1)"]();
     })();
   }
