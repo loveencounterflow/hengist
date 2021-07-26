@@ -54,7 +54,7 @@
   ({lets, freeze} = require('letsfreezethat'));
 
   //===========================================================================================================
-  types.declare('tags_constructor_cfg', {
+  types.declare('dbatags_constructor_cfg', {
     tests: {
       '@isa.object x': function(x) {
         return this.isa.object(x);
@@ -72,10 +72,57 @@
   });
 
   //-----------------------------------------------------------------------------------------------------------
+  types.declare('dbatags_tag', {
+    tests: {
+      '@isa.nonempty_text x': function(x) {
+        return this.isa.nonempty_text(x);
+      }
+    }
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
+  types.declare('dbatags_add_tag_cfg', {
+    tests: {
+      '@isa.object x': function(x) {
+        return this.isa.object(x);
+      },
+      '@isa.dbatags_tag x.tag': function(x) {
+        return this.isa.dbatags_tag(x.tag);
+      }
+    }
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
+  types.declare('dbatags_add_tagged_range_cfg', {
+    tests: {
+      '@isa.object x': function(x) {
+        return this.isa.object(x);
+      },
+      '@isa.integer x.lo': function(x) {
+        return this.isa.integer(x.lo);
+      },
+      '@isa.integer x.hi': function(x) {
+        return this.isa.integer(x.hi);
+      },
+      '@isa.dbatags_tag x.tag': function(x) {
+        return this.isa.dbatags_tag(x.tag);
+      }
+    }
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
   types.defaults = {
-    tags_constructor_cfg: {
+    dbatags_constructor_cfg: {
       dba: null,
       prefix: 't_'
+    },
+    dbatags_add_tag_cfg: {
+      tag: null
+    },
+    dbatags_add_tagged_range_cfg: {
+      tag: null,
+      lo: null,
+      hi: null
     }
   };
 
@@ -84,7 +131,7 @@
     class Dbatags {
       //---------------------------------------------------------------------------------------------------------
       constructor(cfg) {
-        validate.tags_constructor_cfg(this.cfg = {...types.defaults.tags_constructor_cfg, ...cfg});
+        validate.dbatags_constructor_cfg(this.cfg = {...types.defaults.dbatags_constructor_cfg, ...cfg});
         if (this.cfg.dba != null) {
           this.dba = this.cfg.dba;
           delete this.cfg.dba;
@@ -93,6 +140,7 @@
         }
         this.cfg = freeze(this.cfg);
         this._create_db_structure();
+        this._compile_sql();
         return void 0;
       }
 
@@ -102,20 +150,48 @@
         x = this.cfg.prefix;
         this.dba.execute(SQL`create table if not exists ${x}tags ( tag text unique not null primary key );
 create table if not exists ${x}tagged_cid_ranges (
-    nr      integer not null primary key,
-    cid_lo  integer not null,
-    cid_hi  integer not null,
-    -- chr_lo  text generated always as ( chr_from_cid( cid_lo ) ) virtual not null,
-    -- chr_hi  text generated always as ( chr_from_cid( cid_hi ) ) virtual not null,
+    nr      integer primary key,
+    lo      integer not null,
+    hi      integer not null,
+    -- chr_lo  text generated always as ( chr_from_cid( lo ) ) virtual not null,
+    -- chr_hi  text generated always as ( chr_from_cid( hi ) ) virtual not null,
     tag     text    not null references ${x}tags ( tag ) );
-create index if not exists ${x}cidlohi_idx on ${x}tagged_cid_ranges ( cid_lo, cid_hi );
-create index if not exists ${x}cidhi_idx on   ${x}tagged_cid_ranges ( cid_hi );
+create index if not exists ${x}cidlohi_idx on ${x}tagged_cid_ranges ( lo, hi );
+create index if not exists ${x}cidhi_idx on   ${x}tagged_cid_ranges ( hi );
 create table if not exists ${x}tagged_cids (
     cid     integer not null,
     -- chr     text    not null,
     tag     text    not null,
     value   json    not null,
   primary key ( cid, tag ) );`);
+        return null;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _compile_sql() {
+        var x;
+        x = this.cfg.prefix;
+        this.sql = {
+          insert_tag: SQL`insert into ${x}tags ( tag )
+  values ( $tag )
+  on conflict ( tag ) do nothing;`,
+          insert_tagged_range: SQL`insert into ${x}tagged_cid_ranges ( lo, hi, tag )
+  values ( $lo, $hi, $tag )`
+        };
+        return null;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      add_tag(cfg) {
+        validate.dbatags_add_tag_cfg(cfg = {...types.defaults.dbatags_add_tag_cfg, ...cfg});
+        this.dba.run(this.sql.insert_tag, cfg);
+        return null;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      add_tagged_range(cfg) {
+        validate.dbatags_add_tagged_range_cfg(cfg = {...types.defaults.dbatags_add_tagged_range_cfg, ...cfg});
+        this.dba.run(this.sql.insert_tagged_range, cfg);
         return null;
       }
 
@@ -268,7 +344,7 @@ create table if not exists ${x}tagged_cids (
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: ranges (1)"] = function(T, done) {
-    var Dba, E, chr, chr_from_cid, cid, cid_from_chr, cid_hi, cid_lo, dba, dbatags, first_cid, i, insert_range, insert_tag, j, k, last_cid, len, len1, nr, prefix, ranges, ref, ref1, ref2, rules, tag, tags, tags_from_cid, value;
+    var Dba, E, chr, chr_from_cid, cid, cid_from_chr, dba, dbatags, first_cid, hi, i, j, k, last_cid, len, len1, lo, prefix, ranges, ref, ref1, ref2, rules, tag, tags, tags_from_cid, value;
     if (T != null) {
       T.halt_on_error();
     }
@@ -314,14 +390,14 @@ create table if not exists ${x}tagged_cids (
     // dba.execute SQL"""
     //   create view tags_by_id as
     //     with
-    //     v1 as ( select min( cid_lo ) as first_cid from tagged_cid_ranges ),
-    //     v2 as ( select max( cid_hi ) as last_cid  from tagged_cid_ranges )
+    //     v1 as ( select min( lo ) as first_cid from tagged_cid_ranges ),
+    //     v2 as ( select max( hi ) as last_cid  from tagged_cid_ranges )
     //     select
     //       r1.n                      as cid,
     //       chr_from_cid( r1.n )      as chr,
     //       r2.nr                     as nr,
-    //       r2.cid_lo                 as cid_lo,
-    //       r2.cid_hi                 as cid_hi,
+    //       r2.lo                 as lo,
+    //       r2.hi                 as hi,
     //       -- r2.chr_lo                 as chr_lo,
     //       -- r2.chr_hi                 as chr_hi,
     //       r2.tag                    as tag
@@ -329,7 +405,7 @@ create table if not exists ${x}tagged_cids (
     //       v1,
     //       v2,
     //       generate_series( v1.first_cid, v2.last_cid ) as r1
-    //       left join tagged_cid_ranges as r2 on ( r1.n between r2.cid_lo and r2.cid_hi )
+    //       left join tagged_cid_ranges as r2 on ( r1.n between r2.lo and r2.hi )
     //     order by r1.n, r2.nr
     //     ;
     //   """
@@ -340,7 +416,7 @@ create table if not exists ${x}tagged_cids (
       sql = SQL`select
     tag
   from ${prefix}tagged_cid_ranges
-  where $cid between cid_lo and cid_hi
+  where $cid between lo and hi
   order by nr asc;`;
       ref = dba.query(sql, {cid});
       for (row of ref) {
@@ -353,11 +429,6 @@ create table if not exists ${x}tagged_cids (
       call: tags_from_cid
     });
     //.........................................................................................................
-    insert_tag = SQL`insert into ${prefix}tags ( tag )
-  values ( $tag )
-  on conflict ( tag ) do nothing;`;
-    insert_range = SQL`insert into ${prefix}tagged_cid_ranges ( nr, cid_lo, cid_hi, tag )
-  values ( $nr, $cid_lo, $cid_hi, $tag )`;
     rules = [
       // [ '+superset',      'A..Z',               ]
       ['+font:fallback',
@@ -384,26 +455,21 @@ create table if not exists ${x}tagged_cids (
       ['+shape/ladder',
       'A, H']
     ];
-    nr = 0;
     for (i = 0, len = rules.length; i < len; i++) {
       [tag, ranges] = rules[i];
-      dba.run(insert_tag, {tag});
+      dbatags.add_tag({tag});
       ref = NCR.parse_multirange_declaration(ranges);
       for (j = 0, len1 = ref.length; j < len1; j++) {
-        ({
-          lo: cid_lo,
-          hi: cid_hi
-        } = ref[j]);
-        nr++;
-        dba.run(insert_range, {nr, tag, cid_lo, cid_hi});
+        ({lo, hi} = ref[j]);
+        dbatags.add_tagged_range({tag, lo, hi});
       }
     }
     //.........................................................................................................
     console.table(dba.list(dba.query(SQL`select
     nr                      as nr,
     tag                     as tag,
-    chr_from_cid( cid_lo )  as chr_lo,
-    chr_from_cid( cid_hi )  as chr_hi
+    chr_from_cid( lo )  as chr_lo,
+    chr_from_cid( hi )  as chr_hi
   from ${prefix}tagged_cid_ranges
   order by nr;`)));
     console.table(dba.list(dba.query(SQL`select * from ${prefix}tags order by tag;`)));
