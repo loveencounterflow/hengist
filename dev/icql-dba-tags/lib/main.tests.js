@@ -254,6 +254,89 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["tags: parse_tagex"] = async function(T, done) {
+    var Dtags, dtags, error, i, len, matcher, probe, probes_and_matchers;
+    // T?.halt_on_error()
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        {
+          tagex: '+foo'
+        },
+        {
+          mode: '+',
+          tag: 'foo',
+          value: true
+        }
+      ],
+      [
+        {
+          tagex: '-foo'
+        },
+        {
+          mode: '-',
+          tag: 'foo',
+          value: false
+        }
+      ],
+      [
+        {
+          tagex: '+shape/excentricity:0.2'
+        },
+        {
+          mode: '+',
+          tag: 'shape/excentricity',
+          value: 0.2
+        }
+      ],
+      [
+        {
+          tagex: '+css/font-family:"Helvetica"'
+        },
+        {
+          mode: '+',
+          tag: 'css/font-family',
+          value: 'Helvetica'
+        }
+      ],
+      [
+        {
+          tagex: '-css/font-family:"Helvetica"'
+        },
+        null,
+        "Dtags_subtractive_value"
+      ],
+      [
+        {
+          tagex: '*bar'
+        },
+        null,
+        "Dtags_invalid_tagex"
+      ],
+      [
+        {
+          tagex: '+bar:blah'
+        },
+        null,
+        "Dtags_illegal_tagex_value_literal"
+      ]
+    ];
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
+    dtags = new Dtags();
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          var result;
+          result = dtags.parse_tagex(probe);
+          return resolve(result);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["tags: add_tagged_range"] = async function(T, done) {
     var Dtags, dtags, error, get_tagged_ranges, i, len, matcher, prefix, probe, probes_and_matchers;
     // T?.halt_on_error()
@@ -516,7 +599,8 @@
       // test @[ "DBA: ranges (1)" ]
       // test @[ "tags: tags_from_tagchain" ]
       // test @[ "tags: add_tagged_range" ]
-      return test(this["tags: add_tag with value"]);
+      // test @[ "tags: add_tag with value" ]
+      return test(this["tags: parse_tagex"]);
     })();
   }
 
