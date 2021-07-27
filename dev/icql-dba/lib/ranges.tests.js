@@ -158,7 +158,7 @@ create table if not exists ${x}tagged_cid_ranges (
     tag     text    not null references ${x}tags ( tag ) );
 create index if not exists ${x}cidlohi_idx on ${x}tagged_cid_ranges ( lo, hi );
 create index if not exists ${x}cidhi_idx on   ${x}tagged_cid_ranges ( hi );
-create table if not exists ${x}tagged_cids (
+create table if not exists ${x}tagged_cids_cache (
     cid     integer not null,
     -- chr     text    not null,
     tag     text    not null,
@@ -366,50 +366,6 @@ create table if not exists ${x}tagged_cids (
     first_cid = cid_from_chr('A');
     last_cid = cid_from_chr('Z');
     //.........................................................................................................
-    dba.create_table_function({
-      name: 'generate_series',
-      columns: ['n'],
-      parameters: ['start', 'stop', 'step'],
-      rows: function*(start, stop, step = null) {
-        var n;
-        if (step == null) {
-          step = 1;
-        }
-        n = start;
-        while (true) {
-          if (n > stop) {
-            break;
-          }
-          yield [n];
-          n += step;
-        }
-        return null;
-      }
-    });
-    // #.........................................................................................................
-    // dba.execute SQL"""
-    //   create view tags_by_id as
-    //     with
-    //     v1 as ( select min( lo ) as first_cid from tagged_cid_ranges ),
-    //     v2 as ( select max( hi ) as last_cid  from tagged_cid_ranges )
-    //     select
-    //       r1.n                      as cid,
-    //       chr_from_cid( r1.n )      as chr,
-    //       r2.nr                     as nr,
-    //       r2.lo                 as lo,
-    //       r2.hi                 as hi,
-    //       -- r2.chr_lo                 as chr_lo,
-    //       -- r2.chr_hi                 as chr_hi,
-    //       r2.tag                    as tag
-    //     from
-    //       v1,
-    //       v2,
-    //       generate_series( v1.first_cid, v2.last_cid ) as r1
-    //       left join tagged_cid_ranges as r2 on ( r1.n between r2.lo and r2.hi )
-    //     order by r1.n, r2.nr
-    //     ;
-    //   """
-    //.........................................................................................................
     tags_from_cid = function(cid) {
       var R, ref, row, sql;
       R = [];
@@ -468,8 +424,8 @@ create table if not exists ${x}tagged_cids (
     console.table(dba.list(dba.query(SQL`select
     nr                      as nr,
     tag                     as tag,
-    chr_from_cid( lo )  as chr_lo,
-    chr_from_cid( hi )  as chr_hi
+    chr_from_cid( lo )      as chr_lo,
+    chr_from_cid( hi )      as chr_hi
   from ${prefix}tagged_cid_ranges
   order by nr;`)));
     console.table(dba.list(dba.query(SQL`select * from ${prefix}tags order by tag;`)));
@@ -482,11 +438,11 @@ create table if not exists ${x}tagged_cids (
       for (tag in tags) {
         value = tags[tag];
         value = JSON.stringify(value);
-        dba.run(SQL`insert into ${prefix}tagged_cids ( cid, tag, value )
+        dba.run(SQL`insert into ${prefix}tagged_cids_cache ( cid, tag, value )
   values ( $cid, $tag, $value );`, {cid, tag, value});
       }
     }
-    console.table(dba.list(dba.query(SQL`select * from ${prefix}tagged_cids order by cid, tag;`)));
+    console.table(dba.list(dba.query(SQL`select * from ${prefix}tagged_cids_cache order by cid, tag;`)));
     return typeof done === "function" ? done() : void 0;
   };
 
