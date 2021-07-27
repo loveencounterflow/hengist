@@ -111,6 +111,18 @@
   });
 
   //-----------------------------------------------------------------------------------------------------------
+  types.declare('dbatags_tagchain_from_cid_cfg', {
+    tests: {
+      '@isa.object x': function(x) {
+        return this.isa.object(x);
+      },
+      '@isa.integer x.cid': function(x) {
+        return this.isa.integer(x.cid);
+      }
+    }
+  });
+
+  //-----------------------------------------------------------------------------------------------------------
   types.defaults = {
     dbatags_constructor_cfg: {
       dba: null,
@@ -123,6 +135,9 @@
       tag: null,
       lo: null,
       hi: null
+    },
+    dbatags_tagchain_from_cid_cfg: {
+      cid: null
     }
   };
 
@@ -149,15 +164,15 @@
         var x;
         x = this.cfg.prefix;
         this.dba.execute(SQL`create table if not exists ${x}tags ( tag text unique not null primary key );
-create table if not exists ${x}tagged_cid_ranges (
+create table if not exists ${x}tagged_ranges (
     nr      integer primary key,
     lo      integer not null,
     hi      integer not null,
     -- chr_lo  text generated always as ( chr_from_cid( lo ) ) virtual not null,
     -- chr_hi  text generated always as ( chr_from_cid( hi ) ) virtual not null,
     tag     text    not null references ${x}tags ( tag ) );
-create index if not exists ${x}cidlohi_idx on ${x}tagged_cid_ranges ( lo, hi );
-create index if not exists ${x}cidhi_idx on   ${x}tagged_cid_ranges ( hi );
+create index if not exists ${x}cidlohi_idx on ${x}tagged_ranges ( lo, hi );
+create index if not exists ${x}cidhi_idx on   ${x}tagged_ranges ( hi );
 create table if not exists ${x}tagged_cids_cache (
     cid     integer not null,
     -- chr     text    not null,
@@ -175,8 +190,14 @@ create table if not exists ${x}tagged_cids_cache (
           insert_tag: SQL`insert into ${x}tags ( tag )
   values ( $tag )
   on conflict ( tag ) do nothing;`,
-          insert_tagged_range: SQL`insert into ${x}tagged_cid_ranges ( lo, hi, tag )
-  values ( $lo, $hi, $tag )`
+          insert_tagged_range: SQL`insert into ${x}tagged_ranges ( lo, hi, tag )
+  values ( $lo, $hi, $tag )`,
+          tags_from_cid: SQL`select
+    tag,
+    value
+  from ${x}tagged_ranges
+  where $cid between lo and hi
+  order by nr asc;`
         };
         return null;
       }
@@ -185,14 +206,37 @@ create table if not exists ${x}tagged_cids_cache (
       add_tag(cfg) {
         validate.dbatags_add_tag_cfg(cfg = {...types.defaults.dbatags_add_tag_cfg, ...cfg});
         this.dba.run(this.sql.insert_tag, cfg);
+        this._clear_cache_for_range(cfg);
         return null;
       }
+
+      //---------------------------------------------------------------------------------------------------------
+      _clear_cache_for_range(cfg) {}
 
       //---------------------------------------------------------------------------------------------------------
       add_tagged_range(cfg) {
         validate.dbatags_add_tagged_range_cfg(cfg = {...types.defaults.dbatags_add_tagged_range_cfg, ...cfg});
         this.dba.run(this.sql.insert_tagged_range, cfg);
         return null;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      tagchain_from_cid(cfg) {
+        var R, ref, row;
+        validate.dbatags_tagchain_from_cid_cfg(cfg = {...types.defaults.dbatags_tagchain_from_cid_cfg, ...cfg});
+        R = [];
+        ref = this.dba.query(this.sql.tags_from_cid, {
+          cid: cfg.cid
+        });
+        for (row of ref) {
+          R.push([row.tag, row.value]);
+        }
+        return R;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      tags_from_cid(cfg) {
+        throw new Error('XXXXXXXXXXXXXXX');
       }
 
       //---------------------------------------------------------------------------------------------------------
@@ -343,8 +387,52 @@ create table if not exists ${x}tagged_cids_cache (
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["tags: caching (1)"] = function(T, done) {
+    var Dba, E, dba, dbatags, get_cache, get_tagged_ranges, prefix;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    //.........................................................................................................
+    ({Dba} = require('../../../apps/icql-dba'));
+    E = require('../../../apps/icql-dba/lib/errors');
+    prefix = 't_';
+    dba = new Dba();
+    dbatags = new Dbatags({dba, prefix});
+    //.........................................................................................................
+    get_tagged_ranges = function() {
+      return dba.list(dba.query(SQL`select * from t_tagged_ranges order by lo, hi, tag;`));
+    };
+    get_cache = function() {
+      return dba.list(dba.query(SQL`select * from t_tagged_cids_cache order by cid, tag;`));
+    };
+    (() => {      //.........................................................................................................
+      dbatags.add_tag({
+        tag: 'first'
+      });
+      dbatags.add_tagged_range({
+        tag: 'first',
+        lo: 10,
+        hi: 20
+      });
+      debug('^4487^', get_tagged_ranges());
+      debug('^4487^', get_cache());
+      T.eq(get_tagged_ranges(), [
+        {
+          nr: 1,
+          lo: 10,
+          hi: 20,
+          tag: 'first'
+        }
+      ]);
+      T.eq(get_cache(), []);
+      return debug('^4487^', get_cache());
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DBA: ranges (1)"] = function(T, done) {
-    var Dba, E, chr, chr_from_cid, cid, cid_from_chr, dba, dbatags, first_cid, hi, i, j, k, last_cid, len, len1, lo, prefix, ranges, ref, ref1, ref2, rules, tag, tags, tags_from_cid, value;
+    var Dba, E, chr, chr_from_cid, cid, cid_from_chr, dba, dbatags, first_cid, hi, i, j, k, last_cid, len, len1, lo, prefix, ranges, ref, ref1, ref2, rules, tag, tags, value;
     if (T != null) {
       T.halt_on_error();
     }
@@ -365,25 +453,6 @@ create table if not exists ${x}tagged_cids_cache (
     });
     first_cid = cid_from_chr('A');
     last_cid = cid_from_chr('Z');
-    //.........................................................................................................
-    tags_from_cid = function(cid) {
-      var R, ref, row, sql;
-      R = [];
-      sql = SQL`select
-    tag
-  from ${prefix}tagged_cid_ranges
-  where $cid between lo and hi
-  order by nr asc;`;
-      ref = dba.query(sql, {cid});
-      for (row of ref) {
-        R.push(row.tag);
-      }
-      return R;
-    };
-    dba.create_function({
-      name: `${prefix}tags_from_cid`,
-      call: tags_from_cid
-    });
     //.........................................................................................................
     rules = [
       // [ '+superset',      'A..Z',               ]
@@ -426,14 +495,14 @@ create table if not exists ${x}tagged_cids_cache (
     tag                     as tag,
     chr_from_cid( lo )      as chr_lo,
     chr_from_cid( hi )      as chr_hi
-  from ${prefix}tagged_cid_ranges
+  from ${prefix}tagged_ranges
   order by nr;`)));
     console.table(dba.list(dba.query(SQL`select * from ${prefix}tags order by tag;`)));
-// console.table dba.list dba.query SQL"""select * from #{prefix}tags_by_id order by tag, cid, nr;"""
+// console.table dba.list dba.query SQL"""select * from #{prefix}tags_by_cid order by tag, cid, nr;"""
 //.........................................................................................................
     for (cid = k = ref1 = first_cid, ref2 = last_cid; (ref1 <= ref2 ? k <= ref2 : k >= ref2); cid = ref1 <= ref2 ? ++k : --k) {
       chr = String.fromCodePoint(cid);
-      tags = dbatags.tags_from_tagchain(tags_from_cid(cid));
+      tags = dbatags.tags_from_tagchain(dbatags.tagchain_from_cid({cid}));
       info(CND.gold(chr), CND.blue(tags));
       for (tag in tags) {
         value = tags[tag];
@@ -450,14 +519,17 @@ create table if not exists ${x}tagged_cids_cache (
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      // test @[ "DBA: ranges (1)" ]
-      // test @[ "tags: tags_from_tagchain" ]
-      return this["DBA: ranges (1)"]();
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  /*
+  // test @[ "DBA: ranges (1)" ]
+// test @[ "tags: tags_from_tagchain" ]
+// @[ "DBA: ranges (1)" ]()
+// test @[ "tags: caching (1)" ]
+/*
  * from https://github.com/loveencounterflow/hengist/tree/master/dev/kitty-font-config-writer-kfcw
 
 superset          ABCDEFGHIJKLMNOPQRSTUVWXYZ  │ CSS-like Configuration with Overlapping Ranges
