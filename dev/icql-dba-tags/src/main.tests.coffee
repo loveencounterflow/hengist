@@ -57,25 +57,23 @@ NCR = new Ncr()
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@[ "tags: tags_from_tagchain" ] = ( T, done ) ->
-  T?.halt_on_error()
+@[ "tags: tags_from_tagexchain" ] = ( T, done ) ->
+  # T?.halt_on_error()
   #.........................................................................................................
   probes_and_matchers = [
     [ [ '+foo',                             ],  { foo: true,          }, ]
-    [ [ '+foo:abc',                         ],  { foo: 'abc',         }, ]
-    [ [ '+font:superset',                   ],  { font: 'superset',   }, ]
-    [ [ '+font:font1',                      ],  { font: 'font1',      }, ]
+    [ [ '+foo:"abc"',                       ],  { foo: 'abc',         }, ]
+    [ [ '+font:"superset"',                 ],  { font: 'superset',   }, ]
     [ [ '+font:"font1"',                    ],  { font: 'font1',      }, ]
-    [ [ "+font:'font1'",                    ],  { font: 'font1',      }, ]
-    [ [ '+font:font1',  '+font:Arial'       ],  { font: 'Arial',      }, ]
-    [ [ '+rounded', '-rounded',             ],  {},                      ]
-    [ [ '+shape/ladder', '+shape/pointy',   ],  { 'shape/ladder': true, 'shape/pointy': true, },                      ]
+    [ [ '+font:"font1"',  '+font:"Arial"',  ],  { font: 'Arial',      }, ]
+    [ [ '+rounded', '-rounded',             ],  { rounded: false,     }, ]
+    [ [ '+shape/ladder', '+shape/pointy',   ],  { 'shape/ladder': true, 'shape/pointy': true, }, ]
     ]
   { Dtags, }  = require '../../../apps/icql-dba-tags'
   dtags       = new Dtags()
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      result = dtags.tags_from_tagchain probe
+      result = dtags.tags_from_tagexchain { tagexchain: probe, }
       resolve result
   #.........................................................................................................
   done?()
