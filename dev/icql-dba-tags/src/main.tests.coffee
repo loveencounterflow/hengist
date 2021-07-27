@@ -162,13 +162,14 @@ NCR = new Ncr()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "tags: caching (1)" ] = ( T, done ) ->
-  T?.halt_on_error()
+  # T?.halt_on_error()
   #.........................................................................................................
   { Dba }           = require '../../../apps/icql-dba'
-  E                 = require '../../../apps/icql-dba/lib/errors'
+  { Dtags, }        = require '../../../apps/icql-dba-tags'
+  # E                 = require '../../../apps/icql-dba/lib/errors'
   prefix            = 't_'
   dba               = new Dba()
-  dtags           = new Dtags { dba, prefix, }
+  dtags             = new Dtags { dba, prefix, }
   #.........................................................................................................
   get_tagged_ranges = -> dba.list dba.query SQL"select * from t_tagged_ranges order by lo, hi, tag;"
   get_cache         = -> dba.list dba.query SQL"select * from t_tagged_cids_cache order by cid, tag;"
@@ -186,12 +187,13 @@ NCR = new Ncr()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: ranges (1)" ] = ( T, done ) ->
-  T?.halt_on_error()
+  # T?.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
-  E                 = require '../../../apps/icql-dba/lib/errors'
+  { Dtags, }        = require '../../../apps/icql-dba-tags'
+  # E                 = require '../../../apps/icql-dba/lib/errors'
   prefix            = 't_'
   dba               = new Dba()
-  dtags           = new Dtags { dba, prefix, }
+  dtags             = new Dtags { dba, prefix, }
   cid_from_chr      = ( chr ) -> chr.codePointAt 0
   chr_from_cid      = ( cid ) -> String.fromCodePoint cid
   dba.create_function name: 'chr_from_cid', call: chr_from_cid
@@ -231,7 +233,9 @@ NCR = new Ncr()
   #.........................................................................................................
   for cid in [ first_cid .. last_cid ]
     chr       = String.fromCodePoint cid
-    tags      = dtags.tags_from_tagchain dtags.tagchain_from_cid { cid, }
+    tagchain  = dtags.tagchain_from_cid { cid, }
+    debug '^5543^', { tagchain, }
+    tags      = dtags.tags_from_tagchain tagchain
     info ( CND.gold chr ), ( CND.blue tags )
     for tag, value of tags
       value = JSON.stringify value
@@ -248,10 +252,10 @@ NCR = new Ncr()
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # test @[ "DBA: ranges (1)" ]
-  # test @[ "tags: tags_from_tagchain" ]
+  test @[ "tags: tags_from_tagexchain" ]
   # test @[ "tags: add_tagged_range" ]
   # test @[ "tags: add_tag with value" ]
-  test @[ "tags: parse_tagex" ]
+  # test @[ "tags: parse_tagex" ]
   # @[ "DBA: ranges (1)" ]()
   # test @[ "tags: caching (1)" ]
 
