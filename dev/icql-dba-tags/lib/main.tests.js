@@ -84,11 +84,9 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this["tags: tags_from_tagchain"] = async function(T, done) {
+  this["tags: tags_from_tagexchain"] = async function(T, done) {
     var Dtags, dtags, error, i, len, matcher, probe, probes_and_matchers;
-    if (T != null) {
-      T.halt_on_error();
-    }
+    // T?.halt_on_error()
     //.........................................................................................................
     probes_and_matchers = [
       [
@@ -98,21 +96,15 @@
         }
       ],
       [
-        ['+foo:abc'],
+        ['+foo:"abc"'],
         {
           foo: 'abc'
         }
       ],
       [
-        ['+font:superset'],
+        ['+font:"superset"'],
         {
           font: 'superset'
-        }
-      ],
-      [
-        ['+font:font1'],
-        {
-          font: 'font1'
         }
       ],
       [
@@ -122,21 +114,19 @@
         }
       ],
       [
-        ["+font:'font1'"],
-        {
-          font: 'font1'
-        }
-      ],
-      [
-        ['+font:font1',
-        '+font:Arial'],
+        ['+font:"font1"',
+        '+font:"Arial"'],
         {
           font: 'Arial'
         }
       ],
-      [['+rounded',
-      '-rounded'],
-      {}],
+      [
+        ['+rounded',
+        '-rounded'],
+        {
+          rounded: false
+        }
+      ],
       [
         ['+shape/ladder',
         '+shape/pointy'],
@@ -153,7 +143,9 @@
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
           var result;
-          result = dtags.tags_from_tagchain(probe);
+          result = dtags.tags_from_tagexchain({
+            tagexchain: probe
+          });
           return resolve(result);
         });
       });
@@ -464,13 +456,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["tags: caching (1)"] = function(T, done) {
-    var Dba, E, dba, dtags, get_cache, get_tagged_ranges, prefix;
-    if (T != null) {
-      T.halt_on_error();
-    }
+    var Dba, Dtags, dba, dtags, get_cache, get_tagged_ranges, prefix;
+    // T?.halt_on_error()
     //.........................................................................................................
     ({Dba} = require('../../../apps/icql-dba'));
-    E = require('../../../apps/icql-dba/lib/errors');
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
+    // E                 = require '../../../apps/icql-dba/lib/errors'
     prefix = 't_';
     dba = new Dba();
     dtags = new Dtags({dba, prefix});
@@ -508,12 +499,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: ranges (1)"] = function(T, done) {
-    var Dba, E, chr, chr_from_cid, cid, cid_from_chr, dba, dtags, first_cid, hi, i, j, k, last_cid, len, len1, lo, prefix, ranges, ref, ref1, ref2, rules, tag, tags, value;
-    if (T != null) {
-      T.halt_on_error();
-    }
+    var Dba, Dtags, chr, chr_from_cid, cid, cid_from_chr, dba, dtags, first_cid, hi, i, j, k, last_cid, len, len1, lo, prefix, ranges, ref, ref1, ref2, rules, tag, tagchain, tags, value;
+    // T?.halt_on_error()
     ({Dba} = require('../../../apps/icql-dba'));
-    E = require('../../../apps/icql-dba/lib/errors');
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
+    // E                 = require '../../../apps/icql-dba/lib/errors'
     prefix = 't_';
     dba = new Dba();
     dtags = new Dtags({dba, prefix});
@@ -578,7 +568,9 @@
 //.........................................................................................................
     for (cid = k = ref1 = first_cid, ref2 = last_cid; (ref1 <= ref2 ? k <= ref2 : k >= ref2); cid = ref1 <= ref2 ? ++k : --k) {
       chr = String.fromCodePoint(cid);
-      tags = dtags.tags_from_tagchain(dtags.tagchain_from_cid({cid}));
+      tagchain = dtags.tagchain_from_cid({cid});
+      debug('^5543^', {tagchain});
+      tags = dtags.tags_from_tagchain(tagchain);
       info(CND.gold(chr), CND.blue(tags));
       for (tag in tags) {
         value = tags[tag];
@@ -597,14 +589,14 @@
     (() => {
       // test @, { timeout: 10e3, }
       // test @[ "DBA: ranges (1)" ]
-      // test @[ "tags: tags_from_tagchain" ]
-      // test @[ "tags: add_tagged_range" ]
-      // test @[ "tags: add_tag with value" ]
-      return test(this["tags: parse_tagex"]);
+      return test(this["tags: tags_from_tagexchain"]);
     })();
   }
 
-  // @[ "DBA: ranges (1)" ]()
+  // test @[ "tags: add_tagged_range" ]
+// test @[ "tags: add_tag with value" ]
+// test @[ "tags: parse_tagex" ]
+// @[ "DBA: ranges (1)" ]()
 // test @[ "tags: caching (1)" ]
 /*
  * from https://github.com/loveencounterflow/hengist/tree/master/dev/kitty-font-config-writer-kfcw
