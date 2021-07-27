@@ -5,7 +5,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'ICQL-DBA/TESTS/BASICS'
+badge                     = 'ICQL-DBA-TAGS/TESTS'
 debug                     = CND.get_logger 'debug',     badge
 warn                      = CND.get_logger 'warn',      badge
 info                      = CND.get_logger 'info',      badge
@@ -16,7 +16,6 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 test                      = require '../../../apps/guy-test'
 PATH                      = require 'path'
-H                         = require './helpers'
 types                     = new ( require 'intertype' ).Intertype
 { isa
   type_of
@@ -33,132 +32,6 @@ dba_path                  = '../../../apps/icql-dba'
   freeze }                = require 'letsfreezethat'
 
 
-#===========================================================================================================
-types.declare 'dbatags_constructor_cfg', tests:
-  '@isa.object x':        ( x ) -> @isa.object x
-  'x.prefix is a prefix': ( x ) ->
-    return false unless @isa.text x.prefix
-    return true if x.prefix is ''
-    return ( /^[_a-z][_a-z0-9]*$/ ).test x.prefix
-
-#-----------------------------------------------------------------------------------------------------------
-types.declare 'dbatags_tag', tests:
-  '@isa.nonempty_text x': ( x ) -> @isa.nonempty_text x
-
-#-----------------------------------------------------------------------------------------------------------
-types.declare 'dbatags_add_tag_cfg', tests:
-  '@isa.object x':            ( x ) -> @isa.object x
-  '@isa.dbatags_tag x.tag':   ( x ) -> @isa.dbatags_tag x.tag
-
-#-----------------------------------------------------------------------------------------------------------
-types.declare 'dbatags_add_tagged_range_cfg', tests:
-  '@isa.object x':            ( x ) -> @isa.object x
-  '@isa.integer x.lo':        ( x ) -> @isa.integer x.lo
-  '@isa.integer x.hi':        ( x ) -> @isa.integer x.hi
-  '@isa.dbatags_tag x.tag':   ( x ) -> @isa.dbatags_tag x.tag
-
-#-----------------------------------------------------------------------------------------------------------
-types.defaults =
-  dbatags_constructor_cfg:
-    dba:        null
-    prefix:     't_'
-  dbatags_add_tag_cfg:
-    tag:        null
-  dbatags_add_tagged_range_cfg:
-    tag:        null
-    lo:         null
-    hi:         null
-
-#===========================================================================================================
-class Dbatags
-  #---------------------------------------------------------------------------------------------------------
-  constructor: ( cfg ) ->
-    validate.dbatags_constructor_cfg @cfg = { types.defaults.dbatags_constructor_cfg..., cfg..., }
-    if @cfg.dba?
-      @dba  = @cfg.dba
-      delete @cfg.dba
-    else
-      @dba  = new ( require dba_path ).Dba()
-    @cfg = freeze @cfg
-    @_create_db_structure()
-    @_compile_sql()
-    return undefined
-
-  #---------------------------------------------------------------------------------------------------------
-  _create_db_structure: ->
-    x = @cfg.prefix
-    @dba.execute SQL"""
-      create table if not exists #{x}tags ( tag text unique not null primary key );
-      create table if not exists #{x}tagged_cid_ranges (
-          nr      integer primary key,
-          lo      integer not null,
-          hi      integer not null,
-          -- chr_lo  text generated always as ( chr_from_cid( lo ) ) virtual not null,
-          -- chr_hi  text generated always as ( chr_from_cid( hi ) ) virtual not null,
-          tag     text    not null references #{x}tags ( tag ) );
-      create index if not exists #{x}cidlohi_idx on #{x}tagged_cid_ranges ( lo, hi );
-      create index if not exists #{x}cidhi_idx on   #{x}tagged_cid_ranges ( hi );
-      create table if not exists #{x}tagged_cids_cache (
-          cid     integer not null,
-          -- chr     text    not null,
-          tag     text    not null,
-          value   json    not null,
-        primary key ( cid, tag ) );
-      """
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  _compile_sql: ->
-    x = @cfg.prefix
-    @sql =
-      insert_tag: SQL"""
-        insert into #{x}tags ( tag )
-          values ( $tag )
-          on conflict ( tag ) do nothing;"""
-      insert_tagged_range: SQL"""
-        insert into #{x}tagged_cid_ranges ( lo, hi, tag )
-          values ( $lo, $hi, $tag )"""
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  add_tag: ( cfg ) ->
-    validate.dbatags_add_tag_cfg cfg = { types.defaults.dbatags_add_tag_cfg..., cfg..., }
-    @dba.run @sql.insert_tag, cfg
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  add_tagged_range: ( cfg ) ->
-    validate.dbatags_add_tagged_range_cfg cfg = { types.defaults.dbatags_add_tagged_range_cfg..., cfg..., }
-    @dba.run @sql.insert_tagged_range, cfg
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  tag_pattern: ///
-    ^
-    (?<mode>  [ - + ] )
-    (?<key>   [ a-z A-Z _ \/ \$ ] [ - a-z A-Z 0-9 _ \/ \$ ]* )
-    ( : (?<value> [^ - + ]+ | ' .* ' | " .* " ) )?
-    $
-    ///
-
-  #---------------------------------------------------------------------------------------------------------
-  tags_from_tagchain: ( tagchain ) ->
-    validate_list_of.text tagchain
-    R = {}
-    return R if tagchain.length is 0
-    for tag_expression in tagchain
-      unless ( match = tag_expression.match @tag_pattern )?
-        throw new Error "^tags_from_tagchain@448^ tag expression not recognized: #{rpr tag_expression}"
-      # debug '^9458^', match
-      { mode, key, value, }   = match.groups
-      switch mode
-        when '+'
-          unless value?                       then value = true
-          else if value[ 0 ] in [ '"', "'", ] then value = value[ 1 ... value.length - 1 ]
-          R[ key ] = value
-        when '-'
-          delete R[ key ]
-    return R
 
 
 #===========================================================================================================
@@ -181,7 +54,9 @@ class Ncr
 NCR = new Ncr()
 
 
-############################################################################################################
+#===========================================================================================================
+#
+#-----------------------------------------------------------------------------------------------------------
 @[ "tags: tags_from_tagchain" ] = ( T, done ) ->
   T?.halt_on_error()
   #.........................................................................................................
@@ -196,11 +71,96 @@ NCR = new Ncr()
     [ [ '+rounded', '-rounded',             ],  {},                      ]
     [ [ '+shape/ladder', '+shape/pointy',   ],  { 'shape/ladder': true, 'shape/pointy': true, },                      ]
     ]
-  dbatags = new Dbatags()
+  { Dbatags, }  = require '../../../apps/icql-dba-tags'
+  dbatags       = new Dbatags()
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
       result = dbatags.tags_from_tagchain probe
       resolve result
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "tags: add_tag with value" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  #.........................................................................................................
+  get_tags = ( dbatags ) ->
+    R = []
+    for row from dbatags.dba.query "select * from t_tags;"
+      # row.value = jp row.value
+      R.push row
+    return R
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ { tag: 'foo',                        },  [ { tag: 'foo',          value: 'true',    } ], ]
+    [ { tag: 'foo', value: 'abc',          },  [ { tag: 'foo',          value: '"abc"',   } ], ]
+    [ { tag: 'font', value: 'font1',       },  [ { tag: 'font',         value: '"font1"', } ], ]
+    [ { tag: 'rounded', value: false,      },  [ { tag: 'rounded',      value: 'false',   } ], ]
+    [ { tag: 'shape/ladder',               },  [ { tag: 'shape/ladder', value: 'true',    } ], ]
+    ]
+  { Dbatags, }  = require '../../../apps/icql-dba-tags'
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      dbatags = new Dbatags()
+      dbatags.add_tag probe
+      result  = get_tags dbatags
+      resolve result
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "tags: add_tagged_range" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  #.........................................................................................................
+  { Dbatags, }  = require '../../../apps/icql-dba-tags'
+  prefix        = 't_'
+  #.........................................................................................................
+  get_tagged_ranges = ( dtags ) ->
+    R = []
+    for row from dtags.dba.query SQL"select * from t_tagged_ranges order by lo, hi, tag;"
+      row.value = jp row.value
+      R.push row
+    return R
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ { lo: 1, hi: 11,  mode: '+', tag: 'foo',                        },  [ { nr: 1, lo: 1, hi: 11, tag: 'foo', value: true, } ], ]
+    [ { lo: 2, hi: 12,  mode: '+', tag: 'foo', value: 'abc',          },  [ { nr: 1, lo: 2, hi: 12, tag: 'foo', value: 'abc', } ], ]
+    [ { lo: 5, hi: 15,  mode: '+', tag: 'font', value: 'font1',       },  [ { nr: 1, lo: 5, hi: 15, tag: 'font', value: 'font1', } ], ]
+    [ { lo: 6, hi: 16,  mode: '-', tag: 'rounded',                    },  [ { nr: 1, lo: 6, hi: 16, tag: 'rounded', value: false, } ],                      ]
+    [ { lo: 7, hi: 17,  mode: '+', tag: 'shape/ladder',               },  [ { nr: 1, lo: 7, hi: 17, tag: 'shape/ladder', value: true, } ],                      ]
+    ]
+  dtags       = new Dbatags()
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      dtags   = new Dbatags { prefix, }
+      dtags.add_tag probe
+      dtags.add_tagged_range probe
+      result  = get_tagged_ranges dtags
+      resolve result
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "tags: caching (1)" ] = ( T, done ) ->
+  T?.halt_on_error()
+  #.........................................................................................................
+  { Dba }           = require '../../../apps/icql-dba'
+  E                 = require '../../../apps/icql-dba/lib/errors'
+  prefix            = 't_'
+  dba               = new Dba()
+  dbatags           = new Dbatags { dba, prefix, }
+  #.........................................................................................................
+  get_tagged_ranges = -> dba.list dba.query SQL"select * from t_tagged_ranges order by lo, hi, tag;"
+  get_cache         = -> dba.list dba.query SQL"select * from t_tagged_cids_cache order by cid, tag;"
+  #.........................................................................................................
+  do =>
+    dbatags.add_tag { tag: 'first', }
+    dbatags.add_tagged_range { tag: 'first', lo: 10, hi: 20, }
+    debug '^4487^', get_tagged_ranges()
+    debug '^4487^', get_cache()
+    T.eq get_tagged_ranges(), [ { nr: 1, lo: 10, hi: 20, tag: 'first' } ]
+    T.eq get_cache(),         []
+    debug '^4487^', get_cache()
   #.........................................................................................................
   done?()
 
@@ -217,18 +177,6 @@ NCR = new Ncr()
   dba.create_function name: 'chr_from_cid', call: chr_from_cid
   first_cid         = cid_from_chr 'A'
   last_cid          = cid_from_chr 'Z'
-  #.........................................................................................................
-  tags_from_cid = ( cid ) ->
-    R   = []
-    sql = SQL"""
-      select
-          tag
-        from #{prefix}tagged_cid_ranges
-        where $cid between lo and hi
-        order by nr asc;"""
-    R.push row.tag for row from dba.query sql, { cid, }
-    return R
-  dba.create_function name: "#{prefix}tags_from_cid", call: tags_from_cid
   #.........................................................................................................
   rules = [
     # [ '+superset',      'A..Z',               ]
@@ -256,14 +204,14 @@ NCR = new Ncr()
         tag                     as tag,
         chr_from_cid( lo )      as chr_lo,
         chr_from_cid( hi )      as chr_hi
-      from #{prefix}tagged_cid_ranges
+      from #{prefix}tagged_ranges
       order by nr;"""
   console.table dba.list dba.query SQL"""select * from #{prefix}tags order by tag;"""
-  # console.table dba.list dba.query SQL"""select * from #{prefix}tags_by_id order by tag, cid, nr;"""
+  # console.table dba.list dba.query SQL"""select * from #{prefix}tags_by_cid order by tag, cid, nr;"""
   #.........................................................................................................
   for cid in [ first_cid .. last_cid ]
     chr       = String.fromCodePoint cid
-    tags      = dbatags.tags_from_tagchain tags_from_cid cid
+    tags      = dbatags.tags_from_tagchain dbatags.tagchain_from_cid { cid, }
     info ( CND.gold chr ), ( CND.blue tags )
     for tag, value of tags
       value = JSON.stringify value
@@ -271,6 +219,7 @@ NCR = new Ncr()
         insert into #{prefix}tagged_cids_cache ( cid, tag, value )
           values ( $cid, $tag, $value );""", { cid, tag, value, }
   console.table dba.list dba.query SQL"""select * from #{prefix}tagged_cids_cache order by cid, tag;"""
+  # console.table dba.list dba.query SQL"""select #{prefix}tags_from_cid( $cid );""", { cid: 65, }
   done?() #..................................................................................................
 
 
@@ -280,7 +229,10 @@ if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # test @[ "DBA: ranges (1)" ]
   # test @[ "tags: tags_from_tagchain" ]
-  @[ "DBA: ranges (1)" ]()
+  # test @[ "tags: add_tagged_range" ]
+  test @[ "tags: add_tag with value" ]
+  # @[ "DBA: ranges (1)" ]()
+  # test @[ "tags: caching (1)" ]
 
 
 
