@@ -71,11 +71,11 @@ NCR = new Ncr()
     [ [ '+rounded', '-rounded',             ],  {},                      ]
     [ [ '+shape/ladder', '+shape/pointy',   ],  { 'shape/ladder': true, 'shape/pointy': true, },                      ]
     ]
-  { Dbatags, }  = require '../../../apps/icql-dba-tags'
-  dbatags       = new Dbatags()
+  { Dtags, }  = require '../../../apps/icql-dba-tags'
+  dtags       = new Dtags()
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      result = dbatags.tags_from_tagchain probe
+      result = dtags.tags_from_tagchain probe
       resolve result
   #.........................................................................................................
   done?()
@@ -84,9 +84,9 @@ NCR = new Ncr()
 @[ "tags: add_tag with value" ] = ( T, done ) ->
   # T?.halt_on_error()
   #.........................................................................................................
-  get_tags = ( dbatags ) ->
+  get_tags = ( dtags ) ->
     R = []
-    for row from dbatags.dba.query "select * from t_tags;"
+    for row from dtags.dba.query "select * from t_tags;"
       # row.value = jp row.value
       R.push row
     return R
@@ -98,12 +98,12 @@ NCR = new Ncr()
     [ { tag: 'rounded', value: false,      },  [ { tag: 'rounded',      value: 'false',   } ], ]
     [ { tag: 'shape/ladder',               },  [ { tag: 'shape/ladder', value: 'true',    } ], ]
     ]
-  { Dbatags, }  = require '../../../apps/icql-dba-tags'
+  { Dtags, }  = require '../../../apps/icql-dba-tags'
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      dbatags = new Dbatags()
-      dbatags.add_tag probe
-      result  = get_tags dbatags
+      dtags = new Dtags()
+      dtags.add_tag probe
+      result  = get_tags dtags
       resolve result
   #.........................................................................................................
   done?()
@@ -112,7 +112,7 @@ NCR = new Ncr()
 @[ "tags: add_tagged_range" ] = ( T, done ) ->
   # T?.halt_on_error()
   #.........................................................................................................
-  { Dbatags, }  = require '../../../apps/icql-dba-tags'
+  { Dtags, }  = require '../../../apps/icql-dba-tags'
   prefix        = 't_'
   #.........................................................................................................
   get_tagged_ranges = ( dtags ) ->
@@ -129,10 +129,10 @@ NCR = new Ncr()
     [ { lo: 6, hi: 16,  mode: '-', tag: 'rounded',                    },  [ { nr: 1, lo: 6, hi: 16, tag: 'rounded', value: false, } ],                      ]
     [ { lo: 7, hi: 17,  mode: '+', tag: 'shape/ladder',               },  [ { nr: 1, lo: 7, hi: 17, tag: 'shape/ladder', value: true, } ],                      ]
     ]
-  dtags       = new Dbatags()
+  dtags       = new Dtags()
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      dtags   = new Dbatags { prefix, }
+      dtags   = new Dtags { prefix, }
       dtags.add_tag probe
       dtags.add_tagged_range probe
       result  = get_tagged_ranges dtags
@@ -148,14 +148,14 @@ NCR = new Ncr()
   E                 = require '../../../apps/icql-dba/lib/errors'
   prefix            = 't_'
   dba               = new Dba()
-  dbatags           = new Dbatags { dba, prefix, }
+  dtags           = new Dtags { dba, prefix, }
   #.........................................................................................................
   get_tagged_ranges = -> dba.list dba.query SQL"select * from t_tagged_ranges order by lo, hi, tag;"
   get_cache         = -> dba.list dba.query SQL"select * from t_tagged_cids_cache order by cid, tag;"
   #.........................................................................................................
   do =>
-    dbatags.add_tag { tag: 'first', }
-    dbatags.add_tagged_range { tag: 'first', lo: 10, hi: 20, }
+    dtags.add_tag { tag: 'first', }
+    dtags.add_tagged_range { tag: 'first', lo: 10, hi: 20, }
     debug '^4487^', get_tagged_ranges()
     debug '^4487^', get_cache()
     T.eq get_tagged_ranges(), [ { nr: 1, lo: 10, hi: 20, tag: 'first' } ]
@@ -171,7 +171,7 @@ NCR = new Ncr()
   E                 = require '../../../apps/icql-dba/lib/errors'
   prefix            = 't_'
   dba               = new Dba()
-  dbatags           = new Dbatags { dba, prefix, }
+  dtags           = new Dtags { dba, prefix, }
   cid_from_chr      = ( chr ) -> chr.codePointAt 0
   chr_from_cid      = ( cid ) -> String.fromCodePoint cid
   dba.create_function name: 'chr_from_cid', call: chr_from_cid
@@ -194,9 +194,9 @@ NCR = new Ncr()
     [ '+shape/ladder',  'A, H',               ]
     ]
   for [ tag, ranges, ] in rules
-    dbatags.add_tag { tag, }
+    dtags.add_tag { tag, }
     for { lo, hi, } in NCR.parse_multirange_declaration ranges
-      dbatags.add_tagged_range { tag, lo, hi, }
+      dtags.add_tagged_range { tag, lo, hi, }
   #.........................................................................................................
   console.table dba.list dba.query SQL"""
     select
@@ -211,7 +211,7 @@ NCR = new Ncr()
   #.........................................................................................................
   for cid in [ first_cid .. last_cid ]
     chr       = String.fromCodePoint cid
-    tags      = dbatags.tags_from_tagchain dbatags.tagchain_from_cid { cid, }
+    tags      = dtags.tags_from_tagchain dtags.tagchain_from_cid { cid, }
     info ( CND.gold chr ), ( CND.blue tags )
     for tag, value of tags
       value = JSON.stringify value
