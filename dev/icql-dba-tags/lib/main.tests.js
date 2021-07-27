@@ -85,7 +85,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["tags: tags_from_tagchain"] = async function(T, done) {
-    var Dbatags, dbatags, error, i, len, matcher, probe, probes_and_matchers;
+    var Dtags, dtags, error, i, len, matcher, probe, probes_and_matchers;
     if (T != null) {
       T.halt_on_error();
     }
@@ -146,14 +146,14 @@
         }
       ]
     ];
-    ({Dbatags} = require('../../../apps/icql-dba-tags'));
-    dbatags = new Dbatags();
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
+    dtags = new Dtags();
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
           var result;
-          result = dbatags.tags_from_tagchain(probe);
+          result = dtags.tags_from_tagchain(probe);
           return resolve(result);
         });
       });
@@ -163,13 +163,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["tags: add_tag with value"] = async function(T, done) {
-    var Dbatags, error, get_tags, i, len, matcher, probe, probes_and_matchers;
+    var Dtags, error, get_tags, i, len, matcher, probe, probes_and_matchers;
     // T?.halt_on_error()
     //.........................................................................................................
-    get_tags = function(dbatags) {
+    get_tags = function(dtags) {
       var R, ref, row;
       R = [];
-      ref = dbatags.dba.query("select * from t_tags;");
+      ref = dtags.dba.query("select * from t_tags;");
       for (row of ref) {
         // row.value = jp row.value
         R.push(row);
@@ -237,15 +237,15 @@
         ]
       ]
     ];
-    ({Dbatags} = require('../../../apps/icql-dba-tags'));
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
-          var dbatags, result;
-          dbatags = new Dbatags();
-          dbatags.add_tag(probe);
-          result = get_tags(dbatags);
+          var dtags, result;
+          dtags = new Dtags();
+          dtags.add_tag(probe);
+          result = get_tags(dtags);
           return resolve(result);
         });
       });
@@ -255,10 +255,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["tags: add_tagged_range"] = async function(T, done) {
-    var Dbatags, dtags, error, get_tagged_ranges, i, len, matcher, prefix, probe, probes_and_matchers;
+    var Dtags, dtags, error, get_tagged_ranges, i, len, matcher, prefix, probe, probes_and_matchers;
     // T?.halt_on_error()
     //.........................................................................................................
-    ({Dbatags} = require('../../../apps/icql-dba-tags'));
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
     prefix = 't_';
     //.........................................................................................................
     get_tagged_ranges = function(dtags) {
@@ -361,13 +361,13 @@
         ]
       ]
     ];
-    dtags = new Dbatags();
+    dtags = new Dtags();
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
           var result;
-          dtags = new Dbatags({prefix});
+          dtags = new Dtags({prefix});
           dtags.add_tag(probe);
           dtags.add_tagged_range(probe);
           result = get_tagged_ranges(dtags);
@@ -381,7 +381,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["tags: caching (1)"] = function(T, done) {
-    var Dba, E, dba, dbatags, get_cache, get_tagged_ranges, prefix;
+    var Dba, E, dba, dtags, get_cache, get_tagged_ranges, prefix;
     if (T != null) {
       T.halt_on_error();
     }
@@ -390,7 +390,7 @@
     E = require('../../../apps/icql-dba/lib/errors');
     prefix = 't_';
     dba = new Dba();
-    dbatags = new Dbatags({dba, prefix});
+    dtags = new Dtags({dba, prefix});
     //.........................................................................................................
     get_tagged_ranges = function() {
       return dba.list(dba.query(SQL`select * from t_tagged_ranges order by lo, hi, tag;`));
@@ -399,10 +399,10 @@
       return dba.list(dba.query(SQL`select * from t_tagged_cids_cache order by cid, tag;`));
     };
     (() => {      //.........................................................................................................
-      dbatags.add_tag({
+      dtags.add_tag({
         tag: 'first'
       });
-      dbatags.add_tagged_range({
+      dtags.add_tagged_range({
         tag: 'first',
         lo: 10,
         hi: 20
@@ -425,7 +425,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: ranges (1)"] = function(T, done) {
-    var Dba, E, chr, chr_from_cid, cid, cid_from_chr, dba, dbatags, first_cid, hi, i, j, k, last_cid, len, len1, lo, prefix, ranges, ref, ref1, ref2, rules, tag, tags, value;
+    var Dba, E, chr, chr_from_cid, cid, cid_from_chr, dba, dtags, first_cid, hi, i, j, k, last_cid, len, len1, lo, prefix, ranges, ref, ref1, ref2, rules, tag, tags, value;
     if (T != null) {
       T.halt_on_error();
     }
@@ -433,7 +433,7 @@
     E = require('../../../apps/icql-dba/lib/errors');
     prefix = 't_';
     dba = new Dba();
-    dbatags = new Dbatags({dba, prefix});
+    dtags = new Dtags({dba, prefix});
     cid_from_chr = function(chr) {
       return chr.codePointAt(0);
     };
@@ -475,11 +475,11 @@
     ];
     for (i = 0, len = rules.length; i < len; i++) {
       [tag, ranges] = rules[i];
-      dbatags.add_tag({tag});
+      dtags.add_tag({tag});
       ref = NCR.parse_multirange_declaration(ranges);
       for (j = 0, len1 = ref.length; j < len1; j++) {
         ({lo, hi} = ref[j]);
-        dbatags.add_tagged_range({tag, lo, hi});
+        dtags.add_tagged_range({tag, lo, hi});
       }
     }
     //.........................................................................................................
@@ -495,7 +495,7 @@
 //.........................................................................................................
     for (cid = k = ref1 = first_cid, ref2 = last_cid; (ref1 <= ref2 ? k <= ref2 : k >= ref2); cid = ref1 <= ref2 ? ++k : --k) {
       chr = String.fromCodePoint(cid);
-      tags = dbatags.tags_from_tagchain(dbatags.tagchain_from_cid({cid}));
+      tags = dtags.tags_from_tagchain(dtags.tagchain_from_cid({cid}));
       info(CND.gold(chr), CND.blue(tags));
       for (tag in tags) {
         value = tags[tag];
