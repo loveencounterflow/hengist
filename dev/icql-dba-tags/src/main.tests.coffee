@@ -109,6 +109,28 @@ NCR = new Ncr()
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "tags: parse_tagex" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ { tagex: '+foo',                          },  { mode: '+', tag: 'foo', value: true,    }, ]
+    [ { tagex: '-foo',                          },  { mode: '-', tag: 'foo', value: false,    }, ]
+    [ { tagex: '+shape/excentricity:0.2',       },  { mode: '+', tag: 'shape/excentricity', value: 0.2,    }, ]
+    [ { tagex: '+css/font-family:"Helvetica"',  },  { mode: '+', tag: 'css/font-family', value: 'Helvetica',    }, ]
+    [ { tagex: '-css/font-family:"Helvetica"',  },  null, "Dtags_subtractive_value", ]
+    [ { tagex: '*bar',                          },  null, "Dtags_invalid_tagex", ]
+    [ { tagex: '+bar:blah',                     },  null, "Dtags_illegal_tagex_value_literal", ]
+    ]
+  { Dtags, }  = require '../../../apps/icql-dba-tags'
+  dtags       = new Dtags()
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      result = dtags.parse_tagex probe
+      resolve result
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "tags: add_tagged_range" ] = ( T, done ) ->
   # T?.halt_on_error()
   #.........................................................................................................
@@ -230,7 +252,8 @@ if module is require.main then do =>
   # test @[ "DBA: ranges (1)" ]
   # test @[ "tags: tags_from_tagchain" ]
   # test @[ "tags: add_tagged_range" ]
-  test @[ "tags: add_tag with value" ]
+  # test @[ "tags: add_tag with value" ]
+  test @[ "tags: parse_tagex" ]
   # @[ "DBA: ranges (1)" ]()
   # test @[ "tags: caching (1)" ]
 
