@@ -90,11 +90,11 @@ NCR = new Ncr()
     return R
   #.........................................................................................................
   probes_and_matchers = [
-    [ { tag: 'foo',                        },  [ { tag: 'foo',          value: 'false',    } ], ]
-    [ { tag: 'foo', value: 'abc',          },  [ { tag: 'foo',          value: '"abc"',   } ], ]
-    [ { tag: 'font', value: 'font1',       },  [ { tag: 'font',         value: '"font1"', } ], ]
-    [ { tag: 'rounded', value: false,      },  [ { tag: 'rounded',      value: 'false',   } ], ]
-    [ { tag: 'shape/ladder',               },  [ { tag: 'shape/ladder', value: 'false',    } ], ]
+    [ { tag: 'foo',                        },  [ { nr: 1, tag: 'foo',          value: 'false',    } ], ]
+    [ { tag: 'foo', value: 'abc',          },  [ { nr: 1, tag: 'foo',          value: '"abc"',   } ], ]
+    [ { tag: 'font', value: 'font1',       },  [ { nr: 1, tag: 'font',         value: '"font1"', } ], ]
+    [ { tag: 'rounded', value: false,      },  [ { nr: 1, tag: 'rounded',      value: 'false',   } ], ]
+    [ { tag: 'shape/ladder',               },  [ { nr: 1, tag: 'shape/ladder', value: 'false',    } ], ]
     ]
   { Dtags, }  = require '../../../apps/icql-dba-tags'
   for [ probe, matcher, error, ] in probes_and_matchers
