@@ -396,7 +396,6 @@
         baz: 42
       });
       T.eq(dtags.get_filtered_fallbacks(), {});
-      whisper('-------------------------');
       T.eq(dtags.tags_from_id({
         id: 10
       }), {
@@ -437,7 +436,6 @@
         foo: true,
         baz: 42
       });
-      whisper('-------------------------');
       T.eq(dtags.tags_from_id({
         id: 10
       }), {
@@ -492,7 +490,6 @@
         bar: false,
         baz: 42
       });
-      whisper('-------------------------');
       T.eq(dtags.tags_from_id({
         id: 10
       }), {
@@ -920,19 +917,21 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      // test @[ "DBA: ranges (1)" ]
-      // test @[ "tags: tags_from_tagexchain" ]
-      // test @[ "tags: add_tagged_range" ]
-      // test @[ "tags: add_tag with value" ]
-      // test @[ "tags: parse_tagex" ]
-      // @[ "DBA: ranges (1)" ]()
-      // test @[ "tags: caching (1)" ]
-      return test(this["tags: fallbacks"]);
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // @[ "tags: fallbacks" ]()
+  // test @[ "DBA: ranges (1)" ]
+// test @[ "tags: tags_from_tagexchain" ]
+// test @[ "tags: add_tagged_range" ]
+// test @[ "tags: add_tag with value" ]
+// test @[ "tags: parse_tagex" ]
+// @[ "DBA: ranges (1)" ]()
+// test @[ "tags: caching (1)" ]
+// test @[ "tags: fallbacks" ]
+// @[ "tags: fallbacks" ]()
 /*
  * from https://github.com/loveencounterflow/hengist/tree/master/dev/kitty-font-config-writer-kfcw
 
