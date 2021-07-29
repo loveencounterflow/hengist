@@ -174,6 +174,7 @@
         },
         [
           {
+            nr: 1,
             tag: 'foo',
             value: 'false'
           }
@@ -186,6 +187,7 @@
         },
         [
           {
+            nr: 1,
             tag: 'foo',
             value: '"abc"'
           }
@@ -198,6 +200,7 @@
         },
         [
           {
+            nr: 1,
             tag: 'font',
             value: '"font1"'
           }
@@ -210,6 +213,7 @@
         },
         [
           {
+            nr: 1,
             tag: 'rounded',
             value: 'false'
           }
@@ -221,6 +225,7 @@
         },
         [
           {
+            nr: 1,
             tag: 'shape/ladder',
             value: 'false'
           }
@@ -323,6 +328,214 @@
         });
       });
     }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["tags: fallbacks"] = function(T, done) {
+    var Dtags, add_some_tags_and_ranges;
+    // T?.halt_on_error()
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
+    //.........................................................................................................
+    add_some_tags_and_ranges = function(dtags) {
+      dtags.add_tag({
+        tag: 'foo',
+        value: true
+      });
+      dtags.add_tag({
+        tag: 'bar',
+        value: false
+      });
+      dtags.add_tag({
+        tag: 'baz',
+        value: 42
+      });
+      dtags.add_tagged_range({
+        lo: 10,
+        hi: 10,
+        tag: 'foo'
+      });
+      dtags.add_tagged_range({
+        lo: 11,
+        hi: 11,
+        mode: '-',
+        tag: 'foo'
+      });
+      dtags.add_tagged_range({
+        lo: 12,
+        hi: 12,
+        tag: 'bar'
+      });
+      dtags.add_tagged_range({
+        lo: 13,
+        hi: 13,
+        mode: '-',
+        tag: 'bar'
+      });
+      dtags.add_tagged_range({
+        lo: 14,
+        hi: 14,
+        tag: 'baz',
+        value: 108
+      });
+      dtags.add_tagged_range({
+        lo: 15,
+        hi: 15,
+        mode: '-',
+        tag: 'baz'
+      });
+      return null;
+    };
+    (() => { //...................................................................................................
+      var dtags;
+      dtags = new Dtags();
+      add_some_tags_and_ranges(dtags);
+      T.eq(dtags.get_fallbacks(), {
+        foo: true,
+        bar: false,
+        baz: 42
+      });
+      T.eq(dtags.get_filtered_fallbacks(), {});
+      whisper('-------------------------');
+      T.eq(dtags.tags_from_id({
+        id: 10
+      }), {
+        foo: true
+      });
+      T.eq(dtags.tags_from_id({
+        id: 11
+      }), {});
+      T.eq(dtags.tags_from_id({
+        id: 12
+      }), {
+        bar: true
+      });
+      T.eq(dtags.tags_from_id({
+        id: 13
+      }), {});
+      T.eq(dtags.tags_from_id({
+        id: 14
+      }), {
+        baz: 108
+      });
+      return T.eq(dtags.tags_from_id({
+        id: 15
+      }), {});
+    })();
+    (() => { //...................................................................................................
+      var dtags;
+      dtags = new Dtags({
+        fallbacks: true
+      });
+      add_some_tags_and_ranges(dtags);
+      T.eq(dtags.get_fallbacks(), {
+        foo: true,
+        bar: false,
+        baz: 42
+      });
+      T.eq(dtags.get_filtered_fallbacks(), {
+        foo: true,
+        baz: 42
+      });
+      whisper('-------------------------');
+      T.eq(dtags.tags_from_id({
+        id: 10
+      }), {
+        foo: true,
+        baz: 42
+      });
+      T.eq(dtags.tags_from_id({
+        id: 11
+      }), {
+        foo: true,
+        baz: 42
+      });
+      T.eq(dtags.tags_from_id({
+        id: 12
+      }), {
+        foo: true,
+        baz: 42,
+        bar: true
+      });
+      T.eq(dtags.tags_from_id({
+        id: 13
+      }), {
+        foo: true,
+        baz: 42
+      });
+      T.eq(dtags.tags_from_id({
+        id: 14
+      }), {
+        foo: true,
+        baz: 108
+      });
+      return T.eq(dtags.tags_from_id({
+        id: 15
+      }), {
+        foo: true,
+        baz: 42
+      });
+    })();
+    (() => { //...................................................................................................
+      var dtags;
+      dtags = new Dtags({
+        fallbacks: 'all'
+      });
+      add_some_tags_and_ranges(dtags);
+      T.eq(dtags.get_fallbacks(), {
+        foo: true,
+        bar: false,
+        baz: 42
+      });
+      T.eq(dtags.get_filtered_fallbacks(), {
+        foo: true,
+        bar: false,
+        baz: 42
+      });
+      whisper('-------------------------');
+      T.eq(dtags.tags_from_id({
+        id: 10
+      }), {
+        foo: true,
+        bar: false,
+        baz: 42
+      });
+      T.eq(dtags.tags_from_id({
+        id: 11
+      }), {
+        foo: true,
+        bar: false,
+        baz: 42
+      });
+      T.eq(dtags.tags_from_id({
+        id: 12
+      }), {
+        foo: true,
+        bar: true,
+        baz: 42
+      });
+      T.eq(dtags.tags_from_id({
+        id: 13
+      }), {
+        foo: true,
+        bar: false,
+        baz: 42
+      });
+      T.eq(dtags.tags_from_id({
+        id: 14
+      }), {
+        foo: true,
+        bar: false,
+        baz: 108
+      });
+      return T.eq(dtags.tags_from_id({
+        id: 15
+      }), {
+        foo: true,
+        bar: false,
+        baz: 42
+      });
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -707,19 +920,19 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      // test @[ "DBA: ranges (1)" ]
+      // test @[ "tags: tags_from_tagexchain" ]
+      // test @[ "tags: add_tagged_range" ]
+      // test @[ "tags: add_tag with value" ]
+      // test @[ "tags: parse_tagex" ]
+      // @[ "DBA: ranges (1)" ]()
+      // test @[ "tags: caching (1)" ]
+      return test(this["tags: fallbacks"]);
     })();
   }
 
-  // test @[ "DBA: ranges (1)" ]
-// test @[ "tags: tags_from_tagexchain" ]
-// test @[ "tags: add_tagged_range" ]
-// test @[ "tags: add_tag with value" ]
-// test @[ "tags: parse_tagex" ]
-// @[ "DBA: ranges (1)" ]()
-// test @[ "tags: caching (1)" ]
+  // @[ "tags: fallbacks" ]()
 /*
  * from https://github.com/loveencounterflow/hengist/tree/master/dev/kitty-font-config-writer-kfcw
 
