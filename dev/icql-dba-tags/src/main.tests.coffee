@@ -129,6 +129,55 @@ NCR = new Ncr()
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "tags: fallbacks" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dtags, }  = require '../../../apps/icql-dba-tags'
+  #.........................................................................................................
+  add_some_tags_and_ranges = ( dtags ) ->
+    dtags.add_tag { tag: 'foo', value: true, }
+    dtags.add_tag { tag: 'bar', value: false, }
+    dtags.add_tag { tag: 'baz', value: 42, }
+    dtags.add_tagged_range { lo: 10, hi: 10, tag: 'foo', }
+    dtags.add_tagged_range { lo: 11, hi: 11, mode: '-', tag: 'foo', }
+    dtags.add_tagged_range { lo: 12, hi: 12, tag: 'bar', }
+    dtags.add_tagged_range { lo: 13, hi: 13, mode: '-', tag: 'bar', }
+    dtags.add_tagged_range { lo: 14, hi: 14, tag: 'baz', value: 108, }
+    dtags.add_tagged_range { lo: 15, hi: 15, mode: '-', tag: 'baz', }
+    return null
+  do => #...................................................................................................
+    dtags = new Dtags(); add_some_tags_and_ranges dtags
+    T.eq dtags.get_fallbacks(), { foo: true, bar: false, baz: 42 }
+    T.eq dtags.get_filtered_fallbacks(), {}
+    T.eq ( dtags.tags_from_id { id: 10, } ), { foo: true }
+    T.eq ( dtags.tags_from_id { id: 11, } ), {}
+    T.eq ( dtags.tags_from_id { id: 12, } ), { bar: true }
+    T.eq ( dtags.tags_from_id { id: 13, } ), {}
+    T.eq ( dtags.tags_from_id { id: 14, } ), { baz: 108 }
+    T.eq ( dtags.tags_from_id { id: 15, } ), {}
+  do => #...................................................................................................
+    dtags = new Dtags { fallbacks: true, }; add_some_tags_and_ranges dtags
+    T.eq dtags.get_fallbacks(), { foo: true, bar: false, baz: 42 }
+    T.eq dtags.get_filtered_fallbacks(), { foo: true, baz: 42 }
+    T.eq ( dtags.tags_from_id { id: 10, } ), { foo: true, baz: 42 }
+    T.eq ( dtags.tags_from_id { id: 11, } ), { foo: true, baz: 42 }
+    T.eq ( dtags.tags_from_id { id: 12, } ), { foo: true, baz: 42, bar: true }
+    T.eq ( dtags.tags_from_id { id: 13, } ), { foo: true, baz: 42 }
+    T.eq ( dtags.tags_from_id { id: 14, } ), { foo: true, baz: 108 }
+    T.eq ( dtags.tags_from_id { id: 15, } ), { foo: true, baz: 42 }
+  do => #...................................................................................................
+    dtags = new Dtags { fallbacks: 'all', }; add_some_tags_and_ranges dtags
+    T.eq dtags.get_fallbacks(), { foo: true, bar: false, baz: 42 }
+    T.eq dtags.get_filtered_fallbacks(), { foo: true, bar: false, baz: 42 }
+    T.eq ( dtags.tags_from_id { id: 10, } ), { foo: true, bar: false, baz: 42 }
+    T.eq ( dtags.tags_from_id { id: 11, } ), { foo: true, bar: false, baz: 42 }
+    T.eq ( dtags.tags_from_id { id: 12, } ), { foo: true, bar: true, baz: 42 }
+    T.eq ( dtags.tags_from_id { id: 13, } ), { foo: true, bar: false, baz: 42 }
+    T.eq ( dtags.tags_from_id { id: 14, } ), { foo: true, bar: false, baz: 108 }
+    T.eq ( dtags.tags_from_id { id: 15, } ), { foo: true, bar: false, baz: 42 }
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "tags: add_tagged_range" ] = ( T, done ) ->
   # T?.halt_on_error()
   #.........................................................................................................
@@ -278,6 +327,8 @@ if module is require.main then do =>
   # test @[ "tags: parse_tagex" ]
   # @[ "DBA: ranges (1)" ]()
   # test @[ "tags: caching (1)" ]
+  # test @[ "tags: fallbacks" ]
+  # @[ "tags: fallbacks" ]()
 
 
 
