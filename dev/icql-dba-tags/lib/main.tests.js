@@ -177,7 +177,7 @@
         [
           {
             tag: 'foo',
-            value: 'true'
+            value: 'false'
           }
         ]
       ],
@@ -224,7 +224,7 @@
         [
           {
             tag: 'shape/ladder',
-            value: 'true'
+            value: 'false'
           }
         ]
       ]
@@ -360,6 +360,7 @@
             nr: 1,
             lo: 1,
             hi: 11,
+            mode: '+',
             tag: 'foo',
             value: true
           }
@@ -378,6 +379,7 @@
             nr: 1,
             lo: 2,
             hi: 12,
+            mode: '+',
             tag: 'foo',
             value: 'abc'
           }
@@ -396,6 +398,7 @@
             nr: 1,
             lo: 5,
             hi: 15,
+            mode: '+',
             tag: 'font',
             value: 'font1'
           }
@@ -413,6 +416,7 @@
             nr: 1,
             lo: 6,
             hi: 16,
+            mode: '-',
             tag: 'rounded',
             value: false
           }
@@ -430,6 +434,7 @@
             nr: 1,
             lo: 7,
             hi: 17,
+            mode: '+',
             tag: 'shape/ladder',
             value: true
           }
@@ -457,7 +462,9 @@
   //-----------------------------------------------------------------------------------------------------------
   this["tags: caching (1)"] = function(T, done) {
     var Dba, Dtags, dba, dtags, get_cache, get_tagged_ranges, prefix;
-    // T?.halt_on_error()
+    if (T != null) {
+      T.halt_on_error();
+    }
     //.........................................................................................................
     ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
@@ -470,29 +477,162 @@
       return dba.list(dba.query(SQL`select * from t_tagged_ranges order by lo, hi, tag;`));
     };
     get_cache = function() {
-      return dba.list(dba.query(SQL`select * from t_tagged_cids_cache order by cid, tag;`));
+      return dba.list(dba.query(SQL`select * from t_tagged_ids_cache order by id;`));
     };
-    (() => {      //.........................................................................................................
+    (() => {      // get_tagchain      = ( id ) -> dba.list dba.query SQL"""
+      //   select mode, tag, value from t_tagged_ranges where $id between lo and hi order by nr asc;""", { id, }
+      //.........................................................................................................
       dtags.add_tag({
         tag: 'first'
       });
-      dtags.add_tagged_range({
-        tag: 'first',
-        lo: 10,
-        hi: 20
+      dtags.add_tag({
+        tag: 'second'
       });
-      debug('^4487^', get_tagged_ranges());
-      debug('^4487^', get_cache());
+      dtags.add_tagged_range({
+        mode: '+',
+        lo: 10,
+        hi: 20,
+        tag: 'first'
+      });
+      dtags.add_tagged_range({
+        mode: '+',
+        lo: 10,
+        hi: 15,
+        tag: 'second'
+      });
+      dtags.add_tagged_range({
+        mode: '-',
+        lo: 12,
+        hi: 12,
+        tag: 'second'
+      });
       T.eq(get_tagged_ranges(), [
+        {
+          nr: 2,
+          lo: 10,
+          hi: 15,
+          mode: '+',
+          tag: 'second',
+          value: 'true'
+        },
         {
           nr: 1,
           lo: 10,
           hi: 20,
-          tag: 'first'
+          mode: '+',
+          tag: 'first',
+          value: 'true'
+        },
+        {
+          nr: 3,
+          lo: 12,
+          hi: 12,
+          mode: '-',
+          tag: 'second',
+          value: 'false'
         }
       ]);
       T.eq(get_cache(), []);
-      return debug('^4487^', get_cache());
+      T.eq(get_tagged_ranges(), [
+        {
+          nr: 2,
+          lo: 10,
+          hi: 15,
+          mode: '+',
+          tag: 'second',
+          value: 'true'
+        },
+        {
+          nr: 1,
+          lo: 10,
+          hi: 20,
+          mode: '+',
+          tag: 'first',
+          value: 'true'
+        },
+        {
+          nr: 3,
+          lo: 12,
+          hi: 12,
+          mode: '-',
+          tag: 'second',
+          value: 'false'
+        }
+      ]);
+      T.eq(dtags.tagchain_from_id({
+        id: 10
+      }), [
+        {
+          mode: '+',
+          tag: 'first',
+          value: 'true'
+        },
+        {
+          mode: '+',
+          tag: 'second',
+          value: 'true'
+        }
+      ]);
+      T.eq(dtags.tagchain_from_id({
+        id: 12
+      }), [
+        {
+          mode: '+',
+          tag: 'first',
+          value: 'true'
+        },
+        {
+          mode: '+',
+          tag: 'second',
+          value: 'true'
+        },
+        {
+          mode: '-',
+          tag: 'second',
+          value: 'false'
+        }
+      ]);
+      T.eq(dtags.tagchain_from_id({
+        id: 16
+      }), [
+        {
+          mode: '+',
+          tag: 'first',
+          value: 'true'
+        }
+      ]);
+      T.eq(get_cache(), []);
+      T.eq(dtags.tags_from_id({
+        id: 10
+      }), {
+        first: 'true',
+        second: 'true'
+      });
+      T.eq(dtags.tags_from_id({
+        id: 12
+      }), {
+        first: 'true',
+        second: 'false'
+      });
+      T.eq(dtags.tags_from_id({
+        id: 16
+      }), {
+        first: 'true'
+      });
+      return T.eq(get_cache(), [
+        {
+          id: 10,
+          tags: '{"first":"true","second":"true"}'
+        },
+        {
+          id: 12,
+          tags: '{"first":"true","second":"false"}'
+        },
+        {
+          id: 16,
+          tags: '{"first":"true"}'
+        }
+      ]);
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -568,7 +708,7 @@
 //.........................................................................................................
     for (cid = k = ref1 = first_cid, ref2 = last_cid; (ref1 <= ref2 ? k <= ref2 : k >= ref2); cid = ref1 <= ref2 ? ++k : --k) {
       chr = String.fromCodePoint(cid);
-      tagchain = dtags.tagchain_from_cid({cid});
+      tagchain = dtags.tagchain_from_id({cid});
       debug('^5543^', {tagchain});
       tags = dtags.tags_from_tagchain(tagchain);
       info(CND.gold(chr), CND.blue(tags));
@@ -589,16 +729,16 @@
     (() => {
       // test @, { timeout: 10e3, }
       // test @[ "DBA: ranges (1)" ]
-      return test(this["tags: tags_from_tagexchain"]);
+      // test @[ "tags: tags_from_tagexchain" ]
+      // test @[ "tags: add_tagged_range" ]
+      // test @[ "tags: add_tag with value" ]
+      // test @[ "tags: parse_tagex" ]
+      // @[ "DBA: ranges (1)" ]()
+      return test(this["tags: caching (1)"]);
     })();
   }
 
-  // test @[ "tags: add_tagged_range" ]
-// test @[ "tags: add_tag with value" ]
-// test @[ "tags: parse_tagex" ]
-// @[ "DBA: ranges (1)" ]()
-// test @[ "tags: caching (1)" ]
-/*
+  /*
  * from https://github.com/loveencounterflow/hengist/tree/master/dev/kitty-font-config-writer-kfcw
 
 superset          ABCDEFGHIJKLMNOPQRSTUVWXYZ  │ CSS-like Configuration with Overlapping Ranges
