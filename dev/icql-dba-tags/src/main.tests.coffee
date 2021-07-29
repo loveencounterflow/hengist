@@ -58,7 +58,7 @@ NCR = new Ncr()
 #
 #-----------------------------------------------------------------------------------------------------------
 @[ "tags: tags_from_tagexchain" ] = ( T, done ) ->
-  # T?.halt_on_error()
+  T?.halt_on_error()
   #.........................................................................................................
   probes_and_matchers = [
     [ [ '+foo',                             ],  { foo: true,          }, ]
@@ -66,7 +66,7 @@ NCR = new Ncr()
     [ [ '+font:"superset"',                 ],  { font: 'superset',   }, ]
     [ [ '+font:"font1"',                    ],  { font: 'font1',      }, ]
     [ [ '+font:"font1"',  '+font:"Arial"',  ],  { font: 'Arial',      }, ]
-    [ [ '+rounded', '-rounded',             ],  { rounded: false,     }, ]
+    [ [ '+rounded', '-rounded',             ],  {},                      ]
     [ [ '+shape/ladder', '+shape/pointy',   ],  { 'shape/ladder': true, 'shape/pointy': true, }, ]
     ]
   { Dtags, }  = require '../../../apps/icql-dba-tags'
@@ -162,7 +162,7 @@ NCR = new Ncr()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "tags: caching (1)" ] = ( T, done ) ->
-  T?.halt_on_error()
+  # T?.halt_on_error()
   #.........................................................................................................
   { Dba }           = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
@@ -171,7 +171,7 @@ NCR = new Ncr()
   dba               = new Dba()
   dtags             = new Dtags { dba, prefix, }
   #.........................................................................................................
-  get_tagged_ranges = -> dba.list dba.query SQL"select * from t_tagged_ranges order by lo, hi, tag;"
+  get_tagged_ranges = -> dba.list dba.query SQL"select * from t_tagged_ranges order by nr;"
   get_cache         = -> dba.list dba.query SQL"select * from t_tagged_ids_cache order by id;"
   # get_tagchain      = ( id ) -> dba.list dba.query SQL"""
   #   select mode, tag, value from t_tagged_ranges where $id between lo and hi order by nr asc;""", { id, }
@@ -182,26 +182,34 @@ NCR = new Ncr()
     dtags.add_tagged_range { mode: '+', lo: 10, hi: 20, tag: 'first',  }
     dtags.add_tagged_range { mode: '+', lo: 10, hi: 15, tag: 'second', }
     dtags.add_tagged_range { mode: '-', lo: 12, hi: 12, tag: 'second', }
-    T.eq ( get_tagged_ranges() ), [ { nr: 2, lo: 10, hi: 15, mode: '+', tag: 'second', value: 'true' }, { nr: 1, lo: 10, hi: 20, mode: '+', tag: 'first', value: 'true' }, { nr: 3, lo: 12, hi: 12, mode: '-', tag: 'second', value: 'false' } ]
     T.eq get_cache(), []
     T.eq get_tagged_ranges(), [
-      { nr: 2, lo: 10, hi: 15, mode: '+', tag: 'second', value: 'true' },
       { nr: 1, lo: 10, hi: 20, mode: '+', tag: 'first', value: 'true' },
+      { nr: 2, lo: 10, hi: 15, mode: '+', tag: 'second', value: 'true' },
       { nr: 3, lo: 12, hi: 12, mode: '-', tag: 'second', value: 'false' } ]
-    T.eq ( dtags.tagchain_from_id { id: 10, } ), [ { mode: '+', tag: 'first', value: 'true' }, { mode: '+', tag: 'second', value: 'true' } ]
-    T.eq ( dtags.tagchain_from_id { id: 12, } ), [ { mode: '+', tag: 'first', value: 'true' }, { mode: '+', tag: 'second', value: 'true' }, { mode: '-', tag: 'second', value: 'false' } ]
-    T.eq ( dtags.tagchain_from_id { id: 16, } ), [ { mode: '+', tag: 'first', value: 'true' } ]
+    T.eq ( dtags.tagchain_from_id { id: 10, } ), [
+      { nr: 1, mode: '+', tag: 'first', value: true },
+      { nr: 2, mode: '+', tag: 'second', value: true }, ]
+    T.eq ( dtags.tagchain_from_id { id: 12, } ), [
+      { nr: 1, mode: '+', tag: 'first', value: true },
+      { nr: 2, mode: '+', tag: 'second', value: true },
+      { nr: 3, mode: '-', tag: 'second', value: false } ]
+    T.eq ( dtags.tagchain_from_id { id: 16, } ), [
+      { nr: 1, mode: '+', tag: 'first', value: true } ]
     T.eq get_cache(), []
-    T.eq ( dtags.tags_from_id { id: 10, } ), { first: 'true', second: 'true' }
-    T.eq ( dtags.tags_from_id { id: 12, } ), { first: 'true', second: 'false' }
-    T.eq ( dtags.tags_from_id { id: 16, } ), { first: 'true' }
-    T.eq get_cache(), [ { id: 10, tags: '{"first":"true","second":"true"}' }, { id: 12, tags: '{"first":"true","second":"false"}' }, { id: 16, tags: '{"first":"true"}' } ]
+    T.eq ( dtags.tags_from_id { id: 10, } ), { first: true, second: true }
+    T.eq ( dtags.tags_from_id { id: 12, } ), { first: true, }
+    T.eq ( dtags.tags_from_id { id: 16, } ), { first: true }
+    T.eq get_cache(), [
+      { id: 10, tags: '{"first":true,"second":true}' },
+      { id: 12, tags: '{"first":true}' },
+      { id: 16, tags: '{"first":true}' } ]
   #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: ranges (1)" ] = ( T, done ) ->
-  # T?.halt_on_error()
+  T?.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
   # E                 = require '../../../apps/icql-dba/lib/errors'
@@ -216,30 +224,35 @@ NCR = new Ncr()
   #.........................................................................................................
   rules = [
     # [ '+superset',      'A..Z',               ]
-    [ '+font:fallback', 'A..Z',               ]
-    # [ '+script:latin',  'A..Z',               ]
-    [ '+font:font1',    'B..H, J, L, N..X',   ]
-    [ '+font:font2',    'B..D',               ]
-    [ '+font:font3',    'G..I',               ]
-    [ '+font:font4',    'M..Q',               ]
-    [ '+font:font5',    'M, O..T',            ]
-    [ '+font:font6',    'M, U, X..Y',         ]
-    [ '+vowel',         'A, E, I, O, U',      ]
-    [ '+shape/pointy',  'A, V',               ]
-    [ '+shape/crossed', 'X',                  ]
-    [ '+shape/ladder',  'A, H',               ]
+    [ '+font:"fallback"', 'A..Z',               ]
+    # [ '+script:"latin"',  'A..Z',               ]
+    [ '+font:"font1"',    'B..H, J, L, N..X',   ]
+    [ '+font:"font2"',    'B..D',               ]
+    [ '+font:"font3"',    'G..I',               ]
+    [ '+font:"font4"',    'M..Q',               ]
+    [ '+font:"font5"',    'M, O..T',            ]
+    [ '+font:"font6"',    'M, U, X..Y',         ]
+    [ '+vowel',           'A, E, I, O, U',      ]
+    [ '+shape/pointy',    'A, V',               ]
+    [ '+shape/crossed',   'X',                  ]
+    [ '+shape/ladder',    'A, H',               ]
     ]
-  for [ tag, ranges, ] in rules
-    dtags.add_tag { tag, }
+  seen_tags = new Set()
+  for [ tagex, ranges, ] in rules
+    { mode, tag, value, } = dtags.parse_tagex { tagex, }
+    unless seen_tags.has tag
+      seen_tags.add tag
+      dtags.add_tag { tag, value: ( if value is true then false else value ), }
     for { lo, hi, } in NCR.parse_multirange_declaration ranges
-      dtags.add_tagged_range { tag, lo, hi, }
+      dtags.add_tagged_range { mode, tag, value, lo, hi, }
   #.........................................................................................................
   console.table dba.list dba.query SQL"""
     select
         nr                      as nr,
-        tag                     as tag,
         chr_from_cid( lo )      as chr_lo,
-        chr_from_cid( hi )      as chr_hi
+        chr_from_cid( hi )      as chr_hi,
+        tag                     as tag,
+        value                   as value
       from #{prefix}tagged_ranges
       order by nr;"""
   console.table dba.list dba.query SQL"""select * from #{prefix}tags order by tag;"""
@@ -247,16 +260,9 @@ NCR = new Ncr()
   #.........................................................................................................
   for cid in [ first_cid .. last_cid ]
     chr       = String.fromCodePoint cid
-    tagchain  = dtags.tagchain_from_id { cid, }
-    debug '^5543^', { tagchain, }
-    tags      = dtags.tags_from_tagchain tagchain
+    tags      = dtags.tags_from_id { id: cid, }
     info ( CND.gold chr ), ( CND.blue tags )
-    for tag, value of tags
-      value = JSON.stringify value
-      dba.run SQL"""
-        insert into #{prefix}tagged_cids_cache ( cid, tag, value )
-          values ( $cid, $tag, $value );""", { cid, tag, value, }
-  console.table dba.list dba.query SQL"""select * from #{prefix}tagged_cids_cache order by cid, tag;"""
+  console.table dba.list dba.query SQL"""select * from #{prefix}tagged_ids_cache order by id;"""
   # console.table dba.list dba.query SQL"""select #{prefix}tags_from_cid( $cid );""", { cid: 65, }
   done?() #..................................................................................................
 
@@ -264,14 +270,14 @@ NCR = new Ncr()
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
+  test @, { timeout: 10e3, }
   # test @[ "DBA: ranges (1)" ]
   # test @[ "tags: tags_from_tagexchain" ]
   # test @[ "tags: add_tagged_range" ]
   # test @[ "tags: add_tag with value" ]
   # test @[ "tags: parse_tagex" ]
   # @[ "DBA: ranges (1)" ]()
-  test @[ "tags: caching (1)" ]
+  # test @[ "tags: caching (1)" ]
 
 
 
