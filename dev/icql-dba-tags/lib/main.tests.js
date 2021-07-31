@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, NCR, Ncr, PATH, SQL, badge, dba_path, debug, echo, freeze, help, info, isa, jp, jr, lets, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, NCR, Ncr, PATH, SQL, _add_tagged_ranges, add_sql_functions, badge, dba_path, debug, demo_html, echo, freeze, help, info, isa, jp, jr, lets, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -50,6 +50,64 @@
   dba_path = '../../../apps/icql-dba';
 
   ({lets, freeze} = require('letsfreezethat'));
+
+  //-----------------------------------------------------------------------------------------------------------
+  add_sql_functions = function(dba) {
+    var R, k, v;
+    //=========================================================================================================
+    R = {
+      //-------------------------------------------------------------------------------------------------------
+      walk_pattern_matches: function*(text, pattern) {
+        var match, regex;
+        regex = new RegExp(pattern, 'g');
+        while ((match = regex.exec(text)) != null) {
+          yield [match[0], match[1]];
+        }
+        return null;
+      },
+      //-------------------------------------------------------------------------------------------------------
+      generate_series: function*(start, stop, step = null) {
+        var n;
+        // stop ?= start
+        debug('^3334^', this);
+        if (step == null) {
+          step = 1;
+        }
+        n = start;
+        while (true) {
+          if (n > stop) {
+            break;
+          }
+          // if n %% 2 is 0 then yield [ "*#{n}*", ]
+          // else                yield [ n, ]
+          yield [n];
+          n += step;
+        }
+        return null;
+      }
+    };
+    for (k in R) {
+      v = R[k];
+      //.........................................................................................................
+      R[k] = v.bind(R);
+    }
+    //.........................................................................................................
+    dba.create_table_function({
+      name: 'generate_series',
+      columns: ['n'],
+      parameters: ['start', 'stop', 'step'],
+      rows: R.generate_series
+    });
+    //.........................................................................................................
+    dba.create_table_function({
+      name: 're_matches',
+      columns: ['match', 'capture'],
+      parameters: ['text', 'pattern'],
+      rows: R.walk_pattern_matches
+    });
+    //.........................................................................................................
+    return R;
+  };
 
   //===========================================================================================================
   Ncr = class Ncr {
@@ -823,57 +881,23 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: ranges (1)"] = function(T, done) {
-    var Dba, Dtags, chr, chr_from_cid, cid, cid_from_chr, dba, dtags, first_cid, hi, i, j, k, last_cid, len, len1, lo, mode, prefix, ranges, ref, ref1, ref2, rules, seen_tags, tag, tagex, tags, value;
-    if (T != null) {
-      T.halt_on_error();
-    }
-    ({Dba} = require('../../../apps/icql-dba'));
-    ({Dtags} = require('../../../apps/icql-dba-tags'));
-    // E                 = require '../../../apps/icql-dba/lib/errors'
-    prefix = 't_';
-    dba = new Dba();
-    dtags = new Dtags({dba, prefix});
-    cid_from_chr = function(chr) {
-      return chr.codePointAt(0);
-    };
-    chr_from_cid = function(cid) {
-      return String.fromCodePoint(cid);
-    };
-    dba.create_function({
-      name: 'chr_from_cid',
-      call: chr_from_cid
-    });
-    first_cid = cid_from_chr('A');
-    last_cid = cid_from_chr('Z');
-    //.........................................................................................................
-    rules = [
-      // [ '+superset',      'A..Z',               ]
-      ['+font:"fallback"',
-      'A..Z'],
-      // [ '+script:"latin"',  'A..Z',               ]
-      ['+font:"font1"',
-      'B..H, J, L, N..X'],
-      ['+font:"font2"',
-      'B..D'],
-      ['+font:"font3"',
-      'G..I'],
-      ['+font:"font4"',
-      'M..Q'],
-      ['+font:"font5"',
-      'M, O..T'],
-      ['+font:"font6"',
-      'M, U, X..Y'],
-      ['+vowel',
-      'A, E, I, O, U'],
-      ['+shape/pointy',
-      'A, V'],
-      ['+shape/crossed',
-      'X'],
-      ['+shape/ladder',
-      'A, H']
-    ];
+  _add_tagged_ranges = function(dtags) {
+    var hi, i, j, len, len1, lo, mode, ranges, ref, rules, seen_tags, tag, tagex, value;
+    // [ '+superset',      'A..Z',               ]
+    // [ '+font:"fallback"', 'A..Z',               ]
+    // [ '+script:"latin"',  'A..Z',               ]
+    rules = [['+font:"font1"', 'B..H, J, L, N..X'], ['+font:"font2"', 'B..D'], ['+font:"font3"', 'G..I'], ['+font:"font4"', 'M..Q'], ['+font:"font5"', 'M, O..T'], ['+font:"font6"', 'M, U, X..X'], ['+vowel', 'A, E, I, O, U'], ['+shape-pointy', 'A, V'], ['+shape-crossed', 'X'], ['+shape-ladder', 'A, H'], ['+pushraise:{"x":100,"y":200}', 'O']];
     seen_tags = new Set();
+    seen_tags.add('font');
+    dtags.add_tag({
+      tag: 'font',
+      value: 'fallback'
+    });
+    seen_tags.add('pushraise');
+    dtags.add_tag({
+      tag: 'pushraise',
+      value: false
+    });
     for (i = 0, len = rules.length; i < len; i++) {
       [tagex, ranges] = rules[i];
       ({mode, tag, value} = dtags.parse_tagex({tagex}));
@@ -890,41 +914,347 @@
         dtags.add_tagged_range({mode, tag, value, lo, hi});
       }
     }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: ranges (1)"] = function(T, done) {
+    var Dba, Dtags, f, fallbacks, i, len, ref;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
+    // E                 = require '../../../apps/icql-dba/lib/errors'
     //.........................................................................................................
-    console.table(dba.list(dba.query(SQL`select
+    f = function(fallbacks) {
+      var chr, chr_from_cid, cid, cid_from_chr, dba, dtags, first_cid, i, last_cid, prefix, ref, ref1, tags;
+      prefix = 't_';
+      dba = new Dba();
+      dtags = new Dtags({dba, prefix, fallbacks});
+      cid_from_chr = function(chr) {
+        return chr.codePointAt(0);
+      };
+      chr_from_cid = function(cid) {
+        return String.fromCodePoint(cid);
+      };
+      dba.create_function({
+        name: 'chr_from_cid',
+        call: chr_from_cid
+      });
+      first_cid = cid_from_chr('A');
+      last_cid = cid_from_chr('Z');
+      //.......................................................................................................
+      _add_tagged_ranges(dtags);
+      //.......................................................................................................
+      console.table(dba.list(dba.query(SQL`select
     nr                      as nr,
     chr_from_cid( lo )      as chr_lo,
     chr_from_cid( hi )      as chr_hi,
+    mode                    as mode,
     tag                     as tag,
     value                   as value
   from ${prefix}tagged_ranges
   order by nr;`)));
-    console.table(dba.list(dba.query(SQL`select * from ${prefix}tags order by tag;`)));
+      console.table(dba.list(dba.query(SQL`select * from ${prefix}tags order by tag;`)));
 // console.table dba.list dba.query SQL"""select * from #{prefix}tags_by_cid order by tag, cid, nr;"""
-//.........................................................................................................
-    for (cid = k = ref1 = first_cid, ref2 = last_cid; (ref1 <= ref2 ? k <= ref2 : k >= ref2); cid = ref1 <= ref2 ? ++k : --k) {
-      chr = String.fromCodePoint(cid);
-      tags = dtags.tags_from_id({
-        id: cid
-      });
-      info(CND.gold(chr), CND.blue(tags));
+//.......................................................................................................
+      for (cid = i = ref = first_cid, ref1 = last_cid; (ref <= ref1 ? i <= ref1 : i >= ref1); cid = ref <= ref1 ? ++i : --i) {
+        chr = String.fromCodePoint(cid);
+        tags = dtags.tags_from_id({
+          id: cid
+        });
+        info(CND.gold(chr), CND.blue(tags));
+      }
+      return console.table(dba.list(dba.query(SQL`select * from ${prefix}tagged_ids_cache order by id;`)));
+    };
+    ref = ['all', true, false];
+    // console.table dba.list dba.query SQL"""select * from #{prefix}tagged_ranges order by lo, hi, nr;"""
+    //.........................................................................................................
+    for (i = 0, len = ref.length; i < len; i++) {
+      fallbacks = ref[i];
+      f(fallbacks);
     }
-    console.table(dba.list(dba.query(SQL`select * from ${prefix}tagged_ids_cache order by id;`)));
     return typeof done === "function" ? done() : void 0;
   };
 
   
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: contiguous ranges"] = function(T, done) {
+    var Dba, Dtags, R, build_cache, chr_from_cid, cid_from_chr, d, dtags, first_cid, group, groups, i, id_pair, id_pairs, idx, j, last_cid, len, len1, match, part, prefix, re, ref, ref1, tags, tags_cache;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
+    // E                 = require '../../../apps/icql-dba/lib/errors'
+    //.........................................................................................................
+    prefix = 't_';
+    dtags = new Dtags({
+      prefix,
+      fallbacks: true
+    });
+    cid_from_chr = function(chr) {
+      return chr.codePointAt(0);
+    };
+    chr_from_cid = function(cid) {
+      return String.fromCodePoint(cid);
+    };
+    first_cid = cid_from_chr('A');
+    last_cid = cid_from_chr('Z');
+    //.........................................................................................................
+    _add_tagged_ranges(dtags);
+    //.........................................................................................................
+    /* Demo for a regex that partitons a text into chunks of characters that all have the same tags. */
+    debug('abcdefgh'.match(/(?<vowels>[aeiou])/g));
+    d = 'arbitrary text';
+    re = /(?<g1>[a-d]+\s*)|(?<g2>[e-h]+\s*)|(?<g3>[i-n]+\s*)|(?<g4>[o-t]+\s*)|(?<g5>[u-z]+\s*)|(?<g0>\s+)/g;
+    R = [];
+    ref = [...(d.matchAll(re))];
+    for (i = 0, len = ref.length; i < len; i++) {
+      match = ref[i];
+      ({groups} = match);
+      ref1 = match.groups;
+      for (group in ref1) {
+        part = ref1[group];
+        if (part == null) {
+          continue;
+        }
+        R.push({group, part});
+        break;
+      }
+    }
+    for (group in R) {
+      part = R[group];
+      info(group, rpr(part));
+    }
+    //.........................................................................................................
+    /* Computing contiguous ranges for all different sets of tags. For each ID, this table contains exactly
+     one matching row between lo and hi, and the lo of each row (except for the first) is the hi of the
+     preceding row plus one. The data in this table replaces `t_tagged_ids_cache` which in a typical
+     application can be expected to be much larger; further, the range data can be used to build a regex
+     as shown above to split a given text into chunks of characters that all have the same tags. */
+    // f = add_sql_functions dtags.dba
+    tags_cache = {};
+    build_cache = function(cfg) {
+      var cur_id, cur_tags, hi, id, j, lo, prv_id, prv_tags, ref2, ref3, ref4, row;
+      ({lo, hi} = cfg);
+      if (lo == null) {
+        lo = first_cid;
+      }
+      if (hi == null) {
+        hi = last_cid;
+      }
+      for (id = j = ref2 = lo, ref3 = hi; (ref2 <= ref3 ? j <= ref3 : j >= ref3); id = ref2 <= ref3 ? ++j : --j) {
+        dtags.tags_from_id({id});
+      }
+      console.table(dtags.dba.list(dtags.dba.query(SQL`select * from t_tagged_ids_cache order by id;`)));
+      cur_id = first_cid;
+      cur_tags = null;
+      prv_id = null;
+      prv_tags = null;
+      ref4 = dtags.dba.query(SQL`select * from t_tagged_ids_cache order by id;`);
+      for (row of ref4) {
+        ({
+          id: cur_id,
+          tags: cur_tags
+        } = row);
+        if (cur_tags !== prv_tags) {
+          if (prv_tags != null) {
+            (tags_cache[prv_tags] != null ? tags_cache[prv_tags] : tags_cache[prv_tags] = []).push([prv_id != null ? prv_id : first_cid, cur_id - 1]);
+          }
+          prv_id = cur_id;
+          prv_tags = cur_tags;
+        }
+      }
+      info('^3487^', {prv_id, prv_tags, cur_id, cur_tags});
+      (tags_cache[cur_tags] != null ? tags_cache[cur_tags] : tags_cache[cur_tags] = []).push([prv_id != null ? prv_id : first_cid, cur_id]);
+      return null;
+    };
+    build_cache({
+      lo: 65,
+      hi: 99
+    });
+    for (tags in tags_cache) {
+      id_pairs = tags_cache[tags];
+      for (idx = j = 0, len1 = id_pairs.length; j < len1; idx = ++j) {
+        id_pair = id_pairs[idx];
+        if (idx === 0) {
+          debug(id_pair, tags);
+        } else {
+          debug(id_pair);
+        }
+      }
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: tagged text"] = function(T, done) {
+    var Cupofhtml, Dtags, H, INTERTEXT, S, _tag, chr, chr_from_cid, chrs, cid_from_chr, cupofhtml, dtag_as_html_tag, dtags, fallbacks, flush, html_tag, i, id, is_open, len, prefill_stack, ref, stack, tag, tags, text, value;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    INTERTEXT = require('../../../apps/intertext');
+    ({Cupofhtml} = INTERTEXT.CUPOFHTML);
+    cupofhtml = new Cupofhtml();
+    ({
+      tag: _tag,
+      S,
+      H
+    } = cupofhtml.export());
+    //.........................................................................................................
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
+    fallbacks = 'all';
+    dtags = new Dtags({fallbacks});
+    cid_from_chr = function(chr) {
+      return chr.codePointAt(0);
+    };
+    chr_from_cid = function(cid) {
+      return String.fromCodePoint(cid);
+    };
+    // dtags.dba.create_function name: 'chr_from_cid', call: chr_from_cid
+    // dtags.dba.create_function name: 'cid_from_chr', call: cid_from_chr
+    _add_tagged_ranges(dtags);
+    //.........................................................................................................
+    text = "lore ipsum";
+    text = text.toUpperCase();
+    chrs = Array.from(text);
+    //.........................................................................................................
+    is_open = {};
+    stack = [];
+    //.........................................................................................................
+    dtag_as_html_tag = function(tag, value) {
+      var R, closer, opener, type;
+      switch ((type = type_of(value))) {
+        case 'object':
+          urge('^77464^', INTERTEXT.CUPOFHTML._html_from_datom({}, {
+            $key: '<foo',
+            bar: 42
+          }));
+          urge('^77464^', INTERTEXT.CUPOFHTML._html_from_datom({}, {
+            $key: '^foo',
+            bar: 42
+          }));
+          urge('^77464^', INTERTEXT.CUPOFHTML._html_from_datom({}, {
+            $key: '>foo',
+            bar: 42
+          }));
+          urge('^77464^', INTERTEXT.CUPOFHTML._html_from_datom({}, 'foo<bar>'));
+          _tag('mytag', value, '\x00');
+          R = cupofhtml.as_html();
+          [opener, closer] = R.split('\x00');
+          return opener;
+        default:
+          return `<${tag} class='${value}'>`;
+      }
+    };
+    //.........................................................................................................
+    prefill_stack = function*() {
+      var ref, tag, value;
+      ref = dtags.get_fallbacks();
+      for (tag in ref) {
+        value = ref[tag];
+        stack.push({tag, value});
+        yield dtag_as_html_tag(tag, value);
+      }
+      return null;
+    };
+    ref = prefill_stack();
+    for (html_tag of ref) {
+      debug('^5576^', html_tag);
+    }
+    whisper('^545^', stack);
+// return done?()
+//.........................................................................................................
+    for (i = 0, len = chrs.length; i < len; i++) {
+      chr = chrs[i];
+      id = cid_from_chr(chr);
+      tags = dtags.tags_from_id({id});
+      whisper('^777^', chr, tags);
+      for (tag in tags) {
+        value = tags[tag];
+        info('^44476^', {tag, value});
+        if (tag !== 'font' && tag !== 'vowel') {
+          continue;
+        }
+        if ((is_open[tag] != null ? is_open[tag] : is_open[tag] = false)) {
+          (flush = function() {
+            var top_tag;
+            while (true) {
+              top_tag = stack.pop();
+              urge('^777^', `</${top_tag}>`);
+              is_open[top_tag] = false;
+              if (tag === top_tag) {
+                break;
+              }
+            }
+            return null;
+          })();
+        }
+        debug('^777^', chr);
+        is_open[tag] = true;
+        info('^777^', `<${tag} class='${value}'>`);
+        stack.push(tag);
+        whisper('^777^', stack);
+      }
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  
+  //-----------------------------------------------------------------------------------------------------------
+  demo_html = function() {
+    var Cupofhtml, H, INTERTEXT, S, cram, cupofhtml, datoms_from_html, expand, html, html_from_datoms, tag;
+    INTERTEXT = require('../../../apps/intertext');
+    ({Cupofhtml} = INTERTEXT.CUPOFHTML);
+    cupofhtml = new Cupofhtml();
+    ({cram, expand, tag, S, H} = cupofhtml.export());
+    ({datoms_from_html, html_from_datoms} = INTERTEXT.HTML.export());
+    //.........................................................................................................
+    H.p(function() {
+      S.text("An interesting ");
+      tag('em', "fact");
+      S.text(" about CupOfJoe is that you ");
+      tag('em', {
+        foo: 'bar'
+      }, function() {
+        return S.text("can");
+      });
+      return tag('strong', " nest", " with both sequences", " and function calls.");
+    });
+    //.........................................................................................................
+    html = cupofhtml.as_html();
+    info(cupofhtml.last_expansion);
+    urge('\n' + html);
+    //.........................................................................................................
+    H.p("another paragraph");
+    debug(cupofhtml.as_html());
+    //.........................................................................................................
+    tag('p', {
+      guess: 'what'
+    }, function() {
+      S.text("yet another paragraph");
+      return tag('foobar', {
+        atr: 'value with spaces'
+      }, "yay");
+    });
+    debug(cupofhtml.as_html());
+    //.........................................................................................................
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      // test @[ "DBA: ranges (1)" ]
+      return test(this["DBA: contiguous ranges"]);
     })();
   }
 
-  // test @[ "DBA: ranges (1)" ]
-// test @[ "tags: tags_from_tagexchain" ]
+  // test @[ "tags: tags_from_tagexchain" ]
 // test @[ "tags: add_tagged_range" ]
 // test @[ "tags: add_tag with value" ]
 // test @[ "tags: parse_tagex" ]
@@ -932,6 +1262,8 @@
 // test @[ "tags: caching (1)" ]
 // test @[ "tags: fallbacks" ]
 // @[ "tags: fallbacks" ]()
+// @[ "DBA: tagged text" ]()
+// demo_html()
 /*
  * from https://github.com/loveencounterflow/hengist/tree/master/dev/kitty-font-config-writer-kfcw
 
