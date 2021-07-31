@@ -299,36 +299,26 @@ NCR = new Ncr()
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: ranges (1)" ] = ( T, done ) ->
-  T?.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
-  { Dtags, }        = require '../../../apps/icql-dba-tags'
-  # E                 = require '../../../apps/icql-dba/lib/errors'
-  prefix            = 't_'
-  dba               = new Dba()
-  dtags             = new Dtags { dba, prefix, }
-  cid_from_chr      = ( chr ) -> chr.codePointAt 0
-  chr_from_cid      = ( cid ) -> String.fromCodePoint cid
-  dba.create_function name: 'chr_from_cid', call: chr_from_cid
-  first_cid         = cid_from_chr 'A'
-  last_cid          = cid_from_chr 'Z'
-  #.........................................................................................................
+_add_tagged_ranges = ( dtags ) ->
   rules = [
     # [ '+superset',      'A..Z',               ]
-    [ '+font:"fallback"', 'A..Z',               ]
+    # [ '+font:"fallback"', 'A..Z',               ]
     # [ '+script:"latin"',  'A..Z',               ]
-    [ '+font:"font1"',    'B..H, J, L, N..X',   ]
-    [ '+font:"font2"',    'B..D',               ]
-    [ '+font:"font3"',    'G..I',               ]
-    [ '+font:"font4"',    'M..Q',               ]
-    [ '+font:"font5"',    'M, O..T',            ]
-    [ '+font:"font6"',    'M, U, X..Y',         ]
-    [ '+vowel',           'A, E, I, O, U',      ]
-    [ '+shape/pointy',    'A, V',               ]
-    [ '+shape/crossed',   'X',                  ]
-    [ '+shape/ladder',    'A, H',               ]
+    [ '+font:"font1"',                  'B..H, J, L, N..X',   ]
+    [ '+font:"font2"',                  'B..D',               ]
+    [ '+font:"font3"',                  'G..I',               ]
+    [ '+font:"font4"',                  'M..Q',               ]
+    [ '+font:"font5"',                  'M, O..T',            ]
+    [ '+font:"font6"',                  'M, U, X..X',         ]
+    [ '+vowel',                         'A, E, I, O, U',      ]
+    [ '+shape-pointy',                  'A, V',               ]
+    [ '+shape-crossed',                 'X',                  ]
+    [ '+shape-ladder',                  'A, H',               ]
+    [ '+pushraise:{"x":100,"y":200}',   'O',                  ]
     ]
   seen_tags = new Set()
+  seen_tags.add 'font';       dtags.add_tag { tag: 'font', value: 'fallback', }
+  seen_tags.add 'pushraise';  dtags.add_tag { tag: 'pushraise', value: false, }
   for [ tagex, ranges, ] in rules
     { mode, tag, value, } = dtags.parse_tagex { tagex, }
     unless seen_tags.has tag
@@ -336,33 +326,239 @@ NCR = new Ncr()
       dtags.add_tag { tag, value: ( if value is true then false else value ), }
     for { lo, hi, } in NCR.parse_multirange_declaration ranges
       dtags.add_tagged_range { mode, tag, value, lo, hi, }
-  #.........................................................................................................
-  console.table dba.list dba.query SQL"""
-    select
-        nr                      as nr,
-        chr_from_cid( lo )      as chr_lo,
-        chr_from_cid( hi )      as chr_hi,
-        tag                     as tag,
-        value                   as value
-      from #{prefix}tagged_ranges
-      order by nr;"""
-  console.table dba.list dba.query SQL"""select * from #{prefix}tags order by tag;"""
-  # console.table dba.list dba.query SQL"""select * from #{prefix}tags_by_cid order by tag, cid, nr;"""
-  #.........................................................................................................
-  for cid in [ first_cid .. last_cid ]
-    chr       = String.fromCodePoint cid
-    tags      = dtags.tags_from_id { id: cid, }
-    info ( CND.gold chr ), ( CND.blue tags )
-  console.table dba.list dba.query SQL"""select * from #{prefix}tagged_ids_cache order by id;"""
-  # console.table dba.list dba.query SQL"""select #{prefix}tags_from_cid( $cid );""", { cid: 65, }
-  done?() #..................................................................................................
+  return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: ranges (1)" ] = ( T, done ) ->
+  T?.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  { Dtags, }        = require '../../../apps/icql-dba-tags'
+  # E                 = require '../../../apps/icql-dba/lib/errors'
+  #.........................................................................................................
+  f = ( fallbacks ) ->
+    prefix            = 't_'
+    dba               = new Dba()
+    dtags             = new Dtags { dba, prefix, fallbacks, }
+    cid_from_chr      = ( chr ) -> chr.codePointAt 0
+    chr_from_cid      = ( cid ) -> String.fromCodePoint cid
+    dba.create_function name: 'chr_from_cid', call: chr_from_cid
+    first_cid         = cid_from_chr 'A'
+    last_cid          = cid_from_chr 'Z'
+    #.......................................................................................................
+    _add_tagged_ranges dtags
+    #.......................................................................................................
+    console.table dba.list dba.query SQL"""
+      select
+          nr                      as nr,
+          chr_from_cid( lo )      as chr_lo,
+          chr_from_cid( hi )      as chr_hi,
+          mode                    as mode,
+          tag                     as tag,
+          value                   as value
+        from #{prefix}tagged_ranges
+        order by nr;"""
+    console.table dba.list dba.query SQL"""select * from #{prefix}tags order by tag;"""
+    # console.table dba.list dba.query SQL"""select * from #{prefix}tags_by_cid order by tag, cid, nr;"""
+    #.......................................................................................................
+    for cid in [ first_cid .. last_cid ]
+      chr       = String.fromCodePoint cid
+      tags      = dtags.tags_from_id { id: cid, }
+      info ( CND.gold chr ), ( CND.blue tags )
+    console.table dba.list dba.query SQL"""select * from #{prefix}tagged_ids_cache order by id;"""
+    # console.table dba.list dba.query SQL"""select * from #{prefix}tagged_ranges order by lo, hi, nr;"""
+  #.........................................................................................................
+  for fallbacks in [ 'all', true, false, ]
+    f fallbacks
+  done?() #.................................................................................................
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: contiguous ranges" ] = ( T, done ) ->
+  T?.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  { Dtags, }        = require '../../../apps/icql-dba-tags'
+  # E                 = require '../../../apps/icql-dba/lib/errors'
+  #.........................................................................................................
+  prefix            = 't_'
+  dtags             = new Dtags { prefix, fallbacks: true, }
+  cid_from_chr      = ( chr ) -> chr.codePointAt 0
+  chr_from_cid      = ( cid ) -> String.fromCodePoint cid
+  first_cid         = cid_from_chr 'A'
+  last_cid          = cid_from_chr 'Z'
+  #.........................................................................................................
+  _add_tagged_ranges dtags
+  #.........................................................................................................
+  ### Demo for a regex that partitons a text into chunks of characters that all have the same tags. ###
+  debug 'abcdefgh'.match /(?<vowels>[aeiou])/g
+  d = 'arbitrary text'
+  re = ///
+    (?<g1> [ a - d ]+ \s* ) |
+    (?<g2> [ e - h ]+ \s* ) |
+    (?<g3> [ i - n ]+ \s* ) |
+    (?<g4> [ o - t ]+ \s* ) |
+    (?<g5> [ u - z ]+ \s* ) |
+    (?<g0> \s+ )
+    ///g
+  R = []
+  for match in [ ( d.matchAll re )..., ]
+    { groups, } = match
+    for group, part of match.groups
+      continue unless part?
+      R.push { group, part, }
+      break
+  for group, part of R
+    info group, rpr part
+  #.........................................................................................................
+  ### Computing contiguous ranges for all different sets of tags. For each ID, this table contains exactly
+  one matching row between lo and hi, and the lo of each row (except for the first) is the hi of the
+  preceding row plus one. The data in this table replaces `t_tagged_ids_cache` which in a typical
+  application can be expected to be much larger; further, the range data can be used to build a regex
+  as shown above to split a given text into chunks of characters that all have the same tags. ###
+  # f = add_sql_functions dtags.dba
+  tags_cache = {}
+  build_cache = ( cfg ) ->
+    { lo, hi, } = cfg
+    lo         ?= first_cid
+    hi         ?= last_cid
+    dtags.tags_from_id { id, } for id in [ lo .. hi ]
+    console.table dtags.dba.list dtags.dba.query SQL"select * from t_tagged_ids_cache order by id;"
+    cur_id        = first_cid
+    cur_tags      = null
+    prv_id        = null
+    prv_tags      = null
+    for row from dtags.dba.query SQL"select * from t_tagged_ids_cache order by id;"
+      { id: cur_id, tags: cur_tags, } = row
+      if cur_tags isnt prv_tags
+        if prv_tags?
+          ( tags_cache[ prv_tags ] ?= [] ).push [ ( prv_id ? first_cid ), ( cur_id - 1 ), ]
+        prv_id    = cur_id
+        prv_tags  = cur_tags
+    info '^3487^', { prv_id, prv_tags, cur_id, cur_tags, }
+    ( tags_cache[ cur_tags ] ?= [] ).push [ ( prv_id ? first_cid ), cur_id, ]
+    return null
+  build_cache { lo: 65, hi: 99, }
+  for tags, id_pairs of tags_cache
+    for id_pair, idx in id_pairs
+      if idx is 0
+        debug id_pair, tags
+      else
+        debug id_pair
+  #.........................................................................................................
+  done?() #.................................................................................................
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: tagged text" ] = ( T, done ) ->
+  T?.halt_on_error()
+  INTERTEXT                 = require '../../../apps/intertext'
+  { Cupofhtml }             = INTERTEXT.CUPOFHTML
+  cupofhtml                 = new Cupofhtml()
+  { tag: _tag
+    S
+    H   }                   = cupofhtml.export()
+  #.........................................................................................................
+  { Dtags, }        = require '../../../apps/icql-dba-tags'
+  fallbacks         = 'all'
+  dtags             = new Dtags { fallbacks, }
+  cid_from_chr      = ( chr ) -> chr.codePointAt 0
+  chr_from_cid      = ( cid ) -> String.fromCodePoint cid
+  # dtags.dba.create_function name: 'chr_from_cid', call: chr_from_cid
+  # dtags.dba.create_function name: 'cid_from_chr', call: cid_from_chr
+  _add_tagged_ranges dtags
+  #.........................................................................................................
+  text  = "lore ipsum"
+  text  = text.toUpperCase()
+  chrs  = Array.from text
+  #.........................................................................................................
+  is_open = {}
+  stack   = []
+  #.........................................................................................................
+  dtag_as_html_tag = ( tag, value ) ->
+    switch ( type = type_of value )
+      when 'object'
+        urge '^77464^', INTERTEXT.CUPOFHTML._html_from_datom {}, { $key: '<foo', bar: 42, }
+        urge '^77464^', INTERTEXT.CUPOFHTML._html_from_datom {}, { $key: '^foo', bar: 42, }
+        urge '^77464^', INTERTEXT.CUPOFHTML._html_from_datom {}, { $key: '>foo', bar: 42, }
+        urge '^77464^', INTERTEXT.CUPOFHTML._html_from_datom {}, 'foo<bar>'
+        _tag 'mytag', value, '\x00'
+        R                   = cupofhtml.as_html()
+        [ opener, closer, ] = R.split '\x00'
+        return opener
+      else
+        return "<#{tag} class='#{value}'>"
+  #.........................................................................................................
+  prefill_stack = ->
+    for tag, value of dtags.get_fallbacks()
+      stack.push { tag, value, }
+      yield dtag_as_html_tag tag, value
+    return null
+  for html_tag from prefill_stack()
+    debug '^5576^', html_tag
+  whisper '^545^', stack
+  # return done?()
+  #.........................................................................................................
+  for chr in chrs
+    id    = cid_from_chr chr
+    tags  = dtags.tags_from_id { id, }
+    whisper '^777^', chr, tags
+    for tag, value of tags
+      info '^44476^', { tag, value, }
+      continue unless tag in [ 'font', 'vowel', ]
+      if ( is_open[ tag ] ?= false )
+        do flush = ->
+          loop
+            top_tag = stack.pop()
+            urge '^777^', "</#{top_tag}>"
+            is_open[ top_tag ] = false
+            break if tag is top_tag
+          return null
+      debug '^777^', chr
+      is_open[ tag ] = true
+      info '^777^', "<#{tag} class='#{value}'>"
+      stack.push tag
+      whisper '^777^', stack
+  #.........................................................................................................
+  done?() #.................................................................................................
+
+
+#-----------------------------------------------------------------------------------------------------------
+demo_html = ->
+  INTERTEXT                 = require '../../../apps/intertext'
+  { Cupofhtml }             = INTERTEXT.CUPOFHTML
+  cupofhtml                 = new Cupofhtml()
+  { cram
+    expand
+    tag
+    S
+    H   }                   = cupofhtml.export()
+  { datoms_from_html
+    html_from_datoms }      = INTERTEXT.HTML.export()
+  #.........................................................................................................
+  H.p ->
+    S.text  "An interesting "
+    tag     'em', "fact"
+    S.text  " about CupOfJoe is that you "
+    tag     'em', { foo: 'bar', }, -> S.text "can"
+    tag     'strong', " nest", " with both sequences", " and function calls."
+  #.........................................................................................................
+  html   = cupofhtml.as_html()
+  info cupofhtml.last_expansion
+  urge '\n' + html
+  #.........................................................................................................
+  H.p "another paragraph"
+  debug cupofhtml.as_html()
+  #.........................................................................................................
+  tag 'p', { guess: 'what', }, ->
+    S.text "yet another paragraph"
+    tag 'foobar', { atr: 'value with spaces', }, "yay"
+  debug cupofhtml.as_html()
+  #.........................................................................................................
+  return null
 
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
+  # test @, { timeout: 10e3, }
   # test @[ "DBA: ranges (1)" ]
+  test @[ "DBA: contiguous ranges" ]
   # test @[ "tags: tags_from_tagexchain" ]
   # test @[ "tags: add_tagged_range" ]
   # test @[ "tags: add_tag with value" ]
@@ -371,6 +567,8 @@ if module is require.main then do =>
   # test @[ "tags: caching (1)" ]
   # test @[ "tags: fallbacks" ]
   # @[ "tags: fallbacks" ]()
+  # @[ "DBA: tagged text" ]()
+  # demo_html()
 
 
 
