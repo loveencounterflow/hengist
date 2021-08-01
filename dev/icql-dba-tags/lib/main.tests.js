@@ -881,6 +881,85 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["tags: caching with empty values"] = function(T, done) {
+    var Dtags, dtags, get_cache, get_tagged_ranges, prefix;
+    // T?.halt_on_error()
+    //.........................................................................................................
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
+    prefix = 't_';
+    dtags = new Dtags({
+      prefix,
+      fallbacks: true
+    });
+    //.........................................................................................................
+    get_tagged_ranges = function() {
+      return dtags.dba.list(dtags.dba.query(SQL`select * from t_tagged_ranges order by nr;`));
+    };
+    get_cache = function() {
+      return dtags.dba.list(dtags.dba.query(SQL`select * from t_tagged_ids_cache order by id;`));
+    };
+    (() => {      // get_tagchain      = ( id ) -> dba.list dba.query SQL"""
+      //   select mode, tag, value from t_tagged_ranges where $id between lo and hi order by nr asc;""", { id, }
+      //.........................................................................................................
+      dtags.add_tag({
+        tag: 'first'
+      });
+      dtags.add_tagged_range({
+        mode: '+',
+        lo: 10,
+        hi: 10,
+        tag: 'first'
+      });
+      T.eq(get_cache(), []);
+      T.eq(get_tagged_ranges(), [
+        {
+          nr: 1,
+          lo: 10,
+          hi: 10,
+          mode: '+',
+          tag: 'first',
+          value: 'true'
+        }
+      ]);
+      T.eq(dtags.tagchain_from_id({
+        id: 10
+      }), [
+        {
+          nr: 1,
+          mode: '+',
+          tag: 'first',
+          value: true
+        }
+      ]);
+      T.eq(dtags.tagchain_from_id({
+        id: 11
+      }), []);
+      T.eq(get_cache(), []);
+      T.eq(dtags.tags_from_id({
+        id: 10
+      }), {
+        first: true
+      });
+      T.eq(dtags.tags_from_id({
+        id: 11
+      }), {});
+      T.eq(get_cache(), [
+        {
+          id: 10,
+          tags: '{"first":true}'
+        },
+        {
+          id: 11,
+          tags: '{}'
+        }
+      ]);
+      console.table(dtags.dba.list(dtags.dba.query(SQL`select * from ${prefix}tagged_ids_cache order by id;`)));
+      return console.table(dtags.dba.list(dtags.dba.query(SQL`select * from ${prefix}tagged_ranges order by lo, hi, nr;`)));
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   _add_tagged_ranges = function(dtags) {
     var hi, i, j, len, len1, lo, mode, ranges, ref, rules, seen_tags, tag, tagex, value;
     // [ '+superset',      'A..Z',               ]
@@ -981,7 +1060,7 @@
   
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: contiguous ranges"] = function(T, done) {
-    var Dba, Dtags, R, build_cache, chr_from_cid, cid_from_chr, d, dtags, first_cid, group, groups, i, id_pair, id_pairs, idx, j, last_cid, len, len1, match, part, prefix, re, ref, ref1, tags, tags_cache;
+    var Dba, Dtags, R, build_cache, chr_from_cid, cid_from_chr, d, dtags, dts, first_cid, group, groups, i, id_pair, id_pairs, idx, j, last_cid, len, len1, match, n, part, prefix, re, ref, ref1, row_count, t0, t1, tags, tags_cache;
     if (T != null) {
       T.halt_on_error();
     }
@@ -1004,6 +1083,20 @@
     last_cid = cid_from_chr('Z');
     //.........................................................................................................
     _add_tagged_ranges(dtags);
+    dtags.add_tagged_range({
+      lo: 0x000000,
+      hi: 0x010000,
+      tag: 'font',
+      value: 'font1'
+    });
+    /* List inflection points: */
+    console.table(dtags.dba.list(dtags.dba.query(SQL`select id from ( select cast( null as integer ) as id where false
+  union select 0x000000 -- ### TAINT replace with first_id
+  union select 0x10ffff -- ### TAINT replace with last_id
+  union select distinct lo      from t_tagged_ranges
+  union select distinct hi + 1  from t_tagged_ranges )
+order by id asc;
+;`)));
     //.........................................................................................................
     /* Demo for a regex that partitons a text into chunks of characters that all have the same tags. */
     debug('abcdefgh'.match(/(?<vowels>[aeiou])/g));
@@ -1035,6 +1128,7 @@
      application can be expected to be much larger; further, the range data can be used to build a regex
      as shown above to split a given text into chunks of characters that all have the same tags. */
     // f = add_sql_functions dtags.dba
+    console.table(dtags.dba.list(dtags.dba.query(SQL`select * from t_tagged_ranges order by lo, hi;`)));
     tags_cache = {};
     build_cache = function(cfg) {
       var cur_id, cur_tags, hi, id, j, lo, prv_id, prv_tags, ref2, ref3, ref4, row;
@@ -1048,7 +1142,6 @@
       for (id = j = ref2 = lo, ref3 = hi; (ref2 <= ref3 ? j <= ref3 : j >= ref3); id = ref2 <= ref3 ? ++j : --j) {
         dtags.tags_from_id({id});
       }
-      console.table(dtags.dba.list(dtags.dba.query(SQL`select * from t_tagged_ids_cache order by id;`)));
       cur_id = first_cid;
       cur_tags = null;
       prv_id = null;
@@ -1086,6 +1179,30 @@
         }
       }
     }
+    //.........................................................................................................
+    /* Iterate over all potential Unicode code points */
+    /* TAINT use proper benchmarking */
+    first_cid = 0x000000;
+    last_cid = 0x010000;
+    n = last_cid - first_cid + 1;
+    t0 = Date.now();
+    (function() {      //.........................................................................................................
+      var id, l, ref2, ref3, results;
+      results = [];
+      for (id = l = ref2 = first_cid, ref3 = last_cid; (ref2 <= ref3 ? l <= ref3 : l >= ref3); id = ref2 <= ref3 ? ++l : --l) {
+        // tagchain  = dtags.tagchain_from_id { id, }
+        // tags      = dtags.tags_from_id { id, }
+        // urge '^337^', dtags.tagchain_from_id { id, }
+        continue;
+      }
+      return results;
+    })();
+    //.........................................................................................................
+    t1 = Date.now();
+    dts = (t1 - t0) / 1000;
+    row_count = dtags.dba.first_value(dtags.dba.query(SQL`select count(*) from ${prefix}tagged_ids_cache;`));
+    // console.table dtags.dba.list dtags.dba.query SQL"""select * from #{prefix}tagged_ids_cache order by id desc limit 100;"""
+    debug('^3376^', {n, dts, row_count});
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -1254,7 +1371,8 @@
     })();
   }
 
-  // test @[ "tags: tags_from_tagexchain" ]
+  // test @[ "tags: caching with empty values" ]
+// test @[ "tags: tags_from_tagexchain" ]
 // test @[ "tags: add_tagged_range" ]
 // test @[ "tags: add_tag with value" ]
 // test @[ "tags: parse_tagex" ]
