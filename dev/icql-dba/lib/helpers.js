@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var CND, DATA, DATOM, Dba, FS, FSP, PATH, badge, dba_types, debug, echo, equals, help, info, isa, rpr, urge, validate, validate_list_of, warn, whisper;
+  var CND, DATA, DATOM, Dba, FS, FSP, H, PATH, badge, dba_types, debug, echo, equals, help, info, isa, rpr, urge, validate, validate_list_of, warn, whisper,
+    indexOf = [].indexOf;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -36,8 +37,6 @@
 
   FSP = require('fs/promises');
 
-  dba_types = require('../../../apps/icql-dba/lib/types');
-
   this.types = new (require('intertype')).Intertype();
 
   ({isa, validate, validate_list_of, equals} = this.types.export());
@@ -46,7 +45,30 @@
 
   DATOM = require('datom');
 
-  ({Dba} = require('../../../apps/icql-dba'));
+  H = this;
+
+  (() => {    //-----------------------------------------------------------------------------------------------------------
+    var message;
+    if (indexOf.call(process.argv, '--icql-dba-use-installed') >= 0) {
+      H.icql_dba_use_installed = true;
+      H.icql_dba_path = 'icql-dba';
+      message = "using installed version of icql-dba";
+    } else {
+      H.icql_dba_use_installed = false;
+      H.icql_dba_path = '../../../apps/icql-dba';
+      message = "using linked icql-dba";
+    }
+    debug('^3337^', CND.reverse(message));
+    process.on('exit', function() {
+      return debug('^3337^', CND.reverse(message));
+    });
+    return null;
+  })();
+
+  //-----------------------------------------------------------------------------------------------------------
+  ({Dba} = require(H.icql_dba_path));
+
+  dba_types = require(H.icql_dba_path + '/lib/types');
 
   //-----------------------------------------------------------------------------------------------------------
   this.types.declare('interpolatable_value', function(x) {

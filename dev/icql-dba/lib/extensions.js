@@ -40,7 +40,7 @@
   this["load_extension"] = function(T, done) {
     var Dba;
     T.halt_on_error();
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     (() => {      //---------------------------------------------------------------------------------------------------------
       var cfg, dba;
       dba = new Dba();
@@ -62,7 +62,7 @@
     var Dba, I, L, V, csv_path, dba, extension_path, schema, work_path;
     /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     schema = 'main';
     dba = new Dba();
     extension_path = PATH.resolve(PATH.join(__dirname, '../../../assets/sqlite-extensions/vsv.so'));

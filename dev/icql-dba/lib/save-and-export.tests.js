@@ -41,7 +41,7 @@
   this["DBA: save() RAM DB"] = async function(T, done) {
     var Dba, matcher, ramdb_path;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     ramdb_path = null;
     matcher = null;
     await (async() => {      //.........................................................................................................
@@ -106,7 +106,7 @@
   this["DBA: export() RAM DB"] = async function(T, done) {
     var Dba, export_path, matcher, ramdb_path;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     ramdb_path = null;
     matcher = null;
     export_path = H.nonexistant_path_from_ref('export-ram-db');
@@ -161,7 +161,7 @@
   this["DBA: import() CSV"] = async function(T, done) {
     var Dba, export_path, matcher;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     // ramdb_path        = null
     matcher = null;
     export_path = H.nonexistant_path_from_ref('import-csv');
@@ -255,7 +255,7 @@
   this["DBA: import() TSV"] = async function(T, done) {
     var Dba, export_path, matcher;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     // ramdb_path        = null
     matcher = null;
     export_path = H.nonexistant_path_from_ref('import-tcsv');
@@ -311,7 +311,7 @@
   this["___ DBA: import() (big file)"] = async function(T, done) {
     var Dba, export_path, matcher;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     // ramdb_path        = null
     matcher = null;
     export_path = H.nonexistant_path_from_ref('import-csv');
@@ -391,7 +391,7 @@ order by wbfs;`;
   this["___ DBA: import() (four corner)"] = async function(T, done) {
     var Dba, export_path, matcher;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     // ramdb_path        = null
     matcher = null;
     export_path = H.nonexistant_path_from_ref('import-csv');
@@ -497,7 +497,7 @@ order by wbfs;`;
   this["DBA: import TSV; cfg variants 1"] = async function(T, done) {
     var Dba, cfg, dba, import_path, is_first, matcher, schema, table_columns, transform;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     matcher = null;
     import_path = H.get_cfg().tsv.micro;
     //.........................................................................................................
@@ -570,7 +570,7 @@ order by wbfs;`;
   this["DBA: import TSV; cfg variants 2"] = async function(T, done) {
     var Dba, cfg, dba, import_path, is_first, matcher, schema, transform;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     matcher = null;
     import_path = H.get_cfg().tsv.micro;
     //.........................................................................................................
@@ -634,7 +634,7 @@ order by wbfs;`;
   this["DBA: import TSV; cfg variants 3"] = async function(T, done) {
     var Dba, cfg, dba, import_path, is_first, matcher, schema, transform;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     matcher = null;
     import_path = H.get_cfg().tsv.micro;
     //.........................................................................................................
@@ -692,7 +692,7 @@ order by wbfs;`;
   this["DBA: import TSV; cfg variants 4"] = async function(T, done) {
     var Dba, cfg, dba, import_path, is_first, matcher, schema, transform;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     matcher = null;
     import_path = H.get_cfg().tsv.holes;
     //.........................................................................................................
@@ -844,7 +844,7 @@ order by wbfs;`;
   this["DBA: import CSV; cfg variants 5"] = async function(T, done) {
     var Dba, cfg, dba, import_path, is_first, matcher, schema, transform;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     matcher = null;
     import_path = H.get_cfg().csv.holes;
     //.........................................................................................................
@@ -892,7 +892,7 @@ order by wbfs;`;
   this["DBA: import TSV; big file"] = async function(T, done) {
     var Dba, count, dba, export_path, formula_count, import_cfg, import_path, is_first, matcher, non_components, schema, spread_cfg, transform;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     matcher = null;
     import_path = '../../../assets/jzrds/shape/shape-breakdown-formula-v2.txt';
     import_path = PATH.resolve(PATH.join(__dirname, import_path));
@@ -1045,7 +1045,7 @@ e6    text );`);
   this["___ DBA: safe eventual persistency"] = async function(T, done) {
     var Dba, cfg, dba, import_path, is_first, matcher, schema, transform;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     matcher = null;
     import_path = H.get_cfg().csv.holes;
     //.........................................................................................................

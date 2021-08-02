@@ -53,8 +53,10 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open()"] = async function(T, done) {
     var Dba, dba, schemas;
-    // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Dba} = require(H.icql_dba_path));
     dba = new Dba();
     schemas = {};
     //.........................................................................................................
@@ -245,8 +247,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open() RAM DB"] = async function(T, done) {
     var Dba, dba, schemas;
-    // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
     dba = new Dba();
     schemas = {};
     await (async() => {      //.........................................................................................................
@@ -312,8 +314,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: VNRs"] = function(T, done) {
     var Dba, bcd, dba, hollerith_tng, matcher, name, schema, sql, to_hex, use_probe;
-    // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
     matcher = null;
     //.........................................................................................................
     whisper('-'.repeat(108));
@@ -532,7 +534,7 @@
   this._demo_csv_parser = function() {
     return new Promise((resolve) => {
       var Dba, csv, csv_cfg, dba, fs, import_path, rows, tcfg;
-      ({Dba} = require('../../../apps/icql-dba'));
+      ({Dba} = require(H.icql_dba_path));
       dba = new Dba();
       //.........................................................................................................
       csv = require('csv-parser');
@@ -568,8 +570,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open() file DB in schema main"] = async function(T, done) {
     var Dba, schema, schemas, template_path, work_path;
-    // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
     schemas = {};
     ({template_path, work_path} = (await H.procure_db({
       size: 'small',
@@ -624,8 +626,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open() RAM DB from file in schema main"] = async function(T, done) {
     var Dba, schema, schemas, template_path, work_path;
-    // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
     schemas = {};
     ({template_path, work_path} = (await H.procure_db({
       size: 'small',
@@ -663,8 +665,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open() empty RAM DB in schema main"] = async function(T, done) {
     var Dba, schema;
-    // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
     schema = 'main';
     await (() => {      //.........................................................................................................
       /* Opening an empty RAM DB */
@@ -706,8 +708,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: writing while reading 1"] = async function(T, done) {
     var Dba, dba, new_bsqlt3, schema;
-    // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
     schema = 'main';
     new_bsqlt3 = require('../../../apps/icql-dba/node_modules/better-sqlite3');
     dba = new Dba();
@@ -752,8 +754,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: writing while reading 2"] = async function(T, done) {
     var Dba, dba, new_bsqlt3, schema;
-    // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
     schema = 'main';
     new_bsqlt3 = require('../../../apps/icql-dba/node_modules/better-sqlite3');
     dba = new Dba();
@@ -801,8 +803,8 @@
   this["DBA: indexing JSON lists (de-constructing method)"] = async function(T, done) {
     var Dba, I, L, V, dba, schema;
     /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
-    // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
     schema = 'main';
     dba = new Dba();
     dba.load_extension(PATH.resolve(PATH.join(__dirname, '../../../assets/sqlite-extensions/json1.so')));
@@ -913,8 +915,8 @@ create trigger multiples_idx_before_update before update on multiples_idx begin
   this["DBA: indexing JSON lists (constructing method)"] = async function(T, done) {
     var Dba, I, L, V, dba, schema;
     /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
-    // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
     schema = 'main';
     dba = new Dba();
     dba.load_extension(PATH.resolve(PATH.join(__dirname, '../../../assets/sqlite-extensions/json1.so')));
@@ -969,8 +971,8 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: advanced interpolation"] = function(T, done) {
     var Dba, E, dba;
-    ({Dba} = require('../../../apps/icql-dba'));
-    E = require('../../../apps/icql-dba/lib/errors');
+    ({Dba} = require(H.icql_dba_path));
+    E = require(H.icql_dba_path + '/lib/errors');
     dba = new Dba();
     (() => { //...................................................................................................
       var d, result, sql;
@@ -1007,14 +1009,13 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      // debug f '𠖏'
+      return test(this["DBA: open()"]);
     })();
   }
 
-  // debug f '𠖏'
-// test @[ "DBA: concurrent UDFs" ]
+  // test @[ "DBA: concurrent UDFs" ]
 // @[ "DBA: concurrent UDFs" ]()
 // test @[ "DBA: advanced interpolation" ]
 // test @[ "DBA: typing" ]

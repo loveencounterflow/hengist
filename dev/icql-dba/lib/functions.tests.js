@@ -7,7 +7,7 @@
 
   rpr = CND.rpr;
 
-  badge = 'ICQL-DBA/TESTS/BASICS';
+  badge = 'ICQL-DBA/TESTS/FUNCTIONS';
 
   debug = CND.get_logger('debug', badge);
 
@@ -53,7 +53,7 @@
   this["DBA: window functions etc."] = async function(T, done) {
     var Dba, dba, numbers, schema, template_path, work_path;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     dba = new Dba();
     schema = 'main';
     ({template_path, work_path} = (await H.procure_db({
@@ -345,7 +345,7 @@
     var Dba, I, L, V, dba, schema;
     /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     schema = 'main';
     dba = new Dba();
     dba.load_extension(PATH.resolve(PATH.join(__dirname, '../../../assets/sqlite-extensions/json1.so')));
@@ -623,7 +623,7 @@ create trigger multiple_instead_update instead of update on multiples begin
   this["DBA: view with UDF"] = async function(T, done) {
     var Dba, dba, matcher, numbers, result, row, schema, template_path, work_path;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     dba = new Dba();
     schema = 'main';
     ({template_path, work_path} = (await H.procure_db({
@@ -667,7 +667,7 @@ create trigger multiple_instead_update instead of update on multiples begin
   this["DBA: typing"] = async function(T, done) {
     var Dba, as_boolean, d/* NOTE: consume iterator to free connection */, dba, error, iterator, schema, statement, template_path, work_path;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     dba = new Dba();
     schema = 'main';
     ({template_path, work_path} = (await H.procure_db({
@@ -766,7 +766,7 @@ create trigger multiple_instead_update instead of update on multiples begin
     var Dba, FS, cfg, dba, export_path, is_first, matcher, path, schema, sql, transform;
     /* new in 7.4.0, see https://github.com/JoshuaWise/better-sqlite3/issues/581 */
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     FS = require('fs');
     //.........................................................................................................
     dba = new Dba();
@@ -932,7 +932,7 @@ create trigger multiple_instead_update instead of update on multiples begin
 
      */
     // T?.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = H);
     schema = 'main';
     ({template_path, work_path} = (await H.procure_db({
       size: 'small',
@@ -977,7 +977,7 @@ create trigger multiple_instead_update instead of update on multiples begin
     };
     //.........................................................................................................
     f2 = () => {
-      var new_sqlt, sqlt1, sqlt2, statement;
+      var new_sqlt, result, sqlt1, sqlt2, statement;
       new_sqlt = require('../../../apps/icql-dba/node_modules/better-sqlite3');
       sqlt1 = new_sqlt(work_path);
       sqlt2 = new_sqlt(work_path);
@@ -988,41 +988,45 @@ create trigger multiple_instead_update instead of update on multiples begin
         return [...s.iterate()][0].x;
       });
       statement = sqlt1.prepare(SQL`select udf();`);
-      info('^244^', [...statement.iterate()]);
+      result = [...statement.iterate()];
+      T.eq(result, [
+        {
+          'udf()': 42
+        }
+      ]);
       return null;
     };
     //.........................................................................................................
     f3 = () => {
-      var new_sqlt, sqlt1, sqlt2, statement;
-      new_sqlt = require('../../../apps/icql-dba/node_modules/better-sqlite3');
-      work_path = 'file:memdb1?mode=memory&cache=shared';
-      sqlt1 = new_sqlt(work_path);
-      sqlt2 = new_sqlt(work_path);
-      urge('^4453^', {work_path});
+      var Db, path, result, sqlt1, sqlt2, statement;
+      Db = require('../../../apps/icql-dba/node_modules/better-sqlite3');
+      path = 'file:memdb1?mode=memory&cache=shared';
+      sqlt1 = new Db(path);
+      sqlt2 = new Db(path);
+      urge('^4453^', {path});
       sqlt1.function('udf', function() {
         var s;
         s = sqlt2.prepare(SQL`select 42 as x;`);
         return [...s.iterate()][0].x;
       });
       statement = sqlt1.prepare(SQL`select udf();`);
-      info('^244^', [...statement.iterate()]);
+      result = [...statement.iterate()];
+      T.eq(result, [
+        {
+          'udf()': 42
+        }
+      ]);
       return null;
     };
     //.........................................................................................................
     f4 = () => {
-      var dba, dba2;
-      work_path = 'file:memdb1?mode=memory&cache=shared';
+      var dba, dba2, path, result;
+      path = 'file:memdb1?mode=memory&cache=shared';
       dba = new Dba();
-      dba.open({
-        path: work_path,
-        schema
-      });
+      dba.open({path, schema});
       dba2 = new Dba();
-      dba2.open({
-        path: work_path,
-        schema
-      });
-      urge('^4453^', {work_path});
+      dba2.open({path, schema});
+      urge('^4453^', {path});
       dba.create_function({
         name: 'udf',
         call: function() {
@@ -1031,14 +1035,18 @@ create trigger multiple_instead_update instead of update on multiples begin
           return [...R][0].x;
         }
       });
-      info('^244^', dba.list(dba.query(SQL`select udf();`)));
+      result = dba.list(dba.query(SQL`select udf();`));
+      T.eq(result, [
+        {
+          'udf()': 42
+        }
+      ]);
       return null;
     };
     //.........................................................................................................
-    f1();
-    f2();
+    // f1()
+    // f2()
     f3();
-    f4();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -1054,6 +1062,8 @@ create trigger multiple_instead_update instead of update on multiples begin
   // debug f '𠖏'
 // test @[ "DBA: concurrent UDFs" ]
 // @[ "DBA: concurrent UDFs" ]()
+// debug process.env[ 'icql-dba-use' ]
+// debug process.argv
 
 }).call(this);
 

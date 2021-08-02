@@ -41,7 +41,7 @@
   this["DBA: open() 2"] = async function(T, done) {
     var Dba, cfg, template_path_1, template_path_2, work_path_1, work_path_2, work_path_3;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     //.........................................................................................................
     cfg = H.get_cfg();
     cfg.ref = 'multicon';
@@ -230,7 +230,7 @@
   this["DBA: _list_temp_schema_numbers()"] = async function(T, done) {
     var Dba, cfg;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     //.........................................................................................................
     cfg = H.get_cfg();
     cfg.ref = 'foo';
@@ -292,7 +292,7 @@
   this["DBA: import { format: 'db', }"] = async function(T, done) {
     var Dba, cfg, template_path_1, work_path_1;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     //.........................................................................................................
     cfg = H.get_cfg();
     cfg.ref = 'multicon';
@@ -348,7 +348,7 @@
   this["___ DBA: import { format: 'sql', }"] = async function(T, done) {
     var Dba, cfg;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     cfg = H.get_cfg();
     await (() => {      //.........................................................................................................
       var dba, path, schema;
@@ -374,7 +374,7 @@
   this["DBA: _walk_all_objects()"] = async function(T, done) {
     var Dba, cfg, objects_matcher, template_path_1, template_path_2, work_path_1, work_path_2;
     // T.halt_on_error()
-    ({Dba} = require('../../../apps/icql-dba'));
+    ({Dba} = require(H.icql_dba_path));
     //.........................................................................................................
     cfg = H.get_cfg();
     cfg.ref = 'icqldba_schema';
@@ -639,7 +639,7 @@
   this["DBA: as_sql"] = async function(T, done) {
     var ICQLDBA, dba, error, i, len, matcher, probe, probes_and_matchers;
     // T.halt_on_error()
-    ICQLDBA = require('../../../apps/icql-dba');
+    ICQLDBA = require(H.icql_dba_path);
     dba = new ICQLDBA.Dba();
     probes_and_matchers = [[true, '1'], [false, '0'], [42, '42'], ['text', "'text'"], ["text with 'quotes'", "'text with ''quotes'''"], [[1, 2, 3], "'[1,2,3]'"], [[], "'[]'"]];
 //.........................................................................................................
@@ -658,7 +658,7 @@
   this["DBA: interpolate"] = async function(T, done) {
     var ICQLDBA, dba, error, i, len, matcher, probe, probes_and_matchers;
     // T.halt_on_error()
-    ICQLDBA = require('../../../apps/icql-dba');
+    ICQLDBA = require(H.icql_dba_path);
     dba = new ICQLDBA.Dba();
     probes_and_matchers = [
       [
@@ -708,7 +708,7 @@
   this["DBA: toposort is removed"] = function(T, done) {
     var ICQLDBA, dba;
     // T.halt_on_error()
-    ICQLDBA = require('../../../apps/icql-dba');
+    ICQLDBA = require(H.icql_dba_path);
     dba = new ICQLDBA.Dba();
     T.eq(dba.get_toposort, void 0);
     /* removed b/c stops working when tables refer to each other cyclical fashion:
@@ -724,7 +724,7 @@
   this["DBA: clear()"] = function(T, done) {
     var ICQLDBA, d, dba, i, id, ref1;
     // T.halt_on_error()
-    ICQLDBA = require('../../../apps/icql-dba');
+    ICQLDBA = require(H.icql_dba_path);
     dba = new ICQLDBA.Dba();
     //.........................................................................................................
     // Create tables, indexes:
@@ -834,7 +834,7 @@
   this["DBA: open from DB file"] = async function(T, done) {
     var ICQLDBA, cfg, d, dba, ignore, objects, path, s;
     // T.halt_on_error()
-    ICQLDBA = require('../../../apps/icql-dba');
+    ICQLDBA = require(H.icql_dba_path);
     cfg = H.get_cfg();
     cfg.size = 'small';
     cfg.mode = 'fle';
@@ -870,7 +870,7 @@
   this["_DBA: copy file DB to memory"] = async function(T, done) {
     var ICQLDBA, cfg, d, dba, path, ref1;
     // T.halt_on_error()
-    ICQLDBA = require('../../../apps/icql-dba');
+    ICQLDBA = require(H.icql_dba_path);
     cfg = H.get_cfg();
     cfg.size = 'small';
     cfg.mode = 'fle';
@@ -928,7 +928,7 @@
   this["DBA: copy file DB to memory"] = async function(T, done) {
     var ICQLDBA, cfg, count, d, dba, dba_cfg, i, len, obj_name_x, result, schema_x, sql, to_schema_objects;
     // T.halt_on_error()
-    ICQLDBA = require('../../../apps/icql-dba');
+    ICQLDBA = require(H.icql_dba_path);
     //.........................................................................................................
     cfg = {
       pragmas: ['page_size = 4096', 'cache_size = 16384', 'temp_store = MEMORY', 'journal_mode = WAL', 'locking_mode = EXCLUSIVE', 'synchronous = OFF'],
@@ -1017,7 +1017,7 @@
   this["DBA: in-memory DB API"] = function(T, done) {
     var Dba, ICQLDBA;
     // T.halt_on_error()
-    ICQLDBA = require('../../../apps/icql-dba');
+    ICQLDBA = require(H.icql_dba_path);
     ({isa, validate} = ICQLDBA.types.export());
     //-----------------------------------------------------------------------------------------------------------
     Dba = class Dba extends ICQLDBA.Dba {
