@@ -448,10 +448,19 @@ jp                        = JSON.parse
       > better-sqlite3 currently catches things like endless recursions this way, but that's the kind of
       > responsibility I'm willing to take when going into unsafeMode.
 
+    * https://github.com/JoshuaWise/better-sqlite3/issues/483
+
+      > The string passed to the Database constructor is passed directly to the underlying SQLite3 library.
+      > The reason you can't use file: is because the default build configuration bundled in better-sqlite3
+      > uses the SQLITE_USE_URI=0 option. You can get around this by supplying your own build configuration
+      > instead.
+
+  From v7.1.0 on ICQL/DBA uses a recent algamation from https://sqlite.com/download.html with
+  `SQLITE_USE_URI` set to `1` so concurrent UDFs are possible.
 
   ###
   # T?.halt_on_error()
-  { Dba }           =H
+  { Dba }           = require H.icql_dba_path
   schema            = 'main'
   { template_path
     work_path }     = await H.procure_db { size: 'small', ref: 'typing', }
@@ -512,19 +521,19 @@ jp                        = JSON.parse
     T.eq result, [ { 'udf()': 42 } ]
     return null
   #.........................................................................................................
-  # f1()
-  # f2()
+  f1()
+  f2()
   f3()
-  # f4()
+  f4()
   #.........................................................................................................
   done?()
 
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
+  # test @, { timeout: 10e3, }
   # debug f '𠖏'
-  # test @[ "DBA: concurrent UDFs" ]
+  test @[ "DBA: concurrent UDFs" ]
   # @[ "DBA: concurrent UDFs" ]()
   # debug process.env[ 'icql-dba-use' ]
   # debug process.argv
