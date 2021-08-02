@@ -323,6 +323,108 @@ jp                        = JSON.parse
   done()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "DBA: virtual tables" ] = ( T, done ) ->
+  ### new in 7.4.0, see https://github.com/JoshuaWise/better-sqlite3/issues/581 ###
+  # T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  FS                = require 'fs'
+  #.........................................................................................................
+  dba               = new Dba()
+  # schema            = 'csv'
+  # schema_i          = dba.sql.I schema
+  transform         = null
+  is_first          = true
+  #.........................................................................................................
+  cfg =
+    columns: [ 'path', 'data', ],
+    rows: ->
+      for filename in FS.readdirSync __dirname
+        path  = PATH.resolve PATH.join __dirname, filename
+        data  = ( FS.readFileSync path, { encoding: 'utf-8', } ).trim()[ .. 50 ]
+        yield { path, data }
+      return null
+  dba.sqlt.table "files", cfg
+  matcher = dba.list dba.query "select * from files order by data;"
+  console.table matcher
+  #.........................................................................................................
+  cfg =
+    columns: [ 'match', 'capture', ]
+    parameters: [ 'pattern', 'text', ]
+    rows: ( pattern, text ) ->
+      regex = new RegExp pattern, 'g'
+      while ( match = regex.exec text )?
+        yield [ match[ 0 ], match[ 1 ], ]
+      return null
+  dba.sqlt.table 're_matches', cfg
+  sql     = "select pattern, text, match, capture from re_matches( ?, ? ) order by 1, 2, 3, 4;"
+  matcher = dba.list dba.query sql, [ '€([-,.0-9]+)', "between €30,-- and €40,--", ]
+  console.table matcher
+  #.........................................................................................................
+  cfg = ( filename, P... ) ->
+    urge '^46456^', { filename, P, }
+    columns: [ 'path', 'lnr', 'line', ],
+    rows: ->
+      path  = PATH.resolve PATH.join __dirname, '../../../assets/icql', filename
+      lines = ( FS.readFileSync path, { encoding: 'utf-8', } ).split '\n'
+      for line, line_idx in lines
+        yield { path, lnr: line_idx + 1, line, }
+      return null
+  dba.sqlt.table 'file_contents', cfg
+  dba.execute "create virtual table contents_of_wbftsv using file_contents( ncrglyphwbf.tsv, any stuff goes here, and more here );"
+  sql     = "select * from contents_of_wbftsv order by 1, 2, 3;"
+  matcher = dba.list dba.query sql
+  console.table matcher
+  #.........................................................................................................
+  cfg =
+    columns: [ 'n', ]
+    parameters: [ 'start', 'stop', 'step', ]
+    rows: ( start, stop, step = null ) ->
+      # stop ?= start
+      step ?= 1
+      n     = start
+      loop
+        break if n > stop
+        # if n %% 2 is 0 then yield [ "*#{n}*", ]
+        # else                yield [ n, ]
+        yield [ n, ]
+        n += step
+      return null
+  dba.sqlt.table 'generate_series', cfg
+  console.table dba.list dba.query "select * from generate_series( ?, ? )", [ 1, 5, ]
+  console.table dba.list dba.query "select * from generate_series( ?, ?, ? )", [ 1, 10, 2, ]
+  console.table dba.list dba.query "select * from generate_series( ?, ?, ? ) limit 10;", [ 500, Infinity, 1234, ]
+  #.........................................................................................................
+  cfg =
+    columns: [ 'path', 'vnr', 'line', 'vnr_h', ]
+    parameters: [ '_path', ]
+    rows: ( path ) ->
+      readlines = new ( require 'n-readlines' ) path
+      lnr       = 0
+      while ( bytes = readlines.next() ) isnt false
+        lnr++
+        vnr       = [ lnr, ]
+        vnr_json  = JSON.stringify vnr
+        line      = bytes.toString 'utf-8'
+        vnr_h     = dba.as_hollerith vnr
+        yield [ path, vnr_json, line, vnr_h, ]
+      return null
+  dba.sqlt.table 'readlines', cfg
+  path = H.get_cfg().tsv.micro
+  urge "^44558^ reading from #{path}"
+  dba.execute "create table foolines ( path text, vnr json, line text, vnr_h bytea );"
+  # dba.execute "insert into foolines select * from readlines( ? );", [ path, ]
+  dba.execute "insert into foolines select * from readlines( #{dba.sql.L path} );"
+  # console.table dba.list dba.query "select * from readlines( ? ) order by vnr_h;", [ path, ]
+  console.table dba.list dba.query "select * from foolines;"
+  #.........................................................................................................
+  export_path       = H.nonexistant_path_from_ref 'export-virtual-tables'
+  schema            = 'main'
+  dba.export { schema, path: export_path, }
+  urge "^35345^ schema #{rpr schema} exported to #{export_path}"
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBA: concurrent UDFs" ] = ( T, done ) ->
   ###
   See

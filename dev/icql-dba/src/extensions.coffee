@@ -47,6 +47,42 @@ types                     = new ( require 'intertype' ).Intertype
   return null
 
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: sqlean vsv extension" ] = ( T, done ) ->
+  ### see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md ###
+  # T.halt_on_error()
+  { Dba }           = require '../../../apps/icql-dba'
+  schema            = 'main'
+  dba               = new Dba()
+  extension_path    = PATH.resolve PATH.join __dirname, '../../../assets/sqlite-extensions/vsv.so'
+  csv_path          = H.get_cfg().csv.holes
+  work_path         = await H.procure_file { path: csv_path, name: 'vsv-sample.csv', }
+  # debug '^857^', { csv_path, work_path, }
+  { I, L, V, }      = new ( require '../../../apps/icql-dba/lib/sql' ).Sql
+  #.........................................................................................................
+  await do =>
+    dba.load_extension extension_path
+    dba.run SQL"""
+      create virtual table myvsv using vsv(
+        filename  = #{L work_path},      -- the filename, passed to the Operating System
+        -- data=STRING         -- alternative data
+        -- schema=STRING       -- Alternate Schema to use
+        -- columns=N           -- columns parsed from the VSV file
+        -- header=BOOL         -- whether or not a header row is present
+        -- skip=N              -- number of leading data rows to skip
+        -- rsep=STRING         -- record separator
+        -- fsep=STRING         -- field separator
+        -- validatetext=BOOL   -- validate UTF-8 encoding of text fields
+        -- affinity=AFFINITY   -- affinity to apply to each returned value
+        nulls     = true                -- empty fields are returned as NULL
+        );
+      """ #, { csv_path, }
+    for row from dba.query SQL"select * from myvsv;"
+      info '^5554^', row
+    # dba.execute SQL"insert into myvsv ( c0 ) values ( '1111' );"
+  #.........................................................................................................
+  done()
+
 
 ############################################################################################################
 unless module.parent?

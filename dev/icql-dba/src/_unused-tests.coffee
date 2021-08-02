@@ -27,8 +27,8 @@ types                     = new ( require 'intertype' ).Intertype
 
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: open()" ] = ( T, done ) ->
-  T.halt_on_error()
+@[ "DBA: open() 2" ] = ( T, done ) ->
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   #.........................................................................................................
   cfg               = H.get_cfg()
@@ -123,7 +123,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: _list_temp_schema_numbers()" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   #.........................................................................................................
   cfg               = H.get_cfg()
@@ -197,7 +197,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "___ DBA: import { format: 'sql', }" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require '../../../apps/icql-dba'
   cfg               = H.get_cfg()
   #.........................................................................................................
@@ -221,7 +221,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: _walk_all_objects()" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba, }          = require '../../../apps/icql-dba'
   #.........................................................................................................
   cfg               = H.get_cfg()
@@ -309,7 +309,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: as_sql" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   ICQLDBA           = require '../../../apps/icql-dba'
   dba               = new ICQLDBA.Dba()
   probes_and_matchers = [
@@ -329,7 +329,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: interpolate" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   ICQLDBA           = require '../../../apps/icql-dba'
   dba               = new ICQLDBA.Dba()
   probes_and_matchers = [
@@ -346,7 +346,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: toposort is removed" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   ICQLDBA           = require '../../../apps/icql-dba'
   dba               = new ICQLDBA.Dba()
   T.eq dba.get_toposort, undefined
@@ -360,7 +360,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: clear()" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   ICQLDBA           = require '../../../apps/icql-dba'
   dba               = new ICQLDBA.Dba()
   #.........................................................................................................
@@ -401,7 +401,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open from DB file" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   ICQLDBA               = require '../../../apps/icql-dba'
   cfg                   = H.get_cfg()
   cfg.size              = 'small'
@@ -434,7 +434,7 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "_DBA: copy file DB to memory" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   ICQLDBA               = require '../../../apps/icql-dba'
   cfg                   = H.get_cfg()
   cfg.size              = 'small'
@@ -473,7 +473,7 @@ show_schemas_and_objects = ( ref, dba ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: copy file DB to memory" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   ICQLDBA               = require '../../../apps/icql-dba'
   #.........................................................................................................
   cfg                   =
@@ -540,7 +540,7 @@ show_schemas_and_objects = ( ref, dba ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: in-memory DB API" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   ICQLDBA               = require '../../../apps/icql-dba'
   { isa
     validate }          = ICQLDBA.types.export()
