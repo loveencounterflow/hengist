@@ -5,7 +5,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'ICQL-DBA/TESTS/BASICS'
+badge                     = 'ICQL-DBA/TESTS/FUNCTIONS'
 debug                     = CND.get_logger 'debug',     badge
 warn                      = CND.get_logger 'warn',      badge
 info                      = CND.get_logger 'info',      badge
@@ -34,7 +34,7 @@ jp                        = JSON.parse
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: window functions etc." ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   dba               = new Dba()
   schema            = 'main'
   { template_path
@@ -195,7 +195,7 @@ jp                        = JSON.parse
 @[ "DBA: User-Defined Window Function" ] = ( T, done ) ->
   ### see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md ###
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   schema            = 'main'
   dba               = new Dba()
   dba.load_extension PATH.resolve PATH.join __dirname, '../../../assets/sqlite-extensions/json1.so'
@@ -260,7 +260,7 @@ jp                        = JSON.parse
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: view with UDF" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   dba               = new Dba()
   schema            = 'main'
   { template_path
@@ -282,7 +282,7 @@ jp                        = JSON.parse
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: typing" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   dba               = new Dba()
   schema            = 'main'
   { template_path
@@ -326,7 +326,7 @@ jp                        = JSON.parse
 @[ "DBA: virtual tables" ] = ( T, done ) ->
   ### new in 7.4.0, see https://github.com/JoshuaWise/better-sqlite3/issues/581 ###
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   FS                = require 'fs'
   #.........................................................................................................
   dba               = new Dba()
@@ -451,7 +451,7 @@ jp                        = JSON.parse
 
   ###
   # T?.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           =H
   schema            = 'main'
   { template_path
     work_path }     = await H.procure_db { size: 'small', ref: 'typing', }
@@ -482,37 +482,40 @@ jp                        = JSON.parse
       s = sqlt2.prepare SQL"select 42 as x;"
       return [ s.iterate()..., ][ 0 ].x
     statement         = sqlt1.prepare SQL"select udf();"
-    info '^244^', [ statement.iterate()..., ]
+    result            = [ statement.iterate()..., ]
+    T.eq result, [ { 'udf()': 42 } ]
     return null
   #.........................................................................................................
   f3 = =>
-    new_sqlt          = require '../../../apps/icql-dba/node_modules/better-sqlite3'
-    work_path         = 'file:memdb1?mode=memory&cache=shared'
-    sqlt1             = new_sqlt work_path
-    sqlt2             = new_sqlt work_path
-    urge '^4453^', { work_path, }
+    Db                = require '../../../apps/icql-dba/node_modules/better-sqlite3'
+    path              = 'file:memdb1?mode=memory&cache=shared'
+    sqlt1             = new Db path
+    sqlt2             = new Db path
+    urge '^4453^', { path, }
     sqlt1.function 'udf', ->
       s = sqlt2.prepare SQL"select 42 as x;"
       return [ s.iterate()..., ][ 0 ].x
     statement         = sqlt1.prepare SQL"select udf();"
-    info '^244^', [ statement.iterate()..., ]
+    result            = [ statement.iterate()..., ]
+    T.eq result, [ { 'udf()': 42 } ]
     return null
   #.........................................................................................................
   f4 = =>
-    work_path         = 'file:memdb1?mode=memory&cache=shared'
-    dba               = new Dba(); dba.open { path: work_path, schema, }
-    dba2              = new Dba(); dba2.open { path: work_path, schema, }
-    urge '^4453^', { work_path, }
+    path              = 'file:memdb1?mode=memory&cache=shared'
+    dba               = new Dba(); dba.open { path, schema, }
+    dba2              = new Dba(); dba2.open { path, schema, }
+    urge '^4453^', { path, }
     dba.create_function name: 'udf', call: ->
       R = dba2.query SQL"select 42 as x;"
       return [ R..., ][ 0 ].x
-    info '^244^', dba.list dba.query SQL"select udf();"
+    result            = dba.list dba.query SQL"select udf();"
+    T.eq result, [ { 'udf()': 42 } ]
     return null
   #.........................................................................................................
-  f1()
-  f2()
+  # f1()
+  # f2()
   f3()
-  f4()
+  # f4()
   #.........................................................................................................
   done?()
 
@@ -523,3 +526,5 @@ if module is require.main then do =>
   # debug f '𠖏'
   # test @[ "DBA: concurrent UDFs" ]
   # @[ "DBA: concurrent UDFs" ]()
+  # debug process.env[ 'icql-dba-use' ]
+  # debug process.argv

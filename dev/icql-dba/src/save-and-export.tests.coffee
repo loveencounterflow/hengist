@@ -29,7 +29,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: save() RAM DB" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   ramdb_path        = null
   matcher           = null
   #.........................................................................................................
@@ -75,7 +75,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: export() RAM DB" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   ramdb_path        = null
   matcher           = null
   export_path       = H.nonexistant_path_from_ref 'export-ram-db'
@@ -113,7 +113,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import() CSV" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   # ramdb_path        = null
   matcher           = null
   export_path       = H.nonexistant_path_from_ref 'import-csv'
@@ -204,7 +204,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import() TSV" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   # ramdb_path        = null
   matcher           = null
   export_path       = H.nonexistant_path_from_ref 'import-tcsv'
@@ -248,7 +248,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "___ DBA: import() (big file)" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   # ramdb_path        = null
   matcher           = null
   export_path       = H.nonexistant_path_from_ref 'import-csv'
@@ -306,7 +306,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "___ DBA: import() (four corner)" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   # ramdb_path        = null
   matcher           = null
   export_path       = H.nonexistant_path_from_ref 'import-csv'
@@ -381,7 +381,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import TSV; cfg variants 1" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   matcher           = null
   import_path       = H.get_cfg().tsv.micro
   #.........................................................................................................
@@ -436,7 +436,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import TSV; cfg variants 2" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   matcher           = null
   import_path       = H.get_cfg().tsv.micro
   #.........................................................................................................
@@ -485,7 +485,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import TSV; cfg variants 3" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   matcher           = null
   import_path       = H.get_cfg().tsv.micro
   #.........................................................................................................
@@ -533,7 +533,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import TSV; cfg variants 4" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   matcher           = null
   import_path       = H.get_cfg().tsv.holes
   #.........................................................................................................
@@ -589,7 +589,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import CSV; cfg variants 5" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   matcher           = null
   import_path       = H.get_cfg().csv.holes
   #.........................................................................................................
@@ -627,7 +627,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import TSV; big file" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   matcher           = null
   import_path       = '../../../assets/jzrds/shape/shape-breakdown-formula-v2.txt'
   import_path       = PATH.resolve PATH.join __dirname, import_path
@@ -765,7 +765,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "___ DBA: safe eventual persistency" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   matcher           = null
   import_path       = H.get_cfg().csv.holes
   #.........................................................................................................

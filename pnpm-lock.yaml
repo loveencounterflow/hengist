@@ -33,6 +33,7 @@ specifiers:
   hamt: ^2.2.2
   hollerith-codec: 3.0.1
   icql: 5.3.0
+  icql-dba: ^7.1.0
   icql515: npm:icql@5.1.5
   immer: 9.0.1
   immutable: ^4.0.0-rc.12
@@ -124,6 +125,7 @@ dependencies:
   hamt: 2.2.2
   hollerith-codec: 3.0.1
   icql: 5.3.0
+  icql-dba: 7.1.0
   icql515: /icql/5.1.5
   immer: 9.0.1
   immutable: 4.0.0-rc.12
@@ -700,6 +702,13 @@ packages:
     hasBin: true
     dev: false
 
+  /cnd/9.2.2:
+    resolution: {integrity: sha512-F+/H+7luk4fZkvN0+MT0I2nwn80YM/EtfMttNUFxENR50XJH4g0KgQevzeyEJ8B6t6l8Tb4Xti6QAksa8DmePA==}
+    hasBin: true
+    dependencies:
+      jsx-number-format: 0.1.4
+    dev: false
+
   /code-point-at/1.1.0:
     resolution: {integrity: sha1-DQcLTQQ6W+ozovGkDi7bPZpMz3c=}
     engines: {node: '>=0.10.0'}
@@ -908,7 +917,7 @@ packages:
   /datom/8.0.2:
     resolution: {integrity: sha512-vKLmQvQ3UMV7wfLBilFUrq74kQBTeahsw4FQa3drBXLpRYAM08TWDH4QXOsh9+bl2w3FtKUAtjAlaDTUQTQPlw==}
     dependencies:
-      cnd: 9.2.1
+      cnd: 9.2.2
       cupofjoe: 0.1.1
       emittery: 0.6.0
       intertype: 7.6.3
@@ -1571,6 +1580,20 @@ packages:
   /hyphenopoly/4.10.0:
     resolution: {integrity: sha512-cAc1QhxE2wB7aCv8uGi23vFzGcoRGbgaLH3NNcnrjw9NlYdf/STS6bIH5XyEkQzXspkbLJKHe6W+qTHex2yuNg==}
     engines: {node: '>=10.0.0'}
+    dev: false
+
+  /icql-dba/7.1.0:
+    resolution: {integrity: sha512-icOuMwnCO48QrN8NvFZ9Fc7eICCpuYFRrhp+A6R94klSe4mFIOuKMvj/woGruCqfUb1uElgkdFVUzp29zC3nJQ==}
+    requiresBuild: true
+    dependencies:
+      cnd: 9.2.2
+      csv-parser: 3.0.0
+      hollerith-codec: 3.0.1
+      intertype: 7.6.7
+      letsfreezethat: 3.1.0
+      mysql-tokenizer: 1.0.7
+      n-readlines: 1.0.1
+      tempy: 1.0.1
     dev: false
 
   /icql/5.1.5:

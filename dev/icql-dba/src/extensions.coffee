@@ -31,7 +31,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "load_extension" ] = ( T, done ) ->
   T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   #---------------------------------------------------------------------------------------------------------
   do =>
     dba     = new Dba()
@@ -51,7 +51,7 @@ types                     = new ( require 'intertype' ).Intertype
 @[ "DBA: sqlean vsv extension" ] = ( T, done ) ->
   ### see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md ###
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   schema            = 'main'
   dba               = new Dba()
   extension_path    = PATH.resolve PATH.join __dirname, '../../../assets/sqlite-extensions/vsv.so'

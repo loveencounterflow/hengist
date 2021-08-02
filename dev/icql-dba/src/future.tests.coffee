@@ -31,8 +31,8 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open()" ] = ( T, done ) ->
-  # T.halt_on_error()
-  { Dba } = require '../../../apps/icql-dba'
+  T?.halt_on_error()
+  { Dba } = require H.icql_dba_path
   dba     = new Dba()
   schemas = {}
   #.........................................................................................................
@@ -113,8 +113,8 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open() RAM DB" ] = ( T, done ) ->
-  # T.halt_on_error()
-  { Dba } = require '../../../apps/icql-dba'
+  # T?.halt_on_error()
+  { Dba } = require H.icql_dba_path
   dba     = new Dba()
   schemas = {}
   #.........................................................................................................
@@ -157,8 +157,8 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: VNRs" ] = ( T, done ) ->
-  # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
   matcher           = null
   #.........................................................................................................
   whisper '-'.repeat 108
@@ -318,7 +318,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @_demo_csv_parser = -> new Promise ( resolve ) =>
-  { Dba }     = require '../../../apps/icql-dba'
+  { Dba }     = require H.icql_dba_path
   dba         = new Dba()
   #.........................................................................................................
   csv         = require 'csv-parser'
@@ -347,8 +347,8 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open() file DB in schema main" ] = ( T, done ) ->
-  # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
   schemas           = {}
   { template_path
     work_path }     = await H.procure_db { size: 'small', ref: 'F-open-in-main', }
@@ -382,8 +382,8 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open() RAM DB from file in schema main" ] = ( T, done ) ->
-  # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
   schemas           = {}
   { template_path
     work_path }     = await H.procure_db { size: 'small', ref: 'F-open-in-main', }
@@ -410,8 +410,8 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open() empty RAM DB in schema main" ] = ( T, done ) ->
-  # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
   schema            = 'main'
   #.........................................................................................................
   await do =>
@@ -429,8 +429,8 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: writing while reading 1" ] = ( T, done ) ->
-  # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
   schema            = 'main'
   new_bsqlt3        = require '../../../apps/icql-dba/node_modules/better-sqlite3'
   dba               = new Dba()
@@ -457,8 +457,8 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: writing while reading 2" ] = ( T, done ) ->
-  # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
   schema            = 'main'
   new_bsqlt3        = require '../../../apps/icql-dba/node_modules/better-sqlite3'
   dba               = new Dba()
@@ -485,8 +485,8 @@ jp                        = JSON.parse
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: indexing JSON lists (de-constructing method)" ] = ( T, done ) ->
   ### see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md ###
-  # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
   schema            = 'main'
   dba               = new Dba()
   dba.load_extension PATH.resolve PATH.join __dirname, '../../../assets/sqlite-extensions/json1.so'
@@ -575,8 +575,8 @@ jp                        = JSON.parse
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: indexing JSON lists (constructing method)" ] = ( T, done ) ->
   ### see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md ###
-  # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
   schema            = 'main'
   dba               = new Dba()
   dba.load_extension PATH.resolve PATH.join __dirname, '../../../assets/sqlite-extensions/json1.so'
@@ -622,8 +622,8 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: advanced interpolation" ] = ( T, done ) ->
-  { Dba }           = require '../../../apps/icql-dba'
-  E                 = require '../../../apps/icql-dba/lib/errors'
+  { Dba }           = require H.icql_dba_path
+  E                 = require H.icql_dba_path + '/lib/errors'
   dba               = new Dba()
   do => #...................................................................................................
     sql     = SQL"select $:col_a, $:col_b where $:col_b in $V:choices"
@@ -648,8 +648,9 @@ jp                        = JSON.parse
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
+  # test @, { timeout: 10e3, }
   # debug f '𠖏'
+  test @[ "DBA: open()" ]
   # test @[ "DBA: concurrent UDFs" ]
   # @[ "DBA: concurrent UDFs" ]()
   # test @[ "DBA: advanced interpolation" ]

@@ -24,7 +24,6 @@ echo                      = CND.echo.bind CND
 PATH                      = require 'path'
 FS                        = require 'fs'
 FSP                       = require 'fs/promises'
-dba_types                 = require '../../../apps/icql-dba/lib/types'
 @types                    = new ( require 'intertype' ).Intertype
 { isa
   validate
@@ -32,8 +31,24 @@ dba_types                 = require '../../../apps/icql-dba/lib/types'
   equals }                = @types.export()
 DATA                      = require '../../../lib/data-providers-nocache'
 DATOM                     = require 'datom'
-{ Dba }                   = require '../../../apps/icql-dba'
-
+H                         = @
+#-----------------------------------------------------------------------------------------------------------
+do =>
+  if '--icql-dba-use-installed' in process.argv
+    H.icql_dba_use_installed  = true
+    H.icql_dba_path           = 'icql-dba'
+    message                   = "using installed version of icql-dba"
+  else
+    H.icql_dba_use_installed  = false
+    H.icql_dba_path           = '../../../apps/icql-dba'
+    message                   = "using linked icql-dba"
+  debug '^3337^', CND.reverse message
+  process.on 'exit', ->
+    debug '^3337^', CND.reverse message
+  return null
+#-----------------------------------------------------------------------------------------------------------
+{ Dba }                   = require H.icql_dba_path
+dba_types                 = require H.icql_dba_path + '/lib/types'
 
 #-----------------------------------------------------------------------------------------------------------
 @types.declare 'interpolatable_value', ( x ) ->

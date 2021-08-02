@@ -29,7 +29,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open() 2" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   #.........................................................................................................
   cfg               = H.get_cfg()
   cfg.ref           = 'multicon'
@@ -124,7 +124,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: _list_temp_schema_numbers()" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   #.........................................................................................................
   cfg               = H.get_cfg()
   cfg.ref           = 'foo'
@@ -167,7 +167,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: import { format: 'db', }" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   #.........................................................................................................
   cfg               = H.get_cfg()
   cfg.ref           = 'multicon'
@@ -198,7 +198,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "___ DBA: import { format: 'sql', }" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
+  { Dba }           = require H.icql_dba_path
   cfg               = H.get_cfg()
   #.........................................................................................................
   await do =>
@@ -222,7 +222,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: _walk_all_objects()" ] = ( T, done ) ->
   # T.halt_on_error()
-  { Dba, }          = require '../../../apps/icql-dba'
+  { Dba, }          = require H.icql_dba_path
   #.........................................................................................................
   cfg               = H.get_cfg()
   cfg.ref           = 'icqldba_schema'
@@ -310,7 +310,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: as_sql" ] = ( T, done ) ->
   # T.halt_on_error()
-  ICQLDBA           = require '../../../apps/icql-dba'
+  ICQLDBA           = require H.icql_dba_path
   dba               = new ICQLDBA.Dba()
   probes_and_matchers = [
     [true,'1',]
@@ -330,7 +330,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: interpolate" ] = ( T, done ) ->
   # T.halt_on_error()
-  ICQLDBA           = require '../../../apps/icql-dba'
+  ICQLDBA           = require H.icql_dba_path
   dba               = new ICQLDBA.Dba()
   probes_and_matchers = [
     [["foo, $bar, baz",{bar:42,}],"foo, 42, baz"]
@@ -347,7 +347,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: toposort is removed" ] = ( T, done ) ->
   # T.halt_on_error()
-  ICQLDBA           = require '../../../apps/icql-dba'
+  ICQLDBA           = require H.icql_dba_path
   dba               = new ICQLDBA.Dba()
   T.eq dba.get_toposort, undefined
   ### removed b/c stops working when tables refer to each other cyclical fashion:
@@ -361,7 +361,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: clear()" ] = ( T, done ) ->
   # T.halt_on_error()
-  ICQLDBA           = require '../../../apps/icql-dba'
+  ICQLDBA           = require H.icql_dba_path
   dba               = new ICQLDBA.Dba()
   #.........................................................................................................
   # Create tables, indexes:
@@ -402,7 +402,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open from DB file" ] = ( T, done ) ->
   # T.halt_on_error()
-  ICQLDBA               = require '../../../apps/icql-dba'
+  ICQLDBA               = require H.icql_dba_path
   cfg                   = H.get_cfg()
   cfg.size              = 'small'
   cfg.mode              = 'fle'
@@ -435,7 +435,7 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "_DBA: copy file DB to memory" ] = ( T, done ) ->
   # T.halt_on_error()
-  ICQLDBA               = require '../../../apps/icql-dba'
+  ICQLDBA               = require H.icql_dba_path
   cfg                   = H.get_cfg()
   cfg.size              = 'small'
   cfg.mode              = 'fle'
@@ -474,7 +474,7 @@ show_schemas_and_objects = ( ref, dba ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: copy file DB to memory" ] = ( T, done ) ->
   # T.halt_on_error()
-  ICQLDBA               = require '../../../apps/icql-dba'
+  ICQLDBA               = require H.icql_dba_path
   #.........................................................................................................
   cfg                   =
     pragmas: [
@@ -541,7 +541,7 @@ show_schemas_and_objects = ( ref, dba ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: in-memory DB API" ] = ( T, done ) ->
   # T.halt_on_error()
-  ICQLDBA               = require '../../../apps/icql-dba'
+  ICQLDBA               = require H.icql_dba_path
   { isa
     validate }          = ICQLDBA.types.export()
   #-----------------------------------------------------------------------------------------------------------
