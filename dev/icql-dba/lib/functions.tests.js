@@ -762,6 +762,150 @@ create trigger multiple_instead_update instead of update on multiples begin
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["DBA: virtual tables"] = function(T, done) {
+    var Dba, FS, cfg, dba, export_path, is_first, matcher, path, schema, sql, transform;
+    /* new in 7.4.0, see https://github.com/JoshuaWise/better-sqlite3/issues/581 */
+    // T.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
+    FS = require('fs');
+    //.........................................................................................................
+    dba = new Dba();
+    // schema            = 'csv'
+    // schema_i          = dba.sql.I schema
+    transform = null;
+    is_first = true;
+    //.........................................................................................................
+    cfg = {
+      columns: ['path', 'data'],
+      rows: function*() {
+        var data, filename, i, len, path, ref;
+        ref = FS.readdirSync(__dirname);
+        for (i = 0, len = ref.length; i < len; i++) {
+          filename = ref[i];
+          path = PATH.resolve(PATH.join(__dirname, filename));
+          data = (FS.readFileSync(path, {
+            encoding: 'utf-8'
+          })).trim().slice(0, 51);
+          yield ({path, data});
+        }
+        return null;
+      }
+    };
+    dba.sqlt.table("files", cfg);
+    matcher = dba.list(dba.query("select * from files order by data;"));
+    console.table(matcher);
+    //.........................................................................................................
+    cfg = {
+      columns: ['match', 'capture'],
+      parameters: ['pattern', 'text'],
+      rows: function*(pattern, text) {
+        var match, regex;
+        regex = new RegExp(pattern, 'g');
+        while ((match = regex.exec(text)) != null) {
+          yield [match[0], match[1]];
+        }
+        return null;
+      }
+    };
+    dba.sqlt.table('re_matches', cfg);
+    sql = "select pattern, text, match, capture from re_matches( ?, ? ) order by 1, 2, 3, 4;";
+    matcher = dba.list(dba.query(sql, ['€([-,.0-9]+)', "between €30,-- and €40,--"]));
+    console.table(matcher);
+    //.........................................................................................................
+    cfg = function(filename, ...P) {
+      urge('^46456^', {filename, P});
+      return {
+        columns: ['path', 'lnr', 'line'],
+        rows: function*() {
+          var i, len, line, line_idx, lines, path;
+          path = PATH.resolve(PATH.join(__dirname, '../../../assets/icql', filename));
+          lines = (FS.readFileSync(path, {
+            encoding: 'utf-8'
+          })).split('\n');
+          for (line_idx = i = 0, len = lines.length; i < len; line_idx = ++i) {
+            line = lines[line_idx];
+            yield ({
+              path,
+              lnr: line_idx + 1,
+              line
+            });
+          }
+          return null;
+        }
+      };
+    };
+    dba.sqlt.table('file_contents', cfg);
+    dba.execute("create virtual table contents_of_wbftsv using file_contents( ncrglyphwbf.tsv, any stuff goes here, and more here );");
+    sql = "select * from contents_of_wbftsv order by 1, 2, 3;";
+    matcher = dba.list(dba.query(sql));
+    console.table(matcher);
+    //.........................................................................................................
+    cfg = {
+      columns: ['n'],
+      parameters: ['start', 'stop', 'step'],
+      rows: function*(start, stop, step = null) {
+        var n;
+        // stop ?= start
+        if (step == null) {
+          step = 1;
+        }
+        n = start;
+        while (true) {
+          if (n > stop) {
+            break;
+          }
+          // if n %% 2 is 0 then yield [ "*#{n}*", ]
+          // else                yield [ n, ]
+          yield [n];
+          n += step;
+        }
+        return null;
+      }
+    };
+    dba.sqlt.table('generate_series', cfg);
+    console.table(dba.list(dba.query("select * from generate_series( ?, ? )", [1, 5])));
+    console.table(dba.list(dba.query("select * from generate_series( ?, ?, ? )", [1, 10, 2])));
+    console.table(dba.list(dba.query("select * from generate_series( ?, ?, ? ) limit 10;", [500, 2e308, 1234])));
+    //.........................................................................................................
+    cfg = {
+      columns: ['path', 'vnr', 'line', 'vnr_h'],
+      parameters: ['_path'],
+      rows: function*(path) {
+        var bytes, line, lnr, readlines, vnr, vnr_h, vnr_json;
+        readlines = new (require('n-readlines'))(path);
+        lnr = 0;
+        while ((bytes = readlines.next()) !== false) {
+          lnr++;
+          vnr = [lnr];
+          vnr_json = JSON.stringify(vnr);
+          line = bytes.toString('utf-8');
+          vnr_h = dba.as_hollerith(vnr);
+          yield [path, vnr_json, line, vnr_h];
+        }
+        return null;
+      }
+    };
+    dba.sqlt.table('readlines', cfg);
+    path = H.get_cfg().tsv.micro;
+    urge(`^44558^ reading from ${path}`);
+    dba.execute("create table foolines ( path text, vnr json, line text, vnr_h bytea );");
+    // dba.execute "insert into foolines select * from readlines( ? );", [ path, ]
+    dba.execute(`insert into foolines select * from readlines( ${dba.sql.L(path)} );`);
+    // console.table dba.list dba.query "select * from readlines( ? ) order by vnr_h;", [ path, ]
+    console.table(dba.list(dba.query("select * from foolines;")));
+    //.........................................................................................................
+    export_path = H.nonexistant_path_from_ref('export-virtual-tables');
+    schema = 'main';
+    dba.export({
+      schema,
+      path: export_path
+    });
+    urge(`^35345^ schema ${rpr(schema)} exported to ${export_path}`);
+    //.........................................................................................................
+    return done();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DBA: concurrent UDFs"] = async function(T, done) {
     var Dba, f1, f2, f3, f4, schema, template_path, work_path;
     /*
