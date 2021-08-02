@@ -421,15 +421,31 @@ _add_tagged_ranges = ( dtags ) ->
   _add_tagged_ranges dtags
   dtags.add_tagged_range { lo: 0x000000, hi: 0x010000, tag: 'font', value: 'font1', }
   ### List inflection points: ###
-  console.table dtags.dba.list dtags.dba.query SQL"""
-    select id from ( select cast( null as integer ) as id where false
-      union select 0x000000 -- ### TAINT replace with first_id
-      union select 0x10ffff -- ### TAINT replace with last_id
-      union select distinct lo      from t_tagged_ranges
-      union select distinct hi + 1  from t_tagged_ranges )
-    order by id asc;
-    ;
+  dtags.dba.run SQL"""
+    create view #{prefix}_potential_inflection_points as
+      select id from ( select cast( null as integer ) as id where false
+        union select 0x000000 -- ### TAINT replace with first_id
+        union select 0x10ffff -- ### TAINT replace with last_id
+        union select distinct lo      from t_tagged_ranges
+        union select distinct hi + 1  from t_tagged_ranges )
+      order by id asc;
     """
+  dtags.dba.run SQL"""
+    create view #{prefix}_potential_contiguous_ranges as
+      select
+        id                          as lo,
+        ( lead( id ) over w ) - 1   as hi
+      from #{prefix}_potential_inflection_points as r1
+      -- left join #{prefix}
+      window w as ( order by id )
+    """
+  console.table dtags.dba.list dtags.dba.query SQL"select * from #{prefix}_potential_inflection_points order by id;"
+  console.table dtags.dba.list dtags.dba.query SQL"select * from #{prefix}_potential_contiguous_ranges order by lo, hi;"
+  dtags.dba.do_unsafe =>
+    console.table dtags.dba.list dtags.dba.query SQL"select 10, #{prefix}_tags_from_id( 10 );"
+    console.table dtags.dba.list dtags.dba.query SQL"select 65, #{prefix}_tags_from_id( 65 );"
+    console.table dtags.dba.list dtags.dba.query SQL"select 99, #{prefix}_tags_from_id( 99 );"
+  return null
   #.........................................................................................................
   ### Demo for a regex that partitons a text into chunks of characters that all have the same tags. ###
   debug 'abcdefgh'.match /(?<vowels>[aeiou])/g
@@ -452,15 +468,15 @@ _add_tagged_ranges = ( dtags ) ->
   for group, part of R
     info group, rpr part
   #.........................................................................................................
-  ### Computing contiguous ranges for all different sets of tags. For each ID, this table contains exactly
+  ### Computing contiguous ranges for all distinct sets of tags. For each ID, this table contains exactly
   one matching row between lo and hi, and the lo of each row (except for the first) is the hi of the
   preceding row plus one. The data in this table replaces `t_tagged_ids_cache` which in a typical
   application can be expected to be much larger; further, the range data can be used to build a regex
   as shown above to split a given text into chunks of characters that all have the same tags. ###
   # f = add_sql_functions dtags.dba
-  console.table dtags.dba.list dtags.dba.query SQL"select * from t_tagged_ranges order by lo, hi;"
-  tags_cache = {}
-  build_cache = ( cfg ) ->
+  # console.table dtags.dba.list dtags.dba.query SQL"select * from t_tagged_ranges order by lo, hi;"
+  tags_cache_1 = {}
+  build_cache_1 = ( cfg ) ->
     { lo, hi, } = cfg
     lo         ?= first_cid
     hi         ?= last_cid
@@ -473,14 +489,36 @@ _add_tagged_ranges = ( dtags ) ->
       { id: cur_id, tags: cur_tags, } = row
       if cur_tags isnt prv_tags
         if prv_tags?
-          ( tags_cache[ prv_tags ] ?= [] ).push [ ( prv_id ? first_cid ), ( cur_id - 1 ), ]
+          ( tags_cache_1[ prv_tags ] ?= [] ).push [ ( prv_id ? first_cid ), ( cur_id - 1 ), ]
         prv_id    = cur_id
         prv_tags  = cur_tags
     info '^3487^', { prv_id, prv_tags, cur_id, cur_tags, }
-    ( tags_cache[ cur_tags ] ?= [] ).push [ ( prv_id ? first_cid ), cur_id, ]
+    ( tags_cache_1[ cur_tags ] ?= [] ).push [ ( prv_id ? first_cid ), cur_id, ]
     return null
-  build_cache { lo: 65, hi: 99, }
-  for tags, id_pairs of tags_cache
+  build_cache_1 { lo: 0, hi: 99, }
+  for tags, id_pairs of tags_cache_1
+    for id_pair, idx in id_pairs
+      if idx is 0
+        debug id_pair, tags
+      else
+        debug id_pair
+  #.........................................................................................................
+  ### Computing contiguous ranges for all distinct sets of tags using inflection points. ###
+  tags_cache_2 = {}
+  build_cache_2 = ( cfg ) ->
+    { lo, hi, }   = cfg
+    lo           ?= first_cid
+    hi           ?= last_cid
+    cur_id        = first_cid
+    cur_tags      = null
+    prv_id        = null
+    prv_tags      = null
+    dtags.dba.do_unsafe =>
+      for row from dtags.dba.query SQL"select * from #{prefix}_potential_inflection_points order by id;"
+        { id, tags, } = row
+        debug '^477^', id, dtags.tags_from_id { id, }
+  build_cache_2 { lo: 65, hi: 99, }
+  for tags, id_pairs of tags_cache_2
     for id_pair, idx in id_pairs
       if idx is 0
         debug id_pair, tags
@@ -622,7 +660,8 @@ demo_html = ->
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # test @[ "DBA: ranges (1)" ]
-  test @[ "DBA: contiguous ranges" ]
+  # test @[ "DBA: contiguous ranges" ]
+  @[ "DBA: contiguous ranges" ]()
   # test @[ "tags: caching with empty values" ]
   # test @[ "tags: tags_from_tagexchain" ]
   # test @[ "tags: add_tagged_range" ]
