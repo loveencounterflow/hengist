@@ -1057,7 +1057,7 @@
   
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: contiguous ranges"] = function(T, done) {
-    var Dtags, R, build_cache_1, build_cache_2, chr_from_cid, cid_from_chr, create_minimal_contiguous_ranges, d, dba, dtags, dts, first_cid, group, groups, i, id_pair, id_pairs, idx, j, l, last_cid, len, len1, len2, match, n, part, prefix, re, ref, ref1, row_count, t0, t1, tags, tags_cache_1, tags_cache_2;
+    var Dtags, R, build_cache_1, build_cache_2, chr_from_cid, cid_from_chr, d, dba, dtags, dts, first_cid, group, groups, i, id_pair, id_pairs, idx, j, l, last_cid, len, len1, len2, match, n, part, prefix, re, ref, ref1, row_count, t0, t1, tags, tags_cache_1, tags_cache_2;
     if (T != null) {
       T.halt_on_error();
     }
@@ -1080,57 +1080,14 @@
     //.........................................................................................................
     _add_tagged_ranges(dtags);
     dtags.add_tagged_range({
-      lo: 0x000000,
-      hi: 0x010000,
+      lo: dtags.cfg.first_id,
+      hi: dtags.cfg.last_id,
       tag: 'font',
       value: 'font1'
     });
     //.........................................................................................................
-    create_minimal_contiguous_ranges = function() {
-      var entry, hi, i, id, ids_and_tags, idx, j, last_id, last_idx, lo, pi_ids, prv_tags, ref, ref1, row, tags;
-      pi_ids = (function() {
-        var ref, results;
-        ref = this.dba.query(SQL`select id from ${prefix}_potential_inflection_points;`);
-        results = [];
-        for (row of ref) {
-          results.push(row.id);
-        }
-        return results;
-      }).call(this);
-      last_idx = pi_ids.length - 1;
-      last_id = pi_ids[last_idx];
-      prv_tags = null;
-      ids_and_tags = [];
-//.......................................................................................................
-      for (idx = i = 0, ref = pi_ids.length - 1; (0 <= ref ? i < ref : i > ref); idx = 0 <= ref ? ++i : --i) {
-        id = pi_ids[idx];
-        tags = JSON.stringify(dtags.tags_from_id({id}));
-        if (tags === prv_tags) {
-          continue;
-        }
-        // nxt_id    = pi_ids[ idx + 1 ] - 1
-        prv_tags = tags;
-        // debug '^3337^', id, nxt_id, rpr tags
-        debug('^3337^', id, rpr(tags));
-        ids_and_tags.push({id, tags});
-      }
-      ids_and_tags.push({
-        id: last_id,
-        tags: null
-      });
-//.......................................................................................................
-      for (idx = j = 0, ref1 = ids_and_tags.length - 1; (0 <= ref1 ? j < ref1 : j > ref1); idx = 0 <= ref1 ? ++j : --j) {
-        entry = ids_and_tags[idx];
-        lo = entry.id;
-        hi = ids_and_tags[idx + 1].id - 1;
-        tags = entry.tags;
-        this.dba.run(this.sql.insert_contiguous_range, {lo, hi, tags});
-      }
-      //.......................................................................................................
-      return null;
-    };
     console.table(dba.list(dba.query(SQL`select * from ${prefix}_potential_inflection_points order by id;`)));
-    create_minimal_contiguous_ranges.apply(dtags);
+    dtags.create_minimal_contiguous_ranges();
     console.table(dba.list(dba.query(SQL`select * from ${prefix}contiguous_ranges order by lo;`)));
     if (typeof done === "function") {
       done();
@@ -1264,7 +1221,7 @@
     /* Iterate over all potential Unicode code points */
     /* TAINT use proper benchmarking */
     first_cid = 0x000000;
-    last_cid = 0x010000;
+    last_cid = 0x10ffff;
     n = last_cid - first_cid + 1;
     t0 = Date.now();
     (function() {      //.........................................................................................................
@@ -1448,12 +1405,12 @@
     (() => {
       // test @, { timeout: 10e3, }
       // test @[ "DBA: ranges (1)" ]
-      return test(this["DBA: contiguous ranges"]);
+      // test @[ "DBA: contiguous ranges" ]
+      return this["DBA: contiguous ranges"]();
     })();
   }
 
-  // @[ "DBA: contiguous ranges" ]()
-// test @[ "tags: caching with empty values" ]
+  // test @[ "tags: caching with empty values" ]
 // test @[ "tags: tags_from_tagexchain" ]
 // test @[ "tags: add_tagged_range" ]
 // test @[ "tags: add_tag with value" ]
