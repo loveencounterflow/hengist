@@ -415,37 +415,10 @@ _add_tagged_ranges = ( dtags ) ->
   last_cid          = cid_from_chr 'Z'
   #.........................................................................................................
   _add_tagged_ranges dtags
-  dtags.add_tagged_range { lo: 0x000000, hi: 0x010000, tag: 'font', value: 'font1', }
+  dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
   #.........................................................................................................
-  create_minimal_contiguous_ranges = ->
-    pi_ids    = ( row.id for row from @dba.query SQL"""
-      select id from #{prefix}_potential_inflection_points;""" )
-    last_idx      = pi_ids.length - 1
-    last_id       = pi_ids[ last_idx ]
-    prv_tags      = null
-    ids_and_tags  = []
-    #.......................................................................................................
-    for idx in [ 0 ... pi_ids.length - 1 ]
-      id    = pi_ids[ idx ]
-      tags  = JSON.stringify dtags.tags_from_id { id, }
-      continue if tags is prv_tags
-      # nxt_id    = pi_ids[ idx + 1 ] - 1
-      prv_tags  = tags
-      # debug '^3337^', id, nxt_id, rpr tags
-      debug '^3337^', id, rpr tags
-      ids_and_tags.push { id, tags, }
-    ids_and_tags.push { id: last_id, tags: null, }
-    #.......................................................................................................
-    for idx in [ 0 ... ids_and_tags.length - 1 ]
-      entry = ids_and_tags[ idx ]
-      lo    = entry.id
-      hi    = ids_and_tags[ idx + 1 ].id - 1
-      tags  = entry.tags
-      @dba.run @sql.insert_contiguous_range, { lo, hi, tags, }
-    #.......................................................................................................
-    return null
   console.table dba.list dba.query SQL"select * from #{prefix}_potential_inflection_points order by id;"
-  create_minimal_contiguous_ranges.apply dtags
+  dtags.create_minimal_contiguous_ranges()
   console.table dba.list dba.query SQL"select * from #{prefix}contiguous_ranges order by lo;"
   done?(); return null
   #.........................................................................................................
@@ -530,7 +503,7 @@ _add_tagged_ranges = ( dtags ) ->
   ### Iterate over all potential Unicode code points ###
   ### TAINT use proper benchmarking ###
   first_cid = 0x000000
-  last_cid  = 0x010000
+  last_cid  = 0x10ffff
   n         = last_cid - first_cid + 1
   t0        = Date.now()
   #.........................................................................................................
@@ -662,8 +635,8 @@ demo_html = ->
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # test @[ "DBA: ranges (1)" ]
-  test @[ "DBA: contiguous ranges" ]
-  # @[ "DBA: contiguous ranges" ]()
+  # test @[ "DBA: contiguous ranges" ]
+  @[ "DBA: contiguous ranges" ]()
   # test @[ "tags: caching with empty values" ]
   # test @[ "tags: tags_from_tagexchain" ]
   # test @[ "tags: add_tagged_range" ]
