@@ -364,23 +364,20 @@ _add_tagged_ranges = ( dtags ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: ranges (1)" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
-  # E                 = require '../../../apps/icql-dba/lib/errors'
   #.........................................................................................................
   f = ( fallbacks ) ->
     prefix            = 't_'
-    dba               = new Dba()
-    dtags             = new Dtags { dba, prefix, fallbacks, }
+    dtags             = new Dtags { prefix, fallbacks, }
     cid_from_chr      = ( chr ) -> chr.codePointAt 0
     chr_from_cid      = ( cid ) -> String.fromCodePoint cid
-    dba.create_function name: 'chr_from_cid', call: chr_from_cid
+    dtags.dba.create_function name: 'chr_from_cid', call: chr_from_cid
     first_cid         = cid_from_chr 'A'
     last_cid          = cid_from_chr 'Z'
     #.......................................................................................................
     _add_tagged_ranges dtags
     #.......................................................................................................
-    console.table dba.list dba.query SQL"""
+    console.table dtags.dba.list dtags.dba.query SQL"""
       select
           nr                      as nr,
           chr_from_cid( lo )      as chr_lo,
@@ -390,15 +387,15 @@ _add_tagged_ranges = ( dtags ) ->
           value                   as value
         from #{prefix}tagged_ranges
         order by nr;"""
-    console.table dba.list dba.query SQL"""select * from #{prefix}tags order by tag;"""
-    # console.table dba.list dba.query SQL"""select * from #{prefix}tags_by_cid order by tag, cid, nr;"""
+    console.table dtags.dba.list dtags.dba.query SQL"""select * from #{prefix}tags order by tag;"""
+    # console.table dtags.dba.list dtags.dba.query SQL"""select * from #{prefix}tags_by_cid order by tag, cid, nr;"""
     #.......................................................................................................
     for cid in [ first_cid .. last_cid ]
       chr       = String.fromCodePoint cid
       tags      = dtags.tags_from_id { id: cid, }
       info ( CND.gold chr ), ( CND.blue tags )
-    console.table dba.list dba.query SQL"""select * from #{prefix}tagged_ids_cache order by id;"""
-    # console.table dba.list dba.query SQL"""select * from #{prefix}tagged_ranges order by lo, hi, nr;"""
+    console.table dtags.dba.list dtags.dba.query SQL"""select * from #{prefix}tagged_ids_cache order by id;"""
+    # console.table dtags.dba.list dtags.dba.query SQL"""select * from #{prefix}tagged_ranges order by lo, hi, nr;"""
   #.........................................................................................................
   for fallbacks in [ 'all', true, false, ]
     f fallbacks
@@ -407,12 +404,11 @@ _add_tagged_ranges = ( dtags ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: contiguous ranges" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dba }           = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
-  # E                 = require '../../../apps/icql-dba/lib/errors'
   #.........................................................................................................
   prefix            = 't_'
   dtags             = new Dtags { prefix, fallbacks: true, }
+  { dba, }          = dtags
   cid_from_chr      = ( chr ) -> chr.codePointAt 0
   chr_from_cid      = ( cid ) -> String.fromCodePoint cid
   first_cid         = cid_from_chr 'A'
@@ -420,32 +416,38 @@ _add_tagged_ranges = ( dtags ) ->
   #.........................................................................................................
   _add_tagged_ranges dtags
   dtags.add_tagged_range { lo: 0x000000, hi: 0x010000, tag: 'font', value: 'font1', }
-  ### List inflection points: ###
-  dtags.dba.run SQL"""
-    create view #{prefix}_potential_inflection_points as
-      select id from ( select cast( null as integer ) as id where false
-        union select 0x000000 -- ### TAINT replace with first_id
-        union select 0x10ffff -- ### TAINT replace with last_id
-        union select distinct lo      from t_tagged_ranges
-        union select distinct hi + 1  from t_tagged_ranges )
-      order by id asc;
-    """
-  dtags.dba.run SQL"""
-    create view #{prefix}_potential_contiguous_ranges as
-      select
-        id                          as lo,
-        ( lead( id ) over w ) - 1   as hi
-      from #{prefix}_potential_inflection_points as r1
-      -- left join #{prefix}
-      window w as ( order by id )
-    """
-  console.table dtags.dba.list dtags.dba.query SQL"select * from #{prefix}_potential_inflection_points order by id;"
-  console.table dtags.dba.list dtags.dba.query SQL"select * from #{prefix}_potential_contiguous_ranges order by lo, hi;"
-  dtags.dba.do_unsafe =>
-    console.table dtags.dba.list dtags.dba.query SQL"select 10, #{prefix}_tags_from_id( 10 );"
-    console.table dtags.dba.list dtags.dba.query SQL"select 65, #{prefix}_tags_from_id( 65 );"
-    console.table dtags.dba.list dtags.dba.query SQL"select 99, #{prefix}_tags_from_id( 99 );"
-  return null
+  #.........................................................................................................
+  create_minimal_contiguous_ranges = ->
+    pi_ids    = ( row.id for row from @dba.query SQL"""
+      select id from #{prefix}_potential_inflection_points;""" )
+    last_idx      = pi_ids.length - 1
+    last_id       = pi_ids[ last_idx ]
+    prv_tags      = null
+    ids_and_tags  = []
+    #.......................................................................................................
+    for idx in [ 0 ... pi_ids.length - 1 ]
+      id    = pi_ids[ idx ]
+      tags  = JSON.stringify dtags.tags_from_id { id, }
+      continue if tags is prv_tags
+      # nxt_id    = pi_ids[ idx + 1 ] - 1
+      prv_tags  = tags
+      # debug '^3337^', id, nxt_id, rpr tags
+      debug '^3337^', id, rpr tags
+      ids_and_tags.push { id, tags, }
+    ids_and_tags.push { id: last_id, tags: null, }
+    #.......................................................................................................
+    for idx in [ 0 ... ids_and_tags.length - 1 ]
+      entry = ids_and_tags[ idx ]
+      lo    = entry.id
+      hi    = ids_and_tags[ idx + 1 ].id - 1
+      tags  = entry.tags
+      @dba.run @sql.insert_contiguous_range, { lo, hi, tags, }
+    #.......................................................................................................
+    return null
+  console.table dba.list dba.query SQL"select * from #{prefix}_potential_inflection_points order by id;"
+  create_minimal_contiguous_ranges.apply dtags
+  console.table dba.list dba.query SQL"select * from #{prefix}contiguous_ranges order by lo;"
+  done?(); return null
   #.........................................................................................................
   ### Demo for a regex that partitons a text into chunks of characters that all have the same tags. ###
   debug 'abcdefgh'.match /(?<vowels>[aeiou])/g
@@ -660,8 +662,8 @@ demo_html = ->
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # test @[ "DBA: ranges (1)" ]
-  # test @[ "DBA: contiguous ranges" ]
-  @[ "DBA: contiguous ranges" ]()
+  test @[ "DBA: contiguous ranges" ]
+  # @[ "DBA: contiguous ranges" ]()
   # test @[ "tags: caching with empty values" ]
   # test @[ "tags: tags_from_tagexchain" ]
   # test @[ "tags: add_tagged_range" ]
