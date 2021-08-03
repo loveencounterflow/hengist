@@ -1060,7 +1060,7 @@
   
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: contiguous ranges"] = function(T, done) {
-    var Dba, Dtags, R, build_cache_1, build_cache_2, chr_from_cid, cid_from_chr, d, dtags, dts, first_cid, group, groups, i, id_pair, id_pairs, idx, j, l, last_cid, len, len1, len2, match, n, part, prefix, re, ref, ref1, row_count, t0, t1, tags, tags_cache_1, tags_cache_2;
+    var Dba, Dtags, R, build_cache_1, build_cache_2, chr_from_cid, cid_from_chr, d, dba, dtags, dts, first_cid, group, groups, i, id_pair, id_pairs, idx, j, l, last_cid, len, len1, len2, match, n, part, prefix, re, ref, ref1, row_count, t0, t1, tags, tags_cache_1, tags_cache_2;
     if (T != null) {
       T.halt_on_error();
     }
@@ -1069,7 +1069,13 @@
     // E                 = require '../../../apps/icql-dba/lib/errors'
     //.........................................................................................................
     prefix = 't_';
+    // dba               = new Dba(); dba.open { path: '/tmp/dtags.db', }
+    dba = new Dba();
+    dba.open({
+      path: 'file:memdb1?mode=memory&cache=shared'
+    });
     dtags = new Dtags({
+      dba,
       prefix,
       fallbacks: true
     });
@@ -1106,11 +1112,9 @@
   window w as ( order by id )`);
     console.table(dtags.dba.list(dtags.dba.query(SQL`select * from ${prefix}_potential_inflection_points order by id;`)));
     console.table(dtags.dba.list(dtags.dba.query(SQL`select * from ${prefix}_potential_contiguous_ranges order by lo, hi;`)));
-    dtags.dba.do_unsafe(() => {
-      console.table(dtags.dba.list(dtags.dba.query(SQL`select 10, ${prefix}_tags_from_id( 10 );`)));
-      console.table(dtags.dba.list(dtags.dba.query(SQL`select 65, ${prefix}_tags_from_id( 65 );`)));
-      return console.table(dtags.dba.list(dtags.dba.query(SQL`select 99, ${prefix}_tags_from_id( 99 );`)));
-    });
+    console.table(dtags.dba.list(dtags.dba.query(SQL`select 10, ${prefix}_tags_from_id( 10 );`)));
+    console.table(dtags.dba.list(dtags.dba.query(SQL`select 65, ${prefix}_tags_from_id( 65 );`)));
+    console.table(dtags.dba.list(dtags.dba.query(SQL`select 99, ${prefix}_tags_from_id( 99 );`)));
     return null;
     //.........................................................................................................
     /* Demo for a regex that partitons a text into chunks of characters that all have the same tags. */
