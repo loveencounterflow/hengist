@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, NCR, Ncr, PATH, SQL, _add_tagged_ranges, add_sql_functions, badge, dba_path, debug, demo_html, echo, freeze, help, info, isa, jp, jr, lets, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, NCR, Ncr, PATH, SQL, _add_tagged_ranges, add_sql_functions, badge, dba_path, debug, demo_html, echo, freeze, help, info, isa, jp, jr, lets, on_process_exit, regex_demo, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -1057,7 +1057,7 @@
   
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: contiguous ranges"] = function(T, done) {
-    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, first_cid, last_cid, prefix;
+    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, prefix;
     if (T != null) {
       T.halt_on_error();
     }
@@ -1075,8 +1075,6 @@
     chr_from_cid = function(cid) {
       return String.fromCodePoint(cid);
     };
-    first_cid = cid_from_chr('A');
-    last_cid = cid_from_chr('Z');
     //.........................................................................................................
     _add_tagged_ranges(dtags);
     dtags.add_tagged_range({
@@ -1132,156 +1130,206 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["DBA: validate contiguous ranges"] = function(T, done) {
+    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, i, id, j, n, prefix, prv_hi, ref, row, rows;
+    // T?.halt_on_error()
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
+    //.........................................................................................................
+    prefix = 't_';
+    dtags = new Dtags({
+      prefix,
+      fallbacks: true
+    });
+    ({dba} = dtags);
+    cid_from_chr = function(chr) {
+      return chr.codePointAt(0);
+    };
+    chr_from_cid = function(cid) {
+      return String.fromCodePoint(cid);
+    };
+    //.........................................................................................................
+    _add_tagged_ranges(dtags);
+    dtags.add_tagged_range({
+      lo: dtags.cfg.first_id,
+      hi: dtags.cfg.last_id,
+      tag: 'font',
+      value: 'font1'
+    });
+    dtags._create_minimal_contiguous_ranges();
+    //.........................................................................................................
+    rows = dba.list(dba.query(SQL`select * from t_contiguous_ranges where lo = ?;`, [dtags.cfg.first_id]));
+    if (T != null) {
+      T.eq(rows.length, 1);
+    }
+    //.........................................................................................................
+    rows = dba.list(dba.query(SQL`select * from t_contiguous_ranges where hi = ?;`, [dtags.cfg.last_id]));
+    if (T != null) {
+      T.eq(rows.length, 1);
+    }
+    //.........................................................................................................
+    prv_hi = null;
+    ref = dtags.dba.query(SQL`select * from t_contiguous_ranges order by lo;`);
+    for (row of ref) {
+      info('^4333^', row);
+      T.ok(row.lo <= row.hi);
+      if (prv_hi != null) {
+        T.eq(row.lo, prv_hi + 1);
+      }
+      prv_hi = row.hi;
+    }
+//.........................................................................................................
+    for (id = i = 0; i <= 100; id = ++i) {
+      rows = dba.list(dba.query(SQL`select * from t_contiguous_ranges where ? between lo and hi;`, [id]));
+      if (T != null) {
+        T.eq(rows.length, 1);
+      }
+    }
+//.........................................................................................................
+    for (n = j = 1; j <= 10; n = ++j) {
+      id = CND.random_integer(dtags.cfg.first_id, dtags.cfg.last_id + 1);
+      rows = dba.list(dba.query(SQL`select * from t_contiguous_ranges where ? between lo and hi;`, [id]));
+      if (T != null) {
+        T.eq(rows.length, 1);
+      }
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  
+  //-----------------------------------------------------------------------------------------------------------
   this["DBA: split text along ranges"] = function(T, done) {
-    var R, build_cache_1, build_cache_2, d, dts, first_cid, group, groups, i, id_pair, id_pairs, idx, j, l, last_cid, len, len1, len2, match, n, part, re, ref, ref1, row_count, t0, t1, tags, tags_cache_1, tags_cache_2;
-    //.........................................................................................................
-    /* Demo for a regex that partitons a text into chunks of characters that all have the same tags. */
-    debug('abcdefgh'.match(/(?<vowels>[aeiou])/g));
-    d = 'arbitrary text';
-    re = /(?<g1>[a-d]+\s*)|(?<g2>[e-h]+\s*)|(?<g3>[i-n]+\s*)|(?<g4>[o-t]+\s*)|(?<g5>[u-z]+\s*)|(?<g0>\s+)/g;
-    R = [];
-    ref = [...(d.matchAll(re))];
-    for (i = 0, len = ref.length; i < len; i++) {
-      match = ref[i];
-      ({groups} = match);
-      ref1 = match.groups;
-      for (group in ref1) {
-        part = ref1[group];
-        if (part == null) {
-          continue;
-        }
-        R.push({group, part});
-        break;
-      }
+    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, prefix, to_hex;
+    if (T != null) {
+      T.halt_on_error();
     }
-    for (group in R) {
-      part = R[group];
-      info(group, rpr(part));
-    }
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
     //.........................................................................................................
-    /* Computing contiguous ranges for all distinct sets of tags. For each ID, this table contains exactly
-     one matching row between lo and hi, and the lo of each row (except for the first) is the hi of the
-     preceding row plus one. The data in this table replaces `t_tagged_ids_cache` which in a typical
-     application can be expected to be much larger; further, the range data can be used to build a regex
-     as shown above to split a given text into chunks of characters that all have the same tags. */
-    // f = add_sql_functions dtags.dba
-    // console.table dtags.dba.list dtags.dba.query SQL"select * from t_tagged_ranges order by lo, hi;"
-    tags_cache_1 = {};
-    build_cache_1 = function(cfg) {
-      var cur_id, cur_tags, hi, id, j, lo, prv_id, prv_tags, ref2, ref3, ref4, row;
-      ({lo, hi} = cfg);
-      if (lo == null) {
-        lo = first_cid;
-      }
-      if (hi == null) {
-        hi = last_cid;
-      }
-      for (id = j = ref2 = lo, ref3 = hi; (ref2 <= ref3 ? j <= ref3 : j >= ref3); id = ref2 <= ref3 ? ++j : --j) {
-        dtags.tags_from_id({id});
-      }
-      cur_id = first_cid;
-      cur_tags = null;
-      prv_id = null;
-      prv_tags = null;
-      ref4 = dtags.dba.query(SQL`select * from t_tagged_ids_cache order by id;`);
-      for (row of ref4) {
-        ({
-          id: cur_id,
-          tags: cur_tags
-        } = row);
-        if (cur_tags !== prv_tags) {
-          if (prv_tags != null) {
-            (tags_cache_1[prv_tags] != null ? tags_cache_1[prv_tags] : tags_cache_1[prv_tags] = []).push([prv_id != null ? prv_id : first_cid, cur_id - 1]);
-          }
-          prv_id = cur_id;
-          prv_tags = cur_tags;
-        }
-      }
-      info('^3487^', {prv_id, prv_tags, cur_id, cur_tags});
-      (tags_cache_1[cur_tags] != null ? tags_cache_1[cur_tags] : tags_cache_1[cur_tags] = []).push([prv_id != null ? prv_id : first_cid, cur_id]);
-      return null;
-    };
-    build_cache_1({
-      lo: 0,
-      hi: 99
+    prefix = 't_';
+    dtags = new Dtags({
+      prefix,
+      fallbacks: true
     });
-    for (tags in tags_cache_1) {
-      id_pairs = tags_cache_1[tags];
-      for (idx = j = 0, len1 = id_pairs.length; j < len1; idx = ++j) {
-        id_pair = id_pairs[idx];
-        if (idx === 0) {
-          debug(id_pair, tags);
-        } else {
-          debug(id_pair);
-        }
-      }
-    }
-    //.........................................................................................................
-    /* Computing contiguous ranges for all distinct sets of tags using inflection points. */
-    tags_cache_2 = {};
-    build_cache_2 = function(cfg) {
-      var cur_id, cur_tags, hi, lo, prv_id, prv_tags;
-      ({lo, hi} = cfg);
-      if (lo == null) {
-        lo = first_cid;
-      }
-      if (hi == null) {
-        hi = last_cid;
-      }
-      cur_id = first_cid;
-      cur_tags = null;
-      prv_id = null;
-      prv_tags = null;
-      return dtags.dba.do_unsafe(() => {
-        var id, ref2, results, row;
-        ref2 = dtags.dba.query(SQL`select * from ${prefix}_potential_inflection_points order by id;`);
-        results = [];
-        for (row of ref2) {
-          ({id, tags} = row);
-          results.push(debug('^477^', id, dtags.tags_from_id({id})));
-        }
-        return results;
-      });
+    ({dba} = dtags);
+    cid_from_chr = function(chr) {
+      return chr.codePointAt(0);
     };
-    build_cache_2({
-      lo: 65,
-      hi: 99
+    chr_from_cid = function(cid) {
+      return String.fromCodePoint(cid);
+    };
+    to_hex = function(cid) {
+      return '0x' + cid.toString(16);
+    };
+    dtags.dba.create_function({
+      name: 'to_hex',
+      call: to_hex
     });
-    for (tags in tags_cache_2) {
-      id_pairs = tags_cache_2[tags];
-      for (idx = l = 0, len2 = id_pairs.length; l < len2; idx = ++l) {
-        id_pair = id_pairs[idx];
-        if (idx === 0) {
-          debug(id_pair, tags);
-        } else {
-          debug(id_pair);
-        }
-      }
-    }
+    dtags.dba.create_function({
+      name: 'chr_from_cid',
+      call: chr_from_cid
+    });
     //.........................................................................................................
-    /* Iterate over all potential Unicode code points */
-    /* TAINT use proper benchmarking */
-    first_cid = 0x000000;
-    last_cid = 0x10ffff;
-    n = last_cid - first_cid + 1;
-    t0 = Date.now();
+    _add_tagged_ranges(dtags);
+    dtags.add_tagged_range({
+      lo: dtags.cfg.first_id,
+      hi: dtags.cfg.last_id,
+      tag: 'font',
+      value: 'font1'
+    });
+    dtags._create_minimal_contiguous_ranges();
+    console.table(dba.list(dba.query(SQL`select
+  to_hex( lo )          as lo,
+  to_hex( hi )          as hi,
+  chr_from_cid( lo )    as loc,
+  chr_from_cid( hi )    as hic,
+  tags
+from ${prefix}contiguous_ranges
+order by lo;`)));
     (function() {      //.........................................................................................................
-      var id, m, ref2, ref3, results;
+      var R, group, groups, i, len, match, part, re, ref, ref1, results, text;
+      /* Demo for a regex that partitons a text into chunks of characters that all have the same tags. */
+      debug('abcdefgh'.match(/(?<vowels>[aeiou])/g));
+      text = 'arbitrary text';
+      re = /(?<g1>[a-d]+\s*)|(?<g2>[e-h]+\s*)|(?<g3>[i-n]+\s*)|(?<g4>[o-t]+\s*)|(?<g5>[u-z]+\s*)|(?<g0>\s+)/g;
+      //.......................................................................................................
+      R = [];
+      ref = [...(text.matchAll(re))];
+      for (i = 0, len = ref.length; i < len; i++) {
+        match = ref[i];
+        ({groups} = match);
+        ref1 = match.groups;
+        for (group in ref1) {
+          part = ref1[group];
+          if (part == null) {
+            continue;
+          }
+          R.push({group, part});
+          break;
+        }
+      }
       results = [];
-      for (id = m = ref2 = first_cid, ref3 = last_cid; (ref2 <= ref3 ? m <= ref3 : m >= ref3); id = ref2 <= ref3 ? ++m : --m) {
-        // tagchain  = dtags.tagchain_from_id { id, }
-        // tags      = dtags.tags_from_id { id, }
-        // urge '^337^', dtags.tagchain_from_id { id, }
-        continue;
+      for (group in R) {
+        part = R[group];
+        results.push(info(group, rpr(part)));
       }
       return results;
     })();
-    //.........................................................................................................
-    t1 = Date.now();
-    dts = (t1 - t0) / 1000;
-    row_count = dtags.dba.first_value(dtags.dba.query(SQL`select count(*) from ${prefix}tagged_ids_cache;`));
-    // console.table dtags.dba.list dtags.dba.query SQL"""select * from #{prefix}tagged_ids_cache order by id desc limit 100;"""
-    debug('^3376^', {n, dts, row_count});
+    (function() {      //.........................................................................................................
+      /* Build regex to split text from actual table contents */
+      var count, f, re, text;
+      count = 0;
+      dtags._hex_re_from_contiguous_ranges = function() {
+        /* TAINT make addition of spaces configurable, e.g. as `all_groups_extra: '\\s'`  */
+        var hi, lo, ranges, ref, row;
+        ranges = [];
+        ref = dtags.dba.query(SQL`select * from ${prefix}contiguous_ranges order by lo;`);
+        for (row of ref) {
+          // count++; break if count > 3
+          lo = `\\u{${row.lo.toString(16)}}`;
+          if (row.lo === row.hi) {
+            ranges.push(`(?<g${row.lo}>[${lo}]+)`);
+          } else {
+            hi = `\\u{${row.hi.toString(16)}}`;
+            ranges.push(`(?<g${row.lo}>[${lo}-${hi}]+)`);
+          }
+        }
+        ranges = ranges.join('|');
+        return new RegExp(`${ranges}`, 'gu');
+      };
+      //.......................................................................................................
+      whisper('-'.repeat(108));
+      text = "ARBITRARY TEXT";
+      text = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      re = dtags._hex_re_from_contiguous_ranges();
+      debug('^33436^', re);
+      // re = /(?<g0>[\u{0000}-\u{0040}]+s*)|(?<g65>\u{0041}+s*)|(?<g66>[\u{0042}-\u{0044}]+s*)/gu
+      // re = /([\u{0000}-\u{0040}]\s*)/gu
+      // re = /(?<g777>[a-z]+)/gu
+      debug('^33436^', re);
+      f = function(re, text) {
+        var R, idx, key, match, ref, ref1, value;
+        R = [];
+        idx = 0;
+        debug(text.length);
+        ref = text.matchAll(re);
+        for (match of ref) {
+          ref1 = match.groups;
+          for (key in ref1) {
+            value = ref1[key];
+            if (value != null) {
+              break;
+            }
+          }
+          if (match.index > idx) {
+            warn(idx, match.index, CND.reverse(rpr(text.slice(idx, match.index))));
+            idx = match.index;
+          }
+          idx += value.length;
+          info(match.index, idx, key, rpr(value));
+        }
+        return R;
+      };
+      return f(re, text);
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -1441,16 +1489,56 @@
     return null;
   };
 
+  regex_demo = function() {
+    /* ... but we prefer to not special-case whitespace to avoid spaces to be treated like a preceding
+     special-cased glyf (which might get scaled, translated and so on); `<g3>` is now an ordinary group
+     without any overlaps: */
+    var R, idx, key, match, re, ref, ref1, text, value;
+    text = " abcdab cfgbbzäöüabc ÄÖÜ z";
+    // re    = dtags._hex_re_from_contiguous_ranges()
+    // debug '^33436^', re
+    // re = /(?<g0>[\u{0000}-\u{0040}]+s*)|(?<g65>\u{0041}+s*)|(?<g66>[\u{0042}-\u{0044}]+s*)/gu
+    // re = /([\u{0000}-\u{0040}]\s*)/gu
+    /* Version with trailing spaces becoming part of preceding group; `<g0>` only used for leading space
+     and space after unmatched characters (hich should never happen) */
+    re = /(?<g0>[\s]+)|(?<g1>[\u{61}-\u{65}\s]+)|(?<g2>[\u{66}-\u{7a}\s]+)/gu;
+    re = /(?<g1>[\u{61}-\u{65}]+)|(?<g2>[\u{66}-\u{7a}]+)|(?<g3>[\s]+)/gu;
+    debug('^33436^', re);
+    R = [];
+    idx = 0;
+    debug(text.length);
+    ref = text.matchAll(re);
+    for (match of ref) {
+      ref1 = match.groups;
+      for (key in ref1) {
+        value = ref1[key];
+        if (value != null) {
+          break;
+        }
+      }
+      if (match.index > idx) {
+        warn(idx, match.index, CND.reverse(rpr(text.slice(idx, match.index))));
+        idx = match.index;
+      }
+      idx += value.length;
+      info(match.index, idx, key, rpr(value));
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
       // test @[ "DBA: ranges (1)" ]
-      return test(this["DBA: contiguous ranges"]);
+      // test @[ "DBA: contiguous ranges" ]
+      // test @[ "DBA: validate contiguous ranges" ]
+      return test(this["DBA: split text along ranges"]);
     })();
   }
 
-  // @[ "DBA: contiguous ranges" ]()
+  // regex_demo()
+// @[ "DBA: contiguous ranges" ]()
 // test @[ "tags: caching with empty values" ]
 // test @[ "tags: tags_from_tagexchain" ]
 // test @[ "tags: add_tagged_range" ]
