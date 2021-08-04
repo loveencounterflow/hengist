@@ -411,8 +411,6 @@ _add_tagged_ranges = ( dtags ) ->
   { dba, }          = dtags
   cid_from_chr      = ( chr ) -> chr.codePointAt 0
   chr_from_cid      = ( cid ) -> String.fromCodePoint cid
-  first_cid         = cid_from_chr 'A'
-  last_cid          = cid_from_chr 'Z'
   #.........................................................................................................
   _add_tagged_ranges dtags
   dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
@@ -428,105 +426,142 @@ _add_tagged_ranges = ( dtags ) ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "DBA: validate contiguous ranges" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dtags, }        = require '../../../apps/icql-dba-tags'
+  #.........................................................................................................
+  prefix            = 't_'
+  dtags             = new Dtags { prefix, fallbacks: true, }
+  { dba, }          = dtags
+  cid_from_chr      = ( chr ) -> chr.codePointAt 0
+  chr_from_cid      = ( cid ) -> String.fromCodePoint cid
+  #.........................................................................................................
+  _add_tagged_ranges dtags
+  dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
+  dtags._create_minimal_contiguous_ranges()
+  #.........................................................................................................
+  rows = dba.list dba.query SQL"select * from t_contiguous_ranges where lo = ?;", [ dtags.cfg.first_id, ]
+  T?.eq rows.length, 1
+  #.........................................................................................................
+  rows = dba.list dba.query SQL"select * from t_contiguous_ranges where hi = ?;", [ dtags.cfg.last_id, ]
+  T?.eq rows.length, 1
+  #.........................................................................................................
+  prv_hi = null
+  for row from dtags.dba.query SQL"select * from t_contiguous_ranges order by lo;"
+    info '^4333^', row
+    T.ok row.lo <= row.hi
+    T.eq row.lo, prv_hi + 1 if prv_hi?
+    prv_hi = row.hi
+  #.........................................................................................................
+  for id in [ 0 .. 100 ]
+    rows  = dba.list dba.query SQL"select * from t_contiguous_ranges where ? between lo and hi;", [ id, ]
+    T?.eq rows.length, 1
+  #.........................................................................................................
+  for n in [ 1 .. 10 ]
+    id    = ( CND.random_integer dtags.cfg.first_id, dtags.cfg.last_id + 1 )
+    rows  = dba.list dba.query SQL"select * from t_contiguous_ranges where ? between lo and hi;", [ id, ]
+    T?.eq rows.length, 1
+  #.........................................................................................................
+  done?() #.................................................................................................
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBA: split text along ranges" ] = ( T, done ) ->
+  T?.halt_on_error()
+  { Dtags, }        = require '../../../apps/icql-dba-tags'
   #.........................................................................................................
-  ### Demo for a regex that partitons a text into chunks of characters that all have the same tags. ###
-  debug 'abcdefgh'.match /(?<vowels>[aeiou])/g
-  d = 'arbitrary text'
-  re = ///
-    (?<g1> [ a - d ]+ \s* ) |
-    (?<g2> [ e - h ]+ \s* ) |
-    (?<g3> [ i - n ]+ \s* ) |
-    (?<g4> [ o - t ]+ \s* ) |
-    (?<g5> [ u - z ]+ \s* ) |
-    (?<g0> \s+ )
-    ///g
-  R = []
-  for match in [ ( d.matchAll re )..., ]
-    { groups, } = match
-    for group, part of match.groups
-      continue unless part?
-      R.push { group, part, }
-      break
-  for group, part of R
-    info group, rpr part
+  prefix            = 't_'
+  dtags             = new Dtags { prefix, fallbacks: true, }
+  { dba, }          = dtags
+  cid_from_chr      = ( chr ) -> chr.codePointAt 0
+  chr_from_cid      = ( cid ) -> String.fromCodePoint cid
+  to_hex            = ( cid ) -> '0x' + cid.toString 16
+  dtags.dba.create_function name: 'to_hex', call: to_hex
+  dtags.dba.create_function name: 'chr_from_cid', call: chr_from_cid
   #.........................................................................................................
-  ### Computing contiguous ranges for all distinct sets of tags. For each ID, this table contains exactly
-  one matching row between lo and hi, and the lo of each row (except for the first) is the hi of the
-  preceding row plus one. The data in this table replaces `t_tagged_ids_cache` which in a typical
-  application can be expected to be much larger; further, the range data can be used to build a regex
-  as shown above to split a given text into chunks of characters that all have the same tags. ###
-  # f = add_sql_functions dtags.dba
-  # console.table dtags.dba.list dtags.dba.query SQL"select * from t_tagged_ranges order by lo, hi;"
-  tags_cache_1 = {}
-  build_cache_1 = ( cfg ) ->
-    { lo, hi, } = cfg
-    lo         ?= first_cid
-    hi         ?= last_cid
-    dtags.tags_from_id { id, } for id in [ lo .. hi ]
-    cur_id        = first_cid
-    cur_tags      = null
-    prv_id        = null
-    prv_tags      = null
-    for row from dtags.dba.query SQL"select * from t_tagged_ids_cache order by id;"
-      { id: cur_id, tags: cur_tags, } = row
-      if cur_tags isnt prv_tags
-        if prv_tags?
-          ( tags_cache_1[ prv_tags ] ?= [] ).push [ ( prv_id ? first_cid ), ( cur_id - 1 ), ]
-        prv_id    = cur_id
-        prv_tags  = cur_tags
-    info '^3487^', { prv_id, prv_tags, cur_id, cur_tags, }
-    ( tags_cache_1[ cur_tags ] ?= [] ).push [ ( prv_id ? first_cid ), cur_id, ]
-    return null
-  build_cache_1 { lo: 0, hi: 99, }
-  for tags, id_pairs of tags_cache_1
-    for id_pair, idx in id_pairs
-      if idx is 0
-        debug id_pair, tags
-      else
-        debug id_pair
-  #.........................................................................................................
-  ### Computing contiguous ranges for all distinct sets of tags using inflection points. ###
-  tags_cache_2 = {}
-  build_cache_2 = ( cfg ) ->
-    { lo, hi, }   = cfg
-    lo           ?= first_cid
-    hi           ?= last_cid
-    cur_id        = first_cid
-    cur_tags      = null
-    prv_id        = null
-    prv_tags      = null
-    dtags.dba.do_unsafe =>
-      for row from dtags.dba.query SQL"select * from #{prefix}_potential_inflection_points order by id;"
-        { id, tags, } = row
-        debug '^477^', id, dtags.tags_from_id { id, }
-  build_cache_2 { lo: 65, hi: 99, }
-  for tags, id_pairs of tags_cache_2
-    for id_pair, idx in id_pairs
-      if idx is 0
-        debug id_pair, tags
-      else
-        debug id_pair
-  #.........................................................................................................
-  ### Iterate over all potential Unicode code points ###
-  ### TAINT use proper benchmarking ###
-  first_cid = 0x000000
-  last_cid  = 0x10ffff
-  n         = last_cid - first_cid + 1
-  t0        = Date.now()
+  _add_tagged_ranges dtags
+  dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
+  dtags._create_minimal_contiguous_ranges()
+  console.table dba.list dba.query SQL"""select
+      to_hex( lo )          as lo,
+      to_hex( hi )          as hi,
+      chr_from_cid( lo )    as loc,
+      chr_from_cid( hi )    as hic,
+      tags
+    from #{prefix}contiguous_ranges
+    order by lo;"""
   #.........................................................................................................
   do ->
-    for id in [ first_cid .. last_cid ]
-      # tagchain  = dtags.tagchain_from_id { id, }
-      # tags      = dtags.tags_from_id { id, }
-      # urge '^337^', dtags.tagchain_from_id { id, }
-      continue
+    ### Demo for a regex that partitons a text into chunks of characters that all have the same tags. ###
+    debug 'abcdefgh'.match /(?<vowels>[aeiou])/g
+    text = 'arbitrary text'
+    re = ///
+      (?<g1> [ a - d ]+ \s* ) |
+      (?<g2> [ e - h ]+ \s* ) |
+      (?<g3> [ i - n ]+ \s* ) |
+      (?<g4> [ o - t ]+ \s* ) |
+      (?<g5> [ u - z ]+ \s* ) |
+      (?<g0> \s+ )
+      ///g
+    #.......................................................................................................
+    R = []
+    for match in [ ( text.matchAll re )..., ]
+      { groups, } = match
+      for group, part of match.groups
+        continue unless part?
+        R.push { group, part, }
+        break
+    for group, part of R
+      info group, rpr part
   #.........................................................................................................
-  t1        = Date.now()
-  dts       = ( t1 - t0 ) / 1000
-  row_count = dtags.dba.first_value dtags.dba.query SQL"select count(*) from #{prefix}tagged_ids_cache;"
-  # console.table dtags.dba.list dtags.dba.query SQL"""select * from #{prefix}tagged_ids_cache order by id desc limit 100;"""
-  debug '^3376^', { n, dts, row_count, }
+  do ->
+    ### Build regex to split text from actual table contents ###
+    count = 0
+    dtags._hex_re_from_contiguous_ranges = ->
+      ### TAINT make addition of spaces configurable, e.g. as `all_groups_extra: '\\s'`  ###
+      ranges = []
+      for row from dtags.dba.query SQL"select * from #{prefix}contiguous_ranges order by lo;"
+        # count++; break if count > 3
+        lo = "\\u{#{row.lo.toString 16}}"
+        if row.lo is row.hi
+          ranges.push "(?<g#{row.lo}>[#{lo}]+)"
+        else
+          hi = "\\u{#{row.hi.toString 16}}"
+          ranges.push "(?<g#{row.lo}>[#{lo}-#{hi}]+)"
+      ranges  = ranges.join '|'
+      return new RegExp "#{ranges}", 'gu'
+    #.......................................................................................................
+    whisper '-'.repeat 108
+    text  = "ARBITRARY TEXT"
+    text  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    re    = dtags._hex_re_from_contiguous_ranges()
+    debug '^33436^', re
+    # re = /(?<g0>[\u{0000}-\u{0040}]+s*)|(?<g65>\u{0041}+s*)|(?<g66>[\u{0042}-\u{0044}]+s*)/gu
+    # re = /([\u{0000}-\u{0040}]\s*)/gu
+    # re = /(?<g777>[a-z]+)/gu
+    debug '^33436^', re
+    f = ( re, text ) ->
+      R     = []
+      idx   = 0
+      debug text.length
+      for match from text.matchAll re
+        for key, value of match.groups
+          break if value?
+        if match.index > idx
+          warn idx, match.index, CND.reverse rpr text[ idx ... match.index ]
+          idx = match.index
+        idx += value.length
+        info match.index, idx, key, rpr value
+      return R
+    f re, text
+    # R     = []
+    # for match in [ ( text.matchAll re )..., ]
+    #   { groups, } = match
+    #   for group, part of match.groups
+    #     continue unless part?
+    #     R.push { group, part, }
+    #     break
+    # for group, part of R
+    #   info group, rpr part
   #.........................................................................................................
   done?() #.................................................................................................
 
@@ -638,12 +673,50 @@ demo_html = ->
   #.........................................................................................................
   return null
 
+regex_demo = ->
+  text  = " abcdab cfgbbzäöüabc ÄÖÜ z"
+  # re    = dtags._hex_re_from_contiguous_ranges()
+  # debug '^33436^', re
+  # re = /(?<g0>[\u{0000}-\u{0040}]+s*)|(?<g65>\u{0041}+s*)|(?<g66>[\u{0042}-\u{0044}]+s*)/gu
+  # re = /([\u{0000}-\u{0040}]\s*)/gu
+  ### Version with trailing spaces becoming part of preceding group; `<g0>` only used for leading space
+  and space after unmatched characters (hich should never happen) ###
+  re = ///
+    (?<g0> [ \s ]+ ) |
+    (?<g1> [ \u{61} - \u{65} \s ]+ ) |
+    (?<g2> [ \u{66} - \u{7a} \s ]+ )
+    ///gu
+  ### ... but we prefer to not special-case whitespace to avoid spaces to be treated like a preceding
+  special-cased glyf (which might get scaled, translated and so on); `<g3>` is now an ordinary group
+  without any overlaps: ###
+  re = ///
+    (?<g1> [ \u{61} - \u{65} ]+ ) |
+    (?<g2> [ \u{66} - \u{7a} ]+ ) |
+    (?<g3> [ \s ]+ )
+    ///gu
+  debug '^33436^', re
+  R     = []
+  idx   = 0
+  debug text.length
+  for match from text.matchAll re
+    for key, value of match.groups
+      break if value?
+    if match.index > idx
+      warn idx, match.index, CND.reverse rpr text[ idx ... match.index ]
+      idx = match.index
+    idx += value.length
+    info match.index, idx, key, rpr value
+  return null
+
 
 ############################################################################################################
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # test @[ "DBA: ranges (1)" ]
-  test @[ "DBA: contiguous ranges" ]
+  # test @[ "DBA: contiguous ranges" ]
+  # test @[ "DBA: validate contiguous ranges" ]
+  test @[ "DBA: split text along ranges" ]
+  # regex_demo()
   # @[ "DBA: contiguous ranges" ]()
   # test @[ "tags: caching with empty values" ]
   # test @[ "tags: tags_from_tagexchain" ]
