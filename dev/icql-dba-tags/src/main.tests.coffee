@@ -465,7 +465,7 @@ _add_tagged_ranges = ( dtags ) ->
   done?() #.................................................................................................
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: split text along ranges" ] = ( T, done ) ->
+@[ "DBA: split text along ranges (demo)" ] = ( T, done ) ->
   T?.halt_on_error()
   { Dtags, }        = require '../../../apps/icql-dba-tags'
   #.........................................................................................................
@@ -515,12 +515,10 @@ _add_tagged_ranges = ( dtags ) ->
   #.........................................................................................................
   do ->
     ### Build regex to split text from actual table contents ###
-    count = 0
     dtags._hex_re_from_contiguous_ranges = ->
       ### TAINT make addition of spaces configurable, e.g. as `all_groups_extra: '\\s'`  ###
       ranges = []
       for row from dtags.dba.query SQL"select * from #{prefix}contiguous_ranges order by lo;"
-        # count++; break if count > 3
         lo = "\\u{#{row.lo.toString 16}}"
         if row.lo is row.hi
           ranges.push "(?<g#{row.lo}>[#{lo}]+)"
@@ -553,15 +551,78 @@ _add_tagged_ranges = ( dtags ) ->
         info match.index, idx, key, rpr value
       return R
     f re, text
-    # R     = []
-    # for match in [ ( text.matchAll re )..., ]
-    #   { groups, } = match
-    #   for group, part of match.groups
-    #     continue unless part?
-    #     R.push { group, part, }
-    #     break
-    # for group, part of R
-    #   info group, rpr part
+  #.........................................................................................................
+  done?() #.................................................................................................
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: split text along ranges" ] = ( T, done ) ->
+  T?.halt_on_error()
+  { Dtags, }        = require '../../../apps/icql-dba-tags'
+  #.........................................................................................................
+  prefix            = 't_'
+  dtags             = new Dtags { prefix, fallbacks: true, }
+  { dba, }          = dtags
+  cid_from_chr      = ( chr ) -> chr.codePointAt 0
+  chr_from_cid      = ( cid ) -> String.fromCodePoint cid
+  to_hex            = ( cid ) -> '0x' + cid.toString 16
+  dtags.dba.create_function name: 'to_hex', call: to_hex
+  dtags.dba.create_function name: 'chr_from_cid', call: chr_from_cid
+  #.........................................................................................................
+  _add_tagged_ranges dtags
+  dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
+  dtags._create_minimal_contiguous_ranges()
+  console.table dba.list dba.query SQL"""select
+      lo                    as lo,
+      hi                    as hi,
+      to_hex( lo )          as lox,
+      to_hex( hi )          as hix,
+      chr_from_cid( lo )    as loc,
+      chr_from_cid( hi )    as hic,
+      tags
+    from #{prefix}contiguous_ranges
+    order by lo;"""
+  #.........................................................................................................
+  console.table dba.list dba.query SQL"select * from #{prefix}tags_and_rangelists;"
+  return done?()
+  #.........................................................................................................
+  do ->
+    ### Build regex to split text from actual table contents ###
+    dtags._hex_re_from_contiguous_ranges = ->
+      ### TAINT make addition of spaces configurable, e.g. as `all_groups_extra: '\\s'`  ###
+      ranges = []
+      for row from dtags.dba.query SQL"select * from #{prefix}contiguous_ranges order by lo;"
+        lo = "\\u{#{row.lo.toString 16}}"
+        if row.lo is row.hi
+          ranges.push "(?<g#{row.lo}>[#{lo}]+)"
+        else
+          hi = "\\u{#{row.hi.toString 16}}"
+          ranges.push "(?<g#{row.lo}>[#{lo}-#{hi}]+)"
+      ranges  = ranges.join '|'
+      return new RegExp "#{ranges}", 'gu'
+    #.......................................................................................................
+    whisper '-'.repeat 108
+    text  = "ARBITRARY TEXT"
+    text  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    re    = dtags._hex_re_from_contiguous_ranges()
+    debug '^33436^', re
+    # re = /(?<g0>[\u{0000}-\u{0040}]+s*)|(?<g65>\u{0041}+s*)|(?<g66>[\u{0042}-\u{0044}]+s*)/gu
+    # re = /([\u{0000}-\u{0040}]\s*)/gu
+    # re = /(?<g777>[a-z]+)/gu
+    debug '^33436^', re
+    f = ( re, text ) ->
+      R     = []
+      idx   = 0
+      debug text.length
+      for match from text.matchAll re
+        for key, value of match.groups
+          break if value?
+        if match.index > idx
+          warn idx, match.index, CND.reverse rpr text[ idx ... match.index ]
+          idx = match.index
+        idx += value.length
+        info match.index, idx, key, rpr value
+      return R
+    f re, text
   #.........................................................................................................
   done?() #.................................................................................................
 
@@ -715,7 +776,9 @@ if module is require.main then do =>
   # test @[ "DBA: ranges (1)" ]
   # test @[ "DBA: contiguous ranges" ]
   # test @[ "DBA: validate contiguous ranges" ]
-  test @[ "DBA: split text along ranges" ]
+  # test @[ "DBA: split text along ranges (demo)" ]
+  # test @[ "DBA: split text along ranges" ]
+  @[ "DBA: split text along ranges" ]()
   # regex_demo()
   # @[ "DBA: contiguous ranges" ]()
   # test @[ "tags: caching with empty values" ]
