@@ -1057,7 +1057,7 @@
   
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: contiguous ranges"] = function(T, done) {
-    var Dtags, R, build_cache_1, build_cache_2, chr_from_cid, cid_from_chr, d, dba, dtags, dts, first_cid, group, groups, i, id_pair, id_pairs, idx, j, l, last_cid, len, len1, len2, match, n, part, prefix, re, ref, ref1, row_count, t0, t1, tags, tags_cache_1, tags_cache_2;
+    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, first_cid, last_cid, prefix;
     if (T != null) {
       T.halt_on_error();
     }
@@ -1087,12 +1087,53 @@
     });
     //.........................................................................................................
     console.table(dba.list(dba.query(SQL`select * from ${prefix}_potential_inflection_points order by id;`)));
-    dtags.create_minimal_contiguous_ranges();
+    dtags._create_minimal_contiguous_ranges();
     console.table(dba.list(dba.query(SQL`select * from ${prefix}contiguous_ranges order by lo;`)));
-    if (typeof done === "function") {
-      done();
+    if (T != null) {
+      T.eq(dba.first_row(dba.query(SQL`select * from ${prefix}contiguous_ranges where lo = 0 order by lo;`)), {
+        lo: 0,
+        hi: 64,
+        tags: '{"font":"font1"}'
+      });
     }
-    return null;
+    if (T != null) {
+      T.eq(dba.first_row(dba.query(SQL`select * from ${prefix}contiguous_ranges where lo = 89 order by lo;`)), {
+        lo: 89,
+        hi: 1114111,
+        tags: '{"font":"font1"}'
+      });
+    }
+    if (T != null) {
+      T.eq(dtags.tags_from_id({
+        id: 10
+      }), {
+        font: 'font1'
+      });
+    }
+    if (T != null) {
+      T.eq(dtags.tags_from_id({
+        id: 65
+      }), {
+        font: 'font1',
+        vowel: true,
+        'shape-pointy': true,
+        'shape-ladder': true
+      });
+    }
+    if (T != null) {
+      T.eq(dtags.tags_from_id({
+        id: cid_from_chr('X')
+      }), {
+        font: 'font1',
+        'shape-crossed': true
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: split text along ranges"] = function(T, done) {
+    var R, build_cache_1, build_cache_2, d, dts, first_cid, group, groups, i, id_pair, id_pairs, idx, j, l, last_cid, len, len1, len2, match, n, part, re, ref, ref1, row_count, t0, t1, tags, tags_cache_1, tags_cache_2;
     //.........................................................................................................
     /* Demo for a regex that partitons a text into chunks of characters that all have the same tags. */
     debug('abcdefgh'.match(/(?<vowels>[aeiou])/g));
@@ -1405,12 +1446,12 @@
     (() => {
       // test @, { timeout: 10e3, }
       // test @[ "DBA: ranges (1)" ]
-      // test @[ "DBA: contiguous ranges" ]
-      return this["DBA: contiguous ranges"]();
+      return test(this["DBA: contiguous ranges"]);
     })();
   }
 
-  // test @[ "tags: caching with empty values" ]
+  // @[ "DBA: contiguous ranges" ]()
+// test @[ "tags: caching with empty values" ]
 // test @[ "tags: tags_from_tagexchain" ]
 // test @[ "tags: add_tagged_range" ]
 // test @[ "tags: add_tag with value" ]
