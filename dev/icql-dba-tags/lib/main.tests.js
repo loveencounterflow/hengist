@@ -1334,7 +1334,7 @@ order by lo;`)));
   
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: split text along ranges"] = function(T, done) {
-    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, nr, parts, prefix, range, ranges, re, ref, tags, to_hex, x;
+    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, prefix, to_hex;
     if (T != null) {
       T.halt_on_error();
     }
@@ -1395,55 +1395,85 @@ order by lo;`)));
     };
     //.........................................................................................................
     /* Build regex to split text from actual table contents */
-    nr = 0;
-    parts = [];
-    ref = dba.query(SQL`select * from ${prefix}tags_and_rangelists;`);
-    for (x of ref) {
-      ({ranges, tags} = x);
-      nr++;
-      ranges = JSON.parse(ranges);
-      ranges = ((function() {
-        var i, len, results;
-        results = [];
-        for (i = 0, len = ranges.length; i < len; i++) {
-          range = ranges[i];
-          results.push(dtags._chr_class_from_range(range));
+    dtags._build_text_regions_re = function() {
+      var nr, parts, range, ranges, ref, tags, x;
+      nr = 0;
+      parts = [];
+      ref = dba.query(SQL`select * from ${prefix}tags_and_rangelists;`);
+      for (x of ref) {
+        ({ranges, tags} = x);
+        debug('^33376^', tags);
+        if (tags === '{"font":"font1"}') { // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+          continue;
         }
-        return results;
-      })()).join('');
-      parts.push(`(?<g${nr}>[${ranges}]+)`);
-    }
-    parts = parts.join('|');
-    re = new RegExp(parts, 'gu');
+        nr++;
+        ranges = JSON.parse(ranges);
+        ranges = ((function() {
+          var i, len, results;
+          results = [];
+          for (i = 0, len = ranges.length; i < len; i++) {
+            range = ranges[i];
+            results.push(this._chr_class_from_range(range));
+          }
+          return results;
+        }).call(this)).join('');
+        parts.push(`(?<g${nr}>[${ranges}]+)`);
+      }
+      parts = parts.join('|');
+      return this._text_regions_re = new RegExp(parts, 'gu');
+    };
+    //.........................................................................................................
+    dtags.find_tagged_regions = function(text) {
+      var R, key, match, new_stop, part, re, ref, ref1, ref2, start, stop;
+      re = (ref = this._text_regions_re) != null ? ref : dtags._build_text_regions_re();
+      debug('^33436^', re);
+      R = [];
+      stop = 0;
+      ref1 = text.matchAll(re);
+      //.......................................................................................................
+      for (match of ref1) {
+        ({
+          index: start
+        } = match);
+        ref2 = match.groups;
+        for (key in ref2) {
+          part = ref2[key];
+          if (part != null) {
+            break;
+          }
+        }
+        if (start > stop) {
+          part = text.slice(stop, start);
+          warn(stop, start, CND.reverse(rpr(part)));
+          new_stop = start + part.length;
+          R.push({
+            key: 'missing',
+            start: stop,
+            stop: new_stop,
+            part
+          });
+          stop = new_stop;
+          continue;
+        }
+        //.....................................................................................................
+        stop += part.length;
+        info(start, stop, key, rpr(part));
+        R.push({key, start, stop, part});
+      }
+      //.......................................................................................................
+      return R;
+    };
     (function() {      //.........................................................................................................
-      var f, text;
+      var i, len, ref, region, results, text;
       // text  = "ARBITRARY TEXT"
       text = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      debug('^33436^', re);
-      f = function(re, text) {
-        var R, idx, key, match, ref1, ref2, value;
-        R = [];
-        idx = 0;
-        debug(text.length);
-        ref1 = text.matchAll(re);
-        for (match of ref1) {
-          ref2 = match.groups;
-          for (key in ref2) {
-            value = ref2[key];
-            if (value != null) {
-              break;
-            }
-          }
-          if (match.index > idx) {
-            warn(idx, match.index, CND.reverse(rpr(text.slice(idx, match.index))));
-            idx = match.index;
-          }
-          idx += value.length;
-          info(match.index, idx, key, rpr(value));
-        }
-        return R;
-      };
-      return f(re, text);
+      ref = dtags.find_tagged_regions(text);
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        region = ref[i];
+        results.push(debug('^33443^', region));
+      }
+      return results;
     })();
     return typeof done === "function" ? done() : void 0;
   };
