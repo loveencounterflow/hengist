@@ -1334,7 +1334,7 @@ order by lo;`)));
   
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: split text along ranges"] = function(T, done) {
-    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, prefix, to_hex;
+    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, nr, parts, prefix, range, ranges, re, ref, tags, to_hex, x;
     if (T != null) {
       T.halt_on_error();
     }
@@ -1382,49 +1382,54 @@ order by lo;`)));
   tags
 from ${prefix}contiguous_ranges
 order by lo;`)));
-    //.........................................................................................................
     console.table(dba.list(dba.query(SQL`select * from ${prefix}tags_and_rangelists;`)));
-    return typeof done === "function" ? done() : void 0;
-    (function() {      //.........................................................................................................
-      var f, re, text;
-      /* Build regex to split text from actual table contents */
-      dtags._hex_re_from_contiguous_ranges = function() {
-        /* TAINT make addition of spaces configurable, e.g. as `all_groups_extra: '\\s'`  */
-        var hi, lo, ranges, ref, row;
-        ranges = [];
-        ref = dtags.dba.query(SQL`select * from ${prefix}contiguous_ranges order by lo;`);
-        for (row of ref) {
-          lo = `\\u{${row.lo.toString(16)}}`;
-          if (row.lo === row.hi) {
-            ranges.push(`(?<g${row.lo}>[${lo}]+)`);
-          } else {
-            hi = `\\u{${row.hi.toString(16)}}`;
-            ranges.push(`(?<g${row.lo}>[${lo}-${hi}]+)`);
-          }
+    //.........................................................................................................
+    dtags._chr_class_from_range = function(range) {
+      /* TAINT make addition of spaces configurable, e.g. as `all_groups_extra: '\\s'`  */
+      var hi, lo;
+      [lo, hi] = range;
+      if (lo === hi) {
+        return `\\u{${lo.toString(16)}}`;
+      }
+      return `\\u{${lo.toString(16)}}-\\u{${hi.toString(16)}}`;
+    };
+    //.........................................................................................................
+    /* Build regex to split text from actual table contents */
+    nr = 0;
+    parts = [];
+    ref = dba.query(SQL`select * from ${prefix}tags_and_rangelists;`);
+    for (x of ref) {
+      ({ranges, tags} = x);
+      nr++;
+      ranges = JSON.parse(ranges);
+      ranges = ((function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = ranges.length; i < len; i++) {
+          range = ranges[i];
+          results.push(dtags._chr_class_from_range(range));
         }
-        ranges = ranges.join('|');
-        return new RegExp(`${ranges}`, 'gu');
-      };
-      //.......................................................................................................
-      whisper('-'.repeat(108));
-      text = "ARBITRARY TEXT";
+        return results;
+      })()).join('');
+      parts.push(`(?<g${nr}>[${ranges}]+)`);
+    }
+    parts = parts.join('|');
+    re = new RegExp(parts, 'gu');
+    (function() {      //.........................................................................................................
+      var f, text;
+      // text  = "ARBITRARY TEXT"
       text = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      re = dtags._hex_re_from_contiguous_ranges();
-      debug('^33436^', re);
-      // re = /(?<g0>[\u{0000}-\u{0040}]+s*)|(?<g65>\u{0041}+s*)|(?<g66>[\u{0042}-\u{0044}]+s*)/gu
-      // re = /([\u{0000}-\u{0040}]\s*)/gu
-      // re = /(?<g777>[a-z]+)/gu
       debug('^33436^', re);
       f = function(re, text) {
-        var R, idx, key, match, ref, ref1, value;
+        var R, idx, key, match, ref1, ref2, value;
         R = [];
         idx = 0;
         debug(text.length);
-        ref = text.matchAll(re);
-        for (match of ref) {
-          ref1 = match.groups;
-          for (key in ref1) {
-            value = ref1[key];
+        ref1 = text.matchAll(re);
+        for (match of ref1) {
+          ref2 = match.groups;
+          for (key in ref2) {
+            value = ref2[key];
             if (value != null) {
               break;
             }
