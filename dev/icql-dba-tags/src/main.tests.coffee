@@ -581,33 +581,28 @@ _add_tagged_ranges = ( dtags ) ->
       tags
     from #{prefix}contiguous_ranges
     order by lo;"""
-  #.........................................................................................................
   console.table dba.list dba.query SQL"select * from #{prefix}tags_and_rangelists;"
-  return done?()
+  #.........................................................................................................
+  dtags._chr_class_from_range = ( range ) ->
+    ### TAINT make addition of spaces configurable, e.g. as `all_groups_extra: '\\s'`  ###
+    [ lo, hi, ] = range
+    return "\\u{#{lo.toString 16}}" if lo is hi
+    return "\\u{#{lo.toString 16}}-\\u{#{hi.toString 16}}"
+  #.........................................................................................................
+  ### Build regex to split text from actual table contents ###
+  nr    = 0
+  parts = []
+  for { ranges, tags, } from dba.query SQL"select * from #{prefix}tags_and_rangelists;"
+    nr++
+    ranges = JSON.parse ranges
+    ranges = ( ( dtags._chr_class_from_range range ) for range in ranges ).join ''
+    parts.push "(?<g#{nr}>[#{ranges}]+)"
+  parts = parts.join '|'
+  re    = new RegExp parts, 'gu'
   #.........................................................................................................
   do ->
-    ### Build regex to split text from actual table contents ###
-    dtags._hex_re_from_contiguous_ranges = ->
-      ### TAINT make addition of spaces configurable, e.g. as `all_groups_extra: '\\s'`  ###
-      ranges = []
-      for row from dtags.dba.query SQL"select * from #{prefix}contiguous_ranges order by lo;"
-        lo = "\\u{#{row.lo.toString 16}}"
-        if row.lo is row.hi
-          ranges.push "(?<g#{row.lo}>[#{lo}]+)"
-        else
-          hi = "\\u{#{row.hi.toString 16}}"
-          ranges.push "(?<g#{row.lo}>[#{lo}-#{hi}]+)"
-      ranges  = ranges.join '|'
-      return new RegExp "#{ranges}", 'gu'
-    #.......................................................................................................
-    whisper '-'.repeat 108
-    text  = "ARBITRARY TEXT"
+    # text  = "ARBITRARY TEXT"
     text  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    re    = dtags._hex_re_from_contiguous_ranges()
-    debug '^33436^', re
-    # re = /(?<g0>[\u{0000}-\u{0040}]+s*)|(?<g65>\u{0041}+s*)|(?<g66>[\u{0042}-\u{0044}]+s*)/gu
-    # re = /([\u{0000}-\u{0040}]\s*)/gu
-    # re = /(?<g777>[a-z]+)/gu
     debug '^33436^', re
     f = ( re, text ) ->
       R     = []
