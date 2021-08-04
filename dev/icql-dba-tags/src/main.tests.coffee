@@ -418,9 +418,17 @@ _add_tagged_ranges = ( dtags ) ->
   dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
   #.........................................................................................................
   console.table dba.list dba.query SQL"select * from #{prefix}_potential_inflection_points order by id;"
-  dtags.create_minimal_contiguous_ranges()
+  dtags._create_minimal_contiguous_ranges()
   console.table dba.list dba.query SQL"select * from #{prefix}contiguous_ranges order by lo;"
-  done?(); return null
+  T?.eq ( dba.first_row dba.query SQL"select * from #{prefix}contiguous_ranges where lo = 0 order by lo;" ), { lo: 0, hi: 64, tags: '{"font":"font1"}' }
+  T?.eq ( dba.first_row dba.query SQL"select * from #{prefix}contiguous_ranges where lo = 89 order by lo;" ), { lo: 89, hi: 1114111, tags: '{"font":"font1"}' }
+  T?.eq ( dtags.tags_from_id { id: 10, }                   ), { font: 'font1' }
+  T?.eq ( dtags.tags_from_id { id: 65, }                   ), { font: 'font1', vowel: true, 'shape-pointy': true, 'shape-ladder': true }
+  T?.eq ( dtags.tags_from_id { id: ( cid_from_chr 'X' ), } ), { font: 'font1', 'shape-crossed': true }
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: split text along ranges" ] = ( T, done ) ->
   #.........................................................................................................
   ### Demo for a regex that partitons a text into chunks of characters that all have the same tags. ###
   debug 'abcdefgh'.match /(?<vowels>[aeiou])/g
@@ -635,8 +643,8 @@ demo_html = ->
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # test @[ "DBA: ranges (1)" ]
-  # test @[ "DBA: contiguous ranges" ]
-  @[ "DBA: contiguous ranges" ]()
+  test @[ "DBA: contiguous ranges" ]
+  # @[ "DBA: contiguous ranges" ]()
   # test @[ "tags: caching with empty values" ]
   # test @[ "tags: tags_from_tagexchain" ]
   # test @[ "tags: add_tagged_range" ]
