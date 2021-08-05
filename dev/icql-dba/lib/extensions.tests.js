@@ -44,14 +44,53 @@
     // T.halt_on_error()
     ({Dba} = require(H.icql_dba_path));
     (() => {      //---------------------------------------------------------------------------------------------------------
-      var cfg, dba;
+      var cfg, dba, r1, r2;
       dba = new Dba();
       cfg = H.get_cfg();
       // dba.load_extension PATH.resolve PATH.join '/home/flow/jzr/hengist/dev/in-memory-sql/json1.so'
       // # dba.load_extension PATH.resolve PATH.join '/home/flow/3rd-party-repos/sqlite/ext/fts5/fts5'
       //.......................................................................................................
-      info('^334-1^', dba.list(dba.query(`select json(' { "this" : "is", "a": [ "test" ] } ') as d;`)));
-      info('^334-1^', dba.list(dba.query(`select json_array(1,2,'3',4) as d;`)));
+      info('^334-1^', r1 = dba.list(dba.query(SQL`select json(' { "this" : "is", "a": [ "test" ] } ') as d;`)));
+      info('^334-1^', r2 = dba.list(dba.query(SQL`select json_array(1,2,'3',4) as d;`)));
+      if (T != null) {
+        T.eq(r1, [
+          {
+            d: '{"this":"is","a":["test"]}'
+          }
+        ]);
+      }
+      if (T != null) {
+        T.eq(r2, [
+          {
+            d: '[1,2,"3",4]'
+          }
+        ]);
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["SQLite math functions"] = function(T, done) {
+    var Dba;
+    // T.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
+    (() => {      //---------------------------------------------------------------------------------------------------------
+      var cfg, dba, r1;
+      dba = new Dba();
+      cfg = H.get_cfg();
+      // dba.load_extension PATH.resolve PATH.join '/home/flow/jzr/hengist/dev/in-memory-sql/json1.so'
+      // # dba.load_extension PATH.resolve PATH.join '/home/flow/3rd-party-repos/sqlite/ext/fts5/fts5'
+      //.......................................................................................................
+      info('^334-1^', r1 = dba.list(dba.query(SQL`select sin( ? ) as d;`, [Math.PI])));
+      if (T != null) {
+        T.eq(r1, [
+          {
+            d: 1.2246467991473532e-16
+          }
+        ]);
+      }
       return null;
     })();
     //---------------------------------------------------------------------------------------------------------
@@ -106,7 +145,8 @@
   //###########################################################################################################
   if (module.parent == null) {
     // test @
-    test(this["load_extension"]);
+    // test @[ "load_extension" ]
+    test(this["SQLite math functions"]);
   }
 
 }).call(this);

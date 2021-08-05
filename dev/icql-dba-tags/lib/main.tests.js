@@ -1539,7 +1539,7 @@ order by lo;`)));
         }
       }
       if (error == null) {
-        return T != null ? T.fail("expected error, got none") : void 0;
+        return T != null ? T.fail("expected error, got none (ref ^4956649089^)") : void 0;
       }
     })();
     return typeof done === "function" ? done() : void 0;
@@ -1767,12 +1767,14 @@ order by lo;`)));
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      return test(this["DBA: caching behavior"]);
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // test @[ "DBA: ranges (1)" ]
+  // test @[ "DBA: caching behavior" ]
+// test @[ "DBA: ranges (1)" ]
 // test @[ "DBA: contiguous ranges" ]
 // test @[ "DBA: validate contiguous ranges" ]
 // test @[ "DBA: split text along ranges (demo)" ]
