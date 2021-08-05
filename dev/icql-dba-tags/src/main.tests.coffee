@@ -556,7 +556,7 @@ _add_tagged_ranges = ( dtags ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: split text along ranges" ] = ( T, done ) ->
-  T?.halt_on_error()
+  # T?.halt_on_error()
   { Dtags, }        = require '../../../apps/icql-dba-tags'
   #.........................................................................................................
   prefix            = 't_'
@@ -570,6 +570,8 @@ _add_tagged_ranges = ( dtags ) ->
   #.........................................................................................................
   _add_tagged_ranges dtags
   dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
+  tagsets_by_keys = dtags.get_tagsets_by_keys()
+  T?.eq tagsets_by_keys, { g1: { font: 'font1', 'shape-crossed': true }, g2: { font: 'font1', 'shape-ladder': true }, g3: { font: 'font1', 'shape-pointy': true }, g4: { font: 'font1', vowel: true, pushraise: { x: 100, y: 200 } }, g5: { font: 'font1', vowel: true, 'shape-pointy': true, 'shape-ladder': true }, g6: { font: 'font1', vowel: true }, g7: { font: 'font1' } }
   dtags._create_minimal_contiguous_ranges()
   console.table dba.list dba.query SQL"""select
       lo                    as lo,
@@ -604,6 +606,8 @@ _add_tagged_ranges = ( dtags ) ->
       { key: 'g1', start: 23, stop: 24, part: 'X' }
       { key: 'g7', start: 24, stop: 26, part: 'YZ' }
       ]
+    tagsets_by_keys = dtags.get_tagsets_by_keys()
+    T?.eq tagsets_by_keys, { g1: { font: 'font1', 'shape-crossed': true }, g2: { font: 'font1', 'shape-ladder': true }, g3: { font: 'font1', 'shape-pointy': true }, g4: { font: 'font1', vowel: true, pushraise: { x: 100, y: 200 } }, g5: { font: 'font1', vowel: true, 'shape-pointy': true, 'shape-ladder': true }, g6: { font: 'font1', vowel: true }, g7: { font: 'font1' } }
   done?() #.................................................................................................
 
 #-----------------------------------------------------------------------------------------------------------
