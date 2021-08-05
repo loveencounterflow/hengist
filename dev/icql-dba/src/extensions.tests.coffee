@@ -39,13 +39,31 @@ SQL                       = String.raw
     # dba.load_extension PATH.resolve PATH.join '/home/flow/jzr/hengist/dev/in-memory-sql/json1.so'
     # # dba.load_extension PATH.resolve PATH.join '/home/flow/3rd-party-repos/sqlite/ext/fts5/fts5'
     #.......................................................................................................
-    info '^334-1^', dba.list dba.query """select json(' { "this" : "is", "a": [ "test" ] } ') as d;"""
-    info '^334-1^', dba.list dba.query """select json_array(1,2,'3',4) as d;"""
+    info '^334-1^', r1 = dba.list dba.query SQL"""select json(' { "this" : "is", "a": [ "test" ] } ') as d;"""
+    info '^334-1^', r2 = dba.list dba.query SQL"""select json_array(1,2,'3',4) as d;"""
+    T?.eq r1, [ { d: '{"this":"is","a":["test"]}' } ]
+    T?.eq r2, [ { d: '[1,2,"3",4]' } ]
+    return null
+  #---------------------------------------------------------------------------------------------------------
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "SQLite math functions" ] = ( T, done ) ->
+  # T.halt_on_error()
+  { Dba }           = require H.icql_dba_path
+  #---------------------------------------------------------------------------------------------------------
+  do =>
+    dba     = new Dba()
+    cfg     = H.get_cfg()
+    # dba.load_extension PATH.resolve PATH.join '/home/flow/jzr/hengist/dev/in-memory-sql/json1.so'
+    # # dba.load_extension PATH.resolve PATH.join '/home/flow/3rd-party-repos/sqlite/ext/fts5/fts5'
+    #.......................................................................................................
+    info '^334-1^', r1 = dba.list dba.query SQL"""select sin( ? ) as d;""", [ Math.PI, ]
+    T?.eq r1, [ { d: 1.2246467991473532e-16 } ]
     return null
   #---------------------------------------------------------------------------------------------------------
   done()
   return null
-
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: sqlean vsv extension" ] = ( T, done ) ->
@@ -86,6 +104,7 @@ SQL                       = String.raw
 
 ############################################################################################################
 unless module.parent?
-  # test @
-  test @[ "load_extension" ]
+  test @
+  # test @[ "load_extension" ]
+  # test @[ "SQLite math functions" ]
 
