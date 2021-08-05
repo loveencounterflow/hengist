@@ -586,9 +586,24 @@ _add_tagged_ranges = ( dtags ) ->
   do ->
     # text  = "ARBITRARY TEXT"
     text  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    for region in dtags.find_tagged_regions text
+    for region in regions = dtags.find_tagged_regions text
       debug '^33443^', region
-  #.........................................................................................................
+    T?.eq regions, [
+      { key: 'g5', start: 0, stop: 1, part: 'A' }
+      { key: 'g7', start: 1, stop: 4, part: 'BCD' }
+      { key: 'g6', start: 4, stop: 5, part: 'E' }
+      { key: 'g7', start: 5, stop: 7, part: 'FG' }
+      { key: 'g2', start: 7, stop: 8, part: 'H' }
+      { key: 'g6', start: 8, stop: 9, part: 'I' }
+      { key: 'g7', start: 9, stop: 14, part: 'JKLMN' }
+      { key: 'g4', start: 14, stop: 15, part: 'O' }
+      { key: 'g7', start: 15, stop: 20, part: 'PQRST' }
+      { key: 'g6', start: 20, stop: 21, part: 'U' }
+      { key: 'g3', start: 21, stop: 22, part: 'V' }
+      { key: 'g7', start: 22, stop: 23, part: 'W' }
+      { key: 'g1', start: 23, stop: 24, part: 'X' }
+      { key: 'g7', start: 24, stop: 26, part: 'YZ' }
+      ]
   done?() #.................................................................................................
 
 #-----------------------------------------------------------------------------------------------------------
@@ -742,8 +757,8 @@ if module is require.main then do =>
   # test @[ "DBA: contiguous ranges" ]
   # test @[ "DBA: validate contiguous ranges" ]
   # test @[ "DBA: split text along ranges (demo)" ]
-  # test @[ "DBA: split text along ranges" ]
-  @[ "DBA: split text along ranges" ]()
+  test @[ "DBA: split text along ranges" ]
+  # @[ "DBA: split text along ranges" ]()
   # regex_demo()
   # @[ "DBA: contiguous ranges" ]()
   # test @[ "tags: caching with empty values" ]
