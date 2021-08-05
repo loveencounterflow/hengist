@@ -590,6 +590,96 @@ _add_tagged_ranges = ( dtags ) ->
   done?() #.................................................................................................
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "DBA: tags must be declared" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dtags, }        = require '../../../apps/icql-dba-tags'
+  first_id          = 'a'.codePointAt 0
+  last_id           = 'z'.codePointAt 0
+  dtags             = new Dtags { fallbacks: true, first_id, last_id, }
+  { dba, }          = dtags
+  #.........................................................................................................
+  do ->
+    ### ensure tags must be explicitly added before being used ###
+    error = null
+    try
+      dtags.add_tagged_range { lo: ( dtags.f.cid_from_chr 'c' ), hi: ( dtags.f.cid_from_chr 'e' ), tag: 'c_e', }
+    catch error
+      # warn error.message
+      # warn type_of error
+      T?.eq error.code, 'SQLITE_CONSTRAINT_FOREIGNKEY'
+    unless error?
+      T?.fail "expected error, got none (ref ^4956649089^)"
+  return done?()
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: table getters" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dtags, }        = require '../../../apps/icql-dba-tags'
+  first_id          = 'a'.codePointAt 0
+  last_id           = 'z'.codePointAt 0
+  dtags             = new Dtags { fallbacks: true, first_id, last_id, }
+  { dba, }          = dtags
+  { cid_from_chr
+    chr_from_cid }  = dtags.f
+  #.........................................................................................................
+  do ->
+    dtags.add_tag { tag: 'base', }
+    dtags.add_tagged_range { lo: ( cid_from_chr 'a' ), hi: ( cid_from_chr 'z' ), tag: 'base', }
+    info '^33736^', tags                = dtags.get_tags()
+    info '^33736^', tagged_ranges       = dtags.get_tagged_ranges()
+    info '^33736^', fallbacks           = dtags.get_fallbacks()
+    info '^33736^', filtered_fallbacks  = dtags.get_filtered_fallbacks()
+    info '^33736^', tags_of_b           = dtags.tags_from_id { id: ( cid_from_chr 'b' ) }
+    info '^33736^', contiguous_ranges   = dtags.get_continuous_ranges()
+    info '^33736^', tags_and_rangelists = dtags.get_tags_and_rangelists()
+    T?.eq tags,                 { base: { nr: 1, fallback: 'false' } }
+    T?.eq tagged_ranges,        [ { nr: 1, lo: 97, hi: 122, mode: '+', tag: 'base', value: true } ]
+    T?.eq fallbacks,            { base: false }
+    T?.eq filtered_fallbacks,   {}
+    T?.eq tags_of_b,            { base: true }
+    T?.eq contiguous_ranges,    [ { lo: 97, hi: 122, tags: { base: true } } ]
+    T?.eq tags_and_rangelists,  [ { key: 'g1', tags: { base: true }, ranges: [ [ 97, 122 ] ] } ]
+    #.......................................................................................................
+    whisper '-'.repeat 108
+    dtags.add_tagged_range { lo: ( cid_from_chr 'd' ), hi: ( cid_from_chr 'f' ), tag: 'base', }
+    info '^33736^', tags                = dtags.get_tags()
+    info '^33736^', tagged_ranges       = dtags.get_tagged_ranges()
+    info '^33736^', fallbacks           = dtags.get_fallbacks()
+    info '^33736^', filtered_fallbacks  = dtags.get_filtered_fallbacks()
+    info '^33736^', tags_of_b           = dtags.tags_from_id { id: ( cid_from_chr 'b' ) }
+    info '^33736^', contiguous_ranges   = dtags.get_continuous_ranges()
+    info '^33736^', tags_and_rangelists = dtags.get_tags_and_rangelists()
+    T?.eq tags,                 { base: { nr: 1, fallback: 'false' } }
+    T?.eq tagged_ranges,        [ { nr: 1, lo: 97, hi: 122, mode: '+', tag: 'base', value: true }, { nr: 2, lo: 100, hi: 102, mode: '+', tag: 'base', value: true } ]
+    T?.eq fallbacks,            { base: false }
+    T?.eq filtered_fallbacks,   {}
+    T?.eq tags_of_b,            { base: true }
+    T?.eq contiguous_ranges,    [ { lo: 97, hi: 122, tags: { base: true } } ]
+    T?.eq tags_and_rangelists,  [ { key: 'g1', tags: { base: true }, ranges: [ [ 97, 122 ] ] } ]
+    #.......................................................................................................
+    whisper '-'.repeat 108
+    dtags.add_tag { tag: 'color', value: 'black', }
+    dtags.add_tagged_range { lo: ( cid_from_chr 'e' ), hi: ( cid_from_chr 'e' ), tag: 'color', value: 'red', }
+    info '^33736^', tags                = dtags.get_tags()
+    info '^33736^', tagged_ranges       = dtags.get_tagged_ranges()
+    info '^33736^', fallbacks           = dtags.get_fallbacks()
+    info '^33736^', filtered_fallbacks  = dtags.get_filtered_fallbacks()
+    info '^33736^', tags_of_b           = dtags.tags_from_id { id: ( cid_from_chr 'b' ) }
+    info '^33736^', contiguous_ranges   = dtags.get_continuous_ranges()
+    info '^33736^', tags_and_rangelists = dtags.get_tags_and_rangelists()
+    T?.eq tags,                 { base: { nr: 1, fallback: 'false' }, color: { nr: 2, fallback: '"black"' } }
+    T?.eq tagged_ranges,        [ { nr: 1, lo: 97, hi: 122, mode: '+', tag: 'base', value: true }, { nr: 2, lo: 100, hi: 102, mode: '+', tag: 'base', value: true }, { nr: 3, lo: 101, hi: 101, mode: '+', tag: 'color', value: 'red' } ]
+    T?.eq fallbacks,            { base: false, color: 'black' }
+    T?.eq filtered_fallbacks,   { color: 'black' }
+    T?.eq tags_of_b,            { color: 'black', base: true }
+    T?.eq contiguous_ranges,    [ { lo: 97, hi: 100, tags: { color: 'black', base: true } }, { lo: 101, hi: 101, tags: { color: 'red', base: true } }, { lo: 102, hi: 122, tags: { color: 'black', base: true } } ]
+    T?.eq tags_and_rangelists,  [ { key: 'g1', tags: { color: 'black', base: true }, ranges: [ [ 97, 100 ], [ 102, 122 ] ] }, { key: 'g2', tags: { color: 'red', base: true }, ranges: [ [ 101, 101 ] ] } ]
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBA: tagged text" ] = ( T, done ) ->
   T?.halt_on_error()
   INTERTEXT                 = require '../../../apps/intertext'
@@ -736,11 +826,13 @@ regex_demo = ->
 ############################################################################################################
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
+  # test @[ "DBA: tags must be declared" ]
+  test @[ "DBA: table getters" ]
   # test @[ "DBA: ranges (1)" ]
   # test @[ "DBA: contiguous ranges" ]
   # test @[ "DBA: validate contiguous ranges" ]
   # test @[ "DBA: split text along ranges (demo)" ]
-  test @[ "DBA: split text along ranges" ]
+  # test @[ "DBA: split text along ranges" ]
   # @[ "DBA: split text along ranges" ]()
   # regex_demo()
   # @[ "DBA: contiguous ranges" ]()
