@@ -643,6 +643,27 @@ jp                        = JSON.parse
     result  = dba.sql.interpolate sql, d
   done() #..................................................................................................
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: foreign keys enforced" ] = ( T, done ) ->
+  { Dba }           = require H.icql_dba_path
+  E                 = require H.icql_dba_path + '/lib/errors'
+  dba               = new Dba()
+  #.........................................................................................................
+  T?.eq dba._get_foreign_key_state(), true
+  dba.execute SQL"create table keys ( key text primary key );"
+  dba.execute SQL"create table main ( foo text not null references keys ( key ) );"
+  error = null
+  try
+    dba.execute SQL"insert into main values ( 'x' );"
+  catch error
+    warn error.message
+    warn error.name
+    warn error.code
+    T?.eq error.code, 'SQLITE_CONSTRAINT_FOREIGNKEY'
+  unless error
+    T?.fail "expected error, got none"
+  done?() #.................................................................................................
+
 # use table valued functions to do joins over 2+ dba instances
 
 
@@ -650,7 +671,7 @@ jp                        = JSON.parse
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # debug f '𠖏'
-  test @[ "DBA: open()" ]
+  test @[ "DBA: foreign keys enforced" ]
   # test @[ "DBA: concurrent UDFs" ]
   # @[ "DBA: concurrent UDFs" ]()
   # test @[ "DBA: advanced interpolation" ]
