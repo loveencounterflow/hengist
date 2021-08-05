@@ -144,10 +144,11 @@
 
   //###########################################################################################################
   if (module.parent == null) {
-    // test @
-    // test @[ "load_extension" ]
-    test(this["SQLite math functions"]);
+    test(this);
   }
+
+  // test @[ "load_extension" ]
+// test @[ "SQLite math functions" ]
 
 }).call(this);
 
