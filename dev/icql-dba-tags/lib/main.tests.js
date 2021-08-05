@@ -1334,10 +1334,8 @@ order by lo;`)));
   
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: split text along ranges"] = function(T, done) {
-    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, prefix, to_hex;
-    if (T != null) {
-      T.halt_on_error();
-    }
+    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, prefix, tagsets_by_keys, to_hex;
+    // T?.halt_on_error()
     ({Dtags} = require('../../../apps/icql-dba-tags'));
     //.........................................................................................................
     prefix = 't_';
@@ -1371,6 +1369,44 @@ order by lo;`)));
       tag: 'font',
       value: 'font1'
     });
+    tagsets_by_keys = dtags.get_tagsets_by_keys();
+    if (T != null) {
+      T.eq(tagsets_by_keys, {
+        g1: {
+          font: 'font1',
+          'shape-crossed': true
+        },
+        g2: {
+          font: 'font1',
+          'shape-ladder': true
+        },
+        g3: {
+          font: 'font1',
+          'shape-pointy': true
+        },
+        g4: {
+          font: 'font1',
+          vowel: true,
+          pushraise: {
+            x: 100,
+            y: 200
+          }
+        },
+        g5: {
+          font: 'font1',
+          vowel: true,
+          'shape-pointy': true,
+          'shape-ladder': true
+        },
+        g6: {
+          font: 'font1',
+          vowel: true
+        },
+        g7: {
+          font: 'font1'
+        }
+      });
+    }
     dtags._create_minimal_contiguous_ranges();
     console.table(dba.list(dba.query(SQL`select
   lo                    as lo,
@@ -1392,92 +1428,130 @@ order by lo;`)));
         region = ref[i];
         debug('^33443^', region);
       }
-      return T != null ? T.eq(regions, [
-        {
-          key: 'g5',
-          start: 0,
-          stop: 1,
-          part: 'A'
+      if (T != null) {
+        T.eq(regions, [
+          {
+            key: 'g5',
+            start: 0,
+            stop: 1,
+            part: 'A'
+          },
+          {
+            key: 'g7',
+            start: 1,
+            stop: 4,
+            part: 'BCD'
+          },
+          {
+            key: 'g6',
+            start: 4,
+            stop: 5,
+            part: 'E'
+          },
+          {
+            key: 'g7',
+            start: 5,
+            stop: 7,
+            part: 'FG'
+          },
+          {
+            key: 'g2',
+            start: 7,
+            stop: 8,
+            part: 'H'
+          },
+          {
+            key: 'g6',
+            start: 8,
+            stop: 9,
+            part: 'I'
+          },
+          {
+            key: 'g7',
+            start: 9,
+            stop: 14,
+            part: 'JKLMN'
+          },
+          {
+            key: 'g4',
+            start: 14,
+            stop: 15,
+            part: 'O'
+          },
+          {
+            key: 'g7',
+            start: 15,
+            stop: 20,
+            part: 'PQRST'
+          },
+          {
+            key: 'g6',
+            start: 20,
+            stop: 21,
+            part: 'U'
+          },
+          {
+            key: 'g3',
+            start: 21,
+            stop: 22,
+            part: 'V'
+          },
+          {
+            key: 'g7',
+            start: 22,
+            stop: 23,
+            part: 'W'
+          },
+          {
+            key: 'g1',
+            start: 23,
+            stop: 24,
+            part: 'X'
+          },
+          {
+            key: 'g7',
+            start: 24,
+            stop: 26,
+            part: 'YZ'
+          }
+        ]);
+      }
+      tagsets_by_keys = dtags.get_tagsets_by_keys();
+      return T != null ? T.eq(tagsets_by_keys, {
+        g1: {
+          font: 'font1',
+          'shape-crossed': true
         },
-        {
-          key: 'g7',
-          start: 1,
-          stop: 4,
-          part: 'BCD'
+        g2: {
+          font: 'font1',
+          'shape-ladder': true
         },
-        {
-          key: 'g6',
-          start: 4,
-          stop: 5,
-          part: 'E'
+        g3: {
+          font: 'font1',
+          'shape-pointy': true
         },
-        {
-          key: 'g7',
-          start: 5,
-          stop: 7,
-          part: 'FG'
+        g4: {
+          font: 'font1',
+          vowel: true,
+          pushraise: {
+            x: 100,
+            y: 200
+          }
         },
-        {
-          key: 'g2',
-          start: 7,
-          stop: 8,
-          part: 'H'
+        g5: {
+          font: 'font1',
+          vowel: true,
+          'shape-pointy': true,
+          'shape-ladder': true
         },
-        {
-          key: 'g6',
-          start: 8,
-          stop: 9,
-          part: 'I'
+        g6: {
+          font: 'font1',
+          vowel: true
         },
-        {
-          key: 'g7',
-          start: 9,
-          stop: 14,
-          part: 'JKLMN'
-        },
-        {
-          key: 'g4',
-          start: 14,
-          stop: 15,
-          part: 'O'
-        },
-        {
-          key: 'g7',
-          start: 15,
-          stop: 20,
-          part: 'PQRST'
-        },
-        {
-          key: 'g6',
-          start: 20,
-          stop: 21,
-          part: 'U'
-        },
-        {
-          key: 'g3',
-          start: 21,
-          stop: 22,
-          part: 'V'
-        },
-        {
-          key: 'g7',
-          start: 22,
-          stop: 23,
-          part: 'W'
-        },
-        {
-          key: 'g1',
-          start: 23,
-          stop: 24,
-          part: 'X'
-        },
-        {
-          key: 'g7',
-          start: 24,
-          stop: 26,
-          part: 'YZ'
+        g7: {
+          font: 'font1'
         }
-      ]) : void 0;
+      }) : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
   };
