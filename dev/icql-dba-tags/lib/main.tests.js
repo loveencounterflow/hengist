@@ -1384,16 +1384,100 @@ from ${prefix}contiguous_ranges
 order by lo;`)));
     console.table(dba.list(dba.query(SQL`select * from ${prefix}tags_and_rangelists;`)));
     (function() {      //.........................................................................................................
-      var i, len, ref, region, results, text;
+      var i, len, ref, region, regions, text;
       // text  = "ARBITRARY TEXT"
       text = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      ref = dtags.find_tagged_regions(text);
-      results = [];
+      ref = regions = dtags.find_tagged_regions(text);
       for (i = 0, len = ref.length; i < len; i++) {
         region = ref[i];
-        results.push(debug('^33443^', region));
+        debug('^33443^', region);
       }
-      return results;
+      return T != null ? T.eq(regions, [
+        {
+          key: 'g5',
+          start: 0,
+          stop: 1,
+          part: 'A'
+        },
+        {
+          key: 'g7',
+          start: 1,
+          stop: 4,
+          part: 'BCD'
+        },
+        {
+          key: 'g6',
+          start: 4,
+          stop: 5,
+          part: 'E'
+        },
+        {
+          key: 'g7',
+          start: 5,
+          stop: 7,
+          part: 'FG'
+        },
+        {
+          key: 'g2',
+          start: 7,
+          stop: 8,
+          part: 'H'
+        },
+        {
+          key: 'g6',
+          start: 8,
+          stop: 9,
+          part: 'I'
+        },
+        {
+          key: 'g7',
+          start: 9,
+          stop: 14,
+          part: 'JKLMN'
+        },
+        {
+          key: 'g4',
+          start: 14,
+          stop: 15,
+          part: 'O'
+        },
+        {
+          key: 'g7',
+          start: 15,
+          stop: 20,
+          part: 'PQRST'
+        },
+        {
+          key: 'g6',
+          start: 20,
+          stop: 21,
+          part: 'U'
+        },
+        {
+          key: 'g3',
+          start: 21,
+          stop: 22,
+          part: 'V'
+        },
+        {
+          key: 'g7',
+          start: 22,
+          stop: 23,
+          part: 'W'
+        },
+        {
+          key: 'g1',
+          start: 23,
+          stop: 24,
+          part: 'X'
+        },
+        {
+          key: 'g7',
+          start: 24,
+          stop: 26,
+          part: 'YZ'
+        }
+      ]) : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -1599,12 +1683,12 @@ order by lo;`)));
       // test @[ "DBA: contiguous ranges" ]
       // test @[ "DBA: validate contiguous ranges" ]
       // test @[ "DBA: split text along ranges (demo)" ]
-      // test @[ "DBA: split text along ranges" ]
-      return this["DBA: split text along ranges"]();
+      return test(this["DBA: split text along ranges"]);
     })();
   }
 
-  // regex_demo()
+  // @[ "DBA: split text along ranges" ]()
+// regex_demo()
 // @[ "DBA: contiguous ranges" ]()
 // test @[ "tags: caching with empty values" ]
 // test @[ "tags: tags_from_tagexchain" ]
