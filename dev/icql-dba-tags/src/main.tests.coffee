@@ -20,7 +20,8 @@ types                     = new ( require 'intertype' ).Intertype
 { isa
   type_of
   validate
-  validate_list_of }      = types.export()
+  validate_list_of
+  equals }                = types.export()
 # { to_width }              = require 'to-width'
 on_process_exit           = require 'exit-hook'
 sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, dts * 1000

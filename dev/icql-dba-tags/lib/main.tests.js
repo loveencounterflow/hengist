@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, NCR, Ncr, PATH, SQL, _add_tagged_ranges, add_sql_functions, badge, dba_path, debug, demo_html, echo, freeze, help, info, isa, jp, jr, lets, on_process_exit, regex_demo, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, NCR, Ncr, PATH, SQL, _add_tagged_ranges, add_sql_functions, badge, dba_path, debug, demo_html, echo, equals, freeze, help, info, isa, jp, jr, lets, on_process_exit, regex_demo, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -30,7 +30,7 @@
 
   types = new (require('intertype')).Intertype();
 
-  ({isa, type_of, validate, validate_list_of} = types.export());
+  ({isa, type_of, validate, validate_list_of, equals} = types.export());
 
   // { to_width }              = require 'to-width'
   on_process_exit = require('exit-hook');
@@ -1508,6 +1508,67 @@ order by lo;`)));
 
   
   //-----------------------------------------------------------------------------------------------------------
+  this["DBA: markup text"] = function(T, done) {
+    var Dtags, dba, dtags, prefix;
+    // T?.halt_on_error()
+    ({Dtags} = require('../../../apps/icql-dba-tags'));
+    //.........................................................................................................
+    prefix = 't_';
+    dtags = new Dtags({
+      prefix,
+      fallbacks: true
+    });
+    ({dba} = dtags);
+    //.........................................................................................................
+    _add_tagged_ranges(dtags);
+    dtags.add_tagged_range({
+      lo: dtags.cfg.first_id,
+      hi: dtags.cfg.last_id,
+      tag: 'font',
+      value: 'font1'
+    });
+    (function() {      //.........................................................................................................
+      var current_tags, d, i, len, markup, push, ref, stack, tag, text, value;
+      // text  = "ARBITRARY TEXT"
+      // text          = "ABCDEFGHIJKLMNOPQRSTUVWXYZAEIOUX"
+      text = "ABCDE";
+      markup = dtags._markup_text({text});
+      stack = [];
+      current_tags = dtags.get_tags();
+      push = function(tag, value) {
+        stack.push({tag, value});
+        current_tags[tag] = value;
+        if (value === true) {
+          return `<${tag}>`;
+        } else if (value === false) {
+          return `</${tag}>`;
+        } else {
+          value = JSON.stringify(value);
+          return `<${tag} value='${value}'}>`;
+        }
+      };
+      debug('^445^', '--------------------------');
+      for (i = 0, len = markup.length; i < len; i++) {
+        d = markup[i];
+        ref = d.tags;
+        for (tag in ref) {
+          value = ref[tag];
+          info('^347^', tag, value, equals(current_tags[tag], value));
+          if (equals(current_tags[tag], value)) {
+            null;
+          } else {
+            urge('^348^', push(tag, value));
+          }
+        }
+        debug('^4554^', d.tags, rpr(d.region.part));
+      }
+      return debug(stack);
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  
+  //-----------------------------------------------------------------------------------------------------------
   this["DBA: tags must be declared"] = function(T, done) {
     var Dtags, dba, dtags, first_id, last_id;
     // T?.halt_on_error()
@@ -1583,7 +1644,7 @@ order by lo;`)));
         T.eq(tags, {
           base: {
             nr: 1,
-            fallback: 'false'
+            fallback: false
           }
         });
       }
@@ -1655,7 +1716,7 @@ order by lo;`)));
         T.eq(tags, {
           base: {
             nr: 1,
-            fallback: 'false'
+            fallback: false
           }
         });
       }
@@ -1740,11 +1801,11 @@ order by lo;`)));
         T.eq(tags, {
           base: {
             nr: 1,
-            fallback: 'false'
+            fallback: false
           },
           color: {
             nr: 2,
-            fallback: '"black"'
+            fallback: 'black'
           }
         });
       }
@@ -2042,13 +2103,16 @@ order by lo;`)));
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      // test @[ "DBA: tags must be declared" ]
-      return test(this["DBA: table getters"]);
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // test @[ "DBA: ranges (1)" ]
+  // test @[ "DBA: tags must be declared" ]
+// test @[ "DBA: table getters" ]
+// test @[ "DBA: markup text" ]
+// test @[ "DBA: ranges (1)" ]
 // test @[ "DBA: contiguous ranges" ]
 // test @[ "DBA: validate contiguous ranges" ]
 // test @[ "DBA: split text along ranges (demo)" ]
