@@ -24,13 +24,13 @@ types                     = new ( require 'intertype' ).Intertype
   validate
   validate_list_of }      = types.export()
 { to_width }              = require 'to-width'
-
+SQL                       = String.raw
 
 
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "load_extension" ] = ( T, done ) ->
-  T.halt_on_error()
+  # T.halt_on_error()
   { Dba }           = require H.icql_dba_path
   #---------------------------------------------------------------------------------------------------------
   do =>
