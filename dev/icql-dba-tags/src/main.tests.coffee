@@ -263,7 +263,6 @@ NCR = new Ncr()
   dtags             = new Dtags { dba, prefix, }
   #.........................................................................................................
   get_tagged_ranges = -> dba.list dba.query SQL"select * from t_tagged_ranges order by nr;"
-  get_cache         = -> dba.list dba.query SQL"select * from t_tagged_ids_cache order by id;"
   # get_tagchain      = ( id ) -> dba.list dba.query SQL"""
   #   select mode, tag, value from t_tagged_ranges where $id between lo and hi order by nr asc;""", { id, }
   #.........................................................................................................
@@ -273,7 +272,6 @@ NCR = new Ncr()
     dtags.add_tagged_range { mode: '+', lo: 10, hi: 20, tag: 'first',  }
     dtags.add_tagged_range { mode: '+', lo: 10, hi: 15, tag: 'second', }
     dtags.add_tagged_range { mode: '-', lo: 12, hi: 12, tag: 'second', }
-    T.eq get_cache(), []
     T.eq get_tagged_ranges(), [
       { nr: 1, lo: 10, hi: 20, mode: '+', tag: 'first', value: 'true' },
       { nr: 2, lo: 10, hi: 15, mode: '+', tag: 'second', value: 'true' },
@@ -287,46 +285,32 @@ NCR = new Ncr()
       { nr: 3, mode: '-', tag: 'second', value: false } ]
     T.eq ( dtags.tagchain_from_id { id: 16, } ), [
       { nr: 1, mode: '+', tag: 'first', value: true } ]
-    T.eq get_cache(), []
     T.eq ( dtags.tags_from_id { id: 10, } ), { first: true, second: true }
     T.eq ( dtags.tags_from_id { id: 12, } ), { first: true, }
     T.eq ( dtags.tags_from_id { id: 16, } ), { first: true }
-    T.eq get_cache(), [
-      { id: 10, tags: '{"first":true,"second":true}' },
-      { id: 12, tags: '{"first":true}' },
-      { id: 16, tags: '{"first":true}' } ]
   #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "tags: caching with empty values" ] = ( T, done ) ->
-  # T?.halt_on_error()
+  T?.halt_on_error()
   #.........................................................................................................
   { Dtags, }        = require '../../../apps/icql-dba-tags'
-  prefix            = 't_'
+  prefix            = 'theprefix_'
   dtags             = new Dtags { prefix, fallbacks: true, }
   #.........................................................................................................
-  get_tagged_ranges = -> dtags.dba.list dtags.dba.query SQL"select * from t_tagged_ranges order by nr;"
-  get_cache         = -> dtags.dba.list dtags.dba.query SQL"select * from t_tagged_ids_cache order by id;"
-  # get_tagchain      = ( id ) -> dba.list dba.query SQL"""
-  #   select mode, tag, value from t_tagged_ranges where $id between lo and hi order by nr asc;""", { id, }
+  get_tagged_ranges = -> dtags.dba.list dtags.dba.query SQL"select * from #{prefix}tagged_ranges order by nr;"
   #.........................................................................................................
   do =>
     dtags.add_tag { tag: 'first', }
     dtags.add_tagged_range { mode: '+', lo: 10, hi: 10, tag: 'first',  }
-    T.eq get_cache(), []
     T.eq get_tagged_ranges(), [
       { nr: 1, lo: 10, hi: 10, mode: '+', tag: 'first', value: 'true' }, ]
     T.eq ( dtags.tagchain_from_id { id: 10, } ), [
       { nr: 1, mode: '+', tag: 'first', value: true }, ]
     T.eq ( dtags.tagchain_from_id { id: 11, } ), []
-    T.eq get_cache(), []
     T.eq ( dtags.tags_from_id { id: 10, } ), { first: true, }
     T.eq ( dtags.tags_from_id { id: 11, } ), {}
-    T.eq get_cache(), [
-      { id: 10, tags: '{"first":true}' },
-      { id: 11, tags: '{}' }, ]
-    console.table dtags.dba.list dtags.dba.query SQL"""select * from #{prefix}tagged_ids_cache order by id;"""
     console.table dtags.dba.list dtags.dba.query SQL"""select * from #{prefix}tagged_ranges order by lo, hi, nr;"""
   #.........................................................................................................
   done?()
@@ -394,7 +378,7 @@ _add_tagged_ranges = ( dtags ) ->
       chr       = String.fromCodePoint cid
       tags      = dtags.tags_from_id { id: cid, }
       info ( CND.gold chr ), ( CND.blue tags )
-    console.table dtags.dba.list dtags.dba.query SQL"""select * from #{prefix}tagged_ids_cache order by id;"""
+    # console.table dtags.dba.list dtags.dba.query SQL"""select * from #{prefix}tagged_ids_cache order by id;"""
     # console.table dtags.dba.list dtags.dba.query SQL"""select * from #{prefix}tagged_ranges order by lo, hi, nr;"""
   #.........................................................................................................
   for fallbacks in [ 'all', true, false, ]
@@ -562,11 +546,6 @@ _add_tagged_ranges = ( dtags ) ->
   prefix            = 't_'
   dtags             = new Dtags { prefix, fallbacks: true, }
   { dba, }          = dtags
-  cid_from_chr      = ( chr ) -> chr.codePointAt 0
-  chr_from_cid      = ( cid ) -> String.fromCodePoint cid
-  to_hex            = ( cid ) -> '0x' + cid.toString 16
-  dtags.dba.create_function name: 'to_hex', call: to_hex
-  dtags.dba.create_function name: 'chr_from_cid', call: chr_from_cid
   #.........................................................................................................
   _add_tagged_ranges dtags
   dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
