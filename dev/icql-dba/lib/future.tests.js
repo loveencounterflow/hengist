@@ -1004,6 +1004,39 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
   };
 
   
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: foreign keys enforced"] = function(T, done) {
+    var Dba, E, dba, error;
+    ({Dba} = require(H.icql_dba_path));
+    E = require(H.icql_dba_path + '/lib/errors');
+    dba = new Dba();
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(dba._get_foreign_key_state(), true);
+    }
+    dba.execute(SQL`create table keys ( key text primary key );`);
+    dba.execute(SQL`create table main ( foo text not null references keys ( key ) );`);
+    error = null;
+    try {
+      dba.execute(SQL`insert into main values ( 'x' );`);
+    } catch (error1) {
+      error = error1;
+      warn(error.message);
+      warn(error.name);
+      warn(error.code);
+      if (T != null) {
+        T.eq(error.code, 'SQLITE_CONSTRAINT_FOREIGNKEY');
+      }
+    }
+    if (!error) {
+      if (T != null) {
+        T.fail("expected error, got none");
+      }
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  
   // use table valued functions to do joins over 2+ dba instances
 
   //###########################################################################################################
@@ -1011,7 +1044,7 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     (() => {
       // test @, { timeout: 10e3, }
       // debug f '𠖏'
-      return test(this["DBA: open()"]);
+      return test(this["DBA: foreign keys enforced"]);
     })();
   }
 

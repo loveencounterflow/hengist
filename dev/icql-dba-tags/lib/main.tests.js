@@ -1520,16 +1520,55 @@ order by lo;`)));
       last_id
     });
     ({dba} = dtags);
-    //.........................................................................................................
-    dtags.add_tagged_range({
-      lo: dtags.f.cid_from_chr('c'),
-      hi: dtags.f.cid_from_chr('e'),
-      tag: 'c_e'
-    });
-    debug('^33736^', dtags.get_tags());
-    debug('^33736^', dtags.get_tagged_ranges());
-    debug('^33736^', dtags.get_fallbacks());
-    debug('^33736^', dtags.get_filtered_fallbacks());
+    (function() {      //.........................................................................................................
+      /* ensure tags must be explicitly added before being used */
+      var error;
+      error = null;
+      try {
+        dtags.add_tagged_range({
+          lo: dtags.f.cid_from_chr('c'),
+          hi: dtags.f.cid_from_chr('e'),
+          tag: 'c_e'
+        });
+      } catch (error1) {
+        error = error1;
+        // warn error.message
+        // warn type_of error
+        if (T != null) {
+          T.eq(error.code, 'SQLITE_CONSTRAINT_FOREIGNKEY');
+        }
+      }
+      if (error == null) {
+        return T != null ? T.fail("expected error, got none") : void 0;
+      }
+    })();
+    return typeof done === "function" ? done() : void 0;
+    (function() {      //.........................................................................................................
+      var fallbacks, filtered_fallbacks, tagged_ranges, tags;
+      debug('^33736^', tags = dtags.get_tags());
+      debug('^33736^', tagged_ranges = dtags.get_tagged_ranges());
+      debug('^33736^', fallbacks = dtags.get_fallbacks());
+      debug('^33736^', filtered_fallbacks = dtags.get_filtered_fallbacks());
+      if (T != null) {
+        T.eq(tags, null);
+      }
+      if (T != null) {
+        T.eq(tagged_ranges, [
+          {
+            nr: 1,
+            lo: 99,
+            hi: 101,
+            mode: '+',
+            tag: 'c_e',
+            value: 'true'
+          }
+        ]);
+      }
+      if (T != null) {
+        T.eq(fallbacks, null);
+      }
+      return T != null ? T.eq(filtered_fallbacks, null) : void 0;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -1728,9 +1767,8 @@ order by lo;`)));
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      return test(this["DBA: caching behavior"]);
     })();
   }
 
@@ -1739,7 +1777,6 @@ order by lo;`)));
 // test @[ "DBA: validate contiguous ranges" ]
 // test @[ "DBA: split text along ranges (demo)" ]
 // test @[ "DBA: split text along ranges" ]
-// @[ "DBA: caching behavior" ]()
 // @[ "DBA: split text along ranges" ]()
 // regex_demo()
 // @[ "DBA: contiguous ranges" ]()
