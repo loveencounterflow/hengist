@@ -635,7 +635,7 @@ _add_tagged_ranges = ( dtags ) ->
     info '^33736^', tags_of_b           = dtags.tags_from_id { id: ( cid_from_chr 'b' ) }
     info '^33736^', contiguous_ranges   = dtags.get_continuous_ranges()
     info '^33736^', tags_and_rangelists = dtags.get_tags_and_rangelists()
-    T?.eq tags,                 { base: { nr: 1, fallback: 'false' } }
+    T?.eq tags,                 { base: { nr: 1, fallback: false } }
     T?.eq tagged_ranges,        [ { nr: 1, lo: 97, hi: 122, mode: '+', tag: 'base', value: true } ]
     T?.eq fallbacks,            { base: false }
     T?.eq filtered_fallbacks,   {}
@@ -652,7 +652,7 @@ _add_tagged_ranges = ( dtags ) ->
     info '^33736^', tags_of_b           = dtags.tags_from_id { id: ( cid_from_chr 'b' ) }
     info '^33736^', contiguous_ranges   = dtags.get_continuous_ranges()
     info '^33736^', tags_and_rangelists = dtags.get_tags_and_rangelists()
-    T?.eq tags,                 { base: { nr: 1, fallback: 'false' } }
+    T?.eq tags,                 { base: { nr: 1, fallback: false } }
     T?.eq tagged_ranges,        [ { nr: 1, lo: 97, hi: 122, mode: '+', tag: 'base', value: true }, { nr: 2, lo: 100, hi: 102, mode: '+', tag: 'base', value: true } ]
     T?.eq fallbacks,            { base: false }
     T?.eq filtered_fallbacks,   {}
@@ -670,7 +670,7 @@ _add_tagged_ranges = ( dtags ) ->
     info '^33736^', tags_of_b           = dtags.tags_from_id { id: ( cid_from_chr 'b' ) }
     info '^33736^', contiguous_ranges   = dtags.get_continuous_ranges()
     info '^33736^', tags_and_rangelists = dtags.get_tags_and_rangelists()
-    T?.eq tags,                 { base: { nr: 1, fallback: 'false' }, color: { nr: 2, fallback: '"black"' } }
+    T?.eq tags,                 { base: { nr: 1, fallback: false }, color: { nr: 2, fallback: 'black' } }
     T?.eq tagged_ranges,        [ { nr: 1, lo: 97, hi: 122, mode: '+', tag: 'base', value: true }, { nr: 2, lo: 100, hi: 102, mode: '+', tag: 'base', value: true }, { nr: 3, lo: 101, hi: 101, mode: '+', tag: 'color', value: 'red' } ]
     T?.eq fallbacks,            { base: false, color: 'black' }
     T?.eq filtered_fallbacks,   { color: 'black' }
