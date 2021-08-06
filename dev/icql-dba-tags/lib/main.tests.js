@@ -1528,41 +1528,63 @@ order by lo;`)));
       value: 'font1'
     });
     (function() {      //.........................................................................................................
-      var current_tags, d, i, len, markup, push, ref, stack, tag, text, value;
+      var atrs, current_tags, d, fallbacks, i, j, k, len, len1, markup, part, results, tag, tags, tags_closing, tags_opening, text, value;
       // text  = "ARBITRARY TEXT"
       // text          = "ABCDEFGHIJKLMNOPQRSTUVWXYZAEIOUX"
-      text = "ABCDE";
+      text = "AAAEBCDE";
       markup = dtags._markup_text({text});
-      stack = [];
-      current_tags = dtags.get_tags();
-      push = function(tag, value) {
-        stack.push({tag, value});
-        current_tags[tag] = value;
-        if (value === true) {
-          return `<${tag}>`;
-        } else if (value === false) {
-          return `</${tag}>`;
-        } else {
-          value = JSON.stringify(value);
-          return `<${tag} value='${value}'}>`;
+      // stack         = []
+      fallbacks = freeze(dtags.get_filtered_fallbacks());
+      tags_opening = freeze((function() {
+        var results;
+        results = [];
+        for (k in dtags.get_tags()) {
+          results.push(k);
         }
-      };
+        return results;
+      })());
+      tags_closing = freeze([...tags_opening].reverse());
+      current_tags = {...fallbacks};
+      debug('^33342^', current_tags);
+      debug('^33342^', tags_opening);
+      debug('^33342^', tags_closing);
+      // push  = ( tag, value ) ->
+      //   # stack.push { tag, value, }
+      //   current_tags[ tag ] = value
+      //   if value is true
+      //     return "<#{tag}>"
+      //   else if value is false
+      //     return "</#{tag}>"
+      //   else
+      //     ### TAINT just mockup not for reals ###
+      //     value = JSON.stringify value
+      //     return "<#{tag} value='#{value}'}>"
       debug('^445^', '--------------------------');
+      results = [];
       for (i = 0, len = markup.length; i < len; i++) {
         d = markup[i];
-        ref = d.tags;
-        for (tag in ref) {
-          value = ref[tag];
-          info('^347^', tag, value, equals(current_tags[tag], value));
-          if (equals(current_tags[tag], value)) {
-            null;
+        tags = {...fallbacks, ...d.tags};
+        ({part} = d.region);
+        atrs = [];
+        for (j = 0, len1 = tags_opening.length; j < len1; j++) {
+          tag = tags_opening[j];
+          if ((value = tags[tag]) == null) {
+            continue;
+          }
+          /* TAINT just mockup not for reals */
+          if (value === true) {
+            atrs.push(`${tag}`);
           } else {
-            urge('^348^', push(tag, value));
+            value = JSON.stringify(value);
+            atrs.push(`${tag}='${value}'`);
           }
         }
-        debug('^4554^', d.tags, rpr(d.region.part));
+        // info '^347^', "#{tag}: #{rpr value}"
+        atrs = atrs.join(' ');
+        whisper('^4554^', tags, rpr(d.region.part));
+        results.push(urge(`<span ${atrs}>${part}</span>`));
       }
-      return debug(stack);
+      return results;
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -2103,16 +2125,14 @@ order by lo;`)));
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      // test @[ "DBA: tags must be declared" ]
+      // test @[ "DBA: table getters" ]
+      return test(this["DBA: markup text"]);
     })();
   }
 
-  // test @[ "DBA: tags must be declared" ]
-// test @[ "DBA: table getters" ]
-// test @[ "DBA: markup text" ]
-// test @[ "DBA: ranges (1)" ]
+  // test @[ "DBA: ranges (1)" ]
 // test @[ "DBA: contiguous ranges" ]
 // test @[ "DBA: validate contiguous ranges" ]
 // test @[ "DBA: split text along ranges (demo)" ]
