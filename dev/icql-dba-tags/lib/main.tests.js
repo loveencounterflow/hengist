@@ -1528,14 +1528,15 @@ order by lo;`)));
       value: 'font1'
     });
     (function() {      //.........................................................................................................
-      var atrs, current_tags, d, fallbacks, i, j, k, len, len1, markup, part, results, tag, tags, tags_closing, tags_opening, text, value;
+      var _as_html_attribute_value, atrs, closing_tag, current_tags, d, fallbacks, html_tag_name, i, j, k, len, len1, markup, opening_tag, part, results, tag, tags, tags_ordered, text, value;
       // text  = "ARBITRARY TEXT"
-      // text          = "ABCDEFGHIJKLMNOPQRSTUVWXYZAEIOUX"
-      text = "AAAEBCDE";
+      text = "ABCDEFGHIJKLMNOPQRSTUVWXYZAEIOUX";
+      html_tag_name = 't'/* TAINT should come from `cfg` */
+      // text          = "AAAEBCDE"
       markup = dtags._markup_text({text});
       // stack         = []
       fallbacks = freeze(dtags.get_filtered_fallbacks());
-      tags_opening = freeze((function() {
+      tags_ordered = freeze((function() {
         var results;
         results = [];
         for (k in dtags.get_tags()) {
@@ -1543,46 +1544,47 @@ order by lo;`)));
         }
         return results;
       })());
-      tags_closing = freeze([...tags_opening].reverse());
       current_tags = {...fallbacks};
-      debug('^33342^', current_tags);
-      debug('^33342^', tags_opening);
-      debug('^33342^', tags_closing);
-      // push  = ( tag, value ) ->
-      //   # stack.push { tag, value, }
-      //   current_tags[ tag ] = value
-      //   if value is true
-      //     return "<#{tag}>"
-      //   else if value is false
-      //     return "</#{tag}>"
-      //   else
-      //     ### TAINT just mockup not for reals ###
-      //     value = JSON.stringify value
-      //     return "<#{tag} value='#{value}'}>"
-      debug('^445^', '--------------------------');
+      //.......................................................................................................
+      _as_html_attribute_value = function(value) {
+        /* TAINT questionable choice since it makes attribute values ambiguous; make configurable */
+        var R;
+        R = value;
+        if (!isa.text(R)) {
+          R = JSON.stringify(R);
+        }
+        R = CND.escape_html(R);
+        R = R.replace(/'/g, '&#39;');
+        return R;
+      };
+//.......................................................................................................
       results = [];
       for (i = 0, len = markup.length; i < len; i++) {
         d = markup[i];
         tags = {...fallbacks, ...d.tags};
         ({part} = d.region);
         atrs = [];
-        for (j = 0, len1 = tags_opening.length; j < len1; j++) {
-          tag = tags_opening[j];
+        for (j = 0, len1 = tags_ordered.length; j < len1; j++) {
+          tag = tags_ordered[j];
           if ((value = tags[tag]) == null) {
             continue;
           }
-          /* TAINT just mockup not for reals */
+          if (value === false) {
+            continue;
+          }
           if (value === true) {
             atrs.push(`${tag}`);
-          } else {
-            value = JSON.stringify(value);
-            atrs.push(`${tag}='${value}'`);
+            continue;
           }
+          value = _as_html_attribute_value(value);
+          /* TAINT must either validate `tag` or escape(?) it */
+          atrs.push(`${tag}='${value}'`);
         }
-        // info '^347^', "#{tag}: #{rpr value}"
         atrs = atrs.join(' ');
-        whisper('^4554^', tags, rpr(d.region.part));
-        results.push(urge(`<span ${atrs}>${part}</span>`));
+        opening_tag = `<${html_tag_name} ${atrs}>${part}</${html_tag_name}>`;
+        closing_tag = `</${html_tag_name}>`;
+        part = CND.escape_html(part);
+        results.push(info((CND.lime(opening_tag)) + (CND.blue(CND.reverse(part))) + (CND.gold(closing_tag))));
       }
       return results;
     })();
