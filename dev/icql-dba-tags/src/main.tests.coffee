@@ -591,6 +591,62 @@ _add_tagged_ranges = ( dtags ) ->
   done?() #.................................................................................................
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "DBA: markup text" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dtags, }        = require '../../../apps/icql-dba-tags'
+  #.........................................................................................................
+  prefix            = 't_'
+  dtags             = new Dtags { prefix, fallbacks: true, }
+  { dba, }          = dtags
+  #.........................................................................................................
+  _add_tagged_ranges dtags
+  dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
+  #.........................................................................................................
+  do ->
+    # text  = "ARBITRARY TEXT"
+    # text          = "ABCDEFGHIJKLMNOPQRSTUVWXYZAEIOUX"
+    text          = "AAAEBCDE"
+    markup        = dtags._markup_text { text, }
+    # stack         = []
+    fallbacks     = freeze dtags.get_filtered_fallbacks()
+    tags_opening  = freeze ( k for k of dtags.get_tags() )
+    tags_closing  = freeze [ tags_opening..., ].reverse()
+    current_tags  = { fallbacks..., }
+    debug '^33342^', current_tags
+    debug '^33342^', tags_opening
+    debug '^33342^', tags_closing
+    # push  = ( tag, value ) ->
+    #   # stack.push { tag, value, }
+    #   current_tags[ tag ] = value
+    #   if value is true
+    #     return "<#{tag}>"
+    #   else if value is false
+    #     return "</#{tag}>"
+    #   else
+    #     ### TAINT just mockup not for reals ###
+    #     value = JSON.stringify value
+    #     return "<#{tag} value='#{value}'}>"
+    debug '^445^', '--------------------------'
+    for d in markup
+      tags      = { fallbacks..., d.tags..., }
+      { part, } = d.region
+      atrs      = []
+      for tag in tags_opening
+        continue unless ( value = tags[ tag ] )?
+        ### TAINT just mockup not for reals ###
+        if value is true
+          atrs.push "#{tag}"
+        else
+          value = JSON.stringify value
+          atrs.push "#{tag}='#{value}'"
+          # info '^347^', "#{tag}: #{rpr value}"
+      atrs = atrs.join ' '
+      whisper '^4554^', tags, rpr d.region.part
+      urge "<span #{atrs}>#{part}</span>"
+    # debug stack
+  done?() #.................................................................................................
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBA: tags must be declared" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Dtags, }        = require '../../../apps/icql-dba-tags'
@@ -828,7 +884,8 @@ regex_demo = ->
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # test @[ "DBA: tags must be declared" ]
-  test @[ "DBA: table getters" ]
+  # test @[ "DBA: table getters" ]
+  test @[ "DBA: markup text" ]
   # test @[ "DBA: ranges (1)" ]
   # test @[ "DBA: contiguous ranges" ]
   # test @[ "DBA: validate contiguous ranges" ]
