@@ -604,45 +604,41 @@ _add_tagged_ranges = ( dtags ) ->
   #.........................................................................................................
   do ->
     # text  = "ARBITRARY TEXT"
-    # text          = "ABCDEFGHIJKLMNOPQRSTUVWXYZAEIOUX"
-    text          = "AAAEBCDE"
+    text          = "ABCDEFGHIJKLMNOPQRSTUVWXYZAEIOUX"
+    html_tag_name = 't' ### TAINT should come from `cfg` ###
+    # text          = "AAAEBCDE"
     markup        = dtags._markup_text { text, }
     # stack         = []
     fallbacks     = freeze dtags.get_filtered_fallbacks()
-    tags_opening  = freeze ( k for k of dtags.get_tags() )
-    tags_closing  = freeze [ tags_opening..., ].reverse()
+    tags_ordered  = freeze ( k for k of dtags.get_tags() )
     current_tags  = { fallbacks..., }
-    debug '^33342^', current_tags
-    debug '^33342^', tags_opening
-    debug '^33342^', tags_closing
-    # push  = ( tag, value ) ->
-    #   # stack.push { tag, value, }
-    #   current_tags[ tag ] = value
-    #   if value is true
-    #     return "<#{tag}>"
-    #   else if value is false
-    #     return "</#{tag}>"
-    #   else
-    #     ### TAINT just mockup not for reals ###
-    #     value = JSON.stringify value
-    #     return "<#{tag} value='#{value}'}>"
-    debug '^445^', '--------------------------'
+    #.......................................................................................................
+    _as_html_attribute_value = ( value ) ->
+      R = value
+      ### TAINT questionable choice since it makes attribute values ambiguous; make configurable ###
+      R = JSON.stringify R unless isa.text R
+      R = CND.escape_html R
+      R = R.replace /'/g, '&#39;'
+      return R
+    #.......................................................................................................
     for d in markup
       tags      = { fallbacks..., d.tags..., }
       { part, } = d.region
       atrs      = []
-      for tag in tags_opening
+      for tag in tags_ordered
         continue unless ( value = tags[ tag ] )?
-        ### TAINT just mockup not for reals ###
+        continue if ( value is false )
         if value is true
           atrs.push "#{tag}"
-        else
-          value = JSON.stringify value
-          atrs.push "#{tag}='#{value}'"
-          # info '^347^', "#{tag}: #{rpr value}"
+          continue
+        value = _as_html_attribute_value value
+        ### TAINT must either validate `tag` or escape(?) it ###
+        atrs.push "#{tag}='#{value}'"
       atrs = atrs.join ' '
-      whisper '^4554^', tags, rpr d.region.part
-      urge "<span #{atrs}>#{part}</span>"
+      opening_tag = "<#{html_tag_name} #{atrs}>#{part}</#{html_tag_name}>"
+      closing_tag = "</#{html_tag_name}>"
+      part        = CND.escape_html part
+      info ( CND.lime opening_tag ) + ( CND.blue CND.reverse part ) + ( CND.gold closing_tag )
     # debug stack
   done?() #.................................................................................................
 
