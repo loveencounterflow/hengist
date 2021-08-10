@@ -184,11 +184,11 @@
       '-rounded'],
       {}],
       [
-        ['+shape/ladder',
-        '+shape/pointy'],
+        ['+shape_ladder',
+        '+shape_pointy'],
         {
-          'shape/ladder': true,
-          'shape/pointy': true
+          'shape_ladder': true,
+          'shape_pointy': true
         }
       ]
     ];
@@ -279,12 +279,12 @@
       ],
       [
         {
-          tag: 'shape/ladder'
+          tag: 'shape_ladder'
         },
         [
           {
             nr: 1,
-            tag: 'shape/ladder',
+            tag: 'shape_ladder',
             value: 'false'
           }
         ]
@@ -693,7 +693,7 @@
           lo: 7,
           hi: 17,
           mode: '+',
-          tag: 'shape/ladder'
+          tag: 'shape_ladder'
         },
         [
           {
@@ -701,7 +701,7 @@
             lo: 7,
             hi: 17,
             mode: '+',
-            tag: 'shape/ladder',
+            tag: 'shape_ladder',
             value: true
           }
         ]
@@ -930,7 +930,7 @@
     // [ '+superset',      'A..Z',               ]
     // [ '+font:"fallback"', 'A..Z',               ]
     // [ '+script:"latin"',  'A..Z',               ]
-    rules = [['+font:"font1"', 'B..H, J, L, N..X'], ['+font:"font2"', 'B..D'], ['+font:"font3"', 'G..I'], ['+font:"font4"', 'M..Q'], ['+font:"font5"', 'M, O..T'], ['+font:"font6"', 'M, U, X..X'], ['+vowel', 'A, E, I, O, U'], ['+shape-pointy', 'A, V'], ['+shape-crossed', 'X'], ['+shape-ladder', 'A, H'], ['+pushraise:{"x":100,"y":200}', 'O']];
+    rules = [['+font:"font1"', 'B..H, J, L, N..X'], ['+font:"font2"', 'B..D'], ['+font:"font3"', 'G..I'], ['+font:"font4"', 'M..Q'], ['+font:"font5"', 'M, O..T'], ['+font:"font6"', 'M, U, X..X'], ['+vowel', 'A, E, I, O, U'], ['+shape_pointy', 'A, V'], ['+shape_crossed', 'X'], ['+shape_ladder', 'A, H'], ['+pushraise:{"x":100,"y":200}', 'O']];
     seen_tags = new Set();
     seen_tags.add('font');
     dtags.add_tag({
@@ -1081,8 +1081,8 @@
       }), {
         font: 'font1',
         vowel: true,
-        'shape-pointy': true,
-        'shape-ladder': true
+        'shape_pointy': true,
+        'shape_ladder': true
       });
     }
     if (T != null) {
@@ -1090,7 +1090,7 @@
         id: cid_from_chr('X')
       }), {
         font: 'font1',
-        'shape-crossed': true
+        'shape_crossed': true
       });
     }
     return typeof done === "function" ? done() : void 0;
@@ -1324,15 +1324,15 @@ order by lo;`)));
       T.eq(tagsets_by_keys, {
         g1: {
           font: 'font1',
-          'shape-crossed': true
+          'shape_crossed': true
         },
         g2: {
           font: 'font1',
-          'shape-ladder': true
+          'shape_ladder': true
         },
         g3: {
           font: 'font1',
-          'shape-pointy': true
+          'shape_pointy': true
         },
         g4: {
           font: 'font1',
@@ -1345,8 +1345,8 @@ order by lo;`)));
         g5: {
           font: 'font1',
           vowel: true,
-          'shape-pointy': true,
-          'shape-ladder': true
+          'shape_pointy': true,
+          'shape_ladder': true
         },
         g6: {
           font: 'font1',
@@ -1470,15 +1470,15 @@ order by lo;`)));
       return T != null ? T.eq(tagsets_by_keys, {
         g1: {
           font: 'font1',
-          'shape-crossed': true
+          'shape_crossed': true
         },
         g2: {
           font: 'font1',
-          'shape-ladder': true
+          'shape_ladder': true
         },
         g3: {
           font: 'font1',
-          'shape-pointy': true
+          'shape_pointy': true
         },
         g4: {
           font: 'font1',
@@ -1491,8 +1491,8 @@ order by lo;`)));
         g5: {
           font: 'font1',
           vowel: true,
-          'shape-pointy': true,
-          'shape-ladder': true
+          'shape_pointy': true,
+          'shape_ladder': true
         },
         g6: {
           font: 'font1',
@@ -1521,18 +1521,17 @@ order by lo;`)));
     ({dba} = dtags);
     //.........................................................................................................
     _add_tagged_ranges(dtags);
-    dtags.add_tagged_range({
-      lo: dtags.cfg.first_id,
-      hi: dtags.cfg.last_id,
-      tag: 'font',
-      value: 'font1'
-    });
+    // dtags.get_tagsets_by_keys()
+    // dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
+    console.table(dba.list(dba.query(SQL`select * from t_tagged_ranges order by lo, hi, nr;`)));
+    console.table(dba.list(dba.query(SQL`select * from t_tags_and_rangelists;`)));
     (function() {      //.........................................................................................................
-      var _as_html_attribute_value, atrs, closing_tag, current_tags, d, fallbacks, html_tag_name, i, j, k, len, len1, markup, opening_tag, part, results, tag, tags, tags_ordered, text, value;
-      // text  = "ARBITRARY TEXT"
-      text = "ABCDEFGHIJKLMNOPQRSTUVWXYZAEIOUX";
-      html_tag_name = 't'/* TAINT should come from `cfg` */
+      /* NOTE using unescaped `tag` as tag name *should* be OK since whitespace, brackets etc cannot occur in tags */
+      var _as_html_attribute_value, atrs, closing_tag, current_tags, fallbacks, html_tag_name, i, j, k, len, len1, markup, opening_tag, part, region, results, tag, tags, tags_ordered, text, value;
+      text = "ARBITRARY TEXT";
+      // text          = "ABCDEFGHIJKLMNOPQRSTUVWXYZAEIOUX"
       // text          = "AAAEBCDE"
+      html_tag_name = 't'/* TAINT should come from `cfg` */
       markup = dtags._markup_text({text});
       // stack         = []
       fallbacks = freeze(dtags.get_filtered_fallbacks());
@@ -1547,12 +1546,9 @@ order by lo;`)));
       current_tags = {...fallbacks};
       //.......................................................................................................
       _as_html_attribute_value = function(value) {
-        /* TAINT questionable choice since it makes attribute values ambiguous; make configurable */
         var R;
         R = value;
-        if (!isa.text(R)) {
-          R = JSON.stringify(R);
-        }
+        R = JSON.stringify(R); // unless isa.text R
         R = CND.escape_html(R);
         R = R.replace(/'/g, '&#39;');
         return R;
@@ -1560,9 +1556,10 @@ order by lo;`)));
 //.......................................................................................................
       results = [];
       for (i = 0, len = markup.length; i < len; i++) {
-        d = markup[i];
-        tags = {...fallbacks, ...d.tags};
-        ({part} = d.region);
+        region = markup[i];
+        debug('^098^', region);
+        tags = {...fallbacks, ...region.tags};
+        ({part} = region);
         atrs = [];
         for (j = 0, len1 = tags_ordered.length; j < len1; j++) {
           tag = tags_ordered[j];
@@ -1577,11 +1574,10 @@ order by lo;`)));
             continue;
           }
           value = _as_html_attribute_value(value);
-          /* TAINT must either validate `tag` or escape(?) it */
           atrs.push(`${tag}='${value}'`);
         }
         atrs = atrs.join(' ');
-        opening_tag = `<${html_tag_name} ${atrs}>${part}</${html_tag_name}>`;
+        opening_tag = `<${html_tag_name} ${atrs}>`;
         closing_tag = `</${html_tag_name}>`;
         part = CND.escape_html(part);
         results.push(info((CND.lime(opening_tag)) + (CND.blue(CND.reverse(part))) + (CND.gold(closing_tag))));
@@ -2127,6 +2123,7 @@ order by lo;`)));
   //###########################################################################################################
   if (module === require.main) {
     (() => {
+      // info '^3443^', JSON.parse '"helo w&#x6f;rld"'
       // test @, { timeout: 10e3, }
       // test @[ "DBA: tags must be declared" ]
       // test @[ "DBA: table getters" ]
