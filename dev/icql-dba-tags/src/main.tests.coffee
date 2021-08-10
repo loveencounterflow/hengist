@@ -110,7 +110,7 @@ NCR = new Ncr()
     [ [ '+font:"font1"',                    ],  { font: 'font1',      }, ]
     [ [ '+font:"font1"',  '+font:"Arial"',  ],  { font: 'Arial',      }, ]
     [ [ '+rounded', '-rounded',             ],  {},                      ]
-    [ [ '+shape/ladder', '+shape/pointy',   ],  { 'shape/ladder': true, 'shape/pointy': true, }, ]
+    [ [ '+shape_ladder', '+shape_pointy',   ],  { 'shape_ladder': true, 'shape_pointy': true, }, ]
     ]
   { Dtags, }  = require '../../../apps/icql-dba-tags'
   dtags       = new Dtags()
@@ -137,7 +137,7 @@ NCR = new Ncr()
     [ { tag: 'foo', value: 'abc',          },  [ { nr: 1, tag: 'foo',          value: '"abc"',   } ], ]
     [ { tag: 'font', value: 'font1',       },  [ { nr: 1, tag: 'font',         value: '"font1"', } ], ]
     [ { tag: 'rounded', value: false,      },  [ { nr: 1, tag: 'rounded',      value: 'false',   } ], ]
-    [ { tag: 'shape/ladder',               },  [ { nr: 1, tag: 'shape/ladder', value: 'false',    } ], ]
+    [ { tag: 'shape_ladder',               },  [ { nr: 1, tag: 'shape_ladder', value: 'false',    } ], ]
     ]
   { Dtags, }  = require '../../../apps/icql-dba-tags'
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -239,7 +239,7 @@ NCR = new Ncr()
     [ { lo: 2, hi: 12,  mode: '+', tag: 'foo', value: 'abc',          },  [ { nr: 1, lo: 2, hi: 12, mode: '+', tag: 'foo', value: 'abc', } ], ]
     [ { lo: 5, hi: 15,  mode: '+', tag: 'font', value: 'font1',       },  [ { nr: 1, lo: 5, hi: 15, mode: '+', tag: 'font', value: 'font1', } ], ]
     [ { lo: 6, hi: 16,  mode: '-', tag: 'rounded',                    },  [ { nr: 1, lo: 6, hi: 16, mode: '-', tag: 'rounded', value: false, } ],                      ]
-    [ { lo: 7, hi: 17,  mode: '+', tag: 'shape/ladder',               },  [ { nr: 1, lo: 7, hi: 17, mode: '+', tag: 'shape/ladder', value: true, } ],                      ]
+    [ { lo: 7, hi: 17,  mode: '+', tag: 'shape_ladder',               },  [ { nr: 1, lo: 7, hi: 17, mode: '+', tag: 'shape_ladder', value: true, } ],                      ]
     ]
   dtags       = new Dtags()
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -329,9 +329,9 @@ _add_tagged_ranges = ( dtags ) ->
     [ '+font:"font5"',                  'M, O..T',            ]
     [ '+font:"font6"',                  'M, U, X..X',         ]
     [ '+vowel',                         'A, E, I, O, U',      ]
-    [ '+shape-pointy',                  'A, V',               ]
-    [ '+shape-crossed',                 'X',                  ]
-    [ '+shape-ladder',                  'A, H',               ]
+    [ '+shape_pointy',                  'A, V',               ]
+    [ '+shape_crossed',                 'X',                  ]
+    [ '+shape_ladder',                  'A, H',               ]
     [ '+pushraise:{"x":100,"y":200}',   'O',                  ]
     ]
   seen_tags = new Set()
@@ -406,8 +406,8 @@ _add_tagged_ranges = ( dtags ) ->
   T?.eq ( dba.first_row dba.query SQL"select * from #{prefix}contiguous_ranges where lo = 0 order by lo;" ), { lo: 0, hi: 64, tags: '{"font":"font1"}' }
   T?.eq ( dba.first_row dba.query SQL"select * from #{prefix}contiguous_ranges where lo = 89 order by lo;" ), { lo: 89, hi: 1114111, tags: '{"font":"font1"}' }
   T?.eq ( dtags.tags_from_id { id: 10, }                   ), { font: 'font1' }
-  T?.eq ( dtags.tags_from_id { id: 65, }                   ), { font: 'font1', vowel: true, 'shape-pointy': true, 'shape-ladder': true }
-  T?.eq ( dtags.tags_from_id { id: ( cid_from_chr 'X' ), } ), { font: 'font1', 'shape-crossed': true }
+  T?.eq ( dtags.tags_from_id { id: 65, }                   ), { font: 'font1', vowel: true, 'shape_pointy': true, 'shape_ladder': true }
+  T?.eq ( dtags.tags_from_id { id: ( cid_from_chr 'X' ), } ), { font: 'font1', 'shape_crossed': true }
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -551,7 +551,7 @@ _add_tagged_ranges = ( dtags ) ->
   _add_tagged_ranges dtags
   dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
   tagsets_by_keys = dtags.get_tagsets_by_keys()
-  T?.eq tagsets_by_keys, { g1: { font: 'font1', 'shape-crossed': true }, g2: { font: 'font1', 'shape-ladder': true }, g3: { font: 'font1', 'shape-pointy': true }, g4: { font: 'font1', vowel: true, pushraise: { x: 100, y: 200 } }, g5: { font: 'font1', vowel: true, 'shape-pointy': true, 'shape-ladder': true }, g6: { font: 'font1', vowel: true }, g7: { font: 'font1' } }
+  T?.eq tagsets_by_keys, { g1: { font: 'font1', 'shape_crossed': true }, g2: { font: 'font1', 'shape_ladder': true }, g3: { font: 'font1', 'shape_pointy': true }, g4: { font: 'font1', vowel: true, pushraise: { x: 100, y: 200 } }, g5: { font: 'font1', vowel: true, 'shape_pointy': true, 'shape_ladder': true }, g6: { font: 'font1', vowel: true }, g7: { font: 'font1' } }
   dtags._create_minimal_contiguous_ranges()
   console.table dba.list dba.query SQL"""select
       lo                    as lo,
@@ -587,7 +587,7 @@ _add_tagged_ranges = ( dtags ) ->
       { key: 'g7', start: 24, stop: 26, part: 'YZ' }
       ]
     tagsets_by_keys = dtags.get_tagsets_by_keys()
-    T?.eq tagsets_by_keys, { g1: { font: 'font1', 'shape-crossed': true }, g2: { font: 'font1', 'shape-ladder': true }, g3: { font: 'font1', 'shape-pointy': true }, g4: { font: 'font1', vowel: true, pushraise: { x: 100, y: 200 } }, g5: { font: 'font1', vowel: true, 'shape-pointy': true, 'shape-ladder': true }, g6: { font: 'font1', vowel: true }, g7: { font: 'font1' } }
+    T?.eq tagsets_by_keys, { g1: { font: 'font1', 'shape_crossed': true }, g2: { font: 'font1', 'shape_ladder': true }, g3: { font: 'font1', 'shape_pointy': true }, g4: { font: 'font1', vowel: true, pushraise: { x: 100, y: 200 } }, g5: { font: 'font1', vowel: true, 'shape_pointy': true, 'shape_ladder': true }, g6: { font: 'font1', vowel: true }, g7: { font: 'font1' } }
   done?() #.................................................................................................
 
 #-----------------------------------------------------------------------------------------------------------
@@ -600,13 +600,16 @@ _add_tagged_ranges = ( dtags ) ->
   { dba, }          = dtags
   #.........................................................................................................
   _add_tagged_ranges dtags
-  dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
+  # dtags.get_tagsets_by_keys()
+  # dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
+  console.table dba.list dba.query SQL"select * from t_tagged_ranges order by lo, hi, nr;"
+  console.table dba.list dba.query SQL"select * from t_tags_and_rangelists;"
   #.........................................................................................................
   do ->
-    # text  = "ARBITRARY TEXT"
-    text          = "ABCDEFGHIJKLMNOPQRSTUVWXYZAEIOUX"
-    html_tag_name = 't' ### TAINT should come from `cfg` ###
+    text          = "ARBITRARY TEXT"
+    # text          = "ABCDEFGHIJKLMNOPQRSTUVWXYZAEIOUX"
     # text          = "AAAEBCDE"
+    html_tag_name = 't' ### TAINT should come from `cfg` ###
     markup        = dtags._markup_text { text, }
     # stack         = []
     fallbacks     = freeze dtags.get_filtered_fallbacks()
@@ -615,15 +618,15 @@ _add_tagged_ranges = ( dtags ) ->
     #.......................................................................................................
     _as_html_attribute_value = ( value ) ->
       R = value
-      ### TAINT questionable choice since it makes attribute values ambiguous; make configurable ###
-      R = JSON.stringify R unless isa.text R
+      R = JSON.stringify R # unless isa.text R
       R = CND.escape_html R
       R = R.replace /'/g, '&#39;'
       return R
     #.......................................................................................................
-    for d in markup
-      tags      = { fallbacks..., d.tags..., }
-      { part, } = d.region
+    for region in markup
+      debug '^098^', region
+      tags      = { fallbacks..., region.tags..., }
+      { part, } = region
       atrs      = []
       for tag in tags_ordered
         continue unless ( value = tags[ tag ] )?
@@ -631,11 +634,11 @@ _add_tagged_ranges = ( dtags ) ->
         if value is true
           atrs.push "#{tag}"
           continue
+        ### NOTE using unescaped `tag` as tag name *should* be OK since whitespace, brackets etc cannot occur in tags ###
         value = _as_html_attribute_value value
-        ### TAINT must either validate `tag` or escape(?) it ###
         atrs.push "#{tag}='#{value}'"
       atrs = atrs.join ' '
-      opening_tag = "<#{html_tag_name} #{atrs}>#{part}</#{html_tag_name}>"
+      opening_tag = "<#{html_tag_name} #{atrs}>"
       closing_tag = "</#{html_tag_name}>"
       part        = CND.escape_html part
       info ( CND.lime opening_tag ) + ( CND.blue CND.reverse part ) + ( CND.gold closing_tag )
@@ -878,6 +881,7 @@ regex_demo = ->
 
 ############################################################################################################
 if module is require.main then do =>
+  # info '^3443^', JSON.parse '"helo w&#x6f;rld"'
   # test @, { timeout: 10e3, }
   # test @[ "DBA: tags must be declared" ]
   # test @[ "DBA: table getters" ]
