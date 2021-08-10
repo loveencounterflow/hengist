@@ -41,6 +41,7 @@
     "fraction.js": "^4.0.13",
     "get-source": "^2.0.11",
     "glob": "^7.1.6",
+    "got": "^11.8.2",
     "guy-test": "4.1.0",
     "hamt": "^2.2.2",
     "hollerith-codec": "3.0.1",
