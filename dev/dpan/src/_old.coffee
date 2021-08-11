@@ -179,49 +179,6 @@ demo = ->
   debug '^577^', dpan.dba.list dpan.dba.query SQL"select semver_satisfies( '1.2.5', '^1.2' );"
   return null
 
-#-----------------------------------------------------------------------------------------------------------
-demo_custom_require = ->
-  RPKGUP = await import( 'read-pkg-up' )
-  debug ( k for k of RPKGUP )
-  pkg_names_and_svranges = [
-    [ '@ef-carbon/deep-freeze',    '^1.0.1', ]
-    [ '@scotttrinh/number-ranges', '^2.1.0', ]
-    [ 'argparse',                  '^2.0.1', ]
-    [ 'better-sqlite3',            '7.4.0', ]
-    [ 'chance',                    '^1.1.7', ]
-    [ 'cnd',                       '^9.2.1', ]
-    ]
-  path  = '../../../lib/main.js'
-  path  = PATH.resolve PATH.join __dirname, path
-  { createRequire, } = require 'module'
-  rq    = createRequire path
-  for [ pkg_name, svrange, ] in pkg_names_and_svranges
-    dep_fspath        = rq.resolve pkg_name
-    dep_json_info     = RPKGUP.readPackageUpSync { cwd: dep_fspath, normalize: true, }
-    dep_json          = dep_json_info.packageJson
-    dep_version       = dep_json.version
-    dep_description   = dep_json.description
-    dep_keywords      = dep_json.keywords ? []
-    dep_json_fspath   = dep_json_info.path
-    info()
-    info ( CND.yellow pkg_name )
-    info ( CND.blue dep_fspath )
-    info ( CND.gold dep_keywords )
-    # info ( CND.lime dep_pkgj_fspath )
-    info dep_version
-    info dep_description
-    # info ( CND.lime FS.realpathSync dep_fspath )
-  return null
-
-
-############################################################################################################
-if module is require.main then do =>
-  # await demo()
-  await demo_custom_require()
-  # CP = require 'child_process'
-  # debug '^33442^', CP.execSync "npm view icql-dba@^6 dependencies", { encoding: 'utf-8', }
-  # debug '^33442^', CP.execSync "npm view icql-dba dependencies", { encoding: 'utf-8', }
-
 f = ->
   dpan          = new Dpan()
   pkg_name  = 'icql-dba-vars'
