@@ -1,13 +1,13 @@
 (function() {
   'use strict';
-  var CND, Dba, Dpan, FS, PATH, SQL, badge, debug, def, demo_custom_require, echo, freeze, glob, got, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Dba, Dpan, FS, PATH, SQL, badge, debug, def, demo_fs_walk_dep_infos, echo, freeze, glob, got, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
 
   rpr = CND.rpr;
 
-  badge = 'HENGIST/DEV/DPAN';
+  badge = 'DPAN/DEMOS';
 
   debug = CND.get_logger('debug', badge);
 
@@ -52,36 +52,48 @@
   ({Dpan} = require('../../../apps/dpan'));
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_custom_require = async function() {
-    var RPKGUP, dep_description, dep_fspath, dep_json, dep_json_fspath, dep_json_info, dep_keywords, dep_version, dpan, fallback, i, len, pkg_fspath, pkg_name, pkg_names_and_svranges, ref, svrange;
+  demo_fs_walk_dep_infos = async function() {
+    var RPKGUP, count, count_max, dep, dpan, fallback/* TAINT not strictly true */, pkg_fspath, pkg_name, ref;
     RPKGUP = (await import('read-pkg-up'));
     dpan = new Dpan();
-    pkg_names_and_svranges = [['@ef-carbon/deep-freeze', '^1.0.1'], ['@scotttrinh/number-ranges', '^2.1.0'], ['argparse', '^2.0.1'], ['better-sqlite3', '7.4.0'], ['chance', '^1.1.7'], ['cnd', '^9.2.1']];
-    pkg_fspath = '../../../lib/main.js';
+    pkg_fspath = '../../../';
     pkg_fspath = PATH.resolve(PATH.join(__dirname, pkg_fspath));
+    pkg_name = PATH.basename(pkg_fspath);
     fallback = null;
-    for (i = 0, len = pkg_names_and_svranges.length; i < len; i++) {
-      [pkg_name, svrange] = pkg_names_and_svranges[i];
-      dep_fspath = rq.resolve(pkg_name);
-      dep_json_info = (await dpan.fs_fetch_pkg_json_info({pkg_fspath, fallback}));
-      if (dep_json_info == null) {
-        warn(`unable to fetch package.json for ${pkg_fspath}`);
-        continue;
+    count = 0;
+    count_max = 20;
+    ref = dpan.fs_walk_dep_infos({pkg_fspath});
+    for await (dep of ref) {
+      count++;
+      if (count > count_max) {
+        break;
       }
-      dep_json = dep_json_info.packageJson;
-      dep_version = dep_json.version;
-      dep_description = dep_json.description;
-      dep_keywords = (ref = dep_json.keywords) != null ? ref : [];
-      dep_json_fspath = dep_json_info.path;
-      info();
-      info(CND.yellow(pkg_name));
-      info(CND.blue(dep_fspath));
-      info(CND.gold(dep_keywords));
-      // info ( CND.lime dep_pkgj_fspath )
-      info(dep_version);
-      info(dep_description);
+      // whisper '^850^', dep
+      info('^850^', dep.pkg_name, dep.pkg_version, `(${dep.dep_svrange})`, CND.yellow(dep.pkg_keywords.join(' ')));
+      urge('^850^', dep.pkg_deps);
+      continue;
     }
-    // info ( CND.lime FS.realpathSync dep_fspath )
+    /*
+    dep_fspath        = dpan.fs_resolve_dep_fspath { pkg_fspath, dep_name, }
+    dep_json_info     = await dpan.fs_fetch_pkg_json_info { pkg_fspath: dep_fspath, fallback, }
+    unless dep_json_info?
+      warn "unable to fetch package.json for #{dep_fspath}"
+      continue
+    debug '^33344^', ( k for k of dep_json_info )
+    dep_json          = dep_json_info.pkg_json
+    dep_version       = dep_json.version
+    dep_description   = dep_json.description
+    dep_keywords      = dep_json.keywords ? []
+    dep_json_fspath   = dep_json_info.path
+    info()
+    info ( CND.yellow dep_name )
+    info ( CND.blue dep_fspath )
+    info ( CND.gold dep_keywords )
+     * info ( CND.lime dep_pkgj_fspath )
+    info dep_version
+    info dep_description
+     * info ( CND.lime FS.realpathSync dep_fspath )
+     */
     return null;
   };
 
@@ -89,7 +101,7 @@
   if (module === require.main) {
     (async() => {
       // await demo()
-      return (await demo_custom_require());
+      return (await demo_fs_walk_dep_infos());
     })();
   }
 
