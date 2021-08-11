@@ -47,9 +47,21 @@ demo_db_add_pkg_info = ->
   pkg_fspath          = PATH.resolve PATH.join __dirname, pkg_fspath
   pkg_name            = PATH.basename pkg_fspath ### TAINT not strictly true ###
   pkg_info            = await dpan.fs_fetch_pkg_info { pkg_fspath, }
-  debug '^476^', ( k for k of pkg_info )
-  # debug '^476^', pkg_info
-  dpan.db_add_pkg_info { pkg_info, }
+  dpan.db_add_pkg_info pkg_info
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_db_add_pkg_infos = ->
+  dpan                  = new Dpan_next()
+  home_path             = PATH.resolve PATH.join __dirname, '../../../../'
+  project_path_pattern  = PATH.join home_path, '*/package.json'
+  debug '^488^', project_path_pattern
+  for project_path in glob.sync project_path_pattern
+    pkg_fspath  = PATH.dirname project_path
+    pkg_info    = await dpan.fs_fetch_pkg_info { pkg_fspath, }
+    # whisper '^564^', pkg_info
+    info '^564^', pkg_info.pkg_name, pkg_info.pkg_version
+    dpan.db_add_pkg_info pkg_info
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -74,6 +86,7 @@ demo_fs_walk_dep_infos = ->
 if module is require.main then do =>
   # await demo_fs_walk_dep_infos()
   # await demo_db_add_package()
-  await demo_db_add_pkg_info()
+  # await demo_db_add_pkg_info()
+  await demo_db_add_pkg_infos()
 
 
