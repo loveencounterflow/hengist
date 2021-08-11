@@ -52,58 +52,7 @@
   ({Dpan} = require('../../../apps/dpan'));
 
   //-----------------------------------------------------------------------------------------------------------
-  Dpan_next = class Dpan_next extends Dpan {
-    // #---------------------------------------------------------------------------------------------------------
-    // _db_add_pkg_name: ( pkg_name ) ->
-    //   @dba.run SQL"""insert into #{prefix}pkg_names ( pkg_name )
-    //     values ( $pkg_name )
-    //     on conflict do nothing;""", { pkg_name, }
-    //   return null
-
-      // #---------------------------------------------------------------------------------------------------------
-    // _db_add_pkg_version: ( pkg_version ) ->
-    //   @dba.run SQL"""insert into #{prefix}pkg_versions ( pkg_version )
-    //     values ( $pkg_version )
-    //     on conflict do nothing;""", { pkg_version, }
-    //   return null
-
-      // #---------------------------------------------------------------------------------------------------------
-    // _db_add_pkg_svrange: ( pkg_svrange ) ->
-    //   @dba.run SQL"""insert into #{prefix}pkg_svranges ( pkg_svrange )
-    //     values ( $pkg_svrange )
-    //     on conflict do nothing;""", { pkg_svrange, }
-    //   return null
-
-      //---------------------------------------------------------------------------------------------------------
-    db_add_pkg_info(cfg) {
-      /* TAINT validate */
-      var dep_name, dep_svrange, pkg_info, ref;
-      ({pkg_info} = cfg);
-      this.dba.run(this.sql.add_pkg_name, pkg_info);
-      this.dba.run(this.sql.add_pkg_version, pkg_info);
-      this.dba.run(this.sql.add_pkg, pkg_info);
-      ref = pkg_info.pkg_deps;
-      // @_db_add_pkg_name    pkg_info.pkg_name
-      // @_db_add_pkg_version pkg_info.pkg_version
-      // @dba.run SQL"""insert into #{prefix}pkgs ( pkg_name, pkg_version )
-      //   values ( $pkg_name, $pkg_version )
-      //   on conflict do nothing;""", pkg_info
-      //.......................................................................................................
-      for (dep_name in ref) {
-        dep_svrange = ref[dep_name];
-        this.dba.run(this.sql.add_pkg_name, {
-          pkg_name: dep_name
-        });
-        this.dba.run(this.sql.add_pkg_svrange, {
-          pkg_svrange: dep_svrange
-        });
-        this.dba.run(this.sql.add_pkg_dep, {...pkg_info, dep_name, dep_svrange});
-      }
-      //.......................................................................................................
-      return null;
-    }
-
-  };
+  Dpan_next = class Dpan_next extends Dpan {};
 
   //-----------------------------------------------------------------------------------------------------------
   demo_db_add_pkg_info = async function() {
@@ -121,6 +70,7 @@
       }
       return results;
     })());
+    // debug '^476^', pkg_info
     dpan.db_add_pkg_info({pkg_info});
     return null;
   };
