@@ -53,22 +53,21 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_custom_require = async function() {
-    var RPKGUP, createRequire, dep_description, dep_fspath, dep_json, dep_json_fspath, dep_json_info, dep_keywords, dep_version, dpan, i, len, path, pkg_name, pkg_names_and_svranges, ref, rq, svrange;
+    var RPKGUP, dep_description, dep_fspath, dep_json, dep_json_fspath, dep_json_info, dep_keywords, dep_version, dpan, fallback, i, len, pkg_fspath, pkg_name, pkg_names_and_svranges, ref, svrange;
     RPKGUP = (await import('read-pkg-up'));
     dpan = new Dpan();
-    return;
     pkg_names_and_svranges = [['@ef-carbon/deep-freeze', '^1.0.1'], ['@scotttrinh/number-ranges', '^2.1.0'], ['argparse', '^2.0.1'], ['better-sqlite3', '7.4.0'], ['chance', '^1.1.7'], ['cnd', '^9.2.1']];
-    path = '../../../lib/main.js';
-    path = PATH.resolve(PATH.join(__dirname, path));
-    ({createRequire} = require('module'));
-    rq = createRequire(path);
+    pkg_fspath = '../../../lib/main.js';
+    pkg_fspath = PATH.resolve(PATH.join(__dirname, pkg_fspath));
+    fallback = null;
     for (i = 0, len = pkg_names_and_svranges.length; i < len; i++) {
       [pkg_name, svrange] = pkg_names_and_svranges[i];
       dep_fspath = rq.resolve(pkg_name);
-      dep_json_info = RPKGUP.readPackageUpSync({
-        cwd: dep_fspath,
-        normalize: true
-      });
+      dep_json_info = (await dpan.fs_fetch_pkg_json_info({pkg_fspath, fallback}));
+      if (dep_json_info == null) {
+        warn(`unable to fetch package.json for ${pkg_fspath}`);
+        continue;
+      }
       dep_json = dep_json_info.packageJson;
       dep_version = dep_json.version;
       dep_description = dep_json.description;

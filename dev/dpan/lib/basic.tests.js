@@ -37,9 +37,6 @@
   //-----------------------------------------------------------------------------------------------------------
   test_fs_fetch_pkg_json_info = async function(T, fallback) {
     var Dpan, count, depth, dpan, error, has_fallback, pkg_fspath, pkg_json_info, pkg_name, ref;
-    if (T != null) {
-      T.halt_on_error();
-    }
     ({Dpan} = require(H.dpan_path));
     dpan = new Dpan();
     has_fallback = fallback !== void 0;
@@ -90,8 +87,30 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["dpan.fs_fetch_pkg_json_info 1"] = async function(T, done) {
+    if (T != null) {
+      T.halt_on_error();
+    }
     await test_fs_fetch_pkg_json_info(T, void 0);
     await test_fs_fetch_pkg_json_info(T, null);
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["dpan.fs_resolve_dep_fspath 1"] = function(T, done) {
+    var Dpan, dep_fspath, dep_name, dpan, pkg_fspath;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Dpan} = require(H.dpan_path));
+    dpan = new Dpan();
+    dep_name = 'cnd';
+    // pkg_fspath        = '../../../lib/main.js'
+    pkg_fspath = '../../..';
+    pkg_fspath = PATH.resolve(PATH.join(__dirname, pkg_fspath));
+    debug('^3488^', {pkg_fspath});
+    dep_fspath = dpan.fs_resolve_dep_fspath({pkg_fspath, dep_name});
+    debug('^3488^', {dep_fspath});
+    T.ok((require(dep_name)) === (require(dep_fspath)));
     return typeof done === "function" ? done() : void 0;
   };
 
