@@ -24,7 +24,7 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 
 #-----------------------------------------------------------------------------------------------------------
-test_fs_fetch_pkg_json_info = ( T, fallback ) ->
+test_fs_fetch_pkg_info = ( T, fallback ) ->
   { Dpan }          = require H.dpan_path
   dpan              = new Dpan()
   has_fallback      = fallback isnt undefined
@@ -39,9 +39,9 @@ test_fs_fetch_pkg_json_info = ( T, fallback ) ->
     debug '^3736^', pkg_fspath, count, depth
     try
       if has_fallback
-        pkg_json_info = await dpan.fs_fetch_pkg_json_info { pkg_fspath, fallback, }
+        pkg_json_info = await dpan.fs_fetch_pkg_info { pkg_fspath, fallback, }
       else
-        pkg_json_info = await dpan.fs_fetch_pkg_json_info { pkg_fspath, }
+        pkg_json_info = await dpan.fs_fetch_pkg_info { pkg_fspath, }
     catch error
       T?.eq ( type_of error ), 'dba_fs_pkg_json_not_found'
       throw error unless ( type_of error ) is 'dba_fs_pkg_json_not_found'
@@ -59,10 +59,10 @@ test_fs_fetch_pkg_json_info = ( T, fallback ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "dpan.fs_fetch_pkg_json_info 1" ] = ( T, done ) ->
+@[ "dpan.fs_fetch_pkg_info 1" ] = ( T, done ) ->
   T?.halt_on_error()
-  await test_fs_fetch_pkg_json_info T, undefined
-  await test_fs_fetch_pkg_json_info T, null
+  await test_fs_fetch_pkg_info T, undefined
+  await test_fs_fetch_pkg_info T, null
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
