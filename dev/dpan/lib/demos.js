@@ -68,8 +68,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_db_add_pkg_infos = async function() {
-    var dpan, home_path, i, len, pkg_fspath, pkg_info, project_path, project_path_pattern, ref;
-    dpan = new Dpan_next();
+    var dpan, entry, error, home_path, i, j, len, len1, pkg_fspath, pkg_info, project_path, project_path_pattern, ref, skipped;
+    dpan = new Dpan_next({
+      recreate: true
+    });
+    skipped = [];
     home_path = PATH.resolve(PATH.join(__dirname, '../../../../'));
     project_path_pattern = PATH.join(home_path, '*/package.json');
     debug('^488^', project_path_pattern);
@@ -77,11 +80,27 @@
     for (i = 0, len = ref.length; i < len; i++) {
       project_path = ref[i];
       pkg_fspath = PATH.dirname(project_path);
-      pkg_info = (await dpan.fs_fetch_pkg_info({pkg_fspath}));
+      try {
+        pkg_info = (await dpan.fs_fetch_pkg_info({pkg_fspath}));
+        dpan.db_add_pkg_info(pkg_info);
+      } catch (error1) {
+        error = error1;
+        warn(`error occurred when trying to add ${pkg_fspath}: ${error.message}; skipping`);
+        skipped.push(pkg_fspath);
+        continue;
+      }
       // whisper '^564^', pkg_info
       info('^564^', pkg_info.pkg_name, pkg_info.pkg_version);
-      dpan.db_add_pkg_info(pkg_info);
     }
+    //.........................................................................................................
+    if (skipped.length > 0) {
+      warn("some paths looked like projects but caused errors (see above):");
+      for (j = 0, len1 = skipped.length; j < len1; j++) {
+        entry = skipped[j];
+        warn('  ' + entry);
+      }
+    }
+    //.........................................................................................................
     return null;
   };
 
