@@ -36,9 +36,64 @@ semver_cmp                = require 'semver/functions/cmp'
 
 
 #-----------------------------------------------------------------------------------------------------------
+class Dpan_next extends Dpan
+
+  # #---------------------------------------------------------------------------------------------------------
+  # _db_add_pkg_name: ( pkg_name ) ->
+  #   @dba.run SQL"""insert into #{prefix}pkg_names ( pkg_name )
+  #     values ( $pkg_name )
+  #     on conflict do nothing;""", { pkg_name, }
+  #   return null
+
+  # #---------------------------------------------------------------------------------------------------------
+  # _db_add_pkg_version: ( pkg_version ) ->
+  #   @dba.run SQL"""insert into #{prefix}pkg_versions ( pkg_version )
+  #     values ( $pkg_version )
+  #     on conflict do nothing;""", { pkg_version, }
+  #   return null
+
+  # #---------------------------------------------------------------------------------------------------------
+  # _db_add_pkg_svrange: ( pkg_svrange ) ->
+  #   @dba.run SQL"""insert into #{prefix}pkg_svranges ( pkg_svrange )
+  #     values ( $pkg_svrange )
+  #     on conflict do nothing;""", { pkg_svrange, }
+  #   return null
+
+  #---------------------------------------------------------------------------------------------------------
+  db_add_pkg_info: ( cfg ) ->
+    ### TAINT validate ###
+    { pkg_info, } = cfg
+    @dba.run @sql.add_pkg_name,     pkg_info
+    @dba.run @sql.add_pkg_version,  pkg_info
+    @dba.run @sql.add_pkg,          pkg_info
+    # @_db_add_pkg_name    pkg_info.pkg_name
+    # @_db_add_pkg_version pkg_info.pkg_version
+    # @dba.run SQL"""insert into #{prefix}pkgs ( pkg_name, pkg_version )
+    #   values ( $pkg_name, $pkg_version )
+    #   on conflict do nothing;""", pkg_info
+    #.......................................................................................................
+    for dep_name, dep_svrange of pkg_info.pkg_deps
+      @dba.run @sql.add_pkg_name,     { pkg_name: dep_name, }
+      @dba.run @sql.add_pkg_svrange,  { pkg_svrange: dep_svrange, }
+      @dba.run @sql.add_pkg_dep,      { pkg_info..., dep_name, dep_svrange, }
+    #.......................................................................................................
+    return null
+
+
+#-----------------------------------------------------------------------------------------------------------
+demo_db_add_pkg_info = ->
+  dpan                = new Dpan_next()
+  pkg_fspath          = '../../../'
+  pkg_fspath          = PATH.resolve PATH.join __dirname, pkg_fspath
+  pkg_name            = PATH.basename pkg_fspath ### TAINT not strictly true ###
+  pkg_info            = await dpan.fs_fetch_pkg_info { pkg_fspath, }
+  debug '^476^', ( k for k of pkg_info )
+  dpan.db_add_pkg_info { pkg_info, }
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 demo_fs_walk_dep_infos = ->
-  RPKGUP  = await import( 'read-pkg-up' )
-  dpan        = new Dpan()
+  dpan                = new Dpan()
   pkg_fspath          = '../../../'
   pkg_fspath          = PATH.resolve PATH.join __dirname, pkg_fspath
   pkg_name            = PATH.basename pkg_fspath ### TAINT not strictly true ###
@@ -51,35 +106,13 @@ demo_fs_walk_dep_infos = ->
     # whisper '^850^', dep
     info '^850^', dep.pkg_name, dep.pkg_version, "(#{dep.dep_svrange})", ( CND.yellow dep.pkg_keywords.join ' ' )
     urge '^850^', dep.pkg_deps
-    continue
-    ###
-    dep_fspath        = dpan.fs_resolve_dep_fspath { pkg_fspath, dep_name, }
-    dep_json_info     = await dpan.fs_fetch_pkg_json_info { pkg_fspath: dep_fspath, fallback, }
-    unless dep_json_info?
-      warn "unable to fetch package.json for #{dep_fspath}"
-      continue
-    debug '^33344^', ( k for k of dep_json_info )
-    dep_json          = dep_json_info.pkg_json
-    dep_version       = dep_json.version
-    dep_description   = dep_json.description
-    dep_keywords      = dep_json.keywords ? []
-    dep_json_fspath   = dep_json_info.path
-    info()
-    info ( CND.yellow dep_name )
-    info ( CND.blue dep_fspath )
-    info ( CND.gold dep_keywords )
-    # info ( CND.lime dep_pkgj_fspath )
-    info dep_version
-    info dep_description
-    # info ( CND.lime FS.realpathSync dep_fspath )
-    ###
   return null
 
 
 ############################################################################################################
 if module is require.main then do =>
-  # await demo()
-  await demo_fs_walk_dep_infos()
-  # CP = require 'child_process'
-  # debug '^33442^', CP.execSync "npm view icql-dba@^6 dependencies", { encoding: 'utf-8', }
-  # debug '^33442^', CP.execSync "npm view icql-dba dependencies", { encoding: 'utf-8', }
+  # await demo_fs_walk_dep_infos()
+  # await demo_db_add_package()
+  await demo_db_add_pkg_info()
+
+
