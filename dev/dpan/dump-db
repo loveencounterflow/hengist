@@ -6,15 +6,15 @@ db_path='../../../dpan/dpan.sqlite'
 
 target_path='/tmp/dpan.txt'
 echo '' > "$target_path"
-printf '\ndpan_deps\n'                                  >> "$target_path"
-sqlite3 "$db_path" "select * from dpan_deps;"          >> "$target_path"
-printf '\ndpan_pkg_versions\n'                          >> "$target_path"
-sqlite3 "$db_path" "select * from dpan_pkg_versions;"  >> "$target_path"
-printf '\ndpan_pkg_names\n'                             >> "$target_path"
-sqlite3 "$db_path" "select * from dpan_pkg_names;"     >> "$target_path"
-printf '\ndpan_pkg_svranges\n'                          >> "$target_path"
-sqlite3 "$db_path" "select * from dpan_pkg_svranges;"  >> "$target_path"
-printf '\ndpan_pkgs\n'                                  >> "$target_path"
-sqlite3 "$db_path" "select * from dpan_pkgs;"          >> "$target_path"
+printf '\ndpan_deps\n'                                            >> "$target_path"
+sqlite3 "$db_path" "select * from dpan_deps order by 1;"          >> "$target_path"
+printf '\ndpan_pkg_versions\n'                                    >> "$target_path"
+sqlite3 "$db_path" "select * from dpan_pkg_versions order by 1;"  >> "$target_path"
+printf '\ndpan_pkg_names\n'                                       >> "$target_path"
+sqlite3 "$db_path" "select * from dpan_pkg_names order by 1;"     >> "$target_path"
+printf '\ndpan_pkg_svranges\n'                                    >> "$target_path"
+sqlite3 "$db_path" "select * from dpan_pkg_svranges order by 1;"  >> "$target_path"
+printf '\ndpan_pkgs\n'                                            >> "$target_path"
+sqlite3 "$db_path" "select * from dpan_pkgs order by 1;"          >> "$target_path"
 
 
