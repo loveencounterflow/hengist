@@ -87,6 +87,7 @@
     "postgres": "^1.0.2",
     "random-ext": "2.6.4",
     "re2": "^1.15.9",
+    "read-pkg-up": "^8.0.0",
     "readable-stream": "^3.6.0",
     "rustybuzz-wasm": "^0.1.2",
     "semver": "^7.3.5",
