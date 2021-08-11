@@ -25,7 +25,6 @@ types                     = new ( require 'intertype' ).Intertype
 
 #-----------------------------------------------------------------------------------------------------------
 test_fs_fetch_pkg_json_info = ( T, fallback ) ->
-  T?.halt_on_error()
   { Dpan }          = require H.dpan_path
   dpan              = new Dpan()
   has_fallback      = fallback isnt undefined
@@ -61,8 +60,24 @@ test_fs_fetch_pkg_json_info = ( T, fallback ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "dpan.fs_fetch_pkg_json_info 1" ] = ( T, done ) ->
+  T?.halt_on_error()
   await test_fs_fetch_pkg_json_info T, undefined
   await test_fs_fetch_pkg_json_info T, null
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "dpan.fs_resolve_dep_fspath 1" ] = ( T, done ) ->
+  T?.halt_on_error()
+  { Dpan }          = require H.dpan_path
+  dpan              = new Dpan()
+  dep_name          = 'cnd'
+  # pkg_fspath        = '../../../lib/main.js'
+  pkg_fspath        = '../../..'
+  pkg_fspath        = PATH.resolve PATH.join __dirname, pkg_fspath
+  debug '^3488^', { pkg_fspath, }
+  dep_fspath        = dpan.fs_resolve_dep_fspath { pkg_fspath, dep_name, }
+  debug '^3488^', { dep_fspath, }
+  T.ok ( require dep_name ) is ( require dep_fspath )
   done?()
 
 
