@@ -40,34 +40,6 @@ f = ->
         # debug ( CND.grey dep_path ), ( CND.gold dep_name ), ( CND.lime dep_version )
     return null
 class X
-  #=========================================================================================================
-  # RETRIEVE CANONICAL PACKAGE URL
-  #---------------------------------------------------------------------------------------------------------
-  _url_from_vpackage_d_homepage: ( vpackage_d ) ->
-    if ( R = vpackage_d.homepage ? null )?
-      return R.replace /#readme$/, ''
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  _url_from_vpackage_d_repository: ( vpackage_d ) ->
-    if ( R = vpackage_d.repository?.url  ? null )?
-      return R.replace /^(git\+)?(.+?)(\.git)?$/, '$2'
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  _url_from_vpackage_d_bugs: ( vpackage_d ) ->
-    if ( R = vpackage_d.bugs?.url        ? null )?
-      return R.replace /\/issues$/, ''
-    return null
-
-  #---------------------------------------------------------------------------------------------------------
-  get_package_url: ( package_d, version ) ->
-    unless ( vpackage_d = package_d.versions?[ version ] ? null )?
-      throw new Error "^37596^ unknown version: #{rpr version}"
-    return R if ( R = @_url_from_vpackage_d_homepage    vpackage_d )?
-    return R if ( R = @_url_from_vpackage_d_repository  vpackage_d )?
-    return R if ( R = @_url_from_vpackage_d_bugs        vpackage_d )?
-    return null
 
 
   #=========================================================================================================
@@ -102,82 +74,6 @@ class X
     # debug '^443^', ( k for k of package_d.versions[ '0.2.1' ].dependencies )
     return @_package_infos_from_package_d_and_version package_d, version
 
-#-----------------------------------------------------------------------------------------------------------
-register_package = ( dpan, pkg_name, pkg_version ) ->
-  prefix          = dpan.cfg.prefix
-  ### TAINT code duplication, same logic in SQL ###
-  pkg_vname   = "#{pkg_name}@#{pkg_version}"
-  #.........................................................................................................
-  dpan._add_package_name = ( pkg_name ) ->
-    @dba.run SQL"""insert into #{prefix}pkg_names ( pkg_name )
-      values ( $pkg_name )
-      on conflict do nothing;""", { pkg_name, }
-    return null
-  #.........................................................................................................
-  dpan._add_package_version = ( pkg_version ) ->
-    @dba.run SQL"""insert into #{prefix}pkg_versions ( pkg_version )
-      values ( $pkg_version )
-      on conflict do nothing;""", { pkg_version, }
-    return null
-  #.........................................................................................................
-  dpan._add_package = ( package_info ) ->
-    @dba.run @sql.add_pkg_name,     package_info
-    @dba.run @sql.add_pkg_version,  package_info
-    @dba.run @sql.add_pkg,          package_info
-    # @_add_package_name    package_info.pkg_name
-    # @_add_package_version package_info.pkg_version
-    # @dba.run SQL"""insert into #{prefix}pkgs ( pkg_name, pkg_version )
-    #   values ( $pkg_name, $pkg_version )
-    #   on conflict do nothing;""", package_info
-    #.......................................................................................................
-    for dep_name, dep_version of package_info.dependencies
-      ### TAINT code duplication, same logic in SQL ###
-      dep_vname   = "#{dep_name}@#{dep_version}"
-      @_add_package_name    dep_name
-      @_add_package_version dep_version
-      @dba.run SQL"""insert into #{prefix}pkgs ( pkg_name, pkg_version )
-        values ( $pkg_name, $pkg_version )
-        on conflict do nothing;""", { pkg_name: dep_name, pkg_version: dep_version, }
-      @dba.run SQL"""insert into #{prefix}deps ( pkg_vname, dep_vname )
-        values ( $pkg_vname, $dep_vname )
-        on conflict do nothing;""", { pkg_vname, dep_vname, }
-    #.......................................................................................................
-    return null
-  #.........................................................................................................
-  package_info = await dpan.fetch_package_infos pkg_name, pkg_version
-  info '^677^', JSON.stringify package_info, null, '  '
-  #.........................................................................................................
-  dpan._add_package package_info
-  # for version in package_info.versions
-  #.........................................................................................................
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-demo = ->
-  dpan            = new Dpan { recreate: true, }
-  pkgs = [
-    { pkg_name: 'cnd',                pkg_version: '9.2.2', }
-    # { pkg_name: 'csv-parser',         pkg_version: '3.0.0', }
-    # { pkg_name: 'del',                pkg_version: '6.0.0', }
-    # { pkg_name: 'hollerith-codec',    pkg_version: '3.0.1', }
-    # { pkg_name: 'icql-dba',           pkg_version: '7.2.0', }
-    # { pkg_name: 'icql-dba-tags',      pkg_version: '0.2.1', }
-    # { pkg_name: 'intertype',          pkg_version: '7.6.7', }
-    # { pkg_name: 'is-stream',          pkg_version: '2.0.0', }
-    # { pkg_name: 'jsx-number-format',  pkg_version: '0.1.4', }
-    # { pkg_name: 'letsfreezethat',     pkg_version: '3.1.0', }
-    # { pkg_name: 'multimix',           pkg_version: '5.0.0', }
-    # { pkg_name: 'mysql-tokenizer',    pkg_version: '1.0.7', }
-    # { pkg_name: 'n-readlines',        pkg_version: '1.0.1', }
-    # { pkg_name: 'temp-dir',           pkg_version: '2.0.0', }
-    # { pkg_name: 'tempy',              pkg_version: '1.0.1', }
-    # { pkg_name: 'type-fest',          pkg_version: '0.16.0', }
-    { pkg_name: 'unique-string',      pkg_version: '2.0.0', }
-    ]
-  for { pkg_name, pkg_version, } in pkgs
-    await register_package dpan, pkg_name, pkg_version
-  debug '^577^', dpan.dba.list dpan.dba.query SQL"select semver_satisfies( '1.2.5', '^1.2' );"
-  return null
 
 f = ->
   dpan          = new Dpan()
