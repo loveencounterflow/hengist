@@ -1,5 +1,5 @@
 (function() {
-  var X, demo, f, register_package;
+  var X, f;
 
   f = function() {
     return {
@@ -72,53 +72,6 @@
 
   X = class X {
     //=========================================================================================================
-    // RETRIEVE CANONICAL PACKAGE URL
-    //---------------------------------------------------------------------------------------------------------
-    _url_from_vpackage_d_homepage(vpackage_d) {
-      var R, ref;
-      if ((R = (ref = vpackage_d.homepage) != null ? ref : null) != null) {
-        return R.replace(/#readme$/, '');
-      }
-      return null;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    _url_from_vpackage_d_repository(vpackage_d) {
-      var R, ref, ref1;
-      if ((R = (ref = (ref1 = vpackage_d.repository) != null ? ref1.url : void 0) != null ? ref : null) != null) {
-        return R.replace(/^(git\+)?(.+?)(\.git)?$/, '$2');
-      }
-      return null;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    _url_from_vpackage_d_bugs(vpackage_d) {
-      var R, ref, ref1;
-      if ((R = (ref = (ref1 = vpackage_d.bugs) != null ? ref1.url : void 0) != null ? ref : null) != null) {
-        return R.replace(/\/issues$/, '');
-      }
-      return null;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    get_package_url(package_d, version) {
-      var R, ref, ref1, vpackage_d;
-      if ((vpackage_d = (ref = (ref1 = package_d.versions) != null ? ref1[version] : void 0) != null ? ref : null) == null) {
-        throw new Error(`^37596^ unknown version: ${rpr(version)}`);
-      }
-      if ((R = this._url_from_vpackage_d_homepage(vpackage_d)) != null) {
-        return R;
-      }
-      if ((R = this._url_from_vpackage_d_repository(vpackage_d)) != null) {
-        return R;
-      }
-      if ((R = this._url_from_vpackage_d_bugs(vpackage_d)) != null) {
-        return R;
-      }
-      return null;
-    }
-
-    //=========================================================================================================
 
     //---------------------------------------------------------------------------------------------------------
     _npm_api_url_from_package_name(pkg_name) {
@@ -164,107 +117,6 @@
       return this._package_infos_from_package_d_and_version(package_d, version);
     }
 
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  register_package = async function(dpan, pkg_name, pkg_version) {
-    /* TAINT code duplication, same logic in SQL */
-    var package_info, pkg_vname, prefix;
-    prefix = dpan.cfg.prefix;
-    pkg_vname = `${pkg_name}@${pkg_version}`;
-    //.........................................................................................................
-    dpan._add_package_name = function(pkg_name) {
-      this.dba.run(SQL`insert into ${prefix}pkg_names ( pkg_name )
-values ( $pkg_name )
-on conflict do nothing;`, {pkg_name});
-      return null;
-    };
-    //.........................................................................................................
-    dpan._add_package_version = function(pkg_version) {
-      this.dba.run(SQL`insert into ${prefix}pkg_versions ( pkg_version )
-values ( $pkg_version )
-on conflict do nothing;`, {pkg_version});
-      return null;
-    };
-    //.........................................................................................................
-    dpan._add_package = function(package_info) {
-      /* TAINT code duplication, same logic in SQL */
-      var dep_name, dep_version, dep_vname, ref;
-      this.dba.run(this.sql.add_pkg_name, package_info);
-      this.dba.run(this.sql.add_pkg_version, package_info);
-      this.dba.run(this.sql.add_pkg, package_info);
-      ref = package_info.dependencies;
-      // @_add_package_name    package_info.pkg_name
-      // @_add_package_version package_info.pkg_version
-      // @dba.run SQL"""insert into #{prefix}pkgs ( pkg_name, pkg_version )
-      //   values ( $pkg_name, $pkg_version )
-      //   on conflict do nothing;""", package_info
-      //.......................................................................................................
-      for (dep_name in ref) {
-        dep_version = ref[dep_name];
-        dep_vname = `${dep_name}@${dep_version}`;
-        this._add_package_name(dep_name);
-        this._add_package_version(dep_version);
-        this.dba.run(SQL`insert into ${prefix}pkgs ( pkg_name, pkg_version )
-values ( $pkg_name, $pkg_version )
-on conflict do nothing;`, {
-          pkg_name: dep_name,
-          pkg_version: dep_version
-        });
-        this.dba.run(SQL`insert into ${prefix}deps ( pkg_vname, dep_vname )
-values ( $pkg_vname, $dep_vname )
-on conflict do nothing;`, {pkg_vname, dep_vname});
-      }
-      //.......................................................................................................
-      return null;
-    };
-    //.........................................................................................................
-    package_info = (await dpan.fetch_package_infos(pkg_name, pkg_version));
-    info('^677^', JSON.stringify(package_info, null, '  '));
-    //.........................................................................................................
-    dpan._add_package(package_info);
-    // for version in package_info.versions
-    //.........................................................................................................
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  demo = async function() {
-    var dpan, i, len, pkg_name, pkg_version, pkgs;
-    dpan = new Dpan({
-      recreate: true
-    });
-    pkgs = [
-      {
-        pkg_name: 'cnd',
-        pkg_version: '9.2.2'
-      },
-      {
-        // { pkg_name: 'csv-parser',         pkg_version: '3.0.0', }
-        // { pkg_name: 'del',                pkg_version: '6.0.0', }
-        // { pkg_name: 'hollerith-codec',    pkg_version: '3.0.1', }
-        // { pkg_name: 'icql-dba',           pkg_version: '7.2.0', }
-        // { pkg_name: 'icql-dba-tags',      pkg_version: '0.2.1', }
-        // { pkg_name: 'intertype',          pkg_version: '7.6.7', }
-        // { pkg_name: 'is-stream',          pkg_version: '2.0.0', }
-        // { pkg_name: 'jsx-number-format',  pkg_version: '0.1.4', }
-        // { pkg_name: 'letsfreezethat',     pkg_version: '3.1.0', }
-        // { pkg_name: 'multimix',           pkg_version: '5.0.0', }
-        // { pkg_name: 'mysql-tokenizer',    pkg_version: '1.0.7', }
-        // { pkg_name: 'n-readlines',        pkg_version: '1.0.1', }
-        // { pkg_name: 'temp-dir',           pkg_version: '2.0.0', }
-        // { pkg_name: 'tempy',              pkg_version: '1.0.1', }
-        // { pkg_name: 'type-fest',          pkg_version: '0.16.0', }
-        pkg_name: 'unique-string',
-        pkg_version: '2.0.0'
-      }
-    ];
-    for (i = 0, len = pkgs.length; i < len; i++) {
-      ({pkg_name, pkg_version} = pkgs[i]);
-      await register_package(dpan, pkg_name, pkg_version);
-    }
-    debug('^577^', dpan.dba.list(dpan.dba.query(SQL`select semver_satisfies( '1.2.5', '^1.2' );`)));
-    return null;
   };
 
   f = async function() {

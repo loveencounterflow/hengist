@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, badge, debug, echo, help, info, isa, rpr, test, test_fs_fetch_pkg_json_info, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, badge, debug, echo, help, info, isa, rpr, test, test_fs_fetch_pkg_info, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -35,7 +35,7 @@
   ({isa, type_of, validate, validate_list_of} = types.export());
 
   //-----------------------------------------------------------------------------------------------------------
-  test_fs_fetch_pkg_json_info = async function(T, fallback) {
+  test_fs_fetch_pkg_info = async function(T, fallback) {
     var Dpan, count, depth, dpan, error, has_fallback, pkg_fspath, pkg_json_info, pkg_name, ref;
     ({Dpan} = require(H.dpan_path));
     dpan = new Dpan();
@@ -53,9 +53,9 @@
       debug('^3736^', pkg_fspath, count, depth);
       try {
         if (has_fallback) {
-          pkg_json_info = (await dpan.fs_fetch_pkg_json_info({pkg_fspath, fallback}));
+          pkg_json_info = (await dpan.fs_fetch_pkg_info({pkg_fspath, fallback}));
         } else {
-          pkg_json_info = (await dpan.fs_fetch_pkg_json_info({pkg_fspath}));
+          pkg_json_info = (await dpan.fs_fetch_pkg_info({pkg_fspath}));
         }
       } catch (error1) {
         error = error1;
@@ -86,12 +86,12 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["dpan.fs_fetch_pkg_json_info 1"] = async function(T, done) {
+  this["dpan.fs_fetch_pkg_info 1"] = async function(T, done) {
     if (T != null) {
       T.halt_on_error();
     }
-    await test_fs_fetch_pkg_json_info(T, void 0);
-    await test_fs_fetch_pkg_json_info(T, null);
+    await test_fs_fetch_pkg_info(T, void 0);
+    await test_fs_fetch_pkg_info(T, null);
     return typeof done === "function" ? done() : void 0;
   };
 
