@@ -38,46 +38,6 @@ semver_cmp                = require 'semver/functions/cmp'
 #-----------------------------------------------------------------------------------------------------------
 class Dpan_next extends Dpan
 
-  # #---------------------------------------------------------------------------------------------------------
-  # _db_add_pkg_name: ( pkg_name ) ->
-  #   @dba.run SQL"""insert into #{prefix}pkg_names ( pkg_name )
-  #     values ( $pkg_name )
-  #     on conflict do nothing;""", { pkg_name, }
-  #   return null
-
-  # #---------------------------------------------------------------------------------------------------------
-  # _db_add_pkg_version: ( pkg_version ) ->
-  #   @dba.run SQL"""insert into #{prefix}pkg_versions ( pkg_version )
-  #     values ( $pkg_version )
-  #     on conflict do nothing;""", { pkg_version, }
-  #   return null
-
-  # #---------------------------------------------------------------------------------------------------------
-  # _db_add_pkg_svrange: ( pkg_svrange ) ->
-  #   @dba.run SQL"""insert into #{prefix}pkg_svranges ( pkg_svrange )
-  #     values ( $pkg_svrange )
-  #     on conflict do nothing;""", { pkg_svrange, }
-  #   return null
-
-  #---------------------------------------------------------------------------------------------------------
-  db_add_pkg_info: ( cfg ) ->
-    ### TAINT validate ###
-    { pkg_info, } = cfg
-    @dba.run @sql.add_pkg_name,     pkg_info
-    @dba.run @sql.add_pkg_version,  pkg_info
-    @dba.run @sql.add_pkg,          pkg_info
-    # @_db_add_pkg_name    pkg_info.pkg_name
-    # @_db_add_pkg_version pkg_info.pkg_version
-    # @dba.run SQL"""insert into #{prefix}pkgs ( pkg_name, pkg_version )
-    #   values ( $pkg_name, $pkg_version )
-    #   on conflict do nothing;""", pkg_info
-    #.......................................................................................................
-    for dep_name, dep_svrange of pkg_info.pkg_deps
-      @dba.run @sql.add_pkg_name,     { pkg_name: dep_name, }
-      @dba.run @sql.add_pkg_svrange,  { pkg_svrange: dep_svrange, }
-      @dba.run @sql.add_pkg_dep,      { pkg_info..., dep_name, dep_svrange, }
-    #.......................................................................................................
-    return null
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -88,6 +48,7 @@ demo_db_add_pkg_info = ->
   pkg_name            = PATH.basename pkg_fspath ### TAINT not strictly true ###
   pkg_info            = await dpan.fs_fetch_pkg_info { pkg_fspath, }
   debug '^476^', ( k for k of pkg_info )
+  # debug '^476^', pkg_info
   dpan.db_add_pkg_info { pkg_info, }
   return null
 
