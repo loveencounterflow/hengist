@@ -35,6 +35,7 @@ specifiers:
   hollerith-codec: 3.0.1
   icql: 5.3.0
   icql-dba: 7.2.0
+  icql-dba-vars: 1.0.0
   icql515: npm:icql@5.1.5
   immer: 9.0.1
   immutable: ^4.0.0-rc.12
@@ -129,6 +130,7 @@ dependencies:
   hollerith-codec: 3.0.1
   icql: 5.3.0
   icql-dba: 7.2.0
+  icql-dba-vars: 1.0.0
   icql515: /icql/5.1.5
   immer: 9.0.1
   immutable: 4.0.0-rc.12
@@ -1730,6 +1732,15 @@ packages:
   /hyphenopoly/4.10.0:
     resolution: {integrity: sha512-cAc1QhxE2wB7aCv8uGi23vFzGcoRGbgaLH3NNcnrjw9NlYdf/STS6bIH5XyEkQzXspkbLJKHe6W+qTHex2yuNg==}
     engines: {node: '>=10.0.0'}
+    dev: false
+
+  /icql-dba-vars/1.0.0:
+    resolution: {integrity: sha512-iJt+7Toju4iwqTAjjQJQerNKqGqRfFTaU0flgK9iJEh1Xifj/Kw0W6hk1IMWBzQDrTzeO70ukCd3NtJj4Hv18Q==}
+    dependencies:
+      cnd: 9.2.2
+      icql-dba: 7.2.0
+      intertype: 7.6.7
+      letsfreezethat: 3.1.0
     dev: false
 
   /icql-dba/7.2.0:
