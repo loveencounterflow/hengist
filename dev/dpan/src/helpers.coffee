@@ -25,12 +25,12 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 do =>
   if '--dpan-use-installed' in process.argv
-    H.dpan_use_installed  = true
-    H.dpan_path           = 'dpan'
+    H.dpan_use_installed      = true
+    H.dpan_path               = 'dpan'
     message                   = "using installed version of dpan"
   else
-    H.dpan_use_installed  = false
-    H.dpan_path           = '../../../apps/dpan'
+    H.dpan_use_installed      = false
+    H.dpan_path               = PATH.resolve PATH.join __dirname, '../../../apps/dpan'
     message                   = "using linked dpan"
   debug '^3337^', CND.reverse message
   process.on 'exit', ->
