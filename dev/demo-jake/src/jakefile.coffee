@@ -89,7 +89,7 @@ task 'H', [ 'A', 'B', ], -> new Promise ( resolve ) ->
 #-----------------------------------------------------------------------------------------------------------
 task 'git-updates', [
   'git-update-lib'
-  'git-update-readmes'
+  # 'git-update-readmes'
   'git-update-dependencies'
   'git-status' ],
   -> new Promise ( resolve ) -> resolve()
