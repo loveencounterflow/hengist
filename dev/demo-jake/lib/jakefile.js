@@ -152,7 +152,12 @@
   });
 
   //-----------------------------------------------------------------------------------------------------------
-  task('git-updates', ['git-update-lib', 'git-update-readmes', 'git-update-dependencies', 'git-status'], function() {
+  task('git-updates', [
+    'git-update-lib',
+    // 'git-update-readmes'
+    'git-update-dependencies',
+    'git-status'
+  ], function() {
     return new Promise(function(resolve) {
       return resolve();
     });
@@ -227,3 +232,5 @@
   }
 
 }).call(this);
+
+//# sourceMappingURL=jakefile.js.map

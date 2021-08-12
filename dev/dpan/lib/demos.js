@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dba, Dpan, Dpan_next, FS, PATH, SQL, badge, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, echo, freeze, glob, got, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Dba, FS, H, PATH, SQL, badge, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, demo_variables, echo, freeze, glob, got, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -49,15 +49,17 @@
 
   semver_cmp = require('semver/functions/cmp');
 
-  ({Dpan} = require('../../../apps/dpan'));
+  H = require('./helpers');
 
-  //-----------------------------------------------------------------------------------------------------------
-  Dpan_next = class Dpan_next extends Dpan {};
+  // #-----------------------------------------------------------------------------------------------------------
+  // class Dpan_next extends Dpan
 
   //-----------------------------------------------------------------------------------------------------------
   demo_db_add_pkg_info = async function() {
-    var dpan, pkg_fspath, pkg_info/* TAINT not strictly true */, pkg_name;
-    dpan = new Dpan_next();
+    var Dpan, dpan, pkg_fspath, pkg_info/* TAINT not strictly true */, pkg_name;
+    ({Dpan} = require(H.dpan_path));
+    // dpan                = new Dpan_next()
+    dpan = new Dpan();
     pkg_fspath = '../../../';
     pkg_fspath = PATH.resolve(PATH.join(__dirname, pkg_fspath));
     pkg_name = PATH.basename(pkg_fspath);
@@ -68,10 +70,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_db_add_pkg_infos = async function() {
-    var dpan, entry, error, home_path, i, j, len, len1, pkg_fspath, pkg_info, project_path, project_path_pattern, ref, skipped;
-    dpan = new Dpan_next({
-      recreate: true
-    });
+    var Dpan, dpan, entry, error, home_path, i, j, len, len1, pkg_fspath, pkg_info, project_path, project_path_pattern, ref, skipped;
+    ({Dpan} = require(H.dpan_path));
+    // dpan                  = new Dpan_next { recreate: true, }
+    dpan = new Dpan();
     skipped = [];
     home_path = PATH.resolve(PATH.join(__dirname, '../../../../'));
     project_path_pattern = PATH.join(home_path, '*/package.json');
@@ -106,7 +108,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_fs_walk_dep_infos = async function() {
-    var count, count_max, dep, dpan, fallback/* TAINT not strictly true */, pkg_fspath, pkg_name, ref;
+    var Dpan, count, count_max, dep, dpan, fallback/* TAINT not strictly true */, pkg_fspath, pkg_name, ref;
+    ({Dpan} = require(H.dpan_path));
     dpan = new Dpan();
     pkg_fspath = '../../../';
     pkg_fspath = PATH.resolve(PATH.join(__dirname, pkg_fspath));
@@ -127,13 +130,29 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_variables = function() {
+    var Dpan, dpan;
+    debug('^3344^', {
+      dpan_path: H.dpan_path
+    });
+    ({Dpan} = require(H.dpan_path));
+    dpan = new Dpan();
+    debug('^4443^', dpan.v.set('myvariable', "some value"));
+    debug('^4443^', dpan.v.set('ditance', 12));
+    debug('^4443^', dpan.v.get('myvariable'));
+    debug('^4443^', dpan.v.get('ditance'));
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
       // await demo_fs_walk_dep_infos()
       // await demo_db_add_package()
       // await demo_db_add_pkg_info()
-      return (await demo_db_add_pkg_infos());
+      // await demo_db_add_pkg_infos()
+      return (await demo_variables());
     })();
   }
 

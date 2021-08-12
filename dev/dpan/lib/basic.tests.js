@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, badge, debug, echo, help, info, isa, rpr, test, test_fs_fetch_pkg_info, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, echo, help, info, isa, rpr, test, test_fs_fetch_pkg_info, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -33,6 +33,8 @@
   types = new (require('intertype')).Intertype();
 
   ({isa, type_of, validate, validate_list_of} = types.export());
+
+  SQL = String.raw;
 
   //-----------------------------------------------------------------------------------------------------------
   test_fs_fetch_pkg_info = async function(T, fallback) {
@@ -114,16 +116,62 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["dpan variables 1"] = function(T, done) {
+    var Dba, Dpan, dba, dpan;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    debug('^5543^', {
+      dpan_path: H.dpan_path
+    });
+    ({Dpan} = require(H.dpan_path));
+    ({Dba} = require('../../../apps/icql-dba'));
+    // db_path           = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
+    dba = new Dba();
+    dba.open({
+      ram: true
+    });
+    dpan = new Dpan({dba});
+    debug('^4474^', dpan.dba === dba);
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["dpan variables 2"] = function(T, done) {
+    var Dpan, db_path, dba, dpan, funny;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    debug('^5543^', {
+      dpan_path: H.dpan_path
+    });
+    ({Dpan} = require(H.dpan_path));
+    db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
+    dpan = new Dpan({
+      db_path,
+      recreate: true
+    });
+    ({dba} = dpan);
+    funny = Math.floor(Math.random() * 1e6);
+    T.eq(dpan.v.set('myvariable', "some value"), "some value");
+    T.eq(dpan.v.set('distance', funny), funny);
+    T.eq(dpan.v.get('myvariable'), "some value");
+    T.eq(dpan.v.get('distance'), funny);
+    T.eq(dba.list(dba.query(SQL`select * from dpan_variables`)), []);
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      // test @[ "dpan variables 1" ]
+      return this["dpan variables 1"]();
     })();
   }
 
-  // test @[ "DBA: concurrent UDFs" ]
+  // test @[ "dpan variables 2" ]
 
 }).call(this);
 

@@ -43,7 +43,7 @@
       message = "using installed version of dpan";
     } else {
       H.dpan_use_installed = false;
-      H.dpan_path = '../../../apps/dpan';
+      H.dpan_path = PATH.resolve(PATH.join(__dirname, '../../../apps/dpan'));
       message = "using linked dpan";
     }
     debug('^3337^', CND.reverse(message));
