@@ -32,17 +32,19 @@ FS                        = require 'fs'
 got                       = require 'got'
 semver_satisfies          = require 'semver/functions/satisfies'
 semver_cmp                = require 'semver/functions/cmp'
-{ Dpan, }                 = require '../../../apps/dpan'
+H                         = require './helpers'
 
 
-#-----------------------------------------------------------------------------------------------------------
-class Dpan_next extends Dpan
+# #-----------------------------------------------------------------------------------------------------------
+# class Dpan_next extends Dpan
 
 
 
 #-----------------------------------------------------------------------------------------------------------
 demo_db_add_pkg_info = ->
-  dpan                = new Dpan_next()
+  { Dpan }            = require H.dpan_path
+  # dpan                = new Dpan_next()
+  dpan                = new Dpan()
   pkg_fspath          = '../../../'
   pkg_fspath          = PATH.resolve PATH.join __dirname, pkg_fspath
   pkg_name            = PATH.basename pkg_fspath ### TAINT not strictly true ###
@@ -52,7 +54,9 @@ demo_db_add_pkg_info = ->
 
 #-----------------------------------------------------------------------------------------------------------
 demo_db_add_pkg_infos = ->
-  dpan                  = new Dpan_next { recreate: true, }
+  { Dpan }              = require H.dpan_path
+  # dpan                  = new Dpan_next { recreate: true, }
+  dpan                  = new Dpan()
   skipped               = []
   home_path             = PATH.resolve PATH.join __dirname, '../../../../'
   project_path_pattern  = PATH.join home_path, '*/package.json'
@@ -77,6 +81,7 @@ demo_db_add_pkg_infos = ->
 
 #-----------------------------------------------------------------------------------------------------------
 demo_fs_walk_dep_infos = ->
+  { Dpan }            = require H.dpan_path
   dpan                = new Dpan()
   pkg_fspath          = '../../../'
   pkg_fspath          = PATH.resolve PATH.join __dirname, pkg_fspath
@@ -92,12 +97,24 @@ demo_fs_walk_dep_infos = ->
     urge '^850^', dep.pkg_deps
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_variables = ->
+  debug '^3344^', { dpan_path: H.dpan_path, }
+  { Dpan }            = require H.dpan_path
+  dpan                = new Dpan()
+  debug '^4443^', dpan.v.set 'myvariable', "some value"
+  debug '^4443^', dpan.v.set 'ditance', 12
+  debug '^4443^', dpan.v.get 'myvariable'
+  debug '^4443^', dpan.v.get 'ditance'
+  return null
+
 
 ############################################################################################################
 if module is require.main then do =>
   # await demo_fs_walk_dep_infos()
   # await demo_db_add_package()
   # await demo_db_add_pkg_info()
-  await demo_db_add_pkg_infos()
+  # await demo_db_add_pkg_infos()
+  await demo_variables()
 
 
