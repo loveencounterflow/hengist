@@ -18,3 +18,9 @@ printf '\ndpan_pkgs\n'                                            >> "$target_pa
 sqlite3 "$db_path" "select * from dpan_pkgs order by 1;"          >> "$target_path"
 
 
+# sqlite3pspg "$db_path" "select * from dpan_deps         order by 1;"
+# sqlite3pspg "$db_path" "select * from dpan_pkg_versions order by 1;"
+# sqlite3pspg "$db_path" "select * from dpan_pkg_names    order by 1;"
+# sqlite3pspg "$db_path" "select * from dpan_pkg_svranges order by 1;"
+# sqlite3pspg "$db_path" "select * from dpan_pkgs         order by 1;"
+
