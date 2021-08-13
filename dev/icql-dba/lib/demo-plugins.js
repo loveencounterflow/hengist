@@ -75,9 +75,6 @@
       if (typeof this._compile_sql === "function") {
         this._compile_sql();
       }
-      if (typeof this._populate === "function") {
-        this._populate();
-      }
       return void 0;
     }
 
@@ -107,7 +104,7 @@ create unique index if not exists ${prefix}squares_p1_idx on ${prefix}squares ( 
     }
 
     //---------------------------------------------------------------------------------------------------------
-    _populate() {
+    populate_db() {
       var i, n, p, prefix, ref, ref1, ref2;
       ({prefix} = this.cfg);
       for (n = i = ref = this.cfg.first, ref1 = this.cfg.last, ref2 = this.cfg.step; ref2 !== 0 && (ref2 > 0 ? i <= ref1 : i >= ref1); n = i += ref2) {
@@ -129,22 +126,51 @@ create unique index if not exists ${prefix}squares_p1_idx on ${prefix}squares ( 
       this.cfg = {
         prefix: 'usr_'
       };
-      this.dbsq = new Dbsquares({
+      this.dbsq1 = new Dbsquares({
         dba: this.dba,
-        prefix: this.cfg.prefix
+        prefix: this.cfg.prefix + 'sq1_',
+        first: 10,
+        last: 15
       });
+      this.dbsq2 = new Dbsquares({
+        dba: this.dba,
+        prefix: this.cfg.prefix + 'sq2_',
+        first: 20,
+        last: 25
+      });
+      this.dbsq1.populate_db();
+      this.dbsq2.populate_db();
       return void 0;
     }
 
     //---------------------------------------------------------------------------------------------------------
-    show_squares() {
-      var ref, results, row;
-      ref = this.dba.query(SQL`select * from ${this.cfg.prefix}squares order by n;`);
-      results = [];
+    list_relations() {
+      var ref, row;
+      ref = this.dba.query(SQL`select
+  name,
+  type
+from sqlite_schema
+where type in ( 'table', 'view' )
+order by name;`);
       for (row of ref) {
-        results.push(info('^887^', row));
+        urge('^556^', row);
       }
-      return results;
+      return null;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    show_squares() {
+      var ref, ref1, row;
+      ref = this.dba.query(SQL`select * from ${this.cfg.prefix}sq1_squares order by n;`);
+      for (row of ref) {
+        info('^887^', row);
+      }
+      whisper('--------------------');
+      ref1 = this.dba.query(SQL`select * from ${this.cfg.prefix}sq2_squares order by n;`);
+      for (row of ref1) {
+        info('^887^', row);
+      }
+      return null;
     }
 
   };
@@ -154,7 +180,8 @@ create unique index if not exists ${prefix}squares_p1_idx on ${prefix}squares ( 
     (() => {
       var dbu;
       dbu = new Dba_user();
-      return dbu.show_squares();
+      dbu.show_squares();
+      return dbu.list_relations();
     })();
   }
 
