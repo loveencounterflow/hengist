@@ -36,6 +36,7 @@ class Dba_plugins
     delete cfg.dba
     return undefined
 
+
 #===========================================================================================================
 class Dbsquares extends Dba_plugins
 
@@ -47,7 +48,6 @@ class Dbsquares extends Dba_plugins
     @_create_sql_functions?()
     @_create_db_structure?()
     @_compile_sql?()
-    @_populate?()
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ class Dbsquares extends Dba_plugins
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _populate: ->
+  populate_db: ->
     { prefix } = @cfg
     for n in [ @cfg.first .. @cfg.last ] by @cfg.step
       p = n ** 2
@@ -85,18 +85,37 @@ class Dba_user
     @dba  = new Dba { ram: true, }
     @cfg  =
       prefix:     'usr_'
-    @dbsq = new Dbsquares { dba: @dba, prefix: @cfg.prefix, }
+    @dbsq1 = new Dbsquares { dba: @dba, prefix: ( @cfg.prefix + 'sq1_' ), first: 10, last: 15, }
+    @dbsq2 = new Dbsquares { dba: @dba, prefix: ( @cfg.prefix + 'sq2_' ), first: 20, last: 25, }
+    @dbsq1.populate_db()
+    @dbsq2.populate_db()
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
+  list_relations: ->
+    for row from @dba.query SQL"""select
+        name,
+        type
+      from sqlite_schema
+      where type in ( 'table', 'view' )
+      order by name;"""
+      urge '^556^', row
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
   show_squares: ->
-    for row from @dba.query SQL"select * from #{@cfg.prefix}squares order by n;"
+    for row from @dba.query SQL"select * from #{@cfg.prefix}sq1_squares order by n;"
       info '^887^', row
+    whisper '--------------------'
+    for row from @dba.query SQL"select * from #{@cfg.prefix}sq2_squares order by n;"
+      info '^887^', row
+    return null
 
 
 ############################################################################################################
 if module is require.main then do =>
   dbu = new Dba_user()
   dbu.show_squares()
+  dbu.list_relations()
 
 
