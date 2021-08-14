@@ -28,7 +28,9 @@ SQL                       = String.raw
 #-----------------------------------------------------------------------------------------------------------
 test_fs_fetch_pkg_info = ( T, fallback ) ->
   { Dpan }          = require H.dpan_path
-  dpan              = new Dpan()
+  { Dba }           = require H.dba_path
+  dba               = new Dba()
+  dpan              = new Dpan { dba, }
   has_fallback      = fallback isnt undefined
   #.........................................................................................................
   pkg_fspath  = __filename
