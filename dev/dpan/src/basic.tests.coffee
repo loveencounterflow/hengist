@@ -42,10 +42,8 @@ test_fs_fetch_pkg_info = ( T, fallback ) ->
     error = null
     debug '^3736^', pkg_fspath, count, depth
     try
-      if has_fallback
-        pkg_json_info = await dpan.fs_fetch_pkg_info { pkg_fspath, fallback, }
-      else
-        pkg_json_info = await dpan.fs_fetch_pkg_info { pkg_fspath, }
+      if has_fallback then  pkg_json_info = await dpan.fs_fetch_pkg_info { pkg_fspath, fallback, }
+      else                  pkg_json_info = await dpan.fs_fetch_pkg_info { pkg_fspath, }
     catch error
       T?.eq ( type_of error ), 'dba_fs_pkg_json_not_found'
       throw error unless ( type_of error ) is 'dba_fs_pkg_json_not_found'
