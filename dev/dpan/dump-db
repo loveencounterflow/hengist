@@ -2,7 +2,8 @@
 set -euo pipefail
 home="$(realpath "$(realpath "${BASH_SOURCE[0]}" | xargs dirname)"/.)"
 cd "$home"
-db_path='../../../dpan/dpan.sqlite'
+db_path=$(realpath '../../data/dpan.sqlite')
+echo "dumping DB at $db_path"
 
 target_path='/tmp/dpan.txt'
 echo '' > "$target_path"
