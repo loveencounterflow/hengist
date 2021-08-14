@@ -53,7 +53,7 @@ test_fs_fetch_pkg_info = ( T, fallback ) ->
       if pkg_json_info is fallback
         T.ok true
       else
-        pkg_name      = pkg_json_info?.pkg_json?.name
+        pkg_name      = pkg_json_info?.pkg_name
         debug '^3736^', CND.blue pkg_name
         T?.eq pkg_name, 'hengist'
         pkg_fspath    = PATH.dirname pkg_fspath
