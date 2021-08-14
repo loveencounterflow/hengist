@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, PATH, SQL, badge, dbv_path, debug, def, echo, equals, freeze, help, info, isa, jp, jr, lets, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, PATH, SQL, badge, dba_path, dbv_path, debug, def, echo, equals, freeze, help, info, isa, jp, jr, lets, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -49,6 +49,8 @@
 
   dbv_path = '../../../apps/icql-dba-vars';
 
+  dba_path = '../../../apps/icql-dba';
+
   ({lets, freeze} = require('letsfreezethat'));
 
   def = Object.defineProperty;
@@ -57,7 +59,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["getting and setting single values"] = async function(T, done) {
-    var Dbv, dba, dbv, error, i, k, len, matcher, probe, probes_and_matchers;
+    var Dba, Dbv, dba, dbv, error, i, k, len, matcher, probe, probes_and_matchers;
     if (T != null) {
       T.halt_on_error();
     }
@@ -98,8 +100,9 @@
       108]]
     ];
     ({Dbv} = require(dbv_path));
-    dbv = new Dbv();
-    ({dba} = dbv);
+    ({Dba} = require(dba_path));
+    dba = new Dba();
+    dbv = new Dbv({dba});
     debug('4476^', dbv);
     debug('4476^', (function() {
       var results;
