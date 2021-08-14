@@ -71,7 +71,9 @@ test_fs_fetch_pkg_info = ( T, fallback ) ->
 @[ "dpan.fs_resolve_dep_fspath 1" ] = ( T, done ) ->
   T?.halt_on_error()
   { Dpan }          = require H.dpan_path
-  dpan              = new Dpan()
+  { Dba }           = require H.dba_path
+  dba               = new Dba()
+  dpan              = new Dpan { dba, }
   dep_name          = 'cnd'
   # pkg_fspath        = '../../../lib/main.js'
   pkg_fspath        = '../../..'
