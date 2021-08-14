@@ -112,8 +112,10 @@ NCR = new Ncr()
     [ [ '+rounded', '-rounded',             ],  {},                      ]
     [ [ '+shape_ladder', '+shape_pointy',   ],  { 'shape_ladder': true, 'shape_pointy': true, }, ]
     ]
+  { Dba, }    = require '../../../apps/icql-dba'
   { Dtags, }  = require '../../../apps/icql-dba-tags'
-  dtags       = new Dtags()
+  dba         = new Dba()
+  dtags       = new Dtags { dba, }
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
       result = dtags.tags_from_tagexchain { tagexchain: probe, }
@@ -139,10 +141,12 @@ NCR = new Ncr()
     [ { tag: 'rounded', value: false,      },  [ { nr: 1, tag: 'rounded',      value: 'false',   } ], ]
     [ { tag: 'shape_ladder',               },  [ { nr: 1, tag: 'shape_ladder', value: 'false',    } ], ]
     ]
+  { Dba, }    = require '../../../apps/icql-dba'
   { Dtags, }  = require '../../../apps/icql-dba-tags'
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      dtags = new Dtags()
+      dba   = new Dba()
+      dtags = new Dtags { dba, }
       dtags.add_tag probe
       result  = get_tags dtags
       resolve result
@@ -162,8 +166,10 @@ NCR = new Ncr()
     [ { tagex: '*bar',                          },  null, "Dtags_invalid_tagex", ]
     [ { tagex: '+bar:blah',                     },  null, "Dtags_illegal_tagex_value_literal", ]
     ]
+  { Dba, }    = require '../../../apps/icql-dba'
   { Dtags, }  = require '../../../apps/icql-dba-tags'
-  dtags       = new Dtags()
+  dba         = new Dba()
+  dtags       = new Dtags { dba, }
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
       result = dtags.parse_tagex probe
@@ -174,6 +180,7 @@ NCR = new Ncr()
 #-----------------------------------------------------------------------------------------------------------
 @[ "tags: fallbacks" ] = ( T, done ) ->
   # T?.halt_on_error()
+  { Dba, }    = require '../../../apps/icql-dba'
   { Dtags, }  = require '../../../apps/icql-dba-tags'
   #.........................................................................................................
   add_some_tags_and_ranges = ( dtags ) ->
@@ -188,7 +195,8 @@ NCR = new Ncr()
     dtags.add_tagged_range { lo: 15, hi: 15, mode: '-', tag: 'baz', }
     return null
   do => #...................................................................................................
-    dtags = new Dtags(); add_some_tags_and_ranges dtags
+    dba   = new Dba()
+    dtags = new Dtags { dba, }; add_some_tags_and_ranges dtags
     T.eq dtags.get_fallbacks(), { foo: true, bar: false, baz: 42 }
     T.eq dtags.get_filtered_fallbacks(), {}
     T.eq ( dtags.tags_from_id { id: 10, } ), { foo: true }
@@ -198,7 +206,8 @@ NCR = new Ncr()
     T.eq ( dtags.tags_from_id { id: 14, } ), { baz: 108 }
     T.eq ( dtags.tags_from_id { id: 15, } ), {}
   do => #...................................................................................................
-    dtags = new Dtags { fallbacks: true, }; add_some_tags_and_ranges dtags
+    dba   = new Dba()
+    dtags = new Dtags { dba, fallbacks: true, }; add_some_tags_and_ranges dtags
     T.eq dtags.get_fallbacks(), { foo: true, bar: false, baz: 42 }
     T.eq dtags.get_filtered_fallbacks(), { foo: true, baz: 42 }
     T.eq ( dtags.tags_from_id { id: 10, } ), { foo: true, baz: 42 }
@@ -208,7 +217,8 @@ NCR = new Ncr()
     T.eq ( dtags.tags_from_id { id: 14, } ), { foo: true, baz: 108 }
     T.eq ( dtags.tags_from_id { id: 15, } ), { foo: true, baz: 42 }
   do => #...................................................................................................
-    dtags = new Dtags { fallbacks: 'all', }; add_some_tags_and_ranges dtags
+    dba   = new Dba()
+    dtags = new Dtags { dba, fallbacks: 'all', }; add_some_tags_and_ranges dtags
     T.eq dtags.get_fallbacks(), { foo: true, bar: false, baz: 42 }
     T.eq dtags.get_filtered_fallbacks(), { foo: true, bar: false, baz: 42 }
     T.eq ( dtags.tags_from_id { id: 10, } ), { foo: true, bar: false, baz: 42 }
@@ -224,6 +234,7 @@ NCR = new Ncr()
 @[ "tags: add_tagged_range" ] = ( T, done ) ->
   # T?.halt_on_error()
   #.........................................................................................................
+  { Dba, }    = require '../../../apps/icql-dba'
   { Dtags, }  = require '../../../apps/icql-dba-tags'
   prefix        = 't_'
   #.........................................................................................................
@@ -241,10 +252,10 @@ NCR = new Ncr()
     [ { lo: 6, hi: 16,  mode: '-', tag: 'rounded',                    },  [ { nr: 1, lo: 6, hi: 16, mode: '-', tag: 'rounded', value: false, } ],                      ]
     [ { lo: 7, hi: 17,  mode: '+', tag: 'shape_ladder',               },  [ { nr: 1, lo: 7, hi: 17, mode: '+', tag: 'shape_ladder', value: true, } ],                      ]
     ]
-  dtags       = new Dtags()
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      dtags   = new Dtags { prefix, }
+      dba     = new Dba()
+      dtags   = new Dtags { dba, prefix, }
       dtags.add_tag probe
       dtags.add_tagged_range probe
       result  = get_tagged_ranges dtags
@@ -296,9 +307,11 @@ NCR = new Ncr()
 @[ "tags: caching with empty values" ] = ( T, done ) ->
   T?.halt_on_error()
   #.........................................................................................................
+  { Dba, }          = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
+  dba               = new Dba()
   prefix            = 'theprefix_'
-  dtags             = new Dtags { prefix, fallbacks: true, }
+  dtags             = new Dtags { dba, prefix, fallbacks: true, }
   #.........................................................................................................
   get_tagged_ranges = -> dtags.dba.list dtags.dba.query SQL"select * from #{prefix}tagged_ranges order by nr;"
   #.........................................................................................................
@@ -349,11 +362,13 @@ _add_tagged_ranges = ( dtags ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: ranges (1)" ] = ( T, done ) ->
   T?.halt_on_error()
+  { Dba, }          = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
   #.........................................................................................................
   f = ( fallbacks ) ->
     prefix            = 't_'
-    dtags             = new Dtags { prefix, fallbacks, }
+    dba               = new Dba()
+    dtags             = new Dtags { dba, prefix, fallbacks, }
     cid_from_chr      = ( chr ) -> chr.codePointAt 0
     chr_from_cid      = ( cid ) -> String.fromCodePoint cid
     dtags.dba.create_function name: 'chr_from_cid', call: chr_from_cid
@@ -389,11 +404,12 @@ _add_tagged_ranges = ( dtags ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: contiguous ranges" ] = ( T, done ) ->
   T?.halt_on_error()
+  { Dba, }          = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
   #.........................................................................................................
   prefix            = 't_'
-  dtags             = new Dtags { prefix, fallbacks: true, }
-  { dba, }          = dtags
+  dba               = new Dba()
+  dtags             = new Dtags { dba, prefix, fallbacks: true, }
   cid_from_chr      = ( chr ) -> chr.codePointAt 0
   chr_from_cid      = ( cid ) -> String.fromCodePoint cid
   #.........................................................................................................
@@ -413,11 +429,12 @@ _add_tagged_ranges = ( dtags ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: validate contiguous ranges" ] = ( T, done ) ->
   # T?.halt_on_error()
+  { Dba, }          = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
   #.........................................................................................................
   prefix            = 't_'
-  dtags             = new Dtags { prefix, fallbacks: true, }
-  { dba, }          = dtags
+  dba               = new Dba()
+  dtags             = new Dtags { dba, prefix, fallbacks: true, }
   cid_from_chr      = ( chr ) -> chr.codePointAt 0
   chr_from_cid      = ( cid ) -> String.fromCodePoint cid
   #.........................................................................................................
@@ -452,11 +469,12 @@ _add_tagged_ranges = ( dtags ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: split text along ranges (demo)" ] = ( T, done ) ->
   T?.halt_on_error()
+  { Dba, }          = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
   #.........................................................................................................
   prefix            = 't_'
-  dtags             = new Dtags { prefix, fallbacks: true, }
-  { dba, }          = dtags
+  dba               = new Dba()
+  dtags             = new Dtags { dba, prefix, fallbacks: true, }
   cid_from_chr      = ( chr ) -> chr.codePointAt 0
   chr_from_cid      = ( cid ) -> String.fromCodePoint cid
   to_hex            = ( cid ) -> '0x' + cid.toString 16
@@ -542,11 +560,12 @@ _add_tagged_ranges = ( dtags ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: split text along ranges" ] = ( T, done ) ->
   # T?.halt_on_error()
+  { Dba, }          = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
   #.........................................................................................................
   prefix            = 't_'
-  dtags             = new Dtags { prefix, fallbacks: true, }
-  { dba, }          = dtags
+  dba               = new Dba()
+  dtags             = new Dtags { dba, prefix, fallbacks: true, }
   #.........................................................................................................
   _add_tagged_ranges dtags
   dtags.add_tagged_range { lo: dtags.cfg.first_id, hi: dtags.cfg.last_id, tag: 'font', value: 'font1', }
@@ -593,11 +612,12 @@ _add_tagged_ranges = ( dtags ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: markup text" ] = ( T, done ) ->
   # T?.halt_on_error()
+  { Dba, }          = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
   #.........................................................................................................
   prefix            = 't_'
-  dtags             = new Dtags { prefix, fallbacks: true, }
-  { dba, }          = dtags
+  dba               = new Dba()
+  dtags             = new Dtags { dba, prefix, fallbacks: true, }
   #.........................................................................................................
   _add_tagged_ranges dtags
   # dtags.get_tagsets_by_keys()
@@ -648,11 +668,12 @@ _add_tagged_ranges = ( dtags ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: tags must be declared" ] = ( T, done ) ->
   # T?.halt_on_error()
+  { Dba, }          = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
   first_id          = 'a'.codePointAt 0
   last_id           = 'z'.codePointAt 0
-  dtags             = new Dtags { fallbacks: true, first_id, last_id, }
-  { dba, }          = dtags
+  dba               = new Dba()
+  dtags             = new Dtags { dba, fallbacks: true, first_id, last_id, }
   #.........................................................................................................
   do ->
     ### ensure tags must be explicitly added before being used ###
@@ -672,11 +693,12 @@ _add_tagged_ranges = ( dtags ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: table getters" ] = ( T, done ) ->
   # T?.halt_on_error()
+  { Dba, }          = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
   first_id          = 'a'.codePointAt 0
   last_id           = 'z'.codePointAt 0
-  dtags             = new Dtags { fallbacks: true, first_id, last_id, }
-  { dba, }          = dtags
+  dba               = new Dba()
+  dtags             = new Dtags { dba, fallbacks: true, first_id, last_id, }
   { cid_from_chr
     chr_from_cid }  = dtags.f
   #.........................................................................................................
@@ -745,9 +767,11 @@ _add_tagged_ranges = ( dtags ) ->
     S
     H   }                   = cupofhtml.export()
   #.........................................................................................................
+  { Dba, }          = require '../../../apps/icql-dba'
   { Dtags, }        = require '../../../apps/icql-dba-tags'
   fallbacks         = 'all'
-  dtags             = new Dtags { fallbacks, }
+  dba               = new Dba()
+  dtags             = new Dtags { dba, fallbacks, }
   cid_from_chr      = ( chr ) -> chr.codePointAt 0
   chr_from_cid      = ( cid ) -> String.fromCodePoint cid
   # dtags.dba.create_function name: 'chr_from_cid', call: chr_from_cid
@@ -882,10 +906,14 @@ regex_demo = ->
 ############################################################################################################
 if module is require.main then do =>
   # info '^3443^', JSON.parse '"helo w&#x6f;rld"'
-  # test @, { timeout: 10e3, }
+  test @, { timeout: 10e3, }
+  # @[ "tags: tags_from_tagexchain" ]()
+  # { Dba, } = require dba_path
+  # debug '^445^', dba = new Dba()
+  # debug '^445^', type_of dba
   # test @[ "DBA: tags must be declared" ]
   # test @[ "DBA: table getters" ]
-  test @[ "DBA: markup text" ]
+  # test @[ "DBA: markup text" ]
   # test @[ "DBA: ranges (1)" ]
   # test @[ "DBA: contiguous ranges" ]
   # test @[ "DBA: validate contiguous ranges" ]
