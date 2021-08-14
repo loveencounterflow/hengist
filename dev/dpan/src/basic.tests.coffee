@@ -86,46 +86,33 @@ test_fs_fetch_pkg_info = ( T, fallback ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "dpan variables 1" ] = ( T, done ) ->
-  T?.halt_on_error()
+  # T?.halt_on_error()
   debug '^5543^', { dpan_path: H.dpan_path, }
   { Dpan }          = require H.dpan_path
-  { Dba }           = require '../../../apps/icql-dba'
-  # db_path           = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
-  dba               = new Dba()
-  dba.open { ram: true, }
-  dpan              = new Dpan { dba, }
-  debug '^4474^', dpan.dba is dba
-  # funny             = Math.floor Math.random() * 1e6
-  # T.eq ( dpan.v.set 'myvariable', "some value"  ), "some value"
-  # T.eq ( dpan.v.set 'distance', funny           ), funny
-  # T.eq ( dpan.v.get 'myvariable'                ), "some value"
-  # T.eq ( dpan.v.get 'distance'                  ), funny
-  # T.eq ( dba.list dba.query SQL"select * from dpan_variables" ), []
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "dpan variables 2" ] = ( T, done ) ->
-  T?.halt_on_error()
-  debug '^5543^', { dpan_path: H.dpan_path, }
-  { Dpan }          = require H.dpan_path
+  { Dba }           = require H.dba_path
   db_path           = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
-  dpan              = new Dpan { db_path, recreate: true, }
-  { dba }           = dpan
+  urge "using DB at #{db_path}"
+  dba               = new Dba()
+  dba.open { path: db_path, }
+  debug '^557^', dba.list dba.query SQL"select name, type from sqlite_schema where type in ( 'table', 'view' ) order by name;"
+  dpan              = new Dpan { dba, recreate: true, }
+  debug '^557^', dba.list dba.query SQL"select name, type from sqlite_schema where type in ( 'table', 'view' ) order by name;"
+  T.eq dba, dpan.dba
+  T.eq dba, dpan.vars.dba
   funny             = Math.floor Math.random() * 1e6
-  T.eq ( dpan.v.set 'myvariable', "some value"  ), "some value"
-  T.eq ( dpan.v.set 'distance', funny           ), funny
-  T.eq ( dpan.v.get 'myvariable'                ), "some value"
-  T.eq ( dpan.v.get 'distance'                  ), funny
+  T.eq ( dpan.vars.set 'myvariable', "some value"  ), "some value"
+  T.eq ( dpan.vars.set 'distance', funny           ), funny
+  T.eq ( dpan.vars.get 'myvariable'                ), "some value"
+  T.eq ( dpan.vars.get 'distance'                  ), funny
+  console.table dba.list dba.query SQL"select name, type from sqlite_schema where type in ( 'table', 'view' ) order by name;"
   T.eq ( dba.list dba.query SQL"select * from dpan_variables" ), []
   done?()
 
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
+  test @, { timeout: 10e3, }
   # test @[ "dpan variables 1" ]
-  @[ "dpan variables 1" ]()
-  # test @[ "dpan variables 2" ]
 
 
 
