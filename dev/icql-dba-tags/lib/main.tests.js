@@ -143,7 +143,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["tags: tags_from_tagexchain"] = async function(T, done) {
-    var Dtags, dtags, error, i, len, matcher, probe, probes_and_matchers;
+    var Dba, Dtags, dba, dtags, error, i, len, matcher, probe, probes_and_matchers;
     if (T != null) {
       T.halt_on_error();
     }
@@ -192,8 +192,10 @@
         }
       ]
     ];
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
-    dtags = new Dtags();
+    dba = new Dba();
+    dtags = new Dtags({dba});
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
@@ -211,7 +213,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["tags: add_tag with value"] = async function(T, done) {
-    var Dtags, error, get_tags, i, len, matcher, probe, probes_and_matchers;
+    var Dba, Dtags, error, get_tags, i, len, matcher, probe, probes_and_matchers;
     // T?.halt_on_error()
     //.........................................................................................................
     get_tags = function(dtags) {
@@ -290,13 +292,15 @@
         ]
       ]
     ];
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
-          var dtags, result;
-          dtags = new Dtags();
+          var dba, dtags, result;
+          dba = new Dba();
+          dtags = new Dtags({dba});
           dtags.add_tag(probe);
           result = get_tags(dtags);
           return resolve(result);
@@ -308,7 +312,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["tags: parse_tagex"] = async function(T, done) {
-    var Dtags, dtags, error, i, len, matcher, probe, probes_and_matchers;
+    var Dba, Dtags, dba, dtags, error, i, len, matcher, probe, probes_and_matchers;
     // T?.halt_on_error()
     //.........................................................................................................
     probes_and_matchers = [
@@ -374,8 +378,10 @@
         "Dtags_illegal_tagex_value_literal"
       ]
     ];
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
-    dtags = new Dtags();
+    dba = new Dba();
+    dtags = new Dtags({dba});
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
@@ -391,8 +397,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["tags: fallbacks"] = function(T, done) {
-    var Dtags, add_some_tags_and_ranges;
+    var Dba, Dtags, add_some_tags_and_ranges;
     // T?.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
     //.........................................................................................................
     add_some_tags_and_ranges = function(dtags) {
@@ -445,8 +452,9 @@
       return null;
     };
     (() => { //...................................................................................................
-      var dtags;
-      dtags = new Dtags();
+      var dba, dtags;
+      dba = new Dba();
+      dtags = new Dtags({dba});
       add_some_tags_and_ranges(dtags);
       T.eq(dtags.get_fallbacks(), {
         foo: true,
@@ -480,8 +488,10 @@
       }), {});
     })();
     (() => { //...................................................................................................
-      var dtags;
+      var dba, dtags;
+      dba = new Dba();
       dtags = new Dtags({
+        dba,
         fallbacks: true
       });
       add_some_tags_and_ranges(dtags);
@@ -533,8 +543,10 @@
       });
     })();
     (() => { //...................................................................................................
-      var dtags;
+      var dba, dtags;
+      dba = new Dba();
       dtags = new Dtags({
+        dba,
         fallbacks: 'all'
       });
       add_some_tags_and_ranges(dtags);
@@ -596,9 +608,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["tags: add_tagged_range"] = async function(T, done) {
-    var Dtags, dtags, error, get_tagged_ranges, i, len, matcher, prefix, probe, probes_and_matchers;
+    var Dba, Dtags, error, get_tagged_ranges, i, len, matcher, prefix, probe, probes_and_matchers;
     // T?.halt_on_error()
     //.........................................................................................................
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
     prefix = 't_';
     //.........................................................................................................
@@ -707,13 +720,13 @@
         ]
       ]
     ];
-    dtags = new Dtags();
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
-          var result;
-          dtags = new Dtags({prefix});
+          var dba, dtags, result;
+          dba = new Dba();
+          dtags = new Dtags({dba, prefix});
           dtags.add_tag(probe);
           dtags.add_tagged_range(probe);
           result = get_tagged_ranges(dtags);
@@ -863,14 +876,17 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["tags: caching with empty values"] = function(T, done) {
-    var Dtags, dtags, get_tagged_ranges, prefix;
+    var Dba, Dtags, dba, dtags, get_tagged_ranges, prefix;
     if (T != null) {
       T.halt_on_error();
     }
     //.........................................................................................................
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
+    dba = new Dba();
     prefix = 'theprefix_';
     dtags = new Dtags({
+      dba,
       prefix,
       fallbacks: true
     });
@@ -963,16 +979,18 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: ranges (1)"] = function(T, done) {
-    var Dtags, f, fallbacks, i, len, ref;
+    var Dba, Dtags, f, fallbacks, i, len, ref;
     if (T != null) {
       T.halt_on_error();
     }
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
     //.........................................................................................................
     f = function(fallbacks) {
-      var chr, chr_from_cid, cid, cid_from_chr, dtags, first_cid, i, last_cid, prefix, ref, ref1, results, tags;
+      var chr, chr_from_cid, cid, cid_from_chr, dba, dtags, first_cid, i, last_cid, prefix, ref, ref1, results, tags;
       prefix = 't_';
-      dtags = new Dtags({prefix, fallbacks});
+      dba = new Dba();
+      dtags = new Dtags({dba, prefix, fallbacks});
       cid_from_chr = function(chr) {
         return chr.codePointAt(0);
       };
@@ -1024,18 +1042,20 @@
   
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: contiguous ranges"] = function(T, done) {
-    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, prefix;
+    var Dba, Dtags, chr_from_cid, cid_from_chr, dba, dtags, prefix;
     if (T != null) {
       T.halt_on_error();
     }
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
     //.........................................................................................................
     prefix = 't_';
+    dba = new Dba();
     dtags = new Dtags({
+      dba,
       prefix,
       fallbacks: true
     });
-    ({dba} = dtags);
     cid_from_chr = function(chr) {
       return chr.codePointAt(0);
     };
@@ -1098,16 +1118,18 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: validate contiguous ranges"] = function(T, done) {
-    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, i, id, j, n, prefix, prv_hi, ref, row, rows;
+    var Dba, Dtags, chr_from_cid, cid_from_chr, dba, dtags, i, id, j, n, prefix, prv_hi, ref, row, rows;
     // T?.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
     //.........................................................................................................
     prefix = 't_';
+    dba = new Dba();
     dtags = new Dtags({
+      dba,
       prefix,
       fallbacks: true
     });
-    ({dba} = dtags);
     cid_from_chr = function(chr) {
       return chr.codePointAt(0);
     };
@@ -1165,18 +1187,20 @@
   
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: split text along ranges (demo)"] = function(T, done) {
-    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, prefix, to_hex;
+    var Dba, Dtags, chr_from_cid, cid_from_chr, dba, dtags, prefix, to_hex;
     if (T != null) {
       T.halt_on_error();
     }
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
     //.........................................................................................................
     prefix = 't_';
+    dba = new Dba();
     dtags = new Dtags({
+      dba,
       prefix,
       fallbacks: true
     });
-    ({dba} = dtags);
     cid_from_chr = function(chr) {
       return chr.codePointAt(0);
     };
@@ -1301,16 +1325,18 @@ order by lo;`)));
   
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: split text along ranges"] = function(T, done) {
-    var Dtags, dba, dtags, prefix, tagsets_by_keys;
+    var Dba, Dtags, dba, dtags, prefix, tagsets_by_keys;
     // T?.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
     //.........................................................................................................
     prefix = 't_';
+    dba = new Dba();
     dtags = new Dtags({
+      dba,
       prefix,
       fallbacks: true
     });
-    ({dba} = dtags);
     //.........................................................................................................
     _add_tagged_ranges(dtags);
     dtags.add_tagged_range({
@@ -1509,16 +1535,18 @@ order by lo;`)));
   
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: markup text"] = function(T, done) {
-    var Dtags, dba, dtags, prefix;
+    var Dba, Dtags, dba, dtags, prefix;
     // T?.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
     //.........................................................................................................
     prefix = 't_';
+    dba = new Dba();
     dtags = new Dtags({
+      dba,
       prefix,
       fallbacks: true
     });
-    ({dba} = dtags);
     //.........................................................................................................
     _add_tagged_ranges(dtags);
     // dtags.get_tagsets_by_keys()
@@ -1590,17 +1618,19 @@ order by lo;`)));
   
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: tags must be declared"] = function(T, done) {
-    var Dtags, dba, dtags, first_id, last_id;
+    var Dba, Dtags, dba, dtags, first_id, last_id;
     // T?.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
     first_id = 'a'.codePointAt(0);
     last_id = 'z'.codePointAt(0);
+    dba = new Dba();
     dtags = new Dtags({
+      dba,
       fallbacks: true,
       first_id,
       last_id
     });
-    ({dba} = dtags);
     (function() {      //.........................................................................................................
       /* ensure tags must be explicitly added before being used */
       var error;
@@ -1629,17 +1659,19 @@ order by lo;`)));
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: table getters"] = function(T, done) {
-    var Dtags, chr_from_cid, cid_from_chr, dba, dtags, first_id, last_id;
+    var Dba, Dtags, chr_from_cid, cid_from_chr, dba, dtags, first_id, last_id;
     // T?.halt_on_error()
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
     first_id = 'a'.codePointAt(0);
     last_id = 'z'.codePointAt(0);
+    dba = new Dba();
     dtags = new Dtags({
+      dba,
       fallbacks: true,
       first_id,
       last_id
     });
-    ({dba} = dtags);
     ({cid_from_chr, chr_from_cid} = dtags.f);
     (function() {      //.........................................................................................................
       var contiguous_ranges, fallbacks, filtered_fallbacks, tagged_ranges, tags, tags_and_rangelists, tags_of_b;
@@ -1930,7 +1962,7 @@ order by lo;`)));
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: tagged text"] = function(T, done) {
-    var Cupofhtml, Dtags, H, INTERTEXT, S, _tag, chr, chr_from_cid, chrs, cid_from_chr, cupofhtml, dtag_as_html_tag, dtags, fallbacks, flush, html_tag, i, id, is_open, len, prefill_stack, ref, stack, tag, tags, text, value;
+    var Cupofhtml, Dba, Dtags, H, INTERTEXT, S, _tag, chr, chr_from_cid, chrs, cid_from_chr, cupofhtml, dba, dtag_as_html_tag, dtags, fallbacks, flush, html_tag, i, id, is_open, len, prefill_stack, ref, stack, tag, tags, text, value;
     if (T != null) {
       T.halt_on_error();
     }
@@ -1943,9 +1975,11 @@ order by lo;`)));
       H
     } = cupofhtml.export());
     //.........................................................................................................
+    ({Dba} = require('../../../apps/icql-dba'));
     ({Dtags} = require('../../../apps/icql-dba-tags'));
     fallbacks = 'all';
-    dtags = new Dtags({fallbacks});
+    dba = new Dba();
+    dtags = new Dtags({dba, fallbacks});
     cid_from_chr = function(chr) {
       return chr.codePointAt(0);
     };
@@ -2124,14 +2158,20 @@ order by lo;`)));
   if (module === require.main) {
     (() => {
       // info '^3443^', JSON.parse '"helo w&#x6f;rld"'
-      // test @, { timeout: 10e3, }
-      // test @[ "DBA: tags must be declared" ]
-      // test @[ "DBA: table getters" ]
-      return test(this["DBA: markup text"]);
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // test @[ "DBA: ranges (1)" ]
+  // @[ "tags: tags_from_tagexchain" ]()
+// { Dba, } = require dba_path
+// debug '^445^', dba = new Dba()
+// debug '^445^', type_of dba
+// test @[ "DBA: tags must be declared" ]
+// test @[ "DBA: table getters" ]
+// test @[ "DBA: markup text" ]
+// test @[ "DBA: ranges (1)" ]
 // test @[ "DBA: contiguous ranges" ]
 // test @[ "DBA: validate contiguous ranges" ]
 // test @[ "DBA: split text along ranges (demo)" ]
