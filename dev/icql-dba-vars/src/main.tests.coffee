@@ -29,6 +29,7 @@ SQL                       = String.raw
 jr                        = JSON.stringify
 jp                        = JSON.parse
 dbv_path                  = '../../../apps/icql-dba-vars'
+dba_path                  = '../../../apps/icql-dba'
 { lets
   freeze }                = require 'letsfreezethat'
 def                       = Object.defineProperty
@@ -51,8 +52,9 @@ def                       = Object.defineProperty
     [ [ 'v7', [ 1, 2, 108, ],    ],  [ 1, 2, 108, ], ]
     ]
   { Dbv, }    = require dbv_path
-  dbv         = new Dbv()
-  { dba, }    = dbv
+  { Dba, }    = require dba_path
+  dba         = new Dba()
+  dbv         = new Dbv { dba, }
   debug '4476^', dbv
   debug '4476^', ( k for k of dbv )
   console.table dba.list dba.query SQL"select * from v_variables;"
