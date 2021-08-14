@@ -38,9 +38,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   test_fs_fetch_pkg_info = async function(T, fallback) {
-    var Dpan, count, depth, dpan, error, has_fallback, pkg_fspath, pkg_json_info, pkg_name, ref;
+    var Dba, Dpan, count, dba, depth, dpan, error, has_fallback, pkg_fspath, pkg_json_info, pkg_name;
     ({Dpan} = require(H.dpan_path));
-    dpan = new Dpan();
+    ({Dba} = require(H.dba_path));
+    dba = new Dba();
+    dpan = new Dpan({dba});
     has_fallback = fallback !== void 0;
     //.........................................................................................................
     pkg_fspath = __filename;
@@ -69,12 +71,12 @@
         }
         break;
       }
-      // unless error.
       if (error == null) {
+        // debug '^477^', pkg_json_info
         if (pkg_json_info === fallback) {
           T.ok(true);
         } else {
-          pkg_name = pkg_json_info != null ? (ref = pkg_json_info.pkg_json) != null ? ref.name : void 0 : void 0;
+          pkg_name = pkg_json_info != null ? pkg_json_info.pkg_name : void 0;
           debug('^3736^', CND.blue(pkg_name));
           if (T != null) {
             T.eq(pkg_name, 'hengist');
@@ -99,12 +101,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["dpan.fs_resolve_dep_fspath 1"] = function(T, done) {
-    var Dpan, dep_fspath, dep_name, dpan, pkg_fspath;
+    var Dba, Dpan, dba, dep_fspath, dep_name, dpan, pkg_fspath;
     if (T != null) {
       T.halt_on_error();
     }
     ({Dpan} = require(H.dpan_path));
-    dpan = new Dpan();
+    ({Dba} = require(H.dba_path));
+    dba = new Dba();
+    dpan = new Dpan({dba});
     dep_name = 'cnd';
     // pkg_fspath        = '../../../lib/main.js'
     pkg_fspath = '../../..';
@@ -118,46 +122,33 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["dpan variables 1"] = function(T, done) {
-    var Dba, Dpan, dba, dpan;
-    if (T != null) {
-      T.halt_on_error();
-    }
+    var Dba, Dpan, db_path, dba, dpan, funny;
+    // T?.halt_on_error()
     debug('^5543^', {
       dpan_path: H.dpan_path
     });
     ({Dpan} = require(H.dpan_path));
-    ({Dba} = require('../../../apps/icql-dba'));
-    // db_path           = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
+    ({Dba} = require(H.dba_path));
+    db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
+    urge(`using DB at ${db_path}`);
     dba = new Dba();
     dba.open({
-      ram: true
+      path: db_path
     });
-    dpan = new Dpan({dba});
-    debug('^4474^', dpan.dba === dba);
-    return typeof done === "function" ? done() : void 0;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["dpan variables 2"] = function(T, done) {
-    var Dpan, db_path, dba, dpan, funny;
-    if (T != null) {
-      T.halt_on_error();
-    }
-    debug('^5543^', {
-      dpan_path: H.dpan_path
-    });
-    ({Dpan} = require(H.dpan_path));
-    db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
+    debug('^557^', dba.list(dba.query(SQL`select name, type from sqlite_schema where type in ( 'table', 'view' ) order by name;`)));
     dpan = new Dpan({
-      db_path,
+      dba,
       recreate: true
     });
-    ({dba} = dpan);
+    debug('^557^', dba.list(dba.query(SQL`select name, type from sqlite_schema where type in ( 'table', 'view' ) order by name;`)));
+    T.eq(dba, dpan.dba);
+    T.eq(dba, dpan.vars.dba);
     funny = Math.floor(Math.random() * 1e6);
-    T.eq(dpan.v.set('myvariable', "some value"), "some value");
-    T.eq(dpan.v.set('distance', funny), funny);
-    T.eq(dpan.v.get('myvariable'), "some value");
-    T.eq(dpan.v.get('distance'), funny);
+    T.eq(dpan.vars.set('myvariable', "some value"), "some value");
+    T.eq(dpan.vars.set('distance', funny), funny);
+    T.eq(dpan.vars.get('myvariable'), "some value");
+    T.eq(dpan.vars.get('distance'), funny);
+    console.table(dba.list(dba.query(SQL`select name, type from sqlite_schema where type in ( 'table', 'view' ) order by name;`)));
     T.eq(dba.list(dba.query(SQL`select * from dpan_variables`)), []);
     return typeof done === "function" ? done() : void 0;
   };
@@ -165,13 +156,13 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      // test @[ "dpan variables 1" ]
-      return this["dpan variables 1"]();
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // test @[ "dpan variables 2" ]
+  // test @[ "dpan variables 1" ]
 
 }).call(this);
 

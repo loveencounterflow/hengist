@@ -40,10 +40,12 @@
     if (indexOf.call(process.argv, '--dpan-use-installed') >= 0) {
       H.dpan_use_installed = true;
       H.dpan_path = 'dpan';
+      H.dba_path = 'icql-dba';
       message = "using installed version of dpan";
     } else {
       H.dpan_use_installed = false;
       H.dpan_path = PATH.resolve(PATH.join(__dirname, '../../../apps/dpan'));
+      H.dba_path = PATH.resolve(PATH.join(__dirname, '../../../apps/icql-dba'));
       message = "using linked dpan";
     }
     debug('^3337^', CND.reverse(message));
