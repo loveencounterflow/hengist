@@ -48,8 +48,8 @@ test_fs_fetch_pkg_info = ( T, fallback ) ->
       T?.eq ( type_of error ), 'dba_fs_pkg_json_not_found'
       throw error unless ( type_of error ) is 'dba_fs_pkg_json_not_found'
       break
-      # unless error.
     unless error?
+      # debug '^477^', pkg_json_info
       if pkg_json_info is fallback
         T.ok true
       else
