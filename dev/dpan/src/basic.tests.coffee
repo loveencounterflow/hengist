@@ -91,28 +91,23 @@ test_fs_fetch_pkg_info = ( T, fallback ) ->
   { Dpan }          = require H.dpan_path
   { Dba }           = require H.dba_path
   db_path           = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
-  urge "using DB at #{db_path}"
+  urge "^4858^ using DB at #{db_path}"
   dba               = new Dba()
   dba.open { path: db_path, }
-  debug '^557^', dba.list dba.query SQL"select name, type from sqlite_schema where type in ( 'table', 'view' ) order by name;"
   dpan              = new Dpan { dba, recreate: true, }
-  debug '^557^', dba.list dba.query SQL"select name, type from sqlite_schema where type in ( 'table', 'view' ) order by name;"
   T.eq dba, dpan.dba
   T.eq dba, dpan.vars.dba
   funny             = Math.floor Math.random() * 1e6
   T.eq ( dpan.vars.set 'myvariable', "some value"  ), "some value"
   T.eq ( dpan.vars.set 'distance', funny           ), funny
-  T.eq ( dpan.vars.get 'myvariable'                ), "some value"
-  T.eq ( dpan.vars.get 'distance'                  ), funny
-  console.table dba.list dba.query SQL"select name, type from sqlite_schema where type in ( 'table', 'view' ) order by name;"
-  T.eq ( dba.list dba.query SQL"select * from dpan_variables" ), []
+  # console.table dba.list dba.query SQL"select name, type from sqlite_schema where type in ( 'table', 'view' ) order by name;"
+  T.eq ( dba.list dba.query SQL"select * from dpan_variables" ), [ { key: 'myvariable', value: '"some value"' }, { key: 'distance', value: funny, } ]
   done?()
 
 
 ############################################################################################################
 if module is require.main then do =>
   test @, { timeout: 10e3, }
-  # test @[ "dpan variables 1" ]
 
 
 
