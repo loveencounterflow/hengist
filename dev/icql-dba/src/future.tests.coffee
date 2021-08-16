@@ -691,7 +691,7 @@ jp                        = JSON.parse
   T?.eq dba._get_foreign_key_state(), true
   #.........................................................................................................
   debug '^544734^', ( d.name for d from dba.walk_objects { schema, } )
-  T?.eq ( d.name for d from dba.walk_objects() ), [ 'sqlite_autoindex_k1_1', 'sqlite_autoindex_k2_1', 'k1', 'k2' ]
+  T?.eq ( d.name for d from dba.walk_objects { schema, } ), [ 'sqlite_autoindex_k1_1', 'sqlite_autoindex_k2_1', 'k1', 'k2' ]
   T?.eq ( dba.list dba.query "select * from k1 join k2 on ( k1.fk_k2 = k2.id );" ), [
     { id: 1, fk_k2: 1, fk_k1: 1 },
     { id: 2, fk_k2: 2, fk_k1: 2 },
@@ -704,7 +704,7 @@ jp                        = JSON.parse
     { id: 9, fk_k2: 9, fk_k1: 9 } ]
   #.........................................................................................................
   dba.clear { schema, }
-  T?.eq ( d.name for d from dba.walk_objects() ), []
+  T?.eq ( d.name for d from dba.walk_objects { schema, } ), []
   #.........................................................................................................
   done?()
 
