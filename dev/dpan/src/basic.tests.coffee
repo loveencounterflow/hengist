@@ -171,7 +171,7 @@ populate_db_with_hengist_deps = ( dpan ) ->
   # debug '^3343^', ( k for k of dpan.tags )
   seen_tags = new Set()
   for await dep from dpan.fs_walk_dep_infos { pkg_fspath, }
-    debug '^3398^', dep.pkg_keywords
+    # debug '^3398^', dep.pkg_keywords
     for tag in dep.pkg_keywords
       tag = tag.replace /[-\s]/g, '_'
       tag = tag.replace /['"]/g, ''
@@ -179,14 +179,17 @@ populate_db_with_hengist_deps = ( dpan ) ->
       unless seen_tags.has tag
         seen_tags.add tag
         dpan.tags.add_tag { tag, }
-  debug '^445^', dba.list dba.query SQL".tables"
+  # debug '^445^', dba.list dba.query SQL".tables"
   done?()
 
 
 ############################################################################################################
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
-  test @[ "dpan tagging 1" ]
+  # test @[ "dpan.fs_fetch_pkg_info 1" ]
+  # @[ "dpan.db_add_pkg_info 1" ]()
+  @[ "dpan.dba.clear 1" ]()
+  # test @[ "dpan tagging 1" ]
 
 
 

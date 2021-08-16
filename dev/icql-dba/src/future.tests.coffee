@@ -668,7 +668,7 @@ jp                        = JSON.parse
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: clear()" ] = ( T, done ) ->
-  # T?.halt_on_error()
+  T?.halt_on_error()
   ICQLDBA           = require H.icql_dba_path
   dba               = new ICQLDBA.Dba()
   schema            = 'main'
@@ -715,7 +715,6 @@ jp                        = JSON.parse
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # debug f '𠖏'
-  test @[ "DBA: foreign keys enforced" ]
   # test @[ "DBA: concurrent UDFs" ]
   # @[ "DBA: concurrent UDFs" ]()
   # test @[ "DBA: advanced interpolation" ]
@@ -747,7 +746,8 @@ if module is require.main then do =>
   # test @[ "DBA: import() TSV" ]
   # @[ "DBA: import() CSV" ]()
   # test @[ "DBA: clear()" ]
-  @[ "DBA: clear()" ]()
+  # test @[ "DBA: foreign keys enforced" ]
+  test @[ "DBA: clear()" ]
 
 
 

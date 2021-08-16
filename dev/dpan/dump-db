@@ -20,6 +20,17 @@ sqlite3 "$db_path" "select * from dpan_pkgs order by 1;"          >> "$target_pa
 printf '\ndpan_variables\n'                                       >> "$target_path"
 sqlite3 "$db_path" "select * from dpan_variables order by 1;"     >> "$target_path"
 
+# printf '\ndpan__potential_inflection_points\n'                                    >> "$target_path"
+# sqlite3 "$db_path" "select * from dpan__potential_inflection_points order by 1;"  >> "$target_path"
+# printf '\ndpan_tags_and_rangelists\n'                                             >> "$target_path"
+# sqlite3 "$db_path" "select * from dpan_tags_and_rangelists order by 1;"           >> "$target_path"
+# printf '\ndpan_contiguous_ranges\n'                                               >> "$target_path"
+# sqlite3 "$db_path" "select * from dpan_contiguous_ranges order by 1;"             >> "$target_path"
+# printf '\ndpan_tagged_ranges\n'                                                   >> "$target_path"
+# sqlite3 "$db_path" "select * from dpan_tagged_ranges order by 1;"                 >> "$target_path"
+printf '\ndpan_tags\n'                                                            >> "$target_path"
+sqlite3 "$db_path" "select * from dpan_tags order by 1;"                          >> "$target_path"
+
 
 # sqlite3pspg "$db_path" "select * from dpan_deps         order by 1;"
 # sqlite3pspg "$db_path" "select * from dpan_pkg_versions order by 1;"
