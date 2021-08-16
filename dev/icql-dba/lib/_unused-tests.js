@@ -721,116 +721,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: clear()"] = function(T, done) {
-    var ICQLDBA, d, dba, i, id, ref1;
-    // T.halt_on_error()
-    ICQLDBA = require(H.icql_dba_path);
-    dba = new ICQLDBA.Dba();
-    //.........................................................................................................
-    // Create tables, indexes:
-    dba.execute("create table main.k1 ( id integer primary key, fk_k2 integer unique references k2 ( id ) );");
-    dba.execute("create table main.k2 ( id integer primary key, fk_k1 integer unique references k1 ( id ) );");
-    ref1 = dba.walk_objects();
-    //.........................................................................................................
-    for (d of ref1) {
-      info("^557-300^", {
-        type: d.type,
-        name: d.name
-      });
-    }
-    //.........................................................................................................
-    // Insert rows:
-    T.eq(dba.get_foreign_key_state(), true);
-    dba.set_foreign_key_state(false);
-    T.eq(dba.get_foreign_key_state(), false);
-    for (id = i = 1; i <= 9; id = ++i) {
-      dba.execute(`insert into main.k1 values ( ${id}, ${id} );`);
-      dba.execute(`insert into main.k2 values ( ${id}, ${id} );`);
-    }
-    dba.set_foreign_key_state(true);
-    T.eq(dba.get_foreign_key_state(), true);
-    //.........................................................................................................
-    debug('^544734^', (function() {
-      var ref2, results;
-      ref2 = dba.walk_objects();
-      results = [];
-      for (d of ref2) {
-        results.push(d.name);
-      }
-      return results;
-    })());
-    T.eq((function() {
-      var ref2, results;
-      ref2 = dba.walk_objects();
-      results = [];
-      for (d of ref2) {
-        results.push(d.name);
-      }
-      return results;
-    })(), ['sqlite_autoindex_k1_1', 'sqlite_autoindex_k2_1', 'k1', 'k2']);
-    T.eq(dba.list(dba.query("select * from k1 join k2 on ( k1.fk_k2 = k2.id );")), [
-      {
-        id: 1,
-        fk_k2: 1,
-        fk_k1: 1
-      },
-      {
-        id: 2,
-        fk_k2: 2,
-        fk_k1: 2
-      },
-      {
-        id: 3,
-        fk_k2: 3,
-        fk_k1: 3
-      },
-      {
-        id: 4,
-        fk_k2: 4,
-        fk_k1: 4
-      },
-      {
-        id: 5,
-        fk_k2: 5,
-        fk_k1: 5
-      },
-      {
-        id: 6,
-        fk_k2: 6,
-        fk_k1: 6
-      },
-      {
-        id: 7,
-        fk_k2: 7,
-        fk_k1: 7
-      },
-      {
-        id: 8,
-        fk_k2: 8,
-        fk_k1: 8
-      },
-      {
-        id: 9,
-        fk_k2: 9,
-        fk_k1: 9
-      }
-    ]);
-    //.........................................................................................................
-    dba.clear();
-    T.eq((function() {
-      var ref2, results;
-      ref2 = dba.walk_objects();
-      results = [];
-      for (d of ref2) {
-        results.push(d.name);
-      }
-      return results;
-    })(), []);
-    //.........................................................................................................
-    return done();
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this["DBA: open from DB file"] = async function(T, done) {
     var ICQLDBA, cfg, d, dba, ignore, objects, path, s;
     // T.halt_on_error()
@@ -1068,8 +958,10 @@
   };
 
   //###########################################################################################################
-  if (module.parent == null) {
-    test(this);
+  if (module === require.main) {
+    (() => {
+      return test(this);
+    })();
   }
 
   // test @[ "DBA: copy file DB to memory" ]
@@ -1082,7 +974,6 @@
 // test @[ "DBA: in-memory DB API" ]
 // test @[ "DBA: as_sql" ]
 // test @[ "DBA: interpolate" ]
-// test @[ "DBA: clear()" ]
 // test @[ "toposort with schema" ]
 // @[ "toposort with schema" ]()
 

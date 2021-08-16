@@ -158,12 +158,51 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["dpan tagging 1"] = async function(T, done) {
+    var Dba, Dpan, db_path, dba, dep, dpan, i, len, pkg_fspath, ref, ref1, seen_tags, tag;
+    // T?.halt_on_error()
+    ({Dpan} = require(H.dpan_path));
+    ({Dba} = require(H.dba_path));
+    db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
+    pkg_fspath = __filename;
+    urge(`^4858^ using DB at ${db_path}`);
+    dba = new Dba();
+    dba.open({
+      path: db_path
+    });
+    dpan = new Dpan({
+      dba,
+      pkg_fspath,
+      recreate: true
+    });
+    // console.table dba.list dba.query SQL"select name, type from sqlite_schema where type in ( 'table', 'view' ) order by name;"
+    // debug '^3343^', ( k for k of dpan.tags )
+    seen_tags = new Set();
+    ref = dpan.fs_walk_dep_infos({pkg_fspath});
+    for await (dep of ref) {
+      debug('^3398^', dep.pkg_keywords);
+      ref1 = dep.pkg_keywords;
+      for (i = 0, len = ref1.length; i < len; i++) {
+        tag = ref1[i];
+        tag = tag.replace(/[-\s]/g, '_');
+        tag = tag.replace(/['"]/g, '');
+        tag = tag.toLowerCase();
+        if (!seen_tags.has(tag)) {
+          seen_tags.add(tag);
+          dpan.tags.add_tag({tag});
+        }
+      }
+    }
+    debug('^445^', dba.list(dba.query(SQL`.tables`)));
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      return test(this["dpan tagging 1"]);
     })();
   }
 
