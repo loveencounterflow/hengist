@@ -68,6 +68,58 @@ test_fs_fetch_pkg_info = ( T, fallback ) ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+populate_db_with_hengist_deps = ( dpan ) ->
+  glob                  = require 'glob'
+  skipped               = []
+  home_path             = PATH.resolve PATH.join __dirname, '../../../../'
+  project_path_pattern  = PATH.join home_path, '*/package.json'
+  debug '^488^', project_path_pattern
+  for project_path in glob.sync project_path_pattern
+    pkg_fspath  = PATH.dirname project_path
+    try
+      pkg_info = await dpan.fs_fetch_pkg_info { pkg_fspath, }
+      dpan.db_add_pkg_info pkg_info
+    catch error
+      warn "error occurred when trying to add #{pkg_fspath}: #{error.message}; skipping"
+      skipped.push pkg_fspath
+      continue
+    # whisper '^564^', pkg_info
+    info '^564^', pkg_info.pkg_name, pkg_info.pkg_version
+  #.........................................................................................................
+  if skipped.length > 0
+    warn "some paths looked like projects but caused errors (see above):"
+    warn '  ' + entry for entry in skipped
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "dpan.db_add_pkg_info 1" ] = ( T, done ) ->
+  { Dpan }              = require H.dpan_path
+  # dpan                  = new Dpan_next { recreate: true, }
+  { Dba }               = require H.dba_path
+  db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
+  dba                   = new Dba()
+  dba.open { path: db_path, }
+  dpan                  = new Dpan { dba, recreate: true, }
+  await populate_db_with_hengist_deps dpan
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "dpan.dba.clear 1" ] = ( T, done ) ->
+  { Dpan }              = require H.dpan_path
+  # dpan                  = new Dpan_next { recreate: true, }
+  { Dba }               = require H.dba_path
+  db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
+  dba                   = new Dba()
+  dba.open { path: db_path, }
+  dpan                  = new Dpan { dba, recreate: true, }
+  await populate_db_with_hengist_deps dpan
+  dba.clear { schema: 'main', }
+  T?.eq ( dba.list dba.query SQL"select * from sqlite_schema;" ), []
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "dpan.fs_resolve_dep_fspath 1" ] = ( T, done ) ->
   T?.halt_on_error()
   { Dpan }          = require H.dpan_path
