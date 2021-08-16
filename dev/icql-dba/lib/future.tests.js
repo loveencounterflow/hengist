@@ -1039,45 +1039,168 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
   
   // use table valued functions to do joins over 2+ dba instances
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: clear()"] = function(T, done) {
+    var ICQLDBA, d, dba, i, id, ref, schema;
+    // T?.halt_on_error()
+    ICQLDBA = require(H.icql_dba_path);
+    dba = new ICQLDBA.Dba();
+    schema = 'main';
+    //.........................................................................................................
+    // Create tables, indexes:
+    dba.execute("create table main.k1 ( id integer primary key, fk_k2 integer unique references k2 ( id ) );");
+    dba.execute("create table main.k2 ( id integer primary key, fk_k1 integer unique references k1 ( id ) );");
+    ref = dba.walk_objects({schema});
+    //.........................................................................................................
+    for (d of ref) {
+      info("^557-300^", {
+        type: d.type,
+        name: d.name
+      });
+    }
+    //.........................................................................................................
+    // Insert rows:
+    if (T != null) {
+      T.eq(dba._get_foreign_key_state(), true);
+    }
+    dba._set_foreign_key_state(false);
+    if (T != null) {
+      T.eq(dba._get_foreign_key_state(), false);
+    }
+    for (id = i = 1; i <= 9; id = ++i) {
+      dba.execute(`insert into main.k1 values ( ${id}, ${id} );`);
+      dba.execute(`insert into main.k2 values ( ${id}, ${id} );`);
+    }
+    dba._set_foreign_key_state(true);
+    if (T != null) {
+      T.eq(dba._get_foreign_key_state(), true);
+    }
+    //.........................................................................................................
+    debug('^544734^', (function() {
+      var ref1, results;
+      ref1 = dba.walk_objects({schema});
+      results = [];
+      for (d of ref1) {
+        results.push(d.name);
+      }
+      return results;
+    })());
+    if (T != null) {
+      T.eq((function() {
+        var ref1, results;
+        ref1 = dba.walk_objects();
+        results = [];
+        for (d of ref1) {
+          results.push(d.name);
+        }
+        return results;
+      })(), ['sqlite_autoindex_k1_1', 'sqlite_autoindex_k2_1', 'k1', 'k2']);
+    }
+    if (T != null) {
+      T.eq(dba.list(dba.query("select * from k1 join k2 on ( k1.fk_k2 = k2.id );")), [
+        {
+          id: 1,
+          fk_k2: 1,
+          fk_k1: 1
+        },
+        {
+          id: 2,
+          fk_k2: 2,
+          fk_k1: 2
+        },
+        {
+          id: 3,
+          fk_k2: 3,
+          fk_k1: 3
+        },
+        {
+          id: 4,
+          fk_k2: 4,
+          fk_k1: 4
+        },
+        {
+          id: 5,
+          fk_k2: 5,
+          fk_k1: 5
+        },
+        {
+          id: 6,
+          fk_k2: 6,
+          fk_k1: 6
+        },
+        {
+          id: 7,
+          fk_k2: 7,
+          fk_k1: 7
+        },
+        {
+          id: 8,
+          fk_k2: 8,
+          fk_k1: 8
+        },
+        {
+          id: 9,
+          fk_k2: 9,
+          fk_k1: 9
+        }
+      ]);
+    }
+    //.........................................................................................................
+    dba.clear({schema});
+    if (T != null) {
+      T.eq((function() {
+        var ref1, results;
+        ref1 = dba.walk_objects();
+        results = [];
+        for (d of ref1) {
+          results.push(d.name);
+        }
+        return results;
+      })(), []);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
       // debug f '𠖏'
-      return test(this["DBA: foreign keys enforced"]);
+      test(this["DBA: foreign keys enforced"]);
+      // test @[ "DBA: concurrent UDFs" ]
+      // @[ "DBA: concurrent UDFs" ]()
+      // test @[ "DBA: advanced interpolation" ]
+      // test @[ "DBA: typing" ]
+      // test @[ "DBA: window functions etc." ]
+      // test @[ "DBA: view with UDF" ]
+      // test @[ "DBA: sqlean vsv extension" ]
+      // test @[ "DBA: indexing JSON lists (de-constructing method)" ]
+      // test @[ "DBA: indexing JSON lists (constructing method)" ]
+      // test @[ "DBA: User-Defined Window Function" ]
+      // test @[ "DBA: VNRs" ], { timeout: 5e3, }
+      // test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
+      // test @[ "DBA: open() file DB in schema main" ]
+      // test @[ "DBA: writing while reading 2" ]
+      // test @[ "DBA: open() RAM DB from file in schema main" ]
+      // test @[ "DBA: open() empty RAM DB in schema main" ]
+      // test @[ "DBA: virtual tables" ]
+      // test @[ "DBA: import TSV; cfg variants 2" ]
+      // test @[ "DBA: import TSV; cfg variants 2" ]
+      // test @[ "DBA: import TSV; cfg variants 3" ]
+      // test @[ "DBA: import TSV; cfg variants 4" ]
+      // test @[ "DBA: import CSV; cfg variants 5" ]
+      // await @_demo_csv_parser()
+      // test @[ "___ DBA: import() (four corner)" ]
+      // test @[ "___ DBA: import() (big file)" ]
+      // test @[ "DBA: open() RAM DB" ]
+      // test @[ "DBA: export() RAM DB" ]
+      // test @[ "DBA: import() CSV" ]
+      // test @[ "DBA: import() TSV" ]
+      // @[ "DBA: import() CSV" ]()
+      // test @[ "DBA: clear()" ]
+      return this["DBA: clear()"]();
     })();
   }
-
-  // test @[ "DBA: concurrent UDFs" ]
-// @[ "DBA: concurrent UDFs" ]()
-// test @[ "DBA: advanced interpolation" ]
-// test @[ "DBA: typing" ]
-// test @[ "DBA: window functions etc." ]
-// test @[ "DBA: view with UDF" ]
-// test @[ "DBA: sqlean vsv extension" ]
-// test @[ "DBA: indexing JSON lists (de-constructing method)" ]
-// test @[ "DBA: indexing JSON lists (constructing method)" ]
-// test @[ "DBA: User-Defined Window Function" ]
-// test @[ "DBA: VNRs" ], { timeout: 5e3, }
-// test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
-// test @[ "DBA: open() file DB in schema main" ]
-// test @[ "DBA: writing while reading 2" ]
-// test @[ "DBA: open() RAM DB from file in schema main" ]
-// test @[ "DBA: open() empty RAM DB in schema main" ]
-// test @[ "DBA: virtual tables" ]
-// test @[ "DBA: import TSV; cfg variants 2" ]
-// test @[ "DBA: import TSV; cfg variants 2" ]
-// test @[ "DBA: import TSV; cfg variants 3" ]
-// test @[ "DBA: import TSV; cfg variants 4" ]
-// test @[ "DBA: import CSV; cfg variants 5" ]
-// await @_demo_csv_parser()
-// test @[ "___ DBA: import() (four corner)" ]
-// test @[ "___ DBA: import() (big file)" ]
-// test @[ "DBA: open() RAM DB" ]
-// test @[ "DBA: export() RAM DB" ]
-// test @[ "DBA: import() CSV" ]
-// test @[ "DBA: import() TSV" ]
-// @[ "DBA: import() CSV" ]()
 
 }).call(this);
 

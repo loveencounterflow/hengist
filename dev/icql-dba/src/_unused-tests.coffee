@@ -359,47 +359,6 @@ types                     = new ( require 'intertype' ).Intertype
   done()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: clear()" ] = ( T, done ) ->
-  # T.halt_on_error()
-  ICQLDBA           = require H.icql_dba_path
-  dba               = new ICQLDBA.Dba()
-  #.........................................................................................................
-  # Create tables, indexes:
-  dba.execute "create table main.k1 ( id integer primary key, fk_k2 integer unique references k2 ( id ) );"
-  dba.execute "create table main.k2 ( id integer primary key, fk_k1 integer unique references k1 ( id ) );"
-  #.........................................................................................................
-  for d from dba.walk_objects()
-    info "^557-300^", { type: d.type, name: d.name, }
-  #.........................................................................................................
-  # Insert rows:
-  T.eq dba.get_foreign_key_state(), true
-  dba.set_foreign_key_state off
-  T.eq dba.get_foreign_key_state(), false
-  for id in [ 1 .. 9 ]
-    dba.execute "insert into main.k1 values ( #{id}, #{id} );"
-    dba.execute "insert into main.k2 values ( #{id}, #{id} );"
-  dba.set_foreign_key_state on
-  T.eq dba.get_foreign_key_state(), true
-  #.........................................................................................................
-  debug '^544734^', ( d.name for d from dba.walk_objects() )
-  T.eq ( d.name for d from dba.walk_objects() ), [ 'sqlite_autoindex_k1_1', 'sqlite_autoindex_k2_1', 'k1', 'k2' ]
-  T.eq ( dba.list dba.query "select * from k1 join k2 on ( k1.fk_k2 = k2.id );" ), [
-    { id: 1, fk_k2: 1, fk_k1: 1 },
-    { id: 2, fk_k2: 2, fk_k1: 2 },
-    { id: 3, fk_k2: 3, fk_k1: 3 },
-    { id: 4, fk_k2: 4, fk_k1: 4 },
-    { id: 5, fk_k2: 5, fk_k1: 5 },
-    { id: 6, fk_k2: 6, fk_k1: 6 },
-    { id: 7, fk_k2: 7, fk_k1: 7 },
-    { id: 8, fk_k2: 8, fk_k1: 8 },
-    { id: 9, fk_k2: 9, fk_k1: 9 } ]
-  #.........................................................................................................
-  dba.clear()
-  T.eq ( d.name for d from dba.walk_objects() ), []
-  #.........................................................................................................
-  done()
-
-#-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open from DB file" ] = ( T, done ) ->
   # T.halt_on_error()
   ICQLDBA               = require H.icql_dba_path
@@ -584,7 +543,7 @@ show_schemas_and_objects = ( ref, dba ) ->
 
 
 ############################################################################################################
-unless module.parent?
+if module is require.main then do =>
   test @
   # test @[ "DBA: copy file DB to memory" ]
   # test @[ "DBA: open()" ]
@@ -596,7 +555,6 @@ unless module.parent?
   # test @[ "DBA: in-memory DB API" ]
   # test @[ "DBA: as_sql" ]
   # test @[ "DBA: interpolate" ]
-  # test @[ "DBA: clear()" ]
   # test @[ "toposort with schema" ]
   # @[ "toposort with schema" ]()
 
