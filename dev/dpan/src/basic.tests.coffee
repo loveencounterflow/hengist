@@ -104,10 +104,37 @@ test_fs_fetch_pkg_info = ( T, fallback ) ->
   T.eq ( dba.list dba.query SQL"select * from dpan_variables" ), [ { key: 'myvariable', value: '"some value"' }, { key: 'distance', value: funny, } ]
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "dpan tagging 1" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dpan }          = require H.dpan_path
+  { Dba }           = require H.dba_path
+  db_path           = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
+  pkg_fspath        = __filename
+  urge "^4858^ using DB at #{db_path}"
+  dba               = new Dba()
+  dba.open { path: db_path, }
+  dpan              = new Dpan { dba, pkg_fspath, recreate: true, }
+  # console.table dba.list dba.query SQL"select name, type from sqlite_schema where type in ( 'table', 'view' ) order by name;"
+  # debug '^3343^', ( k for k of dpan.tags )
+  seen_tags = new Set()
+  for await dep from dpan.fs_walk_dep_infos { pkg_fspath, }
+    debug '^3398^', dep.pkg_keywords
+    for tag in dep.pkg_keywords
+      tag = tag.replace /[-\s]/g, '_'
+      tag = tag.replace /['"]/g, ''
+      tag = tag.toLowerCase()
+      unless seen_tags.has tag
+        seen_tags.add tag
+        dpan.tags.add_tag { tag, }
+  debug '^445^', dba.list dba.query SQL".tables"
+  done?()
+
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
+  # test @, { timeout: 10e3, }
+  test @[ "dpan tagging 1" ]
 
 
 
