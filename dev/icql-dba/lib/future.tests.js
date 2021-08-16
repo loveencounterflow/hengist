@@ -1042,7 +1042,9 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: clear()"] = function(T, done) {
     var ICQLDBA, d, dba, i, id, ref, schema;
-    // T?.halt_on_error()
+    if (T != null) {
+      T.halt_on_error();
+    }
     ICQLDBA = require(H.icql_dba_path);
     dba = new ICQLDBA.Dba();
     schema = 'main';
@@ -1088,7 +1090,7 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     if (T != null) {
       T.eq((function() {
         var ref1, results;
-        ref1 = dba.walk_objects();
+        ref1 = dba.walk_objects({schema});
         results = [];
         for (d of ref1) {
           results.push(d.name);
@@ -1150,7 +1152,7 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     if (T != null) {
       T.eq((function() {
         var ref1, results;
-        ref1 = dba.walk_objects();
+        ref1 = dba.walk_objects({schema});
         results = [];
         for (d of ref1) {
           results.push(d.name);
@@ -1166,7 +1168,6 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     (() => {
       // test @, { timeout: 10e3, }
       // debug f '𠖏'
-      test(this["DBA: foreign keys enforced"]);
       // test @[ "DBA: concurrent UDFs" ]
       // @[ "DBA: concurrent UDFs" ]()
       // test @[ "DBA: advanced interpolation" ]
@@ -1198,7 +1199,8 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
       // test @[ "DBA: import() TSV" ]
       // @[ "DBA: import() CSV" ]()
       // test @[ "DBA: clear()" ]
-      return this["DBA: clear()"]();
+      // test @[ "DBA: foreign keys enforced" ]
+      return test(this["DBA: clear()"]);
     })();
   }
 

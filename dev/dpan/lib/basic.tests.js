@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, help, info, isa, rpr, test, test_fs_fetch_pkg_info, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, echo, help, info, isa, populate_db_with_hengist_deps, rpr, test, test_fs_fetch_pkg_info, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -100,6 +100,85 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  populate_db_with_hengist_deps = async function(dpan) {
+    var entry, error, glob, home_path, i, j, len, len1, pkg_fspath, pkg_info, project_path, project_path_pattern, ref, skipped;
+    glob = require('glob');
+    skipped = [];
+    home_path = PATH.resolve(PATH.join(__dirname, '../../../../'));
+    project_path_pattern = PATH.join(home_path, '*/package.json');
+    debug('^488^', project_path_pattern);
+    ref = glob.sync(project_path_pattern);
+    for (i = 0, len = ref.length; i < len; i++) {
+      project_path = ref[i];
+      pkg_fspath = PATH.dirname(project_path);
+      try {
+        pkg_info = (await dpan.fs_fetch_pkg_info({pkg_fspath}));
+        dpan.db_add_pkg_info(pkg_info);
+      } catch (error1) {
+        error = error1;
+        warn(`error occurred when trying to add ${pkg_fspath}: ${error.message}; skipping`);
+        skipped.push(pkg_fspath);
+        continue;
+      }
+      // whisper '^564^', pkg_info
+      info('^564^', pkg_info.pkg_name, pkg_info.pkg_version);
+    }
+    //.........................................................................................................
+    if (skipped.length > 0) {
+      warn("some paths looked like projects but caused errors (see above):");
+      for (j = 0, len1 = skipped.length; j < len1; j++) {
+        entry = skipped[j];
+        warn('  ' + entry);
+      }
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["dpan.db_add_pkg_info 1"] = async function(T, done) {
+    var Dba, Dpan, db_path, dba, dpan;
+    ({Dpan} = require(H.dpan_path));
+    // dpan                  = new Dpan_next { recreate: true, }
+    ({Dba} = require(H.dba_path));
+    db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
+    dba = new Dba();
+    dba.open({
+      path: db_path
+    });
+    dpan = new Dpan({
+      dba,
+      recreate: true
+    });
+    await populate_db_with_hengist_deps(dpan);
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["dpan.dba.clear 1"] = async function(T, done) {
+    var Dba, Dpan, db_path, dba, dpan;
+    ({Dpan} = require(H.dpan_path));
+    // dpan                  = new Dpan_next { recreate: true, }
+    ({Dba} = require(H.dba_path));
+    db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
+    dba = new Dba();
+    dba.open({
+      path: db_path
+    });
+    dpan = new Dpan({
+      dba,
+      recreate: true
+    });
+    await populate_db_with_hengist_deps(dpan);
+    dba.clear({
+      schema: 'main'
+    });
+    if (T != null) {
+      T.eq(dba.list(dba.query(SQL`select * from sqlite_schema;`)), []);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["dpan.fs_resolve_dep_fspath 1"] = function(T, done) {
     var Dba, Dpan, dba, dep_fspath, dep_name, dpan, pkg_fspath;
     if (T != null) {
@@ -181,8 +260,8 @@
     seen_tags = new Set();
     ref = dpan.fs_walk_dep_infos({pkg_fspath});
     for await (dep of ref) {
-      debug('^3398^', dep.pkg_keywords);
       ref1 = dep.pkg_keywords;
+      // debug '^3398^', dep.pkg_keywords
       for (i = 0, len = ref1.length; i < len; i++) {
         tag = ref1[i];
         tag = tag.replace(/[-\s]/g, '_');
@@ -194,7 +273,6 @@
         }
       }
     }
-    debug('^445^', dba.list(dba.query(SQL`.tables`)));
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -202,9 +280,13 @@
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      return test(this["dpan tagging 1"]);
+      // test @[ "dpan.fs_fetch_pkg_info 1" ]
+      // @[ "dpan.db_add_pkg_info 1" ]()
+      return this["dpan.dba.clear 1"]();
     })();
   }
+
+  // test @[ "dpan tagging 1" ]
 
 }).call(this);
 

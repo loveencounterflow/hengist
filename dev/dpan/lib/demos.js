@@ -70,10 +70,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_db_add_pkg_infos = async function() {
-    var Dpan, dpan, entry, error, home_path, i, j, len, len1, pkg_fspath, pkg_info, project_path, project_path_pattern, ref, skipped;
+    var Dpan, dba, dpan, entry, error, home_path, i, j, len, len1, pkg_fspath, pkg_info, project_path, project_path_pattern, ref, skipped;
     ({Dpan} = require(H.dpan_path));
+    ({Dba} = require(H.dba_path));
+    dba = new Dba();
+    dpan = new Dpan({dba});
     // dpan                  = new Dpan_next { recreate: true, }
-    dpan = new Dpan();
     skipped = [];
     home_path = PATH.resolve(PATH.join(__dirname, '../../../../'));
     project_path_pattern = PATH.join(home_path, '*/package.json');
@@ -132,16 +134,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_variables = function() {
-    var Dpan, dpan;
-    debug('^3344^', {
-      dpan_path: H.dpan_path
-    });
+    var Dpan, dba, dpan;
+    ({Dba} = require(H.dba_path));
     ({Dpan} = require(H.dpan_path));
-    dpan = new Dpan();
-    debug('^4443^', dpan.v.set('myvariable', "some value"));
-    debug('^4443^', dpan.v.set('ditance', 12));
-    debug('^4443^', dpan.v.get('myvariable'));
-    debug('^4443^', dpan.v.get('ditance'));
+    dba = new Dba();
+    dpan = new Dpan({dba});
+    debug('^4443^', dpan.vars.set('myvariable', "some value"));
+    debug('^4443^', dpan.vars.set('ditance', 12));
+    debug('^4443^', dpan.vars.get('myvariable'));
+    debug('^4443^', dpan.vars.get('ditance'));
     return null;
   };
 
