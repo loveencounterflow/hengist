@@ -27,7 +27,7 @@
 
    */
   'use strict';
-  var CND, Worker, after, badge, debug, defer, demo_A, demo_B, echo, help, info, isMainThread, rpr, urge, warn, whisper, workerData;
+  var CND, Worker, after, badge, debug, defer, demo_A, demo_B, demo_deasync_1, demo_deasync_2, echo, help, info, isMainThread, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper, workerData;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -59,38 +59,73 @@
 
   ({isMainThread, Worker, workerData} = require('worker_threads'));
 
+  types = new (require('intertype')).Intertype();
+
+  ({isa, type_of, validate, validate_list_of} = types.export());
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_A = function() {
-    var lock, release;
-    release = function(typed_array, index, value) {
-      return (require('fs')).readFile(__filename, function(error, data) {
+    var lock, release, shared_data_idx, shared_data_proceed, shared_data_signal, shared_data_value, shared_ram, worker;
+    debug('^3486^', CND.reverse(isMainThread, workerData));
+    shared_data_idx = 0;
+    shared_data_value = 54321;
+    shared_data_signal = 123456;
+    shared_data_proceed = 64;
+    //.........................................................................................................
+    release = function() {
+      var shared_data;
+      warn('^879-1^', "release");
+      shared_data = new Int32Array(workerData);
+      warn('^879-2^', "waiting a bit in worker thread...");
+      Atomics.wait(shared_data, shared_data_idx, shared_data_value);
+      after(1, function() {
+        warn('^879-3^', Atomics.store(shared_data, shared_data_idx, shared_data_signal));
+        return warn('^879-4^', Atomics.notify(shared_data, shared_data_idx, 1));
+      });
+      return null;
+    };
+    //.........................................................................................................
+    lock = function(shared_ram) {
+      var shared_data, timeout;
+      info('^879-5^', "lock");
+      shared_data = new Int32Array(shared_ram);
+      timeout = 1000;
+      shared_data[shared_data_idx] = shared_data_value;
+      info('^879-6^', shared_data[shared_data_idx]);
+      whisper('^879-7^', '-------------------------------------------------------');
+      //.......................................................................................................
+      (require('fs')).readFile(__filename, function(error, data) {
+        info('^879-x^', "read file");
         if (error != null) {
           throw error;
         }
-        urge('^898^', `read ${data.length} bytes`);
-        urge('^565-1^', typed_array[index]);
-        debug('^477-1^', Atomics.store(typed_array, index, value + 1));
-        return debug('^477-2^', Atomics.notify(typed_array, index, 2e308));
+        info('^879-x^', `read ${data.length} bytes`);
+        return Atomics.store(shared_data, shared_data_idx, shared_data_proceed);
       });
+      //.......................................................................................................
+      info('^879-8^', CND.reverse(Atomics.wait(shared_data, shared_data_idx, shared_data_value))); //, timeout
+      info('^879-9^', "received shared_data_signal:", shared_data[shared_data_idx]);
+      return null;
     };
-    lock = function() {
-      var index, sab, timeout, typed_array, value;
-      index = 0;
-      value = 0;
-      timeout = 1000;
-      sab = new SharedArrayBuffer(1024);
-      typed_array = new Int32Array(sab);
-      typed_array[index] = value; // + 1
-      urge('^565-2^', typed_array[index]);
-      release(typed_array, index, value);
-      debug('^477-3^', Atomics.wait(typed_array, index, value)); //, timeout
-      return urge('^565-3^', typed_array[index]);
-    };
-    return lock();
+    //.........................................................................................................
+    if (isMainThread) {
+      info('^879-10^', "main thread");
+      shared_ram = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT);
+      worker = new Worker(__filename, {
+        workerData: shared_ram
+      });
+      lock(shared_ram);
+    } else {
+      warn('^879-11^', "worker thread");
+      release();
+    }
+    return null;
   };
 
-  // await lock()
+  //-----------------------------------------------------------------------------------------------------------
   demo_B = function() {
     var _, i, j, k, l, ref, shared_data, shared_ram, worker, worker_count, workers;
+    /* thx to https://stackoverflow.com/a/53923671/256361 */
     debug('^447-1^', 'isMainThread', isMainThread);
     worker_count = 3;
     if (isMainThread) {
@@ -129,14 +164,68 @@
     return null;
   };
 
+  //===========================================================================================================
+  // DEASYNC
+  //-----------------------------------------------------------------------------------------------------------
+  demo_deasync_1 = function() {
+    var cp, deasync, error, exec;
+    deasync = require('deasync');
+    cp = require('child_process');
+    exec = deasync(cp.exec);
+    try {
+      // output result of ls -la
+      info('^434-1^', exec('ls -la'));
+    } catch (error1) {
+      error = error1;
+      info('^434-2^', error);
+    }
+    // done is printed last, as supposed, with cp.exec wrapped in deasync first without.
+    info('^434-3^', 'done');
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_deasync_2 = function() {
+    var deasync_awaitable, deasync_callbackable, frob_async, frob_sync;
+    after = function(dts, f) {
+      return setTimeout(f, dts * 1000);
+    };
+    deasync_callbackable = require('deasync');
+    //.........................................................................................................
+    deasync_awaitable = function(fn_with_promise) {
+      return deasync_callbackable(async(handler) => {
+        var result;
+        result = (await fn_with_promise());
+        handler(null, result);
+        return null;
+      });
+    };
+    //.........................................................................................................
+    frob_async = function() {
+      return new Promise((resolve) => {
+        return after(1, function() {
+          warn('^455-1^', "frob_async done");
+          return resolve();
+        });
+      });
+    };
+    //.........................................................................................................
+    frob_sync = deasync_awaitable(frob_async);
+    frob_sync();
+    info('^455-3^', "call to frob_sync done");
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return demo_A();
+      // await demo_A()
+      // await demo_B()
+      // await demo_deasync_1()
+      demo_deasync_2();
+      return urge('^803-1^', "demo_deasync_2 done");
     })();
   }
-
-  // await demo_B()
 
 }).call(this);
 
