@@ -1,4 +1,31 @@
 (function() {
+  /*
+
+  See
+    * [*A future for SQL on the web*](https://lobste.rs/s/1ylnel/future_for_sql_on_web)
+    * [*A future for SQL on the web* by James Long (August 12, 2021)](https://jlongster.com/future-sql-web)
+
+  > The biggest problem is when sqlite does a read or write, the API is totally synchronous because it’s based
+  > on the C API. Accessing IndexedDB is always async, so how do we get around that?
+  >
+  > We spawn a worker process and give it a SharedArrayBuffer and then use the
+  > [`Atomics`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Atomics) API
+  > to communicate via the buffer. For example, our backend writes a read request into the shared buffer, and
+  > the worker reads it, performs the read async, and then writes the result back.
+  >
+  > I wrote a small [channel
+  > abstraction](https://github.com/jlongster/absurd-sql/blob/master/src/indexeddb/shared-channel.js) to send
+  > different types of data across a SharedArrayBuffer.
+  >
+  > The real magic is the
+  > [`Atomics.wait`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Atomics/wait)
+  > API. It’s a beautiful thing. When you call it, it completely blocks JS until the condition is met. You use
+  > it to wait on some data in the SharedArrayBuffer, and this is what enables us to turn the async read/write
+  > into a sync one. The backend calls it to wait on the result from the worker and blocks until it’s
+  > done.—[*A future for SQL on the web* by James Long (August 12,
+  > 2021)](https://jlongster.com/future-sql-web)
+
+   */
   'use strict';
   var CND, Worker, after, badge, debug, defer, demo_A, demo_B, echo, help, info, isMainThread, rpr, urge, warn, whisper, workerData;
 
