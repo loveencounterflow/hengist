@@ -16,6 +16,7 @@ specifiers:
   csv-parser: ^3.0.0
   cupofjoe: 0.2.1
   datom: 8.0.3
+  deasync: ^0.1.22
   deepcopy: ^2.1.0
   deepfreeze: ^2.0.0
   deepfreezer: ^1.2.2
@@ -111,6 +112,7 @@ dependencies:
   csv-parser: 3.0.0
   cupofjoe: 0.2.1
   datom: 8.0.3
+  deasync: 0.1.22
   deepcopy: 2.1.0
   deepfreeze: 2.0.0
   deepfreezer: 1.2.2
@@ -1030,6 +1032,15 @@ packages:
       intertype: 7.6.5
       letsfreezethat: 3.1.0
       multimix: 5.0.0
+    dev: false
+
+  /deasync/0.1.22:
+    resolution: {integrity: sha512-o21R8Vhv3wX0E19jpATUJIAinQ1I2rHIlAnzRRsMynWlIrvU0HbCwjpquPIYR544Tvg9z/L+NZQev5cjVD1/nQ==}
+    engines: {node: '>=0.11.0'}
+    requiresBuild: true
+    dependencies:
+      bindings: 1.5.0
+      node-addon-api: 1.7.2
     dev: false
 
   /debug/2.6.9:
@@ -2513,6 +2524,10 @@ packages:
     resolution: {integrity: sha512-g6bZh3YCKQRdwuO/tSZZYJAw622SjsRfJ2X0Iy4sSOHZ34/sPPdVBn8fev2tj7njzLwuqPw9uMtGsGkO5kIQvg==}
     dependencies:
       semver: 5.7.1
+    dev: false
+
+  /node-addon-api/1.7.2:
+    resolution: {integrity: sha512-ibPK3iA+vaY1eEjESkQkM0BbCqFOaZMiXRTtdB0u7b4djtY6JnsjvPdUHVMg6xQt3B8fpTTWHI9A+ADjM9frzg==}
     dev: false
 
   /node-gyp/3.8.0:
