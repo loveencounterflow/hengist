@@ -56,32 +56,63 @@ after                     = ( dts, f ) -> setTimeout  f, dts * 1000
 { isMainThread
   Worker
   workerData            } = require 'worker_threads'
+types                     = new ( require 'intertype' ).Intertype
+{ isa
+  type_of
+  validate
+  validate_list_of }      = types.export()
 
 
+#-----------------------------------------------------------------------------------------------------------
 demo_A = ->
-  release = ( typed_array, index, value ) ->
-    ( require 'fs' ).readFile __filename, ( error, data ) ->
-      throw error if error?
-      urge '^898^', "read #{data.length} bytes"
-      urge '^565-1^', typed_array[ index ]
-      debug '^477-1^', Atomics.store  typed_array, index, value + 1
-      debug '^477-2^', Atomics.notify typed_array, index, Infinity
-
-  lock = ->
-    index       = 0
-    value       = 0
+  debug '^3486^', CND.reverse isMainThread, workerData
+  shared_data_idx     = 0
+  shared_data_value   = 54321
+  shared_data_signal  = 123456
+  shared_data_proceed = 64
+  #.........................................................................................................
+  release = ->
+    warn '^879-1^', "release"
+    shared_data = new Int32Array workerData
+    warn '^879-2^', "waiting a bit in worker thread..."
+    Atomics.wait shared_data, shared_data_idx, shared_data_value
+    after 1, ->
+      warn '^879-3^', Atomics.store  shared_data, shared_data_idx, shared_data_signal
+      warn '^879-4^', Atomics.notify shared_data, shared_data_idx, 1
+    return null
+  #.........................................................................................................
+  lock = ( shared_ram ) ->
+    info '^879-5^', "lock"
+    shared_data = new Int32Array shared_ram
     timeout     = 1000
-    sab         = new SharedArrayBuffer 1024
-    typed_array = new Int32Array sab
-    typed_array[ index ] = value # + 1
-    urge '^565-2^', typed_array[ index ]
-    release typed_array, index, value
-    debug '^477-3^', Atomics.wait typed_array, index, value #, timeout
-    urge '^565-3^', typed_array[ index ]
-  lock()
-  # await lock()
+    shared_data[ shared_data_idx ] = shared_data_value
+    info '^879-6^', shared_data[ shared_data_idx ]
+    whisper '^879-7^', '-------------------------------------------------------'
+    #.......................................................................................................
+    ( require 'fs' ).readFile __filename, ( error, data ) ->
+      info '^879-x^', "read file"
+      throw error if error?
+      info '^879-x^', "read #{data.length} bytes"
+      Atomics.store shared_data, shared_data_idx, shared_data_proceed
+    #.......................................................................................................
+    info '^879-8^', CND.reverse Atomics.wait shared_data, shared_data_idx, shared_data_value #, timeout
+    info '^879-9^', "received shared_data_signal:", shared_data[ shared_data_idx ]
+    return null
+  #.........................................................................................................
+  if isMainThread
+    info '^879-10^', "main thread"
+    shared_ram  = new SharedArrayBuffer Int32Array.BYTES_PER_ELEMENT
+    worker      = new Worker __filename, { workerData: shared_ram }
+    lock shared_ram
+  else
+    warn '^879-11^', "worker thread"
+    release()
+  return null
 
+
+#-----------------------------------------------------------------------------------------------------------
 demo_B = ->
+  ### thx to https://stackoverflow.com/a/53923671/256361 ###
   debug '^447-1^', 'isMainThread', isMainThread
   worker_count = 3
   if isMainThread
@@ -106,8 +137,48 @@ demo_B = ->
   return null
 
 
+#===========================================================================================================
+# DEASYNC
+#-----------------------------------------------------------------------------------------------------------
+demo_deasync_1 = ->
+  deasync = require 'deasync'
+  cp      = require 'child_process'
+  exec    = deasync cp.exec
+  # output result of ls -la
+  try
+      info '^434-1^', exec 'ls -la'
+  catch error
+      info '^434-2^', error
+  # done is printed last, as supposed, with cp.exec wrapped in deasync first without.
+  info '^434-3^', 'done'
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_deasync_2 = ->
+  after                 = ( dts, f ) -> setTimeout  f, dts * 1000
+  deasync_callbackable  = require 'deasync'
+  #.........................................................................................................
+  deasync_awaitable = ( fn_with_promise ) ->
+    return deasync_callbackable ( handler ) =>
+      result = await fn_with_promise()
+      handler null, result
+      return null
+  #.........................................................................................................
+  frob_async = -> new Promise ( resolve ) =>
+    after 1, -> warn '^455-1^', "frob_async done"; resolve()
+  #.........................................................................................................
+  frob_sync = deasync_awaitable frob_async
+  frob_sync()
+  info '^455-3^', "call to frob_sync done"
+  return null
+
+
 ############################################################################################################
 if module is require.main then do =>
-  demo_A()
+  # await demo_A()
   # await demo_B()
+  # await demo_deasync_1()
+  demo_deasync_2()
+  urge '^803-1^', "demo_deasync_2 done"
+
 
