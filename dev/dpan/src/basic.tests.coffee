@@ -99,6 +99,7 @@ populate_db_with_hengist_deps = ( dpan ) ->
   db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
   dba                   = new Dba()
   dba.open { path: db_path, }
+  dba.pragma SQL"journal_mode=MEMORY"
   dpan                  = new Dpan { dba, recreate: true, }
   await populate_db_with_hengist_deps dpan
   #.........................................................................................................
@@ -187,8 +188,8 @@ populate_db_with_hengist_deps = ( dpan ) ->
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # test @[ "dpan.fs_fetch_pkg_info 1" ]
-  # @[ "dpan.db_add_pkg_info 1" ]()
-  @[ "dpan.dba.clear 1" ]()
+  test @[ "dpan.db_add_pkg_info 1" ], { timeout: 60e3, }
+  # @[ "dpan.dba.clear 1" ]()
   # test @[ "dpan tagging 1" ]
 
 
