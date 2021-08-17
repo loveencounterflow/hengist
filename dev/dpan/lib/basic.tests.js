@@ -145,6 +145,7 @@
     dba.open({
       path: db_path
     });
+    dba.pragma(SQL`journal_mode=MEMORY`);
     dpan = new Dpan({
       dba,
       recreate: true
@@ -281,12 +282,14 @@
     (() => {
       // test @, { timeout: 10e3, }
       // test @[ "dpan.fs_fetch_pkg_info 1" ]
-      // @[ "dpan.db_add_pkg_info 1" ]()
-      return this["dpan.dba.clear 1"]();
+      return test(this["dpan.db_add_pkg_info 1"], {
+        timeout: 60e3
+      });
     })();
   }
 
-  // test @[ "dpan tagging 1" ]
+  // @[ "dpan.dba.clear 1" ]()
+// test @[ "dpan tagging 1" ]
 
 }).call(this);
 
