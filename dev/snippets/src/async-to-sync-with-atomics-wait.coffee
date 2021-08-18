@@ -159,16 +159,17 @@ demo_deasync_2 = ->
   deasync_callbackable  = require 'deasync'
   #.........................................................................................................
   deasync_awaitable = ( fn_with_promise ) ->
-    return deasync_callbackable ( handler ) =>
-      result = await fn_with_promise()
+    return deasync_callbackable ( P..., handler ) =>
+      result = await fn_with_promise P...
       handler null, result
       return null
   #.........................................................................................................
-  frob_async = -> new Promise ( resolve ) =>
+  frob_async = ( P... ) -> new Promise ( resolve ) =>
+    debug '^455-x^', P
     after 1, -> warn '^455-1^', "frob_async done"; resolve()
   #.........................................................................................................
   frob_sync = deasync_awaitable frob_async
-  frob_sync()
+  frob_sync 1, 2, 3
   info '^455-3^', "call to frob_sync done"
   return null
 
