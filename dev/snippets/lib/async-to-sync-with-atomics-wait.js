@@ -27,7 +27,8 @@
 
    */
   'use strict';
-  var CND, Worker, after, badge, debug, defer, demo_A, demo_B, demo_deasync_1, demo_deasync_2, echo, help, info, isMainThread, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper, workerData;
+  var CND, Worker, after, badge, debug, defer, demo_A, demo_B, demo_deasync_1, demo_deasync_2, echo, help, info, isMainThread, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper, workerData,
+    splice = [].splice;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -193,16 +194,18 @@
     deasync_callbackable = require('deasync');
     //.........................................................................................................
     deasync_awaitable = function(fn_with_promise) {
-      return deasync_callbackable(async(handler) => {
-        var result;
-        result = (await fn_with_promise());
+      return deasync_callbackable(async(...P) => {
+        var handler, ref, result;
+        ref = P, [...P] = ref, [handler] = splice.call(P, -1);
+        result = (await fn_with_promise(...P));
         handler(null, result);
         return null;
       });
     };
     //.........................................................................................................
-    frob_async = function() {
+    frob_async = function(...P) {
       return new Promise((resolve) => {
+        debug('^455-x^', P);
         return after(1, function() {
           warn('^455-1^', "frob_async done");
           return resolve();
@@ -211,7 +214,7 @@
     };
     //.........................................................................................................
     frob_sync = deasync_awaitable(frob_async);
-    frob_sync();
+    frob_sync(1, 2, 3);
     info('^455-3^', "call to frob_sync done");
     return null;
   };
