@@ -35,7 +35,7 @@ specifiers:
   hamt: ^2.2.2
   hollerith-codec: 3.0.1
   icql: 5.3.0
-  icql-dba: 7.2.0
+  icql-dba: 7.3.1
   icql-dba-vars: 1.0.0
   icql515: npm:icql@5.1.5
   immer: 9.0.1
@@ -131,7 +131,7 @@ dependencies:
   hamt: 2.2.2
   hollerith-codec: 3.0.1
   icql: 5.3.0
-  icql-dba: 7.2.0
+  icql-dba: 7.3.1_deasync@0.1.22
   icql-dba-vars: 1.0.0
   icql515: /icql/5.1.5
   immer: 9.0.1
@@ -1651,6 +1651,16 @@ packages:
       intertype: 7.6.6
     dev: false
 
+  /guy/1.0.0_deasync@0.1.22:
+    resolution: {integrity: sha512-cwRh8VJPQ5cXxDfxY3/elbBVBuAXGMnLXeC53sLRAEzq0PjmIBMgnCq2xnqMFrsN9TQOuv3g/ER/pb5pER/UoQ==}
+    peerDependencies:
+      deasync: ^0.1.22
+    dependencies:
+      cnd: 9.2.2
+      deasync: 0.1.22
+      intertype: 7.6.7
+    dev: false
+
   /hamt/2.2.2:
     resolution: {integrity: sha512-4V67NW9SuDo5xqyLiSEIxITsEjOMHZB3JqS/I2ZhzWdjDx8NRJtf6lGqt8RP+nCFZDf8t+XNa5l29z4p2hUFcQ==}
     dev: false
@@ -1766,6 +1776,23 @@ packages:
       mysql-tokenizer: 1.0.7
       n-readlines: 1.0.1
       tempy: 1.0.1
+    dev: false
+
+  /icql-dba/7.3.1_deasync@0.1.22:
+    resolution: {integrity: sha512-Ofc1idCVvS+QDUipTmBHT+qRc4jLwOq4YRr8uk7D+O+Chqrqi8TzexcFFzKdquZ9f7zVsK8SpYXXnMSMVAs+pw==}
+    requiresBuild: true
+    dependencies:
+      cnd: 9.2.2
+      csv-parser: 3.0.0
+      guy: 1.0.0_deasync@0.1.22
+      hollerith-codec: 3.0.1
+      intertype: 7.6.7
+      letsfreezethat: 3.1.0
+      mysql-tokenizer: 1.0.7
+      n-readlines: 1.0.1
+      tempy: 1.0.1
+    transitivePeerDependencies:
+      - deasync
     dev: false
 
   /icql/5.1.5:
