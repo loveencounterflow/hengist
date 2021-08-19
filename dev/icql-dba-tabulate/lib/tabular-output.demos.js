@@ -27,8 +27,6 @@
   // test                      = require '../../../apps/guy-test'
   PATH = require('path');
 
-  H = require('./helpers');
-
   types = new (require('intertype')).Intertype();
 
   ({isa, type_of, validate, validate_list_of} = types.export());
@@ -37,6 +35,10 @@
   // on_process_exit           = require 'exit-hook'
   // sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, dts * 1000
   SQL = String.raw;
+
+  H = {
+    icql_dba_path: '../../../apps/icql-dba'
+  };
 
   //===========================================================================================================
 
