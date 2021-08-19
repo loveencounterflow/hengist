@@ -41,8 +41,8 @@ demo_intertext_tabulate_3 = -> new Promise ( resolve, reject ) =>
   urge "^487^ using DB at #{db_path}"
   dba         = new Dba()
   dba.open { path: db_path, }
-  for line from dbatbl.walk_relation_lines 'dpan_tags'
   dbatbl      = new Tbl { dba, }
+  for line from dbatbl.walk_relation_lines { name: 'dpan_tags', }
     echo CND.lime line
   return null
 
@@ -56,7 +56,7 @@ demo_intertext_tabulate_2 = -> new Promise ( resolve, reject ) =>
   dba.open { path: db_path, }
   dbatbl      = new Tbl { dba, }
   query       = dba.query SQL"select * from dpan_tags limit 500;"
-  urge '^337^', dbatbl.tabulate query
+  urge '^337^', dbatbl._tabulate query
   return null
 
 
@@ -64,8 +64,9 @@ demo_intertext_tabulate_2 = -> new Promise ( resolve, reject ) =>
 ############################################################################################################
 if module is require.main then do =>
   # await demo_intertext_tabulate_1()
-  # demo_intertext_tabulate_2()
+  demo_intertext_tabulate_2()
   demo_intertext_tabulate_3()
+  # demo_intertext_tabulate_5()
 
 
 
