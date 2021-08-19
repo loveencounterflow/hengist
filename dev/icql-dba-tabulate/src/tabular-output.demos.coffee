@@ -59,32 +59,6 @@ demo_intertext_tabulate_2 = -> new Promise ( resolve, reject ) =>
   urge '^337^', dbatbl.tabulate query
   return null
 
-#-----------------------------------------------------------------------------------------------------------
-demo_intertext_tabulate_1 = -> new Promise ( resolve, reject ) =>
-  { Dba, }  = require H.icql_dba_path
-  db_path   = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
-  urge "^487^ using DB at #{db_path}"
-  dba       = new Dba()
-  dba.open { path: db_path, }
-  { $
-    $watch
-    $drain } = SP.export()
-  debug '^363^', ( k for k of TXT.TBL )
-  debug '^363^', TXT.TBL
-  source    = SP.new_push_source()
-  pipeline  = []
-  pipeline.push source
-  pipeline.push TXT.TBL.$tabulate { multiline: false, }
-  # pipeline.push TXT.TBL.$tabulate { multiline: false, width: 30, }
-  pipeline.push $ ( d, send ) -> send d.text
-  pipeline.push $watch ( d ) -> echo d
-  pipeline.push $drain ( result ) -> resolve result
-  SP.pull pipeline...
-  for row from dba.query SQL"select * from dpan_tags limit 500;"
-    # debug '^448^', row
-    source.send row
-  source.end()
-  return null
 
 
 ############################################################################################################
