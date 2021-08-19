@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, demo_intertext_tabulate, echo, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, demo_intertext_tabulate_1, demo_intertext_tabulate_2, demo_intertext_tabulate_3, echo, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -38,12 +38,52 @@
   // sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, dts * 1000
   SQL = String.raw;
 
+  //===========================================================================================================
+
   //-----------------------------------------------------------------------------------------------------------
-  demo_intertext_tabulate = function() {
+  demo_intertext_tabulate_3 = function() {
     return new Promise((resolve, reject) => {
-      var $, $drain, $watch, Dba, SP, TXT, db_path, dba, k, pipeline, ref, row, source;
-      TXT = require('../../../apps/intertext');
-      SP = require('../../../apps/steampipes');
+      var Dba, Dbatbl, db_path, dba, dbatbl, line, ref;
+      ({Dbatbl} = require('../../../apps/icql-dba-tabulate'));
+      ({Dba} = require(H.icql_dba_path));
+      db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
+      urge(`^487^ using DB at ${db_path}`);
+      dba = new Dba();
+      dba.open({
+        path: db_path
+      });
+      dbatbl = new Dbatbl({dba});
+      ref = dbatbl.walk_relation_lines('dpan_tags');
+      for (line of ref) {
+        echo(CND.lime(line));
+      }
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_intertext_tabulate_2 = function() {
+    return new Promise((resolve, reject) => {
+      var Dba, Dbatbl, db_path, dba, dbatbl, query;
+      ({Dbatbl} = require('../../../apps/icql-dba-tabulate'));
+      ({Dba} = require(H.icql_dba_path));
+      db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
+      urge(`^487^ using DB at ${db_path}`);
+      dba = new Dba();
+      dba.open({
+        path: db_path
+      });
+      dbatbl = new Dbatbl({dba});
+      query = dba.query(SQL`select * from dpan_tags limit 500;`);
+      urge('^337^', dbatbl.tabulate(query));
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_intertext_tabulate_1 = function() {
+    return new Promise((resolve, reject) => {
+      var $, $drain, $watch, Dba, db_path, dba, k, pipeline, ref, row, source;
       ({Dba} = require(H.icql_dba_path));
       db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
       urge(`^487^ using DB at ${db_path}`);
@@ -78,7 +118,7 @@
         return resolve(result);
       }));
       SP.pull(...pipeline);
-      ref = dba.query(SQL`select * from dpan_tags limit 5;`);
+      ref = dba.query(SQL`select * from dpan_tags limit 500;`);
       for (row of ref) {
         // debug '^448^', row
         source.send(row);
@@ -90,8 +130,10 @@
 
   //###########################################################################################################
   if (module === require.main) {
-    (async() => {
-      return (await demo_intertext_tabulate());
+    (() => {
+      // await demo_intertext_tabulate_1()
+      // demo_intertext_tabulate_2()
+      return demo_intertext_tabulate_3();
     })();
   }
 

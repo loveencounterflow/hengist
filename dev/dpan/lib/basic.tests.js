@@ -43,6 +43,7 @@
     ({Dba} = require(H.dba_path));
     dba = new Dba();
     dpan = new Dpan({dba});
+    dba.pragma(SQL`journal_mode=memory`);
     has_fallback = fallback !== void 0;
     //.........................................................................................................
     pkg_fspath = __filename;
@@ -145,7 +146,7 @@
     dba.open({
       path: db_path
     });
-    dba.pragma(SQL`journal_mode=MEMORY`);
+    dba.pragma(SQL`journal_mode=memory`);
     dpan = new Dpan({
       dba,
       recreate: true
@@ -165,6 +166,7 @@
     dba.open({
       path: db_path
     });
+    dba.pragma(SQL`journal_mode=memory`);
     dpan = new Dpan({
       dba,
       recreate: true
@@ -215,6 +217,7 @@
     dba.open({
       path: db_path
     });
+    dba.pragma(SQL`journal_mode=memory`);
     dpan = new Dpan({
       dba,
       recreate: true
@@ -251,6 +254,7 @@
     dba.open({
       path: db_path
     });
+    dba.pragma(SQL`journal_mode=memory`);
     dpan = new Dpan({
       dba,
       pkg_fspath,
@@ -280,15 +284,15 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      // test @[ "dpan.fs_fetch_pkg_info 1" ]
-      return test(this["dpan.db_add_pkg_info 1"], {
+      return test(this, {
         timeout: 60e3
       });
     })();
   }
 
-  // @[ "dpan.dba.clear 1" ]()
+  // test @[ "dpan.fs_fetch_pkg_info 1" ]
+// test @[ "dpan.db_add_pkg_info 1" ], { timeout: 60e3, }
+// @[ "dpan.dba.clear 1" ]()
 // test @[ "dpan tagging 1" ]
 
 }).call(this);
