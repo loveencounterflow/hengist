@@ -35,26 +35,26 @@ H =
 #
 #-----------------------------------------------------------------------------------------------------------
 demo_intertext_tabulate_3 = -> new Promise ( resolve, reject ) =>
-  { Dbatbl }  = require '../../../apps/icql-dba-tabulate'
+  { Tbl, }    = require '../../../apps/icql-dba-tabulate'
   { Dba, }    = require H.icql_dba_path
   db_path     = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
   urge "^487^ using DB at #{db_path}"
   dba         = new Dba()
   dba.open { path: db_path, }
-  dbatbl      = new Dbatbl { dba, }
   for line from dbatbl.walk_relation_lines 'dpan_tags'
+  dbatbl      = new Tbl { dba, }
     echo CND.lime line
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 demo_intertext_tabulate_2 = -> new Promise ( resolve, reject ) =>
-  { Dbatbl }  = require '../../../apps/icql-dba-tabulate'
+  { Tbl, }    = require '../../../apps/icql-dba-tabulate'
   { Dba, }    = require H.icql_dba_path
   db_path     = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
   urge "^487^ using DB at #{db_path}"
   dba         = new Dba()
   dba.open { path: db_path, }
-  dbatbl      = new Dbatbl { dba, }
+  dbatbl      = new Tbl { dba, }
   query       = dba.query SQL"select * from dpan_tags limit 500;"
   urge '^337^', dbatbl.tabulate query
   return null
