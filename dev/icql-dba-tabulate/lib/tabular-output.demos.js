@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, demo_intertext_tabulate_2, demo_intertext_tabulate_3, echo, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, demo_intertext_tabulate_2, demo_intertext_tabulate_3, demo_intertext_tabulate_4, echo, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -41,6 +41,34 @@
   };
 
   //===========================================================================================================
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_intertext_tabulate_4 = function() {
+    return new Promise((resolve, reject) => {
+      var Dba, Tbl, db_path, dba, dbatbl, line, name, ref, ref1, x;
+      ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+      ({Dba} = require(H.icql_dba_path));
+      // db_path     = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
+      db_path = PATH.resolve(PATH.join(__dirname, '../../../assets/icql/Chinook_Sqlite_AutoIncrementPKs.db'));
+      urge(`^487^ using DB at ${db_path}`);
+      dba = new Dba();
+      dba.open({
+        path: db_path
+      });
+      dbatbl = new Tbl({dba});
+      ref = dba.query(SQL`select * from sqlite_schema
+where type in ( 'table', 'view' )
+order by type, name;`);
+      for (x of ref) {
+        ({name} = x);
+        ref1 = dbatbl.walk_relation_lines({name});
+        for (line of ref1) {
+          echo(line);
+        }
+      }
+      return null;
+    });
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   demo_intertext_tabulate_3 = function() {
@@ -88,12 +116,14 @@
   if (module === require.main) {
     (() => {
       // await demo_intertext_tabulate_1()
-      demo_intertext_tabulate_2();
-      return demo_intertext_tabulate_3();
+      // demo_intertext_tabulate_2()
+      // demo_intertext_tabulate_3()
+      return demo_intertext_tabulate_4();
     })();
   }
 
-  // demo_intertext_tabulate_5()
+  // for code in [ 0 .. 255 ]
+//   echo code + 'helo world ' + "\x1b[#{code}m" + "helo world" + CND.red ''
 
 }).call(this);
 
