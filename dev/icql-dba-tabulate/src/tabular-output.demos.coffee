@@ -34,6 +34,24 @@ H =
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
+demo_intertext_tabulate_4 = -> new Promise ( resolve, reject ) =>
+  { Tbl, }    = require '../../../apps/icql-dba-tabulate'
+  { Dba, }    = require H.icql_dba_path
+  # db_path     = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
+  db_path     = PATH.resolve PATH.join __dirname, '../../../assets/icql/Chinook_Sqlite_AutoIncrementPKs.db'
+  urge "^487^ using DB at #{db_path}"
+  dba         = new Dba()
+  dba.open { path: db_path, }
+  dbatbl      = new Tbl { dba, }
+  for { name, } from dba.query SQL"""
+    select * from sqlite_schema
+    where type in ( 'table', 'view' )
+    order by type, name;"""
+    for line from dbatbl.walk_relation_lines { name, }
+      echo line
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 demo_intertext_tabulate_3 = -> new Promise ( resolve, reject ) =>
   { Tbl, }    = require '../../../apps/icql-dba-tabulate'
   { Dba, }    = require H.icql_dba_path
@@ -64,11 +82,11 @@ demo_intertext_tabulate_2 = -> new Promise ( resolve, reject ) =>
 ############################################################################################################
 if module is require.main then do =>
   # await demo_intertext_tabulate_1()
-  demo_intertext_tabulate_2()
-  demo_intertext_tabulate_3()
-  # demo_intertext_tabulate_5()
-
-
+  # demo_intertext_tabulate_2()
+  # demo_intertext_tabulate_3()
+  demo_intertext_tabulate_4()
+  # for code in [ 0 .. 255 ]
+  #   echo code + 'helo world ' + "\x1b[#{code}m" + "helo world" + CND.red ''
 
 
 
