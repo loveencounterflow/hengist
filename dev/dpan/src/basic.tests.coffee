@@ -31,6 +31,7 @@ test_fs_fetch_pkg_info = ( T, fallback ) ->
   { Dba }           = require H.dba_path
   dba               = new Dba()
   dpan              = new Dpan { dba, }
+  dba.pragma SQL"journal_mode=memory"
   has_fallback      = fallback isnt undefined
   #.........................................................................................................
   pkg_fspath  = __filename
@@ -99,7 +100,7 @@ populate_db_with_hengist_deps = ( dpan ) ->
   db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
   dba                   = new Dba()
   dba.open { path: db_path, }
-  dba.pragma SQL"journal_mode=MEMORY"
+  dba.pragma SQL"journal_mode=memory"
   dpan                  = new Dpan { dba, recreate: true, }
   await populate_db_with_hengist_deps dpan
   #.........................................................................................................
@@ -113,6 +114,7 @@ populate_db_with_hengist_deps = ( dpan ) ->
   db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
   dba                   = new Dba()
   dba.open { path: db_path, }
+  dba.pragma SQL"journal_mode=memory"
   dpan                  = new Dpan { dba, recreate: true, }
   await populate_db_with_hengist_deps dpan
   dba.clear { schema: 'main', }
@@ -147,6 +149,7 @@ populate_db_with_hengist_deps = ( dpan ) ->
   urge "^4858^ using DB at #{db_path}"
   dba               = new Dba()
   dba.open { path: db_path, }
+  dba.pragma SQL"journal_mode=memory"
   dpan              = new Dpan { dba, recreate: true, }
   T.eq dba, dpan.dba
   T.eq dba, dpan.vars.dba
@@ -167,6 +170,7 @@ populate_db_with_hengist_deps = ( dpan ) ->
   urge "^4858^ using DB at #{db_path}"
   dba               = new Dba()
   dba.open { path: db_path, }
+  dba.pragma SQL"journal_mode=memory"
   dpan              = new Dpan { dba, pkg_fspath, recreate: true, }
   # console.table dba.list dba.query SQL"select name, type from sqlite_schema where type in ( 'table', 'view' ) order by name;"
   # debug '^3343^', ( k for k of dpan.tags )
@@ -186,9 +190,9 @@ populate_db_with_hengist_deps = ( dpan ) ->
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
+  test @, { timeout: 60e3, }
   # test @[ "dpan.fs_fetch_pkg_info 1" ]
-  test @[ "dpan.db_add_pkg_info 1" ], { timeout: 60e3, }
+  # test @[ "dpan.db_add_pkg_info 1" ], { timeout: 60e3, }
   # @[ "dpan.dba.clear 1" ]()
   # test @[ "dpan tagging 1" ]
 
