@@ -54,10 +54,14 @@ demo_db_add_pkg_info = ->
 
 #-----------------------------------------------------------------------------------------------------------
 demo_db_add_pkg_infos = ->
-  { Dpan }              = require H.dpan_path
-  { Dba }               = require H.dba_path
+  { Dpan, }             = require H.dpan_path
+  { Tbl, }              = require '../../../apps/icql-dba-tabulate'
+  { Dba, }              = require H.dba_path
+  db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
   dba                   = new Dba()
-  dpan                  = new Dpan { dba, }
+  dba.open { path: db_path, }
+  dba.pragma SQL"journal_mode=memory"
+  dpan                  = new Dpan { dba, recreate: true, }
   # dpan                  = new Dpan_next { recreate: true, }
   skipped               = []
   home_path             = PATH.resolve PATH.join __dirname, '../../../../'
@@ -78,6 +82,9 @@ demo_db_add_pkg_infos = ->
   if skipped.length > 0
     warn "some paths looked like projects but caused errors (see above):"
     warn '  ' + entry for entry in skipped
+  #.........................................................................................................
+  dbatbl      = new Tbl { dba, }
+  dbatbl.dump_db()
   #.........................................................................................................
   return null
 
@@ -117,7 +124,7 @@ if module is require.main then do =>
   # await demo_fs_walk_dep_infos()
   # await demo_db_add_package()
   # await demo_db_add_pkg_info()
-  # await demo_db_add_pkg_infos()
-  await demo_variables()
+  await demo_db_add_pkg_infos()
+  # await demo_variables()
 
 
