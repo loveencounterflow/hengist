@@ -54,6 +54,68 @@ jp                        = JSON.parse
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: fields_of()" ] = ( T, done ) ->
+  T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
+  { template_path
+    work_path }     = await H.procure_db { size: 'small', ref: 'type-of', }
+  schema            = 'main'
+  #.........................................................................................................
+  urge '^344-3^', { template_path, work_path, schema, }
+  # dba     = new Dba()
+  dba = new Dba()
+  dba.open { path: work_path, }
+  #.........................................................................................................
+  T?.eq ( dba.fields_of { schema, name: 'sources'                     } ), {
+    id:   { idx: 0, type: 'integer',     optional: false, default: null, is_pk: true },
+    path: { idx: 1, type: 'text',        optional: true,  default: null, is_pk: false } }
+  T?.eq ( dba.fields_of { schema, name: 'dest_changes_backward'       } ), {
+    nxt_dest: { idx: 0, type: null,      optional: true,  default: null, is_pk: false },
+    vnr:      { idx: 1, type: 'json',    optional: true,  default: null, is_pk: false },
+    stamped:  { idx: 2, type: 'boolean', optional: true,  default: null, is_pk: false },
+    dest:     { idx: 3, type: 'text',    optional: true,  default: null, is_pk: false },
+    sid:      { idx: 4, type: 'integer', optional: true,  default: null, is_pk: false },
+    realm:    { idx: 5, type: 'text',    optional: true,  default: null, is_pk: false },
+    ref:      { idx: 6, type: 'text',    optional: true,  default: null, is_pk: false },
+    key:      { idx: 7, type: 'text',    optional: true,  default: null, is_pk: false },
+    text:     { idx: 8, type: 'text',    optional: true,  default: null, is_pk: false },
+    p:        { idx: 9, type: 'json',    optional: true,  default: null, is_pk: false },
+    vnr_blob: { idx: 10, type: 'blob',   optional: true,  default: null, is_pk: false } }
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: field_names_of()" ] = ( T, done ) ->
+  T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
+  { template_path
+    work_path }     = await H.procure_db { size: 'small', ref: 'type-of', }
+  schema            = 'main'
+  #.........................................................................................................
+  urge '^344-3^', { template_path, work_path, schema, }
+  # dba     = new Dba()
+  dba = new Dba()
+  dba.open { path: work_path, }
+  #.........................................................................................................
+  T?.eq ( dba.field_names_of { schema, name: 'sources'                     } ), [
+    'id'
+    'path' ]
+  T?.eq ( dba.field_names_of { schema, name: 'dest_changes_backward'       } ), [
+    'nxt_dest'
+    'vnr'
+    'stamped'
+    'dest'
+    'sid'
+    'realm'
+    'ref'
+    'key'
+    'text'
+    'p'
+    'vnr_blob' ]
+  #.........................................................................................................
+  done?()
+
 
 
 
