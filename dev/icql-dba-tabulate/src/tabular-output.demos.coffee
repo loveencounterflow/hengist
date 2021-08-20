@@ -50,19 +50,7 @@ demo_intertext_tabulate_4 = -> new Promise ( resolve, reject ) =>
     schema_i    = dba.sql.I schema
     dba.open { path: db_path, schema, }
     dbatbl      = new Tbl { dba, }
-    title       = "dump of SQLite DB at #{dba._schemas[ schema ].path}"
-    echo()
-    echo CND.white title
-    echo CND.white '—'.repeat width_of title
-    echo()
-    for line from dbatbl.walk_relation_lines { name: 'sqlite_schema', limit: null, }
-      echo line
-    for { name, } from dba.query SQL"""
-      select * from #{schema_i}.sqlite_schema
-      where type in ( 'table', 'view' )
-      order by type, name;"""
-      for line from dbatbl.walk_relation_lines { name, }
-        echo line
+    dbatbl.dump_db()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
