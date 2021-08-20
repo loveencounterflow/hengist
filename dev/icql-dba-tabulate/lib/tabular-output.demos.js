@@ -47,41 +47,42 @@
   //-----------------------------------------------------------------------------------------------------------
   demo_intertext_tabulate_4 = function() {
     return new Promise((resolve, reject) => {
-      var Dba, Tbl, db_path, dba, dbatbl, line, name, ref, ref1, ref2, schema, schema_i, title, x;
+      var Dba, Tbl, db_path, db_paths, dba, dbatbl, i, len, line, name, ref, ref1, ref2, schema, schema_i, title, x;
       ({Tbl} = require('../../../apps/icql-dba-tabulate'));
       ({Dba} = require(H.icql_dba_path));
-      // db_path     = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
-      // db_path     = PATH.resolve PATH.join __dirname, '../../../assets/icql/Chinook_Sqlite_AutoIncrementPKs.db'
-      db_path = PATH.resolve(PATH.join(__dirname, '../../../data/icql/icql-type-of-small.db'));
-      urge(`^487^ using DB at ${db_path}`);
-      dba = new Dba();
-      schema = 'main';
-      schema_i = dba.sql.I(schema);
-      dba.open({
-        path: db_path,
-        schema
-      });
-      dbatbl = new Tbl({dba});
-      title = `dump of SQLite DB at ${dba._schemas[schema].path}`;
-      echo();
-      echo(CND.white(title));
-      echo(CND.white('—'.repeat(width_of(title))));
-      echo();
-      ref = dbatbl.walk_relation_lines({
-        name: 'sqlite_schema',
-        limit: null
-      });
-      for (line of ref) {
-        echo(line);
-      }
-      ref1 = dba.query(SQL`select * from ${schema_i}.sqlite_schema
+      db_paths = [PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite')), PATH.resolve(PATH.join(__dirname, '../../../assets/icql/Chinook_Sqlite_AutoIncrementPKs.db')), PATH.resolve(PATH.join(__dirname, '../../../data/icql/icql-type-of-small.db'))];
+      for (i = 0, len = db_paths.length; i < len; i++) {
+        db_path = db_paths[i];
+        // urge "^487^ using DB at #{db_path}"
+        dba = new Dba();
+        schema = 'main';
+        schema_i = dba.sql.I(schema);
+        dba.open({
+          path: db_path,
+          schema
+        });
+        dbatbl = new Tbl({dba});
+        title = `dump of SQLite DB at ${dba._schemas[schema].path}`;
+        echo();
+        echo(CND.white(title));
+        echo(CND.white('—'.repeat(width_of(title))));
+        echo();
+        ref = dbatbl.walk_relation_lines({
+          name: 'sqlite_schema',
+          limit: null
+        });
+        for (line of ref) {
+          echo(line);
+        }
+        ref1 = dba.query(SQL`select * from ${schema_i}.sqlite_schema
 where type in ( 'table', 'view' )
 order by type, name;`);
-      for (x of ref1) {
-        ({name} = x);
-        ref2 = dbatbl.walk_relation_lines({name});
-        for (line of ref2) {
-          echo(line);
+        for (x of ref1) {
+          ({name} = x);
+          ref2 = dbatbl.walk_relation_lines({name});
+          for (line of ref2) {
+            echo(line);
+          }
         }
       }
       return null;
