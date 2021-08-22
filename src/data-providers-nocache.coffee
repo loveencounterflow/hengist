@@ -53,12 +53,12 @@ FS                        = require 'fs'
   validate.cardinal n
   validate.integer  min
   validate.integer  max
-  return ( ( CND.random_integer min, max ) for _ in [ 1 .. n ] )
+  return ( ( CND.random_integer min, max ) for _ in [ 1 .. n ] by +1 )
 
 #-----------------------------------------------------------------------------------------------------------
 @get_booleans = ( n = 10 ) ->
   validate.cardinal n
-  return ( ( ( CND.random_integer 0, 2 ) is 0 ) for _ in [ 1 .. n ] )
+  return ( ( ( CND.random_integer 0, 2 ) is 0 ) for _ in [ 1 .. n ] by +1 )
 
 #-----------------------------------------------------------------------------------------------------------
 @get_cjk_chr = ( n = 10 ) ->
