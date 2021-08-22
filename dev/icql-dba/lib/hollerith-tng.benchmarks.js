@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, HOLLERITH, HOLLERITH_CODEC, HOLLERITH_CODEC_TNG, Hollerith, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, rpr, test, urge, warn, whisper;
+  var BM, CND, DATA, FS, HOLLERITH_CODEC, HOLLERITH_CODEC_TNG, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -48,59 +48,7 @@
 
   HOLLERITH_CODEC = require('../../../apps/hollerith-codec');
 
-  HOLLERITH_CODEC_TNG = require('../../../apps/hollerith-codec/lib/tng');
-
-  //===========================================================================================================
-  // IMPLEMENTATIONS (TO BE MOVED TO HOLLERITH-CODEC)
-  //-----------------------------------------------------------------------------------------------------------
-  Hollerith = class Hollerith {
-    //---------------------------------------------------------------------------------------------------------
-    constructor() {
-      this.sign_delta = 0x80000000/* used to lift negative numbers to non-negative */
-      this.u32_width = 4/* bytes per element */
-      this.vnr_width = 5/* maximum elements in VNR vector */
-      this.nr_min = -0x80000000/* smallest possible VNR element */
-      this.nr_max = +0x7fffffff/* largest possible VNR element */
-      return void 0;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    encode_tng(vnr) {
-      var R, i, idx, offset/* TAINT pre-compute constant */, ref, ref1, ref2;
-      if (!((0 < (ref = vnr.length) && ref <= this.vnr_width))) {
-        throw new Error(`^44798^ expected VNR to be between 1 and ${this.vnr_width} elements long, got length ${vnr.length}`);
-      }
-      R = Buffer.alloc(this.vnr_width * this.u32_width, 0x00);
-      offset = -this.u32_width;
-      for (idx = i = 0, ref1 = this.vnr_width; (0 <= ref1 ? i < ref1 : i > ref1); idx = 0 <= ref1 ? ++i : --i) {
-        R.writeUInt32BE(((ref2 = vnr[idx]) != null ? ref2 : 0) + this.sign_delta, (offset += this.u32_width));
-      }
-      return R;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    encode_bcd(vnr) {
-      var R, base, dpe, i, idx, minus, nr, padder, plus, ref, ref1, sign, vnr_width;
-      vnr_width = 5/* maximum elements in VNR vector */
-      dpe = 4/* digits per element */
-      base = 36;
-      plus = '+';
-      minus = '!';
-      padder = '.';
-      R = [];
-      for (idx = i = 0, ref = vnr_width; (0 <= ref ? i < ref : i > ref); idx = 0 <= ref ? ++i : --i) {
-        nr = (ref1 = vnr[idx]) != null ? ref1 : 0;
-        sign = nr >= 0 ? plus : minus;
-        R.push(sign + ((Math.abs(nr)).toString(base)).padStart(dpe, padder));
-      }
-      R = R.join(',');
-      return R;
-    }
-
-  };
-
-  //===========================================================================================================
-  HOLLERITH = new Hollerith();
+  HOLLERITH_CODEC_TNG = (require('../../../apps/hollerith-codec/lib/tng')).HOLLERITH_CODEC;
 
   //===========================================================================================================
 
@@ -163,7 +111,7 @@
           count = 0;
           for (i = 0, len = integer_lists.length; i < len; i++) {
             integer_list = integer_lists[i];
-            x = HOLLERITH.encode_tng(integer_list);
+            x = HOLLERITH_CODEC_TNG.encode(integer_list);
             count++;
           }
           return resolve(count);
@@ -185,7 +133,7 @@
           count = 0;
           for (i = 0, len = integer_lists.length; i < len; i++) {
             integer_list = integer_lists[i];
-            x = HOLLERITH.encode_bcd([integer_list]);
+            x = HOLLERITH_CODEC_TNG._encode_bcd([integer_list]);
             count++;
           }
           return resolve(count);
@@ -204,9 +152,9 @@
     gcfg.verbose = false;
     bench = BM.new_benchmarks();
     cfg = {
-      list_count: 3e5,
+      list_count: 3e1,
       list_length_min: 1,
-      list_length_max: HOLLERITH.vnr_width
+      list_length_max: HOLLERITH_CODEC_TNG.vnr_width
     };
     repetitions = 5;
     test_names = ['hollerith_classic', 'hollerith_tng', 'hollerith_bcd'];
