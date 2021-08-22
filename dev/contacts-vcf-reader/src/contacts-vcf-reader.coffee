@@ -1,4 +1,6 @@
 
+
+
 'use strict'
 
 ############################################################################################################
@@ -14,6 +16,13 @@ warn                      = CND.get_logger 'warn',      badge
 help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
+
+
+warn "^345876^ this code now part of contacts"; process.exit 1
+
+
+
+
 #...........................................................................................................
 { assign
   jr }                    = CND
