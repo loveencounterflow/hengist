@@ -39,9 +39,10 @@ demo_intertext_tabulate_4 = -> new Promise ( resolve, reject ) =>
   { Tbl, }    = require '../../../apps/icql-dba-tabulate'
   { Dba, }    = require H.icql_dba_path
   db_paths    = [
-    PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
-    PATH.resolve PATH.join __dirname, '../../../assets/icql/Chinook_Sqlite_AutoIncrementPKs.db'
-    PATH.resolve PATH.join __dirname, '../../../data/icql/icql-type-of-small.db'
+    # PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
+    # PATH.resolve PATH.join __dirname, '../../../assets/icql/Chinook_Sqlite_AutoIncrementPKs.db'
+    # PATH.resolve PATH.join __dirname, '../../../data/icql/icql-type-of-small.db'
+    '/tmp/mygithub/github.sqlite'
     ]
   for db_path in db_paths
     # urge "^487^ using DB at #{db_path}"
