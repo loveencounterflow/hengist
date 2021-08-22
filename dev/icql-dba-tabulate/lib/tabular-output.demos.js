@@ -50,7 +50,10 @@
       var Dba, Tbl, db_path, db_paths, dba, dbatbl, i, len, schema, schema_i;
       ({Tbl} = require('../../../apps/icql-dba-tabulate'));
       ({Dba} = require(H.icql_dba_path));
-      db_paths = [PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite')), PATH.resolve(PATH.join(__dirname, '../../../assets/icql/Chinook_Sqlite_AutoIncrementPKs.db')), PATH.resolve(PATH.join(__dirname, '../../../data/icql/icql-type-of-small.db'))];
+      // PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
+      // PATH.resolve PATH.join __dirname, '../../../assets/icql/Chinook_Sqlite_AutoIncrementPKs.db'
+      // PATH.resolve PATH.join __dirname, '../../../data/icql/icql-type-of-small.db'
+      db_paths = ['/tmp/mygithub/github.sqlite'];
       for (i = 0, len = db_paths.length; i < len; i++) {
         db_path = db_paths[i];
         // urge "^487^ using DB at #{db_path}"

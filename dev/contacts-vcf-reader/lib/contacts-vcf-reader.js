@@ -27,6 +27,10 @@
 
   echo = CND.echo.bind(CND);
 
+  warn("^345876^ this code now part of contacts");
+
+  process.exit(1);
+
   //...........................................................................................................
   ({assign, jr} = CND);
 
@@ -265,3 +269,5 @@
   }
 
 }).call(this);
+
+//# sourceMappingURL=contacts-vcf-reader.js.map

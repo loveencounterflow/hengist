@@ -86,8 +86,11 @@
     });
     // dpan                  = new Dpan_next { recreate: true, }
     skipped = [];
-    home_path = PATH.resolve(PATH.join(__dirname, '../../../../'));
-    project_path_pattern = PATH.join(home_path, '*/package.json');
+    // home_path             = PATH.resolve PATH.join __dirname, '../../../../'
+    // project_path_pattern  = PATH.join home_path, '*/package.json'
+    // home_path             = PATH.resolve PATH.join __dirname, '../../../../dpan'
+    home_path = PATH.resolve(PATH.join(__dirname, '../../../apps/dpan'));
+    project_path_pattern = PATH.join(home_path, './package.json');
     debug('^488^', project_path_pattern);
     ref = glob.sync(project_path_pattern);
     for (i = 0, len = ref.length; i < len; i++) {
@@ -95,6 +98,7 @@
       pkg_fspath = PATH.dirname(project_path);
       try {
         pkg_info = (await dpan.fs_fetch_pkg_info({pkg_fspath}));
+        // debug '^336^', pkg_info
         dpan.db_add_pkg_info(pkg_info);
       } catch (error1) {
         error = error1;
