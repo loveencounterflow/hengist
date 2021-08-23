@@ -69,7 +69,44 @@ jp                        = JSON.parse
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "_getting and setting single values" ] = ( T, done ) ->
+@[ "alter_table" ] = ( T, done ) ->
+  T?.halt_on_error()
+  #.........................................................................................................
+  { Vnr, }    = require vnr_path
+  { Dba, }    = require dba_path
+  { Tbl, }    = require '../../../apps/icql-dba-tabulate'
+  dba         = new Dba()
+  vnr         = new Vnr { dba, }
+  tbl         = new Tbl { dba, }
+  debug '^3342^', CATALOGUE.all_keys_of vnr.hollerith
+  #.........................................................................................................
+  dba.execute SQL"""
+    create table myfile ( line text not null );
+    """
+  #.........................................................................................................
+  schema            = 'main'
+  table_name        = 'myfile'
+  json_column_name  = 'vnr'
+  blob_column_name  = null
+  vnr.alter_table { schema, table_name, json_column_name, blob_column_name, }
+  insert_sql        = SQL"insert into myfile ( line, vnr ) values ( $line, $vnr )"
+  dba.run insert_sql, { line: "first", vnr: ( jr [ 1, ] ) }
+  debug tbl.dump_db()
+  # debug '4476^', vnr
+  # debug '4476^', JSON.stringify ( CATALOGUE.all_keys_of vnr ).sort(), null, '  '
+  # console.table dba.list dba.query SQL"select * from v_variables;"
+  # for [ probe, matcher, error, ] in probes_and_matchers
+  #   await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+  #     [ key, value, ] = probe
+  #     vnr.set key, value
+  #     result = vnr.get key
+  #     resolve result
+  # console.table dba.list dba.query SQL"select * from v_variables;"
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "_" ] = ( T, done ) ->
   T?.halt_on_error()
   #.........................................................................................................
   probes_and_matchers = []
@@ -94,7 +131,6 @@ jp                        = JSON.parse
 
 ############################################################################################################
 if module is require.main then do =>
-  # info '^3443^', JSON.parse '"helo w&#x6f;rld"'
-  test @, { timeout: 10e3, }
-  # test @[ "DBA: tags must be declared" ]
+  # test @, { timeout: 10e3, }
+  @[ "alter_table" ]()
 
