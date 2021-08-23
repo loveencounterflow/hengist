@@ -127,7 +127,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["alter_table"] = function(T, done) {
-    var Dba, Tbl, Vnr, blob_column_name, dba, insert_sql, json_column_name, schema, table_name, tbl, vnr;
+    var Dba, Tbl, Vnr, blob_column_name, dba, error, insert_sql, json_column_name, schema, table_name, tbl, vnr;
     if (T != null) {
       T.halt_on_error();
     }
@@ -149,12 +149,61 @@
     vnr.alter_table({schema, table_name, json_column_name, blob_column_name});
     insert_sql = SQL`insert into myfile ( line, vnr ) values ( $line, $vnr )`;
     dba.run(insert_sql, {
+      line: "third",
+      vnr: jr([3])
+    });
+    dba.run(insert_sql, {
+      line: "second",
+      vnr: jr([2])
+    });
+    dba.run(insert_sql, {
       line: "first",
       vnr: jr([1])
     });
-    debug(tbl.dump_db());
+    //.........................................................................................................
+    error = null;
+    try {
+      dba.run(insert_sql, {
+        line: "fourth",
+        vnr: jr([3])
+      });
+    } catch (error1) {
+      error = error1;
+      if (T != null) {
+        T.eq(error.code, 'SQLITE_CONSTRAINT_UNIQUE');
+      }
+      debug(error.name);
+    }
+    if (T != null) {
+      T.ok(error != null);
+    }
+    //.........................................................................................................
+    // debug tbl.dump_db { order_by: '1', }
+    T.eq(dba.list(dba.query(SQL`select * from myfile order by vnr_blob;`)), [
+      {
+        line: 'first',
+        vnr: '[1]',
+        vnr_blob: Buffer.from('8000000180000000800000008000000080000000',
+      'hex')
+      },
+      {
+        line: 'second',
+        vnr: '[2]',
+        vnr_blob: Buffer.from('8000000280000000800000008000000080000000',
+      'hex')
+      },
+      {
+        line: 'third',
+        vnr: '[3]',
+        vnr_blob: Buffer.from('8000000380000000800000008000000080000000',
+      'hex')
+      }
+    ]);
     return typeof done === "function" ? done() : void 0;
   };
+
+  // for [ probe, matcher, error, ] in probes_and_matchers
+  //   await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
 
   //-----------------------------------------------------------------------------------------------------------
   this["_"] = function(T, done) {
@@ -174,10 +223,13 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      return this["alter_table"]();
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
+
+  // @[ "alter_table" ]()
 
 }).call(this);
 
