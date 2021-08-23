@@ -113,11 +113,51 @@
     if (T != null) {
       T.eq(dba.first_value(dba.query(SQL`select vnr_encode(      '[ 1, 2, 3 ]' );`)), Buffer.from('8000000180000002800000038000000080000000', 'hex'));
     }
+    if (T != null) {
+      T.eq(vnr.hollerith.nr_min, -2147483648);
+    }
+    if (T != null) {
+      T.eq(vnr.hollerith.nr_max, 2147483647);
+    }
+    if (T != null) {
+      T.eq(vnr.encode([vnr.hollerith.nr_min, vnr.hollerith.nr_max]), Buffer.from('00000000ffffffff800000008000000080000000', 'hex'));
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["_getting and setting single values"] = function(T, done) {
+  this["alter_table"] = function(T, done) {
+    var Dba, Tbl, Vnr, blob_column_name, dba, insert_sql, json_column_name, schema, table_name, tbl, vnr;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    //.........................................................................................................
+    ({Vnr} = require(vnr_path));
+    ({Dba} = require(dba_path));
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    dba = new Dba();
+    vnr = new Vnr({dba});
+    tbl = new Tbl({dba});
+    debug('^3342^', CATALOGUE.all_keys_of(vnr.hollerith));
+    //.........................................................................................................
+    dba.execute(SQL`create table myfile ( line text not null );`);
+    //.........................................................................................................
+    schema = 'main';
+    table_name = 'myfile';
+    json_column_name = 'vnr';
+    blob_column_name = null;
+    vnr.alter_table({schema, table_name, json_column_name, blob_column_name});
+    insert_sql = SQL`insert into myfile ( line, vnr ) values ( $line, $vnr )`;
+    dba.run(insert_sql, {
+      line: "first",
+      vnr: jr([1])
+    });
+    debug(tbl.dump_db());
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["_"] = function(T, done) {
     var Dba, Vnr, dba, probes_and_matchers, vnr;
     if (T != null) {
       T.halt_on_error();
@@ -134,14 +174,10 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // info '^3443^', JSON.parse '"helo w&#x6f;rld"'
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      return this["alter_table"]();
     })();
   }
-
-  // test @[ "DBA: tags must be declared" ]
 
 }).call(this);
 
