@@ -62,6 +62,9 @@ jp                        = JSON.parse
   T?.eq ( jp dba.first_value dba.query SQL"select vnr_new_vnr(     '[ 1, 2, 3 ]' );"             ), [ 1, 2, 3 ]
   T?.eq ( jp dba.first_value dba.query SQL"select vnr_new_vnr(      null         );"             ), [ 0 ]
   T?.eq (    dba.first_value dba.query SQL"select vnr_encode(      '[ 1, 2, 3 ]' );"             ), Buffer.from '8000000180000002800000038000000080000000', 'hex'
+  T?.eq ( vnr.hollerith.nr_min                                        ), -2147483648
+  T?.eq ( vnr.hollerith.nr_max                                        ), 2147483647
+  T?.eq ( vnr.encode [ vnr.hollerith.nr_min, vnr.hollerith.nr_max, ]  ), Buffer.from '00000000ffffffff800000008000000080000000', 'hex'
   #.........................................................................................................
   done?()
 
