@@ -36,8 +36,8 @@ specifiers:
   hamt: ^2.2.2
   hollerith-codec: 3.0.1
   icql: 5.3.0
-  icql-dba: 7.3.1
-  icql-dba-vars: 1.0.0
+  icql-dba: 8.1.0
+  icql-dba-vars: 2.0.1
   icql515: npm:icql@5.1.5
   immer: 9.0.1
   immutable: ^4.0.0-rc.12
@@ -134,8 +134,8 @@ dependencies:
   hamt: 2.2.2
   hollerith-codec: 3.0.1
   icql: 5.3.0
-  icql-dba: 7.3.1_deasync@0.1.22
-  icql-dba-vars: 1.0.0
+  icql-dba: 8.1.0_deasync@0.1.22
+  icql-dba-vars: 2.0.1_deasync@0.1.22+icql-dba@8.1.0
   icql515: /icql/5.1.5
   immer: 9.0.1
   immutable: 4.0.0-rc.12
@@ -1773,31 +1773,22 @@ packages:
     engines: {node: '>=10.0.0'}
     dev: false
 
-  /icql-dba-vars/1.0.0:
-    resolution: {integrity: sha512-iJt+7Toju4iwqTAjjQJQerNKqGqRfFTaU0flgK9iJEh1Xifj/Kw0W6hk1IMWBzQDrTzeO70ukCd3NtJj4Hv18Q==}
+  /icql-dba-vars/2.0.1_deasync@0.1.22+icql-dba@8.1.0:
+    resolution: {integrity: sha512-VCJCd9GVWCoGZUwrwz8qxUniJwn5rdrQtsOPnHDgZJbShT3oYcur01oYONJhprJ9lFDpl9jx8JFWr2NC8VyCxQ==}
+    peerDependencies:
+      icql-dba: ^7.2.0
     dependencies:
       cnd: 9.2.2
-      icql-dba: 7.2.0
+      guy: 1.0.0_deasync@0.1.22
+      icql-dba: 8.1.0_deasync@0.1.22
       intertype: 7.6.7
       letsfreezethat: 3.1.0
+    transitivePeerDependencies:
+      - deasync
     dev: false
 
-  /icql-dba/7.2.0:
-    resolution: {integrity: sha512-LYBNHL1U1Xo+Xx93Lm3ZLh9I+E5j1oa/mPM07BMQyAOehClXpbM5/1UXEGvqDZYzGVZ9BlKKbkYHKcqjMBeb6w==}
-    requiresBuild: true
-    dependencies:
-      cnd: 9.2.2
-      csv-parser: 3.0.0
-      hollerith-codec: 3.0.1
-      intertype: 7.6.7
-      letsfreezethat: 3.1.0
-      mysql-tokenizer: 1.0.7
-      n-readlines: 1.0.1
-      tempy: 1.0.1
-    dev: false
-
-  /icql-dba/7.3.1_deasync@0.1.22:
-    resolution: {integrity: sha512-Ofc1idCVvS+QDUipTmBHT+qRc4jLwOq4YRr8uk7D+O+Chqrqi8TzexcFFzKdquZ9f7zVsK8SpYXXnMSMVAs+pw==}
+  /icql-dba/8.1.0_deasync@0.1.22:
+    resolution: {integrity: sha512-bOcnDYQpweONs9LAcjDbCv+07pVDf4I2mzDjZ7AKRmatGZd1lHBpW4HpW0zVSiRj23vunJwnyJrz/lIgkfhb9g==}
     requiresBuild: true
     dependencies:
       cnd: 9.2.2
