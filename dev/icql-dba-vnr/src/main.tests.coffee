@@ -90,20 +90,28 @@ jp                        = JSON.parse
   blob_column_name  = null
   vnr.alter_table { schema, table_name, json_column_name, blob_column_name, }
   insert_sql        = SQL"insert into myfile ( line, vnr ) values ( $line, $vnr )"
+  dba.run insert_sql, { line: "third", vnr: ( jr [ 3, ] ) }
+  dba.run insert_sql, { line: "second", vnr: ( jr [ 2, ] ) }
   dba.run insert_sql, { line: "first", vnr: ( jr [ 1, ] ) }
-  debug tbl.dump_db()
-  # debug '4476^', vnr
-  # debug '4476^', JSON.stringify ( CATALOGUE.all_keys_of vnr ).sort(), null, '  '
-  # console.table dba.list dba.query SQL"select * from v_variables;"
-  # for [ probe, matcher, error, ] in probes_and_matchers
-  #   await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-  #     [ key, value, ] = probe
-  #     vnr.set key, value
-  #     result = vnr.get key
-  #     resolve result
-  # console.table dba.list dba.query SQL"select * from v_variables;"
+  #.........................................................................................................
+  error = null
+  try
+    dba.run insert_sql, { line: "fourth", vnr: ( jr [ 3, ] ) }
+  catch error
+    T?.eq error.code, 'SQLITE_CONSTRAINT_UNIQUE'
+    debug error.name
+  T?.ok error?
+  #.........................................................................................................
+  # debug tbl.dump_db { order_by: '1', }
+  T.eq ( dba.list dba.query SQL"select * from myfile order by vnr_blob;" ), [
+    { line: 'first',  vnr: '[1]', vnr_blob: ( Buffer.from '8000000180000000800000008000000080000000', 'hex' ) },
+    { line: 'second', vnr: '[2]', vnr_blob: ( Buffer.from '8000000280000000800000008000000080000000', 'hex' ) },
+    { line: 'third',  vnr: '[3]', vnr_blob: ( Buffer.from '8000000380000000800000008000000080000000', 'hex' ) } ]
   #.........................................................................................................
   done?()
+
+  # for [ probe, matcher, error, ] in probes_and_matchers
+  #   await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "_" ] = ( T, done ) ->
@@ -131,6 +139,6 @@ jp                        = JSON.parse
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
-  @[ "alter_table" ]()
+  test @, { timeout: 10e3, }
+  # @[ "alter_table" ]()
 
