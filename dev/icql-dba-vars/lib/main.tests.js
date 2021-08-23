@@ -51,6 +51,10 @@
 
   dba_path = '../../../apps/icql-dba';
 
+  debug(CND.reverse('^89435^', {dbv_path}));
+
+  debug(CND.reverse('^89435^', {dba_path}));
+
   ({lets, freeze} = require('letsfreezethat'));
 
   def = Object.defineProperty;
