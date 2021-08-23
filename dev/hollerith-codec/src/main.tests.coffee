@@ -3,7 +3,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'HOLLERITH-CODEC/tests'
+badge                     = 'HOLLERITH-CODEC/TESTS'
 log                       = CND.get_logger 'plain',     badge
 info                      = CND.get_logger 'info',      badge
 whisper                   = CND.get_logger 'whisper',   badge
@@ -15,7 +15,7 @@ urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
 test                      = require 'guy-test'
-CODEC                     = require './main'
+CODEC                     = require '../../../apps/hollerith-codec'
 ƒ                         = CND.format_number
 { jr, }                   = CND
 
