@@ -227,7 +227,7 @@ jp                        = JSON.parse
   to_hex = ( blob ) -> blob.toString 'hex'
   dba.create_function name: 'to_hex', deterministic: true, varargs: false, call: to_hex
   #.........................................................................................................
-  dba.execute """
+  dba.execute SQL"""
     create table v.main (
         nr                int   unique not null,
         vnr               json  unique not null,
@@ -235,8 +235,8 @@ jp                        = JSON.parse
         vnr_bcd           blob  generated always as ( bcd(            vnr ) ) stored,
       primary key ( nr ) );"""
   #.........................................................................................................
-  dba.execute """create unique index v.main_vnr_hollerith_tng on main ( hollerith_tng( vnr ) );"""
-  dba.execute """create unique index v.main_vnr_bcd on main ( bcd( vnr ) );"""
+  dba.execute SQL"""create unique index v.main_vnr_hollerith_tng on main ( hollerith_tng( vnr ) );"""
+  dba.execute SQL"""create unique index v.main_vnr_bcd on main ( bcd( vnr ) );"""
   use_probe = 2
   #.........................................................................................................
   do =>
@@ -288,7 +288,7 @@ jp                        = JSON.parse
       vnr_json  = JSON.stringify vnr
       values    = [ nr, vnr_json, ]
       try
-        dba.run "insert into v.main ( nr, vnr ) values ( ?, ? )", values
+        dba.run SQL"insert into v.main ( nr, vnr ) values ( ?, ? )", values
       catch error
         warn "when trying to insert values #{rpr values}, an error occurred: #{error.message}"
         throw error
