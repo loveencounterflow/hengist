@@ -58,8 +58,8 @@
 ### Retire `hollerith`
 
 * Its primary use case (EAV-style DBs) has been given up in favor of relation DBs and SQL
-* [–] rename `hollerith` to `hollerith-legacy`
-* [–] publish a salutory `hollerith` version on npm that *includes the new repo URL*,
+* [+] rename `hollerith` to `hollerith-legacy`
+* [+] publish a salutory `hollerith` version (1.2.6) on npm that *includes the new repo URL*,
   https://github.com/loveencounterflow/hollerith-legacy
 * address https://github.com/loveencounterflow/hollerith is now free for re-use
 * [–] move relevant tests, benchmarks from `hengist/dev/hollerith` to `hengist/dev/hollerith-legacy`
