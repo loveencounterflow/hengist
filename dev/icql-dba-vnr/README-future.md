@@ -68,8 +68,8 @@
 ### [–] Retire `hollerith-codec`
 
 * code to be integrated into new `hollerith`
-* **[–]** rename `hollerith-codec` to `hollerith-codec-legacy`
-* **[–]** publish a salutory `hollerith-codec` version on npm that *includes the new repo URL*,
+* **[+]** rename `hollerith-codec` to `hollerith-codec-legacy`
+* **[+]** publish a salutory `hollerith-codec` version on npm that *includes the new repo URL*,
 * **[–]** move relevant tests, benchmarks from `hengist/dev/hollerith-codec` to `hengist/dev/hollerith-codec-legacy`
 
 ### [–] Init New Major Version of `hollerith`
