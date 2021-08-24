@@ -62,7 +62,8 @@
 * [+] publish a salutory `hollerith` version (1.2.6) on npm that *includes the new repo URL*,
   https://github.com/loveencounterflow/hollerith-legacy
 * address https://github.com/loveencounterflow/hollerith is now free for re-use
-* [–] move relevant tests, benchmarks from `hengist/dev/hollerith` to `hengist/dev/hollerith-legacy`
+* [–] <del>move relevant tests, benchmarks from `hengist/dev/hollerith` to `hengist/dev/hollerith-legacy`</del>
+* [–] rename `hengist/dev/hollerith-codec` to `hengist/dev/hollerith`
 
 ### Retire `hollerith-codec`
 
