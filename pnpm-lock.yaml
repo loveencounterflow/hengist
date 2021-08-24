@@ -5,7 +5,9 @@ specifiers:
   '@scotttrinh/number-ranges': ^2.1.0
   argparse: ^2.0.1
   better-sqlite3: 7.4.0
+  bytewise: ^1.1.0
   chance: ^1.1.7
+  charwise: ^3.0.1
   cnd: ^9.2.1
   coffee-lex: ^9.1.5
   coffeescript: ^2.5.1
@@ -103,7 +105,9 @@ dependencies:
   '@scotttrinh/number-ranges': 2.1.0
   argparse: 2.0.1
   better-sqlite3: 7.4.0
+  bytewise: 1.1.0
   chance: 1.1.7
+  charwise: 3.0.1
   cnd: 9.2.1
   coffee-lex: 9.1.5
   coffeescript: 2.5.1
@@ -687,6 +691,19 @@ packages:
     resolution: {integrity: sha1-y5T662HIaWRR2zZTThQi+U8K7og=}
     dev: false
 
+  /bytewise-core/1.2.3:
+    resolution: {integrity: sha1-P7QQx+kVWOsasiqCg0V3qmvWHUI=}
+    dependencies:
+      typewise-core: 1.2.0
+    dev: false
+
+  /bytewise/1.1.0:
+    resolution: {integrity: sha1-HRPL/3F65xWAlKqIGzXQgbOHJT4=}
+    dependencies:
+      bytewise-core: 1.2.3
+      typewise: 1.0.3
+    dev: false
+
   /cacheable-lookup/5.0.4:
     resolution: {integrity: sha512-2/kNscPhpcxrOigMZzbiWF7dz8ilhb/nIHU3EyZiXWXpeq/au8qJ8VhdftMkty3n7Gj6HIGalQG8oiBNB3AJgA==}
     engines: {node: '>=10.6.0'}
@@ -745,6 +762,10 @@ packages:
 
   /chance/1.1.7:
     resolution: {integrity: sha512-bua/2cZEfzS6qPm0vi3JEvGNbriDLcMj9lKxCQOjUcCJRcyjA7umP0zZm6bKWWlBN04vA0L99QGH/CZQawr0eg==}
+    dev: false
+
+  /charwise/3.0.1:
+    resolution: {integrity: sha512-RcdumNsM6fJZ5HHbYunqj2bpurVRGsXour3OR+SlLEHFhG6ALm54i6Osnh+OvO7kEoSBzwExpblYFH8zKQiEPw==}
     dev: false
 
   /chownr/1.1.4:
@@ -4142,6 +4163,16 @@ packages:
 
   /typedarray/0.0.6:
     resolution: {integrity: sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=}
+    dev: false
+
+  /typewise-core/1.2.0:
+    resolution: {integrity: sha1-l+uRgFx/VdL5QXSPpQ0xXZke8ZU=}
+    dev: false
+
+  /typewise/1.0.3:
+    resolution: {integrity: sha1-EGeTZUCvl5N8xdz5kiSG6fooRlE=}
+    dependencies:
+      typewise-core: 1.2.0
     dev: false
 
   /typical/2.6.1:
