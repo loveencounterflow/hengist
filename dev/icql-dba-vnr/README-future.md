@@ -58,33 +58,33 @@
 ### Retire `hollerith`
 
 * Its primary use case (EAV-style DBs) has been given up in favor of relation DBs and SQL
-* [—] rename `hollerith` to `hollerith-legacy`
-* [—] publish a salutory `hollerith` version on npm that *includes the new repo URL*,
+* [–] rename `hollerith` to `hollerith-legacy`
+* [–] publish a salutory `hollerith` version on npm that *includes the new repo URL*,
   https://github.com/loveencounterflow/hollerith-legacy
 * address https://github.com/loveencounterflow/hollerith is now free for re-use
-* [—] move relevant tests, benchmarks from `hengist/dev/hollerith` to `hengist/dev/hollerith-legacy`
+* [–] move relevant tests, benchmarks from `hengist/dev/hollerith` to `hengist/dev/hollerith-legacy`
 
 ### Retire `hollerith-codec`
 
 * code to be integrated into new `hollerith`
-* [—] rename `hollerith-codec` to `hollerith-codec-legacy`
-* [—] publish a salutory `hollerith-codec` version on npm that *includes the new repo URL*,
-* [—] move relevant tests, benchmarks from `hengist/dev/hollerith-codec` to `hengist/dev/hollerith-codec-legacy`
+* [–] rename `hollerith-codec` to `hollerith-codec-legacy`
+* [–] publish a salutory `hollerith-codec` version on npm that *includes the new repo URL*,
+* [–] move relevant tests, benchmarks from `hengist/dev/hollerith-codec` to `hengist/dev/hollerith-codec-legacy`
 
 ### Init New Major Version of `hollerith`
 
-* [—] move code from `datom/src/vnr` to `hollerith`
-* [—] publish new major version of `datom` to reflect breaking change
-* [—] move code from `hollerith-codec-legacy` to `hollerith`
-* [—] rewrite relevant tests, benchmarks, demos in `hengist/dev/hollerith` based on existing code
-* [—] publish initial version of `hollerith`
+* [–] move code from `datom/src/vnr` to `hollerith`
+* [–] publish new major version of `datom` to reflect breaking change
+* [–] move code from `hollerith-codec-legacy` to `hollerith`
+* [–] rewrite relevant tests, benchmarks, demos in `hengist/dev/hollerith` based on existing code
+* [–] publish initial version of `hollerith`
 
 ### Re-Publish `icql-dba-vnr` as `icql-dba-hollerith`
 
-* [—] deprecate `icql-dba-vnr`
-* [—] copy code, history to `icql-dba-hollerith`
-* [—] relocate relevant test, benchmarks, demos in `hengist`
-* [—] adapt `icql-dba-hollerith` to replace dependency on `hollerith-codec`, `datom/lib/vnr` with dependency
+* [–] deprecate `icql-dba-vnr`
+* [–] copy code, history to `icql-dba-hollerith`
+* [–] relocate relevant test, benchmarks, demos in `hengist`
+* [–] adapt `icql-dba-hollerith` to replace dependency on `hollerith-codec`, `datom/lib/vnr` with dependency
   on `hollerith`
 
 ## Benchmarks
