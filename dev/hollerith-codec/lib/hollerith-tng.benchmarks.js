@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, HOLLERITH_CODEC, HOLLERITH_CODEC_TNG, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, rpr, test, urge, warn, whisper;
+  var BM, BYTEWISE/* https://github.com/dominictarr/charwise */, CHARWISE, CND, DATA, FS, HOLLERITH_CODEC, HOLLERITH_CODEC_TNG, PATH, alert, badge, data_cache, debug, defaults, echo, gcfg, help, info, isa, jr, log, rpr, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -50,10 +50,18 @@
 
   HOLLERITH_CODEC_TNG = (require('../../../apps/hollerith-codec/lib/tng')).HOLLERITH_CODEC;
 
+  types = new (require('intertype')).Intertype();
+
+  ({isa, type_of, defaults, validate} = types.export());
+
+  CHARWISE = require('charwise');
+
+  BYTEWISE = require('bytewise');
+
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.get_data = function(cfg) {
+  this./* https://github.com/deanlandolt/bytewise */get_data = function(cfg) {
     var DATOM, i, integer_lists, len, list_length, list_lengths;
     if (data_cache != null) {
       return data_cache;
@@ -143,6 +151,50 @@
     });
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.bytewise = function(cfg) {
+    return new Promise((resolve) => {
+      var integer_lists;
+      ({integer_lists} = this.get_data(cfg));
+      //.........................................................................................................
+      resolve(() => {
+        return new Promise((resolve) => {
+          var count, i, integer_list, len, x;
+          count = 0;
+          for (i = 0, len = integer_lists.length; i < len; i++) {
+            integer_list = integer_lists[i];
+            x = BYTEWISE.encode([integer_list]);
+            count++;
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.charwise = function(cfg) {
+    return new Promise((resolve) => {
+      var integer_lists;
+      ({integer_lists} = this.get_data(cfg));
+      //.........................................................................................................
+      resolve(() => {
+        return new Promise((resolve) => {
+          var count, i, integer_list, len, x;
+          count = 0;
+          for (i = 0, len = integer_lists.length; i < len; i++) {
+            integer_list = integer_lists[i];
+            x = CHARWISE.encode([integer_list]);
+            count++;
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
@@ -152,12 +204,12 @@
     gcfg.verbose = false;
     bench = BM.new_benchmarks();
     cfg = {
-      list_count: 3e1,
+      list_count: 3e5,
       list_length_min: 1,
       list_length_max: HOLLERITH_CODEC_TNG.vnr_width
     };
     repetitions = 5;
-    test_names = ['hollerith_classic', 'hollerith_tng', 'hollerith_bcd'];
+    test_names = ['hollerith_classic', 'hollerith_tng', 'hollerith_bcd', 'bytewise', 'charwise'];
     if (global.gc != null) {
       global.gc();
     }
@@ -182,6 +234,12 @@
       return (await this.run_benchmarks());
     })();
   }
+
+  // debug '^787^', type_of CHARWISE.encode 'helo world'
+// debug '^787^', type_of CHARWISE.encode [ 4, 5, 6, ]
+// debug '^787^', rpr CHARWISE.buffer
+// debug '^787^', type_of BYTEWISE.encode 'helo world'
+// debug '^787^', type_of BYTEWISE.encode [ 4, 5, 6, ]
 
 }).call(this);
 
