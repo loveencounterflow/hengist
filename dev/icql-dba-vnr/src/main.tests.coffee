@@ -43,6 +43,10 @@ jp                        = JSON.parse
   prefix      = 'vnr_'
   dba         = new Dba()
   vnr         = new Vnr { dba, prefix, }
+  fq          = ( P... ) -> dba.first_value dba.query P...
+  #.........................................................................................................
+  ### NOTE these are just shallow sanity checks; for tests proper see
+  https://github.com/loveencounterflow/hengist/blob/master/dev/datom/src/vnr.test.coffee ###
   T?.eq ( vnr.advance      [ 1, 2, 3, ]            ), [ 1, 2, 4 ]
   T?.eq ( vnr.recede       [ 1, 2, 3, ]            ), [ 1, 2, 2 ]
   T?.eq ( vnr.deepen       [ 1, 2, 3, ]            ), [ 1, 2, 3, 0 ]
@@ -53,18 +57,61 @@ jp                        = JSON.parse
   T?.eq ( vnr.new_vnr      null                    ), [ 0 ]
   T?.eq ( vnr.encode       [ 1, 2, 3, ]            ), Buffer.from '8000000180000002800000038000000080000000', 'hex'
   #.........................................................................................................
-  T?.eq ( jp dba.first_value dba.query SQL"select vnr_advance(     '[ 1, 2, 3 ]' );" ),             [ 1, 2, 4 ]
-  T?.eq ( jp dba.first_value dba.query SQL"select vnr_recede(      '[ 1, 2, 3 ]' );" ),             [ 1, 2, 2 ]
-  T?.eq ( jp dba.first_value dba.query SQL"select vnr_deepen(      '[ 1, 2, 3 ]' );" ),             [ 1, 2, 3, 0 ]
-  T?.eq (    dba.first_value dba.query SQL"select vnr_cmp_fair(    '[ 1, 2, 3 ]', '[ 1, 2 ]' );" ), 1
-  T?.eq (    dba.first_value dba.query SQL"select vnr_cmp_partial( '[ 1, 2, 3 ]', '[ 1, 2 ]' );" ), 1
-  T?.eq (    dba.first_value dba.query SQL"select vnr_cmp_total(   '[ 1, 2, 3 ]', '[ 1, 2 ]' );" ), 1
-  T?.eq ( jp dba.first_value dba.query SQL"select vnr_new_vnr(     '[ 1, 2, 3 ]' );"             ), [ 1, 2, 3 ]
-  T?.eq ( jp dba.first_value dba.query SQL"select vnr_new_vnr(      null         );"             ), [ 0 ]
-  T?.eq (    dba.first_value dba.query SQL"select vnr_encode(      '[ 1, 2, 3 ]' );"             ), Buffer.from '8000000180000002800000038000000080000000', 'hex'
+  T?.eq ( jp fq SQL"select vnr_advance(     '[ 1, 2, 3 ]' );" ),             [ 1, 2, 4 ]
+  T?.eq ( jp fq SQL"select vnr_recede(      '[ 1, 2, 3 ]' );" ),             [ 1, 2, 2 ]
+  T?.eq ( jp fq SQL"select vnr_deepen(      '[ 1, 2, 3 ]' );" ),             [ 1, 2, 3, 0 ]
+  T?.eq (    fq SQL"select vnr_cmp_fair(    '[ 1, 2, 3 ]', '[ 1, 2 ]' );" ), 1
+  T?.eq (    fq SQL"select vnr_cmp_partial( '[ 1, 2, 3 ]', '[ 1, 2 ]' );" ), 1
+  T?.eq (    fq SQL"select vnr_cmp_total(   '[ 1, 2, 3 ]', '[ 1, 2 ]' );" ), 1
+  T?.eq ( jp fq SQL"select vnr_new_vnr(     '[ 1, 2, 3 ]' );"             ), [ 1, 2, 3 ]
+  T?.eq ( jp fq SQL"select vnr_new_vnr(      null         );"             ), [ 0 ]
+  T?.eq (    fq SQL"select vnr_encode(      '[ 1, 2, 3 ]' );"             ), Buffer.from '8000000180000002800000038000000080000000', 'hex'
   T?.eq ( vnr.hollerith.nr_min                                        ), -2147483648
   T?.eq ( vnr.hollerith.nr_max                                        ), 2147483647
   T?.eq ( vnr.encode [ vnr.hollerith.nr_min, vnr.hollerith.nr_max, ]  ), Buffer.from '00000000ffffffff800000008000000080000000', 'hex'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "VNR basics (JS)" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  #.........................................................................................................
+  { Vnr, }    = require vnr_path
+  { Dba, }    = require dba_path
+  { Tbl, }    = require '../../../apps/icql-dba-tabulate'
+  dba         = new Dba()
+  vnr         = new Vnr { dba, }
+  #.........................................................................................................
+  T?.eq ( d = vnr.new_vnr()                 ), [ 0, ]
+  T?.eq ( d = vnr.new_vnr      [ 4, 6, 5, ] ), [ 4, 6, 5, ]
+  T?.eq ( d = vnr.deepen       d            ), [ 4, 6, 5, 0, ]
+  T?.eq ( d = vnr.deepen       d, 42        ), [ 4, 6, 5, 0, 42, ]
+  T?.eq ( d = vnr.advance      d            ), [ 4, 6, 5, 0, 43, ]
+  T?.eq ( d = vnr.recede       d            ), [ 4, 6, 5, 0, 42, ]
+  T?.ok ( vnr.new_vnr  d ) isnt d
+  T?.ok ( vnr.deepen   d ) isnt d
+  T?.ok ( vnr.advance  d ) isnt d
+  T?.ok ( vnr.recede   d ) isnt d
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "VNR basics (SQL)" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  #.........................................................................................................
+  { Vnr, }    = require vnr_path
+  { Dba, }    = require dba_path
+  { Tbl, }    = require '../../../apps/icql-dba-tabulate'
+  dba         = new Dba()
+  vnr         = new Vnr { dba, }
+  fq          = ( P... ) -> dba.first_value dba.query P...
+  #.........................................................................................................
+  T?.eq ( d = jp fq SQL"select vnr_new_vnr();"                 ), [ 0, ]
+  T?.eq ( d = jp fq SQL"select vnr_new_vnr(  '[ 4, 6, 5 ]' );" ), [ 4, 6, 5, ]
+  T?.eq ( d = jp fq SQL"select vnr_deepen(   $d            );", { d: ( jr d ), } ), [ 4, 6, 5, 0, ]
+  T?.eq ( d = jp fq SQL"select vnr_deepen(   $d, 42        );", { d: ( jr d ), } ), [ 4, 6, 5, 0, 42, ]
+  T?.eq ( d = jp fq SQL"select vnr_advance(  $d            );", { d: ( jr d ), } ), [ 4, 6, 5, 0, 43, ]
+  T?.eq ( d = jp fq SQL"select vnr_recede(   $d            );", { d: ( jr d ), } ), [ 4, 6, 5, 0, 42, ]
   #.........................................................................................................
   done?()
 
@@ -78,7 +125,7 @@ jp                        = JSON.parse
   dba         = new Dba()
   vnr         = new Vnr { dba, }
   tbl         = new Tbl { dba, }
-  debug '^3342^', CATALOGUE.all_keys_of vnr.hollerith
+  # debug '^3342^', CATALOGUE.all_keys_of vnr.hollerith
   #.........................................................................................................
   dba.execute SQL"""
     create table myfile ( line text not null );
@@ -102,7 +149,7 @@ jp                        = JSON.parse
     debug error.name
   T?.ok error?
   #.........................................................................................................
-  # debug tbl.dump_db { order_by: '1', }
+  debug tbl.dump_db { order_by: '1', }
   T.eq ( dba.list dba.query SQL"select * from myfile order by vnr_blob;" ), [
     { line: 'first',  vnr: '[1]', vnr_blob: ( Buffer.from '8000000180000000800000008000000080000000', 'hex' ) },
     { line: 'second', vnr: '[2]', vnr_blob: ( Buffer.from '8000000280000000800000008000000080000000', 'hex' ) },
