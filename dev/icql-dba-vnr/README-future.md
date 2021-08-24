@@ -8,10 +8,10 @@
 
 - [Packages mentioned](#packages-mentioned)
 - [The Plan](#the-plan)
-  - [Retire `hollerith`](#retire-hollerith)
-  - [Retire `hollerith-codec`](#retire-hollerith-codec)
-  - [Init New Major Version of `hollerith`](#init-new-major-version-of-hollerith)
-  - [Re-Publish `icql-dba-vnr` as `icql-dba-hollerith`](#re-publish-icql-dba-vnr-as-icql-dba-hollerith)
+  - [[+] Retire `hollerith`](#-retire-hollerith)
+  - [[–] Retire `hollerith-codec`](#-retire-hollerith-codec)
+  - [[–] Init New Major Version of `hollerith`](#-init-new-major-version-of-hollerith)
+  - [[–] Re-Publish `icql-dba-vnr` as `icql-dba-hollerith`](#-re-publish-icql-dba-vnr-as-icql-dba-hollerith)
 - [Benchmarks](#benchmarks)
 - [Related](#related)
 
@@ -55,7 +55,7 @@
 
 ## The Plan
 
-### Retire `hollerith`
+### [+] Retire `hollerith`
 
 * Its primary use case (EAV-style DBs) has been given up in favor of relation DBs and SQL
 * [+] rename `hollerith` to `hollerith-legacy`
@@ -65,14 +65,14 @@
 * <del>move relevant tests, benchmarks from `hengist/dev/hollerith` to `hengist/dev/hollerith-legacy`</del>
 * [+] rename `hengist/dev/hollerith-codec` to `hengist/dev/hollerith`
 
-### Retire `hollerith-codec`
+### [–] Retire `hollerith-codec`
 
 * code to be integrated into new `hollerith`
 * [–] rename `hollerith-codec` to `hollerith-codec-legacy`
 * [–] publish a salutory `hollerith-codec` version on npm that *includes the new repo URL*,
 * [–] move relevant tests, benchmarks from `hengist/dev/hollerith-codec` to `hengist/dev/hollerith-codec-legacy`
 
-### Init New Major Version of `hollerith`
+### [–] Init New Major Version of `hollerith`
 
 * [–] move code from `datom/src/vnr` to `hollerith`
 * [–] publish new major version of `datom` to reflect breaking change
@@ -80,7 +80,7 @@
 * [–] rewrite relevant tests, benchmarks, demos in `hengist/dev/hollerith` based on existing code
 * [–] publish initial version of `hollerith`
 
-### Re-Publish `icql-dba-vnr` as `icql-dba-hollerith`
+### [–] Re-Publish `icql-dba-vnr` as `icql-dba-hollerith`
 
 * [–] deprecate `icql-dba-vnr`
 * [–] copy code, history to `icql-dba-hollerith`
