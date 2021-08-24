@@ -50,7 +50,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["API"] = function(T, done) {
-    var Dba, Vnr, dba, prefix, vnr;
+    var Dba, Vnr, dba, fq, prefix, vnr;
     // T?.halt_on_error()
     //.........................................................................................................
     ({Vnr} = require(vnr_path));
@@ -58,6 +58,12 @@
     prefix = 'vnr_';
     dba = new Dba();
     vnr = new Vnr({dba, prefix});
+    fq = function(...P) {
+      return dba.first_value(dba.query(...P));
+    };
+    //.........................................................................................................
+    /* NOTE these are just shallow sanity checks; for tests proper see
+     https://github.com/loveencounterflow/hengist/blob/master/dev/datom/src/vnr.test.coffee */
     if (T != null) {
       T.eq(vnr.advance([1, 2, 3]), [1, 2, 4]);
     }
@@ -87,31 +93,31 @@
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(jp(dba.first_value(dba.query(SQL`select vnr_advance(     '[ 1, 2, 3 ]' );`))), [1, 2, 4]);
+      T.eq(jp(fq(SQL`select vnr_advance(     '[ 1, 2, 3 ]' );`)), [1, 2, 4]);
     }
     if (T != null) {
-      T.eq(jp(dba.first_value(dba.query(SQL`select vnr_recede(      '[ 1, 2, 3 ]' );`))), [1, 2, 2]);
+      T.eq(jp(fq(SQL`select vnr_recede(      '[ 1, 2, 3 ]' );`)), [1, 2, 2]);
     }
     if (T != null) {
-      T.eq(jp(dba.first_value(dba.query(SQL`select vnr_deepen(      '[ 1, 2, 3 ]' );`))), [1, 2, 3, 0]);
+      T.eq(jp(fq(SQL`select vnr_deepen(      '[ 1, 2, 3 ]' );`)), [1, 2, 3, 0]);
     }
     if (T != null) {
-      T.eq(dba.first_value(dba.query(SQL`select vnr_cmp_fair(    '[ 1, 2, 3 ]', '[ 1, 2 ]' );`)), 1);
+      T.eq(fq(SQL`select vnr_cmp_fair(    '[ 1, 2, 3 ]', '[ 1, 2 ]' );`), 1);
     }
     if (T != null) {
-      T.eq(dba.first_value(dba.query(SQL`select vnr_cmp_partial( '[ 1, 2, 3 ]', '[ 1, 2 ]' );`)), 1);
+      T.eq(fq(SQL`select vnr_cmp_partial( '[ 1, 2, 3 ]', '[ 1, 2 ]' );`), 1);
     }
     if (T != null) {
-      T.eq(dba.first_value(dba.query(SQL`select vnr_cmp_total(   '[ 1, 2, 3 ]', '[ 1, 2 ]' );`)), 1);
+      T.eq(fq(SQL`select vnr_cmp_total(   '[ 1, 2, 3 ]', '[ 1, 2 ]' );`), 1);
     }
     if (T != null) {
-      T.eq(jp(dba.first_value(dba.query(SQL`select vnr_new_vnr(     '[ 1, 2, 3 ]' );`))), [1, 2, 3]);
+      T.eq(jp(fq(SQL`select vnr_new_vnr(     '[ 1, 2, 3 ]' );`)), [1, 2, 3]);
     }
     if (T != null) {
-      T.eq(jp(dba.first_value(dba.query(SQL`select vnr_new_vnr(      null         );`))), [0]);
+      T.eq(jp(fq(SQL`select vnr_new_vnr(      null         );`)), [0]);
     }
     if (T != null) {
-      T.eq(dba.first_value(dba.query(SQL`select vnr_encode(      '[ 1, 2, 3 ]' );`)), Buffer.from('8000000180000002800000038000000080000000', 'hex'));
+      T.eq(fq(SQL`select vnr_encode(      '[ 1, 2, 3 ]' );`), Buffer.from('8000000180000002800000038000000080000000', 'hex'));
     }
     if (T != null) {
       T.eq(vnr.hollerith.nr_min, -2147483648);
@@ -121,6 +127,93 @@
     }
     if (T != null) {
       T.eq(vnr.encode([vnr.hollerith.nr_min, vnr.hollerith.nr_max]), Buffer.from('00000000ffffffff800000008000000080000000', 'hex'));
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["VNR basics (JS)"] = function(T, done) {
+    var Dba, Tbl, Vnr, d, dba, vnr;
+    // T?.halt_on_error()
+    //.........................................................................................................
+    ({Vnr} = require(vnr_path));
+    ({Dba} = require(dba_path));
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    dba = new Dba();
+    vnr = new Vnr({dba});
+    //.........................................................................................................
+    if (T != null) {
+      T.eq((d = vnr.new_vnr()), [0]);
+    }
+    if (T != null) {
+      T.eq((d = vnr.new_vnr([4, 6, 5])), [4, 6, 5]);
+    }
+    if (T != null) {
+      T.eq((d = vnr.deepen(d)), [4, 6, 5, 0]);
+    }
+    if (T != null) {
+      T.eq((d = vnr.deepen(d, 42)), [4, 6, 5, 0, 42]);
+    }
+    if (T != null) {
+      T.eq((d = vnr.advance(d)), [4, 6, 5, 0, 43]);
+    }
+    if (T != null) {
+      T.eq((d = vnr.recede(d)), [4, 6, 5, 0, 42]);
+    }
+    if (T != null) {
+      T.ok((vnr.new_vnr(d)) !== d);
+    }
+    if (T != null) {
+      T.ok((vnr.deepen(d)) !== d);
+    }
+    if (T != null) {
+      T.ok((vnr.advance(d)) !== d);
+    }
+    if (T != null) {
+      T.ok((vnr.recede(d)) !== d);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["VNR basics (SQL)"] = function(T, done) {
+    var Dba, Tbl, Vnr, d, dba, fq, vnr;
+    // T?.halt_on_error()
+    //.........................................................................................................
+    ({Vnr} = require(vnr_path));
+    ({Dba} = require(dba_path));
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    dba = new Dba();
+    vnr = new Vnr({dba});
+    fq = function(...P) {
+      return dba.first_value(dba.query(...P));
+    };
+    //.........................................................................................................
+    if (T != null) {
+      T.eq((d = jp(fq(SQL`select vnr_new_vnr();`))), [0]);
+    }
+    if (T != null) {
+      T.eq((d = jp(fq(SQL`select vnr_new_vnr(  '[ 4, 6, 5 ]' );`))), [4, 6, 5]);
+    }
+    if (T != null) {
+      T.eq((d = jp(fq(SQL`select vnr_deepen(   $d            );`, {
+        d: jr(d)
+      }))), [4, 6, 5, 0]);
+    }
+    if (T != null) {
+      T.eq((d = jp(fq(SQL`select vnr_deepen(   $d, 42        );`, {
+        d: jr(d)
+      }))), [4, 6, 5, 0, 42]);
+    }
+    if (T != null) {
+      T.eq((d = jp(fq(SQL`select vnr_advance(  $d            );`, {
+        d: jr(d)
+      }))), [4, 6, 5, 0, 43]);
+    }
+    if (T != null) {
+      T.eq((d = jp(fq(SQL`select vnr_recede(   $d            );`, {
+        d: jr(d)
+      }))), [4, 6, 5, 0, 42]);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -138,7 +231,7 @@
     dba = new Dba();
     vnr = new Vnr({dba});
     tbl = new Tbl({dba});
-    debug('^3342^', CATALOGUE.all_keys_of(vnr.hollerith));
+    // debug '^3342^', CATALOGUE.all_keys_of vnr.hollerith
     //.........................................................................................................
     dba.execute(SQL`create table myfile ( line text not null );`);
     //.........................................................................................................
@@ -178,7 +271,9 @@
       T.ok(error != null);
     }
     //.........................................................................................................
-    // debug tbl.dump_db { order_by: '1', }
+    debug(tbl.dump_db({
+      order_by: '1'
+    }));
     T.eq(dba.list(dba.query(SQL`select * from myfile order by vnr_blob;`)), [
       {
         line: 'first',
