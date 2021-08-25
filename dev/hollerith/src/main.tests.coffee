@@ -80,34 +80,84 @@ test_basics = ( T, VNR ) ->
 #-----------------------------------------------------------------------------------------------------------
 @[ "HLR sort 3" ] = ( T, done ) ->
   HLR       = ( require hollerith_path ).HOLLERITH
-  # info CND.blue   'cmp_total    ', "[ 1, ],     [ 1, -1, ]", VNR.cmp_total   [ 1, ],     [ 1, -1, ]
-  # info CND.blue   'cmp_total    ', "[ 1, ],     [ 1,  0, ]", VNR.cmp_total   [ 1, ],     [ 1,  0, ]
-  # info CND.blue   'cmp_total    ', "[ 1, ],     [ 1, +1, ]", VNR.cmp_total   [ 1, ],     [ 1, +1, ]
-  # info CND.blue   'cmp_total    ', "----------------------"
-  # info CND.blue   'cmp_total    ', "[ 1, 0, ],  [ 1, -1, ]", VNR.cmp_total   [ 1, 0, ],  [ 1, -1, ]
-  # info CND.blue   'cmp_total    ', "[ 1, 0, ],  [ 1,  0, ]", VNR.cmp_total   [ 1, 0, ],  [ 1,  0, ]
-  # info CND.blue   'cmp_total    ', "[ 1, 0, ],  [ 1, +1, ]", VNR.cmp_total   [ 1, 0, ],  [ 1, +1, ]
-  # info()
-  # info CND.lime   'cmp_partial  ', "[ 1, ],     [ 1, -1, ]", VNR.cmp_partial [ 1, ],     [ 1, -1, ]
-  # info CND.lime   'cmp_partial  ', "[ 1, ],     [ 1,  0, ]", VNR.cmp_partial [ 1, ],     [ 1,  0, ]
-  # info CND.lime   'cmp_partial  ', "[ 1, ],     [ 1, +1, ]", VNR.cmp_partial [ 1, ],     [ 1, +1, ]
-  # info CND.lime   'cmp_partial  ', "----------------------"
-  # info CND.lime   'cmp_partial  ', "[ 1, 0, ],  [ 1, -1, ]", VNR.cmp_partial [ 1, 0, ],  [ 1, -1, ]
-  # info CND.lime   'cmp_partial  ', "[ 1, 0, ],  [ 1,  0, ]", VNR.cmp_partial [ 1, 0, ],  [ 1,  0, ]
-  # info CND.lime   'cmp_partial  ', "[ 1, 0, ],  [ 1, +1, ]", VNR.cmp_partial [ 1, 0, ],  [ 1, +1, ]
-  # info()
-  info CND.steel  'cmp_fair     ', "[ 1, ],     [ 1, -1, ]", HLR.cmp    [ 1, ],     [ 1, -1, ]
-  info CND.steel  'cmp_fair     ', "[ 1, ],     [ 1,  0, ]", HLR.cmp    [ 1, ],     [ 1,  0, ]
-  info CND.steel  'cmp_fair     ', "[ 1, ],     [ 1, +1, ]", HLR.cmp    [ 1, ],     [ 1, +1, ]
-  info CND.steel  'cmp_fair     ', "----------------------"
-  info CND.steel  'cmp_fair     ', "[ 1, 0, ],  [ 1, -1, ]", HLR.cmp    [ 1, 0, ],  [ 1, -1, ]
-  info CND.steel  'cmp_fair     ', "[ 1, 0, ],  [ 1,  0, ]", HLR.cmp    [ 1, 0, ],  [ 1,  0, ]
-  info CND.steel  'cmp_fair     ', "[ 1, 0, ],  [ 1, +1, ]", HLR.cmp    [ 1, 0, ],  [ 1, +1, ]
+  BCD       = new ( require hollerith_path ).Hollerith { format: 'bcd', }
+  #.........................................................................................................
+  cmp_bcd = ( a, b ) ->
+    return  0 if a == b
+    return +1 if a > b
+    return -1
+  #.........................................................................................................
+  info CND.grey   'cmp        ', "----------------------"
+  info CND.steel  'cmp        ', "[ 1, ],     [ 1, -1, ]", HLR.cmp    [ 1, ],     [ 1, -1, ]
+  info CND.steel  'cmp        ', "[ 1, ],     [ 1,  0, ]", HLR.cmp    [ 1, ],     [ 1,  0, ]
+  info CND.steel  'cmp        ', "[ 1, ],     [ 1, +1, ]", HLR.cmp    [ 1, ],     [ 1, +1, ]
+  info CND.steel  'cmp        ', "----------------------"
+  info CND.steel  'cmp        ', "[ 1, 0, ],  [ 1, -1, ]", HLR.cmp    [ 1, 0, ],  [ 1, -1, ]
+  info CND.steel  'cmp        ', "[ 1, 0, ],  [ 1,  0, ]", HLR.cmp    [ 1, 0, ],  [ 1,  0, ]
+  info CND.steel  'cmp        ', "[ 1, 0, ],  [ 1, +1, ]", HLR.cmp    [ 1, 0, ],  [ 1, +1, ]
+  #.........................................................................................................
+  info CND.grey   'cmp_blobs  ', "----------------------"
+  info CND.steel  'cmp_blobs  ', "[ 1, ],     [ 1, -1, ]", HLR.cmp ( HLR.encode [ 1, ] ),    ( HLR.encode [ 1, -1, ] )
+  info CND.steel  'cmp_blobs  ', "[ 1, ],     [ 1,  0, ]", HLR.cmp ( HLR.encode [ 1, ] ),    ( HLR.encode [ 1,  0, ] )
+  info CND.steel  'cmp_blobs  ', "[ 1, ],     [ 1, +1, ]", HLR.cmp ( HLR.encode [ 1, ] ),    ( HLR.encode [ 1, +1, ] )
+  info CND.steel  'cmp_blobs  ', "----------------------"
+  info CND.steel  'cmp_blobs  ', "[ 1, 0, ],  [ 1, -1, ]", HLR.cmp ( HLR.encode [ 1, 0, ] ), ( HLR.encode [ 1, -1, ] )
+  info CND.steel  'cmp_blobs  ', "[ 1, 0, ],  [ 1,  0, ]", HLR.cmp ( HLR.encode [ 1, 0, ] ), ( HLR.encode [ 1,  0, ] )
+  info CND.steel  'cmp_blobs  ', "[ 1, 0, ],  [ 1, +1, ]", HLR.cmp ( HLR.encode [ 1, 0, ] ), ( HLR.encode [ 1, +1, ] )
+  #.........................................................................................................
+  info CND.grey   'cmp bcd    ', "----------------------"
+  info CND.steel  'cmp bcd    ', "[ 1, ],     [ 1, -1, ]", cmp_bcd ( BCD.encode [ 1, ] ),    ( BCD.encode [ 1, -1, ] )
+  info CND.steel  'cmp bcd    ', "[ 1, ],     [ 1,  0, ]", cmp_bcd ( BCD.encode [ 1, ] ),    ( BCD.encode [ 1,  0, ] )
+  info CND.steel  'cmp bcd    ', "[ 1, ],     [ 1, +1, ]", cmp_bcd ( BCD.encode [ 1, ] ),    ( BCD.encode [ 1, +1, ] )
+  info CND.steel  'cmp bcd    ', "----------------------"
+  info CND.steel  'cmp bcd    ', "[ 1, 0, ],  [ 1, -1, ]", cmp_bcd ( BCD.encode [ 1, 0, ] ), ( BCD.encode [ 1, -1, ] )
+  info CND.steel  'cmp bcd    ', "[ 1, 0, ],  [ 1,  0, ]", cmp_bcd ( BCD.encode [ 1, 0, ] ), ( BCD.encode [ 1,  0, ] )
+  info CND.steel  'cmp bcd    ', "[ 1, 0, ],  [ 1, +1, ]", cmp_bcd ( BCD.encode [ 1, 0, ] ), ( BCD.encode [ 1, +1, ] )
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ [ [ 1, ],     [ 1, -1, ], ],  +1, ]
+    [ [ [ 1, ],     [ 1,  0, ], ],  0, ]
+    [ [ [ 1, ],     [ 1, +1, ], ],  -1, ]
+    [ [ [ 1, 0, ],  [ 1, -1, ], ],  +1, ]
+    [ [ [ 1, 0, ],  [ 1,  0, ], ],  0, ]
+    [ [ [ 1, 0, ],  [ 1, +1, ], ],  -1, ]
+    ]
+  #.........................................................................................................
+  compare = ( description, a, b, a_blob, b_blob, r1, r2 ) ->
+    return null if equals r1, r2
+    warn "^34234^ when comparing"
+    warn description
+    warn "using"
+    warn a
+    warn b
+    warn a_blob
+    warn b_blob
+    warn "r1", r1
+    warn "r1", r2
+    warn "didn't test equal"
+    T?.fail "comparison failed"
+  #.........................................................................................................
+  for [ probe, matcher, ] in probes_and_matchers
+    await T.perform probe, matcher, null, -> return new Promise ( resolve, reject ) ->
+      [ a, b, ] = probe
+      a_blob    = HLR.encode a
+      b_blob    = HLR.encode b
+      result_1  = HLR.cmp       a, b
+      result_1r = HLR.cmp       b, a
+      result_2  = HLR.cmp_blobs a_blob, b_blob
+      result_2r = HLR.cmp_blobs b_blob, a_blob
+      compare "result_1,  -result_1r", a, b, a_blob, b_blob, result_1,  -result_1r
+      compare "result_2,  -result_2r", a, b, a_blob, b_blob, result_2,  -result_2r
+      compare "result_1,   result_2 ", a, b, a_blob, b_blob, result_1,   result_2
+      compare "result_1r,  result_2r", a, b, a_blob, b_blob, result_1r,  result_2r
+      # T.eq result, matcher
+      # debug '^334^', { a, b, result_1, result_1r, result_2, result_2r, }
+      resolve result_1
   done()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "test for stable sort 2" ] = ( T, done ) ->
+@[ "test for stable sort" ] = ( T, done ) ->
   n         = 1e4
   m         = Math.floor n / 3
   ds        = ( [ nr, ( CND.random_integer -m, +m ) ] for nr in [ 1 .. n ])
