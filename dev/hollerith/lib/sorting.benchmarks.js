@@ -112,33 +112,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.hollerith2_nv_cmp2 = function(cfg) {
-    return new Promise((resolve) => {
-      var HLR, integer_lists;
-      ({integer_lists} = this.get_data(cfg));
-      HLR = new Hollerith({
-        validate: false
-      });
-      integer_lists = [...integer_lists];
-      //.........................................................................................................
-      resolve(() => {
-        return new Promise((resolve) => {
-          var count, x;
-          count = 0;
-          x = integer_lists.sort(HLR.cmp2);
-          if (cfg.show) {
-            whisper('^234-3^', integer_lists);
-            urge('^234-3^', x);
-          }
-          count += integer_lists.length;
-          return resolve(count);
-        });
-      });
-      return null;
-    });
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this.hollerith2_nv_bcd = function(cfg) {
     return new Promise((resolve) => {
       var HLR, d, integer_lists, integer_lists_bcd;
@@ -248,7 +221,7 @@
         repetitions = 1;
     }
     cfg.show = cfg.list_count < 10;
-    test_names = ['hollerith2_nv_cmp2', 'hollerith2_nv_sort', 'hollerith2_nv_bcd', 'hollerith2_nv_u32'];
+    test_names = ['hollerith2_nv_sort', 'hollerith2_nv_bcd', 'hollerith2_nv_u32'];
     if (global.gc != null) {
       global.gc();
     }

@@ -114,8 +114,8 @@ types                     = new ( require 'intertype' ).Intertype
   gcfg.verbose    = true
   gcfg.verbose    = false
   bench           = BM.new_benchmarks()
-  mode            = 'functional_test'
   mode            = 'medium'
+  mode            = 'functional_test'
   mode            = 'standard'
   list_length_max = Hollerith.C.defaults.hlr_constructor_cfg.vnr_width
   switch mode
