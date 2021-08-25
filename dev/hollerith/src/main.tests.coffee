@@ -55,6 +55,21 @@ test_basics = ( T, VNR ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "HLR encode Infinity" ] = ( T, done ) ->
+  Hollerith = ( require hollerith_path ).Hollerith
+  HLR       = ( require hollerith_path ).HOLLERITH
+  debug '^28974^', Hollerith.C.u32_nr_max
+  debug '^28974^', Hollerith.C.u32_nr_min
+  debug '^28974^', HLR.encode [ +Infinity, ]
+  debug '^28974^', HLR.encode [ -Infinity, ]
+  T?.eq ( HLR._encode_u32 [ +Infinity, ] ), Buffer.from 'ffffffff80000000800000008000000080000000', 'hex'
+  T?.eq ( HLR._encode_u32 [ -Infinity, ] ), Buffer.from '0000000080000000800000008000000080000000', 'hex'
+  T?.eq ( HLR._encode_bcd [ +Infinity, ] ), '+zzzz,+...0,+...0,+...0,+...0'
+  T?.eq ( HLR._encode_bcd [ -Infinity, ] ), '!zzzz,+...0,+...0,+...0,+...0'
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "HLR sort 2" ] = ( T, done ) ->
   matchers = [
     [ [ 1, 0, -1 ], [ 1 ], [ 1, 0 ], [ 1, 0, 1 ], [ 2, -1 ], [ 2 ], [ 2, 0 ], [ 2, 1 ] ]
@@ -205,15 +220,17 @@ test_basics = ( T, VNR ) ->
   defaults  = Hollerith.C.defaults
   delete C.defaults
   T?.eq C, {
-    u32_sign_delta:   2147483648,
-    u32_width:        4,
-    u32_nr_min:       -2147483648,
-    u32_nr_max:       2147483647,
-    bcd_dpe:          4,
-    bcd_base:         36,
+    u32_sign_delta:   2147483648
+    u32_width:        4
+    u32_nr_min:       -2147483648
+    u32_nr_max:       2147483647
+    bcd_dpe:          4
+    bcd_base:         36
     bcd_plus:         '+'
     bcd_minus:        '!'
-    bcd_padder:       '.' }
+    bcd_padder:       '.'
+    bcd_nr_max:       1679615
+    bcd_nr_min: -1679615 }
   T?.eq defaults, { hlr_constructor_cfg: { vnr_width: 5, validate: false, format: 'u32' } }
   done()
   return null
@@ -223,7 +240,7 @@ test_basics = ( T, VNR ) ->
 ############################################################################################################
 if require.main is module then do =>
   test @
-  # test @[ "HLR._first_nonzero_is_negative()" ]
+  # test @[ "HLR encode Infinity" ]
   # test @[ "HLR class and instance attributes" ]
   # test @[ "HLR basics" ]
   # test @[ "HLR sort 2" ]
