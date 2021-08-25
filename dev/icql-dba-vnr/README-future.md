@@ -9,7 +9,7 @@
 - [Packages mentioned](#packages-mentioned)
 - [The Plan](#the-plan)
   - [[+] Retire `hollerith`](#-retire-hollerith)
-  - [[–] Retire `hollerith-codec`](#-retire-hollerith-codec)
+  - [[+] Retire `hollerith-codec`](#-retire-hollerith-codec)
   - [[–] Init New Major Version of `hollerith`](#-init-new-major-version-of-hollerith)
   - [[–] Re-Publish `icql-dba-vnr` as `icql-dba-hollerith`](#-re-publish-icql-dba-vnr-as-icql-dba-hollerith)
 - [Benchmarks](#benchmarks)
@@ -65,12 +65,12 @@
 * <del>move relevant tests, benchmarks from `hengist/dev/hollerith` to `hengist/dev/hollerith-legacy`</del>
 * **[+]** rename `hengist/dev/hollerith-codec` to `hengist/dev/hollerith`
 
-### [–] Retire `hollerith-codec`
+### [+] Retire `hollerith-codec`
 
 * code to be integrated into new `hollerith`
 * **[+]** rename `hollerith-codec` to `hollerith-codec-legacy`
 * **[+]** publish a salutory `hollerith-codec` version on npm that *includes the new repo URL*,
-* **[–]** move relevant tests, benchmarks from `hengist/dev/hollerith-codec` to `hengist/dev/hollerith-codec-legacy`
+* **[+]** move relevant tests, benchmarks from `hengist/dev/hollerith-codec` to `hengist/dev/hollerith-codec-legacy`
 
 ### [–] Init New Major Version of `hollerith`
 
