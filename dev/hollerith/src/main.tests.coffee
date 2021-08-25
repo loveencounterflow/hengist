@@ -203,27 +203,6 @@ test_basics = ( T, VNR ) ->
   done()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "HLR._first_nonzero_is_negative()" ] = ( T, done ) ->
-  HLR = ( require hollerith_path ).HOLLERITH
-  #.........................................................................................................
-  probes_and_matchers = [
-    [[ [3,4,0,0,],        2, ], false, ]
-    [[ [3,4,0,-1,],       2, ], true, ]
-    [[ [3,4,0,-1,0,0,],   2, ], true, ]
-    [[ [3,4,0,1,-1,0,0,], 2, ], false, ]
-    [[ [3,4,0,1,-1,0,0,], 0, ], false, ]
-    [[ [3,4,0,0,],        3, ], false, ]
-    [[ [3,4,0,0,],        4, ], false, ]
-    ]
-  #.........................................................................................................
-  for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      [ list, first_idx, ] = probe
-      resolve HLR._first_nonzero_is_negative list, first_idx
-  done()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
 @[ "HLR class and instance attributes" ] = ( T, done ) ->
   Hollerith = ( require hollerith_path ).Hollerith
   HLR       = ( require hollerith_path ).HOLLERITH
