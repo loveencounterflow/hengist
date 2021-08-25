@@ -204,8 +204,17 @@ test_basics = ( T, VNR ) ->
   C         = { Hollerith.C... }
   defaults  = Hollerith.C.defaults
   delete C.defaults
-  T?.eq C, { sign_delta: 2147483648, u32_width: 4, nr_min: -2147483648, nr_max: 2147483647, }
-  T?.eq defaults, { hlr_constructor_cfg: { vnr_width: 5, validate: true } }
+  T?.eq C, {
+    u32_sign_delta:   2147483648,
+    u32_width:        4,
+    u32_nr_min:       -2147483648,
+    u32_nr_max:       2147483647,
+    bcd_dpe:          4,
+    bcd_base:         36,
+    bcd_plus:         '+'
+    bcd_minus:        '!'
+    bcd_padder:       '.' }
+  T?.eq defaults, { hlr_constructor_cfg: { vnr_width: 5, validate: false, format: 'u32' } }
   done()
   return null
 
