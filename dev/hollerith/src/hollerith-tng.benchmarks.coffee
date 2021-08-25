@@ -24,8 +24,8 @@ test                      = require 'guy-test'
 BM                        = require '../../../lib/benchmarks'
 data_cache                = null
 gcfg                      = { verbose: false, }
-HOLLERITH_CODEC           = require '../../../apps/hollerith-codec'
-HOLLERITH_CODEC_TNG       = ( require '../../../apps/hollerith-codec/lib/tng' ).HOLLERITH_CODEC
+HCODECLEGACY              = require '../../../apps/hollerith-codec-legacy'
+HCODECLEGACY_TNG          = ( require '../../../apps/hollerith-codec-legacy/lib/tng' ).HOLLERITH_CODEC
 types                     = new ( require 'intertype' ).Intertype
 { isa
   type_of
@@ -33,6 +33,8 @@ types                     = new ( require 'intertype' ).Intertype
   validate }              = types.export()
 CHARWISE                  = require 'charwise' ### https://github.com/dominictarr/charwise ###
 BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandolt/bytewise ###
+{ lets
+  freeze }                = require 'letsfreezethat'
 
 
 
@@ -42,7 +44,6 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
 @get_data = ( cfg ) ->
   return data_cache if data_cache?
   whisper "retrieving test data..."
-  DATOM = require '../../../apps/datom'
   integer_lists = []
   list_lengths  = DATA.get_integers cfg.list_count, cfg.list_length_min, cfg.list_length_max
   #.........................................................................................................
@@ -51,7 +52,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
     integer_lists.push DATA.get_integers list_length, -100, +100
   #.........................................................................................................
   data_cache  = { integer_lists, }
-  data_cache  = DATOM.freeze data_cache
+  data_cache  = freeze data_cache
   whisper "...done"
   return data_cache
 
@@ -65,7 +66,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
   resolve => new Promise ( resolve ) =>
     count = 0
     for integer_list in integer_lists
-      x = HOLLERITH_CODEC.encode integer_list
+      x = HCODECLEGACY.encode integer_list
       count++
     resolve count
   return null
@@ -77,7 +78,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
   resolve => new Promise ( resolve ) =>
     count = 0
     for integer_list in integer_lists
-      x = HOLLERITH_CODEC_TNG.encode integer_list
+      x = HCODECLEGACY_TNG.encode integer_list
       count++
     resolve count
   return null
@@ -89,7 +90,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
   resolve => new Promise ( resolve ) =>
     count = 0
     for integer_list in integer_lists
-      x = HOLLERITH_CODEC_TNG._encode_bcd [ integer_list, ]
+      x = HCODECLEGACY_TNG._encode_bcd [ integer_list, ]
       count++
     resolve count
   return null
@@ -126,8 +127,19 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
   gcfg.verbose  = true
   gcfg.verbose  = false
   bench         = BM.new_benchmarks()
-  cfg           = { list_count: 3e5, list_length_min: 1, list_length_max: HOLLERITH_CODEC_TNG.vnr_width, }
-  repetitions   = 5
+  mode          = 'standard'
+  mode          = 'functional_test'
+  mode          = 'medium'
+  switch mode
+    when 'standard'
+      cfg           = { list_count: 3e5, list_length_min: 1, list_length_max: HCODECLEGACY_TNG.vnr_width, }
+      repetitions   = 5
+    when 'medium'
+      cfg           = { list_count: 1e3, list_length_min: 1, list_length_max: HCODECLEGACY_TNG.vnr_width, }
+      repetitions   = 3
+    when 'functional_test'
+      cfg           = { list_count: 3, list_length_min: 1, list_length_max: HCODECLEGACY_TNG.vnr_width, }
+      repetitions   = 1
   test_names    = [
     ### add benchmarks for Hollerith v2 with and without validation ###
     'hollerith_classic'
