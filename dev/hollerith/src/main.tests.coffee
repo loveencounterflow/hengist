@@ -23,6 +23,12 @@ jr                        = JSON.stringify
 #   validate
 #   type_of }               = types
 #...........................................................................................................
+types                     = new ( require 'intertype' ).Intertype
+{ isa
+  equals
+  type_of
+  defaults
+  validate }              = types.export()
 hollerith_path            = '../../../apps/hollerith'
 
 
