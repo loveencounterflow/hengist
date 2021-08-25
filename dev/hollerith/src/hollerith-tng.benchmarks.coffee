@@ -135,15 +135,16 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
   mode          = 'standard'
   mode          = 'functional_test'
   mode          = 'medium'
+  list_length_max = Hollerith.C.defaults.hlr_constructor_cfg.vnr_width
   switch mode
     when 'standard'
-      cfg           = { list_count: 3e5, list_length_min: 1, list_length_max: HCODECLEGACY_TNG.vnr_width, }
+      cfg           = { list_count: 3e5, list_length_min: 1, list_length_max, }
       repetitions   = 5
     when 'medium'
-      cfg           = { list_count: 1e3, list_length_min: 1, list_length_max: HCODECLEGACY_TNG.vnr_width, }
-      repetitions   = 3
+      cfg           = { list_count: 1e4, list_length_min: 1, list_length_max, }
+      repetitions   = 1
     when 'functional_test'
-      cfg           = { list_count: 3, list_length_min: 1, list_length_max: HCODECLEGACY_TNG.vnr_width, }
+      cfg           = { list_count: 3, list_length_min: 1, list_length_max, }
       repetitions   = 1
   cfg.show      = cfg.list_count < 10
   test_names    = [
