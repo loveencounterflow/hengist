@@ -97,6 +97,7 @@
 
 ## Benchmarks
 
+### `encode()`
 
 ```
 hollerith_tng       0.236 s    300,000 items     1,269,827⏶Hz             788⏷nspc
@@ -111,9 +112,26 @@ bytewise           15.028 s    300,000 items        19,963⏶Hz          50,092�
 03:05 HENGIST/BENCHMARKS  ▶  bytewise               19,642  Hz ≙ 1 ÷ 58.1     1.7 % │▎            │
 ```
 
+
 * `hollerith-codec/tng` is much faster than the (more generic) encoding used by `charwise` and `bytewise`
 * neither of which have a fixed length and would probably have to be padded or otherwise post-processed to
   be used in SQLite sort entries
+
+### `sorting`
+
+```
+hollerith2_nv_bcd   0.648 s         300,000 items    462,622⏶Hz             2,162⏷nspc
+hollerith2_nv_u32   2.336 s         300,000 items    128,449⏶Hz             7,785⏷nspc
+hollerith2_nv_sort  1.647 s         300,000 items    182,197⏶Hz             5,489⏷nspc
+00:38 HENGIST/BENCHMARKS  ▶  hollerith2_nv_bcd       463,899  Hz ≙ 1 ÷ 1.0  100.0 % │████████████▌│
+00:38 HENGIST/BENCHMARKS  ▶  hollerith2_nv_sort      181,132  Hz ≙ 1 ÷ 2.6   39.0 % │████▉        │
+00:38 HENGIST/BENCHMARKS  ▶  hollerith2_nv_u32       124,740  Hz ≙ 1 ÷ 3.7   26.9 % │███▍         │
+```
+
+* While the textual `bcd` encoding format is much slower with `encode()`, it delivers texts which are 3
+  times as fast than sorting with `buffer.compare()` that is needed for the `u32` format.
+* Interestingly, even the current inefficient implementation of `hlr.cmp()` is a bit faster than
+  `buffer.compare()`.
 
 ## Related
 
