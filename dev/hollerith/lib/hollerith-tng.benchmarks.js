@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, BYTEWISE/* https://github.com/dominictarr/charwise */, CHARWISE, CND, DATA, FS, HOLLERITH_CODEC, HOLLERITH_CODEC_TNG, PATH, alert, badge, data_cache, debug, defaults, echo, gcfg, help, info, isa, jr, log, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var BM, BYTEWISE/* https://github.com/dominictarr/charwise */, CHARWISE, CND, DATA, FS, HCODECLEGACY, HCODECLEGACY_TNG, PATH, alert, badge, data_cache, debug, defaults, echo, freeze, gcfg, help, info, isa, jr, lets/* https://github.com/deanlandolt/bytewise */, log, rpr, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -46,9 +46,9 @@
     verbose: false
   };
 
-  HOLLERITH_CODEC = require('../../../apps/hollerith-codec');
+  HCODECLEGACY = require('../../../apps/hollerith-codec-legacy');
 
-  HOLLERITH_CODEC_TNG = (require('../../../apps/hollerith-codec/lib/tng')).HOLLERITH_CODEC;
+  HCODECLEGACY_TNG = (require('../../../apps/hollerith-codec-legacy/lib/tng')).HOLLERITH_CODEC;
 
   types = new (require('intertype')).Intertype();
 
@@ -58,16 +58,17 @@
 
   BYTEWISE = require('bytewise');
 
+  ({lets, freeze} = require('letsfreezethat'));
+
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this./* https://github.com/deanlandolt/bytewise */get_data = function(cfg) {
-    var DATOM, i, integer_lists, len, list_length, list_lengths;
+  this.get_data = function(cfg) {
+    var i, integer_lists, len, list_length, list_lengths;
     if (data_cache != null) {
       return data_cache;
     }
     whisper("retrieving test data...");
-    DATOM = require('../../../apps/datom');
     integer_lists = [];
     list_lengths = DATA.get_integers(cfg.list_count, cfg.list_length_min, cfg.list_length_max);
 //.........................................................................................................
@@ -78,7 +79,7 @@
     }
     //.........................................................................................................
     data_cache = {integer_lists};
-    data_cache = DATOM.freeze(data_cache);
+    data_cache = freeze(data_cache);
     whisper("...done");
     return data_cache;
   };
@@ -97,7 +98,7 @@
           count = 0;
           for (i = 0, len = integer_lists.length; i < len; i++) {
             integer_list = integer_lists[i];
-            x = HOLLERITH_CODEC.encode(integer_list);
+            x = HCODECLEGACY.encode(integer_list);
             count++;
           }
           return resolve(count);
@@ -119,7 +120,7 @@
           count = 0;
           for (i = 0, len = integer_lists.length; i < len; i++) {
             integer_list = integer_lists[i];
-            x = HOLLERITH_CODEC_TNG.encode(integer_list);
+            x = HCODECLEGACY_TNG.encode(integer_list);
             count++;
           }
           return resolve(count);
@@ -141,7 +142,7 @@
           count = 0;
           for (i = 0, len = integer_lists.length; i < len; i++) {
             integer_list = integer_lists[i];
-            x = HOLLERITH_CODEC_TNG._encode_bcd([integer_list]);
+            x = HCODECLEGACY_TNG._encode_bcd([integer_list]);
             count++;
           }
           return resolve(count);
@@ -199,16 +200,38 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.run_benchmarks = async function() {
-    var _, bench, cfg, i, j, len, ref, ref1, repetitions, test_name, test_names;
+    var _, bench, cfg, i, j, len, mode, ref, ref1, repetitions, test_name, test_names;
     gcfg.verbose = true;
     gcfg.verbose = false;
     bench = BM.new_benchmarks();
-    cfg = {
-      list_count: 3e5,
-      list_length_min: 1,
-      list_length_max: HOLLERITH_CODEC_TNG.vnr_width
-    };
-    repetitions = 5;
+    mode = 'standard';
+    mode = 'functional_test';
+    mode = 'medium';
+    switch (mode) {
+      case 'standard':
+        cfg = {
+          list_count: 3e5,
+          list_length_min: 1,
+          list_length_max: HCODECLEGACY_TNG.vnr_width
+        };
+        repetitions = 5;
+        break;
+      case 'medium':
+        cfg = {
+          list_count: 1e3,
+          list_length_min: 1,
+          list_length_max: HCODECLEGACY_TNG.vnr_width
+        };
+        repetitions = 3;
+        break;
+      case 'functional_test':
+        cfg = {
+          list_count: 3,
+          list_length_min: 1,
+          list_length_max: HCODECLEGACY_TNG.vnr_width
+        };
+        repetitions = 1;
+    }
     test_names = [/* add benchmarks for Hollerith v2 with and without validation */ 'hollerith_classic', 'hollerith_tng', 'hollerith_bcd', 'bytewise', 'charwise'];
     if (global.gc != null) {
       global.gc();
