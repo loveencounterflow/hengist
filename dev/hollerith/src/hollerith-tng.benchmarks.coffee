@@ -24,18 +24,20 @@ test                      = require 'guy-test'
 BM                        = require '../../../lib/benchmarks'
 data_cache                = null
 gcfg                      = { verbose: false, }
-HCODECLEGACY              = require '../../../apps/hollerith-codec-legacy'
-HCODECLEGACY_TNG          = ( require '../../../apps/hollerith-codec-legacy/lib/tng' ).HOLLERITH_CODEC
 types                     = new ( require 'intertype' ).Intertype
 { isa
   type_of
   defaults
   validate }              = types.export()
-CHARWISE                  = require 'charwise' ### https://github.com/dominictarr/charwise ###
-BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandolt/bytewise ###
 { lets
   freeze }                = require 'letsfreezethat'
-
+#-----------------------------------------------------------------------------------------------------------
+HCODECLEGACY              = require '../../../apps/hollerith-codec-legacy'
+HCODECLEGACY_TNG          = ( require '../../../apps/hollerith-codec-legacy/lib/tng' ).HOLLERITH_CODEC
+CHARWISE                  = require 'charwise' ### https://github.com/dominictarr/charwise ###
+BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandolt/bytewise ###
+{ HOLLERITH
+  Hollerith }             = require '../../../apps/hollerith'
 
 
 #===========================================================================================================
