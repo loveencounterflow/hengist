@@ -71,6 +71,31 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["HLR encode Infinity"] = function(T, done) {
+    var HLR, Hollerith;
+    Hollerith = (require(hollerith_path)).Hollerith;
+    HLR = (require(hollerith_path)).HOLLERITH;
+    debug('^28974^', Hollerith.C.u32_nr_max);
+    debug('^28974^', Hollerith.C.u32_nr_min);
+    debug('^28974^', HLR.encode([+2e308]));
+    debug('^28974^', HLR.encode([-2e308]));
+    if (T != null) {
+      T.eq(HLR._encode_u32([+2e308]), Buffer.from('ffffffff80000000800000008000000080000000', 'hex'));
+    }
+    if (T != null) {
+      T.eq(HLR._encode_u32([-2e308]), Buffer.from('0000000080000000800000008000000080000000', 'hex'));
+    }
+    if (T != null) {
+      T.eq(HLR._encode_bcd([+2e308]), '+zzzz,+...0,+...0,+...0,+...0');
+    }
+    if (T != null) {
+      T.eq(HLR._encode_bcd([-2e308]), '!zzzz,+...0,+...0,+...0,+...0');
+    }
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["HLR sort 2"] = async function(T, done) {
     var HLR, i, len, matcher, matchers, probe;
     matchers = [[[1, 0, -1], [1], [1, 0], [1, 0, 1], [2, -1], [2], [2, 0], [2, 1]], [[2], [2, 0]], [[2e308, -1], [2e308], [2e308, 1]], [[2e308, -1], [2e308, 0], [2e308, 1]], [[1]], [[1], [2]]];
@@ -78,15 +103,20 @@
     for (i = 0, len = matchers.length; i < len; i++) {
       matcher = matchers[i];
       probe = [...matcher];
-      await T.perform(probe, matcher, null, function() {
+      await T.perform(probe, true, null, function() {
         return new Promise(function(resolve, reject) {
           var result;
+          probe = CND.shuffle(probe);
           result = HLR.sort(probe);
           T.ok(probe !== matcher);
           T.ok(probe !== result);
           T.eq(result, matcher);
+          //.....................................................................................................
+          // debug '^31312^', ( HLR._encode_u32 p for p in probe )
+          // debug '^31312^', ( HLR._encode_u32 m for m in matcher)
+          //.....................................................................................................
           // debug '^334^', rpr result
-          return resolve(result);
+          return resolve(true);
         });
       });
     }
@@ -276,15 +306,15 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "HLR encode Infinity" ]
+      // test @[ "HLR class and instance attributes" ]
+      // test @[ "HLR basics" ]
+      return test(this["HLR sort 2"]);
     })();
   }
 
-  // test @[ "HLR._first_nonzero_is_negative()" ]
-// test @[ "HLR class and instance attributes" ]
-// test @[ "HLR basics" ]
-// test @[ "HLR sort 2" ]
-// test @[ "HLR sort 3" ]
+  // test @[ "HLR sort 3" ]
 // test @[ "test for stable sort 2" ]
 
 }).call(this);
