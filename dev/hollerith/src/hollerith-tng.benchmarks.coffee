@@ -129,6 +129,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
   cfg           = { list_count: 3e5, list_length_min: 1, list_length_max: HOLLERITH_CODEC_TNG.vnr_width, }
   repetitions   = 5
   test_names    = [
+    ### add benchmarks for Hollerith v2 with and without validation ###
     'hollerith_classic'
     'hollerith_tng'
     'hollerith_bcd'
