@@ -92,7 +92,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
   resolve => new Promise ( resolve ) =>
     count = 0
     for integer_list in integer_lists
-      x = HCODECLEGACY_TNG._encode_bcd [ integer_list, ]
+      x = HCODECLEGACY_TNG._encode_bcd integer_list
       urge '^234-4^', x if cfg.show
       count++
     resolve count
@@ -105,7 +105,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
   resolve => new Promise ( resolve ) =>
     count = 0
     for integer_list in integer_lists
-      x = BYTEWISE.encode [ integer_list, ]
+      x = BYTEWISE.encode integer_list
       urge '^234-5^', x if cfg.show
       count++
     resolve count
@@ -118,7 +118,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
   resolve => new Promise ( resolve ) =>
     count = 0
     for integer_list in integer_lists
-      x = CHARWISE.encode [ integer_list, ]
+      x = CHARWISE.encode integer_list
       urge '^234-6^', x if cfg.show
       count++
     resolve count
