@@ -150,15 +150,15 @@
     info(CND.steel('cmp        ', "[ 1, 0, ],  [ 1, -1, ]", HLR.cmp([1, 0], [1, -1])));
     info(CND.steel('cmp        ', "[ 1, 0, ],  [ 1,  0, ]", HLR.cmp([1, 0], [1, 0])));
     info(CND.steel('cmp        ', "[ 1, 0, ],  [ 1, +1, ]", HLR.cmp([1, 0], [1, +1])));
-    //.........................................................................................................
-    info(CND.grey('cmp2       ', "----------------------"));
-    info(CND.steel('cmp2       ', "[ 1, ],     [ 1, -1, ]", HLR.cmp2([1], [1, -1])));
-    info(CND.steel('cmp2       ', "[ 1, ],     [ 1,  0, ]", HLR.cmp2([1], [1, 0])));
-    info(CND.steel('cmp2       ', "[ 1, ],     [ 1, +1, ]", HLR.cmp2([1], [1, +1])));
-    info(CND.steel('cmp2       ', "----------------------"));
-    info(CND.steel('cmp2       ', "[ 1, 0, ],  [ 1, -1, ]", HLR.cmp2([1, 0], [1, -1])));
-    info(CND.steel('cmp2       ', "[ 1, 0, ],  [ 1,  0, ]", HLR.cmp2([1, 0], [1, 0])));
-    info(CND.steel('cmp2       ', "[ 1, 0, ],  [ 1, +1, ]", HLR.cmp2([1, 0], [1, +1])));
+    // #.........................................................................................................
+    // info CND.grey   'cmp2       ', "----------------------"
+    // info CND.steel  'cmp2       ', "[ 1, ],     [ 1, -1, ]", HLR.cmp2   [ 1, ],     [ 1, -1, ]
+    // info CND.steel  'cmp2       ', "[ 1, ],     [ 1,  0, ]", HLR.cmp2   [ 1, ],     [ 1,  0, ]
+    // info CND.steel  'cmp2       ', "[ 1, ],     [ 1, +1, ]", HLR.cmp2   [ 1, ],     [ 1, +1, ]
+    // info CND.steel  'cmp2       ', "----------------------"
+    // info CND.steel  'cmp2       ', "[ 1, 0, ],  [ 1, -1, ]", HLR.cmp2   [ 1, 0, ],  [ 1, -1, ]
+    // info CND.steel  'cmp2       ', "[ 1, 0, ],  [ 1,  0, ]", HLR.cmp2   [ 1, 0, ],  [ 1,  0, ]
+    // info CND.steel  'cmp2       ', "[ 1, 0, ],  [ 1, +1, ]", HLR.cmp2   [ 1, 0, ],  [ 1, +1, ]
     //.........................................................................................................
     info(CND.grey('cmp_blobs  ', "----------------------"));
     info(CND.steel('cmp_blobs  ', "[ 1, ],     [ 1, -1, ]", HLR.cmp(HLR.encode([1]), HLR.encode([1, -1]))));
@@ -317,16 +317,16 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @[ "HLR encode Infinity" ]
-      // test @[ "HLR class and instance attributes" ]
-      // test @[ "HLR basics" ]
-      // test @[ "HLR sort 2" ]
-      return test(this["HLR sort 3"]);
+      return test(this);
     })();
   }
 
-  // test @[ "test for stable sort 2" ]
+  // test @[ "HLR encode Infinity" ]
+// test @[ "HLR class and instance attributes" ]
+// test @[ "HLR basics" ]
+// test @[ "HLR sort 2" ]
+// test @[ "HLR sort 3" ]
+// test @[ "test for stable sort 2" ]
 
 }).call(this);
 
