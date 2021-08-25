@@ -67,6 +67,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
     count = 0
     for integer_list in integer_lists
       x = HCODECLEGACY.encode integer_list
+      urge '^234-1^', x if cfg.show
       count++
     resolve count
   return null
@@ -79,6 +80,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
     count = 0
     for integer_list in integer_lists
       x = HCODECLEGACY_TNG.encode integer_list
+      urge '^234-3^', x if cfg.show
       count++
     resolve count
   return null
@@ -91,6 +93,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
     count = 0
     for integer_list in integer_lists
       x = HCODECLEGACY_TNG._encode_bcd [ integer_list, ]
+      urge '^234-4^', x if cfg.show
       count++
     resolve count
   return null
@@ -103,6 +106,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
     count = 0
     for integer_list in integer_lists
       x = BYTEWISE.encode [ integer_list, ]
+      urge '^234-5^', x if cfg.show
       count++
     resolve count
   return null
@@ -115,6 +119,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
     count = 0
     for integer_list in integer_lists
       x = CHARWISE.encode [ integer_list, ]
+      urge '^234-6^', x if cfg.show
       count++
     resolve count
   return null
@@ -140,6 +145,7 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
     when 'functional_test'
       cfg           = { list_count: 3, list_length_min: 1, list_length_max: HCODECLEGACY_TNG.vnr_width, }
       repetitions   = 1
+  cfg.show      = cfg.list_count < 10
   test_names    = [
     ### add benchmarks for Hollerith v2 with and without validation ###
     'hollerith_classic'
