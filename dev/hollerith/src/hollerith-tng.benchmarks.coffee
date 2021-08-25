@@ -82,10 +82,27 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
     count = 0
     for integer_list in integer_lists
       x = HCODECLEGACY_TNG.encode integer_list
+      urge '^234-2^', x if cfg.show
+      count++
+    resolve count
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_hollerith2 = ( cfg, hlr ) -> new Promise ( resolve ) =>
+  { integer_lists, }  = @get_data cfg
+  HLR                 = new Hollerith hlr
+  #.........................................................................................................
+  resolve => new Promise ( resolve ) =>
+    count = 0
+    for integer_list in integer_lists
+      x = HLR.encode integer_list
       urge '^234-3^', x if cfg.show
       count++
     resolve count
   return null
+@hollerith2_with_validation = ( cfg ) -> @_hollerith2 cfg, { validate: true, }
+@hollerith2_no_validation   = ( cfg ) -> @_hollerith2 cfg, { validate: false, }
+@hollerith2_nv_bcd          = ( cfg ) -> @_hollerith2 cfg, { validate: false, format: 'bcd', }
 
 #-----------------------------------------------------------------------------------------------------------
 @hollerith_bcd = ( cfg ) -> new Promise ( resolve ) =>
@@ -131,12 +148,12 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
 #
 #-----------------------------------------------------------------------------------------------------------
 @run_benchmarks = ->
-  gcfg.verbose  = true
-  gcfg.verbose  = false
-  bench         = BM.new_benchmarks()
-  mode          = 'standard'
-  mode          = 'functional_test'
-  mode          = 'medium'
+  gcfg.verbose    = true
+  gcfg.verbose    = false
+  bench           = BM.new_benchmarks()
+  mode            = 'standard'
+  mode            = 'medium'
+  mode            = 'functional_test'
   list_length_max = Hollerith.C.defaults.hlr_constructor_cfg.vnr_width
   switch mode
     when 'standard'
@@ -150,10 +167,12 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
       repetitions   = 1
   cfg.show      = cfg.list_count < 10
   test_names    = [
-    ### add benchmarks for Hollerith v2 with and without validation ###
-    'hollerith_classic'
+    'hollerith2_nv_bcd'
     'hollerith_tng'
     'hollerith_bcd'
+    'hollerith2_with_validation'
+    'hollerith2_no_validation'
+    'hollerith_classic'
     'bytewise'
     'charwise'
     ]
