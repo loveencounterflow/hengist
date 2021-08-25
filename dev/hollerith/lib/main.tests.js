@@ -255,27 +255,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["HLR._first_nonzero_is_negative()"] = async function(T, done) {
-    var HLR, error, i, len, matcher, probe, probes_and_matchers;
-    HLR = (require(hollerith_path)).HOLLERITH;
-    //.........................................................................................................
-    probes_and_matchers = [[[[3, 4, 0, 0], 2], false], [[[3, 4, 0, -1], 2], true], [[[3, 4, 0, -1, 0, 0], 2], true], [[[3, 4, 0, 1, -1, 0, 0], 2], false], [[[3, 4, 0, 1, -1, 0, 0], 0], false], [[[3, 4, 0, 0], 3], false], [[[3, 4, 0, 0], 4], false]];
-//.........................................................................................................
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher, error] = probes_and_matchers[i];
-      await T.perform(probe, matcher, error, function() {
-        return new Promise(function(resolve, reject) {
-          var first_idx, list;
-          [list, first_idx] = probe;
-          return resolve(HLR._first_nonzero_is_negative(list, first_idx));
-        });
-      });
-    }
-    done();
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this["HLR class and instance attributes"] = function(T, done) {
     var C, HLR, Hollerith;
     Hollerith = (require(hollerith_path)).Hollerith;
