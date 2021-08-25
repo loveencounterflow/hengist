@@ -82,13 +82,18 @@ test_basics = ( T, VNR ) ->
   HLR       = ( require hollerith_path ).HOLLERITH
   for matcher in matchers
     probe   = [ matcher..., ]
-    await T.perform probe, matcher, null, -> return new Promise ( resolve, reject ) ->
+    await T.perform probe, true, null, -> return new Promise ( resolve, reject ) ->
+      # probe   = CND.shuffle probe
       result  = HLR.sort probe
       T.ok probe isnt matcher
       T.ok probe isnt result
       T.eq result, matcher
+      #.....................................................................................................
+      # debug '^31312^', ( HLR._encode_u32 p for p in probe )
+      # debug '^31312^', ( HLR._encode_u32 m for m in matcher)
+      #.....................................................................................................
       # debug '^334^', rpr result
-      resolve result
+      resolve true
   done()
   return null
 
