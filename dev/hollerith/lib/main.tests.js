@@ -1,13 +1,13 @@
 (function() {
   'use strict';
-  var CND, badge, debug, echo, help, hollerith_path, info, inspect, jr, rpr, test, test_basics, urge, warn, whisper;
+  var CND, badge, debug, defaults, echo, equals, help, hollerith_path, info, isa, jr, rpr, test, test_basics, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
 
   rpr = CND.rpr;
 
-  badge = 'DATOM/TESTS/VNR';
+  badge = 'HOLLERITH/TESTS';
 
   debug = CND.get_logger('debug', badge);
 
@@ -34,25 +34,9 @@
   //   validate
   //   type_of }               = types
   //...........................................................................................................
-  ({inspect} = require('util'));
+  types = new (require('intertype')).Intertype();
 
-  rpr = function(...P) {
-    var x;
-    return ((function() {
-      var i, len, results;
-      results = [];
-      for (i = 0, len = P.length; i < len; i++) {
-        x = P[i];
-        results.push(inspect(x, {
-          depth: 2e308,
-          maxArrayLength: 2e308,
-          breakLength: 2e308,
-          compact: true
-        }));
-      }
-      return results;
-    })()).join(' ');
-  };
+  ({isa, equals, type_of, defaults, validate} = types.export());
 
   hollerith_path = '../../../apps/hollerith';
 
@@ -111,38 +95,97 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["HLR sort 3"] = function(T, done) {
-    var HLR;
+  this["HLR sort 3"] = async function(T, done) {
+    var BCD, HLR, cmp_bcd, compare, i, len, matcher, probe, probes_and_matchers;
     HLR = (require(hollerith_path)).HOLLERITH;
-    // info CND.blue   'cmp_total    ', "[ 1, ],     [ 1, -1, ]", VNR.cmp_total   [ 1, ],     [ 1, -1, ]
-    // info CND.blue   'cmp_total    ', "[ 1, ],     [ 1,  0, ]", VNR.cmp_total   [ 1, ],     [ 1,  0, ]
-    // info CND.blue   'cmp_total    ', "[ 1, ],     [ 1, +1, ]", VNR.cmp_total   [ 1, ],     [ 1, +1, ]
-    // info CND.blue   'cmp_total    ', "----------------------"
-    // info CND.blue   'cmp_total    ', "[ 1, 0, ],  [ 1, -1, ]", VNR.cmp_total   [ 1, 0, ],  [ 1, -1, ]
-    // info CND.blue   'cmp_total    ', "[ 1, 0, ],  [ 1,  0, ]", VNR.cmp_total   [ 1, 0, ],  [ 1,  0, ]
-    // info CND.blue   'cmp_total    ', "[ 1, 0, ],  [ 1, +1, ]", VNR.cmp_total   [ 1, 0, ],  [ 1, +1, ]
-    // info()
-    // info CND.lime   'cmp_partial  ', "[ 1, ],     [ 1, -1, ]", VNR.cmp_partial [ 1, ],     [ 1, -1, ]
-    // info CND.lime   'cmp_partial  ', "[ 1, ],     [ 1,  0, ]", VNR.cmp_partial [ 1, ],     [ 1,  0, ]
-    // info CND.lime   'cmp_partial  ', "[ 1, ],     [ 1, +1, ]", VNR.cmp_partial [ 1, ],     [ 1, +1, ]
-    // info CND.lime   'cmp_partial  ', "----------------------"
-    // info CND.lime   'cmp_partial  ', "[ 1, 0, ],  [ 1, -1, ]", VNR.cmp_partial [ 1, 0, ],  [ 1, -1, ]
-    // info CND.lime   'cmp_partial  ', "[ 1, 0, ],  [ 1,  0, ]", VNR.cmp_partial [ 1, 0, ],  [ 1,  0, ]
-    // info CND.lime   'cmp_partial  ', "[ 1, 0, ],  [ 1, +1, ]", VNR.cmp_partial [ 1, 0, ],  [ 1, +1, ]
-    // info()
-    info(CND.steel('cmp_fair     ', "[ 1, ],     [ 1, -1, ]", HLR.cmp([1], [1, -1])));
-    info(CND.steel('cmp_fair     ', "[ 1, ],     [ 1,  0, ]", HLR.cmp([1], [1, 0])));
-    info(CND.steel('cmp_fair     ', "[ 1, ],     [ 1, +1, ]", HLR.cmp([1], [1, +1])));
-    info(CND.steel('cmp_fair     ', "----------------------"));
-    info(CND.steel('cmp_fair     ', "[ 1, 0, ],  [ 1, -1, ]", HLR.cmp([1, 0], [1, -1])));
-    info(CND.steel('cmp_fair     ', "[ 1, 0, ],  [ 1,  0, ]", HLR.cmp([1, 0], [1, 0])));
-    info(CND.steel('cmp_fair     ', "[ 1, 0, ],  [ 1, +1, ]", HLR.cmp([1, 0], [1, +1])));
+    BCD = new (require(hollerith_path)).Hollerith({
+      format: 'bcd'
+    });
+    //.........................................................................................................
+    cmp_bcd = function(a, b) {
+      if (a === b) {
+        return 0;
+      }
+      if (a > b) {
+        return +1;
+      }
+      return -1;
+    };
+    //.........................................................................................................
+    info(CND.grey('cmp        ', "----------------------"));
+    info(CND.steel('cmp        ', "[ 1, ],     [ 1, -1, ]", HLR.cmp([1], [1, -1])));
+    info(CND.steel('cmp        ', "[ 1, ],     [ 1,  0, ]", HLR.cmp([1], [1, 0])));
+    info(CND.steel('cmp        ', "[ 1, ],     [ 1, +1, ]", HLR.cmp([1], [1, +1])));
+    info(CND.steel('cmp        ', "----------------------"));
+    info(CND.steel('cmp        ', "[ 1, 0, ],  [ 1, -1, ]", HLR.cmp([1, 0], [1, -1])));
+    info(CND.steel('cmp        ', "[ 1, 0, ],  [ 1,  0, ]", HLR.cmp([1, 0], [1, 0])));
+    info(CND.steel('cmp        ', "[ 1, 0, ],  [ 1, +1, ]", HLR.cmp([1, 0], [1, +1])));
+    //.........................................................................................................
+    info(CND.grey('cmp_blobs  ', "----------------------"));
+    info(CND.steel('cmp_blobs  ', "[ 1, ],     [ 1, -1, ]", HLR.cmp(HLR.encode([1]), HLR.encode([1, -1]))));
+    info(CND.steel('cmp_blobs  ', "[ 1, ],     [ 1,  0, ]", HLR.cmp(HLR.encode([1]), HLR.encode([1, 0]))));
+    info(CND.steel('cmp_blobs  ', "[ 1, ],     [ 1, +1, ]", HLR.cmp(HLR.encode([1]), HLR.encode([1, +1]))));
+    info(CND.steel('cmp_blobs  ', "----------------------"));
+    info(CND.steel('cmp_blobs  ', "[ 1, 0, ],  [ 1, -1, ]", HLR.cmp(HLR.encode([1, 0]), HLR.encode([1, -1]))));
+    info(CND.steel('cmp_blobs  ', "[ 1, 0, ],  [ 1,  0, ]", HLR.cmp(HLR.encode([1, 0]), HLR.encode([1, 0]))));
+    info(CND.steel('cmp_blobs  ', "[ 1, 0, ],  [ 1, +1, ]", HLR.cmp(HLR.encode([1, 0]), HLR.encode([1, +1]))));
+    //.........................................................................................................
+    info(CND.grey('cmp bcd    ', "----------------------"));
+    info(CND.steel('cmp bcd    ', "[ 1, ],     [ 1, -1, ]", cmp_bcd(BCD.encode([1]), BCD.encode([1, -1]))));
+    info(CND.steel('cmp bcd    ', "[ 1, ],     [ 1,  0, ]", cmp_bcd(BCD.encode([1]), BCD.encode([1, 0]))));
+    info(CND.steel('cmp bcd    ', "[ 1, ],     [ 1, +1, ]", cmp_bcd(BCD.encode([1]), BCD.encode([1, +1]))));
+    info(CND.steel('cmp bcd    ', "----------------------"));
+    info(CND.steel('cmp bcd    ', "[ 1, 0, ],  [ 1, -1, ]", cmp_bcd(BCD.encode([1, 0]), BCD.encode([1, -1]))));
+    info(CND.steel('cmp bcd    ', "[ 1, 0, ],  [ 1,  0, ]", cmp_bcd(BCD.encode([1, 0]), BCD.encode([1, 0]))));
+    info(CND.steel('cmp bcd    ', "[ 1, 0, ],  [ 1, +1, ]", cmp_bcd(BCD.encode([1, 0]), BCD.encode([1, +1]))));
+    //.........................................................................................................
+    probes_and_matchers = [[[[1], [1, -1]], +1], [[[1], [1, 0]], 0], [[[1], [1, +1]], -1], [[[1, 0], [1, -1]], +1], [[[1, 0], [1, 0]], 0], [[[1, 0], [1, +1]], -1]];
+    //.........................................................................................................
+    compare = function(description, a, b, a_blob, b_blob, r1, r2) {
+      if (equals(r1, r2)) {
+        return null;
+      }
+      warn("^34234^ when comparing");
+      warn(description);
+      warn("using");
+      warn(a);
+      warn(b);
+      warn(a_blob);
+      warn(b_blob);
+      warn("r1", r1);
+      warn("r1", r2);
+      warn("didn't test equal");
+      return T != null ? T.fail("comparison failed") : void 0;
+    };
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher] = probes_and_matchers[i];
+      await T.perform(probe, matcher, null, function() {
+        return new Promise(function(resolve, reject) {
+          var a, a_blob, b, b_blob, result_1, result_1r, result_2, result_2r;
+          [a, b] = probe;
+          a_blob = HLR.encode(a);
+          b_blob = HLR.encode(b);
+          result_1 = HLR.cmp(a, b);
+          result_1r = HLR.cmp(b, a);
+          result_2 = HLR.cmp_blobs(a_blob, b_blob);
+          result_2r = HLR.cmp_blobs(b_blob, a_blob);
+          compare("result_1,  -result_1r", a, b, a_blob, b_blob, result_1, -result_1r);
+          compare("result_2,  -result_2r", a, b, a_blob, b_blob, result_2, -result_2r);
+          compare("result_1,   result_2 ", a, b, a_blob, b_blob, result_1, result_2);
+          compare("result_1r,  result_2r", a, b, a_blob, b_blob, result_1r, result_2r);
+          // T.eq result, matcher
+          // debug '^334^', { a, b, result_1, result_1r, result_2, result_2r, }
+          return resolve(result_1);
+        });
+      });
+    }
     done();
     return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["test for stable sort 2"] = function(T, done) {
+  this["test for stable sort"] = function(T, done) {
     var ds, i, is_stable, len, m, n, nr, prv_nr, prv_r, r;
     n = 1e4;
     m = Math.floor(n / 3);
@@ -195,7 +238,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["HLR class and instance attributes"] = function(T, done) {
-    var C, HLR, Hollerith, defaults;
+    var C, HLR, Hollerith;
     Hollerith = (require(hollerith_path)).Hollerith;
     HLR = (require(hollerith_path)).HOLLERITH;
     debug(Hollerith.cfg);
@@ -206,17 +249,23 @@
     delete C.defaults;
     if (T != null) {
       T.eq(C, {
-        sign_delta: 2147483648,
+        u32_sign_delta: 2147483648,
         u32_width: 4,
-        nr_min: -2147483648,
-        nr_max: 2147483647
+        u32_nr_min: -2147483648,
+        u32_nr_max: 2147483647,
+        bcd_dpe: 4,
+        bcd_base: 36,
+        bcd_plus: '+',
+        bcd_minus: '!',
+        bcd_padder: '.'
       });
     }
     if (T != null) {
       T.eq(defaults, {
         hlr_constructor_cfg: {
           vnr_width: 5,
-          validate: true
+          validate: false,
+          format: 'u32'
         }
       });
     }

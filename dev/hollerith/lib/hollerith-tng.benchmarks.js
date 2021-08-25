@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, BYTEWISE/* https://github.com/dominictarr/charwise */, CHARWISE, CND, DATA, FS, HCODECLEGACY, HCODECLEGACY_TNG, PATH, alert, badge, data_cache, debug, defaults, echo, freeze, gcfg, help, info, isa, jr, lets/* https://github.com/deanlandolt/bytewise */, log, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var BM, BYTEWISE/* https://github.com/dominictarr/charwise */, CHARWISE, CND, DATA, FS, HCODECLEGACY, HCODECLEGACY_TNG, HOLLERITH/* https://github.com/deanlandolt/bytewise */, Hollerith, PATH, alert, badge, data_cache, debug, defaults, echo, freeze, gcfg, help, info, isa, jr, lets, log, rpr, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -46,19 +46,22 @@
     verbose: false
   };
 
-  HCODECLEGACY = require('../../../apps/hollerith-codec-legacy');
-
-  HCODECLEGACY_TNG = (require('../../../apps/hollerith-codec-legacy/lib/tng')).HOLLERITH_CODEC;
-
   types = new (require('intertype')).Intertype();
 
   ({isa, type_of, defaults, validate} = types.export());
+
+  ({lets, freeze} = require('letsfreezethat'));
+
+  //-----------------------------------------------------------------------------------------------------------
+  HCODECLEGACY = require('../../../apps/hollerith-codec-legacy');
+
+  HCODECLEGACY_TNG = (require('../../../apps/hollerith-codec-legacy/lib/tng')).HOLLERITH_CODEC;
 
   CHARWISE = require('charwise');
 
   BYTEWISE = require('bytewise');
 
-  ({lets, freeze} = require('letsfreezethat'));
+  ({HOLLERITH, Hollerith} = require('../../../apps/hollerith'));
 
   //===========================================================================================================
 
@@ -99,6 +102,9 @@
           for (i = 0, len = integer_lists.length; i < len; i++) {
             integer_list = integer_lists[i];
             x = HCODECLEGACY.encode(integer_list);
+            if (cfg.show) {
+              urge('^234-1^', x);
+            }
             count++;
           }
           return resolve(count);
@@ -121,12 +127,60 @@
           for (i = 0, len = integer_lists.length; i < len; i++) {
             integer_list = integer_lists[i];
             x = HCODECLEGACY_TNG.encode(integer_list);
+            if (cfg.show) {
+              urge('^234-2^', x);
+            }
             count++;
           }
           return resolve(count);
         });
       });
       return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._hollerith2 = function(cfg, hlr) {
+    return new Promise((resolve) => {
+      var HLR, integer_lists;
+      ({integer_lists} = this.get_data(cfg));
+      HLR = new Hollerith(hlr);
+      //.........................................................................................................
+      resolve(() => {
+        return new Promise((resolve) => {
+          var count, i, integer_list, len, x;
+          count = 0;
+          for (i = 0, len = integer_lists.length; i < len; i++) {
+            integer_list = integer_lists[i];
+            x = HLR.encode(integer_list);
+            if (cfg.show) {
+              urge('^234-3^', x);
+            }
+            count++;
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  this.hollerith2_with_validation = function(cfg) {
+    return this._hollerith2(cfg, {
+      validate: true
+    });
+  };
+
+  this.hollerith2_no_validation = function(cfg) {
+    return this._hollerith2(cfg, {
+      validate: false
+    });
+  };
+
+  this.hollerith2_nv_bcd = function(cfg) {
+    return this._hollerith2(cfg, {
+      validate: false,
+      format: 'bcd'
     });
   };
 
@@ -142,7 +196,10 @@
           count = 0;
           for (i = 0, len = integer_lists.length; i < len; i++) {
             integer_list = integer_lists[i];
-            x = HCODECLEGACY_TNG._encode_bcd([integer_list]);
+            x = HCODECLEGACY_TNG._encode_bcd(integer_list);
+            if (cfg.show) {
+              urge('^234-4^', x);
+            }
             count++;
           }
           return resolve(count);
@@ -164,7 +221,10 @@
           count = 0;
           for (i = 0, len = integer_lists.length; i < len; i++) {
             integer_list = integer_lists[i];
-            x = BYTEWISE.encode([integer_list]);
+            x = BYTEWISE.encode(integer_list);
+            if (cfg.show) {
+              urge('^234-5^', x);
+            }
             count++;
           }
           return resolve(count);
@@ -186,7 +246,10 @@
           count = 0;
           for (i = 0, len = integer_lists.length; i < len; i++) {
             integer_list = integer_lists[i];
-            x = CHARWISE.encode([integer_list]);
+            x = CHARWISE.encode(integer_list);
+            if (cfg.show) {
+              urge('^234-6^', x);
+            }
             count++;
           }
           return resolve(count);
@@ -200,39 +263,41 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.run_benchmarks = async function() {
-    var _, bench, cfg, i, j, len, mode, ref, ref1, repetitions, test_name, test_names;
+    var _, bench, cfg, i, j, len, list_length_max, mode, ref, ref1, repetitions, test_name, test_names;
     gcfg.verbose = true;
     gcfg.verbose = false;
     bench = BM.new_benchmarks();
     mode = 'standard';
-    mode = 'functional_test';
     mode = 'medium';
+    mode = 'functional_test';
+    list_length_max = Hollerith.C.defaults.hlr_constructor_cfg.vnr_width;
     switch (mode) {
       case 'standard':
         cfg = {
           list_count: 3e5,
           list_length_min: 1,
-          list_length_max: HCODECLEGACY_TNG.vnr_width
+          list_length_max
         };
         repetitions = 5;
         break;
       case 'medium':
         cfg = {
-          list_count: 1e3,
+          list_count: 1e4,
           list_length_min: 1,
-          list_length_max: HCODECLEGACY_TNG.vnr_width
+          list_length_max
         };
-        repetitions = 3;
+        repetitions = 1;
         break;
       case 'functional_test':
         cfg = {
           list_count: 3,
           list_length_min: 1,
-          list_length_max: HCODECLEGACY_TNG.vnr_width
+          list_length_max
         };
         repetitions = 1;
     }
-    test_names = [/* add benchmarks for Hollerith v2 with and without validation */ 'hollerith_classic', 'hollerith_tng', 'hollerith_bcd', 'bytewise', 'charwise'];
+    cfg.show = cfg.list_count < 10;
+    test_names = ['hollerith2_nv_bcd', 'hollerith_tng', 'hollerith_bcd', 'hollerith2_with_validation', 'hollerith2_no_validation', 'hollerith_classic', 'bytewise', 'charwise'];
     if (global.gc != null) {
       global.gc();
     }
