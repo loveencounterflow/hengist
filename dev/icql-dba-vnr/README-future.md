@@ -12,6 +12,7 @@
   - [[+] Retire `hollerith-codec`](#-retire-hollerith-codec)
   - [[–] Init New Major Version of `hollerith`](#-init-new-major-version-of-hollerith)
   - [[–] Re-Publish `icql-dba-vnr` as `icql-dba-hollerith`](#-re-publish-icql-dba-vnr-as-icql-dba-hollerith)
+  - [Add benchmarks](#add-benchmarks)
 - [Benchmarks](#benchmarks)
 - [Related](#related)
 
@@ -87,6 +88,12 @@
 * **[–]** relocate relevant test, benchmarks, demos in `hengist`
 * **[–]** adapt `icql-dba-hollerith` to replace dependency on `hollerith-codec`, `datom/lib/vnr` with dependency
   on `hollerith`
+
+### Add benchmarks
+
+* **[–]** add benchmarks for Hollerith v2 with and without validation
+* **[–]** add benchmarks for Hollerith v2 with different sorting methods
+
 
 ## Benchmarks
 
