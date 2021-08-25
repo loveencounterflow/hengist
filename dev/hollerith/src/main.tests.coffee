@@ -23,11 +23,6 @@ jr                        = JSON.stringify
 #   validate
 #   type_of }               = types
 #...........................................................................................................
-{ inspect }               = require 'util'
-rpr = ( P... ) ->
-  return ( \
-    ( inspect x, { depth: Infinity, maxArrayLength: Infinity, breakLength: Infinity, compact: true, } ) \
-      for x in P ).join ' '
 hollerith_path            = '../../../apps/hollerith'
 
 
