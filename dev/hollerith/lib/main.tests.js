@@ -106,7 +106,7 @@
       await T.perform(probe, true, null, function() {
         return new Promise(function(resolve, reject) {
           var result;
-          probe = CND.shuffle(probe);
+          // probe   = CND.shuffle probe
           result = HLR.sort(probe);
           T.ok(probe !== matcher);
           T.ok(probe !== result);
@@ -287,7 +287,9 @@
         bcd_base: 36,
         bcd_plus: '+',
         bcd_minus: '!',
-        bcd_padder: '.'
+        bcd_padder: '.',
+        bcd_nr_max: 1679615,
+        bcd_nr_min: -1679615
       });
     }
     if (T != null) {
@@ -306,15 +308,15 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @[ "HLR encode Infinity" ]
-      // test @[ "HLR class and instance attributes" ]
-      // test @[ "HLR basics" ]
-      return test(this["HLR sort 2"]);
+      return test(this);
     })();
   }
 
-  // test @[ "HLR sort 3" ]
+  // test @[ "HLR encode Infinity" ]
+// test @[ "HLR class and instance attributes" ]
+// test @[ "HLR basics" ]
+// test @[ "HLR sort 2" ]
+// test @[ "HLR sort 3" ]
 // test @[ "test for stable sort 2" ]
 
 }).call(this);

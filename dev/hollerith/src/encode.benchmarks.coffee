@@ -152,16 +152,16 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
   gcfg.verbose    = false
   bench           = BM.new_benchmarks()
   mode            = 'standard'
-  mode            = 'medium'
   mode            = 'functional_test'
+  mode            = 'medium'
   list_length_max = Hollerith.C.defaults.hlr_constructor_cfg.vnr_width
   switch mode
     when 'standard'
       cfg           = { list_count: 3e5, list_length_min: 1, list_length_max, }
       repetitions   = 5
     when 'medium'
-      cfg           = { list_count: 1e4, list_length_min: 1, list_length_max, }
-      repetitions   = 1
+      cfg           = { list_count: 5e4, list_length_min: 1, list_length_max, }
+      repetitions   = 3
     when 'functional_test'
       cfg           = { list_count: 3, list_length_min: 1, list_length_max, }
       repetitions   = 1
@@ -173,8 +173,8 @@ BYTEWISE                  = require 'bytewise' ### https://github.com/deanlandol
     'hollerith2_with_validation'
     'hollerith2_no_validation'
     'hollerith_classic'
-    'bytewise'
-    'charwise'
+    # 'bytewise'
+    # 'charwise'
     ]
   global.gc() if global.gc?
   data_cache = null
