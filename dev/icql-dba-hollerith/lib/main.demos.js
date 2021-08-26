@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CATALOGUE, CND, PATH, SQL, badge, dba_path, debug, echo, equals, freeze, help, info, isa, jp, jr, lets, rpr, type_of, types, urge, validate, validate_list_of, vnr_path, warn, whisper;
+  var CATALOGUE, CND, PATH, SQL, badge, dba_path, debug, echo, equals, freeze, help, icql_dba_hollerith_path, info, isa, jp, jr, lets, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -32,7 +32,7 @@
 
   SQL = String.raw;
 
-  vnr_path = '../../../apps/icql-dba-vnr';
+  icql_dba_hollerith_path = '../../../apps/icql-dba-hollerith';
 
   dba_path = '../../../apps/icql-dba';
 
@@ -48,14 +48,17 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_simple_table = function() {
-    var Dba, Tbl, Vnr, blob_column_name, dba, insert_sql, json_column_name, line, ref, schema, table_name, tbl, vnr;
+    var Dba, Hollerith, Tbl, blob_column_name, dba, dhlr, insert_sql, json_column_name, line, ref, schema, table_name, tbl;
     // T?.halt_on_error()
     //.........................................................................................................
-    ({Vnr} = require(vnr_path));
+    ({Hollerith} = require(icql_dba_hollerith_path));
     ({Dba} = require(dba_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
     dba = new Dba();
-    vnr = new Vnr({dba});
+    dhlr = new Hollerith({dba});
+    // debug '^6w3^', dhlr
+    debug('^6w3^', dhlr.cfg);
+    debug('^6w3^', dhlr.cfg.vnr_width);
     tbl = new Tbl({dba});
     // fq          = ( P... ) -> dba.first_value dba.query P...
     //.........................................................................................................
@@ -65,7 +68,7 @@
     table_name = 'myfiles';
     json_column_name = 'vnr';
     blob_column_name = null;
-    vnr.alter_table({schema, table_name, json_column_name, blob_column_name});
+    dhlr.alter_table({schema, table_name, json_column_name, blob_column_name});
     //.........................................................................................................
     insert_sql = SQL`insert into myfiles ( "text", vnr ) values ( $text, $vnr )`;
     dba.run(insert_sql, {
