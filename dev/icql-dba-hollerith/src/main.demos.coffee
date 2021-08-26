@@ -22,7 +22,7 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of
   equals }                = types.export()
 SQL                       = String.raw
-vnr_path                  = '../../../apps/icql-dba-vnr'
+icql_dba_hollerith_path   = '../../../apps/icql-dba-hollerith'
 dba_path                  = '../../../apps/icql-dba'
 { lets
   freeze }                = require 'letsfreezethat'
@@ -37,12 +37,15 @@ jp                        = JSON.parse
 @demo_simple_table = ->
   # T?.halt_on_error()
   #.........................................................................................................
-  { Vnr, }    = require vnr_path
-  { Dba, }    = require dba_path
-  { Tbl, }    = require '../../../apps/icql-dba-tabulate'
-  dba         = new Dba()
-  vnr         = new Vnr { dba, }
-  tbl         = new Tbl { dba, }
+  { Hollerith, }  = require icql_dba_hollerith_path
+  { Dba, }        = require dba_path
+  { Tbl, }        = require '../../../apps/icql-dba-tabulate'
+  dba             = new Dba()
+  dhlr            = new Hollerith { dba, }
+  # debug '^6w3^', dhlr
+  debug '^6w3^', dhlr.cfg
+  debug '^6w3^', dhlr.cfg.vnr_width
+  tbl             = new Tbl { dba, }
   # fq          = ( P... ) -> dba.first_value dba.query P...
   #.........................................................................................................
   dba.execute SQL"""
@@ -53,7 +56,7 @@ jp                        = JSON.parse
   table_name        = 'myfiles'
   json_column_name  = 'vnr'
   blob_column_name  = null
-  vnr.alter_table { schema, table_name, json_column_name, blob_column_name, }
+  dhlr.alter_table { schema, table_name, json_column_name, blob_column_name, }
   #.........................................................................................................
   insert_sql        = SQL"""insert into myfiles ( "text", vnr ) values ( $text, $vnr )"""
   dba.run insert_sql, { vnr: ( jr [ 1,    ] ), text: 'helo world', }
