@@ -268,8 +268,8 @@
     gcfg.verbose = false;
     bench = BM.new_benchmarks();
     mode = 'standard';
-    mode = 'functional_test';
     mode = 'medium';
+    mode = 'functional_test';
     list_length_max = Hollerith.C.defaults.hlr_constructor_cfg.vnr_width;
     switch (mode) {
       case 'standard':
