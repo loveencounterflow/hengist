@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dba, FS, H, PATH, SQL, badge, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, demo_git_fetch_dirty_counts, demo_git_fetch_pkg_status, demo_variables, echo, freeze, glob, got, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Dba, FS, H, PATH, SQL, badge, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, demo_git_fetch_pkg_status, demo_git_get_dirty_counts, demo_variables, echo, freeze, glob, got, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -125,7 +125,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_git_fetch_dirty_counts = function() {
+  demo_git_get_dirty_counts = function() {
     var Dpan, Tbl, db_path, dba, dcs, dpan, home_path, i, k, len, pkg_fspath, project_path, project_path_pattern, ref, sum, v;
     ({Dpan} = require(H.dpan_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
@@ -240,7 +240,7 @@
       // await demo_db_add_pkg_info()
       // await demo_db_add_pkg_infos()
       // await demo_git_fetch_pkg_status()
-      return (await demo_git_fetch_dirty_counts());
+      return (await demo_git_get_dirty_counts());
     })();
   }
 
