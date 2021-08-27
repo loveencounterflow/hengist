@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dba, FS, H, PATH, SQL, badge, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, demo_git_fetch_pkg_status, demo_git_get_dirty_counts, demo_variables, echo, freeze, glob, got, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Dba, FS, H, PATH, SQL, badge, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, demo_git_fetch_pkg_status, demo_git_get_dirty_counts, demo_variables, echo, freeze, glob, got, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -28,7 +28,8 @@
 
   ({isa, type_of, validate, validate_list_of} = types.export());
 
-  // { to_width }              = require 'to-width'
+  ({to_width} = require('to-width'));
+
   SQL = String.raw;
 
   ({lets, freeze} = require('letsfreezethat'));
@@ -126,10 +127,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_git_get_dirty_counts = function() {
-    var Dpan, Tbl, db_path, dba, dcs, dpan, home_path, i, k, len, pkg_fspath, project_path, project_path_pattern, ref, sum, v;
+    var Dpan, Tbl, db_path, dba, dcs, dpan, home_path, i, k, len, pkg_fspath, pkg_rel_fspath, project_path, project_path_pattern, ref, ref_path, sum, v;
     ({Dpan} = require(H.dpan_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
     ({Dba} = require(H.dba_path));
+    ref_path = process.cwd();
     db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
     dba = new Dba();
     // dba.open { path: db_path, }
@@ -148,6 +150,7 @@
     for (i = 0, len = ref.length; i < len; i++) {
       project_path = ref[i];
       pkg_fspath = PATH.dirname(project_path);
+      pkg_rel_fspath = PATH.relative(ref_path, pkg_fspath);
       if ((dcs = dpan.git_get_dirty_counts({
         pkg_fspath,
         fallback: null
@@ -166,7 +169,7 @@
             delete dcs[k];
           }
         }
-        help('^334-2^', pkg_fspath, CND.yellow(CND.reverse(` ${sum} `)), CND.grey(dcs));
+        help('^334-2^', to_width(pkg_rel_fspath, 50), CND.yellow(CND.reverse(` ${sum} `)), CND.grey(dcs));
       }
     }
     //.........................................................................................................
