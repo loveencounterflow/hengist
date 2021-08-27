@@ -161,11 +161,12 @@
       sum = dcs.sum;
       delete dcs.sum;
       if (sum === 0) {
-        whisper('^334-1^', pkg_fspath);
+        null;
       } else {
         for (k in dcs) {
           v = dcs[k];
           if (v === 0) {
+            // whisper '^334-1^', pkg_fspath
             delete dcs[k];
           }
         }
