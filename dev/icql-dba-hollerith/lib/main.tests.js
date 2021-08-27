@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CATALOGUE, CND, PATH, SQL, badge, dba_path, debug, echo, equals, freeze, help, info, isa, jp, jr, lets, rpr, test, type_of, types, urge, validate, validate_list_of, vnr_path, warn, whisper;
+  var CATALOGUE, CND, PATH, SQL, badge, dba_path, debug, echo, equals, freeze, help, icql_dba_hollerith_path, info, isa, jp, jr, lets, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -34,7 +34,7 @@
 
   SQL = String.raw;
 
-  vnr_path = '../../../apps/icql-dba-vnr';
+  icql_dba_hollerith_path = '../../../apps/icql-dba-hollerith';
 
   dba_path = '../../../apps/icql-dba';
 
@@ -50,168 +50,159 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["API"] = function(T, done) {
-    var Dba, Vnr, dba, fq, prefix, vnr;
-    // T?.halt_on_error()
+    var Dba, Hollerith, dba, fq, hlr, prefix;
+    if (T != null) {
+      T.halt_on_error();
+    }
     //.........................................................................................................
-    ({Vnr} = require(vnr_path));
+    ({Hollerith} = require(icql_dba_hollerith_path));
     ({Dba} = require(dba_path));
-    prefix = 'vnr_';
+    prefix = 'hlr_';
     dba = new Dba();
-    vnr = new Vnr({dba, prefix});
+    hlr = new Hollerith({dba, prefix});
     fq = function(...P) {
       return dba.first_value(dba.query(...P));
     };
     //.........................................................................................................
     /* NOTE these are just shallow sanity checks; for tests proper see
-     https://github.com/loveencounterflow/hengist/blob/master/dev/datom/src/vnr.test.coffee */
+     https://github.com/loveencounterflow/hengist/blob/master/dev/datom/src/hlr.test.coffee */
     if (T != null) {
-      T.eq(vnr.advance([1, 2, 3]), [1, 2, 4]);
+      T.eq(hlr.advance([1, 2, 3]), [1, 2, 4]);
     }
     if (T != null) {
-      T.eq(vnr.recede([1, 2, 3]), [1, 2, 2]);
+      T.eq(hlr.recede([1, 2, 3]), [1, 2, 2]);
     }
     if (T != null) {
-      T.eq(vnr.deepen([1, 2, 3]), [1, 2, 3, 0]);
+      T.eq(hlr.deepen([1, 2, 3]), [1, 2, 3, 0]);
     }
     if (T != null) {
-      T.eq(vnr.cmp_fair([1, 2, 3], [1, 2]), 1);
+      T.eq(hlr.cmp([1, 2, 3], [1, 2]), 1);
     }
     if (T != null) {
-      T.eq(vnr.cmp_partial([1, 2, 3], [1, 2]), 1);
+      T.eq(hlr.new_vnr([1, 2, 3]), [1, 2, 3]);
     }
     if (T != null) {
-      T.eq(vnr.cmp_total([1, 2, 3], [1, 2]), 1);
+      T.eq(hlr.new_vnr(null), [0]);
     }
     if (T != null) {
-      T.eq(vnr.new_vnr([1, 2, 3]), [1, 2, 3]);
-    }
-    if (T != null) {
-      T.eq(vnr.new_vnr(null), [0]);
-    }
-    if (T != null) {
-      T.eq(vnr.encode([1, 2, 3]), Buffer.from('8000000180000002800000038000000080000000', 'hex'));
+      T.eq(hlr.encode([1, 2, 3]), Buffer.from('8000000180000002800000038000000080000000', 'hex'));
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(jp(fq(SQL`select vnr_advance(     '[ 1, 2, 3 ]' );`)), [1, 2, 4]);
+      T.eq(jp(fq(SQL`select hlr_advance(     '[ 1, 2, 3 ]' );`)), [1, 2, 4]);
     }
     if (T != null) {
-      T.eq(jp(fq(SQL`select vnr_recede(      '[ 1, 2, 3 ]' );`)), [1, 2, 2]);
+      T.eq(jp(fq(SQL`select hlr_recede(      '[ 1, 2, 3 ]' );`)), [1, 2, 2]);
     }
     if (T != null) {
-      T.eq(jp(fq(SQL`select vnr_deepen(      '[ 1, 2, 3 ]' );`)), [1, 2, 3, 0]);
+      T.eq(jp(fq(SQL`select hlr_deepen(      '[ 1, 2, 3 ]' );`)), [1, 2, 3, 0]);
     }
     if (T != null) {
-      T.eq(fq(SQL`select vnr_cmp_fair(    '[ 1, 2, 3 ]', '[ 1, 2 ]' );`), 1);
+      T.eq(fq(SQL`select hlr_cmp(         '[ 1, 2, 3 ]', '[ 1, 2 ]' );`), 1);
     }
     if (T != null) {
-      T.eq(fq(SQL`select vnr_cmp_partial( '[ 1, 2, 3 ]', '[ 1, 2 ]' );`), 1);
+      T.eq(jp(fq(SQL`select hlr_new_vnr(      '[ 1, 2, 3 ]' );`)), [1, 2, 3]);
+    }
+    return done();
+    if (T != null) {
+      T.eq(jp(fq(SQL`select hlr_new_vnr(       null         );`)), [0]);
     }
     if (T != null) {
-      T.eq(fq(SQL`select vnr_cmp_total(   '[ 1, 2, 3 ]', '[ 1, 2 ]' );`), 1);
+      T.eq(fq(SQL`select hlr_encode(      '[ 1, 2, 3 ]' );`), Buffer.from('8000000180000002800000038000000080000000', 'hex'));
     }
     if (T != null) {
-      T.eq(jp(fq(SQL`select vnr_new_vnr(     '[ 1, 2, 3 ]' );`)), [1, 2, 3]);
+      T.eq(hlr.hollerith.nr_min, -2147483648);
     }
     if (T != null) {
-      T.eq(jp(fq(SQL`select vnr_new_vnr(      null         );`)), [0]);
+      T.eq(hlr.hollerith.nr_max, 2147483647);
     }
     if (T != null) {
-      T.eq(fq(SQL`select vnr_encode(      '[ 1, 2, 3 ]' );`), Buffer.from('8000000180000002800000038000000080000000', 'hex'));
-    }
-    if (T != null) {
-      T.eq(vnr.hollerith.nr_min, -2147483648);
-    }
-    if (T != null) {
-      T.eq(vnr.hollerith.nr_max, 2147483647);
-    }
-    if (T != null) {
-      T.eq(vnr.encode([vnr.hollerith.nr_min, vnr.hollerith.nr_max]), Buffer.from('00000000ffffffff800000008000000080000000', 'hex'));
+      T.eq(hlr.encode([hlr.hollerith.nr_min, hlr.hollerith.nr_max]), Buffer.from('00000000ffffffff800000008000000080000000', 'hex'));
     }
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this["VNR basics (JS)"] = function(T, done) {
-    var Dba, Tbl, Vnr, d, dba, vnr;
+    var Dba, Hollerith, Tbl, d, dba, hlr;
     // T?.halt_on_error()
     //.........................................................................................................
-    ({Vnr} = require(vnr_path));
+    ({Hollerith} = require(icql_dba_hollerith_path));
     ({Dba} = require(dba_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
     dba = new Dba();
-    vnr = new Vnr({dba});
+    hlr = new Hollerith({dba});
     //.........................................................................................................
     if (T != null) {
-      T.eq((d = vnr.new_vnr()), [0]);
+      T.eq((d = hlr.new_vnr()), [0]);
     }
     if (T != null) {
-      T.eq((d = vnr.new_vnr([4, 6, 5])), [4, 6, 5]);
+      T.eq((d = hlr.new_vnr([4, 6, 5])), [4, 6, 5]);
     }
     if (T != null) {
-      T.eq((d = vnr.deepen(d)), [4, 6, 5, 0]);
+      T.eq((d = hlr.deepen(d)), [4, 6, 5, 0]);
     }
     if (T != null) {
-      T.eq((d = vnr.deepen(d, 42)), [4, 6, 5, 0, 42]);
+      T.eq((d = hlr.deepen(d, 42)), [4, 6, 5, 0, 42]);
     }
     if (T != null) {
-      T.eq((d = vnr.advance(d)), [4, 6, 5, 0, 43]);
+      T.eq((d = hlr.advance(d)), [4, 6, 5, 0, 43]);
     }
     if (T != null) {
-      T.eq((d = vnr.recede(d)), [4, 6, 5, 0, 42]);
+      T.eq((d = hlr.recede(d)), [4, 6, 5, 0, 42]);
     }
     if (T != null) {
-      T.ok((vnr.new_vnr(d)) !== d);
+      T.ok((hlr.new_vnr(d)) !== d);
     }
     if (T != null) {
-      T.ok((vnr.deepen(d)) !== d);
+      T.ok((hlr.deepen(d)) !== d);
     }
     if (T != null) {
-      T.ok((vnr.advance(d)) !== d);
+      T.ok((hlr.advance(d)) !== d);
     }
     if (T != null) {
-      T.ok((vnr.recede(d)) !== d);
+      T.ok((hlr.recede(d)) !== d);
     }
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this["VNR basics (SQL)"] = function(T, done) {
-    var Dba, Tbl, Vnr, d, dba, fq, vnr;
+    var Dba, Hollerith, Tbl, d, dba, fq, hlr;
     // T?.halt_on_error()
     //.........................................................................................................
-    ({Vnr} = require(vnr_path));
+    ({Hollerith} = require(icql_dba_hollerith_path));
     ({Dba} = require(dba_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
     dba = new Dba();
-    vnr = new Vnr({dba});
+    hlr = new Hollerith({dba});
     fq = function(...P) {
       return dba.first_value(dba.query(...P));
     };
     //.........................................................................................................
     if (T != null) {
-      T.eq((d = jp(fq(SQL`select vnr_new_vnr();`))), [0]);
+      T.eq((d = jp(fq(SQL`select hlr_new_vnr();`))), [0]);
     }
     if (T != null) {
-      T.eq((d = jp(fq(SQL`select vnr_new_vnr(  '[ 4, 6, 5 ]' );`))), [4, 6, 5]);
+      T.eq((d = jp(fq(SQL`select hlr_new_vnr(  '[ 4, 6, 5 ]' );`))), [4, 6, 5]);
     }
     if (T != null) {
-      T.eq((d = jp(fq(SQL`select vnr_deepen(   $d            );`, {
+      T.eq((d = jp(fq(SQL`select hlr_deepen(   $d            );`, {
         d: jr(d)
       }))), [4, 6, 5, 0]);
     }
     if (T != null) {
-      T.eq((d = jp(fq(SQL`select vnr_deepen(   $d, 42        );`, {
+      T.eq((d = jp(fq(SQL`select hlr_deepen(   $d, 42        );`, {
         d: jr(d)
       }))), [4, 6, 5, 0, 42]);
     }
     if (T != null) {
-      T.eq((d = jp(fq(SQL`select vnr_advance(  $d            );`, {
+      T.eq((d = jp(fq(SQL`select hlr_advance(  $d            );`, {
         d: jr(d)
       }))), [4, 6, 5, 0, 43]);
     }
     if (T != null) {
-      T.eq((d = jp(fq(SQL`select vnr_recede(   $d            );`, {
+      T.eq((d = jp(fq(SQL`select hlr_recede(   $d            );`, {
         d: jr(d)
       }))), [4, 6, 5, 0, 42]);
     }
@@ -219,19 +210,19 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["alter_table"] = function(T, done) {
-    var Dba, Tbl, Vnr, blob_column_name, dba, error, insert_sql, json_column_name, schema, table_name, tbl, vnr;
+  this["HLR alter_table"] = function(T, done) {
+    var Dba, Hollerith, Tbl, blob_column_name, dba, error, hlr, insert_sql, json_column_name, schema, table_name, tbl;
     if (T != null) {
       T.halt_on_error();
     }
     //.........................................................................................................
-    ({Vnr} = require(vnr_path));
+    ({Hollerith} = require(icql_dba_hollerith_path));
     ({Dba} = require(dba_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
     dba = new Dba();
-    vnr = new Vnr({dba});
+    hlr = new Hollerith({dba});
     tbl = new Tbl({dba});
-    // debug '^3342^', CATALOGUE.all_keys_of vnr.hollerith
+    // debug '^3342^', CATALOGUE.all_keys_of hlr.hollerith
     //.........................................................................................................
     dba.execute(SQL`create table myfile ( line text not null );`);
     //.........................................................................................................
@@ -239,7 +230,7 @@
     table_name = 'myfile';
     json_column_name = 'vnr';
     blob_column_name = null;
-    vnr.alter_table({schema, table_name, json_column_name, blob_column_name});
+    hlr.alter_table({schema, table_name, json_column_name, blob_column_name});
     insert_sql = SQL`insert into myfile ( line, vnr ) values ( $line, $vnr )`;
     dba.run(insert_sql, {
       line: "third",
@@ -302,16 +293,16 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["_"] = function(T, done) {
-    var Dba, Vnr, dba, probes_and_matchers, vnr;
+    var Dba, Hollerith, dba, hlr, probes_and_matchers;
     if (T != null) {
       T.halt_on_error();
     }
     //.........................................................................................................
     probes_and_matchers = [];
-    ({Vnr} = require(vnr_path));
+    ({Hollerith} = require(icql_dba_hollerith_path));
     ({Dba} = require(dba_path));
     dba = new Dba();
-    vnr = new Vnr({dba});
+    hlr = new Hollerith({dba});
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -324,7 +315,8 @@
     })();
   }
 
-  // @[ "alter_table" ]()
+  // test @[ "API" ]
+// @[ "alter_table" ]()
 
 }).call(this);
 

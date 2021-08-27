@@ -43,13 +43,13 @@
   //-----------------------------------------------------------------------------------------------------------
   test_basics = function(T, VNR) {
     var d;
-    T.eq((d = VNR.create()), [0]);
-    T.eq((d = VNR.create([4, 6, 5])), [4, 6, 5]);
+    T.eq((d = VNR.new_vnr()), [0]);
+    T.eq((d = VNR.new_vnr([4, 6, 5])), [4, 6, 5]);
     T.eq((d = VNR.deepen(d)), [4, 6, 5, 0]);
     T.eq((d = VNR.deepen(d, 42)), [4, 6, 5, 0, 42]);
     T.eq((d = VNR.advance(d)), [4, 6, 5, 0, 43]);
     T.eq((d = VNR.recede(d)), [4, 6, 5, 0, 42]);
-    T.ok((VNR.create(d)) !== d);
+    T.ok((VNR.new_vnr(d)) !== d);
     T.ok((VNR.deepen(d)) !== d);
     T.ok((VNR.advance(d)) !== d);
     T.ok((VNR.recede(d)) !== d);
