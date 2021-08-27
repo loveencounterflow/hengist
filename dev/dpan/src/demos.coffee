@@ -93,7 +93,7 @@ demo_db_add_pkg_infos = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-demo_git_fetch_dirty_counts = ->
+demo_git_get_dirty_counts = ->
   { Dpan, }             = require H.dpan_path
   { Tbl, }              = require '../../../apps/icql-dba-tabulate'
   { Dba, }              = require H.dba_path
@@ -175,7 +175,7 @@ if module is require.main then do =>
   # await demo_db_add_pkg_info()
   # await demo_db_add_pkg_infos()
   # await demo_git_fetch_pkg_status()
-  await demo_git_fetch_dirty_counts()
+  await demo_git_get_dirty_counts()
   # await demo_variables()
 
 
