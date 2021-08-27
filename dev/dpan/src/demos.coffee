@@ -118,7 +118,8 @@ demo_git_get_dirty_counts = ->
     sum = dcs.sum
     delete dcs.sum
     if sum is 0
-      whisper '^334-1^', pkg_fspath
+      null
+      # whisper '^334-1^', pkg_fspath
     else
       delete dcs[ k ] for k, v of dcs when v is 0
       help '^334-2^', ( to_width pkg_rel_fspath, 50 ), ( CND.yellow CND.reverse " #{sum} " ), ( CND.grey dcs )
