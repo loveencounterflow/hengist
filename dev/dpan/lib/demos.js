@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dba, FS, H, PATH, SQL, badge, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, demo_variables, echo, freeze, glob, got, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Dba, FS, H, PATH, SQL, badge, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, demo_git_fetch_dirty_counts, demo_git_fetch_pkg_status, demo_variables, echo, freeze, glob, got, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -125,6 +125,55 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  demo_git_fetch_dirty_counts = function() {
+    var Dpan, Tbl, db_path, dba, dcs, dpan, home_path, i, k, len, pkg_fspath, project_path, project_path_pattern, ref, sum, v;
+    ({Dpan} = require(H.dpan_path));
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    ({Dba} = require(H.dba_path));
+    db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
+    dba = new Dba();
+    // dba.open { path: db_path, }
+    // dba.pragma SQL"journal_mode=memory"
+    dpan = new Dpan({
+      dba,
+      recreate: true
+    });
+    home_path = PATH.resolve(PATH.join(__dirname, '../../../../'));
+    project_path_pattern = PATH.join(home_path, '*/package.json');
+    // home_path             = PATH.resolve PATH.join __dirname, '../../../../dpan'
+    // home_path             = PATH.resolve PATH.join __dirname, '../../../apps/dpan'
+    // project_path_pattern  = PATH.join home_path, './package.json'
+    debug('^488^', project_path_pattern);
+    ref = glob.sync(project_path_pattern);
+    for (i = 0, len = ref.length; i < len; i++) {
+      project_path = ref[i];
+      pkg_fspath = PATH.dirname(project_path);
+      if ((dcs = dpan.git_get_dirty_counts({
+        pkg_fspath,
+        fallback: null
+      })) == null) {
+        warn(`not a git repo: ${pkg_fspath}`);
+        continue;
+      }
+      sum = dcs.sum;
+      delete dcs.sum;
+      if (sum === 0) {
+        whisper('^334-1^', pkg_fspath);
+      } else {
+        for (k in dcs) {
+          v = dcs[k];
+          if (v === 0) {
+            delete dcs[k];
+          }
+        }
+        help('^334-2^', pkg_fspath, CND.yellow(CND.reverse(` ${sum} `)), CND.grey(dcs));
+      }
+    }
+    //.........................................................................................................
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_fs_walk_dep_infos = async function() {
     var Dpan, count, count_max, dep, dpan, fallback/* TAINT not strictly true */, pkg_fspath, pkg_name, ref;
     ({Dpan} = require(H.dpan_path));
@@ -149,6 +198,27 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  demo_git_fetch_pkg_status = function() {
+    var Dpan, db_path, dba, dpan, pkg_fspath;
+    ({Dpan} = require(H.dpan_path));
+    ({Dba} = require(H.dba_path));
+    db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
+    dba = new Dba();
+    dba.open({
+      path: db_path
+    });
+    dba.pragma(SQL`journal_mode=memory`);
+    dpan = new Dpan({
+      dba,
+      recreate: true
+    });
+    pkg_fspath = '../../../';
+    pkg_fspath = PATH.resolve(PATH.join(__dirname, pkg_fspath));
+    dpan.git_fetch_pkg_status({pkg_fspath});
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_variables = function() {
     var Dpan, dba, dpan;
     ({Dba} = require(H.dba_path));
@@ -168,7 +238,9 @@
       // await demo_fs_walk_dep_infos()
       // await demo_db_add_package()
       // await demo_db_add_pkg_info()
-      return (await demo_db_add_pkg_infos());
+      // await demo_db_add_pkg_infos()
+      // await demo_git_fetch_pkg_status()
+      return (await demo_git_fetch_dirty_counts());
     })();
   }
 

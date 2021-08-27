@@ -103,7 +103,6 @@
     if (T != null) {
       T.eq(jp(fq(SQL`select hlr_new_vnr(      '[ 1, 2, 3 ]' );`)), [1, 2, 3]);
     }
-    return done();
     if (T != null) {
       T.eq(jp(fq(SQL`select hlr_new_vnr(       null         );`)), [0]);
     }
@@ -111,13 +110,13 @@
       T.eq(fq(SQL`select hlr_encode(      '[ 1, 2, 3 ]' );`), Buffer.from('8000000180000002800000038000000080000000', 'hex'));
     }
     if (T != null) {
-      T.eq(hlr.hollerith.nr_min, -2147483648);
+      T.eq(hlr.C.u32_nr_min, -2147483648);
     }
     if (T != null) {
-      T.eq(hlr.hollerith.nr_max, 2147483647);
+      T.eq(hlr.C.u32_nr_max, 2147483647);
     }
     if (T != null) {
-      T.eq(hlr.encode([hlr.hollerith.nr_min, hlr.hollerith.nr_max]), Buffer.from('00000000ffffffff800000008000000080000000', 'hex'));
+      T.eq(hlr.encode([hlr.C.u32_nr_min, hlr.C.u32_nr_max]), Buffer.from('00000000ffffffff800000008000000080000000', 'hex'));
     }
     return typeof done === "function" ? done() : void 0;
   };
