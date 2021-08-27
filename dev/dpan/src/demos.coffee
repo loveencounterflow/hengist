@@ -20,7 +20,7 @@ types                     = new ( require 'intertype' ).Intertype
   type_of
   validate
   validate_list_of }      = types.export()
-# { to_width }              = require 'to-width'
+{ to_width }              = require 'to-width'
 SQL                       = String.raw
 { lets
   freeze }                = require 'letsfreezethat'
@@ -97,6 +97,7 @@ demo_git_get_dirty_counts = ->
   { Dpan, }             = require H.dpan_path
   { Tbl, }              = require '../../../apps/icql-dba-tabulate'
   { Dba, }              = require H.dba_path
+  ref_path              = process.cwd()
   db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
   dba                   = new Dba()
   # dba.open { path: db_path, }
@@ -109,7 +110,8 @@ demo_git_get_dirty_counts = ->
   # project_path_pattern  = PATH.join home_path, './package.json'
   debug '^488^', project_path_pattern
   for project_path in glob.sync project_path_pattern
-    pkg_fspath  = PATH.dirname project_path
+    pkg_fspath      = PATH.dirname project_path
+    pkg_rel_fspath  = PATH.relative ref_path, pkg_fspath
     unless ( dcs = dpan.git_get_dirty_counts { pkg_fspath, fallback: null, } )?
       warn "not a git repo: #{pkg_fspath}"
       continue
@@ -119,7 +121,7 @@ demo_git_get_dirty_counts = ->
       whisper '^334-1^', pkg_fspath
     else
       delete dcs[ k ] for k, v of dcs when v is 0
-      help '^334-2^', pkg_fspath, ( CND.yellow CND.reverse " #{sum} " ), ( CND.grey dcs )
+      help '^334-2^', ( to_width pkg_rel_fspath, 50 ), ( CND.yellow CND.reverse " #{sum} " ), ( CND.grey dcs )
   #.........................................................................................................
   return null
 
