@@ -23,7 +23,7 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of
   equals }                = types.export()
 SQL                       = String.raw
-vnr_path                  = '../../../apps/icql-dba-vnr'
+icql_dba_hollerith_path   = '../../../apps/icql-dba-hollerith'
 dba_path                  = '../../../apps/icql-dba'
 { lets
   freeze }                = require 'letsfreezethat'
@@ -36,39 +36,35 @@ jp                        = JSON.parse
 #
 #-----------------------------------------------------------------------------------------------------------
 @[ "API" ] = ( T, done ) ->
-  # T?.halt_on_error()
+  T?.halt_on_error()
   #.........................................................................................................
-  { Vnr, }    = require vnr_path
-  { Dba, }    = require dba_path
-  prefix      = 'vnr_'
-  dba         = new Dba()
-  vnr         = new Vnr { dba, prefix, }
-  fq          = ( P... ) -> dba.first_value dba.query P...
+  { Hollerith, }  = require icql_dba_hollerith_path
+  { Dba, }        = require dba_path
+  prefix          = 'hlr_'
+  dba             = new Dba()
+  hlr             = new Hollerith { dba, prefix, }
+  fq              = ( P... ) -> dba.first_value dba.query P...
   #.........................................................................................................
   ### NOTE these are just shallow sanity checks; for tests proper see
-  https://github.com/loveencounterflow/hengist/blob/master/dev/datom/src/vnr.test.coffee ###
-  T?.eq ( vnr.advance      [ 1, 2, 3, ]            ), [ 1, 2, 4 ]
-  T?.eq ( vnr.recede       [ 1, 2, 3, ]            ), [ 1, 2, 2 ]
-  T?.eq ( vnr.deepen       [ 1, 2, 3, ]            ), [ 1, 2, 3, 0 ]
-  T?.eq ( vnr.cmp_fair     [ 1, 2, 3, ], [ 1, 2, ] ), 1
-  T?.eq ( vnr.cmp_partial  [ 1, 2, 3, ], [ 1, 2, ] ), 1
-  T?.eq ( vnr.cmp_total    [ 1, 2, 3, ], [ 1, 2, ] ), 1
-  T?.eq ( vnr.new_vnr      [ 1, 2, 3, ]            ), [ 1, 2, 3 ]
-  T?.eq ( vnr.new_vnr      null                    ), [ 0 ]
-  T?.eq ( vnr.encode       [ 1, 2, 3, ]            ), Buffer.from '8000000180000002800000038000000080000000', 'hex'
+  https://github.com/loveencounterflow/hengist/blob/master/dev/datom/src/hlr.test.coffee ###
+  T?.eq ( hlr.advance      [ 1, 2, 3, ]            ), [ 1, 2, 4 ]
+  T?.eq ( hlr.recede       [ 1, 2, 3, ]            ), [ 1, 2, 2 ]
+  T?.eq ( hlr.deepen       [ 1, 2, 3, ]            ), [ 1, 2, 3, 0 ]
+  T?.eq ( hlr.cmp          [ 1, 2, 3, ], [ 1, 2, ] ), 1
+  T?.eq ( hlr.new_vnr      [ 1, 2, 3, ]            ), [ 1, 2, 3 ]
+  T?.eq ( hlr.new_vnr      null                    ), [ 0 ]
+  T?.eq ( hlr.encode       [ 1, 2, 3, ]            ), Buffer.from '8000000180000002800000038000000080000000', 'hex'
   #.........................................................................................................
-  T?.eq ( jp fq SQL"select vnr_advance(     '[ 1, 2, 3 ]' );" ),             [ 1, 2, 4 ]
-  T?.eq ( jp fq SQL"select vnr_recede(      '[ 1, 2, 3 ]' );" ),             [ 1, 2, 2 ]
-  T?.eq ( jp fq SQL"select vnr_deepen(      '[ 1, 2, 3 ]' );" ),             [ 1, 2, 3, 0 ]
-  T?.eq (    fq SQL"select vnr_cmp_fair(    '[ 1, 2, 3 ]', '[ 1, 2 ]' );" ), 1
-  T?.eq (    fq SQL"select vnr_cmp_partial( '[ 1, 2, 3 ]', '[ 1, 2 ]' );" ), 1
-  T?.eq (    fq SQL"select vnr_cmp_total(   '[ 1, 2, 3 ]', '[ 1, 2 ]' );" ), 1
-  T?.eq ( jp fq SQL"select vnr_new_vnr(     '[ 1, 2, 3 ]' );"             ), [ 1, 2, 3 ]
-  T?.eq ( jp fq SQL"select vnr_new_vnr(      null         );"             ), [ 0 ]
-  T?.eq (    fq SQL"select vnr_encode(      '[ 1, 2, 3 ]' );"             ), Buffer.from '8000000180000002800000038000000080000000', 'hex'
-  T?.eq ( vnr.hollerith.nr_min                                        ), -2147483648
-  T?.eq ( vnr.hollerith.nr_max                                        ), 2147483647
-  T?.eq ( vnr.encode [ vnr.hollerith.nr_min, vnr.hollerith.nr_max, ]  ), Buffer.from '00000000ffffffff800000008000000080000000', 'hex'
+  T?.eq ( jp fq SQL"select hlr_advance(     '[ 1, 2, 3 ]' );" ),             [ 1, 2, 4 ]
+  T?.eq ( jp fq SQL"select hlr_recede(      '[ 1, 2, 3 ]' );" ),             [ 1, 2, 2 ]
+  T?.eq ( jp fq SQL"select hlr_deepen(      '[ 1, 2, 3 ]' );" ),             [ 1, 2, 3, 0 ]
+  T?.eq (    fq SQL"select hlr_cmp(         '[ 1, 2, 3 ]', '[ 1, 2 ]' );" ), 1
+  T?.eq ( jp fq SQL"select hlr_new_vnr(      '[ 1, 2, 3 ]' );"             ), [ 1, 2, 3 ]
+  T?.eq ( jp fq SQL"select hlr_new_vnr(       null         );"             ), [ 0 ]
+  T?.eq (    fq SQL"select hlr_encode(      '[ 1, 2, 3 ]' );"             ), Buffer.from '8000000180000002800000038000000080000000', 'hex'
+  T?.eq ( hlr.C.u32_nr_min                                        ), -2147483648
+  T?.eq ( hlr.C.u32_nr_max                                        ), 2147483647
+  T?.eq ( hlr.encode [ hlr.C.u32_nr_min, hlr.C.u32_nr_max, ]  ), Buffer.from '00000000ffffffff800000008000000080000000', 'hex'
   #.........................................................................................................
   done?()
 
@@ -76,22 +72,22 @@ jp                        = JSON.parse
 @[ "VNR basics (JS)" ] = ( T, done ) ->
   # T?.halt_on_error()
   #.........................................................................................................
-  { Vnr, }    = require vnr_path
-  { Dba, }    = require dba_path
-  { Tbl, }    = require '../../../apps/icql-dba-tabulate'
-  dba         = new Dba()
-  vnr         = new Vnr { dba, }
+  { Hollerith, }  = require icql_dba_hollerith_path
+  { Dba, }        = require dba_path
+  { Tbl, }        = require '../../../apps/icql-dba-tabulate'
+  dba             = new Dba()
+  hlr             = new Hollerith { dba, }
   #.........................................................................................................
-  T?.eq ( d = vnr.new_vnr()                 ), [ 0, ]
-  T?.eq ( d = vnr.new_vnr      [ 4, 6, 5, ] ), [ 4, 6, 5, ]
-  T?.eq ( d = vnr.deepen       d            ), [ 4, 6, 5, 0, ]
-  T?.eq ( d = vnr.deepen       d, 42        ), [ 4, 6, 5, 0, 42, ]
-  T?.eq ( d = vnr.advance      d            ), [ 4, 6, 5, 0, 43, ]
-  T?.eq ( d = vnr.recede       d            ), [ 4, 6, 5, 0, 42, ]
-  T?.ok ( vnr.new_vnr  d ) isnt d
-  T?.ok ( vnr.deepen   d ) isnt d
-  T?.ok ( vnr.advance  d ) isnt d
-  T?.ok ( vnr.recede   d ) isnt d
+  T?.eq ( d = hlr.new_vnr()                 ), [ 0, ]
+  T?.eq ( d = hlr.new_vnr      [ 4, 6, 5, ] ), [ 4, 6, 5, ]
+  T?.eq ( d = hlr.deepen       d            ), [ 4, 6, 5, 0, ]
+  T?.eq ( d = hlr.deepen       d, 42        ), [ 4, 6, 5, 0, 42, ]
+  T?.eq ( d = hlr.advance      d            ), [ 4, 6, 5, 0, 43, ]
+  T?.eq ( d = hlr.recede       d            ), [ 4, 6, 5, 0, 42, ]
+  T?.ok ( hlr.new_vnr  d ) isnt d
+  T?.ok ( hlr.deepen   d ) isnt d
+  T?.ok ( hlr.advance  d ) isnt d
+  T?.ok ( hlr.recede   d ) isnt d
   #.........................................................................................................
   done?()
 
@@ -99,33 +95,33 @@ jp                        = JSON.parse
 @[ "VNR basics (SQL)" ] = ( T, done ) ->
   # T?.halt_on_error()
   #.........................................................................................................
-  { Vnr, }    = require vnr_path
-  { Dba, }    = require dba_path
-  { Tbl, }    = require '../../../apps/icql-dba-tabulate'
-  dba         = new Dba()
-  vnr         = new Vnr { dba, }
-  fq          = ( P... ) -> dba.first_value dba.query P...
+  { Hollerith, }  = require icql_dba_hollerith_path
+  { Dba, }        = require dba_path
+  { Tbl, }        = require '../../../apps/icql-dba-tabulate'
+  dba             = new Dba()
+  hlr             = new Hollerith { dba, }
+  fq              = ( P... ) -> dba.first_value dba.query P...
   #.........................................................................................................
-  T?.eq ( d = jp fq SQL"select vnr_new_vnr();"                 ), [ 0, ]
-  T?.eq ( d = jp fq SQL"select vnr_new_vnr(  '[ 4, 6, 5 ]' );" ), [ 4, 6, 5, ]
-  T?.eq ( d = jp fq SQL"select vnr_deepen(   $d            );", { d: ( jr d ), } ), [ 4, 6, 5, 0, ]
-  T?.eq ( d = jp fq SQL"select vnr_deepen(   $d, 42        );", { d: ( jr d ), } ), [ 4, 6, 5, 0, 42, ]
-  T?.eq ( d = jp fq SQL"select vnr_advance(  $d            );", { d: ( jr d ), } ), [ 4, 6, 5, 0, 43, ]
-  T?.eq ( d = jp fq SQL"select vnr_recede(   $d            );", { d: ( jr d ), } ), [ 4, 6, 5, 0, 42, ]
+  T?.eq ( d = jp fq SQL"select hlr_new_vnr();"                 ), [ 0, ]
+  T?.eq ( d = jp fq SQL"select hlr_new_vnr(  '[ 4, 6, 5 ]' );" ), [ 4, 6, 5, ]
+  T?.eq ( d = jp fq SQL"select hlr_deepen(   $d            );", { d: ( jr d ), } ), [ 4, 6, 5, 0, ]
+  T?.eq ( d = jp fq SQL"select hlr_deepen(   $d, 42        );", { d: ( jr d ), } ), [ 4, 6, 5, 0, 42, ]
+  T?.eq ( d = jp fq SQL"select hlr_advance(  $d            );", { d: ( jr d ), } ), [ 4, 6, 5, 0, 43, ]
+  T?.eq ( d = jp fq SQL"select hlr_recede(   $d            );", { d: ( jr d ), } ), [ 4, 6, 5, 0, 42, ]
   #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "alter_table" ] = ( T, done ) ->
+@[ "HLR alter_table" ] = ( T, done ) ->
   T?.halt_on_error()
   #.........................................................................................................
-  { Vnr, }    = require vnr_path
-  { Dba, }    = require dba_path
-  { Tbl, }    = require '../../../apps/icql-dba-tabulate'
-  dba         = new Dba()
-  vnr         = new Vnr { dba, }
-  tbl         = new Tbl { dba, }
-  # debug '^3342^', CATALOGUE.all_keys_of vnr.hollerith
+  { Hollerith, }  = require icql_dba_hollerith_path
+  { Dba, }        = require dba_path
+  { Tbl, }        = require '../../../apps/icql-dba-tabulate'
+  dba             = new Dba()
+  hlr             = new Hollerith { dba, }
+  tbl             = new Tbl { dba, }
+  # debug '^3342^', CATALOGUE.all_keys_of hlr.hollerith
   #.........................................................................................................
   dba.execute SQL"""
     create table myfile ( line text not null );
@@ -135,7 +131,7 @@ jp                        = JSON.parse
   table_name        = 'myfile'
   json_column_name  = 'vnr'
   blob_column_name  = null
-  vnr.alter_table { schema, table_name, json_column_name, blob_column_name, }
+  hlr.alter_table { schema, table_name, json_column_name, blob_column_name, }
   insert_sql        = SQL"insert into myfile ( line, vnr ) values ( $line, $vnr )"
   dba.run insert_sql, { line: "third", vnr: ( jr [ 3, ] ) }
   dba.run insert_sql, { line: "second", vnr: ( jr [ 2, ] ) }
@@ -165,10 +161,10 @@ jp                        = JSON.parse
   T?.halt_on_error()
   #.........................................................................................................
   probes_and_matchers = []
-  { Vnr, }    = require vnr_path
-  { Dba, }    = require dba_path
-  dba         = new Dba()
-  vnr         = new Vnr { dba, }
+  { Hollerith, }  = require icql_dba_hollerith_path
+  { Dba, }        = require dba_path
+  dba             = new Dba()
+  hlr             = new Hollerith { dba, }
   # debug '4476^', vnr
   # debug '4476^', JSON.stringify ( CATALOGUE.all_keys_of vnr ).sort(), null, '  '
   # console.table dba.list dba.query SQL"select * from v_variables;"
@@ -187,5 +183,6 @@ jp                        = JSON.parse
 ############################################################################################################
 if module is require.main then do =>
   test @, { timeout: 10e3, }
+  # test @[ "API" ]
   # @[ "alter_table" ]()
 
