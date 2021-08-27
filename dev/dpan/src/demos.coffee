@@ -93,6 +93,37 @@ demo_db_add_pkg_infos = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+demo_git_fetch_dirty_counts = ->
+  { Dpan, }             = require H.dpan_path
+  { Tbl, }              = require '../../../apps/icql-dba-tabulate'
+  { Dba, }              = require H.dba_path
+  db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
+  dba                   = new Dba()
+  # dba.open { path: db_path, }
+  # dba.pragma SQL"journal_mode=memory"
+  dpan                  = new Dpan { dba, recreate: true, }
+  home_path             = PATH.resolve PATH.join __dirname, '../../../../'
+  project_path_pattern  = PATH.join home_path, '*/package.json'
+  # home_path             = PATH.resolve PATH.join __dirname, '../../../../dpan'
+  # home_path             = PATH.resolve PATH.join __dirname, '../../../apps/dpan'
+  # project_path_pattern  = PATH.join home_path, './package.json'
+  debug '^488^', project_path_pattern
+  for project_path in glob.sync project_path_pattern
+    pkg_fspath  = PATH.dirname project_path
+    unless ( dcs = dpan.git_get_dirty_counts { pkg_fspath, fallback: null, } )?
+      warn "not a git repo: #{pkg_fspath}"
+      continue
+    sum = dcs.sum
+    delete dcs.sum
+    if sum is 0
+      whisper '^334-1^', pkg_fspath
+    else
+      delete dcs[ k ] for k, v of dcs when v is 0
+      help '^334-2^', pkg_fspath, ( CND.yellow CND.reverse " #{sum} " ), ( CND.grey dcs )
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 demo_fs_walk_dep_infos = ->
   { Dpan }            = require H.dpan_path
   dpan                = new Dpan()
@@ -108,6 +139,20 @@ demo_fs_walk_dep_infos = ->
     # whisper '^850^', dep
     info '^850^', dep.pkg_name, dep.pkg_version, "(#{dep.dep_svrange})", ( CND.yellow dep.pkg_keywords.join ' ' )
     urge '^850^', dep.pkg_deps
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_git_fetch_pkg_status = ->
+  { Dpan }            = require H.dpan_path
+  { Dba, }            = require H.dba_path
+  db_path             = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
+  dba                 = new Dba()
+  dba.open { path: db_path, }
+  dba.pragma SQL"journal_mode=memory"
+  dpan                = new Dpan { dba, recreate: true, }
+  pkg_fspath          = '../../../'
+  pkg_fspath          = PATH.resolve PATH.join __dirname, pkg_fspath
+  dpan.git_fetch_pkg_status { pkg_fspath, }
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -128,7 +173,9 @@ if module is require.main then do =>
   # await demo_fs_walk_dep_infos()
   # await demo_db_add_package()
   # await demo_db_add_pkg_info()
-  await demo_db_add_pkg_infos()
+  # await demo_db_add_pkg_infos()
+  # await demo_git_fetch_pkg_status()
+  await demo_git_fetch_dirty_counts()
   # await demo_variables()
 
 
