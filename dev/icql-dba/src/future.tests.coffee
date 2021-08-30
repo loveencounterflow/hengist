@@ -28,6 +28,8 @@ sleep                     = ( dts ) -> new Promise ( done ) => setTimeout done, 
 SQL                       = String.raw
 jr                        = JSON.stringify
 jp                        = JSON.parse
+DATA                      = require '../../../lib/data-providers-nocache'
+
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open()" ] = ( T, done ) ->
@@ -409,6 +411,43 @@ jp                        = JSON.parse
   done()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "DBA: open() many RAM DBs" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
+  schema            = 'main'
+  dba               = new Dba()
+  #.........................................................................................................
+  SQLITE_MAX_ATTACHED = 125
+  for nr in [ 1 .. SQLITE_MAX_ATTACHED ] then do =>
+    schema    = "s#{nr}"
+    schema_i  = dba.sql.I schema
+    dba.open { schema, ram: true, }
+    dba.run SQL"""
+      create table #{schema_i}.numbers (
+        schema  text    not null,
+        nr      integer not null,
+        n       integer not null unique primary key,
+        rnd     integer not null );"""
+    for idx in [ 0 .. 5 ]
+      n   = idx + 1
+      rnd = nr * n
+      dba.run SQL"""
+        insert into #{schema_i}.numbers ( schema, nr, n, rnd )
+          values ( $schema, $nr, $n, $rnd );""", { schema, nr, n, rnd, }
+    return null
+  #.........................................................................................................
+  sql = []
+  for nr in [ 1 .. SQLITE_MAX_ATTACHED ]
+    schema    = "s#{nr}"
+    schema_i  = dba.sql.I schema
+    sql.push SQL"select * from #{schema_i}.numbers"
+  sql = sql.join '\n' + SQL"union all "
+  sql += '\n' + SQL"order by nr, n;"
+  console.table dba.list dba.query sql
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBA: open() empty RAM DB in schema main" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Dba }           = require H.icql_dba_path
@@ -747,7 +786,9 @@ if module is require.main then do =>
   # @[ "DBA: import() CSV" ]()
   # test @[ "DBA: clear()" ]
   # test @[ "DBA: foreign keys enforced" ]
-  test @[ "DBA: clear()" ]
+  # test @[ "DBA: clear()" ]
+  # test @[ "DBA: open() many RAM DBs" ]
+  @[ "DBA: open() many RAM DBs" ]()
 
 
 
