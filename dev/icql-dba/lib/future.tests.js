@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, help, info, isa, jp, jr, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
+  var CND, DATA, H, PATH, SQL, badge, debug, echo, help, info, isa, jp, jr, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
     indexOf = [].indexOf;
 
   //###########################################################################################################
@@ -49,6 +49,8 @@
   jr = JSON.stringify;
 
   jp = JSON.parse;
+
+  DATA = require('../../../lib/data-providers-nocache');
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open()"] = async function(T, done) {
@@ -663,6 +665,51 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["DBA: open() many RAM DBs"] = function(T, done) {
+    var Dba, SQLITE_MAX_ATTACHED, dba, i, j, nr, ref, ref1, schema, schema_i, sql;
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
+    schema = 'main';
+    dba = new Dba();
+    //.........................................................................................................
+    SQLITE_MAX_ATTACHED = 125;
+    for (nr = i = 1, ref = SQLITE_MAX_ATTACHED; (1 <= ref ? i <= ref : i >= ref); nr = 1 <= ref ? ++i : --i) {
+      (() => {
+        var idx, j, n, rnd, schema_i;
+        schema = `s${nr}`;
+        schema_i = dba.sql.I(schema);
+        dba.open({
+          schema,
+          ram: true
+        });
+        dba.run(SQL`create table ${schema_i}.numbers (
+  schema  text    not null,
+  nr      integer not null,
+  n       integer not null unique primary key,
+  rnd     integer not null );`);
+        for (idx = j = 0; j <= 5; idx = ++j) {
+          n = idx + 1;
+          rnd = nr * n;
+          dba.run(SQL`insert into ${schema_i}.numbers ( schema, nr, n, rnd )
+  values ( $schema, $nr, $n, $rnd );`, {schema, nr, n, rnd});
+        }
+        return null;
+      })();
+    }
+    //.........................................................................................................
+    sql = [];
+    for (nr = j = 1, ref1 = SQLITE_MAX_ATTACHED; (1 <= ref1 ? j <= ref1 : j >= ref1); nr = 1 <= ref1 ? ++j : --j) {
+      schema = `s${nr}`;
+      schema_i = dba.sql.I(schema);
+      sql.push(SQL`select * from ${schema_i}.numbers`);
+    }
+    sql = sql.join('\n' + SQL`union all `);
+    sql += '\n' + SQL`order by nr, n;`;
+    console.table(dba.list(dba.query(sql)));
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DBA: open() empty RAM DB in schema main"] = async function(T, done) {
     var Dba, schema;
     // T?.halt_on_error()
@@ -1200,7 +1247,9 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
       // @[ "DBA: import() CSV" ]()
       // test @[ "DBA: clear()" ]
       // test @[ "DBA: foreign keys enforced" ]
-      return test(this["DBA: clear()"]);
+      // test @[ "DBA: clear()" ]
+      // test @[ "DBA: open() many RAM DBs" ]
+      return this["DBA: open() many RAM DBs"]();
     })();
   }
 
