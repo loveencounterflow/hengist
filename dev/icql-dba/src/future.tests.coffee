@@ -747,6 +747,20 @@ DATA                      = require '../../../lib/data-providers-nocache'
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: _is_sqlite3_db()" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dba }               = require H.icql_dba_path
+  dba                   = new Dba()
+  cfg                   = H.get_cfg()
+  debug '^556^', path_1 = cfg.db.templates.nnt
+  debug '^556^', path_2 = cfg.sql.small
+  #.........................................................................................................
+  T?.eq ( dba._is_sqlite3_db path_1    ), true
+  T?.eq ( dba._is_sqlite3_db path_2    ), false
+  T?.throws /must be of type string/, -> ( dba._is_sqlite3_db undefined )
+  #.........................................................................................................
+  done?()
 
 
 
@@ -788,7 +802,8 @@ if module is require.main then do =>
   # test @[ "DBA: foreign keys enforced" ]
   # test @[ "DBA: clear()" ]
   # test @[ "DBA: open() many RAM DBs" ]
-  @[ "DBA: open() many RAM DBs" ]()
+  # @[ "DBA: open() many RAM DBs" ]()
+  test @[ "DBA: _is_sqlite3_db()" ]
 
 
 
