@@ -1210,6 +1210,30 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: _is_sqlite3_db()"] = function(T, done) {
+    var Dba, cfg, dba, path_1, path_2;
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
+    dba = new Dba();
+    cfg = H.get_cfg();
+    debug('^556^', path_1 = cfg.db.templates.nnt);
+    debug('^556^', path_2 = cfg.sql.small);
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(dba._is_sqlite3_db(path_1), true);
+    }
+    if (T != null) {
+      T.eq(dba._is_sqlite3_db(path_2), false);
+    }
+    if (T != null) {
+      T.throws(/must be of type string/, function() {
+        return dba._is_sqlite3_db(void 0);
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
@@ -1249,7 +1273,8 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
       // test @[ "DBA: foreign keys enforced" ]
       // test @[ "DBA: clear()" ]
       // test @[ "DBA: open() many RAM DBs" ]
-      return this["DBA: open() many RAM DBs"]();
+      // @[ "DBA: open() many RAM DBs" ]()
+      return test(this["DBA: _is_sqlite3_db()"]);
     })();
   }
 
