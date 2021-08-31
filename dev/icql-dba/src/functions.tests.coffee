@@ -528,12 +528,75 @@ jp                        = JSON.parse
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: create_with_transaction()" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
+  #.........................................................................................................
+  do =>
+    dba = new Dba()
+    T?.throws /not a valid dba_create_with_transaction_cfg/, -> dba.create_with_transaction()
+  #.........................................................................................................
+  do =>
+    error = null
+    dba   = new Dba()
+    # dba.open { schema: 'main', }
+    create_table = dba.create_with_transaction call: ( cfg ) ->
+      help '^70^', "creating a table with", cfg
+      dba.execute SQL"create table foo ( bar integer );"
+      throw new Error "oops" if cfg.throw_error
+    #.......................................................................................................
+    try create_table { throw_error: true, } catch error
+      T?.ok error.message is "oops"
+      T?.eq ( dba.list dba.query "select * from sqlite_schema;" ), []
+    T.fail "expected error but none was thrown" unless error?
+    #.......................................................................................................
+    create_table { throw_error: false, }
+    T?.eq ( dba.all_first_values dba.query "select name from sqlite_schema;" ), [ 'foo', ]
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: with_transaction()" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
+  #.........................................................................................................
+  do =>
+    dba = new Dba()
+    T?.throws /not a valid dba_with_transaction_cfg/, -> dba.with_transaction()
+  #.........................................................................................................
+  do =>
+    error = null
+    dba   = new Dba()
+    try
+      dba.with_transaction call: ->
+        help '^70^', "creating a table"
+        dba.execute SQL"create table foo ( bar integer );"
+        throw new Error "oops"
+    catch error
+      warn error.message
+      T?.ok error.message is "oops"
+    T.fail "expected error but none was thrown" unless error?
+    T?.eq ( dba.list dba.query "select * from sqlite_schema;" ), []
+    #.......................................................................................................
+    dba.with_transaction call: ->
+      help '^70^', "creating a table"
+      dba.execute SQL"create table foo ( bar integer );"
+    #.......................................................................................................
+    T?.eq ( dba.all_first_values dba.query "select name from sqlite_schema;" ), [ 'foo', ]
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # debug f '𠖏'
-  test @[ "DBA: concurrent UDFs" ]
+  # test @[ "DBA: concurrent UDFs" ]
+  # @[ "DBA: create_with_transaction()" ]()
+  # test @[ "DBA: create_with_transaction()" ]
+  @[ "DBA: with_transaction()" ]()
+  test @[ "DBA: with_transaction()" ]
   # @[ "DBA: concurrent UDFs" ]()
   # debug process.env[ 'icql-dba-use' ]
   # debug process.argv
