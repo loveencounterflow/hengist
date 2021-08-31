@@ -471,7 +471,7 @@ jp                        = JSON.parse
     dba.open { path: work_path, schema, }
     dba.create_function name: 'udf', call: -> [ ( dba.query SQL"select 42 as x;" )..., ][ 0 ].x
     try
-      dba.do_unsafe -> console.table dba.list dba.query SQL"select udf();"
+      dba.with_unsafe_mode call: -> console.table dba.list dba.query SQL"select udf();"
       console.table dba.list dba.query SQL"select udf();"
     catch error
       if error.message is 'This database connection is busy executing a query'
@@ -583,9 +583,38 @@ jp                        = JSON.parse
       help '^70^', "creating a table"
       dba.execute SQL"create table foo ( bar integer );"
     #.......................................................................................................
-    T?.eq ( dba.all_first_values dba.query "select name from sqlite_schema;" ), [ 'foo', ]
+    T?.eq ( dba.all_first_values dba.query SQL"select name from sqlite_schema;" ), [ 'foo', ]
   #.........................................................................................................
   done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: create_with_unsafe_mode()" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
+  #.........................................................................................................
+  do =>
+    dba = new Dba()
+    T?.throws /not a valid dba_create_with_unsafe_mode_cfg/, -> dba.create_with_unsafe_mode()
+  #.........................................................................................................
+  do =>
+    error = null
+    dba   = new Dba()
+    # dba.open { schema: 'main', }
+    dba.execute SQL"create table foo ( n integer, is_new boolean default false );"
+    for n in [ 10 .. 19 ]
+      dba.run SQL"insert into foo ( n ) values ( $n );", { n, }
+    do_more_inserts = dba.create_with_unsafe_mode call: ( cfg ) ->
+      for row from dba.query SQL"select * from foo where not is_new;"
+        dba.run SQL"insert into foo ( n, is_new ) values ( $n, $is_new );", { n: row.n * 3, is_new: 1, }
+      dba.execute SQL"update foo set is_new = false where is_new;"
+    #.......................................................................................................
+    do_more_inserts()
+    console.table rows = dba.list dba.query SQL"select * from foo order by n;"
+    result = ( d.n for d in rows )
+    T?.eq result, [ 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57 ]
+  #.........................................................................................................
+  done?()
+
 
 
 ############################################################################################################
@@ -594,9 +623,9 @@ if module is require.main then do =>
   # debug f '𠖏'
   # test @[ "DBA: concurrent UDFs" ]
   # @[ "DBA: create_with_transaction()" ]()
-  # test @[ "DBA: create_with_transaction()" ]
-  @[ "DBA: with_transaction()" ]()
-  test @[ "DBA: with_transaction()" ]
+  test @[ "DBA: create_with_unsafe_mode()" ]
+  # @[ "DBA: with_transaction()" ]()
+  # test @[ "DBA: with_transaction()" ]
   # @[ "DBA: concurrent UDFs" ]()
   # debug process.env[ 'icql-dba-use' ]
   # debug process.argv

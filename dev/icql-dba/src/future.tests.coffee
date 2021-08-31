@@ -509,10 +509,11 @@ DATA                      = require '../../../lib/data-providers-nocache'
   #.........................................................................................................
   await do =>
     dba.execute SQL"update x set locked = true;"
-    dba.do_unsafe =>
+    dba.with_unsafe_mode call: =>
       for row from dba.query SQL"select * from x where locked;"
-        # info '^44555^', row
+        info '^44555^', dba._state
         dba.run SQL"insert into x ( n ) values ( ? );", [ row.n + 100, ]
+    info '^44555^', dba._state
   #.........................................................................................................
   await do =>
     # for row from dba.query SQL"select * from x;"
@@ -804,8 +805,8 @@ if module is require.main then do =>
   # test @[ "DBA: open() many RAM DBs" ]
   # @[ "DBA: open() many RAM DBs" ]()
   # test @[ "DBA: _is_sqlite3_db()" ]
-  test @[ "DBA: writing while reading 1" ]
-  # test @[ "DBA: writing while reading 2" ]
+  # test @[ "DBA: writing while reading 1" ]
+  test @[ "DBA: writing while reading 2" ]
 
 
 
