@@ -1216,6 +1216,74 @@ create trigger multiple_instead_update instead of update on multiples begin
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: with_foreign_keys_off()"] = function(T, done) {
+    var Dba;
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
+    (() => {      //.........................................................................................................
+      var dba;
+      dba = new Dba();
+      return T != null ? T.throws(/not a valid dba_create_with_foreign_keys_off_cfg/, function() {
+        return dba.with_foreign_keys_off();
+      }) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var d, dba, error, result, rows;
+      error = null;
+      dba = new Dba();
+      // dba.open { schema: 'main', }
+      dba.execute(SQL`create table a ( n integer not null primary key references b ( n ) );
+create table b ( n integer not null primary key references a ( n ) );`);
+      //.......................................................................................................
+      error = null;
+      try {
+        dba.execute(SQL`insert into a ( n ) values ( 1 );`);
+      } catch (error1) {
+        error = error1;
+        warn('^090^', rpr(error.message));
+        if (T != null) {
+          T.eq(error.message, "FOREIGN KEY constraint failed");
+        }
+      }
+      if (error == null) {
+        if (T != null) {
+          T.fail("expected error, got none");
+        }
+      }
+      //.......................................................................................................
+      dba.with_foreign_keys_off({
+        call: function() {
+          dba.execute(SQL`insert into a ( n ) values ( 1 );`);
+          dba.execute(SQL`insert into a ( n ) values ( 2 );`);
+          dba.execute(SQL`insert into a ( n ) values ( 3 );`);
+          dba.execute(SQL`insert into b ( n ) values ( 1 );`);
+          dba.execute(SQL`insert into b ( n ) values ( 2 );`);
+          return dba.execute(SQL`insert into b ( n ) values ( 3 );`);
+        }
+      });
+      //.......................................................................................................
+      console.table(rows = dba.list(dba.query(SQL`select
+    a.n as a_n,
+    b.n as b_n
+  from a
+  left join b using ( n )
+  order by n;`)));
+      debug('^400^', rows);
+      result = (function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = rows.length; i < len; i++) {
+          d = rows[i];
+          results.push([d.a_n, d.b_n]);
+        }
+        return results;
+      })();
+      return T != null ? T.eq(result, [[1, 1], [2, 2], [3, 3]]) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
@@ -1223,7 +1291,8 @@ create trigger multiple_instead_update instead of update on multiples begin
       // debug f '𠖏'
       // test @[ "DBA: concurrent UDFs" ]
       // @[ "DBA: create_with_transaction()" ]()
-      return test(this["DBA: create_with_unsafe_mode()"]);
+      // test @[ "DBA: create_with_unsafe_mode()" ]
+      return test(this["DBA: with_foreign_keys_off()"]);
     })();
   }
 
