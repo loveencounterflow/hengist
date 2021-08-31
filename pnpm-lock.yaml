@@ -39,7 +39,7 @@ specifiers:
   guy-test: 4.1.0
   hamt: ^2.2.2
   icql: 5.3.0
-  icql-dba: 8.3.0
+  icql-dba: 8.5.0
   icql-dba-vars: 2.0.1
   icql515: npm:icql@5.1.5
   immer: 9.0.1
@@ -141,8 +141,8 @@ dependencies:
   guy-test: 4.1.0
   hamt: 2.2.2
   icql: 5.3.0
-  icql-dba: 8.3.0_deasync@0.1.23
-  icql-dba-vars: 2.0.1_deasync@0.1.23+icql-dba@8.3.0
+  icql-dba: 8.5.0_deasync@0.1.23
+  icql-dba-vars: 2.0.1_deasync@0.1.23+icql-dba@8.5.0
   icql515: /icql/5.1.5
   immer: 9.0.1
   immutable: 4.0.0-rc.14
@@ -1869,22 +1869,22 @@ packages:
     dev: false
     optional: true
 
-  /icql-dba-vars/2.0.1_deasync@0.1.23+icql-dba@8.3.0:
+  /icql-dba-vars/2.0.1_deasync@0.1.23+icql-dba@8.5.0:
     resolution: {integrity: sha512-VCJCd9GVWCoGZUwrwz8qxUniJwn5rdrQtsOPnHDgZJbShT3oYcur01oYONJhprJ9lFDpl9jx8JFWr2NC8VyCxQ==}
     peerDependencies:
       icql-dba: ^7.2.0
     dependencies:
       cnd: 9.2.2
       guy: 1.0.0_deasync@0.1.23
-      icql-dba: 8.3.0_deasync@0.1.23
+      icql-dba: 8.5.0_deasync@0.1.23
       intertype: 7.6.7
       letsfreezethat: 3.1.0
     transitivePeerDependencies:
       - deasync
     dev: false
 
-  /icql-dba/8.3.0_deasync@0.1.23:
-    resolution: {integrity: sha512-S5RTJOWiIGAZCmV8dX4hCTebXf9H4SqSIvKZ/962s/5b5ouZ+RW+rbQ7EYgG4uostOyykYXwLzZEropBgW3o6g==}
+  /icql-dba/8.5.0_deasync@0.1.23:
+    resolution: {integrity: sha512-k4uBS6m8xAkrhE/1dS8wSiPKe7Fr4kRtjIi6IWjC+lFTnLenjkfdb63eLqEXJkEFhflNLhzVpmvpKcIxZ0KJ1Q==}
     requiresBuild: true
     dependencies:
       cnd: 9.2.2
