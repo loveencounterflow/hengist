@@ -803,7 +803,9 @@ if module is require.main then do =>
   # test @[ "DBA: clear()" ]
   # test @[ "DBA: open() many RAM DBs" ]
   # @[ "DBA: open() many RAM DBs" ]()
-  test @[ "DBA: _is_sqlite3_db()" ]
+  # test @[ "DBA: _is_sqlite3_db()" ]
+  test @[ "DBA: writing while reading 1" ]
+  # test @[ "DBA: writing while reading 2" ]
 
 
 
