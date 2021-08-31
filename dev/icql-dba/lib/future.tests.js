@@ -817,16 +817,19 @@
     })();
     await (() => {      //.........................................................................................................
       dba.execute(SQL`update x set locked = true;`);
-      return dba.do_unsafe(() => {
-        var ref, results, row;
-        ref = dba.query(SQL`select * from x where locked;`);
-        results = [];
-        for (row of ref) {
-          // info '^44555^', row
-          results.push(dba.run(SQL`insert into x ( n ) values ( ? );`, [row.n + 100]));
+      dba.with_unsafe_mode({
+        call: () => {
+          var ref, results, row;
+          ref = dba.query(SQL`select * from x where locked;`);
+          results = [];
+          for (row of ref) {
+            info('^44555^', dba._state);
+            results.push(dba.run(SQL`insert into x ( n ) values ( ? );`, [row.n + 100]));
+          }
+          return results;
         }
-        return results;
       });
+      return info('^44555^', dba._state);
     })();
     await (() => {      //.........................................................................................................
       var d;
@@ -1275,11 +1278,10 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
       // test @[ "DBA: open() many RAM DBs" ]
       // @[ "DBA: open() many RAM DBs" ]()
       // test @[ "DBA: _is_sqlite3_db()" ]
-      return test(this["DBA: writing while reading 1"]);
+      // test @[ "DBA: writing while reading 1" ]
+      return test(this["DBA: writing while reading 2"]);
     })();
   }
-
-  // test @[ "DBA: writing while reading 2" ]
 
 }).call(this);
 
