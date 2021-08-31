@@ -135,13 +135,53 @@ H                         = require './helpers'
   T?.eq trace, [ 'm1', 'm2', 'fa1', 'fa2', 'fa1', 'fa2', 'fa1', 'fa2', 'm3' ]
   done?()
 
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "use-call" ] = ( T, done ) ->
+#   # T?.halt_on_error()
+#   # guy         = require H.guy_path
+#   # #.........................................................................................................
+#   # class Gx extends guy.constructor
+#   #   new_use_call: ( cfg ) ->
+#   #     { target
+#   #       enter } = cfg
+#   #     handler = ( cfg, call ) -> enter cfg, call
+#   #     return if target? then handler.bind target else handler
+#   # #.........................................................................................................
+#   # gx      = new Gx()
+#   # target  = { target: true, }
+#   # enter   = ( cfg, call ) ->
+#   #   debug '^443^', cfg
+#   #   R = call 'arguments provided by `enter()`', cfg
+#   #   debug '^897^', "ok"
+#   #   return R
+#   # use     = gx.new_use_call { target, enter, }
+#   # help '^33^', use { foo: 'bar', }, ( P... ) ->
+#   #   debug '^787^', P
+#   #   return 42
+#   # #.........................................................................................................
+#   defaults =
+#     dba_use_cfg:
+#       unsafe: false
+#   class Gx2 extends guy.constructor
+#     use: ( cfg ) ->
+#       cfg   = defaults.dba_use_cfg
+#       prve  = {}
+#       if cfg.unsafe
+#         prv.unsafe = @sqlt.unsafe()
+#         @sqlt.unsafeMode true
+#       try return cfg.call() finally
+#         @sqlt.unsafeMode prv.unsafe if prv.unsafe?
+#   guy = new Gx2()
+#   #.........................................................................................................
+#   done?()
 
 
 ############################################################################################################
 if require.main is module then do =>
   # test @, { timeout: 5000, }
   # test @[ "await with async steampipes" ]
-  test @[ "nowait with async steampipes" ]
+  # test @[ "nowait with async steampipes" ]
+  test @[ "use-call" ]
   # @[ "await with async steampipes" ]()
   # @[ "demo" ]()
   # @[ "nowait" ]()
