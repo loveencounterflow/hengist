@@ -1274,9 +1274,12 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
       // test @[ "DBA: clear()" ]
       // test @[ "DBA: open() many RAM DBs" ]
       // @[ "DBA: open() many RAM DBs" ]()
-      return test(this["DBA: _is_sqlite3_db()"]);
+      // test @[ "DBA: _is_sqlite3_db()" ]
+      return test(this["DBA: writing while reading 1"]);
     })();
   }
+
+  // test @[ "DBA: writing while reading 2" ]
 
 }).call(this);
 
