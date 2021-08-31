@@ -1061,12 +1061,118 @@ create trigger multiple_instead_update instead of update on multiples begin
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: create_with_transaction()"] = function(T, done) {
+    var Dba;
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
+    (() => {      //.........................................................................................................
+      var dba;
+      dba = new Dba();
+      return T != null ? T.throws(/not a valid dba_create_with_transaction_cfg/, function() {
+        return dba.create_with_transaction();
+      }) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var create_table, dba, error;
+      error = null;
+      dba = new Dba();
+      // dba.open { schema: 'main', }
+      create_table = dba.create_with_transaction({
+        call: function(cfg) {
+          help('^70^', "creating a table with", cfg);
+          dba.execute(SQL`create table foo ( bar integer );`);
+          if (cfg.throw_error) {
+            throw new Error("oops");
+          }
+        }
+      });
+      try {
+        //.......................................................................................................
+        create_table({
+          throw_error: true
+        });
+      } catch (error1) {
+        error = error1;
+        if (T != null) {
+          T.ok(error.message === "oops");
+        }
+        if (T != null) {
+          T.eq(dba.list(dba.query("select * from sqlite_schema;")), []);
+        }
+      }
+      if (error == null) {
+        T.fail("expected error but none was thrown");
+      }
+      //.......................................................................................................
+      create_table({
+        throw_error: false
+      });
+      return T != null ? T.eq(dba.all_first_values(dba.query("select name from sqlite_schema;")), ['foo']) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: with_transaction()"] = function(T, done) {
+    var Dba;
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
+    (() => {      //.........................................................................................................
+      var dba;
+      dba = new Dba();
+      return T != null ? T.throws(/not a valid dba_with_transaction_cfg/, function() {
+        return dba.with_transaction();
+      }) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var dba, error;
+      error = null;
+      dba = new Dba();
+      try {
+        dba.with_transaction({
+          call: function() {
+            help('^70^', "creating a table");
+            dba.execute(SQL`create table foo ( bar integer );`);
+            throw new Error("oops");
+          }
+        });
+      } catch (error1) {
+        error = error1;
+        warn(error.message);
+        if (T != null) {
+          T.ok(error.message === "oops");
+        }
+      }
+      if (error == null) {
+        T.fail("expected error but none was thrown");
+      }
+      if (T != null) {
+        T.eq(dba.list(dba.query("select * from sqlite_schema;")), []);
+      }
+      //.......................................................................................................
+      dba.with_transaction({
+        call: function() {
+          help('^70^', "creating a table");
+          return dba.execute(SQL`create table foo ( bar integer );`);
+        }
+      });
+      //.......................................................................................................
+      return T != null ? T.eq(dba.all_first_values(dba.query("select name from sqlite_schema;")), ['foo']) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
       // debug f '𠖏'
-      return test(this["DBA: concurrent UDFs"]);
+      // test @[ "DBA: concurrent UDFs" ]
+      // @[ "DBA: create_with_transaction()" ]()
+      // test @[ "DBA: create_with_transaction()" ]
+      this["DBA: with_transaction()"]();
+      return test(this["DBA: with_transaction()"]);
     })();
   }
 
