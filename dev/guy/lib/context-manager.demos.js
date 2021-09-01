@@ -64,11 +64,6 @@
     }
 
     //---------------------------------------------------------------------------------------------------------
-    frobulate(n) {
-      return n ** 2;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
     enter(...P) {
       debug('^701^', "enter()", P);
       return 1;
@@ -100,8 +95,8 @@
           }
           return results;
         }).call(this));
-        whisper('^4554^', this.frobulate);
-        whisper('^4554^', this.frobulate(42));
+        whisper('^4554^', this.enter);
+        whisper('^4554^', this.exit);
         return ((function() {
           var i, len, results;
           results = [];
