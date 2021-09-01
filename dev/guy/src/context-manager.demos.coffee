@@ -151,6 +151,11 @@ if require.main is module then do =>
 * Context manager classes conventionally declared as `With_frobulations extends Context_manager`,
   `With_foreign_keys_off extends Context_manager`, or use `cxm` suffix as in `File_cxm`, `Connection_cxm`.
 
+# To Do
+
+* **[–]** Following Python, define class / factory / decorator that takes a one-off generator function
+  and returns a context manager, sparing users the class declaration overhead.
+
 
 ###
 
