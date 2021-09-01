@@ -72,40 +72,10 @@ demo_dba_foreign_keys_off_cxm = ->
 # CLASS DEFINITION
 #-----------------------------------------------------------------------------------------------------------
 class Context_manager extends Function
-
-  #---------------------------------------------------------------------------------------------------------
-  constructor: ( kernel ) ->
-    super()
-    @kernel     = kernel.bind @
-    @ressources = {}
-    return @manage
-
-  #---------------------------------------------------------------------------------------------------------
-  enter: ( P... ) ->
-    R = null
-    debug '^701^', "enter()", P
-    return R
-
-  #---------------------------------------------------------------------------------------------------------
-  manage: ( P..., block ) =>
-    validate.function block
-    cx_value = @enter P...
-    debug '^701^', "manage()", { P, block, cx_value, }
-    try R = @kernel cx_value, P... finally @exit cx_value, P...
-    return R
-
-  #---------------------------------------------------------------------------------------------------------
-  exit: ( P... ) ->
-    debug '^701^', "exit()", P
-    return null
-
-#-----------------------------------------------------------------------------------------------------------
-class Context_manager_2 extends Function
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     super()
-    @cfg        = cfg
-    @ressources = {}
+    @cfg = cfg
     return @manage
   #---------------------------------------------------------------------------------------------------------
   enter: ( rtas... ) ->
@@ -117,13 +87,14 @@ class Context_manager_2 extends Function
     debug '^exit^     ', { cx_value, rtas, cfg: @cfg, }
     return null
   #---------------------------------------------------------------------------------------------------------
-  manage: ( rtas..., block ) => ### RTAS: Run Time ArgumentS ###
+  manage: ( rtas..., block ) =>
     validate.function block
     help  '^manage^   ', { rtas, cfg: @cfg, block, }
     cx_value = @enter rtas...
     help  '^manage^   ', { rtas, cfg: @cfg, block, cx_value, }
     try
-      block_value = block cx_value, rtas...
+      # block_value = block cx_value, rtas...
+      block_value = block.call @, cx_value, rtas...
     finally
       @exit cx_value, rtas...
     help  '^manage^   ', { block_value, }
@@ -134,30 +105,19 @@ class Context_manager_2 extends Function
 #-----------------------------------------------------------------------------------------------------------
 demo_2 = ->
   do =>
-    manage  = new Context_manager_2 cfg = { whatever: 'values', }
+    manage  = new Context_manager cfg = { whatever: 'values', }
     rtas    = [ 'a', 'b', 'c', ]
     block   = ( cx_value, rtas... ) ->
-      info '^block^    ', { cx_value, rtas, }
+      info '^block^    ', { cx_value, rtas, cfg: @cfg, }
       return 'block_value'
     block_value = manage rtas..., block
     debug '^3334^', rpr block_value
+    whisper '--------------------------------'
+    debug '^3334^', rpr block_value = manage 'some', 'other', 'rtas', ( cx_value, rtas... ) ->
+      info '^block2^   ', { cx_value, rtas, cfg: @cfg, }
+      return 'another_block_value'
     return null
 
-#-----------------------------------------------------------------------------------------------------------
-demo_1 = ->
-  do =>
-    manage = new Context_manager kernel = ( P... ) ->
-      info '^4554^', 'kernel', P
-      whisper '^4554^', @id
-      whisper '^4554^', ( k for k of @ )
-      whisper '^4554^', @enter
-      whisper '^4554^', @exit
-      return ( rpr p for p in P ).join '|'
-    block_result = manage 'a', 'b', 'c', block = -> ( cx_value, context_arguments... ) ->
-      info '^4554^', 'block', { cx_value, context_arguments, }
-      return 'block_result'
-    debug '^3334^', rpr block_result
-    return null
 
 ############################################################################################################
 if require.main is module then do =>
@@ -166,3 +126,31 @@ if require.main is module then do =>
   urge '#############################'
   demo_2()
   # demo_dba_foreign_keys_off_cxm()
+
+
+###
+
+* RTAs / `rtas`: Run Time Arguments, the arguments passed in fron of the `block` when using the `manager`,
+  as in `manager 'some', 'rtas', 'here', ( cx_value, rtas... ) -> ...`
+
+* CX value / `cx_value`: the 'context value', commonly a resource, an object of central interest that
+  enables certain operations and has to be resource-managed, such as a DB connection to be established and
+  freed, or a file to be opened and closed.
+
+* Block (payload?, run time block?, )
+  * if unbound function is used, its `this` value will be the `Context_manager` instance (i.e. `manage()`);
+    from inside the block, the arguments used to instantiate the context manager may be accessed as `@cfg`
+    in this case.
+
+* Manager (cxmanager, context manager): a callable return value from instantiating a `Context_manager`
+  class.
+  * can be called any number of times with any number of RTAs and a required callable `block` as last
+    argument
+  * naming: conventionally `with_${purpose}`, as in `with_foreign_keys_off()`, `with_open_file()`,
+    `with_db_connection()`.
+* Context manager classes conventionally declared as `With_frobulations extends Context_manager`,
+  `With_foreign_keys_off extends Context_manager`, or use `cxm` suffix as in `File_cxm`, `Connection_cxm`.
+
+
+###
+
