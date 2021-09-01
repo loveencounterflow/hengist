@@ -109,20 +109,23 @@ class Context_manager_2 extends Function
     return @manage
   #---------------------------------------------------------------------------------------------------------
   enter: ( rtas... ) ->
-    R = null
-    debug '^enter^    ', { rtas, }, @cfg
+    R = { cx: 'value', }
+    debug '^enter^    ', { rtas, cfg: @cfg, }
     return R
   #---------------------------------------------------------------------------------------------------------
-  exit: ( rtas... ) ->
-    debug '^exit^     ', { rtas, }, @cfg
+  exit: ( cx_value, rtas... ) ->
+    debug '^exit^     ', { cx_value, rtas, cfg: @cfg, }
     return null
   #---------------------------------------------------------------------------------------------------------
   manage: ( rtas..., block ) => ### RTAS: Run Time ArgumentS ###
     validate.function block
-    help  '^manage^   ', { rtas, }, @cfg, { block, }
+    help  '^manage^   ', { rtas, cfg: @cfg, block, }
     cx_value = @enter rtas...
-    help  '^manage^   ', { cx_value, }
-    try block_value = block cx_value, rtas... finally @exit cx_value, rtas...
+    help  '^manage^   ', { rtas, cfg: @cfg, block, cx_value, }
+    try
+      block_value = block cx_value, rtas...
+    finally
+      @exit cx_value, rtas...
     help  '^manage^   ', { block_value, }
     return block_value
 
@@ -131,12 +134,13 @@ class Context_manager_2 extends Function
 #-----------------------------------------------------------------------------------------------------------
 demo_2 = ->
   do =>
-    manage = new Context_manager_2 cfg = { whatever: 'values', }
-    help '^342^', { manage, }
-    block_result = manage 'a', 'b', 'c', block = -> ( cx_value, context_arguments... ) ->
-      info '^4554^', 'block', { cx_value, context_arguments, }
-      return 'block_result'
-    debug '^3334^', rpr block_result
+    manage  = new Context_manager_2 cfg = { whatever: 'values', }
+    rtas    = [ 'a', 'b', 'c', ]
+    block   = ( cx_value, rtas... ) ->
+      info '^block^    ', { cx_value, rtas, }
+      return 'block_value'
+    block_value = manage rtas..., block
+    debug '^3334^', rpr block_value
     return null
 
 #-----------------------------------------------------------------------------------------------------------
