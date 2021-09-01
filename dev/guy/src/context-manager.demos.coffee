@@ -31,12 +31,12 @@ types                     = new ( require 'intertype' ).Intertype
 class Context_manager extends Function
 
   #---------------------------------------------------------------------------------------------------------
-  constructor: ( f ) ->
+  constructor: ( kernel ) ->
     super()
-    f = f.bind @
+    kernel = kernel.bind @
     manager = ( P... ) =>
       @enter P...
-      try R = f P... finally @exit P...
+      try R = kernel P... finally @exit P...
       return R
     @id = 4567
     return manager
