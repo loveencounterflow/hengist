@@ -42,9 +42,6 @@ class Context_manager extends Function
     return manager
 
   #---------------------------------------------------------------------------------------------------------
-  frobulate: ( n ) -> n ** 2
-
-  #---------------------------------------------------------------------------------------------------------
   enter: ( P... ) ->
     debug '^701^', "enter()", P
     return 1
@@ -63,8 +60,8 @@ demo_1 = ->
       info '^4554^', 'kernel', P
       whisper '^4554^', @id
       whisper '^4554^', ( k for k of @ )
-      whisper '^4554^', @frobulate
-      whisper '^4554^', @frobulate 42
+      whisper '^4554^', @enter
+      whisper '^4554^', @exit
       return ( rpr p for p in P ).join '|'
     urge cm_2 'a', 'b', 'c'
     # whisper '------------------'
