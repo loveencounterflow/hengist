@@ -28,63 +28,47 @@ types                     = new ( require 'intertype' ).Intertype
 #===========================================================================================================
 # CLASS DEFINITION
 #-----------------------------------------------------------------------------------------------------------
-class Context_manager_1 extends Function
-
-  #---------------------------------------------------------------------------------------------------------
-  constructor: ->
-    super()
-    Object.setPrototypeOf @mymethod, Context_manager_1.prototype
-    # Object.setPrototypeOf @mymethod, @constructor.prototype
-    @id = 1234
-    return @mymethod
-
-  #---------------------------------------------------------------------------------------------------------
-  mymethod: ( P... ) =>
-    # debug '^4554^', type_of @
-    debug '^4554^', ( k for k of @ )
-    debug '^4554^', @id
-    debug '^4554^', @frobulate
-
-  frobulate: ( n ) -> n ** 2
-
-#-----------------------------------------------------------------------------------------------------------
-class Context_manager_2 extends Function
+class Context_manager extends Function
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( f ) ->
     super()
-    @f = f.bind @
-    # Object.setPrototypeOf f, Context_manager_2.prototype
-    # Object.setPrototypeOf @f, @constructor.prototype
+    f = f.bind @
+    manager = ( P... ) =>
+      @enter P...
+      try R = f P... finally @exit P...
+      return R
     @id = 4567
-    # f.__call__ = @f
-    # return @f
-    return undefined
+    return manager
 
+  #---------------------------------------------------------------------------------------------------------
   frobulate: ( n ) -> n ** 2
 
+  #---------------------------------------------------------------------------------------------------------
+  enter: ( P... ) ->
+    debug '^701^', "enter()", P
+    return 1
+
+  #---------------------------------------------------------------------------------------------------------
+  exit: ( P... ) ->
+    debug '^701^', "exit()", P
+    return 1
 
 #===========================================================================================================
 # DEMOS
 #-----------------------------------------------------------------------------------------------------------
 demo_1 = ->
   do =>
-    cm_1 = new Context_manager_1()
-    cm_1()
-    whisper '------------------'
-    cm_1.mymethod()
-  whisper '================='
-  do =>
-    cm_2 = new Context_manager_2 ->
-      info '^4554^', @id
-      info '^4554^', ( k for k of @ )
-      info '^4554^', @frobulate
-      return 'othermethod'
-    cm_2()
-    whisper '------------------'
-    urge cm_2.f?()
-    # urge cm_2.__call__?()
-    urge cm_2.frobulate? 3
+    cm_2 = new Context_manager ( P... ) ->
+      info '^4554^', 'kernel', P
+      whisper '^4554^', @id
+      whisper '^4554^', ( k for k of @ )
+      whisper '^4554^', @frobulate
+      whisper '^4554^', @frobulate 42
+      return ( rpr p for p in P ).join '|'
+    urge cm_2 'a', 'b', 'c'
+    # whisper '------------------'
+    # urge cm_2.f?()
     # urge cm_2.frobulate? 3
 
 
