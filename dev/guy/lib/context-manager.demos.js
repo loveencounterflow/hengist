@@ -163,14 +163,23 @@
     //---------------------------------------------------------------------------------------------------------
     enter(...rtas) {
       var R;
-      R = null;
-      debug('^enter^    ', {rtas}, this.cfg);
+      R = {
+        cx: 'value'
+      };
+      debug('^enter^    ', {
+        rtas,
+        cfg: this.cfg
+      });
       return R;
     }
 
     //---------------------------------------------------------------------------------------------------------
-    exit(...rtas) {
-      debug('^exit^     ', {rtas}, this.cfg);
+    exit(cx_value, ...rtas) {
+      debug('^exit^     ', {
+        cx_value,
+        rtas,
+        cfg: this.cfg
+      });
       return null;
     }
 
@@ -179,9 +188,18 @@
       boundMethodCheck(this, Context_manager_2);
       ref = rtas, [...rtas] = ref, [block] = splice.call(rtas, -1);
       validate.function(block);
-      help('^manage^   ', {rtas}, this.cfg, {block});
+      help('^manage^   ', {
+        rtas,
+        cfg: this.cfg,
+        block
+      });
       cx_value = this.enter(...rtas);
-      help('^manage^   ', {cx_value});
+      help('^manage^   ', {
+        rtas,
+        cfg: this.cfg,
+        block,
+        cx_value
+      });
       try {
         block_value = block(cx_value, ...rtas);
       } finally {
@@ -198,18 +216,17 @@
   //-----------------------------------------------------------------------------------------------------------
   demo_2 = function() {
     return (() => {
-      var block, block_result, cfg, manage;
+      var block, block_value, cfg, manage, rtas;
       manage = new Context_manager_2(cfg = {
         whatever: 'values'
       });
-      help('^342^', {manage});
-      block_result = manage('a', 'b', 'c', block = function() {
-        return function(cx_value, ...context_arguments) {
-          info('^4554^', 'block', {cx_value, context_arguments});
-          return 'block_result';
-        };
-      });
-      debug('^3334^', rpr(block_result));
+      rtas = ['a', 'b', 'c'];
+      block = function(cx_value, ...rtas) {
+        info('^block^    ', {cx_value, rtas});
+        return 'block_value';
+      };
+      block_value = manage(...rtas, block);
+      debug('^3334^', rpr(block_value));
       return null;
     })();
   };
