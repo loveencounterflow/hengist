@@ -1,6 +1,8 @@
 (function() {
   //###########################################################################################################
-  var CND, Context_manager, FS, H, PATH, alert, badge, debug, demo_1, echo, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Context_manager, FS, H, PATH, alert, badge, debug, demo_1, demo_dba_foreign_keys_off_cxm, echo, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
+    boundMethodCheck = function(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new Error('Bound instance method accessed before binding'); } },
+    splice = [].splice;
 
   PATH = require('path');
 
@@ -46,33 +48,41 @@
   Context_manager = class Context_manager extends Function {
     //---------------------------------------------------------------------------------------------------------
     constructor(kernel) {
-      var manager;
       super();
-      kernel = kernel.bind(this);
-      manager = (...P) => {
-        var R;
-        this.enter(...P);
-        try {
-          R = kernel(...P);
-        } finally {
-          this.exit(...P);
-        }
-        return R;
-      };
-      this.id = 4567;
-      return manager;
+      //---------------------------------------------------------------------------------------------------------
+      this.manage = this.manage.bind(this);
+      this.kernel = kernel.bind(this);
+      this.ressources = {};
+      return this.manage;
     }
 
     //---------------------------------------------------------------------------------------------------------
     enter(...P) {
+      var R;
+      R = null;
       debug('^701^', "enter()", P);
-      return 1;
+      return R;
+    }
+
+    manage(...P) {
+      var R, block, cx_value, ref;
+      boundMethodCheck(this, Context_manager);
+      ref = P, [...P] = ref, [block] = splice.call(P, -1);
+      validate.function(block);
+      cx_value = this.enter(...P);
+      debug('^701^', "manage()", {P, block, cx_value});
+      try {
+        R = this.kernel(cx_value, ...P);
+      } finally {
+        this.exit(cx_value, ...P);
+      }
+      return R;
     }
 
     //---------------------------------------------------------------------------------------------------------
     exit(...P) {
       debug('^701^', "exit()", P);
-      return 1;
+      return null;
     }
 
   };
@@ -82,8 +92,8 @@
   //-----------------------------------------------------------------------------------------------------------
   demo_1 = function() {
     return (() => {
-      var cm_2;
-      cm_2 = new Context_manager(function(...P) {
+      var block, block_result, kernel, manage;
+      manage = new Context_manager(kernel = function(...P) {
         var k, p;
         info('^4554^', 'kernel', P);
         whisper('^4554^', this.id);
@@ -107,13 +117,77 @@
           return results;
         })()).join('|');
       });
-      return urge(cm_2('a', 'b', 'c'));
+      block_result = manage('a', 'b', 'c', block = function() {
+        return function(cx_value, ...context_arguments) {
+          info('^4554^', 'block', {cx_value, context_arguments});
+          return 'block_result';
+        };
+      });
+      debug('^3334^', rpr(block_result));
+      return null;
     })();
   };
 
-  // whisper '------------------'
-  // urge cm_2.f?()
-  // urge cm_2.frobulate? 3
+  //-----------------------------------------------------------------------------------------------------------
+  demo_dba_foreign_keys_off_cxm = function() {
+    var Dba_x, Foreign_keys_off_cxm;
+    //=========================================================================================================
+    Foreign_keys_off_cxm = class Foreign_keys_off_cxm extends Context_manager {
+      //-------------------------------------------------------------------------------------------------------
+      enter(...P) {
+        debug('^Foreign_keys_off_cxm.enter^', P);
+        return null;
+      }
+
+      //-------------------------------------------------------------------------------------------------------
+      exit(...P) {
+        debug('^Foreign_keys_off_cxm.exit^', P);
+        return null;
+      }
+
+    };
+    //=========================================================================================================
+    Dba_x = class Dba_x extends (require('../../../apps/icql-dba')).Dba {
+      constructor() {
+        super(...arguments);
+        //-----------------------------------------------------------------------------------------------------
+        this.create_with_foreign_keys_off = this.create_with_foreign_keys_off.bind(this);
+        //-----------------------------------------------------------------------------------------------------
+        this.with_foreign_keys_off = this.with_foreign_keys_off.bind(this);
+      }
+
+      create_with_foreign_keys_off(...cxm_arguments) {
+        var cxm;
+        boundMethodCheck(this, Dba_x);
+        cxm = new Foreign_keys_off_cxm({
+          dba: this
+        });
+        return cxm;
+      }
+
+      with_foreign_keys_off(...cxm_arguments) {
+        var cxm;
+        boundMethodCheck(this, Dba_x);
+        cxm = this.create_with_foreign_keys_off(...cxm_arguments);
+        cxm = new Foreign_keys_off_cxm({
+          dba: this
+        });
+        return cxm;
+      }
+
+    };
+    (() => {      //=========================================================================================================
+      var block, dba;
+      //-------------------------------------------------------------------------------------------------------
+      dba = new Dba();
+      dba.with_foreign_keys_off('cxm_arguments', block = function(cx_value, ...extra_arguments) {
+        debug('^inside-managed-context');
+        return 'block-result';
+      });
+      return null;
+    })();
+    return null;
+  };
 
   //###########################################################################################################
   if (require.main === module) {
@@ -121,6 +195,8 @@
       return demo_1();
     })();
   }
+
+  // demo_dba_foreign_keys_off_cxm()
 
 }).call(this);
 
