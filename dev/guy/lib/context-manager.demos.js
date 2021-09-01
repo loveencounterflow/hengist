@@ -1,6 +1,6 @@
 (function() {
   //###########################################################################################################
-  var CND, Context_manager, Context_manager_2, FS, H, PATH, alert, badge, debug, demo_1, demo_2, demo_dba_foreign_keys_off_cxm, echo, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
+  var CND, Context_manager, FS, H, PATH, alert, badge, debug, demo_2, demo_dba_foreign_keys_off_cxm, echo, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
     boundMethodCheck = function(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new Error('Bound instance method accessed before binding'); } },
     splice = [].splice;
 
@@ -108,55 +108,11 @@
   //-----------------------------------------------------------------------------------------------------------
   Context_manager = class Context_manager extends Function {
     //---------------------------------------------------------------------------------------------------------
-    constructor(kernel) {
-      super();
-      //---------------------------------------------------------------------------------------------------------
-      this.manage = this.manage.bind(this);
-      this.kernel = kernel.bind(this);
-      this.ressources = {};
-      return this.manage;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    enter(...P) {
-      var R;
-      R = null;
-      debug('^701^', "enter()", P);
-      return R;
-    }
-
-    manage(...P) {
-      var R, block, cx_value, ref;
-      boundMethodCheck(this, Context_manager);
-      ref = P, [...P] = ref, [block] = splice.call(P, -1);
-      validate.function(block);
-      cx_value = this.enter(...P);
-      debug('^701^', "manage()", {P, block, cx_value});
-      try {
-        R = this.kernel(cx_value, ...P);
-      } finally {
-        this.exit(cx_value, ...P);
-      }
-      return R;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    exit(...P) {
-      debug('^701^', "exit()", P);
-      return null;
-    }
-
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  Context_manager_2 = class Context_manager_2 extends Function {
-    //---------------------------------------------------------------------------------------------------------
     constructor(cfg) {
       super();
       //---------------------------------------------------------------------------------------------------------
       this.manage = this.manage.bind(this);
       this.cfg = cfg;
-      this.ressources = {};
       return this.manage;
     }
 
@@ -183,9 +139,9 @@
       return null;
     }
 
-    manage(...rtas)/* RTAS: Run Time ArgumentS */ {
+    manage(...rtas) {
       var block, block_value, cx_value, ref;
-      boundMethodCheck(this, Context_manager_2);
+      boundMethodCheck(this, Context_manager);
       ref = rtas, [...rtas] = ref, [block] = splice.call(rtas, -1);
       validate.function(block);
       help('^manage^   ', {
@@ -201,7 +157,8 @@
         cx_value
       });
       try {
-        block_value = block(cx_value, ...rtas);
+        // block_value = block cx_value, rtas...
+        block_value = block.call(this, cx_value, ...rtas);
       } finally {
         this.exit(cx_value, ...rtas);
       }
@@ -217,55 +174,29 @@
   demo_2 = function() {
     return (() => {
       var block, block_value, cfg, manage, rtas;
-      manage = new Context_manager_2(cfg = {
+      manage = new Context_manager(cfg = {
         whatever: 'values'
       });
       rtas = ['a', 'b', 'c'];
       block = function(cx_value, ...rtas) {
-        info('^block^    ', {cx_value, rtas});
+        info('^block^    ', {
+          cx_value,
+          rtas,
+          cfg: this.cfg
+        });
         return 'block_value';
       };
       block_value = manage(...rtas, block);
       debug('^3334^', rpr(block_value));
-      return null;
-    })();
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  demo_1 = function() {
-    return (() => {
-      var block, block_result, kernel, manage;
-      manage = new Context_manager(kernel = function(...P) {
-        var k, p;
-        info('^4554^', 'kernel', P);
-        whisper('^4554^', this.id);
-        whisper('^4554^', (function() {
-          var results;
-          results = [];
-          for (k in this) {
-            results.push(k);
-          }
-          return results;
-        }).call(this));
-        whisper('^4554^', this.enter);
-        whisper('^4554^', this.exit);
-        return ((function() {
-          var i, len, results;
-          results = [];
-          for (i = 0, len = P.length; i < len; i++) {
-            p = P[i];
-            results.push(rpr(p));
-          }
-          return results;
-        })()).join('|');
-      });
-      block_result = manage('a', 'b', 'c', block = function() {
-        return function(cx_value, ...context_arguments) {
-          info('^4554^', 'block', {cx_value, context_arguments});
-          return 'block_result';
-        };
-      });
-      debug('^3334^', rpr(block_result));
+      whisper('--------------------------------');
+      debug('^3334^', rpr(block_value = manage('some', 'other', 'rtas', function(cx_value, ...rtas) {
+        info('^block2^   ', {
+          cx_value,
+          rtas,
+          cfg: this.cfg
+        });
+        return 'another_block_value';
+      })));
       return null;
     })();
   };
@@ -281,6 +212,30 @@
   }
 
   // demo_dba_foreign_keys_off_cxm()
+/*
+
+* RTAs / `rtas`: Run Time Arguments, the arguments passed in fron of the `block` when using the `manager`,
+  as in `manager 'some', 'rtas', 'here', ( cx_value, rtas... ) -> ...`
+
+* CX value / `cx_value`: the 'context value', commonly a resource, an object of central interest that
+  enables certain operations and has to be resource-managed, such as a DB connection to be established and
+  freed, or a file to be opened and closed.
+
+* Block (payload?, run time block?, )
+  * if unbound function is used, its `this` value will be the `Context_manager` instance (i.e. `manage()`);
+    from inside the block, the arguments used to instantiate the context manager may be accessed as `@cfg`
+    in this case.
+
+* Manager (cxmanager, context manager): a callable return value from instantiating a `Context_manager`
+  class.
+  * can be called any number of times with any number of RTAs and a required callable `block` as last
+    argument
+  * naming: conventionally `with_${purpose}`, as in `with_foreign_keys_off()`, `with_open_file()`,
+    `with_db_connection()`.
+* Context manager classes conventionally declared as `With_frobulations extends Context_manager`,
+  `With_foreign_keys_off extends Context_manager`, or use `cxm` suffix as in `File_cxm`, `Connection_cxm`.
+
+ */
 
 }).call(this);
 
