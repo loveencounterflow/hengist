@@ -45,15 +45,15 @@
   //-----------------------------------------------------------------------------------------------------------
   Context_manager = class Context_manager extends Function {
     //---------------------------------------------------------------------------------------------------------
-    constructor(f) {
+    constructor(kernel) {
       var manager;
       super();
-      f = f.bind(this);
+      kernel = kernel.bind(this);
       manager = (...P) => {
         var R;
         this.enter(...P);
         try {
-          R = f(...P);
+          R = kernel(...P);
         } finally {
           this.exit(...P);
         }
