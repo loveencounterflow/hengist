@@ -25,55 +25,6 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 
 
-#===========================================================================================================
-# CLASS DEFINITION
-#-----------------------------------------------------------------------------------------------------------
-class Context_manager extends Function
-
-  #---------------------------------------------------------------------------------------------------------
-  constructor: ( kernel ) ->
-    super()
-    @kernel     = kernel.bind @
-    @ressources = {}
-    return @manage
-
-  #---------------------------------------------------------------------------------------------------------
-  enter: ( P... ) ->
-    R = null
-    debug '^701^', "enter()", P
-    return R
-
-  #---------------------------------------------------------------------------------------------------------
-  manage: ( P..., block ) =>
-    validate.function block
-    cx_value = @enter P...
-    debug '^701^', "manage()", { P, block, cx_value, }
-    try R = @kernel cx_value, P... finally @exit cx_value, P...
-    return R
-
-  #---------------------------------------------------------------------------------------------------------
-  exit: ( P... ) ->
-    debug '^701^', "exit()", P
-    return null
-
-#===========================================================================================================
-# DEMOS
-#-----------------------------------------------------------------------------------------------------------
-demo_1 = ->
-  do =>
-    manage = new Context_manager kernel = ( P... ) ->
-      info '^4554^', 'kernel', P
-      whisper '^4554^', @id
-      whisper '^4554^', ( k for k of @ )
-      whisper '^4554^', @enter
-      whisper '^4554^', @exit
-      return ( rpr p for p in P ).join '|'
-    block_result = manage 'a', 'b', 'c', block = -> ( cx_value, context_arguments... ) ->
-      info '^4554^', 'block', { cx_value, context_arguments, }
-      return 'block_result'
-    debug '^3334^', rpr block_result
-    return null
-
 #-----------------------------------------------------------------------------------------------------------
 demo_dba_foreign_keys_off_cxm = ->
   #=========================================================================================================
@@ -116,7 +67,98 @@ demo_dba_foreign_keys_off_cxm = ->
   return null
 
 
+
+#===========================================================================================================
+# CLASS DEFINITION
+#-----------------------------------------------------------------------------------------------------------
+class Context_manager extends Function
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( kernel ) ->
+    super()
+    @kernel     = kernel.bind @
+    @ressources = {}
+    return @manage
+
+  #---------------------------------------------------------------------------------------------------------
+  enter: ( P... ) ->
+    R = null
+    debug '^701^', "enter()", P
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  manage: ( P..., block ) =>
+    validate.function block
+    cx_value = @enter P...
+    debug '^701^', "manage()", { P, block, cx_value, }
+    try R = @kernel cx_value, P... finally @exit cx_value, P...
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  exit: ( P... ) ->
+    debug '^701^', "exit()", P
+    return null
+
+#-----------------------------------------------------------------------------------------------------------
+class Context_manager_2 extends Function
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( cfg ) ->
+    super()
+    @cfg        = cfg
+    @ressources = {}
+    return @manage
+  #---------------------------------------------------------------------------------------------------------
+  enter: ( rtas... ) ->
+    R = null
+    debug '^enter^    ', { rtas, }, @cfg
+    return R
+  #---------------------------------------------------------------------------------------------------------
+  exit: ( rtas... ) ->
+    debug '^exit^     ', { rtas, }, @cfg
+    return null
+  #---------------------------------------------------------------------------------------------------------
+  manage: ( rtas..., block ) => ### RTAS: Run Time ArgumentS ###
+    validate.function block
+    help  '^manage^   ', { rtas, }, @cfg, { block, }
+    cx_value = @enter rtas...
+    help  '^manage^   ', { cx_value, }
+    try block_value = block cx_value, rtas... finally @exit cx_value, rtas...
+    help  '^manage^   ', { block_value, }
+    return block_value
+
+#===========================================================================================================
+# DEMOS
+#-----------------------------------------------------------------------------------------------------------
+demo_2 = ->
+  do =>
+    manage = new Context_manager_2 cfg = { whatever: 'values', }
+    help '^342^', { manage, }
+    block_result = manage 'a', 'b', 'c', block = -> ( cx_value, context_arguments... ) ->
+      info '^4554^', 'block', { cx_value, context_arguments, }
+      return 'block_result'
+    debug '^3334^', rpr block_result
+    return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_1 = ->
+  do =>
+    manage = new Context_manager kernel = ( P... ) ->
+      info '^4554^', 'kernel', P
+      whisper '^4554^', @id
+      whisper '^4554^', ( k for k of @ )
+      whisper '^4554^', @enter
+      whisper '^4554^', @exit
+      return ( rpr p for p in P ).join '|'
+    block_result = manage 'a', 'b', 'c', block = -> ( cx_value, context_arguments... ) ->
+      info '^4554^', 'block', { cx_value, context_arguments, }
+      return 'block_result'
+    debug '^3334^', rpr block_result
+    return null
+
 ############################################################################################################
 if require.main is module then do =>
-  demo_1()
+  # urge '#############################'
+  # demo_1()
+  urge '#############################'
+  demo_2()
   # demo_dba_foreign_keys_off_cxm()
