@@ -26,43 +26,49 @@ types                     = new ( require 'intertype' ).Intertype
 
 
 #-----------------------------------------------------------------------------------------------------------
-demo_dba_foreign_keys_off_cxm = ->
+demo_dba_With_foreign_keys_off_cxm = ->
   #=========================================================================================================
-  class Foreign_keys_off_cxm extends Context_manager
+  class With_foreign_keys_off extends Context_manager
+
+    #-------------------------------------------------------------------------------------------------------
+    constructor: ( P... ) ->
+      R = super P...
+      debug '^4746^', @cfg
+      @prv_in_foreign_keys_state = @cfg.dba._get_foreign_keys_state
+      return @
 
     #-------------------------------------------------------------------------------------------------------
     enter: ( P... ) ->
-      debug '^Foreign_keys_off_cxm.enter^', P
-
+      debug '^With_foreign_keys_off.enter^'
+      @prv_in_foreign_keys_state = @cfg.dba._get_foreign_keys_state()
+      @cfg.dba._set_foreign_keys_state false
       return null
 
     #-------------------------------------------------------------------------------------------------------
     exit: ( P... ) ->
-      debug '^Foreign_keys_off_cxm.exit^', P
+      debug '^With_foreign_keys_off.exit^', @prv_in_foreign_keys_state
+      @cfg.dba._set_foreign_keys_state @prv_in_foreign_keys_state
       return null
 
   #=========================================================================================================
   class Dba_x extends ( require '../../../apps/icql-dba' ).Dba
 
-    #-----------------------------------------------------------------------------------------------------
-    create_with_foreign_keys_off: ( cxm_arguments... ) =>
-      cxm = new Foreign_keys_off_cxm { dba: @, }
-      return cxm
-
-    #-----------------------------------------------------------------------------------------------------
-    with_foreign_keys_off: ( cxm_arguments... ) =>
-      cxm = @create_with_foreign_keys_off cxm_arguments...
-      cxm = new Foreign_keys_off_cxm { dba: @, }
-      return cxm
+    #---------------------------------------------------------------------------------------------------------
+    with_foreign_keys_off: ( P... ) => ( @_with_foreign_keys_off ?= new With_foreign_keys_off { dba: @, } ) P...
 
   #=========================================================================================================
   do =>
 
     #-------------------------------------------------------------------------------------------------------
-    dba = new Dba()
-    dba.with_foreign_keys_off 'cxm_arguments', block = ( cx_value, extra_arguments... ) ->
+    # { Dba, }  = require '../../../apps/icql-dba'
+    dba       = new Dba_x()
+    debug '^70^', dba.With_foreign_keys_off
+    info '^123^', dba._state
+    dba.with_foreign_keys_off ( cx_value, extra_arguments... ) ->
       debug '^inside-managed-context'
-      return 'block-result'
+      info '^123^', dba._state
+      return null
+    info '^123^', dba._state
     return null
   return null
 
@@ -72,32 +78,28 @@ demo_dba_foreign_keys_off_cxm = ->
 # CLASS DEFINITION
 #-----------------------------------------------------------------------------------------------------------
 class Context_manager extends Function
+
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     super()
     @cfg = cfg
     return @manage
+
   #---------------------------------------------------------------------------------------------------------
-  enter: ( rtas... ) ->
-    R = { cx: 'value', }
-    debug '^enter^    ', { rtas, cfg: @cfg, }
-    return R
+  enter: ( rtas... ) -> null
+
   #---------------------------------------------------------------------------------------------------------
-  exit: ( cx_value, rtas... ) ->
-    debug '^exit^     ', { cx_value, rtas, cfg: @cfg, }
-    return null
+  exit: ( cx_value, rtas... ) -> null
+
   #---------------------------------------------------------------------------------------------------------
   manage: ( rtas..., block ) =>
     validate.function block
-    help  '^manage^   ', { rtas, cfg: @cfg, block, }
     cx_value = @enter rtas...
-    help  '^manage^   ', { rtas, cfg: @cfg, block, cx_value, }
+    urge '^22298^', @cfg, cx_value
     try
-      # block_value = block cx_value, rtas...
       block_value = block.call @, cx_value, rtas...
     finally
       @exit cx_value, rtas...
-    help  '^manage^   ', { block_value, }
     return block_value
 
 #===========================================================================================================
@@ -118,14 +120,35 @@ demo_2 = ->
       return 'another_block_value'
     return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_3 = ->
+  ### NOTE we just define context managers as a kind of pattern and are done ###
+  class X
+    with_unsafe_mode: ( path, foo, P..., f ) ->
+      # @types.validate.function f
+      validate.function f
+      urge '^65^', { path, foo, }
+      prv_in_unsafe_mode = @_unsafe
+      @_unsafe = true
+      try R = f P... finally @_unsafe = prv_in_unsafe_mode
+      return R
+  x = new X()
+  x._unsafe = false
+  result = x.with_unsafe_mode 'some/path', 'FOO', 'a', 'b', ( P... ) ->
+    debug '^334^', "inside context", P
+    return 42
+  info '^334^', result
+
+
 
 ############################################################################################################
 if require.main is module then do =>
   # urge '#############################'
   # demo_1()
-  urge '#############################'
-  demo_2()
-  # demo_dba_foreign_keys_off_cxm()
+  # urge '#############################'
+  # demo_2()
+  demo_3()
+  # demo_dba_With_foreign_keys_off_cxm()
 
 
 ###
