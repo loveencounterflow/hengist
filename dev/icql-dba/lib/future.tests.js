@@ -817,17 +817,15 @@
     })();
     await (() => {      //.........................................................................................................
       dba.execute(SQL`update x set locked = true;`);
-      dba.with_unsafe_mode({
-        call: () => {
-          var ref, results, row;
-          ref = dba.query(SQL`select * from x where locked;`);
-          results = [];
-          for (row of ref) {
-            info('^44555^', dba._state);
-            results.push(dba.run(SQL`insert into x ( n ) values ( ? );`, [row.n + 100]));
-          }
-          return results;
+      dba.with_unsafe_mode(() => {
+        var ref, results, row;
+        ref = dba.query(SQL`select * from x where locked;`);
+        results = [];
+        for (row of ref) {
+          info('^44555^', dba._state);
+          results.push(dba.run(SQL`insert into x ( n ) values ( ? );`, [row.n + 100]));
         }
+        return results;
       });
       return info('^44555^', dba._state);
     })();

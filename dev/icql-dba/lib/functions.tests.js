@@ -964,10 +964,8 @@ create trigger multiple_instead_update instead of update on multiples begin
         }
       });
       try {
-        dba.with_unsafe_mode({
-          call: function() {
-            return console.table(dba.list(dba.query(SQL`select udf();`)));
-          }
+        dba.with_unsafe_mode(function() {
+          return console.table(dba.list(dba.query(SQL`select udf();`)));
         });
         console.table(dba.list(dba.query(SQL`select udf();`)));
       } catch (error1) {
@@ -1064,33 +1062,34 @@ create trigger multiple_instead_update instead of update on multiples begin
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: create_with_transaction()"] = function(T, done) {
+  this["DBA: with_transaction() 1"] = function(T, done) {
     var Dba;
     // T?.halt_on_error()
     ({Dba} = require(H.icql_dba_path));
     (() => {      //.........................................................................................................
       var dba;
       dba = new Dba();
-      return T != null ? T.throws(/not a valid dba_create_with_transaction_cfg/, function() {
-        return dba.create_with_transaction();
+      return T != null ? T.throws(/not a valid function/, function() {
+        return dba.with_transaction();
       }) : void 0;
     })();
     (() => {      //.........................................................................................................
       var create_table, dba, error;
-      error = null;
       dba = new Dba();
       // dba.open { schema: 'main', }
-      create_table = dba.create_with_transaction({
-        call: function(cfg) {
+      create_table = function(cfg) {
+        debug('^435^', {cfg});
+        return dba.with_transaction(function() {
           help('^70^', "creating a table with", cfg);
           dba.execute(SQL`create table foo ( bar integer );`);
           if (cfg.throw_error) {
             throw new Error("oops");
           }
-        }
-      });
+        });
+      };
+      //.......................................................................................................
+      error = null;
       try {
-        //.......................................................................................................
         create_table({
           throw_error: true
         });
@@ -1116,14 +1115,14 @@ create trigger multiple_instead_update instead of update on multiples begin
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: with_transaction()"] = function(T, done) {
+  this["DBA: with_transaction() 2"] = function(T, done) {
     var Dba;
     // T?.halt_on_error()
     ({Dba} = require(H.icql_dba_path));
     (() => {      //.........................................................................................................
       var dba;
       dba = new Dba();
-      return T != null ? T.throws(/not a valid dba_with_transaction_cfg/, function() {
+      return T != null ? T.throws(/not a valid function/, function() {
         return dba.with_transaction();
       }) : void 0;
     })();
@@ -1132,12 +1131,10 @@ create trigger multiple_instead_update instead of update on multiples begin
       error = null;
       dba = new Dba();
       try {
-        dba.with_transaction({
-          call: function() {
-            help('^70^', "creating a table");
-            dba.execute(SQL`create table foo ( bar integer );`);
-            throw new Error("oops");
-          }
+        dba.with_transaction(function() {
+          help('^70^', "creating a table");
+          dba.execute(SQL`create table foo ( bar integer );`);
+          throw new Error("oops");
         });
       } catch (error1) {
         error = error1;
@@ -1153,11 +1150,9 @@ create trigger multiple_instead_update instead of update on multiples begin
         T.eq(dba.list(dba.query("select * from sqlite_schema;")), []);
       }
       //.......................................................................................................
-      dba.with_transaction({
-        call: function() {
-          help('^70^', "creating a table");
-          return dba.execute(SQL`create table foo ( bar integer );`);
-        }
+      dba.with_transaction(function() {
+        help('^70^', "creating a table");
+        return dba.execute(SQL`create table foo ( bar integer );`);
       });
       //.......................................................................................................
       return T != null ? T.eq(dba.all_first_values(dba.query(SQL`select name from sqlite_schema;`)), ['foo']) : void 0;
@@ -1166,19 +1161,21 @@ create trigger multiple_instead_update instead of update on multiples begin
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: create_with_unsafe_mode()"] = function(T, done) {
+  this["DBA: with_unsafe_mode()"] = function(T, done) {
     var Dba;
-    // T?.halt_on_error()
+    if (T != null) {
+      T.halt_on_error();
+    }
     ({Dba} = require(H.icql_dba_path));
     (() => {      //.........................................................................................................
       var dba;
       dba = new Dba();
-      return T != null ? T.throws(/not a valid dba_create_with_unsafe_mode_cfg/, function() {
-        return dba.create_with_unsafe_mode();
+      return T != null ? T.throws(/not a valid function/, function() {
+        return dba.with_unsafe_mode();
       }) : void 0;
     })();
     (() => {      //.........................................................................................................
-      var d, dba, do_more_inserts, error, i, n, result, rows;
+      var d, dba, error, i, n, result, rows;
       error = null;
       dba = new Dba();
       // dba.open { schema: 'main', }
@@ -1186,21 +1183,18 @@ create trigger multiple_instead_update instead of update on multiples begin
       for (n = i = 10; i <= 19; n = ++i) {
         dba.run(SQL`insert into foo ( n ) values ( $n );`, {n});
       }
-      do_more_inserts = dba.create_with_unsafe_mode({
-        call: function(cfg) {
-          var ref, row;
-          ref = dba.query(SQL`select * from foo where not is_new;`);
-          for (row of ref) {
-            dba.run(SQL`insert into foo ( n, is_new ) values ( $n, $is_new );`, {
-              n: row.n * 3,
-              is_new: 1
-            });
-          }
-          return dba.execute(SQL`update foo set is_new = false where is_new;`);
+      dba.with_unsafe_mode(function() {
+        var ref, row;
+        ref = dba.query(SQL`select * from foo where not is_new;`);
+        for (row of ref) {
+          dba.run(SQL`insert into foo ( n, is_new ) values ( $n, $is_new );`, {
+            n: row.n * 3,
+            is_new: 1
+          });
         }
+        return dba.execute(SQL`update foo set is_new = false where is_new;`);
       });
       //.......................................................................................................
-      do_more_inserts();
       console.table(rows = dba.list(dba.query(SQL`select * from foo order by n;`)));
       result = (function() {
         var j, len, results;
@@ -1224,7 +1218,7 @@ create trigger multiple_instead_update instead of update on multiples begin
     (() => {      //.........................................................................................................
       var dba;
       dba = new Dba();
-      return T != null ? T.throws(/not a valid dba_create_with_foreign_keys_off_cfg/, function() {
+      return T != null ? T.throws(/not a valid function/, function() {
         return dba.with_foreign_keys_off();
       }) : void 0;
     })();
@@ -1252,15 +1246,13 @@ create table b ( n integer not null primary key references a ( n ) );`);
         }
       }
       //.......................................................................................................
-      dba.with_foreign_keys_off({
-        call: function() {
-          dba.execute(SQL`insert into a ( n ) values ( 1 );`);
-          dba.execute(SQL`insert into a ( n ) values ( 2 );`);
-          dba.execute(SQL`insert into a ( n ) values ( 3 );`);
-          dba.execute(SQL`insert into b ( n ) values ( 1 );`);
-          dba.execute(SQL`insert into b ( n ) values ( 2 );`);
-          return dba.execute(SQL`insert into b ( n ) values ( 3 );`);
-        }
+      dba.with_foreign_keys_off(function() {
+        dba.execute(SQL`insert into a ( n ) values ( 1 );`);
+        dba.execute(SQL`insert into a ( n ) values ( 2 );`);
+        dba.execute(SQL`insert into a ( n ) values ( 3 );`);
+        dba.execute(SQL`insert into b ( n ) values ( 1 );`);
+        dba.execute(SQL`insert into b ( n ) values ( 2 );`);
+        return dba.execute(SQL`insert into b ( n ) values ( 3 );`);
       });
       //.......................................................................................................
       console.table(rows = dba.list(dba.query(SQL`select
@@ -1287,16 +1279,19 @@ create table b ( n integer not null primary key references a ( n ) );`);
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      // debug f '𠖏'
-      // test @[ "DBA: concurrent UDFs" ]
-      // @[ "DBA: create_with_transaction()" ]()
-      // test @[ "DBA: create_with_unsafe_mode()" ]
-      return test(this["DBA: with_foreign_keys_off()"]);
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // @[ "DBA: with_transaction()" ]()
+  // debug f '𠖏'
+// test @[ "DBA: concurrent UDFs" ]
+// test @[ "DBA: create_with_unsafe_mode()" ]
+// @[ "DBA: with_foreign_keys_off()" ]()
+// @[ "DBA: with_unsafe_mode()" ]()
+// test @[ "DBA: with_transaction() 1" ]
+// @[ "DBA: with_transaction() 2" ]()
 // test @[ "DBA: with_transaction()" ]
 // @[ "DBA: concurrent UDFs" ]()
 // debug process.env[ 'icql-dba-use' ]
