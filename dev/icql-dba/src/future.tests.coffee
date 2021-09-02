@@ -509,7 +509,7 @@ DATA                      = require '../../../lib/data-providers-nocache'
   #.........................................................................................................
   await do =>
     dba.execute SQL"update x set locked = true;"
-    dba.with_unsafe_mode call: =>
+    dba.with_unsafe_mode =>
       for row from dba.query SQL"select * from x where locked;"
         info '^44555^', dba._state
         dba.run SQL"insert into x ( n ) values ( ? );", [ row.n + 100, ]

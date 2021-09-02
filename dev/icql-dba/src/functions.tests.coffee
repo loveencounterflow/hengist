@@ -471,7 +471,7 @@ jp                        = JSON.parse
     dba.open { path: work_path, schema, }
     dba.create_function name: 'udf', call: -> [ ( dba.query SQL"select 42 as x;" )..., ][ 0 ].x
     try
-      dba.with_unsafe_mode call: -> console.table dba.list dba.query SQL"select udf();"
+      dba.with_unsafe_mode -> console.table dba.list dba.query SQL"select udf();"
       console.table dba.list dba.query SQL"select udf();"
     catch error
       if error.message is 'This database connection is busy executing a query'
@@ -529,23 +529,25 @@ jp                        = JSON.parse
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: create_with_transaction()" ] = ( T, done ) ->
+@[ "DBA: with_transaction() 1" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Dba }           = require H.icql_dba_path
   #.........................................................................................................
   do =>
     dba = new Dba()
-    T?.throws /not a valid dba_create_with_transaction_cfg/, -> dba.create_with_transaction()
+    T?.throws /not a valid function/, -> dba.with_transaction()
   #.........................................................................................................
   do =>
-    error = null
     dba   = new Dba()
     # dba.open { schema: 'main', }
-    create_table = dba.create_with_transaction call: ( cfg ) ->
-      help '^70^', "creating a table with", cfg
-      dba.execute SQL"create table foo ( bar integer );"
-      throw new Error "oops" if cfg.throw_error
+    create_table = ( cfg ) ->
+      debug '^435^', { cfg, }
+      dba.with_transaction ->
+        help '^70^', "creating a table with", cfg
+        dba.execute SQL"create table foo ( bar integer );"
+        throw new Error "oops" if cfg.throw_error
     #.......................................................................................................
+    error = null
     try create_table { throw_error: true, } catch error
       T?.ok error.message is "oops"
       T?.eq ( dba.list dba.query "select * from sqlite_schema;" ), []
@@ -557,19 +559,19 @@ jp                        = JSON.parse
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: with_transaction()" ] = ( T, done ) ->
+@[ "DBA: with_transaction() 2" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Dba }           = require H.icql_dba_path
   #.........................................................................................................
   do =>
     dba = new Dba()
-    T?.throws /not a valid dba_with_transaction_cfg/, -> dba.with_transaction()
+    T?.throws /not a valid function/, -> dba.with_transaction()
   #.........................................................................................................
   do =>
     error = null
     dba   = new Dba()
     try
-      dba.with_transaction call: ->
+      dba.with_transaction ->
         help '^70^', "creating a table"
         dba.execute SQL"create table foo ( bar integer );"
         throw new Error "oops"
@@ -579,7 +581,7 @@ jp                        = JSON.parse
     T.fail "expected error but none was thrown" unless error?
     T?.eq ( dba.list dba.query "select * from sqlite_schema;" ), []
     #.......................................................................................................
-    dba.with_transaction call: ->
+    dba.with_transaction ->
       help '^70^', "creating a table"
       dba.execute SQL"create table foo ( bar integer );"
     #.......................................................................................................
@@ -588,13 +590,13 @@ jp                        = JSON.parse
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: create_with_unsafe_mode()" ] = ( T, done ) ->
-  # T?.halt_on_error()
+@[ "DBA: with_unsafe_mode()" ] = ( T, done ) ->
+  T?.halt_on_error()
   { Dba }           = require H.icql_dba_path
   #.........................................................................................................
   do =>
     dba = new Dba()
-    T?.throws /not a valid dba_create_with_unsafe_mode_cfg/, -> dba.create_with_unsafe_mode()
+    T?.throws /not a valid function/, -> dba.with_unsafe_mode()
   #.........................................................................................................
   do =>
     error = null
@@ -603,12 +605,11 @@ jp                        = JSON.parse
     dba.execute SQL"create table foo ( n integer, is_new boolean default false );"
     for n in [ 10 .. 19 ]
       dba.run SQL"insert into foo ( n ) values ( $n );", { n, }
-    do_more_inserts = dba.create_with_unsafe_mode call: ( cfg ) ->
+    dba.with_unsafe_mode ->
       for row from dba.query SQL"select * from foo where not is_new;"
         dba.run SQL"insert into foo ( n, is_new ) values ( $n, $is_new );", { n: row.n * 3, is_new: 1, }
       dba.execute SQL"update foo set is_new = false where is_new;"
     #.......................................................................................................
-    do_more_inserts()
     console.table rows = dba.list dba.query SQL"select * from foo order by n;"
     result = ( d.n for d in rows )
     T?.eq result, [ 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57 ]
@@ -622,7 +623,7 @@ jp                        = JSON.parse
   #.........................................................................................................
   do =>
     dba = new Dba()
-    T?.throws /not a valid dba_create_with_foreign_keys_off_cfg/, -> dba.with_foreign_keys_off()
+    T?.throws /not a valid function/, -> dba.with_foreign_keys_off()
   #.........................................................................................................
   do =>
     error = null
@@ -641,7 +642,7 @@ jp                        = JSON.parse
       T?.eq error.message, "FOREIGN KEY constraint failed"
     T?.fail "expected error, got none" unless error?
     #.......................................................................................................
-    dba.with_foreign_keys_off call: ->
+    dba.with_foreign_keys_off ->
       dba.execute SQL"insert into a ( n ) values ( 1 );"
       dba.execute SQL"insert into a ( n ) values ( 2 );"
       dba.execute SQL"insert into a ( n ) values ( 3 );"
@@ -666,13 +667,14 @@ jp                        = JSON.parse
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
+  test @, { timeout: 10e3, }
   # debug f '𠖏'
   # test @[ "DBA: concurrent UDFs" ]
-  # @[ "DBA: create_with_transaction()" ]()
   # test @[ "DBA: create_with_unsafe_mode()" ]
-  test @[ "DBA: with_foreign_keys_off()" ]
-  # @[ "DBA: with_transaction()" ]()
+  # @[ "DBA: with_foreign_keys_off()" ]()
+  # @[ "DBA: with_unsafe_mode()" ]()
+  # test @[ "DBA: with_transaction() 1" ]
+  # @[ "DBA: with_transaction() 2" ]()
   # test @[ "DBA: with_transaction()" ]
   # @[ "DBA: concurrent UDFs" ]()
   # debug process.env[ 'icql-dba-use' ]
