@@ -95,7 +95,6 @@ class Context_manager extends Function
   manage: ( rtas..., block ) =>
     validate.function block
     cx_value = @enter rtas...
-    urge '^22298^', @cfg, cx_value
     try
       block_value = block.call @, cx_value, rtas...
     finally
