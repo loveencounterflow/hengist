@@ -671,7 +671,7 @@ jp                        = JSON.parse
   { Dba }           = require H.icql_dba_path
   list_table_a      = ( dba ) -> ( row.n for row from dba.query SQL"select n from a;" )
   list_table_b      = ( dba ) -> ( row.n for row from dba.query SQL"select n from b;" )
-  #.........................................................................................................
+  #---------------------------------------------------------------------------------------------------------
   do =>
     urge '^50-1^', "begin transaction, then defer fks"
     dba               = new Dba()
@@ -680,34 +680,106 @@ jp                        = JSON.parse
       create table a ( n integer not null primary key references b ( n ) );
       create table b ( n integer not null primary key references a ( n ) );
       """
-    debug '^50-1^', sqlt.inTransaction; T?.eq sqlt.inTransaction, false
-    debug '^50-2^', sqlt.pragma SQL"defer_foreign_keys;"
-    debug '^50-3^'; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 0 } ]
-    debug '^50-4^'; dba.execute SQL"begin transaction;"
-    debug '^50-5^', sqlt.inTransaction; T?.eq sqlt.inTransaction, true
-    debug '^50-6^'; T?.eq dba._get_foreign_keys_state(), true
-    debug '^50-7^'; sqlt.pragma SQL"defer_foreign_keys=1;"
-    debug '^50-8^'; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 1 } ]
-    debug '^50-9^'; dba.execute SQL"insert into a ( n ) values ( 1 );"
-    debug '^50-10^'; dba.execute SQL"insert into b ( n ) values ( 1 );"
-    debug '^50-11^'; dba.execute SQL"insert into a ( n ) values ( 2 );"
-    # debug '^50-12^'; dba.execute SQL"insert into b ( n ) values ( 2 );"
+    #.......................................................................................................
+    ### ensure DB transaction, fk state ###
+    info '^50-2^', sqlt.inTransaction;                   T?.eq sqlt.inTransaction, false
+    info '^50-3^', dba._get_foreign_keys_state();        T?.eq dba._get_foreign_keys_state(), true
+    info '^50-4^', sqlt.pragma SQL"defer_foreign_keys;"; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 0 } ]
+    #.......................................................................................................
+    ### begin transaction, then  start deferred fks ###
+    debug '^50-5^'; dba.execute SQL"begin transaction;"
+    debug '^50-6^'; sqlt.pragma SQL"defer_foreign_keys=1;"
+    #.......................................................................................................
+    ### ensure DB transaction, fk state ###
+    info '^50-7^', sqlt.inTransaction;                   T?.eq sqlt.inTransaction, true
+    info '^50-8^', dba._get_foreign_keys_state();        T?.eq dba._get_foreign_keys_state(), true
+    info '^50-9^', sqlt.pragma SQL"defer_foreign_keys;"; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 1 } ]
+    #.......................................................................................................
+    ### insert partly bogus values, check ###
+    debug '^50-10^'; dba.execute SQL"insert into a ( n ) values ( 1 );"
+    debug '^50-11^'; dba.execute SQL"insert into b ( n ) values ( 1 );"
+    debug '^50-12^'; dba.execute SQL"insert into a ( n ) values ( 2 );"
+    # debug '^50-13^'; dba.execute SQL"insert into b ( n ) values ( 2 );"
     error = null
-    debug '^50-20^', list_table_a dba; T?.eq ( list_table_a dba ), [ 1, 2, ]
-    debug '^50-21^', list_table_b dba; T?.eq ( list_table_b dba ), [ 1, ]
+    debug '^50-14^', list_table_a dba; T?.eq ( list_table_a dba ), [ 1, 2, ]
+    debug '^50-15^', list_table_b dba; T?.eq ( list_table_b dba ), [ 1, ]
+    #.......................................................................................................
+    ### try to commit, rollback on error ###
     try
-      debug '^50-15^'; dba.execute SQL"commit;"
+      debug '^50-16^'; dba.execute SQL"commit;"
     catch error
-      debug '^50-16^', sqlt.inTransaction; T?.eq sqlt.inTransaction, true
+      debug '^50-17^', sqlt.inTransaction; T?.eq sqlt.inTransaction, true
       warn error.message
       T?.eq error.message, "FOREIGN KEY constraint failed"
-      debug '^50-17^'; dba.execute SQL"rollback;"
-      debug '^50-18^', sqlt.inTransaction; T?.eq sqlt.inTransaction, false
-    finally
+      debug '^50-18^'; dba.execute SQL"rollback;"
       debug '^50-19^', sqlt.inTransaction; T?.eq sqlt.inTransaction, false
-    T.fail "^50-13^ expected error, got none" unless error?
-    debug '^50-20^', list_table_a dba; T?.eq ( list_table_a dba ), []
-    debug '^50-21^', list_table_b dba; T?.eq ( list_table_b dba ), []
+    finally
+      debug '^50-20^', sqlt.inTransaction; T?.eq sqlt.inTransaction, false
+    #.......................................................................................................
+    ### Ensure error happened, tables empty as before ###
+    T.fail '^50-21^', "expected error, got none" unless error?
+    debug '^50-22^', list_table_a dba; T?.eq ( list_table_a dba ), []
+    debug '^50-23^', list_table_b dba; T?.eq ( list_table_b dba ), []
+    #.......................................................................................................
+    ### ensure DB transaction, fk state ###
+    info '^50-24^', sqlt.inTransaction;                   T?.eq sqlt.inTransaction, false
+    info '^50-25^', dba._get_foreign_keys_state();        T?.eq dba._get_foreign_keys_state(), true
+    info '^50-26^', sqlt.pragma SQL"defer_foreign_keys;"; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 0 } ]
+  #---------------------------------------------------------------------------------------------------------
+  do =>
+    urge '^50-27^', "defer fks, then begin transaction"
+    dba               = new Dba()
+    { sqlt, }         = dba
+    dba.execute SQL"""
+      create table a ( n integer not null primary key references b ( n ) );
+      create table b ( n integer not null primary key references a ( n ) );
+      """
+    #.......................................................................................................
+    ### ensure DB transaction, fk state ###
+    info '^50-28^', sqlt.inTransaction;                   T?.eq sqlt.inTransaction, false
+    info '^50-29^', dba._get_foreign_keys_state();        T?.eq dba._get_foreign_keys_state(), true
+    info '^50-30^', sqlt.pragma SQL"defer_foreign_keys;"; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 0 } ]
+    #.......................................................................................................
+    ### begin transaction, then  start deferred fks ###
+    debug '^50-31^'; sqlt.pragma SQL"defer_foreign_keys=1;"
+    debug '^50-32^'; dba.execute SQL"begin transaction;"
+    #.......................................................................................................
+    ### ensure DB transaction, fk state ###
+    info '^50-33^', sqlt.inTransaction;                   T?.eq sqlt.inTransaction, true
+    info '^50-34^', dba._get_foreign_keys_state();        T?.eq dba._get_foreign_keys_state(), true
+    info '^50-35^', sqlt.pragma SQL"defer_foreign_keys;"; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 1 } ]
+    #.......................................................................................................
+    ### insert partly bogus values, check ###
+    debug '^50-36^'; dba.execute SQL"insert into a ( n ) values ( 1 );"
+    debug '^50-37^'; dba.execute SQL"insert into b ( n ) values ( 1 );"
+    debug '^50-38^'; dba.execute SQL"insert into a ( n ) values ( 2 );"
+    # debug '^50-39^'; dba.execute SQL"insert into b ( n ) values ( 2 );"
+    error = null
+    debug '^50-40^', list_table_a dba; T?.eq ( list_table_a dba ), [ 1, 2, ]
+    debug '^50-41^', list_table_b dba; T?.eq ( list_table_b dba ), [ 1, ]
+    #.......................................................................................................
+    ### try to commit, rollback on error ###
+    try
+      debug '^50-42^'; dba.execute SQL"commit;"
+    catch error
+      debug '^50-43^', sqlt.inTransaction; T?.eq sqlt.inTransaction, true
+      warn error.message
+      T?.eq error.message, "FOREIGN KEY constraint failed"
+      debug '^50-44^'; dba.execute SQL"rollback;"
+      debug '^50-45^', sqlt.inTransaction; T?.eq sqlt.inTransaction, false
+      # throw error ### in production, re-throw error after rollback ###
+    finally
+      debug '^50-46^', sqlt.inTransaction; T?.eq sqlt.inTransaction, false
+    #.......................................................................................................
+    ### Ensure error happened, tables empty as before ###
+    T.fail '^50-47^', "expected error, got none" unless error?
+    debug '^50-48^', list_table_a dba; T?.eq ( list_table_a dba ), []
+    debug '^50-49^', list_table_b dba; T?.eq ( list_table_b dba ), []
+    #.......................................................................................................
+    ### ensure DB transaction, fk state ###
+    info '^50-50^', sqlt.inTransaction;                   T?.eq sqlt.inTransaction, false
+    info '^50-51^', dba._get_foreign_keys_state();        T?.eq dba._get_foreign_keys_state(), true
+    info '^50-52^', sqlt.pragma SQL"defer_foreign_keys;"; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 0 } ]
   #.........................................................................................................
   done?()
 
