@@ -1211,7 +1211,7 @@ create trigger multiple_instead_update instead of update on multiples begin
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: with_foreign_keys_off()"] = function(T, done) {
+  this["DBA: with_foreign_keys_off() 1"] = function(T, done) {
     var Dba;
     // T?.halt_on_error()
     ({Dba} = require(H.icql_dba_path));
@@ -1255,6 +1255,16 @@ create table b ( n integer not null primary key references a ( n ) );`);
         return dba.execute(SQL`insert into b ( n ) values ( 3 );`);
       });
       //.......................................................................................................
+      if (T != null) {
+        T.eq(dba.pragma(SQL`foreign_key_check;`), []);
+      }
+      if (T != null) {
+        T.eq(dba.pragma(SQL`integrity_check;`), [
+          {
+            integrity_check: 'ok'
+          }
+        ]);
+      }
       console.table(rows = dba.list(dba.query(SQL`select
     a.n as a_n,
     b.n as b_n
@@ -1276,26 +1286,335 @@ create table b ( n integer not null primary key references a ( n ) );`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: with_foreign_keys_deferred(), preliminaries"] = function(T, done) {
+    var Dba, list_table_a, list_table_b;
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
+    list_table_a = function(dba) {
+      var ref, results, row;
+      ref = dba.query(SQL`select n from a;`);
+      results = [];
+      for (row of ref) {
+        results.push(row.n);
+      }
+      return results;
+    };
+    list_table_b = function(dba) {
+      var ref, results, row;
+      ref = dba.query(SQL`select n from b;`);
+      results = [];
+      for (row of ref) {
+        results.push(row.n);
+      }
+      return results;
+    };
+    (() => {      //.........................................................................................................
+      var dba, error, sqlt;
+      urge('^50-1^', "begin transaction, then defer fks");
+      dba = new Dba();
+      ({sqlt} = dba);
+      dba.execute(SQL`create table a ( n integer not null primary key references b ( n ) );
+create table b ( n integer not null primary key references a ( n ) );`);
+      debug('^50-1^', sqlt.inTransaction);
+      if (T != null) {
+        T.eq(sqlt.inTransaction, false);
+      }
+      debug('^50-2^', sqlt.pragma(SQL`defer_foreign_keys;`));
+      debug('^50-3^');
+      if (T != null) {
+        T.eq(sqlt.pragma(SQL`defer_foreign_keys;`), [
+          {
+            defer_foreign_keys: 0
+          }
+        ]);
+      }
+      debug('^50-4^');
+      dba.execute(SQL`begin transaction;`);
+      debug('^50-5^', sqlt.inTransaction);
+      if (T != null) {
+        T.eq(sqlt.inTransaction, true);
+      }
+      debug('^50-6^');
+      if (T != null) {
+        T.eq(dba._get_foreign_keys_state(), true);
+      }
+      debug('^50-7^');
+      sqlt.pragma(SQL`defer_foreign_keys=1;`);
+      debug('^50-8^');
+      if (T != null) {
+        T.eq(sqlt.pragma(SQL`defer_foreign_keys;`), [
+          {
+            defer_foreign_keys: 1
+          }
+        ]);
+      }
+      debug('^50-9^');
+      dba.execute(SQL`insert into a ( n ) values ( 1 );`);
+      debug('^50-10^');
+      dba.execute(SQL`insert into b ( n ) values ( 1 );`);
+      debug('^50-11^');
+      dba.execute(SQL`insert into a ( n ) values ( 2 );`);
+      // debug '^50-12^'; dba.execute SQL"insert into b ( n ) values ( 2 );"
+      error = null;
+      debug('^50-20^', list_table_a(dba));
+      if (T != null) {
+        T.eq(list_table_a(dba), [1, 2]);
+      }
+      debug('^50-21^', list_table_b(dba));
+      if (T != null) {
+        T.eq(list_table_b(dba), [1]);
+      }
+      try {
+        debug('^50-15^');
+        dba.execute(SQL`commit;`);
+      } catch (error1) {
+        error = error1;
+        debug('^50-16^', sqlt.inTransaction);
+        if (T != null) {
+          T.eq(sqlt.inTransaction, true);
+        }
+        warn(error.message);
+        if (T != null) {
+          T.eq(error.message, "FOREIGN KEY constraint failed");
+        }
+        debug('^50-17^');
+        dba.execute(SQL`rollback;`);
+        debug('^50-18^', sqlt.inTransaction);
+        if (T != null) {
+          T.eq(sqlt.inTransaction, false);
+        }
+      } finally {
+        debug('^50-19^', sqlt.inTransaction);
+        if (T != null) {
+          T.eq(sqlt.inTransaction, false);
+        }
+      }
+      if (error == null) {
+        T.fail("^50-13^ expected error, got none");
+      }
+      debug('^50-20^', list_table_a(dba));
+      if (T != null) {
+        T.eq(list_table_a(dba), []);
+      }
+      debug('^50-21^', list_table_b(dba));
+      return T != null ? T.eq(list_table_b(dba), []) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: with_foreign_keys_deferred(), ensure checks"] = function(T, done) {
+    var Dba, d, dba, error, list_table_a, nxt_values, prv_values, result, rows;
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
+    //.........................................................................................................
+    list_table_a = function(dba) {
+      var ref, results, row;
+      ref = dba.query(SQL`select n from a;`);
+      results = [];
+      for (row of ref) {
+        results.push(row.n);
+      }
+      return results;
+    };
+    //.........................................................................................................
+    error = null;
+    dba = new Dba();
+    // dba.open { schema: 'main', }
+    dba.execute(SQL`create table a ( n integer not null primary key references b ( n ) );
+create table b ( n integer not null primary key references a ( n ) );`);
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(CND.truth(dba.sqlt.inTransaction, false));
+    }
+    if (T != null) {
+      T.eq(dba._get_foreign_keys_state(), true);
+    }
+    dba.with_foreign_keys_deferred(function() {
+      if (T != null) {
+        T.eq(CND.truth(dba.sqlt.inTransaction, true));
+      }
+      if (T != null) {
+        T.eq(dba._get_foreign_keys_state(), true);
+      }
+      dba.execute(SQL`insert into a ( n ) values ( 1 );`);
+      dba.execute(SQL`insert into a ( n ) values ( 2 );`);
+      dba.execute(SQL`insert into a ( n ) values ( 3 );`);
+      dba.execute(SQL`insert into b ( n ) values ( 1 );`);
+      dba.execute(SQL`insert into b ( n ) values ( 2 );`);
+      dba.execute(SQL`insert into b ( n ) values ( 3 );`);
+      // dba.execute SQL"insert into a ( n ) values ( 4 );"
+      console.table(dba.list(dba.query(SQL`select * from a;`)));
+      return console.table(dba.list(dba.query(SQL`select * from b;`)));
+    });
+    if (T != null) {
+      T.eq(CND.truth(dba.sqlt.inTransaction, false));
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(dba._get_foreign_keys_state(), true);
+    }
+    if (T != null) {
+      T.eq(dba.pragma(SQL`foreign_key_check;`), []);
+    }
+    if (T != null) {
+      T.eq(dba.pragma(SQL`integrity_check;`), [
+        {
+          integrity_check: 'ok'
+        }
+      ]);
+    }
+    //.........................................................................................................
+    debug('^778-1^', (prv_values = list_table_a(dba)));
+    if (T != null) {
+      T.eq((nxt_values = list_table_a(dba)), prv_values);
+    }
+    prv_values = nxt_values;
+    debug('^778-2^');
+    if (T != null) {
+      T.eq(dba.sqlt.inTransaction, false);
+    }
+    try {
+      dba.with_foreign_keys_deferred(function() {
+        if (T != null) {
+          T.eq(dba.sqlt.inTransaction, true);
+        }
+        return dba.execute(SQL`insert into a ( n ) values ( 101 );`);
+      });
+    } catch (error1) {
+      error = error1;
+      warn(error.message);
+      if (T != null) {
+        T.eq(error.message, "FOREIGN KEY constraint failed");
+      }
+    }
+    if (T != null) {
+      T.eq(dba.sqlt.inTransaction, false);
+    }
+    debug('^778-4^', list_table_a(dba));
+    if (T != null) {
+      T.eq((nxt_values = list_table_a(dba)), prv_values);
+    }
+    prv_values = nxt_values;
+    //.........................................................................................................
+    debug('^778-5^');
+    try {
+      dba.with_transaction(function() {
+        return dba.with_foreign_keys_deferred(function() {
+          return dba.execute(SQL`insert into a ( n ) values ( 102 );`);
+        });
+      });
+    } catch (error1) {
+      error = error1;
+      warn(error.message);
+      if (T != null) {
+        T.eq(error.message, "^dba-functions@901^ (Dba_no_nested_transactions) cannot start a transaction within a transaction");
+      }
+    }
+    debug('^778-6^', list_table_a(dba));
+    if (T != null) {
+      T.eq((nxt_values = list_table_a(dba)), prv_values);
+    }
+    prv_values = nxt_values;
+    //.........................................................................................................
+    debug('^778-7^');
+    try {
+      dba.with_foreign_keys_deferred(function() {
+        return dba.with_transaction(function() {
+          return dba.execute(SQL`insert into a ( n ) values ( 103 );`);
+        });
+      });
+    } catch (error1) {
+      error = error1;
+      warn(error.message);
+      if (T != null) {
+        T.eq(error.message, "^dba-functions@901^ (Dba_no_deferred_fks_in_tx) cannot defer foreign keys inside a transaction");
+      }
+    }
+    debug('^778-8^', list_table_a(dba));
+    if (T != null) {
+      T.eq((nxt_values = list_table_a(dba)), prv_values);
+    }
+    prv_values = nxt_values;
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(dba.pragma(SQL`foreign_key_check;`), []);
+    }
+    if (T != null) {
+      T.eq(dba.pragma(SQL`integrity_check;`), [
+        {
+          integrity_check: 'ok'
+        }
+      ]);
+    }
+    //.........................................................................................................
+    console.table(rows = dba.list(dba.query(SQL`select
+    a.n as a_n,
+    b.n as b_n
+  from a
+  left join b using ( n )
+  order by n;`)));
+    debug('^400^', rows);
+    result = (function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = rows.length; i < len; i++) {
+        d = rows[i];
+        results.push([d.a_n, d.b_n]);
+      }
+      return results;
+    })();
+    if (T != null) {
+      T.eq(result, [[1, 1], [2, 2], [3, 3]]);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      var f;
+      // test @, { timeout: 10e3, }
+      // debug f '𠖏'
+      // test @[ "DBA: concurrent UDFs" ]
+      // test @[ "DBA: create_with_unsafe_mode()" ]
+      // @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]()
+      test(this["DBA: with_foreign_keys_deferred(), preliminaries"]);
+      // test @[ "DBA: with_foreign_keys_deferred(), ensure checks" ]
+
+      // @[ "DBA: with_foreign_keys_off() 1" ]()
+      // test @[ "DBA: with_foreign_keys_off() 1" ]
+      // @[ "DBA: with_unsafe_mode()" ]()
+      // test @[ "DBA: with_transaction() 1" ]
+      // @[ "DBA: with_transaction() 2" ]()
+      // test @[ "DBA: with_transaction()" ]
+      // @[ "DBA: concurrent UDFs" ]()
+      // debug process.env[ 'icql-dba-use' ]
+      // debug process.argv
+      return f = function() {
+        debugger;
+        var error;
+        error = null;
+        try {
+          xxx;
+          null;
+        } catch (error1) {
+          error = error1;
+          null;
+        } finally {
+          // debug '^34-catch^', error?.message
+          // throw error
+          debug('^34-finally^');
+          if (error != null) {
+            debug('^34-finally-2', error.message);
+            throw error;
+          }
+        }
+        return null;
+      };
     })();
   }
-
-  // debug f '𠖏'
-// test @[ "DBA: concurrent UDFs" ]
-// test @[ "DBA: create_with_unsafe_mode()" ]
-// @[ "DBA: with_foreign_keys_off()" ]()
-// @[ "DBA: with_unsafe_mode()" ]()
-// test @[ "DBA: with_transaction() 1" ]
-// @[ "DBA: with_transaction() 2" ]()
-// test @[ "DBA: with_transaction()" ]
-// @[ "DBA: concurrent UDFs" ]()
-// debug process.env[ 'icql-dba-use' ]
-// debug process.argv
 
 }).call(this);
 
