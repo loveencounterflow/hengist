@@ -1309,19 +1309,24 @@ create table b ( n integer not null primary key references a ( n ) );`);
       }
       return results;
     };
-    (() => {      //.........................................................................................................
+    (() => {      //---------------------------------------------------------------------------------------------------------
       var dba, error, sqlt;
       urge('^50-1^', "begin transaction, then defer fks");
       dba = new Dba();
       ({sqlt} = dba);
       dba.execute(SQL`create table a ( n integer not null primary key references b ( n ) );
 create table b ( n integer not null primary key references a ( n ) );`);
-      debug('^50-1^', sqlt.inTransaction);
+      //.......................................................................................................
+      /* ensure DB transaction, fk state */
+      info('^50-2^', sqlt.inTransaction);
       if (T != null) {
         T.eq(sqlt.inTransaction, false);
       }
-      debug('^50-2^', sqlt.pragma(SQL`defer_foreign_keys;`));
-      debug('^50-3^');
+      info('^50-3^', dba._get_foreign_keys_state());
+      if (T != null) {
+        T.eq(dba._get_foreign_keys_state(), true);
+      }
+      info('^50-4^', sqlt.pragma(SQL`defer_foreign_keys;`));
       if (T != null) {
         T.eq(sqlt.pragma(SQL`defer_foreign_keys;`), [
           {
@@ -1329,19 +1334,23 @@ create table b ( n integer not null primary key references a ( n ) );`);
           }
         ]);
       }
-      debug('^50-4^');
+      //.......................................................................................................
+      /* begin transaction, then  start deferred fks */
+      debug('^50-5^');
       dba.execute(SQL`begin transaction;`);
-      debug('^50-5^', sqlt.inTransaction);
+      debug('^50-6^');
+      sqlt.pragma(SQL`defer_foreign_keys=1;`);
+      //.......................................................................................................
+      /* ensure DB transaction, fk state */
+      info('^50-7^', sqlt.inTransaction);
       if (T != null) {
         T.eq(sqlt.inTransaction, true);
       }
-      debug('^50-6^');
+      info('^50-8^', dba._get_foreign_keys_state());
       if (T != null) {
         T.eq(dba._get_foreign_keys_state(), true);
       }
-      debug('^50-7^');
-      sqlt.pragma(SQL`defer_foreign_keys=1;`);
-      debug('^50-8^');
+      info('^50-9^', sqlt.pragma(SQL`defer_foreign_keys;`));
       if (T != null) {
         T.eq(sqlt.pragma(SQL`defer_foreign_keys;`), [
           {
@@ -1349,28 +1358,32 @@ create table b ( n integer not null primary key references a ( n ) );`);
           }
         ]);
       }
-      debug('^50-9^');
-      dba.execute(SQL`insert into a ( n ) values ( 1 );`);
+      //.......................................................................................................
+      /* insert partly bogus values, check */
       debug('^50-10^');
-      dba.execute(SQL`insert into b ( n ) values ( 1 );`);
+      dba.execute(SQL`insert into a ( n ) values ( 1 );`);
       debug('^50-11^');
+      dba.execute(SQL`insert into b ( n ) values ( 1 );`);
+      debug('^50-12^');
       dba.execute(SQL`insert into a ( n ) values ( 2 );`);
-      // debug '^50-12^'; dba.execute SQL"insert into b ( n ) values ( 2 );"
+      // debug '^50-13^'; dba.execute SQL"insert into b ( n ) values ( 2 );"
       error = null;
-      debug('^50-20^', list_table_a(dba));
+      debug('^50-14^', list_table_a(dba));
       if (T != null) {
         T.eq(list_table_a(dba), [1, 2]);
       }
-      debug('^50-21^', list_table_b(dba));
+      debug('^50-15^', list_table_b(dba));
       if (T != null) {
         T.eq(list_table_b(dba), [1]);
       }
       try {
-        debug('^50-15^');
+        //.......................................................................................................
+        /* try to commit, rollback on error */
+        debug('^50-16^');
         dba.execute(SQL`commit;`);
       } catch (error1) {
         error = error1;
-        debug('^50-16^', sqlt.inTransaction);
+        debug('^50-17^', sqlt.inTransaction);
         if (T != null) {
           T.eq(sqlt.inTransaction, true);
         }
@@ -1378,27 +1391,172 @@ create table b ( n integer not null primary key references a ( n ) );`);
         if (T != null) {
           T.eq(error.message, "FOREIGN KEY constraint failed");
         }
-        debug('^50-17^');
+        debug('^50-18^');
         dba.execute(SQL`rollback;`);
-        debug('^50-18^', sqlt.inTransaction);
+        debug('^50-19^', sqlt.inTransaction);
         if (T != null) {
           T.eq(sqlt.inTransaction, false);
         }
       } finally {
-        debug('^50-19^', sqlt.inTransaction);
+        debug('^50-20^', sqlt.inTransaction);
         if (T != null) {
           T.eq(sqlt.inTransaction, false);
         }
       }
       if (error == null) {
-        T.fail("^50-13^ expected error, got none");
+        //.......................................................................................................
+        /* Ensure error happened, tables empty as before */
+        T.fail('^50-21^', "expected error, got none");
       }
-      debug('^50-20^', list_table_a(dba));
+      debug('^50-22^', list_table_a(dba));
       if (T != null) {
         T.eq(list_table_a(dba), []);
       }
-      debug('^50-21^', list_table_b(dba));
-      return T != null ? T.eq(list_table_b(dba), []) : void 0;
+      debug('^50-23^', list_table_b(dba));
+      if (T != null) {
+        T.eq(list_table_b(dba), []);
+      }
+      //.......................................................................................................
+      /* ensure DB transaction, fk state */
+      info('^50-24^', sqlt.inTransaction);
+      if (T != null) {
+        T.eq(sqlt.inTransaction, false);
+      }
+      info('^50-25^', dba._get_foreign_keys_state());
+      if (T != null) {
+        T.eq(dba._get_foreign_keys_state(), true);
+      }
+      info('^50-26^', sqlt.pragma(SQL`defer_foreign_keys;`));
+      return T != null ? T.eq(sqlt.pragma(SQL`defer_foreign_keys;`), [
+        {
+          defer_foreign_keys: 0
+        }
+      ]) : void 0;
+    })();
+    (() => {      //---------------------------------------------------------------------------------------------------------
+      var dba, error, sqlt;
+      urge('^50-27^', "defer fks, then begin transaction");
+      dba = new Dba();
+      ({sqlt} = dba);
+      dba.execute(SQL`create table a ( n integer not null primary key references b ( n ) );
+create table b ( n integer not null primary key references a ( n ) );`);
+      //.......................................................................................................
+      /* ensure DB transaction, fk state */
+      info('^50-28^', sqlt.inTransaction);
+      if (T != null) {
+        T.eq(sqlt.inTransaction, false);
+      }
+      info('^50-29^', dba._get_foreign_keys_state());
+      if (T != null) {
+        T.eq(dba._get_foreign_keys_state(), true);
+      }
+      info('^50-30^', sqlt.pragma(SQL`defer_foreign_keys;`));
+      if (T != null) {
+        T.eq(sqlt.pragma(SQL`defer_foreign_keys;`), [
+          {
+            defer_foreign_keys: 0
+          }
+        ]);
+      }
+      //.......................................................................................................
+      /* begin transaction, then  start deferred fks */
+      debug('^50-31^');
+      sqlt.pragma(SQL`defer_foreign_keys=1;`);
+      debug('^50-32^');
+      dba.execute(SQL`begin transaction;`);
+      //.......................................................................................................
+      /* ensure DB transaction, fk state */
+      info('^50-33^', sqlt.inTransaction);
+      if (T != null) {
+        T.eq(sqlt.inTransaction, true);
+      }
+      info('^50-34^', dba._get_foreign_keys_state());
+      if (T != null) {
+        T.eq(dba._get_foreign_keys_state(), true);
+      }
+      info('^50-35^', sqlt.pragma(SQL`defer_foreign_keys;`));
+      if (T != null) {
+        T.eq(sqlt.pragma(SQL`defer_foreign_keys;`), [
+          {
+            defer_foreign_keys: 1
+          }
+        ]);
+      }
+      //.......................................................................................................
+      /* insert partly bogus values, check */
+      debug('^50-36^');
+      dba.execute(SQL`insert into a ( n ) values ( 1 );`);
+      debug('^50-37^');
+      dba.execute(SQL`insert into b ( n ) values ( 1 );`);
+      debug('^50-38^');
+      dba.execute(SQL`insert into a ( n ) values ( 2 );`);
+      // debug '^50-39^'; dba.execute SQL"insert into b ( n ) values ( 2 );"
+      error = null;
+      debug('^50-40^', list_table_a(dba));
+      if (T != null) {
+        T.eq(list_table_a(dba), [1, 2]);
+      }
+      debug('^50-41^', list_table_b(dba));
+      if (T != null) {
+        T.eq(list_table_b(dba), [1]);
+      }
+      try {
+        //.......................................................................................................
+        /* try to commit, rollback on error */
+        debug('^50-42^');
+        dba.execute(SQL`commit;`);
+      } catch (error1) {
+        error = error1;
+        debug('^50-43^', sqlt.inTransaction);
+        if (T != null) {
+          T.eq(sqlt.inTransaction, true);
+        }
+        warn(error.message);
+        if (T != null) {
+          T.eq(error.message, "FOREIGN KEY constraint failed");
+        }
+        debug('^50-44^');
+        dba.execute(SQL`rollback;`);
+        debug('^50-45^', sqlt.inTransaction);
+        if (T != null) {
+          T.eq(sqlt.inTransaction, false);
+        }
+      } finally {
+        // throw error ### in production, re-throw error after rollback ###
+        debug('^50-46^', sqlt.inTransaction);
+        if (T != null) {
+          T.eq(sqlt.inTransaction, false);
+        }
+      }
+      if (error == null) {
+        //.......................................................................................................
+        /* Ensure error happened, tables empty as before */
+        T.fail('^50-47^', "expected error, got none");
+      }
+      debug('^50-48^', list_table_a(dba));
+      if (T != null) {
+        T.eq(list_table_a(dba), []);
+      }
+      debug('^50-49^', list_table_b(dba));
+      if (T != null) {
+        T.eq(list_table_b(dba), []);
+      }
+      //.......................................................................................................
+      /* ensure DB transaction, fk state */
+      info('^50-50^', sqlt.inTransaction);
+      if (T != null) {
+        T.eq(sqlt.inTransaction, false);
+      }
+      info('^50-51^', dba._get_foreign_keys_state());
+      if (T != null) {
+        T.eq(dba._get_foreign_keys_state(), true);
+      }
+      info('^50-52^', sqlt.pragma(SQL`defer_foreign_keys;`));
+      return T != null ? T.eq(sqlt.pragma(SQL`defer_foreign_keys;`), [
+        {
+          defer_foreign_keys: 0
+        }
+      ]) : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
   };
