@@ -617,7 +617,7 @@ jp                        = JSON.parse
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: with_foreign_keys_off()" ] = ( T, done ) ->
+@[ "DBA: with_foreign_keys_off() 1" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Dba }           = require H.icql_dba_path
   #.........................................................................................................
@@ -650,6 +650,8 @@ jp                        = JSON.parse
       dba.execute SQL"insert into b ( n ) values ( 2 );"
       dba.execute SQL"insert into b ( n ) values ( 3 );"
     #.......................................................................................................
+    T?.eq ( dba.pragma SQL"foreign_key_check;" ), []
+    T?.eq ( dba.pragma SQL"integrity_check;"   ), [ { integrity_check: 'ok' } ]
     console.table rows = dba.list dba.query SQL"""
       select
           a.n as a_n,
@@ -663,15 +665,154 @@ jp                        = JSON.parse
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: with_foreign_keys_deferred(), preliminaries" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
+  list_table_a      = ( dba ) -> ( row.n for row from dba.query SQL"select n from a;" )
+  list_table_b      = ( dba ) -> ( row.n for row from dba.query SQL"select n from b;" )
+  #.........................................................................................................
+  do =>
+    urge '^50-1^', "begin transaction, then defer fks"
+    dba               = new Dba()
+    { sqlt, }         = dba
+    dba.execute SQL"""
+      create table a ( n integer not null primary key references b ( n ) );
+      create table b ( n integer not null primary key references a ( n ) );
+      """
+    debug '^50-1^', sqlt.inTransaction; T?.eq sqlt.inTransaction, false
+    debug '^50-2^', sqlt.pragma SQL"defer_foreign_keys;"
+    debug '^50-3^'; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 0 } ]
+    debug '^50-4^'; dba.execute SQL"begin transaction;"
+    debug '^50-5^', sqlt.inTransaction; T?.eq sqlt.inTransaction, true
+    debug '^50-6^'; T?.eq dba._get_foreign_keys_state(), true
+    debug '^50-7^'; sqlt.pragma SQL"defer_foreign_keys=1;"
+    debug '^50-8^'; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 1 } ]
+    debug '^50-9^'; dba.execute SQL"insert into a ( n ) values ( 1 );"
+    debug '^50-10^'; dba.execute SQL"insert into b ( n ) values ( 1 );"
+    debug '^50-11^'; dba.execute SQL"insert into a ( n ) values ( 2 );"
+    # debug '^50-12^'; dba.execute SQL"insert into b ( n ) values ( 2 );"
+    error = null
+    debug '^50-20^', list_table_a dba; T?.eq ( list_table_a dba ), [ 1, 2, ]
+    debug '^50-21^', list_table_b dba; T?.eq ( list_table_b dba ), [ 1, ]
+    try
+      debug '^50-15^'; dba.execute SQL"commit;"
+    catch error
+      debug '^50-16^', sqlt.inTransaction; T?.eq sqlt.inTransaction, true
+      warn error.message
+      T?.eq error.message, "FOREIGN KEY constraint failed"
+      debug '^50-17^'; dba.execute SQL"rollback;"
+      debug '^50-18^', sqlt.inTransaction; T?.eq sqlt.inTransaction, false
+    finally
+      debug '^50-19^', sqlt.inTransaction; T?.eq sqlt.inTransaction, false
+    T.fail "^50-13^ expected error, got none" unless error?
+    debug '^50-20^', list_table_a dba; T?.eq ( list_table_a dba ), []
+    debug '^50-21^', list_table_b dba; T?.eq ( list_table_b dba ), []
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: with_foreign_keys_deferred(), ensure checks" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dba }           = require H.icql_dba_path
+  #.........................................................................................................
+  list_table_a      = ( dba ) -> ( row.n for row from dba.query SQL"select n from a;" )
+  #.........................................................................................................
+  error             = null
+  dba               = new Dba()
+  # dba.open { schema: 'main', }
+  dba.execute SQL"""
+    create table a ( n integer not null primary key references b ( n ) );
+    create table b ( n integer not null primary key references a ( n ) );
+    """
+  #.........................................................................................................
+  T?.eq CND.truth dba.sqlt.inTransaction, false
+  T?.eq dba._get_foreign_keys_state(), true
+  dba.with_foreign_keys_deferred ->
+    T?.eq CND.truth dba.sqlt.inTransaction, true
+    T?.eq dba._get_foreign_keys_state(), true
+    dba.execute SQL"insert into a ( n ) values ( 1 );"
+    dba.execute SQL"insert into a ( n ) values ( 2 );"
+    dba.execute SQL"insert into a ( n ) values ( 3 );"
+    dba.execute SQL"insert into b ( n ) values ( 1 );"
+    dba.execute SQL"insert into b ( n ) values ( 2 );"
+    dba.execute SQL"insert into b ( n ) values ( 3 );"
+    # dba.execute SQL"insert into a ( n ) values ( 4 );"
+    console.table dba.list dba.query SQL"select * from a;"
+    console.table dba.list dba.query SQL"select * from b;"
+  T?.eq CND.truth dba.sqlt.inTransaction, false
+  #.........................................................................................................
+  T?.eq dba._get_foreign_keys_state(), true
+  T?.eq ( dba.pragma SQL"foreign_key_check;" ), []
+  T?.eq ( dba.pragma SQL"integrity_check;"   ), [ { integrity_check: 'ok' } ]
+  #.........................................................................................................
+  debug '^778-1^', ( prv_values = list_table_a dba )
+  T?.eq ( nxt_values = list_table_a dba ), prv_values; prv_values = nxt_values
+  debug '^778-2^'
+  T?.eq dba.sqlt.inTransaction, false
+  try
+    dba.with_foreign_keys_deferred ->
+      T?.eq dba.sqlt.inTransaction, true
+      dba.execute SQL"insert into a ( n ) values ( 101 );"
+  catch error
+    warn error.message
+    T?.eq error.message, "FOREIGN KEY constraint failed"
+  T?.eq dba.sqlt.inTransaction, false
+  debug '^778-4^', list_table_a dba
+  T?.eq ( nxt_values = list_table_a dba ), prv_values; prv_values = nxt_values
+  #.........................................................................................................
+  debug '^778-5^'
+  try
+    dba.with_transaction ->
+      dba.with_foreign_keys_deferred ->
+        dba.execute SQL"insert into a ( n ) values ( 102 );"
+  catch error
+    warn error.message
+    T?.eq error.message, "^dba-functions@901^ (Dba_no_nested_transactions) cannot start a transaction within a transaction"
+  debug '^778-6^', list_table_a dba
+  T?.eq ( nxt_values = list_table_a dba ), prv_values; prv_values = nxt_values
+  #.........................................................................................................
+  debug '^778-7^'
+  try
+    dba.with_foreign_keys_deferred ->
+      dba.with_transaction ->
+        dba.execute SQL"insert into a ( n ) values ( 103 );"
+  catch error
+    warn error.message
+    T?.eq error.message, "^dba-functions@901^ (Dba_no_deferred_fks_in_tx) cannot defer foreign keys inside a transaction"
+  debug '^778-8^', list_table_a dba
+  T?.eq ( nxt_values = list_table_a dba ), prv_values; prv_values = nxt_values
+  #.........................................................................................................
+  T?.eq ( dba.pragma SQL"foreign_key_check;" ), []
+  T?.eq ( dba.pragma SQL"integrity_check;"   ), [ { integrity_check: 'ok' } ]
+  #.........................................................................................................
+  console.table rows = dba.list dba.query SQL"""
+    select
+        a.n as a_n,
+        b.n as b_n
+      from a
+      left join b using ( n )
+      order by n;"""
+  debug '^400^', rows
+  result = ( [ d.a_n, d.b_n ] for d in rows )
+  T?.eq result, [ [ 1, 1 ], [ 2, 2 ], [ 3, 3 ] ]
+  #.........................................................................................................
+  done?()
+
 
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
+  # test @, { timeout: 10e3, }
   # debug f '𠖏'
   # test @[ "DBA: concurrent UDFs" ]
   # test @[ "DBA: create_with_unsafe_mode()" ]
-  # @[ "DBA: with_foreign_keys_off()" ]()
+  # @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]()
+  test @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]
+  # test @[ "DBA: with_foreign_keys_deferred(), ensure checks" ]
+
+  # @[ "DBA: with_foreign_keys_off() 1" ]()
+  # test @[ "DBA: with_foreign_keys_off() 1" ]
   # @[ "DBA: with_unsafe_mode()" ]()
   # test @[ "DBA: with_transaction() 1" ]
   # @[ "DBA: with_transaction() 2" ]()
@@ -679,3 +820,22 @@ if module is require.main then do =>
   # @[ "DBA: concurrent UDFs" ]()
   # debug process.env[ 'icql-dba-use' ]
   # debug process.argv
+  f = ->
+    debugger
+    error = null
+    try
+      xxx
+      null
+    catch error then null
+      # debug '^34-catch^', error?.message
+      # throw error
+    finally
+      debug '^34-finally^'
+      if error?
+        debug '^34-finally-2', error.message
+        throw error
+    return null
+
+
+
+
