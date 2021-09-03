@@ -1563,6 +1563,30 @@ create table b ( n integer not null primary key references a ( n ) );`);
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: with_foreign_keys_deferred(), ensure checks"] = function(T, done) {
+    var Dba, dba, error, list_table_a;
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
+    //.........................................................................................................
+    list_table_a = function(dba) {
+      var ref, results, row;
+      ref = dba.query(SQL`select n from a;`);
+      results = [];
+      for (row of ref) {
+        results.push(row.n);
+      }
+      return results;
+    };
+    //.........................................................................................................
+    error = null;
+    dba = new Dba();
+    // dba.open { schema: 'main', }
+    dba.execute(SQL`create table a ( n integer not null primary key references b ( n ) );
+create table b ( n integer not null primary key references a ( n ) );`);
+    return typeof dba.done === "function" ? dba.done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: with_foreign_keys_deferred(), ensure checks"] = function(T, done) {
     var Dba, d, dba, error, list_table_a, nxt_values, prv_values, result, rows;
     // T?.halt_on_error()
     ({Dba} = require(H.icql_dba_path));
