@@ -1562,8 +1562,9 @@ create table b ( n integer not null primary key references a ( n ) );`);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: with_foreign_keys_deferred(), ensure checks"] = function(T, done) {
+  this["DBA: get_foreign_keys_deferred()"] = function(T, done) {
     var Dba, dba, error, list_table_a;
+    throw new Error("not implemented");
     // T?.halt_on_error()
     ({Dba} = require(H.icql_dba_path));
     //.........................................................................................................
