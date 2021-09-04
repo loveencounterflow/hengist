@@ -45,6 +45,10 @@
 
   };
 
+  //---------------------------------------------------------------------------------------------------------
+  // _pragma_index_xinfo: ( schema, idx_name ) -> @pragma SQL"#{@sql.I schema}.index_xinfo( #{@sql.L idx_name} );"
+  // _pragma_table_xinfo: ( schema, tbl_name ) -> @pragma SQL"#{@sql.I schema}.table_xinfo( #{@sql.L tbl_name} );"
+
   //-----------------------------------------------------------------------------------------------------------
   create_sql_functions = function(dba, prefix = 'xxx_') {
     dba.create_function({
@@ -76,6 +80,10 @@
 create table ${prefix}b ( n integer not null primary key references a ( n ) );
 create unique index main.${prefix}a_n_idx on ${prefix}a ( n );
 create unique index main.${prefix}b_n_idx on ${prefix}b ( n );`);
+    dba.open({
+      schema: 'foo',
+      ram: true
+    });
     return null;
   };
 
@@ -101,7 +109,8 @@ create unique index main.${prefix}b_n_idx on ${prefix}b ( n );`);
     debug({template_path, work_path});
     // echo dbatbl._tabulate dba.catalog()
     echo(dbatbl._tabulate(dba.query(SQL`select * from sqlite_schema order by type desc, name;`)));
-    // help "pragmas";      echo dbatbl._tabulate dba.query SQL"select * from pragma_pragma_list()      order by xxx_str_reverse( name );"
+    help("pragmas");
+    echo(dbatbl._tabulate(dba.query(SQL`select * from pragma_pragma_list()      order by xxx_str_reverse( name );`)));
     // help "modules";      echo dbatbl._tabulate dba.query SQL"select * from pragma_module_list()      order by name;"
     // help "databases";    echo dbatbl._tabulate dba.query SQL"select * from pragma_database_list()    order by name;"
     // help "collations";   echo dbatbl._tabulate dba.query SQL"select * from pragma_collation_list()   order by name;"
@@ -142,6 +151,8 @@ join
 order by
   m.name,
   p.cid;`)));
+    // help "index_xinfo"; echo dbatbl._tabulate dba._pragma_index_xinfo 'main', 'sqlite_autoindex_xxx_a_1'
+    // help "table_xinfo"; echo dbatbl._tabulate dba._pragma_table_xinfo 'main', 'xxx_a'
     return null;
   };
 

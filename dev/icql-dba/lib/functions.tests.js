@@ -763,10 +763,11 @@ create trigger multiple_instead_update instead of update on multiples begin
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: virtual tables"] = function(T, done) {
-    var Dba, FS, cfg, dba, export_path, is_first, matcher, path, schema, sql, transform;
+    var Dba, FS, HOLLERITH, cfg, dba, export_path, is_first, matcher, path, schema, sql, transform;
     /* new in 7.4.0, see https://github.com/JoshuaWise/better-sqlite3/issues/581 */
     // T.halt_on_error()
     ({Dba} = require(H.icql_dba_path));
+    ({HOLLERITH} = require('../../../apps/hollerith'));
     FS = require('fs');
     //.........................................................................................................
     dba = new Dba();
@@ -879,7 +880,7 @@ create trigger multiple_instead_update instead of update on multiples begin
           vnr = [lnr];
           vnr_json = JSON.stringify(vnr);
           line = bytes.toString('utf-8');
-          vnr_h = dba.as_hollerith(vnr);
+          vnr_h = HOLLERITH.encode(vnr);
           yield [path, vnr_json, line, vnr_h];
         }
         return null;
