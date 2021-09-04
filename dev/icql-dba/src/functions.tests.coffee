@@ -784,26 +784,6 @@ jp                        = JSON.parse
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: get_foreign_keys_deferred()" ] = ( T, done ) ->
-  throw new Error "not implemented"
-  # T?.halt_on_error()
-  { Dba }           = require H.icql_dba_path
-  #.........................................................................................................
-  list_table_a      = ( dba ) -> ( row.n for row from dba.query SQL"select n from a;" )
-  #.........................................................................................................
-  error             = null
-  dba               = new Dba()
-  # dba.open { schema: 'main', }
-  dba.execute SQL"""
-    create table a ( n integer not null primary key references b ( n ) );
-    create table b ( n integer not null primary key references a ( n ) );
-    """
-  #.........................................................................................................
-  dba.
-  #.........................................................................................................
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
 @[ "DBA: with_foreign_keys_deferred(), ensure checks" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Dba }           = require H.icql_dba_path
