@@ -617,55 +617,6 @@ jp                        = JSON.parse
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: with_foreign_keys_off() 1" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { Dba }           = require H.icql_dba_path
-  #.........................................................................................................
-  do =>
-    dba = new Dba()
-    T?.throws /not a valid function/, -> dba.with_foreign_keys_off()
-  #.........................................................................................................
-  do =>
-    error = null
-    dba   = new Dba()
-    # dba.open { schema: 'main', }
-    dba.execute SQL"""
-      create table a ( n integer not null primary key references b ( n ) );
-      create table b ( n integer not null primary key references a ( n ) );
-      """
-    #.......................................................................................................
-    error = null
-    try
-      dba.execute SQL"insert into a ( n ) values ( 1 );"
-    catch error
-      warn '^090^', rpr error.message
-      T?.eq error.message, "FOREIGN KEY constraint failed"
-    T?.fail "expected error, got none" unless error?
-    #.......................................................................................................
-    dba.with_foreign_keys_off ->
-      dba.execute SQL"insert into a ( n ) values ( 1 );"
-      dba.execute SQL"insert into a ( n ) values ( 2 );"
-      dba.execute SQL"insert into a ( n ) values ( 3 );"
-      dba.execute SQL"insert into b ( n ) values ( 1 );"
-      dba.execute SQL"insert into b ( n ) values ( 2 );"
-      dba.execute SQL"insert into b ( n ) values ( 3 );"
-    #.......................................................................................................
-    T?.eq ( dba.pragma SQL"foreign_key_check;" ), []
-    T?.eq ( dba.pragma SQL"integrity_check;"   ), [ { integrity_check: 'ok' } ]
-    console.table rows = dba.list dba.query SQL"""
-      select
-          a.n as a_n,
-          b.n as b_n
-        from a
-        left join b using ( n )
-        order by n;"""
-    debug '^400^', rows
-    result = ( [ d.a_n, d.b_n ] for d in rows )
-    T?.eq result, [ [ 1, 1 ], [ 2, 2 ], [ 3, 3 ] ]
-  #.........................................................................................................
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
 @[ "DBA: with_foreign_keys_deferred(), preliminaries" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Dba }           = require H.icql_dba_path
@@ -880,12 +831,9 @@ if module is require.main then do =>
   # test @[ "DBA: concurrent UDFs" ]
   # test @[ "DBA: create_with_unsafe_mode()" ]
   # @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]()
-  test @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]
+  # test @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]
   # test @[ "DBA: with_foreign_keys_deferred(), ensure checks" ]
-
-  # @[ "DBA: with_foreign_keys_off() 1" ]()
-  # test @[ "DBA: with_foreign_keys_off() 1" ]
-  # @[ "DBA: with_unsafe_mode()" ]()
+  @[ "DBA: with_unsafe_mode()" ]()
   # test @[ "DBA: with_transaction() 1" ]
   # @[ "DBA: with_transaction() 2" ]()
   # test @[ "DBA: with_transaction()" ]
