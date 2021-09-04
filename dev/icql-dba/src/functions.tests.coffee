@@ -327,6 +327,7 @@ jp                        = JSON.parse
   ### new in 7.4.0, see https://github.com/JoshuaWise/better-sqlite3/issues/581 ###
   # T.halt_on_error()
   { Dba }           = require H.icql_dba_path
+  { HOLLERITH }     = require '../../../apps/hollerith'
   FS                = require 'fs'
   #.........................................................................................................
   dba               = new Dba()
@@ -405,7 +406,7 @@ jp                        = JSON.parse
         vnr       = [ lnr, ]
         vnr_json  = JSON.stringify vnr
         line      = bytes.toString 'utf-8'
-        vnr_h     = dba.as_hollerith vnr
+        vnr_h     = HOLLERITH.encode vnr
         yield [ path, vnr_json, line, vnr_h, ]
       return null
   dba.sqlt.table 'readlines', cfg
