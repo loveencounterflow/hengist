@@ -1211,82 +1211,6 @@ create trigger multiple_instead_update instead of update on multiples begin
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: with_foreign_keys_off() 1"] = function(T, done) {
-    var Dba;
-    // T?.halt_on_error()
-    ({Dba} = require(H.icql_dba_path));
-    (() => {      //.........................................................................................................
-      var dba;
-      dba = new Dba();
-      return T != null ? T.throws(/not a valid function/, function() {
-        return dba.with_foreign_keys_off();
-      }) : void 0;
-    })();
-    (() => {      //.........................................................................................................
-      var d, dba, error, result, rows;
-      error = null;
-      dba = new Dba();
-      // dba.open { schema: 'main', }
-      dba.execute(SQL`create table a ( n integer not null primary key references b ( n ) );
-create table b ( n integer not null primary key references a ( n ) );`);
-      //.......................................................................................................
-      error = null;
-      try {
-        dba.execute(SQL`insert into a ( n ) values ( 1 );`);
-      } catch (error1) {
-        error = error1;
-        warn('^090^', rpr(error.message));
-        if (T != null) {
-          T.eq(error.message, "FOREIGN KEY constraint failed");
-        }
-      }
-      if (error == null) {
-        if (T != null) {
-          T.fail("expected error, got none");
-        }
-      }
-      //.......................................................................................................
-      dba.with_foreign_keys_off(function() {
-        dba.execute(SQL`insert into a ( n ) values ( 1 );`);
-        dba.execute(SQL`insert into a ( n ) values ( 2 );`);
-        dba.execute(SQL`insert into a ( n ) values ( 3 );`);
-        dba.execute(SQL`insert into b ( n ) values ( 1 );`);
-        dba.execute(SQL`insert into b ( n ) values ( 2 );`);
-        return dba.execute(SQL`insert into b ( n ) values ( 3 );`);
-      });
-      //.......................................................................................................
-      if (T != null) {
-        T.eq(dba.pragma(SQL`foreign_key_check;`), []);
-      }
-      if (T != null) {
-        T.eq(dba.pragma(SQL`integrity_check;`), [
-          {
-            integrity_check: 'ok'
-          }
-        ]);
-      }
-      console.table(rows = dba.list(dba.query(SQL`select
-    a.n as a_n,
-    b.n as b_n
-  from a
-  left join b using ( n )
-  order by n;`)));
-      debug('^400^', rows);
-      result = (function() {
-        var i, len, results;
-        results = [];
-        for (i = 0, len = rows.length; i < len; i++) {
-          d = rows[i];
-          results.push([d.a_n, d.b_n]);
-        }
-        return results;
-      })();
-      return T != null ? T.eq(result, [[1, 1], [2, 2], [3, 3]]) : void 0;
-    })();
-    return typeof done === "function" ? done() : void 0;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this["DBA: with_foreign_keys_deferred(), preliminaries"] = function(T, done) {
     var Dba, list_table_a, list_table_b;
     // T?.halt_on_error()
@@ -1738,12 +1662,9 @@ create table b ( n integer not null primary key references a ( n ) );`);
       // test @[ "DBA: concurrent UDFs" ]
       // test @[ "DBA: create_with_unsafe_mode()" ]
       // @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]()
-      test(this["DBA: with_foreign_keys_deferred(), preliminaries"]);
+      // test @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]
       // test @[ "DBA: with_foreign_keys_deferred(), ensure checks" ]
-
-      // @[ "DBA: with_foreign_keys_off() 1" ]()
-      // test @[ "DBA: with_foreign_keys_off() 1" ]
-      // @[ "DBA: with_unsafe_mode()" ]()
+      this["DBA: with_unsafe_mode()"]();
       // test @[ "DBA: with_transaction() 1" ]
       // @[ "DBA: with_transaction() 2" ]()
       // test @[ "DBA: with_transaction()" ]
