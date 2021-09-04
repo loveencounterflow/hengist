@@ -1562,31 +1562,6 @@ create table b ( n integer not null primary key references a ( n ) );`);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBA: get_foreign_keys_deferred()"] = function(T, done) {
-    var Dba, dba, error, list_table_a;
-    throw new Error("not implemented");
-    // T?.halt_on_error()
-    ({Dba} = require(H.icql_dba_path));
-    //.........................................................................................................
-    list_table_a = function(dba) {
-      var ref, results, row;
-      ref = dba.query(SQL`select n from a;`);
-      results = [];
-      for (row of ref) {
-        results.push(row.n);
-      }
-      return results;
-    };
-    //.........................................................................................................
-    error = null;
-    dba = new Dba();
-    // dba.open { schema: 'main', }
-    dba.execute(SQL`create table a ( n integer not null primary key references b ( n ) );
-create table b ( n integer not null primary key references a ( n ) );`);
-    return typeof dba.done === "function" ? dba.done() : void 0;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this["DBA: with_foreign_keys_deferred(), ensure checks"] = function(T, done) {
     var Dba, d, dba, error, list_table_a, nxt_values, prv_values, result, rows;
     // T?.halt_on_error()
@@ -1692,7 +1667,7 @@ create table b ( n integer not null primary key references a ( n ) );`);
       error = error1;
       warn(error.message);
       if (T != null) {
-        T.eq(error.message, "^dba-functions@901^ (Dba_no_nested_transactions) cannot start a transaction within a transaction");
+        T.eq(error.message, "^dba-functions@901^ (Dba_no_deferred_fks_in_tx) cannot defer foreign keys inside a transaction");
       }
     }
     debug('^778-6^', list_table_a(dba));
@@ -1712,7 +1687,7 @@ create table b ( n integer not null primary key references a ( n ) );`);
       error = error1;
       warn(error.message);
       if (T != null) {
-        T.eq(error.message, "^dba-functions@901^ (Dba_no_deferred_fks_in_tx) cannot defer foreign keys inside a transaction");
+        T.eq(error.message, "^dba-functions@901^ (Dba_no_nested_transactions) cannot start a transaction within a transaction");
       }
     }
     debug('^778-8^', list_table_a(dba));
