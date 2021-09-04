@@ -535,7 +535,7 @@ jp                        = JSON.parse
   #.........................................................................................................
   do =>
     dba = new Dba()
-    T?.throws /not a valid function/, -> dba.with_transaction()
+    T?.throws /expected between 1 and 2 arguments, got 0/, -> dba.with_transaction()
   #.........................................................................................................
   do =>
     dba   = new Dba()
@@ -565,7 +565,7 @@ jp                        = JSON.parse
   #.........................................................................................................
   do =>
     dba = new Dba()
-    T?.throws /not a valid function/, -> dba.with_transaction()
+    T?.throws /expected between 1 and 2 arguments, got 0/, -> dba.with_transaction()
   #.........................................................................................................
   do =>
     error = null
@@ -826,35 +826,21 @@ jp                        = JSON.parse
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
+  test @, { timeout: 10e3, }
   # debug f '𠖏'
   # test @[ "DBA: concurrent UDFs" ]
   # test @[ "DBA: create_with_unsafe_mode()" ]
   # @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]()
   # test @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]
   # test @[ "DBA: with_foreign_keys_deferred(), ensure checks" ]
-  @[ "DBA: with_unsafe_mode()" ]()
+  # @[ "DBA: with_unsafe_mode()" ]()
+  # @[ "DBA: with_transaction() 1" ]()
   # test @[ "DBA: with_transaction() 1" ]
   # @[ "DBA: with_transaction() 2" ]()
   # test @[ "DBA: with_transaction()" ]
   # @[ "DBA: concurrent UDFs" ]()
   # debug process.env[ 'icql-dba-use' ]
   # debug process.argv
-  f = ->
-    debugger
-    error = null
-    try
-      xxx
-      null
-    catch error then null
-      # debug '^34-catch^', error?.message
-      # throw error
-    finally
-      debug '^34-finally^'
-      if error?
-        debug '^34-finally-2', error.message
-        throw error
-    return null
 
 
 
