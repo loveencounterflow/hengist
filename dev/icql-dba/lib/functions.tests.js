@@ -1322,9 +1322,9 @@ create table b ( n integer not null primary key references a ( n ) );`);
       if (T != null) {
         T.eq(sqlt.inTransaction, false);
       }
-      info('^50-3^', dba._get_foreign_keys_state());
+      info('^50-3^', dba.get_foreign_keys_state());
       if (T != null) {
-        T.eq(dba._get_foreign_keys_state(), true);
+        T.eq(dba.get_foreign_keys_state(), true);
       }
       info('^50-4^', sqlt.pragma(SQL`defer_foreign_keys;`));
       if (T != null) {
@@ -1346,9 +1346,9 @@ create table b ( n integer not null primary key references a ( n ) );`);
       if (T != null) {
         T.eq(sqlt.inTransaction, true);
       }
-      info('^50-8^', dba._get_foreign_keys_state());
+      info('^50-8^', dba.get_foreign_keys_state());
       if (T != null) {
-        T.eq(dba._get_foreign_keys_state(), true);
+        T.eq(dba.get_foreign_keys_state(), true);
       }
       info('^50-9^', sqlt.pragma(SQL`defer_foreign_keys;`));
       if (T != null) {
@@ -1422,9 +1422,9 @@ create table b ( n integer not null primary key references a ( n ) );`);
       if (T != null) {
         T.eq(sqlt.inTransaction, false);
       }
-      info('^50-25^', dba._get_foreign_keys_state());
+      info('^50-25^', dba.get_foreign_keys_state());
       if (T != null) {
-        T.eq(dba._get_foreign_keys_state(), true);
+        T.eq(dba.get_foreign_keys_state(), true);
       }
       info('^50-26^', sqlt.pragma(SQL`defer_foreign_keys;`));
       return T != null ? T.eq(sqlt.pragma(SQL`defer_foreign_keys;`), [
@@ -1446,9 +1446,9 @@ create table b ( n integer not null primary key references a ( n ) );`);
       if (T != null) {
         T.eq(sqlt.inTransaction, false);
       }
-      info('^50-29^', dba._get_foreign_keys_state());
+      info('^50-29^', dba.get_foreign_keys_state());
       if (T != null) {
-        T.eq(dba._get_foreign_keys_state(), true);
+        T.eq(dba.get_foreign_keys_state(), true);
       }
       info('^50-30^', sqlt.pragma(SQL`defer_foreign_keys;`));
       if (T != null) {
@@ -1470,9 +1470,9 @@ create table b ( n integer not null primary key references a ( n ) );`);
       if (T != null) {
         T.eq(sqlt.inTransaction, true);
       }
-      info('^50-34^', dba._get_foreign_keys_state());
+      info('^50-34^', dba.get_foreign_keys_state());
       if (T != null) {
-        T.eq(dba._get_foreign_keys_state(), true);
+        T.eq(dba.get_foreign_keys_state(), true);
       }
       info('^50-35^', sqlt.pragma(SQL`defer_foreign_keys;`));
       if (T != null) {
@@ -1547,9 +1547,9 @@ create table b ( n integer not null primary key references a ( n ) );`);
       if (T != null) {
         T.eq(sqlt.inTransaction, false);
       }
-      info('^50-51^', dba._get_foreign_keys_state());
+      info('^50-51^', dba.get_foreign_keys_state());
       if (T != null) {
-        T.eq(dba._get_foreign_keys_state(), true);
+        T.eq(dba.get_foreign_keys_state(), true);
       }
       info('^50-52^', sqlt.pragma(SQL`defer_foreign_keys;`));
       return T != null ? T.eq(sqlt.pragma(SQL`defer_foreign_keys;`), [
@@ -1587,14 +1587,14 @@ create table b ( n integer not null primary key references a ( n ) );`);
       T.eq(CND.truth(dba.sqlt.inTransaction, false));
     }
     if (T != null) {
-      T.eq(dba._get_foreign_keys_state(), true);
+      T.eq(dba.get_foreign_keys_state(), true);
     }
     dba.with_foreign_keys_deferred(function() {
       if (T != null) {
         T.eq(CND.truth(dba.sqlt.inTransaction, true));
       }
       if (T != null) {
-        T.eq(dba._get_foreign_keys_state(), true);
+        T.eq(dba.get_foreign_keys_state(), true);
       }
       dba.execute(SQL`insert into a ( n ) values ( 1 );`);
       dba.execute(SQL`insert into a ( n ) values ( 2 );`);
@@ -1611,7 +1611,7 @@ create table b ( n integer not null primary key references a ( n ) );`);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(dba._get_foreign_keys_state(), true);
+      T.eq(dba.get_foreign_keys_state(), true);
     }
     if (T != null) {
       T.eq(dba.pragma(SQL`foreign_key_check;`), []);

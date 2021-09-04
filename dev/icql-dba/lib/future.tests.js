@@ -1060,7 +1060,7 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     dba = new Dba();
     //.........................................................................................................
     if (T != null) {
-      T.eq(dba._get_foreign_keys_state(), true);
+      T.eq(dba.get_foreign_keys_state(), true);
     }
     dba.execute(SQL`create table keys ( key text primary key );`);
     dba.execute(SQL`create table main ( foo text not null references keys ( key ) );`);
@@ -1111,19 +1111,19 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     //.........................................................................................................
     // Insert rows:
     if (T != null) {
-      T.eq(dba._get_foreign_keys_state(), true);
+      T.eq(dba.get_foreign_keys_state(), true);
     }
-    dba._set_foreign_keys_state(false);
+    dba.set_foreign_keys_state(false);
     if (T != null) {
-      T.eq(dba._get_foreign_keys_state(), false);
+      T.eq(dba.get_foreign_keys_state(), false);
     }
     for (id = i = 1; i <= 9; id = ++i) {
       dba.execute(`insert into main.k1 values ( ${id}, ${id} );`);
       dba.execute(`insert into main.k2 values ( ${id}, ${id} );`);
     }
-    dba._set_foreign_keys_state(true);
+    dba.set_foreign_keys_state(true);
     if (T != null) {
-      T.eq(dba._get_foreign_keys_state(), true);
+      T.eq(dba.get_foreign_keys_state(), true);
     }
     //.........................................................................................................
     debug('^544734^', (function() {
