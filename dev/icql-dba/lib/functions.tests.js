@@ -1069,7 +1069,7 @@ create trigger multiple_instead_update instead of update on multiples begin
     (() => {      //.........................................................................................................
       var dba;
       dba = new Dba();
-      return T != null ? T.throws(/not a valid function/, function() {
+      return T != null ? T.throws(/expected between 1 and 2 arguments, got 0/, function() {
         return dba.with_transaction();
       }) : void 0;
     })();
@@ -1122,7 +1122,7 @@ create trigger multiple_instead_update instead of update on multiples begin
     (() => {      //.........................................................................................................
       var dba;
       dba = new Dba();
-      return T != null ? T.throws(/not a valid function/, function() {
+      return T != null ? T.throws(/expected between 1 and 2 arguments, got 0/, function() {
         return dba.with_transaction();
       }) : void 0;
     })();
@@ -1656,44 +1656,26 @@ create table b ( n integer not null primary key references a ( n ) );`);
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      var f;
-      // test @, { timeout: 10e3, }
-      // debug f '𠖏'
-      // test @[ "DBA: concurrent UDFs" ]
-      // test @[ "DBA: create_with_unsafe_mode()" ]
-      // @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]()
-      // test @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]
-      // test @[ "DBA: with_foreign_keys_deferred(), ensure checks" ]
-      this["DBA: with_unsafe_mode()"]();
-      // test @[ "DBA: with_transaction() 1" ]
-      // @[ "DBA: with_transaction() 2" ]()
-      // test @[ "DBA: with_transaction()" ]
-      // @[ "DBA: concurrent UDFs" ]()
-      // debug process.env[ 'icql-dba-use' ]
-      // debug process.argv
-      return f = function() {
-        debugger;
-        var error;
-        error = null;
-        try {
-          xxx;
-          null;
-        } catch (error1) {
-          error = error1;
-          null;
-        } finally {
-          // debug '^34-catch^', error?.message
-          // throw error
-          debug('^34-finally^');
-          if (error != null) {
-            debug('^34-finally-2', error.message);
-            throw error;
-          }
-        }
-        return null;
-      };
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
+
+  // debug f '𠖏'
+// test @[ "DBA: concurrent UDFs" ]
+// test @[ "DBA: create_with_unsafe_mode()" ]
+// @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]()
+// test @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]
+// test @[ "DBA: with_foreign_keys_deferred(), ensure checks" ]
+// @[ "DBA: with_unsafe_mode()" ]()
+// @[ "DBA: with_transaction() 1" ]()
+// test @[ "DBA: with_transaction() 1" ]
+// @[ "DBA: with_transaction() 2" ]()
+// test @[ "DBA: with_transaction()" ]
+// @[ "DBA: concurrent UDFs" ]()
+// debug process.env[ 'icql-dba-use' ]
+// debug process.argv
 
 }).call(this);
 
