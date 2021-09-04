@@ -840,7 +840,7 @@ jp                        = JSON.parse
         dba.execute SQL"insert into a ( n ) values ( 102 );"
   catch error
     warn error.message
-    T?.eq error.message, "^dba-functions@901^ (Dba_no_nested_transactions) cannot start a transaction within a transaction"
+    T?.eq error.message, "^dba-functions@901^ (Dba_no_deferred_fks_in_tx) cannot defer foreign keys inside a transaction"
   debug '^778-6^', list_table_a dba
   T?.eq ( nxt_values = list_table_a dba ), prv_values; prv_values = nxt_values
   #.........................................................................................................
@@ -851,7 +851,7 @@ jp                        = JSON.parse
         dba.execute SQL"insert into a ( n ) values ( 103 );"
   catch error
     warn error.message
-    T?.eq error.message, "^dba-functions@901^ (Dba_no_deferred_fks_in_tx) cannot defer foreign keys inside a transaction"
+    T?.eq error.message, "^dba-functions@901^ (Dba_no_nested_transactions) cannot start a transaction within a transaction"
   debug '^778-8^', list_table_a dba
   T?.eq ( nxt_values = list_table_a dba ), prv_values; prv_values = nxt_values
   #.........................................................................................................
