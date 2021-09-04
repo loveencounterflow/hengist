@@ -689,7 +689,7 @@ DATA                      = require '../../../lib/data-providers-nocache'
   E                 = require H.icql_dba_path + '/lib/errors'
   dba               = new Dba()
   #.........................................................................................................
-  T?.eq dba._get_foreign_keys_state(), true
+  T?.eq dba.get_foreign_keys_state(), true
   dba.execute SQL"create table keys ( key text primary key );"
   dba.execute SQL"create table main ( foo text not null references keys ( key ) );"
   error = null
@@ -721,14 +721,14 @@ DATA                      = require '../../../lib/data-providers-nocache'
     info "^557-300^", { type: d.type, name: d.name, }
   #.........................................................................................................
   # Insert rows:
-  T?.eq dba._get_foreign_keys_state(), true
-  dba._set_foreign_keys_state off
-  T?.eq dba._get_foreign_keys_state(), false
+  T?.eq dba.get_foreign_keys_state(), true
+  dba.set_foreign_keys_state off
+  T?.eq dba.get_foreign_keys_state(), false
   for id in [ 1 .. 9 ]
     dba.execute "insert into main.k1 values ( #{id}, #{id} );"
     dba.execute "insert into main.k2 values ( #{id}, #{id} );"
-  dba._set_foreign_keys_state on
-  T?.eq dba._get_foreign_keys_state(), true
+  dba.set_foreign_keys_state on
+  T?.eq dba.get_foreign_keys_state(), true
   #.........................................................................................................
   debug '^544734^', ( d.name for d from dba.walk_objects { schema, } )
   T?.eq ( d.name for d from dba.walk_objects { schema, } ), [ 'sqlite_autoindex_k1_1', 'sqlite_autoindex_k2_1', 'k1', 'k2' ]

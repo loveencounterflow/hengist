@@ -683,7 +683,7 @@ jp                        = JSON.parse
     #.......................................................................................................
     ### ensure DB transaction, fk state ###
     info '^50-2^', sqlt.inTransaction;                   T?.eq sqlt.inTransaction, false
-    info '^50-3^', dba._get_foreign_keys_state();        T?.eq dba._get_foreign_keys_state(), true
+    info '^50-3^', dba.get_foreign_keys_state();        T?.eq dba.get_foreign_keys_state(), true
     info '^50-4^', sqlt.pragma SQL"defer_foreign_keys;"; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 0 } ]
     #.......................................................................................................
     ### begin transaction, then  start deferred fks ###
@@ -692,7 +692,7 @@ jp                        = JSON.parse
     #.......................................................................................................
     ### ensure DB transaction, fk state ###
     info '^50-7^', sqlt.inTransaction;                   T?.eq sqlt.inTransaction, true
-    info '^50-8^', dba._get_foreign_keys_state();        T?.eq dba._get_foreign_keys_state(), true
+    info '^50-8^', dba.get_foreign_keys_state();        T?.eq dba.get_foreign_keys_state(), true
     info '^50-9^', sqlt.pragma SQL"defer_foreign_keys;"; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 1 } ]
     #.......................................................................................................
     ### insert partly bogus values, check ###
@@ -723,7 +723,7 @@ jp                        = JSON.parse
     #.......................................................................................................
     ### ensure DB transaction, fk state ###
     info '^50-24^', sqlt.inTransaction;                   T?.eq sqlt.inTransaction, false
-    info '^50-25^', dba._get_foreign_keys_state();        T?.eq dba._get_foreign_keys_state(), true
+    info '^50-25^', dba.get_foreign_keys_state();        T?.eq dba.get_foreign_keys_state(), true
     info '^50-26^', sqlt.pragma SQL"defer_foreign_keys;"; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 0 } ]
   #---------------------------------------------------------------------------------------------------------
   do =>
@@ -737,7 +737,7 @@ jp                        = JSON.parse
     #.......................................................................................................
     ### ensure DB transaction, fk state ###
     info '^50-28^', sqlt.inTransaction;                   T?.eq sqlt.inTransaction, false
-    info '^50-29^', dba._get_foreign_keys_state();        T?.eq dba._get_foreign_keys_state(), true
+    info '^50-29^', dba.get_foreign_keys_state();        T?.eq dba.get_foreign_keys_state(), true
     info '^50-30^', sqlt.pragma SQL"defer_foreign_keys;"; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 0 } ]
     #.......................................................................................................
     ### begin transaction, then  start deferred fks ###
@@ -746,7 +746,7 @@ jp                        = JSON.parse
     #.......................................................................................................
     ### ensure DB transaction, fk state ###
     info '^50-33^', sqlt.inTransaction;                   T?.eq sqlt.inTransaction, true
-    info '^50-34^', dba._get_foreign_keys_state();        T?.eq dba._get_foreign_keys_state(), true
+    info '^50-34^', dba.get_foreign_keys_state();        T?.eq dba.get_foreign_keys_state(), true
     info '^50-35^', sqlt.pragma SQL"defer_foreign_keys;"; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 1 } ]
     #.......................................................................................................
     ### insert partly bogus values, check ###
@@ -778,7 +778,7 @@ jp                        = JSON.parse
     #.......................................................................................................
     ### ensure DB transaction, fk state ###
     info '^50-50^', sqlt.inTransaction;                   T?.eq sqlt.inTransaction, false
-    info '^50-51^', dba._get_foreign_keys_state();        T?.eq dba._get_foreign_keys_state(), true
+    info '^50-51^', dba.get_foreign_keys_state();        T?.eq dba.get_foreign_keys_state(), true
     info '^50-52^', sqlt.pragma SQL"defer_foreign_keys;"; T?.eq ( sqlt.pragma SQL"defer_foreign_keys;" ), [ { defer_foreign_keys: 0 } ]
   #.........................................................................................................
   done?()
@@ -799,10 +799,10 @@ jp                        = JSON.parse
     """
   #.........................................................................................................
   T?.eq CND.truth dba.sqlt.inTransaction, false
-  T?.eq dba._get_foreign_keys_state(), true
+  T?.eq dba.get_foreign_keys_state(), true
   dba.with_foreign_keys_deferred ->
     T?.eq CND.truth dba.sqlt.inTransaction, true
-    T?.eq dba._get_foreign_keys_state(), true
+    T?.eq dba.get_foreign_keys_state(), true
     dba.execute SQL"insert into a ( n ) values ( 1 );"
     dba.execute SQL"insert into a ( n ) values ( 2 );"
     dba.execute SQL"insert into a ( n ) values ( 3 );"
@@ -814,7 +814,7 @@ jp                        = JSON.parse
     console.table dba.list dba.query SQL"select * from b;"
   T?.eq CND.truth dba.sqlt.inTransaction, false
   #.........................................................................................................
-  T?.eq dba._get_foreign_keys_state(), true
+  T?.eq dba.get_foreign_keys_state(), true
   T?.eq ( dba.pragma SQL"foreign_key_check;" ), []
   T?.eq ( dba.pragma SQL"integrity_check;"   ), [ { integrity_check: 'ok' } ]
   #.........................................................................................................
