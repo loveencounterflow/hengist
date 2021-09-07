@@ -45,18 +45,6 @@ class Dbax extends Dba
 create_sql_functions = ( dba, prefix = 'xxx_' ) ->
   #.........................................................................................................
   dba.create_function
-    name:           prefix + 'str_reverse'
-    deterministic:  true
-    varargs:        false
-    call:           ( s ) -> ( Array.from s ).reverse().join ''
-  #.........................................................................................................
-  dba.create_function
-    name:           prefix + 'str_join'
-    deterministic:  true
-    varargs:        true
-    call:           ( joiner, P... ) -> P.join joiner
-  #.........................................................................................................
-  dba.create_function
     name:           prefix + 'fun_flags_as_text'
     deterministic:  true
     varargs:        false
@@ -132,6 +120,7 @@ demo_1 = ->
   { template_path
     work_path }     = await H.procure_db { size: 'nnt', ref: 'fn', }
   dba.open { path: work_path, schema, }
+  dba.create_stdlib()
   hlr               = new Hollerith { dba, }
   dbatbl            = new Tbl { dba, }
   create_sql_functions dba
@@ -139,7 +128,7 @@ demo_1 = ->
   debug { template_path, work_path, }
   # echo dbatbl._tabulate dba.catalog()
   echo dbatbl._tabulate dba.query SQL"select * from sqlite_schema order by type desc, name;"
-  help "pragmas";      echo dbatbl._tabulate dba.query SQL"select * from pragma_pragma_list()      order by xxx_str_reverse( name );"
+  help "pragmas";      echo dbatbl._tabulate dba.query SQL"select * from pragma_pragma_list()      order by std_str_reverse( name );"
   # help "modules";      echo dbatbl._tabulate dba.query SQL"select * from pragma_module_list()      order by name;"
   # help "databases";    echo dbatbl._tabulate dba.query SQL"select * from pragma_database_list()    order by name;"
   # help "collations";   echo dbatbl._tabulate dba.query SQL"select * from pragma_collation_list()   order by name;"
@@ -151,7 +140,7 @@ demo_1 = ->
     -- thx to https://www.sqlite.org/pragma.html#pragfunc
     select
          -- distinct
-        xxx_str_join( '.', 'main', m.name, ii.name ) as 'indexed-columns',
+        std_str_join( '.', 'main', m.name, ii.name ) as 'indexed-columns',
         *
     from sqlite_schema as m,
       pragma_index_list(  m.name  ) as il,
