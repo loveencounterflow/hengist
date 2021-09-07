@@ -1,6 +1,6 @@
 (function() {
   //###########################################################################################################
-  var CND, FS, H, PATH, alert, badge, debug, echo, help, info, log, rpr, test, urge, warn, whisper;
+  var CND, FS, H, PATH, alert, badge, debug, echo, equals, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   PATH = require('path');
 
@@ -35,6 +35,10 @@
   test = require('guy-test');
 
   H = require('./helpers');
+
+  types = new (require('intertype')).Intertype();
+
+  ({isa, type_of, validate, validate_list_of, equals} = types.export());
 
   //===========================================================================================================
   // TESTS
@@ -186,57 +190,143 @@
     return typeof done === "function" ? done() : void 0;
   };
 
-  // #-----------------------------------------------------------------------------------------------------------
-  // @[ "use-call" ] = ( T, done ) ->
-  //   # T?.halt_on_error()
-  //   # guy         = require H.guy_path
-  //   # #.........................................................................................................
-  //   # class Gx extends guy.constructor
-  //   #   new_use_call: ( cfg ) ->
-  //   #     { target
-  //   #       enter } = cfg
-  //   #     handler = ( cfg, call ) -> enter cfg, call
-  //   #     return if target? then handler.bind target else handler
-  //   # #.........................................................................................................
-  //   # gx      = new Gx()
-  //   # target  = { target: true, }
-  //   # enter   = ( cfg, call ) ->
-  //   #   debug '^443^', cfg
-  //   #   R = call 'arguments provided by `enter()`', cfg
-  //   #   debug '^897^', "ok"
-  //   #   return R
-  //   # use     = gx.new_use_call { target, enter, }
-  //   # help '^33^', use { foo: 'bar', }, ( P... ) ->
-  //   #   debug '^787^', P
-  //   #   return 42
-  //   # #.........................................................................................................
-  //   defaults =
-  //     dba_use_cfg:
-  //       unsafe: false
-  //   class Gx2 extends guy.constructor
-  //     use: ( cfg ) ->
-  //       cfg   = defaults.dba_use_cfg
-  //       prve  = {}
-  //       if cfg.unsafe
-  //         prv.unsafe = @sqlt.unsafe()
-  //         @sqlt.unsafeMode true
-  //       try return cfg.call() finally
-  //         @sqlt.unsafeMode prv.unsafe if prv.unsafe?
-  //   guy = new Gx2()
-  //   #.........................................................................................................
-  //   done?()
+  //-----------------------------------------------------------------------------------------------------------
+  this["configurator"] = function(T, done) {
+    var guy;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    guy = require(H.guy_path);
+    (() => {      //.........................................................................................................
+      /* minimal, must work w/out any specials present */
+      var Sample, ref, ref1, sample;
+      debug('^334-1^');
+      if (T != null) {
+        T.eq(type_of(guy.cfg), 'object');
+      }
+      if (T != null) {
+        T.eq(type_of(guy.cfg.configure_with_types), 'function');
+      }
+      //.......................................................................................................
+      Sample = class Sample {
+        constructor(cfg) {
+          debug('^334-2^', cfg);
+          guy.cfg.configure_with_types(this, cfg);
+        }
+
+      };
+      //.......................................................................................................
+      sample = new Sample({
+        foo: 42
+      });
+      debug('^334-3^', sample);
+      debug('^334-4^', sample.cfg);
+      debug('^334-5^', sample.constructor.C);
+      debug('^334-6^', (ref = sample.constructor.C) != null ? ref.defaults : void 0);
+      if (T != null) {
+        T.eq(type_of(sample.constructor.C), 'undefined');
+      }
+      if (T != null) {
+        T.eq(type_of((ref1 = sample.constructor.C) != null ? ref1.defaults : void 0), 'undefined');
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var Sample, ref, ref1, sample;
+      debug('^334-7^');
+      Sample = (function() {
+        //.......................................................................................................
+        class Sample {
+          static declare_types(self) {
+            if (T != null) {
+              T.eq(type_of(self), 'sample');
+            }
+            if (T != null) {
+              T.eq(type_of(self.cfg), 'object');
+            }
+            debug('^334-8^', self.cfg);
+            self.types.declare('constructor_cfg', {
+              tests: {
+                "@isa.object x": function(x) {
+                  return this.isa.object(x);
+                },
+                "x.foo in [ 'foo-default', 42, ]": function(x) {
+                  var ref;
+                  return (ref = x.foo) === 'foo-default' || ref === 42;
+                },
+                "x.bar is 'bar-default'": function(x) {
+                  return x.bar === 'bar-default';
+                }
+              }
+            });
+            self.types.validate.constructor_cfg(self.cfg);
+            // debug '^334-9^', types
+            return types;
+          }
+
+          constructor(cfg) {
+            guy.cfg.configure_with_types(this, cfg);
+            debug('^334-10^', this.cfg);
+            debug('^334-11^', type_of(this.cfg), 'object');
+            debug('^334-12^', type_of(this.types), 'object');
+            if (T != null) {
+              T.eq(this.cfg, {
+                foo: 42,
+                bar: 'bar-default'
+              });
+            }
+            return void 0;
+          }
+
+        };
+
+        Sample.C = guy.lft.freeze({
+          foo: 'foo-constant',
+          bar: 'bar-constant',
+          defaults: {
+            constructor_cfg: {
+              foo: 'foo-default',
+              bar: 'bar-default'
+            }
+          }
+        });
+
+        return Sample;
+
+      }).call(this);
+      //.......................................................................................................
+      sample = new Sample({
+        foo: 42
+      });
+      debug('^334-13^', sample);
+      debug('^334-14^', sample.cfg);
+      debug('^334-15^', sample.constructor.C);
+      debug('^334-16^', (ref = sample.constructor.C) != null ? ref.defaults : void 0);
+      if (T != null) {
+        T.eq(type_of(sample.constructor.C), 'object');
+      }
+      if (T != null) {
+        T.eq(type_of((ref1 = sample.constructor.C) != null ? ref1.defaults : void 0), 'object');
+      }
+      // configure_with_types
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
 
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @, { timeout: 5000, }
-      // test @[ "await with async steampipes" ]
-      // test @[ "nowait with async steampipes" ]
-      return test(this["use-call"]);
+      return test(this["configurator"]);
     })();
   }
 
-  // @[ "await with async steampipes" ]()
+  // @[ "configurator" ]()
+// test @[ "await with async steampipes" ]
+// test @[ "nowait with async steampipes" ]
+// test @[ "use-call" ]
+// @[ "await with async steampipes" ]()
 // @[ "demo" ]()
 // @[ "nowait" ]()
 
