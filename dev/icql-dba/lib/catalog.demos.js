@@ -62,24 +62,6 @@
     var bit_pattern, property;
     //.........................................................................................................
     dba.create_function({
-      name: prefix + 'str_reverse',
-      deterministic: true,
-      varargs: false,
-      call: function(s) {
-        return (Array.from(s)).reverse().join('');
-      }
-    });
-    //.........................................................................................................
-    dba.create_function({
-      name: prefix + 'str_join',
-      deterministic: true,
-      varargs: true,
-      call: function(joiner, ...P) {
-        return P.join(joiner);
-      }
-    });
-    //.........................................................................................................
-    dba.create_function({
       name: prefix + 'fun_flags_as_text',
       deterministic: true,
       varargs: false,
@@ -216,6 +198,7 @@ create unique index main.${prefix}b_n_idx on ${prefix}b ( n );
       path: work_path,
       schema
     });
+    dba.create_stdlib();
     hlr = new Hollerith({dba});
     dbatbl = new Tbl({dba});
     create_sql_functions(dba);
@@ -224,7 +207,7 @@ create unique index main.${prefix}b_n_idx on ${prefix}b ( n );
     // echo dbatbl._tabulate dba.catalog()
     echo(dbatbl._tabulate(dba.query(SQL`select * from sqlite_schema order by type desc, name;`)));
     help("pragmas");
-    echo(dbatbl._tabulate(dba.query(SQL`select * from pragma_pragma_list()      order by xxx_str_reverse( name );`)));
+    echo(dbatbl._tabulate(dba.query(SQL`select * from pragma_pragma_list()      order by std_str_reverse( name );`)));
     // help "modules";      echo dbatbl._tabulate dba.query SQL"select * from pragma_module_list()      order by name;"
     // help "databases";    echo dbatbl._tabulate dba.query SQL"select * from pragma_database_list()    order by name;"
     // help "collations";   echo dbatbl._tabulate dba.query SQL"select * from pragma_collation_list()   order by name;"
@@ -240,7 +223,7 @@ create unique index main.${prefix}b_n_idx on ${prefix}b ( n );
     echo(dbatbl._tabulate(dba.query(SQL`-- thx to https://www.sqlite.org/pragma.html#pragfunc
 select
      -- distinct
-    xxx_str_join( '.', 'main', m.name, ii.name ) as 'indexed-columns',
+    std_str_join( '.', 'main', m.name, ii.name ) as 'indexed-columns',
     *
 from sqlite_schema as m,
   pragma_index_list(  m.name  ) as il,
@@ -287,6 +270,23 @@ order by
       entry = ref[fun_name];
       info(fun_name, entry);
     }
+    // for n in [ 0 .. 100 ]
+    //   debug '^980^', n, dba.first_row dba.query SQL"select sqlite_compileoption_get( $n ) as option;", { n }
+    dba.execute(SQL`create view xxx_compile_time_options as with r1 as ( select
+    counter.value                             as idx,
+    sqlite_compileoption_get( counter.value ) as facet_txt
+  from std_generate_series( 0, 1e3 ) as counter
+where facet_txt is not null )
+select
+    idx                                 as idx,
+    prefix                              as key,
+    suffix                              as value,
+    sqlite_compileoption_used( prefix ) as used
+  from r1,
+  std_str_split_first( r1.facet_txt, '=' ) as r2
+  order by 1;`);
+    help("compile_time_options");
+    echo(dbatbl._tabulate(dba.query(SQL`select * from xxx_compile_time_options;`)));
     return null;
   };
 
