@@ -353,7 +353,7 @@ DATA                      = require '../../../lib/data-providers-nocache'
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   test @[ "DBA: default schema is 'icql'" ]
-  @[ "DBA: default schema is 'icql'" ]()
+  # @[ "DBA: default schema is 'icql'" ]()
 
 
 
