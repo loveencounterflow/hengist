@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dba, Dbax, H, PATH, SQL, badge, create_db_structure, create_sql_functions, debug, demo_1, echo, function_flags, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Dba, H, PATH, SQL, badge, create_db_structure, create_sql_functions, debug, demo_1, echo, function_flags, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -44,19 +44,6 @@
   };
 
   
-    //===========================================================================================================
-  Dbax = class Dbax extends Dba {
-    //---------------------------------------------------------------------------------------------------------
-    catalog() {
-      return this.query("select * from sqlite_schema order by type desc, name;");
-    }
-
-  };
-
-  //---------------------------------------------------------------------------------------------------------
-  // _pragma_index_xinfo: ( schema, idx_name ) -> @pragma SQL"#{@sql.I schema}.index_xinfo( #{@sql.L idx_name} );"
-  // _pragma_table_xinfo: ( schema, tbl_name ) -> @pragma SQL"#{@sql.I schema}.table_xinfo( #{@sql.L tbl_name} );"
-
   //-----------------------------------------------------------------------------------------------------------
   create_sql_functions = function(dba, prefix = 'xxx_') {
     var bit_pattern, property;
@@ -185,22 +172,31 @@ create unique index main.${prefix}b_n_idx on ${prefix}b ( n );
 
   //-----------------------------------------------------------------------------------------------------------
   demo_1 = async function() {
-    var Hollerith, Tbl, dba, dbatbl, entry, fun_name, hlr, ref, schema, template_path, work_path;
+    var Dcat, Hollerith, Tbl, dba, dbatbl, dcat, entry, fun_name, hlr, ref, schema, template_path, work_path;
     ({Hollerith} = require('../../../apps/icql-dba-hollerith'));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
-    dba = new Dbax();
+    ({Dcat} = require('../../../apps/icql-dba-catalog'));
+    dba = new Dba();
+    debug('^335-1^', Object.isFrozen(dba));
     schema = 'main';
     ({template_path, work_path} = (await H.procure_db({
       size: 'nnt',
       ref: 'fn'
     })));
+    debug('^335-2^', dba._state);
+    debug('^335-3^', Object.isFrozen(dba._state));
     dba.open({
       path: work_path,
       schema
     });
-    dba.create_stdlib();
+    debug('^335-4^', dba._state);
+    debug('^335-5^', Object.isFrozen(dba._state));
     hlr = new Hollerith({dba});
+    debug('^335-6^', Object.isFrozen(dba._state));
+    dcat = new Dcat({dba});
+    debug('^335-7^', Object.isFrozen(dba._state));
     dbatbl = new Tbl({dba});
+    debug('^335-8^', Object.isFrozen(dba._state));
     create_sql_functions(dba);
     create_db_structure(dba);
     debug({template_path, work_path});
@@ -272,21 +268,8 @@ order by
     }
     // for n in [ 0 .. 100 ]
     //   debug '^980^', n, dba.first_row dba.query SQL"select sqlite_compileoption_get( $n ) as option;", { n }
-    dba.execute(SQL`create view xxx_compile_time_options as with r1 as ( select
-    counter.value                             as idx,
-    sqlite_compileoption_get( counter.value ) as facet_txt
-  from std_generate_series( 0, 1e3 ) as counter
-where facet_txt is not null )
-select
-    idx                                 as idx,
-    prefix                              as key,
-    suffix                              as value,
-    sqlite_compileoption_used( prefix ) as used
-  from r1,
-  std_str_split_first( r1.facet_txt, '=' ) as r2
-  order by 1;`);
     help("compile_time_options");
-    echo(dbatbl._tabulate(dba.query(SQL`select * from xxx_compile_time_options;`)));
+    echo(dbatbl._tabulate(dba.query(SQL`select * from dcat_compile_time_options;`)));
     return null;
   };
 

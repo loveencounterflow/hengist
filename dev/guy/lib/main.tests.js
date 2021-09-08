@@ -431,12 +431,14 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @, { timeout: 5000, }
-      return test(this["configurator"]);
+      return test(this, {
+        timeout: 5000
+      });
     })();
   }
 
-  // @[ "configurator" ]()
+  // test @[ "configurator" ]
+// @[ "configurator" ]()
 // test @[ "await with async steampipes" ]
 // test @[ "nowait with async steampipes" ]
 // test @[ "use-call" ]
