@@ -258,8 +258,8 @@ types                     = new ( require 'intertype' ).Intertype
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @, { timeout: 5000, }
-  test @[ "configurator" ]
+  test @, { timeout: 5000, }
+  # test @[ "configurator" ]
   # @[ "configurator" ]()
   # test @[ "await with async steampipes" ]
   # test @[ "nowait with async steampipes" ]
