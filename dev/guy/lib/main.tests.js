@@ -199,7 +199,7 @@
     guy = require(H.guy_path);
     (() => {      //.........................................................................................................
       /* minimal, must work w/out any specials present */
-      var Sample, ref, ref1, sample;
+      var Ex, ex, ref, ref1;
       debug('^334-1^');
       if (T != null) {
         T.eq(type_of(guy.cfg), 'object');
@@ -208,7 +208,7 @@
         T.eq(type_of(guy.cfg.configure_with_types), 'function');
       }
       //.......................................................................................................
-      Sample = class Sample {
+      Ex = class Ex {
         constructor(cfg) {
           debug('^334-2^', cfg);
           guy.cfg.configure_with_types(this, cfg);
@@ -216,33 +216,37 @@
 
       };
       //.......................................................................................................
-      sample = new Sample({
+      ex = new Ex({
         foo: 42
       });
-      debug('^334-3^', sample);
-      debug('^334-4^', sample.cfg);
-      debug('^334-5^', sample.constructor.C);
-      debug('^334-6^', (ref = sample.constructor.C) != null ? ref.defaults : void 0);
+      debug('^334-3^', ex);
+      debug('^334-4^', ex.cfg);
+      debug('^334-5^', ex.constructor.C);
+      debug('^334-6^', (ref = ex.constructor.C) != null ? ref.defaults : void 0);
       if (T != null) {
-        T.eq(type_of(sample.constructor.C), 'undefined');
+        T.eq(type_of(ex.constructor.C), 'undefined');
       }
       if (T != null) {
-        T.eq(type_of((ref1 = sample.constructor.C) != null ? ref1.defaults : void 0), 'undefined');
+        T.eq(type_of((ref1 = ex.constructor.C) != null ? ref1.defaults : void 0), 'undefined');
       }
       return null;
     })();
     (() => {      //.........................................................................................................
-      var Sample, ref, ref1, sample;
+      var Ex, ex, ref, ref1;
+      /* more complete example */
       debug('^334-7^');
-      Sample = (function() {
+      Ex = (function() {
         //.......................................................................................................
-        class Sample {
+        class Ex {
           static declare_types(self) {
             if (T != null) {
-              T.eq(type_of(self), 'sample');
+              T.eq(type_of(self), 'ex');
             }
             if (T != null) {
               T.eq(type_of(self.cfg), 'object');
+            }
+            if (T != null) {
+              T.ok(Object.isFrozen(self.cfg));
             }
             debug('^334-8^', self.cfg);
             self.types.declare('constructor_cfg', {
@@ -261,7 +265,7 @@
             });
             self.types.validate.constructor_cfg(self.cfg);
             // debug '^334-9^', types
-            return types;
+            return null;
           }
 
           constructor(cfg) {
@@ -269,6 +273,9 @@
             debug('^334-10^', this.cfg);
             debug('^334-11^', type_of(this.cfg), 'object');
             debug('^334-12^', type_of(this.types), 'object');
+            if (T != null) {
+              T.ok(Object.isFrozen(this.cfg));
+            }
             if (T != null) {
               T.eq(this.cfg, {
                 foo: 42,
@@ -280,7 +287,7 @@
 
         };
 
-        Sample.C = guy.lft.freeze({
+        Ex.C = guy.lft.freeze({
           foo: 'foo-constant',
           bar: 'bar-constant',
           defaults: {
@@ -291,22 +298,129 @@
           }
         });
 
-        return Sample;
+        return Ex;
 
       }).call(this);
       //.......................................................................................................
-      sample = new Sample({
+      ex = new Ex({
         foo: 42
       });
-      debug('^334-13^', sample);
-      debug('^334-14^', sample.cfg);
-      debug('^334-15^', sample.constructor.C);
-      debug('^334-16^', (ref = sample.constructor.C) != null ? ref.defaults : void 0);
+      debug('^334-13^', ex);
+      debug('^334-14^', ex.cfg);
+      debug('^334-15^', ex.constructor.C);
+      debug('^334-16^', (ref = ex.constructor.C) != null ? ref.defaults : void 0);
       if (T != null) {
-        T.eq(type_of(sample.constructor.C), 'object');
+        T.eq(type_of(ex.constructor.C), 'object');
       }
       if (T != null) {
-        T.eq(type_of((ref1 = sample.constructor.C) != null ? ref1.defaults : void 0), 'object');
+        T.eq(type_of((ref1 = ex.constructor.C) != null ? ref1.defaults : void 0), 'object');
+      }
+      // configure_with_types
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var Ex, ex1, ex2, mytypes, ref;
+      /* example with module-level types */
+      debug('^334-17^');
+      //.......................................................................................................
+      mytypes = new (require('intertype')).Intertype();
+      mytypes.declare('constructor_cfg', {
+        tests: {
+          "@isa.object x": function(x) {
+            return this.isa.object(x);
+          },
+          "x.foo in [ 'foo-default', 42, 123456, ]": function(x) {
+            var ref;
+            return (ref = x.foo) === 'foo-default' || ref === 42 || ref === 123456;
+          },
+          "@isa.nonempty_text x.bar": function(x) {
+            return this.isa.nonempty_text(x.bar);
+          }
+        }
+      });
+      mytypes.declare("rosy_number", {
+        tests: {
+          "@isa.integer x": function(x) {
+            return this.isa.integer(x);
+          },
+          "123 < x < 456": function(x) {
+            return (123 < x && x < 456);
+          }
+        }
+      });
+      Ex = (function() {
+        //.......................................................................................................
+        class Ex {
+          static declare_types(self) {
+            if (T != null) {
+              T.eq(type_of(self), 'ex');
+            }
+            if (T != null) {
+              T.eq(type_of(self.cfg), 'object');
+            }
+            if (T != null) {
+              T.ok(Object.isFrozen(self.cfg));
+            }
+            if (T != null) {
+              T.ok(self.types === mytypes);
+            }
+            self.types.validate.constructor_cfg(self.cfg);
+            self.types.validate.rosy_number(200);
+            if (T != null) {
+              T.ok(!self.types.isa.rosy_number(500));
+            }
+            return null;
+          }
+
+          constructor(cfg) {
+            guy.cfg.configure_with_types(this, cfg, mytypes);
+            return void 0;
+          }
+
+        };
+
+        Ex.C = guy.lft.freeze({
+          foo: 'foo-constant',
+          bar: 'bar-constant',
+          defaults: {
+            constructor_cfg: {
+              foo: 'foo-default',
+              bar: 'bar-default'
+            }
+          }
+        });
+
+        return Ex;
+
+      }).call(this);
+      //.......................................................................................................
+      ex1 = new Ex({
+        foo: 42
+      });
+      if (T != null) {
+        T.eq(type_of(ex1.constructor.C), 'object');
+      }
+      if (T != null) {
+        T.eq(ex1.cfg, {
+          foo: 42,
+          bar: 'bar-default'
+        });
+      }
+      if (T != null) {
+        T.eq(type_of((ref = ex1.constructor.C) != null ? ref.defaults : void 0), 'object');
+      }
+      ex2 = new Ex({
+        foo: 123456,
+        bar: 'mybar'
+      });
+      if (T != null) {
+        T.eq(ex2.cfg, {
+          foo: 123456,
+          bar: 'mybar'
+        });
+      }
+      if (T != null) {
+        T.ok(ex1.types === ex2.types);
       }
       // configure_with_types
       return null;
