@@ -671,8 +671,6 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     (() => {
       // test @, { timeout: 10e3, }
       // debug f '𠖏'
-      // test @[ "DBA: concurrent UDFs" ]
-      // @[ "DBA: concurrent UDFs" ]()
       // test @[ "DBA: advanced interpolation" ]
       // test @[ "DBA: typing" ]
       // test @[ "DBA: window functions etc." ]

@@ -98,7 +98,7 @@
         }
         return results;
       })();
-      return T.eq(result, matcher);
+      return T != null ? T.eq(result, matcher) : void 0;
     })();
     await (() => {      //.........................................................................................................
       /* aggregate function */
@@ -129,7 +129,7 @@
           }
           return results;
         })();
-        return T.eq(result, matcher);
+        return T != null ? T.eq(result, matcher) : void 0;
       })();
       (() => {        //.......................................................................................................
         var matcher, result, row;
@@ -145,7 +145,7 @@
           }
           return results;
         })();
-        return T.eq(result, matcher);
+        return T != null ? T.eq(result, matcher) : void 0;
       })();
       return (() => {        //.......................................................................................................
         var error;
@@ -153,9 +153,15 @@
           dba.query(SQL`select product( n ) over () as product from nnt;`);
         } catch (error1) {
           error = error1;
-          T.eq(error.code, 'SQLITE_ERROR');
-          T.eq(error.name, 'SqliteError');
-          T.eq(error.message, 'product() may not be used as a window function');
+          if (T != null) {
+            T.eq(error.code, 'SQLITE_ERROR');
+          }
+          if (T != null) {
+            T.eq(error.name, 'SqliteError');
+          }
+          if (T != null) {
+            T.eq(error.message, 'product() may not be used as a window function');
+          }
         }
         if (error == null) {
           return T.fail("expected error");
@@ -165,7 +171,7 @@
     await (() => {      // console.table result
       // matcher = [ null, ]
       // result  = ( row.product for row in result )
-      // T.eq result, matcher
+      // T?.eq result, matcher
       //.........................................................................................................
       /* window function */
       dba.create_window_function({
@@ -201,7 +207,7 @@
           }
           return results;
         })();
-        return T.eq(result, matcher);
+        return T != null ? T.eq(result, matcher) : void 0;
       })();
       return (() => {        //.......................................................................................................
         var matcher, result, row;
@@ -225,7 +231,7 @@
           return results;
         })();
         debug('^878^', result);
-        return T.eq(result, matcher);
+        return T != null ? T.eq(result, matcher) : void 0;
       })();
     })();
     await (async() => {      //.........................................................................................................
@@ -263,7 +269,7 @@
           return results;
         })();
         debug('^984^', result);
-        return T.eq(result, matcher);
+        return T != null ? T.eq(result, matcher) : void 0;
       })();
       return (await (() => {
         var matcher, result, row;
@@ -285,7 +291,7 @@
           return results;
         })();
         debug('^984^', result);
-        return T.eq(result, matcher);
+        return T != null ? T.eq(result, matcher) : void 0;
       })());
     })();
     await (() => {      //.........................................................................................................
@@ -334,7 +340,7 @@
         return results;
       })();
       debug('^984^', result);
-      return T.eq(result, matcher);
+      return T != null ? T.eq(result, matcher) : void 0;
     })();
     //.........................................................................................................
     return done();
@@ -419,184 +425,186 @@ create trigger multiple_instead_update instead of update on multiples begin
       //.......................................................................................................
       console.table(dba.list(dba.query(SQL`select * from multiples_idx;`)));
       console.table(dba.list(dba.query(SQL`select * from multiples;`)));
-      T.eq(dba.list(dba.query(SQL`select * from multiples_idx order by n, idx;`)), [
-        {
-          n: 1,
-          idx: 0,
-          multiple: 0
-        },
-        {
-          n: 1,
-          idx: 1,
-          multiple: 1
-        },
-        {
-          n: 1,
-          idx: 2,
-          multiple: 2
-        },
-        {
-          n: 1,
-          idx: 3,
-          multiple: 3
-        },
-        {
-          n: 1,
-          idx: 4,
-          multiple: 4
-        },
-        {
-          n: 1,
-          idx: 5,
-          multiple: 5
-        },
-        {
-          n: 1,
-          idx: 6,
-          multiple: 6
-        },
-        {
-          n: 1,
-          idx: 7,
-          multiple: 7
-        },
-        {
-          n: 1,
-          idx: 8,
-          multiple: 8
-        },
-        {
-          n: 1,
-          idx: 9,
-          multiple: 9
-        },
-        {
-          n: 2,
-          idx: 0,
-          multiple: 0
-        },
-        {
-          n: 2,
-          idx: 1,
-          multiple: 2
-        },
-        {
-          n: 2,
-          idx: 2,
-          multiple: 4
-        },
-        {
-          n: 2,
-          idx: 3,
-          multiple: 6
-        },
-        {
-          n: 2,
-          idx: 4,
-          multiple: 8
-        },
-        {
-          n: 2,
-          idx: 5,
-          multiple: 10
-        },
-        {
-          n: 2,
-          idx: 6,
-          multiple: 12
-        },
-        {
-          n: 2,
-          idx: 7,
-          multiple: 14
-        },
-        {
-          n: 2,
-          idx: 8,
-          multiple: 16
-        },
-        {
-          n: 2,
-          idx: 9,
-          multiple: 18
-        },
-        {
-          n: 3,
-          idx: 0,
-          multiple: 0
-        },
-        {
-          n: 3,
-          idx: 1,
-          multiple: 3
-        },
-        {
-          n: 3,
-          idx: 2,
-          multiple: 6
-        },
-        {
-          n: 3,
-          idx: 3,
-          multiple: 9
-        },
-        {
-          n: 3,
-          idx: 4,
-          multiple: 12
-        },
-        {
-          n: 3,
-          idx: 5,
-          multiple: 15
-        },
-        {
-          n: 3,
-          idx: 6,
-          multiple: 18
-        },
-        {
-          n: 3,
-          idx: 7,
-          multiple: 21
-        },
-        {
-          n: 3,
-          idx: 8,
-          multiple: 24
-        },
-        {
-          n: 3,
-          idx: 9,
-          multiple: 27
-        },
-        {
-          n: 5,
-          idx: 0,
-          multiple: 0
-        },
-        {
-          n: 5,
-          idx: 1,
-          multiple: 5
-        },
-        {
-          n: 5,
-          idx: 2,
-          multiple: 10
-        },
-        {
-          n: 5,
-          idx: 3,
-          multiple: 15
-        },
-        {
-          n: 5,
-          idx: 4,
-          multiple: 20
-        }
-      ]);
-      return T.eq(dba.list(dba.query(SQL`select * from multiples order by n;`)), [
+      if (T != null) {
+        T.eq(dba.list(dba.query(SQL`select * from multiples_idx order by n, idx;`)), [
+          {
+            n: 1,
+            idx: 0,
+            multiple: 0
+          },
+          {
+            n: 1,
+            idx: 1,
+            multiple: 1
+          },
+          {
+            n: 1,
+            idx: 2,
+            multiple: 2
+          },
+          {
+            n: 1,
+            idx: 3,
+            multiple: 3
+          },
+          {
+            n: 1,
+            idx: 4,
+            multiple: 4
+          },
+          {
+            n: 1,
+            idx: 5,
+            multiple: 5
+          },
+          {
+            n: 1,
+            idx: 6,
+            multiple: 6
+          },
+          {
+            n: 1,
+            idx: 7,
+            multiple: 7
+          },
+          {
+            n: 1,
+            idx: 8,
+            multiple: 8
+          },
+          {
+            n: 1,
+            idx: 9,
+            multiple: 9
+          },
+          {
+            n: 2,
+            idx: 0,
+            multiple: 0
+          },
+          {
+            n: 2,
+            idx: 1,
+            multiple: 2
+          },
+          {
+            n: 2,
+            idx: 2,
+            multiple: 4
+          },
+          {
+            n: 2,
+            idx: 3,
+            multiple: 6
+          },
+          {
+            n: 2,
+            idx: 4,
+            multiple: 8
+          },
+          {
+            n: 2,
+            idx: 5,
+            multiple: 10
+          },
+          {
+            n: 2,
+            idx: 6,
+            multiple: 12
+          },
+          {
+            n: 2,
+            idx: 7,
+            multiple: 14
+          },
+          {
+            n: 2,
+            idx: 8,
+            multiple: 16
+          },
+          {
+            n: 2,
+            idx: 9,
+            multiple: 18
+          },
+          {
+            n: 3,
+            idx: 0,
+            multiple: 0
+          },
+          {
+            n: 3,
+            idx: 1,
+            multiple: 3
+          },
+          {
+            n: 3,
+            idx: 2,
+            multiple: 6
+          },
+          {
+            n: 3,
+            idx: 3,
+            multiple: 9
+          },
+          {
+            n: 3,
+            idx: 4,
+            multiple: 12
+          },
+          {
+            n: 3,
+            idx: 5,
+            multiple: 15
+          },
+          {
+            n: 3,
+            idx: 6,
+            multiple: 18
+          },
+          {
+            n: 3,
+            idx: 7,
+            multiple: 21
+          },
+          {
+            n: 3,
+            idx: 8,
+            multiple: 24
+          },
+          {
+            n: 3,
+            idx: 9,
+            multiple: 27
+          },
+          {
+            n: 5,
+            idx: 0,
+            multiple: 0
+          },
+          {
+            n: 5,
+            idx: 1,
+            multiple: 5
+          },
+          {
+            n: 5,
+            idx: 2,
+            multiple: 10
+          },
+          {
+            n: 5,
+            idx: 3,
+            multiple: 15
+          },
+          {
+            n: 5,
+            idx: 4,
+            multiple: 20
+          }
+        ]);
+      }
+      return T != null ? T.eq(dba.list(dba.query(SQL`select * from multiples order by n;`)), [
         {
           n: 1,
           multiples: '[0,1,2,3,4,5,6,7,8,9]'
@@ -613,7 +621,7 @@ create trigger multiple_instead_update instead of update on multiples begin
           n: 5,
           multiples: '[0,5,10,15,20]'
         }
-      ]);
+      ]) : void 0;
     })();
     //.........................................................................................................
     return done();
@@ -658,7 +666,9 @@ create trigger multiple_instead_update instead of update on multiples begin
       return results;
     })();
     debug('^984^', result);
-    T.eq(result, matcher);
+    if (T != null) {
+      T.eq(result, matcher);
+    }
     //.........................................................................................................
     return done();
   };
@@ -693,7 +703,9 @@ create trigger multiple_instead_update instead of update on multiples begin
       }
       return results;
     })();
-    T.eq(d, [['d', 'boolean']]);
+    if (T != null) {
+      T.eq(d, [['d', 'boolean']]);
+    }
     //.........................................................................................................
     /* But as soon as any operation is done on data: that typing information vanishes: */
     statement = dba.sqlt.prepare(SQL`select ( stamped and not stamped ) as d from main;`);
@@ -709,7 +721,9 @@ create trigger multiple_instead_update instead of update on multiples begin
       }
       return results;
     })();
-    T.eq(d, [['d', null]]);
+    if (T != null) {
+      T.eq(d, [['d', null]]);
+    }
     //.........................................................................................................
     /* We can even explicitly cast results but that does not bring back typing: */
     statement = dba.sqlt.prepare(SQL`select cast( stamped and not stamped as boolean ) as d from main;`);
@@ -725,7 +739,9 @@ create trigger multiple_instead_update instead of update on multiples begin
       }
       return results;
     })();
-    T.eq(d, [['d', null]]);
+    if (T != null) {
+      T.eq(d, [['d', null]]);
+    }
     //.........................................................................................................
     /* We can enforce better type checking in SQLite by using `check` constraints and UDFs: */
     as_boolean = function(d) {
@@ -1000,11 +1016,13 @@ create trigger multiple_instead_update instead of update on multiples begin
       });
       statement = sqlt1.prepare(SQL`select udf();`);
       result = [...statement.iterate()];
-      T.eq(result, [
-        {
-          'udf()': 42
-        }
-      ]);
+      if (T != null) {
+        T.eq(result, [
+          {
+            'udf()': 42
+          }
+        ]);
+      }
       return null;
     };
     //.........................................................................................................
@@ -1022,11 +1040,13 @@ create trigger multiple_instead_update instead of update on multiples begin
       });
       statement = sqlt1.prepare(SQL`select udf();`);
       result = [...statement.iterate()];
-      T.eq(result, [
-        {
-          'udf()': 42
-        }
-      ]);
+      if (T != null) {
+        T.eq(result, [
+          {
+            'udf()': 42
+          }
+        ]);
+      }
       return null;
     };
     //.........................................................................................................
@@ -1043,15 +1063,18 @@ create trigger multiple_instead_update instead of update on multiples begin
         call: function() {
           var R;
           R = dba2.query(SQL`select 42 as x;`);
+          debug('^34567^', R);
           return [...R][0].x;
         }
       });
       result = dba.list(dba.query(SQL`select udf();`));
-      T.eq(result, [
-        {
-          'udf()': 42
-        }
-      ]);
+      if (T != null) {
+        T.eq(result, [
+          {
+            'udf()': 42
+          }
+        ]);
+      }
       return null;
     };
     //.........................................................................................................
@@ -1059,6 +1082,131 @@ create trigger multiple_instead_update instead of update on multiples begin
     f2();
     f3();
     f4();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: concurrent UDFs 2"] = async function(T, done) {
+    var Dba, count, dba, error, prefix, ref, ref1, ref2, row, row1, row2, schema, select_sql, show_db_objects, template_path, work_path;
+    prefix = 'dcat_';
+    schema = 'main';
+    ({Dba} = require(H.icql_dba_path));
+    ({template_path, work_path} = (await H.procure_db({
+      size: 'small',
+      ref: 'fnc'
+    })));
+    debug({template_path, work_path});
+    dba = new Dba();
+    dba.open({
+      schema,
+      path: work_path
+    });
+    // dba2              = new Dba(); dba2.open  { schema, path: work_path, }
+    //.........................................................................................................
+    select_sql = SQL`select
+    ${dba.sql.L(schema)} as schema,
+    type,
+    name,
+    tbl_name,
+    rootpage
+  from sqlite_schema
+  order by rootpage;`;
+    //.........................................................................................................
+    dba.create_table_function({
+      name: prefix + 'reltrigs',
+      columns: ['schema', 'type', 'name', 'tbl_name', 'rootpage'],
+      parameters: [],
+      varargs: false,
+      deterministic: false,
+      rows: function*() {
+        return (yield* dba.query(select_sql));
+      }
+    });
+    //.........................................................................................................
+    show_db_objects = function() {
+      return console.table(dba.list(dba.query(SQL`select
+    'main' as schema,
+    type,
+    name,
+    tbl_name,
+    rootpage
+  from sqlite_schema
+  order by rootpage;`)));
+    };
+    //.........................................................................................................
+    count = 0;
+    ref = dba.query(SQL`select * from sqlite_schema where type in ( 'table', 'view' );`);
+    for (row1 of ref) {
+      ref1 = dba.query(SQL`select * from pragma_table_info( $name )`, {
+        name: row1.name
+      });
+      for (row2 of ref1) {
+        count++;
+        if (count > 5) {
+          break;
+        }
+        info('^875-1^', row2);
+      }
+    }
+    //.........................................................................................................
+    count = 0;
+    dba.with_unsafe_mode(function() {
+      var ref2, results;
+      ref2 = dba.query(SQL`select * from sqlite_schema where type in ( 'table', 'view' );`);
+      results = [];
+      for (row1 of ref2) {
+        results.push((function() {
+          var ref3, results1;
+          ref3 = dba.query(SQL`select * from pragma_table_info( $name )`, {
+            name: row1.name
+          });
+          results1 = [];
+          for (row2 of ref3) {
+            count++;
+            if (count > 5) {
+              break;
+            }
+            info('^875-1^', row2);
+            results1.push(dba.execute("create table if not exists foo ( n text );"));
+          }
+          return results1;
+        })());
+      }
+      return results;
+    });
+    try {
+      ref2 = dba.query(SQL`select * from dcat_reltrigs;`);
+      //.........................................................................................................
+      for (row of ref2) {
+        info('^875-2^', row);
+      }
+    } catch (error1) {
+      error = error1;
+      warn(CND.reverse('^875-3^', error.message));
+      if (T != null) {
+        T.eq(error.message, "This database connection is busy executing a query");
+      }
+    }
+    try {
+      //.........................................................................................................
+      dba.with_unsafe_mode(function() {
+        var ref3, results;
+        ref3 = dba.query(SQL`select * from dcat_reltrigs;`);
+        results = [];
+        for (row of ref3) {
+          results.push(info('^875-4^', row));
+        }
+        return results;
+      });
+    } catch (error1) {
+      error = error1;
+      warn(CND.reverse('^875-5^', error.message));
+      if (T != null) {
+        T.eq(error.message, "This database connection is busy executing a query");
+      }
+    }
+    //.........................................................................................................
+    show_db_objects();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -1657,25 +1805,24 @@ create table b ( n integer not null primary key references a ( n ) );`);
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      // debug f '𠖏'
+      // test @[ "DBA: concurrent UDFs" ]
+      // test @[ "DBA: create_with_unsafe_mode()" ]
+      // @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]()
+      // test @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]
+      // test @[ "DBA: with_foreign_keys_deferred(), ensure checks" ]
+      // @[ "DBA: with_unsafe_mode()" ]()
+      // @[ "DBA: with_transaction() 1" ]()
+      // test @[ "DBA: with_transaction() 1" ]
+      // @[ "DBA: with_transaction() 2" ]()
+      // test @[ "DBA: with_transaction()" ]
+      // test @[ "DBA: concurrent UDFs 2" ]
+      return this["DBA: concurrent UDFs 2"]();
     })();
   }
 
-  // debug f '𠖏'
-// test @[ "DBA: concurrent UDFs" ]
-// test @[ "DBA: create_with_unsafe_mode()" ]
-// @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]()
-// test @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]
-// test @[ "DBA: with_foreign_keys_deferred(), ensure checks" ]
-// @[ "DBA: with_unsafe_mode()" ]()
-// @[ "DBA: with_transaction() 1" ]()
-// test @[ "DBA: with_transaction() 1" ]
-// @[ "DBA: with_transaction() 2" ]()
-// test @[ "DBA: with_transaction()" ]
-// @[ "DBA: concurrent UDFs" ]()
-// debug process.env[ 'icql-dba-use' ]
+  // debug process.env[ 'icql-dba-use' ]
 // debug process.argv
 
 }).call(this);

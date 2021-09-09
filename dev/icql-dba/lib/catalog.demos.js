@@ -116,12 +116,19 @@
   primary key ( n, b ) );
 create table ${prefix}b ( n integer not null primary key references a ( n ) );
 create unique index main.${prefix}a_n_idx on ${prefix}a ( n );
-create unique index main.${prefix}b_n_idx on ${prefix}b ( n );
-`);
+create unique index main.${prefix}b_n_idx on ${prefix}b ( n );`);
     dba.open({
       schema: 'foo',
       ram: true
     });
+    // dba.execute SQL"""
+    //   create table foo.blah (
+    //       id integer not null,
+    //       b text not null,
+    //     primary key ( id ) );
+    //   create unique index foo.blah_b_idx on blah ( b );
+    //   create trigger foo.on_blah_insert before insert on foo.blah for each row begin
+    // """
     return null;
   };
 
@@ -146,62 +153,62 @@ create unique index main.${prefix}b_n_idx on ${prefix}b ( n );
     dtab = new Tbl({dba});
     create_sql_functions(dba);
     create_db_structure(dba);
-    // echo dtab._tabulate dba.catalog()
-    echo(dtab._tabulate(dba.query(SQL`select * from sqlite_schema order by type desc, name;`)));
-    help("foreign_keys");
-    echo(dtab._tabulate(dba.query(SQL`select * from main.pragma_foreign_key_list( 'xxx_a' ) order by 1;`)));
-    help("indexed columns");
-    echo(dtab._tabulate(dba.query(SQL`-- thx to https://www.sqlite.org/pragma.html#pragfunc
-select
-     -- distinct
-    std_str_join( '.', 'main', m.name, ii.name ) as 'indexed-columns',
-    *
-from sqlite_schema as m,
-  pragma_index_list(  m.name  ) as il,
-  pragma_index_info(  il.name ) as ii
-where m.type = 'table'
-order by 1;`)));
-    help("all columns");
-    echo(dtab._tabulate(dba.query(SQL`-- thx to https://stackoverflow.com/a/53160348/256361
-select
-  p.cid         as col_id,
-  'main'        as scm_name,
-  m.name        as tbl_name,
-  p.name        as col_name,
-  p.type        as col_type,
-  p."notnull"   as col_notnull,
-  p.dflt_value  as col_default,
-  p.pk          as col_pk_idx
-  -- m.*
-from
-  sqlite_schema as m
-join
-  pragma_table_info(m.name) as p
-order by
-  m.name,
-  p.cid;`)));
-    // help "modules";     echo dtab._tabulate dba.query SQL"select * from dcat_modules;"
-    // help "databases";   echo dtab._tabulate dba.query SQL"select * from dcat_databases;"
-    // help "collations";  echo dtab._tabulate dba.query SQL"select * from dcat_collations;"
-    // help "functions";   echo dtab._tabulate dba.query SQL"select * from dcat_functions;"
-    // help "options";     echo dtab._tabulate dba.query SQL"select * from dcat_compile_time_options;"
-    // help "pragmas";     echo dtab._tabulate dba.query SQL"select * from dcat_pragmas;"
     /*
-    dba.with_unsafe_mode ->
-      dba.pragma SQL"writable_schema = true;"
-      dba.execute SQL"""
-        create trigger foobar before insert on sqlite_schema
-          for each row begin select 42 end;
-        """
-      return null
-
-    */
-    help("table_info");
-    echo(dtab._tabulate(dba.query(SQL`select * from main.pragma_table_info( 'xxx_a' )       order by name;`)));
-    help("table_info");
-    echo(dtab._tabulate(dba.query(SQL`select * from main.pragma_table_info( 'xxx_a' )       order by name;`)));
-    help("indexes");
-    echo(dtab._tabulate(dba.query(SQL`select * from main.pragma_index_list( 'xxx_a' )       order by name;`)));
+     * echo dtab._tabulate dba.catalog()
+    echo dtab._tabulate dba.query SQL"select * from sqlite_schema order by type desc, name;"
+    help "foreign_keys"; echo dtab._tabulate dba.query SQL"select * from main.pragma_foreign_key_list( 'xxx_a' ) order by 1;"
+    help "indexed columns"; echo dtab._tabulate dba.query SQL"""
+      -- thx to https://www.sqlite.org/pragma.html#pragfunc
+      select
+           -- distinct
+          std_str_join( '.', 'main', m.name, ii.name ) as 'indexed-columns',
+          *
+      from sqlite_schema as m,
+        pragma_index_list(  m.name  ) as il,
+        pragma_index_info(  il.name ) as ii
+      where m.type = 'table'
+      order by 1;"""
+    help "all columns"; echo dtab._tabulate dba.query SQL"""
+      -- thx to https://stackoverflow.com/a/53160348/256361
+      select
+        p.cid         as col_id,
+        'main'        as scm_name,
+        m.name        as tbl_name,
+        p.name        as col_name,
+        p.type        as col_type,
+        p."notnull"   as col_notnull,
+        p.dflt_value  as col_default,
+        p.pk          as col_pk_idx
+        -- m.*
+      from
+        sqlite_schema as m
+      join
+        pragma_table_info(m.name) as p
+      order by
+        m.name,
+        p.cid;"""
+     * help "modules";     echo dtab._tabulate dba.query SQL"select * from dcat_modules;"
+     * help "collations";  echo dtab._tabulate dba.query SQL"select * from dcat_collations;"
+     * help "functions";   echo dtab._tabulate dba.query SQL"select * from dcat_functions;"
+     * help "pragmas";     echo dtab._tabulate dba.query SQL"select * from dcat_pragmas;"
+     * help "table_info";   echo dtab._tabulate dba.query SQL"select * from main.pragma_table_info( 'xxx_a' )       order by name;"
+     * help "table_info";   echo dtab._tabulate dba.query SQL"select * from main.pragma_table_info( 'xxx_a' )       order by name;"
+     * help "indexes";      echo dtab._tabulate dba.query SQL"select * from main.pragma_index_list( 'xxx_a' )       order by name;"
+     */
+    help("databases");
+    echo(dtab._tabulate(dba.query(SQL`select * from dcat_databases;`)));
+    help("databases");
+    echo(dtab._tabulate(dba.query(SQL`select * from foo.sqlite_schema;`)));
+    // help "databases";   echo dcat._get_union_of_sqlite_schema_selects()
+    // help "databases";   echo dtab._tabulate dba.query dcat._get_union_of_sqlite_schema_selects()
+    help("databases");
+    echo(dcat.sql.reltrigs);
+    help("databases");
+    echo(dtab._tabulate(dba.query(dcat.sql.reltrigs)));
+    // dba.with_transaction ->
+    //   help "databases";   echo dtab._tabulate dba.query SQL"select * from dcat_reltrigs;"
+    help("options");
+    echo(dtab._tabulate(dba.query(SQL`select * from dcat_compile_time_options;`)));
     return null;
   };
 
