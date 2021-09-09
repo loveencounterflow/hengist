@@ -51,7 +51,7 @@ jp                        = JSON.parse
     result  = dba.list dba.query SQL"select *, square( n ) as square from nnt order by square;"
     console.table result
     result  = ( row.square for row in result )
-    T.eq result, matcher
+    T?.eq result, matcher
   #.........................................................................................................
   await do =>
     ### aggregate function ###
@@ -68,28 +68,28 @@ jp                        = JSON.parse
       console.table result
       matcher = [ 5122922112, ]
       result  = ( row.product for row in result )
-      T.eq result, matcher
+      T?.eq result, matcher
     #.......................................................................................................
     do =>
       result  = dba.list dba.query SQL"select product( n ) as product from nnt where n > 100;"
       console.table result
       matcher = [ null, ]
       result  = ( row.product for row in result )
-      T.eq result, matcher
+      T?.eq result, matcher
     #.......................................................................................................
     do =>
       try
         dba.query SQL"select product( n ) over () as product from nnt;"
       catch error
-        T.eq error.code, 'SQLITE_ERROR'
-        T.eq error.name, 'SqliteError'
-        T.eq error.message, 'product() may not be used as a window function'
+        T?.eq error.code, 'SQLITE_ERROR'
+        T?.eq error.name, 'SqliteError'
+        T?.eq error.message, 'product() may not be used as a window function'
       unless error?
         T.fail "expected error"
       # console.table result
       # matcher = [ null, ]
       # result  = ( row.product for row in result )
-      # T.eq result, matcher
+      # T?.eq result, matcher
   #.........................................................................................................
   await do =>
     ### window function ###
@@ -107,7 +107,7 @@ jp                        = JSON.parse
       console.table result
       matcher = [ '["naught","one","one point five","two","two point three","three","three point one","four","five","six","seven","eight","nine","ten","eleven","twelve"]' ]
       result  = ( row.names for row in result )
-      T.eq result, matcher
+      T?.eq result, matcher
     #.......................................................................................................
     do =>
       result  = dba.list dba.query SQL"""
@@ -123,7 +123,7 @@ jp                        = JSON.parse
       matcher = [ '["eight","eleven"]', '["five","four"]', '["naught","nine"]', '["one","one point five"]', '["seven","six"]', '["ten","three","three point one","twelve","two","two point three"]' ]
       result  = ( row.names for row in result )
       debug '^878^', result
-      T.eq result, matcher
+      T?.eq result, matcher
   #.........................................................................................................
   await do =>
     ### table-valued function ###
@@ -148,7 +148,7 @@ jp                        = JSON.parse
       matcher = [ 'eleven:eve', 'five:ive', 'nine:ine', 'one:one', 'one point five:ive', 'seven:eve', 'three point one:one' ]
       result  = ( "#{row.t}:#{row.capture}" for row in result )
       debug '^984^', result
-      T.eq result, matcher
+      T?.eq result, matcher
     await do =>
       result  = dba.list dba.query SQL"""
         select
@@ -161,7 +161,7 @@ jp                        = JSON.parse
       matcher = [ 'four', 'one', 'one point five', 'one point five', 'three point one', 'three point one', 'two', 'two point three', 'two point three' ]
       result  = ( row.t for row in result )
       debug '^984^', result
-      T.eq result, matcher
+      T?.eq result, matcher
   #.........................................................................................................
   await do =>
     ### virtual table ###
@@ -187,7 +187,7 @@ jp                        = JSON.parse
     matcher = [ 'u-cjk-xa-3417\t㐗\t<1213355>', '', 'u-cjk-xa-34ab\t㒫\t<121135>', 'u-cjk-xa-342a\t㐪\t<415234>', 'u-cjk-xa-342b\t㐫\t<413452>' ]
     result  = ( row.line for row in result )
     debug '^984^', result
-    T.eq result, matcher
+    T?.eq result, matcher
   #.........................................................................................................
   done()
 
@@ -252,8 +252,8 @@ jp                        = JSON.parse
     #.......................................................................................................
     console.table dba.list dba.query SQL"select * from multiples_idx;"
     console.table dba.list dba.query SQL"select * from multiples;"
-    T.eq ( dba.list dba.query SQL"select * from multiples_idx order by n, idx;" ), [ { n: 1, idx: 0, multiple: 0 }, { n: 1, idx: 1, multiple: 1 }, { n: 1, idx: 2, multiple: 2 }, { n: 1, idx: 3, multiple: 3 }, { n: 1, idx: 4, multiple: 4 }, { n: 1, idx: 5, multiple: 5 }, { n: 1, idx: 6, multiple: 6 }, { n: 1, idx: 7, multiple: 7 }, { n: 1, idx: 8, multiple: 8 }, { n: 1, idx: 9, multiple: 9 }, { n: 2, idx: 0, multiple: 0 }, { n: 2, idx: 1, multiple: 2 }, { n: 2, idx: 2, multiple: 4 }, { n: 2, idx: 3, multiple: 6 }, { n: 2, idx: 4, multiple: 8 }, { n: 2, idx: 5, multiple: 10 }, { n: 2, idx: 6, multiple: 12 }, { n: 2, idx: 7, multiple: 14 }, { n: 2, idx: 8, multiple: 16 }, { n: 2, idx: 9, multiple: 18 }, { n: 3, idx: 0, multiple: 0 }, { n: 3, idx: 1, multiple: 3 }, { n: 3, idx: 2, multiple: 6 }, { n: 3, idx: 3, multiple: 9 }, { n: 3, idx: 4, multiple: 12 }, { n: 3, idx: 5, multiple: 15 }, { n: 3, idx: 6, multiple: 18 }, { n: 3, idx: 7, multiple: 21 }, { n: 3, idx: 8, multiple: 24 }, { n: 3, idx: 9, multiple: 27 }, { n: 5, idx: 0, multiple: 0 }, { n: 5, idx: 1, multiple: 5 }, { n: 5, idx: 2, multiple: 10 }, { n: 5, idx: 3, multiple: 15 }, { n: 5, idx: 4, multiple: 20 } ]
-    T.eq ( dba.list dba.query SQL"select * from multiples order by n;" ), [ { n: 1, multiples: '[0,1,2,3,4,5,6,7,8,9]' }, { n: 2, multiples: '[0,2,4,6,8,10,12,14,16,18]' }, { n: 3, multiples: '[0,3,6,9,12,15,18,21,24,27]' }, { n: 5, multiples: '[0,5,10,15,20]' } ]
+    T?.eq ( dba.list dba.query SQL"select * from multiples_idx order by n, idx;" ), [ { n: 1, idx: 0, multiple: 0 }, { n: 1, idx: 1, multiple: 1 }, { n: 1, idx: 2, multiple: 2 }, { n: 1, idx: 3, multiple: 3 }, { n: 1, idx: 4, multiple: 4 }, { n: 1, idx: 5, multiple: 5 }, { n: 1, idx: 6, multiple: 6 }, { n: 1, idx: 7, multiple: 7 }, { n: 1, idx: 8, multiple: 8 }, { n: 1, idx: 9, multiple: 9 }, { n: 2, idx: 0, multiple: 0 }, { n: 2, idx: 1, multiple: 2 }, { n: 2, idx: 2, multiple: 4 }, { n: 2, idx: 3, multiple: 6 }, { n: 2, idx: 4, multiple: 8 }, { n: 2, idx: 5, multiple: 10 }, { n: 2, idx: 6, multiple: 12 }, { n: 2, idx: 7, multiple: 14 }, { n: 2, idx: 8, multiple: 16 }, { n: 2, idx: 9, multiple: 18 }, { n: 3, idx: 0, multiple: 0 }, { n: 3, idx: 1, multiple: 3 }, { n: 3, idx: 2, multiple: 6 }, { n: 3, idx: 3, multiple: 9 }, { n: 3, idx: 4, multiple: 12 }, { n: 3, idx: 5, multiple: 15 }, { n: 3, idx: 6, multiple: 18 }, { n: 3, idx: 7, multiple: 21 }, { n: 3, idx: 8, multiple: 24 }, { n: 3, idx: 9, multiple: 27 }, { n: 5, idx: 0, multiple: 0 }, { n: 5, idx: 1, multiple: 5 }, { n: 5, idx: 2, multiple: 10 }, { n: 5, idx: 3, multiple: 15 }, { n: 5, idx: 4, multiple: 20 } ]
+    T?.eq ( dba.list dba.query SQL"select * from multiples order by n;" ), [ { n: 1, multiples: '[0,1,2,3,4,5,6,7,8,9]' }, { n: 2, multiples: '[0,2,4,6,8,10,12,14,16,18]' }, { n: 3, multiples: '[0,3,6,9,12,15,18,21,24,27]' }, { n: 5, multiples: '[0,5,10,15,20]' } ]
   #.........................................................................................................
   done()
 
@@ -275,7 +275,7 @@ jp                        = JSON.parse
   console.table result
   result  = ( row.square for row in result )
   debug '^984^', result
-  T.eq result, matcher
+  T?.eq result, matcher
   #.........................................................................................................
   done()
 
@@ -294,21 +294,21 @@ jp                        = JSON.parse
   iterator  = statement.iterate []
   [ iterator..., ] ### NOTE: consume iterator to free connection ###
   d         = ( [ d.name, d.type, ] for d in statement.columns() )
-  T.eq d, [ [ 'd', 'boolean' ] ]
+  T?.eq d, [ [ 'd', 'boolean' ] ]
   #.........................................................................................................
   ### But as soon as any operation is done on data: that typing information vanishes: ###
   statement = dba.sqlt.prepare SQL"select ( stamped and not stamped ) as d from main;"
   iterator  = statement.iterate []
   [ iterator..., ] ### NOTE: consume iterator to free connection ###
   d         = ( [ d.name, d.type, ] for d in statement.columns() )
-  T.eq d, [ [ 'd', null ] ]
+  T?.eq d, [ [ 'd', null ] ]
   #.........................................................................................................
   ### We can even explicitly cast results but that does not bring back typing: ###
   statement = dba.sqlt.prepare SQL"select cast( stamped and not stamped as boolean ) as d from main;"
   iterator  = statement.iterate []
   [ iterator..., ] ### NOTE: consume iterator to free connection ###
   d         = ( [ d.name, d.type, ] for d in statement.columns() )
-  T.eq d, [ [ 'd', null ] ]
+  T?.eq d, [ [ 'd', null ] ]
   #.........................................................................................................
   ### We can enforce better type checking in SQLite by using `check` constraints and UDFs: ###
   as_boolean = ( d ) -> if d then 1 else 0
@@ -493,7 +493,7 @@ jp                        = JSON.parse
       return [ s.iterate()..., ][ 0 ].x
     statement         = sqlt1.prepare SQL"select udf();"
     result            = [ statement.iterate()..., ]
-    T.eq result, [ { 'udf()': 42 } ]
+    T?.eq result, [ { 'udf()': 42 } ]
     return null
   #.........................................................................................................
   f3 = =>
@@ -507,7 +507,7 @@ jp                        = JSON.parse
       return [ s.iterate()..., ][ 0 ].x
     statement         = sqlt1.prepare SQL"select udf();"
     result            = [ statement.iterate()..., ]
-    T.eq result, [ { 'udf()': 42 } ]
+    T?.eq result, [ { 'udf()': 42 } ]
     return null
   #.........................................................................................................
   f4 = =>
@@ -517,9 +517,10 @@ jp                        = JSON.parse
     urge '^4453^', { path, }
     dba.create_function name: 'udf', call: ->
       R = dba2.query SQL"select 42 as x;"
+      debug '^34567^', R
       return [ R..., ][ 0 ].x
     result            = dba.list dba.query SQL"select udf();"
-    T.eq result, [ { 'udf()': 42 } ]
+    T?.eq result, [ { 'udf()': 42 } ]
     return null
   #.........................................................................................................
   f1()
