@@ -531,6 +531,80 @@ jp                        = JSON.parse
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "DBA: concurrent UDFs 2" ] = ( T, done ) ->
+  prefix            = 'dcat_'
+  schema            = 'main'
+  { Dba }           = require H.icql_dba_path
+  { template_path
+    work_path }     = await H.procure_db { size: 'small', ref: 'fnc', }
+  debug { template_path, work_path, }
+  dba               = new Dba(); dba.open   { schema, path: work_path, }
+  # dba2              = new Dba(); dba2.open  { schema, path: work_path, }
+  #.........................................................................................................
+  select_sql        = SQL"""
+    select
+        #{dba.sql.L schema} as schema,
+        type,
+        name,
+        tbl_name,
+        rootpage
+      from sqlite_schema
+      order by rootpage;"""
+  #.........................................................................................................
+  dba.create_table_function
+    name:           prefix + 'reltrigs'
+    columns:        [ 'schema', 'type', 'name', 'tbl_name', 'rootpage', ]
+    parameters:     []
+    varargs:        false
+    deterministic:  false
+    rows:           -> yield from dba.query select_sql
+  #.........................................................................................................
+  show_db_objects = ->
+    console.table dba.list dba.query SQL"""
+      select
+          'main' as schema,
+          type,
+          name,
+          tbl_name,
+          rootpage
+        from sqlite_schema
+        order by rootpage;"""
+  #.........................................................................................................
+  count = 0
+  for row1 from dba.query SQL"select * from sqlite_schema where type in ( 'table', 'view' );"
+    for row2 from dba.query SQL"select * from pragma_table_info( $name )", { name: row1.name, }
+      count++
+      break if count > 5
+      info '^875-1^', row2
+  #.........................................................................................................
+  count = 0
+  dba.with_unsafe_mode ->
+    for row1 from dba.query SQL"select * from sqlite_schema where type in ( 'table', 'view' );"
+      for row2 from dba.query SQL"select * from pragma_table_info( $name )", { name: row1.name, }
+        count++
+        break if count > 5
+        info '^875-1^', row2
+        dba.execute "create table if not exists foo ( n text );"
+  #.........................................................................................................
+  try
+    for row from dba.query SQL"select * from dcat_reltrigs;"
+      info '^875-2^', row
+  catch error
+    warn CND.reverse '^875-3^', error.message
+    T?.eq error.message, "This database connection is busy executing a query"
+  #.........................................................................................................
+  try
+    dba.with_unsafe_mode ->
+      for row from dba.query SQL"select * from dcat_reltrigs;"
+        info '^875-4^', row
+  catch error
+    warn CND.reverse '^875-5^', error.message
+    T?.eq error.message, "This database connection is busy executing a query"
+  #.........................................................................................................
+  show_db_objects()
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBA: with_transaction() 1" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Dba }           = require H.icql_dba_path
@@ -828,7 +902,7 @@ jp                        = JSON.parse
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
+  # test @, { timeout: 10e3, }
   # debug f '𠖏'
   # test @[ "DBA: concurrent UDFs" ]
   # test @[ "DBA: create_with_unsafe_mode()" ]
@@ -840,7 +914,8 @@ if module is require.main then do =>
   # test @[ "DBA: with_transaction() 1" ]
   # @[ "DBA: with_transaction() 2" ]()
   # test @[ "DBA: with_transaction()" ]
-  # @[ "DBA: concurrent UDFs" ]()
+  # test @[ "DBA: concurrent UDFs 2" ]
+  @[ "DBA: concurrent UDFs 2" ]()
   # debug process.env[ 'icql-dba-use' ]
   # debug process.argv
 
