@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var CND, DATA, H, PATH, SQL, badge, debug, echo, help, info, isa, jp, jr, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DATA, H, PATH, SQL, badge, debug, echo, guy, help, info, isa, jp, jr, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
+    boundMethodCheck = function(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new Error('Bound instance method accessed before binding'); } };
 
   //###########################################################################################################
   CND = require('cnd');
@@ -50,6 +51,8 @@
   jp = JSON.parse;
 
   DATA = require('../../../lib/data-providers-nocache');
+
+  guy = require('../../../apps/guy');
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: VNRs"] = function(T, done) {
@@ -330,7 +333,7 @@
       dba.sqlt.unsafeMode(true);
       ref = dba.query(SQL`select * from x where locked;`);
       for (row of ref) {
-        // info '^44555^', row
+        // info '^44555-1^', row
         dba.run(SQL`insert into x ( n ) values ( ? );`, [row.n + 100]);
       }
       return dba.sqlt.unsafeMode(false);
@@ -338,7 +341,7 @@
     await (() => {      //.........................................................................................................
       var d;
       // for row from dba.query SQL"select * from x;"
-      //   info '^44555^', row
+      //   info '^44555-2^', row
       return T.eq((function() {
         var ref, results;
         ref = dba.query(SQL`select * from x;`);
@@ -377,17 +380,17 @@
         ref = dba.query(SQL`select * from x where locked;`);
         results = [];
         for (row of ref) {
-          info('^44555^', dba._state);
+          info('^44555-3^', dba._state);
           results.push(dba.run(SQL`insert into x ( n ) values ( ? );`, [row.n + 100]));
         }
         return results;
       });
-      return info('^44555^', dba._state);
+      return info('^44555-4^', dba._state);
     })();
     await (() => {      //.........................................................................................................
       var d;
       // for row from dba.query SQL"select * from x;"
-      //   info '^44555^', row
+      //   info '^44555-5^', row
       return T.eq((function() {
         var ref, results;
         ref = dba.query(SQL`select * from x;`);
@@ -666,49 +669,113 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: _get_connection_url()"] = function(T, done) {
+    var Dba, Dbax, dba;
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
+    Dbax = (function() {
+      //.........................................................................................................
+      class Dbax extends Dba {
+        constructor() {
+          super(...arguments);
+          //---------------------------------------------------------------------------------------------------------
+          this._get_connection_url = this._get_connection_url.bind(this);
+        }
+
+        _get_connection_url(name = null) {
+          var url;
+          boundMethodCheck(this, Dbax);
+          /* Given an optional `name`, return an object with the `name` and the `url` for a new SQLite
+               connection. The url will look like `'file:your_name_here?mode=memory&cache=shared` so multiple
+               connections to the same RAM DB can be opened. When `name` is not given, a random name like
+               `_icql_6200294332` will be chosen (prefix `_icql_`, suffix ten decimal digits). For testing, setting
+               class property `@_rnd_int_cfg` can be used to obtain repeatable series of random names. */
+          if (name == null) {
+            name = `_icql_${this.constructor._rnd_int(1_000_000_000, 9_999_999_999)}`;
+          }
+          url = `file:${name}?mode=memory&cache=shared`;
+          return {url, name};
+        }
+
+      };
+
+      //=========================================================================================================
+      // RANDOM NUMBER GENERATION
+      // seedable for testing purposes
+      //---------------------------------------------------------------------------------------------------------
+      /* To obtain a class with a seedable PRNG that emits repeatable sequences, define class property
+         `@_rnd_int_cfg: { seed, delta, }` where both seed and delta can be arbitrary finite numbers. **NOTE**
+         very small `delta` values (like 1e-10) may cause adjacent numbers to be close together or even repeat. To
+         use default values for both parameters, set `@_rnd_int_cfg: true`.*/
+      Dbax._rnd_int_cfg = null;
+
+      guy.props.def_oneoff(Dbax, '_rnd_int', {
+        enumerable: true
+      }, function() {
+        var ref, ref1;
+        debug('^33343^', Dbax._rnd_int_cfg);
+        if (Dbax._rnd_int_cfg == null) {
+          return CND.random_integer.bind(CND);
+        }
+        return CND.get_rnd_int((ref = Dbax._rnd_int_cfg.seed) != null ? ref : 12.34, (ref1 = Dbax._rnd_int_cfg.delta) != null ? ref1 : 1);
+      });
+
+      return Dbax;
+
+    }).call(this);
+    //.........................................................................................................
+    dba = new Dbax();
+    Dbax._rnd_int_cfg = true;
+    debug('^2809^', dba._get_connection_url());
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      // debug f '𠖏'
-      // test @[ "DBA: advanced interpolation" ]
-      // test @[ "DBA: typing" ]
-      // test @[ "DBA: window functions etc." ]
-      // test @[ "DBA: view with UDF" ]
-      // test @[ "DBA: sqlean vsv extension" ]
-      // test @[ "DBA: indexing JSON lists (de-constructing method)" ]
-      // test @[ "DBA: indexing JSON lists (constructing method)" ]
-      // test @[ "DBA: User-Defined Window Function" ]
-      // test @[ "DBA: VNRs" ], { timeout: 5e3, }
-      // test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
-      // test @[ "DBA: open() file DB in schema main" ]
-      // test @[ "DBA: writing while reading 2" ]
-      // test @[ "DBA: open() RAM DB from file in schema main" ]
-      // test @[ "DBA: open() empty RAM DB in schema main" ]
-      // test @[ "DBA: virtual tables" ]
-      // test @[ "DBA: import TSV; cfg variants 2" ]
-      // test @[ "DBA: import TSV; cfg variants 2" ]
-      // test @[ "DBA: import TSV; cfg variants 3" ]
-      // test @[ "DBA: import TSV; cfg variants 4" ]
-      // test @[ "DBA: import CSV; cfg variants 5" ]
-      // await @_demo_csv_parser()
-      // test @[ "___ DBA: import() (four corner)" ]
-      // test @[ "___ DBA: import() (big file)" ]
-      // test @[ "DBA: open() RAM DB" ]
-      // test @[ "DBA: export() RAM DB" ]
-      // test @[ "DBA: import() CSV" ]
-      // test @[ "DBA: import() TSV" ]
-      // @[ "DBA: import() CSV" ]()
-      // test @[ "DBA: clear()" ]
-      // test @[ "DBA: foreign keys enforced" ]
-      // test @[ "DBA: clear()" ]
-      // test @[ "DBA: open() many RAM DBs" ]
-      // @[ "DBA: open() many RAM DBs" ]()
-      // test @[ "DBA: _is_sqlite3_db()" ]
-      // test @[ "DBA: writing while reading 1" ]
-      return test(this["DBA: writing while reading 2"]);
+      return this["DBA: _get_connection_url()"]();
     })();
   }
+
+  // debug f '𠖏'
+// test @[ "DBA: advanced interpolation" ]
+// test @[ "DBA: typing" ]
+// test @[ "DBA: window functions etc." ]
+// test @[ "DBA: view with UDF" ]
+// test @[ "DBA: sqlean vsv extension" ]
+// test @[ "DBA: indexing JSON lists (de-constructing method)" ]
+// test @[ "DBA: indexing JSON lists (constructing method)" ]
+// test @[ "DBA: User-Defined Window Function" ]
+// test @[ "DBA: VNRs" ], { timeout: 5e3, }
+// test @[ "DBA: import TSV; big file" ], { timeout: 60e3, }
+// test @[ "DBA: open() file DB in schema main" ]
+// test @[ "DBA: writing while reading 2" ]
+// test @[ "DBA: open() RAM DB from file in schema main" ]
+// test @[ "DBA: open() empty RAM DB in schema main" ]
+// test @[ "DBA: virtual tables" ]
+// test @[ "DBA: import TSV; cfg variants 2" ]
+// test @[ "DBA: import TSV; cfg variants 2" ]
+// test @[ "DBA: import TSV; cfg variants 3" ]
+// test @[ "DBA: import TSV; cfg variants 4" ]
+// test @[ "DBA: import CSV; cfg variants 5" ]
+// await @_demo_csv_parser()
+// test @[ "___ DBA: import() (four corner)" ]
+// test @[ "___ DBA: import() (big file)" ]
+// test @[ "DBA: open() RAM DB" ]
+// test @[ "DBA: export() RAM DB" ]
+// test @[ "DBA: import() CSV" ]
+// test @[ "DBA: import() TSV" ]
+// @[ "DBA: import() CSV" ]()
+// test @[ "DBA: clear()" ]
+// test @[ "DBA: foreign keys enforced" ]
+// test @[ "DBA: clear()" ]
+// test @[ "DBA: open() many RAM DBs" ]
+// @[ "DBA: open() many RAM DBs" ]()
+// test @[ "DBA: _is_sqlite3_db()" ]
+// test @[ "DBA: writing while reading 1" ]
+// test @[ "DBA: writing while reading 2" ]
 
 }).call(this);
 
