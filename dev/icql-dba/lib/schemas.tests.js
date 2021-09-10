@@ -52,50 +52,34 @@
 
   DATA = require('../../../lib/data-providers-nocache');
 
-  //-----------------------------------------------------------------------------------------------------------
-  this["DBA: default schema is 'icql'"] = async function(T, done) {
-    var Dba, dba;
-    if (T != null) {
-      T.halt_on_error();
-    }
-    ({Dba} = require(H.icql_dba_path));
-    dba = new Dba({
-      debug: true,
-      readonly: true
-    });
-    await (async() => {      //.........................................................................................................
-      var template_path, work_path;
-      ({template_path, work_path} = (await H.procure_db({
-        size: 'small',
-        ref: 'F-open'
-      })));
-      dba.open({
-        path: work_path,
-        schema: 'main'
-      });
-      return dba.open({
-        ram: true,
-        schema: 'ram'
-      });
-    })();
-    //.........................................................................................................
-    debug('^878^', dba);
-    debug('^878^', dba.sqlt);
-    if (T != null) {
-      T.eq(dba.sqlt.readonly, true);
-    }
-    debug('^878^', dba.list_schemas());
-    debug('^878^', dba.list_schema_names());
-    info('main', dba.list(dba.query(SQL`select name from main.sqlite_schema where type = 'table';`)));
-    info('ram ', dba.list(dba.query(SQL`select name from ram.sqlite_schema where type = 'table';`)));
-    // info 'dm1 ', dba.list dba.query SQL"select name from dm1.sqlite_schema where type = 'table';"
-    //.........................................................................................................
-    dba.execute(SQL`create table a1 ( n integer not null primary key );`);
-    //.........................................................................................................
-    urge('main', dba.list(dba.query(SQL`select name from main.sqlite_schema where type = 'table';`)));
-    urge('ram ', dba.list(dba.query(SQL`select name from ram.sqlite_schema where type = 'table';`)));
-    return typeof done === "function" ? done() : void 0;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // @[ "DBA: default schema is 'icql'" ] = ( T, done ) ->
+  //   T?.halt_on_error()
+  //   { Dba } = require H.icql_dba_path
+  //   dba     = new Dba { debug: true, readonly: true, }
+  //   #.........................................................................................................
+  //   await do =>
+  //     { template_path
+  //       work_path }     = await H.procure_db { size: 'small', ref: 'F-open', }
+  //     dba.open { path: work_path, schema: 'main', }
+  //     dba.open { ram: true,       schema: 'ram', }
+  //   #.........................................................................................................
+  //   debug '^878^', dba
+  //   debug '^878^', dba.sqlt
+  //   T?.eq dba.sqlt.readonly, true
+  //   debug '^878^', dba.list_schemas()
+  //   debug '^878^', dba.list_schema_names()
+  //   info 'main', dba.list dba.query SQL"select name from main.sqlite_schema where type = 'table';"
+  //   info 'ram ', dba.list dba.query SQL"select name from ram.sqlite_schema where type = 'table';"
+  //   # info 'dm1 ', dba.list dba.query SQL"select name from dm1.sqlite_schema where type = 'table';"
+  //   #.........................................................................................................
+  //   dba.execute SQL"create table a1 ( n integer not null primary key );"
+  //   #.........................................................................................................
+  //   urge 'main', dba.list dba.query SQL"select name from main.sqlite_schema where type = 'table';"
+  //   urge 'ram ', dba.list dba.query SQL"select name from ram.sqlite_schema where type = 'table';"
+  //   # info 'dm1 ', dba.list dba.query SQL"select name from dm1.sqlite_schema where type = 'table';"
+  //   #.........................................................................................................
+  //   done?()
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBA: open()"] = async function(T, done) {
