@@ -915,7 +915,8 @@ if module is require.main then do =>
   # @[ "DBA: with_transaction() 2" ]()
   # test @[ "DBA: with_transaction()" ]
   # test @[ "DBA: concurrent UDFs 2" ]
-  @[ "DBA: concurrent UDFs 2" ]()
+  # @[ "DBA: concurrent UDFs 2" ]()
+  @[ "DBA: window functions etc." ]()
   # debug process.env[ 'icql-dba-use' ]
   # debug process.argv
 
