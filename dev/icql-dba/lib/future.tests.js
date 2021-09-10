@@ -673,11 +673,22 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     var Dba, Dbax, dba;
     // T?.halt_on_error()
     ({Dba} = require(H.icql_dba_path));
-    //.........................................................................................................
-    Dbax = class Dbax extends Dba {};
+    Dbax = (function() {
+      //.........................................................................................................
+      class Dbax extends Dba {};
+
+      Dbax._rnd_int_cfg = true;
+
+      return Dbax;
+
+    }).call(this);
     //.........................................................................................................
     dba = new Dbax();
     Dbax._rnd_int_cfg = true;
+    debug('^2809^', dba._get_connection_url());
+    debug('^2809^', dba._get_connection_url());
+    debug('^2809^', dba._get_connection_url());
+    debug('^2809^', dba._get_connection_url());
     debug('^2809^', dba._get_connection_url());
     return typeof done === "function" ? done() : void 0;
   };
