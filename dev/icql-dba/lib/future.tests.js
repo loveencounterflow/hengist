@@ -1,7 +1,6 @@
 (function() {
   'use strict';
-  var CND, DATA, H, PATH, SQL, badge, debug, echo, guy, help, info, isa, jp, jr, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
-    boundMethodCheck = function(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new Error('Bound instance method accessed before binding'); } };
+  var CND, DATA, H, PATH, SQL, badge, debug, echo, guy, help, info, isa, jp, jr, on_process_exit, rpr, sleep, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -674,56 +673,8 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     var Dba, Dbax, dba;
     // T?.halt_on_error()
     ({Dba} = require(H.icql_dba_path));
-    Dbax = (function() {
-      //.........................................................................................................
-      class Dbax extends Dba {
-        constructor() {
-          super(...arguments);
-          //---------------------------------------------------------------------------------------------------------
-          this._get_connection_url = this._get_connection_url.bind(this);
-        }
-
-        _get_connection_url(name = null) {
-          var url;
-          boundMethodCheck(this, Dbax);
-          /* Given an optional `name`, return an object with the `name` and the `url` for a new SQLite
-               connection. The url will look like `'file:your_name_here?mode=memory&cache=shared` so multiple
-               connections to the same RAM DB can be opened. When `name` is not given, a random name like
-               `_icql_6200294332` will be chosen (prefix `_icql_`, suffix ten decimal digits). For testing, setting
-               class property `@_rnd_int_cfg` can be used to obtain repeatable series of random names. */
-          if (name == null) {
-            name = `_icql_${this.constructor._rnd_int(1_000_000_000, 9_999_999_999)}`;
-          }
-          url = `file:${name}?mode=memory&cache=shared`;
-          return {url, name};
-        }
-
-      };
-
-      //=========================================================================================================
-      // RANDOM NUMBER GENERATION
-      // seedable for testing purposes
-      //---------------------------------------------------------------------------------------------------------
-      /* To obtain a class with a seedable PRNG that emits repeatable sequences, define class property
-         `@_rnd_int_cfg: { seed, delta, }` where both seed and delta can be arbitrary finite numbers. **NOTE**
-         very small `delta` values (like 1e-10) may cause adjacent numbers to be close together or even repeat. To
-         use default values for both parameters, set `@_rnd_int_cfg: true`.*/
-      Dbax._rnd_int_cfg = null;
-
-      guy.props.def_oneoff(Dbax, '_rnd_int', {
-        enumerable: true
-      }, function() {
-        var ref, ref1;
-        debug('^33343^', Dbax._rnd_int_cfg);
-        if (Dbax._rnd_int_cfg == null) {
-          return CND.random_integer.bind(CND);
-        }
-        return CND.get_rnd_int((ref = Dbax._rnd_int_cfg.seed) != null ? ref : 12.34, (ref1 = Dbax._rnd_int_cfg.delta) != null ? ref1 : 1);
-      });
-
-      return Dbax;
-
-    }).call(this);
+    //.........................................................................................................
+    Dbax = class Dbax extends Dba {};
     //.........................................................................................................
     dba = new Dbax();
     Dbax._rnd_int_cfg = true;
