@@ -238,13 +238,13 @@ DATA                      = require '../../../lib/data-providers-nocache'
     dba.execute SQL"update x set locked = true;"
     dba.sqlt.unsafeMode true
     for row from dba.query SQL"select * from x where locked;"
-      # info '^44555^', row
+      # info '^44555-1^', row
       dba.run SQL"insert into x ( n ) values ( ? );", [ row.n + 100, ]
     dba.sqlt.unsafeMode false
   #.........................................................................................................
   await do =>
     # for row from dba.query SQL"select * from x;"
-    #   info '^44555^', row
+    #   info '^44555-2^', row
     T.eq ( d.n for d from dba.query SQL"select * from x;" ), [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110 ]
   #.........................................................................................................
   done()
@@ -266,13 +266,13 @@ DATA                      = require '../../../lib/data-providers-nocache'
     dba.execute SQL"update x set locked = true;"
     dba.with_unsafe_mode =>
       for row from dba.query SQL"select * from x where locked;"
-        info '^44555^', dba._state
+        info '^44555-3^', dba._state
         dba.run SQL"insert into x ( n ) values ( ? );", [ row.n + 100, ]
-    info '^44555^', dba._state
+    info '^44555-4^', dba._state
   #.........................................................................................................
   await do =>
     # for row from dba.query SQL"select * from x;"
-    #   info '^44555^', row
+    #   info '^44555-5^', row
     T.eq ( d.n for d from dba.query SQL"select * from x;" ), [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110 ]
   #.........................................................................................................
   done()
