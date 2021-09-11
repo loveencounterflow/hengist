@@ -18,22 +18,22 @@
 
 -----------------------
 
-|    nr    |          in.ram         |   in.path   | in.dbnick  | out.ram | out.path | out.dbnick | out.persistency | out.error |
-| -------- | ----------------------- | ----------- | ---------- | ------- | -------- | ---------- | --------------- | --------- |
-| 4, 8, 12 | `null`, `false`, `true` | `'db/path'` | `'dbnick'` | ———     | ———      | ———        | ———             | **E01**   |
+|    nr    |          in.ram         |   in.path   | in.dbnick  | out.error |
+| -------- | ----------------------- | ----------- | ---------- | --------- |
+| 4, 8, 12 | `null`, `false`, `true` | `'db/path'` | `'dbnick'` | **E01**   |
 
 
-|  nr  |  in.ram | in.path |     in.dbnick      | out.ram | out.path | out.dbnick | out.persistency | out.error |
-| ---- | ------- | ------- | ------------------ | ------- | -------- | ---------- | --------------- | --------- |
-| 5, 6 | `false` | `null`  | `null`, `'dbnick'` | ———     | ———      | ———        | ———             | **E02**   |
+|  nr  |  in.ram | in.path |     in.dbnick      | out.error |
+| ---- | ------- | ------- | ------------------ | --------- |
+| 5, 6 | `false` | `null`  | `null`, `'dbnick'` | **E02**   |
 
 
-|   nr  |      in.ram     |   in.path   | in.dbnick  | out.ram |   out.path  |      out.dbnick     | out.persistency | out.error |
-| ----- | --------------- | ----------- | ---------- | ------- | ----------- | ------------------- | --------------- | --------- |
-| 1, 9  | `null`, `true`  | `null`      | `null`     | `true`  | `null`      | `'_rnd_7714686943'` | none            | ———       |
-| 2, 10 | `null`, `true`  | `null`      | `'dbnick'` | `true`  | `null`      | `'dbnick'`          | none            | ———       |
-| 3, 7  | `null`, `false` | `'db/path'` | `null`     | `false` | `'db/path'` | `null`              | continuous      | ———       |
-| 11    | `true`          | `'db/path'` | `null`     | `true`  | `'db/path'` | `'_rnd_7714686943'` | eventual        | ———       |
+|   nr  |      in.ram     |   in.path   | in.dbnick  | out.ram |   out.path  |      out.dbnick     | out.persistency |
+| ----- | --------------- | ----------- | ---------- | ------- | ----------- | ------------------- | --------------- |
+| 1, 9  | `null`, `true`  | `null`      | `null`     | `true`  | `null`      | `'_rnd_7714686943'` | none            |
+| 2, 10 | `null`, `true`  | `null`      | `'dbnick'` | `true`  | `null`      | `'dbnick'`          | none            |
+| 3, 7  | `null`, `false` | `'db/path'` | `null`     | `false` | `'db/path'` | `null`              | continuous      |
+| 11    | `true`          | `'db/path'` | `null`     | `true`  | `'db/path'` | `'_rnd_7714686943'` | eventual        |
 
 
 url: of the form `file:_rnd_7714686943?mode=memory&cache=shared` or `file:dbnick?mode=memory&cache=shared`
