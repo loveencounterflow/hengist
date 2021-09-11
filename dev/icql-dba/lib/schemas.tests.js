@@ -653,11 +653,11 @@
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      return test(this["DBA: default schema is 'icql'"]);
+      // test @[ "DBA: default schema is 'icql'" ]
+      // @[ "DBA: default schema is 'icql'" ]()
+      return test(this["DBA: open()"]);
     })();
   }
-
-  // @[ "DBA: default schema is 'icql'" ]()
 
 }).call(this);
 

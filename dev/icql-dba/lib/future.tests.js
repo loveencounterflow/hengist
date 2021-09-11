@@ -684,12 +684,45 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     }).call(this);
     //.........................................................................................................
     dba = new Dbax();
-    Dbax._rnd_int_cfg = true;
-    debug('^2809^', dba._get_connection_url());
-    debug('^2809^', dba._get_connection_url());
-    debug('^2809^', dba._get_connection_url());
-    debug('^2809^', dba._get_connection_url());
-    debug('^2809^', dba._get_connection_url());
+    if (T != null) {
+      T.eq(dba._get_connection_url(), {
+        url: 'file:_icql_6200294332?mode=memory&cache=shared',
+        name: '_icql_6200294332'
+      });
+    }
+    if (T != null) {
+      T.eq(dba._get_connection_url(), {
+        url: 'file:_icql_4260041910?mode=memory&cache=shared',
+        name: '_icql_4260041910'
+      });
+    }
+    if (T != null) {
+      T.eq(dba._get_connection_url(), {
+        url: 'file:_icql_9982321802?mode=memory&cache=shared',
+        name: '_icql_9982321802'
+      });
+    }
+    if (T != null) {
+      T.eq(dba._get_connection_url(), {
+        url: 'file:_icql_2420402559?mode=memory&cache=shared',
+        name: '_icql_2420402559'
+      });
+    }
+    if (T != null) {
+      T.eq(dba._get_connection_url(), {
+        url: 'file:_icql_1965667491?mode=memory&cache=shared',
+        name: '_icql_1965667491'
+      });
+    }
+    if (T != null) {
+      T.eq(dba._get_connection_url('yournamehere'), {
+        url: 'file:yournamehere?mode=memory&cache=shared',
+        name: 'yournamehere'
+      });
+    }
+    //.........................................................................................................
+    info(dba._get_connection_url());
+    info(dba._get_connection_url('yournamehere'));
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -697,7 +730,7 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      return this["DBA: _get_connection_url()"]();
+      return test(this["DBA: _get_connection_url()"]);
     })();
   }
 
