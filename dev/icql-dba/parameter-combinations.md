@@ -1,9 +1,8 @@
 
 
 
-| :---- | ---- | ---- |
 | ram   | path | name |
-| ===   | ===  | ===  |
+| ---- | ---- | ---- |
 | false | null | null |
 | false | null | text |
 | false | text | null |
