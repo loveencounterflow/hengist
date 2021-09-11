@@ -20,7 +20,7 @@
 
 |  nr |  in.ram |   in.path   |  in.name   | out.ram | out.path | out.name | out.persistency | out.error | same as  |
 | --- | ------- | ----------- | ---------- | ------- | -------- | -------- | --------------- | --------- | -------- |
-|   4 | `null`  | `null`      | `'dbname'` | ———     | ———      | ———      | ———             | **E01**   | 4, 8, 12 |
+|   4 | `null`  | `'db/path'` | `'dbname'` | ———     | ———      | ———      | ———             | **E01**   | 4, 8, 12 |
 |   8 | `false` | `'db/path'` | `'dbname'` | ———     | ———      | ———      | ———             | **E01**   | 4, 8, 12 |
 |  12 | `true`  | `'db/path'` | `'dbname'` | ———     | ———      | ———      | ———             | **E01**   | 4, 8, 12 |
 
@@ -34,8 +34,8 @@
 |  nr |  in.ram |   in.path   |  in.name   | out.ram |   out.path  |       out.name      | out.persistency | out.error | same as |
 | --- | ------- | ----------- | ---------- | ------- | ----------- | ------------------- | --------------- | --------- | ------- |
 |   1 | `null`  | `null`      | `null`     | `true`  | `null`      | `'_rnd_7714686943'` | none            | ———       | 1, 9    |
-|   2 | `null`  | `null`      | `'dbname'` | `true`  | `null`      | `'dbname'`          | none            | ———       | 2, 10   |
 |   9 | `true`  | `null`      | `null`     | `true`  | `null`      | `'_rnd_7714686943'` | none            | ———       | 1, 9    |
+|   2 | `null`  | `null`      | `'dbname'` | `true`  | `null`      | `'dbname'`          | none            | ———       | 2, 10   |
 |  10 | `true`  | `null`      | `'dbname'` | `true`  | `null`      | `'dbname'`          | none            | ———       | 2, 10   |
 |   3 | `null`  | `'db/path'` | `null`     | `false` | `'db/path'` | `null`              | continuous      | ———       | 3, 7    |
 |   7 | `false` | `'db/path'` | `null`     | `false` | `'db/path'` | `null`              | continuous      | ———       | 3, 7    |
