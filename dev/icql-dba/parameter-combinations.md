@@ -1,14 +1,14 @@
 
 
 
-| ram   | path | name |
-| ---- | ---- | ---- |
-| false | null | null |
-| false | null | text |
-| false | text | null |
-| false | text | text |
-| true  | null | null |
-| true  | null | text |
-| true  | text | null |
-| true  | text | text |
-|       |      |      |
+|  ram  |    path   |   name   |     |     |     |     |     |     |
+| ----- | --------- | -------- | --- | --- | --- | --- | --- | --- |
+| false | null      | null     |     |     |     |     |     |     |
+| false | null      | 'dbname' |     |     |     |     |     |     |
+| false | 'db/path' | null     |     |     |     |     |     |     |
+| false | 'db/path' | 'dbname' |     |     |     |     |     |     |
+| true  | null      | null     |     |     |     |     |     |     |
+| true  | null      | 'dbname' |     |     |     |     |     |     |
+| true  | 'db/path' | null     |     |     |     |     |     |     |
+| true  | 'db/path' | 'dbname' |     |     |     |     |     |     |
+|       |           |          |     |     |     |     |     |     |
