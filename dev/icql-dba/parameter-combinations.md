@@ -3,6 +3,10 @@
 
 |  ram  |    path   |   name   | cfg.ram | cfg.path | cfg.name | cfg.url | persistency | error |
 | ----- | --------- | -------- | ------- | -------- | -------- | ------- | ----------- | ----- |
+| null  | null      | null     |         |          |          |         |             |       |
+|       | null      | 'dbname' |         |          |          |         |             |       |
+|       | 'db/path' | null     |         |          |          |         |             |       |
+|       | 'db/path' | 'dbname' |         |          |          |         |             |       |
 | false | null      | null     |         |          |          |         |             |       |
 | false | null      | 'dbname' |         |          |          |         |             |       |
 | false | 'db/path' | null     |         |          |          |         |             |       |
