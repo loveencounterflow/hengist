@@ -126,3 +126,5 @@ __pycache__/
 .yalc
 
 /data
+
+.~lock.*
