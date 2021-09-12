@@ -68,11 +68,12 @@ class Dbax # extends Dba
     if ( not self.cfg.ram ) and self.cfg.path? and self.cfg.dbnick?
       throw new E.Dba_cfg_error '^dba@1^', "only RAM DB can have both `path` and `dbnick`, got #{rpr self.cfg}"
     if self.cfg.ram
-      ### TAINT rename `name` to `dbnick` ###
-      { name, url, }    = _xxx_dba._get_connection_url self.cfg.dbnick ? null
-      self.cfg.dbnick   = name if ( not self.cfg.dbnick? ) and ( not self.cfg.path? )
+      { dbnick
+        url    }        = _xxx_dba._get_connection_url self.cfg.dbnick ? null
+      self.cfg.dbnick  ?= dbnick
       self.cfg.url      = url
-    self.cfg.url ?= null
+    else
+      self.cfg.url      = null
     return self.cfg
 
   #---------------------------------------------------------------------------------------------------------
@@ -109,7 +110,7 @@ class Dbax # extends Dba
     [ { ram: false,  path: 'db/path', dbnick: null,     }, { ram: false, path: 'db/path', dbnick: null,               url: null, }, null, ] ### 7  ###
     [ { ram: true,   path: null,      dbnick: null,     }, { ram: true,  path: null,      dbnick: '_icql_4260041910', url: 'file:_icql_4260041910?mode=memory&cache=shared', }, null, ] ### 9  ###
     [ { ram: true,   path: null,      dbnick: 'dbnick', }, { ram: true,  path: null,      dbnick: 'dbnick',           url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 10 ###
-    [ { ram: true,   path: 'db/path', dbnick: null,     }, { ram: true,  path: 'db/path', dbnick: '_icql_4260041910', url: 'file:_icql_9982321802?mode=memory&cache=shared', }, null, ] ### 11 ###
+    [ { ram: true,   path: 'db/path', dbnick: null,     }, { ram: true,  path: 'db/path', dbnick: '_icql_9982321802', url: 'file:_icql_9982321802?mode=memory&cache=shared', }, null, ] ### 11 ###
     [ { ram: true,   path: 'db/path', dbnick: 'dbnick', }, { ram: true,  path: 'db/path', dbnick: 'dbnick',           url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 12 ###
     ]
   #.........................................................................................................
