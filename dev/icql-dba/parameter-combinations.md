@@ -1,4 +1,30 @@
 
+## ICQL-DBA Constructor
+
+* In order to construct (instantiate) a DBA object, you can call the constructor without any arguments:
+
+  ```coffee
+  { Dba } = require 'icql-dba'
+  dba     = new Dba()
+  ```
+
+  The `dba` object will then have a property `dba.sqlt` that is a `better-sqlite3` connection to an
+  in-memory DB (a RAM DB in our terminology).
+
+* You can also call the constructor with a configuration object that may have one or more of the following
+  fields:
+
+  * **`cfg.ram`** (`?boolean`): Specifies whether a RAM DB is to be opened. All ICQL-DBA in-memory DBs are
+    named so several
+
+    * When neither **`cfg.path`** nor **`cfg.dbnick`** are given, an empty RAM DB will be opened.
+    * When **`cfg.dbnick`** (but not **`cfg.path`**) is given, a
+    * When **`cfg.path`** is given, an SQLite DB file will be (created if non-existant and) opened; then,
+      the DB will be mirrored to RAM so now you have a RAM DB associated with a disk location. You can use
+      `dba.save()` any number of times to write changes to disk. DB contents will be lost should the process
+      terminate after changes to the DB but before `dba.save()` terminates. This mode of operation is called
+      'Eventual Persistency'.
+
 
 
 |  nr |  in.ram |   in.path   | in.dbnick  | out.ram |   out.path  |      out.dbnick      | out.persistency | out.error | same as  |
