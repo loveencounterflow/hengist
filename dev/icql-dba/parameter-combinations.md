@@ -18,14 +18,14 @@
 
 -----------------------
 
-|    nr    |          in.ram         |   in.path   | in.dbnick  | out.error |
-| -------- | ----------------------- | ----------- | ---------- | --------- |
-| 4, 8, 12 | `null`, `false`, `true` | `'db/path'` | `'dbnick'` | **E01**   |
+|    nr    |          in.ram         |     in.path     |   in.dbnick    |                out.error                 |
+| -------- | ----------------------- | --------------- | -------------- | ---------------------------------------- |
+| 4, 8, 12 | `null`, `false`, `true` | **`'db/path'`** | **`'dbnick'`** | **cannot give both `path` and `dbnick`** |
 
 
-|  nr  |  in.ram | in.path |     in.dbnick      | out.error |
-| ---- | ------- | ------- | ------------------ | --------- |
-| 5, 6 | `false` | `null`  | `null`, `'dbnick'` | **E02**   |
+|  nr  |  in.ram |  in.path   |     in.dbnick      |          out.error          |
+| ---- | ------- | ---------- | ------------------ | --------------------------- |
+| 5, 6 | `false` | **`null`** | `null`, `'dbnick'` | **missing argument `path`** |
 
 
 |   nr  |      in.ram     |   in.path   | in.dbnick  | out.ram |   out.path  |      out.dbnick     | out.persistency |
@@ -36,9 +36,9 @@
 | 11    | `true`          | `'db/path'` | `null`     | `true`  | `'db/path'` | `'_rnd_7714686943'` | eventual        |
 
 
-url: of the form `file:_rnd_7714686943?mode=memory&cache=shared` or `file:dbnick?mode=memory&cache=shared`
+URL: of the form
+* `file:_rnd_7714686943?mode=memory&cache=shared` when generated, or
+* `file:dbnick?mode=memory&cache=shared` where `dbnick` is given.
 
-* **E01**: "either `path` or `dbnick` for FDB"
-* **E02**: "missing argument `path`"
 
 
