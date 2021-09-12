@@ -477,31 +477,11 @@ guy                       = require '../../../apps/guy'
   #.........................................................................................................
   done?()
 
-#-----------------------------------------------------------------------------------------------------------
-@[ "DBA: _get_connection_url()" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { Dba }               = require H.icql_dba_path
-  #.........................................................................................................
-  class Dbax extends Dba
-    @_rnd_int_cfg: true
-  #.........................................................................................................
-  dba = new Dbax()
-  T?.eq dba._get_connection_url(), { url: 'file:_icql_6200294332?mode=memory&cache=shared', name: '_icql_6200294332' }
-  T?.eq dba._get_connection_url(), { url: 'file:_icql_4260041910?mode=memory&cache=shared', name: '_icql_4260041910' }
-  T?.eq dba._get_connection_url(), { url: 'file:_icql_9982321802?mode=memory&cache=shared', name: '_icql_9982321802' }
-  T?.eq dba._get_connection_url(), { url: 'file:_icql_2420402559?mode=memory&cache=shared', name: '_icql_2420402559' }
-  T?.eq dba._get_connection_url(), { url: 'file:_icql_1965667491?mode=memory&cache=shared', name: '_icql_1965667491' }
-  T?.eq ( dba._get_connection_url 'yournamehere' ), { url: 'file:yournamehere?mode=memory&cache=shared', name: 'yournamehere' }
-  #.........................................................................................................
-  info dba._get_connection_url()
-  info dba._get_connection_url 'yournamehere'
-  done?()
-
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
-  test @[ "DBA: _get_connection_url()" ]
+  test @, { timeout: 10e3, }
+  # test @[ "DBA: _get_connection_url()" ]
   # debug f '𠖏'
   # test @[ "DBA: advanced interpolation" ]
   # test @[ "DBA: typing" ]

@@ -125,9 +125,29 @@ class Dbax # extends Dba
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBA: _get_connection_url()" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dba }               = require H.icql_dba_path
+  #.........................................................................................................
+  class Dbax extends Dba
+    @_rnd_int_cfg: true
+  #.........................................................................................................
+  dba = new Dbax()
+  T?.eq dba._get_connection_url(), { url: 'file:_icql_6200294332?mode=memory&cache=shared', dbnick: '_icql_6200294332' }
+  T?.eq dba._get_connection_url(), { url: 'file:_icql_4260041910?mode=memory&cache=shared', dbnick: '_icql_4260041910' }
+  T?.eq dba._get_connection_url(), { url: 'file:_icql_9982321802?mode=memory&cache=shared', dbnick: '_icql_9982321802' }
+  T?.eq dba._get_connection_url(), { url: 'file:_icql_2420402559?mode=memory&cache=shared', dbnick: '_icql_2420402559' }
+  T?.eq dba._get_connection_url(), { url: 'file:_icql_1965667491?mode=memory&cache=shared', dbnick: '_icql_1965667491' }
+  T?.eq ( dba._get_connection_url 'yournamehere' ), { url: 'file:yournamehere?mode=memory&cache=shared', dbnick: 'yournamehere' }
+  #.........................................................................................................
+  info dba._get_connection_url()
+  info dba._get_connection_url 'yournamehere'
+  done?()
+
 
 
 ############################################################################################################
 if require.main is module then do =>
   test @
-  # test @[ "HLR encode Infinity" ]
+  # test @[ "DBA: _get_connection_url()" ]
