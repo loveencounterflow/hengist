@@ -43,11 +43,6 @@ class Dbax # extends Dba
 
   #---------------------------------------------------------------------------------------------------------
   @C: guy.lft.freeze
-    function_flags:
-      is_deterministic:   0x000000800 # SQLITE_DETERMINISTIC
-      is_directonly:      0x000080000 # SQLITE_DIRECTONLY
-      is_subtype:         0x000100000 # SQLITE_SUBTYPE
-      is_innocuous:       0x000200000 # SQLITE_INNOCUOUS
     defaults:
       constructor_cfg:
         _temp_prefix: '_dba_temp_'
