@@ -668,73 +668,17 @@ values ( $n, $idx, $multiple )`, {n, idx, multiple});
     return typeof done === "function" ? done() : void 0;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this["DBA: _get_connection_url()"] = function(T, done) {
-    var Dba, Dbax, dba;
-    // T?.halt_on_error()
-    ({Dba} = require(H.icql_dba_path));
-    Dbax = (function() {
-      //.........................................................................................................
-      class Dbax extends Dba {};
-
-      Dbax._rnd_int_cfg = true;
-
-      return Dbax;
-
-    }).call(this);
-    //.........................................................................................................
-    dba = new Dbax();
-    if (T != null) {
-      T.eq(dba._get_connection_url(), {
-        url: 'file:_icql_6200294332?mode=memory&cache=shared',
-        name: '_icql_6200294332'
-      });
-    }
-    if (T != null) {
-      T.eq(dba._get_connection_url(), {
-        url: 'file:_icql_4260041910?mode=memory&cache=shared',
-        name: '_icql_4260041910'
-      });
-    }
-    if (T != null) {
-      T.eq(dba._get_connection_url(), {
-        url: 'file:_icql_9982321802?mode=memory&cache=shared',
-        name: '_icql_9982321802'
-      });
-    }
-    if (T != null) {
-      T.eq(dba._get_connection_url(), {
-        url: 'file:_icql_2420402559?mode=memory&cache=shared',
-        name: '_icql_2420402559'
-      });
-    }
-    if (T != null) {
-      T.eq(dba._get_connection_url(), {
-        url: 'file:_icql_1965667491?mode=memory&cache=shared',
-        name: '_icql_1965667491'
-      });
-    }
-    if (T != null) {
-      T.eq(dba._get_connection_url('yournamehere'), {
-        url: 'file:yournamehere?mode=memory&cache=shared',
-        name: 'yournamehere'
-      });
-    }
-    //.........................................................................................................
-    info(dba._get_connection_url());
-    info(dba._get_connection_url('yournamehere'));
-    return typeof done === "function" ? done() : void 0;
-  };
-
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      return test(this["DBA: _get_connection_url()"]);
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // debug f '𠖏'
+  // test @[ "DBA: _get_connection_url()" ]
+// debug f '𠖏'
 // test @[ "DBA: advanced interpolation" ]
 // test @[ "DBA: typing" ]
 // test @[ "DBA: window functions etc." ]

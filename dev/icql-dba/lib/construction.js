@@ -85,8 +85,7 @@
     class Dbax { // extends Dba
       //---------------------------------------------------------------------------------------------------------
       static cast_constructor_cfg(self) {
-        /* TAINT rename `name` to `dbnick` */
-        var base, base1, name, ref, url;
+        var base, base1, dbnick, ref, url;
         if ((self.cfg.ram === false) && (self.cfg.path == null)) {
           throw new E.Dba_cfg_error('^dba@1^', `missing argument \`path\`, got ${rpr(self.cfg)}`);
         }
@@ -97,14 +96,13 @@
           throw new E.Dba_cfg_error('^dba@1^', `only RAM DB can have both \`path\` and \`dbnick\`, got ${rpr(self.cfg)}`);
         }
         if (self.cfg.ram) {
-          ({name, url} = _xxx_dba._get_connection_url((ref = self.cfg.dbnick) != null ? ref : null));
-          if ((self.cfg.dbnick == null) && (self.cfg.path == null)) {
-            self.cfg.dbnick = name;
+          ({dbnick, url} = _xxx_dba._get_connection_url((ref = self.cfg.dbnick) != null ? ref : null));
+          if ((base1 = self.cfg).dbnick == null) {
+            base1.dbnick = dbnick;
           }
           self.cfg.url = url;
-        }
-        if ((base1 = self.cfg).url == null) {
-          base1.url = null;
+        } else {
+          self.cfg.url = null;
         }
         return self.cfg;
       }
@@ -304,7 +302,7 @@
         {
           ram: true,
           path: 'db/path',
-          dbnick: '_icql_4260041910',
+          dbnick: '_icql_9982321802',
           url: 'file:_icql_9982321802?mode=memory&cache=shared'
         },
         null
@@ -349,6 +347,64 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBA: _get_connection_url()"] = function(T, done) {
+    var dba;
+    // T?.halt_on_error()
+    ({Dba} = require(H.icql_dba_path));
+    Dbax = (function() {
+      //.........................................................................................................
+      class Dbax extends Dba {};
+
+      Dbax._rnd_int_cfg = true;
+
+      return Dbax;
+
+    }).call(this);
+    //.........................................................................................................
+    dba = new Dbax();
+    if (T != null) {
+      T.eq(dba._get_connection_url(), {
+        url: 'file:_icql_6200294332?mode=memory&cache=shared',
+        dbnick: '_icql_6200294332'
+      });
+    }
+    if (T != null) {
+      T.eq(dba._get_connection_url(), {
+        url: 'file:_icql_4260041910?mode=memory&cache=shared',
+        dbnick: '_icql_4260041910'
+      });
+    }
+    if (T != null) {
+      T.eq(dba._get_connection_url(), {
+        url: 'file:_icql_9982321802?mode=memory&cache=shared',
+        dbnick: '_icql_9982321802'
+      });
+    }
+    if (T != null) {
+      T.eq(dba._get_connection_url(), {
+        url: 'file:_icql_2420402559?mode=memory&cache=shared',
+        dbnick: '_icql_2420402559'
+      });
+    }
+    if (T != null) {
+      T.eq(dba._get_connection_url(), {
+        url: 'file:_icql_1965667491?mode=memory&cache=shared',
+        dbnick: '_icql_1965667491'
+      });
+    }
+    if (T != null) {
+      T.eq(dba._get_connection_url('yournamehere'), {
+        url: 'file:yournamehere?mode=memory&cache=shared',
+        dbnick: 'yournamehere'
+      });
+    }
+    //.........................................................................................................
+    info(dba._get_connection_url());
+    info(dba._get_connection_url('yournamehere'));
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -356,7 +412,7 @@
     })();
   }
 
-  // test @[ "HLR encode Infinity" ]
+  // test @[ "DBA: _get_connection_url()" ]
 
 }).call(this);
 
