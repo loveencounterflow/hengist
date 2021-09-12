@@ -69,14 +69,17 @@
       "@isa.object x": function(x) {
         return this.isa.object(x);
       },
-      "( not x.ram? ) or @isa.boolean x.ram": function(x) {
-        return (x.ram == null) || this.isa.boolean(x.ram);
+      "@isa_optional.boolean x.ram": function(x) {
+        return this.isa_optional.boolean(x.ram);
       },
-      "( not x.url? ) or @isa.nonempty_text x.url": function(x) {
-        return (x.url == null) || this.isa.nonempty_text(x.url);
+      "@isa_optional.nonempty_text x.url": function(x) {
+        return this.isa_optional.nonempty_text(x.url);
       },
-      "( not x.dbnick? ) or @isa.dba_urlsafe_word x.dbnick": function(x) {
-        return (x.dbnick == null) || this.isa.dba_urlsafe_word(x.dbnick);
+      "@isa_optional.dba_urlsafe_word x.dbnick": function(x) {
+        return this.isa_optional.dba_urlsafe_word(x.dbnick);
+      },
+      "@isa_optional.dba_urlsafe_word x.dbnick": function(x) {
+        return this.isa_optional.dba_urlsafe_word(x.dbnick);
       }
     }
   });
@@ -131,12 +134,6 @@
     
     //---------------------------------------------------------------------------------------------------------
     Dbax.C = guy.lft.freeze({
-      function_flags: {
-        is_deterministic: 0x000000800, // SQLITE_DETERMINISTIC
-        is_directonly: 0x000080000, // SQLITE_DIRECTONLY
-        is_subtype: 0x000100000, // SQLITE_SUBTYPE
-        is_innocuous: 0x000200000 // SQLITE_INNOCUOUS
-      },
       defaults: {
         constructor_cfg: {
           _temp_prefix: '_dba_temp_',
