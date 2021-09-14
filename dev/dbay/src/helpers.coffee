@@ -200,20 +200,20 @@ dba_types                 = require H.dbay_path + '/lib/types'
     # word_count: 10_000
     word_count: 10
     sql:
-      small:  @resolve_path 'assets/dbay/small-datamill.sql'
-      big:    @resolve_path 'assets/dbay/Chinook_Sqlite_AutoIncrementPKs.sql'
+      small:  @resolve_path 'assets/icql/small-datamill.sql'
+      big:    @resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql'
     csv:
-      small:  @resolve_path 'assets/dbay/chineselexicaldatabase2.1.small.txt'
-      holes:  @resolve_path 'assets/dbay/ncrglyphwbf-with-holes.csv'
+      small:  @resolve_path 'assets/icql/chineselexicaldatabase2.1.small.txt'
+      holes:  @resolve_path 'assets/icql/ncrglyphwbf-with-holes.csv'
     tsv:
-      micro:  @resolve_path 'assets/dbay/ncrglyphwbf.tsv'
-      holes:  @resolve_path 'assets/dbay/ncrglyphwbf-with-holes.tsv'
+      micro:  @resolve_path 'assets/icql/ncrglyphwbf.tsv'
+      holes:  @resolve_path 'assets/icql/ncrglyphwbf-with-holes.tsv'
     db:
       templates:
-        nnt:    @resolve_path 'assets/dbay/numbersandtexts.db'
-        micro:  @resolve_path 'assets/dbay/micro.db'
-        small:  @resolve_path 'assets/dbay/small-datamill.db'
-        big:    @resolve_path 'assets/dbay/Chinook_Sqlite_AutoIncrementPKs.db'
+        nnt:    @resolve_path 'assets/icql/numbersandtexts.db'
+        micro:  @resolve_path 'assets/icql/micro.db'
+        small:  @resolve_path 'assets/icql/small-datamill.db'
+        big:    @resolve_path 'assets/icql/Chinook_Sqlite_AutoIncrementPKs.db'
       target:
         small:  @resolve_path 'data/dbay/dbay-{ref}-{size}.db'
         big:    @resolve_path 'data/dbay/dbay-{ref}-{size}.db'
