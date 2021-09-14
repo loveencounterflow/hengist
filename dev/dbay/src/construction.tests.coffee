@@ -115,6 +115,15 @@ guy                       = require '../../../apps/guy'
   # info db._get_connection_url 'yournamehere'
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY instance has two connections" ] = ( T, done ) ->
+  { Dbay }        = require H.dbay_path
+  Bsqlite         = require PATH.join H.dbay_path, 'node_modules/better-sqlite3'
+  bsqlite_class   = Bsqlite().constructor
+  dbay = new Dbay()
+  T?.ok dbay.sqlt1.constructor is bsqlite_class
+  T?.ok dbay.sqlt2.constructor is bsqlite_class
+  done?()
 
 
 ############################################################################################################
