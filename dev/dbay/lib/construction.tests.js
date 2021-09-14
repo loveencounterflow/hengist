@@ -40,7 +40,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY constructor arguments 1"] = async function(T, done) {
-    var Dbay, Dbay2, error, i, len, matcher, probe, probes_and_matchers;
+    var Dbay, Dbay2, error, i, len, matcher, probe, probes_and_matchers, x;
     ({Dbay} = require(H.dbay_path));
     Dbay2 = (function() {
       class Dbay2 extends Dbay {};
@@ -102,7 +102,6 @@
         },
         {
           ram: true,
-          path: null,
           dbnick: '_icql_6200294332',
           url: 'file:_icql_6200294332?mode=memory&cache=shared'
         },
@@ -117,7 +116,6 @@
         },
         {
           ram: true,
-          path: null,
           dbnick: 'dbnick',
           url: 'file:dbnick?mode=memory&cache=shared'
         },
@@ -132,9 +130,7 @@
         },
         {
           ram: false,
-          path: 'db/path',
-          dbnick: null,
-          url: null
+          path: 'db/path'
         },
         null
       ],
@@ -147,9 +143,7 @@
         },
         {
           ram: false,
-          path: 'db/path',
-          dbnick: null,
-          url: null
+          path: 'db/path'
         },
         null
       ],
@@ -162,7 +156,6 @@
         },
         {
           ram: true,
-          path: null,
           dbnick: '_icql_6200294332',
           url: 'file:_icql_6200294332?mode=memory&cache=shared'
         },
@@ -177,7 +170,6 @@
         },
         {
           ram: true,
-          path: null,
           dbnick: 'dbnick',
           url: 'file:dbnick?mode=memory&cache=shared'
         },
@@ -213,12 +205,12 @@
         },
         null
       ],
-      [],
+      /* 12 */
+      //-------------------------------------------------------------------------------------------------------
+      null,
       [
         {
-          /* 12 */
-      //-------------------------------------------------------------------------------------------------------
-      ram: false,
+          ram: false,
           path: void 0,
           dbnick: void 0
         },
@@ -265,7 +257,6 @@
         },
         {
           ram: true,
-          path: null,
           dbnick: '_icql_6200294332',
           url: 'file:_icql_6200294332?mode=memory&cache=shared'
         },
@@ -280,7 +271,6 @@
         },
         {
           ram: true,
-          path: null,
           dbnick: 'dbnick',
           url: 'file:dbnick?mode=memory&cache=shared'
         },
@@ -295,9 +285,7 @@
         },
         {
           ram: false,
-          path: 'db/path',
-          dbnick: null,
-          url: null
+          path: 'db/path'
         },
         null
       ],
@@ -310,9 +298,7 @@
         },
         {
           ram: false,
-          path: 'db/path',
-          dbnick: null,
-          url: null
+          path: 'db/path'
         },
         null
       ],
@@ -325,7 +311,6 @@
         },
         {
           ram: true,
-          path: null,
           dbnick: '_icql_6200294332',
           url: 'file:_icql_6200294332?mode=memory&cache=shared'
         },
@@ -340,7 +325,6 @@
         },
         {
           ram: true,
-          path: null,
           dbnick: 'dbnick',
           url: 'file:dbnick?mode=memory&cache=shared'
         },
@@ -376,12 +360,12 @@
         },
         null
       ],
-      [],
+      /* 12 */
+      //-------------------------------------------------------------------------------------------------------
+      null,
       [
         {
-          /* 12 */
-      //-------------------------------------------------------------------------------------------------------
-      ram: false
+          ram: false
         },
         null,
         "missing argument `path`"
@@ -420,7 +404,6 @@
       null,
         {
           ram: true,
-          path: null,
           dbnick: '_icql_6200294332',
           url: 'file:_icql_6200294332?mode=memory&cache=shared'
         },
@@ -433,7 +416,6 @@
         },
         {
           ram: true,
-          path: null,
           dbnick: 'dbnick',
           url: 'file:dbnick?mode=memory&cache=shared'
         },
@@ -446,9 +428,7 @@
         },
         {
           ram: false,
-          path: 'db/path',
-          dbnick: null,
-          url: null
+          path: 'db/path'
         },
         null
       ],
@@ -460,9 +440,7 @@
         },
         {
           ram: false,
-          path: 'db/path',
-          dbnick: null,
-          url: null
+          path: 'db/path'
         },
         null
       ],
@@ -473,7 +451,6 @@
         },
         {
           ram: true,
-          path: null,
           dbnick: '_icql_6200294332',
           url: 'file:_icql_6200294332?mode=memory&cache=shared'
         },
@@ -487,7 +464,6 @@
         },
         {
           ram: true,
-          path: null,
           dbnick: 'dbnick',
           url: 'file:dbnick?mode=memory&cache=shared'
         },
@@ -524,13 +500,13 @@
       ]
     ];
 //.........................................................................................................
-/* 12 */
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher, error] = probes_and_matchers[i];
-      if (probe == null) {
+/* 12 */    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      x = probes_and_matchers[i];
+      if (x === null) {
         whisper('-'.repeat(108));
         continue;
       }
+      [probe, matcher, error] = x;
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           (() => {
