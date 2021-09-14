@@ -382,23 +382,23 @@
       // word_count: 10_000
       word_count: 10,
       sql: {
-        small: this.resolve_path('assets/dbay/small-datamill.sql'),
-        big: this.resolve_path('assets/dbay/Chinook_Sqlite_AutoIncrementPKs.sql')
+        small: this.resolve_path('assets/icql/small-datamill.sql'),
+        big: this.resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.sql')
       },
       csv: {
-        small: this.resolve_path('assets/dbay/chineselexicaldatabase2.1.small.txt'),
-        holes: this.resolve_path('assets/dbay/ncrglyphwbf-with-holes.csv')
+        small: this.resolve_path('assets/icql/chineselexicaldatabase2.1.small.txt'),
+        holes: this.resolve_path('assets/icql/ncrglyphwbf-with-holes.csv')
       },
       tsv: {
-        micro: this.resolve_path('assets/dbay/ncrglyphwbf.tsv'),
-        holes: this.resolve_path('assets/dbay/ncrglyphwbf-with-holes.tsv')
+        micro: this.resolve_path('assets/icql/ncrglyphwbf.tsv'),
+        holes: this.resolve_path('assets/icql/ncrglyphwbf-with-holes.tsv')
       },
       db: {
         templates: {
-          nnt: this.resolve_path('assets/dbay/numbersandtexts.db'),
-          micro: this.resolve_path('assets/dbay/micro.db'),
-          small: this.resolve_path('assets/dbay/small-datamill.db'),
-          big: this.resolve_path('assets/dbay/Chinook_Sqlite_AutoIncrementPKs.db')
+          nnt: this.resolve_path('assets/icql/numbersandtexts.db'),
+          micro: this.resolve_path('assets/icql/micro.db'),
+          small: this.resolve_path('assets/icql/small-datamill.db'),
+          big: this.resolve_path('assets/icql/Chinook_Sqlite_AutoIncrementPKs.db')
         },
         target: {
           small: this.resolve_path('data/dbay/dbay-{ref}-{size}.db'),

@@ -102,8 +102,8 @@
         },
         {
           ram: true,
-          dbnick: '_icql_6200294332',
-          url: 'file:_icql_6200294332?mode=memory&cache=shared'
+          dbnick: '_6200294332',
+          url: 'file:_6200294332?mode=memory&cache=shared'
         },
         null
       ],
@@ -156,8 +156,8 @@
         },
         {
           ram: true,
-          dbnick: '_icql_6200294332',
-          url: 'file:_icql_6200294332?mode=memory&cache=shared'
+          dbnick: '_6200294332',
+          url: 'file:_6200294332?mode=memory&cache=shared'
         },
         null
       ],
@@ -185,8 +185,8 @@
         {
           ram: true,
           path: 'db/path',
-          dbnick: '_icql_6200294332',
-          url: 'file:_icql_6200294332?mode=memory&cache=shared'
+          dbnick: '_6200294332',
+          url: 'file:_6200294332?mode=memory&cache=shared'
         },
         null
       ],
@@ -257,8 +257,8 @@
         },
         {
           ram: true,
-          dbnick: '_icql_6200294332',
-          url: 'file:_icql_6200294332?mode=memory&cache=shared'
+          dbnick: '_6200294332',
+          url: 'file:_6200294332?mode=memory&cache=shared'
         },
         null
       ],
@@ -311,8 +311,8 @@
         },
         {
           ram: true,
-          dbnick: '_icql_6200294332',
-          url: 'file:_icql_6200294332?mode=memory&cache=shared'
+          dbnick: '_6200294332',
+          url: 'file:_6200294332?mode=memory&cache=shared'
         },
         null
       ],
@@ -340,8 +340,8 @@
         {
           ram: true,
           path: 'db/path',
-          dbnick: '_icql_6200294332',
-          url: 'file:_icql_6200294332?mode=memory&cache=shared'
+          dbnick: '_6200294332',
+          url: 'file:_6200294332?mode=memory&cache=shared'
         },
         null
       ],
@@ -404,8 +404,8 @@
       null,
         {
           ram: true,
-          dbnick: '_icql_6200294332',
-          url: 'file:_icql_6200294332?mode=memory&cache=shared'
+          dbnick: '_6200294332',
+          url: 'file:_6200294332?mode=memory&cache=shared'
         },
         null
       ],
@@ -451,8 +451,8 @@
         },
         {
           ram: true,
-          dbnick: '_icql_6200294332',
-          url: 'file:_icql_6200294332?mode=memory&cache=shared'
+          dbnick: '_6200294332',
+          url: 'file:_6200294332?mode=memory&cache=shared'
         },
         null
       ],
@@ -478,8 +478,8 @@
         {
           ram: true,
           path: 'db/path',
-          dbnick: '_icql_6200294332',
-          url: 'file:_icql_6200294332?mode=memory&cache=shared'
+          dbnick: '_6200294332',
+          url: 'file:_6200294332?mode=memory&cache=shared'
         },
         null
       ],
@@ -548,15 +548,65 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY instance has two connections"] = function(T, done) {
+    var Bsqlite, Dbay, bsqlite_class, dbay;
+    ({Dbay} = require(H.dbay_path));
+    Bsqlite = require(PATH.join(H.dbay_path, 'node_modules/better-sqlite3'));
+    bsqlite_class = Bsqlite().constructor;
+    dbay = new Dbay();
+    if (T != null) {
+      T.ok(dbay.sqlt1.constructor === bsqlite_class);
+    }
+    if (T != null) {
+      T.ok(dbay.sqlt2.constructor === bsqlite_class);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY attach memory connections"] = async function(T, done) {
+    var Bsqlite, attach, db_bar, db_foo, foo_path, name_as_url, template_path, url, work_path;
+    /* thx to https://github.com/JoshuaWise/better-sqlite3/issues/102#issuecomment-445606946 */
+    // Bsqlite         = require PATH.join H.dbay_path, 'node_modules/better-sqlite3'
+    Bsqlite = require('better-sqlite3');
+    ({template_path, work_path} = (await H.procure_db({
+      size: 'small',
+      ref: 'F-open',
+      reuse: true
+    })));
+    name_as_url = function(name) {
+      var name_u;
+      // This function is defined here: https://www.sqlite.org/uri.html#the_uri_path
+      name_u = name;
+      name_u = name_u.replace(/#/g, '%23');
+      name_u = name_u.replace(/\?/g, '%3f');
+      name_u = name_u.replace(/\/\/+/g, '/');
+      return `file:${name_u}?mode=memory&cache=shared';`;
+    };
+    foo_path = work_path;
+    db_foo = Bsqlite(foo_path);
+    debug('^554^', db_foo);
+    debug('^554^', foo_path);
+    db_bar = Bsqlite(':memory:'); // , { memory: true }
+    url = name_as_url('bar');
+    debug('^3344^', {url});
+    attach = db_foo.prepare(SQL`attach database $url as bar`);
+    attach.run({url});
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
-      return test(this["DBAY constructor arguments 1"]);
+      return test(this["DBAY attach memory connections"]);
     })();
   }
 
-  // test @[ "DBAY: _get_connection_url()" ]
+  // test @[ "DBAY constructor arguments 1" ]
+// test @[ "DBAY: _get_connection_url()" ]
+// test @[ "DBAY instance has two connections" ]
 
 }).call(this);
 

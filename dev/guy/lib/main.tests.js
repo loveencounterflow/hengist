@@ -427,7 +427,7 @@
   //===========================================================================================================
   // OBJ
   //-----------------------------------------------------------------------------------------------------------
-  this["guy.obj.pick()"] = async function(T, done) {
+  this["guy.obj.pick_with_fallback()"] = async function(T, done) {
     var error, guy, i, len, matcher, probe, probes_and_matchers;
     guy = require(H.guy_path);
     //.........................................................................................................
@@ -514,6 +514,117 @@
           }
           if (T != null) {
             T.eq(d, d_copy);
+          }
+          if (T != null) {
+            T.ok(d !== result);
+          }
+          return resolve(result);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["guy.obj.pluck_with_fallback()"] = async function(T, done) {
+    var error, guy, i, len, matcher, probe, probes_and_matchers;
+    guy = require(H.guy_path);
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        [
+          {
+            a: 1,
+            b: 2,
+            c: 3
+          },
+          null,
+          ['a',
+          'c'],
+          {
+            b: 2
+          }
+        ],
+        {
+          a: 1,
+          c: 3
+        }
+      ],
+      [
+        [
+          {
+            foo: 'bar',
+            baz: 'gnu'
+          },
+          null,
+          ['foo',
+          'wat'],
+          {
+            baz: 'gnu'
+          }
+        ],
+        {
+          foo: 'bar',
+          wat: null
+        }
+      ],
+      [
+        [
+          {
+            foo: 'bar',
+            baz: 'gnu'
+          },
+          42,
+          ['foo',
+          'wat'],
+          {
+            baz: 'gnu'
+          }
+        ],
+        {
+          foo: 'bar',
+          wat: 42
+        }
+      ],
+      [
+        [
+          {
+            foo: null,
+            baz: 'gnu'
+          },
+          42,
+          ['foo',
+          'wat'],
+          {
+            baz: 'gnu'
+          }
+        ],
+        {
+          foo: null,
+          wat: 42
+        }
+      ],
+      [[{},
+      null,
+      void 0,
+      {}],
+      {}]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, d_changed, d_copy, fallback, keys, result;
+          [d, fallback, keys, d_changed] = probe;
+          d_copy = {...d};
+          if (keys != null) {
+            result = guy.obj.pluck_with_fallback(d, fallback, ...keys);
+          } else {
+            result = guy.obj.pluck_with_fallback(d, fallback);
+          }
+          if (T != null) {
+            T.eq(d, d_changed);
           }
           if (T != null) {
             T.ok(d !== result);
@@ -665,7 +776,8 @@
     })();
   }
 
-  // test @[ "guy.obj.pick()" ]
+  // test @[ "guy.obj.pick_with_fallback()" ]
+// test @[ "guy.obj.pluck_with_fallback()" ]
 // test @[ "guy.obj.nullify_undefined()" ]
 // test @[ "guy.obj.omit_nullish()" ]
 // @[ "configurator" ]()
