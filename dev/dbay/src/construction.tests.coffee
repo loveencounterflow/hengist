@@ -128,8 +128,12 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY attach memory connections" ] = ( T, done ) ->
   ### thx to https://github.com/JoshuaWise/better-sqlite3/issues/102#issuecomment-445606946 ###
-  # Bsqlite         = require PATH.join H.dbay_path, 'node_modules/better-sqlite3'
-  Bsqlite         = require 'better-sqlite3'
+  # bsqlite_path    = PATH.resolve PATH.join H.dbay_path, 'node_modules/better-sqlite3'
+  bsqlite_path    = PATH.resolve PATH.join '../../../apps/icql-dba/node_modules/better-sqlite3'
+  # bsqlite_path    = require.resolve 'better-sqlite3'
+  debug '^2233^', "path to better-sqlite3:", bsqlite_path
+  Bsqlite         = require bsqlite_path
+  # debug db = Bsqlite ':memory:'
   { template_path
     work_path }     = await H.procure_db { size: 'small', ref: 'F-open', reuse: true, }
   name_as_url = ( name ) ->
