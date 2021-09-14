@@ -256,10 +256,91 @@ types                     = new ( require 'intertype' ).Intertype
   done?()
 
 
+#===========================================================================================================
+# OBJ
+#-----------------------------------------------------------------------------------------------------------
+@[ "guy.obj.pick()" ] = ( T, done ) ->
+  guy = require H.guy_path
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ [ { a: 1, b: 2, c: 3, },        null, [ 'a', 'c',     ], ], { a: 1, c: 3, } ]
+    [ [ { foo: 'bar', baz: 'gnu', },  null, [ 'foo', 'wat', ], ], { foo: 'bar', wat: null } ]
+    [ [ { foo: 'bar', baz: 'gnu', },  42,   [ 'foo', 'wat', ], ], { foo: 'bar', wat: 42 } ]
+    [ [ { foo: null,  baz: 'gnu', },  42,   [ 'foo', 'wat', ], ], { foo: null, wat: 42 } ]
+    [ [ {},  undefined, undefined, ], {} ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      [ d
+        fallback
+        keys      ] = probe
+      # debug '^443^', { d, fallback, keys, }
+      d_copy        = { d..., }
+      if keys?
+        result        = guy.obj.pick_with_fallback d, fallback, keys...
+      else
+        result        = guy.obj.pick_with_fallback d, fallback
+      T?.eq d, d_copy
+      T?.ok ( d isnt result )
+      resolve result
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "guy.obj.nullify_undefined()" ] = ( T, done ) ->
+  guy = require H.guy_path
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ {}, {} ]
+    [ null, {} ]
+    [ undefined, {} ]
+    [ { a: 1, b: 2, c: 3, }, { a: 1, b: 2, c: 3, } ]
+    [ { a: undefined, b: 2, c: 3, }, { a: null, b: 2, c: 3, } ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      d             = probe
+      d_copy        = { d..., }
+      result        = guy.obj.nullify_undefined d
+      T?.eq d, d_copy if d?
+      T?.ok ( d isnt result )
+      resolve result
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "guy.obj.omit_nullish()" ] = ( T, done ) ->
+  guy = require H.guy_path
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ {}, {} ]
+    [ null, {} ]
+    [ undefined, {} ]
+    [ { a: 1, b: 2, c: 3, }, { a: 1, b: 2, c: 3, } ]
+    [ { a: undefined, b: 2, c: 3, }, { b: 2, c: 3, } ]
+    [ { a: undefined, b: 2, c: null, }, { b: 2, } ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      d             = probe
+      d_copy        = { d..., }
+      result        = guy.obj.omit_nullish d
+      T?.eq d, d_copy if d?
+      T?.ok ( d isnt result )
+      resolve result
+  #.........................................................................................................
+  done?()
+
+
 ############################################################################################################
 if require.main is module then do =>
   test @, { timeout: 5000, }
-  # test @[ "configurator" ]
+  # test @[ "guy.obj.pick()" ]
+  # test @[ "guy.obj.nullify_undefined()" ]
+  # test @[ "guy.obj.omit_nullish()" ]
   # @[ "configurator" ]()
   # test @[ "await with async steampipes" ]
   # test @[ "nowait with async steampipes" ]
