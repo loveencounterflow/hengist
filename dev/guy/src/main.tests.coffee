@@ -106,7 +106,7 @@ types                     = new ( require 'intertype' ).Intertype
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "nowait with async steampipes" ] = ( T, done ) ->
+@[ "_____ HANGS ________________ nowait with async steampipes" ] = ( T, done ) ->
   # T?.halt_on_error()
   guy         = require H.guy_path
   SP          = require 'steampipes'
