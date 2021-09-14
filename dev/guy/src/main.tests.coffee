@@ -181,7 +181,7 @@ types                     = new ( require 'intertype' ).Intertype
       @declare_types: ( self ) ->
         T?.eq ( type_of self ), 'ex'
         T?.eq ( type_of self.cfg ), 'object'
-        T?.ok Object.isFrozen self.cfg
+        # T?.ok Object.isFrozen self.cfg
         debug '^334-8^', self.cfg
         self.types.declare 'constructor_cfg', tests:
           "@isa.object x":                    ( x ) -> @isa.object x
@@ -233,7 +233,7 @@ types                     = new ( require 'intertype' ).Intertype
       @declare_types: ( self ) ->
         T?.eq ( type_of self ), 'ex'
         T?.eq ( type_of self.cfg ), 'object'
-        T?.ok Object.isFrozen self.cfg
+        # T?.ok Object.isFrozen self.cfg
         T?.ok self.types is mytypes
         self.types.validate.constructor_cfg self.cfg
         self.types.validate.rosy_number 200
