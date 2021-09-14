@@ -39,14 +39,14 @@ guy                       = require '../../../apps/guy'
     [ { ram: null,   path: 'db/path', dbnick: 'dbnick', }, null, "only RAM DB can have both `path` and `dbnick`", ] ### 4  ###
     [ { ram: false,  path: 'db/path', dbnick: 'dbnick', }, null, "only RAM DB can have both `path` and `dbnick`", ] ### 8  ###
     #.......................................................................................................
-    [ { ram: null,   path: null,      dbnick: null,     }, { ram: true,                   dbnick: '_icql_6200294332', url: 'file:_icql_6200294332?mode=memory&cache=shared', }, null, ] ### 1  ###
-    [ { ram: null,   path: null,      dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',           url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 2  ###
+    [ { ram: null,   path: null,      dbnick: null,     }, { ram: true,                   dbnick: '_6200294332',  url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 1  ###
+    [ { ram: null,   path: null,      dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',       url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 2  ###
     [ { ram: null,   path: 'db/path', dbnick: null      }, { ram: false, path: 'db/path',                                        }, null, ] ### 3  ###
     [ { ram: false,  path: 'db/path', dbnick: null,     }, { ram: false, path: 'db/path',                                        }, null, ] ### 7  ###
-    [ { ram: true,   path: null,      dbnick: null,     }, { ram: true,                   dbnick: '_icql_6200294332', url: 'file:_icql_6200294332?mode=memory&cache=shared', }, null, ] ### 9  ###
-    [ { ram: true,   path: null,      dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',           url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 10 ###
-    [ { ram: true,   path: 'db/path', dbnick: null,     }, { ram: true,  path: 'db/path', dbnick: '_icql_6200294332', url: 'file:_icql_6200294332?mode=memory&cache=shared', }, null, ] ### 11 ###
-    [ { ram: true,   path: 'db/path', dbnick: 'dbnick', }, { ram: true,  path: 'db/path', dbnick: 'dbnick',           url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 12 ###
+    [ { ram: true,   path: null,      dbnick: null,     }, { ram: true,                   dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 9  ###
+    [ { ram: true,   path: null,      dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 10 ###
+    [ { ram: true,   path: 'db/path', dbnick: null,     }, { ram: true,  path: 'db/path', dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 11 ###
+    [ { ram: true,   path: 'db/path', dbnick: 'dbnick', }, { ram: true,  path: 'db/path', dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 12 ###
     #-------------------------------------------------------------------------------------------------------
     null
     [ { ram: false,     path: undefined, dbnick: undefined,}, null, "missing argument `path`",              ] ### 5  ###
@@ -54,14 +54,14 @@ guy                       = require '../../../apps/guy'
     [ { ram: undefined, path: 'db/path', dbnick: 'dbnick', }, null, "only RAM DB can have both `path` and `dbnick`", ] ### 4  ###
     [ { ram: false,     path: 'db/path', dbnick: 'dbnick', }, null, "only RAM DB can have both `path` and `dbnick`", ] ### 8  ###
     #.......................................................................................................
-    [ { ram: undefined, path: undefined, dbnick: undefined,}, { ram: true,                   dbnick: '_icql_6200294332', url: 'file:_icql_6200294332?mode=memory&cache=shared', }, null, ] ### 1  ###
-    [ { ram: undefined, path: undefined, dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',           url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 2  ###
+    [ { ram: undefined, path: undefined, dbnick: undefined,}, { ram: true,                   dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 1  ###
+    [ { ram: undefined, path: undefined, dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 2  ###
     [ { ram: undefined, path: 'db/path', dbnick: undefined }, { ram: false, path: 'db/path',                                        }, null, ] ### 3  ###
     [ { ram: false,     path: 'db/path', dbnick: undefined,}, { ram: false, path: 'db/path',                                        }, null, ] ### 7  ###
-    [ { ram: true,      path: undefined, dbnick: undefined,}, { ram: true,                   dbnick: '_icql_6200294332', url: 'file:_icql_6200294332?mode=memory&cache=shared', }, null, ] ### 9  ###
-    [ { ram: true,      path: undefined, dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',           url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 10 ###
-    [ { ram: true,      path: 'db/path', dbnick: undefined,}, { ram: true,  path: 'db/path', dbnick: '_icql_6200294332', url: 'file:_icql_6200294332?mode=memory&cache=shared', }, null, ] ### 11 ###
-    [ { ram: true,      path: 'db/path', dbnick: 'dbnick', }, { ram: true,  path: 'db/path', dbnick: 'dbnick',           url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 12 ###
+    [ { ram: true,      path: undefined, dbnick: undefined,}, { ram: true,                   dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 9  ###
+    [ { ram: true,      path: undefined, dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 10 ###
+    [ { ram: true,      path: 'db/path', dbnick: undefined,}, { ram: true,  path: 'db/path', dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 11 ###
+    [ { ram: true,      path: 'db/path', dbnick: 'dbnick', }, { ram: true,  path: 'db/path', dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 12 ###
     #-------------------------------------------------------------------------------------------------------
     null
     [ { ram: false,                                        }, null, "missing argument `path`",              ] ### 5  ###
@@ -69,14 +69,14 @@ guy                       = require '../../../apps/guy'
     [ {                 path: 'db/path', dbnick: 'dbnick', }, null, "only RAM DB can have both `path` and `dbnick`", ] ### 4  ###
     [ { ram: false,     path: 'db/path', dbnick: 'dbnick', }, null, "only RAM DB can have both `path` and `dbnick`", ] ### 8  ###
     #.......................................................................................................
-    [ null,                                                   { ram: true,                   dbnick: '_icql_6200294332', url: 'file:_icql_6200294332?mode=memory&cache=shared', }, null, ] ### 1  ###
-    [ {                                  dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',           url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 2  ###
+    [ null,                                                   { ram: true,                   dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 1  ###
+    [ {                                  dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 2  ###
     [ {                 path: 'db/path',                   }, { ram: false, path: 'db/path',                                        }, null, ] ### 3  ###
     [ { ram: false,     path: 'db/path',                   }, { ram: false, path: 'db/path',                                        }, null, ] ### 7  ###
-    [ { ram: true,                                         }, { ram: true,                   dbnick: '_icql_6200294332', url: 'file:_icql_6200294332?mode=memory&cache=shared', }, null, ] ### 9  ###
-    [ { ram: true,                       dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',           url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 10 ###
-    [ { ram: true,      path: 'db/path',                   }, { ram: true,  path: 'db/path', dbnick: '_icql_6200294332', url: 'file:_icql_6200294332?mode=memory&cache=shared', }, null, ] ### 11 ###
-    [ { ram: true,      path: 'db/path', dbnick: 'dbnick', }, { ram: true,  path: 'db/path', dbnick: 'dbnick',           url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 12 ###
+    [ { ram: true,                                         }, { ram: true,                   dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 9  ###
+    [ { ram: true,                       dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 10 ###
+    [ { ram: true,      path: 'db/path',                   }, { ram: true,  path: 'db/path', dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 11 ###
+    [ { ram: true,      path: 'db/path', dbnick: 'dbnick', }, { ram: true,  path: 'db/path', dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 12 ###
     ]
   #.........................................................................................................
   for x in probes_and_matchers
@@ -104,11 +104,11 @@ guy                       = require '../../../apps/guy'
     @_rnd_int_cfg: true
   #.........................................................................................................
   db = new Dbay2 { ram: null, }
-  # T?.eq db._get_connection_url(), { url: 'file:_icql_6200294332?mode=memory&cache=shared', dbnick: '_icql_6200294332' }
-  # T?.eq db._get_connection_url(), { url: 'file:_icql_4260041910?mode=memory&cache=shared', dbnick: '_icql_4260041910' }
-  # T?.eq db._get_connection_url(), { url: 'file:_icql_9982321802?mode=memory&cache=shared', dbnick: '_icql_9982321802' }
-  # T?.eq db._get_connection_url(), { url: 'file:_icql_2420402559?mode=memory&cache=shared', dbnick: '_icql_2420402559' }
-  # T?.eq db._get_connection_url(), { url: 'file:_icql_1965667491?mode=memory&cache=shared', dbnick: '_icql_1965667491' }
+  # T?.eq db._get_connection_url(), { url: 'file:_6200294332?mode=memory&cache=shared', dbnick: '_6200294332' }
+  # T?.eq db._get_connection_url(), { url: 'file:_4260041910?mode=memory&cache=shared', dbnick: '_4260041910' }
+  # T?.eq db._get_connection_url(), { url: 'file:_9982321802?mode=memory&cache=shared', dbnick: '_9982321802' }
+  # T?.eq db._get_connection_url(), { url: 'file:_2420402559?mode=memory&cache=shared', dbnick: '_2420402559' }
+  # T?.eq db._get_connection_url(), { url: 'file:_1965667491?mode=memory&cache=shared', dbnick: '_1965667491' }
   # T?.eq ( db._get_connection_url 'yournamehere' ), { url: 'file:yournamehere?mode=memory&cache=shared', dbnick: 'yournamehere' }
   # #.........................................................................................................
   # info db._get_connection_url()
