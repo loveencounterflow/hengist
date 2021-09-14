@@ -288,6 +288,35 @@ types                     = new ( require 'intertype' ).Intertype
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "guy.obj.pluck_with_fallback()" ] = ( T, done ) ->
+  guy = require H.guy_path
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ [ { a: 1, b: 2, c: 3, },        null,  [ 'a', 'c',     ], { b: 2, },       ], { a: 1, c: 3, },           ]
+    [ [ { foo: 'bar', baz: 'gnu', },  null,  [ 'foo', 'wat', ], { baz: 'gnu', }, ], { foo: 'bar', wat: null }, ]
+    [ [ { foo: 'bar', baz: 'gnu', },  42,    [ 'foo', 'wat', ], { baz: 'gnu', }, ], { foo: 'bar', wat: 42 },   ]
+    [ [ { foo: null,  baz: 'gnu', },  42,    [ 'foo', 'wat', ], { baz: 'gnu', }, ], { foo: null, wat: 42 },    ]
+    [ [ {},                           null,  undefined,         {},              ], {},                        ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      [ d
+        fallback
+        keys
+        d_changed ] = probe
+      d_copy        = { d..., }
+      if keys?
+        result        = guy.obj.pluck_with_fallback d, fallback, keys...
+      else
+        result        = guy.obj.pluck_with_fallback d, fallback
+      T?.eq d, d_changed
+      T?.ok ( d isnt result )
+      resolve result
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "guy.obj.nullify_undefined()" ] = ( T, done ) ->
   guy = require H.guy_path
   #.........................................................................................................
@@ -338,7 +367,8 @@ types                     = new ( require 'intertype' ).Intertype
 ############################################################################################################
 if require.main is module then do =>
   test @, { timeout: 5000, }
-  # test @[ "guy.obj.pick()" ]
+  # test @[ "guy.obj.pick_with_fallback()" ]
+  # test @[ "guy.obj.pluck_with_fallback()" ]
   # test @[ "guy.obj.nullify_undefined()" ]
   # test @[ "guy.obj.omit_nullish()" ]
   # @[ "configurator" ]()
