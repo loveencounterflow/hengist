@@ -566,10 +566,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY attach memory connections"] = async function(T, done) {
-    var Bsqlite, attach, db_bar, db_foo, foo_path, name_as_url, template_path, url, work_path;
+    var Bsqlite, attach, bsqlite_path, db_bar, db_foo, foo_path, name_as_url, template_path, url, work_path;
     /* thx to https://github.com/JoshuaWise/better-sqlite3/issues/102#issuecomment-445606946 */
-    // Bsqlite         = require PATH.join H.dbay_path, 'node_modules/better-sqlite3'
-    Bsqlite = require('better-sqlite3');
+    // bsqlite_path    = PATH.resolve PATH.join H.dbay_path, 'node_modules/better-sqlite3'
+    bsqlite_path = PATH.resolve(PATH.join('../../../apps/icql-dba/node_modules/better-sqlite3'));
+    // bsqlite_path    = require.resolve 'better-sqlite3'
+    debug('^2233^', "path to better-sqlite3:", bsqlite_path);
+    Bsqlite = require(bsqlite_path);
+    // debug db = Bsqlite ':memory:'
     ({template_path, work_path} = (await H.procure_db({
       size: 'small',
       ref: 'F-open',
