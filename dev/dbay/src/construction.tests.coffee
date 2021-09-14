@@ -125,9 +125,39 @@ guy                       = require '../../../apps/guy'
   T?.ok dbay.sqlt2.constructor is bsqlite_class
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY attach memory connections" ] = ( T, done ) ->
+  ### thx to https://github.com/JoshuaWise/better-sqlite3/issues/102#issuecomment-445606946 ###
+  # Bsqlite         = require PATH.join H.dbay_path, 'node_modules/better-sqlite3'
+  Bsqlite         = require 'better-sqlite3'
+  { template_path
+    work_path }     = await H.procure_db { size: 'small', ref: 'F-open', reuse: true, }
+  name_as_url = ( name ) ->
+    # This function is defined here: https://www.sqlite.org/uri.html#the_uri_path
+    name_u = name
+    name_u = name_u.replace /#/g, '%23'
+    name_u = name_u.replace /\?/g, '%3f'
+    name_u = name_u.replace /\/\/+/g, '/'
+    return "file:#{name_u}?mode=memory&cache=shared';"
+  foo_path  = work_path
+  db_foo    = Bsqlite foo_path
+  debug '^554^', db_foo
+  debug '^554^', foo_path
+  db_bar    = Bsqlite ':memory:' # , { memory: true }
+  url       = name_as_url 'bar'
+  debug '^3344^', { url, }
+  attach    = db_foo.prepare SQL"attach database $url as bar"
+  attach.run { url, }
+  done?()
+
+
 
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  test @[ "DBAY constructor arguments 1" ]
+  test @[ "DBAY attach memory connections" ]
+  # test @[ "DBAY constructor arguments 1" ]
   # test @[ "DBAY: _get_connection_url()" ]
+  # test @[ "DBAY instance has two connections" ]
+
+
