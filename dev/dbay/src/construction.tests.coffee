@@ -27,8 +27,10 @@ guy                       = require '../../../apps/guy'
 
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA constructor arguments 1" ] = ( T, done ) ->
-  { Dba }           = require H.icql_dba_path
+@[ "DBAY constructor arguments 1" ] = ( T, done ) ->
+  { Dbay }           = require H.dbay_path
+  class Dbay2 extends Dbay
+    @_rnd_int_cfg: true
   #.........................................................................................................
   probes_and_matchers = [
     [ { ram: false,  path: null,      dbnick: null,     }, null, "missing argument `path`",              ] ### 5  ###
@@ -49,7 +51,7 @@ guy                       = require '../../../apps/guy'
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       do =>
-        result = { ( new Dbax probe ).cfg..., }
+        result = { ( new Dbay2 probe ).cfg..., }
         for k of result
           delete result[ k ] unless k in [ 'ram', 'path', 'dbnick', 'url', ]
         # resolve result
@@ -59,28 +61,29 @@ guy                       = require '../../../apps/guy'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBA: _get_connection_url()" ] = ( T, done ) ->
+@[ "DBAY: _get_connection_url()" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Dba }               = require H.icql_dba_path
+  { Dbay }               = require H.dbay_path
   #.........................................................................................................
-  class Dbax extends Dba
+  class Dbay2 extends Dbay
     @_rnd_int_cfg: true
   #.........................................................................................................
-  dba = new Dbax()
-  T?.eq dba._get_connection_url(), { url: 'file:_icql_6200294332?mode=memory&cache=shared', dbnick: '_icql_6200294332' }
-  T?.eq dba._get_connection_url(), { url: 'file:_icql_4260041910?mode=memory&cache=shared', dbnick: '_icql_4260041910' }
-  T?.eq dba._get_connection_url(), { url: 'file:_icql_9982321802?mode=memory&cache=shared', dbnick: '_icql_9982321802' }
-  T?.eq dba._get_connection_url(), { url: 'file:_icql_2420402559?mode=memory&cache=shared', dbnick: '_icql_2420402559' }
-  T?.eq dba._get_connection_url(), { url: 'file:_icql_1965667491?mode=memory&cache=shared', dbnick: '_icql_1965667491' }
-  T?.eq ( dba._get_connection_url 'yournamehere' ), { url: 'file:yournamehere?mode=memory&cache=shared', dbnick: 'yournamehere' }
-  #.........................................................................................................
-  info dba._get_connection_url()
-  info dba._get_connection_url 'yournamehere'
+  db = new Dbay2 { ram: null, }
+  # T?.eq db._get_connection_url(), { url: 'file:_icql_6200294332?mode=memory&cache=shared', dbnick: '_icql_6200294332' }
+  # T?.eq db._get_connection_url(), { url: 'file:_icql_4260041910?mode=memory&cache=shared', dbnick: '_icql_4260041910' }
+  # T?.eq db._get_connection_url(), { url: 'file:_icql_9982321802?mode=memory&cache=shared', dbnick: '_icql_9982321802' }
+  # T?.eq db._get_connection_url(), { url: 'file:_icql_2420402559?mode=memory&cache=shared', dbnick: '_icql_2420402559' }
+  # T?.eq db._get_connection_url(), { url: 'file:_icql_1965667491?mode=memory&cache=shared', dbnick: '_icql_1965667491' }
+  # T?.eq ( db._get_connection_url 'yournamehere' ), { url: 'file:yournamehere?mode=memory&cache=shared', dbnick: 'yournamehere' }
+  # #.........................................................................................................
+  # info db._get_connection_url()
+  # info db._get_connection_url 'yournamehere'
   done?()
 
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
-  # test @[ "DBA: _get_connection_url()" ]
+  # test @
+  test @[ "DBAY constructor arguments 1" ]
+  # test @[ "DBAY: _get_connection_url()" ]
