@@ -32,7 +32,7 @@
   echo = CND.echo.bind(CND);
 
   //...........................................................................................................
-  test = require('guy-test');
+  test = require('../../../apps/guy-test');
 
   H = require('./helpers');
 
@@ -145,7 +145,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["nowait with async steampipes"] = function(T, done) {
+  this["_____ HANGS ________________ nowait with async steampipes"] = function(T, done) {
     var $, $async, $drain, $show, SP, f_async, guy, result, trace;
     // T?.halt_on_error()
     guy = require(H.guy_path);
@@ -245,9 +245,7 @@
             if (T != null) {
               T.eq(type_of(self.cfg), 'object');
             }
-            if (T != null) {
-              T.ok(Object.isFrozen(self.cfg));
-            }
+            // T?.ok Object.isFrozen self.cfg
             debug('^334-8^', self.cfg);
             self.types.declare('constructor_cfg', {
               tests: {
@@ -358,9 +356,7 @@
             if (T != null) {
               T.eq(type_of(self.cfg), 'object');
             }
-            if (T != null) {
-              T.ok(Object.isFrozen(self.cfg));
-            }
+            // T?.ok Object.isFrozen self.cfg
             if (T != null) {
               T.ok(self.types === mytypes);
             }
@@ -428,6 +424,238 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //===========================================================================================================
+  // OBJ
+  //-----------------------------------------------------------------------------------------------------------
+  this["guy.obj.pick()"] = async function(T, done) {
+    var error, guy, i, len, matcher, probe, probes_and_matchers;
+    guy = require(H.guy_path);
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        [
+          {
+            a: 1,
+            b: 2,
+            c: 3
+          },
+          null,
+          ['a',
+          'c']
+        ],
+        {
+          a: 1,
+          c: 3
+        }
+      ],
+      [
+        [
+          {
+            foo: 'bar',
+            baz: 'gnu'
+          },
+          null,
+          ['foo',
+          'wat']
+        ],
+        {
+          foo: 'bar',
+          wat: null
+        }
+      ],
+      [
+        [
+          {
+            foo: 'bar',
+            baz: 'gnu'
+          },
+          42,
+          ['foo',
+          'wat']
+        ],
+        {
+          foo: 'bar',
+          wat: 42
+        }
+      ],
+      [
+        [
+          {
+            foo: null,
+            baz: 'gnu'
+          },
+          42,
+          ['foo',
+          'wat']
+        ],
+        {
+          foo: null,
+          wat: 42
+        }
+      ],
+      [[{},
+      void 0,
+      void 0],
+      {}]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, d_copy, fallback, keys, result;
+          [d, fallback, keys] = probe;
+          // debug '^443^', { d, fallback, keys, }
+          d_copy = {...d};
+          if (keys != null) {
+            result = guy.obj.pick_with_fallback(d, fallback, ...keys);
+          } else {
+            result = guy.obj.pick_with_fallback(d, fallback);
+          }
+          if (T != null) {
+            T.eq(d, d_copy);
+          }
+          if (T != null) {
+            T.ok(d !== result);
+          }
+          return resolve(result);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["guy.obj.nullify_undefined()"] = async function(T, done) {
+    var error, guy, i, len, matcher, probe, probes_and_matchers;
+    guy = require(H.guy_path);
+    //.........................................................................................................
+    probes_and_matchers = [
+      [{},
+      {}],
+      [null,
+      {}],
+      [void 0,
+      {}],
+      [
+        {
+          a: 1,
+          b: 2,
+          c: 3
+        },
+        {
+          a: 1,
+          b: 2,
+          c: 3
+        }
+      ],
+      [
+        {
+          a: void 0,
+          b: 2,
+          c: 3
+        },
+        {
+          a: null,
+          b: 2,
+          c: 3
+        }
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, d_copy, result;
+          d = probe;
+          d_copy = {...d};
+          result = guy.obj.nullify_undefined(d);
+          if (d != null) {
+            if (T != null) {
+              T.eq(d, d_copy);
+            }
+          }
+          if (T != null) {
+            T.ok(d !== result);
+          }
+          return resolve(result);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["guy.obj.omit_nullish()"] = async function(T, done) {
+    var error, guy, i, len, matcher, probe, probes_and_matchers;
+    guy = require(H.guy_path);
+    //.........................................................................................................
+    probes_and_matchers = [
+      [{},
+      {}],
+      [null,
+      {}],
+      [void 0,
+      {}],
+      [
+        {
+          a: 1,
+          b: 2,
+          c: 3
+        },
+        {
+          a: 1,
+          b: 2,
+          c: 3
+        }
+      ],
+      [
+        {
+          a: void 0,
+          b: 2,
+          c: 3
+        },
+        {
+          b: 2,
+          c: 3
+        }
+      ],
+      [
+        {
+          a: void 0,
+          b: 2,
+          c: null
+        },
+        {
+          b: 2
+        }
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, d_copy, result;
+          d = probe;
+          d_copy = {...d};
+          result = guy.obj.omit_nullish(d);
+          if (d != null) {
+            if (T != null) {
+              T.eq(d, d_copy);
+            }
+          }
+          if (T != null) {
+            T.ok(d !== result);
+          }
+          return resolve(result);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -437,7 +665,9 @@
     })();
   }
 
-  // test @[ "configurator" ]
+  // test @[ "guy.obj.pick()" ]
+// test @[ "guy.obj.nullify_undefined()" ]
+// test @[ "guy.obj.omit_nullish()" ]
 // @[ "configurator" ]()
 // test @[ "await with async steampipes" ]
 // test @[ "nowait with async steampipes" ]
