@@ -107,15 +107,15 @@ guy                       = require '../../../apps/guy'
     @_rnd_int_cfg: true
   #.........................................................................................................
   db = new Dbay2 { ram: null, }
-  # T?.eq db._get_connection_url(), { url: 'file:_6200294332?mode=memory&cache=shared', dbnick: '_6200294332' }
-  # T?.eq db._get_connection_url(), { url: 'file:_4260041910?mode=memory&cache=shared', dbnick: '_4260041910' }
-  # T?.eq db._get_connection_url(), { url: 'file:_9982321802?mode=memory&cache=shared', dbnick: '_9982321802' }
-  # T?.eq db._get_connection_url(), { url: 'file:_2420402559?mode=memory&cache=shared', dbnick: '_2420402559' }
-  # T?.eq db._get_connection_url(), { url: 'file:_1965667491?mode=memory&cache=shared', dbnick: '_1965667491' }
-  # T?.eq ( db._get_connection_url 'yournamehere' ), { url: 'file:yournamehere?mode=memory&cache=shared', dbnick: 'yournamehere' }
-  # #.........................................................................................................
-  # info db._get_connection_url()
-  # info db._get_connection_url 'yournamehere'
+  T?.eq db._get_connection_url(), { url: 'file:_4260041910?mode=memory&cache=shared', dbnick: '_4260041910' }
+  T?.eq db._get_connection_url(), { url: 'file:_9982321802?mode=memory&cache=shared', dbnick: '_9982321802' }
+  T?.eq db._get_connection_url(), { url: 'file:_2420402559?mode=memory&cache=shared', dbnick: '_2420402559' }
+  T?.eq db._get_connection_url(), { url: 'file:_1965667491?mode=memory&cache=shared', dbnick: '_1965667491' }
+  T?.eq db._get_connection_url(), { url: 'file:_7714686943?mode=memory&cache=shared', dbnick: '_7714686943' }
+  T?.eq ( db._get_connection_url 'yournamehere' ), { url: 'file:yournamehere?mode=memory&cache=shared', dbnick: 'yournamehere' }
+  #.........................................................................................................
+  info db._get_connection_url()
+  info db._get_connection_url 'yournamehere'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
