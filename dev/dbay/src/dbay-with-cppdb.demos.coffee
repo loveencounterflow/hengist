@@ -100,22 +100,24 @@ demo_attach_memory_connections_1 = ->
 demo_udf_1 = ->
   db        = new Dbay2()
   new_bsqlt = require '../../../apps/icql-dba/node_modules/better-sqlite3'
+  # new_bsqlt = require '/tmp/icql-dba-interim/node_modules/better-sqlite3' ### test with cloned, fresh `npm install` ###
   bsqlt1    = new_bsqlt 'file:your_db_name_here?mode=memory&cache=shared'
   bsqlt2    = new_bsqlt 'file:your_db_name_here?mode=memory&cache=shared'
-  debug '^309-1^', 'bsqlt', bsqlt1
-  debug '^309-1^', 'bsqlt', bsqlt1._cppdb
   #.........................................................................................................
+  ### Create table on first connection, can insert data on second connconnection: ###
   bsqlt1.exec SQL"create table x ( n text );"
   bsqlt2.exec SQL"insert into x ( n ) values ( 'helo world' );"
   bsqlt2.exec SQL"insert into x ( n ) values ( 'good to see' );"
   bsqlt2.exec SQL"insert into x ( n ) values ( 'it does work' );"
   #.........................................................................................................
   do =>
+    ### Sanity check that data was persisted: ###
     select = bsqlt2.prepare SQL"select * from x;", {}, false
     select.run()
     info '^309-1^', row for row from select.iterate()
   #.........................................................................................................
   do =>
+    ### Sanity check that UDF does work (on the same connconnection): ###
     bsqlt1.function 'std_square', { varargs: false, }, ( n ) -> n ** 2
     # select  = bsqlt1.prepare SQL"select sqrt( 42 ) as n;"
     select  = bsqlt1.prepare SQL"select std_square( 42 ) as n;"
@@ -123,6 +125,7 @@ demo_udf_1 = ->
     info '^309-1^', row for row from select.iterate()
   #.........................................................................................................
   do =>
+    ### Run query (on 1st connconnection) that calls UDF running another query (on the 2nd connconnection): ###
     bsqlt1.function 'std_row_count', { varargs: false, deterministic: false, }, ->
       statement = bsqlt2.prepare SQL"select count(*) as count from x;", {}, false
       statement.run()
