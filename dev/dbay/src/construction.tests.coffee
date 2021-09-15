@@ -118,8 +118,8 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY instance has two connections" ] = ( T, done ) ->
   { Dbay }        = require H.dbay_path
-  Bsqlite         = require PATH.join H.dbay_path, 'node_modules/better-sqlite3'
-  bsqlite_class   = Bsqlite().constructor
+  Sqlt            = require PATH.join H.dbay_path, 'node_modules/better-sqlite3'
+  bsqlite_class   = Sqlt().constructor
   dbay = new Dbay()
   T?.ok dbay.sqlt1.constructor is bsqlite_class
   T?.ok dbay.sqlt2.constructor is bsqlite_class
@@ -129,11 +129,42 @@ guy                       = require '../../../apps/guy'
 @[ "DBAY attach memory connections" ] = ( T, done ) ->
   ### thx to https://github.com/JoshuaWise/better-sqlite3/issues/102#issuecomment-445606946 ###
   # bsqlite_path    = PATH.resolve PATH.join H.dbay_path, 'node_modules/better-sqlite3'
-  bsqlite_path    = PATH.resolve PATH.join '../../../apps/icql-dba/node_modules/better-sqlite3'
+  bsqlite_path    = PATH.resolve PATH.join __dirname, '../../../apps/icql-dba/node_modules/better-sqlite3'
+  wrapper_path    = PATH.resolve PATH.join __dirname, '../../../apps/icql-dba/node_modules/better-sqlite3/lib/methods/wrappers.js'
+  binding_path    = PATH.resolve PATH.join __dirname, '../../../apps/icql-dba/node_modules/bindings'
+  node_path_1     = PATH.resolve PATH.join __dirname, '../../../apps/icql-dba/node_modules/better-sqlite3/build/Release/better_sqlite3.node'
+  node_path_2     = PATH.resolve PATH.join __dirname, '../../../apps/icql-dba/node_modules/better-sqlite3/build/Release/obj.target/better_sqlite3.node'
   # bsqlite_path    = require.resolve 'better-sqlite3'
   debug '^2233^', "path to better-sqlite3:", bsqlite_path
-  Bsqlite         = require bsqlite_path
-  # debug db = Bsqlite ':memory:'
+  Sqlt            = require bsqlite_path
+  sqlt            = Sqlt ':memory:'
+  # wrapper         = require wrapper_path
+  debug '^290-1^', ( k for k of sqlt._wrappers )
+  # debug '^290-2^', sqlt._wrappers.getters.open
+  # debug '^290-3^', sqlt._wrappers.unsafeMode()
+  # debug '^290-3^', sqlt._wrappers.exec()
+  debug '^290-3^', sqlt._wrappers.get_cppdb()
+  # { Database: CPPDatabase, setErrorConstructor, }
+  debug '^490^', bindings = require binding_path
+  debug '^490^', node_path_1
+  debug '^490^', node_path_2
+  debug '^490^', { Database: Db1, } = require node_path_1
+  debug '^490^', { Database: Db2, } = require node_path_2
+  # new CPPDatabase(filename, filenameGiven, anonymous, readonly, fileMustExist, timeout, verbose || null, buffer || null)
+  debug '^490^', db1 = new Db1 ':memory:', ':memory:', true, false, false, 5000, null, null
+  debug '^490^', db1a = new Db1 'file:your_db_name_here?mode=memory&cache=shared', 'file:your_db_name_here?mode=memory&cache=shared', true, false, false, 5000, null, null
+  debug '^490^', db1b = new Db1 'file:your_db_name_here?mode=memory&cache=shared', 'file:your_db_name_here?mode=memory&cache=shared', true, false, false, 5000, null, null
+  db1a.exec SQL"create table x ( n text );"
+  db1b.exec SQL"insert into x ( n ) values ( 'helo world' );"
+  select = db1b.prepare SQL"select * from x;", {}, true
+  debug '^340^', select.run()
+  for row from select.iterate()
+    info row
+  # debug '^490^', bindings node_path_1
+  # debug '^490^', bindings node_path_2
+  #---------------------------------------------------------------------------------------------------------
+  return done?()
+  # debug db = Sqlt ':memory:'
   { template_path
     work_path }     = await H.procure_db { size: 'small', ref: 'F-open', reuse: true, }
   name_as_url = ( name ) ->
@@ -144,10 +175,10 @@ guy                       = require '../../../apps/guy'
     name_u = name_u.replace /\/\/+/g, '/'
     return "file:#{name_u}?mode=memory&cache=shared';"
   foo_path  = work_path
-  db_foo    = Bsqlite foo_path
+  db_foo    = Sqlt foo_path
   debug '^554^', db_foo
   debug '^554^', foo_path
-  db_bar    = Bsqlite ':memory:' # , { memory: true }
+  db_bar    = Sqlt ':memory:' # , { memory: true }
   url       = name_as_url 'bar'
   debug '^3344^', { url, }
   attach    = db_foo.prepare SQL"attach database $url as bar"
@@ -159,7 +190,8 @@ guy                       = require '../../../apps/guy'
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  test @[ "DBAY attach memory connections" ]
+  # test @[ "DBAY attach memory connections" ]
+  @[ "DBAY attach memory connections" ]()
   # test @[ "DBAY constructor arguments 1" ]
   # test @[ "DBAY: _get_connection_url()" ]
   # test @[ "DBAY instance has two connections" ]
