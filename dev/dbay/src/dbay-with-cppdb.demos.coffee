@@ -155,8 +155,48 @@ demo_udf_2 = ->
   info '^309^', row for row from select.iterate()
   return null
 
+
+#-----------------------------------------------------------------------------------------------------------
+demo_udf_dbay_sqlt = ->
+  { Dbay }  = require H.dbay_path
+  class Dbayx extends Dbay
+    @_rnd_int_cfg: true
+  db        = new Dbayx()
+  #.........................................................................................................
+  ### Create table on first connection, can insert data on second connconnection: ###
+  db.sqlt1.exec SQL"create table x ( n text );"
+  db.sqlt2.exec SQL"insert into x ( n ) values ( 'helo world' );"
+  db.sqlt2.exec SQL"insert into x ( n ) values ( 'good to see' );"
+  db.sqlt2.exec SQL"insert into x ( n ) values ( 'it does work' );"
+  #.........................................................................................................
+  do =>
+    ### Sanity check that data was persisted: ###
+    select = db.sqlt2.prepare SQL"select * from x;", {}, false
+    select.run()
+    info '^309-1^', row for row from select.iterate()
+  #.........................................................................................................
+  do =>
+    ### Sanity check that UDF does work (on the same connconnection): ###
+    db.sqlt1.function 'std_square', { varargs: false, }, ( n ) -> n ** 2
+    # select  = db.sqlt1.prepare SQL"select sqrt( 42 ) as n;"
+    select  = db.sqlt1.prepare SQL"select std_square( 42 ) as n;"
+    select.run()
+    info '^309-1^', row for row from select.iterate()
+  #.........................................................................................................
+  do =>
+    ### Run query (on 1st connconnection) that calls UDF running another query (on the 2nd connconnection): ###
+    db.sqlt1.function 'std_row_count', { varargs: false, deterministic: false, }, ->
+      statement = db.sqlt2.prepare SQL"select count(*) as count from x;", {}, false
+      statement.run()
+      rows      = [ statement.iterate()..., ]
+      return rows[ 0 ]?.count ? null
+    select  = db.sqlt1.prepare SQL"select std_row_count() as n;"
+    select.run()
+    info '^309-1^', row for row from select.iterate()
+  return null
+
 ############################################################################################################
 if require.main is module then do =>
   # demo_attach_memory_connections_1()
-  demo_udf_1()
-
+  # demo_udf_1()
+  demo_udf_dbay_sqlt()
