@@ -40,7 +40,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY constructor arguments 1"] = async function(T, done) {
-    var Dbay, Dbay2, error, i, len, matcher, probe, probes_and_matchers, x;
+    var Dbay, Dbay2, db_path, error, i, len, matcher, probe, probes_and_matchers, x;
     ({Dbay} = require(H.dbay_path));
     Dbay2 = (function() {
       class Dbay2 extends Dbay {};
@@ -50,6 +50,14 @@
       return Dbay2;
 
     }).call(this);
+    ({
+      //.........................................................................................................
+      work_path: db_path
+    } = (await H.procure_db({
+      size: 'small',
+      ref: 'ctor-1'
+    })));
+    info('^3443^', {db_path});
     //.........................................................................................................
     probes_and_matchers = [
       [
@@ -76,7 +84,7 @@
         {
           /* 6  */
       ram: null,
-          path: 'db/path',
+          path: db_path,
           dbnick: 'dbnick'
         },
         null,
@@ -86,7 +94,7 @@
         {
           /* 4  */
       ram: false,
-          path: 'db/path',
+          path: db_path,
           dbnick: 'dbnick'
         },
         null,
@@ -125,12 +133,12 @@
         {
           /* 2  */
       ram: null,
-          path: 'db/path',
+          path: db_path,
           dbnick: null
         },
         {
           ram: false,
-          path: 'db/path'
+          path: db_path
         },
         null
       ],
@@ -138,12 +146,12 @@
         {
           /* 3  */
       ram: false,
-          path: 'db/path',
+          path: db_path,
           dbnick: null
         },
         {
           ram: false,
-          path: 'db/path'
+          path: db_path
         },
         null
       ],
@@ -179,12 +187,12 @@
         {
           /* 10 */
       ram: true,
-          path: 'db/path',
+          path: db_path,
           dbnick: null
         },
         {
           ram: true,
-          path: 'db/path',
+          path: db_path,
           dbnick: '_6200294332',
           url: 'file:_6200294332?mode=memory&cache=shared'
         },
@@ -194,12 +202,12 @@
         {
           /* 11 */
       ram: true,
-          path: 'db/path',
+          path: db_path,
           dbnick: 'dbnick'
         },
         {
           ram: true,
-          path: 'db/path',
+          path: db_path,
           dbnick: 'dbnick',
           url: 'file:dbnick?mode=memory&cache=shared'
         },
@@ -231,7 +239,7 @@
         {
           /* 6  */
       ram: void 0,
-          path: 'db/path',
+          path: db_path,
           dbnick: 'dbnick'
         },
         null,
@@ -241,7 +249,7 @@
         {
           /* 4  */
       ram: false,
-          path: 'db/path',
+          path: db_path,
           dbnick: 'dbnick'
         },
         null,
@@ -280,12 +288,12 @@
         {
           /* 2  */
       ram: void 0,
-          path: 'db/path',
+          path: db_path,
           dbnick: void 0
         },
         {
           ram: false,
-          path: 'db/path'
+          path: db_path
         },
         null
       ],
@@ -293,12 +301,12 @@
         {
           /* 3  */
       ram: false,
-          path: 'db/path',
+          path: db_path,
           dbnick: void 0
         },
         {
           ram: false,
-          path: 'db/path'
+          path: db_path
         },
         null
       ],
@@ -334,12 +342,12 @@
         {
           /* 10 */
       ram: true,
-          path: 'db/path',
+          path: db_path,
           dbnick: void 0
         },
         {
           ram: true,
-          path: 'db/path',
+          path: db_path,
           dbnick: '_6200294332',
           url: 'file:_6200294332?mode=memory&cache=shared'
         },
@@ -349,12 +357,12 @@
         {
           /* 11 */
       ram: true,
-          path: 'db/path',
+          path: db_path,
           dbnick: 'dbnick'
         },
         {
           ram: true,
-          path: 'db/path',
+          path: db_path,
           dbnick: 'dbnick',
           url: 'file:dbnick?mode=memory&cache=shared'
         },
@@ -382,7 +390,7 @@
       [
         {
           /* 6  */
-      path: 'db/path',
+      path: db_path,
           dbnick: 'dbnick'
         },
         null,
@@ -392,7 +400,7 @@
         {
           /* 4  */
       ram: false,
-          path: 'db/path',
+          path: db_path,
           dbnick: 'dbnick'
         },
         null,
@@ -424,11 +432,11 @@
       [
         {
           /* 2  */
-      path: 'db/path'
+      path: db_path
         },
         {
           ram: false,
-          path: 'db/path'
+          path: db_path
         },
         null
       ],
@@ -436,11 +444,11 @@
         {
           /* 3  */
       ram: false,
-          path: 'db/path'
+          path: db_path
         },
         {
           ram: false,
-          path: 'db/path'
+          path: db_path
         },
         null
       ],
@@ -473,11 +481,11 @@
         {
           /* 10 */
       ram: true,
-          path: 'db/path'
+          path: db_path
         },
         {
           ram: true,
-          path: 'db/path',
+          path: db_path,
           dbnick: '_6200294332',
           url: 'file:_6200294332?mode=memory&cache=shared'
         },
@@ -487,12 +495,12 @@
         {
           /* 11 */
       ram: true,
-          path: 'db/path',
+          path: db_path,
           dbnick: 'dbnick'
         },
         {
           ram: true,
-          path: 'db/path',
+          path: db_path,
           dbnick: 'dbnick',
           url: 'file:dbnick?mode=memory&cache=shared'
         },
@@ -545,126 +553,90 @@
     db = new Dbay2({
       ram: null
     });
+    if (T != null) {
+      T.eq(db._get_connection_url(), {
+        url: 'file:_4260041910?mode=memory&cache=shared',
+        dbnick: '_4260041910'
+      });
+    }
+    if (T != null) {
+      T.eq(db._get_connection_url(), {
+        url: 'file:_9982321802?mode=memory&cache=shared',
+        dbnick: '_9982321802'
+      });
+    }
+    if (T != null) {
+      T.eq(db._get_connection_url(), {
+        url: 'file:_2420402559?mode=memory&cache=shared',
+        dbnick: '_2420402559'
+      });
+    }
+    if (T != null) {
+      T.eq(db._get_connection_url(), {
+        url: 'file:_1965667491?mode=memory&cache=shared',
+        dbnick: '_1965667491'
+      });
+    }
+    if (T != null) {
+      T.eq(db._get_connection_url(), {
+        url: 'file:_7714686943?mode=memory&cache=shared',
+        dbnick: '_7714686943'
+      });
+    }
+    if (T != null) {
+      T.eq(db._get_connection_url('yournamehere'), {
+        url: 'file:yournamehere?mode=memory&cache=shared',
+        dbnick: 'yournamehere'
+      });
+    }
+    //.........................................................................................................
+    info(db._get_connection_url());
+    info(db._get_connection_url('yournamehere'));
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY instance has two connections"] = function(T, done) {
-    var Dbay, Sqlt, bsqlite_class, dbay;
+    var Dbay, Sqlt, bsqlite_class, db;
     ({Dbay} = require(H.dbay_path));
     Sqlt = require(PATH.join(H.dbay_path, 'node_modules/better-sqlite3'));
     bsqlite_class = Sqlt().constructor;
-    dbay = new Dbay();
+    db = new Dbay();
+    // debug '^332^', db
+    // debug '^332^', db.cfg
     if (T != null) {
-      T.ok(dbay.sqlt1.constructor === bsqlite_class);
+      T.eq(db.sqlt1.name, db.sqlt2.name);
     }
     if (T != null) {
-      T.ok(dbay.sqlt2.constructor === bsqlite_class);
+      T.ok(db.sqlt1.constructor === bsqlite_class);
+    }
+    if (T != null) {
+      T.ok(db.sqlt2.constructor === bsqlite_class);
+    }
+    if (T != null) {
+      T.ok(db.sqlt2.constructor === db.sqlt1.constructor);
+    }
+    if (T != null) {
+      T.ok(db.sqlt2 !== db.sqlt1);
     }
     return typeof done === "function" ? done() : void 0;
   };
 
-  // #-----------------------------------------------------------------------------------------------------------
-  // @[ "DBAY attach memory connections" ] = ( T, done ) ->
-  //   ### thx to https://github.com/JoshuaWise/better-sqlite3/issues/102#issuecomment-445606946 ###
-  //   # bsqlite_path    = PATH.resolve PATH.join H.dbay_path, 'node_modules/better-sqlite3'
-  //   bsqlite_path    = PATH.resolve PATH.join __dirname, '../../../apps/icql-dba/node_modules/better-sqlite3'
-  //   wrapper_path    = PATH.resolve PATH.join __dirname, '../../../apps/icql-dba/node_modules/better-sqlite3/lib/methods/wrappers.js'
-  //   bindings_path   = PATH.resolve PATH.join __dirname, '../../../apps/icql-dba/node_modules/bindings'
-  //   node_path_1     = PATH.resolve PATH.join __dirname, '../../../apps/icql-dba/node_modules/better-sqlite3/build/Release/better_sqlite3.node'
-  //   node_path_2     = PATH.resolve PATH.join __dirname, '../../../apps/icql-dba/node_modules/better-sqlite3/build/Release/obj.target/better_sqlite3.node'
-  //   # bsqlite_path    = require.resolve 'better-sqlite3'
-  //   debug '^2233^', "path to better-sqlite3:", bsqlite_path
-  //   Sqlt            = require bsqlite_path
-  //   sqlt            = Sqlt ':memory:'
-  //   # wrapper         = require wrapper_path
-  //   debug '^290-1^', ( k for k of sqlt._wrappers )
-  //   # debug '^290-2^', sqlt._wrappers.getters.open
-  //   # debug '^290-3^', sqlt._wrappers.unsafeMode()
-  //   # debug '^290-3^', sqlt._wrappers.exec()
-  //   debug '^290-3^', sqlt._wrappers.get_cppdb()
-  //   # { Database: CPPDatabase, setErrorConstructor, }
-  //   debug '^490^', bindings = require bindings_path
-  //   debug '^490^', node_path_1
-  //   debug '^490^', node_path_2
-  //   debug '^490^', { Database: Db1, } = require node_path_1
-  //   debug '^490^', { Database: Db2, } = require node_path_2
-  //   # new CPPDatabase(filename, filenameGiven, anonymous, readonly, fileMustExist, timeout, verbose || null, buffer || null)
-  //   debug '^490^', db1 = new Db1 ':memory:', ':memory:', true, false, false, 5000, null, null
-  //   debug '^490^', db1a = new Db1 'file:your_db_name_here?mode=memory&cache=shared', 'file:your_db_name_here?mode=memory&cache=shared', true, false, false, 5000, null, null
-  //   debug '^490^', db1b = new Db1 'file:your_db_name_here?mode=memory&cache=shared', 'file:your_db_name_here?mode=memory&cache=shared', true, false, false, 5000, null, null
-  //   db1a.exec SQL"create table x ( n text );"
-  //   db1b.exec SQL"insert into x ( n ) values ( 'helo world' );"
-  //   select = db1b.prepare SQL"select * from x;", {}, false
-  //   debug '^340^', select.run()
-  //   for row from select.iterate()
-  //     info row
-  //   # debug '^490^', bindings node_path_1
-  //   # debug '^490^', bindings node_path_2
-  //   #---------------------------------------------------------------------------------------------------------
-  //   return done?()
-  //   # debug db = Sqlt ':memory:'
-  //   { template_path
-  //     work_path }     = await H.procure_db { size: 'small', ref: 'F-open', reuse: true, }
-  //   name_as_url = ( name ) ->
-  //     # This function is defined here: https://www.sqlite.org/uri.html#the_uri_path
-  //     name_u = name
-  //     name_u = name_u.replace /#/g, '%23'
-  //     name_u = name_u.replace /\?/g, '%3f'
-  //     name_u = name_u.replace /\/\/+/g, '/'
-  //     return "file:#{name_u}?mode=memory&cache=shared';"
-  //   foo_path  = work_path
-  //   db_foo    = Sqlt foo_path
-  //   debug '^554^', db_foo
-  //   debug '^554^', foo_path
-  //   db_bar    = Sqlt ':memory:' # , { memory: true }
-  //   url       = name_as_url 'bar'
-  //   debug '^3344^', { url, }
-  //   attach    = db_foo.prepare SQL"attach database $url as bar"
-  //   attach.run { url, }
-  //   done?()
-
   //-----------------------------------------------------------------------------------------------------------
-  this["DBAY attach memory connections"] = function(T, done) {
-    var Db1, new_connection, node_path_1, ref, row, select, sqlt1, sqlt2;
-    /* TAINT consider to use `bindings` module to automate finding the `better-sqlite3.node` file */
-    // bsqlite_path    = PATH.resolve PATH.join H.dbay_path, 'node_modules/better-sqlite3'
-    // bsqlite_path    = require.resolve 'better-sqlite3'
-    // bsqlite_path    = PATH.resolve PATH.join __dirname, '../../../apps/icql-dba/node_modules/better-sqlite3'
-    // debug '^2233^', "path to better-sqlite3:", bsqlite_path
-    /* NOTE files at node_path_1, node_path_2 identical (?) */
-    node_path_1 = PATH.resolve(PATH.join(__dirname, '../../../apps/icql-dba/node_modules/better-sqlite3/build/Release/better_sqlite3.node'));
-    // node_path_2     = PATH.resolve PATH.join __dirname, '../../../apps/icql-dba/node_modules/better-sqlite3/build/Release/obj.target/better_sqlite3.node'
-    debug('^490^', ({
-      Database: Db1
-    } = require(node_path_1)));
-    // debug '^490^', bindings node_path_1
-    // new CPPDatabase(
-    //---------------------------------------------------------------------------------------------------------
-    new_connection = function(path_or_url) {
-      var cfg;
-      cfg = {
-        filename: path_or_url,
-        filenameGiven: path_or_url,
-        anonymous: true/* ??? */,
-        readonly: false,
-        fileMustExist: false,
-        timeout: 5000,
-        verbose: null,
-        buffer: null
-      };
-      return new Db1(cfg.filename, cfg.filenameGiven, cfg.anonymous, cfg.readonly, cfg.fileMustExist, cfg.timeout, cfg.verbose, cfg.buffer);
-    };
-    //---------------------------------------------------------------------------------------------------------
-    debug('^490^', sqlt1 = new_connection('file:your_db_name_here?mode=memory&cache=shared'));
-    debug('^490^', sqlt2 = new_connection('file:your_db_name_here?mode=memory&cache=shared'));
-    sqlt1.exec(SQL`create table x ( n text );`);
-    sqlt2.exec(SQL`insert into x ( n ) values ( 'helo world' );`);
-    select = sqlt2.prepare(SQL`select * from x;`, {}, false);
-    debug('^340^', select.run());
-    ref = select.iterate();
-    for (row of ref) {
-      info(row);
+  this["DBAY instance non-enumerable properties"] = function(T, done) {
+    var Dbay, Sqlt, db;
+    ({Dbay} = require(H.dbay_path));
+    Sqlt = require(PATH.join(H.dbay_path, 'node_modules/better-sqlite3'));
+    db = new Dbay();
+    debug('^332^', db);
+    if (T != null) {
+      T.eq((Object.getOwnPropertyDescriptor(db, 'sqlt1')).enumerable, false);
+    }
+    if (T != null) {
+      T.eq((Object.getOwnPropertyDescriptor(db, 'sqlt2')).enumerable, false);
+    }
+    if (T != null) {
+      T.eq((Object.getOwnPropertyDescriptor(db, '_rnd_int')).enumerable, false);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -672,13 +644,14 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @[ "DBAY attach memory connections" ]
-      return this["DBAY attach memory connections"]();
+      return test(this);
     })();
   }
 
-  // test @[ "DBAY constructor arguments 1" ]
+  // test @[ "DBAY attach memory connections" ]
+// @[ "DBAY attach memory connections" ]()
+// test @[ "DBAY constructor arguments 1" ]
+// test @[ "DBAY instance non-enumerable properties" ]
 // test @[ "DBAY: _get_connection_url()" ]
 // test @[ "DBAY instance has two connections" ]
 
