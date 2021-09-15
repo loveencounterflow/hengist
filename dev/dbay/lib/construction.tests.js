@@ -550,10 +550,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY instance has two connections"] = function(T, done) {
-    var Bsqlite, Dbay, bsqlite_class, dbay;
+    var Dbay, Sqlt, bsqlite_class, dbay;
     ({Dbay} = require(H.dbay_path));
-    Bsqlite = require(PATH.join(H.dbay_path, 'node_modules/better-sqlite3'));
-    bsqlite_class = Bsqlite().constructor;
+    Sqlt = require(PATH.join(H.dbay_path, 'node_modules/better-sqlite3'));
+    bsqlite_class = Sqlt().constructor;
     dbay = new Dbay();
     if (T != null) {
       T.ok(dbay.sqlt1.constructor === bsqlite_class);
@@ -566,14 +566,55 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY attach memory connections"] = async function(T, done) {
-    var Bsqlite, attach, bsqlite_path, db_bar, db_foo, foo_path, name_as_url, template_path, url, work_path;
+    var Db1, Db2, Sqlt, attach, binding_path, bindings, bsqlite_path, db1, db1a, db1b, db_bar, db_foo, foo_path, k, name_as_url, node_path_1, node_path_2, ref, row, select, sqlt, template_path, url, work_path, wrapper_path;
     /* thx to https://github.com/JoshuaWise/better-sqlite3/issues/102#issuecomment-445606946 */
     // bsqlite_path    = PATH.resolve PATH.join H.dbay_path, 'node_modules/better-sqlite3'
-    bsqlite_path = PATH.resolve(PATH.join('../../../apps/icql-dba/node_modules/better-sqlite3'));
+    bsqlite_path = PATH.resolve(PATH.join(__dirname, '../../../apps/icql-dba/node_modules/better-sqlite3'));
+    wrapper_path = PATH.resolve(PATH.join(__dirname, '../../../apps/icql-dba/node_modules/better-sqlite3/lib/methods/wrappers.js'));
+    binding_path = PATH.resolve(PATH.join(__dirname, '../../../apps/icql-dba/node_modules/bindings'));
+    node_path_1 = PATH.resolve(PATH.join(__dirname, '../../../apps/icql-dba/node_modules/better-sqlite3/build/Release/better_sqlite3.node'));
+    node_path_2 = PATH.resolve(PATH.join(__dirname, '../../../apps/icql-dba/node_modules/better-sqlite3/build/Release/obj.target/better_sqlite3.node'));
     // bsqlite_path    = require.resolve 'better-sqlite3'
     debug('^2233^', "path to better-sqlite3:", bsqlite_path);
-    Bsqlite = require(bsqlite_path);
-    // debug db = Bsqlite ':memory:'
+    Sqlt = require(bsqlite_path);
+    sqlt = Sqlt(':memory:');
+    // wrapper         = require wrapper_path
+    debug('^290-1^', (function() {
+      var results;
+      results = [];
+      for (k in sqlt._wrappers) {
+        results.push(k);
+      }
+      return results;
+    })());
+    // debug '^290-2^', sqlt._wrappers.getters.open
+    // debug '^290-3^', sqlt._wrappers.unsafeMode()
+    // debug '^290-3^', sqlt._wrappers.exec()
+    debug('^290-3^', sqlt._wrappers.get_cppdb());
+    // { Database: CPPDatabase, setErrorConstructor, }
+    debug('^490^', bindings = require(binding_path));
+    debug('^490^', node_path_1);
+    debug('^490^', node_path_2);
+    debug('^490^', ({
+      Database: Db1
+    } = require(node_path_1)));
+    debug('^490^', ({
+      Database: Db2
+    } = require(node_path_2)));
+    // new CPPDatabase(filename, filenameGiven, anonymous, readonly, fileMustExist, timeout, verbose || null, buffer || null)
+    debug('^490^', db1 = new Db1(':memory:', ':memory:', true, false, false, 5000, null, null));
+    debug('^490^', db1a = new Db1('file:your_db_name_here?mode=memory&cache=shared', 'file:your_db_name_here?mode=memory&cache=shared', true, false, false, 5000, null, null));
+    debug('^490^', db1b = new Db1('file:your_db_name_here?mode=memory&cache=shared', 'file:your_db_name_here?mode=memory&cache=shared', true, false, false, 5000, null, null));
+    db1a.exec(SQL`create table x ( n text );`);
+    db1b.exec(SQL`insert into x ( n ) values ( 'helo world' );`);
+    select = db1b.prepare(SQL`select * from x;`, {}, true);
+    debug('^340^', select.run());
+    ref = select.iterate();
+    for (row of ref) {
+      info(row);
+    }
+    return typeof done === "function" ? done() : void 0;
+    // debug db = Sqlt ':memory:'
     ({template_path, work_path} = (await H.procure_db({
       size: 'small',
       ref: 'F-open',
@@ -589,10 +630,10 @@
       return `file:${name_u}?mode=memory&cache=shared';`;
     };
     foo_path = work_path;
-    db_foo = Bsqlite(foo_path);
+    db_foo = Sqlt(foo_path);
     debug('^554^', db_foo);
     debug('^554^', foo_path);
-    db_bar = Bsqlite(':memory:'); // , { memory: true }
+    db_bar = Sqlt(':memory:'); // , { memory: true }
     url = name_as_url('bar');
     debug('^3344^', {url});
     attach = db_foo.prepare(SQL`attach database $url as bar`);
@@ -604,7 +645,8 @@
   if (require.main === module) {
     (() => {
       // test @
-      return test(this["DBAY attach memory connections"]);
+      // test @[ "DBAY attach memory connections" ]
+      return this["DBAY attach memory connections"]();
     })();
   }
 
