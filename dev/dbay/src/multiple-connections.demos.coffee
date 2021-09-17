@@ -117,8 +117,64 @@ demo_udf_dbay_sqlt = ->
   #.........................................................................................................
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_worker_threads = ->
+  #.........................................................................................................
+  create_and_populate_tables = ( db ) ->
+    ### Create table on first connection, can insert data on second connconnection: ###
+    db.sqlt1.exec SQL"create table x ( n text );"
+    db.sqlt2.exec SQL"insert into x ( n ) values ( 'helo world' );"
+    db.sqlt2.exec SQL"insert into x ( n ) values ( 'good to see' );"
+    db.sqlt2.exec SQL"insert into x ( n ) values ( 'it does work' );"
+    urge '^332^', "created and populated table `x`"
+    return null
+  #.........................................................................................................
+  show_sqlite_schema = ( db ) =>
+    info '^300-1^', "sqlite_schema"
+    select  = db.sqlt1.prepare SQL"select * from sqlite_schema;"
+    select.run()
+    info '^300-1^', row for row from select.iterate()
+    return null
+  #.........................................................................................................
+  show_table_contents = ( db ) =>
+    select  = db.sqlt1.prepare SQL"select * from x;"
+    select.run()
+    info '^309-1^', row for row from select.iterate()
+    return null
+  #.........................................................................................................
+  { Worker
+    isMainThread  } = require 'worker_threads'
+  { Dbay }          = require H.dbay_path
+  dbnick            = 'mydb'
+  #.........................................................................................................
+  if isMainThread
+    do =>
+      debug "main thread"
+      db = new Dbay { dbnick, ram: true, }
+      create_and_populate_tables db
+      show_sqlite_schema db
+      help "sleeping..."; await guy.async.sleep 0.1
+      worker = new Worker __filename
+      debug '^445-1^', db.sqlt1
+      debug '^445-1^', db.cfg
+  #.........................................................................................................
+  else
+    do =>
+      debug "worker thread"
+      db = new Dbay { dbnick, ram: true, }
+      show_sqlite_schema db
+      debug '^445-2^', db.sqlt1
+      debug '^445-2^', db.cfg
+      show_table_contents db
+      # help "sleeping..."; await guy.async.sleep 0.1
+  #.........................................................................................................
+  return null
+
+
 ############################################################################################################
 if require.main is module then do =>
   # demo_attach_memory_connections_1()
   # demo_udf_1()
-  demo_udf_dbay_sqlt()
+  # demo_udf_dbay_sqlt()
+  await demo_worker_threads()
+
