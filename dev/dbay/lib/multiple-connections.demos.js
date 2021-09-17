@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, demo_udf_dbay_sqlt, echo, guy, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, demo_udf_dbay_sqlt, demo_worker_threads, echo, guy, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -170,12 +170,89 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_worker_threads = function() {
+    var Dbay, Worker, create_and_populate_tables, dbnick, isMainThread, show_sqlite_schema, show_table_contents;
+    //.........................................................................................................
+    create_and_populate_tables = function(db) {
+      /* Create table on first connection, can insert data on second connconnection: */
+      db.sqlt1.exec(SQL`create table x ( n text );`);
+      db.sqlt2.exec(SQL`insert into x ( n ) values ( 'helo world' );`);
+      db.sqlt2.exec(SQL`insert into x ( n ) values ( 'good to see' );`);
+      db.sqlt2.exec(SQL`insert into x ( n ) values ( 'it does work' );`);
+      urge('^332^', "created and populated table `x`");
+      return null;
+    };
+    //.........................................................................................................
+    show_sqlite_schema = (db) => {
+      var ref, row, select;
+      info('^300-1^', "sqlite_schema");
+      select = db.sqlt1.prepare(SQL`select * from sqlite_schema;`);
+      select.run();
+      ref = select.iterate();
+      for (row of ref) {
+        info('^300-1^', row);
+      }
+      return null;
+    };
+    //.........................................................................................................
+    show_table_contents = (db) => {
+      var ref, row, select;
+      select = db.sqlt1.prepare(SQL`select * from x;`);
+      select.run();
+      ref = select.iterate();
+      for (row of ref) {
+        info('^309-1^', row);
+      }
+      return null;
+    };
+    //.........................................................................................................
+    ({Worker, isMainThread} = require('worker_threads'));
+    ({Dbay} = require(H.dbay_path));
+    dbnick = 'mydb';
+    //.........................................................................................................
+    if (isMainThread) {
+      (async() => {
+        var db, worker;
+        debug("main thread");
+        db = new Dbay({
+          dbnick,
+          ram: true
+        });
+        create_and_populate_tables(db);
+        show_sqlite_schema(db);
+        help("sleeping...");
+        await guy.async.sleep(0.1);
+        worker = new Worker(__filename);
+        debug('^445-1^', db.sqlt1);
+        return debug('^445-1^', db.cfg);
+      })();
+    } else {
+      (() => {        //.........................................................................................................
+        var db;
+        debug("worker thread");
+        db = new Dbay({
+          dbnick,
+          ram: true
+        });
+        show_sqlite_schema(db);
+        debug('^445-2^', db.sqlt1);
+        debug('^445-2^', db.cfg);
+        return show_table_contents(db);
+      })();
+    }
+    // help "sleeping..."; await guy.async.sleep 0.1
+    //.........................................................................................................
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
-    (() => {
+    (async() => {
       // demo_attach_memory_connections_1()
       // demo_udf_1()
-      return demo_udf_dbay_sqlt();
+      // demo_udf_dbay_sqlt()
+      return (await demo_worker_threads());
     })();
   }
 
