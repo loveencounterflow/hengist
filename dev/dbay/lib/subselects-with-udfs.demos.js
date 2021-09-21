@@ -77,14 +77,6 @@
     }
   };
 
-  // #-----------------------------------------------------------------------------------------------------------
-  // walk_choices = ->
-  //   for key, choices of cfg.choices
-  //     Y = {}
-  //     for choice in choices
-  //       Y[ key ] = choice
-  //     yield Y
-
   //-----------------------------------------------------------------------------------------------------------
   /* use_nested_statement  */  prepare_db = function(db) {
     var i, idx, j, len, len1, n, nrx, nry, ref, ref1, word;
