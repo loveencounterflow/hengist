@@ -248,13 +248,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   ff = function(db, count, fingerprint) {
-    var error, ft, i, inner_row, inner_rows, inner_statement, kenning, len, outer_row, outer_statement, ref, ref1, rows, sc, sf, sqlt_a, sqlt_b, statement, un, ut, uu, uw;
+    var error, ft, i, inner_row, inner_rows, inner_statement, len, outer_row, outer_statement, ref, ref1, rows, sc, sf, sqlt_a, sqlt_b, statement, un, ut, uu, uw;
     sqlt_a = db.sqlt1;
     sqlt_b = db.sqlt2;
     error = null;
     rows = null;
     ({uu, sc, ut, uw, sf, ft, un} = fingerprint);
-    kenning = get_kenning(fingerprint);
     //...........................................................................................
     if (uu) {
       db.sqlt1.unsafeMode(true);
@@ -341,7 +340,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_f = function() {
-    var Dbay, choices, count, db, error, fingerprint, ft, get_kenning, i, is_ok, j, l, len, len1, len2, len3, len4, len5, len6, m, matcher, o, p, q, ref, ref1, ref2, ref3, ref4, ref5, ref6, rows, sc, sf, un, ut, uu, uw;
+    var Dbay, choices, count, db, error, fingerprint, ft, get_kenning, i, is_ok, j, kenning, l, len, len1, len2, len3, len4, len5, len6, m, matcher, o, p, q, ref, ref1, ref2, ref3, ref4, ref5, ref6, rows, sc, sf, un, ut, uu, uw;
     ({Dbay} = require(H.dbay_path));
     db = new Dbay();
     (() => {      //.........................................................................................................
@@ -463,6 +462,7 @@
                   un = ref6[q];
                   count++;
                   fingerprint = {uu, sc, ut, uw, sf, ft, un};
+                  kenning = get_kenning(fingerprint);
                   ({rows, error} = ff(db, count++, fingerprint));
                   is_ok = types.equals(rows, matcher);
                   debug('^4509^', CND.blue(count, kenning), CND.truth(is_ok), CND.red(typeof error_message !== "undefined" && error_message !== null ? error_message : ''));
