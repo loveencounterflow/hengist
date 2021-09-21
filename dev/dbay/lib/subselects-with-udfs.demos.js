@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, demo_f, echo, ff, guy, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, _begin_transaction, _commit_transaction, badge, cfg, debug, demo_f, echo, ff, guy, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -36,37 +36,65 @@
 
   guy = require('../../../apps/guy');
 
+  cfg = {
+    // verbose:    true
+    verbose: false
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  _begin_transaction = function(ut, sqlt_a, sqlt_b) {
+    if (!ut) {
+      return;
+    }
+    if (cfg.verbose) {
+      debug('^334-1^', "begin tx");
+    }
+    sqlt_a.exec(SQL`begin transaction;`);
+    if (sqlt_a !== sqlt_b) {
+      sqlt_b.exec(SQL`begin transaction;`);
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  _commit_transaction = function(ut, sqlt_a, sqlt_b) {
+    if (!ut) {
+      return;
+    }
+    if (cfg.verbose) {
+      debug('^334-2^', "commit tx");
+    }
+    sqlt_a.exec(SQL`commit;`);
+    if (sqlt_a !== sqlt_b) {
+      sqlt_b.exec(SQL`commit;`);
+    }
+    return null;
+  };
+
   //-----------------------------------------------------------------------------------------------------------
   ff = function(db, count, fingerprint) {
-    var error, ft, i, inner_row, inner_rows, inner_statement, len, outer_row, outer_statement, ref, ref1, rows, sc, sf, sqlt_a, sqlt_b, statement, un, ut, uu, uw;
+    var error, ft, i, inner_row, inner_rows, inner_statement, len, outer_row, outer_statement, ref, ref1, result, sc, sf, sqlt_a, sqlt_b, statement, un, ut, uu, uw;
     sqlt_a = db.sqlt1;
     sqlt_b = db.sqlt2;
     error = null;
-    rows = null;
+    result = null;
     ({uu, sc, ut, uw, sf, ft, un} = fingerprint);
-    //...........................................................................................
+    //.........................................................................................................
     if (uu) {
       db.sqlt1.unsafeMode(true);
       db.sqlt2.unsafeMode(true);
     }
-    //...........................................................................................
+    //.........................................................................................................
     if (sc) {
       sqlt_b = db.sqlt1;
     }
-    //...........................................................................................
-    if (ut) {
-      // debug '^334-1^', "begin tx"
-      sqlt_a.exec(SQL`begin transaction;`);
-      if (sqlt_a !== sqlt_b) {
-        sqlt_b.exec(SQL`begin transaction;`);
-      }
-    }
     try {
-      //.........................................................................................
-      //...........................................................................................
-      if (un/* use_nested */) {
+      //.........................................................................................................
+      _begin_transaction(ut, sqlt_a, sqlt_b);
+      //.......................................................................................................
+      if (un/* use_nested_statement */) {
         // throw new Error "test case missing"
-        rows = [];
+        result = [];
         outer_statement = sqlt_a.prepare(SQL`select
     *
   from x
@@ -83,7 +111,7 @@
           });
           for (i = 0, len = ref1.length; i < len; i++) {
             inner_row = ref1[i];
-            rows.push({
+            result.push({
               word: outer_row.word,
               nrx: outer_row.nrx,
               nry: inner_row.nry
@@ -91,46 +119,40 @@
           }
         }
       } else {
-        //.........................................................................................
-        statement = sqlt_a.prepare(SQL`select
+        //.......................................................................................................
+        /* do not use_nested_statement */        statement = sqlt_a.prepare(SQL`select
     x.word  as word,
     x.nrx   as nrx,
     y.nry   as nry
   from x
   join y on ( x.word = y.word )
   order by 1, 2, 3;`);
-        rows = statement.all();
+        result = statement.all();
       }
+      //.......................................................................................................
+      _commit_transaction(ut, sqlt_a, sqlt_b);
     } catch (error1) {
       error = error1;
       error = `(${error.message})`;
     } finally {
-      //.........................................................................................
-      //...........................................................................................
+      //.......................................................................................................
+      //.........................................................................................................
       if (uu) {
         db.sqlt1.unsafeMode(false);
         db.sqlt2.unsafeMode(false);
       }
-      //.........................................................................................
-      if (ut) {
-        // debug '^334-2^', "commit tx"
-        sqlt_a.exec(SQL`commit;`);
-        if (sqlt_a !== sqlt_b) {
-          sqlt_b.exec(SQL`commit;`);
-        }
-      }
-      //.........................................................................................
+      //.......................................................................................................
       if (sc) {
         sqlt_b = db.sqlt2;
       }
     }
-    //...........................................................................................
-    return {rows, error};
+    //.........................................................................................................
+    return {result, error};
   };
 
   //-----------------------------------------------------------------------------------------------------------
   demo_f = function() {
-    var Dbay, choices, count, db, error, fingerprint, ft, get_kenning, i, is_ok, j, kenning, l, len, len1, len2, len3, len4, len5, len6, m, matcher, o, p, q, ref, ref1, ref2, ref3, ref4, ref5, ref6, rows, sc, sf, un, ut, uu, uw;
+    var Dbay, choices, count, db, error, fingerprint, ft, get_kenning, i, is_ok, j, kenning, l, len, len1, len2, len3, len4, len5, len6, m, matcher, o, p, q, ref, ref1, ref2, ref3, ref4, ref5, ref6, result, sc, sf, un, ut, uu, uw;
     ({Dbay} = require(H.dbay_path));
     db = new Dbay();
     (() => {      //.........................................................................................................
@@ -163,53 +185,14 @@
       return R.join(',');
     };
     //.........................................................................................................
-    matcher = [
-      {
-        word: 'bar',
-        nrx: 2,
-        nry: 4
-      },
-      {
-        word: 'bar',
-        nrx: 2,
-        nry: 6
-      },
-      {
-        word: 'bar',
-        nrx: 2,
-        nry: 8
-      },
-      {
-        word: 'baz',
-        nrx: 3,
-        nry: 5
-      },
-      {
-        word: 'baz',
-        nrx: 3,
-        nry: 7
-      },
-      {
-        word: 'baz',
-        nrx: 3,
-        nry: 9
-      },
-      {
-        word: 'foo',
-        nrx: 1,
-        nry: 3
-      },
-      {
-        word: 'foo',
-        nrx: 1,
-        nry: 5
-      },
-      {
-        word: 'foo',
-        nrx: 1,
-        nry: 7
-      }
-    ];
+    matcher = db.sqlt1.prepare(SQL`select
+    x.word  as word,
+    x.nrx   as nrx,
+    y.nry   as nry
+  from x
+  join y on ( x.word = y.word )
+  order by 1, 2, 3;`);
+    matcher = matcher.all();
     //.........................................................................................................
     choices = {
       uu: [true, false],
@@ -253,11 +236,11 @@
                   count++;
                   fingerprint = {uu, sc, ut, uw, sf, ft, un};
                   kenning = get_kenning(fingerprint);
-                  ({rows, error} = ff(db, count++, fingerprint));
-                  is_ok = types.equals(rows, matcher);
-                  debug('^4509^', CND.blue(count, kenning), CND.truth(is_ok), CND.red(typeof error_message !== "undefined" && error_message !== null ? error_message : ''));
+                  ({result, error} = ff(db, count++, fingerprint));
+                  is_ok = types.equals(result, matcher);
+                  info('^450^', CND.blue(count, kenning), CND.truth(is_ok), CND.red(error != null ? error : ''));
                   if (!is_ok) {
-                    debug('^338^', rows);
+                    warn('^338^', result);
                   }
                 }
               }
