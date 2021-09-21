@@ -247,10 +247,10 @@
   };
 
   demo_f = function() {
-    var Dbay, choices, count, db, error, error_message, ft, i, inner_row, inner_rows, inner_statement, is_ok, j, k, l, len, len1, len2, len3, len4, len5, len6, len7, m, matcher, o, outer_row, outer_statement, p, q, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, rows, sc, sf, sqlt_a, sqlt_b, statement, un, ut, uu, uw;
+    var Dbay, choices, count, db, error, error_message, fingerprint, ft, get_kenning, i, inner_row, inner_rows, inner_statement, is_ok, j, kenning, l, len, len1, len2, len3, len4, len5, len6, len7, m, matcher, o, outer_row, outer_statement, p, q, r, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, rows, sc, sf, sqlt_a, sqlt_b, statement, un, ut, uu, uw;
     ({Dbay} = require(H.dbay_path));
     db = new Dbay();
-    (() => {
+    (() => {      //.........................................................................................................
       var i, idx, j, len, len1, n, nrx, nry, ref, ref1, word;
       db.sqlt1.exec(SQL`create table x ( word text, nrx );`);
       db.sqlt1.exec(SQL`create table y ( word text, nry );`);
@@ -268,6 +268,17 @@
       }
       return null;
     })();
+    //.........................................................................................................
+    get_kenning = function(fingerprint) {
+      var R, k, v;
+      R = [];
+      for (k in fingerprint) {
+        v = fingerprint[k];
+        v = v === true ? '1' : (v === false ? '0' : rpr(v));
+        R.push(`${k}:${v}`);
+      }
+      return R.join(',');
+    };
     //.........................................................................................................
     matcher = [
       {
@@ -340,30 +351,30 @@
         sc = ref1[j];
         ref2 = choices.ut;
         /* use_transaction       */
-        for (k = 0, len2 = ref2.length; k < len2; k++) {
-          ut = ref2[k];
+        for (l = 0, len2 = ref2.length; l < len2; l++) {
+          ut = ref2[l];
           ref3 = choices.uw;
           /* use_worker            */
-          for (l = 0, len3 = ref3.length; l < len3; l++) {
-            uw = ref3[l];
+          for (m = 0, len3 = ref3.length; m < len3; m++) {
+            uw = ref3[m];
             ref4 = choices.sf;
             /* sf                    */
-            for (m = 0, len4 = ref4.length; m < len4; m++) {
-              sf = ref4[m];
+            for (o = 0, len4 = ref4.length; o < len4; o++) {
+              sf = ref4[o];
               ref5 = choices.ft;
               /* function_type         */
-              for (o = 0, len5 = ref5.length; o < len5; o++) {
-                ft = ref5[o];
+              for (p = 0, len5 = ref5.length; p < len5; p++) {
+                ft = ref5[p];
                 ref6 = choices.un;
                 /* use_nested_statement  */
-                for (p = 0, len6 = ref6.length; p < len6; p++) {
-                  un = ref6[p];
+                for (q = 0, len6 = ref6.length; q < len6; q++) {
+                  un = ref6[q];
                   count++;
                   is_ok = false;
                   error_message = null;
                   rows = null;
-                  // debug '^3343^', count, [ uu, ut, sc, uw, sf, ft, un, ]
-                  // urge '^3343^',  { count, uu, ut, sc, un, }
+                  fingerprint = {uu, sc, ut, uw, sf, ft, un};
+                  kenning = get_kenning(fingerprint);
                   //...........................................................................................
                   if (uu) {
                     db.sqlt1.unsafeMode(true);
@@ -401,8 +412,8 @@
                         ref8 = inner_rows = inner_statement.all({
                           word: outer_row.word
                         });
-                        for (q = 0, len7 = ref8.length; q < len7; q++) {
-                          inner_row = ref8[q];
+                        for (r = 0, len7 = ref8.length; r < len7; r++) {
+                          inner_row = ref8[r];
                           rows.push({
                             word: outer_row.word,
                             nrx: outer_row.nrx,
@@ -445,7 +456,7 @@
                     }
                   }
                   is_ok = types.equals(rows, matcher);
-                  debug('^4509^', CND.blue({count, uu, ut, sc, un}), CND.truth(is_ok), CND.red(error_message != null ? error_message : ''));
+                  debug('^4509^', CND.blue(count, kenning), CND.truth(is_ok), CND.red(error_message != null ? error_message : ''));
                   if (!is_ok) {
                     debug('^338^', rows);
                   }
