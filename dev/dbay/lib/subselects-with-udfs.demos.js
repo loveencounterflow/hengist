@@ -301,15 +301,15 @@
                 /* use_nested_statement  */
                 for (q = 0, len6 = ref6.length; q < len6; q++) {
                   un = ref6[q];
-                  count++;
                   fingerprint = {uu, sc, ut, uw, sf, ft, un};
                   kenning = get_kenning(fingerprint);
                   ({result, error} = ff(db, count, fingerprint));
                   switch (result) {
                     case cfg.results.not_applicable:
-                      whisper('^450^', count, kenning, "N/A", error);
+                      whisper('^450^', 0, kenning, "N/A", error);
                       continue;
                   }
+                  count++;
                   is_ok = equals(result, matcher);
                   info('^450^', CND.blue(count, kenning), CND.truth(is_ok), CND.red(error != null ? error : ''));
                   if (!is_ok) {
