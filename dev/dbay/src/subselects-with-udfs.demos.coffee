@@ -54,9 +54,11 @@ SQL                       = String.raw
 guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 cfg =
-  # verbose:    true
-  verbose:        false
-  catch_errors:   false
+  # verbose:              true
+  verbose:              false
+  catch_errors:         false
+  show_skipped_choices: true
+  # show_skipped_choices: false
   choices:
     uu: [ true, false, ]                                            ### use_unsafe            ###
     sc: [ true, false, ]                                            ### single_connection     ###
@@ -128,7 +130,7 @@ _commit_transaction = ( ut, sqlt_a, sqlt_b ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 query_with_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
-  R          = []
+  result = []
   outer_statement = sqlt_a.prepare SQL"""
     select
         *
@@ -142,20 +144,21 @@ query_with_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
         where word = $word
         order by 1, 2;"""
     for inner_row in inner_rows = inner_statement.all { word: outer_row.word, }
-      R.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
-  return R
+      result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
+  return { result, }
 
 #-----------------------------------------------------------------------------------------------------------
 query_without_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
   switch fingerprint.ft
     when 'none'
-      return join_x_and_y_using_word sqlt_a
+      return { result: ( join_x_and_y_using_word sqlt_a ), }
     when 'scalar'
       statement = sqlt_a.prepare SQL"""
         select join_x_and_y_using_word() as rows;"""
       result = statement.get()
-      return JSON.parse result.rows
-  return { result: cfg.results.not_implemented, error: "ft: {rpr fingerprint.ft} not implemented", }
+      result = JSON.parse result.rows
+      return { result, }
+  return { result: cfg.results.not_implemented, error: "ft: #{rpr fingerprint.ft} not implemented", }
 
 #-----------------------------------------------------------------------------------------------------------
 ff = ( db, count, fingerprint ) ->
@@ -176,22 +179,24 @@ ff = ( db, count, fingerprint ) ->
   #.........................................................................................................
   try
     if ut
-      unless un then return { result: cfg.results.not_applicable, error: "(need nested stms for tx:1)", } if ut
-      unless sc then return { result: cfg.results.not_applicable, error: "(need single conn for tx:1)", } if ut
+      unless un then return { result: cfg.results.not_applicable, error: "need nested stms for tx:1", } if ut
+      unless sc then return { result: cfg.results.not_applicable, error: "need single conn for tx:1", } if ut
     _begin_transaction ut, sqlt_a, sqlt_b
     #.......................................................................................................
     if un ### use_nested_statement ###
-      result = query_with_nested_statement db, count, fingerprint, sqlt_a, sqlt_b
+      R = query_with_nested_statement db, count, fingerprint, sqlt_a, sqlt_b
     else ### do not use_nested_statement ###
-      result = query_without_nested_statement db, count, fingerprint, sqlt_a, sqlt_b
+      R = query_without_nested_statement db, count, fingerprint, sqlt_a, sqlt_b
     #.......................................................................................................
     _commit_transaction ut, sqlt_a, sqlt_b
+    return R
+  #.........................................................................................................
   catch error
     throw error unless cfg.catch_errors
     error = "(#{error.message})"
+    return { error, }
   #.........................................................................................................
   finally
-    #.......................................................................................................
     if uu
       db.sqlt1.unsafeMode false
       db.sqlt2.unsafeMode false
@@ -199,7 +204,7 @@ ff = ( db, count, fingerprint ) ->
     if sc
       sqlt_b = db.sqlt2
   #.........................................................................................................
-  return { result, error, }
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 demo_f = ->
@@ -220,10 +225,10 @@ demo_f = ->
                 kenning       = get_kenning fingerprint
                 { result
                   error }     = ff db, count, fingerprint
-                switch result
-                  when cfg.results.not_applicable
-                    whisper '^450^', 0, kenning, "N/A", error
-                    continue
+                # debug '^3453^', result, isa.symbol result
+                if ( isa.symbol result )
+                  whisper '^450^', 0, kenning, result, error if cfg.show_skipped_choices
+                  continue
                 count++
                 is_ok         = equals result, matcher
                 info '^450^', ( CND.blue count, kenning ), ( CND.truth is_ok ), ( CND.red error ? '' )
