@@ -23,35 +23,49 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 SQL                       = String.raw
 guy                       = require '../../../apps/guy'
+cfg                       =
+  # verbose:    true
+  verbose:    false
 
+#-----------------------------------------------------------------------------------------------------------
+_begin_transaction = ( ut, sqlt_a, sqlt_b ) ->
+  return unless ut
+  debug '^334-1^', "begin tx" if cfg.verbose
+  sqlt_a.exec SQL"begin transaction;"
+  sqlt_b.exec SQL"begin transaction;" if sqlt_a isnt sqlt_b
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+_commit_transaction = ( ut, sqlt_a, sqlt_b ) ->
+  return unless ut
+  debug '^334-2^', "commit tx" if cfg.verbose
+  sqlt_a.exec SQL"commit;"
+  sqlt_b.exec SQL"commit;" if sqlt_a isnt sqlt_b
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 ff = ( db, count, fingerprint ) ->
   sqlt_a        = db.sqlt1
   sqlt_b        = db.sqlt2
   error         = null
-  rows          = null
+  result        = null
   { uu, sc, ut,
     uw, sf, ft,
     un, }       = fingerprint
-  #...........................................................................................
+  #.........................................................................................................
   if uu
     db.sqlt1.unsafeMode true
     db.sqlt2.unsafeMode true
-  #...........................................................................................
+  #.........................................................................................................
   if sc
     sqlt_b = db.sqlt1
-  #...........................................................................................
-  if ut
-    # debug '^334-1^', "begin tx"
-    sqlt_a.exec SQL"begin transaction;"
-    sqlt_b.exec SQL"begin transaction;" if sqlt_a isnt sqlt_b
-  #...........................................................................................
+  #.........................................................................................................
   try
-    #.........................................................................................
-    if un ### use_nested ###
+    _begin_transaction ut, sqlt_a, sqlt_b
+    #.......................................................................................................
+    if un ### use_nested_statement ###
       # throw new Error "test case missing"
-      rows            = []
+      result          = []
       outer_statement = sqlt_a.prepare SQL"""
         select
             *
@@ -65,9 +79,9 @@ ff = ( db, count, fingerprint ) ->
             where word = $word
             order by 1, 2;"""
         for inner_row in inner_rows = inner_statement.all { word: outer_row.word, }
-          rows.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
-    #.........................................................................................
-    else
+          result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
+    #.......................................................................................................
+    else ### do not use_nested_statement ###
       statement = sqlt_a.prepare SQL"""
         select
             x.word  as word,
@@ -76,25 +90,22 @@ ff = ( db, count, fingerprint ) ->
           from x
           join y on ( x.word = y.word )
           order by 1, 2, 3;"""
-      rows  = statement.all()
+      result  = statement.all()
+    #.......................................................................................................
+    _commit_transaction ut, sqlt_a, sqlt_b
   catch error
     error = "(#{error.message})"
-  #...........................................................................................
+  #.........................................................................................................
   finally
-    #.........................................................................................
+    #.......................................................................................................
     if uu
       db.sqlt1.unsafeMode false
       db.sqlt2.unsafeMode false
-    #.........................................................................................
-    if ut
-      # debug '^334-2^', "commit tx"
-      sqlt_a.exec SQL"commit;"
-      sqlt_b.exec SQL"commit;" if sqlt_a isnt sqlt_b
-    #.........................................................................................
+    #.......................................................................................................
     if sc
       sqlt_b = db.sqlt2
-  #...........................................................................................
-  return { rows, error, }
+  #.........................................................................................................
+  return { result, error, }
 
 #-----------------------------------------------------------------------------------------------------------
 demo_f = ->
@@ -119,17 +130,15 @@ demo_f = ->
       R.push "#{k}:#{v}"
     return R.join ','
   #.........................................................................................................
-  matcher = [
-      { word: 'bar', nrx: 2, nry: 4 }
-      { word: 'bar', nrx: 2, nry: 6 }
-      { word: 'bar', nrx: 2, nry: 8 }
-      { word: 'baz', nrx: 3, nry: 5 }
-      { word: 'baz', nrx: 3, nry: 7 }
-      { word: 'baz', nrx: 3, nry: 9 }
-      { word: 'foo', nrx: 1, nry: 3 }
-      { word: 'foo', nrx: 1, nry: 5 }
-      { word: 'foo', nrx: 1, nry: 7 }
-      ]
+  matcher = db.sqlt1.prepare SQL"""
+    select
+        x.word  as word,
+        x.nrx   as nrx,
+        y.nry   as nry
+      from x
+      join y on ( x.word = y.word )
+      order by 1, 2, 3;"""
+  matcher = matcher.all()
   #.........................................................................................................
   choices =
     uu: [ true, false, ]                                            ### use_unsafe            ###
@@ -151,12 +160,12 @@ demo_f = ->
                 count++
                 fingerprint   = { uu, sc, ut, uw, sf, ft, un, }
                 kenning       = get_kenning fingerprint
-                { rows
+                { result
                   error }     = ff db, count++, fingerprint
-                is_ok = types.equals rows, matcher
-                debug '^4509^', ( CND.blue count, kenning ), ( CND.truth is_ok ), ( CND.red error_message ? '' )
+                is_ok = types.equals result, matcher
+                info '^450^', ( CND.blue count, kenning ), ( CND.truth is_ok ), ( CND.red error ? '' )
                 unless is_ok
-                  debug '^338^', rows
+                  warn '^338^', result
   return null
 
 ###
