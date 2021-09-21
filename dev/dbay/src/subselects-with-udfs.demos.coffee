@@ -113,6 +113,37 @@ _commit_transaction = ( ut, sqlt_a, sqlt_b ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+query_with_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
+  R          = []
+  outer_statement = sqlt_a.prepare SQL"""
+    select
+        *
+      from x
+      order by 1, 2;"""
+  for outer_row from outer_statement.iterate()
+    inner_statement = sqlt_b.prepare SQL"""
+      select
+          *
+        from y
+        where word = $word
+        order by 1, 2;"""
+    for inner_row in inner_rows = inner_statement.all { word: outer_row.word, }
+      R.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+query_without_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
+  statement = sqlt_a.prepare SQL"""
+    select
+        x.word  as word,
+        x.nrx   as nrx,
+        y.nry   as nry
+      from x
+      join y on ( x.word = y.word )
+      order by 1, 2, 3;"""
+  return statement.all()
+
+#-----------------------------------------------------------------------------------------------------------
 ff = ( db, count, fingerprint ) ->
   sqlt_a        = db.sqlt1
   sqlt_b        = db.sqlt2
@@ -133,33 +164,9 @@ ff = ( db, count, fingerprint ) ->
     _begin_transaction ut, sqlt_a, sqlt_b
     #.......................................................................................................
     if un ### use_nested_statement ###
-      # throw new Error "test case missing"
-      result          = []
-      outer_statement = sqlt_a.prepare SQL"""
-        select
-            *
-          from x
-          order by 1, 2;"""
-      for outer_row from outer_statement.iterate()
-        inner_statement = sqlt_b.prepare SQL"""
-          select
-              *
-            from y
-            where word = $word
-            order by 1, 2;"""
-        for inner_row in inner_rows = inner_statement.all { word: outer_row.word, }
-          result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
-    #.......................................................................................................
+      result = query_with_nested_statement db, count, fingerprint, sqlt_a, sqlt_b
     else ### do not use_nested_statement ###
-      statement = sqlt_a.prepare SQL"""
-        select
-            x.word  as word,
-            x.nrx   as nrx,
-            y.nry   as nry
-          from x
-          join y on ( x.word = y.word )
-          order by 1, 2, 3;"""
-      result  = statement.all()
+      result = query_without_nested_statement db, count, fingerprint, sqlt_a, sqlt_b
     #.......................................................................................................
     _commit_transaction ut, sqlt_a, sqlt_b
   catch error
