@@ -55,7 +55,8 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 cfg =
   # verbose:    true
-  verbose:    false
+  verbose:        false
+  catch_errors:   false
   choices:
     uu: [ true, false, ]                                            ### use_unsafe            ###
     sc: [ true, false, ]                                            ### single_connection     ###
@@ -63,10 +64,11 @@ cfg =
     uw: [ null, ]        # [ true, false, ]                         ### use_worker            ###
     sf: [ null, ]        # [ true, false, ]                         ### sf                    ###
     # ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
-    ft: [ 'none', 'scalar', ]                                       ### function_type         ###
+    ft: [ 'none', 'scalar', 'table', ]                              ### function_type         ###
     un: [ true, false, ]                                            ### use_nested_statement  ###
   results:
-    not_applicable: Symbol 'not_applicable'
+    not_applicable:   Symbol 'not_applicable'
+    not_implemented:  Symbol 'not_implemented'
 
 #-----------------------------------------------------------------------------------------------------------
 prepare_db = ( db ) ->
@@ -79,13 +81,15 @@ prepare_db = ( db ) ->
       nry = nrx + n * 2
       ( db.sqlt1.prepare SQL"insert into y ( word, nry ) values ( $word, $nry );" ).run { word, nry, }
   fn_cfg = { deterministic: false, varargs: false, }
+  ### TAINT use other connection for query ###
   for connection in [ db.sqlt1, db.sqlt2, ]
-    connection.function 'join_x_and_y_using_word', fn_cfg, -> "[]"
+    connection.function 'join_x_and_y_using_word', fn_cfg, ->
+      return JSON.stringify join_x_and_y_using_word connection
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-get_matcher = ( db ) ->
-  matcher = db.sqlt1.prepare SQL"""
+join_x_and_y_using_word = ( sqlt ) ->
+  statement = sqlt.prepare SQL"""
     select
         x.word  as word,
         x.nrx   as nrx,
@@ -93,7 +97,10 @@ get_matcher = ( db ) ->
       from x
       join y on ( x.word = y.word )
       order by 1, 2, 3;"""
-  return matcher.all()
+  return statement.all()
+
+#-----------------------------------------------------------------------------------------------------------
+get_matcher = ( db ) -> join_x_and_y_using_word db.sqlt1
 
 #-----------------------------------------------------------------------------------------------------------
 get_kenning = ( fingerprint ) ->
@@ -142,23 +149,13 @@ query_with_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
 query_without_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
   switch fingerprint.ft
     when 'none'
-      statement = sqlt_a.prepare SQL"""
-        select
-            x.word  as word,
-            x.nrx   as nrx,
-            y.nry   as nry
-          from x
-          join y on ( x.word = y.word )
-          order by 1, 2, 3;"""
-      return statement.all()
+      return join_x_and_y_using_word sqlt_a
     when 'scalar'
       statement = sqlt_a.prepare SQL"""
         select join_x_and_y_using_word() as rows;"""
-      debug '^321^', statement.get()
-      return null
-    else
-      throw new Error "ft: {rpr fingerprint.ft} not implemented"
-  return statement.all()
+      result = statement.get()
+      return JSON.parse result.rows
+  return { result: cfg.results.not_implemented, error: "ft: {rpr fingerprint.ft} not implemented", }
 
 #-----------------------------------------------------------------------------------------------------------
 ff = ( db, count, fingerprint ) ->
@@ -190,6 +187,7 @@ ff = ( db, count, fingerprint ) ->
     #.......................................................................................................
     _commit_transaction ut, sqlt_a, sqlt_b
   catch error
+    throw error unless cfg.catch_errors
     error = "(#{error.message})"
   #.........................................................................................................
   finally
