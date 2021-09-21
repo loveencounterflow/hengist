@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, _begin_transaction, _commit_transaction, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, isa, prepare_db, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, _begin_transaction, _commit_transaction, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, isa, prepare_db, query_with_nested_statement, query_without_nested_statement, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   /*
 
@@ -76,6 +76,14 @@
       un: [true, false]
     }
   };
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // walk_choices = ->
+  //   for key, choices of cfg.choices
+  //     Y = {}
+  //     for choice in choices
+  //       Y[ key ] = choice
+  //     yield Y
 
   //-----------------------------------------------------------------------------------------------------------
   /* use_nested_statement  */  prepare_db = function(db) {
@@ -153,8 +161,51 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  query_with_nested_statement = function(db, count, fingerprint, sqlt_a, sqlt_b) {
+    var R, i, inner_row, inner_rows, inner_statement, len, outer_row, outer_statement, ref, ref1;
+    R = [];
+    outer_statement = sqlt_a.prepare(SQL`select
+    *
+  from x
+  order by 1, 2;`);
+    ref = outer_statement.iterate();
+    for (outer_row of ref) {
+      inner_statement = sqlt_b.prepare(SQL`select
+    *
+  from y
+  where word = $word
+  order by 1, 2;`);
+      ref1 = inner_rows = inner_statement.all({
+        word: outer_row.word
+      });
+      for (i = 0, len = ref1.length; i < len; i++) {
+        inner_row = ref1[i];
+        R.push({
+          word: outer_row.word,
+          nrx: outer_row.nrx,
+          nry: inner_row.nry
+        });
+      }
+    }
+    return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  query_without_nested_statement = function(db, count, fingerprint, sqlt_a, sqlt_b) {
+    var statement;
+    statement = sqlt_a.prepare(SQL`select
+    x.word  as word,
+    x.nrx   as nrx,
+    y.nry   as nry
+  from x
+  join y on ( x.word = y.word )
+  order by 1, 2, 3;`);
+    return statement.all();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   ff = function(db, count, fingerprint) {
-    var error, ft, i, inner_row, inner_rows, inner_statement, len, outer_row, outer_statement, ref, ref1, result, sc, sf, sqlt_a, sqlt_b, statement, un, ut, uu, uw;
+    var error, ft, result/* do not use_nested_statement */, sc, sf, sqlt_a, sqlt_b, un, ut, uu, uw;
     sqlt_a = db.sqlt1;
     sqlt_b = db.sqlt2;
     error = null;
@@ -174,41 +225,9 @@
       _begin_transaction(ut, sqlt_a, sqlt_b);
       //.......................................................................................................
       if (un/* use_nested_statement */) {
-        // throw new Error "test case missing"
-        result = [];
-        outer_statement = sqlt_a.prepare(SQL`select
-    *
-  from x
-  order by 1, 2;`);
-        ref = outer_statement.iterate();
-        for (outer_row of ref) {
-          inner_statement = sqlt_b.prepare(SQL`select
-    *
-  from y
-  where word = $word
-  order by 1, 2;`);
-          ref1 = inner_rows = inner_statement.all({
-            word: outer_row.word
-          });
-          for (i = 0, len = ref1.length; i < len; i++) {
-            inner_row = ref1[i];
-            result.push({
-              word: outer_row.word,
-              nrx: outer_row.nrx,
-              nry: inner_row.nry
-            });
-          }
-        }
+        result = query_with_nested_statement(db, count, fingerprint, sqlt_a, sqlt_b);
       } else {
-        //.......................................................................................................
-        /* do not use_nested_statement */        statement = sqlt_a.prepare(SQL`select
-    x.word  as word,
-    x.nrx   as nrx,
-    y.nry   as nry
-  from x
-  join y on ( x.word = y.word )
-  order by 1, 2, 3;`);
-        result = statement.all();
+        result = query_without_nested_statement(db, count, fingerprint, sqlt_a, sqlt_b);
       }
       //.......................................................................................................
       _commit_transaction(ut, sqlt_a, sqlt_b);
