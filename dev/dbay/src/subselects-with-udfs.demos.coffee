@@ -62,7 +62,8 @@ cfg =
     ut: [ true, false, ]                                            ### use_transaction       ###
     uw: [ null, ]        # [ true, false, ]                         ### use_worker            ###
     sf: [ null, ]        # [ true, false, ]                         ### sf                    ###
-    ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
+    # ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
+    ft: [ 'none', 'scalar', ]                                       ### function_type         ###
     un: [ true, false, ]                                            ### use_nested_statement  ###
   results:
     not_applicable: Symbol 'not_applicable'
@@ -77,6 +78,9 @@ prepare_db = ( db ) ->
     for n in [ 1, 2, 3, ]
       nry = nrx + n * 2
       ( db.sqlt1.prepare SQL"insert into y ( word, nry ) values ( $word, $nry );" ).run { word, nry, }
+  fn_cfg = { deterministic: false, varargs: false, }
+  for connection in [ db.sqlt1, db.sqlt2, ]
+    connection.function 'join_x_and_y_using_word', fn_cfg, -> "[]"
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -136,14 +140,24 @@ query_with_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 query_without_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
-  statement = sqlt_a.prepare SQL"""
-    select
-        x.word  as word,
-        x.nrx   as nrx,
-        y.nry   as nry
-      from x
-      join y on ( x.word = y.word )
-      order by 1, 2, 3;"""
+  switch fingerprint.ft
+    when 'none'
+      statement = sqlt_a.prepare SQL"""
+        select
+            x.word  as word,
+            x.nrx   as nrx,
+            y.nry   as nry
+          from x
+          join y on ( x.word = y.word )
+          order by 1, 2, 3;"""
+      return statement.all()
+    when 'scalar'
+      statement = sqlt_a.prepare SQL"""
+        select join_x_and_y_using_word() as rows;"""
+      debug '^321^', statement.get()
+      return null
+    else
+      throw new Error "ft: {rpr fingerprint.ft} not implemented"
   return statement.all()
 
 #-----------------------------------------------------------------------------------------------------------
