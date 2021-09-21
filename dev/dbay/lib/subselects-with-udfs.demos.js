@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, _begin_transaction, _commit_transaction, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, isa, prepare_db, query_with_nested_statement, query_without_nested_statement, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, _begin_transaction, _commit_transaction, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, isa, join_x_and_y_using_word, prepare_db, query_with_nested_statement, query_without_nested_statement, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   /*
 
@@ -67,6 +67,7 @@
   cfg = {
     // verbose:    true
     verbose: false,
+    catch_errors: false,
     choices: {
       uu: [true, false],
       /* use_unsafe            */sc: [true, false],
@@ -74,11 +75,12 @@
       /* use_transaction       */uw: [null], // [ true, false, ]                         ### use_worker            ###
       sf: [null], // [ true, false, ]                         ### sf                    ###
       // ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
-      ft: ['none', 'scalar'],
+      ft: ['none', 'scalar', 'table'],
       /* function_type         */un: [true, false]
     },
     /* use_nested_statement  */results: {
-      not_applicable: Symbol('not_applicable')
+      not_applicable: Symbol('not_applicable'),
+      not_implemented: Symbol('not_implemented')
     }
   };
 
@@ -104,26 +106,32 @@
       varargs: false
     };
     ref2 = [db.sqlt1, db.sqlt2];
+    /* TAINT use other connection for query */
     for (l = 0, len2 = ref2.length; l < len2; l++) {
       connection = ref2[l];
       connection.function('join_x_and_y_using_word', fn_cfg, function() {
-        return "[]";
+        return JSON.stringify(join_x_and_y_using_word(connection));
       });
     }
     return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  get_matcher = function(db) {
-    var matcher;
-    matcher = db.sqlt1.prepare(SQL`select
+  join_x_and_y_using_word = function(sqlt) {
+    var statement;
+    statement = sqlt.prepare(SQL`select
     x.word  as word,
     x.nrx   as nrx,
     y.nry   as nry
   from x
   join y on ( x.word = y.word )
   order by 1, 2, 3;`);
-    return matcher.all();
+    return statement.all();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  get_matcher = function(db) {
+    return join_x_and_y_using_word(db.sqlt1);
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -200,25 +208,19 @@
 
   //-----------------------------------------------------------------------------------------------------------
   query_without_nested_statement = function(db, count, fingerprint, sqlt_a, sqlt_b) {
-    var statement;
+    var result, statement;
     switch (fingerprint.ft) {
       case 'none':
-        statement = sqlt_a.prepare(SQL`select
-    x.word  as word,
-    x.nrx   as nrx,
-    y.nry   as nry
-  from x
-  join y on ( x.word = y.word )
-  order by 1, 2, 3;`);
-        return statement.all();
+        return join_x_and_y_using_word(sqlt_a);
       case 'scalar':
         statement = sqlt_a.prepare(SQL`select join_x_and_y_using_word() as rows;`);
-        debug('^321^', statement.get());
-        return null;
-      default:
-        throw new Error("ft: {rpr fingerprint.ft} not implemented");
+        result = statement.get();
+        return JSON.parse(result.rows);
     }
-    return statement.all();
+    return {
+      result: cfg.results.not_implemented,
+      error: "ft: {rpr fingerprint.ft} not implemented"
+    };
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -269,6 +271,9 @@
       _commit_transaction(ut, sqlt_a, sqlt_b);
     } catch (error1) {
       error = error1;
+      if (!cfg.catch_errors) {
+        throw error;
+      }
       error = `(${error.message})`;
     } finally {
       //.......................................................................................................
