@@ -65,9 +65,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   cfg = {
-    // verbose:    true
+    // verbose:              true
     verbose: false,
     catch_errors: false,
+    show_skipped_choices: true,
+    // show_skipped_choices: false
     choices: {
       uu: [true, false],
       /* use_unsafe            */sc: [true, false],
@@ -178,8 +180,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   query_with_nested_statement = function(db, count, fingerprint, sqlt_a, sqlt_b) {
-    var R, i, inner_row, inner_rows, inner_statement, len, outer_row, outer_statement, ref, ref1;
-    R = [];
+    var i, inner_row, inner_rows, inner_statement, len, outer_row, outer_statement, ref, ref1, result;
+    result = [];
     outer_statement = sqlt_a.prepare(SQL`select
     *
   from x
@@ -196,14 +198,14 @@
       });
       for (i = 0, len = ref1.length; i < len; i++) {
         inner_row = ref1[i];
-        R.push({
+        result.push({
           word: outer_row.word,
           nrx: outer_row.nrx,
           nry: inner_row.nry
         });
       }
     }
-    return R;
+    return {result};
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -211,21 +213,24 @@
     var result, statement;
     switch (fingerprint.ft) {
       case 'none':
-        return join_x_and_y_using_word(sqlt_a);
+        return {
+          result: join_x_and_y_using_word(sqlt_a)
+        };
       case 'scalar':
         statement = sqlt_a.prepare(SQL`select join_x_and_y_using_word() as rows;`);
         result = statement.get();
-        return JSON.parse(result.rows);
+        result = JSON.parse(result.rows);
+        return {result};
     }
     return {
       result: cfg.results.not_implemented,
-      error: "ft: {rpr fingerprint.ft} not implemented"
+      error: `ft: ${rpr(fingerprint.ft)} not implemented`
     };
   };
 
   //-----------------------------------------------------------------------------------------------------------
   ff = function(db, count, fingerprint) {
-    var error, ft, result/* do not use_nested_statement */, sc, sf, sqlt_a, sqlt_b, un, ut, uu, uw;
+    var R/* do not use_nested_statement */, error, ft, result, sc, sf, sqlt_a, sqlt_b, un, ut, uu, uw;
     sqlt_a = db.sqlt1;
     sqlt_b = db.sqlt2;
     error = null;
@@ -247,7 +252,7 @@
           if (ut) {
             return {
               result: cfg.results.not_applicable,
-              error: "(need nested stms for tx:1)"
+              error: "need nested stms for tx:1"
             };
           }
         }
@@ -255,7 +260,7 @@
           if (ut) {
             return {
               result: cfg.results.not_applicable,
-              error: "(need single conn for tx:1)"
+              error: "need single conn for tx:1"
             };
           }
         }
@@ -263,20 +268,22 @@
       _begin_transaction(ut, sqlt_a, sqlt_b);
       //.......................................................................................................
       if (un/* use_nested_statement */) {
-        result = query_with_nested_statement(db, count, fingerprint, sqlt_a, sqlt_b);
+        R = query_with_nested_statement(db, count, fingerprint, sqlt_a, sqlt_b);
       } else {
-        result = query_without_nested_statement(db, count, fingerprint, sqlt_a, sqlt_b);
+        R = query_without_nested_statement(db, count, fingerprint, sqlt_a, sqlt_b);
       }
       //.......................................................................................................
       _commit_transaction(ut, sqlt_a, sqlt_b);
+      return R;
     } catch (error1) {
+      //.........................................................................................................
       error = error1;
       if (!cfg.catch_errors) {
         throw error;
       }
       error = `(${error.message})`;
+      return {error};
     } finally {
-      //.......................................................................................................
       //.........................................................................................................
       if (uu) {
         db.sqlt1.unsafeMode(false);
@@ -288,7 +295,7 @@
       }
     }
     //.........................................................................................................
-    return {result, error};
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -331,10 +338,12 @@
                   fingerprint = {uu, sc, ut, uw, sf, ft, un};
                   kenning = get_kenning(fingerprint);
                   ({result, error} = ff(db, count, fingerprint));
-                  switch (result) {
-                    case cfg.results.not_applicable:
-                      whisper('^450^', 0, kenning, "N/A", error);
-                      continue;
+                  // debug '^3453^', result, isa.symbol result
+                  if (isa.symbol(result)) {
+                    if (cfg.show_skipped_choices) {
+                      whisper('^450^', 0, kenning, result, error);
+                    }
+                    continue;
                   }
                   count++;
                   is_ok = equals(result, matcher);
