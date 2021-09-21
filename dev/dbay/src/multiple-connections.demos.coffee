@@ -173,6 +173,7 @@ demo_worker_threads = ->
 demo_f = ->
   { Dbay }  = require H.dbay_path
   db        = new Dbay()
+  #.........................................................................................................
   do =>
     db.sqlt1.exec SQL"create table x ( word text, nrx );"
     db.sqlt1.exec SQL"create table y ( word text, nry );"
@@ -183,6 +184,13 @@ demo_f = ->
         nry = nrx + n * 2
         ( db.sqlt1.prepare SQL"insert into y ( word, nry ) values ( $word, $nry );" ).run { word, nry, }
     return null
+  #.........................................................................................................
+  get_kenning = ( fingerprint ) ->
+    R = []
+    for k, v of fingerprint
+      v = if v is true then '1' else ( if v is false then '0' else rpr v )
+      R.push "#{k}:#{v}"
+    return R.join ','
   #.........................................................................................................
   matcher = [
       { word: 'bar', nrx: 2, nry: 4 }
@@ -219,8 +227,8 @@ demo_f = ->
                 is_ok         = false
                 error_message = null
                 rows          = null
-                # debug '^3343^', count, [ uu, ut, sc, uw, sf, ft, un, ]
-                # urge '^3343^',  { count, uu, ut, sc, un, }
+                fingerprint   = { uu, sc, ut, uw, sf, ft, un, }
+                kenning       = get_kenning fingerprint
                 #...........................................................................................
                 if uu
                   db.sqlt1.unsafeMode true
@@ -281,7 +289,7 @@ demo_f = ->
                   if sc
                     sqlt_b = db.sqlt2
                 is_ok = types.equals rows, matcher
-                debug '^4509^', ( CND.blue { count, uu, ut, sc, un, } ), ( CND.truth is_ok ), ( CND.red error_message ? '' )
+                debug '^4509^', ( CND.blue count, kenning ), ( CND.truth is_ok ), ( CND.red error_message ? '' )
                 unless is_ok
                   debug '^338^', rows
   return null
