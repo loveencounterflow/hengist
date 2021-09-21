@@ -73,8 +73,9 @@
       /* single_connection     */ut: [true, false],
       /* use_transaction       */uw: [null], // [ true, false, ]                         ### use_worker            ###
       sf: [null], // [ true, false, ]                         ### sf                    ###
-      ft: [null], // [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
-      un: [true, false]
+      // ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
+      ft: ['none', 'scalar'],
+      /* function_type         */un: [true, false]
     },
     /* use_nested_statement  */results: {
       not_applicable: Symbol('not_applicable')
@@ -83,7 +84,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   prepare_db = function(db) {
-    var i, idx, j, len, len1, n, nrx, nry, ref, ref1, word;
+    var connection, fn_cfg, i, idx, j, l, len, len1, len2, n, nrx, nry, ref, ref1, ref2, word;
     db.sqlt1.exec(SQL`create table x ( word text, nrx );`);
     db.sqlt1.exec(SQL`create table y ( word text, nry );`);
     ref = "foo bar baz".split(/\s+/);
@@ -97,6 +98,17 @@
         nry = nrx + n * 2;
         (db.sqlt1.prepare(SQL`insert into y ( word, nry ) values ( $word, $nry );`)).run({word, nry});
       }
+    }
+    fn_cfg = {
+      deterministic: false,
+      varargs: false
+    };
+    ref2 = [db.sqlt1, db.sqlt2];
+    for (l = 0, len2 = ref2.length; l < len2; l++) {
+      connection = ref2[l];
+      connection.function('join_x_and_y_using_word', fn_cfg, function() {
+        return "[]";
+      });
     }
     return null;
   };
@@ -189,13 +201,23 @@
   //-----------------------------------------------------------------------------------------------------------
   query_without_nested_statement = function(db, count, fingerprint, sqlt_a, sqlt_b) {
     var statement;
-    statement = sqlt_a.prepare(SQL`select
+    switch (fingerprint.ft) {
+      case 'none':
+        statement = sqlt_a.prepare(SQL`select
     x.word  as word,
     x.nrx   as nrx,
     y.nry   as nry
   from x
   join y on ( x.word = y.word )
   order by 1, 2, 3;`);
+        return statement.all();
+      case 'scalar':
+        statement = sqlt_a.prepare(SQL`select join_x_and_y_using_word() as rows;`);
+        debug('^321^', statement.get());
+        return null;
+      default:
+        throw new Error("ft: {rpr fingerprint.ft} not implemented");
+    }
     return statement.all();
   };
 
