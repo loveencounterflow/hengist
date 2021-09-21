@@ -1,6 +1,34 @@
 
 'use strict'
 
+###
+
+Variables:
+
+* (2) **`use_unsafe: [ true, false, ]`**: safe mode on / off
+* (2) **`use_transaction: [ true, false, ]`**: explicit vs implicit transaction
+* (2) **`single_connection: [ true, false, ]`**: single connection vs double connection
+* (2) **`use_worker: [ true, false, ]`**: single thread vs main thread + worker thread
+* (2) **`use_subselect_function: [ true, false, ]`**: using a function that does no sub-select vs function
+  that does
+* (4) **`function_type: [ 'none', 'scalar', 'table', 'sqlite', ]`**: SQL using no UDF, using scalar UDF,
+  using table UDF, using SQLite function[^1]
+* (2) **`use_nested_statement: [ true, false, ]`**: use nested statement or not
+
+2^6 * 4^1 = 64 * 4 = 256 possible variants (but minus some impossible combinations)
+
+changes:
+
+* (?) **`transaction_type: [ 'deferred', ..., ]`**
+* (?) **`journalling_mode: [ 'wal', 'memory', ..., ]`**
+
+Notes:
+
+[^1]: using a function provided by SQLite will not lead to equivalent results because there's no SQLite
+  function that provides a sub-select.
+
+###
+
 
 ############################################################################################################
 CND                       = require 'cnd'
@@ -17,7 +45,8 @@ echo                      = CND.echo.bind CND
 PATH                      = require 'path'
 H                         = require './helpers'
 types                     = new ( require 'intertype' ).Intertype
-{ isa
+{ equals
+  isa
   type_of
   validate
   validate_list_of }      = types.export()
@@ -26,6 +55,46 @@ guy                       = require '../../../apps/guy'
 cfg                       =
   # verbose:    true
   verbose:    false
+  choices:
+    uu: [ true, false, ]                                            ### use_unsafe            ###
+    sc: [ true, false, ]                                            ### single_connection     ###
+    ut: [ true, false, ]                                            ### use_transaction       ###
+    uw: [ null, ]        # [ true, false, ]                         ### use_worker            ###
+    sf: [ null, ]        # [ true, false, ]                         ### sf                    ###
+    ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
+    un: [ true, false, ]                                            ### use_nested_statement  ###
+
+#-----------------------------------------------------------------------------------------------------------
+prepare_db = ( db ) ->
+  db.sqlt1.exec SQL"create table x ( word text, nrx );"
+  db.sqlt1.exec SQL"create table y ( word text, nry );"
+  for word, idx in "foo bar baz".split /\s+/
+    nrx = idx + 1
+    ( db.sqlt1.prepare SQL"insert into x ( word, nrx ) values ( $word, $nrx );" ).run { word, nrx, }
+    for n in [ 1, 2, 3, ]
+      nry = nrx + n * 2
+      ( db.sqlt1.prepare SQL"insert into y ( word, nry ) values ( $word, $nry );" ).run { word, nry, }
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+get_matcher = ( db ) ->
+  matcher = db.sqlt1.prepare SQL"""
+    select
+        x.word  as word,
+        x.nrx   as nrx,
+        y.nry   as nry
+      from x
+      join y on ( x.word = y.word )
+      order by 1, 2, 3;"""
+  return matcher.all()
+
+#-----------------------------------------------------------------------------------------------------------
+get_kenning = ( fingerprint ) ->
+  R = []
+  for k, v of fingerprint
+    v = if v is true then '1' else ( if v is false then '0' else rpr v )
+    R.push "#{k}:#{v}"
+  return R.join ','
 
 #-----------------------------------------------------------------------------------------------------------
 _begin_transaction = ( ut, sqlt_a, sqlt_b ) ->
@@ -111,90 +180,28 @@ ff = ( db, count, fingerprint ) ->
 demo_f = ->
   { Dbay }  = require H.dbay_path
   db        = new Dbay()
-  #.........................................................................................................
-  do =>
-    db.sqlt1.exec SQL"create table x ( word text, nrx );"
-    db.sqlt1.exec SQL"create table y ( word text, nry );"
-    for word, idx in "foo bar baz".split /\s+/
-      nrx = idx + 1
-      ( db.sqlt1.prepare SQL"insert into x ( word, nrx ) values ( $word, $nrx );" ).run { word, nrx, }
-      for n in [ 1, 2, 3, ]
-        nry = nrx + n * 2
-        ( db.sqlt1.prepare SQL"insert into y ( word, nry ) values ( $word, $nry );" ).run { word, nry, }
-    return null
-  #.........................................................................................................
-  get_kenning = ( fingerprint ) ->
-    R = []
-    for k, v of fingerprint
-      v = if v is true then '1' else ( if v is false then '0' else rpr v )
-      R.push "#{k}:#{v}"
-    return R.join ','
-  #.........................................................................................................
-  matcher = db.sqlt1.prepare SQL"""
-    select
-        x.word  as word,
-        x.nrx   as nrx,
-        y.nry   as nry
-      from x
-      join y on ( x.word = y.word )
-      order by 1, 2, 3;"""
-  matcher = matcher.all()
-  #.........................................................................................................
-  choices =
-    uu: [ true, false, ]                                            ### use_unsafe            ###
-    sc: [ true, false, ]                                            ### single_connection     ###
-    ut: [ true, false, ]                                            ### use_transaction       ###
-    uw: [ null, ]        # [ true, false, ]                         ### use_worker            ###
-    sf: [ null, ]        # [ true, false, ]                         ### sf                    ###
-    ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
-    un: [ true, false, ]                                            ### use_nested_statement  ###
+  prepare_db db
+  matcher   = get_matcher db
   #.........................................................................................................
   count = 0
-  for             uu in choices.uu  ### use_unsafe            ###
-    for           sc in choices.sc  ### single_connection     ###
-      for         ut in choices.ut  ### use_transaction       ###
-        for       uw in choices.uw  ### use_worker            ###
-          for     sf in choices.sf  ### sf                    ###
-            for   ft in choices.ft  ### function_type         ###
-              for un in choices.un  ### use_nested_statement  ###
+  for             uu in cfg.choices.uu  ### use_unsafe            ###
+    for           sc in cfg.choices.sc  ### single_connection     ###
+      for         ut in cfg.choices.ut  ### use_transaction       ###
+        for       uw in cfg.choices.uw  ### use_worker            ###
+          for     sf in cfg.choices.sf  ### sf                    ###
+            for   ft in cfg.choices.ft  ### function_type         ###
+              for un in cfg.choices.un  ### use_nested_statement  ###
                 count++
                 fingerprint   = { uu, sc, ut, uw, sf, ft, un, }
                 kenning       = get_kenning fingerprint
                 { result
-                  error }     = ff db, count++, fingerprint
-                is_ok = types.equals result, matcher
+                  error }     = ff db, count, fingerprint
+                is_ok         = equals result, matcher
                 info '^450^', ( CND.blue count, kenning ), ( CND.truth is_ok ), ( CND.red error ? '' )
                 unless is_ok
                   warn '^338^', result
   return null
 
-###
-
-Variables:
-
-* (2) **`use_unsafe: [ true, false, ]`**: safe mode on / off
-* (2) **`use_transaction: [ true, false, ]`**: explicit vs implicit transaction
-* (2) **`single_connection: [ true, false, ]`**: single connection vs double connection
-* (2) **`use_worker: [ true, false, ]`**: single thread vs main thread + worker thread
-* (2) **`use_subselect_function: [ true, false, ]`**: using a function that does no sub-select vs function
-  that does
-* (4) **`function_type: [ 'none', 'scalar', 'table', 'sqlite', ]`**: SQL using no UDF, using scalar UDF,
-  using table UDF, using SQLite function[^1]
-* (2) **`use_nested_statement: [ true, false, ]`**: use nested statement or not
-
-2^6 * 4^1 = 64 * 4 = 256 possible variants (but minus some impossible combinations)
-
-changes:
-
-* (?) **`transaction_type: [ 'deferred', ..., ]`**
-* (?) **`journalling_mode: [ 'wal', 'memory', ..., ]`**
-
-Notes:
-
-[^1]: using a function provided by SQLite will not lead to equivalent results because there's no SQLite
-  function that provides a sub-select.
-
-###
 
 ############################################################################################################
 if require.main is module then do =>
