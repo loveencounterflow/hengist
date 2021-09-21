@@ -170,6 +170,78 @@ demo_worker_threads = ->
   #.........................................................................................................
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+ff = ( db, count, fingerprint ) ->
+  sqlt_a        = db.sqlt1
+  sqlt_b        = db.sqlt2
+  error         = null
+  rows          = null
+  { uu, sc, ut,
+    uw, sf, ft,
+    un, }       = fingerprint
+  #...........................................................................................
+  if uu
+    db.sqlt1.unsafeMode true
+    db.sqlt2.unsafeMode true
+  #...........................................................................................
+  if sc
+    sqlt_b = db.sqlt1
+  #...........................................................................................
+  if ut
+    # debug '^334-1^', "begin tx"
+    sqlt_a.exec SQL"begin transaction;"
+    sqlt_b.exec SQL"begin transaction;" if sqlt_a isnt sqlt_b
+  #...........................................................................................
+  try
+    #.........................................................................................
+    if un ### use_nested ###
+      # throw new Error "test case missing"
+      rows            = []
+      outer_statement = sqlt_a.prepare SQL"""
+        select
+            *
+          from x
+          order by 1, 2;"""
+      for outer_row from outer_statement.iterate()
+        inner_statement = sqlt_b.prepare SQL"""
+          select
+              *
+            from y
+            where word = $word
+            order by 1, 2;"""
+        for inner_row in inner_rows = inner_statement.all { word: outer_row.word, }
+          rows.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
+    #.........................................................................................
+    else
+      statement = sqlt_a.prepare SQL"""
+        select
+            x.word  as word,
+            x.nrx   as nrx,
+            y.nry   as nry
+          from x
+          join y on ( x.word = y.word )
+          order by 1, 2, 3;"""
+      rows  = statement.all()
+  catch error
+    error = "(#{error.message})"
+  #...........................................................................................
+  finally
+    #.........................................................................................
+    if uu
+      db.sqlt1.unsafeMode false
+      db.sqlt2.unsafeMode false
+    #.........................................................................................
+    if ut
+      # debug '^334-2^', "commit tx"
+      sqlt_a.exec SQL"commit;"
+      sqlt_b.exec SQL"commit;" if sqlt_a isnt sqlt_b
+    #.........................................................................................
+    if sc
+      sqlt_b = db.sqlt2
+  #...........................................................................................
+  return { rows, error, }
+
+#-----------------------------------------------------------------------------------------------------------
 demo_f = ->
   { Dbay }  = require H.dbay_path
   db        = new Dbay()
@@ -214,8 +286,6 @@ demo_f = ->
     un: [ true, false, ]                                            ### use_nested_statement  ###
   #.........................................................................................................
   count = 0
-  sqlt_a  = db.sqlt1
-  sqlt_b  = db.sqlt2
   for             uu in choices.uu  ### use_unsafe            ###
     for           sc in choices.sc  ### single_connection     ###
       for         ut in choices.ut  ### use_transaction       ###
@@ -224,70 +294,10 @@ demo_f = ->
             for   ft in choices.ft  ### function_type         ###
               for un in choices.un  ### use_nested_statement  ###
                 count++
-                is_ok         = false
-                error_message = null
-                rows          = null
                 fingerprint   = { uu, sc, ut, uw, sf, ft, un, }
                 kenning       = get_kenning fingerprint
-                #...........................................................................................
-                if uu
-                  db.sqlt1.unsafeMode true
-                  db.sqlt2.unsafeMode true
-                #...........................................................................................
-                if sc
-                  sqlt_b = db.sqlt1
-                #...........................................................................................
-                if ut
-                  # debug '^334-1^', "begin tx"
-                  sqlt_a.exec SQL"begin transaction;"
-                  sqlt_b.exec SQL"begin transaction;" if sqlt_a isnt sqlt_b
-                #...........................................................................................
-                try
-                  #.........................................................................................
-                  if un ### use_nested ###
-                    # throw new Error "test case missing"
-                    rows            = []
-                    outer_statement = sqlt_a.prepare SQL"""
-                      select
-                          *
-                        from x
-                        order by 1, 2;"""
-                    for outer_row from outer_statement.iterate()
-                      inner_statement = sqlt_b.prepare SQL"""
-                        select
-                            *
-                          from y
-                          where word = $word
-                          order by 1, 2;"""
-                      for inner_row in inner_rows = inner_statement.all { word: outer_row.word, }
-                        rows.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
-                  #.........................................................................................
-                  else
-                    statement = sqlt_a.prepare SQL"""
-                      select
-                          x.word  as word,
-                          x.nrx   as nrx,
-                          y.nry   as nry
-                        from x
-                        join y on ( x.word = y.word )
-                        order by 1, 2, 3;"""
-                    rows  = statement.all()
-                catch error
-                  error_message = "(#{error.message})"
-                #...........................................................................................
-                finally
-                  #.........................................................................................
-                  if uu
-                    db.sqlt1.unsafeMode false
-                    db.sqlt2.unsafeMode false
-                  #.........................................................................................
-                  if ut
-                    # debug '^334-2^', "commit tx"
-                    sqlt_a.exec SQL"commit;"
-                    sqlt_b.exec SQL"commit;" if sqlt_a isnt sqlt_b
-                  #.........................................................................................
-                  if sc
-                    sqlt_b = db.sqlt2
+                { rows
+                  error }     = ff db, count++, fingerprint
                 is_ok = types.equals rows, matcher
                 debug '^4509^', ( CND.blue count, kenning ), ( CND.truth is_ok ), ( CND.red error_message ? '' )
                 unless is_ok
