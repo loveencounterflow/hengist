@@ -52,7 +52,8 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 SQL                       = String.raw
 guy                       = require '../../../apps/guy'
-cfg                       =
+#-----------------------------------------------------------------------------------------------------------
+cfg =
   # verbose:    true
   verbose:    false
   choices:
@@ -63,6 +64,8 @@ cfg                       =
     sf: [ null, ]        # [ true, false, ]                         ### sf                    ###
     ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
     un: [ true, false, ]                                            ### use_nested_statement  ###
+  results:
+    not_applicable: Symbol 'not_applicable'
 
 #-----------------------------------------------------------------------------------------------------------
 prepare_db = ( db ) ->
@@ -161,6 +164,9 @@ ff = ( db, count, fingerprint ) ->
     sqlt_b = db.sqlt1
   #.........................................................................................................
   try
+    if ut
+      unless un then return { result: cfg.results.not_applicable, error: "(need nested stms for tx:1)", } if ut
+      unless sc then return { result: cfg.results.not_applicable, error: "(need single conn for tx:1)", } if ut
     _begin_transaction ut, sqlt_a, sqlt_b
     #.......................................................................................................
     if un ### use_nested_statement ###
@@ -203,6 +209,10 @@ demo_f = ->
                 kenning       = get_kenning fingerprint
                 { result
                   error }     = ff db, count, fingerprint
+                switch result
+                  when cfg.results.not_applicable
+                    whisper '^450^', count, kenning, "N/A", error
+                    continue
                 is_ok         = equals result, matcher
                 info '^450^', ( CND.blue count, kenning ), ( CND.truth is_ok ), ( CND.red error ? '' )
                 unless is_ok
