@@ -111,10 +111,11 @@
     /* TAINT use other connection for query */
     for (l = 0, len2 = ref2.length; l < len2; l++) {
       connection = ref2[l];
-      connection.function('join_x_and_y_using_word', fn_cfg, function() {
+      connection.function('join_x_and_y_using_word_scalar', fn_cfg, function() {
         return JSON.stringify(join_x_and_y_using_word(connection));
       });
     }
+    // connection.table 'join_x_and_y_using_word_table', fn_cfg, ->
     return null;
   };
 
@@ -181,31 +182,44 @@
   //-----------------------------------------------------------------------------------------------------------
   query_with_nested_statement = function(db, count, fingerprint, sqlt_a, sqlt_b) {
     var i, inner_row, inner_rows, inner_statement, len, outer_row, outer_statement, ref, ref1, result;
-    result = [];
-    outer_statement = sqlt_a.prepare(SQL`select
+    switch (fingerprint.ft) {
+      case 'none':
+        result = [];
+        outer_statement = sqlt_a.prepare(SQL`select
     *
   from x
   order by 1, 2;`);
-    ref = outer_statement.iterate();
-    for (outer_row of ref) {
-      inner_statement = sqlt_b.prepare(SQL`select
+        ref = outer_statement.iterate();
+        for (outer_row of ref) {
+          inner_statement = sqlt_b.prepare(SQL`select
     *
   from y
   where word = $word
   order by 1, 2;`);
-      ref1 = inner_rows = inner_statement.all({
-        word: outer_row.word
-      });
-      for (i = 0, len = ref1.length; i < len; i++) {
-        inner_row = ref1[i];
-        result.push({
-          word: outer_row.word,
-          nrx: outer_row.nrx,
-          nry: inner_row.nry
-        });
-      }
+          ref1 = inner_rows = inner_statement.all({
+            word: outer_row.word
+          });
+          for (i = 0, len = ref1.length; i < len; i++) {
+            inner_row = ref1[i];
+            result.push({
+              word: outer_row.word,
+              nrx: outer_row.nrx,
+              nry: inner_row.nry
+            });
+          }
+        }
+        return {result};
     }
-    return {result};
+    return {
+      // when 'scalar'
+      //   statement = sqlt_a.prepare SQL"""
+      //     select join_x_and_y_using_word_scalar() as rows;"""
+      //   result = statement.get()
+      //   result = JSON.parse result.rows
+      //   return { result, }
+      result: cfg.results.not_implemented,
+      error: `ft: ${rpr(fingerprint.ft)} not implemented`
+    };
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -217,7 +231,7 @@
           result: join_x_and_y_using_word(sqlt_a)
         };
       case 'scalar':
-        statement = sqlt_a.prepare(SQL`select join_x_and_y_using_word() as rows;`);
+        statement = sqlt_a.prepare(SQL`select join_x_and_y_using_word_scalar() as rows;`);
         result = statement.get();
         result = JSON.parse(result.rows);
         return {result};
