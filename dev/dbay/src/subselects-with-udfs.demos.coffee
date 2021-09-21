@@ -85,8 +85,9 @@ prepare_db = ( db ) ->
   fn_cfg = { deterministic: false, varargs: false, }
   ### TAINT use other connection for query ###
   for connection in [ db.sqlt1, db.sqlt2, ]
-    connection.function 'join_x_and_y_using_word', fn_cfg, ->
+    connection.function 'join_x_and_y_using_word_scalar', fn_cfg, ->
       return JSON.stringify join_x_and_y_using_word connection
+    # connection.table 'join_x_and_y_using_word_table', fn_cfg, ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -130,22 +131,31 @@ _commit_transaction = ( ut, sqlt_a, sqlt_b ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 query_with_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
-  result = []
-  outer_statement = sqlt_a.prepare SQL"""
-    select
-        *
-      from x
-      order by 1, 2;"""
-  for outer_row from outer_statement.iterate()
-    inner_statement = sqlt_b.prepare SQL"""
-      select
-          *
-        from y
-        where word = $word
-        order by 1, 2;"""
-    for inner_row in inner_rows = inner_statement.all { word: outer_row.word, }
-      result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
-  return { result, }
+  switch fingerprint.ft
+    when 'none'
+      result = []
+      outer_statement = sqlt_a.prepare SQL"""
+        select
+            *
+          from x
+          order by 1, 2;"""
+      for outer_row from outer_statement.iterate()
+        inner_statement = sqlt_b.prepare SQL"""
+          select
+              *
+            from y
+            where word = $word
+            order by 1, 2;"""
+        for inner_row in inner_rows = inner_statement.all { word: outer_row.word, }
+          result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
+      return { result, }
+    # when 'scalar'
+    #   statement = sqlt_a.prepare SQL"""
+    #     select join_x_and_y_using_word_scalar() as rows;"""
+    #   result = statement.get()
+    #   result = JSON.parse result.rows
+    #   return { result, }
+  return { result: cfg.results.not_implemented, error: "ft: #{rpr fingerprint.ft} not implemented", }
 
 #-----------------------------------------------------------------------------------------------------------
 query_without_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
@@ -154,7 +164,7 @@ query_without_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
       return { result: ( join_x_and_y_using_word sqlt_a ), }
     when 'scalar'
       statement = sqlt_a.prepare SQL"""
-        select join_x_and_y_using_word() as rows;"""
+        select join_x_and_y_using_word_scalar() as rows;"""
       result = statement.get()
       result = JSON.parse result.rows
       return { result, }
