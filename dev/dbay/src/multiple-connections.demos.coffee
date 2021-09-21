@@ -32,7 +32,7 @@ demo_udf_dbay_sqlt = ->
     @_rnd_int_cfg: true
   db        = new Dbayx()
   #.........................................................................................................
-  ### Create table on first connection, can insert data on second connconnection: ###
+  ### Create table on first connection, can insert data on second connection: ###
   db.sqlt1.exec SQL"create table x ( n text );"
   db.sqlt2.exec SQL"insert into x ( n ) values ( 'helo world' );"
   db.sqlt2.exec SQL"insert into x ( n ) values ( 'good to see' );"
@@ -46,7 +46,7 @@ demo_udf_dbay_sqlt = ->
     return null
   #.........................................................................................................
   do =>
-    ### Sanity check that UDF does work (on the same connconnection): ###
+    ### Sanity check that UDF does work (on the same connection): ###
     db.sqlt1.function 'std_square', { varargs: false, }, ( n ) -> n ** 2
     # select  = db.sqlt1.prepare SQL"select sqrt( 42 ) as n;"
     select  = db.sqlt1.prepare SQL"select std_square( 42 ) as n;"
@@ -55,7 +55,7 @@ demo_udf_dbay_sqlt = ->
     return null
   #.........................................................................................................
   do =>
-    ### Run query (on 1st connconnection) that calls UDF running another query (on the 2nd connconnection): ###
+    ### Run query (on 1st connection) that calls UDF running another query (on the 2nd connection): ###
     db.sqlt1.function 'std_row_count', { varargs: false, deterministic: false, }, ->
       statement = db.sqlt2.prepare SQL"select count(*) as count from x;", {}, false
       statement.run()
@@ -121,7 +121,7 @@ demo_udf_dbay_sqlt = ->
 demo_worker_threads = ->
   #.........................................................................................................
   create_and_populate_tables = ( db ) ->
-    ### Create table on first connection, can insert data on second connconnection: ###
+    ### Create table on first connection, can insert data on second connection: ###
     db.sqlt1.exec SQL"create table x ( n text );"
     db.sqlt2.exec SQL"insert into x ( n ) values ( 'helo world' );"
     db.sqlt2.exec SQL"insert into x ( n ) values ( 'good to see' );"
