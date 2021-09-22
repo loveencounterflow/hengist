@@ -8,7 +8,7 @@
 
   * (2) **`use_unsafe: [ true, false, ]`**: safe mode on / off
   * (2) **`use_transaction: [ true, false, ]`**: explicit vs implicit transaction
-  * (2) **`single_connection: [ true, false, ]`**: single connection vs double connection
+  * (2) **`connection_count: [ 1, 2, ]`**: single connection vs double connection
   * (2) **`use_worker: [ true, false, ]`**: single thread vs main thread + worker thread
   * (2) **`use_subselect_function: [ true, false, ]`**: using a function that does no sub-select vs function
     that does
@@ -76,8 +76,8 @@
     },
     choices: {
       uu: [true, false],
-      /* use_unsafe            */sc: [true, false],
-      /* single_connection     */ut: [true, false],
+      /* use_unsafe            */cc: [1, 2],
+      /* connection_count      */ut: [true, false],
       /* use_transaction       */uw: [null], // [ true, false, ]                         ### use_worker            ###
       // ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
       ft: ['none', 'scalar', 'table'],
@@ -268,39 +268,42 @@
 
   //-----------------------------------------------------------------------------------------------------------
   ff = function(db, fingerprint) {
-    var R/* do not use_nested_statement */, error, ft, result, sc, sqlt_a, sqlt_b, un, ut, uu, uw;
-    sqlt_a = db.sqlt1;
-    sqlt_b = db.sqlt2;
+    var R/* do not use_nested_statement */, cc, error, ft, result, sqlt_a, sqlt_b, un, ut, uu, uw;
     error = null;
     result = null;
-    ({uu, sc, ut, uw, ft, un} = fingerprint);
+    ({uu, cc, ut, uw, ft, un} = fingerprint);
     //.........................................................................................................
     if (uu) {
       db.sqlt1.unsafeMode(true);
       db.sqlt2.unsafeMode(true);
     }
     //.........................................................................................................
-    if (sc) {
-      sqlt_b = db.sqlt1;
+    switch (cc) {
+      case 1:
+        sqlt_a = db.sqlt1;
+        sqlt_b = sqlt_a;
+        break;
+      case 2:
+        sqlt_a = db.sqlt1;
+        sqlt_b = db.sqlt2;
+        break;
+      default:
+        throw new Error(`expected cc to be 1 or 2, got ${rpr(cc)}`);
     }
     try {
       //.........................................................................................................
       if (ut) {
         if (!un) {
-          if (ut) {
-            return {
-              result: cfg.results.not_applicable,
-              error: "need nested stms for tx:1"
-            };
-          }
+          return {
+            result: cfg.results.not_applicable,
+            error: "need nested stms for tx:1"
+          };
         }
-        if (!sc) {
-          if (ut) {
-            return {
-              result: cfg.results.not_applicable,
-              error: "need single conn for tx:1"
-            };
-          }
+        if (cc === 2) {
+          return {
+            result: cfg.results.not_applicable,
+            error: "need single conn for tx:1"
+          };
         }
       }
       _begin_transaction(ut, sqlt_a, sqlt_b);
@@ -323,14 +326,8 @@
       return {error};
     } finally {
       //.........................................................................................................
-      if (uu) {
-        db.sqlt1.unsafeMode(false);
-        db.sqlt2.unsafeMode(false);
-      }
-      //.......................................................................................................
-      if (sc) {
-        sqlt_b = db.sqlt2;
-      }
+      db.sqlt1.unsafeMode(false);
+      db.sqlt2.unsafeMode(false);
     }
     //.........................................................................................................
     return null;
@@ -365,7 +362,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_f = function() {
-    var Dbay, color, counts, db, error, fingerprint, ft, i, is_ok, j, k, kenning, l, len, len1, len2, len3, len4, len5, m, marker, matcher, o, p, ref, ref1, ref2, ref3, ref4, ref5, result, sc, un, ut, uu, uw, v;
+    var Dbay, cc, color, counts, db, error, fingerprint, ft, i, is_ok, j, k, kenning, l, len, len1, len2, len3, len4, len5, m, marker, matcher, o, p, ref, ref1, ref2, ref3, ref4, ref5, result, un, ut, uu, uw, v;
     ({Dbay} = require(H.dbay_path));
     db = new Dbay();
     prepare_db(db);
@@ -385,10 +382,10 @@
     //.........................................................................................................
     for (i = 0, len = ref.length; i < len; i++) {
       uu = ref[i];
-      ref1 = cfg.choices.sc;
-      /* single_connection     */
+      ref1 = cfg.choices.cc;
+      /* connection_count     */
       for (j = 0, len1 = ref1.length; j < len1; j++) {
-        sc = ref1[j];
+        cc = ref1[j];
         ref2 = cfg.choices.ut;
         /* use_transaction       */
         for (l = 0, len2 = ref2.length; l < len2; l++) {
@@ -406,7 +403,7 @@
               for (p = 0, len5 = ref5.length; p < len5; p++) {
                 un = ref5[p];
                 counts.total++;
-                fingerprint = {uu, sc, ut, uw, ft, un};
+                fingerprint = {uu, cc, ut, uw, ft, un};
                 kenning = get_kenning(fingerprint);
                 ({result, error} = ff(db, fingerprint));
                 // debug '^3453^', result, isa.symbol result
