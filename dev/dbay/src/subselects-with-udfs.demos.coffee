@@ -64,7 +64,6 @@ cfg =
     sc: [ true, false, ]                                            ### single_connection     ###
     ut: [ true, false, ]                                            ### use_transaction       ###
     uw: [ null, ]        # [ true, false, ]                         ### use_worker            ###
-    sf: [ null, ]        # [ true, false, ]                         ### sf                    ###
     # ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
     ft: [ 'none', 'scalar', 'table', ]                              ### function_type         ###
     un: [ true, false, ]                                            ### use_nested_statement  ###
@@ -169,13 +168,12 @@ query_without_nested_statement = ( db, fingerprint, sqlt_a, sqlt_b ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 ff = ( db, fingerprint ) ->
-  sqlt_a        = db.sqlt1
-  sqlt_b        = db.sqlt2
-  error         = null
-  result        = null
+  sqlt_a          = db.sqlt1
+  sqlt_b          = db.sqlt2
+  error           = null
+  result          = null
   { uu, sc, ut,
-    uw, sf, ft,
-    un, }       = fingerprint
+    uw, ft, un, } = fingerprint
   #.........................................................................................................
   if uu
     db.sqlt1.unsafeMode true
@@ -233,35 +231,34 @@ demo_f = ->
     for           sc in cfg.choices.sc  ### single_connection     ###
       for         ut in cfg.choices.ut  ### use_transaction       ###
         for       uw in cfg.choices.uw  ### use_worker            ###
-          for     sf in cfg.choices.sf  ### sf                    ###
-            for   ft in cfg.choices.ft  ### function_type         ###
-              for un in cfg.choices.un  ### use_nested_statement  ###
-                counts.total++
-                fingerprint   = { uu, sc, ut, uw, sf, ft, un, }
-                kenning       = get_kenning fingerprint
-                { result
-                  error }     = ff db, fingerprint
-                # debug '^3453^', result, isa.symbol result
-                if ( isa.symbol result )
-                  switch result
-                    when cfg.results.not_implemented
-                      counts.not_implemented++
-                      color = CND.red
-                    when cfg.results.not_applicable
-                      counts.not_applicable++
-                      color = CND.grey
-                    else
-                      counts.other++
-                      color = CND.yellow
-                  if cfg.show_skipped_choices
-                    whisper '^450^', 0, color kenning, result, error
-                  continue
-                counts.test++
-                if ( is_ok = equals result, matcher ) then  counts.success++
-                else                                        counts.fail++
-                if error?                             then  counts.error++
-                info '^450^', ( CND.blue counts.test, kenning ), ( CND.truth is_ok ), ( CND.red error ? '' )
-                warn '^338^', result unless is_ok
+          for     ft in cfg.choices.ft  ### function_type         ###
+            for   un in cfg.choices.un  ### use_nested_statement  ###
+              counts.total++
+              fingerprint   = { uu, sc, ut, uw, ft, un, }
+              kenning       = get_kenning fingerprint
+              { result
+                error }     = ff db, fingerprint
+              # debug '^3453^', result, isa.symbol result
+              if ( isa.symbol result )
+                switch result
+                  when cfg.results.not_implemented
+                    counts.not_implemented++
+                    color = CND.red
+                  when cfg.results.not_applicable
+                    counts.not_applicable++
+                    color = CND.grey
+                  else
+                    counts.other++
+                    color = CND.yellow
+                if cfg.show_skipped_choices
+                  whisper '^450^', 0, color kenning, result, error
+                continue
+              counts.test++
+              if ( is_ok = equals result, matcher ) then  counts.success++
+              else                                        counts.fail++
+              if error?                             then  counts.error++
+              info '^450^', ( CND.blue counts.test, kenning ), ( CND.truth is_ok ), ( CND.red error ? '' )
+              warn '^338^', result unless is_ok
   #.........................................................................................................
   for k, v of counts
     help ( k.padStart 20 ), ( v.toString().padStart 5 )
