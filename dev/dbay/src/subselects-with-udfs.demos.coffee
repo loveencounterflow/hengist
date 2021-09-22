@@ -56,7 +56,8 @@ guy                       = require '../../../apps/guy'
 cfg =
   # verbose:              true
   verbose:              false
-  catch_errors:         false
+  # catch_errors:         false
+  catch_errors:         true
   show_skipped_choices: true
   # show_skipped_choices: false
   choices:
@@ -86,6 +87,8 @@ prepare_db = ( db ) ->
   for connection in [ db.sqlt1, db.sqlt2, ]
     connection.function 'join_x_and_y_using_word_scalar', fn_cfg, ->
       return JSON.stringify join_x_and_y_using_word connection
+    connection.function 'select_word_from_y_scalar', fn_cfg, ( word ) ->
+      return JSON.stringify select_word_from_y_scalar connection, word
     # connection.table 'join_x_and_y_using_word_table', fn_cfg, ->
   return null
 
@@ -100,6 +103,11 @@ join_x_and_y_using_word = ( sqlt ) ->
       join y on ( x.word = y.word )
       order by 1, 2, 3;"""
   return statement.all()
+
+#-----------------------------------------------------------------------------------------------------------
+select_word_from_y_scalar = ( sqlt, word ) ->
+  statement = sqlt.prepare SQL"select * from y where word = $word order by 1, 2;"
+  return JSON.stringify statement.all { word, }
 
 #-----------------------------------------------------------------------------------------------------------
 get_matcher = ( db ) -> join_x_and_y_using_word db.sqlt1
@@ -142,15 +150,16 @@ query_with_nested_statement = ( db, fingerprint, sqlt_a, sqlt_b ) ->
           result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
       return { result, }
     #.......................................................................................................
-    # when 'scalar'
-    #   ### TAINT refactor ###
-    #   result = []
-    #   outer_statement = sqlt_a.prepare SQL"select * from x order by 1, 2;"
-    #   for outer_row from outer_statement.iterate()
-    #     inner_statement = sqlt_b.prepare SQL"select * from y where word = $word order by 1, 2;"
-    #     for inner_row in inner_rows = inner_statement.all { word: outer_row.word, }
-    #       result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
-    #   return { result, }
+    when 'scalar'
+      ### TAINT refactor ###
+      result = []
+      outer_statement = sqlt_a.prepare SQL"select * from x order by 1, 2;"
+      for outer_row from outer_statement.iterate()
+        { word, }       = outer_row
+        inner_statement = sqlt_b.prepare SQL"select select_word_from_y_scalar( $word );"
+        debug '^3332^', inner_statement.all { word, }
+      return { result, }
+  #.........................................................................................................
   return { result: cfg.results.not_implemented, error: "ft: #{rpr fingerprint.ft} not implemented", }
 
 #-----------------------------------------------------------------------------------------------------------
