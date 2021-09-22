@@ -34,7 +34,7 @@
 
   rpr = CND.rpr;
 
-  badge = 'DBAY/TESTS/SUBSELECTS-WITH-UDFS';
+  badge = 'DBAY/DEMOS/UDFSEL';
 
   debug = CND.get_logger('debug', badge);
 
@@ -180,22 +180,17 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  query_with_nested_statement = function(db, count, fingerprint, sqlt_a, sqlt_b) {
+  query_with_nested_statement = function(db, fingerprint, sqlt_a, sqlt_b) {
+    /* TAINT refactor */
     var i, inner_row, inner_rows, inner_statement, len, outer_row, outer_statement, ref, ref1, result;
     switch (fingerprint.ft) {
+      //.......................................................................................................
       case 'none':
         result = [];
-        outer_statement = sqlt_a.prepare(SQL`select
-    *
-  from x
-  order by 1, 2;`);
+        outer_statement = sqlt_a.prepare(SQL`select * from x order by 1, 2;`);
         ref = outer_statement.iterate();
         for (outer_row of ref) {
-          inner_statement = sqlt_b.prepare(SQL`select
-    *
-  from y
-  where word = $word
-  order by 1, 2;`);
+          inner_statement = sqlt_b.prepare(SQL`select * from y where word = $word order by 1, 2;`);
           ref1 = inner_rows = inner_statement.all({
             word: outer_row.word
           });
@@ -211,11 +206,15 @@
         return {result};
     }
     return {
+      //.......................................................................................................
       // when 'scalar'
-      //   statement = sqlt_a.prepare SQL"""
-      //     select join_x_and_y_using_word_scalar() as rows;"""
-      //   result = statement.get()
-      //   result = JSON.parse result.rows
+      //   ### TAINT refactor ###
+      //   result = []
+      //   outer_statement = sqlt_a.prepare SQL"select * from x order by 1, 2;"
+      //   for outer_row from outer_statement.iterate()
+      //     inner_statement = sqlt_b.prepare SQL"select * from y where word = $word order by 1, 2;"
+      //     for inner_row in inner_rows = inner_statement.all { word: outer_row.word, }
+      //       result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
       //   return { result, }
       result: cfg.results.not_implemented,
       error: `ft: ${rpr(fingerprint.ft)} not implemented`
@@ -223,7 +222,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  query_without_nested_statement = function(db, count, fingerprint, sqlt_a, sqlt_b) {
+  query_without_nested_statement = function(db, fingerprint, sqlt_a, sqlt_b) {
     var result, statement;
     switch (fingerprint.ft) {
       case 'none':
@@ -243,7 +242,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  ff = function(db, count, fingerprint) {
+  ff = function(db, fingerprint) {
     var R/* do not use_nested_statement */, error, ft, result, sc, sf, sqlt_a, sqlt_b, un, ut, uu, uw;
     sqlt_a = db.sqlt1;
     sqlt_b = db.sqlt2;
@@ -282,9 +281,9 @@
       _begin_transaction(ut, sqlt_a, sqlt_b);
       //.......................................................................................................
       if (un/* use_nested_statement */) {
-        R = query_with_nested_statement(db, count, fingerprint, sqlt_a, sqlt_b);
+        R = query_with_nested_statement(db, fingerprint, sqlt_a, sqlt_b);
       } else {
-        R = query_without_nested_statement(db, count, fingerprint, sqlt_a, sqlt_b);
+        R = query_without_nested_statement(db, fingerprint, sqlt_a, sqlt_b);
       }
       //.......................................................................................................
       _commit_transaction(ut, sqlt_a, sqlt_b);
@@ -314,15 +313,24 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_f = function() {
-    var Dbay, count, db, error, fingerprint, ft, i, is_ok, j, kenning, l, len, len1, len2, len3, len4, len5, len6, m, matcher, o, p, q, ref, ref1, ref2, ref3, ref4, ref5, ref6, result, sc, sf, un, ut, uu, uw;
+    var Dbay, color, counts, db, error, fingerprint, ft, i, is_ok, j, k, kenning, l, len, len1, len2, len3, len4, len5, len6, m, matcher, o, p, q, ref, ref1, ref2, ref3, ref4, ref5, ref6, result, sc, sf, un, ut, uu, uw, v;
     ({Dbay} = require(H.dbay_path));
     db = new Dbay();
     prepare_db(db);
     matcher = get_matcher(db);
-    //.........................................................................................................
-    count = 0;
+    counts = {
+      total: 0,
+      not_implemented: 0,
+      not_applicable: 0,
+      other: 0,
+      error: 0,
+      test: 0,
+      success: 0,
+      fail: 0
+    };
     ref = cfg.choices.uu;
     /* use_unsafe            */
+    //.........................................................................................................
     for (i = 0, len = ref.length; i < len; i++) {
       uu = ref[i];
       ref1 = cfg.choices.sc;
@@ -349,19 +357,40 @@
                 /* use_nested_statement  */
                 for (q = 0, len6 = ref6.length; q < len6; q++) {
                   un = ref6[q];
+                  counts.total++;
                   fingerprint = {uu, sc, ut, uw, sf, ft, un};
                   kenning = get_kenning(fingerprint);
-                  ({result, error} = ff(db, count, fingerprint));
+                  ({result, error} = ff(db, fingerprint));
                   // debug '^3453^', result, isa.symbol result
                   if (isa.symbol(result)) {
+                    switch (result) {
+                      case cfg.results.not_implemented:
+                        counts.not_implemented++;
+                        color = CND.red;
+                        break;
+                      case cfg.results.not_applicable:
+                        counts.not_applicable++;
+                        color = CND.grey;
+                        break;
+                      default:
+                        counts.other++;
+                        color = CND.yellow;
+                    }
                     if (cfg.show_skipped_choices) {
-                      whisper('^450^', 0, kenning, result, error);
+                      whisper('^450^', 0, color(kenning, result, error));
                     }
                     continue;
                   }
-                  count++;
-                  is_ok = equals(result, matcher);
-                  info('^450^', CND.blue(count, kenning), CND.truth(is_ok), CND.red(error != null ? error : ''));
+                  counts.test++;
+                  if ((is_ok = equals(result, matcher))) {
+                    counts.success++;
+                  } else {
+                    counts.fail++;
+                  }
+                  if (error != null) {
+                    counts.error++;
+                  }
+                  info('^450^', CND.blue(counts.test, kenning), CND.truth(is_ok), CND.red(error != null ? error : ''));
                   if (!is_ok) {
                     warn('^338^', result);
                   }
@@ -371,6 +400,11 @@
           }
         }
       }
+    }
+//.........................................................................................................
+    for (k in counts) {
+      v = counts[k];
+      help(k.padStart(20), v.toString().padStart(5));
     }
     return null;
   };
