@@ -284,7 +284,7 @@ demo_f = ->
               if error?                             then  counts.error++
               if select fingerprint                 then  marker = CND.gold '█'
               else                                        marker = ' '
-              echo marker, ( CND.blue counts.test, kenning ), ( CND.truth is_ok ), ( CND.red CND.reverse error ? '' )
+              echo marker, ( CND.blue counts.test, kenning ), ( CND.truth is_ok ), marker, ( CND.red CND.reverse error ? '' )
               echo CND.red CND.reverse ' ', result, ' ' if ( not is_ok ) and ( not error? )
   #.........................................................................................................
   for k, v of counts
