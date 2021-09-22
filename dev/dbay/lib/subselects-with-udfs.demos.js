@@ -443,7 +443,7 @@
                 } else {
                   marker = ' ';
                 }
-                echo(marker, CND.blue(counts.test, kenning), CND.truth(is_ok), CND.red(CND.reverse(error != null ? error : '')));
+                echo(marker, CND.blue(counts.test, kenning), CND.truth(is_ok), marker, CND.red(CND.reverse(error != null ? error : '')));
                 if ((!is_ok) && (error == null)) {
                   echo(CND.red(CND.reverse(' ', result, ' ')));
                 }
