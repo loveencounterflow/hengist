@@ -7,7 +7,7 @@ Variables:
 
 * (2) **`use_unsafe: [ true, false, ]`**: safe mode on / off
 * (2) **`use_transaction: [ true, false, ]`**: explicit vs implicit transaction
-* (2) **`single_connection: [ true, false, ]`**: single connection vs double connection
+* (2) **`connection_count: [ 1, 2, ]`**: single connection vs double connection
 * (2) **`use_worker: [ true, false, ]`**: single thread vs main thread + worker thread
 * (2) **`use_subselect_function: [ true, false, ]`**: using a function that does no sub-select vs function
   that does
@@ -63,7 +63,7 @@ cfg =
   hilite:               { ft: 'scalar', }
   choices:
     uu: [ true, false, ]                                            ### use_unsafe            ###
-    sc: [ true, false, ]                                            ### single_connection     ###
+    cc: [ 1, 2, ]                                                   ### connection_count      ###
     ut: [ true, false, ]                                            ### use_transaction       ###
     uw: [ null, ]        # [ true, false, ]                         ### use_worker            ###
     # ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
@@ -181,24 +181,28 @@ query_without_nested_statement = ( db, fingerprint, sqlt_a, sqlt_b ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 ff = ( db, fingerprint ) ->
-  sqlt_a          = db.sqlt1
-  sqlt_b          = db.sqlt2
   error           = null
   result          = null
-  { uu, sc, ut,
+  { uu, cc, ut,
     uw, ft, un, } = fingerprint
   #.........................................................................................................
   if uu
     db.sqlt1.unsafeMode true
     db.sqlt2.unsafeMode true
   #.........................................................................................................
-  if sc
-    sqlt_b = db.sqlt1
+  switch cc
+    when 1
+      sqlt_a          = db.sqlt1
+      sqlt_b          = sqlt_a
+    when 2
+      sqlt_a          = db.sqlt1
+      sqlt_b          = db.sqlt2
+    else throw new Error "expected cc to be 1 or 2, got #{rpr cc}"
   #.........................................................................................................
   try
     if ut
-      unless un then return { result: cfg.results.not_applicable, error: "need nested stms for tx:1", } if ut
-      unless sc then return { result: cfg.results.not_applicable, error: "need single conn for tx:1", } if ut
+      unless un  then return { result: cfg.results.not_applicable, error: "need nested stms for tx:1", }
+      if cc is 2 then return { result: cfg.results.not_applicable, error: "need single conn for tx:1", }
     _begin_transaction ut, sqlt_a, sqlt_b
     #.......................................................................................................
     if un ### use_nested_statement ###
@@ -215,12 +219,8 @@ ff = ( db, fingerprint ) ->
     return { error, }
   #.........................................................................................................
   finally
-    if uu
-      db.sqlt1.unsafeMode false
-      db.sqlt2.unsafeMode false
-    #.......................................................................................................
-    if sc
-      sqlt_b = db.sqlt2
+    db.sqlt1.unsafeMode false
+    db.sqlt2.unsafeMode false
   #.........................................................................................................
   return null
 
@@ -253,13 +253,13 @@ demo_f = ->
     fail:             0
   #.........................................................................................................
   for             uu in cfg.choices.uu  ### use_unsafe            ###
-    for           sc in cfg.choices.sc  ### single_connection     ###
+    for           cc in cfg.choices.cc  ### connection_count     ###
       for         ut in cfg.choices.ut  ### use_transaction       ###
         for       uw in cfg.choices.uw  ### use_worker            ###
           for     ft in cfg.choices.ft  ### function_type         ###
             for   un in cfg.choices.un  ### use_nested_statement  ###
               counts.total++
-              fingerprint   = { uu, sc, ut, uw, ft, un, }
+              fingerprint   = { uu, cc, ut, uw, ft, un, }
               kenning       = get_kenning fingerprint
               { result
                 error }     = ff db, fingerprint
