@@ -58,8 +58,9 @@ cfg =
   verbose:              false
   # catch_errors:         false
   catch_errors:         true
-  show_skipped_choices: true
-  # show_skipped_choices: false
+  # show_na_choices:      true
+  show_na_choices:      false
+  hilite:               { ft: 'scalar', }
   choices:
     uu: [ true, false, ]                                            ### use_unsafe            ###
     sc: [ true, false, ]                                            ### single_connection     ###
@@ -107,7 +108,7 @@ join_x_and_y_using_word = ( sqlt ) ->
 #-----------------------------------------------------------------------------------------------------------
 select_word_from_y_scalar = ( sqlt, word ) ->
   statement = sqlt.prepare SQL"select * from y where word = $word order by 1, 2;"
-  return JSON.stringify statement.all { word, }
+  return statement.all { word, }
 
 #-----------------------------------------------------------------------------------------------------------
 get_matcher = ( db ) -> join_x_and_y_using_word db.sqlt1
@@ -156,8 +157,11 @@ query_with_nested_statement = ( db, fingerprint, sqlt_a, sqlt_b ) ->
       outer_statement = sqlt_a.prepare SQL"select * from x order by 1, 2;"
       for outer_row from outer_statement.iterate()
         { word, }       = outer_row
-        inner_statement = sqlt_b.prepare SQL"select select_word_from_y_scalar( $word );"
-        debug '^3332^', inner_statement.all { word, }
+        inner_statement = sqlt_b.prepare SQL"select select_word_from_y_scalar( $word ) as rows;"
+        inner_rows      = ( inner_statement.get { word, } ).rows
+        inner_rows      = JSON.parse inner_rows
+        for inner_row in inner_rows
+          result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
       return { result, }
   #.........................................................................................................
   return { result: cfg.results.not_implemented, error: "ft: #{rpr fingerprint.ft} not implemented", }
@@ -221,6 +225,18 @@ ff = ( db, fingerprint ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+select = ( fingerprint ) ->
+  return false unless cfg.hilite?
+  for key, choices of cfg.hilite
+    switch type_of choices
+      when 'list'
+        for choice in choices
+          return true if equals choice, fingerprint[ key ]
+      else
+        return true if equals choices, fingerprint[ key ]
+  return false
+
+#-----------------------------------------------------------------------------------------------------------
 demo_f = ->
   { Dbay }  = require H.dbay_path
   db        = new Dbay()
@@ -259,15 +275,17 @@ demo_f = ->
                   else
                     counts.other++
                     color = CND.yellow
-                if cfg.show_skipped_choices
-                  whisper '^450^', 0, color kenning, result, error
+                unless ( result is cfg.results.not_applicable ) and ( not cfg.show_na_choices )
+                  echo CND.grey ' ', 0, color kenning, result, error
                 continue
               counts.test++
               if ( is_ok = equals result, matcher ) then  counts.success++
               else                                        counts.fail++
               if error?                             then  counts.error++
-              info '^450^', ( CND.blue counts.test, kenning ), ( CND.truth is_ok ), ( CND.red error ? '' )
-              warn '^338^', result unless is_ok
+              if select fingerprint                 then  marker = CND.gold '█'
+              else                                        marker = ' '
+              echo marker, ( CND.blue counts.test, kenning ), ( CND.truth is_ok ), ( CND.red CND.reverse error ? '' )
+              echo CND.red CND.reverse ' ', result, ' ' if ( not is_ok ) and ( not error? )
   #.........................................................................................................
   for k, v of counts
     help ( k.padStart 20 ), ( v.toString().padStart 5 )
