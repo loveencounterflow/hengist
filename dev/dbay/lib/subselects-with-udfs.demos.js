@@ -75,7 +75,6 @@
       /* use_unsafe            */sc: [true, false],
       /* single_connection     */ut: [true, false],
       /* use_transaction       */uw: [null], // [ true, false, ]                         ### use_worker            ###
-      sf: [null], // [ true, false, ]                         ### sf                    ###
       // ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
       ft: ['none', 'scalar', 'table'],
       /* function_type         */un: [true, false]
@@ -243,12 +242,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   ff = function(db, fingerprint) {
-    var R/* do not use_nested_statement */, error, ft, result, sc, sf, sqlt_a, sqlt_b, un, ut, uu, uw;
+    var R/* do not use_nested_statement */, error, ft, result, sc, sqlt_a, sqlt_b, un, ut, uu, uw;
     sqlt_a = db.sqlt1;
     sqlt_b = db.sqlt2;
     error = null;
     result = null;
-    ({uu, sc, ut, uw, sf, ft, un} = fingerprint);
+    ({uu, sc, ut, uw, ft, un} = fingerprint);
     //.........................................................................................................
     if (uu) {
       db.sqlt1.unsafeMode(true);
@@ -313,7 +312,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_f = function() {
-    var Dbay, color, counts, db, error, fingerprint, ft, i, is_ok, j, k, kenning, l, len, len1, len2, len3, len4, len5, len6, m, matcher, o, p, q, ref, ref1, ref2, ref3, ref4, ref5, ref6, result, sc, sf, un, ut, uu, uw, v;
+    var Dbay, color, counts, db, error, fingerprint, ft, i, is_ok, j, k, kenning, l, len, len1, len2, len3, len4, len5, m, matcher, o, p, ref, ref1, ref2, ref3, ref4, ref5, result, sc, un, ut, uu, uw, v;
     ({Dbay} = require(H.dbay_path));
     db = new Dbay();
     prepare_db(db);
@@ -345,55 +344,50 @@
           /* use_worker            */
           for (m = 0, len3 = ref3.length; m < len3; m++) {
             uw = ref3[m];
-            ref4 = cfg.choices.sf;
-            /* sf                    */
+            ref4 = cfg.choices.ft;
+            /* function_type         */
             for (o = 0, len4 = ref4.length; o < len4; o++) {
-              sf = ref4[o];
-              ref5 = cfg.choices.ft;
-              /* function_type         */
+              ft = ref4[o];
+              ref5 = cfg.choices.un;
+              /* use_nested_statement  */
               for (p = 0, len5 = ref5.length; p < len5; p++) {
-                ft = ref5[p];
-                ref6 = cfg.choices.un;
-                /* use_nested_statement  */
-                for (q = 0, len6 = ref6.length; q < len6; q++) {
-                  un = ref6[q];
-                  counts.total++;
-                  fingerprint = {uu, sc, ut, uw, sf, ft, un};
-                  kenning = get_kenning(fingerprint);
-                  ({result, error} = ff(db, fingerprint));
-                  // debug '^3453^', result, isa.symbol result
-                  if (isa.symbol(result)) {
-                    switch (result) {
-                      case cfg.results.not_implemented:
-                        counts.not_implemented++;
-                        color = CND.red;
-                        break;
-                      case cfg.results.not_applicable:
-                        counts.not_applicable++;
-                        color = CND.grey;
-                        break;
-                      default:
-                        counts.other++;
-                        color = CND.yellow;
-                    }
-                    if (cfg.show_skipped_choices) {
-                      whisper('^450^', 0, color(kenning, result, error));
-                    }
-                    continue;
+                un = ref5[p];
+                counts.total++;
+                fingerprint = {uu, sc, ut, uw, ft, un};
+                kenning = get_kenning(fingerprint);
+                ({result, error} = ff(db, fingerprint));
+                // debug '^3453^', result, isa.symbol result
+                if (isa.symbol(result)) {
+                  switch (result) {
+                    case cfg.results.not_implemented:
+                      counts.not_implemented++;
+                      color = CND.red;
+                      break;
+                    case cfg.results.not_applicable:
+                      counts.not_applicable++;
+                      color = CND.grey;
+                      break;
+                    default:
+                      counts.other++;
+                      color = CND.yellow;
                   }
-                  counts.test++;
-                  if ((is_ok = equals(result, matcher))) {
-                    counts.success++;
-                  } else {
-                    counts.fail++;
+                  if (cfg.show_skipped_choices) {
+                    whisper('^450^', 0, color(kenning, result, error));
                   }
-                  if (error != null) {
-                    counts.error++;
-                  }
-                  info('^450^', CND.blue(counts.test, kenning), CND.truth(is_ok), CND.red(error != null ? error : ''));
-                  if (!is_ok) {
-                    warn('^338^', result);
-                  }
+                  continue;
+                }
+                counts.test++;
+                if ((is_ok = equals(result, matcher))) {
+                  counts.success++;
+                } else {
+                  counts.fail++;
+                }
+                if (error != null) {
+                  counts.error++;
+                }
+                info('^450^', CND.blue(counts.test, kenning), CND.truth(is_ok), CND.red(error != null ? error : ''));
+                if (!is_ok) {
+                  warn('^338^', result);
                 }
               }
             }
