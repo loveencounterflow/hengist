@@ -33,7 +33,7 @@ Notes:
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'DBAY/TESTS/SUBSELECTS-WITH-UDFS'
+badge                     = 'DBAY/DEMOS/UDFSEL'
 debug                     = CND.get_logger 'debug',     badge
 warn                      = CND.get_logger 'warn',      badge
 info                      = CND.get_logger 'info',      badge
@@ -130,35 +130,32 @@ _commit_transaction = ( ut, sqlt_a, sqlt_b ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-query_with_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
+query_with_nested_statement = ( db, fingerprint, sqlt_a, sqlt_b ) ->
   switch fingerprint.ft
+    #.......................................................................................................
     when 'none'
+      ### TAINT refactor ###
       result = []
-      outer_statement = sqlt_a.prepare SQL"""
-        select
-            *
-          from x
-          order by 1, 2;"""
+      outer_statement = sqlt_a.prepare SQL"select * from x order by 1, 2;"
       for outer_row from outer_statement.iterate()
-        inner_statement = sqlt_b.prepare SQL"""
-          select
-              *
-            from y
-            where word = $word
-            order by 1, 2;"""
+        inner_statement = sqlt_b.prepare SQL"select * from y where word = $word order by 1, 2;"
         for inner_row in inner_rows = inner_statement.all { word: outer_row.word, }
           result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
       return { result, }
+    #.......................................................................................................
     # when 'scalar'
-    #   statement = sqlt_a.prepare SQL"""
-    #     select join_x_and_y_using_word_scalar() as rows;"""
-    #   result = statement.get()
-    #   result = JSON.parse result.rows
+    #   ### TAINT refactor ###
+    #   result = []
+    #   outer_statement = sqlt_a.prepare SQL"select * from x order by 1, 2;"
+    #   for outer_row from outer_statement.iterate()
+    #     inner_statement = sqlt_b.prepare SQL"select * from y where word = $word order by 1, 2;"
+    #     for inner_row in inner_rows = inner_statement.all { word: outer_row.word, }
+    #       result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
     #   return { result, }
   return { result: cfg.results.not_implemented, error: "ft: #{rpr fingerprint.ft} not implemented", }
 
 #-----------------------------------------------------------------------------------------------------------
-query_without_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
+query_without_nested_statement = ( db, fingerprint, sqlt_a, sqlt_b ) ->
   switch fingerprint.ft
     when 'none'
       return { result: ( join_x_and_y_using_word sqlt_a ), }
@@ -171,7 +168,7 @@ query_without_nested_statement = ( db, count, fingerprint, sqlt_a, sqlt_b ) ->
   return { result: cfg.results.not_implemented, error: "ft: #{rpr fingerprint.ft} not implemented", }
 
 #-----------------------------------------------------------------------------------------------------------
-ff = ( db, count, fingerprint ) ->
+ff = ( db, fingerprint ) ->
   sqlt_a        = db.sqlt1
   sqlt_b        = db.sqlt2
   error         = null
@@ -194,9 +191,9 @@ ff = ( db, count, fingerprint ) ->
     _begin_transaction ut, sqlt_a, sqlt_b
     #.......................................................................................................
     if un ### use_nested_statement ###
-      R = query_with_nested_statement db, count, fingerprint, sqlt_a, sqlt_b
+      R = query_with_nested_statement db, fingerprint, sqlt_a, sqlt_b
     else ### do not use_nested_statement ###
-      R = query_without_nested_statement db, count, fingerprint, sqlt_a, sqlt_b
+      R = query_without_nested_statement db, fingerprint, sqlt_a, sqlt_b
     #.......................................................................................................
     _commit_transaction ut, sqlt_a, sqlt_b
     return R
@@ -222,8 +219,16 @@ demo_f = ->
   db        = new Dbay()
   prepare_db db
   matcher   = get_matcher db
+  counts    =
+    total:            0
+    not_implemented:  0
+    not_applicable:   0
+    other:            0
+    error:            0
+    test:             0
+    success:          0
+    fail:             0
   #.........................................................................................................
-  count = 0
   for             uu in cfg.choices.uu  ### use_unsafe            ###
     for           sc in cfg.choices.sc  ### single_connection     ###
       for         ut in cfg.choices.ut  ### use_transaction       ###
@@ -231,19 +236,35 @@ demo_f = ->
           for     sf in cfg.choices.sf  ### sf                    ###
             for   ft in cfg.choices.ft  ### function_type         ###
               for un in cfg.choices.un  ### use_nested_statement  ###
+                counts.total++
                 fingerprint   = { uu, sc, ut, uw, sf, ft, un, }
                 kenning       = get_kenning fingerprint
                 { result
-                  error }     = ff db, count, fingerprint
+                  error }     = ff db, fingerprint
                 # debug '^3453^', result, isa.symbol result
                 if ( isa.symbol result )
-                  whisper '^450^', 0, kenning, result, error if cfg.show_skipped_choices
+                  switch result
+                    when cfg.results.not_implemented
+                      counts.not_implemented++
+                      color = CND.red
+                    when cfg.results.not_applicable
+                      counts.not_applicable++
+                      color = CND.grey
+                    else
+                      counts.other++
+                      color = CND.yellow
+                  if cfg.show_skipped_choices
+                    whisper '^450^', 0, color kenning, result, error
                   continue
-                count++
-                is_ok         = equals result, matcher
-                info '^450^', ( CND.blue count, kenning ), ( CND.truth is_ok ), ( CND.red error ? '' )
-                unless is_ok
-                  warn '^338^', result
+                counts.test++
+                if ( is_ok = equals result, matcher ) then  counts.success++
+                else                                        counts.fail++
+                if error?                             then  counts.error++
+                info '^450^', ( CND.blue counts.test, kenning ), ( CND.truth is_ok ), ( CND.red error ? '' )
+                warn '^338^', result unless is_ok
+  #.........................................................................................................
+  for k, v of counts
+    help ( k.padStart 20 ), ( v.toString().padStart 5 )
   return null
 
 
