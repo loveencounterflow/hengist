@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, _begin_transaction, _commit_transaction, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, isa, join_x_and_y_using_word, prepare_db, query_with_nested_statement, query_without_nested_statement, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, _begin_transaction, _commit_transaction, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, isa, join_x_and_y_using_word, prepare_db, query_with_nested_statement, query_without_nested_statement, rpr, select_word_from_y_scalar, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   /*
 
@@ -67,7 +67,8 @@
   cfg = {
     // verbose:              true
     verbose: false,
-    catch_errors: false,
+    // catch_errors:         false
+    catch_errors: true,
     show_skipped_choices: true,
     // show_skipped_choices: false
     choices: {
@@ -113,6 +114,9 @@
       connection.function('join_x_and_y_using_word_scalar', fn_cfg, function() {
         return JSON.stringify(join_x_and_y_using_word(connection));
       });
+      connection.function('select_word_from_y_scalar', fn_cfg, function(word) {
+        return JSON.stringify(select_word_from_y_scalar(connection, word));
+      });
     }
     // connection.table 'join_x_and_y_using_word_table', fn_cfg, ->
     return null;
@@ -129,6 +133,13 @@
   join y on ( x.word = y.word )
   order by 1, 2, 3;`);
     return statement.all();
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  select_word_from_y_scalar = function(sqlt, word) {
+    var statement;
+    statement = sqlt.prepare(SQL`select * from y where word = $word order by 1, 2;`);
+    return JSON.stringify(statement.all({word}));
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -181,7 +192,7 @@
   //-----------------------------------------------------------------------------------------------------------
   query_with_nested_statement = function(db, fingerprint, sqlt_a, sqlt_b) {
     /* TAINT refactor */
-    var i, inner_row, inner_rows, inner_statement, len, outer_row, outer_statement, ref, ref1, result;
+    var i, inner_row, inner_rows, inner_statement, len, outer_row, outer_statement, ref, ref1, ref2, result, word;
     switch (fingerprint.ft) {
       //.......................................................................................................
       case 'none':
@@ -203,18 +214,21 @@
           }
         }
         return {result};
+      //.......................................................................................................
+      case 'scalar':
+        /* TAINT refactor */
+        result = [];
+        outer_statement = sqlt_a.prepare(SQL`select * from x order by 1, 2;`);
+        ref2 = outer_statement.iterate();
+        for (outer_row of ref2) {
+          ({word} = outer_row);
+          inner_statement = sqlt_b.prepare(SQL`select select_word_from_y_scalar( $word );`);
+          debug('^3332^', inner_statement.all({word}));
+        }
+        return {result};
     }
     return {
-      //.......................................................................................................
-      // when 'scalar'
-      //   ### TAINT refactor ###
-      //   result = []
-      //   outer_statement = sqlt_a.prepare SQL"select * from x order by 1, 2;"
-      //   for outer_row from outer_statement.iterate()
-      //     inner_statement = sqlt_b.prepare SQL"select * from y where word = $word order by 1, 2;"
-      //     for inner_row in inner_rows = inner_statement.all { word: outer_row.word, }
-      //       result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
-      //   return { result, }
+      //.........................................................................................................
       result: cfg.results.not_implemented,
       error: `ft: ${rpr(fingerprint.ft)} not implemented`
     };
