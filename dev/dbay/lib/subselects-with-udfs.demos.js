@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, _begin_transaction, _commit_transaction, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, isa, join_x_and_y_using_word, prepare_db, query_with_nested_statement, query_without_nested_statement, rpr, select_word_from_y_scalar, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, _begin_transaction, _commit_transaction, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, isa, join_x_and_y_using_word, prepare_db, query_with_nested_statement, query_without_nested_statement, rpr, select, select_word_from_y_scalar, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   /*
 
@@ -69,8 +69,11 @@
     verbose: false,
     // catch_errors:         false
     catch_errors: true,
-    show_skipped_choices: true,
-    // show_skipped_choices: false
+    // show_na_choices:      true
+    show_na_choices: false,
+    hilite: {
+      ft: 'scalar'
+    },
     choices: {
       uu: [true, false],
       /* use_unsafe            */sc: [true, false],
@@ -139,7 +142,7 @@
   select_word_from_y_scalar = function(sqlt, word) {
     var statement;
     statement = sqlt.prepare(SQL`select * from y where word = $word order by 1, 2;`);
-    return JSON.stringify(statement.all({word}));
+    return statement.all({word});
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -192,7 +195,7 @@
   //-----------------------------------------------------------------------------------------------------------
   query_with_nested_statement = function(db, fingerprint, sqlt_a, sqlt_b) {
     /* TAINT refactor */
-    var i, inner_row, inner_rows, inner_statement, len, outer_row, outer_statement, ref, ref1, ref2, result, word;
+    var i, inner_row, inner_rows, inner_statement, j, len, len1, outer_row, outer_statement, ref, ref1, ref2, result, word;
     switch (fingerprint.ft) {
       //.......................................................................................................
       case 'none':
@@ -222,8 +225,17 @@
         ref2 = outer_statement.iterate();
         for (outer_row of ref2) {
           ({word} = outer_row);
-          inner_statement = sqlt_b.prepare(SQL`select select_word_from_y_scalar( $word );`);
-          debug('^3332^', inner_statement.all({word}));
+          inner_statement = sqlt_b.prepare(SQL`select select_word_from_y_scalar( $word ) as rows;`);
+          inner_rows = (inner_statement.get({word})).rows;
+          inner_rows = JSON.parse(inner_rows);
+          for (j = 0, len1 = inner_rows.length; j < len1; j++) {
+            inner_row = inner_rows[j];
+            result.push({
+              word: outer_row.word,
+              nrx: outer_row.nrx,
+              nry: inner_row.nry
+            });
+          }
         }
         return {result};
     }
@@ -325,8 +337,35 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  select = function(fingerprint) {
+    var choice, choices, i, key, len, ref;
+    if (cfg.hilite == null) {
+      return false;
+    }
+    ref = cfg.hilite;
+    for (key in ref) {
+      choices = ref[key];
+      switch (type_of(choices)) {
+        case 'list':
+          for (i = 0, len = choices.length; i < len; i++) {
+            choice = choices[i];
+            if (equals(choice, fingerprint[key])) {
+              return true;
+            }
+          }
+          break;
+        default:
+          if (equals(choices, fingerprint[key])) {
+            return true;
+          }
+      }
+    }
+    return false;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_f = function() {
-    var Dbay, color, counts, db, error, fingerprint, ft, i, is_ok, j, k, kenning, l, len, len1, len2, len3, len4, len5, m, matcher, o, p, ref, ref1, ref2, ref3, ref4, ref5, result, sc, un, ut, uu, uw, v;
+    var Dbay, color, counts, db, error, fingerprint, ft, i, is_ok, j, k, kenning, l, len, len1, len2, len3, len4, len5, m, marker, matcher, o, p, ref, ref1, ref2, ref3, ref4, ref5, result, sc, un, ut, uu, uw, v;
     ({Dbay} = require(H.dbay_path));
     db = new Dbay();
     prepare_db(db);
@@ -385,8 +424,8 @@
                       counts.other++;
                       color = CND.yellow;
                   }
-                  if (cfg.show_skipped_choices) {
-                    whisper('^450^', 0, color(kenning, result, error));
+                  if (!((result === cfg.results.not_applicable) && (!cfg.show_na_choices))) {
+                    echo(CND.grey(' ', 0, color(kenning, result, error)));
                   }
                   continue;
                 }
@@ -399,9 +438,14 @@
                 if (error != null) {
                   counts.error++;
                 }
-                info('^450^', CND.blue(counts.test, kenning), CND.truth(is_ok), CND.red(error != null ? error : ''));
-                if (!is_ok) {
-                  warn('^338^', result);
+                if (select(fingerprint)) {
+                  marker = CND.gold('█');
+                } else {
+                  marker = ' ';
+                }
+                echo(marker, CND.blue(counts.test, kenning), CND.truth(is_ok), CND.red(CND.reverse(error != null ? error : '')));
+                if ((!is_ok) && (error == null)) {
+                  echo(CND.red(CND.reverse(' ', result, ' ')));
                 }
               }
             }
