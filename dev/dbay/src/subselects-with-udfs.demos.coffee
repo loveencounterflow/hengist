@@ -5,7 +5,7 @@
 
 Variables:
 
-* (2) **`use_unsafe: [ true, false, ]`**: safe mode on / off
+* (2) **`unsafe_mode: [ true, false, ]`**: safe mode on / off
 * (2) **`use_transaction: [ true, false, ]`**: explicit vs implicit transaction
 * (2) **`connection_count: [ 1, 2, ]`**: single connection vs double connection
 * (2) **`use_worker: [ true, false, ]`**: single thread vs main thread + worker thread
@@ -54,21 +54,22 @@ SQL                       = String.raw
 guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 cfg =
-  # verbose:              true
-  verbose:              false
+  verbose:              true
+  # verbose:              false
   # catch_errors:         false
   catch_errors:         true
   # show_na_choices:      true
   show_na_choices:      false
   hilite:               { ft: 'scalar', }
   choices:
-    uu: [ true, false, ]                                            ### use_unsafe            ###
+    um: [ true, false, ]                                            ### unsafe_mode            ###
     cc: [ 1, 2, ]                                                   ### connection_count      ###
-    ut: [ true, false, ]                                            ### use_transaction       ###
-    uw: [ null, ]        # [ true, false, ]                         ### use_worker            ###
+    # cc: [ 2, ]                                                      ### connection_count      ###
+    wo: [ null, ]        # [ true, false, ]                         ### use_worker            ###
     # ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
-    ft: [ 'none', 'scalar', 'table', ]                              ### function_type         ###
-    un: [ true, false, ]                                            ### use_nested_statement  ###
+    # ft: [ 'none', 'scalar', 'table', ]                              ### function_type         ###
+    ft: [ 'none', 'scalar', ]                              ### function_type         ###
+    ne: [ true, false, ]                                            ### use_nested_statement  ###
   results:
     not_applicable:   Symbol 'not_applicable'
     not_implemented:  Symbol 'not_implemented'
@@ -84,13 +85,54 @@ prepare_db = ( db ) ->
       nry = nrx + n * 2
       ( db.sqlt1.prepare SQL"insert into y ( word, nry ) values ( $word, $nry );" ).run { word, nry, }
   fn_cfg = { deterministic: false, varargs: false, }
-  ### TAINT use other connection for query ###
-  for connection in [ db.sqlt1, db.sqlt2, ]
-    connection.function 'join_x_and_y_using_word_scalar', fn_cfg, ->
-      return JSON.stringify join_x_and_y_using_word connection
-    connection.function 'select_word_from_y_scalar', fn_cfg, ( word ) ->
-      return JSON.stringify select_word_from_y_scalar connection, word
-    # connection.table 'join_x_and_y_using_word_table', fn_cfg, ->
+  # ### TAINT use other connection for query ###
+  # for connection in [ db.sqlt1, db.sqlt2, ]
+  #   connection.function 'join_x_and_y_using_word_scalar', fn_cfg, ->
+  #     return JSON.stringify join_x_and_y_using_word connection
+  #   connection.function 'select_word_from_y_scalar', fn_cfg, ( word ) ->
+  #     return JSON.stringify select_word_from_y_scalar connection, word
+  #   # connection.table 'join_x_and_y_using_word_table', fn_cfg, ->
+  for [ c1, c2, ] in [ [ db.sqlt1, db.sqlt2, ], [ db.sqlt2, db.sqlt1, ], ]
+    c1.function 'join_x_and_y_using_word_scalar', fn_cfg, ->
+      return JSON.stringify join_x_and_y_using_word c2
+    c1.function 'select_word_from_y_scalar', fn_cfg, ( word ) ->
+      return JSON.stringify select_word_from_y_scalar c2, word
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+prepare_dbr = ( dbr ) ->
+  dbr.execute SQL"create table results (
+    um      boolean,
+    cc      integer,
+    wo      boolean,
+    ft      text,
+    ne      boolean,
+    is_ok   boolean,
+    marker  text,
+    error   text );"
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+insert_result = ( dbr, fingerprint, is_ok, marker, error = null ) ->
+  fingerprint = { fingerprint..., }
+  for k, v of fingerprint
+    fingerprint[ k ] = if v is true then 1 else ( if v is false then 0 else rpr v )
+  { um, cc, wo, ft, ne, } = fingerprint
+  is_ok   = if is_ok then 1 else 0
+  dbr.run SQL"""
+    insert into results values (
+      $um, $cc, $wo, $ft, $ne, $is_ok, $marker, $error );
+    """, { um, cc, wo, ft, ne, is_ok, marker, error }
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+show_dbr = ( dbr ) ->
+  { Tbl, }  = require '../../../apps/icql-dba-tabulate'
+  dtab      = new Tbl { dba: dbr, }
+  echo dtab._tabulate dbr.query SQL"""select
+      *
+    from results
+    order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;"""
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -120,22 +162,6 @@ get_kenning = ( fingerprint ) ->
     v = if v is true then '1' else ( if v is false then '0' else rpr v )
     R.push "#{k}:#{v}"
   return R.join ','
-
-#-----------------------------------------------------------------------------------------------------------
-_begin_transaction = ( ut, sqlt_a, sqlt_b ) ->
-  return unless ut
-  debug '^334-1^', "begin tx" if cfg.verbose
-  sqlt_a.exec SQL"begin transaction;"
-  sqlt_b.exec SQL"begin transaction;" if sqlt_a isnt sqlt_b
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-_commit_transaction = ( ut, sqlt_a, sqlt_b ) ->
-  return unless ut
-  debug '^334-2^', "commit tx" if cfg.verbose
-  sqlt_a.exec SQL"commit;"
-  sqlt_b.exec SQL"commit;" if sqlt_a isnt sqlt_b
-  return null
 
 #-----------------------------------------------------------------------------------------------------------
 query_with_nested_statement = ( db, fingerprint, sqlt_a, sqlt_b ) ->
@@ -172,6 +198,7 @@ query_without_nested_statement = ( db, fingerprint, sqlt_a, sqlt_b ) ->
     when 'none'
       return { result: ( join_x_and_y_using_word sqlt_a ), }
     when 'scalar'
+      debug '^2232^', "not nested", fingerprint
       statement = sqlt_a.prepare SQL"""
         select join_x_and_y_using_word_scalar() as rows;"""
       result = statement.get()
@@ -183,10 +210,10 @@ query_without_nested_statement = ( db, fingerprint, sqlt_a, sqlt_b ) ->
 ff = ( db, fingerprint ) ->
   error           = null
   result          = null
-  { uu, cc, ut,
-    uw, ft, un, } = fingerprint
+  { um, cc,
+    wo, ft, ne, } = fingerprint
   #.........................................................................................................
-  if uu
+  if um
     db.sqlt1.unsafeMode true
     db.sqlt2.unsafeMode true
   #.........................................................................................................
@@ -200,18 +227,11 @@ ff = ( db, fingerprint ) ->
     else throw new Error "expected cc to be 1 or 2, got #{rpr cc}"
   #.........................................................................................................
   try
-    if ut
-      unless un  then return { result: cfg.results.not_applicable, error: "need nested stms for tx:1", }
-      if cc is 2 then return { result: cfg.results.not_applicable, error: "need single conn for tx:1", }
-    _begin_transaction ut, sqlt_a, sqlt_b
     #.......................................................................................................
-    if un ### use_nested_statement ###
+    if ne ### use_nested_statement ###
       R = query_with_nested_statement db, fingerprint, sqlt_a, sqlt_b
     else ### do not use_nested_statement ###
       R = query_without_nested_statement db, fingerprint, sqlt_a, sqlt_b
-    #.......................................................................................................
-    _commit_transaction ut, sqlt_a, sqlt_b
-    return R
   #.........................................................................................................
   catch error
     throw error unless cfg.catch_errors
@@ -222,6 +242,7 @@ ff = ( db, fingerprint ) ->
     db.sqlt1.unsafeMode false
     db.sqlt2.unsafeMode false
   #.........................................................................................................
+  return R
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -252,43 +273,51 @@ demo_f = ->
     success:          0
     fail:             0
   #.........................................................................................................
-  for             uu in cfg.choices.uu  ### use_unsafe            ###
+  dbr       = new ( require '../../../apps/icql-dba' ).Dba()
+  dbr.open()
+  prepare_dbr dbr
+  #.........................................................................................................
+  for             um in cfg.choices.um  ### unsafe_mode            ###
     for           cc in cfg.choices.cc  ### connection_count     ###
-      for         ut in cfg.choices.ut  ### use_transaction       ###
-        for       uw in cfg.choices.uw  ### use_worker            ###
-          for     ft in cfg.choices.ft  ### function_type         ###
-            for   un in cfg.choices.un  ### use_nested_statement  ###
-              counts.total++
-              fingerprint   = { uu, cc, ut, uw, ft, un, }
-              kenning       = get_kenning fingerprint
-              { result
-                error }     = ff db, fingerprint
-              # debug '^3453^', result, isa.symbol result
-              if ( isa.symbol result )
-                switch result
-                  when cfg.results.not_implemented
-                    counts.not_implemented++
-                    color = CND.red
-                  when cfg.results.not_applicable
-                    counts.not_applicable++
-                    color = CND.grey
-                  else
-                    counts.other++
-                    color = CND.yellow
-                unless ( result is cfg.results.not_applicable ) and ( not cfg.show_na_choices )
-                  echo CND.grey ' ', 0, color kenning, result, error
-                continue
-              counts.test++
-              if ( is_ok = equals result, matcher ) then  counts.success++
-              else                                        counts.fail++
-              if error?                             then  counts.error++
-              if select fingerprint                 then  marker = CND.gold '█'
-              else                                        marker = ' '
-              echo marker, ( CND.blue counts.test, kenning ), ( CND.truth is_ok ), marker, ( CND.red CND.reverse error ? '' )
-              echo CND.red CND.reverse ' ', result, ' ' if ( not is_ok ) and ( not error? )
+      for         wo in cfg.choices.wo  ### use_worker            ###
+        for       ft in cfg.choices.ft  ### function_type         ###
+          for     ne in cfg.choices.ne  ### use_nested_statement  ###
+            counts.total++
+            fingerprint   = { um, cc, wo, ft, ne, }
+            kenning       = get_kenning fingerprint
+            { result
+              error }     = ff db, fingerprint
+            # debug '^3453^', result, isa.symbol result
+            if ( isa.symbol result )
+              switch result
+                when cfg.results.not_implemented
+                  counts.not_implemented++
+                  color = CND.red
+                when cfg.results.not_applicable
+                  counts.not_applicable++
+                  color = CND.grey
+                else
+                  counts.other++
+                  color = CND.yellow
+              unless ( result is cfg.results.not_applicable ) and ( not cfg.show_na_choices )
+                echo CND.grey ' ', 0, color kenning, result, error
+              continue
+            #.............................................................................................
+            counts.test++
+            if ( is_ok = equals result, matcher ) then  counts.success++
+            else                                        counts.fail++
+            if error?                             then  counts.error++
+            if select fingerprint                 then  marker = CND.gold '█'
+            else                                        marker = ' '
+            #.............................................................................................
+            insert_result dbr, fingerprint, is_ok, marker, error
+            echo marker, ( CND.blue counts.test, kenning ), ( CND.truth is_ok ), marker, ( CND.red CND.reverse error ? '' )
+            echo CND.red CND.reverse ' ', result, ' ' if ( not is_ok ) and ( not error? )
   #.........................................................................................................
   for k, v of counts
     help ( k.padStart 20 ), ( v.toString().padStart 5 )
+  #.........................................................................................................
+  show_dbr dbr
   return null
 
 
