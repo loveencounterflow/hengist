@@ -1,12 +1,12 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, _begin_transaction, _commit_transaction, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, isa, join_x_and_y_using_word, prepare_db, query_with_nested_statement, query_without_nested_statement, rpr, select, select_word_from_y_scalar, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, insert_result, isa, join_x_and_y_using_word, prepare_db, prepare_dbr, query_with_nested_statement, query_without_nested_statement, rpr, select, select_word_from_y_scalar, show_dbr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   /*
 
   Variables:
 
-  * (2) **`use_unsafe: [ true, false, ]`**: safe mode on / off
+  * (2) **`unsafe_mode: [ true, false, ]`**: safe mode on / off
   * (2) **`use_transaction: [ true, false, ]`**: explicit vs implicit transaction
   * (2) **`connection_count: [ 1, 2, ]`**: single connection vs double connection
   * (2) **`use_worker: [ true, false, ]`**: single thread vs main thread + worker thread
@@ -65,8 +65,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   cfg = {
-    // verbose:              true
-    verbose: false,
+    verbose: true,
+    // verbose:              false
     // catch_errors:         false
     catch_errors: true,
     // show_na_choices:      true
@@ -75,13 +75,14 @@
       ft: 'scalar'
     },
     choices: {
-      uu: [true, false],
-      /* use_unsafe            */cc: [1, 2],
-      /* connection_count      */ut: [true, false],
-      /* use_transaction       */uw: [null], // [ true, false, ]                         ### use_worker            ###
+      um: [true, false],
+      /* unsafe_mode            */cc: [1, 2],
+      // cc: [ 2, ]                                                      ### connection_count      ###
+      /* connection_count      */wo: [null], // [ true, false, ]                         ### use_worker            ###
       // ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
-      ft: ['none', 'scalar', 'table'],
-      /* function_type         */un: [true, false]
+      // ft: [ 'none', 'scalar', 'table', ]                              ### function_type         ###
+      ft: ['none', 'scalar'],
+      /* function_type         */ne: [true, false]
     },
     /* use_nested_statement  */results: {
       not_applicable: Symbol('not_applicable'),
@@ -91,7 +92,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   prepare_db = function(db) {
-    var connection, fn_cfg, i, idx, j, l, len, len1, len2, n, nrx, nry, ref, ref1, ref2, word;
+    var c1, c2, fn_cfg, i, idx, j, l, len, len1, len2, n, nrx, nry, ref, ref1, ref2, word;
     db.sqlt1.exec(SQL`create table x ( word text, nrx );`);
     db.sqlt1.exec(SQL`create table y ( word text, nry );`);
     ref = "foo bar baz".split(/\s+/);
@@ -110,18 +111,58 @@
       deterministic: false,
       varargs: false
     };
-    ref2 = [db.sqlt1, db.sqlt2];
-    /* TAINT use other connection for query */
+    ref2 = [[db.sqlt1, db.sqlt2], [db.sqlt2, db.sqlt1]];
+    // ### TAINT use other connection for query ###
+    // for connection in [ db.sqlt1, db.sqlt2, ]
+    //   connection.function 'join_x_and_y_using_word_scalar', fn_cfg, ->
+    //     return JSON.stringify join_x_and_y_using_word connection
+    //   connection.function 'select_word_from_y_scalar', fn_cfg, ( word ) ->
+    //     return JSON.stringify select_word_from_y_scalar connection, word
+    //   # connection.table 'join_x_and_y_using_word_table', fn_cfg, ->
     for (l = 0, len2 = ref2.length; l < len2; l++) {
-      connection = ref2[l];
-      connection.function('join_x_and_y_using_word_scalar', fn_cfg, function() {
-        return JSON.stringify(join_x_and_y_using_word(connection));
+      [c1, c2] = ref2[l];
+      c1.function('join_x_and_y_using_word_scalar', fn_cfg, function() {
+        return JSON.stringify(join_x_and_y_using_word(c2));
       });
-      connection.function('select_word_from_y_scalar', fn_cfg, function(word) {
-        return JSON.stringify(select_word_from_y_scalar(connection, word));
+      c1.function('select_word_from_y_scalar', fn_cfg, function(word) {
+        return JSON.stringify(select_word_from_y_scalar(c2, word));
       });
     }
-    // connection.table 'join_x_and_y_using_word_table', fn_cfg, ->
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  prepare_dbr = function(dbr) {
+    dbr.execute(SQL`create table results ( um      boolean, cc      integer, wo      boolean, ft      text, ne      boolean, is_ok   boolean, marker  text, error   text );`);
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  insert_result = function(dbr, fingerprint, is_ok, marker, error = null) {
+    var cc, ft, k, ne, um, v, wo;
+    fingerprint = {...fingerprint};
+    for (k in fingerprint) {
+      v = fingerprint[k];
+      fingerprint[k] = v === true ? 1 : (v === false ? 0 : rpr(v));
+    }
+    ({um, cc, wo, ft, ne} = fingerprint);
+    is_ok = is_ok ? 1 : 0;
+    dbr.run(SQL`insert into results values (
+  $um, $cc, $wo, $ft, $ne, $is_ok, $marker, $error );`, {um, cc, wo, ft, ne, is_ok, marker, error});
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  show_dbr = function(dbr) {
+    var Tbl, dtab;
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    dtab = new Tbl({
+      dba: dbr
+    });
+    echo(dtab._tabulate(dbr.query(SQL`select
+  *
+from results
+order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;`)));
     return null;
   };
 
@@ -160,36 +201,6 @@
       R.push(`${k}:${v}`);
     }
     return R.join(',');
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  _begin_transaction = function(ut, sqlt_a, sqlt_b) {
-    if (!ut) {
-      return;
-    }
-    if (cfg.verbose) {
-      debug('^334-1^', "begin tx");
-    }
-    sqlt_a.exec(SQL`begin transaction;`);
-    if (sqlt_a !== sqlt_b) {
-      sqlt_b.exec(SQL`begin transaction;`);
-    }
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  _commit_transaction = function(ut, sqlt_a, sqlt_b) {
-    if (!ut) {
-      return;
-    }
-    if (cfg.verbose) {
-      debug('^334-2^', "commit tx");
-    }
-    sqlt_a.exec(SQL`commit;`);
-    if (sqlt_a !== sqlt_b) {
-      sqlt_b.exec(SQL`commit;`);
-    }
-    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -255,6 +266,7 @@
           result: join_x_and_y_using_word(sqlt_a)
         };
       case 'scalar':
+        debug('^2232^', "not nested", fingerprint);
         statement = sqlt_a.prepare(SQL`select join_x_and_y_using_word_scalar() as rows;`);
         result = statement.get();
         result = JSON.parse(result.rows);
@@ -268,12 +280,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   ff = function(db, fingerprint) {
-    var R/* do not use_nested_statement */, cc, error, ft, result, sqlt_a, sqlt_b, un, ut, uu, uw;
+    var R/* do not use_nested_statement */, cc, error, ft, ne, result, sqlt_a, sqlt_b, um, wo;
     error = null;
     result = null;
-    ({uu, cc, ut, uw, ft, un} = fingerprint);
+    ({um, cc, wo, ft, ne} = fingerprint);
     //.........................................................................................................
-    if (uu) {
+    if (um) {
       db.sqlt1.unsafeMode(true);
       db.sqlt2.unsafeMode(true);
     }
@@ -291,31 +303,13 @@
         throw new Error(`expected cc to be 1 or 2, got ${rpr(cc)}`);
     }
     try {
-      //.........................................................................................................
-      if (ut) {
-        if (!un) {
-          return {
-            result: cfg.results.not_applicable,
-            error: "need nested stms for tx:1"
-          };
-        }
-        if (cc === 2) {
-          return {
-            result: cfg.results.not_applicable,
-            error: "need single conn for tx:1"
-          };
-        }
-      }
-      _begin_transaction(ut, sqlt_a, sqlt_b);
       //.......................................................................................................
-      if (un/* use_nested_statement */) {
+      //.........................................................................................................
+      if (ne/* use_nested_statement */) {
         R = query_with_nested_statement(db, fingerprint, sqlt_a, sqlt_b);
       } else {
         R = query_without_nested_statement(db, fingerprint, sqlt_a, sqlt_b);
       }
-      //.......................................................................................................
-      _commit_transaction(ut, sqlt_a, sqlt_b);
-      return R;
     } catch (error1) {
       //.........................................................................................................
       error = error1;
@@ -330,6 +324,7 @@
       db.sqlt2.unsafeMode(false);
     }
     //.........................................................................................................
+    return R;
     return null;
   };
 
@@ -362,7 +357,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_f = function() {
-    var Dbay, cc, color, counts, db, error, fingerprint, ft, i, is_ok, j, k, kenning, l, len, len1, len2, len3, len4, len5, m, marker, matcher, o, p, ref, ref1, ref2, ref3, ref4, ref5, result, un, ut, uu, uw, v;
+    var Dbay, cc, color, counts, db, dbr, error, fingerprint, ft, i, is_ok, j, k, kenning, l, len, len1, len2, len3, len4, m, marker, matcher, ne, o, ref, ref1, ref2, ref3, ref4, result, um, v, wo;
     ({Dbay} = require(H.dbay_path));
     db = new Dbay();
     prepare_db(db);
@@ -377,73 +372,75 @@
       success: 0,
       fail: 0
     };
-    ref = cfg.choices.uu;
-    /* use_unsafe            */
+    //.........................................................................................................
+    dbr = new (require('../../../apps/icql-dba')).Dba();
+    dbr.open();
+    prepare_dbr(dbr);
+    ref = cfg.choices.um;
+    /* unsafe_mode            */
     //.........................................................................................................
     for (i = 0, len = ref.length; i < len; i++) {
-      uu = ref[i];
+      um = ref[i];
       ref1 = cfg.choices.cc;
       /* connection_count     */
       for (j = 0, len1 = ref1.length; j < len1; j++) {
         cc = ref1[j];
-        ref2 = cfg.choices.ut;
-        /* use_transaction       */
+        ref2 = cfg.choices.wo;
+        /* use_worker            */
         for (l = 0, len2 = ref2.length; l < len2; l++) {
-          ut = ref2[l];
-          ref3 = cfg.choices.uw;
-          /* use_worker            */
+          wo = ref2[l];
+          ref3 = cfg.choices.ft;
+          /* function_type         */
           for (m = 0, len3 = ref3.length; m < len3; m++) {
-            uw = ref3[m];
-            ref4 = cfg.choices.ft;
-            /* function_type         */
+            ft = ref3[m];
+            ref4 = cfg.choices.ne;
+            /* use_nested_statement  */
             for (o = 0, len4 = ref4.length; o < len4; o++) {
-              ft = ref4[o];
-              ref5 = cfg.choices.un;
-              /* use_nested_statement  */
-              for (p = 0, len5 = ref5.length; p < len5; p++) {
-                un = ref5[p];
-                counts.total++;
-                fingerprint = {uu, cc, ut, uw, ft, un};
-                kenning = get_kenning(fingerprint);
-                ({result, error} = ff(db, fingerprint));
-                // debug '^3453^', result, isa.symbol result
-                if (isa.symbol(result)) {
-                  switch (result) {
-                    case cfg.results.not_implemented:
-                      counts.not_implemented++;
-                      color = CND.red;
-                      break;
-                    case cfg.results.not_applicable:
-                      counts.not_applicable++;
-                      color = CND.grey;
-                      break;
-                    default:
-                      counts.other++;
-                      color = CND.yellow;
-                  }
-                  if (!((result === cfg.results.not_applicable) && (!cfg.show_na_choices))) {
-                    echo(CND.grey(' ', 0, color(kenning, result, error)));
-                  }
-                  continue;
+              ne = ref4[o];
+              counts.total++;
+              fingerprint = {um, cc, wo, ft, ne};
+              kenning = get_kenning(fingerprint);
+              ({result, error} = ff(db, fingerprint));
+              // debug '^3453^', result, isa.symbol result
+              if (isa.symbol(result)) {
+                switch (result) {
+                  case cfg.results.not_implemented:
+                    counts.not_implemented++;
+                    color = CND.red;
+                    break;
+                  case cfg.results.not_applicable:
+                    counts.not_applicable++;
+                    color = CND.grey;
+                    break;
+                  default:
+                    counts.other++;
+                    color = CND.yellow;
                 }
-                counts.test++;
-                if ((is_ok = equals(result, matcher))) {
-                  counts.success++;
-                } else {
-                  counts.fail++;
+                if (!((result === cfg.results.not_applicable) && (!cfg.show_na_choices))) {
+                  echo(CND.grey(' ', 0, color(kenning, result, error)));
                 }
-                if (error != null) {
-                  counts.error++;
-                }
-                if (select(fingerprint)) {
-                  marker = CND.gold('█');
-                } else {
-                  marker = ' ';
-                }
-                echo(marker, CND.blue(counts.test, kenning), CND.truth(is_ok), marker, CND.red(CND.reverse(error != null ? error : '')));
-                if ((!is_ok) && (error == null)) {
-                  echo(CND.red(CND.reverse(' ', result, ' ')));
-                }
+                continue;
+              }
+              //.............................................................................................
+              counts.test++;
+              if ((is_ok = equals(result, matcher))) {
+                counts.success++;
+              } else {
+                counts.fail++;
+              }
+              if (error != null) {
+                counts.error++;
+              }
+              if (select(fingerprint)) {
+                marker = CND.gold('█');
+              } else {
+                marker = ' ';
+              }
+              //.............................................................................................
+              insert_result(dbr, fingerprint, is_ok, marker, error);
+              echo(marker, CND.blue(counts.test, kenning), CND.truth(is_ok), marker, CND.red(CND.reverse(error != null ? error : '')));
+              if ((!is_ok) && (error == null)) {
+                echo(CND.red(CND.reverse(' ', result, ' ')));
               }
             }
           }
@@ -455,6 +452,8 @@
       v = counts[k];
       help(k.padStart(20), v.toString().padStart(5));
     }
+    //.........................................................................................................
+    show_dbr(dbr);
     return null;
   };
 
