@@ -52,6 +52,7 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 SQL                       = String.raw
 guy                       = require '../../../apps/guy'
+{ Dbay }                  = require H.dbay_path
 #-----------------------------------------------------------------------------------------------------------
 cfg =
   verbose:              true
@@ -250,11 +251,14 @@ select = ( fingerprint ) ->
   return false
 
 #-----------------------------------------------------------------------------------------------------------
-demo_f = ->
-  { Dbay }  = require H.dbay_path
-  db        = new Dbay()
+new_db_with_data = ->
+  db = new Dbay()
   prepare_db db
-  matcher   = get_matcher db
+  return db
+
+#-----------------------------------------------------------------------------------------------------------
+demo_f = ->
+  matcher   = get_matcher new_db_with_data()
   counts    =
     total:            0
     not_implemented:  0
@@ -275,6 +279,7 @@ demo_f = ->
         for       ft in cfg.choices.ft  ### function_type         ###
           for     ne in cfg.choices.ne  ### use_nested_statement  ###
             counts.total++
+            db            = new_db_with_data()
             fingerprint   = { um, cc, wo, ft, ne, }
             kenning       = get_kenning fingerprint
             { result
