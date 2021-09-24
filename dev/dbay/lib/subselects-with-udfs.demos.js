@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, insert_result, isa, join_x_and_y_using_word, prepare_db, prepare_dbr, query_with_nested_statement, query_without_nested_statement, rpr, select, select_word_from_y_scalar, show_dbr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Dbay, H, PATH, SQL, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, insert_result, isa, join_x_and_y_using_word, new_db_with_data, prepare_db, prepare_dbr, query_with_nested_statement, query_without_nested_statement, rpr, select, select_word_from_y_scalar, show_dbr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   /*
 
@@ -62,6 +62,8 @@
   SQL = String.raw;
 
   guy = require('../../../apps/guy');
+
+  ({Dbay} = require(H.dbay_path));
 
   //-----------------------------------------------------------------------------------------------------------
   cfg = {
@@ -349,12 +351,17 @@ order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;`)));
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_f = function() {
-    var Dbay, cc, color, counts, db, dbr, error, fingerprint, ft, i, is_ok, j, k, kenning, l, len, len1, len2, len3, len4, m, marker, matcher, ne, o, ref, ref1, ref2, ref3, ref4, result, um, v, wo;
-    ({Dbay} = require(H.dbay_path));
+  new_db_with_data = function() {
+    var db;
     db = new Dbay();
     prepare_db(db);
-    matcher = get_matcher(db);
+    return db;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_f = function() {
+    var cc, color, counts, db, dbr, error, fingerprint, ft, i, is_ok, j, k, kenning, l, len, len1, len2, len3, len4, m, marker, matcher, ne, o, ref, ref1, ref2, ref3, ref4, result, um, v, wo;
+    matcher = get_matcher(new_db_with_data());
     counts = {
       total: 0,
       not_implemented: 0,
@@ -391,6 +398,7 @@ order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;`)));
             for (o = 0, len4 = ref4.length; o < len4; o++) {
               ne = ref4[o];
               counts.total++;
+              db = new_db_with_data();
               fingerprint = {um, cc, wo, ft, ne};
               kenning = get_kenning(fingerprint);
               ({result, error} = ff(db, fingerprint));
