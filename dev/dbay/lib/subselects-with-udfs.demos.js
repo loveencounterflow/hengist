@@ -81,7 +81,7 @@
       /* connection_count      */wo: [null], // [ true, false, ]                         ### use_worker            ###
       // ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
       // ft: [ 'none', 'scalar', 'table', ]                              ### function_type         ###
-      ft: ['none', 'scalar'],
+      ft: ['scalar'],
       /* function_type         */ne: [true, false]
     },
     /* use_nested_statement  */results: {
@@ -112,13 +112,7 @@
       varargs: false
     };
     ref2 = [[db.sqlt1, db.sqlt2], [db.sqlt2, db.sqlt1]];
-    // ### TAINT use other connection for query ###
-    // for connection in [ db.sqlt1, db.sqlt2, ]
-    //   connection.function 'join_x_and_y_using_word_scalar', fn_cfg, ->
-    //     return JSON.stringify join_x_and_y_using_word connection
-    //   connection.function 'select_word_from_y_scalar', fn_cfg, ( word ) ->
-    //     return JSON.stringify select_word_from_y_scalar connection, word
-    //   # connection.table 'join_x_and_y_using_word_table', fn_cfg, ->
+    //.........................................................................................................
     for (l = 0, len2 = ref2.length; l < len2; l++) {
       [c1, c2] = ref2[l];
       c1.function('join_x_and_y_using_word_scalar', fn_cfg, function() {
@@ -266,7 +260,6 @@ order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;`)));
           result: join_x_and_y_using_word(sqlt_a)
         };
       case 'scalar':
-        debug('^2232^', "not nested", fingerprint);
         statement = sqlt_a.prepare(SQL`select join_x_and_y_using_word_scalar() as rows;`);
         result = statement.get();
         result = JSON.parse(result.rows);
