@@ -1,0 +1,14 @@
+#!/bin/bash +
+RAMDISK_SIZE='16' # Größeneinstellung in MB
+if [ -d "/media/ramdisk/lost+found/" ]
+then
+    # clear
+    echo 'RAM-Disk „/media/ramdisk“ existiert bereits, das Script wird nun beendet!'
+else
+    # clear
+    mkdir /media/ramdisk
+    mke2fs -t ext4 -O extents -vm0 /dev/ram0 ${RAMDISK_SIZE}M -L 'RAMDISK'
+    mount /dev/ram0 /media/ramdisk
+    chmod --verbose a+rwx /media/ramdisk
+fi
+
