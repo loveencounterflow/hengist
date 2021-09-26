@@ -51,7 +51,7 @@ demo_udf_dbay_sqlt = ->
     # select  = db.sqlt1.prepare SQL"select sqrt( 42 ) as n;"
     select  = db.sqlt1.prepare SQL"select std_square( 42 ) as n;"
     select.run()
-    info '^309-1^', row for row from select.iterate()
+    info '^309-2^', row for row from select.iterate()
     return null
   #.........................................................................................................
   do =>
@@ -63,7 +63,7 @@ demo_udf_dbay_sqlt = ->
       return rows[ 0 ]?.count ? null
     select  = db.sqlt1.prepare SQL"select std_row_count() as n;"
     select.run()
-    info '^309-1^', row for row from select.iterate()
+    info '^309-3^', row for row from select.iterate()
     return null
   #.........................................................................................................
   do =>
@@ -82,25 +82,25 @@ demo_udf_dbay_sqlt = ->
         yield { n, } for n in [ 1 .. 3 ]
         return null
     #.......................................................................................................
-    debug '^322-1^'
+    debug '^309-4^'
     xxx_statement = db.sqlt2.prepare SQL"select n from x;"
     db.sqlt1.table 'std_some_texts',
       columns:        [ 'n', ]
       deterministic:  false
       varargs:        false
       rows: ->
-        debug '^322-2^'
+        debug '^309-5^'
         xxx_statement.run()
-        debug '^322-3^'
+        debug '^309-6^'
         # yield from xxx_statement.iterate()
         for row from xxx_statement.iterate()
-          debug '^322-4^', row
+          debug '^309-7^', row
           yield row
         return null
     #.......................................................................................................
     ### not possible to attach the same DB more than once: ###
-    # debug '^078-1^', db.sqlt1.name
-    # debug '^078-1^', ( db.sqlt1.prepare SQL"attach ? as s1b;" ).run [ db.sqlt1.name, ]
+    # debug '^309-8^', db.sqlt1.name
+    # debug '^309-9^', ( db.sqlt1.prepare SQL"attach ? as s1b;" ).run [ db.sqlt1.name, ]
     #.......................................................................................................
     # select  = db.sqlt1.prepare SQL"select * from std_generate_series();"
     # select2 = db.sqlt1.prepare SQL"select * from std_generate_series();"
@@ -108,9 +108,9 @@ demo_udf_dbay_sqlt = ->
     select.run()
     # for row from select.iterate()
     #   select2.run()
-    #   info '^309-1^', row, [ ( select2.iterate() )..., ]
+    #   info '^309-10^', row, [ ( select2.iterate() )..., ]
     for row from select.iterate()
-      info '^309-1^', row
+      info '^309-11^', row
     db.sqlt1.unsafeMode false
     db.sqlt2.unsafeMode false
     return null
@@ -121,28 +121,51 @@ demo_udf_dbay_sqlt = ->
 demo_worker_threads = ->
   #.........................................................................................................
   create_and_populate_tables = ( db ) ->
-    ### Create table on first connection, can insert data on second connection: ###
-    db.sqlt1.exec SQL"create table x ( n text );"
-    db.sqlt2.exec SQL"insert into x ( n ) values ( 'helo world' );"
-    db.sqlt2.exec SQL"insert into x ( n ) values ( 'good to see' );"
-    db.sqlt2.exec SQL"insert into x ( n ) values ( 'it does work' );"
-    urge '^332^', "created and populated table `x`"
+    ### Create table on first connection, can insert data on second connection unless when within
+    transaction: ###
+    debug '^339^', db.sqlt1
+    debug '^339^', db.sqlt2
+    sqlt_a = db.sqlt1
+    sqlt_b = if sqlt_a.inTransaction then sqlt_a else db.sqlt2
+    sqlt_a.exec SQL"create table x ( n text );"
+    sqlt_b.exec SQL"insert into x ( n ) values ( 'helo world' );"
+    sqlt_b.exec SQL"insert into x ( n ) values ( 'good to see' );"
+    sqlt_b.exec SQL"insert into x ( n ) values ( 'it does work' );"
+    urge '^309-12^', "created and populated table `x`"
     return null
+  #.........................................................................................................
+  add_table_function = ( db ) ->
+    db.sqlt1.table 'my_table_udf',
+      deterministic:  false
+      varargs:        false
+      columns:        [ 'n', ]
+      rows:           ->
+        # statement = db.sqlt2.prepare SQL"select * from x;"
+        # yield from statement.iterate()
+        for n in [ 1, 2, 3, ]
+          await sleep 0.25
+          yield { n, }
+        return null
   #.........................................................................................................
   show_sqlite_schema = ( db ) =>
-    info '^300-1^', "sqlite_schema"
+    info '^309-13^', "sqlite_schema"
     select  = db.sqlt1.prepare SQL"select * from sqlite_schema;"
     select.run()
-    info '^300-1^', row for row from select.iterate()
+    info '^309-14^', row for row from select.iterate()
     return null
   #.........................................................................................................
-  show_table_contents = ( db ) =>
-    select  = db.sqlt1.prepare SQL"select * from x;"
-    select.run()
-    info '^309-1^', row for row from select.iterate()
+  show_table_contents = ( title, db ) =>
+    try
+      select  = db.sqlt1.prepare SQL"select * from x;"
+      select.run()
+      urge '^309-15^', title
+      info '^309-16^', row for row from select.iterate()
+    catch error
+      warn CND.reverse error.message
     return null
   #.........................................................................................................
   { Worker
+    parentPort
     isMainThread  } = require 'worker_threads'
   { Dbay }          = require H.dbay_path
   dbnick            = 'mydb'
@@ -151,21 +174,39 @@ demo_worker_threads = ->
     do =>
       debug "main thread"
       db = new Dbay { dbnick, ram: true, }
+      db.sqlt1.exec SQL"begin transaction;"
       create_and_populate_tables db
+      db.sqlt1.exec SQL"commit;"
       show_sqlite_schema db
-      help "sleeping..."; await guy.async.sleep 0.1
       worker = new Worker __filename
-      debug '^445-1^', db.sqlt1
-      debug '^445-1^', db.cfg
+      # worker.postMessage 'ready'
+      worker.on 'message', ( P... ) -> info '^309-1^', "Main thread received message:", P
+      debug '^309-17^', db.sqlt1
+      debug '^309-18^', db.cfg
+      show_table_contents "main thread", db
+      # for n in [ 0 .. 1e8 ]
+      #   null
+      help "sleeping..."; await guy.async.sleep 10
+      help '^309-1^', "exiting"
+      return null
   #.........................................................................................................
   else
     do =>
-      debug "worker thread"
+      urge CND.reverse "█ █ █ █ █ █ worker thread █ █ █ █ █ █ "
+      # parentPort.on 'message', ( P... ) -> info '^309-1^', P
       db = new Dbay { dbnick, ram: true, }
+      add_table_function db
       show_sqlite_schema db
-      debug '^445-2^', db.sqlt1
-      debug '^445-2^', db.cfg
-      show_table_contents db
+      debug '^309-19^', db.sqlt1
+      debug '^309-20^', db.cfg
+      # # show_table_contents "worker thread", db
+      statement = db.sqlt1.prepare SQL"select * from my_table_udf();"
+      for row from statement.iterate()
+        info '^309-1^', row
+      parentPort.postMessage 'done'
+      # help "sleeping..."; await guy.async.sleep 1
+      # show_table_contents "worker thread", db
+      return null
       # help "sleeping..."; await guy.async.sleep 0.1
   #.........................................................................................................
   return null
