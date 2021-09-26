@@ -168,7 +168,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.bettersqlite3_membacked = function(cfg, use_membacked = true) {
+  this.bsqlt_membacked = function(cfg, use_membacked = true) {
     return new Promise((resolve) => {
       var Db, populate_file;
       Db = require('better-sqlite3');
@@ -290,14 +290,14 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.bettersqlite3_mem = (cfg) => {
+  this.bsqlt_mem = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: ':memory:'
     });
   };
 
-  this.bettersqlite3_mem_thrds = (cfg) => {
+  this.bsqlt_mem_thrds = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: ':memory:',
@@ -305,7 +305,7 @@
     });
   };
 
-  this.bettersqlite3_mem_jmoff = (cfg) => {
+  this.bsqlt_mem_jmoff = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: ':memory:',
@@ -313,7 +313,7 @@
     });
   };
 
-  this.bettersqlite3_mem_backup = (cfg) => {
+  this.bsqlt_mem_backup = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: ':memory:',
@@ -322,14 +322,14 @@
   };
 
   //...........................................................................................................
-  this.bettersqlite3_fle = (cfg) => {
+  this.bsqlt_fle = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: paths.fle
     });
   };
 
-  this.bettersqlite3_fle_jmdel = (cfg) => {
+  this.bsqlt_fle_jmdel = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: paths.fle_jmdel,
@@ -337,7 +337,7 @@
     });
   };
 
-  this.bettersqlite3_fle_jmtrunc = (cfg) => {
+  this.bsqlt_fle_jmtrunc = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: paths.fle_jmtrunc,
@@ -345,7 +345,7 @@
     });
   };
 
-  this.bettersqlite3_fle_jmpers = (cfg) => {
+  this.bsqlt_fle_jmpers = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: paths.fle_jmpers,
@@ -353,7 +353,7 @@
     });
   };
 
-  this.bettersqlite3_fle_jmmem = (cfg) => {
+  this.bsqlt_fle_jmmem = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: paths.fle_jmmem,
@@ -361,7 +361,7 @@
     });
   };
 
-  this.bettersqlite3_fle_jmwal = (cfg) => {
+  this.bsqlt_fle_jmwal = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: paths.fle_jmwal,
@@ -369,7 +369,7 @@
     });
   };
 
-  this.bettersqlite3_fle_jmoff = (cfg) => {
+  this.bsqlt_fle_jmoff = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: paths.fle_jmoff,
@@ -377,7 +377,7 @@
     });
   };
 
-  this.bettersqlite3_fle_mmap = (cfg) => {
+  this.bsqlt_fle_mmap = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: paths.fle_mmap,
@@ -385,7 +385,7 @@
     });
   };
 
-  this.bettersqlite3_fle_tmpm = (cfg) => {
+  this.bsqlt_fle_tmpm = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: paths.fle_tmpm,
@@ -393,7 +393,7 @@
     });
   };
 
-  this.bettersqlite3_fle_pgsze = (cfg) => {
+  this.bsqlt_fle_pgsze = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: paths.fle_pgsze,
@@ -401,7 +401,7 @@
     });
   };
 
-  this.bettersqlite3_fle_thrds = (cfg) => {
+  this.bsqlt_fle_thrds = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: paths.fle_thrds,
@@ -409,7 +409,7 @@
     });
   };
 
-  this.bettersqlite3_fle_qtforum1 = (cfg) => {
+  this.bsqlt_fle_qtforum1 = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: paths.fle_qtforum1,
@@ -417,7 +417,7 @@
     });
   };
 
-  this.bettersqlite3_fle_qtforum2 = (cfg) => {
+  this.bsqlt_fle_qtforum2 = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: paths.fle_qtforum2,
@@ -425,7 +425,7 @@
     });
   };
 
-  this.bettersqlite3_tmpfs = (cfg) => {
+  this.bsqlt_tmpfs = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: '/mnt/ramdisk/ram1.db',
@@ -433,7 +433,7 @@
     });
   };
 
-  this.bettersqlite3_tmpfs_jmoff = (cfg) => {
+  this.bsqlt_tmpfs_jmoff = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: '/mnt/ramdisk/ram2.db',
@@ -441,7 +441,7 @@
     });
   };
 
-  this.bettersqlite3_tmpfs_jmwal = (cfg) => {
+  this.bsqlt_tmpfs_jmwal = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: '/mnt/ramdisk/ram2.db',
@@ -449,7 +449,7 @@
     });
   };
 
-  this.bettersqlite3_tmpfs_jmoff32 = (cfg) => {
+  this.bsqlt_tmpfs_jmoff32 = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: '/mnt/ramdisk/ram2.db',
@@ -457,7 +457,7 @@
     });
   };
 
-  this.bettersqlite3_tmpfs_jmwal32 = (cfg) => {
+  this.bsqlt_tmpfs_jmwal32 = (cfg) => {
     return this._btsql3({
       ...cfg,
       db_path: '/mnt/ramdisk/ram2.db',
@@ -466,7 +466,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.bettersqlite3_mem_noprepare = function(cfg) {
+  this.bsqlt_mem_noprepare = function(cfg) {
     return new Promise((resolve) => {
       var Db, count, data, db, db_cfg;
       Db = require('better-sqlite3');
@@ -512,7 +512,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._bettersqlite3_memory_icql = function(cfg, icql_version) {
+  this._bsqlt_memory_icql = function(cfg, icql_version) {
     return new Promise((resolve) => {
       var Db, ICQL, count, data, db, icql_cfg, icql_path;
       Db = require('better-sqlite3');
@@ -550,7 +550,7 @@
           result = db.$.all_rows(db.get_all_texts());
           count += result.length;
           if (gcfg.verbose) {
-            show_result('bettersqlite3_memory_icql', result);
+            show_result('bsqlt_memory_icql', result);
           }
           db.$.db.close();
           return resolve(count);
@@ -561,12 +561,12 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.bettersqlite3_mem_icql515 = function(cfg) {
-    return this._bettersqlite3_memory_icql(cfg, 'icql515');
+  this.bsqlt_mem_icql515 = function(cfg) {
+    return this._bsqlt_memory_icql(cfg, 'icql515');
   };
 
-  this.bettersqlite3_mem_icql_latest = function(cfg) {
-    return this._bettersqlite3_memory_icql(cfg, 'icql_latest');
+  this.bsqlt_mem_icql_latest = function(cfg) {
+    return this._bsqlt_memory_icql(cfg, 'icql_latest');
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -745,30 +745,30 @@
     };
     repetitions = 3;
     test_names = [
-      'bettersqlite3_mem',
-      'bettersqlite3_mem_jmoff',
-      'bettersqlite3_mem_icql_latest',
-      'bettersqlite3_mem_icql515',
-      'bettersqlite3_mem_backup',
-      'bettersqlite3_mem_noprepare',
-      // 'bettersqlite3_fle'
-      // 'bettersqlite3_fle_mmap'
-      // 'bettersqlite3_fle_tmpm'
-      // 'bettersqlite3_fle_thrds'
-      // 'bettersqlite3_fle_pgsze'
-      // 'bettersqlite3_fle_jmwal'
-      // 'bettersqlite3_fle_jmdel'
-      // 'bettersqlite3_fle_jmtrunc' ### NOTE does not produce correct DB file ###
-      // 'bettersqlite3_fle_jmpers'  ### NOTE does not produce correct DB file ###
-      // 'bettersqlite3_fle_jmmem'
-      // 'bettersqlite3_fle_jmoff'
-      'bettersqlite3_fle_qtforum1',
-      'bettersqlite3_fle_qtforum2',
-      'bettersqlite3_tmpfs',
-      'bettersqlite3_tmpfs_jmoff',
-      'bettersqlite3_tmpfs_jmwal',
-      'bettersqlite3_tmpfs_jmoff32',
-      'bettersqlite3_tmpfs_jmwal32'
+      'bsqlt_mem',
+      'bsqlt_mem_jmoff',
+      'bsqlt_mem_icql_latest',
+      'bsqlt_mem_icql515',
+      'bsqlt_mem_backup',
+      'bsqlt_mem_noprepare',
+      // 'bsqlt_fle'
+      // 'bsqlt_fle_mmap'
+      // 'bsqlt_fle_tmpm'
+      // 'bsqlt_fle_thrds'
+      // 'bsqlt_fle_pgsze'
+      // 'bsqlt_fle_jmwal'
+      // 'bsqlt_fle_jmdel'
+      // 'bsqlt_fle_jmtrunc' ### NOTE does not produce correct DB file ###
+      // 'bsqlt_fle_jmpers'  ### NOTE does not produce correct DB file ###
+      // 'bsqlt_fle_jmmem'
+      // 'bsqlt_fle_jmoff'
+      'bsqlt_fle_qtforum1',
+      'bsqlt_fle_qtforum2',
+      'bsqlt_tmpfs',
+      'bsqlt_tmpfs_jmoff',
+      'bsqlt_tmpfs_jmwal',
+      'bsqlt_tmpfs_jmoff32',
+      'bsqlt_tmpfs_jmwal32'
     ];
     if (global.gc != null) {
       // 'pgmem'
