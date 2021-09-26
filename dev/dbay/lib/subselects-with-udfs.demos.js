@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dbay, H, PATH, SQL, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, insert_result, isa, join_x_and_y_using_word, new_db_with_data, prepare_db, prepare_dbr, query_with_nested_statement, query_without_nested_statement, rpr, select, select_word_from_y_scalar, show_dbr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Dbay, H, PATH, SQL, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, insert_result, isa, join_x_and_y_using_word, join_x_and_y_using_word_iterate, jr, new_db_with_data, prepare_db, prepare_dbr, query_with_nested_statement, query_without_nested_statement, rpr, select, select_word_from_y_iterate, select_word_from_y_scalar, show_dbr, trash, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   /*
 
@@ -61,20 +61,28 @@
 
   SQL = String.raw;
 
+  jr = JSON.stringify;
+
   guy = require('../../../apps/guy');
 
   ({Dbay} = require(H.dbay_path));
 
+  trash = require('trash');
+
   //-----------------------------------------------------------------------------------------------------------
   cfg = {
+    // use_ram_db:           true
+    // journal_mode:         'wal'
+    journal_mode: 'memory',
     verbose: true,
     // verbose:              false
     // catch_errors:         false
     catch_errors: true,
     // show_na_choices:      true
     show_na_choices: false,
+    // hilite:               { ft: 'scalar', }
     hilite: {
-      ft: 'scalar'
+      ft: 'table'
     },
     choices: {
       um: [true, false],
@@ -83,18 +91,19 @@
       /* connection_count      */wo: [null], // [ true, false, ]                         ### use_worker            ###
       // ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
       // ft: [ 'none', 'scalar', 'table', ]                              ### function_type         ###
-      ft: ['scalar'],
+      ft: ['scalar', 'table'],
       /* function_type         */ne: [true, false]
     },
     /* use_nested_statement  */results: {
       not_applicable: Symbol('not_applicable'),
-      not_implemented: Symbol('not_implemented')
+      not_implemented: Symbol('not_implemented'),
+      query_hangs: Symbol('query_hangs')
     }
   };
 
   //-----------------------------------------------------------------------------------------------------------
   prepare_db = function(db) {
-    var c1, c2, fn_cfg, i, idx, j, l, len, len1, len2, n, nrx, nry, ref, ref1, ref2, word;
+    var c1, c2, i, idx, j, l, len, len1, len2, n, nrx, nry, ref, ref1, ref2, scalar_fn_cfg, word;
     db.sqlt1.exec(SQL`create table x ( word text, nrx );`);
     db.sqlt1.exec(SQL`create table y ( word text, nry );`);
     ref = "foo bar baz".split(/\s+/);
@@ -109,7 +118,7 @@
         (db.sqlt1.prepare(SQL`insert into y ( word, nry ) values ( $word, $nry );`)).run({word, nry});
       }
     }
-    fn_cfg = {
+    scalar_fn_cfg = {
       deterministic: false,
       varargs: false
     };
@@ -117,11 +126,51 @@
     //.........................................................................................................
     for (l = 0, len2 = ref2.length; l < len2; l++) {
       [c1, c2] = ref2[l];
-      c1.function('join_x_and_y_using_word_scalar', fn_cfg, function() {
-        return JSON.stringify(join_x_and_y_using_word(c2));
+      //.......................................................................................................
+      c1.function('join_x_and_y_using_word_scalar_cc1', scalar_fn_cfg, function() {
+        return jr(join_x_and_y_using_word(c1));
       });
-      c1.function('select_word_from_y_scalar', fn_cfg, function(word) {
-        return JSON.stringify(select_word_from_y_scalar(c2, word));
+      c1.function('join_x_and_y_using_word_scalar_cc2', scalar_fn_cfg, function() {
+        return jr(join_x_and_y_using_word(c2));
+      });
+      c1.table('join_x_and_y_using_word_table_cc1', {
+        deterministic: false,
+        varargs: false,
+        columns: ['word', 'nrx', 'nry'],
+        rows: function*() {
+          return (yield* join_x_and_y_using_word_iterate(c1));
+        }
+      });
+      c1.table('join_x_and_y_using_word_table_cc2', {
+        deterministic: false,
+        varargs: false,
+        columns: ['word', 'nrx', 'nry'],
+        rows: function*() {
+          return (yield* join_x_and_y_using_word_iterate(c2));
+        }
+      });
+      //.......................................................................................................
+      c1.function('select_word_from_y_scalar_cc1', scalar_fn_cfg, function(word) {
+        return jr(select_word_from_y_scalar(c1, word));
+      });
+      c1.function('select_word_from_y_scalar_cc2', scalar_fn_cfg, function(word) {
+        return jr(select_word_from_y_scalar(c2, word));
+      });
+      c1.table('select_word_from_y_table_cc1', {
+        deterministic: false,
+        varargs: false,
+        columns: ['word', 'nry'],
+        rows: function*(word) {
+          return (yield* select_word_from_y_iterate(c1, word));
+        }
+      });
+      c1.table('select_word_from_y_table_cc2', {
+        deterministic: false,
+        varargs: false,
+        columns: ['word', 'nry'],
+        rows: function*(word) {
+          return (yield* select_word_from_y_iterate(c2, word));
+        }
       });
     }
     return null;
@@ -158,7 +207,7 @@
     echo(dtab._tabulate(dbr.query(SQL`select
   *
 from results
-order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;`)));
+order by error, marker desc, cc, ne, 1, 2, 3, 4, 5, 6;`)));
     return null;
   };
 
@@ -176,10 +225,30 @@ order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;`)));
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  join_x_and_y_using_word_iterate = function*(sqlt) {
+    var statement;
+    statement = sqlt.prepare(SQL`select
+    x.word  as word,
+    x.nrx   as nrx,
+    y.nry   as nry
+  from x
+  join y on ( x.word = y.word )
+  order by 1, 2, 3;`);
+    return (yield* statement.iterate());
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   select_word_from_y_scalar = function(sqlt, word) {
     var statement;
     statement = sqlt.prepare(SQL`select * from y where word = $word order by 1, 2;`);
     return statement.all({word});
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  select_word_from_y_iterate = function(sqlt, word) {
+    var statement;
+    statement = sqlt.prepare(SQL`select * from y where word = $word order by 1, 2;`);
+    return statement.iterate({word});
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -201,8 +270,7 @@ order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;`)));
 
   //-----------------------------------------------------------------------------------------------------------
   query_with_nested_statement = function(db, fingerprint, sqlt_a, sqlt_b) {
-    /* TAINT refactor */
-    var i, inner_row, inner_rows, inner_statement, j, len, len1, outer_row, outer_statement, ref, ref1, ref2, result, word;
+    var i, inner_row, inner_rows, inner_statement, j, l, len, len1, len2, outer_row, outer_statement, ref, ref1, ref2, ref3, result, word;
     switch (fingerprint.ft) {
       //.......................................................................................................
       case 'none':
@@ -226,17 +294,43 @@ order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;`)));
         return {result};
       //.......................................................................................................
       case 'scalar':
-        /* TAINT refactor */
         result = [];
         outer_statement = sqlt_a.prepare(SQL`select * from x order by 1, 2;`);
         ref2 = outer_statement.iterate();
         for (outer_row of ref2) {
           ({word} = outer_row);
-          inner_statement = sqlt_b.prepare(SQL`select select_word_from_y_scalar( $word ) as rows;`);
+          if (fingerprint.cc === 1) {
+            inner_statement = sqlt_b.prepare(SQL`select select_word_from_y_scalar_cc1( $word ) as rows;`);
+          } else {
+            inner_statement = sqlt_b.prepare(SQL`select select_word_from_y_scalar_cc2( $word ) as rows;`);
+          }
           inner_rows = (inner_statement.get({word})).rows;
           inner_rows = JSON.parse(inner_rows);
           for (j = 0, len1 = inner_rows.length; j < len1; j++) {
             inner_row = inner_rows[j];
+            result.push({
+              word: outer_row.word,
+              nrx: outer_row.nrx,
+              nry: inner_row.nry
+            });
+          }
+        }
+        return {result};
+      //.......................................................................................................
+      case 'table':
+        result = [];
+        outer_statement = sqlt_a.prepare(SQL`select * from x order by 1, 2;`);
+        ref3 = outer_statement.iterate();
+        for (outer_row of ref3) {
+          ({word} = outer_row);
+          if (fingerprint.cc === 1) {
+            inner_statement = sqlt_b.prepare(SQL`select * from select_word_from_y_table_cc1( $word );`);
+          } else {
+            inner_statement = sqlt_b.prepare(SQL`select * from select_word_from_y_table_cc2( $word );`);
+          }
+          inner_rows = inner_statement.all({word});
+          for (l = 0, len2 = inner_rows.length; l < len2; l++) {
+            inner_row = inner_rows[l];
             result.push({
               word: outer_row.word,
               nrx: outer_row.nrx,
@@ -262,9 +356,21 @@ order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;`)));
           result: join_x_and_y_using_word(sqlt_a)
         };
       case 'scalar':
-        statement = sqlt_a.prepare(SQL`select join_x_and_y_using_word_scalar() as rows;`);
+        if (fingerprint.cc === 1) {
+          statement = sqlt_a.prepare(SQL`select join_x_and_y_using_word_scalar_cc1() as rows;`);
+        } else {
+          statement = sqlt_a.prepare(SQL`select join_x_and_y_using_word_scalar_cc2() as rows;`);
+        }
         result = statement.get();
         result = JSON.parse(result.rows);
+        return {result};
+      case 'table':
+        if (fingerprint.cc === 1) {
+          statement = sqlt_a.prepare(SQL`select * from join_x_and_y_using_word_table_cc1() as rows;`);
+        } else {
+          statement = sqlt_a.prepare(SQL`select * from join_x_and_y_using_word_table_cc2() as rows;`);
+        }
+        result = statement.all();
         return {result};
     }
     return {
@@ -351,21 +457,43 @@ order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;`)));
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  new_db_with_data = function() {
-    var db;
-    db = new Dbay();
+  new_db_with_data = async function() {
+    var db, error, path;
+    if (cfg.use_ram_db) {
+      db = new Dbay({
+        timeout: 500
+      });
+    } else {
+      path = '/tmp/subselects.db';
+      try {
+        await trash(path);
+      } catch (error1) {
+        error = error1; // then throw error unless error.name is 'ENOENT'
+        debug(error.name);
+        debug(error.code);
+        debug(type_of(error));
+        throw error;
+      }
+      db = new Dbay({
+        path,
+        timeout: 500
+      });
+    }
+    db.sqlt1.exec(SQL`pragma journal_mode=${cfg.journal_mode}`);
+    db.sqlt2.exec(SQL`pragma journal_mode=${cfg.journal_mode}`);
     prepare_db(db);
     return db;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_f = function() {
+  demo_f = async function() {
     var cc, color, counts, db, dbr, error, fingerprint, ft, i, is_ok, j, k, kenning, l, len, len1, len2, len3, len4, m, marker, matcher, ne, o, ref, ref1, ref2, ref3, ref4, result, um, v, wo;
-    matcher = get_matcher(new_db_with_data());
+    matcher = get_matcher((await new_db_with_data()));
     counts = {
       total: 0,
       not_implemented: 0,
       not_applicable: 0,
+      query_hangs: 0,
       other: 0,
       error: 0,
       test: 0,
@@ -398,10 +526,26 @@ order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;`)));
             for (o = 0, len4 = ref4.length; o < len4; o++) {
               ne = ref4[o];
               counts.total++;
-              db = new_db_with_data();
+              db = (await new_db_with_data());
               fingerprint = {um, cc, wo, ft, ne};
               kenning = get_kenning(fingerprint);
+              // #...............................................................................................
+              // if false \
+              //   or ( equals fingerprint, { um: true,  cc: 1, wo: null, ft: 'table', ne: false } ) \
+              //   or ( equals fingerprint, { um: false, cc: 1, wo: null, ft: 'table', ne: false } ) \
+              //   or ( equals fingerprint, { um: true,  cc: 1, wo: null, ft: 'table', ne: true  } ) \
+              //   or ( equals fingerprint, { um: false, cc: 1, wo: null, ft: 'table', ne: true  } ) \
+              //   or ( equals fingerprint, { um: true,  cc: 2, wo: null, ft: 'table', ne: true  } ) \
+              //   or ( equals fingerprint, { um: false, cc: 2, wo: null, ft: 'table', ne: true  } )
+              //   # warn "^338^ ad-hoc skipped"
+              //   result  = cfg.results.query_hangs
+              //   error   = "query hangs indefinitely"
+              // #...............................................................................................
+              // else
+              //   { result
+              //     error }     = ff db, fingerprint
               ({result, error} = ff(db, fingerprint));
+              //...............................................................................................
               // debug '^3453^', result, isa.symbol result
               if (isa.symbol(result)) {
                 switch (result) {
@@ -413,6 +557,10 @@ order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;`)));
                     counts.not_applicable++;
                     color = CND.grey;
                     break;
+                  case cfg.results.query_hangs:
+                    counts.query_hangs++;
+                    color = CND.grey;
+                    break;
                   default:
                     counts.other++;
                     color = CND.yellow;
@@ -420,7 +568,9 @@ order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;`)));
                 if (!((result === cfg.results.not_applicable) && (!cfg.show_na_choices))) {
                   echo(CND.grey(' ', 0, color(kenning, result, error)));
                 }
-                continue;
+                if (result !== cfg.results.query_hangs) {
+                  continue;
+                }
               }
               //.............................................................................................
               counts.test++;

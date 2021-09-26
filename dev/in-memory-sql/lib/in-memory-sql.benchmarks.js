@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, paths, pragmas, rpr, show_result, test, try_to_remove_file, urge, warn, whisper;
+  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, freeze, gcfg, help, info, jr, log, paths, pragmas, rpr, show_result, test, try_to_remove_file, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -45,6 +45,8 @@
   gcfg = {
     verbose: false
   };
+
+  ({freeze} = require('letsfreezethat'));
 
   //-----------------------------------------------------------------------------------------------------------
   paths = {
@@ -99,17 +101,17 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.get_data = function(cfg) {
-    var DATOM, texts;
+    var texts;
     if (data_cache != null) {
       return data_cache;
     }
     whisper("retrieving test data...");
-    DATOM = require('../../../apps/datom');
+    // DATOM = require '../../../apps/datom'
     //.........................................................................................................
     texts = DATA.get_words(cfg.word_count);
     //.........................................................................................................
     data_cache = {texts};
-    data_cache = DATOM.freeze(data_cache);
+    data_cache = freeze(data_cache);
     whisper("...done");
     return data_cache;
   };
@@ -423,6 +425,46 @@
     });
   };
 
+  this.bettersqlite3_tmpfs = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: '/mnt/ramdisk/ram1.db',
+      pragmas: pragmas.qtforum2
+    });
+  };
+
+  this.bettersqlite3_tmpfs_jmoff = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: '/mnt/ramdisk/ram2.db',
+      pragmas: ['journal_mode = OFF;']
+    });
+  };
+
+  this.bettersqlite3_tmpfs_jmwal = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: '/mnt/ramdisk/ram2.db',
+      pragmas: ['journal_mode = WAL;']
+    });
+  };
+
+  this.bettersqlite3_tmpfs_jmoff32 = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: '/mnt/ramdisk/ram2.db',
+      pragmas: ['journal_mode = OFF;', 'page_size = 32768;', 'cache_size = 32768;']
+    });
+  };
+
+  this.bettersqlite3_tmpfs_jmwal32 = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: '/mnt/ramdisk/ram2.db',
+      pragmas: ['journal_mode = WAL;', 'page_size = 32768;', 'cache_size = 32768;']
+    });
+  };
+
   //-----------------------------------------------------------------------------------------------------------
   this.bettersqlite3_mem_noprepare = function(cfg) {
     return new Promise((resolve) => {
@@ -699,7 +741,7 @@
     gcfg.verbose = false;
     bench = BM.new_benchmarks();
     cfg = {
-      word_count: 10000
+      word_count: 1000
     };
     repetitions = 3;
     test_names = [
@@ -709,19 +751,24 @@
       'bettersqlite3_mem_icql515',
       'bettersqlite3_mem_backup',
       'bettersqlite3_mem_noprepare',
-      'bettersqlite3_fle',
-      'bettersqlite3_fle_mmap',
-      'bettersqlite3_fle_tmpm',
-      'bettersqlite3_fle_thrds',
-      'bettersqlite3_fle_pgsze',
-      'bettersqlite3_fle_jmwal',
-      'bettersqlite3_fle_jmdel',
+      // 'bettersqlite3_fle'
+      // 'bettersqlite3_fle_mmap'
+      // 'bettersqlite3_fle_tmpm'
+      // 'bettersqlite3_fle_thrds'
+      // 'bettersqlite3_fle_pgsze'
+      // 'bettersqlite3_fle_jmwal'
+      // 'bettersqlite3_fle_jmdel'
       // 'bettersqlite3_fle_jmtrunc' ### NOTE does not produce correct DB file ###
       // 'bettersqlite3_fle_jmpers'  ### NOTE does not produce correct DB file ###
-      'bettersqlite3_fle_jmmem',
-      'bettersqlite3_fle_jmoff',
+      // 'bettersqlite3_fle_jmmem'
+      // 'bettersqlite3_fle_jmoff'
       'bettersqlite3_fle_qtforum1',
-      'bettersqlite3_fle_qtforum2'
+      'bettersqlite3_fle_qtforum2',
+      'bettersqlite3_tmpfs',
+      'bettersqlite3_tmpfs_jmoff',
+      'bettersqlite3_tmpfs_jmwal',
+      'bettersqlite3_tmpfs_jmoff32',
+      'bettersqlite3_tmpfs_jmwal32'
     ];
     if (global.gc != null) {
       // 'pgmem'
