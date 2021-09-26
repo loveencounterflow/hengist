@@ -25,6 +25,10 @@ SQL                       = String.raw
 guy                       = require '../../../apps/guy'
 
 
+throw new Error """
+  this approcach has been abandoned partly because all communication between threads will always be
+  inherently async, and async iterators are not allowed in table UDFs."""
+
 #-----------------------------------------------------------------------------------------------------------
 demo_udf_dbay_sqlt = ->
   { Dbay }  = require H.dbay_path
