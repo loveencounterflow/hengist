@@ -130,7 +130,7 @@ show_result = ( name, result ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@bettersqlite3_membacked = ( cfg, use_membacked = true ) -> new Promise ( resolve ) =>
+@bsqlt_membacked = ( cfg, use_membacked = true ) -> new Promise ( resolve ) =>
   Db            = require 'better-sqlite3'
   # db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
   #.........................................................................................................
@@ -216,32 +216,32 @@ show_result = ( name, result ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@bettersqlite3_mem          = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', }
-@bettersqlite3_mem_thrds    = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'threads = 4;', ] }
-@bettersqlite3_mem_jmoff    = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'journal_mode = OFF;', ], }
-@bettersqlite3_mem_backup   = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', do_backup: true, }
+@bsqlt_mem          = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', }
+@bsqlt_mem_thrds    = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'threads = 4;', ] }
+@bsqlt_mem_jmoff    = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'journal_mode = OFF;', ], }
+@bsqlt_mem_backup   = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', do_backup: true, }
 #...........................................................................................................
-@bettersqlite3_fle          = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle }
-@bettersqlite3_fle_jmdel    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmdel,       pragmas: [ 'journal_mode = DELETE;', ] }
-@bettersqlite3_fle_jmtrunc  = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmtrunc,     pragmas: [ 'journal_mode = TRUNCATE;', ] }
-@bettersqlite3_fle_jmpers   = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmpers,      pragmas: [ 'journal_mode = PERSIST;', ] }
-@bettersqlite3_fle_jmmem    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmmem,       pragmas: [ 'journal_mode = MEMORY;', ] }
-@bettersqlite3_fle_jmwal    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmwal,       pragmas: [ 'journal_mode = WAL;', ] }
-@bettersqlite3_fle_jmoff    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmoff,       pragmas: [ 'journal_mode = OFF;', ] }
-@bettersqlite3_fle_mmap     = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_mmap,        pragmas: [ 'mmap_size = 30000000000;', ] }
-@bettersqlite3_fle_tmpm     = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_tmpm,        pragmas: [ 'temp_store = MEMORY;', ] }
-@bettersqlite3_fle_pgsze    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_pgsze,       pragmas: [ 'page_size = 32768;', ] }
-@bettersqlite3_fle_thrds    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_thrds,       pragmas: [ 'threads = 4;', ] }
-@bettersqlite3_fle_qtforum1 = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_qtforum1,    pragmas: pragmas.qtforum1 }
-@bettersqlite3_fle_qtforum2 = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_qtforum2,    pragmas: pragmas.qtforum2 }
-@bettersqlite3_tmpfs        = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram1.db', pragmas: pragmas.qtforum2 }
-@bettersqlite3_tmpfs_jmoff  = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram2.db', pragmas: [ 'journal_mode = OFF;', ] }
-@bettersqlite3_tmpfs_jmwal  = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram2.db', pragmas: [ 'journal_mode = WAL;', ] }
-@bettersqlite3_tmpfs_jmoff32  = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram2.db', pragmas: [ 'journal_mode = OFF;', 'page_size = 32768;', 'cache_size = 32768;', ] }
-@bettersqlite3_tmpfs_jmwal32  = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram2.db', pragmas: [ 'journal_mode = WAL;', 'page_size = 32768;', 'cache_size = 32768;', ] }
+@bsqlt_fle          = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle }
+@bsqlt_fle_jmdel    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmdel,       pragmas: [ 'journal_mode = DELETE;', ] }
+@bsqlt_fle_jmtrunc  = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmtrunc,     pragmas: [ 'journal_mode = TRUNCATE;', ] }
+@bsqlt_fle_jmpers   = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmpers,      pragmas: [ 'journal_mode = PERSIST;', ] }
+@bsqlt_fle_jmmem    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmmem,       pragmas: [ 'journal_mode = MEMORY;', ] }
+@bsqlt_fle_jmwal    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmwal,       pragmas: [ 'journal_mode = WAL;', ] }
+@bsqlt_fle_jmoff    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmoff,       pragmas: [ 'journal_mode = OFF;', ] }
+@bsqlt_fle_mmap     = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_mmap,        pragmas: [ 'mmap_size = 30000000000;', ] }
+@bsqlt_fle_tmpm     = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_tmpm,        pragmas: [ 'temp_store = MEMORY;', ] }
+@bsqlt_fle_pgsze    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_pgsze,       pragmas: [ 'page_size = 32768;', ] }
+@bsqlt_fle_thrds    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_thrds,       pragmas: [ 'threads = 4;', ] }
+@bsqlt_fle_qtforum1 = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_qtforum1,    pragmas: pragmas.qtforum1 }
+@bsqlt_fle_qtforum2 = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_qtforum2,    pragmas: pragmas.qtforum2 }
+@bsqlt_tmpfs        = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram1.db', pragmas: pragmas.qtforum2 }
+@bsqlt_tmpfs_jmoff  = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram2.db', pragmas: [ 'journal_mode = OFF;', ] }
+@bsqlt_tmpfs_jmwal  = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram2.db', pragmas: [ 'journal_mode = WAL;', ] }
+@bsqlt_tmpfs_jmoff32  = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram2.db', pragmas: [ 'journal_mode = OFF;', 'page_size = 32768;', 'cache_size = 32768;', ] }
+@bsqlt_tmpfs_jmwal32  = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram2.db', pragmas: [ 'journal_mode = WAL;', 'page_size = 32768;', 'cache_size = 32768;', ] }
 
 #-----------------------------------------------------------------------------------------------------------
-@bettersqlite3_mem_noprepare = ( cfg ) -> new Promise ( resolve ) =>
+@bsqlt_mem_noprepare = ( cfg ) -> new Promise ( resolve ) =>
   Db            = require 'better-sqlite3'
   # db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
   db_cfg        = null
@@ -275,7 +275,7 @@ show_result = ( name, result ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@_bettersqlite3_memory_icql = ( cfg, icql_version ) -> new Promise ( resolve ) =>
+@_bsqlt_memory_icql = ( cfg, icql_version ) -> new Promise ( resolve ) =>
   Db            = require 'better-sqlite3'
   icql_path     = PATH.resolve PATH.join __dirname, '../demo-frp.icql'
   ICQL          = require switch icql_version
@@ -298,14 +298,14 @@ show_result = ( name, result ) ->
       db.insert_line { linenr, line, }
     result  = db.$.all_rows db.get_all_texts()
     count  += result.length
-    show_result 'bettersqlite3_memory_icql', result if gcfg.verbose
+    show_result 'bsqlt_memory_icql', result if gcfg.verbose
     db.$.db.close()
     resolve count
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@bettersqlite3_mem_icql515     = ( cfg ) -> @_bettersqlite3_memory_icql cfg, 'icql515'
-@bettersqlite3_mem_icql_latest = ( cfg ) -> @_bettersqlite3_memory_icql cfg, 'icql_latest'
+@bsqlt_mem_icql515     = ( cfg ) -> @_bsqlt_memory_icql cfg, 'icql515'
+@bsqlt_mem_icql_latest = ( cfg ) -> @_bsqlt_memory_icql cfg, 'icql_latest'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -429,30 +429,30 @@ show_result = ( name, result ) ->
   cfg           = { word_count: 1000, }
   repetitions   = 3
   test_names    = [
-    'bettersqlite3_mem'
-    'bettersqlite3_mem_jmoff'
-    'bettersqlite3_mem_icql_latest'
-    'bettersqlite3_mem_icql515'
-    'bettersqlite3_mem_backup'
-    'bettersqlite3_mem_noprepare'
-    # 'bettersqlite3_fle'
-    # 'bettersqlite3_fle_mmap'
-    # 'bettersqlite3_fle_tmpm'
-    # 'bettersqlite3_fle_thrds'
-    # 'bettersqlite3_fle_pgsze'
-    # 'bettersqlite3_fle_jmwal'
-    # 'bettersqlite3_fle_jmdel'
-    # 'bettersqlite3_fle_jmtrunc' ### NOTE does not produce correct DB file ###
-    # 'bettersqlite3_fle_jmpers'  ### NOTE does not produce correct DB file ###
-    # 'bettersqlite3_fle_jmmem'
-    # 'bettersqlite3_fle_jmoff'
-    'bettersqlite3_fle_qtforum1'
-    'bettersqlite3_fle_qtforum2'
-    'bettersqlite3_tmpfs'
-    'bettersqlite3_tmpfs_jmoff'
-    'bettersqlite3_tmpfs_jmwal'
-    'bettersqlite3_tmpfs_jmoff32'
-    'bettersqlite3_tmpfs_jmwal32'
+    'bsqlt_mem'
+    'bsqlt_mem_jmoff'
+    'bsqlt_mem_icql_latest'
+    'bsqlt_mem_icql515'
+    'bsqlt_mem_backup'
+    'bsqlt_mem_noprepare'
+    # 'bsqlt_fle'
+    # 'bsqlt_fle_mmap'
+    # 'bsqlt_fle_tmpm'
+    # 'bsqlt_fle_thrds'
+    # 'bsqlt_fle_pgsze'
+    # 'bsqlt_fle_jmwal'
+    # 'bsqlt_fle_jmdel'
+    # 'bsqlt_fle_jmtrunc' ### NOTE does not produce correct DB file ###
+    # 'bsqlt_fle_jmpers'  ### NOTE does not produce correct DB file ###
+    # 'bsqlt_fle_jmmem'
+    # 'bsqlt_fle_jmoff'
+    'bsqlt_fle_qtforum1'
+    'bsqlt_fle_qtforum2'
+    'bsqlt_tmpfs'
+    'bsqlt_tmpfs_jmoff'
+    'bsqlt_tmpfs_jmwal'
+    'bsqlt_tmpfs_jmoff32'
+    'bsqlt_tmpfs_jmwal32'
     # 'pgmem'
     # 'sqljs'
     # 'porsagerpostgres'
