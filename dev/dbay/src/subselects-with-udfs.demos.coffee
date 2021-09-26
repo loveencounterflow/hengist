@@ -51,17 +51,23 @@ types                     = new ( require 'intertype' ).Intertype
   validate
   validate_list_of }      = types.export()
 SQL                       = String.raw
+jr                        = JSON.stringify
 guy                       = require '../../../apps/guy'
 { Dbay }                  = require H.dbay_path
+trash                     = require 'trash'
 #-----------------------------------------------------------------------------------------------------------
 cfg =
+  # use_ram_db:           true
+  # journal_mode:         'wal'
+  journal_mode:         'memory'
   verbose:              true
   # verbose:              false
   # catch_errors:         false
   catch_errors:         true
   # show_na_choices:      true
   show_na_choices:      false
-  hilite:               { ft: 'scalar', }
+  # hilite:               { ft: 'scalar', }
+  hilite:               { ft: 'table', }
   choices:
     um: [ true, false, ]                                            ### unsafe_mode            ###
     cc: [ 1, 2, ]                                                   ### connection_count      ###
@@ -69,11 +75,12 @@ cfg =
     wo: [ null, ]        # [ true, false, ]                         ### use_worker            ###
     # ft: [ null, ]        # [ 'none', 'scalar', 'table', 'sqlite', ] ### function_type         ###
     # ft: [ 'none', 'scalar', 'table', ]                              ### function_type         ###
-    ft: [ 'scalar', ]                              ### function_type         ###
+    ft: [ 'scalar', 'table', ]                              ### function_type         ###
     ne: [ true, false, ]                                            ### use_nested_statement  ###
   results:
     not_applicable:   Symbol 'not_applicable'
     not_implemented:  Symbol 'not_implemented'
+    query_hangs:      Symbol 'query_hangs'
 
 #-----------------------------------------------------------------------------------------------------------
 prepare_db = ( db ) ->
@@ -85,13 +92,35 @@ prepare_db = ( db ) ->
     for n in [ 1, 2, 3, ]
       nry = nrx + n * 2
       ( db.sqlt1.prepare SQL"insert into y ( word, nry ) values ( $word, $nry );" ).run { word, nry, }
-  fn_cfg = { deterministic: false, varargs: false, }
+  scalar_fn_cfg = { deterministic: false, varargs: false, }
   #.........................................................................................................
   for [ c1, c2, ] in [ [ db.sqlt1, db.sqlt2, ], [ db.sqlt2, db.sqlt1, ], ]
-    c1.function 'join_x_and_y_using_word_scalar', fn_cfg, ->
-      return JSON.stringify join_x_and_y_using_word c2
-    c1.function 'select_word_from_y_scalar', fn_cfg, ( word ) ->
-      return JSON.stringify select_word_from_y_scalar c2, word
+    #.......................................................................................................
+    c1.function 'join_x_and_y_using_word_scalar_cc1', scalar_fn_cfg, -> jr join_x_and_y_using_word c1
+    c1.function 'join_x_and_y_using_word_scalar_cc2', scalar_fn_cfg, -> jr join_x_and_y_using_word c2
+    c1.table 'join_x_and_y_using_word_table_cc1',
+      deterministic:  false
+      varargs:        false
+      columns:        [ 'word', 'nrx', 'nry', ]
+      rows:           -> yield from join_x_and_y_using_word_iterate c1
+    c1.table 'join_x_and_y_using_word_table_cc2',
+      deterministic:  false
+      varargs:        false
+      columns:        [ 'word', 'nrx', 'nry', ]
+      rows:           -> yield from join_x_and_y_using_word_iterate c2
+    #.......................................................................................................
+    c1.function 'select_word_from_y_scalar_cc1', scalar_fn_cfg, ( word ) -> jr select_word_from_y_scalar c1, word
+    c1.function 'select_word_from_y_scalar_cc2', scalar_fn_cfg, ( word ) -> jr select_word_from_y_scalar c2, word
+    c1.table 'select_word_from_y_table_cc1',
+      deterministic:  false
+      varargs:        false
+      columns:        [ 'word', 'nry', ]
+      rows:           ( word ) -> yield from select_word_from_y_iterate c1, word
+    c1.table 'select_word_from_y_table_cc2',
+      deterministic:  false
+      varargs:        false
+      columns:        [ 'word', 'nry', ]
+      rows:           ( word ) -> yield from select_word_from_y_iterate c2, word
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -127,7 +156,7 @@ show_dbr = ( dbr ) ->
   echo dtab._tabulate dbr.query SQL"""select
       *
     from results
-    order by cc, ne, error, marker desc, 1, 2, 3, 4, 5, 6;"""
+    order by error, marker desc, cc, ne, 1, 2, 3, 4, 5, 6;"""
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -143,9 +172,26 @@ join_x_and_y_using_word = ( sqlt ) ->
   return statement.all()
 
 #-----------------------------------------------------------------------------------------------------------
+join_x_and_y_using_word_iterate = ( sqlt ) ->
+  statement = sqlt.prepare SQL"""
+    select
+        x.word  as word,
+        x.nrx   as nrx,
+        y.nry   as nry
+      from x
+      join y on ( x.word = y.word )
+      order by 1, 2, 3;"""
+  yield from statement.iterate()
+
+#-----------------------------------------------------------------------------------------------------------
 select_word_from_y_scalar = ( sqlt, word ) ->
   statement = sqlt.prepare SQL"select * from y where word = $word order by 1, 2;"
   return statement.all { word, }
+
+#-----------------------------------------------------------------------------------------------------------
+select_word_from_y_iterate = ( sqlt, word ) ->
+  statement = sqlt.prepare SQL"select * from y where word = $word order by 1, 2;"
+  return statement.iterate { word, }
 
 #-----------------------------------------------------------------------------------------------------------
 get_matcher = ( db ) -> join_x_and_y_using_word db.sqlt1
@@ -163,7 +209,6 @@ query_with_nested_statement = ( db, fingerprint, sqlt_a, sqlt_b ) ->
   switch fingerprint.ft
     #.......................................................................................................
     when 'none'
-      ### TAINT refactor ###
       result = []
       outer_statement = sqlt_a.prepare SQL"select * from x order by 1, 2;"
       for outer_row from outer_statement.iterate()
@@ -173,14 +218,30 @@ query_with_nested_statement = ( db, fingerprint, sqlt_a, sqlt_b ) ->
       return { result, }
     #.......................................................................................................
     when 'scalar'
-      ### TAINT refactor ###
       result = []
       outer_statement = sqlt_a.prepare SQL"select * from x order by 1, 2;"
       for outer_row from outer_statement.iterate()
         { word, }       = outer_row
-        inner_statement = sqlt_b.prepare SQL"select select_word_from_y_scalar( $word ) as rows;"
+        if fingerprint.cc is 1
+          inner_statement = sqlt_b.prepare SQL"select select_word_from_y_scalar_cc1( $word ) as rows;"
+        else
+          inner_statement = sqlt_b.prepare SQL"select select_word_from_y_scalar_cc2( $word ) as rows;"
         inner_rows      = ( inner_statement.get { word, } ).rows
         inner_rows      = JSON.parse inner_rows
+        for inner_row in inner_rows
+          result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
+      return { result, }
+    #.......................................................................................................
+    when 'table'
+      result = []
+      outer_statement = sqlt_a.prepare SQL"select * from x order by 1, 2;"
+      for outer_row from outer_statement.iterate()
+        { word, }       = outer_row
+        if fingerprint.cc is 1
+          inner_statement = sqlt_b.prepare SQL"select * from select_word_from_y_table_cc1( $word );"
+        else
+          inner_statement = sqlt_b.prepare SQL"select * from select_word_from_y_table_cc2( $word );"
+        inner_rows      = inner_statement.all { word, }
         for inner_row in inner_rows
           result.push { word: outer_row.word, nrx: outer_row.nrx, nry: inner_row.nry, }
       return { result, }
@@ -193,9 +254,19 @@ query_without_nested_statement = ( db, fingerprint, sqlt_a, sqlt_b ) ->
     when 'none'
       return { result: ( join_x_and_y_using_word sqlt_a ), }
     when 'scalar'
-      statement = sqlt_a.prepare SQL"select join_x_and_y_using_word_scalar() as rows;"
+      if fingerprint.cc is 1
+        statement = sqlt_a.prepare SQL"select join_x_and_y_using_word_scalar_cc1() as rows;"
+      else
+        statement = sqlt_a.prepare SQL"select join_x_and_y_using_word_scalar_cc2() as rows;"
       result    = statement.get()
       result    = JSON.parse result.rows
+      return { result, }
+    when 'table'
+      if fingerprint.cc is 1
+        statement = sqlt_a.prepare SQL"select * from join_x_and_y_using_word_table_cc1() as rows;"
+      else
+        statement = sqlt_a.prepare SQL"select * from join_x_and_y_using_word_table_cc2() as rows;"
+      result    = statement.all()
       return { result, }
   return { result: cfg.results.not_implemented, error: "ft: #{rpr fingerprint.ft} not implemented", }
 
@@ -252,17 +323,29 @@ select = ( fingerprint ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 new_db_with_data = ->
-  db = new Dbay()
+  if cfg.use_ram_db
+    db = new Dbay { timeout: 500, }
+  else
+    path  = '/tmp/subselects.db'
+    try await trash path catch error # then throw error unless error.name is 'ENOENT'
+      debug error.name
+      debug error.code
+      debug type_of error
+      throw error
+    db = new Dbay { path, timeout: 500, }
+  db.sqlt1.exec SQL"pragma journal_mode=#{cfg.journal_mode}"
+  db.sqlt2.exec SQL"pragma journal_mode=#{cfg.journal_mode}"
   prepare_db db
   return db
 
 #-----------------------------------------------------------------------------------------------------------
 demo_f = ->
-  matcher   = get_matcher new_db_with_data()
+  matcher   = get_matcher await new_db_with_data()
   counts    =
     total:            0
     not_implemented:  0
     not_applicable:   0
+    query_hangs:      0
     other:            0
     error:            0
     test:             0
@@ -279,11 +362,27 @@ demo_f = ->
         for       ft in cfg.choices.ft  ### function_type         ###
           for     ne in cfg.choices.ne  ### use_nested_statement  ###
             counts.total++
-            db            = new_db_with_data()
+            db            = await new_db_with_data()
             fingerprint   = { um, cc, wo, ft, ne, }
             kenning       = get_kenning fingerprint
+            # #...............................................................................................
+            # if false \
+            #   or ( equals fingerprint, { um: true,  cc: 1, wo: null, ft: 'table', ne: false } ) \
+            #   or ( equals fingerprint, { um: false, cc: 1, wo: null, ft: 'table', ne: false } ) \
+            #   or ( equals fingerprint, { um: true,  cc: 1, wo: null, ft: 'table', ne: true  } ) \
+            #   or ( equals fingerprint, { um: false, cc: 1, wo: null, ft: 'table', ne: true  } ) \
+            #   or ( equals fingerprint, { um: true,  cc: 2, wo: null, ft: 'table', ne: true  } ) \
+            #   or ( equals fingerprint, { um: false, cc: 2, wo: null, ft: 'table', ne: true  } )
+            #   # warn "^338^ ad-hoc skipped"
+            #   result  = cfg.results.query_hangs
+            #   error   = "query hangs indefinitely"
+            # #...............................................................................................
+            # else
+            #   { result
+            #     error }     = ff db, fingerprint
             { result
               error }     = ff db, fingerprint
+            #...............................................................................................
             # debug '^3453^', result, isa.symbol result
             if ( isa.symbol result )
               switch result
@@ -293,12 +392,15 @@ demo_f = ->
                 when cfg.results.not_applicable
                   counts.not_applicable++
                   color = CND.grey
+                when cfg.results.query_hangs
+                  counts.query_hangs++
+                  color = CND.grey
                 else
                   counts.other++
                   color = CND.yellow
               unless ( result is cfg.results.not_applicable ) and ( not cfg.show_na_choices )
                 echo CND.grey ' ', 0, color kenning, result, error
-              continue
+              continue unless result is cfg.results.query_hangs
             #.............................................................................................
             counts.test++
             if ( is_ok = equals result, matcher ) then  counts.success++
