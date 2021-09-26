@@ -24,6 +24,7 @@ test                      = require 'guy-test'
 BM                        = require '../../../lib/benchmarks'
 data_cache                = null
 gcfg                      = { verbose: false, }
+{ freeze }                = require 'letsfreezethat'
 
 #-----------------------------------------------------------------------------------------------------------
 paths =
@@ -80,12 +81,12 @@ show_result = ( name, result ) ->
 @get_data = ( cfg ) ->
   return data_cache if data_cache?
   whisper "retrieving test data..."
-  DATOM = require '../../../apps/datom'
+  # DATOM = require '../../../apps/datom'
   #.........................................................................................................
   texts       = DATA.get_words cfg.word_count
   #.........................................................................................................
   data_cache  = { texts, }
-  data_cache  = DATOM.freeze data_cache
+  data_cache  = freeze data_cache
   whisper "...done"
   return data_cache
 
@@ -221,18 +222,23 @@ show_result = ( name, result ) ->
 @bettersqlite3_mem_backup   = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', do_backup: true, }
 #...........................................................................................................
 @bettersqlite3_fle          = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle }
-@bettersqlite3_fle_jmdel    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmdel,     pragmas: [ 'journal_mode = DELETE;', ] }
-@bettersqlite3_fle_jmtrunc  = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmtrunc,   pragmas: [ 'journal_mode = TRUNCATE;', ] }
-@bettersqlite3_fle_jmpers   = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmpers,    pragmas: [ 'journal_mode = PERSIST;', ] }
-@bettersqlite3_fle_jmmem    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmmem,     pragmas: [ 'journal_mode = MEMORY;', ] }
-@bettersqlite3_fle_jmwal    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmwal,     pragmas: [ 'journal_mode = WAL;', ] }
-@bettersqlite3_fle_jmoff    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmoff,     pragmas: [ 'journal_mode = OFF;', ] }
-@bettersqlite3_fle_mmap     = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_mmap,      pragmas: [ 'mmap_size = 30000000000;', ] }
-@bettersqlite3_fle_tmpm     = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_tmpm,      pragmas: [ 'temp_store = MEMORY;', ] }
-@bettersqlite3_fle_pgsze    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_pgsze,     pragmas: [ 'page_size = 32768;', ] }
-@bettersqlite3_fle_thrds    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_thrds,     pragmas: [ 'threads = 4;', ] }
-@bettersqlite3_fle_qtforum1 = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_qtforum1,  pragmas: pragmas.qtforum1 }
-@bettersqlite3_fle_qtforum2 = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_qtforum2,  pragmas: pragmas.qtforum2 }
+@bettersqlite3_fle_jmdel    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmdel,       pragmas: [ 'journal_mode = DELETE;', ] }
+@bettersqlite3_fle_jmtrunc  = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmtrunc,     pragmas: [ 'journal_mode = TRUNCATE;', ] }
+@bettersqlite3_fle_jmpers   = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmpers,      pragmas: [ 'journal_mode = PERSIST;', ] }
+@bettersqlite3_fle_jmmem    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmmem,       pragmas: [ 'journal_mode = MEMORY;', ] }
+@bettersqlite3_fle_jmwal    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmwal,       pragmas: [ 'journal_mode = WAL;', ] }
+@bettersqlite3_fle_jmoff    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmoff,       pragmas: [ 'journal_mode = OFF;', ] }
+@bettersqlite3_fle_mmap     = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_mmap,        pragmas: [ 'mmap_size = 30000000000;', ] }
+@bettersqlite3_fle_tmpm     = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_tmpm,        pragmas: [ 'temp_store = MEMORY;', ] }
+@bettersqlite3_fle_pgsze    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_pgsze,       pragmas: [ 'page_size = 32768;', ] }
+@bettersqlite3_fle_thrds    = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_thrds,       pragmas: [ 'threads = 4;', ] }
+@bettersqlite3_fle_qtforum1 = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_qtforum1,    pragmas: pragmas.qtforum1 }
+@bettersqlite3_fle_qtforum2 = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_qtforum2,    pragmas: pragmas.qtforum2 }
+@bettersqlite3_tmpfs        = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram1.db', pragmas: pragmas.qtforum2 }
+@bettersqlite3_tmpfs_jmoff  = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram2.db', pragmas: [ 'journal_mode = OFF;', ] }
+@bettersqlite3_tmpfs_jmwal  = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram2.db', pragmas: [ 'journal_mode = WAL;', ] }
+@bettersqlite3_tmpfs_jmoff32  = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram2.db', pragmas: [ 'journal_mode = OFF;', 'page_size = 32768;', 'cache_size = 32768;', ] }
+@bettersqlite3_tmpfs_jmwal32  = ( cfg ) => @_btsql3 { cfg..., db_path: '/mnt/ramdisk/ram2.db', pragmas: [ 'journal_mode = WAL;', 'page_size = 32768;', 'cache_size = 32768;', ] }
 
 #-----------------------------------------------------------------------------------------------------------
 @bettersqlite3_mem_noprepare = ( cfg ) -> new Promise ( resolve ) =>
@@ -420,7 +426,7 @@ show_result = ( name, result ) ->
   gcfg.verbose  = true
   gcfg.verbose  = false
   bench         = BM.new_benchmarks()
-  cfg           = { word_count: 10000, }
+  cfg           = { word_count: 1000, }
   repetitions   = 3
   test_names    = [
     'bettersqlite3_mem'
@@ -429,19 +435,24 @@ show_result = ( name, result ) ->
     'bettersqlite3_mem_icql515'
     'bettersqlite3_mem_backup'
     'bettersqlite3_mem_noprepare'
-    'bettersqlite3_fle'
-    'bettersqlite3_fle_mmap'
-    'bettersqlite3_fle_tmpm'
-    'bettersqlite3_fle_thrds'
-    'bettersqlite3_fle_pgsze'
-    'bettersqlite3_fle_jmwal'
-    'bettersqlite3_fle_jmdel'
+    # 'bettersqlite3_fle'
+    # 'bettersqlite3_fle_mmap'
+    # 'bettersqlite3_fle_tmpm'
+    # 'bettersqlite3_fle_thrds'
+    # 'bettersqlite3_fle_pgsze'
+    # 'bettersqlite3_fle_jmwal'
+    # 'bettersqlite3_fle_jmdel'
     # 'bettersqlite3_fle_jmtrunc' ### NOTE does not produce correct DB file ###
     # 'bettersqlite3_fle_jmpers'  ### NOTE does not produce correct DB file ###
-    'bettersqlite3_fle_jmmem'
-    'bettersqlite3_fle_jmoff'
+    # 'bettersqlite3_fle_jmmem'
+    # 'bettersqlite3_fle_jmoff'
     'bettersqlite3_fle_qtforum1'
     'bettersqlite3_fle_qtforum2'
+    'bettersqlite3_tmpfs'
+    'bettersqlite3_tmpfs_jmoff'
+    'bettersqlite3_tmpfs_jmwal'
+    'bettersqlite3_tmpfs_jmoff32'
+    'bettersqlite3_tmpfs_jmwal32'
     # 'pgmem'
     # 'sqljs'
     # 'porsagerpostgres'
