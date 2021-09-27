@@ -147,12 +147,18 @@
       resolve(() => {
         return new Promise((resolve) => {
           var i, len, nr, ref, result, text;
+          if (cfg.use_transaction) {
+            db.public.none("begin;");
+          }
           nr = 0;
           ref = data.texts;
           for (i = 0, len = ref.length; i < len; i++) {
             text = ref[i];
             nr++;
             table.insert({nr, text});
+          }
+          if (cfg.use_transaction) {
+            db.public.none("commit;");
           }
           result = db.public.many(`select * from test order by text;`);
           count += result.length;
@@ -164,6 +170,14 @@
         });
       });
       return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.pgmem_tx = (cfg) => {
+    return this.pgmem({
+      ...cfg,
+      use_transaction: true
     });
   };
 
@@ -266,12 +280,17 @@
         return new Promise(async(resolve) => {
           var j, len1, nr, ref1, result, text;
           nr = 0;
+          if (cfg.use_transaction) {
+            db.exec("begin transaction;");
+          }
           ref1 = data.texts;
-          // db.transaction =>
           for (j = 0, len1 = ref1.length; j < len1; j++) {
             text = ref1[j];
             nr++;
             insert.run([nr, text]);
+          }
+          if (cfg.use_transaction) {
+            db.exec("commit;");
           }
           result = retrieve.all();
           count += result.length;
@@ -297,6 +316,23 @@
     });
   };
 
+  this.bsqlt_mem_tx = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: ':memory:',
+      use_transaction: true
+    });
+  };
+
+  this.bsqlt_mem_tx_jmwal = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: ':memory:',
+      use_transaction: true,
+      pragmas: ['journal_mode = WAL;']
+    });
+  };
+
   this.bsqlt_mem_thrds = (cfg) => {
     return this._btsql3({
       ...cfg,
@@ -313,6 +349,14 @@
     });
   };
 
+  this.bsqlt_mem_jmwal = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: ':memory:',
+      pragmas: ['journal_mode = WAL;']
+    });
+  };
+
   this.bsqlt_mem_backup = (cfg) => {
     return this._btsql3({
       ...cfg,
@@ -326,6 +370,23 @@
     return this._btsql3({
       ...cfg,
       db_path: paths.fle
+    });
+  };
+
+  this.bsqlt_fle_tx = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: paths.fle,
+      use_transaction: true
+    });
+  };
+
+  this.bsqlt_fle_tx_jmwal = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: paths.fle,
+      use_transaction: true,
+      pragmas: ['journal_mode = WAL;']
     });
   };
 
@@ -425,18 +486,43 @@
     });
   };
 
+  //...........................................................................................................
   this.bsqlt_tmpfs = (cfg) => {
     return this._btsql3({
       ...cfg,
-      db_path: '/mnt/ramdisk/ram1.db',
+      db_path: '/mnt/ramdisk/ram.db'
+    });
+  };
+
+  this.bsqlt_tmpfs_qtforum2 = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: '/mnt/ramdisk/ram.db',
       pragmas: pragmas.qtforum2
+    });
+  };
+
+  this.bsqlt_tmpfs_tx = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: '/mnt/ramdisk/ram.db',
+      use_transaction: true
+    });
+  };
+
+  this.bsqlt_tmpfs_tx_jmwal = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: '/mnt/ramdisk/ram.db',
+      use_transaction: true,
+      pragmas: ['journal_mode = WAL;']
     });
   };
 
   this.bsqlt_tmpfs_jmoff = (cfg) => {
     return this._btsql3({
       ...cfg,
-      db_path: '/mnt/ramdisk/ram2.db',
+      db_path: '/mnt/ramdisk/ram.db',
       pragmas: ['journal_mode = OFF;']
     });
   };
@@ -444,7 +530,7 @@
   this.bsqlt_tmpfs_jmwal = (cfg) => {
     return this._btsql3({
       ...cfg,
-      db_path: '/mnt/ramdisk/ram2.db',
+      db_path: '/mnt/ramdisk/ram.db',
       pragmas: ['journal_mode = WAL;']
     });
   };
@@ -452,7 +538,7 @@
   this.bsqlt_tmpfs_jmoff32 = (cfg) => {
     return this._btsql3({
       ...cfg,
-      db_path: '/mnt/ramdisk/ram2.db',
+      db_path: '/mnt/ramdisk/ram.db',
       pragmas: ['journal_mode = OFF;', 'page_size = 32768;', 'cache_size = 32768;']
     });
   };
@@ -460,8 +546,24 @@
   this.bsqlt_tmpfs_jmwal32 = (cfg) => {
     return this._btsql3({
       ...cfg,
-      db_path: '/mnt/ramdisk/ram2.db',
+      db_path: '/mnt/ramdisk/ram.db',
       pragmas: ['journal_mode = WAL;', 'page_size = 32768;', 'cache_size = 32768;']
+    });
+  };
+
+  this.bsqlt_tmpfs_jmwal_mm0 = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: '/mnt/ramdisk/ram.db',
+      pragmas: ['journal_mode = WAL;', 'mmap_size = 0;']
+    });
+  };
+
+  this.bsqlt_tmpfs_jmwal32_mm0 = (cfg) => {
+    return this._btsql3({
+      ...cfg,
+      db_path: '/mnt/ramdisk/ram.db',
+      pragmas: ['journal_mode = WAL;', 'page_size = 32768;', 'cache_size = 32768;', 'mmap_size = 0;']
     });
   };
 
@@ -631,7 +733,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.porsagerpostgres = function(cfg) {
+  this.porsagerpostgres_tx = function(cfg) {
     return new Promise(async(resolve) => {
       var count, data, postgres, sql;
       postgres = require('postgres');
@@ -678,7 +780,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.briancpg = function(cfg) {
+  this.briancpg_tx = function(cfg) {
     return new Promise(async(resolve) => {
       var count, data, db, db_cfg, pool;
       db_cfg = {
@@ -701,6 +803,7 @@
       resolve(() => {
         return new Promise(async(resolve) => {
           var i, len, nr, q, ref, result, text;
+          await db.query("truncate table test;");
           try {
             await db.query('begin');
             q = {
@@ -717,9 +820,9 @@
               await db.query(q);
             }
             result = (await db.query(`select * from test order by text;`));
-            await db.query('rollback');
+            await db.query('commit');
             if (gcfg.verbose) {
-              show_result('briancpg', result.rows);
+              show_result('briancpg_tx', result.rows);
             }
             count += result.rows.length;
             await resolve(count);
@@ -741,40 +844,52 @@
     gcfg.verbose = false;
     bench = BM.new_benchmarks();
     cfg = {
-      word_count: 1000
+      word_count: 10000
     };
-    repetitions = 3;
+    repetitions = 5;
     test_names = [
       'bsqlt_mem',
-      'bsqlt_mem_jmoff',
-      'bsqlt_mem_icql_latest',
-      'bsqlt_mem_icql515',
-      'bsqlt_mem_backup',
-      'bsqlt_mem_noprepare',
+      'bsqlt_mem_tx',
+      'bsqlt_mem_tx_jmwal',
+      // 'bsqlt_mem_jmoff'
+      'bsqlt_mem_jmwal',
+      // 'bsqlt_mem_icql_latest'
+      // 'bsqlt_mem_icql515'
+      // 'bsqlt_mem_backup'
+      // 'bsqlt_mem_noprepare'
+      'bsqlt_mem_thrds',
       // 'bsqlt_fle'
       // 'bsqlt_fle_mmap'
       // 'bsqlt_fle_tmpm'
       // 'bsqlt_fle_thrds'
       // 'bsqlt_fle_pgsze'
-      // 'bsqlt_fle_jmwal'
+      'bsqlt_fle_jmwal',
       // 'bsqlt_fle_jmdel'
       // 'bsqlt_fle_jmtrunc' ### NOTE does not produce correct DB file ###
       // 'bsqlt_fle_jmpers'  ### NOTE does not produce correct DB file ###
       // 'bsqlt_fle_jmmem'
       // 'bsqlt_fle_jmoff'
-      'bsqlt_fle_qtforum1',
+      // 'bsqlt_fle_qtforum1'
       'bsqlt_fle_qtforum2',
+      'bsqlt_fle_tx',
+      'bsqlt_fle_tx_jmwal',
+      'bsqlt_tmpfs_tx',
+      'bsqlt_tmpfs_tx_jmwal',
       'bsqlt_tmpfs',
-      'bsqlt_tmpfs_jmoff',
+      // 'bsqlt_tmpfs_jmoff'
       'bsqlt_tmpfs_jmwal',
-      'bsqlt_tmpfs_jmoff32',
-      'bsqlt_tmpfs_jmwal32'
+      'bsqlt_tmpfs_qtforum2',
+      // 'bsqlt_tmpfs_jmoff32'
+      // 'bsqlt_tmpfs_jmwal32'
+      // 'bsqlt_tmpfs_jmwal_mm0'
+      // 'bsqlt_tmpfs_jmwal32_mm0'
+      'pgmem',
+      'pgmem_tx',
+      // 'sqljs'
+      'porsagerpostgres_tx',
+      'briancpg_tx'
     ];
     if (global.gc != null) {
-      // 'pgmem'
-      // 'sqljs'
-      // 'porsagerpostgres'
-      // 'briancpg'
       global.gc();
     }
     data_cache = null;

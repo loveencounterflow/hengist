@@ -71,7 +71,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   cfg = {
-    // use_ram_db:           true
+    use_ram_db: true,
     // journal_mode:         'wal'
     journal_mode: 'memory',
     verbose: true,
@@ -481,6 +481,8 @@ order by error, marker desc, cc, ne, 1, 2, 3, 4, 5, 6;`)));
     }
     db.sqlt1.exec(SQL`pragma journal_mode=${cfg.journal_mode}`);
     db.sqlt2.exec(SQL`pragma journal_mode=${cfg.journal_mode}`);
+    debug('^23332^', (db.sqlt1.prepare(SQL`pragma journal_mode;`)).get());
+    debug('^23332^', db.sqlt1);
     prepare_db(db);
     return db;
   };
@@ -610,8 +612,58 @@ order by error, marker desc, cc, ne, 1, 2, 3, 4, 5, 6;`)));
 
   //###########################################################################################################
   if (require.main === module) {
-    (async() => {
-      return (await demo_f());
+    (() => {
+      var new_sqlt;
+      // await demo_f()
+      new_sqlt = require('../../../apps/dbay/node_modules/better-sqlite3');
+      (() => {        // sqlt     = new_sqlt '/tmp/kw.db'
+        var sqlt;
+        echo();
+        sqlt = new_sqlt('file:_3874887994?mode=memory&cache=shared');
+        debug('^332-1^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
+        sqlt.exec("pragma journal_mode=wal;");
+        return debug('^332-2^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
+      })();
+      (() => {
+        var sqlt;
+        echo();
+        sqlt = new_sqlt('');
+        debug('^332-3^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
+        sqlt.exec("pragma journal_mode=wal;");
+        return debug('^332-4^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
+      })();
+      (() => {
+        var sqlt;
+        echo();
+        sqlt = new_sqlt(':memory:');
+        debug('^332-5^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
+        sqlt.exec("pragma journal_mode=wal;");
+        return debug('^332-6^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
+      })();
+      (() => {
+        var sqlt;
+        echo();
+        sqlt = new_sqlt('/tmp/kw.db');
+        debug('^332-7^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
+        sqlt.exec("pragma journal_mode=wal;");
+        return debug('^332-8^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
+      })();
+      (() => {
+        var sqlt;
+        echo();
+        sqlt = new_sqlt('/mnt/ramdisk/kw.db');
+        debug('^332-9^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
+        sqlt.exec("pragma journal_mode=wal;");
+        return debug('^332-10^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
+      })();
+      return (() => {
+        var db;
+        echo();
+        db = new Dbay();
+        debug('^332-11^', db.cfg);
+        debug('^332-12^', db.sqlt_cfg);
+        return debug('^332-13^', db.sqlt1.memory, (db.sqlt1.prepare(SQL`pragma journal_mode;`)).get());
+      })();
     })();
   }
 
