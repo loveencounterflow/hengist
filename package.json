@@ -107,6 +107,7 @@
     "steampipes": "6.7.1",
     "strip-ansi": "^6.0.0",
     "table": "^6.7.1",
+    "temp": "^0.9.4",
     "tempy": "^1.0.1",
     "text-metrics": "^2.0.2",
     "through2": "^4.0.2",
