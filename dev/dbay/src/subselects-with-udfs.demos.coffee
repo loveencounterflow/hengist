@@ -57,9 +57,9 @@ guy                       = require '../../../apps/guy'
 trash                     = require 'trash'
 #-----------------------------------------------------------------------------------------------------------
 cfg =
-  # use_ram_db:           true
-  # journal_mode:         'wal'
-  journal_mode:         'memory'
+  use:                  'ramfs' # 'memory', 'file'
+  journal_mode:         'wal'
+  # journal_mode:         'memory'
   verbose:              true
   # verbose:              false
   # catch_errors:         false
@@ -323,18 +323,22 @@ select = ( fingerprint ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 new_db_with_data = ->
-  if cfg.use_ram_db
-    db = new Dbay { timeout: 500, }
-  else
-    path  = '/tmp/subselects.db'
-    try await trash path catch error # then throw error unless error.name is 'ENOENT'
-      debug error.name
-      debug error.code
-      debug type_of error
-      throw error
-    db = new Dbay { path, timeout: 500, }
+  switch cfg.use
+    when 'ramfs', 'file'
+      path = if cfg.use is 'ramfs' then '/mnt/ramdisk/subselects.db' else '/tmp/subselects.db'
+      try await trash path catch error # then throw error unless error.name is 'ENOENT'
+        debug error.name
+        debug error.code
+        debug type_of error
+        throw error
+      db = new Dbay { path, timeout: 500, }
+    when 'memory'
+      db = new Dbay { timeout: 500, }
+    else throw new Error "unknown value for cfg.use: #{rpr cfg.use}"
   db.sqlt1.exec SQL"pragma journal_mode=#{cfg.journal_mode}"
   db.sqlt2.exec SQL"pragma journal_mode=#{cfg.journal_mode}"
+  debug '^23332^', ( db.sqlt1.prepare SQL"pragma journal_mode;" ).get()
+  debug '^23332^', db.sqlt1
   prepare_db db
   return db
 
@@ -423,4 +427,5 @@ demo_f = ->
 ############################################################################################################
 if require.main is module then do =>
   await demo_f()
+
 
