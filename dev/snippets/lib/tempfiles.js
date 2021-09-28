@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, PATH, badge, debug, demo_tempy_directory, demo_tempy_file, echo, glob, help, info, rpr, time_now, urge, warn, whisper;
+  var CND, FS, PATH, TEMP, UTIL, badge, data, debug, demo_temp, demo_tempy_directory, demo_tempy_file, echo, glob, help, info, rpr, temp, time_now, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -97,11 +97,49 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_temp = function() {};
+
+  TEMP = require('temp');
+
+  FS = require('fs');
+
+  UTIL = require('util');
+
+  data = "foo\nbar\nfoo\nbaz";
+
+  // exec  = ( require 'child_process' ).exec
+  // Automatically track and cleanup files at exit
+  // TEMP.track()
+  TEMP.cleanupSync();
+
+  debug(temp = TEMP.openSync({
+    dir: '/dev/shm',
+    prefix: 'dbay-',
+    suffix: '.sqlite'
+  }));
+
+  FS.writeSync(temp.fd, data);
+
+  debug(rpr(FS.readFileSync(temp.path, {
+    encoding: 'utf-8'
+  })));
+
+  //   if (!err) {
+  //     fs.write(info.fd, data, (err) => {
+  //         console.log(err)
+  //     })
+  //     fs.close(info.fd, function(err) {
+  //       exec("grep foo '" + info.path + "' | wc -l", function(err, stdout) {
+  //         util.puts(stdout.trim())
+  //   return null
+
   //###########################################################################################################
   if (module === require.main) {
-    (async() => {
+    (() => {
       // await demo_tempy_directory()
-      return (await demo_tempy_file());
+      // await demo_tempy_file()
+      return demo_temp();
     })();
   }
 

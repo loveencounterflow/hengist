@@ -71,9 +71,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   cfg = {
-    use_ram_db: true,
-    // journal_mode:         'wal'
-    journal_mode: 'memory',
+    use: 'ramfs', // 'memory', 'file'
+    journal_mode: 'wal',
+    // journal_mode:         'memory'
     verbose: true,
     // verbose:              false
     // catch_errors:         false
@@ -459,25 +459,31 @@ order by error, marker desc, cc, ne, 1, 2, 3, 4, 5, 6;`)));
   //-----------------------------------------------------------------------------------------------------------
   new_db_with_data = async function() {
     var db, error, path;
-    if (cfg.use_ram_db) {
-      db = new Dbay({
-        timeout: 500
-      });
-    } else {
-      path = '/tmp/subselects.db';
-      try {
-        await trash(path);
-      } catch (error1) {
-        error = error1; // then throw error unless error.name is 'ENOENT'
-        debug(error.name);
-        debug(error.code);
-        debug(type_of(error));
-        throw error;
-      }
-      db = new Dbay({
-        path,
-        timeout: 500
-      });
+    switch (cfg.use) {
+      case 'ramfs':
+      case 'file':
+        path = cfg.use === 'ramfs' ? '/mnt/ramdisk/subselects.db' : '/tmp/subselects.db';
+        try {
+          await trash(path);
+        } catch (error1) {
+          error = error1; // then throw error unless error.name is 'ENOENT'
+          debug(error.name);
+          debug(error.code);
+          debug(type_of(error));
+          throw error;
+        }
+        db = new Dbay({
+          path,
+          timeout: 500
+        });
+        break;
+      case 'memory':
+        db = new Dbay({
+          timeout: 500
+        });
+        break;
+      default:
+        throw new Error(`unknown value for cfg.use: ${rpr(cfg.use)}`);
     }
     db.sqlt1.exec(SQL`pragma journal_mode=${cfg.journal_mode}`);
     db.sqlt2.exec(SQL`pragma journal_mode=${cfg.journal_mode}`);
@@ -612,58 +618,8 @@ order by error, marker desc, cc, ne, 1, 2, 3, 4, 5, 6;`)));
 
   //###########################################################################################################
   if (require.main === module) {
-    (() => {
-      var new_sqlt;
-      // await demo_f()
-      new_sqlt = require('../../../apps/dbay/node_modules/better-sqlite3');
-      (() => {        // sqlt     = new_sqlt '/tmp/kw.db'
-        var sqlt;
-        echo();
-        sqlt = new_sqlt('file:_3874887994?mode=memory&cache=shared');
-        debug('^332-1^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
-        sqlt.exec("pragma journal_mode=wal;");
-        return debug('^332-2^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
-      })();
-      (() => {
-        var sqlt;
-        echo();
-        sqlt = new_sqlt('');
-        debug('^332-3^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
-        sqlt.exec("pragma journal_mode=wal;");
-        return debug('^332-4^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
-      })();
-      (() => {
-        var sqlt;
-        echo();
-        sqlt = new_sqlt(':memory:');
-        debug('^332-5^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
-        sqlt.exec("pragma journal_mode=wal;");
-        return debug('^332-6^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
-      })();
-      (() => {
-        var sqlt;
-        echo();
-        sqlt = new_sqlt('/tmp/kw.db');
-        debug('^332-7^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
-        sqlt.exec("pragma journal_mode=wal;");
-        return debug('^332-8^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
-      })();
-      (() => {
-        var sqlt;
-        echo();
-        sqlt = new_sqlt('/mnt/ramdisk/kw.db');
-        debug('^332-9^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
-        sqlt.exec("pragma journal_mode=wal;");
-        return debug('^332-10^', sqlt.memory, (sqlt.prepare(SQL`pragma journal_mode;`)).get());
-      })();
-      return (() => {
-        var db;
-        echo();
-        db = new Dbay();
-        debug('^332-11^', db.cfg);
-        debug('^332-12^', db.sqlt_cfg);
-        return debug('^332-13^', db.sqlt1.memory, (db.sqlt1.prepare(SQL`pragma journal_mode;`)).get());
-      })();
+    (async() => {
+      return (await demo_f());
     })();
   }
 

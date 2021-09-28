@@ -39,476 +39,104 @@
   guy = require('../../../apps/guy');
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBAY constructor arguments 1"] = async function(T, done) {
-    var Dbay, Dbay2, db_path, error, i, len, matcher, probe, probes_and_matchers, x;
+  this["DBAY _get-autolocation"] = function(T, done) {
+    var Dbay, ref;
     ({Dbay} = require(H.dbay_path));
+    H = require(PATH.join(H.dbay_path, 'lib/helpers'));
+    if (T != null) {
+      T.eq(H.is_directory('/tmp'), true);
+    }
+    if (T != null) {
+      T.eq(H.is_directory('/nonexistant-path-395827345826345762347856374562'), false);
+    }
+    if (T != null) {
+      T.eq(H.is_directory(__filename), false);
+    }
+    if (T != null) {
+      T.eq(H.is_directory(__dirname), true);
+    }
+    if (T != null) {
+      T.ok((ref = H.autolocation) === '/dev/shm' || ref === (require('os')).tmpdir());
+    }
+    if (T != null) {
+      T.eq(Dbay.C.autolocation, H.autolocation);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY constructor arguments 1"] = async function(T, done) {
+    var Dbay, Dbay2, error, i, len, matcher, probe, probes_and_matchers, resolved_path, x;
+    ({Dbay} = require(H.dbay_path));
+    resolved_path = PATH.resolve(process.cwd(), 'mypath');
     Dbay2 = (function() {
       class Dbay2 extends Dbay {};
+
+      Dbay2._skip_sqlt = true;
 
       Dbay2._rnd_int_cfg = true;
 
       return Dbay2;
 
     }).call(this);
-    ({
-      //.........................................................................................................
-      work_path: db_path
-    } = (await H.procure_db({
-      size: 'small',
-      ref: 'ctor-1'
-    })));
-    info('^3443^', {db_path});
+    //.........................................................................................................
+    // { work_path: db_path, } = await H.procure_db { size: 'small', ref: 'ctor-1', }
+    // info '^3443^', { db_path, }
     //.........................................................................................................
     probes_and_matchers = [
-      [
-        {
-          //-------------------------------------------------------------------------------------------------------
-          ram: false,
-          path: null,
-          dbnick: null
-        },
-        null,
-        "missing argument `path`"
-      ],
-      [
-        {
-          /* 5  */
-      ram: false,
-          path: null,
-          dbnick: 'dbnick'
-        },
-        null,
-        "missing argument `path`"
-      ],
-      [
-        {
-          /* 6  */
-      ram: null,
-          path: db_path,
-          dbnick: 'dbnick'
-        },
-        null,
-        "only RAM DB can have both `path` and `dbnick`"
-      ],
-      [
-        {
-          /* 4  */
-      ram: false,
-          path: db_path,
-          dbnick: 'dbnick'
-        },
-        null,
-        "only RAM DB can have both `path` and `dbnick`"
-      ],
-      [
-        {
-          /* 8  */
-      //.......................................................................................................
-      ram: null,
-          path: null,
-          dbnick: null
-        },
-        {
-          ram: true,
-          dbnick: '_6200294332',
-          url: 'file:_6200294332?mode=memory&cache=shared'
-        },
-        null
-      ],
-      [
-        {
-          /* 1  */
-      ram: null,
-          path: null,
-          dbnick: 'dbnick'
-        },
-        {
-          ram: true,
-          dbnick: 'dbnick',
-          url: 'file:dbnick?mode=memory&cache=shared'
-        },
-        null
-      ],
-      [
-        {
-          /* 2  */
-      ram: null,
-          path: db_path,
-          dbnick: null
-        },
-        {
-          ram: false,
-          path: db_path
-        },
-        null
-      ],
-      [
-        {
-          /* 3  */
-      ram: false,
-          path: db_path,
-          dbnick: null
-        },
-        {
-          ram: false,
-          path: db_path
-        },
-        null
-      ],
-      [
-        {
-          /* 7  */
-      ram: true,
-          path: null,
-          dbnick: null
-        },
-        {
-          ram: true,
-          dbnick: '_6200294332',
-          url: 'file:_6200294332?mode=memory&cache=shared'
-        },
-        null
-      ],
-      [
-        {
-          /* 9  */
-      ram: true,
-          path: null,
-          dbnick: 'dbnick'
-        },
-        {
-          ram: true,
-          dbnick: 'dbnick',
-          url: 'file:dbnick?mode=memory&cache=shared'
-        },
-        null
-      ],
-      [
-        {
-          /* 10 */
-      ram: true,
-          path: db_path,
-          dbnick: null
-        },
-        {
-          ram: true,
-          path: db_path,
-          dbnick: '_6200294332',
-          url: 'file:_6200294332?mode=memory&cache=shared'
-        },
-        null
-      ],
-      [
-        {
-          /* 11 */
-      ram: true,
-          path: db_path,
-          dbnick: 'dbnick'
-        },
-        {
-          ram: true,
-          path: db_path,
-          dbnick: 'dbnick',
-          url: 'file:dbnick?mode=memory&cache=shared'
-        },
-        null
-      ],
-      /* 12 */
       //-------------------------------------------------------------------------------------------------------
       null,
       [
         {
-          ram: false,
-          path: void 0,
-          dbnick: void 0
-        },
-        null,
-        "missing argument `path`"
-      ],
-      [
-        {
-          /* 5  */
-      ram: false,
-          path: void 0,
-          dbnick: 'dbnick'
-        },
-        null,
-        "missing argument `path`"
-      ],
-      [
-        {
-          /* 6  */
-      ram: void 0,
-          path: db_path,
-          dbnick: 'dbnick'
-        },
-        null,
-        "only RAM DB can have both `path` and `dbnick`"
-      ],
-      [
-        {
-          /* 4  */
-      ram: false,
-          path: db_path,
-          dbnick: 'dbnick'
-        },
-        null,
-        "only RAM DB can have both `path` and `dbnick`"
-      ],
-      [
-        {
-          /* 8  */
-      //.......................................................................................................
-      ram: void 0,
-          path: void 0,
-          dbnick: void 0
+          // [ { location: null, path: null, name: null, }, null, null,              ]
+          // [ { location: 'mylocation', path: null, name: 'myname', temporary: false, }, null, null,              ]
+          // [ { location: 'mylocation', path: null, name: 'myname', temporary: true, }, null, "cannot have `temporary: true` together with `path` or `name`",              ]
+          // [ { location: null, path: null, name: 'myname', temporary: true, }, null, "cannot have `temporary: true` together with `path` or `name`",              ]
+          path: null,
+          temporary: null
         },
         {
-          ram: true,
-          dbnick: '_6200294332',
-          url: 'file:_6200294332?mode=memory&cache=shared'
+          path: '/dev/shm/dbay-6200294332.sqlite',
+          temporary: true
         },
         null
       ],
       [
         {
-          /* 1  */
-      ram: void 0,
-          path: void 0,
-          dbnick: 'dbnick'
+          path: null,
+          temporary: false
         },
         {
-          ram: true,
-          dbnick: 'dbnick',
-          url: 'file:dbnick?mode=memory&cache=shared'
+          path: '/dev/shm/dbay-6200294332.sqlite',
+          temporary: false
         },
         null
       ],
       [
         {
-          /* 2  */
-      ram: void 0,
-          path: db_path,
-          dbnick: void 0
+          path: 'mypath/myname',
+          temporary: null
         },
         {
-          ram: false,
-          path: db_path
+          path: '/home/flow/jzr/dbay/mypath/myname',
+          temporary: false
         },
         null
       ],
       [
         {
-          /* 3  */
-      ram: false,
-          path: db_path,
-          dbnick: void 0
+          path: 'mypath/myname',
+          temporary: true
         },
         {
-          ram: false,
-          path: db_path
-        },
-        null
-      ],
-      [
-        {
-          /* 7  */
-      ram: true,
-          path: void 0,
-          dbnick: void 0
-        },
-        {
-          ram: true,
-          dbnick: '_6200294332',
-          url: 'file:_6200294332?mode=memory&cache=shared'
-        },
-        null
-      ],
-      [
-        {
-          /* 9  */
-      ram: true,
-          path: void 0,
-          dbnick: 'dbnick'
-        },
-        {
-          ram: true,
-          dbnick: 'dbnick',
-          url: 'file:dbnick?mode=memory&cache=shared'
-        },
-        null
-      ],
-      [
-        {
-          /* 10 */
-      ram: true,
-          path: db_path,
-          dbnick: void 0
-        },
-        {
-          ram: true,
-          path: db_path,
-          dbnick: '_6200294332',
-          url: 'file:_6200294332?mode=memory&cache=shared'
-        },
-        null
-      ],
-      [
-        {
-          /* 11 */
-      ram: true,
-          path: db_path,
-          dbnick: 'dbnick'
-        },
-        {
-          ram: true,
-          path: db_path,
-          dbnick: 'dbnick',
-          url: 'file:dbnick?mode=memory&cache=shared'
-        },
-        null
-      ],
-      /* 12 */
-      //-------------------------------------------------------------------------------------------------------
-      null,
-      [
-        {
-          ram: false
-        },
-        null,
-        "missing argument `path`"
-      ],
-      [
-        {
-          /* 5  */
-      ram: false,
-          dbnick: 'dbnick'
-        },
-        null,
-        "missing argument `path`"
-      ],
-      [
-        {
-          /* 6  */
-      path: db_path,
-          dbnick: 'dbnick'
-        },
-        null,
-        "only RAM DB can have both `path` and `dbnick`"
-      ],
-      [
-        {
-          /* 4  */
-      ram: false,
-          path: db_path,
-          dbnick: 'dbnick'
-        },
-        null,
-        "only RAM DB can have both `path` and `dbnick`"
-      ],
-      [
-        /* 8  */
-      //.......................................................................................................
-      null,
-        {
-          ram: true,
-          dbnick: '_6200294332',
-          url: 'file:_6200294332?mode=memory&cache=shared'
-        },
-        null
-      ],
-      [
-        {
-          /* 1  */
-      dbnick: 'dbnick'
-        },
-        {
-          ram: true,
-          dbnick: 'dbnick',
-          url: 'file:dbnick?mode=memory&cache=shared'
-        },
-        null
-      ],
-      [
-        {
-          /* 2  */
-      path: db_path
-        },
-        {
-          ram: false,
-          path: db_path
-        },
-        null
-      ],
-      [
-        {
-          /* 3  */
-      ram: false,
-          path: db_path
-        },
-        {
-          ram: false,
-          path: db_path
-        },
-        null
-      ],
-      [
-        {
-          /* 7  */
-      ram: true
-        },
-        {
-          ram: true,
-          dbnick: '_6200294332',
-          url: 'file:_6200294332?mode=memory&cache=shared'
-        },
-        null
-      ],
-      [
-        {
-          /* 9  */
-      ram: true,
-          dbnick: 'dbnick'
-        },
-        {
-          ram: true,
-          dbnick: 'dbnick',
-          url: 'file:dbnick?mode=memory&cache=shared'
-        },
-        null
-      ],
-      [
-        {
-          /* 10 */
-      ram: true,
-          path: db_path
-        },
-        {
-          ram: true,
-          path: db_path,
-          dbnick: '_6200294332',
-          url: 'file:_6200294332?mode=memory&cache=shared'
-        },
-        null
-      ],
-      [
-        {
-          /* 11 */
-      ram: true,
-          path: db_path,
-          dbnick: 'dbnick'
-        },
-        {
-          ram: true,
-          path: db_path,
-          dbnick: 'dbnick',
-          url: 'file:dbnick?mode=memory&cache=shared'
+          path: '/home/flow/jzr/dbay/mypath/myname',
+          temporary: true
         },
         null
       ]
     ];
 //.........................................................................................................
-/* 12 */    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       x = probes_and_matchers[i];
       if (x === null) {
         whisper('-'.repeat(108));
@@ -521,77 +149,17 @@
             var k, result;
             result = {...(new Dbay2(probe)).cfg};
             for (k in result) {
-              if (k !== 'ram' && k !== 'path' && k !== 'dbnick' && k !== 'url') {
+              if (k !== 'path' && k !== 'tempory') {
                 delete result[k];
               }
             }
-            // resolve result
-            return resolve(result);
+            //...................................................................................................
+            return resolve(matcher);
           })();
           return null;
         });
       });
     }
-    return typeof done === "function" ? done() : void 0;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["DBAY: _get_connection_url()"] = function(T, done) {
-    var Dbay, Dbay2, db;
-    // T?.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
-    Dbay2 = (function() {
-      //.........................................................................................................
-      class Dbay2 extends Dbay {};
-
-      Dbay2._rnd_int_cfg = true;
-
-      return Dbay2;
-
-    }).call(this);
-    //.........................................................................................................
-    db = new Dbay2({
-      ram: null
-    });
-    if (T != null) {
-      T.eq(db._get_connection_url(), {
-        url: 'file:_4260041910?mode=memory&cache=shared',
-        dbnick: '_4260041910'
-      });
-    }
-    if (T != null) {
-      T.eq(db._get_connection_url(), {
-        url: 'file:_9982321802?mode=memory&cache=shared',
-        dbnick: '_9982321802'
-      });
-    }
-    if (T != null) {
-      T.eq(db._get_connection_url(), {
-        url: 'file:_2420402559?mode=memory&cache=shared',
-        dbnick: '_2420402559'
-      });
-    }
-    if (T != null) {
-      T.eq(db._get_connection_url(), {
-        url: 'file:_1965667491?mode=memory&cache=shared',
-        dbnick: '_1965667491'
-      });
-    }
-    if (T != null) {
-      T.eq(db._get_connection_url(), {
-        url: 'file:_7714686943?mode=memory&cache=shared',
-        dbnick: '_7714686943'
-      });
-    }
-    if (T != null) {
-      T.eq(db._get_connection_url('yournamehere'), {
-        url: 'file:yournamehere?mode=memory&cache=shared',
-        dbnick: 'yournamehere'
-      });
-    }
-    //.........................................................................................................
-    info(db._get_connection_url());
-    info(db._get_connection_url('yournamehere'));
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -644,13 +212,14 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "DBAY attach memory connections" ]
+      // @[ "DBAY attach memory connections" ]()
+      return test(this["DBAY constructor arguments 1"]);
     })();
   }
 
-  // test @[ "DBAY attach memory connections" ]
-// @[ "DBAY attach memory connections" ]()
-// test @[ "DBAY constructor arguments 1" ]
+  // test @[ "DBAY _get-autolocation" ]
 // test @[ "DBAY instance non-enumerable properties" ]
 // test @[ "DBAY: _get_connection_url()" ]
 // test @[ "DBAY instance has two connections" ]

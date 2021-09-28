@@ -701,6 +701,9 @@
       resolve(() => {
         return new Promise((resolve) => {
           var i, len, nr, ref, result, text;
+          if (cfg.use_transaction) {
+            db.run("begin transaction;");
+          }
           nr = 0;
           ref = data.texts;
           for (i = 0, len = ref.length; i < len; i++) {
@@ -712,6 +715,9 @@
             while (insert.step()) {
               insert.get();
             }
+          }
+          if (cfg.use_transaction) {
+            db.run("commit;");
           }
           // debug (k for k of retrieve)
           // retrieve.bind(); result = []; result.push retrieve.getAsObject()  while retrieve.step()
@@ -729,6 +735,14 @@
         });
       });
       return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.sqljs_tx = function(cfg) {
+    return this.sqljs({
+      ...cfg,
+      use_transaction: true
     });
   };
 
@@ -885,7 +899,8 @@
       // 'bsqlt_tmpfs_jmwal32_mm0'
       'pgmem',
       'pgmem_tx',
-      // 'sqljs'
+      'sqljs',
+      'sqljs_tx',
       'porsagerpostgres_tx',
       'briancpg_tx'
     ];
