@@ -353,6 +353,7 @@ show_result = ( name, result ) ->
   retrieve      = db.prepare """select * from test order by text;"""
   #.........................................................................................................
   resolve => new Promise ( resolve ) =>
+    db.run "begin transaction;" if cfg.use_transaction
     nr      = 0
     for text in data.texts
       nr++
@@ -360,6 +361,7 @@ show_result = ( name, result ) ->
       # db.run """insert into test ( nr, text ) values ( ?, ? );""", [ nr, text, ]
       insert.bind [ nr, text, ]
       insert.get() while insert.step()
+    db.run "commit;" if cfg.use_transaction
     # debug (k for k of retrieve)
     # retrieve.bind(); result = []; result.push retrieve.getAsObject()  while retrieve.step()
     result = []; db.each """select * from test order by text;""", [], ( row ) -> result.push row
@@ -369,6 +371,9 @@ show_result = ( name, result ) ->
     db.close()
     resolve count
   return null
+
+#-----------------------------------------------------------------------------------------------------------
+@sqljs_tx = ( cfg ) -> @sqljs { cfg..., use_transaction: true, }
 
 #-----------------------------------------------------------------------------------------------------------
 @porsagerpostgres_tx = ( cfg ) -> new Promise ( resolve ) =>
@@ -485,7 +490,8 @@ show_result = ( name, result ) ->
     # 'bsqlt_tmpfs_jmwal32_mm0'
     'pgmem'
     'pgmem_tx'
-    # 'sqljs'
+    'sqljs'
+    'sqljs_tx'
     'porsagerpostgres_tx'
     'briancpg_tx'
     ]
