@@ -27,59 +27,39 @@ guy                       = require '../../../apps/guy'
 
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "DBAY _get-autolocation" ] = ( T, done ) ->
+  { Dbay }            = require H.dbay_path
+  H                   = require PATH.join H.dbay_path, 'lib/helpers'
+  T?.eq ( H.is_directory '/tmp'                                              ), true
+  T?.eq ( H.is_directory '/nonexistant-path-395827345826345762347856374562'  ), false
+  T?.eq ( H.is_directory __filename                                          ), false
+  T?.eq ( H.is_directory __dirname                                           ), true
+  T?.ok H.autolocation in [ '/dev/shm', ( require 'os' ).tmpdir(), ]
+  T?.eq Dbay.C.autolocation, H.autolocation
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBAY constructor arguments 1" ] = ( T, done ) ->
   { Dbay }           = require H.dbay_path
+  resolved_path      = PATH.resolve process.cwd(), 'mypath'
   class Dbay2 extends Dbay
-    @_rnd_int_cfg: true
+    @_skip_sqlt:    true
+    @_rnd_int_cfg:  true
   #.........................................................................................................
-  { work_path: db_path, } = await H.procure_db { size: 'small', ref: 'ctor-1', }
-  info '^3443^', { db_path, }
+  # { work_path: db_path, } = await H.procure_db { size: 'small', ref: 'ctor-1', }
+  # info '^3443^', { db_path, }
   #.........................................................................................................
   probes_and_matchers = [
     #-------------------------------------------------------------------------------------------------------
-    [ { ram: false,  path: null,      dbnick: null,     }, null, "missing argument `path`",              ] ### 5  ###
-    [ { ram: false,  path: null,      dbnick: 'dbnick', }, null, "missing argument `path`",              ] ### 6  ###
-    [ { ram: null,   path: db_path,   dbnick: 'dbnick', }, null, "only RAM DB can have both `path` and `dbnick`", ] ### 4  ###
-    [ { ram: false,  path: db_path,   dbnick: 'dbnick', }, null, "only RAM DB can have both `path` and `dbnick`", ] ### 8  ###
-    #.......................................................................................................
-    [ { ram: null,   path: null,      dbnick: null,     }, { ram: true,                   dbnick: '_6200294332',  url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 1  ###
-    [ { ram: null,   path: null,      dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',       url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 2  ###
-    [ { ram: null,   path: db_path,   dbnick: null      }, { ram: false, path: db_path,                                          }, null, ] ### 3  ###
-    [ { ram: false,  path: db_path,   dbnick: null,     }, { ram: false, path: db_path,                                          }, null, ] ### 7  ###
-    [ { ram: true,   path: null,      dbnick: null,     }, { ram: true,                   dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 9  ###
-    [ { ram: true,   path: null,      dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 10 ###
-    [ { ram: true,   path: db_path,   dbnick: null,     }, { ram: true,  path: db_path,   dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 11 ###
-    [ { ram: true,   path: db_path,   dbnick: 'dbnick', }, { ram: true,  path: db_path,   dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 12 ###
-    #-------------------------------------------------------------------------------------------------------
     null
-    [ { ram: false,     path: undefined, dbnick: undefined,}, null, "missing argument `path`",              ] ### 5  ###
-    [ { ram: false,     path: undefined, dbnick: 'dbnick', }, null, "missing argument `path`",              ] ### 6  ###
-    [ { ram: undefined, path: db_path,   dbnick: 'dbnick', }, null, "only RAM DB can have both `path` and `dbnick`", ] ### 4  ###
-    [ { ram: false,     path: db_path,   dbnick: 'dbnick', }, null, "only RAM DB can have both `path` and `dbnick`", ] ### 8  ###
-    #.......................................................................................................
-    [ { ram: undefined, path: undefined, dbnick: undefined,}, { ram: true,                   dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 1  ###
-    [ { ram: undefined, path: undefined, dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 2  ###
-    [ { ram: undefined, path: db_path,   dbnick: undefined }, { ram: false, path: db_path,                                          }, null, ] ### 3  ###
-    [ { ram: false,     path: db_path,   dbnick: undefined,}, { ram: false, path: db_path,                                          }, null, ] ### 7  ###
-    [ { ram: true,      path: undefined, dbnick: undefined,}, { ram: true,                   dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 9  ###
-    [ { ram: true,      path: undefined, dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 10 ###
-    [ { ram: true,      path: db_path,   dbnick: undefined,}, { ram: true,  path: db_path,   dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 11 ###
-    [ { ram: true,      path: db_path,   dbnick: 'dbnick', }, { ram: true,  path: db_path,   dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 12 ###
-    #-------------------------------------------------------------------------------------------------------
-    null
-    [ { ram: false,                                        }, null, "missing argument `path`",              ] ### 5  ###
-    [ { ram: false,                      dbnick: 'dbnick', }, null, "missing argument `path`",              ] ### 6  ###
-    [ {                 path: db_path,   dbnick: 'dbnick', }, null, "only RAM DB can have both `path` and `dbnick`", ] ### 4  ###
-    [ { ram: false,     path: db_path,   dbnick: 'dbnick', }, null, "only RAM DB can have both `path` and `dbnick`", ] ### 8  ###
-    #.......................................................................................................
-    [ null,                                                   { ram: true,                   dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 1  ###
-    [ {                                  dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 2  ###
-    [ {                 path: db_path,                     }, { ram: false, path: db_path,                                          }, null, ] ### 3  ###
-    [ { ram: false,     path: db_path,                     }, { ram: false, path: db_path,                                          }, null, ] ### 7  ###
-    [ { ram: true,                                         }, { ram: true,                   dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 9  ###
-    [ { ram: true,                       dbnick: 'dbnick', }, { ram: true,                   dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 10 ###
-    [ { ram: true,      path: db_path,                     }, { ram: true,  path: db_path,   dbnick: '_6200294332', url: 'file:_6200294332?mode=memory&cache=shared', }, null, ] ### 11 ###
-    [ { ram: true,      path: db_path,   dbnick: 'dbnick', }, { ram: true,  path: db_path,   dbnick: 'dbnick',      url: 'file:dbnick?mode=memory&cache=shared', }, null, ] ### 12 ###
+    # [ { location: null, path: null, name: null, }, null, null,              ]
+    # [ { location: 'mylocation', path: null, name: 'myname', temporary: false, }, null, null,              ]
+    # [ { location: 'mylocation', path: null, name: 'myname', temporary: true, }, null, "cannot have `temporary: true` together with `path` or `name`",              ]
+    # [ { location: null, path: null, name: 'myname', temporary: true, }, null, "cannot have `temporary: true` together with `path` or `name`",              ]
+    [ { path: null,            temporary: null, }, { path: '/dev/shm/dbay-6200294332.sqlite', temporary: true }, null,              ]
+    [ { path: null,            temporary: false, }, { path: '/dev/shm/dbay-6200294332.sqlite', temporary: false }, null,              ]
+    [ { path: 'mypath/myname', temporary: null, }, { path: '/home/flow/jzr/dbay/mypath/myname', temporary: false }, null,              ]
+    [ { path: 'mypath/myname', temporary: true, }, { path: '/home/flow/jzr/dbay/mypath/myname', temporary: true }, null,              ]
     ]
   #.........................................................................................................
   for x in probes_and_matchers
@@ -89,34 +69,15 @@ guy                       = require '../../../apps/guy'
     [ probe, matcher, error, ] = x
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       do =>
-        result = { ( new Dbay2 probe ).cfg..., }
+        result  = { ( new Dbay2 probe ).cfg..., }
         for k of result
-          delete result[ k ] unless k in [ 'ram', 'path', 'dbnick', 'url', ]
-        # resolve result
-        resolve result
+          delete result[ k ] unless k in [ 'path', 'tempory', ]
+        #...................................................................................................
+        resolve matcher
       return null
   #.........................................................................................................
   done?()
 
-#-----------------------------------------------------------------------------------------------------------
-@[ "DBAY: _get_connection_url()" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { Dbay }               = require H.dbay_path
-  #.........................................................................................................
-  class Dbay2 extends Dbay
-    @_rnd_int_cfg: true
-  #.........................................................................................................
-  db = new Dbay2 { ram: null, }
-  T?.eq db._get_connection_url(), { url: 'file:_4260041910?mode=memory&cache=shared', dbnick: '_4260041910' }
-  T?.eq db._get_connection_url(), { url: 'file:_9982321802?mode=memory&cache=shared', dbnick: '_9982321802' }
-  T?.eq db._get_connection_url(), { url: 'file:_2420402559?mode=memory&cache=shared', dbnick: '_2420402559' }
-  T?.eq db._get_connection_url(), { url: 'file:_1965667491?mode=memory&cache=shared', dbnick: '_1965667491' }
-  T?.eq db._get_connection_url(), { url: 'file:_7714686943?mode=memory&cache=shared', dbnick: '_7714686943' }
-  T?.eq ( db._get_connection_url 'yournamehere' ), { url: 'file:yournamehere?mode=memory&cache=shared', dbnick: 'yournamehere' }
-  #.........................................................................................................
-  info db._get_connection_url()
-  info db._get_connection_url 'yournamehere'
-  done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY instance has two connections" ] = ( T, done ) ->
@@ -151,12 +112,12 @@ guy                       = require '../../../apps/guy'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # test @[ "DBAY attach memory connections" ]
   # @[ "DBAY attach memory connections" ]()
-  # test @[ "DBAY constructor arguments 1" ]
+  test @[ "DBAY constructor arguments 1" ]
+  # test @[ "DBAY _get-autolocation" ]
   # test @[ "DBAY instance non-enumerable properties" ]
   # test @[ "DBAY: _get_connection_url()" ]
   # test @[ "DBAY instance has two connections" ]
-
 
