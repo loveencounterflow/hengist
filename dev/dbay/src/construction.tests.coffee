@@ -52,14 +52,12 @@ guy                       = require '../../../apps/guy'
   probes_and_matchers = [
     #-------------------------------------------------------------------------------------------------------
     null
-    # [ { location: null, path: null, name: null, }, null, null,              ]
-    # [ { location: 'mylocation', path: null, name: 'myname', temporary: false, }, null, null,              ]
-    # [ { location: 'mylocation', path: null, name: 'myname', temporary: true, }, null, "cannot have `temporary: true` together with `path` or `name`",              ]
-    # [ { location: null, path: null, name: 'myname', temporary: true, }, null, "cannot have `temporary: true` together with `path` or `name`",              ]
-    [ { path: null,            temporary: null, }, { path: '/dev/shm/dbay-6200294332.sqlite', temporary: true }, null,              ]
-    [ { path: null,            temporary: false, }, { path: '/dev/shm/dbay-6200294332.sqlite', temporary: false }, null,              ]
-    [ { path: 'mypath/myname', temporary: null, }, { path: '/home/flow/jzr/dbay/mypath/myname', temporary: false }, null,              ]
-    [ { path: 'mypath/myname', temporary: true, }, { path: '/home/flow/jzr/dbay/mypath/myname', temporary: true }, null,              ]
+    [ { path: null,            temporary: null,  }, { path: '/dev/shm/dbay-6200294332.sqlite',   temporary: true  }, null,              ]
+    [ { path: null,            temporary: false, }, { path: '/dev/shm/dbay-6200294332.sqlite',   temporary: false }, null,              ]
+    [ { path: null,            temporary: true,  }, { path: '/dev/shm/dbay-6200294332.sqlite',   temporary: true  }, null,              ]
+    [ { path: 'mypath/myname', temporary: null,  }, { path: '/home/flow/jzr/dbay/mypath/myname', temporary: false }, null,              ]
+    [ { path: 'mypath/myname', temporary: false, }, { path: '/home/flow/jzr/dbay/mypath/myname', temporary: false }, null,              ]
+    [ { path: 'mypath/myname', temporary: true,  }, { path: '/home/flow/jzr/dbay/mypath/myname', temporary: true  }, null,              ]
     ]
   #.........................................................................................................
   for x in probes_and_matchers
@@ -69,10 +67,13 @@ guy                       = require '../../../apps/guy'
     [ probe, matcher, error, ] = x
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       do =>
-        result  = { ( new Dbay2 probe ).cfg..., }
+        db      = new Dbay2 probe
+        result  = { db.cfg..., }
         for k of result
           delete result[ k ] unless k in [ 'path', 'tempory', ]
         #...................................................................................................
+        # debug '^341^', db
+        # debug '^341^', db._dbs
         resolve matcher
       return null
   #.........................................................................................................
