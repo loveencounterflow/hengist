@@ -19,6 +19,7 @@ PATH                      = require 'path'
 H                         = require './helpers'
 types                     = new ( require 'intertype' ).Intertype
 { isa
+  equals
   type_of
   validate
   validate_list_of }      = types.export()
@@ -28,18 +29,20 @@ guy                       = require '../../../apps/guy'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY _get-autolocation" ] = ( T, done ) ->
+  T?.halt_on_error()
   { Dbay }            = require H.dbay_path
-  H                   = require PATH.join H.dbay_path, 'lib/helpers'
-  T?.eq ( H.is_directory '/tmp'                                              ), true
-  T?.eq ( H.is_directory '/nonexistant-path-395827345826345762347856374562'  ), false
-  T?.eq ( H.is_directory __filename                                          ), false
-  T?.eq ( H.is_directory __dirname                                           ), true
-  T?.ok H.autolocation in [ '/dev/shm', ( require 'os' ).tmpdir(), ]
-  T?.eq Dbay.C.autolocation, H.autolocation
+  DH                  = require PATH.join H.dbay_path, 'lib/helpers'
+  T?.eq ( DH.is_directory '/tmp'                                              ), true
+  T?.eq ( DH.is_directory '/nonexistant-path-395827345826345762347856374562'  ), false
+  T?.eq ( DH.is_directory __filename                                          ), false
+  T?.eq ( DH.is_directory __dirname                                           ), true
+  T?.ok DH.autolocation in [ '/dev/shm', ( require 'os' ).tmpdir(), ]
+  T?.eq Dbay.C.autolocation, DH.autolocation
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY constructor arguments 1" ] = ( T, done ) ->
+  T?.halt_on_error()
   { Dbay }           = require H.dbay_path
   resolved_path      = PATH.resolve process.cwd(), 'mypath'
   class Dbay2 extends Dbay
@@ -79,15 +82,22 @@ guy                       = require '../../../apps/guy'
   #.........................................................................................................
   done?()
 
-
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY instance has two connections" ] = ( T, done ) ->
+  T?.halt_on_error()
   { Dbay }        = require H.dbay_path
   Sqlt            = require PATH.join H.dbay_path, 'node_modules/better-sqlite3'
   bsqlite_class   = Sqlt().constructor
   db              = new Dbay()
   # debug '^332^', db
   # debug '^332^', db.cfg
+  #.........................................................................................................
+  info '^908-1^', equals db.sqlt1.name, db.sqlt2.name
+  info '^908-2^', db.sqlt1.constructor is bsqlite_class
+  info '^908-3^', db.sqlt2.constructor is bsqlite_class
+  info '^908-4^', db.sqlt2.constructor is db.sqlt1.constructor
+  info '^908-5^', db.sqlt2 isnt db.sqlt1
+  #.........................................................................................................
   T?.eq db.sqlt1.name, db.sqlt2.name
   T?.ok db.sqlt1.constructor is bsqlite_class
   T?.ok db.sqlt2.constructor is bsqlite_class
@@ -97,6 +107,7 @@ guy                       = require '../../../apps/guy'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY instance non-enumerable properties" ] = ( T, done ) ->
+  T?.halt_on_error()
   { Dbay }        = require H.dbay_path
   Sqlt            = require PATH.join H.dbay_path, 'node_modules/better-sqlite3'
   db              = new Dbay()
@@ -113,10 +124,10 @@ guy                       = require '../../../apps/guy'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # test @[ "DBAY attach memory connections" ]
   # @[ "DBAY attach memory connections" ]()
-  test @[ "DBAY constructor arguments 1" ]
+  # test @[ "DBAY constructor arguments 1" ]
   # test @[ "DBAY _get-autolocation" ]
   # test @[ "DBAY instance non-enumerable properties" ]
   # test @[ "DBAY: _get_connection_url()" ]
