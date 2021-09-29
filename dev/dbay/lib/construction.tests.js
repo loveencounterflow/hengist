@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -32,7 +32,7 @@
 
   types = new (require('intertype')).Intertype();
 
-  ({isa, type_of, validate, validate_list_of} = types.export());
+  ({isa, equals, type_of, validate, validate_list_of} = types.export());
 
   SQL = String.raw;
 
@@ -40,26 +40,29 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY _get-autolocation"] = function(T, done) {
-    var Dbay, ref;
+    var DH, Dbay, ref;
+    if (T != null) {
+      T.halt_on_error();
+    }
     ({Dbay} = require(H.dbay_path));
-    H = require(PATH.join(H.dbay_path, 'lib/helpers'));
+    DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
     if (T != null) {
-      T.eq(H.is_directory('/tmp'), true);
+      T.eq(DH.is_directory('/tmp'), true);
     }
     if (T != null) {
-      T.eq(H.is_directory('/nonexistant-path-395827345826345762347856374562'), false);
+      T.eq(DH.is_directory('/nonexistant-path-395827345826345762347856374562'), false);
     }
     if (T != null) {
-      T.eq(H.is_directory(__filename), false);
+      T.eq(DH.is_directory(__filename), false);
     }
     if (T != null) {
-      T.eq(H.is_directory(__dirname), true);
+      T.eq(DH.is_directory(__dirname), true);
     }
     if (T != null) {
-      T.ok((ref = H.autolocation) === '/dev/shm' || ref === (require('os')).tmpdir());
+      T.ok((ref = DH.autolocation) === '/dev/shm' || ref === (require('os')).tmpdir());
     }
     if (T != null) {
-      T.eq(Dbay.C.autolocation, H.autolocation);
+      T.eq(Dbay.C.autolocation, DH.autolocation);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -67,6 +70,9 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY constructor arguments 1"] = async function(T, done) {
     var Dbay, Dbay2, error, i, len, matcher, probe, probes_and_matchers, resolved_path, x;
+    if (T != null) {
+      T.halt_on_error();
+    }
     ({Dbay} = require(H.dbay_path));
     resolved_path = PATH.resolve(process.cwd(), 'mypath');
     Dbay2 = (function() {
@@ -187,12 +193,22 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY instance has two connections"] = function(T, done) {
     var Dbay, Sqlt, bsqlite_class, db;
+    if (T != null) {
+      T.halt_on_error();
+    }
     ({Dbay} = require(H.dbay_path));
     Sqlt = require(PATH.join(H.dbay_path, 'node_modules/better-sqlite3'));
     bsqlite_class = Sqlt().constructor;
     db = new Dbay();
     // debug '^332^', db
     // debug '^332^', db.cfg
+    //.........................................................................................................
+    info('^908-1^', equals(db.sqlt1.name, db.sqlt2.name));
+    info('^908-2^', db.sqlt1.constructor === bsqlite_class);
+    info('^908-3^', db.sqlt2.constructor === bsqlite_class);
+    info('^908-4^', db.sqlt2.constructor === db.sqlt1.constructor);
+    info('^908-5^', db.sqlt2 !== db.sqlt1);
+    //.........................................................................................................
     if (T != null) {
       T.eq(db.sqlt1.name, db.sqlt2.name);
     }
@@ -214,6 +230,9 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY instance non-enumerable properties"] = function(T, done) {
     var Dbay, Sqlt, db;
+    if (T != null) {
+      T.halt_on_error();
+    }
     ({Dbay} = require(H.dbay_path));
     Sqlt = require(PATH.join(H.dbay_path, 'node_modules/better-sqlite3'));
     db = new Dbay();
@@ -233,14 +252,14 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @[ "DBAY attach memory connections" ]
-      // @[ "DBAY attach memory connections" ]()
-      return test(this["DBAY constructor arguments 1"]);
+      return test(this);
     })();
   }
 
-  // test @[ "DBAY _get-autolocation" ]
+  // test @[ "DBAY attach memory connections" ]
+// @[ "DBAY attach memory connections" ]()
+// test @[ "DBAY constructor arguments 1" ]
+// test @[ "DBAY _get-autolocation" ]
 // test @[ "DBAY instance non-enumerable properties" ]
 // test @[ "DBAY: _get_connection_url()" ]
 // test @[ "DBAY instance has two connections" ]
