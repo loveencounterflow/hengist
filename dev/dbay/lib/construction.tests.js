@@ -88,10 +88,6 @@
       null,
       [
         {
-          // [ { location: null, path: null, name: null, }, null, null,              ]
-          // [ { location: 'mylocation', path: null, name: 'myname', temporary: false, }, null, null,              ]
-          // [ { location: 'mylocation', path: null, name: 'myname', temporary: true, }, null, "cannot have `temporary: true` together with `path` or `name`",              ]
-          // [ { location: null, path: null, name: 'myname', temporary: true, }, null, "cannot have `temporary: true` together with `path` or `name`",              ]
           path: null,
           temporary: null
         },
@@ -114,8 +110,30 @@
       ],
       [
         {
+          path: null,
+          temporary: true
+        },
+        {
+          path: '/dev/shm/dbay-6200294332.sqlite',
+          temporary: true
+        },
+        null
+      ],
+      [
+        {
           path: 'mypath/myname',
           temporary: null
+        },
+        {
+          path: '/home/flow/jzr/dbay/mypath/myname',
+          temporary: false
+        },
+        null
+      ],
+      [
+        {
+          path: 'mypath/myname',
+          temporary: false
         },
         {
           path: '/home/flow/jzr/dbay/mypath/myname',
@@ -146,14 +164,17 @@
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           (() => {
-            var k, result;
-            result = {...(new Dbay2(probe)).cfg};
+            var db, k, result;
+            db = new Dbay2(probe);
+            result = {...db.cfg};
             for (k in result) {
               if (k !== 'path' && k !== 'tempory') {
                 delete result[k];
               }
             }
             //...................................................................................................
+            // debug '^341^', db
+            // debug '^341^', db._dbs
             return resolve(matcher);
           })();
           return null;
