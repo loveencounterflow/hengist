@@ -223,6 +223,60 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY create DB, insert, query values 1"] = function(T, done) {
+    var DH, Dbay, db, path, rows;
+    /* implicit path, explicitly not temporary */
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Dbay} = require(H.dbay_path));
+    path = PATH.resolve(Dbay.C.autolocation, 'dbay-create-and-query-a-table.sqlite');
+    DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
+    db = new Dbay({
+      temporary: false
+    });
+    try {
+      db.execute(SQL`drop table if exists texts;`);
+      db.execute(SQL`create table texts ( nr integer not null primary key, text text );`);
+      db.execute(SQL`insert into texts values ( 3, 'third' );`);
+      if (T != null) {
+        T.throws(/argument extra not allowed/, () => {
+          return db.execute(SQL`insert into texts values ( ?, ? );`, [4, 'fourth']);
+        });
+      }
+      db.query(SQL`insert into texts values ( 1, 'first' );`);
+      db.query(SQL`insert into texts values ( ?, ? );`, [2, 'second']);
+      rows = db.query(SQL`select * from texts order by nr;`);
+      if (T != null) {
+        T.eq(type_of(rows), 'statementiterator');
+      }
+      if (T != null) {
+        T.eq([...rows], [
+          {
+            nr: 1,
+            text: 'first'
+          },
+          {
+            nr: 2,
+            text: 'second'
+          },
+          {
+            nr: 3,
+            text: 'third'
+          }
+        ]);
+      }
+    } finally {
+      null;
+      DH.unlink_file(db._dbs.main.path);
+    }
+    if (T != null) {
+      T.ok(!DH.is_file(db._dbs.main.path));
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
