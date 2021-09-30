@@ -337,6 +337,14 @@
     db = new Dbay({
       temporary: false
     });
+    debug('^233-1^', db);
+    debug('^233-1^', db.sqlt1);
+    debug('^233-1^', db.sqlt2);
+    debug('^233-2^', db.destroy);
+    debug('^233-3^', db.constructor);
+    debug('^233-4^', db._dbs);
+    debug('^233-5^', db.query);
+    return typeof done === "function" ? done() : void 0;
     try {
       db(SQL`drop table if exists texts;`);
       db(SQL`create table texts ( nr integer not null primary key, text text );`);
@@ -374,11 +382,12 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @[ "DBAY do 1" ]
-      return this["DBAY db as callable"]();
+      return test(this);
     })();
   }
+
+  // test @[ "DBAY do 1" ]
+// @[ "DBAY db as callable" ]()
 
 }).call(this);
 
