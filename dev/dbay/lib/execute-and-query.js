@@ -277,10 +277,106 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY do 1"] = function(T, done) {
+    var DH, Dbay, db, path, rows;
+    /* implicit path, explicitly not temporary */
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Dbay} = require(H.dbay_path));
+    DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
+    path = PATH.resolve(Dbay.C.autolocation, 'dbay-do.sqlite');
+    db = new Dbay({
+      temporary: false
+    });
+    try {
+      db.do(SQL`drop table if exists texts;`);
+      db.do(SQL`create table texts ( nr integer not null primary key, text text );`);
+      db.do(SQL`insert into texts values ( 3, 'third' );`);
+      // T?.throws /argument extra not allowed/, =>
+      //   db.do  SQL"insert into texts values ( 4,. ? );", [ 4, 'fourth', ]
+      db.do(SQL`insert into texts values ( 1, 'first' );`);
+      db.do(SQL`insert into texts values ( ?, ? );`, [2, 'second']);
+      rows = db.do(SQL`select * from texts order by nr;`);
+      if (T != null) {
+        T.eq(type_of(rows), 'statementiterator');
+      }
+      if (T != null) {
+        T.eq([...rows], [
+          {
+            nr: 1,
+            text: 'first'
+          },
+          {
+            nr: 2,
+            text: 'second'
+          },
+          {
+            nr: 3,
+            text: 'third'
+          }
+        ]);
+      }
+    } finally {
+      DH.unlink_file(db._dbs.main.path);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY db as callable"] = function(T, done) {
+    var DH, Dbay, db, path, rows;
+    /* implicit path, explicitly not temporary */
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Dbay} = require(H.dbay_path));
+    DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
+    path = PATH.resolve(Dbay.C.autolocation, 'dbay-do.sqlite');
+    db = new Dbay({
+      temporary: false
+    });
+    try {
+      db(SQL`drop table if exists texts;`);
+      db(SQL`create table texts ( nr integer not null primary key, text text );`);
+      db(SQL`insert into texts values ( 3, 'third' );`);
+      // T?.throws /argument extra not allowed/, =>
+      //   db  SQL"insert into texts values ( 4,. ? );", [ 4, 'fourth', ]
+      db(SQL`insert into texts values ( 1, 'first' );`);
+      db(SQL`insert into texts values ( ?, ? );`, [2, 'second']);
+      rows = db(SQL`select * from texts order by nr;`);
+      if (T != null) {
+        T.eq(type_of(rows), 'statementiterator');
+      }
+      if (T != null) {
+        T.eq([...rows], [
+          {
+            nr: 1,
+            text: 'first'
+          },
+          {
+            nr: 2,
+            text: 'second'
+          },
+          {
+            nr: 3,
+            text: 'third'
+          }
+        ]);
+      }
+    } finally {
+      DH.unlink_file(db._dbs.main.path);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "DBAY do 1" ]
+      return this["DBAY db as callable"]();
     })();
   }
 
