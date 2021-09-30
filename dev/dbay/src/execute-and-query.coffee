@@ -163,6 +163,28 @@ guy                       = require '../../../apps/guy'
   T?.ok not DH.is_file db._dbs.main.path
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY do 1" ] = ( T, done ) ->
+  ### implicit path, explicitly not temporary ###
+  T?.halt_on_error()
+  { Dbay }            = require H.dbay_path
+  DH                  = require PATH.join H.dbay_path, 'lib/helpers'
+  path                = PATH.resolve Dbay.C.autolocation, 'dbay-do.sqlite'
+  db                  = new Dbay { temporary: false, }
+  try
+    db.do  SQL"drop table if exists texts;"
+    db.do  SQL"create table texts ( nr integer not null primary key, text text );"
+    db.do  SQL"insert into texts values ( 3, 'third' );"
+    # T?.throws /argument extra not allowed/, =>
+    #   db.do  SQL"insert into texts values ( 4,. ? );", [ 4, 'fourth', ]
+    db.do    SQL"insert into texts values ( 1, 'first' );"
+    db.do    SQL"insert into texts values ( ?, ? );", [ 2, 'second', ]
+    rows = db.do SQL"select * from texts order by nr;"
+    T?.eq ( type_of rows ), 'statementiterator'
+    T?.eq [ rows..., ], [ { nr: 1, text: 'first' }, { nr: 2, text: 'second' }, { nr: 3, text: 'third' } ]
+  finally
+    DH.unlink_file db._dbs.main.path
+  return done?()
 
 
 ############################################################################################################
