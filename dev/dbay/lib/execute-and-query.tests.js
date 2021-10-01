@@ -443,6 +443,56 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY implicit tx can be configured"] = function(T, done) {
+    var Dbay, db, rows;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Dbay} = require(H.dbay_path));
+    db = new Dbay();
+    //.........................................................................................................
+    db(function() {
+      db(SQL`drop table if exists texts;`);
+      return db(SQL`create table texts ( nr integer not null primary key, text text );`);
+    });
+    db({
+      mode: 'deferred'
+    }, function() {
+      return db(SQL`insert into texts values ( 3, 'third' );`);
+    });
+    db({
+      mode: 'immediate'
+    }, function() {
+      return db(SQL`insert into texts values ( 1, 'first' );`);
+    });
+    db({
+      mode: 'exclusive'
+    }, function() {
+      return db(SQL`insert into texts values ( ?, ? );`, [2, 'second']);
+    });
+    //.........................................................................................................
+    rows = db(SQL`select * from texts order by nr;`);
+    rows = [...rows];
+    if (T != null) {
+      T.eq(rows, [
+        {
+          nr: 1,
+          text: 'first'
+        },
+        {
+          nr: 2,
+          text: 'second'
+        },
+        {
+          nr: 3,
+          text: 'third'
+        }
+      ]);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -451,7 +501,7 @@
       // test @[ "DBAY db as callable" ]
       // @[ "DBAY create DB, table 2" ]()
       // test @[ "DBAY db callable checks types of arguments" ]
-      return test(this["DBAY db callable accepts function, begins, commits transaction"]);
+      return test(this["DBAY implicit tx can be configured"]);
     })();
   }
 
