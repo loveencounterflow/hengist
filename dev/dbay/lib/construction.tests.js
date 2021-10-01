@@ -256,13 +256,10 @@
     })();
   }
 
-  // test @[ "DBAY attach memory connections" ]
-// @[ "DBAY attach memory connections" ]()
+  // test @[ "DBAY _get-autolocation" ]
 // test @[ "DBAY constructor arguments 1" ]
-// test @[ "DBAY _get-autolocation" ]
-// test @[ "DBAY instance non-enumerable properties" ]
-// test @[ "DBAY: _get_connection_url()" ]
 // test @[ "DBAY instance has two connections" ]
+// test @[ "DBAY instance non-enumerable properties" ]
 
 }).call(this);
 
