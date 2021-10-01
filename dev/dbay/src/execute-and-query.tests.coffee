@@ -225,8 +225,6 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 @[ "DBAY db callable accepts function, begins, commits transaction" ] = ( T, done ) ->
   T?.halt_on_error()
   { Dbay }            = require H.dbay_path
-  DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  path                = PATH.resolve Dbay.C.autolocation, 'dbay-do.sqlite'
   db                  = new Dbay()
   #.........................................................................................................
   db ->
