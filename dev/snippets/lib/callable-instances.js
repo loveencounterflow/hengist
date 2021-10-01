@@ -1,7 +1,6 @@
 (function() {
   'use strict';
-  var CND, Fn, MMX, badge, debug, demo_2, echo, guy, help, info, isa, rpr, test, type_of, types, urge, validate, warn, whisper,
-    boundMethodCheck = function(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new Error('Bound instance method accessed before binding'); } };
+  var CND, Fn, MMX, badge, debug, demo_2, echo, guy, help, info, isa, rpr, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -81,9 +80,8 @@
 
     //---------------------------------------------------------------------------------------------------------
     constructor() {
+      /* Call the `Function` prototype */
       super('...P', 'return this._me.do(...P)');
-      //---------------------------------------------------------------------------------------------------------
-      this.do = this.do.bind(this);
       /* Define `@_me` as the bound version of `this`: */
       this._me = this.bind(this);
       /* Confusingly, instance attributes like `@_me.prop_7` must be tacked onto `@_me` *here*, but the
@@ -97,8 +95,8 @@
       return this._me;
     }
 
+    //---------------------------------------------------------------------------------------------------------
     do(a = 0, b = 0, c = 0) {
-      boundMethodCheck(this, Fn);
       debug('^8-1^', this);
       help('^8-2^', this.prop_6);
       help('^8-3^', this.prop_7);
