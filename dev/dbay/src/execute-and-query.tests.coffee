@@ -227,6 +227,7 @@ if require.main is module then do =>
   test @
   # test @[ "DBAY create DB, insert, query values 1" ]
   # @[ "DBAY db as callable" ]()
+  # @[ "DBAY create DB, table 2" ]()
 
 
 
