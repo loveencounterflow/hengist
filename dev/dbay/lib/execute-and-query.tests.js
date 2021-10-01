@@ -330,7 +330,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db as callable"] = function(T, done) {
     var DH, Dbay, db, path, rows;
-    /* implicit path, explicitly not temporary */
     if (T != null) {
       T.halt_on_error();
     }
@@ -340,14 +339,6 @@
     db = new Dbay({
       temporary: false
     });
-    debug('^233-1^', db);
-    debug('^233-1^', db.sqlt1);
-    debug('^233-1^', db.sqlt2);
-    debug('^233-2^', db.destroy);
-    debug('^233-3^', db.constructor);
-    debug('^233-4^', db._dbs);
-    debug('^233-5^', db.query);
-    return typeof done === "function" ? done() : void 0;
     try {
       db(SQL`drop table if exists texts;`);
       db(SQL`create table texts ( nr integer not null primary key, text text );`);
@@ -360,8 +351,9 @@
       if (T != null) {
         T.eq(type_of(rows), 'statementiterator');
       }
+      rows = [...rows];
       if (T != null) {
-        T.eq([...rows], [
+        T.eq(rows, [
           {
             nr: 1,
             text: 'first'
@@ -382,16 +374,88 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY db callable checks types of arguments"] = function(T, done) {
+    var Dbay, db;
+    // T?.halt_on_error()
+    ({Dbay} = require(H.dbay_path));
+    db = new Dbay();
+    if (T != null) {
+      T.throws(/expected a text or a function, got a float/, function() {
+        return db(42);
+      });
+    }
+    if (T != null) {
+      T.throws(/expected a text or a function, got a undefined/, function() {
+        return db();
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY db callable accepts function, begins, commits transaction"] = function(T, done) {
+    var DH, Dbay, db, path, rows;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Dbay} = require(H.dbay_path));
+    DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
+    path = PATH.resolve(Dbay.C.autolocation, 'dbay-do.sqlite');
+    db = new Dbay();
+    //.........................................................................................................
+    db(function() {
+      db(SQL`drop table if exists texts;`);
+      db(SQL`create table texts ( nr integer not null primary key, text text );`);
+      db(SQL`insert into texts values ( 3, 'third' );`);
+      db(SQL`insert into texts values ( 1, 'first' );`);
+      db(SQL`insert into texts values ( ?, ? );`, [2, 'second']);
+      //.......................................................................................................
+      return T != null ? T.throws(/cannot start a transaction within a transaction/, function() {
+        return db(function() {});
+      }) : void 0;
+    });
+    //.........................................................................................................
+    if (T != null) {
+      T.throws(/UNIQUE constraint failed: texts\.nr/, function() {
+        return db(function() {
+          return db(SQL`insert into texts values ( 3, 'third' );`);
+        });
+      });
+    }
+    //.........................................................................................................
+    rows = db(SQL`select * from texts order by nr;`);
+    rows = [...rows];
+    if (T != null) {
+      T.eq(rows, [
+        {
+          nr: 1,
+          text: 'first'
+        },
+        {
+          nr: 2,
+          text: 'second'
+        },
+        {
+          nr: 3,
+          text: 'third'
+        }
+      ]);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "DBAY create DB, insert, query values 1" ]
+      // test @[ "DBAY db as callable" ]
+      // @[ "DBAY create DB, table 2" ]()
+      // test @[ "DBAY db callable checks types of arguments" ]
+      return test(this["DBAY db callable accepts function, begins, commits transaction"]);
     })();
   }
-
-  // test @[ "DBAY create DB, insert, query values 1" ]
-// @[ "DBAY db as callable" ]()
-// @[ "DBAY create DB, table 2" ]()
 
 }).call(this);
 
