@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var CND, Fn, MMX, badge, debug, demo_2, echo, guy, help, info, isa, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var CND, Fn, MMX, badge, debug, demo_2, echo, guy, help, info, isa, rpr, test, type_of, types, urge, validate, warn, whisper,
+    boundMethodCheck = function(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new Error('Bound instance method accessed before binding'); } };
 
   //###########################################################################################################
   CND = require('cnd');
@@ -80,8 +81,9 @@
 
     //---------------------------------------------------------------------------------------------------------
     constructor() {
-      /* Call the `Function` prototype */
       super('...P', 'return this._me.do(...P)');
+      //---------------------------------------------------------------------------------------------------------
+      this.do = this.do.bind(this);
       /* Define `@_me` as the bound version of `this`: */
       this._me = this.bind(this);
       /* Confusingly, instance attributes like `@_me.prop_7` must be tacked onto `@_me` *here*, but the
@@ -95,14 +97,14 @@
       return this._me;
     }
 
-    //---------------------------------------------------------------------------------------------------------
     do(a = 0, b = 0, c = 0) {
+      boundMethodCheck(this, Fn);
       debug('^8-1^', this);
       help('^8-2^', this.prop_6);
       help('^8-3^', this.prop_7);
       help('^8-4^', this.prop_11);
-      help('^8-4^', this._me);
-/* undefined */      return a + b + c;
+      // help '^8-4^', @_me ### undefined ###
+      return a + b + c;
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -111,16 +113,17 @@
       urge('^8-6^', this.prop_6);
       urge('^8-7^', this.prop_7);
       urge('^8-8^', this.prop_11);
-      help('^8-4^', this._me);
-/* undefined */      return null;
+      // help '^8-4^', @_me ### undefined ###
+      return null;
     }
 
   };
 
   //-----------------------------------------------------------------------------------------------------------
   test = function() {
-    var fn;
+    var fn, other_method;
     fn = new Fn();
+    // { other_method, } = fn
     info('^8-9^', fn);
     info('^8-10^', fn.prop_6);
     info('^8-11^', fn.prop_7);
@@ -128,8 +131,10 @@
     info('^8-13^', fn(3, 4, 5));
     info('^8-14^', fn.do(3, 4, 5));
     info('^8-15^', fn.other_method());
-    info('^8-15^', fn._me);
-/* undefined */    return null;
+    info('^8-16^', other_method = fn.other_method.bind(fn));
+    info('^8-16^', other_method());
+    // info '^8-15^', fn._me ### undefined ###
+    return null;
   };
 
   //###########################################################################################################
