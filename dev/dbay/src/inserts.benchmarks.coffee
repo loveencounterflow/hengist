@@ -25,6 +25,7 @@ BM                        = require '../../../lib/benchmarks'
 data_cache                = null
 gcfg                      = { verbose: false, }
 { freeze }                = require 'letsfreezethat'
+SQL                       = String.raw
 
 #-----------------------------------------------------------------------------------------------------------
 paths =
@@ -446,6 +447,88 @@ show_result = ( name, result ) ->
 
 
 #-----------------------------------------------------------------------------------------------------------
+@_dbay_prep1 = ( cfg ) -> new Promise ( resolve ) =>
+  { Dbay }      = require '../../../apps/dbay'
+  defaults      = {}
+  cfg           = { defaults..., cfg..., }
+  db_cfg        = { path: cfg.db_path, }
+  try_to_remove_file cfg.db_path
+  db            = new Dbay db_cfg
+  data          = @get_data cfg
+  count         = 0
+  #.........................................................................................................
+  # db.pragma 'synchronous = OFF' # makes file-based DBs much faster
+  db.pragma pragma for pragma in cfg.pragmas ? []
+  #.........................................................................................................
+  # db.exec """drop table if exists test;"""
+  db SQL"""
+    create table test(
+      id    integer primary key,
+      nr    integer not null,
+      text  text );"""
+  # debug '^22233^', db.exec """insert into test ( nr, text ) values ( 1, '2' );"""
+  insert        = db.prepare SQL"""insert into test ( nr, text ) values ( ?, ? );"""
+  retrieve      = db.prepare SQL"""select * from test order by text;"""
+  retrieve.raw true
+  #.........................................................................................................
+  resolve => new Promise ( resolve ) =>
+    nr      = 0
+    db.execute "begin transaction;" if cfg.use_transaction
+    for text in data.texts
+      nr++
+      insert.run [ nr, text, ]
+    db.execute "commit;" if cfg.use_transaction
+    result  = retrieve.all()
+    count  += result.length
+    show_result '_dbay_prep1', result if gcfg.verbose
+    resolve count
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_dbay_naive = ( cfg ) -> new Promise ( resolve ) =>
+  { Dbay }      = require '../../../apps/dbay'
+  defaults      = {}
+  cfg           = { defaults..., cfg..., }
+  db_cfg        = { path: cfg.db_path, }
+  try_to_remove_file cfg.db_path
+  db            = new Dbay db_cfg
+  data          = @get_data cfg
+  count         = 0
+  #.........................................................................................................
+  # db.pragma 'synchronous = OFF' # makes file-based DBs much faster
+  db.pragma pragma for pragma in cfg.pragmas ? []
+  #.........................................................................................................
+  # db.exec """drop table if exists test;"""
+  db SQL"""
+    create table test(
+      id    integer primary key,
+      nr    integer not null,
+      text  text );"""
+  # debug '^22233^', db.exec """insert into test ( nr, text ) values ( 1, '2' );"""
+  #.........................................................................................................
+  resolve => new Promise ( resolve ) =>
+    nr      = 0
+    db.execute "begin transaction;" if cfg.use_transaction
+    for text in data.texts
+      nr++
+      db SQL"""insert into test ( nr, text ) values ( ?, ? );""", [ nr, text, ]
+    db.execute "commit;" if cfg.use_transaction
+    result  = db SQL"""select * from test order by text;"""
+    result  = [ result..., ]
+    count  += result.length
+    show_result '_dbay_naive', result if gcfg.verbose
+    resolve count
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@dbay_tmpfs_prep_tx1  = ( cfg ) => @_dbay_prep1 { cfg..., db_path: '/dev/shm/dbay.db', use_transaction: true, }
+@dbay_naive_tx1       = ( cfg ) => @_dbay_naive { cfg..., db_path: '/dev/shm/dbay.db', use_transaction: true, }
+@dbay_naive_tx0       = ( cfg ) => @_dbay_naive { cfg..., db_path: '/dev/shm/dbay.db', use_transaction: false, }
+
+
+#===========================================================================================================
+#
+#-----------------------------------------------------------------------------------------------------------
 @run_benchmarks = ->
   gcfg.verbose  = true
   gcfg.verbose  = false
@@ -494,6 +577,9 @@ show_result = ( name, result ) ->
     'sqljs_tx'
     'porsagerpostgres_tx'
     'briancpg_tx'
+    'dbay_tmpfs_prep_tx1'
+    'dbay_naive_tx1'
+    'dbay_naive_tx0'
     ]
   global.gc() if global.gc?
   data_cache = null
