@@ -186,7 +186,44 @@ guy                       = require '../../../apps/guy'
     DH.unlink_file db._dbs.main.path
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY db as callable" ] = ( T, done ) ->
+  ### implicit path, explicitly not temporary ###
+  T?.halt_on_error()
+  { Dbay }            = require H.dbay_path
+  DH                  = require PATH.join H.dbay_path, 'lib/helpers'
+  path                = PATH.resolve Dbay.C.autolocation, 'dbay-do.sqlite'
+  db                  = new Dbay { temporary: false, }
+  debug '^233-1^', db
+  debug '^233-1^', db.sqlt1
+  debug '^233-1^', db.sqlt2
+  debug '^233-2^', db.destroy
+  debug '^233-3^', db.constructor
+  debug '^233-4^', db._dbs
+  debug '^233-5^', db.query
+  return done?()
+  try
+    db SQL"drop table if exists texts;"
+    db SQL"create table texts ( nr integer not null primary key, text text );"
+    db SQL"insert into texts values ( 3, 'third' );"
+    # T?.throws /argument extra not allowed/, =>
+    #   db  SQL"insert into texts values ( 4,. ? );", [ 4, 'fourth', ]
+    db SQL"insert into texts values ( 1, 'first' );"
+    db SQL"insert into texts values ( ?, ? );", [ 2, 'second', ]
+    rows = db SQL"select * from texts order by nr;"
+    T?.eq ( type_of rows ), 'statementiterator'
+    T?.eq [ rows..., ], [ { nr: 1, text: 'first' }, { nr: 2, text: 'second' }, { nr: 3, text: 'third' } ]
+  finally
+    DH.unlink_file db._dbs.main.path
+  return done?()
+
+
 
 ############################################################################################################
 if require.main is module then do =>
   test @
+  # test @[ "DBAY do 1" ]
+  # @[ "DBAY db as callable" ]()
+
+
+
