@@ -191,20 +191,11 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db as callable" ] = ( T, done ) ->
-  ### implicit path, explicitly not temporary ###
   T?.halt_on_error()
   { Dbay }            = require H.dbay_path
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
   path                = PATH.resolve Dbay.C.autolocation, 'dbay-do.sqlite'
   db                  = new Dbay { temporary: false, }
-  debug '^233-1^', db
-  debug '^233-1^', db.sqlt1
-  debug '^233-1^', db.sqlt2
-  debug '^233-2^', db.destroy
-  debug '^233-3^', db.constructor
-  debug '^233-4^', db._dbs
-  debug '^233-5^', db.query
-  return done?()
   try
     db SQL"drop table if exists texts;"
     db SQL"create table texts ( nr integer not null primary key, text text );"
@@ -215,19 +206,57 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
     db SQL"insert into texts values ( ?, ? );", [ 2, 'second', ]
     rows = db SQL"select * from texts order by nr;"
     T?.eq ( type_of rows ), 'statementiterator'
-    T?.eq [ rows..., ], [ { nr: 1, text: 'first' }, { nr: 2, text: 'second' }, { nr: 3, text: 'third' } ]
+    rows = [ rows..., ]
+    T?.eq rows, [ { nr: 1, text: 'first' }, { nr: 2, text: 'second' }, { nr: 3, text: 'third' } ]
   finally
     DH.unlink_file db._dbs.main.path
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY db callable checks types of arguments" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dbay }            = require H.dbay_path
+  db                  = new Dbay()
+  T?.throws /expected a text or a function, got a float/, -> db 42
+  T?.throws /expected a text or a function, got a undefined/, -> db()
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY db callable accepts function, begins, commits transaction" ] = ( T, done ) ->
+  T?.halt_on_error()
+  { Dbay }            = require H.dbay_path
+  DH                  = require PATH.join H.dbay_path, 'lib/helpers'
+  path                = PATH.resolve Dbay.C.autolocation, 'dbay-do.sqlite'
+  db                  = new Dbay()
+  #.........................................................................................................
+  db ->
+    db SQL"drop table if exists texts;"
+    db SQL"create table texts ( nr integer not null primary key, text text );"
+    db SQL"insert into texts values ( 3, 'third' );"
+    db SQL"insert into texts values ( 1, 'first' );"
+    db SQL"insert into texts values ( ?, ? );", [ 2, 'second', ]
+    #.......................................................................................................
+    T?.throws /cannot start a transaction within a transaction/, ->
+      db ->
+  #.........................................................................................................
+  T?.throws /UNIQUE constraint failed: texts\.nr/, ->
+    db ->
+      db SQL"insert into texts values ( 3, 'third' );"
+  #.........................................................................................................
+  rows = db SQL"select * from texts order by nr;"
+  rows = [ rows..., ]
+  T?.eq rows, [ { nr: 1, text: 'first' }, { nr: 2, text: 'second' }, { nr: 3, text: 'third' } ]
+  #.........................................................................................................
   return done?()
 
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # test @[ "DBAY create DB, insert, query values 1" ]
-  # @[ "DBAY db as callable" ]()
+  # test @[ "DBAY db as callable" ]
   # @[ "DBAY create DB, table 2" ]()
-
-
+  # test @[ "DBAY db callable checks types of arguments" ]
+  test @[ "DBAY db callable accepts function, begins, commits transaction" ]
 
