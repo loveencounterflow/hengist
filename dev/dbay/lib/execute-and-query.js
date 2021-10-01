@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, MMX, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -39,6 +39,8 @@
 
   guy = require('../../../apps/guy');
 
+  MMX = require('../../../apps/multimix/lib/cataloguing');
+
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, table 1"] = function(T, done) {
     var DH, Dbay, db, path;
@@ -54,6 +56,7 @@
       temporary: true
     });
     try {
+      debug('^447^', MMX.all_keys_of(db));
       if (T != null) {
         T.ok(DH.is_file(db._dbs.main.path));
       }
@@ -386,7 +389,7 @@
     })();
   }
 
-  // test @[ "DBAY do 1" ]
+  // test @[ "DBAY create DB, insert, query values 1" ]
 // @[ "DBAY db as callable" ]()
 
 }).call(this);

@@ -26,6 +26,7 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 SQL                       = String.raw
 guy                       = require '../../../apps/guy'
+MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -37,11 +38,13 @@ guy                       = require '../../../apps/guy'
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
   db                  = new Dbay { path, temporary: true, }
   try
+    debug '^447^', MMX.all_keys_of db
     T?.ok DH.is_file db._dbs.main.path
     db.execute SQL"create table texts ( nr integer not null primary key, text text );"
     db.destroy()
     T?.ok not DH.is_file db._dbs.main.path
   finally
+
     DH.unlink_file db._dbs.main.path
   return done?()
 
@@ -222,7 +225,7 @@ guy                       = require '../../../apps/guy'
 ############################################################################################################
 if require.main is module then do =>
   test @
-  # test @[ "DBAY do 1" ]
+  # test @[ "DBAY create DB, insert, query values 1" ]
   # @[ "DBAY db as callable" ]()
 
 
