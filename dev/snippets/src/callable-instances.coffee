@@ -70,7 +70,7 @@ class Fn extends Function
     help '^8-2^', @prop_6
     help '^8-3^', @prop_7
     help '^8-4^', @prop_11
-    help '^8-4^', @_me ### undefined ###
+    # help '^8-4^', @_me ### undefined ###
     return a + b + c
 
   #---------------------------------------------------------------------------------------------------------
@@ -79,12 +79,13 @@ class Fn extends Function
     urge '^8-6^', @prop_6
     urge '^8-7^', @prop_7
     urge '^8-8^', @prop_11
-    help '^8-4^', @_me ### undefined ###
+    # help '^8-4^', @_me ### undefined ###
     return null
 
 #-----------------------------------------------------------------------------------------------------------
 test = ->
   fn = new Fn()
+  # { other_method, } = fn
   info '^8-9^', fn
   info '^8-10^', fn.prop_6
   info '^8-11^', fn.prop_7
@@ -92,7 +93,9 @@ test = ->
   info '^8-13^', fn 3, 4, 5
   info '^8-14^', fn.do 3, 4, 5
   info '^8-15^', fn.other_method()
-  info '^8-15^', fn._me ### undefined ###
+  info '^8-16^', other_method = fn.other_method.bind fn
+  info '^8-16^', other_method()
+  # info '^8-15^', fn._me ### undefined ###
   return null
 
 
