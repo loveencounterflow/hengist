@@ -1005,7 +1005,7 @@
     gcfg.verbose = false;
     bench = BM.new_benchmarks();
     cfg = {
-      word_count: 100
+      word_count: 10000
     };
     repetitions = 5;
     test_names = [
