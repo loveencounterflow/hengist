@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, freeze, gcfg, help, info, jr, log, paths, pragmas, rpr, show_result, test, try_to_remove_file, urge, warn, whisper;
+  var BM, CND, DATA, FS, PATH, SQL, alert, badge, data_cache, debug, echo, freeze, gcfg, help, info, jr, log, paths, pragmas, rpr, show_result, test, try_to_remove_file, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -47,6 +47,8 @@
   };
 
   ({freeze} = require('letsfreezethat'));
+
+  SQL = String.raw;
 
   //-----------------------------------------------------------------------------------------------------------
   paths = {
@@ -852,6 +854,151 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this._dbay_prep1 = function(cfg) {
+    return new Promise((resolve) => {
+      var Dbay, count, data, db, db_cfg, defaults, i, insert, len, pragma, ref, ref1, retrieve;
+      ({Dbay} = require('../../../apps/dbay'));
+      defaults = {};
+      cfg = {...defaults, ...cfg};
+      db_cfg = {
+        path: cfg.db_path
+      };
+      try_to_remove_file(cfg.db_path);
+      db = new Dbay(db_cfg);
+      data = this.get_data(cfg);
+      count = 0;
+      ref1 = (ref = cfg.pragmas) != null ? ref : [];
+      for (i = 0, len = ref1.length; i < len; i++) {
+        pragma = ref1[i];
+        //.........................................................................................................
+        // db.pragma 'synchronous = OFF' # makes file-based DBs much faster
+        db.pragma(pragma);
+      }
+      //.........................................................................................................
+      // db.exec """drop table if exists test;"""
+      db(SQL`create table test(
+  id    integer primary key,
+  nr    integer not null,
+  text  text );`);
+      // debug '^22233^', db.exec """insert into test ( nr, text ) values ( 1, '2' );"""
+      insert = db.prepare(SQL`insert into test ( nr, text ) values ( ?, ? );`);
+      retrieve = db.prepare(SQL`select * from test order by text;`);
+      retrieve.raw(true);
+      //.........................................................................................................
+      resolve(() => {
+        return new Promise((resolve) => {
+          var j, len1, nr, ref2, result, text;
+          nr = 0;
+          if (cfg.use_transaction) {
+            db.execute("begin transaction;");
+          }
+          ref2 = data.texts;
+          for (j = 0, len1 = ref2.length; j < len1; j++) {
+            text = ref2[j];
+            nr++;
+            insert.run([nr, text]);
+          }
+          if (cfg.use_transaction) {
+            db.execute("commit;");
+          }
+          result = retrieve.all();
+          count += result.length;
+          if (gcfg.verbose) {
+            show_result('_dbay_prep1', result);
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._dbay_naive = function(cfg) {
+    return new Promise((resolve) => {
+      var Dbay, count, data, db, db_cfg, defaults, i, len, pragma, ref, ref1;
+      ({Dbay} = require('../../../apps/dbay'));
+      defaults = {};
+      cfg = {...defaults, ...cfg};
+      db_cfg = {
+        path: cfg.db_path
+      };
+      try_to_remove_file(cfg.db_path);
+      db = new Dbay(db_cfg);
+      data = this.get_data(cfg);
+      count = 0;
+      ref1 = (ref = cfg.pragmas) != null ? ref : [];
+      for (i = 0, len = ref1.length; i < len; i++) {
+        pragma = ref1[i];
+        //.........................................................................................................
+        // db.pragma 'synchronous = OFF' # makes file-based DBs much faster
+        db.pragma(pragma);
+      }
+      //.........................................................................................................
+      // db.exec """drop table if exists test;"""
+      db(SQL`create table test(
+  id    integer primary key,
+  nr    integer not null,
+  text  text );`);
+      // debug '^22233^', db.exec """insert into test ( nr, text ) values ( 1, '2' );"""
+      //.........................................................................................................
+      resolve(() => {
+        return new Promise((resolve) => {
+          var j, len1, nr, ref2, result, text;
+          nr = 0;
+          if (cfg.use_transaction) {
+            db.execute("begin transaction;");
+          }
+          ref2 = data.texts;
+          for (j = 0, len1 = ref2.length; j < len1; j++) {
+            text = ref2[j];
+            nr++;
+            db(SQL`insert into test ( nr, text ) values ( ?, ? );`, [nr, text]);
+          }
+          if (cfg.use_transaction) {
+            db.execute("commit;");
+          }
+          result = db(SQL`select * from test order by text;`);
+          result = [...result];
+          count += result.length;
+          if (gcfg.verbose) {
+            show_result('_dbay_naive', result);
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_tmpfs_prep_tx1 = (cfg) => {
+    return this._dbay_prep1({
+      ...cfg,
+      db_path: '/dev/shm/dbay.db',
+      use_transaction: true
+    });
+  };
+
+  this.dbay_naive_tx1 = (cfg) => {
+    return this._dbay_naive({
+      ...cfg,
+      db_path: '/dev/shm/dbay.db',
+      use_transaction: true
+    });
+  };
+
+  this.dbay_naive_tx0 = (cfg) => {
+    return this._dbay_naive({
+      ...cfg,
+      db_path: '/dev/shm/dbay.db',
+      use_transaction: false
+    });
+  };
+
+  //===========================================================================================================
+
+  //-----------------------------------------------------------------------------------------------------------
   this.run_benchmarks = async function() {
     var _, bench, cfg, i, j, len, ref, ref1, repetitions, test_name, test_names;
     gcfg.verbose = true;
@@ -902,7 +1049,10 @@
       'sqljs',
       'sqljs_tx',
       'porsagerpostgres_tx',
-      'briancpg_tx'
+      'briancpg_tx',
+      'dbay_tmpfs_prep_tx1',
+      'dbay_naive_tx1',
+      'dbay_naive_tx0'
     ];
     if (global.gc != null) {
       global.gc();
