@@ -125,11 +125,7 @@ guy                       = require '../../../apps/guy'
 ############################################################################################################
 if require.main is module then do =>
   test @
-  # test @[ "DBAY attach memory connections" ]
-  # @[ "DBAY attach memory connections" ]()
-  # test @[ "DBAY constructor arguments 1" ]
   # test @[ "DBAY _get-autolocation" ]
-  # test @[ "DBAY instance non-enumerable properties" ]
-  # test @[ "DBAY: _get_connection_url()" ]
+  # test @[ "DBAY constructor arguments 1" ]
   # test @[ "DBAY instance has two connections" ]
-
+  # test @[ "DBAY instance non-enumerable properties" ]
