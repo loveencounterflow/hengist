@@ -337,6 +337,84 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
   #.........................................................................................................
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY db.first_values walks over first value in all rows" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dbay }            = require H.dbay_path
+  db                  = new Dbay()
+  db.open { schema: 'aux', }
+  db SQL"create table squares ( n int not null primary key, square int not null );"
+  #.........................................................................................................
+  db ->
+    for n in [ 10 .. 12 ]
+      db SQL"insert into squares ( n, square ) values ( ?, ? );", [ n, n ** 2, ]
+  #.........................................................................................................
+  do ->
+    result = []
+    for value from db.first_values SQL"select * from squares order by n desc;"
+      result.push value
+    T?.eq result, [ 12, 11, 10, ]
+  #.........................................................................................................
+  do ->
+    result = []
+    for value from db.first_values SQL"select square, n from squares order by n desc;"
+      result.push value
+    T?.eq result, [ 144, 121, 100 ]
+  #.........................................................................................................
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY db.all_first_values returns list of first value in all rows" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dbay }            = require H.dbay_path
+  db                  = new Dbay()
+  db.open { schema: 'aux', }
+  db SQL"create table squares ( n int not null primary key, square int not null );"
+  #.........................................................................................................
+  db ->
+    for n in [ 10 .. 12 ]
+      db SQL"insert into squares ( n, square ) values ( ?, ? );", [ n, n ** 2, ]
+  #.........................................................................................................
+  do ->
+    result = db.all_first_values SQL"select * from squares order by n desc;"
+    T?.eq result, [ 12, 11, 10, ]
+  #.........................................................................................................
+  do ->
+    result = db.all_first_values SQL"select square, n from squares order by n desc;"
+    T?.eq result, [ 144, 121, 100 ]
+  #.........................................................................................................
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY db.single_value returns single value or throws error" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dbay }            = require H.dbay_path
+  db                  = new Dbay()
+  db.open { schema: 'aux', }
+  db SQL"create table squares ( n int not null primary key, square int not null );"
+  #.........................................................................................................
+  db ->
+    for n in [ 10 .. 12 ]
+      db SQL"insert into squares ( n, square ) values ( ?, ? );", [ n, n ** 2, ]
+  #.........................................................................................................
+  do ->
+    result = db.single_value SQL"select n from squares order by n desc limit 1;"
+    T?.eq result, 12
+  #.........................................................................................................
+  do ->
+    T?.throws /expected 1 row, got 3/, ->
+      db.single_value SQL"select square, n from squares order by n desc;"
+  #.........................................................................................................
+  do ->
+    T?.throws /expected row with single field, got fields \[ 'square', 'n' \]/, ->
+      db.single_value SQL"select square, n from squares order by n limit 1;"
+  #.........................................................................................................
+  do ->
+    T?.throws /expected 1 row, got 0/, ->
+      db.single_value SQL"select square, n from squares where n < 0;"
+  #.........................................................................................................
+  return done?()
+
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "DBAY db.first_row() exhausts iterator" ] = ( T, done ) ->
 #   # T?.halt_on_error()
@@ -370,4 +448,4 @@ if require.main is module then do =>
   # @[ "DBAY can do explicit rollback in tx context handler" ]()
   # test @[ "DBAY implicit tx can be configured" ]
   # test @[ "DBAY db.first_row returns `null` for empty result set" ]
-
+  # test @[ "DBAY db.first_values walks over first value in all rows" ]
