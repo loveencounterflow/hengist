@@ -39,8 +39,8 @@
   guy = require('../../../apps/guy');
 
   //-----------------------------------------------------------------------------------------------------------
-  this["___________ DBAY open() 1"] = function(T, done) {
-    var DH, Dbay, db, schema;
+  this["DBAY open() 1"] = function(T, done) {
+    var DH, Dbay, db, error, schema;
     if (T != null) {
       T.halt_on_error();
     }
@@ -48,25 +48,35 @@
     DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
     db = new Dbay();
     schema = 'aux';
-    debug('^300-1^', db.open({schema}));
-    debug('^300-1^', db._dbs);
-    db(function() {
-      return db(SQL`create table aux.squares ( n int not null primary key, square int not null );`);
-    });
+    db.open({schema});
+    if (T != null) {
+      T.eq(db._dbs.aux.temporary, true);
+    }
+    if (T != null) {
+      T.eq((Object.keys(db._dbs)).length, 2);
+    }
+    try {
+      db(function() {
+        db(SQL`create table aux.squares ( n int not null primary key, square int not null );`);
+        throw new Error('xxx');
+      });
+    } catch (error1) {
+      error = error1;
+      if (error.message !== 'xxx') {
+        throw error;
+      }
+    }
+    info(db.all_rows(SQL`select * from sqlite_schema;`));
     return typeof done === "function" ? done() : void 0;
   };
 
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      return test(this["DBAY open() 1"]);
     })();
   }
-
-  // test @[ "DBAY _get-autolocation" ]
-// test @[ "DBAY constructor arguments 1" ]
-// test @[ "DBAY instance has two connections" ]
-// test @[ "DBAY instance non-enumerable properties" ]
 
 }).call(this);
 

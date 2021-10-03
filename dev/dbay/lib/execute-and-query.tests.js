@@ -493,18 +493,173 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY can do explicit rollback in tx context handler"] = function(T, done) {
+    var Dbay, db;
+    // T?.halt_on_error()
+    ({Dbay} = require(H.dbay_path));
+    db = new Dbay();
+    db(SQL`create table squares ( n int not null primary key, square int not null );`);
+    db(function() {
+      var i, n;
+      for (n = i = 10; i <= 12; n = ++i) {
+        db(SQL`insert into squares ( n, square ) values ( ?, ? );`, [n, n ** 2]);
+      }
+      return db(SQL`rollback;`);
+    });
+    if (T != null) {
+      T.eq(db.all_rows(SQL`select * from squares order by n;`), []);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY tx rollback also reverts create table"] = function(T, done) {
+    var Dbay, db, error;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Dbay} = require(H.dbay_path));
+    db = new Dbay();
+    db.open({
+      schema: 'aux'
+    });
+    try {
+      //.........................................................................................................
+      db(function() {
+        db(SQL`create table squares ( n int not null primary key, square int not null );`);
+        db(SQL`create table aux.squares ( n int not null primary key, square int not null );`);
+        throw new Error('xxx');
+      });
+    } catch (error1) {
+      error = error1;
+      if (error.message !== 'xxx') {
+        throw error;
+      }
+    }
+    if (T != null) {
+      T.eq((db.all_rows(SQL`select * from main.sqlite_schema;`)).length, 0);
+    }
+    if (T != null) {
+      T.eq((db.all_rows(SQL`select * from aux.sqlite_schema;`)).length, 0);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY db.first_row returns `null` for empty result set"] = function(T, done) {
+    var Dbay, db;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Dbay} = require(H.dbay_path));
+    db = new Dbay();
+    db.open({
+      schema: 'aux'
+    });
+    db(SQL`create table squares ( n int not null primary key, square int not null );`);
+    //.........................................................................................................
+    db(function() {
+      var i, n, results;
+      results = [];
+      for (n = i = 10; i <= 12; n = ++i) {
+        results.push(db(SQL`insert into squares ( n, square ) values ( ?, ? );`, [n, n ** 2]));
+      }
+      return results;
+    });
+    if (T != null) {
+      T.eq((db.all_rows(SQL`select * from squares order by n;`)).length, 3);
+    }
+    if (T != null) {
+      T.eq(db.first_row(SQL`select * from squares order by n;`), {
+        n: 10,
+        square: 100
+      });
+    }
+    if (T != null) {
+      T.eq(db.first_row(SQL`select * from squares where n > 100;`), null);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY db.single_row returns throws error on empty result set"] = function(T, done) {
+    var Dbay, db;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Dbay} = require(H.dbay_path));
+    db = new Dbay();
+    db.open({
+      schema: 'aux'
+    });
+    db(SQL`create table squares ( n int not null primary key, square int not null );`);
+    //.........................................................................................................
+    db(function() {
+      var i, n, results;
+      results = [];
+      for (n = i = 10; i <= 12; n = ++i) {
+        results.push(db(SQL`insert into squares ( n, square ) values ( ?, ? );`, [n, n ** 2]));
+      }
+      return results;
+    });
+    if (T != null) {
+      T.eq((db.all_rows(SQL`select * from squares order by n;`)).length, 3);
+    }
+    if (T != null) {
+      T.eq(db.single_row(SQL`select * from squares order by n limit 1;`), {
+        n: 10,
+        square: 100
+      });
+    }
+    if (T != null) {
+      T.throws(/expected 1 row, got 0/, function() {
+        return db.single_row(SQL`select * from squares where n > 100;`);
+      });
+    }
+    if (T != null) {
+      T.throws(/expected 1 row, got 3/, function() {
+        return db.single_row(SQL`select * from squares;`);
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // @[ "DBAY db.first_row() exhausts iterator" ] = ( T, done ) ->
+  //   # T?.halt_on_error()
+  //   { Dbay }            = require H.dbay_path
+  //   db                  = new Dbay()
+  //   db SQL"create table squares ( n int not null primary key, square int not null );"
+  //   db ->
+  //     for n in [ 10 .. 12 ]
+  //       db SQL"insert into squares ( n, square ) values ( ?, ? );", [ n, n ** 2, ]
+  //   sql = SQL"select * from squares order by n;"
+  //   T?.eq ( db.first_row sql ), { n: 10, square: 100 }
+  //   # T?.eq db._statements[ sql ].all(), []
+  //   urge [ ( db.query SQL"select * from squares;" )..., ]
+  //   info db.sqlt1
+  //   info [ db._statements[ sql ].iterate()..., ]
+  //   info [ db._statements[ sql ].iterate()..., ]
+  //   info [ db._statements[ sql ].iterate()..., ]
+  //   return done?()
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @[ "DBAY create DB, insert, query values 1" ]
-      // test @[ "DBAY db as callable" ]
-      // @[ "DBAY create DB, table 2" ]()
-      return test(this["DBAY db callable checks types of arguments"]);
+      return test(this);
     })();
   }
 
-  // test @[ "DBAY implicit tx can be configured" ]
+  // test @[ "DBAY create DB, insert, query values 1" ]
+// test @[ "DBAY db as callable" ]
+// @[ "DBAY create DB, table 2" ]()
+// test @[ "DBAY db callable checks types of arguments" ]
+// test @[ "DBAY tx rollback also reverts create table" ]
+// test @[ "DBAY db.first_row() exhausts iterator" ]
+// @[ "DBAY can do explicit rollback in tx context handler" ]()
+// test @[ "DBAY implicit tx can be configured" ]
+// test @[ "DBAY db.first_row returns `null` for empty result set" ]
 
 }).call(this);
 
