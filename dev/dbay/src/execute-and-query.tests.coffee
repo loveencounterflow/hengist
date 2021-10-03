@@ -217,8 +217,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
   # T?.halt_on_error()
   { Dbay }            = require H.dbay_path
   db                  = new Dbay()
-  T?.throws /expected a text or a function, got a float/, -> db 42
-  T?.throws /expected a text or a function, got a undefined/, -> db()
+  T?.throws /expected .*, got a float/, -> db 42
+  T?.throws /expected .*, got a undefined/, -> db()
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -277,6 +277,6 @@ if require.main is module then do =>
   # test @[ "DBAY create DB, insert, query values 1" ]
   # test @[ "DBAY db as callable" ]
   # @[ "DBAY create DB, table 2" ]()
-  # test @[ "DBAY db callable checks types of arguments" ]
-  test @[ "DBAY implicit tx can be configured" ]
+  test @[ "DBAY db callable checks types of arguments" ]
+  # test @[ "DBAY implicit tx can be configured" ]
 
