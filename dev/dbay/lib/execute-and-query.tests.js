@@ -381,12 +381,12 @@
     ({Dbay} = require(H.dbay_path));
     db = new Dbay();
     if (T != null) {
-      T.throws(/expected a text or a function, got a float/, function() {
+      T.throws(/expected .*, got a float/, function() {
         return db(42);
       });
     }
     if (T != null) {
-      T.throws(/expected a text or a function, got a undefined/, function() {
+      T.throws(/expected .*, got a undefined/, function() {
         return db();
       });
     }
@@ -500,10 +500,11 @@
       // test @[ "DBAY create DB, insert, query values 1" ]
       // test @[ "DBAY db as callable" ]
       // @[ "DBAY create DB, table 2" ]()
-      // test @[ "DBAY db callable checks types of arguments" ]
-      return test(this["DBAY implicit tx can be configured"]);
+      return test(this["DBAY db callable checks types of arguments"]);
     })();
   }
+
+  // test @[ "DBAY implicit tx can be configured" ]
 
 }).call(this);
 
