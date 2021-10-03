@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/tagged-tempplate-literals.coffee"
+  ],
+  "names": [],
+  "mappings": "AAGA;EAAA;AAAA,MAAA,GAAA,EAAA,KAAA,EAAA,KAAA,EAAA,IAAA,EAAA,IAAA,EAAA,IAAA,EAAA,IAAA,EAAA,GAAA,EAAA,IAAA,EAAA,IAAA,EAAA,OAAA;;;EAIA,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,GAAA,GAA4B,GAAG,CAAC;;EAChC,KAAA,GAA4B;;EAC5B,KAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,OAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,SAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,IAAI,CAAC,IAAT,CAAc,GAAd,EAb5B;;;EAiBA,IAAA,GAAO,QAAA,CAAA,CAAA;AACP,QAAA,GAAA,EAAA;IAAE,CAAA,GAAI,QAAA,CAAE,OAAF,EAAA,GAAW,MAAX,CAAA;MACF,IAAA,CAAA;MACA,IAAA,CAAK,cAAL,EAAqB,OAArB;MACA,IAAA,CAAK,cAAL,EAAqB,OAAO,CAAC,GAA7B;MACA,IAAA,CAAK,cAAL,EAAqB,MAArB;AACA,aAAO;IALL;IAMJ,IAAA,CAAK,CAAC,CAAA,aAAA,CAAN;IACA,GAAA,GAAM;IACN,IAAA,CAAK,CAAC,CAAA,eAAA,CAAN;IACA,IAAA,CAAK,CAAC,CAAA,IAAA,CAAA,CAAO,GAAP,CAAA,IAAA,CAAN,EATF;;AAWE,WAAO;EAZF,EAjBP;;;EAiCA,IAAG,MAAA,KAAU,OAAO,CAAC,IAArB;IAAkC,CAAA,CAAA,CAAA,GAAA;aAChC,IAAA,CAAA;IADgC,CAAA,IAAlC;;AAjCA",
+  "sourcesContent": [
+    "\n\n\n'use strict'\n\n\n############################################################################################################\nCND                       = require 'cnd'\nrpr                       = CND.rpr\nbadge                     = 'TAGGED-TEMPLATE-LITERALS'\ndebug                     = CND.get_logger 'debug',     badge\nwarn                      = CND.get_logger 'warn',      badge\ninfo                      = CND.get_logger 'info',      badge\nurge                      = CND.get_logger 'urge',      badge\nhelp                      = CND.get_logger 'help',      badge\nwhisper                   = CND.get_logger 'whisper',   badge\necho                      = CND.echo.bind CND\n\n\n#-----------------------------------------------------------------------------------------------------------\ndemo = ->\n  f = ( strings, values... ) ->\n    info()\n    info \"strings     \", strings\n    info \"strings.raw \", strings.raw\n    info \"values      \", values\n    return null\n  urge f\"helo \\n world\"\n  bar = 42\n  urge f\"foo ${bar} baz\"\n  urge f\"foo #{bar} baz\"\n  # urge f\"foo #{bar:blah} baz\"\n  return null\n\n\n############################################################################################################\nif module is require.main then do =>\n  demo()\n\n\n"
+  ]
+}
