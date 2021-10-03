@@ -269,14 +269,105 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
   #.........................................................................................................
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY can do explicit rollback in tx context handler" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Dbay }            = require H.dbay_path
+  db                  = new Dbay()
+  db SQL"create table squares ( n int not null primary key, square int not null );"
+  db ->
+    for n in [ 10 .. 12 ]
+      db SQL"insert into squares ( n, square ) values ( ?, ? );", [ n, n ** 2, ]
+    db SQL"rollback;"
+  T?.eq ( db.all_rows SQL"select * from squares order by n;" ), []
+  #.........................................................................................................
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY tx rollback also reverts create table" ] = ( T, done ) ->
+  T?.halt_on_error()
+  { Dbay }            = require H.dbay_path
+  db                  = new Dbay()
+  db.open { schema: 'aux', }
+  #.........................................................................................................
+  try
+    db ->
+      db SQL"create table squares ( n int not null primary key, square int not null );"
+      db SQL"create table aux.squares ( n int not null primary key, square int not null );"
+      throw new Error 'xxx'
+  catch error
+    throw error unless error.message is 'xxx'
+  T?.eq ( db.all_rows SQL"select * from main.sqlite_schema;" ).length, 0
+  T?.eq ( db.all_rows SQL"select * from aux.sqlite_schema;"  ).length, 0
+  #.........................................................................................................
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY db.first_row returns `null` for empty result set" ] = ( T, done ) ->
+  T?.halt_on_error()
+  { Dbay }            = require H.dbay_path
+  db                  = new Dbay()
+  db.open { schema: 'aux', }
+  db SQL"create table squares ( n int not null primary key, square int not null );"
+  #.........................................................................................................
+  db ->
+    for n in [ 10 .. 12 ]
+      db SQL"insert into squares ( n, square ) values ( ?, ? );", [ n, n ** 2, ]
+  T?.eq ( db.all_rows  SQL"select * from squares order by n;"     ).length, 3
+  T?.eq ( db.first_row SQL"select * from squares order by n;"     ), { n: 10, square: 100, }
+  T?.eq ( db.first_row SQL"select * from squares where n > 100;"  ), null
+  #.........................................................................................................
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY db.single_row returns throws error on empty result set" ] = ( T, done ) ->
+  T?.halt_on_error()
+  { Dbay }            = require H.dbay_path
+  db                  = new Dbay()
+  db.open { schema: 'aux', }
+  db SQL"create table squares ( n int not null primary key, square int not null );"
+  #.........................................................................................................
+  db ->
+    for n in [ 10 .. 12 ]
+      db SQL"insert into squares ( n, square ) values ( ?, ? );", [ n, n ** 2, ]
+  T?.eq ( db.all_rows  SQL"select * from squares order by n;"     ).length, 3
+  T?.eq ( db.single_row SQL"select * from squares order by n limit 1;"     ), { n: 10, square: 100, }
+  T?.throws /expected 1 row, got 0/, -> db.single_row SQL"select * from squares where n > 100;"
+  T?.throws /expected 1 row, got 3/, -> db.single_row SQL"select * from squares;"
+  #.........................................................................................................
+  return done?()
+
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "DBAY db.first_row() exhausts iterator" ] = ( T, done ) ->
+#   # T?.halt_on_error()
+#   { Dbay }            = require H.dbay_path
+#   db                  = new Dbay()
+#   db SQL"create table squares ( n int not null primary key, square int not null );"
+#   db ->
+#     for n in [ 10 .. 12 ]
+#       db SQL"insert into squares ( n, square ) values ( ?, ? );", [ n, n ** 2, ]
+#   sql = SQL"select * from squares order by n;"
+#   T?.eq ( db.first_row sql ), { n: 10, square: 100 }
+#   # T?.eq db._statements[ sql ].all(), []
+#   urge [ ( db.query SQL"select * from squares;" )..., ]
+#   info db.sqlt1
+#   info [ db._statements[ sql ].iterate()..., ]
+#   info [ db._statements[ sql ].iterate()..., ]
+#   info [ db._statements[ sql ].iterate()..., ]
+#   return done?()
+
 
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # test @[ "DBAY create DB, insert, query values 1" ]
   # test @[ "DBAY db as callable" ]
   # @[ "DBAY create DB, table 2" ]()
-  test @[ "DBAY db callable checks types of arguments" ]
+  # test @[ "DBAY db callable checks types of arguments" ]
+  # test @[ "DBAY tx rollback also reverts create table" ]
+  # test @[ "DBAY db.first_row() exhausts iterator" ]
+  # @[ "DBAY can do explicit rollback in tx context handler" ]()
   # test @[ "DBAY implicit tx can be configured" ]
+  # test @[ "DBAY db.first_row returns `null` for empty result set" ]
 

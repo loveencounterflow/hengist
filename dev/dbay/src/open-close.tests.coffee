@@ -28,16 +28,22 @@ guy                       = require '../../../apps/guy'
 
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "___________ DBAY open() 1" ] = ( T, done ) ->
+@[ "DBAY open() 1" ] = ( T, done ) ->
   T?.halt_on_error()
   { Dbay }            = require H.dbay_path
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
   db                  = new Dbay()
   schema              = 'aux'
-  debug '^300-1^', db.open { schema, }
-  debug '^300-1^', db._dbs
-  db ->
-    db SQL"create table aux.squares ( n int not null primary key, square int not null );"
+  db.open { schema, }
+  T?.eq db._dbs.aux.temporary, true
+  T?.eq ( Object.keys db._dbs ).length, 2
+  try
+    db ->
+      db SQL"create table aux.squares ( n int not null primary key, square int not null );"
+      throw new Error 'xxx'
+  catch error
+    throw error unless error.message is 'xxx'
+  info db.all_rows SQL"select * from sqlite_schema;"
   return done?()
 
 
@@ -46,8 +52,5 @@ guy                       = require '../../../apps/guy'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
-  # test @[ "DBAY _get-autolocation" ]
-  # test @[ "DBAY constructor arguments 1" ]
-  # test @[ "DBAY instance has two connections" ]
-  # test @[ "DBAY instance non-enumerable properties" ]
+  # test @
+  test @[ "DBAY open() 1" ]
