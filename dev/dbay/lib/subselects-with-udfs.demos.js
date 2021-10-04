@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dbay, H, PATH, SQL, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, insert_result, isa, join_x_and_y_using_word, join_x_and_y_using_word_iterate, jr, new_db_with_data, prepare_db, prepare_dbr, query_with_nested_statement, query_without_nested_statement, rpr, select, select_word_from_y_iterate, select_word_from_y_scalar, show_dbr, trash, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Dbay, H, PATH, SQL, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, insert_result, isa, join_x_and_y_using_word, join_x_and_y_using_word_iterate, jr, new_db_with_data, prepare_db, prepare_dbr, query_with_nested_statement, query_without_nested_statement, rpr, select, select_word_from_y_iterate, select_word_from_y_scalar, show_dbr, simple_demo, trash, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   /*
 
@@ -462,7 +462,7 @@ order by error, marker desc, cc, ne, 1, 2, 3, 4, 5, 6;`)));
     switch (cfg.use) {
       case 'ramfs':
       case 'file':
-        path = cfg.use === 'ramfs' ? '/mnt/ramdisk/subselects.db' : '/tmp/subselects.db';
+        path = cfg.use === 'ramfs' ? '/dev/shm/subselects.db' : '/tmp/subselects.db';
         try {
           await trash(path);
         } catch (error1) {
@@ -616,10 +616,72 @@ order by error, marker desc, cc, ne, 1, 2, 3, 4, 5, 6;`)));
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  simple_demo = function() {
+    var create_functions, db, n, ref;
+    ({Dbay} = require(H.dbay_path));
+    db = new Dbay();
+    //.........................................................................................................
+    create_functions = function() {
+      var select_from_facets_stm;
+      select_from_facets_stm = null;
+      db.create_table_function({
+        name: 'subselect',
+        columns: ['key', 'value'],
+        parameters: ['n'],
+        rows: function*(n) {
+          if (select_from_facets_stm == null) {
+            select_from_facets_stm = db.sqlt2.prepare(SQL`select key, value from facets where n = $n order by value, key;`);
+          }
+          yield* select_from_facets_stm.iterate({n});
+          return null;
+        }
+      });
+      return null;
+    };
+    create_functions();
+    //.........................................................................................................
+    db(SQL`create table facets (
+    n     integer not null references numbers ( n ),
+    key   text    not null,
+    value number  not null,
+  primary key ( n, key ) );
+create table numbers (
+    n     integer not null,
+  primary key ( n ) );`);
+    //.........................................................................................................
+    db(function() {
+      var i, n, results;
+      results = [];
+      for (n = i = 1; i <= 3; n = ++i) {
+        db(SQL`insert into numbers ( n ) values ( $n )`, {n});
+        db(SQL`insert into facets ( n, key, value ) values ( ?, ?, ? )`, [n, 'double', n * 2]);
+        db(SQL`insert into facets ( n, key, value ) values ( ?, ?, ? )`, [n, 'half', n / 2]);
+        results.push(db(SQL`insert into facets ( n, key, value ) values ( ?, ?, ? )`, [n, 'square', n * n]));
+      }
+      return results;
+    });
+    //.........................................................................................................
+    console.table(db.all_rows(SQL`select * from numbers order by n;`));
+    console.table(db.all_rows(SQL`select * from facets order by value;`));
+    ref = db.first_values(SQL`select n from numbers order by n;`);
+    for (n of ref) {
+      info('^338^', {n});
+      console.table(db.all_rows(SQL`select
+    $n      as n,
+    key     as key,
+    value   as value
+  from subselect( $n ) as r1;`, {n}));
+    }
+    //.........................................................................................................
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
-    (async() => {
-      return (await demo_f());
+    (() => {
+      // await demo_f()
+      return simple_demo();
     })();
   }
 
