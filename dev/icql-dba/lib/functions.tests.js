@@ -1805,24 +1805,26 @@ create table b ( n integer not null primary key references a ( n ) );`);
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      // debug f '𠖏'
-      // test @[ "DBA: concurrent UDFs" ]
-      // test @[ "DBA: create_with_unsafe_mode()" ]
-      // @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]()
-      // test @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]
-      // test @[ "DBA: with_foreign_keys_deferred(), ensure checks" ]
-      // @[ "DBA: with_unsafe_mode()" ]()
-      // @[ "DBA: with_transaction() 1" ]()
-      // test @[ "DBA: with_transaction() 1" ]
-      // @[ "DBA: with_transaction() 2" ]()
-      // test @[ "DBA: with_transaction()" ]
-      // test @[ "DBA: concurrent UDFs 2" ]
-      return this["DBA: concurrent UDFs 2"]();
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // debug process.env[ 'icql-dba-use' ]
+  // debug f '𠖏'
+// test @[ "DBA: concurrent UDFs" ]
+// test @[ "DBA: create_with_unsafe_mode()" ]
+// @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]()
+// test @[ "DBA: with_foreign_keys_deferred(), preliminaries" ]
+// test @[ "DBA: with_foreign_keys_deferred(), ensure checks" ]
+// @[ "DBA: with_unsafe_mode()" ]()
+// @[ "DBA: with_transaction() 1" ]()
+// test @[ "DBA: with_transaction() 1" ]
+// @[ "DBA: with_transaction() 2" ]()
+// test @[ "DBA: with_transaction()" ]
+// test @[ "DBA: concurrent UDFs 2" ]
+// @[ "DBA: concurrent UDFs 2" ]()
+// debug process.env[ 'icql-dba-use' ]
 // debug process.argv
 
 }).call(this);
