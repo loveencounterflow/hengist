@@ -325,7 +325,7 @@ select = ( fingerprint ) ->
 new_db_with_data = ->
   switch cfg.use
     when 'ramfs', 'file'
-      path = if cfg.use is 'ramfs' then '/mnt/ramdisk/subselects.db' else '/tmp/subselects.db'
+      path = if cfg.use is 'ramfs' then '/dev/shm/subselects.db' else '/tmp/subselects.db'
       try await trash path catch error # then throw error unless error.name is 'ENOENT'
         debug error.name
         debug error.code
@@ -423,9 +423,58 @@ demo_f = ->
   show_dbr dbr
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+simple_demo = ->
+  { Dbay }  = require H.dbay_path
+  db        = new Dbay()
+  #.........................................................................................................
+  create_functions = ->
+    select_from_facets_stm = null
+    db.create_table_function
+      name:         'subselect'
+      columns:      [ 'key', 'value' ]
+      parameters:   [ 'n', ]
+      rows: ( n ) ->
+        select_from_facets_stm ?= db.sqlt2.prepare SQL"""
+          select key, value from facets where n = $n order by value, key;"""
+        # select_from_facets_stm ?= db.prepare SQL"select key, value from facets where n = $n"
+        yield from select_from_facets_stm.iterate { n, }
+        return null
+    return null
+  create_functions()
+  #.........................................................................................................
+  db SQL"""
+    create table facets (
+        n     integer not null references numbers ( n ),
+        key   text    not null,
+        value number  not null,
+      primary key ( n, key ) );
+    create table numbers (
+        n     integer not null,
+      primary key ( n ) );"""
+  #.........................................................................................................
+  db ->
+    for n in [ 1 .. 3 ]
+      db SQL"insert into numbers ( n ) values ( $n )", { n, }
+      db SQL"insert into facets ( n, key, value ) values ( ?, ?, ? )", [ n, 'double', ( n * 2 ), ]
+      db SQL"insert into facets ( n, key, value ) values ( ?, ?, ? )", [ n, 'half',   ( n / 2 ), ]
+      db SQL"insert into facets ( n, key, value ) values ( ?, ?, ? )", [ n, 'square', ( n * n ), ]
+  #.........................................................................................................
+  console.table db.all_rows SQL"select * from numbers order by n;"
+  console.table db.all_rows SQL"select * from facets order by value;"
+  for n from db.first_values SQL"select n from numbers order by n;"
+    info '^338^', { n, }
+    console.table db.all_rows SQL"""
+      select
+          $n      as n,
+          key     as key,
+          value   as value
+        from subselect( $n ) as r1;""", { n, }
+  #.........................................................................................................
+  return null
 
 ############################################################################################################
 if require.main is module then do =>
-  await demo_f()
-
+  # await demo_f()
+  simple_demo()
 
