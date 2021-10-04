@@ -11,7 +11,15 @@
   - [Cryptids of Cornwall](#cryptids-of-cornwall)
   - [How To Format an API Listing](#how-to-format-an-api-listing)
     - [Old](#old)
-    - [New](#new)
+    - [New (?)](#new-)
+    - [Using H6](#using-h6)
+        - [`walk: ( sql, P... ) ->`](#walk--sql-p---)
+        - [`all_rows: ( sql, P... ) ->`](#all_rows--sql-p---)
+        - [`first_row: ( sql, P... ) ->`](#first_row--sql-p---)
+        - [`single_row: ( sql, P... ) ->`](#single_row--sql-p---)
+        - [`first_values: ( sql, P... ) ->`](#first_values--sql-p---)
+        - [`all_first_values: ( sql, P... ) ->`](#all_first_values--sql-p---)
+        - [`single_value: ( sql, P... ) ->`](#single_value--sql-p---)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -38,10 +46,10 @@
 
 * **`db.interpolate( sql, values ): ->`** interpolates values into a template with placeholder formulas.
 
-#### New
+#### New (?)
 
-<dl>
-<dt>`db.interpolate( sql, values ): ->`</dt> <dd>interpolates values into a template with placeholder formulas.</dd>
+<dl> <dt><code>db.interpolate( sql, values ): -></code></dt> <dd>interpolates values into a template with
+placeholder formulas.</dd>
 
 <dt><code>walk: ( sql, P... ) -></code></dt>
 
@@ -77,4 +85,26 @@
   query didn't return a single row or the row doesn't have a single field.</dd>
 
 </dl>
+
+#### Using H6
+
+###### `walk: ( sql, P... ) ->`
+Iterate over rows in the result set. The query must return values.
+###### `all_rows: ( sql, P... ) ->`
+Return a list with all rows.
+###### `first_row: ( sql, P... ) ->`
+Return first row of the result set. This will call `db.all_rows()`, so may be inefficient when the query
+returns a large number of rows; best used together with `limit 1`. In case the query did not yield any rows,
+`db.first_row()` will return `null`.
+###### `single_row: ( sql, P... ) ->`
+Return the only row of the result set. Like `db.first_row()`, but will throw an error if the size of the
+result set is not exactly 1.
+###### `first_values: ( sql, P... ) ->`
+Walk over all 'first' value of the rows of the result set, i.e. the field that is mentioned first in a
+`select ... from ...` query.
+###### `all_first_values: ( sql, P... ) ->`
+Same as `db.first_values()`, but returns a list of values.
+###### `single_value: ( sql, P... ) ->`
+Given a query that returns a single field in a single row, return its value. Throws an error if the query
+didn't return a single row or the row doesn't have a single field.
 
