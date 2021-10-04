@@ -902,7 +902,7 @@ jp                        = JSON.parse
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
+  test @, { timeout: 10e3, }
   # debug f '𠖏'
   # test @[ "DBA: concurrent UDFs" ]
   # test @[ "DBA: create_with_unsafe_mode()" ]
@@ -916,7 +916,6 @@ if module is require.main then do =>
   # test @[ "DBA: with_transaction()" ]
   # test @[ "DBA: concurrent UDFs 2" ]
   # @[ "DBA: concurrent UDFs 2" ]()
-  @[ "DBA: window functions etc." ]()
   # debug process.env[ 'icql-dba-use' ]
   # debug process.argv
 
