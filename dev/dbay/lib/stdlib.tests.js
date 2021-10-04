@@ -38,72 +38,72 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY stdlib functions"] = function(T, done) {
-    var Dbay, db;
+    var Dbay, db, test_and_show;
     // T?.halt_on_error()
     ({Dbay} = require(H.dbay_path));
     //.........................................................................................................
     db = new Dbay();
     db.create_stdlib();
     //.........................................................................................................
-    if (T != null) {
-      T.eq(db.all_rows(SQL`select std_str_reverse( 'abc一無所有𫠣' ) as x;`), [
-        {
-          x: '𫠣有所無一cba'
-        }
-      ]);
-    }
-    if (T != null) {
-      T.eq(db.all_rows(SQL`select std_str_join( '-', '1', '1', '1', '1', '1', '1'  ) as x;`), [
-        {
-          "x": '1-1-1-1-1-1'
-        }
-      ]);
-    }
-    if (T != null) {
-      T.eq(db.all_rows(SQL`select * from std_str_split_first( 'foo/bar/baz', '/' ) as x;`), [
-        {
-          prefix: 'foo',
-          suffix: 'bar/baz'
-        }
-      ]);
-    }
-    if (T != null) {
-      T.eq(db.all_rows(SQL`select * from std_generate_series( 1, 3, 1 ) as x;`), [
-        {
-          value: 1
-        },
-        {
-          value: 2
-        },
-        {
-          value: 3
-        }
-      ]);
-    }
-    if (T != null) {
-      T.eq(db.all_rows(SQL`select * from std_re_matches( 'abcdefghijklmnopqrstuvqxyz', '[aeiou](..)' ) as x;`), [
-        {
-          match: 'abc',
-          capture: 'bc'
-        },
-        {
-          match: 'efg',
-          capture: 'fg'
-        },
-        {
-          match: 'ijk',
-          capture: 'jk'
-        },
-        {
-          match: 'opq',
-          capture: 'pq'
-        },
-        {
-          match: 'uvq',
-          capture: 'vq'
-        }
-      ]);
-    }
+    test_and_show = (probe, matcher) => {
+      var result;
+      urge('^341-1', probe);
+      info('^341-2', result = db.all_rows(probe));
+      if (T != null) {
+        T.eq(result, matcher);
+      }
+      return null;
+    };
+    //.........................................................................................................
+    test_and_show(SQL`select std_str_reverse( 'abc一無所有𫠣' ) as x;`, [
+      {
+        x: '𫠣有所無一cba'
+      }
+    ]);
+    test_and_show(SQL`select std_str_join( '-', '1', '1', '1', '1', '1', '1'  ) as x;`, [
+      {
+        "x": '1-1-1-1-1-1'
+      }
+    ]);
+    test_and_show(SQL`select * from std_str_split_first( 'foo/bar/baz', '/' ) as x;`, [
+      {
+        prefix: 'foo',
+        suffix: 'bar/baz'
+      }
+    ]);
+    test_and_show(SQL`select * from std_generate_series( 1, 3, 1 ) as x;`, [
+      {
+        value: 1
+      },
+      {
+        value: 2
+      },
+      {
+        value: 3
+      }
+    ]);
+    test_and_show(SQL`select * from std_re_matches( 'abcdefghijklmnopqrstuvqxyz', '[aeiou](..)' ) as x;`, [
+      {
+        match: 'abc',
+        capture: 'bc'
+      },
+      {
+        match: 'efg',
+        capture: 'fg'
+      },
+      {
+        match: 'ijk',
+        capture: 'jk'
+      },
+      {
+        match: 'opq',
+        capture: 'pq'
+      },
+      {
+        match: 'uvq',
+        capture: 'vq'
+      }
+    ]);
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -115,6 +115,8 @@
       });
     })();
   }
+
+  // @[ "DBAY stdlib functions" ]()
 
 }).call(this);
 
