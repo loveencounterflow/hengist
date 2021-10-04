@@ -7,19 +7,25 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [Definition Lists](#definition-lists)
-  - [Cryptids of Cornwall](#cryptids-of-cornwall)
-  - [How To Format an API Listing](#how-to-format-an-api-listing)
-    - [Old](#old)
-    - [New (?)](#new-)
-    - [Using H6](#using-h6)
-        - [`walk: ( sql, P... ) ->`](#walk--sql-p---)
-        - [`all_rows: ( sql, P... ) ->`](#all_rows--sql-p---)
-        - [`first_row: ( sql, P... ) ->`](#first_row--sql-p---)
-        - [`single_row: ( sql, P... ) ->`](#single_row--sql-p---)
-        - [`first_values: ( sql, P... ) ->`](#first_values--sql-p---)
-        - [`all_first_values: ( sql, P... ) ->`](#all_first_values--sql-p---)
-        - [`single_value: ( sql, P... ) ->`](#single_value--sql-p---)
+  - [Definition Lists](#definition-lists)
+    - [Cryptids of Cornwall](#cryptids-of-cornwall)
+    - [How To Format an API Listing](#how-to-format-an-api-listing)
+      - [Old](#old)
+      - [New (?)](#new-)
+      - [Using H6](#using-h6)
+          - [`walk: ( sql, P... ) ->`](#walk--sql-p---)
+          - [`all_rows: ( sql, P... ) ->`](#all_rows--sql-p---)
+          - [`first_row: ( sql, P... ) ->`](#first_row--sql-p---)
+          - [`single_row: ( sql, P... ) ->`](#single_row--sql-p---)
+          - [`first_values: ( sql, P... ) ->`](#first_values--sql-p---)
+          - [`all_first_values: ( sql, P... ) ->`](#all_first_values--sql-p---)
+          - [`single_value: ( sql, P... ) ->`](#single_value--sql-p---)
+- [Using Other Heading Levels](#using-other-heading-levels)
+  - [`walk: ( sql, P... ) ->`](#walk--sql-p----1)
+    - [`walk: ( sql, P... ) ->`](#walk--sql-p----2)
+      - [`walk: ( sql, P... ) ->`](#walk--sql-p----3)
+        - [`walk: ( sql, P... ) ->`](#walk--sql-p----4)
+          - [`walk: ( sql, P... ) ->`](#walk--sql-p----5)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -108,3 +114,16 @@ Same as `db.first_values()`, but returns a list of values.
 Given a query that returns a single field in a single row, return its value. Throws an error if the query
 didn't return a single row or the row doesn't have a single field.
 
+
+# Using Other Heading Levels
+
+## `walk: ( sql, P... ) ->`
+Iterate over rows in the result set. The query must return values.
+### `walk: ( sql, P... ) ->`
+Iterate over rows in the result set. The query must return values.
+#### `walk: ( sql, P... ) ->`
+Iterate over rows in the result set. The query must return values.
+##### `walk: ( sql, P... ) ->`
+Iterate over rows in the result set. The query must return values.
+###### `walk: ( sql, P... ) ->`
+Iterate over rows in the result set. The query must return values.
