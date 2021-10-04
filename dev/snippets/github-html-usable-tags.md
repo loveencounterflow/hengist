@@ -43,35 +43,35 @@
 <dl>
 <dt>`db.interpolate( sql, values ): ->`</dt> <dd>interpolates values into a template with placeholder formulas.</dd>
 
-<dt>walk: ( sql, P... ) -></dt>
+<dt><code>walk: ( sql, P... ) -></code></dt>
 
   <dd>Iterate over rows in the result set. The query must return values.</dd>
 
-<dt>all_rows: ( sql, P... ) -></dt>
+<dt><code>all_rows: ( sql, P... ) -></code></dt>
 
   <dd>Return a list with all rows.</dd>
 
-<dt>first_row: ( sql, P... ) -></dt>
+<dt><code>first_row: ( sql, P... ) -></code></dt>
 
   <dd>Return first row of the result set. This will call `db.all_rows()`, so may be inefficient when the
   query returns a large number of rows; best used together with `limit 1`. In case the query did not yield
   any rows, `db.first_row()` will return `null`.</dd>
 
-<dt>single_row: ( sql, P... ) -></dt>
+<dt><code>single_row: ( sql, P... ) -></code></dt>
 
   <dd>Return the only row of the result set. Like `db.first_row()`, but will throw an error if the size of
   the result set is not exactly 1.</dd>
 
-<dt>first_values: ( sql, P... ) -></dt>
+<dt><code>first_values: ( sql, P... ) -></code></dt>
 
   <dd>Walk over all 'first' value of the rows of the result set, i.e. the field that is mentioned first in a
   `select ... from ...` query.</dd>
 
-<dt>all_first_values: ( sql, P... ) -></dt>
+<dt><code>all_first_values: ( sql, P... ) -></code></dt>
 
   <dd>Same as `db.first_values()`, but returns a list of values.</dd>
 
-<dt>single_value: ( sql, P... ) -></dt>
+<dt><code>single_value: ( sql, P... ) -></code></dt>
 
   <dd>Given a query that returns a single field in a single row, return its value. Throws an error if the
   query didn't return a single row or the row doesn't have a single field.</dd>
