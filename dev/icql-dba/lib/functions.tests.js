@@ -1818,8 +1818,7 @@ create table b ( n integer not null primary key references a ( n ) );`);
       // @[ "DBA: with_transaction() 2" ]()
       // test @[ "DBA: with_transaction()" ]
       // test @[ "DBA: concurrent UDFs 2" ]
-      // @[ "DBA: concurrent UDFs 2" ]()
-      return this["DBA: window functions etc."]();
+      return this["DBA: concurrent UDFs 2"]();
     })();
   }
 
