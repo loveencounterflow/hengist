@@ -32,11 +32,17 @@ SQL                       = String.raw
   db = new Dbay()
   db.create_stdlib()
   #.........................................................................................................
-  T?.eq ( db.all_rows SQL"select std_str_reverse( 'abc一無所有𫠣' ) as x;" ), [ { x: '𫠣有所無一cba' } ]
-  T?.eq ( db.all_rows SQL"select std_str_join( '-', '1', '1', '1', '1', '1', '1'  ) as x;" ), [ { "x": '1-1-1-1-1-1' } ]
-  T?.eq ( db.all_rows SQL"select * from std_str_split_first( 'foo/bar/baz', '/' ) as x;" ), [ { prefix: 'foo', suffix: 'bar/baz' } ]
-  T?.eq ( db.all_rows SQL"select * from std_generate_series( 1, 3, 1 ) as x;" ), [ { value: 1 }, { value: 2 }, { value: 3 } ]
-  T?.eq ( db.all_rows SQL"select * from std_re_matches( 'abcdefghijklmnopqrstuvqxyz', '[aeiou](..)' ) as x;" ), [ { match: 'abc', capture: 'bc' }, { match: 'efg', capture: 'fg' }, { match: 'ijk', capture: 'jk' }, { match: 'opq', capture: 'pq' }, { match: 'uvq', capture: 'vq' } ]
+  test_and_show = ( probe, matcher ) =>
+    urge '^341-1', probe
+    info '^341-2', result = db.all_rows probe
+    T?.eq result, matcher
+    return null
+  #.........................................................................................................
+  test_and_show ( SQL"select std_str_reverse( 'abc一無所有𫠣' ) as x;" ), [ { x: '𫠣有所無一cba' } ]
+  test_and_show ( SQL"select std_str_join( '-', '1', '1', '1', '1', '1', '1'  ) as x;" ), [ { "x": '1-1-1-1-1-1' } ]
+  test_and_show ( SQL"select * from std_str_split_first( 'foo/bar/baz', '/' ) as x;" ), [ { prefix: 'foo', suffix: 'bar/baz' } ]
+  test_and_show ( SQL"select * from std_generate_series( 1, 3, 1 ) as x;" ), [ { value: 1 }, { value: 2 }, { value: 3 } ]
+  test_and_show ( SQL"select * from std_re_matches( 'abcdefghijklmnopqrstuvqxyz', '[aeiou](..)' ) as x;" ), [ { match: 'abc', capture: 'bc' }, { match: 'efg', capture: 'fg' }, { match: 'ijk', capture: 'jk' }, { match: 'opq', capture: 'pq' }, { match: 'uvq', capture: 'vq' } ]
   #.........................................................................................................
   done?()
 
@@ -48,7 +54,7 @@ SQL                       = String.raw
 ############################################################################################################
 if module is require.main then do =>
   test @, { timeout: 10e3, }
-
+  # @[ "DBAY stdlib functions" ]()
 
 
 
