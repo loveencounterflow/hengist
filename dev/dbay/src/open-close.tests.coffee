@@ -30,9 +30,9 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY open() 1" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
+  { DBay }            = require H.dbay_path
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  db                  = new Dbay()
+  db                  = new DBay()
   schema              = 'aux'
   db.open { schema, }
   T?.eq db._dbs.aux.temporary, true

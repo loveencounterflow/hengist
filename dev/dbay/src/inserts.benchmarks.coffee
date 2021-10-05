@@ -448,12 +448,12 @@ show_result = ( name, result ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @_dbay_prep1 = ( cfg ) -> new Promise ( resolve ) =>
-  { Dbay }      = require '../../../apps/dbay'
+  { DBay }      = require '../../../apps/dbay'
   defaults      = {}
   cfg           = { defaults..., cfg..., }
   db_cfg        = { path: cfg.db_path, }
   try_to_remove_file cfg.db_path
-  db            = new Dbay db_cfg
+  db            = new DBay db_cfg
   data          = @get_data cfg
   count         = 0
   #.........................................................................................................
@@ -486,12 +486,12 @@ show_result = ( name, result ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @_dbay_naive = ( cfg ) -> new Promise ( resolve ) =>
-  { Dbay }      = require '../../../apps/dbay'
+  { DBay }      = require '../../../apps/dbay'
   defaults      = {}
   cfg           = { defaults..., cfg..., }
   db_cfg        = { path: cfg.db_path, }
   try_to_remove_file cfg.db_path
-  db            = new Dbay db_cfg
+  db            = new DBay db_cfg
   data          = @get_data cfg
   count         = 0
   #.........................................................................................................

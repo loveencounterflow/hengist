@@ -31,10 +31,10 @@ throw new Error """
 
 #-----------------------------------------------------------------------------------------------------------
 demo_udf_dbay_sqlt = ->
-  { Dbay }  = require H.dbay_path
-  class Dbayx extends Dbay
+  { DBay }  = require H.dbay_path
+  class DBayx extends DBay
     @_rnd_int_cfg: true
-  db        = new Dbayx()
+  db        = new DBayx()
   #.........................................................................................................
   ### Create table on first connection, can insert data on second connection: ###
   db.sqlt1.exec SQL"create table x ( n text );"
@@ -171,13 +171,13 @@ demo_worker_threads = ->
   { Worker
     parentPort
     isMainThread  } = require 'worker_threads'
-  { Dbay }          = require H.dbay_path
+  { DBay }          = require H.dbay_path
   dbnick            = 'mydb'
   #.........................................................................................................
   if isMainThread
     do =>
       debug "main thread"
-      db = new Dbay { dbnick, ram: true, }
+      db = new DBay { dbnick, ram: true, }
       db.sqlt1.exec SQL"begin transaction;"
       create_and_populate_tables db
       db.sqlt1.exec SQL"commit;"
@@ -198,7 +198,7 @@ demo_worker_threads = ->
     do =>
       urge CND.reverse "█ █ █ █ █ █ worker thread █ █ █ █ █ █ "
       # parentPort.on 'message', ( P... ) -> info '^309-1^', P
-      db = new Dbay { dbnick, ram: true, }
+      db = new DBay { dbnick, ram: true, }
       add_table_function db
       show_sqlite_schema db
       debug '^309-19^', db.sqlt1

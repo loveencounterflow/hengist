@@ -53,7 +53,7 @@ types                     = new ( require 'intertype' ).Intertype
 SQL                       = String.raw
 jr                        = JSON.stringify
 guy                       = require '../../../apps/guy'
-{ Dbay }                  = require H.dbay_path
+{ DBay }                  = require H.dbay_path
 trash                     = require 'trash'
 #-----------------------------------------------------------------------------------------------------------
 cfg =
@@ -331,9 +331,9 @@ new_db_with_data = ->
         debug error.code
         debug type_of error
         throw error
-      db = new Dbay { path, timeout: 500, }
+      db = new DBay { path, timeout: 500, }
     when 'memory'
-      db = new Dbay { timeout: 500, }
+      db = new DBay { timeout: 500, }
     else throw new Error "unknown value for cfg.use: #{rpr cfg.use}"
   db.sqlt1.exec SQL"pragma journal_mode=#{cfg.journal_mode}"
   db.sqlt2.exec SQL"pragma journal_mode=#{cfg.journal_mode}"
@@ -425,8 +425,8 @@ demo_f = ->
 
 #-----------------------------------------------------------------------------------------------------------
 simple_demo = ->
-  { Dbay }  = require H.dbay_path
-  db        = new Dbay()
+  { DBay }  = require H.dbay_path
+  db        = new DBay()
   #.........................................................................................................
   create_functions = ->
     select_from_facets_stm = null

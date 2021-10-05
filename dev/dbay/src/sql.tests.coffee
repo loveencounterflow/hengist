@@ -31,9 +31,9 @@ guy                       = require '../../../apps/guy'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY advanced interpolation" ] = ( T, done ) ->
-  { Dbay }          = require H.dbay_path
+  { DBay }          = require H.dbay_path
   E                 = require H.dbay_path + '/lib/errors'
-  db                = new Dbay()
+  db                = new DBay()
   do => #...................................................................................................
     sql     = SQL"select $:col_a, $:col_b where $:col_b in $V:choices"
     d       = { col_a: 'foo', col_b: 'bar', choices: [ 1, 2, 3, ], }

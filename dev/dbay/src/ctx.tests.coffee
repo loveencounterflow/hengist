@@ -27,14 +27,14 @@ SQL                       = String.raw
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY/CTX with_transaction() 1" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Dbay }          = require H.dbay_path
+  { DBay }          = require H.dbay_path
   #.........................................................................................................
   do =>
-    db = new Dbay()
+    db = new DBay()
     T?.throws /expected between 1 and 2 arguments, got 0/, -> db.with_transaction()
   #.........................................................................................................
   do =>
-    db   = new Dbay()
+    db   = new DBay()
     # db.open { schema: 'main', }
     create_table = ( cfg ) ->
       debug '^435^', { cfg, }
@@ -57,15 +57,15 @@ SQL                       = String.raw
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY/CTX with_transaction() 2" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Dbay }          = require H.dbay_path
+  { DBay }          = require H.dbay_path
   #.........................................................................................................
   do =>
-    db = new Dbay()
+    db = new DBay()
     T?.throws /expected between 1 and 2 arguments, got 0/, -> db.with_transaction()
   #.........................................................................................................
   do =>
     error = null
-    db   = new Dbay()
+    db   = new DBay()
     try
       db.with_transaction ->
         help '^70^', "creating a table"
@@ -88,15 +88,15 @@ SQL                       = String.raw
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY/CTX with_unsafe_mode()" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dbay }          = require H.dbay_path
+  { DBay }          = require H.dbay_path
   #.........................................................................................................
   do =>
-    db = new Dbay()
+    db = new DBay()
     T?.throws /not a valid function/, -> db.with_unsafe_mode()
   #.........................................................................................................
   do =>
     error = null
-    db   = new Dbay()
+    db   = new DBay()
     # db.open { schema: 'main', }
     db.execute SQL"create table foo ( n integer, is_new boolean default false );"
     for n in [ 10 .. 19 ]
@@ -115,13 +115,13 @@ SQL                       = String.raw
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY/CTX with_foreign_keys_deferred(), preliminaries" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Dbay }          = require H.dbay_path
+  { DBay }          = require H.dbay_path
   list_table_a      = ( db ) -> ( row.n for row from db.query SQL"select n from a;" )
   list_table_b      = ( db ) -> ( row.n for row from db.query SQL"select n from b;" )
   #---------------------------------------------------------------------------------------------------------
   do =>
     urge '^50-1^', "begin transaction, then defer fks"
-    db                = new Dbay()
+    db                = new DBay()
     { sqlt1, }        = db
     db.execute SQL"""
       create table a ( n integer not null primary key references b ( n ) );
@@ -175,7 +175,7 @@ SQL                       = String.raw
   #---------------------------------------------------------------------------------------------------------
   do =>
     urge '^50-27^', "defer fks, then begin transaction"
-    db                = new Dbay()
+    db                = new DBay()
     { sqlt1, }         = db
     db.execute SQL"""
       create table a ( n integer not null primary key references b ( n ) );
@@ -233,12 +233,12 @@ SQL                       = String.raw
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY/CTX with_foreign_keys_deferred(), ensure checks" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Dbay }          = require H.dbay_path
+  { DBay }          = require H.dbay_path
   #.........................................................................................................
   list_table_a      = ( db ) -> ( row.n for row from db.query SQL"select n from a;" )
   #.........................................................................................................
   error             = null
-  db                = new Dbay()
+  db                = new DBay()
   # db.open { schema: 'main', }
   db.execute SQL"""
     create table a ( n integer not null primary key references b ( n ) );
@@ -287,7 +287,7 @@ SQL                       = String.raw
         db.execute SQL"insert into a ( n ) values ( 102 );"
   catch error
     warn error.message
-    T?.eq error.message, '^dbay/ctx@6^ (Dbay_no_deferred_fks_in_tx) cannot defer foreign keys inside a transaction'
+    T?.eq error.message, '^dbay/ctx@6^ (DBay_no_deferred_fks_in_tx) cannot defer foreign keys inside a transaction'
   debug '^778-6^', list_table_a db
   T?.eq ( nxt_values = list_table_a db ), prv_values; prv_values = nxt_values
   #.........................................................................................................
@@ -298,7 +298,7 @@ SQL                       = String.raw
         db.execute SQL"insert into a ( n ) values ( 103 );"
   catch error
     warn error.message
-    T?.eq error.message, '^dbay/ctx@5^ (Dbay_no_nested_transactions) cannot start a transaction within a transaction'
+    T?.eq error.message, '^dbay/ctx@5^ (DBay_no_nested_transactions) cannot start a transaction within a transaction'
   debug '^778-8^', list_table_a db
   T?.eq ( nxt_values = list_table_a db ), prv_values; prv_values = nxt_values
   #.........................................................................................................

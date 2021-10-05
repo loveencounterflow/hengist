@@ -33,10 +33,10 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 @[ "DBAY create DB, table 1" ] = ( T, done ) ->
   ### explicit path, explicitly temporary ###
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  path                = PATH.resolve Dbay.C.autolocation, 'dbay-create-a-table.sqlite'
+  { DBay }            = require H.dbay_path
+  path                = PATH.resolve DBay.C.autolocation, 'dbay-create-a-table.sqlite'
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  db                  = new Dbay { path, temporary: true, }
+  db                  = new DBay { path, temporary: true, }
   try
     debug '^447^', MMX.all_keys_of db
     T?.ok DH.is_file db._dbs.main.path
@@ -52,10 +52,10 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 @[ "DBAY create DB, table 2" ] = ( T, done ) ->
   ### explicit path, explicitly not temporary ###
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  path                = PATH.resolve Dbay.C.autolocation, 'dbay-create-a-table.sqlite'
+  { DBay }            = require H.dbay_path
+  path                = PATH.resolve DBay.C.autolocation, 'dbay-create-a-table.sqlite'
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  db                  = new Dbay { path, temporary: false, }
+  db                  = new DBay { path, temporary: false, }
   try
     T?.ok DH.is_file db._dbs.main.path
     db.execute SQL"create table texts ( nr integer not null primary key, text text );"
@@ -70,10 +70,10 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 @[ "DBAY create DB, table 3" ] = ( T, done ) ->
   ### explicit path, implicitly not temporary ###
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  path                = PATH.resolve Dbay.C.autolocation, 'dbay-create-a-table.sqlite'
+  { DBay }            = require H.dbay_path
+  path                = PATH.resolve DBay.C.autolocation, 'dbay-create-a-table.sqlite'
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  db                  = new Dbay { path, }
+  db                  = new DBay { path, }
   try
     T?.ok DH.is_file db._dbs.main.path
     db.execute SQL"create table texts ( nr integer not null primary key, text text );"
@@ -88,10 +88,10 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 @[ "DBAY create DB, table 4" ] = ( T, done ) ->
   ### implicit path, implicitly temporary ###
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  path                = PATH.resolve Dbay.C.autolocation, 'dbay-create-a-table.sqlite'
+  { DBay }            = require H.dbay_path
+  path                = PATH.resolve DBay.C.autolocation, 'dbay-create-a-table.sqlite'
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  db                  = new Dbay()
+  db                  = new DBay()
   path                = null
   try
     T?.ok DH.is_file db._dbs.main.path
@@ -107,10 +107,10 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 @[ "DBAY create DB, table 5" ] = ( T, done ) ->
   ### implicit path, explicitly temporary ###
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  path                = PATH.resolve Dbay.C.autolocation, 'dbay-create-a-table.sqlite'
+  { DBay }            = require H.dbay_path
+  path                = PATH.resolve DBay.C.autolocation, 'dbay-create-a-table.sqlite'
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  db                  = new Dbay { temporary: true, }
+  db                  = new DBay { temporary: true, }
   path                = null
   try
     T?.ok DH.is_file db._dbs.main.path
@@ -126,10 +126,10 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 @[ "DBAY create DB, table 6" ] = ( T, done ) ->
   ### implicit path, explicitly not temporary ###
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  path                = PATH.resolve Dbay.C.autolocation, 'dbay-create-a-table.sqlite'
+  { DBay }            = require H.dbay_path
+  path                = PATH.resolve DBay.C.autolocation, 'dbay-create-a-table.sqlite'
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  db                  = new Dbay { temporary: false, }
+  db                  = new DBay { temporary: false, }
   path                = null
   try
     T?.ok DH.is_file db._dbs.main.path
@@ -145,10 +145,10 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 @[ "DBAY create DB, insert, query values 1" ] = ( T, done ) ->
   ### implicit path, explicitly not temporary ###
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  path                = PATH.resolve Dbay.C.autolocation, 'dbay-create-and-query-a-table.sqlite'
+  { DBay }            = require H.dbay_path
+  path                = PATH.resolve DBay.C.autolocation, 'dbay-create-and-query-a-table.sqlite'
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  db                  = new Dbay { temporary: false, }
+  db                  = new DBay { temporary: false, }
   try
     db.execute  SQL"drop table if exists texts;"
     db.execute  SQL"create table texts ( nr integer not null primary key, text text );"
@@ -170,10 +170,10 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 @[ "DBAY do 1" ] = ( T, done ) ->
   ### implicit path, explicitly not temporary ###
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
+  { DBay }            = require H.dbay_path
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  path                = PATH.resolve Dbay.C.autolocation, 'dbay-do.sqlite'
-  db                  = new Dbay { temporary: false, }
+  path                = PATH.resolve DBay.C.autolocation, 'dbay-do.sqlite'
+  db                  = new DBay { temporary: false, }
   try
     db.do  SQL"drop table if exists texts;"
     db.do  SQL"create table texts ( nr integer not null primary key, text text );"
@@ -192,10 +192,10 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db as callable" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
+  { DBay }            = require H.dbay_path
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  path                = PATH.resolve Dbay.C.autolocation, 'dbay-do.sqlite'
-  db                  = new Dbay { temporary: false, }
+  path                = PATH.resolve DBay.C.autolocation, 'dbay-do.sqlite'
+  db                  = new DBay { temporary: false, }
   try
     db SQL"drop table if exists texts;"
     db SQL"create table texts ( nr integer not null primary key, text text );"
@@ -215,8 +215,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db callable checks types of arguments" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  db                  = new Dbay()
+  { DBay }            = require H.dbay_path
+  db                  = new DBay()
   T?.throws /expected .*, got a float/, -> db 42
   T?.throws /expected .*, got a undefined/, -> db()
   return done?()
@@ -224,8 +224,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db callable accepts function, begins, commits transaction" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  db                  = new Dbay()
+  { DBay }            = require H.dbay_path
+  db                  = new DBay()
   #.........................................................................................................
   db ->
     db SQL"drop table if exists texts;"
@@ -250,8 +250,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY implicit tx can be configured" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  db                  = new Dbay()
+  { DBay }            = require H.dbay_path
+  db                  = new DBay()
   #.........................................................................................................
   db ->
     db SQL"drop table if exists texts;"
@@ -272,8 +272,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY can do explicit rollback in tx context handler" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  db                  = new Dbay()
+  { DBay }            = require H.dbay_path
+  db                  = new DBay()
   db SQL"create table squares ( n int not null primary key, square int not null );"
   db ->
     for n in [ 10 .. 12 ]
@@ -286,8 +286,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY tx rollback also reverts create table" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  db                  = new Dbay()
+  { DBay }            = require H.dbay_path
+  db                  = new DBay()
   db.open { schema: 'aux', }
   #.........................................................................................................
   try
@@ -305,8 +305,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db.first_row returns `null` for empty result set" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  db                  = new Dbay()
+  { DBay }            = require H.dbay_path
+  db                  = new DBay()
   db.open { schema: 'aux', }
   db SQL"create table squares ( n int not null primary key, square int not null );"
   #.........................................................................................................
@@ -322,8 +322,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db.single_row returns throws error on empty result set" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  db                  = new Dbay()
+  { DBay }            = require H.dbay_path
+  db                  = new DBay()
   db.open { schema: 'aux', }
   db SQL"create table squares ( n int not null primary key, square int not null );"
   #.........................................................................................................
@@ -340,8 +340,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db.first_values walks over first value in all rows" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  db                  = new Dbay()
+  { DBay }            = require H.dbay_path
+  db                  = new DBay()
   db.open { schema: 'aux', }
   db SQL"create table squares ( n int not null primary key, square int not null );"
   #.........................................................................................................
@@ -366,8 +366,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db.all_first_values returns list of first value in all rows" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  db                  = new Dbay()
+  { DBay }            = require H.dbay_path
+  db                  = new DBay()
   db.open { schema: 'aux', }
   db SQL"create table squares ( n int not null primary key, square int not null );"
   #.........................................................................................................
@@ -388,8 +388,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db.single_value returns single value or throws error" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
-  db                  = new Dbay()
+  { DBay }            = require H.dbay_path
+  db                  = new DBay()
   db.open { schema: 'aux', }
   db SQL"create table squares ( n int not null primary key, square int not null );"
   #.........................................................................................................
@@ -418,8 +418,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "DBAY db.first_row() exhausts iterator" ] = ( T, done ) ->
 #   # T?.halt_on_error()
-#   { Dbay }            = require H.dbay_path
-#   db                  = new Dbay()
+#   { DBay }            = require H.dbay_path
+#   db                  = new DBay()
 #   db SQL"create table squares ( n int not null primary key, square int not null );"
 #   db ->
 #     for n in [ 10 .. 12 ]

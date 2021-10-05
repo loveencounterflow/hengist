@@ -30,22 +30,22 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY _get-autolocation" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dbay }            = require H.dbay_path
+  { DBay }            = require H.dbay_path
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
   T?.eq ( DH.is_directory '/tmp'                                              ), true
   T?.eq ( DH.is_directory '/nonexistant-path-395827345826345762347856374562'  ), false
   T?.eq ( DH.is_directory __filename                                          ), false
   T?.eq ( DH.is_directory __dirname                                           ), true
   T?.ok DH.autolocation in [ '/dev/shm', ( require 'os' ).tmpdir(), ]
-  T?.eq Dbay.C.autolocation, DH.autolocation
+  T?.eq DBay.C.autolocation, DH.autolocation
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY constructor arguments 1" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dbay }           = require H.dbay_path
+  { DBay }           = require H.dbay_path
   resolved_path      = PATH.resolve process.cwd(), 'mypath'
-  class Dbay2 extends Dbay
+  class DBay2 extends DBay
     @_skip_sqlt:    true
     @_rnd_int_cfg:  true
   #.........................................................................................................
@@ -70,7 +70,7 @@ guy                       = require '../../../apps/guy'
     [ probe, matcher, error, ] = x
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       do =>
-        db      = new Dbay2 probe
+        db      = new DBay2 probe
         result  = { db.cfg..., }
         for k of result
           delete result[ k ] unless k in [ 'path', 'tempory', ]
@@ -85,10 +85,10 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY instance has two connections" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dbay }        = require H.dbay_path
+  { DBay }        = require H.dbay_path
   Sqlt            = require PATH.join H.dbay_path, 'node_modules/better-sqlite3'
   bsqlite_class   = Sqlt().constructor
-  db              = new Dbay()
+  db              = new DBay()
   # debug '^332^', db
   # debug '^332^', db.cfg
   #.........................................................................................................
@@ -108,9 +108,9 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY instance non-enumerable properties" ] = ( T, done ) ->
   T?.halt_on_error()
-  { Dbay }        = require H.dbay_path
+  { DBay }        = require H.dbay_path
   Sqlt            = require PATH.join H.dbay_path, 'node_modules/better-sqlite3'
-  db              = new Dbay()
+  db              = new DBay()
   debug '^332^', db
   T?.eq ( Object.getOwnPropertyDescriptor db, 'sqlt1'     ).enumerable, false
   T?.eq ( Object.getOwnPropertyDescriptor db, 'sqlt2'     ).enumerable, false
