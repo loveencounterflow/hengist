@@ -40,11 +40,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY _get-autolocation"] = function(T, done) {
-    var DH, Dbay, ref;
+    var DBay, DH, ref;
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
     if (T != null) {
       T.eq(DH.is_directory('/tmp'), true);
@@ -62,27 +62,27 @@
       T.ok((ref = DH.autolocation) === '/dev/shm' || ref === (require('os')).tmpdir());
     }
     if (T != null) {
-      T.eq(Dbay.C.autolocation, DH.autolocation);
+      T.eq(DBay.C.autolocation, DH.autolocation);
     }
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY constructor arguments 1"] = async function(T, done) {
-    var Dbay, Dbay2, error, i, len, matcher, probe, probes_and_matchers, resolved_path, x;
+    var DBay, DBay2, error, i, len, matcher, probe, probes_and_matchers, resolved_path, x;
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     resolved_path = PATH.resolve(process.cwd(), 'mypath');
-    Dbay2 = (function() {
-      class Dbay2 extends Dbay {};
+    DBay2 = (function() {
+      class DBay2 extends DBay {};
 
-      Dbay2._skip_sqlt = true;
+      DBay2._skip_sqlt = true;
 
-      Dbay2._rnd_int_cfg = true;
+      DBay2._rnd_int_cfg = true;
 
-      return Dbay2;
+      return DBay2;
 
     }).call(this);
     //.........................................................................................................
@@ -171,7 +171,7 @@
         return new Promise(function(resolve, reject) {
           (() => {
             var db, k, result;
-            db = new Dbay2(probe);
+            db = new DBay2(probe);
             result = {...db.cfg};
             for (k in result) {
               if (k !== 'path' && k !== 'tempory') {
@@ -192,14 +192,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY instance has two connections"] = function(T, done) {
-    var Dbay, Sqlt, bsqlite_class, db;
+    var DBay, Sqlt, bsqlite_class, db;
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     Sqlt = require(PATH.join(H.dbay_path, 'node_modules/better-sqlite3'));
     bsqlite_class = Sqlt().constructor;
-    db = new Dbay();
+    db = new DBay();
     // debug '^332^', db
     // debug '^332^', db.cfg
     //.........................................................................................................
@@ -229,13 +229,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY instance non-enumerable properties"] = function(T, done) {
-    var Dbay, Sqlt, db;
+    var DBay, Sqlt, db;
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     Sqlt = require(PATH.join(H.dbay_path, 'node_modules/better-sqlite3'));
-    db = new Dbay();
+    db = new DBay();
     debug('^332^', db);
     if (T != null) {
       T.eq((Object.getOwnPropertyDescriptor(db, 'sqlt1')).enumerable, false);

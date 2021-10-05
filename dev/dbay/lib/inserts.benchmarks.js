@@ -856,15 +856,15 @@
   //-----------------------------------------------------------------------------------------------------------
   this._dbay_prep1 = function(cfg) {
     return new Promise((resolve) => {
-      var Dbay, count, data, db, db_cfg, defaults, i, insert, len, pragma, ref, ref1, retrieve;
-      ({Dbay} = require('../../../apps/dbay'));
+      var DBay, count, data, db, db_cfg, defaults, i, insert, len, pragma, ref, ref1, retrieve;
+      ({DBay} = require('../../../apps/dbay'));
       defaults = {};
       cfg = {...defaults, ...cfg};
       db_cfg = {
         path: cfg.db_path
       };
       try_to_remove_file(cfg.db_path);
-      db = new Dbay(db_cfg);
+      db = new DBay(db_cfg);
       data = this.get_data(cfg);
       count = 0;
       ref1 = (ref = cfg.pragmas) != null ? ref : [];
@@ -916,15 +916,15 @@
   //-----------------------------------------------------------------------------------------------------------
   this._dbay_naive = function(cfg) {
     return new Promise((resolve) => {
-      var Dbay, count, data, db, db_cfg, defaults, i, len, pragma, ref, ref1;
-      ({Dbay} = require('../../../apps/dbay'));
+      var DBay, count, data, db, db_cfg, defaults, i, len, pragma, ref, ref1;
+      ({DBay} = require('../../../apps/dbay'));
       defaults = {};
       cfg = {...defaults, ...cfg};
       db_cfg = {
         path: cfg.db_path
       };
       try_to_remove_file(cfg.db_path);
-      db = new Dbay(db_cfg);
+      db = new DBay(db_cfg);
       data = this.get_data(cfg);
       count = 0;
       ref1 = (ref = cfg.pragmas) != null ? ref : [];

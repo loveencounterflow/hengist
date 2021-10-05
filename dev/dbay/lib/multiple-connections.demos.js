@@ -41,17 +41,17 @@ inherently async, and async iterators are not allowed in table UDFs.`);
 
   //-----------------------------------------------------------------------------------------------------------
   demo_udf_dbay_sqlt = function() {
-    var Dbay, Dbayx, db;
-    ({Dbay} = require(H.dbay_path));
-    Dbayx = (function() {
-      class Dbayx extends Dbay {};
+    var DBay, DBayx, db;
+    ({DBay} = require(H.dbay_path));
+    DBayx = (function() {
+      class DBayx extends DBay {};
 
-      Dbayx._rnd_int_cfg = true;
+      DBayx._rnd_int_cfg = true;
 
-      return Dbayx;
+      return DBayx;
 
     }).call(this);
-    db = new Dbayx();
+    db = new DBayx();
     //.........................................................................................................
     /* Create table on first connection, can insert data on second connection: */
     db.sqlt1.exec(SQL`create table x ( n text );`);
@@ -175,7 +175,7 @@ inherently async, and async iterators are not allowed in table UDFs.`);
 
   //-----------------------------------------------------------------------------------------------------------
   demo_worker_threads = function() {
-    var Dbay, Worker, add_table_function, create_and_populate_tables, dbnick, isMainThread, parentPort, show_sqlite_schema, show_table_contents;
+    var DBay, Worker, add_table_function, create_and_populate_tables, dbnick, isMainThread, parentPort, show_sqlite_schema, show_table_contents;
     //.........................................................................................................
     create_and_populate_tables = function(db) {
       var sqlt_a, sqlt_b;
@@ -243,14 +243,14 @@ inherently async, and async iterators are not allowed in table UDFs.`);
     };
     //.........................................................................................................
     ({Worker, parentPort, isMainThread} = require('worker_threads'));
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     dbnick = 'mydb';
     //.........................................................................................................
     if (isMainThread) {
       (async() => {
         var db, worker;
         debug("main thread");
-        db = new Dbay({
+        db = new DBay({
           dbnick,
           ram: true
         });
@@ -278,7 +278,7 @@ inherently async, and async iterators are not allowed in table UDFs.`);
         var db, ref, row, statement;
         urge(CND.reverse("█ █ █ █ █ █ worker thread █ █ █ █ █ █ "));
         // parentPort.on 'message', ( P... ) -> info '^309-1^', P
-        db = new Dbay({
+        db = new DBay({
           dbnick,
           ram: true
         });

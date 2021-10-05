@@ -38,11 +38,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY stdlib functions"] = function(T, done) {
-    var Dbay, db, test_and_show;
+    var DBay, db, test_and_show;
     // T?.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     //.........................................................................................................
-    db = new Dbay();
+    db = new DBay();
     db.create_stdlib();
     //.........................................................................................................
     test_and_show = (probe, matcher) => {

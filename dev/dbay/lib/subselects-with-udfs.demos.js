@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dbay, H, PATH, SQL, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, insert_result, isa, join_x_and_y_using_word, join_x_and_y_using_word_iterate, jr, new_db_with_data, prepare_db, prepare_dbr, query_with_nested_statement, query_without_nested_statement, rpr, select, select_word_from_y_iterate, select_word_from_y_scalar, show_dbr, simple_demo, trash, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, H, PATH, SQL, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, insert_result, isa, join_x_and_y_using_word, join_x_and_y_using_word_iterate, jr, new_db_with_data, prepare_db, prepare_dbr, query_with_nested_statement, query_without_nested_statement, rpr, select, select_word_from_y_iterate, select_word_from_y_scalar, show_dbr, simple_demo, trash, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   /*
 
@@ -65,7 +65,7 @@
 
   guy = require('../../../apps/guy');
 
-  ({Dbay} = require(H.dbay_path));
+  ({DBay} = require(H.dbay_path));
 
   trash = require('trash');
 
@@ -472,13 +472,13 @@ order by error, marker desc, cc, ne, 1, 2, 3, 4, 5, 6;`)));
           debug(type_of(error));
           throw error;
         }
-        db = new Dbay({
+        db = new DBay({
           path,
           timeout: 500
         });
         break;
       case 'memory':
-        db = new Dbay({
+        db = new DBay({
           timeout: 500
         });
         break;
@@ -619,8 +619,8 @@ order by error, marker desc, cc, ne, 1, 2, 3, 4, 5, 6;`)));
   //-----------------------------------------------------------------------------------------------------------
   simple_demo = function() {
     var create_functions, db, n, ref;
-    ({Dbay} = require(H.dbay_path));
-    db = new Dbay();
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
     //.........................................................................................................
     create_functions = function() {
       var select_from_facets_stm;

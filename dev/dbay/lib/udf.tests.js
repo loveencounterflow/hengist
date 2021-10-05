@@ -42,16 +42,16 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY/UDF window functions etc."] = async function(T, done) {
-    var Dbay, db, numbers, schema, template_path, work_path;
+    var DBay, db, numbers, schema, template_path, work_path;
     // T.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     schema = 'main';
     ({template_path, work_path} = (await H.procure_db({
       size: 'nnt',
       ref: 'fn'
     })));
     debug({template_path, work_path});
-    db = new Dbay({
+    db = new DBay({
       path: work_path,
       schema
     });
@@ -337,12 +337,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY/UDF User-Defined Window Function"] = async function(T, done) {
-    var Dbay, I, L, V, db, schema;
+    var DBay, I, L, V, db, schema;
     /* see https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md */
     // T.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     schema = 'main';
-    db = new Dbay();
+    db = new DBay();
     // db.load_extension PATH.resolve PATH.join __dirname, '../../../assets/sqlite-extensions/json1.so'
     // db.sqlt.unsafeMode true
     ({I, L, V} = db.sql);
@@ -617,15 +617,15 @@ create trigger multiple_instead_update instead of update on multiples begin
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY/UDF view with UDF"] = async function(T, done) {
-    var Dbay, db, matcher, numbers, result, row, schema, template_path, work_path;
+    var DBay, db, matcher, numbers, result, row, schema, template_path, work_path;
     // T.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     schema = 'main';
     ({template_path, work_path} = (await H.procure_db({
       size: 'nnt',
       ref: 'fnsquareview'
     })));
-    db = new Dbay({
+    db = new DBay({
       path: work_path,
       schema
     });
@@ -661,15 +661,15 @@ create trigger multiple_instead_update instead of update on multiples begin
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY/UDF typing"] = async function(T, done) {
-    var Dbay, as_boolean, d/* NOTE: consume iterator to free connection */, db, error, iterator, schema, statement, template_path, work_path;
+    var DBay, as_boolean, d/* NOTE: consume iterator to free connection */, db, error, iterator, schema, statement, template_path, work_path;
     // T.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     schema = 'main';
     ({template_path, work_path} = (await H.procure_db({
       size: 'small',
       ref: 'typing'
     })));
-    db = new Dbay({
+    db = new DBay({
       path: work_path,
       schema
     });
@@ -769,19 +769,19 @@ create trigger multiple_instead_update instead of update on multiples begin
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY/UDF concurrent UDFs 2"] = async function(T, done) {
-    var Dbay, count, db, error, prefix, ref, ref1, ref2, row, row1, row2, schema, select_sql, show_db_objects, template_path, work_path;
+    var DBay, count, db, error, prefix, ref, ref1, ref2, row, row1, row2, schema, select_sql, show_db_objects, template_path, work_path;
     prefix = 'dcat_';
     schema = 'main';
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     ({template_path, work_path} = (await H.procure_db({
       size: 'small',
       ref: 'fnc'
     })));
     debug({template_path, work_path});
-    db = new Dbay({
+    db = new DBay({
       path: work_path
     });
-    // db2              = new Dbay(); db2.open  { schema, path: work_path, }
+    // db2              = new DBay(); db2.open  { schema, path: work_path, }
     //.........................................................................................................
     select_sql = SQL`select
     ${db.sql.L(schema)} as schema,

@@ -43,10 +43,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY advanced interpolation"] = function(T, done) {
-    var Dbay, E, db;
-    ({Dbay} = require(H.dbay_path));
+    var DBay, E, db;
+    ({DBay} = require(H.dbay_path));
     E = require(H.dbay_path + '/lib/errors');
-    db = new Dbay();
+    db = new DBay();
     (() => { //...................................................................................................
       var d, result, sql;
       sql = SQL`select $:col_a, $:col_b where $:col_b in $V:choices`;

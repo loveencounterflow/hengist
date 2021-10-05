@@ -39,19 +39,19 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY/CTX with_transaction() 1"] = function(T, done) {
-    var Dbay;
+    var DBay;
     // T?.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     (() => {      //.........................................................................................................
       var db;
-      db = new Dbay();
+      db = new DBay();
       return T != null ? T.throws(/expected between 1 and 2 arguments, got 0/, function() {
         return db.with_transaction();
       }) : void 0;
     })();
     (() => {      //.........................................................................................................
       var create_table, db, error;
-      db = new Dbay();
+      db = new DBay();
       // db.open { schema: 'main', }
       create_table = function(cfg) {
         debug('^435^', {cfg});
@@ -92,12 +92,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY/CTX with_transaction() 2"] = function(T, done) {
-    var Dbay;
+    var DBay;
     // T?.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     (() => {      //.........................................................................................................
       var db;
-      db = new Dbay();
+      db = new DBay();
       return T != null ? T.throws(/expected between 1 and 2 arguments, got 0/, function() {
         return db.with_transaction();
       }) : void 0;
@@ -105,7 +105,7 @@
     (() => {      //.........................................................................................................
       var db, error;
       error = null;
-      db = new Dbay();
+      db = new DBay();
       try {
         db.with_transaction(function() {
           help('^70^', "creating a table");
@@ -138,14 +138,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY/CTX with_unsafe_mode()"] = function(T, done) {
-    var Dbay;
+    var DBay;
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     (() => {      //.........................................................................................................
       var db;
-      db = new Dbay();
+      db = new DBay();
       return T != null ? T.throws(/not a valid function/, function() {
         return db.with_unsafe_mode();
       }) : void 0;
@@ -153,7 +153,7 @@
     (() => {      //.........................................................................................................
       var d, db, error, i, n, result, rows;
       error = null;
-      db = new Dbay();
+      db = new DBay();
       // db.open { schema: 'main', }
       db.execute(SQL`create table foo ( n integer, is_new boolean default false );`);
       for (n = i = 10; i <= 19; n = ++i) {
@@ -188,9 +188,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY/CTX with_foreign_keys_deferred(), preliminaries"] = function(T, done) {
-    var Dbay, list_table_a, list_table_b;
+    var DBay, list_table_a, list_table_b;
     // T?.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     list_table_a = function(db) {
       var ref, results, row;
       ref = db.query(SQL`select n from a;`);
@@ -212,7 +212,7 @@
     (() => {      //---------------------------------------------------------------------------------------------------------
       var db, error, sqlt1;
       urge('^50-1^', "begin transaction, then defer fks");
-      db = new Dbay();
+      db = new DBay();
       ({sqlt1} = db);
       db.execute(SQL`create table a ( n integer not null primary key references b ( n ) );
 create table b ( n integer not null primary key references a ( n ) );`);
@@ -336,7 +336,7 @@ create table b ( n integer not null primary key references a ( n ) );`);
     (() => {      //---------------------------------------------------------------------------------------------------------
       var db, error, sqlt1;
       urge('^50-27^', "defer fks, then begin transaction");
-      db = new Dbay();
+      db = new DBay();
       ({sqlt1} = db);
       db.execute(SQL`create table a ( n integer not null primary key references b ( n ) );
 create table b ( n integer not null primary key references a ( n ) );`);
@@ -463,9 +463,9 @@ create table b ( n integer not null primary key references a ( n ) );`);
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY/CTX with_foreign_keys_deferred(), ensure checks"] = function(T, done) {
-    var Dbay, d, db, error, list_table_a, nxt_values, prv_values, result, rows;
+    var DBay, d, db, error, list_table_a, nxt_values, prv_values, result, rows;
     // T?.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     //.........................................................................................................
     list_table_a = function(db) {
       var ref, results, row;
@@ -478,7 +478,7 @@ create table b ( n integer not null primary key references a ( n ) );`);
     };
     //.........................................................................................................
     error = null;
-    db = new Dbay();
+    db = new DBay();
     // db.open { schema: 'main', }
     db.execute(SQL`create table a ( n integer not null primary key references b ( n ) );
 create table b ( n integer not null primary key references a ( n ) );`);
@@ -567,7 +567,7 @@ create table b ( n integer not null primary key references a ( n ) );`);
       error = error1;
       warn(error.message);
       if (T != null) {
-        T.eq(error.message, '^dbay/ctx@6^ (Dbay_no_deferred_fks_in_tx) cannot defer foreign keys inside a transaction');
+        T.eq(error.message, '^dbay/ctx@6^ (DBay_no_deferred_fks_in_tx) cannot defer foreign keys inside a transaction');
       }
     }
     debug('^778-6^', list_table_a(db));
@@ -587,7 +587,7 @@ create table b ( n integer not null primary key references a ( n ) );`);
       error = error1;
       warn(error.message);
       if (T != null) {
-        T.eq(error.message, '^dbay/ctx@5^ (Dbay_no_nested_transactions) cannot start a transaction within a transaction');
+        T.eq(error.message, '^dbay/ctx@5^ (DBay_no_nested_transactions) cannot start a transaction within a transaction');
       }
     }
     debug('^778-8^', list_table_a(db));

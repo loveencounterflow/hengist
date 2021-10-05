@@ -40,13 +40,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY open() 1"] = function(T, done) {
-    var DH, Dbay, db, error, schema;
+    var DBay, DH, db, error, schema;
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
-    db = new Dbay();
+    db = new DBay();
     schema = 'aux';
     db.open({schema});
     if (T != null) {

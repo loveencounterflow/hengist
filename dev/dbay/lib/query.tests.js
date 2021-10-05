@@ -43,15 +43,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, table 1"] = function(T, done) {
-    var DH, Dbay, db, path;
+    var DBay, DH, db, path;
     /* explicit path, explicitly temporary */
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
-    path = PATH.resolve(Dbay.C.autolocation, 'dbay-create-a-table.sqlite');
+    ({DBay} = require(H.dbay_path));
+    path = PATH.resolve(DBay.C.autolocation, 'dbay-create-a-table.sqlite');
     DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
-    db = new Dbay({
+    db = new DBay({
       path,
       temporary: true
     });
@@ -73,15 +73,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, table 2"] = function(T, done) {
-    var DH, Dbay, db, path;
+    var DBay, DH, db, path;
     /* explicit path, explicitly not temporary */
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
-    path = PATH.resolve(Dbay.C.autolocation, 'dbay-create-a-table.sqlite');
+    ({DBay} = require(H.dbay_path));
+    path = PATH.resolve(DBay.C.autolocation, 'dbay-create-a-table.sqlite');
     DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
-    db = new Dbay({
+    db = new DBay({
       path,
       temporary: false
     });
@@ -105,15 +105,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, table 3"] = function(T, done) {
-    var DH, Dbay, db, path;
+    var DBay, DH, db, path;
     /* explicit path, implicitly not temporary */
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
-    path = PATH.resolve(Dbay.C.autolocation, 'dbay-create-a-table.sqlite');
+    ({DBay} = require(H.dbay_path));
+    path = PATH.resolve(DBay.C.autolocation, 'dbay-create-a-table.sqlite');
     DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
-    db = new Dbay({path});
+    db = new DBay({path});
     try {
       if (T != null) {
         T.ok(DH.is_file(db._dbs.main.path));
@@ -134,15 +134,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, table 4"] = function(T, done) {
-    var DH, Dbay, db, path;
+    var DBay, DH, db, path;
     /* implicit path, implicitly temporary */
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
-    path = PATH.resolve(Dbay.C.autolocation, 'dbay-create-a-table.sqlite');
+    ({DBay} = require(H.dbay_path));
+    path = PATH.resolve(DBay.C.autolocation, 'dbay-create-a-table.sqlite');
     DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
-    db = new Dbay();
+    db = new DBay();
     path = null;
     try {
       if (T != null) {
@@ -164,15 +164,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, table 5"] = function(T, done) {
-    var DH, Dbay, db, path;
+    var DBay, DH, db, path;
     /* implicit path, explicitly temporary */
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
-    path = PATH.resolve(Dbay.C.autolocation, 'dbay-create-a-table.sqlite');
+    ({DBay} = require(H.dbay_path));
+    path = PATH.resolve(DBay.C.autolocation, 'dbay-create-a-table.sqlite');
     DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
-    db = new Dbay({
+    db = new DBay({
       temporary: true
     });
     path = null;
@@ -196,15 +196,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, table 6"] = function(T, done) {
-    var DH, Dbay, db, path;
+    var DBay, DH, db, path;
     /* implicit path, explicitly not temporary */
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
-    path = PATH.resolve(Dbay.C.autolocation, 'dbay-create-a-table.sqlite');
+    ({DBay} = require(H.dbay_path));
+    path = PATH.resolve(DBay.C.autolocation, 'dbay-create-a-table.sqlite');
     DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
-    db = new Dbay({
+    db = new DBay({
       temporary: false
     });
     path = null;
@@ -228,15 +228,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, insert, query values 1"] = function(T, done) {
-    var DH, Dbay, db, path, rows;
+    var DBay, DH, db, path, rows;
     /* implicit path, explicitly not temporary */
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
-    path = PATH.resolve(Dbay.C.autolocation, 'dbay-create-and-query-a-table.sqlite');
+    ({DBay} = require(H.dbay_path));
+    path = PATH.resolve(DBay.C.autolocation, 'dbay-create-and-query-a-table.sqlite');
     DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
-    db = new Dbay({
+    db = new DBay({
       temporary: false
     });
     try {
@@ -282,15 +282,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY do 1"] = function(T, done) {
-    var DH, Dbay, db, path, rows;
+    var DBay, DH, db, path, rows;
     /* implicit path, explicitly not temporary */
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
-    path = PATH.resolve(Dbay.C.autolocation, 'dbay-do.sqlite');
-    db = new Dbay({
+    path = PATH.resolve(DBay.C.autolocation, 'dbay-do.sqlite');
+    db = new DBay({
       temporary: false
     });
     try {
@@ -329,14 +329,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db as callable"] = function(T, done) {
-    var DH, Dbay, db, path, rows;
+    var DBay, DH, db, path, rows;
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
+    ({DBay} = require(H.dbay_path));
     DH = require(PATH.join(H.dbay_path, 'lib/helpers'));
-    path = PATH.resolve(Dbay.C.autolocation, 'dbay-do.sqlite');
-    db = new Dbay({
+    path = PATH.resolve(DBay.C.autolocation, 'dbay-do.sqlite');
+    db = new DBay({
       temporary: false
     });
     try {
@@ -376,10 +376,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db callable checks types of arguments"] = function(T, done) {
-    var Dbay, db;
+    var DBay, db;
     // T?.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
-    db = new Dbay();
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
     if (T != null) {
       T.throws(/expected .*, got a float/, function() {
         return db(42);
@@ -395,12 +395,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db callable accepts function, begins, commits transaction"] = function(T, done) {
-    var Dbay, db, rows;
+    var DBay, db, rows;
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
-    db = new Dbay();
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
     //.........................................................................................................
     db(function() {
       db(SQL`drop table if exists texts;`);
@@ -445,12 +445,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY implicit tx can be configured"] = function(T, done) {
-    var Dbay, db, rows;
+    var DBay, db, rows;
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
-    db = new Dbay();
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
     //.........................................................................................................
     db(function() {
       db(SQL`drop table if exists texts;`);
@@ -495,10 +495,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY can do explicit rollback in tx context handler"] = function(T, done) {
-    var Dbay, db;
+    var DBay, db;
     // T?.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
-    db = new Dbay();
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
     db(SQL`create table squares ( n int not null primary key, square int not null );`);
     db(function() {
       var i, n;
@@ -515,12 +515,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY tx rollback also reverts create table"] = function(T, done) {
-    var Dbay, db, error;
+    var DBay, db, error;
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
-    db = new Dbay();
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
     db.open({
       schema: 'aux'
     });
@@ -548,12 +548,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db.first_row returns `null` for empty result set"] = function(T, done) {
-    var Dbay, db;
+    var DBay, db;
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
-    db = new Dbay();
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
     db.open({
       schema: 'aux'
     });
@@ -584,12 +584,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db.single_row returns throws error on empty result set"] = function(T, done) {
-    var Dbay, db;
+    var DBay, db;
     if (T != null) {
       T.halt_on_error();
     }
-    ({Dbay} = require(H.dbay_path));
-    db = new Dbay();
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
     db.open({
       schema: 'aux'
     });
@@ -627,10 +627,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db.first_values walks over first value in all rows"] = function(T, done) {
-    var Dbay, db;
+    var DBay, db;
     // T?.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
-    db = new Dbay();
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
     db.open({
       schema: 'aux'
     });
@@ -667,10 +667,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db.all_first_values returns list of first value in all rows"] = function(T, done) {
-    var Dbay, db;
+    var DBay, db;
     // T?.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
-    db = new Dbay();
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
     db.open({
       schema: 'aux'
     });
@@ -699,10 +699,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db.single_value returns single value or throws error"] = function(T, done) {
-    var Dbay, db;
+    var DBay, db;
     // T?.halt_on_error()
-    ({Dbay} = require(H.dbay_path));
-    db = new Dbay();
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
     db.open({
       schema: 'aux'
     });
@@ -742,8 +742,8 @@
   // #-----------------------------------------------------------------------------------------------------------
   // @[ "DBAY db.first_row() exhausts iterator" ] = ( T, done ) ->
   //   # T?.halt_on_error()
-  //   { Dbay }            = require H.dbay_path
-  //   db                  = new Dbay()
+  //   { DBay }            = require H.dbay_path
+  //   db                  = new DBay()
   //   db SQL"create table squares ( n int not null primary key, square int not null );"
   //   db ->
   //     for n in [ 10 .. 12 ]
