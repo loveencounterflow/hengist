@@ -47,7 +47,7 @@ gcfg                      = { verbose: false, }
       buffer = buffer.slice 0, bytes_read if bytes_read < cfg.chunk_size
       for line from SL.walk_lines ctx, buffer
         count++
-        debug '^888-1^', { count, bytes_read, line, } if cfg.show
+        debug '^888-1^', { count, line, } if cfg.show
     for line from SL.flush ctx
       count++
       debug '^888-2^', { count, line, } if cfg.show
@@ -56,8 +56,8 @@ gcfg                      = { verbose: false, }
 
 #-----------------------------------------------------------------------------------------------------------
 @_n_readlines = ( cfg ) -> new Promise ( resolve ) =>
-  if cfg.use_patched then Readlines = require 'n-readlines'
-  else                    Readlines = require '../n-readlines-patched'
+  if cfg.use_patched then Readlines = require '../../../apps/guy/dependencies/n-readlines-patched'
+  else                    Readlines = require 'n-readlines'
   #.........................................................................................................
   resolve => new Promise ( resolve ) =>
     count         = 0
@@ -77,6 +77,19 @@ gcfg                      = { verbose: false, }
 @n_readlines_patched  = ( cfg ) -> @_n_readlines { cfg..., use_patched: true, }
 
 #-----------------------------------------------------------------------------------------------------------
+@guy_fs_walk_lines = ( cfg ) -> new Promise ( resolve ) =>
+  { walk_lines } = ( require '../../../apps/guy' ).fs
+  #.........................................................................................................
+  resolve => new Promise ( resolve ) =>
+    count         = 0
+    path          = cfg.paths[ cfg.size ]
+    for line from walk_lines path
+      count++
+      debug '^888-1^', { count, line, } if cfg.show
+    resolve count
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @run_benchmarks = ->
   gcfg.verbose  = true
   gcfg.verbose  = false
@@ -84,13 +97,14 @@ gcfg                      = { verbose: false, }
   cfg           =
     # size:         'small'
     size:         'big1'
+    # chunk_size:   100
     # chunk_size:   1 * 1024
-    chunk_size:   4 * 1024
+    chunk_size:   4 * 1024 ### optimum ###
     # chunk_size:   8 * 1024
     # chunk_size:   16 * 1024
     # chunk_size:   64 * 1024
     paths:
-      small:  PATH.resolve PATH.join __filename
+      small:  PATH.resolve PATH.join __dirname, '../../../assets/a-few-words.txt'
       big1:   '/usr/share/dict/american-english'
   cfg.show      = cfg.size is 'small'
   repetitions   = 5
@@ -98,6 +112,7 @@ gcfg                      = { verbose: false, }
     'n_readlines'
     'n_readlines_patched'
     'intertext_splitlines'
+    'guy_fs_walk_lines'
     ]
   global.gc() if global.gc?
   data_cache = null
