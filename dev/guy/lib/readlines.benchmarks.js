@@ -102,7 +102,7 @@
     return new Promise((resolve) => {
       var Readlines;
       if (cfg.use_patched) {
-        Readlines = require('../n-readlines-patched');
+        Readlines = require('../../../apps/guy/dependencies/n-readlines-patched');
       } else {
         Readlines = require('n-readlines');
       }
