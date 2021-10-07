@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, echo, help, info, isa, r, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -36,6 +36,8 @@
 
   SQL = String.raw;
 
+  r = String.raw;
+
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY stdlib functions"] = function(T, done) {
     var DBay, db, test_and_show;
@@ -69,6 +71,144 @@
       {
         prefix: 'foo',
         suffix: 'bar/baz'
+      }
+    ]);
+    test_and_show(SQL`select * from std_str_split( '/foo/bar/baz', '/' ) as x;`, [
+      {
+        part: ''
+      },
+      {
+        part: 'foo'
+      },
+      {
+        part: 'bar'
+      },
+      {
+        part: 'baz'
+      }
+    ]);
+    test_and_show(SQL`select * from std_str_split( '/foo/bar/baz', '/', true ) as x;`, [
+      {
+        part: 'foo'
+      },
+      {
+        part: 'bar'
+      },
+      {
+        part: 'baz'
+      }
+    ]);
+    test_and_show(SQL`select * from std_str_split_re( 'unanimous', '[aeiou]' ) as x;`, [
+      {
+        part: ''
+      },
+      {
+        part: 'n'
+      },
+      {
+        part: 'n'
+      },
+      {
+        part: 'm'
+      },
+      {
+        part: ''
+      },
+      {
+        part: 's'
+      }
+    ]);
+    test_and_show(SQL`select * from std_str_split_re( 'unanimous', '[aeiou]', 'i', true ) as x;`, [
+      {
+        part: 'n'
+      },
+      {
+        part: 'n'
+      },
+      {
+        part: 'm'
+      },
+      {
+        part: 's'
+      }
+    ]);
+    test_and_show(SQL`select * from std_str_split_re( 'unanimous', '[aeiou]', '', true ) as x;`, [
+      {
+        part: 'n'
+      },
+      {
+        part: 'n'
+      },
+      {
+        part: 'm'
+      },
+      {
+        part: 's'
+      }
+    ]);
+    // test_and_show ( SQL"select * from std_str_split_re( 'unanimous', '[aeiou]', null, true ) as x;" ), [ { part: 'n' }, { part: 'n' }, { part: 'm' }, { part: 's' } ]
+    test_and_show(SQL`select * from std_str_split_re( 'unanimous', '([AEIOU])', 'i' ) as x;`, [
+      {
+        part: ''
+      },
+      {
+        part: 'u'
+      },
+      {
+        part: 'n'
+      },
+      {
+        part: 'a'
+      },
+      {
+        part: 'n'
+      },
+      {
+        part: 'i'
+      },
+      {
+        part: 'm'
+      },
+      {
+        part: 'o'
+      },
+      {
+        part: ''
+      },
+      {
+        part: 'u'
+      },
+      {
+        part: 's'
+      }
+    ]);
+    test_and_show(SQL`select * from std_str_split_re( 'unanimous', '([AEIOU])', 'i', true ) as x;`, [
+      {
+        part: 'u'
+      },
+      {
+        part: 'n'
+      },
+      {
+        part: 'a'
+      },
+      {
+        part: 'n'
+      },
+      {
+        part: 'i'
+      },
+      {
+        part: 'm'
+      },
+      {
+        part: 'o'
+      },
+      {
+        part: 'u'
+      },
+      {
+        part: 's'
       }
     ]);
     test_and_show(SQL`select * from std_generate_series( 1, 3, 1 ) as x;`, [
@@ -107,6 +247,64 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY std_str_split_re()"] = function(T, done) {
+    var DBay, db, i, len, ref, result, row;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    //.........................................................................................................
+    db = new DBay();
+    db.create_stdlib();
+    //.........................................................................................................
+    db(SQL`create table entries ( entry text not null );`);
+    db(SQL`insert into entries values ( 'some nice words' );`);
+    db(SQL`insert into entries values ( 'can help a lot' );`);
+    ref = result = db.all_rows(SQL`select
+    r1.entry  as entry,
+    r2.part   as word
+  from
+    entries as r1,
+    std_str_split_re( r1.entry, '\s' ) as r2;`);
+    for (i = 0, len = ref.length; i < len; i++) {
+      row = ref[i];
+      // info word for word from db.first_values SQL"""
+      info(row);
+    }
+    if (T != null) {
+      T.eq(result, [
+        {
+          entry: 'some nice words',
+          word: 'some'
+        },
+        {
+          entry: 'some nice words',
+          word: 'nice'
+        },
+        {
+          entry: 'some nice words',
+          word: 'words'
+        },
+        {
+          entry: 'can help a lot',
+          word: 'can'
+        },
+        {
+          entry: 'can help a lot',
+          word: 'help'
+        },
+        {
+          entry: 'can help a lot',
+          word: 'a'
+        },
+        {
+          entry: 'can help a lot',
+          word: 'lot'
+        }
+      ]);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
@@ -117,6 +315,7 @@
   }
 
   // @[ "DBAY stdlib functions" ]()
+// @[ "DBAY std_str_split_re()" ]()
 
 }).call(this);
 

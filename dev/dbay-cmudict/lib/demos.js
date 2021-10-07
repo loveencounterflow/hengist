@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, PATH, SQL, badge, debug, demo_1, echo, equals, guy, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, PATH, SQL, badge, debug, demo_1, demo_count_transcriptions, echo, equals, guy, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -48,11 +48,38 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_count_transcriptions = function() {
+    var Cmud, DBay, Tbl, cmud, db, dtab;
+    ({DBay} = require('../../../apps/dbay'));
+    ({Cmud} = require('../../../apps/dbay-cmudict'));
+    db = new DBay();
+    db.create_stdlib();
+    cmud = new Cmud({db});
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    dtab = new Tbl({
+      dba: db
+    });
+    // echo dtab._tabulate db SQL"select 42;"
+    db(function() {
+      echo(dtab._tabulate(db(SQL`select
+    word as word,
+    abs1 as abs1
+  from entries
+  where word glob 'n*'
+  order by word
+  limit 100;`)));
+      return null;
+    });
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // await demo_f()
-      return demo_1();
+      // demo_1()
+      return demo_count_transcriptions();
     })();
   }
 

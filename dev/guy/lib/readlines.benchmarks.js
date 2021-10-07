@@ -79,7 +79,7 @@
             for (line of ref) {
               count++;
               if (cfg.show) {
-                debug('^888-1^', {count, bytes_read, line});
+                debug('^888-1^', {count, line});
               }
             }
           }
@@ -102,9 +102,9 @@
     return new Promise((resolve) => {
       var Readlines;
       if (cfg.use_patched) {
-        Readlines = require('n-readlines');
-      } else {
         Readlines = require('../n-readlines-patched');
+      } else {
+        Readlines = require('n-readlines');
       }
       //.........................................................................................................
       resolve(() => {
@@ -146,6 +146,31 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.guy_fs_walk_lines = function(cfg) {
+    return new Promise((resolve) => {
+      var walk_lines;
+      ({walk_lines} = (require('../../../apps/guy')).fs);
+      //.........................................................................................................
+      resolve(() => {
+        return new Promise((resolve) => {
+          var count, line, path, ref;
+          count = 0;
+          path = cfg.paths[cfg.size];
+          ref = walk_lines(path);
+          for (line of ref) {
+            count++;
+            if (cfg.show) {
+              debug('^888-1^', {count, line});
+            }
+          }
+          return resolve(count);
+        });
+      });
+      return null;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.run_benchmarks = async function() {
     var _, bench, cfg, i, j, len, ref, ref1, repetitions, test_name, test_names;
     gcfg.verbose = true;
@@ -154,19 +179,20 @@
     cfg = {
       // size:         'small'
       size: 'big1',
+      // chunk_size:   100
       // chunk_size:   1 * 1024
-      chunk_size: 4 * 1024,
+      chunk_size: 4 * 1024/* optimum */,
       // chunk_size:   8 * 1024
       // chunk_size:   16 * 1024
       // chunk_size:   64 * 1024
       paths: {
-        small: PATH.resolve(PATH.join(__filename)),
+        small: PATH.resolve(PATH.join(__dirname, '../../../assets/a-few-words.txt')),
         big1: '/usr/share/dict/american-english'
       }
     };
     cfg.show = cfg.size === 'small';
     repetitions = 5;
-    test_names = ['n_readlines', 'n_readlines_patched', 'intertext_splitlines'];
+    test_names = ['n_readlines', 'n_readlines_patched', 'intertext_splitlines', 'guy_fs_walk_lines'];
     if (global.gc != null) {
       global.gc();
     }
