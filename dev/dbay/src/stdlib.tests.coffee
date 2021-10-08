@@ -42,14 +42,14 @@ r                         = String.raw
   test_and_show ( SQL"select std_str_reverse( 'abc一無所有𫠣' ) as x;" ), [ { x: '𫠣有所無一cba' } ]
   test_and_show ( SQL"select std_str_join( '-', '1', '1', '1', '1', '1', '1'  ) as x;" ), [ { "x": '1-1-1-1-1-1' } ]
   test_and_show ( SQL"select * from std_str_split_first( 'foo/bar/baz', '/' ) as x;" ), [ { prefix: 'foo', suffix: 'bar/baz' } ]
-  test_and_show ( SQL"select * from std_str_split( '/foo/bar/baz', '/' ) as x;" ), [ { part: '' }, { part: 'foo' }, { part: 'bar' }, { part: 'baz' } ]
-  test_and_show ( SQL"select * from std_str_split( '/foo/bar/baz', '/', true ) as x;" ), [ { part: 'foo' }, { part: 'bar' }, { part: 'baz' } ]
-  test_and_show ( SQL"select * from std_str_split_re( 'unanimous', '[aeiou]' ) as x;" ), [ { part: '' }, { part: 'n' }, { part: 'n' }, { part: 'm' }, { part: '' }, { part: 's' } ]
-  test_and_show ( SQL"select * from std_str_split_re( 'unanimous', '[aeiou]', 'i', true ) as x;" ), [ { part: 'n' }, { part: 'n' }, { part: 'm' }, { part: 's' } ]
-  test_and_show ( SQL"select * from std_str_split_re( 'unanimous', '[aeiou]', '', true ) as x;" ), [ { part: 'n' }, { part: 'n' }, { part: 'm' }, { part: 's' } ]
+  test_and_show ( SQL"select * from std_str_split( '/foo/bar/baz', '/' ) as x;" ), [ { lnr: 1, rnr: 4, part: '' }, { lnr: 2, rnr: 3, part: 'foo' }, { lnr: 3, rnr: 2, part: 'bar' }, { lnr: 4, rnr: 1, part: 'baz' } ]
+  test_and_show ( SQL"select * from std_str_split( '/foo/bar/baz', '/', true ) as x;" ), [ { lnr: 1, rnr: 3, part: 'foo' }, { lnr: 2, rnr: 2, part: 'bar' }, { lnr: 3, rnr: 1, part: 'baz' } ]
+  test_and_show ( SQL"select * from std_str_split_re( 'unanimous', '[aeiou]' ) as x;" ), [ { lnr: 1, rnr: 6, part: '' }, { lnr: 2, rnr: 5, part: 'n' }, { lnr: 3, rnr: 4, part: 'n' }, { lnr: 4, rnr: 3, part: 'm' }, { lnr: 5, rnr: 2, part: '' }, { lnr: 6, rnr: 1, part: 's' } ]
+  test_and_show ( SQL"select * from std_str_split_re( 'unanimous', '[aeiou]', 'i', true ) as x;" ), [ { lnr: 1, rnr: 4, part: 'n' }, { lnr: 2, rnr: 3, part: 'n' }, { lnr: 3, rnr: 2, part: 'm' }, { lnr: 4, rnr: 1, part: 's' } ]
+  test_and_show ( SQL"select * from std_str_split_re( 'unanimous', '[aeiou]', '', true ) as x;" ), [ { lnr: 1, rnr: 4, part: 'n' }, { lnr: 2, rnr: 3, part: 'n' }, { lnr: 3, rnr: 2, part: 'm' }, { lnr: 4, rnr: 1, part: 's' } ]
   # test_and_show ( SQL"select * from std_str_split_re( 'unanimous', '[aeiou]', null, true ) as x;" ), [ { part: 'n' }, { part: 'n' }, { part: 'm' }, { part: 's' } ]
-  test_and_show ( SQL"select * from std_str_split_re( 'unanimous', '([AEIOU])', 'i' ) as x;" ), [ { part: '' }, { part: 'u' }, { part: 'n' }, { part: 'a' }, { part: 'n' }, { part: 'i' }, { part: 'm' }, { part: 'o' }, { part: '' }, { part: 'u' }, { part: 's' } ]
-  test_and_show ( SQL"select * from std_str_split_re( 'unanimous', '([AEIOU])', 'i', true ) as x;" ), [ { part: 'u' }, { part: 'n' }, { part: 'a' }, { part: 'n' }, { part: 'i' }, { part: 'm' }, { part: 'o' }, { part: 'u' }, { part: 's' } ]
+  test_and_show ( SQL"select * from std_str_split_re( 'unanimous', '([AEIOU])', 'i' ) as x;" ), [ { lnr: 1, rnr: 11, part: '' }, { lnr: 2, rnr: 10, part: 'u' }, { lnr: 3, rnr: 9, part: 'n' }, { lnr: 4, rnr: 8, part: 'a' }, { lnr: 5, rnr: 7, part: 'n' }, { lnr: 6, rnr: 6, part: 'i' }, { lnr: 7, rnr: 5, part: 'm' }, { lnr: 8, rnr: 4, part: 'o' }, { lnr: 9, rnr: 3, part: '' }, { lnr: 10, rnr: 2, part: 'u' }, { lnr: 11, rnr: 1, part: 's' } ]
+  test_and_show ( SQL"select * from std_str_split_re( 'unanimous', '([AEIOU])', 'i', true ) as x;" ), [ { lnr: 1, rnr: 9, part: 'u' }, { lnr: 2, rnr: 8, part: 'n' }, { lnr: 3, rnr: 7, part: 'a' }, { lnr: 4, rnr: 6, part: 'n' }, { lnr: 5, rnr: 5, part: 'i' }, { lnr: 6, rnr: 4, part: 'm' }, { lnr: 7, rnr: 3, part: 'o' }, { lnr: 8, rnr: 2, part: 'u' }, { lnr: 9, rnr: 1, part: 's' } ]
   test_and_show ( SQL"select * from std_generate_series( 1, 3, 1 ) as x;" ), [ { value: 1 }, { value: 2 }, { value: 3 } ]
   test_and_show ( SQL"select * from std_re_matches( 'abcdefghijklmnopqrstuvqxyz', '[aeiou](..)' ) as x;" ), [ { match: 'abc', capture: 'bc' }, { match: 'efg', capture: 'fg' }, { match: 'ijk', capture: 'jk' }, { match: 'opq', capture: 'pq' }, { match: 'uvq', capture: 'vq' } ]
   #.........................................................................................................
@@ -70,24 +70,23 @@ r                         = String.raw
   info row for row in result = db.all_rows SQL"""
     select
         r1.entry  as entry,
+        r2.lnr    as lnr,
+        r2.rnr    as rnr,
         r2.part   as word
       from
         entries as r1,
         std_str_split_re( r1.entry, '\s' ) as r2;"""
   T?.eq result, [
-    { entry: 'some nice words', word: 'some' }
-    { entry: 'some nice words', word: 'nice' }
-    { entry: 'some nice words', word: 'words' }
-    { entry: 'can help a lot', word: 'can' }
-    { entry: 'can help a lot', word: 'help' }
-    { entry: 'can help a lot', word: 'a' }
-    { entry: 'can help a lot', word: 'lot' }
+    { entry: 'some nice words', lnr: 1, rnr: 3, word: 'some' }
+    { entry: 'some nice words', lnr: 2, rnr: 2, word: 'nice' }
+    { entry: 'some nice words', lnr: 3, rnr: 1, word: 'words' }
+    { entry: 'can help a lot', lnr: 1, rnr: 4, word: 'can' }
+    { entry: 'can help a lot', lnr: 2, rnr: 3, word: 'help' }
+    { entry: 'can help a lot', lnr: 3, rnr: 2, word: 'a' }
+    { entry: 'can help a lot', lnr: 4, rnr: 1, word: 'lot' }
     ]
   #.........................................................................................................
   done?()
-
-
-
 
 
 
