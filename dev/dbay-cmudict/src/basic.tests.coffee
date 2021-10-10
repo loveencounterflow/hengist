@@ -41,13 +41,31 @@ r                         = String.raw
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY-CMUDICT ipa rewriting" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }          = require '../../../apps/dbay'
+  { Cmud }          = require '../../../apps/dbay-cmudict'
+  db                = new DBay { temporary: true, }
+  cmud              = new Cmud { db, create: false, }
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'k ɝ0 ɪ1 r',          null, ]
+    [ 'b ɪ1 r m ʌ0 n',      null, ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, ] in probes_and_matchers
+    debug probe.match /ɝ0/g #   'ə0 r'
+    info cmud.ipa_from_ipa_raw probe
+  #.........................................................................................................
+  done?()
+
 
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
-  # @[ "DBAY stdlib functions" ]()
-  # @[ "DBAY std_str_split_re()" ]()
+  # test @, { timeout: 10e3, }
+  @[ "DBAY-CMUDICT ipa rewriting" ]()
 
 
 
