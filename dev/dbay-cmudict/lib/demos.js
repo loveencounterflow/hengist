@@ -40,6 +40,7 @@
     ({DBay} = require('../../../apps/dbay'));
     ({Cmud} = require('../../../apps/dbay-cmudict'));
     db = new DBay();
+    // cmud              = new Cmud { db, create: true, max_entry_count: 1000, }
     cmud = new Cmud({
       db,
       create: true
