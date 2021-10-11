@@ -84,11 +84,39 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY-CMUDICT _rewrite_beep_word"] = function(T, done) {
+    var Cmud, DBay, cmud, db, i, len, matcher, probe, probes_and_matchers, result;
+    // T?.halt_on_error()
+    ({DBay} = require('../../../apps/dbay'));
+    ({Cmud} = require('../../../apps/dbay-cmudict'));
+    db = new DBay({
+      temporary: true
+    });
+    cmud = new Cmud({
+      db,
+      create: false
+    });
+    //.........................................................................................................
+    probes_and_matchers = [['b\\^ete', "bête"], ["caf\\'e", "café"], ["brassi\\`ere", "brassière"], ["ch\\^ateau", "château"], ["\\'ep\\'ees", "épées"], ["table_d'h\\^ote", "table d'hôte"], ["t\\^ete-\\`a-t\\^ete", "tête-à-tête"]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher] = probes_and_matchers[i];
+      result = cmud._rewrite_beep_word(probe);
+      info(result);
+      if (T != null) {
+        T.eq(result, matcher);
+      }
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      return this["DBAY-CMUDICT ipa rewriting"]();
+      // @[ "DBAY-CMUDICT ipa rewriting" ]()
+      return test(this["DBAY-CMUDICT _rewrite_beep_word"]);
     })();
   }
 
