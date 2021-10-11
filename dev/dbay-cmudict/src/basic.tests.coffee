@@ -60,13 +60,38 @@ r                         = String.raw
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY-CMUDICT _rewrite_beep_word" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }          = require '../../../apps/dbay'
+  { Cmud }          = require '../../../apps/dbay-cmudict'
+  db                = new DBay { temporary: true, }
+  cmud              = new Cmud { db, create: false, }
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'b\\^ete',                  "bête",           ]
+    [ "caf\\'e",                  "café",           ]
+    [ "brassi\\`ere",             "brassière",      ]
+    [ "ch\\^ateau",               "château",        ]
+    [ "\\'ep\\'ees",              "épées",          ]
+    [ "table_d'h\\^ote",          "table d'hôte",   ]
+    [ "t\\^ete-\\`a-t\\^ete",     "tête-à-tête",    ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, ] in probes_and_matchers
+    result = ( cmud._rewrite_beep_word probe )
+    info result
+    T?.eq result, matcher
+  #.........................................................................................................
+  done?()
+
 
 
 ############################################################################################################
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
-  @[ "DBAY-CMUDICT ipa rewriting" ]()
-
+  # @[ "DBAY-CMUDICT ipa rewriting" ]()
+  test @[ "DBAY-CMUDICT _rewrite_beep_word" ]
 
 
 
