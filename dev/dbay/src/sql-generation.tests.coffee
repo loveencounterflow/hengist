@@ -27,15 +27,15 @@ r                         = String.raw
 
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "_DBAY Sqlgen demo" ] = ( T, done ) ->
+@[ "DBAY Sqlgen demo" ] = ( T, done ) ->
   # T?.halt_on_error()
-  # { DBay }          = require H.dbay_path
-  # db                = new DBay()
-  Sqlgen            = get_Sqlgen()
-  db                = new Sqlgen()
+  { DBay }          = require H.dbay_path
+  db                = new DBay()
   { Tbl, }          = require '../../../apps/icql-dba-tabulate'
   dtab              = new Tbl { dba: db, }
   schema            = 'main'
+  #.........................................................................................................
+  T?.throws /object 'main.cities' does not exist/, => db._get_field_names 'main', 'cities'
   #.........................................................................................................
   db ->
     db SQL"""
@@ -44,11 +44,12 @@ r                         = String.raw
         name    text    not null,
         country text    not null )
       """
-    debug '^334^', db.create_insert { schema, table: 'cities', }
-    echo dtab._tabulate db SQL"select type, name from sqlite_schema;"
-    echo dtab._tabulate db SQL"select * from #{schema}.pragma_table_info( $name );", { name: 'cities', }
-    debug '^33443^', db._get_fields { schema, name: 'cities', }
-    echo dtab._tabulate ( row for _, row of db._get_fields { schema, name: 'cities', } )
+    sql = db.create_insert { schema, into: 'cities', }
+    T?.eq sql, """insert into "main"."cities" ( "id", "name", "country" ) values ( $id, $name, $country );"""
+    # echo dtab._tabulate db SQL"select type, name from sqlite_schema;"
+    # echo dtab._tabulate db SQL"select * from #{schema}.pragma_table_info( $name );", { name: 'cities', }
+    # debug '^33443^', db._get_fields { schema, name: 'cities', }
+    # echo dtab._tabulate ( row for _, row of db._get_fields { schema, name: 'cities', } )
   #.........................................................................................................
   done?()
 
@@ -56,8 +57,8 @@ r                         = String.raw
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
-  @[ "_DBAY Sqlgen demo" ]()
+  test @, { timeout: 10e3, }
+  # @[ "_DBAY Sqlgen demo" ]()
 
 
 
