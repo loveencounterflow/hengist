@@ -415,6 +415,33 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
   #.........................................................................................................
   return done?()
 
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY prepared statement allowed in `db.do()`" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }          = require H.dbay_path
+  db                = new DBay()
+  { Tbl, }          = require '../../../apps/icql-dba-tabulate'
+  dtab              = new Tbl { dba: db, }
+  schema            = 'main'
+  #.........................................................................................................
+  db ->
+    db SQL"""
+      create table xy (
+        a   integer not null primary key,
+        b   text not null,
+        c   boolean not null );"""
+    insert_into_xy = db.prepare_insert { into: 'xy', exclude: [ 'a', ], }
+    db insert_into_xy, { b: 'one', c: 1, }
+    db insert_into_xy, { b: 'two', c: 1, }
+    db insert_into_xy, { b: 'three', c: 1, }
+    db insert_into_xy, { b: 'four', c: 1, }
+    echo dtab._tabulate db SQL"select * from xy order by a;"
+    T?.eq ( db.all_rows SQL"select * from xy order by a;" ), [ { a: 1, b: 'one', c: 1 }, { a: 2, b: 'two', c: 1 }, { a: 3, b: 'three', c: 1 }, { a: 4, b: 'four', c: 1 } ]
+    db SQL"rollback;"
+  #.........................................................................................................
+  done?()
+
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "DBAY db.first_row() exhausts iterator" ] = ( T, done ) ->
 #   # T?.halt_on_error()
@@ -439,6 +466,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 ############################################################################################################
 if require.main is module then do =>
   test @
+  # @[ "DBAY prepared statement allowed in `db.do()`" ]()
   # test @[ "DBAY create DB, insert, query values 1" ]
   # test @[ "DBAY db as callable" ]
   # @[ "DBAY create DB, table 2" ]()
