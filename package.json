@@ -90,6 +90,7 @@
     "pg-cursor": "^2.5.2",
     "pg-mem": "2.1.5",
     "pgsqwell": "^1.0.1",
+    "pkg-dir": "^6.0.1",
     "postgres": "^1.0.2",
     "random-ext": "2.7.1",
     "re2": "^1.15.9",
