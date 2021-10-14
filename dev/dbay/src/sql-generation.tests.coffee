@@ -41,10 +41,14 @@ r                         = String.raw
     [ { schema: 'blah', into: 'foobar', }, true, ]
     [ { into: 'foobar', fields: [ 'a', 'b', ], }, true, ]
     [ { into: 'foobar', exclude: [ 'a', 'b', ], }, true, ]
+    [ { into: 'foobar', exclude: [ 'a', 'b', ], on_conflict: SQL"do nothing", }, true, ]
     [ { into: 'foobar', fields: [ 'a', 'b', ], exclude: [ 'a', 'b', ], }, null, /violates 'either x.fields or x.exclude may be a nonempty list of nonempty_texts'/, ]
     [ { into: 'foobar', fields: [], }, null, /violates 'either x.fields or x.exclude may be a nonempty list of nonempty_texts'/, ]
     [ { into: 'foobar', exclude: [], }, null, /violates 'either x.fields or x.exclude may be a nonempty list of nonempty_texts'/, ]
     [ { into: 'foobar', exclude: 'c', }, null, /violates 'either x.fields or x.exclude may be a nonempty list of nonempty_texts'/, ]
+    [ { into: 'foobar', on_conflict: 42, }, null, /violates/, ]
+    [ { into: 'foobar', on_conflict: { update: true, }, }, true, ]
+    [ { into: 'foobar', on_conflict: { update: [ 'b', ], }, }, null, /violates/, ]
     ]
   #.........................................................................................................
   # debug intersection_of [ 1, 2, 3, ], [ 'a', 3, 1, ]
@@ -101,15 +105,27 @@ r                         = String.raw
          c text,
          d integer generated always as (a*abs(b)) virtual,
          e text generated always as (substr(c,b,b+1)) stored );"""
+    #.......................................................................................................
     sql = db.create_insert { into: 't1', }
     urge '^4498^', rpr sql
     T?.eq sql, 'insert into "main"."t1" ( "a", "b", "c" ) values ( $a, $b, $c );'
+    #.......................................................................................................
     sql = db.create_insert { into: 't1', fields: [ 'b', 'c', ], }
     urge '^4498^', rpr sql
     T?.eq sql, 'insert into "main"."t1" ( "b", "c" ) values ( $b, $c );'
+    #.......................................................................................................
     sql = db.create_insert { into: 't1', exclude: [ 'a', ], }
     urge '^4498^', rpr sql
     T?.eq sql, 'insert into "main"."t1" ( "b", "c" ) values ( $b, $c );'
+    #.......................................................................................................
+    sql = db.create_insert { into: 't1', exclude: [ 'a', ], on_conflict: "do nothing", }
+    urge '^4498^', rpr sql
+    T?.eq sql, 'insert into "main"."t1" ( "b", "c" ) values ( $b, $c ) on conflict do nothing;'
+    #.......................................................................................................
+    sql = db.create_insert { into: 't1', exclude: [ 'a', ], on_conflict: { update: true, }, }
+    urge '^4498^', rpr sql
+    T?.eq sql, 'insert into "main"."t1" ( "b", "c" ) values ( $b, $c ) on conflict do update set "b" = excluded."b", "c" = excluded."c";'
+    #.......................................................................................................
     echo dtab._tabulate db SQL"select * from pragma_table_info( 't1' );"
     echo dtab._tabulate db SQL"select * from pragma_table_xinfo( 't1' );"
     db SQL"rollback;"
@@ -160,14 +176,56 @@ r                         = String.raw
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY Sqlgen on_conflict 1" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }          = require H.dbay_path
+  db                = new DBay()
+  { Tbl, }          = require '../../../apps/icql-dba-tabulate'
+  dtab              = new Tbl { dba: db, }
+  schema            = 'main'
+  #.........................................................................................................
+  db SQL"""
+    create table xy (
+      a   integer not null primary key,
+      b   text not null,
+      c   integer not null );"""
+  #.........................................................................................................
+  db ->
+    insert_into_xy_sql = db.create_insert { into: 'xy', on_conflict: SQL"do nothing", }
+    urge '^4400^', rpr insert_into_xy_sql
+    T?.eq insert_into_xy_sql, 'insert into "main"."xy" ( "a", "b", "c" ) values ( $a, $b, $c ) on conflict do nothing;'
+    db insert_into_xy_sql, { a: 1, b: 'one', c: 1, }
+    db insert_into_xy_sql, { a: 1, b: 'two', c: 2, }
+    db insert_into_xy_sql, { a: 1, b: 'three', c: 3, }
+    db insert_into_xy_sql, { a: 1, b: 'four', c: 4, }
+    echo dtab._tabulate db SQL"select * from xy order by a;"
+    T?.eq ( db.all_rows SQL"select * from xy order by a;" ), [ { a: 1, b: 'one', c: 1 } ]
+    db SQL"rollback;"
+  #.........................................................................................................
+  db ->
+    insert_into_xy_sql = db.create_insert { into: 'xy', on_conflict: { update: true, }, }
+    urge '^4400^', rpr insert_into_xy_sql
+    T?.eq insert_into_xy_sql, 'insert into "main"."xy" ( "a", "b", "c" ) values ( $a, $b, $c ) on conflict do update set "a" = excluded."a", "b" = excluded."b", "c" = excluded."c";'
+    db insert_into_xy_sql, { a: 1, b: 'one', c: 1, }
+    db insert_into_xy_sql, { a: 1, b: 'two', c: 2, }
+    db insert_into_xy_sql, { a: 1, b: 'three', c: 3, }
+    db insert_into_xy_sql, { a: 1, b: 'four', c: 4, }
+    echo dtab._tabulate db SQL"select * from xy order by a;"
+    T?.eq ( db.all_rows SQL"select * from xy order by a;" ), [ { a: 1, b: 'four', c: 4 } ]
+    db SQL"rollback;"
+  #.........................................................................................................
+  done?()
+
 
 
 ############################################################################################################
 if module is require.main then do =>
-  # test @, { timeout: 10e3, }
+  test @, { timeout: 10e3, }
   # @[ "_DBAY Sqlgen demo" ]()
-  test @[ "DBAY Sqlgen create_insert() 2" ]
+  # test @[ "DBAY Sqlgen create_insert() 2" ]
   # test @[ "DBAY Sqlgen isa.dbay_create_insert_cfg()" ]
+  # test @[ "DBAY Sqlgen on_conflict 2" ]
 
 
 
