@@ -165,9 +165,9 @@ demo_variables = ->
   dba                 = new Dba()
   dpan                = new Dpan { dba, }
   debug '^4443^', dpan.vars.set 'myvariable', "some value"
-  debug '^4443^', dpan.vars.set 'ditance', 12
+  debug '^4443^', dpan.vars.set 'distance', 12
   debug '^4443^', dpan.vars.get 'myvariable'
-  debug '^4443^', dpan.vars.get 'ditance'
+  debug '^4443^', dpan.vars.get 'distance'
   return null
 
 
