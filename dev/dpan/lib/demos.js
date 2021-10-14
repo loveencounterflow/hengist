@@ -274,11 +274,12 @@
       // await demo_db_add_pkg_info()
       // await demo_db_add_pkg_infos()
       // await demo_git_fetch_pkg_status()
-      // await demo_git_get_dirty_counts()
-      // await demo_variables()
-      return (await demo_staged_file_paths());
+      return (await demo_git_get_dirty_counts());
     })();
   }
+
+  // await demo_variables()
+// await demo_staged_file_paths()
 
 }).call(this);
 
