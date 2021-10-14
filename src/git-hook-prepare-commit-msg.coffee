@@ -26,10 +26,8 @@ do =>
   staged_paths              = CP.execSync 'git diff --cached --name-only', { encoding: 'utf-8', }
   staged_paths              = ( staged_path for staged_path in ( staged_paths.split /\n/ ) \
     when staged_path isnt '' )
-  debug '^335^', staged_paths
   for staged_path, idx in staged_paths
     staged_paths[ idx ] = join cwd, PATH.dirname staged_path.trim()
-  debug '^335^', staged_paths
   staged_modules            = new Set()
   for staged_path in staged_paths
     staged_modules.add PATH.basename PKGDIR.packageDirectorySync { cwd: staged_path, }
