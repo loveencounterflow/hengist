@@ -86,6 +86,15 @@
       [
         {
           into: 'foobar',
+          exclude: ['a',
+        'b'],
+          on_conflict: SQL`do nothing`
+        },
+        true
+      ],
+      [
+        {
+          into: 'foobar',
           fields: ['a',
         'b'],
           exclude: ['a',
@@ -117,6 +126,33 @@
         },
         null,
         /violates 'either x.fields or x.exclude may be a nonempty list of nonempty_texts'/
+      ],
+      [
+        {
+          into: 'foobar',
+          on_conflict: 42
+        },
+        null,
+        /violates/
+      ],
+      [
+        {
+          into: 'foobar',
+          on_conflict: {
+            update: true
+          }
+        },
+        true
+      ],
+      [
+        {
+          into: 'foobar',
+          on_conflict: {
+            update: ['b']
+          }
+        },
+        null,
+        /violates/
       ]
     ];
 //.........................................................................................................
@@ -201,6 +237,7 @@ next_id integer generated always as ( id + 1 ) );`);
    c text,
    d integer generated always as (a*abs(b)) virtual,
    e text generated always as (substr(c,b,b+1)) stored );`);
+      //.......................................................................................................
       sql = db.create_insert({
         into: 't1'
       });
@@ -208,6 +245,7 @@ next_id integer generated always as ( id + 1 ) );`);
       if (T != null) {
         T.eq(sql, 'insert into "main"."t1" ( "a", "b", "c" ) values ( $a, $b, $c );');
       }
+      //.......................................................................................................
       sql = db.create_insert({
         into: 't1',
         fields: ['b', 'c']
@@ -216,6 +254,7 @@ next_id integer generated always as ( id + 1 ) );`);
       if (T != null) {
         T.eq(sql, 'insert into "main"."t1" ( "b", "c" ) values ( $b, $c );');
       }
+      //.......................................................................................................
       sql = db.create_insert({
         into: 't1',
         exclude: ['a']
@@ -224,6 +263,29 @@ next_id integer generated always as ( id + 1 ) );`);
       if (T != null) {
         T.eq(sql, 'insert into "main"."t1" ( "b", "c" ) values ( $b, $c );');
       }
+      //.......................................................................................................
+      sql = db.create_insert({
+        into: 't1',
+        exclude: ['a'],
+        on_conflict: "do nothing"
+      });
+      urge('^4498^', rpr(sql));
+      if (T != null) {
+        T.eq(sql, 'insert into "main"."t1" ( "b", "c" ) values ( $b, $c ) on conflict do nothing;');
+      }
+      //.......................................................................................................
+      sql = db.create_insert({
+        into: 't1',
+        exclude: ['a'],
+        on_conflict: {
+          update: true
+        }
+      });
+      urge('^4498^', rpr(sql));
+      if (T != null) {
+        T.eq(sql, 'insert into "main"."t1" ( "b", "c" ) values ( $b, $c ) on conflict do update set "b" = excluded."b", "c" = excluded."c";');
+      }
+      //.......................................................................................................
       echo(dtab._tabulate(db(SQL`select * from pragma_table_info( 't1' );`)));
       echo(dtab._tabulate(db(SQL`select * from pragma_table_xinfo( 't1' );`)));
       return db(SQL`rollback;`);
@@ -330,16 +392,126 @@ next_id integer generated always as ( id + 1 ) );`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY Sqlgen on_conflict 1"] = function(T, done) {
+    var DBay, Tbl, db, dtab, schema;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    dtab = new Tbl({
+      dba: db
+    });
+    schema = 'main';
+    //.........................................................................................................
+    db(SQL`create table xy (
+  a   integer not null primary key,
+  b   text not null,
+  c   integer not null );`);
+    //.........................................................................................................
+    db(function() {
+      var insert_into_xy_sql;
+      insert_into_xy_sql = db.create_insert({
+        into: 'xy',
+        on_conflict: SQL`do nothing`
+      });
+      urge('^4400^', rpr(insert_into_xy_sql));
+      if (T != null) {
+        T.eq(insert_into_xy_sql, 'insert into "main"."xy" ( "a", "b", "c" ) values ( $a, $b, $c ) on conflict do nothing;');
+      }
+      db(insert_into_xy_sql, {
+        a: 1,
+        b: 'one',
+        c: 1
+      });
+      db(insert_into_xy_sql, {
+        a: 1,
+        b: 'two',
+        c: 2
+      });
+      db(insert_into_xy_sql, {
+        a: 1,
+        b: 'three',
+        c: 3
+      });
+      db(insert_into_xy_sql, {
+        a: 1,
+        b: 'four',
+        c: 4
+      });
+      echo(dtab._tabulate(db(SQL`select * from xy order by a;`)));
+      if (T != null) {
+        T.eq(db.all_rows(SQL`select * from xy order by a;`), [
+          {
+            a: 1,
+            b: 'one',
+            c: 1
+          }
+        ]);
+      }
+      return db(SQL`rollback;`);
+    });
+    //.........................................................................................................
+    db(function() {
+      var insert_into_xy_sql;
+      insert_into_xy_sql = db.create_insert({
+        into: 'xy',
+        on_conflict: {
+          update: true
+        }
+      });
+      urge('^4400^', rpr(insert_into_xy_sql));
+      if (T != null) {
+        T.eq(insert_into_xy_sql, 'insert into "main"."xy" ( "a", "b", "c" ) values ( $a, $b, $c ) on conflict do update set "a" = excluded."a", "b" = excluded."b", "c" = excluded."c";');
+      }
+      db(insert_into_xy_sql, {
+        a: 1,
+        b: 'one',
+        c: 1
+      });
+      db(insert_into_xy_sql, {
+        a: 1,
+        b: 'two',
+        c: 2
+      });
+      db(insert_into_xy_sql, {
+        a: 1,
+        b: 'three',
+        c: 3
+      });
+      db(insert_into_xy_sql, {
+        a: 1,
+        b: 'four',
+        c: 4
+      });
+      echo(dtab._tabulate(db(SQL`select * from xy order by a;`)));
+      if (T != null) {
+        T.eq(db.all_rows(SQL`select * from xy order by a;`), [
+          {
+            a: 1,
+            b: 'four',
+            c: 4
+          }
+        ]);
+      }
+      return db(SQL`rollback;`);
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // test @, { timeout: 10e3, }
-      // @[ "_DBAY Sqlgen demo" ]()
-      return test(this["DBAY Sqlgen create_insert() 2"]);
+      return test(this, {
+        timeout: 10e3
+      });
     })();
   }
 
-  // test @[ "DBAY Sqlgen isa.dbay_create_insert_cfg()" ]
+  // @[ "_DBAY Sqlgen demo" ]()
+// test @[ "DBAY Sqlgen create_insert() 2" ]
+// test @[ "DBAY Sqlgen isa.dbay_create_insert_cfg()" ]
+// test @[ "DBAY Sqlgen on_conflict 2" ]
 
 }).call(this);
 
