@@ -170,6 +170,22 @@ demo_variables = ->
   debug '^4443^', dpan.vars.get 'distance'
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_staged_file_paths = ->
+  { Dba }             = require H.dba_path
+  { Dpan }            = require H.dpan_path
+  dba                 = new Dba()
+  dpan                = new Dpan { dba, }
+  GU                  = require 'git-utils'
+  pkg_fspath          = PATH.resolve PATH.join __dirname, '../../../apps/git-expanded-commit-messages'
+  repo                = GU.open pkg_fspath
+  unless repo?
+    throw new Error "^43487^ no repo at #{pkg_fspath}"
+  debug '^3324^', repo.getStatus() ### missing untracked files ###
+  debug '^3324^',( pkg_fspath for pkg_fspath, status of repo.getStatus() when status is 1 ) ### missing untracked files ###
+  info '^5909^', dpan.git_get_staged_file_paths { pkg_fspath, }
+  return null
+
 
 ############################################################################################################
 if module is require.main then do =>
@@ -178,7 +194,7 @@ if module is require.main then do =>
   # await demo_db_add_pkg_info()
   # await demo_db_add_pkg_infos()
   # await demo_git_fetch_pkg_status()
-  await demo_git_get_dirty_counts()
+  # await demo_git_get_dirty_counts()
   # await demo_variables()
-
+  await demo_staged_file_paths()
 
