@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dba, FS, H, PATH, SQL, badge, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, demo_git_fetch_pkg_status, demo_git_get_dirty_counts, demo_variables, echo, freeze, glob, got, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Dba, FS, H, PATH, SQL, badge, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, demo_git_fetch_pkg_status, demo_git_get_dirty_counts, demo_staged_file_paths, demo_variables, echo, freeze, glob, got, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -236,6 +236,36 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_staged_file_paths = function() {
+    var Dpan, GU, dba, dpan, pkg_fspath, repo, status;
+    ({Dba} = require(H.dba_path));
+    ({Dpan} = require(H.dpan_path));
+    dba = new Dba();
+    dpan = new Dpan({dba});
+    GU = require('git-utils');
+    pkg_fspath = PATH.resolve(PATH.join(__dirname, '../../../apps/git-expanded-commit-messages'));
+    repo = GU.open(pkg_fspath);
+    if (repo == null) {
+      throw new Error(`^43487^ no repo at ${pkg_fspath}`);
+    }
+    debug('^3324^', repo.getStatus());
+    /* missing untracked files */    debug('^3324^', (function() {
+      var ref, results;
+      ref = repo.getStatus();
+      results = [];
+      for (pkg_fspath in ref) {
+        status = ref[pkg_fspath];
+        if (status === 1) {
+          results.push(pkg_fspath);
+        }
+      }
+      return results;
+    })());
+    /* missing untracked files */    info('^5909^', dpan.git_get_staged_file_paths({pkg_fspath}));
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
@@ -244,11 +274,11 @@
       // await demo_db_add_pkg_info()
       // await demo_db_add_pkg_infos()
       // await demo_git_fetch_pkg_status()
-      return (await demo_git_get_dirty_counts());
+      // await demo_git_get_dirty_counts()
+      // await demo_variables()
+      return (await demo_staged_file_paths());
     })();
   }
-
-  // await demo_variables()
 
 }).call(this);
 
