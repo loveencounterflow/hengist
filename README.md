@@ -12,6 +12,7 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
+# 𐌷𐌴𐌽𐌲𐌹𐍃𐍄
 
 ## Multi-App Dev (M.A.D.)
 
@@ -76,13 +77,19 @@
 </pre>
 
 
+## Thoughts & Plans
 
-# To Do
 
 
-* [ ] Update tree representation: local development under `dev/` (which is included in Hengist git repo);
+## To Do
+
+
+* **[–]** Update tree representation: local development under `dev/` (which is included in Hengist git repo);
   external stuff (for which Hengist only provides tests and/or benchmarks and/or demos, experiments) is
   symlinked under `apps/` (and not included in Hengist git repo).
+* **[+]** Implement a `prepare-commit-msg` git hook that prepends each commit with the names of the
+  sub-projects affected. This works by retrieving the relative paths of all staged files with `git diff
+  --cached --name-only` and then looking for the nearest `package.json` file for each part.
 
 
 
