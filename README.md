@@ -81,6 +81,19 @@
 
 ## Thoughts & Plans
 
+* We continue to keep
+
+  * benchmarks,
+  * demos and
+  * tests
+
+  for the projects under `hengist/dev/$project_name`. This makes `hengist` a monorepo *for the dev code of
+  the projects, but not for their production code*. Dependencies for stuff under `dev` will be kept in
+  `hengist/node_modules` and be declared in `hengist/package.json`.
+
+* To help subject-oriented development, `apps-$subject` folders such as `apps-dbay` and `apps-typesetting`
+  are introduced. These contain symlinks to the projects that are relevent for the `$subject` (e.g.
+  `typesetting`) at hand; they may also contain further material such as `README`s.
 
 
 ## To Do
