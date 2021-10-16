@@ -101,13 +101,37 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["BASICS term-size"] = function(T, done) {
+    var CP, INTERTEXT, columns, get_terminal_size, rows, rpr;
+    INTERTEXT = require('../../../apps/intertext');
+    ({get_terminal_size} = INTERTEXT.export());
+    ({rpr} = INTERTEXT.export());
+    CP = require('child_process');
+    //.........................................................................................................
+    columns = parseInt((CP.execSync("tput cols", {
+      encoding: 'utf-8'
+    })).trim(), 10);
+    rows = parseInt((CP.execSync("tput lines", {
+      encoding: 'utf-8'
+    })).trim(), 10);
+    if (T != null) {
+      T.eq(get_terminal_size(), {columns, rows});
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => { // await do =>
       // debug ( k for k of ( require '../..' ).HTML ).sort().join ' '
       // await @_demo()
       // test @
-      return test(this["BASICS camelize"]);
+      // test @[ "BASICS camelize" ]
+      return test(this["BASICS term-size"]);
     })();
   }
 
