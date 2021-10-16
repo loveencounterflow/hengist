@@ -66,6 +66,20 @@ test                      = require 'guy-test'
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "BASICS term-size" ] = ( T, done ) ->
+  INTERTEXT                 = require '../../../apps/intertext'
+  { get_terminal_size }     = INTERTEXT.export()
+  { rpr }                   = INTERTEXT.export()
+  CP                        = require 'child_process'
+  #.........................................................................................................
+  columns = parseInt ( CP.execSync "tput cols",  { encoding: 'utf-8', } ).trim(), 10
+  rows    = parseInt ( CP.execSync "tput lines", { encoding: 'utf-8', } ).trim(), 10
+  T?.eq get_terminal_size(), { columns, rows, }
+  #.........................................................................................................
+  done?()
+  return null
+
 
 
 ############################################################################################################
@@ -73,7 +87,8 @@ if module is require.main then do => # await do =>
   # debug ( k for k of ( require '../..' ).HTML ).sort().join ' '
   # await @_demo()
   # test @
-  test @[ "BASICS camelize" ]
+  # test @[ "BASICS camelize" ]
+  test @[ "BASICS term-size" ]
   # test @[ "HTML.datoms_from_html (dubious)" ]
   # test @[ "HTML.datoms_from_html (2)" ]
   # test @[ "HTML.html_from_datoms (singular tags)" ]
