@@ -1,0 +1,33 @@
+<!doctype html>
+
+<title>Gauge to estimate Browser Scaling</title>
+
+<style>
+  body {
+    background-color:       #cf68;
+    /*display:                block;*/
+    transform-origin:       0px 0px 0px;
+    transform:              scale(1.43,1.43);
+  }
+  hgauge {
+    display:                block;
+    width:                  100mm;
+    height:                 10mm;
+    background-color:       yellow;
+    mix-blend-mode:         multiply;
+    border:                 1px solid black;
+  }
+  vgauge {
+    display:                block;
+    width:                  10mm;
+    height:                 100mm;
+    background-color:       orange;
+    mix-blend-mode:         multiply;
+    border:                 1px solid black;
+  }
+</style>
+
+<body>
+  <hgauge>hgauge</hgauge>
+  <vgauge>vgauge</vgauge>
+  </body>
