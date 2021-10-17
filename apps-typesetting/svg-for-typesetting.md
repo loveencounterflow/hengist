@@ -11,6 +11,9 @@
 - [Notes on SVG for Typesetting](#notes-on-svg-for-typesetting)
   - [Overall Structure of an 'SVG Font' File](#overall-structure-of-an-svg-font-file)
   - [Overall Structure of a HTML Page using an 'SVG Font'](#overall-structure-of-a-html-page-using-an-svg-font)
+  - [Coordinate Systems, Viewports, Sizes and Units](#coordinate-systems-viewports-sizes-and-units)
+  - [Font Design Size](#font-design-size)
+  - [Converting SVG Typeset Material to Other Formats](#converting-svg-typeset-material-to-other-formats)
   - [XXXXXXXXXXXXX](#xxxxxxxxxxxxx)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -22,6 +25,46 @@
 ## Overall Structure of an 'SVG Font' File
 
 ## Overall Structure of a HTML Page using an 'SVG Font'
+
+## Coordinate Systems, Viewports, Sizes and Units
+
+
+* [*MDN SVG Tutorial: Positions*](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Positions)
+
+* (*W3 SVG2: Chapter 8: Coordinate Systems, Transformations and Units*)[https://www.w3.org/TR/SVG2/coords.html]
+* (*W3 SVG2: §8.9: Units*)[https://www.w3.org/TR/SVG2/coords.html#Units]
+
+* (*W3 SVG2: §8.4: The Initial Coordinate System*)[https://www.w3.org/TR/SVG2/coords.html#InitialCoordinateSystem]
+
+> the initial viewport coordinate system (and therefore the initial user coordinate system) must have its
+> origin at the top/left of the viewport, with the positive x-axis pointing towards the right, the positive
+> y-axis pointing down, and text rendered with an "upright" orientation, which means glyphs are oriented
+> such that Roman characters and full-size ideographic characters for Asian scripts have the top edge of the
+> corresponding glyphs oriented upwards and the right edge of the corresponding glyphs oriented to the
+> right.—(W3 SVG2 *§8.4: The Initial Coordinate System*)[https://www.w3.org/TR/SVG2/coords.html#InitialCoordinateSystem]
+
+
+## Font Design Size
+
+* fixed at 1000⨉1000
+* only intzeger steps, no decimal fractions
+* should be good enough
+* numbers are human-readable, coordinate pairs like `( 560, 2000 )` are immediately intelligible (although a
+  hundred lines / ems à 1000 units gives `y = 100000` which is far more readable with thousands separator, `y =
+  100_000`)
+* alternative: design size of 1⨉1 (!), then we have *only* fractional measurements within each glyph
+  outline; extra care must be taken to always round at 4 digits after the decimal point; the good thing is
+  when seeing `( 78.4430, 23.0114 )` one can immediately say it's 78 ems to the right and 23 ems down. But
+  this is highly unusual and needs further evaluation.
+
+## Converting SVG Typeset Material to Other Formats
+
+* in the browser
+* https://github.com/shakiba/svgexport/, which uses puppeteer
+
+```bash
+svgexport 'sample-font.svg' '/tmp/preview.png' 0.1x
+```
 
 ## XXXXXXXXXXXXX
 
