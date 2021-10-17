@@ -12,9 +12,12 @@
   - [Overall Structure of an 'SVG Font' File](#overall-structure-of-an-svg-font-file)
   - [Overall Structure of a HTML Page using an 'SVG Font'](#overall-structure-of-a-html-page-using-an-svg-font)
   - [Coordinate Systems, Viewports, Sizes and Units](#coordinate-systems-viewports-sizes-and-units)
+    - [Page Scale Necessary?](#page-scale-necessary)
   - [Font Design Size](#font-design-size)
   - [Converting SVG Typeset Material to Other Formats](#converting-svg-typeset-material-to-other-formats)
-  - [XXXXXXXXXXXXX](#xxxxxxxxxxxxx)
+  - [Embedding SVG in HTML](#embedding-svg-in-html)
+    - [Overflow](#overflow)
+    - [XXX](#xxx)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -30,11 +33,15 @@
 
 
 * [*MDN SVG Tutorial: Positions*](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Positions)
-
-* (*W3 SVG2: Chapter 8: Coordinate Systems, Transformations and Units*)[https://www.w3.org/TR/SVG2/coords.html]
+* [*SVG Viewport and View Box*](http://tutorials.jenkov.com/svg/svg-viewport-view-box.html)
+* A more thorough introduction: [*Understanding SVG Coordinate Systems and Transformations (Part 1) — The
+  viewport, viewBox, and preserveAspectRatio*](https://www.sarasoueidan.com/blog/svg-coordinate-systems/)
+* (*W3 SVG2: Chapter 8: Coordinate Systems, Transformations and
+  Units*)[https://www.w3.org/TR/SVG2/coords.html]
 * (*W3 SVG2: §8.9: Units*)[https://www.w3.org/TR/SVG2/coords.html#Units]
 
-* (*W3 SVG2: §8.4: The Initial Coordinate System*)[https://www.w3.org/TR/SVG2/coords.html#InitialCoordinateSystem]
+* (*W3 SVG2: §8.4: The Initial Coordinate
+  System*)[https://www.w3.org/TR/SVG2/coords.html#InitialCoordinateSystem]
 
 > the initial viewport coordinate system (and therefore the initial user coordinate system) must have its
 > origin at the top/left of the viewport, with the positive x-axis pointing towards the right, the positive
@@ -43,6 +50,56 @@
 > corresponding glyphs oriented upwards and the right edge of the corresponding glyphs oriented to the
 > right.—(W3 SVG2 *§8.4: The Initial Coordinate System*)[https://www.w3.org/TR/SVG2/coords.html#InitialCoordinateSystem]
 
+* The dimensionless units that are (preferably) used in SVG documents can be scaled to relate to a physical
+  size by setting a CSS style attribute `width` on the `<object>` tag that represents the SVG file in an
+  HTML document:
+
+* In the SVG document, we set a view box having width and height (here: 10000 user units):
+
+  ```svg
+  <?xml version='1.0' standalone='no'?>
+  <svg xmlns='http://www.w3.org/2000/svg'
+    xmlns:xlink='http://www.w3.org/1999/xlink'
+    viewBox='0 0 10000 10000'
+    overflow='visible'>
+  ```
+
+* In the HTML document we render the SVG by way of an explicitly sized `<object>` tag:
+
+  ```html
+  <object
+    type='image/svg+xml'
+    data='./sample-font.svg'
+    style='width:1000mm'>
+      (Fallback for SVG here)
+      </object>
+  ```
+
+* In the above example, we have mapped 10'000u (user units) to 1'000mm (= 1m) of real-world length.
+
+* 90dpi ≘ 3.543307px per mm (what Inkscape used to use), but I believe the common standard these days is
+* 96dpi ≘ 3.779527559px per mm
+
+### Page Scale Necessary?
+
+* All content rendered too small in browsers
+* but why does the browser scale all content?
+* tested in Firefox, Vivaldi, Brave...
+
+```html
+<style>
+  body {
+    transform-origin:       0px 0px 0px;
+    transform:              scale(1.43,1.43); }
+  hgauge { ... }
+  vgauge { ... }
+</style>
+
+<body>
+  <hgauge>hgauge</hgauge>
+  <vgauge>vgauge</vgauge>
+  </body>
+```
 
 ## Font Design Size
 
@@ -66,7 +123,14 @@
 svgexport 'sample-font.svg' '/tmp/preview.png' 0.1x
 ```
 
-## XXXXXXXXXXXXX
+## Embedding SVG in HTML
+
+### Overflow
+
+* `overflow` attribute in `<svg>` element *always* set to `visible`.
+* in addition, in the `<style>` section, `overflow: visible` is set for all `<symbol>`s.
+
+### XXX
 
 
 ```xml
