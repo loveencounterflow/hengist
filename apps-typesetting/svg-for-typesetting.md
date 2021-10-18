@@ -31,10 +31,24 @@
 
 ## Overall Structure of a HTML Page using an 'SVG Font'
 
+Possible solutions:
+
+* Use SVG `symbol`s in an SVG 'font' (outlines) file, and SVG `use` in an SVG 'galley' file to define and
+  render outlines. While the
+  [demo](https://github.com/loveencounterflow/hengist/tree/93b8ae143deea940707e03755b1d89d67c64ed08/apps-typesetting/html%2Bsvg-demos/011)
+  shows that this is, as such, a viable approach, there are two downsides:
+  * the SVG 'font' file (which would presumably be produced dynamically rather than be realised as an actual
+    file in the file system) should be constructed such that it only contains the outlines needed by the
+    rendering task at hand; this is mainly a concern for CJK typesetting with its huge glyf inventories.
+  * The technique is known not to work in Chrome, so violates the [Dual Browser
+    Strategy](#strategy-dual-browser-support).
+
 ## Strategy: Dual Browser Support
 
 As of 2021, there are more or less only two kind of web browsers left: those that are (built on)
-Chrom(e|ium), and Mozilla FireFox.
+Chrom(e|ium), and Mozilla Firefox. The [Chrome External Symbol
+Bug](#svg-use-symbol-with-external-ressource-not-working-in-chrome) is one more indicator that the best
+strategy will be to see this software will work in *both* Chromish and Firefoxish browsers.
 
 ## SVG 'Use Symbol' with External Ressource Not Working in Chrome
 
@@ -42,7 +56,7 @@ Chrom(e|ium), and Mozilla FireFox.
   commit](https://github.com/loveencounterflow/hengist/tree/93b8ae143deea940707e03755b1d89d67c64ed08/apps-typesetting/html%2Bsvg-demos/011)
 * use simple web server from inside that directory
 * open `index.html`
-* see that it does work in FireFox (v93.0) but not in Chromium (v94.0)
+* see that it does work in Firefox (v93.0) but not in Chromium (v94.0)
 
 
 `foofont.svg`:
