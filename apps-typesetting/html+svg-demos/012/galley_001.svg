@@ -1,0 +1,34 @@
+<?xml version='1.0' standalone='no'?>
+<svg xmlns='http://www.w3.org/2000/svg'
+  viewBox='0 0 21000 29700'
+  width='210mm'
+  height='297mm'
+  overflow='visible'>
+<style>
+  .x-rect {
+    fill:                   yellow;
+    mix-blend-mode:         multiply; }
+  symbol {
+    overflow:               visible;
+    opacity:                0.75; }
+  </style>
+<!-- <path stroke='black' stroke-width='10' d='M 0    0 L 1000 1000'/> -->
+<!-- <path stroke='black' stroke-width='10' d='M 0 1000 L 1000 1000'/> -->
+<use x='1000' y='1000' style='fill:red;' href='foofont.svg#g74'/>
+<use x='2000' y='1000' style='fill:black;' href='foofont.svg#g77'/>
+<use x='3000' y='1000' style='fill:black;' href='foofont.svg#g78'/>
+<use x='4000' y='1000' style='fill:black;' href='foofont.svg#g84'/>
+<use x='5000' y='1000' style='fill:black;' href='foofont.svg#g90'/>
+<use x='6000' y='1000' style='fill:black;' href='foofont.svg#g71'/>
+<use x='7000' y='1000' style='fill:black;' href='foofont.svg#g72'/>
+<image x='8000' y='1000' width='1000' height='1000' href='foofont.svg#g72'/>
+<!-- <rect class='x-rect' x='1000' y='0' width='1000' height='1000'/> -->
+<!-- <rect class='x-rect' x='2000' y='0' width='1000' height='1000'/> -->
+</svg>
+
+
+
+
+
+
+
