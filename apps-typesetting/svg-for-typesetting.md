@@ -13,7 +13,7 @@
   - [Structure of a HTML Page using an 'SVG Font'](#structure-of-a-html-page-using-an-svg-font)
     - [Solution: Use Symbol from External (rejected)](#solution-use-symbol-from-external-rejected)
     - [Solution: SVG Outline-Per-Glyf in DOM](#solution-svg-outline-per-glyf-in-dom)
-    - [Solution: Single HTML Page](#solution-single-html-page)
+    - [Solution: All Inclusive](#solution-all-inclusive)
   - [Strategy: Standalone, Static Standards-Compliant File(s)](#strategy-standalone-static-standards-compliant-files)
     - [Single Standalone, Static Standards-Compliant File](#single-standalone-static-standards-compliant-file)
   - [Strategy: Dual Browser Support](#strategy-dual-browser-support)
@@ -41,24 +41,42 @@ Possible solutions:
 ### Solution: Use Symbol from External (rejected)
 
 * Use SVG `symbol`s in an SVG 'font' (outlines) file, and SVG `use` in an SVG 'galley' file to define and
-  render outlines. While the
-  [demo](https://github.com/loveencounterflow/hengist/tree/93b8ae143deea940707e03755b1d89d67c64ed08/apps-typesetting/html%2Bsvg-demos/011)
-  shows that this is, as such, a viable approach, there are two downsides:
-  * the SVG 'font' file (which would presumably be produced dynamically rather than be realised as an actual
-    file in the file system) should be constructed such that it only contains the outlines needed by the
-    rendering task at hand; this is mainly a concern for CJK typesetting with its huge glyf inventories.
-  * The technique is known not to work in Chrome, so violates the [Dual Browser
-    Strategy](#strategy-dual-browser-support).
+  render outlines.
+
+While the
+[demo](https://github.com/loveencounterflow/hengist/tree/93b8ae143deea940707e03755b1d89d67c64ed08/apps-typesetting/html%2Bsvg-demos/011)
+shows that this is, as such, a viable approach, there are downsides:
+
+* **Downside:** the SVG 'font' file (which would presumably be produced dynamically rather than be realised
+  as an actual file in the file system) should be constructed such that it only contains the outlines needed
+  by the rendering task at hand; this is mainly a concern for CJK typesetting with its huge glyf
+  inventories.
+* **Downside:** The technique is known not to work in Chrome, so violates the [Dual Browser
+  Strategy](#strategy-dual-browser-support).
+* **Downside:** As such, it only works with a running server; one would have to further transform the output
+  to make a document truly archivable.
 
 ### Solution: SVG Outline-Per-Glyf in DOM
 
-### Solution: Single HTML Page
+* This is an ancient and venerable technique; one of the few popular websites that still works this way is
+  [Rick Harbough's 中文.com](http://zhongwen.com/).
+* **Downside:** Bazillions of (virtual) files, gazillions of HTTP requests (a lot, even with a local web
+  server).
+* **Downside:** Data volume increases because **(1)** *each outline needs to be wrapped in namespaced SVG
+  tags*, and **(2)** *each request brings its own, highly repetitive overhead*.
+* **Downside:** As such, it only works with a running server; one would have to further transform the output
+  to make a document truly archivable.
 
+### Solution: All Inclusive
+
+A.k.a. 'Single HTML Page with Glyf Outlines Included and Arranged on One SVG Per Page' (SHPGOIAOSPP)
 
 
 ## Strategy: Standalone, Static Standards-Compliant File(s)
 
-* The [Single HTML Page Solution]()
+The [Single HTML Page Solution](#solution-single-html-page) offers the potential to produce *passive*,
+*static* yet in-browser *renderable* documents that, once compiled, **obviate the need to have a server
+running just to view a document**. This is only achieved with the []
 
 ### Single Standalone, Static Standards-Compliant File
 
