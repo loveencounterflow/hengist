@@ -13,6 +13,9 @@
   - [Structure of a HTML Page using an 'SVG Font'](#structure-of-a-html-page-using-an-svg-font)
     - [Solution: Use Symbol from External (rejected)](#solution-use-symbol-from-external-rejected)
     - [Solution: SVG Outline-Per-Glyf in DOM](#solution-svg-outline-per-glyf-in-dom)
+    - [Solution: Single HTML Page](#solution-single-html-page)
+  - [Strategy: Standalone, Static Standards-Compliant File(s)](#strategy-standalone-static-standards-compliant-files)
+    - [Single Standalone, Static Standards-Compliant File](#single-standalone-static-standards-compliant-file)
   - [Strategy: Dual Browser Support](#strategy-dual-browser-support)
   - [SVG 'Use Symbol' with External Ressource Not Working in Chrome](#svg-use-symbol-with-external-ressource-not-working-in-chrome)
   - [Coordinate Systems, Viewports, Sizes and Units](#coordinate-systems-viewports-sizes-and-units)
@@ -49,7 +52,15 @@ Possible solutions:
 
 ### Solution: SVG Outline-Per-Glyf in DOM
 
+### Solution: Single HTML Page
 
+
+
+## Strategy: Standalone, Static Standards-Compliant File(s)
+
+* The [Single HTML Page Solution]()
+
+### Single Standalone, Static Standards-Compliant File
 
 ## Strategy: Dual Browser Support
 
