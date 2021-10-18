@@ -11,6 +11,8 @@
 - [Notes on SVG for Typesetting](#notes-on-svg-for-typesetting)
   - [Overall Structure of an 'SVG Font' File](#overall-structure-of-an-svg-font-file)
   - [Overall Structure of a HTML Page using an 'SVG Font'](#overall-structure-of-a-html-page-using-an-svg-font)
+  - [Strategy: Dual Browser Support](#strategy-dual-browser-support)
+  - [SVG 'Use Symbol' with External Ressource Not Working in Chrome](#svg-use-symbol-with-external-ressource-not-working-in-chrome)
   - [Coordinate Systems, Viewports, Sizes and Units](#coordinate-systems-viewports-sizes-and-units)
     - [Page Scale Necessary?](#page-scale-necessary)
   - [Font Design Size](#font-design-size)
@@ -28,6 +30,53 @@
 ## Overall Structure of an 'SVG Font' File
 
 ## Overall Structure of a HTML Page using an 'SVG Font'
+
+## Strategy: Dual Browser Support
+
+As of 2021, there are more or less only two kind of web browsers left: those that are (built on)
+Chrom(e|ium), and Mozilla FireFox.
+
+## SVG 'Use Symbol' with External Ressource Not Working in Chrome
+
+* See the [respective
+  commit](https://github.com/loveencounterflow/hengist/tree/93b8ae143deea940707e03755b1d89d67c64ed08/apps-typesetting/html%2Bsvg-demos/011)
+* use simple web server from inside that directory
+* open `index.html`
+* see that it does work in FireFox (v93.0) but not in Chromium (v94.0)
+
+
+`foofont.svg`:
+
+```xml
+<?xml version='1.0' standalone='no'?>
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 21000 29700' width='210mm' height='297mm' overflow='visible'>
+<style> symbol { overflow: visible; } </style>
+<symbol id='g74' width='1000' height='1000' viewBox='0,0,1000,1000'><path d='M839-18C839-31 83...827 0 839 0 839-18Z'/></symbol>
+<symbol id='g77' width='1000' height='1000' viewBox='0,0,1000,1000'><path d='M586-143C586-153 ...11 586-138 586-143Z'/></symbol>
+...
+</svg>
+```
+
+`galley_001.svg`:
+
+```xml
+<?xml version='1.0' standalone='no'?>
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 21000 29700' width='210mm' height='297mm' overflow='visible'>
+<style> symbol { overflow: visible; } </style>
+<use x='1000' y='1000' style='fill:red;' href='foofont.svg#g74'/>
+<use x='2000' y='1000' style='fill:black;' href='foofont.svg#g77'/>
+...
+</svg>
+```
+
+`index.html`:
+
+```html
+<div><object
+  type='image/svg+xml'
+  data='./galley_001.svg'
+  style='width:210mm;height:297mm;'>(Fallback for SVG here)</object></div>
+```
 
 ## Coordinate Systems, Viewports, Sizes and Units
 
