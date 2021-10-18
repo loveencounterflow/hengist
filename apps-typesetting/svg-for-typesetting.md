@@ -15,7 +15,6 @@
     - [Solution: SVG Outline-Per-Glyf in DOM](#solution-svg-outline-per-glyf-in-dom)
     - [Solution: All Inclusive](#solution-all-inclusive)
   - [Strategy: Standalone, Static Standards-Compliant File(s)](#strategy-standalone-static-standards-compliant-files)
-    - [Single Standalone, Static Standards-Compliant File](#single-standalone-static-standards-compliant-file)
   - [Strategy: Dual Browser Support](#strategy-dual-browser-support)
   - [SVG 'Use Symbol' with External Ressource Not Working in Chrome](#svg-use-symbol-with-external-ressource-not-working-in-chrome)
   - [Coordinate Systems, Viewports, Sizes and Units](#coordinate-systems-viewports-sizes-and-units)
@@ -71,14 +70,26 @@ shows that this is, as such, a viable approach, there are downsides:
 
 A.k.a. 'Single HTML Page with Glyf Outlines Included and Arranged on One SVG Per Page' (SHPGOIAOSPP)
 
+* Multiple print pages included and arranged in single HTML file ...
+* ... that can, if need be, also be split up into separate pages.
+* Glyf Outlines included in a separate SVG element near the top of the document to enable better rendering
+  when big files are opened.
+* Possible to add more glyf oputlines later on if in a long document that data should not be initially
+  known.
+* Could prepend *each* page with either *all* the outlines needed on that page, or only those that are
+  *added* on that page.
 
 ## Strategy: Standalone, Static Standards-Compliant File(s)
 
 The [Single HTML Page Solution](#solution-single-html-page) offers the potential to produce *passive*,
 *static* yet in-browser *renderable* documents that, once compiled, **obviate the need to have a server
-running just to view a document**. This is only achieved with the []
+running just to view a document**. This is only achieved with the [All-Inclusive
+Solution](#solution-all-inclusive).
 
-### Single Standalone, Static Standards-Compliant File
+* With [Data URLs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs) it becomes
+  possible to bundle resources such as GIFs, PNGs and JPGs into a single HTML file that can easily be passed
+  around.
+* **Question**: Any size limit on the length of Data URLs?
 
 ## Strategy: Dual Browser Support
 
