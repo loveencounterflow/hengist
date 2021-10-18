@@ -9,8 +9,10 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Notes on SVG for Typesetting](#notes-on-svg-for-typesetting)
-  - [Overall Structure of an 'SVG Font' File](#overall-structure-of-an-svg-font-file)
-  - [Overall Structure of a HTML Page using an 'SVG Font'](#overall-structure-of-a-html-page-using-an-svg-font)
+  - [Structure of an 'SVG Font' File](#structure-of-an-svg-font-file)
+  - [Structure of a HTML Page using an 'SVG Font'](#structure-of-a-html-page-using-an-svg-font)
+    - [Solution: Use Symbol from External (rejected)](#solution-use-symbol-from-external-rejected)
+    - [Solution: SVG Outline-Per-Glyf in DOM](#solution-svg-outline-per-glyf-in-dom)
   - [Strategy: Dual Browser Support](#strategy-dual-browser-support)
   - [SVG 'Use Symbol' with External Ressource Not Working in Chrome](#svg-use-symbol-with-external-ressource-not-working-in-chrome)
   - [Coordinate Systems, Viewports, Sizes and Units](#coordinate-systems-viewports-sizes-and-units)
@@ -27,11 +29,13 @@
 # Notes on SVG for Typesetting
 
 
-## Overall Structure of an 'SVG Font' File
+## Structure of an 'SVG Font' File
 
-## Overall Structure of a HTML Page using an 'SVG Font'
+## Structure of a HTML Page using an 'SVG Font'
 
 Possible solutions:
+
+### Solution: Use Symbol from External (rejected)
 
 * Use SVG `symbol`s in an SVG 'font' (outlines) file, and SVG `use` in an SVG 'galley' file to define and
   render outlines. While the
@@ -42,6 +46,10 @@ Possible solutions:
     rendering task at hand; this is mainly a concern for CJK typesetting with its huge glyf inventories.
   * The technique is known not to work in Chrome, so violates the [Dual Browser
     Strategy](#strategy-dual-browser-support).
+
+### Solution: SVG Outline-Per-Glyf in DOM
+
+
 
 ## Strategy: Dual Browser Support
 
