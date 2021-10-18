@@ -78,6 +78,8 @@ A.k.a. 'Single HTML Page with Glyf Outlines Included and Arranged on One SVG Per
   known.
 * Could prepend *each* page with either *all* the outlines needed on that page, or only those that are
   *added* on that page.
+* **Surprise**: Unless explicitly clipped, *SVG elements can appear outside of their respective SVG
+  rectangle*.
 
 ## Strategy: Standalone, Static Standards-Compliant File(s)
 
@@ -89,7 +91,8 @@ Solution](#solution-all-inclusive).
 * With [Data URLs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs) it becomes
   possible to bundle resources such as GIFs, PNGs and JPGs into a single HTML file that can easily be passed
   around.
-* **Question**: Any size limit on the length of Data URLs?
+* **Question**: Any size limit on the length of Data URLs?—**Answer**: [It
+  depends.](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs)
 
 ## Strategy: Dual Browser Support
 
