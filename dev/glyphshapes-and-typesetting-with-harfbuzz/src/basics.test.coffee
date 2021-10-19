@@ -30,7 +30,7 @@ types                     = new ( require 'intertype' ).Intertype()
 @[ "HB.shape_text() fails on nonexisting font file" ] = ( T, done ) ->
   HB = require '../../../apps/glyphshapes-and-typesetting-with-harfbuzz'
   probes_and_matchers = [
-    [ { text: 'x', font: { path: 'nosuchfile', }, }, null, "hb-shape: Couldn't read or find nosuchfile, or it was empty.", ]
+    [ { text: 'x', font: { path: 'nosuchfile', }, }, null, /Failed reading file/, ]
     ]
   #.........................................................................................................
   debug '^3344^', ( k for k of HB )
@@ -145,5 +145,5 @@ if require.main is module then do =>
   # test @
   # test @[ "RBW.register_font(), RBW.font_register_is_free()" ]
   # test @[ "RBW.shape_text()" ]
-  test @[ "RBW use npm package" ], { timeout: 50e3, }
-
+  # test @[ "RBW use npm package" ], { timeout: 50e3, }
+  test @[ "HB.shape_text() fails on nonexisting font file" ]
