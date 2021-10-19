@@ -30,9 +30,15 @@
   .svg-font {
     display:                none; }
 
+  #xxx {
+    display:                none; }
+
+  .show-grid #xxx {
+    display:                block; }
+
   </style>
 
-<body class=reveal-blocks>
+<body class='reveal-blocks show-grid'>
 
 
 <h1>SVG</h1>
@@ -118,6 +124,13 @@ the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
       <svg class='gtx' x='146.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>150</text></svg>
       <svg class='gtx' x='196.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>200</text></svg>
       </g>
+    <g id='gvm'>
+      <svg class='gtx' x='2' y='047.5' width='7' height='4'><rect/><text x='0.5' y='3.5'>050</text></svg>
+      <svg class='gtx' x='2' y='097.5' width='7' height='4'><rect/><text x='0.5' y='3.5'>100</text></svg>
+      <svg class='gtx' x='2' y='147.5' width='7' height='4'><rect/><text x='0.5' y='3.5'>150</text></svg>
+      <svg class='gtx' x='2' y='197.5' width='7' height='4'><rect/><text x='0.5' y='3.5'>200</text></svg>
+      <svg class='gtx' x='2' y='247.5' width='7' height='4'><rect/><text x='0.5' y='3.5'>250</text></svg>
+      </g>
     </defs>
   <g id='cm-grid'>
     <use href='#gh' class='h0' x='000' y='000'/>
@@ -174,6 +187,8 @@ the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
     <use href='#gv' class='v1' x='210' y='000'/>
     <use href='#ghm' x='000' y='000'/>
     <use href='#ghm' x='000' y='289'/>
+    <use href='#gvm' x='000' y='000'/>
+    <use href='#gvm' x='200' y='000'/>
     </g>
   </svg>
 
@@ -182,7 +197,7 @@ the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
 <div>Coordinates have a pleasant ratio of 1 unit per mm.</div>
 
 <svg id=p0001 class='galley A4' viewBox='0 0 210 297'>
-<use x='000' y='000' href='#cm-grid'/>
+<use id='xxx' x='000' y='000' href='#cm-grid'/>
 <use x='000' y='000' class='shady' href='#o_lmc_90_20'/>
 <use x='000' y='020' href='#o_lmc_90_10'/>
 <use x='000' y='030' href='#o_lmc_90_20'/>
