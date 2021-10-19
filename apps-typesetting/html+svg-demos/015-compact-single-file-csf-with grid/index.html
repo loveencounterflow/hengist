@@ -1,7 +1,39 @@
 <!doctype html>
 
 <title>SVG with glyph outlines</title>
-<link rel=stylesheet href='./main.css'>
+<style>
+  body {
+    background-color:       #96f0c93b;
+    transform-origin:       0px 0px 0px;
+    transform:              scale(1.43,1.43);
+  }
+
+  gauge {
+    display:                block;
+    width:                  100mm;
+    height:                 10mm;
+    background-color:       yellow;
+    mix-blend-mode:         multiply; }
+
+  .shady {
+    fill:                   blue;
+    opacity:                0.5; }
+
+  .reveal-blocks .galley {                      /* debugging */
+    outline:                1px dotted blue;
+    overflow:               visible; }
+
+  .galley.A4 {
+    width:                  210mm;
+    height:                 297mm; }
+
+  .svg-font {
+    display:                none; }
+
+
+  </style>
+
+<body class=reveal-blocks>
 <svg xmlns="http://www.w3.org/2000/svg" width=0 height=0><!-- this introduces the SVG namespace declaration --></svg>
 
 
@@ -9,7 +41,7 @@
 <gauge>gauge</gauge>
 <hr>
 
-<svg id='outlines' style='display:none;' viewBox='0 0 1000 1000' overflow='visible'>
+<svg id='outlines' class='svg-font' viewBox='0 0 1000 1000' overflow='visible'>
 
 <!-- Part I where we declare one outline per font and glyf -->
 <!-- Outlines are defined in an em square of 1000⨉1000 units -->
@@ -40,63 +72,113 @@ the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
 <use id='o_lmc_74_9'  transform='scale(0.009)' href='#o_lmc_74'/>
 <use id='o_lmc_74_50' transform='scale(0.050)' href='#o_lmc_74'/>
 
-<!-- Experimental: Glyfs scaled for second SVG below which has 1/10mm per unit -->
-<use id='o_lmc_90_200' transform='scale(0.20)' href='#o_lmc_90'/>
-<use id='o_lmc_90_100' transform='scale(0.10)' href='#o_lmc_90'/>
-<use id='o_lmc_74_10'  transform='scale(0.01)' href='#o_lmc_74'/>
-<use id='o_lmc_74_20'  transform='scale(0.02)' href='#o_lmc_74'/>
-<use id='o_lmc_74_30'  transform='scale(0.03)' href='#o_lmc_74'/>
-<use id='o_lmc_74_40'  transform='scale(0.04)' href='#o_lmc_74'/>
-<use id='o_lmc_74_50'  transform='scale(0.05)' href='#o_lmc_74'/>
-<use id='o_lmc_74_60'  transform='scale(0.06)' href='#o_lmc_74'/>
-<use id='o_lmc_74_70'  transform='scale(0.07)' href='#o_lmc_74'/>
-<use id='o_lmc_74_80'  transform='scale(0.08)' href='#o_lmc_74'/>
-<use id='o_lmc_74_90'  transform='scale(0.09)' href='#o_lmc_74'/>
-<use id='o_lmc_74_500' transform='scale(0.50)' href='#o_lmc_74'/>
-
-<!-- <path id='chevron' class='line' stroke-width='1' d='M 0  0 L 10 10 L 0 10'/> -->
 </svg>
+<!-- =================================================================================================== -->
+<svg class='svg-grid' viewBox='0 0 100 100' overflow='visible'>
+  <style>
+    .svg-grid {
+      display:                none;
+      width:                  100mm;
+      height:                 100mm;
+      outline:                1px dotted red; }
 
+    .gridh, .gridv {
+      mix-blend-mode:         multiply; }
+
+    .h0, .h1, .h2, .h3, .h4, .h5, .h6, .h7, .h8, .h9,
+    .v0, .v1, .v2, .v3, .v4, .v5, .v6, .v7, .v8, .v9 {
+      opacity:                0.5;
+      stroke-width:           0.25;
+      stroke:                 red; }
+
+    .h0, .v0 {
+      stroke-width:           0.5;
+      opacity:                0.8; }
+
+    .h5, .v5 {
+      stroke-width:           0.25;
+      opacity:                1; }
+
+  </style>
+  <defs>
+    <path class='gridh' id='gh' d='M0 0 L210 0'/>
+    <path class='gridv' id='gv' d='M0 0 L0 297'/>
+    </defs>
+  <g id='cm-grid'>
+    <use href='#gh' class='h0' x='000' y='000'/>
+    <use href='#gh' class='h1' x='000' y='010'/>
+    <use href='#gh' class='h2' x='000' y='020'/>
+    <use href='#gh' class='h3' x='000' y='030'/>
+    <use href='#gh' class='h4' x='000' y='040'/>
+    <use href='#gh' class='h5' x='000' y='050'/>
+    <use href='#gh' class='h6' x='000' y='060'/>
+    <use href='#gh' class='h7' x='000' y='070'/>
+    <use href='#gh' class='h8' x='000' y='080'/>
+    <use href='#gh' class='h9' x='000' y='090'/>
+    <use href='#gh' class='h0' x='000' y='100'/>
+    <use href='#gh' class='h1' x='000' y='110'/>
+    <use href='#gh' class='h2' x='000' y='120'/>
+    <use href='#gh' class='h3' x='000' y='130'/>
+    <use href='#gh' class='h4' x='000' y='140'/>
+    <use href='#gh' class='h5' x='000' y='150'/>
+    <use href='#gh' class='h6' x='000' y='160'/>
+    <use href='#gh' class='h7' x='000' y='170'/>
+    <use href='#gh' class='h8' x='000' y='180'/>
+    <use href='#gh' class='h9' x='000' y='190'/>
+    <use href='#gh' class='h0' x='000' y='200'/>
+    <use href='#gh' class='h1' x='000' y='210'/>
+    <use href='#gh' class='h2' x='000' y='220'/>
+    <use href='#gh' class='h3' x='000' y='230'/>
+    <use href='#gh' class='h4' x='000' y='240'/>
+    <use href='#gh' class='h5' x='000' y='250'/>
+    <use href='#gh' class='h6' x='000' y='260'/>
+    <use href='#gh' class='h7' x='000' y='270'/>
+    <use href='#gh' class='h8' x='000' y='280'/>
+    <use href='#gh' class='h9' x='000' y='290'/>
+    <use href='#gv' class='v0' x='000' y='000'/>
+    <use href='#gv' class='v1' x='010' y='000'/>
+    <use href='#gv' class='v2' x='020' y='000'/>
+    <use href='#gv' class='v3' x='030' y='000'/>
+    <use href='#gv' class='v4' x='040' y='000'/>
+    <use href='#gv' class='v5' x='050' y='000'/>
+    <use href='#gv' class='v6' x='060' y='000'/>
+    <use href='#gv' class='v7' x='070' y='000'/>
+    <use href='#gv' class='v8' x='080' y='000'/>
+    <use href='#gv' class='v9' x='090' y='000'/>
+    <use href='#gv' class='v0' x='100' y='000'/>
+    <use href='#gv' class='v1' x='110' y='000'/>
+    <use href='#gv' class='v2' x='120' y='000'/>
+    <use href='#gv' class='v3' x='130' y='000'/>
+    <use href='#gv' class='v4' x='140' y='000'/>
+    <use href='#gv' class='v5' x='150' y='000'/>
+    <use href='#gv' class='v6' x='160' y='000'/>
+    <use href='#gv' class='v7' x='170' y='000'/>
+    <use href='#gv' class='v8' x='180' y='000'/>
+    <use href='#gv' class='v9' x='190' y='000'/>
+    <use href='#gv' class='v0' x='200' y='000'/>
+    <use href='#gv' class='v1' x='210' y='000'/>
+    </g>
+  </svg>
+
+<!-- =================================================================================================== -->
 <div>Part III where we position and style the scaled outlines to construct the page to be printed.</div>
 <div>Coordinates have a pleasant ratio of 1 unit per mm.</div>
 
-<svg
-  id=p0001
-  style='width:210mm;height:50mm;'
-  viewBox='0 0 210 50'
-  overflow='visible'>
-<use x='0' y='20' href='#o_lmc_90_10'/>
-<use x='0' y='30' href='#o_lmc_90_20'/>
-<use x='10' y='40' href='#o_lmc_74_1'/>
-<use x='20' y='40' href='#o_lmc_74_2'/>
-<use x='30' y='40' href='#o_lmc_74_3'/>
-<use x='40' y='40' href='#o_lmc_74_4'/>
-<use x='50' y='40' href='#o_lmc_74_5'/>
-<use x='60' y='40' href='#o_lmc_74_6'/>
-<use x='70' y='40' href='#o_lmc_74_7'/>
-<use x='80' y='40' href='#o_lmc_74_8'/>
-<use x='90' y='40' href='#o_lmc_74_9'/>
-<use x='100' y='40' style='fill:transparent;stroke:forestgreen;stroke-width:1mm;' href='#o_lmc_74_50'/>
+<svg id=p0001 class='galley A4' viewBox='0 0 210 297'>
+<use x='000' y='000' href='#cm-grid'/>
+<use x='000' y='000' class='shady' href='#o_lmc_90_20'/>
+<use x='000' y='020' href='#o_lmc_90_10'/>
+<use x='000' y='030' href='#o_lmc_90_20'/>
+<use x='010' y='040' href='#o_lmc_74_1'/>
+<use x='020' y='040' href='#o_lmc_74_2'/>
+<use x='030' y='040' href='#o_lmc_74_3'/>
+<use x='040' y='040' href='#o_lmc_74_4'/>
+<use x='050' y='040' href='#o_lmc_74_5'/>
+<use x='060' y='040' href='#o_lmc_74_6'/>
+<use x='070' y='040' href='#o_lmc_74_7'/>
+<use x='080' y='040' href='#o_lmc_74_8'/>
+<use x='090' y='040' href='#o_lmc_74_9'/>
+<use x='100' y='040' style='fill:transparent;stroke:forestgreen;stroke-width:1mm;' href='#o_lmc_74_50'/>
 </svg>
 
-<div>Here we use 0.1mm per unit which means all sizes and positions can be given in integer numbers.</div>
-
-<svg
-  id=p0002
-  style='width:210mm;height:50mm;'
-  viewBox='0 0 2100 500'
-  overflow='visible'>
-<use x='0' y='200' href='#o_lmc_90_100'/>
-<use x='0' y='300' href='#o_lmc_90_200'/>
-<use x='100' y='400' href='#o_lmc_74_10'/>
-<use x='200' y='400' href='#o_lmc_74_20'/>
-<use x='300' y='400' href='#o_lmc_74_30'/>
-<use x='400' y='400' href='#o_lmc_74_40'/>
-<use x='500' y='400' href='#o_lmc_74_50'/>
-<use x='600' y='400' href='#o_lmc_74_60'/>
-<use x='700' y='400' href='#o_lmc_74_70'/>
-<use x='800' y='400' href='#o_lmc_74_80'/>
-<use x='900' y='400' href='#o_lmc_74_90'/>
-<use x='1000' y='400' style='fill:transparent;stroke:forestgreen;stroke-width:1mm;' href='#o_lmc_74_500'/>
-</svg>
-
+</body>
