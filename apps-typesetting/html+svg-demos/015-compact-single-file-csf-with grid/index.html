@@ -75,7 +75,7 @@ the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
 <svg class='svg-grid' viewBox='0 0 100 100' overflow='visible'>
   <style>
     .svg-grid {
-      display:                none;
+      /*display:                none;*/
       width:                  100mm;
       height:                 100mm;
       outline:                1px dotted red; }
@@ -96,6 +96,17 @@ the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
     .h5, .v5 {
       stroke-width:           0.25;
       opacity:                1; }
+
+    .gtx text {
+      font-family:            'Iosevka Slab', monospace;
+      font-size:              1mm;
+      fill:                   red;
+      opacity:                0.8; }
+
+    .gtx rect {
+      width:                  100%;
+      height:                 100%;
+      fill:                   white; }
 
   </style>
   <defs>
@@ -155,6 +166,10 @@ the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
     <use href='#gv' class='v9' x='190' y='000'/>
     <use href='#gv' class='v0' x='200' y='000'/>
     <use href='#gv' class='v1' x='210' y='000'/>
+    <svg class='gtx' x='046.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>050</text></svg>
+    <svg class='gtx' x='096.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>100</text></svg>
+    <svg class='gtx' x='146.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>150</text></svg>
+    <svg class='gtx' x='196.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>200</text></svg>
     </g>
   </svg>
 
