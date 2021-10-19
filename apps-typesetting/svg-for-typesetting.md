@@ -13,7 +13,7 @@
   - [Structure of a HTML Page using an 'SVG Font'](#structure-of-a-html-page-using-an-svg-font)
     - [Solution: Use Symbol from External (rejected)](#solution-use-symbol-from-external-rejected)
     - [Solution: SVG Outline-Per-Glyf in DOM](#solution-svg-outline-per-glyf-in-dom)
-    - [Solution: All Inclusive](#solution-all-inclusive)
+    - [Solution: All Inclusive / Compact Single File (CSF)](#solution-all-inclusive--compact-single-file-csf)
   - [Strategy: Standalone, Static Standards-Compliant File(s)](#strategy-standalone-static-standards-compliant-files)
   - [Strategy: Dual Browser Support](#strategy-dual-browser-support)
   - [SVG 'Use Symbol' with External Ressource Not Working in Chrome](#svg-use-symbol-with-external-ressource-not-working-in-chrome)
@@ -66,7 +66,7 @@ shows that this is, as such, a viable approach, there are downsides:
 * **Downside:** As such, it only works with a running server; one would have to further transform the output
   to make a document truly archivable.
 
-### Solution: All Inclusive
+### Solution: All Inclusive / Compact Single File (CSF)
 
 A.k.a. 'Single HTML Page with Glyf Outlines Included and Arranged on One SVG Per Page' (SHPGOIAOSPP)
 
@@ -79,7 +79,26 @@ A.k.a. 'Single HTML Page with Glyf Outlines Included and Arranged on One SVG Per
 * Could prepend *each* page with either *all* the outlines needed on that page, or only those that are
   *added* on that page.
 * **Surprise**: Unless explicitly clipped, *SVG elements can appear outside of their respective SVG
-  rectangle*.
+  rectangle* when `overflow` is set to `visible`.
+* Preview available at [commit
+  `ff455450b`](https://github.com/loveencounterflow/hengist/tree/ff455450b0113fab4ddfa3b912ab1bcb02d8163f/apps-typesetting/html%2Bsvg-demos/015-compact-single-file-csf-with%20grid)
+* Typesetting is done in three steps:
+  * First, oulines are defined
+    * as `<path/>`s (no more `<symbol>`s)
+    * in an em square of 1000⨉1000 units
+    * Only integer numbers are used in outlines so a 1cm high glyf has a precision of 0.01mm and a 10cm high
+      glyf still has a precision of 0.1mm, which should be good enough.
+    * outlines look like `<path id='o_lmc_74' d='M839-18C839-31 832...39-18Z'/>`
+  * Second, outlines are scaled with `<use/>` elements:
+    * Since outlines have 1000 units per em and the galley has 1mm per unit, the scale factor equals `( type
+      size in mm ) times ( 1 / 1000 )`, i.e. 0.001 corresponds to 1mm
+    * the path element from above might be scaled as `<use id='o_lmc_74_5'  transform='scale(0.005)'
+      href='#o_lmc_74'/>`.
+  * Third, the scaled versions are put into the galleys, again with `<use/>` elements, e.g. `<use x='050'
+    y='040' href='#o_lmc_74_5'/>`.
+  * No styling is applied to the outlines in the definition step, so a single outline can be rendered in a
+    variety of styles with varying `stroke` and `fill` settings.
+
 
 ## Strategy: Standalone, Static Standards-Compliant File(s)
 
