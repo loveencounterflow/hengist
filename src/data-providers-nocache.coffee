@@ -76,7 +76,7 @@ FS                        = require 'fs'
   m         = Math.ceil n / 2
   path      = '/usr/share/dict/french'
   CP        = require 'child_process'
-  debug '^770^', "shuf -n #{m} #{path}"
+  # debug '^770^', "shuf -n #{m} #{path}"
   R         = ( ( CP.execSync "shuf -n #{m} #{path}", { maxBuffer: 1e7, } ).toString 'utf-8' ).split '\n'
   R         = ( word.replace /'s$/g, '' for word in R )
   R         = ( word for word in R when word isnt '' )
