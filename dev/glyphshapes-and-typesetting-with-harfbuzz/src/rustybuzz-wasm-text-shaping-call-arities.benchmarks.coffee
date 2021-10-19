@@ -23,6 +23,7 @@ test                      = require 'guy-test'
 { jr }                    = CND
 BM                        = require '../../../lib/benchmarks'
 data_cache                = null
+guy                       = require 'guy'
 #...........................................................................................................
 gcfg                      =
   batchsizes:
@@ -44,7 +45,6 @@ show_result = ( name, result ) ->
 @get_data = ( cfg ) ->
   return data_cache if data_cache?
   whisper "^3373^ fetching data..."
-  DATOM = require '../../../apps/datom'
   #.........................................................................................................
   texts       = DATA.get_text_lines cfg
   font        =
@@ -55,7 +55,7 @@ show_result = ( name, result ) ->
   font.path   = PATH.resolve PATH.join __dirname, '../../../assets/jizura-fonts', font.path
   #.........................................................................................................
   data_cache  = { texts, font, }
-  data_cache  = DATOM.freeze data_cache
+  data_cache  = guy.lft.freeze data_cache
   whisper "^3373^ ...done"
   return data_cache
 
