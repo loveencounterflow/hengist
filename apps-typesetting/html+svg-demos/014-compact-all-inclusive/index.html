@@ -11,9 +11,11 @@
 
 <svg id='outlines' style='display:none;' viewBox='0 0 1000 1000' overflow='visible'>
 
-<!-- part I where we declare one outline per font and glyf -->
-<!-- outlines are defined in an em square of 1000⨉1000 units -->
-<!-- ID pattern: purpose, font ID, glyf ID: O(outline)_L(atin)M(odern)C(ursive)_glyfid -->
+<!-- Part I where we declare one outline per font and glyf -->
+<!-- Outlines are defined in an em square of 1000⨉1000 units -->
+<!-- Only integer numbers are used in outlines so a 1cm high glyf has a precision of 0.01mm -->
+<!-- and a 10cm high glyf still has a precision of 0.1mm, which should be good enough. -->
+<!-- ID pattern: kind — font ID — glyf ID: O(outline)_L(atin)M(odern)C(ursive)_glyfid -->
 <!-- u/004d M --><path id='o_lmc_74' d='M839-18C839-31 832-31 812-31C754-31 754-39 754-48C754-48 754-56 758-71L893-612C901-644 909-652 972-652C993-652 1002-652 1002-670C1002-683 994-683 977-683L849-683C827-683 824-683 813-665L473-100L417-661C415-683 413-683 389-683L256-683C240-683 229-683 229-664C229-652 237-652 256-652C287-652 314-652 314-635C314-632 314-630 310-616L182-101C168-45 130-33 85-31C77-31 66-30 66-12C66-3 72 0 79 0C109 0 143-3 174-3C206-3 241 0 272 0C278 0 290 0 290-18C290-30 283-31 271-31C214-33 212-59 212-74C212-77 212-83 216-99L349-630L350-630L411-24C413-7 413 0 428 0C441 0 446-7 452-18L825-639L826-639L685-73C677-39 671-31 603-31C587-31 576-31 576-12C576 0 587 0 590 0C627 0 666-3 704-3C742-3 783 0 820 0C827 0 839 0 839-18Z'/></symbol>
 <!-- u/006e n --><path id='o_lmc_77' d='M586-143C586-153 578-153 571-153C558-153 558-151 554-136C546-109 519-11 461-11C440-11 439-26 439-40C439-65 449-91 457-115C477-168 518-280 518-338C518-420 463-442 414-442C332-442 284-382 271-363C264-412 230-442 187-442C151-442 131-419 115-389C96-349 83-288 83-288C83-278 93-278 98-278C111-278 112-279 117-301C135-371 154-420 185-420C211-420 211-391 211-380C211-364 208-345 204-329L129-29C127-23 126-18 126-15C126-4 134 11 154 11C166 11 183 4 190-15L230-175C235-197 241-218 246-240C259-291 259-292 276-321C290-345 335-420 411-420C455-420 457-375 457-354C457-292 413-173 399-133C386-99 383-90 383-69C383-25 411 11 459 11C552 11 586-138 586-143Z'/></symbol>
 <!-- u/0039 9 --><path id='o_lmc_78' d='M553-488C553-515 553-666 423-666C292-666 165-524 165-376C165-331 190-219 305-219C365-219 409-259 440-306C414-200 389-140 345-84C324-58 276-6 214-6C186-6 152-13 139-42C187-46 190-86 190-91C190-105 182-123 156-123C122-123 104-94 104-58C104-5 150 22 212 22C308 22 392-59 439-126C539-267 553-444 553-488ZM488-550C488-478 445-241 308-241C237-241 237-314 237-328C237-366 267-501 295-551C307-573 350-641 421-641C472-641 488-593 488-550Z'/></symbol>
@@ -22,7 +24,7 @@
 <!-- u/004c L --><path id='o_lmc_71' d='M624-246C624-258 612-258 609-258C597-258 596-255 589-236C557-147 514-31 358-31L277-31C246-31 246-34 246-41C246-47 249-57 250-63L386-607C395-642 401-652 482-652L492-652C509-652 520-652 520-671C520-683 509-683 505-683C460-683 413-680 367-680C326-680 284-683 244-683C238-683 225-683 225-664C225-652 233-652 252-652C283-652 310-652 310-635C310-632 310-630 306-616L171-73C163-39 157-31 89-31C73-31 62-31 62-12C62 0 71 0 87 0L515 0C537 0 538-1 544-18L620-233Z'/></symbol>
 <!-- u/0051 Q --><path id='o_lmc_90' d='M695 1C695-6 690-11 684-11C676-11 674-5 672 2C649 72 599 100 562 100C528 100 504 85 502-6C667-78 788-265 788-444C788-608 686-705 560-705C355-705 148-468 148-236C148-85 242 22 378 22C413 22 448 14 469 7C461 59 459 88 459 102C459 157 480 194 538 194C654 194 695 1 695 1ZM704-480C704-392 660-144 499-42C497-74 491-148 419-148C364-148 322-91 322-43C322-27 325-20 327-15C256-48 233-130 233-202C233-266 258-417 333-532C394-625 479-680 553-680C645-680 704-599 704-480ZM473-26C449-14 417-3 385-3C374-3 344-3 344-43C344-79 376-126 420-126C474-126 474-80 474-54C474-46 474-34 473-26Z'/>
 
-<!-- part II where we declare one outline per size -->
+<!-- Part II where we declare one outline per size -->
 <!-- since outline have 1000 units per em and the galley has 1mm per unit,
 the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
 <use id='o_lmc_90_20' transform='scale(0.020)' href='#o_lmc_90'/>
@@ -38,16 +40,31 @@ the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
 <use id='o_lmc_74_9'  transform='scale(0.009)' href='#o_lmc_74'/>
 <use id='o_lmc_74_50' transform='scale(0.050)' href='#o_lmc_74'/>
 
+<!-- Experimental: Glyfs scaled for second SVG below which has 1/10mm per unit -->
+<use id='o_lmc_90_200' transform='scale(0.20)' href='#o_lmc_90'/>
+<use id='o_lmc_90_100' transform='scale(0.10)' href='#o_lmc_90'/>
+<use id='o_lmc_74_10'  transform='scale(0.01)' href='#o_lmc_74'/>
+<use id='o_lmc_74_20'  transform='scale(0.02)' href='#o_lmc_74'/>
+<use id='o_lmc_74_30'  transform='scale(0.03)' href='#o_lmc_74'/>
+<use id='o_lmc_74_40'  transform='scale(0.04)' href='#o_lmc_74'/>
+<use id='o_lmc_74_50'  transform='scale(0.05)' href='#o_lmc_74'/>
+<use id='o_lmc_74_60'  transform='scale(0.06)' href='#o_lmc_74'/>
+<use id='o_lmc_74_70'  transform='scale(0.07)' href='#o_lmc_74'/>
+<use id='o_lmc_74_80'  transform='scale(0.08)' href='#o_lmc_74'/>
+<use id='o_lmc_74_90'  transform='scale(0.09)' href='#o_lmc_74'/>
+<use id='o_lmc_74_500' transform='scale(0.50)' href='#o_lmc_74'/>
+
 <!-- <path id='chevron' class='line' stroke-width='1' d='M 0  0 L 10 10 L 0 10'/> -->
 </svg>
 
+<div>Part III where we position and style the scaled outlines to construct the page to be printed.</div>
+<div>Coordinates have a pleasant ratio of 1 unit per mm.</div>
+
 <svg
   id=p0001
-  style='width:210mm;height:297mm;'
-  viewBox='0 0 210 297'
+  style='width:210mm;height:50mm;'
+  viewBox='0 0 210 50'
   overflow='visible'>
-<!-- part III where we position and style the scaled outlines to construct the page to be printed -->
-<!-- Coordinates have a pleasant ratio of 1 unit per mm -->
 <use x='0' y='20' href='#o_lmc_90_10'/>
 <use x='0' y='30' href='#o_lmc_90_20'/>
 <use x='10' y='40' href='#o_lmc_74_1'/>
@@ -60,5 +77,26 @@ the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
 <use x='80' y='40' href='#o_lmc_74_8'/>
 <use x='90' y='40' href='#o_lmc_74_9'/>
 <use x='100' y='40' style='fill:transparent;stroke:forestgreen;stroke-width:1mm;' href='#o_lmc_74_50'/>
+</svg>
+
+<div>Here we use 0.1mm per unit which means all sizes and positions can be given in integer numbers.</div>
+
+<svg
+  id=p0002
+  style='width:210mm;height:50mm;'
+  viewBox='0 0 2100 500'
+  overflow='visible'>
+<use x='0' y='200' href='#o_lmc_90_100'/>
+<use x='0' y='300' href='#o_lmc_90_200'/>
+<use x='100' y='400' href='#o_lmc_74_10'/>
+<use x='200' y='400' href='#o_lmc_74_20'/>
+<use x='300' y='400' href='#o_lmc_74_30'/>
+<use x='400' y='400' href='#o_lmc_74_40'/>
+<use x='500' y='400' href='#o_lmc_74_50'/>
+<use x='600' y='400' href='#o_lmc_74_60'/>
+<use x='700' y='400' href='#o_lmc_74_70'/>
+<use x='800' y='400' href='#o_lmc_74_80'/>
+<use x='900' y='400' href='#o_lmc_74_90'/>
+<use x='1000' y='400' style='fill:transparent;stroke:forestgreen;stroke-width:1mm;' href='#o_lmc_74_500'/>
 </svg>
 

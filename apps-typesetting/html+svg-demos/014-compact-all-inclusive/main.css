@@ -13,3 +13,6 @@ gauge {
   height:                 10mm;
   background-color:       yellow;
   mix-blend-mode:         multiply; }
+
+.shady {
+  opacity:                0.1; }
