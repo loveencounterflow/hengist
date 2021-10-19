@@ -1,0 +1,18 @@
+body {
+  background-color:       #96f0c93b;
+  transform-origin:       0px 0px 0px;
+  transform:              scale(1.43,1.43);
+}
+
+svg {
+  border:                 1px dotted blue; }
+
+gauge {
+  display:                block;
+  width:                  100mm;
+  height:                 10mm;
+  background-color:       yellow;
+  mix-blend-mode:         multiply; }
+
+.shady {
+  opacity:                0.1; }
