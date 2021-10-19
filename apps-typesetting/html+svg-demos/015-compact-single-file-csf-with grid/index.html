@@ -75,7 +75,7 @@ the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
 <svg class='svg-grid' viewBox='0 0 100 100' overflow='visible'>
   <style>
     .svg-grid {
-      /*display:                none;*/
+      display:                none;
       width:                  100mm;
       height:                 100mm;
       outline:                1px dotted red; }
@@ -112,6 +112,12 @@ the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
   <defs>
     <path class='gridh' id='gh' d='M0 0 L210 0'/>
     <path class='gridv' id='gv' d='M0 0 L0 297'/>
+    <g id='ghm'>
+      <svg class='gtx' x='046.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>050</text></svg>
+      <svg class='gtx' x='096.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>100</text></svg>
+      <svg class='gtx' x='146.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>150</text></svg>
+      <svg class='gtx' x='196.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>200</text></svg>
+      </g>
     </defs>
   <g id='cm-grid'>
     <use href='#gh' class='h0' x='000' y='000'/>
@@ -166,10 +172,8 @@ the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
     <use href='#gv' class='v9' x='190' y='000'/>
     <use href='#gv' class='v0' x='200' y='000'/>
     <use href='#gv' class='v1' x='210' y='000'/>
-    <svg class='gtx' x='046.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>050</text></svg>
-    <svg class='gtx' x='096.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>100</text></svg>
-    <svg class='gtx' x='146.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>150</text></svg>
-    <svg class='gtx' x='196.5' y='2' width='7' height='4'><rect/><text x='0.5' y='3.5'>200</text></svg>
+    <use href='#ghm' x='000' y='000'/>
+    <use href='#ghm' x='000' y='289'/>
     </g>
   </svg>
 
