@@ -1,0 +1,13 @@
+lockfileVersion: 5.3
+
+specifiers:
+  rustybuzz-wasm: ^0.1.2
+
+dependencies:
+  rustybuzz-wasm: 0.1.2
+
+packages:
+
+  /rustybuzz-wasm/0.1.2:
+    resolution: {integrity: sha512-/6NjTMSbEH7tCIxJPP1GPonNtB+0hDpp/eC7JMehYn6aDB9UZp62hQt0Mnid4oXoUP5iQy+J1lw6fgqwmBPLtw==}
+    dev: false
