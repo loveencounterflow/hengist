@@ -50,7 +50,7 @@
           }
         },
         null,
-        "hb-shape: Couldn't read or find nosuchfile, or it was empty."
+        /Failed reading file/
       ]
     ];
     //.........................................................................................................
@@ -212,9 +212,8 @@
       // test @
       // test @[ "RBW.register_font(), RBW.font_register_is_free()" ]
       // test @[ "RBW.shape_text()" ]
-      return test(this["RBW use npm package"], {
-        timeout: 50e3
-      });
+      // test @[ "RBW use npm package" ], { timeout: 50e3, }
+      return test(this["HB.shape_text() fails on nonexisting font file"]);
     })();
   }
 

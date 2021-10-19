@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, gcfg, help, info, jr, log, rpr, show_result, test, urge, warn, whisper;
+  var BM, CND, DATA, FS, PATH, alert, badge, data_cache, debug, echo, gcfg, guy, help, info, jr, log, rpr, show_result, test, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -46,6 +46,8 @@
     verbose: false
   };
 
+  guy = require('guy');
+
   //-----------------------------------------------------------------------------------------------------------
   show_result = function(name, result) {
     info('-----------------------------------------------');
@@ -57,11 +59,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.get_data = function(cfg) {
-    var DATOM, font, texts;
+    var font, texts;
     if (data_cache != null) {
       return data_cache;
     }
-    DATOM = require('../../../apps/datom');
     //.........................................................................................................
     texts = DATA.get_text_lines(cfg);
     font = {
@@ -78,7 +79,7 @@
     font.path = PATH.resolve(PATH.join(__dirname, '../../../assets/jizura-fonts', font.path));
     //.........................................................................................................
     data_cache = {texts, font};
-    data_cache = DATOM.freeze(data_cache);
+    data_cache = guy.lft.freeze(data_cache);
     return data_cache;
   };
 
