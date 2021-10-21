@@ -42,19 +42,16 @@ H                         = require './helpers'
   dtab                = new Tbl { db, }
   schema              = 'drb'
   fontnick            = 'jzr'
-  do =>
-    fspath              = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
-    drb.register_fontnick { fontnick, fspath, }
-    echo dtab._tabulate db SQL"select * from #{schema}.outlines order by fontnick, gid;"
-    echo dtab._tabulate db SQL"select * from #{schema}.fontnicks order by fontnick;"
-    whisper '^3334^', "loading font #{rpr fontnick}..."
-    drb.load_font { fontnick, }
-    whisper '^3334^', "... done"
-
-  # debug '^290^', font_idx = drb.register_font 'garamond_italic'
-  # gid = 74
-  # urge '^290^', outline = JSON.parse RBW.glyph_to_svg_pathdata font_idx, gid
-
+  fspath              = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
+  drb.register_fontnick { fontnick, fspath, }
+  echo dtab._tabulate db SQL"select * from #{schema}.outlines order by fontnick, gid;"
+  echo dtab._tabulate db SQL"select * from #{schema}.fontnicks order by fontnick;"
+  whisper '^3334^', "loading font #{rpr fontnick}..."
+  drb.load_font { fontnick, }
+  whisper '^3334^', "... done"
+  gid                 = 74
+  font_idx            = 0
+  urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
   return null
 
 
