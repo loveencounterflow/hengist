@@ -29,8 +29,7 @@ guy                       = require '../../../apps/guy'
 RBW                       = require 'rustybuzz-wasm'
 H                         = require './helpers'
 
-#-----------------------------------------------------------------------------------------------------------
-newlinyfy = ( text ) -> ( ( Array.from text ).join '\n' ) + '\n'
+
 
 #===========================================================================================================
 #
@@ -55,17 +54,9 @@ newlinyfy = ( text ) -> ( ( Array.from text ).join '\n' ) + '\n'
   font_idx            = 0
   urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
   urge '^290^', { bbox, pd, } = drb.get_single_outline { fontnick, gid, }
-  text                = newlinyfy "sample text"
-  help '^290^', drb.RBW.shape_text { format: 'json',  text, 0, }
-  help '^290^', drb.RBW.shape_text { format: 'rusty', text, 0, }
-  help '^290^', gids = drb.RBW.shape_text { format: 'short', text, 0, }
-  help '^290^', gids.split '|'
-  # help '^290^', gids.match   /\|[^|]+\|[^|]+/g
-  help '^290^', gids = gids.replace /\|([0-9]+:)[^|]+\|[^|]+/g, '$1'
-  help '^290^', gids = gids[ ... gids.length - 2 ]
-  help '^290^', gids = gids.split ':'
-  help '^290^', gids = ( ( parseInt gid ) for gid in gids )
-  # help '^290^', arrangement.replace /^\|[^|]+\|[^|]+/g
+  text                = "sampletext算"
+  cids                = ( ( chr.codePointAt 0 ) for chr in Array.from text )
+  help '^290^', drb.gids_from_cids { cids, fontnick, }
   return null
 
 
