@@ -46,7 +46,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_load_font_outlines = function() {
-    var DBay, Drb, Tbl, db, drb, dtab, font_idx, fontnick, fspath, gid, outline, schema;
+    var DBay, Drb, Tbl, bbox, db, drb, dtab, font_idx, fontnick, fspath, gid, outline, pd, schema;
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
@@ -69,6 +69,7 @@
     gid = 74;
     font_idx = 0;
     urge('^290^', outline = JSON.parse(drb.RBW.glyph_to_svg_pathdata(font_idx, gid)));
+    urge('^290^', ({bbox, pd} = drb.get_single_outline({fontnick, gid})));
     return null;
   };
 
