@@ -52,6 +52,7 @@ H                         = require './helpers'
   gid                 = 74
   font_idx            = 0
   urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
+  urge '^290^', { bbox, pd, } = drb.get_single_outline { fontnick, gid, }
   return null
 
 
