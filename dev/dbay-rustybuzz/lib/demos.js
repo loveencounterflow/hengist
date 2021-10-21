@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, H, PATH, RBW, SQL, badge, debug, echo, equals, guy, help, info, isa, newlinyfy, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, H, PATH, RBW, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -42,16 +42,11 @@
 
   H = require('./helpers');
 
-  //-----------------------------------------------------------------------------------------------------------
-  newlinyfy = function(text) {
-    return ((Array.from(text)).join('\n')) + '\n';
-  };
-
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_load_font_outlines = function() {
-    var DBay, Drb, Tbl, bbox, db, drb, dtab, font_idx, fontnick, fspath, gid, gids, outline, pd, schema, text;
+    var DBay, Drb, Tbl, bbox, chr, cids, db, drb, dtab, font_idx, fontnick, fspath, gid, outline, pd, schema, text;
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
@@ -76,37 +71,18 @@
     font_idx = 0;
     urge('^290^', outline = JSON.parse(drb.RBW.glyph_to_svg_pathdata(font_idx, gid)));
     urge('^290^', ({bbox, pd} = drb.get_single_outline({fontnick, gid})));
-    text = newlinyfy("sample text");
-    help('^290^', drb.RBW.shape_text({
-      format: 'json',
-      text,
-      0: 0
-    }));
-    help('^290^', drb.RBW.shape_text({
-      format: 'rusty',
-      text,
-      0: 0
-    }));
-    help('^290^', gids = drb.RBW.shape_text({
-      format: 'short',
-      text,
-      0: 0
-    }));
-    help('^290^', gids.split('|'));
-    // help '^290^', gids.match   /\|[^|]+\|[^|]+/g
-    help('^290^', gids = gids.replace(/\|([0-9]+:)[^|]+\|[^|]+/g, '$1'));
-    help('^290^', gids = gids.slice(0, gids.length - 2));
-    help('^290^', gids = gids.split(':'));
-    help('^290^', gids = (function() {
-      var i, len, results;
+    text = "sampletext算";
+    cids = (function() {
+      var i, len, ref, results;
+      ref = Array.from(text);
       results = [];
-      for (i = 0, len = gids.length; i < len; i++) {
-        gid = gids[i];
-        results.push(parseInt(gid));
+      for (i = 0, len = ref.length; i < len; i++) {
+        chr = ref[i];
+        results.push(chr.codePointAt(0));
       }
       return results;
-    })());
-    // help '^290^', arrangement.replace /^\|[^|]+\|[^|]+/g
+    })();
+    help('^290^', drb.gids_from_cids({cids, fontnick}));
     return null;
   };
 
