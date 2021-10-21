@@ -75,11 +75,73 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DRB no shared state in WASM module"] = function(T, done) {
+    var DBay, Drb, font_idx, fontnick, gid;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({Drb} = require(H.drb_path));
+    fontnick = 'gi';
+    gid = 74;
+    font_idx = 0;
+    (() => {      //.........................................................................................................
+      /* Establish that trying to retrieve an outline with an unused `font_idx` throws an error: */
+      var db, drb, error, message, name, outline;
+      db = new DBay();
+      drb = new Drb({
+        db,
+        temporary: true
+      });
+      try {
+        urge('^290^', outline = JSON.parse(drb.RBW.glyph_to_svg_pathdata(font_idx, gid)));
+      } catch (error1) {
+        error = error1;
+        ({name, message} = error);
+        warn({name, message});
+      }
+      if (error == null) {
+        return T != null ? T.fail("^5568347-1^ failed to throw an error") : void 0;
+      }
+    })();
+    (() => {      //.........................................................................................................
+      /* Establish that after associating `font_idx` with a loaded font, outline retrieval does work: */
+      var db, drb, outline;
+      db = new DBay();
+      drb = new Drb({
+        db,
+        temporary: true
+      });
+      drb.load_font({fontnick});
+      return urge('^290^', outline = JSON.parse(drb.RBW.glyph_to_svg_pathdata(font_idx, gid)));
+    })();
+    (() => {      //.........................................................................................................
+      var db, drb, error, message, name, outline;
+      db = new DBay();
+      drb = new Drb({
+        db,
+        temporary: true
+      });
+      try {
+        /* we do not call `drb.load_font { fontnick, }` */
+        urge('^290^', outline = JSON.parse(drb.RBW.glyph_to_svg_pathdata(font_idx, gid)));
+      } catch (error1) {
+        error = error1;
+        ({name, message} = error);
+        warn({name, message});
+      }
+      if (error == null) {
+        return T != null ? T.fail("^5568347-2^ failed to throw an error") : void 0;
+      }
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
-      return this["DRB foobar"]();
+      // @[ "DRB foobar" ]()
+      return test(this["DRB no shared state in WASM module"]);
     })();
   }
 
