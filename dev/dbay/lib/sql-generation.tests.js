@@ -393,6 +393,42 @@ next_id integer generated always as ( id + 1 ) );`);
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["DBAY Sqlgen create_insert() without known table"] = function(T, done) {
+    var DBay, Tbl, db, dtab, schema;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    dtab = new Tbl({
+      dba: db
+    });
+    schema = 'main';
+    //.........................................................................................................
+    db(function() {
+      if (T != null) {
+        T.throws(/object 'main.xy' does not exist/, () => {
+          return db.create_insert({
+            into: 'xy'
+          });
+        });
+      }
+      if (T != null) {
+        T.throws(/object 'main.xy' does not exist/, () => {
+          return db.create_insert({
+            into: 'xy',
+            exclude: ['a']
+          });
+        });
+      }
+      return T != null ? T.eq(db.create_insert({
+        into: 'xy',
+        fields: ['b', 'c']
+      }), 'insert into "main"."xy" ( "b", "c" ) values ( $b, $c );') : void 0;
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DBAY Sqlgen on_conflict 1"] = function(T, done) {
     var DBay, Tbl, db, dtab, schema;
     // T?.halt_on_error()
@@ -502,9 +538,8 @@ next_id integer generated always as ( id + 1 ) );`);
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      return test(this["DBAY Sqlgen create_insert() without known table"]);
     })();
   }
 
