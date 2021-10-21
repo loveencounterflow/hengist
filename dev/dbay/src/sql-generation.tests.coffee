@@ -177,6 +177,22 @@ r                         = String.raw
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "DBAY Sqlgen create_insert() without known table" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }          = require H.dbay_path
+  db                = new DBay()
+  { Tbl, }          = require '../../../apps/icql-dba-tabulate'
+  dtab              = new Tbl { dba: db, }
+  schema            = 'main'
+  #.........................................................................................................
+  db ->
+    T?.throws /object 'main.xy' does not exist/, => db.create_insert { into: 'xy', }
+    T?.throws /object 'main.xy' does not exist/, => db.create_insert { into: 'xy', exclude: [ 'a', ], }
+    T?.eq ( db.create_insert { into: 'xy', fields: [ 'b', 'c', ] } ), 'insert into "main"."xy" ( "b", "c" ) values ( $b, $c );'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBAY Sqlgen on_conflict 1" ] = ( T, done ) ->
   # T?.halt_on_error()
   { DBay }          = require H.dbay_path
@@ -221,7 +237,8 @@ r                         = String.raw
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
+  # test @, { timeout: 10e3, }
+  test @[ "DBAY Sqlgen create_insert() without known table" ]
   # @[ "_DBAY Sqlgen demo" ]()
   # test @[ "DBAY Sqlgen create_insert() 2" ]
   # test @[ "DBAY Sqlgen isa.dbay_create_insert_cfg()" ]
