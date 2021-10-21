@@ -54,7 +54,7 @@ do =>
     message                   = "using installed version of drb"
   else
     H.drb_use_installed  = false
-    H.drb_path           = '../../../apps/drb'
+    H.drb_path           = '../../../apps/dbay-rustybuzz'
     message                   = "using linked drb"
   debug '^3337^', CND.reverse message
   process.on 'exit', ->
