@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, H, PATH, RBW, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, H, PATH, RBW, SQL, badge, cids_from_text, debug, echo, equals, guy, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -42,11 +42,22 @@
 
   H = require('./helpers');
 
+  cids_from_text = function(text) {
+    var chr, i, len, ref, results;
+    ref = Array.from(text);
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      chr = ref[i];
+      results.push(chr.codePointAt(0));
+    }
+    return results;
+  };
+
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_load_font_outlines = function() {
-    var DBay, Drb, Tbl, bbox, chr, cids, db, drb, dtab, font_idx, fontnick, fspath, gid, outline, pd, schema, text;
+    var DBay, Drb, Tbl, bbox, cids, db, drb, dtab, font_idx, fontnick, fspath, gid, gid_by_cids, pd, schema, t0, t1;
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
@@ -59,30 +70,35 @@
     dtab = new Tbl({db});
     schema = 'drb';
     // fontnick = 'jzr';   fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
-    fontnick = 'djvs';
-    fspath = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'));
+    // fontnick = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
+    fontnick = 'qkai';
+    fspath = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/jizura-fonts/cwTeXQKai-Medium.ttf'));
     drb.register_fontnick({fontnick, fspath});
     echo(dtab._tabulate(db(SQL`select * from ${schema}.outlines order by fontnick, gid;`)));
     echo(dtab._tabulate(db(SQL`select * from ${schema}.fontnicks order by fontnick;`)));
     whisper('^3334^', `loading font ${rpr(fontnick)}...`);
     drb.load_font({fontnick});
     whisper('^3334^', "... done");
+    //.........................................................................................................
+    // gid                 = drb.gids_from_cids { cids: ( cids_from_text 'O' ), fontnick, }
     gid = 74;
     font_idx = 0;
-    urge('^290^', outline = JSON.parse(drb.RBW.glyph_to_svg_pathdata(font_idx, gid)));
+    // urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
     urge('^290^', ({bbox, pd} = drb.get_single_outline({fontnick, gid})));
-    text = "sampletext算";
+    //.........................................................................................................
+    cids = cids_from_text("sampletext算");
     cids = (function() {
-      var i, len, ref, results;
-      ref = Array.from(text);
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        chr = ref[i];
-        results.push(chr.codePointAt(0));
-      }
+      var results = [];
+      for (var i = 0x0021; i <= 53248; i++){ results.push(i); }
       return results;
-    })();
-    help('^290^', drb.gids_from_cids({cids, fontnick}));
+    }).apply(this);
+    t0 = Date.now();
+    gid_by_cids = drb.gids_from_cids({cids, fontnick});
+    t1 = Date.now();
+    debug('^324^', cids.length + ' cids');
+    debug('^324^', gid_by_cids.size + ' gids');
+    debug('^324^', ((t1 - t0) / 1000) + 's');
+    help('^290^', (rpr(gid_by_cids)).slice(0, 200) + '...');
     return null;
   };
 
