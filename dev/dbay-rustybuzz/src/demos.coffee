@@ -29,6 +29,8 @@ guy                       = require '../../../apps/guy'
 RBW                       = require 'rustybuzz-wasm'
 H                         = require './helpers'
 
+#-----------------------------------------------------------------------------------------------------------
+newlinyfy = ( text ) -> ( ( Array.from text ).join '\n' ) + '\n'
 
 #===========================================================================================================
 #
@@ -41,8 +43,8 @@ H                         = require './helpers'
   drb                 = new Drb { db, create: true, temporary: true, }
   dtab                = new Tbl { db, }
   schema              = 'drb'
-  fontnick            = 'jzr'
-  fspath              = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
+  # fontnick = 'jzr';   fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
+  fontnick = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
   drb.register_fontnick { fontnick, fspath, }
   echo dtab._tabulate db SQL"select * from #{schema}.outlines order by fontnick, gid;"
   echo dtab._tabulate db SQL"select * from #{schema}.fontnicks order by fontnick;"
@@ -53,6 +55,17 @@ H                         = require './helpers'
   font_idx            = 0
   urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
   urge '^290^', { bbox, pd, } = drb.get_single_outline { fontnick, gid, }
+  text                = newlinyfy "sample text"
+  help '^290^', drb.RBW.shape_text { format: 'json',  text, 0, }
+  help '^290^', drb.RBW.shape_text { format: 'rusty', text, 0, }
+  help '^290^', gids = drb.RBW.shape_text { format: 'short', text, 0, }
+  help '^290^', gids.split '|'
+  # help '^290^', gids.match   /\|[^|]+\|[^|]+/g
+  help '^290^', gids = gids.replace /\|([0-9]+:)[^|]+\|[^|]+/g, '$1'
+  help '^290^', gids = gids[ ... gids.length - 2 ]
+  help '^290^', gids = gids.split ':'
+  help '^290^', gids = ( ( parseInt gid ) for gid in gids )
+  # help '^290^', arrangement.replace /^\|[^|]+\|[^|]+/g
   return null
 
 
