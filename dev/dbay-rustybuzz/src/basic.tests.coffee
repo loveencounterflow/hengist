@@ -56,6 +56,46 @@ guy                       = require '../../../apps/guy'
   #.........................................................................................................
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DRB no shared state in WASM module" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }            = require H.dbay_path
+  { Drb }             = require H.drb_path
+  fontnick            = 'gi'
+  gid                 = 74
+  font_idx            = 0
+  #.........................................................................................................
+  ### Establish that trying to retrieve an outline with an unused `font_idx` throws an error: ###
+  do =>
+    db                  = new DBay()
+    drb                 = new Drb { db, temporary: true, }
+    try
+      urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
+    catch error
+      { name, message, } = error
+      warn { name, message, }
+    T?.fail "^5568347-1^ failed to throw an error" unless error?
+  #.........................................................................................................
+  ### Establish that after associating `font_idx` with a loaded font, outline retrieval does work: ###
+  do =>
+    db                  = new DBay()
+    drb                 = new Drb { db, temporary: true, }
+    drb.load_font { fontnick, }
+    urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
+  #.........................................................................................................
+  do =>
+    db                  = new DBay()
+    drb                 = new Drb { db, temporary: true, }
+    ### we do not call `drb.load_font { fontnick, }` ###
+    try
+      urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
+    catch error
+      { name, message, } = error
+      warn { name, message, }
+    T?.fail "^5568347-2^ failed to throw an error" unless error?
+  #.........................................................................................................
+  return done?()
+
 
 
 
@@ -63,7 +103,8 @@ guy                       = require '../../../apps/guy'
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  @[ "DRB foobar" ]()
+  # @[ "DRB foobar" ]()
+  test @[ "DRB no shared state in WASM module" ]
 
 
 
