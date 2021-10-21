@@ -27,20 +27,33 @@ SQL                       = String.raw
 guy                       = require '../../../apps/guy'
 # MMX                       = require '../../../apps/multimix/lib/cataloguing'
 RBW                       = require 'rustybuzz-wasm'
+H                         = require './helpers'
 
 
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-
-
-#-----------------------------------------------------------------------------------------------------------
 @demo_load_font_outlines = ->
-  xxx = new Xxx()
-  debug '^290^', xxx
-  debug '^290^', font_idx = xxx.register_font 'garamond_italic'
-  gid = 74
-  urge '^290^', outline = JSON.parse RBW.glyph_to_svg_pathdata font_idx, gid
+  { DBay }            = require H.dbay_path
+  { Drb }             = require H.drb_path
+  { Tbl, }            = require '../../../apps/icql-dba-tabulate'
+  db                  = new DBay()
+  drb                 = new Drb { db, create: true, temporary: true, }
+  dtab                = new Tbl { db, }
+  schema              = 'drb'
+  fontnick            = 'jzr'
+  do =>
+    fspath              = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
+    drb.register_fontnick { fontnick, fspath, }
+    echo dtab._tabulate db SQL"select * from #{schema}.outlines order by fontnick, gid;"
+    echo dtab._tabulate db SQL"select * from #{schema}.fontnicks order by fontnick;"
+    whisper '^3334^', "loading font #{rpr fontnick}..."
+    drb.load_font { fontnick, }
+    whisper '^3334^', "... done"
+
+  # debug '^290^', font_idx = drb.register_font 'garamond_italic'
+  # gid = 74
+  # urge '^290^', outline = JSON.parse RBW.glyph_to_svg_pathdata font_idx, gid
 
   return null
 
