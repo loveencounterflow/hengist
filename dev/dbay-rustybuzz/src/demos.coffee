@@ -28,7 +28,7 @@ guy                       = require '../../../apps/guy'
 # MMX                       = require '../../../apps/multimix/lib/cataloguing'
 RBW                       = require 'rustybuzz-wasm'
 H                         = require './helpers'
-
+cids_from_text            = ( text ) -> ( ( chr.codePointAt 0 ) for chr in Array.from text )
 
 
 #===========================================================================================================
@@ -43,20 +43,30 @@ H                         = require './helpers'
   dtab                = new Tbl { db, }
   schema              = 'drb'
   # fontnick = 'jzr';   fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
-  fontnick = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
+  # fontnick = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
+  fontnick = 'qkai';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/cwTeXQKai-Medium.ttf'
   drb.register_fontnick { fontnick, fspath, }
   echo dtab._tabulate db SQL"select * from #{schema}.outlines order by fontnick, gid;"
   echo dtab._tabulate db SQL"select * from #{schema}.fontnicks order by fontnick;"
   whisper '^3334^', "loading font #{rpr fontnick}..."
   drb.load_font { fontnick, }
   whisper '^3334^', "... done"
+  #.........................................................................................................
+  # gid                 = drb.gids_from_cids { cids: ( cids_from_text 'O' ), fontnick, }
   gid                 = 74
   font_idx            = 0
-  urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
+  # urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
   urge '^290^', { bbox, pd, } = drb.get_single_outline { fontnick, gid, }
-  text                = "sampletext算"
-  cids                = ( ( chr.codePointAt 0 ) for chr in Array.from text )
-  help '^290^', drb.gids_from_cids { cids, fontnick, }
+  #.........................................................................................................
+  cids                = cids_from_text "sampletext算"
+  cids                = [ 0x0021 .. 0xd000 ]
+  t0                  = Date.now()
+  gid_by_cids         = drb.gids_from_cids { cids, fontnick, }
+  t1                  = Date.now()
+  debug '^324^', cids.length      + ' cids'
+  debug '^324^', gid_by_cids.size + ' gids'
+  debug '^324^', ( ( t1 - t0 ) / 1000 ) + 's'
+  help '^290^',  ( rpr gid_by_cids )[ ... 200 ] + '...'
   return null
 
 
