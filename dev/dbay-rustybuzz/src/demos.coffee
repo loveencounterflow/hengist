@@ -43,8 +43,8 @@ cids_from_text            = ( text ) -> ( ( chr.codePointAt 0 ) for chr in Array
   dtab                = new Tbl { db, }
   schema              = 'drb'
   # fontnick = 'jzr';   fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
-  # fontnick = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
-  fontnick = 'qkai';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/cwTeXQKai-Medium.ttf'
+  fontnick = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
+  # fontnick = 'qkai';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/cwTeXQKai-Medium.ttf'
   drb.register_fontnick { fontnick, fspath, }
   echo dtab._tabulate db SQL"select * from #{schema}.outlines order by fontnick, gid;"
   echo dtab._tabulate db SQL"select * from #{schema}.fontnicks order by fontnick;"
@@ -60,7 +60,7 @@ cids_from_text            = ( text ) -> ( ( chr.codePointAt 0 ) for chr in Array
   #.........................................................................................................
   ### TAINT obtain list of all valid Unicode codepoints (again) ###
   cids                = cids_from_text "sampletext算"
-  cids                = [ 0x0021 .. 0xd000 ]
+  # cids                = [ 0x0021 .. 0xd000 ]
   t0                  = Date.now()
   gid_by_cids         = drb.gids_from_cids { cids, fontnick, }
   t1                  = Date.now()
@@ -69,6 +69,24 @@ cids_from_text            = ( text ) -> ( ( chr.codePointAt 0 ) for chr in Array
   debug '^324^', gid_by_cids.size + ' gids'
   debug '^324^', ( ( t1 - t0 ) / 1000 ) + 's'
   help '^290^',  ( rpr gid_by_cids )[ ... 200 ] + '...'
+  insert_outline  = db.prepare drb.sql.insert_outline
+  db =>
+    for gid from gid_by_cids.values()
+      { bbox: {
+          x, y, x1, y1, }
+        pd                } = drb.get_single_outline { gid, fontnick, }
+      insert_outline.run { fontnick, gid, x, y, x1, y1, pd, }
+  echo dtab._tabulate db SQL"""
+    select
+        fontnick,
+        gid,
+        x,
+        y,
+        x1,
+        y1,
+        substring( pd, 0, 50 ) || '...' as "(pd)"
+      from #{schema}.outlines
+      order by fontnick, gid;"""
   return null
 
 
