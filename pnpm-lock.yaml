@@ -35,7 +35,7 @@ specifiers:
   gitlog: ^4.0.4
   glob: 7.2.0
   got: ^11.8.2
-  guy: 2.5.0
+  guy: 2.6.0
   guy-test: 4.1.1
   hamt: ^2.2.2
   icql: 5.3.0
@@ -47,7 +47,7 @@ specifiers:
   intermatic: 0.5.4
   intershop: file:../intershop
   intershop-intertext: file:../intershop-intertext
-  intertext: ^5.0.0
+  intertext: 5.0.2
   intertext-splitlines: 1.2.1
   intertype: 7.6.7
   jake: ^10.8.2
@@ -84,7 +84,7 @@ specifiers:
   re2: ^1.15.9
   read-pkg-up: ^8.0.0
   readable-stream: ^3.6.0
-  rustybuzz-wasm: ^0.1.2
+  rustybuzz-wasm: 0.3.0
   semver: ^7.3.5
   simple-git: 2.46.0
   source-map: ^0.7.3
@@ -100,7 +100,7 @@ specifiers:
   tempy: 2.0.0
   text-metrics: ^2.0.2
   through2: ^4.0.2
-  to-width: ^1.1.0
+  to-width: 1.2.0
   trash: 8.0.0
   validate-npm-package-name: ^3.0.0
   xql: ^1.4.12
@@ -140,7 +140,7 @@ dependencies:
   gitlog: 4.0.4
   glob: 7.2.0
   got: 11.8.2
-  guy: 2.5.0_deasync@0.1.23
+  guy: 2.6.0_deasync@0.1.23
   guy-test: 4.1.1
   hamt: 2.2.2
   icql: 5.3.0
@@ -152,7 +152,7 @@ dependencies:
   intermatic: 0.5.4
   intershop: link:../intershop
   intershop-intertext: link:../intershop-intertext
-  intertext: 5.0.1
+  intertext: 5.0.2
   intertext-splitlines: 1.2.1
   intertype: 7.6.7
   jake: 10.8.2
@@ -189,7 +189,7 @@ dependencies:
   re2: 1.16.0
   read-pkg-up: 8.0.0
   readable-stream: 3.6.0
-  rustybuzz-wasm: 0.1.2
+  rustybuzz-wasm: 0.3.0
   semver: 7.3.5
   simple-git: 2.46.0
   source-map: 0.7.3
@@ -205,7 +205,7 @@ dependencies:
   tempy: 2.0.0
   text-metrics: 2.0.9
   through2: 4.0.2
-  to-width: 1.1.0
+  to-width: 1.2.0
   trash: 8.0.0
   validate-npm-package-name: 3.0.0
   xql: 1.4.12
@@ -558,11 +558,6 @@ packages:
   /ansi-regex/2.1.1:
     resolution: {integrity: sha1-w7M6te42DYbg5ijwRorn7yfWVN8=}
     engines: {node: '>=0.10.0'}
-    dev: false
-
-  /ansi-regex/5.0.0:
-    resolution: {integrity: sha512-bY6fj56OUQ0hU1KjFNDQuJFezqKdrAyFdIevADiqrWHwSlbmBNMHp5ak2f40Pm8JTFyM2mqxkG6ngkHO11f/lg==}
-    engines: {node: '>=8'}
     dev: false
 
   /ansi-regex/5.0.1:
@@ -1319,17 +1314,6 @@ packages:
 
   /data-uri-to-buffer/2.0.2:
     resolution: {integrity: sha512-ND9qDTLc6diwj+Xe5cdAgVTbLVdXbtxTJRXRhli8Mowuaan+0EJOtdqJ0QCHNSSPyoXGx9HX2/VMnKeC34AChA==}
-    dev: false
-
-  /datom/7.0.3:
-    resolution: {integrity: sha512-0t2/KrbaYkAzTCGexM8lS6dQkPuKjG2udpdRzrgWTHtOyK3TxWW1lGXfY18NK8SqZYCSJvjNPqKfGNfI4Msm2Q==}
-    dependencies:
-      cnd: 9.2.2
-      cupofjoe: 0.1.1
-      emittery: 0.6.0
-      intertype: 7.6.7
-      letsfreezethat: 2.2.5
-      multimix: 4.1.0
     dev: false
 
   /datom/8.0.2:
@@ -2262,8 +2246,8 @@ packages:
       intertype: 7.6.7
     dev: false
 
-  /guy/2.5.0_deasync@0.1.23:
-    resolution: {integrity: sha512-H+pVvZdLa7BGmg5M+vPFEgnMD6e+p9zMQVhj7A2dlgQLO+20v23ZpdjAt6c47OfmtXiFZ2dyU4mhRSAv3EJqMg==}
+  /guy/2.6.0_deasync@0.1.23:
+    resolution: {integrity: sha512-PtNQaSVvwKgcO/YKqrnupRu/3yHVHvaGPMhXAFzzvPisVNJoIMO6BpkMcpK0qcBSRmROunLXZnEM1QAeDViKJg==}
     peerDependencies:
       deasync: ^0.1.22
     dependencies:
@@ -2461,7 +2445,7 @@ packages:
     dependencies:
       cnd: 9.2.2
       csv-parser: 3.0.0
-      guy: 2.5.0_deasync@0.1.23
+      guy: 2.6.0_deasync@0.1.23
       intertype: 7.6.7
       letsfreezethat: 3.1.0
       mysql-tokenizer: 1.0.7
@@ -2605,21 +2589,20 @@ packages:
       intertype: 7.6.5
     dev: false
 
-  /intertext/5.0.1:
-    resolution: {integrity: sha512-0dLQ0U7gyCPrQMbJ+/mTiy8JgTttFbXD9u3zRptp1MvmXOULLZpwAnkaZ0eLa0PqsrCIBmDHvx0yvoeaxZRrUg==}
+  /intertext/5.0.2:
+    resolution: {integrity: sha512-hO0RjiAntid6hqPXJMxy684cinynJXq0ktURifIr3w4Z6kHxNdFDFmdwBHsFt1GWnG5/wdObmpbmi8rCE+wQ9Q==}
     dependencies:
       cnd: 9.2.2
       color-convert: 2.0.1
-      cupofjoe: 0.1.1
-      datom: 7.0.3
+      cupofjoe: 0.2.1
+      datom: 8.0.3
       diff-match-patch: 1.0.5
       hyphenopoly: 4.12.0
       intertype: 7.6.7
       linebreak: 1.0.2
-      multimix: 4.1.0
+      multimix: 5.0.0
       steampipes: 6.7.1
-      term-size: 2.2.1
-      to-width: 1.1.0
+      to-width: 1.2.0
     dev: false
 
   /intertype/7.6.3:
@@ -3031,10 +3014,6 @@ packages:
       v8flags: 3.2.0
     transitivePeerDependencies:
       - supports-color
-    dev: false
-
-  /letsfreezethat/2.2.5:
-    resolution: {integrity: sha512-w4XD73ki7rClXBft9OmvngG6abnE71h0BTMNCCXdmDGI3zYNIZYjG6/fOhRjz1crWc5ic/XGKdl6KkusftiKpA==}
     dev: false
 
   /letsfreezethat/3.1.0:
@@ -4637,8 +4616,8 @@ packages:
       queue-microtask: 1.2.3
     dev: false
 
-  /rustybuzz-wasm/0.1.2:
-    resolution: {integrity: sha512-/6NjTMSbEH7tCIxJPP1GPonNtB+0hDpp/eC7JMehYn6aDB9UZp62hQt0Mnid4oXoUP5iQy+J1lw6fgqwmBPLtw==}
+  /rustybuzz-wasm/0.3.0:
+    resolution: {integrity: sha512-3iDVZ0uAmirulFULD1A9kHbLgYkcpeFXojuXK13YXxcX/Zerr1TdaNqxkUrjLb9Qg8iXDXt9BM1llDWKgX3Ypg==}
     dev: false
 
   /safe-buffer/5.1.2:
@@ -5001,15 +4980,6 @@ packages:
       strip-ansi: 3.0.1
     dev: false
 
-  /string-width/4.2.1:
-    resolution: {integrity: sha512-LL0OLyN6AnfV9xqGQpDBwedT2Rt63737LxvsRxbcwpa2aIeynBApG2Sm//F3TaLHIR1aJBN52DWklc06b94o5Q==}
-    engines: {node: '>=8'}
-    dependencies:
-      emoji-regex: 8.0.0
-      is-fullwidth-code-point: 3.0.0
-      strip-ansi: 6.0.0
-    dev: false
-
   /string-width/4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
     engines: {node: '>=8'}
@@ -5040,13 +5010,6 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       ansi-regex: 2.1.1
-    dev: false
-
-  /strip-ansi/6.0.0:
-    resolution: {integrity: sha512-AuvKTrTfQNYNIctbR1K/YGTR1756GycPsg7b9bdV9Duqur4gv6aKqHXah67Z8ImS7WEz5QVcOtlfW2rZEugt6w==}
-    engines: {node: '>=8'}
-    dependencies:
-      ansi-regex: 5.0.0
     dev: false
 
   /strip-ansi/6.0.1:
@@ -5230,11 +5193,6 @@ packages:
       unique-string: 3.0.0
     dev: false
 
-  /term-size/2.2.1:
-    resolution: {integrity: sha512-wK0Ri4fOGjv/XPy8SBHZChl8CM7uMc5VML7SqiQ0zG7+J5Vr+RMQDoHa2CNT6KHUnTGIXH34UDMkPzAUyapBZg==}
-    engines: {node: '>=8'}
-    dev: false
-
   /test-value/3.0.0:
     resolution: {integrity: sha512-sVACdAWcZkSU9x7AOmJo5TqE+GyNJknHaHsMrR6ZnhjVlVN9Yx6FjHrsKZ3BjIpPCT68zYesPWkakrNupwfOTQ==}
     engines: {node: '>=4.0.0'}
@@ -5315,11 +5273,10 @@ packages:
       safe-regex: 1.1.0
     dev: false
 
-  /to-width/1.1.0:
-    resolution: {integrity: sha512-zN1F5YSsKkI8MW+JGOE3neo3SVGUODZhMqjiEV7a2LSaAFjUkN1hcsv7Y+PJSayxAJ6ZmppfQZc4TuOAW8wIwg==}
+  /to-width/1.2.0:
+    resolution: {integrity: sha512-ok/CRyzSZVA6xk9t5PuWuh3SHqCtKCkhI6dfF2YaVX11clXz4yAxxyesC27+m54ilrMRtqTI9UNQRct8lwVYZQ==}
     dependencies:
-      cnd: 9.2.1
-      string-width: 4.2.1
+      string-width: 4.2.3
       wcstring: 2.1.1
     dev: false
 
