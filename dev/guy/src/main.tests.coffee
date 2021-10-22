@@ -1,4 +1,7 @@
 
+'use strict'
+
+
 ############################################################################################################
 PATH                      = require 'path'
 FS                        = require 'fs'
@@ -363,10 +366,28 @@ types                     = new ( require 'intertype' ).Intertype
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "guy.props.def(), .hide()" ] = ( T, done ) ->
+  guy = require H.guy_path
+  #.........................................................................................................
+  do =>
+    x = {}
+    guy.props.def   x, 'foo', { enumerable: false, value: 42, }
+    T?.eq ( rpr x ), '{}'
+    T?.eq ( Object.getOwnPropertyDescriptor x, 'foo' ), { value: 42, writable: false, enumerable: false, configurable: false }
+  do =>
+    x = {}
+    guy.props.hide  x, 'foo', 42
+    T?.eq ( rpr x ), '{}'
+    T?.eq ( Object.getOwnPropertyDescriptor x, 'foo' ), { value: 42, writable: false, enumerable: false, configurable: false }
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
   test @, { timeout: 5000, }
+  # test @[ "guy.props.def(), .hide()" ]
   # test @[ "guy.obj.pick_with_fallback()" ]
   # test @[ "guy.obj.pluck_with_fallback()" ]
   # test @[ "guy.obj.nullify_undefined()" ]
