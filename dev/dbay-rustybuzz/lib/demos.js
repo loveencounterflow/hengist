@@ -86,6 +86,7 @@
     // urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
     urge('^290^', ({bbox, pd} = drb.get_single_outline({fontnick, gid})));
     //.........................................................................................................
+    /* TAINT obtain list of all valid Unicode codepoints (again) */
     cids = cids_from_text("sampletext算");
     cids = (function() {
       var results = [];
@@ -95,6 +96,7 @@
     t0 = Date.now();
     gid_by_cids = drb.gids_from_cids({cids, fontnick});
     t1 = Date.now();
+    /* TAINT might want to turn this into a benchmark (or improve reporting) */
     debug('^324^', cids.length + ' cids');
     debug('^324^', gid_by_cids.size + ' gids');
     debug('^324^', ((t1 - t0) / 1000) + 's');

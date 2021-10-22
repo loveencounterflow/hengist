@@ -1,7 +1,8 @@
 (function() {
-  //###########################################################################################################
+  'use strict';
   var CND, FS, H, PATH, alert, badge, debug, echo, equals, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
+  //###########################################################################################################
   PATH = require('path');
 
   FS = require('fs');
@@ -767,6 +768,44 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["guy.props.def(), .hide()"] = function(T, done) {
+    var guy;
+    guy = require(H.guy_path);
+    (() => {      //.........................................................................................................
+      var x;
+      x = {};
+      guy.props.def(x, 'foo', {
+        enumerable: false,
+        value: 42
+      });
+      if (T != null) {
+        T.eq(rpr(x), '{}');
+      }
+      return T != null ? T.eq(Object.getOwnPropertyDescriptor(x, 'foo'), {
+        value: 42,
+        writable: false,
+        enumerable: false,
+        configurable: false
+      }) : void 0;
+    })();
+    (() => {
+      var x;
+      x = {};
+      guy.props.hide(x, 'foo', 42);
+      if (T != null) {
+        T.eq(rpr(x), '{}');
+      }
+      return T != null ? T.eq(Object.getOwnPropertyDescriptor(x, 'foo'), {
+        value: 42,
+        writable: false,
+        enumerable: false,
+        configurable: false
+      }) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -776,7 +815,8 @@
     })();
   }
 
-  // test @[ "guy.obj.pick_with_fallback()" ]
+  // test @[ "guy.props.def(), .hide()" ]
+// test @[ "guy.obj.pick_with_fallback()" ]
 // test @[ "guy.obj.pluck_with_fallback()" ]
 // test @[ "guy.obj.nullify_undefined()" ]
 // test @[ "guy.obj.omit_nullish()" ]
