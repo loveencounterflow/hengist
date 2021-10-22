@@ -57,7 +57,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_load_font_outlines = function() {
-    var DBay, Drb, Tbl, bbox, cids, db, drb, dtab, font_idx, fontnick, fspath, gid, gid_by_cids, pd, schema, t0, t1;
+    var DBay, Drb, Tbl, bbox, cids, db, drb, dtab, font_idx, fontnick, fspath, gid, gid_by_cids, insert_outline, pd, schema, t0, t1;
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
@@ -70,9 +70,9 @@
     dtab = new Tbl({db});
     schema = 'drb';
     // fontnick = 'jzr';   fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
-    // fontnick = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
-    fontnick = 'qkai';
-    fspath = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/jizura-fonts/cwTeXQKai-Medium.ttf'));
+    fontnick = 'djvs';
+    fspath = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'));
+    // fontnick = 'qkai';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/cwTeXQKai-Medium.ttf'
     drb.register_fontnick({fontnick, fspath});
     echo(dtab._tabulate(db(SQL`select * from ${schema}.outlines order by fontnick, gid;`)));
     echo(dtab._tabulate(db(SQL`select * from ${schema}.fontnicks order by fontnick;`)));
@@ -88,11 +88,7 @@
     //.........................................................................................................
     /* TAINT obtain list of all valid Unicode codepoints (again) */
     cids = cids_from_text("sampletext算");
-    cids = (function() {
-      var results = [];
-      for (var i = 0x0021; i <= 53248; i++){ results.push(i); }
-      return results;
-    }).apply(this);
+    // cids                = [ 0x0021 .. 0xd000 ]
     t0 = Date.now();
     gid_by_cids = drb.gids_from_cids({cids, fontnick});
     t1 = Date.now();
@@ -101,6 +97,30 @@
     debug('^324^', gid_by_cids.size + ' gids');
     debug('^324^', ((t1 - t0) / 1000) + 's');
     help('^290^', (rpr(gid_by_cids)).slice(0, 200) + '...');
+    insert_outline = db.prepare(drb.sql.insert_outline);
+    db(() => {
+      var ref, results, x, x1, y, y1;
+      ref = gid_by_cids.values();
+      results = [];
+      for (gid of ref) {
+        ({
+          bbox: {x, y, x1, y1},
+          pd
+        } = drb.get_single_outline({gid, fontnick}));
+        results.push(insert_outline.run({fontnick, gid, x, y, x1, y1, pd}));
+      }
+      return results;
+    });
+    echo(dtab._tabulate(db(SQL`select
+    fontnick,
+    gid,
+    x,
+    y,
+    x1,
+    y1,
+    substring( pd, 0, 50 ) || '...' as "(pd)"
+  from ${schema}.outlines
+  order by fontnick, gid;`)));
     return null;
   };
 
