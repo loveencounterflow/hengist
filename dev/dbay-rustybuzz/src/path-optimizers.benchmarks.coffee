@@ -25,58 +25,9 @@ BM                        = require '../../../lib/benchmarks'
 data_cache                = null
 gcfg                      = { verbose: false, }
 { freeze }                = require 'letsfreezethat'
-SQL                       = String.raw
+ZLIB                      = require 'zlib'
+SVGO                      = require 'svgo'
 
-#-----------------------------------------------------------------------------------------------------------
-paths =
-  fle:          '/tmp/hengist-in-memory-sql.benchmarks.db',
-  fle_jmdel:    '/tmp/hengist-in-memory-sql.jmdel.benchmarks.db'
-  fle_jmtrunc:  '/tmp/hengist-in-memory-sql.jmtrunc.benchmarks.db'
-  fle_jmpers:   '/tmp/hengist-in-memory-sql.jmpers.benchmarks.db'
-  fle_jmmem:    '/tmp/hengist-in-memory-sql.jmmem.benchmarks.db'
-  fle_jmwal:    '/tmp/hengist-in-memory-sql.jmwal.benchmarks.db'
-  fle_jmoff:    '/tmp/hengist-in-memory-sql.jmoff.benchmarks.db'
-  fle_mmap:     '/tmp/hengist-in-memory-sql.mmap.benchmarks.db'
-  fle_tmpm:     '/tmp/hengist-in-memory-sql.tmpm.benchmarks.db'
-  fle_pgsze:    '/tmp/hengist-in-memory-sql.tmpm.benchmarks.db'
-  fle_thrds:    '/tmp/hengist-in-memory-sql.thrds.benchmarks.db'
-  fle_qtforum1: '/tmp/hengist-in-memory-sql.qtforum1.benchmarks.db'
-  fle_qtforum2: '/tmp/hengist-in-memory-sql.qtforum2.benchmarks.db'
-
-#-----------------------------------------------------------------------------------------------------------
-pragmas =
-  #.........................................................................................................
-  ### thx to https://forum.qt.io/topic/8879/solved-saving-and-restoring-an-in-memory-sqlite-database/2 ###
-  qtforum1: [
-    'page_size = 4096'
-    'cache_size = 16384'
-    'temp_store = MEMORY'
-    'journal_mode = OFF'
-    'locking_mode = EXCLUSIVE'
-    'synchronous = OFF' ]
-  qtforum2: [
-    'page_size = 4096'
-    'cache_size = 16384'
-    'temp_store = MEMORY'
-    'journal_mode = WAL'
-    'locking_mode = EXCLUSIVE'
-    'synchronous = OFF' ]
-  #.........................................................................................................
-
-#-----------------------------------------------------------------------------------------------------------
-try_to_remove_file = ( path ) ->
-  try FS.unlinkSync path catch error
-    return if error.code is 'ENOENT'
-    throw error
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-show_result = ( name, result ) ->
-  info '-----------------------------------------------'
-  urge name
-  whisper result
-  info '-----------------------------------------------'
-  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @get_data = ( cfg ) ->
@@ -84,446 +35,160 @@ show_result = ( name, result ) ->
   whisper "retrieving test data..."
   # DATOM = require '../../../apps/datom'
   #.........................................................................................................
-  texts       = DATA.get_words cfg.word_count
+  svg_paths   = DATA.get_svg_pathdata cfg.path_count
   #.........................................................................................................
-  data_cache  = { texts, }
-  data_cache  = freeze data_cache
+  deflate_dict  = Buffer.from "M 727 -397 Q 748 -397 794 -370 Q 840 -342 840 -322 Q 840 -315 832 -310 Q 824 -305 817 -305 L 784 -309 Q 697 -320 630 -320 Q 494 -320 285 -291 Q 282 -29M 811 -601 Q 811 -588 784 -588 Q 782 -588 757 -589 Q 731 -590 691 -591 Q 651 -593 613 -593 Q 549 -593 502 -588 L 461 -582"
+  data_cache    = { svg_paths, deflate_dict, }
+  data_cache    = freeze data_cache
   whisper "...done"
   return data_cache
 
 #-----------------------------------------------------------------------------------------------------------
-@pgmem = ( cfg ) -> new Promise ( resolve ) =>
-  db            = ( require 'pg-mem' ).newDb()
-  PGM           = require 'pg-mem'
-  data          = @get_data cfg
-  count         = 0
-  #.........................................................................................................
-  ### PGM data types:
-  array, bigint, bool, box, bytea, circlecitext, date, decimal, float, inet, integer, interval, json,
-  jsonb, line, lseg, null, path, point, polygon, record, regclass, regtype, text, time, timestamp,
-  timestampz, uuid ###
-  # generate_series = ( first_n, last_n ) => 42
-  # generate_series_des = {
-  #   name:             'generate_series',
-  #   args:             [ PGM.DataType.integer, PGM.DataType.integer, ],
-  #   returns:          PGM.DataType.integer,
-  #   implementation:   generate_series, }
-  # db.public.registerFunction generate_series
-  # debug db.public.many """select * from generate_series( 1, 10 ) as n;"""
-  #.........................................................................................................
-  db.public.none """
-    create table test(
-      id    integer generated by default as identity primary key,
-      nr    integer not null,
-      text  text );"""
-  table = db.public.getTable 'test'
+despace_svg_pathdata = ( svg_pathda ) ->
+  R = svg_pathda
+  R = R.replace /([0-9])\x20([^0-9])/g, '$1$2'
+  R = R.replace /([^0-9])\x20([0-9])/g, '$1$2'
+  return R
+
+# #-----------------------------------------------------------------------------------------------------------
+# despace_svg_pathdata_2 = ( svg_pathda ) ->
+#   return svg_pathda.replace /([0-9])\x20([^0-9])|([^0-9])\x20([0-9])/g, '$1$2$3$4'
+
+#-----------------------------------------------------------------------------------------------------------
+@svgo = ( cfg ) -> new Promise ( resolve ) =>
+  { svg_paths       } = @get_data cfg
+  original_size       = 0
+  compressed_size     = 0
+  count               = 0
   #.........................................................................................................
   resolve => new Promise ( resolve ) =>
-    db.public.none "begin;" if cfg.use_transaction
-    nr      = 0
-    for text in data.texts
-      nr++
-      table.insert { nr, text, }
-    db.public.none "commit;" if cfg.use_transaction
-    result  = db.public.many """select * from test order by text;"""
-    count  += result.length
-    show_result 'pgmem', result if gcfg.verbose
-    # db.close()
+    for svg_path in svg_paths
+      svg                       = """<svg><path d='#{svg_path}'/></svg>"""
+      { data: svg_optimized, }  = SVGO.optimize svg
+      compressed_svg_path       = svg_optimized.replace /^.*d="([^"]+)".*$/, '$1'
+      original_size            += svg_path.length
+      compressed_size          += compressed_svg_path.length
+      count++
+      if cfg.show
+        debug '^3343^', svg_path
+        debug '^3343^', compressed_svg_path
+    original_size_txt   = CND.format_number original_size
+    compressed_size_txt = CND.format_number compressed_size
+    ratio               = compressed_size / original_size
+    ratio_txt           = ratio.toFixed 3
+    debug '^23^', "original_size: #{original_size_txt}, compressed_size: #{compressed_size_txt}, ratio: #{ratio_txt}"
     resolve count
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@pgmem_tx = ( cfg ) => @pgmem { cfg..., use_transaction: true, }
-
-#-----------------------------------------------------------------------------------------------------------
-@bsqlt_membacked = ( cfg, use_membacked = true ) -> new Promise ( resolve ) =>
-  Db            = require 'better-sqlite3'
-  # db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
-  #.........................................................................................................
-  do populate_file = =>
-    db_cfg        = null
-    db_path       = "/tmp/hengist-in-memory-sql.benchmarks.membacked.db"
-    filedb        = new Db db_path, db_cfg
-    data          = @get_data cfg
-    count         = 0
-    #.........................................................................................................
-    # filedb.unsafeMode true
-    # filedb.pragma 'cache_size = 32000'
-    filedb.pragma 'synchronous = OFF' # makes file-based DBs much faster
-    #.........................................................................................................
-    filedb.exec """drop table if exists test;"""
-    filedb.exec """
-      create table test(
-        id    integer primary key,
-        nr    integer not null,
-        text  text );"""
-    # debug '^22233^', filedb.exec """insert into test ( nr, text ) values ( 1, '2' );"""
-    insert        = filedb.prepare """insert into test ( nr, text ) values ( ?, ? );"""
-    retrieve      = filedb.prepare """select * from test order by text;"""
-    nr      = 0
-    for text in data.texts
-      nr++
-      insert.run [ nr, text, ]
-    filedb.backup ':memory:'
-    return null
+@_despace = ( cfg ) -> new Promise ( resolve ) =>
+  { svg_paths       } = @get_data cfg
+  original_size       = 0
+  compressed_size     = 0
+  count               = 0
+  despace             = switch cfg.method
+    when 1  then  despace = despace_svg_pathdata
+    when 2  then  despace = despace_svg_pathdata_2
+    else throw new Error "^7409^ unknown method #{rpr cfg.method}"
   #.........................................................................................................
   resolve => new Promise ( resolve ) =>
-    result  = retrieve.all()
-    count  += result.length
-    show_result 'bettersqlite3', result if gcfg.verbose
-    if do_backup
-      await db.backup ':memory:'
-    db.close()
+    for svg_path in svg_paths
+      original_size            += svg_path.length
+      compressed_svg_path       = despace svg_path
+      compressed_size          += compressed_svg_path.length
+      count++
+      if cfg.show
+        debug '^3343^', svg_path
+        debug '^3343^', compressed_svg_path
+    original_size_txt   = CND.format_number original_size
+    compressed_size_txt = CND.format_number compressed_size
+    ratio               = compressed_size / original_size
+    ratio_txt           = ratio.toFixed 3
+    debug '^23^', "original_size: #{original_size_txt}, compressed_size: #{compressed_size_txt}, ratio: #{ratio_txt}"
     resolve count
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@_btsql3 = ( cfg ) -> new Promise ( resolve ) =>
-  Db            = require 'better-sqlite3'
-  # db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
-  defaults      = { do_backup: false, pragmas: [], }
-  cfg           = { defaults..., cfg..., }
-  db_cfg        = null
-  try_to_remove_file cfg.db_path if cfg.db_path isnt ':memory:'
-  db            = new Db cfg.db_path, db_cfg
-  data          = @get_data cfg
-  count         = 0
+@despace_1 = ( cfg ) => @_despace { cfg..., method: 1, }
+# @despace_2 = ( cfg ) => @_despace { cfg..., method: 2, }
+
+#-----------------------------------------------------------------------------------------------------------
+@_zlib = ( cfg ) -> new Promise ( resolve ) =>
+  compress      = switch cfg.method
+    when 'deflate'        then ZLIB.deflateSync
+    when 'deflateraw'     then ZLIB.deflateRawSync
+    when 'deflaterawdict' then ZLIB.deflateRawSync
+    when 'gzip'           then ZLIB.gzipSync
+    when 'brotli'         then ZLIB.brotliCompressSync
+    else throw new Error "^445488^ unknown method #{rpr cfg.method}"
+  decompress    = switch cfg.method
+    when 'deflate'        then ZLIB.inflateSync
+    when 'deflateraw'     then ZLIB.inflateRawSync
+    when 'deflaterawdict' then ZLIB.inflateRawSync
+    when 'gzip'           then ZLIB.gunzipSync
+    when 'brotli'         then ZLIB.brotliDecompressSync
+    else throw new Error "^445488^ unknown method #{rpr cfg.method}"
   #.........................................................................................................
-  # db.unsafeMode true
-  # db.pragma 'cache_size = 32000'
-  db.pragma 'synchronous = OFF' # makes file-based DBs much faster
-  for pragma in cfg.pragmas
-    db.pragma pragma
-  #.........................................................................................................
-  # db.exec """drop table if exists test;"""
-  db.exec """
-    create table test(
-      id    integer primary key,
-      nr    integer not null,
-      text  text );"""
-  # debug '^22233^', db.exec """insert into test ( nr, text ) values ( 1, '2' );"""
-  insert        = db.prepare """insert into test ( nr, text ) values ( ?, ? );"""
-  retrieve      = db.prepare """select * from test order by text;"""
-  retrieve.raw true
+  { svg_paths
+    deflate_dict  }   = @get_data cfg
+  count               = 0
+  decompression_count = 0
+  zlib_cfg            = {}
+  zlib_cfg.dictionary = deflate_dict if cfg.method is 'deflaterawdict'
+  zlib_cfg.level      = cfg.level ? -1
+  zlib_cfg.strategy   = cfg.strategy ? ZLIB.constants.Z_DEFAULT_STRATEGY
+  original_size       = 0
+  compressed_size     = 0
+  if cfg.despace  then  despace = despace_svg_pathdata
+  else                  despace = ( x ) -> x
   #.........................................................................................................
   resolve => new Promise ( resolve ) =>
-    nr      = 0
-    db.exec "begin transaction;" if cfg.use_transaction
-    for text in data.texts
-      nr++
-      insert.run [ nr, text, ]
-    db.exec "commit;" if cfg.use_transaction
-    result  = retrieve.all()
-    count  += result.length
-    show_result 'bettersqlite3', result if gcfg.verbose
-    if cfg.do_backup
-      await db.backup "/tmp/hengist-in-memory-sql.benchmarks.backup-#{Date.now()}.db"
-    db.close()
+    for svg_path in svg_paths
+      original_size      += ( Buffer.from svg_path ).length
+      svg_path            = despace svg_path
+      original_buffer     = Buffer.from svg_path
+      compressed_buffer   = compress original_buffer, zlib_cfg
+      compressed_size    += compressed_buffer.length
+      if Math.random() < cfg.outline_usage_rate
+        decompression_count++
+        decompressed_buffer = decompress compressed_buffer
+        decompressed_size   = decompressed_buffer.length
+        warn "^3445^", { decompressed_size, original_size: original_buffer.length, }, cfg if original_buffer.length isnt decompressed_size
+      if cfg.show
+        debug '^4354^', original_buffer.toString()[ .. 50 ]
+        debug '^4354^', original_buffer.length, compressed_buffer.length
+      count++
+    original_size_txt   = CND.format_number original_size
+    compressed_size_txt = CND.format_number compressed_size
+    ratio               = compressed_size / original_size
+    ratio_txt           = ratio.toFixed 3
+    debug '^23^', "original_size: #{original_size_txt}, compressed_size: #{compressed_size_txt}, ratio: #{ratio_txt}; decompression_count: #{decompression_count}"
     resolve count
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@bsqlt_mem                = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', }
-@bsqlt_mem_tx             = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', use_transaction: true, }
-@bsqlt_mem_tx_jmwal       = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', use_transaction: true, pragmas: [ 'journal_mode = WAL;', ], }
-@bsqlt_mem_thrds          = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'threads = 4;', ] }
-@bsqlt_mem_jmoff          = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'journal_mode = OFF;', ], }
-@bsqlt_mem_jmwal          = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', pragmas: [ 'journal_mode = WAL;', ], }
-@bsqlt_mem_backup         = ( cfg ) => @_btsql3 { cfg..., db_path: ':memory:', do_backup: true, }
-#...........................................................................................................
-@bsqlt_fle                = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle }
-@bsqlt_fle_tx             = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle, use_transaction: true, }
-@bsqlt_fle_tx_jmwal       = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle, use_transaction: true, pragmas: [ 'journal_mode = WAL;', ], }
-@bsqlt_fle_jmdel          = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmdel,       pragmas: [ 'journal_mode = DELETE;', ] }
-@bsqlt_fle_jmtrunc        = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmtrunc,     pragmas: [ 'journal_mode = TRUNCATE;', ] }
-@bsqlt_fle_jmpers         = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmpers,      pragmas: [ 'journal_mode = PERSIST;', ] }
-@bsqlt_fle_jmmem          = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmmem,       pragmas: [ 'journal_mode = MEMORY;', ] }
-@bsqlt_fle_jmwal          = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmwal,       pragmas: [ 'journal_mode = WAL;', ] }
-@bsqlt_fle_jmoff          = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_jmoff,       pragmas: [ 'journal_mode = OFF;', ] }
-@bsqlt_fle_mmap           = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_mmap,        pragmas: [ 'mmap_size = 30000000000;', ] }
-@bsqlt_fle_tmpm           = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_tmpm,        pragmas: [ 'temp_store = MEMORY;', ] }
-@bsqlt_fle_pgsze          = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_pgsze,       pragmas: [ 'page_size = 32768;', ] }
-@bsqlt_fle_thrds          = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_thrds,       pragmas: [ 'threads = 4;', ] }
-@bsqlt_fle_qtforum1       = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_qtforum1,    pragmas: pragmas.qtforum1 }
-@bsqlt_fle_qtforum2       = ( cfg ) => @_btsql3 { cfg..., db_path: paths.fle_qtforum2,    pragmas: pragmas.qtforum2 }
-#...........................................................................................................
-@bsqlt_tmpfs              = ( cfg ) => @_btsql3 { cfg..., db_path: '/dev/shm/ram.db', }
-@bsqlt_tmpfs_qtforum2     = ( cfg ) => @_btsql3 { cfg..., db_path: '/dev/shm/ram.db', pragmas: pragmas.qtforum2, }
-@bsqlt_tmpfs_tx           = ( cfg ) => @_btsql3 { cfg..., db_path: '/dev/shm/ram.db', use_transaction: true, }
-@bsqlt_tmpfs_tx_jmwal     = ( cfg ) => @_btsql3 { cfg..., db_path: '/dev/shm/ram.db', use_transaction: true, pragmas: [ 'journal_mode = WAL;', ], }
-@bsqlt_tmpfs_jmoff        = ( cfg ) => @_btsql3 { cfg..., db_path: '/dev/shm/ram.db', pragmas: [ 'journal_mode = OFF;', ] }
-@bsqlt_tmpfs_jmwal        = ( cfg ) => @_btsql3 { cfg..., db_path: '/dev/shm/ram.db', pragmas: [ 'journal_mode = WAL;', ] }
-@bsqlt_tmpfs_jmoff32      = ( cfg ) => @_btsql3 { cfg..., db_path: '/dev/shm/ram.db', pragmas: [ 'journal_mode = OFF;', 'page_size = 32768;', 'cache_size = 32768;', ] }
-@bsqlt_tmpfs_jmwal32      = ( cfg ) => @_btsql3 { cfg..., db_path: '/dev/shm/ram.db', pragmas: [ 'journal_mode = WAL;', 'page_size = 32768;', 'cache_size = 32768;', ] }
-@bsqlt_tmpfs_jmwal_mm0    = ( cfg ) => @_btsql3 { cfg..., db_path: '/dev/shm/ram.db', pragmas: [ 'journal_mode = WAL;', 'mmap_size = 0;' ], }
-@bsqlt_tmpfs_jmwal32_mm0  = ( cfg ) => @_btsql3 { cfg..., db_path: '/dev/shm/ram.db', pragmas: [ 'journal_mode = WAL;', 'page_size = 32768;', 'cache_size = 32768;', 'mmap_size = 0;' ], }
+@zlib_deflateraw_1            = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',     'level': 1, strategy: ZLIB.constants.Z_DEFAULT_STRATEGY, }
+@zlib_deflateraw_1_hfm        = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',     'level': 1, strategy: ZLIB.constants.Z_HUFFMAN_ONLY, despace: false, }
+@zlib_deflateraw_1_hfm_optim  = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',     'level': 1, strategy: ZLIB.constants.Z_HUFFMAN_ONLY, despace: true, }
+@zlib_deflateraw_1_rle        = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',     'level': 1, strategy: ZLIB.constants.Z_RLE, }
+@zlib_deflateraw_1_fixed      = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',     'level': 1, strategy: ZLIB.constants.Z_FIXED, }
+@zlib_gzip_1                  = ( cfg ) => @_zlib { cfg..., method: 'gzip',           'level': 1, strategy: ZLIB.constants.Z_DEFAULT_STRATEGY, }
+@zlib_gzip_1_hfm              = ( cfg ) => @_zlib { cfg..., method: 'gzip',           'level': 1, strategy: ZLIB.constants.Z_HUFFMAN_ONLY, }
+@zlib_gzip_1_rle              = ( cfg ) => @_zlib { cfg..., method: 'gzip',           'level': 1, strategy: ZLIB.constants.Z_RLE, }
+@zlib_gzip_1_fixed            = ( cfg ) => @_zlib { cfg..., method: 'gzip',           'level': 1, strategy: ZLIB.constants.Z_FIXED, }
 
-
-#-----------------------------------------------------------------------------------------------------------
-@bsqlt_mem_noprepare = ( cfg ) -> new Promise ( resolve ) =>
-  Db            = require 'better-sqlite3'
-  # db_cfg        = { verbose: ( CND.get_logger 'whisper', '^33365^ SQLite3' ), }
-  db_cfg        = null
-  db            = new Db ':memory:', db_cfg
-  data          = @get_data cfg
-  count         = 0
-  #.........................................................................................................
-  # db.unsafeMode true
-  # db.pragma 'cache_size = 32000'
-  db.pragma 'synchronous = OFF' # makes file-based DBs much faster
-  #.........................................................................................................
-  db.exec """drop table if exists test;"""
-  db.exec """
-    create table test(
-      id    integer primary key,
-      nr    integer not null,
-      text  text );"""
-  #.........................................................................................................
-  resolve => new Promise ( resolve ) =>
-    nr      = 0
-    for text in data.texts
-      nr++
-      insert = db.prepare """insert into test ( nr, text ) values ( ?, ? );"""
-      insert.run [ nr, text, ]
-    retrieve  = db.prepare """select * from test order by text;"""
-    result    = retrieve.all()
-    count    += result.length
-    show_result 'bettersqlite3', result if gcfg.verbose
-    db.close()
-    resolve count
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@_bsqlt_memory_icql = ( cfg, icql_version ) -> new Promise ( resolve ) =>
-  Db            = require 'better-sqlite3'
-  icql_path     = PATH.resolve PATH.join __dirname, '../demo-frp.icql'
-  ICQL          = require switch icql_version
-    when 'icql_latest'  then '../../../apps/icql'
-    when 'icql515'      then 'icql515'
-    else throw new Error "^45458^ unknown icql_version: #{rpr icql_version}"
-  icql_cfg =
-    connector:    Db
-    db_path:      ':memory:'
-    icql_path:    icql_path
-  db            = ICQL.bind icql_cfg
-  db.create_table_text()
-  data          = @get_data cfg
-  count         = 0
-  #.........................................................................................................
-  resolve => new Promise ( resolve ) =>
-    linenr = 0
-    for line in data.texts
-      linenr++
-      db.insert_line { linenr, line, }
-    result  = db.$.all_rows db.get_all_texts()
-    count  += result.length
-    show_result 'bsqlt_memory_icql', result if gcfg.verbose
-    db.$.db.close()
-    resolve count
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@bsqlt_mem_icql515     = ( cfg ) -> @_bsqlt_memory_icql cfg, 'icql515'
-@bsqlt_mem_icql_latest = ( cfg ) -> @_bsqlt_memory_icql cfg, 'icql_latest'
-
-
-#-----------------------------------------------------------------------------------------------------------
-@sqljs = ( cfg ) -> new Promise ( resolve ) =>
-  # initSqlJs            = require 'sql.js/dist/sql-asm-debug.js'
-  # initSqlJs            = require 'sql.js/dist/sql-asm-memory-growth.js'
-  # initSqlJs            = require 'sql.js/dist/sql-asm.js'
-  # initSqlJs            = require 'sql.js/dist/sql-wasm-debug.js'
-  initSqlJs   = require 'sql.js/dist/sql-wasm.js' ### NOTE this is the default import ###
-  DB          = await initSqlJs()
-  # debug ( k for k of require 'sql.js')
-  # debug ( k for k of DB)
-  # debug DB
-  # debug ( k for k of DB.default)
-  # debug ( k for k of DB.default.default)
-  db            = new DB.Database()
-  data          = @get_data cfg
-  count         = 0
-  #.........................................................................................................
-  db.run """
-    create table test(
-      id    integer primary key,
-      nr    integer not null,
-      text  text );"""
-  # debug '^22233^', db.exec """insert into test ( nr, text ) values ( 1, '2' );"""
-  insert        = db.prepare """insert into test ( nr, text ) values ( ?, ? );"""
-  retrieve      = db.prepare """select * from test order by text;"""
-  #.........................................................................................................
-  resolve => new Promise ( resolve ) =>
-    db.run "begin transaction;" if cfg.use_transaction
-    nr      = 0
-    for text in data.texts
-      nr++
-      ### TAINT use prepared statement ###
-      # db.run """insert into test ( nr, text ) values ( ?, ? );""", [ nr, text, ]
-      insert.bind [ nr, text, ]
-      insert.get() while insert.step()
-    db.run "commit;" if cfg.use_transaction
-    # debug (k for k of retrieve)
-    # retrieve.bind(); result = []; result.push retrieve.getAsObject()  while retrieve.step()
-    result = []; db.each """select * from test order by text;""", [], ( row ) -> result.push row
-    # retrieve.bind(); result = []; result.push retrieve.get()          while retrieve.step()
-    count  += result.length
-    show_result 'sqljs', result if gcfg.verbose
-    db.close()
-    resolve count
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@sqljs_tx = ( cfg ) -> @sqljs { cfg..., use_transaction: true, }
-
-#-----------------------------------------------------------------------------------------------------------
-@porsagerpostgres_tx = ( cfg ) -> new Promise ( resolve ) =>
-  postgres      = require 'postgres'
-  sql           = postgres 'postgres://interplot@localhost:5432/interplot'
-  count         = 0
-  data          = @get_data cfg
-  #.........................................................................................................
-    # await sql"""begin transaction;"""
-  await sql"""drop table if exists test cascade;"""
-  await sql"""
-    create table test(
-      id    integer generated by default as identity primary key,
-      nr    integer not null,
-      text  text );"""
-  #.........................................................................................................
-  resolve => new Promise ( resolve ) =>
-    # { rows }     = await sql"select * from MIRAGE.mirror order by dsk, dsnr, linenr limit 10;"
-    nr      = 0
-    await sql.begin ( sql ) =>
-      for text in data.texts
-        nr++
-        await sql"""insert into test ( nr, text ) values ( #{nr}, #{text} );"""
-    result  = await sql"""select * from test order by text;"""
-    show_result 'bettersqlite3', result if gcfg.verbose
-    count  += result.length
-    await sql.end { timeout: 0 }
-    resolve count
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@briancpg_tx = ( cfg ) -> new Promise ( resolve ) =>
-  db_cfg        = { database: 'interplot', user: 'interplot', port: 5432, }
-  pool          = new ( require 'pg' ).Pool db_cfg
-  db            = await pool.connect()
-  count         = 0
-  data          = @get_data cfg
-  #.........................................................................................................
-    # await sql"""begin transaction;"""
-  await db.query """drop table if exists test cascade;"""
-  await db.query """
-    create table test(
-      id    integer generated by default as identity primary key,
-      nr    integer not null,
-      text  text );"""
-  #.........................................................................................................
-  resolve => new Promise ( resolve ) =>
-    await db.query "truncate table test;"
-    try
-      await db.query 'begin'
-      q =
-        text:     """insert into test ( nr, text ) values ( $1, $2 );"""
-        rowMode:  'array' ### TAINT does not seem to work ###
-        values:   [ 0, '', ]
-      nr = 0
-      for text in data.texts
-        nr++
-        q.values = [ nr, text, ]
-        await db.query q
-      result  = await db.query """select * from test order by text;"""
-      await db.query 'commit'
-      show_result 'briancpg_tx', result.rows if gcfg.verbose
-      count  += result.rows.length
-      await resolve count
-    finally
-      db.release()
-      pool.end()
-    resolve 1
-  return null
-
-
-#-----------------------------------------------------------------------------------------------------------
-@_dbay_prep1 = ( cfg ) -> new Promise ( resolve ) =>
-  { DBay }      = require '../../../apps/dbay'
-  defaults      = {}
-  cfg           = { defaults..., cfg..., }
-  db_cfg        = { path: cfg.db_path, }
-  try_to_remove_file cfg.db_path
-  db            = new DBay db_cfg
-  data          = @get_data cfg
-  count         = 0
-  #.........................................................................................................
-  # db.pragma 'synchronous = OFF' # makes file-based DBs much faster
-  db.pragma pragma for pragma in cfg.pragmas ? []
-  #.........................................................................................................
-  # db.exec """drop table if exists test;"""
-  db SQL"""
-    create table test(
-      id    integer primary key,
-      nr    integer not null,
-      text  text );"""
-  # debug '^22233^', db.exec """insert into test ( nr, text ) values ( 1, '2' );"""
-  insert        = db.prepare SQL"""insert into test ( nr, text ) values ( ?, ? );"""
-  retrieve      = db.prepare SQL"""select * from test order by text;"""
-  retrieve.raw true
-  #.........................................................................................................
-  resolve => new Promise ( resolve ) =>
-    nr      = 0
-    db.execute "begin transaction;" if cfg.use_transaction
-    for text in data.texts
-      nr++
-      insert.run [ nr, text, ]
-    db.execute "commit;" if cfg.use_transaction
-    result  = retrieve.all()
-    count  += result.length
-    show_result '_dbay_prep1', result if gcfg.verbose
-    resolve count
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@_dbay_naive = ( cfg ) -> new Promise ( resolve ) =>
-  { DBay }      = require '../../../apps/dbay'
-  defaults      = {}
-  cfg           = { defaults..., cfg..., }
-  db_cfg        = { path: cfg.db_path, }
-  try_to_remove_file cfg.db_path
-  db            = new DBay db_cfg
-  data          = @get_data cfg
-  count         = 0
-  #.........................................................................................................
-  # db.pragma 'synchronous = OFF' # makes file-based DBs much faster
-  db.pragma pragma for pragma in cfg.pragmas ? []
-  #.........................................................................................................
-  # db.exec """drop table if exists test;"""
-  db SQL"""
-    create table test(
-      id    integer primary key,
-      nr    integer not null,
-      text  text );"""
-  # debug '^22233^', db.exec """insert into test ( nr, text ) values ( 1, '2' );"""
-  #.........................................................................................................
-  resolve => new Promise ( resolve ) =>
-    nr      = 0
-    db.execute "begin transaction;" if cfg.use_transaction
-    for text in data.texts
-      nr++
-      db SQL"""insert into test ( nr, text ) values ( ?, ? );""", [ nr, text, ]
-    db.execute "commit;" if cfg.use_transaction
-    result  = db SQL"""select * from test order by text;"""
-    result  = [ result..., ]
-    count  += result.length
-    show_result '_dbay_naive', result if gcfg.verbose
-    resolve count
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@dbay_tmpfs_prep_tx1  = ( cfg ) => @_dbay_prep1 { cfg..., db_path: '/dev/shm/dbay.db', use_transaction: true, }
-@dbay_naive_tx1       = ( cfg ) => @_dbay_naive { cfg..., db_path: '/dev/shm/dbay.db', use_transaction: true, }
-@dbay_naive_tx0       = ( cfg ) => @_dbay_naive { cfg..., db_path: '/dev/shm/dbay.db', use_transaction: false, }
+@zlib_deflate                 = ( cfg ) => @_zlib { cfg..., method: 'deflate',                    }
+@zlib_deflate_1               = ( cfg ) => @_zlib { cfg..., method: 'deflate',        'level': 1, }
+@zlib_deflate_5               = ( cfg ) => @_zlib { cfg..., method: 'deflate',        'level': 5, }
+@zlib_deflate_9               = ( cfg ) => @_zlib { cfg..., method: 'deflate',        'level': 9, }
+@zlib_deflateraw              = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',                 }
+@zlib_deflateraw_5            = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',     'level': 5, }
+@zlib_deflateraw_9            = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',     'level': 9, }
+@zlib_deflaterawdict          = ( cfg ) => @_zlib { cfg..., method: 'deflaterawdict',             }
+@zlib_gzip                    = ( cfg ) => @_zlib { cfg..., method: 'gzip',                       }
+@zlib_gzip_5                  = ( cfg ) => @_zlib { cfg..., method: 'gzip',           'level': 5, }
+@zlib_gzip_9                  = ( cfg ) => @_zlib { cfg..., method: 'gzip',           'level': 9, }
+# @zlib_brotli          = ( cfg ) => @_zlib { cfg..., method: 'brotli',         }
 
 
 #===========================================================================================================
@@ -533,53 +198,50 @@ show_result = ( name, result ) ->
   gcfg.verbose  = true
   gcfg.verbose  = false
   bench         = BM.new_benchmarks()
-  cfg           = { word_count: 10000, }
+  # cfg           = { path_count: 1_000, }
+  cfg           = { path_count: 10_000, }
+  # cfg           = { path_count: 3, }
+  #.........................................................................................................
+  ### outline_usage_rate controls how many of the compressed outlines will get decompressed, thereby
+  reflecting the fact that as more and more (hundreds of thousand) outlines are stored, fewer and fewer will
+  ever be used for typesetting. It is therefore a measure of how much more we value compression speed over
+  decompression speed. ###
+  if          0 < cfg.path_count < 1_000  then  cfg.outline_usage_rate = 1.00
+  else if 1_000 < cfg.path_count < 5_000  then  cfg.outline_usage_rate = 0.50
+  else if 5_000 < cfg.path_count < 10_000 then  cfg.outline_usage_rate = 0.25
+  else                                          cfg.outline_usage_rate = 0.10
+  #.........................................................................................................
+  cfg.show      = cfg.path_count < 10
   repetitions   = 5
   test_names    = [
-    'bsqlt_mem'
-    'bsqlt_mem_tx'
-    'bsqlt_mem_tx_jmwal'
-    # 'bsqlt_mem_jmoff'
-    'bsqlt_mem_jmwal'
-    # 'bsqlt_mem_icql_latest'
-    # 'bsqlt_mem_icql515'
-    # 'bsqlt_mem_backup'
-    # 'bsqlt_mem_noprepare'
-    'bsqlt_mem_thrds'
-    # 'bsqlt_fle'
-    # 'bsqlt_fle_mmap'
-    # 'bsqlt_fle_tmpm'
-    # 'bsqlt_fle_thrds'
-    # 'bsqlt_fle_pgsze'
-    'bsqlt_fle_jmwal'
-    # 'bsqlt_fle_jmdel'
-    # 'bsqlt_fle_jmtrunc' ### NOTE does not produce correct DB file ###
-    # 'bsqlt_fle_jmpers'  ### NOTE does not produce correct DB file ###
-    # 'bsqlt_fle_jmmem'
-    # 'bsqlt_fle_jmoff'
-    # 'bsqlt_fle_qtforum1'
-    'bsqlt_fle_qtforum2'
-    'bsqlt_fle_tx'
-    'bsqlt_fle_tx_jmwal'
-    'bsqlt_tmpfs_tx'
-    'bsqlt_tmpfs_tx_jmwal'
-    'bsqlt_tmpfs'
-    # 'bsqlt_tmpfs_jmoff'
-    'bsqlt_tmpfs_jmwal'
-    'bsqlt_tmpfs_qtforum2'
-    # 'bsqlt_tmpfs_jmoff32'
-    # 'bsqlt_tmpfs_jmwal32'
-    # 'bsqlt_tmpfs_jmwal_mm0'
-    # 'bsqlt_tmpfs_jmwal32_mm0'
-    'pgmem'
-    'pgmem_tx'
-    'sqljs'
-    'sqljs_tx'
-    'porsagerpostgres_tx'
-    'briancpg_tx'
-    'dbay_tmpfs_prep_tx1'
-    'dbay_naive_tx1'
-    'dbay_naive_tx0'
+
+    'zlib_deflateraw_1_hfm'
+    'zlib_gzip_1_hfm'
+    'zlib_deflateraw_1_rle'
+    'zlib_gzip_1_rle'
+
+    # 'zlib_deflateraw_1_hfm_optim'
+    # # 'despace_1'
+    # # # 'despace_2' ### not equivalent to despace_1 as it misses some spaces ###
+
+    # 'zlib_deflateraw_1_fixed'
+    # 'zlib_deflateraw_1'
+    # 'zlib_gzip_1_fixed'
+    # 'zlib_gzip_1'
+
+    # # 'svgo'
+    # 'zlib_deflate_1'
+    # 'zlib_deflate'
+    # 'zlib_deflate_5'
+    # 'zlib_deflate_9'
+    # 'zlib_deflateraw'
+    # 'zlib_deflateraw_5'
+    # 'zlib_deflateraw_9'
+    # # 'zlib_deflaterawdict'
+    # 'zlib_gzip'
+    # 'zlib_gzip_5'
+    # 'zlib_gzip_9'
+    # # 'zlib_brotli'
     ]
   global.gc() if global.gc?
   data_cache = null
@@ -594,3 +256,21 @@ show_result = ( name, result ) ->
 ############################################################################################################
 if require.main is module then do =>
   await @run_benchmarks()
+  # debug '^233^', "Z_NO_COMPRESSION:       ", ZLIB.constants.Z_NO_COMPRESSION
+  # debug '^233^', "Z_BEST_SPEED:           ", ZLIB.constants.Z_BEST_SPEED
+  # debug '^233^', "Z_BEST_COMPRESSION:     ", ZLIB.constants.Z_BEST_COMPRESSION
+  # debug '^233^', "Z_DEFAULT_COMPRESSION:  ", ZLIB.constants.Z_DEFAULT_COMPRESSION
+  # debug '^233^', "Z_FILTERED:             ", ZLIB.constants.Z_FILTERED
+  # debug '^233^', "Z_HUFFMAN_ONLY:         ", ZLIB.constants.Z_HUFFMAN_ONLY
+  # debug '^233^', "Z_RLE:                  ", ZLIB.constants.Z_RLE
+  # debug '^233^', "Z_FIXED:                ", ZLIB.constants.Z_FIXED
+  # debug '^233^', "Z_DEFAULT_STRATEGY:     ", ZLIB.constants.Z_DEFAULT_STRATEGY
+  # pd                        = 'M839-18C839-31 832-31 812-31C754-31 754-39 754-48C754-48 754-56 758-71L893-612C901-644 909-652 972-652C993-652 1002-652 1002-670C1002-683 994-683 977-683L849-683C827-683 824-683 813-665L473-100L417-661C415-683 413-683 389-683L256-683C240-683 229-683 229-664C229-652 237-652 256-652C287-652 314-652 314-635C314-632 314-630 310-616L182-101C168-45 130-33 85-31C77-31 66-30 66-12C66-3 72 0 79 0C109 0 143-3 174-3C206-3 241 0 272 0C278 0 290 0 290-18C290-30 283-31 271-31C214-33 212-59 212-74C212-77 212-83 216-99L349-630L350-630L411-24C413-7 413 0 428 0C441 0 446-7 452-18L825-639L826-639L685-73C677-39 671-31 603-31C587-31 576-31 576-12C576 0 587 0 590 0C627 0 666-3 704-3C742-3 783 0 820 0C827 0 839 0 839-18Z'
+  # svg                       = """<svg><path d='#{pd}'/></svg>"""
+  # { data: svg_optimized, }  = SVGO.optimize svg
+  # pd_optimized              = svg_optimized.replace /^.*d="([^"]+)".*$/, '$1'
+  # debug '^746^', pd
+  # debug '^746^', pd_optimized
+  # debug '^746^', svg.length, svg_optimized.length, svg_optimized.length / svg.length
+
+
