@@ -32,6 +32,8 @@ cids_from_text            = ( text ) -> ( ( chr.codePointAt 0 ) for chr in Array
 ZLIB                      = require 'zlib'
 
 
+
+
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
@@ -42,7 +44,14 @@ ZLIB                      = require 'zlib'
   path                = '/tmp/dbay-rustybuzz.sqlite'
   db                  = new DBay { path, }
   schema              = 'drb'
-  drb                 = new Drb { db, create: true, schema, temporary: false, }
+  drb_cfg             =
+    db:             db
+    path:           '/dev/shm/rustybuzz.sqlite'
+    create:         true
+    schema:         schema
+    compress_svg:   true
+    despace_svg:    true
+  drb                 = new Drb drb_cfg
   dtab                = new Tbl { db, }
   # fontnick = 'jzr';   fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
   # fontnick = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
@@ -74,76 +83,40 @@ ZLIB                      = require 'zlib'
   debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
   help '^290^',  ( rpr gid_by_cids )[ ... 200 ] + '...'
   #.........................................................................................................
-  insert_outlines_as_text = =>
-    insert_outline  = db.prepare drb.sql.insert_outline
+  insert_outlines = =>
+    insert_outline      = db.prepare drb.sql.insert_outline
     t0                  = Date.now()
     db =>
-      for gid from gid_by_cids.values()
+      for [ cid, gid, ] from gid_by_cids.entries()
+        glyph = String.fromCodePoint cid
         { bbox: {
-            x, y, x1, y1, }
-          pd                } = drb.get_single_outline { gid, fontnick, }
-        insert_outline.run { fontnick, gid, x, y, x1, y1, pd, }
+            x, y,
+            x1, y1, },
+          pd          } = drb.get_single_outline { gid, fontnick, }
+        pd              = if drb.cfg.despace_svg then ( drb._despace_svg_pathdata pd ) else pd
+        pd              = ( drb._compress_svg_pathdata pd ) if drb.cfg.compress_svg
+        insert_outline.run { fontnick, gid, cid, glyph, x, y, x1, y1, pd, }
     t1                  = Date.now()
     debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
   #.........................................................................................................
-  insert_outlines_as_brotli = =>
-    insert_outline      = db.prepare drb.sql.insert_outline_blob
-    t0                  = Date.now()
-    db =>
-      for gid from gid_by_cids.values()
-        { bbox: {
-            x, y, x1, y1, }
-          pd                } = drb.get_single_outline { gid, fontnick, }
-        pd                    = ZLIB.brotliCompressSync Buffer.from pd
-        insert_outline.run { fontnick, gid, x, y, x1, y1, pd, }
-    t1                  = Date.now()
-    debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
-  #.........................................................................................................
-  insert_outlines_as_deflateraw = =>
-    insert_outline      = db.prepare drb.sql.insert_outline_blob
-    t0                  = Date.now()
-    db =>
-      for gid from gid_by_cids.values()
-        { bbox: {
-            x, y, x1, y1, }
-          pd                } = drb.get_single_outline { gid, fontnick, }
-        pd                    = ZLIB.deflateRawSync Buffer.from pd
-        insert_outline.run { fontnick, gid, x, y, x1, y1, pd, }
-    t1                  = Date.now()
-    debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
-  #.........................................................................................................
-  insert_outlines_as_gzip = =>
-    insert_outline      = db.prepare drb.sql.insert_outline_blob
-    t0                  = Date.now()
-    db =>
-      for gid from gid_by_cids.values()
-        { bbox: {
-            x, y, x1, y1, }
-          pd                } = drb.get_single_outline { gid, fontnick, }
-        pd                    = ZLIB.gzipSync Buffer.from pd, { strategy: ZLIB.constants.Z_BEST_SPEED, }
-        insert_outline.run { fontnick, gid, x, y, x1, y1, pd, }
-    t1                  = Date.now()
-    debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
-  #.........................................................................................................
-  # insert_outlines_as_brotli()
-  # insert_outlines_as_deflateraw()
-  insert_outlines_as_gzip()
-  # insert_outlines_as_text()
+  insert_outlines()
   #.........................................................................................................
   echo dtab._tabulate db SQL"""
     select
         fontnick,
         gid,
+        cid,
+        glyph,
         x,
         y,
         x1,
         y1,
         substring( pd, 0, 50 ) || '...' as "(pd)"
-      from #{schema}.outlines_blob
+      from #{schema}.outlines
       order by fontnick, gid
-      limit 10;"""
+      limit 100;"""
   echo dtab._tabulate db SQL"""
-    with v1 as ( select count(*) as outline_count from #{schema}.outlines_blob )
+    with v1 as ( select count(*) as outline_count from #{schema}.outlines )
     select
       v1.outline_count / ? as "outlines per second"
     from v1;""", [ dt, ]
