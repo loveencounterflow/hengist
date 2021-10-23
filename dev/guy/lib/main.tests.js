@@ -6,7 +6,7 @@
 
   rpr = CND.rpr;
 
-  badge = 'DBAY/TESTS';
+  badge = 'GUY/TESTS';
 
   log = CND.get_logger('plain', badge);
 
