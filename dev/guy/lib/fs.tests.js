@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, H, PATH, alert, badge, debug, echo, equals, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, H, PATH, alert, badge, debug, echo, equals, freeze, help, info, isa, log, matchers, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   PATH = require('path');
@@ -39,27 +39,78 @@
 
   types = new (require('intertype')).Intertype();
 
+  ({freeze} = require('letsfreezethat'));
+
   ({isa, type_of, validate, validate_list_of, equals} = types.export());
+
+  matchers = {
+    single: ["Ångström's", "éclair", "éclair's", "éclairs", "éclat", "éclat's", "élan", "élan's", "émigré", "émigré's"]
+  };
+
+  matchers.triple = [...matchers.single, ...matchers.single, ...matchers.single];
+
+  matchers = freeze(matchers);
 
   //===========================================================================================================
   // TESTS
   //-----------------------------------------------------------------------------------------------------------
   this["guy.fs.walk_circular_lines() iterates once per default"] = function(T, done) {
-    var guy, line, matcher, path, ref, result;
+    var guy, line, path, ref, result;
     // T?.halt_on_error()
     guy = require(H.guy_path);
     result = [];
-    matcher = ["Ångström's", "éclair", "éclair's", "éclairs", "éclat", "éclat's", "élan", "élan's", "émigré", "émigré's"];
     path = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/a-few-words.txt'));
     ref = guy.fs.walk_circular_lines(path);
     //.........................................................................................................
     for (line of ref) {
       result.push(line);
-      debug('^4433^', line);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(result, matcher);
+      T.eq(result, matchers.single);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["guy.fs.walk_circular_lines() can iterate given number of loops"] = function(T, done) {
+    var guy, line, path, ref, result;
+    // T?.halt_on_error()
+    guy = require(H.guy_path);
+    result = [];
+    path = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/a-few-words.txt'));
+    ref = guy.fs.walk_circular_lines(path, {
+      loop_count: 3
+    });
+    //.........................................................................................................
+    for (line of ref) {
+      result.push(line);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(result, matchers.triple);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["guy.fs.walk_circular_lines() can iterate given number of lines 1"] = function(T, done) {
+    var guy, line, path, ref, result;
+    // T?.halt_on_error()
+    guy = require(H.guy_path);
+    result = [];
+    path = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/a-few-words.txt'));
+    ref = guy.fs.walk_circular_lines(path, {
+      loop_count: 3,
+      line_count: 12
+    });
+    //.........................................................................................................
+    for (line of ref) {
+      result.push(line);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(result.length, 12);
     }
     return typeof done === "function" ? done() : void 0;
   };
