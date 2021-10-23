@@ -29,6 +29,7 @@ guy                       = require '../../../apps/guy'
 RBW                       = require 'rustybuzz-wasm'
 H                         = require './helpers'
 cids_from_text            = ( text ) -> ( ( chr.codePointAt 0 ) for chr in Array.from text )
+ZLIB                      = require 'zlib'
 
 
 #===========================================================================================================
@@ -38,13 +39,14 @@ cids_from_text            = ( text ) -> ( ( chr.codePointAt 0 ) for chr in Array
   { DBay }            = require H.dbay_path
   { Drb }             = require H.drb_path
   { Tbl, }            = require '../../../apps/icql-dba-tabulate'
-  db                  = new DBay()
-  drb                 = new Drb { db, create: true, temporary: true, }
-  dtab                = new Tbl { db, }
+  path                = '/tmp/dbay-rustybuzz.sqlite'
+  db                  = new DBay { path, }
   schema              = 'drb'
+  drb                 = new Drb { db, create: true, schema, temporary: false, }
+  dtab                = new Tbl { db, }
   # fontnick = 'jzr';   fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
-  fontnick = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
-  # fontnick = 'qkai';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/cwTeXQKai-Medium.ttf'
+  # fontnick = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
+  fontnick = 'qkai';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/cwTeXQKai-Medium.ttf'
   drb.register_fontnick { fontnick, fspath, }
   echo dtab._tabulate db SQL"select * from #{schema}.outlines order by fontnick, gid;"
   echo dtab._tabulate db SQL"select * from #{schema}.fontnicks order by fontnick;"
@@ -61,21 +63,73 @@ cids_from_text            = ( text ) -> ( ( chr.codePointAt 0 ) for chr in Array
   ### TAINT obtain list of all valid Unicode codepoints (again) ###
   cids                = cids_from_text "sampletext算"
   # cids                = [ 0x0021 .. 0xd000 ]
+  cids                = [ 0x4e00 .. 0x9fff ]
+  # cids                = [ 0x4e00 .. 0x4e02 ]
   t0                  = Date.now()
   gid_by_cids         = drb.gids_from_cids { cids, fontnick, }
   t1                  = Date.now()
   ### TAINT might want to turn this into a benchmark (or improve reporting) ###
   debug '^324^', cids.length      + ' cids'
   debug '^324^', gid_by_cids.size + ' gids'
-  debug '^324^', ( ( t1 - t0 ) / 1000 ) + 's'
+  debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
   help '^290^',  ( rpr gid_by_cids )[ ... 200 ] + '...'
-  insert_outline  = db.prepare drb.sql.insert_outline
-  db =>
-    for gid from gid_by_cids.values()
-      { bbox: {
-          x, y, x1, y1, }
-        pd                } = drb.get_single_outline { gid, fontnick, }
-      insert_outline.run { fontnick, gid, x, y, x1, y1, pd, }
+  #.........................................................................................................
+  insert_outlines_as_text = =>
+    insert_outline  = db.prepare drb.sql.insert_outline
+    t0                  = Date.now()
+    db =>
+      for gid from gid_by_cids.values()
+        { bbox: {
+            x, y, x1, y1, }
+          pd                } = drb.get_single_outline { gid, fontnick, }
+        insert_outline.run { fontnick, gid, x, y, x1, y1, pd, }
+    t1                  = Date.now()
+    debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
+  #.........................................................................................................
+  insert_outlines_as_brotli = =>
+    insert_outline      = db.prepare drb.sql.insert_outline_blob
+    t0                  = Date.now()
+    db =>
+      for gid from gid_by_cids.values()
+        { bbox: {
+            x, y, x1, y1, }
+          pd                } = drb.get_single_outline { gid, fontnick, }
+        pd                    = ZLIB.brotliCompressSync Buffer.from pd
+        insert_outline.run { fontnick, gid, x, y, x1, y1, pd, }
+    t1                  = Date.now()
+    debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
+  #.........................................................................................................
+  insert_outlines_as_deflateraw = =>
+    insert_outline      = db.prepare drb.sql.insert_outline_blob
+    t0                  = Date.now()
+    db =>
+      for gid from gid_by_cids.values()
+        { bbox: {
+            x, y, x1, y1, }
+          pd                } = drb.get_single_outline { gid, fontnick, }
+        pd                    = ZLIB.deflateRawSync Buffer.from pd
+        insert_outline.run { fontnick, gid, x, y, x1, y1, pd, }
+    t1                  = Date.now()
+    debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
+  #.........................................................................................................
+  insert_outlines_as_gzip = =>
+    insert_outline      = db.prepare drb.sql.insert_outline_blob
+    t0                  = Date.now()
+    db =>
+      for gid from gid_by_cids.values()
+        { bbox: {
+            x, y, x1, y1, }
+          pd                } = drb.get_single_outline { gid, fontnick, }
+        pd                    = ZLIB.gzipSync Buffer.from pd, { strategy: ZLIB.constants.Z_BEST_SPEED, }
+        insert_outline.run { fontnick, gid, x, y, x1, y1, pd, }
+    t1                  = Date.now()
+    debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
+  #.........................................................................................................
+  # insert_outlines_as_brotli()
+  # insert_outlines_as_deflateraw()
+  insert_outlines_as_gzip()
+  # insert_outlines_as_text()
+  #.........................................................................................................
   echo dtab._tabulate db SQL"""
     select
         fontnick,
@@ -85,8 +139,14 @@ cids_from_text            = ( text ) -> ( ( chr.codePointAt 0 ) for chr in Array
         x1,
         y1,
         substring( pd, 0, 50 ) || '...' as "(pd)"
-      from #{schema}.outlines
-      order by fontnick, gid;"""
+      from #{schema}.outlines_blob
+      order by fontnick, gid
+      limit 10;"""
+  echo dtab._tabulate db SQL"""
+    with v1 as ( select count(*) as outline_count from #{schema}.outlines_blob )
+    select
+      v1.outline_count / ? as "outlines per second"
+    from v1;""", [ dt, ]
   return null
 
 
