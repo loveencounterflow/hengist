@@ -22,21 +22,15 @@ echo                      = CND.echo.bind CND
 test                      = require '../../../apps/guy-test'
 H                         = require './helpers'
 types                     = new ( require 'intertype' ).Intertype
+{ freeze }                = require 'letsfreezethat'
 { isa
   type_of
   validate
   validate_list_of
   equals }                = types.export()
 
-
-#===========================================================================================================
-# TESTS
-#-----------------------------------------------------------------------------------------------------------
-@[ "guy.fs.walk_circular_lines() iterates once per default" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  guy     = require H.guy_path
-  result  = []
-  matcher = [
+matchers =
+  single: [
     "Ångström's"
     "éclair"
     "éclair's"
@@ -47,13 +41,48 @@ types                     = new ( require 'intertype' ).Intertype
     "élan's"
     "émigré"
     "émigré's" ]
+matchers.triple = [ matchers.single..., matchers.single..., matchers.single..., ]
+matchers = freeze matchers
+
+#===========================================================================================================
+# TESTS
+#-----------------------------------------------------------------------------------------------------------
+@[ "guy.fs.walk_circular_lines() iterates once per default" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  guy     = require H.guy_path
+  result  = []
   path    = PATH.resolve PATH.join __dirname, '../../../', 'assets/a-few-words.txt'
   #.........................................................................................................
   for line from guy.fs.walk_circular_lines path
     result.push line
-    debug '^4433^', line
   #.........................................................................................................
-  T?.eq result, matcher
+  T?.eq result, matchers.single
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "guy.fs.walk_circular_lines() can iterate given number of loops" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  guy     = require H.guy_path
+  result  = []
+  path    = PATH.resolve PATH.join __dirname, '../../../', 'assets/a-few-words.txt'
+  #.........................................................................................................
+  for line from guy.fs.walk_circular_lines path, { loop_count: 3, }
+    result.push line
+  #.........................................................................................................
+  T?.eq result, matchers.triple
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "guy.fs.walk_circular_lines() can iterate given number of lines 1" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  guy     = require H.guy_path
+  result  = []
+  path    = PATH.resolve PATH.join __dirname, '../../../', 'assets/a-few-words.txt'
+  #.........................................................................................................
+  for line from guy.fs.walk_circular_lines path, { loop_count: 3, line_count: 12, }
+    result.push line
+  #.........................................................................................................
+  T?.eq result.length, 12
   done?()
 
 
