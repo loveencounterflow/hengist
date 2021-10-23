@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, H, PATH, RBW, SQL, badge, cids_from_text, debug, echo, equals, guy, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, H, PATH, RBW, SQL, ZLIB, badge, cids_from_text, debug, echo, equals, guy, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -53,26 +53,30 @@
     return results;
   };
 
+  ZLIB = require('zlib');
+
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_load_font_outlines = function() {
-    var DBay, Drb, Tbl, bbox, cids, db, drb, dtab, font_idx, fontnick, fspath, gid, gid_by_cids, insert_outline, pd, schema, t0, t1;
+    var DBay, Drb, Tbl, bbox, cids, db, drb, dt, dtab, font_idx, fontnick, fspath, gid, gid_by_cids, insert_outlines_as_brotli, insert_outlines_as_deflateraw, insert_outlines_as_gzip, insert_outlines_as_text, path, pd, schema, t0, t1;
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
-    db = new DBay();
+    path = '/tmp/dbay-rustybuzz.sqlite';
+    db = new DBay({path});
+    schema = 'drb';
     drb = new Drb({
       db,
       create: true,
-      temporary: true
+      schema,
+      temporary: false
     });
     dtab = new Tbl({db});
-    schema = 'drb';
     // fontnick = 'jzr';   fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
-    fontnick = 'djvs';
-    fspath = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'));
-    // fontnick = 'qkai';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/cwTeXQKai-Medium.ttf'
+    // fontnick = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
+    fontnick = 'qkai';
+    fspath = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/jizura-fonts/cwTeXQKai-Medium.ttf'));
     drb.register_fontnick({fontnick, fspath});
     echo(dtab._tabulate(db(SQL`select * from ${schema}.outlines order by fontnick, gid;`)));
     echo(dtab._tabulate(db(SQL`select * from ${schema}.fontnicks order by fontnick;`)));
@@ -89,28 +93,115 @@
     /* TAINT obtain list of all valid Unicode codepoints (again) */
     cids = cids_from_text("sampletext算");
     // cids                = [ 0x0021 .. 0xd000 ]
+    cids = (function() {
+      var results = [];
+      for (var i = 0x4e00; i <= 40959; i++){ results.push(i); }
+      return results;
+    }).apply(this);
+    // cids                = [ 0x4e00 .. 0x4e02 ]
     t0 = Date.now();
     gid_by_cids = drb.gids_from_cids({cids, fontnick});
     t1 = Date.now();
     /* TAINT might want to turn this into a benchmark (or improve reporting) */
     debug('^324^', cids.length + ' cids');
     debug('^324^', gid_by_cids.size + ' gids');
-    debug('^324^', ((t1 - t0) / 1000) + 's');
+    debug('^324^', (dt = (t1 - t0) / 1000) + 's');
     help('^290^', (rpr(gid_by_cids)).slice(0, 200) + '...');
-    insert_outline = db.prepare(drb.sql.insert_outline);
-    db(() => {
-      var ref, results, x, x1, y, y1;
-      ref = gid_by_cids.values();
-      results = [];
-      for (gid of ref) {
-        ({
-          bbox: {x, y, x1, y1},
-          pd
-        } = drb.get_single_outline({gid, fontnick}));
-        results.push(insert_outline.run({fontnick, gid, x, y, x1, y1, pd}));
-      }
-      return results;
-    });
+    //.........................................................................................................
+    insert_outlines_as_text = () => {
+      var insert_outline;
+      insert_outline = db.prepare(drb.sql.insert_outline);
+      t0 = Date.now();
+      db(() => {
+        var ref, results, x, x1, y, y1;
+        ref = gid_by_cids.values();
+        results = [];
+        for (gid of ref) {
+          ({
+            bbox: {x, y, x1, y1},
+            pd
+          } = drb.get_single_outline({gid, fontnick}));
+          results.push(insert_outline.run({fontnick, gid, x, y, x1, y1, pd}));
+        }
+        return results;
+      });
+      t1 = Date.now();
+      return debug('^324^', (dt = (t1 - t0) / 1000) + 's');
+    };
+    //.........................................................................................................
+    insert_outlines_as_brotli = () => {
+      var insert_outline;
+      insert_outline = db.prepare(drb.sql.insert_outline_blob);
+      t0 = Date.now();
+      db(() => {
+        var ref, results, x, x1, y, y1;
+        ref = gid_by_cids.values();
+        results = [];
+        for (gid of ref) {
+          ({
+            bbox: {x, y, x1, y1},
+            pd
+          } = drb.get_single_outline({gid, fontnick}));
+          pd = ZLIB.brotliCompressSync(Buffer.from(pd));
+          results.push(insert_outline.run({fontnick, gid, x, y, x1, y1, pd}));
+        }
+        return results;
+      });
+      t1 = Date.now();
+      return debug('^324^', (dt = (t1 - t0) / 1000) + 's');
+    };
+    //.........................................................................................................
+    insert_outlines_as_deflateraw = () => {
+      var insert_outline;
+      insert_outline = db.prepare(drb.sql.insert_outline_blob);
+      t0 = Date.now();
+      db(() => {
+        var ref, results, x, x1, y, y1;
+        ref = gid_by_cids.values();
+        results = [];
+        for (gid of ref) {
+          ({
+            bbox: {x, y, x1, y1},
+            pd
+          } = drb.get_single_outline({gid, fontnick}));
+          pd = ZLIB.deflateRawSync(Buffer.from(pd));
+          results.push(insert_outline.run({fontnick, gid, x, y, x1, y1, pd}));
+        }
+        return results;
+      });
+      t1 = Date.now();
+      return debug('^324^', (dt = (t1 - t0) / 1000) + 's');
+    };
+    //.........................................................................................................
+    insert_outlines_as_gzip = () => {
+      var insert_outline;
+      insert_outline = db.prepare(drb.sql.insert_outline_blob);
+      t0 = Date.now();
+      db(() => {
+        var ref, results, x, x1, y, y1;
+        ref = gid_by_cids.values();
+        results = [];
+        for (gid of ref) {
+          ({
+            bbox: {x, y, x1, y1},
+            pd
+          } = drb.get_single_outline({gid, fontnick}));
+          pd = ZLIB.gzipSync(Buffer.from(pd, {
+            strategy: ZLIB.constants.Z_BEST_SPEED
+          }));
+          results.push(insert_outline.run({fontnick, gid, x, y, x1, y1, pd}));
+        }
+        return results;
+      });
+      t1 = Date.now();
+      return debug('^324^', (dt = (t1 - t0) / 1000) + 's');
+    };
+    //.........................................................................................................
+    // insert_outlines_as_brotli()
+    // insert_outlines_as_deflateraw()
+    insert_outlines_as_gzip();
+    // insert_outlines_as_text()
+    //.........................................................................................................
     echo(dtab._tabulate(db(SQL`select
     fontnick,
     gid,
@@ -119,8 +210,13 @@
     x1,
     y1,
     substring( pd, 0, 50 ) || '...' as "(pd)"
-  from ${schema}.outlines
-  order by fontnick, gid;`)));
+  from ${schema}.outlines_blob
+  order by fontnick, gid
+  limit 10;`)));
+    echo(dtab._tabulate(db(SQL`with v1 as ( select count(*) as outline_count from ${schema}.outlines_blob )
+select
+  v1.outline_count / ? as "outlines per second"
+from v1;`, [dt])));
     return null;
   };
 
