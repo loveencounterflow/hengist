@@ -34,6 +34,7 @@ nf                        = require 'number-format.js'
 # last                      = Symbol 'last'
 PATH                      = require 'path'
 FS                        = require 'fs'
+guy                       = require 'guy'
 
 #-----------------------------------------------------------------------------------------------------------
 @get_values = ( n = 10 ) ->
@@ -103,4 +104,18 @@ FS                        = require 'fs'
     $value: [ RX.integer, 100,  ]
     $vnr:   [ RX.integerArray, 5, 10, 0, ] }
   return RX.objectArray n, datom_template
+
+#-----------------------------------------------------------------------------------------------------------
+@get_svg_pathdata = ( n = 10 ) ->
+  validate.cardinal n
+  threshold = ( 1 / 100 / 100 ) * n # Math.min 1, n / 10_000 *
+  threshold = Math.max 0.01, Math.min 1, threshold
+  R         = new Set()
+  path      = PATH.resolve PATH.join __dirname, '../', 'assets/svg-pathdata.txt'
+  for line from guy.fs.walk_circular_lines path, { loop_count: +Infinity, }
+    continue unless line.startsWith 'M'
+    continue if Math.random() > threshold
+    R.add line
+    return [ R..., ] if R.size >= n
+  return n
 
