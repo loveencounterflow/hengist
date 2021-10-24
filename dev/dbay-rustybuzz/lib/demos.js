@@ -77,9 +77,9 @@
     drb = new Drb(drb_cfg);
     dtab = new Tbl({db});
     // fontnick = 'jzr';   fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
-    // fontnick = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
-    fontnick = 'qkai';
-    fspath = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/jizura-fonts/cwTeXQKai-Medium.ttf'));
+    fontnick = 'djvs';
+    fspath = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'));
+    // fontnick = 'qkai';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/cwTeXQKai-Medium.ttf'
     drb.register_fontnick({fontnick, fspath});
     echo(dtab._tabulate(db(SQL`select * from ${schema}.outlines order by fontnick, gid;`)));
     echo(dtab._tabulate(db(SQL`select * from ${schema}.fontnicks order by fontnick;`)));
@@ -96,11 +96,7 @@
     /* TAINT obtain list of all valid Unicode codepoints (again) */
     cids = cids_from_text("sampletext算");
     // cids                = [ 0x0021 .. 0xd000 ]
-    cids = (function() {
-      var results = [];
-      for (var i = 0x4e00; i <= 40959; i++){ results.push(i); }
-      return results;
-    }).apply(this);
+    // cids                = [ 0x4e00 .. 0x9fff ]
     // cids                = [ 0x4e00 .. 0x4e02 ]
     t0 = Date.now();
     gid_by_cids = drb.gids_from_cids({cids, fontnick});
@@ -113,7 +109,7 @@
     //.........................................................................................................
     insert_outlines = () => {
       var insert_outline;
-      insert_outline = db.prepare(drb.sql.insert_outline);
+      insert_outline = drb.prepare_insert_outline();
       t0 = Date.now();
       db(() => {
         var cid, glyph, ref, results, x, x1, y, y1, z;
