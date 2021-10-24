@@ -82,7 +82,7 @@ ZLIB                      = require 'zlib'
   help '^290^',  ( rpr gid_by_cids )[ ... 200 ] + '...'
   #.........................................................................................................
   insert_outlines = =>
-    insert_outline      = drb.prepare_insert_outline()
+    insert_outline      = drb._prepare_insert_outline()
     db =>
       for [ cid, gid, ] from gid_by_cids.entries()
         glyph       = String.fromCodePoint cid
@@ -90,7 +90,7 @@ ZLIB                      = require 'zlib'
           pd    }   = drb.get_single_outline { gid, fontnick, }
         { x,  y,
           x1, y1, } = bbox
-        pd_blob     = ( drb._compress_svg_pathdata pd )
+        pd_blob     = ( drb._zip pd )
         insert_outline.run { fontnick, gid, cid, glyph, x, y, x1, y1, pd_blob, }
       return null
   #.........................................................................................................
