@@ -114,10 +114,8 @@
         for (z of ref) {
           [cid, gid] = z;
           glyph = String.fromCodePoint(cid);
-          ({
-            bbox: {x, y, x1, y1},
-            pd
-          } = drb.get_single_outline({gid, fontnick}));
+          ({bbox, pd} = drb.get_single_outline({gid, fontnick}));
+          ({x, y, x1, y1} = bbox);
           pd_blob = drb._compress_svg_pathdata(pd);
           insert_outline.run({fontnick, gid, cid, glyph, x, y, x1, y1, pd_blob});
         }
