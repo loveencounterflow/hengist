@@ -49,7 +49,6 @@ ZLIB                      = require 'zlib'
     path:           '/dev/shm/rustybuzz.sqlite'
     create:         true
     schema:         schema
-    compress_svg:   true
   drb                 = new Drb drb_cfg
   dtab                = new Tbl { db, }
   # fontnick = 'jzr';   fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
@@ -91,7 +90,7 @@ ZLIB                      = require 'zlib'
             x, y,
             x1, y1, },
           pd          } = drb.get_single_outline { gid, fontnick, }
-        pd_blob         = ( drb._compress_svg_pathdata pd ) if drb.cfg.compress_svg
+        pd_blob         = ( drb._compress_svg_pathdata pd )
         insert_outline.run { fontnick, gid, cid, glyph, x, y, x1, y1, pd_blob, }
       return null
   #.........................................................................................................
