@@ -107,7 +107,7 @@
     //.........................................................................................................
     insert_outlines = () => {
       var insert_outline;
-      insert_outline = drb.prepare_insert_outline();
+      insert_outline = drb._prepare_insert_outline();
       return db(() => {
         var cid, glyph, pd_blob, ref, x, x1, y, y1, z;
         ref = gid_by_cids.entries();
@@ -116,7 +116,7 @@
           glyph = String.fromCodePoint(cid);
           ({bbox, pd} = drb.get_single_outline({gid, fontnick}));
           ({x, y, x1, y1} = bbox);
-          pd_blob = drb._compress_svg_pathdata(pd);
+          pd_blob = drb._zip(pd);
           insert_outline.run({fontnick, gid, cid, glyph, x, y, x1, y1, pd_blob});
         }
         return null;
