@@ -110,11 +110,9 @@
     insert_outlines = () => {
       var insert_outline;
       insert_outline = drb.prepare_insert_outline();
-      t0 = Date.now();
-      db(() => {
-        var cid, glyph, ref, results, x, x1, y, y1, z;
+      return db(() => {
+        var cid, glyph, pd_blob, ref, x, x1, y, y1, z;
         ref = gid_by_cids.entries();
-        results = [];
         for (z of ref) {
           [cid, gid] = z;
           glyph = String.fromCodePoint(cid);
@@ -124,17 +122,18 @@
           } = drb.get_single_outline({gid, fontnick}));
           pd = drb.cfg.despace_svg ? drb._despace_svg_pathdata(pd) : pd;
           if (drb.cfg.compress_svg) {
-            pd = drb._compress_svg_pathdata(pd);
+            pd_blob = drb._compress_svg_pathdata(pd);
           }
-          results.push(insert_outline.run({fontnick, gid, cid, glyph, x, y, x1, y1, pd}));
+          insert_outline.run({fontnick, gid, cid, glyph, x, y, x1, y1, pd_blob});
         }
-        return results;
+        return null;
       });
-      t1 = Date.now();
-      return debug('^324^', (dt = (t1 - t0) / 1000) + 's');
     };
     //.........................................................................................................
+    t0 = Date.now();
     insert_outlines();
+    t1 = Date.now();
+    debug('^324^', (dt = (t1 - t0) / 1000) + 's');
     //.........................................................................................................
     echo(dtab._tabulate(db(SQL`select
     fontnick,
@@ -146,8 +145,8 @@
     y,
     x1,
     y1,
-    substring( pd_txt, 0, 25 ) || '...' as "(pd_txt)"
-    -- substring( pd, 0, 25 ) || '...' as "(pd)"
+    substring( pd, 0, 25 ) || '...' as "(pd)"
+    -- substring( pd_blob, 0, 25 ) || '...' as "(pd_blob)"
   from ${schema}.outlines
   order by fontnick, gid
   limit 100;`)));
