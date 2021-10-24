@@ -84,7 +84,7 @@ ZLIB                      = require 'zlib'
   help '^290^',  ( rpr gid_by_cids )[ ... 200 ] + '...'
   #.........................................................................................................
   insert_outlines = =>
-    insert_outline      = db.prepare drb.sql.insert_outline
+    insert_outline      = drb.prepare_insert_outline()
     t0                  = Date.now()
     db =>
       for [ cid, gid, ] from gid_by_cids.entries()
