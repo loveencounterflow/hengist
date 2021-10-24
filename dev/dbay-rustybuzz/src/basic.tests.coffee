@@ -127,7 +127,7 @@ guy                       = require '../../../apps/guy'
   { Drb }             = require H.drb_path
   db                  = new DBay()
   drb                 = new Drb { db, temporary: true, RBW, }
-  debug '^4455^', drb.RBW is RBW
+  T?.ok drb.RBW is RBW
   #.........................................................................................................
   return done?()
 
@@ -141,5 +141,5 @@ if require.main is module then do =>
   # @[ "DRB foobar" ]()
   # test @[ "DRB no shared state in WASM module" ]
   # @[ "DRB path compression" ]()
-  @[ "DRB can pass in custom RBW" ]()
+  test @[ "DRB can pass in custom RBW" ]
 
