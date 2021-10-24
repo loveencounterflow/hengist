@@ -44,17 +44,6 @@ SVGO                      = require 'svgo'
   return data_cache
 
 #-----------------------------------------------------------------------------------------------------------
-despace_svg_pathdata = ( svg_pathda ) ->
-  R = svg_pathda
-  R = R.replace /([0-9])\x20([^0-9])/g, '$1$2'
-  R = R.replace /([^0-9])\x20([0-9])/g, '$1$2'
-  return R
-
-# #-----------------------------------------------------------------------------------------------------------
-# despace_svg_pathdata_2 = ( svg_pathda ) ->
-#   return svg_pathda.replace /([0-9])\x20([^0-9])|([^0-9])\x20([0-9])/g, '$1$2$3$4'
-
-#-----------------------------------------------------------------------------------------------------------
 @svgo = ( cfg ) -> new Promise ( resolve ) =>
   { svg_paths       } = @get_data cfg
   original_size       = 0
@@ -79,38 +68,6 @@ despace_svg_pathdata = ( svg_pathda ) ->
     debug '^23^', "original_size: #{original_size_txt}, compressed_size: #{compressed_size_txt}, ratio: #{ratio_txt}"
     resolve count
   return null
-
-#-----------------------------------------------------------------------------------------------------------
-@_despace = ( cfg ) -> new Promise ( resolve ) =>
-  { svg_paths       } = @get_data cfg
-  original_size       = 0
-  compressed_size     = 0
-  count               = 0
-  despace             = switch cfg.method
-    when 1  then  despace = despace_svg_pathdata
-    when 2  then  despace = despace_svg_pathdata_2
-    else throw new Error "^7409^ unknown method #{rpr cfg.method}"
-  #.........................................................................................................
-  resolve => new Promise ( resolve ) =>
-    for svg_path in svg_paths
-      original_size            += svg_path.length
-      compressed_svg_path       = despace svg_path
-      compressed_size          += compressed_svg_path.length
-      count++
-      if cfg.show
-        debug '^3343^', svg_path
-        debug '^3343^', compressed_svg_path
-    original_size_txt   = CND.format_number original_size
-    compressed_size_txt = CND.format_number compressed_size
-    ratio               = compressed_size / original_size
-    ratio_txt           = ratio.toFixed 3
-    debug '^23^', "original_size: #{original_size_txt}, compressed_size: #{compressed_size_txt}, ratio: #{ratio_txt}"
-    resolve count
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@despace_1 = ( cfg ) => @_despace { cfg..., method: 1, }
-# @despace_2 = ( cfg ) => @_despace { cfg..., method: 2, }
 
 #-----------------------------------------------------------------------------------------------------------
 @_zlib = ( cfg ) -> new Promise ( resolve ) =>
@@ -139,13 +96,10 @@ despace_svg_pathdata = ( svg_pathda ) ->
   zlib_cfg.strategy   = cfg.strategy ? ZLIB.constants.Z_DEFAULT_STRATEGY
   original_size       = 0
   compressed_size     = 0
-  if cfg.despace  then  despace = despace_svg_pathdata
-  else                  despace = ( x ) -> x
   #.........................................................................................................
   resolve => new Promise ( resolve ) =>
     for svg_path in svg_paths
       original_size      += ( Buffer.from svg_path ).length
-      svg_path            = despace svg_path
       original_buffer     = Buffer.from svg_path
       compressed_buffer   = compress original_buffer, zlib_cfg
       compressed_size    += compressed_buffer.length
@@ -168,8 +122,7 @@ despace_svg_pathdata = ( svg_pathda ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @zlib_deflateraw_1            = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',     'level': 1, strategy: ZLIB.constants.Z_DEFAULT_STRATEGY, }
-@zlib_deflateraw_1_hfm        = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',     'level': 1, strategy: ZLIB.constants.Z_HUFFMAN_ONLY, despace: false, }
-@zlib_deflateraw_1_hfm_optim  = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',     'level': 1, strategy: ZLIB.constants.Z_HUFFMAN_ONLY, despace: true, }
+@zlib_deflateraw_1_hfm        = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',     'level': 1, strategy: ZLIB.constants.Z_HUFFMAN_ONLY, }
 @zlib_deflateraw_1_rle        = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',     'level': 1, strategy: ZLIB.constants.Z_RLE, }
 @zlib_deflateraw_1_fixed      = ( cfg ) => @_zlib { cfg..., method: 'deflateraw',     'level': 1, strategy: ZLIB.constants.Z_FIXED, }
 @zlib_gzip_1                  = ( cfg ) => @_zlib { cfg..., method: 'gzip',           'level': 1, strategy: ZLIB.constants.Z_DEFAULT_STRATEGY, }
@@ -198,8 +151,8 @@ despace_svg_pathdata = ( svg_pathda ) ->
   gcfg.verbose  = true
   gcfg.verbose  = false
   bench         = BM.new_benchmarks()
-  # cfg           = { path_count: 1_000, }
-  cfg           = { path_count: 10_000, }
+  cfg           = { path_count: 1_000, }
+  # cfg           = { path_count: 10_000, }
   # cfg           = { path_count: 3, }
   #.........................................................................................................
   ### outline_usage_rate controls how many of the compressed outlines will get decompressed, thereby
@@ -219,10 +172,6 @@ despace_svg_pathdata = ( svg_pathda ) ->
     'zlib_gzip_1_hfm'
     'zlib_deflateraw_1_rle'
     'zlib_gzip_1_rle'
-
-    # 'zlib_deflateraw_1_hfm_optim'
-    # # 'despace_1'
-    # # # 'despace_2' ### not equivalent to despace_1 as it misses some spaces ###
 
     # 'zlib_deflateraw_1_fixed'
     # 'zlib_deflateraw_1'
