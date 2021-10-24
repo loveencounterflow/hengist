@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var BM, CND, DATA, FS, PATH, SVGO, ZLIB, alert, badge, data_cache, debug, despace_svg_pathdata, echo, freeze, gcfg, help, info, jr, log, rpr, test, urge, warn, whisper;
+  var BM, CND, DATA, FS, PATH, SVGO, ZLIB, alert, badge, data_cache, debug, echo, freeze, gcfg, help, info, jr, log, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -71,19 +71,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  despace_svg_pathdata = function(svg_pathda) {
-    var R;
-    R = svg_pathda;
-    R = R.replace(/([0-9])\x20([^0-9])/g, '$1$2');
-    R = R.replace(/([^0-9])\x20([0-9])/g, '$1$2');
-    return R;
-  };
-
-  // #-----------------------------------------------------------------------------------------------------------
-  // despace_svg_pathdata_2 = ( svg_pathda ) ->
-  //   return svg_pathda.replace /([0-9])\x20([^0-9])|([^0-9])\x20([0-9])/g, '$1$2$3$4'
-
-  //-----------------------------------------------------------------------------------------------------------
   this.svgo = function(cfg) {
     return new Promise((resolve) => {
       var compressed_size, count, original_size, svg_paths;
@@ -123,64 +110,9 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._despace = function(cfg) {
-    return new Promise((resolve) => {
-      var compressed_size, count, despace, original_size, svg_paths;
-      ({svg_paths} = this.get_data(cfg));
-      original_size = 0;
-      compressed_size = 0;
-      count = 0;
-      despace = (function() {
-        switch (cfg.method) {
-          case 1:
-            return despace = despace_svg_pathdata;
-          case 2:
-            return despace = despace_svg_pathdata_2;
-          default:
-            throw new Error(`^7409^ unknown method ${rpr(cfg.method)}`);
-        }
-      })();
-      //.........................................................................................................
-      resolve(() => {
-        return new Promise((resolve) => {
-          var compressed_size_txt, compressed_svg_path, i, len, original_size_txt, ratio, ratio_txt, svg_path;
-          for (i = 0, len = svg_paths.length; i < len; i++) {
-            svg_path = svg_paths[i];
-            original_size += svg_path.length;
-            compressed_svg_path = despace(svg_path);
-            compressed_size += compressed_svg_path.length;
-            count++;
-            if (cfg.show) {
-              debug('^3343^', svg_path);
-              debug('^3343^', compressed_svg_path);
-            }
-          }
-          original_size_txt = CND.format_number(original_size);
-          compressed_size_txt = CND.format_number(compressed_size);
-          ratio = compressed_size / original_size;
-          ratio_txt = ratio.toFixed(3);
-          debug('^23^', `original_size: ${original_size_txt}, compressed_size: ${compressed_size_txt}, ratio: ${ratio_txt}`);
-          return resolve(count);
-        });
-      });
-      return null;
-    });
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.despace_1 = (cfg) => {
-    return this._despace({
-      ...cfg,
-      method: 1
-    });
-  };
-
-  // @despace_2 = ( cfg ) => @_despace { cfg..., method: 2, }
-
-  //-----------------------------------------------------------------------------------------------------------
   this._zlib = function(cfg) {
     return new Promise((resolve) => {
-      var compress, compressed_size, count, decompress, decompression_count, deflate_dict, despace, original_size, ref, ref1, svg_paths, zlib_cfg;
+      var compress, compressed_size, count, decompress, decompression_count, deflate_dict, original_size, ref, ref1, svg_paths, zlib_cfg;
       compress = (function() {
         switch (cfg.method) {
           case 'deflate':
@@ -225,13 +157,6 @@
       zlib_cfg.strategy = (ref1 = cfg.strategy) != null ? ref1 : ZLIB.constants.Z_DEFAULT_STRATEGY;
       original_size = 0;
       compressed_size = 0;
-      if (cfg.despace) {
-        despace = despace_svg_pathdata;
-      } else {
-        despace = function(x) {
-          return x;
-        };
-      }
       //.........................................................................................................
       resolve(() => {
         return new Promise((resolve) => {
@@ -239,7 +164,6 @@
           for (i = 0, len = svg_paths.length; i < len; i++) {
             svg_path = svg_paths[i];
             original_size += (Buffer.from(svg_path)).length;
-            svg_path = despace(svg_path);
             original_buffer = Buffer.from(svg_path);
             compressed_buffer = compress(original_buffer, zlib_cfg);
             compressed_size += compressed_buffer.length;
@@ -287,18 +211,7 @@
       ...cfg,
       method: 'deflateraw',
       'level': 1,
-      strategy: ZLIB.constants.Z_HUFFMAN_ONLY,
-      despace: false
-    });
-  };
-
-  this.zlib_deflateraw_1_hfm_optim = (cfg) => {
-    return this._zlib({
-      ...cfg,
-      method: 'deflateraw',
-      'level': 1,
-      strategy: ZLIB.constants.Z_HUFFMAN_ONLY,
-      despace: true
+      strategy: ZLIB.constants.Z_HUFFMAN_ONLY
     });
   };
 
@@ -450,10 +363,10 @@
     gcfg.verbose = true;
     gcfg.verbose = false;
     bench = BM.new_benchmarks();
-    // cfg           = { path_count: 1_000, }
     cfg = {
-      path_count: 10_000
+      path_count: 1_000
     };
+    // cfg           = { path_count: 10_000, }
     // cfg           = { path_count: 3, }
     //.........................................................................................................
     /* outline_usage_rate controls how many of the compressed outlines will get decompressed, thereby
@@ -474,10 +387,6 @@
     repetitions = 5;
     test_names = ['zlib_deflateraw_1_hfm', 'zlib_gzip_1_hfm', 'zlib_deflateraw_1_rle', 'zlib_gzip_1_rle'];
     if (global.gc != null) {
-      // 'zlib_deflateraw_1_hfm_optim'
-      // # 'despace_1'
-      // # # 'despace_2' ### not equivalent to despace_1 as it misses some spaces ###
-
       // 'zlib_deflateraw_1_fixed'
       // 'zlib_deflateraw_1'
       // 'zlib_gzip_1_fixed'

@@ -71,8 +71,7 @@
       path: '/dev/shm/rustybuzz.sqlite',
       create: true,
       schema: schema,
-      compress_svg: true,
-      despace_svg: true
+      compress_svg: true
     };
     drb = new Drb(drb_cfg);
     dtab = new Tbl({db});
@@ -120,7 +119,6 @@
             bbox: {x, y, x1, y1},
             pd
           } = drb.get_single_outline({gid, fontnick}));
-          pd = drb.cfg.despace_svg ? drb._despace_svg_pathdata(pd) : pd;
           if (drb.cfg.compress_svg) {
             pd_blob = drb._compress_svg_pathdata(pd);
           }

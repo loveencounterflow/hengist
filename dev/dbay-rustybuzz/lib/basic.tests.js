@@ -182,6 +182,32 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DRB RBW returns despaced pathdata"] = function(T, done) {
+    var DBay, Drb, FS, RBW, bbox, db, drb, fontnick, fspath, pd;
+    // T?.halt_on_error()
+    FS = require('fs');
+    RBW = require('../../../apps/rustybuzz-wasm/pkg');
+    ({DBay} = require(H.dbay_path));
+    ({Drb} = require(H.drb_path));
+    db = new DBay();
+    drb = new Drb({
+      db,
+      temporary: true,
+      RBW
+    });
+    fontnick = 'djvs';
+    fspath = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'));
+    drb.register_fontnick({fontnick, fspath});
+    drb.load_font({fontnick});
+    ({bbox, pd} = drb.get_single_outline({
+      fontnick,
+      gid: 74
+    }));
+    debug('^3344^', rpr(pd));
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -189,7 +215,8 @@
       // @[ "DRB foobar" ]()
       // test @[ "DRB no shared state in WASM module" ]
       // @[ "DRB path compression" ]()
-      return test(this["DRB can pass in custom RBW"]);
+      // test @[ "DRB can pass in custom RBW" ]
+      return this["DRB RBW returns despaced pathdata"]();
     })();
   }
 
