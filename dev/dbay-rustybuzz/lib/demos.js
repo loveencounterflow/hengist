@@ -244,12 +244,27 @@ from v1;`, [dt])));
   //   echo "</svg>"
   //   return null
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_use_linked_rustybuzz_wasm = function() {
+    var font_bytes, font_idx, fontnick, fspath;
+    RBW = require('../../../apps/rustybuzz-wasm/pkg');
+    debug('^455^', RBW);
+    fontnick = 'djvs';
+    fspath = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'));
+    font_idx = 0;
+    font_bytes = (FS.readFileSync(fspath)).toString('hex');
+    RBW.register_font(font_idx, font_bytes);
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (async() => {
       return (await this.demo_load_font_outlines());
     })();
   }
+
+  // await @demo_use_linked_rustybuzz_wasm()
 
 }).call(this);
 

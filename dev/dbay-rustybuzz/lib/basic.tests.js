@@ -163,16 +163,33 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DRB can pass in custom RBW"] = function(T, done) {
+    var DBay, Drb, RBW, db, drb;
+    // T?.halt_on_error()
+    RBW = require('../../../apps/rustybuzz-wasm/pkg');
+    ({DBay} = require(H.dbay_path));
+    ({Drb} = require(H.drb_path));
+    db = new DBay();
+    drb = new Drb({
+      db,
+      temporary: true,
+      RBW
+    });
+    debug('^4455^', drb.RBW === RBW);
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // @[ "DRB foobar" ]()
+      // test @[ "DRB no shared state in WASM module" ]
+      // @[ "DRB path compression" ]()
+      return this["DRB can pass in custom RBW"]();
     })();
   }
-
-  // @[ "DRB foobar" ]()
-// test @[ "DRB no shared state in WASM module" ]
-// @[ "DRB path compression" ]()
 
 }).call(this);
 
