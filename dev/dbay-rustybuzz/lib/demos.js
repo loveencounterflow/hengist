@@ -70,8 +70,7 @@
       db: db,
       path: '/dev/shm/rustybuzz.sqlite',
       create: true,
-      schema: schema,
-      compress_svg: true
+      schema: schema
     };
     drb = new Drb(drb_cfg);
     dtab = new Tbl({db});
@@ -119,9 +118,7 @@
             bbox: {x, y, x1, y1},
             pd
           } = drb.get_single_outline({gid, fontnick}));
-          if (drb.cfg.compress_svg) {
-            pd_blob = drb._compress_svg_pathdata(pd);
-          }
+          pd_blob = drb._compress_svg_pathdata(pd);
           insert_outline.run({fontnick, gid, cid, glyph, x, y, x1, y1, pd_blob});
         }
         return null;
