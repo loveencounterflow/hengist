@@ -85,7 +85,6 @@ ZLIB                      = require 'zlib'
   #.........................................................................................................
   insert_outlines = =>
     insert_outline      = drb.prepare_insert_outline()
-    t0                  = Date.now()
     db =>
       for [ cid, gid, ] from gid_by_cids.entries()
         glyph = String.fromCodePoint cid
@@ -94,12 +93,14 @@ ZLIB                      = require 'zlib'
             x1, y1, },
           pd          } = drb.get_single_outline { gid, fontnick, }
         pd              = if drb.cfg.despace_svg then ( drb._despace_svg_pathdata pd ) else pd
-        pd              = ( drb._compress_svg_pathdata pd ) if drb.cfg.compress_svg
-        insert_outline.run { fontnick, gid, cid, glyph, x, y, x1, y1, pd, }
-    t1                  = Date.now()
-    debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
+        pd_blob         = ( drb._compress_svg_pathdata pd ) if drb.cfg.compress_svg
+        insert_outline.run { fontnick, gid, cid, glyph, x, y, x1, y1, pd_blob, }
+      return null
   #.........................................................................................................
+  t0                  = Date.now()
   insert_outlines()
+  t1                  = Date.now()
+  debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
   #.........................................................................................................
   echo dtab._tabulate db SQL"""
     select
@@ -112,8 +113,8 @@ ZLIB                      = require 'zlib'
         y,
         x1,
         y1,
-        substring( pd_txt, 0, 25 ) || '...' as "(pd_txt)"
-        -- substring( pd, 0, 25 ) || '...' as "(pd)"
+        substring( pd, 0, 25 ) || '...' as "(pd)"
+        -- substring( pd_blob, 0, 25 ) || '...' as "(pd_blob)"
       from #{schema}.outlines
       order by fontnick, gid
       limit 100;"""
