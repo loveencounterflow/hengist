@@ -119,14 +119,27 @@ guy                       = require '../../../apps/guy'
   #.........................................................................................................
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DRB can pass in custom RBW" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  RBW                 = require '../../../apps/rustybuzz-wasm/pkg'
+  { DBay }            = require H.dbay_path
+  { Drb }             = require H.drb_path
+  db                  = new DBay()
+  drb                 = new Drb { db, temporary: true, RBW, }
+  debug '^4455^', drb.RBW is RBW
+  #.........................................................................................................
+  return done?()
+
+
 
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # @[ "DRB foobar" ]()
   # test @[ "DRB no shared state in WASM module" ]
   # @[ "DRB path compression" ]()
-
+  @[ "DRB can pass in custom RBW" ]()
 
