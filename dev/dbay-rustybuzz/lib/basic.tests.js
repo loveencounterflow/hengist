@@ -176,7 +176,9 @@
       temporary: true,
       RBW
     });
-    debug('^4455^', drb.RBW === RBW);
+    if (T != null) {
+      T.ok(drb.RBW === RBW);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -187,7 +189,7 @@
       // @[ "DRB foobar" ]()
       // test @[ "DRB no shared state in WASM module" ]
       // @[ "DRB path compression" ]()
-      return this["DRB can pass in custom RBW"]();
+      return test(this["DRB can pass in custom RBW"]);
     })();
   }
 
