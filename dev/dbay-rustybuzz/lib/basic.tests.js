@@ -184,17 +184,17 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB RBW returns despaced pathdata"] = function(T, done) {
-    var DBay, Drb, FS, RBW, bbox, db, drb, fontnick, fspath, pd;
+    var DBay, Drb, FS, bbox, db, drb, fontnick, fspath, pd;
     // T?.halt_on_error()
     FS = require('fs');
-    RBW = require('../../../apps/rustybuzz-wasm/pkg');
+    // RBW                 = require '../../../apps/rustybuzz-wasm/pkg'
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
     db = new DBay();
+    // drb                 = new Drb { db, temporary: true, RBW, }
     drb = new Drb({
       db,
-      temporary: true,
-      RBW
+      temporary: true
     });
     fontnick = 'djvs';
     fspath = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'));
@@ -205,6 +205,9 @@
       gid: 74
     }));
     debug('^3344^', rpr(pd));
+    if (T != null) {
+      T.eq(pd, 'M525-467L525-11Q525 101 463 161Q402 222 288 222Q237 222 190 213Q143 204 100 185L100 76L147 76Q156 127 188 150Q221 174 282 174Q361 174 398 129Q435 84 435-11L435-81Q409-32 368-9Q327 14 267 14Q171 14 111-62Q50-138 50-260Q50-382 110-458Q171-533 267-533Q327-533 368-510Q409-487 435-438L435-519L611-519L611-467L525-467Z M435-285Q435-378 399-428Q363-477 295-477Q226-477 190-422Q155-368 155-260Q155-152 190-97Q226-42 295-42Q363-42 399-91Q435-140 435-234L435-285Z');
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -216,7 +219,7 @@
       // test @[ "DRB no shared state in WASM module" ]
       // @[ "DRB path compression" ]()
       // test @[ "DRB can pass in custom RBW" ]
-      return this["DRB RBW returns despaced pathdata"]();
+      return test(this["DRB RBW returns despaced pathdata"]);
     })();
   }
 
