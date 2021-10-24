@@ -107,11 +107,13 @@ ZLIB                      = require 'zlib'
         gid,
         cid,
         glyph,
+        uoid,
         x,
         y,
         x1,
         y1,
-        substring( pd, 0, 50 ) || '...' as "(pd)"
+        substring( pd_txt, 0, 25 ) || '...' as "(pd_txt)"
+        -- substring( pd, 0, 25 ) || '...' as "(pd)"
       from #{schema}.outlines
       order by fontnick, gid
       limit 100;"""
