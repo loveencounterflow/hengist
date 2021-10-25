@@ -28,64 +28,15 @@ guy                       = require '../../../apps/guy'
 # MMX                       = require '../../../apps/multimix/lib/cataloguing'
 RBW                       = require 'rustybuzz-wasm'
 H                         = require './helpers'
-cids_from_text            = ( text ) -> ( ( chr.codePointAt 0 ) for chr in Array.from text )
 ZLIB                      = require 'zlib'
 
 
-
-
-#===========================================================================================================
-#
 #-----------------------------------------------------------------------------------------------------------
-@demo_store_outlines = ->
-  { DBay }            = require H.dbay_path
-  { Drb }             = require H.drb_path
+show_db = ( db, schema ) ->
   { Tbl, }            = require '../../../apps/icql-dba-tabulate'
-  path                = '/tmp/dbay-rustybuzz.sqlite'
-  db                  = new DBay { path, }
-  schema              = 'drb'
-  drb_cfg             =
-    db:             db
-    path:           '/dev/shm/rustybuzz.sqlite'
-    create:         true
-    schema:         schema
-  drb                 = new Drb drb_cfg
   dtab                = new Tbl { db, }
-  # fontnick = 'jzr';   fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/jizura3b.ttf'
-  fontnick = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
-  # fontnick = 'qkai';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/cwTeXQKai-Medium.ttf'
-  drb.register_fontnick { fontnick, fspath, }
-  echo dtab._tabulate db SQL"select * from #{schema}.outlines order by fontnick, gid;"
+  # echo dtab._tabulate db SQL"select * from #{schema}.outlines order by fontnick, gid;"
   echo dtab._tabulate db SQL"select * from #{schema}.fontnicks order by fontnick;"
-  whisper '^3334^', "loading font #{rpr fontnick}..."
-  drb.prepare_font { fontnick, }
-  whisper '^3334^', "... done"
-  #.........................................................................................................
-  # gid                 = drb.cgid_map_from_cids { cids: ( cids_from_text 'O' ), fontnick, }
-  gid                 = 74
-  font_idx            = 0
-  # urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
-  urge '^290^', { bbox, pd, } = drb.get_single_outline { fontnick, gid, }
-  #.........................................................................................................
-  ### TAINT obtain list of all valid Unicode codepoints (again) ###
-  cids                = cids_from_text "sampletext算"
-  # cids                = [ 0x0021 .. 0xd000 ]
-  # cids                = [ 0x4e00 .. 0x9fff ]
-  # cids                = [ 0x4e00 .. 0x4e02 ]
-  t0                  = Date.now()
-  cgid_map            = drb.get_cgid_map { cids, fontnick, }
-  t1                  = Date.now()
-  ### TAINT might want to turn this into a benchmark (or improve reporting) ###
-  debug '^324^', cids.length      + ' cids'
-  debug '^324^', cgid_map.size + ' gids'
-  debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
-  help '^290^',  ( rpr cgid_map )[ ... 200 ] + '...'
-  #.........................................................................................................
-  t0                  = Date.now()
-  drb.insert_outlines { fontnick, cgid_map, }
-  t1                  = Date.now()
-  debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
-  #.........................................................................................................
   echo dtab._tabulate db SQL"""
     select
         fontnick,
@@ -93,6 +44,7 @@ ZLIB                      = require 'zlib'
         cid,
         glyph,
         uoid,
+        -- soid,
         x,
         y,
         x1,
@@ -104,11 +56,83 @@ ZLIB                      = require 'zlib'
       order by fontnick, gid
       limit 100;"""
   echo dtab._tabulate db SQL"""
-    with v1 as ( select count(*) as outline_count from #{schema}.outlines )
-    select
-      v1.outline_count / ? as "outlines per second"
-    from v1;""", [ dt, ]
+    select distinct
+        fontnick,
+        count(*) over ( partition by fontnick ) as outlines
+      from #{schema}.outlines
+      order by fontnick, gid
+      limit 100;"""
   return null
+
+
+#===========================================================================================================
+#
+#-----------------------------------------------------------------------------------------------------------
+@demo_store_outlines = ( cfg ) ->
+  defaults            = { set_id: 'small', }
+  cfg                 = { defaults..., cfg..., }
+  { set_id }          = cfg
+  { DBay }            = require H.dbay_path
+  { Drb }             = require H.drb_path
+  path                = '/tmp/dbay-rustybuzz.sqlite'
+  db                  = new DBay { path, }
+  schema              = 'drb'
+  drb_cfg             =
+    db:             db
+    path:           '/dev/shm/rustybuzz.sqlite'
+    create:         true
+    schema:         schema
+  drb                 = new Drb drb_cfg
+  #.........................................................................................................
+  text                = null
+  cids                = null
+  cgid_map            = null
+  #.........................................................................................................
+  switch set_id
+    when 'small'
+      fontnick  = 'djvs'
+      fspath    = 'DejaVuSerif.ttf'
+      text      = "sampletext算"
+    when 'all'
+      fontnick = 'qkai'
+      fspath    = 'cwTeXQKai-Medium.ttf'
+      cids      = drb.get_unicode_codepoints()
+      # fontnick = 'jzr';   fspath = 'jizura3b.ttf'
+      ### TAINT obtain list of all valid Unicode codepoints (again) ###
+      # cids                = [ 0x0021 .. 0xd000 ]
+      # cids                = [ 0x4e00 .. 0x9fff ]
+      # cids                = [ 0x4e00 .. 0x4e02 ]
+    else
+      throw new Error "^345^ unknown set_id #{rpr set_id}"
+  #.........................................................................................................
+  fspath              = PATH.resolve PATH.join __dirname, '../../../assets/jizura-fonts/', fspath
+  #.........................................................................................................
+  drb.register_fontnick { fontnick, fspath, }
+  whisper '^3334^', "loading font #{rpr fontnick}..."; drb.prepare_font { fontnick, }; whisper '^3334^', "... done"
+  #.........................................................................................................
+  urge '^290^', { bbox, pd, } = drb.get_single_outline { fontnick, gid: 74, }
+  #.........................................................................................................
+  t0                  = Date.now()
+  ### NOTE exactly one of `cids`, `text` must be set ###
+  cgid_map            = drb.get_cgid_map { cids, text, fontnick, }
+  t1                  = Date.now()
+  ### TAINT might want to turn this into a benchmark (or improve reporting) ###
+  debug '^324^', cgid_map.size + ' gids'
+  debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
+  help '^290^',  ( rpr cgid_map )[ ... 200 ] + '...'
+  #.........................................................................................................
+  t0                  = Date.now()
+  drb.insert_outlines { fontnick, cgid_map, }
+  t1                  = Date.now()
+  debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
+  #.........................................................................................................
+  # echo dtab._tabulate db SQL"""
+  #   with v1 as ( select count(*) as outline_count from #{schema}.outlines )
+  #   select
+  #     v1.outline_count / ? as "outlines per second"
+  #   from v1;""", [ dt, ]
+  #.........................................................................................................
+  show_db db, schema
 
 
 # #-----------------------------------------------------------------------------------------------------------
@@ -209,8 +233,11 @@ ZLIB                      = require 'zlib'
   return null
 
 
+
 ############################################################################################################
 if require.main is module then do =>
   await @demo_store_outlines()
+  await @demo_store_outlines { set_id: 'all', }
   # await @demo_use_linked_rustybuzz_wasm()
+
 
