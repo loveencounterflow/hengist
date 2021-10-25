@@ -59,7 +59,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_store_outlines = function() {
-    var DBay, Drb, Tbl, bbox, cids, db, drb, drb_cfg, dt, dtab, font_idx, fontnick, fspath, gid, gid_by_cids, insert_outlines, path, pd, schema, t0, t1;
+    var DBay, Drb, Tbl, bbox, cids, db, drb, drb_cfg, dt, dtab, font_idx, fontnick, fspath, gid, gid_by_cids, path, pd, schema, t0, t1;
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
@@ -105,26 +105,8 @@
     debug('^324^', (dt = (t1 - t0) / 1000) + 's');
     help('^290^', (rpr(gid_by_cids)).slice(0, 200) + '...');
     //.........................................................................................................
-    insert_outlines = () => {
-      var insert_outline;
-      insert_outline = drb._prepare_insert_outline();
-      return db(() => {
-        var cid, glyph, pd_blob, ref, x, x1, y, y1, z;
-        ref = gid_by_cids.entries();
-        for (z of ref) {
-          [cid, gid] = z;
-          glyph = String.fromCodePoint(cid);
-          ({bbox, pd} = drb.get_single_outline({gid, fontnick}));
-          ({x, y, x1, y1} = bbox);
-          pd_blob = drb._zip(pd);
-          insert_outline.run({fontnick, gid, cid, glyph, x, y, x1, y1, pd_blob});
-        }
-        return null;
-      });
-    };
-    //.........................................................................................................
     t0 = Date.now();
-    insert_outlines();
+    drb.insert_outlines({fontnick, gid_by_cids});
     t1 = Date.now();
     debug('^324^', (dt = (t1 - t0) / 1000) + 's');
     //.........................................................................................................
