@@ -61,7 +61,7 @@ ZLIB                      = require 'zlib'
   drb.prepare_font { fontnick, }
   whisper '^3334^', "... done"
   #.........................................................................................................
-  # gid                 = drb.gids_from_cids { cids: ( cids_from_text 'O' ), fontnick, }
+  # gid                 = drb.cgid_map_from_cids { cids: ( cids_from_text 'O' ), fontnick, }
   gid                 = 74
   font_idx            = 0
   # urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
@@ -73,16 +73,16 @@ ZLIB                      = require 'zlib'
   # cids                = [ 0x4e00 .. 0x9fff ]
   # cids                = [ 0x4e00 .. 0x4e02 ]
   t0                  = Date.now()
-  gid_by_cids         = drb.gids_from_cids { cids, fontnick, }
+  cgid_map            = drb.get_cgid_map { cids, fontnick, }
   t1                  = Date.now()
   ### TAINT might want to turn this into a benchmark (or improve reporting) ###
   debug '^324^', cids.length      + ' cids'
-  debug '^324^', gid_by_cids.size + ' gids'
+  debug '^324^', cgid_map.size + ' gids'
   debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
-  help '^290^',  ( rpr gid_by_cids )[ ... 200 ] + '...'
+  help '^290^',  ( rpr cgid_map )[ ... 200 ] + '...'
   #.........................................................................................................
   t0                  = Date.now()
-  drb.insert_outlines { fontnick, gid_by_cids, }
+  drb.insert_outlines { fontnick, cgid_map, }
   t1                  = Date.now()
   debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
   #.........................................................................................................
