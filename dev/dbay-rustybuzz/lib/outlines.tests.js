@@ -43,46 +43,158 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB get_cgid_map()"] = function(T, done) {
-    var DBay, Drb, Tbl, db, drb, dtab, matcher, path, schema, text;
+    var DBay, Drb, chr, cids, matcher, text;
+    // ### explicit path, explicitly temporary ###
+    // T?.halt_on_error()
+    // { DBay }            = require H.dbay_path
+    ({DBay} = require(H.dbay_path));
+    ({Drb} = require(H.drb_path));
+    // path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
+    // DH                  = require PATH.join H.dbay_path, 'lib/helpers'
+    text = "there's the rub";
+    cids = (function() {
+      var i, len, ref, results;
+      ref = Array.from(text);
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        chr = ref[i];
+        results.push(chr.codePointAt(0));
+      }
+      return results;
+    })();
+    matcher = new Map([[116, 85], [104, 73], [101, 70], [114, 83], [39, 8], [115, 84], [32, 1], [117, 86], [98, 67]]);
+    (() => {      //.........................................................................................................
+      var db, drb, fontnick, result;
+      db = new DBay();
+      drb = new Drb({
+        db,
+        temporary: true
+      });
+      fontnick = 'gi';
+      drb.prepare_font({fontnick});
+      debug('^33234^', result = drb.get_cgid_map({fontnick, cids}));
+      if (T != null) {
+        T.eq(type_of(result), 'map');
+      }
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var db, drb, fontnick, result;
+      db = new DBay();
+      drb = new Drb({
+        db,
+        temporary: true
+      });
+      fontnick = 'gi';
+      drb.prepare_font({fontnick});
+      debug('^33234^', result = drb.get_cgid_map({fontnick, text}));
+      if (T != null) {
+        T.eq(type_of(result), 'map');
+      }
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var db, drb, fontnick;
+      db = new DBay();
+      drb = new Drb({
+        db,
+        temporary: true
+      });
+      fontnick = 'gi';
+      drb.prepare_font({fontnick});
+      return T != null ? T.throws(/not a valid dbr_get_cgid_map_cfg/, () => {
+        return drb.get_cgid_map({fontnick, cids, text});
+      }) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var db, drb, fontnick;
+      db = new DBay();
+      drb = new Drb({
+        db,
+        temporary: true
+      });
+      fontnick = 'gi';
+      drb.prepare_font({fontnick});
+      return T != null ? T.throws(/not a valid dbr_get_cgid_map_cfg/, () => {
+        return drb.get_cgid_map({fontnick});
+      }) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DRB insert_outlines()"] = function(T, done) {
+    var DBay, Drb, Tbl, chr, cids, matcher, text;
     // ### explicit path, explicitly temporary ###
     // T?.halt_on_error()
     // { DBay }            = require H.dbay_path
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
-    path = PATH.resolve(DBay.C.autolocation, 'drb-23842847.sqlite');
+    // path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
     // DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-    db = new DBay();
-    drb = new Drb({
-      path,
-      db,
-      temporary: true
-    });
-    dtab = new Tbl({db});
-    schema = drb.cfg.schema;
-    text = "there's the rub";
-    matcher = [[116, 85], [104, 73], [101, 70], [114, 83], [39, 8], [115, 84], [32, 1], [117, 86], [98, 67]];
+    text = "'ab-c'.";
+    cids = (function() {
+      var i, len, ref, results;
+      ref = Array.from(text);
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        chr = ref[i];
+        results.push(chr.codePointAt(0));
+      }
+      return results;
+    })();
+    matcher = new Map([[116, 85], [104, 73], [101, 70], [114, 83], [39, 8], [115, 84], [32, 1], [117, 86], [98, 67]]);
     (() => {      //.........................................................................................................
-      var chr, cids, fontnick, result;
+      var db, drb, dtab, fontnick, i, len, pd_blob, result, row;
+      db = new DBay();
+      dtab = new Tbl({db});
+      drb = new Drb({
+        db,
+        temporary: true
+      });
       fontnick = 'gi';
       drb.prepare_font({fontnick});
-      cids = (function() {
-        var i, len, ref, results;
-        ref = Array.from(text);
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          chr = ref[i];
-          results.push(chr.codePointAt(0));
+      drb.insert_outlines({fontnick, cids});
+      result = db.all_rows(SQL`select * from drb.outlines order by cid;`);
+      for (i = 0, len = result.length; i < len; i++) {
+        row = result[i];
+        ({pd_blob} = guy.obj.pluck_with_fallback(row, null, 'pd_blob'));
+        if (T != null) {
+          T.eq(type_of(pd_blob), 'buffer');
         }
-        return results;
-      })();
-      debug('^33234^', result = drb.get_cgid_map({fontnick, cids}));
-      if (T != null) {
-        T.eq(type_of(result), 'map');
+        if (row.glyph === '.') {
+          if (T != null) {
+            T.eq(row, {
+              fontnick: 'gi',
+              gid: 15,
+              cid: 46,
+              glyph: '.',
+              uoid: 'uo15gi',
+              x: 25,
+              y: -101,
+              x1: 135,
+              y1: 14,
+              pd: 'M90-101C54-101 25-72 25-36C25-10 44 14 70 14C106 14 135-15 135-51C135-77 116-101 90-101Z'
+            });
+          }
+        }
       }
-      debug(result, new Map(matcher));
-      debug(equals(result, new Map(matcher)));
-      return T != null ? T.eq([...result], matcher) : void 0;
+      // T?.eq ( type_of result ), 'map'
+      // T?.eq result, matcher
+      return echo(dtab._tabulate(db(SQL`select
+    fontnick,
+    gid,
+    cid,
+    glyph,
+    uoid,
+    x,
+    y,
+    x1,
+    y1,
+    substr( pd, 0, 10 ) as "(pd)"
+  from drb.outlines
+  order by cid;`)));
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -95,7 +207,8 @@
       // test @[ "DRB no shared state in WASM module" ]
       // @[ "DRB path compression" ]()
       // test @[ "DRB can pass in custom RBW" ]
-      return test(this["DRB get_cgid_map()"]);
+      // test @[ "DRB get_cgid_map()" ]
+      return this["DRB insert_outlines()"]();
     })();
   }
 

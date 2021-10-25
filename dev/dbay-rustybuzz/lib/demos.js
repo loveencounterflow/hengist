@@ -120,6 +120,7 @@
     y,
     x1,
     y1,
+    -- pd
     substring( pd, 0, 25 ) || '...' as "(pd)"
     -- substring( pd_blob, 0, 25 ) || '...' as "(pd_blob)"
   from ${schema}.outlines
