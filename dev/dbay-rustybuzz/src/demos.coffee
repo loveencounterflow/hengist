@@ -37,7 +37,7 @@ ZLIB                      = require 'zlib'
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@demo_load_font_outlines = ->
+@demo_store_outlines = ->
   { DBay }            = require H.dbay_path
   { Drb }             = require H.drb_path
   { Tbl, }            = require '../../../apps/icql-dba-tabulate'
@@ -58,7 +58,7 @@ ZLIB                      = require 'zlib'
   echo dtab._tabulate db SQL"select * from #{schema}.outlines order by fontnick, gid;"
   echo dtab._tabulate db SQL"select * from #{schema}.fontnicks order by fontnick;"
   whisper '^3334^', "loading font #{rpr fontnick}..."
-  drb.load_font { fontnick, }
+  drb.prepare_font { fontnick, }
   whisper '^3334^', "... done"
   #.........................................................................................................
   # gid                 = drb.gids_from_cids { cids: ( cids_from_text 'O' ), fontnick, }
@@ -223,6 +223,6 @@ ZLIB                      = require 'zlib'
 
 ############################################################################################################
 if require.main is module then do =>
-  await @demo_load_font_outlines()
+  await @demo_store_outlines()
   # await @demo_use_linked_rustybuzz_wasm()
 

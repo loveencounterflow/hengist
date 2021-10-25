@@ -80,13 +80,13 @@ guy                       = require '../../../apps/guy'
   do =>
     db                  = new DBay()
     drb                 = new Drb { db, temporary: true, }
-    drb.load_font { fontnick, }
+    drb.prepare_font { fontnick, }
     urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
   #.........................................................................................................
   do =>
     db                  = new DBay()
     drb                 = new Drb { db, temporary: true, }
-    ### we do not call `drb.load_font { fontnick, }` ###
+    ### we do not call `drb.prepare_font { fontnick, }` ###
     try
       urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
     catch error
@@ -143,7 +143,7 @@ guy                       = require '../../../apps/guy'
   drb                 = new Drb { db, temporary: true, }
   fontnick            = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
   drb.register_fontnick { fontnick, fspath, }
-  drb.load_font { fontnick, }
+  drb.prepare_font { fontnick, }
   { bbox, pd, }       = drb.get_single_outline { fontnick, gid: 74, }
   debug '^3344^', rpr pd
   T?.eq pd, 'M525-467L525-11Q525 101 463 161Q402 222 288 222Q237 222 190 213Q143 204 100 185L100 76L147 76Q156 127 188 150Q221 174 282 174Q361 174 398 129Q435 84 435-11L435-81Q409-32 368-9Q327 14 267 14Q171 14 111-62Q50-138 50-260Q50-382 110-458Q171-533 267-533Q327-533 368-510Q409-487 435-438L435-519L611-519L611-467L525-467Z M435-285Q435-378 399-428Q363-477 295-477Q226-477 190-422Q155-368 155-260Q155-152 190-97Q226-42 295-42Q363-42 399-91Q435-140 435-234L435-285Z'
