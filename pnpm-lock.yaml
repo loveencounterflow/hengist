@@ -13,7 +13,7 @@ specifiers:
   coffeescript: 2.6.1
   command-line-args: ^5.1.1
   command-line-usage: ^6.1.0
-  commander: 8.2.0
+  commander: 8.3.0
   convert-source-map: ^1.7.0
   csv-parser: ^3.0.0
   cupofjoe: 0.2.1
@@ -49,7 +49,7 @@ specifiers:
   intershop-intertext: file:../intershop-intertext
   intertext: 5.0.2
   intertext-splitlines: 1.2.1
-  intertype: 7.6.7
+  intertype: 7.7.0
   jake: ^10.8.2
   javascript-state-machine: ^3.1.0
   jfee: 0.1.4
@@ -68,7 +68,7 @@ specifiers:
   n-readlines: ^1.0.1
   node-icecream: ^1.0.0
   nodegit: ^0.27.0
-  npm: 8.0.0
+  npm: 8.1.1
   npm-logical-tree: ^1.2.1
   number-format.js: ^2.0.9
   opentype.js: 1.3.4
@@ -76,7 +76,7 @@ specifiers:
   panzoom: ^9.4.1
   pg: ^8.5.1
   pg-cursor: ^2.5.2
-  pg-mem: 2.1.5
+  pg-mem: 2.1.7
   pgsqwell: ^1.0.1
   pkg-dir: ^6.0.1
   postgres: ^1.0.2
@@ -84,9 +84,9 @@ specifiers:
   re2: ^1.15.9
   read-pkg-up: ^8.0.0
   readable-stream: ^3.6.0
-  rustybuzz-wasm: 0.3.0
+  rustybuzz-wasm: 1.0.0
   semver: ^7.3.5
-  simple-git: 2.46.0
+  simple-git: 2.47.0
   source-map: ^0.7.3
   source-map-resolve: ^0.6.0
   sql-template: ^1.2.2
@@ -119,7 +119,7 @@ dependencies:
   coffeescript: 2.6.1
   command-line-args: 5.2.0
   command-line-usage: 6.1.1
-  commander: 8.2.0
+  commander: 8.3.0
   convert-source-map: 1.8.0
   csv-parser: 3.0.0
   cupofjoe: 0.2.1
@@ -155,7 +155,7 @@ dependencies:
   intershop-intertext: link:../intershop-intertext
   intertext: 5.0.2
   intertext-splitlines: 1.2.1
-  intertype: 7.6.7
+  intertype: 7.7.0
   jake: 10.8.2
   javascript-state-machine: 3.1.0
   jfee: 0.1.4
@@ -174,7 +174,7 @@ dependencies:
   n-readlines: 1.0.1
   node-icecream: 1.0.0
   nodegit: 0.27.0
-  npm: 8.0.0
+  npm: 8.1.1
   npm-logical-tree: 1.2.1
   number-format.js: 2.0.9
   opentype.js: 1.3.4
@@ -182,7 +182,7 @@ dependencies:
   panzoom: 9.4.2
   pg: 8.7.1
   pg-cursor: 2.7.1_pg@8.7.1
-  pg-mem: 2.1.5
+  pg-mem: 2.1.7
   pgsqwell: 1.0.1
   pkg-dir: 6.0.1
   postgres: 1.0.2
@@ -190,9 +190,9 @@ dependencies:
   re2: 1.16.0
   read-pkg-up: 8.0.0
   readable-stream: 3.6.0
-  rustybuzz-wasm: 0.3.0
+  rustybuzz-wasm: 1.0.0
   semver: 7.3.5
-  simple-git: 2.46.0
+  simple-git: 2.47.0
   source-map: 0.7.3
   source-map-resolve: 0.6.0
   sql-template: 1.2.2
@@ -1223,8 +1223,8 @@ packages:
     engines: {node: '>= 10'}
     dev: false
 
-  /commander/8.2.0:
-    resolution: {integrity: sha512-LLKxDvHeL91/8MIyTAD5BFMNtoIwztGPMiM/7Bl8rIPmHCZXRxmSWr91h57dpOpnQ6jIUqEWdXE/uBYMfiVZDA==}
+  /commander/8.3.0:
+    resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
     engines: {node: '>= 12'}
     dev: false
 
@@ -1328,7 +1328,7 @@ packages:
     resolution: {integrity: sha512-lNapdhUmwN0y94FGYvGubow+ZznI/A8+AlETPRli5+N4WkSnCys9Md1MiG8ZFPhjpS5Z+/NYC8nWdu+sLOOd/Q==}
     dependencies:
       cnd: 9.2.2
-      intertype: 7.6.7
+      intertype: 7.7.0
       multimix: 4.1.0
     dev: false
 
@@ -2310,7 +2310,7 @@ packages:
     dependencies:
       async: 3.2.1
       cnd: 9.2.2
-      intertype: 7.6.7
+      intertype: 7.7.0
     dev: false
 
   /guy/1.0.0_deasync@0.1.23:
@@ -2510,7 +2510,7 @@ packages:
       cnd: 9.2.2
       guy: 1.0.0_deasync@0.1.23
       icql-dba: 10.1.0_deasync@0.1.23
-      intertype: 7.6.7
+      intertype: 7.7.0
       letsfreezethat: 3.1.0
     transitivePeerDependencies:
       - deasync
@@ -2654,7 +2654,7 @@ packages:
     resolution: {integrity: sha512-wbJT06yDygPP1b8QcMeQeTcu4RJAvusz2TpN6CaSnVMwifUqexOp6FuCdYKw/v2gvT/jpOYeoyfNB5umLiQKeA==}
     dependencies:
       cnd: 9.2.1
-      intertype: 7.6.7
+      intertype: 7.7.0
       interval-skip-list: 2.0.1
       multimix006modern: 0.0.6
     dev: false
@@ -2702,6 +2702,12 @@ packages:
 
   /intertype/7.6.7:
     resolution: {integrity: sha512-vBgYabqxX3fLa9f0Z3QeXgYszadAGdAHXdLcdQc5ZxZSG5CmbJCdYcudZLYtgmNo8epQag8zzyg7wwx+OD5J8g==}
+    dependencies:
+      multimix: 5.0.0
+    dev: false
+
+  /intertype/7.7.0:
+    resolution: {integrity: sha512-Sv923oXpq9In8/CuxP5KAKc3FIETOEl23ltwSfLOnn/8V8A5pDRlxWo0vhaA6p7WybRMgeZXsE4Etw98tWUMPA==}
     dependencies:
       multimix: 5.0.0
     dev: false
@@ -3448,7 +3454,7 @@ packages:
     resolution: {integrity: sha512-H8Aw9aYm6UaokHAxSj2BZnXhErx8G5yH0mu6B1or1XhKvMl6jD3QF68Z5SR03iWxxMQQIASobelJPic5GwSCow==}
     dependencies:
       cnd: 9.2.2
-      intertype: 7.6.7
+      intertype: 7.7.0
       ncr-norangereader: 2.1.3
       nearley: 2.20.1
     dev: false
@@ -3508,7 +3514,7 @@ packages:
     resolution: {integrity: sha512-r7Kfb/jZtgEj8EuVnqIsHydQ0u+rNdo2zUFOTSQ/bBpUnZsJkAQj4/8t+/fXpDlzKpN1LckkghV4WsL84DQpTQ==}
     dependencies:
       cnd: 9.2.1
-      intertype: 7.6.7
+      intertype: 7.7.0
     dev: false
 
   /mysql-tokenizer/1.0.7:
@@ -3554,7 +3560,7 @@ packages:
     dependencies:
       cnd: 9.2.1
       interskiplist: 0.3.0
-      intertype: 7.6.7
+      intertype: 7.7.0
       multimix006modern: 0.0.6
     dev: false
 
@@ -3762,8 +3768,8 @@ packages:
       path-key: 3.1.1
     dev: false
 
-  /npm/8.0.0:
-    resolution: {integrity: sha512-bhZ8L73aloy8CEEhRjkyJp55icQzpsOqdWWA95xZyyLwL52ASgVOm8CsXKcZgIlrh4/cQTeJMuIK6krBju43HA==}
+  /npm/8.1.1:
+    resolution: {integrity: sha512-sD4+ZHh/5Bx3wiTWbKwT+77RFoXvIKUfiSg6VJ/DFYucSDhSocKVyFzK1KviGkbsCFXAMETDifSGLb9kvDm6KA==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16}
     hasBin: true
     dev: false
@@ -4178,8 +4184,8 @@ packages:
     engines: {node: '>=4.0.0'}
     dev: false
 
-  /pg-mem/2.1.5:
-    resolution: {integrity: sha512-P00gzyj8nGAijzn5QbC6n4pz+quVKM/AUxnTdCweM36odR5Xwcp2BXkkBCsp9StnOtkM+Im7ggMggHE9TYCu4A==}
+  /pg-mem/2.1.7:
+    resolution: {integrity: sha512-jDRFdtkyY22kN40vfnVL8OTQ1HnjMxLJ0gSInGgSMpZynM+5J1oDZ5OPme4Kw21V0o753sc+X1FsdpPXIVycFw==}
     peerDependencies:
       knex: ^0.21.15
       mikro-orm: '*'
@@ -4205,7 +4211,7 @@ packages:
       lru-cache: 6.0.0
       moment: 2.29.1
       object-hash: 2.2.0
-      pgsql-ast-parser: 9.1.2
+      pgsql-ast-parser: 9.2.1
     transitivePeerDependencies:
       - '@mikro-orm/entity-generator'
       - '@mikro-orm/mariadb'
@@ -4310,8 +4316,8 @@ packages:
       split2: 3.2.2
     dev: false
 
-  /pgsql-ast-parser/9.1.2:
-    resolution: {integrity: sha512-tPh8h65SLDNZuN18VwtYanpLEFLlIvLURlZXWcah0nffHv1p+hRhI3D4UfOQSNTEDpHUotp1cqeQax5HHmSvqw==}
+  /pgsql-ast-parser/9.2.1:
+    resolution: {integrity: sha512-poyC5hEwFyo6M1b1MFSH9uCeJ6rzjT/F7E0SZsLZZKvVmfrJ3sr8hW3AA35t4cZ7OuaMpCg4Qnmzspo+5Q/+zg==}
     dependencies:
       moo: 0.5.1
       nearley: 2.20.1
@@ -4707,8 +4713,8 @@ packages:
       queue-microtask: 1.2.3
     dev: false
 
-  /rustybuzz-wasm/0.3.0:
-    resolution: {integrity: sha512-3iDVZ0uAmirulFULD1A9kHbLgYkcpeFXojuXK13YXxcX/Zerr1TdaNqxkUrjLb9Qg8iXDXt9BM1llDWKgX3Ypg==}
+  /rustybuzz-wasm/1.0.0:
+    resolution: {integrity: sha512-1B7DiHvwOvqaq4qBSbshPS8r3WgftyEwNT8PjkF54Y20hWp1hU+TzPzmXeqZM+Ba8JqPDsRItkkkExXCtbl3GQ==}
     dev: false
 
   /safe-buffer/5.1.2:
@@ -4809,8 +4815,8 @@ packages:
       simple-concat: 1.0.1
     dev: false
 
-  /simple-git/2.46.0:
-    resolution: {integrity: sha512-6eumII1vfP4NpRqxZcVWCcIT5xHH6dRyvBZSjkH4dJRDRpv+0f75hrN5ysp++y23Mfr3AbRC/dO2NDbfj1lJpQ==}
+  /simple-git/2.47.0:
+    resolution: {integrity: sha512-+HfCpqPBEZTPWiW9fPdbiPJDslM22MLqrktfzNKyI2pWaJa6DhfNVx4Mds04KZzVv5vjC9/ksw3y5gVf8ECWDg==}
     dependencies:
       '@kwsites/file-exists': 1.1.1
       '@kwsites/promise-deferred': 1.1.1
