@@ -1005,6 +1005,7 @@ later = ->
   try ( validate.immediate 1 * '#'    ) catch  error then T.fail 'testcase-171625'
   #.........................................................................................................
   T.throws /not a valid immediate/, -> validate.immediate x = ( new Promise -> )
+  # validate.immediate x = ( new Promise -> )
   try ( r = nowait ( ( x ) -> x ** 2 ) 5 ) catch error then T.fail 'testcase-171626'
   T.eq r, 25
   T.throws /not a valid immediate/, -> r = nowait ( -> new Promise -> )()
@@ -1162,7 +1163,7 @@ later = ->
 unless module.parent?
   test @
   # test @[ "check(): complain on name collision" ]
-  @[ "check(): complain on name collision" ]()
+  # @[ "check(): complain on name collision" ]()
   # test @[ "size_of" ]
   # test @[ "numerical types" ]
   # test @[ "real-life example 2" ]
