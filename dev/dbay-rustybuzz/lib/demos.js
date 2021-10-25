@@ -59,7 +59,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_store_outlines = function() {
-    var DBay, Drb, Tbl, bbox, cids, db, drb, drb_cfg, dt, dtab, font_idx, fontnick, fspath, gid, gid_by_cids, path, pd, schema, t0, t1;
+    var DBay, Drb, Tbl, bbox, cgid_map, cids, db, drb, drb_cfg, dt, dtab, font_idx, fontnick, fspath, gid, path, pd, schema, t0, t1;
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
@@ -85,7 +85,7 @@
     drb.prepare_font({fontnick});
     whisper('^3334^', "... done");
     //.........................................................................................................
-    // gid                 = drb.gids_from_cids { cids: ( cids_from_text 'O' ), fontnick, }
+    // gid                 = drb.cgid_map_from_cids { cids: ( cids_from_text 'O' ), fontnick, }
     gid = 74;
     font_idx = 0;
     // urge '^290^', outline = JSON.parse drb.RBW.glyph_to_svg_pathdata font_idx, gid
@@ -97,16 +97,16 @@
     // cids                = [ 0x4e00 .. 0x9fff ]
     // cids                = [ 0x4e00 .. 0x4e02 ]
     t0 = Date.now();
-    gid_by_cids = drb.gids_from_cids({cids, fontnick});
+    cgid_map = drb.get_cgid_map({cids, fontnick});
     t1 = Date.now();
     /* TAINT might want to turn this into a benchmark (or improve reporting) */
     debug('^324^', cids.length + ' cids');
-    debug('^324^', gid_by_cids.size + ' gids');
+    debug('^324^', cgid_map.size + ' gids');
     debug('^324^', (dt = (t1 - t0) / 1000) + 's');
-    help('^290^', (rpr(gid_by_cids)).slice(0, 200) + '...');
+    help('^290^', (rpr(cgid_map)).slice(0, 200) + '...');
     //.........................................................................................................
     t0 = Date.now();
-    drb.insert_outlines({fontnick, gid_by_cids});
+    drb.insert_outlines({fontnick, cgid_map});
     t1 = Date.now();
     debug('^324^', (dt = (t1 - t0) / 1000) + 's');
     //.........................................................................................................
