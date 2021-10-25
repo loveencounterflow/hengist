@@ -1200,6 +1200,7 @@
       return validate.immediate(x = new Promise(function() {}));
     });
     try {
+      // validate.immediate x = ( new Promise -> )
       (r = nowait((function(x) {
         return x ** 2;
       })(5)));
@@ -1386,11 +1387,11 @@
   //###########################################################################################################
   if (module.parent == null) {
     test(this);
-    // test @[ "check(): complain on name collision" ]
-    this["check(): complain on name collision"]();
   }
 
-  // test @[ "size_of" ]
+  // test @[ "check(): complain on name collision" ]
+// @[ "check(): complain on name collision" ]()
+// test @[ "size_of" ]
 // test @[ "numerical types" ]
 // test @[ "real-life example 2" ]
 // test @[ "equals" ]
