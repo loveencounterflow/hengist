@@ -81,21 +81,8 @@ ZLIB                      = require 'zlib'
   debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
   help '^290^',  ( rpr gid_by_cids )[ ... 200 ] + '...'
   #.........................................................................................................
-  insert_outlines = =>
-    insert_outline      = drb._prepare_insert_outline()
-    db =>
-      for [ cid, gid, ] from gid_by_cids.entries()
-        glyph       = String.fromCodePoint cid
-        { bbox
-          pd    }   = drb.get_single_outline { gid, fontnick, }
-        { x,  y,
-          x1, y1, } = bbox
-        pd_blob     = ( drb._zip pd )
-        insert_outline.run { fontnick, gid, cid, glyph, x, y, x1, y1, pd_blob, }
-      return null
-  #.........................................................................................................
   t0                  = Date.now()
-  insert_outlines()
+  drb.insert_outlines { fontnick, gid_by_cids, }
   t1                  = Date.now()
   debug '^324^', ( dt = ( t1 - t0 ) / 1000 ) + 's'
   #.........................................................................................................
