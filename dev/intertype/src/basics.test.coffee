@@ -1037,6 +1037,10 @@ later = ->
   T.fail "expected error, got none" unless error?
   T.eq ( equals 3, 3 ), true
   T.eq ( equals 3, 4 ), false
+  T.eq ( equals ( new Map [ [ 1, 2, ], ]), ( new Map [ [ 1, 2, ], ]) ), true
+  T.eq ( equals ( new Set [ [ 1, 2, ], ]), ( new Set [ [ 1, 2, ], ]) ), true
+  T.eq ( equals ( new Map [ [ 1, 2, ], ]), ( new Map [ [ 1, 3, ], ]) ), false
+  T.eq ( equals ( new Set [ [ 1, 2, ], ]), ( new Set [ [ 1, 3, ], ]) ), false
   done() if done?
 
 #-----------------------------------------------------------------------------------------------------------
