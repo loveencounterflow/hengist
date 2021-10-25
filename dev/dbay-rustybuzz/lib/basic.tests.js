@@ -111,7 +111,7 @@
         db,
         temporary: true
       });
-      drb.load_font({fontnick});
+      drb.prepare_font({fontnick});
       return urge('^290^', outline = JSON.parse(drb.RBW.glyph_to_svg_pathdata(font_idx, gid)));
     })();
     (() => {      //.........................................................................................................
@@ -122,7 +122,7 @@
         temporary: true
       });
       try {
-        /* we do not call `drb.load_font { fontnick, }` */
+        /* we do not call `drb.prepare_font { fontnick, }` */
         urge('^290^', outline = JSON.parse(drb.RBW.glyph_to_svg_pathdata(font_idx, gid)));
       } catch (error1) {
         error = error1;
@@ -199,7 +199,7 @@
     fontnick = 'djvs';
     fspath = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'));
     drb.register_fontnick({fontnick, fspath});
-    drb.load_font({fontnick});
+    drb.prepare_font({fontnick});
     ({bbox, pd} = drb.get_single_outline({
       fontnick,
       gid: 74

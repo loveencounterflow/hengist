@@ -58,7 +58,7 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.demo_load_font_outlines = function() {
+  this.demo_store_outlines = function() {
     var DBay, Drb, Tbl, bbox, cids, db, drb, drb_cfg, dt, dtab, font_idx, fontnick, fspath, gid, gid_by_cids, insert_outlines, path, pd, schema, t0, t1;
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
@@ -82,7 +82,7 @@
     echo(dtab._tabulate(db(SQL`select * from ${schema}.outlines order by fontnick, gid;`)));
     echo(dtab._tabulate(db(SQL`select * from ${schema}.fontnicks order by fontnick;`)));
     whisper('^3334^', `loading font ${rpr(fontnick)}...`);
-    drb.load_font({fontnick});
+    drb.prepare_font({fontnick});
     whisper('^3334^', "... done");
     //.........................................................................................................
     // gid                 = drb.gids_from_cids { cids: ( cids_from_text 'O' ), fontnick, }
@@ -253,7 +253,7 @@ from v1;`, [dt])));
   //###########################################################################################################
   if (require.main === module) {
     (async() => {
-      return (await this.demo_load_font_outlines());
+      return (await this.demo_store_outlines());
     })();
   }
 
