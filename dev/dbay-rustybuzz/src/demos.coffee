@@ -175,23 +175,14 @@ settings_from_set_id = ( set_id ) ->
   return null
 
 
-#-----------------------------------------------------------------------------------------------------------
-@demo_use_linked_rustybuzz_wasm = ->
-  RBW = require '../../../apps/rustybuzz-wasm/pkg'
-  debug '^455^', RBW
-  fontnick    = 'djvs';  fspath = PATH.resolve PATH.join __dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'
-  font_idx    = 0
-  font_bytes  = ( FS.readFileSync fspath ).toString 'hex'
-  RBW.register_font font_idx, font_bytes
-  return null
 
 
 
 ############################################################################################################
 if require.main is module then do =>
-  await @demo_store_outlines()
+  # await @demo_store_outlines()
   # await @demo_store_outlines { set_id: 'all', }
-  # await @demo_typesetting()
+  await @demo_typesetting()
   # await @demo_use_linked_rustybuzz_wasm()
 
 
