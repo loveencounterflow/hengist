@@ -38,8 +38,8 @@ guy                       = require '../../../apps/guy'
   { Drb }             = require H.drb_path
   # path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
   # DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  text                = "there's the rub"
-  cids                = ( ( chr.codePointAt 0 ) for chr in Array.from text )
+  chrs                = "there's the rub"
+  cids                = ( ( chr.codePointAt 0 ) for chr in Array.from chrs )
   matcher             = new Map [ [ 116, 85 ], [ 104, 73 ], [ 101, 70 ], [ 114, 83 ], [ 39, 8 ], [ 115, 84 ], [ 32, 1 ], [ 117, 86 ], [ 98, 67 ], ]
   #.........................................................................................................
   do =>
@@ -56,7 +56,7 @@ guy                       = require '../../../apps/guy'
     drb         = new Drb { db, temporary: true, }
     fontnick    = 'gi'
     drb.prepare_font { fontnick, }
-    debug '^33234^', result = drb.get_cgid_map { fontnick, text, }
+    debug '^33234^', result = drb.get_cgid_map { fontnick, chrs, }
     T?.eq ( type_of result ), 'map'
     T?.eq result, matcher
   #.........................................................................................................
@@ -65,7 +65,7 @@ guy                       = require '../../../apps/guy'
     drb         = new Drb { db, temporary: true, }
     fontnick    = 'gi'
     drb.prepare_font { fontnick, }
-    T?.throws /not a valid dbr_get_cgid_map_cfg/, => drb.get_cgid_map { fontnick, cids, text, }
+    T?.throws /not a valid dbr_get_cgid_map_cfg/, => drb.get_cgid_map { fontnick, cids, chrs, }
   #.........................................................................................................
   do =>
     db          = new DBay()
@@ -86,8 +86,8 @@ guy                       = require '../../../apps/guy'
   { Tbl, }            = require '../../../apps/icql-dba-tabulate'
   # path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
   # DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  text                = "'ab-c'."
-  cids                = ( ( chr.codePointAt 0 ) for chr in Array.from text )
+  chrs                = "'ab-c'."
+  cids                = ( ( chr.codePointAt 0 ) for chr in Array.from chrs )
   matcher             = new Map [ [ 116, 85 ], [ 104, 73 ], [ 101, 70 ], [ 114, 83 ], [ 39, 8 ], [ 115, 84 ], [ 32, 1 ], [ 117, 86 ], [ 98, 67 ], ]
   #.........................................................................................................
   do =>
@@ -107,7 +107,7 @@ guy                       = require '../../../apps/guy'
           gid:      15,
           cid:      46,
           glyph:    '.',
-          uoid:     'uo15gi',
+          uoid:     'o15gi',
           x:        25,
           y:        -101,
           x1:       135,
@@ -130,7 +130,7 @@ guy                       = require '../../../apps/guy'
         from drb.outlines
         order by cid;"""
   #.........................................................................................................
-  # cgid_map            = drb.get_cgid_map { fontnick, text, }
+  # cgid_map            = drb.get_cgid_map { fontnick, chrs, }
   return done?()
 
 
