@@ -79,7 +79,7 @@ settings_from_set_id = ( set_id ) ->
       fontnick  = 'djvs'
       fspath    = 'DejaVuSerif.ttf'
       chrs      = "sampletext算"
-      text      = "the affirmation."
+      text      = "äöü the affirmation."
     when 'all'
       fontnick = 'qkai'
       fspath    = 'cwTeXQKai-Medium.ttf'
@@ -93,7 +93,7 @@ settings_from_set_id = ( set_id ) ->
       throw new Error "^345^ unknown set_id #{rpr set_id}"
   #.........................................................................................................
   fspath = PATH.resolve PATH.join __dirname, '../../../assets/jizura-fonts/', fspath
-  return { chrs, cids, cgid_map, fontnick, fspath, }
+  return { chrs, cids, cgid_map, text, fontnick, fspath, }
 
 
 #===========================================================================================================
@@ -164,14 +164,16 @@ settings_from_set_id = ( set_id ) ->
     text
     fontnick
     fspath          } = settings_from_set_id set_id
+  size_mm             = 5
   #.........................................................................................................
   drb.register_fontnick { fontnick, fspath, }
   drb.prepare_font      { fontnick, }
   drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
-  drb.shape_text        { fontnick, text, }
+  drb.shape_text        { fontnick, text, size_mm, }
+  drb.shape_text        { fontnick, text, size_mm: 10, }
   #.........................................................................................................
   ### TAINT rename method to distinguish getting outlines from rustybuzz-wasm vs getting them from DB ###
-  urge '^290^', { bbox, pd, } = drb.get_single_outline { fontnick, gid: 74, }
+  # urge '^290^', { bbox, pd, } = drb.get_single_outline { fontnick, gid: 74, }
   return null
 
 
