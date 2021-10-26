@@ -43,7 +43,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB get_cgid_map()"] = function(T, done) {
-    var DBay, Drb, chr, cids, matcher, text;
+    var DBay, Drb, chr, chrs, cids, matcher;
     // ### explicit path, explicitly temporary ###
     // T?.halt_on_error()
     // { DBay }            = require H.dbay_path
@@ -51,10 +51,10 @@
     ({Drb} = require(H.drb_path));
     // path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
     // DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-    text = "there's the rub";
+    chrs = "there's the rub";
     cids = (function() {
       var i, len, ref, results;
-      ref = Array.from(text);
+      ref = Array.from(chrs);
       results = [];
       for (i = 0, len = ref.length; i < len; i++) {
         chr = ref[i];
@@ -87,7 +87,7 @@
       });
       fontnick = 'gi';
       drb.prepare_font({fontnick});
-      debug('^33234^', result = drb.get_cgid_map({fontnick, text}));
+      debug('^33234^', result = drb.get_cgid_map({fontnick, chrs}));
       if (T != null) {
         T.eq(type_of(result), 'map');
       }
@@ -103,7 +103,7 @@
       fontnick = 'gi';
       drb.prepare_font({fontnick});
       return T != null ? T.throws(/not a valid dbr_get_cgid_map_cfg/, () => {
-        return drb.get_cgid_map({fontnick, cids, text});
+        return drb.get_cgid_map({fontnick, cids, chrs});
       }) : void 0;
     })();
     (() => {      //.........................................................................................................
@@ -124,7 +124,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB insert_outlines()"] = function(T, done) {
-    var DBay, Drb, Tbl, chr, cids, matcher, text;
+    var DBay, Drb, Tbl, chr, chrs, cids, matcher;
     // ### explicit path, explicitly temporary ###
     // T?.halt_on_error()
     // { DBay }            = require H.dbay_path
@@ -133,10 +133,10 @@
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
     // path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
     // DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-    text = "'ab-c'.";
+    chrs = "'ab-c'.";
     cids = (function() {
       var i, len, ref, results;
-      ref = Array.from(text);
+      ref = Array.from(chrs);
       results = [];
       for (i = 0, len = ref.length; i < len; i++) {
         chr = ref[i];
@@ -170,7 +170,7 @@
               gid: 15,
               cid: 46,
               glyph: '.',
-              uoid: 'uo15gi',
+              uoid: 'o15gi',
               x: 25,
               y: -101,
               x1: 135,

@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, H, PATH, RBW, SQL, ZLIB, badge, debug, echo, equals, guy, help, info, isa, rpr, show_db, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, Drb, FS, H, PATH, RBW, SQL, ZLIB, badge, debug, echo, equals, guy, help, info, isa, rpr, settings_from_set_id, show_db, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -44,6 +44,10 @@
 
   ZLIB = require('zlib');
 
+  ({DBay} = require(H.dbay_path));
+
+  ({Drb} = require(H.drb_path));
+
   //-----------------------------------------------------------------------------------------------------------
   show_db = function(db, schema) {
     var Tbl, dtab;
@@ -77,39 +81,20 @@
     return null;
   };
 
-  //===========================================================================================================
-
   //-----------------------------------------------------------------------------------------------------------
-  this.demo_store_outlines = function(cfg) {
-    /* NOTE exactly one of `cids`, `text` must be set */
-    var DBay, Drb, bbox, cgid_map, cids, db, defaults, drb, drb_cfg, dt, fontnick, fspath, path, pd, schema, set_id, t0, t1, text;
-    defaults = {
-      set_id: 'small'
-    };
-    cfg = {...defaults, ...cfg};
-    ({set_id} = cfg);
-    ({DBay} = require(H.dbay_path));
-    ({Drb} = require(H.drb_path));
-    path = '/tmp/dbay-rustybuzz.sqlite';
-    db = new DBay({path});
-    schema = 'drb';
-    drb_cfg = {
-      db: db,
-      path: '/dev/shm/rustybuzz.sqlite',
-      create: true,
-      schema: schema
-    };
-    drb = new Drb(drb_cfg);
-    //.........................................................................................................
-    text = null;
+  settings_from_set_id = function(set_id) {
+    var cgid_map, chrs, cids, fontnick, fspath;
+    chrs = null;
     cids = null;
     cgid_map = null;
+    fontnick = null;
+    fspath = null;
     //.........................................................................................................
     switch (set_id) {
       case 'small':
         fontnick = 'djvs';
         fspath = 'DejaVuSerif.ttf';
-        text = "sampletext算";
+        chrs = "sampletext算";
         break;
       case 'all':
         fontnick = 'qkai';
@@ -126,6 +111,32 @@
     }
     //.........................................................................................................
     fspath = PATH.resolve(PATH.join(__dirname, '../../../assets/jizura-fonts/', fspath));
+    return {chrs, cids, cgid_map, fontnick, fspath};
+  };
+
+  //===========================================================================================================
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_store_outlines = function(cfg) {
+    /* NOTE exactly one of `cids`, `chrs` must be set */
+    var bbox, cgid_map, chrs, cids, db, defaults, drb, drb_cfg, dt, fontnick, fspath, path, pd, schema, set_id, t0, t1;
+    defaults = {
+      set_id: 'small'
+    };
+    cfg = {...defaults, ...cfg};
+    ({set_id} = cfg);
+    path = '/tmp/dbay-rustybuzz.sqlite';
+    db = new DBay({path});
+    schema = 'drb';
+    drb_cfg = {
+      db: db,
+      path: '/dev/shm/rustybuzz.sqlite',
+      create: true,
+      schema: schema
+    };
+    drb = new Drb(drb_cfg);
+    //.........................................................................................................
+    ({chrs, cids, cgid_map, fontnick, fspath} = settings_from_set_id(set_id));
     //.........................................................................................................
     drb.register_fontnick({fontnick, fspath});
     whisper('^3334^', `loading font ${rpr(fontnick)}...`);
@@ -138,7 +149,7 @@
     })));
     //.........................................................................................................
     t0 = Date.now();
-    cgid_map = drb.get_cgid_map({cids, text, fontnick});
+    cgid_map = drb.get_cgid_map({cids, chrs, fontnick});
     t1 = Date.now();
     /* TAINT might want to turn this into a benchmark (or improve reporting) */
     debug('^324^', cgid_map.size + ' gids');
@@ -161,90 +172,40 @@
 
   // #-----------------------------------------------------------------------------------------------------------
   // @demo_text_shaping = ->
-  //   me                  = @new_demo()
-  //   fontnick            = 'garamond_italic'
-  //   font_idx            = @register_font me, fontnick
-  //   size                = 5
-  //   # format              = 'short'
-  //   format              = 'json'
-  //   # format              = 'rusty'
-  //   text                = "a certain minimum"
-  //   text                = text.replace /#/g, me.shy
-  //   cfg                 = { format, text, }
-  //   arrangement         = JSON.parse RBW.shape_text cfg
-  //   debug '^4455^', arrangement
-  //   debug '^4455^', RBW.shape_text { format: 'rusty', text, }
-  //   #.........................................................................................................
-  //   urge "glyf IDs and positions of font #{rpr fontnick} for text #{rpr text}:"
-  //   for d in arrangement
-  //     goid   = @_get_glyf_outline_id       fontnick, d.gid
-  //     sgoid  = @_get_sized_glyf_outline_id fontnick, d.gid, size
-  //     info '^223^', goid, sgoid
-  //   #.........................................................................................................
-  //   urge "unique glyf IDs in this text:"
-  //   gids                = new Set ( d.gid for d in arrangement )
-  //   debug '^3344^', gids
-  //   return null
 
-  // #-----------------------------------------------------------------------------------------------------------
-  // @demo_svg_typesetting = ->
-  //   me        = @new_demo()
-  //   format    = 'json' # 'short', 'rusty'
-  //   #.........................................................................................................
-  //   fontnick  = 'tibetan';          text =  "ཨོཾ་མ་ཎི་པདྨེ་ཧཱུྃ"
-  //   fontnick  = 'amiri';            text = ( [ "الخط الأمیری"... ].reverse() ).join ''
-  //   fontnick  = 'garamond_italic';  text = "a certain minimum"
-  //   fontnick  = 'garamond_italic';  text = "af#fix"
-  //   #.........................................................................................................
-  //   font_idx  = @register_font me, fontnick
-  //   text      = text.replace /#/g, me.shy
-  //   #.........................................................................................................
-  //   echo """<?xml version='1.0' encoding='UTF-8'?>
-  //     <svg xmlns='http://www.w3.org/2000/svg' width='6000' height='3000' viewBox='-100 -1500 10500 1500' version='2'>"""
-  //   cfg         = { format, text, }
-  //   arrangement = JSON.parse RBW.shape_text cfg
-  //   gids        = new Set ( d.gid for d in arrangement )
-  //   debug '^3344^', gids
-  //   #.........................................................................................................
-  //   echo """<style>
-  //     path {
-  //       stroke:                 transparent;
-  //       stroke-width:           0mm;
-  //       fill:                   black;; }
-  //     rect {
-  //       stroke:                 transparent;
-  //       stroke-width:           0;
-  //       fill:                   transparent; }
-  //       </style>"""
-  //   # echo """<style>
-  //   #   path {
-  //   #     stroke:                 black;
-  //   #     stroke-width:           8px;
-  //   #     fill:                   #880000bd;; }
-  //   #   rect {
-  //   #     stroke:                 black;
-  //   #     stroke-width:           3px;
-  //   #     fill:                   #ffeb3b42; }
-  //   #     </style>"""
-  //   #.........................................................................................................
-  //   echo "<defs>"
-  //   for gid from gids.values()
-  //     outline = JSON.parse RBW.glyph_to_svg_pathdata font_idx, gid
-  //     debug '^3344^', gid, outline.pd[ .. 100 ]
-  //     # continue if outline.pd is ''
-  //     echo "<symbol overflow='visible' id='b#{gid}'>#{outline.br}</symbol>"
-  //     echo "<symbol overflow='visible' id='g#{gid}'><path d='#{outline.pd}'/></symbol>"
-  //   echo "</defs>"
-  //   #.........................................................................................................
-  //   for d in arrangement
-  //     echo "<use href='#g#{d.gid}' x='#{d.x}' y='#{d.y}'/>"
-  //     echo "<use href='#b#{d.gid}' x='#{d.x}' y='#{d.y}'/>"
-  //     # echo "<g x='#{d.x}' y='#{d.y + 1000}'>"
-  //     # echo "#{outline.br}"
-  //     # echo "</g>"
-  //   #.........................................................................................................
-  //   echo "</svg>"
-  //   return null
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_typesetting = function(cfg) {
+    var bbox, cgid_map, chrs, cids, db, defaults, drb, fontnick, fspath, pd, schema, set_id;
+    defaults = {
+      set_id: 'small'
+    };
+    cfg = {...defaults, ...cfg};
+    ({set_id} = cfg);
+    db = new DBay({
+      path: '/dev/shm/typesetting-1.sqlite'
+    });
+    schema = 'drb';
+    drb = new Drb({
+      db,
+      create: true,
+      schema,
+      path: '/dev/shm/typesetting-2.sqlite'
+    });
+    //.........................................................................................................
+    ({chrs, cids, cgid_map, fontnick, fspath} = settings_from_set_id(set_id));
+    //.........................................................................................................
+    drb.register_fontnick({fontnick, fspath});
+    drb.prepare_font({fontnick});
+    drb.insert_outlines({fontnick, cgid_map, cids, chrs});
+    // drb.shape_text        { fontnick, cgid_map, cids, chrs, }
+    //.........................................................................................................
+    /* TAINT rename method to distinguish getting outlines from rustybuzz-wasm vs getting them from DB */
+    urge('^290^', ({bbox, pd} = drb.get_single_outline({
+      fontnick,
+      gid: 74
+    })));
+    return null;
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_use_linked_rustybuzz_wasm = function() {
@@ -262,14 +223,13 @@
   //###########################################################################################################
   if (require.main === module) {
     (async() => {
-      await this.demo_store_outlines();
-      return (await this.demo_store_outlines({
-        set_id: 'all'
-      }));
+      return (await this.demo_store_outlines());
     })();
   }
 
-  // await @demo_use_linked_rustybuzz_wasm()
+  // await @demo_store_outlines { set_id: 'all', }
+// await @demo_typesetting()
+// await @demo_use_linked_rustybuzz_wasm()
 
 }).call(this);
 
