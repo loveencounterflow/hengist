@@ -79,6 +79,7 @@ settings_from_set_id = ( set_id ) ->
       fontnick  = 'djvs'
       fspath    = 'DejaVuSerif.ttf'
       chrs      = "sampletext算"
+      text      = "the affirmation."
     when 'all'
       fontnick = 'qkai'
       fspath    = 'cwTeXQKai-Medium.ttf'
@@ -160,13 +161,14 @@ settings_from_set_id = ( set_id ) ->
   { chrs
     cids
     cgid_map
+    text
     fontnick
     fspath          } = settings_from_set_id set_id
   #.........................................................................................................
   drb.register_fontnick { fontnick, fspath, }
   drb.prepare_font      { fontnick, }
   drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
-  # drb.shape_text        { fontnick, cgid_map, cids, chrs, }
+  drb.shape_text        { fontnick, text, }
   #.........................................................................................................
   ### TAINT rename method to distinguish getting outlines from rustybuzz-wasm vs getting them from DB ###
   urge '^290^', { bbox, pd, } = drb.get_single_outline { fontnick, gid: 74, }
