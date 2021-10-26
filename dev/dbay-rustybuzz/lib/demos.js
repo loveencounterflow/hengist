@@ -83,7 +83,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   settings_from_set_id = function(set_id) {
-    var cgid_map, chrs, cids, fontnick, fspath;
+    var cgid_map, chrs, cids, fontnick, fspath, text;
     chrs = null;
     cids = null;
     cgid_map = null;
@@ -95,6 +95,7 @@
         fontnick = 'djvs';
         fspath = 'DejaVuSerif.ttf';
         chrs = "sampletext算";
+        text = "the affirmation.";
         break;
       case 'all':
         fontnick = 'qkai';
@@ -175,7 +176,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typesetting = function(cfg) {
-    var bbox, cgid_map, chrs, cids, db, defaults, drb, fontnick, fspath, pd, schema, set_id;
+    var bbox, cgid_map, chrs, cids, db, defaults, drb, fontnick, fspath, pd, schema, set_id, text;
     defaults = {
       set_id: 'small'
     };
@@ -192,12 +193,12 @@
       path: '/dev/shm/typesetting-2.sqlite'
     });
     //.........................................................................................................
-    ({chrs, cids, cgid_map, fontnick, fspath} = settings_from_set_id(set_id));
+    ({chrs, cids, cgid_map, text, fontnick, fspath} = settings_from_set_id(set_id));
     //.........................................................................................................
     drb.register_fontnick({fontnick, fspath});
     drb.prepare_font({fontnick});
     drb.insert_outlines({fontnick, cgid_map, cids, chrs});
-    // drb.shape_text        { fontnick, cgid_map, cids, chrs, }
+    drb.shape_text({fontnick, text});
     //.........................................................................................................
     /* TAINT rename method to distinguish getting outlines from rustybuzz-wasm vs getting them from DB */
     urge('^290^', ({bbox, pd} = drb.get_single_outline({
@@ -207,29 +208,16 @@
     return null;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.demo_use_linked_rustybuzz_wasm = function() {
-    var font_bytes, font_idx, fontnick, fspath;
-    RBW = require('../../../apps/rustybuzz-wasm/pkg');
-    debug('^455^', RBW);
-    fontnick = 'djvs';
-    fspath = PATH.resolve(PATH.join(__dirname, '../../../', 'assets/jizura-fonts/DejaVuSerif.ttf'));
-    font_idx = 0;
-    font_bytes = (FS.readFileSync(fspath)).toString('hex');
-    RBW.register_font(font_idx, font_bytes);
-    return null;
-  };
-
   //###########################################################################################################
   if (require.main === module) {
     (async() => {
-      return (await this.demo_store_outlines());
+      // await @demo_store_outlines()
+      // await @demo_store_outlines { set_id: 'all', }
+      return (await this.demo_typesetting());
     })();
   }
 
-  // await @demo_store_outlines { set_id: 'all', }
-// await @demo_typesetting()
-// await @demo_use_linked_rustybuzz_wasm()
+  // await @demo_use_linked_rustybuzz_wasm()
 
 }).call(this);
 
