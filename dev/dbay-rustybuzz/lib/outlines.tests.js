@@ -202,15 +202,16 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // @[ "DRB foobar" ]()
-      // test @[ "DRB no shared state in WASM module" ]
-      // @[ "DRB path compression" ]()
-      // test @[ "DRB can pass in custom RBW" ]
-      // test @[ "DRB get_cgid_map()" ]
-      return this["DRB insert_outlines()"]();
+      return test(this);
     })();
   }
+
+  // @[ "DRB foobar" ]()
+// test @[ "DRB no shared state in WASM module" ]
+// @[ "DRB path compression" ]()
+// test @[ "DRB can pass in custom RBW" ]
+// test @[ "DRB get_cgid_map()" ]
+// @[ "DRB insert_outlines()" ]()
 
 }).call(this);
 

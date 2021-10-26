@@ -167,7 +167,7 @@
   this["DRB can pass in custom RBW"] = function(T, done) {
     var DBay, Drb, RBW, db, drb;
     // T?.halt_on_error()
-    RBW = require('../../../apps/rustybuzz-wasm/pkg');
+    RBW = require('../../../assets/dbay-rustybuzz/pkg');
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
     db = new DBay();
@@ -219,9 +219,16 @@
       // test @[ "DRB no shared state in WASM module" ]
       // @[ "DRB path compression" ]()
       // test @[ "DRB can pass in custom RBW" ]
-      return test(this["DRB RBW returns despaced pathdata"]);
+      // test @[ "DRB RBW returns despaced pathdata" ]
+
+      // test @[ "DRB foobar" ]
+      // test @[ "DRB no shared state in WASM module" ]
+      // test @[ "___________ DRB path compression" ]
+      return test(this["DRB can pass in custom RBW"]);
     })();
   }
+
+  // test @[ "DRB RBW returns despaced pathdata" ]
 
 }).call(this);
 
