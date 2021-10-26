@@ -162,5 +162,10 @@ if require.main is module then do =>
   # test @[ "DRB no shared state in WASM module" ]
   # @[ "DRB path compression" ]()
   # test @[ "DRB can pass in custom RBW" ]
-  test @[ "DRB RBW returns despaced pathdata" ]
+  # test @[ "DRB RBW returns despaced pathdata" ]
 
+  # test @[ "DRB foobar" ]
+  # test @[ "DRB no shared state in WASM module" ]
+  # test @[ "___________ DRB path compression" ]
+  test @[ "DRB can pass in custom RBW" ]
+  # test @[ "DRB RBW returns despaced pathdata" ]
