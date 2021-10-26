@@ -122,7 +122,7 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DRB can pass in custom RBW" ] = ( T, done ) ->
   # T?.halt_on_error()
-  RBW                 = require '../../../apps/rustybuzz-wasm/pkg'
+  RBW                 = require '../../../assets/dbay-rustybuzz/pkg'
   { DBay }            = require H.dbay_path
   { Drb }             = require H.drb_path
   db                  = new DBay()
