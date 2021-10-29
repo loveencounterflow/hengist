@@ -464,7 +464,9 @@ create table b ( n integer not null primary key references a ( n ) );`);
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY/CTX with_foreign_keys_deferred(), ensure checks"] = function(T, done) {
     var DBay, d, db, error, list_table_a, nxt_values, prv_values, result, rows;
-    // T?.halt_on_error()
+    if (T != null) {
+      T.halt_on_error();
+    }
     ({DBay} = require(H.dbay_path));
     //.........................................................................................................
     list_table_a = function(db) {
@@ -491,7 +493,7 @@ create table b ( n integer not null primary key references a ( n ) );`);
     }
     db.with_foreign_keys_deferred(function() {
       if (T != null) {
-        T.eq(CND.truth(db.within_transaction(), true));
+        T.eq(db.within_transaction(), true);
       }
       if (T != null) {
         T.eq(db.get_foreign_keys_state(), true);
@@ -632,17 +634,16 @@ create table b ( n integer not null primary key references a ( n ) );`);
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      // test @[ "DBAY/CTX with_transaction() 1" ]
+      // test @[ "DBAY/CTX with_transaction() 2" ]
+      // test @[ "DBAY/CTX with_unsafe_mode()" ]
+      // test @[ "DBAY/CTX with_foreign_keys_deferred(), preliminaries" ]
+      return test(this["DBAY/CTX with_foreign_keys_deferred(), ensure checks"]);
     })();
   }
 
-  // test @[ "DBAY/CTX with_transaction() 1" ]
-// test @[ "DBAY/CTX with_transaction() 2" ]
-// test @[ "DBAY/CTX with_unsafe_mode()" ]
-// test @[ "DBAY/CTX with_foreign_keys_deferred(), preliminaries" ]
-// test @[ "DBAY/CTX with_foreign_keys_deferred(), ensure checks" ]
+  // @[ "DBAY/CTX with_foreign_keys_deferred(), ensure checks" ]()
 
 }).call(this);
 
