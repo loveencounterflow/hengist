@@ -30,8 +30,9 @@ r                         = String.raw
   # T?.halt_on_error()
   { DBay }          = require '../../../apps/dbay'
   { Cmud }          = require '../../../apps/dbay-cmudict'
+  path              = PATH.resolve PATH.join __dirname, '../../../data/dbay-cmudict.sqlite'
   db                = new DBay { temporary: true, }
-  cmud              = new Cmud { db, create: true, max_entry_count: 10000, }
+  cmud              = new Cmud { db, path, rebuild: true, max_entry_count: 10000, }
   debug '^3344^', cmud.cfg
   { schema,   } = cmud.cfg
   { I, L, V,  } = db.sql
@@ -41,32 +42,34 @@ r                         = String.raw
   #.........................................................................................................
   done?()
 
-#-----------------------------------------------------------------------------------------------------------
-@[ "DBAY-CMUDICT ipa rewriting" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { DBay }          = require '../../../apps/dbay'
-  { Cmud }          = require '../../../apps/dbay-cmudict'
-  db                = new DBay { temporary: true, }
-  cmud              = new Cmud { db, create: false, }
-  #.........................................................................................................
-  probes_and_matchers = [
-    [ 'k ɝ0 ɪ1 r',          null, ]
-    [ 'b ɪ1 r m ʌ0 n',      null, ]
-    ]
-  #.........................................................................................................
-  for [ probe, matcher, ] in probes_and_matchers
-    debug probe.match /ɝ0/g #   'ə0 r'
-    info cmud.ipa_from_ipa_raw probe
-  #.........................................................................................................
-  done?()
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "DBAY-CMUDICT ipa rewriting" ] = ( T, done ) ->
+#   # T?.halt_on_error()
+#   path              = PATH.resolve PATH.join __dirname, '../../../data/dbay-cmudict.sqlite'
+#   { DBay }          = require '../../../apps/dbay'
+#   { Cmud }          = require '../../../apps/dbay-cmudict'
+#   db                = new DBay { temporary: true, }
+#   cmud              = new Cmud { db, path, rebuild: false, }
+#   #.........................................................................................................
+#   probes_and_matchers = [
+#     [ 'k ɝ0 ɪ1 r',          null, ]
+#     [ 'b ɪ1 r m ʌ0 n',      null, ]
+#     ]
+#   #.........................................................................................................
+#   for [ probe, matcher, ] in probes_and_matchers
+#     debug probe.match /ɝ0/g #   'ə0 r'
+#     info cmud.ipa_from_ipa_raw probe
+#   #.........................................................................................................
+#   done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY-CMUDICT _rewrite_beep_word" ] = ( T, done ) ->
   # T?.halt_on_error()
   { DBay }          = require '../../../apps/dbay'
   { Cmud }          = require '../../../apps/dbay-cmudict'
+  path              = PATH.resolve PATH.join __dirname, '../../../data/dbay-cmudict.sqlite'
   db                = new DBay { temporary: true, }
-  cmud              = new Cmud { db, create: false, }
+  cmud              = new Cmud { db, path, rebuild: false, }
   #.........................................................................................................
   probes_and_matchers = [
     [ 'b\\^ete',                  "bête",           ]
