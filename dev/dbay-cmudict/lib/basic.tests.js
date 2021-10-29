@@ -39,16 +39,18 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY-CMUDICT object creation"] = function(T, done) {
-    var Cmud, DBay, I, L, V, cmud, db, schema;
+    var Cmud, DBay, I, L, V, cmud, db, path, schema;
     // T?.halt_on_error()
     ({DBay} = require('../../../apps/dbay'));
     ({Cmud} = require('../../../apps/dbay-cmudict'));
+    path = PATH.resolve(PATH.join(__dirname, '../../../data/dbay-cmudict.sqlite'));
     db = new DBay({
       temporary: true
     });
     cmud = new Cmud({
       db,
-      create: true,
+      path,
+      rebuild: true,
       max_entry_count: 10000
     });
     debug('^3344^', cmud.cfg);
@@ -60,42 +62,40 @@
     return typeof done === "function" ? done() : void 0;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this["DBAY-CMUDICT ipa rewriting"] = function(T, done) {
-    var Cmud, DBay, cmud, db, i, len, matcher, probe, probes_and_matchers;
-    // T?.halt_on_error()
-    ({DBay} = require('../../../apps/dbay'));
-    ({Cmud} = require('../../../apps/dbay-cmudict'));
-    db = new DBay({
-      temporary: true
-    });
-    cmud = new Cmud({
-      db,
-      create: false
-    });
-    //.........................................................................................................
-    probes_and_matchers = [['k ɝ0 ɪ1 r', null], ['b ɪ1 r m ʌ0 n', null]];
-//.........................................................................................................
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher] = probes_and_matchers[i];
-      debug(probe.match(/ɝ0/g)); //   'ə0 r'
-      info(cmud.ipa_from_ipa_raw(probe));
-    }
-    return typeof done === "function" ? done() : void 0;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // @[ "DBAY-CMUDICT ipa rewriting" ] = ( T, done ) ->
+  //   # T?.halt_on_error()
+  //   path              = PATH.resolve PATH.join __dirname, '../../../data/dbay-cmudict.sqlite'
+  //   { DBay }          = require '../../../apps/dbay'
+  //   { Cmud }          = require '../../../apps/dbay-cmudict'
+  //   db                = new DBay { temporary: true, }
+  //   cmud              = new Cmud { db, path, rebuild: false, }
+  //   #.........................................................................................................
+  //   probes_and_matchers = [
+  //     [ 'k ɝ0 ɪ1 r',          null, ]
+  //     [ 'b ɪ1 r m ʌ0 n',      null, ]
+  //     ]
+  //   #.........................................................................................................
+  //   for [ probe, matcher, ] in probes_and_matchers
+  //     debug probe.match /ɝ0/g #   'ə0 r'
+  //     info cmud.ipa_from_ipa_raw probe
+  //   #.........................................................................................................
+  //   done?()
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY-CMUDICT _rewrite_beep_word"] = function(T, done) {
-    var Cmud, DBay, cmud, db, i, len, matcher, probe, probes_and_matchers, result;
+    var Cmud, DBay, cmud, db, i, len, matcher, path, probe, probes_and_matchers, result;
     // T?.halt_on_error()
     ({DBay} = require('../../../apps/dbay'));
     ({Cmud} = require('../../../apps/dbay-cmudict'));
+    path = PATH.resolve(PATH.join(__dirname, '../../../data/dbay-cmudict.sqlite'));
     db = new DBay({
       temporary: true
     });
     cmud = new Cmud({
       db,
-      create: false
+      path,
+      rebuild: false
     });
     //.........................................................................................................
     probes_and_matchers = [['b\\^ete', "bête"], ["caf\\'e", "café"], ["brassi\\`ere", "brassière"], ["ch\\^ateau", "château"], ["\\'ep\\'ees", "épées"], ["table_d'h\\^ote", "table d'hôte"], ["t\\^ete-\\`a-t\\^ete", "tête-à-tête"]];
