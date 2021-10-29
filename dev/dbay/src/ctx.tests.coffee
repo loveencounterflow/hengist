@@ -232,7 +232,7 @@ SQL                       = String.raw
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY/CTX with_foreign_keys_deferred(), ensure checks" ] = ( T, done ) ->
-  # T?.halt_on_error()
+  T?.halt_on_error()
   { DBay }          = require H.dbay_path
   #.........................................................................................................
   list_table_a      = ( db ) -> ( row.n for row from db.query SQL"select n from a;" )
@@ -248,7 +248,7 @@ SQL                       = String.raw
   T?.eq db.within_transaction(), false
   T?.eq db.get_foreign_keys_state(), true
   db.with_foreign_keys_deferred ->
-    T?.eq CND.truth db.within_transaction(), true
+    T?.eq db.within_transaction(), true
     T?.eq db.get_foreign_keys_state(), true
     db.execute SQL"insert into a ( n ) values ( 1 );"
     db.execute SQL"insert into a ( n ) values ( 2 );"
@@ -322,9 +322,10 @@ SQL                       = String.raw
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
+  # test @, { timeout: 10e3, }
   # test @[ "DBAY/CTX with_transaction() 1" ]
   # test @[ "DBAY/CTX with_transaction() 2" ]
   # test @[ "DBAY/CTX with_unsafe_mode()" ]
   # test @[ "DBAY/CTX with_foreign_keys_deferred(), preliminaries" ]
-  # test @[ "DBAY/CTX with_foreign_keys_deferred(), ensure checks" ]
+  test @[ "DBAY/CTX with_foreign_keys_deferred(), ensure checks" ]
+  # @[ "DBAY/CTX with_foreign_keys_deferred(), ensure checks" ]()
