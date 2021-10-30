@@ -83,6 +83,46 @@
     return null;
   })();
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.settings_from_set_id = function(set_id) {
+    var cgid_map, chrs, cids, fontnick, fspath, text;
+    chrs = null;
+    cids = null;
+    cgid_map = null;
+    fontnick = null;
+    fspath = null;
+    //.........................................................................................................
+    switch (set_id) {
+      case 'small':
+        fontnick = 'djvs';
+        fspath = 'DejaVuSerif.ttf';
+        chrs = "sampletext算";
+        text = "affirmation.";
+        break;
+      case 'smalli':
+        fontnick = 'djvsi';
+        fspath = 'DejaVuSerif-Italic.ttf';
+        chrs = "sampletext算";
+        text = "affirmation.";
+        break;
+      case 'all':
+        fontnick = 'qkai';
+        fspath = 'cwTeXQKai-Medium.ttf';
+        cids = drb.get_unicode_codepoints();
+        break;
+      default:
+        // fontnick = 'jzr';   fspath = 'jizura3b.ttf'
+        /* TAINT obtain list of all valid Unicode codepoints (again) */
+        // cids                = [ 0x0021 .. 0xd000 ]
+        // cids                = [ 0x4e00 .. 0x9fff ]
+        // cids                = [ 0x4e00 .. 0x4e02 ]
+        throw new Error(`^345^ unknown set_id ${rpr(set_id)}`);
+    }
+    //.........................................................................................................
+    fspath = PATH.resolve(PATH.join(__dirname, '../../../assets/jizura-fonts/', fspath));
+    return {chrs, cids, cgid_map, text, fontnick, fspath};
+  };
+
   // #-----------------------------------------------------------------------------------------------------------
 // { Dba }                   = require H.dbay_path
 // dba_types                 = require H.dbay_path + '/lib/types'

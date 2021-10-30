@@ -214,21 +214,21 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // @[ "DRB foobar" ]()
-      // test @[ "DRB no shared state in WASM module" ]
-      // @[ "DRB path compression" ]()
-      // test @[ "DRB can pass in custom RBW" ]
-      // test @[ "DRB RBW returns despaced pathdata" ]
-
-      // test @[ "DRB foobar" ]
-      // test @[ "DRB no shared state in WASM module" ]
-      // test @[ "___________ DRB path compression" ]
-      return test(this["DRB can pass in custom RBW"]);
+      return test(this);
     })();
   }
 
-  // test @[ "DRB RBW returns despaced pathdata" ]
+  // @[ "DRB foobar" ]()
+// test @[ "DRB no shared state in WASM module" ]
+// @[ "DRB path compression" ]()
+// test @[ "DRB can pass in custom RBW" ]
+// test @[ "DRB RBW returns despaced pathdata" ]
+
+  // test @[ "DRB foobar" ]
+// test @[ "DRB no shared state in WASM module" ]
+// test @[ "___________ DRB path compression" ]
+// test @[ "DRB can pass in custom RBW" ]
+// test @[ "DRB RBW returns despaced pathdata" ]
 
 }).call(this);
 

@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, PATH, RBW, SQL, ZLIB, badge, debug, echo, equals, guy, help, info, isa, rpr, settings_from_set_id, show_db, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, Drb, FS, H, PATH, RBW, SQL, ZLIB, badge, debug, echo, equals, guy, help, info, isa, rpr, show_db, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -81,40 +81,6 @@
     return null;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  settings_from_set_id = function(set_id) {
-    var cgid_map, chrs, cids, fontnick, fspath, text;
-    chrs = null;
-    cids = null;
-    cgid_map = null;
-    fontnick = null;
-    fspath = null;
-    //.........................................................................................................
-    switch (set_id) {
-      case 'small':
-        fontnick = 'djvs';
-        fspath = 'DejaVuSerif.ttf';
-        chrs = "sampletext算";
-        text = "äöü the affirmation.";
-        break;
-      case 'all':
-        fontnick = 'qkai';
-        fspath = 'cwTeXQKai-Medium.ttf';
-        cids = drb.get_unicode_codepoints();
-        break;
-      default:
-        // fontnick = 'jzr';   fspath = 'jizura3b.ttf'
-        /* TAINT obtain list of all valid Unicode codepoints (again) */
-        // cids                = [ 0x0021 .. 0xd000 ]
-        // cids                = [ 0x4e00 .. 0x9fff ]
-        // cids                = [ 0x4e00 .. 0x4e02 ]
-        throw new Error(`^345^ unknown set_id ${rpr(set_id)}`);
-    }
-    //.........................................................................................................
-    fspath = PATH.resolve(PATH.join(__dirname, '../../../assets/jizura-fonts/', fspath));
-    return {chrs, cids, cgid_map, text, fontnick, fspath};
-  };
-
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
@@ -137,7 +103,7 @@
     };
     drb = new Drb(drb_cfg);
     //.........................................................................................................
-    ({chrs, cids, cgid_map, fontnick, fspath} = settings_from_set_id(set_id));
+    ({chrs, cids, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
     //.........................................................................................................
     drb.register_fontnick({fontnick, fspath});
     whisper('^3334^', `loading font ${rpr(fontnick)}...`);
@@ -174,53 +140,16 @@
   // #-----------------------------------------------------------------------------------------------------------
   // @demo_text_shaping = ->
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.demo_typesetting = function(cfg) {
-    var cgid_map, chrs, cids, db, defaults, drb, fontnick, fspath, schema, set_id, size_mm, text;
-    defaults = {
-      set_id: 'small'
-    };
-    cfg = {...defaults, ...cfg};
-    ({set_id} = cfg);
-    db = new DBay({
-      path: '/dev/shm/typesetting-1.sqlite'
-    });
-    schema = 'drb';
-    drb = new Drb({
-      db,
-      create: true,
-      schema,
-      path: '/dev/shm/typesetting-2.sqlite'
-    });
-    //.........................................................................................................
-    ({chrs, cids, cgid_map, text, fontnick, fspath} = settings_from_set_id(set_id));
-    size_mm = 5;
-    //.........................................................................................................
-    drb.register_fontnick({fontnick, fspath});
-    drb.prepare_font({fontnick});
-    drb.insert_outlines({fontnick, cgid_map, cids, chrs});
-    drb.shape_text({fontnick, text, size_mm});
-    drb.shape_text({
-      fontnick,
-      text,
-      size_mm: 10
-    });
-    //.........................................................................................................
-    /* TAINT rename method to distinguish getting outlines from rustybuzz-wasm vs getting them from DB */
-    // urge '^290^', { bbox, pd, } = drb.get_single_outline { fontnick, gid: 74, }
-    return null;
-  };
-
   //###########################################################################################################
   if (require.main === module) {
     (async() => {
-      // await @demo_store_outlines()
-      // await @demo_store_outlines { set_id: 'all', }
-      return (await this.demo_typesetting());
+      return (await this.demo_store_outlines());
     })();
   }
 
-  // await @demo_use_linked_rustybuzz_wasm()
+  // await @demo_store_outlines { set_id: 'all', }
+// await @demo_typeset_sample_page()
+// await @demo_use_linked_rustybuzz_wasm()
 
 }).call(this);
 
