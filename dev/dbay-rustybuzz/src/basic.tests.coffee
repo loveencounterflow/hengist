@@ -157,7 +157,7 @@ guy                       = require '../../../apps/guy'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # @[ "DRB foobar" ]()
   # test @[ "DRB no shared state in WASM module" ]
   # @[ "DRB path compression" ]()
@@ -167,5 +167,5 @@ if require.main is module then do =>
   # test @[ "DRB foobar" ]
   # test @[ "DRB no shared state in WASM module" ]
   # test @[ "___________ DRB path compression" ]
-  test @[ "DRB can pass in custom RBW" ]
+  # test @[ "DRB can pass in custom RBW" ]
   # test @[ "DRB RBW returns despaced pathdata" ]
