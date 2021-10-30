@@ -1,0 +1,197 @@
+<!doctype html>
+
+<title>SVG with glyph outlines</title>
+<style>
+  body {
+    background-color:       #96f0c93b;
+    transform-origin:       0px 0px 0px;
+    transform:              scale(1.4157,1.4157);
+  }
+
+  .shady {
+    fill:                   blue;
+    opacity:                0.5; }
+
+  .reveal-blocks .galley {                      /* debugging */
+    outline:                1px dotted blue;
+    overflow:               visible; }
+
+  .galley.A4 {
+    width:                  210mm;
+    height:                 297mm; }
+
+  .svg-font {
+    display:                none; }
+
+  #xxx {
+    display:                none; }
+
+  .show-grid #xxx {
+    display:                block; }
+
+  </style>
+
+<body class='reveal-blocks show-grid'>
+
+
+<h1>Demo Typeset Sample Page</h1>
+
+<svg id='outlines' class='svg-font' viewBox='0 0 1000 1000' overflow='visible'>
+  <style>
+    .glyfbox {
+      fill:                   brown;
+      opacity:                0.5;
+      mix-blend-mode:         multiply;
+      stroke:                 red;
+      stroke-width:           5mm;
+    }
+  </style>
+
+<!-- Part I where we declare one outline per font and glyf -->
+<!-- Outlines are defined in an em square of 1000⨉1000 units -->
+<!-- Only integer numbers are used in outlines so a 1cm high glyf has a precision of 0.01mm -->
+<!-- and a 10cm high glyf still has a precision of 0.1mm, which should be good enough. -->
+<!-- ID pattern: kind — font ID — glyf ID: O(outline)_L(atin)M(odern)C(ursive)_glyfid -->
+<!-- <path id='o_lmc_74' d='M839-18C839-31 832-31 812-31C754-31 754-39 754-48C754-48 754-56 758-71L893-612C901-644 909-652 972-652C993-652 1002-652 1002-670C1002-683 994-683 977-683L849-683C827-683 824-683 813-665L473-100L417-661C415-683 413-683 389-683L256-683C240-683 229-683 229-664C229-652 237-652 256-652C287-652 314-652 314-635C314-632 314-630 310-616L182-101C168-45 130-33 85-31C77-31 66-30 66-12C66-3 72 0 79 0C109 0 143-3 174-3C206-3 241 0 272 0C278 0 290 0 290-18C290-30 283-31 271-31C214-33 212-59 212-74C212-77 212-83 216-99L349-630L350-630L411-24C413-7 413 0 428 0C441 0 446-7 452-18L825-639L826-639L685-73C677-39 671-31 603-31C587-31 576-31 576-12C576 0 587 0 590 0C627 0 666-3 704-3C742-3 783 0 820 0C827 0 839 0 839-18Z'/> -->
+<?unscaled_outlines?>
+
+<!-- Part II where we declare one outline per size -->
+<!-- since outlines have 1000 units per em and the galley has 1mm per unit,
+the scale factor equals ( size in mm ) times ( 1 / 1000 ) (0.001 ≘ 1mm) -->
+<!-- <use id='o_lmc_74_6'  transform='scale(0.006)' href='#o_lmc_74'/> -->
+<?scaled_outlines?>
+
+</svg>
+
+
+
+<!-- =================================================================================================== -->
+<svg class='svg-grid' viewBox='0 0 100 100' overflow='visible'>
+  <style>
+    .svg-grid {
+      display:                none;
+      width:                  100mm;
+      height:                 100mm;
+      outline:                1px dotted red; }
+
+    .gridh, .gridv {
+      mix-blend-mode:         multiply; }
+
+    .h0, .h1, .h2, .h3, .h4, .h5, .h6, .h7, .h8, .h9,
+    .v0, .v1, .v2, .v3, .v4, .v5, .v6, .v7, .v8, .v9 {
+      opacity:                0.5;
+      stroke-width:           0.25;
+      stroke:                 red; }
+
+    .h0, .v0 {
+      stroke-width:           0.5;
+      opacity:                0.8; }
+
+    .h5, .v5 {
+      stroke-width:           0.25;
+      opacity:                1; }
+
+    .gtx text {
+      font-family:            'Iosevka Slab', monospace;
+      font-size:              1mm;
+      fill:                   red;
+      opacity:                0.8; }
+
+    .gtx rect {
+      width:                  100%;
+      height:                 100%;
+      fill:                   white; }
+
+  </style>
+  <defs>
+    <path class='gridh' id='gh' d='M0 0 L210 0'/>
+    <path class='gridv' id='gv' d='M0 0 L0 297'/>
+    <g id='ghm'>
+      <svg class='gtx' x='046.5' y='2' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>050</text></svg>
+      <svg class='gtx' x='096.5' y='2' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>100</text></svg>
+      <svg class='gtx' x='146.5' y='2' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>150</text></svg>
+      <svg class='gtx' x='196.5' y='2' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>200</text></svg>
+      </g>
+    <g id='gvm'>
+      <svg class='gtx' x='2' y='047.5' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>050</text></svg>
+      <svg class='gtx' x='2' y='097.5' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>100</text></svg>
+      <svg class='gtx' x='2' y='147.5' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>150</text></svg>
+      <svg class='gtx' x='2' y='197.5' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>200</text></svg>
+      <svg class='gtx' x='2' y='247.5' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>250</text></svg>
+      </g>
+    </defs>
+  <g id='cm-grid'>
+    <use href='#gh' class='h0' x='000' y='000'/>
+    <use href='#gh' class='h1' x='000' y='010'/>
+    <use href='#gh' class='h2' x='000' y='020'/>
+    <use href='#gh' class='h3' x='000' y='030'/>
+    <use href='#gh' class='h4' x='000' y='040'/>
+    <use href='#gh' class='h5' x='000' y='050'/>
+    <use href='#gh' class='h6' x='000' y='060'/>
+    <use href='#gh' class='h7' x='000' y='070'/>
+    <use href='#gh' class='h8' x='000' y='080'/>
+    <use href='#gh' class='h9' x='000' y='090'/>
+    <use href='#gh' class='h0' x='000' y='100'/>
+    <use href='#gh' class='h1' x='000' y='110'/>
+    <use href='#gh' class='h2' x='000' y='120'/>
+    <use href='#gh' class='h3' x='000' y='130'/>
+    <use href='#gh' class='h4' x='000' y='140'/>
+    <use href='#gh' class='h5' x='000' y='150'/>
+    <use href='#gh' class='h6' x='000' y='160'/>
+    <use href='#gh' class='h7' x='000' y='170'/>
+    <use href='#gh' class='h8' x='000' y='180'/>
+    <use href='#gh' class='h9' x='000' y='190'/>
+    <use href='#gh' class='h0' x='000' y='200'/>
+    <use href='#gh' class='h1' x='000' y='210'/>
+    <use href='#gh' class='h2' x='000' y='220'/>
+    <use href='#gh' class='h3' x='000' y='230'/>
+    <use href='#gh' class='h4' x='000' y='240'/>
+    <use href='#gh' class='h5' x='000' y='250'/>
+    <use href='#gh' class='h6' x='000' y='260'/>
+    <use href='#gh' class='h7' x='000' y='270'/>
+    <use href='#gh' class='h8' x='000' y='280'/>
+    <use href='#gh' class='h9' x='000' y='290'/>
+    <use href='#gv' class='v0' x='000' y='000'/>
+    <use href='#gv' class='v1' x='010' y='000'/>
+    <use href='#gv' class='v2' x='020' y='000'/>
+    <use href='#gv' class='v3' x='030' y='000'/>
+    <use href='#gv' class='v4' x='040' y='000'/>
+    <use href='#gv' class='v5' x='050' y='000'/>
+    <use href='#gv' class='v6' x='060' y='000'/>
+    <use href='#gv' class='v7' x='070' y='000'/>
+    <use href='#gv' class='v8' x='080' y='000'/>
+    <use href='#gv' class='v9' x='090' y='000'/>
+    <use href='#gv' class='v0' x='100' y='000'/>
+    <use href='#gv' class='v1' x='110' y='000'/>
+    <use href='#gv' class='v2' x='120' y='000'/>
+    <use href='#gv' class='v3' x='130' y='000'/>
+    <use href='#gv' class='v4' x='140' y='000'/>
+    <use href='#gv' class='v5' x='150' y='000'/>
+    <use href='#gv' class='v6' x='160' y='000'/>
+    <use href='#gv' class='v7' x='170' y='000'/>
+    <use href='#gv' class='v8' x='180' y='000'/>
+    <use href='#gv' class='v9' x='190' y='000'/>
+    <use href='#gv' class='v0' x='200' y='000'/>
+    <use href='#gv' class='v1' x='210' y='000'/>
+    <use href='#ghm' x='000' y='000'/>
+    <use href='#ghm' x='000' y='289'/>
+    <use href='#gvm' x='000' y='000'/>
+    <use href='#gvm' x='200' y='000'/>
+    </g>
+  </svg>
+
+<!-- =================================================================================================== -->
+<!-- Part III where we position and style the scaled outlines to construct the page to be printed. -->
+<!-- Coordinates have a pleasant ratio of 1 unit per mm. -->
+
+<svg id=p0001 class='galley A4' viewBox='0 0 210 297'>
+<use id='xxx' x='000' y='000' href='#cm-grid'/>
+<rect x='50' y='50' width='10' height='10' style='fill:blue;'/>
+
+<!-- <use x='000' y='020' href='#o_lmc_90_10'/> -->
+<?content?>
+
+
+</svg>
+
+</body>
