@@ -66,35 +66,6 @@ show_db = ( db, schema ) ->
       limit 100;"""
   return null
 
-#-----------------------------------------------------------------------------------------------------------
-settings_from_set_id = ( set_id ) ->
-  chrs                = null
-  cids                = null
-  cgid_map            = null
-  fontnick            = null
-  fspath              = null
-  #.........................................................................................................
-  switch set_id
-    when 'small'
-      fontnick  = 'djvs'
-      fspath    = 'DejaVuSerif.ttf'
-      chrs      = "sampletext算"
-      text      = "äöü the affirmation."
-    when 'all'
-      fontnick = 'qkai'
-      fspath    = 'cwTeXQKai-Medium.ttf'
-      cids      = drb.get_unicode_codepoints()
-      # fontnick = 'jzr';   fspath = 'jizura3b.ttf'
-      ### TAINT obtain list of all valid Unicode codepoints (again) ###
-      # cids                = [ 0x0021 .. 0xd000 ]
-      # cids                = [ 0x4e00 .. 0x9fff ]
-      # cids                = [ 0x4e00 .. 0x4e02 ]
-    else
-      throw new Error "^345^ unknown set_id #{rpr set_id}"
-  #.........................................................................................................
-  fspath = PATH.resolve PATH.join __dirname, '../../../assets/jizura-fonts/', fspath
-  return { chrs, cids, cgid_map, text, fontnick, fspath, }
-
 
 #===========================================================================================================
 #
@@ -117,7 +88,7 @@ settings_from_set_id = ( set_id ) ->
     cids
     cgid_map
     fontnick
-    fspath          } = settings_from_set_id set_id
+    fspath          } = H.settings_from_set_id set_id
   #.........................................................................................................
   drb.register_fontnick { fontnick, fspath, }
   whisper '^3334^', "loading font #{rpr fontnick}..."; drb.prepare_font { fontnick, }; whisper '^3334^', "... done"
