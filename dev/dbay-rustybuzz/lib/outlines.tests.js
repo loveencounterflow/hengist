@@ -199,55 +199,39 @@
     return typeof done === "function" ? done() : void 0;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this["DRB RBW shape_text() returns scaled coordinates"] = function(T, done) {
-    var DBay, Drb, RBW, cgid_map, chrs, cids, d, db, drb, fontnick, fspath, i, j, len, len1, ref, ref1, set_id, size_mm, text, use_linked_RBW;
-    // T?.halt_on_error()
-    use_linked_RBW = false;
-    globalThis.info = info;
-    RBW = require('../../../apps/rustybuzz-wasm/pkg');
-    ({DBay} = require(H.dbay_path));
-    ({Drb} = require(H.drb_path));
-    db = new DBay();
-    if (use_linked_RBW) {
-      debug('^4445^', CND.reverse(" using linked RBW "));
-      drb = new Drb({
-        db,
-        temporary: true,
-        RBW
-      });
-      if (T != null) {
-        T.ok(drb.RBW === RBW);
-      }
-    } else {
-      drb = new Drb({
-        db,
-        temporary: true
-      });
-    }
-    set_id = 'small';
-    //.........................................................................................................
-    ({chrs, cids, cgid_map, text, fontnick, fspath} = H.settings_from_set_id(set_id));
-    size_mm = 6;
-    info('^33443^', {fontnick, text, size_mm});
-    //.........................................................................................................
-    drb.register_fontnick({fontnick, fspath});
-    drb.prepare_font({fontnick});
-    drb.insert_outlines({fontnick, cgid_map, cids, chrs});
-    size_mm = 1;
-    ref = drb.shape_text({fontnick, text, size_mm});
-    for (i = 0, len = ref.length; i < len; i++) {
-      d = ref[i];
-      urge('^3343^', {size_mm}, d);
-    }
-    size_mm = 10;
-    ref1 = drb.shape_text({fontnick, text, size_mm});
-    for (j = 0, len1 = ref1.length; j < len1; j++) {
-      d = ref1[j];
-      help('^3343^', {size_mm}, d);
-    }
-    return typeof done === "function" ? done() : void 0;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // @[ "DRB RBW shape_text() returns scaled coordinates" ] = ( T, done ) ->
+  //   # T?.halt_on_error()
+  //   use_linked_RBW      = false
+  //   globalThis.info     = info
+  //   RBW                 = require '../../../apps/rustybuzz-wasm/pkg'
+  //   { DBay }            = require H.dbay_path
+  //   { Drb }             = require H.drb_path
+  //   db                  = new DBay()
+  //   if use_linked_RBW
+  //     debug '^4445^', CND.reverse " using linked RBW "
+  //     drb                 = new Drb { db, temporary: true, RBW, }
+  //     T?.ok drb.RBW is RBW
+  //   else
+  //     drb                 = new Drb { db, temporary: true, }
+  //   set_id              = 'small'
+  //   #.........................................................................................................
+  //   { chrs
+  //     cids
+  //     cgid_map
+  //     text
+  //     fontnick
+  //     fspath          } = H.settings_from_set_id set_id
+  //   size_mm             = 6
+  //   info '^33443^', { fontnick, text, size_mm, }
+  //   #.........................................................................................................
+  //   drb.register_fontnick { fontnick, fspath, }
+  //   drb.prepare_font      { fontnick, }
+  //   drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
+  //   size_mm = 1;  urge '^3343^', { size_mm, }, d for d in drb.shape_text { fontnick, text, size_mm, }
+  //   size_mm = 10; help '^3343^', { size_mm, }, d for d in drb.shape_text { fontnick, text, size_mm, }
+  //   #.........................................................................................................
+  //   return done?()
 
   //###########################################################################################################
   if (require.main === module) {
