@@ -120,42 +120,15 @@ show_db = ( db, schema ) ->
 # #-----------------------------------------------------------------------------------------------------------
 # @demo_text_shaping = ->
 
-#-----------------------------------------------------------------------------------------------------------
-@demo_typesetting = ( cfg ) ->
-  defaults            = { set_id: 'small', }
-  cfg                 = { defaults..., cfg..., }
-  { set_id }          = cfg
-  db                  = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
-  schema              = 'drb'
-  drb                 = new Drb { db, create: true, schema, path: '/dev/shm/typesetting-2.sqlite', }
-  #.........................................................................................................
-  { chrs
-    cids
-    cgid_map
-    text
-    fontnick
-    fspath          } = settings_from_set_id set_id
-  size_mm             = 5
-  #.........................................................................................................
-  drb.register_fontnick { fontnick, fspath, }
-  drb.prepare_font      { fontnick, }
-  drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
-  drb.shape_text        { fontnick, text, size_mm, }
-  drb.shape_text        { fontnick, text, size_mm: 10, }
-  #.........................................................................................................
-  ### TAINT rename method to distinguish getting outlines from rustybuzz-wasm vs getting them from DB ###
-  # urge '^290^', { bbox, pd, } = drb.get_single_outline { fontnick, gid: 74, }
-  return null
-
 
 
 
 
 ############################################################################################################
 if require.main is module then do =>
-  # await @demo_store_outlines()
+  await @demo_store_outlines()
   # await @demo_store_outlines { set_id: 'all', }
-  await @demo_typesetting()
+  # await @demo_typeset_sample_page()
   # await @demo_use_linked_rustybuzz_wasm()
 
 
