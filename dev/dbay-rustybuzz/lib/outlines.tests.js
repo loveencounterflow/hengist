@@ -201,7 +201,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB RBW shape_text() returns coordinates acc to font upem"] = function(T, done) {
-    var DBay, Drb, RBW, db, drb, i, len, ref, set_id, use_linked_RBW;
+    var DBay, Drb, RBW, db, drb, i, len, ref, result, set_id, use_linked_RBW;
     // T?.halt_on_error()
     use_linked_RBW = true;
     globalThis.info = info;
@@ -225,25 +225,39 @@
         temporary: true
       });
     }
-    ref = ['3a', '3b'];
     //.........................................................................................................
+    result = {};
+    ref = ['3a', '3b'];
     for (i = 0, len = ref.length; i < len; i++) {
       set_id = ref[i];
       (() => {
-        var cgid_map, chrs, cids, d, fontnick, fspath, j, len1, ref1, results, text;
+        var cgid_map, chrs, cids, fontnick, fspath, text;
         ({chrs, cids, cgid_map, text, fontnick, fspath} = H.settings_from_set_id(set_id));
         //.....................................................................................................
         drb.register_fontnick({fontnick, fspath});
         drb.prepare_font({fontnick});
         drb.insert_outlines({fontnick, cgid_map, cids, chrs});
-        ref1 = drb.shape_text({fontnick, text});
-        results = [];
-        for (j = 0, len1 = ref1.length; j < len1; j++) {
-          d = ref1[j];
-          results.push(urge('^3343^', {fontnick}, d));
-        }
-        return results;
+        return result[fontnick] = (drb.shape_text({fontnick, text}))[0];
       })();
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(result, {
+        djvsi: {
+          gid: 68,
+          x: 0,
+          y: 0,
+          dx: 596.2,
+          dy: 0
+        },
+        eg81: {
+          gid: 66,
+          x: 0,
+          y: 0,
+          dx: 492,
+          dy: 0
+        }
+      });
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -258,7 +272,7 @@
       // test @[ "DRB can pass in custom RBW" ]
       // test @[ "DRB get_cgid_map()" ]
       // @[ "DRB insert_outlines()" ]()
-      return this["DRB RBW shape_text() returns coordinates acc to font upem"]();
+      return test(this["DRB RBW shape_text() returns coordinates acc to font upem"]);
     })();
   }
 
