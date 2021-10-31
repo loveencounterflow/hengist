@@ -72,44 +72,30 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var arrangement, chrs, content, d, db, defaults, drb, fontnick, fspath, fudge, gid, gids, i, j, k, len, len1, len2, outline, page, scale, scale_txt, scaled_outlines, schema, set_id, size_mm, soid, text, unscaled_outlines, uoid, x, x0, xxx, y, y0;
+    var arrangement, chrs, content, d, db, defaults, drb, fontnick, fspath, gid, gids, i, j, k, len, len1, len2, outline, page, scale, scale_txt, scaled_outlines, set_id, size_mm, soid, text, unscaled_outlines, uoid, x, x0, xxx, y, y0;
     defaults = {
-      set_id: 'smalli'
+      set_id: 'small-eg8i'
     };
     cfg = {...defaults, ...cfg};
     ({set_id} = cfg);
-    RBW = require('../../../assets/dbay-rustybuzz/pkg');
     db = new DBay({
       path: '/dev/shm/typesetting-1.sqlite'
     });
-    schema = 'drb';
     drb = new Drb({
       db,
-      RBW,
       create: true,
-      schema,
       path: '/dev/shm/typesetting-2.sqlite'
     });
     //.........................................................................................................
     ({text, fontnick, fspath} = H.settings_from_set_id(set_id));
-    size_mm = 20;
+    size_mm = 10;
     chrs = [...(new Set(Array.from(text)))];
     //.........................................................................................................
     drb.register_fontnick({fontnick, fspath});
     drb.prepare_font({fontnick});
     drb.insert_outlines({fontnick, chrs});
     // drb.shape_text        { fontnick, text, size_mm, }
-    arrangement = drb.shape_text({
-      fontnick,
-      text,
-      size_mm: 10
-    });
-    debug('^4455^', {
-      fontnick,
-      text,
-      size_mm: 10
-    });
-    debug('^4455^', arrangement);
+    arrangement = drb.shape_text({fontnick, text, size_mm});
     page = tpl;
     gids = [
       ...(new Set((function() {
@@ -138,7 +124,8 @@
     //.........................................................................................................
     /* Part II: insert scaled outline defs */
     scaled_outlines = [];
-    scale_txt = (size_mm / 1_000).toFixed(4);
+    scale = size_mm / 1000;
+    scale_txt = scale.toFixed(4);
     for (j = 0, len1 = gids.length; j < len1; j++) {
       gid = gids[j];
       uoid = `o${gid}${fontnick}`;
@@ -152,19 +139,12 @@
     content = [];
     x0 = 0;
     y0 = 50;
-    scale = size_mm / 1000;
-    //  5mm -> 1 / 4
-    //  6mm -> 1 / 3.3333
-    // 10mm -> 1 / 2
-    // 20mm -> 1 / 1
-    // 40mm -> 2 / 1
-    fudge = 1 / 2;
     for (k = 0, len2 = arrangement.length; k < len2; k++) {
       xxx = arrangement[k];
       gid = xxx.gid;
       soid = `s${gid}${fontnick}-${size_mm}`;
-      x = x0 + (xxx.x * scale * fudge);
-      y = y0 + (xxx.y * scale * fudge);
+      x = x0 + (xxx.x * scale);
+      y = y0 + (xxx.y * scale);
       content.push(`<use href='#${soid}' x='${x}' y='${y}'/>`);
       info('^3344^', `<use href='#${soid}' x='${x}' y='${y}'/>`);
     }
@@ -181,7 +161,10 @@
     (async() => {
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
-      return (await this.demo_typeset_sample_page());
+      // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+      return (await this.demo_typeset_sample_page({
+        set_id: 'small-djvsi'
+      }));
     })();
   }
 
