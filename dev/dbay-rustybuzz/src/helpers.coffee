@@ -109,6 +109,15 @@ do =>
       # cids                = [ 0x0021 .. 0xd000 ]
       # cids                = [ 0x4e00 .. 0x9fff ]
       # cids                = [ 0x4e00 .. 0x4e02 ]
+      # garamond_italic:  { path: 'EBGaramond08-Italic.otf', }
+      # amiri:            { path: 'arabic/Amiri-0.113/Amiri-Bold.ttf', }
+      # tibetan:          { path: '/usr/share/fonts/truetype/tibetan-machine/TibetanMachineUni.ttf', }
+      # notoserif:        { path: 'NotoSerifJP/NotoSerifJP-Medium.otf', }
+      # djvsi:            { path: 'DejaVuSerif-Italic.ttf', }
+      # fontnick  = 'tibetan';          text =  "ཨོཾ་མ་ཎི་པདྨེ་ཧཱུྃ"
+      # fontnick  = 'amiri';            text = ( [ "الخط الأمیری"... ].reverse() ).join ''
+      # fontnick  = 'garamond_italic';  text = "a certain minimum"
+      # fontnick  = 'garamond_italic';  text = "af#fix"
     else
       throw new Error "^345^ unknown set_id #{rpr set_id}"
   #.........................................................................................................

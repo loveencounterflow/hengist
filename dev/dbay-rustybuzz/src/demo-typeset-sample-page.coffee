@@ -33,6 +33,8 @@ H                         = require './helpers'
 tpl_path                  = PATH.resolve PATH.join __dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-page.template.html'
 tpl                       = FS.readFileSync tpl_path, { encoding: 'utf-8', }
 target_path               = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/html+svg-demos/demo-typeset-sample-page.output.html'
+{ to_width }              = require 'to-width'
+
 
 #-----------------------------------------------------------------------------------------------------------
 XXX_show_clusters = ( text, arrangement ) ->
@@ -48,17 +50,27 @@ XXX_show_clusters = ( text, arrangement ) ->
 
 
 #-----------------------------------------------------------------------------------------------------------
+append_to = ( page, name, text ) ->
+  text = rpr text unless isa.text text
+  echo ( CND.reverse CND.grey to_width name, 15 ) + ( CND.reverse CND.gold ' ' + to_width text, 108 )
+  marker = "<!--?#{name}-end?-->"
+  return page.replace marker, text.toString() + marker + '\n'
+
+#-----------------------------------------------------------------------------------------------------------
 @demo_typeset_sample_page = ( cfg ) ->
   defaults            = { set_id: 'small-eg8i', }
   cfg                 = { defaults..., cfg..., }
   { set_id }          = cfg
+  RBW                 = require '../../../apps/rustybuzz-wasm/pkg'
   db                  = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
-  drb                 = new Drb { db, create: true, path: '/dev/shm/typesetting-2.sqlite', }
+  drb                 = new Drb { db, create: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
   #.........................................................................................................
   { text
     fontnick
     fspath          } = H.settings_from_set_id set_id
   size_mm             = 10
+  scale               = size_mm / 1000
+  scale_txt           = scale.toFixed 4
   chrs                = [ ( new Set Array.from text )..., ]
   #.........................................................................................................
   drb.register_fontnick { fontnick, fspath, }
@@ -69,40 +81,40 @@ XXX_show_clusters = ( text, arrangement ) ->
   page        = tpl
   gids        = [ ( new Set ( d.gid for d in arrangement ) )..., ]
   #.........................................................................................................
+  fm          = drb.get_font_metrics { fontnick, }
+  page        = append_to page, 'remarks', rpr fm
+  #.........................................................................................................
   ### Part I: insert unscaled outlines ###
-  unscaled_outlines = []
-  for gid in gids
-    outline = drb.get_single_outline { fontnick, gid, }
-    uoid    = "o#{gid}#{fontnick}"
-    unscaled_outlines.push "<path id='#{uoid}' d='#{outline.pd}'/>"
-  unscaled_outlines = unscaled_outlines.join '\n'
-  page              = page.replace '<?unscaled_outlines?>', unscaled_outlines
+  insert_outlines = ( page ) ->
+    unscaled_outlines = []
+    for gid in gids
+      outline = drb.get_single_outline { fontnick, gid, }
+      uoid    = "o#{gid}#{fontnick}"
+      page    = append_to page, 'unscaled-outlines', "<path id='#{uoid}' d='#{outline.pd}'/>"
+    return page
   #.........................................................................................................
-  ### Part II: insert scaled outline defs ###
-  scaled_outlines = []
-  scale           = size_mm / 1000
-  scale_txt       = scale.toFixed 4
-  for gid in gids
-    uoid  = "o#{gid}#{fontnick}"
-    soid  = "s#{gid}#{fontnick}-#{size_mm}"
-    scaled_outlines.push "<use href='##{uoid}' id='#{soid}' transform='scale(#{scale_txt})'/>"
-  scaled_outlines = scaled_outlines.join '\n'
-  page            = page.replace '<?scaled_outlines?>', scaled_outlines
+  insert_content = ( page ) ->
+    # page = page.replace '<?scaled_outlines?>', ''
+    #.........................................................................................................
+    ### Part III: insert outline refs (the typesetting proper so to speak) ###
+    content = []
+    x0      = 0
+    y0      = 50
+    page    = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
+    page    = append_to page, 'content', "<rect class='typeframe' x='0' y='-800' width='10000' height='1000'/>"
+    for xxx in arrangement
+      gid     = xxx.gid
+      uoid    = "o#{gid}#{fontnick}"
+      x       = Math.round xxx.x
+      y       = Math.round xxx.y
+      if y != 0 then  element = "<use href='##{uoid}' x='#{x}' y='#{y}'/>"
+      else            element = "<use href='##{uoid}' x='#{x}'/>"
+      page    = append_to page, 'content', element
+    page    = append_to page, 'content', "</g>"
+    return page
   #.........................................................................................................
-  ### Part III: insert outline refs (the typesetting proper so to speak) ###
-  content = []
-  x0      = 0
-  y0      = 50
-  for xxx in arrangement
-    gid   = xxx.gid
-    soid  = "s#{gid}#{fontnick}-#{size_mm}"
-    x     = x0 + ( xxx.x * scale )
-    y     = y0 + ( xxx.y * scale )
-    content.push   "<use href='##{soid}' x='#{x}' y='#{y}'/>"
-    info '^3344^', "<use href='##{soid}' x='#{x}' y='#{y}'/>"
-  content   = content.join '\n'
-  page      = page.replace '<?content?>', content
-  #.........................................................................................................
+  page = insert_outlines  page
+  page = insert_content   page
   FS.writeFileSync target_path, page
   #.........................................................................................................
   return null
@@ -113,8 +125,8 @@ XXX_show_clusters = ( text, arrangement ) ->
 if require.main is module then do =>
   # await @demo_store_outlines()
   # await @demo_store_outlines { set_id: 'all', }
-  # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
-  await @demo_typeset_sample_page { set_id: 'small-djvsi', }
+  await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+  # await @demo_typeset_sample_page { set_id: 'small-djvsi', }
   # await @demo_use_linked_rustybuzz_wasm()
 
 
