@@ -133,39 +133,41 @@ guy                       = require '../../../apps/guy'
   # cgid_map            = drb.get_cgid_map { fontnick, chrs, }
   return done?()
 
-# #-----------------------------------------------------------------------------------------------------------
-# @[ "DRB RBW shape_text() returns scaled coordinates" ] = ( T, done ) ->
-#   # T?.halt_on_error()
-#   use_linked_RBW      = false
-#   globalThis.info     = info
-#   RBW                 = require '../../../apps/rustybuzz-wasm/pkg'
-#   { DBay }            = require H.dbay_path
-#   { Drb }             = require H.drb_path
-#   db                  = new DBay()
-#   if use_linked_RBW
-#     debug '^4445^', CND.reverse " using linked RBW "
-#     drb                 = new Drb { db, temporary: true, RBW, }
-#     T?.ok drb.RBW is RBW
-#   else
-#     drb                 = new Drb { db, temporary: true, }
-#   set_id              = 'small'
-#   #.........................................................................................................
-#   { chrs
-#     cids
-#     cgid_map
-#     text
-#     fontnick
-#     fspath          } = H.settings_from_set_id set_id
-#   size_mm             = 6
-#   info '^33443^', { fontnick, text, size_mm, }
-#   #.........................................................................................................
-#   drb.register_fontnick { fontnick, fspath, }
-#   drb.prepare_font      { fontnick, }
-#   drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
-#   size_mm = 1;  urge '^3343^', { size_mm, }, d for d in drb.shape_text { fontnick, text, size_mm, }
-#   size_mm = 10; help '^3343^', { size_mm, }, d for d in drb.shape_text { fontnick, text, size_mm, }
-#   #.........................................................................................................
-#   return done?()
+#-----------------------------------------------------------------------------------------------------------
+@[ "DRB RBW shape_text() returns coordinates acc to font upem" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  use_linked_RBW      = true
+  globalThis.info     = info
+  RBW                 = require '../../../apps/rustybuzz-wasm/pkg'
+  { DBay }            = require H.dbay_path
+  { Drb }             = require H.drb_path
+  db                  = new DBay()
+  if use_linked_RBW
+    debug '^4445^', CND.reverse " using linked RBW "
+    drb                 = new Drb { db, temporary: true, RBW, }
+    T?.ok drb.RBW is RBW
+  else
+    drb                 = new Drb { db, temporary: true, }
+  #.........................................................................................................
+  result = {}
+  for set_id in [ '3a', '3b', ]
+    do =>
+      { chrs
+        cids
+        cgid_map
+        text
+        fontnick
+        fspath          } = H.settings_from_set_id set_id
+      #.....................................................................................................
+      drb.register_fontnick { fontnick, fspath, }
+      drb.prepare_font      { fontnick, }
+      drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
+      result[ fontnick ] = ( drb.shape_text { fontnick, text, } )[ 0 ]
+  #.........................................................................................................
+  T?.eq result, {
+    djvsi: { gid: 68, x: 0, y: 0, dx: 596.2,  dy: 0 },
+    eg81:  { gid: 66, x: 0, y: 0, dx: 492,    dy: 0 }, }
+  return done?()
 
 
 
@@ -180,5 +182,5 @@ if require.main is module then do =>
   # test @[ "DRB can pass in custom RBW" ]
   # test @[ "DRB get_cgid_map()" ]
   # @[ "DRB insert_outlines()" ]()
-  @[ "DRB RBW shape_text() returns scaled coordinates" ]()
+  test @[ "DRB RBW shape_text() returns coordinates acc to font upem" ]
 
