@@ -49,29 +49,25 @@ XXX_show_clusters = ( text, arrangement ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_typeset_sample_page = ( cfg ) ->
-  defaults            = { set_id: 'smalli', }
+  defaults            = { set_id: 'small-eg8i', }
   cfg                 = { defaults..., cfg..., }
   { set_id }          = cfg
-  RBW                 = require '../../../assets/dbay-rustybuzz/pkg'
   db                  = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
-  schema              = 'drb'
-  drb                 = new Drb { db, RBW, create: true, schema, path: '/dev/shm/typesetting-2.sqlite', }
+  drb                 = new Drb { db, create: true, path: '/dev/shm/typesetting-2.sqlite', }
   #.........................................................................................................
   { text
     fontnick
     fspath          } = H.settings_from_set_id set_id
-  size_mm             = 20
+  size_mm             = 10
   chrs                = [ ( new Set Array.from text )..., ]
   #.........................................................................................................
   drb.register_fontnick { fontnick, fspath, }
   drb.prepare_font      { fontnick, }
   drb.insert_outlines   { fontnick, chrs, }
   # drb.shape_text        { fontnick, text, size_mm, }
-  arrangement = drb.shape_text { fontnick, text, size_mm: 10, }
-  debug '^4455^', { fontnick, text, size_mm: 10, }
-  debug '^4455^', arrangement
-  page  = tpl
-  gids  = [ ( new Set ( d.gid for d in arrangement ) )..., ]
+  arrangement = drb.shape_text { fontnick, text, size_mm, }
+  page        = tpl
+  gids        = [ ( new Set ( d.gid for d in arrangement ) )..., ]
   #.........................................................................................................
   ### Part I: insert unscaled outlines ###
   unscaled_outlines = []
@@ -84,7 +80,8 @@ XXX_show_clusters = ( text, arrangement ) ->
   #.........................................................................................................
   ### Part II: insert scaled outline defs ###
   scaled_outlines = []
-  scale_txt       = ( size_mm / 1_000 ).toFixed 4
+  scale           = size_mm / 1000
+  scale_txt       = scale.toFixed 4
   for gid in gids
     uoid  = "o#{gid}#{fontnick}"
     soid  = "s#{gid}#{fontnick}-#{size_mm}"
@@ -96,18 +93,11 @@ XXX_show_clusters = ( text, arrangement ) ->
   content = []
   x0      = 0
   y0      = 50
-  scale   = size_mm / 1000
-  #  5mm -> 1 / 4
-  #  6mm -> 1 / 3.3333
-  # 10mm -> 1 / 2
-  # 20mm -> 1 / 1
-  # 40mm -> 2 / 1
-  fudge   = 1 / 2
   for xxx in arrangement
     gid   = xxx.gid
     soid  = "s#{gid}#{fontnick}-#{size_mm}"
-    x     = x0 + ( xxx.x * scale * fudge )
-    y     = y0 + ( xxx.y * scale * fudge )
+    x     = x0 + ( xxx.x * scale )
+    y     = y0 + ( xxx.y * scale )
     content.push   "<use href='##{soid}' x='#{x}' y='#{y}'/>"
     info '^3344^', "<use href='##{soid}' x='#{x}' y='#{y}'/>"
   content   = content.join '\n'
@@ -123,7 +113,8 @@ XXX_show_clusters = ( text, arrangement ) ->
 if require.main is module then do =>
   # await @demo_store_outlines()
   # await @demo_store_outlines { set_id: 'all', }
-  await @demo_typeset_sample_page()
+  # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+  await @demo_typeset_sample_page { set_id: 'small-djvsi', }
   # await @demo_use_linked_rustybuzz_wasm()
 
 
