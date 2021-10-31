@@ -73,32 +73,37 @@ do =>
     when 'small'
       fontnick  = 'djvs'
       fspath    = 'DejaVuSerif.ttf'
-      chrs      = "sampletext算"
+      chrs      = "abcdefghijklm"
       text      = "affirmation."
     when 'smalli'
       fontnick  = 'djvsi'
       fspath    = 'DejaVuSerif-Italic.ttf'
-      chrs      = "sampletext算"
+      chrs      = "abcdefghijklm"
       text      = "affirmation."
     when 'small-eg8i'
-      fontnick  = 'eg81'
+      fontnick  = 'eg8i'
       fspath    = 'EBGaramond08-Italic.otf'
-      chrs      = "sampletext算"
+      chrs      = "abcdefghijklm"
+      text      = "Affirmation Titian Sylt."
+    when 'small-aleo'
+      fontnick  = 'aleo'
+      fspath    = 'Aleo_font_v1.2.2/Desktop OTF/Aleo-Italic.otf'
+      chrs      = "abcdefghijklm"
       text      = "Affirmation Titian Sylt."
     when 'small-djvsi'
       fontnick  = 'djvsi'
       fspath    = 'DejaVuSerif-Italic.ttf'
-      chrs      = "sampletext算"
+      chrs      = "abcdefghijklm"
       text      = "Affirmation Titian Sylt."
     when '3a'
       fontnick  = 'djvsi'
       fspath    = 'DejaVuSerif-Italic.ttf'
-      chrs      = "abc"
+      chrs      = "abcdefghijklm"
       text      = "abc"
     when '3b'
-      fontnick  = 'eg81'
+      fontnick  = 'eg8i'
       fspath    = 'EBGaramond08-Italic.otf'
-      chrs      = "abc"
+      chrs      = "abcdefghijklm"
       text      = "abc"
     when 'all'
       fontnick = 'qkai'
