@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, PATH, RBW, SQL, XXX_show_clusters, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, tpl, tpl_path, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, Drb, FS, H, PATH, RBW, SQL, XXX_show_clusters, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, to_width, tpl, tpl_path, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -54,6 +54,8 @@
 
   target_path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/html+svg-demos/demo-typeset-sample-page.output.html'));
 
+  ({to_width} = require('to-width'));
+
   //-----------------------------------------------------------------------------------------------------------
   XXX_show_clusters = function(text, arrangement) {
     var cur_bidx, cur_text, d, d_idx, i, len, nxt_bidx, ref, ref1;
@@ -71,24 +73,39 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  append_to = function(page, name, text) {
+    var marker;
+    if (!isa.text(text)) {
+      text = rpr(text);
+    }
+    echo((CND.reverse(CND.grey(to_width(name, 15)))) + (CND.reverse(CND.gold(' ' + to_width(text, 108)))));
+    marker = `<!--?${name}-end?-->`;
+    return page.replace(marker, text.toString() + marker + '\n');
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var arrangement, chrs, content, d, db, defaults, drb, fontnick, fspath, gid, gids, i, j, k, len, len1, len2, outline, page, scale, scale_txt, scaled_outlines, set_id, size_mm, soid, text, unscaled_outlines, uoid, x, x0, xxx, y, y0;
+    var arrangement, chrs, d, db, defaults, drb, fm, fontnick, fspath, gids, insert_content, insert_outlines, page, scale, scale_txt, set_id, size_mm, text;
     defaults = {
       set_id: 'small-eg8i'
     };
     cfg = {...defaults, ...cfg};
     ({set_id} = cfg);
+    RBW = require('../../../apps/rustybuzz-wasm/pkg');
     db = new DBay({
       path: '/dev/shm/typesetting-1.sqlite'
     });
     drb = new Drb({
       db,
       create: true,
+      RBW,
       path: '/dev/shm/typesetting-2.sqlite'
     });
     //.........................................................................................................
     ({text, fontnick, fspath} = H.settings_from_set_id(set_id));
     size_mm = 10;
+    scale = size_mm / 1000;
+    scale_txt = scale.toFixed(4);
     chrs = [...(new Set(Array.from(text)))];
     //.........................................................................................................
     drb.register_fontnick({fontnick, fspath});
@@ -111,46 +128,51 @@
       })()))
     ];
     //.........................................................................................................
+    fm = drb.get_font_metrics({fontnick});
+    page = append_to(page, 'remarks', rpr(fm));
+    //.........................................................................................................
     /* Part I: insert unscaled outlines */
-    unscaled_outlines = [];
-    for (i = 0, len = gids.length; i < len; i++) {
-      gid = gids[i];
-      outline = drb.get_single_outline({fontnick, gid});
-      uoid = `o${gid}${fontnick}`;
-      unscaled_outlines.push(`<path id='${uoid}' d='${outline.pd}'/>`);
-    }
-    unscaled_outlines = unscaled_outlines.join('\n');
-    page = page.replace('<?unscaled_outlines?>', unscaled_outlines);
+    insert_outlines = function(page) {
+      var gid, i, len, outline, unscaled_outlines, uoid;
+      unscaled_outlines = [];
+      for (i = 0, len = gids.length; i < len; i++) {
+        gid = gids[i];
+        outline = drb.get_single_outline({fontnick, gid});
+        uoid = `o${gid}${fontnick}`;
+        page = append_to(page, 'unscaled-outlines', `<path id='${uoid}' d='${outline.pd}'/>`);
+      }
+      return page;
+    };
     //.........................................................................................................
-    /* Part II: insert scaled outline defs */
-    scaled_outlines = [];
-    scale = size_mm / 1000;
-    scale_txt = scale.toFixed(4);
-    for (j = 0, len1 = gids.length; j < len1; j++) {
-      gid = gids[j];
-      uoid = `o${gid}${fontnick}`;
-      soid = `s${gid}${fontnick}-${size_mm}`;
-      scaled_outlines.push(`<use href='#${uoid}' id='${soid}' transform='scale(${scale_txt})'/>`);
-    }
-    scaled_outlines = scaled_outlines.join('\n');
-    page = page.replace('<?scaled_outlines?>', scaled_outlines);
+    insert_content = function(page) {
+      var content, element, gid, i, len, uoid, x, x0, xxx, y, y0;
+      // page = page.replace '<?scaled_outlines?>', ''
+      //.........................................................................................................
+      /* Part III: insert outline refs (the typesetting proper so to speak) */
+      content = [];
+      x0 = 0;
+      y0 = 50;
+      page = append_to(page, 'content', `<g transform='translate(${x0} ${y0}) scale(${scale_txt})'>`);
+      page = append_to(page, 'content', "<rect class='typeframe' x='0' y='-800' width='10000' height='1000'/>");
+      for (i = 0, len = arrangement.length; i < len; i++) {
+        xxx = arrangement[i];
+        gid = xxx.gid;
+        uoid = `o${gid}${fontnick}`;
+        x = Math.round(xxx.x);
+        y = Math.round(xxx.y);
+        if (y !== 0) {
+          element = `<use href='#${uoid}' x='${x}' y='${y}'/>`;
+        } else {
+          element = `<use href='#${uoid}' x='${x}'/>`;
+        }
+        page = append_to(page, 'content', element);
+      }
+      page = append_to(page, 'content', "</g>");
+      return page;
+    };
     //.........................................................................................................
-    /* Part III: insert outline refs (the typesetting proper so to speak) */
-    content = [];
-    x0 = 0;
-    y0 = 50;
-    for (k = 0, len2 = arrangement.length; k < len2; k++) {
-      xxx = arrangement[k];
-      gid = xxx.gid;
-      soid = `s${gid}${fontnick}-${size_mm}`;
-      x = x0 + (xxx.x * scale);
-      y = y0 + (xxx.y * scale);
-      content.push(`<use href='#${soid}' x='${x}' y='${y}'/>`);
-      info('^3344^', `<use href='#${soid}' x='${x}' y='${y}'/>`);
-    }
-    content = content.join('\n');
-    page = page.replace('<?content?>', content);
-    //.........................................................................................................
+    page = insert_outlines(page);
+    page = insert_content(page);
     FS.writeFileSync(target_path, page);
     //.........................................................................................................
     return null;
@@ -161,14 +183,14 @@
     (async() => {
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
-      // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'small-djvsi'
+        set_id: 'small-eg8i'
       }));
     })();
   }
 
-  // await @demo_use_linked_rustybuzz_wasm()
+  // await @demo_typeset_sample_page { set_id: 'small-djvsi', }
+// await @demo_use_linked_rustybuzz_wasm()
 
 }).call(this);
 
