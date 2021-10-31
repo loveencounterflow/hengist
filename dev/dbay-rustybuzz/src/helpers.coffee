@@ -80,6 +80,26 @@ do =>
       fspath    = 'DejaVuSerif-Italic.ttf'
       chrs      = "sampletext算"
       text      = "affirmation."
+    when 'small-eg8i'
+      fontnick  = 'eg81'
+      fspath    = 'EBGaramond08-Italic.otf'
+      chrs      = "sampletext算"
+      text      = "Affirmation Titian Sylt."
+    when 'small-djvsi'
+      fontnick  = 'djvsi'
+      fspath    = 'DejaVuSerif-Italic.ttf'
+      chrs      = "sampletext算"
+      text      = "Affirmation Titian Sylt."
+    when '3a'
+      fontnick  = 'djvsi'
+      fspath    = 'DejaVuSerif-Italic.ttf'
+      chrs      = "abc"
+      text      = "abc"
+    when '3b'
+      fontnick  = 'eg81'
+      fspath    = 'EBGaramond08-Italic.otf'
+      chrs      = "abc"
+      text      = "abc"
     when 'all'
       fontnick = 'qkai'
       fspath    = 'cwTeXQKai-Medium.ttf'
