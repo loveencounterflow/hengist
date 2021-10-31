@@ -85,7 +85,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var arrangement, chrs, d, db, defaults, drb, fm, fontnick, fspath, gids, insert_content, insert_outlines, page, scale, scale_txt, set_id, size_mm, text;
+    /* TAINT make this a DRB method */
+    /* TAINT make this a method `difference_of_sets()`: */
+    var I, L, V, arrangement, bbox, cgid_map, chrs, cids, d, db, defaults, drb, fm, fontnick, fspath, gid, insert_content, insert_outlines, known_gids, missing_gids, page, pd, required_gids, scale, scale_txt, set_id, size_mm, text;
     defaults = {
       set_id: 'small-eg8i'
     };
@@ -102,51 +104,67 @@
       path: '/dev/shm/typesetting-2.sqlite'
     });
     //.........................................................................................................
-    ({text, fontnick, fspath} = H.settings_from_set_id(set_id));
+    ({text, chrs, cids, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
     size_mm = 10;
     scale = size_mm / 1000;
     scale_txt = scale.toFixed(4);
-    chrs = [...(new Set(Array.from(text)))];
+    // chrs            = [ ( new Set Array.from text )..., ]
     //.........................................................................................................
     drb.register_fontnick({fontnick, fspath});
     drb.prepare_font({fontnick});
-    drb.insert_outlines({fontnick, chrs});
-    // drb.shape_text        { fontnick, text, size_mm, }
-    arrangement = drb.shape_text({fontnick, text, size_mm});
+    drb.insert_outlines({fontnick, chrs, cids, cgid_map});
+    arrangement = drb.shape_text({fontnick, text});
     page = tpl;
-    gids = [
-      ...(new Set((function() {
-        var i,
-      len,
-      results;
-        results = [];
-        for (i = 0, len = arrangement.length; i < len; i++) {
-          d = arrangement[i];
-          results.push(d.gid);
-        }
-        return results;
-      })()))
-    ];
+    required_gids = new Set((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = arrangement.length; i < len; i++) {
+        d = arrangement[i];
+        results.push(d.gid);
+      }
+      return results;
+    })());
+    known_gids = new Set(db.first_values(SQL`select gid from outlines where fontnick = $fontnick;`, {fontnick}));
+    missing_gids = new Set([...required_gids].filter(function(gid) {
+      return !known_gids.has(gid);
+    }));
+    debug('^44552^', {required_gids, known_gids, missing_gids});
+    //.........................................................................................................
+    ({I, L, V} = db.sql);
+    // fetch_outlines  = SQL"select * from outlines where fontnick = $fontnick and gid in #{V [ missing_gids..., ]};"
+    drb.insert_outlines({fontnick, chrs, cids, cgid_map});
+// outlines        = {}
+// bboxes          = {}
+    for (gid of missing_gids) {
+      ({bbox, pd} = drb.get_single_outline({fontnick, gid}));
+      debug('^3332^', entry);
+      continue;
+      urge('^3343^', to_width(rpr(d), 108));
+      known_gids.add(d.gid);
+      page = append_to(page, 'outlines', `<path id='${d.uoid}' d='${d.pd}'/>`);
+    }
+    // debug '^3332^',
+    return null;
     //.........................................................................................................
     fm = drb.get_font_metrics({fontnick});
     page = append_to(page, 'remarks', rpr(fm));
     //.........................................................................................................
     /* Part I: insert unscaled outlines */
     insert_outlines = function(page) {
-      var gid, i, len, outline, unscaled_outlines, uoid;
+      var i, len, outline, unscaled_outlines, uoid;
       unscaled_outlines = [];
       for (i = 0, len = gids.length; i < len; i++) {
         gid = gids[i];
         outline = drb.get_single_outline({fontnick, gid});
         uoid = `o${gid}${fontnick}`;
-        page = append_to(page, 'unscaled-outlines', `<path id='${uoid}' d='${outline.pd}'/>`);
+        page = append_to(page, 'outlines', `<path id='${uoid}' d='${outline.pd}'/>`);
       }
       return page;
     };
     //.........................................................................................................
     /* Part II: insert outline refs (the typesetting proper so to speak) */
     insert_content = function(page) {
-      var content, element, gid, i, len, swdth, uoid, x, x0, xxx, y, y0;
+      var content, element, i, len, swdth, uoid, x, x0, xxx, y, y0;
       content = [];
       x0 = 0;
       y0 = 50;
@@ -187,8 +205,9 @@
     (async() => {
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
+      // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'small-eg8i'
+        set_id: 'small-aleo'
       }));
     })();
   }
