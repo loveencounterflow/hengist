@@ -93,15 +93,19 @@ append_to = ( page, name, text ) ->
       page    = append_to page, 'unscaled-outlines', "<path id='#{uoid}' d='#{outline.pd}'/>"
     return page
   #.........................................................................................................
+  ### Part II: insert outline refs (the typesetting proper so to speak) ###
   insert_content = ( page ) ->
-    # page = page.replace '<?scaled_outlines?>', ''
-    #.........................................................................................................
-    ### Part III: insert outline refs (the typesetting proper so to speak) ###
     content = []
     x0      = 0
     y0      = 50
+    swdth   = 0.25 # stroke width in mm
+    swdth  *= 1000 * size_mm * scale
     page    = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
-    page    = append_to page, 'content', "<rect class='typeframe' x='0' y='-800' width='10000' height='1000'/>"
+    # page    = append_to page, 'content', "<rect class='typeframe' x='0' y='-800' width='10000' height='1000'/>"
+    page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
+    page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.descender}' x2='10000' y2='#{fm.descender}'/>"
+    page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.x_height}' x2='10000' y2='#{fm.x_height}'/>"
+    page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>"
     for xxx in arrangement
       gid     = xxx.gid
       uoid    = "o#{gid}#{fontnick}"
