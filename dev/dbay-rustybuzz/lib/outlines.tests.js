@@ -43,7 +43,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB get_cgid_map()"] = function(T, done) {
-    var DBay, Drb, chr, chrs, cids, matcher;
+    var DBay, Drb, chrs, matcher;
     // ### explicit path, explicitly temporary ###
     // T?.halt_on_error()
     // { DBay }            = require H.dbay_path
@@ -51,33 +51,8 @@
     ({Drb} = require(H.drb_path));
     // path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
     // DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-    chrs = "there's the rub";
-    cids = (function() {
-      var i, len, ref, results;
-      ref = Array.from(chrs);
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        chr = ref[i];
-        results.push(chr.codePointAt(0));
-      }
-      return results;
-    })();
-    matcher = new Map([[116, 85], [104, 73], [101, 70], [114, 83], [39, 8], [115, 84], [32, 1], [117, 86], [98, 67]]);
-    (() => {      //.........................................................................................................
-      var db, drb, fontnick, result;
-      db = new DBay();
-      drb = new Drb({
-        db,
-        temporary: true
-      });
-      fontnick = 'gi';
-      drb.prepare_font({fontnick});
-      debug('^33234^', result = drb.get_cgid_map({fontnick, cids}));
-      if (T != null) {
-        T.eq(type_of(result), 'map');
-      }
-      return T != null ? T.eq(result, matcher) : void 0;
-    })();
+    chrs = "affirm無字";
+    matcher = new Map([['a', 66], ['ffi', 1536], ['r', 83], ['m', 78]]);
     (() => {      //.........................................................................................................
       var db, drb, fontnick, result;
       db = new DBay();
@@ -103,20 +78,10 @@
       fontnick = 'gi';
       drb.prepare_font({fontnick});
       return T != null ? T.throws(/not a valid dbr_get_cgid_map_cfg/, () => {
-        return drb.get_cgid_map({fontnick, cids, chrs});
-      }) : void 0;
-    })();
-    (() => {      //.........................................................................................................
-      var db, drb, fontnick;
-      db = new DBay();
-      drb = new Drb({
-        db,
-        temporary: true
-      });
-      fontnick = 'gi';
-      drb.prepare_font({fontnick});
-      return T != null ? T.throws(/not a valid dbr_get_cgid_map_cfg/, () => {
-        return drb.get_cgid_map({fontnick});
+        return drb.get_cgid_map({
+          fontnick,
+          cids: [42]
+        });
       }) : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
@@ -124,7 +89,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB insert_outlines()"] = function(T, done) {
-    var DBay, Drb, Tbl, chr, chrs, cids, matcher;
+    var DBay, Drb, Tbl, chrs, matcher;
     // ### explicit path, explicitly temporary ###
     // T?.halt_on_error()
     // { DBay }            = require H.dbay_path
@@ -134,16 +99,6 @@
     // path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
     // DH                  = require PATH.join H.dbay_path, 'lib/helpers'
     chrs = "'ab-c'.";
-    cids = (function() {
-      var i, len, ref, results;
-      ref = Array.from(chrs);
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        chr = ref[i];
-        results.push(chr.codePointAt(0));
-      }
-      return results;
-    })();
     matcher = new Map([[116, 85], [104, 73], [101, 70], [114, 83], [39, 8], [115, 84], [32, 1], [117, 86], [98, 67]]);
     (() => {      //.........................................................................................................
       var db, drb, dtab, fontnick, i, len, pd_blob, result, row;
@@ -155,22 +110,21 @@
       });
       fontnick = 'gi';
       drb.prepare_font({fontnick});
-      drb.insert_outlines({fontnick, cids});
-      result = db.all_rows(SQL`select * from drb.outlines order by cid;`);
+      drb.insert_outlines({fontnick, chrs});
+      result = db.all_rows(SQL`select * from drb.outlines order by chrs;`);
       for (i = 0, len = result.length; i < len; i++) {
         row = result[i];
         ({pd_blob} = guy.obj.pluck_with_fallback(row, null, 'pd_blob'));
         if (T != null) {
           T.eq(type_of(pd_blob), 'buffer');
         }
-        if (row.glyph === '.') {
+        if (row.text === '.') {
           if (T != null) {
             T.eq(row, {
               fontnick: 'gi',
               gid: 15,
-              cid: 46,
-              glyph: '.',
-              uoid: 'o15gi',
+              sid: 'o15gi',
+              chrs: '.',
               x: 25,
               y: -101,
               x1: 135,
@@ -185,16 +139,15 @@
       return echo(dtab._tabulate(db(SQL`select
     fontnick,
     gid,
-    cid,
-    glyph,
-    uoid,
+    sid,
+    chrs,
     x,
     y,
     x1,
     y1,
     substr( pd, 0, 10 ) as "(pd)"
   from drb.outlines
-  order by cid;`)));
+  order by chrs;`)));
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -245,17 +198,23 @@
       T.eq(result, {
         djvsi: {
           gid: 68,
+          b: 0,
           x: 0,
           y: 0,
           dx: 596.2,
-          dy: 0
+          dy: 0,
+          chrs: 'a',
+          sid: 'o68djvsi'
         },
-        eg81: {
+        eg8i: {
           gid: 66,
+          b: 0,
           x: 0,
           y: 0,
           dx: 492,
-          dy: 0
+          dy: 0,
+          chrs: 'a',
+          sid: 'o66eg8i'
         }
       });
     }
@@ -275,6 +234,8 @@
       return test(this["DRB RBW shape_text() returns coordinates acc to font upem"]);
     })();
   }
+
+  // test @[ "DRB insert_outlines()" ]
 
 }).call(this);
 

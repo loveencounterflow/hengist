@@ -42,7 +42,7 @@
   // MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DRB get_unicode_codepoints()"] = function(T, done) {
+  this["DRB get_assigned_unicode_chrs()"] = function(T, done) {
     var DBay, Drb;
     // ### explicit path, explicitly temporary ###
     // T?.halt_on_error()
@@ -58,7 +58,7 @@
         db,
         temporary: true
       });
-      result = drb.get_unicode_codepoints();
+      result = drb.get_assigned_unicode_chrs();
       /* as of NodeJS v16.9.1 with  Unicode 13 (?) */
       if (T != null) {
         T.ok(result.length >= 143_439);

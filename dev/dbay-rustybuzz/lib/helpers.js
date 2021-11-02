@@ -123,6 +123,12 @@
         chrs = "abcdefghijklm";
         text = "Affirmation Titian Sylt.";
         break;
+      case 'widechrs':
+        fontnick = 'sfb';
+        fspath = 'sunflower-u-cjk-xb.ttf';
+        chrs = "x𠀀𠀁𠀂𠀃𠀄𠀅𠀆x";
+        text = "x𠀀𠀁𠀂𠀃𠀄𠀅𠀆x";
+        break;
       case '3a':
         fontnick = 'djvsi';
         fspath = 'DejaVuSerif-Italic.ttf';
@@ -138,7 +144,7 @@
       case 'all':
         fontnick = 'qkai';
         fspath = 'cwTeXQKai-Medium.ttf';
-        cids = drb.get_unicode_codepoints();
+        chrs = drb.get_assigned_unicode_chrs();
         break;
       default:
         // fontnick = 'jzr';   fspath = 'jizura3b.ttf'

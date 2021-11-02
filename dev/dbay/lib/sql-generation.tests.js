@@ -535,18 +535,64 @@ next_id integer generated always as ( id + 1 ) );`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY Sqlgen create_insert() with returning clause"] = function(T, done) {
+    var DBay, Tbl, db, dtab, schema;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    dtab = new Tbl({
+      dba: db
+    });
+    schema = 'main';
+    //.........................................................................................................
+    db(SQL`create table xy (
+  a   integer not null primary key,
+  b   text not null,
+  c   text generated always as ( '+' || b || '+' ) );`);
+    //.........................................................................................................
+    db(function() {
+      var insert_into_xy_sql;
+      insert_into_xy_sql = db.create_insert({
+        into: 'xy',
+        on_conflict: SQL`do nothing`,
+        returning: '*'
+      });
+      urge('^4400^', rpr(insert_into_xy_sql));
+      if (T != null) {
+        T.eq(insert_into_xy_sql, 'insert into "main"."xy" ( "a", "b" ) values ( $a, $b ) on conflict do nothing returning *;');
+      }
+      urge('^4400^', db.single_row(insert_into_xy_sql, {
+        a: 1,
+        b: 'any'
+      }));
+      urge('^4400^', db.single_row(insert_into_xy_sql, {
+        a: 2,
+        b: 'duh'
+      }));
+      urge('^4400^', db.single_row(insert_into_xy_sql, {
+        a: 3,
+        b: 'foo'
+      }));
+      echo(dtab._tabulate(db(SQL`select * from xy;`)));
+      return db(SQL`rollback;`);
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      return test(this["DBAY Sqlgen create_insert() without known table"]);
+      // test @[ "DBAY Sqlgen create_insert() without known table" ]
+      // @[ "_DBAY Sqlgen demo" ]()
+      // test @[ "DBAY Sqlgen create_insert() 2" ]
+      // test @[ "DBAY Sqlgen isa.dbay_create_insert_cfg()" ]
+      // test @[ "DBAY Sqlgen on_conflict 2" ]
+      return this["DBAY Sqlgen create_insert() with returning clause"]();
     })();
   }
-
-  // @[ "_DBAY Sqlgen demo" ]()
-// test @[ "DBAY Sqlgen create_insert() 2" ]
-// test @[ "DBAY Sqlgen isa.dbay_create_insert_cfg()" ]
-// test @[ "DBAY Sqlgen on_conflict 2" ]
 
 }).call(this);
 
