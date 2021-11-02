@@ -95,6 +95,11 @@ do =>
       fspath    = 'DejaVuSerif-Italic.ttf'
       chrs      = "abcdefghijklm"
       text      = "Affirmation Titian Sylt."
+    when 'widechrs'
+      fontnick  = 'sfb'
+      fspath    = 'sunflower-u-cjk-xb.ttf'
+      chrs      = "x𠀀𠀁𠀂𠀃𠀄𠀅𠀆x"
+      text      = "x𠀀𠀁𠀂𠀃𠀄𠀅𠀆x"
     when '3a'
       fontnick  = 'djvsi'
       fspath    = 'DejaVuSerif-Italic.ttf'
@@ -108,7 +113,7 @@ do =>
     when 'all'
       fontnick = 'qkai'
       fspath    = 'cwTeXQKai-Medium.ttf'
-      cids      = drb.get_unicode_codepoints()
+      chrs      = drb.get_assigned_unicode_chrs()
       # fontnick = 'jzr';   fspath = 'jizura3b.ttf'
       ### TAINT obtain list of all valid Unicode codepoints (again) ###
       # cids                = [ 0x0021 .. 0xd000 ]

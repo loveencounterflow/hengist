@@ -30,7 +30,7 @@ guy                       = require '../../../apps/guy'
 
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DRB get_unicode_codepoints()" ] = ( T, done ) ->
+@[ "DRB get_assigned_unicode_chrs()" ] = ( T, done ) ->
   # ### explicit path, explicitly temporary ###
   # T?.halt_on_error()
   # { DBay }            = require H.dbay_path
@@ -42,7 +42,7 @@ guy                       = require '../../../apps/guy'
   do =>
     db          = new DBay()
     drb         = new Drb { db, temporary: true, }
-    result      = drb.get_unicode_codepoints()
+    result      = drb.get_assigned_unicode_chrs()
     ### as of NodeJS v16.9.1 with  Unicode 13 (?) ###
     T?.ok result.length >= 143_439
     return null

@@ -64,6 +64,7 @@ append_to = ( page, name, text ) ->
   RBW             = require '../../../apps/rustybuzz-wasm/pkg'
   db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
   drb             = new Drb { db, create: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
+  { I, L, V }     = db.sql
   #.........................................................................................................
   { text
     chrs
@@ -76,30 +77,58 @@ append_to = ( page, name, text ) ->
   scale_txt       = scale.toFixed 4
   # chrs            = [ ( new Set Array.from text )..., ]
   #.........................................................................................................
+  ### Need to find a way to find associations between CIDs and GIDs ###
   drb.register_fontnick { fontnick, fspath, }
   drb.prepare_font      { fontnick, }
   drb.insert_outlines   { fontnick, chrs, cids, cgid_map, }
   arrangement     = drb.shape_text { fontnick, text, }
-  page            = tpl
-  required_gids   = new Set ( d.gid for d in arrangement )
-  ### TAINT make this a DRB method ###
-  known_gids      = new Set db.first_values SQL"select gid from outlines where fontnick = $fontnick;", { fontnick, }
-  ### TAINT make this a method `difference_of_sets()`: ###
-  missing_gids    = new Set [ required_gids..., ].filter ( gid ) -> not known_gids.has gid
-  debug '^44552^', { required_gids, known_gids, missing_gids, }
+  # debug '^33443^', arrangement
   #.........................................................................................................
-  { I, L, V }     = db.sql
-  # fetch_outlines  = SQL"select * from outlines where fontnick = $fontnick and gid in #{V [ missing_gids..., ]};"
-  drb.insert_outlines { fontnick, chrs, cids, cgid_map, }
+  page                  = tpl
+  required_xds          = {}
+  required_xds[ d.sid ] = d for d in arrangement
+  known_ods             = {}
+  debug '^3343^', "required_xds:", ( Object.keys required_xds ).length
+  debug '^3343^', "known_ods:   ", ( Object.keys known_ods ).length
+  do =>
+    required_sids         = Object.keys required_xds
+    for od from db SQL"""
+      select
+          *
+        from outlines
+        where sid in #{V required_sids};"""
+      urge '^33443^', to_width ( rpr od ), 100
+      known_ods[ od.sid ] = od
+      delete required_xds[ od.sid ]
+    return null
+  debug '^3343^', "required_xds:", ( Object.keys required_xds ).length
+  debug '^3343^', "known_ods:   ", ( Object.keys known_ods ).length
+  info k, ( to_width ( rpr v ), 100 ) for k, v of required_xds
+  info k, ( to_width ( rpr v ), 100 ) for k, v of known_ods
+  #.........................................................................................................
+  cgid_map = new Map
+  for d from drb.insert_and_walk_outlines { fontnick, chrs, cids, cgid_map, }
+    debug '^3443^', d
+  #.........................................................................................................
+  return null
+
+  # known_ods[ d.]      =
+  known_sids      = new Set db.first_values SQL"select sid from outlines where fontnick = $fontnick;", { fontnick, }
+  # missing_sids    = new Set [ required_sids..., ].filter ( sid ) -> not known_sids.has sid
+  debug '^44552^', { required_sids, known_sids, missing_sids, }
+  #.........................................................................................................
+  # fetch_outlines  = SQL"select * from outlines where fontnick = $fontnick and gid in #{V [ missing_sids..., ]};"
+  return null
+
   # outlines        = {}
   # bboxes          = {}
-  for gid from missing_gids
+  for sid from missing_sids
     { bbox
-      pd  } = drb.get_single_outline { fontnick, gid, }
-    debug '^3332^', entry
+      pd  } = drb.get_single_outline { sid, }
+    # debug '^3332^', entry
     continue
     urge '^3343^', to_width ( rpr d ), 108
-    known_gids.add d.gid
+    known_sids.add d.gid
     page    = append_to page, 'outlines', "<path id='#{d.uoid}' d='#{d.pd}'/>"
     # debug '^3332^',
   return null
@@ -152,8 +181,9 @@ append_to = ( page, name, text ) ->
 if require.main is module then do =>
   # await @demo_store_outlines()
   # await @demo_store_outlines { set_id: 'all', }
-  # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
-  await @demo_typeset_sample_page { set_id: 'small-aleo', }
+  await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+  # await @demo_typeset_sample_page { set_id: 'small-aleo', }
+  # await @demo_typeset_sample_page { set_id: 'widechrs', }
   # await @demo_typeset_sample_page { set_id: 'small-djvsi', }
   # await @demo_use_linked_rustybuzz_wasm()
 

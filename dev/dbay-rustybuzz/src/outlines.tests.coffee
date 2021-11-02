@@ -38,18 +38,8 @@ guy                       = require '../../../apps/guy'
   { Drb }             = require H.drb_path
   # path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
   # DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-  chrs                = "there's the rub"
-  cids                = ( ( chr.codePointAt 0 ) for chr in Array.from chrs )
-  matcher             = new Map [ [ 116, 85 ], [ 104, 73 ], [ 101, 70 ], [ 114, 83 ], [ 39, 8 ], [ 115, 84 ], [ 32, 1 ], [ 117, 86 ], [ 98, 67 ], ]
-  #.........................................................................................................
-  do =>
-    db          = new DBay()
-    drb         = new Drb { db, temporary: true, }
-    fontnick    = 'gi'
-    drb.prepare_font { fontnick, }
-    debug '^33234^', result = drb.get_cgid_map { fontnick, cids, }
-    T?.eq ( type_of result ), 'map'
-    T?.eq result, matcher
+  chrs                = "affirm無字"
+  matcher             = new Map [ [ 'a', 66, ], [ 'ffi', 1536, ], [ 'r', 83, ], [ 'm', 78, ], ]
   #.........................................................................................................
   do =>
     db          = new DBay()
@@ -65,14 +55,7 @@ guy                       = require '../../../apps/guy'
     drb         = new Drb { db, temporary: true, }
     fontnick    = 'gi'
     drb.prepare_font { fontnick, }
-    T?.throws /not a valid dbr_get_cgid_map_cfg/, => drb.get_cgid_map { fontnick, cids, chrs, }
-  #.........................................................................................................
-  do =>
-    db          = new DBay()
-    drb         = new Drb { db, temporary: true, }
-    fontnick    = 'gi'
-    drb.prepare_font { fontnick, }
-    T?.throws /not a valid dbr_get_cgid_map_cfg/, => drb.get_cgid_map { fontnick, }
+    T?.throws /not a valid dbr_get_cgid_map_cfg/, => drb.get_cgid_map { fontnick, cids: [ 42, ], }
   #.........................................................................................................
   return done?()
 
@@ -87,7 +70,6 @@ guy                       = require '../../../apps/guy'
   # path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
   # DH                  = require PATH.join H.dbay_path, 'lib/helpers'
   chrs                = "'ab-c'."
-  cids                = ( ( chr.codePointAt 0 ) for chr in Array.from chrs )
   matcher             = new Map [ [ 116, 85 ], [ 104, 73 ], [ 101, 70 ], [ 114, 83 ], [ 39, 8 ], [ 115, 84 ], [ 32, 1 ], [ 117, 86 ], [ 98, 67 ], ]
   #.........................................................................................................
   do =>
@@ -96,39 +78,37 @@ guy                       = require '../../../apps/guy'
     drb         = new Drb { db, temporary: true, }
     fontnick    = 'gi'
     drb.prepare_font { fontnick, }
-    drb.insert_outlines { fontnick, cids, }
-    result      = db.all_rows SQL"select * from drb.outlines order by cid;"
+    drb.insert_outlines { fontnick, chrs, }
+    result      = db.all_rows SQL"select * from drb.outlines order by chrs;"
     for row in result
       { pd_blob, } = guy.obj.pluck_with_fallback row, null, 'pd_blob'
       T?.eq ( type_of pd_blob ), 'buffer'
-      if row.glyph is '.'
+      if row.text is '.'
         T?.eq row, {
           fontnick: 'gi',
           gid:      15,
-          cid:      46,
-          glyph:    '.',
-          uoid:     'o15gi',
+          sid:      'o15gi',
+          chrs:     '.',
           x:        25,
           y:        -101,
           x1:       135,
           y1:       14,
-          pd:       'M90-101C54-101 25-72 25-36C25-10 44 14 70 14C106 14 135-15 135-51C135-77 116-101 90-101Z', }
+          pd:       'M90-101C54-101 25-72 25-36C25-10 44 14 70 14C106 14 135-15 135-51C135-77 116-101 90-101Z' }
     # T?.eq ( type_of result ), 'map'
     # T?.eq result, matcher
     echo dtab._tabulate db SQL"""
       select
           fontnick,
           gid,
-          cid,
-          glyph,
-          uoid,
+          sid,
+          chrs,
           x,
           y,
           x1,
           y1,
           substr( pd, 0, 10 ) as "(pd)"
         from drb.outlines
-        order by cid;"""
+        order by chrs;"""
   #.........................................................................................................
   # cgid_map            = drb.get_cgid_map { fontnick, chrs, }
   return done?()
@@ -165,8 +145,24 @@ guy                       = require '../../../apps/guy'
       result[ fontnick ] = ( drb.shape_text { fontnick, text, } )[ 0 ]
   #.........................................................................................................
   T?.eq result, {
-    djvsi: { gid: 68, x: 0, y: 0, dx: 596.2,  dy: 0 },
-    eg81:  { gid: 66, x: 0, y: 0, dx: 492,    dy: 0 }, }
+    djvsi:
+      gid: 68,
+      b: 0,
+      x: 0,
+      y: 0,
+      dx: 596.2,
+      dy: 0,
+      chrs: 'a',
+      sid: 'o68djvsi'
+    eg8i:
+      gid: 66,
+      b: 0,
+      x: 0,
+      y: 0,
+      dx: 492,
+      dy: 0,
+      chrs: 'a',
+      sid: 'o66eg8i' }
   return done?()
 
 
@@ -183,4 +179,4 @@ if require.main is module then do =>
   # test @[ "DRB get_cgid_map()" ]
   # @[ "DRB insert_outlines()" ]()
   test @[ "DRB RBW shape_text() returns coordinates acc to font upem" ]
-
+  # test @[ "DRB insert_outlines()" ]
