@@ -46,35 +46,17 @@
     padding:                1em;
     margin:                 1em; }
 
+  .glyfbox {
+    fill:                   brown;
+    opacity:                0.5;
+    mix-blend-mode:         multiply;
+    stroke:                 red;
+    stroke-width:           5mm;
+  }
+
   </style>
 
 <body class='reveal-blocks show-grid'>
-
-
-
-<svg id='outlines' class='svg-font' viewBox='0 0 1000 1000' overflow='visible'>
-  <style>
-    .glyfbox {
-      fill:                   brown;
-      opacity:                0.5;
-      mix-blend-mode:         multiply;
-      stroke:                 red;
-      stroke-width:           5mm;
-    }
-  </style>
-
-<!-- Part I where we declare one outline per font and glyf -->
-<!-- Outlines are defined in an em square of 1000⨉1000 units -->
-<!-- Only integer numbers are used in outlines so a 1cm high glyf has a precision of 0.01mm -->
-<!-- and a 10cm high glyf still has a precision of 0.1mm, which should be good enough. -->
-<!-- ID pattern: kind — font ID — glyf ID: O(outline)_L(atin)M(odern)C(ursive)_glyfid -->
-<!-- <path id='o_lmc_74' d='M839-18C839-31 832-31 812-31C754-31 754-39 754-48C754-48 754-56 758-71L893-612C901-644 909-652 972-652C993-652 1002-652 1002-670C1002-683 994-683 977-683L849-683C827-683 824-683 813-665L473-100L417-661C415-683 413-683 389-683L256-683C240-683 229-683 229-664C229-652 237-652 256-652C287-652 314-652 314-635C314-632 314-630 310-616L182-101C168-45 130-33 85-31C77-31 66-30 66-12C66-3 72 0 79 0C109 0 143-3 174-3C206-3 241 0 272 0C278 0 290 0 290-18C290-30 283-31 271-31C214-33 212-59 212-74C212-77 212-83 216-99L349-630L350-630L411-24C413-7 413 0 428 0C441 0 446-7 452-18L825-639L826-639L685-73C677-39 671-31 603-31C587-31 576-31 576-12C576 0 587 0 590 0C627 0 666-3 704-3C742-3 783 0 820 0C827 0 839 0 839-18Z'/> -->
-<!--?outlines-start?-->
-<!--?outlines-end?-->
-
-</svg>
-
-
 
 <!-- =================================================================================================== -->
 <svg class='svg-grid' viewBox='0 0 100 100' overflow='visible'>
@@ -192,22 +174,31 @@
   </svg>
 
 <!-- =================================================================================================== -->
-<!-- Part II where we position and style the scaled outlines to construct the page to be printed. -->
-<!-- Coordinates have a pleasant ratio of 1 unit per mm. -->
+<!-- Part I where we declare one outline per font and glyf -->
+<!-- Outlines are defined in an em square of 1000⨉1000 units -->
+<!-- Only integer numbers are used in outlines so a 1cm high glyf has a precision of 0.01mm -->
+<!-- and a 10cm high glyf still has a precision of 0.1mm, which should be good enough. -->
+<!-- ID pattern: kind — font ID — glyf ID: O(outline)_L(atin)M(odern)C(ursive)_glyfid -->
+<!-- <path id='o74lmc' d='M839-18C839-31 ...'/> -->
+<svg id='outlines' class='svg-font' viewBox='0 0 1000 1000' overflow='visible'>
+<!--?outlines-start?-->
+<!--?outlines-end?-->
+</svg>
+
+
 <h1>Demo Typeset Sample Page</h1>
 
 <remarks><!--?remarks-start?-->
 <!--?remarks-end?--></remarks>
 
+<!-- =================================================================================================== -->
+<!-- Part II where we position and style the scaled outlines to construct the page to be printed. -->
+<!-- Coordinates have a pleasant ratio of 1 unit per mm. -->
+<!-- <use x='000' y='020' href='#o74lmc'/> -->
 <svg id=p0001 class='galley A4' viewBox='0 0 210 297'>
 <use id='xxx' x='000' y='000' href='#cm-grid'/>
-<!-- <rect x='50' y='50' width='10' height='10' style='fill:blue;'/> -->
-
-<!-- <use x='000' y='020' href='#o_lmc_90_10'/> -->
 <!--?content-start?-->
 <!--?content-end?-->
-
-
 </svg>
 
 </body>
