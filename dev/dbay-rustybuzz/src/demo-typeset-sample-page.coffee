@@ -113,9 +113,12 @@ append_to = ( page, name, text ) ->
   #.........................................................................................................
   debug '^3343-3^', "required_ads:", ( Object.keys required_ads ).length
   debug '^3343-4^', "known_ods:   ", ( Object.keys known_ods ).length
+  missing_sid     = 'oNull'
+  missing_pd      = 'M0 200 L0-800 L1000-800 L1000 200'
   #.........................................................................................................
   ### `append_outlines()`: ###
   append_outlines = ( page ) ->
+    page        = append_to page, 'outlines', "<!--NULL--><path id='#{missing_sid}' d='#{missing_pd}'/>"
     for sid, od of known_ods
       ### TAINT not safe to use unescaped `chrs` inside XML comment ###
       page = append_to page, 'outlines', "<!--#{od.chrs}--><path id='#{sid}' d='#{od.pd}'/>"
@@ -136,6 +139,10 @@ append_to = ( page, name, text ) ->
       if ad.y is 0 then element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}'/>"
       else              element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
       page  = append_to page, 'content', element
+    for d in missing_chrs
+      page  = append_to page, 'content', "<!--#{d.chrs}--><use href='##{missing_sid}' x='#{d.x}' y='#{d.y}'/>"
+      ### TAINT must escape `d.chrs` ###
+      page  = append_to page, 'content', "<text class='missing-chrs' style='font-size:1000px;' x='#{d.x}' y='#{d.y}'>#{d.chrs}</text>"
     page = append_to page, 'content', "</g>"
     return page
   #.........................................................................................................
