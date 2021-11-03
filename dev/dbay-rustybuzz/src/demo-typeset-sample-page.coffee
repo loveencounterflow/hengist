@@ -79,7 +79,7 @@ append_to = ( page, name, text ) ->
   scale_txt       = scale.toFixed 4
   { missing }     = Drb.C
   missing_sid     = "o0#{fontnick}"
-  missing_pd      = 'M0 200 L0-800 L1000-800 L1000 200'
+  missing_pd      = 'M0 200 L0-800 L900-800 L900 200'
   known_ods       = { missing_sid }
   #.........................................................................................................
   ### Register, load and prepopulate font: ###
@@ -91,11 +91,13 @@ append_to = ( page, name, text ) ->
     ads
     fm          } = drb.typeset { fontnick, text, known_ods, }
   page            = append_to page, 'remarks', "<div>fm: #{rpr fm}</div>"
-  page            = append_to page, 'remarks', "<div>missing_chrs: #{rpr missing_chrs}</div>"
+  missing_txt     = ( rpr ad.chrs for ad in missing_chrs ).join ', '
+  page            = append_to page, 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
   #.........................................................................................................
   ### `append_outlines()`: ###
   append_outlines = ( page ) ->
     page        = append_to page, 'outlines', "<!--NULL--><path id='#{missing_sid}' class='missing' d='#{missing_pd}'/>"
+    # page        = append_to page, 'outlines', "<!--NULL--><rect id='#{missing_sid}' class='missing' width='800' height='1000' rx='200' ry='200'/>"
     for sid, od of known_ods
       ### TAINT not safe to use unescaped `chrs` inside XML comment ###
       page = append_to page, 'outlines', "<!--#{od.chrs}--><path id='#{sid}' d='#{od.pd}'/>"
@@ -114,7 +116,7 @@ append_to = ( page, name, text ) ->
     page        = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>"
     for ad in ads
       if ad.gid is missing.gid
-        element = """<!--#{ad.chrs}--><use href='##{missing_sid}' transform='translate(#{ad.x} #{ad.y}) scale(#{ad.dx/1000} 1)'/>
+        element = """<!--#{ad.chrs}--><use href='##{missing_sid}' class='missing' transform='translate(#{ad.x} #{ad.y}) scale(#{ad.dx/1000} 1)'/>
           <text class='missing-chrs' style='font-size:1000px;' x='#{ad.x}' y='#{ad.y}'>#{ad.chrs}</text>"""
       else
         if ad.y is 0 then element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}'/>"
