@@ -27,7 +27,8 @@ types                     = new ( require 'intertype' ).Intertype
 SQL                       = String.raw
 guy                       = require '../../../apps/guy'
 # MMX                       = require '../../../apps/multimix/lib/cataloguing'
-
+{ width_of
+  to_width }              = require 'to-width'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DRB get_assigned_unicode_chrs()" ] = ( T, done ) ->
@@ -43,6 +44,15 @@ guy                       = require '../../../apps/guy'
     db          = new DBay()
     drb         = new Drb { db, temporary: true, }
     result      = drb.get_assigned_unicode_chrs()
+    result_txt  = result.join ''
+    debug '^98402^', to_width result_txt, 1500
+    widths      = {}
+    for chr in result
+      width = width_of chr
+      ( widths[ width ] ?= [] ).push chr
+    for width, chrs of widths
+      chrs = chrs.join ''
+      debug '^98402^', width, to_width chrs, 150
     ### as of NodeJS v16.9.1 with  Unicode 13 (?) ###
     T?.ok result.length >= 143_439
     return null
