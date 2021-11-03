@@ -84,17 +84,17 @@ do =>
       fontnick  = 'eg8i'
       fspath    = 'EBGaramond08-Italic.otf'
       chrs      = "abcdefghijklm"
-      text      = "Affirmation Titian Sylt."
+      text      = "Affirmation 𠀅 Titian Sylt."
     when 'small-aleo'
       fontnick  = 'aleo'
       fspath    = 'Aleo_font_v1.2.2/Desktop OTF/Aleo-Italic.otf'
       chrs      = "abcdefghijklm"
-      text      = "Affirmation Titian Sylt."
+      text      = "Affirmation 𠀅 Titian Sylt."
     when 'small-djvsi'
       fontnick  = 'djvsi'
       fspath    = 'DejaVuSerif-Italic.ttf'
       chrs      = "abcdefghijklm"
-      text      = "Affirmation Titian Sylt."
+      text      = "Affirmation 𠀅 Titian Sylt."
     when 'widechrs'
       fontnick  = 'sfb'
       fspath    = 'sunflower-u-cjk-xb.ttf'
@@ -122,14 +122,14 @@ do =>
     when 'arabic'
       fontnick  = 'amiri'
       fspath    = 'arabic/Amiri-0.113/Amiri-Bold.ttf'
-      text      = ( [ "الخط الأمیری"... ].reverse() ).join ''
+      text      = ( [ "نستعلیق‎ 字缺 الخط الأمیری"... ].reverse() ).join ''
       chrs      = ( [ "الخط الأمیری"... ].reverse() ).join ''
     when 'urdu'
       fontnick  = 'nur'
       fspath    = 'noto-arabic/NotoNastaliqUrdu-unhinted/NotoNastaliqUrdu-Regular.ttf'
       # text      = ( [ "اُردُو‌ حُرُوفِ ‌تَہَجِّی"... ].reverse() ).join ''
-      text      = "نستعلیق‎"
-      # text      = ( [ "نستعلیق‎"... ].reverse() ).join ''
+      # text      = "نستعلیق‎"
+      text      = ( [ "نستعلیق‎"... ].reverse() ).join ''
       chrs      = ( [ "الخط الأمیری"... ].reverse() ).join ''
     else
       throw new Error "^345^ unknown set_id #{rpr set_id}"
