@@ -98,8 +98,8 @@ do =>
     when 'widechrs'
       fontnick  = 'sfb'
       fspath    = 'sunflower-u-cjk-xb.ttf'
-      chrs      = "x𠀀𠀁𠀂𠀃𠀄𠀅𠀆x"
-      text      = "x𠀀𠀁𠀂𠀃𠀄𠀅𠀆x"
+      chrs      = "𠀀𠀁𠀂𠀃𠀄𠀅𠀆"
+      text      = "𠀀𠀁𠀂𠀃𠀄𠀅𠀆"
     when '3a'
       fontnick  = 'djvsi'
       fspath    = 'DejaVuSerif-Italic.ttf'
@@ -111,23 +111,19 @@ do =>
       chrs      = "abcdefghijklm"
       text      = "abc"
     when 'all'
-      fontnick = 'qkai'
+      fontnick  = 'qkai'
       fspath    = 'cwTeXQKai-Medium.ttf'
       chrs      = drb.get_assigned_unicode_chrs()
-      # fontnick = 'jzr';   fspath = 'jizura3b.ttf'
-      ### TAINT obtain list of all valid Unicode codepoints (again) ###
-      # cids                = [ 0x0021 .. 0xd000 ]
-      # cids                = [ 0x4e00 .. 0x9fff ]
-      # cids                = [ 0x4e00 .. 0x4e02 ]
-      # garamond_italic:  { path: 'EBGaramond08-Italic.otf', }
-      # amiri:            { path: 'arabic/Amiri-0.113/Amiri-Bold.ttf', }
-      # tibetan:          { path: '/usr/share/fonts/truetype/tibetan-machine/TibetanMachineUni.ttf', }
-      # notoserif:        { path: 'NotoSerifJP/NotoSerifJP-Medium.otf', }
-      # djvsi:            { path: 'DejaVuSerif-Italic.ttf', }
-      # fontnick  = 'tibetan';          text =  "ཨོཾ་མ་ཎི་པདྨེ་ཧཱུྃ"
-      # fontnick  = 'amiri';            text = ( [ "الخط الأمیری"... ].reverse() ).join ''
-      # fontnick  = 'garamond_italic';  text = "a certain minimum"
-      # fontnick  = 'garamond_italic';  text = "af#fix"
+    when 'tibetan'
+      fontnick  = 'tbm'
+      fspath    = 'TibetanMachineUni.ttf'
+      text      = "ཨོཾ་མ་ཎི་པདྨེ་ཧཱུྃ"
+      chrs      = 'abc'
+    when 'arabic'
+      fontnick  = 'amiri'
+      fspath    = 'arabic/Amiri-0.113/Amiri-Bold.ttf'
+      text      = ( [ "الخط الأمیری"... ].reverse() ).join ''
+      chrs      = ( [ "الخط الأمیری"... ].reverse() ).join ''
     else
       throw new Error "^345^ unknown set_id #{rpr set_id}"
   #.........................................................................................................
