@@ -114,6 +114,7 @@ append_to = ( page, name, text ) ->
     page        = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.descender}' x2='10000' y2='#{fm.descender}'/>"
     page        = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.x_height}' x2='10000' y2='#{fm.x_height}'/>"
     page        = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>"
+    page        = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
     for ad in ads
       if ad.gid is missing.gid
         element = """<!--#{ad.chrs}--><use href='##{missing_sid}' class='missing' transform='translate(#{ad.x} #{ad.y}) scale(#{ad.dx/1000} 1)'/>

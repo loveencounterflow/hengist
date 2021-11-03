@@ -57,6 +57,19 @@
     fill:                   fuchsia;
     mix-blend-mode:         multiply; }
 
+  textcontainer {
+    display:                block;
+    position:               absolute;
+    width:                  210mm;
+    height:                 297mm;
+    outline:                1px dotted fuchsia;
+    font-size:              10mm;
+    line-height:            10mm; }
+
+  textcontainer div {
+    position:               absolute;
+    color:                  transparent; }
+
   </style>
 
 <body class='reveal-blocks show-grid'>
@@ -217,6 +230,8 @@
 <!-- Part II where we position and style the scaled outlines to construct the page to be printed. -->
 <!-- Coordinates have a pleasant ratio of 1 unit per mm. -->
 <!-- <use x='000' y='020' href='#o74lmc'/> -->
+<textcontainer><!--?textcontainer-start?-->
+<div style='left:0mm;top:40mm;'>Affirmation字缺TitianիϪSylt.</div><!--?textcontainer-end?--></textcontainer>
 <svg id=p0001 class='galley A4' viewBox='0 0 210 297'>
 <use id='xxx' x='000' y='000' href='#cm-grid'/>
 <!--?content-start?-->
