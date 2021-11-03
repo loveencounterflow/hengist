@@ -107,8 +107,7 @@ append_to = ( page, name, text ) ->
   #.........................................................................................................
   ### Retrieve (from font) and insert (into DB) missing outline data (ODs) items: ###
   do =>
-    cgid_map      = drb._get_cgid_map_from_ads ads
-    for od from drb.insert_and_walk_outlines { fontnick, cgid_map, }
+    for od from drb.insert_and_walk_outlines { fontnick, ads, }
       delete required_ads[ od.sid ]
       known_ods[ od.sid ] = od
   #.........................................................................................................
