@@ -77,6 +77,10 @@ append_to = ( page, name, text ) ->
   size_mm         = 10
   scale           = size_mm / 1000
   scale_txt       = scale.toFixed 4
+  { missing }     = Drb.C
+  missing_sid     = "o0#{fontnick}"
+  missing_pd      = 'M0 200 L0-800 L1000-800 L1000 200'
+  known_ods       = { missing_sid }
   #.........................................................................................................
   ### Register, load and prepopulate font: ###
   drb.register_fontnick { fontnick, fspath, }
@@ -85,15 +89,13 @@ append_to = ( page, name, text ) ->
     new_ods
     missing_chrs
     ads
-    fm          } = drb.typeset { fontnick, text, }
+    fm          } = drb.typeset { fontnick, text, known_ods, }
   page            = append_to page, 'remarks', "<div>fm: #{rpr fm}</div>"
   page            = append_to page, 'remarks', "<div>missing_chrs: #{rpr missing_chrs}</div>"
-  missing_sid     = 'oNull'
-  missing_pd      = 'M0 200 L0-800 L1000-800 L1000 200'
   #.........................................................................................................
   ### `append_outlines()`: ###
   append_outlines = ( page ) ->
-    page        = append_to page, 'outlines', "<!--NULL--><path id='#{missing_sid}' d='#{missing_pd}'/>"
+    page        = append_to page, 'outlines', "<!--NULL--><path id='#{missing_sid}' class='missing' d='#{missing_pd}'/>"
     for sid, od of known_ods
       ### TAINT not safe to use unescaped `chrs` inside XML comment ###
       page = append_to page, 'outlines', "<!--#{od.chrs}--><path id='#{sid}' d='#{od.pd}'/>"
@@ -111,13 +113,14 @@ append_to = ( page, name, text ) ->
     page        = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.x_height}' x2='10000' y2='#{fm.x_height}'/>"
     page        = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>"
     for ad in ads
-      if ad.y is 0 then element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}'/>"
-      else              element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
+      if ad.gid is missing.gid
+        element = """<!--#{ad.chrs}--><use href='##{missing_sid}' transform='translate(#{ad.x} #{ad.y}) scale(#{ad.dx/1000} 1)'/>
+          <text class='missing-chrs' style='font-size:1000px;' x='#{ad.x}' y='#{ad.y}'>#{ad.chrs}</text>"""
+      else
+        if ad.y is 0 then element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}'/>"
+        else              element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
       page  = append_to page, 'content', element
-    for d in missing_chrs
-      page  = append_to page, 'content', "<!--#{d.chrs}--><use href='##{missing_sid}' x='#{d.x}' y='#{d.y}'/>"
       ### TAINT must escape `d.chrs` ###
-      page  = append_to page, 'content', "<text class='missing-chrs' style='font-size:1000px;' x='#{d.x}' y='#{d.y}'>#{d.chrs}</text>"
     page = append_to page, 'content', "</g>"
     return page
   #.........................................................................................................
@@ -147,11 +150,11 @@ append_to = ( page, name, text ) ->
 if require.main is module then do =>
   # await @demo_store_outlines()
   # await @demo_store_outlines { set_id: 'all', }
-  # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+  await @demo_typeset_sample_page { set_id: 'small-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'small-aleo', }
   # await @demo_typeset_sample_page { set_id: 'widechrs', }
   # await @demo_typeset_sample_page { set_id: 'tibetan', }
-  await @demo_typeset_sample_page { set_id: 'arabic', }
+  # await @demo_typeset_sample_page { set_id: 'arabic', }
   # await @demo_typeset_sample_page { set_id: 'urdu', }
   # await @demo_typeset_sample_page { set_id: 'small-djvsi', }
   # await @demo_use_linked_rustybuzz_wasm()
