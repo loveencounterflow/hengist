@@ -39,7 +39,7 @@ guy                       = require '../../../apps/guy'
   # path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
   # DH                  = require PATH.join H.dbay_path, 'lib/helpers'
   chrs                = "affirm無字"
-  matcher             = new Map [ [ 'a', 66, ], [ 'ffi', 1536, ], [ 'r', 83, ], [ 'm', 78, ], ]
+  matcher             = new Map [ [ 66, 'a', ], [ 1536, 'ffi', ], [ 83, 'r', ], [ 78, 'm', ], ]
   #.........................................................................................................
   do =>
     db          = new DBay()
