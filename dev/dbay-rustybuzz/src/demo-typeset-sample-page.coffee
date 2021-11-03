@@ -30,19 +30,18 @@ RBW                       = require 'rustybuzz-wasm'
 H                         = require './helpers'
 { DBay }                  = require H.dbay_path
 { Drb }                   = require H.drb_path
-tpl_path                  = PATH.resolve PATH.join __dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-page.template.html'
-tpl                       = FS.readFileSync tpl_path, { encoding: 'utf-8', }
+template_path             = PATH.resolve PATH.join __dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-page.template.html'
 target_path               = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/html+svg-demos/demo-typeset-sample-page.output.html'
 { to_width }              = require 'to-width'
 
 
 #-----------------------------------------------------------------------------------------------------------
-XXX_show_clusters = ( text, arrangement ) ->
+XXX_show_clusters = ( text, ads ) ->
   ### This is probably based on a misunderstanding of what `rustybuzz` means by 'cluster';
   see https://docs.rs/rustybuzz/0.4.0/rustybuzz/struct.GlyphInfo.html ###
-  for d, d_idx in arrangement
+  for d, d_idx in ads
     cur_bidx  = d.bidx
-    nxt_bidx  = arrangement[ d_idx + 1 ]?.bidx ? arrangement.length
+    nxt_bidx  = ads[ d_idx + 1 ]?.bidx ? ads.length
     cur_text  = text[ cur_bidx ... nxt_bidx ]
     info '^4448^', rpr cur_text
   help '^4448^', rpr text
@@ -54,100 +53,76 @@ append_to = ( page, name, text ) ->
   text = rpr text unless isa.text text
   echo ( CND.reverse CND.grey to_width name, 15 ) + ( CND.reverse CND.gold ' ' + to_width text, 108 )
   marker = "<!--?#{name}-end?-->"
-  return page.replace marker, text.toString() + marker + '\n'
+  return page.replace marker, '\n' + text.toString() + marker
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_typeset_sample_page = ( cfg ) ->
   defaults        = { set_id: 'small-eg8i', }
   cfg             = { defaults..., cfg..., }
   { set_id }      = cfg
+  ### NOTE: for testing we want to use the most recent `rustybuzz-wasm`: ###
   RBW             = require '../../../apps/rustybuzz-wasm/pkg'
+  { Tbl, }        = require '../../../apps/icql-dba-tabulate'
   db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
-  drb             = new Drb { db, create: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
+  drb             = new Drb { db, rebuild: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
+  dtab            = new Tbl { db, }
+  page            = FS.readFileSync template_path, { encoding: 'utf-8', }
   { I, L, V }     = db.sql
   #.........................................................................................................
   { text
     chrs
-    cids
     cgid_map
     fontnick
     fspath      } = H.settings_from_set_id set_id
   size_mm         = 10
   scale           = size_mm / 1000
   scale_txt       = scale.toFixed 4
-  # chrs            = [ ( new Set Array.from text )..., ]
   #.........................................................................................................
-  ### Need to find a way to find associations between CIDs and GIDs ###
+  ### Register, load and prepopulate font: ###
   drb.register_fontnick { fontnick, fspath, }
   drb.prepare_font      { fontnick, }
-  drb.insert_outlines   { fontnick, chrs, cids, cgid_map, }
-  arrangement     = drb.shape_text { fontnick, text, }
-  # debug '^33443^', arrangement
   #.........................................................................................................
-  page                  = tpl
-  required_xds          = {}
-  required_xds[ d.sid ] = d for d in arrangement
+  ### Shape text, which gives us positions, GIDs/SIDs, and the characters corresponding to each outline. The
+  `required_ads` maps from SIDs to arrangement data items (ADs): ###
+  ads                   = drb.shape_text { fontnick, text, }
+  required_ads          = {}
+  required_ads[ d.sid ] = d for d in ads
   known_ods             = {}
-  debug '^3343^', "required_xds:", ( Object.keys required_xds ).length
-  debug '^3343^', "known_ods:   ", ( Object.keys known_ods ).length
+  #.........................................................................................................
+  debug '^3343-1^', "required_ads:", ( Object.keys required_ads ).length
+  debug '^3343-2^', "known_ods:   ", ( Object.keys known_ods ).length
+  #.........................................................................................................
+  fm          = drb.get_font_metrics { fontnick, }
+  page        = append_to page, 'remarks', rpr fm
   do =>
-    required_sids         = Object.keys required_xds
+    required_sids = Object.keys required_ads
     for od from db SQL"""
       select
           *
         from outlines
         where sid in #{V required_sids};"""
-      urge '^33443^', to_width ( rpr od ), 100
       known_ods[ od.sid ] = od
-      delete required_xds[ od.sid ]
+      delete required_ads[ od.sid ]
     return null
-  debug '^3343^', "required_xds:", ( Object.keys required_xds ).length
-  debug '^3343^', "known_ods:   ", ( Object.keys known_ods ).length
-  info k, ( to_width ( rpr v ), 100 ) for k, v of required_xds
-  info k, ( to_width ( rpr v ), 100 ) for k, v of known_ods
   #.........................................................................................................
-  cgid_map = new Map
-  for d from drb.insert_and_walk_outlines { fontnick, chrs, cids, cgid_map, }
-    debug '^3443^', d
+  ### Retrieve (from font) and insert (into DB) missing outline data (ODs) items: ###
+  do =>
+    cgid_map      = drb._get_cgid_map_from_ads ads
+    for od from drb.insert_and_walk_outlines { fontnick, cgid_map, }
+      delete required_ads[ od.sid ]
+      known_ods[ od.sid ] = od
   #.........................................................................................................
-  return null
-
-  # known_ods[ d.]      =
-  known_sids      = new Set db.first_values SQL"select sid from outlines where fontnick = $fontnick;", { fontnick, }
-  # missing_sids    = new Set [ required_sids..., ].filter ( sid ) -> not known_sids.has sid
-  debug '^44552^', { required_sids, known_sids, missing_sids, }
+  debug '^3343-3^', "required_ads:", ( Object.keys required_ads ).length
+  debug '^3343-4^', "known_ods:   ", ( Object.keys known_ods ).length
   #.........................................................................................................
-  # fetch_outlines  = SQL"select * from outlines where fontnick = $fontnick and gid in #{V [ missing_sids..., ]};"
-  return null
-
-  # outlines        = {}
-  # bboxes          = {}
-  for sid from missing_sids
-    { bbox
-      pd  } = drb.get_single_outline { sid, }
-    # debug '^3332^', entry
-    continue
-    urge '^3343^', to_width ( rpr d ), 108
-    known_sids.add d.gid
-    page    = append_to page, 'outlines', "<path id='#{d.uoid}' d='#{d.pd}'/>"
-    # debug '^3332^',
-  return null
-  #.........................................................................................................
-  fm          = drb.get_font_metrics { fontnick, }
-  page        = append_to page, 'remarks', rpr fm
-  #.........................................................................................................
-  ### Part I: insert unscaled outlines ###
-  insert_outlines = ( page ) ->
-    unscaled_outlines = []
-    for gid in gids
-      outline = drb.get_single_outline { fontnick, gid, }
-      uoid    = "o#{gid}#{fontnick}"
-      page    = append_to page, 'outlines', "<path id='#{uoid}' d='#{outline.pd}'/>"
+  ### `append_outlines()`: ###
+  append_outlines = ( page ) ->
+    for sid, od of known_ods
+      ### TAINT not safe to use unescaped `chrs` inside XML comment ###
+      page = append_to page, 'outlines', "<!--#{od.chrs}--><path id='#{sid}' d='#{od.pd}'/>"
     return page
   #.........................................................................................................
-  ### Part II: insert outline refs (the typesetting proper so to speak) ###
-  insert_content = ( page ) ->
-    content = []
+  append_content = ( page ) ->
     x0      = 0
     y0      = 50
     swdth   = 0.25 # stroke width in mm
@@ -158,32 +133,44 @@ append_to = ( page, name, text ) ->
     page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.descender}' x2='10000' y2='#{fm.descender}'/>"
     page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.x_height}' x2='10000' y2='#{fm.x_height}'/>"
     page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>"
-    for xxx in arrangement
-      gid     = xxx.gid
-      uoid    = "o#{gid}#{fontnick}"
-      x       = Math.round xxx.x
-      y       = Math.round xxx.y
-      if y != 0 then  element = "<use href='##{uoid}' x='#{x}' y='#{y}'/>"
-      else            element = "<use href='##{uoid}' x='#{x}'/>"
-      page    = append_to page, 'content', element
-    page    = append_to page, 'content', "</g>"
+    for ad in ads
+      if ad.y is 0 then element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}'/>"
+      else              element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
+      page  = append_to page, 'content', element
+    page = append_to page, 'content', "</g>"
     return page
   #.........................................................................................................
-  page = insert_outlines  page
-  page = insert_content   page
-  FS.writeFileSync target_path, page
+  append_overview = ( page ) ->
+    x0      = 0
+    y0      = 70
+    swdth   = 0.25 # stroke width in mm
+    swdth  *= 1000 * size_mm * scale
+    page    = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
+    dx      = 1000 * 100 * scale
+    x       = -dx
+    for od from db SQL"select * from drb.outlines where fontnick = $fontnick order by sid;", { fontnick, }
+      x    += dx
+      page  = append_to page, 'content', "<!--#{od.chrs}--><use href='##{od.sid}' x='#{x}'/>"
+    page = append_to page, 'content', "</g>"
+    return page
   #.........................................................................................................
+  page  = append_outlines page
+  page  = append_content  page
+  page  = append_overview page
+  #.........................................................................................................
+  FS.writeFileSync target_path, page
   return null
-
 
 
 ############################################################################################################
 if require.main is module then do =>
   # await @demo_store_outlines()
   # await @demo_store_outlines { set_id: 'all', }
-  await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+  # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'small-aleo', }
   # await @demo_typeset_sample_page { set_id: 'widechrs', }
+  # await @demo_typeset_sample_page { set_id: 'tibetan', }
+  await @demo_typeset_sample_page { set_id: 'arabic', }
   # await @demo_typeset_sample_page { set_id: 'small-djvsi', }
   # await @demo_use_linked_rustybuzz_wasm()
 
