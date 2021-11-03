@@ -158,6 +158,14 @@
         text = ([..."الخط الأمیری"].reverse()).join('');
         chrs = ([..."الخط الأمیری"].reverse()).join('');
         break;
+      case 'urdu':
+        fontnick = 'nur';
+        fspath = 'noto-arabic/NotoNastaliqUrdu-unhinted/NotoNastaliqUrdu-Regular.ttf';
+        // text      = ( [ "اُردُو‌ حُرُوفِ ‌تَہَجِّی"... ].reverse() ).join ''
+        text = "نستعلیق‎";
+        // text      = ( [ "نستعلیق‎"... ].reverse() ).join ''
+        chrs = ([..."الخط الأمیری"].reverse()).join('');
+        break;
       default:
         throw new Error(`^345^ unknown set_id ${rpr(set_id)}`);
     }

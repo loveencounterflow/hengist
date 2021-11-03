@@ -144,8 +144,7 @@
     (() => {      //.........................................................................................................
       /* Retrieve (from font) and insert (into DB) missing outline data (ODs) items: */
       var od, ref, results;
-      cgid_map = drb._get_cgid_map_from_ads(ads);
-      ref = drb.insert_and_walk_outlines({fontnick, cgid_map});
+      ref = drb.insert_and_walk_outlines({fontnick, ads});
       results = [];
       for (od of ref) {
         delete required_ads[od.sid];
@@ -223,17 +222,18 @@
     (async() => {
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
-      // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
-      // await @demo_typeset_sample_page { set_id: 'small-aleo', }
-      // await @demo_typeset_sample_page { set_id: 'widechrs', }
-      // await @demo_typeset_sample_page { set_id: 'tibetan', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'arabic'
+        set_id: 'small-eg8i'
       }));
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'small-djvsi', }
+  // await @demo_typeset_sample_page { set_id: 'small-aleo', }
+// await @demo_typeset_sample_page { set_id: 'widechrs', }
+// await @demo_typeset_sample_page { set_id: 'tibetan', }
+// await @demo_typeset_sample_page { set_id: 'arabic', }
+// await @demo_typeset_sample_page { set_id: 'urdu', }
+// await @demo_typeset_sample_page { set_id: 'small-djvsi', }
 // await @demo_use_linked_rustybuzz_wasm()
 
 }).call(this);
