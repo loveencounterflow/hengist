@@ -166,11 +166,12 @@ append_to = ( page, name, text ) ->
 if require.main is module then do =>
   # await @demo_store_outlines()
   # await @demo_store_outlines { set_id: 'all', }
-  # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+  await @demo_typeset_sample_page { set_id: 'small-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'small-aleo', }
   # await @demo_typeset_sample_page { set_id: 'widechrs', }
   # await @demo_typeset_sample_page { set_id: 'tibetan', }
-  await @demo_typeset_sample_page { set_id: 'arabic', }
+  # await @demo_typeset_sample_page { set_id: 'arabic', }
+  # await @demo_typeset_sample_page { set_id: 'urdu', }
   # await @demo_typeset_sample_page { set_id: 'small-djvsi', }
   # await @demo_use_linked_rustybuzz_wasm()
 

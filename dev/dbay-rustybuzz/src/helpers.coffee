@@ -124,6 +124,13 @@ do =>
       fspath    = 'arabic/Amiri-0.113/Amiri-Bold.ttf'
       text      = ( [ "الخط الأمیری"... ].reverse() ).join ''
       chrs      = ( [ "الخط الأمیری"... ].reverse() ).join ''
+    when 'urdu'
+      fontnick  = 'nur'
+      fspath    = 'noto-arabic/NotoNastaliqUrdu-unhinted/NotoNastaliqUrdu-Regular.ttf'
+      # text      = ( [ "اُردُو‌ حُرُوفِ ‌تَہَجِّی"... ].reverse() ).join ''
+      text      = "نستعلیق‎"
+      # text      = ( [ "نستعلیق‎"... ].reverse() ).join ''
+      chrs      = ( [ "الخط الأمیری"... ].reverse() ).join ''
     else
       throw new Error "^345^ unknown set_id #{rpr set_id}"
   #.........................................................................................................
