@@ -81,7 +81,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var I, L, Tbl, V, ads, append_content, append_outlines, append_overview, cgid_map, chrs, d, db, defaults, drb, dtab, fm, fontnick, fspath, i, known_ods, len, page, required_ads, scale, scale_txt, set_id, size_mm, text;
+    var I, L, Tbl, V, ads, append_content, append_outlines, append_overview, cgid_map, chrs, db, defaults, drb, dtab, fm, fontnick, fspath, known_ods, missing_chrs, missing_pd, missing_sid, new_ods, page, scale, scale_txt, set_id, size_mm, text;
     defaults = {
       set_id: 'small-eg8i'
     };
@@ -112,53 +112,16 @@
     /* Register, load and prepopulate font: */
     drb.register_fontnick({fontnick, fspath});
     drb.prepare_font({fontnick});
-    //.........................................................................................................
-    /* Shape text, which gives us positions, GIDs/SIDs, and the characters corresponding to each outline. The
-     `required_ads` maps from SIDs to arrangement data items (ADs): */
-    ads = drb.shape_text({fontnick, text});
-    required_ads = {};
-    for (i = 0, len = ads.length; i < len; i++) {
-      d = ads[i];
-      required_ads[d.sid] = d;
-    }
-    known_ods = {};
-    //.........................................................................................................
-    debug('^3343-1^', "required_ads:", (Object.keys(required_ads)).length);
-    debug('^3343-2^', "known_ods:   ", (Object.keys(known_ods)).length);
-    //.........................................................................................................
-    fm = drb.get_font_metrics({fontnick});
-    page = append_to(page, 'remarks', rpr(fm));
-    (() => {
-      var od, ref, required_sids;
-      required_sids = Object.keys(required_ads);
-      ref = db(SQL`select
-    *
-  from outlines
-  where sid in ${V(required_sids)};`);
-      for (od of ref) {
-        known_ods[od.sid] = od;
-        delete required_ads[od.sid];
-      }
-      return null;
-    })();
-    (() => {      //.........................................................................................................
-      /* Retrieve (from font) and insert (into DB) missing outline data (ODs) items: */
-      var od, ref, results;
-      ref = drb.insert_and_walk_outlines({fontnick, ads});
-      results = [];
-      for (od of ref) {
-        delete required_ads[od.sid];
-        results.push(known_ods[od.sid] = od);
-      }
-      return results;
-    })();
-    //.........................................................................................................
-    debug('^3343-3^', "required_ads:", (Object.keys(required_ads)).length);
-    debug('^3343-4^', "known_ods:   ", (Object.keys(known_ods)).length);
+    ({known_ods, new_ods, missing_chrs, ads, fm} = drb.typeset({fontnick, text}));
+    page = append_to(page, 'remarks', `<div>fm: ${rpr(fm)}</div>`);
+    page = append_to(page, 'remarks', `<div>missing_chrs: ${rpr(missing_chrs)}</div>`);
+    missing_sid = 'oNull';
+    missing_pd = 'M0 200 L0-800 L1000-800 L1000 200';
     //.........................................................................................................
     /* `append_outlines()`: */
     append_outlines = function(page) {
       var od, sid;
+      page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' d='${missing_pd}'/>`);
       for (sid in known_ods) {
         od = known_ods[sid];
         page = append_to(page, 'outlines', `<!--${od.chrs}--><path id='${sid}' d='${od.pd}'/>`);
@@ -167,25 +130,30 @@
     };
     //.........................................................................................................
     append_content = function(page) {
-      var ad, element, j, len1, swdth, x0, y0;
+      var ad, d, element, i, j, len, len1, swdth, x0, y0;
       x0 = 0;
       y0 = 50;
       swdth = 0.25; // stroke width in mm
       swdth *= 1000 * size_mm * scale;
       page = append_to(page, 'content', `<g transform='translate(${x0} ${y0}) scale(${scale_txt})'>`);
-      // page    = append_to page, 'content', "<rect class='typeframe' x='0' y='-800' width='10000' height='1000'/>"
+      // page        = append_to page, 'content', "<rect class='typeframe' x='0' y='-800' width='10000' height='1000'/>"
       page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`);
       page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.descender}' x2='10000' y2='${fm.descender}'/>`);
       page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.x_height}' x2='10000' y2='${fm.x_height}'/>`);
       page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.capital_height}' x2='10000' y2='${fm.capital_height}'/>`);
-      for (j = 0, len1 = ads.length; j < len1; j++) {
-        ad = ads[j];
+      for (i = 0, len = ads.length; i < len; i++) {
+        ad = ads[i];
         if (ad.y === 0) {
           element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}'/>`;
         } else {
           element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
         }
         page = append_to(page, 'content', element);
+      }
+      for (j = 0, len1 = missing_chrs.length; j < len1; j++) {
+        d = missing_chrs[j];
+        page = append_to(page, 'content', `<!--${d.chrs}--><use href='#${missing_sid}' x='${d.x}' y='${d.y}'/>`);
+        page = append_to(page, 'content', `<text class='missing-chrs' style='font-size:1000px;' x='${d.x}' y='${d.y}'>${d.chrs}</text>`);
       }
       page = append_to(page, 'content', "</g>");
       return page;
@@ -222,17 +190,17 @@
     (async() => {
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
+      // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+      // await @demo_typeset_sample_page { set_id: 'small-aleo', }
+      // await @demo_typeset_sample_page { set_id: 'widechrs', }
+      // await @demo_typeset_sample_page { set_id: 'tibetan', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'small-eg8i'
+        set_id: 'arabic'
       }));
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'small-aleo', }
-// await @demo_typeset_sample_page { set_id: 'widechrs', }
-// await @demo_typeset_sample_page { set_id: 'tibetan', }
-// await @demo_typeset_sample_page { set_id: 'arabic', }
-// await @demo_typeset_sample_page { set_id: 'urdu', }
+  // await @demo_typeset_sample_page { set_id: 'urdu', }
 // await @demo_typeset_sample_page { set_id: 'small-djvsi', }
 // await @demo_use_linked_rustybuzz_wasm()
 
