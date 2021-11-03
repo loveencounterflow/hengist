@@ -81,7 +81,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var I, L, Tbl, V, ads, append_content, append_outlines, append_overview, cgid_map, chrs, db, defaults, drb, dtab, fm, fontnick, fspath, known_ods, missing, missing_chrs, missing_pd, missing_sid, new_ods, page, scale, scale_txt, set_id, size_mm, text;
+    var I, L, Tbl, V, ad, ads, append_content, append_outlines, append_overview, cgid_map, chrs, db, defaults, drb, dtab, fm, fontnick, fspath, known_ods, missing, missing_chrs, missing_pd, missing_sid, missing_txt, new_ods, page, scale, scale_txt, set_id, size_mm, text;
     defaults = {
       set_id: 'small-eg8i'
     };
@@ -110,7 +110,7 @@
     scale_txt = scale.toFixed(4);
     ({missing} = Drb.C);
     missing_sid = `o0${fontnick}`;
-    missing_pd = 'M0 200 L0-800 L1000-800 L1000 200';
+    missing_pd = 'M0 200 L0-800 L900-800 L900 200';
     known_ods = {missing_sid};
     //.........................................................................................................
     /* Register, load and prepopulate font: */
@@ -118,12 +118,22 @@
     drb.prepare_font({fontnick});
     ({known_ods, new_ods, missing_chrs, ads, fm} = drb.typeset({fontnick, text, known_ods}));
     page = append_to(page, 'remarks', `<div>fm: ${rpr(fm)}</div>`);
-    page = append_to(page, 'remarks', `<div>missing_chrs: ${rpr(missing_chrs)}</div>`);
+    missing_txt = ((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = missing_chrs.length; i < len; i++) {
+        ad = missing_chrs[i];
+        results.push(rpr(ad.chrs));
+      }
+      return results;
+    })()).join(', ');
+    page = append_to(page, 'remarks', `<div>missing_chrs: ${missing_txt}</div>`);
     //.........................................................................................................
     /* `append_outlines()`: */
     append_outlines = function(page) {
       var od, sid;
       page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' class='missing' d='${missing_pd}'/>`);
+// page        = append_to page, 'outlines', "<!--NULL--><rect id='#{missing_sid}' class='missing' width='800' height='1000' rx='200' ry='200'/>"
       for (sid in known_ods) {
         od = known_ods[sid];
         page = append_to(page, 'outlines', `<!--${od.chrs}--><path id='${sid}' d='${od.pd}'/>`);
@@ -132,7 +142,7 @@
     };
     //.........................................................................................................
     append_content = function(page) {
-      var ad, element, i, len, swdth, x0, y0;
+      var element, i, len, swdth, x0, y0;
       x0 = 0;
       y0 = 50;
       swdth = 0.25; // stroke width in mm
@@ -146,7 +156,7 @@
       for (i = 0, len = ads.length; i < len; i++) {
         ad = ads[i];
         if (ad.gid === missing.gid) {
-          element = `<!--${ad.chrs}--><use href='#${missing_sid}' transform='translate(${ad.x} ${ad.y}) scale(${ad.dx / 1000} 1)'/>
+          element = `<!--${ad.chrs}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${ad.dx / 1000} 1)'/>
 <text class='missing-chrs' style='font-size:1000px;' x='${ad.x}' y='${ad.y}'>${ad.chrs}</text>`;
         } else {
           if (ad.y === 0) {
