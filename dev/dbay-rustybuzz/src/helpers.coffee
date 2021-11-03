@@ -84,17 +84,17 @@ do =>
       fontnick  = 'eg8i'
       fspath    = 'EBGaramond08-Italic.otf'
       chrs      = "abcdefghijklm"
-      text      = "Affirmation 𠀅 Titian Sylt."
+      text      = "Affirmation字缺TitianիϪSylt."
     when 'small-aleo'
       fontnick  = 'aleo'
       fspath    = 'Aleo_font_v1.2.2/Desktop OTF/Aleo-Italic.otf'
       chrs      = "abcdefghijklm"
-      text      = "Affirmation 𠀅 Titian Sylt."
+      text      = "Affirmation字缺TitianիϪSylt."
     when 'small-djvsi'
       fontnick  = 'djvsi'
       fspath    = 'DejaVuSerif-Italic.ttf'
       chrs      = "abcdefghijklm"
-      text      = "Affirmation 𠀅 Titian Sylt."
+      text      = "Affirmation字缺TitianիϪSylt."
     when 'widechrs'
       fontnick  = 'sfb'
       fspath    = 'sunflower-u-cjk-xb.ttf'
