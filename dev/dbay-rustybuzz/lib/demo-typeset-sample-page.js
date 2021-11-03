@@ -81,7 +81,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var I, L, Tbl, V, ads, append_content, append_outlines, append_overview, cgid_map, chrs, db, defaults, drb, dtab, fm, fontnick, fspath, known_ods, missing_chrs, missing_pd, missing_sid, new_ods, page, scale, scale_txt, set_id, size_mm, text;
+    var I, L, Tbl, V, ads, append_content, append_outlines, append_overview, cgid_map, chrs, db, defaults, drb, dtab, fm, fontnick, fspath, known_ods, missing, missing_chrs, missing_pd, missing_sid, new_ods, page, scale, scale_txt, set_id, size_mm, text;
     defaults = {
       set_id: 'small-eg8i'
     };
@@ -108,20 +108,22 @@
     size_mm = 10;
     scale = size_mm / 1000;
     scale_txt = scale.toFixed(4);
+    ({missing} = Drb.C);
+    missing_sid = `o0${fontnick}`;
+    missing_pd = 'M0 200 L0-800 L1000-800 L1000 200';
+    known_ods = {missing_sid};
     //.........................................................................................................
     /* Register, load and prepopulate font: */
     drb.register_fontnick({fontnick, fspath});
     drb.prepare_font({fontnick});
-    ({known_ods, new_ods, missing_chrs, ads, fm} = drb.typeset({fontnick, text}));
+    ({known_ods, new_ods, missing_chrs, ads, fm} = drb.typeset({fontnick, text, known_ods}));
     page = append_to(page, 'remarks', `<div>fm: ${rpr(fm)}</div>`);
     page = append_to(page, 'remarks', `<div>missing_chrs: ${rpr(missing_chrs)}</div>`);
-    missing_sid = 'oNull';
-    missing_pd = 'M0 200 L0-800 L1000-800 L1000 200';
     //.........................................................................................................
     /* `append_outlines()`: */
     append_outlines = function(page) {
       var od, sid;
-      page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' d='${missing_pd}'/>`);
+      page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' class='missing' d='${missing_pd}'/>`);
       for (sid in known_ods) {
         od = known_ods[sid];
         page = append_to(page, 'outlines', `<!--${od.chrs}--><path id='${sid}' d='${od.pd}'/>`);
@@ -130,7 +132,7 @@
     };
     //.........................................................................................................
     append_content = function(page) {
-      var ad, d, element, i, j, len, len1, swdth, x0, y0;
+      var ad, element, i, len, swdth, x0, y0;
       x0 = 0;
       y0 = 50;
       swdth = 0.25; // stroke width in mm
@@ -143,17 +145,17 @@
       page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.capital_height}' x2='10000' y2='${fm.capital_height}'/>`);
       for (i = 0, len = ads.length; i < len; i++) {
         ad = ads[i];
-        if (ad.y === 0) {
-          element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}'/>`;
+        if (ad.gid === missing.gid) {
+          element = `<!--${ad.chrs}--><use href='#${missing_sid}' transform='translate(${ad.x} ${ad.y}) scale(${ad.dx / 1000} 1)'/>
+<text class='missing-chrs' style='font-size:1000px;' x='${ad.x}' y='${ad.y}'>${ad.chrs}</text>`;
         } else {
-          element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
+          if (ad.y === 0) {
+            element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}'/>`;
+          } else {
+            element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
+          }
         }
         page = append_to(page, 'content', element);
-      }
-      for (j = 0, len1 = missing_chrs.length; j < len1; j++) {
-        d = missing_chrs[j];
-        page = append_to(page, 'content', `<!--${d.chrs}--><use href='#${missing_sid}' x='${d.x}' y='${d.y}'/>`);
-        page = append_to(page, 'content', `<text class='missing-chrs' style='font-size:1000px;' x='${d.x}' y='${d.y}'>${d.chrs}</text>`);
       }
       page = append_to(page, 'content', "</g>");
       return page;
@@ -190,17 +192,17 @@
     (async() => {
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
-      // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
-      // await @demo_typeset_sample_page { set_id: 'small-aleo', }
-      // await @demo_typeset_sample_page { set_id: 'widechrs', }
-      // await @demo_typeset_sample_page { set_id: 'tibetan', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'arabic'
+        set_id: 'small-eg8i'
       }));
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'urdu', }
+  // await @demo_typeset_sample_page { set_id: 'small-aleo', }
+// await @demo_typeset_sample_page { set_id: 'widechrs', }
+// await @demo_typeset_sample_page { set_id: 'tibetan', }
+// await @demo_typeset_sample_page { set_id: 'arabic', }
+// await @demo_typeset_sample_page { set_id: 'urdu', }
 // await @demo_typeset_sample_page { set_id: 'small-djvsi', }
 // await @demo_use_linked_rustybuzz_wasm()
 
