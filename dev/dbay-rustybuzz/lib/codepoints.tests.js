@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper, width_of;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -40,6 +40,7 @@
   guy = require('../../../apps/guy');
 
   // MMX                       = require '../../../apps/multimix/lib/cataloguing'
+  ({width_of, to_width} = require('to-width'));
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB get_assigned_unicode_chrs()"] = function(T, done) {
@@ -52,13 +53,26 @@
     (() => {      // path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
       // DH                  = require PATH.join H.dbay_path, 'lib/helpers'
       //.........................................................................................................
-      var db, drb, result;
+      var chr, chrs, db, drb, i, len, result, result_txt, width, widths;
       db = new DBay();
       drb = new Drb({
         db,
         temporary: true
       });
       result = drb.get_assigned_unicode_chrs();
+      result_txt = result.join('');
+      debug('^98402^', to_width(result_txt, 1500));
+      widths = {};
+      for (i = 0, len = result.length; i < len; i++) {
+        chr = result[i];
+        width = width_of(chr);
+        (widths[width] != null ? widths[width] : widths[width] = []).push(chr);
+      }
+      for (width in widths) {
+        chrs = widths[width];
+        chrs = chrs.join('');
+        debug('^98402^', width, to_width(chrs, 150));
+      }
       /* as of NodeJS v16.9.1 with  Unicode 13 (?) */
       if (T != null) {
         T.ok(result.length >= 143_439);
