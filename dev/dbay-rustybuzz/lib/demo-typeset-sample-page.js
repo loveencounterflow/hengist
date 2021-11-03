@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, PATH, RBW, SQL, XXX_show_clusters, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, to_width, tpl, tpl_path, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, Drb, FS, H, PATH, RBW, SQL, XXX_show_clusters, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -46,25 +46,21 @@
 
   ({Drb} = require(H.drb_path));
 
-  tpl_path = PATH.resolve(PATH.join(__dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-page.template.html'));
-
-  tpl = FS.readFileSync(tpl_path, {
-    encoding: 'utf-8'
-  });
+  template_path = PATH.resolve(PATH.join(__dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-page.template.html'));
 
   target_path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/html+svg-demos/demo-typeset-sample-page.output.html'));
 
   ({to_width} = require('to-width'));
 
   //-----------------------------------------------------------------------------------------------------------
-  XXX_show_clusters = function(text, arrangement) {
+  XXX_show_clusters = function(text, ads) {
     var cur_bidx, cur_text, d, d_idx, i, len, nxt_bidx, ref, ref1;
 /* This is probably based on a misunderstanding of what `rustybuzz` means by 'cluster';
  see https://docs.rs/rustybuzz/0.4.0/rustybuzz/struct.GlyphInfo.html */
-    for (d_idx = i = 0, len = arrangement.length; i < len; d_idx = ++i) {
-      d = arrangement[d_idx];
+    for (d_idx = i = 0, len = ads.length; i < len; d_idx = ++i) {
+      d = ads[d_idx];
       cur_bidx = d.bidx;
-      nxt_bidx = (ref = (ref1 = arrangement[d_idx + 1]) != null ? ref1.bidx : void 0) != null ? ref : arrangement.length;
+      nxt_bidx = (ref = (ref1 = ads[d_idx + 1]) != null ? ref1.bidx : void 0) != null ? ref : ads.length;
       cur_text = text.slice(cur_bidx, nxt_bidx);
       info('^4448^', rpr(cur_text));
     }
@@ -80,123 +76,99 @@
     }
     echo((CND.reverse(CND.grey(to_width(name, 15)))) + (CND.reverse(CND.gold(' ' + to_width(text, 108)))));
     marker = `<!--?${name}-end?-->`;
-    return page.replace(marker, text.toString() + marker + '\n');
+    return page.replace(marker, '\n' + text.toString() + marker);
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var I, L, V, arrangement, bbox, cgid_map, chrs, cids, d, db, defaults, drb, fm, fontnick, fspath, i, insert_content, insert_outlines, k, known_ods, known_sids, len, page, pd, ref, required_xds, scale, scale_txt, set_id, sid, size_mm, text, v;
+    var I, L, Tbl, V, ads, append_content, append_outlines, append_overview, cgid_map, chrs, d, db, defaults, drb, dtab, fm, fontnick, fspath, i, known_ods, len, page, required_ads, scale, scale_txt, set_id, size_mm, text;
     defaults = {
       set_id: 'small-eg8i'
     };
     cfg = {...defaults, ...cfg};
     ({set_id} = cfg);
     RBW = require('../../../apps/rustybuzz-wasm/pkg');
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
     db = new DBay({
       path: '/dev/shm/typesetting-1.sqlite'
     });
     drb = new Drb({
       db,
-      create: true,
+      rebuild: true,
       RBW,
       path: '/dev/shm/typesetting-2.sqlite'
     });
+    dtab = new Tbl({db});
+    page = FS.readFileSync(template_path, {
+      encoding: 'utf-8'
+    });
     ({I, L, V} = db.sql);
     //.........................................................................................................
-    ({text, chrs, cids, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
+    ({text, chrs, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
     size_mm = 10;
     scale = size_mm / 1000;
     scale_txt = scale.toFixed(4);
-    // chrs            = [ ( new Set Array.from text )..., ]
     //.........................................................................................................
-    /* Need to find a way to find associations between CIDs and GIDs */
+    /* Register, load and prepopulate font: */
     drb.register_fontnick({fontnick, fspath});
     drb.prepare_font({fontnick});
-    drb.insert_outlines({fontnick, chrs, cids, cgid_map});
-    arrangement = drb.shape_text({fontnick, text});
-    // debug '^33443^', arrangement
     //.........................................................................................................
-    page = tpl;
-    required_xds = {};
-    for (i = 0, len = arrangement.length; i < len; i++) {
-      d = arrangement[i];
-      required_xds[d.sid] = d;
+    /* Shape text, which gives us positions, GIDs/SIDs, and the characters corresponding to each outline. The
+     `required_ads` maps from SIDs to arrangement data items (ADs): */
+    ads = drb.shape_text({fontnick, text});
+    required_ads = {};
+    for (i = 0, len = ads.length; i < len; i++) {
+      d = ads[i];
+      required_ads[d.sid] = d;
     }
     known_ods = {};
-    debug('^3343^', "required_xds:", (Object.keys(required_xds)).length);
-    debug('^3343^', "known_ods:   ", (Object.keys(known_ods)).length);
+    //.........................................................................................................
+    debug('^3343-1^', "required_ads:", (Object.keys(required_ads)).length);
+    debug('^3343-2^', "known_ods:   ", (Object.keys(known_ods)).length);
+    //.........................................................................................................
+    fm = drb.get_font_metrics({fontnick});
+    page = append_to(page, 'remarks', rpr(fm));
     (() => {
       var od, ref, required_sids;
-      required_sids = Object.keys(required_xds);
+      required_sids = Object.keys(required_ads);
       ref = db(SQL`select
     *
   from outlines
   where sid in ${V(required_sids)};`);
       for (od of ref) {
-        urge('^33443^', to_width(rpr(od), 100));
         known_ods[od.sid] = od;
-        delete required_xds[od.sid];
+        delete required_ads[od.sid];
       }
       return null;
     })();
-    debug('^3343^', "required_xds:", (Object.keys(required_xds)).length);
-    debug('^3343^', "known_ods:   ", (Object.keys(known_ods)).length);
-    for (k in required_xds) {
-      v = required_xds[k];
-      info(k, to_width(rpr(v), 100));
-    }
-    for (k in known_ods) {
-      v = known_ods[k];
-      info(k, to_width(rpr(v), 100));
-    }
+    (() => {      //.........................................................................................................
+      /* Retrieve (from font) and insert (into DB) missing outline data (ODs) items: */
+      var od, ref, results;
+      cgid_map = drb._get_cgid_map_from_ads(ads);
+      ref = drb.insert_and_walk_outlines({fontnick, cgid_map});
+      results = [];
+      for (od of ref) {
+        delete required_ads[od.sid];
+        results.push(known_ods[od.sid] = od);
+      }
+      return results;
+    })();
     //.........................................................................................................
-    cgid_map = new Map();
-    ref = drb.insert_and_walk_outlines({fontnick, chrs, cids, cgid_map});
-    for (d of ref) {
-      debug('^3443^', d);
-    }
+    debug('^3343-3^', "required_ads:", (Object.keys(required_ads)).length);
+    debug('^3343-4^', "known_ods:   ", (Object.keys(known_ods)).length);
     //.........................................................................................................
-    return null;
-    // known_ods[ d.]      =
-    known_sids = new Set(db.first_values(SQL`select sid from outlines where fontnick = $fontnick;`, {fontnick}));
-    // missing_sids    = new Set [ required_sids..., ].filter ( sid ) -> not known_sids.has sid
-    debug('^44552^', {required_sids, known_sids, missing_sids});
-    //.........................................................................................................
-    // fetch_outlines  = SQL"select * from outlines where fontnick = $fontnick and gid in #{V [ missing_sids..., ]};"
-    return null;
-// outlines        = {}
-// bboxes          = {}
-    for (sid of missing_sids) {
-      ({bbox, pd} = drb.get_single_outline({sid}));
-      // debug '^3332^', entry
-      continue;
-      urge('^3343^', to_width(rpr(d), 108));
-      known_sids.add(d.gid);
-      page = append_to(page, 'outlines', `<path id='${d.uoid}' d='${d.pd}'/>`);
-    }
-    // debug '^3332^',
-    return null;
-    //.........................................................................................................
-    fm = drb.get_font_metrics({fontnick});
-    page = append_to(page, 'remarks', rpr(fm));
-    //.........................................................................................................
-    /* Part I: insert unscaled outlines */
-    insert_outlines = function(page) {
-      var gid, j, len1, outline, unscaled_outlines, uoid;
-      unscaled_outlines = [];
-      for (j = 0, len1 = gids.length; j < len1; j++) {
-        gid = gids[j];
-        outline = drb.get_single_outline({fontnick, gid});
-        uoid = `o${gid}${fontnick}`;
-        page = append_to(page, 'outlines', `<path id='${uoid}' d='${outline.pd}'/>`);
+    /* `append_outlines()`: */
+    append_outlines = function(page) {
+      var od, sid;
+      for (sid in known_ods) {
+        od = known_ods[sid];
+        page = append_to(page, 'outlines', `<!--${od.chrs}--><path id='${sid}' d='${od.pd}'/>`);
       }
       return page;
     };
     //.........................................................................................................
-    /* Part II: insert outline refs (the typesetting proper so to speak) */
-    insert_content = function(page) {
-      var content, element, gid, j, len1, swdth, uoid, x, x0, xxx, y, y0;
-      content = [];
+    append_content = function(page) {
+      var ad, element, j, len1, swdth, x0, y0;
       x0 = 0;
       y0 = 50;
       swdth = 0.25; // stroke width in mm
@@ -207,16 +179,12 @@
       page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.descender}' x2='10000' y2='${fm.descender}'/>`);
       page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.x_height}' x2='10000' y2='${fm.x_height}'/>`);
       page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.capital_height}' x2='10000' y2='${fm.capital_height}'/>`);
-      for (j = 0, len1 = arrangement.length; j < len1; j++) {
-        xxx = arrangement[j];
-        gid = xxx.gid;
-        uoid = `o${gid}${fontnick}`;
-        x = Math.round(xxx.x);
-        y = Math.round(xxx.y);
-        if (y !== 0) {
-          element = `<use href='#${uoid}' x='${x}' y='${y}'/>`;
+      for (j = 0, len1 = ads.length; j < len1; j++) {
+        ad = ads[j];
+        if (ad.y === 0) {
+          element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}'/>`;
         } else {
-          element = `<use href='#${uoid}' x='${x}'/>`;
+          element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
         }
         page = append_to(page, 'content', element);
       }
@@ -224,10 +192,29 @@
       return page;
     };
     //.........................................................................................................
-    page = insert_outlines(page);
-    page = insert_content(page);
-    FS.writeFileSync(target_path, page);
+    append_overview = function(page) {
+      var dx, od, ref, swdth, x, x0, y0;
+      x0 = 0;
+      y0 = 70;
+      swdth = 0.25; // stroke width in mm
+      swdth *= 1000 * size_mm * scale;
+      page = append_to(page, 'content', `<g transform='translate(${x0} ${y0}) scale(${scale_txt})'>`);
+      dx = 1000 * 100 * scale;
+      x = -dx;
+      ref = db(SQL`select * from drb.outlines where fontnick = $fontnick order by sid;`, {fontnick});
+      for (od of ref) {
+        x += dx;
+        page = append_to(page, 'content', `<!--${od.chrs}--><use href='#${od.sid}' x='${x}'/>`);
+      }
+      page = append_to(page, 'content', "</g>");
+      return page;
+    };
     //.........................................................................................................
+    page = append_outlines(page);
+    page = append_content(page);
+    page = append_overview(page);
+    //.........................................................................................................
+    FS.writeFileSync(target_path, page);
     return null;
   };
 
@@ -236,15 +223,17 @@
     (async() => {
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
+      // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+      // await @demo_typeset_sample_page { set_id: 'small-aleo', }
+      // await @demo_typeset_sample_page { set_id: 'widechrs', }
+      // await @demo_typeset_sample_page { set_id: 'tibetan', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'small-eg8i'
+        set_id: 'arabic'
       }));
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'small-aleo', }
-// await @demo_typeset_sample_page { set_id: 'widechrs', }
-// await @demo_typeset_sample_page { set_id: 'small-djvsi', }
+  // await @demo_typeset_sample_page { set_id: 'small-djvsi', }
 // await @demo_use_linked_rustybuzz_wasm()
 
 }).call(this);
