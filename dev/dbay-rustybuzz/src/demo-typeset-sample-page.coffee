@@ -55,6 +55,75 @@ append_to = ( page, name, text ) ->
   marker = "<!--?#{name}-end?-->"
   return page.replace marker, '\n' + text.toString() + marker
 
+
+#===========================================================================================================
+#
+#-----------------------------------------------------------------------------------------------------------
+append_remarks = ( cfg ) ->
+  { page, fm, missing_chrs, } = cfg
+  page            = append_to page, 'remarks', "<div>fm: #{rpr fm}</div>"
+  missing_txt     = ( rpr ad.chrs for ad in missing_chrs ).join ', '
+  page            = append_to page, 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
+
+#-----------------------------------------------------------------------------------------------------------
+append_outlines = ( cfg ) ->
+  { page, missing_sid, missing_pd, known_ods, } = cfg
+  page        = append_to page, 'outlines', "<!--NULL--><path id='#{missing_sid}' class='missing' d='#{missing_pd}'/>"
+  # page        = append_to page, 'outlines', "<!--NULL--><rect id='#{missing_sid}' class='missing' width='800' height='1000' rx='200' ry='200'/>"
+  for sid, od of known_ods
+    ### TAINT not safe to use unescaped `chrs` inside XML comment ###
+    page = append_to page, 'outlines', "<!--#{od.chrs}--><path id='#{sid}' d='#{od.pd}'/>"
+  return page
+
+#-----------------------------------------------------------------------------------------------------------
+append_content_fontmetrics = ( cfg ) ->
+  { page, x0, y0, size_mm, scale, fm, } = cfg
+  swdth   = 0.25 # stroke width in mm
+  swdth  *= 1000 * size_mm * scale
+  # page        = append_to page, 'content', "<rect class='typeframe' x='0' y='-800' width='10000' height='1000'/>"
+  page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
+  page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.descender}' x2='10000' y2='#{fm.descender}'/>"
+  page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.x_height}' x2='10000' y2='#{fm.x_height}'/>"
+  page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>"
+  return page
+
+#-----------------------------------------------------------------------------------------------------------
+append_content = ( cfg ) ->
+  { page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid, } = cfg
+  page        = page
+  page        = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
+  page        = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
+  page        = append_content_fontmetrics { page, x0, y0, size_mm, scale, fm, }
+  for ad in ads
+    if ad.gid is missing.gid
+      element = """<!--#{ad.chrs}--><use href='##{missing_sid}' class='missing' transform='translate(#{ad.x} #{ad.y}) scale(#{ad.dx/1000} 1)'/>\
+        <text class='missing-chrs' style='font-size:1000px;' x='#{ad.x}' y='#{ad.y}'>#{ad.chrs}</text>"""
+    else
+      if ad.y is 0 then element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}'/>"
+      else              element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
+    page  = append_to page, 'content', element
+    ### TAINT must escape `d.chrs` ###
+  page = append_to page, 'content', "</g>"
+  return page
+
+# #-----------------------------------------------------------------------------------------------------------
+# append_used_outlines_overview = ( page ) ->
+#   x0      = 0
+#   y0      = 70
+#   swdth   = 0.25 # stroke width in mm
+#   swdth  *= 1000 * size_mm * scale
+#   page    = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
+#   dx      = 1000 * 100 * scale
+#   x       = -dx
+#   for od from db SQL"select * from drb.outlines where fontnick = $fontnick order by sid;", { fontnick, }
+#     x    += dx
+#     page  = append_to page, 'content', "<!--#{od.chrs}--><use href='##{od.sid}' x='#{x}'/>"
+#   page = append_to page, 'content', "</g>"
+#   return page
+
+
+#===========================================================================================================
+#
 #-----------------------------------------------------------------------------------------------------------
 @demo_typeset_sample_page = ( cfg ) ->
   defaults        = { set_id: 'small-eg8i', }
@@ -90,60 +159,13 @@ append_to = ( page, name, text ) ->
     missing_chrs
     ads
     fm          } = drb.typeset { fontnick, text, known_ods, }
-  page            = append_to page, 'remarks', "<div>fm: #{rpr fm}</div>"
-  missing_txt     = ( rpr ad.chrs for ad in missing_chrs ).join ', '
-  page            = append_to page, 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
   #.........................................................................................................
-  ### `append_outlines()`: ###
-  append_outlines = ( page ) ->
-    page        = append_to page, 'outlines', "<!--NULL--><path id='#{missing_sid}' class='missing' d='#{missing_pd}'/>"
-    # page        = append_to page, 'outlines', "<!--NULL--><rect id='#{missing_sid}' class='missing' width='800' height='1000' rx='200' ry='200'/>"
-    for sid, od of known_ods
-      ### TAINT not safe to use unescaped `chrs` inside XML comment ###
-      page = append_to page, 'outlines', "<!--#{od.chrs}--><path id='#{sid}' d='#{od.pd}'/>"
-    return page
-  #.........................................................................................................
-  append_content = ( page ) ->
-    x0          = 0
-    y0          = 50
-    swdth       = 0.25 # stroke width in mm
-    swdth      *= 1000 * size_mm * scale
-    page        = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
-    # page        = append_to page, 'content', "<rect class='typeframe' x='0' y='-800' width='10000' height='1000'/>"
-    page        = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
-    page        = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.descender}' x2='10000' y2='#{fm.descender}'/>"
-    page        = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.x_height}' x2='10000' y2='#{fm.x_height}'/>"
-    page        = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>"
-    page        = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
-    for ad in ads
-      if ad.gid is missing.gid
-        element = """<!--#{ad.chrs}--><use href='##{missing_sid}' class='missing' transform='translate(#{ad.x} #{ad.y}) scale(#{ad.dx/1000} 1)'/>
-          <text class='missing-chrs' style='font-size:1000px;' x='#{ad.x}' y='#{ad.y}'>#{ad.chrs}</text>"""
-      else
-        if ad.y is 0 then element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}'/>"
-        else              element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
-      page  = append_to page, 'content', element
-      ### TAINT must escape `d.chrs` ###
-    page = append_to page, 'content', "</g>"
-    return page
-  #.........................................................................................................
-  append_overview = ( page ) ->
-    x0      = 0
-    y0      = 70
-    swdth   = 0.25 # stroke width in mm
-    swdth  *= 1000 * size_mm * scale
-    page    = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
-    dx      = 1000 * 100 * scale
-    x       = -dx
-    for od from db SQL"select * from drb.outlines where fontnick = $fontnick order by sid;", { fontnick, }
-      x    += dx
-      page  = append_to page, 'content', "<!--#{od.chrs}--><use href='##{od.sid}' x='#{x}'/>"
-    page = append_to page, 'content', "</g>"
-    return page
-  #.........................................................................................................
-  page  = append_outlines page
-  page  = append_content  page
-  # page  = append_overview page
+  x0    = 0
+  y0    = 50
+  page  = append_remarks  { page, fm, missing_chrs, }
+  page  = append_outlines { page, missing_sid, missing_pd, known_ods, }
+  page  = append_content  { page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid, }
+  # page  = append_used_outlines_overview page
   #.........................................................................................................
   FS.writeFileSync target_path, page
   return null
