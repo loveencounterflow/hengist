@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, PATH, RBW, SQL, XXX_show_clusters, append_content, append_content_fontmetrics, append_outlines, append_remarks, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, Drb, FS, H, PATH, RBW, SQL, XXX_show_clusters, _escape_for_html_comment, _escape_for_html_text, append_content, append_content_fontmetrics, append_outlines, append_remarks, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -99,8 +99,19 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  /* TAINT use standard method */
+  _escape_for_html_comment = function(text) {
+    return (text != null ? text : '').replace(/-/g, '&#x2d;');
+  };
+
+  _escape_for_html_text = function(text) {
+    return ((text != null ? text : '').replace(/&/g, '&amp;')).replace(/</g, '&lt;');
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   append_outlines = function(cfg) {
-    var chrs_txt, known_ods, missing, missing_pd, missing_sid, od, page, ref, sid;
+    /* TAINT use standard method */
+    var chrs_txt, known_ods, missing, missing_pd, missing_sid, od, page, sid;
     ({page, missing, missing_sid, missing_pd, known_ods} = cfg);
     page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' class='missing' d='${missing_pd}'/>`);
     for (sid in known_ods) {
@@ -108,7 +119,7 @@
       if (od.gid === missing.gid) {
         continue;
       }
-      chrs_txt = ((ref = od.chrs) != null ? ref : '').replace(/-/g, '&#x2d;');
+      chrs_txt = _escape_for_html_comment(od.chrs);
       page = append_to(page, 'outlines', `<!--${chrs_txt}--><path id='${sid}' d='${od.pd}'/>`);
     }
     return page;
@@ -120,7 +131,6 @@
     ({page, x0, y0, size_mm, scale, fm} = cfg);
     swdth = 0.25; // stroke width in mm
     swdth *= 1000 * size_mm * scale;
-    // page        = append_to page, 'content', "<rect class='typeframe' x='0' y='-800' width='10000' height='1000'/>"
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`);
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.descender}' x2='10000' y2='${fm.descender}'/>`);
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.x_height}' x2='10000' y2='${fm.x_height}'/>`);
@@ -130,22 +140,26 @@
 
   //-----------------------------------------------------------------------------------------------------------
   append_content = function(cfg) {
+    /* TAINT use standard method */
+    /* TAINT use standard method */
     /* TAINT must escape `d.chrs` */
-    var ad, ads, element, fm, i, len, missing, missing_sid, page, relwdth, scale, scale_txt, size_mm, text, x0, y0;
+    var ad, ads, chrs_ctxt, chrs_htxt, element, fm, i, len, missing, missing_sid, page, relwdth, scale, scale_txt, size_mm, text, x0, y0;
     ({page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid} = cfg);
     page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
     page = append_to(page, 'content', `<g transform='translate(${x0} ${y0}) scale(${scale_txt})'>`);
     page = append_content_fontmetrics({page, x0, y0, size_mm, scale, fm});
     for (i = 0, len = ads.length; i < len; i++) {
       ad = ads[i];
+      chrs_ctxt = _escape_for_html_comment(ad.chrs);
       if (ad.gid === missing.gid) {
+        chrs_htxt = _escape_for_html_text(ad.chrs);
         relwdth = ad.dx / 1000/* relative width of missing outline rectangle */
-        element = `<!--${ad.chrs}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;' x='${ad.x}' y='${ad.y}'>${ad.chrs}</text>`;
+        element = `<!--${chrs_ctxt}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;' x='${ad.x}' y='${ad.y}'>${chrs_htxt}</text>`;
       } else {
         if (ad.y === 0) {
-          element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}'/>`;
+          element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}'/>`;
         } else {
-          element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
+          element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
         }
       }
       page = append_to(page, 'content', element);

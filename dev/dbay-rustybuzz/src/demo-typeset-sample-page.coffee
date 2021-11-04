@@ -73,6 +73,8 @@ append_outlines = ( cfg ) ->
   for sid, od of known_ods
     ### TAINT not safe to use unescaped `chrs` inside XML comment ###
     page = append_to page, 'outlines', "<!--#{od.chrs}--><path id='#{sid}' d='#{od.pd}'/>"
+    chrs_txt  = ( od.chrs ? '' ).replace /-/g, '&#x2d;'
+    page      = append_to page, 'outlines', "<!--#{chrs_txt}--><path id='#{sid}' d='#{od.pd}'/>"
   return page
 
 #-----------------------------------------------------------------------------------------------------------
