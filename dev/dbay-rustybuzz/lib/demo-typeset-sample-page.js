@@ -192,7 +192,7 @@
     //.........................................................................................................
     page = append_outlines(page);
     page = append_content(page);
-    page = append_overview(page);
+    // page  = append_overview page
     //.........................................................................................................
     FS.writeFileSync(target_path, page);
     return null;
