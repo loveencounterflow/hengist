@@ -66,14 +66,18 @@ append_remarks = ( cfg ) ->
   page            = append_to page, 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
 
 #-----------------------------------------------------------------------------------------------------------
+### TAINT use standard method ###
+_escape_for_html_comment  = ( text ) ->   ( text ? '' ).replace /-/g, '&#x2d;'
+_escape_for_html_text     = ( text ) -> ( ( text ? '' ).replace /&/g, '&amp;' ).replace /</g, '&lt;'
+
+#-----------------------------------------------------------------------------------------------------------
 append_outlines = ( cfg ) ->
   { page, missing_sid, missing_pd, known_ods, } = cfg
   page        = append_to page, 'outlines', "<!--NULL--><path id='#{missing_sid}' class='missing' d='#{missing_pd}'/>"
   # page        = append_to page, 'outlines', "<!--NULL--><rect id='#{missing_sid}' class='missing' width='800' height='1000' rx='200' ry='200'/>"
   for sid, od of known_ods
-    ### TAINT not safe to use unescaped `chrs` inside XML comment ###
-    page = append_to page, 'outlines', "<!--#{od.chrs}--><path id='#{sid}' d='#{od.pd}'/>"
-    chrs_txt  = ( od.chrs ? '' ).replace /-/g, '&#x2d;'
+    ### TAINT use standard method ###
+    chrs_txt  = _escape_for_html_comment od.chrs
     page      = append_to page, 'outlines', "<!--#{chrs_txt}--><path id='#{sid}' d='#{od.pd}'/>"
   return page
 
@@ -97,12 +101,14 @@ append_content = ( cfg ) ->
   page        = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
   page        = append_content_fontmetrics { page, x0, y0, size_mm, scale, fm, }
   for ad in ads
+    ### TAINT use standard method ###
+    chrs_ctxt = _escape_for_html_comment ad.chrs
     if ad.gid is missing.gid
-      element = """<!--#{ad.chrs}--><use href='##{missing_sid}' class='missing' transform='translate(#{ad.x} #{ad.y}) scale(#{ad.dx/1000} 1)'/>\
-        <text class='missing-chrs' style='font-size:1000px;' x='#{ad.x}' y='#{ad.y}'>#{ad.chrs}</text>"""
+      ### TAINT use standard method ###
+      chrs_htxt = _escape_for_html_text ad.chrs
     else
-      if ad.y is 0 then element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}'/>"
-      else              element = "<!--#{ad.chrs}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
+      if ad.y is 0 then element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}'/>"
+      else              element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
     page  = append_to page, 'content', element
     ### TAINT must escape `d.chrs` ###
   page = append_to page, 'content', "</g>"
