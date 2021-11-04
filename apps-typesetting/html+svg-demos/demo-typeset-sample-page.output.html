@@ -66,9 +66,10 @@
     font-size:              10mm;
     line-height:            10mm; }
 
-  textcontainer div {
+  textcontainer span {
     position:               absolute;
-    color:                  transparent; }
+    color:                  yellow;
+    mix-blend-mode:         multiply; }
 
   svg text,
   h1,
@@ -235,8 +236,9 @@
 <!-- Part II where we position and style the scaled outlines to construct the page to be printed. -->
 <!-- Coordinates have a pleasant ratio of 1 unit per mm. -->
 <!-- <use x='000' y='020' href='#o74lmc'/> -->
-<textcontainer><!--?textcontainer-start?-->
-<div style='left:0mm;top:40mm;'>Affirmation字缺TitianիϪSylt.</div><!--?textcontainer-end?--></textcontainer>
+<textcontainer><!--?textcontainer-start?--><p><span style='left:0mm;top:40mm;'>first line of text </span><span style='left:00mm;top:50mm;'>second line-</span><span style='left:50mm;top:40mm;'>of-text; third line </span><span style='left:50mm;top:50mm;'>fourth line</span><p><span style='left:0mm;top:40mm;'>first line of text </span><span style='left:00mm;top:50mm;'>inten</span><span style='left:50mm;top:40mm;'>tion; third line </span><span style='left:50mm;top:50mm;'>fourth line</span>
+<!--?textcontainer-end?--></textcontainer>
+<textcontainer><span>one </span><span>two</span></textcontainer>
 <svg id=p0001 class='galley A4' viewBox='0 0 210 297'>
 <use id='xxx' x='000' y='000' href='#cm-grid'/>
 <!--?content-start?-->
@@ -274,23 +276,6 @@
 <!--l--><use href='#o77eg8i' x='10891'/>
 <!--t--><use href='#o85eg8i' x='11146'/>
 <!--.--><use href='#o15eg8i' x='11447'/>
-</g>
-<g transform='translate(0 70) scale(0.0100)'>
-<!--Ϫ--><use href='#o0eg8i' x='0'/>
-<!--ffi--><use href='#o1161eg8i' x='1000'/>
-<!--.--><use href='#o15eg8i' x='2000'/>
-<!--A--><use href='#o34eg8i' x='3000'/>
-<!--S--><use href='#o52eg8i' x='4000'/>
-<!--T--><use href='#o53eg8i' x='5000'/>
-<!--a--><use href='#o66eg8i' x='6000'/>
-<!--i--><use href='#o74eg8i' x='7000'/>
-<!--l--><use href='#o77eg8i' x='8000'/>
-<!--m--><use href='#o78eg8i' x='9000'/>
-<!--n--><use href='#o79eg8i' x='10000'/>
-<!--o--><use href='#o80eg8i' x='11000'/>
-<!--r--><use href='#o83eg8i' x='12000'/>
-<!--t--><use href='#o85eg8i' x='13000'/>
-<!--y--><use href='#o90eg8i' x='14000'/>
 </g><!--?content-end?-->
 </svg>
 
