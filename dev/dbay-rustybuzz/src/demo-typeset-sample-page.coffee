@@ -72,10 +72,10 @@ _escape_for_html_text     = ( text ) -> ( ( text ? '' ).replace /&/g, '&amp;' ).
 
 #-----------------------------------------------------------------------------------------------------------
 append_outlines = ( cfg ) ->
-  { page, missing_sid, missing_pd, known_ods, } = cfg
-  page        = append_to page, 'outlines', "<!--NULL--><path id='#{missing_sid}' class='missing' d='#{missing_pd}'/>"
-  # page        = append_to page, 'outlines', "<!--NULL--><rect id='#{missing_sid}' class='missing' width='800' height='1000' rx='200' ry='200'/>"
+  { page, missing, missing_sid, missing_pd, known_ods, } = cfg
+  page = append_to page, 'outlines', "<!--NULL--><path id='#{missing_sid}' class='missing' d='#{missing_pd}'/>"
   for sid, od of known_ods
+    continue if od.gid is missing.gid
     ### TAINT use standard method ###
     chrs_txt  = _escape_for_html_comment od.chrs
     page      = append_to page, 'outlines', "<!--#{chrs_txt}--><path id='#{sid}' d='#{od.pd}'/>"
@@ -86,7 +86,6 @@ append_content_fontmetrics = ( cfg ) ->
   { page, x0, y0, size_mm, scale, fm, } = cfg
   swdth   = 0.25 # stroke width in mm
   swdth  *= 1000 * size_mm * scale
-  # page        = append_to page, 'content', "<rect class='typeframe' x='0' y='-800' width='10000' height='1000'/>"
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.descender}' x2='10000' y2='#{fm.descender}'/>"
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.x_height}' x2='10000' y2='#{fm.x_height}'/>"
@@ -96,7 +95,6 @@ append_content_fontmetrics = ( cfg ) ->
 #-----------------------------------------------------------------------------------------------------------
 append_content = ( cfg ) ->
   { page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid, } = cfg
-  page        = page
   page        = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
   page        = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
   page        = append_content_fontmetrics { page, x0, y0, size_mm, scale, fm, }
@@ -106,6 +104,9 @@ append_content = ( cfg ) ->
     if ad.gid is missing.gid
       ### TAINT use standard method ###
       chrs_htxt = _escape_for_html_text ad.chrs
+      relwdth = ad.dx / 1000 ### relative width of missing outline rectangle ###
+      element = """<!--#{chrs_ctxt}--><use href='##{missing_sid}' class='missing' transform='translate(#{ad.x} #{ad.y}) scale(#{relwdth} 1)'/>\
+        <text class='missing-chrs' style='font-size:1000px;' x='#{ad.x}' y='#{ad.y}'>#{chrs_htxt}</text>"""
     else
       if ad.y is 0 then element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}'/>"
       else              element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
@@ -157,7 +158,7 @@ append_content = ( cfg ) ->
   { missing }     = Drb.C
   missing_sid     = "o0#{fontnick}"
   missing_pd      = 'M0 200 L0-800 L900-800 L900 200'
-  known_ods       = { missing_sid }
+  known_ods       = { [missing_sid]: { gid: missing.gid, sid: missing_sid, fontnick, }, }
   #.........................................................................................................
   ### Register, load and prepopulate font: ###
   drb.register_fontnick { fontnick, fspath, }
@@ -171,7 +172,7 @@ append_content = ( cfg ) ->
   x0    = 0
   y0    = 50
   page  = append_remarks  { page, fm, missing_chrs, }
-  page  = append_outlines { page, missing_sid, missing_pd, known_ods, }
+  page  = append_outlines { page, missing, missing_sid, missing_pd, known_ods, }
   page  = append_content  { page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid, }
   # page  = append_used_outlines_overview page
   #.........................................................................................................
