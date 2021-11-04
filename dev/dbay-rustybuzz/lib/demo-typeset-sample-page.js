@@ -100,14 +100,16 @@
 
   //-----------------------------------------------------------------------------------------------------------
   append_outlines = function(cfg) {
-    /* TAINT not safe to use unescaped `chrs` inside XML comment */
-    var known_ods, missing_pd, missing_sid, od, page, sid;
-    ({page, missing_sid, missing_pd, known_ods} = cfg);
+    var chrs_txt, known_ods, missing, missing_pd, missing_sid, od, page, ref, sid;
+    ({page, missing, missing_sid, missing_pd, known_ods} = cfg);
     page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' class='missing' d='${missing_pd}'/>`);
-// page        = append_to page, 'outlines', "<!--NULL--><rect id='#{missing_sid}' class='missing' width='800' height='1000' rx='200' ry='200'/>"
     for (sid in known_ods) {
       od = known_ods[sid];
-      page = append_to(page, 'outlines', `<!--${od.chrs}--><path id='${sid}' d='${od.pd}'/>`);
+      if (od.gid === missing.gid) {
+        continue;
+      }
+      chrs_txt = ((ref = od.chrs) != null ? ref : '').replace(/-/g, '&#x2d;');
+      page = append_to(page, 'outlines', `<!--${chrs_txt}--><path id='${sid}' d='${od.pd}'/>`);
     }
     return page;
   };
@@ -129,16 +131,16 @@
   //-----------------------------------------------------------------------------------------------------------
   append_content = function(cfg) {
     /* TAINT must escape `d.chrs` */
-    var ad, ads, element, fm, i, len, missing, missing_sid, page, scale, scale_txt, size_mm, text, x0, y0;
+    var ad, ads, element, fm, i, len, missing, missing_sid, page, relwdth, scale, scale_txt, size_mm, text, x0, y0;
     ({page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid} = cfg);
-    page = page;
     page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
     page = append_to(page, 'content', `<g transform='translate(${x0} ${y0}) scale(${scale_txt})'>`);
     page = append_content_fontmetrics({page, x0, y0, size_mm, scale, fm});
     for (i = 0, len = ads.length; i < len; i++) {
       ad = ads[i];
       if (ad.gid === missing.gid) {
-        element = `<!--${ad.chrs}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${ad.dx / 1000} 1)'/><text class='missing-chrs' style='font-size:1000px;' x='${ad.x}' y='${ad.y}'>${ad.chrs}</text>`;
+        relwdth = ad.dx / 1000/* relative width of missing outline rectangle */
+        element = `<!--${ad.chrs}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;' x='${ad.x}' y='${ad.y}'>${ad.chrs}</text>`;
       } else {
         if (ad.y === 0) {
           element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}'/>`;
@@ -201,7 +203,13 @@
     ({missing} = Drb.C);
     missing_sid = `o0${fontnick}`;
     missing_pd = 'M0 200 L0-800 L900-800 L900 200';
-    known_ods = {missing_sid};
+    known_ods = {
+      [missing_sid]: {
+        gid: missing.gid,
+        sid: missing_sid,
+        fontnick
+      }
+    };
     //.........................................................................................................
     /* Register, load and prepopulate font: */
     drb.register_fontnick({fontnick, fspath});
@@ -211,7 +219,7 @@
     x0 = 0;
     y0 = 50;
     page = append_remarks({page, fm, missing_chrs});
-    page = append_outlines({page, missing_sid, missing_pd, known_ods});
+    page = append_outlines({page, missing, missing_sid, missing_pd, known_ods});
     page = append_content({page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid});
     // page  = append_used_outlines_overview page
     //.........................................................................................................
