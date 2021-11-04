@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, PATH, RBW, SQL, XXX_show_clusters, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, Drb, FS, H, PATH, RBW, SQL, XXX_show_clusters, append_content, append_content_fontmetrics, append_outlines, append_remarks, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -79,9 +79,99 @@
     return page.replace(marker, '\n' + text.toString() + marker);
   };
 
+  //===========================================================================================================
+
+  //-----------------------------------------------------------------------------------------------------------
+  append_remarks = function(cfg) {
+    var ad, fm, missing_chrs, missing_txt, page;
+    ({page, fm, missing_chrs} = cfg);
+    page = append_to(page, 'remarks', `<div>fm: ${rpr(fm)}</div>`);
+    missing_txt = ((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = missing_chrs.length; i < len; i++) {
+        ad = missing_chrs[i];
+        results.push(rpr(ad.chrs));
+      }
+      return results;
+    })()).join(', ');
+    return page = append_to(page, 'remarks', `<div>missing_chrs: ${missing_txt}</div>`);
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  append_outlines = function(cfg) {
+    /* TAINT not safe to use unescaped `chrs` inside XML comment */
+    var known_ods, missing_pd, missing_sid, od, page, sid;
+    ({page, missing_sid, missing_pd, known_ods} = cfg);
+    page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' class='missing' d='${missing_pd}'/>`);
+// page        = append_to page, 'outlines', "<!--NULL--><rect id='#{missing_sid}' class='missing' width='800' height='1000' rx='200' ry='200'/>"
+    for (sid in known_ods) {
+      od = known_ods[sid];
+      page = append_to(page, 'outlines', `<!--${od.chrs}--><path id='${sid}' d='${od.pd}'/>`);
+    }
+    return page;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  append_content_fontmetrics = function(cfg) {
+    var fm, page, scale, size_mm, swdth, x0, y0;
+    ({page, x0, y0, size_mm, scale, fm} = cfg);
+    swdth = 0.25; // stroke width in mm
+    swdth *= 1000 * size_mm * scale;
+    // page        = append_to page, 'content', "<rect class='typeframe' x='0' y='-800' width='10000' height='1000'/>"
+    page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`);
+    page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.descender}' x2='10000' y2='${fm.descender}'/>`);
+    page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.x_height}' x2='10000' y2='${fm.x_height}'/>`);
+    page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.capital_height}' x2='10000' y2='${fm.capital_height}'/>`);
+    return page;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  append_content = function(cfg) {
+    /* TAINT must escape `d.chrs` */
+    var ad, ads, element, fm, i, len, missing, missing_sid, page, scale, scale_txt, size_mm, text, x0, y0;
+    ({page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid} = cfg);
+    page = page;
+    page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
+    page = append_to(page, 'content', `<g transform='translate(${x0} ${y0}) scale(${scale_txt})'>`);
+    page = append_content_fontmetrics({page, x0, y0, size_mm, scale, fm});
+    for (i = 0, len = ads.length; i < len; i++) {
+      ad = ads[i];
+      if (ad.gid === missing.gid) {
+        element = `<!--${ad.chrs}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${ad.dx / 1000} 1)'/><text class='missing-chrs' style='font-size:1000px;' x='${ad.x}' y='${ad.y}'>${ad.chrs}</text>`;
+      } else {
+        if (ad.y === 0) {
+          element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}'/>`;
+        } else {
+          element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
+        }
+      }
+      page = append_to(page, 'content', element);
+    }
+    page = append_to(page, 'content', "</g>");
+    return page;
+  };
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // append_used_outlines_overview = ( page ) ->
+  //   x0      = 0
+  //   y0      = 70
+  //   swdth   = 0.25 # stroke width in mm
+  //   swdth  *= 1000 * size_mm * scale
+  //   page    = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
+  //   dx      = 1000 * 100 * scale
+  //   x       = -dx
+  //   for od from db SQL"select * from drb.outlines where fontnick = $fontnick order by sid;", { fontnick, }
+  //     x    += dx
+  //     page  = append_to page, 'content', "<!--#{od.chrs}--><use href='##{od.sid}' x='#{x}'/>"
+  //   page = append_to page, 'content', "</g>"
+  //   return page
+
+  //===========================================================================================================
+
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var I, L, Tbl, V, ad, ads, append_content, append_outlines, append_overview, cgid_map, chrs, db, defaults, drb, dtab, fm, fontnick, fspath, known_ods, missing, missing_chrs, missing_pd, missing_sid, missing_txt, new_ods, page, scale, scale_txt, set_id, size_mm, text;
+    var I, L, Tbl, V, ads, cgid_map, chrs, db, defaults, drb, dtab, fm, fontnick, fspath, known_ods, missing, missing_chrs, missing_pd, missing_sid, new_ods, page, scale, scale_txt, set_id, size_mm, text, x0, y0;
     defaults = {
       set_id: 'small-eg8i'
     };
@@ -117,82 +207,13 @@
     drb.register_fontnick({fontnick, fspath});
     drb.prepare_font({fontnick});
     ({known_ods, new_ods, missing_chrs, ads, fm} = drb.typeset({fontnick, text, known_ods}));
-    page = append_to(page, 'remarks', `<div>fm: ${rpr(fm)}</div>`);
-    missing_txt = ((function() {
-      var i, len, results;
-      results = [];
-      for (i = 0, len = missing_chrs.length; i < len; i++) {
-        ad = missing_chrs[i];
-        results.push(rpr(ad.chrs));
-      }
-      return results;
-    })()).join(', ');
-    page = append_to(page, 'remarks', `<div>missing_chrs: ${missing_txt}</div>`);
     //.........................................................................................................
-    /* `append_outlines()`: */
-    append_outlines = function(page) {
-      var od, sid;
-      page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' class='missing' d='${missing_pd}'/>`);
-// page        = append_to page, 'outlines', "<!--NULL--><rect id='#{missing_sid}' class='missing' width='800' height='1000' rx='200' ry='200'/>"
-      for (sid in known_ods) {
-        od = known_ods[sid];
-        page = append_to(page, 'outlines', `<!--${od.chrs}--><path id='${sid}' d='${od.pd}'/>`);
-      }
-      return page;
-    };
-    //.........................................................................................................
-    append_content = function(page) {
-      var element, i, len, swdth, x0, y0;
-      x0 = 0;
-      y0 = 50;
-      swdth = 0.25; // stroke width in mm
-      swdth *= 1000 * size_mm * scale;
-      page = append_to(page, 'content', `<g transform='translate(${x0} ${y0}) scale(${scale_txt})'>`);
-      // page        = append_to page, 'content', "<rect class='typeframe' x='0' y='-800' width='10000' height='1000'/>"
-      page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`);
-      page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.descender}' x2='10000' y2='${fm.descender}'/>`);
-      page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.x_height}' x2='10000' y2='${fm.x_height}'/>`);
-      page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.capital_height}' x2='10000' y2='${fm.capital_height}'/>`);
-      page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
-      for (i = 0, len = ads.length; i < len; i++) {
-        ad = ads[i];
-        if (ad.gid === missing.gid) {
-          element = `<!--${ad.chrs}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${ad.dx / 1000} 1)'/>
-<text class='missing-chrs' style='font-size:1000px;' x='${ad.x}' y='${ad.y}'>${ad.chrs}</text>`;
-        } else {
-          if (ad.y === 0) {
-            element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}'/>`;
-          } else {
-            element = `<!--${ad.chrs}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
-          }
-        }
-        page = append_to(page, 'content', element);
-      }
-      page = append_to(page, 'content', "</g>");
-      return page;
-    };
-    //.........................................................................................................
-    append_overview = function(page) {
-      var dx, od, ref, swdth, x, x0, y0;
-      x0 = 0;
-      y0 = 70;
-      swdth = 0.25; // stroke width in mm
-      swdth *= 1000 * size_mm * scale;
-      page = append_to(page, 'content', `<g transform='translate(${x0} ${y0}) scale(${scale_txt})'>`);
-      dx = 1000 * 100 * scale;
-      x = -dx;
-      ref = db(SQL`select * from drb.outlines where fontnick = $fontnick order by sid;`, {fontnick});
-      for (od of ref) {
-        x += dx;
-        page = append_to(page, 'content', `<!--${od.chrs}--><use href='#${od.sid}' x='${x}'/>`);
-      }
-      page = append_to(page, 'content', "</g>");
-      return page;
-    };
-    //.........................................................................................................
-    page = append_outlines(page);
-    page = append_content(page);
-    // page  = append_overview page
+    x0 = 0;
+    y0 = 50;
+    page = append_remarks({page, fm, missing_chrs});
+    page = append_outlines({page, missing_sid, missing_pd, known_ods});
+    page = append_content({page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid});
+    // page  = append_used_outlines_overview page
     //.........................................................................................................
     FS.writeFileSync(target_path, page);
     return null;
