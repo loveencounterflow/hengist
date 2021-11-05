@@ -135,7 +135,7 @@ append_content = ( cfg ) ->
 #
 #-----------------------------------------------------------------------------------------------------------
 @demo_typeset_sample_page = ( cfg ) ->
-  defaults        = { set_id: 'small-eg8i', }
+  defaults        = { set_id: 'medium-eg8i', }
   cfg             = { defaults..., cfg..., }
   { set_id }      = cfg
   ### NOTE: for testing we want to use the most recent `rustybuzz-wasm`: ###
@@ -152,6 +152,9 @@ append_content = ( cfg ) ->
     cgid_map
     fontnick
     fspath      } = H.settings_from_set_id set_id
+  text            = text.replace /\n/g, ' '
+  text            = text.replace /\x20{2,}/g, ' '
+  width_mm        = 100
   size_mm         = 10
   scale           = size_mm / 1000
   scale_txt       = scale.toFixed 4
@@ -184,7 +187,8 @@ append_content = ( cfg ) ->
 if require.main is module then do =>
   # await @demo_store_outlines()
   # await @demo_store_outlines { set_id: 'all', }
-  await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+  # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+  await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'small-aleo', }
   # await @demo_typeset_sample_page { set_id: 'widechrs', }
   # await @demo_typeset_sample_page { set_id: 'tibetan', }
