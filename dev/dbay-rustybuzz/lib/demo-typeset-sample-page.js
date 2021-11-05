@@ -187,9 +187,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var I, L, Tbl, V, ads, cgid_map, chrs, db, defaults, drb, dtab, fm, fontnick, fspath, known_ods, missing, missing_chrs, missing_pd, missing_sid, new_ods, page, scale, scale_txt, set_id, size_mm, text, x0, y0;
+    var I, L, Tbl, V, ads, cgid_map, chrs, db, defaults, drb, dtab, fm, fontnick, fspath, known_ods, missing, missing_chrs, missing_pd, missing_sid, new_ods, page, scale, scale_txt, set_id, size_mm, text, width_mm, x0, y0;
     defaults = {
-      set_id: 'small-eg8i'
+      set_id: 'medium-eg8i'
     };
     cfg = {...defaults, ...cfg};
     ({set_id} = cfg);
@@ -211,6 +211,9 @@
     ({I, L, V} = db.sql);
     //.........................................................................................................
     ({text, chrs, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
+    text = text.replace(/\n/g, ' ');
+    text = text.replace(/\x20{2,}/g, ' ');
+    width_mm = 100;
     size_mm = 10;
     scale = size_mm / 1000;
     scale_txt = scale.toFixed(4);
@@ -228,7 +231,7 @@
     /* Register, load and prepopulate font: */
     drb.register_fontnick({fontnick, fspath});
     drb.prepare_font({fontnick});
-    ({known_ods, new_ods, missing_chrs, ads, fm} = drb.typeset({fontnick, text, known_ods}));
+    ({known_ods, new_ods, missing_chrs, ads, fm} = drb.compose({fontnick, text, known_ods}));
     //.........................................................................................................
     x0 = 0;
     y0 = 50;
@@ -246,8 +249,9 @@
     (async() => {
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
+      // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'small-eg8i'
+        set_id: 'medium-eg8i'
       }));
     })();
   }
