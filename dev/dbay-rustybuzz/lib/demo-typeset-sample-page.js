@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, PATH, RBW, SQL, XXX_show_clusters, _escape_for_html_comment, _escape_for_html_text, append_content, append_content_fontmetrics, append_outlines, append_remarks, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _escape_for_html_comment, _escape_for_html_text, _escape_syms, _prepare_text, append_content, append_content_fontmetrics, append_outlines, append_remarks, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -52,6 +52,8 @@
 
   ({to_width} = require('to-width'));
 
+  ITXT = require('intertext');
+
   //-----------------------------------------------------------------------------------------------------------
   XXX_show_clusters = function(text, ads) {
     var cur_bidx, cur_text, d, d_idx, i, len, nxt_bidx, ref, ref1;
@@ -99,9 +101,29 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  /* TAINT use standard method */
+  /* TAINT use standard methods */
+  _prepare_text = function(text) {
+    var R;
+    R = text;
+    R = R.replace(/\n/g, ' ');
+    R = R.replace(/\x20{2,}/g, ' ');
+    R = ITXT.HYPH.hyphenate(R);
+    R = R.replace(/&shy;/g, '\xad');
+    R = R.replace(/&wbr;/g, '\u200b');
+    // debug '^9865^', ITXT.HYPH.reveal_hyphens R, '|'; process.exit 1
+    return R;
+  };
+
+  _escape_syms = function(text) {
+    var R;
+    R = text;
+    R = R.replace(/\xad/g, '&shy;');
+    R = R.replace(/\u200b/g, '&wbr;');
+    return R;
+  };
+
   _escape_for_html_comment = function(text) {
-    return (text != null ? text : '').replace(/-/g, '&#x2d;');
+    return (_escape_syms(text != null ? text : '')).replace(/--/g, '- -');
   };
 
   _escape_for_html_text = function(text) {
@@ -211,8 +233,7 @@
     ({I, L, V} = db.sql);
     //.........................................................................................................
     ({text, chrs, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
-    text = text.replace(/\n/g, ' ');
-    text = text.replace(/\x20{2,}/g, ' ');
+    text = _prepare_text(text);
     width_mm = 100;
     size_mm = 10;
     scale = size_mm / 1000;

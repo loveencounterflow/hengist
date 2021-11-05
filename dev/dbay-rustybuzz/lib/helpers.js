@@ -111,14 +111,22 @@
         chrs = "abcdefghijklm";
         text = "Affirmation字缺TitianիϪSylt.";
         break;
-      case 'medium-eg8i':
+      case 'medium-eg8i-da':
         fontnick = 'eg8i';
         fspath = 'EBGaramond08-Italic.otf';
         chrs = "abcdefghijklm";
         text = `Dansk er et nordisk sprog, også præciseret som østnordisk, i den germanske
 sprogfamilie. Det danske sprog tales af ca. seks millioner mennesker, hovedsageligt i Danmark, men
-også i Sydslesvig (i Flensborg ca. 20 %), på Færøerne og Grønland.[1] Dansk er tæt forbundet med
+også i Sydslesvig (i Flensborg ca. 20 %), på Færøerne og Grønland. Dansk er tæt forbundet med
 norsk og svensk, og sproghistorisk har dansk været stærkt påvirket af plattysk.`;
+        break;
+      case 'medium-eg8i':
+        fontnick = 'eg8i';
+        fspath = 'EBGaramond08-Italic.otf';
+        chrs = "abcdefghijklm";
+        text = `f&shy;f&shy;i f&wbr;f&wbr;i affirmation Danish is a North Germanic language spoken by about six million people, principally in
+Denmark, Greenland, the Faroe Islands and in the region of Southern Schles&shy;wig in northern Germany,
+where it has minority language status.`;
         break;
       case 'small-aleo':
         fontnick = 'aleo';
