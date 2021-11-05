@@ -169,6 +169,21 @@ append_content = ( cfg ) ->
     fontnick
     fspath      } = H.settings_from_set_id set_id
   text            = _prepare_text text
+  debug '^50598^', { segments } = ITXT.SLABS.slabjoints_from_text text
+  collector = []
+  shy       = '\xad'
+  wbr       = '\u200b'
+  for segment in segments
+    [ slab, joint, ] = ITXT.SLABS.text_and_joint_from_segment segment
+    collector.push switch joint
+      when '#' then slab + wbr
+      when '=' then slab.replace /-$/, shy
+      when '°' then slab + ' '
+      else throw new Error "^8064563^ unknown joint #{rpr joint}"
+  text = collector.join ''
+  text = text.replace /\u200b{2,}/g, wbr
+  text = text.replace /\u200b$/, ''
+  text = text.replace /^\u200b/, ''
   width_mm        = 100
   size_mm         = 10
   scale           = size_mm / 1000
