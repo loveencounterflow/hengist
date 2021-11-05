@@ -209,7 +209,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var I, L, Tbl, V, ads, cgid_map, chrs, db, defaults, drb, dtab, fm, fontnick, fspath, known_ods, missing, missing_chrs, missing_pd, missing_sid, new_ods, page, scale, scale_txt, set_id, size_mm, text, width_mm, x0, y0;
+    var I, L, Tbl, V, ads, cgid_map, chrs, collector, db, defaults, drb, dtab, fm, fontnick, fspath, i, joint, known_ods, len, missing, missing_chrs, missing_pd, missing_sid, new_ods, page, scale, scale_txt, segment, segments, set_id, shy, size_mm, slab, text, wbr, width_mm, x0, y0;
     defaults = {
       set_id: 'medium-eg8i'
     };
@@ -234,6 +234,30 @@
     //.........................................................................................................
     ({text, chrs, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
     text = _prepare_text(text);
+    debug('^50598^', ({segments} = ITXT.SLABS.slabjoints_from_text(text)));
+    collector = [];
+    shy = '\xad';
+    wbr = '\u200b';
+    for (i = 0, len = segments.length; i < len; i++) {
+      segment = segments[i];
+      [slab, joint] = ITXT.SLABS.text_and_joint_from_segment(segment);
+      collector.push((function() {
+        switch (joint) {
+          case '#':
+            return slab + wbr;
+          case '=':
+            return slab.replace(/-$/, shy);
+          case '°':
+            return slab + ' ';
+          default:
+            throw new Error(`^8064563^ unknown joint ${rpr(joint)}`);
+        }
+      })());
+    }
+    text = collector.join('');
+    text = text.replace(/\u200b{2,}/g, wbr);
+    text = text.replace(/\u200b$/, '');
+    text = text.replace(/^\u200b/, '');
     width_mm = 100;
     size_mm = 10;
     scale = size_mm / 1000;
