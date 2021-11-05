@@ -33,6 +33,7 @@ H                         = require './helpers'
 template_path             = PATH.resolve PATH.join __dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-page.template.html'
 target_path               = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/html+svg-demos/demo-typeset-sample-page.output.html'
 { to_width }              = require 'to-width'
+ITXT                      = require 'intertext'
 
 
 #-----------------------------------------------------------------------------------------------------------
