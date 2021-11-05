@@ -66,8 +66,23 @@ append_remarks = ( cfg ) ->
   page            = append_to page, 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
 
 #-----------------------------------------------------------------------------------------------------------
-### TAINT use standard method ###
-_escape_for_html_comment  = ( text ) ->   ( text ? '' ).replace /-/g, '&#x2d;'
+### TAINT use standard methods ###
+_prepare_text = ( text ) ->
+  R = text
+  R = R.replace /\n/g, ' '
+  R = R.replace /\x20{2,}/g, ' '
+  R = ITXT.HYPH.hyphenate R
+  R = R.replace /&shy;/g, '\xad'
+  R = R.replace /&wbr;/g, '\u200b'
+  # debug '^9865^', ITXT.HYPH.reveal_hyphens R, '|'; process.exit 1
+  return R
+
+_escape_syms              = ( text ) ->
+  R = text
+  R = R.replace /\xad/g,   '&shy;'
+  R = R.replace /\u200b/g, '&wbr;'
+  return R
+_escape_for_html_comment  = ( text ) ->   ( _escape_syms text ? '' ).replace /--/g, '- -'
 _escape_for_html_text     = ( text ) -> ( ( text ? '' ).replace /&/g, '&amp;' ).replace /</g, '&lt;'
 
 #-----------------------------------------------------------------------------------------------------------
@@ -152,8 +167,7 @@ append_content = ( cfg ) ->
     cgid_map
     fontnick
     fspath      } = H.settings_from_set_id set_id
-  text            = text.replace /\n/g, ' '
-  text            = text.replace /\x20{2,}/g, ' '
+  text            = _prepare_text text
   width_mm        = 100
   size_mm         = 10
   scale           = size_mm / 1000
