@@ -167,7 +167,7 @@ append_content = ( cfg ) ->
     new_ods
     missing_chrs
     ads
-    fm          } = drb.typeset { fontnick, text, known_ods, }
+    fm          } = drb.compose { fontnick, text, known_ods, }
   #.........................................................................................................
   x0    = 0
   y0    = 50
