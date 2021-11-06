@@ -314,20 +314,20 @@
     (async() => {
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
-      // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
-      // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
-      // await @demo_typeset_sample_page { set_id: 'small-aleo', }
-      // await @demo_typeset_sample_page { set_id: 'widechrs', }
-      // await @demo_typeset_sample_page { set_id: 'tibetan', }
-      // await @demo_typeset_sample_page { set_id: 'arabic', }
-      // await @demo_typeset_sample_page { set_id: 'urdu', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'small-djvsi'
+        set_id: 'small-eg8i'
       }));
     })();
   }
 
-  // await @demo_use_linked_rustybuzz_wasm()
+  // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
+// await @demo_typeset_sample_page { set_id: 'small-aleo', }
+// await @demo_typeset_sample_page { set_id: 'widechrs', }
+// await @demo_typeset_sample_page { set_id: 'tibetan', }
+// await @demo_typeset_sample_page { set_id: 'arabic', }
+// await @demo_typeset_sample_page { set_id: 'urdu', }
+// await @demo_typeset_sample_page { set_id: 'small-djvsi', }
+// await @demo_use_linked_rustybuzz_wasm()
 
 }).call(this);
 
