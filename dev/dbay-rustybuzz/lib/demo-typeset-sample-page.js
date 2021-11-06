@@ -135,14 +135,18 @@
   //-----------------------------------------------------------------------------------------------------------
   append_outlines = function(cfg) {
     /* TAINT use standard method */
-    var bottom, chrs_txt, fm, fontnick, known_ods, missing, missing_pd, missing_sid, od, owdth, page, scale, sid, size_mm, swdth, top;
-    ({page, fontnick, size_mm, scale, fm, missing, missing_sid, missing_pd, known_ods} = cfg);
+    var bottom, chrs_txt, fm, fontnick, known_ods, left, missing, missing_pd, missing_sid, od, owdth, page, right, scale, sid, size_mm, swdth, top;
+    ({page, fontnick, size_mm, scale, fm, missing, missing_sid, known_ods} = cfg);
     swdth = 0.5; // stroke width in mm
     swdth *= 1000 * size_mm * scale;
     owdth = 3 * swdth;
     top = fm.ascender - owdth;
     bottom = fm.descender + owdth;
-    page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' class='missing' d='${missing_pd}'/>`);
+    left = Math.round(owdth * 0.5);
+    right = Math.round(1000 - owdth * 0.5);
+    // debug '^432433^', 2
+    missing_pd = `M${left} ${bottom} L${left} ${top} L${right} ${top} L${right} ${bottom}`;
+    page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' class='missing' d='${missing_pd}' transform='skewX(${fm.angle})'/>`);
     page = append_to(page, 'outlines', `<!--SHY--><line id='oshy-${fontnick}' class='fontmetric shy' stroke-width='${swdth}' x1='0' y1='${bottom}' x2='0' y2='${top}' transform='skewX(${fm.angle})'/>`);
     page = append_to(page, 'outlines', `<!--WBR--><line id='owbr-${fontnick}' class='fontmetric wbr' stroke-width='${swdth}' x1='0' y1='${bottom}' x2='0' y2='${top}' transform='skewX(${fm.angle})'/>`);
     for (sid in known_ods) {
@@ -193,7 +197,7 @@
       if (ad.gid === missing.gid) {
         chrs_htxt = _escape_for_html_text(ad.chrs);
         relwdth = ad.dx / 1000/* relative width of missing outline rectangle */
-        element = `<!--${chrs_ctxt}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;' x='${ad.x}' y='${ad.y}'>${chrs_htxt}</text>`;
+        element = `<!--${chrs_ctxt}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;transform:skew(${fm.angle}deg)' x='${ad.x}' y='${ad.y}'>${chrs_htxt}</text>`;
       } else {
         if (ad.y === 0) {
           element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}'/>`;
@@ -226,7 +230,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var I, L, Tbl, V, ads, cgid_map, chrs, collector, db, defaults, drb, dtab, fm, fontnick, fspath, i, joint, known_ods, len, missing, missing_chrs, missing_pd, missing_sid, new_ods, page, scale, scale_txt, segment, segments, set_id, shy, size_mm, slab, text, wbr, width_mm, x0, y0;
+    var I, L, Tbl, V, ads, cgid_map, chrs, collector, db, defaults, drb, dtab, fm, fontnick, fspath, i, joint, known_ods, len, missing, missing_chrs, missing_sid, new_ods, page, scale, scale_txt, segment, segments, set_id, shy, size_mm, slab, text, wbr, width_mm, x0, y0;
     defaults = {
       set_id: 'medium-eg8i'
     };
@@ -284,7 +288,7 @@
     scale_txt = scale.toFixed(4);
     ({missing} = Drb.C);
     missing_sid = `o0${fontnick}`;
-    missing_pd = 'M0 200 L0-800 L900-800 L900 200';
+    debug('^53453^');
     known_ods = {
       [missing_sid]: {
         gid: missing.gid,
@@ -301,7 +305,7 @@
     x0 = 0;
     y0 = 50;
     page = append_remarks({page, fm, missing_chrs});
-    page = append_outlines({page, fontnick, size_mm, scale, fm, missing, missing_sid, missing_pd, known_ods});
+    page = append_outlines({page, fontnick, size_mm, scale, fm, missing, missing_sid, known_ods});
     page = append_content({page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid});
     // page  = append_used_outlines_overview page
     //.........................................................................................................
