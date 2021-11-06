@@ -237,7 +237,7 @@ strategy will be to see this software will work in *both* Chromish and Firefoxis
 ## Font Design Size
 
 * fixed at 1000⨉1000
-* only intzeger steps, no decimal fractions
+* only integer steps, no decimal fractions
 * should be good enough
 * numbers are human-readable, coordinate pairs like `( 560, 2000 )` are immediately intelligible (although a
   hundred lines / ems à 1000 units gives `y = 100000` which is far more readable with thousands separator, `y =
