@@ -143,8 +143,8 @@
     top = fm.ascender - owdth;
     bottom = fm.descender + owdth;
     page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' class='missing' d='${missing_pd}'/>`);
-    page = append_to(page, 'outlines', `<!--SHY--><line id='oshy-${fontnick}' class='fontmetric shy' stroke-width='${swdth}' x1='0' y1='${bottom}' x2='0' y2='${top}'/>`);
-    page = append_to(page, 'outlines', `<!--WBR--><line id='owbr-${fontnick}' class='fontmetric wbr' stroke-width='${swdth}' x1='0' y1='${bottom}' x2='0' y2='${top}'/>`);
+    page = append_to(page, 'outlines', `<!--SHY--><line id='oshy-${fontnick}' class='fontmetric shy' stroke-width='${swdth}' x1='0' y1='${bottom}' x2='0' y2='${top}' transform='skewX(${fm.angle})'/>`);
+    page = append_to(page, 'outlines', `<!--WBR--><line id='owbr-${fontnick}' class='fontmetric wbr' stroke-width='${swdth}' x1='0' y1='${bottom}' x2='0' y2='${top}' transform='skewX(${fm.angle})'/>`);
     for (sid in known_ods) {
       od = known_ods[sid];
       if (od.gid === missing.gid) {
