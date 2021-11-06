@@ -90,8 +90,15 @@ _escape_for_html_text     = ( text ) -> ( ( text ? '' ).replace /&/g, '&amp;' ).
 
 #-----------------------------------------------------------------------------------------------------------
 append_outlines = ( cfg ) ->
-  { page, missing, missing_sid, missing_pd, known_ods, } = cfg
+  { page, size_mm, scale, fm, missing, missing_sid, missing_pd, known_ods, } = cfg
+  swdth   = 0.5 # stroke width in mm
+  swdth  *= 1000 * size_mm * scale
+  owdth   = 3 * swdth
+  top     = fm.ascender  - owdth
+  bottom  = fm.descender + owdth
   page = append_to page, 'outlines', "<!--NULL--><path id='#{missing_sid}' class='missing' d='#{missing_pd}'/>"
+  page = append_to page, 'outlines', "<!--SHY--><line id='o-shy' class='fontmetric shy' stroke-width='#{swdth}' x1='0' y1='#{bottom}' x2='0' y2='#{top}'/>"
+  page = append_to page, 'outlines', "<!--WBR--><line id='o-wbr' class='fontmetric wbr' stroke-width='#{swdth}' x1='0' y1='#{bottom}' x2='0' y2='#{top}'/>"
   for sid, od of known_ods
     continue if od.gid is missing.gid
     ### TAINT use standard method ###
@@ -100,8 +107,8 @@ append_outlines = ( cfg ) ->
   return page
 
 #-----------------------------------------------------------------------------------------------------------
-append_content_fontmetrics = ( cfg ) ->
-  { page, x0, y0, size_mm, scale, fm, } = cfg
+_append_fontmetrics = ( cfg ) ->
+  { page, size_mm, scale, fm, } = cfg
   swdth   = 0.25 # stroke width in mm
   swdth  *= 1000 * size_mm * scale
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
@@ -111,11 +118,17 @@ append_content_fontmetrics = ( cfg ) ->
   return page
 
 #-----------------------------------------------------------------------------------------------------------
+_append_breakpoint = ( cfg ) ->
+  { page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid, } = cfg
+  page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
+  return page
+
+#-----------------------------------------------------------------------------------------------------------
 append_content = ( cfg ) ->
   { page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid, } = cfg
   page        = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
   page        = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
-  page        = append_content_fontmetrics { page, x0, y0, size_mm, scale, fm, }
+  page        = _append_fontmetrics { page, size_mm, scale, fm, }
   for ad in ads
     ### TAINT use standard method ###
     chrs_ctxt = _escape_for_html_comment ad.chrs
@@ -208,7 +221,7 @@ append_content = ( cfg ) ->
   x0    = 0
   y0    = 50
   page  = append_remarks  { page, fm, missing_chrs, }
-  page  = append_outlines { page, missing, missing_sid, missing_pd, known_ods, }
+  page  = append_outlines { page, size_mm, scale, fm, missing, missing_sid, missing_pd, known_ods, }
   page  = append_content  { page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid, }
   # page  = append_used_outlines_overview page
   #.........................................................................................................
@@ -221,13 +234,13 @@ if require.main is module then do =>
   # await @demo_store_outlines()
   # await @demo_store_outlines { set_id: 'all', }
   # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
-  await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
+  # await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'small-aleo', }
   # await @demo_typeset_sample_page { set_id: 'widechrs', }
   # await @demo_typeset_sample_page { set_id: 'tibetan', }
   # await @demo_typeset_sample_page { set_id: 'arabic', }
   # await @demo_typeset_sample_page { set_id: 'urdu', }
-  # await @demo_typeset_sample_page { set_id: 'small-djvsi', }
+  await @demo_typeset_sample_page { set_id: 'small-djvsi', }
   # await @demo_use_linked_rustybuzz_wasm()
 
 
