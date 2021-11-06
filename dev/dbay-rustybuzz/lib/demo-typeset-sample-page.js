@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_breakpoint, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, _prepare_text, append_content, append_outlines, append_remarks, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_grid_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_breakpoint, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, _prepare_text, append_content, append_outlines, append_remarks, append_to, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -48,7 +48,7 @@
 
   template_path = PATH.resolve(PATH.join(__dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-page.template.html'));
 
-  template_grid_path = PATH.resolve(PATH.join(__dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-cmgrid.template.html'));
+  cm_grid_path = PATH.resolve(PATH.join(__dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-cmgrid.svg'));
 
   target_path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/html+svg-demos/demo-typeset-sample-page.output.html'));
 
@@ -247,7 +247,7 @@
     page = FS.readFileSync(template_path, {
       encoding: 'utf-8'
     });
-    page = append_to(page, 'grid', FS.readFileSync(template_grid_path, {
+    page = append_to(page, 'grid', FS.readFileSync(cm_grid_path, {
       encoding: 'utf-8'
     }));
     ({I, L, V} = db.sql);
@@ -315,19 +315,19 @@
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
       // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+      // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
+      // await @demo_typeset_sample_page { set_id: 'small-aleo', }
+      // await @demo_typeset_sample_page { set_id: 'widechrs', }
+      // await @demo_typeset_sample_page { set_id: 'tibetan', }
+      // await @demo_typeset_sample_page { set_id: 'arabic', }
+      // await @demo_typeset_sample_page { set_id: 'urdu', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'medium-eg8i'
+        set_id: 'small-djvsi'
       }));
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'small-aleo', }
-// await @demo_typeset_sample_page { set_id: 'widechrs', }
-// await @demo_typeset_sample_page { set_id: 'tibetan', }
-// await @demo_typeset_sample_page { set_id: 'arabic', }
-// await @demo_typeset_sample_page { set_id: 'urdu', }
-// await @demo_typeset_sample_page { set_id: 'small-djvsi', }
-// await @demo_use_linked_rustybuzz_wasm()
+  // await @demo_use_linked_rustybuzz_wasm()
 
 }).call(this);
 
