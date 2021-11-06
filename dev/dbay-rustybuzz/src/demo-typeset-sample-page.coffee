@@ -31,7 +31,9 @@ H                         = require './helpers'
 { DBay }                  = require H.dbay_path
 { Drb }                   = require H.drb_path
 template_path             = PATH.resolve PATH.join __dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-page.template.html'
+template_grid_path        = PATH.resolve PATH.join __dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-cmgrid.template.html'
 target_path               = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/html+svg-demos/demo-typeset-sample-page.output.html'
+
 { to_width }              = require 'to-width'
 ITXT                      = require 'intertext'
 
@@ -161,6 +163,7 @@ append_content = ( cfg ) ->
   drb             = new Drb { db, rebuild: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
   dtab            = new Tbl { db, }
   page            = FS.readFileSync template_path, { encoding: 'utf-8', }
+  page            = append_to page, 'grid', FS.readFileSync template_grid_path, { encoding: 'utf-8', }
   { I, L, V }     = db.sql
   #.........................................................................................................
   { text
