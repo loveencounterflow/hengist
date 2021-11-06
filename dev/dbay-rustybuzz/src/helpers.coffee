@@ -109,7 +109,7 @@ do =>
       fontnick  = 'djvsi'
       fspath    = 'DejaVuSerif-Italic.ttf'
       chrs      = "abcdefghijklm"
-      text      = "Affirmation字缺TitianիϪSylt."
+      text      = "Af&shy;&shy;&wbr;firmation字缺TitianիϪSylt."
     when 'widechrs'
       fontnick  = 'sfb'
       fspath    = 'sunflower-u-cjk-xb.ttf'
