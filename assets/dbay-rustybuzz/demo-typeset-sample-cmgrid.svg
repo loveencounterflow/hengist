@@ -1,7 +1,8 @@
-<svg class='svg-grid' viewBox='0 0 100 100' overflow='visible'>
+<?xml version="1.0" standalone="no"?>
+<svg class='svg-grid' viewBox='0 0 210 297' overflow='visible' xmlns="http://www.w3.org/2000/svg">
   <style>
-    .svg-grid {
-      display:                none; }
+    /*.svg-grid {*/
+      /*display:                none; }*/
 
     .gridh, .gridv {
       mix-blend-mode:         multiply; }
