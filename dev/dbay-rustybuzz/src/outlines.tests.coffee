@@ -209,6 +209,38 @@ guy                       = require '../../../apps/guy'
       T.ok false
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DRB get_font_metrics()" ] = ( T, done ) ->
+  # ### explicit path, explicitly temporary ###
+  # T?.halt_on_error()
+  # { DBay }            = require H.dbay_path
+  RBW                 = null
+  # RBW                 = require '../../../apps/rustybuzz-wasm/pkg'
+  { DBay }            = require H.dbay_path
+  { Drb }             = require H.drb_path
+  { Tbl, }            = require '../../../apps/icql-dba-tabulate'
+  # path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
+  # DH                  = require PATH.join H.dbay_path, 'lib/helpers'
+  matcher             =
+    ascender:           -710
+    capital_height:     -664
+    descender:          290
+    scale:              1
+    units_per_em:       1000
+    x_height:           -400
+    angle:              -17
+  #.........................................................................................................
+  db          = new DBay()
+  dtab        = new Tbl { db, }
+  drb         = new Drb { db, RBW, temporary: true, }
+  fontnick    = 'gi'
+  drb.prepare_font { fontnick, }
+  fm          = drb.get_font_metrics { fontnick, }
+  urge '^6464^', fm
+  T?.eq fm, matcher
+  #.........................................................................................................
+  # cgid_map            = drb.get_cgid_map { fontnick, chrs, }
+  return done?()
 
 
 
@@ -223,5 +255,6 @@ if require.main is module then do =>
   # test @[ "DRB get_cgid_map()" ]
   # @[ "DRB insert_outlines()" ]()
   # test @[ "DRB RBW shape_text() returns coordinates acc to font upem" ]
-  test @[ "DRB RBW shape_text() honors missing outlines" ]
+  # test @[ "DRB RBW shape_text() honors missing outlines" ]
+  test @[ "DRB get_font_metrics()" ]
   # test @[ "DRB insert_outlines()" ]
