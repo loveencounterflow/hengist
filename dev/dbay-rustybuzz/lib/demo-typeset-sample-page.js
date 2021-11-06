@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _escape_for_html_comment, _escape_for_html_text, _escape_syms, _prepare_text, append_content, append_content_fontmetrics, append_outlines, append_remarks, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _escape_for_html_comment, _escape_for_html_text, _escape_syms, _prepare_text, append_content, append_content_fontmetrics, append_outlines, append_remarks, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_grid_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -47,6 +47,8 @@
   ({Drb} = require(H.drb_path));
 
   template_path = PATH.resolve(PATH.join(__dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-page.template.html'));
+
+  template_grid_path = PATH.resolve(PATH.join(__dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-cmgrid.template.html'));
 
   target_path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/html+svg-demos/demo-typeset-sample-page.output.html'));
 
@@ -230,6 +232,9 @@
     page = FS.readFileSync(template_path, {
       encoding: 'utf-8'
     });
+    page = append_to(page, 'grid', FS.readFileSync(template_grid_path, {
+      encoding: 'utf-8'
+    }));
     ({I, L, V} = db.sql);
     //.........................................................................................................
     ({text, chrs, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
