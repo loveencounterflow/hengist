@@ -1,0 +1,79 @@
+<!doctype html>
+
+<title>SVG with glyph outlines</title>
+<style>
+  body {
+    background-color:       #96f0c93b;
+    transform-origin:       0px 0px 0px;
+    transform:              scale(1.4157,1.4157);
+  }
+
+  #defs {
+    display:                none; }
+
+  .svg-grid,
+  #x-cm-grid {
+    display:                none; }
+
+  .show-grid #x-cm-grid {
+    opacity:                0.5;
+    display:                block; }
+
+  .reveal-blocks .galley {                      /* debugging */
+    outline:                1px dotted blue;
+    overflow:               visible; }
+
+  .galley.A4 {
+    width:                  210mm;
+    height:                 297mm; }
+
+  #cm-grid-obj {
+    position:               absolute;
+    margin:                 0;
+    padding:                0;
+    width:                  210mm;
+    height:                 297mm;
+  }
+
+  #cm-grid-img {
+    position:               absolute;
+    margin:                 0;
+    padding:                0;
+    width:                  210mm;
+    height:                 297mm;
+    opacity:                0.5; }
+
+  line {
+    mix-blend-mode:         multiply;
+    opacity:                0.5; }
+
+  .a { stroke: goldenrod; }
+  .b { stroke: cornflowerblue; }
+  .c { stroke: purple; }
+
+  </style>
+
+<body class='reveal-blocks show-grid'>
+
+<svg id='defs' viewBox='0 0 1000 1000' overflow='visible'>
+
+</svg>
+
+<h1>SVG Def, Use, Transform</h1>
+<img id='cm-grid-img' src='./assets/dbay-rustybuzz/demo-typeset-sample-cmgrid.svg'>
+
+<!-- <svg id=p0001 class='galley A4' viewBox='0 0 210 297'> -->
+<svg id=p0001 class='galley A4' viewBox='0 0 420 594'>
+<defs>
+  </defs>
+  <line id='l1' style='stroke-width:1px;' class='a' x1='0' y1='0' x2='0', y2='50'/>
+  <line id='l2' style='stroke-width:1mm;' class='b' x1='0' y1='0' x2='0', y2='50'/>
+  <line id='l3' style='stroke-width:10;' class='c' x1='0' y1='0' x2='0', y2='50'/>
+
+<use href='#l1' x='50' y='10' transform='skewX(-10)'/>
+<use href='#l2' x='50' y='15' transform='skewX(-10)'/>
+<use href='#l3' x='50' y='20' transform='skewX(-10)'/>
+
+</svg>
+
+</body>
