@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _escape_for_html_comment, _escape_for_html_text, _escape_syms, _prepare_text, append_content, append_content_fontmetrics, append_outlines, append_remarks, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_grid_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_breakpoint, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, _prepare_text, append_content, append_outlines, append_remarks, append_to, badge, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_grid_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -135,9 +135,16 @@
   //-----------------------------------------------------------------------------------------------------------
   append_outlines = function(cfg) {
     /* TAINT use standard method */
-    var chrs_txt, known_ods, missing, missing_pd, missing_sid, od, page, sid;
-    ({page, missing, missing_sid, missing_pd, known_ods} = cfg);
+    var bottom, chrs_txt, fm, known_ods, missing, missing_pd, missing_sid, od, owdth, page, scale, sid, size_mm, swdth, top;
+    ({page, size_mm, scale, fm, missing, missing_sid, missing_pd, known_ods} = cfg);
+    swdth = 0.5; // stroke width in mm
+    swdth *= 1000 * size_mm * scale;
+    owdth = 3 * swdth;
+    top = fm.ascender - owdth;
+    bottom = fm.descender + owdth;
     page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' class='missing' d='${missing_pd}'/>`);
+    page = append_to(page, 'outlines', `<!--SHY--><line id='o-shy' class='fontmetric shy' stroke-width='${swdth}' x1='0' y1='${bottom}' x2='0' y2='${top}'/>`);
+    page = append_to(page, 'outlines', `<!--WBR--><line id='o-wbr' class='fontmetric wbr' stroke-width='${swdth}' x1='0' y1='${bottom}' x2='0' y2='${top}'/>`);
     for (sid in known_ods) {
       od = known_ods[sid];
       if (od.gid === missing.gid) {
@@ -150,15 +157,23 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  append_content_fontmetrics = function(cfg) {
-    var fm, page, scale, size_mm, swdth, x0, y0;
-    ({page, x0, y0, size_mm, scale, fm} = cfg);
+  _append_fontmetrics = function(cfg) {
+    var fm, page, scale, size_mm, swdth;
+    ({page, size_mm, scale, fm} = cfg);
     swdth = 0.25; // stroke width in mm
     swdth *= 1000 * size_mm * scale;
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`);
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.descender}' x2='10000' y2='${fm.descender}'/>`);
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.x_height}' x2='10000' y2='${fm.x_height}'/>`);
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.capital_height}' x2='10000' y2='${fm.capital_height}'/>`);
+    return page;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  _append_breakpoint = function(cfg) {
+    var ads, fm, missing, missing_sid, page, scale, scale_txt, size_mm, text, x0, y0;
+    ({page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid} = cfg);
+    page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`);
     return page;
   };
 
@@ -171,7 +186,7 @@
     ({page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid} = cfg);
     page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
     page = append_to(page, 'content', `<g transform='translate(${x0} ${y0}) scale(${scale_txt})'>`);
-    page = append_content_fontmetrics({page, x0, y0, size_mm, scale, fm});
+    page = _append_fontmetrics({page, size_mm, scale, fm});
     for (i = 0, len = ads.length; i < len; i++) {
       ad = ads[i];
       chrs_ctxt = _escape_for_html_comment(ad.chrs);
@@ -286,7 +301,7 @@
     x0 = 0;
     y0 = 50;
     page = append_remarks({page, fm, missing_chrs});
-    page = append_outlines({page, missing, missing_sid, missing_pd, known_ods});
+    page = append_outlines({page, size_mm, scale, fm, missing, missing_sid, missing_pd, known_ods});
     page = append_content({page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid});
     // page  = append_used_outlines_overview page
     //.........................................................................................................
@@ -300,19 +315,19 @@
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
       // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+      // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
+      // await @demo_typeset_sample_page { set_id: 'small-aleo', }
+      // await @demo_typeset_sample_page { set_id: 'widechrs', }
+      // await @demo_typeset_sample_page { set_id: 'tibetan', }
+      // await @demo_typeset_sample_page { set_id: 'arabic', }
+      // await @demo_typeset_sample_page { set_id: 'urdu', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'medium-eg8i'
+        set_id: 'small-djvsi'
       }));
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'small-aleo', }
-// await @demo_typeset_sample_page { set_id: 'widechrs', }
-// await @demo_typeset_sample_page { set_id: 'tibetan', }
-// await @demo_typeset_sample_page { set_id: 'arabic', }
-// await @demo_typeset_sample_page { set_id: 'urdu', }
-// await @demo_typeset_sample_page { set_id: 'small-djvsi', }
-// await @demo_use_linked_rustybuzz_wasm()
+  // await @demo_use_linked_rustybuzz_wasm()
 
 }).call(this);
 

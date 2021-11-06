@@ -138,7 +138,7 @@ where it has minority language status.`;
         fontnick = 'djvsi';
         fspath = 'DejaVuSerif-Italic.ttf';
         chrs = "abcdefghijklm";
-        text = "Affirmation字缺TitianիϪSylt.";
+        text = "Af&shy;&shy;&wbr;firmation字缺TitianիϪSylt.";
         break;
       case 'widechrs':
         fontnick = 'sfb';
