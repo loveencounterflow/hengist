@@ -232,7 +232,7 @@
   this.demo_typeset_sample_page = function(cfg) {
     /* TAINT make this a method */
     /* TAINT use constants */
-    var I, L, Tbl, V, ad, ad_br, ads, cgid_map, chrs, collector, db, defaults, drb, dtab, fm, fontnick, fspath, i, j, joint, known_ods, lads, len, len1, line, line_text, lines, missing, missing_chrs, missing_sid, mm_p_u, mm_p_u_txt, new_ods, page, segment, segments, set_id, shy, size_mm, slab, text, wbr, width_mm;
+    var I, L, Tbl, V, ad, ad_br, ads, cgid_map, chrs, collector, db, defaults, drb, dtab, fm, fontnick, fspath, i, j, joint, known_ods, lads, len, len1, line, line_text, lines, missing, missing_chrs, missing_sid, mm_p_u, mm_p_u_txt, new_ods, page, segment, segments, set_id, shy, size_mm, slab, text, wbr, width_mm, x0, y0;
     defaults = {
       set_id: 'medium-eg8i'
     };
@@ -306,11 +306,11 @@
     drb.prepare_font({fontnick});
     ({known_ods, new_ods, missing_chrs, ads, fm} = drb.compose({fontnick, text, known_ods}));
     //.........................................................................................................
-    // x0    = 0
-    // y0    = 50
-    // page  = append_remarks  { page, fm, missing_chrs, }
-    // page  = append_outlines { page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods, }
-    // page  = append_content  { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, }
+    x0 = 0;
+    y0 = 50;
+    page = append_remarks({page, fm, missing_chrs});
+    page = append_outlines({page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods});
+    page = append_content({page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid});
     ({lines} = drb.distribute({ads, mm_p_u, width_mm}));
 // for ad in ads
 //   urge '^3980^', ad
@@ -350,7 +350,8 @@
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'short-eg12i', }
+  // await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
+// await @demo_typeset_sample_page { set_id: 'short-eg12i', }
 // await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
 // await @demo_typeset_sample_page { set_id: 'small-aleo', }
 // await @demo_typeset_sample_page { set_id: 'widechrs', }
