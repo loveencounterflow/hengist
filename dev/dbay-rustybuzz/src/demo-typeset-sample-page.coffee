@@ -90,9 +90,9 @@ _escape_for_html_text     = ( text ) -> ( ( text ? '' ).replace /&/g, '&amp;' ).
 
 #-----------------------------------------------------------------------------------------------------------
 append_outlines = ( cfg ) ->
-  { page, fontnick, size_mm, scale, fm, missing, missing_sid, known_ods, } = cfg
+  { page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods, } = cfg
   swdth       = 0.5 # stroke width in mm
-  swdth      *= 1000 * size_mm * scale
+  swdth      *= 1000 * size_mm * mm_p_u
   owdth       = 3 * swdth
   top         = fm.ascender  - owdth
   bottom      = fm.descender + owdth
@@ -112,9 +112,9 @@ append_outlines = ( cfg ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 _append_fontmetrics = ( cfg ) ->
-  { page, size_mm, scale, fm, } = cfg
+  { page, size_mm, mm_p_u, fm, } = cfg
   swdth   = 0.25 # stroke width in mm
-  swdth  *= 1000 * size_mm * scale
+  swdth  *= 1000 * size_mm * mm_p_u
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.descender}' x2='10000' y2='#{fm.descender}'/>"
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.x_height}' x2='10000' y2='#{fm.x_height}'/>"
@@ -123,16 +123,16 @@ _append_fontmetrics = ( cfg ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 _append_breakpoint = ( cfg ) ->
-  { page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid, } = cfg
+  { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, } = cfg
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
   return page
 
 #-----------------------------------------------------------------------------------------------------------
 append_content = ( cfg ) ->
-  { page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid, } = cfg
+  { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, } = cfg
   page        = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
-  page        = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
-  page        = _append_fontmetrics { page, size_mm, scale, fm, }
+  page        = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{mm_p_u_txt})'>"
+  page        = _append_fontmetrics { page, size_mm, mm_p_u, fm, }
   for ad in ads
     ### TAINT use standard method ###
     chrs_ctxt = _escape_for_html_comment ad.chrs
@@ -155,9 +155,9 @@ append_content = ( cfg ) ->
 #   x0      = 0
 #   y0      = 70
 #   swdth   = 0.25 # stroke width in mm
-#   swdth  *= 1000 * size_mm * scale
-#   page    = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
-#   dx      = 1000 * 100 * scale
+#   swdth  *= 1000 * size_mm * mm_p_u
+#   page    = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{mm_p_u_txt})'>"
+#   dx      = 1000 * 100 * mm_p_u
 #   x       = -dx
 #   for od from db SQL"select * from drb.outlines where fontnick = $fontnick order by sid;", { fontnick, }
 #     x    += dx
@@ -189,7 +189,10 @@ append_content = ( cfg ) ->
     fontnick
     fspath      } = H.settings_from_set_id set_id
   text            = _prepare_text text
-  debug '^50598^', { segments } = ITXT.SLABS.slabjoints_from_text text
+  #---------------------------------------------------------------------------------------------------------
+  { segments }    = ITXT.SLABS.slabjoints_from_text text
+  ### TAINT make this a method ###
+  ### TAINT use constants ###
   collector = []
   shy       = '\xad'
   wbr       = '\u200b'
@@ -204,13 +207,14 @@ append_content = ( cfg ) ->
   text = text.replace /\u200b{2,}/g, wbr
   text = text.replace /\u200b$/, ''
   text = text.replace /^\u200b/, ''
+  #---------------------------------------------------------------------------------------------------------
+  { segments }    = ITXT.SLABS.slabjoints_from_text text
   width_mm        = 100
   size_mm         = 10
-  scale           = size_mm / 1000
-  scale_txt       = scale.toFixed 4
+  mm_p_u          = size_mm / 1000 # mm per unit as valid inside scaled `<g>` line element
+  mm_p_u_txt      = mm_p_u.toFixed 4
   { missing }     = Drb.C
   missing_sid     = "o0#{fontnick}"
-  debug '^53453^'
   known_ods       = { [missing_sid]: { gid: missing.gid, sid: missing_sid, fontnick, }, }
   #.........................................................................................................
   ### Register, load and prepopulate font: ###
@@ -222,11 +226,14 @@ append_content = ( cfg ) ->
     ads
     fm          } = drb.compose { fontnick, text, known_ods, }
   #.........................................................................................................
-  x0    = 0
-  y0    = 50
-  page  = append_remarks  { page, fm, missing_chrs, }
-  page  = append_outlines { page, fontnick, size_mm, scale, fm, missing, missing_sid, known_ods, }
-  page  = append_content  { page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid, }
+  # x0    = 0
+  # y0    = 50
+  # page  = append_remarks  { page, fm, missing_chrs, }
+  # page  = append_outlines { page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods, }
+  # page  = append_content  { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, }
+  lines = drb.distribute { ads, mm_p_u, width_mm, }
+  for line in lines
+    debug '^3980^', ( ad.chrs for ad in line ).join '|'
   # page  = append_used_outlines_overview page
   #.........................................................................................................
   FS.writeFileSync target_path, page
@@ -237,8 +244,10 @@ append_content = ( cfg ) ->
 if require.main is module then do =>
   # await @demo_store_outlines()
   # await @demo_store_outlines { set_id: 'all', }
-  await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+  # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
+  await @demo_typeset_sample_page { set_id: 'short-eg12i', }
+  # await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
   # await @demo_typeset_sample_page { set_id: 'small-aleo', }
   # await @demo_typeset_sample_page { set_id: 'widechrs', }
   # await @demo_typeset_sample_page { set_id: 'tibetan', }
