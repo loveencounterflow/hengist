@@ -135,10 +135,10 @@
   //-----------------------------------------------------------------------------------------------------------
   append_outlines = function(cfg) {
     /* TAINT use standard method */
-    var bottom, chrs_txt, fm, fontnick, known_ods, left, missing, missing_pd, missing_sid, od, owdth, page, right, scale, sid, size_mm, swdth, top;
-    ({page, fontnick, size_mm, scale, fm, missing, missing_sid, known_ods} = cfg);
+    var bottom, chrs_txt, fm, fontnick, known_ods, left, missing, missing_pd, missing_sid, mm_p_u, od, owdth, page, right, sid, size_mm, swdth, top;
+    ({page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods} = cfg);
     swdth = 0.5; // stroke width in mm
-    swdth *= 1000 * size_mm * scale;
+    swdth *= 1000 * size_mm * mm_p_u;
     owdth = 3 * swdth;
     top = fm.ascender - owdth;
     bottom = fm.descender + owdth;
@@ -162,10 +162,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   _append_fontmetrics = function(cfg) {
-    var fm, page, scale, size_mm, swdth;
-    ({page, size_mm, scale, fm} = cfg);
+    var fm, mm_p_u, page, size_mm, swdth;
+    ({page, size_mm, mm_p_u, fm} = cfg);
     swdth = 0.25; // stroke width in mm
-    swdth *= 1000 * size_mm * scale;
+    swdth *= 1000 * size_mm * mm_p_u;
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`);
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.descender}' x2='10000' y2='${fm.descender}'/>`);
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.x_height}' x2='10000' y2='${fm.x_height}'/>`);
@@ -175,8 +175,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   _append_breakpoint = function(cfg) {
-    var ads, fm, missing, missing_sid, page, scale, scale_txt, size_mm, text, x0, y0;
-    ({page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid} = cfg);
+    var ads, fm, missing, missing_sid, mm_p_u, mm_p_u_txt, page, size_mm, text, x0, y0;
+    ({page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`);
     return page;
   };
@@ -186,11 +186,11 @@
     /* TAINT use standard method */
     /* TAINT use standard method */
     /* TAINT must escape `d.chrs` */
-    var ad, ads, chrs_ctxt, chrs_htxt, element, fm, i, len, missing, missing_sid, page, relwdth, scale, scale_txt, size_mm, text, x0, y0;
-    ({page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid} = cfg);
+    var ad, ads, chrs_ctxt, chrs_htxt, element, fm, i, len, missing, missing_sid, mm_p_u, mm_p_u_txt, page, relwdth, size_mm, text, x0, y0;
+    ({page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
     page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
-    page = append_to(page, 'content', `<g transform='translate(${x0} ${y0}) scale(${scale_txt})'>`);
-    page = _append_fontmetrics({page, size_mm, scale, fm});
+    page = append_to(page, 'content', `<g transform='translate(${x0} ${y0}) scale(${mm_p_u_txt})'>`);
+    page = _append_fontmetrics({page, size_mm, mm_p_u, fm});
     for (i = 0, len = ads.length; i < len; i++) {
       ad = ads[i];
       chrs_ctxt = _escape_for_html_comment(ad.chrs);
@@ -216,9 +216,9 @@
   //   x0      = 0
   //   y0      = 70
   //   swdth   = 0.25 # stroke width in mm
-  //   swdth  *= 1000 * size_mm * scale
-  //   page    = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{scale_txt})'>"
-  //   dx      = 1000 * 100 * scale
+  //   swdth  *= 1000 * size_mm * mm_p_u
+  //   page    = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{mm_p_u_txt})'>"
+  //   dx      = 1000 * 100 * mm_p_u
   //   x       = -dx
   //   for od from db SQL"select * from drb.outlines where fontnick = $fontnick order by sid;", { fontnick, }
   //     x    += dx
@@ -230,7 +230,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var I, L, Tbl, V, ads, cgid_map, chrs, collector, db, defaults, drb, dtab, fm, fontnick, fspath, i, joint, known_ods, len, missing, missing_chrs, missing_sid, new_ods, page, scale, scale_txt, segment, segments, set_id, shy, size_mm, slab, text, wbr, width_mm, x0, y0;
+    /* TAINT make this a method */
+    /* TAINT use constants */
+    var I, L, Tbl, V, ad, ads, cgid_map, chrs, collector, db, defaults, drb, dtab, fm, fontnick, fspath, i, j, joint, known_ods, len, len1, line, lines, missing, missing_chrs, missing_sid, mm_p_u, mm_p_u_txt, new_ods, page, segment, segments, set_id, shy, size_mm, slab, text, wbr, width_mm;
     defaults = {
       set_id: 'medium-eg8i'
     };
@@ -258,7 +260,8 @@
     //.........................................................................................................
     ({text, chrs, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
     text = _prepare_text(text);
-    debug('^50598^', ({segments} = ITXT.SLABS.slabjoints_from_text(text)));
+    //---------------------------------------------------------------------------------------------------------
+    ({segments} = ITXT.SLABS.slabjoints_from_text(text));
     collector = [];
     shy = '\xad';
     wbr = '\u200b';
@@ -282,13 +285,14 @@
     text = text.replace(/\u200b{2,}/g, wbr);
     text = text.replace(/\u200b$/, '');
     text = text.replace(/^\u200b/, '');
+    //---------------------------------------------------------------------------------------------------------
+    ({segments} = ITXT.SLABS.slabjoints_from_text(text));
     width_mm = 100;
     size_mm = 10;
-    scale = size_mm / 1000;
-    scale_txt = scale.toFixed(4);
+    mm_p_u = size_mm / 1000; // mm per unit as valid inside scaled `<g>` line element
+    mm_p_u_txt = mm_p_u.toFixed(4);
     ({missing} = Drb.C);
     missing_sid = `o0${fontnick}`;
-    debug('^53453^');
     known_ods = {
       [missing_sid]: {
         gid: missing.gid,
@@ -302,11 +306,24 @@
     drb.prepare_font({fontnick});
     ({known_ods, new_ods, missing_chrs, ads, fm} = drb.compose({fontnick, text, known_ods}));
     //.........................................................................................................
-    x0 = 0;
-    y0 = 50;
-    page = append_remarks({page, fm, missing_chrs});
-    page = append_outlines({page, fontnick, size_mm, scale, fm, missing, missing_sid, known_ods});
-    page = append_content({page, x0, y0, size_mm, scale, scale_txt, fm, text, ads, missing, missing_sid});
+    // x0    = 0
+    // y0    = 50
+    // page  = append_remarks  { page, fm, missing_chrs, }
+    // page  = append_outlines { page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods, }
+    // page  = append_content  { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, }
+    lines = drb.distribute({ads, mm_p_u, width_mm});
+    for (j = 0, len1 = lines.length; j < len1; j++) {
+      line = lines[j];
+      debug('^3980^', ((function() {
+        var k, len2, results;
+        results = [];
+        for (k = 0, len2 = line.length; k < len2; k++) {
+          ad = line[k];
+          results.push(ad.chrs);
+        }
+        return results;
+      })()).join('|'));
+    }
     // page  = append_used_outlines_overview page
     //.........................................................................................................
     FS.writeFileSync(target_path, page);
@@ -318,13 +335,15 @@
     (async() => {
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
+      // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+      // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'small-eg8i'
+        set_id: 'short-eg12i'
       }));
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
+  // await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
 // await @demo_typeset_sample_page { set_id: 'small-aleo', }
 // await @demo_typeset_sample_page { set_id: 'widechrs', }
 // await @demo_typeset_sample_page { set_id: 'tibetan', }

@@ -128,6 +128,20 @@ norsk og svensk, og sproghistorisk har dansk været stærkt påvirket af plattys
 Denmark, Greenland, the Faroe Islands and in the region of Southern Schles&shy;wig in northern Germany,
 where it has minority language status.`;
         break;
+      case 'medium-eg12i':
+        fontnick = 'eg12i';
+        fspath = 'EBGaramond12-Italic.otf';
+        chrs = "abcdefghijklm";
+        text = `f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language spoken by about six million people, principally in
+Denmark, Greenland, the Faroe Islands and in the region of Southern Schles&shy;wig in northern Germany,
+where it has minority language status.`;
+        break;
+      case 'short-eg12i':
+        fontnick = 'eg12i';
+        fspath = 'EBGaramond12-Italic.otf';
+        chrs = "abcdefghijklm";
+        text = `f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language.`;
+        break;
       case 'small-aleo':
         fontnick = 'aleo';
         fspath = 'Aleo_font_v1.2.2/Desktop OTF/Aleo-Italic.otf';
