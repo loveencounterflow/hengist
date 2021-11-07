@@ -201,7 +201,7 @@
           b: 0,
           x: 0,
           y: 0,
-          dx: 596.2,
+          dx: 596,
           dy: 0,
           chrs: 'a',
           sid: 'o68djvsi'
@@ -279,7 +279,8 @@
         dx: 243,
         dy: 0,
         chrs: ' ',
-        sid: 'o1eg8i'
+        sid: 'o1eg8i',
+        br: 'spc'
       },
       {
         gid: 0,
@@ -323,6 +324,8 @@
     }
     for (idx = j = 0, len1 = result.length; j < len1; idx = ++j) {
       ad = result[idx];
+      help('^33443^', ad);
+      urge('^33443^', matcher[idx]);
       if (equals(ad, matcher[idx])) {
         T.ok(true);
         help('^45958^', ad.chrs, ad.sid, ad);
@@ -386,12 +389,12 @@
       // test @[ "DRB get_cgid_map()" ]
       // @[ "DRB insert_outlines()" ]()
       // test @[ "DRB RBW shape_text() returns coordinates acc to font upem" ]
-      // test @[ "DRB RBW shape_text() honors missing outlines" ]
-      return test(this["DRB get_font_metrics()"]);
+      return test(this["DRB RBW shape_text() honors missing outlines"]);
     })();
   }
 
-  // test @[ "DRB insert_outlines()" ]
+  // test @[ "DRB get_font_metrics()" ]
+// test @[ "DRB insert_outlines()" ]
 
 }).call(this);
 
