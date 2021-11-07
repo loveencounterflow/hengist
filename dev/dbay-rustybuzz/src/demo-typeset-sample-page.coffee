@@ -231,9 +231,13 @@ append_content = ( cfg ) ->
   # page  = append_remarks  { page, fm, missing_chrs, }
   # page  = append_outlines { page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods, }
   # page  = append_content  { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, }
-  lines = drb.distribute { ads, mm_p_u, width_mm, }
+  { lines, } = drb.distribute { ads, mm_p_u, width_mm, }
   for line in lines
-    debug '^3980^', ( ad.chrs for ad in line ).join '|'
+    ad_br       = ads[ line.adi2 ]
+    lads        = ads[ line.adi1 .. line.adi2 - 1 ]
+    line_text   = ( ads[ idx ].chrs for idx in [ line.adi1 .. line.adi2 - 1 ] ).join ''
+    line_text  += '-' if ad_br.br is 'shy'
+    info '^3980^', rpr line_text
   # page  = append_used_outlines_overview page
   #.........................................................................................................
   FS.writeFileSync target_path, page
@@ -246,8 +250,8 @@ if require.main is module then do =>
   # await @demo_store_outlines { set_id: 'all', }
   # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
-  await @demo_typeset_sample_page { set_id: 'short-eg12i', }
-  # await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
+  # await @demo_typeset_sample_page { set_id: 'short-eg12i', }
+  await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
   # await @demo_typeset_sample_page { set_id: 'small-aleo', }
   # await @demo_typeset_sample_page { set_id: 'widechrs', }
   # await @demo_typeset_sample_page { set_id: 'tibetan', }
