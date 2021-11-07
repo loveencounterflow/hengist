@@ -150,7 +150,7 @@ guy                       = require '../../../apps/guy'
       b: 0,
       x: 0,
       y: 0,
-      dx: 596.2,
+      dx: 596,
       dy: 0,
       chrs: 'a',
       sid: 'o68djvsi'
@@ -188,7 +188,7 @@ guy                       = require '../../../apps/guy'
     { gid: 0, b: 0, x: 0, y: 0, dx: 1000, dy: 0, chrs: '買', sid: 'o0eg8i' }
     { gid: 79, b: 3, x: 1000, y: 0, dx: 508, dy: 0, chrs: 'n', sid: 'o79eg8i' }
     { gid: 70, b: 4, x: 1508, y: 0, dx: 367, dy: 0, chrs: 'e', sid: 'o70eg8i' }
-    { gid: 1, b: 5, x: 1875, y: 0, dx: 243, dy: 0, chrs: ' ', sid: 'o1eg8i' }
+    { gid: 1, b: 5, x: 1875, y: 0, dx: 243, dy: 0, chrs: ' ', sid: 'o1eg8i', br: 'spc' }
     { gid: 0, b: 6, x: 2118, y: 0, dx: 1000, dy: 0, chrs: '來', sid: 'o0eg8i' }
     { gid: 68, b: 9, x: 3118, y: 0, dx: 359, dy: 0, chrs: 'c', sid: 'o68eg8i' }
     { gid: 66, b: 10, x: 3477, y: 0, dx: 492, dy: 0, chrs: 'a', sid: 'o66eg8i' }
@@ -200,6 +200,8 @@ guy                       = require '../../../apps/guy'
   result = drb.shape_text { fontnick, text, }
   urge '^45958^', ad.chrs, ad.sid, ad for ad in result
   for ad, idx in result
+    help '^33443^', ad
+    urge '^33443^', matcher[ idx ]
     if equals ad, matcher[ idx ]
       T.ok true
       help '^45958^', ad.chrs, ad.sid, ad
@@ -255,6 +257,6 @@ if require.main is module then do =>
   # test @[ "DRB get_cgid_map()" ]
   # @[ "DRB insert_outlines()" ]()
   # test @[ "DRB RBW shape_text() returns coordinates acc to font upem" ]
-  # test @[ "DRB RBW shape_text() honors missing outlines" ]
-  test @[ "DRB get_font_metrics()" ]
+  test @[ "DRB RBW shape_text() honors missing outlines" ]
+  # test @[ "DRB get_font_metrics()" ]
   # test @[ "DRB insert_outlines()" ]
