@@ -112,6 +112,11 @@ do =>
       fspath    = 'EBGaramond12-Italic.otf'
       chrs      = "abcdefghijklm"
       text      = """f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language."""
+    when 'longwords-eg12i'
+      fontnick  = 'eg12i'
+      fspath    = 'EBGaramond12-Italic.otf'
+      chrs      = "abcdefghijklm"
+      text      = """xxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxx."""
     when 'small-aleo'
       fontnick  = 'aleo'
       fspath    = 'Aleo_font_v1.2.2/Desktop OTF/Aleo-Italic.otf'

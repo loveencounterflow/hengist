@@ -226,11 +226,11 @@ append_content = ( cfg ) ->
     ads
     fm          } = drb.compose { fontnick, text, known_ods, }
   #.........................................................................................................
-  # x0    = 0
-  # y0    = 50
-  # page  = append_remarks  { page, fm, missing_chrs, }
-  # page  = append_outlines { page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods, }
-  # page  = append_content  { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, }
+  x0    = 0
+  y0    = 50
+  page  = append_remarks  { page, fm, missing_chrs, }
+  page  = append_outlines { page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods, }
+  page  = append_content  { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, }
   { lines, } = drb.distribute { ads, mm_p_u, width_mm, }
   # for ad in ads
   #   urge '^3980^', ad
@@ -252,6 +252,7 @@ if require.main is module then do =>
   # await @demo_store_outlines { set_id: 'all', }
   # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
   await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
+  # await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
   # await @demo_typeset_sample_page { set_id: 'short-eg12i', }
   # await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
   # await @demo_typeset_sample_page { set_id: 'small-aleo', }
