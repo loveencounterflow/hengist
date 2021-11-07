@@ -232,7 +232,7 @@
   this.demo_typeset_sample_page = function(cfg) {
     /* TAINT make this a method */
     /* TAINT use constants */
-    var I, L, Tbl, V, ad_br, ads, cgid_map, chrs, collector, db, defaults, drb, dtab, fm, fontnick, fspath, i, idx, j, joint, known_ods, lads, len, len1, line, line_text, lines, missing, missing_chrs, missing_sid, mm_p_u, mm_p_u_txt, new_ods, page, segment, segments, set_id, shy, size_mm, slab, text, wbr, width_mm;
+    var I, L, Tbl, V, ad, ad_br, ads, cgid_map, chrs, collector, db, defaults, drb, dtab, fm, fontnick, fspath, i, j, joint, known_ods, lads, len, len1, line, line_text, lines, missing, missing_chrs, missing_sid, mm_p_u, mm_p_u_txt, new_ods, page, segment, segments, set_id, shy, size_mm, slab, text, wbr, width_mm;
     defaults = {
       set_id: 'medium-eg8i'
     };
@@ -312,15 +312,18 @@
     // page  = append_outlines { page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods, }
     // page  = append_content  { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, }
     ({lines} = drb.distribute({ads, mm_p_u, width_mm}));
+// for ad in ads
+//   urge '^3980^', ad
     for (j = 0, len1 = lines.length; j < len1; j++) {
       line = lines[j];
       ad_br = ads[line.adi2];
       lads = ads.slice(line.adi1, +(line.adi2 - 1) + 1 || 9e9);
       line_text = ((function() {
-        var k, ref, ref1, results;
+        var k, len2, results;
         results = [];
-        for (idx = k = ref = line.adi1, ref1 = line.adi2 - 1; (ref <= ref1 ? k <= ref1 : k >= ref1); idx = ref <= ref1 ? ++k : --k) {
-          results.push(ads[idx].chrs);
+        for (k = 0, len2 = lads.length; k < len2; k++) {
+          ad = lads[k];
+          results.push(ad.chrs);
         }
         return results;
       })()).join('');
@@ -341,15 +344,15 @@
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
       // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
-      // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
-      // await @demo_typeset_sample_page { set_id: 'short-eg12i', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'medium-eg12i'
+        set_id: 'medium-eg8i'
       }));
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'small-aleo', }
+  // await @demo_typeset_sample_page { set_id: 'short-eg12i', }
+// await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
+// await @demo_typeset_sample_page { set_id: 'small-aleo', }
 // await @demo_typeset_sample_page { set_id: 'widechrs', }
 // await @demo_typeset_sample_page { set_id: 'tibetan', }
 // await @demo_typeset_sample_page { set_id: 'arabic', }
