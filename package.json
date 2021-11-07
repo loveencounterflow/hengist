@@ -15,6 +15,7 @@
   "dependencies": {
     "@ef-carbon/deep-freeze": "^1.0.1",
     "@scotttrinh/number-ranges": "^2.1.0",
+    "@sindresorhus/transliterate": "^1.5.0",
     "argparse": "^2.0.1",
     "better-sqlite3": "7.4.3",
     "bytewise": "^1.1.0",
@@ -41,6 +42,8 @@
     "executive": "^1.6.3",
     "exit-hook": "3.0.0",
     "fast-copy": "^2.1.0",
+    "file-url": "^4.0.0",
+    "fix-esm": "^1.0.1",
     "fraction.js": "^4.0.13",
     "get-source": "^2.0.11",
     "git-utils": "^5.7.3",
