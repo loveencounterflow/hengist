@@ -129,25 +129,43 @@ _append_breakpoint = ( cfg ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 append_content = ( cfg ) ->
-  { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, } = cfg
-  page        = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
-  page        = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{mm_p_u_txt})'>"
-  page        = _append_fontmetrics { page, size_mm, mm_p_u, fm, }
-  for ad in ads
-    ### TAINT use standard method ###
-    chrs_ctxt = _escape_for_html_comment ad.chrs
-    if ad.gid is missing.gid
+  { drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, } = cfg
+  page = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
+  page = _append_fontmetrics { page, size_mm, mm_p_u, fm, }
+  { lines, } = drb.distribute { ads, mm_p_u, width_mm, }
+  # for ad in ads
+  #   urge '^3980^', ad
+  line_y0       = 20
+  line_y_delta  = 10
+  line_y        = line_y0 - line_y_delta
+  for line in lines
+    continue if line.length is 0
+    line_y     += line_y_delta
+    ad_br       = ads[ line.adi2 ]
+    do ->
+      lads        = ads[ line.adi1 .. line.adi2 - 1 ]
+      line_text   = ( ad.chrs for ad in lads ).join ''
+      line_text  += '-' if ad_br.br is 'shy'
+      info '^3980^', rpr line_text
+    page = append_to page, 'content', "<g transform='translate(#{x0} #{line_y}) scale(#{mm_p_u_txt})'>"
+    for adi in [ line.adi1 .. line.adi2 ]
+      ad  = ads[ adi ]
+      x   = ad.x - line.dx0
+      y   = line_y + ad.y
       ### TAINT use standard method ###
-      chrs_htxt = _escape_for_html_text ad.chrs
-      relwdth = ad.dx / 1000 ### relative width of missing outline rectangle ###
-      element = """<!--#{chrs_ctxt}--><use href='##{missing_sid}' class='missing' transform='translate(#{ad.x} #{ad.y}) scale(#{relwdth} 1)'/>\
-        <text class='missing-chrs' style='font-size:1000px;transform:skew(#{fm.angle}deg)' x='#{ad.x}' y='#{ad.y}'>#{chrs_htxt}</text>"""
-    else
-      if ad.y is 0 then element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}'/>"
-      else              element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
-    page  = append_to page, 'content', element
-    ### TAINT must escape `d.chrs` ###
-  page = append_to page, 'content', "</g>"
+      chrs_ctxt = _escape_for_html_comment ad.chrs
+      if ad.gid is missing.gid
+        ### TAINT use standard method ###
+        chrs_htxt = _escape_for_html_text ad.chrs
+        relwdth = ad.dx / 1000 ### relative width of missing outline rectangle ###
+        element = """<!--#{chrs_ctxt}--><use href='##{missing_sid}' class='missing' transform='translate(#{x} #{ad.y}) scale(#{relwdth} 1)'/>\
+          <text class='missing-chrs' style='font-size:1000px;transform:skew(#{fm.angle}deg)' x='#{x}' y='#{ad.y}'>#{chrs_htxt}</text>"""
+      else
+        if ad.y is 0 then element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{x}'/>"
+        else              element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{x}' y='#{ad.y}'/>"
+      page  = append_to page, 'content', element
+    page = append_to page, 'content', "</g>"
+    # # page  = append_used_outlines_overview page
   return page
 
 # #-----------------------------------------------------------------------------------------------------------
@@ -228,19 +246,9 @@ append_content = ( cfg ) ->
   #.........................................................................................................
   x0    = 0
   y0    = 50
-  page  = append_remarks  { page, fm, missing_chrs, }
-  page  = append_outlines { page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods, }
-  page  = append_content  { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, }
-  { lines, } = drb.distribute { ads, mm_p_u, width_mm, }
-  # for ad in ads
-  #   urge '^3980^', ad
-  for line in lines
-    ad_br       = ads[ line.adi2 ]
-    lads        = ads[ line.adi1 .. line.adi2 - 1 ]
-    line_text   = ( ad.chrs for ad in lads ).join ''
-    line_text  += '-' if ad_br.br is 'shy'
-    info '^3980^', rpr line_text
-  # page  = append_used_outlines_overview page
+  page  = append_remarks  { drb, page, fm, missing_chrs, }
+  page  = append_outlines { drb, page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods, }
+  page  = append_content  { drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, }
   #.........................................................................................................
   FS.writeFileSync target_path, page
   return null
