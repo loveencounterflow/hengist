@@ -62,6 +62,14 @@ do =>
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@fontnicks_and_paths =
+  djvs: 'DejaVuSerif.ttf'
+do =>
+  for fontnick, fspath of @fontnicks_and_paths
+    @fontnicks_and_paths[ fontnick ] = PATH.resolve PATH.join __dirname, '../../../assets/jizura-fonts/', fspath
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @settings_from_set_id = ( set_id ) ->
   chrs                = null
   cids                = null
