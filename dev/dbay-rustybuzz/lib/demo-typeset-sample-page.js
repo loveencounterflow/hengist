@@ -168,6 +168,7 @@
     swdth *= 1000 * size_mm * mm_p_u;
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`);
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.descender}' x2='10000' y2='${fm.descender}'/>`);
+    page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='0' x2='10000' y2='0'/>`);
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.x_height}' x2='10000' y2='${fm.x_height}'/>`);
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.capital_height}' x2='10000' y2='${fm.capital_height}'/>`);
     return page;
@@ -185,18 +186,17 @@
   append_content = function(cfg) {
     /* TAINT use standard method */
     /* TAINT use standard method */
-    var ad, ad_br, adi, ads, chrs_ctxt, chrs_htxt, drb, element, fm, i, j, len, line, line_y, line_y0, line_y_delta, lines, missing, missing_sid, mm_p_u, mm_p_u_txt, page, ref, ref1, relwdth, size_mm, text, width_mm, x, x0, y, y0;
+    var ad, ad_br, adi, ads, chrs_ctxt, chrs_htxt, drb, element, fm, i, j, len, line, line_idx, line_y, line_y0, line_y_delta, lines, missing, missing_sid, mm_p_u, mm_p_u_txt, page, ref, ref1, relwdth, size_mm, text, width_mm, x, x0, y, y0;
     ({drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
     page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
-    page = _append_fontmetrics({page, size_mm, mm_p_u, fm});
     ({lines} = drb.distribute({ads, mm_p_u, width_mm}));
     // for ad in ads
     //   urge '^3980^', ad
     line_y0 = 20;
     line_y_delta = 10;
     line_y = line_y0 - line_y_delta;
-    for (i = 0, len = lines.length; i < len; i++) {
-      line = lines[i];
+    for (line_idx = i = 0, len = lines.length; i < len; line_idx = ++i) {
+      line = lines[line_idx];
       if (line.length === 0) {
         continue;
       }
@@ -220,6 +220,7 @@
         return info('^3980^', rpr(line_text));
       })();
       page = append_to(page, 'content', `<g transform='translate(${x0} ${line_y}) scale(${mm_p_u_txt})'>`);
+// page = _append_fontmetrics { page, size_mm, mm_p_u, fm, } # if line_idx is 0
       for (adi = j = ref = line.adi1, ref1 = line.adi2; (ref <= ref1 ? j <= ref1 : j >= ref1); adi = ref <= ref1 ? ++j : --j) {
         ad = ads[adi];
         x = ad.x - line.dx0;
