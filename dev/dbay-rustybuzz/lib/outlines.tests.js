@@ -339,6 +339,69 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["___ DRB hyphens in many fonts behave unsurprisingly"] = function(T, done) {
+    var DBay, Drb, ad, ads_h, ads_s, db, drb, fontnick, fspath, h_dx, hyphen_dx, i, j, k, len, len1, len2, letter, letters, missing, ref, s_dx;
+    /* Less of a test but more of a routine to ensure that our naïve assumption that the hyphen in 'all
+     fonts' behaves such that we can always replace the outlines for `x&shy;` with those for `x-` and just add
+     the hyphen's length. */
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({Drb} = require(H.drb_path));
+    db = new DBay();
+    drb = new Drb({
+      db,
+      temporary: true
+    });
+    ({missing} = Drb.C);
+    letters = Array.from(`abcdefghijklmnopqrstuvwxyz
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+0123456789
+,.-;:_–—#'+*\`´^°!"§$%&/()=?`.replace(/\s+/g, ''));
+    ref = H.fontnicks_and_paths;
+    // debug '^3098^', letters
+    // debug '^3098^', H.fontnicks_and_paths
+    //.........................................................................................................
+    for (fontnick in ref) {
+      fspath = ref[fontnick];
+      drb.register_fontnick({fontnick, fspath});
+      drb.prepare_font({fontnick});
+      hyphen_dx = (drb.shape_text({
+        fontnick,
+        text: '-'
+      }))[0].dx;
+      info('^3441^', {fontnick, hyphen_dx});
+      for (i = 0, len = letters.length; i < len; i++) {
+        letter = letters[i];
+        ads_s = drb.shape_text({
+          fontnick,
+          text: `${letter}\xad`
+        });
+        ads_h = drb.shape_text({
+          fontnick,
+          text: `${letter}-`
+        });
+        s_dx = ads_s[1].x + hyphen_dx;
+        h_dx = ads_h[1].x + ads_h[1].dx;
+        if (T != null) {
+          T.eq(s_dx, h_dx);
+        }
+        if (s_dx !== h_dx) {
+          info({fontnick, letter});
+          for (j = 0, len1 = ads_s.length; j < len1; j++) {
+            ad = ads_s[j];
+            debug('^68402^', ad);
+          }
+          for (k = 0, len2 = ads_h.length; k < len2; k++) {
+            ad = ads_h[k];
+            urge('^68402^', ad);
+          }
+        }
+      }
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DRB get_font_metrics()"] = function(T, done) {
     var DBay, Drb, RBW, Tbl, db, drb, dtab, fm, fontnick, matcher;
     // ### explicit path, explicitly temporary ###
@@ -381,20 +444,21 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // @[ "DRB foobar" ]()
-      // test @[ "DRB no shared state in WASM module" ]
-      // @[ "DRB path compression" ]()
-      // test @[ "DRB can pass in custom RBW" ]
-      // test @[ "DRB get_cgid_map()" ]
-      // @[ "DRB insert_outlines()" ]()
-      // test @[ "DRB RBW shape_text() returns coordinates acc to font upem" ]
-      return test(this["DRB RBW shape_text() honors missing outlines"]);
+      return test(this);
     })();
   }
 
-  // test @[ "DRB get_font_metrics()" ]
+  // @[ "DRB foobar" ]()
+// test @[ "DRB no shared state in WASM module" ]
+// @[ "DRB path compression" ]()
+// test @[ "DRB can pass in custom RBW" ]
+// test @[ "DRB get_cgid_map()" ]
+// @[ "DRB insert_outlines()" ]()
+// test @[ "DRB RBW shape_text() returns coordinates acc to font upem" ]
+// test @[ "DRB RBW shape_text() honors missing outlines" ]
+// test @[ "DRB get_font_metrics()" ]
 // test @[ "DRB insert_outlines()" ]
+// test @[ "DRB hyphens in many fonts behave unsurprisingly" ]
 
 }).call(this);
 

@@ -186,7 +186,7 @@
   append_content = function(cfg) {
     /* TAINT use standard method */
     /* TAINT use standard method */
-    var ad, ad_br, adi, ads, chrs_ctxt, chrs_htxt, drb, element, fm, i, j, len, line, line_idx, line_y, line_y0, line_y_delta, lines, missing, missing_sid, mm_p_u, mm_p_u_txt, page, ref, ref1, relwdth, size_mm, text, width_mm, x, x0, y, y0;
+    var ad, ad_br, adi, ads, chrs_ctxt, chrs_htxt, drb, element, fm, i, j, k, len, line, line_idx, line_y, line_y0, line_y_delta, lines, missing, missing_sid, mm_p_u, mm_p_u_txt, page, ref, ref1, ref2, ref3, relwdth, size_mm, text, width_mm, x, x0, y, y0;
     ({drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
     page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
     ({lines} = drb.distribute({ads, mm_p_u, width_mm}));
@@ -220,8 +220,11 @@
         return info('^3980^', rpr(line_text));
       })();
       page = append_to(page, 'content', `<g transform='translate(${x0} ${line_y}) scale(${mm_p_u_txt})'>`);
-// page = _append_fontmetrics { page, size_mm, mm_p_u, fm, } # if line_idx is 0
       for (adi = j = ref = line.adi1, ref1 = line.adi2; (ref <= ref1 ? j <= ref1 : j >= ref1); adi = ref <= ref1 ? ++j : --j) {
+        // page = _append_fontmetrics { page, size_mm, mm_p_u, fm, } # if line_idx is 0
+        debug('^3443^', ads[adi]);
+      }
+      for (adi = k = ref2 = line.adi1, ref3 = line.adi2; (ref2 <= ref3 ? k <= ref3 : k >= ref3); adi = ref2 <= ref3 ? ++k : --k) {
         ad = ads[adi];
         x = ad.x - line.dx0;
         y = line_y + ad.y;
@@ -356,15 +359,15 @@
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
       // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
+      // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
+      // await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'medium-eg8i'
+        set_id: 'short-eg12i'
       }));
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
-// await @demo_typeset_sample_page { set_id: 'short-eg12i', }
-// await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
+  // await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
 // await @demo_typeset_sample_page { set_id: 'small-aleo', }
 // await @demo_typeset_sample_page { set_id: 'widechrs', }
 // await @demo_typeset_sample_page { set_id: 'tibetan', }

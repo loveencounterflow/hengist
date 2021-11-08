@@ -84,6 +84,21 @@
   })();
 
   //-----------------------------------------------------------------------------------------------------------
+  this.fontnicks_and_paths = {
+    djvs: 'DejaVuSerif.ttf'
+  };
+
+  (() => {
+    var fontnick, fspath, ref;
+    ref = this.fontnicks_and_paths;
+    for (fontnick in ref) {
+      fspath = ref[fontnick];
+      this.fontnicks_and_paths[fontnick] = PATH.resolve(PATH.join(__dirname, '../../../assets/jizura-fonts/', fspath));
+    }
+    return null;
+  })();
+
+  //-----------------------------------------------------------------------------------------------------------
   this.settings_from_set_id = function(set_id) {
     var cgid_map, chrs, cids, fontnick, fspath, text;
     chrs = null;
