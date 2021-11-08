@@ -117,6 +117,7 @@ _append_fontmetrics = ( cfg ) ->
   swdth  *= 1000 * size_mm * mm_p_u
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.descender}' x2='10000' y2='#{fm.descender}'/>"
+  page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='0' x2='10000' y2='0'/>"
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.x_height}' x2='10000' y2='#{fm.x_height}'/>"
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>"
   return page
@@ -131,14 +132,13 @@ _append_breakpoint = ( cfg ) ->
 append_content = ( cfg ) ->
   { drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, } = cfg
   page = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
-  page = _append_fontmetrics { page, size_mm, mm_p_u, fm, }
   { lines, } = drb.distribute { ads, mm_p_u, width_mm, }
   # for ad in ads
   #   urge '^3980^', ad
   line_y0       = 20
   line_y_delta  = 10
   line_y        = line_y0 - line_y_delta
-  for line in lines
+  for line, line_idx in lines
     continue if line.length is 0
     line_y     += line_y_delta
     ad_br       = ads[ line.adi2 ]
@@ -148,6 +148,7 @@ append_content = ( cfg ) ->
       line_text  += '-' if ad_br.br is 'shy'
       info '^3980^', rpr line_text
     page = append_to page, 'content', "<g transform='translate(#{x0} #{line_y}) scale(#{mm_p_u_txt})'>"
+    # page = _append_fontmetrics { page, size_mm, mm_p_u, fm, } # if line_idx is 0
     for adi in [ line.adi1 .. line.adi2 ]
       ad  = ads[ adi ]
       x   = ad.x - line.dx0
