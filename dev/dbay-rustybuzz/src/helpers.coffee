@@ -99,7 +99,7 @@ do =>
       chrs      = "abcdefghijklm"
       text      = """f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language spoken by about six million people, principally in
         Denmark, Greenland, the Fa&shy;roe Islands and in the region of Southern Schles&shy;wig in northern Germany,
-        where it has minority language status."""
+        where it has minority language status. This-and-that this-and-that this-and-that this-and-that."""
     when 'medium-eg12i'
       fontnick  = 'eg12i'
       fspath    = 'EBGaramond12-Italic.otf'
