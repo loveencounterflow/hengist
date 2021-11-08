@@ -185,29 +185,62 @@
   append_content = function(cfg) {
     /* TAINT use standard method */
     /* TAINT use standard method */
-    /* TAINT must escape `d.chrs` */
-    var ad, ads, chrs_ctxt, chrs_htxt, element, fm, i, len, missing, missing_sid, mm_p_u, mm_p_u_txt, page, relwdth, size_mm, text, x0, y0;
-    ({page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
+    var ad, ad_br, adi, ads, chrs_ctxt, chrs_htxt, drb, element, fm, i, j, len, line, line_y, line_y0, line_y_delta, lines, missing, missing_sid, mm_p_u, mm_p_u_txt, page, ref, ref1, relwdth, size_mm, text, width_mm, x, x0, y, y0;
+    ({drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
     page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
-    page = append_to(page, 'content', `<g transform='translate(${x0} ${y0}) scale(${mm_p_u_txt})'>`);
     page = _append_fontmetrics({page, size_mm, mm_p_u, fm});
-    for (i = 0, len = ads.length; i < len; i++) {
-      ad = ads[i];
-      chrs_ctxt = _escape_for_html_comment(ad.chrs);
-      if (ad.gid === missing.gid) {
-        chrs_htxt = _escape_for_html_text(ad.chrs);
-        relwdth = ad.dx / 1000/* relative width of missing outline rectangle */
-        element = `<!--${chrs_ctxt}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;transform:skew(${fm.angle}deg)' x='${ad.x}' y='${ad.y}'>${chrs_htxt}</text>`;
-      } else {
-        if (ad.y === 0) {
-          element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}'/>`;
-        } else {
-          element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
-        }
+    ({lines} = drb.distribute({ads, mm_p_u, width_mm}));
+    // for ad in ads
+    //   urge '^3980^', ad
+    line_y0 = 20;
+    line_y_delta = 10;
+    line_y = line_y0 - line_y_delta;
+    for (i = 0, len = lines.length; i < len; i++) {
+      line = lines[i];
+      if (line.length === 0) {
+        continue;
       }
-      page = append_to(page, 'content', element);
+      line_y += line_y_delta;
+      ad_br = ads[line.adi2];
+      (function() {
+        var ad, lads, line_text;
+        lads = ads.slice(line.adi1, +(line.adi2 - 1) + 1 || 9e9);
+        line_text = ((function() {
+          var j, len1, results;
+          results = [];
+          for (j = 0, len1 = lads.length; j < len1; j++) {
+            ad = lads[j];
+            results.push(ad.chrs);
+          }
+          return results;
+        })()).join('');
+        if (ad_br.br === 'shy') {
+          line_text += '-';
+        }
+        return info('^3980^', rpr(line_text));
+      })();
+      page = append_to(page, 'content', `<g transform='translate(${x0} ${line_y}) scale(${mm_p_u_txt})'>`);
+      for (adi = j = ref = line.adi1, ref1 = line.adi2; (ref <= ref1 ? j <= ref1 : j >= ref1); adi = ref <= ref1 ? ++j : --j) {
+        ad = ads[adi];
+        x = ad.x - line.dx0;
+        y = line_y + ad.y;
+        chrs_ctxt = _escape_for_html_comment(ad.chrs);
+        if (ad.gid === missing.gid) {
+          chrs_htxt = _escape_for_html_text(ad.chrs);
+          relwdth = ad.dx / 1000/* relative width of missing outline rectangle */
+          element = `<!--${chrs_ctxt}--><use href='#${missing_sid}' class='missing' transform='translate(${x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;transform:skew(${fm.angle}deg)' x='${x}' y='${ad.y}'>${chrs_htxt}</text>`;
+        } else {
+          if (ad.y === 0) {
+            element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${x}'/>`;
+          } else {
+            element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${x}' y='${ad.y}'/>`;
+          }
+        }
+        page = append_to(page, 'content', element);
+      }
+      page = append_to(page, 'content', "</g>");
     }
-    page = append_to(page, 'content', "</g>");
+    // # page  = append_used_outlines_overview page
     return page;
   };
 
@@ -232,7 +265,7 @@
   this.demo_typeset_sample_page = function(cfg) {
     /* TAINT make this a method */
     /* TAINT use constants */
-    var I, L, Tbl, V, ad, ad_br, ads, cgid_map, chrs, collector, db, defaults, drb, dtab, fm, fontnick, fspath, i, j, joint, known_ods, lads, len, len1, line, line_text, lines, missing, missing_chrs, missing_sid, mm_p_u, mm_p_u_txt, new_ods, page, segment, segments, set_id, shy, size_mm, slab, text, wbr, width_mm, x0, y0;
+    var I, L, Tbl, V, ads, cgid_map, chrs, collector, db, defaults, drb, dtab, fm, fontnick, fspath, i, joint, known_ods, len, missing, missing_chrs, missing_sid, mm_p_u, mm_p_u_txt, new_ods, page, segment, segments, set_id, shy, size_mm, slab, text, wbr, width_mm, x0, y0;
     defaults = {
       set_id: 'medium-eg8i'
     };
@@ -308,31 +341,9 @@
     //.........................................................................................................
     x0 = 0;
     y0 = 50;
-    page = append_remarks({page, fm, missing_chrs});
-    page = append_outlines({page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods});
-    page = append_content({page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid});
-    ({lines} = drb.distribute({ads, mm_p_u, width_mm}));
-// for ad in ads
-//   urge '^3980^', ad
-    for (j = 0, len1 = lines.length; j < len1; j++) {
-      line = lines[j];
-      ad_br = ads[line.adi2];
-      lads = ads.slice(line.adi1, +(line.adi2 - 1) + 1 || 9e9);
-      line_text = ((function() {
-        var k, len2, results;
-        results = [];
-        for (k = 0, len2 = lads.length; k < len2; k++) {
-          ad = lads[k];
-          results.push(ad.chrs);
-        }
-        return results;
-      })()).join('');
-      if (ad_br.br === 'shy') {
-        line_text += '-';
-      }
-      info('^3980^', rpr(line_text));
-    }
-    // page  = append_used_outlines_overview page
+    page = append_remarks({drb, page, fm, missing_chrs});
+    page = append_outlines({drb, page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods});
+    page = append_content({drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid});
     //.........................................................................................................
     FS.writeFileSync(target_path, page);
     return null;
