@@ -149,7 +149,7 @@ append_content = ( cfg ) ->
       info '^3980^', rpr line_text
     page = append_to page, 'content', "<g transform='translate(#{x0} #{line_y}) scale(#{mm_p_u_txt})'>"
     # page = _append_fontmetrics { page, size_mm, mm_p_u, fm, } # if line_idx is 0
-    debug '^3443^', ads[ adi ] for adi in [ line.adi1 .. line.adi2 ]
+    # debug '^3443^', ads[ adi ] for adi in [ line.adi1 .. line.adi2 ]
     for adi in [ line.adi1 .. line.adi2 ]
       ad  = ads[ adi ]
       x   = ad.x - line.dx0
@@ -263,8 +263,8 @@ if require.main is module then do =>
   # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
-  await @demo_typeset_sample_page { set_id: 'short-eg12i', }
-  # await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
+  # await @demo_typeset_sample_page { set_id: 'short-eg12i', }
+  await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
   # await @demo_typeset_sample_page { set_id: 'small-aleo', }
   # await @demo_typeset_sample_page { set_id: 'widechrs', }
   # await @demo_typeset_sample_page { set_id: 'tibetan', }
