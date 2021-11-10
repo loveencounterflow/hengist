@@ -112,7 +112,7 @@ jp                        = JSON.parse
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "HLR alter_table" ] = ( T, done ) ->
+@[ "HLR alter_table 1" ] = ( T, done ) ->
   T?.halt_on_error()
   #.........................................................................................................
   { Hollerith, }  = require icql_dba_hollerith_path
@@ -125,6 +125,49 @@ jp                        = JSON.parse
   #.........................................................................................................
   dba.execute SQL"""
     create table myfile ( line text not null );
+    """
+  #.........................................................................................................
+  schema            = 'main'
+  table_name        = 'myfile'
+  json_column_name  = 'vnr'
+  blob_column_name  = null
+  hlr.alter_table { schema, table_name, json_column_name, blob_column_name, }
+  insert_sql        = SQL"insert into myfile ( line, vnr ) values ( $line, $vnr )"
+  dba.run insert_sql, { line: "third", vnr: ( jr [ 3, ] ) }
+  dba.run insert_sql, { line: "second", vnr: ( jr [ 2, ] ) }
+  dba.run insert_sql, { line: "first", vnr: ( jr [ 1, ] ) }
+  #.........................................................................................................
+  error = null
+  try
+    dba.run insert_sql, { line: "fourth", vnr: ( jr [ 3, ] ) }
+  catch error
+    T?.eq error.code, 'SQLITE_CONSTRAINT_UNIQUE'
+    debug error.name
+  T?.ok error?
+  #.........................................................................................................
+  debug tbl.dump_db { order_by: '1', }
+  T.eq ( dba.list dba.query SQL"select * from myfile order by vnr_blob;" ), [
+    { line: 'first',  vnr: '[1]', vnr_blob: ( Buffer.from '8000000180000000800000008000000080000000', 'hex' ) },
+    { line: 'second', vnr: '[2]', vnr_blob: ( Buffer.from '8000000280000000800000008000000080000000', 'hex' ) },
+    { line: 'third',  vnr: '[3]', vnr_blob: ( Buffer.from '8000000380000000800000008000000080000000', 'hex' ) } ]
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "HLR alter_table with existing columns 1" ] = ( T, done ) ->
+  T?.halt_on_error()
+  #.........................................................................................................
+  { Hollerith, }  = require icql_dba_hollerith_path
+  { Dba, }        = require dba_path
+  { Tbl, }        = require '../../../apps/icql-dba-tabulate'
+  dba             = new Dba()
+  hlr             = new Hollerith { dba, }
+  tbl             = new Tbl { dba, }
+  # debug '^3342^', CATALOGUE.all_keys_of hlr.hollerith
+  #.........................................................................................................
+  dba.execute SQL"""
+    create table myfile ( line text not null, vnr json not null );
+    create unique index hlr_myfile_vnr_idx on myfile ( vnr );
     """
   #.........................................................................................................
   schema            = 'main'
@@ -184,5 +227,5 @@ jp                        = JSON.parse
 if module is require.main then do =>
   test @, { timeout: 10e3, }
   # test @[ "API" ]
-  # @[ "alter_table" ]()
+  @[ "HLR alter_table with existing columns 1" ]()
 
