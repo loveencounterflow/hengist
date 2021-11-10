@@ -266,7 +266,9 @@ if require.main is module then do =>
   # await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
   # await @demo_typeset_sample_page { set_id: 'short-eg12i', }
-  await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
+  # await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
+  await @demo_typeset_sample_page { set_id: 'uppercasehyphen-eg12i', }
+  # await @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
   # await @demo_typeset_sample_page { set_id: 'small-aleo', }
   # await @demo_typeset_sample_page { set_id: 'widechrs', }
   # await @demo_typeset_sample_page { set_id: 'tibetan', }
