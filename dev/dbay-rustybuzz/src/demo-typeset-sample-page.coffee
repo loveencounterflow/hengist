@@ -132,7 +132,7 @@ _append_breakpoint = ( cfg ) ->
 append_content = ( cfg ) ->
   { drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, } = cfg
   page = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
-  { lines, } = drb.distribute { ads, mm_p_u, width_mm, }
+  { lines, } = drb.distribute { ads, mm_p_u, width_mm, size_mm, }
   # for ad in ads
   #   urge '^3980^', ad
   line_y0       = 20
