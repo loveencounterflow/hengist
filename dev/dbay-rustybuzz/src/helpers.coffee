@@ -115,11 +115,30 @@ do =>
       text      = """f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language spoken by about six million people, principally in
         Denmark, Greenland, the Fa&shy;roe Islands and in the region of Southern Schles&shy;wig in northern Germany,
         where it has minority language status."""
+    when 'egypt-eg12i'
+      fontnick  = 'eg12i'
+      fspath    = 'EBGaramond12-Italic.otf'
+      chrs      = "abcdefghijklm"
+      text      = """Egypt has one of the longest histories of any country, tracing its heritage along the
+        Nile Delta back to the 6th–4th millennia BCE. Considered a cradle of civilisation, Ancient Egypt saw
+        some of the earliest developments of writing, agriculture, urbanisation, organised religion and
+        central government. Iconic monuments such as the Giza Necropolis and its Great Sphinx, as well the
+        ruins of Memphis, Thebes, Karnak, and the Valley of the Kings, reflect this legacy and remain a
+        significant focus of scientific and popular interest. Egypt's long and rich cultural heritage is an
+        integral part of its national identity, which reflects its unique transcontinental location being
+        simultaneously Mediterranean, Middle Eastern and North African. Egypt was an early and important
+        centre of Christianity, but was largely Islamised in the seventh century and remains a predominantly
+        Muslim country, albeit with a significant Christian minority."""
     when 'short-eg12i'
       fontnick  = 'eg12i'
       fspath    = 'EBGaramond12-Italic.otf'
       chrs      = "abcdefghijklm"
       text      = """f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language."""
+    when 'uppercasehyphen-eg12i'
+      fontnick  = 'eg12i'
+      fspath    = 'EBGaramond12-Italic.otf'
+      chrs      = "abcdefghijklm"
+      text      = """Hyphenated uppercase that should cause reformatting b/o kerning STORMY&shy;YEAR"""
     when 'longwords-eg12i'
       fontnick  = 'eg12i'
       fspath    = 'EBGaramond12-Italic.otf'
