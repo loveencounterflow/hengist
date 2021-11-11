@@ -139,20 +139,23 @@ append_content = ( cfg ) ->
   line_y_delta  = 10
   line_y        = line_y0 - line_y_delta
   for line, line_idx in lines
-    continue if line.length is 0
-    adi1        = line.vnr_1[ 0 ]
-    adi2        = line.vnr_2[ 0 ]
+    debug '^3337^', line
+    # continue if line.length is 0
+    adi_1       = line.adi_1
+    adi_2       = line.adi_2
+    # adi_1        = line.vnr_1[ 0 ]
+    # adi_2        = line.vnr_2[ 0 ]
     line_y     += line_y_delta
-    ad_br       = ads[ adi2 ]
+    ad_br       = ads[ adi_2 ]
     do ->
-      lads        = ads[ adi1 .. adi2 - 1 ]
+      lads        = ads[ adi_1 .. adi_2 - 1 ]
       line_text   = ( ad.chrs for ad in lads ).join ''
       line_text  += '-' if ad_br.br is 'shy'
       info '^3980^', rpr line_text
     page = append_to page, 'content', "<g transform='translate(#{x0} #{line_y}) scale(#{mm_p_u_txt})'>"
     # page = _append_fontmetrics { page, size_mm, mm_p_u, fm, } # if line_idx is 0
-    # debug '^3443^', ads[ adi ] for adi in [ adi1 .. adi2 ]
-    for adi in [ adi1 .. adi2 ]
+    # debug '^3443^', ads[ adi ] for adi in [ adi_1 .. adi_2 ]
+    for adi in [ adi_1 .. adi_2 ]
       ad  = ads[ adi ]
       x   = ad.x - line.dx0
       y   = line_y + ad.y
