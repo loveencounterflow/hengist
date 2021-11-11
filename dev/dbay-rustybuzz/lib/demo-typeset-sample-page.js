@@ -186,7 +186,7 @@
   append_content = function(cfg) {
     /* TAINT use standard method */
     /* TAINT use standard method */
-    var ad, ad_br, adi, adi1, adi2, ads, chrs_ctxt, chrs_htxt, drb, element, fm, i, j, len, line, line_idx, line_y, line_y0, line_y_delta, lines, missing, missing_sid, mm_p_u, mm_p_u_txt, page, ref, ref1, relwdth, size_mm, text, width_mm, x, x0, y, y0;
+    var ad, ad_br, adi, adi_1, adi_2, ads, chrs_ctxt, chrs_htxt, drb, element, fm, i, j, len, line, line_idx, line_y, line_y0, line_y_delta, lines, missing, missing_sid, mm_p_u, mm_p_u_txt, page, ref, ref1, relwdth, size_mm, text, width_mm, x, x0, y, y0;
     ({drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
     page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
     ({lines} = drb.distribute({ads, mm_p_u, width_mm, size_mm}));
@@ -197,16 +197,17 @@
     line_y = line_y0 - line_y_delta;
     for (line_idx = i = 0, len = lines.length; i < len; line_idx = ++i) {
       line = lines[line_idx];
-      if (line.length === 0) {
-        continue;
-      }
-      adi1 = line.vnr_1[0];
-      adi2 = line.vnr_2[0];
+      debug('^3337^', line);
+      // continue if line.length is 0
+      adi_1 = line.adi_1;
+      adi_2 = line.adi_2;
+      // adi_1        = line.vnr_1[ 0 ]
+      // adi_2        = line.vnr_2[ 0 ]
       line_y += line_y_delta;
-      ad_br = ads[adi2];
+      ad_br = ads[adi_2];
       (function() {
         var ad, lads, line_text;
-        lads = ads.slice(adi1, +(adi2 - 1) + 1 || 9e9);
+        lads = ads.slice(adi_1, +(adi_2 - 1) + 1 || 9e9);
         line_text = ((function() {
           var j, len1, results;
           results = [];
@@ -223,8 +224,8 @@
       })();
       page = append_to(page, 'content', `<g transform='translate(${x0} ${line_y}) scale(${mm_p_u_txt})'>`);
 // page = _append_fontmetrics { page, size_mm, mm_p_u, fm, } # if line_idx is 0
-// debug '^3443^', ads[ adi ] for adi in [ adi1 .. adi2 ]
-      for (adi = j = ref = adi1, ref1 = adi2; (ref <= ref1 ? j <= ref1 : j >= ref1); adi = ref <= ref1 ? ++j : --j) {
+// debug '^3443^', ads[ adi ] for adi in [ adi_1 .. adi_2 ]
+      for (adi = j = ref = adi_1, ref1 = adi_2; (ref <= ref1 ? j <= ref1 : j >= ref1); adi = ref <= ref1 ? ++j : --j) {
         ad = ads[adi];
         x = ad.x - line.dx0;
         y = line_y + ad.y;
