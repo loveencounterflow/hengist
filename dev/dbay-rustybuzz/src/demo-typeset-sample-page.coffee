@@ -157,6 +157,9 @@ append_content = ( cfg ) ->
     # debug '^3443^', ads[ adi ] for adi in [ adi_1 .. adi_2 ]
     for adi in [ adi_1 .. adi_2 ]
       ad  = ads[ adi ]
+      break if ( ad.br is 'end' )
+      # break if ( adi is adi_2 ) and ( ad.br in [ 'shy', 'wbr', ] )
+      continue if ( ad.br in [ 'shy', 'wbr', ] )
       x   = ad.x - line.dx0
       y   = line_y + ad.y
       ### TAINT use standard method ###
