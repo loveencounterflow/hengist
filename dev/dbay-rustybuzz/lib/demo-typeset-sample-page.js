@@ -207,7 +207,7 @@
       ad_br = ads[adi_2];
       (function() {
         var ad, lads, line_text;
-        lads = ads.slice(adi_1, +(adi_2 - 1) + 1 || 9e9);
+        lads = ads.slice(adi_1, +adi_2 + 1 || 9e9);
         line_text = ((function() {
           var j, len1, results;
           results = [];
