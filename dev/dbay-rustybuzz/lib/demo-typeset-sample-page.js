@@ -234,6 +234,9 @@
           // break if ( adi is adi_2 ) and ( ad.br in [ 'shy', 'wbr', ] )
           continue;
         }
+        if (ad.chrs === '\x20') {
+          continue;
+        }
         x = ad.x - line.dx0;
         y = line_y + ad.y;
         chrs_ctxt = _escape_for_html_comment(ad.chrs);
