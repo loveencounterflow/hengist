@@ -186,7 +186,7 @@
   append_content = function(cfg) {
     /* TAINT use standard method */
     /* TAINT use standard method */
-    var ad, ad_br, adi, adi_1, adi_2, ads, chrs_ctxt, chrs_htxt, drb, element, fm, i, j, len, line, line_idx, line_y, line_y0, line_y_delta, lines, missing, missing_sid, mm_p_u, mm_p_u_txt, page, ref, ref1, relwdth, size_mm, text, width_mm, x, x0, y, y0;
+    var ad, ad_br, adi, adi_1, adi_2, ads, chrs_ctxt, chrs_htxt, drb, element, fm, i, j, len, line, line_idx, line_y, line_y0, line_y_delta, lines, missing, missing_sid, mm_p_u, mm_p_u_txt, page, ref, ref1, ref2, relwdth, size_mm, text, width_mm, x, x0, y, y0;
     ({drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
     page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
     ({lines} = drb.distribute({ads, mm_p_u, width_mm, size_mm}));
@@ -227,6 +227,13 @@
 // debug '^3443^', ads[ adi ] for adi in [ adi_1 .. adi_2 ]
       for (adi = j = ref = adi_1, ref1 = adi_2; (ref <= ref1 ? j <= ref1 : j >= ref1); adi = ref <= ref1 ? ++j : --j) {
         ad = ads[adi];
+        if (ad.br === 'end') {
+          break;
+        }
+        if (((ref2 = ad.br) === 'shy' || ref2 === 'wbr')) {
+          // break if ( adi is adi_2 ) and ( ad.br in [ 'shy', 'wbr', ] )
+          continue;
+        }
         x = ad.x - line.dx0;
         y = line_y + ad.y;
         chrs_ctxt = _escape_for_html_comment(ad.chrs);
