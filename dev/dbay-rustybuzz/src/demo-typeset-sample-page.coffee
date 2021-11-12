@@ -148,7 +148,7 @@ append_content = ( cfg ) ->
     line_y     += line_y_delta
     ad_br       = ads[ adi_2 ]
     do ->
-      lads        = ads[ adi_1 .. adi_2 - 1 ]
+      lads        = ads[ adi_1 .. adi_2 ]
       line_text   = ( ad.chrs for ad in lads ).join ''
       line_text  += '-' if ad_br.br is 'shy'
       info '^3980^', rpr line_text
