@@ -197,7 +197,7 @@
     line_y = line_y0 - line_y_delta;
     for (line_idx = i = 0, len = lines.length; i < len; line_idx = ++i) {
       line = lines[line_idx];
-      debug('^3337^', line);
+      // debug '^3337^', line
       // continue if line.length is 0
       adi_1 = line.adi_1;
       adi_2 = line.adi_2;
