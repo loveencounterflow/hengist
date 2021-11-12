@@ -160,6 +160,7 @@ append_content = ( cfg ) ->
       break if ( ad.br is 'end' )
       # break if ( adi is adi_2 ) and ( ad.br in [ 'shy', 'wbr', ] )
       continue if ( ad.br in [ 'shy', 'wbr', ] )
+      continue if ad.chrs is '\x20'
       x   = ad.x - line.dx0
       y   = line_y + ad.y
       ### TAINT use standard method ###
