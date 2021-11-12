@@ -139,7 +139,7 @@ append_content = ( cfg ) ->
   line_y_delta  = 10
   line_y        = line_y0 - line_y_delta
   for line, line_idx in lines
-    debug '^3337^', line
+    # debug '^3337^', line
     # continue if line.length is 0
     adi_1       = line.adi_1
     adi_2       = line.adi_2
