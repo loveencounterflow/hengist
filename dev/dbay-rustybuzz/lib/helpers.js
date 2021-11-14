@@ -124,7 +124,22 @@
         fontnick = 'eg8i';
         fspath = 'EBGaramond08-Italic.otf';
         chrs = "abcdefghijklm";
-        text = "Affirmation字缺TitianիϪSylt.";
+        text = "affirm affluent";
+        break;
+      case 'small-b42':
+        fontnick = 'b42';
+        fspath = null;
+        chrs = "abcdefghijklm";
+        text = "affirm affluent deus";
+        break;
+      case 'medium-b42':
+        fontnick = 'b42';
+        fspath = null;
+        chrs = "abcdefghijklm";
+        text = `Dansk er et nordisk sprog, også præciseret som østnordisk, i den germanske
+sprogfamilie. Det danske sprog tales af ca. seks millioner mennesker, hovedsageligt i Danmark, men
+også i Sydslesvig (i Flensborg ca. 20 %), på Færøerne og Grønland. Dansk er tæt forbundet med
+norsk og svensk, og sproghistorisk har dansk været stærkt påvirket af plattysk.`;
         break;
       case 'medium-eg8i-da':
         fontnick = 'eg8i';
@@ -242,8 +257,10 @@ Muslim country, albeit with a significant Christian minority.`;
       default:
         throw new Error(`^345^ unknown set_id ${rpr(set_id)}`);
     }
-    //.........................................................................................................
-    fspath = PATH.resolve(PATH.join(__dirname, '../../../assets/jizura-fonts/', fspath));
+    if (fspath != null) {
+      //.........................................................................................................
+      fspath = PATH.resolve(PATH.join(__dirname, '../../../assets/jizura-fonts/', fspath));
+    }
     return {chrs, cids, cgid_map, text, fontnick, fspath};
   };
 

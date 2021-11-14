@@ -348,9 +348,11 @@
         fontnick
       }
     };
-    //.........................................................................................................
-    /* Register, load and prepopulate font: */
-    drb.register_fontnick({fontnick, fspath});
+    if (fspath != null) {
+      //.........................................................................................................
+      /* Register, load and prepopulate font: */
+      drb.register_fontnick({fontnick, fspath});
+    }
     drb.prepare_font({fontnick});
     ({known_ods, new_ods, missing_chrs, ads, fm} = drb.compose({fontnick, text, known_ods}));
     //.........................................................................................................
@@ -370,17 +372,19 @@
       // await @demo_store_outlines()
       // await @demo_store_outlines { set_id: 'all', }
       // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
-      // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
-      // await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
-      // await @demo_typeset_sample_page { set_id: 'short-eg12i', }
-      // await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
+      // await @demo_typeset_sample_page { set_id: 'small-eg12i', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'uppercasehyphen-eg12i'
+        set_id: 'small-b42'
       }));
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
+  // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
+// await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
+// await @demo_typeset_sample_page { set_id: 'short-eg12i', }
+// await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
+// await @demo_typeset_sample_page { set_id: 'uppercasehyphen-eg12i', }
+// await @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
 // await @demo_typeset_sample_page { set_id: 'small-aleo', }
 // await @demo_typeset_sample_page { set_id: 'widechrs', }
 // await @demo_typeset_sample_page { set_id: 'tibetan', }
