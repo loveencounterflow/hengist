@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_breakpoint, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, _prepare_text, append_content, append_outlines, append_remarks, append_to, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_breakpoint, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, _prepare_text, append_content, append_outlines, append_remarks, append_to, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper,
+    modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
   CND = require('cnd');
@@ -188,6 +189,13 @@
     /* TAINT use standard method */
     var ad, ad_br, adi, adi_1, adi_2, ads, chrs_ctxt, chrs_htxt, drb, element, fm, i, j, len, line, line_idx, line_y, line_y0, line_y_delta, lines, missing, missing_sid, mm_p_u, mm_p_u_txt, page, ref, ref1, ref2, relwdth, size_mm, text, width_mm, x, x0, y, y0;
     ({drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
+    /* TAINT add to cfg type */
+    if (cfg.skip_shy_etc == null) {
+      cfg.skip_shy_etc = false;
+    }
+    if (cfg.skip_ws == null) {
+      cfg.skip_ws = false;
+    }
     page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
     ({lines} = drb.distribute({ads, mm_p_u, width_mm, size_mm}));
     // for ad in ads
@@ -230,12 +238,16 @@
         if (ad.br === 'end') {
           break;
         }
-        if (((ref2 = ad.br) === 'shy' || ref2 === 'wbr')) {
-          // break if ( adi is adi_2 ) and ( ad.br in [ 'shy', 'wbr', ] )
-          continue;
+        // break if ( adi is adi_2 ) and ( ad.br in [ 'shy', 'wbr', ] )
+        if (cfg.skip_shy_etc) {
+          if (((ref2 = ad.br) === 'shy' || ref2 === 'wbr')) {
+            continue;
+          }
         }
-        if (ad.chrs === '\x20') {
-          continue;
+        if (cfg.skip_ws) {
+          if (ad.chrs === '\x20') {
+            continue;
+          }
         }
         x = ad.x - line.dx0;
         y = line_y + ad.y;
@@ -366,6 +378,68 @@
     return null;
   };
 
+  //===========================================================================================================
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_glyfgrid = function(cfg) {
+    var I, L, V, bbox, db, defaults, drb, fontnick, fspath, gid, gid_1, gid_2, i, mm_p_u, mm_p_u_txt, page, pd, px/* TAINT code duplication */, py, ref, ref1, sid, size_mm, tx, ty, width_mm, x, x1, y, y1;
+    defaults = {
+      fontnick: 'b42',
+      fspath: null,
+      gid_1: 1,
+      gid_2: 100
+    };
+    cfg = {...defaults, ...cfg};
+    ({fontnick, fspath, gid_1, gid_2} = cfg);
+    width_mm = 100;
+    size_mm = 10;
+    mm_p_u = size_mm / 1000; // mm per unit as valid inside scaled `<g>` line element
+    mm_p_u_txt = mm_p_u.toFixed(4);
+    /* NOTE: for testing we want to use the most recent `rustybuzz-wasm`: */
+    // { Tbl, }        = require '../../../apps/icql-dba-tabulate'
+    db = new DBay({
+      path: '/dev/shm/typesetting-1.sqlite'
+    });
+    drb = new Drb({
+      db,
+      rebuild: true,
+      RBW,
+      path: '/dev/shm/typesetting-2.sqlite'
+    });
+    // dtab            = new Tbl { db, }
+    page = FS.readFileSync(template_path, {
+      encoding: 'utf-8'
+    });
+    page = append_to(page, 'grid', FS.readFileSync(cm_grid_path, {
+      encoding: 'utf-8'
+    }));
+    ({I, L, V} = db.sql);
+    if (fspath != null) {
+      //.........................................................................................................
+      drb.register_fontnick({fontnick, fspath});
+    }
+    drb.prepare_font({fontnick});
+    //.........................................................................................................
+    page = append_to(page, 'content', `<g transform='translate(${0} ${10}) scale(${mm_p_u_txt})'>`);
+//.........................................................................................................
+    for (gid = i = ref = gid_1, ref1 = gid_2; (ref <= ref1 ? i <= ref1 : i >= ref1); gid = ref <= ref1 ? ++i : --i) {
+      ({bbox, pd} = drb.get_single_outline({gid, fontnick}));
+      ({x, y, x1, y1} = bbox);
+      sid = `o${gid}${fontnick}`;
+      px = (modulo(gid, 10)) / mm_p_u * size_mm;
+      py = (Math.floor(gid / 10)) / mm_p_u * size_mm;
+      tx = px + ((0.5 * size_mm) / mm_p_u);
+      ty = py - ((0.7 * size_mm) / mm_p_u);
+      page = append_to(page, 'outlines', `<path id='${sid}' d='${pd}'/>`);
+      page = append_to(page, 'content', `<use href='#${sid}' x='${px}' y='${py}'/>`);
+      page = append_to(page, 'content', `<text class='glyfgridgid' x='${tx}' y='${ty}'>${gid}</text>`);
+    }
+    //.........................................................................................................
+    page = append_to(page, 'content', "</g>");
+    FS.writeFileSync(target_path, page);
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (async() => {
@@ -379,7 +453,8 @@
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
+  // await @demo_glyfgrid { fontnick: 'b42', gid_1: 0, gid_2: 599, }
+// await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
 // await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
 // await @demo_typeset_sample_page { set_id: 'short-eg12i', }
 // await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
