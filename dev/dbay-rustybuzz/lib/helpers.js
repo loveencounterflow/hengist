@@ -130,7 +130,7 @@
         fontnick = 'b42';
         fspath = null;
         chrs = "abcdefghijklm";
-        text = "affirm affluent deus";
+        text = "affirm affluent deus in excelsior. et in pacem.";
         break;
       case 'medium-b42':
         fontnick = 'b42';
