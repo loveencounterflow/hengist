@@ -131,6 +131,9 @@ _append_breakpoint = ( cfg ) ->
 #-----------------------------------------------------------------------------------------------------------
 append_content = ( cfg ) ->
   { drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, } = cfg
+  ### TAINT add to cfg type ###
+  cfg.skip_shy_etc  ?= false
+  cfg.skip_ws       ?= false
   page = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
   { lines, } = drb.distribute { ads, mm_p_u, width_mm, size_mm, }
   # for ad in ads
@@ -159,8 +162,10 @@ append_content = ( cfg ) ->
       ad  = ads[ adi ]
       break if ( ad.br is 'end' )
       # break if ( adi is adi_2 ) and ( ad.br in [ 'shy', 'wbr', ] )
-      continue if ( ad.br in [ 'shy', 'wbr', ] )
-      continue if ad.chrs is '\x20'
+      if cfg.skip_shy_etc
+        continue if ( ad.br in [ 'shy', 'wbr', ] )
+      if cfg.skip_ws
+        continue if ad.chrs is '\x20'
       x   = ad.x - line.dx0
       y   = line_y + ad.y
       ### TAINT use standard method ###
@@ -265,6 +270,53 @@ append_content = ( cfg ) ->
   return null
 
 
+#===========================================================================================================
+#
+#-----------------------------------------------------------------------------------------------------------
+@demo_glyfgrid = ( cfg ) ->
+  defaults        = { fontnick: 'b42', fspath: null, gid_1: 1, gid_2: 100, }
+  cfg             = { defaults..., cfg..., }
+  { fontnick
+    fspath
+    gid_1
+    gid_2    }    = cfg
+  width_mm        = 100
+  size_mm         = 10
+  mm_p_u          = size_mm / 1000 # mm per unit as valid inside scaled `<g>` line element
+  mm_p_u_txt      = mm_p_u.toFixed 4
+  ### NOTE: for testing we want to use the most recent `rustybuzz-wasm`: ###
+  # { Tbl, }        = require '../../../apps/icql-dba-tabulate'
+  db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
+  drb             = new Drb { db, rebuild: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
+  # dtab            = new Tbl { db, }
+  page            = FS.readFileSync template_path, { encoding: 'utf-8', }
+  page            = append_to page, 'grid', FS.readFileSync cm_grid_path, { encoding: 'utf-8', }
+  { I, L, V }     = db.sql
+  #.........................................................................................................
+  drb.register_fontnick { fontnick, fspath, } if fspath?
+  drb.prepare_font      { fontnick, }
+  #.........................................................................................................
+  page = append_to page, 'content', "<g transform='translate(#{0} #{10}) scale(#{mm_p_u_txt})'>"
+  #.........................................................................................................
+  for gid in [ gid_1 .. gid_2 ]
+    { bbox
+      pd    }   = drb.get_single_outline { gid, fontnick, }
+    { x,  y,
+      x1, y1, } = bbox
+    sid         = "o#{gid}#{fontnick}" ### TAINT code duplication ###
+    px          = ( gid %% 10 ) / mm_p_u * size_mm
+    py          = ( gid // 10 ) / mm_p_u * size_mm
+    tx          = px + ( ( 0.5 * size_mm ) / mm_p_u )
+    ty          = py - ( ( 0.7 * size_mm ) / mm_p_u )
+    page        = append_to page, 'outlines', "<path id='#{sid}' d='#{pd}'/>"
+    page        = append_to page, 'content',  "<use href='##{sid}' x='#{px}' y='#{py}'/>"
+    page        = append_to page, 'content',  "<text class='glyfgridgid' x='#{tx}' y='#{ty}'>#{gid}</text>"
+  #.........................................................................................................
+  page = append_to page, 'content', "</g>"
+  FS.writeFileSync target_path, page
+  return null
+
+
 ############################################################################################################
 if require.main is module then do =>
   # await @demo_store_outlines()
@@ -272,6 +324,7 @@ if require.main is module then do =>
   # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'small-eg12i', }
   await @demo_typeset_sample_page { set_id: 'small-b42', }
+  # await @demo_glyfgrid { fontnick: 'b42', gid_1: 0, gid_2: 599, }
   # await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
   # await @demo_typeset_sample_page { set_id: 'short-eg12i', }
