@@ -206,7 +206,7 @@ do =>
     else
       throw new Error "^345^ unknown set_id #{rpr set_id}"
   #.........................................................................................................
-  fspath = PATH.resolve PATH.join __dirname, '../../../assets/jizura-fonts/', fspath
+  fspath = PATH.resolve PATH.join __dirname, '../../../assets/jizura-fonts/', fspath if fspath?
   return { chrs, cids, cgid_map, text, fontnick, fspath, }
 
 # #-----------------------------------------------------------------------------------------------------------

@@ -247,7 +247,7 @@ append_content = ( cfg ) ->
   known_ods       = { [missing_sid]: { gid: missing.gid, sid: missing_sid, fontnick, }, }
   #.........................................................................................................
   ### Register, load and prepopulate font: ###
-  drb.register_fontnick { fontnick, fspath, }
+  drb.register_fontnick { fontnick, fspath, } if fspath?
   drb.prepare_font      { fontnick, }
   { known_ods
     new_ods
