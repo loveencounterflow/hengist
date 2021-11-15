@@ -135,53 +135,51 @@ append_content = ( cfg ) ->
   cfg.skip_shy_etc  ?= false
   cfg.skip_ws       ?= false
   page = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
-  { lines, } = drb.distribute { ads, mm_p_u, width_mm, size_mm, }
+  drb.distribute { ads, mm_p_u, width_mm, size_mm, }
   # for ad in ads
   #   urge '^3980^', ad
   line_y0       = 20
   line_y_delta  = 10
   line_y        = line_y0 - line_y_delta
-  for line, line_idx in lines
-    # debug '^3337^', line
-    # continue if line.length is 0
-    adi_1       = line.adi_1
-    adi_2       = line.adi_2
-    # adi_1        = line.vnr_1[ 0 ]
-    # adi_2        = line.vnr_2[ 0 ]
-    line_y     += line_y_delta
-    ad_br       = ads[ adi_2 ]
-    do ->
-      lads        = ads[ adi_1 .. adi_2 ]
-      line_text   = ( ad.chrs for ad in lads ).join ''
-      line_text  += '-' if ad_br.br is 'shy'
-      info '^3980^', rpr line_text
-    page = append_to page, 'content', "<g transform='translate(#{x0} #{line_y}) scale(#{mm_p_u_txt})'>"
-    # page = _append_fontmetrics { page, size_mm, mm_p_u, fm, } # if line_idx is 0
-    # debug '^3443^', ads[ adi ] for adi in [ adi_1 .. adi_2 ]
-    for adi in [ adi_1 .. adi_2 ]
-      ad  = ads[ adi ]
-      break if ( ad.br is 'end' )
-      # break if ( adi is adi_2 ) and ( ad.br in [ 'shy', 'wbr', ] )
-      if cfg.skip_shy_etc
-        continue if ( ad.br in [ 'shy', 'wbr', ] )
-      if cfg.skip_ws
-        continue if ad.chrs is '\x20'
-      x   = ad.x - line.dx0
-      y   = line_y + ad.y
-      ### TAINT use standard method ###
-      chrs_ctxt = _escape_for_html_comment ad.chrs
+  doc           = 1
+  par           = 1
+  #.........................................................................................................
+  lnr_1         = 1
+  ### TAINT use API ###
+  lnr_2         = drb.db.single_value SQL"""
+    select
+        max( lnr ) as lnr_2
+      from #{drb.cfg.schema}.ads
+      where true
+        and ( doc = $doc )
+        and ( par = $par );""", { doc, par, }
+  for lnr in [ lnr_1 .. lnr_2 ]
+    page      = append_to page, 'content', "<g transform='translate(#{x0} #{line_y}) scale(#{mm_p_u_txt})'>"
+    line_text = ''
+    line_y    = line_y0 + ( line_y_delta * ( lnr - 1 ) )
+    for ad from drb.db SQL"""
+      select
+          *
+        from #{drb.cfg.schema}.ads
+        where true
+          and ( doc = $doc )
+          and ( par = $par )
+          and ( lnr = $lnr )
+        order by doc, par, adi;""", { doc, par, lnr, }
+      line_text  += ad.chrs
+      chrs_ctxt   = _escape_for_html_comment ad.chrs
       if ad.gid is missing.gid
         ### TAINT use standard method ###
         chrs_htxt = _escape_for_html_text ad.chrs
-        relwdth = ad.dx / 1000 ### relative width of missing outline rectangle ###
-        element = """<!--#{chrs_ctxt}--><use href='##{missing_sid}' class='missing' transform='translate(#{x} #{ad.y}) scale(#{relwdth} 1)'/>\
+        relwdth   = ad.dx / 1000 ### relative width of missing outline rectangle ###
+        element   = """<!--#{chrs_ctxt}--><use href='##{missing_sid}' class='missing' transform='translate(#{x} #{ad.y}) scale(#{relwdth} 1)'/>\
           <text class='missing-chrs' style='font-size:1000px;transform:skew(#{fm.angle}deg)' x='#{x}' y='#{ad.y}'>#{chrs_htxt}</text>"""
       else
-        if ad.y is 0 then element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{x}'/>"
-        else              element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{x}' y='#{ad.y}'/>"
+        if ad.y is 0 then element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}'/>"
+        else              element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
       page  = append_to page, 'content', element
     page = append_to page, 'content', "</g>"
-    # # page  = append_used_outlines_overview page
+    info '^43487^', { doc, par, lnr, }, rpr line_text
   return page
 
 # #-----------------------------------------------------------------------------------------------------------
