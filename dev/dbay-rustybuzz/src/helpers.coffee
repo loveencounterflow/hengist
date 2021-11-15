@@ -97,7 +97,7 @@ do =>
       fontnick  = 'b42'
       fspath    = null
       chrs      = "abcdefghijklm"
-      text      = "affirm affluent deus in excelsior. et in pacem."
+      text      = "affirm affluent deus in excelsior. xxxxxxxxxxx major/minor."
     when 'medium-b42'
       fontnick  = 'b42'
       fspath    = null
