@@ -186,8 +186,8 @@
   //-----------------------------------------------------------------------------------------------------------
   append_content = function(cfg) {
     /* TAINT use standard method */
-    /* TAINT use standard method */
-    var ad, ad_br, adi, adi_1, adi_2, ads, chrs_ctxt, chrs_htxt, drb, element, fm, i, j, len, line, line_idx, line_y, line_y0, line_y_delta, lines, missing, missing_sid, mm_p_u, mm_p_u_txt, page, ref, ref1, ref2, relwdth, size_mm, text, width_mm, x, x0, y, y0;
+    /* TAINT use API */
+    var ad, ads, chrs_ctxt, chrs_htxt, doc, drb, element, fm, i, line_text, line_y, line_y0, line_y_delta, lnr, lnr_1, lnr_2, missing, missing_sid, mm_p_u, mm_p_u_txt, page, par, ref, ref1, ref2, relwdth, size_mm, text, width_mm, x0, y0;
     ({drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
     /* TAINT add to cfg type */
     if (cfg.skip_shy_etc == null) {
@@ -197,60 +197,36 @@
       cfg.skip_ws = false;
     }
     page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
-    ({lines} = drb.distribute({ads, mm_p_u, width_mm, size_mm}));
+    drb.distribute({ads, mm_p_u, width_mm, size_mm});
     // for ad in ads
     //   urge '^3980^', ad
     line_y0 = 20;
     line_y_delta = 10;
     line_y = line_y0 - line_y_delta;
-    for (line_idx = i = 0, len = lines.length; i < len; line_idx = ++i) {
-      line = lines[line_idx];
-      // debug '^3337^', line
-      // continue if line.length is 0
-      adi_1 = line.adi_1;
-      adi_2 = line.adi_2;
-      // adi_1        = line.vnr_1[ 0 ]
-      // adi_2        = line.vnr_2[ 0 ]
-      line_y += line_y_delta;
-      ad_br = ads[adi_2];
-      (function() {
-        var ad, lads, line_text;
-        lads = ads.slice(adi_1, +adi_2 + 1 || 9e9);
-        line_text = ((function() {
-          var j, len1, results;
-          results = [];
-          for (j = 0, len1 = lads.length; j < len1; j++) {
-            ad = lads[j];
-            results.push(ad.chrs);
-          }
-          return results;
-        })()).join('');
-        if (ad_br.br === 'shy') {
-          line_text += '-';
-        }
-        return info('^3980^', rpr(line_text));
-      })();
+    doc = 1;
+    par = 1;
+    //.........................................................................................................
+    lnr_1 = 1;
+    lnr_2 = drb.db.single_value(SQL`select
+    max( lnr ) as lnr_2
+  from ${drb.cfg.schema}.ads
+  where true
+    and ( doc = $doc )
+    and ( par = $par );`, {doc, par});
+    for (lnr = i = ref = lnr_1, ref1 = lnr_2; (ref <= ref1 ? i <= ref1 : i >= ref1); lnr = ref <= ref1 ? ++i : --i) {
       page = append_to(page, 'content', `<g transform='translate(${x0} ${line_y}) scale(${mm_p_u_txt})'>`);
-// page = _append_fontmetrics { page, size_mm, mm_p_u, fm, } # if line_idx is 0
-// debug '^3443^', ads[ adi ] for adi in [ adi_1 .. adi_2 ]
-      for (adi = j = ref = adi_1, ref1 = adi_2; (ref <= ref1 ? j <= ref1 : j >= ref1); adi = ref <= ref1 ? ++j : --j) {
-        ad = ads[adi];
-        if (ad.br === 'end') {
-          break;
-        }
-        // break if ( adi is adi_2 ) and ( ad.br in [ 'shy', 'wbr', ] )
-        if (cfg.skip_shy_etc) {
-          if (((ref2 = ad.br) === 'shy' || ref2 === 'wbr')) {
-            continue;
-          }
-        }
-        if (cfg.skip_ws) {
-          if (ad.chrs === '\x20') {
-            continue;
-          }
-        }
-        x = ad.x - line.dx0;
-        y = line_y + ad.y;
+      line_text = '';
+      line_y = line_y0 + (line_y_delta * (lnr - 1));
+      ref2 = drb.db(SQL`select
+    *
+  from ${drb.cfg.schema}.ads
+  where true
+    and ( doc = $doc )
+    and ( par = $par )
+    and ( lnr = $lnr )
+  order by doc, par, adi;`, {doc, par, lnr});
+      for (ad of ref2) {
+        line_text += ad.chrs;
         chrs_ctxt = _escape_for_html_comment(ad.chrs);
         if (ad.gid === missing.gid) {
           chrs_htxt = _escape_for_html_text(ad.chrs);
@@ -258,16 +234,16 @@
           element = `<!--${chrs_ctxt}--><use href='#${missing_sid}' class='missing' transform='translate(${x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;transform:skew(${fm.angle}deg)' x='${x}' y='${ad.y}'>${chrs_htxt}</text>`;
         } else {
           if (ad.y === 0) {
-            element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${x}'/>`;
+            element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}'/>`;
           } else {
-            element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${x}' y='${ad.y}'/>`;
+            element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
           }
         }
         page = append_to(page, 'content', element);
       }
       page = append_to(page, 'content', "</g>");
+      info('^43487^', {doc, par, lnr}, rpr(line_text));
     }
-    // # page  = append_used_outlines_overview page
     return page;
   };
 
