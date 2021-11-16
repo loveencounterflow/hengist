@@ -132,6 +132,12 @@
         chrs = "abcdefghijklm";
         text = "affirm affluent deus in excelsior. xxxxxxxxxxx major/minor.";
         break;
+      case 'typo-b42':
+        fontnick = 'b42';
+        fspath = null;
+        chrs = "abcdefghijklm";
+        text = "Typothetica, vel fortasse compositio typographica, est compositio linguae scriptae per typos effecta. Litterae et alia signa reposita (sortes in rationibus mechanicis et glypha in rationibus digitalibus appellata) pro ostentu ad visum pertinente recuperantur et secundum orthographiam linguae ordinantur. Typothetica prioris rationis eget, fontis designati. Impressio stipibus ligni est modus textús, imaginum, vel exemplaria impressa, qui late per Asia Orientali adhibitus est. Antiquitus in Sina ortus est ut modus imprimendi in textilibus, et tunc in chartis. Modi imprimendi in textilibus, prima exempla exstantia ex Sina facta sunt ante 220 a.C.n., et ex Aegypto Romana ad saeculum quartum.";
+        break;
       case 'medium-b42':
         fontnick = 'b42';
         fspath = null;
