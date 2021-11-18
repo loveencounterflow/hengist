@@ -156,7 +156,7 @@
         continue;
       }
       chrs_txt = _escape_for_html_comment(od.chrs);
-      page = append_to(page, 'outlines', `<!--${chrs_txt}--><path id='${sid}' d='${od.pd}'/>`);
+      page = append_to(page, 'outlines', `<!--${chrs_txt}--><path class='shady' id='${sid}' d='${od.pd}'/>`);
     }
     return page;
   };
@@ -187,7 +187,7 @@
   append_content = function(cfg) {
     /* TAINT use standard method */
     /* TAINT use API */
-    var ad, ads, chrs_ctxt, chrs_htxt, doc, drb, element, fm, i, line_text, line_y, line_y0, line_y_delta, lnr, lnr_1, lnr_2, missing, missing_sid, mm_p_u, mm_p_u_txt, page, par, ref, ref1, ref2, relwdth, size_mm, text, width_mm, x0, y0;
+    var ad, ads, chrs_ctxt, chrs_htxt, doc, drb, element, fm, i, line_text, line_y, line_y0, line_y_delta, lnr, lnr_1, lnr_2, missing, missing_sid, mm_p_u, mm_p_u_txt, page, par, ref, ref1, ref2, ref3, relwdth, size_mm, text, width_mm, x0, y0;
     ({drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
     /* TAINT add to cfg type */
     if (cfg.skip_shy_etc == null) {
@@ -201,7 +201,7 @@
     // for ad in ads
     //   urge '^3980^', ad
     line_y0 = 20;
-    line_y_delta = 12;
+    line_y_delta = 10;
     line_y = line_y0 - line_y_delta;
     doc = 1;
     par = 1;
@@ -226,12 +226,12 @@
     and ( lnr = $lnr )
   order by doc, par, adi;`, {doc, par, lnr});
       for (ad of ref2) {
-        line_text += ad.chrs;
+        line_text += (ref3 = ad.chrs) != null ? ref3 : '';
         chrs_ctxt = _escape_for_html_comment(ad.chrs);
         if (ad.gid === missing.gid) {
           chrs_htxt = _escape_for_html_text(ad.chrs);
           relwdth = ad.dx / 1000/* relative width of missing outline rectangle */
-          element = `<!--${chrs_ctxt}--><use href='#${missing_sid}' class='missing' transform='translate(${x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;transform:skew(${fm.angle}deg)' x='${x}' y='${ad.y}'>${chrs_htxt}</text>`;
+          element = `<!--${chrs_ctxt}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;transform:skew(${fm.angle}deg)' x='${ad.x}' y='${ad.y}'>${chrs_htxt}</text>`;
         } else {
           if (ad.y === 0) {
             element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}'/>`;
@@ -296,6 +296,11 @@
     //.........................................................................................................
     ({text, chrs, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
     text = _prepare_text(text);
+    // #---------------------------------------------------------------------------------------------------------
+    // do =>
+    //   for letter in 'abcdefghijklmnopqrstuvwxyz'
+    //     text += ' l' + letter
+    //   return null
     //---------------------------------------------------------------------------------------------------------
     ({segments} = ITXT.SLABS.slabjoints_from_text(text));
     collector = [];
@@ -322,7 +327,6 @@
     text = text.replace(/\u200b$/, '');
     text = text.replace(/^\u200b/, '');
     //---------------------------------------------------------------------------------------------------------
-    ({segments} = ITXT.SLABS.slabjoints_from_text(text));
     width_mm = 100;
     size_mm = 10;
     mm_p_u = size_mm / 1000; // mm per unit as valid inside scaled `<g>` line element
@@ -423,14 +427,16 @@
       // await @demo_store_outlines { set_id: 'all', }
       // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
       // await @demo_typeset_sample_page { set_id: 'small-eg12i', }
-      // await @demo_typeset_sample_page { set_id: 'small-b42', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'typo-b42'
+        set_id: 'gaga-b42'
       }));
     })();
   }
 
-  // await @demo_glyfgrid { fontnick: 'b42', gid_1: 0, gid_2: 599, }
+  // await @demo_typeset_sample_page { set_id: 'small-b42', }
+// await @demo_typeset_sample_page { set_id: 'typo-b42', }
+// await @demo_typeset_sample_page { set_id: 'typo-b36', }
+// await @demo_glyfgrid { fontnick: 'b42', gid_1: 0, gid_2: 599, }
 // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
 // await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
 // await @demo_typeset_sample_page { set_id: 'short-eg12i', }

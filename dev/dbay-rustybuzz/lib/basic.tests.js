@@ -214,7 +214,9 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "DRB RBW finds UAX#14 breakpoints" ]
+      return test(this["DRB RBW decode_ncrs()"]);
     })();
   }
 
