@@ -240,7 +240,6 @@ append_content = ( cfg ) ->
   text = text.replace /\u200b$/, ''
   text = text.replace /^\u200b/, ''
   #---------------------------------------------------------------------------------------------------------
-  { segments }    = ITXT.SLABS.slabjoints_from_text text
   width_mm        = 100
   size_mm         = 10
   mm_p_u          = size_mm / 1000 # mm per unit as valid inside scaled `<g>` line element
