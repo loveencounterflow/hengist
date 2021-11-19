@@ -285,15 +285,15 @@ guy                       = require '../../../apps/guy'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # @[ "DRB foobar" ]()
   # test @[ "DRB no shared state in WASM module" ]
   # @[ "DRB path compression" ]()
   # test @[ "DRB can pass in custom RBW" ]
-  # test @[ "DRB get_cgid_map()" ]
+  # @[ "DRB get_cgid_map()" ]()
   # @[ "DRB insert_outlines()" ]()
   # test @[ "DRB RBW shape_text() returns coordinates acc to font upem" ]
-  # test @[ "DRB RBW shape_text() honors missing outlines" ]
+  test @[ "DRB RBW shape_text() honors missing outlines" ]
   # test @[ "DRB get_font_metrics()" ]
   # test @[ "DRB insert_outlines()" ]
   # test @[ "DRB hyphens in many fonts behave unsurprisingly" ]

@@ -321,8 +321,10 @@ if require.main is module then do =>
   # await @demo_store_outlines { set_id: 'all', }
   # await @demo_typeset_sample_page { set_id: 'small-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'small-eg12i', }
+  await @demo_typeset_sample_page { set_id: 'gaga-b42', }
   # await @demo_typeset_sample_page { set_id: 'small-b42', }
-  await @demo_typeset_sample_page { set_id: 'typo-b42', }
+  # await @demo_typeset_sample_page { set_id: 'typo-b42', }
+  # await @demo_typeset_sample_page { set_id: 'typo-b36', }
   # await @demo_glyfgrid { fontnick: 'b42', gid_1: 0, gid_2: 599, }
   # await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
   # await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }

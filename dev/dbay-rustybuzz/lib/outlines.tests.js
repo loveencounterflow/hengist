@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
+    indexOf = [].indexOf;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -63,6 +64,7 @@
       fontnick = 'gi';
       drb.prepare_font({fontnick});
       debug('^33234^', result = drb.get_cgid_map({fontnick, chrs}));
+      result.delete(null);
       if (T != null) {
         T.eq(type_of(result), 'map');
       }
@@ -154,35 +156,35 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB RBW shape_text() returns coordinates acc to font upem"] = function(T, done) {
-    var DBay, Drb, RBW, db, drb, i, len, ref, result, set_id, use_linked_RBW;
+    var DBay, Drb, RBW, db, doc, drb, i, len, ref, result, set_id, use_linked_RBW;
     // T?.halt_on_error()
     use_linked_RBW = true;
     globalThis.info = info;
     RBW = require('../../../apps/rustybuzz-wasm/pkg');
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
-    db = new DBay();
-    if (use_linked_RBW) {
-      debug('^4445^', CND.reverse(" using linked RBW "));
-      drb = new Drb({
-        db,
-        temporary: true,
-        RBW
-      });
-      if (T != null) {
-        T.ok(drb.RBW === RBW);
-      }
-    } else {
-      drb = new Drb({
-        db,
-        temporary: true
-      });
-    }
-    //.........................................................................................................
     result = {};
     ref = ['3a', '3b'];
-    for (i = 0, len = ref.length; i < len; i++) {
-      set_id = ref[i];
+    //.........................................................................................................
+    for (doc = i = 0, len = ref.length; i < len; doc = ++i) {
+      set_id = ref[doc];
+      db = new DBay();
+      if (use_linked_RBW) {
+        debug('^4445^', CND.reverse(" using linked RBW "));
+        drb = new Drb({
+          db,
+          temporary: true,
+          RBW
+        });
+        if (T != null) {
+          T.ok(drb.RBW === RBW);
+        }
+      } else {
+        drb = new Drb({
+          db,
+          temporary: true
+        });
+      }
       (() => {
         var cgid_map, chrs, cids, fontnick, fspath, text;
         ({chrs, cids, cgid_map, text, fontnick, fspath} = H.settings_from_set_id(set_id));
@@ -190,31 +192,59 @@
         drb.register_fontnick({fontnick, fspath});
         drb.prepare_font({fontnick});
         drb.insert_outlines({fontnick, cgid_map, cids, chrs});
-        return result[fontnick] = (drb.shape_text({fontnick, text}))[0];
+        return result[fontnick] = (drb.shape_text({
+          fontnick,
+          text,
+          doc,
+          par: 1,
+          vrt: 1
+        }))[1];
       })();
     }
     //.........................................................................................................
     if (T != null) {
       T.eq(result, {
         djvsi: {
+          id: 17,
+          doc: 0,
+          par: 1,
+          adi: 1,
+          vrt: 1,
+          sgi: 1,
           gid: 68,
           b: 0,
           x: 0,
           y: 0,
           dx: 596,
           dy: 0,
+          x1: 596,
           chrs: 'a',
-          sid: 'o68djvsi'
+          sid: 'o68djvsi',
+          nobr: 0,
+          br: null,
+          lnr: null,
+          rnr: null
         },
         eg8i: {
+          id: 17,
+          doc: 1,
+          par: 1,
+          adi: 1,
+          vrt: 1,
+          sgi: 1,
           gid: 66,
           b: 0,
           x: 0,
           y: 0,
           dx: 492,
           dy: 0,
+          x1: 492,
           chrs: 'a',
-          sid: 'o66eg8i'
+          sid: 'o66eg8i',
+          nobr: 0,
+          br: null,
+          lnr: null,
+          rnr: null
         }
       });
     }
@@ -223,7 +253,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB RBW shape_text() honors missing outlines"] = function(T, done) {
-    var DBay, Drb, ad, cgid_map, chrs, cids, db, drb, fontnick, fspath, i, idx, j, len, len1, matcher, missing, missing_sid, result, set_id, text;
+    var DBay, Drb, ad, cgid_map, chrs, cids, db, drb, fontnick, fspath, i, idx, j, key, keys, len, len1, matcher, missing, missing_sid, result, set_id, text;
     // T?.halt_on_error()
     globalThis.info = info;
     ({DBay} = require(H.dbay_path));
@@ -317,7 +347,14 @@
     drb.register_fontnick({fontnick, fspath});
     drb.prepare_font({fontnick});
     drb.insert_outlines({fontnick, cgid_map, cids, chrs});
-    result = drb.shape_text({fontnick, text});
+    result = drb.shape_text({
+      fontnick,
+      text,
+      doc: 1,
+      par: 1,
+      vrt: 1
+    });
+    result = result.slice(1, result.length - 1);
     for (i = 0, len = result.length; i < len; i++) {
       ad = result[i];
       urge('^45958^', ad.chrs, ad.sid, ad);
@@ -326,6 +363,12 @@
       ad = result[idx];
       help('^33443^', ad);
       urge('^33443^', matcher[idx]);
+      keys = Object.keys(matcher[idx]);
+      for (key in ad) {
+        if (indexOf.call(keys, key) < 0) {
+          delete ad[key];
+        }
+      }
       if (equals(ad, matcher[idx])) {
         T.ok(true);
         help('^45958^', ad.chrs, ad.sid, ad);
@@ -444,19 +487,19 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // @[ "DRB foobar" ]()
+      // test @[ "DRB no shared state in WASM module" ]
+      // @[ "DRB path compression" ]()
+      // test @[ "DRB can pass in custom RBW" ]
+      // @[ "DRB get_cgid_map()" ]()
+      // @[ "DRB insert_outlines()" ]()
+      // test @[ "DRB RBW shape_text() returns coordinates acc to font upem" ]
+      return test(this["DRB RBW shape_text() honors missing outlines"]);
     })();
   }
 
-  // @[ "DRB foobar" ]()
-// test @[ "DRB no shared state in WASM module" ]
-// @[ "DRB path compression" ]()
-// test @[ "DRB can pass in custom RBW" ]
-// test @[ "DRB get_cgid_map()" ]
-// @[ "DRB insert_outlines()" ]()
-// test @[ "DRB RBW shape_text() returns coordinates acc to font upem" ]
-// test @[ "DRB RBW shape_text() honors missing outlines" ]
-// test @[ "DRB get_font_metrics()" ]
+  // test @[ "DRB get_font_metrics()" ]
 // test @[ "DRB insert_outlines()" ]
 // test @[ "DRB hyphens in many fonts behave unsurprisingly" ]
 
