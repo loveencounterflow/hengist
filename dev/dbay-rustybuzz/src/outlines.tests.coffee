@@ -47,6 +47,7 @@ guy                       = require '../../../apps/guy'
     fontnick    = 'gi'
     drb.prepare_font { fontnick, }
     debug '^33234^', result = drb.get_cgid_map { fontnick, chrs, }
+    result.delete null
     T?.eq ( type_of result ), 'map'
     T?.eq result, matcher
   #.........................................................................................................
@@ -121,16 +122,16 @@ guy                       = require '../../../apps/guy'
   RBW                 = require '../../../apps/rustybuzz-wasm/pkg'
   { DBay }            = require H.dbay_path
   { Drb }             = require H.drb_path
-  db                  = new DBay()
-  if use_linked_RBW
-    debug '^4445^', CND.reverse " using linked RBW "
-    drb                 = new Drb { db, temporary: true, RBW, }
-    T?.ok drb.RBW is RBW
-  else
-    drb                 = new Drb { db, temporary: true, }
+  result              = {}
   #.........................................................................................................
-  result = {}
-  for set_id in [ '3a', '3b', ]
+  for set_id, doc in [ '3a', '3b', ]
+    db                  = new DBay()
+    if use_linked_RBW
+      debug '^4445^', CND.reverse " using linked RBW "
+      drb                 = new Drb { db, temporary: true, RBW, }
+      T?.ok drb.RBW is RBW
+    else
+      drb                 = new Drb { db, temporary: true, }
     do =>
       { chrs
         cids
@@ -142,27 +143,49 @@ guy                       = require '../../../apps/guy'
       drb.register_fontnick { fontnick, fspath, }
       drb.prepare_font      { fontnick, }
       drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
-      result[ fontnick ] = ( drb.shape_text { fontnick, text, } )[ 0 ]
+      result[ fontnick ] = ( drb.shape_text { fontnick, text, doc, par: 1, vrt: 1, } )[ 1 ]
   #.........................................................................................................
   T?.eq result, {
-    djvsi:
-      gid: 68,
-      b: 0,
-      x: 0,
-      y: 0,
-      dx: 596,
-      dy: 0,
-      chrs: 'a',
-      sid: 'o68djvsi'
-    eg8i:
-      gid: 66,
-      b: 0,
-      x: 0,
-      y: 0,
-      dx: 492,
-      dy: 0,
-      chrs: 'a',
-      sid: 'o66eg8i' }
+    djvsi: {
+      id:     17,
+      doc:    0,
+      par:    1,
+      adi:    1,
+      vrt:    1,
+      sgi:    1,
+      gid:    68,
+      b:      0,
+      x:      0,
+      y:      0,
+      dx:     596,
+      dy:     0,
+      x1:     596,
+      chrs:   'a',
+      sid:    'o68djvsi',
+      nobr:   0,
+      br:     null,
+      lnr:    null,
+      rnr:    null },
+    eg8i:  {
+      id:     17,
+      doc:    1,
+      par:    1,
+      adi:    1,
+      vrt:    1,
+      sgi:    1,
+      gid:    66,
+      b:      0,
+      x:      0,
+      y:      0,
+      dx:     492,
+      dy:     0,
+      x1:     492,
+      chrs:   'a',
+      sid:    'o66eg8i',
+      nobr:   0,
+      br:     null,
+      lnr:    null,
+      rnr:    null } }
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -197,11 +220,15 @@ guy                       = require '../../../apps/guy'
   drb.register_fontnick { fontnick, fspath, }
   drb.prepare_font      { fontnick, }
   drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
-  result = drb.shape_text { fontnick, text, }
+  result = drb.shape_text { fontnick, text, doc: 1, par: 1, vrt: 1, }
+  result = result[ 1 ... result.length - 1 ]
   urge '^45958^', ad.chrs, ad.sid, ad for ad in result
   for ad, idx in result
     help '^33443^', ad
     urge '^33443^', matcher[ idx ]
+    keys = Object.keys matcher[ idx ]
+    for key of ad
+      delete ad[ key ] unless key in keys
     if equals ad, matcher[ idx ]
       T.ok true
       help '^45958^', ad.chrs, ad.sid, ad
