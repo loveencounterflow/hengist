@@ -266,9 +266,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    /* TAINT make this a method */
-    /* TAINT use constants */
-    var I, L, Tbl, V, ads, cgid_map, chrs, collector, db, defaults, drb, dtab, fm, fontnick, fspath, i, joint, known_ods, len, missing, missing_chrs, missing_sid, mm_p_u, mm_p_u_txt, new_ods, page, segment, segments, set_id, shy, size_mm, slab, text, wbr, width_mm, x0, y0;
+    var I, L, Tbl, V, ads, cgid_map, chrs, db, defaults, drb, dtab, fm, fontnick, fspath, known_ods, missing, missing_chrs, missing_sid, mm_p_u, mm_p_u_txt, new_ods, page, set_id, size_mm, text, width_mm, x0, y0;
     defaults = {
       set_id: 'medium-eg8i'
     };
@@ -295,37 +293,16 @@
     ({I, L, V} = db.sql);
     //.........................................................................................................
     ({text, chrs, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
-    text = _prepare_text(text);
-    // #---------------------------------------------------------------------------------------------------------
-    // do =>
-    //   for letter in 'abcdefghijklmnopqrstuvwxyz'
-    //     text += ' l' + letter
-    //   return null
-    //---------------------------------------------------------------------------------------------------------
-    ({segments} = ITXT.SLABS.slabjoints_from_text(text));
-    collector = [];
-    shy = '\xad';
-    wbr = '\u200b';
-    for (i = 0, len = segments.length; i < len; i++) {
-      segment = segments[i];
-      [slab, joint] = ITXT.SLABS.text_and_joint_from_segment(segment);
-      collector.push((function() {
-        switch (joint) {
-          case '#':
-            return slab + wbr;
-          case '=':
-            return slab.replace(/-$/, shy);
-          case '°':
-            return slab + ' ';
-          default:
-            throw new Error(`^8064563^ unknown joint ${rpr(joint)}`);
-        }
-      })());
-    }
-    text = collector.join('');
-    text = text.replace(/\u200b{2,}/g, wbr);
-    text = text.replace(/\u200b$/, '');
-    text = text.replace(/^\u200b/, '');
+    text = drb.prepare_text({
+      text,
+      entities: true,
+      ncrs: true,
+      hyphenate: true,
+      newlines: true,
+      uax14: true,
+      trim: true,
+      chomp: true
+    });
     //---------------------------------------------------------------------------------------------------------
     width_mm = 100;
     size_mm = 10;
