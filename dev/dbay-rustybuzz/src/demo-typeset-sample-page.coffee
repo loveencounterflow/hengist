@@ -220,30 +220,15 @@ append_content = ( cfg ) ->
     cgid_map
     fontnick
     fspath      } = H.settings_from_set_id set_id
-  text            = _prepare_text text
-  # #---------------------------------------------------------------------------------------------------------
-  # do =>
-  #   for letter in 'abcdefghijklmnopqrstuvwxyz'
-  #     text += ' l' + letter
-  #   return null
-  #---------------------------------------------------------------------------------------------------------
-  { segments }    = ITXT.SLABS.slabjoints_from_text text
-  ### TAINT make this a method ###
-  ### TAINT use constants ###
-  collector = []
-  shy       = '\xad'
-  wbr       = '\u200b'
-  for segment in segments
-    [ slab, joint, ] = ITXT.SLABS.text_and_joint_from_segment segment
-    collector.push switch joint
-      when '#' then slab + wbr
-      when '=' then slab.replace /-$/, shy
-      when '°' then slab + ' '
-      else throw new Error "^8064563^ unknown joint #{rpr joint}"
-  text = collector.join ''
-  text = text.replace /\u200b{2,}/g, wbr
-  text = text.replace /\u200b$/, ''
-  text = text.replace /^\u200b/, ''
+  text            = drb.prepare_text {
+    text
+    entities:         true
+    ncrs:             true
+    hyphenate:        true
+    newlines:         true
+    uax14:            true
+    trim:             true
+    chomp:            true }
   #---------------------------------------------------------------------------------------------------------
   width_mm        = 100
   size_mm         = 10
