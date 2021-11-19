@@ -139,7 +139,7 @@ append_content = ( cfg ) ->
   # for ad in ads
   #   urge '^3980^', ad
   line_y0       = 20
-  line_y_delta  = 12
+  line_y_delta  = 10
   line_y        = line_y0 - line_y_delta
   doc           = 1
   par           = 1
@@ -166,14 +166,14 @@ append_content = ( cfg ) ->
           and ( par = $par )
           and ( lnr = $lnr )
         order by doc, par, adi;""", { doc, par, lnr, }
-      line_text  += ad.chrs
+      line_text  += ad.chrs ? ''
       chrs_ctxt   = _escape_for_html_comment ad.chrs
       if ad.gid is missing.gid
         ### TAINT use standard method ###
         chrs_htxt = _escape_for_html_text ad.chrs
         relwdth   = ad.dx / 1000 ### relative width of missing outline rectangle ###
-        element   = """<!--#{chrs_ctxt}--><use href='##{missing_sid}' class='missing' transform='translate(#{x} #{ad.y}) scale(#{relwdth} 1)'/>\
-          <text class='missing-chrs' style='font-size:1000px;transform:skew(#{fm.angle}deg)' x='#{x}' y='#{ad.y}'>#{chrs_htxt}</text>"""
+        element   = """<!--#{chrs_ctxt}--><use href='##{missing_sid}' class='missing' transform='translate(#{ad.x} #{ad.y}) scale(#{relwdth} 1)'/>\
+          <text class='missing-chrs' style='font-size:1000px;transform:skew(#{fm.angle}deg)' x='#{ad.x}' y='#{ad.y}'>#{chrs_htxt}</text>"""
       else
         if ad.y is 0 then element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}'/>"
         else              element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
@@ -221,6 +221,11 @@ append_content = ( cfg ) ->
     fontnick
     fspath      } = H.settings_from_set_id set_id
   text            = _prepare_text text
+  # #---------------------------------------------------------------------------------------------------------
+  # do =>
+  #   for letter in 'abcdefghijklmnopqrstuvwxyz'
+  #     text += ' l' + letter
+  #   return null
   #---------------------------------------------------------------------------------------------------------
   { segments }    = ITXT.SLABS.slabjoints_from_text text
   ### TAINT make this a method ###
