@@ -107,7 +107,7 @@ append_outlines = ( cfg ) ->
     continue if od.gid is missing.gid
     ### TAINT use standard method ###
     chrs_txt  = _escape_for_html_comment od.chrs
-    page      = append_to page, 'outlines', "<!--#{chrs_txt}--><path id='#{sid}' d='#{od.pd}'/>"
+    page      = append_to page, 'outlines', "<!--#{chrs_txt}--><path class='shady' id='#{sid}' d='#{od.pd}'/>"
   return page
 
 #-----------------------------------------------------------------------------------------------------------
