@@ -293,6 +293,7 @@
     ({I, L, V} = db.sql);
     //.........................................................................................................
     ({text, chrs, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
+    //---------------------------------------------------------------------------------------------------------
     text = drb.prepare_text({
       text,
       entities: true,
@@ -404,14 +405,14 @@
       // await @demo_store_outlines { set_id: 'all', }
       // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
       // await @demo_typeset_sample_page { set_id: 'small-eg12i', }
+      // await @demo_typeset_sample_page { set_id: 'gaga-b42', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'gaga-b42'
+        set_id: 'small-b42'
       }));
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'small-b42', }
-// await @demo_typeset_sample_page { set_id: 'typo-b42', }
+  // await @demo_typeset_sample_page { set_id: 'typo-b42', }
 // await @demo_typeset_sample_page { set_id: 'typo-b36', }
 // await @demo_glyfgrid { fontnick: 'b42', gid_1: 0, gid_2: 599, }
 // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }

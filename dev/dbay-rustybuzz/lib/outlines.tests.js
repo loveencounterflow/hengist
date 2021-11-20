@@ -197,7 +197,7 @@
           text,
           doc,
           par: 1,
-          vrt: 1
+          alt: 1
         }))[1];
       })();
     }
@@ -209,8 +209,8 @@
           doc: 0,
           par: 1,
           adi: 1,
-          vrt: 1,
           sgi: 1,
+          alt: 1,
           gid: 68,
           b: 0,
           x: 0,
@@ -230,8 +230,8 @@
           doc: 1,
           par: 1,
           adi: 1,
-          vrt: 1,
           sgi: 1,
+          alt: 1,
           gid: 66,
           b: 0,
           x: 0,
@@ -352,7 +352,7 @@
       text,
       doc: 1,
       par: 1,
-      vrt: 1
+      alt: 1
     });
     result = result.slice(1, result.length - 1);
     for (i = 0, len = result.length; i < len; i++) {
