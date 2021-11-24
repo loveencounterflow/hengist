@@ -184,15 +184,14 @@
 
   //###########################################################################################################
   if (require.main === module) {
-    (() => {
-      // test @
-      // test @[ "DRB RBW finds UAX#14 breakpoints" ]
-      // test @[ "DRB RBW decode_ncrs()" ]
-      return test(this["DRB RBW prepare_text()"]);
-    })();
+    (() => {})();
   }
 
-  // @[ "DRB foobar" ]()
+  // test @
+// test @[ "DRB RBW finds UAX#14 breakpoints" ]
+// test @[ "DRB RBW decode_ncrs()" ]
+// test @[ "DRB RBW prepare_text()" ]
+// @[ "DRB foobar" ]()
 // test @[ "DRB no shared state in WASM module" ]
 // @[ "DRB path compression" ]()
 // test @[ "DRB can pass in custom RBW" ]

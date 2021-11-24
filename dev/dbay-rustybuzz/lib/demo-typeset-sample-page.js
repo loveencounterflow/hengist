@@ -197,7 +197,6 @@
       cfg.skip_ws = false;
     }
     page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
-    drb.distribute({ads, mm_p_u, width_mm, size_mm});
     // for ad in ads
     //   urge '^3980^', ad
     line_y0 = 20;
@@ -325,6 +324,7 @@
     }
     drb.prepare_font({fontnick});
     ({known_ods, new_ods, missing_chrs, ads, fm} = drb.compose({fontnick, text, known_ods}));
+    drb.distribute({ads, mm_p_u, width_mm, size_mm});
     //.........................................................................................................
     x0 = 0;
     y0 = 50;
