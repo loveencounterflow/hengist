@@ -147,7 +147,7 @@ if require.main is module then do =>
   # test @
   # test @[ "DRB RBW finds UAX#14 breakpoints" ]
   # test @[ "DRB RBW decode_ncrs()" ]
-  test @[ "DRB RBW prepare_text()" ]
+  # test @[ "DRB RBW prepare_text()" ]
   # @[ "DRB foobar" ]()
   # test @[ "DRB no shared state in WASM module" ]
   # @[ "DRB path compression" ]()
