@@ -130,6 +130,7 @@
         fontnick = 'b42';
         fspath = null;
         chrs = "abcdefghijklm";
+        // text      = "far-out"
         text = "af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.";
         break;
       case 'gaga-b42':

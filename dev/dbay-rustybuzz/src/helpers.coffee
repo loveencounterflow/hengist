@@ -97,6 +97,7 @@ do =>
       fontnick  = 'b42'
       fspath    = null
       chrs      = "abcdefghijklm"
+      # text      = "far-out"
       text      = "af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati."
     when 'gaga-b42'
       fontnick  = 'b42'
