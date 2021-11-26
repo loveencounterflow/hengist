@@ -187,6 +187,7 @@
   append_content = function(cfg) {
     /* TAINT use standard method */
     /* TAINT use API */
+    /* TAINT use field `rnr` to determine where to stop */
     var ad, ads, chrs_ctxt, chrs_htxt, doc, drb, element, fm, i, line_text, line_y, line_y0, line_y_delta, lnr, lnr_1, lnr_2, missing, missing_sid, mm_p_u, mm_p_u_txt, page, par, ref, ref1, ref2, ref3, relwdth, size_mm, text, width_mm, x0, y0;
     ({drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
     /* TAINT add to cfg type */
@@ -208,7 +209,7 @@
     lnr_1 = 1;
     lnr_2 = drb.db.single_value(SQL`select
     max( lnr ) as lnr_2
-  from ${drb.cfg.schema}.ads
+  from ${drb.cfg.schema}.lines
   where true
     and ( doc = $doc )
     and ( par = $par );`, {doc, par});
@@ -218,13 +219,15 @@
       line_y = line_y0 + (line_y_delta * (lnr - 1));
       ref2 = drb.db(SQL`select
     *
-  from ${drb.cfg.schema}.ads
+  from ${drb.cfg.schema}.line_ads as r1
+  left join ${drb.cfg.schema}.ads as r2 on ( r1.ads_id = r2.id )
   where true
-    and ( doc = $doc )
-    and ( par = $par )
-    and ( lnr = $lnr )
-  order by doc, par, adi;`, {doc, par, lnr});
+    and ( r1.doc = $doc )
+    and ( r1.par = $par )
+    and ( r1.lnr = $lnr )
+  order by r1.ads_id;`, {doc, par, lnr});
       for (ad of ref2) {
+        debug('^6684048^', ad);
         line_text += (ref3 = ad.chrs) != null ? ref3 : '';
         chrs_ctxt = _escape_for_html_comment(ad.chrs);
         if (ad.gid === missing.gid) {
