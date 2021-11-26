@@ -145,10 +145,11 @@ append_content = ( cfg ) ->
   #.........................................................................................................
   lnr_1         = 1
   ### TAINT use API ###
+  ### TAINT use field `rnr` to determine where to stop ###
   lnr_2         = drb.db.single_value SQL"""
     select
         max( lnr ) as lnr_2
-      from #{drb.cfg.schema}.ads
+      from #{drb.cfg.schema}.lines
       where true
         and ( doc = $doc )
         and ( par = $par );""", { doc, par, }
@@ -159,12 +160,14 @@ append_content = ( cfg ) ->
     for ad from drb.db SQL"""
       select
           *
-        from #{drb.cfg.schema}.ads
+        from #{drb.cfg.schema}.line_ads as r1
+        left join #{drb.cfg.schema}.ads as r2 on ( r1.ads_id = r2.id )
         where true
-          and ( doc = $doc )
-          and ( par = $par )
-          and ( lnr = $lnr )
-        order by doc, par, adi;""", { doc, par, lnr, }
+          and ( r1.doc = $doc )
+          and ( r1.par = $par )
+          and ( r1.lnr = $lnr )
+        order by r1.ads_id;""", { doc, par, lnr, }
+      debug '^6684048^', ad
       line_text  += ad.chrs ? ''
       chrs_ctxt   = _escape_for_html_comment ad.chrs
       if ad.gid is missing.gid
