@@ -167,7 +167,7 @@ append_content = ( cfg ) ->
           and ( r1.par = $par )
           and ( r1.lnr = $lnr )
         order by r1.ads_id;""", { doc, par, lnr, }
-      debug '^6684048^', ad
+      # debug '^6684048^', ad
       line_text  += ad.chrs ? ''
       chrs_ctxt   = _escape_for_html_comment ad.chrs
       if ad.gid is missing.gid
