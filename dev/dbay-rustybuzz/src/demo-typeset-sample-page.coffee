@@ -159,14 +159,21 @@ append_content = ( cfg ) ->
     line_y    = line_y0 + ( line_y_delta * ( lnr - 1 ) )
     for ad from drb.db SQL"""
       select
-          *
-        from #{drb.cfg.schema}.line_ads as r1
-        left join #{drb.cfg.schema}.ads as r2 on ( r1.ads_id = r2.id )
+          a.sid     as sid,
+          a.chrs    as chrs,
+          a.dx      as dx,
+          a.dy      as dy,
+          l.x       as x,
+          l.y       as y,
+          l.lnr     as lnr,
+          l.ads_id  as ads_id
+        from #{drb.cfg.schema}.line_ads as l
+        left join #{drb.cfg.schema}.ads as a on ( l.ads_id = a.id )
         where true
-          and ( r1.doc = $doc )
-          and ( r1.par = $par )
-          and ( r1.lnr = $lnr )
-        order by r1.ads_id;""", { doc, par, lnr, }
+          and ( l.doc = $doc )
+          and ( l.par = $par )
+          and ( l.lnr = $lnr )
+        order by l.ads_id;""", { doc, par, lnr, }
       # debug '^6684048^', ad
       line_text  += ad.chrs ? ''
       chrs_ctxt   = _escape_for_html_comment ad.chrs
