@@ -227,7 +227,7 @@
     and ( r1.lnr = $lnr )
   order by r1.ads_id;`, {doc, par, lnr});
       for (ad of ref2) {
-        debug('^6684048^', ad);
+        // debug '^6684048^', ad
         line_text += (ref3 = ad.chrs) != null ? ref3 : '';
         chrs_ctxt = _escape_for_html_comment(ad.chrs);
         if (ad.gid === missing.gid) {
