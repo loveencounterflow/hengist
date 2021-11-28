@@ -98,7 +98,17 @@ do =>
       fspath    = null
       chrs      = "abcdefghijklm"
       # text      = "far-out"
-      text      = "af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati."
+      text      = """af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.
+      sic habet cognomina, affirmatio."""
+    when 'apollo-b42'
+      fontnick  = 'b42'
+      fspath    = null
+      chrs      = "abcdefghijklm"
+      # text      = "far-out"
+      text      = """Apollo, (-inis, m, Graece Ἀπόλλων, Apóllōn) in mythologia Graeca est filius Iovis et
+        Latonae, Deli in insula natus. Qui est deus vaticinationis, musicae, iuventutis, scientiae,
+        medicinae, et solis (igitur, varia habet cognomina, primo scilicet Phoebus (Graece φοῖβος
+        'resplendens, luminosus') etiam Paean, 'deus salutaris')."""
     when 'gaga-b42'
       fontnick  = 'b42'
       fspath    = null
