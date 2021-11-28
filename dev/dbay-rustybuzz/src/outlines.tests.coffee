@@ -115,7 +115,7 @@ guy                       = require '../../../apps/guy'
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DRB RBW shape_text() returns coordinates acc to font upem" ] = ( T, done ) ->
+@[ "DRB RBW arrange() returns coordinates acc to font upem" ] = ( T, done ) ->
   # T?.halt_on_error()
   use_linked_RBW      = true
   globalThis.info     = info
@@ -143,7 +143,7 @@ guy                       = require '../../../apps/guy'
       drb.register_fontnick { fontnick, fspath, }
       drb.prepare_font      { fontnick, }
       drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
-      result[ fontnick ] = ( drb.shape_text { fontnick, text, doc, par: 1, alt: 1, } )[ 1 ]
+      result[ fontnick ] = ( drb.arrange { fontnick, text, doc, par: 1, alt: 1, } )[ 1 ]
   #.........................................................................................................
   T?.eq result, {
     djvsi: {
@@ -189,7 +189,7 @@ guy                       = require '../../../apps/guy'
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DRB RBW shape_text() honors missing outlines" ] = ( T, done ) ->
+@[ "DRB RBW arrange() honors missing outlines" ] = ( T, done ) ->
   # T?.halt_on_error()
   globalThis.info     = info
   { DBay }            = require H.dbay_path
@@ -220,7 +220,7 @@ guy                       = require '../../../apps/guy'
   drb.register_fontnick { fontnick, fspath, }
   drb.prepare_font      { fontnick, }
   drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
-  result = drb.shape_text { fontnick, text, doc: 1, par: 1, alt: 1, }
+  result = drb.arrange { fontnick, text, doc: 1, par: 1, alt: 1, }
   result = result[ 1 ... result.length - 1 ]
   urge '^45958^', ad.chrs, ad.sid, ad for ad in result
   for ad, idx in result
@@ -260,11 +260,11 @@ guy                       = require '../../../apps/guy'
   for fontnick, fspath of H.fontnicks_and_paths
     drb.register_fontnick { fontnick, fspath, }
     drb.prepare_font      { fontnick, }
-    hyphen_dx = ( drb.shape_text { fontnick, text: '-', } )[ 0 ].dx
+    hyphen_dx = ( drb.arrange { fontnick, text: '-', } )[ 0 ].dx
     info '^3441^', { fontnick, hyphen_dx, }
     for letter in letters
-      ads_s = drb.shape_text { fontnick, text: "#{letter}\xad", }
-      ads_h = drb.shape_text { fontnick, text: "#{letter}-",    }
+      ads_s = drb.arrange { fontnick, text: "#{letter}\xad", }
+      ads_h = drb.arrange { fontnick, text: "#{letter}-",    }
       s_dx  = ads_s[ 1 ].x + hyphen_dx
       h_dx  = ads_h[ 1 ].x + ads_h[ 1 ].dx
       T?.eq s_dx, h_dx
@@ -319,8 +319,8 @@ if require.main is module then do =>
   # test @[ "DRB can pass in custom RBW" ]
   # @[ "DRB get_cgid_map()" ]()
   # @[ "DRB insert_outlines()" ]()
-  # test @[ "DRB RBW shape_text() returns coordinates acc to font upem" ]
-  test @[ "DRB RBW shape_text() honors missing outlines" ]
+  # test @[ "DRB RBW arrange() returns coordinates acc to font upem" ]
+  test @[ "DRB RBW arrange() honors missing outlines" ]
   # test @[ "DRB get_font_metrics()" ]
   # test @[ "DRB insert_outlines()" ]
   # test @[ "DRB hyphens in many fonts behave unsurprisingly" ]
