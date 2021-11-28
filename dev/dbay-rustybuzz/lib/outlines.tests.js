@@ -155,7 +155,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DRB RBW shape_text() returns coordinates acc to font upem"] = function(T, done) {
+  this["DRB RBW arrange() returns coordinates acc to font upem"] = function(T, done) {
     var DBay, Drb, RBW, db, doc, drb, i, len, ref, result, set_id, use_linked_RBW;
     // T?.halt_on_error()
     use_linked_RBW = true;
@@ -192,7 +192,7 @@
         drb.register_fontnick({fontnick, fspath});
         drb.prepare_font({fontnick});
         drb.insert_outlines({fontnick, cgid_map, cids, chrs});
-        return result[fontnick] = (drb.shape_text({
+        return result[fontnick] = (drb.arrange({
           fontnick,
           text,
           doc,
@@ -252,7 +252,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DRB RBW shape_text() honors missing outlines"] = function(T, done) {
+  this["DRB RBW arrange() honors missing outlines"] = function(T, done) {
     var DBay, Drb, ad, cgid_map, chrs, cids, db, drb, fontnick, fspath, i, idx, j, key, keys, len, len1, matcher, missing, missing_sid, result, set_id, text;
     // T?.halt_on_error()
     globalThis.info = info;
@@ -347,7 +347,7 @@
     drb.register_fontnick({fontnick, fspath});
     drb.prepare_font({fontnick});
     drb.insert_outlines({fontnick, cgid_map, cids, chrs});
-    result = drb.shape_text({
+    result = drb.arrange({
       fontnick,
       text,
       doc: 1,
@@ -408,18 +408,18 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
       fspath = ref[fontnick];
       drb.register_fontnick({fontnick, fspath});
       drb.prepare_font({fontnick});
-      hyphen_dx = (drb.shape_text({
+      hyphen_dx = (drb.arrange({
         fontnick,
         text: '-'
       }))[0].dx;
       info('^3441^', {fontnick, hyphen_dx});
       for (i = 0, len = letters.length; i < len; i++) {
         letter = letters[i];
-        ads_s = drb.shape_text({
+        ads_s = drb.arrange({
           fontnick,
           text: `${letter}\xad`
         });
-        ads_h = drb.shape_text({
+        ads_h = drb.arrange({
           fontnick,
           text: `${letter}-`
         });
@@ -494,8 +494,8 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
       // test @[ "DRB can pass in custom RBW" ]
       // @[ "DRB get_cgid_map()" ]()
       // @[ "DRB insert_outlines()" ]()
-      // test @[ "DRB RBW shape_text() returns coordinates acc to font upem" ]
-      return test(this["DRB RBW shape_text() honors missing outlines"]);
+      // test @[ "DRB RBW arrange() returns coordinates acc to font upem" ]
+      return test(this["DRB RBW arrange() honors missing outlines"]);
     })();
   }
 
