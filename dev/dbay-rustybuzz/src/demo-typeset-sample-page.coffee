@@ -92,7 +92,7 @@ _escape_for_html_text     = ( text ) -> ( ( text ? '' ).replace /&/g, '&amp;' ).
 
 #-----------------------------------------------------------------------------------------------------------
 append_outlines = ( cfg ) ->
-  { drb, page, fontnick, size_mm, mm_p_u, missing, missing_sid, known_ods, } = cfg
+  { drb, page, fontnick, size_mm, mm_p_u, missing, missing_sid, } = cfg
   fm          = drb.get_fontmetrics { fontnick, }
   swdth       = 0.5 # stroke width in mm
   swdth      *= 1000 * size_mm * mm_p_u
@@ -106,11 +106,11 @@ append_outlines = ( cfg ) ->
   page = append_to page, 'outlines', "<!--NULL--><path id='#{missing_sid}' class='missing' d='#{missing_pd}' transform='skewX(#{fm.angle})'/>"
   page = append_to page, 'outlines', "<!--SHY--><line id='oshy-#{fontnick}' class='fontmetric shy' stroke-width='#{swdth}' x1='0' y1='#{bottom}' x2='0' y2='#{top}' transform='skewX(#{fm.angle})'/>"
   page = append_to page, 'outlines', "<!--WBR--><line id='owbr-#{fontnick}' class='fontmetric wbr' stroke-width='#{swdth}' x1='0' y1='#{bottom}' x2='0' y2='#{top}' transform='skewX(#{fm.angle})'/>"
-  for sid, od of known_ods
-    continue if od.gid is missing.gid
+  for od from drb.db SQL"select * from outlines;"
+    # continue if od.gid is missing.gid
     ### TAINT use standard method ###
     chrs_txt  = _escape_for_html_comment od.chrs
-    page      = append_to page, 'outlines', "<!--#{chrs_txt}--><path class='shady' id='#{sid}' d='#{od.pd}'/>"
+    page      = append_to page, 'outlines', "<!--#{chrs_txt}--><path class='shady' id='#{od.sid}' d='#{od.pd}'/>"
   return page
 
 #-----------------------------------------------------------------------------------------------------------
