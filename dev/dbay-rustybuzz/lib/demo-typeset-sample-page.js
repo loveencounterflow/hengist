@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_breakpoint, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, _prepare_text, append_content, append_outlines, append_remarks, append_to, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper,
+  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, _prepare_text, append_content, append_outlines, append_remarks, append_to, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper,
     modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
@@ -88,19 +88,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   append_remarks = function(cfg) {
-    var ad, fm, missing_chrs, missing_txt, page;
-    ({page, fm, missing_chrs} = cfg);
+    var drb, fm, fontnick, missing_chrs, page;
+    ({drb, page, missing_chrs, fontnick} = cfg);
+    fm = drb.get_fontmetrics({fontnick});
     page = append_to(page, 'remarks', `<div>fm: ${rpr(fm)}</div>`);
-    missing_txt = ((function() {
-      var i, len, results;
-      results = [];
-      for (i = 0, len = missing_chrs.length; i < len; i++) {
-        ad = missing_chrs[i];
-        results.push(rpr(ad.chrs));
-      }
-      return results;
-    })()).join(', ');
-    return page = append_to(page, 'remarks', `<div>missing_chrs: ${missing_txt}</div>`);
+    // missing_txt     = ( rpr ad.chrs for ad in missing_chrs ).join ', '
+    // page            = append_to page, 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
+    return page;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -136,8 +130,9 @@
   //-----------------------------------------------------------------------------------------------------------
   append_outlines = function(cfg) {
     /* TAINT use standard method */
-    var bottom, chrs_txt, fm, fontnick, known_ods, left, missing, missing_pd, missing_sid, mm_p_u, od, owdth, page, right, sid, size_mm, swdth, top;
-    ({page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods} = cfg);
+    var bottom, chrs_txt, drb, fm, fontnick, known_ods, left, missing, missing_pd, missing_sid, mm_p_u, od, owdth, page, right, sid, size_mm, swdth, top;
+    ({drb, page, fontnick, size_mm, mm_p_u, missing, missing_sid, known_ods} = cfg);
+    fm = drb.get_fontmetrics({fontnick});
     swdth = 0.5; // stroke width in mm
     swdth *= 1000 * size_mm * mm_p_u;
     owdth = 3 * swdth;
@@ -163,8 +158,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   _append_fontmetrics = function(cfg) {
-    var fm, mm_p_u, page, size_mm, swdth;
-    ({page, size_mm, mm_p_u, fm} = cfg);
+    var drb, fm, fontnick, mm_p_u, page, size_mm, swdth;
+    ({drb, page, fontnick, size_mm, mm_p_u} = cfg);
+    fm = drb.get_fontmetrics({fontnick});
     swdth = 0.25; // stroke width in mm
     swdth *= 1000 * size_mm * mm_p_u;
     page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`);
@@ -175,22 +171,21 @@
     return page;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  _append_breakpoint = function(cfg) {
-    var ads, fm, missing, missing_sid, mm_p_u, mm_p_u_txt, page, size_mm, text, x0, y0;
-    ({page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
-    page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`);
-    return page;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // _append_breakpoint = ( cfg ) ->
+  //   { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, } = cfg
+  //   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
+  //   return page
 
   //-----------------------------------------------------------------------------------------------------------
   append_content = function(cfg) {
     /* TAINT use standard method */
+    /* TAINT add to cfg type */
     /* TAINT use API */
     /* TAINT use field `rnr` to determine where to stop */
-    var ad, ads, chrs_ctxt, chrs_htxt, doc, drb, element, fm, i, line_text, line_y, line_y0, line_y_delta, lnr, lnr_1, lnr_2, missing, missing_sid, mm_p_u, mm_p_u_txt, page, par, ref, ref1, ref2, ref3, relwdth, size_mm, text, width_mm, x0, y0;
-    ({drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid} = cfg);
-    /* TAINT add to cfg type */
+    var ad, chrs_ctxt, chrs_htxt, doc, drb, element, fm, fontnick, i, line_text, line_y, line_y0, line_y_delta, lnr, lnr_1, lnr_2, missing, missing_sid, mm_p_u, mm_p_u_txt, page, par, ref, ref1, ref2, ref3, relwdth, size_mm, text, width_mm, x0, y0;
+    ({drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing, missing_sid} = cfg);
+    fm = drb.get_fontmetrics({fontnick});
     if (cfg.skip_shy_etc == null) {
       cfg.skip_shy_etc = false;
     }
@@ -275,7 +270,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var I, L, Tbl, V, ads, cgid_map, chrs, db, defaults, drb, dtab, fm, fontnick, fspath, known_ods, missing, missing_chrs, missing_sid, mm_p_u, mm_p_u_txt, new_ods, page, set_id, size_mm, text, width_mm, x0, y0;
+    var I, L, Tbl, V, cgid_map, chrs, db, defaults, doc, drb, dtab, fontnick, fspath, known_ods, missing, missing_sid, mm_p_u, mm_p_u_txt, page, par, set_id, size_mm, text, width_mm, x0, y0;
     defaults = {
       set_id: 'medium-eg8i'
     };
@@ -293,6 +288,8 @@
       path: '/dev/shm/typesetting-2.sqlite'
     });
     dtab = new Tbl({db});
+    doc = 1;
+    par = 1;
     page = FS.readFileSync(template_path, {
       encoding: 'utf-8'
     });
@@ -333,14 +330,15 @@
       drb.register_fontnick({fontnick, fspath});
     }
     drb.prepare_font({fontnick});
-    ({known_ods, new_ods, missing_chrs, ads, fm} = drb.compose({fontnick, text, known_ods}));
-    drb.distribute({ads, mm_p_u, width_mm, size_mm});
+    drb.arrange({fontnick, text, doc, par});
+    drb.distribute({mm_p_u, width_mm, size_mm});
+    drb.compose({fontnick, text, doc, par});
     //.........................................................................................................
     x0 = 0;
     y0 = 50;
-    page = append_remarks({drb, page, fm, missing_chrs});
-    page = append_outlines({drb, page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods});
-    page = append_content({drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid});
+    page = append_remarks({drb, page, fontnick});
+    page = append_outlines({drb, page, fontnick, size_mm, mm_p_u, missing, missing_sid, known_ods});
+    page = append_content({drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing, missing_sid});
     //.........................................................................................................
     FS.writeFileSync(target_path, page);
     return null;
