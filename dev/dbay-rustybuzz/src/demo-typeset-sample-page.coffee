@@ -63,10 +63,12 @@ append_to = ( page, name, text ) ->
 #
 #-----------------------------------------------------------------------------------------------------------
 append_remarks = ( cfg ) ->
-  { page, fm, missing_chrs, } = cfg
+  { drb, page, missing_chrs, fontnick, } = cfg
+  fm              = drb.get_fontmetrics { fontnick, }
   page            = append_to page, 'remarks', "<div>fm: #{rpr fm}</div>"
-  missing_txt     = ( rpr ad.chrs for ad in missing_chrs ).join ', '
-  page            = append_to page, 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
+  # missing_txt     = ( rpr ad.chrs for ad in missing_chrs ).join ', '
+  # page            = append_to page, 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
+  return page
 
 #-----------------------------------------------------------------------------------------------------------
 ### TAINT use standard methods ###
@@ -90,7 +92,8 @@ _escape_for_html_text     = ( text ) -> ( ( text ? '' ).replace /&/g, '&amp;' ).
 
 #-----------------------------------------------------------------------------------------------------------
 append_outlines = ( cfg ) ->
-  { page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods, } = cfg
+  { drb, page, fontnick, size_mm, mm_p_u, missing, missing_sid, known_ods, } = cfg
+  fm          = drb.get_fontmetrics { fontnick, }
   swdth       = 0.5 # stroke width in mm
   swdth      *= 1000 * size_mm * mm_p_u
   owdth       = 3 * swdth
@@ -112,7 +115,8 @@ append_outlines = ( cfg ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 _append_fontmetrics = ( cfg ) ->
-  { page, size_mm, mm_p_u, fm, } = cfg
+  { drb, page, fontnick, size_mm, mm_p_u, } = cfg
+  fm      = drb.get_fontmetrics { fontnick, }
   swdth   = 0.25 # stroke width in mm
   swdth  *= 1000 * size_mm * mm_p_u
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
@@ -122,16 +126,17 @@ _append_fontmetrics = ( cfg ) ->
   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>"
   return page
 
-#-----------------------------------------------------------------------------------------------------------
-_append_breakpoint = ( cfg ) ->
-  { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, } = cfg
-  page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
-  return page
+# #-----------------------------------------------------------------------------------------------------------
+# _append_breakpoint = ( cfg ) ->
+#   { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, } = cfg
+#   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
+#   return page
 
 #-----------------------------------------------------------------------------------------------------------
 append_content = ( cfg ) ->
-  { drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, } = cfg
+  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing, missing_sid, } = cfg
   ### TAINT add to cfg type ###
+  fm            = drb.get_fontmetrics { fontnick, }
   cfg.skip_shy_etc  ?= false
   cfg.skip_ws       ?= false
   page = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
@@ -220,6 +225,8 @@ append_content = ( cfg ) ->
   db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
   drb             = new Drb { db, rebuild: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
   dtab            = new Tbl { db, }
+  doc             = 1
+  par             = 1
   page            = FS.readFileSync template_path, { encoding: 'utf-8', }
   page            = append_to page, 'grid', FS.readFileSync cm_grid_path, { encoding: 'utf-8', }
   { I, L, V }     = db.sql
@@ -251,18 +258,15 @@ append_content = ( cfg ) ->
   ### Register, load and prepopulate font: ###
   drb.register_fontnick { fontnick, fspath, } if fspath?
   drb.prepare_font      { fontnick, }
-  { known_ods
-    new_ods
-    missing_chrs
-    ads
-    fm          } = drb.compose { fontnick, text, known_ods, }
-  drb.distribute { ads, mm_p_u, width_mm, size_mm, }
+  drb.arrange           { fontnick, text, doc, par, }
+  drb.distribute        { mm_p_u, width_mm, size_mm, }
+  drb.compose           { fontnick, text, doc, par, }
   #.........................................................................................................
   x0    = 0
   y0    = 50
-  page  = append_remarks  { drb, page, fm, missing_chrs, }
-  page  = append_outlines { drb, page, fontnick, size_mm, mm_p_u, fm, missing, missing_sid, known_ods, }
-  page  = append_content  { drb, page, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, }
+  page  = append_remarks  { drb, page, fontnick, }
+  page  = append_outlines { drb, page, fontnick, size_mm, mm_p_u, missing, missing_sid, known_ods, }
+  page  = append_content  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing, missing_sid, }
   #.........................................................................................................
   FS.writeFileSync target_path, page
   return null
