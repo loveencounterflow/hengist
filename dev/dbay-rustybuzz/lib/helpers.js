@@ -134,6 +134,11 @@
         text = `af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.
 sic habet cognomina, affirmatio.`;
         break;
+      case 'affirm-b42':
+        fontnick = 'b42';
+        fspath = null;
+        text = `*************** affirm`;
+        break;
       case 'apollo-b42':
         fontnick = 'b42';
         fspath = null;

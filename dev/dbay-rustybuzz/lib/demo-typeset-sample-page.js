@@ -412,8 +412,9 @@
       // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
       // await @demo_typeset_sample_page { set_id: 'small-eg12i', }
       // await @demo_typeset_sample_page { set_id: 'gaga-b42', }
+      // await @demo_typeset_sample_page { set_id: 'small-b42', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'small-b42'
+        set_id: 'affirm-b42'
       }));
     })();
   }
