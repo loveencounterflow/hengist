@@ -100,6 +100,10 @@ do =>
       # text      = "far-out"
       text      = """af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.
       sic habet cognomina, affirmatio."""
+    when 'affirm-b42'
+      fontnick  = 'b42'
+      fspath    = null
+      text      = """*************** affirm"""
     when 'apollo-b42'
       fontnick  = 'b42'
       fspath    = null
