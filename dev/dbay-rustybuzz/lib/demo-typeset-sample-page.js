@@ -129,9 +129,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   append_outlines = function(cfg) {
-    /* TAINT use standard method */
-    var bottom, chrs_txt, drb, fm, fontnick, known_ods, left, missing, missing_pd, missing_sid, mm_p_u, od, owdth, page, right, sid, size_mm, swdth, top;
-    ({drb, page, fontnick, size_mm, mm_p_u, missing, missing_sid, known_ods} = cfg);
+    var bottom, chrs_txt, drb, fm, fontnick, left, missing, missing_pd, missing_sid, mm_p_u, od, owdth, page, ref, right, size_mm, swdth, top;
+    ({drb, page, fontnick, size_mm, mm_p_u, missing, missing_sid} = cfg);
     fm = drb.get_fontmetrics({fontnick});
     swdth = 0.5; // stroke width in mm
     swdth *= 1000 * size_mm * mm_p_u;
@@ -145,13 +144,12 @@
     page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' class='missing' d='${missing_pd}' transform='skewX(${fm.angle})'/>`);
     page = append_to(page, 'outlines', `<!--SHY--><line id='oshy-${fontnick}' class='fontmetric shy' stroke-width='${swdth}' x1='0' y1='${bottom}' x2='0' y2='${top}' transform='skewX(${fm.angle})'/>`);
     page = append_to(page, 'outlines', `<!--WBR--><line id='owbr-${fontnick}' class='fontmetric wbr' stroke-width='${swdth}' x1='0' y1='${bottom}' x2='0' y2='${top}' transform='skewX(${fm.angle})'/>`);
-    for (sid in known_ods) {
-      od = known_ods[sid];
-      if (od.gid === missing.gid) {
-        continue;
-      }
+    ref = drb.db(SQL`select * from outlines;`);
+    for (od of ref) {
+      // continue if od.gid is missing.gid
+      /* TAINT use standard method */
       chrs_txt = _escape_for_html_comment(od.chrs);
-      page = append_to(page, 'outlines', `<!--${chrs_txt}--><path class='shady' id='${sid}' d='${od.pd}'/>`);
+      page = append_to(page, 'outlines', `<!--${chrs_txt}--><path class='shady' id='${od.sid}' d='${od.pd}'/>`);
     }
     return page;
   };
