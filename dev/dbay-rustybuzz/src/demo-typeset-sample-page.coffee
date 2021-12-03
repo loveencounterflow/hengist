@@ -259,7 +259,7 @@ append_content = ( cfg ) ->
   drb.register_fontnick { fontnick, fspath, } if fspath?
   drb.prepare_font      { fontnick, }
   drb.arrange           { fontnick, text, doc, par, }
-  drb.distribute        { mm_p_u, width_mm, size_mm, }
+  drb.distribute        { doc, par, mm_p_u, width_mm, size_mm, }
   drb.compose           { fontnick, text, doc, par, }
   #.........................................................................................................
   x0    = 0
