@@ -192,24 +192,26 @@
         drb.register_fontnick({fontnick, fspath});
         drb.prepare_font({fontnick});
         drb.insert_outlines({fontnick, cgid_map, cids, chrs});
-        return result[fontnick] = (drb.arrange({
+        result[fontnick] = (drb.arrange({
           fontnick,
           text,
           doc,
           par: 1,
           alt: 1
-        }))[1];
+        }))[0];
+        return delete result[fontnick].id;
       })();
     }
     //.........................................................................................................
     if (T != null) {
       T.eq(result, {
         djvsi: {
-          id: 17,
           doc: 0,
           par: 1,
+          alt: 1,
           adi: 1,
           sgi: 1,
+          osgi: null,
           alt: 1,
           gid: 68,
           b: 0,
@@ -221,16 +223,15 @@
           chrs: 'a',
           sid: 'o68djvsi',
           nobr: 0,
-          br: null,
-          lnr: null,
-          rnr: null
+          br: null
         },
         eg8i: {
-          id: 17,
           doc: 1,
           par: 1,
+          alt: 1,
           adi: 1,
           sgi: 1,
+          osgi: null,
           alt: 1,
           gid: 66,
           b: 0,
@@ -242,9 +243,7 @@
           chrs: 'a',
           sid: 'o66eg8i',
           nobr: 0,
-          br: null,
-          lnr: null,
-          rnr: null
+          br: null
         }
       });
     }
@@ -354,9 +353,9 @@
       par: 1,
       alt: 1
     });
-    result = result.slice(1, result.length - 1);
     for (i = 0, len = result.length; i < len; i++) {
       ad = result[i];
+      // result = result[ 1 ... result.length - 1 ]
       urge('^45958^', ad.chrs, ad.sid, ad);
     }
     for (idx = j = 0, len1 = result.length; j < len1; idx = ++j) {
@@ -454,12 +453,12 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
       // test @[ "DRB can pass in custom RBW" ]
       // @[ "DRB get_cgid_map()" ]()
       // @[ "DRB insert_outlines()" ]()
-      // test @[ "DRB RBW arrange() returns coordinates acc to font upem" ]
-      return test(this["DRB RBW arrange() honors missing outlines"]);
+      return test(this["DRB RBW arrange() returns coordinates acc to font upem"]);
     })();
   }
 
-  // test @[ "DRB insert_outlines()" ]
+  // test @[ "DRB RBW arrange() honors missing outlines" ]
+// test @[ "DRB insert_outlines()" ]
 // test @[ "DRB hyphens in many fonts behave unsurprisingly" ]
 
 }).call(this);

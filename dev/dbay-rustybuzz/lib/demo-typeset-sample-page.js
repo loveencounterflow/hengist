@@ -329,7 +329,7 @@
     }
     drb.prepare_font({fontnick});
     drb.arrange({fontnick, text, doc, par});
-    drb.distribute({mm_p_u, width_mm, size_mm});
+    drb.distribute({doc, par, mm_p_u, width_mm, size_mm});
     drb.compose({fontnick, text, doc, par});
     //.........................................................................................................
     x0 = 0;
@@ -413,22 +413,26 @@
       // await @demo_typeset_sample_page { set_id: 'small-eg12i', }
       // await @demo_typeset_sample_page { set_id: 'gaga-b42', }
       // await @demo_typeset_sample_page { set_id: 'small-b42', }
+      // await @demo_typeset_sample_page { set_id: 'affirm-b42', }
+      // await @demo_typeset_sample_page { set_id: 'apollo-b42', }
+      // await @demo_typeset_sample_page { set_id: 'typo-b42', }
+      // await @demo_typeset_sample_page { set_id: 'typo-b36', }
+      // await @demo_glyfgrid { fontnick: 'b42', gid_1: 0, gid_2: 599, }
+      // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
+      // await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
+      // await @demo_typeset_sample_page { set_id: 'short-eg12i', }
+      // await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
+      // await @demo_typeset_sample_page { set_id: 'medium-b42', }
+      // await @demo_typeset_sample_page { set_id: 'uppercasehyphen-eg12i', }
+      // await @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
+      // await @demo_typeset_sample_page { set_id: 'egypt-b42', }
       return (await this.demo_typeset_sample_page({
-        set_id: 'affirm-b42'
+        set_id: 'memphis-b42'
       }));
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'apollo-b42', }
-// await @demo_typeset_sample_page { set_id: 'typo-b42', }
-// await @demo_typeset_sample_page { set_id: 'typo-b36', }
-// await @demo_glyfgrid { fontnick: 'b42', gid_1: 0, gid_2: 599, }
-// await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
-// await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
-// await @demo_typeset_sample_page { set_id: 'short-eg12i', }
-// await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
-// await @demo_typeset_sample_page { set_id: 'uppercasehyphen-eg12i', }
-// await @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
+  // await @demo_typeset_sample_page { set_id: 'small-arya', }
 // await @demo_typeset_sample_page { set_id: 'small-aleo', }
 // await @demo_typeset_sample_page { set_id: 'widechrs', }
 // await @demo_typeset_sample_page { set_id: 'tibetan', }
