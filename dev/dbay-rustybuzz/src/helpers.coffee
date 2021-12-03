@@ -103,7 +103,15 @@ do =>
     when 'affirm-b42'
       fontnick  = 'b42'
       fspath    = null
-      text      = """*************** affirm"""
+      text      = """**********affirm affluent deus in excelsior"""
+    when 'memphis-b42'
+      fontnick  = 'b42'
+      fspath    = null
+      text      = """of Memphis, Thebes, Karnak, and the Valley of the Kings"""
+    when 'small-arya'
+      fontnick  = 'arya'
+      fspath    = 'indic/arya/AArya-Bold.otf'
+      text      = """mirror mirror देवनागरी A वकिव mirror mirror mirror mirror mirror 1कि2"""
     when 'apollo-b42'
       fontnick  = 'b42'
       fspath    = null
@@ -175,6 +183,20 @@ do =>
     when 'egypt-eg12i'
       fontnick  = 'eg12i'
       fspath    = 'EBGaramond12-Italic.otf'
+      chrs      = "abcdefghijklm"
+      text      = """Egypt has one of the longest histories of any country, tracing its heritage along the
+        Nile Delta back to the 6th–4th millennia BCE. Considered a cradle of civilisation, Ancient Egypt saw
+        some of the earliest developments of writing, agriculture, urbanisation, organised religion and
+        central government. Iconic monuments such as the Giza Necropolis and its Great Sphinx, as well the
+        ruins of Memphis, Thebes, Karnak, and the Valley of the Kings, reflect this legacy and remain a
+        significant focus of scientific and popular interest. Egypt's long and rich cultural heritage is an
+        integral part of its national identity, which reflects its unique transcontinental location being
+        simultaneously Mediterranean, Middle Eastern and North African. Egypt was an early and important
+        centre of Christianity, but was largely Islamised in the seventh century and remains a predominantly
+        Muslim country, albeit with a significant Christian minority."""
+    when 'egypt-b42'
+      fontnick  = 'b42'
+      fspath    = null
       chrs      = "abcdefghijklm"
       text      = """Egypt has one of the longest histories of any country, tracing its heritage along the
         Nile Delta back to the 6th–4th millennia BCE. Considered a cradle of civilisation, Ancient Egypt saw
