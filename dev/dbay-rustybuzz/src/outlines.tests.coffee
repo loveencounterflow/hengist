@@ -143,15 +143,17 @@ guy                       = require '../../../apps/guy'
       drb.register_fontnick { fontnick, fspath, }
       drb.prepare_font      { fontnick, }
       drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
-      result[ fontnick ] = ( drb.arrange { fontnick, text, doc, par: 1, alt: 1, } )[ 1 ]
+      result[ fontnick ] = ( drb.arrange { fontnick, text, doc, par: 1, alt: 1, } )[ 0 ]
+      delete result[ fontnick ].id
   #.........................................................................................................
   T?.eq result, {
     djvsi: {
-      id:     17,
       doc:    0,
       par:    1,
+      alt:    1,
       adi:    1,
       sgi:    1,
+      osgi:   null,
       alt:    1,
       gid:    68,
       b:      0,
@@ -163,15 +165,14 @@ guy                       = require '../../../apps/guy'
       chrs:   'a',
       sid:    'o68djvsi',
       nobr:   0,
-      br:     null,
-      lnr:    null,
-      rnr:    null },
+      br:     null, },
     eg8i:  {
-      id:     17,
       doc:    1,
       par:    1,
+      alt:    1,
       adi:    1,
       sgi:    1,
+      osgi:   null,
       alt:    1,
       gid:    66,
       b:      0,
@@ -183,9 +184,7 @@ guy                       = require '../../../apps/guy'
       chrs:   'a',
       sid:    'o66eg8i',
       nobr:   0,
-      br:     null,
-      lnr:    null,
-      rnr:    null } }
+      br:     null, } }
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -221,7 +220,7 @@ guy                       = require '../../../apps/guy'
   drb.prepare_font      { fontnick, }
   drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
   result = drb.arrange { fontnick, text, doc: 1, par: 1, alt: 1, }
-  result = result[ 1 ... result.length - 1 ]
+  # result = result[ 1 ... result.length - 1 ]
   urge '^45958^', ad.chrs, ad.sid, ad for ad in result
   for ad, idx in result
     help '^33443^', ad
@@ -286,8 +285,8 @@ if require.main is module then do =>
   # test @[ "DRB can pass in custom RBW" ]
   # @[ "DRB get_cgid_map()" ]()
   # @[ "DRB insert_outlines()" ]()
-  # test @[ "DRB RBW arrange() returns coordinates acc to font upem" ]
-  test @[ "DRB RBW arrange() honors missing outlines" ]
+  test @[ "DRB RBW arrange() returns coordinates acc to font upem" ]
+  # test @[ "DRB RBW arrange() honors missing outlines" ]
   # test @[ "DRB insert_outlines()" ]
   # test @[ "DRB hyphens in many fonts behave unsurprisingly" ]
 
