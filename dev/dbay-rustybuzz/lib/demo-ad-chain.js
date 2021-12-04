@@ -119,7 +119,7 @@
     echo(drb.render_ad_chain({
       format: 'compact',
       b: 25,
-      context: 10
+      context: 20
     }));
     return null;
   };

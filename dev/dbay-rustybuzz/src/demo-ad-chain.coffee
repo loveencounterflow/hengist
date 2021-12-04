@@ -91,7 +91,7 @@ guy                       = require '../../../apps/guy'
 @demo_ad_chain_compact = ( cfg ) ->
   db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
   drb             = new Drb { db, rebuild: false, path: '/dev/shm/typesetting-2.sqlite', }
-  echo drb.render_ad_chain { format: 'compact', b: 25, context: 10, }
+  echo drb.render_ad_chain { format: 'compact', b: 25, context: 20, }
   return null
 
 ###
