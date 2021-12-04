@@ -106,58 +106,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.demo_ad_chain_2 = function(cfg) {
-    var ad, b, b1, chrs, collector, db, drb, gid, h, i, len, line, ref, width;
-    db = new DBay({
-      path: '/dev/shm/typesetting-1.sqlite'
-    });
-    drb = new Drb({
-      db,
-      rebuild: false,
-      path: '/dev/shm/typesetting-2.sqlite'
-    });
-    collector = [[], [], [], [], []];
-    ref = db(SQL`select
-    *
-  from ads
-  where true
-    and ( alt > 1 )
-  order by b1
-  limit 50;`, {});
-    for (ad of ref) {
-      ({gid, chrs, b1} = ad);
-      b = ' ' + b1.toString();
-      chrs = chrs.replace('\xad', '¬');
-      chrs = chrs.replace('\x20', '␣');
-      gid = gid.toString();
-      width = Math.max(1, width_of(b), width_of(chrs), width_of(gid));
-      b = to_width(b, width, {
-        align: 'left'
-      });
-      chrs = to_width(chrs, width, {
-        align: 'right'
-      });
-      gid = to_width(gid, width, {
-        align: 'right'
-      });
-      h = '─'.repeat(width);
-      collector[0].push(b + ' ');
-      collector[1].push('┬' + h);
-      collector[2].push('│' + chrs);
-      collector[3].push('│' + gid);
-      collector[4].push('┴' + h);
-    }
-    for (i = 0, len = collector.length; i < len; i++) {
-      line = collector[i];
-      echo(to_width(line.join(''), 120, {
-        align: 'left'
-      }));
-    }
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.demo_ad_chain_3 = function(cfg) {
+  this.demo_ad_chain_compact = function(cfg) {
     var db, drb;
     db = new DBay({
       path: '/dev/shm/typesetting-1.sqlite'
@@ -169,7 +118,7 @@
     });
     echo(drb.render_ad_chain({
       format: 'compact',
-      b: 125,
+      b: 25,
       context: 10
     }));
     return null;
@@ -189,7 +138,7 @@
     (() => {
       // @demo_ad_chain_1()
       // @demo_ad_chain_2()
-      return this.demo_ad_chain_3();
+      return this.demo_ad_chain_compact();
     })();
   }
 
