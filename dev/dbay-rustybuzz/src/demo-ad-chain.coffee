@@ -87,54 +87,11 @@ guy                       = require '../../../apps/guy'
     echo to_width ( line.join '' ), 200, { align: 'center', ellipsis: '', }
   return null
 
-
-
 #-----------------------------------------------------------------------------------------------------------
-@demo_ad_chain_2 = ( cfg ) ->
+@demo_ad_chain_compact = ( cfg ) ->
   db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
   drb             = new Drb { db, rebuild: false, path: '/dev/shm/typesetting-2.sqlite', }
-  collector       = [
-    []
-    []
-    []
-    []
-    []
-    ]
-  for ad from db SQL"""
-    select
-        *
-      from ads
-      where true
-        and ( alt > 1 )
-      order by b1
-      limit 50;
-    """, {}
-    { gid
-      chrs
-      b1  } = ad
-    b       = ' ' + b1.toString()
-    chrs    = chrs.replace '\xad', '¬'
-    chrs    = chrs.replace '\x20', '␣'
-    gid     = gid.toString()
-    width   = Math.max 1, ( width_of b ), ( width_of chrs ), ( width_of gid )
-    b       = to_width b,     width, { align: 'left', }
-    chrs    = to_width chrs,  width, { align: 'right', }
-    gid     = to_width gid,   width, { align: 'right', }
-    h       = '─'.repeat width
-    collector[ 0 ].push b + ' '
-    collector[ 1 ].push '┬' + h
-    collector[ 2 ].push '│' + chrs
-    collector[ 3 ].push '│' + gid
-    collector[ 4 ].push '┴' + h
-  for line in collector
-    echo to_width ( line.join '' ), 120, { align: 'left', }
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@demo_ad_chain_3 = ( cfg ) ->
-  db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
-  drb             = new Drb { db, rebuild: false, path: '/dev/shm/typesetting-2.sqlite', }
-  echo drb.render_ad_chain { format: 'compact', b: 125, context: 10, }
+  echo drb.render_ad_chain { format: 'compact', b: 25, context: 10, }
   return null
 
 ###
@@ -152,6 +109,6 @@ gid      │23|85| 3|-1|176|40|180| 3│
 if require.main is module then do =>
   # @demo_ad_chain_1()
   # @demo_ad_chain_2()
-  @demo_ad_chain_3()
+  @demo_ad_chain_compact()
 
 
