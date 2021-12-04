@@ -156,7 +156,8 @@ guy                       = require '../../../apps/guy'
       osgi:   null,
       alt:    1,
       gid:    68,
-      b:      0,
+      b1:     0,
+      b2:     1,
       x:      0,
       y:      0,
       dx:     596,
@@ -175,7 +176,8 @@ guy                       = require '../../../apps/guy'
       osgi:   null,
       alt:    1,
       gid:    66,
-      b:      0,
+      b1:     0,
+      b2:     1,
       x:      0,
       y:      0,
       dx:     492,
@@ -207,13 +209,13 @@ guy                       = require '../../../apps/guy'
   missing_sid         = "o#{missing.gid}#{fontnick}"
   #.....................................................................................................
   matcher = [
-    { gid: 0, b: 0, x: 0, y: 0, dx: 1000, dy: 0, chrs: '買', sid: 'o0eg8i' }
-    { gid: 79, b: 3, x: 1000, y: 0, dx: 508, dy: 0, chrs: 'n', sid: 'o79eg8i' }
-    { gid: 70, b: 4, x: 1508, y: 0, dx: 367, dy: 0, chrs: 'e', sid: 'o70eg8i' }
-    { gid: 1, b: 5, x: 1875, y: 0, dx: 243, dy: 0, chrs: ' ', sid: 'o1eg8i', br: 'spc' }
-    { gid: 0, b: 6, x: 2118, y: 0, dx: 1000, dy: 0, chrs: '來', sid: 'o0eg8i' }
-    { gid: 68, b: 9, x: 3118, y: 0, dx: 359, dy: 0, chrs: 'c', sid: 'o68eg8i' }
-    { gid: 66, b: 10, x: 3477, y: 0, dx: 492, dy: 0, chrs: 'a', sid: 'o66eg8i' }
+    { gid: 0,  b1: 0,  b2: 3,  x: 0,    y: 0, dx: 1000, dy: 0, chrs: '買', sid: 'o0eg8i' }
+    { gid: 79, b1: 3,  b2: 4,  x: 1000, y: 0, dx: 508,  dy: 0, chrs: 'n', sid: 'o79eg8i' }
+    { gid: 70, b1: 4,  b2: 5,  x: 1508, y: 0, dx: 367,  dy: 0, chrs: 'e', sid: 'o70eg8i' }
+    { gid: 1,  b1: 5,  b2: 6,  x: 1875, y: 0, dx: 243,  dy: 0, chrs: ' ', sid: 'o1eg8i', br: 'spc' }
+    { gid: 0,  b1: 6,  b2: 9,  x: 2118, y: 0, dx: 1000, dy: 0, chrs: '來', sid: 'o0eg8i' }
+    { gid: 68, b1: 9,  b2: 10, x: 3118, y: 0, dx: 359,  dy: 0, chrs: 'c', sid: 'o68eg8i' }
+    { gid: 66, b1: 10, b2: 11, x: 3477, y: 0, dx: 492,  dy: 0, chrs: 'a', sid: 'o66eg8i' }
     ]
   #.....................................................................................................
   drb.register_fontnick { fontnick, fspath, }
