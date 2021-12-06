@@ -115,7 +115,7 @@
   _escape_for_html_comment = function(text) {
     var R;
     R = text != null ? text : '';
-    R = R.replace(/-/g, '&hyph;');
+    R = R.replace(/-/g, '&hhy;');
     R = R.replace(/\n/g, '\\n');
     R = R.replace(/\r/g, '\\r');
     // R = R.replace /\b/g, '\\b'
@@ -421,7 +421,8 @@
     })();
   }
 
-  // @demo_typeset_sample_page { set_id: 'typo-b36', }
+  // @demo_typeset_sample_page { set_id: 'twolines-eg8i', }
+// @demo_typeset_sample_page { set_id: 'typo-b36', }
 // @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
 // @demo_typeset_sample_page { set_id: 'egypt-b42', }
 // @demo_store_outlines()

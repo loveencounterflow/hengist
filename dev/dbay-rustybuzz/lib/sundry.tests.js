@@ -51,7 +51,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DRB RBW prepare_text()"] = async function(T, done) {
     var DBay, Drb, db, drb, error, i, len, matcher, probe, probes_and_matchers;
-    probes_and_matchers = [[[null, true, 'extraordinary'], 'ex&#xad;tra&#xad;or&#xad;di&#xad;nary'], [[null, true, 'extra-ordinary'], 'ex&#xad;tra-&#x200b;or&#xad;di&#xad;nary'], [[null, true, 'extra&shy;ordinary'], 'ex&#xad;tra&#xad;or&#xad;di&#xad;nary'], [[null, true, 'extra\n\nordinary'], 'ex&#xad;tra or&#xad;di&#xad;nary'], [[null, true, '  xxx  '], 'xxx'], [[null, true, '&nbsp;xxx  '], '&#xa0;xxx'], [[null, true, '&nbsp;xxx\n\n\n'], '&#xa0;xxx'], [[null, true, 'xxx&br;'], 'xxx&#xa;']];
+    probes_and_matchers = [[[null, true, 'extraordinary'], 'ex&#xad;tra&#xad;or&#xad;di&#xad;nary'], [[null, true, 'extra-ordinary'], 'ex&#xad;tra-&#x200b;or&#xad;di&#xad;nary'], [[null, true, 'extra&shy;ordinary'], 'ex&#xad;tra&#xad;or&#xad;di&#xad;nary'], [[null, true, 'extra\n\nordinary'], 'ex&#xad;tra or&#xad;di&#xad;nary'], [[null, true, '  xxx  '], 'xxx'], [[null, true, '&nbsp;xxx  '], '&#xa0;xxx'], [[null, true, '&nbsp;xxx\n\n\n'], '&#xa0;xxx'], [[null, true, 'xxx&nl;'], 'xxx&#xa;'], [[null, true, 'first &nl;\n  second'], 'first&#xa;sec&#xad;ond'], [[null, true, 'first &nl;&nl; &nl;  second'], 'first &#xa;&#xa;&#xa;sec&#xad;ond']];
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
     db = new DBay();
@@ -84,7 +84,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DRB RBW decode_ncrs()"] = async function(T, done) {
     var DBay, Drb, db, drb, error, i, len, matcher, probe, probes_and_matchers;
-    probes_and_matchers = [[[false, '&#x5443;&#x4e00;'], '呃一'], [[true, '&wbr;'], '&#x200b;'], [[true, '&shy;'], '&#xad;'], [[true, '&br;'], '&#xa;']];
+    probes_and_matchers = [[[false, '&#x5443;&#x4e00;'], '呃一'], [[true, '&wbr;'], '&#x200b;'], [[true, '&shy;'], '&#xad;'], [[true, '&nl;'], '&#xa;']];
     //.........................................................................................................
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
