@@ -28,6 +28,9 @@ SQL                       = String.raw
 guy                       = require '../../../apps/guy'
 # MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
+#-----------------------------------------------------------------------------------------------------------
+reveal                    = ( text ) ->
+  return text.replace /[^\x20-\x7f]/ug, ( $0 ) -> "&#x#{($0.codePointAt 0).toString 16};"
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -40,6 +43,7 @@ guy                       = require '../../../apps/guy'
     [ [ null, true, '  xxx  ',            ], 'xxx',                                         ]
     [ [ null, true, '&nbsp;xxx  ',        ], '&#xa0;xxx',                                   ]
     [ [ null, true, '&nbsp;xxx\n\n\n',    ], '&#xa0;xxx',                                   ]
+    [ [ null, true, 'xxx&br;',            ], 'xxx&xa;',                                     ]
     ]
   { DBay }            = require H.dbay_path
   { Drb }             = require H.drb_path
@@ -60,23 +64,25 @@ guy                       = require '../../../apps/guy'
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "_______ DRB RBW decode_ncrs()" ] = ( T, done ) ->
+@[ "DRB RBW decode_ncrs()" ] = ( T, done ) ->
   probes_and_matchers = [
     [ [ false, '&#x5443;&#x4e00;',  ],            '呃一', ]
     [ [ true,  '&wbr;',             ],            '&#x200b;', ]
     [ [ true,  '&shy;',             ],            '&#xad;', ]
+    [ [ true,  '&br;',              ],            '&#xa;', ]
     ]
   #.........................................................................................................
-  RBW                 = require '../../../apps/rustybuzz-wasm/pkg'
-  reveal              = ( text ) ->
-    return text.replace /[^\x20-\x7f]/ug, ( $0 ) -> "&#x#{($0.codePointAt 0).toString 16};"
+  { DBay }            = require H.dbay_path
+  { Drb }             = require H.drb_path
+  db                  = new DBay()
+  drb                 = new Drb { db, temporary: true, }
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
       # [ do_reveal, text, ]  = probe
       do_reveal             = probe[ 0 ]
       text                  = probe[ 1 ]
-      result                = RBW.decode_ncrs text
+      result                = drb._decode_entities text
       result                = reveal result if do_reveal
       # T?.eq result, matcher
       resolve result
@@ -84,7 +90,7 @@ guy                       = require '../../../apps/guy'
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "_______ DRB RBW finds UAX#14 breakpoints" ] = ( T, done ) ->
+@[ "DRB RBW finds UAX#14 breakpoints" ] = ( T, done ) ->
   # T?.halt_on_error()
   ### TAINT make this a DRB method ###
   _prepare_text = ( text ) ->
@@ -145,17 +151,6 @@ guy                       = require '../../../apps/guy'
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  # test @[ "DRB RBW finds UAX#14 breakpoints" ]
+  test @[ "DRB RBW prepare_text()" ]
   # test @[ "DRB RBW decode_ncrs()" ]
-  # test @[ "DRB RBW prepare_text()" ]
-  # @[ "DRB foobar" ]()
-  # test @[ "DRB no shared state in WASM module" ]
-  # @[ "DRB path compression" ]()
-  # test @[ "DRB can pass in custom RBW" ]
-  # test @[ "DRB RBW returns despaced pathdata" ]
-
-  # test @[ "DRB foobar" ]
-  # test @[ "DRB no shared state in WASM module" ]
-  # test @[ "___________ DRB path compression" ]
-  # test @[ "DRB can pass in custom RBW" ]
-  # test @[ "DRB RBW returns despaced pathdata" ]
+  # test @[ "DRB RBW finds UAX#14 breakpoints" ]
