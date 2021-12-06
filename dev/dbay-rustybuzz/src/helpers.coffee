@@ -100,6 +100,17 @@ do =>
       # text      = "far-out"
       text      = """af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.
       sic habet cognomina, affirmatio."""
+    when 'shorties-b42'
+      fontnick  = 'b42'
+      fspath    = null
+      chrs      = "abcdefghijklm"
+      # text      = "far-out"
+      text      = """
+      af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.&br;
+      sic habet cognomina, affirmatio.&br;
+      of Memphis, Thebes, Karnak, and the Valley of the Kings&br;
+      talibus appellata) pro ostentu ad visum pertinente os‌tentu brot‌zeit brotzeit&br;
+      """
     when 'affirm-b42'
       fontnick  = 'b42'
       fspath    = null
@@ -124,8 +135,8 @@ do =>
     when 'gaga-b42'
       fontnick  = 'b42'
       fspath    = null
-      chrs      = "abcdefghijklm"
-      text      = "*************lalblc—ldlelf"
+      chrs      = null
+      text      = "talibus appellata) pro ostentu ad visum pertinente os‌tentu brot‌zeit brotzeit"
     when 'typo-b42'
       fontnick  = 'b42'
       fspath    = null
@@ -138,6 +149,11 @@ do =>
         adhibitus est. Antiquitus in Sina ortus est ut modus imprimendi in textilibus, et tunc in chartis.
         Modi imprimendi in textilibus, prima exempla exstantia ex Sina facta sunt ante 220 a.C.n., et ex
         Aegypto Romana ad saeculum quartum."
+    when 'missing-t-b42'
+      fontnick  = 'b42'
+      fspath    = null
+      chrs      = null
+      text      = "talibus appellata) pro ostentu ad visum pertinente"
     when 'typo-b36'
       fontnick  = 'b36'
       fspath    = null
@@ -170,6 +186,13 @@ do =>
       fontnick  = 'eg8i'
       fspath    = 'EBGaramond08-Italic.otf'
       chrs      = "abcdefghijklm"
+      text      = """f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language spoken by about six million people, principally in
+        Denmark, Greenland, the Fa&shy;roe Islands and in the region of Southern Schles&shy;wig in northern Germany,
+        where it has minority language status. This-and-that this-and-that this-and-that this-and-that."""
+    when 'medium-n1518'
+      fontnick  = 'n1518'
+      fspath    = 'kps-fonts.ch/1518_neudoerffer_fraktur.otf'
+      chrs      = null
       text      = """f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language spoken by about six million people, principally in
         Denmark, Greenland, the Fa&shy;roe Islands and in the region of Southern Schles&shy;wig in northern Germany,
         where it has minority language status. This-and-that this-and-that this-and-that this-and-that."""
