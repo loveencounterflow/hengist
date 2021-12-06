@@ -82,7 +82,7 @@ _escape_for_html_text = ( text ) -> ( ( text ? '' ).replace /&/g, '&amp;' ).repl
 #-----------------------------------------------------------------------------------------------------------
 _escape_for_html_comment = ( text ) ->
   R = text ? ''
-  R = R.replace /-/g, '&hyph;'
+  R = R.replace /-/g,  '&hhy;'
   R = R.replace /\n/g, '\\n'
   R = R.replace /\r/g, '\\r'
   # R = R.replace /\b/g, '\\b'
