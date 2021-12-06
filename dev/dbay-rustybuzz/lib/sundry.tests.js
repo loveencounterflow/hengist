@@ -51,7 +51,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this["DRB RBW prepare_text()"] = async function(T, done) {
     var DBay, Drb, db, drb, error, i, len, matcher, probe, probes_and_matchers;
-    probes_and_matchers = [[[null, true, 'extraordinary'], 'ex&#xad;tra&#xad;or&#xad;di&#xad;nary'], [[null, true, 'extra-ordinary'], 'ex&#xad;tra-&#x200b;or&#xad;di&#xad;nary'], [[null, true, 'extra&shy;ordinary'], 'ex&#xad;tra&#xad;or&#xad;di&#xad;nary'], [[null, true, 'extra\n\nordinary'], 'ex&#xad;tra or&#xad;di&#xad;nary'], [[null, true, '  xxx  '], 'xxx'], [[null, true, '&nbsp;xxx  '], '&#xa0;xxx'], [[null, true, '&nbsp;xxx\n\n\n'], '&#xa0;xxx'], [[null, true, 'xxx&br;'], 'xxx&xa;']];
+    probes_and_matchers = [[[null, true, 'extraordinary'], 'ex&#xad;tra&#xad;or&#xad;di&#xad;nary'], [[null, true, 'extra-ordinary'], 'ex&#xad;tra-&#x200b;or&#xad;di&#xad;nary'], [[null, true, 'extra&shy;ordinary'], 'ex&#xad;tra&#xad;or&#xad;di&#xad;nary'], [[null, true, 'extra\n\nordinary'], 'ex&#xad;tra or&#xad;di&#xad;nary'], [[null, true, '  xxx  '], 'xxx'], [[null, true, '&nbsp;xxx  '], '&#xa0;xxx'], [[null, true, '&nbsp;xxx\n\n\n'], '&#xa0;xxx'], [[null, true, 'xxx&br;'], 'xxx&#xa;']];
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
     db = new DBay();
