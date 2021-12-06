@@ -134,6 +134,16 @@
         text = `af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.
 sic habet cognomina, affirmatio.`;
         break;
+      case 'shorties-b42':
+        fontnick = 'b42';
+        fspath = null;
+        chrs = "abcdefghijklm";
+        // text      = "far-out"
+        text = `af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.&br;
+sic habet cognomina, affirmatio.&br;
+of Memphis, Thebes, Karnak, and the Valley of the Kings&br;
+talibus appellata) pro ostentu ad visum pertinente os‌tentu brot‌zeit brotzeit&br;`;
+        break;
       case 'affirm-b42':
         fontnick = 'b42';
         fspath = null;
@@ -162,14 +172,20 @@ medicinae, et solis (igitur, varia habet cognomina, primo scilicet Phoebus (Grae
       case 'gaga-b42':
         fontnick = 'b42';
         fspath = null;
-        chrs = "abcdefghijklm";
-        text = "*************lalblc—ldlelf";
+        chrs = null;
+        text = "talibus appellata) pro ostentu ad visum pertinente os‌tentu brot‌zeit brotzeit";
         break;
       case 'typo-b42':
         fontnick = 'b42';
         fspath = null;
         chrs = "abcdefghijklm";
         text = "Typothetica, vel fortasse compositio typographica, est compositio linguae scriptae per typos effecta. Litterae et alia signa reposita (sortes in rationibus mechanicis et glypha in rationibus digitalibus appellata) pro ostentu ad visum pertinente recuperantur et secundum orthographiam linguae ordinantur. Typothetica prioris rationis eget, fontis designati. Impressio stipibus ligni est modus textús, imaginum, vel exemplaria impressa, qui late per Asia Orientali adhibitus est. Antiquitus in Sina ortus est ut modus imprimendi in textilibus, et tunc in chartis. Modi imprimendi in textilibus, prima exempla exstantia ex Sina facta sunt ante 220 a.C.n., et ex Aegypto Romana ad saeculum quartum.";
+        break;
+      case 'missing-t-b42':
+        fontnick = 'b42';
+        fspath = null;
+        chrs = null;
+        text = "talibus appellata) pro ostentu ad visum pertinente";
         break;
       case 'typo-b36':
         fontnick = 'b36';
@@ -199,6 +215,14 @@ norsk og svensk, og sproghistorisk har dansk været stærkt påvirket af plattys
         fontnick = 'eg8i';
         fspath = 'EBGaramond08-Italic.otf';
         chrs = "abcdefghijklm";
+        text = `f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language spoken by about six million people, principally in
+Denmark, Greenland, the Fa&shy;roe Islands and in the region of Southern Schles&shy;wig in northern Germany,
+where it has minority language status. This-and-that this-and-that this-and-that this-and-that.`;
+        break;
+      case 'medium-n1518':
+        fontnick = 'n1518';
+        fspath = 'kps-fonts.ch/1518_neudoerffer_fraktur.otf';
+        chrs = null;
         text = `f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language spoken by about six million people, principally in
 Denmark, Greenland, the Fa&shy;roe Islands and in the region of Southern Schles&shy;wig in northern Germany,
 where it has minority language status. This-and-that this-and-that this-and-that this-and-that.`;

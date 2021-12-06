@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, _prepare_text, append_content, append_outlines, append_remarks, append_to, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper,
+  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, append_content, append_outlines, append_remarks, append_to, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper,
     modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
@@ -98,19 +98,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  /* TAINT use standard methods */
-  _prepare_text = function(text) {
-    var R;
-    R = text;
-    R = R.replace(/\n/g, ' ');
-    R = R.replace(/\x20{2,}/g, ' ');
-    R = ITXT.HYPH.hyphenate(R);
-    R = R.replace(/&shy;/g, '\xad');
-    R = R.replace(/&wbr;/g, '\u200b');
-    // debug '^9865^', ITXT.HYPH.reveal_hyphens R, '|'; process.exit 1
-    return R;
-  };
-
   _escape_syms = function(text) {
     var R;
     R = text;
@@ -119,12 +106,27 @@
     return R;
   };
 
-  _escape_for_html_comment = function(text) {
-    return (_escape_syms(text != null ? text : '')).replace(/--/g, '- -');
-  };
-
+  //-----------------------------------------------------------------------------------------------------------
   _escape_for_html_text = function(text) {
     return ((text != null ? text : '').replace(/&/g, '&amp;')).replace(/</g, '&lt;');
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  _escape_for_html_comment = function(text) {
+    var R;
+    R = text != null ? text : '';
+    R = R.replace(/-/g, '&hyph;');
+    R = R.replace(/\n/g, '\\n');
+    R = R.replace(/\r/g, '\\r');
+    // R = R.replace /\b/g, '\\b'
+    R = R.replace(/\t/g, '\\t');
+    R = R.replace(/\v/g, '\\v');
+    R = R.replace(/\f/g, '\\f');
+    R = R.replace(/\x20/g, '&spc;');
+    R = R.replace(/\p{C}|\p{Z}/ug, function($0) {
+      return `&#x${($0.codePointAt(0)).toString(16)};`;
+    });
+    return R;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -406,40 +408,43 @@
 
   //###########################################################################################################
   if (require.main === module) {
-    (async() => {
-      // await @demo_store_outlines()
-      // await @demo_store_outlines { set_id: 'all', }
-      // await @demo_typeset_sample_page { set_id: 'small-eg8i', }
-      // await @demo_typeset_sample_page { set_id: 'small-eg12i', }
-      // await @demo_typeset_sample_page { set_id: 'gaga-b42', }
-      // await @demo_typeset_sample_page { set_id: 'small-b42', }
-      // await @demo_typeset_sample_page { set_id: 'affirm-b42', }
-      // await @demo_typeset_sample_page { set_id: 'apollo-b42', }
-      // await @demo_typeset_sample_page { set_id: 'typo-b42', }
-      // await @demo_typeset_sample_page { set_id: 'typo-b36', }
-      // await @demo_glyfgrid { fontnick: 'b42', gid_1: 0, gid_2: 599, }
-      // await @demo_typeset_sample_page { set_id: 'medium-eg8i', }
-      // await @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
-      // await @demo_typeset_sample_page { set_id: 'short-eg12i', }
-      // await @demo_typeset_sample_page { set_id: 'medium-eg12i', }
-      // await @demo_typeset_sample_page { set_id: 'medium-b42', }
-      // await @demo_typeset_sample_page { set_id: 'uppercasehyphen-eg12i', }
-      // await @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
-      // await @demo_typeset_sample_page { set_id: 'egypt-b42', }
-      return (await this.demo_typeset_sample_page({
-        set_id: 'memphis-b42'
-      }));
+    (() => {
+      // @demo_typeset_sample_page { set_id: 'affirm-b42', }
+      // @demo_typeset_sample_page { set_id: 'missing-t-b42', }
+      // @demo_typeset_sample_page { set_id: 'medium-eg12i', }
+      // @demo_typeset_sample_page { set_id: 'typo-b42', }
+      // @demo_typeset_sample_page { set_id: 'gaga-b42', }
+      // @demo_typeset_sample_page { set_id: 'medium-n1518', }
+      return this.demo_typeset_sample_page({
+        set_id: 'shorties-b42'
+      });
     })();
   }
 
-  // await @demo_typeset_sample_page { set_id: 'small-arya', }
-// await @demo_typeset_sample_page { set_id: 'small-aleo', }
-// await @demo_typeset_sample_page { set_id: 'widechrs', }
-// await @demo_typeset_sample_page { set_id: 'tibetan', }
-// await @demo_typeset_sample_page { set_id: 'arabic', }
-// await @demo_typeset_sample_page { set_id: 'urdu', }
-// await @demo_typeset_sample_page { set_id: 'small-djvsi', }
-// await @demo_use_linked_rustybuzz_wasm()
+  // @demo_typeset_sample_page { set_id: 'typo-b36', }
+// @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
+// @demo_typeset_sample_page { set_id: 'egypt-b42', }
+// @demo_store_outlines()
+// @demo_store_outlines { set_id: 'all', }
+// @demo_typeset_sample_page { set_id: 'small-eg8i', }
+// @demo_typeset_sample_page { set_id: 'small-eg12i', }
+// @demo_typeset_sample_page { set_id: 'small-b42', }
+// @demo_typeset_sample_page { set_id: 'apollo-b42', }
+// @demo_glyfgrid { fontnick: 'b42', gid_1: 0, gid_2: 599, }
+// @demo_typeset_sample_page { set_id: 'medium-eg8i', }
+// @demo_typeset_sample_page { set_id: 'longwords-eg12i', }
+// @demo_typeset_sample_page { set_id: 'short-eg12i', }
+// @demo_typeset_sample_page { set_id: 'medium-b42', }
+// @demo_typeset_sample_page { set_id: 'uppercasehyphen-eg12i', }
+// @demo_typeset_sample_page { set_id: 'memphis-b42', }
+// @demo_typeset_sample_page { set_id: 'small-arya', }
+// @demo_typeset_sample_page { set_id: 'small-aleo', }
+// @demo_typeset_sample_page { set_id: 'widechrs', }
+// @demo_typeset_sample_page { set_id: 'tibetan', }
+// @demo_typeset_sample_page { set_id: 'arabic', }
+// @demo_typeset_sample_page { set_id: 'urdu', }
+// @demo_typeset_sample_page { set_id: 'small-djvsi', }
+// @demo_use_linked_rustybuzz_wasm()
 
 }).call(this);
 

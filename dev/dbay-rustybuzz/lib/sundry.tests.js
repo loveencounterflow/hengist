@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, reveal, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -42,9 +42,16 @@
   // MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
   //-----------------------------------------------------------------------------------------------------------
+  reveal = function(text) {
+    return text.replace(/[^\x20-\x7f]/ug, function($0) {
+      return `&#x${($0.codePointAt(0)).toString(16)};`;
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DRB RBW prepare_text()"] = async function(T, done) {
     var DBay, Drb, db, drb, error, i, len, matcher, probe, probes_and_matchers;
-    probes_and_matchers = [[[null, true, 'extraordinary'], 'ex&#xad;tra&#xad;or&#xad;di&#xad;nary'], [[null, true, 'extra-ordinary'], 'ex&#xad;tra-&#x200b;or&#xad;di&#xad;nary'], [[null, true, 'extra&shy;ordinary'], 'ex&#xad;tra&#xad;or&#xad;di&#xad;nary'], [[null, true, 'extra\n\nordinary'], 'ex&#xad;tra or&#xad;di&#xad;nary'], [[null, true, '  xxx  '], 'xxx'], [[null, true, '&nbsp;xxx  '], '&#xa0;xxx'], [[null, true, '&nbsp;xxx\n\n\n'], '&#xa0;xxx']];
+    probes_and_matchers = [[[null, true, 'extraordinary'], 'ex&#xad;tra&#xad;or&#xad;di&#xad;nary'], [[null, true, 'extra-ordinary'], 'ex&#xad;tra-&#x200b;or&#xad;di&#xad;nary'], [[null, true, 'extra&shy;ordinary'], 'ex&#xad;tra&#xad;or&#xad;di&#xad;nary'], [[null, true, 'extra\n\nordinary'], 'ex&#xad;tra or&#xad;di&#xad;nary'], [[null, true, '  xxx  '], 'xxx'], [[null, true, '&nbsp;xxx  '], '&#xa0;xxx'], [[null, true, '&nbsp;xxx\n\n\n'], '&#xa0;xxx'], [[null, true, 'xxx&br;'], 'xxx&xa;']];
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
     db = new DBay();
@@ -75,16 +82,17 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["_______ DRB RBW decode_ncrs()"] = async function(T, done) {
-    var RBW, error, i, len, matcher, probe, probes_and_matchers, reveal;
-    probes_and_matchers = [[[false, '&#x5443;&#x4e00;'], '呃一'], [[true, '&wbr;'], '&#x200b;'], [[true, '&shy;'], '&#xad;']];
+  this["DRB RBW decode_ncrs()"] = async function(T, done) {
+    var DBay, Drb, db, drb, error, i, len, matcher, probe, probes_and_matchers;
+    probes_and_matchers = [[[false, '&#x5443;&#x4e00;'], '呃一'], [[true, '&wbr;'], '&#x200b;'], [[true, '&shy;'], '&#xad;'], [[true, '&br;'], '&#xa;']];
     //.........................................................................................................
-    RBW = require('../../../apps/rustybuzz-wasm/pkg');
-    reveal = function(text) {
-      return text.replace(/[^\x20-\x7f]/ug, function($0) {
-        return `&#x${($0.codePointAt(0)).toString(16)};`;
-      });
-    };
+    ({DBay} = require(H.dbay_path));
+    ({Drb} = require(H.drb_path));
+    db = new DBay();
+    drb = new Drb({
+      db,
+      temporary: true
+    });
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -94,7 +102,7 @@
           // [ do_reveal, text, ]  = probe
           do_reveal = probe[0];
           text = probe[1];
-          result = RBW.decode_ncrs(text);
+          result = drb._decode_entities(text);
           if (do_reveal) {
             result = reveal(result);
           }
@@ -107,9 +115,9 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["_______ DRB RBW finds UAX#14 breakpoints"] = function(T, done) {
+  this["DRB RBW finds UAX#14 breakpoints"] = function(T, done) {
     /* TAINT make this a DRB method */
-    var DBay, Drb, RBW, _escape_syms, _prepare_text, bri, bris, db, drb, i, idx, len, matcher, new_text, nxt_bri, part, parts, reveal, text, text_bfr;
+    var DBay, Drb, RBW, _escape_syms, _prepare_text, bri, bris, db, drb, i, idx, len, matcher, new_text, nxt_bri, part, parts, text, text_bfr;
     // T?.halt_on_error()
     /* TAINT make this a DRB method */
     _prepare_text = function(text) {
@@ -184,24 +192,14 @@
 
   //###########################################################################################################
   if (require.main === module) {
-    (() => {})();
+    (() => {
+      // test @
+      return test(this["DRB RBW prepare_text()"]);
+    })();
   }
 
-  // test @
+  // test @[ "DRB RBW decode_ncrs()" ]
 // test @[ "DRB RBW finds UAX#14 breakpoints" ]
-// test @[ "DRB RBW decode_ncrs()" ]
-// test @[ "DRB RBW prepare_text()" ]
-// @[ "DRB foobar" ]()
-// test @[ "DRB no shared state in WASM module" ]
-// @[ "DRB path compression" ]()
-// test @[ "DRB can pass in custom RBW" ]
-// test @[ "DRB RBW returns despaced pathdata" ]
-
-  // test @[ "DRB foobar" ]
-// test @[ "DRB no shared state in WASM module" ]
-// test @[ "___________ DRB path compression" ]
-// test @[ "DRB can pass in custom RBW" ]
-// test @[ "DRB RBW returns despaced pathdata" ]
 
 }).call(this);
 
