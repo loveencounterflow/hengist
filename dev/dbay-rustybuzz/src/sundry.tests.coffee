@@ -43,7 +43,7 @@ reveal                    = ( text ) ->
     [ [ null, true, '  xxx  ',            ], 'xxx',                                         ]
     [ [ null, true, '&nbsp;xxx  ',        ], '&#xa0;xxx',                                   ]
     [ [ null, true, '&nbsp;xxx\n\n\n',    ], '&#xa0;xxx',                                   ]
-    [ [ null, true, 'xxx&br;',            ], 'xxx&xa;',                                     ]
+    [ [ null, true, 'xxx&br;',            ], 'xxx&#xa;',                                    ]
     ]
   { DBay }            = require H.dbay_path
   { Drb }             = require H.drb_path
