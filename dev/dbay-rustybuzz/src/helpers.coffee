@@ -100,16 +100,22 @@ do =>
       # text      = "far-out"
       text      = """af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.
       sic habet cognomina, affirmatio."""
+    when 'twolines-eg8i'
+      fontnick  = 'eg8i'
+      fspath    = 'EBGaramond08-Italic.otf'
+      chrs      = null
+      # text      = "far-out"
+      text      = """first&nl;second"""
     when 'shorties-b42'
       fontnick  = 'b42'
       fspath    = null
       chrs      = "abcdefghijklm"
       # text      = "far-out"
       text      = """
-      af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.&br;
-      sic habet cognomina, affirmatio.&br;
-      of Memphis, Thebes, Karnak, and the Valley of the Kings&br;
-      talibus appellata) pro ostentu ad visum pertinente os‌tentu brot‌zeit brotzeit&br;
+      af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.&nl;
+      sic habet cognomina, affirmatio.&nl;
+      of Memphis, Thebes, Karnak, and the Valley of the Kings&nl;
+      talibus appellata) pro ostentu ad visum pertinente os‌tentu brot‌zeit brotzeit&nl;
       """
     when 'affirm-b42'
       fontnick  = 'b42'
