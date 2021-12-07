@@ -182,6 +182,20 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  // #-----------------------------------------------------------------------------------------------------------
+  // @[ "DRB use object as namespace for interpolation" ] = ( T, done ) ->
+  //   # T?.halt_on_error()
+  //   { DBay }            = require H.dbay_path
+  //   { Drb }             = require H.drb_path
+  //   db                  = new DBay()
+  //   drb                 = new Drb { db, temporary: true, }
+  //   #.........................................................................................................
+  //   db SQL"create table d ( x integer );"
+  //   db SQL"insert into d values ( 42 );"
+  //   db SQL"select * from d where x = ${namespace.key};", { namespace: { key: 42, }, }
+  //   #.........................................................................................................
+  //   return done?()
+
   //-----------------------------------------------------------------------------------------------------------
   this["DRB RBW returns despaced pathdata"] = function(T, done) {
     var DBay, Drb, FS, bbox, db, drb, fontnick, fspath, pd;
@@ -216,21 +230,10 @@
     (() => {
       // test @
       // test @[ "DRB RBW finds UAX#14 breakpoints" ]
-      return test(this["DRB RBW decode_ncrs()"]);
+      // test @[ "DRB RBW decode_ncrs()" ]
+      return test(this["DRB use object as namespace for interpolation"]);
     })();
   }
-
-  // @[ "DRB foobar" ]()
-// test @[ "DRB no shared state in WASM module" ]
-// @[ "DRB path compression" ]()
-// test @[ "DRB can pass in custom RBW" ]
-// test @[ "DRB RBW returns despaced pathdata" ]
-
-  // test @[ "DRB foobar" ]
-// test @[ "DRB no shared state in WASM module" ]
-// test @[ "___________ DRB path compression" ]
-// test @[ "DRB can pass in custom RBW" ]
-// test @[ "DRB RBW returns despaced pathdata" ]
 
 }).call(this);
 

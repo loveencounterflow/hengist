@@ -227,7 +227,7 @@
     and ( l.doc = $doc )
     and ( l.par = $par )
     and ( l.lnr = $lnr )
-  order by l.ads_id;`, {doc, par, lnr});
+  order by a.b1;`, {doc, par, lnr});
       for (ad of ref2) {
         // debug '^6684048^', ad
         line_text += (ref3 = ad.chrs) != null ? ref3 : '';
@@ -415,22 +415,23 @@
       // @demo_typeset_sample_page { set_id: 'typo-b42', }
       // @demo_typeset_sample_page { set_id: 'gaga-b42', }
       // @demo_typeset_sample_page { set_id: 'medium-n1518', }
+      // @demo_typeset_sample_page { set_id: 'shorties-b42', }
+      // @demo_typeset_sample_page { set_id: 'shorties-eg8i', }
+      // @demo_typeset_sample_page { set_id: 'twolines-eg8i', }
+      // @demo_typeset_sample_page { set_id: 'typo-b36', }
+      // @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
+      // @demo_typeset_sample_page { set_id: 'egypt-b42', }
+      // @demo_store_outlines()
+      // @demo_store_outlines { set_id: 'all', }
+      // @demo_typeset_sample_page { set_id: 'small-eg8i', }
+      // @demo_typeset_sample_page { set_id: 'small-eg12i', }
       return this.demo_typeset_sample_page({
-        set_id: 'shorties-b42'
+        set_id: 'small-b42'
       });
     })();
   }
 
-  // @demo_typeset_sample_page { set_id: 'twolines-eg8i', }
-// @demo_typeset_sample_page { set_id: 'typo-b36', }
-// @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
-// @demo_typeset_sample_page { set_id: 'egypt-b42', }
-// @demo_store_outlines()
-// @demo_store_outlines { set_id: 'all', }
-// @demo_typeset_sample_page { set_id: 'small-eg8i', }
-// @demo_typeset_sample_page { set_id: 'small-eg12i', }
-// @demo_typeset_sample_page { set_id: 'small-b42', }
-// @demo_typeset_sample_page { set_id: 'apollo-b42', }
+  // @demo_typeset_sample_page { set_id: 'apollo-b42', }
 // @demo_glyfgrid { fontnick: 'b42', gid_1: 0, gid_2: 599, }
 // @demo_typeset_sample_page { set_id: 'medium-eg8i', }
 // @demo_typeset_sample_page { set_id: 'longwords-eg12i', }

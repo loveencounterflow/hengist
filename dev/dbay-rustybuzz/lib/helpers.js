@@ -111,40 +111,41 @@
       case 'small':
         fontnick = 'djvs';
         fspath = 'DejaVuSerif.ttf';
-        chrs = "abcdefghijklm";
         text = "affirmation.";
         break;
       case 'smalli':
         fontnick = 'djvsi';
         fspath = 'DejaVuSerif-Italic.ttf';
-        chrs = "abcdefghijklm";
         text = "affirmation.";
         break;
       case 'small-eg8i':
         fontnick = 'eg8i';
         fspath = 'EBGaramond08-Italic.otf';
-        chrs = "abcdefghijklm";
         text = "affirm affluent";
         break;
       case 'small-b42':
         fontnick = 'b42';
-        fspath = null;
-        chrs = "abcdefghijklm";
         // text      = "far-out"
-        text = `af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.
-sic habet cognomina, affirmatio.`;
+        text = `sic habet cognomina, affirmatio.&nl;sic habet cognomina, affir&wbr;matio.`;
         break;
+      // text      = """sic habet cognomina, affirmatio."""
       case 'twolines-eg8i':
         fontnick = 'eg8i';
         fspath = 'EBGaramond08-Italic.otf';
-        chrs = null;
         // text      = "far-out"
         text = `first&nl;second`;
         break;
       case 'shorties-b42':
         fontnick = 'b42';
-        fspath = null;
-        chrs = "abcdefghijklm";
+        // text      = "far-out"
+        text = `af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.&nl;
+sic habet cognomina, affirmatio.&nl;
+of Memphis, Thebes, Karnak, and the Valley of the Kings&nl;
+talibus appellata) pro ostentu ad visum pertinente os‌tentu brot‌zeit brotzeit&nl;`;
+        break;
+      case 'shorties-eg8i':
+        fontnick = 'eg8i';
+        fspath = 'EBGaramond08-Italic.otf';
         // text      = "far-out"
         text = `af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.&nl;
 sic habet cognomina, affirmatio.&nl;
@@ -153,12 +154,10 @@ talibus appellata) pro ostentu ad visum pertinente os‌tentu brot‌zeit brotze
         break;
       case 'affirm-b42':
         fontnick = 'b42';
-        fspath = null;
         text = `**********affirm affluent deus in excelsior`;
         break;
       case 'memphis-b42':
         fontnick = 'b42';
-        fspath = null;
         text = `of Memphis, Thebes, Karnak, and the Valley of the Kings`;
         break;
       case 'small-arya':
@@ -168,8 +167,6 @@ talibus appellata) pro ostentu ad visum pertinente os‌tentu brot‌zeit brotze
         break;
       case 'apollo-b42':
         fontnick = 'b42';
-        fspath = null;
-        chrs = "abcdefghijklm";
         // text      = "far-out"
         text = `Apollo, (-inis, m, Graece Ἀπόλλων, Apóllōn) in mythologia Graeca est filius Iovis et
 Latonae, Deli in insula natus. Qui est deus vaticinationis, musicae, iuventutis, scientiae,
@@ -178,32 +175,22 @@ medicinae, et solis (igitur, varia habet cognomina, primo scilicet Phoebus (Grae
         break;
       case 'gaga-b42':
         fontnick = 'b42';
-        fspath = null;
-        chrs = null;
         text = "talibus appellata) pro ostentu ad visum pertinente os‌tentu brot‌zeit brotzeit";
         break;
       case 'typo-b42':
         fontnick = 'b42';
-        fspath = null;
-        chrs = "abcdefghijklm";
         text = "Typothetica, vel fortasse compositio typographica, est compositio linguae scriptae per typos effecta. Litterae et alia signa reposita (sortes in rationibus mechanicis et glypha in rationibus digitalibus appellata) pro ostentu ad visum pertinente recuperantur et secundum orthographiam linguae ordinantur. Typothetica prioris rationis eget, fontis designati. Impressio stipibus ligni est modus textús, imaginum, vel exemplaria impressa, qui late per Asia Orientali adhibitus est. Antiquitus in Sina ortus est ut modus imprimendi in textilibus, et tunc in chartis. Modi imprimendi in textilibus, prima exempla exstantia ex Sina facta sunt ante 220 a.C.n., et ex Aegypto Romana ad saeculum quartum.";
         break;
       case 'missing-t-b42':
         fontnick = 'b42';
-        fspath = null;
-        chrs = null;
         text = "talibus appellata) pro ostentu ad visum pertinente";
         break;
       case 'typo-b36':
         fontnick = 'b36';
-        fspath = null;
-        chrs = "abcdefghijklm";
         text = "Typothetica, vel fortasse compositio typographica, est compositio linguae scriptae per typos effecta. Litterae et alia signa reposita (sortes in rationibus mechanicis et glypha in rationibus digitalibus appellata) pro ostentu ad visum pertinente recuperantur et secundum orthographiam linguae ordinantur. Typothetica prioris rationis eget, fontis designati. Impressio stipibus ligni est modus textús, imaginum, vel exemplaria impressa, qui late per Asia Orientali adhibitus est. Antiquitus in Sina ortus est ut modus imprimendi in textilibus, et tunc in chartis. Modi imprimendi in textilibus, prima exempla exstantia ex Sina facta sunt ante 220 a.C.n., et ex Aegypto Romana ad saeculum quartum.";
         break;
       case 'medium-b42':
         fontnick = 'b42';
-        fspath = null;
-        chrs = "abcdefghijklm";
         text = `Dansk er et nordisk sprog, også præciseret som østnordisk, i den germanske
 sprogfamilie. Det danske sprog tales af ca. seks millioner mennesker, hovedsageligt i Danmark, men
 også i Sydslesvig (i Flensborg ca. 20 %), på Færøerne og Grønland. Dansk er tæt forbundet med
@@ -212,7 +199,6 @@ norsk og svensk, og sproghistorisk har dansk været stærkt påvirket af plattys
       case 'medium-eg8i-da':
         fontnick = 'eg8i';
         fspath = 'EBGaramond08-Italic.otf';
-        chrs = "abcdefghijklm";
         text = `Dansk er et nordisk sprog, også præciseret som østnordisk, i den germanske
 sprogfamilie. Det danske sprog tales af ca. seks millioner mennesker, hovedsageligt i Danmark, men
 også i Sydslesvig (i Flensborg ca. 20 %), på Færøerne og Grønland. Dansk er tæt forbundet med
@@ -221,7 +207,6 @@ norsk og svensk, og sproghistorisk har dansk været stærkt påvirket af plattys
       case 'medium-eg8i':
         fontnick = 'eg8i';
         fspath = 'EBGaramond08-Italic.otf';
-        chrs = "abcdefghijklm";
         text = `f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language spoken by about six million people, principally in
 Denmark, Greenland, the Fa&shy;roe Islands and in the region of Southern Schles&shy;wig in northern Germany,
 where it has minority language status. This-and-that this-and-that this-and-that this-and-that.`;
@@ -229,7 +214,6 @@ where it has minority language status. This-and-that this-and-that this-and-that
       case 'medium-n1518':
         fontnick = 'n1518';
         fspath = 'kps-fonts.ch/1518_neudoerffer_fraktur.otf';
-        chrs = null;
         text = `f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language spoken by about six million people, principally in
 Denmark, Greenland, the Fa&shy;roe Islands and in the region of Southern Schles&shy;wig in northern Germany,
 where it has minority language status. This-and-that this-and-that this-and-that this-and-that.`;
@@ -237,7 +221,6 @@ where it has minority language status. This-and-that this-and-that this-and-that
       case 'medium-eg12i':
         fontnick = 'eg12i';
         fspath = 'EBGaramond12-Italic.otf';
-        chrs = "abcdefghijklm";
         text = `f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language spoken by about six million people, principally in
 Denmark, Greenland, the Fa&shy;roe Islands and in the region of Southern Schles&shy;wig in northern Germany,
 where it has minority language status.`;
@@ -245,7 +228,6 @@ where it has minority language status.`;
       case 'egypt-eg12i':
         fontnick = 'eg12i';
         fspath = 'EBGaramond12-Italic.otf';
-        chrs = "abcdefghijklm";
         text = `Egypt has one of the longest histories of any country, tracing its heritage along the
 Nile Delta back to the 6th–4th millennia BCE. Considered a cradle of civilisation, Ancient Egypt saw
 some of the earliest developments of writing, agriculture, urbanisation, organised religion and
@@ -259,8 +241,6 @@ Muslim country, albeit with a significant Christian minority.`;
         break;
       case 'egypt-b42':
         fontnick = 'b42';
-        fspath = null;
-        chrs = "abcdefghijklm";
         text = `Egypt has one of the longest histories of any country, tracing its heritage along the
 Nile Delta back to the 6th–4th millennia BCE. Considered a cradle of civilisation, Ancient Egypt saw
 some of the earliest developments of writing, agriculture, urbanisation, organised religion and
@@ -275,67 +255,56 @@ Muslim country, albeit with a significant Christian minority.`;
       case 'short-eg12i':
         fontnick = 'eg12i';
         fspath = 'EBGaramond12-Italic.otf';
-        chrs = "abcdefghijklm";
         text = `f&shy;f&shy;i f&wbr;f&wbr;i affirmation丹麥Danish is a North Germanic language.`;
         break;
       case 'uppercasehyphen-eg12i':
         fontnick = 'eg12i';
         fspath = 'EBGaramond12-Italic.otf';
-        chrs = "abcdefghijklm";
         text = `Hyphenated uppercase that should cause reformatting b/o kerning STORMY&shy;YEAR`;
         break;
       case 'longwords-eg12i':
         fontnick = 'eg12i';
         fspath = 'EBGaramond12-Italic.otf';
-        chrs = "abcdefghijklm";
         text = `xxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx xxxxx.`;
         break;
       case 'small-aleo':
         fontnick = 'aleo';
         fspath = 'Aleo_font_v1.2.2/Desktop OTF/Aleo-Italic.otf';
-        chrs = "abcdefghijklm";
         text = "Affirmation字缺TitianիϪSylt.";
         break;
       case 'small-djvsi':
         fontnick = 'djvsi';
         fspath = 'DejaVuSerif-Italic.ttf';
-        chrs = "abcdefghijklm";
         text = "Af&shy;&shy;&wbr;firmation字缺TitianիϪSylt.";
         break;
       case 'widechrs':
         fontnick = 'sfb';
         fspath = 'sunflower-u-cjk-xb.ttf';
-        chrs = "𠀀𠀁𠀂𠀃𠀄𠀅𠀆";
         text = "𠀀𠀁𠀂𠀃𠀄𠀅𠀆";
         break;
       case '3a':
         fontnick = 'djvsi';
         fspath = 'DejaVuSerif-Italic.ttf';
-        chrs = "abcdefghijklm";
         text = "abc";
         break;
       case '3b':
         fontnick = 'eg8i';
         fspath = 'EBGaramond08-Italic.otf';
-        chrs = "abcdefghijklm";
         text = "abc";
         break;
       case 'all':
         fontnick = 'qkai';
         fspath = 'cwTeXQKai-Medium.ttf';
-        chrs = drb.get_assigned_unicode_chrs();
         break;
       case 'tibetan':
         fontnick = 'tbm';
         fspath = 'TibetanMachineUni.ttf';
         text = "ཨོཾ་མ་ཎི་པདྨེ་ཧཱུྃ";
-        chrs = 'abc';
         break;
       case 'arabic':
         fontnick = 'amiri';
         fspath = 'arabic/Amiri-0.113/Amiri-Bold.ttf';
         text = ([..."نستعلیق‎ 字缺 الخط الأمیری"].reverse()).join('');
-        chrs = ([..."الخط الأمیری"].reverse()).join('');
         break;
       case 'urdu':
         fontnick = 'nur';
@@ -343,7 +312,6 @@ Muslim country, albeit with a significant Christian minority.`;
         // text      = ( [ "اُردُو‌ حُرُوفِ ‌تَہَجِّی"... ].reverse() ).join ''
         // text      = "نستعلیق‎"
         text = ([..."نستعلیق‎"].reverse()).join('');
-        chrs = ([..."الخط الأمیری"].reverse()).join('');
         break;
       default:
         throw new Error(`^345^ unknown set_id ${rpr(set_id)}`);
