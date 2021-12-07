@@ -197,7 +197,7 @@
           text,
           doc,
           par: 1,
-          alt: 1
+          trk: 1
         }))[0];
         return delete result[fontnick].id;
       })();
@@ -208,10 +208,9 @@
         djvsi: {
           doc: 0,
           par: 1,
-          alt: 1,
+          trk: 1,
           sgi: 1,
           osgi: null,
-          alt: 1,
           gid: 68,
           b1: 0,
           b2: 1,
@@ -228,10 +227,9 @@
         eg8i: {
           doc: 1,
           par: 1,
-          alt: 1,
+          trk: 1,
           sgi: 1,
           osgi: null,
-          alt: 1,
           gid: 66,
           b1: 0,
           b2: 1,
@@ -358,7 +356,7 @@
       text,
       doc: 1,
       par: 1,
-      alt: 1
+      trk: 1
     });
     for (i = 0, len = result.length; i < len; i++) {
       ad = result[i];
