@@ -181,7 +181,7 @@ append_content = ( cfg ) ->
           and ( l.doc = $doc )
           and ( l.par = $par )
           and ( l.lnr = $lnr )
-        order by l.ads_id;""", { doc, par, lnr, }
+        order by a.b1;""", { doc, par, lnr, }
       # debug '^6684048^', ad
       line_text  += ad.chrs ? ''
       chrs_ctxt   = _escape_for_html_comment ad.chrs
