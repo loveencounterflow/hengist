@@ -143,17 +143,16 @@ guy                       = require '../../../apps/guy'
       drb.register_fontnick { fontnick, fspath, }
       drb.prepare_font      { fontnick, }
       drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
-      result[ fontnick ] = ( drb.arrange { fontnick, text, doc, par: 1, alt: 1, } )[ 0 ]
+      result[ fontnick ] = ( drb.arrange { fontnick, text, doc, par: 1, trk: 1, } )[ 0 ]
       delete result[ fontnick ].id
   #.........................................................................................................
   T?.eq result, {
     djvsi: {
       doc:    0,
       par:    1,
-      alt:    1,
+      trk:    1,
       sgi:    1,
       osgi:   null,
-      alt:    1,
       gid:    68,
       b1:     0,
       b2:     1,
@@ -169,10 +168,9 @@ guy                       = require '../../../apps/guy'
     eg8i:  {
       doc:    1,
       par:    1,
-      alt:    1,
+      trk:    1,
       sgi:    1,
       osgi:   null,
-      alt:    1,
       gid:    66,
       b1:     0,
       b2:     1,
@@ -219,7 +217,7 @@ guy                       = require '../../../apps/guy'
   drb.register_fontnick { fontnick, fspath, }
   drb.prepare_font      { fontnick, }
   drb.insert_outlines   { fontnick, cgid_map, cids, chrs, }
-  result = drb.arrange { fontnick, text, doc: 1, par: 1, alt: 1, }
+  result = drb.arrange { fontnick, text, doc: 1, par: 1, trk: 1, }
   # result = result[ 1 ... result.length - 1 ]
   urge '^45958^', ad.chrs, ad.sid, ad for ad in result
   for ad, idx in result

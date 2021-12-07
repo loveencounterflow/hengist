@@ -59,7 +59,7 @@ guy                       = require '../../../apps/guy'
         *
       from ads
       where true
-        and ( alt = 1 )
+        and ( trk = 1 )
       order by b1
       limit 50;
     """, {}
