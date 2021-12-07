@@ -106,6 +106,7 @@ do =>
       text      = """
       af&shy;f&shy;irm affluent deus in excelsior. ** major/minor designati.&nl;
       sic habet cognomina, affirmatio.&nl;
+      sic habet cognomina, affir&wbr;matio.&nl;
       of Memphis, Thebes, Karnak, and the Valley of the Kings&nl;
       talibus appellata) pro ostentu ad visum pertinente os‌tentu brot‌zeit brotzeit&nl;
       """
