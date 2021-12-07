@@ -330,7 +330,8 @@ if require.main is module then do =>
   # @demo_typeset_sample_page { set_id: 'typo-b42', }
   # @demo_typeset_sample_page { set_id: 'gaga-b42', }
   # @demo_typeset_sample_page { set_id: 'medium-n1518', }
-  @demo_typeset_sample_page { set_id: 'shorties-b42', }
+  # @demo_typeset_sample_page { set_id: 'shorties-b42', }
+  # @demo_typeset_sample_page { set_id: 'shorties-eg8i', }
   # @demo_typeset_sample_page { set_id: 'twolines-eg8i', }
   # @demo_typeset_sample_page { set_id: 'typo-b36', }
   # @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
@@ -339,7 +340,7 @@ if require.main is module then do =>
   # @demo_store_outlines { set_id: 'all', }
   # @demo_typeset_sample_page { set_id: 'small-eg8i', }
   # @demo_typeset_sample_page { set_id: 'small-eg12i', }
-  # @demo_typeset_sample_page { set_id: 'small-b42', }
+  @demo_typeset_sample_page { set_id: 'small-b42', }
   # @demo_typeset_sample_page { set_id: 'apollo-b42', }
   # @demo_glyfgrid { fontnick: 'b42', gid_1: 0, gid_2: 599, }
   # @demo_typeset_sample_page { set_id: 'medium-eg8i', }
