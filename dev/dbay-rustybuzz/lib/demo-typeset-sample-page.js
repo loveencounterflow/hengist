@@ -270,7 +270,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var I, L, Tbl, V, cgid_map, chrs, db, defaults, doc, drb, dtab, fontnick, fspath, known_ods, missing, missing_sid, mm_p_u, mm_p_u_txt, page, par, set_id, size_mm, text, width_mm, x0, y0;
+    var I, L, Tbl, V, cgid_map, chrs, db, defaults, doc, drb, dtab, fontnick, fspath, known_ods, missing, missing_sid, mm_p_u, mm_p_u_txt, page, par, set_id, size_mm, specials, text, width_mm, x0, y0;
     defaults = {
       set_id: 'medium-eg8i'
     };
@@ -315,11 +315,12 @@
     size_mm = 10;
     mm_p_u = size_mm / 1000; // mm per unit as valid inside scaled `<g>` line element
     mm_p_u_txt = mm_p_u.toFixed(4);
-    ({missing} = Drb.C);
-    missing_sid = `o0${fontnick}`;
+    ({specials} = Drb.C);
+    ({missing} = specials);
+    missing_sid = `o${missing.sid}${fontnick}`;
     known_ods = {
       [missing_sid]: {
-        gid: missing.gid,
+        gid: specials.missing.gid,
         sid: missing_sid,
         fontnick
       }

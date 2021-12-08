@@ -250,7 +250,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB RBW arrange() honors missing outlines"] = function(T, done) {
-    var DBay, Drb, ad, cgid_map, chrs, cids, db, drb, fontnick, fspath, i, idx, j, key, keys, len, len1, matcher, missing, missing_sid, result, set_id, text;
+    var DBay, Drb, ad, cgid_map, chrs, cids, db, drb, fontnick, fspath, i, idx, j, key, keys, len, len1, matcher, missing_sid, result, set_id, specials, text;
     // T?.halt_on_error()
     globalThis.info = info;
     ({DBay} = require(H.dbay_path));
@@ -262,10 +262,10 @@
     });
     set_id = 'small-eg8i';
     text = "買ne 來ca";
-    ({missing} = Drb.C);
+    ({specials} = Drb.C);
     //.........................................................................................................
     ({chrs, cids, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
-    missing_sid = `o${missing.gid}${fontnick}`;
+    missing_sid = `o${specials.missing.gid}${fontnick}`;
     //.....................................................................................................
     matcher = [
       {
@@ -387,7 +387,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["___ DRB hyphens in many fonts behave unsurprisingly"] = function(T, done) {
-    var DBay, Drb, ad, ads_h, ads_s, db, drb, fontnick, fspath, h_dx, hyphen_dx, i, j, k, len, len1, len2, letter, letters, missing, ref, s_dx;
+    var DBay, Drb, ad, ads_h, ads_s, db, drb, fontnick, fspath, h_dx, hyphen_dx, i, j, k, len, len1, len2, letter, letters, ref, s_dx;
     /* Less of a test but more of a routine to ensure that our naïve assumption that the hyphen in 'all
      fonts' behaves such that we can always replace the outlines for `x&shy;` with those for `x-` and just add
      the hyphen's length. */
@@ -399,7 +399,7 @@
       db,
       temporary: true
     });
-    ({missing} = Drb.C);
+    // { specials }        = Drb.C
     letters = Array.from(`abcdefghijklmnopqrstuvwxyz
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
 0123456789
@@ -458,7 +458,7 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
       // test @[ "DRB can pass in custom RBW" ]
       // @[ "DRB get_cgid_map()" ]()
       // @[ "DRB insert_outlines()" ]()
-      return test(this["DRB RBW arrange() returns coordinates acc to font upem"]);
+      return this["DRB RBW arrange() returns coordinates acc to font upem"]();
     })();
   }
 

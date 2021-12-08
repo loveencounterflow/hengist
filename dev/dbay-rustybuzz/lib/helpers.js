@@ -121,6 +121,7 @@
       case 'small-eg8i':
         fontnick = 'eg8i';
         fspath = 'EBGaramond08-Italic.otf';
+        chrs = "abcdefghijklm";
         text = "affirm affluent";
         break;
       case 'small-b42':
@@ -286,11 +287,13 @@ Muslim country, albeit with a significant Christian minority.`;
       case '3a':
         fontnick = 'djvsi';
         fspath = 'DejaVuSerif-Italic.ttf';
+        chrs = "abcdefghijklm";
         text = "abc";
         break;
       case '3b':
         fontnick = 'eg8i';
         fspath = 'EBGaramond08-Italic.otf';
+        chrs = "abcdefghijklm";
         text = "abc";
         break;
       case 'all':
