@@ -195,14 +195,14 @@ guy                       = require '../../../apps/guy'
   drb                 = new Drb { db, temporary: true, }
   set_id              = 'small-eg8i'
   text                = "買ne 來ca"
-  { missing }         = Drb.C
+  { specials }        = Drb.C
   #.........................................................................................................
   { chrs
     cids
     cgid_map
     fontnick
     fspath          } = H.settings_from_set_id set_id
-  missing_sid         = "o#{missing.gid}#{fontnick}"
+  missing_sid         = "o#{specials.missing.gid}#{fontnick}"
   #.....................................................................................................
   matcher = [
     { gid: 0,  b1: 0,  b2: 3,  x: 0,    y: 0, dx: 1000, dy: 0, chrs: '買', sid: 'o0eg8i' }
@@ -245,7 +245,7 @@ guy                       = require '../../../apps/guy'
   { Drb }             = require H.drb_path
   db                  = new DBay()
   drb                 = new Drb { db, temporary: true, }
-  { missing }         = Drb.C
+  # { specials }        = Drb.C
   letters             = Array.from """
     abcdefghijklmnopqrstuvwxyz
     ABCDEFGHIJKLMNOPQRSTUVWXYZ
@@ -283,7 +283,7 @@ if require.main is module then do =>
   # test @[ "DRB can pass in custom RBW" ]
   # @[ "DRB get_cgid_map()" ]()
   # @[ "DRB insert_outlines()" ]()
-  test @[ "DRB RBW arrange() returns coordinates acc to font upem" ]
+  @[ "DRB RBW arrange() returns coordinates acc to font upem" ]()
   # test @[ "DRB RBW arrange() honors missing outlines" ]
   # test @[ "DRB insert_outlines()" ]
   # test @[ "DRB hyphens in many fonts behave unsurprisingly" ]

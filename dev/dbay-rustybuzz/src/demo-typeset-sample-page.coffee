@@ -254,9 +254,10 @@ append_content = ( cfg ) ->
   size_mm         = 10
   mm_p_u          = size_mm / 1000 # mm per unit as valid inside scaled `<g>` line element
   mm_p_u_txt      = mm_p_u.toFixed 4
-  { missing }     = Drb.C
-  missing_sid     = "o0#{fontnick}"
-  known_ods       = { [missing_sid]: { gid: missing.gid, sid: missing_sid, fontnick, }, }
+  { specials    } = Drb.C
+  { missing     } = specials
+  missing_sid     = "o#{missing.sid}#{fontnick}"
+  known_ods       = { [missing_sid]: { gid: specials.missing.gid, sid: missing_sid, fontnick, }, }
   #.........................................................................................................
   ### Register, load and prepopulate font: ###
   drb.register_fontnick { fontnick, fspath, } if fspath?
