@@ -95,7 +95,7 @@ _escape_for_html_comment = ( text ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 append_outlines = ( cfg ) ->
-  { drb, page, fontnick, size_mm, mm_p_u, missing, missing_sid, } = cfg
+  { drb, page, fontnick, size_mm, mm_p_u, missing_sid, } = cfg
   fm          = drb.get_fontmetrics { fontnick, }
   swdth       = 0.5 # stroke width in mm
   swdth      *= 1000 * size_mm * mm_p_u
@@ -137,7 +137,9 @@ _append_fontmetrics = ( cfg ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 append_content = ( cfg ) ->
-  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing, missing_sid, } = cfg
+  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, } = cfg
+  { specials  } = drb.constructor.C
+  { missing   } = specials
   ### TAINT add to cfg type ###
   fm            = drb.get_fontmetrics { fontnick, }
   cfg.skip_shy_etc  ?= false
@@ -256,8 +258,8 @@ append_content = ( cfg ) ->
   mm_p_u_txt      = mm_p_u.toFixed 4
   { specials    } = Drb.C
   { missing     } = specials
-  missing_sid     = "o#{missing.sid}#{fontnick}"
-  known_ods       = { [missing_sid]: { gid: specials.missing.gid, sid: missing_sid, fontnick, }, }
+  missing_sid     = "o#{missing.gid}#{fontnick}"
+  known_ods       = { [missing_sid]: { gid: missing.gid, sid: missing_sid, fontnick, }, }
   #.........................................................................................................
   ### Register, load and prepopulate font: ###
   drb.register_fontnick { fontnick, fspath, } if fspath?
@@ -269,8 +271,8 @@ append_content = ( cfg ) ->
   x0    = 0
   y0    = 50
   page  = append_remarks  { drb, page, fontnick, }
-  page  = append_outlines { drb, page, fontnick, size_mm, mm_p_u, missing, missing_sid, known_ods, }
-  page  = append_content  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing, missing_sid, }
+  page  = append_outlines { drb, page, fontnick, size_mm, mm_p_u, missing_sid, known_ods, }
+  page  = append_content  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, }
   #.........................................................................................................
   FS.writeFileSync target_path, page
   return null
