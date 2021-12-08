@@ -131,8 +131,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   append_outlines = function(cfg) {
-    var bottom, chrs_txt, drb, fm, fontnick, left, missing, missing_pd, missing_sid, mm_p_u, od, owdth, page, ref, right, size_mm, swdth, top;
-    ({drb, page, fontnick, size_mm, mm_p_u, missing, missing_sid} = cfg);
+    var bottom, chrs_txt, drb, fm, fontnick, left, missing_pd, missing_sid, mm_p_u, od, owdth, page, ref, right, size_mm, swdth, top;
+    ({drb, page, fontnick, size_mm, mm_p_u, missing_sid} = cfg);
     fm = drb.get_fontmetrics({fontnick});
     swdth = 0.5; // stroke width in mm
     swdth *= 1000 * size_mm * mm_p_u;
@@ -183,8 +183,10 @@
     /* TAINT add to cfg type */
     /* TAINT use API */
     /* TAINT use field `rnr` to determine where to stop */
-    var ad, chrs_ctxt, chrs_htxt, doc, drb, element, fm, fontnick, i, line_text, line_y, line_y0, line_y_delta, lnr, lnr_1, lnr_2, missing, missing_sid, mm_p_u, mm_p_u_txt, page, par, ref, ref1, ref2, ref3, relwdth, size_mm, text, width_mm, x0, y0;
-    ({drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing, missing_sid} = cfg);
+    var ad, chrs_ctxt, chrs_htxt, doc, drb, element, fm, fontnick, i, line_text, line_y, line_y0, line_y_delta, lnr, lnr_1, lnr_2, missing, missing_sid, mm_p_u, mm_p_u_txt, page, par, ref, ref1, ref2, ref3, relwdth, size_mm, specials, text, width_mm, x0, y0;
+    ({drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid} = cfg);
+    ({specials} = drb.constructor.C);
+    ({missing} = specials);
     fm = drb.get_fontmetrics({fontnick});
     if (cfg.skip_shy_etc == null) {
       cfg.skip_shy_etc = false;
@@ -317,10 +319,10 @@
     mm_p_u_txt = mm_p_u.toFixed(4);
     ({specials} = Drb.C);
     ({missing} = specials);
-    missing_sid = `o${missing.sid}${fontnick}`;
+    missing_sid = `o${missing.gid}${fontnick}`;
     known_ods = {
       [missing_sid]: {
-        gid: specials.missing.gid,
+        gid: missing.gid,
         sid: missing_sid,
         fontnick
       }
@@ -338,8 +340,8 @@
     x0 = 0;
     y0 = 50;
     page = append_remarks({drb, page, fontnick});
-    page = append_outlines({drb, page, fontnick, size_mm, mm_p_u, missing, missing_sid, known_ods});
-    page = append_content({drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing, missing_sid});
+    page = append_outlines({drb, page, fontnick, size_mm, mm_p_u, missing_sid, known_ods});
+    page = append_content({drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid});
     //.........................................................................................................
     FS.writeFileSync(target_path, page);
     return null;
