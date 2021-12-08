@@ -89,6 +89,7 @@ do =>
     when 'small-eg8i'
       fontnick  = 'eg8i'
       fspath    = 'EBGaramond08-Italic.otf'
+      chrs      = "abcdefghijklm"
       text      = "affirm affluent"
     when 'small-b42'
       fontnick  = 'b42'
@@ -246,10 +247,12 @@ do =>
     when '3a'
       fontnick  = 'djvsi'
       fspath    = 'DejaVuSerif-Italic.ttf'
+      chrs      = "abcdefghijklm"
       text      = "abc"
     when '3b'
       fontnick  = 'eg8i'
       fspath    = 'EBGaramond08-Italic.otf'
+      chrs      = "abcdefghijklm"
       text      = "abc"
     when 'all'
       fontnick  = 'qkai'
