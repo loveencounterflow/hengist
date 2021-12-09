@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/pikchr.coffee"
+  ],
+  "names": [],
+  "mappings": "AAGA;EAAA;AAAA,MAAA,GAAA,EAAA,MAAA,EAAA,KAAA,EAAA,KAAA,EAAA,GAAA,EAAA,CAAA,EAAA,KAAA,EAAA,IAAA,EAAA,IAAA,EAAA,GAAA,EAAA,IAAA,EAAA,IAAA,EAAA,OAAA;;;EAIA,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,GAAA,GAA4B,GAAG,CAAC;;EAChC,KAAA,GAA4B;;EAC5B,KAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,KAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,OAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,SAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAE5B,MAAA,GAAS,OAAA,CAAQ,QAAR;;EACT,IAAA,CAAK,MAAM,CAAC,MAAP,CAAgB,CAAA,mCAAA,CAAhB,CAAL;;EACA,GAAA,GAAM,CAAA;;EACN,CAAA,GAAM,MAAM,CAAC,QAAP,CAAgB,CAAA,mCAAA,CAAhB,EAA2D,GAA3D;;EACN,IAAA,CAAK,MAAM,CAAC,IAAP,CAAY,CAAZ,CAAL;;EACA,IAAA,CAAK,CAAC,CAAC,MAAP;AApBA",
+  "sourcesContent": [
+    "\n\n\n'use strict'\n\n\n############################################################################################################\nCND                       = require 'cnd'\nrpr                       = CND.rpr\nbadge                     = 'PIKCHR'\ndebug                     = CND.get_logger 'debug',     badge\nalert                     = CND.get_logger 'alert',     badge\nwhisper                   = CND.get_logger 'whisper',   badge\nwarn                      = CND.get_logger 'warn',      badge\nhelp                      = CND.get_logger 'help',      badge\nurge                      = CND.get_logger 'urge',      badge\ninfo                      = CND.get_logger 'info',      badge\n\nPIKCHR = require 'pikchr'\nhelp PIKCHR.pikchr   \"\"\"line ; box \"Hello,\" \"World!\"; arrow\"\"\"\ncfg = {}\nd   = PIKCHR.pikchrex \"\"\"line ; box \"Hello,\" \"World!\"; arrow\"\"\", cfg\ninfo Object.keys d\nurge d.output\n\n"
+  ]
+}
