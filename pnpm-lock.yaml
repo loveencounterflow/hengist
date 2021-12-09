@@ -81,6 +81,7 @@ specifiers:
   pg-cursor: ^2.5.2
   pg-mem: 2.1.7
   pgsqwell: ^1.0.1
+  pikchr: ^0.0.5
   pkg-dir: ^6.0.1
   postgres: ^1.0.2
   random-ext: 2.7.1
@@ -190,6 +191,7 @@ dependencies:
   pg-cursor: 2.7.1_pg@8.7.1
   pg-mem: 2.1.7
   pgsqwell: 1.0.1
+  pikchr: 0.0.5
   pkg-dir: 6.0.1
   postgres: 1.0.2
   random-ext: 2.7.1
@@ -1058,6 +1060,10 @@ packages:
 
   /bezier-easing/2.1.0:
     resolution: {integrity: sha1-wE3+i5JtbsrKGBPWn/F5t8ICXYY=}
+    dev: false
+
+  /bindings/1.2.1:
+    resolution: {integrity: sha1-FK1hE4EtLTfXLme0ystLtyZQXxE=}
     dev: false
 
   /bindings/1.5.0:
@@ -4705,6 +4711,13 @@ packages:
   /pify/3.0.0:
     resolution: {integrity: sha1-5aSs0sEB/fPZpNB/DbxNtJ3SgXY=}
     engines: {node: '>=4'}
+    dev: false
+
+  /pikchr/0.0.5:
+    resolution: {integrity: sha512-t4/YlqDwcYiX6NWbE3+rJUwGCovmobjivOPaRhlWRxWMWYA+D5RSjL3zT06Ng+8Cw9HorGaaStJXRRKcpuU4rA==}
+    requiresBuild: true
+    dependencies:
+      bindings: 1.2.1
     dev: false
 
   /pinkie-promise/2.0.1:

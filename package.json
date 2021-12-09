@@ -93,6 +93,7 @@
     "pg-cursor": "^2.5.2",
     "pg-mem": "2.1.7",
     "pgsqwell": "^1.0.1",
+    "pikchr": "^0.0.5",
     "pkg-dir": "^6.0.1",
     "postgres": "^1.0.2",
     "random-ext": "2.7.1",
