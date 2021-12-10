@@ -129,10 +129,10 @@ reveal                    = ( text ) ->
     part = _escape_syms part
     urge '^3409^', { bri, nxt_bri, }, rpr part
   parts = ( ( text_bfr[ bri ... bris[ idx + 1 ] ? Infinity ].toString 'utf-8' ) for bri, idx in bris )
-  echo rpr new_text = parts.join drb.constructor.C.special_chrs.wbr
-  new_text  = new_text.replace /\xad\u200b/g, drb.constructor.C.special_chrs.shy
+  echo rpr new_text = parts.join drb.constructor.C.specials.wbr.chrs
+  new_text  = new_text.replace /\xad\u200b/g, drb.constructor.C.specials.shy.chrs
   new_text  = new_text.replace /\x20\u200b/g,   '\x20'
-  new_text  = new_text.replace /\u200b{2,}/g, drb.constructor.C.special_chrs.wbr
+  new_text  = new_text.replace /\u200b{2,}/g, drb.constructor.C.specials.wbr.chrs
   new_text  = new_text.replace /\u200b$/g, ''
   echo rpr reveal new_text
   T?.eq matcher, reveal new_text
@@ -153,6 +153,6 @@ reveal                    = ( text ) ->
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  test @[ "DRB RBW prepare_text()" ]
+  # test @[ "DRB RBW prepare_text()" ]
   # test @[ "DRB RBW decode_ncrs()" ]
-  # test @[ "DRB RBW finds UAX#14 breakpoints" ]
+  test @[ "DRB RBW finds UAX#14 breakpoints" ]
