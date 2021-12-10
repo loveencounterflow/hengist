@@ -319,7 +319,10 @@
     mm_p_u_txt = mm_p_u.toFixed(4);
     ({specials} = Drb.C);
     ({missing} = specials);
-    missing_sid = `o${missing.gid}${fontnick}`;
+    missing_sid = drb._get_sid({
+      fontnick,
+      gid: missing.gid
+    });
     known_ods = {
       [missing_sid]: {
         gid: missing.gid,
@@ -351,7 +354,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_glyfgrid = function(cfg) {
-    var I, L, V, bbox, db, defaults, drb, fontnick, fspath, gid, gid_1, gid_2, i, mm_p_u, mm_p_u_txt, page, pd, px/* TAINT code duplication */, py, ref, ref1, sid, size_mm, tx, ty, width_mm, x, x1, y, y1;
+    var I, L, V, bbox, db, defaults, drb, fontnick, fspath, gid, gid_1, gid_2, i, mm_p_u, mm_p_u_txt, page, pd, px, py, ref, ref1, sid, size_mm, tx, ty, width_mm, x, x1, y, y1;
     defaults = {
       fontnick: 'b42',
       fspath: null,
@@ -394,7 +397,7 @@
     for (gid = i = ref = gid_1, ref1 = gid_2; (ref <= ref1 ? i <= ref1 : i >= ref1); gid = ref <= ref1 ? ++i : --i) {
       ({bbox, pd} = drb.get_single_outline({gid, fontnick}));
       ({x, y, x1, y1} = bbox);
-      sid = `o${gid}${fontnick}`;
+      sid = drb._get_sid({fontnick, gid});
       px = (modulo(gid, 10)) / mm_p_u * size_mm;
       py = (Math.floor(gid / 10)) / mm_p_u * size_mm;
       tx = px + ((0.5 * size_mm) / mm_p_u);

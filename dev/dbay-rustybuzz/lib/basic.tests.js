@@ -229,7 +229,6 @@
   if (require.main === module) {
     (() => {
       // test @
-      // test @[ "DRB RBW finds UAX#14 breakpoints" ]
       // test @[ "DRB RBW decode_ncrs()" ]
       return test(this["DRB use object as namespace for interpolation"]);
     })();

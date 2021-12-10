@@ -250,7 +250,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB RBW arrange() honors missing outlines"] = function(T, done) {
-    var DBay, Drb, ad, cgid_map, chrs, cids, db, drb, fontnick, fspath, i, idx, j, key, keys, len, len1, matcher, missing_sid, result, set_id, specials, text;
+    var DBay, Drb, ad, cgid_map, chrs, cids, db, drb, fontnick, fspath, i, idx, j, key, keys, len, len1, matcher, result, set_id, specials, text;
     // T?.halt_on_error()
     globalThis.info = info;
     ({DBay} = require(H.dbay_path));
@@ -265,7 +265,6 @@
     ({specials} = Drb.C);
     //.........................................................................................................
     ({chrs, cids, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
-    missing_sid = `o${specials.missing.gid}${fontnick}`;
     //.....................................................................................................
     matcher = [
       {
