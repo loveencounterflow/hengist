@@ -258,7 +258,7 @@ append_content = ( cfg ) ->
   mm_p_u_txt      = mm_p_u.toFixed 4
   { specials    } = Drb.C
   { missing     } = specials
-  missing_sid     = "o#{missing.gid}#{fontnick}"
+  missing_sid     = drb._get_sid { fontnick, gid: missing.gid, }
   known_ods       = { [missing_sid]: { gid: missing.gid, sid: missing_sid, fontnick, }, }
   #.........................................................................................................
   ### Register, load and prepopulate font: ###
@@ -311,7 +311,7 @@ append_content = ( cfg ) ->
       pd    }   = drb.get_single_outline { gid, fontnick, }
     { x,  y,
       x1, y1, } = bbox
-    sid         = "o#{gid}#{fontnick}" ### TAINT code duplication ###
+    sid         = drb._get_sid { fontnick, gid, }
     px          = ( gid %% 10 ) / mm_p_u * size_mm
     py          = ( gid // 10 ) / mm_p_u * size_mm
     tx          = px + ( ( 0.5 * size_mm ) / mm_p_u )
