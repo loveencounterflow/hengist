@@ -82,10 +82,42 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DRB arrange() uses correct GIDs for specials"] = function(T, done) {
+    var DBay, Drb, db, doc, drb, fontnick, matcher, par, schema, specials, text;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({Drb} = require(H.drb_path));
+    db = new DBay();
+    drb = new Drb({
+      db,
+      temporary: true
+    });
+    text = "買ne 來ca";
+    ({specials} = Drb.C);
+    ({schema} = drb.cfg);
+    //.........................................................................................................
+    fontnick = 'gr';
+    text = "abc&wbr;x&shy;y&nl;z u";
+    text = drb.prepare_text({text});
+    doc = 1;
+    par = 1;
+    //.....................................................................................................
+    matcher = [];
+    //.....................................................................................................
+    // drb.register_fontnick { fontnick, }
+    drb.prepare_font({fontnick});
+    drb.arrange({fontnick, text, doc, par});
+    //.....................................................................................................
+    console.table(db.all_rows(SQL`select * from ${schema}.ads order by trk, b1;`));
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      return this["DRB arrange() uses correct GIDs for specials"]();
     })();
   }
 

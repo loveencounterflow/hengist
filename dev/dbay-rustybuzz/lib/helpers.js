@@ -124,6 +124,11 @@
         chrs = "abcdefghijklm";
         text = "affirm affluent";
         break;
+      case 'specials-eg8i':
+        fontnick = 'eg8i';
+        fspath = 'EBGaramond08-Italic.otf';
+        text = "abc&wbr;x&shy;y&nl;z";
+        break;
       case 'small-b42':
         fontnick = 'b42';
         // text      = "far-out"

@@ -419,8 +419,9 @@
       // @demo_typeset_sample_page { set_id: 'gaga-b42', }
       // @demo_typeset_sample_page { set_id: 'medium-n1518', }
       // @demo_typeset_sample_page { set_id: 'shorties-b42', }
+      // @demo_typeset_sample_page { set_id: 'shorties-eg8i', }
       return this.demo_typeset_sample_page({
-        set_id: 'shorties-eg8i'
+        set_id: 'specials-eg8i'
       });
     })();
   }
