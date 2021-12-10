@@ -172,6 +172,5 @@ guy                       = require '../../../apps/guy'
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  # test @[ "DRB RBW finds UAX#14 breakpoints" ]
   # test @[ "DRB RBW decode_ncrs()" ]
   test @[ "DRB use object as namespace for interpolation" ]

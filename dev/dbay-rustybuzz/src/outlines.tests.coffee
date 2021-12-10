@@ -202,7 +202,6 @@ guy                       = require '../../../apps/guy'
     cgid_map
     fontnick
     fspath          } = H.settings_from_set_id set_id
-  missing_sid         = "o#{specials.missing.gid}#{fontnick}"
   #.....................................................................................................
   matcher = [
     { gid: 0,  b1: 0,  b2: 3,  x: 0,    y: 0, dx: 1000, dy: 0, chrs: '買', sid: 'o0eg8i' }
