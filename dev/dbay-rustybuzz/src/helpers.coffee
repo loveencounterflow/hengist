@@ -91,6 +91,10 @@ do =>
       fspath    = 'EBGaramond08-Italic.otf'
       chrs      = "abcdefghijklm"
       text      = "affirm affluent"
+    when 'specials-eg8i'
+      fontnick  = 'eg8i'
+      fspath    = 'EBGaramond08-Italic.otf'
+      text      = "abc&wbr;x&shy;y&nl;z"
     when 'small-b42'
       fontnick  = 'b42'
       # text      = "far-out"
