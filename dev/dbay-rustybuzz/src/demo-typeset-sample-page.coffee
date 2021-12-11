@@ -113,7 +113,7 @@ append_outlines = ( cfg ) ->
     # continue if od.gid is missing.gid
     ### TAINT use standard method ###
     chrs_txt  = _escape_for_html_comment od.chrs
-    page      = append_to page, 'outlines', "<!--#{chrs_txt}--><path class='shady' id='#{od.sid}' d='#{od.pd}'/>"
+    page      = append_to page, 'outlines', "<!--#{chrs_txt}-->#{od.gd}"
   return page
 
 #-----------------------------------------------------------------------------------------------------------
@@ -275,6 +275,20 @@ append_content = ( cfg ) ->
   page  = append_content  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, }
   #.........................................................................................................
   FS.writeFileSync target_path, page
+  console.table db.all_rows SQL"""
+    select
+        fontnick,
+        gid,
+        sid,
+        chrs,
+        x,
+        y,
+        x1,
+        y1,
+        olt,
+        substring( gd, 1, 12 ) as gd
+      from outlines
+      order by chrs;"""
   return null
 
 
@@ -308,7 +322,7 @@ append_content = ( cfg ) ->
   #.........................................................................................................
   for gid in [ gid_1 .. gid_2 ]
     { bbox
-      pd    }   = drb.get_single_outline { gid, fontnick, }
+      gd    }   = drb.get_single_outline { gid, fontnick, }
     { x,  y,
       x1, y1, } = bbox
     sid         = drb._get_sid { fontnick, gid, }
@@ -316,7 +330,7 @@ append_content = ( cfg ) ->
     py          = ( gid // 10 ) / mm_p_u * size_mm
     tx          = px + ( ( 0.5 * size_mm ) / mm_p_u )
     ty          = py - ( ( 0.7 * size_mm ) / mm_p_u )
-    page        = append_to page, 'outlines', "<path id='#{sid}' d='#{pd}'/>"
+    page        = append_to page, 'outlines', "<path id='#{sid}' d='#{gd}'/>"
     page        = append_to page, 'content',  "<use href='##{sid}' x='#{px}' y='#{py}'/>"
     page        = append_to page, 'content',  "<text class='glyfgridgid' x='#{tx}' y='#{ty}'>#{gid}</text>"
   #.........................................................................................................
