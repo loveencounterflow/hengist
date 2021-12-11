@@ -84,7 +84,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB arrange() uses correct GIDs for specials"] = function(T, done) {
-    var DBay, Drb, db, doc, drb, fontnick, matcher, par, schema, specials, text;
+    var DBay, Drb, ad, db, doc, drb, fontnick, i, key, keys, len, matcher, par, result, schema, specials, text;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     ({Drb} = require(H.drb_path));
@@ -98,18 +98,230 @@
     ({schema} = drb.cfg);
     //.........................................................................................................
     fontnick = 'gr';
-    text = "abc&wbr;x&shy;y&nl;z u";
+    text = "abc&wbr;x&shy;y&nl;z u近Ϣk";
     text = drb.prepare_text({text});
     doc = 1;
     par = 1;
     //.....................................................................................................
-    matcher = [];
+    matcher = [
+      {
+        trk: 1,
+        b1: 0,
+        chrs: 'a',
+        fontnick: 'gr',
+        gid: 66,
+        nobr: 0,
+        br: null
+      },
+      {
+        trk: 1,
+        b1: 1,
+        chrs: 'b',
+        fontnick: 'gr',
+        gid: 67,
+        nobr: 0,
+        br: null
+      },
+      {
+        trk: 1,
+        b1: 2,
+        chrs: 'c',
+        fontnick: 'gr',
+        gid: 68,
+        nobr: 0,
+        br: null
+      },
+      {
+        trk: 1,
+        b1: 3,
+        chrs: '\u{200b}',
+        fontnick: 'gr',
+        gid: -5,
+        nobr: 1,
+        br: 'wbr'
+      },
+      {
+        trk: 1,
+        b1: 6,
+        chrs: 'x',
+        fontnick: 'gr',
+        gid: 89,
+        nobr: 1,
+        br: null
+      },
+      {
+        trk: 1,
+        b1: 7,
+        chrs: '\u{00ad}',
+        fontnick: 'gr',
+        gid: -6,
+        nobr: 0,
+        br: 'shy'
+      },
+      {
+        trk: 1,
+        b1: 9,
+        chrs: 'y',
+        fontnick: 'gr',
+        gid: 90,
+        nobr: 0,
+        br: null
+      },
+      {
+        trk: 1,
+        b1: 10,
+        chrs: '\n',
+        fontnick: 'gr',
+        gid: -7,
+        nobr: 0,
+        br: 'nl'
+      },
+      {
+        trk: 1,
+        b1: 11,
+        chrs: 'z',
+        fontnick: 'gr',
+        gid: 91,
+        nobr: 0,
+        br: null
+      },
+      {
+        trk: 1,
+        b1: 12,
+        chrs: ' ',
+        fontnick: 'gr',
+        gid: -4,
+        nobr: 0,
+        br: 'spc'
+      },
+      {
+        trk: 1,
+        b1: 13,
+        chrs: 'u',
+        fontnick: 'gr',
+        gid: 86,
+        nobr: 0,
+        br: null
+      },
+      {
+        trk: 1,
+        b1: 14,
+        chrs: '\u{200b}',
+        fontnick: 'gr',
+        gid: -5,
+        nobr: 0,
+        br: 'wbr'
+      },
+      {
+        trk: 1,
+        b1: 17,
+        chrs: '近',
+        fontnick: 'gr',
+        gid: -2,
+        nobr: 0,
+        br: null
+      },
+      {
+        trk: 1,
+        b1: 20,
+        chrs: '\u{200b}',
+        fontnick: 'gr',
+        gid: -5,
+        nobr: 0,
+        br: 'wbr'
+      },
+      {
+        trk: 1,
+        b1: 23,
+        chrs: 'Ϣ',
+        fontnick: 'gr',
+        gid: -1,
+        nobr: 0,
+        br: null
+      },
+      {
+        trk: 1,
+        b1: 25,
+        chrs: 'k',
+        fontnick: 'gr',
+        gid: 76,
+        nobr: 0,
+        br: 'end'
+      },
+      {
+        trk: 2,
+        b1: 2,
+        chrs: 'c',
+        fontnick: 'gr',
+        gid: 68,
+        nobr: 0,
+        br: null
+      },
+      {
+        trk: 2,
+        b1: 3,
+        chrs: '\u{200b}',
+        fontnick: 'gr',
+        gid: -5,
+        nobr: 0,
+        br: 'wbr'
+      },
+      {
+        trk: 2,
+        b1: 6,
+        chrs: 'x',
+        fontnick: 'gr',
+        gid: 89,
+        nobr: 0,
+        br: null
+      },
+      {
+        trk: 3,
+        b1: 7,
+        chrs: '-',
+        fontnick: 'gr',
+        gid: 14,
+        nobr: 0,
+        br: 'hhy'
+      },
+      {
+        trk: 4,
+        b1: 14,
+        chrs: '\u{200b}',
+        fontnick: 'gr',
+        gid: -5,
+        nobr: 0,
+        br: 'wbr'
+      },
+      {
+        trk: 5,
+        b1: 20,
+        chrs: '\u{200b}',
+        fontnick: 'gr',
+        gid: -5,
+        nobr: 0,
+        br: 'wbr'
+      }
+    ];
     //.....................................................................................................
     // drb.register_fontnick { fontnick, }
     drb.prepare_font({fontnick});
     drb.arrange({fontnick, text, doc, par});
     //.....................................................................................................
     console.table(db.all_rows(SQL`select * from ${schema}.ads order by trk, b1;`));
+    result = db.all_rows(SQL`select * from ${schema}.ads order by trk, b1;`);
+    keys = new Set(Object.keys(matcher[0]));
+    for (i = 0, len = result.length; i < len; i++) {
+      ad = result[i];
+      for (key in ad) {
+        if (!keys.has(key)) {
+          delete ad[key];
+        }
+      }
+    }
+    if (T != null) {
+      T.eq(result, matcher);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -117,7 +329,7 @@
   if (require.main === module) {
     (() => {
       // test @
-      return this["DRB arrange() uses correct GIDs for specials"]();
+      return test(this["DRB arrange() uses correct GIDs for specials"]);
     })();
   }
 

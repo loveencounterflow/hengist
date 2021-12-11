@@ -127,7 +127,7 @@
       case 'specials-eg8i':
         fontnick = 'eg8i';
         fspath = 'EBGaramond08-Italic.otf';
-        text = "abc&wbr;x&shy;y&nl;z";
+        text = "abc&wbr;x&shy;y&nl;z u近Ϣk";
         break;
       case 'small-b42':
         fontnick = 'b42';
