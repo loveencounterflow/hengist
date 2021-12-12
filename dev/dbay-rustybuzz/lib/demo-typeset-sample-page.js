@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, append_content, append_outlines, append_remarks, append_to, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper,
+  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, append_content, append_outlines, append_remarks, append_to, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, ui_font_path, urge, validate, validate_list_of, warn, whisper,
     modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
@@ -52,6 +52,8 @@
   cm_grid_path = PATH.resolve(PATH.join(__dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-cmgrid.svg'));
 
   target_path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/html+svg-demos/demo-typeset-sample-page.output.html'));
+
+  ui_font_path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/iosevka-medium.woff2.base64'));
 
   ({to_width} = require('to-width'));
 
@@ -144,8 +146,6 @@
     // debug '^432433^', 2
     missing_pd = `M${left} ${bottom} L${left} ${top} L${right} ${top} L${right} ${bottom}`;
     page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' class='missing' d='${missing_pd}' transform='skewX(${fm.angle})'/>`);
-    page = append_to(page, 'outlines', `<!--SHY--><line id='oshy-${fontnick}' class='fontmetric shy' stroke-width='${swdth}' x1='0' y1='${bottom}' x2='0' y2='${top}' transform='skewX(${fm.angle})'/>`);
-    page = append_to(page, 'outlines', `<!--WBR--><line id='owbr-${fontnick}' class='fontmetric wbr' stroke-width='${swdth}' x1='0' y1='${bottom}' x2='0' y2='${top}' transform='skewX(${fm.angle})'/>`);
     ref = drb.db(SQL`select * from outlines;`);
     for (od of ref) {
       // continue if od.gid is missing.gid
@@ -298,6 +298,9 @@
     page = append_to(page, 'grid', FS.readFileSync(cm_grid_path, {
       encoding: 'utf-8'
     }));
+    page = page.replace(/\${ui_font_data}/g, FS.readFileSync(ui_font_path, {
+      encoding: 'utf-8'
+    }));
     ({I, L, V} = db.sql);
     //.........................................................................................................
     ({text, chrs, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
@@ -345,6 +348,7 @@
     page = append_remarks({drb, page, fontnick});
     page = append_outlines({drb, page, fontnick, size_mm, mm_p_u, missing_sid, known_ods});
     page = append_content({drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid});
+    // page  = _append_fontmetrics { drb, page, fontnick, size_mm, mm_p_u, }
     //.........................................................................................................
     FS.writeFileSync(target_path, page);
     console.table(db.all_rows(SQL`select
@@ -434,15 +438,15 @@
       // @demo_typeset_sample_page { set_id: 'typo-b42', }
       // @demo_typeset_sample_page { set_id: 'gaga-b42', }
       // @demo_typeset_sample_page { set_id: 'medium-n1518', }
-      // @demo_typeset_sample_page { set_id: 'shorties-b42', }
-      // @demo_typeset_sample_page { set_id: 'shorties-eg8i', }
       return this.demo_typeset_sample_page({
-        set_id: 'specials-eg8i'
+        set_id: 'shorties-b42'
       });
     })();
   }
 
-  // @demo_typeset_sample_page { set_id: 'twolines-eg8i', }
+  // @demo_typeset_sample_page { set_id: 'shorties-eg8i', }
+// @demo_typeset_sample_page { set_id: 'specials-eg8i', }
+// @demo_typeset_sample_page { set_id: 'twolines-eg8i', }
 // @demo_typeset_sample_page { set_id: 'typo-b36', }
 // @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
 // @demo_typeset_sample_page { set_id: 'egypt-b42', }
