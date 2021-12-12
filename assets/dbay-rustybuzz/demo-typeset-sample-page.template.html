@@ -2,6 +2,13 @@
 
 <title>SVG with glyph outlines</title>
 <style>
+
+  @font-face {
+    font-family:            'drb-ui';
+    /*src:                    url( '/iosevka-medium.woff2' );*/
+    src:                    url( 'data:font/woff2;base64,${ui_font_data}' );
+    unicode-range:          U+00000-10ffff; }
+
   body {
     background-color:       #96f0c93b;
     transform-origin:       0px 0px 0px;
@@ -43,13 +50,27 @@
     opacity:                50%;
     stroke:                 steelblue; }
 
+  .fontmetric.shy,
+  .fontmetric.wbr,
+  .fontmetric.hhy {
+    font-size:              100mm;
+    font-family:            'drb-ui';
+    font-weight:            bolder; }
+
   .fontmetric.shy {
-    stroke:                 red; }
+    stroke:                 red;
+    fill:                   red; }
 
   .fontmetric.wbr {
-    stroke:                 yellowgreen; }
+    stroke:                 yellowgreen;
+    fill:                   yellowgreen; }
+
+  .fontmetric.hhy {
+    stroke:                 blue;
+    fill:                   blue; }
 
   remarks {
+    font-family:            'drb-ui';
     display:                block;
     background-color:       #345;
     color:                  white;

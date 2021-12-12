@@ -33,7 +33,7 @@ H                         = require './helpers'
 template_path             = PATH.resolve PATH.join __dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-page.template.html'
 cm_grid_path              = PATH.resolve PATH.join __dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-cmgrid.svg'
 target_path               = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/html+svg-demos/demo-typeset-sample-page.output.html'
-
+ui_font_path              = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/iosevka-medium.woff2.base64'
 { to_width }              = require 'to-width'
 ITXT                      = require 'intertext'
 
@@ -107,8 +107,6 @@ append_outlines = ( cfg ) ->
   # debug '^432433^', 2
   missing_pd  = "M#{left} #{bottom} L#{left} #{top} L#{right} #{top} L#{right} #{bottom}"
   page = append_to page, 'outlines', "<!--NULL--><path id='#{missing_sid}' class='missing' d='#{missing_pd}' transform='skewX(#{fm.angle})'/>"
-  page = append_to page, 'outlines', "<!--SHY--><line id='oshy-#{fontnick}' class='fontmetric shy' stroke-width='#{swdth}' x1='0' y1='#{bottom}' x2='0' y2='#{top}' transform='skewX(#{fm.angle})'/>"
-  page = append_to page, 'outlines', "<!--WBR--><line id='owbr-#{fontnick}' class='fontmetric wbr' stroke-width='#{swdth}' x1='0' y1='#{bottom}' x2='0' y2='#{top}' transform='skewX(#{fm.angle})'/>"
   for od from drb.db SQL"select * from outlines;"
     # continue if od.gid is missing.gid
     ### TAINT use standard method ###
@@ -234,6 +232,7 @@ append_content = ( cfg ) ->
   par             = 1
   page            = FS.readFileSync template_path, { encoding: 'utf-8', }
   page            = append_to page, 'grid', FS.readFileSync cm_grid_path, { encoding: 'utf-8', }
+  page            = page.replace /\${ui_font_data}/g, FS.readFileSync ui_font_path, { encoding: 'utf-8', }
   { I, L, V }     = db.sql
   #.........................................................................................................
   { text
@@ -273,6 +272,7 @@ append_content = ( cfg ) ->
   page  = append_remarks  { drb, page, fontnick, }
   page  = append_outlines { drb, page, fontnick, size_mm, mm_p_u, missing_sid, known_ods, }
   page  = append_content  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, }
+  # page  = _append_fontmetrics { drb, page, fontnick, size_mm, mm_p_u, }
   #.........................................................................................................
   FS.writeFileSync target_path, page
   console.table db.all_rows SQL"""
@@ -347,9 +347,9 @@ if require.main is module then do =>
   # @demo_typeset_sample_page { set_id: 'typo-b42', }
   # @demo_typeset_sample_page { set_id: 'gaga-b42', }
   # @demo_typeset_sample_page { set_id: 'medium-n1518', }
-  # @demo_typeset_sample_page { set_id: 'shorties-b42', }
+  @demo_typeset_sample_page { set_id: 'shorties-b42', }
   # @demo_typeset_sample_page { set_id: 'shorties-eg8i', }
-  @demo_typeset_sample_page { set_id: 'specials-eg8i', }
+  # @demo_typeset_sample_page { set_id: 'specials-eg8i', }
   # @demo_typeset_sample_page { set_id: 'twolines-eg8i', }
   # @demo_typeset_sample_page { set_id: 'typo-b36', }
   # @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
