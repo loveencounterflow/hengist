@@ -53,7 +53,7 @@
 
   target_path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/html+svg-demos/demo-typeset-sample-page.output.html'));
 
-  ui_font_path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/iosevka-medium.woff2.base64'));
+  ui_font_path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/iosevka-medium.woff2.data-uri'));
 
   ({to_width} = require('to-width'));
 
