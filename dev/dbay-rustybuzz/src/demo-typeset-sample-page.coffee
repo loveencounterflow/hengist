@@ -229,7 +229,7 @@ append_content = ( cfg ) ->
   doc             = 1
   par             = 1
   page            = FS.readFileSync template_path, { encoding: 'utf-8', }
-  page            = append_to page, 'grid', FS.readFileSync cm_grid_path, { encoding: 'utf-8', }
+  # page            = append_to page, 'grid', FS.readFileSync cm_grid_path, { encoding: 'utf-8', }
   page            = page.replace /\${ui_font_data}/g, FS.readFileSync ui_font_path, { encoding: 'utf-8', }
   { I, L, V }     = db.sql
   #.........................................................................................................
@@ -285,6 +285,7 @@ append_content = ( cfg ) ->
         y1,
         olt,
         substring( gd, 1, 12 ) as gd
+        -- gd
       from outlines
       order by chrs;"""
   return null
@@ -350,6 +351,7 @@ if require.main is module then do =>
   @demo_typeset_sample_page { set_id: 'specials-eg8i', }
   # @demo_typeset_sample_page { set_id: 'twolines-eg8i', }
   # @demo_typeset_sample_page { set_id: 'typo-b36', }
+  # @demo_typeset_sample_page { set_id: 'typo-gr', }
   # @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
   # @demo_typeset_sample_page { set_id: 'egypt-b42', }
   # @demo_store_outlines()
