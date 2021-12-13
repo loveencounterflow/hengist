@@ -133,7 +133,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   append_outlines = function(cfg) {
-    var bottom, chrs_txt, drb, fm, fontnick, left, missing_pd, missing_sid, mm_p_u, od, owdth, page, ref, right, size_mm, swdth, top;
+    var bottom, chrs_txt, drb, fm, fontnick, left, missing_sid, mm_p_u, od, owdth, page, ref, right, size_mm, swdth, top;
     ({drb, page, fontnick, size_mm, mm_p_u, missing_sid} = cfg);
     fm = drb.get_fontmetrics({fontnick});
     swdth = 0.5; // stroke width in mm
@@ -143,10 +143,8 @@
     bottom = fm.descender + owdth;
     left = Math.round(owdth * 0.5);
     right = Math.round(1000 - owdth * 0.5);
-    // debug '^432433^', 2
-    missing_pd = `M${left} ${bottom} L${left} ${top} L${right} ${top} L${right} ${bottom}`;
-    page = append_to(page, 'outlines', `<!--NULL--><path id='${missing_sid}' class='missing' d='${missing_pd}' transform='skewX(${fm.angle})'/>`);
     ref = drb.db(SQL`select * from outlines;`);
+    // debug '^432433^', 2
     for (od of ref) {
       // continue if od.gid is missing.gid
       /* TAINT use standard method */
@@ -295,9 +293,7 @@
     page = FS.readFileSync(template_path, {
       encoding: 'utf-8'
     });
-    page = append_to(page, 'grid', FS.readFileSync(cm_grid_path, {
-      encoding: 'utf-8'
-    }));
+    // page            = append_to page, 'grid', FS.readFileSync cm_grid_path, { encoding: 'utf-8', }
     page = page.replace(/\${ui_font_data}/g, FS.readFileSync(ui_font_path, {
       encoding: 'utf-8'
     }));
@@ -362,6 +358,7 @@
     y1,
     olt,
     substring( gd, 1, 12 ) as gd
+    -- gd
   from outlines
   order by chrs;`));
     return null;
@@ -448,6 +445,7 @@
 
   // @demo_typeset_sample_page { set_id: 'twolines-eg8i', }
 // @demo_typeset_sample_page { set_id: 'typo-b36', }
+// @demo_typeset_sample_page { set_id: 'typo-gr', }
 // @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
 // @demo_typeset_sample_page { set_id: 'egypt-b42', }
 // @demo_store_outlines()

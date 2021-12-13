@@ -54,6 +54,11 @@
     font-family:            'drb-ui';
     font-weight:            bolder; }
 
+  .fontmetric.shy     { display: inherit; }
+  .fontmetric.wbr     { display: inherit; }
+  .fontmetric.hhy     { display: inherit; }
+  .fontmetric.ignored { display: inherit; }
+
   g.fontmetric text {
     stroke-width:           0;
     fill:                   black; }
@@ -75,6 +80,15 @@
   .fontmetric.hhy line {
     stroke:                 blue;
     fill:                   yellow; }
+
+  .fontmetric.ignored circle,
+  .fontmetric.ignored line {
+    stroke:                 orange;
+    fill:                   yellow; }
+
+  .fontmetric.missing1 rect,
+  .fontmetric.missing2 rect {
+    rx:                     25mm; }
 
   g.fontmetric circle {
     stroke-width:           10mm; }
@@ -130,119 +144,7 @@ textcontainer { display: none; }
 
 <!-- <body> -->
 <body class='reveal-blocks show-grid'>
-<!--?grid-start?-->
-<?xml version="1.0" standalone="no"?>
-<svg class='svg-grid' viewBox='0 0 210 297' overflow='visible' xmlns="http://www.w3.org/2000/svg">
-  <style>
-    /*.svg-grid {*/
-      /*display:                none; }*/
-
-    .gridh, .gridv {
-      mix-blend-mode:         multiply; }
-
-    .h0, .h1, .h2, .h3, .h4, .h5, .h6, .h7, .h8, .h9,
-    .v0, .v1, .v2, .v3, .v4, .v5, .v6, .v7, .v8, .v9 {
-      opacity:                0.5;
-      stroke-width:           0.25;
-      stroke:                 red; }
-
-    .h0, .v0 {
-      stroke-width:           0.5;
-      opacity:                0.8; }
-
-    .h5, .v5 {
-      stroke-width:           0.25;
-      opacity:                1; }
-
-    .gtx text {
-      font-family:            'Iosevka Slab', monospace;
-      font-size:              1mm;
-      fill:                   red;
-      opacity:                0.8; }
-
-    .gtx rect {
-      width:                  100%;
-      height:                 100%;
-      fill:                   white; }
-
-  </style>
-  <defs>
-    <path class='gridh' id='gh' d='M0 0 L210 0'/>
-    <path class='gridv' id='gv' d='M0 0 L0 297'/>
-    <g id='ghm'>
-      <svg class='gtx' x='046.5' y='2' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>050</text></svg>
-      <svg class='gtx' x='096.5' y='2' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>100</text></svg>
-      <svg class='gtx' x='146.5' y='2' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>150</text></svg>
-      <svg class='gtx' x='196.5' y='2' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>200</text></svg>
-      </g>
-    <g id='gvm'>
-      <svg class='gtx' x='2' y='047.5' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>050</text></svg>
-      <svg class='gtx' x='2' y='097.5' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>100</text></svg>
-      <svg class='gtx' x='2' y='147.5' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>150</text></svg>
-      <svg class='gtx' x='2' y='197.5' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>200</text></svg>
-      <svg class='gtx' x='2' y='247.5' width='7' height='4'><rect width='1' height='1'/><text x='0.5' y='3.5'>250</text></svg>
-      </g>
-    </defs>
-  <g id='cm-grid'>
-    <use href='#gh' class='h0' x='000' y='000'/>
-    <use href='#gh' class='h1' x='000' y='010'/>
-    <use href='#gh' class='h2' x='000' y='020'/>
-    <use href='#gh' class='h3' x='000' y='030'/>
-    <use href='#gh' class='h4' x='000' y='040'/>
-    <use href='#gh' class='h5' x='000' y='050'/>
-    <use href='#gh' class='h6' x='000' y='060'/>
-    <use href='#gh' class='h7' x='000' y='070'/>
-    <use href='#gh' class='h8' x='000' y='080'/>
-    <use href='#gh' class='h9' x='000' y='090'/>
-    <use href='#gh' class='h0' x='000' y='100'/>
-    <use href='#gh' class='h1' x='000' y='110'/>
-    <use href='#gh' class='h2' x='000' y='120'/>
-    <use href='#gh' class='h3' x='000' y='130'/>
-    <use href='#gh' class='h4' x='000' y='140'/>
-    <use href='#gh' class='h5' x='000' y='150'/>
-    <use href='#gh' class='h6' x='000' y='160'/>
-    <use href='#gh' class='h7' x='000' y='170'/>
-    <use href='#gh' class='h8' x='000' y='180'/>
-    <use href='#gh' class='h9' x='000' y='190'/>
-    <use href='#gh' class='h0' x='000' y='200'/>
-    <use href='#gh' class='h1' x='000' y='210'/>
-    <use href='#gh' class='h2' x='000' y='220'/>
-    <use href='#gh' class='h3' x='000' y='230'/>
-    <use href='#gh' class='h4' x='000' y='240'/>
-    <use href='#gh' class='h5' x='000' y='250'/>
-    <use href='#gh' class='h6' x='000' y='260'/>
-    <use href='#gh' class='h7' x='000' y='270'/>
-    <use href='#gh' class='h8' x='000' y='280'/>
-    <use href='#gh' class='h9' x='000' y='290'/>
-    <use href='#gv' class='v0' x='000' y='000'/>
-    <use href='#gv' class='v1' x='010' y='000'/>
-    <use href='#gv' class='v2' x='020' y='000'/>
-    <use href='#gv' class='v3' x='030' y='000'/>
-    <use href='#gv' class='v4' x='040' y='000'/>
-    <use href='#gv' class='v5' x='050' y='000'/>
-    <use href='#gv' class='v6' x='060' y='000'/>
-    <use href='#gv' class='v7' x='070' y='000'/>
-    <use href='#gv' class='v8' x='080' y='000'/>
-    <use href='#gv' class='v9' x='090' y='000'/>
-    <use href='#gv' class='v0' x='100' y='000'/>
-    <use href='#gv' class='v1' x='110' y='000'/>
-    <use href='#gv' class='v2' x='120' y='000'/>
-    <use href='#gv' class='v3' x='130' y='000'/>
-    <use href='#gv' class='v4' x='140' y='000'/>
-    <use href='#gv' class='v5' x='150' y='000'/>
-    <use href='#gv' class='v6' x='160' y='000'/>
-    <use href='#gv' class='v7' x='170' y='000'/>
-    <use href='#gv' class='v8' x='180' y='000'/>
-    <use href='#gv' class='v9' x='190' y='000'/>
-    <use href='#gv' class='v0' x='200' y='000'/>
-    <use href='#gv' class='v1' x='210' y='000'/>
-    <use href='#ghm' x='000' y='000'/>
-    <use href='#ghm' x='000' y='289'/>
-    <use href='#gvm' x='000' y='000'/>
-    <use href='#gvm' x='200' y='000'/>
-    </g>
-  </svg>
-<!--?grid-end?-->
+<!--?grid-start?--><!--?grid-end?-->
 
 <!-- =================================================================================================== -->
 <!-- Part I where we declare one outline per font and glyf -->
@@ -253,10 +155,11 @@ textcontainer { display: none; }
 <svg id='outlines' class='svg-font' viewBox='0 0 1000 1000' overflow='visible'>
 <!--?outlines-start?-->
 
-<!--NULL--><path id='o0eg8i' class='missing' d='M75 424 L75 -876 L925 -876 L925 424' transform='skewX(-14)'/>
-<!----><g id='o-3eg8i'><g class ='fontmetric ignored' transform ='skewX(-14)' ><line x1 ='0' y1 ='274' x2 ='0' y2 ='-726' /><circle cx='0' cy='-726' r='200' /><text x ='-100' y ='-651' >undefined</text></g></g>
-<!--&#x200b;--><g id='o-5eg8i'><g class ='fontmetric wbr' transform ='skewX(-14)' ><line x1 ='0' y1 ='274' x2 ='0' y2 ='-726' /><circle cx='0' cy='-726' r='200' /><text x ='-100' y ='-651' >w</text></g></g>
-<!--&#xad;--><g id='o-6eg8i'><g class ='fontmetric shy' transform ='skewX(-14)' ><line x1 ='0' y1 ='274' x2 ='0' y2 ='-726' /><circle cx='0' cy='-726' r='200' /><text x ='-100' y ='-651' >s</text></g></g>
+<!----><g id='o-3eg8i'><g class ='fontmetric ignored' transform ='skewX(-14)' ><line x1 ='0' y1 ='274' x2 ='0' y2 ='-576' /><circle cx='0' cy='274' r='200' /><text x ='-100' y ='349' >i</text></g></g>
+<!--&#x200b;--><g id='o-5eg8i'><g class ='fontmetric wbr' transform ='skewX(-14)' ><line x1 ='0' y1 ='274' x2 ='0' y2 ='-576' /><circle cx='0' cy='274' r='200' /><text x ='-100' y ='349' >w</text></g></g>
+<!--&#xad;--><g id='o-6eg8i'><g class ='fontmetric shy' transform ='skewX(-14)' ><line x1 ='0' y1 ='274' x2 ='0' y2 ='-576' /><circle cx='0' cy='274' r='200' /><text x ='-100' y ='349' >s</text></g></g>
+<!--&#xad;--><g id='o-1eg8i'><g class ='fontmetric missing missing1' transform ='skewX(-14)' ><rect x='75' y='-576' width='350' height='576'/></g></g>
+<!--&#xad;--><g id='o-2eg8i'><g class ='fontmetric missing missing2' transform ='skewX(-14)' ><rect x='75' y='-576' width='850' height='576'/></g></g>
 <!--&hhy;--><path class='shady' id='o14eg8i' d='M320-271L82-252C56-249 45-214 45-195C45-175 65-173 99-176L318-194C341-195 351-220 351-243C351-266 334-272 320-271Z'/>
 <!--a--><path class='shady' id='o66eg8i' d='M110-86C110-161 274-347 322-347C345-347 361-326 361-313C361-249 211-58 128-58C115-58 110-72 110-86Z M463-407C467-423 457-442 416-442C409-442 401-437 398-430C386-403 380-396 373-396C367-396 360-402 346-402C256-402 15-188 15-43C15-5 46 14 87 14C185 14 253-51 308-125C312-131 318-131 316-121C305-73 280 14 338 14C398 14 478-62 478-97C478-103 477-110 471-110C456-110 425-62 389-62C380-62 378-67 381-79Z'/>
 <!--b--><path class='shady' id='o67eg8i' d='M125-105C125-177 226-367 326-367C349-367 355-344 355-320C355-189 257-46 174-46C152-46 125-71 125-105Z M198-344C181-328 184-348 187-360L240-572C249-609 255-635 255-657C255-670 253-682 231-682C199-682 100-656 100-641C100-626 170-612 170-604C170-593 167-583 161-558L60-154C53-126 48-107 48-82C48-32 92 14 142 14C262 14 440-160 440-340C440-386 408-430 367-430C325-430 253-395 198-344Z'/>
