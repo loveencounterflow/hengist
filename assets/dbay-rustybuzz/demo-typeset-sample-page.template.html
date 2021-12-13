@@ -54,6 +54,11 @@
     font-family:            'drb-ui';
     font-weight:            bolder; }
 
+  .fontmetric.shy     { display: inherit; }
+  .fontmetric.wbr     { display: inherit; }
+  .fontmetric.hhy     { display: inherit; }
+  .fontmetric.ignored { display: inherit; }
+
   g.fontmetric text {
     stroke-width:           0;
     fill:                   black; }
@@ -75,6 +80,15 @@
   .fontmetric.hhy line {
     stroke:                 blue;
     fill:                   yellow; }
+
+  .fontmetric.ignored circle,
+  .fontmetric.ignored line {
+    stroke:                 orange;
+    fill:                   yellow; }
+
+  .fontmetric.missing1 rect,
+  .fontmetric.missing2 rect {
+    rx:                     25mm; }
 
   g.fontmetric circle {
     stroke-width:           10mm; }
