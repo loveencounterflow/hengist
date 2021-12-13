@@ -105,8 +105,6 @@ append_outlines = ( cfg ) ->
   left        = Math.round owdth * 0.5
   right       = Math.round 1000 - owdth * 0.5
   # debug '^432433^', 2
-  missing_pd  = "M#{left} #{bottom} L#{left} #{top} L#{right} #{top} L#{right} #{bottom}"
-  page = append_to page, 'outlines', "<!--NULL--><path id='#{missing_sid}' class='missing' d='#{missing_pd}' transform='skewX(#{fm.angle})'/>"
   for od from drb.db SQL"select * from outlines;"
     # continue if od.gid is missing.gid
     ### TAINT use standard method ###
