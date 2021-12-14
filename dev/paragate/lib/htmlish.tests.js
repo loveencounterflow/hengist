@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, INTERTEXT, alert, badge, debug, demo, demo_streaming, echo, help, info, isa, jr, lets, log, rpr, test, type_of, urge, warn, whisper;
+  var CND, GUY, H, INTERTEXT, alert, badge, debug, demo, demo_streaming, echo, help, info, isa, jr, lets, log, rpr, test, type_of, urge, warn, whisper;
 
   // coffeelint: disable=max_line_length
 
@@ -41,6 +41,8 @@
   ({lets} = (require('datom')).export());
 
   H = require('./test-helpers');
+
+  GUY = require('../../../apps/guy');
 
   //===========================================================================================================
   // TESTS
@@ -1612,58 +1614,6 @@
   //   return null
 
   // #-----------------------------------------------------------------------------------------------------------
-  // @[ "HTML._parse_compact_tagname" ] = ( T, done ) ->
-  //   INTERTEXT                 = require '../../../apps/intertext'
-  //   { _parse_compact_tagname
-  //     h }                     = INTERTEXT.HTML.export()
-  //   #.........................................................................................................
-  //   probes_and_matchers = [
-  //     ["foo-bar",{"tagname":"foo-bar"},null]
-  //     ["foo-bar#c55",{"tagname":"foo-bar","id":"c55"},null]
-  //     ["foo-bar.blah.beep",{"tagname":"foo-bar","class":"blah beep"},null]
-  //     ["foo-bar#c55.blah.beep",{"tagname":"foo-bar","id":"c55","class":"blah beep"},null]
-  //     ["#c55",{id:"c55"}]
-  //     [".blah.beep",{"class":"blah beep"}]
-  //     ["...#",null,"illegal compact tag syntax"]
-  //     ]
-  //   for [ probe, matcher, error, ] in probes_and_matchers
-  //     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-  //       resolve _parse_compact_tagname probe
-  //   #.........................................................................................................
-  //   done()
-  //   return null
-
-  // #-----------------------------------------------------------------------------------------------------------
-  // @[ "HTML.tag" ] = ( T, done ) ->
-  //   INTERTEXT                 = require '../../../apps/intertext'
-  //   { _parse_compact_tagname
-  //     tag }                 = INTERTEXT.HTML.export()
-  //   #.........................................................................................................
-  //   probes_and_matchers = [
-  //     [["div"],[{"$key":"^div"}],null]
-  //     [["div#x32"],[{"$key":"^div","id":"x32"}],null]
-  //     [["div.foo"],[{"$key":"^div","class":"foo"}],null]
-  //     [["div#x32.foo"],[{"$key":"^div","id":"x32","class":"foo"}],null]
-  //     [["div#x32",{"alt":"nice guy"}],[{"$key":"^div","id":"x32","alt":"nice guy"}],null]
-  //     [["div#x32",{"alt":"nice guy"}," a > b & b > c => a > c"],[{"id":"x32","alt":"nice guy","$key":"<div"},{"text":" a > b & b > c => a > c","$key":"^text"},{"$key":">div"}],null]
-  //     [["foo-bar"],[{"$key":"^foo-bar"}],null]
-  //     [["foo-bar#c55"],[{"$key":"^foo-bar","id":"c55"}],null]
-  //     [["foo-bar.blah.beep"],[{"$key":"^foo-bar","class":"blah beep"}],null]
-  //     [["foo-bar#c55.blah.beep"],[{"$key":"^foo-bar","id":"c55","class":"blah beep"}],null]
-  //     [["div#sidebar.green", { id: 'd3', class: "orange"}, ],[{"id":"d3","class":"orange","$key":"^div"}],null]
-  //     [["#c55"],null,"not a valid intertext_html_tagname"]
-  //     [[".blah.beep"],null,"not a valid intertext_html_tagname"]
-  //     [["...#"],null,"illegal compact tag syntax"]
-  //     ]
-  //   for [ probe, matcher, error, ] in probes_and_matchers
-  //     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-  //       # urge h probe...
-  //       resolve tag probe...
-  //   #.........................................................................................................
-  //   done()
-  //   return null
-
-  // #-----------------------------------------------------------------------------------------------------------
   // @[ "HTML demo" ] = ( T, done ) ->
   //   INTERTEXT                 = require '../../../apps/intertext'
   //   { HTML, }                 = INTERTEXT
@@ -1860,15 +1810,243 @@
   //###########################################################################################################
 
   //-----------------------------------------------------------------------------------------------------------
+  this["HTML._parse_compact_tagname"] = async function(T, done) {
+    var HTML, error, i, len, matcher, probe, probes_and_matchers;
+    HTML = require('../../../apps/paragate/lib/htmlish.grammar');
+    // #-----------------------------------------------------------------------------------------------------------
+    // HTML.parse_compact_tagname = ( compact_tagname ) ->
+    //   # debug '^45048^', 'g:foo#bar.batz.dar'.match /^((?<prefix>[^:]+):)?(?<name>[^.#]+)(#(?<id>[^.#:]+))?(\.(?<classes>.*))?$/
+    //   { name
+    //     atrs }  = ( compact_tagname.match /^(?<name>[^#.]*)(?<atrs>.*)$/ ).groups
+    //   name      = null if name is ''
+    //   atrs      = null if atrs is ''
+    //   R         = {}
+    //   prefix    = null
+    //   #.......................................................................................................
+    //   if name? and ( idx = name.indexOf ':' ) > -1
+    //     prefix    = name[ ... idx ]
+    //     prefix    = null if prefix is ''
+    //     name      = name[ idx + 1 .. ]
+    //     name      = null if name is ''
+    //   #.......................................................................................................
+    //   R.prefix  = prefix  if prefix?
+    //   R.name    = name    if name?
+    //   #.......................................................................................................
+    //   return R unless atrs?
+    //   for attribute in atrs.split /([#.][^#.]*)/
+    //     continue if attribute is ''
+    //     avalue = attribute[ 1 .. ]
+    //     unless avalue.length > 0
+    //       throw new Error "^intertext/_parse_compact_tagname@1234^ illegal compact tag syntax in #{rpr compact_tagname}"
+    //     if attribute[ 0 ] is '#' then R.id = avalue
+    //     else                          ( R.class ?= [] ).push avalue
+    //   R.class = R.class.join ' ' if R.class?
+    //   return R
+    HTML._parse_compact_tagname = function(compact_tagname, strict = false) {
+      var R, groups, k, pattern, ref, target, v, x;
+      pattern = /(?<prefix>[^\s.:#]+(?=:))|(?<id>(?<=#)[^\s.:#]+)|(?<class>(?<=\.)[^\s.:#]+)|(?<name>[^\s.:#]+)/ug;
+      // pattern = /(?<prefix>[^\s.:#]+(?=:))|(?<id>(?<=#)[^\s.:#]+)|(?<class>(?<=\.)[^\s.:#]+)|(?<name>[^\s.:#]+)/ug
+      R = {};
+      ref = compact_tagname.matchAll(pattern);
+      for (x of ref) {
+        ({groups} = x);
+        for (k in groups) {
+          v = groups[k];
+          if ((v == null) || (v === '')) {
+            continue;
+          }
+          if (k === 'class') {
+            (R.class != null ? R.class : R.class = []).push(v);
+          } else {
+            if ((target = R[k]) != null) {
+              throw new Error(`^5584^ found duplicate values for ${rpr(k)}: ${rpr(target)}, ${rpr(v)}`);
+            }
+            R[k] = v;
+          }
+        }
+      }
+      if (strict && (R.name == null)) {
+        throw new Error(`^paragate/_parse_compact_tagname@1^ illegal compact tag syntax in ${rpr(compact_tagname)}`);
+      }
+      return R;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        'foo-bar',
+        {
+          name: 'foo-bar'
+        },
+        null
+      ],
+      [
+        'foo-bar#c55',
+        {
+          name: 'foo-bar',
+          id: 'c55'
+        },
+        null
+      ],
+      [
+        'foo-bar.blah.beep',
+        {
+          name: 'foo-bar',
+          class: ['blah',
+        'beep']
+        },
+        null
+      ],
+      [
+        'foo-bar#c55.blah.beep',
+        {
+          name: 'foo-bar',
+          id: 'c55',
+          class: ['blah',
+        'beep']
+        },
+        null
+      ],
+      [
+        '#c55',
+        {
+          id: 'c55'
+        },
+        null
+      ],
+      [
+        'dang:blah',
+        {
+          prefix: 'dang',
+          name: 'blah'
+        },
+        null
+      ],
+      [
+        'dang:blah#c3',
+        {
+          prefix: 'dang',
+          name: 'blah',
+          id: 'c3'
+        },
+        null
+      ],
+      [
+        'dang:blah#c3.some.thing',
+        {
+          prefix: 'dang',
+          name: 'blah',
+          id: 'c3',
+          class: ['some',
+        'thing']
+        },
+        null
+      ],
+      [
+        'dang:#c3.some.thing',
+        {
+          prefix: 'dang',
+          id: 'c3',
+          class: ['some',
+        'thing']
+        },
+        null
+      ],
+      [
+        'dang:bar.dub#c3.other',
+        {
+          prefix: 'dang',
+          name: 'bar',
+          class: ['dub',
+        'other'],
+          id: 'c3'
+        },
+        null
+      ],
+      [
+        '.blah.beep',
+        {
+          class: ['blah',
+        'beep']
+        },
+        null
+      ],
+      [['...#',
+      true],
+      null,
+      'illegal compact tag syntax']
+    ];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          if (isa.list(probe)) {
+            return resolve(HTML._parse_compact_tagname(...probe));
+          } else {
+            return resolve(HTML._parse_compact_tagname(probe));
+          }
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // @[ "HTML.tag" ] = ( T, done ) ->
+  //   INTERTEXT                 = require '../../../apps/intertext'
+  //   { _parse_compact_tagname
+  //     tag }                 = INTERTEXT.HTML.export()
+  //   #.........................................................................................................
+  //   probes_and_matchers = [
+  //     [["div"],[{"$key":"^div"}],null]
+  //     [["div#x32"],[{"$key":"^div","id":"x32"}],null]
+  //     [["div.foo"],[{"$key":"^div","class":"foo"}],null]
+  //     [["div#x32.foo"],[{"$key":"^div","id":"x32","class":"foo"}],null]
+  //     [["div#x32",{"alt":"nice guy"}],[{"$key":"^div","id":"x32","alt":"nice guy"}],null]
+  //     [["div#x32",{"alt":"nice guy"}," a > b & b > c => a > c"],[{"id":"x32","alt":"nice guy","$key":"<div"},{"text":" a > b & b > c => a > c","$key":"^text"},{"$key":">div"}],null]
+  //     [["foo-bar"],[{"$key":"^foo-bar"}],null]
+  //     [["foo-bar#c55"],[{"$key":"^foo-bar","id":"c55"}],null]
+  //     [["foo-bar.blah.beep"],[{"$key":"^foo-bar","class":"blah beep"}],null]
+  //     [["foo-bar#c55.blah.beep"],[{"$key":"^foo-bar","id":"c55","class":"blah beep"}],null]
+  //     [["div#sidebar.green", { id: 'd3', class: "orange"}, ],[{"id":"d3","class":"orange","$key":"^div"}],null]
+  //     [["#c55"],null,"not a valid intertext_html_tagname"]
+  //     [[".blah.beep"],null,"not a valid intertext_html_tagname"]
+  //     [["...#"],null,"illegal compact tag syntax"]
+  //     ]
+  //   for [ probe, matcher, error, ] in probes_and_matchers
+  //     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+  //       # urge h probe...
+  //       resolve tag probe...
+  //   #.........................................................................................................
+  //   done()
+  //   return null
+
+  //-----------------------------------------------------------------------------------------------------------
   demo = function() {
-    var HTML, grammar;
+    var HTML, _, d, grammar, i, len, prefix, ref, tail, tokens;
     HTML = require('../../../apps/paragate/lib/htmlish.grammar');
     // grammar = HTML.grammar.new { bare: true, }
     grammar = new HTML.new_grammar({
       bare: true
     });
     urge(grammar.settings);
-    urge(grammar.parse(`<p>helo</p>`));
+    tokens = grammar.parse(`<p#c123>helo\nthis is a placeholder: <drb:loc#first/>, isn't it?</p>
+<blah#id1 id=id2/>`);
+    for (i = 0, len = tokens.length; i < len; i++) {
+      d = tokens[i];
+      if ((ref = d.$key) !== '^tag' && ref !== '<tag') {
+        continue;
+      }
+      [_, prefix, tail] = d.name.split(/^([^:]*):(.*)$/);
+      debug('^44403^', {prefix, tail});
+      if (prefix !== 'drb') {
+        continue;
+      }
+      // d.id = 'xxx'
+      debug('^44947^', d);
+    }
+    console.table(tokens);
     return null;
   };
 
@@ -1904,6 +2082,7 @@
   // test @[ "HTML: parse bare" ]
 // demo()
 // await demo_streaming()
+// test @[ "HTML._parse_compact_tagname" ]
 
 }).call(this);
 
