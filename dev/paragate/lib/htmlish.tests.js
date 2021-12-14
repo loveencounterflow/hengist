@@ -1813,63 +1813,6 @@
   this["HTML._parse_compact_tagname"] = async function(T, done) {
     var HTML, error, i, len, matcher, probe, probes_and_matchers;
     HTML = require('../../../apps/paragate/lib/htmlish.grammar');
-    // #-----------------------------------------------------------------------------------------------------------
-    // HTML.parse_compact_tagname = ( compact_tagname ) ->
-    //   # debug '^45048^', 'g:foo#bar.batz.dar'.match /^((?<prefix>[^:]+):)?(?<name>[^.#]+)(#(?<id>[^.#:]+))?(\.(?<classes>.*))?$/
-    //   { name
-    //     atrs }  = ( compact_tagname.match /^(?<name>[^#.]*)(?<atrs>.*)$/ ).groups
-    //   name      = null if name is ''
-    //   atrs      = null if atrs is ''
-    //   R         = {}
-    //   prefix    = null
-    //   #.......................................................................................................
-    //   if name? and ( idx = name.indexOf ':' ) > -1
-    //     prefix    = name[ ... idx ]
-    //     prefix    = null if prefix is ''
-    //     name      = name[ idx + 1 .. ]
-    //     name      = null if name is ''
-    //   #.......................................................................................................
-    //   R.prefix  = prefix  if prefix?
-    //   R.name    = name    if name?
-    //   #.......................................................................................................
-    //   return R unless atrs?
-    //   for attribute in atrs.split /([#.][^#.]*)/
-    //     continue if attribute is ''
-    //     avalue = attribute[ 1 .. ]
-    //     unless avalue.length > 0
-    //       throw new Error "^intertext/_parse_compact_tagname@1234^ illegal compact tag syntax in #{rpr compact_tagname}"
-    //     if attribute[ 0 ] is '#' then R.id = avalue
-    //     else                          ( R.class ?= [] ).push avalue
-    //   R.class = R.class.join ' ' if R.class?
-    //   return R
-    HTML._parse_compact_tagname = function(compact_tagname, strict = false) {
-      var R, groups, k, pattern, ref, target, v, x;
-      pattern = /(?<prefix>[^\s.:#]+(?=:))|(?<id>(?<=#)[^\s.:#]+)|(?<class>(?<=\.)[^\s.:#]+)|(?<name>[^\s.:#]+)/ug;
-      // pattern = /(?<prefix>[^\s.:#]+(?=:))|(?<id>(?<=#)[^\s.:#]+)|(?<class>(?<=\.)[^\s.:#]+)|(?<name>[^\s.:#]+)/ug
-      R = {};
-      ref = compact_tagname.matchAll(pattern);
-      for (x of ref) {
-        ({groups} = x);
-        for (k in groups) {
-          v = groups[k];
-          if ((v == null) || (v === '')) {
-            continue;
-          }
-          if (k === 'class') {
-            (R.class != null ? R.class : R.class = []).push(v);
-          } else {
-            if ((target = R[k]) != null) {
-              throw new Error(`^5584^ found duplicate values for ${rpr(k)}: ${rpr(target)}, ${rpr(v)}`);
-            }
-            R[k] = v;
-          }
-        }
-      }
-      if (strict && (R.name == null)) {
-        throw new Error(`^paragate/_parse_compact_tagname@1^ illegal compact tag syntax in ${rpr(compact_tagname)}`);
-      }
-      return R;
-    };
     //.........................................................................................................
     probes_and_matchers = [
       [
@@ -1980,10 +1923,29 @@
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
           if (isa.list(probe)) {
-            return resolve(HTML._parse_compact_tagname(...probe));
+            return resolve(HTML.grammar._parse_compact_tagname(...probe));
           } else {
-            return resolve(HTML._parse_compact_tagname(probe));
+            return resolve(HTML.grammar._parse_compact_tagname(probe));
           }
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["parse_compact_tagname 2"] = async function(T, done) {
+    var HTML, error, i, len, matcher, probe, probes_and_matchers;
+    HTML = require('../../../apps/paragate/lib/htmlish.grammar');
+    //.........................................................................................................
+    probes_and_matchers = [['<foo-bar>', "$key='<tag',$vnr=[ 1, 1 ],name='foo-bar',start=0,stop=9,text='<foo-bar>',type='otag'", null], ['<foo-bar#c55>', "$key='<tag',$vnr=[ 1, 1 ],id='c55',name='foo-bar',start=0,stop=13,text='<foo-bar#c55>',type='otag'", null], ['<foo-bar.blah.beep>', "$key='<tag',$vnr=[ 1, 1 ],class=[ 'blah', 'beep' ],name='foo-bar',start=0,stop=19,text='<foo-bar.blah.beep>',type='otag'", null], ['<foo-bar#c55.blah.beep>', "$key='<tag',$vnr=[ 1, 1 ],class=[ 'blah', 'beep' ],id='c55',name='foo-bar',start=0,stop=23,text='<foo-bar#c55.blah.beep>',type='otag'", null], ['<#c55>', null, "illegal compact tag syntax"], ['<dang:blah>', "$key='<tag',$vnr=[ 1, 1 ],name='blah',prefix='dang',start=0,stop=11,text='<dang:blah>',type='otag'", null], ['<dang:blah#c3>', "$key='<tag',$vnr=[ 1, 1 ],id='c3',name='blah',prefix='dang',start=0,stop=14,text='<dang:blah#c3>',type='otag'", null], ['<dang:blah#c3.some.thing>', "$key='<tag',$vnr=[ 1, 1 ],class=[ 'some', 'thing' ],id='c3',name='blah',prefix='dang',start=0,stop=25,text='<dang:blah#c3.some.thing>',type='otag'", null], ['<dang:#c3.some.thing>', null, "illegal compact tag syntax"], ['<dang:bar.dub#c3.other>', "$key='<tag',$vnr=[ 1, 1 ],class=[ 'dub', 'other' ],id='c3',name='bar',prefix='dang',start=0,stop=23,text='<dang:bar.dub#c3.other>',type='otag'", null], ['<.blah.beep>', null, "illegal compact tag syntax"], ['<...#>', null, 'illegal compact tag syntax']];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          return resolve(H.condense_tokens(HTML.grammar.parse(probe)));
         });
       });
     }
@@ -2075,14 +2037,14 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => { // await do =>
-      return test(this);
+      // test @
+      // test @[ "HTML: parse bare" ]
+      // demo()
+      // await demo_streaming()
+      // test @[ "HTML._parse_compact_tagname" ]
+      return test(this["parse_compact_tagname 2"]);
     })();
   }
-
-  // test @[ "HTML: parse bare" ]
-// demo()
-// await demo_streaming()
-// test @[ "HTML._parse_compact_tagname" ]
 
 }).call(this);
 
