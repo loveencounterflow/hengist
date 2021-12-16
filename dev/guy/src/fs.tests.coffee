@@ -20,6 +20,8 @@ urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
 test                      = require '../../../apps/guy-test'
+PATH                      = require 'path'
+FS                        = require 'fs'
 H                         = require './helpers'
 types                     = new ( require 'intertype' ).Intertype
 { freeze }                = require 'letsfreezethat'
@@ -56,6 +58,7 @@ matchers = freeze matchers
   for line from guy.fs.walk_circular_lines path
     result.push line
   #.........................................................................................................
+  debug '^3434^', result
   T?.eq result, matchers.single
   done?()
 
@@ -85,10 +88,65 @@ matchers = freeze matchers
   T?.eq result.length, 12
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "guy.fs.get_file_size" ] = ( T, done ) ->
+  guy     = require H.guy_path
+  path    = 'short-proposal.mkts.md'
+  path    = PATH.resolve PATH.join __dirname, '../../../assets', path
+  #.........................................................................................................
+  do =>
+    T?.eq ( guy.fs.get_file_size path ), 405
+  #.........................................................................................................
+  do =>
+    error = null
+    try result  = guy.fs.get_file_size 'no/such/path' catch error
+      T?.ok ( error.message.match /no such file or directory/ )?
+    T?.ok error?
+  #.........................................................................................................
+  do =>
+    fallback = Symbol 'fallback'
+    T?.eq ( guy.fs.get_file_size 'no/such/path',  fallback ), fallback
+    T?.eq ( guy.fs.get_file_size path,            fallback ), 405
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "guy.fs.get_content_hash" ] = ( T, done ) ->
+  guy     = require H.guy_path
+  path    = 'short-proposal.mkts.md'
+  path    = PATH.resolve PATH.join __dirname, '../../../assets', path
+  #.........................................................................................................
+  do =>
+    matcher = '2c244f1d168c54906'
+    result  = guy.fs.get_content_hash path
+    T?.eq result, matcher
+  #.........................................................................................................
+  do =>
+    matcher = '669e730e533ff63af'
+    result  = guy.fs.get_content_hash path, { command: 'sha256sum', }
+    T?.eq result, matcher
+  #.........................................................................................................
+  do =>
+    matcher = '2c24'
+    result  = guy.fs.get_content_hash path, { length: 4, }
+    T?.eq result, matcher
+  #.........................................................................................................
+  do =>
+    error = null
+    try result  = guy.fs.get_content_hash path, { length: 400, } catch error
+      T?.ok ( error.message.match /unable to generate hash of length 400 using sha1sum/ )?
+    T?.ok error?
+  #.........................................................................................................
+  done()
+  return null
+
+
 
 ############################################################################################################
 if require.main is module then do =>
   test @, { timeout: 5000, }
+  # test @[ "guy.fs.walk_circular_lines() can iterate given number of loops" ]
+  # test @[ "guy.fs.get_content_hash" ]
   # test @[ "guy.props.def(), .hide()" ]
   # test @[ "guy.obj.pick_with_fallback()" ]
   # test @[ "guy.obj.pluck_with_fallback()" ]
