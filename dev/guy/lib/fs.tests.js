@@ -35,6 +35,10 @@
   //...........................................................................................................
   test = require('../../../apps/guy-test');
 
+  PATH = require('path');
+
+  FS = require('fs');
+
   H = require('./helpers');
 
   types = new (require('intertype')).Intertype();
@@ -66,6 +70,7 @@
       result.push(line);
     }
     //.........................................................................................................
+    debug('^3434^', result);
     if (T != null) {
       T.eq(result, matchers.single);
     }
@@ -115,6 +120,87 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["guy.fs.get_file_size"] = function(T, done) {
+    var guy, path;
+    guy = require(H.guy_path);
+    path = 'short-proposal.mkts.md';
+    path = PATH.resolve(PATH.join(__dirname, '../../../assets', path));
+    (() => {      //.........................................................................................................
+      return T != null ? T.eq(guy.fs.get_file_size(path), 405) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var error, result;
+      error = null;
+      try {
+        result = guy.fs.get_file_size('no/such/path');
+      } catch (error1) {
+        error = error1;
+        if (T != null) {
+          T.ok((error.message.match(/no such file or directory/)) != null);
+        }
+      }
+      return T != null ? T.ok(error != null) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var fallback;
+      fallback = Symbol('fallback');
+      if (T != null) {
+        T.eq(guy.fs.get_file_size('no/such/path', fallback), fallback);
+      }
+      return T != null ? T.eq(guy.fs.get_file_size(path, fallback), 405) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["guy.fs.get_content_hash"] = function(T, done) {
+    var guy, path;
+    guy = require(H.guy_path);
+    path = 'short-proposal.mkts.md';
+    path = PATH.resolve(PATH.join(__dirname, '../../../assets', path));
+    (() => {      //.........................................................................................................
+      var matcher, result;
+      matcher = '2c244f1d168c54906';
+      result = guy.fs.get_content_hash(path);
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var matcher, result;
+      matcher = '669e730e533ff63af';
+      result = guy.fs.get_content_hash(path, {
+        command: 'sha256sum'
+      });
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var matcher, result;
+      matcher = '2c24';
+      result = guy.fs.get_content_hash(path, {
+        length: 4
+      });
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var error, result;
+      error = null;
+      try {
+        result = guy.fs.get_content_hash(path, {
+          length: 400
+        });
+      } catch (error1) {
+        error = error1;
+        if (T != null) {
+          T.ok((error.message.match(/unable to generate hash of length 400 using sha1sum/)) != null);
+        }
+      }
+      return T != null ? T.ok(error != null) : void 0;
+    })();
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -124,7 +210,9 @@
     })();
   }
 
-  // test @[ "guy.props.def(), .hide()" ]
+  // test @[ "guy.fs.walk_circular_lines() can iterate given number of loops" ]
+// test @[ "guy.fs.get_content_hash" ]
+// test @[ "guy.props.def(), .hide()" ]
 // test @[ "guy.obj.pick_with_fallback()" ]
 // test @[ "guy.obj.pluck_with_fallback()" ]
 // test @[ "guy.obj.nullify_undefined()" ]

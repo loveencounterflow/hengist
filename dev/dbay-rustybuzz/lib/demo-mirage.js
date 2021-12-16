@@ -64,24 +64,16 @@
     path = 'assets/dbay-rustybuzz/demo-typeset-sample-page.template.html';
     path = PATH.resolve(PATH.join(__dirname, '../../../', path));
     drb.mrg.register_dsk({dsk, path});
-    console.table(db.all_rows(SQL`select * from mrg_datasources;`));
     drb.mrg.read_datasource({dsk});
+    console.table(db.all_rows(SQL`select * from mrg_datasources;`));
     console.table(db.all_rows(SQL`select * from mrg_mirror where lnr between 153 and 160 order by lnr;`));
     return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.demo_parser = function() {
-    var ITXT;
-    ITXT = require('../../../apps/intertext');
-    return debug('^7564^', ITXT.HTML);
   };
 
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // @demo_mirage()
-      return this.demo_parser();
+      return this.demo_mirage();
     })();
   }
 
