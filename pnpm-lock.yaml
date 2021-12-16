@@ -109,6 +109,8 @@ specifiers:
   trash: 8.0.0
   validate-npm-package-name: ^3.0.0
   xql: ^1.4.12
+  xxhash-addon: ^1.4.0
+  xxhashjs: ^0.2.2
 
 dependencies:
   '@ef-carbon/deep-freeze': 1.0.1
@@ -219,6 +221,8 @@ dependencies:
   trash: 8.0.0
   validate-npm-package-name: 3.0.0
   xql: 1.4.12
+  xxhash-addon: 1.4.0
+  xxhashjs: 0.2.2
 
 packages:
 
@@ -1559,6 +1563,10 @@ packages:
     hasBin: true
     dependencies:
       minimist: 1.2.5
+    dev: false
+
+  /cuint/0.2.2:
+    resolution: {integrity: sha1-QICG1AlVDCYxFVYZ6fp7ytw7mRs=}
     dev: false
 
   /cupofjoe/0.1.1:
@@ -6014,6 +6022,18 @@ packages:
   /xtend/4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
+    dev: false
+
+  /xxhash-addon/1.4.0:
+    resolution: {integrity: sha512-n3Ml0Vgvy7jMYJBlQIoFLjYxXNZQ5CbzW8E2Ynq2QCUpWMqCouooW7j02+7Oud5FijBuSrjQNuN/fCiz1SHN+w==}
+    engines: {node: '>=8.6.0 <9.0.0 || >=10.0.0'}
+    requiresBuild: true
+    dev: false
+
+  /xxhashjs/0.2.2:
+    resolution: {integrity: sha512-AkTuIuVTET12tpsVIQo+ZU6f/qDmKuRUcjaqR+OIvm+aCBsZ95i7UVY5WJ9TMsSaZ0DA2WxoZ4acu0sPH+OKAw==}
+    dependencies:
+      cuint: 0.2.2
     dev: false
 
   /yallist/3.1.1:
