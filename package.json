@@ -120,6 +120,8 @@
     "to-width": "1.2.0",
     "trash": "8.0.0",
     "validate-npm-package-name": "^3.0.0",
-    "xql": "^1.4.12"
+    "xql": "^1.4.12",
+    "xxhash-addon": "^1.4.0",
+    "xxhashjs": "^0.2.2"
   }
 }
