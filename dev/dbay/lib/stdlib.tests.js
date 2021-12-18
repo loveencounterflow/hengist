@@ -403,12 +403,94 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY std_getv()"] = function(T, done) {
+    var DBay, Tbl, db, dtab;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    //.........................................................................................................
+    db = new DBay();
+    db.create_stdlib();
+    dtab = new Tbl({db});
+    (() => {      //.........................................................................................................
+      var error;
+      error = null;
+      try {
+        db.all_rows(SQL`select std_getv( 'city' ) as city;`);
+      } catch (error1) {
+        error = error1;
+        warn(CND.reverse(error.message));
+        if (T != null) {
+          T.ok((error.message.match(/unknown variable 'city'/)) != null);
+        }
+      }
+      return T != null ? T.ok(error != null) : void 0;
+    })();
+    //.........................................................................................................
+    db.setv('city', 'Hamburg');
+    db.setv('x', 20);
+    db.setv('n', 123.4567890123456789);
+    db.setv('foo', 'bar');
+    db.setv('baz', true);
+    db.setv('sqrt2', Math.sqrt(2));
+    if (T != null) {
+      T.eq(db.variables.city, 'Hamburg');
+    }
+    //.........................................................................................................
+    echo(rpr(db.all_rows(SQL`select std_getv( 'city' ) as city;`)));
+    if (T != null) {
+      T.eq(db.all_rows(SQL`select std_getv( 'city' )  as city;`), [
+        {
+          city: 'Hamburg'
+        }
+      ]);
+    }
+    if (T != null) {
+      T.eq(db.all_rows(SQL`select std_getv( 'x' )     as x;`), [
+        {
+          x: 20
+        }
+      ]);
+    }
+    if (T != null) {
+      T.eq(db.all_rows(SQL`select std_getv( 'n' )     as n;`), [
+        {
+          n: 123.4567890123456789
+        }
+      ]);
+    }
+    if (T != null) {
+      T.eq(db.all_rows(SQL`select std_getv( 'foo' )   as foo;`), [
+        {
+          foo: 'bar'
+        }
+      ]);
+    }
+    if (T != null) {
+      T.eq(db.all_rows(SQL`select std_getv( 'baz' )   as baz;`), [
+        {
+          baz: 1
+        }
+      ]);
+    }
+    if (T != null) {
+      T.eq(db.all_rows(SQL`select std_getv( 'sqrt2' ) as sqrt2;`), [
+        {
+          sqrt2: Math.sqrt(2)
+        }
+      ]);
+    }
+    echo(dtab._tabulate(db(SQL`select * from std_variables order by name;`)));
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      // @[ "DBAY std_getv()" ]()
+      return test(this["DBAY std_getv()"]);
     })();
   }
 
