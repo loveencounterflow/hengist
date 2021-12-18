@@ -88,11 +88,48 @@ r                         = String.raw
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY std_getv()" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }          = require H.dbay_path
+  { Tbl, }          = require '../../../apps/icql-dba-tabulate'
+  #.........................................................................................................
+  db                = new DBay()
+  db.create_stdlib()
+  dtab              = new Tbl { db, }
+  #.........................................................................................................
+  do =>
+    error = null
+    try db.all_rows SQL"select std_getv( 'city' ) as city;" catch error
+      warn CND.reverse error.message
+      T?.ok ( error.message.match /unknown variable 'city'/ )?
+    T?.ok error?
+  #.........................................................................................................
+  db.setv 'city',   'Hamburg'
+  db.setv 'x',      20
+  db.setv 'n',      123.4567890123456789
+  db.setv 'foo',    'bar'
+  db.setv 'baz',    true
+  db.setv 'sqrt2',  Math.sqrt 2
+  T?.eq db.variables.city, 'Hamburg'
+  #.........................................................................................................
+  echo rpr db.all_rows SQL"select std_getv( 'city' ) as city;"
+  T?.eq ( db.all_rows SQL"select std_getv( 'city' )  as city;"  ), [ { city: 'Hamburg',             }, ]
+  T?.eq ( db.all_rows SQL"select std_getv( 'x' )     as x;"     ), [ { x:     20,                   }, ]
+  T?.eq ( db.all_rows SQL"select std_getv( 'n' )     as n;"     ), [ { n:     123.4567890123456789, }, ]
+  T?.eq ( db.all_rows SQL"select std_getv( 'foo' )   as foo;"   ), [ { foo:   'bar',                }, ]
+  T?.eq ( db.all_rows SQL"select std_getv( 'baz' )   as baz;"   ), [ { baz:   1,                    }, ]
+  T?.eq ( db.all_rows SQL"select std_getv( 'sqrt2' ) as sqrt2;" ), [ { sqrt2: Math.sqrt 2,          }, ]
+  echo dtab._tabulate db SQL"select * from std_variables order by name;"
+  done?()
+
 
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
+  # test @, { timeout: 10e3, }
+  # @[ "DBAY std_getv()" ]()
+  test @[ "DBAY std_getv()" ]
   # @[ "DBAY stdlib functions" ]()
   # @[ "DBAY std_str_split_re()" ]()
 
