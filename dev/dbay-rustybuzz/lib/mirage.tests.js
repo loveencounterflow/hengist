@@ -270,7 +270,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["loc markers 2"] = function(T, done) {
-    var DBay, Mrg, db, dsk, mrg, path, ref, row;
+    var DBay, Mrg, db, dsk, line, mrg, path, ref, x;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     ({Mrg} = require('../../../apps/dbay-rustybuzz/lib/_mirage'));
@@ -280,22 +280,267 @@
     dsk = 'twcm';
     path = 'dbay-rustybuzz/template-with-content-markers.html';
     path = PATH.resolve(PATH.join(__dirname, '../../../assets', path));
+    //.........................................................................................................
     mrg.register_dsk({dsk, path});
-    info('^33298-2^', mrg.refresh_datasource({dsk}));
+    mrg.refresh_datasource({dsk});
+    //.........................................................................................................
     console.table(db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`));
-    info('^33298-3^', mrg.append_to_loc({
-      dsk,
-      locid: 'title',
-      text: "A Grand Union"
-    }));
+    if (T != null) {
+      T.eq(db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`), [
+        {
+          dsk: 'twcm',
+          lnr: 1,
+          lnpart: 1,
+          xtra: 0,
+          isloc: 0,
+          line: '<title>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 1,
+          lnpart: 2,
+          xtra: 0,
+          isloc: 1,
+          line: '<mrg:loc#title/>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 1,
+          lnpart: 3,
+          xtra: 0,
+          isloc: 0,
+          line: '</title>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 2,
+          lnpart: 0,
+          xtra: 0,
+          isloc: 0,
+          line: '<article>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 3,
+          lnpart: 1,
+          xtra: 0,
+          isloc: 0,
+          line: '  <p>Here comes some '
+        },
+        {
+          dsk: 'twcm',
+          lnr: 3,
+          lnpart: 2,
+          xtra: 0,
+          isloc: 1,
+          line: '<mrg:loc#content/>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 3,
+          lnpart: 3,
+          xtra: 0,
+          isloc: 0,
+          line: '.</p>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 4,
+          lnpart: 0,
+          xtra: 0,
+          isloc: 0,
+          line: '  </article>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 5,
+          lnpart: 0,
+          xtra: 0,
+          isloc: 0,
+          line: ''
+        }
+      ]);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(mrg.append_to_loc({
+        dsk,
+        locid: 'title',
+        text: "A Grand Union"
+      }), {
+        dsk: 'twcm',
+        lnr: 1,
+        lnpart: 2,
+        xtra: 1,
+        isloc: 0,
+        line: 'A Grand Union'
+      });
+    }
+    if (T != null) {
+      T.eq(mrg.append_to_loc({
+        dsk,
+        locid: 'content',
+        text: "more "
+      }), {
+        dsk: 'twcm',
+        lnr: 3,
+        lnpart: 2,
+        xtra: 1,
+        isloc: 0,
+        line: 'more '
+      });
+    }
+    if (T != null) {
+      T.eq(mrg.append_to_loc({
+        dsk,
+        locid: 'content',
+        text: "content"
+      }), {
+        dsk: 'twcm',
+        lnr: 3,
+        lnpart: 2,
+        xtra: 2,
+        isloc: 0,
+        line: 'content'
+      });
+    }
     // info '^33298-4^', mrg.prepend_to_loc { dsk, locid: 'content', text: "content goes here" }
     console.table(db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`));
+    if (T != null) {
+      T.eq(db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`), [
+        {
+          dsk: 'twcm',
+          lnr: 1,
+          lnpart: 1,
+          xtra: 0,
+          isloc: 0,
+          line: '<title>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 1,
+          lnpart: 2,
+          xtra: 0,
+          isloc: 1,
+          line: '<mrg:loc#title/>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 1,
+          lnpart: 2,
+          xtra: 1,
+          isloc: 0,
+          line: 'A Grand Union'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 1,
+          lnpart: 3,
+          xtra: 0,
+          isloc: 0,
+          line: '</title>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 2,
+          lnpart: 0,
+          xtra: 0,
+          isloc: 0,
+          line: '<article>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 3,
+          lnpart: 1,
+          xtra: 0,
+          isloc: 0,
+          line: '  <p>Here comes some '
+        },
+        {
+          dsk: 'twcm',
+          lnr: 3,
+          lnpart: 2,
+          xtra: 0,
+          isloc: 1,
+          line: '<mrg:loc#content/>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 3,
+          lnpart: 2,
+          xtra: 1,
+          isloc: 0,
+          line: 'more '
+        },
+        {
+          dsk: 'twcm',
+          lnr: 3,
+          lnpart: 2,
+          xtra: 2,
+          isloc: 0,
+          line: 'content'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 3,
+          lnpart: 3,
+          xtra: 0,
+          isloc: 0,
+          line: '.</p>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 4,
+          lnpart: 0,
+          xtra: 0,
+          isloc: 0,
+          line: '  </article>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 5,
+          lnpart: 0,
+          xtra: 0,
+          isloc: 0,
+          line: ''
+        }
+      ]);
+    }
     ref = mrg.walk_line_rows({dsk});
     //.........................................................................................................
-    for (row of ref) {
-      urge('^587^', row);
+    for (x of ref) {
+      ({line} = x);
+      urge('^587^', rpr(line));
     }
-    console.table([...(mrg.walk_line_rows({dsk}))]);
+    if (T != null) {
+      T.eq(mrg.get_line_rows({dsk}), [
+        {
+          dsk: 'twcm',
+          lnr: 1,
+          line: '<title><mrg:loc#title/>A Grand Union</title>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 2,
+          line: '<article>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 3,
+          line: '  <p>Here comes some <mrg:loc#content/>more content.</p>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 4,
+          line: '  </article>'
+        },
+        {
+          dsk: 'twcm',
+          lnr: 5,
+          line: ''
+        }
+      ]);
+    }
     if (typeof done === "function") {
       done();
     }
@@ -308,7 +553,7 @@
       // test @
       // test @[ "mrg.refresh_datasource" ]
       // test @[ "loc markers 1" ]
-      return this["loc markers 2"]();
+      return test(this["loc markers 2"]);
     })();
   }
 
