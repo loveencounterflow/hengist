@@ -507,20 +507,21 @@
 
   /*
 
-00:07 HENGIST/BENCHMARKS  ▶  plainjs_mutable                                    8,268 Hz   100.0 % │████████████▌│
-00:07 HENGIST/BENCHMARKS  ▶  plainjs_immutable                                  4,933 Hz    59.7 % │███████▌     │
-00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_thaw_freeze_f0                   4,682 Hz    56.6 % │███████▏     │
-00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v2_standard                         4,464 Hz    54.0 % │██████▊      │
-00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_lets_f0                          4,444 Hz    53.8 % │██████▊      │
-00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_lets_f1                          4,213 Hz    51.0 % │██████▍      │
-00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_thaw_freeze_f1                   4,034 Hz    48.8 % │██████▏      │
-00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v2_nofreeze                         2,143 Hz    25.9 % │███▎         │
-00:07 HENGIST/BENCHMARKS  ▶  immutable                                          1,852 Hz    22.4 % │██▊          │
-00:07 HENGIST/BENCHMARKS  ▶  mori                                               1,779 Hz    21.5 % │██▊          │
-00:07 HENGIST/BENCHMARKS  ▶  hamt                                               1,752 Hz    21.2 % │██▋          │
-00:07 HENGIST/BENCHMARKS  ▶  immer                                              1,352 Hz    16.3 % │██           │
+  00:07 HENGIST/BENCHMARKS  ▶  plainjs_mutable                                    8,268 Hz   100.0 % │████████████▌│
+  00:07 HENGIST/BENCHMARKS  ▶  plainjs_immutable                                  4,933 Hz    59.7 % │███████▌     │
+  00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_thaw_freeze_f0                   4,682 Hz    56.6 % │███████▏     │
+  00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v2_standard                         4,464 Hz    54.0 % │██████▊      │
+  00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_lets_f0                          4,444 Hz    53.8 % │██████▊      │
+  00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_lets_f1                          4,213 Hz    51.0 % │██████▍      │
+  00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v3_thaw_freeze_f1                   4,034 Hz    48.8 % │██████▏      │
+  00:07 HENGIST/BENCHMARKS  ▶  letsfreezethat_v2_nofreeze                         2,143 Hz    25.9 % │███▎         │
+  00:07 HENGIST/BENCHMARKS  ▶  immutable                                          1,852 Hz    22.4 % │██▊          │
+  00:07 HENGIST/BENCHMARKS  ▶  mori                                               1,779 Hz    21.5 % │██▊          │
+  00:07 HENGIST/BENCHMARKS  ▶  hamt                                               1,752 Hz    21.2 % │██▋          │
+  00:07 HENGIST/BENCHMARKS  ▶  immer                                              1,352 Hz    16.3 % │██           │
 
-*/
+  */
+  globalThis.structuredClone;
 
 }).call(this);
 
