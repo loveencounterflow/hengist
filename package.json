@@ -72,6 +72,8 @@
     "jsx-number-format": "^0.1.4",
     "klona": "^2.0.4",
     "letsfreezethat": "^3.1.0",
+    "letsfreezethat225": "npm:letsfreezethat@2.2.5",
+    "letsfreezethat310": "npm:letsfreezethat@3.1.0",
     "load-source-map": "^2.0.0",
     "loupe": "2.3.0",
     "merge-ranges": "^1.0.2",
