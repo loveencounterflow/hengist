@@ -35,18 +35,21 @@ guy                       = require '../../../apps/guy'
   { Mrg } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
   #.........................................................................................................
   probes_and_matchers = [
-    [ '<mrg:loc#first/>',         [ { id: 'first' } ], null ]
-    [ '<mrg:loc#foo-bar-123/>',   [ { id: 'foo-bar-123' } ], null ]
-    [ '<mrg:loc# foo-bar-123/>',  [], null ]
-    [ '<MRG:loc#foo-bar-123/>',   [], null ]
-    [ '<mrg:loc#first />',        [], null ]
-    [ '<mrg:loc id="first"/>',    [], null ]
-    [ '<mrg:loc#first>',          [], null ]
+    [ '<mrg:loc#first/>',         [ [ '', '<mrg:loc#first/>', ''       ], { locid: 'first'        }, ], ]
+    [ '<mrg:loc#foo-bar-123/>',   [ [ '', '<mrg:loc#foo-bar-123/>', '' ], { locid: 'foo-bar-123'  }, ], ]
+    [ '<mrg:loc# foo-bar-123/>',  [ [ '<mrg:loc# foo-bar-123/>'        ], { locid: ' foo-bar-123' }, ], ]
+    [ '<MRG:loc#foo-bar-123/>',   [ [ '<MRG:loc#foo-bar-123/>'         ], { locid: 'foo-bar-123'  }, ], ]
+    [ '<mrg:loc#first />',        [ [ '<mrg:loc#first />'              ], { locid: 'first '       }, ], ]
+    [ '<mrg:loc id="first"/>',    [ [ '<mrg:loc id="first"/>'          ], null                     , ], ]
+    [ '<mrg:loc#first>',          [ [ '<mrg:loc#first>'                ], { locid: 'first>'       }, ], ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      result = ( { d.groups..., } for d from probe.matchAll Mrg.C.defaults.constructor_cfg.loc_pattern )
+      # result = ( { d.groups..., } for d from probe.matchAll Mrg.C.defaults.constructor_cfg.loc_splitter )
+      result = [
+        ( probe.split Mrg.C.defaults.constructor_cfg.loc_splitter ),
+        ( ( probe.match Mrg.C.defaults.constructor_cfg.locid_re )?.groups ? null ) ]
       resolve result
       return null
   #.........................................................................................................
@@ -107,18 +110,18 @@ guy                       = require '../../../apps/guy'
   console.table db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;"
   console.table db.all_rows SQL"select * from mrg_locs   order by dsk, locid;"
   T?.eq ( db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;" ), [
-    { dsk: 'twcm', lnr: 1, lnpart: 1, isloc: 0, line: '<title>' },
-    { dsk: 'twcm', lnr: 1, lnpart: 2, isloc: 1, line: '<mrg:loc#title/>' },
-    { dsk: 'twcm', lnr: 1, lnpart: 3, isloc: 0, line: '</title>' },
-    { dsk: 'twcm', lnr: 2, lnpart: 1, isloc: 0, line: '<article>' },
-    { dsk: 'twcm', lnr: 3, lnpart: 1, isloc: 0, line: '  <p>Here comes some ' },
-    { dsk: 'twcm', lnr: 3, lnpart: 2, isloc: 1, line: '<mrg:loc#content/>' },
-    { dsk: 'twcm', lnr: 3, lnpart: 3, isloc: 0, line: '.</p>' },
-    { dsk: 'twcm', lnr: 4, lnpart: 1, isloc: 0, line: '  </article>' },
-    { dsk: 'twcm', lnr: 5, lnpart: 1, isloc: 0, line: '' } ]
-  T?.eq ( db.all_rows SQL"select * from mrg_locs   order by dsk, locid;" ), [
-    { dsk: 'twcm', locid: 'content', lnr: 3, lnpart: 2 },
-    { dsk: 'twcm', locid: 'title', lnr: 1, lnpart: 2 } ]
+    { dsk: 'twcm', lnr: 1, lnpart: 0, xtra: 0, isloc: 0, line: '<title>' },
+    { dsk: 'twcm', lnr: 1, lnpart: 1, xtra: 0, isloc: 1, line: '<mrg:loc#title/>' },
+    { dsk: 'twcm', lnr: 1, lnpart: 2, xtra: 0, isloc: 0, line: '</title>' },
+    { dsk: 'twcm', lnr: 2, lnpart: 0, xtra: 0, isloc: 0, line: '<article>' },
+    { dsk: 'twcm', lnr: 3, lnpart: 0, xtra: 0, isloc: 0, line: '  <p>Here comes some ' },
+    { dsk: 'twcm', lnr: 3, lnpart: 1, xtra: 0, isloc: 1, line: '<mrg:loc#content/>' },
+    { dsk: 'twcm', lnr: 3, lnpart: 2, xtra: 0, isloc: 0, line: '.</p>' },
+    { dsk: 'twcm', lnr: 4, lnpart: 0, xtra: 0, isloc: 0, line: '  </article>' },
+    { dsk: 'twcm', lnr: 5, lnpart: 0, xtra: 0, isloc: 0, line: '' } ]
+  T?.eq ( db.all_rows SQL"select * from mrg_locs order by dsk, locid;" ), [
+    { dsk: 'twcm', locid: 'content', lnr: 3, lnpart: 1 },
+    { dsk: 'twcm', locid: 'title', lnr: 1, lnpart: 1 } ]
   #.........................................................................................................
   done()
   return null
@@ -139,35 +142,35 @@ guy                       = require '../../../apps/guy'
   mrg.refresh_datasource { dsk, }
   #.........................................................................................................
   console.table db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;"
-  T?.eq ( db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;" ), [
-    { dsk: 'twcm', lnr: 1, lnpart: 1, xtra: 0, isloc: 0, line: '<title>'               },
-    { dsk: 'twcm', lnr: 1, lnpart: 2, xtra: 0, isloc: 1, line: '<mrg:loc#title/>'      },
-    { dsk: 'twcm', lnr: 1, lnpart: 3, xtra: 0, isloc: 0, line: '</title>'              },
-    { dsk: 'twcm', lnr: 2, lnpart: 0, xtra: 0, isloc: 0, line: '<article>'             },
-    { dsk: 'twcm', lnr: 3, lnpart: 1, xtra: 0, isloc: 0, line: '  <p>Here comes some ' },
-    { dsk: 'twcm', lnr: 3, lnpart: 2, xtra: 0, isloc: 1, line: '<mrg:loc#content/>'    },
-    { dsk: 'twcm', lnr: 3, lnpart: 3, xtra: 0, isloc: 0, line: '.</p>'                 },
-    { dsk: 'twcm', lnr: 4, lnpart: 0, xtra: 0, isloc: 0, line: '  </article>'          },
-    { dsk: 'twcm', lnr: 5, lnpart: 0, xtra: 0, isloc: 0, line: ''                      } ]
+  rows = db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;"
+  T?.eq rows[ 0 ], { dsk: 'twcm', lnr: 1, lnpart: 0, xtra: 0, isloc: 0, line: '<title>'               }
+  T?.eq rows[ 1 ], { dsk: 'twcm', lnr: 1, lnpart: 1, xtra: 0, isloc: 1, line: '<mrg:loc#title/>'      }
+  T?.eq rows[ 2 ], { dsk: 'twcm', lnr: 1, lnpart: 2, xtra: 0, isloc: 0, line: '</title>'              }
+  T?.eq rows[ 3 ], { dsk: 'twcm', lnr: 2, lnpart: 0, xtra: 0, isloc: 0, line: '<article>'             }
+  T?.eq rows[ 4 ], { dsk: 'twcm', lnr: 3, lnpart: 0, xtra: 0, isloc: 0, line: '  <p>Here comes some ' }
+  T?.eq rows[ 5 ], { dsk: 'twcm', lnr: 3, lnpart: 1, xtra: 0, isloc: 1, line: '<mrg:loc#content/>'    }
+  T?.eq rows[ 6 ], { dsk: 'twcm', lnr: 3, lnpart: 2, xtra: 0, isloc: 0, line: '.</p>'                 }
+  T?.eq rows[ 7 ], { dsk: 'twcm', lnr: 4, lnpart: 0, xtra: 0, isloc: 0, line: '  </article>'          }
+  T?.eq rows[ 8 ], { dsk: 'twcm', lnr: 5, lnpart: 0, xtra: 0, isloc: 0, line: ''                      }
   #.........................................................................................................
-  T?.eq ( mrg.append_to_loc { dsk, locid: 'title',  text: "A Grand Union" } ), { dsk: 'twcm', lnr: 1, lnpart: 2, xtra: 1, isloc: 0, line: 'A Grand Union' }
-  T?.eq ( mrg.append_to_loc { dsk, locid: 'content', text: "more "        } ), { dsk: 'twcm', lnr: 3, lnpart: 2, xtra: 1, isloc: 0, line: 'more ' }
-  T?.eq ( mrg.append_to_loc { dsk, locid: 'content', text: "content"      } ), { dsk: 'twcm', lnr: 3, lnpart: 2, xtra: 2, isloc: 0, line: 'content' }
+  T?.eq ( mrg.append_to_loc { dsk, locid: 'title',  text: "A Grand Union" } ), { dsk: 'twcm', lnr: 1, lnpart: 1, xtra: 1, isloc: 0, line: 'A Grand Union' }
+  T?.eq ( mrg.append_to_loc { dsk, locid: 'content', text: "more "        } ), { dsk: 'twcm', lnr: 3, lnpart: 1, xtra: 1, isloc: 0, line: 'more ' }
+  T?.eq ( mrg.append_to_loc { dsk, locid: 'content', text: "content"      } ), { dsk: 'twcm', lnr: 3, lnpart: 1, xtra: 2, isloc: 0, line: 'content' }
   # info '^33298-4^', mrg.prepend_to_loc { dsk, locid: 'content', text: "content goes here" }
   console.table db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;"
-  T?.eq ( db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;" ), [
-    { dsk: 'twcm', lnr: 1, lnpart: 1, xtra: 0, isloc: 0, line: '<title>'               },
-    { dsk: 'twcm', lnr: 1, lnpart: 2, xtra: 0, isloc: 1, line: '<mrg:loc#title/>'      },
-    { dsk: 'twcm', lnr: 1, lnpart: 2, xtra: 1, isloc: 0, line: 'A Grand Union'         },
-    { dsk: 'twcm', lnr: 1, lnpart: 3, xtra: 0, isloc: 0, line: '</title>'              },
-    { dsk: 'twcm', lnr: 2, lnpart: 0, xtra: 0, isloc: 0, line: '<article>'             },
-    { dsk: 'twcm', lnr: 3, lnpart: 1, xtra: 0, isloc: 0, line: '  <p>Here comes some ' },
-    { dsk: 'twcm', lnr: 3, lnpart: 2, xtra: 0, isloc: 1, line: '<mrg:loc#content/>'    },
-    { dsk: 'twcm', lnr: 3, lnpart: 2, xtra: 1, isloc: 0, line: 'more '                 },
-    { dsk: 'twcm', lnr: 3, lnpart: 2, xtra: 2, isloc: 0, line: 'content'               },
-    { dsk: 'twcm', lnr: 3, lnpart: 3, xtra: 0, isloc: 0, line: '.</p>'                 },
-    { dsk: 'twcm', lnr: 4, lnpart: 0, xtra: 0, isloc: 0, line: '  </article>'          },
-    { dsk: 'twcm', lnr: 5, lnpart: 0, xtra: 0, isloc: 0, line: ''                      } ]
+  rows = db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;"
+  T?.eq rows[ 0  ], { dsk: 'twcm', lnr: 1, lnpart: 0, xtra: 0, isloc: 0, line: '<title>'               }
+  T?.eq rows[ 1  ], { dsk: 'twcm', lnr: 1, lnpart: 1, xtra: 0, isloc: 1, line: '<mrg:loc#title/>'      }
+  T?.eq rows[ 2  ], { dsk: 'twcm', lnr: 1, lnpart: 1, xtra: 1, isloc: 0, line: 'A Grand Union'         }
+  T?.eq rows[ 3  ], { dsk: 'twcm', lnr: 1, lnpart: 2, xtra: 0, isloc: 0, line: '</title>'              }
+  T?.eq rows[ 4  ], { dsk: 'twcm', lnr: 2, lnpart: 0, xtra: 0, isloc: 0, line: '<article>'             }
+  T?.eq rows[ 5  ], { dsk: 'twcm', lnr: 3, lnpart: 0, xtra: 0, isloc: 0, line: '  <p>Here comes some ' }
+  T?.eq rows[ 6  ], { dsk: 'twcm', lnr: 3, lnpart: 1, xtra: 0, isloc: 1, line: '<mrg:loc#content/>'    }
+  T?.eq rows[ 7  ], { dsk: 'twcm', lnr: 3, lnpart: 1, xtra: 1, isloc: 0, line: 'more '                 }
+  T?.eq rows[ 8  ], { dsk: 'twcm', lnr: 3, lnpart: 1, xtra: 2, isloc: 0, line: 'content'               }
+  T?.eq rows[ 9  ], { dsk: 'twcm', lnr: 3, lnpart: 2, xtra: 0, isloc: 0, line: '.</p>'                 }
+  T?.eq rows[ 10 ], { dsk: 'twcm', lnr: 4, lnpart: 0, xtra: 0, isloc: 0, line: '  </article>'          }
+  T?.eq rows[ 11 ], { dsk: 'twcm', lnr: 5, lnpart: 0, xtra: 0, isloc: 0, line: ''                      }
   #.........................................................................................................
   for { line, } from mrg.walk_line_rows { dsk, }
     urge '^587^', rpr line
@@ -185,8 +188,9 @@ guy                       = require '../../../apps/guy'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
+  # test @[ "location marker matching" ]
   # test @[ "mrg.refresh_datasource" ]
   # test @[ "loc markers 1" ]
-  test @[ "loc markers 2" ]
+  # test @[ "loc markers 2" ]
 
