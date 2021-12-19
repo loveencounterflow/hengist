@@ -49,52 +49,73 @@
       [
         '<mrg:loc#first/>',
         [
+          ['',
+          '<mrg:loc#first/>',
+          ''],
           {
-            id: 'first'
+            locid: 'first'
           }
-        ],
-        null
+        ]
       ],
       [
         '<mrg:loc#foo-bar-123/>',
         [
+          ['',
+          '<mrg:loc#foo-bar-123/>',
+          ''],
           {
-            id: 'foo-bar-123'
+            locid: 'foo-bar-123'
           }
-        ],
-        null
+        ]
       ],
-      ['<mrg:loc# foo-bar-123/>',
-      [],
-      null],
-      ['<MRG:loc#foo-bar-123/>',
-      [],
-      null],
-      ['<mrg:loc#first />',
-      [],
-      null],
+      [
+        '<mrg:loc# foo-bar-123/>',
+        [
+          ['<mrg:loc# foo-bar-123/>'],
+          {
+            locid: ' foo-bar-123'
+          }
+        ]
+      ],
+      [
+        '<MRG:loc#foo-bar-123/>',
+        [
+          ['<MRG:loc#foo-bar-123/>'],
+          {
+            locid: 'foo-bar-123'
+          }
+        ]
+      ],
+      [
+        '<mrg:loc#first />',
+        [
+          ['<mrg:loc#first />'],
+          {
+            locid: 'first '
+          }
+        ]
+      ],
       ['<mrg:loc id="first"/>',
-      [],
-      null],
-      ['<mrg:loc#first>',
-      [],
-      null]
+      [['<mrg:loc id="first"/>'],
+      null]],
+      [
+        '<mrg:loc#first>',
+        [
+          ['<mrg:loc#first>'],
+          {
+            locid: 'first>'
+          }
+        ]
+      ]
     ];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, result;
-          result = (function() {
-            var ref, results;
-            ref = probe.matchAll(Mrg.C.defaults.constructor_cfg.loc_pattern);
-            results = [];
-            for (d of ref) {
-              results.push({...d.groups});
-            }
-            return results;
-          })();
+          var ref, ref1, result;
+          // result = ( { d.groups..., } for d from probe.matchAll Mrg.C.defaults.constructor_cfg.loc_splitter )
+          result = [probe.split(Mrg.C.defaults.constructor_cfg.loc_splitter), (ref = (ref1 = probe.match(Mrg.C.defaults.constructor_cfg.locid_re)) != null ? ref1.groups : void 0) != null ? ref : null];
           resolve(result);
           return null;
         });
@@ -185,81 +206,90 @@
         {
           dsk: 'twcm',
           lnr: 1,
-          lnpart: 1,
+          lnpart: 0,
+          xtra: 0,
           isloc: 0,
           line: '<title>'
         },
         {
           dsk: 'twcm',
           lnr: 1,
-          lnpart: 2,
+          lnpart: 1,
+          xtra: 0,
           isloc: 1,
           line: '<mrg:loc#title/>'
         },
         {
           dsk: 'twcm',
           lnr: 1,
-          lnpart: 3,
+          lnpart: 2,
+          xtra: 0,
           isloc: 0,
           line: '</title>'
         },
         {
           dsk: 'twcm',
           lnr: 2,
-          lnpart: 1,
+          lnpart: 0,
+          xtra: 0,
           isloc: 0,
           line: '<article>'
         },
         {
           dsk: 'twcm',
           lnr: 3,
-          lnpart: 1,
+          lnpart: 0,
+          xtra: 0,
           isloc: 0,
           line: '  <p>Here comes some '
         },
         {
           dsk: 'twcm',
           lnr: 3,
-          lnpart: 2,
+          lnpart: 1,
+          xtra: 0,
           isloc: 1,
           line: '<mrg:loc#content/>'
         },
         {
           dsk: 'twcm',
           lnr: 3,
-          lnpart: 3,
+          lnpart: 2,
+          xtra: 0,
           isloc: 0,
           line: '.</p>'
         },
         {
           dsk: 'twcm',
           lnr: 4,
-          lnpart: 1,
+          lnpart: 0,
+          xtra: 0,
           isloc: 0,
           line: '  </article>'
         },
         {
           dsk: 'twcm',
           lnr: 5,
-          lnpart: 1,
+          lnpart: 0,
+          xtra: 0,
           isloc: 0,
           line: ''
         }
       ]);
     }
     if (T != null) {
-      T.eq(db.all_rows(SQL`select * from mrg_locs   order by dsk, locid;`), [
+      T.eq(db.all_rows(SQL`select * from mrg_locs order by dsk, locid;`), [
         {
           dsk: 'twcm',
           locid: 'content',
           lnr: 3,
-          lnpart: 2
+          lnpart: 1
         },
         {
           dsk: 'twcm',
           locid: 'title',
           lnr: 1,
-          lnpart: 2
+          lnpart: 1
         }
       ]);
     }
@@ -270,7 +300,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["loc markers 2"] = function(T, done) {
-    var DBay, Mrg, db, dsk, line, mrg, path, ref, x;
+    var DBay, Mrg, db, dsk, line, mrg, path, ref, rows, x;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     ({Mrg} = require('../../../apps/dbay-rustybuzz/lib/_mirage'));
@@ -285,81 +315,96 @@
     mrg.refresh_datasource({dsk});
     //.........................................................................................................
     console.table(db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`));
+    rows = db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`);
     if (T != null) {
-      T.eq(db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`), [
-        {
-          dsk: 'twcm',
-          lnr: 1,
-          lnpart: 1,
-          xtra: 0,
-          isloc: 0,
-          line: '<title>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 1,
-          lnpart: 2,
-          xtra: 0,
-          isloc: 1,
-          line: '<mrg:loc#title/>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 1,
-          lnpart: 3,
-          xtra: 0,
-          isloc: 0,
-          line: '</title>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 2,
-          lnpart: 0,
-          xtra: 0,
-          isloc: 0,
-          line: '<article>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 3,
-          lnpart: 1,
-          xtra: 0,
-          isloc: 0,
-          line: '  <p>Here comes some '
-        },
-        {
-          dsk: 'twcm',
-          lnr: 3,
-          lnpart: 2,
-          xtra: 0,
-          isloc: 1,
-          line: '<mrg:loc#content/>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 3,
-          lnpart: 3,
-          xtra: 0,
-          isloc: 0,
-          line: '.</p>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 4,
-          lnpart: 0,
-          xtra: 0,
-          isloc: 0,
-          line: '  </article>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 5,
-          lnpart: 0,
-          xtra: 0,
-          isloc: 0,
-          line: ''
-        }
-      ]);
+      T.eq(rows[0], {
+        dsk: 'twcm',
+        lnr: 1,
+        lnpart: 0,
+        xtra: 0,
+        isloc: 0,
+        line: '<title>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[1], {
+        dsk: 'twcm',
+        lnr: 1,
+        lnpart: 1,
+        xtra: 0,
+        isloc: 1,
+        line: '<mrg:loc#title/>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[2], {
+        dsk: 'twcm',
+        lnr: 1,
+        lnpart: 2,
+        xtra: 0,
+        isloc: 0,
+        line: '</title>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[3], {
+        dsk: 'twcm',
+        lnr: 2,
+        lnpart: 0,
+        xtra: 0,
+        isloc: 0,
+        line: '<article>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[4], {
+        dsk: 'twcm',
+        lnr: 3,
+        lnpart: 0,
+        xtra: 0,
+        isloc: 0,
+        line: '  <p>Here comes some '
+      });
+    }
+    if (T != null) {
+      T.eq(rows[5], {
+        dsk: 'twcm',
+        lnr: 3,
+        lnpart: 1,
+        xtra: 0,
+        isloc: 1,
+        line: '<mrg:loc#content/>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[6], {
+        dsk: 'twcm',
+        lnr: 3,
+        lnpart: 2,
+        xtra: 0,
+        isloc: 0,
+        line: '.</p>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[7], {
+        dsk: 'twcm',
+        lnr: 4,
+        lnpart: 0,
+        xtra: 0,
+        isloc: 0,
+        line: '  </article>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[8], {
+        dsk: 'twcm',
+        lnr: 5,
+        lnpart: 0,
+        xtra: 0,
+        isloc: 0,
+        line: ''
+      });
     }
     //.........................................................................................................
     if (T != null) {
@@ -370,7 +415,7 @@
       }), {
         dsk: 'twcm',
         lnr: 1,
-        lnpart: 2,
+        lnpart: 1,
         xtra: 1,
         isloc: 0,
         line: 'A Grand Union'
@@ -384,7 +429,7 @@
       }), {
         dsk: 'twcm',
         lnr: 3,
-        lnpart: 2,
+        lnpart: 1,
         xtra: 1,
         isloc: 0,
         line: 'more '
@@ -398,7 +443,7 @@
       }), {
         dsk: 'twcm',
         lnr: 3,
-        lnpart: 2,
+        lnpart: 1,
         xtra: 2,
         isloc: 0,
         line: 'content'
@@ -406,105 +451,126 @@
     }
     // info '^33298-4^', mrg.prepend_to_loc { dsk, locid: 'content', text: "content goes here" }
     console.table(db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`));
+    rows = db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`);
     if (T != null) {
-      T.eq(db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`), [
-        {
-          dsk: 'twcm',
-          lnr: 1,
-          lnpart: 1,
-          xtra: 0,
-          isloc: 0,
-          line: '<title>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 1,
-          lnpart: 2,
-          xtra: 0,
-          isloc: 1,
-          line: '<mrg:loc#title/>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 1,
-          lnpart: 2,
-          xtra: 1,
-          isloc: 0,
-          line: 'A Grand Union'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 1,
-          lnpart: 3,
-          xtra: 0,
-          isloc: 0,
-          line: '</title>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 2,
-          lnpart: 0,
-          xtra: 0,
-          isloc: 0,
-          line: '<article>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 3,
-          lnpart: 1,
-          xtra: 0,
-          isloc: 0,
-          line: '  <p>Here comes some '
-        },
-        {
-          dsk: 'twcm',
-          lnr: 3,
-          lnpart: 2,
-          xtra: 0,
-          isloc: 1,
-          line: '<mrg:loc#content/>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 3,
-          lnpart: 2,
-          xtra: 1,
-          isloc: 0,
-          line: 'more '
-        },
-        {
-          dsk: 'twcm',
-          lnr: 3,
-          lnpart: 2,
-          xtra: 2,
-          isloc: 0,
-          line: 'content'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 3,
-          lnpart: 3,
-          xtra: 0,
-          isloc: 0,
-          line: '.</p>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 4,
-          lnpart: 0,
-          xtra: 0,
-          isloc: 0,
-          line: '  </article>'
-        },
-        {
-          dsk: 'twcm',
-          lnr: 5,
-          lnpart: 0,
-          xtra: 0,
-          isloc: 0,
-          line: ''
-        }
-      ]);
+      T.eq(rows[0], {
+        dsk: 'twcm',
+        lnr: 1,
+        lnpart: 0,
+        xtra: 0,
+        isloc: 0,
+        line: '<title>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[1], {
+        dsk: 'twcm',
+        lnr: 1,
+        lnpart: 1,
+        xtra: 0,
+        isloc: 1,
+        line: '<mrg:loc#title/>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[2], {
+        dsk: 'twcm',
+        lnr: 1,
+        lnpart: 1,
+        xtra: 1,
+        isloc: 0,
+        line: 'A Grand Union'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[3], {
+        dsk: 'twcm',
+        lnr: 1,
+        lnpart: 2,
+        xtra: 0,
+        isloc: 0,
+        line: '</title>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[4], {
+        dsk: 'twcm',
+        lnr: 2,
+        lnpart: 0,
+        xtra: 0,
+        isloc: 0,
+        line: '<article>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[5], {
+        dsk: 'twcm',
+        lnr: 3,
+        lnpart: 0,
+        xtra: 0,
+        isloc: 0,
+        line: '  <p>Here comes some '
+      });
+    }
+    if (T != null) {
+      T.eq(rows[6], {
+        dsk: 'twcm',
+        lnr: 3,
+        lnpart: 1,
+        xtra: 0,
+        isloc: 1,
+        line: '<mrg:loc#content/>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[7], {
+        dsk: 'twcm',
+        lnr: 3,
+        lnpart: 1,
+        xtra: 1,
+        isloc: 0,
+        line: 'more '
+      });
+    }
+    if (T != null) {
+      T.eq(rows[8], {
+        dsk: 'twcm',
+        lnr: 3,
+        lnpart: 1,
+        xtra: 2,
+        isloc: 0,
+        line: 'content'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[9], {
+        dsk: 'twcm',
+        lnr: 3,
+        lnpart: 2,
+        xtra: 0,
+        isloc: 0,
+        line: '.</p>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[10], {
+        dsk: 'twcm',
+        lnr: 4,
+        lnpart: 0,
+        xtra: 0,
+        isloc: 0,
+        line: '  </article>'
+      });
+    }
+    if (T != null) {
+      T.eq(rows[11], {
+        dsk: 'twcm',
+        lnr: 5,
+        lnpart: 0,
+        xtra: 0,
+        isloc: 0,
+        line: ''
+      });
     }
     ref = mrg.walk_line_rows({dsk});
     //.........................................................................................................
@@ -550,12 +616,14 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @[ "mrg.refresh_datasource" ]
-      // test @[ "loc markers 1" ]
-      return test(this["loc markers 2"]);
+      return test(this);
     })();
   }
+
+  // test @[ "location marker matching" ]
+// test @[ "mrg.refresh_datasource" ]
+// test @[ "loc markers 1" ]
+// test @[ "loc markers 2" ]
 
 }).call(this);
 
