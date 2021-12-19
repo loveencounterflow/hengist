@@ -192,7 +192,7 @@
     if (cfg.skip_ws == null) {
       cfg.skip_ws = false;
     }
-    page = append_to(page, 'textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`);
+    debug('^3453^', drb.mrg.append_to_loc('textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`));
     // for ad in ads
     //   urge '^3980^', ad
     line_y0 = 20;

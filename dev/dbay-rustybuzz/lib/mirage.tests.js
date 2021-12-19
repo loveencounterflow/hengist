@@ -179,8 +179,60 @@
         bytes: 384
       }) : void 0;
     })();
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["altering mirrored source lines causes error"] = function(T, done) {
+    var DBay, Mrg, db, dsk, mrg, path, rows_after, rows_before;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({Mrg} = require('../../../apps/dbay-rustybuzz/lib/_mirage'));
+    // { Drb }   = require H.drb_path
+    db = new DBay();
+    mrg = new Mrg({db});
+    dsk = 'twcm';
+    path = 'dbay-rustybuzz/template-with-content-markers.html';
+    path = PATH.resolve(PATH.join(__dirname, '../../../assets', path));
+    mrg.register_dsk({dsk, path});
+    mrg.refresh_datasource({dsk});
+    console.table(db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`));
+    rows_before = db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`);
+    (() => {      //.........................................................................................................
+      var error;
+      error = null;
+      try {
+        db(SQL`insert into mrg_mirror
+( dsk, lnr, lnpart, xtra, isloc, line )
+values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
+          dsk: dsk,
+          lnr: 10,
+          lnpart: 0,
+          xtra: 0,
+          isloc: 0,
+          line: "some text"
+        });
+      } catch (error1) {
+        error = error1;
+        warn(CND.reverse(error.message));
+        if (T != null) {
+          T.ok(/not allowed to modify table mrg_mirror/.test(error.message));
+        }
+      }
+      return T != null ? T.ok(error != null) : void 0;
+    })();
     //.........................................................................................................
-    done();
+    console.table(db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`));
+    rows_after = db.all_rows(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`);
+    if (T != null) {
+      T.eq(rows_before, rows_after);
+    }
+    if (typeof done === "function") {
+      done();
+    }
     return null;
   };
 
@@ -620,7 +672,9 @@
     })();
   }
 
-  // test @[ "location marker matching" ]
+  // test @[ "altering mirrored source lines causes error" ]
+// @[ "altering mirrored source lines causes error" ]()
+// test @[ "location marker matching" ]
 // test @[ "mrg.refresh_datasource" ]
 // test @[ "loc markers 1" ]
 // test @[ "loc markers 2" ]
