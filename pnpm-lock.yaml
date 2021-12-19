@@ -60,6 +60,8 @@ specifiers:
   jsx-number-format: ^0.1.4
   klona: ^2.0.4
   letsfreezethat: ^3.1.0
+  letsfreezethat225: npm:letsfreezethat@2.2.5
+  letsfreezethat310: npm:letsfreezethat@3.1.0
   load-source-map: ^2.0.0
   loupe: 2.3.0
   merge-ranges: ^1.0.2
@@ -173,6 +175,8 @@ dependencies:
   jsx-number-format: 0.1.4
   klona: 2.0.4
   letsfreezethat: 3.1.0
+  letsfreezethat225: /letsfreezethat/2.2.5
+  letsfreezethat310: /letsfreezethat/3.1.0
   load-source-map: 2.0.0
   loupe: 2.3.0
   merge-ranges: 1.0.2
@@ -3433,6 +3437,10 @@ packages:
       v8flags: 3.2.0
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /letsfreezethat/2.2.5:
+    resolution: {integrity: sha512-w4XD73ki7rClXBft9OmvngG6abnE71h0BTMNCCXdmDGI3zYNIZYjG6/fOhRjz1crWc5ic/XGKdl6KkusftiKpA==}
     dev: false
 
   /letsfreezethat/3.1.0:
