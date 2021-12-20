@@ -123,13 +123,90 @@ r                         = String.raw
   echo dtab._tabulate db SQL"select * from std_variables order by name;"
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY stdlib error throwing" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }          = require H.dbay_path
+  #.........................................................................................................
+  db                = new DBay()
+  db.create_stdlib()
+  #.........................................................................................................
+  db.create_function
+    name:           'std_raise'
+    deterministic:  true
+    varargs:        false
+    call: ( message ) ->
+      throw new Error message
+  #.........................................................................................................
+  db.create_function
+    name:           'std_raise_json'
+    deterministic:  true
+    varargs:        false
+    call: ( facets_json ) ->
+      try facets = JSON.parse facets_json catch error
+        throw new Error "not a valid argument for std_raise_json: #{rpr facets}"
+      error = new Error facets.message ? "(no error message given)"
+      for k, v of facets
+        continue if k is 'message'
+        error[ k ] = v
+      throw error
+  #.........................................................................................................
+  db.create_function
+    name:           'std_assert',
+    deterministic:  true,
+    varargs:        false,
+    call:           ( test, message ) ->
+      if ( not test? ) or ( test is 0 )
+        throw new Error message
+      return test
+  #.........................................................................................................
+  do =>
+    error = null
+    try db.all_rows SQL"select std_raise( '^foo@34^ an error has occurred' );" catch error
+      help '^45678-1', CND.reverse error.message
+      T?.eq error.message, '^foo@34^ an error has occurred'
+    T?.ok error?
+  #.........................................................................................................
+  do =>
+    error = null
+    try db.all_rows SQL"""
+      select std_raise_json( '{"ref":"^foo@34^","message":"another error has occurred"}' );""" catch error
+      help '^45678-2', CND.reverse error.ref
+      help '^45678-3', CND.reverse error.message
+      T?.eq error.ref,      '^foo@34^'
+      T?.eq error.message,  'another error has occurred'
+    T?.ok error?
+  #.........................................................................................................
+  do =>
+    error = null
+    db SQL"""
+      create table d ( x integer primary key );
+      insert into d values ( 42 );"""
+    T?.eq [ { some_value: 42 } ], db.all_rows SQL"""
+      select std_assert( 42, '^bar@567^ expected something else' ) as some_value;"""
+    T?.eq [ { some_value: 1 } ], db.all_rows SQL"""
+      select std_assert( 42 is not null, '^bar@567^ expected something else' ) as some_value;"""
+    try
+      debug '^1345^', db.all_rows SQL"""
+        select std_assert( 42 is null, '^bar@567^ expected something else' ) as some_value;"""
+    catch error
+      help '^45678-4', CND.reverse error.message
+      T?.eq error.message,  '^bar@567^ expected something else'
+    T?.ok error?
+  #.........................................................................................................
+  # db.all_rows SQL"""
+  #   select std_raise_json( '{"ref":"^foo@34^","message":"another error has occurred"}' );"""
+  done?()
+
 
 
 ############################################################################################################
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # @[ "DBAY std_getv()" ]()
-  test @[ "DBAY std_getv()" ]
+  # test @[ "DBAY std_getv()" ]
+  test @[ "DBAY stdlib error throwing" ]
+  # @[ "DBAY stdlib error throwing" ]()
   # @[ "DBAY stdlib functions" ]()
   # @[ "DBAY std_str_split_re()" ]()
 
