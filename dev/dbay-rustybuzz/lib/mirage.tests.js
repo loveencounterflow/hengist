@@ -714,20 +714,51 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["loc markers 4"] = function(T, done) {
+    var DBay, Mrg, db, dsk, mrg, path;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({Mrg} = require('../../../apps/dbay-rustybuzz/lib/_mirage'));
+    // { Drb }   = require H.drb_path
+    db = new DBay();
+    mrg = new Mrg({db});
+    dsk = 'twcm';
+    path = 'dbay-rustybuzz/template-with-content-markers.html';
+    path = PATH.resolve(PATH.join(__dirname, '../../../assets', path));
+    //.........................................................................................................
+    mrg.register_dsk({dsk, path});
+    mrg.refresh_datasource({dsk});
+    //.........................................................................................................
+    db.setv('dsk', dsk);
+    db.setv('locid', 'title');
+    console.table(db.all_rows(SQL`select * from mrg_location_from_dsk_locid;`));
+    console.table(db.all_rows(SQL`select * from mrg_prv_nxt_xtra_from_dsk_locid;`));
+    //.........................................................................................................
+    db.setv('dsk', dsk);
+    db.setv('locid', 'nonexistentloc');
+    console.table(db.all_rows(SQL`select * from mrg_location_from_dsk_locid;`));
+    console.table(db.all_rows(SQL`select * from mrg_prv_nxt_xtra_from_dsk_locid;`));
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "altering mirrored source lines causes error" ]
+      // @[ "altering mirrored source lines causes error" ]()
+      // test @[ "location marker matching" ]
+      // test @[ "mrg.refresh_datasource" ]
+      // test @[ "loc markers 1" ]
+      // test @[ "loc markers 2" ]
+      // test @[ "loc markers 3" ]
+      return test(this["loc markers 4"]);
     })();
   }
-
-  // test @[ "altering mirrored source lines causes error" ]
-// @[ "altering mirrored source lines causes error" ]()
-// test @[ "location marker matching" ]
-// test @[ "mrg.refresh_datasource" ]
-// test @[ "loc markers 1" ]
-// test @[ "loc markers 2" ]
-// test @[ "loc markers 3" ]
 
 }).call(this);
 

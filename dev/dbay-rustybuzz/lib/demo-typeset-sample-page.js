@@ -90,13 +90,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   append_remarks = function(cfg) {
-    var drb, fm, fontnick, missing_chrs, page;
-    ({drb, page, missing_chrs, fontnick} = cfg);
+    var drb, dsk, fm, fontnick;
+    ({drb, dsk, fontnick} = cfg);
     fm = drb.get_fontmetrics({fontnick});
-    page = append_to(page, 'remarks', `<div>fm: ${rpr(fm)}</div>`);
+    drb.mrg.append_to_loc('remarks', `<div>fm: ${rpr(fm)}</div>`);
     // missing_txt     = ( rpr ad.chrs for ad in missing_chrs ).join ', '
     // page            = append_to page, 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
-    return page;
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -270,7 +270,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var I, L, Tbl, V, cgid_map, chrs, db, defaults, doc, drb, dtab, fontnick, fspath, known_ods, missing, missing_sid, mm_p_u, mm_p_u_txt, page, par, set_id, size_mm, specials, text, width_mm, x0, y0;
+    var I, L, Tbl, V, cgid_map, chrs, db, defaults, doc, drb, dsk, dtab, fontnick, fspath, known_ods, missing, missing_sid, mm_p_u, mm_p_u_txt, par, set_id, size_mm, specials, text, ui_font_data, width_mm, x0, y0;
     defaults = {
       set_id: 'medium-eg8i'
     };
@@ -281,22 +281,32 @@
     db = new DBay({
       path: '/dev/shm/typesetting-1.sqlite'
     });
+    dtab = new Tbl({db});
     drb = new Drb({
       db,
       rebuild: true,
       RBW,
       path: '/dev/shm/typesetting-2.sqlite'
     });
-    dtab = new Tbl({db});
-    doc = 1;
-    par = 1;
-    page = FS.readFileSync(template_path, {
+    dsk = 'demo';
+    ui_font_data = FS.readFileSync(ui_font_path, {
       encoding: 'utf-8'
     });
+    drb.mrg.register_dsk({
+      dsk,
+      path: template_path
+    });
+    drb.mrg.refresh_datasource({dsk});
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'ui_font_data',
+      text: ui_font_data
+    });
+    doc = 1;
+    par = 1;
+    // page            = page.replace /\${ui_font_data}/g, FS.readFileSync ui_font_path, { encoding: 'utf-8', }
+    // page            = FS.readFileSync template_path, { encoding: 'utf-8', }
     // page            = append_to page, 'grid', FS.readFileSync cm_grid_path, { encoding: 'utf-8', }
-    page = page.replace(/\${ui_font_data}/g, FS.readFileSync(ui_font_path, {
-      encoding: 'utf-8'
-    }));
     ({I, L, V} = db.sql);
     //.........................................................................................................
     ({text, chrs, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
@@ -341,9 +351,9 @@
     //.........................................................................................................
     x0 = 0;
     y0 = 50;
-    page = append_remarks({drb, page, fontnick});
-    page = append_outlines({drb, page, fontnick, size_mm, mm_p_u, missing_sid, known_ods});
-    page = append_content({drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid});
+    append_remarks({drb, dsk, fontnick});
+    // page  = append_outlines { drb, page, fontnick, size_mm, mm_p_u, missing_sid, known_ods, }
+    // page  = append_content  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, }
     // page  = _append_fontmetrics { drb, page, fontnick, size_mm, mm_p_u, }
     //.........................................................................................................
     FS.writeFileSync(target_path, page);

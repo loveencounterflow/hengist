@@ -485,16 +485,136 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY stdlib error throwing"] = function(T, done) {
+    var DBay, db;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    //.........................................................................................................
+    db = new DBay();
+    db.create_stdlib();
+    //.........................................................................................................
+    db.create_function({
+      name: 'std_raise',
+      deterministic: true,
+      varargs: false,
+      call: function(message) {
+        throw new Error(message);
+      }
+    });
+    //.........................................................................................................
+    db.create_function({
+      name: 'std_raise_json',
+      deterministic: true,
+      varargs: false,
+      call: function(facets_json) {
+        var error, facets, k, ref, v;
+        try {
+          facets = JSON.parse(facets_json);
+        } catch (error1) {
+          error = error1;
+          throw new Error(`not a valid argument for std_raise_json: ${rpr(facets)}`);
+        }
+        error = new Error((ref = facets.message) != null ? ref : "(no error message given)");
+        for (k in facets) {
+          v = facets[k];
+          if (k === 'message') {
+            continue;
+          }
+          error[k] = v;
+        }
+        throw error;
+      }
+    });
+    //.........................................................................................................
+    db.create_function({
+      name: 'std_assert',
+      deterministic: true,
+      varargs: false,
+      call: function(test, message) {
+        if ((test == null) || (test === 0)) {
+          throw new Error(message);
+        }
+        return test;
+      }
+    });
+    (() => {      //.........................................................................................................
+      var error;
+      error = null;
+      try {
+        db.all_rows(SQL`select std_raise( '^foo@34^ an error has occurred' );`);
+      } catch (error1) {
+        error = error1;
+        help('^45678-1', CND.reverse(error.message));
+        if (T != null) {
+          T.eq(error.message, '^foo@34^ an error has occurred');
+        }
+      }
+      return T != null ? T.ok(error != null) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var error;
+      error = null;
+      try {
+        db.all_rows(SQL`select std_raise_json( '{"ref":"^foo@34^","message":"another error has occurred"}' );`);
+      } catch (error1) {
+        error = error1;
+        help('^45678-2', CND.reverse(error.ref));
+        help('^45678-3', CND.reverse(error.message));
+        if (T != null) {
+          T.eq(error.ref, '^foo@34^');
+        }
+        if (T != null) {
+          T.eq(error.message, 'another error has occurred');
+        }
+      }
+      return T != null ? T.ok(error != null) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var error;
+      error = null;
+      db(SQL`create table d ( x integer primary key );
+insert into d values ( 42 );`);
+      if (T != null) {
+        T.eq([
+          {
+            some_value: 42
+          }
+        ], db.all_rows(SQL`select std_assert( 42, '^bar@567^ expected something else' ) as some_value;`));
+      }
+      if (T != null) {
+        T.eq([
+          {
+            some_value: 1
+          }
+        ], db.all_rows(SQL`select std_assert( 42 is not null, '^bar@567^ expected something else' ) as some_value;`));
+      }
+      try {
+        debug('^1345^', db.all_rows(SQL`select std_assert( 42 is null, '^bar@567^ expected something else' ) as some_value;`));
+      } catch (error1) {
+        error = error1;
+        help('^45678-4', CND.reverse(error.message));
+        if (T != null) {
+          T.eq(error.message, '^bar@567^ expected something else');
+        }
+      }
+      return T != null ? T.ok(error != null) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
       // @[ "DBAY std_getv()" ]()
-      return test(this["DBAY std_getv()"]);
+      // test @[ "DBAY std_getv()" ]
+      return test(this["DBAY stdlib error throwing"]);
     })();
   }
 
-  // @[ "DBAY stdlib functions" ]()
+  // @[ "DBAY stdlib error throwing" ]()
+// @[ "DBAY stdlib functions" ]()
 // @[ "DBAY std_str_split_re()" ]()
 
 }).call(this);
