@@ -260,19 +260,29 @@ guy                       = require '../../../apps/guy'
   path      = 'dbay-rustybuzz/template-with-content-markers.html'
   path      = PATH.resolve PATH.join __dirname, '../../../assets', path
   #.........................................................................................................
+  debug '^68667-1^'
   mrg.register_dsk { dsk, path, }
   mrg.refresh_datasource { dsk, }
   #.........................................................................................................
+  debug '^68667-2^'
   db.setv 'dsk',    dsk
   db.setv 'locid',  'title'
   console.table db.all_rows SQL"select * from mrg_location_from_dsk_locid;"
   console.table db.all_rows SQL"select * from mrg_prv_nxt_xtra_from_dsk_locid;"
   #.........................................................................................................
+  debug '^68667-3^'
   db.setv 'dsk',    dsk
   db.setv 'locid',  'nonexistentloc'
-  console.table db.all_rows SQL"select * from mrg_location_from_dsk_locid;"
-  console.table db.all_rows SQL"select * from mrg_prv_nxt_xtra_from_dsk_locid;"
-  # mrg.append_to_loc { dsk, locid: 'nonexistentloc',  text: "A Grand Union" }
+  # console.table db.all_rows SQL"select * from mrg_location_from_dsk_locid;"
+  # console.table db.all_rows SQL"select * from mrg_prv_nxt_xtra_from_dsk_locid;"
+  do =>
+    error = null
+    try
+      mrg.append_to_loc { dsk, locid: 'nonexistentloc',  text: "A Grand Union" }
+    catch error
+      help '^4345^', CND.reverse error.message
+      T?.ok ( error.message.match /unknown locid/ )?
+    T?.ok error?
   # console.table db.all_rows SQL"select raise( fail, 'message goes here' );"
   #.........................................................................................................
   done?()
