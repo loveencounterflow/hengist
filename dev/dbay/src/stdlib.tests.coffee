@@ -169,6 +169,65 @@ r                         = String.raw
   #   select std_raise_json( '{"ref":"^foo@34^","message":"another error has occurred"}' );"""
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY exceptions use case: record not found" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }          = require H.dbay_path
+  db                = new DBay()
+  db.create_stdlib()
+  #.........................................................................................................
+  do =>
+    db SQL"""
+      create table a ( name text not null primary key, n integer );
+      insert into a values ( 'alpha', 1 ), ( 'beta', 2 ), ( 'gamma', 3 );
+      """
+    #.......................................................................................................
+    console.table db.all_rows SQL"""
+      select
+          *,
+          std_assert( name is not null, '^683-1^ expected a name, found none' )  as assertion
+        from a;"""
+    #.......................................................................................................
+    console.table db.all_rows SQL"""
+      select
+          *,
+          std_assert( name is not null, '^683-2^ expected a name, found none' )  as assertion
+        from a where name is 'beta';"""
+    #.......................................................................................................
+    # This doesn't work; there's no matching row, so `std_assert()` never gets called:
+    console.table db.all_rows SQL"""
+      select
+          *,
+          std_assert( name is not null, '^683-3^ expected a name, found none' )  as assertion
+        from a where name is 'nonexistant';"""
+    #.......................................................................................................
+    urge '^45678-6'; console.table db.all_rows SQL"""
+      select
+          std_assert( name, '^546^ expected a name, got nothing' ) as name,
+          n
+        from ( select
+            *,
+            count( name ) as count
+          from a where name is 'beta' );"""
+    #.......................................................................................................
+    try
+      urge '^45678-7'; console.table db.all_rows SQL"""
+        select
+            std_assert( name, '^546^ expected a name, got nothing' ) as name,
+            n
+          from ( select
+              *,
+              count( name ) as count
+            from a where name is 'nonexistant' );"""
+    catch error
+      urge '^45678-8', CND.reverse error.message
+    ### The above works because SQLite allows to list other fields together with the aggregate function
+    `count()`; PostgreSQL would error out with `column "a.name" must appear in the GROUP BY clause or be
+    used in an aggregate function`: ###
+    urge '^45678-7'; console.table db.all_rows SQL"select *, count(*) from a;"
+  #.........................................................................................................
+  done?()
+
 
 
 ############################################################################################################
@@ -176,8 +235,9 @@ if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # @[ "DBAY std_getv()" ]()
   # test @[ "DBAY std_getv()" ]
-  test @[ "DBAY stdlib error throwing" ]
+  # test @[ "DBAY stdlib error throwing" ]
   # @[ "DBAY stdlib error throwing" ]()
+  @[ "DBAY exceptions use case: record not found" ]()
   # @[ "DBAY stdlib functions" ]()
   # @[ "DBAY std_str_split_re()" ]()
 
