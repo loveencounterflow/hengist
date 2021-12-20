@@ -727,18 +727,38 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
     path = 'dbay-rustybuzz/template-with-content-markers.html';
     path = PATH.resolve(PATH.join(__dirname, '../../../assets', path));
     //.........................................................................................................
+    debug('^68667-1^');
     mrg.register_dsk({dsk, path});
     mrg.refresh_datasource({dsk});
     //.........................................................................................................
+    debug('^68667-2^');
     db.setv('dsk', dsk);
     db.setv('locid', 'title');
     console.table(db.all_rows(SQL`select * from mrg_location_from_dsk_locid;`));
     console.table(db.all_rows(SQL`select * from mrg_prv_nxt_xtra_from_dsk_locid;`));
     //.........................................................................................................
+    debug('^68667-3^');
     db.setv('dsk', dsk);
     db.setv('locid', 'nonexistentloc');
-    console.table(db.all_rows(SQL`select * from mrg_location_from_dsk_locid;`));
-    console.table(db.all_rows(SQL`select * from mrg_prv_nxt_xtra_from_dsk_locid;`));
+    (() => {      // console.table db.all_rows SQL"select * from mrg_location_from_dsk_locid;"
+      // console.table db.all_rows SQL"select * from mrg_prv_nxt_xtra_from_dsk_locid;"
+      var error;
+      error = null;
+      try {
+        mrg.append_to_loc({
+          dsk,
+          locid: 'nonexistentloc',
+          text: "A Grand Union"
+        });
+      } catch (error1) {
+        error = error1;
+        help('^4345^', CND.reverse(error.message));
+        if (T != null) {
+          T.ok((error.message.match(/unknown locid/)) != null);
+        }
+      }
+      return T != null ? T.ok(error != null) : void 0;
+    })();
     if (typeof done === "function") {
       done();
     }

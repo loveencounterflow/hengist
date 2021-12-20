@@ -493,51 +493,6 @@
     //.........................................................................................................
     db = new DBay();
     db.create_stdlib();
-    //.........................................................................................................
-    db.create_function({
-      name: 'std_raise',
-      deterministic: true,
-      varargs: false,
-      call: function(message) {
-        throw new Error(message);
-      }
-    });
-    //.........................................................................................................
-    db.create_function({
-      name: 'std_raise_json',
-      deterministic: true,
-      varargs: false,
-      call: function(facets_json) {
-        var error, facets, k, ref, v;
-        try {
-          facets = JSON.parse(facets_json);
-        } catch (error1) {
-          error = error1;
-          throw new Error(`not a valid argument for std_raise_json: ${rpr(facets)}`);
-        }
-        error = new Error((ref = facets.message) != null ? ref : "(no error message given)");
-        for (k in facets) {
-          v = facets[k];
-          if (k === 'message') {
-            continue;
-          }
-          error[k] = v;
-        }
-        throw error;
-      }
-    });
-    //.........................................................................................................
-    db.create_function({
-      name: 'std_assert',
-      deterministic: true,
-      varargs: false,
-      call: function(test, message) {
-        if ((test == null) || (test === 0)) {
-          throw new Error(message);
-        }
-        return test;
-      }
-    });
     (() => {      //.........................................................................................................
       var error;
       error = null;
@@ -603,18 +558,78 @@ insert into d values ( 42 );`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY exceptions use case: record not found"] = function(T, done) {
+    var DBay, db;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
+    db.create_stdlib();
+    (() => {      //.........................................................................................................
+      var error;
+      db(SQL`create table a ( name text not null primary key, n integer );
+insert into a values ( 'alpha', 1 ), ( 'beta', 2 ), ( 'gamma', 3 );`);
+      //.......................................................................................................
+      console.table(db.all_rows(SQL`select
+    *,
+    std_assert( name is not null, '^683-1^ expected a name, found none' )  as assertion
+  from a;`));
+      //.......................................................................................................
+      console.table(db.all_rows(SQL`select
+    *,
+    std_assert( name is not null, '^683-2^ expected a name, found none' )  as assertion
+  from a where name is 'beta';`));
+      //.......................................................................................................
+      // This doesn't work; there's no matching row, so `std_assert()` never gets called:
+      console.table(db.all_rows(SQL`select
+    *,
+    std_assert( name is not null, '^683-3^ expected a name, found none' )  as assertion
+  from a where name is 'nonexistant';`));
+      //.......................................................................................................
+      urge('^45678-6');
+      console.table(db.all_rows(SQL`select
+    std_assert( name, '^546^ expected a name, got nothing' ) as name,
+    n
+  from ( select
+      *,
+      count( name ) as count
+    from a where name is 'beta' );`));
+      try {
+        //.......................................................................................................
+        urge('^45678-7');
+        console.table(db.all_rows(SQL`select
+    std_assert( name, '^546^ expected a name, got nothing' ) as name,
+    n
+  from ( select
+      *,
+      count( name ) as count
+    from a where name is 'nonexistant' );`));
+      } catch (error1) {
+        error = error1;
+        urge('^45678-8', CND.reverse(error.message));
+      }
+      /* The above works because SQLite allows to list other fields together with the aggregate function
+         `count()`; PostgreSQL would error out with `column "a.name" must appear in the GROUP BY clause or be
+         used in an aggregate function`: */
+      urge('^45678-7');
+      return console.table(db.all_rows(SQL`select *, count(*) from a;`));
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
       // @[ "DBAY std_getv()" ]()
       // test @[ "DBAY std_getv()" ]
-      return test(this["DBAY stdlib error throwing"]);
+      // test @[ "DBAY stdlib error throwing" ]
+      // @[ "DBAY stdlib error throwing" ]()
+      return this["DBAY exceptions use case: record not found"]();
     })();
   }
 
-  // @[ "DBAY stdlib error throwing" ]()
-// @[ "DBAY stdlib functions" ]()
+  // @[ "DBAY stdlib functions" ]()
 // @[ "DBAY std_str_split_re()" ]()
 
 }).call(this);
