@@ -1,7 +1,7 @@
 <!doctype html>
 
-<mrg:loc#title/>
-<title>SVG with glyph outlines</title>
+
+<title><mrg:loc#title/> — SVG with glyph outlines</title>
 <style>
 
 
@@ -139,7 +139,7 @@
     font-size:              100mm; /* to be scaled */
     fill:                   red; }
 
-textcontainer { display: none; }
+/*textcontainer { display: none; }*/
 
   </style>
 
@@ -168,8 +168,7 @@ textcontainer { display: none; }
 <!-- Part II where we position and style the scaled outlines to construct the page to be printed. -->
 <!-- Coordinates have a pleasant ratio of 1 unit per mm. -->
 <!-- <use x='000' y='020' href='#o74lmc'/> -->
-<textcontainer><!--?textcontainer-start?-->
-<!--?textcontainer-end?--></textcontainer>
+<textcontainer><mrg:loc#textcontainer/></textcontainer>
 <!-- <svg id=p0001 class='galley superlong' viewBox='0 0 210 2297'> -->
 <svg id=p0001 class='galley A4' viewBox='0 0 210 297'>
 <use id='x-cm-grid' x='000' y='000' href='#cm-grid'/>

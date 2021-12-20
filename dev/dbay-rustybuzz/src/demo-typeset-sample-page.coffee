@@ -63,12 +63,12 @@ append_to = ( page, name, text ) ->
 #
 #-----------------------------------------------------------------------------------------------------------
 append_remarks = ( cfg ) ->
-  { drb, page, missing_chrs, fontnick, } = cfg
+  { drb, dsk, fontnick, } = cfg
   fm              = drb.get_fontmetrics { fontnick, }
-  page            = append_to page, 'remarks', "<div>fm: #{rpr fm}</div>"
+  drb.mrg.append_to_loc 'remarks', "<div>fm: #{rpr fm}</div>"
   # missing_txt     = ( rpr ad.chrs for ad in missing_chrs ).join ', '
   # page            = append_to page, 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
-  return page
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 _escape_syms = ( text ) ->
@@ -140,7 +140,7 @@ append_content = ( cfg ) ->
   fm            = drb.get_fontmetrics { fontnick, }
   cfg.skip_shy_etc  ?= false
   cfg.skip_ws       ?= false
-  page = append_to page, 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
+  debug '^3453^', drb.mrg.append_to_loc 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
   # for ad in ads
   #   urge '^3980^', ad
   line_y0       = 20
@@ -224,13 +224,18 @@ append_content = ( cfg ) ->
   RBW             = require '../../../apps/rustybuzz-wasm/pkg'
   { Tbl, }        = require '../../../apps/icql-dba-tabulate'
   db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
-  drb             = new Drb { db, rebuild: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
   dtab            = new Tbl { db, }
+  drb             = new Drb { db, rebuild: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
+  dsk             = 'demo'
+  ui_font_data    = FS.readFileSync ui_font_path, { encoding: 'utf-8', }
+  drb.mrg.register_dsk        { dsk, path: template_path, }
+  drb.mrg.refresh_datasource  { dsk, }
+  drb.mrg.append_to_loc       { dsk, locid: 'ui_font_data',  text: ui_font_data, }
   doc             = 1
   par             = 1
-  page            = FS.readFileSync template_path, { encoding: 'utf-8', }
+  # page            = page.replace /\${ui_font_data}/g, FS.readFileSync ui_font_path, { encoding: 'utf-8', }
+  # page            = FS.readFileSync template_path, { encoding: 'utf-8', }
   # page            = append_to page, 'grid', FS.readFileSync cm_grid_path, { encoding: 'utf-8', }
-  page            = page.replace /\${ui_font_data}/g, FS.readFileSync ui_font_path, { encoding: 'utf-8', }
   { I, L, V }     = db.sql
   #.........................................................................................................
   { text
@@ -267,9 +272,9 @@ append_content = ( cfg ) ->
   #.........................................................................................................
   x0    = 0
   y0    = 50
-  page  = append_remarks  { drb, page, fontnick, }
-  page  = append_outlines { drb, page, fontnick, size_mm, mm_p_u, missing_sid, known_ods, }
-  page  = append_content  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, }
+  append_remarks  { drb, dsk, fontnick, }
+  # page  = append_outlines { drb, page, fontnick, size_mm, mm_p_u, missing_sid, known_ods, }
+  # page  = append_content  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, }
   # page  = _append_fontmetrics { drb, page, fontnick, size_mm, mm_p_u, }
   #.........................................................................................................
   FS.writeFileSync target_path, page
