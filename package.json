@@ -55,7 +55,7 @@
     "guy-test": "4.1.1",
     "hamt": "^2.2.2",
     "icql": "5.3.0",
-    "icql-dba": "10.1.0",
+    "icql-dba": "^10.1.0",
     "icql-dba-vars": "2.0.1",
     "icql515": "npm:icql@5.1.5",
     "immer": "9.0.6",
