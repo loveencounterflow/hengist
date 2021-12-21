@@ -53,7 +53,7 @@
     // path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
     // DH                  = require PATH.join H.dbay_path, 'lib/helpers'
     chrs = "affirm無字";
-    matcher = new Map([[66, 'a'], [1536, 'ffi'], [83, 'r'], [78, 'm']]);
+    matcher = new Map([[66, 'a'], [1536, 'ffi'], [83, 'r'], [78, 'm'], [-2, '字']]);
     (() => {      //.........................................................................................................
       var db, drb, fontnick, result;
       db = new DBay();
@@ -103,7 +103,7 @@
     chrs = "'ab-c'.";
     matcher = new Map([[116, 85], [104, 73], [101, 70], [114, 83], [39, 8], [115, 84], [32, 1], [117, 86], [98, 67]]);
     (() => {      //.........................................................................................................
-      var db, drb, dtab, fontnick, i, len, pd_blob, result, row;
+      var db, drb, dtab, fontnick, gd_blob, i, len, result, row;
       db = new DBay();
       dtab = new Tbl({db});
       drb = new Drb({
@@ -116,9 +116,9 @@
       result = db.all_rows(SQL`select * from drb.outlines order by chrs;`);
       for (i = 0, len = result.length; i < len; i++) {
         row = result[i];
-        ({pd_blob} = guy.obj.pluck_with_fallback(row, null, 'pd_blob'));
+        ({gd_blob} = guy.obj.pluck_with_fallback(row, null, 'gd_blob'));
         if (T != null) {
-          T.eq(type_of(pd_blob), 'buffer');
+          T.eq(type_of(gd_blob), 'buffer');
         }
         if (row.text === '.') {
           if (T != null) {
@@ -131,7 +131,7 @@
               y: -101,
               x1: 135,
               y1: 14,
-              pd: 'M90-101C54-101 25-72 25-36C25-10 44 14 70 14C106 14 135-15 135-51C135-77 116-101 90-101Z'
+              gd: 'M90-101C54-101 25-72 25-36C25-10 44 14 70 14C106 14 135-15 135-51C135-77 116-101 90-101Z'
             });
           }
         }
@@ -147,7 +147,7 @@
     y,
     x1,
     y1,
-    substr( pd, 0, 10 ) as "(pd)"
+    substr( gd, 0, 10 ) as "(gd)"
   from drb.outlines
   order by chrs;`)));
     })();
@@ -156,7 +156,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB RBW arrange() returns coordinates acc to font upem"] = function(T, done) {
-    var DBay, Drb, RBW, db, doc, drb, i, len, ref, result, set_id, use_linked_RBW;
+    var DBay, Drb, RBW, db, doc, drb, fontnick, i, j, k, key, keys, len, len1, len2, matcher, ref, ref1, result, set_id, use_linked_RBW;
     // T?.halt_on_error()
     use_linked_RBW = true;
     globalThis.info = info;
@@ -203,47 +203,66 @@
       })();
     }
     //.........................................................................................................
-    if (T != null) {
-      T.eq(result, {
-        djvsi: {
-          doc: 0,
-          par: 1,
-          trk: 1,
-          sgi: 1,
-          osgi: null,
-          gid: 68,
-          b1: 0,
-          b2: 1,
-          x: 0,
-          y: 0,
-          dx: 596,
-          dy: 0,
-          x1: 596,
-          chrs: 'a',
-          sid: 'o68djvsi',
-          nobr: 0,
-          br: null
-        },
-        eg8i: {
-          doc: 1,
-          par: 1,
-          trk: 1,
-          sgi: 1,
-          osgi: null,
-          gid: 66,
-          b1: 0,
-          b2: 1,
-          x: 0,
-          y: 0,
-          dx: 492,
-          dy: 0,
-          x1: 492,
-          chrs: 'a',
-          sid: 'o66eg8i',
-          nobr: 0,
-          br: null
+    matcher = {
+      djvsi: {
+        b1: 0,
+        b2: 1,
+        br: null,
+        chrs: 'a',
+        doc: 0,
+        dx: 596,
+        dy: 0,
+        fontnick: 'djvsi',
+        gid: 68,
+        nobr: 0,
+        osgi: null,
+        par: 1,
+        sgi: 1,
+        sid: 'o68djvsi',
+        trk: 1,
+        x: 0,
+        x1: 596,
+        y: 0
+      },
+      eg8i: {
+        b1: 0,
+        b2: 1,
+        br: null,
+        chrs: 'a',
+        doc: 1,
+        dx: 492,
+        dy: 0,
+        fontnick: 'eg81',
+        gid: 66,
+        nobr: 0,
+        osgi: null,
+        par: 1,
+        sgi: 1,
+        sid: 'o66eg8i',
+        trk: 1,
+        x: 0,
+        x1: 492,
+        y: 0
+      }
+    };
+    //.........................................................................................................
+    keys = (Object.keys(matcher.djvsi)).sort();
+    ref1 = ['djvsi', 'eg8i'];
+    for (j = 0, len1 = ref1.length; j < len1; j++) {
+      fontnick = ref1[j];
+      for (k = 0, len2 = keys.length; k < len2; k++) {
+        key = keys[k];
+        if (equals(result[key], matcher[key])) {
+          if (T != null) {
+            T.ok(true);
+          }
+        } else {
+          warn(`^3435^ not equal: ${fontnick}, ${key} -- ${rpr(result[key])}, ${rpr(matcher[key])}`);
+          if (T != null) {
+            T.ok(false);
+          }
         }
-      });
+      }
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -268,7 +287,7 @@
     //.....................................................................................................
     matcher = [
       {
-        gid: 0,
+        gid: -2,
         b1: 0,
         b2: 3,
         x: 0,
@@ -276,7 +295,7 @@
         dx: 1000,
         dy: 0,
         chrs: '買',
-        sid: 'o0eg8i'
+        sid: 'o-2eg8i'
       },
       {
         gid: 79,
@@ -301,7 +320,7 @@
         sid: 'o70eg8i'
       },
       {
-        gid: 1,
+        gid: -4,
         b1: 5,
         b2: 6,
         x: 1875,
@@ -309,11 +328,11 @@
         dx: 243,
         dy: 0,
         chrs: ' ',
-        sid: 'o1eg8i',
+        sid: 'o-4eg8i',
         br: 'spc'
       },
       {
-        gid: 0,
+        gid: -2,
         b1: 6,
         b2: 9,
         x: 2118,
@@ -321,7 +340,7 @@
         dx: 1000,
         dy: 0,
         chrs: '來',
-        sid: 'o0eg8i'
+        sid: 'o-2eg8i'
       },
       {
         gid: 68,
@@ -450,18 +469,18 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // @[ "DRB foobar" ]()
-      // test @[ "DRB no shared state in WASM module" ]
-      // @[ "DRB path compression" ]()
-      // test @[ "DRB can pass in custom RBW" ]
-      // @[ "DRB get_cgid_map()" ]()
-      // @[ "DRB insert_outlines()" ]()
-      return this["DRB RBW arrange() returns coordinates acc to font upem"]();
+      return test(this);
     })();
   }
 
-  // test @[ "DRB RBW arrange() honors missing outlines" ]
+  // @[ "DRB foobar" ]()
+// test @[ "DRB no shared state in WASM module" ]
+// @[ "DRB path compression" ]()
+// test @[ "DRB can pass in custom RBW" ]
+// @[ "DRB get_cgid_map()" ]()
+// @[ "DRB insert_outlines()" ]()
+// @[ "DRB RBW arrange() returns coordinates acc to font upem" ]()
+// test @[ "DRB RBW arrange() honors missing outlines" ]
 // test @[ "DRB insert_outlines()" ]
 // test @[ "DRB hyphens in many fonts behave unsurprisingly" ]
 
