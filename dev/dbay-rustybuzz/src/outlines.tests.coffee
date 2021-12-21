@@ -39,7 +39,7 @@ guy                       = require '../../../apps/guy'
   # path                = PATH.resolve DBay.C.autolocation, 'drb-23842847.sqlite'
   # DH                  = require PATH.join H.dbay_path, 'lib/helpers'
   chrs                = "affirm無字"
-  matcher             = new Map [ [ 66, 'a', ], [ 1536, 'ffi', ], [ 83, 'r', ], [ 78, 'm', ], ]
+  matcher             = new Map [ [ 66, 'a', ], [ 1536, 'ffi', ], [ 83, 'r', ], [ 78, 'm', ], [ -2, '字', ] ]
   #.........................................................................................................
   do =>
     db          = new DBay()
@@ -82,8 +82,8 @@ guy                       = require '../../../apps/guy'
     drb.insert_outlines { fontnick, chrs, }
     result      = db.all_rows SQL"select * from drb.outlines order by chrs;"
     for row in result
-      { pd_blob, } = guy.obj.pluck_with_fallback row, null, 'pd_blob'
-      T?.eq ( type_of pd_blob ), 'buffer'
+      { gd_blob, } = guy.obj.pluck_with_fallback row, null, 'gd_blob'
+      T?.eq ( type_of gd_blob ), 'buffer'
       if row.text is '.'
         T?.eq row, {
           fontnick: 'gi',
@@ -94,7 +94,7 @@ guy                       = require '../../../apps/guy'
           y:        -101,
           x1:       135,
           y1:       14,
-          pd:       'M90-101C54-101 25-72 25-36C25-10 44 14 70 14C106 14 135-15 135-51C135-77 116-101 90-101Z' }
+          gd:       'M90-101C54-101 25-72 25-36C25-10 44 14 70 14C106 14 135-15 135-51C135-77 116-101 90-101Z' }
     # T?.eq ( type_of result ), 'map'
     # T?.eq result, matcher
     echo dtab._tabulate db SQL"""
@@ -107,7 +107,7 @@ guy                       = require '../../../apps/guy'
           y,
           x1,
           y1,
-          substr( pd, 0, 10 ) as "(pd)"
+          substr( gd, 0, 10 ) as "(gd)"
         from drb.outlines
         order by chrs;"""
   #.........................................................................................................
@@ -122,7 +122,7 @@ guy                       = require '../../../apps/guy'
   RBW                 = require '../../../apps/rustybuzz-wasm/pkg'
   { DBay }            = require H.dbay_path
   { Drb }             = require H.drb_path
-  result              = {}
+  result             = {}
   #.........................................................................................................
   for set_id, doc in [ '3a', '3b', ]
     db                  = new DBay()
@@ -146,43 +146,57 @@ guy                       = require '../../../apps/guy'
       result[ fontnick ] = ( drb.arrange { fontnick, text, doc, par: 1, trk: 1, } )[ 0 ]
       delete result[ fontnick ].id
   #.........................................................................................................
-  T?.eq result, {
+  matcher = {
     djvsi: {
-      doc:    0,
-      par:    1,
-      trk:    1,
-      sgi:    1,
-      osgi:   null,
-      gid:    68,
       b1:     0,
       b2:     1,
-      x:      0,
-      y:      0,
+      br:     null,
+      chrs:   'a',
+      doc:    0,
       dx:     596,
       dy:     0,
-      x1:     596,
-      chrs:   'a',
-      sid:    'o68djvsi',
+      fontnick: 'djvsi'
+      gid:    68,
       nobr:   0,
-      br:     null, },
-    eg8i:  {
-      doc:    1,
-      par:    1,
-      trk:    1,
-      sgi:    1,
       osgi:   null,
-      gid:    66,
+      par:    1,
+      sgi:    1,
+      sid:    'o68djvsi',
+      trk:    1,
+      x:      0,
+      x1:     596,
+      y:      0,
+      },
+    eg8i:  {
       b1:     0,
       b2:     1,
-      x:      0,
-      y:      0,
+      br:     null,
+      chrs:   'a',
+      doc:    1,
       dx:     492,
       dy:     0,
-      x1:     492,
-      chrs:   'a',
-      sid:    'o66eg8i',
+      fontnick: 'eg81'
+      gid:    66,
       nobr:   0,
-      br:     null, } }
+      osgi:   null,
+      par:    1,
+      sgi:    1,
+      sid:    'o66eg8i',
+      trk:    1,
+      x:      0,
+      x1:     492,
+      y:      0,
+      } }
+  #.........................................................................................................
+  keys = ( Object.keys matcher.djvsi ).sort()
+  for fontnick in [ 'djvsi', 'eg8i', ]
+    for key in keys
+      if equals result[ key ], matcher[ key ]
+        T?.ok true
+      else
+        warn "^3435^ not equal: #{fontnick}, #{key} -- #{rpr result[ key ]}, #{rpr matcher[ key ]}"
+        T?.ok false
+  #.........................................................................................................
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -204,11 +218,11 @@ guy                       = require '../../../apps/guy'
     fspath          } = H.settings_from_set_id set_id
   #.....................................................................................................
   matcher = [
-    { gid: 0,  b1: 0,  b2: 3,  x: 0,    y: 0, dx: 1000, dy: 0, chrs: '買', sid: 'o0eg8i' }
+    { gid: -2,  b1: 0,  b2: 3,  x: 0,    y: 0, dx: 1000, dy: 0, chrs: '買', sid: 'o-2eg8i' }
     { gid: 79, b1: 3,  b2: 4,  x: 1000, y: 0, dx: 508,  dy: 0, chrs: 'n', sid: 'o79eg8i' }
     { gid: 70, b1: 4,  b2: 5,  x: 1508, y: 0, dx: 367,  dy: 0, chrs: 'e', sid: 'o70eg8i' }
-    { gid: 1,  b1: 5,  b2: 6,  x: 1875, y: 0, dx: 243,  dy: 0, chrs: ' ', sid: 'o1eg8i', br: 'spc' }
-    { gid: 0,  b1: 6,  b2: 9,  x: 2118, y: 0, dx: 1000, dy: 0, chrs: '來', sid: 'o0eg8i' }
+    { gid: -4,  b1: 5,  b2: 6,  x: 1875, y: 0, dx: 243,  dy: 0, chrs: ' ', sid: 'o-4eg8i', br: 'spc' }
+    { gid: -2,  b1: 6,  b2: 9,  x: 2118, y: 0, dx: 1000, dy: 0, chrs: '來', sid: 'o-2eg8i' }
     { gid: 68, b1: 9,  b2: 10, x: 3118, y: 0, dx: 359,  dy: 0, chrs: 'c', sid: 'o68eg8i' }
     { gid: 66, b1: 10, b2: 11, x: 3477, y: 0, dx: 492,  dy: 0, chrs: 'a', sid: 'o66eg8i' }
     ]
@@ -275,14 +289,14 @@ guy                       = require '../../../apps/guy'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # @[ "DRB foobar" ]()
   # test @[ "DRB no shared state in WASM module" ]
   # @[ "DRB path compression" ]()
   # test @[ "DRB can pass in custom RBW" ]
   # @[ "DRB get_cgid_map()" ]()
   # @[ "DRB insert_outlines()" ]()
-  @[ "DRB RBW arrange() returns coordinates acc to font upem" ]()
+  # @[ "DRB RBW arrange() returns coordinates acc to font upem" ]()
   # test @[ "DRB RBW arrange() honors missing outlines" ]
   # test @[ "DRB insert_outlines()" ]
   # test @[ "DRB hyphens in many fonts behave unsurprisingly" ]
