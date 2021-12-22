@@ -145,7 +145,10 @@
     // home_path             = PATH.resolve PATH.join __dirname, '../../../../dpan'
     // home_path             = PATH.resolve PATH.join __dirname, '../../../apps/dpan'
     // project_path_pattern  = PATH.join home_path, './package.json'
-    debug('^488^', project_path_pattern);
+    // debug '^488^', project_path_pattern
+    whisper("ACC: ahead-commit  count");
+    whisper("BCC: behind-commit count");
+    whisper("DFC: dirty file    count");
     ref = glob.sync(project_path_pattern);
     for (i = 0, len = ref.length; i < len; i++) {
       project_path = ref[i];
