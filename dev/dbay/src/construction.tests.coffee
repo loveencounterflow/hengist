@@ -42,25 +42,26 @@ guy                       = require '../../../apps/guy'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY constructor arguments 1" ] = ( T, done ) ->
-  T?.halt_on_error()
+  # T?.halt_on_error()
   { DBay }           = require H.dbay_path
   resolved_path      = PATH.resolve process.cwd(), 'mypath'
   class DBay2 extends DBay
     @_skip_sqlt:    true
-    @_rnd_int_cfg:  true
   #.........................................................................................................
   # { work_path: db_path, } = await H.procure_db { size: 'small', ref: 'ctor-1', }
   # info '^3443^', { db_path, }
   #.........................................................................................................
+  relpath = 'mypath/myname'
+  abspath = PATH.resolve process.cwd(), PATH.join relpath
   probes_and_matchers = [
     #-------------------------------------------------------------------------------------------------------
     null
-    [ { path: null,            temporary: null,  }, { path: '/dev/shm/dbay-6200294332.sqlite',   temporary: true  }, null,              ]
-    [ { path: null,            temporary: false, }, { path: '/dev/shm/dbay-6200294332.sqlite',   temporary: false }, null,              ]
-    [ { path: null,            temporary: true,  }, { path: '/dev/shm/dbay-6200294332.sqlite',   temporary: true  }, null,              ]
-    [ { path: 'mypath/myname', temporary: null,  }, { path: '/home/flow/jzr/dbay/mypath/myname', temporary: false }, null,              ]
-    [ { path: 'mypath/myname', temporary: false, }, { path: '/home/flow/jzr/dbay/mypath/myname', temporary: false }, null,              ]
-    [ { path: 'mypath/myname', temporary: true,  }, { path: '/home/flow/jzr/dbay/mypath/myname', temporary: true  }, null,              ]
+    [ { random_seed: 1, random_delta: 1,  temporary: null   }, { path: '/dev/shm/dbay-7388632709.sqlite',   temporary: true  }, null ]
+    [ { random_seed: 1, random_delta: 1,  temporary: false  }, { path: '/dev/shm/dbay-7388632709.sqlite',   temporary: false }, null ]
+    [ { random_seed: 1, random_delta: 1,  temporary: true   }, { path: '/dev/shm/dbay-7388632709.sqlite',   temporary: true  }, null ]
+    [ { path: relpath,                    temporary: null,  }, { path: abspath,                             temporary: false }, null ]
+    [ { path: relpath,                    temporary: false, }, { path: abspath,                             temporary: false }, null ]
+    [ { path: relpath,                    temporary: true,  }, { path: abspath,                             temporary: true  }, null ]
     ]
   #.........................................................................................................
   for x in probes_and_matchers
@@ -69,16 +70,23 @@ guy                       = require '../../../apps/guy'
       continue
     [ probe, matcher, error, ] = x
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      do =>
-        db      = new DBay2 probe
-        result  = { db.cfg..., }
-        for k of result
-          delete result[ k ] unless k in [ 'path', 'tempory', ]
-        #...................................................................................................
-        # debug '^341^', db
-        # debug '^341^', db._dbs
-        resolve matcher
-      return null
+      db      = new DBay2 probe
+      result  = { db.cfg..., }
+      for k of result
+        delete result[ k ] unless k in [ 'path', 'temporary', ]
+      # debug '^657561^', result, matcher, equals result, matcher
+      #...................................................................................................
+      # debug '^341^', db
+      # debug '^341^', db._dbs
+      resolve result
+  # for _ in [ 1 .. 3 ]
+  #   do =>
+  #     db = new DBay()
+  #     whisper '---------------------'
+  #     info '^345657^', db.rnd.get_random_filename()
+  #     info '^345657^', db.rnd.get_random_filename()
+  #     info '^345657^', db.rnd.get_random_filename()
+  #     info '^345657^', db.rnd.get_random_filename()
   #.........................................................................................................
   done?()
 
@@ -114,7 +122,7 @@ guy                       = require '../../../apps/guy'
   debug '^332^', db
   T?.eq ( Object.getOwnPropertyDescriptor db, 'sqlt1'     ).enumerable, false
   T?.eq ( Object.getOwnPropertyDescriptor db, 'sqlt2'     ).enumerable, false
-  T?.eq ( Object.getOwnPropertyDescriptor db, '_rnd_int'  ).enumerable, false
+  T?.eq ( Object.getOwnPropertyDescriptor db, 'rnd'       ).enumerable, false
   # debug '^332^', db.cfg
   done?()
 
@@ -124,8 +132,9 @@ guy                       = require '../../../apps/guy'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # test @[ "DBAY _get-autolocation" ]
-  # test @[ "DBAY constructor arguments 1" ]
+  test @[ "DBAY constructor arguments 1" ]
+  # test @[ "xxx" ]
   # test @[ "DBAY instance has two connections" ]
   # test @[ "DBAY instance non-enumerable properties" ]
