@@ -69,18 +69,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY constructor arguments 1"] = async function(T, done) {
-    var DBay, DBay2, error, i, len, matcher, probe, probes_and_matchers, resolved_path, x;
-    if (T != null) {
-      T.halt_on_error();
-    }
+    var DBay, DBay2, abspath, error, i, len, matcher, probe, probes_and_matchers, relpath, resolved_path, x;
+    // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     resolved_path = PATH.resolve(process.cwd(), 'mypath');
     DBay2 = (function() {
       class DBay2 extends DBay {};
 
       DBay2._skip_sqlt = true;
-
-      DBay2._rnd_int_cfg = true;
 
       return DBay2;
 
@@ -89,71 +85,76 @@
     // { work_path: db_path, } = await H.procure_db { size: 'small', ref: 'ctor-1', }
     // info '^3443^', { db_path, }
     //.........................................................................................................
+    relpath = 'mypath/myname';
+    abspath = PATH.resolve(process.cwd(), PATH.join(relpath));
     probes_and_matchers = [
       //-------------------------------------------------------------------------------------------------------
       null,
       [
         {
-          path: null,
+          random_seed: 1,
+          random_delta: 1,
           temporary: null
         },
         {
-          path: '/dev/shm/dbay-6200294332.sqlite',
+          path: '/dev/shm/dbay-7388632709.sqlite',
           temporary: true
         },
         null
       ],
       [
         {
-          path: null,
+          random_seed: 1,
+          random_delta: 1,
           temporary: false
         },
         {
-          path: '/dev/shm/dbay-6200294332.sqlite',
+          path: '/dev/shm/dbay-7388632709.sqlite',
           temporary: false
         },
         null
       ],
       [
         {
-          path: null,
+          random_seed: 1,
+          random_delta: 1,
           temporary: true
         },
         {
-          path: '/dev/shm/dbay-6200294332.sqlite',
+          path: '/dev/shm/dbay-7388632709.sqlite',
           temporary: true
         },
         null
       ],
       [
         {
-          path: 'mypath/myname',
+          path: relpath,
           temporary: null
         },
         {
-          path: '/home/flow/jzr/dbay/mypath/myname',
+          path: abspath,
           temporary: false
         },
         null
       ],
       [
         {
-          path: 'mypath/myname',
+          path: relpath,
           temporary: false
         },
         {
-          path: '/home/flow/jzr/dbay/mypath/myname',
+          path: abspath,
           temporary: false
         },
         null
       ],
       [
         {
-          path: 'mypath/myname',
+          path: relpath,
           temporary: true
         },
         {
-          path: '/home/flow/jzr/dbay/mypath/myname',
+          path: abspath,
           temporary: true
         },
         null
@@ -169,21 +170,19 @@
       [probe, matcher, error] = x;
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          (() => {
-            var db, k, result;
-            db = new DBay2(probe);
-            result = {...db.cfg};
-            for (k in result) {
-              if (k !== 'path' && k !== 'tempory') {
-                delete result[k];
-              }
+          var db, k, result;
+          db = new DBay2(probe);
+          result = {...db.cfg};
+          for (k in result) {
+            if (k !== 'path' && k !== 'temporary') {
+              delete result[k];
             }
-            //...................................................................................................
-            // debug '^341^', db
-            // debug '^341^', db._dbs
-            return resolve(matcher);
-          })();
-          return null;
+          }
+          // debug '^657561^', result, matcher, equals result, matcher
+          //...................................................................................................
+          // debug '^341^', db
+          // debug '^341^', db._dbs
+          return resolve(result);
         });
       });
     }
@@ -244,7 +243,7 @@
       T.eq((Object.getOwnPropertyDescriptor(db, 'sqlt2')).enumerable, false);
     }
     if (T != null) {
-      T.eq((Object.getOwnPropertyDescriptor(db, '_rnd_int')).enumerable, false);
+      T.eq((Object.getOwnPropertyDescriptor(db, 'rnd')).enumerable, false);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -252,12 +251,13 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "DBAY _get-autolocation" ]
+      return test(this["DBAY constructor arguments 1"]);
     })();
   }
 
-  // test @[ "DBAY _get-autolocation" ]
-// test @[ "DBAY constructor arguments 1" ]
+  // test @[ "xxx" ]
 // test @[ "DBAY instance has two connections" ]
 // test @[ "DBAY instance non-enumerable properties" ]
 

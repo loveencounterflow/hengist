@@ -70,11 +70,28 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["______ DBAY open multiple connections"] = function(T, done) {
+    var DBay, db1, db2, path;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({DBay} = require(H.dbay_path));
+    path = (new DBay())._get_random_filename();
+    debug('^347654^', path);
+    db1 = new DBay({path});
+    db2 = new DBay({path});
+    db1(SQL`create table a ( x text primary key );`);
+    db2(SQL`create table a ( x text primary key );`);
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
-      return test(this["DBAY open() 1"]);
+      // test @[ "DBAY open() 1" ]
+      return this["DBAY open multiple connections"]();
     })();
   }
 
