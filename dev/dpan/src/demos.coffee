@@ -108,7 +108,10 @@ demo_git_get_dirty_counts = ->
   # home_path             = PATH.resolve PATH.join __dirname, '../../../../dpan'
   # home_path             = PATH.resolve PATH.join __dirname, '../../../apps/dpan'
   # project_path_pattern  = PATH.join home_path, './package.json'
-  debug '^488^', project_path_pattern
+  # debug '^488^', project_path_pattern
+  whisper "ACC: ahead-commit  count"
+  whisper "BCC: behind-commit count"
+  whisper "DFC: dirty file    count"
   for project_path in glob.sync project_path_pattern
     pkg_fspath      = PATH.dirname project_path
     pkg_rel_fspath  = PATH.relative ref_path, pkg_fspath
