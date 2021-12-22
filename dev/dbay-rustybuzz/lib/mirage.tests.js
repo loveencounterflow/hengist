@@ -717,7 +717,9 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
   //-----------------------------------------------------------------------------------------------------------
   this["loc markers 4"] = function(T, done) {
     var DBay, Mrg, db, dsk, mrg, path;
-    // T?.halt_on_error()
+    if (T != null) {
+      T.halt_on_error();
+    }
     ({DBay} = require(H.dbay_path));
     ({Mrg} = require('../../../apps/dbay-rustybuzz/lib/_mirage'));
     // { Drb }   = require H.drb_path
@@ -736,13 +738,45 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
     db.setv('locid', 'title');
     console.table(db.all_rows(SQL`select * from mrg_location_from_dsk_locid;`));
     console.table(db.all_rows(SQL`select * from mrg_prv_nxt_xtra_from_dsk_locid;`));
-    //.........................................................................................................
-    debug('^68667-3^');
-    db.setv('dsk', dsk);
-    db.setv('locid', 'nonexistentloc');
-    (() => {      // console.table db.all_rows SQL"select * from mrg_location_from_dsk_locid;"
-      // console.table db.all_rows SQL"select * from mrg_prv_nxt_xtra_from_dsk_locid;"
+    (() => {      //.........................................................................................................
       var error;
+      error = null;
+      db.setv('dsk', dsk);
+      db.setv('locid', 'nonexistentloc');
+      debug('^68667-3^');
+      try {
+        console.table(db.all_rows(SQL`select * from mrg_location_from_dsk_locid;`));
+      } catch (error1) {
+        error = error1;
+        help('^68667-4^', CND.reverse(error.message));
+        if (T != null) {
+          T.ok((error.message.match(/unknown locid/)) != null);
+        }
+      }
+      debug('^68667-5^');
+      return T != null ? T.ok(error != null) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var error;
+      error = null;
+      db.setv('dsk', dsk);
+      db.setv('locid', 'nonexistentloc');
+      debug('^68667-6^');
+      try {
+        console.table(db.all_rows(SQL`select * from mrg_prv_nxt_xtra_from_dsk_locid;`));
+      } catch (error1) {
+        error = error1;
+        help('^68667-7^', CND.reverse(error.message));
+        if (T != null) {
+          T.ok((error.message.match(/unknown locid/)) != null);
+        }
+      }
+      debug('^68667-8^');
+      return T != null ? T.ok(error != null) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var error;
+      debug('^68667-9^');
       error = null;
       try {
         mrg.append_to_loc({
@@ -752,11 +786,12 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         });
       } catch (error1) {
         error = error1;
-        help('^4345^', CND.reverse(error.message));
+        help('^68667-10^', CND.reverse(error.message));
         if (T != null) {
           T.ok((error.message.match(/unknown locid/)) != null);
         }
       }
+      debug('^68667-11^');
       return T != null ? T.ok(error != null) : void 0;
     })();
     if (typeof done === "function") {

@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, append_content, append_outlines, append_remarks, append_to, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, ui_font_path, urge, validate, validate_list_of, warn, whisper,
+  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, append_content, append_grid, append_outlines, append_remarks, append_title, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, rpr, target_path, template_path, to_width, type_of, types, ui_font_path, urge, validate, validate_list_of, warn, whisper, write_output,
     modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
@@ -75,16 +75,12 @@
     return null;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  append_to = function(page, name, text) {
-    var marker;
-    if (!isa.text(text)) {
-      text = rpr(text);
-    }
-    echo((CND.reverse(CND.grey(to_width(name, 15)))) + (CND.reverse(CND.gold(' ' + to_width(text, 108)))));
-    marker = `<!--?${name}-end?-->`;
-    return page.replace(marker, '\n' + text.toString() + marker);
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // append_to = ( page, name, text ) ->
+  //   text = rpr text unless isa.text text
+  //   echo ( CND.reverse CND.grey to_width name, 15 ) + ( CND.reverse CND.gold ' ' + to_width text, 108 )
+  //   marker = "<!--?#{name}-end?-->"
+  //   return page.replace marker, '\n' + text.toString() + marker
 
   //===========================================================================================================
 
@@ -93,9 +89,45 @@
     var drb, dsk, fm, fontnick;
     ({drb, dsk, fontnick} = cfg);
     fm = drb.get_fontmetrics({fontnick});
-    drb.mrg.append_to_loc('remarks', `<div>fm: ${rpr(fm)}</div>`);
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'remarks',
+      text: `<div>fm: ${rpr(fm)}</div>`
+    });
     // missing_txt     = ( rpr ad.chrs for ad in missing_chrs ).join ', '
-    // page            = append_to page, 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
+    // 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  append_grid = function(cfg) {
+    var drb, dsk, grid_txt;
+    ({drb, dsk} = cfg);
+    grid_txt = FS.readFileSync(cm_grid_path, {
+      encoding: 'utf-8'
+    });
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'grid',
+      text: grid_txt
+    });
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  append_title = function(cfg) {
+    var drb, dsk, title;
+    ({drb, dsk, title} = cfg);
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'title_page',
+      text: title
+    });
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'title_heading',
+      text: title
+    });
     return null;
   };
 
@@ -133,8 +165,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   append_outlines = function(cfg) {
-    var bottom, chrs_txt, drb, fm, fontnick, left, missing_sid, mm_p_u, od, owdth, page, ref, right, size_mm, swdth, top;
-    ({drb, page, fontnick, size_mm, mm_p_u, missing_sid} = cfg);
+    var bottom, chrs_txt, drb, dsk, fm, fontnick, left, missing_sid, mm_p_u, od, owdth, ref, right, size_mm, swdth, top;
+    ({drb, dsk, fontnick, size_mm, mm_p_u, missing_sid} = cfg);
     fm = drb.get_fontmetrics({fontnick});
     swdth = 0.5; // stroke width in mm
     swdth *= 1000 * size_mm * mm_p_u;
@@ -149,24 +181,48 @@
       // continue if od.gid is missing.gid
       /* TAINT use standard method */
       chrs_txt = _escape_for_html_comment(od.chrs);
-      page = append_to(page, 'outlines', `<!--${chrs_txt}-->${od.gd}`);
+      drb.mrg.append_to_loc({
+        dsk,
+        locid: 'outlines',
+        text: `<!--${chrs_txt}-->${od.gd}`
+      });
     }
-    return page;
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   _append_fontmetrics = function(cfg) {
-    var drb, fm, fontnick, mm_p_u, page, size_mm, swdth;
-    ({drb, page, fontnick, size_mm, mm_p_u} = cfg);
+    var drb, dsk, fm, fontnick, mm_p_u, size_mm, swdth;
+    ({drb, dsk, fontnick, size_mm, mm_p_u} = cfg);
     fm = drb.get_fontmetrics({fontnick});
     swdth = 0.25; // stroke width in mm
     swdth *= 1000 * size_mm * mm_p_u;
-    page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`);
-    page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.descender}' x2='10000' y2='${fm.descender}'/>`);
-    page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='0' x2='10000' y2='0'/>`);
-    page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.x_height}' x2='10000' y2='${fm.x_height}'/>`);
-    page = append_to(page, 'content', `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.capital_height}' x2='10000' y2='${fm.capital_height}'/>`);
-    return page;
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'content',
+      text: `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`
+    });
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'content',
+      text: `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.descender}' x2='10000' y2='${fm.descender}'/>`
+    });
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'content',
+      text: `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='0' x2='10000' y2='0'/>`
+    });
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'content',
+      text: `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.x_height}' x2='10000' y2='${fm.x_height}'/>`
+    });
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'content',
+      text: `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.capital_height}' x2='10000' y2='${fm.capital_height}'/>`
+    });
+    return null;
   };
 
   // #-----------------------------------------------------------------------------------------------------------
@@ -181,8 +237,8 @@
     /* TAINT add to cfg type */
     /* TAINT use API */
     /* TAINT use field `rnr` to determine where to stop */
-    var ad, chrs_ctxt, chrs_htxt, doc, drb, element, fm, fontnick, i, line_text, line_y, line_y0, line_y_delta, lnr, lnr_1, lnr_2, missing, missing_sid, mm_p_u, mm_p_u_txt, page, par, ref, ref1, ref2, ref3, relwdth, size_mm, specials, text, width_mm, x0, y0;
-    ({drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid} = cfg);
+    var ad, chrs_ctxt, chrs_htxt, doc, drb, dsk, element, fm, fontnick, i, line_text, line_y, line_y0, line_y_delta, lnr, lnr_1, lnr_2, missing, missing_sid, mm_p_u, mm_p_u_txt, par, ref, ref1, ref2, ref3, relwdth, size_mm, specials, text, width_mm, x0, y0;
+    ({drb, dsk, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid} = cfg);
     ({specials} = drb.constructor.C);
     ({missing} = specials);
     fm = drb.get_fontmetrics({fontnick});
@@ -192,7 +248,11 @@
     if (cfg.skip_ws == null) {
       cfg.skip_ws = false;
     }
-    debug('^3453^', drb.mrg.append_to_loc('textcontainer', `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`));
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'textcontainer',
+      text: `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`
+    });
     // for ad in ads
     //   urge '^3980^', ad
     line_y0 = 20;
@@ -209,7 +269,11 @@
     and ( doc = $doc )
     and ( par = $par );`, {doc, par});
     for (lnr = i = ref = lnr_1, ref1 = lnr_2; (ref <= ref1 ? i <= ref1 : i >= ref1); lnr = ref <= ref1 ? ++i : --i) {
-      page = append_to(page, 'content', `<g transform='translate(${x0} ${line_y}) scale(${mm_p_u_txt})'>`);
+      drb.mrg.append_to_loc({
+        dsk,
+        locid: 'content',
+        text: `<g transform='translate(${x0} ${line_y}) scale(${mm_p_u_txt})'>`
+      });
       line_text = '';
       line_y = line_y0 + (line_y_delta * (lnr - 1));
       ref2 = drb.db(SQL`select
@@ -243,12 +307,20 @@
             element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
           }
         }
-        page = append_to(page, 'content', element);
+        drb.mrg.append_to_loc({
+          dsk,
+          locid: 'content',
+          text: element
+        });
       }
-      page = append_to(page, 'content', "</g>");
+      drb.mrg.append_to_loc({
+        dsk,
+        locid: 'content',
+        text: "</g>"
+      });
       info('^43487^', {doc, par, lnr}, rpr(line_text));
     }
-    return page;
+    return null;
   };
 
   // #-----------------------------------------------------------------------------------------------------------
@@ -265,6 +337,18 @@
   //     page  = append_to page, 'content', "<!--#{od.chrs}--><use href='##{od.sid}' x='#{x}'/>"
   //   page = append_to page, 'content', "</g>"
   //   return page
+
+  //-----------------------------------------------------------------------------------------------------------
+  write_output = function(cfg) {
+    var drb, dsk, page;
+    ({drb, dsk} = cfg);
+    page = drb.mrg.get_text({
+      dsk,
+      keep_locs: false
+    });
+    FS.writeFileSync(target_path, page);
+    return null;
+  };
 
   //===========================================================================================================
 
@@ -285,8 +369,7 @@
     drb = new Drb({
       db,
       rebuild: true,
-      RBW,
-      path: '/dev/shm/typesetting-2.sqlite'
+      RBW
     });
     dsk = 'demo';
     ui_font_data = FS.readFileSync(ui_font_path, {
@@ -304,9 +387,7 @@
     });
     doc = 1;
     par = 1;
-    // page            = page.replace /\${ui_font_data}/g, FS.readFileSync ui_font_path, { encoding: 'utf-8', }
-    // page            = FS.readFileSync template_path, { encoding: 'utf-8', }
-    // page            = append_to page, 'grid', FS.readFileSync cm_grid_path, { encoding: 'utf-8', }
+    //.........................................................................................................
     ({I, L, V} = db.sql);
     //.........................................................................................................
     ({text, chrs, cgid_map, fontnick, fspath} = H.settings_from_set_id(set_id));
@@ -348,15 +429,21 @@
     drb.arrange({fontnick, text, doc, par});
     drb.distribute({doc, par, mm_p_u, width_mm, size_mm});
     drb.compose({fontnick, text, doc, par});
+    append_remarks({drb, dsk, fontnick});
+    append_grid({drb, dsk});
+    append_title({
+      drb,
+      dsk,
+      title: "DBay Rustybuzz Typesetting Demo"
+    });
     //.........................................................................................................
     x0 = 0;
     y0 = 50;
-    append_remarks({drb, dsk, fontnick});
-    // page  = append_outlines { drb, page, fontnick, size_mm, mm_p_u, missing_sid, known_ods, }
-    // page  = append_content  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, }
+    append_outlines({drb, dsk, fontnick, size_mm, mm_p_u, missing_sid, known_ods});
+    append_content({drb, dsk, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid});
     // page  = _append_fontmetrics { drb, page, fontnick, size_mm, mm_p_u, }
     //.........................................................................................................
-    FS.writeFileSync(target_path, page);
+    write_output({drb, dsk});
     console.table(db.all_rows(SQL`select
     fontnick,
     gid,
@@ -406,9 +493,7 @@
     page = FS.readFileSync(template_path, {
       encoding: 'utf-8'
     });
-    page = append_to(page, 'grid', FS.readFileSync(cm_grid_path, {
-      encoding: 'utf-8'
-    }));
+    append_grid({drb, dsk});
     ({I, L, V} = db.sql);
     if (fspath != null) {
       //.........................................................................................................
@@ -416,7 +501,11 @@
     }
     drb.prepare_font({fontnick});
     //.........................................................................................................
-    page = append_to(page, 'content', `<g transform='translate(${0} ${10}) scale(${mm_p_u_txt})'>`);
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'content',
+      text: `<g transform='translate(${0} ${10}) scale(${mm_p_u_txt})'>`
+    });
 //.........................................................................................................
     for (gid = i = ref = gid_1, ref1 = gid_2; (ref <= ref1 ? i <= ref1 : i >= ref1); gid = ref <= ref1 ? ++i : --i) {
       ({bbox, gd} = drb.get_single_outline({gid, fontnick}));
@@ -426,12 +515,28 @@
       py = (Math.floor(gid / 10)) / mm_p_u * size_mm;
       tx = px + ((0.5 * size_mm) / mm_p_u);
       ty = py - ((0.7 * size_mm) / mm_p_u);
-      page = append_to(page, 'outlines', `<path id='${sid}' d='${gd}'/>`);
-      page = append_to(page, 'content', `<use href='#${sid}' x='${px}' y='${py}'/>`);
-      page = append_to(page, 'content', `<text class='glyfgridgid' x='${tx}' y='${ty}'>${gid}</text>`);
+      drb.mrg.append_to_loc({
+        dsk,
+        locid: 'outlines',
+        text: `<path id='${sid}' d='${gd}'/>`
+      });
+      drb.mrg.append_to_loc({
+        dsk,
+        locid: 'content',
+        text: `<use href='#${sid}' x='${px}' y='${py}'/>`
+      });
+      drb.mrg.append_to_loc({
+        dsk,
+        locid: 'content',
+        text: `<text class='glyfgridgid' x='${tx}' y='${ty}'>${gid}</text>`
+      });
     }
     //.........................................................................................................
-    page = append_to(page, 'content', "</g>");
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'content',
+      text: "</g>"
+    });
     FS.writeFileSync(target_path, page);
     return null;
   };
@@ -456,11 +561,11 @@
     })();
   }
 
-  // @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
+  // @demo_typeset_sample_page { set_id: 'small-eg8i', }
+// @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
 // @demo_typeset_sample_page { set_id: 'egypt-b42', }
 // @demo_store_outlines()
 // @demo_store_outlines { set_id: 'all', }
-// @demo_typeset_sample_page { set_id: 'small-eg8i', }
 // @demo_typeset_sample_page { set_id: 'small-eg12i', }
 // @demo_typeset_sample_page { set_id: 'small-b42', }
 // @demo_typeset_sample_page { set_id: 'apollo-b42', }
