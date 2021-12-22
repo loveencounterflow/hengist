@@ -38,14 +38,14 @@ guy                       = require '../../../apps/guy'
 #
 #-----------------------------------------------------------------------------------------------------------
 @demo_mirage = ( cfg ) ->
-  db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
-  drb             = new Drb { db, rebuild: false, path: '/dev/shm/typesetting-2.sqlite', }
+  db              = new DBay { path: '/dev/shm/demo-mirage-1.sqlite', }
+  drb             = new Drb { db, rebuild: true, }
   # mrg             = new Mrg { db, }
   dsk             = 'tmpl'
   path            = 'assets/dbay-rustybuzz/demo-typeset-sample-page.template.html'
   path            = PATH.resolve PATH.join __dirname, '../../../', path
   drb.mrg.register_dsk { dsk, path, }
-  drb.mrg.read_datasource { dsk, }
+  drb.mrg.refresh_datasource { dsk, }
   console.table db.all_rows SQL"select * from mrg_datasources;"
   console.table db.all_rows SQL"select * from mrg_mirror where lnr between 153 and 160 order by lnr;"
   return null
