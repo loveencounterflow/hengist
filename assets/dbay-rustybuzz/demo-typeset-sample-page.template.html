@@ -1,7 +1,7 @@
 <!doctype html>
 
 
-<title><mrg:loc#title/> — SVG with glyph outlines</title>
+<title><mrg:loc#title_page/> — SVG with glyph outlines</title>
 <style>
 
 
@@ -100,7 +100,10 @@
     background-color:       #345;
     color:                  white;
     padding:                1em;
-    margin:                 1em; }
+    margin-top:             1em;
+    margin-bottom:          1em;
+    width:                  210mm;
+    box-sizing:             border-box; }
 
   .glyfbox {
     fill:                   brown;
@@ -145,7 +148,7 @@
 
 <!-- <body> -->
 <body class='reveal-blocks show-grid'>
-<!--?grid-start?--><!--?grid-end?-->
+<mrg:loc#grid/>
 
 <!-- =================================================================================================== -->
 <!-- Part I where we declare one outline per font and glyf -->
@@ -159,10 +162,9 @@
 <!--?outlines-end?-->
 </svg>
 
-<h1>Demo Typeset Sample Page</h1>
+<h1><mrg:loc#title_heading/></h1>
 
-<remarks><!--?remarks-start?-->
-<!--?remarks-end?--></remarks>
+<remarks><mrg:loc#remarks/></remarks>
 
 <!-- =================================================================================================== -->
 <!-- Part II where we position and style the scaled outlines to construct the page to be printed. -->
@@ -173,8 +175,7 @@
 <svg id=p0001 class='galley A4' viewBox='0 0 210 297'>
 <use id='x-cm-grid' x='000' y='000' href='#cm-grid'/>
 <!-- <rect style='width:10mm;height:10mm;fill:deepskyblue;'/> -->
-<!--?content-start?-->
-<!--?content-end?-->
+<mrg:loc#content/>
 </svg>
 
 </body>

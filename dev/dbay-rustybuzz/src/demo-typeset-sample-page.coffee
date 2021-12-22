@@ -51,12 +51,12 @@ XXX_show_clusters = ( text, ads ) ->
   return null
 
 
-#-----------------------------------------------------------------------------------------------------------
-append_to = ( page, name, text ) ->
-  text = rpr text unless isa.text text
-  echo ( CND.reverse CND.grey to_width name, 15 ) + ( CND.reverse CND.gold ' ' + to_width text, 108 )
-  marker = "<!--?#{name}-end?-->"
-  return page.replace marker, '\n' + text.toString() + marker
+# #-----------------------------------------------------------------------------------------------------------
+# append_to = ( page, name, text ) ->
+#   text = rpr text unless isa.text text
+#   echo ( CND.reverse CND.grey to_width name, 15 ) + ( CND.reverse CND.gold ' ' + to_width text, 108 )
+#   marker = "<!--?#{name}-end?-->"
+#   return page.replace marker, '\n' + text.toString() + marker
 
 
 #===========================================================================================================
@@ -65,9 +65,26 @@ append_to = ( page, name, text ) ->
 append_remarks = ( cfg ) ->
   { drb, dsk, fontnick, } = cfg
   fm              = drb.get_fontmetrics { fontnick, }
-  drb.mrg.append_to_loc 'remarks', "<div>fm: #{rpr fm}</div>"
+  drb.mrg.append_to_loc { dsk, locid: 'remarks', text: "<div>fm: #{rpr fm}</div>", }
   # missing_txt     = ( rpr ad.chrs for ad in missing_chrs ).join ', '
-  # page            = append_to page, 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
+  # 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+append_grid = ( cfg ) ->
+  { drb
+    dsk   } = cfg
+  grid_txt  = FS.readFileSync cm_grid_path, { encoding: 'utf-8', }
+  drb.mrg.append_to_loc { dsk, locid: 'grid', text: grid_txt, }
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+append_title = ( cfg ) ->
+  { drb
+    dsk
+    title } = cfg
+  drb.mrg.append_to_loc { dsk, locid: 'title_page',     text: title, }
+  drb.mrg.append_to_loc { dsk, locid: 'title_heading',  text: title, }
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -95,7 +112,7 @@ _escape_for_html_comment = ( text ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 append_outlines = ( cfg ) ->
-  { drb, page, fontnick, size_mm, mm_p_u, missing_sid, } = cfg
+  { drb, dsk, fontnick, size_mm, mm_p_u, missing_sid, } = cfg
   fm          = drb.get_fontmetrics { fontnick, }
   swdth       = 0.5 # stroke width in mm
   swdth      *= 1000 * size_mm * mm_p_u
@@ -109,21 +126,21 @@ append_outlines = ( cfg ) ->
     # continue if od.gid is missing.gid
     ### TAINT use standard method ###
     chrs_txt  = _escape_for_html_comment od.chrs
-    page      = append_to page, 'outlines', "<!--#{chrs_txt}-->#{od.gd}"
-  return page
+    drb.mrg.append_to_loc { dsk, locid: 'outlines', text: "<!--#{chrs_txt}-->#{od.gd}", }
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 _append_fontmetrics = ( cfg ) ->
-  { drb, page, fontnick, size_mm, mm_p_u, } = cfg
+  { drb, dsk, fontnick, size_mm, mm_p_u, } = cfg
   fm      = drb.get_fontmetrics { fontnick, }
   swdth   = 0.25 # stroke width in mm
   swdth  *= 1000 * size_mm * mm_p_u
-  page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
-  page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.descender}' x2='10000' y2='#{fm.descender}'/>"
-  page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='0' x2='10000' y2='0'/>"
-  page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.x_height}' x2='10000' y2='#{fm.x_height}'/>"
-  page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>"
-  return page
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>",              }
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.descender}' x2='10000' y2='#{fm.descender}'/>",            }
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='0' x2='10000' y2='0'/>",                                        }
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.x_height}' x2='10000' y2='#{fm.x_height}'/>",              }
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>",  }
+  return null
 
 # #-----------------------------------------------------------------------------------------------------------
 # _append_breakpoint = ( cfg ) ->
@@ -133,14 +150,14 @@ _append_fontmetrics = ( cfg ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 append_content = ( cfg ) ->
-  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, } = cfg
+  { drb, dsk, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, } = cfg
   { specials  } = drb.constructor.C
   { missing   } = specials
   ### TAINT add to cfg type ###
   fm            = drb.get_fontmetrics { fontnick, }
   cfg.skip_shy_etc  ?= false
   cfg.skip_ws       ?= false
-  debug '^3453^', drb.mrg.append_to_loc 'textcontainer', "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>"
+  drb.mrg.append_to_loc { dsk, locid: 'textcontainer', text: "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>", }
   # for ad in ads
   #   urge '^3980^', ad
   line_y0       = 20
@@ -160,7 +177,10 @@ append_content = ( cfg ) ->
         and ( doc = $doc )
         and ( par = $par );""", { doc, par, }
   for lnr in [ lnr_1 .. lnr_2 ]
-    page      = append_to page, 'content', "<g transform='translate(#{x0} #{line_y}) scale(#{mm_p_u_txt})'>"
+    drb.mrg.append_to_loc {
+      dsk,
+      locid: 'content',
+      text:  "<g transform='translate(#{x0} #{line_y}) scale(#{mm_p_u_txt})'>", }
     line_text = ''
     line_y    = line_y0 + ( line_y_delta * ( lnr - 1 ) )
     for ad from drb.db SQL"""
@@ -192,10 +212,10 @@ append_content = ( cfg ) ->
       else
         if ad.y is 0 then element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}'/>"
         else              element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
-      page  = append_to page, 'content', element
-    page = append_to page, 'content', "</g>"
+      drb.mrg.append_to_loc { dsk, locid: 'content', text: element, }
+    drb.mrg.append_to_loc { dsk, locid: 'content', text: "</g>", }
     info '^43487^', { doc, par, lnr, }, rpr line_text
-  return page
+  return null
 
 # #-----------------------------------------------------------------------------------------------------------
 # append_used_outlines_overview = ( page ) ->
@@ -212,6 +232,14 @@ append_content = ( cfg ) ->
 #   page = append_to page, 'content', "</g>"
 #   return page
 
+#-----------------------------------------------------------------------------------------------------------
+write_output = ( cfg ) ->
+  { drb
+    dsk } = cfg
+  page    = drb.mrg.get_text { dsk, keep_locs: false, }
+  FS.writeFileSync target_path, page
+  return null
+
 
 #===========================================================================================================
 #
@@ -225,7 +253,7 @@ append_content = ( cfg ) ->
   { Tbl, }        = require '../../../apps/icql-dba-tabulate'
   db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
   dtab            = new Tbl { db, }
-  drb             = new Drb { db, rebuild: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
+  drb             = new Drb { db, rebuild: true, RBW, }
   dsk             = 'demo'
   ui_font_data    = FS.readFileSync ui_font_path, { encoding: 'utf-8', }
   drb.mrg.register_dsk        { dsk, path: template_path, }
@@ -233,9 +261,7 @@ append_content = ( cfg ) ->
   drb.mrg.append_to_loc       { dsk, locid: 'ui_font_data',  text: ui_font_data, }
   doc             = 1
   par             = 1
-  # page            = page.replace /\${ui_font_data}/g, FS.readFileSync ui_font_path, { encoding: 'utf-8', }
-  # page            = FS.readFileSync template_path, { encoding: 'utf-8', }
-  # page            = append_to page, 'grid', FS.readFileSync cm_grid_path, { encoding: 'utf-8', }
+  #.........................................................................................................
   { I, L, V }     = db.sql
   #.........................................................................................................
   { text
@@ -269,15 +295,17 @@ append_content = ( cfg ) ->
   drb.arrange           { fontnick, text, doc, par, }
   drb.distribute        { doc, par, mm_p_u, width_mm, size_mm, }
   drb.compose           { fontnick, text, doc, par, }
+  append_remarks        { drb, dsk, fontnick, }
+  append_grid           { drb, dsk, }
+  append_title          { drb, dsk, title: "DBay Rustybuzz Typesetting Demo", }
   #.........................................................................................................
   x0    = 0
   y0    = 50
-  append_remarks  { drb, dsk, fontnick, }
-  # page  = append_outlines { drb, page, fontnick, size_mm, mm_p_u, missing_sid, known_ods, }
-  # page  = append_content  { drb, page, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, }
+  append_outlines { drb, dsk, fontnick, size_mm, mm_p_u, missing_sid, known_ods, }
+  append_content  { drb, dsk, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, }
   # page  = _append_fontmetrics { drb, page, fontnick, size_mm, mm_p_u, }
   #.........................................................................................................
-  FS.writeFileSync target_path, page
+  write_output { drb, dsk, }
   console.table db.all_rows SQL"""
     select
         fontnick,
@@ -316,13 +344,13 @@ append_content = ( cfg ) ->
   drb             = new Drb { db, rebuild: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
   # dtab            = new Tbl { db, }
   page            = FS.readFileSync template_path, { encoding: 'utf-8', }
-  page            = append_to page, 'grid', FS.readFileSync cm_grid_path, { encoding: 'utf-8', }
+  append_grid     { drb, dsk, }
   { I, L, V }     = db.sql
   #.........................................................................................................
   drb.register_fontnick { fontnick, fspath, } if fspath?
   drb.prepare_font      { fontnick, }
   #.........................................................................................................
-  page = append_to page, 'content', "<g transform='translate(#{0} #{10}) scale(#{mm_p_u_txt})'>"
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<g transform='translate(#{0} #{10}) scale(#{mm_p_u_txt})'>", }
   #.........................................................................................................
   for gid in [ gid_1 .. gid_2 ]
     { bbox
@@ -334,11 +362,11 @@ append_content = ( cfg ) ->
     py          = ( gid // 10 ) / mm_p_u * size_mm
     tx          = px + ( ( 0.5 * size_mm ) / mm_p_u )
     ty          = py - ( ( 0.7 * size_mm ) / mm_p_u )
-    page        = append_to page, 'outlines', "<path id='#{sid}' d='#{gd}'/>"
-    page        = append_to page, 'content',  "<use href='##{sid}' x='#{px}' y='#{py}'/>"
-    page        = append_to page, 'content',  "<text class='glyfgridgid' x='#{tx}' y='#{ty}'>#{gid}</text>"
+    drb.mrg.append_to_loc { dsk, locid: 'outlines', text: "<path id='#{sid}' d='#{gd}'/>",                                }
+    drb.mrg.append_to_loc { dsk, locid: 'content',  text: "<use href='##{sid}' x='#{px}' y='#{py}'/>",                    }
+    drb.mrg.append_to_loc { dsk, locid: 'content',  text: "<text class='glyfgridgid' x='#{tx}' y='#{ty}'>#{gid}</text>",  }
   #.........................................................................................................
-  page = append_to page, 'content', "</g>"
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "</g>", }
   FS.writeFileSync target_path, page
   return null
 
@@ -357,11 +385,11 @@ if require.main is module then do =>
   # @demo_typeset_sample_page { set_id: 'twolines-eg8i', }
   # @demo_typeset_sample_page { set_id: 'typo-b36', }
   @demo_typeset_sample_page { set_id: 'typo-gr', }
+  # @demo_typeset_sample_page { set_id: 'small-eg8i', }
   # @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
   # @demo_typeset_sample_page { set_id: 'egypt-b42', }
   # @demo_store_outlines()
   # @demo_store_outlines { set_id: 'all', }
-  # @demo_typeset_sample_page { set_id: 'small-eg8i', }
   # @demo_typeset_sample_page { set_id: 'small-eg12i', }
   # @demo_typeset_sample_page { set_id: 'small-b42', }
   # @demo_typeset_sample_page { set_id: 'apollo-b42', }

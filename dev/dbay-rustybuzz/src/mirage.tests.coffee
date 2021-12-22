@@ -250,7 +250,7 @@ guy                       = require '../../../apps/guy'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "loc markers 4" ] = ( T, done ) ->
-  # T?.halt_on_error()
+  T?.halt_on_error()
   { DBay  } = require H.dbay_path
   { Mrg   } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
   # { Drb }   = require H.drb_path
@@ -270,18 +270,41 @@ guy                       = require '../../../apps/guy'
   console.table db.all_rows SQL"select * from mrg_location_from_dsk_locid;"
   console.table db.all_rows SQL"select * from mrg_prv_nxt_xtra_from_dsk_locid;"
   #.........................................................................................................
-  debug '^68667-3^'
-  db.setv 'dsk',    dsk
-  db.setv 'locid',  'nonexistentloc'
-  # console.table db.all_rows SQL"select * from mrg_location_from_dsk_locid;"
-  # console.table db.all_rows SQL"select * from mrg_prv_nxt_xtra_from_dsk_locid;"
   do =>
+    error = null
+    db.setv 'dsk',    dsk
+    db.setv 'locid',  'nonexistentloc'
+    debug '^68667-3^'
+    try
+      console.table db.all_rows SQL"select * from mrg_location_from_dsk_locid;"
+    catch error
+      help '^68667-4^', CND.reverse error.message
+      T?.ok ( error.message.match /unknown locid/ )?
+    debug '^68667-5^'
+    T?.ok error?
+  #.........................................................................................................
+  do =>
+    error = null
+    db.setv 'dsk',    dsk
+    db.setv 'locid',  'nonexistentloc'
+    debug '^68667-6^'
+    try
+      console.table db.all_rows SQL"select * from mrg_prv_nxt_xtra_from_dsk_locid;"
+    catch error
+      help '^68667-7^', CND.reverse error.message
+      T?.ok ( error.message.match /unknown locid/ )?
+    debug '^68667-8^'
+    T?.ok error?
+  #.........................................................................................................
+  do =>
+    debug '^68667-9^'
     error = null
     try
       mrg.append_to_loc { dsk, locid: 'nonexistentloc',  text: "A Grand Union" }
     catch error
-      help '^4345^', CND.reverse error.message
+      help '^68667-10^', CND.reverse error.message
       T?.ok ( error.message.match /unknown locid/ )?
+    debug '^68667-11^'
     T?.ok error?
   # console.table db.all_rows SQL"select raise( fail, 'message goes here' );"
   #.........................................................................................................
