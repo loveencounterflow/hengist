@@ -57,6 +57,30 @@ guy                       = require '../../../apps/guy'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "___ extended location marker matching" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Mrg } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ '<mrg:loc.delete#title/>',         [ [ '', '<mrg:loc#first/>', ''       ], { locid: 'first'        }, ], ]
+    [ '<mrg:loc#title.delete/>',         [ [ '', '<mrg:loc#first/>', ''       ], { locid: 'first'        }, ], ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      # result = ( { d.groups..., } for d from probe.matchAll Mrg.C.defaults.constructor_cfg.loc_splitter )
+      result = [
+        ( probe.split Mrg.C.defaults.constructor_cfg.loc_splitter ),
+        ( ( probe.match Mrg.C.defaults.constructor_cfg.locid_re )?.groups ? null ) ]
+      naked_probe = probe[ 1 ... probe.length - 2 ]
+      debug '^545575^', INTERTEXT.HTML.parse_compact_tagname naked_probe
+      resolve result
+      return null
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "mrg.refresh_datasource" ] = ( T, done ) ->
   # T?.halt_on_error()
   { DBay  } = require H.dbay_path
@@ -323,5 +347,6 @@ if require.main is module then do =>
   # test @[ "loc markers 1" ]
   # test @[ "loc markers 2" ]
   # test @[ "loc markers 3" ]
-  test @[ "loc markers 4" ]
+  # test @[ "loc markers 4" ]
+  test @[ "extended location marker matching" ]
 
