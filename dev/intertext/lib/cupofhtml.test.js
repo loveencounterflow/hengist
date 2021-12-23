@@ -192,7 +192,7 @@
     ({Cupofhtml} = INTERTEXT.CUPOFHTML);
     cupofhtml = new Cupofhtml();
     ({cram, expand, tag, S, H} = cupofhtml.export());
-    ({datoms_from_html, html_from_datoms} = INTERTEXT.HTML.export());
+    ({datoms_from_html, html_from_datoms} = INTERTEXT.HTMLISH.export());
     //.........................................................................................................
     // debug '^33343^', ( k for k of cupofhtml )
     // debug '^33343^', ( k for k of cupofhtml.export() )
@@ -266,7 +266,7 @@
       newlines: false
     });
     ({cram, expand, tag, S, H} = cupofhtml.export());
-    ({datoms_from_html, html_from_datoms} = INTERTEXT.HTML.export());
+    ({datoms_from_html, html_from_datoms} = INTERTEXT.HTMLISH.export());
     //.........................................................................................................
     T.eq(cupofhtml.settings.newlines, false);
     //.........................................................................................................
