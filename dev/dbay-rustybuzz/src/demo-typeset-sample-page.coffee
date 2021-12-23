@@ -51,14 +51,6 @@ XXX_show_clusters = ( text, ads ) ->
   return null
 
 
-# #-----------------------------------------------------------------------------------------------------------
-# append_to = ( page, name, text ) ->
-#   text = rpr text unless isa.text text
-#   echo ( CND.reverse CND.grey to_width name, 15 ) + ( CND.reverse CND.gold ' ' + to_width text, 108 )
-#   marker = "<!--?#{name}-end?-->"
-#   return page.replace marker, '\n' + text.toString() + marker
-
-
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
@@ -142,12 +134,6 @@ _append_fontmetrics = ( cfg ) ->
   drb.mrg.append_to_loc { dsk, locid: 'content', text: "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>",  }
   return null
 
-# #-----------------------------------------------------------------------------------------------------------
-# _append_breakpoint = ( cfg ) ->
-#   { page, x0, y0, size_mm, mm_p_u, mm_p_u_txt, fm, text, ads, missing, missing_sid, } = cfg
-#   page    = append_to page, 'content', "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>"
-#   return page
-
 #-----------------------------------------------------------------------------------------------------------
 append_content = ( cfg ) ->
   { drb, dsk, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, } = cfg
@@ -223,13 +209,13 @@ append_content = ( cfg ) ->
 #   y0      = 70
 #   swdth   = 0.25 # stroke width in mm
 #   swdth  *= 1000 * size_mm * mm_p_u
-#   page    = append_to page, 'content', "<g transform='translate(#{x0} #{y0}) scale(#{mm_p_u_txt})'>"
+#   page    = drb.mrg.append_to_loc { dsk, locid: 'content', text: "<g transform='translate(#{x0} #{y0}) scale(#{mm_p_u_txt})'>", }
 #   dx      = 1000 * 100 * mm_p_u
 #   x       = -dx
 #   for od from db SQL"select * from drb.outlines where fontnick = $fontnick order by sid;", { fontnick, }
 #     x    += dx
-#     page  = append_to page, 'content', "<!--#{od.chrs}--><use href='##{od.sid}' x='#{x}'/>"
-#   page = append_to page, 'content', "</g>"
+#     page  = drb.mrg.append_to_loc { dsk, locid: 'content', text: "<!--#{od.chrs}--><use href='##{od.sid}' x='#{x}'/>", }
+#   page = drb.mrg.append_to_loc { dsk, locid: 'content', text: "</g>", }
 #   return page
 
 #-----------------------------------------------------------------------------------------------------------
