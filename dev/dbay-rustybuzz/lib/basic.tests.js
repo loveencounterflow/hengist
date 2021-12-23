@@ -41,39 +41,32 @@
 
   // MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
-  //-----------------------------------------------------------------------------------------------------------
-  this["DRB foobar"] = function(T, done) {
-    var DBay, Drb, Tbl, db, drb, dtab, path, schema;
-    // ### explicit path, explicitly temporary ###
-    // T?.halt_on_error()
-    // { DBay }            = require H.dbay_path
-    ({DBay} = require(H.dbay_path));
-    ({Drb} = require(H.drb_path));
-    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
-    path = PATH.resolve(DBay.C.autolocation, 'drb.sqlite');
-    // DH                  = require PATH.join H.dbay_path, 'lib/helpers'
-    db = new DBay();
-    drb = new Drb({
-      path,
-      db,
-      temporary: true
-    });
-    dtab = new Tbl({db});
-    schema = drb.cfg.schema;
-    //.........................................................................................................
-    db(() => {
-      echo(dtab._tabulate(db(SQL`select type, name from ${schema}.sqlite_schema;`)));
-      return echo(dtab._tabulate(db(SQL`select * from ${schema}.pragma_table_info( 'outlines' );`)));
-    });
-    //.........................................................................................................
-    //.........................................................................................................
-    db(() => {
-      echo(dtab._tabulate(db(SQL`select * from ${schema}.pragma_table_info( 'fontnicks' );`)));
-      echo(dtab._tabulate(db(SQL`select * from ${schema}.outlines order by fontnick, gid;`)));
-      return echo(dtab._tabulate(db(SQL`select * from ${schema}.fontnicks order by fontnick;`)));
-    });
-    return typeof done === "function" ? done() : void 0;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // @[ "DRB foobar" ] = ( T, done ) ->
+  //   # ### explicit path, explicitly temporary ###
+  //   # T?.halt_on_error()
+  //   # { DBay }            = require H.dbay_path
+  //   { DBay }            = require H.dbay_path
+  //   { Drb }             = require H.drb_path
+  //   { Tbl, }            = require '../../../apps/icql-dba-tabulate'
+  //   path                = PATH.resolve DBay.C.autolocation, 'drb.sqlite'
+  //   # DH                  = require PATH.join H.dbay_path, 'lib/helpers'
+  //   db                  = new DBay()
+  //   drb                 = new Drb { path, db, temporary: true, }
+  //   dtab                = new Tbl { db, }
+  //   schema              = drb.cfg.schema
+  //   #.........................................................................................................
+  //   db =>
+  //     echo dtab._tabulate db SQL"select type, name from #{schema}.sqlite_schema;"
+  //     echo dtab._tabulate db SQL"select * from #{schema}.pragma_table_info( 'outlines' );"
+  //   #.........................................................................................................
+  //   #.........................................................................................................
+  //   db =>
+  //     echo dtab._tabulate db SQL"select * from #{schema}.pragma_table_info( 'fontnicks' );"
+  //     echo dtab._tabulate db SQL"select * from #{schema}.outlines order by fontnick, gid;"
+  //     echo dtab._tabulate db SQL"select * from #{schema}.fontnicks order by fontnick;"
+  //   #.........................................................................................................
+  //   return done?()
 
   //-----------------------------------------------------------------------------------------------------------
   this["DRB no shared state in WASM module"] = function(T, done) {

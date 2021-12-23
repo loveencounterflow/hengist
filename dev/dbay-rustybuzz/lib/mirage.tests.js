@@ -127,6 +127,56 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["___ extended location marker matching"] = async function(T, done) {
+    var Mrg, error, i, len, matcher, probe, probes_and_matchers;
+    // T?.halt_on_error()
+    ({Mrg} = require('../../../apps/dbay-rustybuzz/lib/_mirage'));
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        '<mrg:loc.delete#title/>',
+        [
+          ['',
+          '<mrg:loc#first/>',
+          ''],
+          {
+            locid: 'first'
+          }
+        ]
+      ],
+      [
+        '<mrg:loc#title.delete/>',
+        [
+          ['',
+          '<mrg:loc#first/>',
+          ''],
+          {
+            locid: 'first'
+          }
+        ]
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var naked_probe, ref, ref1, result;
+          // result = ( { d.groups..., } for d from probe.matchAll Mrg.C.defaults.constructor_cfg.loc_splitter )
+          result = [probe.split(Mrg.C.defaults.constructor_cfg.loc_splitter), (ref = (ref1 = probe.match(Mrg.C.defaults.constructor_cfg.locid_re)) != null ? ref1.groups : void 0) != null ? ref : null];
+          naked_probe = probe.slice(1, probe.length - 2);
+          debug('^545575^', INTERTEXT.HTML.parse_compact_tagname(naked_probe));
+          resolve(result);
+          return null;
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["mrg.refresh_datasource"] = function(T, done) {
     var DBay, Mrg, db, dsk, mrg, path;
     // T?.halt_on_error()
@@ -811,7 +861,8 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
       // test @[ "loc markers 1" ]
       // test @[ "loc markers 2" ]
       // test @[ "loc markers 3" ]
-      return test(this["loc markers 4"]);
+      // test @[ "loc markers 4" ]
+      return test(this["extended location marker matching"]);
     })();
   }
 

@@ -518,15 +518,15 @@
       // # await @demo_old_asciisorter()
       // # await @demo_old_indentation()
       // await @demo_chrsubsetter()
-      // await @demo_css_blocks()
-      // await @demo_css_planes()
-      // await @demo_css_halfplanes()
-      // await @demo_css_words()
-      return (await this.demo_htmlish());
+      return (await this.demo_css_blocks());
     })();
   }
 
-  // await @demo_regex_whitespace_regular()
+  // await @demo_css_planes()
+// await @demo_css_halfplanes()
+// await @demo_css_words()
+// await @demo_htmlish()
+// await @demo_regex_whitespace_regular()
 // await @demo_regex_whitespace_streaming()
 
 }).call(this);
