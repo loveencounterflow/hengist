@@ -272,6 +272,32 @@ guy                       = require '../../../apps/guy'
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "multiple loc markers in one line" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay  } = require H.dbay_path
+  { Mrg   } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
+  # { Drb }   = require H.drb_path
+  db        = new DBay()
+  mrg       = new Mrg { db, }
+  dsk       = 'twcm2'
+  path      = 'dbay-rustybuzz/template-with-content-markers-2.html'
+  path      = PATH.resolve PATH.join __dirname, '../../../assets', path
+  #.........................................................................................................
+  mrg.register_dsk { dsk, path, }
+  mrg.refresh_datasource { dsk, }
+  #.........................................................................................................
+  mrg.append_to_loc { dsk, locid: 'title',  text: "A Grand Union" }
+  mrg.append_to_loc { dsk, locid: 'some-content', text: "some content"      }
+  mrg.append_to_loc { dsk, locid: 'more-content', text: "and more content"  }
+  debug '^45346^', mrg.get_text { dsk, keep_locs: null,  }
+  T?.eq ( mrg.get_text { dsk, keep_locs: null,  } ), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#some-content/>some content and some more <mrg:loc#more-content/>and more content.</p>\n  </article>\n'
+  T?.eq ( mrg.get_text { dsk, keep_locs: true,  } ), '<title><mrg:loc.delete-marker#title/>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#some-content/>some content and some more <mrg:loc#more-content/>and more content.</p>\n  </article>\n'
+  T?.eq ( mrg.get_text { dsk, keep_locs: false, } ), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some some content and some more and more content.</p>\n  </article>\n'
+  #.........................................................................................................
+  done?()
+  return null
+
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -340,7 +366,7 @@ guy                       = require '../../../apps/guy'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # test @[ "altering mirrored source lines causes error" ]
   # @[ "altering mirrored source lines causes error" ]()
   # test @[ "location marker matching" ]
@@ -350,4 +376,5 @@ if require.main is module then do =>
   # test @[ "loc markers 3" ]
   # test @[ "loc markers 4" ]
   # test @[ "extended location marker matching" ]
+  test @[ "multiple loc markers in one line" ]
 
