@@ -332,7 +332,6 @@ guy                       = require '../../../apps/guy'
       T?.ok ( error.message.match /unknown locid/ )?
     debug '^68667-11^'
     T?.ok error?
-  # console.table db.all_rows SQL"select raise( fail, 'message goes here' );"
   #.........................................................................................................
   done?()
   return null
@@ -341,14 +340,14 @@ guy                       = require '../../../apps/guy'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # test @[ "altering mirrored source lines causes error" ]
   # @[ "altering mirrored source lines causes error" ]()
   # test @[ "location marker matching" ]
   # test @[ "mrg.refresh_datasource" ]
   # test @[ "loc markers 1" ]
   # test @[ "loc markers 2" ]
-  @[ "loc markers 3" ]()
+  # test @[ "loc markers 3" ]
   # test @[ "loc markers 4" ]
   # test @[ "extended location marker matching" ]
 
