@@ -269,40 +269,6 @@ guy                       = require '../../../apps/guy'
   T?.eq ( mrg.get_text { dsk, keep_locs: true,  } ), '<title><mrg:loc.delete-marker#title/>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#content/>more content.</p>\n  </article>\n'
   T?.eq ( mrg.get_text { dsk, keep_locs: false, } ), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some more content.</p>\n  </article>\n'
   #.........................................................................................................
-  prefix = 'mrg'
-  for keep_locs in [ 1, 0, null, ]
-    console.table db.all_rows SQL"""
-        select distinct
-            r1.dsk                                              as dsk,
-            r1.lnr                                              as lnr,
-            -- coalesce( group_concat( r1.line, '' ) over w, '' )  as line
-            r1.line                                            as line
-            -- r1.lnpart                                           as lnpart,
-            -- r1.xtra                                             as xtra,
-            -- r1.locid                                            as locid,
-            -- r2.props                                            as props,
-            ,r2.del                                              as del
-            -- dsk                                             as dsk,
-            -- lnr                                             as lnr,
-          from #{prefix}_mirror as r1
-          left join #{prefix}_locs as r2 using ( dsk, locid )
-          where true
-            and ( r1.dsk = $dsk )
-            and ( case when $keep_locs or ( r2.del is null )
-              then true
-              else
-                case when ( $keep_locs is null ) and ( r2.del = true )
-                  then true
-                  else false
-                  end
-                end )
-            -- and ( case when $keep_locs is null then not r2.del else ( r1.locid is not null ) end )
-          window w as (
-            partition by r1.lnr
-            order by r1.lnpart, r1.xtra
-            range between unbounded preceding and unbounded following );
-        """, { dsk, keep_locs, }
-  #.........................................................................................................
   done?()
   return null
 
