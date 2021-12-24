@@ -634,7 +634,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $locid, $line )`, {
 
   //-----------------------------------------------------------------------------------------------------------
   this["loc markers 3"] = function(T, done) {
-    var DBay, Mrg, db, dsk, i, keep_locs, len, mrg, path, prefix, ref;
+    var DBay, Mrg, db, dsk, mrg, path;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     ({Mrg} = require('../../../apps/dbay-rustybuzz/lib/_mirage'));
@@ -680,41 +680,6 @@ values ( $dsk, $lnr, $lnpart, $xtra, $locid, $line )`, {
         dsk,
         keep_locs: false
       }), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some more content.</p>\n  </article>\n');
-    }
-    //.........................................................................................................
-    prefix = 'mrg';
-    ref = [1, 0, null];
-    for (i = 0, len = ref.length; i < len; i++) {
-      keep_locs = ref[i];
-      console.table(db.all_rows(SQL`select distinct
-    r1.dsk                                              as dsk,
-    r1.lnr                                              as lnr,
-    -- coalesce( group_concat( r1.line, '' ) over w, '' )  as line
-    r1.line                                            as line
-    -- r1.lnpart                                           as lnpart,
-    -- r1.xtra                                             as xtra,
-    -- r1.locid                                            as locid,
-    -- r2.props                                            as props,
-    ,r2.del                                              as del
-    -- dsk                                             as dsk,
-    -- lnr                                             as lnr,
-  from ${prefix}_mirror as r1
-  left join ${prefix}_locs as r2 using ( dsk, locid )
-  where true
-    and ( r1.dsk = $dsk )
-    and ( case when $keep_locs or ( r2.del is null )
-      then true
-      else
-        case when ( $keep_locs is null ) and ( r2.del = true )
-          then true
-          else false
-          end
-        end )
-    -- and ( case when $keep_locs is null then not r2.del else ( r1.locid is not null ) end )
-  window w as (
-    partition by r1.lnr
-    order by r1.lnpart, r1.xtra
-    range between unbounded preceding and unbounded following );`, {dsk, keep_locs}));
     }
     if (typeof done === "function") {
       done();
@@ -811,18 +776,18 @@ values ( $dsk, $lnr, $lnpart, $xtra, $locid, $line )`, {
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @[ "altering mirrored source lines causes error" ]
-      // @[ "altering mirrored source lines causes error" ]()
-      // test @[ "location marker matching" ]
-      // test @[ "mrg.refresh_datasource" ]
-      // test @[ "loc markers 1" ]
-      // test @[ "loc markers 2" ]
-      return this["loc markers 3"]();
+      return test(this);
     })();
   }
 
-  // test @[ "loc markers 4" ]
+  // test @[ "altering mirrored source lines causes error" ]
+// @[ "altering mirrored source lines causes error" ]()
+// test @[ "location marker matching" ]
+// test @[ "mrg.refresh_datasource" ]
+// test @[ "loc markers 1" ]
+// test @[ "loc markers 2" ]
+// test @[ "loc markers 3" ]
+// test @[ "loc markers 4" ]
 // test @[ "extended location marker matching" ]
 
 }).call(this);
