@@ -39,142 +39,56 @@
 
   guy = require('../../../apps/guy');
 
-  //-----------------------------------------------------------------------------------------------------------
-  this["location marker matching"] = async function(T, done) {
-    var Mrg, error, i, len, matcher, probe, probes_and_matchers;
-    // T?.halt_on_error()
-    ({Mrg} = require('../../../apps/dbay-rustybuzz/lib/_mirage'));
-    //.........................................................................................................
-    probes_and_matchers = [
-      [
-        '<mrg:loc#first/>',
-        [
-          ['',
-          '<mrg:loc#first/>',
-          ''],
-          {
-            locid: 'first'
-          }
-        ]
-      ],
-      [
-        '<mrg:loc#foo-bar-123/>',
-        [
-          ['',
-          '<mrg:loc#foo-bar-123/>',
-          ''],
-          {
-            locid: 'foo-bar-123'
-          }
-        ]
-      ],
-      [
-        '<mrg:loc# foo-bar-123/>',
-        [
-          ['<mrg:loc# foo-bar-123/>'],
-          {
-            locid: ' foo-bar-123'
-          }
-        ]
-      ],
-      [
-        '<MRG:loc#foo-bar-123/>',
-        [
-          ['<MRG:loc#foo-bar-123/>'],
-          {
-            locid: 'foo-bar-123'
-          }
-        ]
-      ],
-      [
-        '<mrg:loc#first />',
-        [
-          ['<mrg:loc#first />'],
-          {
-            locid: 'first '
-          }
-        ]
-      ],
-      ['<mrg:loc id="first"/>',
-      [['<mrg:loc id="first"/>'],
-      null]],
-      [
-        '<mrg:loc#first>',
-        [
-          ['<mrg:loc#first>'],
-          {
-            locid: 'first>'
-          }
-        ]
-      ]
-    ];
-//.........................................................................................................
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher, error] = probes_and_matchers[i];
-      await T.perform(probe, matcher, error, function() {
-        return new Promise(function(resolve, reject) {
-          var ref, ref1, result;
-          // result = ( { d.groups..., } for d from probe.matchAll Mrg.C.defaults.constructor_cfg.loc_splitter )
-          result = [probe.split(Mrg.C.defaults.constructor_cfg.loc_splitter), (ref = (ref1 = probe.match(Mrg.C.defaults.constructor_cfg.locid_re)) != null ? ref1.groups : void 0) != null ? ref : null];
-          resolve(result);
-          return null;
-        });
-      });
-    }
-    //.........................................................................................................
-    done();
-    return null;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // @[ "location marker matching" ] = ( T, done ) ->
+  //   # T?.halt_on_error()
+  //   { Mrg } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
+  //   #.........................................................................................................
+  //   probes_and_matchers = [
+  //     [ '<mrg:loc#first/>',         [ [ '', '<mrg:loc#first/>', ''       ], { locid: 'first'        }, ], ]
+  //     [ '<mrg:loc#foo-bar-123/>',   [ [ '', '<mrg:loc#foo-bar-123/>', '' ], { locid: 'foo-bar-123'  }, ], ]
+  //     [ '<mrg:loc# foo-bar-123/>',  [ [ '<mrg:loc# foo-bar-123/>'        ], { locid: ' foo-bar-123' }, ], ]
+  //     [ '<MRG:loc#foo-bar-123/>',   [ [ '<MRG:loc#foo-bar-123/>'         ], { locid: 'foo-bar-123'  }, ], ]
+  //     [ '<mrg:loc#first />',        [ [ '<mrg:loc#first />'              ], { locid: 'first '       }, ], ]
+  //     [ '<mrg:loc id="first"/>',    [ [ '<mrg:loc id="first"/>'          ], null                     , ], ]
+  //     [ '<mrg:loc#first>',          [ [ '<mrg:loc#first>'                ], { locid: 'first>'       }, ], ]
+  //     ]
+  //   #.........................................................................................................
+  //   for [ probe, matcher, error, ] in probes_and_matchers
+  //     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+  //       # result = ( { d.groups..., } for d from probe.matchAll Mrg.C.defaults.constructor_cfg.loc_splitter )
+  //       result = [
+  //         ( probe.split Mrg.C.defaults.constructor_cfg.loc_splitter ),
+  //         ( ( probe.match Mrg.C.defaults.constructor_cfg.locid_re )?.groups ? null ) ]
+  //       resolve result
+  //       return null
+  //   #.........................................................................................................
+  //   done()
+  //   return null
 
-  //-----------------------------------------------------------------------------------------------------------
-  this["___ extended location marker matching"] = async function(T, done) {
-    var Mrg, error, i, len, matcher, probe, probes_and_matchers;
-    // T?.halt_on_error()
-    ({Mrg} = require('../../../apps/dbay-rustybuzz/lib/_mirage'));
-    //.........................................................................................................
-    probes_and_matchers = [
-      [
-        '<mrg:loc.delete#title/>',
-        [
-          ['',
-          '<mrg:loc#first/>',
-          ''],
-          {
-            locid: 'first'
-          }
-        ]
-      ],
-      [
-        '<mrg:loc#title.delete/>',
-        [
-          ['',
-          '<mrg:loc#first/>',
-          ''],
-          {
-            locid: 'first'
-          }
-        ]
-      ]
-    ];
-//.........................................................................................................
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher, error] = probes_and_matchers[i];
-      await T.perform(probe, matcher, error, function() {
-        return new Promise(function(resolve, reject) {
-          var naked_probe, ref, ref1, result;
-          // result = ( { d.groups..., } for d from probe.matchAll Mrg.C.defaults.constructor_cfg.loc_splitter )
-          result = [probe.split(Mrg.C.defaults.constructor_cfg.loc_splitter), (ref = (ref1 = probe.match(Mrg.C.defaults.constructor_cfg.locid_re)) != null ? ref1.groups : void 0) != null ? ref : null];
-          naked_probe = probe.slice(1, probe.length - 2);
-          debug('^545575^', INTERTEXT.HTML.parse_compact_tagname(naked_probe));
-          resolve(result);
-          return null;
-        });
-      });
-    }
-    //.........................................................................................................
-    done();
-    return null;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // @[ "___ extended location marker matching" ] = ( T, done ) ->
+  //   # T?.halt_on_error()
+  //   { Mrg } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
+  //   #.........................................................................................................
+  //   probes_and_matchers = [
+  //     [ '<mrg:loc.delete#title/>',         [ [ '', '<mrg:loc#first/>', ''       ], { locid: 'first'        }, ], ]
+  //     [ '<mrg:loc#title.delete/>',         [ [ '', '<mrg:loc#first/>', ''       ], { locid: 'first'        }, ], ]
+  //     ]
+  //   #.........................................................................................................
+  //   for [ probe, matcher, error, ] in probes_and_matchers
+  //     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+  //       # result = ( { d.groups..., } for d from probe.matchAll Mrg.C.defaults.constructor_cfg.loc_splitter )
+  //       result = [
+  //         ( probe.split Mrg.C.defaults.constructor_cfg.loc_splitter ),
+  //         ( ( probe.match Mrg.C.defaults.constructor_cfg.locid_re )?.groups ? null ) ]
+  //       naked_probe = probe[ 1 ... probe.length - 2 ]
+  //       debug '^545575^', INTERTEXT.HTML.parse_compact_tagname naked_probe
+  //       resolve result
+  //       return null
+  //   #.........................................................................................................
+  //   done()
+  //   return null
 
   //-----------------------------------------------------------------------------------------------------------
   this["mrg.refresh_datasource"] = function(T, done) {
@@ -256,13 +170,13 @@
       error = null;
       try {
         db(SQL`insert into mrg_mirror
-( dsk, lnr, lnpart, xtra, isloc, line )
-values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
+( dsk, lnr, lnpart, xtra, locid, line )
+values ( $dsk, $lnr, $lnpart, $xtra, $locid, $line )`, {
           dsk: dsk,
           lnr: 10,
           lnpart: 0,
           xtra: 0,
-          isloc: 0,
+          locid: null,
           line: "some text"
         });
       } catch (error1) {
@@ -310,7 +224,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
           lnr: 1,
           lnpart: 0,
           xtra: 0,
-          isloc: 0,
+          locid: null,
           line: '<title>'
         },
         {
@@ -318,15 +232,15 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
           lnr: 1,
           lnpart: 1,
           xtra: 0,
-          isloc: 1,
-          line: '<mrg:loc#title/>'
+          locid: 'title',
+          line: '<mrg:loc.delete-marker#title/>'
         },
         {
           dsk: 'twcm',
           lnr: 1,
           lnpart: 2,
           xtra: 0,
-          isloc: 0,
+          locid: null,
           line: '</title>'
         },
         {
@@ -334,7 +248,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
           lnr: 2,
           lnpart: 0,
           xtra: 0,
-          isloc: 0,
+          locid: null,
           line: '<article>'
         },
         {
@@ -342,7 +256,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
           lnr: 3,
           lnpart: 0,
           xtra: 0,
-          isloc: 0,
+          locid: null,
           line: '  <p>Here comes some '
         },
         {
@@ -350,7 +264,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
           lnr: 3,
           lnpart: 1,
           xtra: 0,
-          isloc: 1,
+          locid: 'content',
           line: '<mrg:loc#content/>'
         },
         {
@@ -358,7 +272,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
           lnr: 3,
           lnpart: 2,
           xtra: 0,
-          isloc: 0,
+          locid: null,
           line: '.</p>'
         },
         {
@@ -366,7 +280,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
           lnr: 4,
           lnpart: 0,
           xtra: 0,
-          isloc: 0,
+          locid: null,
           line: '  </article>'
         },
         {
@@ -374,7 +288,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
           lnr: 5,
           lnpart: 0,
           xtra: 0,
-          isloc: 0,
+          locid: null,
           line: ''
         }
       ]);
@@ -385,13 +299,17 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
           dsk: 'twcm',
           locid: 'content',
           lnr: 3,
-          lnpart: 1
+          lnpart: 1,
+          props: null,
+          del: 0
         },
         {
           dsk: 'twcm',
           locid: 'title',
           lnr: 1,
-          lnpart: 1
+          lnpart: 1,
+          props: '["delete-marker"]',
+          del: 1
         }
       ]);
     }
@@ -424,7 +342,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 1,
         lnpart: 0,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: '<title>'
       });
     }
@@ -434,8 +352,8 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 1,
         lnpart: 1,
         xtra: 0,
-        isloc: 1,
-        line: '<mrg:loc#title/>'
+        locid: 'title',
+        line: '<mrg:loc.delete-marker#title/>'
       });
     }
     if (T != null) {
@@ -444,7 +362,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 1,
         lnpart: 2,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: '</title>'
       });
     }
@@ -454,7 +372,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 2,
         lnpart: 0,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: '<article>'
       });
     }
@@ -464,7 +382,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 3,
         lnpart: 0,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: '  <p>Here comes some '
       });
     }
@@ -474,7 +392,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 3,
         lnpart: 1,
         xtra: 0,
-        isloc: 1,
+        locid: 'content',
         line: '<mrg:loc#content/>'
       });
     }
@@ -484,7 +402,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 3,
         lnpart: 2,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: '.</p>'
       });
     }
@@ -494,7 +412,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 4,
         lnpart: 0,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: '  </article>'
       });
     }
@@ -504,11 +422,10 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 5,
         lnpart: 0,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: ''
       });
     }
-    //.........................................................................................................
     if (T != null) {
       T.eq(mrg.append_to_loc({
         dsk,
@@ -519,7 +436,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 1,
         lnpart: 1,
         xtra: 1,
-        isloc: 0,
+        locid: null,
         line: 'A Grand Union'
       });
     }
@@ -533,7 +450,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 3,
         lnpart: 1,
         xtra: 1,
-        isloc: 0,
+        locid: null,
         line: 'more '
       });
     }
@@ -547,7 +464,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 3,
         lnpart: 1,
         xtra: 2,
-        isloc: 0,
+        locid: null,
         line: 'content'
       });
     }
@@ -560,7 +477,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 1,
         lnpart: 0,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: '<title>'
       });
     }
@@ -570,8 +487,8 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 1,
         lnpart: 1,
         xtra: 0,
-        isloc: 1,
-        line: '<mrg:loc#title/>'
+        locid: 'title',
+        line: '<mrg:loc.delete-marker#title/>'
       });
     }
     if (T != null) {
@@ -580,7 +497,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 1,
         lnpart: 1,
         xtra: 1,
-        isloc: 0,
+        locid: null,
         line: 'A Grand Union'
       });
     }
@@ -590,7 +507,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 1,
         lnpart: 2,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: '</title>'
       });
     }
@@ -600,7 +517,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 2,
         lnpart: 0,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: '<article>'
       });
     }
@@ -610,7 +527,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 3,
         lnpart: 0,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: '  <p>Here comes some '
       });
     }
@@ -620,7 +537,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 3,
         lnpart: 1,
         xtra: 0,
-        isloc: 1,
+        locid: 'content',
         line: '<mrg:loc#content/>'
       });
     }
@@ -630,7 +547,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 3,
         lnpart: 1,
         xtra: 1,
-        isloc: 0,
+        locid: null,
         line: 'more '
       });
     }
@@ -640,7 +557,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 3,
         lnpart: 1,
         xtra: 2,
-        isloc: 0,
+        locid: null,
         line: 'content'
       });
     }
@@ -650,7 +567,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 3,
         lnpart: 2,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: '.</p>'
       });
     }
@@ -660,7 +577,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 4,
         lnpart: 0,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: '  </article>'
       });
     }
@@ -670,7 +587,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         lnr: 5,
         lnpart: 0,
         xtra: 0,
-        isloc: 0,
+        locid: null,
         line: ''
       });
     }
@@ -685,7 +602,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
         {
           dsk: 'twcm',
           lnr: 1,
-          line: '<title><mrg:loc#title/>A Grand Union</title>'
+          line: '<title><mrg:loc.delete-marker#title/>A Grand Union</title>'
         },
         {
           dsk: 'twcm',
@@ -717,7 +634,7 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
 
   //-----------------------------------------------------------------------------------------------------------
   this["loc markers 3"] = function(T, done) {
-    var DBay, Mrg, db, dsk, mrg, path;
+    var DBay, Mrg, db, dsk, i, keep_locs, len, mrg, path, prefix, ref;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     ({Mrg} = require('../../../apps/dbay-rustybuzz/lib/_mirage'));
@@ -749,14 +666,55 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
     if (T != null) {
       T.eq(mrg.get_text({
         dsk,
+        keep_locs: null
+      }), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#content/>more content.</p>\n  </article>\n');
+    }
+    if (T != null) {
+      T.eq(mrg.get_text({
+        dsk,
         keep_locs: true
-      }), '<title><mrg:loc#title/>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#content/>more content.</p>\n  </article>\n');
+      }), '<title><mrg:loc.delete-marker#title/>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#content/>more content.</p>\n  </article>\n');
     }
     if (T != null) {
       T.eq(mrg.get_text({
         dsk,
         keep_locs: false
       }), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some more content.</p>\n  </article>\n');
+    }
+    //.........................................................................................................
+    prefix = 'mrg';
+    ref = [1, 0, null];
+    for (i = 0, len = ref.length; i < len; i++) {
+      keep_locs = ref[i];
+      console.table(db.all_rows(SQL`select distinct
+    r1.dsk                                              as dsk,
+    r1.lnr                                              as lnr,
+    -- coalesce( group_concat( r1.line, '' ) over w, '' )  as line
+    r1.line                                            as line
+    -- r1.lnpart                                           as lnpart,
+    -- r1.xtra                                             as xtra,
+    -- r1.locid                                            as locid,
+    -- r2.props                                            as props,
+    ,r2.del                                              as del
+    -- dsk                                             as dsk,
+    -- lnr                                             as lnr,
+  from ${prefix}_mirror as r1
+  left join ${prefix}_locs as r2 using ( dsk, locid )
+  where true
+    and ( r1.dsk = $dsk )
+    and ( case when $keep_locs or ( r2.del is null )
+      then true
+      else
+        case when ( $keep_locs is null ) and ( r2.del = true )
+          then true
+          else false
+          end
+        end )
+    -- and ( case when $keep_locs is null then not r2.del else ( r1.locid is not null ) end )
+  window w as (
+    partition by r1.lnr
+    order by r1.lnpart, r1.xtra
+    range between unbounded preceding and unbounded following );`, {dsk, keep_locs}));
     }
     if (typeof done === "function") {
       done();
@@ -860,11 +818,12 @@ values ( $dsk, $lnr, $lnpart, $xtra, $isloc, $line )`, {
       // test @[ "mrg.refresh_datasource" ]
       // test @[ "loc markers 1" ]
       // test @[ "loc markers 2" ]
-      // test @[ "loc markers 3" ]
-      // test @[ "loc markers 4" ]
-      return test(this["extended location marker matching"]);
+      return this["loc markers 3"]();
     })();
   }
+
+  // test @[ "loc markers 4" ]
+// test @[ "extended location marker matching" ]
 
 }).call(this);
 
