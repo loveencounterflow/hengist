@@ -34,6 +34,7 @@ template_path             = PATH.resolve PATH.join __dirname, '../../../assets/d
 cm_grid_path              = PATH.resolve PATH.join __dirname, '../../../assets/dbay-rustybuzz/demo-typeset-sample-cmgrid.svg'
 target_path               = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/html+svg-demos/demo-typeset-sample-page.output.html'
 ui_font_path              = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/iosevka-medium.woff2.data-uri'
+mudom_path                = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/mudom.js.data-uri'
 { to_width }              = require 'to-width'
 ITXT                      = require 'intertext'
 
@@ -240,10 +241,12 @@ write_output = ( cfg ) ->
   dtab            = new Tbl { db, }
   drb             = new Drb { db, rebuild: true, RBW, }
   dsk             = 'demo'
-  ui_font_data    = FS.readFileSync ui_font_path, { encoding: 'utf-8', }
+  ui_font_data    = ( FS.readFileSync ui_font_path, { encoding: 'utf-8', } ).trim()
+  mudom_data      = ( FS.readFileSync mudom_path,   { encoding: 'utf-8', } ).trim()
   drb.mrg.register_dsk        { dsk, path: template_path, }
   drb.mrg.refresh_datasource  { dsk, }
-  drb.mrg.append_to_loc       { dsk, locid: 'ui_font_data',  text: ui_font_data, }
+  drb.mrg.append_to_loc       { dsk, locid: 'ui_font_data',  text: ui_font_data, nl: false, }
+  drb.mrg.append_to_loc       { dsk, locid: 'mudom_data',    text: mudom_data,   nl: false, }
   doc             = 1
   par             = 1
   #.........................................................................................................

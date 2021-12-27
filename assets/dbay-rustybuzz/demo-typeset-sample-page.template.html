@@ -4,7 +4,33 @@
 <title><mrg:loc.delete-marker#title_page/> — SVG with glyph outlines</title>
 <style>
 
+<script src='<mrg:loc#mudom_data/>'></script>
+<script>
+  globalThis.µ  = require( 'mudom' );
+  globalThis.toggle_fontmetrics_shy = () => {
+    let is_shown = ! µ.DOM.toggle_class( µ.body, 'show-shy' );
+    if ( is_shown ) { µ.all_shys.forEach( ( element ) => { µ.DOM.hide( element ); } ); }
+    else            { µ.all_shys.forEach( ( element ) => { µ.DOM.show( element ); } ); }; };
+  globalThis.toggle_fontmetrics_wbr = () => {
+    let is_shown = ! µ.DOM.toggle_class( µ.body, 'show-wbr' );
+    if ( is_shown ) { µ.all_wbrs.forEach( ( element ) => { µ.DOM.hide( element ); } ); }
+    else            { µ.all_wbrs.forEach( ( element ) => { µ.DOM.show( element ); } ); }; };
+  globalThis.toggle_fontmetrics_ignored = () => {
+    let is_shown = ! µ.DOM.toggle_class( µ.body, 'show-ignored' );
+    if ( is_shown ) { µ.all_ignoreds.forEach( ( element ) => { µ.DOM.hide( element ); } ); }
+    else            { µ.all_ignoreds.forEach( ( element ) => { µ.DOM.show( element ); } ); }; };
+  µ.DOM.ready( function(){
+    µ.body          = µ.DOM.select_first( 'body'                );
+    µ.scalingwrap   = µ.DOM.select_first( 'scalingwrap'         );
+    µ.outlines      = µ.DOM.select_first( '#outlines'           );
+    µ.all_shys      = µ.DOM.select_all(   '.fontmetric.shy'     );
+    µ.all_wbrs      = µ.DOM.select_all(   '.fontmetric.wbr'     );
+    µ.all_ignoreds  = µ.DOM.select_all(   '.fontmetric.ignored' );
+    // µ.DOM.on( document, 'keydown', ( event ) => { alert( event ); } );
+    } );
+  </script>
 
+<style>
 
   @font-face {
     font-family:            'drb-ui';
