@@ -292,6 +292,7 @@ guy                       = require '../../../apps/guy'
   mrg.append_to_loc { dsk, locid: 'more-content', text: "and more content"  }
   debug '^45346^', mrg.get_text { dsk, keep_locs: null,  }
   T?.eq ( mrg.get_text { dsk, keep_locs: null,  } ), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#some-content/>some content and some more <mrg:loc#more-content/>and more content.</p>\n  </article>\n'
+  T?.eq ( mrg.get_text { dsk,                   } ), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#some-content/>some content and some more <mrg:loc#more-content/>and more content.</p>\n  </article>\n'
   T?.eq ( mrg.get_text { dsk, keep_locs: true,  } ), '<title><mrg:loc.delete-marker#title/>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#some-content/>some content and some more <mrg:loc#more-content/>and more content.</p>\n  </article>\n'
   T?.eq ( mrg.get_text { dsk, keep_locs: false, } ), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some some content and some more and more content.</p>\n  </article>\n'
   #.........................................................................................................
@@ -373,8 +374,8 @@ if require.main is module then do =>
   # test @[ "mrg.refresh_datasource" ]
   # test @[ "loc markers 1" ]
   # test @[ "loc markers 2" ]
-  # test @[ "loc markers 3" ]
+  test @[ "loc markers 3" ]
   # test @[ "loc markers 4" ]
   # test @[ "extended location marker matching" ]
-  test @[ "multiple loc markers in one line" ]
+  # test @[ "multiple loc markers in one line" ]
 
