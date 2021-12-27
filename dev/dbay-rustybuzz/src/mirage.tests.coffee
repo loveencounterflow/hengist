@@ -262,9 +262,9 @@ guy                       = require '../../../apps/guy'
   mrg.register_dsk { dsk, path, }
   mrg.refresh_datasource { dsk, }
   #.........................................................................................................
-  mrg.append_to_loc { dsk, locid: 'title',  text: "A Grand Union" }
-  mrg.append_to_loc { dsk, locid: 'content', text: "more "        }
-  mrg.append_to_loc { dsk, locid: 'content', text: "content"      }
+  mrg.append_to_loc { dsk, locid: 'title',   text: "A Grand Union", nl: false,  }
+  mrg.append_to_loc { dsk, locid: 'content', text: "more ",         nl: false,  }
+  mrg.append_to_loc { dsk, locid: 'content', text: "content",       nl: false,  }
   T?.eq ( mrg.get_text { dsk, keep_locs: null,  } ), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#content/>more content.</p>\n  </article>\n'
   T?.eq ( mrg.get_text { dsk, keep_locs: true,  } ), '<title><mrg:loc.delete-marker#title/>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#content/>more content.</p>\n  </article>\n'
   T?.eq ( mrg.get_text { dsk, keep_locs: false, } ), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some more content.</p>\n  </article>\n'
