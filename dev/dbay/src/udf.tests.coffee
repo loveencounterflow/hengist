@@ -275,6 +275,94 @@ jp                        = JSON.parse
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "assertions, warnings" ] = ( T, done ) ->
+  # T.halt_on_error()
+  { DBay }          = require H.dbay_path
+  schema            = 'main'
+  { template_path
+    work_path }     = await H.procure_db { size: 'nnt', ref: 'fnsquareview', }
+  #.........................................................................................................
+  do ->
+    db  = new DBay { path: work_path, schema, }
+    FS = require 'fs'
+    # output_fd = FS.openSync '/tmp/mystdout.txt', 'w'
+    db.create_stdlib()
+    console.table db.all_rows SQL"""
+      with v1 as ( select
+        std_info( t ) as info,
+        std_warn_unless(
+          count(*) > 0,
+          '^2734-1^ expected one or more rows, got ' || count(*) ) as _message
+        from nnt
+        where true
+          and ( n != 0 ) )
+      select
+          *
+        from nnt, v1
+        where true
+          and ( n != 0 );"""
+    console.table db.all_rows SQL"""
+      select
+          *
+          ,std_warn_unless( count(*) > 0, '^2734-1^ expected one or more rows, got ' || count(*) ) as _message
+        from nnt
+        where true
+          and ( n != 0 );"""
+    console.table db.all_rows SQL"""
+      select
+          *,
+          std_warn_unless( count(*) > 0, '^2734-2^ expected one or more rows, got ' || count(*) ) as _message
+        from nnt
+        where true
+          and ( n != 0 )
+          and ( t = 'nonexistant' );"""
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "XXXXXX aggregate function" ] = ( T, done ) ->
+  # T.halt_on_error()
+  { DBay }          = require H.dbay_path
+  schema            = 'main'
+  { template_path
+    work_path }     = await H.procure_db { size: 'nnt', ref: 'fnsquareview', }
+  db                = new DBay { path: work_path, schema, }
+  numbers           = db.all_first_values SQL"select n from nnt order by n;"
+  #.........................................................................................................
+  db.create_aggregate_function
+    name:           'product'
+    start:          -> null
+    step:           ( total, element ) -> debug '^4476^', { total, element, }; ( total ? 1 ) * element
+  #.........................................................................................................
+  db.create_aggregate_function
+    name:           'std_keep'
+    start:          1
+    step:           ( total, element ) -> debug '^4476^', { total, element, }; ( total ? 1 ) * element
+    result:         ( x ) -> debug '^4476^', { x, }; 42
+  #.........................................................................................................
+  console.table db.all_rows SQL"""
+    select
+        *,
+        product( null ) as keep
+      from nnt
+      where true
+        -- and ( t = 'xxx' )
+        and ( n != 0 )
+      ;
+
+    """
+  # db.execute SQL"create view squares as select n, square( n ) as square from nnt order by n;"
+  # matcher = [ 0, 1, 2.25, 4, 5.289999999999999, 9, 9.610000000000001, 16, 25, 36, 49, 64, 81, 100, 121, 144 ]
+  # result  = db.all_rows SQL"select * from squares;"
+  # console.table result
+  # result  = ( row.square for row in result )
+  # debug '^984^', result
+  # T?.eq result, matcher
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBAY/UDF typing" ] = ( T, done ) ->
   # T.halt_on_error()
   { DBay }          = require H.dbay_path
@@ -393,12 +481,13 @@ jp                        = JSON.parse
 
 ############################################################################################################
 if module is require.main then do =>
-  test @, { timeout: 10e3, }
+  # test @, { timeout: 10e3, }
   # test @[ "DBAY/UDF window functions etc." ]
   # test @[ "DBAY/UDF User-Defined Window Function" ]
   # test @[ "DBAY/UDF view with UDF" ]
   # test @[ "DBAY/UDF typing" ]
   # test @[ "DBAY/UDF concurrent UDFs 2" ]
-
+  # @[ "XXXXXX aggregate function" ]()
+  @[ "assertions, warnings" ]()
 
 
