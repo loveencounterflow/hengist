@@ -90,7 +90,7 @@ do =>
       fontnick  = 'eg8i'
       fspath    = 'EBGaramond08-Italic.otf'
       chrs      = "abcdefghijklm"
-      text      = "affirm affluent"
+      text      = "affirm こちらはいい affluent"
     when 'specials-eg8i'
       fontnick  = 'eg8i'
       fspath    = 'EBGaramond08-Italic.otf'
