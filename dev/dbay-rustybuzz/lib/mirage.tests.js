@@ -651,17 +651,20 @@ values ( $dsk, $lnr, $lnpart, $xtra, $locid, $line )`, {
     mrg.append_to_loc({
       dsk,
       locid: 'title',
-      text: "A Grand Union"
+      text: "A Grand Union",
+      nl: false
     });
     mrg.append_to_loc({
       dsk,
       locid: 'content',
-      text: "more "
+      text: "more ",
+      nl: false
     });
     mrg.append_to_loc({
       dsk,
       locid: 'content',
-      text: "content"
+      text: "content",
+      nl: false
     });
     if (T != null) {
       T.eq(mrg.get_text({
@@ -727,6 +730,9 @@ values ( $dsk, $lnr, $lnpart, $xtra, $locid, $line )`, {
         dsk,
         keep_locs: null
       }), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#some-content/>some content and some more <mrg:loc#more-content/>and more content.</p>\n  </article>\n');
+    }
+    if (T != null) {
+      T.eq(mrg.get_text({dsk}), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#some-content/>some content and some more <mrg:loc#more-content/>and more content.</p>\n  </article>\n');
     }
     if (T != null) {
       T.eq(mrg.get_text({
@@ -842,12 +848,13 @@ values ( $dsk, $lnr, $lnpart, $xtra, $locid, $line )`, {
       // test @[ "mrg.refresh_datasource" ]
       // test @[ "loc markers 1" ]
       // test @[ "loc markers 2" ]
-      // test @[ "loc markers 3" ]
-      // test @[ "loc markers 4" ]
-      // test @[ "extended location marker matching" ]
-      return test(this["multiple loc markers in one line"]);
+      return test(this["loc markers 3"]);
     })();
   }
+
+  // test @[ "loc markers 4" ]
+// test @[ "extended location marker matching" ]
+// test @[ "multiple loc markers in one line" ]
 
 }).call(this);
 

@@ -660,6 +660,108 @@ create trigger multiple_instead_update instead of update on multiples begin
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["assertions, warnings"] = async function(T, done) {
+    var DBay, schema, template_path, work_path;
+    // T.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    schema = 'main';
+    ({template_path, work_path} = (await H.procure_db({
+      size: 'nnt',
+      ref: 'fnsquareview'
+    })));
+    (function() {      //.........................................................................................................
+      var FS, db;
+      db = new DBay({
+        path: work_path,
+        schema
+      });
+      FS = require('fs');
+      // output_fd = FS.openSync '/tmp/mystdout.txt', 'w'
+      db.create_stdlib();
+      console.table(db.all_rows(SQL`with v1 as ( select
+  std_info( t ) as info,
+  std_warn_unless(
+    count(*) > 0,
+    '^2734-1^ expected one or more rows, got ' || count(*) ) as _message
+  from nnt
+  where true
+    and ( n != 0 ) )
+select
+    *
+  from nnt, v1
+  where true
+    and ( n != 0 );`));
+      console.table(db.all_rows(SQL`select
+    *
+    ,std_warn_unless( count(*) > 0, '^2734-1^ expected one or more rows, got ' || count(*) ) as _message
+  from nnt
+  where true
+    and ( n != 0 );`));
+      console.table(db.all_rows(SQL`select
+    *,
+    std_warn_unless( count(*) > 0, '^2734-2^ expected one or more rows, got ' || count(*) ) as _message
+  from nnt
+  where true
+    and ( n != 0 )
+    and ( t = 'nonexistant' );`));
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["XXXXXX aggregate function"] = async function(T, done) {
+    var DBay, db, numbers, schema, template_path, work_path;
+    // T.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    schema = 'main';
+    ({template_path, work_path} = (await H.procure_db({
+      size: 'nnt',
+      ref: 'fnsquareview'
+    })));
+    db = new DBay({
+      path: work_path,
+      schema
+    });
+    numbers = db.all_first_values(SQL`select n from nnt order by n;`);
+    //.........................................................................................................
+    db.create_aggregate_function({
+      name: 'product',
+      start: function() {
+        return null;
+      },
+      step: function(total, element) {
+        debug('^4476^', {total, element});
+        return (total != null ? total : 1) * element;
+      }
+    });
+    //.........................................................................................................
+    db.create_aggregate_function({
+      name: 'std_keep',
+      start: 1,
+      step: function(total, element) {
+        debug('^4476^', {total, element});
+        return (total != null ? total : 1) * element;
+      },
+      result: function(x) {
+        debug('^4476^', {x});
+        return 42;
+      }
+    });
+    //.........................................................................................................
+    console.table(db.all_rows(SQL`select
+    *,
+    product( null ) as keep
+  from nnt
+  where true
+    -- and ( t = 'xxx' )
+    and ( n != 0 )
+  ;
+`));
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DBAY/UDF typing"] = async function(T, done) {
     var DBay, as_boolean, d/* NOTE: consume iterator to free connection */, db, error, iterator, schema, statement, template_path, work_path;
     // T.halt_on_error()
@@ -893,17 +995,16 @@ create trigger multiple_instead_update instead of update on multiples begin
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this, {
-        timeout: 10e3
-      });
+      // test @, { timeout: 10e3, }
+      // test @[ "DBAY/UDF window functions etc." ]
+      // test @[ "DBAY/UDF User-Defined Window Function" ]
+      // test @[ "DBAY/UDF view with UDF" ]
+      // test @[ "DBAY/UDF typing" ]
+      // test @[ "DBAY/UDF concurrent UDFs 2" ]
+      // @[ "XXXXXX aggregate function" ]()
+      return this["assertions, warnings"]();
     })();
   }
-
-  // test @[ "DBAY/UDF window functions etc." ]
-// test @[ "DBAY/UDF User-Defined Window Function" ]
-// test @[ "DBAY/UDF view with UDF" ]
-// test @[ "DBAY/UDF typing" ]
-// test @[ "DBAY/UDF concurrent UDFs 2" ]
 
 }).call(this);
 
