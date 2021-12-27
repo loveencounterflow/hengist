@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/stdout-prefixer.coffee"
+  ],
+  "names": [],
+  "mappings": "AAEA;EAAA;AAAA,MAAA,GAAA,EAAA,KAAA,EAAA,KAAA,EAAA,IAAA,EAAA,IAAA,EAAA,IAAA,EAAA,MAAA,EAAA,GAAA,EAAA,IAAA,EAAA,IAAA,EAAA,OAAA;;;EAGA,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,GAAA,GAA4B,GAAG,CAAC;;EAChC,KAAA,GAA4B;;EAC5B,KAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,OAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,SAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,IAAI,CAAC,IAAT,CAAc,GAAd,EAZ5B;;;EAgBA,MAAA,GAAS,QAAA,CAAA,CAAA;AACT,QAAA,MAAA,EAAA,KAAA,EAAA;IAAE,IAAA,CAAK,SAAL,EAAF;;;IAGE,CAAA,CAAE,KAAF,EACE,MADF,EAEE,MAFF,CAAA,GAEc,OAFd;IAGA,KAAK,CAAC,WAAN,CAAkB,OAAlB,EANF;;IAQE,KAAK,CAAC,EAAN,CAAS,MAAT,EAAiB,CAAE,IAAF,CAAA,GAAA;AACnB,UAAA,CAAA,EAAA,GAAA,EAAA,IAAA,EAAA,GAAA,EAAA,GAAA,EAAA;MAAI,GAAA,GAAM,IAAI,IAAJ,CAAA,CAAU,CAAC,QAAX,CAAA;AACN;AAAA;MAAA,KAAA,qCAAA;;qBAAA,IAAA,CAAK,CAAA,CAAA,CAAG,GAAH,EAAA,CAAA,CAAU,IAAV,CAAA,CAAL;MAAA,CAAA;;IAFe,CAAjB;AAGA,WAAO;EAZA,EAhBT;;;EAgCA,IAAG,MAAA,KAAU,OAAO,CAAC,IAArB;IAAkC,CAAA,CAAA,CAAA,GAAA;aAChC,MAAA,CAAA;IADgC,CAAA,IAAlC;;AAhCA",
+  "sourcesContent": [
+    "\n\n'use strict'\n\n############################################################################################################\nCND                       = require 'cnd'\nrpr                       = CND.rpr\nbadge                     = 'PREFIXER'\ndebug                     = CND.get_logger 'debug',     badge\nwarn                      = CND.get_logger 'warn',      badge\ninfo                      = CND.get_logger 'info',      badge\nurge                      = CND.get_logger 'urge',      badge\nhelp                      = CND.get_logger 'help',      badge\nwhisper                   = CND.get_logger 'whisper',   badge\necho                      = CND.echo.bind CND\n\n\n#-----------------------------------------------------------------------------------------------------------\nprefix = ->\n  info '^34534^'\n  # debug date = Temporal.Now.plainDateISO()\n  # info date.toString()\n  { stdin\n    stdout\n    stderr }  = process\n  stdin.setEncoding 'utf-8'\n  # stdin.resume()\n  stdin.on 'data', ( data ) =>\n    now = new Date().toString()\n    echo \"#{now} #{line}\" for line in data.split '\\n'\n  return null\n\n\n############################################################################################################\nif module is require.main then do =>\n  prefix()\n\n\n\n\n\n"
+  ]
+}
