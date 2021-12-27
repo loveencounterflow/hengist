@@ -75,8 +75,8 @@ append_title = ( cfg ) ->
   { drb
     dsk
     title } = cfg
-  drb.mrg.append_to_loc { dsk, locid: 'title_page',     text: title, }
-  drb.mrg.append_to_loc { dsk, locid: 'title_heading',  text: title, }
+  drb.mrg.append_to_loc { dsk, locid: 'title_page',     text: title, nl: false, }
+  drb.mrg.append_to_loc { dsk, locid: 'title_heading',  text: title, nl: false, }
   return null
 
 #-----------------------------------------------------------------------------------------------------------
