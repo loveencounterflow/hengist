@@ -222,8 +222,7 @@ append_content = ( cfg ) ->
 write_output = ( cfg ) ->
   { drb
     dsk } = cfg
-  page    = drb.mrg.get_text { dsk, keep_locs: false, }
-  FS.writeFileSync target_path, page
+  FS.writeFileSync target_path, drb.mrg.get_text { dsk, }
   return null
 
 
