@@ -39,11 +39,43 @@
     unicode-range:          U+00000-10ffff; }
 
   body {
+    font-family:            'drb-ui';
     background-color:       #96f0c93b;
-    transform-origin:       0px 0px 0px;
-    transform:              scale(1.4157,1.4157);
     padding:                10mm;
     caret-color:            red; }
+
+  scalingwrap {
+    display:                block;
+    transform-origin:       0px 0px 0px;
+    transform:              scale(1.4157,1.4157); }
+
+  toolbox {
+    display:                block;
+    z-index:                100;
+    border:                 1px solid black;
+    opacity:                0.5;
+    transition:             opacity 0.25s ease-in-out;
+    background-color:       white;
+    padding:                2mm;
+    border-radius:          2mm;
+    position:               fixed;
+    top:                    5mm;
+    left:                   5mm; }
+
+  toolbox:hover {
+    transition:             opacity 0.25s ease-in-out;
+    opacity:                1; }
+
+  toolbox button {
+    background-color:       whitesmoke;
+    font-family:            'drb-ui';
+    font-size:              3mm; }
+
+  .show-grid    toolbox button.grid     { background-color: yellow; }
+  .show-text    toolbox button.text     { background-color: yellow; }
+  .show-shy     toolbox button.shy      { background-color: yellow; }
+  .show-wbr     toolbox button.wbr      { background-color: yellow; }
+  .show-ignored toolbox button.ignored  { background-color: yellow; }
 
   .shady {
     fill:                   blue;
@@ -75,16 +107,11 @@
     fill:                   white; }
 
   .fontmetric {
+    /*display:                none;*/
     mix-blend-mode:         multiply;
     opacity:                0.5;
     font-size:              100mm;
-    font-family:            'drb-ui';
     font-weight:            bolder; }
-
-  .fontmetric.shy     { display: inherit; }
-  .fontmetric.wbr     { display: inherit; }
-  .fontmetric.hhy     { display: inherit; }
-  .fontmetric.ignored { display: inherit; }
 
   g.fontmetric text {
     stroke-width:           0;
@@ -120,6 +147,18 @@
   g.fontmetric circle {
     stroke-width:           10mm; }
 
+  /*g.fontmetric.shy { display: none; }*/
+  .show-shy g.fontmetric.shy { display: inline; }
+                /*.shy     { display: none; }*/
+                /*.wbr     { display: none; }*/
+                /*.hhy     { display: none; }*/
+                /*.ignored { display: none; }*/
+  /*#scalingwrap.show-shy     .shy     { display: inline; }*/
+  /*#scalingwrap.show-wbr     .wbr     { display: inline; }*/
+  /*#scalingwrap.show-hhy     .hhy     { display: inline; }*/
+  /*#scalingwrap.show-ignored .ignored { display: inline; }*/
+
+
   remarks {
     font-family:            'drb-ui';
     display:                block;
@@ -147,7 +186,7 @@
     opacity:                0.75; }
 
   textcontainer {
-    display:                block;
+    display:                none;
     position:               absolute;
     width:                  210mm;
     height:                 297mm;
@@ -155,9 +194,13 @@
     font-size:              10mm;
     line-height:            10mm; }
 
+  .show-text textcontainer {
+    display:                block; }
+
   textcontainer div {
     position:               absolute;
-    color:                  transparent; }
+    color:                  transparent;
+    color:  fuchsia; }
 
   svg text,
   h1,
@@ -173,7 +216,23 @@
   </style>
 
 <!-- <body> -->
-<body class='reveal-blocks show-grid'>
+<body class='reveal-blocks show-grid show-shy show-wbr show-hhy show-ignored show-text'>
+<toolbox>
+  <button class=grid    onclick="µ.DOM.toggle_class( µ.body, 'show-grid' );">grid</button>
+  <button class=text    onclick="µ.DOM.toggle_class( µ.body, 'show-text' );">text</button>
+  <button class=shy     onclick="toggle_fontmetrics_shy();">shy</button>
+  <button class=wbr     onclick="toggle_fontmetrics_wbr();">wbr</button>
+  <button class=ignored onclick="toggle_fontmetrics_ignored();">ignored</button>
+  </toolbox>
+<svg id='outlines' class='svg-font' viewBox='0 0 1000 1000' overflow='visible'>
+<mrg:loc#outlines/>
+</svg>
+
+
+<!-- All elements with `position: fixed` must be placed outside of the scalingwrape as it
+  uses a CSS `transform` for scaling which creates a new positioning context and thus interferes
+  with `position: fixed`. -->
+<scalingwrap id='scalingwrap'>
 <mrg:loc#grid/>
 
 <!-- =================================================================================================== -->
@@ -182,12 +241,6 @@
 <!-- Only integer numbers are used in outlines so a 1cm high glyf has a precision of 0.01mm -->
 <!-- and a 10cm high glyf still has a precision of 0.1mm, which should be good enough. -->
 <!-- <path id='o74lmc' d='M839-18C839-31 ...'/> -->
-<svg id='outlines' class='svg-font' viewBox='0 0 1000 1000' overflow='visible'>
-<mrg:loc#outlines/>
-<!--?outlines-start?-->
-<!--?outlines-end?-->
-</svg>
-
 <h1><mrg:loc#title_heading/></h1>
 
 <remarks><mrg:loc#remarks/></remarks>
@@ -203,5 +256,6 @@
 <!-- <rect style='width:10mm;height:10mm;fill:deepskyblue;'/> -->
 <mrg:loc#content/>
 </svg>
+</scalingwrap>
 
 </body>
