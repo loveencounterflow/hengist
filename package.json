@@ -14,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@ef-carbon/deep-freeze": "^1.0.1",
+    "@js-temporal/polyfill": "^0.3.0",
     "@scotttrinh/number-ranges": "^2.1.0",
     "@sindresorhus/transliterate": "^1.5.0",
     "argparse": "^2.0.1",
