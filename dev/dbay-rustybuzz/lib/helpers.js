@@ -122,7 +122,7 @@
         fontnick = 'eg8i';
         fspath = 'EBGaramond08-Italic.otf';
         chrs = "abcdefghijklm";
-        text = "affirm こちらはいい affluent";
+        text = "affirmこちらはいいaffluent";
         break;
       case 'specials-eg8i':
         fontnick = 'eg8i';
