@@ -7,26 +7,8 @@
 <script src='<mrg:loc#mudom_data/>'></script>
 <script>
   globalThis.µ  = require( 'mudom' );
-  globalThis.toggle_fontmetrics_shy = () => {
-    let is_shown = ! µ.DOM.toggle_class( µ.body, 'show-shy' );
-    if ( is_shown ) { µ.all_shys.forEach( ( element ) => { µ.DOM.hide( element ); } ); }
-    else            { µ.all_shys.forEach( ( element ) => { µ.DOM.show( element ); } ); }; };
-  globalThis.toggle_fontmetrics_wbr = () => {
-    let is_shown = ! µ.DOM.toggle_class( µ.body, 'show-wbr' );
-    if ( is_shown ) { µ.all_wbrs.forEach( ( element ) => { µ.DOM.hide( element ); } ); }
-    else            { µ.all_wbrs.forEach( ( element ) => { µ.DOM.show( element ); } ); }; };
-  globalThis.toggle_fontmetrics_ignored = () => {
-    let is_shown = ! µ.DOM.toggle_class( µ.body, 'show-ignored' );
-    if ( is_shown ) { µ.all_ignoreds.forEach( ( element ) => { µ.DOM.hide( element ); } ); }
-    else            { µ.all_ignoreds.forEach( ( element ) => { µ.DOM.show( element ); } ); }; };
   µ.DOM.ready( function(){
     µ.body          = µ.DOM.select_first( 'body'                );
-    µ.scalingwrap   = µ.DOM.select_first( 'scalingwrap'         );
-    µ.outlines      = µ.DOM.select_first( '#outlines'           );
-    µ.all_shys      = µ.DOM.select_all(   '.fontmetric.shy'     );
-    µ.all_wbrs      = µ.DOM.select_all(   '.fontmetric.wbr'     );
-    µ.all_ignoreds  = µ.DOM.select_all(   '.fontmetric.ignored' );
-    // µ.DOM.on( document, 'keydown', ( event ) => { alert( event ); } );
     } );
   </script>
 
@@ -34,7 +16,6 @@
 
   @font-face {
     font-family:            'drb-ui';
-    /*src:                    url( '/iosevka-medium.woff2' );*/
     src:                    url( '<mrg:loc#ui_font_data/>' );
     unicode-range:          U+00000-10ffff; }
 
@@ -107,7 +88,6 @@
     fill:                   white; }
 
   .fontmetric {
-    /*display:                none;*/
     mix-blend-mode:         multiply;
     opacity:                0.5;
     font-size:              100mm;
@@ -147,16 +127,6 @@
   g.fontmetric circle {
     stroke-width:           10mm; }
 
-  /*g.fontmetric.shy { display: none; }*/
-  .show-shy g.fontmetric.shy { display: inline; }
-                /*.shy     { display: none; }*/
-                /*.wbr     { display: none; }*/
-                /*.hhy     { display: none; }*/
-                /*.ignored { display: none; }*/
-  /*#scalingwrap.show-shy     .shy     { display: inline; }*/
-  /*#scalingwrap.show-wbr     .wbr     { display: inline; }*/
-  /*#scalingwrap.show-hhy     .hhy     { display: inline; }*/
-  /*#scalingwrap.show-ignored .ignored { display: inline; }*/
 
 
   remarks {
@@ -210,8 +180,6 @@
   .glyfgridgid {
     font-size:              100mm; /* to be scaled */
     fill:                   red; }
-
-/*textcontainer { display: none; }*/
 
   </style>
 
