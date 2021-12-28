@@ -123,7 +123,7 @@ append_outlines = ( cfg ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-_append_fontmetrics = ( cfg ) ->
+_append_fontmetric_hgrid = ( cfg ) ->
   { drb, dsk, fontnick, size_mm, mm_p_u, } = cfg
   fm      = drb.get_fontmetrics { fontnick, }
   swdth   = 0.25 # stroke width in mm
@@ -167,19 +167,21 @@ append_content = ( cfg ) ->
     drb.mrg.append_to_loc {
       dsk,
       locid: 'content',
-      text:  "<g transform='translate(#{x0} #{line_y}) scale(#{mm_p_u_txt})'>", }
+      text:  "<!-- ^42-1^ --><g transform='translate(#{x0} #{line_y}) scale(#{mm_p_u_txt})'>", }
     line_text = ''
     line_y    = line_y0 + ( line_y_delta * ( lnr - 1 ) )
     for ad from drb.db SQL"""
       select
-          a.sid     as sid,
-          a.chrs    as chrs,
-          a.dx      as dx,
-          a.dy      as dy,
-          l.x       as x,
-          l.y       as y,
-          l.lnr     as lnr,
-          l.ads_id  as ads_id
+          a.fontnick  as fontnick,
+          a.gid       as gid,
+          a.sid       as sid,
+          a.chrs      as chrs,
+          a.dx        as dx,
+          a.dy        as dy,
+          l.x         as x,
+          l.y         as y,
+          l.lnr       as lnr,
+          l.ads_id    as ads_id
         from #{drb.cfg.schema}.line_ads as l
         left join #{drb.cfg.schema}.ads as a on ( l.ads_id = a.id )
         where true
@@ -194,11 +196,20 @@ append_content = ( cfg ) ->
         ### TAINT use standard method ###
         chrs_htxt = _escape_for_html_text ad.chrs
         relwdth   = ad.dx / 1000 ### relative width of missing outline rectangle ###
-        element   = """<!--#{chrs_ctxt}--><use href='##{missing_sid}' class='missing' transform='translate(#{ad.x} #{ad.y}) scale(#{relwdth} 1)'/>\
+        element   = """<!-- ^42-2^ #{chrs_ctxt}--><use href='##{missing_sid}' class='missing' transform='translate(#{ad.x} #{ad.y}) scale(#{relwdth} 1)'/>\
           <text class='missing-chrs' style='font-size:1000px;transform:skew(#{fm.angle}deg)' x='#{ad.x}' y='#{ad.y}'>#{chrs_htxt}</text>"""
       else
-        if ad.y is 0 then element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}'/>"
-        else              element = "<!--#{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
+        clasz = ( specials[ ad.gid ] ? null )?.name ? null
+        if ad.y is 0
+          if clasz?
+            element = "<!-- ^42-3^ #{chrs_ctxt}--><use class='fontmetrics #{clasz}' href='##{ad.sid}' x='#{ad.x}'/>"
+          else
+            element = "<!-- ^42-4^ #{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}'/>"
+        else
+          if clasz?
+            element = "<!-- ^42-5^ #{chrs_ctxt}--><use class='fontmetrics #{clasz}' href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
+          else
+            element = "<!-- ^42-6^ #{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
       drb.mrg.append_to_loc { dsk, locid: 'content', text: element, }
     drb.mrg.append_to_loc { dsk, locid: 'content', text: "</g>", }
     info '^43487^', { doc, par, lnr, }, rpr line_text
@@ -291,7 +302,7 @@ write_output = ( cfg ) ->
   y0    = 50
   append_outlines { drb, dsk, fontnick, size_mm, mm_p_u, missing_sid, known_ods, }
   append_content  { drb, dsk, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid, }
-  # page  = _append_fontmetrics { drb, page, fontnick, size_mm, mm_p_u, }
+  # page  = _append_fontmetric_hgrid { drb, page, fontnick, size_mm, mm_p_u, }
   #.........................................................................................................
   write_output { drb, dsk, }
   console.table db.all_rows SQL"""
