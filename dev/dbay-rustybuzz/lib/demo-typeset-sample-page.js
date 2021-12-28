@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_fontmetrics, _escape_for_html_comment, _escape_for_html_text, _escape_syms, append_content, append_grid, append_outlines, append_remarks, append_title, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, mudom_path, rpr, target_path, template_path, to_width, type_of, types, ui_font_path, urge, validate, validate_list_of, warn, whisper, write_output,
+  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_fontmetric_hgrid, _escape_for_html_comment, _escape_for_html_text, _escape_syms, append_content, append_grid, append_outlines, append_remarks, append_title, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, mudom_path, rpr, target_path, template_path, to_width, type_of, types, ui_font_path, urge, validate, validate_list_of, warn, whisper, write_output,
     modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
@@ -188,7 +188,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  _append_fontmetrics = function(cfg) {
+  _append_fontmetric_hgrid = function(cfg) {
     var drb, dsk, fm, fontnick, mm_p_u, size_mm, swdth;
     ({drb, dsk, fontnick, size_mm, mm_p_u} = cfg);
     fm = drb.get_fontmetrics({fontnick});
@@ -228,7 +228,7 @@
     /* TAINT add to cfg type */
     /* TAINT use API */
     /* TAINT use field `rnr` to determine where to stop */
-    var ad, chrs_ctxt, chrs_htxt, doc, drb, dsk, element, fm, fontnick, i, line_text, line_y, line_y0, line_y_delta, lnr, lnr_1, lnr_2, missing, missing_sid, mm_p_u, mm_p_u_txt, par, ref, ref1, ref2, ref3, relwdth, size_mm, specials, text, width_mm, x0, y0;
+    var ad, chrs_ctxt, chrs_htxt, clasz, doc, drb, dsk, element, fm, fontnick, i, line_text, line_y, line_y0, line_y_delta, lnr, lnr_1, lnr_2, missing, missing_sid, mm_p_u, mm_p_u_txt, par, ref, ref1, ref2, ref3, ref4, ref5, ref6, relwdth, size_mm, specials, text, width_mm, x0, y0;
     ({drb, dsk, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid} = cfg);
     ({specials} = drb.constructor.C);
     ({missing} = specials);
@@ -263,19 +263,21 @@
       drb.mrg.append_to_loc({
         dsk,
         locid: 'content',
-        text: `<g transform='translate(${x0} ${line_y}) scale(${mm_p_u_txt})'>`
+        text: `<!-- ^42-1^ --><g transform='translate(${x0} ${line_y}) scale(${mm_p_u_txt})'>`
       });
       line_text = '';
       line_y = line_y0 + (line_y_delta * (lnr - 1));
       ref2 = drb.db(SQL`select
-    a.sid     as sid,
-    a.chrs    as chrs,
-    a.dx      as dx,
-    a.dy      as dy,
-    l.x       as x,
-    l.y       as y,
-    l.lnr     as lnr,
-    l.ads_id  as ads_id
+    a.fontnick  as fontnick,
+    a.gid       as gid,
+    a.sid       as sid,
+    a.chrs      as chrs,
+    a.dx        as dx,
+    a.dy        as dy,
+    l.x         as x,
+    l.y         as y,
+    l.lnr       as lnr,
+    l.ads_id    as ads_id
   from ${drb.cfg.schema}.line_ads as l
   left join ${drb.cfg.schema}.ads as a on ( l.ads_id = a.id )
   where true
@@ -290,12 +292,21 @@
         if (ad.gid === missing.gid) {
           chrs_htxt = _escape_for_html_text(ad.chrs);
           relwdth = ad.dx / 1000/* relative width of missing outline rectangle */
-          element = `<!--${chrs_ctxt}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;transform:skew(${fm.angle}deg)' x='${ad.x}' y='${ad.y}'>${chrs_htxt}</text>`;
+          element = `<!-- ^42-2^ ${chrs_ctxt}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;transform:skew(${fm.angle}deg)' x='${ad.x}' y='${ad.y}'>${chrs_htxt}</text>`;
         } else {
+          clasz = (ref4 = (ref5 = (ref6 = specials[ad.gid]) != null ? ref6 : null) != null ? ref5.name : void 0) != null ? ref4 : null;
           if (ad.y === 0) {
-            element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}'/>`;
+            if (clasz != null) {
+              element = `<!-- ^42-3^ ${chrs_ctxt}--><use class='fontmetrics ${clasz}' href='#${ad.sid}' x='${ad.x}'/>`;
+            } else {
+              element = `<!-- ^42-4^ ${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}'/>`;
+            }
           } else {
-            element = `<!--${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
+            if (clasz != null) {
+              element = `<!-- ^42-5^ ${chrs_ctxt}--><use class='fontmetrics ${clasz}' href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
+            } else {
+              element = `<!-- ^42-6^ ${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
+            }
           }
         }
         drb.mrg.append_to_loc({
@@ -438,7 +449,7 @@
     y0 = 50;
     append_outlines({drb, dsk, fontnick, size_mm, mm_p_u, missing_sid, known_ods});
     append_content({drb, dsk, fontnick, x0, y0, width_mm, size_mm, mm_p_u, mm_p_u_txt, text, missing_sid});
-    // page  = _append_fontmetrics { drb, page, fontnick, size_mm, mm_p_u, }
+    // page  = _append_fontmetric_hgrid { drb, page, fontnick, size_mm, mm_p_u, }
     //.........................................................................................................
     write_output({drb, dsk});
     console.table(db.all_rows(SQL`select
