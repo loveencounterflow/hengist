@@ -35,6 +35,7 @@ cm_grid_path              = PATH.resolve PATH.join __dirname, '../../../assets/d
 target_path               = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/html+svg-demos/demo-typeset-sample-page.output.html'
 ui_font_path              = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/iosevka-medium.woff2.data-uri'
 mudom_path                = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/mudom.js.data-uri'
+favicon_path              = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/mingkwai-icon.128.png.data-uri'
 { to_width }              = require 'to-width'
 ITXT                      = require 'intertext'
 
@@ -254,10 +255,12 @@ write_output = ( cfg ) ->
   dsk             = 'demo'
   ui_font_data    = ( FS.readFileSync ui_font_path, { encoding: 'utf-8', } ).trim()
   mudom_data      = ( FS.readFileSync mudom_path,   { encoding: 'utf-8', } ).trim()
+  favicon_data    = ( FS.readFileSync favicon_path, { encoding: 'utf-8', } ).trim()
   drb.mrg.register_dsk        { dsk, path: template_path, }
   drb.mrg.refresh_datasource  { dsk, }
   drb.mrg.append_to_loc       { dsk, locid: 'ui_font_data',  text: ui_font_data, nl: false, }
   drb.mrg.append_to_loc       { dsk, locid: 'mudom_data',    text: mudom_data,   nl: false, }
+  drb.mrg.append_to_loc       { dsk, locid: 'favicon_data',  text: favicon_data, nl: false, }
   doc             = 1
   par             = 1
   #.........................................................................................................
