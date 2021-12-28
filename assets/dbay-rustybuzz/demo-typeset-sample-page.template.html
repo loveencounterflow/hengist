@@ -127,6 +127,10 @@
   .show-wbr     toolbox button.wbr      { background-color: yellow; }
   .show-ignored toolbox button.ignored  { background-color: yellow; }
 
+  svg use.shy     { display: none; } .show-shy     svg use.shy { display: inline; }
+  svg use.wbr     { display: none; } .show-wbr     svg use.wbr { display: inline; }
+  svg use.ignored { display: none; } .show-ignored svg use.ignored { display: inline; }
+
 
   remarks {
     font-family:            'drb-ui';
@@ -185,11 +189,11 @@
 <!-- <body> -->
 <body class='reveal-blocks show-grid show-shy show-wbr show-hhy show-ignored show-text'>
 <toolbox>
-  <button class=grid    onclick="µ.DOM.toggle_class( µ.body, 'show-grid' );">grid</button>
-  <button class=text    onclick="µ.DOM.toggle_class( µ.body, 'show-text' );">text</button>
-  <button class=shy     onclick="toggle_fontmetrics_shy();">shy</button>
-  <button class=wbr     onclick="toggle_fontmetrics_wbr();">wbr</button>
-  <button class=ignored onclick="toggle_fontmetrics_ignored();">ignored</button>
+  <button class=grid    onclick="µ.DOM.toggle_class( µ.body, 'show-grid'    );">grid</button>
+  <button class=text    onclick="µ.DOM.toggle_class( µ.body, 'show-text'    );">text</button>
+  <button class=shy     onclick="µ.DOM.toggle_class( µ.body, 'show-shy'     );">shy</button>
+  <button class=wbr     onclick="µ.DOM.toggle_class( µ.body, 'show-wbr'     );">wbr</button>
+  <button class=ignored onclick="µ.DOM.toggle_class( µ.body, 'show-ignored' );">ignored</button>
   </toolbox>
 <svg id='outlines' class='svg-font' viewBox='0 0 1000 1000' overflow='visible'>
 <mrg:loc#outlines/>
