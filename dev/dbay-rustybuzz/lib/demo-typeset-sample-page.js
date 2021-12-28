@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_fontmetric_hgrid, _escape_for_html_comment, _escape_for_html_text, _escape_syms, append_content, append_grid, append_outlines, append_remarks, append_title, badge, cm_grid_path, debug, echo, equals, guy, help, info, isa, mudom_path, rpr, target_path, template_path, to_width, type_of, types, ui_font_path, urge, validate, validate_list_of, warn, whisper, write_output,
+  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_fontmetric_hgrid, _escape_for_html_comment, _escape_for_html_text, _escape_syms, append_content, append_grid, append_outlines, append_remarks, append_title, badge, cm_grid_path, debug, echo, equals, favicon_path, guy, help, info, isa, mudom_path, rpr, target_path, template_path, to_width, type_of, types, ui_font_path, urge, validate, validate_list_of, warn, whisper, write_output,
     modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
@@ -56,6 +56,8 @@
   ui_font_path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/iosevka-medium.woff2.data-uri'));
 
   mudom_path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/mudom.js.data-uri'));
+
+  favicon_path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/mingkwai-icon.128.png.data-uri'));
 
   ({to_width} = require('to-width'));
 
@@ -352,7 +354,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_typeset_sample_page = function(cfg) {
-    var I, L, Tbl, V, cgid_map, chrs, db, defaults, doc, drb, dsk, dtab, fontnick, fspath, known_ods, missing, missing_sid, mm_p_u, mm_p_u_txt, mudom_data, par, set_id, size_mm, specials, text, ui_font_data, width_mm, x0, y0;
+    var I, L, Tbl, V, cgid_map, chrs, db, defaults, doc, drb, dsk, dtab, favicon_data, fontnick, fspath, known_ods, missing, missing_sid, mm_p_u, mm_p_u_txt, mudom_data, par, set_id, size_mm, specials, text, ui_font_data, width_mm, x0, y0;
     defaults = {
       set_id: 'medium-eg8i'
     };
@@ -376,6 +378,9 @@
     mudom_data = (FS.readFileSync(mudom_path, {
       encoding: 'utf-8'
     })).trim();
+    favicon_data = (FS.readFileSync(favicon_path, {
+      encoding: 'utf-8'
+    })).trim();
     drb.mrg.register_dsk({
       dsk,
       path: template_path
@@ -391,6 +396,12 @@
       dsk,
       locid: 'mudom_data',
       text: mudom_data,
+      nl: false
+    });
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'favicon_data',
+      text: favicon_data,
       nl: false
     });
     doc = 1;
