@@ -1,51 +1,53 @@
-```
 
-// Please note: When loading paper as a normal module installed in node_modules,
-// you would use this instead:
-var paper = require('paper-jsdom');
-// var paper = require('../../dist/paper-core.js');
-var path = require('path');
-var fs = require('fs');
 
-// with (paper) {
-    paper.setup( new paper.Size(300, 600));
-    var stops = [new paper.Color(1, 1, 0, 0), 'red', 'black'];
+'use strict'
 
-    var radius = paper.view.bounds.width * 0.4,
-        from = new paper.Point( paper.view.center.x),
-        to = from.add(radius, 0);
 
-    var circle = new paper.Path.Circle({
-        center: from,
-        radius: radius * 2,
-        fillColor: 'red',
-        strokeColor: 'black'
-    });
+############################################################################################################
+CND                       = require 'cnd'
+rpr                       = CND.rpr
+badge                     = 'DEMO-SVG-WITH-PAPER-JS'
+debug                     = CND.get_logger 'debug',     badge
+warn                      = CND.get_logger 'warn',      badge
+info                      = CND.get_logger 'info',      badge
+urge                      = CND.get_logger 'urge',      badge
+help                      = CND.get_logger 'help',      badge
+whisper                   = CND.get_logger 'whisper',   badge
+echo                      = CND.echo.bind CND
+PAPER                     = require 'paper-jsdom'
+FS                        = require 'fs'
 
-    var from = paper.view.bounds.leftCenter,
-        to = paper.view.bounds.bottomRight;
+PAPER.setup new PAPER.Size 300, 600
 
-    var rect = new paper.Path.Rectangle({
-        from: from,
-        to: to,
-        fillColor: 'red',
-        strokeColor: 'black'
-    });
+# stops   = [ ( new PAPER.Color 1, 1, 0, 0 ), 'red', 'black', ]
+radius  = PAPER.view.bounds.width * 0.4
+from_pt = new PAPER.Point PAPER.view.center.x, 300
+to_pt   = from_pt.add radius, 0
 
-    rect.rotate(45).scale(0.7);
-    var svg = paper.project.exportSVG({ asString: true });
-    console.log(svg);
-    fs.writeFileSync( '/tmp/paper1.svg', svg );
-    rect.unite(circle);
-    rect.remove();
-    circle.remove();
-    var svg = paper.project.exportSVG({ asString: true });
-    console.log(svg);
-    fs.writeFileSync( '/tmp/paper2.svg', svg );
+circle = new PAPER.Path.Circle
+  center:       from_pt
+  radius:       radius * 0.7
+  fillColor:    'red'
+  strokeColor:  'black'
 
-    // fs.writeFile(path.resolve('./out.svg'), svg, function (err) {
-    //     if (err) throw err;
-    //     // console.log('Saved!');
-    // });
-// }
-```
+rectangle = new PAPER.Path.Rectangle
+  from:         PAPER.view.bounds.leftCenter
+  to:           PAPER.view.bounds.bottomRight
+  fillColor:    'red',
+  strokeColor:  'black'
+
+rectangle.rotate(45).scale(0.7)
+# svg = PAPER.project.exportSVG { asString: true, }
+# console.log(svg)
+# fs.writeFileSync( '/tmp/paper1.svg', svg )
+union_pth = rectangle.unite circle
+rectangle.remove()
+circle.remove()
+# debug '^35345^', ( k for k of circle )
+debug '^35345^', circle.exportSVG { asString: true, }
+urge '^35345^', union_pth.exportSVG { asString: true, }
+
+svg = PAPER.project.exportSVG { asString: true, }
+info svg
+FS.writeFileSync '/tmp/paper2.svg', svg
+
