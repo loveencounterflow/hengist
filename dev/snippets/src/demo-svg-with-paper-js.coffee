@@ -45,9 +45,13 @@ rectangle.remove()
 circle.remove()
 # debug '^35345^', ( k for k of circle )
 debug '^35345^', circle.exportSVG { asString: true, }
-urge '^35345^', union_pth.exportSVG { asString: true, }
+urge '^35345^', union_pth.exportSVG { asString: true, precision: 0, }
 
-svg = PAPER.project.exportSVG { asString: true, }
+svg = PAPER.project.exportSVG { asString: true, precision: 0, }
 info svg
 FS.writeFileSync '/tmp/paper2.svg', svg
+
+dom = PAPER.project.exportSVG { asString: false, precision: 0, }
+# debug '^445645^', ( k for k of dom )
+help '^5345348^', ( dom.getElementsByTagName 'path' )[ 0 ].getAttribute 'd'
 
