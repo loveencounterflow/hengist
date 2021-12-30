@@ -1,11 +1,77 @@
-<?xml version="1.0" encoding="utf-8"?>
-<svg viewBox="0 0 486.356 479.936" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
-  <defs>
-    <bx:grid x="0" y="0" width="100" height="100"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 16000 16000"
+   version="1.1"
+   id="svg61"
+   sodipodi:docname="symbols-for-special-chrs.svg"
+   inkscape:version="1.2-dev (9ff083a, 2021-12-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:bx="https://boxy-svg.com">
+  <sodipodi:namedview
+     id="namedview63"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:blackoutopacity="0.0"
+     showgrid="true"
+     inkscape:zoom="0.55944959"
+     inkscape:cx="742.69426"
+     inkscape:cy="808.83069"
+     inkscape:window-width="1366"
+     inkscape:window-height="713"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg61">
+    <inkscape:grid
+       type="xygrid"
+       id="grid533"
+       dotted="false"
+       spacingx="100"
+       spacingy="100"
+       color="#6a6aff"
+       opacity="0.1254902"
+       empcolor="#0000ed"
+       empopacity="0.25098039"
+       empspacing="10" />
+    <inkscape:grid
+       type="xygrid"
+       id="grid535"
+       spacingx="1000"
+       spacingy="1000"
+       color="#ff5b0c"
+       opacity="0.1254902"
+       empcolor="#fcff3f"
+       empopacity="0.25098039" />
+  </sodipodi:namedview>
+  <defs
+     id="defs53">
+    <bx:grid
+       x="0"
+       y="0"
+       width="100"
+       height="100" />
   </defs>
-  <path style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);" d="M 252.168 248.154 L 201.606 348.957 L 302.409 348.957 L 252.168 248.154 Z" id="sym-wbr"/>
-  <g id="sym-shy">
-    <path d="M 45.224 201.605 L 55.578 201.605 L 55.578 391.713 L 45.224 391.713 L 45.224 201.605 Z" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
-    <path d="M 0 385.779 L 100.803 385.779 L 100.803 403.212 L 0 403.212 L 0 385.779 Z" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0);"/>
+  <path
+     style="fill:#d8d8d8;stroke:#000000;stroke-width:3.91148"
+     d="M 1000.077,599.75049 802.30467,994.03961 h 394.28913 z"
+     id="sym-wbr" />
+  <g
+     id="sym-shy"
+     transform="translate(-51.411381,564.34949)">
+    <path
+       d="M 25.324752,-306.20094 H 75.478248 V 390.12694 H 25.324752 Z"
+       style="fill:#d8d8d8;stroke:#000000;stroke-width:4.21215"
+       id="path56" />
+    <path
+       d="m -152.75957,359.36056 h 406.32214 v 70.26988 h -406.32214 z"
+       style="fill:#d8d8d8;stroke:#000000;stroke-width:4.03085"
+       id="path58" />
   </g>
 </svg>
