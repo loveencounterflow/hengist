@@ -117,6 +117,8 @@
     "stacktracey": "2.1.7",
     "steampipes": "6.7.1",
     "strip-ansi": "7.0.1",
+    "svg_pathify": "^0.0.8",
+    "svgo": "^2.8.0",
     "table": "6.7.2",
     "temp": "^0.9.4",
     "tempy": "2.0.0",
