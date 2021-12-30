@@ -21,7 +21,8 @@ types                     = new ( require 'intertype' ).Intertype()
 { validate
   type_of
   isa                   } = types.export()
-
+SVGO                      = require 'svgo'
+svg_pathify               = require 'svg_pathify'
 
 # # stops   = [ ( new PAPER.Color 1, 1, 0, 0 ), 'red', 'black', ]
 # radius  = PAPER.view.bounds.width * 0.4
@@ -52,40 +53,143 @@ types                     = new ( require 'intertype' ).Intertype()
 # info svg
 # FS.writeFileSync '/tmp/paper2.svg', svg
 
-# dom = PAPER.project.exportSVG { asString: false, precision: 0, }
-# # debug '^445645^', ( k for k of dom )
-# help '^5345348^', ( dom.getElementsByTagName 'path' )[ 0 ].getAttribute 'd'
+# svg_dom = PAPER.project.exportSVG { asString: false, precision: 0, }
+# # debug '^445645^', ( k for k of svg_dom )
+# help '^5345348^', ( svg_dom.getElementsByTagName 'path' )[ 0 ].getAttribute 'd'
 
 #-----------------------------------------------------------------------------------------------------------
 demo_import_export = ->
   path    = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/html+svg-demos/symbols-for-special-chrs.svg'
   project = new PAPER.Project()
-  project.importSVG FS.readFileSync path, { encoding: 'utf-8', }
-  dom     = project.exportSVG()
+  ### NOTE importing SVG appears to apply / remove transforms so we can deal with path data as-is ###
+  svg_txt = FS.readFileSync path, { encoding: 'utf-8', }
+  length_before = svg_txt.length
+  svg_txt = prepare_svg_txt path, svg_txt
+  length_after = svg_txt.length
+  debug '^432-1^', { length_before, length_after, }
+  project.importSVG svg_txt
+  svg_dom = project.exportSVG()
   seen    = new Set()
+  for x_dom in svg_dom.querySelectorAll '*'
+    debug '^432-2^', get_dom_node_description x_dom
   #.........................................................................................................
-  for g_dom in dom.querySelectorAll 'g'
-    id    = g_dom.getAttribute 'id'
-    continue unless id? and id.startsWith 'sym-'
+  for g_dom in svg_dom.querySelectorAll 'g'
+    g_id  = g_dom.getAttribute 'id'
+    continue unless g_id?
+    continue unless g_id.startsWith 'sym-'
+    debug '^432-3^', { g_id, }
     name  = g_dom.tagName
-    info '^432^', "group", rpr id
+    info '^432-4^', "group", rpr g_id
     pds   = []
     for path_dom in g_dom.querySelectorAll 'path'
       continue if seen.has path_dom
       seen.add path_dom
-      pds.push path_dom.getAttribute 'd'
-    urge '^432^', pds
-    urge '^432^', unite_path_data pds
+      path_id = path_dom.getAttribute 'id'
+      debug '^432-5^', { path_id, }
+      if path_id.endsWith '-glyfmetric'
+        pd    = path_dom.getAttribute 'd'
+        bbox  = boundingbox_from_pathdata pd
+        # x1  = path_dom.getAttribute 'x1'
+        # y1  = path_dom.getAttribute 'y1'
+        # x2  = path_dom.getAttribute 'x2'
+        # y2  = path_dom.getAttribute 'y2'
+        info '^432-6^', "glyfmetric", bbox
+      else
+        pds.push path_dom.getAttribute 'd'
+    urge '^432-7^', pds
+    if pds.length is 0
+      warn "found no paths for group #{rpr path_id}"
+    else
+      urge '^432-8^', unite_path_data pds
   #.........................................................................................................
-  for path_dom in dom.querySelectorAll 'path'
+  for path_dom in svg_dom.querySelectorAll 'path'
     continue if seen.has path_dom
     id    = path_dom.getAttribute 'id'
     continue unless id? and id.startsWith 'sym-'
     name  = path_dom.tagName
-    info '^432^', "single path", rpr id
-    urge '^432^', pd = path_dom.getAttribute 'd'
+    info '^432-9^', "single path", rpr id
+    urge '^432-10^', pd = path_dom.getAttribute 'd'
   #.........................................................................................................
   return null
+
+#-----------------------------------------------------------------------------------------------------------
+prepare_svg_txt = ( path, svg_txt ) ->
+  cfg =
+    path:       path
+    pretty:     true
+    multipass:  true
+    plugins: [
+      # 'preset-default'
+      'cleanupAttrs'                    # cleanup attributes from newlines, trailing, and repeating spaces  enabled
+      'mergeStyles'                     # merge multiple style elements into one  enabled
+      'inlineStyles'                    # move and merge styles from <style> elements to element style attributes enabled
+      'removeDoctype'                   # remove doctype declaration  enabled
+      'removeXMLProcInst'               # remove XML processing instructions  enabled
+      'removeComments'                  # remove comments enabled
+      'removeMetadata'                  # remove <metadata> enabled
+      'removeTitle'                     # remove <title>  enabled
+      'removeDesc'                      # remove <desc> enabled
+      'removeUselessDefs'               # remove elements of <defs> without id  enabled
+      # 'removeXMLNS'                     # removes the xmlns attribute (for inline SVG)  disabled
+      'removeEditorsNSData'             # remove editors namespaces, elements, and attributes enabled
+      'removeEmptyAttrs'                # remove empty attributes enabled
+      'removeHiddenElems'               # remove hidden elements  enabled
+      'removeEmptyText'                 # remove empty Text elements  enabled
+      'removeEmptyContainers'           # remove empty Container elements enabled
+      'removeViewBox'                   # remove viewBox attribute when possible  enabled
+      'cleanupEnableBackground'         # remove or cleanup enable-background attribute when possible enabled
+      'minifyStyles'                    # minify <style> elements content with CSSO enabled
+      # 'convertStyleToAttrs'             # convert styles into attributes  disabled
+      'convertColors'                   # convert colors (from rgb() to #rrggbb, from #rrggbb to #rgb)  enabled
+      'convertPathData'                 # convert Path data to relative or absolute (whichever is shorter), convert one segment to another, trim useless delimiters, smart rounding, and much more  enabled
+      'convertTransform'                # collapse multiple transforms into one, convert matrices to the short aliases, and much more enabled
+      'removeUnknownsAndDefaults'       # remove unknown elements content and attributes, remove attributes with default values enabled
+      'removeNonInheritableGroupAttrs'  # remove non-inheritable group's "presentation" attributes  enabled
+      'removeUselessStrokeAndFill'      # remove useless stroke and fill attributes enabled
+      'removeUnusedNS'                  # remove unused namespaces declaration  enabled
+      # 'prefixIds'                       # prefix IDs and classes with the SVG filename or an arbitrary string disabled
+      # 'cleanupIDs'                      # remove unused and minify used IDs enabled
+      'cleanupNumericValues'            # round numeric values to the fixed precision, remove default px units  enabled
+      # 'cleanupListOfValues'             # round numeric values in attributes that take a list of numbers (like viewBox or enable-background)  disabled
+      'moveElemsAttrsToGroup'           # move elements' attributes to their enclosing group  enabled
+      'moveGroupAttrsToElems'           # move some group attributes to the contained elements  enabled
+      'collapseGroups'                  # collapse useless groups enabled
+      # 'removeRasterImages'              # remove raster images  disabled
+      'mergePaths'                      # merge multiple Paths into one enabled
+      'convertShapeToPath'              # convert some basic shapes to <path> enabled
+      'convertEllipseToCircle'          # convert non-eccentric <ellipse> to <circle> enabled
+      # 'sortAttrs'                       # sort element attributes for epic readability  disabled
+      'sortDefsChildren'                # sort children of <defs> in order to improve compression enabled
+      # 'removeDimensions'                # remove width/height and add viewBox if it's missing (opposite to removeViewBox, disable it first) disabled
+      # 'removeAttrs'                     # remove attributes by pattern  disabled
+      # 'removeAttributesBySelector'      # removes attributes of elements that match a CSS selector  disabled
+      # 'removeElementsByAttr'            # remove arbitrary elements by ID or className  disabled
+      # 'addClassesToSVGElement'          # add classnames to an outer <svg> element  disabled
+      # 'addAttributesToSVGElement'       # adds attributes to an outer <svg> element disabled
+      # 'removeOffCanvasPaths'            # removes elements that are drawn outside of the viewbox  disabled
+      # 'removeStyleElement'              # remove <style> elements disabled
+      # 'removeScriptElement'             # remove <script> elements  disabled
+      # 'reusePaths'                      # Find duplicated elements and replace them with links disabled
+    ]
+  return svg_pathify ( SVGO.optimize svg_txt, cfg ).data
+
+#-----------------------------------------------------------------------------------------------------------
+get_dom_node_description = ( x_dom ) ->
+  R         = { $tag: x_dom.tagName, }
+  R[ name ] = value for { name, value, } in x_dom.attributes
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+boundingbox_from_pathdata = ( pd ) ->
+  PAPER.setup new PAPER.Size 1000, 1000
+  validate.nonempty_text pd
+  path_pth    = PAPER.PathItem.create pd
+  { x
+    y
+    width
+    height  } =   path_pth.bounds
+  debug '^432-11^', { x, y, width, height, }
+  return { x1: x, y1: y, x2: x + width, y2: y + height, width, height, }
 
 #-----------------------------------------------------------------------------------------------------------
 unite_path_data = ( pds ) ->
