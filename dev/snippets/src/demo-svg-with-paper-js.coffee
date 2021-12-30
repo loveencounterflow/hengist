@@ -59,6 +59,7 @@ svg_pathify               = require 'svg_pathify'
 
 #-----------------------------------------------------------------------------------------------------------
 demo_import_export = ->
+  R       = {}
   path    = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/html+svg-demos/symbols-for-special-chrs.svg'
   project = new PAPER.Project()
   ### NOTE importing SVG appears to apply / remove transforms so we can deal with path data as-is ###
@@ -77,39 +78,45 @@ demo_import_export = ->
     g_id  = g_dom.getAttribute 'id'
     continue unless g_id?
     continue unless g_id.startsWith 'sym-'
+    sym_name      = g_id.replace /^sym-/, ''
+    entry         = { sym_name, }
+    R[ sym_name ] = entry
+    pds           = []
     debug '^432-3^', { g_id, }
-    name  = g_dom.tagName
     info '^432-4^', "group", rpr g_id
-    pds   = []
     for path_dom in g_dom.querySelectorAll 'path'
       continue if seen.has path_dom
       seen.add path_dom
       path_id = path_dom.getAttribute 'id'
       debug '^432-5^', { path_id, }
       if path_id.endsWith '-glyfmetric'
-        pd    = path_dom.getAttribute 'd'
-        bbox  = boundingbox_from_pathdata pd
-        # x1  = path_dom.getAttribute 'x1'
-        # y1  = path_dom.getAttribute 'y1'
-        # x2  = path_dom.getAttribute 'x2'
-        # y2  = path_dom.getAttribute 'y2'
-        info '^432-6^', "glyfmetric", bbox
+        pd          = path_dom.getAttribute 'd'
+        bbox        = boundingbox_from_pathdata pd
+        entry.shift = { x: bbox.x1, }
       else
         pds.push path_dom.getAttribute 'd'
     urge '^432-7^', pds
     if pds.length is 0
       warn "found no paths for group #{rpr path_id}"
-    else
-      urge '^432-8^', unite_path_data pds
+      continue
+    entry.pd = unite_path_data pds
+    entry.pd = shift_pathdata entry.pd, entry.shift if ( entry.shift?.x ? 0 ) != 0
   #.........................................................................................................
   for path_dom in svg_dom.querySelectorAll 'path'
     continue if seen.has path_dom
-    id    = path_dom.getAttribute 'id'
-    continue unless id? and id.startsWith 'sym-'
-    name  = path_dom.tagName
-    info '^432-9^', "single path", rpr id
-    urge '^432-10^', pd = path_dom.getAttribute 'd'
+    path_id   = path_dom.getAttribute 'id'
+    continue unless path_id?
+    continue unless path_id.startsWith 'sym-'
+    sym_name  = path_id.replace /^sym-/, ''
+    pd        = path_dom.getAttribute 'd'
+    R.push { sym_name, pd, }
   #.........................................................................................................
+  echo()
+  echo entry.pd for sym_name, entry of R
+  echo()
+  for sym_name, { pd, } of R
+    echo "<path fill='red' stroke='black' id='#{sym_name}' d='#{pd}'/>"
+  echo()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -190,6 +197,14 @@ boundingbox_from_pathdata = ( pd ) ->
     height  } =   path_pth.bounds
   debug '^432-11^', { x, y, width, height, }
   return { x1: x, y1: y, x2: x + width, y2: y + height, width, height, }
+
+#-----------------------------------------------------------------------------------------------------------
+shift_pathdata = ( pd, shift ) ->
+  PAPER.setup new PAPER.Size 1000, 1000
+  validate.nonempty_text pd
+  path_pth    = PAPER.PathItem.create pd
+  path_pth.translate new PAPER.Point -shift.x, 0
+  return ( path_pth.exportSVG { asString: false, precision: 0, } ).getAttribute 'd'
 
 #-----------------------------------------------------------------------------------------------------------
 unite_path_data = ( pds ) ->

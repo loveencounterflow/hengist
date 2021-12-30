@@ -20,7 +20,7 @@
      inkscape:blackoutopacity="0.0"
      showgrid="false"
      inkscape:zoom="0.30833462"
-     inkscape:cx="2472.9627"
+     inkscape:cx="1117.2926"
      inkscape:cy="569.18682"
      inkscape:window-width="1366"
      inkscape:window-height="713"
@@ -437,30 +437,4 @@
      marker-end="url(#stop-2-6)"
      id="xxx-glyfmetric-5"
      style="marker-start:url(#stop-2-6);marker-end:url(#stop-2-6)" />
-  <g
-     id="sym-xxx"
-     inkscape:label="sym-xxx">
-    <line
-       class="glyphmetric horizontal"
-       x1="2116.4426"
-       y1="881.23438"
-       x2="2886.0986"
-       y2="881.23438"
-       stroke="#0000ff"
-       stroke-width="11.6599"
-       marker-start="url(#stop-2)"
-       marker-end="url(#stop-2)"
-       id="xxx-glyfmetric"
-       style="marker-start:url(#stop-2);marker-end:url(#stop-2)" />
-    <rect
-       style="fill:#006600"
-       id="rect11586"
-       width="234.75778"
-       height="264.84399"
-       x="1944.5135"
-       y="-1478.5978"
-       ry="0"
-       rx="0"
-       transform="rotate(45)" />
-  </g>
 </svg>
