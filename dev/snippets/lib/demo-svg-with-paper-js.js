@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, PAPER, PATH, SVGO, badge, boundingbox_from_pathdata, debug, demo_import_export, demo_union, echo, get_dom_node_description, help, info, isa, prepare_svg_txt, rpr, svg_pathify, type_of, types, unite_path_data, urge, validate, warn, whisper;
+  var CND, FS, PAPER, PATH, SVGO, badge, boundingbox_from_pathdata, debug, demo_import_export, demo_union, echo, get_dom_node_description, help, info, isa, prepare_svg_txt, rpr, shift_pathdata, svg_pathify, type_of, types, unite_path_data, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -73,7 +73,8 @@
   //-----------------------------------------------------------------------------------------------------------
   demo_import_export = function() {
     /* NOTE importing SVG appears to apply / remove transforms so we can deal with path data as-is */
-    var bbox, g_dom, g_id, i, id, j, k, l, len, len1, len2, len3, length_after, length_before, name, path, path_dom, path_id, pd, pds, project, ref, ref1, ref2, ref3, seen, svg_dom, svg_txt, x_dom;
+    var R, bbox, entry, g_dom, g_id, i, j, k, l, len, len1, len2, len3, length_after, length_before, path, path_dom, path_id, pd, pds, project, ref, ref1, ref2, ref3, ref4, ref5, seen, svg_dom, svg_txt, sym_name, x_dom;
+    R = {};
     path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/html+svg-demos/symbols-for-special-chrs.svg'));
     project = new PAPER.Project();
     svg_txt = FS.readFileSync(path, {
@@ -102,10 +103,12 @@
       if (!g_id.startsWith('sym-')) {
         continue;
       }
-      debug('^432-3^', {g_id});
-      name = g_dom.tagName;
-      info('^432-4^', "group", rpr(g_id));
+      sym_name = g_id.replace(/^sym-/, '');
+      entry = {sym_name};
+      R[sym_name] = entry;
       pds = [];
+      debug('^432-3^', {g_id});
+      info('^432-4^', "group", rpr(g_id));
       ref2 = g_dom.querySelectorAll('path');
       for (k = 0, len2 = ref2.length; k < len2; k++) {
         path_dom = ref2[k];
@@ -118,11 +121,9 @@
         if (path_id.endsWith('-glyfmetric')) {
           pd = path_dom.getAttribute('d');
           bbox = boundingbox_from_pathdata(pd);
-          // x1  = path_dom.getAttribute 'x1'
-          // y1  = path_dom.getAttribute 'y1'
-          // x2  = path_dom.getAttribute 'x2'
-          // y2  = path_dom.getAttribute 'y2'
-          info('^432-6^', "glyfmetric", bbox);
+          entry.shift = {
+            x: bbox.x1
+          };
         } else {
           pds.push(path_dom.getAttribute('d'));
         }
@@ -130,26 +131,43 @@
       urge('^432-7^', pds);
       if (pds.length === 0) {
         warn(`found no paths for group ${rpr(path_id)}`);
-      } else {
-        urge('^432-8^', unite_path_data(pds));
+        continue;
+      }
+      entry.pd = unite_path_data(pds);
+      if (((ref3 = (ref4 = entry.shift) != null ? ref4.x : void 0) != null ? ref3 : 0) !== 0) {
+        entry.pd = shift_pathdata(entry.pd, entry.shift);
       }
     }
-    ref3 = svg_dom.querySelectorAll('path');
+    ref5 = svg_dom.querySelectorAll('path');
     //.........................................................................................................
-    for (l = 0, len3 = ref3.length; l < len3; l++) {
-      path_dom = ref3[l];
+    for (l = 0, len3 = ref5.length; l < len3; l++) {
+      path_dom = ref5[l];
       if (seen.has(path_dom)) {
         continue;
       }
-      id = path_dom.getAttribute('id');
-      if (!((id != null) && id.startsWith('sym-'))) {
+      path_id = path_dom.getAttribute('id');
+      if (path_id == null) {
         continue;
       }
-      name = path_dom.tagName;
-      info('^432-9^', "single path", rpr(id));
-      urge('^432-10^', pd = path_dom.getAttribute('d'));
+      if (!path_id.startsWith('sym-')) {
+        continue;
+      }
+      sym_name = path_id.replace(/^sym-/, '');
+      pd = path_dom.getAttribute('d');
+      R.push({sym_name, pd});
     }
     //.........................................................................................................
+    echo();
+    for (sym_name in R) {
+      entry = R[sym_name];
+      echo(entry.pd);
+    }
+    echo();
+    for (sym_name in R) {
+      ({pd} = R[sym_name]);
+      echo(`<path fill='red' stroke='black' id='${sym_name}' d='${pd}'/>`);
+    }
+    echo();
     return null;
   };
 
@@ -247,6 +265,19 @@
       width,
       height
     };
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  shift_pathdata = function(pd, shift) {
+    var path_pth;
+    PAPER.setup(new PAPER.Size(1000, 1000));
+    validate.nonempty_text(pd);
+    path_pth = PAPER.PathItem.create(pd);
+    path_pth.translate(new PAPER.Point(-shift.x, 0));
+    return (path_pth.exportSVG({
+      asString: false,
+      precision: 0
+    })).getAttribute('d');
   };
 
   //-----------------------------------------------------------------------------------------------------------
