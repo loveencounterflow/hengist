@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, PAPER, PATH, badge, debug, demo_import_export, demo_union, echo, help, info, isa, rpr, type_of, types, unite_path_data, urge, validate, warn, whisper;
+  var CND, FS, PAPER, PATH, SVGO, badge, boundingbox_from_pathdata, debug, demo_import_export, demo_union, echo, get_dom_node_description, help, info, isa, prepare_svg_txt, rpr, svg_pathify, type_of, types, unite_path_data, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -33,6 +33,10 @@
 
   ({validate, type_of, isa} = types.export());
 
+  SVGO = require('svgo');
+
+  svg_pathify = require('svg_pathify');
+
   // # stops   = [ ( new PAPER.Color 1, 1, 0, 0 ), 'red', 'black', ]
   // radius  = PAPER.view.bounds.width * 0.4
   // from_pt = new PAPER.Point PAPER.view.center.x, 300
@@ -62,47 +66,78 @@
   // info svg
   // FS.writeFileSync '/tmp/paper2.svg', svg
 
-  // dom = PAPER.project.exportSVG { asString: false, precision: 0, }
-  // # debug '^445645^', ( k for k of dom )
-  // help '^5345348^', ( dom.getElementsByTagName 'path' )[ 0 ].getAttribute 'd'
+  // svg_dom = PAPER.project.exportSVG { asString: false, precision: 0, }
+  // # debug '^445645^', ( k for k of svg_dom )
+  // help '^5345348^', ( svg_dom.getElementsByTagName 'path' )[ 0 ].getAttribute 'd'
 
   //-----------------------------------------------------------------------------------------------------------
   demo_import_export = function() {
-    var dom, g_dom, i, id, j, k, len, len1, len2, name, path, path_dom, pd, pds, project, ref, ref1, ref2, seen;
+    /* NOTE importing SVG appears to apply / remove transforms so we can deal with path data as-is */
+    var bbox, g_dom, g_id, i, id, j, k, l, len, len1, len2, len3, length_after, length_before, name, path, path_dom, path_id, pd, pds, project, ref, ref1, ref2, ref3, seen, svg_dom, svg_txt, x_dom;
     path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/html+svg-demos/symbols-for-special-chrs.svg'));
     project = new PAPER.Project();
-    project.importSVG(FS.readFileSync(path, {
+    svg_txt = FS.readFileSync(path, {
       encoding: 'utf-8'
-    }));
-    dom = project.exportSVG();
+    });
+    length_before = svg_txt.length;
+    svg_txt = prepare_svg_txt(path, svg_txt);
+    length_after = svg_txt.length;
+    debug('^432-1^', {length_before, length_after});
+    project.importSVG(svg_txt);
+    svg_dom = project.exportSVG();
     seen = new Set();
-    ref = dom.querySelectorAll('g');
-    //.........................................................................................................
+    ref = svg_dom.querySelectorAll('*');
     for (i = 0, len = ref.length; i < len; i++) {
-      g_dom = ref[i];
-      id = g_dom.getAttribute('id');
-      if (!((id != null) && id.startsWith('sym-'))) {
+      x_dom = ref[i];
+      debug('^432-2^', get_dom_node_description(x_dom));
+    }
+    ref1 = svg_dom.querySelectorAll('g');
+    //.........................................................................................................
+    for (j = 0, len1 = ref1.length; j < len1; j++) {
+      g_dom = ref1[j];
+      g_id = g_dom.getAttribute('id');
+      if (g_id == null) {
         continue;
       }
+      if (!g_id.startsWith('sym-')) {
+        continue;
+      }
+      debug('^432-3^', {g_id});
       name = g_dom.tagName;
-      info('^432^', "group", rpr(id));
+      info('^432-4^', "group", rpr(g_id));
       pds = [];
-      ref1 = g_dom.querySelectorAll('path');
-      for (j = 0, len1 = ref1.length; j < len1; j++) {
-        path_dom = ref1[j];
+      ref2 = g_dom.querySelectorAll('path');
+      for (k = 0, len2 = ref2.length; k < len2; k++) {
+        path_dom = ref2[k];
         if (seen.has(path_dom)) {
           continue;
         }
         seen.add(path_dom);
-        pds.push(path_dom.getAttribute('d'));
+        path_id = path_dom.getAttribute('id');
+        debug('^432-5^', {path_id});
+        if (path_id.endsWith('-glyfmetric')) {
+          pd = path_dom.getAttribute('d');
+          bbox = boundingbox_from_pathdata(pd);
+          // x1  = path_dom.getAttribute 'x1'
+          // y1  = path_dom.getAttribute 'y1'
+          // x2  = path_dom.getAttribute 'x2'
+          // y2  = path_dom.getAttribute 'y2'
+          info('^432-6^', "glyfmetric", bbox);
+        } else {
+          pds.push(path_dom.getAttribute('d'));
+        }
       }
-      urge('^432^', pds);
-      urge('^432^', unite_path_data(pds));
+      urge('^432-7^', pds);
+      if (pds.length === 0) {
+        warn(`found no paths for group ${rpr(path_id)}`);
+      } else {
+        urge('^432-8^', unite_path_data(pds));
+      }
     }
-    ref2 = dom.querySelectorAll('path');
+    ref3 = svg_dom.querySelectorAll('path');
     //.........................................................................................................
-    for (k = 0, len2 = ref2.length; k < len2; k++) {
-      path_dom = ref2[k];
+    for (l = 0, len3 = ref3.length; l < len3; l++) {
+      path_dom = ref3[l];
       if (seen.has(path_dom)) {
         continue;
       }
@@ -111,11 +146,107 @@
         continue;
       }
       name = path_dom.tagName;
-      info('^432^', "single path", rpr(id));
-      urge('^432^', pd = path_dom.getAttribute('d'));
+      info('^432-9^', "single path", rpr(id));
+      urge('^432-10^', pd = path_dom.getAttribute('d'));
     }
     //.........................................................................................................
     return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  prepare_svg_txt = function(path, svg_txt) {
+    var cfg;
+    cfg = {
+      path: path,
+      pretty: true,
+      multipass: true,
+      plugins: [
+        // 'preset-default'
+        'cleanupAttrs', // cleanup attributes from newlines, trailing, and repeating spaces  enabled
+        'mergeStyles', // merge multiple style elements into one  enabled
+        'inlineStyles', // move and merge styles from <style> elements to element style attributes enabled
+        'removeDoctype', // remove doctype declaration  enabled
+        'removeXMLProcInst', // remove XML processing instructions  enabled
+        'removeComments', // remove comments enabled
+        'removeMetadata', // remove <metadata> enabled
+        'removeTitle', // remove <title>  enabled
+        'removeDesc', // remove <desc> enabled
+        'removeUselessDefs', // remove elements of <defs> without id  enabled
+        // 'removeXMLNS'                     # removes the xmlns attribute (for inline SVG)  disabled
+        'removeEditorsNSData', // remove editors namespaces, elements, and attributes enabled
+        'removeEmptyAttrs', // remove empty attributes enabled
+        'removeHiddenElems', // remove hidden elements  enabled
+        'removeEmptyText', // remove empty Text elements  enabled
+        'removeEmptyContainers', // remove empty Container elements enabled
+        'removeViewBox', // remove viewBox attribute when possible  enabled
+        'cleanupEnableBackground', // remove or cleanup enable-background attribute when possible enabled
+        'minifyStyles', // minify <style> elements content with CSSO enabled
+        // 'convertStyleToAttrs'             # convert styles into attributes  disabled
+        'convertColors', // convert colors (from rgb() to #rrggbb, from #rrggbb to #rgb)  enabled
+        'convertPathData', // convert Path data to relative or absolute (whichever is shorter), convert one segment to another, trim useless delimiters, smart rounding, and much more  enabled
+        'convertTransform', // collapse multiple transforms into one, convert matrices to the short aliases, and much more enabled
+        'removeUnknownsAndDefaults', // remove unknown elements content and attributes, remove attributes with default values enabled
+        'removeNonInheritableGroupAttrs', // remove non-inheritable group's "presentation" attributes  enabled
+        'removeUselessStrokeAndFill', // remove useless stroke and fill attributes enabled
+        'removeUnusedNS', // remove unused namespaces declaration  enabled
+        // 'prefixIds'                       # prefix IDs and classes with the SVG filename or an arbitrary string disabled
+        // 'cleanupIDs'                      # remove unused and minify used IDs enabled
+        'cleanupNumericValues', // round numeric values to the fixed precision, remove default px units  enabled
+        // 'cleanupListOfValues'             # round numeric values in attributes that take a list of numbers (like viewBox or enable-background)  disabled
+        'moveElemsAttrsToGroup', // move elements' attributes to their enclosing group  enabled
+        'moveGroupAttrsToElems', // move some group attributes to the contained elements  enabled
+        'collapseGroups', // collapse useless groups enabled
+        // 'removeRasterImages'              # remove raster images  disabled
+        'mergePaths', // merge multiple Paths into one enabled
+        'convertShapeToPath', // convert some basic shapes to <path> enabled
+        'convertEllipseToCircle', // convert non-eccentric <ellipse> to <circle> enabled
+        // 'sortAttrs'                       # sort element attributes for epic readability  disabled
+        'sortDefsChildren' // sort children of <defs> in order to improve compression enabled
+      ]
+    };
+    // 'removeDimensions'                # remove width/height and add viewBox if it's missing (opposite to removeViewBox, disable it first) disabled
+    // 'removeAttrs'                     # remove attributes by pattern  disabled
+    // 'removeAttributesBySelector'      # removes attributes of elements that match a CSS selector  disabled
+    // 'removeElementsByAttr'            # remove arbitrary elements by ID or className  disabled
+    // 'addClassesToSVGElement'          # add classnames to an outer <svg> element  disabled
+    // 'addAttributesToSVGElement'       # adds attributes to an outer <svg> element disabled
+    // 'removeOffCanvasPaths'            # removes elements that are drawn outside of the viewbox  disabled
+    // 'removeStyleElement'              # remove <style> elements disabled
+    // 'removeScriptElement'             # remove <script> elements  disabled
+    // 'reusePaths'                      # Find duplicated elements and replace them with links disabled
+    return svg_pathify((SVGO.optimize(svg_txt, cfg)).data);
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  get_dom_node_description = function(x_dom) {
+    var R, i, len, name, ref, value;
+    R = {
+      $tag: x_dom.tagName
+    };
+    ref = x_dom.attributes;
+    for (i = 0, len = ref.length; i < len; i++) {
+      ({name, value} = ref[i]);
+      R[name] = value;
+    }
+    return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  boundingbox_from_pathdata = function(pd) {
+    var height, path_pth, width, x, y;
+    PAPER.setup(new PAPER.Size(1000, 1000));
+    validate.nonempty_text(pd);
+    path_pth = PAPER.PathItem.create(pd);
+    ({x, y, width, height} = path_pth.bounds);
+    debug('^432-11^', {x, y, width, height});
+    return {
+      x1: x,
+      y1: y,
+      x2: x + width,
+      y2: y + height,
+      width,
+      height
+    };
   };
 
   //-----------------------------------------------------------------------------------------------------------

@@ -1,4 +1,9 @@
 (function() {
+  /* Note
+
+  this code now in hengist/dev/snippets/src/demo-svg-with-paper-js.coffee
+
+  */
   'use strict';
   var CND, FS, PATH, SVGO, badge, debug, demo_1, echo, equals, guy, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
