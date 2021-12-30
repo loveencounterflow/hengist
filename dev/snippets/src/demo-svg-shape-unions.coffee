@@ -1,4 +1,14 @@
 
+
+
+### Note
+
+this code now in hengist/dev/snippets/src/demo-svg-with-paper-js.coffee
+
+###
+
+
+
 'use strict'
 
 
