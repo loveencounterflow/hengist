@@ -31,11 +31,19 @@ symbols_path              = PATH.resolve PATH.join __dirname, '../../../apps-typ
 #
 #-----------------------------------------------------------------------------------------------------------
 @demo_read_svg_symbols = ->
-  HTML      = require '../../../apps/paragate/lib/htmlish.grammar'
-  info HTML.grammar.parse FS.readFileSync symbols_path, { encoding: 'utf-8', }
+  { Svgttf2 } = require '../../../apps/svgttf/lib/svgttf-next'
+  svgttf2     = new Svgttf2()
+  path        = '../../../apps-typesetting/html+svg-demos/symbols-for-special-chrs.svg'
+  path        = PATH.resolve PATH.join __dirname, path
+  svg         = FS.readFileSync path, { encoding: 'utf-8', }
+  result      = svgttf2.glyf_pathdata_from_svg { path, svg, }
+  whisper sym_name for sym_name, _ of result
+  echo d.pd for _, d of result
   return null
 
 
 ############################################################################################################
 if require.main is module then do =>
   @demo_read_svg_symbols()
+
+
