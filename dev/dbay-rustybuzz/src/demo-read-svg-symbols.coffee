@@ -24,12 +24,6 @@ types                     = new ( require 'intertype' ).Intertype
   validate
   validate_list_of }      = types.export()
 SQL                       = String.raw
-guy                       = require '../../../apps/guy'
-# MMX                       = require '../../../apps/multimix/lib/cataloguing'
-RBW                       = require 'rustybuzz-wasm'
-H                         = require './helpers'
-{ DBay }                  = require H.dbay_path
-{ Drb }                   = require H.drb_path
 symbols_path              = PATH.resolve PATH.join __dirname, '../../../apps-typesetting/html+svg-demos/symbols-for-special-chrs.svg'
 
 
