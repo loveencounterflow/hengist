@@ -19,9 +19,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:blackoutopacity="0.0"
      showgrid="false"
-     inkscape:zoom="0.30833462"
-     inkscape:cx="1117.2926"
-     inkscape:cy="569.18682"
+     inkscape:zoom="0.36121868"
+     inkscape:cx="2311.6191"
+     inkscape:cy="325.28772"
      inkscape:window-width="1366"
      inkscape:window-height="713"
      inkscape:window-x="0"
@@ -160,6 +160,34 @@
          stroke-width="1"
          d="M 0,0 V 10"
          id="path11502" />
+    </marker>
+    <marker
+       id="stop-3-5"
+       viewBox="0 0 10 10"
+       refX="0"
+       refY="5"
+       markerWidth="6"
+       markerHeight="6"
+       orient="auto-start-reverse">
+      <path
+         stroke="#0000ff"
+         stroke-width="1"
+         d="M 0,0 V 10"
+         id="path10135-5-3" />
+    </marker>
+    <marker
+       id="marker15659"
+       viewBox="0 0 10 10"
+       refX="0"
+       refY="5"
+       markerWidth="6"
+       markerHeight="6"
+       orient="auto-start-reverse">
+      <path
+         stroke="#0000ff"
+         stroke-width="1"
+         d="M 0,0 V 10"
+         id="path15657" />
     </marker>
   </defs>
   <style
@@ -390,9 +418,9 @@
     <line
        class="glyphmetric horizontal"
        x1="1448.3628"
-       y1="916.21405"
+       y1="576.21405"
        x2="1448.3628"
-       y2="916.21405"
+       y2="576.21405"
        stroke="#0000ff"
        stroke-width="11.6599"
        marker-start="url(#stop-3)"
@@ -404,18 +432,6 @@
   <g
      id="sym-shy"
      transform="translate(448.31526,425.5596)">
-    <line
-       class="glyphmetric horizontal"
-       x1="51.411381"
-       y1="576.63489"
-       x2="51.411381"
-       y2="576.63489"
-       stroke="#0000ff"
-       stroke-width="11.6599"
-       marker-start="url(#stop)"
-       marker-end="url(#stop)"
-       id="sym-shy-glyfmetric"
-       inkscape:label="sym-shy-glyfmetric" />
     <path
        d="m -152.75957,461.36056 h 406.32214 v 70.26988 h -406.32214 z"
        style="fill:#d8d8d8;stroke:#000000;stroke-width:4.03085"
@@ -424,6 +440,18 @@
        d="M 25.324752,-340.20094 H 75.478248 V 497.53979 H 25.324752 Z"
        style="fill:#d8d8d8;stroke:#000000;stroke-width:4.21215"
        id="path56" />
+    <line
+       class="glyphmetric horizontal"
+       x1="51.411381"
+       y1="196.63489"
+       x2="51.411381"
+       y2="196.63489"
+       stroke="#0000ff"
+       stroke-width="11.6599"
+       marker-start="url(#stop)"
+       marker-end="url(#stop)"
+       id="sym-shy-glyfmetric"
+       inkscape:label="sym-shy-glyfmetric" />
   </g>
   <line
      class="glyphmetric horizontal"
@@ -437,4 +465,26 @@
      marker-end="url(#stop-2-6)"
      id="xxx-glyfmetric-5"
      style="marker-start:url(#stop-2-6);marker-end:url(#stop-2-6)" />
+  <g
+     id="sym-ignored"
+     inkscape:label="sym-ignored">
+    <line
+       class="glyphmetric horizontal"
+       x1="2463.6035"
+       y1="763.51251"
+       x2="2463.6035"
+       y2="763.51251"
+       stroke="#0000ff"
+       stroke-width="11.6599"
+       marker-start="url(#stop-3-5)"
+       marker-end="url(#stop-3-5)"
+       id="sym-ignored-glyfmetric"
+       inkscape:label="sym-ignored-glyfmetric"
+       style="marker-start:url(#stop-3-5);marker-end:url(#stop-3-5)" />
+    <path
+       id="circle1146"
+       style="fill:#0800ff;fill-opacity:1;stroke:none;stroke-width:47.3367;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       inkscape:label="sym-ignored-xxx"
+       d="M 2463.6035 154.22656 A 110.75193 110.75193 0 0 0 2352.8516 264.97852 A 110.75193 110.75193 0 0 0 2463.6035 375.73047 A 110.75193 110.75193 0 0 0 2574.3555 264.97852 A 110.75193 110.75193 0 0 0 2463.6035 154.22656 z M 2463.6035 203.91211 A 61.065178 61.065178 0 0 1 2524.668 264.97852 A 61.065178 61.065178 0 0 1 2463.6035 326.04297 A 61.065178 61.065178 0 0 1 2402.5391 264.97852 A 61.065178 61.065178 0 0 1 2463.6035 203.91211 z " />
+  </g>
 </svg>
