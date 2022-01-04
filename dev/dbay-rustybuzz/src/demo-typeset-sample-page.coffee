@@ -106,7 +106,7 @@ XXX_show_clusters = ( text, ads ) ->
 append_remarks = ( cfg ) ->
   { drb, dsk, fontnick, } = cfg
   fm              = drb.get_fontmetrics { fontnick, }
-  drb.mrg.append_to_loc { dsk, locid: 'remarks', text: "<div>fm: #{rpr fm}</div>", }
+  drb.mrg.append_to_loc { dsk, locid: 'remarks', text: "<!-- ^42-1^ --><div>fm: #{rpr fm}</div>", }
   # missing_txt     = ( rpr ad.chrs for ad in missing_chrs ).join ', '
   # 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
   return null
@@ -116,7 +116,7 @@ append_grid = ( cfg ) ->
   { drb
     dsk   } = cfg
   grid_txt  = FS.readFileSync cm_grid_path, { encoding: 'utf-8', }
-  drb.mrg.append_to_loc { dsk, locid: 'grid', text: grid_txt, }
+  drb.mrg.append_to_loc { dsk, locid: 'grid', text: '<!-- ^42-2^ -->' + grid_txt, }
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ append_outlines = ( cfg ) ->
     # continue if od.gid is missing.gid
     ### TAINT use standard method ###
     chrs_txt  = _escape_for_html_comment od.chrs
-    drb.mrg.append_to_loc { dsk, locid: 'outlines', text: "<!--#{chrs_txt}-->#{od.gd}", }
+    drb.mrg.append_to_loc { dsk, locid: 'outlines', text: "<!-- ^42-3^ #{chrs_txt}-->#{od.gd}", }
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -176,11 +176,11 @@ _append_fontmetric_hgrid = ( cfg ) ->
   fm      = drb.get_fontmetrics { fontnick, }
   swdth   = 0.25 # stroke width in mm
   swdth  *= 1000 * size_mm * mm_p_u
-  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>",              }
-  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.descender}' x2='10000' y2='#{fm.descender}'/>",            }
-  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='0' x2='10000' y2='0'/>",                                        }
-  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.x_height}' x2='10000' y2='#{fm.x_height}'/>",              }
-  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>",  }
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<!-- ^42-4^ --><line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.ascender}' x2='10000' y2='#{fm.ascender}'/>",              }
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<!-- ^42-5^ --><line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.descender}' x2='10000' y2='#{fm.descender}'/>",            }
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<!-- ^42-6^ --><line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='0' x2='10000' y2='0'/>",                                        }
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<!-- ^42-7^ --><line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.x_height}' x2='10000' y2='#{fm.x_height}'/>",              }
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<!-- ^42-8^ --><line class='fontmetric' stroke-width='#{swdth}' x1='0' y1='#{fm.capital_height}' x2='10000' y2='#{fm.capital_height}'/>",  }
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -192,7 +192,7 @@ append_content = ( cfg ) ->
   fm            = drb.get_fontmetrics { fontnick, }
   cfg.skip_shy_etc  ?= false
   cfg.skip_ws       ?= false
-  drb.mrg.append_to_loc { dsk, locid: 'textcontainer', text: "<div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>", }
+  drb.mrg.append_to_loc { dsk, locid: 'textcontainer', text: "<!-- ^42-9^ --><div style='left:#{x0}mm;top:#{y0 - size_mm}mm;'>#{text}</div>", }
   # for ad in ads
   #   urge '^3980^', ad
   line_y0       = 20
@@ -215,7 +215,7 @@ append_content = ( cfg ) ->
     drb.mrg.append_to_loc {
       dsk,
       locid: 'content',
-      text:  "<!-- ^42-1^ --><g transform='translate(#{x0} #{line_y}) scale(#{mm_p_u_txt})'>", }
+      text:  "<!-- ^42-10^ --><g transform='translate(#{x0} #{line_y}) scale(#{mm_p_u_txt})'>", }
     line_text = ''
     line_y    = line_y0 + ( line_y_delta * ( lnr - 1 ) )
     for ad from drb.db SQL"""
@@ -244,22 +244,23 @@ append_content = ( cfg ) ->
         ### TAINT use standard method ###
         chrs_htxt = _escape_for_html_text ad.chrs
         relwdth   = ad.dx / 1000 ### relative width of missing outline rectangle ###
-        element   = """<!-- ^42-2^ #{chrs_ctxt}--><use href='##{missing_sid}' class='missing' transform='translate(#{ad.x} #{ad.y}) scale(#{relwdth} 1)'/>\
+        element   = """<!-- ^42-11^ #{chrs_ctxt}--><use href='##{missing_sid}' class='missing' transform='translate(#{ad.x} #{ad.y}) scale(#{relwdth} 1)'/>\
           <text class='missing-chrs' style='font-size:1000px;transform:skew(#{fm.angle}deg)' x='#{ad.x}' y='#{ad.y}'>#{chrs_htxt}</text>"""
       else
         clasz = ( specials[ ad.gid ] ? null )?.name ? null
         if ad.y is 0
           if clasz?
-            element = "<!-- ^42-3^ #{chrs_ctxt}--><use class='fontmetrics #{clasz}' href='##{ad.sid}' x='#{ad.x}'/>"
+            element = "<!-- ^42-12^ #{chrs_ctxt}--><use class='fontmetrics #{clasz}' href='##{ad.sid}' x='#{ad.x}'/>"
           else
-            element = "<!-- ^42-4^ #{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}'/>"
+            element = "<!-- ^42-13^ #{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}'/>"
         else
           if clasz?
-            element = "<!-- ^42-5^ #{chrs_ctxt}--><use class='fontmetrics #{clasz}' href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
+            element = "<!-- ^42-14^ #{chrs_ctxt}--><use class='fontmetrics #{clasz}' href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
           else
-            element = "<!-- ^42-6^ #{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
+            element = "<!-- ^42-15^ #{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
       drb.mrg.append_to_loc { dsk, locid: 'content', text: element, }
-    drb.mrg.append_to_loc { dsk, locid: 'content', text: "</g>", }
+      drb.mrg.append_to_loc { dsk, locid: 'p1c1b1', text: element, }
+    drb.mrg.append_to_loc { dsk, locid: 'content', text: "<!-- ^42-16^ --></g>", }
     info '^43487^', { doc, par, lnr, }, rpr line_text
   return null
 
