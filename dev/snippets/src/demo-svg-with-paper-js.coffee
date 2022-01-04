@@ -1,4 +1,12 @@
 
+###
+
+This code is now in svgttf/src/svgttf-next.coffee
+
+###
+
+
+
 
 'use strict'
 
