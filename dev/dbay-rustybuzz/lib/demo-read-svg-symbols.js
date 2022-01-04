@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, PATH, RBW, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, symbols_path, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, PATH, SQL, badge, debug, echo, equals, help, info, isa, rpr, symbols_path, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -35,28 +35,29 @@
 
   SQL = String.raw;
 
-  guy = require('../../../apps/guy');
-
-  // MMX                       = require '../../../apps/multimix/lib/cataloguing'
-  RBW = require('rustybuzz-wasm');
-
-  H = require('./helpers');
-
-  ({DBay} = require(H.dbay_path));
-
-  ({Drb} = require(H.drb_path));
-
   symbols_path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/html+svg-demos/symbols-for-special-chrs.svg'));
 
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_read_svg_symbols = function() {
-    var HTML;
-    HTML = require('../../../apps/paragate/lib/htmlish.grammar');
-    info(HTML.grammar.parse(FS.readFileSync(symbols_path, {
+    var Svgttf2, _, d, path, result, svg, svgttf2, sym_name;
+    ({Svgttf2} = require('../../../apps/svgttf/lib/svgttf-next'));
+    svgttf2 = new Svgttf2();
+    path = '../../../apps-typesetting/html+svg-demos/symbols-for-special-chrs.svg';
+    path = PATH.resolve(PATH.join(__dirname, path));
+    svg = FS.readFileSync(path, {
       encoding: 'utf-8'
-    })));
+    });
+    result = svgttf2.glyf_pathdata_from_svg({path, svg});
+    for (sym_name in result) {
+      _ = result[sym_name];
+      whisper(sym_name);
+    }
+    for (_ in result) {
+      d = result[_];
+      echo(d.pd);
+    }
     return null;
   };
 

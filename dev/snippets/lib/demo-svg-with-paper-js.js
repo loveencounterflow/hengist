@@ -1,4 +1,9 @@
 (function() {
+  /*
+
+  This code is now in svgttf/src/svgttf-next.coffee
+
+  */
   'use strict';
   var CND, FS, PAPER, PATH, SVGO, badge, boundingbox_from_pathdata, debug, demo_import_export, demo_union, echo, get_dom_node_description, help, info, isa, prepare_svg_txt, rpr, shift_pathdata, svg_pathify, type_of, types, unite_path_data, urge, validate, warn, whisper;
 

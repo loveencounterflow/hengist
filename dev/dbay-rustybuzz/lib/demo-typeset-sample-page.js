@@ -82,6 +82,86 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
+  this.demo_glyfgrid = function(cfg) {
+    var I, L, V, bbox, db, defaults, drb, fontnick, fspath, gd, gid, gid_1, gid_2, i, mm_p_u, mm_p_u_txt, page, px, py, ref, ref1, sid, size_mm, tx, ty, width_mm, x, x1, y, y1;
+    defaults = {
+      fontnick: 'b42',
+      fspath: null,
+      gid_1: 1,
+      gid_2: 100
+    };
+    cfg = {...defaults, ...cfg};
+    ({fontnick, fspath, gid_1, gid_2} = cfg);
+    width_mm = 100;
+    size_mm = 10;
+    mm_p_u = size_mm / 1000; // mm per unit as valid inside scaled `<g>` line element
+    mm_p_u_txt = mm_p_u.toFixed(4);
+    /* NOTE: for testing we want to use the most recent `rustybuzz-wasm`: */
+    // { Tbl, }        = require '../../../apps/icql-dba-tabulate'
+    db = new DBay({
+      path: '/dev/shm/typesetting-1.sqlite'
+    });
+    drb = new Drb({
+      db,
+      rebuild: true,
+      RBW,
+      path: '/dev/shm/typesetting-2.sqlite'
+    });
+    // dtab            = new Tbl { db, }
+    page = FS.readFileSync(template_path, {
+      encoding: 'utf-8'
+    });
+    append_grid({drb, dsk});
+    ({I, L, V} = db.sql);
+    if (fspath != null) {
+      //.........................................................................................................
+      drb.register_fontnick({fontnick, fspath});
+    }
+    drb.prepare_font({fontnick});
+    //.........................................................................................................
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'content',
+      text: `<!-- ^42-17^ --><g transform='translate(${0} ${10}) scale(${mm_p_u_txt})'>`
+    });
+//.........................................................................................................
+    for (gid = i = ref = gid_1, ref1 = gid_2; (ref <= ref1 ? i <= ref1 : i >= ref1); gid = ref <= ref1 ? ++i : --i) {
+      ({bbox, gd} = drb.get_single_outline({gid, fontnick}));
+      ({x, y, x1, y1} = bbox);
+      sid = drb._get_sid({fontnick, gid});
+      px = (modulo(gid, 10)) / mm_p_u * size_mm;
+      py = (Math.floor(gid / 10)) / mm_p_u * size_mm;
+      tx = px + ((0.5 * size_mm) / mm_p_u);
+      ty = py - ((0.7 * size_mm) / mm_p_u);
+      drb.mrg.append_to_loc({
+        dsk,
+        locid: 'outlines',
+        text: `<!-- ^42-18^ --><path id='${sid}' d='${gd}'/>`
+      });
+      drb.mrg.append_to_loc({
+        dsk,
+        locid: 'content',
+        text: `<!-- ^42-19^ --><use href='#${sid}' x='${px}' y='${py}'/>`
+      });
+      drb.mrg.append_to_loc({
+        dsk,
+        locid: 'content',
+        text: `<!-- ^42-20^ --><text class='glyfgridgid' x='${tx}' y='${ty}'>${gid}</text>`
+      });
+    }
+    //.........................................................................................................
+    drb.mrg.append_to_loc({
+      dsk,
+      locid: 'content',
+      text: "<!-- ^42-21^ --></g>"
+    });
+    FS.writeFileSync(target_path, page);
+    return null;
+  };
+
+  //===========================================================================================================
+
+  //-----------------------------------------------------------------------------------------------------------
   append_remarks = function(cfg) {
     var drb, dsk, fm, fontnick;
     ({drb, dsk, fontnick} = cfg);
@@ -89,7 +169,7 @@
     drb.mrg.append_to_loc({
       dsk,
       locid: 'remarks',
-      text: `<div>fm: ${rpr(fm)}</div>`
+      text: `<!-- ^42-1^ --><div>fm: ${rpr(fm)}</div>`
     });
     // missing_txt     = ( rpr ad.chrs for ad in missing_chrs ).join ', '
     // 'remarks', "<div>missing_chrs: #{missing_txt}</div>"
@@ -106,7 +186,7 @@
     drb.mrg.append_to_loc({
       dsk,
       locid: 'grid',
-      text: grid_txt
+      text: '<!-- ^42-2^ -->' + grid_txt
     });
     return null;
   };
@@ -183,7 +263,7 @@
       drb.mrg.append_to_loc({
         dsk,
         locid: 'outlines',
-        text: `<!--${chrs_txt}-->${od.gd}`
+        text: `<!-- ^42-3^ ${chrs_txt}-->${od.gd}`
       });
     }
     return null;
@@ -199,27 +279,27 @@
     drb.mrg.append_to_loc({
       dsk,
       locid: 'content',
-      text: `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`
+      text: `<!-- ^42-4^ --><line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.ascender}' x2='10000' y2='${fm.ascender}'/>`
     });
     drb.mrg.append_to_loc({
       dsk,
       locid: 'content',
-      text: `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.descender}' x2='10000' y2='${fm.descender}'/>`
+      text: `<!-- ^42-5^ --><line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.descender}' x2='10000' y2='${fm.descender}'/>`
     });
     drb.mrg.append_to_loc({
       dsk,
       locid: 'content',
-      text: `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='0' x2='10000' y2='0'/>`
+      text: `<!-- ^42-6^ --><line class='fontmetric' stroke-width='${swdth}' x1='0' y1='0' x2='10000' y2='0'/>`
     });
     drb.mrg.append_to_loc({
       dsk,
       locid: 'content',
-      text: `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.x_height}' x2='10000' y2='${fm.x_height}'/>`
+      text: `<!-- ^42-7^ --><line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.x_height}' x2='10000' y2='${fm.x_height}'/>`
     });
     drb.mrg.append_to_loc({
       dsk,
       locid: 'content',
-      text: `<line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.capital_height}' x2='10000' y2='${fm.capital_height}'/>`
+      text: `<!-- ^42-8^ --><line class='fontmetric' stroke-width='${swdth}' x1='0' y1='${fm.capital_height}' x2='10000' y2='${fm.capital_height}'/>`
     });
     return null;
   };
@@ -244,7 +324,7 @@
     drb.mrg.append_to_loc({
       dsk,
       locid: 'textcontainer',
-      text: `<div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`
+      text: `<!-- ^42-9^ --><div style='left:${x0}mm;top:${y0 - size_mm}mm;'>${text}</div>`
     });
     // for ad in ads
     //   urge '^3980^', ad
@@ -265,7 +345,7 @@
       drb.mrg.append_to_loc({
         dsk,
         locid: 'content',
-        text: `<!-- ^42-1^ --><g transform='translate(${x0} ${line_y}) scale(${mm_p_u_txt})'>`
+        text: `<!-- ^42-10^ --><g transform='translate(${x0} ${line_y}) scale(${mm_p_u_txt})'>`
       });
       line_text = '';
       line_y = line_y0 + (line_y_delta * (lnr - 1));
@@ -294,20 +374,20 @@
         if (ad.gid === missing.gid) {
           chrs_htxt = _escape_for_html_text(ad.chrs);
           relwdth = ad.dx / 1000/* relative width of missing outline rectangle */
-          element = `<!-- ^42-2^ ${chrs_ctxt}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;transform:skew(${fm.angle}deg)' x='${ad.x}' y='${ad.y}'>${chrs_htxt}</text>`;
+          element = `<!-- ^42-11^ ${chrs_ctxt}--><use href='#${missing_sid}' class='missing' transform='translate(${ad.x} ${ad.y}) scale(${relwdth} 1)'/><text class='missing-chrs' style='font-size:1000px;transform:skew(${fm.angle}deg)' x='${ad.x}' y='${ad.y}'>${chrs_htxt}</text>`;
         } else {
           clasz = (ref4 = (ref5 = (ref6 = specials[ad.gid]) != null ? ref6 : null) != null ? ref5.name : void 0) != null ? ref4 : null;
           if (ad.y === 0) {
             if (clasz != null) {
-              element = `<!-- ^42-3^ ${chrs_ctxt}--><use class='fontmetrics ${clasz}' href='#${ad.sid}' x='${ad.x}'/>`;
+              element = `<!-- ^42-12^ ${chrs_ctxt}--><use class='fontmetrics ${clasz}' href='#${ad.sid}' x='${ad.x}'/>`;
             } else {
-              element = `<!-- ^42-4^ ${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}'/>`;
+              element = `<!-- ^42-13^ ${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}'/>`;
             }
           } else {
             if (clasz != null) {
-              element = `<!-- ^42-5^ ${chrs_ctxt}--><use class='fontmetrics ${clasz}' href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
+              element = `<!-- ^42-14^ ${chrs_ctxt}--><use class='fontmetrics ${clasz}' href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
             } else {
-              element = `<!-- ^42-6^ ${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
+              element = `<!-- ^42-15^ ${chrs_ctxt}--><use href='#${ad.sid}' x='${ad.x}' y='${ad.y}'/>`;
             }
           }
         }
@@ -316,11 +396,16 @@
           locid: 'content',
           text: element
         });
+        drb.mrg.append_to_loc({
+          dsk,
+          locid: 'p1c1b1',
+          text: element
+        });
       }
       drb.mrg.append_to_loc({
         dsk,
         locid: 'content',
-        text: "</g>"
+        text: "<!-- ^42-16^ --></g>"
       });
       info('^43487^', {doc, par, lnr}, rpr(line_text));
     }
@@ -477,86 +562,6 @@
     -- gd
   from outlines
   order by chrs;`));
-    return null;
-  };
-
-  //===========================================================================================================
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.demo_glyfgrid = function(cfg) {
-    var I, L, V, bbox, db, defaults, drb, fontnick, fspath, gd, gid, gid_1, gid_2, i, mm_p_u, mm_p_u_txt, page, px, py, ref, ref1, sid, size_mm, tx, ty, width_mm, x, x1, y, y1;
-    defaults = {
-      fontnick: 'b42',
-      fspath: null,
-      gid_1: 1,
-      gid_2: 100
-    };
-    cfg = {...defaults, ...cfg};
-    ({fontnick, fspath, gid_1, gid_2} = cfg);
-    width_mm = 100;
-    size_mm = 10;
-    mm_p_u = size_mm / 1000; // mm per unit as valid inside scaled `<g>` line element
-    mm_p_u_txt = mm_p_u.toFixed(4);
-    /* NOTE: for testing we want to use the most recent `rustybuzz-wasm`: */
-    // { Tbl, }        = require '../../../apps/icql-dba-tabulate'
-    db = new DBay({
-      path: '/dev/shm/typesetting-1.sqlite'
-    });
-    drb = new Drb({
-      db,
-      rebuild: true,
-      RBW,
-      path: '/dev/shm/typesetting-2.sqlite'
-    });
-    // dtab            = new Tbl { db, }
-    page = FS.readFileSync(template_path, {
-      encoding: 'utf-8'
-    });
-    append_grid({drb, dsk});
-    ({I, L, V} = db.sql);
-    if (fspath != null) {
-      //.........................................................................................................
-      drb.register_fontnick({fontnick, fspath});
-    }
-    drb.prepare_font({fontnick});
-    //.........................................................................................................
-    drb.mrg.append_to_loc({
-      dsk,
-      locid: 'content',
-      text: `<g transform='translate(${0} ${10}) scale(${mm_p_u_txt})'>`
-    });
-//.........................................................................................................
-    for (gid = i = ref = gid_1, ref1 = gid_2; (ref <= ref1 ? i <= ref1 : i >= ref1); gid = ref <= ref1 ? ++i : --i) {
-      ({bbox, gd} = drb.get_single_outline({gid, fontnick}));
-      ({x, y, x1, y1} = bbox);
-      sid = drb._get_sid({fontnick, gid});
-      px = (modulo(gid, 10)) / mm_p_u * size_mm;
-      py = (Math.floor(gid / 10)) / mm_p_u * size_mm;
-      tx = px + ((0.5 * size_mm) / mm_p_u);
-      ty = py - ((0.7 * size_mm) / mm_p_u);
-      drb.mrg.append_to_loc({
-        dsk,
-        locid: 'outlines',
-        text: `<path id='${sid}' d='${gd}'/>`
-      });
-      drb.mrg.append_to_loc({
-        dsk,
-        locid: 'content',
-        text: `<use href='#${sid}' x='${px}' y='${py}'/>`
-      });
-      drb.mrg.append_to_loc({
-        dsk,
-        locid: 'content',
-        text: `<text class='glyfgridgid' x='${tx}' y='${ty}'>${gid}</text>`
-      });
-    }
-    //.........................................................................................................
-    drb.mrg.append_to_loc({
-      dsk,
-      locid: 'content',
-      text: "</g>"
-    });
-    FS.writeFileSync(target_path, page);
     return null;
   };
 
