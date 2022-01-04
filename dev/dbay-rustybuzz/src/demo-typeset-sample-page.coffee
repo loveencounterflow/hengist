@@ -56,6 +56,53 @@ XXX_show_clusters = ( text, ads ) ->
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
+@demo_glyfgrid = ( cfg ) ->
+  defaults        = { fontnick: 'b42', fspath: null, gid_1: 1, gid_2: 100, }
+  cfg             = { defaults..., cfg..., }
+  { fontnick
+    fspath
+    gid_1
+    gid_2    }    = cfg
+  width_mm        = 100
+  size_mm         = 10
+  mm_p_u          = size_mm / 1000 # mm per unit as valid inside scaled `<g>` line element
+  mm_p_u_txt      = mm_p_u.toFixed 4
+  ### NOTE: for testing we want to use the most recent `rustybuzz-wasm`: ###
+  # { Tbl, }        = require '../../../apps/icql-dba-tabulate'
+  db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
+  drb             = new Drb { db, rebuild: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
+  # dtab            = new Tbl { db, }
+  page            = FS.readFileSync template_path, { encoding: 'utf-8', }
+  append_grid     { drb, dsk, }
+  { I, L, V }     = db.sql
+  #.........................................................................................................
+  drb.register_fontnick { fontnick, fspath, } if fspath?
+  drb.prepare_font      { fontnick, }
+  #.........................................................................................................
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<!-- ^42-17^ --><g transform='translate(#{0} #{10}) scale(#{mm_p_u_txt})'>", }
+  #.........................................................................................................
+  for gid in [ gid_1 .. gid_2 ]
+    { bbox
+      gd    }   = drb.get_single_outline { gid, fontnick, }
+    { x,  y,
+      x1, y1, } = bbox
+    sid         = drb._get_sid { fontnick, gid, }
+    px          = ( gid %% 10 ) / mm_p_u * size_mm
+    py          = ( gid // 10 ) / mm_p_u * size_mm
+    tx          = px + ( ( 0.5 * size_mm ) / mm_p_u )
+    ty          = py - ( ( 0.7 * size_mm ) / mm_p_u )
+    drb.mrg.append_to_loc { dsk, locid: 'outlines', text: "<!-- ^42-18^ --><path id='#{sid}' d='#{gd}'/>",                                }
+    drb.mrg.append_to_loc { dsk, locid: 'content',  text: "<!-- ^42-19^ --><use href='##{sid}' x='#{px}' y='#{py}'/>",                    }
+    drb.mrg.append_to_loc { dsk, locid: 'content',  text: "<!-- ^42-20^ --><text class='glyfgridgid' x='#{tx}' y='#{ty}'>#{gid}</text>",  }
+  #.........................................................................................................
+  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<!-- ^42-21^ --></g>", }
+  FS.writeFileSync target_path, page
+  return null
+
+
+#===========================================================================================================
+#
+#-----------------------------------------------------------------------------------------------------------
 append_remarks = ( cfg ) ->
   { drb, dsk, fontnick, } = cfg
   fm              = drb.get_fontmetrics { fontnick, }
@@ -325,52 +372,6 @@ write_output = ( cfg ) ->
       order by chrs;"""
   return null
 
-
-#===========================================================================================================
-#
-#-----------------------------------------------------------------------------------------------------------
-@demo_glyfgrid = ( cfg ) ->
-  defaults        = { fontnick: 'b42', fspath: null, gid_1: 1, gid_2: 100, }
-  cfg             = { defaults..., cfg..., }
-  { fontnick
-    fspath
-    gid_1
-    gid_2    }    = cfg
-  width_mm        = 100
-  size_mm         = 10
-  mm_p_u          = size_mm / 1000 # mm per unit as valid inside scaled `<g>` line element
-  mm_p_u_txt      = mm_p_u.toFixed 4
-  ### NOTE: for testing we want to use the most recent `rustybuzz-wasm`: ###
-  # { Tbl, }        = require '../../../apps/icql-dba-tabulate'
-  db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
-  drb             = new Drb { db, rebuild: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
-  # dtab            = new Tbl { db, }
-  page            = FS.readFileSync template_path, { encoding: 'utf-8', }
-  append_grid     { drb, dsk, }
-  { I, L, V }     = db.sql
-  #.........................................................................................................
-  drb.register_fontnick { fontnick, fspath, } if fspath?
-  drb.prepare_font      { fontnick, }
-  #.........................................................................................................
-  drb.mrg.append_to_loc { dsk, locid: 'content', text: "<g transform='translate(#{0} #{10}) scale(#{mm_p_u_txt})'>", }
-  #.........................................................................................................
-  for gid in [ gid_1 .. gid_2 ]
-    { bbox
-      gd    }   = drb.get_single_outline { gid, fontnick, }
-    { x,  y,
-      x1, y1, } = bbox
-    sid         = drb._get_sid { fontnick, gid, }
-    px          = ( gid %% 10 ) / mm_p_u * size_mm
-    py          = ( gid // 10 ) / mm_p_u * size_mm
-    tx          = px + ( ( 0.5 * size_mm ) / mm_p_u )
-    ty          = py - ( ( 0.7 * size_mm ) / mm_p_u )
-    drb.mrg.append_to_loc { dsk, locid: 'outlines', text: "<path id='#{sid}' d='#{gd}'/>",                                }
-    drb.mrg.append_to_loc { dsk, locid: 'content',  text: "<use href='##{sid}' x='#{px}' y='#{py}'/>",                    }
-    drb.mrg.append_to_loc { dsk, locid: 'content',  text: "<text class='glyfgridgid' x='#{tx}' y='#{ty}'>#{gid}</text>",  }
-  #.........................................................................................................
-  drb.mrg.append_to_loc { dsk, locid: 'content', text: "</g>", }
-  FS.writeFileSync target_path, page
-  return null
 
 
 ############################################################################################################
