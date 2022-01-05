@@ -260,6 +260,34 @@ r                         = String.raw
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY Sqlgen create_insert() without any fields" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }          = require H.dbay_path
+  db                = new DBay()
+  { Tbl, }          = require '../../../apps/icql-dba-tabulate'
+  dtab              = new Tbl { dba: db, }
+  schema            = 'main'
+  #.........................................................................................................
+  db SQL"""
+    create table atrids ( atrid integer not null primary key );"""
+  #.........................................................................................................
+  db ->
+    explicit_insert = db.create_insert { into: 'atrids', returning: '*', }
+    urge '^4400^', rpr explicit_insert
+    T?.eq explicit_insert, 'insert into "main"."atrids" ( "atrid" ) values ( $atrid ) returning *;'
+    implicit_insert = db.create_insert { into: 'atrids', exclude: [ 'atrid', ], returning: '*', }
+    urge '^4400^', rpr implicit_insert
+    T?.eq implicit_insert, 'insert into "main"."atrids" default values returning *;'
+    urge '^4400^', db.single_row explicit_insert, { atrid: 24, }
+    urge '^4400^', db.single_row explicit_insert, { atrid: 25, }
+    urge '^4400^', db.single_row implicit_insert
+    urge '^4400^', db.single_row implicit_insert
+    T?.eq ( db.all_first_values SQL"select * from atrids order by atrid;" ), [ 24, 25, 26, 27 ]
+    db SQL"rollback;"
+  #.........................................................................................................
+  done?()
+
 
 
 ############################################################################################################
@@ -270,7 +298,8 @@ if module is require.main then do =>
   # test @[ "DBAY Sqlgen create_insert() 2" ]
   # test @[ "DBAY Sqlgen isa.dbay_create_insert_cfg()" ]
   # test @[ "DBAY Sqlgen on_conflict 2" ]
-  @[ "DBAY Sqlgen create_insert() with returning clause" ]()
+  # @[ "DBAY Sqlgen create_insert() with returning clause" ]()
+  test @[ "DBAY Sqlgen create_insert() without any fields" ]
 
 
 
