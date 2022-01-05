@@ -581,6 +581,55 @@ next_id integer generated always as ( id + 1 ) );`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY Sqlgen create_insert() without any fields"] = function(T, done) {
+    var DBay, Tbl, db, dtab, schema;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    dtab = new Tbl({
+      dba: db
+    });
+    schema = 'main';
+    //.........................................................................................................
+    db(SQL`create table atrids ( atrid integer not null primary key );`);
+    //.........................................................................................................
+    db(function() {
+      var explicit_insert, implicit_insert;
+      explicit_insert = db.create_insert({
+        into: 'atrids',
+        returning: '*'
+      });
+      urge('^4400^', rpr(explicit_insert));
+      if (T != null) {
+        T.eq(explicit_insert, 'insert into "main"."atrids" ( "atrid" ) values ( $atrid ) returning *;');
+      }
+      implicit_insert = db.create_insert({
+        into: 'atrids',
+        exclude: ['atrid'],
+        returning: '*'
+      });
+      urge('^4400^', rpr(implicit_insert));
+      if (T != null) {
+        T.eq(implicit_insert, 'insert into "main"."atrids" default values returning *;');
+      }
+      urge('^4400^', db.single_row(explicit_insert, {
+        atrid: 24
+      }));
+      urge('^4400^', db.single_row(explicit_insert, {
+        atrid: 25
+      }));
+      urge('^4400^', db.single_row(implicit_insert));
+      urge('^4400^', db.single_row(implicit_insert));
+      if (T != null) {
+        T.eq(db.all_first_values(SQL`select * from atrids order by atrid;`), [24, 25, 26, 27]);
+      }
+      return db(SQL`rollback;`);
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
@@ -590,7 +639,8 @@ next_id integer generated always as ( id + 1 ) );`);
       // test @[ "DBAY Sqlgen create_insert() 2" ]
       // test @[ "DBAY Sqlgen isa.dbay_create_insert_cfg()" ]
       // test @[ "DBAY Sqlgen on_conflict 2" ]
-      return this["DBAY Sqlgen create_insert() with returning clause"]();
+      // @[ "DBAY Sqlgen create_insert() with returning clause" ]()
+      return test(this["DBAY Sqlgen create_insert() without any fields"]);
     })();
   }
 

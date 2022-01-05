@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, XXX_show_clusters, _append_fontmetric_hgrid, _escape_for_html_comment, _escape_for_html_text, _escape_syms, append_content, append_grid, append_outlines, append_remarks, append_title, badge, cm_grid_path, debug, echo, equals, favicon_path, guy, help, info, isa, mudom_path, rpr, target_path, template_path, to_width, type_of, types, ui_font_path, urge, validate, validate_list_of, warn, whisper, write_output,
+  var CND, DBay, Drb, FS, H, ITXT, PATH, RBW, SQL, TMP_add_baselines_to_db, TMP_append_baselines_to_svg, XXX_show_clusters, _append_fontmetric_hgrid, _escape_for_html_comment, _escape_for_html_text, _escape_syms, append_content, append_grid, append_outlines, append_remarks, append_title, badge, cm_grid_path, debug, echo, equals, favicon_path, guy, help, info, isa, mudom_path, rpr, target_path, template_path, to_width, type_of, types, ui_font_path, urge, validate, validate_list_of, warn, whisper, write_output,
     modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
@@ -396,12 +396,8 @@
           locid: 'content',
           text: element
         });
-        drb.mrg.append_to_loc({
-          dsk,
-          locid: 'p1c1b1',
-          text: element
-        });
       }
+      // drb.mrg.append_to_loc { dsk, locid: 'p1c1b1', text: element, }
       drb.mrg.append_to_loc({
         dsk,
         locid: 'content',
@@ -426,6 +422,54 @@
   //     page  = drb.mrg.append_to_loc { dsk, locid: 'content', text: "<!--#{od.chrs}--><use href='##{od.sid}' x='#{x}'/>", }
   //   page = drb.mrg.append_to_loc { dsk, locid: 'content', text: "</g>", }
   //   return page
+
+  //-----------------------------------------------------------------------------------------------------------
+  TMP_add_baselines_to_db = function(cfg) {
+    var angle, clm, doc, drb, dsk, dy, insert_baseline, length, x1, y0;
+    ({drb, dsk, doc} = cfg);
+    clm = 1;
+    x1 = 10/* TAINT make coordinates relative to column */
+    y0 = 20;
+    dy = 10;
+    length = 10000/* TAINT derive line length from column width */
+    angle = -8;
+    insert_baseline = drb.db.prepare(drb.sql.insert_baseline);
+    drb.db(() => {
+      var bln, i, y1;
+      for (bln = i = 1; i <= 5; bln = ++i) {
+        y1 = y0 + (bln - 1) * dy;
+        insert_baseline.run({doc, clm, bln, x1, y1, length, angle});
+      }
+      return null;
+    });
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  TMP_append_baselines_to_svg = function(cfg) {
+    var angle, base_id, baseline_svg, bln, clm, doc, drb, dsk, length, ref, row, x1, y1;
+    ({drb, dsk, doc} = cfg);
+    ref = drb.db.all_rows(SQL`select
+  *
+from ${drb.cfg.schema}.baselines
+where true
+  and ( doc = $doc )
+order by clm, bln;`, {doc});
+    for (row of ref) {
+      // info '^568678^', row
+      ({clm, bln, x1, y1, length, angle} = row);
+      base_id = `p1c${clm}b${bln}`;
+      baseline_svg = `<g id='${base_id}-g' transform='translate(${x1},${y1}) rotate(${angle}) scale(0.0100)'>
+  <line id='${base_id}-l' class='baseline' x1='0' y1='0' x2='${length}' y2='0'/></g>`.trim();
+      drb.mrg.append_to_loc({
+        dsk,
+        locid: 'TMP-baselines',
+        text: baseline_svg,
+        nl: true
+      });
+    }
+    return null;
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   write_output = function(cfg) {
@@ -531,6 +575,8 @@
     }
     drb.prepare_font({fontnick});
     drb.arrange({fontnick, text, doc, par});
+    TMP_add_baselines_to_db({drb, dsk, doc});
+    TMP_append_baselines_to_svg({drb, dsk, doc});
     drb.distribute({doc, par, mm_p_u, width_mm, size_mm});
     drb.compose({fontnick, text, doc, par});
     append_remarks({drb, dsk, fontnick});
