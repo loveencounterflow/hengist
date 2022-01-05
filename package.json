@@ -70,6 +70,7 @@
     "jake": "^10.8.2",
     "javascript-state-machine": "^3.1.0",
     "jfee": "0.1.4",
+    "jsdom": "^19.0.0",
     "jsx-number-format": "^0.1.4",
     "klona": "^2.0.4",
     "letsfreezethat": "^3.1.0",
