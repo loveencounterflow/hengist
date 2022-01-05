@@ -259,7 +259,7 @@ append_content = ( cfg ) ->
           else
             element = "<!-- ^42-15^ #{chrs_ctxt}--><use href='##{ad.sid}' x='#{ad.x}' y='#{ad.y}'/>"
       drb.mrg.append_to_loc { dsk, locid: 'content', text: element, }
-      drb.mrg.append_to_loc { dsk, locid: 'p1c1b1', text: element, }
+      # drb.mrg.append_to_loc { dsk, locid: 'p1c1b1', text: element, }
     drb.mrg.append_to_loc { dsk, locid: 'content', text: "<!-- ^42-16^ --></g>", }
     info '^43487^', { doc, par, lnr, }, rpr line_text
   return null
@@ -278,6 +278,50 @@ append_content = ( cfg ) ->
 #     page  = drb.mrg.append_to_loc { dsk, locid: 'content', text: "<!--#{od.chrs}--><use href='##{od.sid}' x='#{x}'/>", }
 #   page = drb.mrg.append_to_loc { dsk, locid: 'content', text: "</g>", }
 #   return page
+
+#-----------------------------------------------------------------------------------------------------------
+TMP_add_baselines_to_db = ( cfg ) ->
+  { drb
+    dsk
+    doc }         = cfg
+  clm             = 1
+  x1              = 10 ### TAINT make coordinates relative to column ###
+  y0              = 20
+  dy              = 10
+  length          = 10000 ### TAINT derive line length from column width ###
+  angle           = -8
+  insert_baseline = drb.db.prepare drb.sql.insert_baseline
+  drb.db =>
+    for bln in [ 1 .. 5 ]
+      y1 = y0 + ( bln - 1 ) * dy
+      insert_baseline.run { doc, clm, bln, x1, y1, length, angle, }
+    return null
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+TMP_append_baselines_to_svg = ( cfg ) ->
+  { drb
+    dsk
+    doc }         = cfg
+  for row from drb.db.all_rows SQL"""select
+      *
+    from #{drb.cfg.schema}.baselines
+    where true
+      and ( doc = $doc )
+    order by clm, bln;""", { doc, }
+    # info '^568678^', row
+    { clm
+      bln
+      x1
+      y1
+      length
+      angle     } = row
+    base_id       = "p1c#{clm}b#{bln}"
+    baseline_svg  = """
+    <g id='#{base_id}-g' transform='translate(#{x1},#{y1}) rotate(#{angle}) scale(0.0100)'>
+      <line id='#{base_id}-l' class='baseline' x1='0' y1='0' x2='#{length}' y2='0'/></g>""".trim()
+    drb.mrg.append_to_loc { dsk, locid: 'TMP-baselines',  text: baseline_svg, nl: true, }
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 write_output = ( cfg ) ->
@@ -343,6 +387,8 @@ write_output = ( cfg ) ->
   drb.register_fontnick { fontnick, fspath, } if fspath?
   drb.prepare_font      { fontnick, }
   drb.arrange           { fontnick, text, doc, par, }
+  TMP_add_baselines_to_db     { drb, dsk, doc, }
+  TMP_append_baselines_to_svg { drb, dsk, doc, }
   drb.distribute        { doc, par, mm_p_u, width_mm, size_mm, }
   drb.compose           { fontnick, text, doc, par, }
   append_remarks        { drb, dsk, fontnick, }
