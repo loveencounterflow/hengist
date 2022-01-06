@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/demo-await-import.coffee"
+  ],
+  "names": [],
+  "mappings": "AAI4G;EAAA;AAAA,MAAA,GAAA,EAAA,KAAA,EAAA,KAAA,EAAA,KAAA,EAAA,IAAA,EAAA,IAAA,EAAA,IAAA,EAAA,GAAA,EAAA,GAAA,EAAA,IAAA,EAAA,IAAA,EAAA;;EAC5G,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,GAAA,GAA4B,GAAG,CAAC;;EAChC,KAAA,GAA4B;;EAC5B,GAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,OAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,SAAf,EAA4B,KAA5B;;EAC5B,KAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,KAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,IAAI,CAAC,IAAT,CAAc,GAAd,EAZgF;;;EAc5G,OAAA,CAAQ,SAAR;;EAd4G;;;;;;;;;AAAA",
+  "sourcesContent": [
+    "\n\n\n\n############################################################################################################\nCND                       = require 'cnd'\nrpr                       = CND.rpr\nbadge                     = 'GUY/TESTS'\nlog                       = CND.get_logger 'plain',     badge\ninfo                      = CND.get_logger 'info',      badge\nwhisper                   = CND.get_logger 'whisper',   badge\nalert                     = CND.get_logger 'alert',     badge\ndebug                     = CND.get_logger 'debug',     badge\nwarn                      = CND.get_logger 'warn',      badge\nhelp                      = CND.get_logger 'help',      badge\nurge                      = CND.get_logger 'urge',      badge\necho                      = CND.echo.bind CND\n# GUY                       = require 'guy'\nrequire 'deasync'\n\n# #-----------------------------------------------------------------------------------------------------------\n# print_later       = -> GUY.async.after 0.1, -> help \"f got called\"\n# print_later_sync  = GUY.nowait.for_awaitable print_later\n\n# info '^764-1^'\n# print_later()\n# info '^764-2^'\n# print_later_sync()\n# info '^764-3^'\n\n\n"
+  ]
+}
