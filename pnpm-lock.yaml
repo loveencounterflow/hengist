@@ -22,7 +22,7 @@ specifiers:
   cupofjoe: 0.2.1
   datom: 8.0.3
   dbay: ^10.121.1
-  deasync: ^0.1.22
+  deasync: ^0.1.23
   deepcopy: ^2.1.0
   deepfreeze: ^2.0.0
   deepfreezer: ^1.2.2
@@ -106,6 +106,7 @@ specifiers:
   sqlite-parser: ^1.0.1
   stacktracey: 2.1.7
   steampipes: 6.7.1
+  stringify-attributes: 2.0.0
   strip-ansi: 7.0.1
   svg_pathify: ^0.0.8
   svgo: ^2.8.0
@@ -227,6 +228,7 @@ dependencies:
   sqlite-parser: 1.0.1
   stacktracey: 2.1.7
   steampipes: 6.7.1
+  stringify-attributes: 2.0.0
   strip-ansi: 7.0.1
   svg_pathify: 0.0.8
   svgo: 2.8.0
@@ -2195,6 +2197,11 @@ packages:
   /escalade/3.1.1:
     resolution: {integrity: sha512-k0er2gUkLf8O0zKJiAhmkTnJlTvINGv7ygDNPbeIsX/TJjGJZHuh9B2UxbsaEkmlEo9MfhrSzmhIlhRlI2GXnw==}
     engines: {node: '>=6'}
+    dev: false
+
+  /escape-goat/2.1.1:
+    resolution: {integrity: sha512-8/uIhbG12Csjy2JEW7D9pHbreaVaS/OpN3ycnyvElTdwM5n6GY6W6e2IPemfvGZeUMqZ9A/3GqIZMgKnBhAw/Q==}
+    engines: {node: '>=8'}
     dev: false
 
   /escape-string-regexp/1.0.5:
@@ -5893,6 +5900,13 @@ packages:
     resolution: {integrity: sha512-hkRX8U1WjJFd8LsDJ2yQ/wWWxaopEsABU1XfkM8A+j0+85JAGppt16cr1Whg6KIbb4okU6Mql6BOj+uup/wKeA==}
     dependencies:
       safe-buffer: 5.2.1
+    dev: false
+
+  /stringify-attributes/2.0.0:
+    resolution: {integrity: sha512-wrVfRV6sCCB6wr3gx8OgKsp/9dSWWbKr8ifLfOxEcd/BBoa8d5pAf4BZb/jQW1JZnoZImjvUdxdo3ikYHZmYiw==}
+    engines: {node: '>=8'}
+    dependencies:
+      escape-goat: 2.1.1
     dev: false
 
   /strip-ansi/3.0.1:
