@@ -142,17 +142,11 @@
     db = new DBay({
       path: '/dev/shm/demo-datamill.sqlite'
     });
-    db("drop view  if exists next_free_aid;");
-    db("drop table if exists atrs;");
-    db("drop table if exists tags;");
-    db("drop table if exists atrids;");
-    db("drop table if exists docs;");
-    // db SQL"""
-    // drop view  if exists next_free_aid;
-    // drop table if exists atrids;
-    // drop table if exists atrs;
-    // drop table if exists tags;
-    // drop table if exists docs;"""
+    db(SQL`drop view  if exists next_free_aid;
+drop table if exists atrs;
+drop table if exists tags;
+drop table if exists atrids;
+drop table if exists docs;`);
     db(SQL`create table atrids ( atrid integer not null primary key );`);
     db(SQL`create table atrs (
     atrid integer not null references atrids,
@@ -221,6 +215,39 @@
       }
     });
     //.........................................................................................................
+    db.create_window_function({
+      name: 'xxx_create_tag',
+      varargs: false,
+      deterministic: true,
+      start: null,
+      step: function(Σ, sgl, tag, k, v) {
+        if (Σ == null) {
+          Σ = {
+            sgl,
+            tag,
+            atrs: {}
+          };
+        }
+        if (k != null) {
+          Σ.atrs[k] = v;
+        }
+        return Σ;
+      },
+      inverse: function(Σ, dropped) {
+        if (Σ == null) {
+          return null;
+        }
+        delete Σ.atrs[k];
+        return Σ;
+      },
+      result: function(Σ) {
+        if (Σ == null) {
+          return '';
+        }
+        return hdml.create_tag(Σ.sgl, Σ.tag, Σ.atrs);
+      }
+    });
+    //.........................................................................................................
     doc = 1;
     _append_tag = function(doc, sgl, tag, atrs = null, text = null) {
       var atrid, k, v;
@@ -241,9 +268,14 @@
       urge(db.first_row(_insert_tag, {doc, sgl, tag, atrid, text}));
       return null;
     };
+    //.........................................................................................................
+    _append_tag(1, '^', 'path', {
+      id: 'c1',
+      d: 'M100,100L200,200'
+    });
     _append_tag(1, '<', 'div', {
       id: 'c1',
-      class: ['foo', 'bar']
+      class: 'foo bar'
     });
     _append_tag(1, '^', '$text', null, "helo");
     _append_tag(1, '>', 'div');
@@ -252,16 +284,19 @@
     console.table(db.all_rows(SQL`select * from tags;`));
     console.table(db.all_rows(SQL`select * from atrs;`));
     console.table(db.all_rows(SQL`select distinct
-    tid,
-    sgl,
-    tag,
-    atrid,
-    text,
-    xxx_array_agg( k, v ) over w as xxx
-  from tags as t
-  left join atrs as a
-  using ( atrid )
-  window w as ( partition by atrid )
+    t.tid                                                     as tid,
+    t.sgl                                                     as sgl,
+    t.tag                                                     as tag,
+    t.atrid                                                   as atrid,
+    case t.tag when '$text' then t.text
+    else xxx_create_tag( t.sgl, t.tag, a.k, a.v ) over w end  as xxx
+  from
+    tags as t
+    left join atrs as a using ( atrid )
+  window w as (
+    partition by t.tid
+    order by a.k
+    rows between unbounded preceding and unbounded following )
   order by tid;`));
     return null;
   };
@@ -293,10 +328,11 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // @demo_datamill()
-      return this.demo_html_generation();
+      return this.demo_datamill();
     })();
   }
+
+  // @demo_html_generation()
 
 }).call(this);
 
