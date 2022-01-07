@@ -44,6 +44,9 @@ guy                       = require '../../../apps/guy'
 { width_of
   to_width }              = require 'to-width'
 
+#-----------------------------------------------------------------------------------------------------------
+banner = ( title ) -> echo CND.reverse CND.steel to_width ( ' ' + title + ' ' ), 50
+
 
 #===========================================================================================================
 #
@@ -177,8 +180,7 @@ hdml = new Hdml()
     inverse:        ( Σ, dropped ) -> return null unless Σ?; delete Σ.atrs[ k ]; Σ
     result:         ( Σ ) -> return '' unless Σ?; hdml.create_tag Σ.sgl, Σ.tag, Σ.atrs
   #.........................................................................................................
-  doc         = 1
-  _append_tag = ( doc, sgl, tag, atrs = null, text = null ) ->
+  _append_tag = ( dsk, sgl, tag, atrs = null, text = null ) ->
     atrid = null
     if text?
       validate.null atrs
@@ -187,18 +189,24 @@ hdml = new Hdml()
       { atrid } = db.first_row _insert_atrid
       for k, v of atrs
         v = rpr v unless isa.text v
-        info '^689-1^', db.first_row _insert_atr, { atrid, k, v, }
-    urge db.first_row _insert_tag, { doc, sgl, tag, atrid, text, }
+        _insert_atr.run { atrid, k, v, }
+    urge db.first_row _insert_content, { dsk, sgl, tag, atrid, text, }
     return null
   #.........................................................................................................
-  _append_tag 1, '^', 'path', { id: 'c1', d: 'M100,100L200,200', }
-  _append_tag 1, '<', 'div', { id: 'c1', class: 'foo bar', }
-  _append_tag 1, '^', '$text', null, "helo"
-  _append_tag 1, '>', 'div'
+  dsk = 'demo'
+  _insert_datasource.run { dsk, url: 'ram:', digest: null, }
+  _append_tag dsk, '^', 'path', { id: 'c1', d: 'M100,100L200,200', }
+  _append_tag dsk, '<', 'div', { id: 'c1', class: 'foo bar', }
+  _append_tag dsk, '^', '$text', null, "helo"
+  _append_tag dsk, '>', 'div'
+  _append_tag dsk, '^', 'mrg:loc#baselines'
   #.........................................................................................................
-  console.table db.all_rows SQL"select * from docs;"
-  console.table db.all_rows SQL"select * from tags;"
-  console.table db.all_rows SQL"select * from atrs;"
+  db.setv 'dsk', 'demo'
+  banner "datasources";     console.table db.all_rows SQL"select * from datasources;"
+  banner "mirror";          console.table db.all_rows SQL"select * from mirror;"
+  banner "atrs";            console.table db.all_rows SQL"select * from atrs;"
+  banner "std_variables()"; console.table db.all_rows SQL"select * from std_variables();"
+  banner "tags_and_html";   console.table db.all_rows SQL"select * from tags_and_html;"
   return null
 
 #-----------------------------------------------------------------------------------------------------------
