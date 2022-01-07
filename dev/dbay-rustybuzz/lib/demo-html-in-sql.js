@@ -83,7 +83,7 @@ drop table if exists datasources;`);
     tag   text    not null,      -- use '$text' for text nodes
     atrid integer,
     text  text,
-  primary key ( tid ),
+  primary key ( dsk, tid ),
   foreign key ( dsk   ) references datasources,
   foreign key ( atrid ) references atrids );`);
     db(SQL`create table datasources (
@@ -115,11 +115,13 @@ drop table if exists datasources;`);
       returning: '*',
       exclude: ['atrid']
     });
-    _insert_content = db.prepare_insert({
-      into: 'mirror',
-      returning: '*',
-      exclude: ['tid']
-    });
+    /* NOTE we don't use `autoincrement` b/c this is the more general solution; details will change when the
+     VNR gets more realistic (dsk, linenr, ...) */
+    // _insert_content     = db.prepare_insert { into: 'mirror',       returning: '*', exclude: [ 'tid', ], }
+    _insert_content = db.prepare(SQL`with v1 as ( select coalesce( max( tid ), 0 ) + 1 as tid from mirror where dsk = $dsk )
+insert into mirror ( dsk, tid, sgl, tag, atrid, text )
+  values ( $dsk, ( select tid from v1 ), $sgl, $tag, $atrid, $text )
+  returning *;`);
     _insert_atr = db.prepare_insert({
       into: 'atrs',
       returning: null
