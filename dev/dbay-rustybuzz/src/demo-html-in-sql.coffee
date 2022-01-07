@@ -53,21 +53,27 @@ banner = ( title ) -> echo CND.reverse CND.steel to_width ( ' ' + title + ' ' ),
     drop table if exists atrids;
     drop table if exists datasources;"""
   db SQL"""
-    create table atrids ( atrid integer not null primary key );"""
+    create table atrids (
+        atrid integer not null,
+      primary key ( atrid ) );"""
   db SQL"""
     create table atrs (
-        atrid integer not null references atrids,
-        k     text not null,
-        v     text not null,
-      primary key ( atrid, k ) );"""
+        atrid integer not null,
+        k     text    not null,
+        v     text    not null,
+      primary key ( atrid, k ),
+      foreign key ( atrid ) references atrids );"""
   db SQL"""
     create table mirror (
-        dsk   text    not null references datasources,
-        tid   integer not null primary key,
+        dsk   text    not null,
+        tid   integer not null,
         sgl   text    not null,      -- sigil, one of `<`, `>`, `^`
         tag   text    not null,      -- use '$text' for text nodes
-        atrid integer references atrids,
-        text  text );"""
+        atrid integer,
+        text  text,
+      primary key ( tid ),
+      foreign key ( dsk   ) references datasources,
+      foreign key ( atrid ) references atrids );"""
   db SQL"""
     create table datasources (
         dsk     text not null,
