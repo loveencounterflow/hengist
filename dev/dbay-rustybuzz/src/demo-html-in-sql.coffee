@@ -151,6 +151,18 @@ hdml = new Hdml()
     inverse:        ( total, dropped ) -> return null unless total?; delete total[ k ]; total
     result:         ( total ) -> return '' unless total?; JSON.stringify total
   #.........................................................................................................
+  db.create_window_function
+    name:           'xxx_create_tag'
+    varargs:        false
+    deterministic:  true
+    start:          null
+    step:           ( Σ, sgl, tag, k, v ) ->
+      Σ            ?= { sgl, tag, atrs: {}, }
+      Σ.atrs[ k ]   = v if k?
+      return Σ
+    inverse:        ( Σ, dropped ) -> return null unless Σ?; delete Σ.atrs[ k ]; Σ
+    result:         ( Σ ) -> return '' unless Σ?; hdml.create_tag Σ.sgl, Σ.tag, Σ.atrs
+  #.........................................................................................................
   doc         = 1
   _append_tag = ( doc, sgl, tag, atrs = null, text = null ) ->
     atrid = null
