@@ -98,6 +98,7 @@ hdml = new Hdml()
 #-----------------------------------------------------------------------------------------------------------
 @demo_datamill = ( cfg ) ->
   db              = new DBay { path: '/dev/shm/demo-datamill.sqlite', }
+  db.create_stdlib()
   db SQL"""
     drop view  if exists tags_and_html;
     drop table if exists atrs;
