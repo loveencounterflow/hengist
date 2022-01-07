@@ -114,20 +114,20 @@ hdml = new Hdml()
         v     text not null,
       primary key ( atrid, k ) );"""
   db SQL"""
-    create table tags (
+    create table mirror (
+        dsk   text    not null references datasources,
         tid   integer not null primary key,
         sgl   text    not null,      -- sigil, one of `<`, `>`, `^`
         tag   text    not null,      -- use '$text' for text nodes
         atrid integer references atrids,
         text  text );"""
   db SQL"""
-    create table docs (
-        doc   integer not null,   -- references docs
-        v2    integer not null,   -- VNR
-        v3    integer not null,   -- VNR
-        v4    integer not null,   -- VNR
-        tid   integer not null references tags,
-      primary key ( doc, v2, v3, v4 ) );"""
+    create table datasources (
+        dsk     text not null,
+        url     text not null,
+        digest  text default null,
+      primary key ( dsk ) );"""
+      # -- create table #{prefix}_datasources (
   db SQL"""
     create view tags_and_html as select distinct
         t.tid                                                     as tid,
