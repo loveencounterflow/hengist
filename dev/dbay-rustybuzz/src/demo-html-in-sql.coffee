@@ -143,6 +143,11 @@ banner = ( title ) -> echo CND.reverse CND.steel to_width ( ' ' + title + ' ' ),
     urge db.first_row _insert_content, { dsk, sgl, tag, atrid, text, }
     return null
   #.........................................................................................................
+  render_dsk = ( cfg ) ->
+    { dsk } = cfg
+    db.setv 'dsk', dsk
+    return ( db.all_first_values SQL"select xxx from tags_and_html;" ).join ''
+  #.........................................................................................................
   dsk = 'demo'
   _insert_datasource.run { dsk, url: 'ram:', digest: null, }
   _append_tag dsk, '^', 'path', { id: 'c1', d: 'M100,100L200,200', }
@@ -157,6 +162,7 @@ banner = ( title ) -> echo CND.reverse CND.steel to_width ( ' ' + title + ' ' ),
   banner "atrs";            console.table db.all_rows SQL"select * from atrs;"
   banner "std_variables()"; console.table db.all_rows SQL"select * from std_variables();"
   banner "tags_and_html";   console.table db.all_rows SQL"select * from tags_and_html;"
+  banner "render_dsk";      info rpr render_dsk { dsk, }
   return null
 
 
