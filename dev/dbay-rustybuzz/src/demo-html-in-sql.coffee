@@ -171,7 +171,9 @@ hdml = new Hdml()
         info '^689-1^', db.first_row _insert_atr, { atrid, k, v, }
     urge db.first_row _insert_tag, { doc, sgl, tag, atrid, text, }
     return null
-  _append_tag 1, '<', 'div', { id: 'c1', class: [ 'foo', 'bar', ], }
+  #.........................................................................................................
+  _append_tag 1, '^', 'path', { id: 'c1', d: 'M100,100L200,200', }
+  _append_tag 1, '<', 'div', { id: 'c1', class: 'foo bar', }
   _append_tag 1, '^', '$text', null, "helo"
   _append_tag 1, '>', 'div'
   #.........................................................................................................
@@ -210,8 +212,8 @@ hdml = new Hdml()
 
 ############################################################################################################
 if require.main is module then do =>
-  # @demo_datamill()
-  @demo_html_generation()
+  @demo_datamill()
+  # @demo_html_generation()
 
 
 
