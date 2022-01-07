@@ -147,10 +147,10 @@ hdml = new Hdml()
         rows between unbounded preceding and unbounded following )
       order by tid;"""
   #.........................................................................................................
-  _insert_atrid     = db.prepare_insert { into: 'atrids', returning: '*', exclude: [ 'atrid', ], }
-  _insert_tag       = db.prepare_insert { into: 'tags',   returning: '*', exclude: [ 'tid', ], }
-  _insert_atr       = db.prepare_insert { into: 'atrs',   returning: '*', }
-  _insert_doc       = db.prepare_insert { into: 'docs',   returning: '*', }
+  _insert_atrid       = db.prepare_insert { into: 'atrids',       returning: '*', exclude: [ 'atrid', ], }
+  _insert_content     = db.prepare_insert { into: 'mirror',       returning: '*', exclude: [ 'tid', ], }
+  _insert_atr         = db.prepare_insert { into: 'atrs',         returning: null, }
+  _insert_datasource  = db.prepare_insert { into: 'datasources',  returning: '*', }
   #.........................................................................................................
   db.create_window_function
     name:           'xxx_array_agg'
