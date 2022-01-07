@@ -128,6 +128,24 @@ hdml = new Hdml()
         v4    integer not null,   -- VNR
         tid   integer not null references tags,
       primary key ( doc, v2, v3, v4 ) );"""
+  db SQL"""
+    create view tags_and_html as select distinct
+        t.tid                                                     as tid,
+        t.sgl                                                     as sgl,
+        t.tag                                                     as tag,
+        t.atrid                                                   as atrid,
+        case t.tag when '$text' then t.text
+        else xxx_create_tag( t.sgl, t.tag, a.k, a.v ) over w end  as xxx
+      from
+        mirror as t
+        left join atrs as a using ( atrid )
+      where true
+        and ( t.dsk = std_getv( 'dsk' ) )
+      window w as (
+        partition by t.tid
+        order by a.k
+        rows between unbounded preceding and unbounded following )
+      order by tid;"""
   #.........................................................................................................
   _insert_atrid     = db.prepare_insert { into: 'atrids', returning: '*', exclude: [ 'atrid', ], }
   _insert_tag       = db.prepare_insert { into: 'tags',   returning: '*', exclude: [ 'tid', ], }
