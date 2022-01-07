@@ -98,17 +98,12 @@ hdml = new Hdml()
 #-----------------------------------------------------------------------------------------------------------
 @demo_datamill = ( cfg ) ->
   db              = new DBay { path: '/dev/shm/demo-datamill.sqlite', }
-  db "drop view  if exists next_free_aid;"
-  db "drop table if exists atrs;"
-  db "drop table if exists tags;"
-  db "drop table if exists atrids;"
-  db "drop table if exists docs;"
-  # db SQL"""
-    # drop view  if exists next_free_aid;
-    # drop table if exists atrids;
-    # drop table if exists atrs;
-    # drop table if exists tags;
-    # drop table if exists docs;"""
+  db SQL"""
+    drop view  if exists next_free_aid;
+    drop table if exists atrs;
+    drop table if exists tags;
+    drop table if exists atrids;
+    drop table if exists docs;"""
   db SQL"""
     create table atrids ( atrid integer not null primary key );"""
   db SQL"""
