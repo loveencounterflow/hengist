@@ -1,18 +1,7 @@
 
 'use strict'
 
-###
 
-Hypertext   HTMLish
-Database    DBay
-Markup      Manipulation
-Language    Library
-
-Hypertext+DB
-
-HTMLish DataMilL
-
-###
 
 ############################################################################################################
 CND                       = require 'cnd'
@@ -43,57 +32,12 @@ guy                       = require '../../../apps/guy'
 # { Mrg }                   = require PATH.join H.drb_path, 'lib/_mirage'
 { width_of
   to_width }              = require 'to-width'
+{ HDML }                  = require '../../../apps/hdml'
+
 
 #-----------------------------------------------------------------------------------------------------------
 banner = ( title ) -> echo CND.reverse CND.steel to_width ( ' ' + title + ' ' ), 50
 
-
-#===========================================================================================================
-#
-#-----------------------------------------------------------------------------------------------------------
-class Hdml
-
-  #-----------------------------------------------------------------------------------------------------------
-  escape_text: ( text ) ->
-    R = text
-    R = R.replace /&/g,   '&amp;'
-    R = R.replace /</g,   '&lt;'
-    R = R.replace />/g,   '&gt;'
-    return R
-
-  #-----------------------------------------------------------------------------------------------------------
-  atr_value_as_text: ( x ) ->
-    R = if isa.text x then x else JSON.stringify x
-    R = @escape_text R
-    R = R.replace /'/g,   '&#39;'
-    R = R.replace /\n/g,  '&#10;'
-    return "'#{R}'"
-
-  #-----------------------------------------------------------------------------------------------------------
-  create_tag: ( sigil, tag, atrs = null ) ->
-    return switch sigil
-      when '<' then @_create_opening_or_selfclosing_tag false, tag, atrs
-      when '^' then @_create_opening_or_selfclosing_tag true,  tag, atrs
-      when '>' then @create_closing_tag tag
-    throw new Error "^45487^ illegal sigil #{rpr sigil}"
-
-  #-----------------------------------------------------------------------------------------------------------
-  create_opening_tag:     ( tag, atrs = null ) -> @_create_opening_or_selfclosing_tag false, tag, atrs
-  create_selfclosing_tag: ( tag, atrs = null ) -> @_create_opening_or_selfclosing_tag true,  tag, atrs
-
-  #-----------------------------------------------------------------------------------------------------------
-  _create_opening_or_selfclosing_tag: ( is_selfclosing, tag, atrs = null ) ->
-    ### TAINT validate or escape tag, atr keys ###
-    s = if is_selfclosing then '/' else ''
-    return "<#{tag}#{s}>" if ( not atrs? ) or ( ( Object.keys atrs ).length is 0 )
-    atrs_txt = ( "#{k}=#{@atr_value_as_text v}" for k, v of atrs ).join ' '
-    return "<#{tag} #{atrs_txt}#{s}>"
-
-  #-----------------------------------------------------------------------------------------------------------
-  ### TAINT validate or escape tag ###
-  create_closing_tag: ( tag ) -> "</#{tag}>"
-
-hdml = new Hdml()
 
 
 #===========================================================================================================
@@ -178,7 +122,7 @@ hdml = new Hdml()
       Σ.atrs[ k ]   = v if k?
       return Σ
     inverse:        ( Σ, dropped ) -> return null unless Σ?; delete Σ.atrs[ k ]; Σ
-    result:         ( Σ ) -> return '' unless Σ?; hdml.create_tag Σ.sgl, Σ.tag, Σ.atrs
+    result:         ( Σ ) -> return '' unless Σ?; HDML.create_tag Σ.sgl, Σ.tag, Σ.atrs
   #.........................................................................................................
   _append_tag = ( dsk, sgl, tag, atrs = null, text = null ) ->
     atrid = null
@@ -209,16 +153,6 @@ hdml = new Hdml()
   banner "tags_and_html";   console.table db.all_rows SQL"select * from tags_and_html;"
   return null
 
-#-----------------------------------------------------------------------------------------------------------
-@demo_html_generation = ->
-  urge '^574^', rpr hdml.create_tag '<', 'foo'
-  urge '^574^', rpr hdml.create_tag '<', 'foo', null
-  urge '^574^', rpr hdml.create_tag '<', 'foo', {}
-  urge '^574^', rpr hdml.create_tag '<', 'foo', { a: 42, b: "'", c: '"', }
-  urge '^574^', rpr hdml.create_tag '^', 'foo', { a: 42, b: "'", c: '"', }
-  urge '^574^', rpr hdml.create_tag '^', 'prfx:foo', { a: 42, b: "'", c: '"', }
-  urge '^574^', rpr hdml.create_tag '>', 'foo'
-  return null
 
 
 ############################################################################################################
