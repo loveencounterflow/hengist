@@ -1,19 +1,7 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, Hdml, PATH, SQL, badge, banner, debug, echo, equals, guy, hdml, help, info, isa, rpr, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper, width_of;
+  var CND, DBay, Drb, FS, H, HDML, PATH, SQL, badge, banner, debug, echo, equals, guy, help, info, isa, rpr, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper, width_of;
 
-  /*
-
-  Hypertext   HTMLish
-  Database    DBay
-  Markup      Manipulation
-  Language    Library
-
-  Hypertext+DB
-
-  HTMLish DataMilL
-
-  */
   //###########################################################################################################
   CND = require('cnd');
 
@@ -58,6 +46,8 @@
   // { Mrg }                   = require PATH.join H.drb_path, 'lib/_mirage'
   ({width_of, to_width} = require('to-width'));
 
+  ({HDML} = require('../../../apps/hdml'));
+
   //-----------------------------------------------------------------------------------------------------------
   banner = function(title) {
     return echo(CND.reverse(CND.steel(to_width(' ' + title + ' ', 50))));
@@ -66,84 +56,8 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  Hdml = class Hdml {
-    //-----------------------------------------------------------------------------------------------------------
-    escape_text(text) {
-      var R;
-      R = text;
-      R = R.replace(/&/g, '&amp;');
-      R = R.replace(/</g, '&lt;');
-      R = R.replace(/>/g, '&gt;');
-      return R;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------
-    atr_value_as_text(x) {
-      var R;
-      R = isa.text(x) ? x : JSON.stringify(x);
-      R = this.escape_text(R);
-      R = R.replace(/'/g, '&#39;');
-      R = R.replace(/\n/g, '&#10;');
-      return `'${R}'`;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------
-    create_tag(sigil, tag, atrs = null) {
-      switch (sigil) {
-        case '<':
-          return this._create_opening_or_selfclosing_tag(false, tag, atrs);
-        case '^':
-          return this._create_opening_or_selfclosing_tag(true, tag, atrs);
-        case '>':
-          return this.create_closing_tag(tag);
-      }
-      throw new Error(`^45487^ illegal sigil ${rpr(sigil)}`);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------
-    create_opening_tag(tag, atrs = null) {
-      return this._create_opening_or_selfclosing_tag(false, tag, atrs);
-    }
-
-    create_selfclosing_tag(tag, atrs = null) {
-      return this._create_opening_or_selfclosing_tag(true, tag, atrs);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------
-    _create_opening_or_selfclosing_tag(is_selfclosing, tag, atrs = null) {
-      /* TAINT validate or escape tag, atr keys */
-      var atrs_txt, k, s, v;
-      s = is_selfclosing ? '/' : '';
-      if ((atrs == null) || ((Object.keys(atrs)).length === 0)) {
-        return `<${tag}${s}>`;
-      }
-      atrs_txt = ((function() {
-        var results;
-        results = [];
-        for (k in atrs) {
-          v = atrs[k];
-          results.push(`${k}=${this.atr_value_as_text(v)}`);
-        }
-        return results;
-      }).call(this)).join(' ');
-      return `<${tag} ${atrs_txt}${s}>`;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------
-    /* TAINT validate or escape tag */
-    create_closing_tag(tag) {
-      return `</${tag}>`;
-    }
-
-  };
-
-  hdml = new Hdml();
-
-  //===========================================================================================================
-
-  //-----------------------------------------------------------------------------------------------------------
   this.demo_datamill = function(cfg) {
-    var _append_tag, _insert_atr, _insert_atrid, _insert_content, _insert_datasource, db, dsk;
+    var _append_tag, _insert_atr, _insert_atrid, _insert_content, _insert_datasource, db, dsk, render_dsk;
     db = new DBay({
       path: '/dev/shm/demo-datamill.sqlite'
     });
@@ -153,19 +67,25 @@ drop table if exists atrs;
 drop table if exists mirror;
 drop table if exists atrids;
 drop table if exists datasources;`);
-    db(SQL`create table atrids ( atrid integer not null primary key );`);
+    db(SQL`create table atrids (
+    atrid integer not null,
+  primary key ( atrid ) );`);
     db(SQL`create table atrs (
-    atrid integer not null references atrids,
-    k     text not null,
-    v     text not null,
-  primary key ( atrid, k ) );`);
+    atrid integer not null,
+    k     text    not null,
+    v     text    not null,
+  primary key ( atrid, k ),
+  foreign key ( atrid ) references atrids );`);
     db(SQL`create table mirror (
-    dsk   text    not null references datasources,
-    tid   integer not null primary key,
+    dsk   text    not null,
+    tid   integer not null,
     sgl   text    not null,      -- sigil, one of \`<\`, \`>\`, \`^\`
     tag   text    not null,      -- use '$text' for text nodes
-    atrid integer references atrids,
-    text  text );`);
+    atrid integer,
+    text  text,
+  primary key ( tid ),
+  foreign key ( dsk   ) references datasources,
+  foreign key ( atrid ) references atrids );`);
     db(SQL`create table datasources (
     dsk     text not null,
     url     text not null,
@@ -267,7 +187,7 @@ drop table if exists datasources;`);
         if (Σ == null) {
           return '';
         }
-        return hdml.create_tag(Σ.sgl, Σ.tag, Σ.atrs);
+        return HDML.create_tag(Σ.sgl, Σ.tag, Σ.atrs);
       }
     });
     //.........................................................................................................
@@ -289,6 +209,13 @@ drop table if exists datasources;`);
       }
       urge(db.first_row(_insert_content, {dsk, sgl, tag, atrid, text}));
       return null;
+    };
+    //.........................................................................................................
+    render_dsk = function(cfg) {
+      var dsk;
+      ({dsk} = cfg);
+      db.setv('dsk', dsk);
+      return (db.all_first_values(SQL`select xxx from tags_and_html;`)).join('');
     };
     //.........................................................................................................
     dsk = 'demo';
@@ -320,30 +247,8 @@ drop table if exists datasources;`);
     console.table(db.all_rows(SQL`select * from std_variables();`));
     banner("tags_and_html");
     console.table(db.all_rows(SQL`select * from tags_and_html;`));
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.demo_html_generation = function() {
-    urge('^574^', rpr(hdml.create_tag('<', 'foo')));
-    urge('^574^', rpr(hdml.create_tag('<', 'foo', null)));
-    urge('^574^', rpr(hdml.create_tag('<', 'foo', {})));
-    urge('^574^', rpr(hdml.create_tag('<', 'foo', {
-      a: 42,
-      b: "'",
-      c: '"'
-    })));
-    urge('^574^', rpr(hdml.create_tag('^', 'foo', {
-      a: 42,
-      b: "'",
-      c: '"'
-    })));
-    urge('^574^', rpr(hdml.create_tag('^', 'prfx:foo', {
-      a: 42,
-      b: "'",
-      c: '"'
-    })));
-    urge('^574^', rpr(hdml.create_tag('>', 'foo')));
+    banner("render_dsk");
+    info(rpr(render_dsk({dsk})));
     return null;
   };
 
