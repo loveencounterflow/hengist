@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, Drb, FS, H, Hdml, PATH, SQL, badge, debug, echo, equals, guy, hdml, help, info, isa, rpr, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper, width_of;
+  var CND, DBay, Drb, FS, H, Hdml, PATH, SQL, badge, banner, debug, echo, equals, guy, hdml, help, info, isa, rpr, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper, width_of;
 
   /*
 
@@ -57,6 +57,11 @@
 
   // { Mrg }                   = require PATH.join H.drb_path, 'lib/_mirage'
   ({width_of, to_width} = require('to-width'));
+
+  //-----------------------------------------------------------------------------------------------------------
+  banner = function(title) {
+    return echo(CND.reverse(CND.steel(to_width(' ' + title + ' ', 50))));
+  };
 
   //===========================================================================================================
 
@@ -138,51 +143,69 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_datamill = function(cfg) {
-    var _append_tag, _insert_atr, _insert_atrid, _insert_doc, _insert_tag, db, doc;
+    var _append_tag, _insert_atr, _insert_atrid, _insert_content, _insert_datasource, db, dsk;
     db = new DBay({
       path: '/dev/shm/demo-datamill.sqlite'
     });
-    db(SQL`drop view  if exists next_free_aid;
+    db.create_stdlib();
+    db(SQL`drop view  if exists tags_and_html;
 drop table if exists atrs;
-drop table if exists tags;
+drop table if exists mirror;
 drop table if exists atrids;
-drop table if exists docs;`);
+drop table if exists datasources;`);
     db(SQL`create table atrids ( atrid integer not null primary key );`);
     db(SQL`create table atrs (
     atrid integer not null references atrids,
     k     text not null,
     v     text not null,
   primary key ( atrid, k ) );`);
-    db(SQL`create table tags (
+    db(SQL`create table mirror (
+    dsk   text    not null references datasources,
     tid   integer not null primary key,
     sgl   text    not null,      -- sigil, one of \`<\`, \`>\`, \`^\`
     tag   text    not null,      -- use '$text' for text nodes
     atrid integer references atrids,
     text  text );`);
-    db(SQL`create table docs (
-    doc   integer not null,   -- references docs
-    v2    integer not null,   -- VNR
-    v3    integer not null,   -- VNR
-    v4    integer not null,   -- VNR
-    tid   integer not null references tags,
-  primary key ( doc, v2, v3, v4 ) );`);
+    db(SQL`create table datasources (
+    dsk     text not null,
+    url     text not null,
+    digest  text default null,
+  primary key ( dsk ) );`);
+    // -- create table #{prefix}_datasources (
+    db(SQL`create view tags_and_html as select distinct
+    t.tid                                                     as tid,
+    t.sgl                                                     as sgl,
+    t.tag                                                     as tag,
+    t.atrid                                                   as atrid,
+    case t.tag when '$text' then t.text
+    else xxx_create_tag( t.sgl, t.tag, a.k, a.v ) over w end  as xxx
+  from
+    mirror as t
+    left join atrs as a using ( atrid )
+  where true
+    and ( t.dsk = std_getv( 'dsk' ) )
+  window w as (
+    partition by t.tid
+    order by a.k
+    rows between unbounded preceding and unbounded following )
+  order by tid;`);
     //.........................................................................................................
     _insert_atrid = db.prepare_insert({
       into: 'atrids',
       returning: '*',
       exclude: ['atrid']
     });
-    _insert_tag = db.prepare_insert({
-      into: 'tags',
+    _insert_content = db.prepare_insert({
+      into: 'mirror',
       returning: '*',
       exclude: ['tid']
     });
     _insert_atr = db.prepare_insert({
       into: 'atrs',
-      returning: '*'
+      returning: null
     });
-    _insert_doc = db.prepare_insert({
-      into: 'docs',
+    _insert_datasource = db.prepare_insert({
+      into: 'datasources',
       returning: '*'
     });
     //.........................................................................................................
@@ -248,8 +271,7 @@ drop table if exists docs;`);
       }
     });
     //.........................................................................................................
-    doc = 1;
-    _append_tag = function(doc, sgl, tag, atrs = null, text = null) {
+    _append_tag = function(dsk, sgl, tag, atrs = null, text = null) {
       var atrid, k, v;
       atrid = null;
       if (text != null) {
@@ -262,42 +284,42 @@ drop table if exists docs;`);
           if (!isa.text(v)) {
             v = rpr(v);
           }
-          info('^689-1^', db.first_row(_insert_atr, {atrid, k, v}));
+          _insert_atr.run({atrid, k, v});
         }
       }
-      urge(db.first_row(_insert_tag, {doc, sgl, tag, atrid, text}));
+      urge(db.first_row(_insert_content, {dsk, sgl, tag, atrid, text}));
       return null;
     };
     //.........................................................................................................
-    _append_tag(1, '^', 'path', {
+    dsk = 'demo';
+    _insert_datasource.run({
+      dsk,
+      url: 'ram:',
+      digest: null
+    });
+    _append_tag(dsk, '^', 'path', {
       id: 'c1',
       d: 'M100,100L200,200'
     });
-    _append_tag(1, '<', 'div', {
+    _append_tag(dsk, '<', 'div', {
       id: 'c1',
       class: 'foo bar'
     });
-    _append_tag(1, '^', '$text', null, "helo");
-    _append_tag(1, '>', 'div');
+    _append_tag(dsk, '^', '$text', null, "helo");
+    _append_tag(dsk, '>', 'div');
+    _append_tag(dsk, '^', 'mrg:loc#baselines');
     //.........................................................................................................
-    console.table(db.all_rows(SQL`select * from docs;`));
-    console.table(db.all_rows(SQL`select * from tags;`));
+    db.setv('dsk', 'demo');
+    banner("datasources");
+    console.table(db.all_rows(SQL`select * from datasources;`));
+    banner("mirror");
+    console.table(db.all_rows(SQL`select * from mirror;`));
+    banner("atrs");
     console.table(db.all_rows(SQL`select * from atrs;`));
-    console.table(db.all_rows(SQL`select distinct
-    t.tid                                                     as tid,
-    t.sgl                                                     as sgl,
-    t.tag                                                     as tag,
-    t.atrid                                                   as atrid,
-    case t.tag when '$text' then t.text
-    else xxx_create_tag( t.sgl, t.tag, a.k, a.v ) over w end  as xxx
-  from
-    tags as t
-    left join atrs as a using ( atrid )
-  window w as (
-    partition by t.tid
-    order by a.k
-    rows between unbounded preceding and unbounded following )
-  order by tid;`));
+    banner("std_variables()");
+    console.table(db.all_rows(SQL`select * from std_variables();`));
+    banner("tags_and_html");
+    console.table(db.all_rows(SQL`select * from tags_and_html;`));
     return null;
   };
 
