@@ -199,22 +199,6 @@ hdml = new Hdml()
   console.table db.all_rows SQL"select * from docs;"
   console.table db.all_rows SQL"select * from tags;"
   console.table db.all_rows SQL"select * from atrs;"
-  console.table db.all_rows SQL"""
-    select distinct
-        t.tid                                                     as tid,
-        t.sgl                                                     as sgl,
-        t.tag                                                     as tag,
-        t.atrid                                                   as atrid,
-        case t.tag when '$text' then t.text
-        else xxx_create_tag( t.sgl, t.tag, a.k, a.v ) over w end  as xxx
-      from
-        tags as t
-        left join atrs as a using ( atrid )
-      window w as (
-        partition by t.tid
-        order by a.k
-        rows between unbounded preceding and unbounded following )
-      order by tid;"""
   return null
 
 #-----------------------------------------------------------------------------------------------------------
