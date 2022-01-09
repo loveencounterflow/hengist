@@ -5,7 +5,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'DBAY-MIRAGE'
+badge                     = 'DBAY-MIRAGE/BASICS'
 debug                     = CND.get_logger 'debug',     badge
 warn                      = CND.get_logger 'warn',      badge
 info                      = CND.get_logger 'info',      badge
@@ -17,7 +17,6 @@ echo                      = CND.echo.bind CND
 test                      = require '../../../apps/guy-test'
 PATH                      = require 'path'
 # FS                        = require 'fs'
-H                         = require './helpers'
 types                     = new ( require 'intertype' ).Intertype
 { isa
   equals
@@ -32,7 +31,7 @@ guy                       = require '../../../apps/guy'
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "location marker matching" ] = ( T, done ) ->
 #   # T?.halt_on_error()
-#   { Mrg } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
+#   { Mrg } = require '../../../apps/dbay-mirage'
 #   #.........................................................................................................
 #   probes_and_matchers = [
 #     [ '<mrg:loc#first/>',         [ [ '', '<mrg:loc#first/>', ''       ], { locid: 'first'        }, ], ]
@@ -59,7 +58,7 @@ guy                       = require '../../../apps/guy'
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "___ extended location marker matching" ] = ( T, done ) ->
 #   # T?.halt_on_error()
-#   { Mrg } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
+#   { Mrg } = require '../../../apps/dbay-mirage'
 #   #.........................................................................................................
 #   probes_and_matchers = [
 #     [ '<mrg:loc.delete#title/>',         [ [ '', '<mrg:loc#first/>', ''       ], { locid: 'first'        }, ], ]
@@ -83,9 +82,8 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "mrg.refresh_datasource" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { DBay  } = require H.dbay_path
-  { Mrg   } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
-  # { Drb }   = require H.drb_path
+  { DBay  } = require '../../../apps/dbay'
+  { Mrg   } = require '../../../apps/dbay-mirage'
   db        = new DBay()
   mrg       = new Mrg { db, }
   dsk       = 'sp'
@@ -120,9 +118,8 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "altering mirrored source lines causes error" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { DBay  } = require H.dbay_path
-  { Mrg   } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
-  # { Drb }   = require H.drb_path
+  { DBay  } = require '../../../apps/dbay'
+  { Mrg   } = require '../../../apps/dbay-mirage'
   db        = new DBay()
   mrg       = new Mrg { db, }
   dsk       = 'twcm'
@@ -160,9 +157,8 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "loc markers 1" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { DBay  } = require H.dbay_path
-  { Mrg   } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
-  # { Drb }   = require H.drb_path
+  { DBay  } = require '../../../apps/dbay'
+  { Mrg   } = require '../../../apps/dbay-mirage'
   db        = new DBay()
   mrg       = new Mrg { db, }
   dsk       = 'twcm'
@@ -193,9 +189,8 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "loc markers 2" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { DBay  } = require H.dbay_path
-  { Mrg   } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
-  # { Drb }   = require H.drb_path
+  { DBay  } = require '../../../apps/dbay'
+  { Mrg   } = require '../../../apps/dbay-mirage'
   db        = new DBay()
   mrg       = new Mrg { db, }
   dsk       = 'twcm'
@@ -216,10 +211,9 @@ guy                       = require '../../../apps/guy'
   T?.eq rows[ 6 ], { dsk: 'twcm', lnr: 3, lnpart: 2, xtra: 0, locid: null, line: '.</p>'                 }
   T?.eq rows[ 7 ], { dsk: 'twcm', lnr: 4, lnpart: 0, xtra: 0, locid: null, line: '  </article>'          }
   T?.eq rows[ 8 ], { dsk: 'twcm', lnr: 5, lnpart: 0, xtra: 0, locid: null, line: ''                      }
-  T?.eq ( mrg.append_to_loc { dsk, locid: 'title',  text: "A Grand Union" } ), { dsk: 'twcm', lnr: 1, lnpart: 1, xtra: 1, locid: null, line: 'A Grand Union' }
-  T?.eq ( mrg.append_to_loc { dsk, locid: 'content', text: "more "        } ), { dsk: 'twcm', lnr: 3, lnpart: 1, xtra: 1, locid: null, line: 'more ' }
-  T?.eq ( mrg.append_to_loc { dsk, locid: 'content', text: "content"      } ), { dsk: 'twcm', lnr: 3, lnpart: 1, xtra: 2, locid: null, line: 'content' }
-  # info '^33298-4^', mrg.prepend_to_loc { dsk, locid: 'content', text: "content goes here" }
+  T?.eq ( mrg.append_to_loc { dsk, locid: 'title',  text: "A Grand Union", nl: false } ), { dsk: 'twcm', lnr: 1, lnpart: 1, xtra: 1, locid: null, line: 'A Grand Union' }
+  T?.eq ( mrg.append_to_loc { dsk, locid: 'content', text: "more ", nl: false        } ), { dsk: 'twcm', lnr: 3, lnpart: 1, xtra: 1, locid: null, line: 'more ' }
+  T?.eq ( mrg.append_to_loc { dsk, locid: 'content', text: "content", nl: false      } ), { dsk: 'twcm', lnr: 3, lnpart: 1, xtra: 2, locid: null, line: 'content' }
   console.table db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;"
   rows = db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;"
   T?.eq rows[ 0  ], { dsk: 'twcm', lnr: 1, lnpart: 0, xtra: 0, locid: null, line: '<title>'               }
@@ -238,9 +232,9 @@ guy                       = require '../../../apps/guy'
   for { line, } from mrg.walk_line_rows { dsk, }
     urge '^587^', rpr line
   T?.eq ( mrg.get_line_rows { dsk, } ), [
-    { dsk: 'twcm', lnr: 1, line: '<title><mrg:loc.delete-marker#title/>A Grand Union</title>'             },
+    { dsk: 'twcm', lnr: 1, line: '<title>A Grand Union</title>'             },
     { dsk: 'twcm', lnr: 2, line: '<article>'                                                },
-    { dsk: 'twcm', lnr: 3, line: '  <p>Here comes some <mrg:loc#content/>more content.</p>' },
+    { dsk: 'twcm', lnr: 3, line: '  <p>Here comes some more content.</p>' },
     { dsk: 'twcm', lnr: 4, line: '  </article>'                                             },
     { dsk: 'twcm', lnr: 5, line: ''                                                         } ]
   #.........................................................................................................
@@ -250,9 +244,8 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "loc markers 3" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { DBay  } = require H.dbay_path
-  { Mrg   } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
-  # { Drb }   = require H.drb_path
+  { DBay  } = require '../../../apps/dbay'
+  { Mrg   } = require '../../../apps/dbay-mirage'
   db        = new DBay()
   mrg       = new Mrg { db, }
   dsk       = 'twcm'
@@ -275,9 +268,8 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "multiple loc markers in one line" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { DBay  } = require H.dbay_path
-  { Mrg   } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
-  # { Drb }   = require H.drb_path
+  { DBay  } = require '../../../apps/dbay'
+  { Mrg   } = require '../../../apps/dbay-mirage'
   db        = new DBay()
   mrg       = new Mrg { db, }
   dsk       = 'twcm2'
@@ -287,12 +279,12 @@ guy                       = require '../../../apps/guy'
   mrg.register_dsk { dsk, path, }
   mrg.refresh_datasource { dsk, }
   #.........................................................................................................
-  mrg.append_to_loc { dsk, locid: 'title',  text: "A Grand Union" }
-  mrg.append_to_loc { dsk, locid: 'some-content', text: "some content"      }
-  mrg.append_to_loc { dsk, locid: 'more-content', text: "and more content"  }
+  mrg.append_to_loc { dsk, locid: 'title',  text: "A Grand Union", nl: false, }
+  mrg.append_to_loc { dsk, locid: 'some-content', text: "some content", nl: false,      }
+  mrg.append_to_loc { dsk, locid: 'more-content', text: "and more content", nl: false,  }
   debug '^45346^', mrg.get_text { dsk, keep_locs: null,  }
   T?.eq ( mrg.get_text { dsk, keep_locs: null,  } ), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#some-content/>some content and some more <mrg:loc#more-content/>and more content.</p>\n  </article>\n'
-  T?.eq ( mrg.get_text { dsk,                   } ), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#some-content/>some content and some more <mrg:loc#more-content/>and more content.</p>\n  </article>\n'
+  T?.eq ( mrg.get_text { dsk,                   } ), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some some content and some more and more content.</p>\n  </article>\n'
   T?.eq ( mrg.get_text { dsk, keep_locs: true,  } ), '<title><mrg:loc.delete-marker#title/>A Grand Union</title>\n<article>\n  <p>Here comes some <mrg:loc#some-content/>some content and some more <mrg:loc#more-content/>and more content.</p>\n  </article>\n'
   T?.eq ( mrg.get_text { dsk, keep_locs: false, } ), '<title>A Grand Union</title>\n<article>\n  <p>Here comes some some content and some more and more content.</p>\n  </article>\n'
   #.........................................................................................................
@@ -304,9 +296,8 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "loc markers 4" ] = ( T, done ) ->
   T?.halt_on_error()
-  { DBay  } = require H.dbay_path
-  { Mrg   } = require '../../../apps/dbay-rustybuzz/lib/_mirage'
-  # { Drb }   = require H.drb_path
+  { DBay  } = require '../../../apps/dbay'
+  { Mrg   } = require '../../../apps/dbay-mirage'
   db        = new DBay()
   mrg       = new Mrg { db, }
   dsk       = 'twcm'
@@ -367,14 +358,14 @@ guy                       = require '../../../apps/guy'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # test @[ "altering mirrored source lines causes error" ]
   # @[ "altering mirrored source lines causes error" ]()
   # test @[ "location marker matching" ]
   # test @[ "mrg.refresh_datasource" ]
   # test @[ "loc markers 1" ]
   # test @[ "loc markers 2" ]
-  test @[ "loc markers 3" ]
+  # test @[ "loc markers 3" ]
   # test @[ "loc markers 4" ]
   # test @[ "extended location marker matching" ]
   # test @[ "multiple loc markers in one line" ]

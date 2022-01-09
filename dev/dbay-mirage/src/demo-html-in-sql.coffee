@@ -17,7 +17,6 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 PATH                      = require 'path'
 FS                        = require 'fs'
-H                         = require './helpers'
 types                     = new ( require 'intertype' ).Intertype
 { isa
   equals
@@ -26,10 +25,7 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 SQL                       = String.raw
 guy                       = require '../../../apps/guy'
-# MMX                       = require '../../../apps/multimix/lib/cataloguing'
-{ DBay }                  = require H.dbay_path
-{ Drb }                   = require H.drb_path
-# { Mrg }                   = require PATH.join H.drb_path, 'lib/_mirage'
+{ DBay }                  = require '../../../apps/dbay'
 { width_of
   to_width }              = require 'to-width'
 { HDML }                  = require '../../../apps/hdml'
