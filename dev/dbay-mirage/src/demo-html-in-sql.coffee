@@ -109,19 +109,6 @@ banner = ( title ) -> echo CND.reverse CND.steel to_width ( ' ' + title + ' ' ),
   _insert_datasource  = db.prepare_insert { into: 'datasources',  returning: '*', }
   #.........................................................................................................
   db.create_window_function
-    name:           'xxx_array_agg'
-    varargs:        false
-    deterministic:  true
-    start:          null
-    step:           ( total, k, v ) ->
-      if k?
-        total      ?= {}
-        total[ k ]  = v
-      return total
-    inverse:        ( total, dropped ) -> return null unless total?; delete total[ k ]; total
-    result:         ( total ) -> return '' unless total?; JSON.stringify total
-  #.........................................................................................................
-  db.create_window_function
     name:           'xxx_create_tag'
     varargs:        false
     deterministic:  true
