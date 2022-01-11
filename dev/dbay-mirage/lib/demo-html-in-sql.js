@@ -126,35 +126,6 @@ insert into mirror ( dsk, tid, sgl, tag, atrid, text )
     });
     //.........................................................................................................
     db.create_window_function({
-      name: 'xxx_array_agg',
-      varargs: false,
-      deterministic: true,
-      start: null,
-      step: function(total, k, v) {
-        if (k != null) {
-          if (total == null) {
-            total = {};
-          }
-          total[k] = v;
-        }
-        return total;
-      },
-      inverse: function(total, dropped) {
-        if (total == null) {
-          return null;
-        }
-        delete total[k];
-        return total;
-      },
-      result: function(total) {
-        if (total == null) {
-          return '';
-        }
-        return JSON.stringify(total);
-      }
-    });
-    //.........................................................................................................
-    db.create_window_function({
       name: 'xxx_create_tag',
       varargs: false,
       deterministic: true,
