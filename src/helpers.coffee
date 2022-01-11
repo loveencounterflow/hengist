@@ -19,6 +19,8 @@ echo                      = CND.echo.bind CND
   assign }                = CND
 #...........................................................................................................
 PATH                      = require 'path'
+{ width_of
+  to_width }              = require 'to-width'
 
 #===========================================================================================================
 #
@@ -34,3 +36,15 @@ PATH                      = require 'path'
   basename  = PATH.basename filename
   return 'BENCHMARKS/' + ( basename .replace /^(.*?)\.[^.]+$/, '$1' ).toUpperCase()
 
+#-----------------------------------------------------------------------------------------------------------
+@banner = ( title ) ->
+  echo CND.reverse CND.steel to_width ( ' ' + title + ' ' ), 50
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@tabulate = ( title, query ) ->
+  { Tbl, }  = require '../apps/icql-dba-tabulate'
+  dtab      = new Tbl { dba: {}, }
+  @banner title if title?
+  echo dtab._tabulate query
+  return null
