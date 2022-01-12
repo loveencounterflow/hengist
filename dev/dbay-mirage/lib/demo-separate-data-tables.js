@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, normalize_tokens, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -103,14 +103,123 @@
     return null;
   };
 
+  //===========================================================================================================
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_htmlish = function(cfg) {
+    var DBay, HTML, Mrg, db, dsk, lnr, mrg, new_grammar, path, prefix, ref, txt, x;
+    ({DBay} = require('../../../apps/dbay'));
+    ({Mrg} = require('../../../apps/dbay-mirage/lib/main2'));
+    ({new_grammar} = require('../../../apps/paragate/lib/htmlish.grammar'));
+    HTML = new_grammar({
+      bare: true
+    });
+    prefix = 'mrg';
+    db = new DBay();
+    mrg = new Mrg({db, prefix});
+    db.create_stdlib();
+    dsk = 'twcm';
+    path = 'dbay-rustybuzz/htmlish-tags.html';
+    path = PATH.resolve(PATH.join(__dirname, '../../../assets', path));
+    mrg.register_dsk({dsk, path});
+    mrg.refresh_datasource({dsk});
+    //.........................................................................................................
+    // db.setv 'allow_change_on_mirror', 1
+    db(mrg.sql.insert_lnpart, {
+      dsk,
+      lnr: 2,
+      trk: 2,
+      pce: 1,
+      txt: `something`
+    });
+    mrg.deactivate({
+      dsk,
+      lnr: 2,
+      trk: 2
+    });
+    db(mrg.sql.insert_lnpart, {
+      dsk,
+      lnr: 2,
+      trk: 3,
+      pce: 1,
+      txt: `<div>`
+    });
+    db(mrg.sql.insert_lnpart, {
+      dsk,
+      lnr: 2,
+      trk: 3,
+      pce: 2,
+      txt: `inserted content`
+    });
+    db(mrg.sql.insert_lnpart, {
+      dsk,
+      lnr: 2,
+      trk: 3,
+      pce: 3,
+      txt: `</div>`
+    });
+    //.........................................................................................................
+    H.tabulate(`${prefix}_mirror`, db(SQL`select * from ${prefix}_mirror order by dsk, lnr, trk, pce;`));
+    H.tabulate(`${prefix}_mirror`, db(SQL`select * from ${prefix}_paragraph_linenumbers;`));
+    H.tabulate(`${prefix}_parmirror`, db(SQL`select * from ${prefix}_parmirror;`));
+    H.tabulate(`${prefix}_lines`, mrg.walk_line_rows({dsk}));
+    H.tabulate(`${prefix}_lines`, mrg.walk_par_rows({dsk}));
+    return null;
+    ref = mrg.walk_line_rows({dsk});
+    //.........................................................................................................
+    for (x of ref) {
+      ({lnr, txt} = x);
+      urge((HTML.parse(txt)).length);
+      urge((normalize_tokens(HTML.parse(txt))).length);
+      H.tabulate(`${lnr} ${rpr(txt)}`, normalize_tokens(HTML.parse(txt)));
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_rxws = function(cfg) {
+    var DBay, Mrg, RXWS;
+    ({DBay} = require('../../../apps/dbay'));
+    ({Mrg} = require('../../../apps/dbay-mirage/lib/main2'));
+    ({
+      grammar: RXWS
+    } = require('../../../apps/paragate/lib/regex-whitespace.grammar'));
+    debug('^343545^', RXWS.parse(`first paragraph
+
+second
+paragraph
+
+  indented`));
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  normalize_tokens = function(tokens) {
+    var R, d, i, j, key, keys, len, len1, ref, token;
+    keys = ['$vnr', '$key', 'type', 'prefix', 'name', 'class', 'id', 'start', 'stop', 'text', '$'];
+    R = [];
+    for (i = 0, len = tokens.length; i < len; i++) {
+      token = tokens[i];
+      d = {};
+      for (j = 0, len1 = keys.length; j < len1; j++) {
+        key = keys[j];
+        d[key] = (ref = token[key]) != null ? ref : null;
+      }
+      R.push(d);
+    }
+    return guy.lft.freeze(R);
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return this.demo_datamill();
+      // @demo_html_generation()
+      // @demo_datamill()
+      return this.demo_htmlish();
     })();
   }
 
-  // @demo_html_generation()
+  // @demo_rxws()
 
 }).call(this);
 
