@@ -43,7 +43,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_datamill = function(cfg) {
-    var DBay, Mrg, db, dsk, mrg, path;
+    var DBay, Mrg, db, dsk, lnr, mrg, path, ref, txt, x;
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage/lib/main2'));
     db = new DBay();
@@ -55,9 +55,51 @@
     //.........................................................................................................
     mrg.register_dsk({dsk, path});
     mrg.refresh_datasource({dsk});
+    db.setv('allow_change_on_mirror', 1);
+    db(mrg.sql.insert_lnpart, {
+      dsk,
+      lnr: 2,
+      trk: 2,
+      pce: 1,
+      txt: `something`
+    });
+    mrg.deactivate({
+      dsk,
+      lnr: 2,
+      trk: 2
+    });
+    db(mrg.sql.insert_lnpart, {
+      dsk,
+      lnr: 2,
+      trk: 3,
+      pce: 1,
+      txt: `<div>`
+    });
+    db(mrg.sql.insert_lnpart, {
+      dsk,
+      lnr: 2,
+      trk: 3,
+      pce: 2,
+      txt: `inserted content`
+    });
+    db(mrg.sql.insert_lnpart, {
+      dsk,
+      lnr: 2,
+      trk: 3,
+      pce: 3,
+      txt: `</div>`
+    });
     //.........................................................................................................
+    db.setv('dsk', dsk);
     H.tabulate('mrg_datasources', db(SQL`select * from mrg_datasources;`));
-    H.tabulate('mrg_mirror', db(SQL`select * from mrg_mirror order by dsk, lnr, lnpart;`));
+    H.tabulate('mrg_mirror', db(SQL`select * from mrg_mirror order by dsk, lnr, trk, pce;`));
+    H.tabulate('mrg_lines', db(SQL`select * from mrg_lines  order by dsk, lnr;`));
+    H.banner(`lines of ${dsk}`);
+    ref = mrg.walk_line_rows({dsk});
+    for (x of ref) {
+      ({lnr, txt} = x);
+      urge('^474^', lnr, rpr(txt));
+    }
     return null;
   };
 
