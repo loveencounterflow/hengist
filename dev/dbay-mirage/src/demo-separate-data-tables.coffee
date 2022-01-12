@@ -91,10 +91,10 @@ H                         = require '../../../lib/helpers'
   H.tabulate "mrg.walk_par_rows()",   mrg.walk_par_rows { dsk, }
   # return null
   #.........................................................................................................
-  for { lnr, txt, } from mrg.walk_line_rows { dsk, }
+  for { par, lnr1, lnr2, txt, } from mrg.walk_par_rows { dsk, }
     urge ( HTML.parse txt ).length
     urge ( normalize_tokens HTML.parse txt ).length
-    H.tabulate "#{lnr} #{rpr txt}", normalize_tokens HTML.parse txt
+    H.tabulate "#{par} (#{lnr1}..#{lnr2}) #{rpr txt}", normalize_tokens HTML.parse txt
   return null
 
 #-----------------------------------------------------------------------------------------------------------
