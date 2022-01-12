@@ -59,12 +59,90 @@ H                         = require '../../../lib/helpers'
   urge '^474^', lnr, rpr txt for { lnr, txt, } from mrg.walk_line_rows { dsk, }
   return null
 
+#===========================================================================================================
+#
+#-----------------------------------------------------------------------------------------------------------
+@demo_htmlish = ( cfg ) ->
+  { DBay }        = require '../../../apps/dbay'
+  { Mrg }         = require '../../../apps/dbay-mirage/lib/main2'
+  { new_grammar } = require '../../../apps/paragate/lib/htmlish.grammar'
+  HTML = new_grammar { bare: true, }
+  prefix          = 'mrg'
+  db              = new DBay()
+  mrg             = new Mrg { db, prefix, }
+  db.create_stdlib()
+  dsk       = 'twcm'
+  path      = 'dbay-rustybuzz/htmlish-tags.html'
+  path      = PATH.resolve PATH.join __dirname, '../../../assets', path
+  mrg.register_dsk { dsk, path, }
+  mrg.refresh_datasource { dsk, }
+  #.........................................................................................................
+  # db.setv 'allow_change_on_mirror', 1
+  db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 2, pce: 1, txt: """something""", }
+  mrg.deactivate { dsk, lnr: 2, trk: 2, }
+  db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 3, pce: 1, txt: """<div>""", }
+  db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 3, pce: 2, txt: """inserted content""", }
+  db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 3, pce: 3, txt: """</div>""", }
+  #.........................................................................................................
+  H.tabulate "#{prefix}_mirror", db SQL"select * from #{prefix}_mirror order by dsk, lnr, trk, pce;"
+  H.tabulate "#{prefix}_mirror", db SQL"select * from #{prefix}_paragraph_linenumbers;"
+  H.tabulate "#{prefix}_parmirror", db SQL"select * from #{prefix}_parmirror;"
+  H.tabulate "#{prefix}_lines",     mrg.walk_line_rows { dsk, }
+  H.tabulate "#{prefix}_lines",     mrg.walk_par_rows { dsk, }
+  return null
+  #.........................................................................................................
+  for { lnr, txt, } from mrg.walk_line_rows { dsk, }
+    urge ( HTML.parse txt ).length
+    urge ( normalize_tokens HTML.parse txt ).length
+    H.tabulate "#{lnr} #{rpr txt}", normalize_tokens HTML.parse txt
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_rxws = ( cfg ) ->
+  { DBay }          = require '../../../apps/dbay'
+  { Mrg }           = require '../../../apps/dbay-mirage/lib/main2'
+  { grammar: RXWS } = require '../../../apps/paragate/lib/regex-whitespace.grammar'
+  debug '^343545^', RXWS.parse """
+    first paragraph
+
+    second
+    paragraph
+
+      indented
+    """
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+normalize_tokens = ( tokens ) ->
+  keys = [
+    '$vnr'
+    '$key'
+    'type'
+    'prefix'
+    'name'
+    'class'
+    'id'
+    'start'
+    'stop'
+    'text'
+    '$'
+    ]
+  R = []
+  for token in tokens
+    d = {}
+    d[ key ] = ( token[ key ] ? null ) for key in keys
+    R.push d
+  return guy.lft.freeze R
+
+
 
 
 ############################################################################################################
 if require.main is module then do =>
-  @demo_datamill()
   # @demo_html_generation()
+  # @demo_datamill()
+  @demo_htmlish()
+  # @demo_rxws()
 
 
 
