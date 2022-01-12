@@ -107,7 +107,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_htmlish = function(cfg) {
-    var DBay, HTML, Mrg, db, dsk, lnr, mrg, new_grammar, path, prefix, ref, txt, x;
+    var DBay, HTML, Mrg, db, dsk, lnr1, lnr2, mrg, new_grammar, par, path, prefix, ref, txt, x;
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage/lib/main2'));
     ({new_grammar} = require('../../../apps/paragate/lib/htmlish.grammar'));
@@ -162,16 +162,16 @@
     H.tabulate(`${prefix}_mirror`, db(SQL`select * from ${prefix}_mirror order by dsk, lnr, trk, pce;`));
     H.tabulate(`${prefix}_mirror`, db(SQL`select * from ${prefix}_paragraph_linenumbers;`));
     H.tabulate(`${prefix}_parmirror`, db(SQL`select * from ${prefix}_parmirror;`));
-    H.tabulate(`${prefix}_lines`, mrg.walk_line_rows({dsk}));
-    H.tabulate(`${prefix}_lines`, mrg.walk_par_rows({dsk}));
-    return null;
-    ref = mrg.walk_line_rows({dsk});
+    H.tabulate("mrg.walk_line_rows()", mrg.walk_line_rows({dsk}));
+    H.tabulate("mrg.walk_par_rows()", mrg.walk_par_rows({dsk}));
+    ref = mrg.walk_par_rows({dsk});
+    // return null
     //.........................................................................................................
     for (x of ref) {
-      ({lnr, txt} = x);
+      ({par, lnr1, lnr2, txt} = x);
       urge((HTML.parse(txt)).length);
       urge((normalize_tokens(HTML.parse(txt))).length);
-      H.tabulate(`${lnr} ${rpr(txt)}`, normalize_tokens(HTML.parse(txt)));
+      H.tabulate(`${par} (${lnr1}..${lnr2}) ${rpr(txt)}`, normalize_tokens(HTML.parse(txt)));
     }
     return null;
   };
@@ -196,7 +196,7 @@ paragraph
   //-----------------------------------------------------------------------------------------------------------
   normalize_tokens = function(tokens) {
     var R, d, i, j, key, keys, len, len1, ref, token;
-    keys = ['$vnr', '$key', 'type', 'prefix', 'name', 'class', 'id', 'start', 'stop', 'text', '$'];
+    keys = ['$vnr', '$key', 'type', 'prefix', 'name', 'id', 'class', 'atrs', 'start', 'stop', 'text', '$'];
     R = [];
     for (i = 0, len = tokens.length; i < len; i++) {
       token = tokens[i];
