@@ -84,12 +84,12 @@ H                         = require '../../../lib/helpers'
   db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 3, pce: 2, txt: """inserted content""", }
   db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 3, pce: 3, txt: """</div>""", }
   #.........................................................................................................
-  H.tabulate "#{prefix}_mirror", db SQL"select * from #{prefix}_mirror order by dsk, lnr, trk, pce;"
-  H.tabulate "#{prefix}_mirror", db SQL"select * from #{prefix}_paragraph_linenumbers;"
-  H.tabulate "#{prefix}_parmirror", db SQL"select * from #{prefix}_parmirror;"
-  H.tabulate "#{prefix}_lines",     mrg.walk_line_rows { dsk, }
-  H.tabulate "#{prefix}_lines",     mrg.walk_par_rows { dsk, }
-  return null
+  H.tabulate "#{prefix}_mirror",      db SQL"select * from #{prefix}_mirror order by dsk, lnr, trk, pce;"
+  H.tabulate "#{prefix}_mirror",      db SQL"select * from #{prefix}_paragraph_linenumbers;"
+  H.tabulate "#{prefix}_parmirror",   db SQL"select * from #{prefix}_parmirror;"
+  H.tabulate "mrg.walk_line_rows()",  mrg.walk_line_rows { dsk, }
+  H.tabulate "mrg.walk_par_rows()",   mrg.walk_par_rows { dsk, }
+  # return null
   #.........................................................................................................
   for { lnr, txt, } from mrg.walk_line_rows { dsk, }
     urge ( HTML.parse txt ).length
