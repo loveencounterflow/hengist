@@ -197,7 +197,9 @@ GUY                       = require '../../../apps/guy'
   probes_and_matchers = [
     [ '<div>', "$key='<tag',$vnr=[ 1, 1 ],name='div',start=0,stop=5,text='<div>',type='otag'", null ]
     [ '?[div]', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=6,text='?[div]'", null ]
-    # [ '\\<div>', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=6,text='\\[div]'", null ]
+    [ 'before ?[div] after', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=19,text='before ?[div] after'", null ]
+    [ '\\<div>', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=6,text='\\\\<div>'", null ]
+    [ 'before \\<div> after', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=19,text='before \\\\<div> after'", null ]
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
@@ -716,10 +718,10 @@ if module is require.main then do => # await do =>
   # test @[ "HTML: parse bare" ]
   # demo()
   # await demo_streaming()
-  test @[ "HTML._parse_compact_tagname" ]
+  # test @[ "HTML._parse_compact_tagname" ]
   # test @[ "parse_compact_tagname 2" ]
   # test @[ "HTML: parse (dubious)" ]
-  # test @[ "HTML: parse escaped" ]
+  test @[ "HTML: parse escaped" ]
 
 
 
