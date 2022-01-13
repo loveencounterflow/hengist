@@ -24,9 +24,12 @@ types                     = new ( require 'intertype' ).Intertype
   validate
   validate_list_of }      = types.export()
 SQL                       = String.raw
-guy                       = require '../../../apps/guy'
+GUY                       = require '../../../apps/guy'
 # { HDML }                  = require '../../../apps/hdml'
 H                         = require '../../../lib/helpers'
+{ lets
+  freeze }                = GUY.lft
+{ to_width }              = require 'to-width'
 
 
 #===========================================================================================================
@@ -62,11 +65,63 @@ H                         = require '../../../lib/helpers'
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
+HTML                      = ( require 'paragate/lib/htmlish.grammar' ).new_grammar { bare: true, }
+TIMETUNNEL                = require 'timetunnel'
+
+#-----------------------------------------------------------------------------------------------------------
+class Htmlish
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ->
+    # tnl = new TIMETUNNEL.Timetunnel { guards: 'abcde', }
+    GUY.props.hide @, '_tunnel', new TIMETUNNEL.Timetunnel {}
+    @_tunnel.add_tunnel TIMETUNNEL.tunnels.remove_backslash
+    # @_tunnel.add_tunnel TIMETUNNEL.tunnels.keep_backslash
+    # original  = "abcdefg \\\\ helo \\< world"
+    # original  = raw"abcdefg \\ helo \< world\{\}"
+    # hidden    = tnl.hide original
+    # urge '^3232^', rpr tnl.hide raw"\$"
+    # revealed  = tnl.reveal hidden
+    return undefined
+
+  #---------------------------------------------------------------------------------------------------------
+  parse: ( text ) ->
+    tunneled  = @_tunnel.hide text
+    tokens    = HTML.parse tunneled
+    R = lets ( tokens ), ( tokens ) =>
+      for d, idx in tokens
+        # warn '^44564976^', d if d.$key is '^error'
+        if ( d.$key is '<tag' )
+          if ( d.type is 'otag' )
+            if ( /^<\s+/.test d.text )
+              @_as_error d, '^ð1^', 'xtraows', "extraneous whitespace before tag name"
+        else if ( d.$key is '>tag' )
+          if ( d.type is 'ctag' )
+            if( /^<\s*\/\s+/.test d.text ) or ( /^<\s+\/\s*/.test d.text )
+              @_as_error d, '^ð2^', 'xtracws', "extraneous whitespace in closing tag"
+        else if ( d.$key is '^text' )
+          if ( /[<&]/.test d.text )
+            @_as_error d, '^ð1^', 'bareachrs', "bare active characters"
+        d.text = @_tunnel.reveal d.text if d.text?
+      return null
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  _as_error: ( token, ref, code, message ) ->
+    token.$key    = '^error'
+    token.origin  = 'htmlish'
+    token.code    = code
+    token.message = message
+    token.$       = ref
+    return null
+
+
+HTMLISH = new Htmlish()
+
+#-----------------------------------------------------------------------------------------------------------
 @demo_htmlish = ( cfg ) ->
   { DBay }        = require '../../../apps/dbay'
   { Mrg }         = require '../../../apps/dbay-mirage/lib/main2'
-  { new_grammar } = require '../../../apps/paragate/lib/htmlish.grammar'
-  HTML = new_grammar { bare: true, }
   prefix          = 'mrg'
   db              = new DBay()
   mrg             = new Mrg { db, prefix, }
@@ -92,24 +147,7 @@ H                         = require '../../../lib/helpers'
   # return null
   #.........................................................................................................
   for { par, lnr1, lnr2, txt, } from mrg.walk_par_rows { dsk, }
-    urge ( HTML.parse txt ).length
-    urge ( normalize_tokens HTML.parse txt ).length
-    H.tabulate "#{par} (#{lnr1}..#{lnr2}) #{rpr txt}", normalize_tokens HTML.parse txt
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@demo_rxws = ( cfg ) ->
-  { DBay }          = require '../../../apps/dbay'
-  { Mrg }           = require '../../../apps/dbay-mirage/lib/main2'
-  { grammar: RXWS } = require '../../../apps/paragate/lib/regex-whitespace.grammar'
-  debug '^343545^', RXWS.parse """
-    first paragraph
-
-    second
-    paragraph
-
-      indented
-    """
+    H.tabulate "#{par} (#{lnr1}..#{lnr2}) #{rpr txt}", normalize_tokens HTMLISH.parse txt
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -127,13 +165,37 @@ normalize_tokens = ( tokens ) ->
     'stop'
     'text'
     '$'
+    'code'      ### { $key: '^error', } ###
+    # 'chvtname'  ### { $key: '^error', } ###
+    # 'origin'    ### { $key: '^error', } ###
+    'message'   ### { $key: '^error', } ###
     ]
   R = []
   for token in tokens
     d = {}
-    d[ key ] = ( token[ key ] ? null ) for key in keys
+    d[ key ]  = ( token[ key ] ? null ) for key in keys
+    # d.$key    = ( CND.reverse CND.red d.$key ) if d.$key is '^error'
+    d.message = ( to_width d.message, 20 ) if d.message?
     R.push d
-  return guy.lft.freeze R
+  return freeze R
+
+#-----------------------------------------------------------------------------------------------------------
+demo_timetunnel = ->
+  raw             = String.raw
+  TIMETUNNEL      = require 'timetunnel'
+  # tnl = new TIMETUNNEL.Timetunnel { guards: 'abcde', }
+  tnl             = new TIMETUNNEL.Timetunnel {}
+  tnl.add_tunnel TIMETUNNEL.tunnels.remove_backslash
+  # tnl.add_tunnel TIMETUNNEL.tunnels.keep_backslash
+  # original  = "abcdefg \\\\ helo \\< world"
+  original  = raw"abcdefg \\ helo \< world\{\}"
+  hidden    = tnl.hide original
+  urge '^3232^', rpr tnl.hide raw"\$"
+  revealed  = tnl.reveal hidden
+  info '^435^', { original, hidden, revealed, }
+  info '^435^', rpr tnl.reveal '\x104\x11'
+  debug '^653^', tnl._cache
+  return null
 
 
 
@@ -143,8 +205,4 @@ if require.main is module then do =>
   # @demo_html_generation()
   # @demo_datamill()
   @demo_htmlish()
-  # @demo_rxws()
-
-
-
 
