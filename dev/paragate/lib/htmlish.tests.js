@@ -1437,8 +1437,7 @@
   this["HTML: parse escaped"] = async function(T, done) {
     var HTML, error, i, len, matcher, probe, probes_and_matchers;
     HTML = require('../../../apps/paragate/lib/htmlish.grammar');
-    probes_and_matchers = [['<div>', "$key='<tag',$vnr=[ 1, 1 ],name='div',start=0,stop=5,text='<div>',type='otag'", null], ['?[div]', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=6,text='?[div]'", null]];
-// [ '\\<div>', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=6,text='\\[div]'", null ]
+    probes_and_matchers = [['<div>', "$key='<tag',$vnr=[ 1, 1 ],name='div',start=0,stop=5,text='<div>',type='otag'", null], ['?[div]', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=6,text='?[div]'", null], ['before ?[div] after', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=19,text='before ?[div] after'", null], ['\\<div>', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=6,text='\\\\<div>'", null], ['before \\<div> after', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=19,text='before \\\\<div> after'", null]];
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
@@ -2039,13 +2038,12 @@
       // test @[ "HTML: parse bare" ]
       // demo()
       // await demo_streaming()
-      return test(this["HTML._parse_compact_tagname"]);
+      // test @[ "HTML._parse_compact_tagname" ]
+      // test @[ "parse_compact_tagname 2" ]
+      // test @[ "HTML: parse (dubious)" ]
+      return test(this["HTML: parse escaped"]);
     })();
   }
-
-  // test @[ "parse_compact_tagname 2" ]
-// test @[ "HTML: parse (dubious)" ]
-// test @[ "HTML: parse escaped" ]
 
 }).call(this);
 

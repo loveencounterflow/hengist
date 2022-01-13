@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, GUY, H, HTML, HTMLISH, Htmlish, PATH, SQL, TIMETUNNEL, badge, debug, demo_timetunnel, echo, equals, freeze, help, info, isa, lets, normalize_tokens, rpr, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, GUY, H, HTML, HTMLISH, Htmlish, PATH, SQL, badge, debug, echo, equals, freeze, help, info, isa, lets, normalize_tokens, rpr, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -114,29 +114,16 @@
     bare: true
   });
 
-  TIMETUNNEL = require('timetunnel');
-
   //-----------------------------------------------------------------------------------------------------------
   Htmlish = class Htmlish {
-    //---------------------------------------------------------------------------------------------------------
-    constructor() {
-      // tnl = new TIMETUNNEL.Timetunnel { guards: 'abcde', }
-      GUY.props.hide(this, '_tunnel', new TIMETUNNEL.Timetunnel({}));
-      this._tunnel.add_tunnel(TIMETUNNEL.tunnels.remove_backslash);
-      // @_tunnel.add_tunnel TIMETUNNEL.tunnels.keep_backslash
-      // original  = "abcdefg \\\\ helo \\< world"
-      // original  = raw"abcdefg \\ helo \< world\{\}"
-      // hidden    = tnl.hide original
-      // urge '^3232^', rpr tnl.hide raw"\$"
-      // revealed  = tnl.reveal hidden
-      return void 0;
-    }
+    // #---------------------------------------------------------------------------------------------------------
+    // constructor: ->
+    //   return undefined
 
-    //---------------------------------------------------------------------------------------------------------
+      //---------------------------------------------------------------------------------------------------------
     parse(text) {
-      var R, tokens, tunneled;
-      tunneled = this._tunnel.hide(text);
-      tokens = HTML.parse(tunneled);
+      var R, tokens;
+      tokens = HTML.parse(text);
       R = lets(tokens, (tokens) => {
         var d, i, idx, len;
         for (idx = i = 0, len = tokens.length; i < len; idx = ++i) {
@@ -155,12 +142,9 @@
               }
             }
           } else if (d.$key === '^text') {
-            if (/[<&]/.test(d.text)) {
+            if (/(?<!\\)[<&]/.test(d.text)) {
               this._as_error(d, '^ð1^', 'bareachrs', "bare active characters");
             }
-          }
-          if (d.text != null) {
-            d.text = this._tunnel.reveal(d.text);
           }
         }
         return null;
@@ -285,26 +269,6 @@
       R.push(d);
     }
     return freeze(R);
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  demo_timetunnel = function() {
-    var hidden, original, raw, revealed, tnl;
-    raw = String.raw;
-    TIMETUNNEL = require('timetunnel');
-    // tnl = new TIMETUNNEL.Timetunnel { guards: 'abcde', }
-    tnl = new TIMETUNNEL.Timetunnel({});
-    tnl.add_tunnel(TIMETUNNEL.tunnels.remove_backslash);
-    // tnl.add_tunnel TIMETUNNEL.tunnels.keep_backslash
-    // original  = "abcdefg \\\\ helo \\< world"
-    original = raw`abcdefg \\ helo \< world\{\}`;
-    hidden = tnl.hide(original);
-    urge('^3232^', rpr(tnl.hide(raw`\$`)));
-    revealed = tnl.reveal(hidden);
-    info('^435^', {original, hidden, revealed});
-    info('^435^', rpr(tnl.reveal('\x104\x11')));
-    debug('^653^', tnl._cache);
-    return null;
   };
 
   //###########################################################################################################
