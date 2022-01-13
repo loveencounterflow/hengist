@@ -84,6 +84,7 @@ specifiers:
   ora: 6.0.1
   panzoom: ^9.4.1
   paper-jsdom: ^0.12.15
+  paragate: ^2.1.0
   path-intersection: ^2.2.1
   pg: ^8.5.1
   pg-cursor: ^2.5.2
@@ -106,7 +107,7 @@ specifiers:
   sqlite-parser: ^1.0.1
   stacktracey: 2.1.7
   steampipes: 6.7.1
-  stringify-attributes: 2.0.0
+  stringify-attributes: '=2.0.0'
   strip-ansi: 7.0.1
   svg_pathify: ^0.0.8
   svgo: ^2.8.0
@@ -115,6 +116,7 @@ specifiers:
   tempy: 2.0.0
   text-metrics: ^2.0.2
   through2: ^4.0.2
+  timetunnel: ^1.1.1
   to-width: 1.2.0
   trash: 8.0.0
   validate-npm-package-name: ^3.0.0
@@ -206,6 +208,7 @@ dependencies:
   ora: 6.0.1
   panzoom: 9.4.2
   paper-jsdom: 0.12.15
+  paragate: 2.1.0
   path-intersection: 2.2.1
   pg: 8.7.1
   pg-cursor: 2.7.1_pg@8.7.1
@@ -237,6 +240,7 @@ dependencies:
   tempy: 2.0.0
   text-metrics: 2.0.9
   through2: 4.0.2
+  timetunnel: 1.1.1
   to-width: 1.2.0
   trash: 8.0.0
   validate-npm-package-name: 3.0.0
@@ -1400,6 +1404,12 @@ packages:
     resolution: {integrity: sha512-RcdumNsM6fJZ5HHbYunqj2bpurVRGsXour3OR+SlLEHFhG6ALm54i6Osnh+OvO7kEoSBzwExpblYFH8zKQiEPw==}
     dev: false
 
+  /chevrotain/7.1.2:
+    resolution: {integrity: sha512-9bQsXVQ7UAvzMs7iUBBJ9Yv//exOy7bIR3PByOEk4M64vIE/LsiOiX7VIkMF/vEMlrSStwsaE884Bp9CpjtC5g==}
+    dependencies:
+      regexp-to-ast: 0.5.0
+    dev: false
+
   /chownr/1.1.4:
     resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
     dev: false
@@ -1782,6 +1792,17 @@ packages:
       abab: 2.0.5
       whatwg-mimetype: 3.0.0
       whatwg-url: 10.0.0
+    dev: false
+
+  /datom/7.0.3:
+    resolution: {integrity: sha512-0t2/KrbaYkAzTCGexM8lS6dQkPuKjG2udpdRzrgWTHtOyK3TxWW1lGXfY18NK8SqZYCSJvjNPqKfGNfI4Msm2Q==}
+    dependencies:
+      cnd: 9.2.2
+      cupofjoe: 0.1.1
+      emittery: 0.6.0
+      intertype: 7.7.0
+      letsfreezethat: 2.2.5
+      multimix: 4.1.0
     dev: false
 
   /datom/8.0.2:
@@ -3283,6 +3304,21 @@ packages:
       hyphenopoly: 4.12.0
       intertype: 7.6.7
       linebreak: 1.0.2
+      multimix: 5.0.0
+      steampipes: 6.7.1
+      to-width: 1.2.0
+    dev: false
+
+  /intertext/8.0.0:
+    resolution: {integrity: sha512-rD4SrGbZ8CRDFgArMd5bzK/ZIGvgdwMyrpL/vvuGh437Xln/bez7QOb1cL18DAn97oDE/M7igfWDV/IIIcbVTQ==}
+    dependencies:
+      cnd: 9.2.2
+      color-convert: 2.0.1
+      cupofjoe: 0.2.1
+      datom: 8.0.3
+      diff-match-patch: 1.0.5
+      hyphenopoly: 4.12.0
+      intertype: 7.7.0
       multimix: 5.0.0
       steampipes: 6.7.1
       to-width: 1.2.0
@@ -4836,6 +4872,18 @@ packages:
     engines: {node: '>=8.0.0'}
     dev: false
 
+  /paragate/2.1.0:
+    resolution: {integrity: sha512-LMpPO7tShZtGgAcqjOSD1+XEVvSrA8XAnRrgRJixpxcZyS0Nk//lQ1HhHsqAlMZUwj+Hbil7US3GYaLW/1U2Ow==}
+    dependencies:
+      chevrotain: 7.1.2
+      cnd: 9.2.2
+      datom: 7.0.3
+      intertext: 8.0.0
+      intertype: 7.7.0
+      multimix: 4.1.0
+      steampipes: 6.7.1
+    dev: false
+
   /parse-filepath/1.0.2:
     resolution: {integrity: sha1-pjISf1Oq89FYdvWHLz/6x2PWyJE=}
     engines: {node: '>=0.8'}
@@ -5366,6 +5414,10 @@ packages:
     dependencies:
       extend-shallow: 3.0.2
       safe-regex: 1.1.0
+    dev: false
+
+  /regexp-to-ast/0.5.0:
+    resolution: {integrity: sha512-tlbJqcMHnPKI9zSrystikWKwHkBqu2a/Sgw01h3zFjvYrMxEDYHzzoMZnUrbIfpTFEsoRnnviOXNCzFiSc54Qw==}
     dev: false
 
   /repeat-element/1.1.4:
@@ -6151,6 +6203,14 @@ packages:
   /tildify/2.0.0:
     resolution: {integrity: sha512-Cc+OraorugtXNfs50hU9KS369rFXCfgGLpfCfvlc+Ud5u6VWmUQsOAa9HbTvheQdYnrdJqqv1e5oIqXppMYnSw==}
     engines: {node: '>=8'}
+    dev: false
+
+  /timetunnel/1.1.1:
+    resolution: {integrity: sha512-c8QMxTfNDawaQzrA6U2MIheqK/r3GkvNsnEiCQvLSddSfanynYRvRvViioIL6XTsIOWJrdL+ZoyGPx9GgUjgQA==}
+    dependencies:
+      cnd: 9.2.1
+      intertype: 7.6.5
+      multimix: 5.0.0
     dev: false
 
   /timsort/0.3.0:
