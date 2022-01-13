@@ -577,21 +577,18 @@ GUY                       = require '../../../apps/guy'
     [ 'foo-bar#c55', { name: 'foo-bar', id: 'c55' }, null ]
     [ 'foo-bar.blah.beep', { name: 'foo-bar', class: [ 'blah', 'beep', ] }, null ]
     [ 'foo-bar#c55.blah.beep', { name: 'foo-bar', id: 'c55', class: [ 'blah', 'beep', ] }, null ]
-    [ '#c55', { id: 'c55' }, null ]
+    [ '#c55', null, "illegal compact tag syntax in '#c55'" ]
     [ 'dang:blah', { prefix: 'dang', name: 'blah' }, null ]
     [ 'dang:blah#c3', { prefix: 'dang', name: 'blah', id: 'c3' }, null ]
     [ 'dang:blah#c3.some.thing', { prefix: 'dang', name: 'blah', id: 'c3', class: [ 'some', 'thing', ] }, null ]
-    [ 'dang:#c3.some.thing', { prefix: 'dang', id: 'c3', class: [ 'some', 'thing', ] }, null ]
+    [ 'dang:#c3.some.thing', null, "illegal compact tag syntax in 'dang:#c3.some.thing'" ]
     [ 'dang:bar.dub#c3.other', { prefix: 'dang', name: 'bar', class: [ 'dub', 'other', ], id: 'c3' }, null ]
-    [ '.blah.beep', { class: [ 'blah', 'beep', ] }, null ]
-    [ [ '...#', true, ], null, 'illegal compact tag syntax' ]
+    [ '.blah.beep', null, "illegal compact tag syntax in '.blah.beep'" ]
+    [ '...#', null, 'illegal compact tag syntax' ]
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
-      if isa.list probe
-        resolve HTML.grammar._parse_compact_tagname probe...
-      else
-        resolve HTML.grammar._parse_compact_tagname probe
+      resolve HTML.grammar._parse_compact_tagname probe
   #.........................................................................................................
   done()
   return null
