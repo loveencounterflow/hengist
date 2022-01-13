@@ -1419,7 +1419,26 @@
   this["HTML: parse (dubious)"] = async function(T, done) {
     var HTML, error, i, len, matcher, probe, probes_and_matchers;
     HTML = require('../../../apps/paragate/lib/htmlish.grammar');
-    probes_and_matchers = [['< >', "$key='<tag',$vnr=[ 1, 1 ],start=0,stop=3,text='< >',type='otag'#$key='^error',$vnr=[ 1, 3 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=2,stop=3,text='>'", null], ['< x >', "$key='<tag',$vnr=[ 1, 1 ],name='x',start=0,stop=5,text='< x >',type='otag'", null], ['<>', "$key='<tag',$vnr=[ 1, 1 ],start=0,stop=2,text='<>',type='otag'#$key='^error',$vnr=[ 1, 2 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=1,stop=2,text='>'", null], ['<', "$key='^error',$vnr=[ 1, 1 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=0,stop=1,text='<'", null], ['<tag', "$key='<tag',$vnr=[ 1, 1 ],name='tag',start=0,stop=4,text='<tag'#$key='^error',$vnr=[ 1, 2 ],chvtname='NoViableAltException',code='missing',origin='parser',start=1,stop=4,text='tag'", null], ['if <math> a > b </math> then', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=3,text='if '#$key='<tag',$vnr=[ 1, 4 ],name='math',start=3,stop=9,text='<math>',type='otag'#$key='^text',$vnr=[ 1, 10 ],start=9,stop=16,text=' a > b '#$key='>tag',$vnr=[ 1, 17 ],name='math',start=16,stop=23,text='</math>',type='ctag'#$key='^text',$vnr=[ 1, 24 ],start=23,stop=28,text=' then'", null], ['>', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=1,text='>'", null], ['&', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=1,text='&'", null], ['&amp;', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=5,text='&amp;'", null], ["<tag a='<'>", `$key='<tag',$vnr=[ 1, 1 ],atrs={ a: "'<'" },name='tag',start=0,stop=11,text="<tag a='<'>",type='otag'`, null]];
+    probes_and_matchers = [['< >', "$key='<tag',$vnr=[ 1, 1 ],start=0,stop=3,text='< >',type='otag'#$key='^error',$vnr=[ 1, 3 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=2,stop=3,text='>'", null], ['< x >', "$key='<tag',$vnr=[ 1, 1 ],name='x',start=0,stop=5,text='< x >',type='otag'", null], ['</x>', "$key='>tag',$vnr=[ 1, 1 ],name='x',start=0,stop=4,text='</x>',type='ctag'", null], ['</x >', "$key='>tag',$vnr=[ 1, 1 ],name='x',start=0,stop=5,text='</x >',type='ctag'", null], ['</ x>', "$key='>tag',$vnr=[ 1, 1 ],name='x',start=0,stop=5,text='</ x>',type='ctag'", null], ['< / x >', "$key='<tag',$vnr=[ 1, 1 ],start=0,stop=3,text='< /',type='ntag'#$key='^error',$vnr=[ 1, 3 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=2,stop=3,text='/'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=7,text=' x >'", null], ['<>', "$key='<tag',$vnr=[ 1, 1 ],start=0,stop=2,text='<>',type='otag'#$key='^error',$vnr=[ 1, 2 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=1,stop=2,text='>'", null], ['<', "$key='^error',$vnr=[ 1, 1 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=0,stop=1,text='<'", null], ['<tag', "$key='<tag',$vnr=[ 1, 1 ],name='tag',start=0,stop=4,text='<tag'#$key='^error',$vnr=[ 1, 2 ],chvtname='NoViableAltException',code='missing',origin='parser',start=1,stop=4,text='tag'", null], ['if <math> a > b </math> then', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=3,text='if '#$key='<tag',$vnr=[ 1, 4 ],name='math',start=3,stop=9,text='<math>',type='otag'#$key='^text',$vnr=[ 1, 10 ],start=9,stop=16,text=' a > b '#$key='>tag',$vnr=[ 1, 17 ],name='math',start=16,stop=23,text='</math>',type='ctag'#$key='^text',$vnr=[ 1, 24 ],start=23,stop=28,text=' then'", null], ['>', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=1,text='>'", null], ['&', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=1,text='&'", null], ['&amp;', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=5,text='&amp;'", null], ["<tag a='<'>", `$key='<tag',$vnr=[ 1, 1 ],atrs={ a: "'<'" },name='tag',start=0,stop=11,text="<tag a='<'>",type='otag'`, null]];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          return resolve(H.condense_tokens(HTML.grammar.parse(probe)));
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["HTML: parse escaped"] = async function(T, done) {
+    var HTML, error, i, len, matcher, probe, probes_and_matchers;
+    HTML = require('../../../apps/paragate/lib/htmlish.grammar');
+    probes_and_matchers = [['<div>', "$key='<tag',$vnr=[ 1, 1 ],name='div',start=0,stop=5,text='<div>',type='otag'", null], ['?[div]', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=6,text='?[div]'", null]];
+// [ '\\<div>', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=6,text='\\[div]'", null ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
@@ -1849,13 +1868,9 @@
         },
         null
       ],
-      [
-        '#c55',
-        {
-          id: 'c55'
-        },
-        null
-      ],
+      ['#c55',
+      null,
+      "illegal compact tag syntax in '#c55'"],
       [
         'dang:blah',
         {
@@ -1884,16 +1899,9 @@
         },
         null
       ],
-      [
-        'dang:#c3.some.thing',
-        {
-          prefix: 'dang',
-          id: 'c3',
-          class: ['some',
-        'thing']
-        },
-        null
-      ],
+      ['dang:#c3.some.thing',
+      null,
+      "illegal compact tag syntax in 'dang:#c3.some.thing'"],
       [
         'dang:bar.dub#c3.other',
         {
@@ -1905,16 +1913,10 @@
         },
         null
       ],
-      [
-        '.blah.beep',
-        {
-          class: ['blah',
-        'beep']
-        },
-        null
-      ],
-      [['...#',
-      true],
+      ['.blah.beep',
+      null,
+      "illegal compact tag syntax in '.blah.beep'"],
+      ['...#',
       null,
       'illegal compact tag syntax']
     ];
@@ -1922,11 +1924,7 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve) {
-          if (isa.list(probe)) {
-            return resolve(HTML.grammar._parse_compact_tagname(...probe));
-          } else {
-            return resolve(HTML.grammar._parse_compact_tagname(probe));
-          }
+          return resolve(HTML.grammar._parse_compact_tagname(probe));
         });
       });
     }
@@ -2041,10 +2039,13 @@
       // test @[ "HTML: parse bare" ]
       // demo()
       // await demo_streaming()
-      // test @[ "HTML._parse_compact_tagname" ]
-      return test(this["parse_compact_tagname 2"]);
+      return test(this["HTML._parse_compact_tagname"]);
     })();
   }
+
+  // test @[ "parse_compact_tagname 2" ]
+// test @[ "HTML: parse (dubious)" ]
+// test @[ "HTML: parse escaped" ]
 
 }).call(this);
 

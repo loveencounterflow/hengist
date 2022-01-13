@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, normalize_tokens, rpr, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, GUY, H, HTML, HTMLISH, Htmlish, PATH, SQL, TIMETUNNEL, badge, debug, demo_timetunnel, echo, equals, freeze, help, info, isa, lets, normalize_tokens, rpr, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -34,16 +34,20 @@
 
   SQL = String.raw;
 
-  guy = require('../../../apps/guy');
+  GUY = require('../../../apps/guy');
 
   // { HDML }                  = require '../../../apps/hdml'
   H = require('../../../lib/helpers');
+
+  ({lets, freeze} = GUY.lft);
+
+  ({to_width} = require('to-width'));
 
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_datamill = function(cfg) {
-    var DBay, Mrg, db, dsk, lnr, mrg, path, ref, txt, x;
+    var DBay, Mrg, db, dsk, lnr, mrg, path, ref1, txt, x;
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage/lib/main2'));
     db = new DBay();
@@ -95,8 +99,8 @@
     H.tabulate('mrg_mirror', db(SQL`select * from mrg_mirror order by dsk, lnr, trk, pce;`));
     H.tabulate('mrg_lines', db(SQL`select * from mrg_lines  order by dsk, lnr;`));
     H.banner(`lines of ${dsk}`);
-    ref = mrg.walk_line_rows({dsk});
-    for (x of ref) {
+    ref1 = mrg.walk_line_rows({dsk});
+    for (x of ref1) {
       ({lnr, txt} = x);
       urge('^474^', lnr, rpr(txt));
     }
@@ -106,14 +110,83 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
+  HTML = (require('paragate/lib/htmlish.grammar')).new_grammar({
+    bare: true
+  });
+
+  TIMETUNNEL = require('timetunnel');
+
+  //-----------------------------------------------------------------------------------------------------------
+  Htmlish = class Htmlish {
+    //---------------------------------------------------------------------------------------------------------
+    constructor() {
+      // tnl = new TIMETUNNEL.Timetunnel { guards: 'abcde', }
+      GUY.props.hide(this, '_tunnel', new TIMETUNNEL.Timetunnel({}));
+      this._tunnel.add_tunnel(TIMETUNNEL.tunnels.remove_backslash);
+      // @_tunnel.add_tunnel TIMETUNNEL.tunnels.keep_backslash
+      // original  = "abcdefg \\\\ helo \\< world"
+      // original  = raw"abcdefg \\ helo \< world\{\}"
+      // hidden    = tnl.hide original
+      // urge '^3232^', rpr tnl.hide raw"\$"
+      // revealed  = tnl.reveal hidden
+      return void 0;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    parse(text) {
+      var R, tokens, tunneled;
+      tunneled = this._tunnel.hide(text);
+      tokens = HTML.parse(tunneled);
+      R = lets(tokens, (tokens) => {
+        var d, i, idx, len;
+        for (idx = i = 0, len = tokens.length; i < len; idx = ++i) {
+          d = tokens[idx];
+          // warn '^44564976^', d if d.$key is '^error'
+          if (d.$key === '<tag') {
+            if (d.type === 'otag') {
+              if (/^<\s+/.test(d.text)) {
+                this._as_error(d, '^ð1^', 'xtraows', "extraneous whitespace before tag name");
+              }
+            }
+          } else if (d.$key === '>tag') {
+            if (d.type === 'ctag') {
+              if ((/^<\s*\/\s+/.test(d.text)) || (/^<\s+\/\s*/.test(d.text))) {
+                this._as_error(d, '^ð2^', 'xtracws', "extraneous whitespace in closing tag");
+              }
+            }
+          } else if (d.$key === '^text') {
+            if (/[<&]/.test(d.text)) {
+              this._as_error(d, '^ð1^', 'bareachrs', "bare active characters");
+            }
+          }
+          if (d.text != null) {
+            d.text = this._tunnel.reveal(d.text);
+          }
+        }
+        return null;
+      });
+      return R;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    _as_error(token, ref, code, message) {
+      token.$key = '^error';
+      token.origin = 'htmlish';
+      token.code = code;
+      token.message = message;
+      token.$ = ref;
+      return null;
+    }
+
+  };
+
+  HTMLISH = new Htmlish();
+
+  //-----------------------------------------------------------------------------------------------------------
   this.demo_htmlish = function(cfg) {
-    var DBay, HTML, Mrg, db, dsk, lnr1, lnr2, mrg, new_grammar, par, path, prefix, ref, txt, x;
+    var DBay, Mrg, db, dsk, lnr1, lnr2, mrg, par, path, prefix, ref1, txt, x;
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage/lib/main2'));
-    ({new_grammar} = require('../../../apps/paragate/lib/htmlish.grammar'));
-    HTML = new_grammar({
-      bare: true
-    });
     prefix = 'mrg';
     db = new DBay();
     mrg = new Mrg({db, prefix});
@@ -164,50 +237,74 @@
     H.tabulate(`${prefix}_parmirror`, db(SQL`select * from ${prefix}_parmirror;`));
     H.tabulate("mrg.walk_line_rows()", mrg.walk_line_rows({dsk}));
     H.tabulate("mrg.walk_par_rows()", mrg.walk_par_rows({dsk}));
-    ref = mrg.walk_par_rows({dsk});
+    ref1 = mrg.walk_par_rows({dsk});
     // return null
     //.........................................................................................................
-    for (x of ref) {
+    for (x of ref1) {
       ({par, lnr1, lnr2, txt} = x);
-      urge((HTML.parse(txt)).length);
-      urge((normalize_tokens(HTML.parse(txt))).length);
-      H.tabulate(`${par} (${lnr1}..${lnr2}) ${rpr(txt)}`, normalize_tokens(HTML.parse(txt)));
+      H.tabulate(`${par} (${lnr1}..${lnr2}) ${rpr(txt)}`, normalize_tokens(HTMLISH.parse(txt)));
     }
     return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.demo_rxws = function(cfg) {
-    var DBay, Mrg, RXWS;
-    ({DBay} = require('../../../apps/dbay'));
-    ({Mrg} = require('../../../apps/dbay-mirage/lib/main2'));
-    ({
-      grammar: RXWS
-    } = require('../../../apps/paragate/lib/regex-whitespace.grammar'));
-    debug('^343545^', RXWS.parse(`first paragraph
-
-second
-paragraph
-
-  indented`));
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   normalize_tokens = function(tokens) {
-    var R, d, i, j, key, keys, len, len1, ref, token;
-    keys = ['$vnr', '$key', 'type', 'prefix', 'name', 'id', 'class', 'atrs', 'start', 'stop', 'text', '$'];
+    var R, d, i, j, key, keys, len, len1, ref1, token;
+    keys = [
+      '$vnr',
+      '$key',
+      'type',
+      'prefix',
+      'name',
+      'id',
+      'class',
+      'atrs',
+      'start',
+      'stop',
+      'text',
+      '$',
+      'code'/* { $key: '^error', } */
+      ,
+      // 'chvtname'  ### { $key: '^error', } ###
+      // 'origin'    ### { $key: '^error', } ###
+      'message'/* { $key: '^error', } */
+      
+    ];
     R = [];
     for (i = 0, len = tokens.length; i < len; i++) {
       token = tokens[i];
       d = {};
       for (j = 0, len1 = keys.length; j < len1; j++) {
         key = keys[j];
-        d[key] = (ref = token[key]) != null ? ref : null;
+        d[key] = (ref1 = token[key]) != null ? ref1 : null;
+      }
+      if (d.message != null) {
+        // d.$key    = ( CND.reverse CND.red d.$key ) if d.$key is '^error'
+        d.message = to_width(d.message, 20);
       }
       R.push(d);
     }
-    return guy.lft.freeze(R);
+    return freeze(R);
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_timetunnel = function() {
+    var hidden, original, raw, revealed, tnl;
+    raw = String.raw;
+    TIMETUNNEL = require('timetunnel');
+    // tnl = new TIMETUNNEL.Timetunnel { guards: 'abcde', }
+    tnl = new TIMETUNNEL.Timetunnel({});
+    tnl.add_tunnel(TIMETUNNEL.tunnels.remove_backslash);
+    // tnl.add_tunnel TIMETUNNEL.tunnels.keep_backslash
+    // original  = "abcdefg \\\\ helo \\< world"
+    original = raw`abcdefg \\ helo \< world\{\}`;
+    hidden = tnl.hide(original);
+    urge('^3232^', rpr(tnl.hide(raw`\$`)));
+    revealed = tnl.reveal(hidden);
+    info('^435^', {original, hidden, revealed});
+    info('^435^', rpr(tnl.reveal('\x104\x11')));
+    debug('^653^', tnl._cache);
+    return null;
   };
 
   //###########################################################################################################
@@ -218,8 +315,6 @@ paragraph
       return this.demo_htmlish();
     })();
   }
-
-  // @demo_rxws()
 
 }).call(this);
 
