@@ -187,6 +187,21 @@ GUY                       = require '../../../apps/guy'
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "HTML: parse escaped" ] = ( T, done ) ->
+  HTML = require '../../../apps/paragate/lib/htmlish.grammar'
+  probes_and_matchers = [
+    [ '<div>', "$key='<tag',$vnr=[ 1, 1 ],name='div',start=0,stop=5,text='<div>',type='otag'", null ]
+    [ '?[div]', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=6,text='?[div]'", null ]
+    # [ '\\<div>', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=6,text='\\[div]'", null ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      resolve H.condense_tokens HTML.grammar.parse probe
+  #.........................................................................................................
+  done()
+  return null
+
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "HTML.$datoms_from_html" ] = ( T, done ) ->
 #   INTERTEXT                 = require '../..'
