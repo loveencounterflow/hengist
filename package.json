@@ -96,7 +96,7 @@
     "ora": "6.0.1",
     "panzoom": "^9.4.1",
     "paper-jsdom": "^0.12.15",
-    "paragate": "^2.1.0",
+    "paragate": "3.0.1",
     "path-intersection": "^2.2.1",
     "pg": "^8.5.1",
     "pg-cursor": "^2.5.2",
