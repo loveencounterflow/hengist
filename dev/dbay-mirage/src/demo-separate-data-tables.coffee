@@ -66,29 +66,18 @@ H                         = require '../../../lib/helpers'
 #
 #-----------------------------------------------------------------------------------------------------------
 HTML                      = ( require 'paragate/lib/htmlish.grammar' ).new_grammar { bare: true, }
-TIMETUNNEL                = require 'timetunnel'
 
 #-----------------------------------------------------------------------------------------------------------
 class Htmlish
 
-  #---------------------------------------------------------------------------------------------------------
-  constructor: ->
-    # tnl = new TIMETUNNEL.Timetunnel { guards: 'abcde', }
-    GUY.props.hide @, '_tunnel', new TIMETUNNEL.Timetunnel {}
-    @_tunnel.add_tunnel TIMETUNNEL.tunnels.remove_backslash
-    # @_tunnel.add_tunnel TIMETUNNEL.tunnels.keep_backslash
-    # original  = "abcdefg \\\\ helo \\< world"
-    # original  = raw"abcdefg \\ helo \< world\{\}"
-    # hidden    = tnl.hide original
-    # urge '^3232^', rpr tnl.hide raw"\$"
-    # revealed  = tnl.reveal hidden
-    return undefined
+  # #---------------------------------------------------------------------------------------------------------
+  # constructor: ->
+  #   return undefined
 
   #---------------------------------------------------------------------------------------------------------
   parse: ( text ) ->
-    tunneled  = @_tunnel.hide text
-    tokens    = HTML.parse tunneled
-    R = lets ( tokens ), ( tokens ) =>
+    tokens    = HTML.parse text
+    R         = lets tokens, ( tokens ) =>
       for d, idx in tokens
         # warn '^44564976^', d if d.$key is '^error'
         if ( d.$key is '<tag' )
@@ -100,9 +89,8 @@ class Htmlish
             if( /^<\s*\/\s+/.test d.text ) or ( /^<\s+\/\s*/.test d.text )
               @_as_error d, '^ð2^', 'xtracws', "extraneous whitespace in closing tag"
         else if ( d.$key is '^text' )
-          if ( /[<&]/.test d.text )
+          if ( /(?<!\\)[<&]/.test d.text )
             @_as_error d, '^ð1^', 'bareachrs', "bare active characters"
-        d.text = @_tunnel.reveal d.text if d.text?
       return null
     return R
 
@@ -178,24 +166,6 @@ normalize_tokens = ( tokens ) ->
     d.message = ( to_width d.message, 20 ) if d.message?
     R.push d
   return freeze R
-
-#-----------------------------------------------------------------------------------------------------------
-demo_timetunnel = ->
-  raw             = String.raw
-  TIMETUNNEL      = require 'timetunnel'
-  # tnl = new TIMETUNNEL.Timetunnel { guards: 'abcde', }
-  tnl             = new TIMETUNNEL.Timetunnel {}
-  tnl.add_tunnel TIMETUNNEL.tunnels.remove_backslash
-  # tnl.add_tunnel TIMETUNNEL.tunnels.keep_backslash
-  # original  = "abcdefg \\\\ helo \\< world"
-  original  = raw"abcdefg \\ helo \< world\{\}"
-  hidden    = tnl.hide original
-  urge '^3232^', rpr tnl.hide raw"\$"
-  revealed  = tnl.reveal hidden
-  info '^435^', { original, hidden, revealed, }
-  info '^435^', rpr tnl.reveal '\x104\x11'
-  debug '^653^', tnl._cache
-  return null
 
 
 
