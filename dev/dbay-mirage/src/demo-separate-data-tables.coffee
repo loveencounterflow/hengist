@@ -48,18 +48,18 @@ H                         = require '../../../lib/helpers'
   mrg.register_dsk { dsk, path, }
   mrg.refresh_datasource { dsk, }
   db.setv 'allow_change_on_mirror', 1
-  db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 2, pce: 1, txt: """something""", }
-  mrg.deactivate { dsk, lnr: 2, trk: 2, }
-  db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 3, pce: 1, txt: """<div>""", }
-  db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 3, pce: 2, txt: """inserted content""", }
-  db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 3, pce: 3, txt: """</div>""", }
+  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 2, pce: 1, txt: """something""", }
+  mrg.deactivate { dsk, oln: 2, trk: 2, }
+  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 3, pce: 1, txt: """<div>""", }
+  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 3, pce: 2, txt: """inserted content""", }
+  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 3, pce: 3, txt: """</div>""", }
   #.........................................................................................................
   db.setv 'dsk', dsk
   H.tabulate 'mrg_datasources', db SQL"select * from mrg_datasources;"
-  H.tabulate 'mrg_mirror',      db SQL"select * from mrg_mirror order by dsk, lnr, trk, pce;"
-  H.tabulate 'mrg_lines',       db SQL"select * from mrg_lines  order by dsk, lnr;"
+  H.tabulate 'mrg_mirror',      db SQL"select * from mrg_mirror order by dsk, oln, trk, pce;"
+  H.tabulate 'mrg_lines',       db SQL"select * from mrg_lines  order by dsk, oln;"
   H.banner "lines of #{dsk}"
-  urge '^474^', lnr, rpr txt for { lnr, txt, } from mrg.walk_line_rows { dsk, }
+  urge '^474^', oln, rpr txt for { oln, txt, } from mrg.walk_line_rows { dsk, }
   return null
 
 #===========================================================================================================
@@ -120,22 +120,32 @@ HTMLISH = new Htmlish()
   mrg.register_dsk { dsk, path, }
   mrg.refresh_datasource { dsk, }
   #.........................................................................................................
-  # db.setv 'allow_change_on_mirror', 1
-  db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 2, pce: 1, txt: """something""", }
-  mrg.deactivate { dsk, lnr: 2, trk: 2, }
-  db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 3, pce: 1, txt: """<div>""", }
-  db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 3, pce: 2, txt: """inserted content""", }
-  db mrg.sql.insert_lnpart, { dsk, lnr: 2, trk: 3, pce: 3, txt: """</div>""", }
+  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 2, pce: 1, txt: """something""", }
+  mrg.deactivate { dsk, oln: 2, trk: 2, }
+  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 3, pce: 1, txt: """<div>""", }
+  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 3, pce: 2, txt: """inserted content""", }
+  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 3, pce: 3, txt: """</div>""", }
+  try
+    db.setv 'allow_change_on_mirror', 1
+    # mrg.deactivate { dsk, oln: 10, trk: 1, }
+  finally
+    db.setv 'allow_change_on_mirror', 0
+  db mrg.sql.insert_lnpart, { dsk, oln: 11, trk: 2, pce: 1, txt: '', }
+  db mrg.sql.insert_lnpart, { dsk, oln: 11, trk: 2, pce: 2, txt: """generated paragraph""", }
+  db mrg.sql.insert_lnpart, { dsk, oln: 11, trk: 2, pce: 3, txt: '', }
+  # #.........................................................................................................
+  # for { par, lnr1, lnr2, txt, } from mrg.walk_par_rows { dsk, }
+  #   H.tabulate "#{par} (#{lnr1}..#{lnr2}) #{rpr txt}", normalize_tokens HTMLISH.parse txt
   #.........................................................................................................
-  H.tabulate "#{prefix}_mirror",      db SQL"select * from #{prefix}_mirror order by dsk, lnr, trk, pce;"
-  H.tabulate "#{prefix}_mirror",      db SQL"select * from #{prefix}_paragraph_linenumbers;"
-  H.tabulate "#{prefix}_parmirror",   db SQL"select * from #{prefix}_parmirror;"
-  H.tabulate "mrg.walk_line_rows()",  mrg.walk_line_rows { dsk, }
-  H.tabulate "mrg.walk_par_rows()",   mrg.walk_par_rows { dsk, }
-  # return null
+  H.tabulate "#{prefix}_mirror",        db SQL"select * from #{prefix}_mirror           order by dsk, oln, trk, pce;"
+  # H.tabulate "#{prefix}_mirror (act)",  db SQL"select * from #{prefix}_mirror where act order by dsk, oln, trk, pce;"
+  H.tabulate "#{prefix}_rwnmirror",     db SQL"select * from #{prefix}_rwnmirror;"
+  H.tabulate "#{prefix}_parlnrs0",      db SQL"select * from #{prefix}_parlnrs0;"
+  H.tabulate "#{prefix}_parlnrs",       db SQL"select * from #{prefix}_parlnrs;"
+  H.tabulate "#{prefix}_parmirror",     db SQL"select * from #{prefix}_parmirror;"
+  # H.tabulate "mrg.walk_line_rows()",  mrg.walk_line_rows { dsk, }
+  # H.tabulate "mrg.walk_par_rows()",   mrg.walk_par_rows { dsk, }
   #.........................................................................................................
-  for { par, lnr1, lnr2, txt, } from mrg.walk_par_rows { dsk, }
-    H.tabulate "#{par} (#{lnr1}..#{lnr2}) #{rpr txt}", normalize_tokens HTMLISH.parse txt
   return null
 
 #-----------------------------------------------------------------------------------------------------------
