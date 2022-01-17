@@ -253,7 +253,8 @@
     (() => {
       // test @
       // test @[ "DBAY _get-autolocation" ]
-      return test(this["DBAY constructor arguments 1"]);
+      // test @[ "DBAY constructor arguments 1" ]
+      return test(this["DBAY URL/path conversion"]);
     })();
   }
 

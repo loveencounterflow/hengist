@@ -834,23 +834,47 @@ values ( $dsk, $lnr, $lnpart, $xtra, $locid, $line )`, {
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["URL/path conversion"] = async function(T, done) {
+    var DBay, Mrg, db, error, i, len, matcher, mrg, probe, probes_and_matchers;
+    // T?.halt_on_error()
+    ({DBay} = require('../../../apps/dbay'));
+    ({Mrg} = require('../../../apps/dbay-mirage/lib/main2'));
+    db = new DBay();
+    mrg = new Mrg({db});
+    probes_and_matchers = [['/foo.txt', ['file:///foo.txt', '/foo.txt'], null], ['/foo.txt', ['file:///foo.txt', '/foo.txt'], null], ['/some weird path.jpg', ['file:///some%20weird%20path.jpg', '/some weird path.jpg'], null], ['/some weird path.jpg#oops', ['file:///some%20weird%20path.jpg%23oops', '/some weird path.jpg#oops'], null], ['/path/with/folders/to/file.txt', ['file:///path/with/folders/to/file.txt', '/path/with/folders/to/file.txt'], null]];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var path, url;
+          url = mrg._url_from_path(probe);
+          path = mrg._path_from_url(url);
+          // urge { probe, url, path, }
+          return resolve([url, path]);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "altering mirrored source lines causes error" ]
+      // @[ "altering mirrored source lines causes error" ]()
+      // test @[ "location marker matching" ]
+      // test @[ "mrg.refresh_datasource" ]
+      // test @[ "loc markers 1" ]
+      // test @[ "loc markers 2" ]
+      // test @[ "loc markers 3" ]
+      // test @[ "loc markers 4" ]
+      // test @[ "extended location marker matching" ]
+      // test @[ "multiple loc markers in one line" ]
+      return test(this["URL/path conversion"]);
     })();
   }
-
-  // test @[ "altering mirrored source lines causes error" ]
-// @[ "altering mirrored source lines causes error" ]()
-// test @[ "location marker matching" ]
-// test @[ "mrg.refresh_datasource" ]
-// test @[ "loc markers 1" ]
-// test @[ "loc markers 2" ]
-// test @[ "loc markers 3" ]
-// test @[ "loc markers 4" ]
-// test @[ "extended location marker matching" ]
-// test @[ "multiple loc markers in one line" ]
 
 }).call(this);
 
