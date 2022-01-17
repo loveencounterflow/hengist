@@ -63,9 +63,7 @@ H                         = require '../../../lib/helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-
-#-----------------------------------------------------------------------------------------------------------
-@demo_htmlish = ( cfg ) ->
+@demo_paragraphs_etc = ( cfg ) ->
   { DBay }        = require '../../../apps/dbay'
   { Mrg }         = require '../../../apps/dbay-mirage/lib/main2'
   prefix          = 'mrg'
@@ -91,9 +89,6 @@ H                         = require '../../../lib/helpers'
   db mrg.sql.insert_lnpart, { dsk, oln: 11, trk: 2, pce: 1, txt: '', }
   db mrg.sql.insert_lnpart, { dsk, oln: 11, trk: 2, pce: 2, txt: """generated paragraph""", }
   db mrg.sql.insert_lnpart, { dsk, oln: 11, trk: 2, pce: 3, txt: '', }
-  # #.........................................................................................................
-  # for { par, lnr1, lnr2, txt, } from mrg.walk_par_rows { dsk, }
-  #   H.tabulate "#{par} (#{lnr1}..#{lnr2}) #{rpr txt}", normalize_tokens HTMLISH.parse txt
   #.........................................................................................................
   H.tabulate "#{prefix}_mirror",        db SQL"select * from #{prefix}_mirror           order by dsk, oln, trk, pce;"
   # H.tabulate "#{prefix}_mirror (act)",  db SQL"select * from #{prefix}_mirror where act order by dsk, oln, trk, pce;"
@@ -103,7 +98,7 @@ H                         = require '../../../lib/helpers'
   H.tabulate "#{prefix}_parmirror",     db SQL"select * from #{prefix}_parmirror;"
   # H.tabulate "#{prefix}_datasources",   db SQL"select * from #{prefix}_datasources;"
   # H.tabulate "mrg.walk_line_rows()",  mrg.walk_line_rows { dsk, }
-  # H.tabulate "mrg.walk_par_rows()",   mrg.walk_par_rows { dsk, }
+  H.tabulate "mrg.walk_par_rows()",   mrg.walk_par_rows { dsk, }
   #.........................................................................................................
   return null
 
@@ -147,22 +142,29 @@ normalize_tokens = ( tokens ) ->
   mrg             = new Mrg { db, prefix, }
   mrg.html        = new Html { mrg, prefix, }
   db.create_stdlib()
-  dsk       = 'demo'
-  mrg.register_dsk { dsk, url: 'live:', }
+  # dsk       = 'demo'
+  # mrg.register_dsk { dsk, url: 'live:', }
+  dsk       = 'twcm'
+  path      = 'dbay-rustybuzz/htmlish-tags.html'
+  path      = PATH.resolve PATH.join __dirname, '../../../assets', path
+  mrg.register_dsk { dsk, path, }
+  mrg.refresh_datasource { dsk, }
   # mrg.html.statements.insert_datasource.run { dsk, url: 'ram:', digest: null, }
-  mrg.html._append_tag dsk, '^', 'path', { id: 'c1', d: 'M100,100L200,200', }
-  mrg.html._append_tag dsk, '<', 'div', { id: 'c1', class: 'foo bar', }
-  mrg.html._append_tag dsk, '^', '$text', null, "helo"
-  mrg.html._append_tag dsk, '>', 'div'
-  mrg.html._append_tag dsk, '^', 'mrg:loc#baselines'
+  # mrg.html._append_tag dsk, '^', 'path', { id: 'c1', d: 'M100,100L200,200', }
+  # mrg.html._append_tag dsk, '<', 'div', { id: 'c1', class: 'foo bar', }
+  # mrg.html._append_tag dsk, '^', '$text', null, "helo"
+  # mrg.html._append_tag dsk, '>', 'div'
+  # mrg.html._append_tag dsk, '^', 'mrg:loc#baselines'
+  mrg.html.parse_dsk { dsk, }
   #.........................................................................................................
-  db.setv 'dsk', 'demo'
-  H.tabulate "#{prefix}_html_datasources",    db SQL"select * from #{prefix}_html_datasources;"
+  db.setv 'dsk', dsk
+  # # H.tabulate "#{prefix}_datasources",         db SQL"select * from #{prefix}_datasources;"
   H.tabulate "#{prefix}_html_mirror",         db SQL"select * from #{prefix}_html_mirror;"
   H.tabulate "#{prefix}_html_atrs",           db SQL"select * from #{prefix}_html_atrs;"
-  H.tabulate "std_variables()",               db SQL"select * from std_variables();"
+  # H.tabulate "std_variables()",               db SQL"select * from std_variables();"
   H.tabulate "#{prefix}_html_tags_and_html",  db SQL"select * from #{prefix}_html_tags_and_html;"
-  H.banner "render_dsk";                      echo mrg.html.render_dsk { dsk, }
+  # H.tabulate "#{prefix}_parmirror",           db SQL"select * from #{prefix}_parmirror;"
+  # H.banner "render_dsk";                      echo mrg.html.render_dsk { dsk, }
   return null
 
 
@@ -172,6 +174,6 @@ normalize_tokens = ( tokens ) ->
 if require.main is module then do =>
   # @demo_html_generation()
   # @demo_datamill()
-  @demo_htmlish()
-  # @demo_html_parsing()
+  # @demo_paragraphs_etc()
+  @demo_html_parsing()
 
