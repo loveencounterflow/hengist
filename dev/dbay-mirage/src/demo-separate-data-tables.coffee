@@ -178,11 +178,45 @@ normalize_tokens = ( tokens ) ->
   return freeze R
 
 
+#-----------------------------------------------------------------------------------------------------------
+@demo_html_parsing = ( cfg ) ->
+  { DBay }        = require '../../../apps/dbay'
+  { Mrg }         = require '../../../apps/dbay-mirage/lib/main2'
+  { Html }        = require '../../../apps/dbay-mirage/lib/html'
+  prefix          = 'mrg'
+  db              = new DBay()
+  mrg             = new Mrg { db, prefix, }
+  mrg.html        = new Html { mrg, prefix, }
+  db.create_stdlib()
+  dsk       = 'twcm'
+  path      = 'dbay-rustybuzz/htmlish-tags.html'
+  path      = PATH.resolve PATH.join __dirname, '../../../assets', path
+  mrg.register_dsk { dsk, path, }
+  mrg.refresh_datasource { dsk, }
+  dsk = 'demo'
+  mrg.html.statements.insert_datasource.run { dsk, url: 'ram:', digest: null, }
+  mrg.html._append_tag dsk, '^', 'path', { id: 'c1', d: 'M100,100L200,200', }
+  mrg.html._append_tag dsk, '<', 'div', { id: 'c1', class: 'foo bar', }
+  mrg.html._append_tag dsk, '^', '$text', null, "helo"
+  mrg.html._append_tag dsk, '>', 'div'
+  mrg.html._append_tag dsk, '^', 'mrg:loc#baselines'
+  #.........................................................................................................
+  db.setv 'dsk', 'demo'
+  H.tabulate "#{prefix}h_datasources",      db SQL"select * from #{prefix}h_datasources;"
+  H.tabulate "#{prefix}h_mirror",           db SQL"select * from #{prefix}h_mirror;"
+  H.tabulate "#{prefix}h_atrs",             db SQL"select * from #{prefix}h_atrs;"
+  H.tabulate "std_variables()",             db SQL"select * from std_variables();"
+  H.tabulate "#{prefix}h_tags_and_html",    db SQL"select * from #{prefix}h_tags_and_html;"
+  H.banner "render_dsk";                    echo mrg.html.render_dsk { dsk, }
+  return null
+
+
 
 
 ############################################################################################################
 if require.main is module then do =>
   # @demo_html_generation()
   # @demo_datamill()
-  @demo_htmlish()
+  # @demo_htmlish()
+  @demo_html_parsing()
 
