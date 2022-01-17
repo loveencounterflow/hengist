@@ -99,6 +99,7 @@
       'mrg:loc#baselines'],
       '<mrg:loc#baselines/>',
       null],
+      // [ [ '^', '$text' ], '<mrg:loc#baselines/>', null ]
       [['>',
       'foo'],
       '</foo>',
