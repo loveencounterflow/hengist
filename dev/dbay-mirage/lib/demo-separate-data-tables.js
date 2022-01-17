@@ -332,11 +332,11 @@
     mrg.html._append_tag(dsk, '^', 'mrg:loc#baselines');
     //.........................................................................................................
     db.setv('dsk', 'demo');
-    H.tabulate(`${prefix}h_datasources`, db(SQL`select * from ${prefix}h_datasources;`));
-    H.tabulate(`${prefix}h_mirror`, db(SQL`select * from ${prefix}h_mirror;`));
-    H.tabulate(`${prefix}h_atrs`, db(SQL`select * from ${prefix}h_atrs;`));
+    H.tabulate(`${prefix}_html_datasources`, db(SQL`select * from ${prefix}_html_datasources;`));
+    H.tabulate(`${prefix}_html_mirror`, db(SQL`select * from ${prefix}_html_mirror;`));
+    H.tabulate(`${prefix}_html_atrs`, db(SQL`select * from ${prefix}_html_atrs;`));
     H.tabulate("std_variables()", db(SQL`select * from std_variables();`));
-    H.tabulate(`${prefix}h_tags_and_html`, db(SQL`select * from ${prefix}h_tags_and_html;`));
+    H.tabulate(`${prefix}_html_tags_and_html`, db(SQL`select * from ${prefix}_html_tags_and_html;`));
     H.banner("render_dsk");
     echo(mrg.html.render_dsk({dsk}));
     return null;
