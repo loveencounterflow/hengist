@@ -143,6 +143,7 @@ HTMLISH = new Htmlish()
   H.tabulate "#{prefix}_parlnrs0",      db SQL"select * from #{prefix}_parlnrs0;"
   H.tabulate "#{prefix}_parlnrs",       db SQL"select * from #{prefix}_parlnrs;"
   H.tabulate "#{prefix}_parmirror",     db SQL"select * from #{prefix}_parmirror;"
+  # H.tabulate "#{prefix}_datasources",   db SQL"select * from #{prefix}_datasources;"
   # H.tabulate "mrg.walk_line_rows()",  mrg.walk_line_rows { dsk, }
   # H.tabulate "mrg.walk_par_rows()",   mrg.walk_par_rows { dsk, }
   #.........................................................................................................
@@ -188,13 +189,9 @@ normalize_tokens = ( tokens ) ->
   mrg             = new Mrg { db, prefix, }
   mrg.html        = new Html { mrg, prefix, }
   db.create_stdlib()
-  dsk       = 'twcm'
-  path      = 'dbay-rustybuzz/htmlish-tags.html'
-  path      = PATH.resolve PATH.join __dirname, '../../../assets', path
-  mrg.register_dsk { dsk, path, }
-  mrg.refresh_datasource { dsk, }
-  dsk = 'demo'
-  mrg.html.statements.insert_datasource.run { dsk, url: 'ram:', digest: null, }
+  dsk       = 'demo'
+  mrg.register_dsk { dsk, url: 'live:', }
+  # mrg.html.statements.insert_datasource.run { dsk, url: 'ram:', digest: null, }
   mrg.html._append_tag dsk, '^', 'path', { id: 'c1', d: 'M100,100L200,200', }
   mrg.html._append_tag dsk, '<', 'div', { id: 'c1', class: 'foo bar', }
   mrg.html._append_tag dsk, '^', '$text', null, "helo"
@@ -217,6 +214,6 @@ normalize_tokens = ( tokens ) ->
 if require.main is module then do =>
   # @demo_html_generation()
   # @demo_datamill()
-  # @demo_htmlish()
-  @demo_html_parsing()
+  @demo_htmlish()
+  # @demo_html_parsing()
 
