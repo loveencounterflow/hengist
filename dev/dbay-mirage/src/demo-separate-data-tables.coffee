@@ -62,49 +62,7 @@ H                         = require '../../../lib/helpers'
   urge '^474^', oln, rpr txt for { oln, txt, } from mrg.walk_line_rows { dsk, }
   return null
 
-#===========================================================================================================
-#
 #-----------------------------------------------------------------------------------------------------------
-HTML                      = ( require 'paragate/lib/htmlish.grammar' ).new_grammar { bare: true, }
-
-#-----------------------------------------------------------------------------------------------------------
-class Htmlish
-
-  # #---------------------------------------------------------------------------------------------------------
-  # constructor: ->
-  #   return undefined
-
-  #---------------------------------------------------------------------------------------------------------
-  parse: ( text ) ->
-    tokens    = HTML.parse text
-    R         = lets tokens, ( tokens ) =>
-      for d, idx in tokens
-        # warn '^44564976^', d if d.$key is '^error'
-        if ( d.$key is '<tag' )
-          if ( d.type is 'otag' )
-            if ( /^<\s+/.test d.text )
-              @_as_error d, '^ð1^', 'xtraows', "extraneous whitespace before tag name"
-        else if ( d.$key is '>tag' )
-          if ( d.type is 'ctag' )
-            if( /^<\s*\/\s+/.test d.text ) or ( /^<\s+\/\s*/.test d.text )
-              @_as_error d, '^ð2^', 'xtracws', "extraneous whitespace in closing tag"
-        else if ( d.$key is '^text' )
-          if ( /(?<!\\)[<&]/.test d.text )
-            @_as_error d, '^ð1^', 'bareachrs', "bare active characters"
-      return null
-    return R
-
-  #---------------------------------------------------------------------------------------------------------
-  _as_error: ( token, ref, code, message ) ->
-    token.$key    = '^error'
-    token.origin  = 'htmlish'
-    token.code    = code
-    token.message = message
-    token.$       = ref
-    return null
-
-
-HTMLISH = new Htmlish()
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_htmlish = ( cfg ) ->
