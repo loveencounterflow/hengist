@@ -354,11 +354,32 @@ guy                       = require '../../../apps/guy'
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "URL/path conversion" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay  } = require '../../../apps/dbay'
+  { Mrg   } = require '../../../apps/dbay-mirage/lib/main2'
+  db        = new DBay()
+  mrg       = new Mrg { db, }
+  probes_and_matchers = [
+    [ '/foo.txt', [ 'file:///foo.txt', '/foo.txt' ], null ]
+    [ '/foo.txt', [ 'file:///foo.txt', '/foo.txt' ], null ]
+    [ '/some weird path.jpg', [ 'file:///some%20weird%20path.jpg', '/some weird path.jpg' ], null ]
+    [ '/some weird path.jpg#oops', [ 'file:///some%20weird%20path.jpg%23oops', '/some weird path.jpg#oops' ], null ]
+    [ '/path/with/folders/to/file.txt', [ 'file:///path/with/folders/to/file.txt', '/path/with/folders/to/file.txt' ], null ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      url    = mrg._url_from_path probe
+      path   = mrg._path_from_url url
+      # urge { probe, url, path, }
+      resolve [ url, path, ]
+  return done?()
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # test @[ "altering mirrored source lines causes error" ]
   # @[ "altering mirrored source lines causes error" ]()
   # test @[ "location marker matching" ]
@@ -369,4 +390,4 @@ if require.main is module then do =>
   # test @[ "loc markers 4" ]
   # test @[ "extended location marker matching" ]
   # test @[ "multiple loc markers in one line" ]
-
+  test @[ "URL/path conversion" ]

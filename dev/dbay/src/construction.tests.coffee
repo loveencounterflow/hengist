@@ -134,7 +134,8 @@ guy                       = require '../../../apps/guy'
 if require.main is module then do =>
   # test @
   # test @[ "DBAY _get-autolocation" ]
-  test @[ "DBAY constructor arguments 1" ]
+  # test @[ "DBAY constructor arguments 1" ]
+  test @[ "DBAY URL/path conversion" ]
   # test @[ "xxx" ]
   # test @[ "DBAY instance has two connections" ]
   # test @[ "DBAY instance non-enumerable properties" ]
