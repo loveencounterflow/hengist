@@ -144,8 +144,8 @@ normalize_tokens = ( tokens ) ->
   db.create_stdlib()
   # dsk       = 'demo'
   # mrg.register_dsk { dsk, url: 'live:', }
-  dsk       = 'twcm'
-  path      = 'dbay-rustybuzz/htmlish-tags.html'
+  # dsk       = 'twcm'; path = 'dbay-rustybuzz/htmlish-tags.html'
+  dsk       = 'ne'; path = 'dbay-rustybuzz/no-errors.html'
   path      = PATH.resolve PATH.join __dirname, '../../../assets', path
   mrg.register_dsk { dsk, path, }
   mrg.refresh_datasource { dsk, }
