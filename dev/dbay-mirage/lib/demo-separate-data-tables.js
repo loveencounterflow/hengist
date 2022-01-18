@@ -49,7 +49,7 @@
   this.demo_datamill = function(cfg) {
     var DBay, Mrg, db, dsk, mrg, oln, path, ref, txt, x;
     ({DBay} = require('../../../apps/dbay'));
-    ({Mrg} = require('../../../apps/dbay-mirage/lib/main2'));
+    ({Mrg} = require('../../../apps/dbay-mirage'));
     db = new DBay();
     mrg = new Mrg({db});
     db.create_stdlib();
@@ -111,7 +111,7 @@
   this.demo_paragraphs_etc = function(cfg) {
     var DBay, Mrg, db, dsk, mrg, path, prefix;
     ({DBay} = require('../../../apps/dbay'));
-    ({Mrg} = require('../../../apps/dbay-mirage/lib/main2'));
+    ({Mrg} = require('../../../apps/dbay-mirage'));
     prefix = 'mrg';
     db = new DBay();
     mrg = new Mrg({db, prefix});
@@ -240,7 +240,7 @@
   this.demo_html_parsing = function(cfg) {
     var DBay, Html, Mrg, db, dsk, mrg, path, prefix;
     ({DBay} = require('../../../apps/dbay'));
-    ({Mrg} = require('../../../apps/dbay-mirage/lib/main2'));
+    ({Mrg} = require('../../../apps/dbay-mirage'));
     ({Html} = require('../../../apps/dbay-mirage/lib/html'));
     prefix = 'mrg';
     db = new DBay();
