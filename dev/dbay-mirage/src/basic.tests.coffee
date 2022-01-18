@@ -76,28 +76,29 @@ guy                       = require '../../../apps/guy'
   path      = PATH.resolve PATH.join __dirname, '../../../assets', path
   mrg.register_dsk { dsk, path, }
   mrg.refresh_datasource { dsk, }
-  console.table db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;"
-  rows_before = db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;"
+  rows_before = db.all_rows SQL"select * from mrg_mirror order by dsk, oln, trk, pce;"
+  console.table rows_before
   #.........................................................................................................
   do =>
     error = null
     try
       db SQL"""insert into mrg_mirror
-        ( dsk, lnr, lnpart, xtra, locid, line )
-        values ( $dsk, $lnr, $lnpart, $xtra, $locid, $line )""", {
+        ( dsk, oln, trk, pce, txt )
+        values ( $dsk, $oln, $trk, $pce, $txt )""", {
           dsk:      dsk,
-          lnr:      10,
-          lnpart:   0,
-          xtra:     0,
-          locid:    null,
-          line:     "some text", }
+          oln:      10,
+          trk:      1,
+          pce:      0,
+          txt:      "some text", }
     catch error
       warn CND.reverse error.message
-      T?.ok ( /not allowed to modify table mrg_mirror/ ).test error.message
+      throw error unless ( /not allowed to modify table mrg_mirror/ ).test error.message
+      T?.ok true
     T?.ok error?
   #.........................................................................................................
-  console.table db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;"
-  rows_after = db.all_rows SQL"select * from mrg_mirror order by dsk, lnr, lnpart;"
+  rows_after = db.all_rows SQL"select * from mrg_mirror order by dsk, oln, trk, pce;"
+  console.table rows_after
+  # debug types.equals rows_before, rows_after
   T?.eq rows_before, rows_after
   #.........................................................................................................
   done?()
