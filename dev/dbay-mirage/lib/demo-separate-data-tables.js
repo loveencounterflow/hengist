@@ -243,7 +243,10 @@
     ({Mrg} = require('../../../apps/dbay-mirage'));
     ({Html} = require('../../../apps/dbay-mirage/lib/html'));
     prefix = 'mrg';
-    db = new DBay();
+    db = new DBay({
+      path: '/dev/shm/demo-html-parsing.sqlite',
+      recreate: true
+    });
     mrg = new Mrg({db, prefix});
     mrg.html = new Html({mrg, prefix});
     db.create_stdlib();
