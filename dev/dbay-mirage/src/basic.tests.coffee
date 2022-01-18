@@ -107,7 +107,7 @@ guy                       = require '../../../apps/guy'
 @[ "URL/path conversion" ] = ( T, done ) ->
   # T?.halt_on_error()
   { DBay  } = require '../../../apps/dbay'
-  { Mrg   } = require '../../../apps/dbay-mirage/lib/main2'
+  { Mrg   } = require '../../../apps/dbay-mirage'
   db        = new DBay()
   mrg       = new Mrg { db, }
   probes_and_matchers = [

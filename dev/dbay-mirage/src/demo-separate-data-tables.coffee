@@ -37,7 +37,7 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @demo_datamill = ( cfg ) ->
   { DBay }        = require '../../../apps/dbay'
-  { Mrg }         = require '../../../apps/dbay-mirage/lib/main2'
+  { Mrg }         = require '../../../apps/dbay-mirage'
   db              = new DBay()
   mrg             = new Mrg { db, }
   db.create_stdlib()
@@ -65,7 +65,7 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @demo_paragraphs_etc = ( cfg ) ->
   { DBay }        = require '../../../apps/dbay'
-  { Mrg }         = require '../../../apps/dbay-mirage/lib/main2'
+  { Mrg }         = require '../../../apps/dbay-mirage'
   prefix          = 'mrg'
   db              = new DBay()
   mrg             = new Mrg { db, prefix, }
@@ -135,7 +135,7 @@ normalize_tokens = ( tokens ) ->
 #-----------------------------------------------------------------------------------------------------------
 @demo_html_parsing = ( cfg ) ->
   { DBay }        = require '../../../apps/dbay'
-  { Mrg }         = require '../../../apps/dbay-mirage/lib/main2'
+  { Mrg }         = require '../../../apps/dbay-mirage'
   { Html }        = require '../../../apps/dbay-mirage/lib/html'
   prefix          = 'mrg'
   db              = new DBay()
