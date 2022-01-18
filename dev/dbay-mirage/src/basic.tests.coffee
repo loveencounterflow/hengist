@@ -129,7 +129,6 @@ guy                       = require '../../../apps/guy'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # test @[ "altering mirrored source lines causes error" ]
   # @[ "altering mirrored source lines causes error" ]()
-  test @[ "URL/path conversion" ]
