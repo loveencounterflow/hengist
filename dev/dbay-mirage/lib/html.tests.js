@@ -59,8 +59,11 @@
     // debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c3 x='"Q"'></title>""", }
     // debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c4 x="'Q'"></title>""", }
     text = `<title id=c1 x="Q"></title>
+
 <title id=c2 x='Q'></title>
+
 <title id=c3 x='"Q"'></title>
+
 <title id=c4 x="'Q'"></title>`;
     mrg.append_text({
       dsk,
@@ -79,7 +82,7 @@
     and ( m.typ = '<' )
     and ( m.tag = 'title' )
     and ( a.k   = 'x' )
-  order by m.tid;`));
+  order by m.dsk, m.oln, m.trk, m.pce;`));
     result = db.all_first_values(SQL`select
     v
   from ${prefix}_html_mirror as m
@@ -88,7 +91,7 @@
     and ( m.typ = '<' )
     and ( m.tag = 'title' )
     and ( a.k   = 'x' )
-  order by m.tid;`);
+  order by m.dsk, m.oln, m.trk, m.pce;`);
     if (T != null) {
       T.eq(result, ['Q', 'Q', '"Q"', "'Q'"]);
     }
@@ -98,12 +101,12 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "altering mirrored source lines causes error" ]
+      // @[ "altering mirrored source lines causes error" ]()
+      return this["Mirage HTML: quotes in attribute values"]();
     })();
   }
-
-  // test @[ "altering mirrored source lines causes error" ]
-// @[ "altering mirrored source lines causes error" ]()
 
 }).call(this);
 
