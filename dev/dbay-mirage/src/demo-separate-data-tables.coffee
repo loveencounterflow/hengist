@@ -48,11 +48,11 @@ H                         = require '../../../lib/helpers'
   mrg.register_dsk { dsk, path, }
   mrg.refresh_datasource { dsk, }
   db.setv 'allow_change_on_mirror', 1
-  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 2, pce: 1, txt: """something""", }
+  db mrg.sql.insert_trk_line, { dsk, oln: 2, trk: 2, pce: 1, txt: """something""", }
   mrg.deactivate { dsk, oln: 2, trk: 2, }
-  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 3, pce: 1, txt: """<div>""", }
-  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 3, pce: 2, txt: """inserted content""", }
-  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 3, pce: 3, txt: """</div>""", }
+  db mrg.sql.insert_trk_line, { dsk, oln: 2, trk: 3, pce: 1, txt: """<div>""", }
+  db mrg.sql.insert_trk_line, { dsk, oln: 2, trk: 3, pce: 2, txt: """inserted content""", }
+  db mrg.sql.insert_trk_line, { dsk, oln: 2, trk: 3, pce: 3, txt: """</div>""", }
   #.........................................................................................................
   db.setv 'dsk', dsk
   H.tabulate 'mrg_datasources', db SQL"select * from mrg_datasources;"
@@ -76,19 +76,19 @@ H                         = require '../../../lib/helpers'
   mrg.register_dsk { dsk, path, }
   mrg.refresh_datasource { dsk, }
   #.........................................................................................................
-  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 2, pce: 1, txt: """something""", }
+  db mrg.sql.insert_trk_line, { dsk, oln: 2, trk: 2, pce: 1, txt: """something""", }
   mrg.deactivate { dsk, oln: 2, trk: 2, }
-  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 3, pce: 1, txt: """<div>""", }
-  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 3, pce: 2, txt: """inserted content""", }
-  db mrg.sql.insert_lnpart, { dsk, oln: 2, trk: 3, pce: 3, txt: """</div>""", }
+  db mrg.sql.insert_trk_line, { dsk, oln: 2, trk: 3, pce: 1, txt: """<div>""", }
+  db mrg.sql.insert_trk_line, { dsk, oln: 2, trk: 3, pce: 2, txt: """inserted content""", }
+  db mrg.sql.insert_trk_line, { dsk, oln: 2, trk: 3, pce: 3, txt: """</div>""", }
   try
     db.setv 'allow_change_on_mirror', 1
     # mrg.deactivate { dsk, oln: 10, trk: 1, }
   finally
     db.setv 'allow_change_on_mirror', 0
-  db mrg.sql.insert_lnpart, { dsk, oln: 11, trk: 2, pce: 1, txt: '', }
-  db mrg.sql.insert_lnpart, { dsk, oln: 11, trk: 2, pce: 2, txt: """generated paragraph""", }
-  db mrg.sql.insert_lnpart, { dsk, oln: 11, trk: 2, pce: 3, txt: '', }
+  db mrg.sql.insert_trk_line, { dsk, oln: 11, trk: 2, pce: 1, txt: '', }
+  db mrg.sql.insert_trk_line, { dsk, oln: 11, trk: 2, pce: 2, txt: """generated paragraph""", }
+  db mrg.sql.insert_trk_line, { dsk, oln: 11, trk: 2, pce: 3, txt: '', }
   #.........................................................................................................
   H.tabulate "#{prefix}_mirror",        db SQL"select * from #{prefix}_mirror           order by dsk, oln, trk, pce;"
   # H.tabulate "#{prefix}_mirror (act)",  db SQL"select * from #{prefix}_mirror where act order by dsk, oln, trk, pce;"
