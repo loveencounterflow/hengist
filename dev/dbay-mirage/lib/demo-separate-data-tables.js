@@ -60,7 +60,7 @@
     mrg.register_dsk({dsk, path});
     mrg.refresh_datasource({dsk});
     db.setv('allow_change_on_mirror', 1);
-    db(mrg.sql.insert_lnpart, {
+    db(mrg.sql.insert_trk_line, {
       dsk,
       oln: 2,
       trk: 2,
@@ -72,21 +72,21 @@
       oln: 2,
       trk: 2
     });
-    db(mrg.sql.insert_lnpart, {
+    db(mrg.sql.insert_trk_line, {
       dsk,
       oln: 2,
       trk: 3,
       pce: 1,
       txt: `<div>`
     });
-    db(mrg.sql.insert_lnpart, {
+    db(mrg.sql.insert_trk_line, {
       dsk,
       oln: 2,
       trk: 3,
       pce: 2,
       txt: `inserted content`
     });
-    db(mrg.sql.insert_lnpart, {
+    db(mrg.sql.insert_trk_line, {
       dsk,
       oln: 2,
       trk: 3,
@@ -122,7 +122,7 @@
     mrg.register_dsk({dsk, path});
     mrg.refresh_datasource({dsk});
     //.........................................................................................................
-    db(mrg.sql.insert_lnpart, {
+    db(mrg.sql.insert_trk_line, {
       dsk,
       oln: 2,
       trk: 2,
@@ -134,21 +134,21 @@
       oln: 2,
       trk: 2
     });
-    db(mrg.sql.insert_lnpart, {
+    db(mrg.sql.insert_trk_line, {
       dsk,
       oln: 2,
       trk: 3,
       pce: 1,
       txt: `<div>`
     });
-    db(mrg.sql.insert_lnpart, {
+    db(mrg.sql.insert_trk_line, {
       dsk,
       oln: 2,
       trk: 3,
       pce: 2,
       txt: `inserted content`
     });
-    db(mrg.sql.insert_lnpart, {
+    db(mrg.sql.insert_trk_line, {
       dsk,
       oln: 2,
       trk: 3,
@@ -161,21 +161,21 @@
       // mrg.deactivate { dsk, oln: 10, trk: 1, }
       db.setv('allow_change_on_mirror', 0);
     }
-    db(mrg.sql.insert_lnpart, {
+    db(mrg.sql.insert_trk_line, {
       dsk,
       oln: 11,
       trk: 2,
       pce: 1,
       txt: ''
     });
-    db(mrg.sql.insert_lnpart, {
+    db(mrg.sql.insert_trk_line, {
       dsk,
       oln: 11,
       trk: 2,
       pce: 2,
       txt: `generated paragraph`
     });
-    db(mrg.sql.insert_lnpart, {
+    db(mrg.sql.insert_trk_line, {
       dsk,
       oln: 11,
       trk: 2,
@@ -280,10 +280,11 @@
     (() => {
       // @demo_html_generation()
       // @demo_datamill()
-      // @demo_paragraphs_etc()
-      return this.demo_html_parsing();
+      return this.demo_paragraphs_etc();
     })();
   }
+
+  // @demo_html_parsing()
 
 }).call(this);
 

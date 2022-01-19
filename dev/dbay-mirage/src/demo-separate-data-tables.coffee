@@ -172,6 +172,6 @@ normalize_tokens = ( tokens ) ->
 if require.main is module then do =>
   # @demo_html_generation()
   # @demo_datamill()
-  # @demo_paragraphs_etc()
-  @demo_html_parsing()
+  @demo_paragraphs_etc()
+  # @demo_html_parsing()
 
