@@ -25,6 +25,7 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 SQL                       = String.raw
 guy                       = require '../../../apps/guy'
+H                         = require '../../../lib/helpers'
 
 
 
@@ -35,10 +36,45 @@ guy                       = require '../../../apps/guy'
   { Mrg   } = require '../../../apps/dbay-mirage'
   db        = new DBay()
   mrg       = new Mrg { db, }
+  prefix    = 'mrg'
   probes_and_matchers = []
   dsk       = 'quotedattributes'
   mrg.register_dsk { dsk, url: 'live:', }
-  mrg.append_text { dsk, trk: 1, text: """<title id=maintitle x='"quoted"'></title>""", }
+  # debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c1 x="Q"></title>""", }
+  # debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c2 x='Q'></title>""", }
+  # debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c3 x='"Q"'></title>""", }
+  # debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c4 x="'Q'"></title>""", }
+  text = """
+    <title id=c1 x="Q"></title>
+    <title id=c2 x='Q'></title>
+    <title id=c3 x='"Q"'></title>
+    <title id=c4 x="'Q'"></title>"""
+  mrg.append_text { dsk, trk: 1, text, }
+  mrg.html.parse_dsk { dsk, }
+  H.tabulate "#{prefix}_mirror",              db SQL"select * from #{prefix}_mirror;"
+  H.tabulate "#{prefix}_html_mirror",         db SQL"select * from #{prefix}_html_mirror;"
+  H.tabulate "#{prefix}_html_tags_and_html",  db SQL"select * from #{prefix}_html_tags_and_html;"
+  H.tabulate "#{prefix}_tags_and_atrs", db SQL"""
+    select
+        *
+      from #{prefix}_html_mirror as m
+      join #{prefix}_html_atrs as a using ( atrid )
+      where true
+        and ( m.typ = '<' )
+        and ( m.tag = 'title' )
+        and ( a.k   = 'x' )
+      order by m.tid;"""
+  result = db.all_first_values SQL"""
+    select
+        v
+      from #{prefix}_html_mirror as m
+      join #{prefix}_html_atrs as a using ( atrid )
+      where true
+        and ( m.typ = '<' )
+        and ( m.tag = 'title' )
+        and ( a.k   = 'x' )
+      order by m.tid;"""
+  T?.eq result, [ 'Q', 'Q', '"Q"', "'Q'" ]
   # for [ probe, matcher, error, ] in probes_and_matchers
   #   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
   #     url    = mrg._url_from_path probe
