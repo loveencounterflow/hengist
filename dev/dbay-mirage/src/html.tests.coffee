@@ -46,8 +46,11 @@ H                         = require '../../../lib/helpers'
   # debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c4 x="'Q'"></title>""", }
   text = """
     <title id=c1 x="Q"></title>
+
     <title id=c2 x='Q'></title>
+
     <title id=c3 x='"Q"'></title>
+
     <title id=c4 x="'Q'"></title>"""
   mrg.append_text { dsk, trk: 1, text, }
   mrg.html.parse_dsk { dsk, }
@@ -63,7 +66,7 @@ H                         = require '../../../lib/helpers'
         and ( m.typ = '<' )
         and ( m.tag = 'title' )
         and ( a.k   = 'x' )
-      order by m.tid;"""
+      order by m.dsk, m.oln, m.trk, m.pce;"""
   result = db.all_first_values SQL"""
     select
         v
@@ -73,7 +76,7 @@ H                         = require '../../../lib/helpers'
         and ( m.typ = '<' )
         and ( m.tag = 'title' )
         and ( a.k   = 'x' )
-      order by m.tid;"""
+      order by m.dsk, m.oln, m.trk, m.pce;"""
   T?.eq result, [ 'Q', 'Q', '"Q"', "'Q'" ]
   # for [ probe, matcher, error, ] in probes_and_matchers
   #   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
@@ -86,6 +89,7 @@ H                         = require '../../../lib/helpers'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # test @[ "altering mirrored source lines causes error" ]
   # @[ "altering mirrored source lines causes error" ]()
+  @[ "Mirage HTML: quotes in attribute values" ]()
