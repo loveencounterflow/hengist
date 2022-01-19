@@ -238,17 +238,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_html_parsing = function(cfg) {
-    var DBay, Html, Mrg, db, dsk, mrg, path, prefix;
+    var DBay, Mrg, db, dsk, mrg, path, prefix;
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage'));
-    ({Html} = require('../../../apps/dbay-mirage/lib/html'));
     prefix = 'mrg';
     db = new DBay({
       path: '/dev/shm/demo-html-parsing.sqlite',
       recreate: true
     });
     mrg = new Mrg({db, prefix});
-    mrg.html = new Html({mrg, prefix});
     db.create_stdlib();
     // dsk       = 'demo'
     // mrg.register_dsk { dsk, url: 'live:', }

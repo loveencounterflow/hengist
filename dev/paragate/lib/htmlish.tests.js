@@ -1451,6 +1451,28 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["HTML: quotes in attribute values"] = async function(T, done) {
+    var HTML, error, grammar, i, len, matcher, probe, probes_and_matchers;
+    HTML = require('../../../apps/paragate/lib/htmlish.grammar');
+    grammar = new HTML.new_grammar({
+      bare: true
+    });
+    probes_and_matchers = [['<div x=1>', '1'], ['<div x="1">', '1'], ["<div x='1'>", '1'], [`<div x='"1"'>`, '"1"'], [`<div x="'1'">`, "'1'"], [`<div x="'">`, "'"], [`<div x='"'>`, '"'], [`<div x>`, true]];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          var ref, ref1, ref2;
+          return resolve((ref = grammar.parse(probe)) != null ? (ref1 = ref[0]) != null ? (ref2 = ref1.atrs) != null ? ref2.x : void 0 : void 0 : void 0);
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   // #-----------------------------------------------------------------------------------------------------------
   // @[ "HTML.$datoms_from_html" ] = ( T, done ) ->
   //   INTERTEXT                 = require '../..'
@@ -2041,7 +2063,8 @@
       // test @[ "HTML._parse_compact_tagname" ]
       // test @[ "parse_compact_tagname 2" ]
       // test @[ "HTML: parse (dubious)" ]
-      return test(this["HTML: parse escaped"]);
+      // test @[ "HTML: parse escaped" ]
+      return test(this["HTML: quotes in attribute values"]);
     })();
   }
 
