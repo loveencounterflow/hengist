@@ -208,6 +208,27 @@ GUY                       = require '../../../apps/guy'
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "HTML: quotes in attribute values" ] = ( T, done ) ->
+  HTML    = require '../../../apps/paragate/lib/htmlish.grammar'
+  grammar = new HTML.new_grammar { bare: true, }
+  probes_and_matchers = [
+    [ '<div x=1>', '1' ]
+    [ '<div x="1">', '1' ]
+    [ "<div x='1'>", '1' ]
+    [ """<div x='"1"'>""", '"1"' ]
+    [ """<div x="'1'">""", "'1'" ]
+    [ """<div x="'">""", "'" ]
+    [ """<div x='"'>""", '"' ]
+    [ """<div x>""", true ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      resolve ( grammar.parse probe )?[ 0 ]?.atrs?.x
+  #.........................................................................................................
+  done()
+  return null
+
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "HTML.$datoms_from_html" ] = ( T, done ) ->
 #   INTERTEXT                 = require '../..'
@@ -721,7 +742,8 @@ if module is require.main then do => # await do =>
   # test @[ "HTML._parse_compact_tagname" ]
   # test @[ "parse_compact_tagname 2" ]
   # test @[ "HTML: parse (dubious)" ]
-  test @[ "HTML: parse escaped" ]
+  # test @[ "HTML: parse escaped" ]
+  test @[ "HTML: quotes in attribute values" ]
 
 
 
