@@ -25,20 +25,22 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 SQL                       = String.raw
 guy                       = require '../../../apps/guy'
+H                         = require '../../../lib/helpers'
 
 
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "mrg.refresh_datasource" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { DBay  } = require '../../../apps/dbay'
-  { Mrg   } = require '../../../apps/dbay-mirage'
-  db        = new DBay()
-  mrg       = new Mrg { db, }
-  dsk       = 'sp'
-  path      = 'short-proposal.mkts.md'
-  path      = PATH.resolve PATH.join __dirname, '../../../assets', path
+  { DBay    } = require '../../../apps/dbay'
+  { Mrg     } = require '../../../apps/dbay-mirage'
+  db          = new DBay()
+  mrg         = new Mrg { db, }
+  dsk         = 'sp'
+  path        = 'short-proposal.mkts.md'
+  path        = PATH.resolve PATH.join __dirname, '../../../assets', path
   mrg.register_dsk { dsk, path, }
+  { prefix  } = mrg.cfg
   #.........................................................................................................
   do =>
     result  = mrg.refresh_datasource { dsk, }
@@ -60,6 +62,9 @@ guy                       = require '../../../apps/guy'
     result  = mrg.refresh_datasource { dsk, force: true, }
     debug '^44498^', result
     T?.eq result, { files: 1, bytes: 384 }
+  #.........................................................................................................
+  H.tabulate "#{prefix}_mirror",      db SQL"select * from #{prefix}_mirror order by dsk, oln, trk, pce;"
+  H.tabulate "#{prefix}_raw_mirror",  db SQL"select * from #{prefix}_raw_mirror order by dsk, oln, trk, pce;"
   #.........................................................................................................
   done?()
   return null
