@@ -161,10 +161,10 @@ normalize_tokens = ( tokens ) ->
   H.tabulate "#{prefix}_html_atrs",           db SQL"select * from #{prefix}_html_atrs;"
   # H.tabulate "std_variables()",               db SQL"select * from std_variables();"
   H.tabulate "#{prefix}_html_tags_and_html",  db SQL"select * from #{prefix}_html_tags_and_html;"
-  # H.tabulate "#{prefix}_parmirror",           db SQL"select * from #{prefix}_parmirror;"
+  H.tabulate "#{prefix}_parmirror",           db SQL"select * from #{prefix}_parmirror;"
+  H.tabulate "#{prefix}_mirror",              db SQL"select * from #{prefix}_mirror;"
   # H.banner "render_dsk";                      echo mrg.html.render_dsk { dsk, }
   return null
-
 
 
 
@@ -172,6 +172,6 @@ normalize_tokens = ( tokens ) ->
 if require.main is module then do =>
   # @demo_html_generation()
   # @demo_datamill()
-  @demo_paragraphs_etc()
-  # @demo_html_parsing()
+  # @demo_paragraphs_etc()
+  @demo_html_parsing()
 
