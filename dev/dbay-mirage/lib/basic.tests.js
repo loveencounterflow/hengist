@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -37,9 +37,11 @@
 
   guy = require('../../../apps/guy');
 
+  H = require('../../../lib/helpers');
+
   //-----------------------------------------------------------------------------------------------------------
   this["mrg.refresh_datasource"] = function(T, done) {
-    var DBay, Mrg, db, dsk, mrg, path;
+    var DBay, Mrg, db, dsk, mrg, path, prefix;
     // T?.halt_on_error()
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage'));
@@ -49,6 +51,7 @@
     path = 'short-proposal.mkts.md';
     path = PATH.resolve(PATH.join(__dirname, '../../../assets', path));
     mrg.register_dsk({dsk, path});
+    ({prefix} = mrg.cfg);
     (() => {      //.........................................................................................................
       var result;
       result = mrg.refresh_datasource({dsk});
@@ -89,6 +92,9 @@
         bytes: 384
       }) : void 0;
     })();
+    //.........................................................................................................
+    H.tabulate(`${prefix}_mirror`, db(SQL`select * from ${prefix}_mirror order by dsk, oln, trk, pce;`));
+    H.tabulate(`${prefix}_raw_mirror`, db(SQL`select * from ${prefix}_raw_mirror order by dsk, oln, trk, pce;`));
     if (typeof done === "function") {
       done();
     }
@@ -115,8 +121,8 @@
       error = null;
       try {
         db(SQL`insert into mrg_mirror
-( dsk, oln, trk, pce, txt )
-values ( $dsk, $oln, $trk, $pce, $txt )`, {
+( dsk, oln, trk, pce )
+values ( $dsk, $oln, $trk, $pce )`, {
           dsk: dsk,
           oln: 10,
           trk: 1,
@@ -175,12 +181,13 @@ values ( $dsk, $oln, $trk, $pce, $txt )`, {
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // @[ "mrg.refresh_datasource" ]()
+      // test @[ "mrg.refresh_datasource" ]
+      this["altering mirrored source lines causes error"]();
+      return test(this["altering mirrored source lines causes error"]);
     })();
   }
-
-  // test @[ "altering mirrored source lines causes error" ]
-// @[ "altering mirrored source lines causes error" ]()
 
 }).call(this);
 
