@@ -88,8 +88,8 @@ H                         = require '../../../lib/helpers'
     error = null
     try
       db SQL"""insert into mrg_mirror
-        ( dsk, oln, trk, pce, txt )
-        values ( $dsk, $oln, $trk, $pce, $txt )""", {
+        ( dsk, oln, trk, pce )
+        values ( $dsk, $oln, $trk, $pce )""", {
           dsk:      dsk,
           oln:      10,
           trk:      1,
@@ -134,6 +134,8 @@ H                         = require '../../../lib/helpers'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
-  # test @[ "altering mirrored source lines causes error" ]
-  # @[ "altering mirrored source lines causes error" ]()
+  # test @
+  # @[ "mrg.refresh_datasource" ]()
+  # test @[ "mrg.refresh_datasource" ]
+  @[ "altering mirrored source lines causes error" ]()
+  test @[ "altering mirrored source lines causes error" ]
