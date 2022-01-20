@@ -74,15 +74,6 @@
     H.tabulate(`${prefix}_mirror`, db(SQL`select * from ${prefix}_mirror;`));
     H.tabulate(`${prefix}_html_mirror`, db(SQL`select * from ${prefix}_html_mirror;`));
     H.tabulate(`${prefix}_html_tags_and_html`, db(SQL`select * from ${prefix}_html_tags_and_html;`));
-    H.tabulate(`${prefix}_tags_and_atrs`, db(SQL`select
-    *
-  from ${prefix}_html_mirror as m
-  join ${prefix}_html_atrs as a using ( atrid )
-  where true
-    and ( m.typ = '<' )
-    and ( m.tag = 'title' )
-    and ( a.k   = 'x' )
-  order by m.dsk, m.oln, m.trk, m.pce;`));
     result = db.all_first_values(SQL`select
     v
   from ${prefix}_html_mirror as m
