@@ -137,7 +137,8 @@ normalize_tokens = ( tokens ) ->
   { DBay }        = require '../../../apps/dbay'
   { Mrg }         = require '../../../apps/dbay-mirage'
   prefix          = 'mrg'
-  db              = new DBay { path: '/dev/shm/demo-html-parsing.sqlite', recreate: true, }
+  path            = PATH.join DBay.C.autolocation, 'demo-html-parsing.sqlite'
+  db              = new DBay { path, recreate: true, }
   mrg             = new Mrg { db, prefix, }
   db.create_stdlib()
   # dsk       = 'demo'
