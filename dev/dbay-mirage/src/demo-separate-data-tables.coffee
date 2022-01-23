@@ -165,6 +165,7 @@ normalize_tokens = ( tokens ) ->
   H.tabulate "#{prefix}_parmirror",           db SQL"select * from #{prefix}_parmirror;"
   H.tabulate "#{prefix}_mirror",              db SQL"select * from #{prefix}_mirror;"
   # H.banner "render_dsk";                      echo mrg.html.render_dsk { dsk, }
+  urge '^3243^', "DB file at #{db.cfg.path}"
   return null
 
 
