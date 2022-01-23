@@ -122,11 +122,6 @@ matchers = freeze matchers
     T?.eq result, matcher
   #.........................................................................................................
   do =>
-    matcher = '669e730e533ff63af'
-    result  = guy.fs.get_content_hash path, { command: 'sha256sum', }
-    T?.eq result, matcher
-  #.........................................................................................................
-  do =>
     matcher = '2c24'
     result  = guy.fs.get_content_hash path, { length: 4, }
     T?.eq result, matcher
@@ -134,10 +129,10 @@ matchers = freeze matchers
   do =>
     error = null
     try result  = guy.fs.get_content_hash path, { length: 400, } catch error
-      T?.ok ( error.message.match /unable to generate hash of length 400 using sha1sum/ )?
+      T?.ok ( error.message.match /unable to generate hash of length 400 using/ )?
     T?.ok error?
   #.........................................................................................................
-  done()
+  done?()
   return null
 
 
@@ -147,6 +142,7 @@ if require.main is module then do =>
   test @, { timeout: 5000, }
   # test @[ "guy.fs.walk_circular_lines() can iterate given number of loops" ]
   # test @[ "guy.fs.get_content_hash" ]
+  # @[ "guy.fs.get_content_hash" ]()
   # test @[ "guy.props.def(), .hide()" ]
   # test @[ "guy.obj.pick_with_fallback()" ]
   # test @[ "guy.obj.pluck_with_fallback()" ]
