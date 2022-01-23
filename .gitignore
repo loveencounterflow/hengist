@@ -128,3 +128,4 @@ __pycache__/
 /data
 
 .~lock.*
+.DS_Store
