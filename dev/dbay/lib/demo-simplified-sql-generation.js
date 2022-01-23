@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, DBay2, FS, GUY, H, PATH, SQL, badge, debug, echo, equals, freeze, help, info, isa, lets, rpr, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, DBay2, FS, GUY, H, PATH, SQL, Sql, Sql2, badge, debug, echo, equals, freeze, help, info, isa, lets, rpr, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -45,7 +45,18 @@
 
   ({DBay} = require('../../../apps/dbay'));
 
+  ({Sql} = require('../../../apps/dbay/lib/sql'));
+
+  Sql2 = class Sql2 extends Sql {};
+
   DBay2 = class DBay2 extends DBay {
+    //---------------------------------------------------------------------------------------------------------
+    constructor(...P) {
+      super(...P);
+      this.sql = new Sql2();
+      return void 0;
+    }
+
     //---------------------------------------------------------------------------------------------------------
     get_primary_keys(cfg) {
       var R, i, len, row, schema;
@@ -81,6 +92,55 @@
       return R;
     }
 
+    //---------------------------------------------------------------------------------------------------------
+    _get_foreign_key_by_from_fields(cfg) {
+      var R, ref, row, schema;
+      ({schema} = this.cfg);
+      R = {};
+      ref = this.query(SQL`select 
+    "from"                      as from_field,
+    "table"                     as to_table,
+    coalesce( "to", "from" )    as to_field
+  from ${schema}.pragma_foreign_key_list( $table );`, cfg);
+      for (row of ref) {
+        R[row.from_field] = {
+          table: row.to_table,
+          field: row.to_field
+        };
+      }
+      return R;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    _get_primary_key_clause(cfg) {
+      var I, pk, pk_names, pks;
+      ({I} = this.sql);
+      pks = this.get_primary_keys(cfg);
+      pk_names = ((function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = pks.length; i < len; i++) {
+          pk = pks[i];
+          results.push(I(pk.field));
+        }
+        return results;
+      })()).join(', ');
+      return SQL`primary key ( ${pk_names} )`;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    _get_foreign_key_clauses(cfg) {
+      var I, R, field, from_field, ref, table;
+      ({I} = this.sql);
+      R = {};
+      ref = this._get_foreign_key_by_from_fields(cfg);
+      for (from_field in ref) {
+        ({table, field} = ref[from_field]);
+        R[from_field] = `references ${I(table)} ( ${I(field)} )`;
+      }
+      return R;
+    }
+
   };
 
   //===========================================================================================================
@@ -95,14 +155,18 @@
     db(SQL`create table a ( 
     foo float,
     bar float,
-    baz float,
+    baz float unique,
     nr integer,
   primary key ( nr ) );
 create table b ( 
     idx integer not null, 
-    b text, 
+    name text unique, 
   primary key ( idx ), 
-  foreign key ( idx ) references a ( nr ) );`);
+  foreign key ( idx ) references a ( nr ) );
+create table c (
+    x integer primary key references a ( nr ),
+    y text references b ( name ), 
+    z float references a ( baz ) );`);
     //.........................................................................................................
     // H.tabulate 'sqlite_schema', db SQL"select * from sqlite_schema;"
     H.tabulate("pragma_table_list()", db(SQL`select * from pragma_table_list();`));
@@ -125,6 +189,21 @@ create table b (
     }));
     H.tabulate("db.get_foreign_keys { table: 'mrg_raw_mirror', }", db.get_foreign_keys({
       table: 'mrg_raw_mirror'
+    }));
+    urge('^546^', db._get_primary_key_clause({
+      table: 'mrg_raw_mirror'
+    }));
+    urge('^546^', db._get_foreign_key_clauses({
+      table: 'mrg_raw_mirror'
+    }));
+    urge('^546^', db._get_primary_key_clause({
+      table: 'a'
+    }));
+    urge('^546^', db._get_primary_key_clause({
+      table: 'b'
+    }));
+    urge('^546^', db._get_foreign_key_clauses({
+      table: 'b'
     }));
     return null;
   };
