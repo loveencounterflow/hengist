@@ -49,3 +49,5 @@ pactl list sinks | grep 'Volume: f' | sed -E 's/^.*\s([0-9]+)%.*$/\1/g'
 */
 
 }).call(this);
+
+//# sourceMappingURL=main.js.map

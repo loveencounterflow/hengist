@@ -167,14 +167,6 @@
     })();
     (() => {      //.........................................................................................................
       var matcher, result;
-      matcher = '669e730e533ff63af';
-      result = guy.fs.get_content_hash(path, {
-        command: 'sha256sum'
-      });
-      return T != null ? T.eq(result, matcher) : void 0;
-    })();
-    (() => {      //.........................................................................................................
-      var matcher, result;
       matcher = '2c24';
       result = guy.fs.get_content_hash(path, {
         length: 4
@@ -191,13 +183,14 @@
       } catch (error1) {
         error = error1;
         if (T != null) {
-          T.ok((error.message.match(/unable to generate hash of length 400 using sha1sum/)) != null);
+          T.ok((error.message.match(/unable to generate hash of length 400 using/)) != null);
         }
       }
       return T != null ? T.ok(error != null) : void 0;
     })();
-    //.........................................................................................................
-    done();
+    if (typeof done === "function") {
+      done();
+    }
     return null;
   };
 
@@ -212,6 +205,7 @@
 
   // test @[ "guy.fs.walk_circular_lines() can iterate given number of loops" ]
 // test @[ "guy.fs.get_content_hash" ]
+// @[ "guy.fs.get_content_hash" ]()
 // test @[ "guy.props.def(), .hide()" ]
 // test @[ "guy.obj.pick_with_fallback()" ]
 // test @[ "guy.obj.pluck_with_fallback()" ]

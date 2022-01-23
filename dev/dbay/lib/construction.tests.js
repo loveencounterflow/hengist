@@ -69,10 +69,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY constructor arguments 1"] = async function(T, done) {
-    var DBay, DBay2, abspath, error, i, len, matcher, probe, probes_and_matchers, relpath, resolved_path, x;
+    var DBay, DBay2, abspath, autolocation, error, i, join, len, matcher, probe, probes_and_matchers, relpath, resolved_path, x;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     resolved_path = PATH.resolve(process.cwd(), 'mypath');
+    autolocation = (require('../../../apps/dbay/lib/helpers')).autolocation;
+    join = function(...P) {
+      return PATH.resolve(PATH.join(...P));
+    };
     DBay2 = (function() {
       class DBay2 extends DBay {};
 
@@ -97,7 +101,8 @@
           temporary: null
         },
         {
-          path: '/dev/shm/dbay-7388632709.sqlite',
+          path: join(autolocation,
+        'dbay-7388632709.sqlite'),
           temporary: true
         },
         null
@@ -109,7 +114,8 @@
           temporary: false
         },
         {
-          path: '/dev/shm/dbay-7388632709.sqlite',
+          path: join(autolocation,
+        'dbay-7388632709.sqlite'),
           temporary: false
         },
         null
@@ -121,7 +127,8 @@
           temporary: true
         },
         {
-          path: '/dev/shm/dbay-7388632709.sqlite',
+          path: join(autolocation,
+        'dbay-7388632709.sqlite'),
           temporary: true
         },
         null
@@ -253,14 +260,14 @@
     (() => {
       // test @
       // test @[ "DBAY _get-autolocation" ]
-      // test @[ "DBAY constructor arguments 1" ]
-      return test(this["DBAY URL/path conversion"]);
+      test(this["DBAY constructor arguments 1"]);
+      // test @[ "DBAY URL/path conversion" ]
+      // test @[ "xxx" ]
+      // test @[ "DBAY instance has two connections" ]
+      // test @[ "DBAY instance non-enumerable properties" ]
+      return xxx;
     })();
   }
-
-  // test @[ "xxx" ]
-// test @[ "DBAY instance has two connections" ]
-// test @[ "DBAY instance non-enumerable properties" ]
 
 }).call(this);
 

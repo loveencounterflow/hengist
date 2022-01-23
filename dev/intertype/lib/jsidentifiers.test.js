@@ -184,3 +184,5 @@
 // debug jsidentifier_pattern.test '5'
 
 }).call(this);
+
+//# sourceMappingURL=jsidentifiers.test.js.map

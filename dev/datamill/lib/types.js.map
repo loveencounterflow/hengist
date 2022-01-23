@@ -3,7 +3,7 @@
   "file": "",
   "sourceRoot": "",
   "sources": [
-    "/home/flow/jzr/hengist/dev/datamill/src/types.coffee"
+    "../src/types.coffee"
   ],
   "names": [],
   "mappings": "AAGA;EAAA;AAAA,MAAA,GAAA,EAAA,SAAA,EAAA,KAAA,EAAA,SAAA,EAAA,GAAA;;;EAIA,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,GAAA,GAA4B,GAAG,CAAC;;EAChC,KAAA,GAA4B,oBAN5B;;;;;;;;;;EAeA,SAAA,GAA4B,CAAE,OAAA,CAAQ,WAAR,CAAF,CAAuB,CAAC;;EACpD,SAAA,GAA4B,IAAI,SAAJ,CAAc,MAAM,CAAC,OAArB;;EAhB5B;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAAA",

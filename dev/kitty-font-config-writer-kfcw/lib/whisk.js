@@ -19,3 +19,5 @@
   });
 
 }).call(this);
+
+//# sourceMappingURL=whisk.js.map

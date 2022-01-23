@@ -242,8 +242,9 @@
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage'));
     prefix = 'mrg';
+    path = PATH.join(DBay.C.autolocation, 'demo-html-parsing.sqlite');
     db = new DBay({
-      path: '/dev/shm/demo-html-parsing.sqlite',
+      path,
       recreate: true
     });
     mrg = new Mrg({db, prefix});
