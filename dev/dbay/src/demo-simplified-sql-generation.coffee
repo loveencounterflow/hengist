@@ -31,9 +31,17 @@ H                         = require '../../../lib/helpers'
   freeze }                = GUY.lft
 { to_width }              = require 'to-width'
 { DBay }                  = require '../../../apps/dbay'
+{ Sql }                   = require '../../../apps/dbay/lib/sql'
 
+class Sql2 extends Sql
 
 class DBay2 extends DBay
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( P... ) ->
+    super P...
+    @sql = new Sql2  
+    return undefined
 
   #---------------------------------------------------------------------------------------------------------
   get_primary_keys: ( cfg ) ->
@@ -65,6 +73,34 @@ class DBay2 extends DBay
         order by seq;""", cfg
     return R
 
+  #---------------------------------------------------------------------------------------------------------
+  _get_foreign_key_by_from_fields: ( cfg ) ->
+    { schema  } = @cfg
+    R = {}
+    for row from @query SQL"""
+      select 
+          "from"                      as from_field,
+          "table"                     as to_table,
+          coalesce( "to", "from" )    as to_field
+        from #{schema}.pragma_foreign_key_list( $table );""", cfg
+      R[ row.from_field ] = { table: row.to_table, field: row.to_field, }
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  _get_primary_key_clause: ( cfg ) ->
+    { I     } = @sql
+    pks       = @get_primary_keys cfg 
+    pk_names  = ( I pk.field for pk in pks ).join ', '
+    return SQL"primary key ( #{pk_names} )"
+
+  #---------------------------------------------------------------------------------------------------------
+  _get_foreign_key_clauses: ( cfg ) ->
+    { I     } = @sql
+    R         = {}
+    for from_field, { table, field, } of @_get_foreign_key_by_from_fields cfg 
+      R[ from_field ] = "references #{I table} ( #{I field} )"
+    return R
+
 
 #===========================================================================================================
 #
@@ -78,14 +114,18 @@ class DBay2 extends DBay
     create table a ( 
         foo float,
         bar float,
-        baz float,
+        baz float unique,
         nr integer,
       primary key ( nr ) );
     create table b ( 
         idx integer not null, 
-        b text, 
+        name text unique, 
       primary key ( idx ), 
       foreign key ( idx ) references a ( nr ) );
+    create table c (
+        x integer primary key references a ( nr ),
+        y text references b ( name ), 
+        z float references a ( baz ) );
     """
   #.........................................................................................................
   # H.tabulate 'sqlite_schema', db SQL"select * from sqlite_schema;"
@@ -102,6 +142,11 @@ class DBay2 extends DBay
   H.tabulate "db.get_primary_keys { table: 'b', }", db.get_primary_keys { table: 'b', }
   H.tabulate "db.get_foreign_keys { table: 'b', }", db.get_foreign_keys { table: 'b', }
   H.tabulate "db.get_foreign_keys { table: 'mrg_raw_mirror', }", db.get_foreign_keys { table: 'mrg_raw_mirror', }
+  urge '^546^', db._get_primary_key_clause { table: 'mrg_raw_mirror', }
+  urge '^546^', db._get_foreign_key_clauses { table: 'mrg_raw_mirror', }
+  urge '^546^', db._get_primary_key_clause { table: 'a', }
+  urge '^546^', db._get_primary_key_clause { table: 'b', }
+  urge '^546^', db._get_foreign_key_clauses { table: 'b', }
   return null
 
 
