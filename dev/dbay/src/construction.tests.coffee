@@ -43,8 +43,10 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY constructor arguments 1" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { DBay }           = require H.dbay_path
-  resolved_path      = PATH.resolve process.cwd(), 'mypath'
+  { DBay }            = require H.dbay_path
+  resolved_path       = PATH.resolve process.cwd(), 'mypath'
+  autolocation        = ( require '../../../apps/dbay/lib/helpers' ).autolocation
+  join                = ( P... ) -> PATH.resolve PATH.join P...
   class DBay2 extends DBay
     @_skip_sqlt:    true
   #.........................................................................................................
@@ -56,9 +58,9 @@ guy                       = require '../../../apps/guy'
   probes_and_matchers = [
     #-------------------------------------------------------------------------------------------------------
     null
-    [ { random_seed: 1, random_delta: 1,  temporary: null   }, { path: '/dev/shm/dbay-7388632709.sqlite',   temporary: true  }, null ]
-    [ { random_seed: 1, random_delta: 1,  temporary: false  }, { path: '/dev/shm/dbay-7388632709.sqlite',   temporary: false }, null ]
-    [ { random_seed: 1, random_delta: 1,  temporary: true   }, { path: '/dev/shm/dbay-7388632709.sqlite',   temporary: true  }, null ]
+    [ { random_seed: 1, random_delta: 1,  temporary: null   }, { path: ( join autolocation, 'dbay-7388632709.sqlite' ),   temporary: true  }, null ]
+    [ { random_seed: 1, random_delta: 1,  temporary: false  }, { path: ( join autolocation, 'dbay-7388632709.sqlite' ),   temporary: false }, null ]
+    [ { random_seed: 1, random_delta: 1,  temporary: true   }, { path: ( join autolocation, 'dbay-7388632709.sqlite' ),   temporary: true  }, null ]
     [ { path: relpath,                    temporary: null,  }, { path: abspath,                             temporary: false }, null ]
     [ { path: relpath,                    temporary: false, }, { path: abspath,                             temporary: false }, null ]
     [ { path: relpath,                    temporary: true,  }, { path: abspath,                             temporary: true  }, null ]
@@ -134,8 +136,9 @@ guy                       = require '../../../apps/guy'
 if require.main is module then do =>
   # test @
   # test @[ "DBAY _get-autolocation" ]
-  # test @[ "DBAY constructor arguments 1" ]
-  test @[ "DBAY URL/path conversion" ]
+  test @[ "DBAY constructor arguments 1" ]
+  # test @[ "DBAY URL/path conversion" ]
   # test @[ "xxx" ]
   # test @[ "DBAY instance has two connections" ]
   # test @[ "DBAY instance non-enumerable properties" ]
+  xxx
