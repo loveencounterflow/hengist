@@ -38,6 +38,41 @@ H                         = require '../../../lib/helpers'
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
+@demo_two_kinds_of_foreign_keys = ( cfg ) ->
+  do =>
+    db              = new DBay()
+    db SQL"""
+      create table a (
+          nr    integer  not null primary key,
+          name  text     not null unique );
+      create table b (
+          nr    integer  not null,
+          name  text     not null,
+        foreign key ( nr, name ) references a ( nr, name ) );
+      """
+    db SQL"insert into a ( nr, name ) values ( 1, 'one' ), ( 2, 'two' );"
+    # SQL"insert into b ( nr, name ) values ( 1, 'one' ), ( 2, 'two' );"
+    # H.tabulate "select * from a;", db SQL"select * from a;"
+    # H.tabulate "select * from b;", db SQL"select * from b;"
+  do =>
+    db              = new DBay()
+    db SQL"""
+      create table a (
+          nr    integer  not null primary key,
+          name  text     not null unique );
+      create table b (
+          nr    integer  not null,
+          name  text     not null,
+        foreign key ( nr    ) references a ( nr   ),
+        foreign key ( name  ) references a ( name ) );
+      """
+    db SQL"insert into a ( nr, name ) values ( 1, 'one' ), ( 2, 'two' );"
+    db SQL"insert into b ( nr, name ) values ( 1, 'one' ), ( 2, 'two' );"
+    db SQL"insert into b ( nr, name ) values ( 1, 'two' );"
+    H.tabulate "select * from a;", db SQL"select * from a;"
+    H.tabulate "select * from b;", db SQL"select * from b;"
+  return null
+
 #-----------------------------------------------------------------------------------------------------------
 @demo_simplified_sql_generation = ( cfg ) ->
   { Mrg }         = require '../../../apps/dbay-mirage'
@@ -113,8 +148,8 @@ H                         = require '../../../lib/helpers'
 
 ############################################################################################################
 if module is require.main then do =>
-  @demo_simplified_sql_generation()
-
+  # @demo_simplified_sql_generation()
+  @demo_two_kinds_of_foreign_keys()
 
 
 
