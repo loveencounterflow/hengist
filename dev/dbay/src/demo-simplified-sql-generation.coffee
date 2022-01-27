@@ -38,48 +38,76 @@ H                         = require '../../../lib/helpers'
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------
 @demo_simplified_sql_generation = ( cfg ) ->
   { Mrg }         = require '../../../apps/dbay-mirage'
-  db              = new DBay2()
-  mrg             = new Mrg { db, }
+  db              = new DBay()
+  # mrg             = new Mrg { db, }
   #.........................................................................................................
   db SQL"""
-    create table a ( 
+    create table a (
+        nr integer,
         foo float,
         bar float,
         baz float unique,
-        nr integer,
+        this,
+        that any,
+        stealth integer hidden,
+        x421 integer generated always as ( 42 ) virtual,
+        x422 integer generated always as ( 42 ) stored,
+        x423 integer generated always as ( 42 ) stored,
       primary key ( nr ) );
-    create table b ( 
-        idx integer not null, 
-        name text unique, 
-      primary key ( idx ), 
-      foreign key ( idx ) references a ( nr ) );
+    create unique index athisthat on a ( this, that );
+    create table b (
+        idx integer not null,
+        name text unique,
+      primary key ( idx, name ),
+      -- foreign key ( idx ) references a ( nr ),
+      foreign key ( idx, name ) references a ( nr, baz ) );
+    create table b2 (
+        idx integer not null,
+        name text unique,
+      primary key ( idx, name ),
+      foreign key ( idx ) references a ( nr ),
+      foreign key ( name ) references a ( baz ) );
     create table c (
         x integer primary key references a ( nr ),
-        y text references b ( name ), 
+        y text references b ( name ),
         z float references a ( baz ) );
     """
   #.........................................................................................................
-  # H.tabulate 'sqlite_schema', db SQL"select * from sqlite_schema;"
+  # H.tabulate 'sqlite_schema', db SQL"select type, name, tbl_name from sqlite_schema;"
   H.tabulate "pragma_table_list()", db SQL"select * from pragma_table_list();"
-  H.tabulate "pragma_table_info( 'mrg_mirror' )", db SQL"select * from pragma_table_info( 'mrg_mirror' );"
-  H.tabulate "pragma_foreign_key_list( 'mrg_mirror' )", db SQL"select * from pragma_foreign_key_list( 'mrg_mirror' );"
-  H.tabulate "pragma_table_info( 'mrg_raw_mirror' )", db SQL"select * from pragma_table_info( 'mrg_raw_mirror' );"
-  H.tabulate "pragma_foreign_key_list( 'mrg_raw_mirror' )", db SQL"select * from pragma_foreign_key_list( 'mrg_raw_mirror' );"
-  H.tabulate "db.get_primary_keys { table: 'mrg_raw_mirror', }", db.get_primary_keys { table: 'mrg_raw_mirror', }
   H.tabulate "pragma_table_info( 'a' )", db SQL"select * from pragma_table_info( 'a' );"
-  H.tabulate "pragma_foreign_key_list( 'a' )", db SQL"select * from pragma_foreign_key_list( 'a' );"
-  H.tabulate "pragma_table_info( 'b' )", db SQL"select * from pragma_table_info( 'b' );"
+  H.tabulate "pragma_table_xinfo( 'a' )", db SQL"select * from pragma_table_xinfo( 'a' );"
+  H.tabulate "all the columns", db SQL"""
+      select
+          tl.schema         as schema,
+          tl.name           as table_name,
+          tl.type           as table_type,
+          -- tl.ncol           as tl_ncol,
+          -- tl.wr             as tl_wr, -- without rowid
+          -- tl.strict         as tl_strict,
+          ti.cid            as field_nr,
+          ti.name           as field_name,
+          case ti.type when '' then 'any' else lower( ti.type ) end         as field_type,
+          not ti."notnull"        as nullable,
+          ti.dflt_value     as fallback,
+          ti.pk             as ti_pk,
+          ti.hidden             as hidden
+        from pragma_table_list() as tl
+        join pragma_table_xinfo( tl.name ) as ti on ( true )
+        where true
+          and ( tl.name not like 'sqlite_%' );"""
+  # H.tabulate "pragma_index_list( 'a' )", db SQL"select * from pragma_index_list( 'a' );"
   H.tabulate "pragma_foreign_key_list( 'b' )", db SQL"select * from pragma_foreign_key_list( 'b' );"
-  H.tabulate "db.get_primary_keys { table: 'b', }", db.get_primary_keys { table: 'b', }
-  H.tabulate "db.get_foreign_keys { table: 'b', }", db.get_foreign_keys { table: 'b', }
-  H.tabulate "db.get_foreign_keys { table: 'mrg_raw_mirror', }", db.get_foreign_keys { table: 'mrg_raw_mirror', }
-  urge '^546^', db._get_primary_key_clause { table: 'mrg_raw_mirror', }
-  urge '^546^', db._get_foreign_key_clauses { table: 'mrg_raw_mirror', }
-  urge '^546^', db._get_primary_key_clause { table: 'a', }
-  urge '^546^', db._get_primary_key_clause { table: 'b', }
-  urge '^546^', db._get_foreign_key_clauses { table: 'b', }
+  H.tabulate "pragma_foreign_key_list( 'b2' )", db SQL"select * from pragma_foreign_key_list( 'b2' );"
+  H.tabulate "pragma_foreign_key_list( 'c' )", db SQL"select * from pragma_foreign_key_list( 'c' );"
+  # # H.tabulate "pragma_table_info( 'b' )", db SQL"select * from pragma_table_info( 'b' );"
+  # # H.tabulate "pragma_table_info( 'c' )", db SQL"select * from pragma_table_info( 'c' );"
+  # # H.tabulate "pragma_index_list( 'a' )", db SQL"select * from pragma_index_list( 'a' );"
+  # # H.tabulate "pragma_index_list( 'c' )", db SQL"select * from pragma_index_list( 'c' );"
+  # # H.tabulate "pragma_index_info( 'athisthat' )", db SQL"select * from pragma_index_info( 'athisthat' );"
   return null
 
 
