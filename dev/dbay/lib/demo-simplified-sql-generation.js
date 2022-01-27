@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, DBay2, FS, GUY, H, PATH, SQL, Sql, Sql2, badge, debug, echo, equals, freeze, help, info, isa, lets, rpr, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, FS, GUY, H, PATH, SQL, Sql, badge, debug, echo, equals, freeze, help, info, isa, lets, rpr, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -47,171 +47,120 @@
 
   ({Sql} = require('../../../apps/dbay/lib/sql'));
 
-  Sql2 = class Sql2 extends Sql {};
-
-  DBay2 = class DBay2 extends DBay {
-    //---------------------------------------------------------------------------------------------------------
-    constructor(...P) {
-      super(...P);
-      this.sql = new Sql2();
-      return void 0;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    get_primary_keys(cfg) {
-      var R, i, len, row, schema;
-      ({schema} = this.cfg);
-      R = this.all_rows(SQL`select 
-    -- pk                          as nr,
-    $table                      as "table",
-    name                        as field, 
-    lower( type )               as type,
-    not "notnull"               as nullable
-  from ${schema}.pragma_table_info( $table )
-  where true 
-    and ( pk > 0 )
-  order by pk;`, cfg);
-      for (i = 0, len = R.length; i < len; i++) {
-        row = R[i];
-        row.nullable = !!row.nullable;
-      }
-      return R;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    get_foreign_keys(cfg) {
-      var R, schema;
-      ({schema} = this.cfg);
-      R = this.all_rows(SQL`select 
-    $table                      as from_table,
-    "from"                      as from_field,
-    "table"                     as to_table,
-    coalesce( "to", "from" )    as to_field
-  from ${schema}.pragma_foreign_key_list( $table )
-  order by seq;`, cfg);
-      return R;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    _get_foreign_key_by_from_fields(cfg) {
-      var R, ref, row, schema;
-      ({schema} = this.cfg);
-      R = {};
-      ref = this.query(SQL`select 
-    "from"                      as from_field,
-    "table"                     as to_table,
-    coalesce( "to", "from" )    as to_field
-  from ${schema}.pragma_foreign_key_list( $table );`, cfg);
-      for (row of ref) {
-        R[row.from_field] = {
-          table: row.to_table,
-          field: row.to_field
-        };
-      }
-      return R;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    _get_primary_key_clause(cfg) {
-      var I, pk, pk_names, pks;
-      ({I} = this.sql);
-      pks = this.get_primary_keys(cfg);
-      pk_names = ((function() {
-        var i, len, results;
-        results = [];
-        for (i = 0, len = pks.length; i < len; i++) {
-          pk = pks[i];
-          results.push(I(pk.field));
-        }
-        return results;
-      })()).join(', ');
-      return SQL`primary key ( ${pk_names} )`;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    _get_foreign_key_clauses(cfg) {
-      var I, R, field, from_field, ref, table;
-      ({I} = this.sql);
-      R = {};
-      ref = this._get_foreign_key_by_from_fields(cfg);
-      for (from_field in ref) {
-        ({table, field} = ref[from_field]);
-        R[from_field] = `references ${I(table)} ( ${I(field)} )`;
-      }
-      return R;
-    }
-
-  };
-
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
+  this.demo_two_kinds_of_foreign_keys = function(cfg) {
+    (() => {
+      var db;
+      db = new DBay();
+      db(SQL`create table a (
+    nr    integer  not null primary key,
+    name  text     not null unique );
+create table b (
+    nr    integer  not null,
+    name  text     not null,
+  foreign key ( nr, name ) references a ( nr, name ) );`);
+      return db(SQL`insert into a ( nr, name ) values ( 1, 'one' ), ( 2, 'two' );`);
+    })();
+    (() => {      // SQL"insert into b ( nr, name ) values ( 1, 'one' ), ( 2, 'two' );"
+      // H.tabulate "select * from a;", db SQL"select * from a;"
+      // H.tabulate "select * from b;", db SQL"select * from b;"
+      var db;
+      db = new DBay();
+      db(SQL`create table a (
+    nr    integer  not null primary key,
+    name  text     not null unique );
+create table b (
+    nr    integer  not null,
+    name  text     not null,
+  foreign key ( nr    ) references a ( nr   ),
+  foreign key ( name  ) references a ( name ) );`);
+      db(SQL`insert into a ( nr, name ) values ( 1, 'one' ), ( 2, 'two' );`);
+      db(SQL`insert into b ( nr, name ) values ( 1, 'one' ), ( 2, 'two' );`);
+      db(SQL`insert into b ( nr, name ) values ( 1, 'two' );`);
+      H.tabulate("select * from a;", db(SQL`select * from a;`));
+      return H.tabulate("select * from b;", db(SQL`select * from b;`));
+    })();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.demo_simplified_sql_generation = function(cfg) {
-    var Mrg, db, mrg;
+    var Mrg, db;
     ({Mrg} = require('../../../apps/dbay-mirage'));
-    db = new DBay2();
-    mrg = new Mrg({db});
+    db = new DBay();
+    // mrg             = new Mrg { db, }
     //.........................................................................................................
-    db(SQL`create table a ( 
+    db(SQL`create table a (
+    nr integer,
     foo float,
     bar float,
     baz float unique,
-    nr integer,
+    this,
+    that any,
+    stealth integer hidden,
+    x421 integer generated always as ( 42 ) virtual,
+    x422 integer generated always as ( 42 ) stored,
+    x423 integer generated always as ( 42 ) stored,
   primary key ( nr ) );
-create table b ( 
-    idx integer not null, 
-    name text unique, 
-  primary key ( idx ), 
-  foreign key ( idx ) references a ( nr ) );
+create unique index athisthat on a ( this, that );
+create table b (
+    idx integer not null,
+    name text unique,
+  primary key ( idx, name ),
+  -- foreign key ( idx ) references a ( nr ),
+  foreign key ( idx, name ) references a ( nr, baz ) );
+create table b2 (
+    idx integer not null,
+    name text unique,
+  primary key ( idx, name ),
+  foreign key ( idx ) references a ( nr ),
+  foreign key ( name ) references a ( baz ) );
 create table c (
     x integer primary key references a ( nr ),
-    y text references b ( name ), 
+    y text references b ( name ),
     z float references a ( baz ) );`);
     //.........................................................................................................
-    // H.tabulate 'sqlite_schema', db SQL"select * from sqlite_schema;"
+    // H.tabulate 'sqlite_schema', db SQL"select type, name, tbl_name from sqlite_schema;"
     H.tabulate("pragma_table_list()", db(SQL`select * from pragma_table_list();`));
-    H.tabulate("pragma_table_info( 'mrg_mirror' )", db(SQL`select * from pragma_table_info( 'mrg_mirror' );`));
-    H.tabulate("pragma_foreign_key_list( 'mrg_mirror' )", db(SQL`select * from pragma_foreign_key_list( 'mrg_mirror' );`));
-    H.tabulate("pragma_table_info( 'mrg_raw_mirror' )", db(SQL`select * from pragma_table_info( 'mrg_raw_mirror' );`));
-    H.tabulate("pragma_foreign_key_list( 'mrg_raw_mirror' )", db(SQL`select * from pragma_foreign_key_list( 'mrg_raw_mirror' );`));
-    H.tabulate("db.get_primary_keys { table: 'mrg_raw_mirror', }", db.get_primary_keys({
-      table: 'mrg_raw_mirror'
-    }));
     H.tabulate("pragma_table_info( 'a' )", db(SQL`select * from pragma_table_info( 'a' );`));
-    H.tabulate("pragma_foreign_key_list( 'a' )", db(SQL`select * from pragma_foreign_key_list( 'a' );`));
-    H.tabulate("pragma_table_info( 'b' )", db(SQL`select * from pragma_table_info( 'b' );`));
+    H.tabulate("pragma_table_xinfo( 'a' )", db(SQL`select * from pragma_table_xinfo( 'a' );`));
+    H.tabulate("all the columns", db(SQL`select
+    tl.schema         as schema,
+    tl.name           as table_name,
+    tl.type           as table_type,
+    -- tl.ncol           as tl_ncol,
+    -- tl.wr             as tl_wr, -- without rowid
+    -- tl.strict         as tl_strict,
+    ti.cid            as field_nr,
+    ti.name           as field_name,
+    case ti.type when '' then 'any' else lower( ti.type ) end         as field_type,
+    not ti."notnull"        as nullable,
+    ti.dflt_value     as fallback,
+    ti.pk             as ti_pk,
+    ti.hidden             as hidden
+  from pragma_table_list() as tl
+  join pragma_table_xinfo( tl.name ) as ti on ( true )
+  where true
+    and ( tl.name not like 'sqlite_%' );`));
+    // H.tabulate "pragma_index_list( 'a' )", db SQL"select * from pragma_index_list( 'a' );"
     H.tabulate("pragma_foreign_key_list( 'b' )", db(SQL`select * from pragma_foreign_key_list( 'b' );`));
-    H.tabulate("db.get_primary_keys { table: 'b', }", db.get_primary_keys({
-      table: 'b'
-    }));
-    H.tabulate("db.get_foreign_keys { table: 'b', }", db.get_foreign_keys({
-      table: 'b'
-    }));
-    H.tabulate("db.get_foreign_keys { table: 'mrg_raw_mirror', }", db.get_foreign_keys({
-      table: 'mrg_raw_mirror'
-    }));
-    urge('^546^', db._get_primary_key_clause({
-      table: 'mrg_raw_mirror'
-    }));
-    urge('^546^', db._get_foreign_key_clauses({
-      table: 'mrg_raw_mirror'
-    }));
-    urge('^546^', db._get_primary_key_clause({
-      table: 'a'
-    }));
-    urge('^546^', db._get_primary_key_clause({
-      table: 'b'
-    }));
-    urge('^546^', db._get_foreign_key_clauses({
-      table: 'b'
-    }));
+    H.tabulate("pragma_foreign_key_list( 'b2' )", db(SQL`select * from pragma_foreign_key_list( 'b2' );`));
+    H.tabulate("pragma_foreign_key_list( 'c' )", db(SQL`select * from pragma_foreign_key_list( 'c' );`));
+    // # H.tabulate "pragma_table_info( 'b' )", db SQL"select * from pragma_table_info( 'b' );"
+    // # H.tabulate "pragma_table_info( 'c' )", db SQL"select * from pragma_table_info( 'c' );"
+    // # H.tabulate "pragma_index_list( 'a' )", db SQL"select * from pragma_index_list( 'a' );"
+    // # H.tabulate "pragma_index_list( 'c' )", db SQL"select * from pragma_index_list( 'c' );"
+    // # H.tabulate "pragma_index_info( 'athisthat' )", db SQL"select * from pragma_index_info( 'athisthat' );"
     return null;
   };
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return this.demo_simplified_sql_generation();
+      // @demo_simplified_sql_generation()
+      return this.demo_two_kinds_of_foreign_keys();
     })();
   }
 
