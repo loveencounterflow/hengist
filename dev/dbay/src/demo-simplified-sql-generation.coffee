@@ -61,7 +61,24 @@ add_views = ( db ) ->
       where true
         and ( tl.name not like 'sqlite_%' )
         and ( tl.name not like 'dbay_%' )
-        ;"""
+      order by schema, table_name, field_nr;"""
+  db SQL"""
+    drop view if exists dbay_field_clauses_1;
+    create view dbay_field_clauses_1 as select
+        schema                                                      as schema,
+        table_name                                                  as table_name,
+        table_type                                                  as table_type,
+        field_nr                                                    as field_nr,
+        field_name                                                  as field_name,
+        field_type                                                  as field_type,
+        nullable                                                    as nullable,
+        fallback                                                    as fallback,
+        pk_nr                                                       as pk_nr,
+        hidden                                                      as hidden,
+        std_sql_i( field_name ) || ' ' || field_type                as field_clause_1,
+        case when nullable then 'null' else 'not null' end          as field_clause_2
+      from dbay_fields
+      order by schema, table_name, field_nr;"""
   db SQL"""
     drop view if exists dbay_foreign_key_statements_1;
     create view dbay_foreign_key_statements_1 as select
@@ -121,15 +138,20 @@ add_views = ( db ) ->
         partition by schema, table_name
         order by pk_nr
         rows between unbounded preceding and unbounded following )
+      order by schema, table_name;"""
+  db SQL"""
+    drop view if exists dbay_primary_key_statements;
+    create view dbay_primary_key_statements as select distinct
+        schema                                                      as schema,
+        table_name                                                  as table_name,
+        group_concat(
+          'primary key ( ' || field_names || ' )' ) over w          as pk_clause
+      from dbay_primary_key_statements_1
+      window w as (
+        partition by schema, table_name
+        rows between unbounded preceding and unbounded following )
       order by schema, table_name
     ;"""
-  # db SQL"""
-  #   drop view if exists dbay_primary_key_statements;
-  #   create view dbay_primary_key_statements as select distinct
-  #       schema                                                      as schema,
-  #       table_name                                                  as table_name,
-  #       group_concat( 'primary key ( ' || field_name)
-  #   ;"""
   return db
 
 #-----------------------------------------------------------------------------------------------------------
@@ -164,7 +186,8 @@ add_views = ( db ) ->
     # H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
     # H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
     H.tabulate "dbay_foreign_key_statements", db SQL"select * from dbay_foreign_key_statements;"
-    H.tabulate "dbay_primary_key_statements_1", db SQL"select * from dbay_primary_key_statements_1;"
+    H.tabulate "dbay_primary_key_statements", db SQL"select * from dbay_primary_key_statements;"
+    H.tabulate "dbay_field_clauses_1", db SQL"select * from dbay_field_clauses_1;"
   do =>
     urge '################################'
     db              = add_views new DBay { path: '/tmp/fk-demo-2.sqlite', }
@@ -197,7 +220,8 @@ add_views = ( db ) ->
     # H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
     # H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
     H.tabulate "dbay_foreign_key_statements", db SQL"select * from dbay_foreign_key_statements;"
-    H.tabulate "dbay_primary_key_statements_1", db SQL"select * from dbay_primary_key_statements_1;"
+    H.tabulate "dbay_primary_key_statements", db SQL"select * from dbay_primary_key_statements;"
+    H.tabulate "dbay_field_clauses_1", db SQL"select * from dbay_field_clauses_1;"
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -234,7 +258,7 @@ add_views = ( db ) ->
       foreign key ( name ) references a ( baz ) );
     create table c (
         x integer primary key references a ( nr ),
-        y text references b ( name ),
+        y text default 'whatever' references b ( name ),
         z float references a ( baz ) );
     """
   #.........................................................................................................
@@ -255,7 +279,8 @@ add_views = ( db ) ->
   # H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
   # H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
   H.tabulate "dbay_foreign_key_statements", db SQL"select * from dbay_foreign_key_statements;"
-  H.tabulate "dbay_primary_key_statements_1", db SQL"select * from dbay_primary_key_statements_1;"
+  H.tabulate "dbay_primary_key_statements", db SQL"select * from dbay_primary_key_statements;"
+  H.tabulate "dbay_field_clauses_1", db SQL"select * from dbay_field_clauses_1;"
   return null
 
 
