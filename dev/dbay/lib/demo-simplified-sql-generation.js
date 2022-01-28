@@ -105,7 +105,7 @@ create view dbay_foreign_key_statements_2 as select distinct
     db(SQL`drop view if exists dbay_foreign_key_statements;
 create view dbay_foreign_key_statements as select distinct
     schema                                                      as schema,
-    from_table_name                                             as from_table_name,
+    from_table_name                                             as table_name,
     group_concat(
       'foreign key ( ' || from_field_names || ' ) references '
         || std_sql_i( to_table_name )
@@ -114,9 +114,29 @@ create view dbay_foreign_key_statements as select distinct
   from dbay_foreign_key_statements_2
   window w as (
     partition by schema, from_table_name
-    order by fk_id
+    order by fk_id desc
     rows between unbounded preceding and unbounded following )
   order by schema, from_table_name, fk_id;`);
+    db(SQL`drop view if exists dbay_primary_key_statements_1;
+create view dbay_primary_key_statements_1 as select distinct
+    schema                                                      as schema,
+    table_name                                                  as table_name,
+    group_concat( std_sql_i( field_name ), ', ' ) over w        as field_names
+  from dbay_fields
+  where pk_nr is not null
+  window w as (
+    partition by schema, table_name
+    order by pk_nr
+    rows between unbounded preceding and unbounded following )
+  order by schema, table_name
+;`);
+    // db SQL"""
+    //   drop view if exists dbay_primary_key_statements;
+    //   create view dbay_primary_key_statements as select distinct
+    //       schema                                                      as schema,
+    //       table_name                                                  as table_name,
+    //       group_concat( 'primary key ( ' || field_name)
+    //   ;"""
     return db;
   };
 
@@ -161,7 +181,8 @@ create table b (
       H.tabulate("dbay_fields", db(SQL`select * from dbay_fields;`));
       // H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
       // H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
-      return H.tabulate("dbay_foreign_key_statements", db(SQL`select * from dbay_foreign_key_statements;`));
+      H.tabulate("dbay_foreign_key_statements", db(SQL`select * from dbay_foreign_key_statements;`));
+      return H.tabulate("dbay_primary_key_statements_1", db(SQL`select * from dbay_primary_key_statements_1;`));
     })();
     (() => {
       var db;
@@ -195,7 +216,8 @@ create table b (
       H.tabulate("dbay_fields", db(SQL`select * from dbay_fields;`));
       // H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
       // H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
-      return H.tabulate("dbay_foreign_key_statements", db(SQL`select * from dbay_foreign_key_statements;`));
+      H.tabulate("dbay_foreign_key_statements", db(SQL`select * from dbay_foreign_key_statements;`));
+      return H.tabulate("dbay_primary_key_statements_1", db(SQL`select * from dbay_primary_key_statements_1;`));
     })();
     return null;
   };
@@ -254,6 +276,7 @@ create table c (
     // H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
     // H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
     H.tabulate("dbay_foreign_key_statements", db(SQL`select * from dbay_foreign_key_statements;`));
+    H.tabulate("dbay_primary_key_statements_1", db(SQL`select * from dbay_primary_key_statements_1;`));
     return null;
   };
 
