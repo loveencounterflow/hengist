@@ -97,7 +97,7 @@ add_views = ( db ) ->
     drop view if exists dbay_foreign_key_statements;
     create view dbay_foreign_key_statements as select distinct
         schema                                                      as schema,
-        from_table_name                                             as from_table_name,
+        from_table_name                                             as table_name,
         group_concat(
           'foreign key ( ' || from_field_names || ' ) references '
             || std_sql_i( to_table_name )
