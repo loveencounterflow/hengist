@@ -65,7 +65,7 @@ create view dbay_db_overview as select
     case ti.type when '' then 'any' else lower( ti.type ) end   as field_type,
     not ti."notnull"                                            as nullable,
     ti.dflt_value                                               as fallback,
-    ti.pk                                                       as ti_pk,
+    case ti.pk when 0 then null else ti.pk end                  as pk_nr,
     ti.hidden                                                   as hidden
   from pragma_table_list() as tl
   join pragma_table_xinfo( tl.name ) as ti on ( true )
@@ -157,10 +157,10 @@ create table b (
       trycatch('^578-5^', db, SQL`insert into b ( nr, name ) values ( 1, 'two' );`);
       H.tabulate("select * from a;", db(SQL`select * from a;`));
       H.tabulate("select * from b;", db(SQL`select * from b;`));
-      H.tabulate("pragma_foreign_key_list( 'b' )", db(SQL`select * from pragma_foreign_key_list( 'b' );`));
+      // H.tabulate "pragma_foreign_key_list( 'b' )", db SQL"select * from pragma_foreign_key_list( 'b' );"
       H.tabulate("dbay_db_overview", db(SQL`select * from dbay_db_overview;`));
-      H.tabulate("dbay_foreign_key_statements_1", db(SQL`select * from dbay_foreign_key_statements_1;`));
-      H.tabulate("dbay_foreign_key_statements_2", db(SQL`select * from dbay_foreign_key_statements_2;`));
+      // H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
+      // H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
       return H.tabulate("dbay_foreign_key_statements", db(SQL`select * from dbay_foreign_key_statements;`));
     })();
     (() => {
@@ -191,10 +191,10 @@ create table b (
       trycatch('^578-11^', db, SQL`insert into b ( nr, name ) values ( 1, 'two' );`);
       H.tabulate("select * from a;", db(SQL`select * from a;`));
       H.tabulate("select * from b;", db(SQL`select * from b;`));
-      H.tabulate("pragma_foreign_key_list( 'b' )", db(SQL`select * from pragma_foreign_key_list( 'b' );`));
+      // H.tabulate "pragma_foreign_key_list( 'b' )", db SQL"select * from pragma_foreign_key_list( 'b' );"
       H.tabulate("dbay_db_overview", db(SQL`select * from dbay_db_overview;`));
-      H.tabulate("dbay_foreign_key_statements_1", db(SQL`select * from dbay_foreign_key_statements_1;`));
-      H.tabulate("dbay_foreign_key_statements_2", db(SQL`select * from dbay_foreign_key_statements_2;`));
+      // H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
+      // H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
       return H.tabulate("dbay_foreign_key_statements", db(SQL`select * from dbay_foreign_key_statements;`));
     })();
     return null;
@@ -238,21 +238,21 @@ create table c (
     z float references a ( baz ) );`);
     //.........................................................................................................
     // H.tabulate 'sqlite_schema', db SQL"select type, name, tbl_name from sqlite_schema;"
-    H.tabulate("pragma_table_list()", db(SQL`select * from pragma_table_list();`));
-    H.tabulate("pragma_table_info( 'a' )", db(SQL`select * from pragma_table_info( 'a' );`));
-    H.tabulate("pragma_table_xinfo( 'a' )", db(SQL`select * from pragma_table_xinfo( 'a' );`));
-    // H.tabulate "pragma_index_list( 'a' )", db SQL"select * from pragma_index_list( 'a' );"
-    H.tabulate("pragma_foreign_key_list( 'b' )", db(SQL`select * from pragma_foreign_key_list( 'b' );`));
-    H.tabulate("pragma_foreign_key_list( 'b2' )", db(SQL`select * from pragma_foreign_key_list( 'b2' );`));
-    H.tabulate("pragma_foreign_key_list( 'c' )", db(SQL`select * from pragma_foreign_key_list( 'c' );`));
-    // # H.tabulate "pragma_table_info( 'b' )", db SQL"select * from pragma_table_info( 'b' );"
-    // # H.tabulate "pragma_table_info( 'c' )", db SQL"select * from pragma_table_info( 'c' );"
+    // H.tabulate "pragma_table_list()", db SQL"select * from pragma_table_list();"
+    // H.tabulate "pragma_table_info( 'a' )", db SQL"select * from pragma_table_info( 'a' );"
+    // H.tabulate "pragma_table_xinfo( 'a' )", db SQL"select * from pragma_table_xinfo( 'a' );"
     // # H.tabulate "pragma_index_list( 'a' )", db SQL"select * from pragma_index_list( 'a' );"
-    // # H.tabulate "pragma_index_list( 'c' )", db SQL"select * from pragma_index_list( 'c' );"
-    // # H.tabulate "pragma_index_info( 'athisthat' )", db SQL"select * from pragma_index_info( 'athisthat' );"
+    // H.tabulate "pragma_foreign_key_list( 'b' )", db SQL"select * from pragma_foreign_key_list( 'b' );"
+    // H.tabulate "pragma_foreign_key_list( 'b2' )", db SQL"select * from pragma_foreign_key_list( 'b2' );"
+    // H.tabulate "pragma_foreign_key_list( 'c' )", db SQL"select * from pragma_foreign_key_list( 'c' );"
+    // # # H.tabulate "pragma_table_info( 'b' )", db SQL"select * from pragma_table_info( 'b' );"
+    // # # H.tabulate "pragma_table_info( 'c' )", db SQL"select * from pragma_table_info( 'c' );"
+    // # # H.tabulate "pragma_index_list( 'a' )", db SQL"select * from pragma_index_list( 'a' );"
+    // # # H.tabulate "pragma_index_list( 'c' )", db SQL"select * from pragma_index_list( 'c' );"
+    // # # H.tabulate "pragma_index_info( 'athisthat' )", db SQL"select * from pragma_index_info( 'athisthat' );"
     H.tabulate("dbay_db_overview", db(SQL`select * from dbay_db_overview;`));
-    H.tabulate("dbay_foreign_key_statements_1", db(SQL`select * from dbay_foreign_key_statements_1;`));
-    H.tabulate("dbay_foreign_key_statements_2", db(SQL`select * from dbay_foreign_key_statements_2;`));
+    // H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
+    // H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
     H.tabulate("dbay_foreign_key_statements", db(SQL`select * from dbay_foreign_key_statements;`));
     return null;
   };
