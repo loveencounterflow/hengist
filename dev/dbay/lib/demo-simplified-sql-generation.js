@@ -101,8 +101,22 @@ create view dbay_fk_view_2 as select distinct
     partition by schema, from_table_name, fk_id
     order by fk_idx
     rows between unbounded preceding and unbounded following )
-  order by schema, from_table_name, fk_id, fk_idx
-;`);
+  order by schema, from_table_name, fk_id, fk_idx;`);
+    db(SQL`drop view if exists dbay_fk_view_3;
+create view dbay_fk_view_3 as select distinct
+    schema                                                      as schema,
+    from_table_name                                             as from_table_name,
+    group_concat(
+      'foreign key ( ' || from_field_names || ' ) references '
+        || std_sql_i( to_table_name )
+        || ' ( ' || to_field_names || ' )',
+        ',' || char( 10 ) ) over w                              as fk_clauses
+  from dbay_fk_view_2
+  window w as (
+    partition by schema, from_table_name
+    order by fk_id
+    rows between unbounded preceding and unbounded following )
+  order by schema, from_table_name, fk_id;`);
     return db;
   };
 
@@ -146,7 +160,8 @@ create table b (
       H.tabulate("pragma_foreign_key_list( 'b' )", db(SQL`select * from pragma_foreign_key_list( 'b' );`));
       H.tabulate("dbay_db_overview", db(SQL`select * from dbay_db_overview;`));
       H.tabulate("dbay_fk_view_1", db(SQL`select * from dbay_fk_view_1;`));
-      return H.tabulate("dbay_fk_view_2", db(SQL`select * from dbay_fk_view_2;`));
+      H.tabulate("dbay_fk_view_2", db(SQL`select * from dbay_fk_view_2;`));
+      return H.tabulate("dbay_fk_view_3", db(SQL`select * from dbay_fk_view_3;`));
     })();
     (() => {
       var db;
@@ -179,7 +194,8 @@ create table b (
       H.tabulate("pragma_foreign_key_list( 'b' )", db(SQL`select * from pragma_foreign_key_list( 'b' );`));
       H.tabulate("dbay_db_overview", db(SQL`select * from dbay_db_overview;`));
       H.tabulate("dbay_fk_view_1", db(SQL`select * from dbay_fk_view_1;`));
-      return H.tabulate("dbay_fk_view_2", db(SQL`select * from dbay_fk_view_2;`));
+      H.tabulate("dbay_fk_view_2", db(SQL`select * from dbay_fk_view_2;`));
+      return H.tabulate("dbay_fk_view_3", db(SQL`select * from dbay_fk_view_3;`));
     })();
     return null;
   };
@@ -237,17 +253,17 @@ create table c (
     H.tabulate("dbay_db_overview", db(SQL`select * from dbay_db_overview;`));
     H.tabulate("dbay_fk_view_1", db(SQL`select * from dbay_fk_view_1;`));
     H.tabulate("dbay_fk_view_2", db(SQL`select * from dbay_fk_view_2;`));
+    H.tabulate("dbay_fk_view_3", db(SQL`select * from dbay_fk_view_3;`));
     return null;
   };
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return this.demo_two_kinds_of_foreign_keys();
+      this.demo_two_kinds_of_foreign_keys();
+      return this.demo_simplified_sql_generation();
     })();
   }
-
-  // @demo_simplified_sql_generation()
 
 }).call(this);
 
