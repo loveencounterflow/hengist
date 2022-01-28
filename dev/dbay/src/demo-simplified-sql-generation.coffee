@@ -44,8 +44,8 @@ add_views = ( db ) ->
         # -- tl.wr             as tl_wr, -- without rowid
         # -- tl.strict         as tl_strict,
   db SQL"""
-    drop view if exists dbay_db_overview;
-    create view dbay_db_overview as select
+    drop view if exists dbay_fields;
+    create view dbay_fields as select
         tl.schema                                                   as schema,
         tl.name                                                     as table_name,
         tl.type                                                     as table_type,
@@ -139,7 +139,7 @@ add_views = ( db ) ->
     H.tabulate "select * from a;", db SQL"select * from a;"
     H.tabulate "select * from b;", db SQL"select * from b;"
     # H.tabulate "pragma_foreign_key_list( 'b' )", db SQL"select * from pragma_foreign_key_list( 'b' );"
-    H.tabulate "dbay_db_overview", db SQL"select * from dbay_db_overview;"
+    H.tabulate "dbay_fields", db SQL"select * from dbay_fields;"
     # H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
     # H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
     H.tabulate "dbay_foreign_key_statements", db SQL"select * from dbay_foreign_key_statements;"
@@ -171,7 +171,7 @@ add_views = ( db ) ->
     H.tabulate "select * from a;", db SQL"select * from a;"
     H.tabulate "select * from b;", db SQL"select * from b;"
     # H.tabulate "pragma_foreign_key_list( 'b' )", db SQL"select * from pragma_foreign_key_list( 'b' );"
-    H.tabulate "dbay_db_overview", db SQL"select * from dbay_db_overview;"
+    H.tabulate "dbay_fields", db SQL"select * from dbay_fields;"
     # H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
     # H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
     H.tabulate "dbay_foreign_key_statements", db SQL"select * from dbay_foreign_key_statements;"
@@ -228,7 +228,7 @@ add_views = ( db ) ->
   # # # H.tabulate "pragma_index_list( 'a' )", db SQL"select * from pragma_index_list( 'a' );"
   # # # H.tabulate "pragma_index_list( 'c' )", db SQL"select * from pragma_index_list( 'c' );"
   # # # H.tabulate "pragma_index_info( 'athisthat' )", db SQL"select * from pragma_index_info( 'athisthat' );"
-  H.tabulate "dbay_db_overview", db SQL"select * from dbay_db_overview;"
+  H.tabulate "dbay_fields", db SQL"select * from dbay_fields;"
   # H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
   # H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
   H.tabulate "dbay_foreign_key_statements", db SQL"select * from dbay_foreign_key_statements;"
