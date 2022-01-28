@@ -39,6 +39,7 @@ H                         = require '../../../lib/helpers'
 #
 #-----------------------------------------------------------------------------------------------------------
 add_views = ( db ) ->
+  db.create_stdlib()
         # -- tl.ncol           as tl_ncol,
         # -- tl.wr             as tl_wr, -- without rowid
         # -- tl.strict         as tl_strict,
@@ -83,9 +84,9 @@ add_views = ( db ) ->
         fk_id                                                       as fk_id,
         schema                                                      as schema,
         from_table_name                                             as from_table_name,
-        json_group_array( from_field_name ) over w                  as from_field_names,
+        group_concat( std_sql_i( from_field_name ), ', ' ) over w   as from_field_names,
         to_table_name                                               as to_table_name,
-        json_group_array( to_field_name ) over w                    as to_field_names
+        group_concat( std_sql_i(   to_field_name ), ', ' ) over w   as to_field_names
       from dbay_fk_view_1
       window w as (
         partition by schema, from_table_name, fk_id
