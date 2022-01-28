@@ -109,6 +109,27 @@ add_views = ( db ) ->
         order by fk_id desc
         rows between unbounded preceding and unbounded following )
       order by schema, from_table_name, fk_id;"""
+  db SQL"""
+    drop view if exists dbay_primary_key_statements_1;
+    create view dbay_primary_key_statements_1 as select distinct
+        schema                                                      as schema,
+        table_name                                                  as table_name,
+        group_concat( std_sql_i( field_name ), ', ' ) over w        as field_names
+      from dbay_fields
+      where pk_nr is not null
+      window w as (
+        partition by schema, table_name
+        order by pk_nr
+        rows between unbounded preceding and unbounded following )
+      order by schema, table_name
+    ;"""
+  # db SQL"""
+  #   drop view if exists dbay_primary_key_statements;
+  #   create view dbay_primary_key_statements as select distinct
+  #       schema                                                      as schema,
+  #       table_name                                                  as table_name,
+  #       group_concat( 'primary key ( ' || field_name)
+  #   ;"""
   return db
 
 #-----------------------------------------------------------------------------------------------------------
@@ -143,6 +164,7 @@ add_views = ( db ) ->
     # H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
     # H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
     H.tabulate "dbay_foreign_key_statements", db SQL"select * from dbay_foreign_key_statements;"
+    H.tabulate "dbay_primary_key_statements_1", db SQL"select * from dbay_primary_key_statements_1;"
   do =>
     urge '################################'
     db              = add_views new DBay { path: '/tmp/fk-demo-2.sqlite', }
@@ -175,6 +197,7 @@ add_views = ( db ) ->
     # H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
     # H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
     H.tabulate "dbay_foreign_key_statements", db SQL"select * from dbay_foreign_key_statements;"
+    H.tabulate "dbay_primary_key_statements_1", db SQL"select * from dbay_primary_key_statements_1;"
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -232,6 +255,7 @@ add_views = ( db ) ->
   # H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
   # H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
   H.tabulate "dbay_foreign_key_statements", db SQL"select * from dbay_foreign_key_statements;"
+  H.tabulate "dbay_primary_key_statements_1", db SQL"select * from dbay_primary_key_statements_1;"
   return null
 
 
