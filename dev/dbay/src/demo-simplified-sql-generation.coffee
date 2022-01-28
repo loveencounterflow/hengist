@@ -54,7 +54,7 @@ add_views = ( db ) ->
         case ti.type when '' then 'any' else lower( ti.type ) end   as field_type,
         not ti."notnull"                                            as nullable,
         ti.dflt_value                                               as fallback,
-        ti.pk                                                       as ti_pk,
+        case ti.pk when 0 then null else ti.pk end                  as pk_nr,
         ti.hidden                                                   as hidden
       from pragma_table_list() as tl
       join pragma_table_xinfo( tl.name ) as ti on ( true )
