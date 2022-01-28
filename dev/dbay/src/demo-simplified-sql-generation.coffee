@@ -92,8 +92,23 @@ add_views = ( db ) ->
         partition by schema, from_table_name, fk_id
         order by fk_idx
         rows between unbounded preceding and unbounded following )
-      order by schema, from_table_name, fk_id, fk_idx
-    ;"""
+      order by schema, from_table_name, fk_id, fk_idx;"""
+  db SQL"""
+    drop view if exists dbay_fk_view_3;
+    create view dbay_fk_view_3 as select distinct
+        schema                                                      as schema,
+        from_table_name                                             as from_table_name,
+        group_concat(
+          'foreign key ( ' || from_field_names || ' ) references '
+            || std_sql_i( to_table_name )
+            || ' ( ' || to_field_names || ' )',
+            ',' || char( 10 ) ) over w                              as fk_clauses
+      from dbay_fk_view_2
+      window w as (
+        partition by schema, from_table_name
+        order by fk_id
+        rows between unbounded preceding and unbounded following )
+      order by schema, from_table_name, fk_id;"""
   return db
 
 #-----------------------------------------------------------------------------------------------------------
@@ -127,6 +142,7 @@ add_views = ( db ) ->
     H.tabulate "dbay_db_overview", db SQL"select * from dbay_db_overview;"
     H.tabulate "dbay_fk_view_1", db SQL"select * from dbay_fk_view_1;"
     H.tabulate "dbay_fk_view_2", db SQL"select * from dbay_fk_view_2;"
+    H.tabulate "dbay_fk_view_3", db SQL"select * from dbay_fk_view_3;"
   do =>
     urge '################################'
     db              = add_views new DBay { path: '/tmp/fk-demo-2.sqlite', }
@@ -158,6 +174,7 @@ add_views = ( db ) ->
     H.tabulate "dbay_db_overview", db SQL"select * from dbay_db_overview;"
     H.tabulate "dbay_fk_view_1", db SQL"select * from dbay_fk_view_1;"
     H.tabulate "dbay_fk_view_2", db SQL"select * from dbay_fk_view_2;"
+    H.tabulate "dbay_fk_view_3", db SQL"select * from dbay_fk_view_3;"
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -214,13 +231,14 @@ add_views = ( db ) ->
   H.tabulate "dbay_db_overview", db SQL"select * from dbay_db_overview;"
   H.tabulate "dbay_fk_view_1", db SQL"select * from dbay_fk_view_1;"
   H.tabulate "dbay_fk_view_2", db SQL"select * from dbay_fk_view_2;"
+  H.tabulate "dbay_fk_view_3", db SQL"select * from dbay_fk_view_3;"
   return null
 
 
 ############################################################################################################
 if module is require.main then do =>
   @demo_two_kinds_of_foreign_keys()
-  # @demo_simplified_sql_generation()
+  @demo_simplified_sql_generation()
 
 
 
