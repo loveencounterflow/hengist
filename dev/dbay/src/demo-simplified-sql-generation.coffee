@@ -156,13 +156,6 @@ add_views = ( db ) ->
     H.tabulate "select * from b;", db SQL"select * from b;"
     H.tabulate "pragma_foreign_key_list( 'b' )", db SQL"select * from pragma_foreign_key_list( 'b' );"
     H.tabulate "dbay_db_overview", db SQL"select * from dbay_db_overview;"
-    H.tabulate "dbay_db_overview", db SQL"""
-      select distinct
-        table_name,
-        json_group_object( field_name, json_object( 'type', field_type ) ) over w as d
-      from dbay_db_overview
-      window w as ( partition by table_name )
-      ;"""
     H.tabulate "dbay_fk_view_1", db SQL"select * from dbay_fk_view_1;"
     H.tabulate "dbay_fk_view_2", db SQL"select * from dbay_fk_view_2;"
   return null
