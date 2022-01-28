@@ -63,8 +63,8 @@ add_views = ( db ) ->
         and ( tl.name not like 'dbay_%' )
         ;"""
   db SQL"""
-    drop view if exists dbay_fk_view_1;
-    create view dbay_fk_view_1 as select
+    drop view if exists dbay_foreign_key_statements_1;
+    create view dbay_foreign_key_statements_1 as select
         fk.id                                                       as fk_id,
         fk.seq                                                      as fk_idx,
         tl.schema                                                   as schema,
@@ -79,23 +79,23 @@ add_views = ( db ) ->
         and ( tl.name not like 'dbay_%' )
       order by schema, from_table_name, fk_id, fk_idx;"""
   db SQL"""
-    drop view if exists dbay_fk_view_2;
-    create view dbay_fk_view_2 as select distinct
+    drop view if exists dbay_foreign_key_statements_2;
+    create view dbay_foreign_key_statements_2 as select distinct
         fk_id                                                       as fk_id,
         schema                                                      as schema,
         from_table_name                                             as from_table_name,
         group_concat( std_sql_i( from_field_name ), ', ' ) over w   as from_field_names,
         to_table_name                                               as to_table_name,
         group_concat( std_sql_i(   to_field_name ), ', ' ) over w   as to_field_names
-      from dbay_fk_view_1
+      from dbay_foreign_key_statements_1
       window w as (
         partition by schema, from_table_name, fk_id
         order by fk_idx
         rows between unbounded preceding and unbounded following )
       order by schema, from_table_name, fk_id, fk_idx;"""
   db SQL"""
-    drop view if exists dbay_fk_view_3;
-    create view dbay_fk_view_3 as select distinct
+    drop view if exists dbay_foreign_key_statements;
+    create view dbay_foreign_key_statements as select distinct
         schema                                                      as schema,
         from_table_name                                             as from_table_name,
         group_concat(
@@ -103,7 +103,7 @@ add_views = ( db ) ->
             || std_sql_i( to_table_name )
             || ' ( ' || to_field_names || ' )',
             ',' || char( 10 ) ) over w                              as fk_clauses
-      from dbay_fk_view_2
+      from dbay_foreign_key_statements_2
       window w as (
         partition by schema, from_table_name
         order by fk_id
@@ -140,9 +140,9 @@ add_views = ( db ) ->
     H.tabulate "select * from b;", db SQL"select * from b;"
     H.tabulate "pragma_foreign_key_list( 'b' )", db SQL"select * from pragma_foreign_key_list( 'b' );"
     H.tabulate "dbay_db_overview", db SQL"select * from dbay_db_overview;"
-    H.tabulate "dbay_fk_view_1", db SQL"select * from dbay_fk_view_1;"
-    H.tabulate "dbay_fk_view_2", db SQL"select * from dbay_fk_view_2;"
-    H.tabulate "dbay_fk_view_3", db SQL"select * from dbay_fk_view_3;"
+    H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
+    H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
+    H.tabulate "dbay_foreign_key_statements", db SQL"select * from dbay_foreign_key_statements;"
   do =>
     urge '################################'
     db              = add_views new DBay { path: '/tmp/fk-demo-2.sqlite', }
@@ -172,9 +172,9 @@ add_views = ( db ) ->
     H.tabulate "select * from b;", db SQL"select * from b;"
     H.tabulate "pragma_foreign_key_list( 'b' )", db SQL"select * from pragma_foreign_key_list( 'b' );"
     H.tabulate "dbay_db_overview", db SQL"select * from dbay_db_overview;"
-    H.tabulate "dbay_fk_view_1", db SQL"select * from dbay_fk_view_1;"
-    H.tabulate "dbay_fk_view_2", db SQL"select * from dbay_fk_view_2;"
-    H.tabulate "dbay_fk_view_3", db SQL"select * from dbay_fk_view_3;"
+    H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
+    H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
+    H.tabulate "dbay_foreign_key_statements", db SQL"select * from dbay_foreign_key_statements;"
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -229,9 +229,9 @@ add_views = ( db ) ->
   # # H.tabulate "pragma_index_list( 'c' )", db SQL"select * from pragma_index_list( 'c' );"
   # # H.tabulate "pragma_index_info( 'athisthat' )", db SQL"select * from pragma_index_info( 'athisthat' );"
   H.tabulate "dbay_db_overview", db SQL"select * from dbay_db_overview;"
-  H.tabulate "dbay_fk_view_1", db SQL"select * from dbay_fk_view_1;"
-  H.tabulate "dbay_fk_view_2", db SQL"select * from dbay_fk_view_2;"
-  H.tabulate "dbay_fk_view_3", db SQL"select * from dbay_fk_view_3;"
+  H.tabulate "dbay_foreign_key_statements_1", db SQL"select * from dbay_foreign_key_statements_1;"
+  H.tabulate "dbay_foreign_key_statements_2", db SQL"select * from dbay_foreign_key_statements_2;"
+  H.tabulate "dbay_foreign_key_statements", db SQL"select * from dbay_foreign_key_statements;"
   return null
 
 
