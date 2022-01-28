@@ -51,6 +51,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   add_views = function(db) {
+    db.create_stdlib();
     // -- tl.ncol           as tl_ncol,
     // -- tl.wr             as tl_wr, -- without rowid
     // -- tl.strict         as tl_strict,
@@ -92,9 +93,9 @@ create view dbay_fk_view_2 as select distinct
     fk_id                                                       as fk_id,
     schema                                                      as schema,
     from_table_name                                             as from_table_name,
-    json_group_array( from_field_name ) over w                  as from_field_names,
+    group_concat( std_sql_i( from_field_name ), ', ' ) over w   as from_field_names,
     to_table_name                                               as to_table_name,
-    json_group_array( to_field_name ) over w                    as to_field_names
+    group_concat( std_sql_i(   to_field_name ), ', ' ) over w   as to_field_names
   from dbay_fk_view_1
   window w as (
     partition by schema, from_table_name, fk_id
@@ -177,12 +178,6 @@ create table b (
       H.tabulate("select * from b;", db(SQL`select * from b;`));
       H.tabulate("pragma_foreign_key_list( 'b' )", db(SQL`select * from pragma_foreign_key_list( 'b' );`));
       H.tabulate("dbay_db_overview", db(SQL`select * from dbay_db_overview;`));
-      H.tabulate("dbay_db_overview", db(SQL`select distinct
-  table_name,
-  json_group_object( field_name, json_object( 'type', field_type ) ) over w as d
-from dbay_db_overview
-window w as ( partition by table_name )
-;`));
       H.tabulate("dbay_fk_view_1", db(SQL`select * from dbay_fk_view_1;`));
       return H.tabulate("dbay_fk_view_2", db(SQL`select * from dbay_fk_view_2;`));
     })();
