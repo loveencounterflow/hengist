@@ -106,7 +106,7 @@ add_views = ( db ) ->
       from dbay_foreign_key_statements_2
       window w as (
         partition by schema, from_table_name
-        order by fk_id
+        order by fk_id desc
         rows between unbounded preceding and unbounded following )
       order by schema, from_table_name, fk_id;"""
   return db
