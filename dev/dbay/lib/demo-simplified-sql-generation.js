@@ -121,23 +121,6 @@ create view ${schema}.dbay_fields as select
   from ${schema}.dbay_fields_1 as fd
   left join ${schema}.dbay_unique_fields as uf using ( schema, table_name, field_name )
   order by schema, table_nr, field_nr;`);
-    db(SQL`drop view if exists ${schema}.dbay_field_clauses_1;
-create view ${schema}.dbay_field_clauses_1 as select
-    schema                                                      as schema,
-    table_nr                                                    as table_nr,
-    field_nr                                                    as field_nr,
-    table_name                                                  as table_name,
-    table_type                                                  as table_type,
-    field_name                                                  as field_name,
-    field_type                                                  as field_type,
-    nullable                                                    as nullable,
-    fallback                                                    as fallback,
-    pk_nr                                                       as pk_nr,
-    hidden                                                      as hidden,
-    std_sql_i( field_name ) || ' ' || field_type                as field_clause_1,
-    case when nullable then 'null' else 'not null' end          as field_clause_2
-  from ${schema}.dbay_fields
-  order by schema, table_name, field_nr;`);
     db(SQL`drop view if exists ${schema}.dbay_foreign_key_clauses_1;
 create view ${schema}.dbay_foreign_key_clauses_1 as select
     fk.id                                                       as fk_id,
@@ -206,6 +189,19 @@ create view ${schema}.dbay_primary_key_clauses as select distinct
     rows between unbounded preceding and unbounded following )
   order by schema, table_name
 ;`);
+    db(SQL`drop view if exists ${schema}.dbay_field_clauses_1;
+create view ${schema}.dbay_field_clauses_1 as select
+    schema                                                          as schema,
+    table_nr                                                        as table_nr,
+    field_nr                                                        as field_nr,
+    table_name                                                      as table_name,
+    field_name                                                      as field_name,
+    std_sql_i( field_name ) || ' ' || field_type                    as fc_name_type,
+    case when not nullable         then 'not null'             end  as fc_null,
+    case when is_unique            then 'unique'               end  as fc_unique,
+    case when fallback is not null then 'default ' || fallback end  as fc_default
+  from ${schema}.dbay_fields
+  order by schema, table_nr, field_nr;`);
     return db;
   };
 
@@ -306,7 +302,7 @@ create table b (
     db(SQL`create table a (
     nr integer,
     foo float,
-    bar float,
+    bar float default 42,
     baz float unique,
     this,
     that any,
@@ -347,7 +343,6 @@ create table c (
     // H.tabulate "dbay_foreign_key_clauses_2", db SQL"select * from dbay_foreign_key_clauses_2;"
     H.tabulate("dbay_foreign_key_clauses", db(SQL`select * from dbay_foreign_key_clauses;`));
     H.tabulate("dbay_primary_key_clauses", db(SQL`select * from dbay_primary_key_clauses;`));
-    H.tabulate("dbay_field_clauses_1", db(SQL`select * from dbay_field_clauses_1;`));
     // H.tabulate "pragma_index_list( 'b2' )", db SQL"select * from pragma_index_list( 'b2' );"
     // H.tabulate "pragma_index_info( 'sqlite_autoindex_b2_2' )", db SQL"select * from pragma_index_info( 'sqlite_autoindex_b2_2' );"
     // H.tabulate "pragma_index_xinfo( 'sqlite_autoindex_b2_2' )", db SQL"select * from pragma_index_xinfo( 'sqlite_autoindex_b2_2' );"
@@ -357,6 +352,7 @@ create table c (
     H.tabulate("pragma_table_list()", db(SQL`select * from pragma_table_list();`));
     // H.tabulate "pragma_table_xinfo( 'a' )", db SQL"select * from pragma_table_xinfo( 'a' );"
     H.tabulate("select * from dbay_relation_nrs;", db(SQL`select * from dbay_relation_nrs;`));
+    H.tabulate("dbay_field_clauses_1", db(SQL`select * from dbay_field_clauses_1;`));
     return null;
   };
 
