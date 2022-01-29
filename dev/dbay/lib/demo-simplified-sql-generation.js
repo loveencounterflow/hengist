@@ -259,7 +259,8 @@ create table b (
       H.tabulate("dbay_foreign_key_clauses", db(SQL`select * from dbay_foreign_key_clauses;`));
       H.tabulate("dbay_primary_key_clauses", db(SQL`select * from dbay_primary_key_clauses;`));
       // H.tabulate "dbay_field_clauses_1", db SQL"select * from dbay_field_clauses_1;"
-      return H.tabulate("dbay_unique_fields", db(SQL`select * from dbay_unique_fields;`));
+      H.tabulate("dbay_unique_fields", db(SQL`select * from dbay_unique_fields;`));
+      return H.tabulate("dbay_field_clauses", db(SQL`select * from dbay_field_clauses;`));
     })();
     (() => {
       var db;
@@ -296,7 +297,8 @@ create table b (
       H.tabulate("dbay_foreign_key_clauses", db(SQL`select * from dbay_foreign_key_clauses;`));
       H.tabulate("dbay_primary_key_clauses", db(SQL`select * from dbay_primary_key_clauses;`));
       // H.tabulate "dbay_field_clauses_1", db SQL"select * from dbay_field_clauses_1;"
-      return H.tabulate("dbay_unique_fields", db(SQL`select * from dbay_unique_fields;`));
+      H.tabulate("dbay_unique_fields", db(SQL`select * from dbay_unique_fields;`));
+      return H.tabulate("dbay_field_clauses", db(SQL`select * from dbay_field_clauses;`));
     })();
     return null;
   };
@@ -337,7 +339,13 @@ create table b2 (
 create table c (
     x integer primary key references a ( nr ),
     y text default 'whatever' references b ( name ),
-    z float references a ( baz ) );`);
+    z float references a ( baz ) );
+create view ab as select
+    3 * 4 as twelve,
+    x421,
+    nr
+  from a
+  order by x421;`);
     //.........................................................................................................
     // H.tabulate 'sqlite_schema', db SQL"select type, name, tbl_name from sqlite_schema;"
     // H.tabulate "pragma_table_info( 'a' )", db SQL"select * from pragma_table_info( 'a' );"
@@ -351,19 +359,17 @@ create table c (
     // H.tabulate "pragma_index_info( 'athisthat' )", db SQL"select * from pragma_index_info( 'athisthat' );"
     // H.tabulate "dbay_foreign_key_clauses_1", db SQL"select * from dbay_foreign_key_clauses_1;"
     // H.tabulate "dbay_foreign_key_clauses_2", db SQL"select * from dbay_foreign_key_clauses_2;"
-    H.tabulate("dbay_foreign_key_clauses", db(SQL`select * from dbay_foreign_key_clauses;`));
-    H.tabulate("dbay_primary_key_clauses", db(SQL`select * from dbay_primary_key_clauses;`));
     // H.tabulate "pragma_index_list( 'b2' )", db SQL"select * from pragma_index_list( 'b2' );"
     // H.tabulate "pragma_index_info( 'sqlite_autoindex_b2_2' )", db SQL"select * from pragma_index_info( 'sqlite_autoindex_b2_2' );"
     // H.tabulate "pragma_index_xinfo( 'sqlite_autoindex_b2_2' )", db SQL"select * from pragma_index_xinfo( 'sqlite_autoindex_b2_2' );"
-    H.tabulate("dbay_unique_fields", db(SQL`select * from dbay_unique_fields;`));
-    H.tabulate("dbay_fields", db(SQL`select * from dbay_fields;`));
-    H.tabulate("dbay_fields where is_unique", db(SQL`select * from dbay_fields where is_unique;`));
-    H.tabulate("pragma_table_list()", db(SQL`select * from pragma_table_list();`));
+    // H.tabulate "dbay_unique_fields", db SQL"select * from dbay_unique_fields;"
+    // H.tabulate "dbay_fields", db SQL"select * from dbay_fields;"
+    // H.tabulate "pragma_table_list()", db SQL"select * from pragma_table_list();"
     // H.tabulate "pragma_table_xinfo( 'a' )", db SQL"select * from pragma_table_xinfo( 'a' );"
     H.tabulate("select * from dbay_relation_nrs;", db(SQL`select * from dbay_relation_nrs;`));
-    H.tabulate("dbay_field_clauses_1", db(SQL`select * from dbay_field_clauses_1;`));
     H.tabulate("dbay_field_clauses", db(SQL`select * from dbay_field_clauses;`));
+    H.tabulate("dbay_foreign_key_clauses", db(SQL`select * from dbay_foreign_key_clauses;`));
+    H.tabulate("dbay_primary_key_clauses", db(SQL`select * from dbay_primary_key_clauses;`));
     return null;
   };
 
