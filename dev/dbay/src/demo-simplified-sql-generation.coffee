@@ -44,8 +44,23 @@ add_views = ( db ) ->
         # -- tl.wr             as tl_wr, -- without rowid
         # -- tl.strict         as tl_strict,
   db SQL"""
-    drop view if exists dbay_fields;
-    create view dbay_fields as select
+    drop view if exists dbay_unique_fields;
+    create view dbay_unique_fields as select
+        tl.schema                                           as schema,
+        tl.name                                             as table_name,
+        ii.name                                             as field_name,
+        il.seq                                              as index_idx,
+        il.name                                             as index_name
+      from pragma_table_list() as tl
+      join pragma_index_list( tl.name ) as il on ( true )
+      join pragma_index_info( il.name ) as ii on ( true )
+      where true
+        and ( il.origin = 'u' )
+        and ( il."unique" )
+      ;"""
+  db SQL"""
+    drop view if exists dbay_fields_1;
+    create view dbay_fields_1 as select
         tl.schema                                                   as schema,
         tl.name                                                     as table_name,
         tl.type                                                     as table_type,
@@ -61,6 +76,14 @@ add_views = ( db ) ->
       where true
         and ( tl.name not like 'sqlite_%' )
         and ( tl.name not like 'dbay_%' )
+      order by schema, table_name, field_nr;"""
+  db SQL"""
+    drop view if exists dbay_fields;
+    create view dbay_fields as select
+        fd.*,
+        case when uf.field_name is null then 0 else 1 end           as is_unique
+      from dbay_fields_1 as fd
+      left join dbay_unique_fields as uf using ( schema, table_name, field_name )
       order by schema, table_name, field_nr;"""
   db SQL"""
     drop view if exists dbay_field_clauses_1;
