@@ -53,15 +53,15 @@ add_views = ( db ) ->
     -- to keep that aspect from juggling around rows.
     drop view if exists #{schema}.dbay_relation_nrs;
     create view #{schema}.dbay_relation_nrs as with v1 as ( select
-        row_number() over ()  as nr,
-        type                  as type,
-        name                  as name
+        row_number() over ()                                        as nr,
+        type                                                        as type,
+        name                                                        as name
       from #{schema}.sqlite_schema )
     select
-        row_number() over ()  as nr,
-        type                  as type,
-        #{db.sql.L schema}    as schema,
-        name                  as name
+        row_number() over ()                                        as nr,
+        type                                                        as type,
+        #{db.sql.L schema}                                          as schema,
+        name                                                        as name
       from v1
       where true
         and ( type in ( 'table', 'view' ) )
@@ -87,9 +87,10 @@ add_views = ( db ) ->
     drop view if exists #{schema}.dbay_fields_1;
     create view #{schema}.dbay_fields_1 as select
         tl.schema                                                   as schema,
+        rn.nr                                                       as table_nr,
+        ti.cid                                                      as field_nr,
         tl.name                                                     as table_name,
         tl.type                                                     as table_type,
-        ti.cid                                                      as field_nr,
         ti.name                                                     as field_name,
         case ti.type when '' then 'any' else lower( ti.type ) end   as field_type,
         not ti."notnull"                                            as nullable,
@@ -98,10 +99,11 @@ add_views = ( db ) ->
         ti.hidden                                                   as hidden
       from #{schema}.pragma_table_list() as tl
       join #{schema}.pragma_table_xinfo( tl.name ) as ti on ( true )
+      join #{schema}.dbay_relation_nrs as rn on ( tl.schema = rn.schema and tl.name = rn.name )
       where true
         and ( tl.name not like 'sqlite_%' )
         and ( tl.name not like 'dbay_%' )
-      order by schema, table_name, field_nr;"""
+      order by schema, table_nr, field_nr;"""
   db SQL"""
     drop view if exists #{schema}.dbay_fields;
     create view #{schema}.dbay_fields as select
@@ -109,14 +111,15 @@ add_views = ( db ) ->
         case when uf.field_name is null then 0 else 1 end           as is_unique
       from #{schema}.dbay_fields_1 as fd
       left join #{schema}.dbay_unique_fields as uf using ( schema, table_name, field_name )
-      order by schema, table_name, field_nr;"""
+      order by schema, table_nr, field_nr;"""
   db SQL"""
     drop view if exists #{schema}.dbay_field_clauses_1;
     create view #{schema}.dbay_field_clauses_1 as select
         schema                                                      as schema,
+        table_nr                                                    as table_nr,
+        field_nr                                                    as field_nr,
         table_name                                                  as table_name,
         table_type                                                  as table_type,
-        field_nr                                                    as field_nr,
         field_name                                                  as field_name,
         field_type                                                  as field_type,
         nullable                                                    as nullable,
