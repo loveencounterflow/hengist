@@ -71,11 +71,11 @@ add_views = ( db ) ->
   db SQL"""
     drop view if exists dbay_unique_fields;
     create view dbay_unique_fields as select
-        tl.schema                                           as schema,
-        tl.name                                             as table_name,
-        ii.name                                             as field_name,
-        il.seq                                              as index_idx,
-        il.name                                             as index_name
+        tl.schema                                                   as schema,
+        tl.name                                                     as table_name,
+        ii.name                                                     as field_name,
+        il.seq                                                      as index_idx,
+        il.name                                                     as index_name
       from pragma_table_list() as tl
       join pragma_index_list( tl.name ) as il on ( true )
       join pragma_index_info( il.name ) as ii on ( true )
