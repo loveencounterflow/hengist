@@ -44,6 +44,31 @@ add_views = ( db ) ->
         # -- tl.wr             as tl_wr, -- without rowid
         # -- tl.strict         as tl_strict,
   db SQL"""
+    -- ### NOTE this is a best-effort approach to recover the correct ordering for DDL statements
+    -- from the data provided by SQLite. It is not quite clear whether the ordering in
+    -- `sqlite_schema` can be relied upon and whether it is safe to assume that adding `row_number()`
+    -- to the query will not accidentally change the ordering in absence of an `order by` clause.
+    -- To attain a modicum of reliability the filtering has been separated from the raw numbering
+    -- to keep that aspect from juggling around rows.
+    -- ### TAINT schema is hardcoded
+    drop view if exists dbay_relation_nrs;
+    create view dbay_relation_nrs as with v1 as ( select
+        row_number() over ()  as nr,
+        type                  as type,
+        name                  as name
+      from sqlite_schema )
+    select
+        row_number() over ()  as nr,
+        type                  as type,
+        'main'                as schema,
+        name                  as name
+      from v1
+      where true
+        and ( type in ( 'table', 'view' ) )
+        and ( name not like 'sqlite_%' )
+        and ( name not like 'dbay_%' )
+      order by nr;"""
+  db SQL"""
     drop view if exists dbay_unique_fields;
     create view dbay_unique_fields as select
         tl.schema                                           as schema,
@@ -289,9 +314,7 @@ add_views = ( db ) ->
     """
   #.........................................................................................................
   # H.tabulate 'sqlite_schema', db SQL"select type, name, tbl_name from sqlite_schema;"
-  # H.tabulate "pragma_table_list()", db SQL"select * from pragma_table_list();"
   # H.tabulate "pragma_table_info( 'a' )", db SQL"select * from pragma_table_info( 'a' );"
-  # H.tabulate "pragma_table_xinfo( 'a' )", db SQL"select * from pragma_table_xinfo( 'a' );"
   # # H.tabulate "pragma_index_list( 'a' )", db SQL"select * from pragma_index_list( 'a' );"
   # H.tabulate "pragma_foreign_key_list( 'b' )", db SQL"select * from pragma_foreign_key_list( 'b' );"
   # H.tabulate "pragma_foreign_key_list( 'c' )", db SQL"select * from pragma_foreign_key_list( 'c' );"
@@ -310,6 +333,10 @@ add_views = ( db ) ->
   # H.tabulate "pragma_index_xinfo( 'sqlite_autoindex_b2_2' )", db SQL"select * from pragma_index_xinfo( 'sqlite_autoindex_b2_2' );"
   H.tabulate "dbay_unique_fields", db SQL"select * from dbay_unique_fields;"
   H.tabulate "dbay_fields", db SQL"select * from dbay_fields;"
+  H.tabulate "dbay_fields where is_unique", db SQL"select * from dbay_fields where is_unique;"
+  H.tabulate "pragma_table_list()", db SQL"select * from pragma_table_list();"
+  # H.tabulate "pragma_table_xinfo( 'a' )", db SQL"select * from pragma_table_xinfo( 'a' );"
+  H.tabulate "select * from dbay_relation_nrs;", db SQL"select * from dbay_relation_nrs;"
   return null
 
 
