@@ -197,10 +197,20 @@ create view ${schema}.dbay_field_clauses_1 as select
     table_name                                                      as table_name,
     field_name                                                      as field_name,
     std_sql_i( field_name ) || ' ' || field_type                    as fc_name_type,
-    case when not nullable         then 'not null'             end  as fc_null,
-    case when is_unique            then 'unique'               end  as fc_unique,
-    case when fallback is not null then 'default ' || fallback end  as fc_default
+    case when not nullable         then ' not null'             else '' end  as fc_null,
+    case when is_unique            then ' unique'               else '' end  as fc_unique,
+    case when fallback is not null then ' default ' || fallback else '' end  as fc_default
   from ${schema}.dbay_fields
+  order by schema, table_nr, field_nr;`);
+    db(SQL`drop view if exists ${schema}.dbay_field_clauses;
+create view ${schema}.dbay_field_clauses as select
+    schema                                                          as schema,
+    table_nr                                                        as table_nr,
+    field_nr                                                        as field_nr,
+    table_name                                                      as table_name,
+    field_name                                                      as field_name,
+    fc_name_type || fc_null || fc_unique || fc_default              as field_clause
+  from ${schema}.dbay_field_clauses_1
   order by schema, table_nr, field_nr;`);
     return db;
   };
@@ -353,6 +363,7 @@ create table c (
     // H.tabulate "pragma_table_xinfo( 'a' )", db SQL"select * from pragma_table_xinfo( 'a' );"
     H.tabulate("select * from dbay_relation_nrs;", db(SQL`select * from dbay_relation_nrs;`));
     H.tabulate("dbay_field_clauses_1", db(SQL`select * from dbay_field_clauses_1;`));
+    H.tabulate("dbay_field_clauses", db(SQL`select * from dbay_field_clauses;`));
     return null;
   };
 
