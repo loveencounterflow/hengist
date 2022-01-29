@@ -40,6 +40,7 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 add_views = ( db ) ->
   db.create_stdlib()
+  schema = 'main'
         # -- tl.ncol           as tl_ncol,
         # -- tl.wr             as tl_wr, -- without rowid
         # -- tl.strict         as tl_strict,
@@ -50,17 +51,16 @@ add_views = ( db ) ->
     -- to the query will not accidentally change the ordering in absence of an `order by` clause.
     -- To attain a modicum of reliability the filtering has been separated from the raw numbering
     -- to keep that aspect from juggling around rows.
-    -- ### TAINT schema is hardcoded
-    drop view if exists dbay_relation_nrs;
-    create view dbay_relation_nrs as with v1 as ( select
+    drop view if exists #{schema}.dbay_relation_nrs;
+    create view #{schema}.dbay_relation_nrs as with v1 as ( select
         row_number() over ()  as nr,
         type                  as type,
         name                  as name
-      from sqlite_schema )
+      from #{schema}.sqlite_schema )
     select
         row_number() over ()  as nr,
         type                  as type,
-        'main'                as schema,
+        #{db.sql.L schema}    as schema,
         name                  as name
       from v1
       where true
@@ -69,23 +69,23 @@ add_views = ( db ) ->
         and ( name not like 'dbay_%' )
       order by nr;"""
   db SQL"""
-    drop view if exists dbay_unique_fields;
-    create view dbay_unique_fields as select
+    drop view if exists #{schema}.dbay_unique_fields;
+    create view #{schema}.dbay_unique_fields as select
         tl.schema                                                   as schema,
         tl.name                                                     as table_name,
         ii.name                                                     as field_name,
         il.seq                                                      as index_idx,
         il.name                                                     as index_name
-      from pragma_table_list() as tl
-      join pragma_index_list( tl.name ) as il on ( true )
-      join pragma_index_info( il.name ) as ii on ( true )
+      from #{schema}.pragma_table_list() as tl
+      join #{schema}.pragma_index_list( tl.name ) as il on ( true )
+      join #{schema}.pragma_index_info( il.name ) as ii on ( true )
       where true
         and ( il.origin = 'u' )
         and ( il."unique" )
       ;"""
   db SQL"""
-    drop view if exists dbay_fields_1;
-    create view dbay_fields_1 as select
+    drop view if exists #{schema}.dbay_fields_1;
+    create view #{schema}.dbay_fields_1 as select
         tl.schema                                                   as schema,
         tl.name                                                     as table_name,
         tl.type                                                     as table_type,
@@ -96,23 +96,23 @@ add_views = ( db ) ->
         ti.dflt_value                                               as fallback,
         case ti.pk when 0 then null else ti.pk end                  as pk_nr,
         ti.hidden                                                   as hidden
-      from pragma_table_list() as tl
-      join pragma_table_xinfo( tl.name ) as ti on ( true )
+      from #{schema}.pragma_table_list() as tl
+      join #{schema}.pragma_table_xinfo( tl.name ) as ti on ( true )
       where true
         and ( tl.name not like 'sqlite_%' )
         and ( tl.name not like 'dbay_%' )
       order by schema, table_name, field_nr;"""
   db SQL"""
-    drop view if exists dbay_fields;
-    create view dbay_fields as select
+    drop view if exists #{schema}.dbay_fields;
+    create view #{schema}.dbay_fields as select
         fd.*,
         case when uf.field_name is null then 0 else 1 end           as is_unique
-      from dbay_fields_1 as fd
-      left join dbay_unique_fields as uf using ( schema, table_name, field_name )
+      from #{schema}.dbay_fields_1 as fd
+      left join #{schema}.dbay_unique_fields as uf using ( schema, table_name, field_name )
       order by schema, table_name, field_nr;"""
   db SQL"""
-    drop view if exists dbay_field_clauses_1;
-    create view dbay_field_clauses_1 as select
+    drop view if exists #{schema}.dbay_field_clauses_1;
+    create view #{schema}.dbay_field_clauses_1 as select
         schema                                                      as schema,
         table_name                                                  as table_name,
         table_type                                                  as table_type,
@@ -125,11 +125,11 @@ add_views = ( db ) ->
         hidden                                                      as hidden,
         std_sql_i( field_name ) || ' ' || field_type                as field_clause_1,
         case when nullable then 'null' else 'not null' end          as field_clause_2
-      from dbay_fields
+      from #{schema}.dbay_fields
       order by schema, table_name, field_nr;"""
   db SQL"""
-    drop view if exists dbay_foreign_key_clauses_1;
-    create view dbay_foreign_key_clauses_1 as select
+    drop view if exists #{schema}.dbay_foreign_key_clauses_1;
+    create view #{schema}.dbay_foreign_key_clauses_1 as select
         fk.id                                                       as fk_id,
         fk.seq                                                      as fk_idx,
         tl.schema                                                   as schema,
@@ -137,30 +137,30 @@ add_views = ( db ) ->
         fk."from"                                                   as from_field_name,
         fk."table"                                                  as to_table_name,
         fk."to"                                                     as to_field_name
-      from pragma_table_list() as tl
-      join pragma_foreign_key_list( tl.name ) as fk
+      from #{schema}.pragma_table_list() as tl
+      join #{schema}.pragma_foreign_key_list( tl.name ) as fk
       where true
         and ( tl.name not like 'sqlite_%' )
         and ( tl.name not like 'dbay_%' )
       order by schema, from_table_name, fk_id, fk_idx;"""
   db SQL"""
-    drop view if exists dbay_foreign_key_clauses_2;
-    create view dbay_foreign_key_clauses_2 as select distinct
+    drop view if exists #{schema}.dbay_foreign_key_clauses_2;
+    create view #{schema}.dbay_foreign_key_clauses_2 as select distinct
         fk_id                                                       as fk_id,
         schema                                                      as schema,
         from_table_name                                             as from_table_name,
         group_concat( std_sql_i( from_field_name ), ', ' ) over w   as from_field_names,
         to_table_name                                               as to_table_name,
         group_concat( std_sql_i(   to_field_name ), ', ' ) over w   as to_field_names
-      from dbay_foreign_key_clauses_1
+      from #{schema}.dbay_foreign_key_clauses_1
       window w as (
         partition by schema, from_table_name, fk_id
         order by fk_idx
         rows between unbounded preceding and unbounded following )
       order by schema, from_table_name, fk_id, fk_idx;"""
   db SQL"""
-    drop view if exists dbay_foreign_key_clauses;
-    create view dbay_foreign_key_clauses as select distinct
+    drop view if exists #{schema}.dbay_foreign_key_clauses;
+    create view #{schema}.dbay_foreign_key_clauses as select distinct
         schema                                                      as schema,
         from_table_name                                             as table_name,
         group_concat(
@@ -168,19 +168,19 @@ add_views = ( db ) ->
             || std_sql_i( to_table_name )
             || ' ( ' || to_field_names || ' )',
             ',' || char( 10 ) ) over w                              as fk_clauses
-      from dbay_foreign_key_clauses_2
+      from #{schema}.dbay_foreign_key_clauses_2
       window w as (
         partition by schema, from_table_name
         order by fk_id desc
         rows between unbounded preceding and unbounded following )
       order by schema, from_table_name, fk_id;"""
   db SQL"""
-    drop view if exists dbay_primary_key_clauses_1;
-    create view dbay_primary_key_clauses_1 as select distinct
+    drop view if exists #{schema}.dbay_primary_key_clauses_1;
+    create view #{schema}.dbay_primary_key_clauses_1 as select distinct
         schema                                                      as schema,
         table_name                                                  as table_name,
         group_concat( std_sql_i( field_name ), ', ' ) over w        as field_names
-      from dbay_fields
+      from #{schema}.dbay_fields
       where pk_nr is not null
       window w as (
         partition by schema, table_name
@@ -188,13 +188,13 @@ add_views = ( db ) ->
         rows between unbounded preceding and unbounded following )
       order by schema, table_name;"""
   db SQL"""
-    drop view if exists dbay_primary_key_clauses;
-    create view dbay_primary_key_clauses as select distinct
+    drop view if exists #{schema}.dbay_primary_key_clauses;
+    create view #{schema}.dbay_primary_key_clauses as select distinct
         schema                                                      as schema,
         table_name                                                  as table_name,
         group_concat(
           'primary key ( ' || field_names || ' )' ) over w          as pk_clause
-      from dbay_primary_key_clauses_1
+      from #{schema}.dbay_primary_key_clauses_1
       window w as (
         partition by schema, table_name
         rows between unbounded preceding and unbounded following )
