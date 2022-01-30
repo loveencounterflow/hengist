@@ -224,9 +224,7 @@ add_views = ( db ) ->
         ct.table_name                                                   as table_name,
         ct.create_start
           || group_concat( fc.field_clause, ', ' || char( 10 ) ) over w
-          || ct.create_end
-
-                                      as create_table_statement
+          || ct.create_end                                              as create_table_statement
       from #{schema}.dbay_create_table_clauses as ct
       join #{schema}.dbay_field_clauses as fc using ( table_nr, table_name )
       window w as (
