@@ -124,6 +124,7 @@ create view ${schema}.dbay_foreign_key_clauses_1 as select
     fk.id                                                       as fk_id,
     fk.seq                                                      as fk_idx,
     tb.schema                                                   as schema,
+    tb.table_nr                                                 as from_table_nr,
     tb.table_name                                               as from_table_name,
     fk."from"                                                   as from_field_name,
     fk."table"                                                  as to_table_name,
@@ -135,6 +136,7 @@ create view ${schema}.dbay_foreign_key_clauses_1 as select
 create view ${schema}.dbay_foreign_key_clauses_2 as select distinct
     fk_id                                                       as fk_id,
     schema                                                      as schema,
+    from_table_nr                                               as from_table_nr,
     from_table_name                                             as from_table_name,
     group_concat( std_sql_i( from_field_name ), ', ' ) over w   as from_field_names,
     to_table_name                                               as to_table_name,
@@ -148,6 +150,7 @@ create view ${schema}.dbay_foreign_key_clauses_2 as select distinct
     db(SQL`drop view if exists ${schema}.dbay_foreign_key_clauses;
 create view ${schema}.dbay_foreign_key_clauses as select distinct
     schema                                                      as schema,
+    from_table_nr                                               as table_nr,
     from_table_name                                             as table_name,
     group_concat(
       '  foreign key ( ' || from_field_names || ' ) references '
@@ -163,6 +166,7 @@ create view ${schema}.dbay_foreign_key_clauses as select distinct
     db(SQL`drop view if exists ${schema}.dbay_primary_key_clauses_1;
 create view ${schema}.dbay_primary_key_clauses_1 as select distinct
     schema                                                      as schema,
+    table_nr                                                    as table_nr,
     table_name                                                  as table_name,
     group_concat( std_sql_i( field_name ), ', ' ) over w        as field_names
   from ${schema}.dbay_fields
@@ -175,6 +179,7 @@ create view ${schema}.dbay_primary_key_clauses_1 as select distinct
     db(SQL`drop view if exists ${schema}.dbay_primary_key_clauses;
 create view ${schema}.dbay_primary_key_clauses as select distinct
     schema                                                      as schema,
+    table_nr                                                    as table_nr,
     table_name                                                  as table_name,
     '  primary key ( ' || field_names || ' )'                   as pk_clause
   from ${schema}.dbay_primary_key_clauses_1
@@ -186,7 +191,7 @@ create view ${schema}.dbay_field_clauses_1 as select
     field_nr                                                        as field_nr,
     table_name                                                      as table_name,
     field_name                                                      as field_name,
-    '    ' || std_sql_i( field_name ) || ' ' || field_type                    as fc_name_type,
+    '    ' || std_sql_i( field_name ) || ' ' || field_type                   as fc_name_type,
     case when not nullable         then ' not null'             else '' end  as fc_null,
     case when is_unique            then ' unique'               else '' end  as fc_unique,
     case when fallback is not null then ' default ' || fallback else '' end  as fc_default
@@ -205,6 +210,7 @@ create view ${schema}.dbay_field_clauses as select
     db(SQL`drop view if exists ${schema}.dbay_create_table_clauses;
 create view ${schema}.dbay_create_table_clauses as select
     schema                                                            as schema,
+    table_nr                                                          as table_nr,
     table_name                                                        as table_name,
     'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )  as create_start,
     ' );'                                                             as create_end
