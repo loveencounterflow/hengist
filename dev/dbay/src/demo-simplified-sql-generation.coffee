@@ -51,6 +51,8 @@ add_views = ( db ) ->
     -- to the query will not accidentally change the ordering in absence of an `order by` clause.
     -- To attain a modicum of reliability the filtering has been separated from the raw numbering
     -- to keep that aspect from juggling around rows.
+    -- ### TAINT replace existing `select from pragma_table_list` by `select from dbay_relation_nrs`
+    -- ### TAINT consider to always list `table_nr` along with `table_name` or to omit it where not needed (?)
     drop view if exists #{schema}.dbay_relation_nrs;
     create view #{schema}.dbay_relation_nrs as with v1 as ( select
         row_number() over ()                                        as table_nr,
