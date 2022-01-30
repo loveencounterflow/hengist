@@ -84,13 +84,13 @@ select
   order by table_nr;`);
     db(SQL`drop view if exists ${schema}.dbay_unique_fields;
 create view ${schema}.dbay_unique_fields as select
-    tl.schema                                                   as schema,
-    tl.name                                                     as table_name,
+    rn.schema                                                   as schema,
+    rn.table_name                                               as table_name,
     ii.name                                                     as field_name,
     il.seq                                                      as index_idx,
     il.name                                                     as index_name
-  from ${schema}.pragma_table_list() as tl
-  join ${schema}.pragma_index_list( tl.name ) as il on ( true )
+  from ${schema}.dbay_relation_nrs as rn
+  join ${schema}.pragma_index_list( rn.table_name ) as il on ( true )
   join ${schema}.pragma_index_info( il.name ) as ii on ( true )
   where true
     and ( il.origin = 'u' )
@@ -98,23 +98,19 @@ create view ${schema}.dbay_unique_fields as select
   ;`);
     db(SQL`drop view if exists ${schema}.dbay_fields_1;
 create view ${schema}.dbay_fields_1 as select
-    tl.schema                                                   as schema,
+    rn.schema                                                   as schema,
     rn.table_nr                                                 as table_nr,
     ti.cid                                                      as field_nr,
-    tl.name                                                     as table_name,
-    tl.type                                                     as table_type,
+    rn.table_name                                               as table_name,
+    rn.type                                                     as table_type,
     ti.name                                                     as field_name,
     case ti.type when '' then 'any' else lower( ti.type ) end   as field_type,
     not ti."notnull"                                            as nullable,
     ti.dflt_value                                               as fallback,
     case ti.pk when 0 then null else ti.pk end                  as pk_nr,
     ti.hidden                                                   as hidden
-  from ${schema}.pragma_table_list() as tl
-  join ${schema}.pragma_table_xinfo( tl.name ) as ti on ( true )
-  join ${schema}.dbay_relation_nrs as rn on ( tl.schema = rn.schema and tl.name = rn.table_name )
-  where true
-    and ( tl.name not like 'sqlite_%' )
-    and ( tl.name not like 'dbay_%' )
+  from ${schema}.dbay_relation_nrs as rn
+  join ${schema}.pragma_table_xinfo( rn.table_name ) as ti on ( true )
   order by schema, table_nr, field_nr;`);
     db(SQL`drop view if exists ${schema}.dbay_fields;
 create view ${schema}.dbay_fields as select
@@ -127,16 +123,13 @@ create view ${schema}.dbay_fields as select
 create view ${schema}.dbay_foreign_key_clauses_1 as select
     fk.id                                                       as fk_id,
     fk.seq                                                      as fk_idx,
-    tl.schema                                                   as schema,
-    tl.name                                                     as from_table_name,
+    rn.schema                                                   as schema,
+    rn.table_name                                               as from_table_name,
     fk."from"                                                   as from_field_name,
     fk."table"                                                  as to_table_name,
     fk."to"                                                     as to_field_name
-  from ${schema}.pragma_table_list() as tl
-  join ${schema}.pragma_foreign_key_list( tl.name ) as fk
-  where true
-    and ( tl.name not like 'sqlite_%' )
-    and ( tl.name not like 'dbay_%' )
+  from ${schema}.dbay_relation_nrs as rn
+  join ${schema}.pragma_foreign_key_list( rn.table_name ) as fk
   order by schema, from_table_name, fk_id, fk_idx;`);
     db(SQL`drop view if exists ${schema}.dbay_foreign_key_clauses_2;
 create view ${schema}.dbay_foreign_key_clauses_2 as select distinct
@@ -234,8 +227,13 @@ create view ${schema}.dbay_create_table_statements as select distinct
   window w as (
     partition by ct.schema, ct.table_name
     order by fc.field_nr
-    rows between unbounded preceding and unbounded following )
-;`);
+    rows between unbounded preceding and unbounded following );`);
+    // db SQL"""
+    //   drop view if exists #{schema}.dbay_db_dump;
+    //   create view #{schema}.dbay_db_dump as select
+    //     'pragma foreign_keys=off;'
+    //     'begin transaction;'
+    //   ;"""
     return db;
   };
 
