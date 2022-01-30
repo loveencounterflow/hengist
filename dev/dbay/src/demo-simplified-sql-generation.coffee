@@ -44,6 +44,7 @@ add_views = ( db ) ->
         # -- tl.ncol           as tl_ncol,
         # -- tl.wr             as tl_wr, -- without rowid
         # -- tl.strict         as tl_strict,
+  #---------------------------------------------------------------------------------------------------------
   db SQL"""
     -- ### NOTE this is a best-effort approach to recover the correct ordering for DDL statements
     -- from the data provided by SQLite. It is not quite clear whether the ordering in
@@ -70,6 +71,7 @@ add_views = ( db ) ->
         and ( table_name not like 'sqlite_%' )
         and ( table_name not like 'dbay_%' )
       order by table_nr;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_unique_fields;
     create view #{schema}.dbay_unique_fields as select
@@ -85,6 +87,7 @@ add_views = ( db ) ->
         and ( il.origin = 'u' )
         and ( il."unique" )
       ;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_fields_1;
     create view #{schema}.dbay_fields_1 as select
@@ -102,6 +105,7 @@ add_views = ( db ) ->
       from #{schema}.dbay_tables as tb
       join #{schema}.pragma_table_xinfo( tb.table_name ) as ti on ( true )
       order by schema, table_nr, field_nr;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_fields;
     create view #{schema}.dbay_fields as select
@@ -110,6 +114,7 @@ add_views = ( db ) ->
       from #{schema}.dbay_fields_1 as fd
       left join #{schema}.dbay_unique_fields as uf using ( schema, table_name, field_name )
       order by schema, table_nr, field_nr;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_foreign_key_clauses_1;
     create view #{schema}.dbay_foreign_key_clauses_1 as select
@@ -124,6 +129,7 @@ add_views = ( db ) ->
       from #{schema}.dbay_tables as tb
       join #{schema}.pragma_foreign_key_list( tb.table_name ) as fk
       order by schema, from_table_name, fk_id, fk_idx;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_foreign_key_clauses_2;
     create view #{schema}.dbay_foreign_key_clauses_2 as select distinct
@@ -140,6 +146,7 @@ add_views = ( db ) ->
         order by fk_idx
         rows between unbounded preceding and unbounded following )
       order by schema, from_table_name, fk_id, fk_idx;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_foreign_key_clauses;
     create view #{schema}.dbay_foreign_key_clauses as select distinct
@@ -157,6 +164,7 @@ add_views = ( db ) ->
         order by fk_id desc
         rows between unbounded preceding and unbounded following )
       order by schema, from_table_name, fk_id;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_foreign_key_clauses_3;
     create view #{schema}.dbay_foreign_key_clauses_3 as select -- distinct
@@ -166,6 +174,7 @@ add_views = ( db ) ->
       window w as (
         partition by schema, from_table_name )
       order by schema, from_table_name, fk_id;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_foreign_key_clauses_MIRAGE_3;
     create view #{schema}.dbay_foreign_key_clauses_MIRAGE_3 as select -- distinct
@@ -183,6 +192,7 @@ add_views = ( db ) ->
         order by fk_id desc
         rows between unbounded preceding and unbounded following )
       order by schema, from_table_name, fk_id;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_primary_key_clauses_1;
     create view #{schema}.dbay_primary_key_clauses_1 as select distinct
@@ -197,6 +207,7 @@ add_views = ( db ) ->
         order by pk_nr
         rows between unbounded preceding and unbounded following )
       order by schema, table_name;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_primary_key_clauses;
     create view #{schema}.dbay_primary_key_clauses as select distinct
@@ -206,6 +217,7 @@ add_views = ( db ) ->
         '  primary key ( ' || field_names || ' )'                                 as pk_clause
       from #{schema}.dbay_primary_key_clauses_1
       order by schema, table_name;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_field_clauses_1;
     create view #{schema}.dbay_field_clauses_1 as select
@@ -220,6 +232,7 @@ add_views = ( db ) ->
         case when fallback is not null then ' default ' || fallback else '' end   as fc_default
       from #{schema}.dbay_fields
       order by schema, table_nr, field_nr;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_field_clauses;
     create view #{schema}.dbay_field_clauses as select
@@ -231,6 +244,7 @@ add_views = ( db ) ->
         fc_name_type || fc_null || fc_unique || fc_default                        as field_clause
       from #{schema}.dbay_field_clauses_1
       order by schema, table_nr, field_nr;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_create_table_clauses;
     create view #{schema}.dbay_create_table_clauses as select
@@ -240,6 +254,7 @@ add_views = ( db ) ->
         'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )          as create_start,
         ' );'                                                                     as create_end
       from #{schema}.dbay_tables;"""
+  #-------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_create_table_statements;
     create view #{schema}.dbay_create_table_statements as select distinct
@@ -260,6 +275,7 @@ add_views = ( db ) ->
         partition by ct.schema, ct.table_name
         order by fc.field_nr
         rows between unbounded preceding and unbounded following );"""
+  #-------------------------------------------------------------------------------------------------------
   # db SQL"""
   #   drop view if exists #{schema}.dbay_db_dump;
   #   create view #{schema}.dbay_db_dump as select
