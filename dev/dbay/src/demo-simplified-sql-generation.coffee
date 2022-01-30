@@ -158,6 +158,32 @@ add_views = ( db ) ->
         rows between unbounded preceding and unbounded following )
       order by schema, from_table_name, fk_id;"""
   db SQL"""
+    drop view if exists #{schema}.dbay_foreign_key_clauses_3;
+    create view #{schema}.dbay_foreign_key_clauses_3 as select -- distinct
+        *,
+        count(*) over w as line_count
+      from #{schema}.dbay_foreign_key_clauses_2
+      window w as (
+        partition by schema, from_table_name )
+      order by schema, from_table_name, fk_id;"""
+  db SQL"""
+    drop view if exists #{schema}.dbay_foreign_key_clauses_MIRAGE_3;
+    create view #{schema}.dbay_foreign_key_clauses_MIRAGE_3 as select -- distinct
+        schema                                                                    as schema,
+        from_table_nr                                                             as table_nr,
+        from_table_name                                                           as table_name,
+        case when row_number() over w = line_count then 'XXX' else '---' end as xxx,
+        row_number() over w                                                       as line_nr,
+          '  foreign key ( ' || from_field_names || ' ) references '
+            || std_sql_i( to_table_name )
+            || ' ( ' || to_field_names || ' )'                                    as fk_clause
+      from #{schema}.dbay_foreign_key_clauses_3
+      window w as (
+        partition by schema, from_table_name
+        order by fk_id desc
+        rows between unbounded preceding and unbounded following )
+      order by schema, from_table_name, fk_id;"""
+  db SQL"""
     drop view if exists #{schema}.dbay_primary_key_clauses_1;
     create view #{schema}.dbay_primary_key_clauses_1 as select distinct
         schema                                                                    as schema,
@@ -252,7 +278,9 @@ show_overview = ( db ) ->
   H.tabulate "#{schema}.dbay_fields",                   db SQL"select * from #{schema}.dbay_fields"
   H.tabulate "#{schema}.dbay_foreign_key_clauses_1",    db SQL"select * from #{schema}.dbay_foreign_key_clauses_1"
   H.tabulate "#{schema}.dbay_foreign_key_clauses_2",    db SQL"select * from #{schema}.dbay_foreign_key_clauses_2"
+  H.tabulate "#{schema}.dbay_foreign_key_clauses_3",    db SQL"select * from #{schema}.dbay_foreign_key_clauses_3"
   H.tabulate "#{schema}.dbay_foreign_key_clauses",      db SQL"select * from #{schema}.dbay_foreign_key_clauses"
+  H.tabulate "#{schema}.dbay_foreign_key_clauses_MIRAGE_3",      db SQL"select * from #{schema}.dbay_foreign_key_clauses_MIRAGE_3"
   H.tabulate "#{schema}.dbay_primary_key_clauses_1",    db SQL"select * from #{schema}.dbay_primary_key_clauses_1"
   H.tabulate "#{schema}.dbay_primary_key_clauses",      db SQL"select * from #{schema}.dbay_primary_key_clauses"
   H.tabulate "#{schema}.dbay_field_clauses_1",          db SQL"select * from #{schema}.dbay_field_clauses_1"
