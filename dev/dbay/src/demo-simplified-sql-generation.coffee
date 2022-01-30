@@ -151,7 +151,7 @@ add_views = ( db ) ->
         schema                                                      as schema,
         from_table_name                                             as table_name,
         group_concat(
-          'foreign key ( ' || from_field_names || ' ) references '
+          '  foreign key ( ' || from_field_names || ' ) references '
             || std_sql_i( to_table_name )
             || ' ( ' || to_field_names || ' )',
             ',' || char( 10 ) ) over w                              as fk_clauses
@@ -211,7 +211,6 @@ add_views = ( db ) ->
     drop view if exists #{schema}.dbay_create_table_clauses;
     create view #{schema}.dbay_create_table_clauses as select
         schema                                                            as schema,
-        table_nr                                                          as table_nr,
         table_name                                                        as table_name,
         'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )  as create_start,
         ' );'                                                             as create_end
@@ -220,13 +219,20 @@ add_views = ( db ) ->
     drop view if exists #{schema}.dbay_create_table_statements;
     create view #{schema}.dbay_create_table_statements as select distinct
         ct.schema                                                       as schema,
-        ct.table_nr                                                     as table_nr,
+        rn.table_nr                                                     as table_nr,
         ct.table_name                                                   as table_name,
         ct.create_start
           || group_concat( fc.field_clause, ', ' || char( 10 ) ) over w
-          || ct.create_end                                              as create_table_statement
+          || case when pk.table_name is null then '' else ',' || char( 10 ) || pk.pk_clause end
+          || case when fk.table_name is null then '' else ',' || char( 10 ) || fk.fk_clauses end
+          || ct.create_end
+
+                                      as create_table_statement
       from #{schema}.dbay_create_table_clauses as ct
-      join #{schema}.dbay_field_clauses as fc using ( table_nr, table_name )
+      join #{schema}.dbay_field_clauses as fc using ( schema, table_name )
+      left join #{schema}.dbay_primary_key_clauses as pk using ( schema, table_name )
+      left join #{schema}.dbay_foreign_key_clauses as fk using ( schema, table_name )
+      join #{schema}.dbay_relation_nrs as rn using ( schema, table_name )
       window w as (
         partition by ct.schema, ct.table_name
         order by fc.field_nr
