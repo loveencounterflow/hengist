@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, FS, GUY, H, PATH, SQL, Sql, add_views, badge, debug, echo, equals, freeze, help, info, isa, lets, rpr, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, FS, GUY, H, PATH, SQL, Sql, add_views, badge, debug, echo, equals, freeze, help, info, isa, lets, rpr, show_overview, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -244,6 +244,27 @@ create view ${schema}.dbay_create_table_statements as select distinct
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  show_overview = function(db) {
+    var schema;
+    info('#############################################################################');
+    schema = 'main';
+    H.tabulate(`${schema}.dbay_tables`, db(SQL`select * from ${schema}.dbay_tables`));
+    H.tabulate(`${schema}.dbay_unique_fields`, db(SQL`select * from ${schema}.dbay_unique_fields`));
+    H.tabulate(`${schema}.dbay_fields_1`, db(SQL`select * from ${schema}.dbay_fields_1`));
+    H.tabulate(`${schema}.dbay_fields`, db(SQL`select * from ${schema}.dbay_fields`));
+    H.tabulate(`${schema}.dbay_foreign_key_clauses_1`, db(SQL`select * from ${schema}.dbay_foreign_key_clauses_1`));
+    H.tabulate(`${schema}.dbay_foreign_key_clauses_2`, db(SQL`select * from ${schema}.dbay_foreign_key_clauses_2`));
+    H.tabulate(`${schema}.dbay_foreign_key_clauses`, db(SQL`select * from ${schema}.dbay_foreign_key_clauses`));
+    H.tabulate(`${schema}.dbay_primary_key_clauses_1`, db(SQL`select * from ${schema}.dbay_primary_key_clauses_1`));
+    H.tabulate(`${schema}.dbay_primary_key_clauses`, db(SQL`select * from ${schema}.dbay_primary_key_clauses`));
+    H.tabulate(`${schema}.dbay_field_clauses_1`, db(SQL`select * from ${schema}.dbay_field_clauses_1`));
+    H.tabulate(`${schema}.dbay_field_clauses`, db(SQL`select * from ${schema}.dbay_field_clauses`));
+    H.tabulate(`${schema}.dbay_create_table_clauses`, db(SQL`select * from ${schema}.dbay_create_table_clauses`));
+    H.tabulate(`${schema}.dbay_create_table_statements`, db(SQL`select schema, table_nr, table_name, substring( create_table_statement, 1, 100 ) from ${schema}.dbay_create_table_statements`));
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.demo_two_kinds_of_foreign_keys = function(cfg) {
     var trycatch;
     trycatch = (ref, db, sql) => {
@@ -413,6 +434,7 @@ create view ab as select
     for (row of ref1) {
       urge(row.schema, row.table_nr, '\n' + row.create_table_statement);
     }
+    show_overview(db);
     return null;
   };
 
