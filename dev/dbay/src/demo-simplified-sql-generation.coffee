@@ -225,9 +225,7 @@ add_views = ( db ) ->
           || group_concat( fc.field_clause, ', ' || char( 10 ) ) over w
           || case when pk.table_name is null then '' else ',' || char( 10 ) || pk.pk_clause end
           || case when fk.table_name is null then '' else ',' || char( 10 ) || fk.fk_clauses end
-          || ct.create_end
-
-                                      as create_table_statement
+          || ct.create_end                                              as create_table_statement
       from #{schema}.dbay_create_table_clauses as ct
       join #{schema}.dbay_field_clauses as fc using ( schema, table_name )
       left join #{schema}.dbay_primary_key_clauses as pk using ( schema, table_name )
