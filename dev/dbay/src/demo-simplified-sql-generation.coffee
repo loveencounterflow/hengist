@@ -210,6 +210,24 @@ add_views = ( db ) ->
         fc_name_type || fc_null || fc_unique || fc_default              as field_clause
       from #{schema}.dbay_field_clauses_1
       order by schema, table_nr, field_nr;"""
+  db SQL"""
+    drop view if exists #{schema}.dbay_create_table_clauses;
+    create view #{schema}.dbay_create_table_clauses as select
+        table_nr                                                          as table_nr,
+        schema                                                            as schema,
+        table_name                                                        as table_name,
+        'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )  as ctc_start,
+        ' );'                                                             as ctc_end
+      from #{schema}.dbay_relation_nrs;"""
+  # db SQL"""
+  #   drop view if exists #{schema}.dbay_create_table_statements;
+  #   create view #{schema}.dbay_create_table_statements as select
+  #       rn.nr                                                           as nr,
+  #       rn.schema                                                       as schema,
+  #       rn.table_name                                                   as table_name,
+  #     from #{schema}.dbay_relation_nrs as rn
+  #     join #{schema}.dbay_field_clauses as fc
+  #   ;"""
   return db
 
 #-----------------------------------------------------------------------------------------------------------
@@ -354,6 +372,8 @@ add_views = ( db ) ->
   H.tabulate "dbay_field_clauses", db SQL"select * from dbay_field_clauses;"
   H.tabulate "dbay_foreign_key_clauses", db SQL"select * from dbay_foreign_key_clauses;"
   H.tabulate "dbay_primary_key_clauses", db SQL"select * from dbay_primary_key_clauses;"
+  H.tabulate "dbay_create_table_clauses", db SQL"select * from dbay_create_table_clauses;"
+  H.tabulate "dbay_create_table_statements", db SQL"select * from dbay_create_table_statements;"
   return null
 
 
