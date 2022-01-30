@@ -65,21 +65,21 @@
 -- to keep that aspect from juggling around rows.
 drop view if exists ${schema}.dbay_relation_nrs;
 create view ${schema}.dbay_relation_nrs as with v1 as ( select
-    row_number() over ()                                        as nr,
+    row_number() over ()                                        as table_nr,
     type                                                        as type,
-    name                                                        as name
+    name                                                        as table_name
   from ${schema}.sqlite_schema )
 select
-    row_number() over ()                                        as nr,
+    row_number() over ()                                        as table_nr,
     type                                                        as type,
     ${db.sql.L(schema)}                                          as schema,
-    name                                                        as name
+    table_name                                                  as table_name
   from v1
   where true
     and ( type in ( 'table', 'view' ) )
-    and ( name not like 'sqlite_%' )
-    and ( name not like 'dbay_%' )
-  order by nr;`);
+    and ( table_name not like 'sqlite_%' )
+    and ( table_name not like 'dbay_%' )
+  order by table_nr;`);
     db(SQL`drop view if exists ${schema}.dbay_unique_fields;
 create view ${schema}.dbay_unique_fields as select
     tl.schema                                                   as schema,
@@ -97,7 +97,7 @@ create view ${schema}.dbay_unique_fields as select
     db(SQL`drop view if exists ${schema}.dbay_fields_1;
 create view ${schema}.dbay_fields_1 as select
     tl.schema                                                   as schema,
-    rn.nr                                                       as table_nr,
+    rn.table_nr                                                 as table_nr,
     ti.cid                                                      as field_nr,
     tl.name                                                     as table_name,
     tl.type                                                     as table_type,
@@ -109,7 +109,7 @@ create view ${schema}.dbay_fields_1 as select
     ti.hidden                                                   as hidden
   from ${schema}.pragma_table_list() as tl
   join ${schema}.pragma_table_xinfo( tl.name ) as ti on ( true )
-  join ${schema}.dbay_relation_nrs as rn on ( tl.schema = rn.schema and tl.name = rn.name )
+  join ${schema}.dbay_relation_nrs as rn on ( tl.schema = rn.schema and tl.name = rn.table_name )
   where true
     and ( tl.name not like 'sqlite_%' )
     and ( tl.name not like 'dbay_%' )
@@ -212,6 +212,23 @@ create view ${schema}.dbay_field_clauses as select
     fc_name_type || fc_null || fc_unique || fc_default              as field_clause
   from ${schema}.dbay_field_clauses_1
   order by schema, table_nr, field_nr;`);
+    db(SQL`drop view if exists ${schema}.dbay_create_table_clauses;
+create view ${schema}.dbay_create_table_clauses as select
+    table_nr                                                          as table_nr,
+    schema                                                            as schema,
+    table_name                                                        as table_name,
+    'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )  as ctc_start,
+    ' );'                                                             as ctc_end
+  from ${schema}.dbay_relation_nrs;`);
+    // db SQL"""
+    //   drop view if exists #{schema}.dbay_create_table_statements;
+    //   create view #{schema}.dbay_create_table_statements as select
+    //       rn.nr                                                           as nr,
+    //       rn.schema                                                       as schema,
+    //       rn.table_name                                                   as table_name,
+    //     from #{schema}.dbay_relation_nrs as rn
+    //     join #{schema}.dbay_field_clauses as fc
+    //   ;"""
     return db;
   };
 
@@ -238,18 +255,18 @@ drop table if exists a;
 drop table if exists b;
 pragma foreign_keys = true;
 create table a (
-    nr    integer  not null unique,
+    xnr   integer  not null unique,
     name  text     not null unique,
-  primary key ( nr, name ) );
+  primary key ( xnr, name ) );
 create table b (
-    nr    integer  not null,
+    xnr    integer  not null,
     name  text     not null,
-  foreign key ( nr, name ) references a ( nr, name ) );`);
-      trycatch('^578-1^', db, SQL`insert into a ( nr, name ) values ( 1, 'one' );`);
-      trycatch('^578-2^', db, SQL`insert into a ( nr, name ) values ( 2, 'two' );`);
-      trycatch('^578-3^', db, SQL`insert into b ( nr, name ) values ( 1, 'one' );`);
-      trycatch('^578-4^', db, SQL`insert into b ( nr, name ) values ( 2, 'two' );`);
-      trycatch('^578-5^', db, SQL`insert into b ( nr, name ) values ( 1, 'two' );`);
+  foreign key ( xnr, name ) references a ( xnr, name ) );`);
+      trycatch('^578-1^', db, SQL`insert into a ( xnr, name ) values ( 1, 'one' );`);
+      trycatch('^578-2^', db, SQL`insert into a ( xnr, name ) values ( 2, 'two' );`);
+      trycatch('^578-3^', db, SQL`insert into b ( xnr, name ) values ( 1, 'one' );`);
+      trycatch('^578-4^', db, SQL`insert into b ( xnr, name ) values ( 2, 'two' );`);
+      trycatch('^578-5^', db, SQL`insert into b ( xnr, name ) values ( 1, 'two' );`);
       H.tabulate("select * from a;", db(SQL`select * from a;`));
       H.tabulate("select * from b;", db(SQL`select * from b;`));
       // H.tabulate "pragma_foreign_key_list( 'b' )", db SQL"select * from pragma_foreign_key_list( 'b' );"
@@ -273,21 +290,21 @@ drop table if exists a;
 drop table if exists b;
 pragma foreign_keys = true;
 create table a (
-    nr    integer  not null unique,
+    xnr   integer  not null unique,
     name  text     not null unique,
-  primary key ( nr, name ) );
+  primary key ( xnr, name ) );
 create table b (
-    nr    integer  not null,
+    xnr   integer  not null,
     name  text     not null,
-  foreign key ( nr    ) references a ( nr   ),
+  foreign key ( xnr    ) references a ( xnr   ),
   foreign key ( name  ) references a ( name ) );`);
       // db "pragma foreign_keys = false;"
       // H.tabulate "select * from pragma_foreign_key_check();", db SQL"select * from pragma_foreign_key_check();"
-      trycatch('^578-7^', db, SQL`insert into a ( nr, name ) values ( 1, 'one' );`);
-      trycatch('^578-8^', db, SQL`insert into a ( nr, name ) values ( 2, 'two' );`);
-      trycatch('^578-9^', db, SQL`insert into b ( nr, name ) values ( 1, 'one' );`);
-      trycatch('^578-10^', db, SQL`insert into b ( nr, name ) values ( 2, 'two' );`);
-      trycatch('^578-11^', db, SQL`insert into b ( nr, name ) values ( 1, 'two' );`);
+      trycatch('^578-7^', db, SQL`insert into a ( xnr, name ) values ( 1, 'one' );`);
+      trycatch('^578-8^', db, SQL`insert into a ( xnr, name ) values ( 2, 'two' );`);
+      trycatch('^578-9^', db, SQL`insert into b ( xnr, name ) values ( 1, 'one' );`);
+      trycatch('^578-10^', db, SQL`insert into b ( xnr, name ) values ( 2, 'two' );`);
+      trycatch('^578-11^', db, SQL`insert into b ( xnr, name ) values ( 1, 'two' );`);
       H.tabulate("select * from a;", db(SQL`select * from a;`));
       H.tabulate("select * from b;", db(SQL`select * from b;`));
       // H.tabulate "pragma_foreign_key_list( 'b' )", db SQL"select * from pragma_foreign_key_list( 'b' );"
@@ -307,12 +324,21 @@ create table b (
   this.demo_simplified_sql_generation = function(cfg) {
     var Mrg, db;
     ({Mrg} = require('../../../apps/dbay-mirage'));
-    db = add_views(new DBay());
+    db = add_views(new DBay({
+      path: '/tmp/foobar.sqlite'
+    }));
     // mrg             = new Mrg { db, }
     urge('################################');
     //.........................................................................................................
-    db(SQL`create table a (
-    nr integer,
+    db(SQL`pragma foreign_keys = false;
+drop table if exists a;
+drop table if exists b;
+drop table if exists c;
+drop table if exists b2;
+drop view if exists ab;
+pragma foreign_keys = true;
+create table a (
+    xnr integer,
     foo float,
     bar float default 42,
     baz float unique,
@@ -322,28 +348,28 @@ create table b (
     x421 integer generated always as ( 42 ) virtual,
     x422 integer generated always as ( 42 ) stored,
     x423 integer generated always as ( 42 ) stored,
-  primary key ( nr ) );
+  primary key ( xnr ) );
 create unique index athisthat on a ( this, that );
 create table b (
     idx integer not null,
     name text unique,
   primary key ( idx, name ),
-  -- foreign key ( idx ) references a ( nr ),
-  foreign key ( idx, name ) references a ( nr, baz ) );
+  -- foreign key ( idx ) references a ( xnr ),
+  foreign key ( idx, name ) references a ( xnr, baz ) );
 create table b2 (
     idx integer not null,
     name text unique,
   primary key ( idx, name ),
-  foreign key ( idx ) references a ( nr ),
+  foreign key ( idx ) references a ( xnr ),
   foreign key ( name ) references a ( baz ) );
 create table c (
-    x integer primary key references a ( nr ),
+    x integer primary key references a ( xnr ),
     y text default 'whatever' references b ( name ),
     z float references a ( baz ) );
 create view ab as select
     3 * 4 as twelve,
     x421,
-    nr
+    xnr
   from a
   order by x421;`);
     //.........................................................................................................
@@ -370,6 +396,8 @@ create view ab as select
     H.tabulate("dbay_field_clauses", db(SQL`select * from dbay_field_clauses;`));
     H.tabulate("dbay_foreign_key_clauses", db(SQL`select * from dbay_foreign_key_clauses;`));
     H.tabulate("dbay_primary_key_clauses", db(SQL`select * from dbay_primary_key_clauses;`));
+    H.tabulate("dbay_create_table_clauses", db(SQL`select * from dbay_create_table_clauses;`));
+    H.tabulate("dbay_create_table_statements", db(SQL`select * from dbay_create_table_statements;`));
     return null;
   };
 
@@ -380,6 +408,12 @@ create view ab as select
       return this.demo_simplified_sql_generation();
     })();
   }
+
+  // path        = '/tmp/foobar.sqlite'
+// backup_path = '/tmp/foobar.sql'
+// db          = new DBay { path, }
+// try await db.sqlt1.backup backup_path catch error
+//   throw new Error "^4456^ when trying to backup #{path} to #{backup_path}, an error occurred: #{rpr error}"
 
 }).call(this);
 
