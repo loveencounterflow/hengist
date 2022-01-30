@@ -83,7 +83,7 @@ select
     and ( table_name not like 'sqlite_%' )
     and ( table_name not like 'dbay_%' )
   order by table_nr;`);
-    //-------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists ${schema}.dbay_unique_fields;
 create view ${schema}.dbay_unique_fields as select
     tb.schema                                                                 as schema,
@@ -98,7 +98,7 @@ create view ${schema}.dbay_unique_fields as select
     and ( il.origin = 'u' )
     and ( il."unique" )
   ;`);
-    //-------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists ${schema}.dbay_fields_1;
 create view ${schema}.dbay_fields_1 as select
     tb.schema                                                                 as schema,
@@ -115,7 +115,7 @@ create view ${schema}.dbay_fields_1 as select
   from ${schema}.dbay_tables as tb
   join ${schema}.pragma_table_xinfo( tb.table_name ) as ti on ( true )
   order by schema, table_nr, field_nr;`);
-    //-------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists ${schema}.dbay_fields;
 create view ${schema}.dbay_fields as select
     fd.*,
@@ -123,7 +123,7 @@ create view ${schema}.dbay_fields as select
   from ${schema}.dbay_fields_1 as fd
   left join ${schema}.dbay_unique_fields as uf using ( schema, table_name, field_name )
   order by schema, table_nr, field_nr;`);
-    //-------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists ${schema}.dbay_foreign_key_clauses_1;
 create view ${schema}.dbay_foreign_key_clauses_1 as select
     fk.id                                                                     as fk_id,
@@ -137,7 +137,7 @@ create view ${schema}.dbay_foreign_key_clauses_1 as select
   from ${schema}.dbay_tables as tb
   join ${schema}.pragma_foreign_key_list( tb.table_name ) as fk
   order by schema, from_table_name, fk_id, fk_idx;`);
-    //-------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists ${schema}.dbay_foreign_key_clauses_2;
 create view ${schema}.dbay_foreign_key_clauses_2 as select distinct
     fk_id                                                                     as fk_id,
@@ -153,9 +153,9 @@ create view ${schema}.dbay_foreign_key_clauses_2 as select distinct
     order by fk_idx
     rows between unbounded preceding and unbounded following )
   order by schema, from_table_name, fk_id, fk_idx;`);
-    //-------------------------------------------------------------------------------------------------------
-    db(SQL`drop view if exists ${schema}.dbay_foreign_key_clauses;
-create view ${schema}.dbay_foreign_key_clauses as select distinct
+    //---------------------------------------------------------------------------------------------------------
+    db(SQL`drop view if exists ${schema}.dbay_foreign_key_clauses_OLD;
+create view ${schema}.dbay_foreign_key_clauses_OLD as select distinct
     schema                                                                    as schema,
     from_table_nr                                                             as table_nr,
     from_table_name                                                           as table_name,
@@ -170,33 +170,32 @@ create view ${schema}.dbay_foreign_key_clauses as select distinct
     order by fk_id desc
     rows between unbounded preceding and unbounded following )
   order by schema, from_table_name, fk_id;`);
-    //-------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists ${schema}.dbay_foreign_key_clauses_3;
-create view ${schema}.dbay_foreign_key_clauses_3 as select -- distinct
+create view ${schema}.dbay_foreign_key_clauses_3 as select
     *,
     count(*) over w as line_count
   from ${schema}.dbay_foreign_key_clauses_2
   window w as (
-    partition by schema, from_table_name )
-  order by schema, from_table_name, fk_id;`);
-    //-------------------------------------------------------------------------------------------------------
-    db(SQL`drop view if exists ${schema}.dbay_foreign_key_clauses_MIRAGE_3;
-create view ${schema}.dbay_foreign_key_clauses_MIRAGE_3 as select -- distinct
+    partition by schema, from_table_name );`);
+    //---------------------------------------------------------------------------------------------------------
+    db(SQL`drop view if exists ${schema}.dbay_foreign_key_clauses;
+create view ${schema}.dbay_foreign_key_clauses as select
     schema                                                                    as schema,
     from_table_nr                                                             as table_nr,
     from_table_name                                                           as table_name,
-    case when row_number() over w = line_count then 'XXX' else '---' end as xxx,
-    row_number() over w                                                       as line_nr,
-      '  foreign key ( ' || from_field_names || ' ) references '
-        || std_sql_i( to_table_name )
-        || ' ( ' || to_field_names || ' )'                                    as fk_clause
+    row_number() over w                                                       as fk_nr,
+    '  foreign key ( ' || from_field_names || ' ) references '
+      || std_sql_i( to_table_name )
+      || ' ( ' || to_field_names || ' )'
+      || case when row_number() over w = line_count then '' else ',' end      as fk_clause
   from ${schema}.dbay_foreign_key_clauses_3
   window w as (
     partition by schema, from_table_name
     order by fk_id desc
     rows between unbounded preceding and unbounded following )
-  order by schema, from_table_name, fk_id;`);
-    //-------------------------------------------------------------------------------------------------------
+  order by schema, from_table_name, fk_nr;`);
+    //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists ${schema}.dbay_primary_key_clauses_1;
 create view ${schema}.dbay_primary_key_clauses_1 as select distinct
     schema                                                                    as schema,
@@ -210,7 +209,7 @@ create view ${schema}.dbay_primary_key_clauses_1 as select distinct
     order by pk_nr
     rows between unbounded preceding and unbounded following )
   order by schema, table_name;`);
-    //-------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists ${schema}.dbay_primary_key_clauses;
 create view ${schema}.dbay_primary_key_clauses as select distinct
     schema                                                                    as schema,
@@ -219,7 +218,7 @@ create view ${schema}.dbay_primary_key_clauses as select distinct
     '  primary key ( ' || field_names || ' )'                                 as pk_clause
   from ${schema}.dbay_primary_key_clauses_1
   order by schema, table_name;`);
-    //-------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists ${schema}.dbay_field_clauses_1;
 create view ${schema}.dbay_field_clauses_1 as select
     schema                                                                    as schema,
@@ -233,7 +232,7 @@ create view ${schema}.dbay_field_clauses_1 as select
     case when fallback is not null then ' default ' || fallback else '' end   as fc_default
   from ${schema}.dbay_fields
   order by schema, table_nr, field_nr;`);
-    //-------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists ${schema}.dbay_field_clauses;
 create view ${schema}.dbay_field_clauses as select
     schema                                                                    as schema,
@@ -244,7 +243,7 @@ create view ${schema}.dbay_field_clauses as select
     fc_name_type || fc_null || fc_unique || fc_default                        as field_clause
   from ${schema}.dbay_field_clauses_1
   order by schema, table_nr, field_nr;`);
-    //-------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists ${schema}.dbay_create_table_clauses;
 create view ${schema}.dbay_create_table_clauses as select
     schema                                                                    as schema,
@@ -253,7 +252,7 @@ create view ${schema}.dbay_create_table_clauses as select
     'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )          as create_start,
     ' );'                                                                     as create_end
   from ${schema}.dbay_tables;`);
-    //-------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists ${schema}.dbay_create_table_statements;
 create view ${schema}.dbay_create_table_statements as select distinct
     ct.schema                                                                 as schema,
@@ -267,12 +266,32 @@ create view ${schema}.dbay_create_table_statements as select distinct
   from ${schema}.dbay_create_table_clauses as ct
   join ${schema}.dbay_field_clauses as fc using ( schema, table_name )
   left join ${schema}.dbay_primary_key_clauses as pk using ( schema, table_name )
-  left join ${schema}.dbay_foreign_key_clauses as fk using ( schema, table_name )
+  left join ${schema}.dbay_foreign_key_clauses_OLD as fk using ( schema, table_name )
   join ${schema}.dbay_tables as tb using ( schema, table_name )
   window w as (
     partition by ct.schema, ct.table_name
     order by fc.field_nr
     rows between unbounded preceding and unbounded following );`);
+    //---------------------------------------------------------------------------------------------------------
+    db(SQL`drop view if exists ${schema}.dbay_create_table_statements_MIRAGE;
+-- .....................................................................................................
+create view ${schema}.dbay_create_table_statements_MIRAGE as select
+    ct.schema                                                                 as schema,
+    ct.table_nr                                                               as table_nr,
+    2                                                                         as part_nr,
+    ct.table_name                                                             as table_name,
+    ct.create_start                                                           as txt
+  from ${schema}.dbay_create_table_clauses as ct
+  -- ...................................................................................................
+  union all select
+    ct.schema                                                                 as schema,
+    ct.table_nr                                                               as table_nr,
+    2                                                                         as part_nr,
+    ct.table_name                                                             as table_name,
+    ct.create_start                                                           as txt
+  from ${schema}.dbay_create_table_clauses as ct
+  order by schema, table_nr, part_nr
+  ;`);
     //-------------------------------------------------------------------------------------------------------
     // db SQL"""
     //   drop view if exists #{schema}.dbay_db_dump;
@@ -295,14 +314,15 @@ create view ${schema}.dbay_create_table_statements as select distinct
     H.tabulate(`${schema}.dbay_foreign_key_clauses_1`, db(SQL`select * from ${schema}.dbay_foreign_key_clauses_1`));
     H.tabulate(`${schema}.dbay_foreign_key_clauses_2`, db(SQL`select * from ${schema}.dbay_foreign_key_clauses_2`));
     H.tabulate(`${schema}.dbay_foreign_key_clauses_3`, db(SQL`select * from ${schema}.dbay_foreign_key_clauses_3`));
+    H.tabulate(`${schema}.dbay_foreign_key_clauses_OLD`, db(SQL`select * from ${schema}.dbay_foreign_key_clauses_OLD`));
     H.tabulate(`${schema}.dbay_foreign_key_clauses`, db(SQL`select * from ${schema}.dbay_foreign_key_clauses`));
-    H.tabulate(`${schema}.dbay_foreign_key_clauses_MIRAGE_3`, db(SQL`select * from ${schema}.dbay_foreign_key_clauses_MIRAGE_3`));
     H.tabulate(`${schema}.dbay_primary_key_clauses_1`, db(SQL`select * from ${schema}.dbay_primary_key_clauses_1`));
     H.tabulate(`${schema}.dbay_primary_key_clauses`, db(SQL`select * from ${schema}.dbay_primary_key_clauses`));
     H.tabulate(`${schema}.dbay_field_clauses_1`, db(SQL`select * from ${schema}.dbay_field_clauses_1`));
     H.tabulate(`${schema}.dbay_field_clauses`, db(SQL`select * from ${schema}.dbay_field_clauses`));
     H.tabulate(`${schema}.dbay_create_table_clauses`, db(SQL`select * from ${schema}.dbay_create_table_clauses`));
     H.tabulate(`${schema}.dbay_create_table_statements`, db(SQL`select schema, table_nr, table_name, substring( create_table_statement, 1, 100 ) from ${schema}.dbay_create_table_statements`));
+    H.tabulate(`${schema}.dbay_create_table_statements_MIRAGE`, db(SQL`select schema, table_nr, part_nr, table_name, substring( txt, 1, 100 ) from ${schema}.dbay_create_table_statements_MIRAGE`));
     return null;
   };
 
@@ -347,7 +367,7 @@ create table b (
       H.tabulate("dbay_fields", db(SQL`select * from dbay_fields;`));
       // H.tabulate "dbay_foreign_key_clauses_1", db SQL"select * from dbay_foreign_key_clauses_1;"
       // H.tabulate "dbay_foreign_key_clauses_2", db SQL"select * from dbay_foreign_key_clauses_2;"
-      H.tabulate("dbay_foreign_key_clauses", db(SQL`select * from dbay_foreign_key_clauses;`));
+      H.tabulate("dbay_foreign_key_clauses_OLD", db(SQL`select * from dbay_foreign_key_clauses_OLD;`));
       H.tabulate("dbay_primary_key_clauses", db(SQL`select * from dbay_primary_key_clauses;`));
       // H.tabulate "dbay_field_clauses_1", db SQL"select * from dbay_field_clauses_1;"
       H.tabulate("dbay_unique_fields", db(SQL`select * from dbay_unique_fields;`));
@@ -385,7 +405,7 @@ create table b (
       H.tabulate("dbay_fields", db(SQL`select * from dbay_fields;`));
       // H.tabulate "dbay_foreign_key_clauses_1", db SQL"select * from dbay_foreign_key_clauses_1;"
       // H.tabulate "dbay_foreign_key_clauses_2", db SQL"select * from dbay_foreign_key_clauses_2;"
-      H.tabulate("dbay_foreign_key_clauses", db(SQL`select * from dbay_foreign_key_clauses;`));
+      H.tabulate("dbay_foreign_key_clauses_OLD", db(SQL`select * from dbay_foreign_key_clauses_OLD;`));
       H.tabulate("dbay_primary_key_clauses", db(SQL`select * from dbay_primary_key_clauses;`));
       // H.tabulate "dbay_field_clauses_1", db SQL"select * from dbay_field_clauses_1;"
       H.tabulate("dbay_unique_fields", db(SQL`select * from dbay_unique_fields;`));
@@ -468,7 +488,7 @@ create view ab as select
     // H.tabulate "pragma_table_xinfo( 'a' )", db SQL"select * from pragma_table_xinfo( 'a' );"
     H.tabulate("select * from dbay_tables;", db(SQL`select * from dbay_tables;`));
     H.tabulate("dbay_field_clauses", db(SQL`select * from dbay_field_clauses;`));
-    H.tabulate("dbay_foreign_key_clauses", db(SQL`select * from dbay_foreign_key_clauses;`));
+    H.tabulate("dbay_foreign_key_clauses_OLD", db(SQL`select * from dbay_foreign_key_clauses_OLD;`));
     H.tabulate("dbay_primary_key_clauses", db(SQL`select * from dbay_primary_key_clauses;`));
     H.tabulate("dbay_create_table_clauses", db(SQL`select * from dbay_create_table_clauses;`));
     H.tabulate("dbay_create_table_statements", db(SQL`select schema, table_nr, table_name, substring( create_table_statement, 1, 100 ) from dbay_create_table_statements;`));
