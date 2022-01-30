@@ -243,6 +243,25 @@ add_views = ( db ) ->
   return db
 
 #-----------------------------------------------------------------------------------------------------------
+show_overview = ( db ) ->
+  info '#############################################################################'
+  schema = 'main'
+  H.tabulate "#{schema}.dbay_tables",                   db SQL"select * from #{schema}.dbay_tables"
+  H.tabulate "#{schema}.dbay_unique_fields",            db SQL"select * from #{schema}.dbay_unique_fields"
+  H.tabulate "#{schema}.dbay_fields_1",                 db SQL"select * from #{schema}.dbay_fields_1"
+  H.tabulate "#{schema}.dbay_fields",                   db SQL"select * from #{schema}.dbay_fields"
+  H.tabulate "#{schema}.dbay_foreign_key_clauses_1",    db SQL"select * from #{schema}.dbay_foreign_key_clauses_1"
+  H.tabulate "#{schema}.dbay_foreign_key_clauses_2",    db SQL"select * from #{schema}.dbay_foreign_key_clauses_2"
+  H.tabulate "#{schema}.dbay_foreign_key_clauses",      db SQL"select * from #{schema}.dbay_foreign_key_clauses"
+  H.tabulate "#{schema}.dbay_primary_key_clauses_1",    db SQL"select * from #{schema}.dbay_primary_key_clauses_1"
+  H.tabulate "#{schema}.dbay_primary_key_clauses",      db SQL"select * from #{schema}.dbay_primary_key_clauses"
+  H.tabulate "#{schema}.dbay_field_clauses_1",          db SQL"select * from #{schema}.dbay_field_clauses_1"
+  H.tabulate "#{schema}.dbay_field_clauses",            db SQL"select * from #{schema}.dbay_field_clauses"
+  H.tabulate "#{schema}.dbay_create_table_clauses",     db SQL"select * from #{schema}.dbay_create_table_clauses"
+  H.tabulate "#{schema}.dbay_create_table_statements",  db SQL"select schema, table_nr, table_name, substring( create_table_statement, 1, 100 ) from #{schema}.dbay_create_table_statements"
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @demo_two_kinds_of_foreign_keys = ( cfg ) ->
   trycatch = ( ref, db, sql ) => try db sql catch error then warn ref, ( sql ), CND.reverse error.message
   do =>
@@ -395,7 +414,9 @@ add_views = ( db ) ->
   H.tabulate "dbay_create_table_statements", db SQL"select schema, table_nr, table_name, substring( create_table_statement, 1, 100 ) from dbay_create_table_statements;"
   for row from db SQL"select * from dbay_create_table_statements order by schema, table_nr;"
     urge row.schema, row.table_nr, '\n' + row.create_table_statement
+  show_overview db
   return null
+
 
 
 ############################################################################################################
