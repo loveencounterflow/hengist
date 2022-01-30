@@ -179,14 +179,9 @@ add_views = ( db ) ->
     create view #{schema}.dbay_primary_key_clauses as select distinct
         schema                                                      as schema,
         table_name                                                  as table_name,
-        group_concat(
-          'primary key ( ' || field_names || ' )' ) over w          as pk_clause
+        '  primary key ( ' || field_names || ' )'                   as pk_clause
       from #{schema}.dbay_primary_key_clauses_1
-      window w as (
-        partition by schema, table_name
-        rows between unbounded preceding and unbounded following )
-      order by schema, table_name
-    ;"""
+      order by schema, table_name;"""
   db SQL"""
     drop view if exists #{schema}.dbay_field_clauses_1;
     create view #{schema}.dbay_field_clauses_1 as select
