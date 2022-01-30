@@ -409,12 +409,6 @@ create view ab as select
     })();
   }
 
-  // path        = '/tmp/foobar.sqlite'
-// backup_path = '/tmp/foobar.sql'
-// db          = new DBay { path, }
-// try await db.sqlt1.backup backup_path catch error
-//   throw new Error "^4456^ when trying to backup #{path} to #{backup_path}, an error occurred: #{rpr error}"
-
 }).call(this);
 
 //# sourceMappingURL=demo-simplified-sql-generation.js.map
