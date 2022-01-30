@@ -193,7 +193,7 @@ add_views = ( db ) ->
         field_nr                                                        as field_nr,
         table_name                                                      as table_name,
         field_name                                                      as field_name,
-        std_sql_i( field_name ) || ' ' || field_type                    as fc_name_type,
+        '    ' || std_sql_i( field_name ) || ' ' || field_type                    as fc_name_type,
         case when not nullable         then ' not null'             else '' end  as fc_null,
         case when is_unique            then ' unique'               else '' end  as fc_unique,
         case when fallback is not null then ' default ' || fallback else '' end  as fc_default
@@ -213,21 +213,30 @@ add_views = ( db ) ->
   db SQL"""
     drop view if exists #{schema}.dbay_create_table_clauses;
     create view #{schema}.dbay_create_table_clauses as select
-        table_nr                                                          as table_nr,
         schema                                                            as schema,
+        table_nr                                                          as table_nr,
         table_name                                                        as table_name,
-        'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )  as ctc_start,
-        ' );'                                                             as ctc_end
+        'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )  as create_start,
+        ' );'                                                             as create_end
       from #{schema}.dbay_relation_nrs;"""
-  # db SQL"""
-  #   drop view if exists #{schema}.dbay_create_table_statements;
-  #   create view #{schema}.dbay_create_table_statements as select
-  #       rn.nr                                                           as nr,
-  #       rn.schema                                                       as schema,
-  #       rn.table_name                                                   as table_name,
-  #     from #{schema}.dbay_relation_nrs as rn
-  #     join #{schema}.dbay_field_clauses as fc
-  #   ;"""
+  db SQL"""
+    drop view if exists #{schema}.dbay_create_table_statements;
+    create view #{schema}.dbay_create_table_statements as select distinct
+        ct.schema                                                       as schema,
+        ct.table_nr                                                     as table_nr,
+        ct.table_name                                                   as table_name,
+        ct.create_start
+          || group_concat( fc.field_clause, ', ' || char( 10 ) ) over w
+          || ct.create_end
+
+                                      as create_table_statement
+      from #{schema}.dbay_create_table_clauses as ct
+      join #{schema}.dbay_field_clauses as fc using ( table_nr, table_name )
+      window w as (
+        partition by ct.schema, ct.table_name
+        order by fc.field_nr
+        rows between unbounded preceding and unbounded following )
+    ;"""
   return db
 
 #-----------------------------------------------------------------------------------------------------------
@@ -380,7 +389,9 @@ add_views = ( db ) ->
   H.tabulate "dbay_foreign_key_clauses", db SQL"select * from dbay_foreign_key_clauses;"
   H.tabulate "dbay_primary_key_clauses", db SQL"select * from dbay_primary_key_clauses;"
   H.tabulate "dbay_create_table_clauses", db SQL"select * from dbay_create_table_clauses;"
-  H.tabulate "dbay_create_table_statements", db SQL"select * from dbay_create_table_statements;"
+  H.tabulate "dbay_create_table_statements", db SQL"select schema, table_nr, table_name, substring( create_table_statement, 1, 100 ) from dbay_create_table_statements;"
+  for row from db SQL"select * from dbay_create_table_statements order by schema, table_nr;"
+    urge row.schema, row.table_nr, '\n' + row.create_table_statement
   return null
 
 
