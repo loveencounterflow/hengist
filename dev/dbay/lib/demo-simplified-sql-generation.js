@@ -67,15 +67,15 @@
 -- ### TAINT consider to always list \`table_nr\` along with \`table_name\` or to omit it where not needed (?)
 drop view if exists ${schema}.dbay_tables;
 create view ${schema}.dbay_tables as with v1 as ( select
-    row_number() over ()                                        as table_nr,
-    type                                                        as type,
-    name                                                        as table_name
+    row_number() over ()                                                      as table_nr,
+    type                                                                      as type,
+    name                                                                      as table_name
   from ${schema}.sqlite_schema )
 select
-    row_number() over ()                                        as table_nr,
-    type                                                        as type,
-    ${db.sql.L(schema)}                                          as schema,
-    table_name                                                  as table_name
+    row_number() over ()                                                      as table_nr,
+    type                                                                      as type,
+    ${db.sql.L(schema)}                                                        as schema,
+    table_name                                                                as table_name
   from v1
   where true
     and ( type in ( 'table', 'view' ) )
@@ -84,11 +84,11 @@ select
   order by table_nr;`);
     db(SQL`drop view if exists ${schema}.dbay_unique_fields;
 create view ${schema}.dbay_unique_fields as select
-    tb.schema                                                   as schema,
-    tb.table_name                                               as table_name,
-    ii.name                                                     as field_name,
-    il.seq                                                      as index_idx,
-    il.name                                                     as index_name
+    tb.schema                                                                 as schema,
+    tb.table_name                                                             as table_name,
+    ii.name                                                                   as field_name,
+    il.seq                                                                    as index_idx,
+    il.name                                                                   as index_name
   from ${schema}.dbay_tables as tb
   join ${schema}.pragma_index_list( tb.table_name ) as il on ( true )
   join ${schema}.pragma_index_info( il.name ) as ii on ( true )
@@ -98,49 +98,49 @@ create view ${schema}.dbay_unique_fields as select
   ;`);
     db(SQL`drop view if exists ${schema}.dbay_fields_1;
 create view ${schema}.dbay_fields_1 as select
-    tb.schema                                                   as schema,
-    tb.table_nr                                                 as table_nr,
-    ti.cid                                                      as field_nr,
-    tb.table_name                                               as table_name,
-    tb.type                                                     as table_type,
-    ti.name                                                     as field_name,
-    case ti.type when '' then 'any' else lower( ti.type ) end   as field_type,
-    not ti."notnull"                                            as nullable,
-    ti.dflt_value                                               as fallback,
-    case ti.pk when 0 then null else ti.pk end                  as pk_nr,
-    ti.hidden                                                   as hidden
+    tb.schema                                                                 as schema,
+    tb.table_nr                                                               as table_nr,
+    ti.cid                                                                    as field_nr,
+    tb.table_name                                                             as table_name,
+    tb.type                                                                   as table_type,
+    ti.name                                                                   as field_name,
+    case ti.type when '' then 'any' else lower( ti.type ) end                 as field_type,
+    not ti."notnull"                                                          as nullable,
+    ti.dflt_value                                                             as fallback,
+    case ti.pk when 0 then null else ti.pk end                                as pk_nr,
+    ti.hidden                                                                 as hidden
   from ${schema}.dbay_tables as tb
   join ${schema}.pragma_table_xinfo( tb.table_name ) as ti on ( true )
   order by schema, table_nr, field_nr;`);
     db(SQL`drop view if exists ${schema}.dbay_fields;
 create view ${schema}.dbay_fields as select
     fd.*,
-    case when uf.field_name is null then 0 else 1 end           as is_unique
+    case when uf.field_name is null then 0 else 1 end                         as is_unique
   from ${schema}.dbay_fields_1 as fd
   left join ${schema}.dbay_unique_fields as uf using ( schema, table_name, field_name )
   order by schema, table_nr, field_nr;`);
     db(SQL`drop view if exists ${schema}.dbay_foreign_key_clauses_1;
 create view ${schema}.dbay_foreign_key_clauses_1 as select
-    fk.id                                                       as fk_id,
-    fk.seq                                                      as fk_idx,
-    tb.schema                                                   as schema,
-    tb.table_nr                                                 as from_table_nr,
-    tb.table_name                                               as from_table_name,
-    fk."from"                                                   as from_field_name,
-    fk."table"                                                  as to_table_name,
-    fk."to"                                                     as to_field_name
+    fk.id                                                                     as fk_id,
+    fk.seq                                                                    as fk_idx,
+    tb.schema                                                                 as schema,
+    tb.table_nr                                                               as from_table_nr,
+    tb.table_name                                                             as from_table_name,
+    fk."from"                                                                 as from_field_name,
+    fk."table"                                                                as to_table_name,
+    fk."to"                                                                   as to_field_name
   from ${schema}.dbay_tables as tb
   join ${schema}.pragma_foreign_key_list( tb.table_name ) as fk
   order by schema, from_table_name, fk_id, fk_idx;`);
     db(SQL`drop view if exists ${schema}.dbay_foreign_key_clauses_2;
 create view ${schema}.dbay_foreign_key_clauses_2 as select distinct
-    fk_id                                                       as fk_id,
-    schema                                                      as schema,
-    from_table_nr                                               as from_table_nr,
-    from_table_name                                             as from_table_name,
-    group_concat( std_sql_i( from_field_name ), ', ' ) over w   as from_field_names,
-    to_table_name                                               as to_table_name,
-    group_concat( std_sql_i(   to_field_name ), ', ' ) over w   as to_field_names
+    fk_id                                                                     as fk_id,
+    schema                                                                    as schema,
+    from_table_nr                                                             as from_table_nr,
+    from_table_name                                                           as from_table_name,
+    group_concat( std_sql_i( from_field_name ), ', ' ) over w                 as from_field_names,
+    to_table_name                                                             as to_table_name,
+    group_concat( std_sql_i(   to_field_name ), ', ' ) over w                 as to_field_names
   from ${schema}.dbay_foreign_key_clauses_1
   window w as (
     partition by schema, from_table_name, fk_id
@@ -149,14 +149,14 @@ create view ${schema}.dbay_foreign_key_clauses_2 as select distinct
   order by schema, from_table_name, fk_id, fk_idx;`);
     db(SQL`drop view if exists ${schema}.dbay_foreign_key_clauses;
 create view ${schema}.dbay_foreign_key_clauses as select distinct
-    schema                                                      as schema,
-    from_table_nr                                               as table_nr,
-    from_table_name                                             as table_name,
+    schema                                                                    as schema,
+    from_table_nr                                                             as table_nr,
+    from_table_name                                                           as table_name,
     group_concat(
       '  foreign key ( ' || from_field_names || ' ) references '
         || std_sql_i( to_table_name )
         || ' ( ' || to_field_names || ' )',
-        ',' || char( 10 ) ) over w                              as fk_clauses
+        ',' || char( 10 ) ) over w                                            as fk_clauses
   from ${schema}.dbay_foreign_key_clauses_2
   window w as (
     partition by schema, from_table_name
@@ -165,10 +165,10 @@ create view ${schema}.dbay_foreign_key_clauses as select distinct
   order by schema, from_table_name, fk_id;`);
     db(SQL`drop view if exists ${schema}.dbay_primary_key_clauses_1;
 create view ${schema}.dbay_primary_key_clauses_1 as select distinct
-    schema                                                      as schema,
-    table_nr                                                    as table_nr,
-    table_name                                                  as table_name,
-    group_concat( std_sql_i( field_name ), ', ' ) over w        as field_names
+    schema                                                                    as schema,
+    table_nr                                                                  as table_nr,
+    table_name                                                                as table_name,
+    group_concat( std_sql_i( field_name ), ', ' ) over w                      as field_names
   from ${schema}.dbay_fields
   where pk_nr is not null
   window w as (
@@ -178,53 +178,53 @@ create view ${schema}.dbay_primary_key_clauses_1 as select distinct
   order by schema, table_name;`);
     db(SQL`drop view if exists ${schema}.dbay_primary_key_clauses;
 create view ${schema}.dbay_primary_key_clauses as select distinct
-    schema                                                      as schema,
-    table_nr                                                    as table_nr,
-    table_name                                                  as table_name,
-    '  primary key ( ' || field_names || ' )'                   as pk_clause
+    schema                                                                    as schema,
+    table_nr                                                                  as table_nr,
+    table_name                                                                as table_name,
+    '  primary key ( ' || field_names || ' )'                                 as pk_clause
   from ${schema}.dbay_primary_key_clauses_1
   order by schema, table_name;`);
     db(SQL`drop view if exists ${schema}.dbay_field_clauses_1;
 create view ${schema}.dbay_field_clauses_1 as select
-    schema                                                          as schema,
-    table_nr                                                        as table_nr,
-    field_nr                                                        as field_nr,
-    table_name                                                      as table_name,
-    field_name                                                      as field_name,
-    '    ' || std_sql_i( field_name ) || ' ' || field_type                   as fc_name_type,
-    case when not nullable         then ' not null'             else '' end  as fc_null,
-    case when is_unique            then ' unique'               else '' end  as fc_unique,
-    case when fallback is not null then ' default ' || fallback else '' end  as fc_default
+    schema                                                                    as schema,
+    table_nr                                                                  as table_nr,
+    field_nr                                                                  as field_nr,
+    table_name                                                                as table_name,
+    field_name                                                                as field_name,
+    '    ' || std_sql_i( field_name ) || ' ' || field_type                    as fc_name_type,
+    case when not nullable         then ' not null'             else '' end   as fc_null,
+    case when is_unique            then ' unique'               else '' end   as fc_unique,
+    case when fallback is not null then ' default ' || fallback else '' end   as fc_default
   from ${schema}.dbay_fields
   order by schema, table_nr, field_nr;`);
     db(SQL`drop view if exists ${schema}.dbay_field_clauses;
 create view ${schema}.dbay_field_clauses as select
-    schema                                                          as schema,
-    table_nr                                                        as table_nr,
-    field_nr                                                        as field_nr,
-    table_name                                                      as table_name,
-    field_name                                                      as field_name,
-    fc_name_type || fc_null || fc_unique || fc_default              as field_clause
+    schema                                                                    as schema,
+    table_nr                                                                  as table_nr,
+    field_nr                                                                  as field_nr,
+    table_name                                                                as table_name,
+    field_name                                                                as field_name,
+    fc_name_type || fc_null || fc_unique || fc_default                        as field_clause
   from ${schema}.dbay_field_clauses_1
   order by schema, table_nr, field_nr;`);
     db(SQL`drop view if exists ${schema}.dbay_create_table_clauses;
 create view ${schema}.dbay_create_table_clauses as select
-    schema                                                            as schema,
-    table_nr                                                          as table_nr,
-    table_name                                                        as table_name,
-    'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )  as create_start,
-    ' );'                                                             as create_end
+    schema                                                                    as schema,
+    table_nr                                                                  as table_nr,
+    table_name                                                                as table_name,
+    'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )          as create_start,
+    ' );'                                                                     as create_end
   from ${schema}.dbay_tables;`);
     db(SQL`drop view if exists ${schema}.dbay_create_table_statements;
 create view ${schema}.dbay_create_table_statements as select distinct
-    ct.schema                                                       as schema,
-    tb.table_nr                                                     as table_nr,
-    ct.table_name                                                   as table_name,
+    ct.schema                                                                 as schema,
+    tb.table_nr                                                               as table_nr,
+    ct.table_name                                                             as table_name,
     ct.create_start
       || group_concat( fc.field_clause, ', ' || char( 10 ) ) over w
       || case when pk.table_name is null then '' else ',' || char( 10 ) || pk.pk_clause end
       || case when fk.table_name is null then '' else ',' || char( 10 ) || fk.fk_clauses end
-      || ct.create_end                                              as create_table_statement
+      || ct.create_end                                                        as create_table_statement
   from ${schema}.dbay_create_table_clauses as ct
   join ${schema}.dbay_field_clauses as fc using ( schema, table_name )
   left join ${schema}.dbay_primary_key_clauses as pk using ( schema, table_name )
