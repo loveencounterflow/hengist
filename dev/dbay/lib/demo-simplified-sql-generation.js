@@ -63,6 +63,8 @@
 -- to the query will not accidentally change the ordering in absence of an \`order by\` clause.
 -- To attain a modicum of reliability the filtering has been separated from the raw numbering
 -- to keep that aspect from juggling around rows.
+-- ### TAINT replace existing \`select from pragma_table_list\` by \`select from dbay_relation_nrs\`
+-- ### TAINT consider to always list \`table_nr\` along with \`table_name\` or to omit it where not needed (?)
 drop view if exists ${schema}.dbay_relation_nrs;
 create view ${schema}.dbay_relation_nrs as with v1 as ( select
     row_number() over ()                                        as table_nr,
@@ -155,7 +157,7 @@ create view ${schema}.dbay_foreign_key_clauses as select distinct
     schema                                                      as schema,
     from_table_name                                             as table_name,
     group_concat(
-      'foreign key ( ' || from_field_names || ' ) references '
+      '  foreign key ( ' || from_field_names || ' ) references '
         || std_sql_i( to_table_name )
         || ' ( ' || to_field_names || ' )',
         ',' || char( 10 ) ) over w                              as fk_clauses
@@ -181,14 +183,9 @@ create view ${schema}.dbay_primary_key_clauses_1 as select distinct
 create view ${schema}.dbay_primary_key_clauses as select distinct
     schema                                                      as schema,
     table_name                                                  as table_name,
-    group_concat(
-      'primary key ( ' || field_names || ' )' ) over w          as pk_clause
+    '  primary key ( ' || field_names || ' )'                   as pk_clause
   from ${schema}.dbay_primary_key_clauses_1
-  window w as (
-    partition by schema, table_name
-    rows between unbounded preceding and unbounded following )
-  order by schema, table_name
-;`);
+  order by schema, table_name;`);
     db(SQL`drop view if exists ${schema}.dbay_field_clauses_1;
 create view ${schema}.dbay_field_clauses_1 as select
     schema                                                          as schema,
@@ -215,7 +212,6 @@ create view ${schema}.dbay_field_clauses as select
     db(SQL`drop view if exists ${schema}.dbay_create_table_clauses;
 create view ${schema}.dbay_create_table_clauses as select
     schema                                                            as schema,
-    table_nr                                                          as table_nr,
     table_name                                                        as table_name,
     'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )  as create_start,
     ' );'                                                             as create_end
@@ -223,15 +219,20 @@ create view ${schema}.dbay_create_table_clauses as select
     db(SQL`drop view if exists ${schema}.dbay_create_table_statements;
 create view ${schema}.dbay_create_table_statements as select distinct
     ct.schema                                                       as schema,
-    ct.table_nr                                                     as table_nr,
+    rn.table_nr                                                     as table_nr,
     ct.table_name                                                   as table_name,
     ct.create_start
       || group_concat( fc.field_clause, ', ' || char( 10 ) ) over w
+      || case when pk.table_name is null then '' else ',' || char( 10 ) || pk.pk_clause end
+      || case when fk.table_name is null then '' else ',' || char( 10 ) || fk.fk_clauses end
       || ct.create_end
 
                                   as create_table_statement
   from ${schema}.dbay_create_table_clauses as ct
-  join ${schema}.dbay_field_clauses as fc using ( table_nr, table_name )
+  join ${schema}.dbay_field_clauses as fc using ( schema, table_name )
+  left join ${schema}.dbay_primary_key_clauses as pk using ( schema, table_name )
+  left join ${schema}.dbay_foreign_key_clauses as fk using ( schema, table_name )
+  join ${schema}.dbay_relation_nrs as rn using ( schema, table_name )
   window w as (
     partition by ct.schema, ct.table_name
     order by fc.field_nr
