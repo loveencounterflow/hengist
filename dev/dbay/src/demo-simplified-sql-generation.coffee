@@ -148,8 +148,8 @@ add_views = ( db ) ->
       order by schema, from_table_name, fk_id, fk_idx;"""
   #---------------------------------------------------------------------------------------------------------
   db SQL"""
-    drop view if exists #{schema}.dbay_foreign_key_clauses;
-    create view #{schema}.dbay_foreign_key_clauses as select distinct
+    drop view if exists #{schema}.dbay_foreign_key_clauses_OLD;
+    create view #{schema}.dbay_foreign_key_clauses_OLD as select distinct
         schema                                                                    as schema,
         from_table_nr                                                             as table_nr,
         from_table_name                                                           as table_name,
@@ -167,31 +167,30 @@ add_views = ( db ) ->
   #---------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_foreign_key_clauses_3;
-    create view #{schema}.dbay_foreign_key_clauses_3 as select -- distinct
+    create view #{schema}.dbay_foreign_key_clauses_3 as select
         *,
         count(*) over w as line_count
       from #{schema}.dbay_foreign_key_clauses_2
       window w as (
-        partition by schema, from_table_name )
-      order by schema, from_table_name, fk_id;"""
+        partition by schema, from_table_name );"""
   #---------------------------------------------------------------------------------------------------------
   db SQL"""
-    drop view if exists #{schema}.dbay_foreign_key_clauses_MIRAGE_3;
-    create view #{schema}.dbay_foreign_key_clauses_MIRAGE_3 as select -- distinct
+    drop view if exists #{schema}.dbay_foreign_key_clauses;
+    create view #{schema}.dbay_foreign_key_clauses as select
         schema                                                                    as schema,
         from_table_nr                                                             as table_nr,
         from_table_name                                                           as table_name,
-        case when row_number() over w = line_count then 'XXX' else '---' end as xxx,
-        row_number() over w                                                       as line_nr,
-          '  foreign key ( ' || from_field_names || ' ) references '
-            || std_sql_i( to_table_name )
-            || ' ( ' || to_field_names || ' )'                                    as fk_clause
+        row_number() over w                                                       as fk_nr,
+        '  foreign key ( ' || from_field_names || ' ) references '
+          || std_sql_i( to_table_name )
+          || ' ( ' || to_field_names || ' )'
+          || case when row_number() over w = line_count then '' else ',' end      as fk_clause
       from #{schema}.dbay_foreign_key_clauses_3
       window w as (
         partition by schema, from_table_name
         order by fk_id desc
         rows between unbounded preceding and unbounded following )
-      order by schema, from_table_name, fk_id;"""
+      order by schema, from_table_name, fk_nr;"""
   #---------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists #{schema}.dbay_primary_key_clauses_1;
@@ -269,12 +268,51 @@ add_views = ( db ) ->
       from #{schema}.dbay_create_table_clauses as ct
       join #{schema}.dbay_field_clauses as fc using ( schema, table_name )
       left join #{schema}.dbay_primary_key_clauses as pk using ( schema, table_name )
-      left join #{schema}.dbay_foreign_key_clauses as fk using ( schema, table_name )
+      left join #{schema}.dbay_foreign_key_clauses_OLD as fk using ( schema, table_name )
       join #{schema}.dbay_tables as tb using ( schema, table_name )
       window w as (
         partition by ct.schema, ct.table_name
         order by fc.field_nr
         rows between unbounded preceding and unbounded following );"""
+  #---------------------------------------------------------------------------------------------------------
+  db SQL"""
+    drop view if exists #{schema}.dbay_create_table_statements_MIRAGE;
+    create view #{schema}.dbay_create_table_statements_MIRAGE as
+      with x as ( select * from #{schema}.dbay_create_table_clauses )
+      -- ...................................................................................................
+      select
+        null                                                                      as schema,
+        null                                                                      as table_nr,
+        null                                                                      as part_nr,
+        null                                                                      as lnr,
+        null                                                                      as table_name,
+        null                                                                      as txt
+      where false
+      -- ...................................................................................................
+      union all select schema, table_nr, 10, 1, table_name, '-- autogenerated simplyfied schema;'   from x
+      union all select schema, table_nr, 10, 2, table_name, 'pragma foreign_keys false;'            from x
+      union all select schema, table_nr, 10, 3, table_name, 'begin transaction;'                    from x
+      -- ...................................................................................................
+      union all select
+        schema                                                                    as schema,
+        table_nr                                                                  as table_nr,
+        20                                                                        as part_nr,
+        1                                                                         as lnr,
+        table_name                                                                as table_name,
+        create_start                                                              as txt
+      from #{schema}.dbay_create_table_clauses as ct
+      -- ...................................................................................................
+      union all select
+        schema                                                                    as schema,
+        table_nr                                                                  as table_nr,
+        90                                                                        as part_nr,
+        1                                                                         as lnr,
+        table_name                                                                as table_name,
+        create_end                                                                as txt
+      from #{schema}.dbay_create_table_clauses as ct
+      -- ...................................................................................................
+      order by schema, table_nr, part_nr, lnr
+      ;"""
   #-------------------------------------------------------------------------------------------------------
   # db SQL"""
   #   drop view if exists #{schema}.dbay_db_dump;
@@ -295,14 +333,15 @@ show_overview = ( db ) ->
   H.tabulate "#{schema}.dbay_foreign_key_clauses_1",    db SQL"select * from #{schema}.dbay_foreign_key_clauses_1"
   H.tabulate "#{schema}.dbay_foreign_key_clauses_2",    db SQL"select * from #{schema}.dbay_foreign_key_clauses_2"
   H.tabulate "#{schema}.dbay_foreign_key_clauses_3",    db SQL"select * from #{schema}.dbay_foreign_key_clauses_3"
+  H.tabulate "#{schema}.dbay_foreign_key_clauses_OLD",      db SQL"select * from #{schema}.dbay_foreign_key_clauses_OLD"
   H.tabulate "#{schema}.dbay_foreign_key_clauses",      db SQL"select * from #{schema}.dbay_foreign_key_clauses"
-  H.tabulate "#{schema}.dbay_foreign_key_clauses_MIRAGE_3",      db SQL"select * from #{schema}.dbay_foreign_key_clauses_MIRAGE_3"
   H.tabulate "#{schema}.dbay_primary_key_clauses_1",    db SQL"select * from #{schema}.dbay_primary_key_clauses_1"
   H.tabulate "#{schema}.dbay_primary_key_clauses",      db SQL"select * from #{schema}.dbay_primary_key_clauses"
   H.tabulate "#{schema}.dbay_field_clauses_1",          db SQL"select * from #{schema}.dbay_field_clauses_1"
   H.tabulate "#{schema}.dbay_field_clauses",            db SQL"select * from #{schema}.dbay_field_clauses"
   H.tabulate "#{schema}.dbay_create_table_clauses",     db SQL"select * from #{schema}.dbay_create_table_clauses"
   H.tabulate "#{schema}.dbay_create_table_statements",  db SQL"select schema, table_nr, table_name, substring( create_table_statement, 1, 100 ) from #{schema}.dbay_create_table_statements"
+  H.tabulate "#{schema}.dbay_create_table_statements_MIRAGE",  db SQL"select schema, table_nr, part_nr, table_name, substring( txt, 1, 100 ) from #{schema}.dbay_create_table_statements_MIRAGE"
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -336,7 +375,7 @@ show_overview = ( db ) ->
     H.tabulate "dbay_fields", db SQL"select * from dbay_fields;"
     # H.tabulate "dbay_foreign_key_clauses_1", db SQL"select * from dbay_foreign_key_clauses_1;"
     # H.tabulate "dbay_foreign_key_clauses_2", db SQL"select * from dbay_foreign_key_clauses_2;"
-    H.tabulate "dbay_foreign_key_clauses", db SQL"select * from dbay_foreign_key_clauses;"
+    H.tabulate "dbay_foreign_key_clauses_OLD", db SQL"select * from dbay_foreign_key_clauses_OLD;"
     H.tabulate "dbay_primary_key_clauses", db SQL"select * from dbay_primary_key_clauses;"
     # H.tabulate "dbay_field_clauses_1", db SQL"select * from dbay_field_clauses_1;"
     H.tabulate "dbay_unique_fields", db SQL"select * from dbay_unique_fields;"
@@ -372,7 +411,7 @@ show_overview = ( db ) ->
     H.tabulate "dbay_fields", db SQL"select * from dbay_fields;"
     # H.tabulate "dbay_foreign_key_clauses_1", db SQL"select * from dbay_foreign_key_clauses_1;"
     # H.tabulate "dbay_foreign_key_clauses_2", db SQL"select * from dbay_foreign_key_clauses_2;"
-    H.tabulate "dbay_foreign_key_clauses", db SQL"select * from dbay_foreign_key_clauses;"
+    H.tabulate "dbay_foreign_key_clauses_OLD", db SQL"select * from dbay_foreign_key_clauses_OLD;"
     H.tabulate "dbay_primary_key_clauses", db SQL"select * from dbay_primary_key_clauses;"
     # H.tabulate "dbay_field_clauses_1", db SQL"select * from dbay_field_clauses_1;"
     H.tabulate "dbay_unique_fields", db SQL"select * from dbay_unique_fields;"
@@ -452,7 +491,7 @@ show_overview = ( db ) ->
   # H.tabulate "pragma_table_xinfo( 'a' )", db SQL"select * from pragma_table_xinfo( 'a' );"
   H.tabulate "select * from dbay_tables;", db SQL"select * from dbay_tables;"
   H.tabulate "dbay_field_clauses", db SQL"select * from dbay_field_clauses;"
-  H.tabulate "dbay_foreign_key_clauses", db SQL"select * from dbay_foreign_key_clauses;"
+  H.tabulate "dbay_foreign_key_clauses_OLD", db SQL"select * from dbay_foreign_key_clauses_OLD;"
   H.tabulate "dbay_primary_key_clauses", db SQL"select * from dbay_primary_key_clauses;"
   H.tabulate "dbay_create_table_clauses", db SQL"select * from dbay_create_table_clauses;"
   H.tabulate "dbay_create_table_statements", db SQL"select schema, table_nr, table_name, substring( create_table_statement, 1, 100 ) from dbay_create_table_statements;"
