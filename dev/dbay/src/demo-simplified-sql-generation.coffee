@@ -486,6 +486,8 @@ show_overview = ( db ) ->
   H.tabulate "dbay_primary_key_clauses", db SQL"select * from dbay_primary_key_clauses;"
   H.tabulate "dbay_create_table_clauses", db SQL"select * from dbay_create_table_clauses;"
   show_overview db
+  for row from db SQL"select * from dbay_create_table_statements_MIRAGE"
+    echo row.txt
   return null
 
 
