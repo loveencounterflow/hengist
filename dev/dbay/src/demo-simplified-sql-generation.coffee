@@ -393,6 +393,7 @@ show_overview = ( db ) ->
       pragma foreign_keys = false;
       drop table if exists a;
       drop table if exists b;
+      drop view  if exists c;
       pragma foreign_keys = true;
       create table a (
           xnr   integer  not null unique,
@@ -403,6 +404,12 @@ show_overview = ( db ) ->
           name  text     not null,
         foreign key ( xnr    ) references a ( xnr   ),
         foreign key ( name  ) references a ( name ) );
+      create view c as select
+          xnr,
+          name
+        from b
+        where xnr > 1
+        order by xnr;
       """
     # db "pragma foreign_keys = false;"
     # H.tabulate "select * from pragma_foreign_key_check();", db SQL"select * from pragma_foreign_key_check();"
