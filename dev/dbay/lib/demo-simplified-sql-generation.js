@@ -242,7 +242,7 @@ create view dbay_field_clauses as select
 create view dbay_create_table_clauses as select
     table_nr                                                                  as table_nr,
     table_name                                                                as table_name,
-    'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )          as create_start,
+    'create table ' || std_sql_i( table_name ) || ' ('                        as create_start,
     ' );'                                                                     as create_end
   from dbay_tables;`);
     //---------------------------------------------------------------------------------------------------------
@@ -438,7 +438,7 @@ create view c as select
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_simplified_sql_generation = function(cfg) {
-    var Mrg, db;
+    var Mrg, db, ref1, row;
     ({Mrg} = require('../../../apps/dbay-mirage'));
     db = add_views(new DBay({
       path: '/tmp/foobar.sqlite'
@@ -500,6 +500,10 @@ create view ab as select
     H.tabulate("dbay_primary_key_clauses", db(SQL`select * from dbay_primary_key_clauses;`));
     H.tabulate("dbay_create_table_clauses", db(SQL`select * from dbay_create_table_clauses;`));
     show_overview(db);
+    ref1 = db(SQL`select * from dbay_create_table_statements_MIRAGE`);
+    for (row of ref1) {
+      echo(row.txt);
+    }
     return null;
   };
 
