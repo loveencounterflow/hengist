@@ -512,7 +512,7 @@ substring( create_table_statement, 1, 100 ) from dbay_create_table_statements;`)
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      this.demo_two_kinds_of_foreign_keys();
+      // @demo_two_kinds_of_foreign_keys()
       return this.demo_simplified_sql_generation();
     })();
   }

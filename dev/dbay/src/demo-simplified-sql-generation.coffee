@@ -497,9 +497,8 @@ show_overview = ( db ) ->
 
 ############################################################################################################
 if module is require.main then do =>
-  @demo_two_kinds_of_foreign_keys()
+  # @demo_two_kinds_of_foreign_keys()
   @demo_simplified_sql_generation()
-
 
 
 
