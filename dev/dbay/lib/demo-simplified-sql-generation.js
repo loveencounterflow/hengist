@@ -183,11 +183,13 @@ create view dbay_primary_key_clauses_1 as select distinct
     //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists dbay_primary_key_clauses;
 create view dbay_primary_key_clauses as select distinct
-    table_nr                                                                  as table_nr,
-    table_name                                                                as table_name,
-    '  primary key ( ' || field_names || ' )'                                 as pk_clause
-  from dbay_primary_key_clauses_1
-  order by table_name;`);
+    p1.table_nr                                                               as table_nr,
+    p1.table_name                                                             as table_name,
+    '  primary key ( ' || p1.field_names || ' )'
+      || case when fc.fk_clause is null then '' else ',' end                  as pk_clause
+  from dbay_primary_key_clauses_1     as p1
+  left join dbay_foreign_key_clauses  as fc on ( p1.table_name = fc.table_name and fc.fk_nr = 1 )
+  order by p1.table_name;`);
     //---------------------------------------------------------------------------------------------------------
     db(SQL`drop view if exists dbay_field_clauses_1;
 create view dbay_field_clauses_1 as select
@@ -425,6 +427,7 @@ drop table if exists a;
 drop table if exists b;
 drop table if exists c;
 drop table if exists b2;
+drop table if exists only_fk;
 drop view if exists ab;
 pragma foreign_keys = true;
 create table a (
@@ -456,6 +459,11 @@ create table c (
     x integer primary key references a ( xnr ),
     y text default 'whatever' references b ( name ),
     z float references a ( baz ) );
+create table only_fk (
+    x integer,
+    y text,
+  foreign key ( x ) references a ( xnr ),
+  foreign key ( y ) references b ( name ) );
 create view ab as select
     3 * 4 as twelve,
     x421,
