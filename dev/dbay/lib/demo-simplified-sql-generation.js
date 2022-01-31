@@ -406,6 +406,7 @@ create table b (
       db(SQL`pragma foreign_keys = false;
 drop table if exists a;
 drop table if exists b;
+drop view  if exists c;
 pragma foreign_keys = true;
 create table a (
     xnr   integer  not null unique,
@@ -415,7 +416,13 @@ create table b (
     xnr   integer  not null,
     name  text     not null,
   foreign key ( xnr    ) references a ( xnr   ),
-  foreign key ( name  ) references a ( name ) );`);
+  foreign key ( name  ) references a ( name ) );
+create view c as select
+    xnr,
+    name
+  from b
+  where xnr > 1
+  order by xnr;`);
       // db "pragma foreign_keys = false;"
       // H.tabulate "select * from pragma_foreign_key_check();", db SQL"select * from pragma_foreign_key_check();"
       trycatch('^578-7^', db, SQL`insert into a ( xnr, name ) values ( 1, 'one' );`);
