@@ -86,7 +86,7 @@ add_views = ( db ) ->
     drop view if exists dbay_fields_1;
     create view dbay_fields_1 as select
         tb.table_nr                                                               as table_nr,
-        ti.cid                                                                    as field_nr,
+        ti.cid + 1                                                                as field_nr,
         tb.table_name                                                             as table_name,
         tb.type                                                                   as table_type,
         ti.name                                                                   as field_name,
@@ -100,12 +100,31 @@ add_views = ( db ) ->
       order by table_nr, field_nr;"""
   #---------------------------------------------------------------------------------------------------------
   db SQL"""
-    drop view if exists dbay_fields;
-    create view dbay_fields as select
+    drop view if exists dbay_fields_2;
+    create view dbay_fields_2 as select
         fd.*,
         case when uf.field_name is null then 0 else 1 end                         as is_unique
       from dbay_fields_1 as fd
       left join dbay_unique_fields as uf using ( table_name, field_name )
+      order by table_nr, field_nr;"""
+  #---------------------------------------------------------------------------------------------------------
+  db SQL"""
+    drop view if exists dbay_fields;
+    create view dbay_fields as select
+        table_nr                                                                  as table_nr,
+        field_nr                                                                  as field_nr,
+        count() over w - field_nr + 1                                             as field_rnr,
+        table_name                                                                as table_name,
+        table_type                                                                as table_type,
+        field_name                                                                as field_name,
+        field_type                                                                as field_type,
+        nullable                                                                  as nullable,
+        fallback                                                                  as fallback,
+        pk_nr                                                                     as pk_nr,
+        hidden                                                                    as hidden,
+        is_unique                                                                 as is_unique
+      from dbay_fields_2
+      window w as ( partition by table_name )
       order by table_nr, field_nr;"""
   #---------------------------------------------------------------------------------------------------------
   db SQL"""
@@ -187,13 +206,14 @@ add_views = ( db ) ->
           || case when fc.fk_clause is null then '' else ',' end                  as pk_clause
       from dbay_primary_key_clauses_1     as p1
       left join dbay_foreign_key_clauses  as fc on ( p1.table_name = fc.table_name and fc.fk_nr = 1 )
-      order by p1.table_name;"""
+      order by p1.table_nr;"""
   #---------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists dbay_field_clauses_1;
     create view dbay_field_clauses_1 as select
         table_nr                                                                  as table_nr,
         field_nr                                                                  as field_nr,
+        field_rnr                                                                 as field_rnr,
         table_name                                                                as table_name,
         field_name                                                                as field_name,
         '    ' || std_sql_i( field_name ) || ' ' || field_type                    as fc_name_type,
@@ -206,13 +226,18 @@ add_views = ( db ) ->
   db SQL"""
     drop view if exists dbay_field_clauses;
     create view dbay_field_clauses as select
-        table_nr                                                                  as table_nr,
-        field_nr                                                                  as field_nr,
-        table_name                                                                as table_name,
-        field_name                                                                as field_name,
-        fc_name_type || fc_null || fc_unique || fc_default                        as field_clause
-      from dbay_field_clauses_1
-      order by table_nr, field_nr;"""
+        f1.table_nr                                                               as table_nr,
+        f1.field_nr                                                               as field_nr,
+        f1.table_name                                                             as table_name,
+        f1.field_name                                                             as field_name,
+        f1.fc_name_type || f1.fc_null || f1.fc_unique || f1.fc_default
+          || case when f1.field_rnr > 1 then ','
+             else case when fc.fk_clause is null and pc.pk_clause is null then ''
+             else ',' end end                                                     as field_clause
+      from dbay_field_clauses_1           as f1
+      left join dbay_foreign_key_clauses  as fc on ( f1.table_name = fc.table_name and fc.fk_nr = 1 )
+      left join dbay_primary_key_clauses  as pc on ( f1.table_name = pc.table_name )
+      order by f1.table_nr, f1.field_nr;"""
   #---------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists dbay_create_table_clauses;
