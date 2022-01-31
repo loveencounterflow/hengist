@@ -169,7 +169,7 @@ add_views = ( db ) ->
     drop view if exists #{schema}.dbay_foreign_key_clauses_3;
     create view #{schema}.dbay_foreign_key_clauses_3 as select
         *,
-        count(*) over w as line_count
+        count(*) over w                                                           as line_count
       from #{schema}.dbay_foreign_key_clauses_2
       window w as (
         partition by schema, from_table_name );"""
