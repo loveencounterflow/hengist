@@ -244,7 +244,7 @@ add_views = ( db ) ->
     create view dbay_create_table_clauses as select
         table_nr                                                                  as table_nr,
         table_name                                                                as table_name,
-        'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )          as create_start,
+        'create table ' || std_sql_i( table_name ) || ' ('                        as create_start,
         ' );'                                                                     as create_end
       from dbay_tables;"""
   #---------------------------------------------------------------------------------------------------------
