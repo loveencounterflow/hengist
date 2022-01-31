@@ -139,23 +139,6 @@ add_views = ( db ) ->
       order by from_table_name, fk_id, fk_idx;"""
   #---------------------------------------------------------------------------------------------------------
   db SQL"""
-    drop view if exists dbay_foreign_key_clauses_OLD;
-    create view dbay_foreign_key_clauses_OLD as select distinct
-        from_table_nr                                                             as table_nr,
-        from_table_name                                                           as table_name,
-        group_concat(
-          '  foreign key ( ' || from_field_names || ' ) references '
-            || std_sql_i( to_table_name )
-            || ' ( ' || to_field_names || ' )',
-            ',' || char( 10 ) ) over w                                            as fk_clauses
-      from dbay_foreign_key_clauses_2
-      window w as (
-        partition by from_table_name
-        order by fk_id desc
-        rows between unbounded preceding and unbounded following )
-      order by from_table_name, fk_id;"""
-  #---------------------------------------------------------------------------------------------------------
-  db SQL"""
     drop view if exists dbay_foreign_key_clauses_3;
     create view dbay_foreign_key_clauses_3 as select
         *,
@@ -237,26 +220,6 @@ add_views = ( db ) ->
         'create table ' || std_sql_i( table_name ) || ' (' || char( 10 )          as create_start,
         ' );'                                                                     as create_end
       from dbay_tables;"""
-  #---------------------------------------------------------------------------------------------------------
-  db SQL"""
-    drop view if exists dbay_create_table_statements;
-    create view dbay_create_table_statements as select distinct
-        tb.table_nr                                                               as table_nr,
-        ct.table_name                                                             as table_name,
-        ct.create_start
-          || group_concat( fc.field_clause, ', ' || char( 10 ) ) over w
-          || case when pk.table_name is null then '' else ',' || char( 10 ) || pk.pk_clause end
-          || case when fk.table_name is null then '' else ',' || char( 10 ) || fk.fk_clauses end
-          || ct.create_end                                                        as create_table_statement
-      from dbay_create_table_clauses as ct
-      join dbay_field_clauses as fc using ( table_name )
-      left join dbay_primary_key_clauses as pk using ( table_name )
-      left join dbay_foreign_key_clauses_OLD as fk using ( table_name )
-      join dbay_tables as tb using ( table_name )
-      window w as (
-        partition by ct.table_name
-        order by fc.field_nr
-        rows between unbounded preceding and unbounded following );"""
   #---------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists dbay_create_table_statements_MIRAGE;
@@ -343,15 +306,12 @@ show_overview = ( db ) ->
   H.tabulate "dbay_foreign_key_clauses_1",    db SQL"select * from dbay_foreign_key_clauses_1"
   H.tabulate "dbay_foreign_key_clauses_2",    db SQL"select * from dbay_foreign_key_clauses_2"
   H.tabulate "dbay_foreign_key_clauses_3",    db SQL"select * from dbay_foreign_key_clauses_3"
-  H.tabulate "dbay_foreign_key_clauses_OLD",      db SQL"select * from dbay_foreign_key_clauses_OLD"
   H.tabulate "dbay_foreign_key_clauses",      db SQL"select * from dbay_foreign_key_clauses"
   H.tabulate "dbay_primary_key_clauses_1",    db SQL"select * from dbay_primary_key_clauses_1"
   H.tabulate "dbay_primary_key_clauses",      db SQL"select * from dbay_primary_key_clauses"
   H.tabulate "dbay_field_clauses_1",          db SQL"select * from dbay_field_clauses_1"
   H.tabulate "dbay_field_clauses",            db SQL"select * from dbay_field_clauses"
   H.tabulate "dbay_create_table_clauses",     db SQL"select * from dbay_create_table_clauses"
-  H.tabulate "dbay_create_table_statements",  db SQL"""select table_nr, table_name,
-    substring( create_table_statement, 1, 100 ) from dbay_create_table_statements"""
   H.tabulate "dbay_create_table_statements_MIRAGE",  db SQL"""select section_nr, table_nr, part_nr,
     lnr, table_name, substring( txt, 1, 100 ) from dbay_create_table_statements_MIRAGE"""
   return null
@@ -387,7 +347,6 @@ show_overview = ( db ) ->
     H.tabulate "dbay_fields", db SQL"select * from dbay_fields;"
     # H.tabulate "dbay_foreign_key_clauses_1", db SQL"select * from dbay_foreign_key_clauses_1;"
     # H.tabulate "dbay_foreign_key_clauses_2", db SQL"select * from dbay_foreign_key_clauses_2;"
-    H.tabulate "dbay_foreign_key_clauses_OLD", db SQL"select * from dbay_foreign_key_clauses_OLD;"
     H.tabulate "dbay_primary_key_clauses", db SQL"select * from dbay_primary_key_clauses;"
     # H.tabulate "dbay_field_clauses_1", db SQL"select * from dbay_field_clauses_1;"
     H.tabulate "dbay_unique_fields", db SQL"select * from dbay_unique_fields;"
@@ -430,7 +389,7 @@ show_overview = ( db ) ->
     H.tabulate "dbay_fields", db SQL"select * from dbay_fields;"
     # H.tabulate "dbay_foreign_key_clauses_1", db SQL"select * from dbay_foreign_key_clauses_1;"
     # H.tabulate "dbay_foreign_key_clauses_2", db SQL"select * from dbay_foreign_key_clauses_2;"
-    H.tabulate "dbay_foreign_key_clauses_OLD", db SQL"select * from dbay_foreign_key_clauses_OLD;"
+    # H.tabulate "dbay_foreign_key_clauses_OLD", db SQL"select * from dbay_foreign_key_clauses_OLD;"
     H.tabulate "dbay_primary_key_clauses", db SQL"select * from dbay_primary_key_clauses;"
     # H.tabulate "dbay_field_clauses_1", db SQL"select * from dbay_field_clauses_1;"
     H.tabulate "dbay_unique_fields", db SQL"select * from dbay_unique_fields;"
@@ -489,34 +448,10 @@ show_overview = ( db ) ->
       order by x421;
     """
   #.........................................................................................................
-  # H.tabulate 'sqlite_schema', db SQL"select type, name, tbl_name from sqlite_schema;"
-  # H.tabulate "pragma_table_info( 'a' )", db SQL"select * from pragma_table_info( 'a' );"
-  # # H.tabulate "pragma_index_list( 'a' )", db SQL"select * from pragma_index_list( 'a' );"
-  # H.tabulate "pragma_foreign_key_list( 'b' )", db SQL"select * from pragma_foreign_key_list( 'b' );"
-  # H.tabulate "pragma_foreign_key_list( 'c' )", db SQL"select * from pragma_foreign_key_list( 'c' );"
-  # H.tabulate "pragma_table_info( 'b' )", db SQL"select * from pragma_table_info( 'b' );"
-  # H.tabulate "pragma_table_info( 'c' )", db SQL"select * from pragma_table_info( 'c' );"
-  # H.tabulate "pragma_index_list( 'a' )", db SQL"select * from pragma_index_list( 'a' );"
-  # H.tabulate "pragma_index_list( 'c' )", db SQL"select * from pragma_index_list( 'c' );"
-  # H.tabulate "pragma_index_info( 'athisthat' )", db SQL"select * from pragma_index_info( 'athisthat' );"
-  # H.tabulate "dbay_foreign_key_clauses_1", db SQL"select * from dbay_foreign_key_clauses_1;"
-  # H.tabulate "dbay_foreign_key_clauses_2", db SQL"select * from dbay_foreign_key_clauses_2;"
-  # H.tabulate "pragma_index_list( 'b2' )", db SQL"select * from pragma_index_list( 'b2' );"
-  # H.tabulate "pragma_index_info( 'sqlite_autoindex_b2_2' )", db SQL"select * from pragma_index_info( 'sqlite_autoindex_b2_2' );"
-  # H.tabulate "pragma_index_xinfo( 'sqlite_autoindex_b2_2' )", db SQL"select * from pragma_index_xinfo( 'sqlite_autoindex_b2_2' );"
-  # H.tabulate "dbay_unique_fields", db SQL"select * from dbay_unique_fields;"
-  # H.tabulate "dbay_fields", db SQL"select * from dbay_fields;"
-  # H.tabulate "pragma_table_list()", db SQL"select * from pragma_table_list();"
-  # H.tabulate "pragma_table_xinfo( 'a' )", db SQL"select * from pragma_table_xinfo( 'a' );"
   H.tabulate "select * from dbay_tables;", db SQL"select * from dbay_tables;"
   H.tabulate "dbay_field_clauses", db SQL"select * from dbay_field_clauses;"
-  H.tabulate "dbay_foreign_key_clauses_OLD", db SQL"select * from dbay_foreign_key_clauses_OLD;"
   H.tabulate "dbay_primary_key_clauses", db SQL"select * from dbay_primary_key_clauses;"
   H.tabulate "dbay_create_table_clauses", db SQL"select * from dbay_create_table_clauses;"
-  H.tabulate "dbay_create_table_statements", db SQL"""select table_nr, table_name,
-    substring( create_table_statement, 1, 100 ) from dbay_create_table_statements;"""
-  for row from db SQL"select * from dbay_create_table_statements order by table_nr;"
-    urge row.table_nr, '\n' + row.create_table_statement
   show_overview db
   return null
 
