@@ -266,7 +266,7 @@ add_views = ( db ) ->
       union all select distinct 10, null, 10, 2, null, 'pragma foreign_keys = false;'         from x
       union all select distinct 10, null, 10, 3, null, 'begin transaction;'                   from x
       union all select distinct 90, null, 10, 1, null, 'commit;'                              from x
-      union all select distinct 90, null, 10, 2, null, 'pragma foreign_keys = false;'         from x
+      union all select distinct 90, null, 10, 2, null, 'pragma foreign_keys = true;'          from x
       -- ...................................................................................................
       union all select
         20                                                                        as section_nr,
