@@ -107,7 +107,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
     """
   path    = PATH.join DBay.C.autolocation, ( new Random() ).get_random_filename()
   help "^534535^ writing db.trash() output to #{path}"
-  result  = db.trash { path, }
+  result  = db.trash { format: 'sql', path, }
   T?.eq result, path
   result  = ( line for line from ( guy.fs.walk_lines path ) when not line.startsWith '--' ).join '\n'
   T?.eq result, """
@@ -141,7 +141,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
     create table first ( a integer not null primary key, b text unique not null );
     create table second ( x integer references first ( a ), y text references first ( b ) );
     """
-  path    = db.trash { path: true, }
+  path    = db.trash { format: 'sql', path: true, }
   help "^534535^ db.trash() output written to #{path}"
   result  = ( line for line from ( guy.fs.walk_lines path ) when not line.startsWith '--' ).join '\n'
   T?.eq result, """
@@ -169,7 +169,9 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 if require.main is module then do =>
   test @
   # test @[ "DBAY trash basic functionality with public API" ]
+  # @[ "DBAY trash basic functionality with private API" ]()
   # @[ "DBAY trash basic functionality with public API" ]()
+  # @[ "DBAY trash to file (1)" ]()
   # @[ "DBAY trash to file (2)" ]()
 
 
