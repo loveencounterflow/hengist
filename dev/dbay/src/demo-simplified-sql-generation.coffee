@@ -333,48 +333,60 @@ add_views = ( db ) ->
       from dbay_create_table_clauses as ct
       -- ...................................................................................................
       order by section_nr, table_nr, part_nr, lnr;"""
-  # #---------------------------------------------------------------------------------------------------------
-  # db.create_table_function
-  #   name:         'mrg_lines_from_text'
-  #   parameters:   [ 'prv_line', 'line', ]
-  #   columns:      [ 'vnr2', 'txt', ]
-  #   rows: ( prv_line, line ) ->
-  #     debug [ prv_line, line, ]
-  #     yield [ 1, line, ]
-  #     return null
   #---------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists dbay_create_table_statements_2;
-    create view dbay_create_table_statements_2 as
-      select
-          row_number() over ()                                                    as lnr,
-          1                                                                       as tail,
-          txt                                                                     as txt
-        from dbay_create_table_statements_1 as r1
-        order by section_nr, table_nr, part_nr, r1.lnr;"""
+    create view dbay_create_table_statements_2 as select
+        row_number() over ()                                                      as lnr,
+        1                                                                         as tail,
+        txt                                                                       as txt
+      from dbay_create_table_statements_1 as r1
+      order by section_nr, table_nr, part_nr, r1.lnr;"""
   #---------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists dbay_create_table_statements_3;
-    create view dbay_create_table_statements_3 as
-      select
-          r1.lnr                                                                  as lnr,
-          r2.lnr                                                                  as tail,
-          r2.part                                                                 as txt
-        from dbay_create_table_statements_2 as r1,
-        std_str_split( r1.txt, '\n' )       as r2
-        order by lnr, tail;"""
+    create view dbay_create_table_statements_3 as select
+        r1.lnr                                                                    as lnr,
+        r2.lnr                                                                    as tail,
+        r2.part                                                                   as txt
+      from dbay_create_table_statements_2 as r1,
+      std_str_split( r1.txt, '\n' )       as r2
+      order by lnr, tail;"""
+  #---------------------------------------------------------------------------------------------------------
+  db SQL"""
+    drop view if exists dbay_create_table_statements_4;
+    create view dbay_create_table_statements_4 as select
+        r1.lnr                                                                    as lnr,
+        r1.tail                                                                   as tail,
+        lead( r1.txt ) over ()                                                    as nxt_txt,
+        r1.txt                                                                    as txt
+      from dbay_create_table_statements_3 as r1
+      order by lnr, tail;"""
+  #---------------------------------------------------------------------------------------------------------
+  skip = false
+  db.create_table_function
+    name:         'mrg_lines_from_text'
+    parameters:   [ 'line', 'nxt_line', ]
+    columns:      [ 'vnr2', 'txt', ]
+    rows: ( line, nxt_line ) ->
+      # debug [ line, nxt_line, ]
+      if skip
+        skip = false
+      else if nxt_line.startsWith '\b'
+        skip = true
+        yield [ 1, line + nxt_line[ 1 .. ], ]
+      else
+        yield [ 1, line, ]
+      return null
   #---------------------------------------------------------------------------------------------------------
   db SQL"""
     drop view if exists dbay_create_table_statements;
-    create view dbay_create_table_statements as
-      select
-          r1.lnr                                                                  as lnr,
-          r1.tail                                                                 as tail,
-          lead( r1.txt ) over () as nxt_txt,
-          r1.txt                                                                  as txt
-        from dbay_create_table_statements_3 as r1
-        -- window w as ( partition by lnr, tail order by tail range )
-        order by lnr, tail;"""
+    create view dbay_create_table_statements as select
+        row_number() over ( order by r1.lnr, r1.tail, r2.vnr2 )                   as lnr,
+        r2.txt                                                                    as txt
+      from dbay_create_table_statements_4     as r1,
+      mrg_lines_from_text( r1.txt, nxt_txt )  as r2
+      order by r1.lnr, r1.tail, r2.vnr2;"""
   #-------------------------------------------------------------------------------------------------------
   # db SQL"""
   #   drop view if exists dbay_db_dump;
@@ -389,17 +401,21 @@ show_overview = ( db ) ->
   info '#############################################################################'
   H.tabulate "dbay_tables",                   db SQL"select * from dbay_tables"
   H.tabulate "dbay_unique_fields",            db SQL"select * from dbay_unique_fields"
-  H.tabulate "dbay_fields_1",                 db SQL"select * from dbay_fields_1"
+  # H.tabulate "dbay_fields_1",                 db SQL"select * from dbay_fields_1"
   H.tabulate "dbay_fields",                   db SQL"select * from dbay_fields"
-  H.tabulate "dbay_foreign_key_clauses_1",    db SQL"select * from dbay_foreign_key_clauses_1"
-  H.tabulate "dbay_foreign_key_clauses_2",    db SQL"select * from dbay_foreign_key_clauses_2"
-  H.tabulate "dbay_foreign_key_clauses_3",    db SQL"select * from dbay_foreign_key_clauses_3"
+  # H.tabulate "dbay_foreign_key_clauses_1",    db SQL"select * from dbay_foreign_key_clauses_1"
+  # H.tabulate "dbay_foreign_key_clauses_2",    db SQL"select * from dbay_foreign_key_clauses_2"
+  # H.tabulate "dbay_foreign_key_clauses_3",    db SQL"select * from dbay_foreign_key_clauses_3"
   H.tabulate "dbay_foreign_key_clauses",      db SQL"select * from dbay_foreign_key_clauses"
-  H.tabulate "dbay_primary_key_clauses_1",    db SQL"select * from dbay_primary_key_clauses_1"
+  # H.tabulate "dbay_primary_key_clauses_1",    db SQL"select * from dbay_primary_key_clauses_1"
   H.tabulate "dbay_primary_key_clauses",      db SQL"select * from dbay_primary_key_clauses"
-  H.tabulate "dbay_field_clauses_1",          db SQL"select * from dbay_field_clauses_1"
+  # H.tabulate "dbay_field_clauses_1",          db SQL"select * from dbay_field_clauses_1"
   H.tabulate "dbay_field_clauses",            db SQL"select * from dbay_field_clauses"
   H.tabulate "dbay_create_table_clauses",     db SQL"select * from dbay_create_table_clauses"
+  # H.tabulate "dbay_create_table_statements_1", db SQL"select * from dbay_create_table_statements_1"
+  # H.tabulate "dbay_create_table_statements_2", db SQL"select * from dbay_create_table_statements_2"
+  # H.tabulate "dbay_create_table_statements_3", db SQL"select * from dbay_create_table_statements_3"
+  # H.tabulate "dbay_create_table_statements_4", db SQL"select * from dbay_create_table_statements_4"
   H.tabulate "dbay_create_table_statements",  db SQL"select * from dbay_create_table_statements"
   # H.tabulate "dbay_create_table_statements",  db SQL"""
   #   select
