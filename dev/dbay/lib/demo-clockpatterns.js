@@ -92,7 +92,7 @@
       db.create_function({
         name: 'call',
         call: function(name, time, digits) {
-          return functions[name](time, JSON.parse(digits));
+          return functions[name](time, ...(JSON.parse(digits)));
         }
       });
       //.......................................................................................................
@@ -139,13 +139,16 @@ create table times (
     //---------------------------------------------------------------------------------------------------------
     db(function() {
       var insert_pattern;
-      functions.ascending = function(time, digits) {
-        var ref, ref1;
-        return nbool(((digits[0] < (ref1 = digits[1]) && ref1 < (ref = digits[2])) && ref < digits[3]));
+      functions.asc = function(time, d1, d2, d3, d4) {
+        return nbool(((d1 < d2 && d2 < d3) && d3 < d4));
       };
-      functions.incrementing = function(time, digits) {
+      functions.inc4 = function(time, d1, d2, d3, d4) {
         var ref, ref1;
-        return nbool(((digits[0] === (ref1 = digits[1] - 1) && ref1 === (ref = digits[2] - 2)) && ref === digits[3] - 3));
+        return nbool(((d1 === (ref1 = d2 - 1) && ref1 === (ref = d3 - 2)) && ref === d4 - 3));
+      };
+      functions.inc3 = function(time, d1, d2, d3, d4) {
+        var ref, ref1;
+        return nbool(((d1 === (ref = d2 - 1) && ref === d3 - 2)) || ((d2 === (ref1 = d3 - 1) && ref1 === d4 - 2)));
       };
       insert_pattern = db.prepare_insert({
         into: 'patterns',
@@ -156,13 +159,14 @@ create table times (
         kind: 're',
         pattern: raw`(?<d>\d)\k<d>:\k<d>\k<d>`
       });
+      // insert_pattern.run { kind: 'fn', pattern: 'asc',    }
       insert_pattern.run({
         kind: 'fn',
-        pattern: 'ascending'
+        pattern: 'inc4'
       });
       return insert_pattern.run({
         kind: 'fn',
-        pattern: 'incrementing'
+        pattern: 'inc3'
       });
     });
     //.........................................................................................................
