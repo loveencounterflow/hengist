@@ -59,7 +59,7 @@ tabulate = ( db, query ) -> H.tabulate query, db query
       call:     ( time ) -> JSON.stringify ( parseInt d, 10 for d in time when d isnt ':' )
     db.create_function
       name:     'call'
-      call:     ( name, time, digits ) -> functions[ name ] time, JSON.parse digits
+      call:     ( name, time, digits ) -> functions[ name ] time, ( JSON.parse digits )...
     #.......................................................................................................
     db SQL"""
       drop table if exists times;
@@ -89,12 +89,14 @@ tabulate = ( db, query ) -> H.tabulate query, db query
         insert_time.run { time, }
   #---------------------------------------------------------------------------------------------------------
   db ->
-    functions.ascending     = ( time, digits ) -> nbool digits[ 0 ] < digits[ 1 ] < digits[ 2 ] < digits[ 3 ]
-    functions.incrementing  = ( time, digits ) -> nbool digits[ 0 ] is digits[ 1 ] - 1 is digits[ 2 ] - 2 is digits[ 3 ] - 3
+    functions.asc  = ( time, d1, d2, d3, d4 ) -> nbool d1 < d2 < d3 < d4
+    functions.inc4 = ( time, d1, d2, d3, d4 ) -> nbool d1 is d2 - 1 is d3 - 2 is d4 - 3
+    functions.inc3 = ( time, d1, d2, d3, d4 ) -> nbool ( d1 is d2 - 1 is d3 - 2 ) or ( d2 is d3 - 1 is d4 - 2 )
     insert_pattern = db.prepare_insert { into: 'patterns', exclude: [ 'nr', ], returning: '*', }
     insert_pattern.run { kind: 're', pattern: raw'(?<d>\d)\k<d>:\k<d>\k<d>', }
-    insert_pattern.run { kind: 'fn', pattern: 'ascending', }
-    insert_pattern.run { kind: 'fn', pattern: 'incrementing', }
+    # insert_pattern.run { kind: 'fn', pattern: 'asc',    }
+    insert_pattern.run { kind: 'fn', pattern: 'inc4', }
+    insert_pattern.run { kind: 'fn', pattern: 'inc3', }
   #.........................................................................................................
   tabulate db, SQL"select * from times limit 25 offset 123;"
   tabulate db, SQL"""
