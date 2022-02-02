@@ -90,7 +90,6 @@ commit;`);
     ({DBay} = require(H.dbay_path));
     ({SQL} = DBay);
     db = new DBay();
-    db._implement_trash();
     db(SQL`create table first ( a integer not null primary key, b text unique not null );
 create table second ( x integer references first ( a ), y text references first ( b ) );`);
     result = db.trash();
@@ -126,6 +125,102 @@ commit;`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY trash to file (1)"] = function(T, done) {
+    var DBay, Random, SQL, db, line, path, result;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({Random} = require(PATH.join(H.dbay_path, 'lib/random')));
+    ({SQL} = DBay);
+    db = new DBay();
+    db(SQL`create table first ( a integer not null primary key, b text unique not null );
+create table second ( x integer references first ( a ), y text references first ( b ) );`);
+    path = PATH.join(DBay.C.autolocation, (new Random()).get_random_filename());
+    help(`^534535^ writing db.trash() output to ${path}`);
+    result = db.trash({path});
+    if (T != null) {
+      T.eq(result, path);
+    }
+    result = ((function() {
+      var ref, results;
+      ref = guy.fs.walk_lines(path);
+      results = [];
+      for (line of ref) {
+        if (!line.startsWith('--')) {
+          results.push(line);
+        }
+      }
+      return results;
+    })()).join('\n');
+    if (T != null) {
+      T.eq(result, `.bail on
+pragma foreign_keys = false;
+begin transaction;
+drop table if exists "first";
+drop table if exists "second";
+create table "first" (
+    "a" integer not null,
+    "b" text not null unique,
+  primary key ( "a" )
+ );
+create table "second" (
+    "x" integer,
+    "y" text,
+  foreign key ( "x" ) references "first" ( "a" ),
+  foreign key ( "y" ) references "first" ( "b" )
+ );
+commit;`);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY trash to file (2)"] = function(T, done) {
+    var DBay, Random, SQL, db, line, path, result;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({Random} = require(PATH.join(H.dbay_path, 'lib/random')));
+    ({SQL} = DBay);
+    db = new DBay();
+    db(SQL`create table first ( a integer not null primary key, b text unique not null );
+create table second ( x integer references first ( a ), y text references first ( b ) );`);
+    path = db.trash({
+      path: true
+    });
+    help(`^534535^ db.trash() output written to ${path}`);
+    result = ((function() {
+      var ref, results;
+      ref = guy.fs.walk_lines(path);
+      results = [];
+      for (line of ref) {
+        if (!line.startsWith('--')) {
+          results.push(line);
+        }
+      }
+      return results;
+    })()).join('\n');
+    if (T != null) {
+      T.eq(result, `.bail on
+pragma foreign_keys = false;
+begin transaction;
+drop table if exists "first";
+drop table if exists "second";
+create table "first" (
+    "a" integer not null,
+    "b" text not null unique,
+  primary key ( "a" )
+ );
+create table "second" (
+    "x" integer,
+    "y" text,
+  foreign key ( "x" ) references "first" ( "a" ),
+  foreign key ( "y" ) references "first" ( "b" )
+ );
+commit;`);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -135,6 +230,7 @@ commit;`);
 
   // test @[ "DBAY trash basic functionality with public API" ]
 // @[ "DBAY trash basic functionality with public API" ]()
+// @[ "DBAY trash to file (2)" ]()
 
 }).call(this);
 
