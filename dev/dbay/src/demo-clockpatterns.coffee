@@ -73,7 +73,8 @@ tabulate = ( db, query ) -> H.tabulate query, db query
       drop table if exists patterns;
         create table patterns (
         nr      integer not null primary key,
-        pattern text not null unique,
+        name    text not null unique,
+        pattern text unique,
         kind    text not null,
         check ( length( pattern ) > 0 ),
         check ( kind in ( 're', 'fn' ) ) );"""
@@ -89,16 +90,27 @@ tabulate = ( db, query ) -> H.tabulate query, db query
         insert_time.run { time, }
   #---------------------------------------------------------------------------------------------------------
   db ->
-    functions.asc  = ( time, d1, d2, d3, d4 ) -> nbool d1 < d2 < d3 < d4
-    functions.inc4 = ( time, d1, d2, d3, d4 ) -> nbool d1 is d2 - 1 is d3 - 2 is d4 - 3
-    functions.inc3 = ( time, d1, d2, d3, d4 ) -> nbool ( d1 is d2 - 1 is d3 - 2 ) or ( d2 is d3 - 1 is d4 - 2 )
+    functions.asc     = ( time, d1, d2, d3, d4 ) -> nbool d1 < d2 < d3 < d4
+    functions.inc4    = ( time, d1, d2, d3, d4 ) -> nbool d1 is d2 - 1 is d3 - 2 is d4 - 3
+    functions.dec4    = ( time, d1, d2, d3, d4 ) -> nbool d1 is d2 + 1 is d3 + 2 is d4 + 3
+    functions.dec3a   = ( time, d1, d2, d3, d4 ) -> nbool d1 is d2 + 1 is d3 + 2
+    functions.dec3b   = ( time, d1, d2, d3, d4 ) -> nbool d2 is d3 + 1 is d4 + 2
+    functions.inc3a   = ( time, d1, d2, d3, d4 ) -> nbool d1 is d2 - 1 is d3 - 2
+    functions.inc3b   = ( time, d1, d2, d3, d4 ) -> nbool d2 is d3 - 1 is d4 - 2
+    # functions.hism = ( time, d1, d2, d3, d4 ) -> nbool ( d1 is d2 - 1 is d3 - 2 ) or ( d2 is d3 - 1 is d4 - 2 )
     insert_pattern = db.prepare_insert { into: 'patterns', exclude: [ 'nr', ], returning: '*', }
-    insert_pattern.run { kind: 're', pattern: raw'(?<d>\d)\k<d>:\k<d>\k<d>', }
+    insert_pattern.run { kind: 're', name: 'all4', pattern: raw'(?<d>\d)\k<d>:\k<d>\k<d>', }
+    insert_pattern.run { kind: 're', name: 'hism', pattern: raw'(?<dd>\d\d):\k<dd>', }
     # insert_pattern.run { kind: 'fn', pattern: 'asc',    }
-    insert_pattern.run { kind: 'fn', pattern: 'inc4', }
-    insert_pattern.run { kind: 'fn', pattern: 'inc3', }
+    insert_pattern.run { kind: 'fn', name: 'inc4', pattern: null, }
+    insert_pattern.run { kind: 'fn', name: 'dec4', pattern: null, }
+    insert_pattern.run { kind: 'fn', name: 'dec3a', pattern: null, }
+    insert_pattern.run { kind: 'fn', name: 'dec3b', pattern: null, }
+    insert_pattern.run { kind: 'fn', name: 'inc3a', pattern: null, }
+    insert_pattern.run { kind: 'fn', name: 'inc3b', pattern: null, }
   #.........................................................................................................
   tabulate db, SQL"select * from times limit 25 offset 123;"
+  tabulate db, SQL"select * from patterns order by kind, name;"
   tabulate db, SQL"""
     -- with v1 as ( select * from times where time between '11:00' and '11:59' )
     with
@@ -109,14 +121,14 @@ tabulate = ( db, query ) -> H.tabulate query, db query
         v1.nr                                               as time_nr,
         p.nr                                                as pattern_nr,
         p.kind                                              as kind,
-        p.pattern                                           as pattern,
+        p.name                                              as name,
         v2.count                                            as count,
         v1.digits                                           as digits,
         v1.time                                             as time
       from v1, v2, patterns as p
       where case p.kind
         when 're' then std_re_is_match( v1.time, pattern )
-        when 'fn' then call( p.pattern, time, digits )
+        when 'fn' then call( p.name, time, digits )
         else std_raise( 'unknown kind ' || quote( p.kind ) ) end
         ;"""
   return null
