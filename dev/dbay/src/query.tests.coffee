@@ -24,13 +24,27 @@ types                     = new ( require 'intertype' ).Intertype
   type_of
   validate
   validate_list_of }      = types.export()
-SQL                       = String.raw
 guy                       = require '../../../apps/guy'
 MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "DBAY SQL tag function" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }            = require H.dbay_path
+  { SQL  }            = DBay
+  T?.eq SQL"x\n\nx", "x\n\nx"
+  T?.ok SQL is ( require PATH.join H.dbay_path, 'lib/helpers' ).SQL
+  T?.eq SQL"foo #{1+2+3} bar", "foo 6 bar"
+  if T?
+    ```
+    T.eq( SQL`foo ${1+2+3} bar`, "foo 6 bar" )
+    ```
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBAY create DB, table 1" ] = ( T, done ) ->
+  SQL                       = String.raw
   ### explicit path, explicitly temporary ###
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
@@ -44,12 +58,12 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
     db.destroy()
     T?.ok not DH.is_file db._dbs.main.path
   finally
-
     DH.unlink_file db._dbs.main.path
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY create DB, table 2" ] = ( T, done ) ->
+  SQL                       = String.raw
   ### explicit path, explicitly not temporary ###
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
@@ -68,6 +82,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY create DB, table 3" ] = ( T, done ) ->
+  SQL                       = String.raw
   ### explicit path, implicitly not temporary ###
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
@@ -86,6 +101,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY create DB, table 4" ] = ( T, done ) ->
+  SQL                       = String.raw
   ### implicit path, implicitly temporary ###
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
@@ -105,6 +121,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY create DB, table 5" ] = ( T, done ) ->
+  SQL                       = String.raw
   ### implicit path, explicitly temporary ###
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
@@ -124,6 +141,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY create DB, table 6" ] = ( T, done ) ->
+  SQL                       = String.raw
   ### implicit path, explicitly not temporary ###
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
@@ -143,6 +161,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY create DB, insert, query values 1" ] = ( T, done ) ->
+  SQL                       = String.raw
   ### implicit path, explicitly not temporary ###
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
@@ -168,6 +187,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY do 1" ] = ( T, done ) ->
+  SQL                       = String.raw
   ### implicit path, explicitly not temporary ###
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
@@ -191,6 +211,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db as callable" ] = ( T, done ) ->
+  SQL                       = String.raw
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
@@ -214,6 +235,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db callable checks types of arguments" ] = ( T, done ) ->
+  SQL                       = String.raw
   # T?.halt_on_error()
   { DBay }            = require H.dbay_path
   db                  = new DBay()
@@ -223,6 +245,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db callable accepts function, begins, commits transaction" ] = ( T, done ) ->
+  SQL                       = String.raw
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
   db                  = new DBay()
@@ -249,6 +272,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY implicit tx can be configured" ] = ( T, done ) ->
+  SQL                       = String.raw
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
   db                  = new DBay()
@@ -271,6 +295,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY can do explicit rollback in tx context handler" ] = ( T, done ) ->
+  SQL                       = String.raw
   # T?.halt_on_error()
   { DBay }            = require H.dbay_path
   db                  = new DBay()
@@ -285,6 +310,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY tx rollback also reverts create table" ] = ( T, done ) ->
+  SQL                       = String.raw
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
   db                  = new DBay()
@@ -304,6 +330,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db.first_row returns `null` for empty result set" ] = ( T, done ) ->
+  SQL                       = String.raw
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
   db                  = new DBay()
@@ -321,6 +348,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db.single_row returns throws error on empty result set" ] = ( T, done ) ->
+  SQL                       = String.raw
   T?.halt_on_error()
   { DBay }            = require H.dbay_path
   db                  = new DBay()
@@ -339,6 +367,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db.first_values walks over first value in all rows" ] = ( T, done ) ->
+  SQL                       = String.raw
   # T?.halt_on_error()
   { DBay }            = require H.dbay_path
   db                  = new DBay()
@@ -365,6 +394,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db.all_first_values returns list of first value in all rows" ] = ( T, done ) ->
+  SQL                       = String.raw
   # T?.halt_on_error()
   { DBay }            = require H.dbay_path
   db                  = new DBay()
@@ -387,6 +417,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY db.single_value returns single value or throws error" ] = ( T, done ) ->
+  SQL                       = String.raw
   # T?.halt_on_error()
   { DBay }            = require H.dbay_path
   db                  = new DBay()
@@ -418,6 +449,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY prepared statement allowed in `db.do()`" ] = ( T, done ) ->
+  SQL                       = String.raw
   # T?.halt_on_error()
   { DBay }          = require H.dbay_path
   db                = new DBay()
@@ -465,7 +497,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
+  test @[ "DBAY SQL tag function" ]
   # @[ "DBAY prepared statement allowed in `db.do()`" ]()
   # test @[ "DBAY create DB, insert, query values 1" ]
   # test @[ "DBAY db as callable" ]
