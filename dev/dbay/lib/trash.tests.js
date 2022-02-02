@@ -137,7 +137,10 @@ commit;`);
 create table second ( x integer references first ( a ), y text references first ( b ) );`);
     path = PATH.join(DBay.C.autolocation, (new Random()).get_random_filename());
     help(`^534535^ writing db.trash() output to ${path}`);
-    result = db.trash({path});
+    result = db.trash({
+      format: 'sql',
+      path
+    });
     if (T != null) {
       T.eq(result, path);
     }
@@ -185,6 +188,7 @@ commit;`);
     db(SQL`create table first ( a integer not null primary key, b text unique not null );
 create table second ( x integer references first ( a ), y text references first ( b ) );`);
     path = db.trash({
+      format: 'sql',
       path: true
     });
     help(`^534535^ db.trash() output written to ${path}`);
@@ -229,7 +233,9 @@ commit;`);
   }
 
   // test @[ "DBAY trash basic functionality with public API" ]
+// @[ "DBAY trash basic functionality with private API" ]()
 // @[ "DBAY trash basic functionality with public API" ]()
+// @[ "DBAY trash to file (1)" ]()
 // @[ "DBAY trash to file (2)" ]()
 
 }).call(this);
