@@ -23,7 +23,6 @@ types                     = new ( require 'intertype' ).Intertype
   type_of
   validate
   validate_list_of }      = types.export()
-SQL                       = String.raw
 GUY                       = require '../../../apps/guy'
 # { HDML }                  = require '../../../apps/hdml'
 H                         = require '../../../lib/helpers'
@@ -31,6 +30,7 @@ H                         = require '../../../lib/helpers'
   freeze }                = GUY.lft
 { to_width }              = require 'to-width'
 { DBay }                  = require '../../../apps/dbay'
+{ SQL }                   = DBay
 { Sql }                   = require '../../../apps/dbay/lib/sql'
 
 
