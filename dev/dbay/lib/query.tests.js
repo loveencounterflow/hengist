@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, MMX, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, MMX, PATH, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -35,15 +35,37 @@
 
   ({isa, equals, type_of, validate, validate_list_of} = types.export());
 
-  SQL = String.raw;
-
   guy = require('../../../apps/guy');
 
   MMX = require('../../../apps/multimix/lib/cataloguing');
 
   //-----------------------------------------------------------------------------------------------------------
+  this["DBAY SQL tag function"] = function(T, done) {
+    var DBay, SQL;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({SQL} = DBay);
+    if (T != null) {
+      T.eq(SQL`x\n\nx`, "x\n\nx");
+    }
+    if (T != null) {
+      T.ok(SQL === (require(PATH.join(H.dbay_path, 'lib/helpers'))).SQL);
+    }
+    if (T != null) {
+      T.eq(SQL`foo ${1 + 2 + 3} bar`, "foo 6 bar");
+    }
+    if (T != null) {
+      
+    T.eq( SQL`foo ${1+2+3} bar`, "foo 6 bar" )
+    ;
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, table 1"] = function(T, done) {
-    var DBay, DH, db, path;
+    var DBay, DH, SQL, db, path;
+    SQL = String.raw;
     /* explicit path, explicitly temporary */
     if (T != null) {
       T.halt_on_error();
@@ -73,7 +95,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, table 2"] = function(T, done) {
-    var DBay, DH, db, path;
+    var DBay, DH, SQL, db, path;
+    SQL = String.raw;
     /* explicit path, explicitly not temporary */
     if (T != null) {
       T.halt_on_error();
@@ -105,7 +128,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, table 3"] = function(T, done) {
-    var DBay, DH, db, path;
+    var DBay, DH, SQL, db, path;
+    SQL = String.raw;
     /* explicit path, implicitly not temporary */
     if (T != null) {
       T.halt_on_error();
@@ -134,7 +158,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, table 4"] = function(T, done) {
-    var DBay, DH, db, path;
+    var DBay, DH, SQL, db, path;
+    SQL = String.raw;
     /* implicit path, implicitly temporary */
     if (T != null) {
       T.halt_on_error();
@@ -164,7 +189,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, table 5"] = function(T, done) {
-    var DBay, DH, db, path;
+    var DBay, DH, SQL, db, path;
+    SQL = String.raw;
     /* implicit path, explicitly temporary */
     if (T != null) {
       T.halt_on_error();
@@ -196,7 +222,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, table 6"] = function(T, done) {
-    var DBay, DH, db, path;
+    var DBay, DH, SQL, db, path;
+    SQL = String.raw;
     /* implicit path, explicitly not temporary */
     if (T != null) {
       T.halt_on_error();
@@ -228,7 +255,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY create DB, insert, query values 1"] = function(T, done) {
-    var DBay, DH, db, path, rows;
+    var DBay, DH, SQL, db, path, rows;
+    SQL = String.raw;
     /* implicit path, explicitly not temporary */
     if (T != null) {
       T.halt_on_error();
@@ -282,7 +310,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY do 1"] = function(T, done) {
-    var DBay, DH, db, path, rows;
+    var DBay, DH, SQL, db, path, rows;
+    SQL = String.raw;
     /* implicit path, explicitly not temporary */
     if (T != null) {
       T.halt_on_error();
@@ -329,7 +358,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db as callable"] = function(T, done) {
-    var DBay, DH, db, path, rows;
+    var DBay, DH, SQL, db, path, rows;
+    SQL = String.raw;
     if (T != null) {
       T.halt_on_error();
     }
@@ -376,7 +406,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db callable checks types of arguments"] = function(T, done) {
-    var DBay, db;
+    var DBay, SQL, db;
+    SQL = String.raw;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     db = new DBay();
@@ -395,7 +426,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db callable accepts function, begins, commits transaction"] = function(T, done) {
-    var DBay, db, rows;
+    var DBay, SQL, db, rows;
+    SQL = String.raw;
     if (T != null) {
       T.halt_on_error();
     }
@@ -445,7 +477,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY implicit tx can be configured"] = function(T, done) {
-    var DBay, db, rows;
+    var DBay, SQL, db, rows;
+    SQL = String.raw;
     if (T != null) {
       T.halt_on_error();
     }
@@ -495,7 +528,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY can do explicit rollback in tx context handler"] = function(T, done) {
-    var DBay, db;
+    var DBay, SQL, db;
+    SQL = String.raw;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     db = new DBay();
@@ -515,7 +549,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY tx rollback also reverts create table"] = function(T, done) {
-    var DBay, db, error;
+    var DBay, SQL, db, error;
+    SQL = String.raw;
     if (T != null) {
       T.halt_on_error();
     }
@@ -548,7 +583,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db.first_row returns `null` for empty result set"] = function(T, done) {
-    var DBay, db;
+    var DBay, SQL, db;
+    SQL = String.raw;
     if (T != null) {
       T.halt_on_error();
     }
@@ -584,7 +620,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db.single_row returns throws error on empty result set"] = function(T, done) {
-    var DBay, db;
+    var DBay, SQL, db;
+    SQL = String.raw;
     if (T != null) {
       T.halt_on_error();
     }
@@ -627,7 +664,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db.first_values walks over first value in all rows"] = function(T, done) {
-    var DBay, db;
+    var DBay, SQL, db;
+    SQL = String.raw;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     db = new DBay();
@@ -667,7 +705,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db.all_first_values returns list of first value in all rows"] = function(T, done) {
-    var DBay, db;
+    var DBay, SQL, db;
+    SQL = String.raw;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     db = new DBay();
@@ -699,7 +738,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY db.single_value returns single value or throws error"] = function(T, done) {
-    var DBay, db;
+    var DBay, SQL, db;
+    SQL = String.raw;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     db = new DBay();
@@ -741,7 +781,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY prepared statement allowed in `db.do()`"] = function(T, done) {
-    var DBay, Tbl, db, dtab, schema;
+    var DBay, SQL, Tbl, db, dtab, schema;
+    SQL = String.raw;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     db = new DBay();
@@ -829,7 +870,8 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      return test(this["DBAY SQL tag function"]);
     })();
   }
 
