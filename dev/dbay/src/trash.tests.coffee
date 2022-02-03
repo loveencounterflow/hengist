@@ -72,7 +72,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
     create table first ( a integer not null primary key, b text unique not null );
     create table second ( x integer references first ( a ), y text references first ( b ) );
     """
-  result  = db.trash()
+  result  = db.trash_to_sql()
   result  = ( row.txt for row from result when not row.txt.startsWith '--' ).join '\n'
   T?.eq result, """
     .bail on
@@ -107,7 +107,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
     """
   path    = PATH.join DBay.C.autolocation, ( new Random() ).get_random_filename()
   help "^534535^ writing db.trash() output to #{path}"
-  result  = db.trash { format: 'sql', path, }
+  result  = db.trash_to_sql { path, }
   T?.eq result, path
   result  = ( line for line from ( guy.fs.walk_lines path ) when not line.startsWith '--' ).join '\n'
   T?.eq result, """
@@ -141,7 +141,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
     create table first ( a integer not null primary key, b text unique not null );
     create table second ( x integer references first ( a ), y text references first ( b ) );
     """
-  path    = db.trash { format: 'sql', path: true, }
+  path    = db.trash_to_sql { path: true, }
   help "^534535^ db.trash() output written to #{path}"
   result  = ( line for line from ( guy.fs.walk_lines path ) when not line.startsWith '--' ).join '\n'
   T?.eq result, """
