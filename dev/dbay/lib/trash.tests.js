@@ -92,7 +92,7 @@ commit;`);
     db = new DBay();
     db(SQL`create table first ( a integer not null primary key, b text unique not null );
 create table second ( x integer references first ( a ), y text references first ( b ) );`);
-    result = db.trash();
+    result = db.trash_to_sql();
     result = ((function() {
       var results;
       results = [];
@@ -137,10 +137,7 @@ commit;`);
 create table second ( x integer references first ( a ), y text references first ( b ) );`);
     path = PATH.join(DBay.C.autolocation, (new Random()).get_random_filename());
     help(`^534535^ writing db.trash() output to ${path}`);
-    result = db.trash({
-      format: 'sql',
-      path
-    });
+    result = db.trash_to_sql({path});
     if (T != null) {
       T.eq(result, path);
     }
@@ -187,8 +184,7 @@ commit;`);
     db = new DBay();
     db(SQL`create table first ( a integer not null primary key, b text unique not null );
 create table second ( x integer references first ( a ), y text references first ( b ) );`);
-    path = db.trash({
-      format: 'sql',
+    path = db.trash_to_sql({
       path: true
     });
     help(`^534535^ db.trash() output written to ${path}`);
