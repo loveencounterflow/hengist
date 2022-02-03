@@ -253,6 +253,13 @@ select
     })();
   }
 
+  /*
+
+Adjacent 3 equal
+binary (only 0 and 1)
+
+*/
+
 }).call(this);
 
 //# sourceMappingURL=demo-clockpatterns.js.map
