@@ -100,7 +100,8 @@ tabulate = ( db, query ) -> H.tabulate query, db query
     # functions.hism = ( time, d1, d2, d3, d4 ) -> nbool ( d1 is d2 - 1 is d3 - 2 ) or ( d2 is d3 - 1 is d4 - 2 )
     insert_pattern = db.prepare_insert { into: 'patterns', exclude: [ 'nr', ], returning: '*', }
     insert_pattern.run { kind: 're', name: 'all4', pattern: raw'(?<d>\d)\k<d>:\k<d>\k<d>', }
-    insert_pattern.run { kind: 're', name: 'hism', pattern: raw'(?<dd>\d\d):\k<dd>', }
+    insert_pattern.run { kind: 're', name: 'hism', pattern: raw'(?<dd>\d\d):\k<dd>', } # hour is minute
+    insert_pattern.run { kind: 're', name: 'pal', pattern: raw'(?<d1>\d)(?<d2>\d):\k<d2>\k<d1>', } # palindrome
     # insert_pattern.run { kind: 'fn', pattern: 'asc',    }
     insert_pattern.run { kind: 'fn', name: 'inc4', pattern: null, }
     insert_pattern.run { kind: 'fn', name: 'dec4', pattern: null, }
@@ -130,6 +131,7 @@ tabulate = ( db, query ) -> H.tabulate query, db query
         when 're' then std_re_is_match( v1.time, pattern )
         when 'fn' then call( p.name, time, digits )
         else std_raise( 'unknown kind ' || quote( p.kind ) ) end
+      order by name, time
         ;"""
   return null
 
