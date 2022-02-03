@@ -139,6 +139,12 @@ tabulate = ( db, query ) -> H.tabulate query, db query
 if require.main is module then do =>
   @demo_clockpatterns()
 
+###
 
+Adjacent 3 equal
+binary (only 0 and 1)
+
+
+###
 
 
