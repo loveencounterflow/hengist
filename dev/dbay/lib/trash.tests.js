@@ -42,9 +42,101 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY _trash_with_fs_open_do"] = function(T, done) {
-    if (T != null) {
-      T.ok(false);
-    }
+    var DBay, Random, SQL, db, path;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({SQL} = DBay);
+    ({Random} = require(PATH.join(H.dbay_path, 'lib/random')));
+    path = PATH.join(DBay.C.autolocation, (new Random()).get_random_filename('txt'));
+    db = new DBay();
+    (() => {      //.........................................................................................................
+      var error, overwrite, result;
+      overwrite = false;
+      result = db._trash_with_fs_open_do(path, 'txt', overwrite, function({
+          path: inner_path,
+          fd
+        }) {
+        if (T != null) {
+          T.eq(path, inner_path);
+        }
+        if (T != null) {
+          T.ok(isa.cardinal(fd));
+        }
+        debug('^324-1^', {fd, path});
+        FS.writeSync(fd, "a line of text\n");
+        return {fd, path};
+      });
+      error = null;
+      if (T != null) {
+        T.ok(isa.object(result));
+      }
+      try {
+        FS.writeSync(result.fd, 'something\n');
+      } catch (error1) {
+        error = error1;
+        warn(error.code);
+        warn(error.message);
+        if (T != null) {
+          T.eq(error.code, 'EBADF');
+        }
+      }
+      if (error == null) {
+        return T != null ? T.fail("^324-2^ expected error, got none") : void 0;
+      }
+    })();
+    (() => {      //.........................................................................................................
+      var error, overwrite;
+      overwrite = false;
+      error = null;
+      try {
+        db._trash_with_fs_open_do(path, 'txt', overwrite, function() {});
+      } catch (error1) {
+        error = error1;
+        warn(error.code);
+        warn(error.message);
+        if (T != null) {
+          T.eq(error.code, 'EEXIST');
+        }
+      }
+      if (error == null) {
+        return T != null ? T.fail("^324-3^ expected error, got none") : void 0;
+      }
+    })();
+    (() => {      //.........................................................................................................
+      var error, overwrite, result;
+      overwrite = true;
+      result = db._trash_with_fs_open_do(path, 'txt', overwrite, function({
+          path: inner_path,
+          fd
+        }) {
+        if (T != null) {
+          T.eq(path, inner_path);
+        }
+        if (T != null) {
+          T.ok(isa.cardinal(fd));
+        }
+        debug('^324-4^', {fd, path});
+        FS.writeSync(fd, "a line of text\n");
+        return {fd, path};
+      });
+      error = null;
+      if (T != null) {
+        T.ok(isa.object(result));
+      }
+      try {
+        FS.writeSync(result.fd, 'something\n');
+      } catch (error1) {
+        error = error1;
+        warn(error.code);
+        warn(error.message);
+        if (T != null) {
+          T.eq(error.code, 'EBADF');
+        }
+      }
+      if (error == null) {
+        return T != null ? T.fail("^324-5^ expected error, got none") : void 0;
+      }
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -290,16 +382,17 @@ CREATE TABLE "second" (
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "DBAY trash basic functionality with public API" ]
+      // @[ "DBAY trash basic functionality with private API" ]()
+      // @[ "DBAY trash basic functionality with public API" ]()
+      // @[ "DBAY trash to file (1)" ]()
+      // @[ "DBAY trash to file (2)" ]()
+      // @[ "DBAY trash to sqlite" ]()
+      this["DBAY _trash_with_fs_open_do"]();
+      return test(this["DBAY _trash_with_fs_open_do"]);
     })();
   }
-
-  // test @[ "DBAY trash basic functionality with public API" ]
-// @[ "DBAY trash basic functionality with private API" ]()
-// @[ "DBAY trash basic functionality with public API" ]()
-// @[ "DBAY trash to file (1)" ]()
-// @[ "DBAY trash to file (2)" ]()
-// @[ "DBAY trash to sqlite" ]()
 
 }).call(this);
 
