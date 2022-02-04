@@ -398,19 +398,19 @@ CREATE TABLE "second" (
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @[ "DBAY trash basic functionality with public API" ]
-      // @[ "DBAY trash basic functionality with private API" ]()
-      // @[ "DBAY trash basic functionality with public API" ]()
-      // @[ "DBAY trash to file (1)" ]()
-      // @[ "DBAY trash to file (2)" ]()
-      // @[ "DBAY trash to sqlite" ]()
-      // @[ "DBAY _trash_with_fs_open_do" ]()
-      return this["DBAY walk over trash statements"]();
+      return test(this);
     })();
   }
 
-  // test @[ "DBAY _trash_with_fs_open_do" ]
+  // test @[ "DBAY trash basic functionality with public API" ]
+// @[ "DBAY trash basic functionality with private API" ]()
+// @[ "DBAY trash basic functionality with public API" ]()
+// @[ "DBAY trash to file (1)" ]()
+// @[ "DBAY trash to file (2)" ]()
+// @[ "DBAY trash to sqlite" ]()
+// @[ "DBAY _trash_with_fs_open_do" ]()
+// @[ "DBAY walk over trash statements" ]()
+// test @[ "DBAY _trash_with_fs_open_do" ]
 
 }).call(this);
 
