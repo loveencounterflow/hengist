@@ -72,9 +72,10 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
     create table first ( a integer not null primary key, b text unique not null );
     create table second ( x integer references first ( a ), y text references first ( b ) );
     """
-  result  = db.trash_to_sql()
-  result  = ( row.txt for row from result when not row.txt.startsWith '--' ).join '\n'
-  T?.eq result, """
+  result1 = db.trash_to_sql { walk: true, }
+  result1 = ( row.txt for row from result1 when not row.txt.startsWith '--' ).join '\n'
+  T?.eq result1, db.trash_to_sql().replace /--.*\n/g, ''
+  T?.eq result1, """
     .bail on
     pragma foreign_keys = false;
     begin transaction;
