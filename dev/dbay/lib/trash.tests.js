@@ -261,7 +261,7 @@ commit;`);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["_________DBAY trash works with implicit foreign keys"] = function(T, done) {
+  this["DBAY trash works with implicit foreign keys"] = function(T, done) {
     var DBay, SQL, db, result;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
@@ -283,10 +283,9 @@ create table "first" (
   primary key ( "a" )
  );
 create table "second" (
-    "x" integer,
-    "y" text,
-  foreign key ( "x" ) references "first" ( "a" ),
-  foreign key ( "y" ) references "first" ( "b" )
+    "a" integer not null,
+    "b" text not null,
+  foreign key ( "a", "b" ) references "first" ( "a", "b" )
  );
 commit;`);
     }
@@ -458,19 +457,20 @@ CREATE TABLE "second" (
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      test(this);
-      // test @[ "DBAY trash basic functionality with public API" ]
-      // @[ "DBAY trash basic functionality with private API" ]()
-      // @[ "DBAY trash basic functionality with public API" ]()
-      // @[ "DBAY trash to file (1)" ]()
-      // @[ "DBAY trash to file (2)" ]()
-      // @[ "DBAY trash to sqlite" ]()
-      // @[ "DBAY _trash_with_fs_open_do" ]()
-      // @[ "DBAY walk over trash statements" ]()
-      // test @[ "DBAY _trash_with_fs_open_do" ]
-      return this["DBAY trash works with implicit foreign keys"]();
+      return test(this);
     })();
   }
+
+  // test @[ "DBAY trash basic functionality with public API" ]
+// @[ "DBAY trash basic functionality with private API" ]()
+// @[ "DBAY trash basic functionality with public API" ]()
+// @[ "DBAY trash to file (1)" ]()
+// @[ "DBAY trash to file (2)" ]()
+// @[ "DBAY trash to sqlite" ]()
+// @[ "DBAY _trash_with_fs_open_do" ]()
+// @[ "DBAY walk over trash statements" ]()
+// test @[ "DBAY _trash_with_fs_open_do" ]
+// @[ "DBAY trash works with implicit foreign keys" ]()
 
 }).call(this);
 

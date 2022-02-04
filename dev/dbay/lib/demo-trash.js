@@ -7,7 +7,7 @@
 
   rpr = CND.rpr;
 
-  badge = 'DBAY-MIRAGE/DEMO';
+  badge = 'DBAY/DEMO/TRASH';
 
   debug = CND.get_logger('debug', badge);
 
@@ -35,7 +35,7 @@
   GUY = require('../../../apps/guy');
 
   // { HDML }                  = require '../../../apps/hdml'
-  H = require('../../../lib/helpers');
+  H = require('./helpers');
 
   ({lets, freeze} = GUY.lft);
 
@@ -51,26 +51,28 @@
 
   //-----------------------------------------------------------------------------------------------------------
   show_overview = function(db) {
+    var X;
+    X = require('../../../lib/helpers');
     info('#############################################################################');
-    H.tabulate("dbay_tables", db(SQL`select * from dbay_tables`));
-    H.tabulate("dbay_unique_fields", db(SQL`select * from dbay_unique_fields`));
-    // H.tabulate "dbay_fields_1",                 db SQL"select * from dbay_fields_1"
-    H.tabulate("dbay_fields", db(SQL`select * from dbay_fields`));
-    H.tabulate("dbay_foreign_key_clauses_1", db(SQL`select * from dbay_foreign_key_clauses_1`));
-    H.tabulate("dbay_foreign_key_clauses_2", db(SQL`select * from dbay_foreign_key_clauses_2`));
-    // H.tabulate "dbay_foreign_key_clauses_3",    db SQL"select * from dbay_foreign_key_clauses_3"
-    H.tabulate("dbay_foreign_key_clauses", db(SQL`select * from dbay_foreign_key_clauses`));
-    // H.tabulate "dbay_primary_key_clauses_1",    db SQL"select * from dbay_primary_key_clauses_1"
-    H.tabulate("dbay_primary_key_clauses", db(SQL`select * from dbay_primary_key_clauses`));
-    // H.tabulate "dbay_field_clauses_1",          db SQL"select * from dbay_field_clauses_1"
-    H.tabulate("dbay_field_clauses", db(SQL`select * from dbay_field_clauses`));
-    H.tabulate("dbay_create_table_clauses", db(SQL`select * from dbay_create_table_clauses`));
-    // H.tabulate "dbay_create_table_statements_1", db SQL"select * from dbay_create_table_statements_1"
-    // H.tabulate "dbay_create_table_statements_2", db SQL"select * from dbay_create_table_statements_2"
-    // H.tabulate "dbay_create_table_statements_3", db SQL"select * from dbay_create_table_statements_3"
-    // H.tabulate "dbay_create_table_statements_4", db SQL"select * from dbay_create_table_statements_4"
-    H.tabulate("dbay_create_table_statements", db(SQL`select * from dbay_create_table_statements`));
-    // H.tabulate "dbay_create_table_statements",  db SQL"""
+    X.tabulate("dbay_tables", db(SQL`select * from dbay_tables`));
+    X.tabulate("dbay_unique_fields", db(SQL`select * from dbay_unique_fields`));
+    // X.tabulate "dbay_fields_1",                 db SQL"select * from dbay_fields_1"
+    X.tabulate("dbay_fields", db(SQL`select * from dbay_fields`));
+    X.tabulate("dbay_foreign_key_clauses_1", db(SQL`select * from dbay_foreign_key_clauses_1`));
+    X.tabulate("dbay_foreign_key_clauses_2", db(SQL`select * from dbay_foreign_key_clauses_2`));
+    // X.tabulate "dbay_foreign_key_clauses_3",    db SQL"select * from dbay_foreign_key_clauses_3"
+    X.tabulate("dbay_foreign_key_clauses", db(SQL`select * from dbay_foreign_key_clauses`));
+    // X.tabulate "dbay_primary_key_clauses_1",    db SQL"select * from dbay_primary_key_clauses_1"
+    X.tabulate("dbay_primary_key_clauses", db(SQL`select * from dbay_primary_key_clauses`));
+    // X.tabulate "dbay_field_clauses_1",          db SQL"select * from dbay_field_clauses_1"
+    X.tabulate("dbay_field_clauses", db(SQL`select * from dbay_field_clauses`));
+    X.tabulate("dbay_create_table_clauses", db(SQL`select * from dbay_create_table_clauses`));
+    // X.tabulate "dbay_create_table_statements_1", db SQL"select * from dbay_create_table_statements_1"
+    // X.tabulate "dbay_create_table_statements_2", db SQL"select * from dbay_create_table_statements_2"
+    // X.tabulate "dbay_create_table_statements_3", db SQL"select * from dbay_create_table_statements_3"
+    // X.tabulate "dbay_create_table_statements_4", db SQL"select * from dbay_create_table_statements_4"
+    X.tabulate("dbay_create_table_statements", db(SQL`select * from dbay_create_table_statements`));
+    // X.tabulate "dbay_create_table_statements",  db SQL"""
     //   select
     //       lnr,
     //       tail,
@@ -85,10 +87,7 @@
     (() => {
       var db;
       db = new DBay();
-      db.create_stdlib();
-      db.setv('_use_dot_cmds', true);
       db.create_trashlib();
-      db.create_stdlib();
       return show_overview(db);
     })();
     (() => {
@@ -102,18 +101,17 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_trash = function(cfg) {
-    var Mrg, db, mrg, path;
+    var Mrg, db, from_path, mrg, path;
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage'));
-    path = PATH.resolve(__dirname, '../../../assets/dbay/demo-html-parsing.sqlite');
+    from_path = PATH.resolve(__dirname, '../../../assets/dbay/demo-html-parsing.sqlite');
+    path = PATH.resolve(__dirname, '../../../data/dbay/demo-html-parsing.sqlite');
+    H.copy_over(from_path, path);
     help(`^43587^ using DB at ${path}`);
     db = new DBay({path});
     mrg = new Mrg({db});
     (() => {
-      db.create_stdlib();
-      db.setv('_use_dot_cmds', true);
       db.create_trashlib();
-      db.create_stdlib();
       return show_overview(db);
     })();
     (() => {})();
@@ -125,11 +123,10 @@
   if (module === require.main) {
     (() => {
       // @demo_two_kinds_of_foreign_keys()
-      return this.demo_trash_empty_db();
+      // @demo_trash_empty_db()
+      return this.demo_trash();
     })();
   }
-
-  // @demo_trash()
 
 }).call(this);
 
