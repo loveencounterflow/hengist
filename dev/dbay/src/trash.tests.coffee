@@ -151,6 +151,22 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
     commit;"""
   return done?()
 
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "DBAY walk over trash statements" ] = ( T, done ) ->
+#   # T?.halt_on_error()
+#   { DBay }            = require H.dbay_path
+#   { SQL  }            = DBay
+#   db                  = new DBay()
+#   db SQL"""
+#     create table first ( a integer not null primary key, b text unique not null );
+#     create table second ( x integer references first ( a ), y text references first ( b ) );
+#     """
+#   iterator = db.trash_to_sql { walk: true, }
+#   echo rpr row for row from iterator
+#   urge '----------'
+#   echo rpr row for row from db SQL"select * from dbay_XXX_statements;"
+#   return done?()
+
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY trash to file (1)" ] = ( T, done ) ->
   # T?.halt_on_error()
@@ -258,14 +274,15 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # test @[ "DBAY trash basic functionality with public API" ]
   # @[ "DBAY trash basic functionality with private API" ]()
   # @[ "DBAY trash basic functionality with public API" ]()
   # @[ "DBAY trash to file (1)" ]()
   # @[ "DBAY trash to file (2)" ]()
   # @[ "DBAY trash to sqlite" ]()
-  @[ "DBAY _trash_with_fs_open_do" ]()
-  test @[ "DBAY _trash_with_fs_open_do" ]
+  # @[ "DBAY _trash_with_fs_open_do" ]()
+  # @[ "DBAY walk over trash statements" ]()
+  # test @[ "DBAY _trash_with_fs_open_do" ]
 
 
