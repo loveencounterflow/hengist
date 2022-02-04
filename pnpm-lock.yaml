@@ -21,6 +21,7 @@ specifiers:
   csv-parser: ^3.0.0
   cupofjoe: 0.2.1
   datom: 8.0.3
+  dbay: ^11.0.0
   deepcopy: ^2.1.0
   deepfreeze: ^2.0.0
   deepfreezer: ^1.2.2
@@ -128,6 +129,7 @@ dependencies:
   csv-parser: 3.0.0
   cupofjoe: 0.2.1
   datom: 8.0.3
+  dbay: 11.0.0
   deepcopy: 2.1.0
   deepfreeze: 2.0.0
   deepfreezer: 1.2.2
@@ -1424,6 +1426,18 @@ packages:
       multimix: 5.0.0
     dev: false
 
+  /dbay/11.0.0:
+    resolution: {integrity: sha512-M4kO8sCqKh0xOC5ZgeiDw/GfU/7JE2927WQfaAkKYmizVAtktEVZVkZ+bx1x296Xc2RC7qYGKogOOAE9MGhxfw==}
+    requiresBuild: true
+    dependencies:
+      cnd: 9.2.2
+      exit-hook: 2.2.1
+      guy: 3.1.0
+      intertype: 7.7.0
+    transitivePeerDependencies:
+      - deasync
+    dev: false
+
   /debug/4.3.2:
     resolution: {integrity: sha512-mOp8wKcvj7XxC78zLgw/ZA+6TSgkoE2C/ienthhRD298T7UNwAg9diBpLRxC0mOezLl4B0xV7M0cCO6P/O0Xhw==}
     engines: {node: '>=6.0'}
@@ -1813,6 +1827,11 @@ packages:
     engines: {node: '>=6.0.0'}
     dev: false
 
+  /exit-hook/2.2.1:
+    resolution: {integrity: sha512-eNTPlAD67BmP31LDINZ3U7HSF8l57TxOY2PmBJ1shpCvpnxBF93mWCE8YHBnXs8qiUZJc9WDcWIeC3a2HIAMfw==}
+    engines: {node: '>=6'}
+    dev: false
+
   /exit-hook/3.0.0:
     resolution: {integrity: sha512-ElRvnoj3dvOc5WjnQx0CF66rS0xehV6eZdcmqZX17uOLPy3me43frl8UD73Frkx5Aq5kgziMDECjDJR2X1oBFQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
@@ -2113,6 +2132,16 @@ packages:
       async: 3.2.1
       cnd: 9.2.2
       intertype: 7.7.0
+    dev: false
+
+  /guy/3.1.0:
+    resolution: {integrity: sha512-5bxlACi0FcjbF/hqDOs0nMyfPLQxzF9so8XJiTDv4g5xuWGOWMs7m/f2wIrstN6JsNlUJiGfxniHX9XoSfaZgg==}
+    peerDependencies:
+      deasync: ^0.1.22
+    dependencies:
+      cnd: 9.2.2
+      intertype: 7.6.7
+      letsfreezethat: 3.1.0
     dev: false
 
   /guy/4.0.0:
