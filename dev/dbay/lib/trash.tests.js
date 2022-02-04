@@ -85,18 +85,20 @@ commit;`);
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY trash basic functionality with public API"] = function(T, done) {
-    var DBay, SQL, db, result, row;
+    var DBay, SQL, db, result1, row;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
     ({SQL} = DBay);
     db = new DBay();
     db(SQL`create table first ( a integer not null primary key, b text unique not null );
 create table second ( x integer references first ( a ), y text references first ( b ) );`);
-    result = db.trash_to_sql();
-    result = ((function() {
+    result1 = db.trash_to_sql({
+      walk: true
+    });
+    result1 = ((function() {
       var results;
       results = [];
-      for (row of result) {
+      for (row of result1) {
         if (!row.txt.startsWith('--')) {
           results.push(row.txt);
         }
@@ -104,7 +106,10 @@ create table second ( x integer references first ( a ), y text references first 
       return results;
     })()).join('\n');
     if (T != null) {
-      T.eq(result, `.bail on
+      T.eq(result1, db.trash_to_sql().replace(/--.*\n/g, ''));
+    }
+    if (T != null) {
+      T.eq(result1, `.bail on
 pragma foreign_keys = false;
 begin transaction;
 drop table if exists "first";
