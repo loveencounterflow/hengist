@@ -149,6 +149,49 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
     commit;"""
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY trash works with empty DB" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }            = require H.dbay_path
+  { SQL  }            = DBay
+  db                  = new DBay()
+  result1 = db.trash_to_sql { walk: true, }
+  result1 = ( row.txt for row from result1 when not row.txt.startsWith '--' ).join '\n'
+  T?.eq result1, db.trash_to_sql().replace /--.*\n/g, ''
+  T?.eq result1, ''
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY trash works with implicit foreign keys" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }            = require H.dbay_path
+  { SQL  }            = DBay
+  db                  = new DBay()
+  db SQL"""
+    create table first ( a integer not null primary key, b text unique not null );
+    create table second ( a integer not null, b text not null, foreign key ( a, b ) references first );
+    """
+  result  = db.trash_to_sql().replace /--.*\n/g, ''
+  debug '^4233^', result
+  T?.eq result, """
+    .bail on
+    pragma foreign_keys = false;
+    begin transaction;
+    drop table if exists "first";
+    drop table if exists "second";
+    create table "first" (
+        "a" integer not null,
+        "b" text not null unique,
+      primary key ( "a" )
+     );
+    create table "second" (
+        "a" integer not null,
+        "b" text not null,
+      foreign key ( "a", "b" ) references "first" ( "a", "b" )
+     );
+    commit;"""
+  return done?()
+
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "DBAY walk over trash statements" ] = ( T, done ) ->
 #   # T?.halt_on_error()
@@ -282,5 +325,5 @@ if require.main is module then do =>
   # @[ "DBAY _trash_with_fs_open_do" ]()
   # @[ "DBAY walk over trash statements" ]()
   # test @[ "DBAY _trash_with_fs_open_do" ]
-
+  # @[ "DBAY trash works with implicit foreign keys" ]()
 
