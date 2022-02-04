@@ -141,7 +141,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DBAY trash basic functionality with private API"] = function(T, done) {
+  this["DBAY trash basic functionality with create_trashlib()"] = function(T, done) {
     var DBay, SQL, db, result, row;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));

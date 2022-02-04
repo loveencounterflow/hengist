@@ -72,7 +72,7 @@ show_overview = ( db ) ->
   do =>
     urge '################################'
     db              = new DBay { path: '/tmp/fk-demo-1.sqlite', }
-    db._implement_trash()
+    db.create_trashlib()
     db SQL"""
       pragma foreign_keys = false;
       drop table if exists a;
@@ -105,7 +105,7 @@ show_overview = ( db ) ->
   do =>
     urge '################################'
     db              = new DBay { path: '/tmp/fk-demo-2.sqlite', }
-    db._implement_trash()
+    db.create_trashlib()
     db SQL"""
       pragma foreign_keys = false;
       drop table if exists a;
