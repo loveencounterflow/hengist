@@ -16,7 +16,7 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 test                      = require '../../../apps/guy-test'
 PATH                      = require 'path'
-# FS                        = require 'fs'
+FS                        = require 'fs'
 H                         = require './helpers'
 types                     = new ( require 'intertype' ).Intertype
 { isa
@@ -29,11 +29,18 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "DBAY _trash_with_fs_open_do" ] = ( T, done ) ->
+  T?.ok false
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBAY trash basic functionality with private API" ] = ( T, done ) ->
   # T?.halt_on_error()
   { DBay }            = require H.dbay_path
   { SQL  }            = DBay
   db                  = new DBay()
+  db.create_stdlib()
+  db.setv '_use_dot_cmds', true
   db._implement_trash()
   db SQL"""
     create table first ( a integer not null primary key, b text unique not null );
@@ -106,7 +113,7 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
     create table first ( a integer not null primary key, b text unique not null );
     create table second ( x integer references first ( a ), y text references first ( b ) );
     """
-  path    = PATH.join DBay.C.autolocation, ( new Random() ).get_random_filename()
+  path    = PATH.join DBay.C.autolocation, ( new Random() ).get_random_filename 'sql'
   help "^534535^ writing db.trash() output to #{path}"
   result  = db.trash_to_sql { path, }
   T?.eq result, path
@@ -165,6 +172,40 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
     commit;"""
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY trash to sqlite" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }            = require H.dbay_path
+  { Random }          = require PATH.join H.dbay_path, 'lib/random'
+  { SQL  }            = DBay
+  db                  = new DBay()
+  db SQL"""
+    create table first ( a integer not null primary key, b text unique not null );
+    create table second ( x integer references first ( a ), y text references first ( b ) );
+    """
+  result    = db.trash_to_sqlite { path: false, }
+  T?.eq ( type_of result ), 'buffer'
+  path      = db.trash_to_sqlite { path: true, }
+  help "^534535^ db.trash_to_sqlite() output written to #{path}"
+  T?.eq ( type_of path ), 'text'
+  sqlt      = DBay.new_bsqlt3_connection FS.readFileSync path
+  statement = sqlt.prepare SQL"select * from sqlite_schema order by name;"
+  sql       = ( row.sql for row from statement.iterate() ).join '\n'
+  T?.eq sql, """
+    CREATE TABLE "first" (
+        "a" integer not null,
+        "b" text not null unique,
+      primary key ( "a" )
+     )
+    CREATE TABLE "second" (
+        "x" integer,
+        "y" text,
+      foreign key ( "x" ) references "first" ( "a" ),
+      foreign key ( "y" ) references "first" ( "b" )
+     )\n
+    """
+  return done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
@@ -174,6 +215,7 @@ if require.main is module then do =>
   # @[ "DBAY trash basic functionality with public API" ]()
   # @[ "DBAY trash to file (1)" ]()
   # @[ "DBAY trash to file (2)" ]()
+  # @[ "DBAY trash to sqlite" ]()
 
 
 
