@@ -147,9 +147,7 @@
     ({DBay} = require(H.dbay_path));
     ({SQL} = DBay);
     db = new DBay();
-    db.create_stdlib();
-    db.setv('_use_dot_cmds', true);
-    db._implement_trash();
+    db.create_trashlib();
     db(SQL`create table first ( a integer not null primary key, b text unique not null );
 create table second ( x integer references first ( a ), y text references first ( b ) );`);
     result = db.all_rows(SQL`select * from dbay_create_table_statements;`);
@@ -213,6 +211,68 @@ create table second ( x integer references first ( a ), y text references first 
     }
     if (T != null) {
       T.eq(result1, `.bail on
+pragma foreign_keys = false;
+begin transaction;
+drop table if exists "first";
+drop table if exists "second";
+create table "first" (
+    "a" integer not null,
+    "b" text not null unique,
+  primary key ( "a" )
+ );
+create table "second" (
+    "x" integer,
+    "y" text,
+  foreign key ( "x" ) references "first" ( "a" ),
+  foreign key ( "y" ) references "first" ( "b" )
+ );
+commit;`);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY trash works with empty DB"] = function(T, done) {
+    var DBay, SQL, db, result1, row;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({SQL} = DBay);
+    db = new DBay();
+    result1 = db.trash_to_sql({
+      walk: true
+    });
+    result1 = ((function() {
+      var results;
+      results = [];
+      for (row of result1) {
+        if (!row.txt.startsWith('--')) {
+          results.push(row.txt);
+        }
+      }
+      return results;
+    })()).join('\n');
+    if (T != null) {
+      T.eq(result1, db.trash_to_sql().replace(/--.*\n/g, ''));
+    }
+    if (T != null) {
+      T.eq(result1, '');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["_________DBAY trash works with implicit foreign keys"] = function(T, done) {
+    var DBay, SQL, db, result;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({SQL} = DBay);
+    db = new DBay();
+    db(SQL`create table first ( a integer not null primary key, b text unique not null );
+create table second ( a integer not null, b text not null, foreign key ( a, b ) references first );`);
+    result = db.trash_to_sql().replace(/--.*\n/g, '');
+    debug('^4233^', result);
+    if (T != null) {
+      T.eq(result, `.bail on
 pragma foreign_keys = false;
 begin transaction;
 drop table if exists "first";
@@ -398,19 +458,19 @@ CREATE TABLE "second" (
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      test(this);
+      // test @[ "DBAY trash basic functionality with public API" ]
+      // @[ "DBAY trash basic functionality with private API" ]()
+      // @[ "DBAY trash basic functionality with public API" ]()
+      // @[ "DBAY trash to file (1)" ]()
+      // @[ "DBAY trash to file (2)" ]()
+      // @[ "DBAY trash to sqlite" ]()
+      // @[ "DBAY _trash_with_fs_open_do" ]()
+      // @[ "DBAY walk over trash statements" ]()
+      // test @[ "DBAY _trash_with_fs_open_do" ]
+      return this["DBAY trash works with implicit foreign keys"]();
     })();
   }
-
-  // test @[ "DBAY trash basic functionality with public API" ]
-// @[ "DBAY trash basic functionality with private API" ]()
-// @[ "DBAY trash basic functionality with public API" ]()
-// @[ "DBAY trash to file (1)" ]()
-// @[ "DBAY trash to file (2)" ]()
-// @[ "DBAY trash to sqlite" ]()
-// @[ "DBAY _trash_with_fs_open_do" ]()
-// @[ "DBAY walk over trash statements" ]()
-// test @[ "DBAY _trash_with_fs_open_do" ]
 
 }).call(this);
 

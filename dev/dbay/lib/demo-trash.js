@@ -56,8 +56,8 @@
     H.tabulate("dbay_unique_fields", db(SQL`select * from dbay_unique_fields`));
     // H.tabulate "dbay_fields_1",                 db SQL"select * from dbay_fields_1"
     H.tabulate("dbay_fields", db(SQL`select * from dbay_fields`));
-    // H.tabulate "dbay_foreign_key_clauses_1",    db SQL"select * from dbay_foreign_key_clauses_1"
-    // H.tabulate "dbay_foreign_key_clauses_2",    db SQL"select * from dbay_foreign_key_clauses_2"
+    H.tabulate("dbay_foreign_key_clauses_1", db(SQL`select * from dbay_foreign_key_clauses_1`));
+    H.tabulate("dbay_foreign_key_clauses_2", db(SQL`select * from dbay_foreign_key_clauses_2`));
     // H.tabulate "dbay_foreign_key_clauses_3",    db SQL"select * from dbay_foreign_key_clauses_3"
     H.tabulate("dbay_foreign_key_clauses", db(SQL`select * from dbay_foreign_key_clauses`));
     // H.tabulate "dbay_primary_key_clauses_1",    db SQL"select * from dbay_primary_key_clauses_1"
@@ -80,11 +80,44 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.demo_trash_empty_db = function(cfg) {
+    ({DBay} = require('../../../apps/dbay'));
+    (() => {
+      var db;
+      db = new DBay();
+      db.create_stdlib();
+      db.setv('_use_dot_cmds', true);
+      db.create_trashlib();
+      db.create_stdlib();
+      return show_overview(db);
+    })();
+    (() => {
+      var db;
+      return db = new DBay();
+    })();
+    // db.
+    // urge '^2334^', db.trash_to_sql()
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.demo_trash = function(cfg) {
-    var Mrg, db, path;
-    path = PATH.resolve(__dirname, '../../assets/dbay/demo-html-parsing.sqlite');
+    var Mrg, db, mrg, path;
+    ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage'));
+    path = PATH.resolve(__dirname, '../../../assets/dbay/demo-html-parsing.sqlite');
+    help(`^43587^ using DB at ${path}`);
     db = new DBay({path});
+    mrg = new Mrg({db});
+    (() => {
+      db.create_stdlib();
+      db.setv('_use_dot_cmds', true);
+      db.create_trashlib();
+      db.create_stdlib();
+      return show_overview(db);
+    })();
+    (() => {})();
+    // urge '^2334^', db.trash_to_sql()
     return null;
   };
 
@@ -92,9 +125,11 @@
   if (module === require.main) {
     (() => {
       // @demo_two_kinds_of_foreign_keys()
-      return this.demo_trash();
+      return this.demo_trash_empty_db();
     })();
   }
+
+  // @demo_trash()
 
 }).call(this);
 
