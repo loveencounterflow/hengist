@@ -6,7 +6,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'DBAY-MIRAGE/DEMO'
+badge                     = 'DBAY/DEMO/TRASH'
 debug                     = CND.get_logger 'debug',     badge
 warn                      = CND.get_logger 'warn',      badge
 info                      = CND.get_logger 'info',      badge
@@ -25,7 +25,7 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 GUY                       = require '../../../apps/guy'
 # { HDML }                  = require '../../../apps/hdml'
-H                         = require '../../../lib/helpers'
+H                         = require './helpers'
 { lets
   freeze }                = GUY.lft
 { to_width }              = require 'to-width'
@@ -39,26 +39,27 @@ H                         = require '../../../lib/helpers'
 #
 #-----------------------------------------------------------------------------------------------------------
 show_overview = ( db ) ->
+  X = require '../../../lib/helpers'
   info '#############################################################################'
-  H.tabulate "dbay_tables",                   db SQL"select * from dbay_tables"
-  H.tabulate "dbay_unique_fields",            db SQL"select * from dbay_unique_fields"
-  # H.tabulate "dbay_fields_1",                 db SQL"select * from dbay_fields_1"
-  H.tabulate "dbay_fields",                   db SQL"select * from dbay_fields"
-  # H.tabulate "dbay_foreign_key_clauses_1",    db SQL"select * from dbay_foreign_key_clauses_1"
-  # H.tabulate "dbay_foreign_key_clauses_2",    db SQL"select * from dbay_foreign_key_clauses_2"
-  # H.tabulate "dbay_foreign_key_clauses_3",    db SQL"select * from dbay_foreign_key_clauses_3"
-  H.tabulate "dbay_foreign_key_clauses",      db SQL"select * from dbay_foreign_key_clauses"
-  # H.tabulate "dbay_primary_key_clauses_1",    db SQL"select * from dbay_primary_key_clauses_1"
-  H.tabulate "dbay_primary_key_clauses",      db SQL"select * from dbay_primary_key_clauses"
-  # H.tabulate "dbay_field_clauses_1",          db SQL"select * from dbay_field_clauses_1"
-  H.tabulate "dbay_field_clauses",            db SQL"select * from dbay_field_clauses"
-  H.tabulate "dbay_create_table_clauses",     db SQL"select * from dbay_create_table_clauses"
-  # H.tabulate "dbay_create_table_statements_1", db SQL"select * from dbay_create_table_statements_1"
-  # H.tabulate "dbay_create_table_statements_2", db SQL"select * from dbay_create_table_statements_2"
-  # H.tabulate "dbay_create_table_statements_3", db SQL"select * from dbay_create_table_statements_3"
-  # H.tabulate "dbay_create_table_statements_4", db SQL"select * from dbay_create_table_statements_4"
-  H.tabulate "dbay_create_table_statements",  db SQL"select * from dbay_create_table_statements"
-  # H.tabulate "dbay_create_table_statements",  db SQL"""
+  X.tabulate "dbay_tables",                   db SQL"select * from dbay_tables"
+  X.tabulate "dbay_unique_fields",            db SQL"select * from dbay_unique_fields"
+  # X.tabulate "dbay_fields_1",                 db SQL"select * from dbay_fields_1"
+  X.tabulate "dbay_fields",                   db SQL"select * from dbay_fields"
+  X.tabulate "dbay_foreign_key_clauses_1",    db SQL"select * from dbay_foreign_key_clauses_1"
+  X.tabulate "dbay_foreign_key_clauses_2",    db SQL"select * from dbay_foreign_key_clauses_2"
+  # X.tabulate "dbay_foreign_key_clauses_3",    db SQL"select * from dbay_foreign_key_clauses_3"
+  X.tabulate "dbay_foreign_key_clauses",      db SQL"select * from dbay_foreign_key_clauses"
+  # X.tabulate "dbay_primary_key_clauses_1",    db SQL"select * from dbay_primary_key_clauses_1"
+  X.tabulate "dbay_primary_key_clauses",      db SQL"select * from dbay_primary_key_clauses"
+  # X.tabulate "dbay_field_clauses_1",          db SQL"select * from dbay_field_clauses_1"
+  X.tabulate "dbay_field_clauses",            db SQL"select * from dbay_field_clauses"
+  X.tabulate "dbay_create_table_clauses",     db SQL"select * from dbay_create_table_clauses"
+  # X.tabulate "dbay_create_table_statements_1", db SQL"select * from dbay_create_table_statements_1"
+  # X.tabulate "dbay_create_table_statements_2", db SQL"select * from dbay_create_table_statements_2"
+  # X.tabulate "dbay_create_table_statements_3", db SQL"select * from dbay_create_table_statements_3"
+  # X.tabulate "dbay_create_table_statements_4", db SQL"select * from dbay_create_table_statements_4"
+  X.tabulate "dbay_create_table_statements",  db SQL"select * from dbay_create_table_statements"
+  # X.tabulate "dbay_create_table_statements",  db SQL"""
   #   select
   #       lnr,
   #       tail,
@@ -67,10 +68,33 @@ show_overview = ( db ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@demo_trash_empty_db = ( cfg ) ->
+  { DBay }        = require '../../../apps/dbay'
+  do =>
+    db = new DBay()
+    db.create_trashlib()
+    show_overview db
+  do =>
+    db = new DBay()
+    # db.
+    # urge '^2334^', db.trash_to_sql()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @demo_trash = ( cfg ) ->
-  path            = PATH.resolve __dirname, '../../assets/dbay/demo-html-parsing.sqlite'
+  { DBay }        = require '../../../apps/dbay'
   { Mrg }         = require '../../../apps/dbay-mirage'
+  from_path       = PATH.resolve __dirname, '../../../assets/dbay/demo-html-parsing.sqlite'
+  path            = PATH.resolve __dirname, '../../../data/dbay/demo-html-parsing.sqlite'
+  H.copy_over from_path, path
+  help "^43587^ using DB at #{path}"
   db              = new DBay { path, }
+  mrg             = new Mrg { db, }
+  do =>
+    db.create_trashlib()
+    show_overview db
+  do =>
+    # urge '^2334^', db.trash_to_sql()
   return null
 
 
@@ -78,6 +102,7 @@ show_overview = ( db ) ->
 ############################################################################################################
 if module is require.main then do =>
   # @demo_two_kinds_of_foreign_keys()
+  # @demo_trash_empty_db()
   @demo_trash()
 
 
