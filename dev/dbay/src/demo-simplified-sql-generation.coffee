@@ -153,7 +153,7 @@ show_overview = ( db ) ->
 @demo_simplified_sql_generation = ( cfg ) ->
   { Mrg }         = require '../../../apps/dbay-mirage'
   db              = new DBay { path: '/tmp/foobar.sqlite', }
-  db._implement_trash()
+  db.create_trashlib()
   # mrg             = new Mrg { db, }
   urge '################################'
   #.........................................................................................................

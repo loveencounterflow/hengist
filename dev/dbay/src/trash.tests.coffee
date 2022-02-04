@@ -83,14 +83,12 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DBAY trash basic functionality with private API" ] = ( T, done ) ->
+@[ "DBAY trash basic functionality with create_trashlib()" ] = ( T, done ) ->
   # T?.halt_on_error()
   { DBay }            = require H.dbay_path
   { SQL  }            = DBay
   db                  = new DBay()
-  db.create_stdlib()
-  db.setv '_use_dot_cmds', true
-  db._implement_trash()
+  db.create_trashlib()
   db SQL"""
     create table first ( a integer not null primary key, b text unique not null );
     create table second ( x integer references first ( a ), y text references first ( b ) );
