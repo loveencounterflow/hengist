@@ -233,6 +233,22 @@ commit;`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  // #-----------------------------------------------------------------------------------------------------------
+  // @[ "DBAY walk over trash statements" ] = ( T, done ) ->
+  //   # T?.halt_on_error()
+  //   { DBay }            = require H.dbay_path
+  //   { SQL  }            = DBay
+  //   db                  = new DBay()
+  //   db SQL"""
+  //     create table first ( a integer not null primary key, b text unique not null );
+  //     create table second ( x integer references first ( a ), y text references first ( b ) );
+  //     """
+  //   iterator = db.trash_to_sql { walk: true, }
+  //   echo rpr row for row from iterator
+  //   urge '----------'
+  //   echo rpr row for row from db SQL"select * from dbay_XXX_statements;"
+  //   return done?()
+
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY trash to file (1)"] = function(T, done) {
     var DBay, Random, SQL, db, line, path, result;
@@ -389,10 +405,12 @@ CREATE TABLE "second" (
       // @[ "DBAY trash to file (1)" ]()
       // @[ "DBAY trash to file (2)" ]()
       // @[ "DBAY trash to sqlite" ]()
-      this["DBAY _trash_with_fs_open_do"]();
-      return test(this["DBAY _trash_with_fs_open_do"]);
+      // @[ "DBAY _trash_with_fs_open_do" ]()
+      return this["DBAY walk over trash statements"]();
     })();
   }
+
+  // test @[ "DBAY _trash_with_fs_open_do" ]
 
 }).call(this);
 
