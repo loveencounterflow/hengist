@@ -30,7 +30,56 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY _trash_with_fs_open_do" ] = ( T, done ) ->
-  T?.ok false
+  # T?.halt_on_error()
+  { DBay }            = require H.dbay_path
+  { SQL  }            = DBay
+  { Random }          = require PATH.join H.dbay_path, 'lib/random'
+  path                = PATH.join DBay.C.autolocation, ( new Random() ).get_random_filename 'txt'
+  db                  = new DBay()
+  #.........................................................................................................
+  do =>
+    overwrite = false
+    result    = db._trash_with_fs_open_do path, 'txt', overwrite, ( { path: inner_path, fd, } ) ->
+      T?.eq path, inner_path
+      T?.ok isa.cardinal fd
+      debug '^324-1^', { fd, path, }
+      FS.writeSync fd, "a line of text\n"
+      return { fd, path, }
+    error = null
+    T?.ok isa.object result
+    try FS.writeSync result.fd, 'something\n' catch error
+      warn error.code
+      warn error.message
+      T?.eq error.code, 'EBADF'
+    T?.fail "^324-2^ expected error, got none" unless error?
+  #.........................................................................................................
+  do =>
+    overwrite = false
+    error     = null
+    try
+      db._trash_with_fs_open_do path, 'txt', overwrite, ->
+    catch error
+      warn error.code
+      warn error.message
+      T?.eq error.code, 'EEXIST'
+    T?.fail "^324-3^ expected error, got none" unless error?
+  #.........................................................................................................
+  do =>
+    overwrite = true
+    result    = db._trash_with_fs_open_do path, 'txt', overwrite, ( { path: inner_path, fd, } ) ->
+      T?.eq path, inner_path
+      T?.ok isa.cardinal fd
+      debug '^324-4^', { fd, path, }
+      FS.writeSync fd, "a line of text\n"
+      return { fd, path, }
+    error = null
+    T?.ok isa.object result
+    try FS.writeSync result.fd, 'something\n' catch error
+      warn error.code
+      warn error.message
+      T?.eq error.code, 'EBADF'
+    T?.fail "^324-5^ expected error, got none" unless error?
+  #.........................................................................................................
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -209,13 +258,14 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # test @[ "DBAY trash basic functionality with public API" ]
   # @[ "DBAY trash basic functionality with private API" ]()
   # @[ "DBAY trash basic functionality with public API" ]()
   # @[ "DBAY trash to file (1)" ]()
   # @[ "DBAY trash to file (2)" ]()
   # @[ "DBAY trash to sqlite" ]()
-
+  @[ "DBAY _trash_with_fs_open_do" ]()
+  test @[ "DBAY _trash_with_fs_open_do" ]
 
 
