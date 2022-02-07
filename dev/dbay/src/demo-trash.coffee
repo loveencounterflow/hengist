@@ -35,6 +35,7 @@ X                         = require '../../../lib/helpers'
 { Sql }                   = require '../../../apps/dbay/lib/sql'
 xrpr                      = ( x ) -> ( require 'util' ).inspect x, {
   colors: true, depth: Infinity, maxArrayLength: null, breakLength: Infinity, }
+to_snake_case             = require 'just-snake-case'
 
 
 #===========================================================================================================
@@ -293,48 +294,73 @@ queries = [
   lineage_cfg =
     positionalRefsEnabled: true
   # q = antlr.parse "SELECT * FROM abc join users as u;", parser_cfg
-  for query in [ queries[ queries.length - 1 ], ]
+  # for query in [ queries[ queries.length - 1 ], ]
+  # for query in [ SQL"""select d as "d1" from a as a1;""", ]
+  # for query in [ SQL"""select d + e + f( x ) as "d1" from a as a1;""", ]
+  # for query in [ SQL"""select * from a left join b where k > 1 order by m limit 1;""", ]
+  for query in [ SQL"SELECT 42 as a;", ]
     X.banner query
     q = antlr.parse query, parser_cfg
     # debug type_of q
     debug CATALOG.all_keys_of q
     info q.getUsedTables()
-    echo '^4656-1^', xrpr CATALOG.all_keys_of q.tree
-    echo '^4656-2^', xrpr q.tree.toStringTree()
-    echo '^4656-3^', xrpr q.tree.text
-    echo '^4656-4^', type_of q
-    echo '^4656-5^', type_of q.tree
-    echo '^4656-6^', type_of q.tree.children
-    echo '^4656-7^', q.tree.childCount
-    echo '^4656-8^', q.tree.query
-    echo '^4656-9^', q.tree.getToken
-    echo '^4656-10^', q.tree.getTokens
-    # echo '^4656-11^', xrpr q
     show_antler_tree q.tree
-    continue
-    # Whether to use "mergedLeaves" or "tree" lineage type
-    merged_leaves = false
-    getTable  = ( P... ) ->
-      debug '^443663456^', P
-      return null
-    lineage   = q.getLineage getTable, merged_leaves, lineage_cfg
-    debug '^53453^', xrpr lineage
-    for node in lineage.nodes
-      delete node.range
-      delete node.data
-      node.columns = ( c.label for c in node.columns )
-      echo xrpr node
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-show_antler_tree = ( tree, level = 0 ) ->
-  dent = '  '.repeat level
-  debug '^4656-1^' + dent + rpr tree.text
-  for child in tree.children
-    info '^4656-1^' + dent + ( type_of child ) + ' ' + ( rpr child.text )
-    if ( child.childCount ? 0 ) > 0
-      show_antler_tree child, level + 1
+show_antler_tree = ( tree ) ->
+  objects_by_type = _show_antler_tree { children: [ tree, ], }, 0, {}
+  types           = ( k for k of objects_by_type ).sort()
+  # for type in types
+  #   d     = objects_by_type[ type ]
+  #   keys  = ( k for k of d when not k.startsWith '_' ).sort()
+  #   urge type, keys
+    # debug '^5600-1^', Object.keys d._start
+    # debug '^5600-2^', Object.keys d._start?.source
+    # debug '^5600-3^', type_of d._start?.source?.source
+    # debug '^5600-4^', d._start?.start
+    # debug '^5600-5^', d._start?.stop
   return null
+
+#-----------------------------------------------------------------------------------------------------------
+antler_types =
+  terminal: null
+  select_clause: ( node ) ->
+    terminal = node.children[ 0 ]
+    unless ( type = type_of_antler_node terminal ) is 'terminal'
+      throw new Error "unexpected type #{rpr type}"
+    unless ( /^select$/i  ).test ( text = terminal.text )
+      throw new Error "unexpected terminal #{rpr text}"
+    debug '^4353^', { type, text, subs: [], }
+
+#-----------------------------------------------------------------------------------------------------------
+type_of_antler_node = ( node ) ->
+  R = node.constructor.name
+  R = R.replace /(Node|Context)$/, ''
+  R = to_snake_case R
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+_show_antler_tree = ( tree, level, R ) ->
+  dent  = '  '.repeat level
+  # debug '^4656-1^' + dent + ( type_of tree ) + ' ' + rpr tree.text
+  for child in tree.children
+    type        = type_of_antler_node child
+    R[ type ]  ?= child
+    type_entry  = antler_types[ type ]
+    switch type_entry_type = type_of type_entry
+      when 'undefined'
+        warn '^4656-1^' + dent + type + ' ' + ( CND.gold rpr child.text )
+      when 'null'
+        whisper '^4656-1^' + dent + type + ' ' + ( rpr child.text )
+      when 'function'
+        info '^4656-1^' + dent + type + ' ' + ( CND.gold rpr child.text )
+        debug '^4656-1^', type_entry child
+      else
+        warn CND.reverse '^4656-1^' + dent + type + ' ' + ( CND.gold rpr child.text ) + " unknown type entry type #{rpr type_entry_type}"
+    if child.children?
+      _show_antler_tree child, level + 1, R
+  return R
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_rhombic_chevrotain = ->
