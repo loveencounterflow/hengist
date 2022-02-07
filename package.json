@@ -66,6 +66,7 @@
     "jfee": "0.1.4",
     "jsdom": "^19.0.0",
     "jsx-number-format": "^0.1.4",
+    "just-snake-case": "^3.0.1",
     "klona": "^2.0.4",
     "letsfreezethat": "^3.1.0",
     "letsfreezethat225": "npm:letsfreezethat@2.2.5",
