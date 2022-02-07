@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, FS, GUY, H, PATH, SQL, Sql, X, badge, debug, echo, equals, freeze, help, info, isa, lets, queries, rpr, show_antler_tree, show_overview, tabulate, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper, xrpr,
+  var CND, DBay, FS, GUY, H, PATH, SQL, Sql, X, _show_antler_tree, antler_types, badge, debug, echo, equals, freeze, help, info, isa, lets, queries, rpr, show_antler_tree, show_overview, tabulate, to_snake_case, to_width, type_of, type_of_antler_node, types, urge, validate, validate_list_of, warn, whisper, xrpr,
     modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
@@ -58,6 +58,8 @@
       breakLength: 2e308
     });
   };
+
+  to_snake_case = require('just-snake-case');
 
   //===========================================================================================================
 
@@ -382,7 +384,7 @@ create view c as select a.d1 as d1, b.d2 as d2 from a join b using ( d1, d2 );`)
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_rhombic_antlr = function() {
-    var CATALOG, antlr, c, getTable, i, j, len, len1, lineage, lineage_cfg, merged_leaves, node, parser_cfg, q, query, ref, ref1;
+    var CATALOG, antlr, i, len, lineage_cfg, parser_cfg, q, query, ref;
     CATALOG = require('multimix/lib/cataloguing');
     ({antlr} = require('rhombic'));
     parser_cfg = {
@@ -391,8 +393,12 @@ create view c as select a.d1 as d1, b.d2 as d2 from a join b using ( d1, d2 );`)
     lineage_cfg = {
       positionalRefsEnabled: true
     };
-    ref = [queries[queries.length - 1]];
+    ref = [SQL`SELECT 42 as a;`];
     // q = antlr.parse "SELECT * FROM abc join users as u;", parser_cfg
+    // for query in [ queries[ queries.length - 1 ], ]
+    // for query in [ SQL"""select d as "d1" from a as a1;""", ]
+    // for query in [ SQL"""select d + e + f( x ) as "d1" from a as a1;""", ]
+    // for query in [ SQL"""select * from a left join b where k > 1 order by m limit 1;""", ]
     for (i = 0, len = ref.length; i < len; i++) {
       query = ref[i];
       X.banner(query);
@@ -400,62 +406,98 @@ create view c as select a.d1 as d1, b.d2 as d2 from a join b using ( d1, d2 );`)
       // debug type_of q
       debug(CATALOG.all_keys_of(q));
       info(q.getUsedTables());
-      echo('^4656-1^', xrpr(CATALOG.all_keys_of(q.tree)));
-      echo('^4656-2^', xrpr(q.tree.toStringTree()));
-      echo('^4656-3^', xrpr(q.tree.text));
-      echo('^4656-4^', type_of(q));
-      echo('^4656-5^', type_of(q.tree));
-      echo('^4656-6^', type_of(q.tree.children));
-      echo('^4656-7^', q.tree.childCount);
-      echo('^4656-8^', q.tree.query);
-      echo('^4656-9^', q.tree.getToken);
-      echo('^4656-10^', q.tree.getTokens);
-      // echo '^4656-11^', xrpr q
       show_antler_tree(q.tree);
-      continue;
-      // Whether to use "mergedLeaves" or "tree" lineage type
-      merged_leaves = false;
-      getTable = function(...P) {
-        debug('^443663456^', P);
-        return null;
-      };
-      lineage = q.getLineage(getTable, merged_leaves, lineage_cfg);
-      debug('^53453^', xrpr(lineage));
-      ref1 = lineage.nodes;
-      for (j = 0, len1 = ref1.length; j < len1; j++) {
-        node = ref1[j];
-        delete node.range;
-        delete node.data;
-        node.columns = (function() {
-          var k, len2, ref2, results;
-          ref2 = node.columns;
-          results = [];
-          for (k = 0, len2 = ref2.length; k < len2; k++) {
-            c = ref2[k];
-            results.push(c.label);
-          }
-          return results;
-        })();
-        echo(xrpr(node));
-      }
     }
     return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  show_antler_tree = function(tree, level = 0) {
-    var child, dent, i, len, ref, ref1;
+  show_antler_tree = function(tree) {
+    var k, objects_by_type;
+    objects_by_type = _show_antler_tree({
+      children: [tree]
+    }, 0, {});
+    types = ((function() {
+      var results;
+      results = [];
+      for (k in objects_by_type) {
+        results.push(k);
+      }
+      return results;
+    })()).sort();
+    // for type in types
+    //   d     = objects_by_type[ type ]
+    //   keys  = ( k for k of d when not k.startsWith '_' ).sort()
+    //   urge type, keys
+    // debug '^5600-1^', Object.keys d._start
+    // debug '^5600-2^', Object.keys d._start?.source
+    // debug '^5600-3^', type_of d._start?.source?.source
+    // debug '^5600-4^', d._start?.start
+    // debug '^5600-5^', d._start?.stop
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  antler_types = {
+    terminal: null,
+    select_clause: function(node) {
+      var terminal, text, type;
+      terminal = node.children[0];
+      if ((type = type_of_antler_node(terminal)) !== 'terminal') {
+        throw new Error(`unexpected type ${rpr(type)}`);
+      }
+      if (!/^select$/i.test((text = terminal.text))) {
+        throw new Error(`unexpected terminal ${rpr(text)}`);
+      }
+      return debug('^4353^', {
+        type,
+        text,
+        subs: []
+      });
+    }
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  type_of_antler_node = function(node) {
+    var R;
+    R = node.constructor.name;
+    R = R.replace(/(Node|Context)$/, '');
+    R = to_snake_case(R);
+    return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  _show_antler_tree = function(tree, level, R) {
+    var child, dent, i, len, ref, type, type_entry, type_entry_type;
     dent = '  '.repeat(level);
-    debug('^4656-1^' + dent + rpr(tree.text));
     ref = tree.children;
+    // debug '^4656-1^' + dent + ( type_of tree ) + ' ' + rpr tree.text
     for (i = 0, len = ref.length; i < len; i++) {
       child = ref[i];
-      info('^4656-1^' + dent + (type_of(child)) + ' ' + (rpr(child.text)));
-      if (((ref1 = child.childCount) != null ? ref1 : 0) > 0) {
-        show_antler_tree(child, level + 1);
+      type = type_of_antler_node(child);
+      if (R[type] == null) {
+        R[type] = child;
+      }
+      type_entry = antler_types[type];
+      switch (type_entry_type = type_of(type_entry)) {
+        case 'undefined':
+          warn('^4656-1^' + dent + type + ' ' + (CND.gold(rpr(child.text))));
+          break;
+        case 'null':
+          whisper('^4656-1^' + dent + type + ' ' + (rpr(child.text)));
+          break;
+        case 'function':
+          info('^4656-1^' + dent + type + ' ' + (CND.gold(rpr(child.text))));
+          debug('^4656-1^', type_entry(child));
+          break;
+        default:
+          warn(CND.reverse('^4656-1^' + dent + type + ' ' + (CND.gold(rpr(child.text))) + ` unknown type entry type ${rpr(type_entry_type)}`));
+      }
+      if (child.children != null) {
+        _show_antler_tree(child, level + 1, R);
       }
     }
-    return null;
+    return R;
   };
 
   //-----------------------------------------------------------------------------------------------------------
