@@ -54,6 +54,7 @@ specifiers:
   jfee: 0.1.4
   jsdom: ^19.0.0
   jsx-number-format: ^0.1.4
+  just-snake-case: ^3.0.1
   klona: ^2.0.4
   letsfreezethat: ^3.1.0
   letsfreezethat225: npm:letsfreezethat@2.2.5
@@ -168,6 +169,7 @@ dependencies:
   jfee: 0.1.4
   jsdom: 19.0.0
   jsx-number-format: 0.1.4
+  just-snake-case: 3.0.1
   klona: 2.0.4
   letsfreezethat: 3.1.0
   letsfreezethat225: /letsfreezethat/2.2.5
@@ -2885,6 +2887,10 @@ packages:
 
   /jsx-number-format/0.1.4:
     resolution: {integrity: sha512-uPc/Q90XqZoRE7Cu1OLFQB2cSrA2Dy8+okzPOtML8vbagNFDSipbndIPme+q0odBjEhL+wf3WH3Wo52was4Tsg==}
+    dev: false
+
+  /just-snake-case/3.0.1:
+    resolution: {integrity: sha512-h2fbGA9baefofrXBowSWk38a0oTvh+8pdxYv8eqtblrYHqehkG+D9gEWCj9XmNOSFOX+O493ciZa4fFRzA9b1A==}
     dev: false
 
   /keyv/4.0.3:
