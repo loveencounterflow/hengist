@@ -107,15 +107,20 @@ select 'helo world' as greetings;`,
     // for query in [ SQL"""select d as "d1" from a as a1;""", ]
     // for query in [ SQL"""select d + e + f( x ) as "d1" from a as a1;""", ]
     // for query in [ SQL"""select * from a left join b where k > 1 order by m limit 1;""", ]
-    // for query in [ SQL"SELECT 42 as a;", ]
+    // for query in [ SQL"select '𠀀' as a;", ]
     // for query in [ queries[ 1 ], ]
     for (i = 0, len = ref.length; i < len; i++) {
       query = ref[i];
       desql = new Desql();
       // echo query
       desql.parse(query);
-      X.tabulate(query, desql.db(SQL`select * from raw_nodes order by id, xtra;`));
-      X.tabulate("counts", desql.db(SQL`select * from raw_nodes as r1 where not exists ( select 1 from raw_nodes as r2 where r2.upid = r1.id )`));
+      tabulate(desql.db, SQL`select * from queries;`);
+      tabulate(desql.db, SQL`select * from raw_nodes order by id, xtra;`);
+      // tabulate desql.db, SQL"""
+      //   select * from raw_nodes as r1 where not exists ( select 1 from raw_nodes as r2 where r2.upid = r1.id )
+      //   """
+      tabulate(desql.db, SQL`select * from coverage;`);
+      tabulate(desql.db, SQL`select * from coverage_holes_1;  `);
     }
     return null;
   };
