@@ -95,7 +95,7 @@
     SQL`select
 42 as d;
 select 'helo world' as greetings;`,
-    SQL`select xxxxx /* comment */ from t as t1 where "x" = $x order by k;`
+    SQL`select f(xxxxx) /* comment */ from t as t1 where "x" = $x order by k;`
   ];
 
   //-----------------------------------------------------------------------------------------------------------
@@ -120,8 +120,10 @@ select 'helo world' as greetings;`,
       //   select * from raw_nodes as r1 where not exists ( select 1 from raw_nodes as r2 where r2.upid = r1.id )
       //   """
       tabulate(desql.db, SQL`select * from coverage;`);
-      tabulate(desql.db, SQL`select * from coverage_holes_1;  `);
+      tabulate(desql.db, SQL`select * from _coverage_holes_1;`);
+      tabulate(desql.db, SQL`select * from _coverage_holes;`);
     }
+    // tabulate desql.db, SQL"select * from _first_coverage_hole;"
     return null;
   };
 
