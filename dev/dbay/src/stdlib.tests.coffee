@@ -24,6 +24,8 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 SQL                       = String.raw
 r                         = String.raw
+{ SQL  }                  = ( require H.dbay_path ).DBay
+
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY stdlib functions" ] = ( T, done ) ->
@@ -75,7 +77,7 @@ r                         = String.raw
         r2.part   as word
       from
         entries as r1,
-        std_str_split_re( r1.entry, '\s' ) as r2;"""
+        std_str_split_re( r1.entry, '\\s' ) as r2;"""
   T?.eq result, [
     { entry: 'some nice words', lnr: 1, rnr: 3, word: 'some' }
     { entry: 'some nice words', lnr: 2, rnr: 2, word: 'nice' }
