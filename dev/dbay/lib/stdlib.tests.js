@@ -38,6 +38,8 @@
 
   r = String.raw;
 
+  ({SQL} = (require(H.dbay_path)).DBay);
+
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY stdlib functions"] = function(T, done) {
     var DBay, db, test_and_show;
@@ -348,7 +350,7 @@
     r2.part   as word
   from
     entries as r1,
-    std_str_split_re( r1.entry, '\s' ) as r2;`);
+    std_str_split_re( r1.entry, '\\s' ) as r2;`);
     for (i = 0, len = ref.length; i < len; i++) {
       row = ref[i];
       // info word for word from db.first_values SQL"""
@@ -617,6 +619,27 @@ insert into a values ( 'alpha', 1 ), ( 'beta', 2 ), ( 'gamma', 3 );`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY std_str_is_blank()"] = async function(T, done) {
+    var DBay, db, error, i, len, matcher, probe, probes_and_matchers;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
+    db.create_stdlib();
+    probes_and_matchers = [['something', 0, null], ['   x', 0, null], ['   x    ', 0, null], ['', 0, null], ['     ', 1, null], ['  \n\t   ', 1, null], ['  \u3000   ', 1, null]];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var result;
+          ({result} = db.first_row(SQL`select std_str_is_blank( $probe ) as result;`, {probe}));
+          return resolve(result);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
@@ -625,12 +648,11 @@ insert into a values ( 'alpha', 1 ), ( 'beta', 2 ), ( 'gamma', 3 );`);
       // test @[ "DBAY std_getv()" ]
       // test @[ "DBAY stdlib error throwing" ]
       // @[ "DBAY stdlib error throwing" ]()
-      return this["DBAY exceptions use case: record not found"]();
+      // @[ "DBAY exceptions use case: record not found" ]()
+      // @[ "DBAY stdlib functions" ]()
+      return test(this["DBAY std_str_is_blank()"]);
     })();
   }
-
-  // @[ "DBAY stdlib functions" ]()
-// @[ "DBAY std_str_split_re()" ]()
 
 }).call(this);
 
