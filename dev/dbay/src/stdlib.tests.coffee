@@ -231,6 +231,28 @@ r                         = String.raw
   done?()
 
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY std_str_is_blank()" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }          = require H.dbay_path
+  db                = new DBay()
+  db.create_stdlib()
+  probes_and_matchers = [
+    [ 'something',    0, null ]
+    [ '   x',         0, null ]
+    [ '   x    ',     0, null ]
+    [ '',             0, null ]
+    [ '     ',        1, null ]
+    [ '  \n\t   ',    1, null ]
+    [ '  \u3000   ',  1, null ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      { result, } = db.first_row SQL"select std_str_is_blank( $probe ) as result;", { probe, }
+      resolve result
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if module is require.main then do =>
@@ -239,9 +261,9 @@ if module is require.main then do =>
   # test @[ "DBAY std_getv()" ]
   # test @[ "DBAY stdlib error throwing" ]
   # @[ "DBAY stdlib error throwing" ]()
-  @[ "DBAY exceptions use case: record not found" ]()
+  # @[ "DBAY exceptions use case: record not found" ]()
   # @[ "DBAY stdlib functions" ]()
-  # @[ "DBAY std_str_split_re()" ]()
+  test @[ "DBAY std_str_is_blank()" ]
 
 
 
