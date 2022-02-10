@@ -119,9 +119,9 @@ select 'helo world' as greetings;`,
       // tabulate desql.db, SQL"""
       //   select * from raw_nodes as r1 where not exists ( select 1 from raw_nodes as r2 where r2.upid = r1.id )
       //   """
-      tabulate(desql.db, SQL`select * from coverage;`);
       tabulate(desql.db, SQL`select * from _coverage_holes_1;`);
       tabulate(desql.db, SQL`select * from _coverage_holes;`);
+      tabulate(desql.db, SQL`select * from coverage;`);
     }
     // tabulate desql.db, SQL"select * from _first_coverage_hole;"
     return null;
