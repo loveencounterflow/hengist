@@ -77,7 +77,7 @@ queries = [
   SQL"""select
     42 as d;
     select 'helo world' as greetings;"""
-  SQL"""select xxxxx /* comment */ from t as t1 where "x" = $x order by k;"""
+  SQL"""select f(xxxxx) /* comment */ from t as t1 where "x" = $x order by k;"""
   ]
 
 #-----------------------------------------------------------------------------------------------------------
