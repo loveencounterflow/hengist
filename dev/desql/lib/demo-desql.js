@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Desql, GUY, SQL, X, badge, debug, echo, equals, help, info, isa, queries, rpr, show_overview, show_series, tabulate, type_of, types, urge, validate, validate_list_of, warn, whisper, xrpr;
+  var CND, Desql, GUY, SQL, X, badge, debug, echo, equals, help, highlight_parsing_result, info, isa, queries, rpr, show_missing, show_overview, tabulate, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper, xrpr;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -37,7 +37,8 @@
 
   // { lets
   //   freeze }                = GUY.lft
-  // { to_width }              = require 'to-width'
+  ({to_width} = require('to-width'));
+
   // { DBay }                  = require '../../../apps/dbay'
   SQL = String.raw;
 
@@ -88,79 +89,97 @@
     SQL`create table d ( x "any" );`,
     SQL`insert into products ( nr, name ) values ( 1234, 'frob' );`,
     SQL`select a, b from s join t using ( c );`,
-    SQL`select t1.a as alias, t2.b from s as t1 join t as t2 using ( c );`,
     SQL`create view v as select a, b, c, f( d ) as k from t where e > 2;`,
-    SQL`create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k;`,
     SQL`select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k;`,
+    SQL`select a as a1, b from t as t1 where "x" = y order by k;`,
+    SQL`   select f(xxxxx) /* comment */ from t as t1 where "x" = $x order by k;`,
+    // SQL"""order by k;"""
     SQL`select
 42 as d;
 select 'helo world' as greetings;`,
-    SQL`select f(xxxxx) /* comment */ from t as t1 where "x" = $x order by k;`
+    SQL`create view v as select a, b, [c], f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;`,
+    SQL`create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;`,
+    SQL`select t1.a as alias, t2.b from s as t1 join t as t2 using ( cy, doe, eps );`,
+    SQL`select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );`
   ];
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_short_query = function() {
-    var desql, i, len, query, ref;
-    ref = [queries[queries.length - 1]];
-    // CATALOG = require '../../../jzr-old/multimix/lib/cataloguing'
-    // q = antlr.parse "SELECT * FROM abc join users as u;", parser_cfg
-    // for query in [ SQL"""select d as "d1" from a as a1;""", ]
-    // for query in [ SQL"""select d + e + f( x ) as "d1" from a as a1;""", ]
-    // for query in [ SQL"""select * from a left join b where k > 1 order by m limit 1;""", ]
-    // for query in [ SQL"select '𠀀' as a;", ]
-    // for query in [ queries[ 1 ], ]
-    for (i = 0, len = ref.length; i < len; i++) {
-      query = ref[i];
+    var desql, i, len, query;
+// CATALOG = require '../../../jzr-old/multimix/lib/cataloguing'
+// q = antlr.parse "SELECT * FROM abc join users as u;", parser_cfg
+// for query in [ SQL"""select d as "d1" from a as a1;""", ]
+// for query in [ SQL"""select d + e + f( x ) as "d1" from a as a1;""", ]
+// for query in [ SQL"""select * from a left join b where k > 1 order by m limit 1;""", ]
+// for query in [ SQL"select '𠀀' as a;", ]
+// for query in [ queries[ 1 ], ]
+// for query in [ queries[ queries.length - 1 ], ]
+    for (i = 0, len = queries.length; i < len; i++) {
+      query = queries[i];
       desql = new Desql();
       // echo query
       desql.parse(query);
-      tabulate(desql.db, SQL`select * from queries;`);
-      tabulate(desql.db, SQL`select * from raw_nodes order by id, xtra;`);
+      // tabulate desql.db, SQL"select * from queries;"
+      // tabulate desql.db, SQL"select * from raw_nodes order by id, xtra;"
+      // tabulate desql.db, SQL"select * from nodes where ( type != 'spc' ) order by id, xtra;"
       // tabulate desql.db, SQL"""
       //   select * from raw_nodes as r1 where not exists ( select 1 from raw_nodes as r2 where r2.upid = r1.id )
       //   """
-      tabulate(desql.db, SQL`select * from _coverage_holes_1;`);
-      tabulate(desql.db, SQL`select * from _coverage_holes;`);
-      tabulate(desql.db, SQL`select * from coverage;`);
+      // tabulate desql.db, SQL"select * from _coverage_1;"
+      // tabulate desql.db, SQL"select * from _coverage_holes_1;"
+      // tabulate desql.db, SQL"select * from _coverage_holes_2;"
+      // # tabulate desql.db, SQL"select * from _coverage_2;"
+      // tabulate desql.db, SQL"select * from nodes;"
+      // tabulate desql.db, SQL"""
+      //   select * from nodes
+      //   where true
+      //     and ( type != 'spc' )
+      //     and ( txt is not null )
+      //     and ( path glob '* i ui t' or path glob '* i qi t' )
+      //     ;"""
+      // tabulate desql.db, SQL"select distinct type from nodes order by type;"
+      // tabulate desql.db, SQL"select * from _coverage_holes where type = 'msg';"
+      highlight_parsing_result(query, desql);
     }
-    // tabulate desql.db, SQL"select * from _first_coverage_hole;"
     return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  show_series = function(query, series) {
-    var i, len, node, ref, ref1, ref2, ref3, ref4, ref5, s;
-    s = [];
-    for (i = 0, len = series.length; i < len; i++) {
-      node = series[i];
-      s.push({
-        id: node.id,
-        xtra: 0,
-        upid: node.upid,
-        type: node.type,
-        idx1: (ref = node.idx1) != null ? ref : null,
-        idx2: (ref1 = node.idx2) != null ? ref1 : null,
-        lnr1: (ref2 = node.lnr1) != null ? ref2 : null,
-        col1: (ref3 = node.col1) != null ? ref3 : null,
-        lnr2: (ref4 = node.lnr2) != null ? ref4 : null,
-        col2: (ref5 = node.col2) != null ? ref5 : null,
-        node_count: node.node_count,
-        text: node.text
-      });
+  show_missing = function(query, desql) {
+    var ref, row, rows;
+    rows = [];
+    ref = desql.db(SQL`select * from _coverage_holes;`);
+    for (row of ref) {
+      row.txt = rpr(row.txt);
+      rows.push(row);
     }
-    X.tabulate(query, s);
-    s = (function() {
-      var j, len1, results;
-      results = [];
-      for (j = 0, len1 = s.length; j < len1; j++) {
-        node = s[j];
-        if ((node.type !== 'terminal') && (node.node_count === 0)) {
-          results.push(node);
-        }
+    X.tabulate("parts missing from AST", rows);
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  highlight_parsing_result = function(query, desql) {
+    var db, parts, path, ref, rvs, txt, y;
+    ({db} = desql);
+    rvs = function(...P) {
+      return CND.bold(CND.reverse(...P));
+    };
+    parts = [];
+    ref = db(SQL`select * from nodes where txt is not null;`);
+    //.........................................................................................................
+    for (y of ref) {
+      ({path, txt} = y);
+      if (!/-spc$/.test(path)) {
+        info(to_width(rpr(txt), 20), rvs(path));
       }
-      return results;
-    })();
-    X.tabulate(query, s);
+      txt = /-msg$/.test(path) ? rvs(CND.red(txt)) : /-fc-fn-qn-i-[uq]i-t$/.test(path) ? rvs(CND.blue(txt)) : /-cv-mi-eci-i-[uq]i-t$/.test(path) ? rvs(CND.olive(txt)) : /-dref-cref-i-[uq]i-t$/.test(path) ? rvs(CND.steel(txt)) : /-dref-i-[uq]i-t$/.test(path) ? rvs(CND.cyan(txt)) : /-tn-.*-i-[uq]i-t$/.test(path) ? rvs(CND.green(txt)) : /-tn-ta-[uq]i-t$/.test(path) ? rvs(CND.lime(txt)) : /-nes-ne-eci-i-[uq]i-t$/.test(path) ? rvs(CND.yellow(txt)) : /-qo-si-e-pd-ve-cref-i-[uq]i-t$/.test(path) ? rvs(CND.pink(txt)) : /-jc[ou]-.*-i-[uq]i-t$/.test(path) ? rvs(CND.indigo(txt)) : /-[uq]i-t$/.test(path) ? rvs(CND.plum(txt)) : txt; // function name // view name // table name in fqn (`t.col`) // col name in fqn (`t.col`) // table name // table alias // col name alias // col in order by // id in join criteria // identifier
+      parts.push(txt);
+    }
+    //.........................................................................................................
+    X.banner(query);
+    echo();
+    echo(parts.join(''));
+    echo();
     return null;
   };
 
