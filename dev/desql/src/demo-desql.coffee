@@ -28,7 +28,7 @@ GUY                       = require 'guy'
 X                         = require '../../../lib/helpers'
 # { lets
 #   freeze }                = GUY.lft
-# { to_width }              = require 'to-width'
+{ to_width }              = require 'to-width'
 # { DBay }                  = require '../../../apps/dbay'
 SQL                       = String.raw
 # { SQL }                   = DBay
@@ -70,14 +70,18 @@ queries = [
   SQL"""create table d ( x "any" );"""
   SQL"insert into products ( nr, name ) values ( 1234, 'frob' );"
   SQL"select a, b from s join t using ( c );"
-  SQL"select t1.a as alias, t2.b from s as t1 join t as t2 using ( c );"
   SQL"create view v as select a, b, c, f( d ) as k from t where e > 2;"
-  SQL"create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k;"
   SQL"select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k;"
+  SQL"""select a as a1, b from t as t1 where "x" = y order by k;"""
+  SQL"""   select f(xxxxx) /* comment */ from t as t1 where "x" = $x order by k;"""
+  # SQL"""order by k;"""
   SQL"""select
     42 as d;
     select 'helo world' as greetings;"""
-  SQL"""select f(xxxxx) /* comment */ from t as t1 where "x" = $x order by k;"""
+  SQL"create view v as select a, b, [c], f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;"
+  SQL"create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;"
+  SQL"select t1.a as alias, t2.b from s as t1 join t as t2 using ( cy, doe, eps );"
+  SQL"select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );"
   ]
 
 #-----------------------------------------------------------------------------------------------------------
@@ -89,45 +93,76 @@ queries = [
   # for query in [ SQL"""select * from a left join b where k > 1 order by m limit 1;""", ]
   # for query in [ SQL"select '𠀀' as a;", ]
   # for query in [ queries[ 1 ], ]
-  for query in [ queries[ queries.length - 1 ], ]
+  # for query in [ queries[ queries.length - 1 ], ]
+  for query in queries
     desql = new Desql()
     # echo query
     desql.parse query
-    tabulate desql.db, SQL"select * from queries;"
-    tabulate desql.db, SQL"select * from raw_nodes order by id, xtra;"
+    # tabulate desql.db, SQL"select * from queries;"
+    # tabulate desql.db, SQL"select * from raw_nodes order by id, xtra;"
+    # tabulate desql.db, SQL"select * from nodes where ( type != 'spc' ) order by id, xtra;"
     # tabulate desql.db, SQL"""
     #   select * from raw_nodes as r1 where not exists ( select 1 from raw_nodes as r2 where r2.upid = r1.id )
     #   """
-    tabulate desql.db, SQL"select * from _coverage_holes_1;"
-    tabulate desql.db, SQL"select * from _coverage_holes;"
-    tabulate desql.db, SQL"select * from coverage;"
-    # tabulate desql.db, SQL"select * from _first_coverage_hole;"
+    # tabulate desql.db, SQL"select * from _coverage_1;"
+    # tabulate desql.db, SQL"select * from _coverage_holes_1;"
+    # tabulate desql.db, SQL"select * from _coverage_holes_2;"
+    # # tabulate desql.db, SQL"select * from _coverage_2;"
+    # tabulate desql.db, SQL"select * from nodes;"
+    # tabulate desql.db, SQL"""
+    #   select * from nodes
+    #   where true
+    #     and ( type != 'spc' )
+    #     and ( txt is not null )
+    #     and ( path glob '* i ui t' or path glob '* i qi t' )
+    #     ;"""
+    # tabulate desql.db, SQL"select distinct type from nodes order by type;"
+    # tabulate desql.db, SQL"select * from _coverage_holes where type = 'msg';"
+    highlight_parsing_result query, desql
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-show_series = ( query, series ) ->
-  s = []
-  for node in series
-    s.push
-      id:         node.id
-      xtra:       0
-      upid:       node.upid
-      type:       node.type
-      idx1:       node.idx1 ? null
-      idx2:       node.idx2 ? null
-      lnr1:       node.lnr1 ? null
-      col1:       node.col1 ? null
-      lnr2:       node.lnr2 ? null
-      col2:       node.col2 ? null
-      node_count: node.node_count
-      text:       node.text
-  X.tabulate query, s
-  s = ( node for node in s when ( node.type isnt 'terminal' ) and ( node.node_count is 0 ) )
-  X.tabulate query, s
+show_missing = ( query, desql ) ->
+  rows = []
+  for row from desql.db SQL"select * from _coverage_holes;"
+    row.txt = rpr row.txt
+    rows.push row
+  X.tabulate "parts missing from AST", rows
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+highlight_parsing_result = ( query, desql ) ->
+  { db, }   = desql
+  rvs       = ( P... ) -> CND.bold CND.reverse P...
+  parts     = []
+  #.........................................................................................................
+  for { path, txt, } from db SQL"""select * from nodes where txt is not null;"""
+    unless ( /-spc$/ ).test path
+      info ( to_width ( rpr txt ), 20 ), rvs path
+    txt = \
+    if      ( /-msg$/                             ).test path then rvs CND.red     txt
+    else if ( /-fc-fn-qn-i-[uq]i-t$/              ).test path then rvs CND.blue    txt # function name
+    else if ( /-cv-mi-eci-i-[uq]i-t$/             ).test path then rvs CND.olive   txt # view name
+    else if ( /-dref-cref-i-[uq]i-t$/             ).test path then rvs CND.steel   txt # table name in fqn (`t.col`)
+    else if ( /-dref-i-[uq]i-t$/                  ).test path then rvs CND.cyan    txt # col name in fqn (`t.col`)
+    else if ( /-tn-.*-i-[uq]i-t$/                 ).test path then rvs CND.green   txt # table name
+    else if ( /-tn-ta-[uq]i-t$/                   ).test path then rvs CND.lime    txt # table alias
+    else if ( /-nes-ne-eci-i-[uq]i-t$/            ).test path then rvs CND.yellow  txt # col name alias
+    else if ( /-qo-si-e-pd-ve-cref-i-[uq]i-t$/    ).test path then rvs CND.pink    txt # col in order by
+    else if ( /-jc[ou]-.*-i-[uq]i-t$/             ).test path then rvs CND.indigo  txt # id in join criteria
+    else if ( /-[uq]i-t$/                         ).test path then rvs CND.plum    txt # identifier
+    else txt
+    parts.push txt
+  #.........................................................................................................
+  X.banner query
+  echo()
+  echo parts.join ''
+  echo()
   return null
 
 
 ############################################################################################################
 if module is require.main then do =>
   @demo_short_query()
+
 
