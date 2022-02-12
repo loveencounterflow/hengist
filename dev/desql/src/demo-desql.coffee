@@ -50,6 +50,7 @@ show_overview = ( db ) ->
 tabulate = ( db, query ) -> X.tabulate query, db query
 
 #-----------------------------------------------------------------------------------------------------------
+pathsep_lit = "'-'"
 queries = [
   SQL"drop view if exists dbay_foreign_key_clauses_2;",
   SQL"""
@@ -82,6 +83,27 @@ queries = [
   SQL"create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;"
   SQL"select t1.a as alias, t2.b from s as t1 join t as t2 using ( cy, doe, eps );"
   SQL"select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );"
+  SQL"""
+      create view _coverage_holes as select
+          c.qid                                                           as qid,
+          c.id                                                            as id,
+          2                                                               as xtra,
+          c.prv_upid                                                      as upid,
+          r.type                                                          as type,
+          c.prv_path || #{pathsep_lit} || r.type                          as path,
+          c.pos1                                                          as pos1,
+          c.pos2                                                          as pos2,
+          c.lnr1                                                          as lnr1,
+          c.col1                                                          as col1,
+          c.lnr2                                                          as lnr2,
+          c.col2                                                          as col2,
+          c.txt                                                           as txt
+        from _coverage_holes_2  as c
+        join ( select
+            qid,
+            id,
+            case when std_str_is_blank( txt ) then 'spc' else 'msg' end as type
+          from _coverage_holes_2 ) as r using ( qid, id );"""
   ]
 
 #-----------------------------------------------------------------------------------------------------------
@@ -145,12 +167,15 @@ highlight_parsing_result = ( query, desql ) ->
     else if ( /-cv-mi-eci-i-[uq]i-t$/             ).test path then rvs CND.olive   txt # view name
     else if ( /-dref-cref-i-[uq]i-t$/             ).test path then rvs CND.steel   txt # table name in fqn (`t.col`)
     else if ( /-dref-i-[uq]i-t$/                  ).test path then rvs CND.cyan    txt # col name in fqn (`t.col`)
+    else if ( /-dref-i-[uq]i-ansinr-t$/           ).test path then rvs CND.cyan    txt # col name in fqn (`t.col`) (also SQL kw)
     else if ( /-tn-.*-i-[uq]i-t$/                 ).test path then rvs CND.green   txt # table name
     else if ( /-tn-ta-[uq]i-t$/                   ).test path then rvs CND.lime    txt # table alias
-    else if ( /-nes-ne-eci-i-[uq]i-t$/            ).test path then rvs CND.yellow  txt # col name alias
+    else if ( /-nes-ne-eci-i-[uq]i-t$/            ).test path then rvs CND.yellow  txt # col alias
+    else if ( /-nes-ne-eci-i-[uq]i-ansinr-t$/     ).test path then rvs CND.yellow  txt # col alias (also SQL kw)
     else if ( /-qo-si-e-pd-ve-cref-i-[uq]i-t$/    ).test path then rvs CND.pink    txt # col in order by
     else if ( /-jc[ou]-.*-i-[uq]i-t$/             ).test path then rvs CND.indigo  txt # id in join criteria
     else if ( /-[uq]i-t$/                         ).test path then rvs CND.plum    txt # identifier
+    else if ( /-c-.*-t$/                          ).test path then rvs CND.orange  txt # literal
     else txt
     parts.push txt
   #.........................................................................................................
