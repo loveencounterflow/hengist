@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Desql, GUY, SQL, X, badge, debug, echo, equals, help, highlight_parsing_result, info, isa, queries, rpr, show_missing, show_overview, tabulate, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper, xrpr;
+  var CND, Desql, GUY, SQL, X, badge, debug, echo, equals, help, highlight_parsing_result, info, isa, pathsep_lit, queries, rpr, show_missing, show_overview, tabulate, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper, xrpr;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -70,6 +70,8 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  pathsep_lit = "'-'";
+
   queries = [
     SQL`drop view if exists dbay_foreign_key_clauses_2;`,
     SQL`create view dbay_foreign_key_clauses_2 as select distinct
@@ -100,7 +102,27 @@ select 'helo world' as greetings;`,
     SQL`create view v as select a, b, [c], f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;`,
     SQL`create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;`,
     SQL`select t1.a as alias, t2.b from s as t1 join t as t2 using ( cy, doe, eps );`,
-    SQL`select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );`
+    SQL`select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );`,
+    SQL`create view _coverage_holes as select
+    c.qid                                                           as qid,
+    c.id                                                            as id,
+    2                                                               as xtra,
+    c.prv_upid                                                      as upid,
+    r.type                                                          as type,
+    c.prv_path || ${pathsep_lit} || r.type                          as path,
+    c.pos1                                                          as pos1,
+    c.pos2                                                          as pos2,
+    c.lnr1                                                          as lnr1,
+    c.col1                                                          as col1,
+    c.lnr2                                                          as lnr2,
+    c.col2                                                          as col2,
+    c.txt                                                           as txt
+  from _coverage_holes_2  as c
+  join ( select
+      qid,
+      id,
+      case when std_str_is_blank( txt ) then 'spc' else 'msg' end as type
+    from _coverage_holes_2 ) as r using ( qid, id );`
   ];
 
   //-----------------------------------------------------------------------------------------------------------
@@ -172,7 +194,7 @@ select 'helo world' as greetings;`,
       if (!/-spc$/.test(path)) {
         info(to_width(rpr(txt), 20), rvs(path));
       }
-      txt = /-msg$/.test(path) ? rvs(CND.red(txt)) : /-fc-fn-qn-i-[uq]i-t$/.test(path) ? rvs(CND.blue(txt)) : /-cv-mi-eci-i-[uq]i-t$/.test(path) ? rvs(CND.olive(txt)) : /-dref-cref-i-[uq]i-t$/.test(path) ? rvs(CND.steel(txt)) : /-dref-i-[uq]i-t$/.test(path) ? rvs(CND.cyan(txt)) : /-tn-.*-i-[uq]i-t$/.test(path) ? rvs(CND.green(txt)) : /-tn-ta-[uq]i-t$/.test(path) ? rvs(CND.lime(txt)) : /-nes-ne-eci-i-[uq]i-t$/.test(path) ? rvs(CND.yellow(txt)) : /-qo-si-e-pd-ve-cref-i-[uq]i-t$/.test(path) ? rvs(CND.pink(txt)) : /-jc[ou]-.*-i-[uq]i-t$/.test(path) ? rvs(CND.indigo(txt)) : /-[uq]i-t$/.test(path) ? rvs(CND.plum(txt)) : txt; // function name // view name // table name in fqn (`t.col`) // col name in fqn (`t.col`) // table name // table alias // col name alias // col in order by // id in join criteria // identifier
+      txt = /-msg$/.test(path) ? rvs(CND.red(txt)) : /-fc-fn-qn-i-[uq]i-t$/.test(path) ? rvs(CND.blue(txt)) : /-cv-mi-eci-i-[uq]i-t$/.test(path) ? rvs(CND.olive(txt)) : /-dref-cref-i-[uq]i-t$/.test(path) ? rvs(CND.steel(txt)) : /-dref-i-[uq]i-t$/.test(path) ? rvs(CND.cyan(txt)) : /-dref-i-[uq]i-ansinr-t$/.test(path) ? rvs(CND.cyan(txt)) : /-tn-.*-i-[uq]i-t$/.test(path) ? rvs(CND.green(txt)) : /-tn-ta-[uq]i-t$/.test(path) ? rvs(CND.lime(txt)) : /-nes-ne-eci-i-[uq]i-t$/.test(path) ? rvs(CND.yellow(txt)) : /-nes-ne-eci-i-[uq]i-ansinr-t$/.test(path) ? rvs(CND.yellow(txt)) : /-qo-si-e-pd-ve-cref-i-[uq]i-t$/.test(path) ? rvs(CND.pink(txt)) : /-jc[ou]-.*-i-[uq]i-t$/.test(path) ? rvs(CND.indigo(txt)) : /-[uq]i-t$/.test(path) ? rvs(CND.plum(txt)) : /-c-.*-t$/.test(path) ? rvs(CND.orange(txt)) : txt; // function name // view name // table name in fqn (`t.col`) // col name in fqn (`t.col`) // col name in fqn (`t.col`) (also SQL kw) // table name // table alias // col alias // col alias (also SQL kw) // col in order by // id in join criteria // identifier // literal
       parts.push(txt);
     }
     //.........................................................................................................
