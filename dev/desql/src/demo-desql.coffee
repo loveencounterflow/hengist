@@ -108,9 +108,18 @@ queries = [
   SQL"select a, b, c,, from t;"
   SQL"select a.b from t;"
   SQL"select a.b.c from p.q.r.s.t;"
-  SQL"select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );"
-  SQL"create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;"
   SQL"create table v as select a, b as b2, c.x as c2, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;"
+  SQL"""
+    create table tcats ( -- terminal category codes
+        major   text not null,
+        minor   text not null,
+        full    text not null generated always as ( major || minor ) virtual,
+        name    text not null,
+      primary key ( major, minor ),
+      check ( std_re_is_match( major, '^[A-Z]$'     ) ),
+      check ( std_re_is_match( minor, '^[a-z0-9]$'  ) ) );"""
+  SQL"select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );"
+  SQL"create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k desc, l, m;"
   ]
 
 #-----------------------------------------------------------------------------------------------------------
@@ -149,6 +158,9 @@ queries = [
     # tabulate desql.db, SQL"select distinct type from nodes order by type;"
     # tabulate desql.db, SQL"select * from _coverage_holes where type = 'miss';"
     highlight_parsing_result query, desql
+    tabulate desql.db, SQL"select * from tcats order by code;"
+    tabulate desql.db, SQL"select * from tcat_rules order by code;"
+    tabulate desql.db, SQL"select * from tcat_matches order by code;"
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -176,7 +188,7 @@ highlight_parsing_result = ( query, desql ) ->
     else if ( /-dref-cref-i-[uq]i-t$/                   ).test path then rvs CND.steel   txt # table name in fqn (`t.col`)
     else if ( /-dref-i-[uq]i-t$/                        ).test path then rvs CND.cyan    txt # col name in fqn (`t.col`)
     else if ( /-dref-i-[uq]i-ansinr-t$/                 ).test path then rvs CND.cyan    txt # col name in fqn (`t.col`) (also SQL kw)
-    else if ( /-select-nes-ne-e-pd-ve-cref-i-[uq]i-t$/  ).test path then rvs CND.gold    txt # col name in select
+    else if ( /-select-nes-ne-e-pd-ve.*-cref-i-[uq]i-t$/  ).test path then rvs CND.gold    txt # col name in select
     else if ( /-ctable-ctableh-mi-eci-i-[uq]i-t$/       ).test path then rvs CND.tan     txt # create table name
     else if ( /-cview-mi-eci-i-[uq]i-t$/                ).test path then rvs CND.tan     txt # create view name
     else if ( /-tn-.*-i-[uq]i-t$/                       ).test path then rvs CND.green   txt # table name
@@ -208,3 +220,4 @@ if module is require.main then do =>
   #   info chalk.inverse.hex( cx.seagreen ).italic.bgCyanBright.bold.underline('Hello, world!')
   #   info chalk.inverse.hex( cx.darkseagreen ).italic.bgBlack.bold.underline('Hello, world!')
   #   info chalk.inverse.hex( cx.aqua ).italic.bgBlack.bold.underline('Hello, world!')
+
