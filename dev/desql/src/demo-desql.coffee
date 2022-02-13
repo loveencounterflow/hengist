@@ -80,9 +80,7 @@ queries = [
     42 as d;
     select 'helo world' as greetings;"""
   SQL"create view v as select a, b, [c], f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;"
-  SQL"create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;"
   SQL"select t1.a as alias, t2.b from s as t1 join t as t2 using ( cy, doe, eps );"
-  SQL"select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );"
   SQL"""
       create view _coverage_holes as select
           c.qid                                                           as qid,
@@ -102,8 +100,17 @@ queries = [
         join ( select
             qid,
             id,
-            case when std_str_is_blank( txt ) then 'spc' else 'msg' end as type
+            case when std_str_is_blank( txt ) then 'spc' else 'miss' end as type
           from _coverage_holes_2 ) as r using ( qid, id );"""
+  SQL"select 42 as d;"
+  SQL"select a b c from t;"
+  SQL"select a, b, c, from t;"
+  SQL"select a, b, c,, from t;"
+  SQL"select a.b from t;"
+  SQL"select a.b.c from p.q.r.s.t;"
+  SQL"select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );"
+  SQL"create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;"
+  SQL"create table v as select a, b as b2, c.x as c2, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;"
   ]
 
 #-----------------------------------------------------------------------------------------------------------
@@ -115,14 +122,15 @@ queries = [
   # for query in [ SQL"""select * from a left join b where k > 1 order by m limit 1;""", ]
   # for query in [ SQL"select '𠀀' as a;", ]
   # for query in [ queries[ 1 ], ]
-  # for query in [ queries[ queries.length - 1 ], ]
-  for query in queries
+  n = queries.length
+  for query in queries[ n - 2 .. ]
+  # for query in queries
     desql = new Desql()
     # echo query
     desql.parse query
     # tabulate desql.db, SQL"select * from queries;"
     # tabulate desql.db, SQL"select * from raw_nodes order by id, xtra;"
-    # tabulate desql.db, SQL"select * from nodes where ( type != 'spc' ) order by id, xtra;"
+    tabulate desql.db, SQL"select * from nodes where ( type != 'spc' ) order by id, xtra;"
     # tabulate desql.db, SQL"""
     #   select * from raw_nodes as r1 where not exists ( select 1 from raw_nodes as r2 where r2.upid = r1.id )
     #   """
@@ -139,7 +147,7 @@ queries = [
     #     and ( path glob '* i ui t' or path glob '* i qi t' )
     #     ;"""
     # tabulate desql.db, SQL"select distinct type from nodes order by type;"
-    # tabulate desql.db, SQL"select * from _coverage_holes where type = 'msg';"
+    # tabulate desql.db, SQL"select * from _coverage_holes where type = 'miss';"
     highlight_parsing_result query, desql
   return null
 
@@ -162,20 +170,24 @@ highlight_parsing_result = ( query, desql ) ->
     unless ( /-spc$/ ).test path
       info ( to_width ( rpr txt ), 20 ), rvs path
     txt = \
-    if      ( /-msg$/                             ).test path then rvs CND.red     txt
-    else if ( /-fc-fn-qn-i-[uq]i-t$/              ).test path then rvs CND.blue    txt # function name
-    else if ( /-cv-mi-eci-i-[uq]i-t$/             ).test path then rvs CND.olive   txt # view name
-    else if ( /-dref-cref-i-[uq]i-t$/             ).test path then rvs CND.steel   txt # table name in fqn (`t.col`)
-    else if ( /-dref-i-[uq]i-t$/                  ).test path then rvs CND.cyan    txt # col name in fqn (`t.col`)
-    else if ( /-dref-i-[uq]i-ansinr-t$/           ).test path then rvs CND.cyan    txt # col name in fqn (`t.col`) (also SQL kw)
-    else if ( /-tn-.*-i-[uq]i-t$/                 ).test path then rvs CND.green   txt # table name
-    else if ( /-tn-ta-[uq]i-t$/                   ).test path then rvs CND.lime    txt # table alias
-    else if ( /-nes-ne-eci-i-[uq]i-t$/            ).test path then rvs CND.yellow  txt # col alias
-    else if ( /-nes-ne-eci-i-[uq]i-ansinr-t$/     ).test path then rvs CND.yellow  txt # col alias (also SQL kw)
-    else if ( /-qo-si-e-pd-ve-cref-i-[uq]i-t$/    ).test path then rvs CND.pink    txt # col in order by
-    else if ( /-jc[ou]-.*-i-[uq]i-t$/             ).test path then rvs CND.indigo  txt # id in join criteria
-    else if ( /-[uq]i-t$/                         ).test path then rvs CND.plum    txt # identifier
-    else if ( /-c-.*-t$/                          ).test path then rvs CND.orange  txt # literal
+    if      ( /-miss$/                                  ).test path then rvs CND.red     txt
+    else if ( /-fc-fn-qn-i-[uq]i-t$/                    ).test path then rvs CND.blue    txt # function name
+    else if ( /-cv-mi-eci-i-[uq]i-t$/                   ).test path then rvs CND.olive   txt # view name
+    else if ( /-dref-cref-i-[uq]i-t$/                   ).test path then rvs CND.steel   txt # table name in fqn (`t.col`)
+    else if ( /-dref-i-[uq]i-t$/                        ).test path then rvs CND.cyan    txt # col name in fqn (`t.col`)
+    else if ( /-dref-i-[uq]i-ansinr-t$/                 ).test path then rvs CND.cyan    txt # col name in fqn (`t.col`) (also SQL kw)
+    else if ( /-select-nes-ne-e-pd-ve-cref-i-[uq]i-t$/  ).test path then rvs CND.gold    txt # col name in select
+    else if ( /-ctable-ctableh-mi-eci-i-[uq]i-t$/       ).test path then rvs CND.tan     txt # create table name
+    else if ( /-cview-mi-eci-i-[uq]i-t$/                ).test path then rvs CND.tan     txt # create view name
+    else if ( /-tn-.*-i-[uq]i-t$/                       ).test path then rvs CND.green   txt # table name
+    else if ( /-tn-ta-[uq]i-t$/                         ).test path then rvs CND.lime    txt # table alias
+    else if ( /-nes-ne-eci-i-[uq]i-t$/                  ).test path then rvs CND.yellow  txt # col alias
+    else if ( /-nes-ne-eci-i-[uq]i-ansinr-t$/           ).test path then rvs CND.yellow  txt # col alias (also SQL kw)
+    else if ( /-qo-si-e-pd-ve-cref-i-[uq]i-t$/          ).test path then rvs CND.pink    txt # col in order by
+    else if ( /-jc[ou]-.*-i-[uq]i-t$/                   ).test path then rvs CND.indigo  txt # id in join criteria
+    #.......................................................................................................
+    else if ( /-[uq]i-t$/                               ).test path then rvs CND.plum    txt # fallback identifier
+    else if ( /-c-.*-t$/                                ).test path then rvs CND.orange  txt # literal
     else txt
     parts.push txt
   #.........................................................................................................
@@ -189,5 +201,10 @@ highlight_parsing_result = ( query, desql ) ->
 ############################################################################################################
 if module is require.main then do =>
   @demo_short_query()
-
-
+  # do =>
+  #   chalk = require 'chalk'
+  #   cx    = require 'cohex'
+  #   info chalk.inverse.hex('#550440').italic.bgCyanBright.bold.underline('Hello, world!')
+  #   info chalk.inverse.hex( cx.seagreen ).italic.bgCyanBright.bold.underline('Hello, world!')
+  #   info chalk.inverse.hex( cx.darkseagreen ).italic.bgBlack.bold.underline('Hello, world!')
+  #   info chalk.inverse.hex( cx.aqua ).italic.bgBlack.bold.underline('Hello, world!')
