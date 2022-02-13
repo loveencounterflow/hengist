@@ -648,11 +648,12 @@ insert into a values ( 'alpha', 1 ), ( 'beta', 2 ), ( 'gamma', 3 );`);
       // test @[ "DBAY std_getv()" ]
       // test @[ "DBAY stdlib error throwing" ]
       // @[ "DBAY stdlib error throwing" ]()
-      // @[ "DBAY exceptions use case: record not found" ]()
-      // @[ "DBAY stdlib functions" ]()
-      return test(this["DBAY std_str_is_blank()"]);
+      return this["DBAY exceptions use case: record not found"]();
     })();
   }
+
+  // @[ "DBAY stdlib functions" ]()
+// test @[ "DBAY std_str_is_blank()" ]
 
 }).call(this);
 
