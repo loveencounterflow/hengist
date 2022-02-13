@@ -261,9 +261,9 @@ if module is require.main then do =>
   # test @[ "DBAY std_getv()" ]
   # test @[ "DBAY stdlib error throwing" ]
   # @[ "DBAY stdlib error throwing" ]()
-  # @[ "DBAY exceptions use case: record not found" ]()
+  @[ "DBAY exceptions use case: record not found" ]()
   # @[ "DBAY stdlib functions" ]()
-  test @[ "DBAY std_str_is_blank()" ]
+  # test @[ "DBAY std_str_is_blank()" ]
 
 
 
