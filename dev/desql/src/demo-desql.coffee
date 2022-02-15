@@ -122,6 +122,7 @@ queries = [
   SQL"select a.b from t;"
   SQL"select fld from tbl;"
   SQL"select tbl.fld from tbl;"
+  SQL"select tbl.fld as fld1 from tbl as tbl1;"
   ]
 
 #-----------------------------------------------------------------------------------------------------------
@@ -139,18 +140,22 @@ queries = [
     desql = new Desql()
     desql.parse query
     # tabulate desql.db, SQL"select * from nodes where ( type != 'spc' ) order by id, xtra;"
+    # tabulate desql.db, SQL"""select * from tcat_matches;"""
     tabulate desql.db, SQL"""
       select distinct
-          path,
-          pos1,
-          txt,
-          group_concat( code, ', ' ) over w as codes
-        from tcat_matches
+          n.path                        as path,
+          n.pos1                        as pos1,
+          n.txt                         as txt,
+          group_concat( m.code ) over w as codes
+        from nodes        as n
+        left join tcat_matches as m using ( qid, id, xtra )
+        where true
+          and n.type = 'terminal'
         window w as (
-          partition by pos1, pos2
-          order by code
+          partition by n.pos1, n.pos2
+          order by m.code
           rows between unbounded preceding and unbounded following )
-        order by pos1, pos2;"""
+        order by n.pos1;"""
     highlight_parsing_result query, desql
   # tabulate desql.db, SQL"select * from tcat_rules as r join tcats using ( code ) order by code;"
   # tabulate desql.db, SQL"select * from tcats order by code;"
@@ -172,8 +177,8 @@ highlight_parsing_result = ( query, desql ) ->
   parts     = []
   #.........................................................................................................
   for { path, txt, } from db SQL"""select * from nodes where txt is not null;"""
-    unless ( /-spc$/ ).test path
-      info ( to_width ( rpr txt ), 20 ), rvs path
+    # unless ( /-spc$/ ).test path
+    #   info ( to_width ( rpr txt ), 20 ), rvs path
     txt = \
     if      ( /-miss$/                                  ).test path then rvs CND.red     txt
     else if ( /-fc-fn-qn-i-[uq]i-t$/                    ).test path then rvs CND.blue    txt # function name
