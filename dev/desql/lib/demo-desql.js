@@ -139,7 +139,8 @@ select 'helo world' as greetings;`,
     SQL`select a.b.c from p.q.r.s.t;`,
     SQL`select a.b from t;`,
     SQL`select fld from tbl;`,
-    SQL`select tbl.fld from tbl;`
+    SQL`select tbl.fld from tbl;`,
+    SQL`select tbl.fld as fld1 from tbl as tbl1;`
   ];
 
   //-----------------------------------------------------------------------------------------------------------
@@ -160,17 +161,21 @@ select 'helo world' as greetings;`,
       desql = new Desql();
       desql.parse(query);
       // tabulate desql.db, SQL"select * from nodes where ( type != 'spc' ) order by id, xtra;"
+      // tabulate desql.db, SQL"""select * from tcat_matches;"""
       tabulate(desql.db, SQL`select distinct
-    path,
-    pos1,
-    txt,
-    group_concat( code, ', ' ) over w as codes
-  from tcat_matches
+    n.path                        as path,
+    n.pos1                        as pos1,
+    n.txt                         as txt,
+    group_concat( m.code ) over w as codes
+  from nodes        as n
+  left join tcat_matches as m using ( qid, id, xtra )
+  where true
+    and n.type = 'terminal'
   window w as (
-    partition by pos1, pos2
-    order by code
+    partition by n.pos1, n.pos2
+    order by m.code
     rows between unbounded preceding and unbounded following )
-  order by pos1, pos2;`);
+  order by n.pos1;`);
       highlight_parsing_result(query, desql);
     }
     // tabulate desql.db, SQL"select * from tcat_rules as r join tcats using ( code ) order by code;"
@@ -203,9 +208,8 @@ select 'helo world' as greetings;`,
     //.........................................................................................................
     for (y of ref) {
       ({path, txt} = y);
-      if (!/-spc$/.test(path)) {
-        info(to_width(rpr(txt), 20), rvs(path));
-      }
+      // unless ( /-spc$/ ).test path
+      //   info ( to_width ( rpr txt ), 20 ), rvs path
       //.......................................................................................................
       txt = /-miss$/.test(path) ? rvs(CND.red(txt)) : /-fc-fn-qn-i-[uq]i-t$/.test(path) ? rvs(CND.blue(txt)) : /-cv-mi-eci-i-[uq]i-t$/.test(path) ? rvs(CND.olive(txt)) : /-dref-cref-i-[uq]i-t$/.test(path) ? rvs(CND.steel(txt)) : /-dref-i-[uq]i-t$/.test(path) ? rvs(CND.cyan(txt)) : /-dref-i-[uq]i-ansinr-t$/.test(path) ? rvs(CND.cyan(txt)) : /-select-nes-ne-e-pd-ve.*-cref-i-[uq]i-t$/.test(path) ? rvs(CND.gold(txt)) : /-ctable-ctableh-mi-eci-i-[uq]i-t$/.test(path) ? rvs(CND.tan(txt)) : /-cview-mi-eci-i-[uq]i-t$/.test(path) ? rvs(CND.tan(txt)) : /-tn-.*-i-[uq]i-t$/.test(path) ? rvs(CND.green(txt)) : /-tn-ta-[uq]i-t$/.test(path) ? rvs(CND.lime(txt)) : /-nes-ne-eci-i-[uq]i-t$/.test(path) ? rvs(CND.yellow(txt)) : /-nes-ne-eci-i-[uq]i-ansinr-t$/.test(path) ? rvs(CND.yellow(txt)) : /-qo-si-e-pd-ve-cref-i-[uq]i-t$/.test(path) ? rvs(CND.pink(txt)) : /-jc[ou]-.*-i-[uq]i-t$/.test(path) ? rvs(CND.indigo(txt)) : /-[uq]i-t$/.test(path) ? rvs(CND.plum(txt)) : /-c-.*-t$/.test(path) ? rvs(CND.orange(txt)) : txt; // function name // view name // table name in fqn (`t.col`) // col name in fqn (`t.col`) // col name in fqn (`t.col`) (also SQL kw) // col name in select // create table name // create view name // table name // table alias // col alias // col alias (also SQL kw) // col in order by // id in join criteria // fallback identifier // literal
       parts.push(txt);
