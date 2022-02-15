@@ -140,7 +140,8 @@ select 'helo world' as greetings;`,
     SQL`select a.b from t;`,
     SQL`select fld from tbl;`,
     SQL`select tbl.fld from tbl;`,
-    SQL`select tbl.fld as fld1 from tbl as tbl1;`
+    SQL`select tbl.fld as fld1 from tbl as tbl1;`,
+    SQL`create view vw as select tbl.fld as fld1 from tbl as tbl1;`
   ];
 
   //-----------------------------------------------------------------------------------------------------------
@@ -163,14 +164,14 @@ select 'helo world' as greetings;`,
       // tabulate desql.db, SQL"select * from nodes where ( type != 'spc' ) order by id, xtra;"
       // tabulate desql.db, SQL"""select * from tcat_matches;"""
       tabulate(desql.db, SQL`select distinct
-    n.path                        as path,
-    n.pos1                        as pos1,
-    n.txt                         as txt,
-    group_concat( m.code ) over w as codes
-  from nodes        as n
-  left join tcat_matches as m using ( qid, id, xtra )
+    n.path                                as path,
+    n.pos1                                as pos1,
+    n.txt                                 as txt,
+    group_concat( m.code, ', ' ) over w   as codes
+  from nodes              as n
+  left join tcat_matches  as m using ( qid, id, xtra )
   where true
-    and n.type = 'terminal'
+    and ( n.type = 'terminal' )
   window w as (
     partition by n.pos1, n.pos2
     order by m.code
