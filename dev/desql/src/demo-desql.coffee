@@ -113,7 +113,6 @@ queries = [
       check ( std_re_is_match( major, '^[A-Z]$'     ) ),
       check ( std_re_is_match( minor, '^[a-z0-9]$'  ) ) );"""
   SQL"select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );"
-  SQL"create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k desc, l, m;"
   SQL"select 42 as d;"
   SQL"select a b c from t;"
   SQL"select a, b, c, from t;"
@@ -125,6 +124,11 @@ queries = [
   SQL"select fld as fld1 from tbl;"
   SQL"select tbl.fld as fld1 from tbl as tbl1;"
   SQL"create view vw as select tbl.fld as fld1 from tbl as tbl1;"
+  SQL"create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k desc, l, m;"
+  SQL"""select `c` from t;"""
+  SQL"""select [c] from t;"""
+  SQL"""select "c" from t;"""
+  SQL"""select "c" as "c1" from t;"""
   ]
 
 #-----------------------------------------------------------------------------------------------------------
