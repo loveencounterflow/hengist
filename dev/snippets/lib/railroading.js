@@ -34,25 +34,31 @@
   //-----------------------------------------------------------------------------------------------------------
   this.demo_railroad_diagrams = function() {
     var RR, d, html, path, pos1, pos2;
-    // Diagram
-    // ComplexDiagram
-    // Sequence
     // Choice
-    // Optional
-    // OneOrMore
-    // ZeroOrMore
-    // Terminal
-    // NonTerminal
     // Comment
+    // ComplexDiagram
+    // Diagram
+    // NonTerminal
+    // OneOrMore
+    // Optional
+    // Sequence
     // Skip
-    // { JSDOM }           = require 'jsdom'
-    // dom                 = new JSDOM '', { pretendToBeVisual: true }
-    // globalThis.window   = dom.window
-    // globalThis.document = dom.document
-    // debug '^78643^', ( k for k of document )
-    RR = require('railroad-diagrams');
-    d = RR.Diagram('foo', RR.Choice(0, 'bar', 'baz'));
-    d.format(0, 0, 0, 0);
+    // Terminal
+    // ZeroOrMore
+
+    // RR    = require 'tetsudou'
+    RR = require('../../../apps/tetsudou');
+    // debug '^948^', RR.Options
+    // RR.Options.VS = 20
+    // RR.Options.AR = 8
+    //.........................................................................................................
+    d = RR.ComplexDiagram('foo', RR.Sequence(RR.Terminal('a node'), RR.Terminal('other')), RR.Choice(0, 'bar', 'baz'), RR.NonTerminal('nonterminal'), RR.Stack(RR.ZeroOrMore(RR.Terminal('A'), RR.Comment('whatever'), 'skip'), RR.Optional('+', 'skip'), RR.Choice(0, RR.NonTerminal('name-start char'), RR.NonTerminal('escape')), RR.ZeroOrMore(RR.Choice(0, RR.NonTerminal('name char'), RR.NonTerminal('escape')))));
+    //.........................................................................................................
+    // d.format 10, 10, 10, 10
+    // d.walk ( P... ) ->
+    //   debug '^587^', P
+    //   return null
+    //.........................................................................................................
     path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/html+svg-demos/railroading-output.html'));
     html = FS.readFileSync(path, {
       encoding: 'utf-8'
@@ -62,9 +68,18 @@
     if (!(pos1 >= 0 && pos2 >= 0)) {
       throw new Error("unable to find target");
     }
-    html = html.slice(0, pos1) + urge(d.toString() + html.slice(pos2));
+    html = html.slice(0, pos1) + d.toString() + html.slice(pos2);
     FS.writeFileSync(path, html);
+    help(`output written to ${PATH.relative(process.cwd(), path)}`);
+    // # debug await import( '/Users/benutzer/3rdparty/tetsudou/railroad.mjs' )
     return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.require_esm = function(path) {
+    var require_esm;
+    require_esm = (require('esm'))(module);
+    return (require_esm(path)).default;
   };
 
   //###########################################################################################################
@@ -73,6 +88,10 @@
       return this.demo_railroad_diagrams();
     })();
   }
+
+  // debug require '../../../apps/tetsudou/loader.js'
+// debug require '../../../apps/tetsudou'
+// debug @require_esm
 
 }).call(this);
 
