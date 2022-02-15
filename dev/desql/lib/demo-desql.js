@@ -140,6 +140,7 @@ select 'helo world' as greetings;`,
     SQL`select a.b from t;`,
     SQL`select fld from tbl;`,
     SQL`select tbl.fld from tbl;`,
+    SQL`select fld as fld1 from tbl;`,
     SQL`select tbl.fld as fld1 from tbl as tbl1;`,
     SQL`create view vw as select tbl.fld as fld1 from tbl as tbl1;`
   ];
@@ -155,7 +156,7 @@ select 'helo world' as greetings;`,
     // for query in [ SQL"select '𠀀' as a;", ]
     // for query in [ queries[ 1 ], ]
     n = queries.length;
-    ref = queries.slice(n - 2);
+    ref = queries.slice(n - 3);
     for (i = 0, len = ref.length; i < len; i++) {
       query = ref[i];
       // for query in queries
@@ -167,7 +168,11 @@ select 'helo world' as greetings;`,
     n.path                                as path,
     n.pos1                                as pos1,
     n.txt                                 as txt,
-    group_concat( m.code, ', ' ) over w   as codes
+    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'a' ) over w as acodes,
+    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'k' ) over w as kcodes,
+    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'i' ) over w as icodes,
+    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'l' ) over w as lcodes,
+    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 's' ) over w as scodes
   from nodes              as n
   left join tcat_matches  as m using ( qid, id, xtra )
   where true
