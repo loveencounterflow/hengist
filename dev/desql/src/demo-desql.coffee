@@ -102,12 +102,6 @@ queries = [
             id,
             case when std_str_is_blank( txt ) then 'spc' else 'miss' end as type
           from _coverage_holes_2 ) as r using ( qid, id );"""
-  SQL"select 42 as d;"
-  SQL"select a b c from t;"
-  SQL"select a, b, c, from t;"
-  SQL"select a, b, c,, from t;"
-  SQL"select a.b from t;"
-  SQL"select a.b.c from p.q.r.s.t;"
   SQL"create table v as select a, b as b2, c.x as c2, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k, l, m;"
   SQL"""
     create table tcats ( -- terminal category codes
@@ -120,6 +114,14 @@ queries = [
       check ( std_re_is_match( minor, '^[a-z0-9]$'  ) ) );"""
   SQL"select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );"
   SQL"create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k desc, l, m;"
+  SQL"select 42 as d;"
+  SQL"select a b c from t;"
+  SQL"select a, b, c, from t;"
+  SQL"select a, b, c,, from t;"
+  SQL"select a.b.c from p.q.r.s.t;"
+  SQL"select a.b from t;"
+  SQL"select fld from tbl;"
+  SQL"select tbl.fld from tbl;"
   ]
 
 #-----------------------------------------------------------------------------------------------------------
@@ -135,32 +137,23 @@ queries = [
   for query in queries[ n - 2 .. ]
   # for query in queries
     desql = new Desql()
-    # echo query
     desql.parse query
-    # tabulate desql.db, SQL"select * from queries;"
-    # tabulate desql.db, SQL"select * from raw_nodes order by id, xtra;"
-    tabulate desql.db, SQL"select * from nodes where ( type != 'spc' ) order by id, xtra;"
-    # tabulate desql.db, SQL"""
-    #   select * from raw_nodes as r1 where not exists ( select 1 from raw_nodes as r2 where r2.upid = r1.id )
-    #   """
-    # tabulate desql.db, SQL"select * from _coverage_1;"
-    # tabulate desql.db, SQL"select * from _coverage_holes_1;"
-    # tabulate desql.db, SQL"select * from _coverage_holes_2;"
-    # # tabulate desql.db, SQL"select * from _coverage_2;"
-    # tabulate desql.db, SQL"select * from nodes;"
-    # tabulate desql.db, SQL"""
-    #   select * from nodes
-    #   where true
-    #     and ( type != 'spc' )
-    #     and ( txt is not null )
-    #     and ( path glob '* i ui t' or path glob '* i qi t' )
-    #     ;"""
-    # tabulate desql.db, SQL"select distinct type from nodes order by type;"
-    # tabulate desql.db, SQL"select * from _coverage_holes where type = 'miss';"
+    # tabulate desql.db, SQL"select * from nodes where ( type != 'spc' ) order by id, xtra;"
+    tabulate desql.db, SQL"""
+      select distinct
+          path,
+          pos1,
+          txt,
+          group_concat( code, ', ' ) over w as codes
+        from tcat_matches
+        window w as (
+          partition by pos1, pos2
+          order by code
+          rows between unbounded preceding and unbounded following )
+        order by pos1, pos2;"""
     highlight_parsing_result query, desql
-    tabulate desql.db, SQL"select * from tcats order by code;"
-    tabulate desql.db, SQL"select * from tcat_rules order by code;"
-    tabulate desql.db, SQL"select * from tcat_matches order by code;"
+  # tabulate desql.db, SQL"select * from tcat_rules as r join tcats using ( code ) order by code;"
+  # tabulate desql.db, SQL"select * from tcats order by code;"
   return null
 
 #-----------------------------------------------------------------------------------------------------------
