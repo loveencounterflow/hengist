@@ -85,6 +85,7 @@ specifiers:
   pgsql-parser: ^13.1.13
   pkg-dir: ^6.0.1
   postgres: ^1.0.2
+  railroad-diagrams: ^1.0.0
   random-ext: 2.7.1
   re2: ^1.15.9
   read-pkg-up: ^8.0.0
@@ -202,6 +203,7 @@ dependencies:
   pgsql-parser: 13.1.13
   pkg-dir: 6.0.1
   postgres: 1.0.2
+  railroad-diagrams: 1.0.0
   random-ext: 2.7.1
   re2: 1.16.0
   read-pkg-up: 8.0.0
