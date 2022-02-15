@@ -131,7 +131,6 @@ select 'helo world' as greetings;`,
   check ( std_re_is_match( major, '^[A-Z]$'     ) ),
   check ( std_re_is_match( minor, '^[a-z0-9]$'  ) ) );`,
     SQL`select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );`,
-    SQL`create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k desc, l, m;`,
     SQL`select 42 as d;`,
     SQL`select a b c from t;`,
     SQL`select a, b, c, from t;`,
@@ -142,7 +141,12 @@ select 'helo world' as greetings;`,
     SQL`select tbl.fld from tbl;`,
     SQL`select fld as fld1 from tbl;`,
     SQL`select tbl.fld as fld1 from tbl as tbl1;`,
-    SQL`create view vw as select tbl.fld as fld1 from tbl as tbl1;`
+    SQL`create view vw as select tbl.fld as fld1 from tbl as tbl1;`,
+    SQL`create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k desc, l, m;`,
+    SQL`select \`c\` from t;`,
+    SQL`select [c] from t;`,
+    SQL`select "c" from t;`,
+    SQL`select "c" as "c1" from t;`
   ];
 
   //-----------------------------------------------------------------------------------------------------------
@@ -164,7 +168,7 @@ select 'helo world' as greetings;`,
       desql.parse(query);
       // tabulate desql.db, SQL"select * from nodes where ( type != 'spc' ) order by id, xtra;"
       // tabulate desql.db, SQL"""select * from tcat_matches;"""
-      tabulate(desql.db, SQL`select distinct
+      X.tabulate(query, desql.db(SQL`select distinct
     n.path                                as path,
     n.pos1                                as pos1,
     n.txt                                 as txt,
@@ -172,7 +176,8 @@ select 'helo world' as greetings;`,
     group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'k' ) over w as kcodes,
     group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'i' ) over w as icodes,
     group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'l' ) over w as lcodes,
-    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 's' ) over w as scodes
+    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 's' ) over w as scodes,
+    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'x' ) over w as xcodes
   from nodes              as n
   left join tcat_matches  as m using ( qid, id, xtra )
   where true
@@ -181,7 +186,7 @@ select 'helo world' as greetings;`,
     partition by n.pos1, n.pos2
     order by m.code
     rows between unbounded preceding and unbounded following )
-  order by n.pos1;`);
+  order by n.pos1;`));
       highlight_parsing_result(query, desql);
     }
     // tabulate desql.db, SQL"select * from tcat_rules as r join tcats using ( code ) order by code;"
