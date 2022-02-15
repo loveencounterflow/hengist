@@ -33,7 +33,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_railroad_diagrams = function() {
-    var RR, d, path;
+    var RR, d, html, path, pos1, pos2;
     // Diagram
     // ComplexDiagram
     // Sequence
@@ -53,9 +53,17 @@
     RR = require('railroad-diagrams');
     d = RR.Diagram('foo', RR.Choice(0, 'bar', 'baz'));
     d.format(0, 0, 0, 0);
-    path = PATH.resolve(PATH.join(__dirname, '../../..//Users/benutzer/jzr/hengist/apps-typesetting/html+svg-demos/railroad-output.html'));
-    debug('^4534^', path);
-    urge(d.toString());
+    path = PATH.resolve(PATH.join(__dirname, '../../../apps-typesetting/html+svg-demos/railroading-output.html'));
+    html = FS.readFileSync(path, {
+      encoding: 'utf-8'
+    });
+    pos1 = html.indexOf('<svg class="railroad-diagram" ');
+    pos2 = (html.indexOf('</svg>')) + 6;
+    if (!(pos1 >= 0 && pos2 >= 0)) {
+      throw new Error("unable to find target");
+    }
+    html = html.slice(0, pos1) + urge(d.toString() + html.slice(pos2));
+    FS.writeFileSync(path, html);
     return null;
   };
 
