@@ -147,7 +147,7 @@ queries = [
     desql.parse query
     # tabulate desql.db, SQL"select * from nodes where ( type != 'spc' ) order by id, xtra;"
     # tabulate desql.db, SQL"""select * from tcat_matches;"""
-    tabulate desql.db, SQL"""
+    X.tabulate query, desql.db SQL"""
       select distinct
           n.path                                as path,
           n.pos1                                as pos1,
@@ -156,7 +156,8 @@ queries = [
           group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'k' ) over w as kcodes,
           group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'i' ) over w as icodes,
           group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'l' ) over w as lcodes,
-          group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 's' ) over w as scodes
+          group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 's' ) over w as scodes,
+          group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'x' ) over w as xcodes
         from nodes              as n
         left join tcat_matches  as m using ( qid, id, xtra )
         where true
