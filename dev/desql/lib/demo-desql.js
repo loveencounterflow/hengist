@@ -146,7 +146,9 @@ select 'helo world' as greetings;`,
     SQL`select \`c\` from t;`,
     SQL`select [c] from t;`,
     SQL`select "c" from t;`,
-    SQL`select "c" as "c1" from t;`
+    SQL`select "c" as "c1" from t;`,
+    SQL`select "c" as "c1" from "t";`,
+    SQL`select name, type from sqlite_schema;`
   ];
 
   //-----------------------------------------------------------------------------------------------------------
@@ -191,6 +193,9 @@ select 'helo world' as greetings;`,
     }
     // tabulate desql.db, SQL"select * from tcat_rules as r join tcats using ( code ) order by code;"
     // tabulate desql.db, SQL"select * from tcats order by code;"
+    desql.db.create_trashlib();
+    tabulate(desql.db, SQL`select name, type from sqlite_schema;`);
+    tabulate(desql.db, SQL`select * from dbay_fields;`);
     return null;
   };
 

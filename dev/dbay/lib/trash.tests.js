@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, H, MMX, PATH, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, H, MMX, PATH, X, badge, debug, echo, equals, guy, help, info, isa, rpr, tabulate, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -39,6 +39,13 @@
   guy = require('../../../apps/guy');
 
   MMX = require('../../../apps/multimix/lib/cataloguing');
+
+  X = require('../../../lib/helpers');
+
+  //-----------------------------------------------------------------------------------------------------------
+  tabulate = function(db, query) {
+    return X.tabulate(query, db(query));
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY _trash_with_fs_open_do"] = function(T, done) {
@@ -181,6 +188,18 @@ create table "second" (
  );
 commit;`);
     }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY trash relations"] = function(T, done) {
+    var DBay, SQL, db;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({SQL} = DBay);
+    db = new DBay();
+    db.create_trashlib();
+    tabulate(db, SQL`select name, type from sqlite_schema order by name;`);
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -461,7 +480,9 @@ CREATE TABLE "second" (
     })();
   }
 
-  // test @[ "DBAY trash basic functionality with public API" ]
+  // @[ "DBAY trash relations" ]()
+// @[ "DBAY trash basic functionality with create_trashlib()" ]()
+// test @[ "DBAY trash basic functionality with public API" ]
 // @[ "DBAY trash basic functionality with private API" ]()
 // @[ "DBAY trash basic functionality with public API" ]()
 // @[ "DBAY trash to file (1)" ]()
