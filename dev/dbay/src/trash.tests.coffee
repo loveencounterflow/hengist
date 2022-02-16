@@ -26,7 +26,10 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 guy                       = require '../../../apps/guy'
 MMX                       = require '../../../apps/multimix/lib/cataloguing'
+X                         = require '../../../lib/helpers'
 
+#-----------------------------------------------------------------------------------------------------------
+tabulate = ( db, query ) -> X.tabulate query, db query
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY _trash_with_fs_open_do" ] = ( T, done ) ->
@@ -114,6 +117,16 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
       foreign key ( "y" ) references "first" ( "b" )
      );
     commit;"""
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY trash relations" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }            = require H.dbay_path
+  { SQL  }            = DBay
+  db                  = new DBay()
+  db.create_trashlib()
+  tabulate db, SQL"select name, type from sqlite_schema order by name;"
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -316,6 +329,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 ############################################################################################################
 if require.main is module then do =>
   test @
+  # @[ "DBAY trash relations" ]()
+  # @[ "DBAY trash basic functionality with create_trashlib()" ]()
   # test @[ "DBAY trash basic functionality with public API" ]
   # @[ "DBAY trash basic functionality with private API" ]()
   # @[ "DBAY trash basic functionality with public API" ]()
