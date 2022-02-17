@@ -142,13 +142,13 @@ select 'helo world' as greetings;`,
     SQL`select fld as fld1 from tbl;`,
     SQL`select tbl.fld as fld1 from tbl as tbl1;`,
     SQL`create view vw as select tbl.fld as fld1 from tbl as tbl1;`,
-    SQL`create view v as select a, b, c, f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k desc, l, m;`,
     SQL`select \`c\` from t;`,
     SQL`select [c] from t;`,
     SQL`select "c" from t;`,
     SQL`select "c" as "c1" from t;`,
-    SQL`select "c" as "c1" from "t";`,
-    SQL`select name, type from sqlite_schema;`
+    SQL`select name, type from sqlite_schema;`,
+    SQL`create view v as select a, b, "c", f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k desc, l, m;`,
+    SQL`select "c" as "c1" from "t";`
   ];
 
   //-----------------------------------------------------------------------------------------------------------
@@ -193,7 +193,7 @@ select 'helo world' as greetings;`,
     }
     // tabulate desql.db, SQL"select * from tcat_rules as r join tcats using ( code ) order by code;"
     // tabulate desql.db, SQL"select * from tcats order by code;"
-    desql.db.create_trashlib();
+    desql.create_trashlib();
     tabulate(desql.db, SQL`select name, type from sqlite_schema;`);
     tabulate(desql.db, SQL`select * from dbay_fields;`);
     return null;
