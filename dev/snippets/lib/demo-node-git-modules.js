@@ -135,6 +135,7 @@
       short_hash = commit.abbrevHash;
       date = commit.authorDate;
       subject = to_width(commit.subject, 100);
+      subject = subject.trim();
       urge(file_count, short_hash, date, subject);
     }
     return null;

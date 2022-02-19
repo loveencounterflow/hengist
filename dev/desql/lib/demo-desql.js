@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Desql, GUY, SQL, X, badge, debug, echo, equals, help, highlight_parsing_result, info, isa, pathsep_lit, queries, rpr, show_missing, show_overview, tabulate, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper, xrpr;
+  var CND, Desql, GUY, SQL, X, badge, chalk, debug, echo, equals, hashbow, help, highlight_parsing_result, info, isa, pathsep_lit, queries, rpr, show_missing, show_overview, tabulate, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper, xrpr;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -54,6 +54,10 @@
   };
 
   ({Desql} = require('../../../apps/desql'));
+
+  hashbow = require('hashbow');
+
+  chalk = require('chalk');
 
   //===========================================================================================================
 
@@ -130,6 +134,25 @@ select 'helo world' as greetings;`,
   primary key ( major, minor ),
   check ( std_re_is_match( major, '^[A-Z]$'     ) ),
   check ( std_re_is_match( minor, '^[a-z0-9]$'  ) ) );`,
+    SQL`create table tcats (
+    major   text not null,
+    minor   text not null,
+    full    text not null generated always as ( major || minor ) virtual,
+    name    text not null,
+  primary key ( major, minor ),
+  check ( std_re_is_match( major, '^[A-Z]$'     ) ),
+  check ( std_re_is_match( minor, '^[a-z0-9]$'  ) ) );`,
+    SQL`create table tcats (
+    major   text not null,
+    minor   text not null,
+    "full"  text not null,
+    name    text not null,
+  primary key ( major, minor ),
+  check ( std_re_is_match( major, '^[A-Z]$'     ) ),
+  check ( std_re_is_match( minor, '^[a-z0-9]$'  ) ) );`,
+    SQL`create table a ( full text );`,
+    SQL`create table a ( "full" text );`,
+    SQL`create table a ( x integer );`,
     SQL`select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );`,
     SQL`select 42 as d;`,
     SQL`select a b c from t;`,
@@ -162,7 +185,8 @@ select 'helo world' as greetings;`,
     // for query in [ SQL"select '𠀀' as a;", ]
     // for query in [ queries[ 1 ], ]
     n = queries.length;
-    ref = queries.slice(n - 3);
+    ref = queries.slice(15, 21);
+    // for query in querides[ n - 3 .. ]
     for (i = 0, len = ref.length; i < len; i++) {
       query = ref[i];
       // for query in queries
@@ -170,32 +194,27 @@ select 'helo world' as greetings;`,
       desql.parse(query);
       // tabulate desql.db, SQL"select * from nodes where ( type != 'spc' ) order by id, xtra;"
       // tabulate desql.db, SQL"""select * from tcat_matches;"""
-      X.tabulate(query, desql.db(SQL`select distinct
-    n.path                                as path,
-    n.pos1                                as pos1,
-    n.txt                                 as txt,
-    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'a' ) over w as acodes,
-    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'k' ) over w as kcodes,
-    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'i' ) over w as icodes,
-    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'l' ) over w as lcodes,
-    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 's' ) over w as scodes,
-    group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'x' ) over w as xcodes
-  from nodes              as n
-  left join tcat_matches  as m using ( qid, id, xtra )
-  where true
-    and ( n.type = 'terminal' )
-  window w as (
-    partition by n.pos1, n.pos2
-    order by m.code
-    rows between unbounded preceding and unbounded following )
-  order by n.pos1;`));
+      X.tabulate(query, desql.db(SQL`select
+    path,
+    pos1,
+    type,
+    substring( txt, 1, 25 ) as txt,
+    codes,
+    acodes,
+    kcodes,
+    icodes,
+    lcodes,
+    scodes,
+    xcodes
+  from terminals_with_grouped_tags
+  where type != 'spc';`));
       highlight_parsing_result(query, desql);
     }
     // tabulate desql.db, SQL"select * from tcat_rules as r join tcats using ( code ) order by code;"
     // tabulate desql.db, SQL"select * from tcats order by code;"
-    desql.create_trashlib();
-    tabulate(desql.db, SQL`select name, type from sqlite_schema;`);
-    tabulate(desql.db, SQL`select * from dbay_fields;`);
+    // desql.create_trashlib()
+    // tabulate desql.db, SQL"select name, type from sqlite_schema;"
+    // tabulate desql.db, SQL"select * from dbay_fields;"
     return null;
   };
 
@@ -214,24 +233,25 @@ select 'helo world' as greetings;`,
 
   //-----------------------------------------------------------------------------------------------------------
   highlight_parsing_result = function(query, desql) {
-    var db, parts, path, ref, rvs, txt, y;
+    var db, icodes, parts, ref, rvs, txt, type, y;
     ({db} = desql);
     rvs = function(...P) {
       return CND.bold(CND.reverse(...P));
     };
     parts = [];
-    ref = db(SQL`select * from nodes where txt is not null;`);
+    ref = db(SQL`select * from terminals_with_grouped_tags;`);
     //.........................................................................................................
     for (y of ref) {
-      ({path, txt} = y);
-      // unless ( /-spc$/ ).test path
-      //   info ( to_width ( rpr txt ), 20 ), rvs path
-      //.......................................................................................................
-      txt = /-miss$/.test(path) ? rvs(CND.red(txt)) : /-fc-fn-qn-i-[uq]i-t$/.test(path) ? rvs(CND.blue(txt)) : /-cv-mi-eci-i-[uq]i-t$/.test(path) ? rvs(CND.olive(txt)) : /-dref-cref-i-[uq]i-t$/.test(path) ? rvs(CND.steel(txt)) : /-dref-i-[uq]i-t$/.test(path) ? rvs(CND.cyan(txt)) : /-dref-i-[uq]i-ansinr-t$/.test(path) ? rvs(CND.cyan(txt)) : /-select-nes-ne-e-pd-ve.*-cref-i-[uq]i-t$/.test(path) ? rvs(CND.gold(txt)) : /-ctable-ctableh-mi-eci-i-[uq]i-t$/.test(path) ? rvs(CND.tan(txt)) : /-cview-mi-eci-i-[uq]i-t$/.test(path) ? rvs(CND.tan(txt)) : /-tn-.*-i-[uq]i-t$/.test(path) ? rvs(CND.green(txt)) : /-tn-ta-[uq]i-t$/.test(path) ? rvs(CND.lime(txt)) : /-nes-ne-eci-i-[uq]i-t$/.test(path) ? rvs(CND.yellow(txt)) : /-nes-ne-eci-i-[uq]i-ansinr-t$/.test(path) ? rvs(CND.yellow(txt)) : /-qo-si-e-pd-ve-cref-i-[uq]i-t$/.test(path) ? rvs(CND.pink(txt)) : /-jc[ou]-.*-i-[uq]i-t$/.test(path) ? rvs(CND.indigo(txt)) : /-[uq]i-t$/.test(path) ? rvs(CND.plum(txt)) : /-c-.*-t$/.test(path) ? rvs(CND.orange(txt)) : txt; // function name // view name // table name in fqn (`t.col`) // col name in fqn (`t.col`) // col name in fqn (`t.col`) (also SQL kw) // col name in select // create table name // create view name // table name // table alias // col alias // col alias (also SQL kw) // col in order by // id in join criteria // fallback identifier // literal
+      ({type, txt, icodes} = y);
+      if (type === 'miss') {
+        txt = chalk.underline.red(txt);
+      } else if (icodes != null) {
+        txt = (chalk.inverse.bold.hex(hashbow(icodes)))(txt);
+      }
       parts.push(txt);
     }
     //.........................................................................................................
-    X.banner(query);
+    // X.banner query
     echo();
     echo(parts.join(''));
     echo();
@@ -246,12 +266,22 @@ select 'helo world' as greetings;`,
   }
 
   // do =>
-//   chalk = require 'chalk'
-//   cx    = require 'cohex'
-//   info chalk.inverse.hex('#550440').italic.bgCyanBright.bold.underline('Hello, world!')
-//   info chalk.inverse.hex( cx.seagreen ).italic.bgCyanBright.bold.underline('Hello, world!')
-//   info chalk.inverse.hex( cx.darkseagreen ).italic.bgBlack.bold.underline('Hello, world!')
-//   info chalk.inverse.hex( cx.aqua ).italic.bgBlack.bold.underline('Hello, world!')
+//   hashbow = require 'hashbow'
+//   chalk   = require 'chalk'
+//   cx      = require 'cohex'
+//   # info chalk.inverse.hex('#550440').italic.bgCyanBright.bold.underline('Hello, world!')
+//   # info chalk.inverse.hex( cx.seagreen ).italic.bgCyanBright.bold.underline('Hello, world!')
+//   # info chalk.inverse.hex( cx.darkseagreen ).italic.bgBlack.bold.underline('Hello, world!')
+//   # info chalk.inverse.hex( cx.aqua ).italic.bgBlack.bold.underline('Hello, world!')
+//   info chalk.inverse.hex( hashbow 'a' ).italic.bgBlack.underline('Hello, world!')
+//   info chalk.inverse.hex( hashbow 'b' ).italic.bgBlack.underline('Hello, world!')
+//   info chalk.inverse.hex( hashbow 'c' ).italic.bgBlack.underline('Hello, world!')
+//   info chalk.hex( hashbow 'a' ) 'Hello, world!'
+//   info chalk.bold.hex( hashbow 'a' ) 'Hello, world!'
+//   info chalk.hex( hashbow 'b' ) 'Hello, world!'
+//   info chalk.bold.hex( hashbow 'b' ) 'Hello, world!'
+//   info chalk.hex( hashbow 'c' ) 'Hello, world!'
+//   info chalk.bold.hex( hashbow 'c' ) 'Hello, world!'
 
 }).call(this);
 

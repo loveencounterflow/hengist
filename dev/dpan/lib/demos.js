@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dba, FS, H, PATH, SQL, badge, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, demo_git_fetch_pkg_status, demo_git_get_dirty_counts, demo_staged_file_paths, demo_variables, echo, freeze, glob, got, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Dba, FS, H, PATH, SQL, badge, chalk, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, demo_git_fetch_pkg_status, demo_git_get_dirty_counts, demo_show_recent_commits, demo_staged_file_paths, demo_variables, echo, freeze, get_gitlog, get_pkg_infos, glob, got, hashbow, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -51,6 +51,10 @@
   semver_cmp = require('semver/functions/cmp');
 
   H = require('./helpers');
+
+  chalk = require('chalk');
+
+  hashbow = require('hashbow');
 
   // #-----------------------------------------------------------------------------------------------------------
   // class Dpan_next extends Dpan
@@ -126,34 +130,59 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_git_get_dirty_counts = function() {
-    var Dpan, Tbl, db_path, dba, dcs, dpan, home_path, i, k, len, pkg_fspath, pkg_rel_fspath, project_path, project_path_pattern, ref, ref_path, sum, v;
-    ({Dpan} = require(H.dpan_path));
-    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
-    ({Dba} = require(H.dba_path));
+  get_gitlog = function(pkg_fspath) {
+    var R, cfg, commit, commit_count, commits, date, file_count, gitlog, i, j, len, len1, name, ref, ref1, short_hash, subject;
+    gitlog = (require('gitlog')).default;
+    cfg = {
+      repo: pkg_fspath,
+      number: 1e6,
+      // fields: ["hash", "abbrevHash", "subject", "authorName", "authorDateRel"],
+      execOptions: {
+        maxBuffer: 1000 * 1024
+      }
+    };
+    commits = gitlog(cfg);
+    commit_count = commits.length;
+    info("commit_count:", commit_count, pkg_fspath);
+    ref = commits.slice(0, 4);
+    /* NOTE commits are ordered newest first */
+    for (i = 0, len = ref.length; i < len; i++) {
+      commit = ref[i];
+      file_count = commit.files.length;
+      short_hash = commit.abbrevHash;
+      date = commit.authorDate;
+      subject = to_width(commit.subject, 100);
+      subject = subject.trim();
+      urge(file_count, short_hash, date, subject);
+    }
+    //.........................................................................................................
+    R = [];
+    ref1 = commits.slice(0, 101);
+    for (j = 0, len1 = ref1.length; j < len1; j++) {
+      commit = ref1[j];
+      name = PATH.basename(pkg_fspath);
+      date = commit.authorDate.replace(/:[^:]+$/, '');
+      subject = commit.subject.trim();
+      R.push({name, date, subject});
+    }
+    return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  get_pkg_infos = function(dpan) {
+    var dcs, home_path, i, len, pkg_fspath, pkg_name, pkg_rel_fspath, pkgs, project_path, project_path_pattern, ref, ref_path;
     ref_path = process.cwd();
-    db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
-    dba = new Dba();
-    // dba.open { path: db_path, }
-    // dba.pragma SQL"journal_mode=memory"
-    dpan = new Dpan({
-      dba,
-      recreate: true
-    });
     home_path = PATH.resolve(PATH.join(__dirname, '../../../../'));
     project_path_pattern = PATH.join(home_path, '*/package.json');
+    pkgs = [];
+    ref = glob.sync(project_path_pattern);
     // home_path             = PATH.resolve PATH.join __dirname, '../../../../dpan'
     // home_path             = PATH.resolve PATH.join __dirname, '../../../apps/dpan'
     // project_path_pattern  = PATH.join home_path, './package.json'
     // debug '^488^', project_path_pattern
-    whisper("ACC: ahead-commit  count");
-    whisper("BCC: behind-commit count");
-    whisper("DFC: dirty file    count");
-    ref = glob.sync(project_path_pattern);
     for (i = 0, len = ref.length; i < len; i++) {
       project_path = ref[i];
       pkg_fspath = PATH.dirname(project_path);
-      pkg_rel_fspath = PATH.relative(ref_path, pkg_fspath);
       if ((dcs = dpan.git_get_dirty_counts({
         pkg_fspath,
         fallback: null
@@ -161,6 +190,42 @@
         warn(`not a git repo: ${pkg_fspath}`);
         continue;
       }
+      pkg_rel_fspath = PATH.relative(ref_path, pkg_fspath);
+      pkg_name = PATH.basename(pkg_fspath);
+      pkgs.push({pkg_fspath, pkg_rel_fspath, pkg_name});
+    }
+    return {ref_path, home_path, project_path_pattern, pkgs};
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_git_get_dirty_counts = function() {
+    var Dpan, Tbl, db_path, dba, dcs, dpan, i, k, len, pkg_fspath, pkg_infos, pkg_name, pkg_rel_fspath, ref, sum, v;
+    ({Dpan} = require(H.dpan_path));
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    ({Dba} = require(H.dba_path));
+    db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
+    help('^46456^', `using DB at ${db_path}`);
+    dba = new Dba();
+    dba.open({
+      path: db_path
+    });
+    // dba.pragma SQL"journal_mode=memory"
+    dpan = new Dpan({
+      dba,
+      recreate: true
+    });
+    whisper("ACC: ahead-commit  count");
+    whisper("BCC: behind-commit count");
+    whisper("DFC: dirty file    count");
+    pkg_infos = get_pkg_infos(dpan);
+    ref = pkg_infos.pkgs;
+    //.........................................................................................................
+    for (i = 0, len = ref.length; i < len; i++) {
+      ({pkg_fspath, pkg_rel_fspath, pkg_name} = ref[i]);
+      dcs = dpan.git_get_dirty_counts({
+        pkg_fspath,
+        fallback: null
+      });
       sum = dcs.sum;
       delete dcs.sum;
       if (sum === 0) {
@@ -175,6 +240,56 @@
         }
         help('^334-2^', to_width(pkg_rel_fspath, 50), CND.yellow(CND.reverse(` ${sum} `)), CND.grey(dcs));
       }
+    }
+    //.........................................................................................................
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_show_recent_commits = function() {
+    var Dpan, Tbl, commit, db_path, dba, dpan, i, j, l, len, len1, len2, name, pkg_fspath, pkg_infos, pkg_name, pkg_rel_fspath, recent_commits, ref, ref1, subject;
+    ({Dpan} = require(H.dpan_path));
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    ({Dba} = require(H.dba_path));
+    db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
+    help('^46456^', `using DB at ${db_path}`);
+    dba = new Dba();
+    dba.open({
+      path: db_path
+    });
+    // dba.pragma SQL"journal_mode=memory"
+    dpan = new Dpan({
+      dba,
+      recreate: true
+    });
+    recent_commits = [];
+    pkg_infos = get_pkg_infos(dpan);
+    ref = pkg_infos.pkgs;
+    //.........................................................................................................
+    for (i = 0, len = ref.length; i < len; i++) {
+      ({pkg_fspath, pkg_rel_fspath, pkg_name} = ref[i]);
+      ref1 = get_gitlog(pkg_fspath);
+      for (j = 0, len1 = ref1.length; j < len1; j++) {
+        commit = ref1[j];
+        recent_commits.push(commit);
+      }
+    }
+    //.........................................................................................................
+    recent_commits.sort(function(a, b) {
+      if (a.date < b.date) {
+        return -1;
+      }
+      if (a.date > b.date) {
+        return +1;
+      }
+      return 0;
+    });
+//.........................................................................................................
+    for (l = 0, len2 = recent_commits.length; l < len2; l++) {
+      commit = recent_commits[l];
+      name = to_width(commit.name, 20);
+      subject = to_width(commit.subject, 100);
+      echo(CND.white(commit.date), (chalk.inverse.bold.hex(hashbow(name)))(name + ' ' + subject));
     }
     //.........................................................................................................
     return null;
@@ -277,6 +392,7 @@
       // await demo_db_add_pkg_info()
       // await demo_db_add_pkg_infos()
       // await demo_git_fetch_pkg_status()
+      await demo_show_recent_commits();
       return (await demo_git_get_dirty_counts());
     })();
   }
