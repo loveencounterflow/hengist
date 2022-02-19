@@ -33,6 +33,8 @@ got                       = require 'got'
 semver_satisfies          = require 'semver/functions/satisfies'
 semver_cmp                = require 'semver/functions/cmp'
 H                         = require './helpers'
+chalk                     = require 'chalk'
+hashbow                   = require 'hashbow'
 
 
 # #-----------------------------------------------------------------------------------------------------------
@@ -93,31 +95,71 @@ demo_db_add_pkg_infos = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-demo_git_get_dirty_counts = ->
-  { Dpan, }             = require H.dpan_path
-  { Tbl, }              = require '../../../apps/icql-dba-tabulate'
-  { Dba, }              = require H.dba_path
+get_gitlog = ( pkg_fspath ) ->
+  gitlog              = ( require 'gitlog' ).default
+  cfg                 =
+    repo:       pkg_fspath
+    number:     1e6
+    # fields: ["hash", "abbrevHash", "subject", "authorName", "authorDateRel"],
+    execOptions: { maxBuffer: 1000 * 1024 },
+  commits       = gitlog cfg
+  commit_count  = commits.length
+  info "commit_count:", commit_count, pkg_fspath
+  ### NOTE commits are ordered newest first ###
+  for commit in commits[ .. 3 ]
+    file_count  = commit.files.length
+    short_hash  = commit.abbrevHash
+    date        = commit.authorDate
+    subject     = to_width commit.subject, 100
+    subject     = subject.trim()
+    urge file_count, short_hash, date, subject
+  #.........................................................................................................
+  R               = []
+  for commit in commits[ .. 100 ]
+    name    = PATH.basename pkg_fspath
+    date    = commit.authorDate.replace /:[^:]+$/, ''
+    subject = commit.subject.trim()
+    R.push { name, date, subject, }
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+get_pkg_infos = ( dpan ) ->
   ref_path              = process.cwd()
-  db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
-  dba                   = new Dba()
-  # dba.open { path: db_path, }
-  # dba.pragma SQL"journal_mode=memory"
-  dpan                  = new Dpan { dba, recreate: true, }
   home_path             = PATH.resolve PATH.join __dirname, '../../../../'
   project_path_pattern  = PATH.join home_path, '*/package.json'
+  pkgs                  = []
   # home_path             = PATH.resolve PATH.join __dirname, '../../../../dpan'
   # home_path             = PATH.resolve PATH.join __dirname, '../../../apps/dpan'
   # project_path_pattern  = PATH.join home_path, './package.json'
   # debug '^488^', project_path_pattern
-  whisper "ACC: ahead-commit  count"
-  whisper "BCC: behind-commit count"
-  whisper "DFC: dirty file    count"
   for project_path in glob.sync project_path_pattern
     pkg_fspath      = PATH.dirname project_path
-    pkg_rel_fspath  = PATH.relative ref_path, pkg_fspath
     unless ( dcs = dpan.git_get_dirty_counts { pkg_fspath, fallback: null, } )?
       warn "not a git repo: #{pkg_fspath}"
       continue
+    pkg_rel_fspath  = PATH.relative ref_path, pkg_fspath
+    pkg_name        = PATH.basename pkg_fspath
+    pkgs.push { pkg_fspath, pkg_rel_fspath, pkg_name, }
+  return { ref_path, home_path, project_path_pattern, pkgs, }
+
+#-----------------------------------------------------------------------------------------------------------
+demo_git_get_dirty_counts = ->
+  { Dpan, }             = require H.dpan_path
+  { Tbl, }              = require '../../../apps/icql-dba-tabulate'
+  { Dba, }              = require H.dba_path
+  db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
+  help '^46456^', "using DB at #{db_path}"
+  dba                   = new Dba()
+  dba.open { path: db_path, }
+  # dba.pragma SQL"journal_mode=memory"
+  dpan                  = new Dpan { dba, recreate: true, }
+  whisper "ACC: ahead-commit  count"
+  whisper "BCC: behind-commit count"
+  whisper "DFC: dirty file    count"
+  pkg_infos             = get_pkg_infos dpan
+  #.........................................................................................................
+  for { pkg_fspath, pkg_rel_fspath, pkg_name, } in pkg_infos.pkgs
+    dcs = dpan.git_get_dirty_counts { pkg_fspath, fallback: null, }
     sum = dcs.sum
     delete dcs.sum
     if sum is 0
@@ -126,6 +168,36 @@ demo_git_get_dirty_counts = ->
     else
       delete dcs[ k ] for k, v of dcs when v is 0
       help '^334-2^', ( to_width pkg_rel_fspath, 50 ), ( CND.yellow CND.reverse " #{sum} " ), ( CND.grey dcs )
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_show_recent_commits = ->
+  { Dpan, }             = require H.dpan_path
+  { Tbl, }              = require '../../../apps/icql-dba-tabulate'
+  { Dba, }              = require H.dba_path
+  db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
+  help '^46456^', "using DB at #{db_path}"
+  dba                   = new Dba()
+  dba.open { path: db_path, }
+  # dba.pragma SQL"journal_mode=memory"
+  dpan                  = new Dpan { dba, recreate: true, }
+  recent_commits        = []
+  pkg_infos             = get_pkg_infos dpan
+  #.........................................................................................................
+  for { pkg_fspath, pkg_rel_fspath, pkg_name, } in pkg_infos.pkgs
+    for commit in get_gitlog pkg_fspath
+      recent_commits.push commit
+  #.........................................................................................................
+  recent_commits.sort ( a, b ) ->
+    return -1 if a.date < b.date
+    return +1 if a.date > b.date
+    return 0
+  #.........................................................................................................
+  for commit in recent_commits
+    name    = to_width commit.name, 20
+    subject = to_width commit.subject, 100
+    echo ( CND.white commit.date ), ( chalk.inverse.bold.hex hashbow name ) name + ' ' + subject
   #.........................................................................................................
   return null
 
@@ -199,7 +271,7 @@ if module is require.main then do =>
   # await demo_db_add_pkg_info()
   # await demo_db_add_pkg_infos()
   # await demo_git_fetch_pkg_status()
+  await demo_show_recent_commits()
   await demo_git_get_dirty_counts()
   # await demo_variables()
   # await demo_staged_file_paths()
-
