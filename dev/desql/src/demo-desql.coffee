@@ -249,10 +249,20 @@ highlight_parsing_result = ( query, desql ) ->
 if module is require.main then do =>
   @demo_short_query()
   # do =>
-  #   chalk = require 'chalk'
-  #   cx    = require 'cohex'
-  #   info chalk.inverse.hex('#550440').italic.bgCyanBright.bold.underline('Hello, world!')
-  #   info chalk.inverse.hex( cx.seagreen ).italic.bgCyanBright.bold.underline('Hello, world!')
-  #   info chalk.inverse.hex( cx.darkseagreen ).italic.bgBlack.bold.underline('Hello, world!')
-  #   info chalk.inverse.hex( cx.aqua ).italic.bgBlack.bold.underline('Hello, world!')
+  #   hashbow = require 'hashbow'
+  #   chalk   = require 'chalk'
+  #   cx      = require 'cohex'
+  #   # info chalk.inverse.hex('#550440').italic.bgCyanBright.bold.underline('Hello, world!')
+  #   # info chalk.inverse.hex( cx.seagreen ).italic.bgCyanBright.bold.underline('Hello, world!')
+  #   # info chalk.inverse.hex( cx.darkseagreen ).italic.bgBlack.bold.underline('Hello, world!')
+  #   # info chalk.inverse.hex( cx.aqua ).italic.bgBlack.bold.underline('Hello, world!')
+  #   info chalk.inverse.hex( hashbow 'a' ).italic.bgBlack.underline('Hello, world!')
+  #   info chalk.inverse.hex( hashbow 'b' ).italic.bgBlack.underline('Hello, world!')
+  #   info chalk.inverse.hex( hashbow 'c' ).italic.bgBlack.underline('Hello, world!')
+  #   info chalk.hex( hashbow 'a' ) 'Hello, world!'
+  #   info chalk.bold.hex( hashbow 'a' ) 'Hello, world!'
+  #   info chalk.hex( hashbow 'b' ) 'Hello, world!'
+  #   info chalk.bold.hex( hashbow 'b' ) 'Hello, world!'
+  #   info chalk.hex( hashbow 'c' ) 'Hello, world!'
+  #   info chalk.bold.hex( hashbow 'c' ) 'Hello, world!'
 
