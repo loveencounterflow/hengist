@@ -36,6 +36,8 @@ SQL                       = String.raw
 xrpr                      = ( x ) -> ( require 'util' ).inspect x, {
   colors: true, depth: Infinity, maxArrayLength: null, breakLength: Infinity, }
 { Desql }                 = require '../../../apps/desql'
+hashbow                   = require 'hashbow'
+chalk                     = require 'chalk'
 
 
 #===========================================================================================================
@@ -164,38 +166,34 @@ queries = [
   # for query in [ SQL"select '𠀀' as a;", ]
   # for query in [ queries[ 1 ], ]
   n = queries.length
-  for query in queries[ n - 3 .. ]
+  # for query in querides[ n - 3 .. ]
+  for query in queries[ 15 .. 20 ]
   # for query in queries
     desql = new Desql()
     desql.parse query
     # tabulate desql.db, SQL"select * from nodes where ( type != 'spc' ) order by id, xtra;"
     # tabulate desql.db, SQL"""select * from tcat_matches;"""
     X.tabulate query, desql.db SQL"""
-      select distinct
-          n.path                                as path,
-          n.pos1                                as pos1,
-          n.txt                                 as txt,
-          group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'a' ) over w as acodes,
-          group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'k' ) over w as kcodes,
-          group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'i' ) over w as icodes,
-          group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'l' ) over w as lcodes,
-          group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 's' ) over w as scodes,
-          group_concat( m.code, ', ' ) filter ( where substring( m.code, 1, 1 ) = 'x' ) over w as xcodes
-        from nodes              as n
-        left join tcat_matches  as m using ( qid, id, xtra )
-        where true
-          and ( n.type = 'terminal' )
-        window w as (
-          partition by n.pos1, n.pos2
-          order by m.code
-          rows between unbounded preceding and unbounded following )
-        order by n.pos1;"""
+      select
+          path,
+          pos1,
+          type,
+          substring( txt, 1, 25 ) as txt,
+          codes,
+          acodes,
+          kcodes,
+          icodes,
+          lcodes,
+          scodes,
+          xcodes
+        from terminals_with_grouped_tags
+        where type != 'spc';"""
     highlight_parsing_result query, desql
   # tabulate desql.db, SQL"select * from tcat_rules as r join tcats using ( code ) order by code;"
   # tabulate desql.db, SQL"select * from tcats order by code;"
-  desql.create_trashlib()
-  tabulate desql.db, SQL"select name, type from sqlite_schema;"
-  tabulate desql.db, SQL"select * from dbay_fields;"
+  # desql.create_trashlib()
+  # tabulate desql.db, SQL"select name, type from sqlite_schema;"
+  # tabulate desql.db, SQL"select * from dbay_fields;"
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -213,32 +211,14 @@ highlight_parsing_result = ( query, desql ) ->
   rvs       = ( P... ) -> CND.bold CND.reverse P...
   parts     = []
   #.........................................................................................................
-  for { path, txt, } from db SQL"""select * from nodes where txt is not null;"""
-    # unless ( /-spc$/ ).test path
-    #   info ( to_width ( rpr txt ), 20 ), rvs path
-    txt = \
-    if      ( /-miss$/                                  ).test path then rvs CND.red     txt
-    else if ( /-fc-fn-qn-i-[uq]i-t$/                    ).test path then rvs CND.blue    txt # function name
-    else if ( /-cv-mi-eci-i-[uq]i-t$/                   ).test path then rvs CND.olive   txt # view name
-    else if ( /-dref-cref-i-[uq]i-t$/                   ).test path then rvs CND.steel   txt # table name in fqn (`t.col`)
-    else if ( /-dref-i-[uq]i-t$/                        ).test path then rvs CND.cyan    txt # col name in fqn (`t.col`)
-    else if ( /-dref-i-[uq]i-ansinr-t$/                 ).test path then rvs CND.cyan    txt # col name in fqn (`t.col`) (also SQL kw)
-    else if ( /-select-nes-ne-e-pd-ve.*-cref-i-[uq]i-t$/  ).test path then rvs CND.gold    txt # col name in select
-    else if ( /-ctable-ctableh-mi-eci-i-[uq]i-t$/       ).test path then rvs CND.tan     txt # create table name
-    else if ( /-cview-mi-eci-i-[uq]i-t$/                ).test path then rvs CND.tan     txt # create view name
-    else if ( /-tn-.*-i-[uq]i-t$/                       ).test path then rvs CND.green   txt # table name
-    else if ( /-tn-ta-[uq]i-t$/                         ).test path then rvs CND.lime    txt # table alias
-    else if ( /-nes-ne-eci-i-[uq]i-t$/                  ).test path then rvs CND.yellow  txt # col alias
-    else if ( /-nes-ne-eci-i-[uq]i-ansinr-t$/           ).test path then rvs CND.yellow  txt # col alias (also SQL kw)
-    else if ( /-qo-si-e-pd-ve-cref-i-[uq]i-t$/          ).test path then rvs CND.pink    txt # col in order by
-    else if ( /-jc[ou]-.*-i-[uq]i-t$/                   ).test path then rvs CND.indigo  txt # id in join criteria
-    #.......................................................................................................
-    else if ( /-[uq]i-t$/                               ).test path then rvs CND.plum    txt # fallback identifier
-    else if ( /-c-.*-t$/                                ).test path then rvs CND.orange  txt # literal
-    else txt
+  for { type, txt, icodes, } from db SQL"""select * from terminals_with_grouped_tags;"""
+    if type is 'miss'
+      txt = chalk.underline.red txt
+    else if icodes?
+      txt = ( chalk.inverse.bold.hex hashbow icodes ) txt
     parts.push txt
   #.........................................................................................................
-  X.banner query
+  # X.banner query
   echo()
   echo parts.join ''
   echo()
