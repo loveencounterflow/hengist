@@ -112,6 +112,27 @@ queries = [
       primary key ( major, minor ),
       check ( std_re_is_match( major, '^[A-Z]$'     ) ),
       check ( std_re_is_match( minor, '^[a-z0-9]$'  ) ) );"""
+  SQL"""
+    create table tcats (
+        major   text not null,
+        minor   text not null,
+        full    text not null generated always as ( major || minor ) virtual,
+        name    text not null,
+      primary key ( major, minor ),
+      check ( std_re_is_match( major, '^[A-Z]$'     ) ),
+      check ( std_re_is_match( minor, '^[a-z0-9]$'  ) ) );"""
+  SQL"""
+    create table tcats (
+        major   text not null,
+        minor   text not null,
+        "full"  text not null,
+        name    text not null,
+      primary key ( major, minor ),
+      check ( std_re_is_match( major, '^[A-Z]$'     ) ),
+      check ( std_re_is_match( minor, '^[a-z0-9]$'  ) ) );"""
+  SQL"""create table a ( full text );"""
+  SQL"""create table a ( "full" text );"""
+  SQL"""create table a ( x integer );"""
   SQL"select t1.a as alias, t2.b from s as t1 join t as t2 on ( cy = doe );"
   SQL"select 42 as d;"
   SQL"select a b c from t;"
