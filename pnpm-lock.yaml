@@ -37,6 +37,7 @@ specifiers:
   executive: ^1.6.3
   exit-hook: 3.0.0
   fast-copy: ^2.1.0
+  fast-glob: ^3.2.11
   file-url: ^4.0.0
   fix-esm: ^1.0.1
   fraction.js: ^4.0.13
@@ -162,6 +163,7 @@ dependencies:
   executive: 1.6.3
   exit-hook: 3.0.0
   fast-copy: 2.1.1
+  fast-glob: 3.2.11
   file-url: 4.0.0
   fix-esm: 1.0.1
   fraction.js: 4.1.1
@@ -2036,9 +2038,9 @@ packages:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
     dev: false
 
-  /fast-glob/3.2.7:
-    resolution: {integrity: sha512-rYGMRwip6lUMvYD3BTScMwT1HtAs2d71SMv66Vrxs0IekGZEjhM0pcMfjQPnknBt2zeCwQMEupiN02ZP4DiT1Q==}
-    engines: {node: '>=8'}
+  /fast-glob/3.2.11:
+    resolution: {integrity: sha512-xrO3+1bxSo3ZVHAnqzyuewYT6aMFHRAd4Kcs92MAonjwQZLsK9d0SF1IyQ3k5PoirxTW0Oe/RqFgMQ6TcNE5Ew==}
+    engines: {node: '>=8.6.0'}
     dependencies:
       '@nodelib/fs.stat': 2.0.5
       '@nodelib/fs.walk': 1.2.8
@@ -2317,7 +2319,7 @@ packages:
     dependencies:
       array-union: 2.1.0
       dir-glob: 3.0.1
-      fast-glob: 3.2.7
+      fast-glob: 3.2.11
       ignore: 5.1.8
       merge2: 1.4.1
       slash: 3.0.0

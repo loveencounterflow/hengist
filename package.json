@@ -49,6 +49,7 @@
     "executive": "^1.6.3",
     "exit-hook": "3.0.0",
     "fast-copy": "^2.1.0",
+    "fast-glob": "^3.2.11",
     "file-url": "^4.0.0",
     "fix-esm": "^1.0.1",
     "fraction.js": "^4.0.13",
