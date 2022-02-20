@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Dba, FS, H, PATH, SQL, badge, chalk, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, demo_git_fetch_pkg_status, demo_git_get_dirty_counts, demo_show_recent_commits, demo_staged_file_paths, demo_variables, echo, freeze, get_gitlog, get_pkg_infos, glob, got, hashbow, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, Dba, FS, H, PATH, SQL, _get_pkg_infos, badge, chalk, debug, def, demo_db_add_pkg_info, demo_db_add_pkg_infos, demo_fs_walk_dep_infos, demo_git_fetch_pkg_status, demo_git_get_dirty_counts, demo_show_recent_commits, demo_staged_file_paths, demo_variables, echo, freeze, get_gitlog, get_pkg_infos, glob, got, hashbow, help, info, isa, lets, rpr, semver_cmp, semver_satisfies, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -131,17 +131,29 @@
 
   //-----------------------------------------------------------------------------------------------------------
   get_gitlog = function(pkg_fspath) {
-    var R, cfg, commit, commit_count, commits, date, file_count, gitlog, i, j, len, len1, name, ref, ref1, short_hash, subject;
+    var R, cfg, commit, commit_count, commits, date, error, file_count, gitlog, i, j, len, len1, name, ref, ref1, short_hash, subject;
+    debug('^353455^', pkg_fspath);
+    // if pkg_fspath.endsWith '/cxltx'
+    //   warn "^439342344^ skipping #{pkg_fspath}"
+    //   return []
     gitlog = (require('gitlog')).default;
     cfg = {
       repo: pkg_fspath,
       number: 1e6,
-      // fields: ["hash", "abbrevHash", "subject", "authorName", "authorDateRel"],
       execOptions: {
-        maxBuffer: 1000 * 1024
-      }
+        maxBuffer: 40096 * 1024
+      },
+      fields: ['abbrevHash', 'authorDate', 'files', 'subject']
     };
-    commits = gitlog(cfg);
+    try {
+      commits = gitlog(cfg);
+    } catch (error1) {
+      error = error1;
+      throw error;
+      warn(`^347834^ when trying to get git logs for ${pkg_fspath}, an error occurred:`);
+      warn(`${error.code} ${error.message}`);
+      return [];
+    }
     commit_count = commits.length;
     info("commit_count:", commit_count, pkg_fspath);
     ref = commits.slice(0, 4);
@@ -170,16 +182,29 @@
 
   //-----------------------------------------------------------------------------------------------------------
   get_pkg_infos = function(dpan) {
-    var dcs, home_path, i, len, pkg_fspath, pkg_name, pkg_rel_fspath, pkgs, project_path, project_path_pattern, ref, ref_path;
+    var R, home_path, i, len, project_path_pattern, ref_path, sub_path, sub_paths;
+    R = [];
     ref_path = process.cwd();
-    home_path = PATH.resolve(PATH.join(__dirname, '../../../../'));
-    project_path_pattern = PATH.join(home_path, '*/package.json');
-    pkgs = [];
-    ref = glob.sync(project_path_pattern);
-    // home_path             = PATH.resolve PATH.join __dirname, '../../../../dpan'
-    // home_path             = PATH.resolve PATH.join __dirname, '../../../apps/dpan'
-    // project_path_pattern  = PATH.join home_path, './package.json'
-    // debug '^488^', project_path_pattern
+    home_path = process.env.HOME;
+    // 'jzr/*/package.json'
+    // 'io/*/package.json'
+    sub_paths = ['io/mingkwai-rack/*/package.json'];
+    for (i = 0, len = sub_paths.length; i < len; i++) {
+      sub_path = sub_paths[i];
+      project_path_pattern = PATH.join(home_path, sub_path);
+      R = [...R, ...(_get_pkg_infos(dpan, ref_path, project_path_pattern))];
+    }
+    return R;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  _get_pkg_infos = function(dpan, ref_path, project_path_pattern) {
+    var R, dcs, i, len, pkg_fspath, pkg_name, pkg_rel_fspath, project_path, ref;
+    R = [];
+    ref = glob.sync(project_path_pattern, {
+      follow: false,
+      realpath: true
+    });
     for (i = 0, len = ref.length; i < len; i++) {
       project_path = ref[i];
       pkg_fspath = PATH.dirname(project_path);
@@ -192,49 +217,41 @@
       }
       pkg_rel_fspath = PATH.relative(ref_path, pkg_fspath);
       pkg_name = PATH.basename(pkg_fspath);
-      pkgs.push({pkg_fspath, pkg_rel_fspath, pkg_name});
+      R.push({pkg_fspath, pkg_rel_fspath, pkg_name, dcs});
     }
-    return {ref_path, home_path, project_path_pattern, pkgs};
+    return R;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   demo_git_get_dirty_counts = function() {
-    var Dpan, Tbl, db_path, dba, dcs, dpan, i, k, len, pkg_fspath, pkg_infos, pkg_name, pkg_rel_fspath, ref, sum, v;
+    var Dpan, Tbl, db_path, dba, dcs, dpan, i, k, len, pkg_fspath, pkg_name, pkg_rel_fspath, pkgs, sum, v;
     ({Dpan} = require(H.dpan_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
     ({Dba} = require(H.dba_path));
     db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
-    help('^46456^', `using DB at ${db_path}`);
     dba = new Dba();
     dba.open({
       path: db_path
     });
-    // dba.pragma SQL"journal_mode=memory"
+    //.........................................................................................................
     dpan = new Dpan({
       dba,
       recreate: true
     });
+    pkgs = get_pkg_infos(dpan);
+    help('^46456^', `using DB at ${db_path}`);
     whisper("ACC: ahead-commit  count");
     whisper("BCC: behind-commit count");
     whisper("DFC: dirty file    count");
-    pkg_infos = get_pkg_infos(dpan);
-    ref = pkg_infos.pkgs;
-    //.........................................................................................................
-    for (i = 0, len = ref.length; i < len; i++) {
-      ({pkg_fspath, pkg_rel_fspath, pkg_name} = ref[i]);
-      dcs = dpan.git_get_dirty_counts({
-        pkg_fspath,
-        fallback: null
-      });
+//.........................................................................................................
+    for (i = 0, len = pkgs.length; i < len; i++) {
+      ({pkg_fspath, pkg_rel_fspath, pkg_name, dcs} = pkgs[i]);
       sum = dcs.sum;
       delete dcs.sum;
-      if (sum === 0) {
-        null;
-      } else {
+      if (sum > 0) {
         for (k in dcs) {
           v = dcs[k];
           if (v === 0) {
-            // whisper '^334-1^', pkg_fspath
             delete dcs[k];
           }
         }
@@ -247,30 +264,28 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_show_recent_commits = function() {
-    var Dpan, Tbl, commit, db_path, dba, dpan, i, j, l, len, len1, len2, name, pkg_fspath, pkg_infos, pkg_name, pkg_rel_fspath, recent_commits, ref, ref1, subject;
+    var Dpan, Tbl, commit, db_path, dba, dpan, i, j, l, len, len1, len2, name, pkg_fspath, pkg_name, pkg_rel_fspath, pkgs, recent_commits, ref, subject;
     ({Dpan} = require(H.dpan_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
     ({Dba} = require(H.dba_path));
     db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
-    help('^46456^', `using DB at ${db_path}`);
     dba = new Dba();
     dba.open({
       path: db_path
     });
-    // dba.pragma SQL"journal_mode=memory"
     dpan = new Dpan({
       dba,
       recreate: true
     });
     recent_commits = [];
-    pkg_infos = get_pkg_infos(dpan);
-    ref = pkg_infos.pkgs;
-    //.........................................................................................................
-    for (i = 0, len = ref.length; i < len; i++) {
-      ({pkg_fspath, pkg_rel_fspath, pkg_name} = ref[i]);
-      ref1 = get_gitlog(pkg_fspath);
-      for (j = 0, len1 = ref1.length; j < len1; j++) {
-        commit = ref1[j];
+    pkgs = get_pkg_infos(dpan);
+    help('^46456^', `using DB at ${db_path}`);
+//.........................................................................................................
+    for (i = 0, len = pkgs.length; i < len; i++) {
+      ({pkg_fspath, pkg_rel_fspath, pkg_name} = pkgs[i]);
+      ref = get_gitlog(pkg_fspath);
+      for (j = 0, len1 = ref.length; j < len1; j++) {
+        commit = ref[j];
         recent_commits.push(commit);
       }
     }
