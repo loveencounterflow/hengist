@@ -98,11 +98,15 @@ demo_db_add_pkg_infos = ->
 get_gitlog = ( pkg_fspath ) ->
   gitlog              = ( require 'gitlog' ).default
   cfg                 =
-    repo:       pkg_fspath
-    number:     1e6
-    # fields: ["hash", "abbrevHash", "subject", "authorName", "authorDateRel"],
-    execOptions: { maxBuffer: 1000 * 1024 },
-  commits       = gitlog cfg
+    repo:         pkg_fspath
+    number:       1e6
+    execOptions:  { maxBuffer: 40096 * 1024, },
+    fields:       [ 'abbrevHash', 'authorDate', 'files', 'subject', ],
+  try commits = gitlog cfg catch error
+    # throw error
+    warn "^347834^ when trying to get git logs for #{pkg_fspath}, an error occurred:"
+    warn "#{error.code} #{error.message}"
+    return []
   commit_count  = commits.length
   info "commit_count:", commit_count, pkg_fspath
   ### NOTE commits are ordered newest first ###
