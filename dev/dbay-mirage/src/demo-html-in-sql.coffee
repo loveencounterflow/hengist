@@ -29,10 +29,12 @@ guy                       = require '../../../apps/guy'
 { width_of
   to_width }              = require 'to-width'
 { HDML }                  = require '../../../apps/hdml'
+X                         = require '../../../lib/helpers'
 
 
 #-----------------------------------------------------------------------------------------------------------
-banner = ( title ) -> echo CND.reverse CND.steel to_width ( ' ' + title + ' ' ), 50
+tabulate = ( db, query ) -> X.tabulate query, db query
+
 
 
 
@@ -40,7 +42,10 @@ banner = ( title ) -> echo CND.reverse CND.steel to_width ( ' ' + title + ' ' ),
 #
 #-----------------------------------------------------------------------------------------------------------
 @demo_datamill = ( cfg ) ->
-  db              = new DBay { path: '/dev/shm/demo-datamill.sqlite', }
+  path            = '../../../dev-shm/demo-datamill.sqlite'
+  path            = PATH.resolve PATH.join __dirname, path
+  debug '^4497^', path
+  db              = new DBay { path, }
   db.create_stdlib()
   db SQL"""
     drop view  if exists tags_and_html;
@@ -147,12 +152,12 @@ banner = ( title ) -> echo CND.reverse CND.steel to_width ( ' ' + title + ' ' ),
   _append_tag dsk, '^', 'mrg:loc#baselines'
   #.........................................................................................................
   db.setv 'dsk', 'demo'
-  banner "datasources";     console.table db.all_rows SQL"select * from datasources;"
-  banner "mirror";          console.table db.all_rows SQL"select * from mirror;"
-  banner "atrs";            console.table db.all_rows SQL"select * from atrs;"
-  banner "std_variables()"; console.table db.all_rows SQL"select * from std_variables();"
-  banner "tags_and_html";   console.table db.all_rows SQL"select * from tags_and_html;"
-  banner "render_dsk";      info rpr render_dsk { dsk, }
+  X.tabulate "datasources",     db.all_rows SQL"select * from datasources;"
+  X.tabulate "mirror",          db.all_rows SQL"select * from mirror;"
+  X.tabulate "atrs",            db.all_rows SQL"select * from atrs;"
+  X.tabulate "std_variables()", db.all_rows SQL"select * from std_variables();"
+  X.tabulate "tags_and_html",   db.all_rows SQL"select * from tags_and_html;"
+  X.banner   "render_dsk";      info rpr render_dsk { dsk, }
   return null
 
 
