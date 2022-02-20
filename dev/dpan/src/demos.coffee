@@ -96,6 +96,10 @@ demo_db_add_pkg_infos = ->
 
 #-----------------------------------------------------------------------------------------------------------
 get_gitlog = ( pkg_fspath ) ->
+  debug '^353455^', pkg_fspath
+  # if pkg_fspath.endsWith '/cxltx'
+  #   warn "^439342344^ skipping #{pkg_fspath}"
+  #   return []
   gitlog              = ( require 'gitlog' ).default
   cfg                 =
     repo:         pkg_fspath
@@ -128,23 +132,31 @@ get_gitlog = ( pkg_fspath ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 get_pkg_infos = ( dpan ) ->
+  R                     = []
   ref_path              = process.cwd()
-  home_path             = PATH.resolve PATH.join __dirname, '../../../../'
-  project_path_pattern  = PATH.join home_path, '*/package.json'
-  pkgs                  = []
-  # home_path             = PATH.resolve PATH.join __dirname, '../../../../dpan'
-  # home_path             = PATH.resolve PATH.join __dirname, '../../../apps/dpan'
-  # project_path_pattern  = PATH.join home_path, './package.json'
-  # debug '^488^', project_path_pattern
-  for project_path in glob.sync project_path_pattern
+  home_path             = process.env.HOME
+  sub_paths             = [
+    # 'jzr/*/package.json'
+    # 'io/*/package.json'
+    'io/mingkwai-rack/*/package.json'
+    ]
+  for sub_path in sub_paths
+    project_path_pattern  = PATH.join home_path, sub_path
+    R                     = [ R..., ( _get_pkg_infos dpan, ref_path, project_path_pattern )..., ]
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+_get_pkg_infos = ( dpan, ref_path, project_path_pattern ) ->
+  R                     = []
+  for project_path in glob.sync project_path_pattern, { follow: false, realpath: true, }
     pkg_fspath      = PATH.dirname project_path
     unless ( dcs = dpan.git_get_dirty_counts { pkg_fspath, fallback: null, } )?
       warn "not a git repo: #{pkg_fspath}"
       continue
     pkg_rel_fspath  = PATH.relative ref_path, pkg_fspath
     pkg_name        = PATH.basename pkg_fspath
-    pkgs.push { pkg_fspath, pkg_rel_fspath, pkg_name, }
-  return { ref_path, home_path, project_path_pattern, pkgs, }
+    R.push { pkg_fspath, pkg_rel_fspath, pkg_name, dcs, }
+  return R
 
 #-----------------------------------------------------------------------------------------------------------
 demo_git_get_dirty_counts = ->
@@ -152,24 +164,20 @@ demo_git_get_dirty_counts = ->
   { Tbl, }              = require '../../../apps/icql-dba-tabulate'
   { Dba, }              = require H.dba_path
   db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
-  help '^46456^', "using DB at #{db_path}"
   dba                   = new Dba()
   dba.open { path: db_path, }
-  # dba.pragma SQL"journal_mode=memory"
+  #.........................................................................................................
   dpan                  = new Dpan { dba, recreate: true, }
+  pkgs                  = get_pkg_infos dpan
+  help '^46456^', "using DB at #{db_path}"
   whisper "ACC: ahead-commit  count"
   whisper "BCC: behind-commit count"
   whisper "DFC: dirty file    count"
-  pkg_infos             = get_pkg_infos dpan
   #.........................................................................................................
-  for { pkg_fspath, pkg_rel_fspath, pkg_name, } in pkg_infos.pkgs
-    dcs = dpan.git_get_dirty_counts { pkg_fspath, fallback: null, }
+  for { pkg_fspath, pkg_rel_fspath, pkg_name, dcs, } in pkgs
     sum = dcs.sum
     delete dcs.sum
-    if sum is 0
-      null
-      # whisper '^334-1^', pkg_fspath
-    else
+    if sum > 0
       delete dcs[ k ] for k, v of dcs when v is 0
       help '^334-2^', ( to_width pkg_rel_fspath, 50 ), ( CND.yellow CND.reverse " #{sum} " ), ( CND.grey dcs )
   #.........................................................................................................
@@ -181,15 +189,14 @@ demo_show_recent_commits = ->
   { Tbl, }              = require '../../../apps/icql-dba-tabulate'
   { Dba, }              = require H.dba_path
   db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
-  help '^46456^', "using DB at #{db_path}"
   dba                   = new Dba()
   dba.open { path: db_path, }
-  # dba.pragma SQL"journal_mode=memory"
   dpan                  = new Dpan { dba, recreate: true, }
   recent_commits        = []
-  pkg_infos             = get_pkg_infos dpan
+  pkgs                  = get_pkg_infos dpan
+  help '^46456^', "using DB at #{db_path}"
   #.........................................................................................................
-  for { pkg_fspath, pkg_rel_fspath, pkg_name, } in pkg_infos.pkgs
+  for { pkg_fspath, pkg_rel_fspath, pkg_name, } in pkgs
     for commit in get_gitlog pkg_fspath
       recent_commits.push commit
   #.........................................................................................................
@@ -279,3 +286,5 @@ if module is require.main then do =>
   await demo_git_get_dirty_counts()
   # await demo_variables()
   # await demo_staged_file_paths()
+
+
