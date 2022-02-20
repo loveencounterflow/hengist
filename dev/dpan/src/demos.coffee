@@ -136,9 +136,10 @@ get_pkg_infos = ( dpan ) ->
   ref_path              = process.cwd()
   home_path             = process.env.HOME
   sub_paths             = [
+    'temp/linuxtimemachine-backups/enceladus/jzr/*/package.json'
     # 'jzr/*/package.json'
     # 'io/*/package.json'
-    'io/mingkwai-rack/*/package.json'
+    # 'io/mingkwai-rack/*/package.json'
     ]
   for sub_path in sub_paths
     project_path_pattern  = PATH.join home_path, sub_path
