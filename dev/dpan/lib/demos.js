@@ -186,9 +186,10 @@
     R = [];
     ref_path = process.cwd();
     home_path = process.env.HOME;
-    // 'jzr/*/package.json'
-    // 'io/*/package.json'
-    sub_paths = ['io/mingkwai-rack/*/package.json'];
+    sub_paths = ['temp/linuxtimemachine-backups/enceladus/jzr/*/package.json'];
+// 'jzr/*/package.json'
+// 'io/*/package.json'
+// 'io/mingkwai-rack/*/package.json'
     for (i = 0, len = sub_paths.length; i < len; i++) {
       sub_path = sub_paths[i];
       project_path_pattern = PATH.join(home_path, sub_path);
