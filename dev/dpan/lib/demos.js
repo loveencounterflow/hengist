@@ -149,7 +149,7 @@
       commits = gitlog(cfg);
     } catch (error1) {
       error = error1;
-      throw error;
+      // throw error
       warn(`^347834^ when trying to get git logs for ${pkg_fspath}, an error occurred:`);
       warn(`${error.code} ${error.message}`);
       return [];
