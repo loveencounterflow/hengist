@@ -136,8 +136,8 @@ get_pkg_infos = ( dpan ) ->
   ref_path              = process.cwd()
   home_path             = process.env.HOME
   sub_paths             = [
-    'temp/linuxtimemachine-backups/enceladus/jzr/*/package.json'
-    # 'jzr/*/package.json'
+    # 'temp/linuxtimemachine-backups/enceladus/jzr/*/package.json'
+    'jzr/*/package.json'
     # 'io/*/package.json'
     # 'io/mingkwai-rack/*/package.json'
     ]
@@ -155,6 +155,7 @@ _get_pkg_infos = ( dpan, ref_path, project_path_pattern ) ->
     unless ( dcs = dpan.git_get_dirty_counts { pkg_fspath, fallback: null, } )?
       warn "not a git repo: #{pkg_fspath}"
       continue
+    # debug '^656874^', pkg_fspath, dcs
     pkg_rel_fspath  = PATH.relative ref_path, pkg_fspath
     pkg_name        = PATH.basename pkg_fspath
     R.push { pkg_fspath, pkg_rel_fspath, pkg_name, dcs, }
