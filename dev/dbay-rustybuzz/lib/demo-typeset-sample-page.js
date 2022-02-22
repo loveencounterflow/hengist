@@ -99,13 +99,13 @@
     /* NOTE: for testing we want to use the most recent `rustybuzz-wasm`: */
     // { Tbl, }        = require '../../../apps/icql-dba-tabulate'
     db = new DBay({
-      path: '/dev/shm/typesetting-1.sqlite'
+      path: PATH.join(__dirname, '../../../dev-shm/typesetting-1.sqlite')
     });
     drb = new Drb({
       db,
       rebuild: true,
       RBW,
-      path: '/dev/shm/typesetting-2.sqlite'
+      path: PATH.join(__dirname, '../../../dev-shm/typesetting-2.sqlite')
     });
     // dtab            = new Tbl { db, }
     page = FS.readFileSync(template_path, {
@@ -492,7 +492,7 @@ order by clm, bln;`, {doc});
     RBW = require('../../../apps/rustybuzz-wasm/pkg');
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
     db = new DBay({
-      path: '/dev/shm/typesetting-1.sqlite'
+      path: PATH.resolve(PATH.join(__dirname, '../../../dev-shm/typesetting-1.sqlite'))
     });
     dtab = new Tbl({db});
     drb = new Drb({
