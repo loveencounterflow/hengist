@@ -142,8 +142,9 @@ get_pkg_infos = ( dpan ) ->
     # 'io/mingkwai-rack/*/package.json'
     ]
   for sub_path in sub_paths
-    project_path_pattern  = PATH.join home_path, sub_path
-    R                     = [ R..., ( _get_pkg_infos dpan, ref_path, project_path_pattern )..., ]
+    if sub_path.startsWith '/' then project_path_pattern  =                       sub_path
+    else                            project_path_pattern  = PATH.join home_path,  sub_path
+    R = [ R..., ( _get_pkg_infos dpan, ref_path, project_path_pattern )..., ]
   return R
 
 #-----------------------------------------------------------------------------------------------------------
