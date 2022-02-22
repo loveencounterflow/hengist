@@ -69,8 +69,8 @@ XXX_show_clusters = ( text, ads ) ->
   mm_p_u_txt      = mm_p_u.toFixed 4
   ### NOTE: for testing we want to use the most recent `rustybuzz-wasm`: ###
   # { Tbl, }        = require '../../../apps/icql-dba-tabulate'
-  db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
-  drb             = new Drb { db, rebuild: true, RBW, path: '/dev/shm/typesetting-2.sqlite', }
+  db              = new DBay { path: ( PATH.join __dirname, '../../../dev-shm/typesetting-1.sqlite' ), }
+  drb             = new Drb { db, rebuild: true, RBW, path: ( PATH.join __dirname, '../../../dev-shm/typesetting-2.sqlite' ), }
   # dtab            = new Tbl { db, }
   page            = FS.readFileSync template_path, { encoding: 'utf-8', }
   append_grid     { drb, dsk, }
@@ -341,7 +341,7 @@ write_output = ( cfg ) ->
   ### NOTE: for testing we want to use the most recent `rustybuzz-wasm`: ###
   RBW             = require '../../../apps/rustybuzz-wasm/pkg'
   { Tbl, }        = require '../../../apps/icql-dba-tabulate'
-  db              = new DBay { path: '/dev/shm/typesetting-1.sqlite', }
+  db              = new DBay { path: ( PATH.resolve PATH.join __dirname, '../../../dev-shm/typesetting-1.sqlite' ), }
   dtab            = new Tbl { db, }
   drb             = new Drb { db, rebuild: true, RBW, }
   dsk             = 'demo'
