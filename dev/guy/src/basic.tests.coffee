@@ -42,7 +42,7 @@ types                     = new ( require 'intertype' ).Intertype
   urge '^83443^', H.guy_path
   help '^83443^', rq.resolve 'cnd'
   help '^83443^', rq.resolve 'intertype'
-  help '^83443^', rq.resolve 'deasync'
+  # help '^83443^', rq.resolve 'deasync'
   # help '^83443^', rq.resolve 'frob'
   # help '^83443^', rq.resolve 'steampipes'
   debug '340^', guy
