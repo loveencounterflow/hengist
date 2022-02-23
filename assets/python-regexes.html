@@ -1,0 +1,903 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+        <html lang="en">
+        <head><title>Python support for regular expressions [LWN.net]</title>
+        <meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@lwnnet" />
+<meta name="twitter:title" content="Python support for regular expressions" />
+<meta name="twitter:description" content="Regular
+expressions are a common feature of computer languages, especially 
+higher-level languages like Ruby, Perl, Python, and others, for doing
+fairly sophisticated text-pattern matching.   Some languages, including
+Perl, 
+incorporate regular expressions into the language itself,
+while others have classes or libraries that come with the language
+installation.  Python's standard library has the re module,
+which provides facilities for working with regular expressions;  as a recent
+discussion on the python-ideas mailing shows, though, that module has
+somewhat fallen by the wayside in recent times.
+" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="robots" CONTENT="noindex">
+        <link rel="icon" href="https://static.lwn.net/images/favicon.png"
+              type="image/png">
+        <link rel="alternate" type="application/rss+xml" title="LWN.net headlines" href="https://lwn.net/headlines/newrss">
+<link rel="alternate" type="application/rss+xml" title="Comments posted to this article" href="https://lwn.net/headlines/885682/">
+        <link rel="stylesheet" href="/CSS/lwn">
+<link rel="stylesheet" href="/CSS/subonly">
+<link rel="stylesheet" href="/CSS/pure-min">
+           <!--[if lte IE 8]>
+             <link rel="stylesheet" href="/CSS/grids-responsive-old-ie-min">
+           <![endif]-->
+           <!--[if gt IE 8]><!-->
+             <link rel="stylesheet" href="/CSS/grids-responsive-min">
+           <!--<![endif]-->
+           <link rel="stylesheet" href="/CSS/pure-lwn">
+           
+        
+<script type="text/javascript">var p="http",d="static";if(document.location.protocol=="https:"){p+="s";d="engine";}var z=document.createElement("script");z.type="text/javascript";z.async=true;z.src=p+"://"+d+".adzerk.net/ados.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(z,s);</script>
+<script type="text/javascript">
+var ados_keywords = ados_keywords || [];
+if( location.protocol=='https:' ) {
+        ados_keywords.push('T:SSL');
+} else {
+        ados_keywords.push('T:HTTP');
+}
+
+var ados = ados || {};
+ados.run = ados.run || [];
+ados.run.push(function() {
+
+ados_add_placement(4669, 20979, "azk13321_leaderboard", 4).setZone(16026);
+
+ados_add_placement(4669, 20979, "azk93271_right_zone", [5,10,6]).setZone(16027);
+
+ados_add_placement(4669, 20979, "azk31017_tracking", 20).setZone(20995);
+
+
+
+ados_setKeywords(ados_keywords.join(', ')); 
+ados_load();
+});</script>
+
+        </head>
+        <body bgcolor="#ffffff" link="Blue" VLINK="Green" alink="Green">
+        <a name="t"></a>
+<div id="menu"><a href="/"><img src="https://static.lwn.net/images/logo/barepenguin-70.png" class="logo"
+                 border="0" alt="LWN.net Logo">
+           <font class="logo">LWN<br>.net</font>
+           <font class="logobl">News from the source</font></a>
+           <a href="/"><img src="https://static.lwn.net/images/lcorner-ss.png" class="sslogo"
+                 border="0" alt="LWN"></a><div class="navmenu-container">
+           <ul class="navmenu">
+        <li><a class="navmenu" href="#t"><b>Content</b></a><ul><li><a href="/current/">Weekly Edition</a></li><li><a href="/Archives/">Archives</a></li><li><a href="/Search/">Search</a></li><li><a href="/Kernel/">Kernel</a></li><li><a href="/Security/">Security</a></li><li><a href="/Distributions/">Distributions</a></li><li><a href="/Calendar/">Events calendar</a></li><li><a href="/Comments/unread">Unread comments</a></li><li><hr></li><li><a href="/op/FAQ.lwn">LWN FAQ</a></li><li><a href="/op/AuthorGuide.lwn">Write for us</a></li></ul></li>
+</ul></div>
+</div> <!-- menu -->
+<div class="pure-g not-handset" style="margin-left: 10.5em">
+           <div class="not-print">
+             <div id="azk13321_leaderboard"></div>
+           </div>
+           </div>
+        <div class="topnav-container">
+<div class="not-handset"><form action="https://lwn.net/Login/" method="post" name="loginform"
+                 class="loginform">
+        <label><b>User:</b> <input type="text" name="Username" value="" size="8" id="uc" /></label> 
+		<label><b>Password:</b> <input type="password" name="Password" size="8" id="pc" /></label> <input type="hidden" name="target" value="/SubscriberLink/885682/ebb44eea5667f358/" /> <input type="submit" name="submit" value="Log in" /></form> |
+           <form action="https://lwn.net/subscribe/" method="post" class="loginform">
+           <input type="submit" name="submit" value="Subscribe" />
+           </form> |
+           <form action="https://lwn.net/Login/newaccount" method="post" class="loginform">
+           <input type="submit" name="submit" value="Register" />
+           </form>
+        </div>
+               <div class="handset-only">
+               <a href="/subscribe/"><b>Subscribe</b></a> /
+               <a href="/Login/"><b>Log in</b></a> /
+               <a href="/Login/newaccount"><b>New account</b></a>
+               </div>
+               </div><div class="pure-grid maincolumn">
+<div class="lwn-u-1 pure-u-md-19-24">
+<div class="PageHeadline">
+<h1>Python support for regular expressions</h1>
+<h2>[LWN subscriber-only content]</h2>
+</div>
+<div class="ArticleText">
+<!-- $Id: slink-none,v 1.2 2005-11-04 22:11:18 corbet Exp $ -->
+<p>
+<blockquote>
+<table class="Form"><tr><td>
+<h3>Welcome to LWN.net</h3>
+<p>
+The following subscription-only content has been made available to you 
+by an LWN subscriber.  Thousands of subscribers depend on LWN for the 
+best news from the Linux and free software communities.  If you enjoy this 
+article, please consider <a href="/subscribe/">subscribing to LWN</a>.  Thank you
+for visiting LWN.net!
+</td>
+</tr>
+</table>
+</blockquote>
+<p>
+<div class="FeatureByline">
+           By <b>Jake Edge</b><br>February 22, 2022
+           </div>
+<p>
+<a href="https://en.wikipedia.org/wiki/Regular_expression">Regular
+expressions</a> are a common feature of computer languages, especially 
+higher-level languages like Ruby, Perl, Python, and others, for doing
+fairly sophisticated text-pattern matching.   Some languages, including
+Perl, 
+incorporate regular expressions into the language itself,
+while others have classes or libraries that come with the language
+installation.  Python's standard library has the <a
+href="https://docs.python.org/3/library/re.html"><tt>re</tt> module</a>,
+which provides facilities for working with regular expressions;  as a recent
+discussion on the python-ideas mailing shows, though, that module has
+somewhat fallen by the wayside in recent times.
+</p>
+
+<h4>Timeouts?</h4>
+
+<p>
+J.B. Langston <a
+href="/ml/python-ideas/CANZFPHhh-ea+qcBEPD7oWEopt1TbOFUTAj3_ocDUOxfHcm5eaw@mail.gmail.com/">posted</a>
+to the list on February&nbsp;14; he had <a
+href="https://bugs.python.org/issue46627">filed a bug</a> about a problem
+he encountered using <tt>re</tt>, which was closed with a suggestion that he
+bring it to the mailing list.  Langston had a regular expression (which is
+often abbreviated as "regex" or "regexp") that
+seemed to hang his program when applied to a rarely occurring log message;
+it turned out that there was a flaw in his regular expression, which caused an enormous
+amount of backtracking that, effectively, never completed.  In the bug report, he was
+asking for a way to specify a timeout:
+<blockquote class="bq">
+I will try to rewrite my regex to address this specific issue, but it's
+hard to anticipate every possible input and craft a bulletproof regex, so
+something like this kind of thing can be used for a denial of service
+attack (intentional or not). In this case the regex was used in an
+automated import process and caused the process to back up for many hours
+before someone noticed.  Maybe a solution could be to add a timeout option
+to the regex engine so it will give up and throw an exception if the regex
+executes for longer than the configured timeout. 
+</blockquote>
+</p>
+
+<p>
+He elaborated his use case further in his post:
+<blockquote class="bq">
+My use case is log parsing and I have a large number of regexes that run
+over many different log lines. With the volume of regexes I have, it's hard
+to make sure every regex has no potential problems, especially when the 
+pathological behavior only occurs on certain inputs that may not have been
+anticipated when developing the regex.
+<p>
+Also because of the volume of data these regexes are parsing, I would never
+want to allow a regex to run longer than a few milliseconds because if it
+did, that would kill my log processing throughput. I'd rather that it just
+raise an 
+exception and move on to the next log entry.
+</blockquote>
+</p>
+
+<p>
+Jonathan Slenders <a
+href="/ml/python-ideas/CAKfyG3zaW+te+4HuWNJBU3Y4Qb1YsakGgGaWXokow+NVSc_5fA@mail.gmail.com/">replied</a>
+that the <a href="https://pypi.org/project/regex/"><tt>regex</tt>
+module</a> on the <a href="https://pypi.org/">Python Package Index</a>
+(PyPI) has support for timeouts.  <tt>regex</tt> is meant to be both a
+drop-in replacement for <tt>re</tt> (using its "version&nbsp;0") and to provide
+support for additional regular-expression features when using "version&nbsp;1".  Those
+features include nested sets, full Unicode case-folding by default,
+dropping the global interpreter lock (GIL) during matching for concurrency,
+and more.  The <tt>regex</tt> home page lists a whole raft of differences
+when using version&nbsp;1, including a <tt>timeout</tt> parameter for the
+matching functions.
+</p>
+
+<h4>Musings on regular expressions</h4>
+
+<p>
+Tim Peters also <a
+href="/ml/python-ideas/CAExdVNnE-iTzr8W8R2My45LuxLzq=SXoXq5m34Bfuhhsa96APw@mail.gmail.com/">mentioned
+<tt>regex</tt></a>, though not because it implements timeouts (which is
+something he only learned via the thread), but because it is "<span>a
+terrific module</span>" with many features from newer regular-expression implementations.
+It is "<span>also
+harder to provoke into exponential-time bad cases</span>".  He 
+discussed some of the tradeoffs that come with regular expressions and recommended the
+classic book, <a
+href="https://www.oreilly.com/library/view/mastering-regular-expressions/0596528124/"><i>Mastering
+Regular Expressions</i></a>, for those struggling to use them well.  He
+noted that <a href="https://en.wikipedia.org/wiki/SNOBOL">SNOBOL</a>, which
+is a string-processing language from the 1960s, did not have regular expressions, though
+there were tasks where it  (and
+its successor of sorts, <a
+href="https://en.wikipedia.org/wiki/Icon_(programming_language)">Icon</a>)
+were able to do matching in more natural ways:
+<blockquote class="bq">
+Naive regexps are both clumsy and prone to bad
+timing in many tasks that "should be" very easy to express. For
+example, "now match up to the next occurrence of 'X'". In SNOBOL and
+Icon, that's trivial. 75% of regexp users will write ".*X", with scant
+understanding that it may match waaaay more than they intended.
+Another 20% will write ".*?X", with scant understanding that may
+extend beyond _just_ "the next" X in some cases. That leaves the happy
+5% who write "[^X]*X", which finally says what they intended from the
+start.
+</blockquote>
+</p>
+
+<p>
+Those who are not well-versed in regular-expression syntax may find some of that a bit
+puzzling.  While this article cannot be an introduction to regular expressions—there are
+countless web sites, books, and other resources for that—we will try to
+give readers a bit of a leg up.  In regular-expression syntax, "<tt>.</tt>" represents any
+single character, adding "<tt>*</tt>" says to match zero or more
+occurrences of the previous term, so "<tt>.*</tt>" matches any string,
+while "<tt>.*X</tt>" matches any string up to a literal "X".  But, as the
+following example shows, that may not be exactly what the programmer had in
+mind:
+<pre>
+    &gt;&gt;&gt; import re
+    &gt;&gt;&gt; re.search(r'.*X', 'abcXdefXg')
+    &lt;re.Match object; span=(0, 8), match='abcXdefX'&gt;
+</pre>
+</p>
+
+<p>
+The <tt>match</tt> value in the object returned from <a
+href="https://docs.python.org/3/library/re.html#re.search"><tt>re.search()</tt></a>
+shows that it matched all the way up to the second occurrence of "X" in the
+string.  That is because
+the "<tt>*</tt>" operator is "<a
+href="https://en.wikipedia.org/wiki/Regular_expression#Lazy_matching">greedy</a>"—it
+matches as much as it can.  The 20% case in Peters's message 
+uses the non-greedy quantifier "<tt>?</tt>" to get closer to the result
+that was asked for:
+<pre>
+    &gt;&gt;&gt; re.search(r'.*?X', 'abcXdefXg')
+    &lt;re.Match object; span=(0, 4), match='abcX'&gt;
+</pre>
+</p>
+
+<p>
+The 5% case, "<tt>[^X]*X</tt>", uses a negated character set,
+"<tt>[^X]</tt>", which means to match anything <i>but</i> "X". So that regular expression
+can be read as "match any characters that are not 'X', followed by 'X'",
+but it may well not be the first thing that comes to mind.  Steven D'Aprano <a
+href="/ml/python-ideas/20220215004427.GL12540@ando.pearwood.info/">was
+surprised</a> that "<tt>.*?X</tt>" might match beyond the next "X", 
+but Chris Angelico <a
+href="/ml/python-ideas/CAPTjJmo7M8PdO7mjvTOdEHbbXLaZe+0yEKmaO-d3RKkZ8VS7Zw@mail.gmail.com/">pointed
+out</a> that non-greedy does not mean it will only match to the next "X":
+<blockquote class="bq">
+Nongreedy means it'll prefer the next X, but it has to be open to
+checking others.
+<pre>
+&gt;&gt;&gt; re.search("a.*?X[^X]*?Y", "zzzabbbXcccXdddYzzz")
+&lt;re.Match object; span=(3, 16), match='abbbXcccXdddY'&gt;
+</pre>
+The X between bbb and ccc won't result in a match, so the .*? has to
+capture more.
+</blockquote>
+
+<p>
+The sub-thread extended a ways, looking into deeper aspects of matching "up
+to the next 'string'", which shows the complications that can
+arise—complete with mistaken "solutions". 
+As can be seen, regular expressions are a powerful mechanism, but they are
+complex, can be
+used inappropriately, and are
+prone to bugs of various sorts; they are also difficult to test fully and
+to debug when problems are encountered.  But they have become ubiquitous in
+today's computing landscape.  Peters <a
+href="/ml/python-ideas/CAExdVN=Fad42TAVOH8mYM0U5maS1crGGU3Oo4fnQuauvjft9qQ@mail.gmail.com/">said</a>:
+<blockquote class="bq">
+As to why regexps prevailed, traction! They are useful tools, and
+_started_ life as pretty simple things, with small, elegant, and
+efficient implementations Feature creep and "faster! faster! faster!"
+turned the implementations more into bottomless pits now ;-)
+</blockquote>
+</p>
+
+<p>
+Matthew Barnett ("MRAB"), who is the developer of <tt>regex</tt>, <a
+href="/ml/python-ideas/a13d8739-9d0c-e985-22f0-2e9bea34c638@mrabarnett.plus.com/">agreed</a>
+with that assessment:
+<blockquote class="bq">
+Regexes were simple to start with, so only a few metacharacters were
+needed, the remaining characters being treated as literals.
+<p>
+As new features were added, the existing metacharacters were used in new
+ways that had been illegal until then in order to remain
+backwards-compatible.
+<p>
+Add to that that there are multiple implementations with differing (and
+sometimes only slightly differing) features and behaviours.
+<p>
+It's a good example of evolution: often messy, and resulting in clunky
+designs.
+</blockquote>
+</p>
+
+<h4>Back to timeouts and <tt>regex</tt></h4>
+
+<p>
+Langston "<span>quite enjoyed reading</span>" the thread that resulted from
+his post, but wanted to see if there was support "<span>for adding a timeout
+feature to the Python re library</span>".  He said that he would be
+investigating <tt>regex</tt> but still thought <tt>re</tt> could benefit
+from a way to stop runaway regular expressions.  Angelico <a
+href="/ml/python-ideas/CAPTjJmq-qsKi-RRskj31mop0C=W0fKenEJr3xN9rjD3DHOgg_w@mail.gmail.com/">was
+opposed</a> to the idea, suggesting that some of the other matching
+techniques explored in the thread should be pursued instead.
+"<span>It
+would add overhead to common cases in order to put a shield around
+pathological ones, and it's difficult to impossible to usefully define
+the cutoff.</span>"
+As he noted in his first reply, though, Peters
+ <a
+href="/ml/python-ideas/CAExdVNk1zttpoRgVXEDL82pJ9yQftpQ7hQHgBq-pbsjXmtdn4g@mail.gmail.com/">thinks</a>
+that no work is likely to be done on features for <tt>re</tt>:
+<blockquote class="bq">
+Buried in the fun discussion was my guess: no way. Python's re is
+effectively dead legacy code, with no current "owner". Its commit
+history shows very little activity for some years already. Most
+commits are due to generic "code cleanup" crusades that have nothing
+specific to do with the algorithms. None required non-trivial
+knowledge of the implementation.
+</blockquote>
+</p>
+
+<p>
+Peters said that the code that makes up the <tt>regex</tt> module was <a
+href="https://bugs.python.org/issue2636">originally targeted</a> at becoming
+part of core Python back in 2008 by its original author, Jeffrey
+C. Jacobs; the work was <a href="https://bugs.python.org/issue3825">picked
+up and carried forward</a> by Barnett, and eventually turned into
+<tt>regex</tt>.  The request to switch <tt>re</tt> over to using it was <a
+href="https://bugs.python.org/issue2636#msg385674">closed in 2021</a>
+because of the existence of <tt>regex</tt> in PyPI; "<span>If someone wants
+to move it into the Python stdlib, I suggest to start on the python-ideas
+list first.</span>"   
+</p>
+
+<p>
+The problem is that <tt>regex</tt> has "<span>_dozens_ of features that would be
+valuable to have in the standard library</span>", Peters said, so:
+<blockquote class="bq">
+[N]o core dev I know of is going to devote their
+limited time to reproducing a tiny subset of regex's many improvements
+in Python's legacy engine. In fact, "install regex!" is such an
+obvious choice at this point that I wouldn't even give time to just
+reviewing a patch that added timeouts.
+</blockquote>
+</p>
+
+<p>
+Barnett <a
+href="/ml/python-ideas/4497bd6c-e26e-7abf-cd43-ad21cdf86087@mrabarnett.plus.com/">said</a>
+that he eventually decided against having the <tt>regex</tt> code added to
+the standard library, at least in part because "<span>that would tie fixes
+and additions to Python's release cycle</span>".  Python is known for being
+"batteries included", "<span>but not nuclear
+reactors</span>", so having <tt>regex</tt> in PyPI makes more sense, he
+said.  Peters <a
+href="/ml/python-ideas/CAExdVNkMcMd0DpWi60agQ=rBF+PCQqfzuysjTF-MdhstR5T4Og@mail.gmail.com/">thought</a>
+that some features in <tt>regex</tt> might have been nuclear reactors back
+in 2008, but are being used more commonly today:
+<blockquote class="bq">
+[...] Python's re module is frozen in an
+ever-receding past. Nobody wants to work on it because, well, "regex
+already does that! In fact, it's been doing it for 15 years already".
+<p>
+Your module is _too_ successful for Python's good ;-)
+</blockquote>
+</p>
+
+<p>
+Peters also <a href="/ml/python-ideas/CAExdVNkfY1oSe6HgmFptkJWckbS+i6bmVYb7TTCLqBSEMWhuzQ@mail.gmail.com/">pointed
+out</a> that trying out <tt>regex</tt> may be easier than Langston
+realized. In fact, because of the version&nbsp;0 compatibility mode, he could
+perhaps add a simple import to give it a whirl:
+<pre>
+    import regex as re
+</pre>
+In another message, Peters
+<a
+href="/ml/python-ideas/CAExdVNmxqxOfXVyOo1o5KUyZphZVvYgGqexdQYcxO_7R9xjpMg@mail.gmail.com/">further
+described</a>
+what he meant by that:
+<blockquote class="bq">
+What I wrote here is more elaboration on that _trying_ this is easier
+than they might be thinking: They don't have to, e.g., rewrite their
+regexps, or invoke different function or method names, or worry that
+they'll get different results. The packages are highly compatible in
+syntax and semantics and APIs so long as you stick to the things re
+does. That in no way suggests they _should_ stick to what re does.
+It's assuring them that _getting started_ is close to trivial. Their
+current code should continue to work unchanged, apart from just
+changing "re" to "regex".
+</blockquote>
+</p>
+
+<p>
+It turns out that Langston's program <a
+href="/ml/python-ideas/164514034605.26634.17266762446315569581@mail.python.org/">already
+uses <tt>regex</tt></a> "<span>via some transitive
+dependency</span>", but he was <a
+href="/ml/python-ideas/164514194436.26634.15033380841786040054@mail.python.org/">not
+impressed</a> with its performance when compared to <tt>re</tt>.  A test
+data set of 700MB was processed in&nbsp;77 seconds with <tt>re</tt> but it
+took&nbsp;92 seconds with <tt>regex</tt>.  Peters <a
+href="/ml/python-ideas/CAExdVN=DKdpgn1zZUymg27RAFmjTBp1xcd=SkvtKHe64yMdwYw@mail.gmail.com/">was
+"<span>mildly surprised</span>"</a> by that, since: "<span>Most times
+people report that regex is at least 
+modestly faster than re</span>". 
+
+<h4>Whither <tt>re</tt>?</h4>
+
+<p>
+The performance of <tt>regex</tt> seems like something that might need
+attention, especially if it is becoming the de facto regular-expression module for
+Python.  Peters's analysis of the status of <tt>re</tt> is somewhat
+disheartening; it is apparently permanently stuck in the past. That may be
+sufficient for many, however, but it somehow seems suboptimal to have two
+separate pieces of the Python ecosystem that both support the more limited
+<tt>re</tt> subset; most enhancements are likely to only go into
+<tt>regex</tt> so that <tt>re</tt> falls further and further behind the
+state of the art.
+</p>
+
+<p>
+Supplanting <tt>re</tt> with <tt>regex</tt> in the standard library (using
+version&nbsp;0 by default) would seem attractive, though Barnett seems at
+least somewhat cautious about doing so.  A similar thing occurred with the
+popular <a href="https://pypi.org/project/requests/">Requests</a> HTTP
+module, which was <a href="/Articles/640838/">considered</a> as a possible
+addition to the standard library at the <a href="/Articles/639773/">2015
+Python Language Summit</a>.  The conclusion was that it made more sense
+for Requests to stay out of the standard library because it moves faster
+than the normal Python release cadence (then&nbsp;18 months, but now yearly),
+especially for security updates (which are done more frequently for the
+language, but not as quickly as Requests can move on its own).
+</p>
+
+<p>
+The "batteries included" story for Python has been a major part of its
+success over the years, but it is starting to fray in various ways.  For
+one thing, the large number of said batteries is straining the maintenance ability of
+the Python core developers.  That has led to <a
+href="/Articles/755229/">discussions</a>, a <a
+href="/Articles/790677/">Python Enhancement Proposal</a> (PEP), and <a
+href="/Articles/877957/">further discussion</a> about removing some parts
+of the library over the years.  Most of the modules in the standard library
+were added long ago and, once
+something is added, it is difficult to remove it—even if the reason for its
+inclusion and the existence of maintainers for it have gone away.
+</p>
+
+<p>
+Meanwhile, regular expressions are clearly something that Python programmers use—a lot—so
+having the best support for them, in one place if possible, seems like the
+right approach. As Peters noted, they are a "<span>a tool with a hyper-concise notation, where a
+correct expression is pretty much indistinguishable from line noise,
+and a typo is rarely detectable as a syntax error</span>".  Adding risks of
+incompatibility (or differing performance) into the mix may not lead to
+much joy either.  It is all a bit of a pickle, but not <i>that</i> <a
+href="https://docs.python.org/3/library/pickle.html"><tt>pickle</tt></a>,
+of course. 
+</p>
+
+<p>
+On the other hand, <tt>re</tt>, which was originally developed by Fredrik
+Lundh (who sadly <a href="/Articles/878325/">died back in November</a>), does
+what it needs to do for lots of 
+different use cases.  Those who need timeouts, <a
+href="https://www.regular-expressions.info/atomic.html">atomic groups</a>,
+nested character sets, <a
+href="https://www.regular-expressions.info/possessive.html">possessive
+quantifiers</a>, and other advanced features have a place to turn.
+Barnett seems keen to maintain the compatibility with <tt>re</tt>, so it
+may turn out to be a situation, like with Requests, where alternatives to
+the standard library should be recommended, perhaps even in the Python
+documentation. There is no clear and obvious "right" solution here it seems.
+</p><br clear="all"><table class="IndexEntries">
+           <tr><th colspan=2>Index entries for this article</th></tr>
+           <tr><td><a href="/Archives/PythonIndex/">Python</a></td><td><a href="/Archives/PythonIndex/#Regular_expressions">Regular expressions</a></td></tr>
+            <tr><td><a href="/Archives/PythonIndex/">Python</a></td><td><a href="/Archives/PythonIndex/#Standard_library">Standard library</a></td></tr>
+            </table><br clear="all">
+<div class="MakeALink">
+               <table align="right"><tr><td>
+               <form action="/SubscriberLink/MakeLink" method="post">
+               <input type="hidden" name="articleid" value="885682">
+               <input type="submit" value="Send a free link"></form>
+               </td></tr></table>
+               </div>
+               <br clear="all">
+               <hr width="60%" align="left">
+           (<a href="https://lwn.net/Login/?target=/Articles/885682/">Log in</a> to post comments)
+           <p>
+           
+</div> <!-- ArticleText -->
+<p><a name="Comments"></a>
+
+<a name="CommAnchor885820"></a>
+<div class="CommentBox">
+  <h3 class="CommentTitle">Python support for &quot;irregular&quot; expressions</h3>
+  <div class="CommentBody">
+    <p class="CommentPoster">Posted Feb 22, 2022 21:53 UTC (Tue) by <b>brenns10</b> (subscriber, #112114)
+       [<a href="/Articles/885820/">Link</a>]
+    </p>
+    <div class="FormattedComment">
+This article and discussion did not go the way I expected. Maybe my way of thinking is uncommon, but I avoid using the &quot;non-regular&quot; (in the theoretical sense of regular languages) features of regex at all costs. Sure, assertions and backreferences can simplify things, but at that point you&#x27;re trying to implement logic in a quite arcane language, and you&#x27;d likely be better served by writing that logic with, well, Python. I had assumed this discussion would naturally land on the issues of exponential backtracking, and a recommendation to switch to a truly &quot;regular&quot; expression engine, such as Google&#x27;s re2. (A good background on this from Russ Cox is found here [1]).<br>
+<p>
+Probably as a result of my attitude toward regex matching, I haven&#x27;t really found any issues with the default &quot;re&quot; module, and didn&#x27;t even know of the existence of &quot;regex&quot;, nor that it was a de-facto standard for many Python users -- I suppose I&#x27;ve never felt that re lacked features.<br>
+<p>
+In any case, I wonder of the original use case would have been solved by a truly &quot;regular&quot; engine, maybe with the option to switch to the more complex (and slower) engine for the rare cases where non-regular features are needed.<br>
+<p>
+[1]: <a href="https://swtch.com/~rsc/regexp/regexp1.html">https://swtch.com/~rsc/regexp/regexp1.html</a><br>
+</div>
+
+  </div>
+  
+  <div class="CommentReplyButton">
+    <form action="/Articles/885820/comment" method="post">
+      <input type="submit" value="Reply to this comment">
+    </form>
+  </div>
+
+  <p>
+  
+</div>
+<div class="Comment">
+
+<a name="CommAnchor885841"></a>
+<div class="CommentBox">
+  <h3 class="CommentTitle">Python support for &quot;irregular&quot; expressions</h3>
+  <div class="CommentBody">
+    <p class="CommentPoster">Posted Feb 23, 2022 8:23 UTC (Wed) by <b>marcH</b> (subscriber, #57642)
+       [<a href="/Articles/885841/">Link</a>]
+    </p>
+    <div class="FormattedComment">
+Same, I enjoyed the &quot;contrast&quot; between:<br>
+<p>
+<font class="QuotedText">&gt; As can be seen, regular expressions are a powerful mechanism, but they are complex, can be used inappropriately, and are prone to bugs of various sorts; they are also difficult to test fully and to debug when problems are encountered. [...] They are useful tools, and _started_ life as pretty simple things, with small, elegant, and efficient implementations Feature creep and &quot;faster! faster! faster!&quot; turned the implementations more into bottomless pits now ;-)</font><br>
+<p>
+and:<br>
+<p>
+<font class="QuotedText">&gt; Those who need timeouts, atomic groups, nested character sets, possessive quantifiers, and other advanced footguns ...</font><br>
+<p>
+Although &quot;timeouts&quot; look more like a security fix than an advanced feature.<br>
+</div>
+
+  </div>
+  
+  <div class="CommentReplyButton">
+    <form action="/Articles/885841/comment" method="post">
+      <input type="submit" value="Reply to this comment">
+    </form>
+  </div>
+
+  <p>
+  
+</div>
+</div>
+
+<a name="CommAnchor885821"></a>
+<div class="CommentBox">
+  <h3 class="CommentTitle">Python support for regular expressions</h3>
+  <div class="CommentBody">
+    <p class="CommentPoster">Posted Feb 22, 2022 22:01 UTC (Tue) by <b>atnot</b> (subscriber, #124910)
+       [<a href="/Articles/885821/">Link</a>]
+    </p>
+    <div class="FormattedComment">
+I feel like the real question here is less what python is going to do about regex specifically, but what they can do about the &quot;The standard library is where modules go to die&quot; situation. Importing the current state of the art in regex library into the cpython repository is going to be nice for a bit, but it doesn&#x27;t really do anything to address the reasons that it came to be neglected in the first place. It would effectively crowd out an actively maintained pypi module in favor of a soon-to-be-unmaintained standard library one once again, as keeps happening. Surely that&#x27;s not in the ecosystem&#x27;s best interest.<br>
+</div>
+
+  </div>
+  
+  <div class="CommentReplyButton">
+    <form action="/Articles/885821/comment" method="post">
+      <input type="submit" value="Reply to this comment">
+    </form>
+  </div>
+
+  <p>
+  
+</div>
+<div class="Comment">
+
+<a name="CommAnchor885832"></a>
+<div class="CommentBox">
+  <h3 class="CommentTitle">Python support for regular expressions</h3>
+  <div class="CommentBody">
+    <p class="CommentPoster">Posted Feb 23, 2022 1:56 UTC (Wed) by <b>fsateler</b> (subscriber, #65497)
+       [<a href="/Articles/885832/">Link</a>]
+    </p>
+    <div class="FormattedComment">
+There is no reason you can&#x27;t have both (stdlib and pypi). Ruby, for example, ships some gems by default, which you can upgrade independently in your Gemfile. This opens a path for removal from the stdlib: recommend to &quot;just add foo to your gemfile&quot; and then it can be removed from the included batteries in a later release. They did this in ruby 3 iirc.<br>
+</div>
+
+  </div>
+  
+  <div class="CommentReplyButton">
+    <form action="/Articles/885832/comment" method="post">
+      <input type="submit" value="Reply to this comment">
+    </form>
+  </div>
+
+  <p>
+  
+</div>
+</div>
+
+<a name="CommAnchor885823"></a>
+<div class="CommentBox">
+  <h3 class="CommentTitle">Python support for regular expressions</h3>
+  <div class="CommentBody">
+    <p class="CommentPoster">Posted Feb 22, 2022 23:38 UTC (Tue) by <b>iabervon</b> (subscriber, #722)
+       [<a href="/Articles/885823/">Link</a>]
+    </p>
+    <div class="FormattedComment">
+I really wish Python releases came bundled with particular versions of some well-managed PyPI packages you could upgrade further. You should be able to rely on the fact that &quot;regex&quot; is present, and that it conforms to the documentation frozen when 3.9 came out, but not that is doesn&#x27;t have undocumented features from the future or that it still has bugs that hadn&#x27;t been discovered.<br>
+<p>
+AFAICT, &quot;requests&quot; hasn&#x27;t removed any documented features since 2015; on the other hand, &quot;construct&quot; has not been as stable, even over a shorter period of time.<br>
+</div>
+
+  </div>
+  
+  <div class="CommentReplyButton">
+    <form action="/Articles/885823/comment" method="post">
+      <input type="submit" value="Reply to this comment">
+    </form>
+  </div>
+
+  <p>
+  
+</div>
+<div class="Comment">
+
+<a name="CommAnchor885825"></a>
+<div class="CommentBox">
+  <h3 class="CommentTitle">Python support for regular expressions</h3>
+  <div class="CommentBody">
+    <p class="CommentPoster">Posted Feb 23, 2022 0:03 UTC (Wed) by <b>NYKevin</b> (subscriber, #129325)
+       [<a href="/Articles/885825/">Link</a>]
+    </p>
+    <div class="FormattedComment">
+I feel like almost every language does packaging and dependencies poorly, and they all just find different ways of being terrible (albeit most also have some redeeming qualities). In the case of Python:<br>
+<p>
+* On the one hand, import statements use a relatively straightforward, easy to understand set of semantics (i.e. &quot;just stick a bunch of py files in a directory structure, and you&#x27;re done!&quot;). This is good for scripting purposes, because you don&#x27;t have to faff about with something like CMake just to build an entirely self-contained app.<br>
+* On the other, those semantics are perhaps *too* simple, because there is no way to specify &quot;I need version X or greater&quot; within the import statement itself, nor where the module actually comes from. So now that information needs to live in metadata somewhere, and get tracked and managed separately by a tool like Pip.<br>
+* To add insult to injury, you can&#x27;t have two different versions of the same module in the same process, without doing all sorts of nasty hacks that may or may not break something depending on how the underlying module works (e.g. Does it check __name__? Does it fiddle around with sys.modules? etc.).<br>
+* And, of course, you have the common beginner mistake of accidentally naming a Python script after a stdlib module (Python will prefer to re-import the script a second time, rather than using the stdlib module, and then everything breaks because it probably won&#x27;t implement the stdlib module&#x27;s API). This can break backcompat if a new stdlib module is introduced with the same name as one of your existing modules, but for some reason nobody seems to care about that failure mode.<br>
+<p>
+Perhaps it would&#x27;ve been less bad if Python had used a slightly more elaborate syntax instead:<br>
+<p>
+from python import re: 3.11+  # Must include Python version for standard library modules.<br>
+from pypi import regex: 3.9+  # Also need version for PyPI modules - if it&#x27;s not installed or too old, then error out.<br>
+from local import regex  # &quot;local&quot; means &quot;don&#x27;t search sys.path, just check the __main__ module&#x27;s containing directory for regex.py.&quot; No version.<br>
+from my_custom_namespace import regex: 1.2.3+  # You can install custom hooks to handle imports in whatever crazy way you want.<br>
+<p>
+Unfortunately, that would be egregiously incompatible with existing usage, so it&#x27;s probably too late now. Oh well.<br>
+</div>
+
+  </div>
+  
+  <div class="CommentReplyButton">
+    <form action="/Articles/885825/comment" method="post">
+      <input type="submit" value="Reply to this comment">
+    </form>
+  </div>
+
+  <p>
+  
+</div>
+<div class="Comment">
+
+<a name="CommAnchor885840"></a>
+<div class="CommentBox">
+  <h3 class="CommentTitle">Python support for regular expressions</h3>
+  <div class="CommentBody">
+    <p class="CommentPoster">Posted Feb 23, 2022 8:14 UTC (Wed) by <b>marcH</b> (subscriber, #57642)
+       [<a href="/Articles/885840/">Link</a>]
+    </p>
+    <div class="FormattedComment">
+<a href="https://medium.com/@sdboyer/so-you-want-to-write-a-package-manager-4ae9c17d9527">https://medium.com/@sdboyer/so-you-want-to-write-a-packag...</a><br>
+</div>
+
+  </div>
+  
+  <div class="CommentReplyButton">
+    <form action="/Articles/885840/comment" method="post">
+      <input type="submit" value="Reply to this comment">
+    </form>
+  </div>
+
+  <p>
+  
+</div>
+
+<a name="CommAnchor885843"></a>
+<div class="CommentBox">
+  <h3 class="CommentTitle">Python support for regular expressions</h3>
+  <div class="CommentBody">
+    <p class="CommentPoster">Posted Feb 23, 2022 8:28 UTC (Wed) by <b>interalia</b> (subscriber, #26615)
+       [<a href="/Articles/885843/">Link</a>]
+    </p>
+    <div class="FormattedComment">
+It does seem crazy that Python didn&#x27;t at some stage namespace libraries better, both stdlib and external ones...<br>
+<p>
+But anyway, do you think what you said about every language doing packaging/dependencies poorly is partly due to every approach having advantages/disadvantages, that being the nature of software development?<br>
+</div>
+
+  </div>
+  
+  <div class="CommentReplyButton">
+    <form action="/Articles/885843/comment" method="post">
+      <input type="submit" value="Reply to this comment">
+    </form>
+  </div>
+
+  <p>
+  
+</div>
+
+<a name="CommAnchor885846"></a>
+<div class="CommentBox">
+  <h3 class="CommentTitle">Python support for regular expressions</h3>
+  <div class="CommentBody">
+    <p class="CommentPoster">Posted Feb 23, 2022 10:24 UTC (Wed) by <b>MrWim</b> (subscriber, #47432)
+       [<a href="/Articles/885846/">Link</a>]
+    </p>
+    <div class="FormattedComment">
+Rust (with Cargo) does this better. I&#x27;ve written a bit about this here: <a href="https://blog.williammanley.net/2022/02/23/pip-and-cargo-are-not-the-same.html">https://blog.williammanley.net/2022/02/23/pip-and-cargo-a...</a> .<br>
+<p>
+I realise this is a bit of a tangent, the subject is Python and not rust, but here goes anyway:<br>
+<p>
+<font class="QuotedText">&gt; On the one hand, import statements use a relatively straightforward, easy to understand set of semantics (i.e. &quot;just stick a bunch of py files in a directory structure, and you&#x27;re done!&quot;).</font><br>
+<p>
+This is where rust isn&#x27;t so good. It can be confusing how `mod` and `use` and `Cargo.toml` interrelate.<br>
+<p>
+<font class="QuotedText">&gt;This is good for scripting purposes, because you don&#x27;t have to faff about with something like CMake just to build an entirely self-contained app.</font><br>
+<p>
+Cargo helps here as it&#x27;s the single blessed build system, and comes bundled with rust.<br>
+<p>
+<font class="QuotedText">&gt; On the other, those semantics are perhaps *too* simple, because there is no way to specify &quot;I need version X or greater&quot; within the import statement itself,</font><br>
+<p>
+With Cargo these versions are specified in `Cargo.toml` - so still external. <br>
+<p>
+<font class="QuotedText">&gt; nor where the module actually comes from.</font><br>
+<p>
+Cargo does restrict where the module comes from.  You&#x27;ll get the version you specified in your Cargo.toml, and you can&#x27;t `use` things that you haven&#x27;t specified there - even if they&#x27;re included in a transitive dependency.<br>
+<p>
+<font class="QuotedText">&gt; To add insult to injury, you can&#x27;t have two different versions of the same module in the same process</font><br>
+<p>
+Cargo and rust fix this with clever symbol mangling.  It could still be an issue with C dependencies, but they are relatively rare in rust land vs. Python<br>
+<p>
+<font class="QuotedText">&gt; And, of course, you have the common beginner mistake of accidentally naming a Python script after a stdlib module</font><br>
+<p>
+This isn&#x27;t a problem with rust - you can use from your local crate with `use crate::mymod`.  And anyway - if you get it wrong you&#x27;ll get a compile error, it&#x27;s not going to silently give you the wrong behaviour at runtime. <br>
+<p>
+Thanks for your comment, it encouraged me to finally publish that blog post. It had been sitting almost finished for about a year now.<br>
+</div>
+
+  </div>
+  
+  <div class="CommentReplyButton">
+    <form action="/Articles/885846/comment" method="post">
+      <input type="submit" value="Reply to this comment">
+    </form>
+  </div>
+
+  <p>
+  
+</div>
+</div>
+</div>
+
+<a name="CommAnchor885830"></a>
+<div class="CommentBox">
+  <h3 class="CommentTitle">Python support for regular expressions</h3>
+  <div class="CommentBody">
+    <p class="CommentPoster">Posted Feb 23, 2022 1:34 UTC (Wed) by <b>da4089</b> (subscriber, #1195)
+       [<a href="/Articles/885830/">Link</a>]
+    </p>
+    <div class="FormattedComment">
+The funny thing is that up until Python 1.4, &#x27;regex&#x27; was the standard regular expression module.  &#x27;re&#x27; was added in Python 1.5, and &#x27;regex&#x27; was declared obsolete.<br>
+<p>
+Switching my brain to &quot;no, you should use &#x27;regex&#x27; again now&quot; is going to be fun ...<br>
+</div>
+
+  </div>
+  
+  <div class="CommentReplyButton">
+    <form action="/Articles/885830/comment" method="post">
+      <input type="submit" value="Reply to this comment">
+    </form>
+  </div>
+
+  <p>
+  
+</div>
+
+<a name="CommAnchor885833"></a>
+<div class="CommentBox">
+  <h3 class="CommentTitle">SNOBOL and parsing</h3>
+  <div class="CommentBody">
+    <p class="CommentPoster">Posted Feb 23, 2022 2:20 UTC (Wed) by <b>klossner</b> (subscriber, #30046)
+       [<a href="/Articles/885833/">Link</a>]
+    </p>
+    <div class="FormattedComment">
+In school, I once realized that I could write the entire parser for my simple compiler in one (continued) line of SNOBOL. I punched the cards, submitted the job, and got my fanfold listing an hour later: the OS aborted my job when it exceeded its CPU allocation.<br>
+</div>
+
+  </div>
+  
+  <div class="CommentReplyButton">
+    <form action="/Articles/885833/comment" method="post">
+      <input type="submit" value="Reply to this comment">
+    </form>
+  </div>
+
+  <p>
+  
+</div>
+<div class="Comment">
+
+<a name="CommAnchor885844"></a>
+<div class="CommentBox">
+  <h3 class="CommentTitle">SNOBOL and parsing</h3>
+  <div class="CommentBody">
+    <p class="CommentPoster">Posted Feb 23, 2022 8:58 UTC (Wed) by <b>lkundrak</b> (subscriber, #43452)
+       [<a href="/Articles/885844/">Link</a>]
+    </p>
+    <div class="FormattedComment">
+This story made me very sad.<br>
+:(<br>
+</div>
+
+  </div>
+  
+  <div class="CommentReplyButton">
+    <form action="/Articles/885844/comment" method="post">
+      <input type="submit" value="Reply to this comment">
+    </form>
+  </div>
+
+  <p>
+  
+</div>
+</div>
+</div>
+<div class="lwn-u-1 pure-u-md-1-6 not-print">
+<div id="azk93271_right_zone"></div>
+</div>
+</div> <!-- pure-grid -->
+
+        <br clear="all">
+        <center>
+        <P>
+        <font size="-2">
+        Copyright &copy; 2022, Eklektix, Inc.<BR>
+        
+        Comments and public postings are copyrighted by their creators.<br>
+        Linux  is a registered trademark of Linus Torvalds<br>
+        </font>
+        </center>
+        
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+            </script>
+            <script type="text/javascript">
+            try {
+            var pageTracker = _gat._getTracker("UA-2039382-1");
+            pageTracker._trackPageview();
+            } catch(err) {}</script>
+            
+        </body></html>
+        
