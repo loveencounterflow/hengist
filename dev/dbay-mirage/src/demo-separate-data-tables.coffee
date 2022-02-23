@@ -143,28 +143,29 @@ normalize_tokens = ( tokens ) ->
   db.create_stdlib()
   # dsk       = 'demo'
   # mrg.register_dsk { dsk, url: 'live:', }
-  # dsk       = 'twcm'; path = 'dbay-rustybuzz/htmlish-tags.html'
-  dsk       = 'ne'; path = 'dbay-rustybuzz/no-errors.html'
+  dsk       = 'twcm'; path = 'dbay-rustybuzz/htmlish-tags.html'
+  # dsk       = 'ne'; path = 'dbay-rustybuzz/no-errors.html'
+  # dsk       = 'ne'; path = 'list-of-egyptian-hieroglyphs.html'
   path      = PATH.resolve PATH.join __dirname, '../../../assets', path
   mrg.register_dsk { dsk, path, }
   mrg.refresh_datasource { dsk, }
-  # mrg.html.statements.insert_datasource.run { dsk, url: 'ram:', digest: null, }
-  # mrg.html._append_tag dsk, '^', 'path', { id: 'c1', d: 'M100,100L200,200', }
-  # mrg.html._append_tag dsk, '<', 'div', { id: 'c1', class: 'foo bar', }
-  # mrg.html._append_tag dsk, '^', '$text', null, "helo"
-  # mrg.html._append_tag dsk, '>', 'div'
-  # mrg.html._append_tag dsk, '^', 'mrg:loc#baselines'
-  mrg.html.parse_dsk { dsk, }
-  #.........................................................................................................
   db.setv 'dsk', dsk
-  # # H.tabulate "#{prefix}_datasources",         db SQL"select * from #{prefix}_datasources;"
-  H.tabulate "#{prefix}_html_mirror",         db SQL"select * from #{prefix}_html_mirror;"
-  H.tabulate "#{prefix}_html_atrs",           db SQL"select * from #{prefix}_html_atrs;"
+  t1 = Date.now()
+  mrg.html.parse_dsk { dsk, }
+  t2 = Date.now(); debug '^33341^', ( t2 - t1 ) / 1000
+  #.........................................................................................................
+  # H.tabulate "#{prefix}_datasources",         db SQL"select * from #{prefix}_datasources;"
   # H.tabulate "std_variables()",               db SQL"select * from std_variables();"
+  # H.tabulate "#{prefix}_mirror",              db SQL"select * from #{prefix}_mirror;"
+  # H.tabulate "#{prefix}_raw_mirror",          db SQL"select * from #{prefix}_raw_mirror;"
+  # H.tabulate "#{prefix}_html_atrs",           db SQL"select * from #{prefix}_html_atrs;"
+  # H.tabulate "#{prefix}_pars",                db SQL"select * from #{prefix}_pars;"
   H.tabulate "#{prefix}_html_tags_and_html",  db SQL"select * from #{prefix}_html_tags_and_html;"
-  H.tabulate "#{prefix}_parmirror",           db SQL"select * from #{prefix}_parmirror;"
-  H.tabulate "#{prefix}_mirror",              db SQL"select * from #{prefix}_mirror;"
-  # H.banner "render_dsk";                      echo mrg.html.render_dsk { dsk, }
+  H.tabulate "#{prefix}_html_mirror",         db SQL"select * from #{prefix}_html_mirror;"
+  H.tabulate "#{prefix}_wspars",              db SQL"select * from #{prefix}_wspars;"
+  # H.tabulate "#{prefix}_parmirror",           db SQL"select * from #{prefix}_parmirror;"
+  # H.tabulate "#{prefix}_rwnmirror",           db SQL"select * from #{prefix}_rwnmirror;"
+  H.banner "render_dsk";                      echo mrg.html.render_dsk { dsk, }
   urge '^3243^', "DB file at #{db.cfg.path}"
   return null
 
