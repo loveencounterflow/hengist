@@ -30,7 +30,15 @@ H                         = require '../../../lib/helpers'
 { lets
   freeze }                = GUY.lft
 { to_width }              = require 'to-width'
-
+TIME                      = 0
+#-----------------------------------------------------------------------------------------------------------
+time = ( label, f ) ->
+  t0    = Date.now()
+  console.time label
+  R     = f()
+  console.timeEnd label
+  TIME  = ( Date.now() - t0 ) / 1000
+  return R
 
 #===========================================================================================================
 #
@@ -131,6 +139,25 @@ normalize_tokens = ( tokens ) ->
     R.push d
   return freeze R
 
+#-----------------------------------------------------------------------------------------------------------
+show_query_plan = ->
+  H.tabulate "query plan", db SQL"explain query plan select * from #{prefix}_wspars;"
+  rows    = []
+  counts  = {}
+  for row from db SQL"explain query plan select * from #{prefix}_wspars;"
+    continue unless /^(SCAN (?!SUBQUERY)|SEARCH)/.test row.detail
+    key =  row.detail.replace /^(\S+).*$/, '$1'
+    counts[ key ] = ( counts[ key ] ? 0 ) + 1
+    # continue unless /^(SCAN|SEARCH)/.test row.detail
+    rows.push row
+  rows.sort ( a, b ) =>
+    return +1 if a.detail > b.detail
+    return -1 if a.detail < b.detail
+    return  0
+  H.tabulate "query plan", rows
+  urge '^44873^', counts
+  #.........................................................................................................
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_html_parsing = ( cfg ) ->
@@ -146,25 +173,36 @@ normalize_tokens = ( tokens ) ->
   dsk       = 'twcm'; path = 'dbay-rustybuzz/htmlish-tags.html'
   # dsk       = 'ne'; path = 'dbay-rustybuzz/no-errors.html'
   # dsk       = 'ne'; path = 'list-of-egyptian-hieroglyphs.html'
+  # dsk       = 'pre'; path = 'python-regexes.html'
   path      = PATH.resolve PATH.join __dirname, '../../../assets', path
-  mrg.register_dsk { dsk, path, }
-  mrg.refresh_datasource { dsk, }
   db.setv 'dsk', dsk
-  t1 = Date.now()
-  mrg.html.parse_dsk { dsk, }
-  t2 = Date.now(); debug '^33341^', ( t2 - t1 ) / 1000
+  db.setv 'trk', 1
+  time 'register_dsk',        => mrg.register_dsk { dsk, path, }
+  time 'refresh_datasource',  => mrg.refresh_datasource { dsk, }
+  time 'html.parse_dsk',      => mrg.html.parse_dsk { dsk, }
+  time 'get_par_rows',        => mrg.get_par_rows { dsk, }
+  txt = FS.readFileSync path, { encoding: 'utf-8', }; time 'mrg.html.HTMLISH.parse', => mrg.html.HTMLISH.parse txt
+  H.tabulate "#{prefix}_raw_mirror limit 25",       db SQL"select * from #{prefix}_raw_mirror limit 25;"
+  H.tabulate "_#{prefix}_ws_linecounts limit 25",       db SQL"select * from _#{prefix}_ws_linecounts limit 25;"
+  H.tabulate "#{prefix}_paragraphs limit 25",       db SQL"select * from #{prefix}_paragraphs limit 25;"
+  #.........................................................................................................
+  { L, I, } = db.sql
+  timings   = []
+  for { name, } from db SQL"""
+    with v1 as ( select row_number() over () as nr, name, type from sqlite_schema )
+    select name from v1 where type in ( 'table', 'view' ) order by nr;"""
+    sql   = SQL"select count(*) as count from #{I name};"
+    count = time name, -> db.single_value sql
+    dt    = TIME.toFixed 3
+    timings.push { name, count, dt, }
+  H.tabulate "timings", timings
   #.........................................................................................................
   # H.tabulate "#{prefix}_datasources",         db SQL"select * from #{prefix}_datasources;"
   # H.tabulate "std_variables()",               db SQL"select * from std_variables();"
-  # H.tabulate "#{prefix}_mirror",              db SQL"select * from #{prefix}_mirror;"
-  # H.tabulate "#{prefix}_raw_mirror",          db SQL"select * from #{prefix}_raw_mirror;"
+  H.tabulate "#{prefix}_raw_mirror",          db SQL"select * from #{prefix}_raw_mirror;"
   # H.tabulate "#{prefix}_html_atrs",           db SQL"select * from #{prefix}_html_atrs;"
-  # H.tabulate "#{prefix}_pars",                db SQL"select * from #{prefix}_pars;"
   H.tabulate "#{prefix}_html_tags_and_html",  db SQL"select * from #{prefix}_html_tags_and_html;"
   H.tabulate "#{prefix}_html_mirror",         db SQL"select * from #{prefix}_html_mirror;"
-  H.tabulate "#{prefix}_wspars",              db SQL"select * from #{prefix}_wspars;"
-  # H.tabulate "#{prefix}_parmirror",           db SQL"select * from #{prefix}_parmirror;"
-  # H.tabulate "#{prefix}_rwnmirror",           db SQL"select * from #{prefix}_rwnmirror;"
   H.banner "render_dsk";                      echo mrg.html.render_dsk { dsk, }
   urge '^3243^', "DB file at #{db.cfg.path}"
   return null
