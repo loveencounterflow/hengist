@@ -171,7 +171,22 @@ select 'helo world' as greetings;`,
     SQL`select "c" as "c1" from t;`,
     SQL`select name, type from sqlite_schema;`,
     SQL`create view v as select a, b, "c", f( d ) as k from t join t2 using ( uuu ) where e > 2 order by k desc, l, m;`,
-    SQL`select "c" as "c1" from "t";`
+    SQL`select "c" as "c1" from "t";`,
+    SQL`create view mrg_parmirror as select
+    rwnmirror.dsk                                                             as dsk,
+    rwnmirror.oln                                                             as oln,
+    rwnmirror.trk                                                             as trk,
+    rwnmirror.pce                                                             as pce,
+    rwnmirror.act                                                             as act,
+    raw_mirror.mat                                                            as mat,
+    ( select
+          parlnrs.par as par
+        from mrg_parlnrs as parlnrs
+        where rwnmirror.rwn between parlnrs.rwn1 and parlnrs.rwn2 limit 1 )   as par,
+    raw_mirror.txt                                                            as txt
+  from mrg_rwnmirror  as rwnmirror
+  join mrg_raw_mirror as raw_mirror using ( oln, trk, pce )
+  order by rwn;`
   ];
 
   //-----------------------------------------------------------------------------------------------------------
@@ -185,10 +200,10 @@ select 'helo world' as greetings;`,
     // for query in [ SQL"select '𠀀' as a;", ]
     // for query in [ queries[ 1 ], ]
     n = queries.length;
-    ref = queries.slice(15, 21);
-    // for query in querides[ n - 3 .. ]
+    ref = queries.slice(n - 3);
     for (i = 0, len = ref.length; i < len; i++) {
       query = ref[i];
+      // for query in queries[ 15 .. 20 ]
       // for query in queries
       desql = new Desql();
       desql.parse(query);

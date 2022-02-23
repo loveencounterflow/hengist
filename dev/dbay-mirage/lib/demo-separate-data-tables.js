@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, GUY, H, PATH, SQL, badge, debug, echo, equals, freeze, help, info, isa, lets, normalize_tokens, rpr, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, GUY, H, PATH, SQL, TIME, badge, debug, echo, equals, freeze, help, info, isa, lets, normalize_tokens, rpr, show_query_plan, time, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -42,6 +42,19 @@
   ({lets, freeze} = GUY.lft);
 
   ({to_width} = require('to-width'));
+
+  TIME = 0;
+
+  //-----------------------------------------------------------------------------------------------------------
+  time = function(label, f) {
+    var R, t0;
+    t0 = Date.now();
+    console.time(label);
+    R = f();
+    console.timeEnd(label);
+    TIME = (Date.now() - t0) / 1000;
+    return R;
+  };
 
   //===========================================================================================================
 
@@ -237,8 +250,39 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  show_query_plan = function() {
+    var counts, key, ref, ref1, row, rows;
+    H.tabulate("query plan", db(SQL`explain query plan select * from ${prefix}_wspars;`));
+    rows = [];
+    counts = {};
+    ref = db(SQL`explain query plan select * from ${prefix}_wspars;`);
+    for (row of ref) {
+      if (!/^(SCAN (?!SUBQUERY)|SEARCH)/.test(row.detail)) {
+        continue;
+      }
+      key = row.detail.replace(/^(\S+).*$/, '$1');
+      counts[key] = ((ref1 = counts[key]) != null ? ref1 : 0) + 1;
+      // continue unless /^(SCAN|SEARCH)/.test row.detail
+      rows.push(row);
+    }
+    rows.sort((a, b) => {
+      if (a.detail > b.detail) {
+        return +1;
+      }
+      if (a.detail < b.detail) {
+        return -1;
+      }
+      return 0;
+    });
+    H.tabulate("query plan", rows);
+    urge('^44873^', counts);
+    //.........................................................................................................
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.demo_html_parsing = function(cfg) {
-    var DBay, Mrg, db, dsk, mrg, path, prefix, t1, t2;
+    var DBay, I, L, Mrg, count, db, dsk, dt, mrg, name, path, prefix, ref, sql, timings, txt, x;
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage'));
     prefix = 'mrg';
@@ -255,26 +299,53 @@
     path = 'dbay-rustybuzz/htmlish-tags.html';
     // dsk       = 'ne'; path = 'dbay-rustybuzz/no-errors.html'
     // dsk       = 'ne'; path = 'list-of-egyptian-hieroglyphs.html'
+    // dsk       = 'pre'; path = 'python-regexes.html'
     path = PATH.resolve(PATH.join(__dirname, '../../../assets', path));
-    mrg.register_dsk({dsk, path});
-    mrg.refresh_datasource({dsk});
     db.setv('dsk', dsk);
-    t1 = Date.now();
-    mrg.html.parse_dsk({dsk});
-    t2 = Date.now();
-    debug('^33341^', (t2 - t1) / 1000);
+    db.setv('trk', 1);
+    time('register_dsk', () => {
+      return mrg.register_dsk({dsk, path});
+    });
+    time('refresh_datasource', () => {
+      return mrg.refresh_datasource({dsk});
+    });
+    time('html.parse_dsk', () => {
+      return mrg.html.parse_dsk({dsk});
+    });
+    time('get_par_rows', () => {
+      return mrg.get_par_rows({dsk});
+    });
+    txt = FS.readFileSync(path, {
+      encoding: 'utf-8'
+    });
+    time('mrg.html.HTMLISH.parse', () => {
+      return mrg.html.HTMLISH.parse(txt);
+    });
+    H.tabulate(`${prefix}_raw_mirror limit 25`, db(SQL`select * from ${prefix}_raw_mirror limit 25;`));
+    H.tabulate(`_${prefix}_ws_linecounts limit 25`, db(SQL`select * from _${prefix}_ws_linecounts limit 25;`));
+    H.tabulate(`${prefix}_paragraphs limit 25`, db(SQL`select * from ${prefix}_paragraphs limit 25;`));
+    //.........................................................................................................
+    ({L, I} = db.sql);
+    timings = [];
+    ref = db(SQL`with v1 as ( select row_number() over () as nr, name, type from sqlite_schema )
+select name from v1 where type in ( 'table', 'view' ) order by nr;`);
+    for (x of ref) {
+      ({name} = x);
+      sql = SQL`select count(*) as count from ${I(name)};`;
+      count = time(name, function() {
+        return db.single_value(sql);
+      });
+      dt = TIME.toFixed(3);
+      timings.push({name, count, dt});
+    }
+    H.tabulate("timings", timings);
     //.........................................................................................................
     // H.tabulate "#{prefix}_datasources",         db SQL"select * from #{prefix}_datasources;"
     // H.tabulate "std_variables()",               db SQL"select * from std_variables();"
-    // H.tabulate "#{prefix}_mirror",              db SQL"select * from #{prefix}_mirror;"
-    // H.tabulate "#{prefix}_raw_mirror",          db SQL"select * from #{prefix}_raw_mirror;"
+    H.tabulate(`${prefix}_raw_mirror`, db(SQL`select * from ${prefix}_raw_mirror;`));
     // H.tabulate "#{prefix}_html_atrs",           db SQL"select * from #{prefix}_html_atrs;"
-    // H.tabulate "#{prefix}_pars",                db SQL"select * from #{prefix}_pars;"
     H.tabulate(`${prefix}_html_tags_and_html`, db(SQL`select * from ${prefix}_html_tags_and_html;`));
     H.tabulate(`${prefix}_html_mirror`, db(SQL`select * from ${prefix}_html_mirror;`));
-    H.tabulate(`${prefix}_wspars`, db(SQL`select * from ${prefix}_wspars;`));
-    // H.tabulate "#{prefix}_parmirror",           db SQL"select * from #{prefix}_parmirror;"
-    // H.tabulate "#{prefix}_rwnmirror",           db SQL"select * from #{prefix}_rwnmirror;"
     H.banner("render_dsk");
     echo(mrg.html.render_dsk({dsk}));
     urge('^3243^', `DB file at ${db.cfg.path}`);
