@@ -94,7 +94,7 @@ prepare_db = ( db ) ->
       ( db.sqlt1.prepare SQL"insert into y ( word, nry ) values ( $word, $nry );" ).run { word, nry, }
   scalar_fn_cfg = { deterministic: false, varargs: false, }
   #.........................................................................................................
-  for [ c1, c2, ] in [ [ db.sqlt1, db.sqlt2, ], [ db.sqlt2, db.sqlt1, ], ]
+  for [ c1, c2, ] in [ [ db.sqlt1, db.sqlt1, ], [ db.sqlt1, db.sqlt1, ], ]
     #.......................................................................................................
     c1.function 'join_x_and_y_using_word_scalar_cc1', scalar_fn_cfg, -> jr join_x_and_y_using_word c1
     c1.function 'join_x_and_y_using_word_scalar_cc2', scalar_fn_cfg, -> jr join_x_and_y_using_word c2
@@ -270,44 +270,42 @@ query_without_nested_statement = ( db, fingerprint, sqlt_a, sqlt_b ) ->
       return { result, }
   return { result: cfg.results.not_implemented, error: "ft: #{rpr fingerprint.ft} not implemented", }
 
-#-----------------------------------------------------------------------------------------------------------
-ff = ( db, fingerprint ) ->
-  error           = null
-  result          = null
-  { um, cc,
-    wo, ft, ne, } = fingerprint
-  #.........................................................................................................
-  if um
-    db.sqlt1.unsafeMode true
-    db.sqlt2.unsafeMode true
-  #.........................................................................................................
-  switch cc
-    when 1
-      sqlt_a          = db.sqlt1
-      sqlt_b          = sqlt_a
-    when 2
-      sqlt_a          = db.sqlt1
-      sqlt_b          = db.sqlt2
-    else throw new Error "expected cc to be 1 or 2, got #{rpr cc}"
-  #.........................................................................................................
-  try
-    #.......................................................................................................
-    if ne ### use_nested_statement ###
-      R = query_with_nested_statement db, fingerprint, sqlt_a, sqlt_b
-    else ### do not use_nested_statement ###
-      R = query_without_nested_statement db, fingerprint, sqlt_a, sqlt_b
-  #.........................................................................................................
-  catch error
-    throw error unless cfg.catch_errors
-    error = "(#{error.message})"
-    return { error, }
-  #.........................................................................................................
-  finally
-    db.sqlt1.unsafeMode false
-    db.sqlt2.unsafeMode false
-  #.........................................................................................................
-  return R
-  return null
+# #-----------------------------------------------------------------------------------------------------------
+# ff = ( db, fingerprint ) ->
+#   error           = null
+#   result          = null
+#   { um, cc,
+#     wo, ft, ne, } = fingerprint
+#   #.........................................................................................................
+#   if um
+#     db.sqlt1.unsafeMode true
+#   #.........................................................................................................
+#   switch cc
+#     when 1
+#       sqlt_a          = db.sqlt1
+#       sqlt_b          = sqlt_a
+#     when 2
+#       sqlt_a          = db.sqlt1
+#       sqlt_b          = db.sqlt1
+#     else throw new Error "expected cc to be 1 or 2, got #{rpr cc}"
+#   #.........................................................................................................
+#   try
+#     #.......................................................................................................
+#     if ne ### use_nested_statement ###
+#       R = query_with_nested_statement db, fingerprint, sqlt_a, sqlt_b
+#     else ### do not use_nested_statement ###
+#       R = query_without_nested_statement db, fingerprint, sqlt_a, sqlt_b
+#   #.........................................................................................................
+#   catch error
+#     throw error unless cfg.catch_errors
+#     error = "(#{error.message})"
+#     return { error, }
+#   #.........................................................................................................
+#   finally
+#     db.sqlt1.unsafeMode false
+#   #.........................................................................................................
+#   return R
+#   return null
 
 #-----------------------------------------------------------------------------------------------------------
 select = ( fingerprint ) ->
@@ -336,7 +334,6 @@ new_db_with_data = ->
       db = new DBay { timeout: 500, }
     else throw new Error "unknown value for cfg.use: #{rpr cfg.use}"
   db.sqlt1.exec SQL"pragma journal_mode=#{cfg.journal_mode}"
-  db.sqlt2.exec SQL"pragma journal_mode=#{cfg.journal_mode}"
   debug '^23332^', ( db.sqlt1.prepare SQL"pragma journal_mode;" ).get()
   debug '^23332^', db.sqlt1
   prepare_db db
@@ -476,5 +473,6 @@ simple_demo = ->
 ############################################################################################################
 if require.main is module then do =>
   # await demo_f()
-  simple_demo()
+  # simple_demo()
+  throw new Error "^4343^ subselects from UDFs not supported"
 

@@ -102,17 +102,9 @@ guy                       = require '../../../apps/guy'
   # debug '^332^', db
   # debug '^332^', db.cfg
   #.........................................................................................................
-  info '^908-1^', equals db.sqlt1.name, db.sqlt2.name
   info '^908-2^', db.sqlt1.constructor is bsqlite_class
-  info '^908-3^', db.sqlt2.constructor is bsqlite_class
-  info '^908-4^', db.sqlt2.constructor is db.sqlt1.constructor
-  info '^908-5^', db.sqlt2 isnt db.sqlt1
   #.........................................................................................................
-  T?.eq db.sqlt1.name, db.sqlt2.name
   T?.ok db.sqlt1.constructor is bsqlite_class
-  T?.ok db.sqlt2.constructor is bsqlite_class
-  T?.ok db.sqlt2.constructor is db.sqlt1.constructor
-  T?.ok db.sqlt2 isnt db.sqlt1
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -142,24 +134,23 @@ guy                       = require '../../../apps/guy'
     catch error
       warn error.name, error.message
     T?.fail "^806-3^ expected error, got none" unless error?
-  #.........................................................................................................
-  ### Whether statements are prepared in- or outside of the transaction doesn't matter: ###
-  do =>
-    help '^806-4^ ------------------------'
-    insert_into_bar = db.prepare SQL"insert into bar values ( $n ) returning *;"
-    db.with_transaction =>
-      for { n, } from ( db.sqlt2.prepare SQL"select * from foo order by n;" ).iterate()
-        info '^806-5^', { n, }
-        urge '^806-6^', insert_into_bar.get { n: n ** 2, }
-      return null
-  #.........................................................................................................
-  do =>
-    help '^806-7^ ------------------------'
-    db.with_transaction =>
-      for { n, } from ( db.sqlt2.prepare SQL"select * from foo order by n;" ).iterate()
-        info '^806-8^', { n, }
-        urge '^806-9^', db.first_row SQL"insert into bar values ( $n ) returning *;", { n: n ** 2, }
-      return null
+  # #.........................................................................................................
+  # do =>
+  #   help '^806-4^ ------------------------'
+  #   insert_into_bar = db.prepare SQL"insert into bar values ( $n ) returning *;"
+  #   db.with_transaction =>
+  #     for { n, } from ( db.sqlt2.prepare SQL"select * from foo order by n;" ).iterate()
+  #       info '^806-5^', { n, }
+  #       urge '^806-6^', insert_into_bar.get { n: n ** 2, }
+  #     return null
+  # #.........................................................................................................
+  # do =>
+  #   help '^806-7^ ------------------------'
+  #   db.with_transaction =>
+  #     for { n, } from ( db.sqlt2.prepare SQL"select * from foo order by n;" ).iterate()
+  #       info '^806-8^', { n, }
+  #       urge '^806-9^', db.first_row SQL"insert into bar values ( $n ) returning *;", { n: n ** 2, }
+  #     return null
   #.........................................................................................................
   do =>
     help '^806-10^ ------------------------'
@@ -181,7 +172,6 @@ guy                       = require '../../../apps/guy'
   db              = new DBay()
   debug '^332^', db
   T?.eq ( Object.getOwnPropertyDescriptor db, 'sqlt1'     ).enumerable, false
-  T?.eq ( Object.getOwnPropertyDescriptor db, 'sqlt2'     ).enumerable, false
   T?.eq ( Object.getOwnPropertyDescriptor db, 'rnd'       ).enumerable, false
   # debug '^332^', db.cfg
   done?()
