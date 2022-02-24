@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, DBay, H, PATH, SQL, badge, cfg, debug, demo_f, echo, equals, ff, get_kenning, get_matcher, guy, help, info, insert_result, isa, join_x_and_y_using_word, join_x_and_y_using_word_iterate, jr, new_db_with_data, prepare_db, prepare_dbr, query_with_nested_statement, query_without_nested_statement, rpr, select, select_word_from_y_iterate, select_word_from_y_scalar, show_dbr, simple_demo, trash, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, DBay, H, PATH, SQL, badge, cfg, debug, demo_f, echo, equals, get_kenning, get_matcher, guy, help, info, insert_result, isa, join_x_and_y_using_word, join_x_and_y_using_word_iterate, jr, new_db_with_data, prepare_db, prepare_dbr, query_with_nested_statement, query_without_nested_statement, rpr, select, select_word_from_y_iterate, select_word_from_y_scalar, show_dbr, simple_demo, trash, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   /*
 
@@ -122,7 +122,7 @@
       deterministic: false,
       varargs: false
     };
-    ref2 = [[db.sqlt1, db.sqlt2], [db.sqlt2, db.sqlt1]];
+    ref2 = [[db.sqlt1, db.sqlt1], [db.sqlt1, db.sqlt1]];
     //.........................................................................................................
     for (l = 0, len2 = ref2.length; l < len2; l++) {
       [c1, c2] = ref2[l];
@@ -379,55 +379,42 @@ order by error, marker desc, cc, ne, 1, 2, 3, 4, 5, 6;`)));
     };
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  ff = function(db, fingerprint) {
-    var R/* do not use_nested_statement */, cc, error, ft, ne, result, sqlt_a, sqlt_b, um, wo;
-    error = null;
-    result = null;
-    ({um, cc, wo, ft, ne} = fingerprint);
-    //.........................................................................................................
-    if (um) {
-      db.sqlt1.unsafeMode(true);
-      db.sqlt2.unsafeMode(true);
-    }
-    //.........................................................................................................
-    switch (cc) {
-      case 1:
-        sqlt_a = db.sqlt1;
-        sqlt_b = sqlt_a;
-        break;
-      case 2:
-        sqlt_a = db.sqlt1;
-        sqlt_b = db.sqlt2;
-        break;
-      default:
-        throw new Error(`expected cc to be 1 or 2, got ${rpr(cc)}`);
-    }
-    try {
-      //.......................................................................................................
-      //.........................................................................................................
-      if (ne/* use_nested_statement */) {
-        R = query_with_nested_statement(db, fingerprint, sqlt_a, sqlt_b);
-      } else {
-        R = query_without_nested_statement(db, fingerprint, sqlt_a, sqlt_b);
-      }
-    } catch (error1) {
-      //.........................................................................................................
-      error = error1;
-      if (!cfg.catch_errors) {
-        throw error;
-      }
-      error = `(${error.message})`;
-      return {error};
-    } finally {
-      //.........................................................................................................
-      db.sqlt1.unsafeMode(false);
-      db.sqlt2.unsafeMode(false);
-    }
-    //.........................................................................................................
-    return R;
-    return null;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // ff = ( db, fingerprint ) ->
+  //   error           = null
+  //   result          = null
+  //   { um, cc,
+  //     wo, ft, ne, } = fingerprint
+  //   #.........................................................................................................
+  //   if um
+  //     db.sqlt1.unsafeMode true
+  //   #.........................................................................................................
+  //   switch cc
+  //     when 1
+  //       sqlt_a          = db.sqlt1
+  //       sqlt_b          = sqlt_a
+  //     when 2
+  //       sqlt_a          = db.sqlt1
+  //       sqlt_b          = db.sqlt1
+  //     else throw new Error "expected cc to be 1 or 2, got #{rpr cc}"
+  //   #.........................................................................................................
+  //   try
+  //     #.......................................................................................................
+  //     if ne ### use_nested_statement ###
+  //       R = query_with_nested_statement db, fingerprint, sqlt_a, sqlt_b
+  //     else ### do not use_nested_statement ###
+  //       R = query_without_nested_statement db, fingerprint, sqlt_a, sqlt_b
+  //   #.........................................................................................................
+  //   catch error
+  //     throw error unless cfg.catch_errors
+  //     error = "(#{error.message})"
+  //     return { error, }
+  //   #.........................................................................................................
+  //   finally
+  //     db.sqlt1.unsafeMode false
+  //   #.........................................................................................................
+  //   return R
+  //   return null
 
   //-----------------------------------------------------------------------------------------------------------
   select = function(fingerprint) {
@@ -486,7 +473,6 @@ order by error, marker desc, cc, ne, 1, 2, 3, 4, 5, 6;`)));
         throw new Error(`unknown value for cfg.use: ${rpr(cfg.use)}`);
     }
     db.sqlt1.exec(SQL`pragma journal_mode=${cfg.journal_mode}`);
-    db.sqlt2.exec(SQL`pragma journal_mode=${cfg.journal_mode}`);
     debug('^23332^', (db.sqlt1.prepare(SQL`pragma journal_mode;`)).get());
     debug('^23332^', db.sqlt1);
     prepare_db(db);
@@ -681,7 +667,8 @@ create table numbers (
   if (require.main === module) {
     (() => {
       // await demo_f()
-      return simple_demo();
+      // simple_demo()
+      throw new Error("^4343^ subselects from UDFs not supported");
     })();
   }
 

@@ -209,26 +209,10 @@
     // debug '^332^', db
     // debug '^332^', db.cfg
     //.........................................................................................................
-    info('^908-1^', equals(db.sqlt1.name, db.sqlt2.name));
     info('^908-2^', db.sqlt1.constructor === bsqlite_class);
-    info('^908-3^', db.sqlt2.constructor === bsqlite_class);
-    info('^908-4^', db.sqlt2.constructor === db.sqlt1.constructor);
-    info('^908-5^', db.sqlt2 !== db.sqlt1);
     //.........................................................................................................
     if (T != null) {
-      T.eq(db.sqlt1.name, db.sqlt2.name);
-    }
-    if (T != null) {
       T.ok(db.sqlt1.constructor === bsqlite_class);
-    }
-    if (T != null) {
-      T.ok(db.sqlt2.constructor === bsqlite_class);
-    }
-    if (T != null) {
-      T.ok(db.sqlt2.constructor === db.sqlt1.constructor);
-    }
-    if (T != null) {
-      T.ok(db.sqlt2 !== db.sqlt1);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -274,40 +258,24 @@ create table bar ( n integer );`);
         return T != null ? T.fail("^806-3^ expected error, got none") : void 0;
       }
     })();
-    (() => {      //.........................................................................................................
-      /* Whether statements are prepared in- or outside of the transaction doesn't matter: */
-      var insert_into_bar;
-      help('^806-4^ ------------------------');
-      insert_into_bar = db.prepare(SQL`insert into bar values ( $n ) returning *;`);
-      return db.with_transaction(() => {
-        var ref, y;
-        ref = (db.sqlt2.prepare(SQL`select * from foo order by n;`)).iterate();
-        for (y of ref) {
-          ({n} = y);
-          info('^806-5^', {n});
-          urge('^806-6^', insert_into_bar.get({
-            n: n ** 2
-          }));
-        }
-        return null;
-      });
-    })();
-    (() => {      //.........................................................................................................
-      help('^806-7^ ------------------------');
-      return db.with_transaction(() => {
-        var ref, y;
-        ref = (db.sqlt2.prepare(SQL`select * from foo order by n;`)).iterate();
-        for (y of ref) {
-          ({n} = y);
-          info('^806-8^', {n});
-          urge('^806-9^', db.first_row(SQL`insert into bar values ( $n ) returning *;`, {
-            n: n ** 2
-          }));
-        }
-        return null;
-      });
-    })();
-    (() => {      //.........................................................................................................
+    (() => {      // #.........................................................................................................
+      // do =>
+      //   help '^806-4^ ------------------------'
+      //   insert_into_bar = db.prepare SQL"insert into bar values ( $n ) returning *;"
+      //   db.with_transaction =>
+      //     for { n, } from ( db.sqlt2.prepare SQL"select * from foo order by n;" ).iterate()
+      //       info '^806-5^', { n, }
+      //       urge '^806-6^', insert_into_bar.get { n: n ** 2, }
+      //     return null
+      // #.........................................................................................................
+      // do =>
+      //   help '^806-7^ ------------------------'
+      //   db.with_transaction =>
+      //     for { n, } from ( db.sqlt2.prepare SQL"select * from foo order by n;" ).iterate()
+      //       info '^806-8^', { n, }
+      //       urge '^806-9^', db.first_row SQL"insert into bar values ( $n ) returning *;", { n: n ** 2, }
+      //     return null
+      //.........................................................................................................
       var insert_into_bar;
       help('^806-10^ ------------------------');
       insert_into_bar = db.prepare(SQL`insert into bar values ( $n ) returning *;`);
@@ -340,9 +308,6 @@ create table bar ( n integer );`);
     debug('^332^', db);
     if (T != null) {
       T.eq((Object.getOwnPropertyDescriptor(db, 'sqlt1')).enumerable, false);
-    }
-    if (T != null) {
-      T.eq((Object.getOwnPropertyDescriptor(db, 'sqlt2')).enumerable, false);
     }
     if (T != null) {
       T.eq((Object.getOwnPropertyDescriptor(db, 'rnd')).enumerable, false);
