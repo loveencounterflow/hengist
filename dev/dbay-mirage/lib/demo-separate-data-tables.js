@@ -282,7 +282,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_html_parsing = function(cfg) {
-    var DBay, I, L, Mrg, count, db, dsk, dt, mrg, name, path, prefix, ref, sql, timings, txt, x;
+    var DBay, I, L, Mrg, count, db, dsk, dt, mrg, name, path, prefix, ref, sql, timings, x;
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage'));
     prefix = 'mrg';
@@ -312,18 +312,12 @@
     time('html.parse_dsk', () => {
       return mrg.html.parse_dsk({dsk});
     });
-    time('get_par_rows', () => {
-      return mrg.get_par_rows({dsk});
-    });
-    txt = FS.readFileSync(path, {
-      encoding: 'utf-8'
-    });
-    time('mrg.html.HTMLISH.parse', () => {
-      return mrg.html.HTMLISH.parse(txt);
-    });
-    H.tabulate(`${prefix}_raw_mirror limit 25`, db(SQL`select * from ${prefix}_raw_mirror limit 25;`));
-    H.tabulate(`_${prefix}_ws_linecounts limit 25`, db(SQL`select * from _${prefix}_ws_linecounts limit 25;`));
-    H.tabulate(`${prefix}_paragraphs limit 25`, db(SQL`select * from ${prefix}_paragraphs limit 25;`));
+    // console.log '---------------------------------'; return null
+    // time 'get_par_rows',        => mrg.get_par_rows { dsk, }
+    // txt = FS.readFileSync path, { encoding: 'utf-8', }; time 'mrg.html.HTMLISH.parse', => mrg.html.HTMLISH.parse txt
+    // H.tabulate "#{prefix}_raw_mirror limit 25",       db SQL"select * from #{prefix}_raw_mirror limit 25;"
+    // H.tabulate "_#{prefix}_ws_linecounts limit 25",       db SQL"select * from _#{prefix}_ws_linecounts limit 25;"
+    // H.tabulate "#{prefix}_paragraphs limit 25",       db SQL"select * from #{prefix}_paragraphs limit 25;"
     //.........................................................................................................
     ({L, I} = db.sql);
     timings = [];

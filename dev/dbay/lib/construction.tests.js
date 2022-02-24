@@ -234,6 +234,101 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["DBAY instance has property `alt` (alternative connection)"] = function(T, done) {
+    var DBay, Sqlt, bsqlite_class, db, i, n;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({DBay} = require(H.dbay_path));
+    Sqlt = require(PATH.join(H.dbay_path, 'node_modules/better-sqlite3'));
+    bsqlite_class = Sqlt().constructor;
+    db = new DBay();
+    //.........................................................................................................
+    // db.open { schema: 'main', }
+    db.execute(SQL`create table foo ( n integer );
+create table bar ( n integer );`);
+    for (n = i = 10; i <= 12; n = ++i) {
+      db(SQL`insert into foo ( n ) values ( $n );`, {n});
+    }
+    (() => {      //.........................................................................................................
+      var error;
+      help('^806-1^ ------------------------');
+      error = null;
+      try {
+        db.with_transaction(() => {
+          var ref, row;
+          ref = db(SQL`select * from foo order by n;`);
+          for (row of ref) {
+            info('^806-2^', row);
+            db(SQL`insert into bar values ( $n );`, {
+              n: n ** 2
+            });
+          }
+          return null;
+        });
+      } catch (error1) {
+        error = error1;
+        warn(error.name, error.message);
+      }
+      if (error == null) {
+        return T != null ? T.fail("^806-3^ expected error, got none") : void 0;
+      }
+    })();
+    (() => {      //.........................................................................................................
+      /* Whether statements are prepared in- or outside of the transaction doesn't matter: */
+      var insert_into_bar;
+      help('^806-4^ ------------------------');
+      insert_into_bar = db.prepare(SQL`insert into bar values ( $n ) returning *;`);
+      return db.with_transaction(() => {
+        var ref, y;
+        ref = (db.sqlt2.prepare(SQL`select * from foo order by n;`)).iterate();
+        for (y of ref) {
+          ({n} = y);
+          info('^806-5^', {n});
+          urge('^806-6^', insert_into_bar.get({
+            n: n ** 2
+          }));
+        }
+        return null;
+      });
+    })();
+    (() => {      //.........................................................................................................
+      help('^806-7^ ------------------------');
+      return db.with_transaction(() => {
+        var ref, y;
+        ref = (db.sqlt2.prepare(SQL`select * from foo order by n;`)).iterate();
+        for (y of ref) {
+          ({n} = y);
+          info('^806-8^', {n});
+          urge('^806-9^', db.first_row(SQL`insert into bar values ( $n ) returning *;`, {
+            n: n ** 2
+          }));
+        }
+        return null;
+      });
+    })();
+    (() => {      //.........................................................................................................
+      var insert_into_bar;
+      help('^806-10^ ------------------------');
+      insert_into_bar = db.prepare(SQL`insert into bar values ( $n ) returning *;`);
+      return db.with_transaction(() => {
+        var ref, y;
+        ref = db.alt(SQL`select * from foo order by n;`);
+        for (y of ref) {
+          ({n} = y);
+          //             ^^^^^^
+          info('^806-12^', {n});
+          urge('^806-13^', db.first_row(SQL`insert into bar values ( $n ) returning *;`, {
+            n: n ** 2
+          }));
+        }
+        return null;
+      });
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["DBAY instance non-enumerable properties"] = function(T, done) {
     var DBay, Sqlt, db;
     if (T != null) {
@@ -260,14 +355,15 @@
     (() => {
       // test @
       // test @[ "DBAY _get-autolocation" ]
-      test(this["DBAY constructor arguments 1"]);
-      // test @[ "DBAY URL/path conversion" ]
-      // test @[ "xxx" ]
-      // test @[ "DBAY instance has two connections" ]
-      // test @[ "DBAY instance non-enumerable properties" ]
-      return xxx;
+      // test @[ "DBAY constructor arguments 1" ]
+      return this["DBAY instance has property `alt` (alternative connection)"]();
     })();
   }
+
+  // test @[ "DBAY URL/path conversion" ]
+// test @[ "xxx" ]
+// test @[ "DBAY instance has two connections" ]
+// test @[ "DBAY instance non-enumerable properties" ]
 
 }).call(this);
 
