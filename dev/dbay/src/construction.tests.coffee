@@ -116,6 +116,64 @@ guy                       = require '../../../apps/guy'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "DBAY instance has property `alt` (alternative connection)" ] = ( T, done ) ->
+  T?.halt_on_error()
+  { DBay }        = require H.dbay_path
+  Sqlt            = require PATH.join H.dbay_path, 'node_modules/better-sqlite3'
+  bsqlite_class   = Sqlt().constructor
+  db              = new DBay()
+  #.........................................................................................................
+  # db.open { schema: 'main', }
+  db.execute SQL"""
+    create table foo ( n integer );
+    create table bar ( n integer );"""
+  for n in [ 10 .. 12 ]
+    db SQL"insert into foo ( n ) values ( $n );", { n, }
+  #.........................................................................................................
+  do =>
+    help '^806-1^ ------------------------'
+    error = null
+    try
+      db.with_transaction =>
+        for row from db SQL"select * from foo order by n;"
+          info '^806-2^', row
+          db SQL"insert into bar values ( $n );", { n: n ** 2, }
+        return null
+    catch error
+      warn error.name, error.message
+    T?.fail "^806-3^ expected error, got none" unless error?
+  #.........................................................................................................
+  ### Whether statements are prepared in- or outside of the transaction doesn't matter: ###
+  do =>
+    help '^806-4^ ------------------------'
+    insert_into_bar = db.prepare SQL"insert into bar values ( $n ) returning *;"
+    db.with_transaction =>
+      for { n, } from ( db.sqlt2.prepare SQL"select * from foo order by n;" ).iterate()
+        info '^806-5^', { n, }
+        urge '^806-6^', insert_into_bar.get { n: n ** 2, }
+      return null
+  #.........................................................................................................
+  do =>
+    help '^806-7^ ------------------------'
+    db.with_transaction =>
+      for { n, } from ( db.sqlt2.prepare SQL"select * from foo order by n;" ).iterate()
+        info '^806-8^', { n, }
+        urge '^806-9^', db.first_row SQL"insert into bar values ( $n ) returning *;", { n: n ** 2, }
+      return null
+  #.........................................................................................................
+  do =>
+    help '^806-10^ ------------------------'
+    insert_into_bar = db.prepare SQL"insert into bar values ( $n ) returning *;"
+    db.with_transaction =>
+      for { n, } from db.alt SQL"select * from foo order by n;"
+        #             ^^^^^^
+        info '^806-12^', { n, }
+        urge '^806-13^', db.first_row SQL"insert into bar values ( $n ) returning *;", { n: n ** 2, }
+      return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "DBAY instance non-enumerable properties" ] = ( T, done ) ->
   T?.halt_on_error()
   { DBay }        = require H.dbay_path
@@ -136,9 +194,9 @@ guy                       = require '../../../apps/guy'
 if require.main is module then do =>
   # test @
   # test @[ "DBAY _get-autolocation" ]
-  test @[ "DBAY constructor arguments 1" ]
+  # test @[ "DBAY constructor arguments 1" ]
+  @[ "DBAY instance has property `alt` (alternative connection)" ]()
   # test @[ "DBAY URL/path conversion" ]
   # test @[ "xxx" ]
   # test @[ "DBAY instance has two connections" ]
   # test @[ "DBAY instance non-enumerable properties" ]
-  xxx
