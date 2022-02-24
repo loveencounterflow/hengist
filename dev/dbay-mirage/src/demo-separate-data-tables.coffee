@@ -180,11 +180,12 @@ show_query_plan = ->
   time 'register_dsk',        => mrg.register_dsk { dsk, path, }
   time 'refresh_datasource',  => mrg.refresh_datasource { dsk, }
   time 'html.parse_dsk',      => mrg.html.parse_dsk { dsk, }
-  time 'get_par_rows',        => mrg.get_par_rows { dsk, }
-  txt = FS.readFileSync path, { encoding: 'utf-8', }; time 'mrg.html.HTMLISH.parse', => mrg.html.HTMLISH.parse txt
-  H.tabulate "#{prefix}_raw_mirror limit 25",       db SQL"select * from #{prefix}_raw_mirror limit 25;"
-  H.tabulate "_#{prefix}_ws_linecounts limit 25",       db SQL"select * from _#{prefix}_ws_linecounts limit 25;"
-  H.tabulate "#{prefix}_paragraphs limit 25",       db SQL"select * from #{prefix}_paragraphs limit 25;"
+  # console.log '---------------------------------'; return null
+  # time 'get_par_rows',        => mrg.get_par_rows { dsk, }
+  # txt = FS.readFileSync path, { encoding: 'utf-8', }; time 'mrg.html.HTMLISH.parse', => mrg.html.HTMLISH.parse txt
+  # H.tabulate "#{prefix}_raw_mirror limit 25",       db SQL"select * from #{prefix}_raw_mirror limit 25;"
+  # H.tabulate "_#{prefix}_ws_linecounts limit 25",       db SQL"select * from _#{prefix}_ws_linecounts limit 25;"
+  # H.tabulate "#{prefix}_paragraphs limit 25",       db SQL"select * from #{prefix}_paragraphs limit 25;"
   #.........................................................................................................
   { L, I, } = db.sql
   timings   = []
