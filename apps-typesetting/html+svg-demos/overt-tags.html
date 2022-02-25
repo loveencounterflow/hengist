@@ -1,0 +1,39 @@
+
+
+<style>
+
+/** { display:                block; }*/
+* {
+  outline:                1px dotted red; }
+
+error {
+  background-color:       red; }
+
+</style>
+
+
+
+<!-- &lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd"&gt; -->
+
+<title myatr='myval'><!-- title to be placed here --></title>
+
+<article>
+  <p>Here comes some <loc/>.</p>
+  </article>
+
+A bare paragraph to demonstrate <tag id='foo'>paragraph-oriented</tag>
+processing.
+
+This paragraph to be
+split into two.
+
+spurious <error code='xtraows' start='9' stop='23'>extraneous whitespace before tag name: '&lt; characters &gt;'</error> abound <error code='xtracws' start='31' stop='45'>extraneous whitespace in closing tag: '&lt;/ characters&gt;'</error> <null><error code='mismatch' start='48' stop='49'>Expecting token of type --&gt; i_name &lt;-- but found --&gt; '/' &lt;--: '/'</error><error code='bareachrs' start='49' stop='63'>bare active characters: 'characters&gt; &lt; '</error></null> &gt;
+
+*not* \&lt; an error; \&amp; is ok, too
+
+
+
+<error code='bareachrs' start='0' stop='13'>bare active characters: 'but this &amp; is'</error>
+
+some <xmp><div>some text</div></xmp> thing
