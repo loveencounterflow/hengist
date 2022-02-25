@@ -204,6 +204,7 @@ show_query_plan = ->
   # H.tabulate "#{prefix}_html_atrs",           db SQL"select * from #{prefix}_html_atrs;"
   H.tabulate "#{prefix}_html_tags_and_html",  db SQL"select * from #{prefix}_html_tags_and_html;"
   H.tabulate "#{prefix}_html_mirror",         db SQL"select * from #{prefix}_html_mirror;"
+  H.tabulate "#{prefix}_html_tags",           db SQL"select * from #{prefix}_html_tags;"
   H.banner "render_dsk";                      echo mrg.html.render_dsk { dsk, }
   urge '^3243^', "DB file at #{db.cfg.path}"
   return null
