@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, MMX, PATH, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, MMX, PATH, X, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -38,6 +38,8 @@
   guy = require('../../../apps/guy');
 
   MMX = require('../../../apps/multimix/lib/cataloguing');
+
+  X = require('../../../lib/helpers');
 
   //-----------------------------------------------------------------------------------------------------------
   this["DBAY SQL tag function"] = function(T, done) {
@@ -848,6 +850,25 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY `execute_file()`"] = function(T, done) {
+    var DBay, SQL, db, path;
+    SQL = String.raw;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
+    path = PATH.resolve(PATH.join(__dirname, '../../../assets/dbay/html5-tags.sql'));
+    //.........................................................................................................
+    db(SQL`create table tags (
+  tag       text    not null primary key,
+  is_block  boolean not null default false,
+  is_empty  boolean not null default false );`);
+    // db ->
+    db.execute_file({path});
+    X.tabulate('tags', db(SQL`select * from tags order by 3, 2, 1;`));
+    return typeof done === "function" ? done() : void 0;
+  };
+
   // #-----------------------------------------------------------------------------------------------------------
   // @[ "DBAY db.first_row() exhausts iterator" ] = ( T, done ) ->
   //   # T?.halt_on_error()
@@ -871,7 +892,8 @@
   if (require.main === module) {
     (() => {
       // test @
-      return test(this["DBAY SQL tag function"]);
+      // test @[ "DBAY SQL tag function" ]
+      return this["DBAY `execute_file()`"]();
     })();
   }
 

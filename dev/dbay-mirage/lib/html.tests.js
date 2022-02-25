@@ -134,6 +134,70 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["Mirage HTML: tag syntax variants"] = async function(T, done) {
+    var DBay, HDML, Mrg, db, error, i, len, lets, matcher, mrg, probe, probes_and_matchers, text_from_token, thaw;
+    // T?.halt_on_error()
+    ({DBay} = require('../../../apps/dbay'));
+    ({Mrg} = require('../../../apps/dbay-mirage'));
+    ({HDML} = require('../../../apps/hdml'));
+    db = new DBay();
+    mrg = new Mrg({db});
+    ({lets, thaw} = guy.lft);
+    //.........................................................................................................
+    text_from_token = function(token) {
+      var $key, name, text, type;
+      ({$key, name, type, text} = token);
+      if (name == null) {
+        name = 'MISSING';
+      }
+      switch ($key) {
+        case '^text':
+          return text;
+        case '^error':
+          return `<ERROR ${token.message}>`;
+        case '<tag':
+          return HDML.create_tag('<', name, token.atrs);
+        case '^tag':
+          return HDML.create_tag('^', name, token.atrs);
+        case '>tag':
+          return HDML.create_tag('>', name);
+        default:
+          throw new Error(`unknown $key ${rpr($key)}`);
+      }
+    };
+    //.........................................................................................................
+    // [ '<py/ling3/',         null, ]
+    probes_and_matchers = [['<title>My Page</title>', '<title>|My Page|</title>'], ['<title/My\\/Your Page/>', '<title>|My/Your Page|</title>|>'], ['<title>My Page</>', "<title>|My Page|</title>|<ERROR Expecting token of type --> i_name <-- but found --> '>' <-->"], ['<title/My Page/>', '<title>|My Page|</title>|>'], ['<title/My/Your Page/>', '<title>|My|</title>|Your Page/>'], ['<title/My\npage/', '<title>|My\npage|</title>'], ['<title k=v j=w/My Page/', "<title k='v' j='w'>|My Page|</title>"], ['<title/<b>My</b> Page/', '<title>|<ERROR bare active characters>|</title>|b> Page/'], ['<title//', '<title>|</title>'], ['<title/>', '<title/>'], ['\\<title/>', '<title/>'], ['<title/My Page/', '<title>|My Page|</title>']];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, j, len1, parts, ref, result;
+          help('^435-1^', rpr(probe));
+          parts = [];
+          ref = mrg.html.HTMLISH.parse(probe);
+          for (j = 0, len1 = ref.length; j < len1; j++) {
+            d = ref[j];
+            parts.push(text_from_token(d));
+            d = thaw(d);
+            delete d.$;
+            delete d.$vnr;
+            urge('^435-2^', d);
+          }
+          result = parts.join('|');
+          info('^435-3^', rpr(result));
+          resolve(result);
+          return null;
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -141,7 +205,8 @@
       // test @[ "altering mirrored source lines causes error" ]
       // @[ "altering mirrored source lines causes error" ]()
       // @[ "Mirage HTML: quotes in attribute values" ]()
-      return this["Mirage HTML: Basic functionality"]();
+      // @[ "Mirage HTML: Basic functionality" ]()
+      return test(this["Mirage HTML: tag syntax variants"]);
     })();
   }
 
