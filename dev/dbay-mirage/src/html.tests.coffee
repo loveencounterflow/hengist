@@ -122,17 +122,74 @@ H                         = require '../../../lib/helpers'
   return done?()
 
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "Mirage HTML: tag syntax variants" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay  } = require '../../../apps/dbay'
+  { Mrg   } = require '../../../apps/dbay-mirage'
+  { HDML  } = require '../../../apps/hdml'
+  db        = new DBay()
+  mrg       = new Mrg { db, }
+  { lets
+    thaw }  = guy.lft
+  #.........................................................................................................
+  text_from_token = ( token ) ->
+    { $key
+      name
+      type
+      text } = token
+    name ?= 'MISSING'
+    return switch $key
+      when '^text'  then text
+      when '^error' then "<ERROR #{token.message}>"
+      when '<tag'   then HDML.create_tag '<', name, token.atrs
+      when '^tag'   then HDML.create_tag '^', name, token.atrs
+      when '>tag'   then HDML.create_tag '>', name
+      else throw new Error "unknown $key #{rpr $key}"
+  #.........................................................................................................
+  probes_and_matchers = [
+    # [ '<py/ling3/',         null, ]
+    [ '<title>My Page</title>',     '<title>|My Page|</title>', ]
+    [ '<title/My\\/Your Page/>',    '<title>|My/Your Page|</title>|>', ]
+    [ '<title>My Page</>',          "<title>|My Page|</title>|<ERROR Expecting token of type --> i_name <-- but found --> '>' <-->", ]
+    [ '<title/My Page/>',           '<title>|My Page|</title>|>', ]
+    [ '<title/My/Your Page/>',      '<title>|My|</title>|Your Page/>', ]
+    [ '<title/My\npage/',           '<title>|My\npage|</title>', ]
+    [ '<title k=v j=w/My Page/',    "<title k='v' j='w'>|My Page|</title>", ]
+    [ '<title/<b>My</b> Page/',     '<title>|<ERROR bare active characters>|</title>|b> Page/', ]
+    [ '<title//',                   '<title>|</title>', ]
+    [ '<title/>',                   '<title/>', ]
+    [ '\\<title/>',                 '<title/>', ]
+    [ '<title/My Page/',            '<title>|My Page|</title>', ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      help '^435-1^', rpr probe
+      parts = []
+      for d in mrg.html.HTMLISH.parse probe
+        parts.push text_from_token d
+        d = thaw d
+        delete d.$
+        delete d.$vnr
+        urge '^435-2^', d
+      result = parts.join '|'
+      info '^435-3^', rpr result
+      resolve result
+      return null
+  #.........................................................................................................
+  done()
+  return null
+
+
 ############################################################################################################
 if require.main is module then do =>
   # test @
   # test @[ "altering mirrored source lines causes error" ]
   # @[ "altering mirrored source lines causes error" ]()
   # @[ "Mirage HTML: quotes in attribute values" ]()
-  @[ "Mirage HTML: Basic functionality" ]()
-
-
-
-
+  # @[ "Mirage HTML: Basic functionality" ]()
+  test @[ "Mirage HTML: tag syntax variants" ]
 
 
 
