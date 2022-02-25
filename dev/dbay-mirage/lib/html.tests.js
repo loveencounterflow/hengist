@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, demo_xncr_matching, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -144,9 +144,14 @@
     db = new DBay();
     mrg = new Mrg({db});
     ({lets, thaw} = guy.lft);
+    // #.........................................................................................................
+    // debug '^33673^', rpr ( mrg.html.HTMLISH._tunnel '\\' ).text
+    // debug '^33673^', rpr ( mrg.html.HTMLISH._tunnel '\\\\' ).text
+    // debug '^33673^', rpr ( mrg.html.HTMLISH._tunnel '\\&amp;' ).text
+    // return done?()
     //.........................................................................................................
     text_from_token = function(token) {
-      var $key, name, text, type;
+      var $key, name, ref, text, type;
       ({$key, name, type, text} = token);
       if (name == null) {
         name = 'MISSING';
@@ -155,7 +160,10 @@
         case '^text':
           return text;
         case '^error':
-          return `<ERROR ${token.message}>`;
+          return (HDML.create_tag('<', 'error', {
+            ...token.attrs,
+            message: token.message
+          })) + ((ref = token.text) != null ? ref : '') + (HDML.create_tag('>', 'error'));
         case '<tag':
           return HDML.create_tag('<', name, token.atrs);
         case '^tag':
@@ -168,7 +176,7 @@
     };
     //.........................................................................................................
     // [ '<py/ling3/',         null, ]
-    probes_and_matchers = [['<title>My Page</title>', '<title>|My Page|</title>'], ['<title/My\\/Your Page/>', '<title>|My/Your Page|</title>|>'], ['<title>My Page</>', "<title>|My Page|</title>|<ERROR Expecting token of type --> i_name <-- but found --> '>' <-->"], ['<title/My Page/>', '<title>|My Page|</title>|>'], ['<title/My/Your Page/>', '<title>|My|</title>|Your Page/>'], ['<title/My\npage/', '<title>|My\npage|</title>'], ['<title k=v j=w/My Page/', "<title k='v' j='w'>|My Page|</title>"], ['<title/<b>My</b> Page/', '<title>|<ERROR bare active characters>|</title>|b> Page/'], ['<title//', '<title>|</title>'], ['<title/>', '<title/>'], ['\\<title/>', '<title/>'], ['<title/My Page/', '<title>|My Page|</title>']];
+    probes_and_matchers = [['<title>My Page</title>', '<title>|My Page|</title>'], ['<title/My\\/Your Page/>', '<title>|My/Your Page|</title>|>'], ['<title>My Page</>', "<title>|My Page|</title>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;&gt;&#39; &lt;--'>></error>"], ['<title/My Page/>', '<title>|My Page|</title>|>'], ['<title/My/Your Page/>', '<title>|My|</title>|Your Page/>'], ['<title/My\npage/', '<title>|My\npage|</title>'], ['<title k=v j=w/My Page/', "<title k='v' j='w'>|My Page|</title>"], ['<title/<b>My</b> Page/', "<title>|<error message='bare active characters'><b>My<</error>|</title>|b> Page/"], ['<title//', '<title>|</title>'], ['<title/>', '<title/>'], ['<title/My Page/', '<title>|My Page|</title>'], ['\\<title/>', '&lt;title/>'], ['&amp;', '&amp;'], ['\\&amp;', '&amp;amp;'], ['foo\\bar', 'foobar'], ['foo\\\\bar', 'foo\\bar']];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -198,6 +206,47 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_xncr_matching = function() {
+    var groups, i, key, len, match, probe, probes, value, xncr;
+    //===========================================================================================================
+    // PATTERNS
+    //-----------------------------------------------------------------------------------------------------------
+    // G: grouped
+    // O: optional
+    xncr = {};
+    xncr.nameG = /(?<name>[a-z][a-z0-9]*)/.source;
+    xncr.nameOG = /(?:(?<csg>(?:[a-z][a-z0-9]*))|)/.source;
+    xncr.hexG = /(?:x(?<hex>[a-fA-F0-9]+))/.source;
+    xncr.decG = /(?<dec>[0-9]+)/.source;
+    xncr.xncr_csg_cid_matcher = RegExp(`(?:&${xncr.nameOG}\\#(?:${xncr.hexG}|${xncr.decG});)`);
+    xncr.xncr_csg_cid_matcher = RegExp(`&${xncr.nameG};|&${xncr.nameOG}\\#(?:${xncr.hexG}|${xncr.decG});`);
+    //...........................................................................................................
+    probes = ['&', '&;', 'foo &bar; baz', '&bar;', '&#123;', 'foo &#123; bar', 'foo &xy#x123; bar'];
+    for (i = 0, len = probes.length; i < len; i++) {
+      probe = probes[i];
+      // debug '^334-1^', probe.match xncr.csg_matcher
+      // debug '^334-2^', probe.match xncr.ncr_matcher
+      // debug '^334-3^', probe.match xncr.xncr_matcher
+      // debug '^334-4^', probe.match xncr.ncr_csg_cid_matcher
+      match = probe.match(xncr.xncr_csg_cid_matcher);
+      if (match != null) {
+        groups = {...match.groups};
+        for (key in groups) {
+          value = groups[key];
+          if (value == null) {
+            delete groups[key];
+          }
+        }
+      } else {
+        groups = null;
+      }
+      debug('^334-5^', rpr(probe), groups);
+    }
+    //...........................................................................................................
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -206,7 +255,8 @@
       // @[ "altering mirrored source lines causes error" ]()
       // @[ "Mirage HTML: quotes in attribute values" ]()
       // @[ "Mirage HTML: Basic functionality" ]()
-      return test(this["Mirage HTML: tag syntax variants"]);
+      // test @[ "Mirage HTML: tag syntax variants" ]
+      return demo_xncr_matching();
     })();
   }
 
