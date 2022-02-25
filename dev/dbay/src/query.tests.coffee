@@ -26,6 +26,7 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 guy                       = require '../../../apps/guy'
 MMX                       = require '../../../apps/multimix/lib/cataloguing'
+X                         = require '../../../lib/helpers'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -474,6 +475,25 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY `execute_file()`" ] = ( T, done ) ->
+  SQL                       = String.raw
+  # T?.halt_on_error()
+  { DBay }          = require H.dbay_path
+  db                = new DBay()
+  path              = PATH.resolve PATH.join __dirname, '../../../assets/dbay/html5-tags.sql'
+  #.........................................................................................................
+  db SQL"""
+    create table tags (
+      tag       text    not null primary key,
+      is_block  boolean not null default false,
+      is_empty  boolean not null default false );"""
+  # db ->
+  db.execute_file { path, }
+  X.tabulate 'tags', db SQL"select * from tags order by 3, 2, 1;"
+  #.........................................................................................................
+  done?()
+
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "DBAY db.first_row() exhausts iterator" ] = ( T, done ) ->
 #   # T?.halt_on_error()
@@ -498,7 +518,8 @@ MMX                       = require '../../../apps/multimix/lib/cataloguing'
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  test @[ "DBAY SQL tag function" ]
+  # test @[ "DBAY SQL tag function" ]
+  @[ "DBAY `execute_file()`" ]()
   # @[ "DBAY prepared statement allowed in `db.do()`" ]()
   # test @[ "DBAY create DB, insert, query values 1" ]
   # test @[ "DBAY db as callable" ]
