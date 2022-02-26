@@ -167,6 +167,7 @@ H                         = require '../../../lib/helpers'
     [ '<title//',                   '<title>|</title>', ]
     [ '<title/>',                   '<title/>', ]
     [ '<title/My Page/',            '<title>|My Page|</title>', ]
+    [ '<title#c1.x/My Page/',       '<title>|My Page|</title>', ]
     [ '\\<title/>',                 '&lt;title/>', ]
     [ '&amp;',                      '&amp;', ]
     [ '\\&amp;',                    '&amp;amp;', ]
@@ -199,13 +200,12 @@ demo_xncr_matching = ->
   #-----------------------------------------------------------------------------------------------------------
   # G: grouped
   # O: optional
-  xncr                      = {}
-  xncr.nameG                = ( ///     (?<name>      [a-z][a-z0-9]* )       /// ).source
-  xncr.nameOG               = ( /// (?: (?<csg>   (?: [a-z][a-z0-9]* ) ) | ) /// ).source
-  xncr.hexG                 = ( /// (?:     x  (?<hex> [a-fA-F0-9]+ )      ) /// ).source
-  xncr.decG                 = ( ///            (?<dec> [      0-9]+ )        /// ).source
-  xncr.xncr_csg_cid_matcher = /// (?: & #{xncr.nameOG} \# (?: #{xncr.hexG} | #{xncr.decG} ) ; ) ///
-  xncr.xncr_csg_cid_matcher = /// & #{xncr.nameG} ; | & #{xncr.nameOG} \# (?: #{xncr.hexG} | #{xncr.decG} ) ; ///
+  xncr          = {}
+  xncr.nameG    = ( ///     (?<name>      [a-z][a-z0-9]* )       /// ).source
+  xncr.nameOG   = ( /// (?: (?<csg>   (?: [a-z][a-z0-9]* ) ) | ) /// ).source
+  xncr.hexG     = ( /// (?:     x  (?<hex> [a-fA-F0-9]+ )      ) /// ).source
+  xncr.decG     = ( ///            (?<dec> [      0-9]+ )        /// ).source
+  xncr.matcher  = /// & #{xncr.nameG} ; | & #{xncr.nameOG} \# (?: #{xncr.hexG} | #{xncr.decG} ) ; ///g
   #...........................................................................................................
   probes = [
     '&'
@@ -214,20 +214,13 @@ demo_xncr_matching = ->
     '&bar;'
     '&#123;'
     'foo &#123; bar'
-    'foo &xy#x123; bar'
+    'foo &xy#x123; bar &baz;'
     ]
   for probe in probes
-  # debug '^334-1^', probe.match xncr.csg_matcher
-  # debug '^334-2^', probe.match xncr.ncr_matcher
-  # debug '^334-3^', probe.match xncr.xncr_matcher
-  # debug '^334-4^', probe.match xncr.ncr_csg_cid_matcher
-    match = probe.match xncr.xncr_csg_cid_matcher
-    if match?
+    for match from probe.matchAll xncr.matcher
       groups = { match.groups..., }
       delete groups[ key ] for key, value of groups when not value?
-    else
-      groups = null
-    debug '^334-5^', ( rpr probe ), groups
+      debug '^334-5^', ( rpr probe ), groups
   #...........................................................................................................
   return null
 
@@ -239,8 +232,8 @@ if require.main is module then do =>
   # @[ "altering mirrored source lines causes error" ]()
   # @[ "Mirage HTML: quotes in attribute values" ]()
   # @[ "Mirage HTML: Basic functionality" ]()
-  # test @[ "Mirage HTML: tag syntax variants" ]
-  demo_xncr_matching()
+  test @[ "Mirage HTML: tag syntax variants" ]
+  # demo_xncr_matching()
 
 
 
