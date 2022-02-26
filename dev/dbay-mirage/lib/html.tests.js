@@ -176,7 +176,7 @@
     };
     //.........................................................................................................
     // [ '<py/ling3/',         null, ]
-    probes_and_matchers = [['<title>My Page</title>', '<title>|My Page|</title>'], ['<title/My\\/Your Page/>', '<title>|My/Your Page|</title>|>'], ['<title>My Page</>', "<title>|My Page|</title>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;&gt;&#39; &lt;--'>></error>"], ['<title/My Page/>', '<title>|My Page|</title>|>'], ['<title/My/Your Page/>', '<title>|My|</title>|Your Page/>'], ['<title/My\npage/', '<title>|My\npage|</title>'], ['<title k=v j=w/My Page/', "<title k='v' j='w'>|My Page|</title>"], ['<title/<b>My</b> Page/', "<title>|<error message='bare active characters'><b>My<</error>|</title>|b> Page/"], ['<title//', '<title>|</title>'], ['<title/>', '<title/>'], ['<title/My Page/', '<title>|My Page|</title>'], ['\\<title/>', '&lt;title/>'], ['&amp;', '&amp;'], ['\\&amp;', '&amp;amp;'], ['foo\\bar', 'foobar'], ['foo\\\\bar', 'foo\\bar']];
+    probes_and_matchers = [['<title>My Page</title>', '<title>|My Page|</title>'], ['<title/My\\/Your Page/>', '<title>|My/Your Page|</title>|>'], ['<title>My Page</>', "<title>|My Page|</title>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;&gt;&#39; &lt;--'>></error>"], ['<title/My Page/>', '<title>|My Page|</title>|>'], ['<title/My/Your Page/>', '<title>|My|</title>|Your Page/>'], ['<title/My\npage/', '<title>|My\npage|</title>'], ['<title k=v j=w/My Page/', "<title k='v' j='w'>|My Page|</title>"], ['<title/<b>My</b> Page/', "<title>|<error message='bare active characters'><b>My<</error>|</title>|b> Page/"], ['<title//', '<title>|</title>'], ['<title/>', '<title/>'], ['<title/My Page/', '<title>|My Page|</title>'], ['<title#c1.x/My Page/', '<title>|My Page|</title>'], ['\\<title/>', '&lt;title/>'], ['&amp;', '&amp;'], ['\\&amp;', '&amp;amp;'], ['foo\\bar', 'foobar'], ['foo\\\\bar', 'foo\\bar']];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -208,7 +208,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_xncr_matching = function() {
-    var groups, i, key, len, match, probe, probes, value, xncr;
+    var groups, i, key, len, match, probe, probes, ref, value, xncr;
     //===========================================================================================================
     // PATTERNS
     //-----------------------------------------------------------------------------------------------------------
@@ -219,18 +219,13 @@
     xncr.nameOG = /(?:(?<csg>(?:[a-z][a-z0-9]*))|)/.source;
     xncr.hexG = /(?:x(?<hex>[a-fA-F0-9]+))/.source;
     xncr.decG = /(?<dec>[0-9]+)/.source;
-    xncr.xncr_csg_cid_matcher = RegExp(`(?:&${xncr.nameOG}\\#(?:${xncr.hexG}|${xncr.decG});)`);
-    xncr.xncr_csg_cid_matcher = RegExp(`&${xncr.nameG};|&${xncr.nameOG}\\#(?:${xncr.hexG}|${xncr.decG});`);
+    xncr.matcher = RegExp(`&${xncr.nameG};|&${xncr.nameOG}\\#(?:${xncr.hexG}|${xncr.decG});`, "g");
     //...........................................................................................................
-    probes = ['&', '&;', 'foo &bar; baz', '&bar;', '&#123;', 'foo &#123; bar', 'foo &xy#x123; bar'];
+    probes = ['&', '&;', 'foo &bar; baz', '&bar;', '&#123;', 'foo &#123; bar', 'foo &xy#x123; bar &baz;'];
     for (i = 0, len = probes.length; i < len; i++) {
       probe = probes[i];
-      // debug '^334-1^', probe.match xncr.csg_matcher
-      // debug '^334-2^', probe.match xncr.ncr_matcher
-      // debug '^334-3^', probe.match xncr.xncr_matcher
-      // debug '^334-4^', probe.match xncr.ncr_csg_cid_matcher
-      match = probe.match(xncr.xncr_csg_cid_matcher);
-      if (match != null) {
+      ref = probe.matchAll(xncr.matcher);
+      for (match of ref) {
         groups = {...match.groups};
         for (key in groups) {
           value = groups[key];
@@ -238,10 +233,8 @@
             delete groups[key];
           }
         }
-      } else {
-        groups = null;
+        debug('^334-5^', rpr(probe), groups);
       }
-      debug('^334-5^', rpr(probe), groups);
     }
     //...........................................................................................................
     return null;
@@ -255,10 +248,11 @@
       // @[ "altering mirrored source lines causes error" ]()
       // @[ "Mirage HTML: quotes in attribute values" ]()
       // @[ "Mirage HTML: Basic functionality" ]()
-      // test @[ "Mirage HTML: tag syntax variants" ]
-      return demo_xncr_matching();
+      return test(this["Mirage HTML: tag syntax variants"]);
     })();
   }
+
+  // demo_xncr_matching()
 
 }).call(this);
 
