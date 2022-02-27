@@ -115,15 +115,13 @@ class Steampipe
     last_idx      = raw_pipeline.length - 1
     @inputs       = []
     @sources      = []
-    for tf, idx in raw_pipeline
-      [ is_source, tf, ] = switch type_of tf
-        when 'function' then [ false, tf, ] ### TAINT validate arity ###
-        when 'list'     then [ true, ( @_source_from_list tf ), ]
-        else throw new Error "^324^ cannoz convert a #{type} to a source"
-      do ( tf, idx, is_source ) =>
+    for raw_transform, idx in raw_pipeline
+      { is_source
+        transform } = @_get_transform raw_transform
+      do ( transform, idx, is_source ) =>
         input       = if idx is 0         then @first_input else @pipeline[ idx - 1 ].output
         output      = if idx is last_idx  then @last_output else []
-        segment     = { tf, input, output, over: false, exit: false, is_source, }
+        segment     = { transform, input, output, over: false, exit: false, is_source, }
         send        = ( d ) ->
           switch d
             when symbol.drop  then  null
@@ -140,6 +138,21 @@ class Steampipe
         @sources.push   segment if is_source
         @inputs.push    input
     return undefined
+
+  #---------------------------------------------------------------------------------------------------------
+  _get_transform: ( raw_transform ) ->
+    is_source = false
+    switch type = type_of raw_transform
+      when 'function'
+        transform = raw_transform
+        unless ( arity = transform.length ) is 2
+          throw new Error "^323^ expected function with arity 2 got one with arity #{arity}"
+      when 'list'
+        is_source = true
+        transform = @_source_from_list raw_transform
+      else
+        throw new Error "^324^ cannot convert a #{type} to a source"
+    return { transform, is_source, }
 
   #---------------------------------------------------------------------------------------------------------
   _source_from_list: ( list ) ->
@@ -163,10 +176,10 @@ class Steampipe
         for segment, idx in @pipeline
           continue if segment.over
           if segment.is_source and segment.input.length is 0
-            segment.tf symbol.drop, segment.send
+            segment.transform symbol.drop, segment.send
           else
             while segment.input.length > 0
-              segment.tf segment.input.shift(), segment.send
+              segment.transform segment.input.shift(), segment.send
               break if mode is 'depth'
           @last_output.length = 0
           throw symbol.exit if segment.exit
@@ -182,7 +195,7 @@ class Steampipe
   _show_pipeline: ->
     urge @inputs[ 0 ]
     for segment in @pipeline
-      urge segment.tf.name ? '?', segment.output
+      urge segment.transform.name ? '?', segment.output
     return null
 
 
