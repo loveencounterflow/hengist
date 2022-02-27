@@ -82,16 +82,6 @@ for tf, idx in raw_pipeline
     pipeline.push { tf, input, output, send, }
     inputs.push input
 
-count = 0
-# for segment in pipeline
-# first_q.unshift 123
-pipeline[ 0 ].tf symbol.drop, pipeline[ 0 ].send
-# pipeline[ 0 ].output.unshift 'o0'
-# pipeline[ 1 ].input.unshift 'i1'
-# pipeline[ 1 ].output.unshift 'o1'
-# pipeline[ 2 ].input.unshift 'i2'
-# pipeline[ 2 ].output.unshift 'o2'
-# pipeline[ 1 ].send 99
 
 show_pipeline = ->
   urge inputs[ 0 ]
@@ -114,30 +104,10 @@ driver_A = ->
       while segment.input.length > 0
         segment.tf segment.input.shift(), segment.send
       show_pipeline()
-    debug '^59587^', inputs
     break unless inputs.some ( x ) -> x.length > 0
   return null
 
-driver_B = ->
-  show_pipeline()
-  round = 0
-  loop
-    round++
-    whisper '^4958^', "round #{round} -------------------------------"
-    for idx in [ 0 .. 3 ]
-      segment = pipeline[ idx ]
-      if idx is 0
-        segment.tf symbol.drop, segment.send
-        continue
-      if segment.input.length > 0
-        segment.tf segment.input.shift(), segment.send
-      show_pipeline()
-    debug '^59587^', inputs
-    break unless inputs.some ( x ) -> x.length > 0
-  return null
 
-driver_A()
-# driver_B()
 
 
 
