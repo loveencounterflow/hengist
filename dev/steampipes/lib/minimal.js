@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, GUY, Steampipe, badge, debug, demo, echo, help, info, rpr, urge, warn, whisper;
+  var CND, GUY, Steampipe, badge, debug, demo, echo, help, info, isa, rpr, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -25,9 +25,13 @@
 
   GUY = require('guy');
 
+  types = new (require('intertype')).Intertype();
+
+  ({isa, type_of, validate} = types);
+
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
-    var $addsome, $embellish, $show, $source_A, $source_B, drive, pipeline;
+    var $addsome, $embellish, $show, $source_A, $source_B, $source_C, drive, pipeline, trace;
     //.........................................................................................................
     $source_A = function(a_list) {
       var source;
@@ -36,10 +40,29 @@
         send(d);
         for (i = 0, len = a_list.length; i < len; i++) {
           e = a_list[i];
-          help('^source^', e);
+          if (trace) {
+            help('^source A^', e);
+          }
           send(e);
         }
         send.over();
+        return null;
+      };
+    };
+    //.........................................................................................................
+    $source_C = function(a_list) {
+      var source;
+      return source = function(d, send) {
+        var e, i, len;
+        send(d);
+        for (i = 0, len = a_list.length; i < len; i++) {
+          e = a_list[i];
+          if (trace) {
+            help('^source C^', e);
+          }
+          send(e);
+        }
+        // send.over()
         return null;
       };
     };
@@ -56,7 +79,9 @@
           idx = -1;
           return send.over();
         }
-        help('^source^', a_list[idx]);
+        if (trace) {
+          help('^source B^', a_list[idx]);
+        }
         send(a_list[idx]);
         return null;
       };
@@ -65,13 +90,13 @@
     $addsome = function() {
       var addsome;
       return addsome = function(d, send) {
-        help('^addsome^', d);
+        if (trace) {
+          help('^addsome^', d);
+        }
+        if (!isa.float(d)) {
+          return send((rpr(d)) + ' * 100 + 1');
+        }
         send(d * 100 + 1);
-        send(d * 100 + 2);
-        // send.exit() if d is 2
-        // send.pass() if d is 2
-        // throw send.symbol.exit if d is 2
-        // throw send.symbol.done if d is 2
         return null;
       };
     };
@@ -79,7 +104,9 @@
     $embellish = function() {
       var embellish;
       return embellish = function(d, send) {
-        help('^embellish^', d);
+        if (trace) {
+          help('^embellish^', d);
+        }
         send(`*${rpr(d)}*`);
         return null;
       };
@@ -88,7 +115,9 @@
     $show = function() {
       var show;
       return show = function(d, send) {
-        help('^show^', d);
+        if (trace) {
+          help('^show^', d);
+        }
         info(d);
         send(d);
         return null;
@@ -97,10 +126,14 @@
     //.........................................................................................................
     pipeline = [];
     // pipeline.push $source_A [ 1, 2, 3, ]
-    pipeline.push($source_B([1, 2, 3]));
+    // pipeline.push $source_B [ 1, 2, ]
+    pipeline.push([1, 2]);
+    pipeline.push(['A', 'B']);
+    pipeline.push($source_C([5, 7, 11]));
     pipeline.push($addsome());
     pipeline.push($embellish());
     pipeline.push($show());
+    trace = false;
     drive = function(mode) {
       var sp;
       whisper('———————————————————————————————————————');
@@ -124,24 +157,36 @@
       
         //---------------------------------------------------------------------------------------------------------
       constructor(raw_pipeline) {
-        var i, idx, last_idx, len, tf;
+        var i, idx, is_source, last_idx, len, tf;
         this.first_input = [];
         this.last_output = [];
         this.pipeline = [];
         last_idx = raw_pipeline.length - 1;
         this.inputs = [];
+        this.sources = [];
         for (idx = i = 0, len = raw_pipeline.length; i < len; idx = ++i) {
           tf = raw_pipeline[idx];
-          (() => {
-            var entry, input, output, send;
+          [is_source, tf] = (function() {
+            switch (type_of(tf)) {
+              case 'function':
+                return [false, tf];
+              case /* TAINT validate arity */'list':
+                return [true, this._source_from_list(tf)];
+              default:
+                throw new Error(`^324^ cannoz convert a ${type} to a source`);
+            }
+          }).call(this);
+          ((tf, idx, is_source) => {
+            var input, output, segment, send;
             input = idx === 0 ? this.first_input : this.pipeline[idx - 1].output;
             output = idx === last_idx ? this.last_output : [];
-            entry = {
+            segment = {
               tf,
               input,
               output,
               over: false,
-              exit: false
+              exit: false,
+              is_source
             };
             send = function(d) {
               switch (d) {
@@ -159,7 +204,7 @@
               }
               return null;
             };
-            send = send.bind(entry);
+            send = send.bind(segment);
             send.symbol = symbol;
             send.over = function() {
               return send(send.symbol.over);
@@ -167,12 +212,32 @@
             send.exit = function() {
               return send(send.symbol.exit);
             };
-            GUY.props.hide(entry, 'send', send);
-            this.pipeline.push(entry);
+            GUY.props.hide(segment, 'send', send);
+            this.pipeline.push(segment);
+            if (is_source) {
+              this.sources.push(segment);
+            }
             return this.inputs.push(input);
-          })();
+          })(tf, idx, is_source);
         }
         return void 0;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _source_from_list(list) {
+        var idx, last_idx, list_source;
+        last_idx = list.length - 1;
+        idx = -1;
+        return list_source = function(d, send) {
+          send(d);
+          idx++;
+          if (idx > last_idx) {
+            idx = -1;
+            return send.over();
+          }
+          send(list[idx]);
+          return null;
+        };
       }
 
       //---------------------------------------------------------------------------------------------------------
@@ -192,8 +257,7 @@
               if (segment.over) {
                 continue;
               }
-              /* TAINT assumes source is at index 0, not generally true */
-              if (idx === 0) {
+              if (segment.is_source && segment.input.length === 0) {
                 segment.tf(symbol.drop, segment.send);
               } else {
                 while (segment.input.length > 0) {
@@ -208,11 +272,14 @@
                 throw symbol.exit;
               }
             }
-            /* TAINT assumes source is at index 0, not generally true */
-            if (this.pipeline[0].over && !this.inputs.some(function(x) {
-              return x.length > 0;
+            if (this.sources.every(function(source) {
+              return source.over;
             })) {
-              break;
+              if (!this.inputs.some(function(input) {
+                return input.length > 0;
+              })) {
+                break;
+              }
             }
           }
         } catch (error1) {
