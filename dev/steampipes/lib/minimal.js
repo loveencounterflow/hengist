@@ -57,7 +57,6 @@
       return source = function(d, send) {
         send(d);
         idx++;
-        // debug '^2242^', { idx, }
         if (idx > last_idx) {
           idx = -1;
           return send.over();
@@ -118,9 +117,9 @@
     pipeline = [];
     // pipeline.push $source_A [ 1, 2, 3, ]
     // pipeline.push $source_B [ 1, 2, ]
-    // pipeline.push [ 1, 2, ]
+    pipeline.push([1, 2]);
     pipeline.push(['A', 'B']);
-    pipeline.push(['C', 'D'].values());
+    pipeline.push(['C', 'D', 'E'].values());
     pipeline.push($generator());
     pipeline.push($addsome());
     pipeline.push($embellish());
@@ -142,7 +141,7 @@
       }
       return results;
     };
-    // drive 'breadth'
+    drive('breadth');
     drive('depth');
     return null;
   };
@@ -213,7 +212,6 @@
             return this.inputs.push(input);
           })(transform, idx, is_source);
         }
-        // debug '^3454^', segment for segment in @pipeline
         return void 0;
       }
 
@@ -280,7 +278,6 @@
         return generator_source = function(d, send) {
           var done, value;
           send(d);
-          debug('^334^');
           ({value, done} = generator.next());
           if (!done) {
             return send(value);
@@ -338,6 +335,9 @@
           for (idx = j = 0, len1 = ref1.length; j < len1; idx = ++j) {
             segment = ref1[idx];
             if (segment.over) {
+              while (segment.input.length > 0) {
+                segment.output.push(segment.input.shift());
+              }
               continue;
             }
             if (segment.is_source && segment.input.length === 0) {
