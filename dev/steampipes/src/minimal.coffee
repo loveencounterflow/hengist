@@ -106,12 +106,12 @@ class Steampipe
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( raw_pipeline ) ->
-    @first_input  = []
-    @last_output  = []
-    @pipeline     = []
-    last_idx      = raw_pipeline.length - 1
-    @inputs       = []
-    @sources      = []
+    @first_input    = []
+    @last_output    = []
+    @pipeline       = []
+    last_idx        = raw_pipeline.length - 1
+    @inputs         = []
+    @sources        = []
     @run_count      = 0
     @is_repeatable  = true
     for raw_transform, idx in raw_pipeline
@@ -144,20 +144,20 @@ class Steampipe
     is_source = false
     switch type = type_of raw_transform
       when 'function'
-        transform = raw_transform
+        transform       = raw_transform
         unless ( arity = transform.length ) is 2
-          throw new Error "^323^ expected function with arity 2 got one with arity #{arity}"
+          throw new Error "^steampipes@1^ expected function with arity 2 got one with arity #{arity}"
       when 'generatorfunction'
-        is_source = true
-        transform = @_source_from_generatorfunction raw_transform
+        is_source       = true
+        transform       = @_source_from_generatorfunction raw_transform
         unless ( arity = transform.length ) is 2
-          throw new Error "^323^ expected function with arity 2 got one with arity #{arity}"
+          throw new Error "^steampipes@2^ expected function with arity 2 got one with arity #{arity}"
         @is_repeatable  = false
       when 'list'
-        is_source = true
-        transform = @_source_from_list raw_transform
+        is_source       = true
+        transform       = @_source_from_list raw_transform
       else
-        throw new Error "^324^ cannot convert a #{type} to a source"
+        throw new Error "^steampipes@4^ cannot convert a #{type} to a source"
     return { transform, is_source, }
 
   #---------------------------------------------------------------------------------------------------------
