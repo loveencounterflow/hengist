@@ -75,12 +75,18 @@ demo = ->
       send d
       return null
   #.........................................................................................................
+  $generator = ->
+    return ->
+      yield 22
+      yield 33
+      return null
+  #.........................................................................................................
   pipeline  = []
   # pipeline.push $source_A [ 1, 2, 3, ]
   # pipeline.push $source_B [ 1, 2, ]
-  pipeline.push [ 1, 2, ]
+  # pipeline.push [ 1, 2, ]
   pipeline.push [ 'A', 'B', ]
-  pipeline.push $source_C [ 5, 7, 11, ]
+  pipeline.push $generator()
   pipeline.push $addsome()
   pipeline.push $embellish()
   pipeline.push $show()
@@ -147,12 +153,30 @@ class Steampipe
         transform = raw_transform
         unless ( arity = transform.length ) is 2
           throw new Error "^323^ expected function with arity 2 got one with arity #{arity}"
+      when 'generatorfunction'
+        is_source = true
+        transform = @_source_from_generatorfunction raw_transform
+        unless ( arity = transform.length ) is 2
+          throw new Error "^323^ expected function with arity 2 got one with arity #{arity}"
       when 'list'
         is_source = true
         transform = @_source_from_list raw_transform
       else
         throw new Error "^324^ cannot convert a #{type} to a source"
     return { transform, is_source, }
+
+  #---------------------------------------------------------------------------------------------------------
+  _source_from_generatorfunction: ( generatorfunction ) ->
+    generator = null
+    return generatorfunction_source = ( d, send ) ->
+      generator ?= generatorfunction()
+      send d
+      { value
+        done  } = generator.next()
+      return send value unless done
+      generator = null
+      send.over()
+      return null
 
   #---------------------------------------------------------------------------------------------------------
   _source_from_list: ( list ) ->
