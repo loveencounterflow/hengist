@@ -90,7 +90,8 @@ show_pipeline = ->
   return null
 
 
-driver_A = ->
+drive = ( cfg ) ->
+  { mode } = cfg
   show_pipeline()
   round = 0
   loop
@@ -103,11 +104,14 @@ driver_A = ->
         continue
       while segment.input.length > 0
         segment.tf segment.input.shift(), segment.send
+        break if mode is 'depth'
       show_pipeline()
     break unless inputs.some ( x ) -> x.length > 0
   return null
 
 
+# drive { mode: 'breadth', }
+drive { mode: 'depth', }
 
 
 
