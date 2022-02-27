@@ -38,7 +38,6 @@ demo = ->
     return source = ( d, send ) ->
       send d
       idx++
-      # debug '^2242^', { idx, }
       if idx > last_idx
         idx = -1
         return send.over()
@@ -75,9 +74,9 @@ demo = ->
   pipeline  = []
   # pipeline.push $source_A [ 1, 2, 3, ]
   # pipeline.push $source_B [ 1, 2, ]
-  # pipeline.push [ 1, 2, ]
+  pipeline.push [ 1, 2, ]
   pipeline.push [ 'A', 'B', ]
-  pipeline.push [ 'C', 'D', ].values()
+  pipeline.push [ 'C', 'D', 'E', ].values()
   pipeline.push $generator()
   pipeline.push $addsome()
   pipeline.push $embellish()
@@ -91,7 +90,7 @@ demo = ->
         break
       whisper '————————————————————————————————————————'
       sp.drive { mode, }
-  # drive 'breadth'
+  drive 'breadth'
   drive 'depth'
   return null
 
@@ -139,7 +138,6 @@ class Steampipe
         @pipeline.push  segment
         @sources.push   segment if is_source
         @inputs.push    input
-    # debug '^3454^', segment for segment in @pipeline
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
@@ -185,7 +183,6 @@ class Steampipe
   _source_from_generator: ( generator ) ->
     return generator_source = ( d, send ) ->
       send d
-      debug '^334^'
       { value
         done  } = generator.next()
       return send value unless done
@@ -221,7 +218,6 @@ class Steampipe
     segment.over  = false for segment in @pipeline
     loop
       for segment, idx in @pipeline
-        continue if segment.over
         if segment.over
           segment.output.push segment.input.shift() while segment.input.length > 0
           continue
