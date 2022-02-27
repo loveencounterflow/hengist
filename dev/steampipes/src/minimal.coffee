@@ -187,24 +187,21 @@ class Steampipe
   drive: ( cfg ) ->
     { mode      } = cfg
     segment.over  = false for segment in @pipeline
-    try
-      loop
-        for segment, idx in @pipeline
-          continue if segment.over
-          if segment.is_source and segment.input.length is 0
-            segment.transform symbol.drop, segment.send
-          else
-            while segment.input.length > 0
-              segment.transform segment.input.shift(), segment.send
-              break if mode is 'depth'
-          @last_output.length = 0
-          throw symbol.exit if segment.exit
-        if @sources.every ( source ) -> source.over
-          unless @inputs.some ( input ) -> input.length > 0
-            break
-    catch error
-      # throw error unless typeof error is 'symbol'
-      throw error unless error is symbol.exit
+    loop
+      for segment, idx in @pipeline
+        continue if segment.over
+        if segment.is_source and segment.input.length is 0
+          segment.transform symbol.drop, segment.send
+        else
+          while segment.input.length > 0
+            segment.transform segment.input.shift(), segment.send
+            break if mode is 'depth'
+        @last_output.length = 0
+        throw symbol.exit if segment.exit
+      ### TAINT collect stats in above loop ###
+      if @sources.every ( source ) -> source.over
+        unless @inputs.some ( input ) -> input.length > 0
+          break
     return null
 
   #---------------------------------------------------------------------------------------------------------
