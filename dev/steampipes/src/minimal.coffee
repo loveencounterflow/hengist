@@ -101,11 +101,16 @@ class Steampipe
     @pipeline     = []
     last_idx      = raw_pipeline.length - 1
     @inputs       = []
+    @sources      = []
     for tf, idx in raw_pipeline
-      do =>
+      [ is_source, tf, ] = switch type_of tf
+        when 'function' then [ false, tf, ] ### TAINT validate arity ###
+        when 'list'     then [ true, ( @_source_from_list tf ), ]
+        else throw new Error "^324^ cannoz convert a #{type} to a source"
+      do ( tf, idx, is_source ) =>
         input       = if idx is 0         then @first_input else @pipeline[ idx - 1 ].output
         output      = if idx is last_idx  then @last_output else []
-        entry       = { tf, input, output, over: false, exit: false, }
+        segment     = { tf, input, output, over: false, exit: false, is_source, }
         send        = ( d ) ->
           switch d
             when symbol.drop  then  null
@@ -113,13 +118,13 @@ class Steampipe
             when symbol.exit  then  @exit = true
             else @output.push d
           return null
-        send        = send.bind entry
+        send        = send.bind segment
         send.symbol = symbol
         send.over   = -> send send.symbol.over
         send.exit   = -> send send.symbol.exit
-        GUY.props.hide entry, 'send', send
-        @pipeline.push entry
         @inputs.push input
+        GUY.props.hide segment, 'send', send
+        @pipeline.push  segment
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
