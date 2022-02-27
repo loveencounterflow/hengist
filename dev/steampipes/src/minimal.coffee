@@ -29,28 +29,31 @@ $source = ( a_list ) ->
       exhausted = true
     return null
 
-addsome = ( d, send ) ->
-  help '^addsome^', d
-  send d + 100
-  send d + 200
-  return null
+$addsome = ->
+  return addsome = ( d, send ) ->
+    help '^addsome^', d
+    send d + 100
+    send d + 200
+    return null
 
-embellish = ( d, send ) ->
-  help '^embellish^', d
-  send "*#{rpr d}*"
-  return null
+$embellish = ->
+  return embellish = ( d, send ) ->
+    help '^embellish^', d
+    send "*#{rpr d}*"
+    return null
 
-show = ( d, send ) ->
-  help '^show^', d
-  info d
-  send d
-  return null
+$show = ->
+  return show = ( d, send ) ->
+    help '^show^', d
+    info d
+    send d
+    return null
 
 raw_pipeline = [
   $source [ 1, 2, 3, ]
-  addsome
-  embellish
-  show
+  $addsome()
+  $embellish()
+  $show()
   ]
 
 symbol    =
