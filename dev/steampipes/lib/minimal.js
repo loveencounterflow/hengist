@@ -106,8 +106,8 @@
         //---------------------------------------------------------------------------------------------------------
       constructor(raw_pipeline) {
         var i, idx, last_idx, len, tf;
-        this.first_q = [];
-        this.last_q = [];
+        this.first_input = [];
+        this.last_output = [];
         this.pipeline = [];
         last_idx = raw_pipeline.length - 1;
         this.inputs = [];
@@ -115,8 +115,8 @@
           tf = raw_pipeline[idx];
           (() => {
             var entry, input, output, send;
-            input = idx === 0 ? this.first_q : this.pipeline[idx - 1].output;
-            output = idx === last_idx ? this.last_q : [];
+            input = idx === 0 ? this.first_input : this.pipeline[idx - 1].output;
+            output = idx === last_idx ? this.last_output : [];
             entry = {
               tf,
               input,
@@ -188,7 +188,7 @@
                 throw symbol.exit;
               }
             }
-            this.last_q.length = 0;
+            this.last_output.length = 0;
             if (!this.inputs.some(function(x) {
               return x.length > 0;
             })) {
