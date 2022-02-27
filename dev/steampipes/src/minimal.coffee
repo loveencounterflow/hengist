@@ -34,7 +34,7 @@ demo = ->
     return source = ( d, send ) ->
       send d
       idx++
-      debug '^2242^', { idx, }
+      # debug '^2242^', { idx, }
       if idx > last_idx
         idx = -1
         return send.over()
@@ -73,15 +73,13 @@ demo = ->
   pipeline.push $embellish()
   pipeline.push $show()
   drive = ( mode ) ->
+    whisper '———————————————————————————————————————'
     sp = new Steampipe pipeline
-    # sp._show_pipeline()
     sp.drive { mode, }
-    # whisper '———————————————————————————————————————'
-    # sp._show_pipeline()
-    # sp.drive { mode, }
-    # sp._show_pipeline()
+    whisper '———————————————————————————————————————'
+    sp.drive { mode, }
   drive 'breadth'
-  # drive 'depth'
+  drive 'depth'
   return null
 
 
@@ -126,12 +124,11 @@ class Steampipe
 
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
-    { mode          } = cfg
-    segment.over = false for segment in @pipeline
+    { mode      } = cfg
+    segment.over  = false for segment in @pipeline
     try
       loop
         for segment, idx in @pipeline
-          debug '^53453^', segment
           continue if segment.over
           if idx is 0
             segment.tf symbol.drop, segment.send
