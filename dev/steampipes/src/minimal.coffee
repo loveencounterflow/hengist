@@ -222,6 +222,9 @@ class Steampipe
     loop
       for segment, idx in @pipeline
         continue if segment.over
+        if segment.over
+          segment.output.push segment.input.shift() while segment.input.length > 0
+          continue
         if segment.is_source and segment.input.length is 0
           segment.transform symbol.drop, segment.send
         else
