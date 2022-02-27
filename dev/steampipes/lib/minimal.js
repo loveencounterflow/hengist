@@ -35,7 +35,6 @@
           help('^source^', e);
           send(e);
         }
-        send.done();
         exhausted = true;
       }
       return null;
@@ -46,13 +45,12 @@
     var addsome;
     return addsome = function(d, send) {
       help('^addsome^', d);
-      send(d + 100);
-      if (d === 2) {
-        // send.stop() if d is 2
-        // throw send.symbol.stop if d is 2
-        throw send.symbol.done;
-      }
-      send(d + 200);
+      send(d * 100 + 1);
+      send(d * 100 + 2);
+      // send.exit() if d is 2
+      // send.pass() if d is 2
+      // throw send.symbol.exit if d is 2
+      // throw send.symbol.done if d is 2
       return null;
     };
   };
@@ -79,9 +77,10 @@
   raw_pipeline = [$source([1, 2, 3]), $addsome(), $embellish(), $show()];
 
   symbol = {
-    done: Symbol.for('done'),
-    drop: Symbol.for('drop'),
-    stop: Symbol.for('stop')
+    // done:       Symbol.for 'done' # done for this iteration
+    drop: Symbol.for('drop'), // this value that will not go to output
+    // pass:       Symbol.for 'pass' # do not call again
+    exit: Symbol.for('exit') // exit pipeline processing
   };
 
   first_q = [];
@@ -104,21 +103,23 @@
         tf,
         input,
         output,
-        done: false,
-        stop: false
+        exit: false
       };
+      // entry       = { tf, input, output, done: false, pass: false, exit: false, }
       send = function(d) {
         switch (d) {
           case symbol.drop:
             info(`dropped: ${rpr(d)}`);
             break;
-          case symbol.done:
-            info(`done: ${rpr(d)}`);
-            this.done = true;
-            break;
-          case symbol.stop:
-            info(`stop: ${rpr(d)}`);
-            this.stop = true;
+          // when symbol.done
+          //   info "done: #{rpr d}"
+          //   @done = true
+          // when symbol.pass
+          //   info "pass: #{rpr d}"
+          //   @pass = true
+          case symbol.exit:
+            info(`exit: ${rpr(d)}`);
+            this.exit = true;
             break;
           default:
             this.output.push(d);
@@ -127,11 +128,10 @@
       };
       send = send.bind(entry);
       send.symbol = symbol;
-      send.done = function() {
-        return send(send.symbol.done);
-      };
-      send.stop = function() {
-        return send(send.symbol.stop);
+      // send.done   = -> send send.symbol.done
+      // send.pass   = -> send send.symbol.pass
+      send.exit = function() {
+        return send(send.symbol.exit);
       };
       entry.send = send;
       pipeline.push(entry);
@@ -170,10 +170,10 @@
               }
             }
           }
-          show_pipeline();
-          if (segment.stop) {
+          // show_pipeline()
+          if (segment.exit) {
             info('^443^', `stopped by ${rpr(segment)}`);
-            throw symbol.stop;
+            throw symbol.exit;
           }
         }
         if (!inputs.some(function(x) {
@@ -184,7 +184,7 @@
       }
     } catch (error1) {
       error = error1;
-      if (error !== symbol.stop) {
+      if (error !== symbol.exit) {
         // throw error unless typeof error is 'symbol'
         throw error;
       }
