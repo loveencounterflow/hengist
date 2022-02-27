@@ -83,15 +83,15 @@ class Steampipe
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( raw_pipeline ) ->
-    @first_q    = []
-    @last_q     = []
-    @pipeline   = []
-    last_idx    = raw_pipeline.length - 1
-    @inputs     = []
+    @first_input  = []
+    @last_output  = []
+    @pipeline     = []
+    last_idx      = raw_pipeline.length - 1
+    @inputs       = []
     for tf, idx in raw_pipeline
       do =>
-        input       = if idx is 0         then @first_q  else @pipeline[ idx - 1 ].output
-        output      = if idx is last_idx  then @last_q   else []
+        input       = if idx is 0         then @first_input else @pipeline[ idx - 1 ].output
+        output      = if idx is last_idx  then @last_output else []
         entry       = { tf, input, output, over: false, exit: false, }
         send        = ( d ) ->
           switch d
@@ -125,7 +125,7 @@ class Steampipe
               segment.tf segment.input.shift(), segment.send
               break if mode is 'depth'
           throw symbol.exit if segment.exit
-        @last_q.length = 0
+        @last_output.length = 0
         break unless @inputs.some ( x ) -> x.length > 0
     catch error
       # throw error unless typeof error is 'symbol'
