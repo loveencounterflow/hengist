@@ -31,7 +31,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
-    var $addsome, $embellish, $show, $source_A, $source_B, $source_C, drive, pipeline, trace;
+    var $addsome, $embellish, $generator, $show, $source_A, $source_B, drive, pipeline, trace;
     //.........................................................................................................
     $source_A = function(a_list) {
       var source;
@@ -46,23 +46,6 @@
           send(e);
         }
         send.over();
-        return null;
-      };
-    };
-    //.........................................................................................................
-    $source_C = function(a_list) {
-      var source;
-      return source = function(d, send) {
-        var e, i, len;
-        send(d);
-        for (i = 0, len = a_list.length; i < len; i++) {
-          e = a_list[i];
-          if (trace) {
-            help('^source C^', e);
-          }
-          send(e);
-        }
-        // send.over()
         return null;
       };
     };
@@ -124,12 +107,20 @@
       };
     };
     //.........................................................................................................
+    $generator = function() {
+      return function*() {
+        yield 22;
+        yield 33;
+        return null;
+      };
+    };
+    //.........................................................................................................
     pipeline = [];
     // pipeline.push $source_A [ 1, 2, 3, ]
     // pipeline.push $source_B [ 1, 2, ]
-    pipeline.push([1, 2]);
+    // pipeline.push [ 1, 2, ]
     pipeline.push(['A', 'B']);
-    pipeline.push($source_C([5, 7, 11]));
+    pipeline.push($generator());
     pipeline.push($addsome());
     pipeline.push($embellish());
     pipeline.push($show());
@@ -211,6 +202,7 @@
             return this.inputs.push(input);
           })(transform, idx, is_source);
         }
+        // debug '^3454^', segment for segment in @pipeline
         return void 0;
       }
 
@@ -225,6 +217,13 @@
               throw new Error(`^323^ expected function with arity 2 got one with arity ${arity}`);
             }
             break;
+          case 'generatorfunction':
+            is_source = true;
+            transform = this._source_from_generatorfunction(raw_transform);
+            if ((arity = transform.length) !== 2) {
+              throw new Error(`^323^ expected function with arity 2 got one with arity ${arity}`);
+            }
+            break;
           case 'list':
             is_source = true;
             transform = this._source_from_list(raw_transform);
@@ -233,6 +232,26 @@
             throw new Error(`^324^ cannot convert a ${type} to a source`);
         }
         return {transform, is_source};
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _source_from_generatorfunction(generatorfunction) {
+        var generator, generatorfunction_source;
+        generator = null;
+        return generatorfunction_source = function(d, send) {
+          var done, value;
+          if (generator == null) {
+            generator = generatorfunction();
+          }
+          send(d);
+          ({value, done} = generator.next());
+          if (!done) {
+            return send(value);
+          }
+          generator = null;
+          send.over();
+          return null;
+        };
       }
 
       //---------------------------------------------------------------------------------------------------------
@@ -254,13 +273,14 @@
 
       //---------------------------------------------------------------------------------------------------------
       drive(cfg) {
-        var error, i, idx, j, len, len1, mode, ref, ref1, segment;
+        var XXX_count, error, i, idx, j, len, len1, mode, ref, ref1, segment;
         ({mode} = cfg);
         ref = this.pipeline;
         for (i = 0, len = ref.length; i < len; i++) {
           segment = ref[i];
           segment.over = false;
         }
+        XXX_count = 0;
         try {
           while (true) {
             ref1 = this.pipeline;
