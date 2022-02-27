@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Steampipe, badge, debug, demo, echo, help, info, rpr, urge, warn, whisper;
+  var CND, GUY, Steampipe, badge, debug, demo, echo, help, info, rpr, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -23,11 +23,13 @@
 
   echo = CND.echo.bind(CND);
 
+  GUY = require('guy');
+
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
-    var $addsome, $embellish, $show, $source, drive, pipeline;
+    var $addsome, $embellish, $show, $source_A, $source_B, drive, pipeline;
     //.........................................................................................................
-    $source = function(a_list) {
+    $source_A = function(a_list) {
       var source;
       return source = function(d, send) {
         var e, i, len;
@@ -38,6 +40,24 @@
           send(e);
         }
         send.over();
+        return null;
+      };
+    };
+    //.........................................................................................................
+    $source_B = function(a_list) {
+      var idx, last_idx, source;
+      last_idx = a_list.length - 1;
+      idx = -1;
+      return source = function(d, send) {
+        send(d);
+        idx++;
+        debug('^2242^', {idx});
+        if (idx > last_idx) {
+          idx = -1;
+          return send.over();
+        }
+        help('^source^', a_list[idx]);
+        send(a_list[idx]);
         return null;
       };
     };
@@ -76,22 +96,23 @@
     };
     //.........................................................................................................
     pipeline = [];
-    pipeline.push($source([1, 2, 3]));
+    // pipeline.push $source_A [ 1, 2, 3, ]
+    pipeline.push($source_B([1, 2, 3]));
     pipeline.push($addsome());
     pipeline.push($embellish());
     pipeline.push($show());
     drive = function(mode) {
       var sp;
       sp = new Steampipe(pipeline);
-      sp._show_pipeline();
-      sp.drive({mode});
-      whisper('———————————————————————————————————————');
-      sp._show_pipeline();
-      sp.drive({mode});
-      return sp._show_pipeline();
+      // sp._show_pipeline()
+      return sp.drive({mode});
     };
+    // whisper '———————————————————————————————————————'
+    // sp._show_pipeline()
+    // sp.drive { mode, }
+    // sp._show_pipeline()
     drive('breadth');
-    drive('depth');
+    // drive 'depth'
     return null;
   };
 
@@ -142,14 +163,13 @@
             };
             send = send.bind(entry);
             send.symbol = symbol;
-            // send.done   = -> send send.symbol.done
             send.over = function() {
               return send(send.symbol.over);
             };
             send.exit = function() {
               return send(send.symbol.exit);
             };
-            entry.send = send;
+            GUY.props.hide(entry, 'send', send);
             this.pipeline.push(entry);
             return this.inputs.push(input);
           })();
@@ -171,6 +191,7 @@
             ref1 = this.pipeline;
             for (idx = j = 0, len1 = ref1.length; j < len1; idx = ++j) {
               segment = ref1[idx];
+              debug('^53453^', segment);
               if (segment.over) {
                 continue;
               }
