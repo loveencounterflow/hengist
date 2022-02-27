@@ -13,19 +13,33 @@ urge                      = CND.get_logger 'urge',      badge
 help                      = CND.get_logger 'help',      badge
 whisper                   = CND.get_logger 'whisper',   badge
 echo                      = CND.echo.bind CND
-
+GUY                       = require 'guy'
 
 
 #-----------------------------------------------------------------------------------------------------------
 demo = ->
   #.........................................................................................................
-  $source = ( a_list ) ->
+  $source_A = ( a_list ) ->
     return source = ( d, send ) ->
       send d
       for e in a_list
         help '^source^', e
         send e
       send.over()
+      return null
+  #.........................................................................................................
+  $source_B = ( a_list ) ->
+    last_idx  = a_list.length - 1
+    idx       = -1
+    return source = ( d, send ) ->
+      send d
+      idx++
+      debug '^2242^', { idx, }
+      if idx > last_idx
+        idx = -1
+        return send.over()
+      help '^source^', a_list[ idx ]
+      send a_list[ idx ]
       return null
   #.........................................................................................................
   $addsome = ->
@@ -53,20 +67,21 @@ demo = ->
       return null
   #.........................................................................................................
   pipeline  = []
-  pipeline.push $source [ 1, 2, 3, ]
+  # pipeline.push $source_A [ 1, 2, 3, ]
+  pipeline.push $source_B [ 1, 2, 3, ]
   pipeline.push $addsome()
   pipeline.push $embellish()
   pipeline.push $show()
   drive = ( mode ) ->
     sp = new Steampipe pipeline
-    sp._show_pipeline()
+    # sp._show_pipeline()
     sp.drive { mode, }
-    whisper '———————————————————————————————————————'
-    sp._show_pipeline()
-    sp.drive { mode, }
-    sp._show_pipeline()
+    # whisper '———————————————————————————————————————'
+    # sp._show_pipeline()
+    # sp.drive { mode, }
+    # sp._show_pipeline()
   drive 'breadth'
-  drive 'depth'
+  # drive 'depth'
   return null
 
 
@@ -102,10 +117,9 @@ class Steampipe
           return null
         send        = send.bind entry
         send.symbol = symbol
-        # send.done   = -> send send.symbol.done
         send.over   = -> send send.symbol.over
         send.exit   = -> send send.symbol.exit
-        entry.send  = send
+        GUY.props.hide entry, 'send', send
         @pipeline.push entry
         @inputs.push input
     return undefined
@@ -117,6 +131,7 @@ class Steampipe
     try
       loop
         for segment, idx in @pipeline
+          debug '^53453^', segment
           continue if segment.over
           if idx is 0
             segment.tf symbol.drop, segment.send
