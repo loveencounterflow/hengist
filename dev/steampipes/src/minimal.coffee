@@ -25,18 +25,18 @@ $source = ( a_list ) ->
       for e in a_list
         help '^source^', e
         send e
-      send.done()
       exhausted = true
     return null
 
 $addsome = ->
   return addsome = ( d, send ) ->
     help '^addsome^', d
-    send d + 100
-    # send.stop() if d is 2
-    # throw send.symbol.stop if d is 2
-    throw send.symbol.done if d is 2
-    send d + 200
+    send d * 100 + 1
+    send d * 100 + 2
+    # send.exit() if d is 2
+    # send.pass() if d is 2
+    # throw send.symbol.exit if d is 2
+    # throw send.symbol.done if d is 2
     return null
 
 $embellish = ->
@@ -60,9 +60,10 @@ raw_pipeline = [
   ]
 
 symbol    =
-  done:       Symbol.for 'done'
-  drop:       Symbol.for 'drop'
-  stop:       Symbol.for 'stop'
+  # done:       Symbol.for 'done' # done for this iteration
+  drop:       Symbol.for 'drop' # this value that will not go to output
+  # pass:       Symbol.for 'pass' # do not call again
+  exit:       Symbol.for 'exit' # exit pipeline processing
 first_q   = []
 last_q    = []
 pipeline  = []
@@ -72,24 +73,29 @@ for tf, idx in raw_pipeline
   do =>
     input       = if idx is 0         then first_q  else pipeline[ idx - 1 ].output
     output      = if idx is last_idx  then last_q   else []
-    entry       = { tf, input, output, done: false, stop: false, }
+    entry       = { tf, input, output, exit: false, }
+    # entry       = { tf, input, output, done: false, pass: false, exit: false, }
     send        = ( d ) ->
       switch d
         when symbol.drop
           info "dropped: #{rpr d}"
-        when symbol.done
-          info "done: #{rpr d}"
-          @done = true
-        when symbol.stop
-          info "stop: #{rpr d}"
-          @stop = true
+        # when symbol.done
+        #   info "done: #{rpr d}"
+        #   @done = true
+        # when symbol.pass
+        #   info "pass: #{rpr d}"
+        #   @pass = true
+        when symbol.exit
+          info "exit: #{rpr d}"
+          @exit = true
         else
           @output.push d
       return null
     send        = send.bind entry
     send.symbol = symbol
-    send.done   = -> send send.symbol.done
-    send.stop   = -> send send.symbol.stop
+    # send.done   = -> send send.symbol.done
+    # send.pass   = -> send send.symbol.pass
+    send.exit   = -> send send.symbol.exit
     entry.send  = send
     pipeline.push entry
     inputs.push input
@@ -116,14 +122,14 @@ drive = ( cfg ) ->
           while segment.input.length > 0
             segment.tf segment.input.shift(), segment.send
             break if mode is 'depth'
-        show_pipeline()
-        if segment.stop
+        # show_pipeline()
+        if segment.exit
           info '^443^', "stopped by #{rpr segment}"
-          throw symbol.stop
+          throw symbol.exit
       break unless inputs.some ( x ) -> x.length > 0
   catch error
     # throw error unless typeof error is 'symbol'
-    throw error unless error is symbol.stop
+    throw error unless error is symbol.exit
     warn error
   return null
 
