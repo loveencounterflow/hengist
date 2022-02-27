@@ -25,22 +25,19 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
-    var $addsome, $embellish, $show, $source, pipeline;
+    var $addsome, $embellish, $show, $source, drive, pipeline;
     //.........................................................................................................
     $source = function(a_list) {
-      var exhausted, source;
-      exhausted = false;
+      var source;
       return source = function(d, send) {
         var e, i, len;
         send(d);
-        if (!exhausted) {
-          for (i = 0, len = a_list.length; i < len; i++) {
-            e = a_list[i];
-            help('^source^', e);
-            send(e);
-          }
-          exhausted = true;
+        for (i = 0, len = a_list.length; i < len; i++) {
+          e = a_list[i];
+          help('^source^', e);
+          send(e);
         }
+        send.over();
         return null;
       };
     };
@@ -83,10 +80,18 @@
     pipeline.push($addsome());
     pipeline.push($embellish());
     pipeline.push($show());
-    pipeline = new Steampipe(pipeline);
-    pipeline.drive({
-      mode: 'depth'
-    });
+    drive = function(mode) {
+      var sp;
+      sp = new Steampipe(pipeline);
+      sp._show_pipeline();
+      sp.drive({mode});
+      whisper('———————————————————————————————————————');
+      sp._show_pipeline();
+      sp.drive({mode});
+      return sp._show_pipeline();
+    };
+    drive('breadth');
+    drive('depth');
     return null;
   };
 
@@ -97,9 +102,7 @@
 
     //-----------------------------------------------------------------------------------------------------------
     class Steampipe {
-      // done:       Symbol.for 'done' # done for this iteration
-      // pass:       Symbol.for 'pass' # do not call again
-
+      
         //---------------------------------------------------------------------------------------------------------
       constructor(raw_pipeline) {
         var i, idx, last_idx, len, tf;
@@ -120,7 +123,7 @@
               output,
               exit: false
             };
-            // entry       = { tf, input, output, done: false, pass: false, exit: false, }
+            // entry       = { tf, input, output, done: false, over: false, exit: false, }
             send = function(d) {
               switch (d) {
                 case symbol.drop:
@@ -129,9 +132,10 @@
                 // when symbol.done
                 //   info "done: #{rpr d}"
                 //   @done = true
-                // when symbol.pass
-                //   info "pass: #{rpr d}"
-                //   @pass = true
+                case symbol.over:
+                  info(`over: ${rpr(d)}`);
+                  this.over = true;
+                  break;
                 case symbol.exit:
                   info(`exit: ${rpr(d)}`);
                   this.exit = true;
@@ -144,7 +148,9 @@
             send = send.bind(entry);
             send.symbol = symbol;
             // send.done   = -> send send.symbol.done
-            // send.pass   = -> send send.symbol.pass
+            send.over = function() {
+              return send(send.symbol.over);
+            };
             send.exit = function() {
               return send(send.symbol.exit);
             };
@@ -158,16 +164,24 @@
 
       //---------------------------------------------------------------------------------------------------------
       drive(cfg) {
-        var error, i, idx, mode, round, segment;
+        var error, i, idx, j, len, len1, mode, ref, ref1, round, segment;
         ({mode} = cfg);
-        this._show_pipeline();
         round = 0;
+        ref = this.pipeline;
+        for (i = 0, len = ref.length; i < len; i++) {
+          segment = ref[i];
+          segment.over = false;
+        }
         try {
           while (true) {
             round++;
             whisper('^4958^', `round ${round} -------------------------------`);
-            for (idx = i = 0; i <= 3; idx = ++i) {
-              segment = this.pipeline[idx];
+            ref1 = this.pipeline;
+            for (idx = j = 0, len1 = ref1.length; j < len1; idx = ++j) {
+              segment = ref1[idx];
+              if (segment.over) {
+                continue;
+              }
               if (idx === 0) {
                 segment.tf(symbol.drop, segment.send);
               } else {
@@ -178,12 +192,12 @@
                   }
                 }
               }
-              // @_show_pipeline()
               if (segment.exit) {
                 info('^443^', `stopped by ${rpr(segment)}`);
                 throw symbol.exit;
               }
             }
+            this.last_q.length = 0;
             if (!this.inputs.some(function(x) {
               return x.length > 0;
             })) {
@@ -196,7 +210,6 @@
             // throw error unless typeof error is 'symbol'
             throw error;
           }
-          warn(error);
         }
         return null;
       }
@@ -217,7 +230,9 @@
 
     Steampipe.C = symbol = {
       drop: Symbol.for('drop'), // this value will not go to output
-      exit: Symbol.for('exit') // exit pipeline processing
+      exit: Symbol.for('exit'), // exit pipeline processing
+      // done:       Symbol.for 'done' # done for this iteration
+      over: Symbol.for('over') // do not call again in this round
     };
 
     return Steampipe;
