@@ -92,23 +92,13 @@ class Steampipe
       do =>
         input       = if idx is 0         then @first_q  else @pipeline[ idx - 1 ].output
         output      = if idx is last_idx  then @last_q   else []
-        entry       = { tf, input, output, exit: false, }
-        # entry       = { tf, input, output, done: false, over: false, exit: false, }
+        entry       = { tf, input, output, over: false, exit: false, }
         send        = ( d ) ->
           switch d
-            when symbol.drop
-              info "dropped: #{rpr d}"
-            # when symbol.done
-            #   info "done: #{rpr d}"
-            #   @done = true
-            when symbol.over
-              info "over: #{rpr d}"
-              @over = true
-            when symbol.exit
-              info "exit: #{rpr d}"
-              @exit = true
-            else
-              @output.push d
+            when symbol.drop  then  null
+            when symbol.over  then  @over = true
+            when symbol.exit  then  @exit = true
+            else @output.push d
           return null
         send        = send.bind entry
         send.symbol = symbol
@@ -123,12 +113,9 @@ class Steampipe
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
     { mode          } = cfg
-    round = 0
     segment.over = false for segment in @pipeline
     try
       loop
-        round++
-        whisper '^4958^', "round #{round} -------------------------------"
         for segment, idx in @pipeline
           continue if segment.over
           if idx is 0
@@ -137,9 +124,7 @@ class Steampipe
             while segment.input.length > 0
               segment.tf segment.input.shift(), segment.send
               break if mode is 'depth'
-          if segment.exit
-            info '^443^', "stopped by #{rpr segment}"
-            throw symbol.exit
+          throw symbol.exit if segment.exit
         @last_q.length = 0
         break unless @inputs.some ( x ) -> x.length > 0
     catch error
