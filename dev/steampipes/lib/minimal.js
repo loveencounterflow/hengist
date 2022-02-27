@@ -47,6 +47,11 @@
     return addsome = function(d, send) {
       help('^addsome^', d);
       send(d + 100);
+      if (d === 2) {
+        // send.stop() if d is 2
+        // throw send.symbol.stop if d is 2
+        throw send.symbol.done;
+      }
       send(d + 200);
       return null;
     };
@@ -100,7 +105,7 @@
         input,
         output,
         done: false,
-        stopped: false
+        stop: false
       };
       send = function(d) {
         switch (d) {
@@ -112,8 +117,8 @@
             this.done = true;
             break;
           case symbol.stop:
-            info(`stopped: ${rpr(d)}`);
-            this.stopped = true;
+            info(`stop: ${rpr(d)}`);
+            this.stop = true;
             break;
           default:
             this.output.push(d);
@@ -124,6 +129,9 @@
       send.symbol = symbol;
       send.done = function() {
         return send(send.symbol.done);
+      };
+      send.stop = function() {
+        return send(send.symbol.stop);
       };
       entry.send = send;
       pipeline.push(entry);
@@ -142,32 +150,45 @@
   };
 
   drive = function(cfg) {
-    var j, mode, round, segment;
+    var error, j, mode, round, segment;
     ({mode} = cfg);
     show_pipeline();
     round = 0;
-    while (true) {
-      round++;
-      whisper('^4958^', `round ${round} -------------------------------`);
-      for (idx = j = 0; j <= 3; idx = ++j) {
-        segment = pipeline[idx];
-        if (idx === 0) {
-          segment.tf(symbol.drop, segment.send);
-          continue;
-        }
-        while (segment.input.length > 0) {
-          segment.tf(segment.input.shift(), segment.send);
-          if (mode === 'depth') {
-            break;
+    try {
+      while (true) {
+        round++;
+        whisper('^4958^', `round ${round} -------------------------------`);
+        for (idx = j = 0; j <= 3; idx = ++j) {
+          segment = pipeline[idx];
+          if (idx === 0) {
+            segment.tf(symbol.drop, segment.send);
+          } else {
+            while (segment.input.length > 0) {
+              segment.tf(segment.input.shift(), segment.send);
+              if (mode === 'depth') {
+                break;
+              }
+            }
+          }
+          show_pipeline();
+          if (segment.stop) {
+            info('^443^', `stopped by ${rpr(segment)}`);
+            throw symbol.stop;
           }
         }
-        show_pipeline();
+        if (!inputs.some(function(x) {
+          return x.length > 0;
+        })) {
+          break;
+        }
       }
-      if (!inputs.some(function(x) {
-        return x.length > 0;
-      })) {
-        break;
+    } catch (error1) {
+      error = error1;
+      if (error !== symbol.stop) {
+        // throw error unless typeof error is 'symbol'
+        throw error;
       }
+      warn(error);
     }
     return null;
   };
@@ -176,18 +197,6 @@
   drive({
     mode: 'depth'
   });
-
-  // f = ->
-//   yield 1
-//   yield 2
-//   yield 3
-//   return null
-
-  // debug g = f()
-// debug g.next()
-// debug g.next()
-// debug g.next()
-// debug g.next()
 
 }).call(this);
 
