@@ -51,7 +51,7 @@
       return source = function(d, send) {
         send(d);
         idx++;
-        debug('^2242^', {idx});
+        // debug '^2242^', { idx, }
         if (idx > last_idx) {
           idx = -1;
           return send.over();
@@ -103,16 +103,14 @@
     pipeline.push($show());
     drive = function(mode) {
       var sp;
+      whisper('———————————————————————————————————————');
       sp = new Steampipe(pipeline);
-      // sp._show_pipeline()
+      sp.drive({mode});
+      whisper('———————————————————————————————————————');
       return sp.drive({mode});
     };
-    // whisper '———————————————————————————————————————'
-    // sp._show_pipeline()
-    // sp.drive { mode, }
-    // sp._show_pipeline()
     drive('breadth');
-    // drive 'depth'
+    drive('depth');
     return null;
   };
 
@@ -191,10 +189,10 @@
             ref1 = this.pipeline;
             for (idx = j = 0, len1 = ref1.length; j < len1; idx = ++j) {
               segment = ref1[idx];
-              debug('^53453^', segment);
               if (segment.over) {
                 continue;
               }
+              /* TAINT assumes source is at index 0, not generally true */
               if (idx === 0) {
                 segment.tf(symbol.drop, segment.send);
               } else {
@@ -205,12 +203,13 @@
                   }
                 }
               }
+              this.last_output.length = 0;
               if (segment.exit) {
                 throw symbol.exit;
               }
             }
-            this.last_output.length = 0;
-            if (!this.inputs.some(function(x) {
+            /* TAINT assumes source is at index 0, not generally true */
+            if (this.pipeline[0].over && !this.inputs.some(function(x) {
               return x.length > 0;
             })) {
               break;
