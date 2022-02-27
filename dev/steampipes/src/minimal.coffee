@@ -77,18 +77,21 @@ demo = ->
   # pipeline.push $source_B [ 1, 2, ]
   # pipeline.push [ 1, 2, ]
   pipeline.push [ 'A', 'B', ]
+  pipeline.push [ 'C', 'D', ].values()
   pipeline.push $generator()
   pipeline.push $addsome()
   pipeline.push $embellish()
   pipeline.push $show()
   trace = false
   drive = ( mode ) ->
-    whisper '———————————————————————————————————————'
     sp = new Steampipe pipeline
-    sp.drive { mode, }
-    whisper '———————————————————————————————————————'
-    sp.drive { mode, }
-  drive 'breadth'
+    for _ in [ 1, 2, ]
+      unless sp.can_repeat()
+        warn "not repeatable"
+        break
+      whisper '————————————————————————————————————————'
+      sp.drive { mode, }
+  # drive 'breadth'
   drive 'depth'
   return null
 
@@ -152,7 +155,12 @@ class Steampipe
         transform       = @_source_from_generatorfunction raw_transform
         unless ( arity = transform.length ) is 2
           throw new Error "^steampipes@2^ expected function with arity 2 got one with arity #{arity}"
+      when 'generator', 'arrayiterator'
         @is_repeatable  = false
+        is_source       = true
+        transform       = @_source_from_generator raw_transform
+        unless ( arity = transform.length ) is 2
+          throw new Error "^steampipes@3^ expected function with arity 2 got one with arity #{arity}"
       when 'list'
         is_source       = true
         transform       = @_source_from_list raw_transform
@@ -170,6 +178,17 @@ class Steampipe
         done  } = generator.next()
       return send value unless done
       generator = null
+      send.over()
+      return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _source_from_generator: ( generator ) ->
+    return generator_source = ( d, send ) ->
+      send d
+      debug '^334^'
+      { value
+        done  } = generator.next()
+      return send value unless done
       send.over()
       return null
 
