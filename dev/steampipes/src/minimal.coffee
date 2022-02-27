@@ -32,15 +32,6 @@ demo = ->
       send.over()
       return null
   #.........................................................................................................
-  $source_C = ( a_list ) ->
-    return source = ( d, send ) ->
-      send d
-      for e in a_list
-        help '^source C^', e if trace
-        send e
-      # send.over()
-      return null
-  #.........................................................................................................
   $source_B = ( a_list ) ->
     last_idx  = a_list.length - 1
     idx       = -1
@@ -143,6 +134,7 @@ class Steampipe
         @pipeline.push  segment
         @sources.push   segment if is_source
         @inputs.push    input
+    # debug '^3454^', segment for segment in @pipeline
     return undefined
 
   #---------------------------------------------------------------------------------------------------------

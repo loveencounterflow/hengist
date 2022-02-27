@@ -273,14 +273,13 @@
 
       //---------------------------------------------------------------------------------------------------------
       drive(cfg) {
-        var XXX_count, error, i, idx, j, len, len1, mode, ref, ref1, segment;
+        var error, i, idx, j, len, len1, mode, ref, ref1, segment;
         ({mode} = cfg);
         ref = this.pipeline;
         for (i = 0, len = ref.length; i < len; i++) {
           segment = ref[i];
           segment.over = false;
         }
-        XXX_count = 0;
         try {
           while (true) {
             ref1 = this.pipeline;
