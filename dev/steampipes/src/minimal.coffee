@@ -59,6 +59,7 @@ raw_pipeline = [
 symbol    =
   done:       Symbol.for 'done'
   drop:       Symbol.for 'drop'
+  stop:       Symbol.for 'stop'
 first_q   = []
 last_q    = []
 pipeline  = []
@@ -68,27 +69,32 @@ for tf, idx in raw_pipeline
   do =>
     input       = if idx is 0         then first_q  else pipeline[ idx - 1 ].output
     output      = if idx is last_idx  then last_q   else []
+    entry       = { tf, input, output, done: false, stopped: false, }
     send        = ( d ) ->
       switch d
         when symbol.drop
           info "dropped: #{rpr d}"
         when symbol.done
           info "done: #{rpr d}"
+          @done = true
+        when symbol.stop
+          info "stopped: #{rpr d}"
+          @stopped = true
         else
-          output.push d
+          @output.push d
       return null
+    send        = send.bind entry
     send.symbol = symbol
     send.done   = -> send send.symbol.done
-    pipeline.push { tf, input, output, send, }
+    entry.send  = send
+    pipeline.push entry
     inputs.push input
-
 
 show_pipeline = ->
   urge inputs[ 0 ]
   for segment in pipeline
     urge segment.tf.name ? '?', segment.output
   return null
-
 
 drive = ( cfg ) ->
   { mode } = cfg
