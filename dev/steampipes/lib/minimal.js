@@ -121,23 +121,18 @@
               tf,
               input,
               output,
+              over: false,
               exit: false
             };
-            // entry       = { tf, input, output, done: false, over: false, exit: false, }
             send = function(d) {
               switch (d) {
                 case symbol.drop:
-                  info(`dropped: ${rpr(d)}`);
+                  null;
                   break;
-                // when symbol.done
-                //   info "done: #{rpr d}"
-                //   @done = true
                 case symbol.over:
-                  info(`over: ${rpr(d)}`);
                   this.over = true;
                   break;
                 case symbol.exit:
-                  info(`exit: ${rpr(d)}`);
                   this.exit = true;
                   break;
                 default:
@@ -164,9 +159,8 @@
 
       //---------------------------------------------------------------------------------------------------------
       drive(cfg) {
-        var error, i, idx, j, len, len1, mode, ref, ref1, round, segment;
+        var error, i, idx, j, len, len1, mode, ref, ref1, segment;
         ({mode} = cfg);
-        round = 0;
         ref = this.pipeline;
         for (i = 0, len = ref.length; i < len; i++) {
           segment = ref[i];
@@ -174,8 +168,6 @@
         }
         try {
           while (true) {
-            round++;
-            whisper('^4958^', `round ${round} -------------------------------`);
             ref1 = this.pipeline;
             for (idx = j = 0, len1 = ref1.length; j < len1; idx = ++j) {
               segment = ref1[idx];
@@ -193,7 +185,6 @@
                 }
               }
               if (segment.exit) {
-                info('^443^', `stopped by ${rpr(segment)}`);
                 throw symbol.exit;
               }
             }
