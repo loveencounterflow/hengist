@@ -112,6 +112,8 @@ class Steampipe
     last_idx      = raw_pipeline.length - 1
     @inputs       = []
     @sources      = []
+    @run_count      = 0
+    @is_repeatable  = true
     for raw_transform, idx in raw_pipeline
       { is_source
         transform } = @_get_transform raw_transform
@@ -150,6 +152,7 @@ class Steampipe
         transform = @_source_from_generatorfunction raw_transform
         unless ( arity = transform.length ) is 2
           throw new Error "^323^ expected function with arity 2 got one with arity #{arity}"
+        @is_repeatable  = false
       when 'list'
         is_source = true
         transform = @_source_from_list raw_transform
@@ -184,7 +187,17 @@ class Steampipe
       return null
 
   #---------------------------------------------------------------------------------------------------------
+  can_repeat: -> @run_count is 0 or @repeatable
+
+  #---------------------------------------------------------------------------------------------------------
+  _on_drive_start: ->
+    return false unless @can_repeat()
+    @run_count++
+    return true
+
+  #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
+    throw new Error "^steampipes@5^ pipeline is not repeatable" unless @_on_drive_start()
     { mode      } = cfg
     segment.over  = false for segment in @pipeline
     loop
