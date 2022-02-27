@@ -20,14 +20,12 @@ echo                      = CND.echo.bind CND
 demo = ->
   #.........................................................................................................
   $source = ( a_list ) ->
-    exhausted = false
     return source = ( d, send ) ->
       send d
-      unless exhausted
-        for e in a_list
-          help '^source^', e
-          send e
-        exhausted = true
+      for e in a_list
+        help '^source^', e
+        send e
+      send.over()
       return null
   #.........................................................................................................
   $addsome = ->
@@ -59,8 +57,16 @@ demo = ->
   pipeline.push $addsome()
   pipeline.push $embellish()
   pipeline.push $show()
-  pipeline = new Steampipe pipeline
-  pipeline.drive { mode: 'depth', }
+  drive = ( mode ) ->
+    sp = new Steampipe pipeline
+    sp._show_pipeline()
+    sp.drive { mode, }
+    whisper '———————————————————————————————————————'
+    sp._show_pipeline()
+    sp.drive { mode, }
+    sp._show_pipeline()
+  drive 'breadth'
+  drive 'depth'
   return null
 
 
@@ -73,7 +79,7 @@ class Steampipe
       drop:       Symbol.for 'drop' # this value will not go to output
       exit:       Symbol.for 'exit' # exit pipeline processing
       # done:       Symbol.for 'done' # done for this iteration
-      # pass:       Symbol.for 'pass' # do not call again
+      over:       Symbol.for 'over' # do not call again in this round
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( raw_pipeline ) ->
@@ -87,7 +93,7 @@ class Steampipe
         input       = if idx is 0         then @first_q  else @pipeline[ idx - 1 ].output
         output      = if idx is last_idx  then @last_q   else []
         entry       = { tf, input, output, exit: false, }
-        # entry       = { tf, input, output, done: false, pass: false, exit: false, }
+        # entry       = { tf, input, output, done: false, over: false, exit: false, }
         send        = ( d ) ->
           switch d
             when symbol.drop
@@ -95,9 +101,9 @@ class Steampipe
             # when symbol.done
             #   info "done: #{rpr d}"
             #   @done = true
-            # when symbol.pass
-            #   info "pass: #{rpr d}"
-            #   @pass = true
+            when symbol.over
+              info "over: #{rpr d}"
+              @over = true
             when symbol.exit
               info "exit: #{rpr d}"
               @exit = true
@@ -107,7 +113,7 @@ class Steampipe
         send        = send.bind entry
         send.symbol = symbol
         # send.done   = -> send send.symbol.done
-        # send.pass   = -> send send.symbol.pass
+        send.over   = -> send send.symbol.over
         send.exit   = -> send send.symbol.exit
         entry.send  = send
         @pipeline.push entry
@@ -117,29 +123,28 @@ class Steampipe
   #---------------------------------------------------------------------------------------------------------
   drive: ( cfg ) ->
     { mode          } = cfg
-    @_show_pipeline()
     round = 0
+    segment.over = false for segment in @pipeline
     try
       loop
         round++
         whisper '^4958^', "round #{round} -------------------------------"
-        for idx in [ 0 .. 3 ]
-          segment = @pipeline[ idx ]
+        for segment, idx in @pipeline
+          continue if segment.over
           if idx is 0
             segment.tf symbol.drop, segment.send
           else
             while segment.input.length > 0
               segment.tf segment.input.shift(), segment.send
               break if mode is 'depth'
-          # @_show_pipeline()
           if segment.exit
             info '^443^', "stopped by #{rpr segment}"
             throw symbol.exit
+        @last_q.length = 0
         break unless @inputs.some ( x ) -> x.length > 0
     catch error
       # throw error unless typeof error is 'symbol'
       throw error unless error is symbol.exit
-      warn error
     return null
 
   #---------------------------------------------------------------------------------------------------------
