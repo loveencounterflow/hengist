@@ -120,20 +120,29 @@
     // pipeline.push $source_B [ 1, 2, ]
     // pipeline.push [ 1, 2, ]
     pipeline.push(['A', 'B']);
+    pipeline.push(['C', 'D'].values());
     pipeline.push($generator());
     pipeline.push($addsome());
     pipeline.push($embellish());
     pipeline.push($show());
     trace = false;
     drive = function(mode) {
-      var sp;
-      whisper('———————————————————————————————————————');
+      var _, i, len, ref, results, sp;
       sp = new Steampipe(pipeline);
-      sp.drive({mode});
-      whisper('———————————————————————————————————————');
-      return sp.drive({mode});
+      ref = [1, 2];
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        _ = ref[i];
+        if (!sp.can_repeat()) {
+          warn("not repeatable");
+          break;
+        }
+        whisper('————————————————————————————————————————');
+        results.push(sp.drive({mode}));
+      }
+      return results;
     };
-    drive('breadth');
+    // drive 'breadth'
     drive('depth');
     return null;
   };
@@ -155,6 +164,8 @@
         last_idx = raw_pipeline.length - 1;
         this.inputs = [];
         this.sources = [];
+        this.run_count = 0;
+        this.is_repeatable = true;
         for (idx = i = 0, len = raw_pipeline.length; i < len; idx = ++i) {
           raw_transform = raw_pipeline[idx];
           ({is_source, transform} = this._get_transform(raw_transform));
@@ -214,14 +225,23 @@
           case 'function':
             transform = raw_transform;
             if ((arity = transform.length) !== 2) {
-              throw new Error(`^323^ expected function with arity 2 got one with arity ${arity}`);
+              throw new Error(`^steampipes@1^ expected function with arity 2 got one with arity ${arity}`);
             }
             break;
           case 'generatorfunction':
             is_source = true;
             transform = this._source_from_generatorfunction(raw_transform);
             if ((arity = transform.length) !== 2) {
-              throw new Error(`^323^ expected function with arity 2 got one with arity ${arity}`);
+              throw new Error(`^steampipes@2^ expected function with arity 2 got one with arity ${arity}`);
+            }
+            break;
+          case 'generator':
+          case 'arrayiterator':
+            this.is_repeatable = false;
+            is_source = true;
+            transform = this._source_from_generator(raw_transform);
+            if ((arity = transform.length) !== 2) {
+              throw new Error(`^steampipes@3^ expected function with arity 2 got one with arity ${arity}`);
             }
             break;
           case 'list':
@@ -229,7 +249,7 @@
             transform = this._source_from_list(raw_transform);
             break;
           default:
-            throw new Error(`^324^ cannot convert a ${type} to a source`);
+            throw new Error(`^steampipes@4^ cannot convert a ${type} to a source`);
         }
         return {transform, is_source};
       }
@@ -255,6 +275,22 @@
       }
 
       //---------------------------------------------------------------------------------------------------------
+      _source_from_generator(generator) {
+        var generator_source;
+        return generator_source = function(d, send) {
+          var done, value;
+          send(d);
+          debug('^334^');
+          ({value, done} = generator.next());
+          if (!done) {
+            return send(value);
+          }
+          send.over();
+          return null;
+        };
+      }
+
+      //---------------------------------------------------------------------------------------------------------
       _source_from_list(list) {
         var idx, last_idx, list_source;
         last_idx = list.length - 1;
@@ -272,52 +308,62 @@
       }
 
       //---------------------------------------------------------------------------------------------------------
+      can_repeat() {
+        return this.run_count === 0 || this.repeatable;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _on_drive_start() {
+        if (!this.can_repeat()) {
+          return false;
+        }
+        this.run_count++;
+        return true;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
       drive(cfg) {
-        var error, i, idx, j, len, len1, mode, ref, ref1, segment;
+        var i, idx, j, len, len1, mode, ref, ref1, segment;
+        if (!this._on_drive_start()) {
+          throw new Error("^steampipes@5^ pipeline is not repeatable");
+        }
         ({mode} = cfg);
         ref = this.pipeline;
         for (i = 0, len = ref.length; i < len; i++) {
           segment = ref[i];
           segment.over = false;
         }
-        try {
-          while (true) {
-            ref1 = this.pipeline;
-            for (idx = j = 0, len1 = ref1.length; j < len1; idx = ++j) {
-              segment = ref1[idx];
-              if (segment.over) {
-                continue;
-              }
-              if (segment.is_source && segment.input.length === 0) {
-                segment.transform(symbol.drop, segment.send);
-              } else {
-                while (segment.input.length > 0) {
-                  segment.transform(segment.input.shift(), segment.send);
-                  if (mode === 'depth') {
-                    break;
-                  }
+        while (true) {
+          ref1 = this.pipeline;
+          for (idx = j = 0, len1 = ref1.length; j < len1; idx = ++j) {
+            segment = ref1[idx];
+            if (segment.over) {
+              continue;
+            }
+            if (segment.is_source && segment.input.length === 0) {
+              segment.transform(symbol.drop, segment.send);
+            } else {
+              while (segment.input.length > 0) {
+                segment.transform(segment.input.shift(), segment.send);
+                if (mode === 'depth') {
+                  break;
                 }
               }
-              this.last_output.length = 0;
-              if (segment.exit) {
-                throw symbol.exit;
-              }
             }
-            if (this.sources.every(function(source) {
-              return source.over;
-            })) {
-              if (!this.inputs.some(function(input) {
-                return input.length > 0;
-              })) {
-                break;
-              }
+            this.last_output.length = 0;
+            if (segment.exit) {
+              throw symbol.exit;
             }
           }
-        } catch (error1) {
-          error = error1;
-          if (error !== symbol.exit) {
-            // throw error unless typeof error is 'symbol'
-            throw error;
+          /* TAINT collect stats in above loop */
+          if (this.sources.every(function(source) {
+            return source.over;
+          })) {
+            if (!this.inputs.some(function(input) {
+              return input.length > 0;
+            })) {
+              break;
+            }
           }
         }
         return null;
