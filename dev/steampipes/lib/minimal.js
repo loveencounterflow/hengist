@@ -157,7 +157,7 @@
       
         //---------------------------------------------------------------------------------------------------------
       constructor(raw_pipeline) {
-        var i, idx, is_source, last_idx, len, tf;
+        var i, idx, is_source, last_idx, len, raw_transform, transform;
         this.first_input = [];
         this.last_output = [];
         this.pipeline = [];
@@ -165,23 +165,14 @@
         this.inputs = [];
         this.sources = [];
         for (idx = i = 0, len = raw_pipeline.length; i < len; idx = ++i) {
-          tf = raw_pipeline[idx];
-          [is_source, tf] = (function() {
-            switch (type_of(tf)) {
-              case 'function':
-                return [false, tf];
-              case /* TAINT validate arity */'list':
-                return [true, this._source_from_list(tf)];
-              default:
-                throw new Error(`^324^ cannoz convert a ${type} to a source`);
-            }
-          }).call(this);
-          ((tf, idx, is_source) => {
+          raw_transform = raw_pipeline[idx];
+          ({is_source, transform} = this._get_transform(raw_transform));
+          ((transform, idx, is_source) => {
             var input, output, segment, send;
             input = idx === 0 ? this.first_input : this.pipeline[idx - 1].output;
             output = idx === last_idx ? this.last_output : [];
             segment = {
-              tf,
+              transform,
               input,
               output,
               over: false,
@@ -218,9 +209,30 @@
               this.sources.push(segment);
             }
             return this.inputs.push(input);
-          })(tf, idx, is_source);
+          })(transform, idx, is_source);
         }
         return void 0;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _get_transform(raw_transform) {
+        var arity, is_source, transform, type;
+        is_source = false;
+        switch (type = type_of(raw_transform)) {
+          case 'function':
+            transform = raw_transform;
+            if ((arity = transform.length) !== 2) {
+              throw new Error(`^323^ expected function with arity 2 got one with arity ${arity}`);
+            }
+            break;
+          case 'list':
+            is_source = true;
+            transform = this._source_from_list(raw_transform);
+            break;
+          default:
+            throw new Error(`^324^ cannot convert a ${type} to a source`);
+        }
+        return {transform, is_source};
       }
 
       //---------------------------------------------------------------------------------------------------------
@@ -258,10 +270,10 @@
                 continue;
               }
               if (segment.is_source && segment.input.length === 0) {
-                segment.tf(symbol.drop, segment.send);
+                segment.transform(symbol.drop, segment.send);
               } else {
                 while (segment.input.length > 0) {
-                  segment.tf(segment.input.shift(), segment.send);
+                  segment.transform(segment.input.shift(), segment.send);
                   if (mode === 'depth') {
                     break;
                   }
@@ -299,7 +311,7 @@
         ref = this.pipeline;
         for (i = 0, len = ref.length; i < len; i++) {
           segment = ref[i];
-          urge((ref1 = segment.tf.name) != null ? ref1 : '?', segment.output);
+          urge((ref1 = segment.transform.name) != null ? ref1 : '?', segment.output);
         }
         return null;
       }
