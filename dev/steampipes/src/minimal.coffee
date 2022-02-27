@@ -130,15 +130,18 @@ class Steampipe
       loop
         for segment, idx in @pipeline
           continue if segment.over
+          ### TAINT assumes source is at index 0, not generally true ###
           if idx is 0
             segment.tf symbol.drop, segment.send
           else
             while segment.input.length > 0
               segment.tf segment.input.shift(), segment.send
               break if mode is 'depth'
+          @last_output.length = 0
           throw symbol.exit if segment.exit
-        @last_output.length = 0
-        break unless @inputs.some ( x ) -> x.length > 0
+        ### TAINT assumes source is at index 0, not generally true ###
+        if @pipeline[ 0 ].over and not @inputs.some ( x ) -> x.length > 0
+          break
     catch error
       # throw error unless typeof error is 'symbol'
       throw error unless error is symbol.exit
