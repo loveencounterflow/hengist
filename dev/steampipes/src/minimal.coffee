@@ -176,6 +176,7 @@ class Steampipe
       send d
       { value
         done  } = generator.next()
+      ### NOTE silently discards value of `return` where present in keeping with JS `for of` loops ###
       return send value unless done
       generator = null
       send.over()
@@ -187,6 +188,7 @@ class Steampipe
       send d
       { value
         done  } = generator.next()
+      ### NOTE silently discards value of `return` where present in keeping with JS `for of` loops ###
       return send value unless done
       send.over()
       return null
