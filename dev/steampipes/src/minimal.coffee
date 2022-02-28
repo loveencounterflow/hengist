@@ -77,6 +77,7 @@ demo = ->
   pipeline.push [ 1, 2, ]
   pipeline.push [ 'A', 'B', ]
   pipeline.push [ 'C', 'D', 'E', ].values()
+  pipeline.push ( new Map [ [ 'a', 42, ], ] ).entries()
   pipeline.push $generator()
   pipeline.push $addsome()
   pipeline.push $embellish()
@@ -153,17 +154,18 @@ class Steampipe
         transform       = @_source_from_generatorfunction raw_transform
         unless ( arity = transform.length ) is 2
           throw new Error "^steampipes@2^ expected function with arity 2 got one with arity #{arity}"
-      when 'generator', 'arrayiterator'
-        @is_repeatable  = false
-        is_source       = true
-        transform       = @_source_from_generator raw_transform
-        unless ( arity = transform.length ) is 2
-          throw new Error "^steampipes@3^ expected function with arity 2 got one with arity #{arity}"
       when 'list'
         is_source       = true
         transform       = @_source_from_list raw_transform
       else
-        throw new Error "^steampipes@4^ cannot convert a #{type} to a source"
+        if ( type is 'generator' ) or ( isa.function raw_transform[ Symbol.iterator ] )
+          @is_repeatable  = false
+          is_source       = true
+          transform       = @_source_from_generator raw_transform
+          unless ( arity = transform.length ) is 2
+            throw new Error "^steampipes@3^ expected function with arity 2 got one with arity #{arity}"
+        else
+          throw new Error "^steampipes@4^ cannot convert a #{type} to a source"
     return { transform, is_source, }
 
   #---------------------------------------------------------------------------------------------------------
