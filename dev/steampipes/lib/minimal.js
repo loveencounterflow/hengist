@@ -120,6 +120,7 @@
     pipeline.push([1, 2]);
     pipeline.push(['A', 'B']);
     pipeline.push(['C', 'D', 'E'].values());
+    pipeline.push((new Map([['a', 42]])).entries());
     pipeline.push($generator());
     pipeline.push($addsome());
     pipeline.push($embellish());
@@ -233,21 +234,21 @@
               throw new Error(`^steampipes@2^ expected function with arity 2 got one with arity ${arity}`);
             }
             break;
-          case 'generator':
-          case 'arrayiterator':
-            this.is_repeatable = false;
-            is_source = true;
-            transform = this._source_from_generator(raw_transform);
-            if ((arity = transform.length) !== 2) {
-              throw new Error(`^steampipes@3^ expected function with arity 2 got one with arity ${arity}`);
-            }
-            break;
           case 'list':
             is_source = true;
             transform = this._source_from_list(raw_transform);
             break;
           default:
-            throw new Error(`^steampipes@4^ cannot convert a ${type} to a source`);
+            if ((type === 'generator') || (isa.function(raw_transform[Symbol.iterator]))) {
+              this.is_repeatable = false;
+              is_source = true;
+              transform = this._source_from_generator(raw_transform);
+              if ((arity = transform.length) !== 2) {
+                throw new Error(`^steampipes@3^ expected function with arity 2 got one with arity ${arity}`);
+              }
+            } else {
+              throw new Error(`^steampipes@4^ cannot convert a ${type} to a source`);
+            }
         }
         return {transform, is_source};
       }
@@ -264,6 +265,7 @@
           send(d);
           ({value, done} = generator.next());
           if (!done) {
+            /* NOTE silently discards value of `return` where present in keeping with JS `for of` loops */
             return send(value);
           }
           generator = null;
@@ -280,6 +282,7 @@
           send(d);
           ({value, done} = generator.next());
           if (!done) {
+            /* NOTE silently discards value of `return` where present in keeping with JS `for of` loops */
             return send(value);
           }
           send.over();
