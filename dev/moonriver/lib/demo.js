@@ -33,7 +33,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
-    var $addsome, $embellish, $generator, $show, $source_A, $source_B, drive, pipeline, trace;
+    var $add_call_count, $addsome, $embellish, $generator, $show, $source_A, $source_B, drive, pipeline, trace;
     //.........................................................................................................
     $source_A = function(a_list) {
       var source;
@@ -116,6 +116,13 @@
       };
     };
     //.........................................................................................................
+    $add_call_count = function() {
+      return function(d, send) {
+        urge('^449^', send.call_count, d);
+        return send(isa.float ? send.call_count * 10_000 + d : d);
+      };
+    };
+    //.........................................................................................................
     pipeline = [];
     // pipeline.push $source_A [ 1, 2, 3, ]
     // pipeline.push $source_B [ 1, 2, ]
@@ -124,6 +131,7 @@
     pipeline.push(['C', 'D', 'E'].values());
     pipeline.push((new Map([['a', 42]])).entries());
     pipeline.push($generator());
+    pipeline.push($add_call_count());
     pipeline.push($addsome());
     pipeline.push($embellish());
     pipeline.push($show());
