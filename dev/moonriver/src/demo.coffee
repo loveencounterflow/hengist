@@ -72,6 +72,11 @@ demo = ->
       yield 33
       return null
   #.........................................................................................................
+  $add_call_count = ->
+    return ( d, send ) ->
+      urge '^449^', send.call_count, d
+      send if isa.float then send.call_count * 10_000 + d else d
+  #.........................................................................................................
   pipeline  = []
   # pipeline.push $source_A [ 1, 2, 3, ]
   # pipeline.push $source_B [ 1, 2, ]
@@ -80,6 +85,7 @@ demo = ->
   pipeline.push [ 'C', 'D', 'E', ].values()
   pipeline.push ( new Map [ [ 'a', 42, ], ] ).entries()
   pipeline.push $generator()
+  pipeline.push $add_call_count()
   pipeline.push $addsome()
   pipeline.push $embellish()
   pipeline.push $show()
