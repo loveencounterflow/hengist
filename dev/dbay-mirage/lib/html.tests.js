@@ -54,10 +54,10 @@
       dsk,
       url: 'live:'
     });
-    // debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c1 x="Q"></title>""", }
-    // debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c2 x='Q'></title>""", }
-    // debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c3 x='"Q"'></title>""", }
-    // debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c4 x="'Q'"></title>""", }
+    // debug '^435^1, mrg.append_text { dsk, trk: 1, text: """<title id=c1 x="Q"></title>""", }
+    // debug '^435^2, mrg.append_text { dsk, trk: 1, text: """<title id=c2 x='Q'></title>""", }
+    // debug '^435^3, mrg.append_text { dsk, trk: 1, text: """<title id=c3 x='"Q"'></title>""", }
+    // debug '^435^4, mrg.append_text { dsk, trk: 1, text: """<title id=c4 x="'Q'"></title>""", }
     mrg.append_text({
       dsk,
       trk: 1,
@@ -99,10 +99,10 @@
       dsk,
       url: 'live:'
     });
-    // debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c1 x="Q"></title>""", }
-    // debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c2 x='Q'></title>""", }
-    // debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c3 x='"Q"'></title>""", }
-    // debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c4 x="'Q'"></title>""", }
+    // debug '^435^5, mrg.append_text { dsk, trk: 1, text: """<title id=c1 x="Q"></title>""", }
+    // debug '^435^6, mrg.append_text { dsk, trk: 1, text: """<title id=c2 x='Q'></title>""", }
+    // debug '^435^7, mrg.append_text { dsk, trk: 1, text: """<title id=c3 x='"Q"'></title>""", }
+    // debug '^435^8, mrg.append_text { dsk, trk: 1, text: """<title id=c4 x="'Q'"></title>""", }
     text = `<title id=c1 x="Q"></title>
 
 <title id=c2 x='Q'></title>
@@ -176,26 +176,73 @@
     };
     //.........................................................................................................
     // [ '<py/ling3/',         null, ]
-    probes_and_matchers = [['<title>My Page</title>', '<title>|My Page|</title>'], ['<title/My\\/Your Page/>', '<title>|My/Your Page|</title>|>'], ['<title>My Page</>', "<title>|My Page|</title>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;&gt;&#39; &lt;--'>></error>"], ['<title/My Page/>', '<title>|My Page|</title>|>'], ['<title/My/Your Page/>', '<title>|My|</title>|Your Page/>'], ['<title/My\npage/', '<title>|My\npage|</title>'], ['<title k=v j=w/My Page/', "<title k='v' j='w'>|My Page|</title>"], ['<title/<b>My</b> Page/', "<title>|<error message='bare active characters'><b>My<</error>|</title>|b> Page/"], ['<title//', '<title>|</title>'], ['<title/>', '<title/>'], ['<title/My Page/', '<title>|My Page|</title>'], ['<title#c1.x/My Page/', '<title>|My Page|</title>'], ['\\<title/>', '&lt;title/>'], ['&amp;', '&amp;'], ['\\&amp;', '&amp;amp;'], ['foo\\bar', 'foobar'], ['foo\\\\bar', 'foo\\bar']];
-//.........................................................................................................
+    probes_and_matchers = [['<title>My Page</title>', '<title>|My Page|</title>', null], ['< title>My Page< /title>', "<error message='extraneous whitespace before tag name'>< title></error>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null], ['<title >My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null], ['<title>My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null], ['<title>My Page</ title>', "<title>|My Page|<error message='extraneous whitespace in closing tag'></ title></error>", null], [/* wrong */ '<title>My Page</title >', '<title>|My Page|</title>', null]];
+    await (async() => {      //.........................................................................................................
+      // [ '<title/My\\/Your Page/>',    '<title>|My/Your Page|</title>|>', ]
+      // [ '<title>My Page</>', "<title>|My Page|</title>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;&gt;&#39; &lt;--'>></error>", ]
+      // [ '<title/My Page/>',           '<title>|My Page|</title>|>', ]
+      // [ '<title/My/Your Page/>',      '<title>|My|</title>|Your Page/>', ]
+      // [ '<title/My\npage/',           '<title>|My\npage|</title>', ]
+      // [ '<title k=v j=w/My Page/',    "<title k='v' j='w'>|My Page|</title>", ]
+      // [ '<title/<b>My</b> Page/',     "<title>|<error message='bare active characters'><b>My<</error>|</title>|b> Page/", ]
+      // [ '<title//',                   '<title>|</title>', ]
+      // [ '<title/>',                   '<title/>', ]
+      // [ '<title/My Page/',            '<title>|My Page|</title>', ]
+      // [ '<title#c1.x/My Page/',       '<title>|My Page|</title>', ]
+      // [ '\\<title/>',                 '&lt;title/>', ]
+      // [ '&amp;',                      '&amp;', ]
+      // [ '\\&amp;',                    '&amp;amp;', ]
+      // [ 'foo\\bar',                   'foobar', ]
+      // [ '\\abc',                      'abc', ]
+      // [ 'first\\\nsecond',            'first second', ]
+      // [ 'foo\\\\bar',                 'foo\\bar', ]
+      var error, i, len, matcher, probe, results;
+      return;
+      results = [];
+      for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+        [probe, matcher, error] = probes_and_matchers[i];
+        results.push((await T.perform(probe, matcher, error, function() {
+          return new Promise(function(resolve, reject) {
+            var d, j, len1, parts, ref, result;
+            help('^435-9^', rpr(probe));
+            parts = [];
+            ref = mrg.html.HTMLISH.parse(probe);
+            for (j = 0, len1 = ref.length; j < len1; j++) {
+              d = ref[j];
+              parts.push(text_from_token(d));
+              d = thaw(d);
+              delete d.$;
+              delete d.$vnr;
+              urge('^435-10^', d);
+            }
+            result = parts.join('|');
+            info('^435-11^', rpr(result));
+            resolve(result);
+            return null;
+          });
+        })));
+      }
+      return results;
+    })();
+    await (() => {})();    //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           var d, j, len1, parts, ref, result;
-          help('^435-1^', rpr(probe));
+          // help '^435-12^', rpr probe
           parts = [];
-          ref = mrg.html.HTMLISH.parse(probe);
+          ref = mrg.html.HTMLISH.parse2(probe);
           for (j = 0, len1 = ref.length; j < len1; j++) {
             d = ref[j];
             parts.push(text_from_token(d));
             d = thaw(d);
             delete d.$;
             delete d.$vnr;
-            urge('^435-2^', d);
           }
+          // urge '^435-13^', d
           result = parts.join('|');
-          info('^435-3^', rpr(result));
+          // info '^435-14^', rpr result
           resolve(result);
           return null;
         });
