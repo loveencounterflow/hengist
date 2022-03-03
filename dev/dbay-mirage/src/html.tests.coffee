@@ -40,10 +40,10 @@ H                         = require '../../../lib/helpers'
   probes_and_matchers = []
   dsk       = 'b'
   mrg.register_dsk { dsk, url: 'live:', }
-  # debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c1 x="Q"></title>""", }
-  # debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c2 x='Q'></title>""", }
-  # debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c3 x='"Q"'></title>""", }
-  # debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c4 x="'Q'"></title>""", }
+  # debug '^435^1, mrg.append_text { dsk, trk: 1, text: """<title id=c1 x="Q"></title>""", }
+  # debug '^435^2, mrg.append_text { dsk, trk: 1, text: """<title id=c2 x='Q'></title>""", }
+  # debug '^435^3, mrg.append_text { dsk, trk: 1, text: """<title id=c3 x='"Q"'></title>""", }
+  # debug '^435^4, mrg.append_text { dsk, trk: 1, text: """<title id=c4 x="'Q'"></title>""", }
   mrg.append_text { dsk, trk: 1, text: """<div id=c1 x="Q"></div>""", }
   mrg.append_text { dsk, trk: 1, text: '', }
   mrg.append_text { dsk, trk: 1, text: """<div id=c2 x="Q">Some Text</div>""", }
@@ -85,10 +85,10 @@ H                         = require '../../../lib/helpers'
   probes_and_matchers = []
   dsk       = 'quotedattributes'
   mrg.register_dsk { dsk, url: 'live:', }
-  # debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c1 x="Q"></title>""", }
-  # debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c2 x='Q'></title>""", }
-  # debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c3 x='"Q"'></title>""", }
-  # debug '^435^', mrg.append_text { dsk, trk: 1, text: """<title id=c4 x="'Q'"></title>""", }
+  # debug '^435^5, mrg.append_text { dsk, trk: 1, text: """<title id=c1 x="Q"></title>""", }
+  # debug '^435^6, mrg.append_text { dsk, trk: 1, text: """<title id=c2 x='Q'></title>""", }
+  # debug '^435^7, mrg.append_text { dsk, trk: 1, text: """<title id=c3 x='"Q"'></title>""", }
+  # debug '^435^8, mrg.append_text { dsk, trk: 1, text: """<title id=c4 x="'Q'"></title>""", }
   text = """
     <title id=c1 x="Q"></title>
 
@@ -177,16 +177,16 @@ H                         = require '../../../lib/helpers'
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      help '^435-1^', rpr probe
+      # help '^435-12^', rpr probe
       parts = []
       for d in mrg.html.HTMLISH.parse probe
         parts.push text_from_token d
         d = thaw d
         delete d.$
         delete d.$vnr
-        urge '^435-2^', d
+        # urge '^435-13^', d
       result = parts.join '|'
-      info '^435-3^', rpr result
+      # info '^435-14^', rpr result
       resolve result
       return null
   #.........................................................................................................
