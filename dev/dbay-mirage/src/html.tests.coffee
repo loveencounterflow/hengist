@@ -156,30 +156,57 @@ H                         = require '../../../lib/helpers'
   #.........................................................................................................
   probes_and_matchers = [
     # [ '<py/ling3/',         null, ]
-    [ '<title>My Page</title>',     '<title>|My Page|</title>', ]
-    [ '<title/My\\/Your Page/>',    '<title>|My/Your Page|</title>|>', ]
-    [ '<title>My Page</>', "<title>|My Page|</title>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;&gt;&#39; &lt;--'>></error>", ]
-    [ '<title/My Page/>',           '<title>|My Page|</title>|>', ]
-    [ '<title/My/Your Page/>',      '<title>|My|</title>|Your Page/>', ]
-    [ '<title/My\npage/',           '<title>|My\npage|</title>', ]
-    [ '<title k=v j=w/My Page/',    "<title k='v' j='w'>|My Page|</title>", ]
-    [ '<title/<b>My</b> Page/',     "<title>|<error message='bare active characters'><b>My<</error>|</title>|b> Page/", ]
-    [ '<title//',                   '<title>|</title>', ]
-    [ '<title/>',                   '<title/>', ]
-    [ '<title/My Page/',            '<title>|My Page|</title>', ]
-    [ '<title#c1.x/My Page/',       '<title>|My Page|</title>', ]
-    [ '\\<title/>',                 '&lt;title/>', ]
-    [ '&amp;',                      '&amp;', ]
-    [ '\\&amp;',                    '&amp;amp;', ]
-    [ 'foo\\bar',                   'foobar', ]
-    [ 'foo\\\\bar',                 'foo\\bar', ]
+    [ '<title>My Page</title>', '<title>|My Page|</title>', null ]
+    [ '< title>My Page< /title>', "<error message='extraneous whitespace before tag name'>< title></error>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null ]
+    [ '<title >My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null ]
+    [ '<title>My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null ]
+    [ '<title>My Page</ title>', "<title>|My Page|<error message='extraneous whitespace in closing tag'></ title></error>", null ]
+    ### wrong ###
+    [ '<title>My Page</title >', '<title>|My Page|</title>', null ]
+
+    # [ '<title/My\\/Your Page/>',    '<title>|My/Your Page|</title>|>', ]
+    # [ '<title>My Page</>', "<title>|My Page|</title>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;&gt;&#39; &lt;--'>></error>", ]
+    # [ '<title/My Page/>',           '<title>|My Page|</title>|>', ]
+    # [ '<title/My/Your Page/>',      '<title>|My|</title>|Your Page/>', ]
+    # [ '<title/My\npage/',           '<title>|My\npage|</title>', ]
+    # [ '<title k=v j=w/My Page/',    "<title k='v' j='w'>|My Page|</title>", ]
+    # [ '<title/<b>My</b> Page/',     "<title>|<error message='bare active characters'><b>My<</error>|</title>|b> Page/", ]
+    # [ '<title//',                   '<title>|</title>', ]
+    # [ '<title/>',                   '<title/>', ]
+    # [ '<title/My Page/',            '<title>|My Page|</title>', ]
+    # [ '<title#c1.x/My Page/',       '<title>|My Page|</title>', ]
+    # [ '\\<title/>',                 '&lt;title/>', ]
+    # [ '&amp;',                      '&amp;', ]
+    # [ '\\&amp;',                    '&amp;amp;', ]
+    # [ 'foo\\bar',                   'foobar', ]
+    # [ '\\abc',                      'abc', ]
+    # [ 'first\\\nsecond',            'first second', ]
+    # [ 'foo\\\\bar',                 'foo\\bar', ]
     ]
   #.........................................................................................................
+  await do =>
+    return
+    for [ probe, matcher, error, ] in probes_and_matchers
+      await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+        help '^435-9^', rpr probe
+        parts = []
+        for d in mrg.html.HTMLISH.parse probe
+          parts.push text_from_token d
+          d = thaw d
+          delete d.$
+          delete d.$vnr
+          urge '^435-10^', d
+        result = parts.join '|'
+        info '^435-11^', rpr result
+        resolve result
+        return null
+  #.........................................................................................................
+  await do =>
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       # help '^435-12^', rpr probe
       parts = []
-      for d in mrg.html.HTMLISH.parse probe
+      for d in mrg.html.HTMLISH.parse2 probe
         parts.push text_from_token d
         d = thaw d
         delete d.$
