@@ -34,99 +34,41 @@
     //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  Pseudo_array = class Pseudo_array extends Array {
+  Pseudo_array = class Pseudo_array {
     //---------------------------------------------------------------------------------------------------------
     constructor(on_change) {
-      super();
       if (on_change != null) {
         GUY.props.hide(this, 'on_change', on_change);
       }
-      // GUY.props.hide @, 'prv_length', 0
+      this.d = [];
       this.prv_length = 0;
       return void 0;
     }
 
     //---------------------------------------------------------------------------------------------------------
-    on_change() {
+    on_change(delta) {
       return null;
     }
 
     //---------------------------------------------------------------------------------------------------------
-    push(...P) {
+    push(x) {
       var R;
-      R = super.push(...P);
-      this.on_change();
+      R = this.d.push(x);
+      this._on_change();
       return R;
     }
 
-    pop(...P) {
+    pop() {
       var R;
-      R = super.pop(...P);
-      this.on_change();
+      R = this.d.pop();
+      this._on_change();
       return R;
     }
 
-    unshift(...P) {
-      var R;
-      R = super.unshift(...P);
-      this.on_change();
-      return R;
-    }
-
-    shift(...P) {
-      var R;
-      R = super.shift(...P);
-      this.on_change();
-      return R;
-    }
-
-    splice(...P) {
-      var R;
-      R = super.splice(...P);
-      this.on_change();
-      return R;
-    }
-
-    reduce(...P) {
-      var R;
-      R = super.reduce(...P);
-      this.on_change();
-      return R;
-    }
-
-    map(...P) {
-      var R;
-      R = super.map(...P);
-      this.on_change();
-      return R;
-    }
-
-    filter(...P) {
-      var R;
-      R = super.filter(...P);
-      this.on_change();
-      return R;
-    }
-
-    slice(...P) {
-      var R;
-      R = super.slice(...P);
-      this.on_change();
-      return R;
-    }
-
-    splice(...P) {
-      var R;
-      R = super.splice(...P);
-      this.on_change();
-      return R;
-    }
-
-    reverse(...P) {
-      var R;
-      R = super.reverse(...P);
-      this.on_change();
-      return R;
+    clear() {
+      this.d.length = 0;
+      this._on_change();
+      return null;
     }
 
   };
@@ -136,14 +78,14 @@
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
     var d;
-    d = new Pseudo_array(function() {
-      info('^348^', this.length, this.length - this.prv_length, rpr(this));
+    d = new Pseudo_array(function(delta) {
+      info('^348^', this.length, delta, rpr(this));
       this.prv_length = this.length;
       return null;
     });
     d.push(42);
     d.push(43);
-    d.splice(1, 0, 'a', 'b', 'c');
+    // d.splice 1, 0, 'a', 'b', 'c'
     urge('^948^', d);
     urge('^948^', d.length);
     return null;

@@ -300,10 +300,12 @@
           return counts.once_after++;
         }),
         //.....................................................................................................
-        function(d,
-        send) {
-          return collector.push(d); //; help collector
-        }
+        $({last},
+        cleanup = function(d) {
+          debug('^309-2^',
+        d);
+          return counts.last++;
+        })
       ];
       //.....................................................................................................
       mr = new Moonriver(pipeline);
@@ -561,6 +563,7 @@
     once_after = Symbol.for('once_after');
     //.......................................................................................................
     pipeline = [$({once_after}, on_once_after = function(d, send) {})];
+    //.........................................................................................................
     error = null;
     try {
       mr = new Moonriver(pipeline);
@@ -568,7 +571,7 @@
       error = error1;
       // throw error
       if (T != null) {
-        T.ok(/transforms with once_after cannot be senders/.test(error.message));
+        T.ok(/transforms with modifier once_after cannot be senders/.test(error.message));
       }
     }
     if (T != null) {
@@ -608,6 +611,61 @@
       }),
       show = function(d) {
         return urge('^4948^',
+      d);
+      },
+      collect = function(d) {
+        return collector.push(d);
+      }
+    ];
+    mr = new Moonriver(pipeline);
+    mr.drive();
+    if (T != null) {
+      T.eq(collector, [42, 43, 44]);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["appending data before closing"] = function(T, done) {
+    var $, Moonriver, before_last, collect, collector, mr, on_once_before, pipeline, show;
+    // T?.halt_on_error()
+    ({Moonriver} = require('../../../apps/moonriver'));
+    ({$} = Moonriver);
+    before_last = Symbol('before_last');
+    collector = [];
+    //.......................................................................................................
+    pipeline = [
+      [-1],
+      show = function(d) {
+        return urge('^4948-1^',
+      d);
+      },
+      $({before_last},
+      on_once_before = function(d,
+      send) {
+        var e,
+      i,
+      len,
+      ref,
+      results;
+        debug('^4532^',
+      d);
+        if (d !== before_last) {
+          return send(d);
+        }
+        ref = ['a', 'b', 'c'];
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          e = ref[i];
+          results.push(send(e));
+        }
+        return results;
+      }),
+      show = function(d) {
+        return urge('^4948-2^',
       d);
       },
       collect = function(d) {
@@ -704,17 +762,19 @@
     (() => {
       // test @
       // @[ "send.call_count" ]()
-      // @[ "using send() in a once_before transform" ]()
-      // @[ "once_before, once_after transformers transparent to data" ]()
-      // test @[ "once_before, once_after transformers transparent to data" ]
-      // @[ "resettable state shared across transforms" ]()
-      // test @[ "resettable state shared across transforms" ]
-      this["modifier once_after"]();
-      return test(this["modifier once_after"]);
+      return this["appending data before closing"]();
     })();
   }
 
-  // @[ "modifier last" ]()
+  // test @[ "appending data before closing" ]
+// test @[ "using send() in a once_before transform" ]
+// @[ "once_before, once_after transformers transparent to data" ]()
+// test @[ "once_before, once_after transformers transparent to data" ]
+// @[ "resettable state shared across transforms" ]()
+// test @[ "resettable state shared across transforms" ]
+// @[ "modifier once_after" ]()
+// test @[ "modifier once_after" ]
+// @[ "modifier last" ]()
 // test @[ "modifier last" ]
 // test @[ "modifier last" ]
 // @[ "called even when pipeline empty: once_before, once_after" ]()
