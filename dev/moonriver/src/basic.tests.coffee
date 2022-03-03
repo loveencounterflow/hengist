@@ -194,7 +194,9 @@ H                         = require '../../../lib/helpers'
         debug '^309-2^', d
         counts.once_after++
       #.....................................................................................................
-      ( d, send ) -> collector.push d #; help collector
+      $ { last, }, cleanup = ( d ) ->
+        debug '^309-2^', d
+        counts.last++
       #.....................................................................................................
       ]
     mr = new Moonriver pipeline
@@ -369,10 +371,11 @@ H                         = require '../../../lib/helpers'
   pipeline      = [
     $ { once_after, }, on_once_after = ( d, send ) ->
     ]
+  #.........................................................................................................
   error = null
   try mr = new Moonriver pipeline catch error
     # throw error
-    T?.ok /transforms with once_after cannot be senders/.test error.message
+    T?.ok /transforms with modifier once_after cannot be senders/.test error.message
   T?.ok error?
   #.........................................................................................................
   done?()
@@ -391,6 +394,31 @@ H                         = require '../../../lib/helpers'
       debug '^4532^', d
       send e for e in d
     show    = ( d ) -> urge '^4948^', d
+    collect = ( d ) -> collector.push d
+    ]
+  mr = new Moonriver pipeline
+  mr.drive()
+  T?.eq collector, [ 42, 43, 44, ]
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "appending data before closing" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Moonriver } = require '../../../apps/moonriver'
+  { $ }         = Moonriver
+  before_last   = Symbol 'before_last'
+  collector     = []
+  #.......................................................................................................
+  pipeline      = [
+    [ -1, ]
+    show    = ( d ) -> urge '^4948-1^', d
+    $ { before_last, }, on_once_before = ( d, send ) ->
+      debug '^4532^', d
+      return send d unless d is before_last
+      send e for e in [ 'a', 'b', 'c', ]
+    show    = ( d ) -> urge '^4948-2^', d
     collect = ( d ) -> collector.push d
     ]
   mr = new Moonriver pipeline
@@ -443,13 +471,15 @@ H                         = require '../../../lib/helpers'
 if require.main is module then do =>
   # test @
   # @[ "send.call_count" ]()
-  # @[ "using send() in a once_before transform" ]()
+  @[ "appending data before closing" ]()
+  # test @[ "appending data before closing" ]
+  # test @[ "using send() in a once_before transform" ]
   # @[ "once_before, once_after transformers transparent to data" ]()
   # test @[ "once_before, once_after transformers transparent to data" ]
   # @[ "resettable state shared across transforms" ]()
   # test @[ "resettable state shared across transforms" ]
-  @[ "modifier once_after" ]()
-  test @[ "modifier once_after" ]
+  # @[ "modifier once_after" ]()
+  # test @[ "modifier once_after" ]
   # @[ "modifier last" ]()
   # test @[ "modifier last" ]
   # test @[ "modifier last" ]
