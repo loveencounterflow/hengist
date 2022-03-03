@@ -24,45 +24,36 @@ types                     = new ( require 'intertype' ).Intertype()
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-class Pseudo_array extends Array
+class Pseudo_array
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( on_change ) ->
-    super()
     GUY.props.hide @, 'on_change', on_change if on_change?
-    # GUY.props.hide @, 'prv_length', 0
+    @d          = []
     @prv_length = 0
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
-  on_change: -> null
+  on_change: ( delta ) -> null
 
   #---------------------------------------------------------------------------------------------------------
-  push:     ( P... ) -> R = super P...; @on_change(); return R
-  pop:      ( P... ) -> R = super P...; @on_change(); return R
-  unshift:  ( P... ) -> R = super P...; @on_change(); return R
-  shift:    ( P... ) -> R = super P...; @on_change(); return R
-  splice:   ( P... ) -> R = super P...; @on_change(); return R
-  reduce:   ( P... ) -> R = super P...; @on_change(); return R
-  map:      ( P... ) -> R = super P...; @on_change(); return R
-  filter:   ( P... ) -> R = super P...; @on_change(); return R
-  slice:    ( P... ) -> R = super P...; @on_change(); return R
-  splice:   ( P... ) -> R = super P...; @on_change(); return R
-  reverse:  ( P... ) -> R = super P...; @on_change(); return R
+  push:     ( x ) -> R = @d.push x;   @_on_change();  return R
+  pop:            -> R = @d.pop();    @_on_change();  return R
+  clear:          -> @d.length = 0;   @_on_change();  return null
 
 
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
 demo = ->
-  d = new Pseudo_array ->
-    info '^348^', @length, ( @length - @prv_length ), rpr @
+  d = new Pseudo_array ( delta ) ->
+    info '^348^', @length, ( delta ), rpr @
     @prv_length = @length
     return null
 
   d.push 42
   d.push 43
-  d.splice 1, 0, 'a', 'b', 'c'
+  # d.splice 1, 0, 'a', 'b', 'c'
   urge '^948^', d
   urge '^948^', d.length
   return null
