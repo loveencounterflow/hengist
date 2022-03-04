@@ -52,6 +52,7 @@ class Pond
     @rear       = null
     @fore       = null
     @pipeline   = null
+    @consumer   = null ### transform to be called when data arrives ###
     @prv_length = 0
     add_length_prop @, 'd'
     return undefined
