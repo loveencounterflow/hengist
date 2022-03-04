@@ -62,6 +62,7 @@
         this.rear = null;
         this.fore = null;
         this.pipeline = null;
+        this.consumer = null/* transform to be called when data arrives */
         this.prv_length = 0;
         add_length_prop(this, 'd');
         return void 0;
@@ -162,7 +163,7 @@
       }
 
       [UTIL.inspect.custom]() {
-        return rpr(this.d);
+        return this.toString();
       }
 
     };
@@ -189,6 +190,15 @@
     //---------------------------------------------------------------------------------------------------------
     constructor(input, output) {
       return void 0;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    toString() {
+      return rpr(this);
+    }
+
+    [UTIL.inspect.custom]() {
+      return this.toString();
     }
 
   };
@@ -233,6 +243,15 @@
         yield segment;
       }
       return null;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    toString() {
+      return rpr(this);
+    }
+
+    [UTIL.inspect.custom]() {
+      return this.toString();
     }
 
   };
