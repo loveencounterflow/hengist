@@ -155,13 +155,14 @@ class Segment
     @moonriver        = null
     @modifiers        = null
     @arity            = null
-    @is_over          = false
+    @_is_over         = false
     @has_exited       = false
     # @is_listener      = false
     @is_sender        = false
     @is_source        = false
     @transform        = @_transform_from_raw_transform raw_transform
-    GUY.props.def @, '_has_input_data', get: => not @input? or @input.length is 0
+    GUY.props.def @, '_has_input_data', get: => @input.length > 0
+    GUY.props.def @, 'is_over',         get: => @_is_over
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
@@ -172,6 +173,12 @@ class Segment
   #---------------------------------------------------------------------------------------------------------
   set_output: ( duct ) ->
     @output  = duct
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  set_is_over: ( onoff ) ->
+    validate.boolean onoff
+    @_is_over = onoff
     return null
 
   #=========================================================================================================
@@ -214,11 +221,11 @@ class Segment
     @send = ( d ) =>
       switch d
         when symbol.drop  then  null
-        when symbol.over  then  @over = true
-        when symbol.exit  then  @exit = true
+        when symbol.over  then  @is_over    = true
+        when symbol.exit  then  @has_exited = true
         else
           throw new Error "^moonriver@3^ cannot send values after pipeline has terminated;" \
-            + "error occurred in transform idx #{idx} (#{rpr segment.transform.name})" if @over
+            + "error occurred in transform idx #{idx} (#{rpr segment.transform.name})" if @is_over
           @output.push d
       return null
     #...................................................................................................
@@ -316,6 +323,7 @@ class Segment
     last_idx  = list.length - 1
     idx       = -1
     return list_source = ( d, send ) ->
+      urge '^094^', d
       send d
       idx++
       if idx > last_idx
@@ -336,7 +344,7 @@ class Segment
   [UTIL.inspect.custom]:  -> @toString()
   toString:               ->
     parts = []
-    parts.push ( rpr @input ) + ' ➡︎ ' if @input?
+    parts.push ( rpr @input ) + ' ➡︎ '
     parts.push @_name_of_transform() + ' ➡︎ ' + ( rpr @output )
     return parts.join ' '
 
@@ -373,6 +381,8 @@ class Moonriver
     if ( last_segment = @last_segment )?
       segment.set_input last_segment.output
       last_segment.output.set_oblivious false
+    else
+      segment.set_input new Duct()
     segment.set_output new Duct { is_oblivious: true, }
     @segments.push segment
     info '^322^', segment
@@ -399,10 +409,10 @@ class Moonriver
     ### TAINT validate `cfg` ###
     throw new Error "^moonriver@9^ pipeline is not repeatable" unless @_on_drive_start()
     return null if @segments.length is 0
-    defaults      = { mode: 'depth', }
-    { mode      } = { defaults..., cfg..., }
-    segment.over  = false for segment in @segments
-    do_exit       = false
+    defaults        = { mode: 'depth', }
+    { mode      }   = { defaults..., cfg..., }
+    segment.set_is_over false for segment in @segments
+    do_exit         = false
     #.......................................................................................................
     ###
     for segment in @on_once_before
@@ -411,8 +421,14 @@ class Moonriver
     #.......................................................................................................
     loop
       for segment in @segments
+        debug '^309-1^', {
+          is_over:          segment.is_over
+          # is_listener:      segment.is_listener
+          is_source:        ( segment.is_source )
+          has_input_data:   segment._has_input_data}
         #...................................................................................................
-        if segment.input? and ( segment.over or not segment.is_listener )
+        # if ( segment.is_over or not segment.is_listener )
+        if segment.is_over
           ### If current segment has signalled it's gone out of business for this lap or is not a listener
           in the first place, route all data on its input queue to its output queue: ###
           ### TAINT rewrite to single step operation using Array::splice() ###
@@ -421,6 +437,7 @@ class Moonriver
           segment.output.push segment.input.shift() while segment.input.length > 0
           continue
         #...................................................................................................
+        debug '^592^', segment.is_source and not segment._has_input_data
         if segment.is_source and not segment._has_input_data
           ### If current segment is a source and no inputs are waiting to be sent, trigger the transform by
           calling  with a discardable `drop` value: ###
@@ -429,10 +446,10 @@ class Moonriver
         else
           ### Otherwise, call transform with next value from input queue, if any; when in operational mode
           `breadth`, repeat until input queue is empty: ###
-          if segment.input?
-            while segment.input.length > 0
-              segment.call segment.input.shift()
-              break if mode is 'depth'
+          debug '^309-2^', segment.input
+          while segment.input.length > 0
+            segment.call segment.input.shift()
+            break if mode is 'depth'
         #...................................................................................................
         ### Stop processing if the `exit` signal has been received: ###
         if segment.exit then do_exit = true; break
@@ -440,7 +457,7 @@ class Moonriver
       #.....................................................................................................
       ### When all sources have called it quits and no more input queues have data, end processing: ###
       ### TAINT collect stats in above loop ###
-      if @sources.every ( source ) -> source.over
+      if @sources.every ( source ) -> source.is_over
         unless @inputs.some ( input ) -> input.length > 0
           # debug '^453453^', "recognized pipeline exhausted"
           # debug '^453453^', @segments[ 2 ].send Symbol.for 'before_last'
@@ -451,13 +468,13 @@ class Moonriver
     # modifier, skipping those that have signalled `over` or `exit`: ###
     # ### TAINT make `last` and `once_after` mutually exclusive ###
     # for segment in @on_last
-    #   continue if segment.over or segment.exit
-    #   segment.over = true
+    #   continue if segment.is_over or segment.exit
+    #   segment.is_over = true
     #   segment.call segment.modifications.last, false
     # #.......................................................................................................
     # for segment in @on_once_after
-    #   continue if segment.over or segment.exit
-    #   segment.over = true
+    #   continue if segment.is_over or segment.exit
+    #   segment.is_over = true
     #   segment.call segment.modifications.once_after, false
     #.......................................................................................................
     return null
@@ -475,11 +492,11 @@ class Moonriver
 demo_2 = ->
   mr = new Moonriver()
   mr.push [ 12, 13, 14, ]
-  mr.push show      = ( d ) -> info '^332-1^', d
+  mr.push show      = ( d ) -> help CND.reverse '^332-1^', d
   mr.push multiply  = ( d, send ) -> send d * 2; send d * 3
-  mr.push show      = ( d ) -> info '^332-2^', d
+  mr.push show      = ( d ) -> help CND.reverse '^332-2^', d
   mr.drive()
-  debug '^343^', mr
+  urge '^343^', mr
   return null
 
 #-----------------------------------------------------------------------------------------------------------
