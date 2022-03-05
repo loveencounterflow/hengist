@@ -58,8 +58,6 @@ class Duct
     @on_change    = pluck cfg, 'on_change'
     @cfg          = GUY.lft.freeze @cfg
     @d            = []
-    # @rear         = null
-    # @fore         = null
     @transform    = null ### transform to be called when data arrives ###
     @prv_length   = 0
     add_length_prop @, 'd'
@@ -78,18 +76,6 @@ class Duct
     throw new Error "^XXX@1^ cannot set to oblivious unless duct is empty" if onoff and @length > 0
     @is_oblivious = onoff
     return null
-
-  # #---------------------------------------------------------------------------------------------------------
-  # set_rear:  ( x ) ->
-  #   # validate.pond x
-  #   @rear = x
-  #   return null
-
-  # #---------------------------------------------------------------------------------------------------------
-  # set_fore: ( x ) ->
-  #   # validate.pond x
-  #   @fore = x
-  #   return null
 
   #---------------------------------------------------------------------------------------------------------
   push: ( x ) ->
@@ -186,8 +172,6 @@ class Segment
       modifications
       transform     } = @_get_transform raw_transform
     @arity            = transform.length
-    # input             = if idx is 0         then @first_input else @pipeline[ idx - 1 ].output
-    # output            = if idx is last_idx  then @last_output else []
     # @is_listener       = not ( modifications.do_once_before or modifications.do_once_after )
     @modifications    = {} ### !!!!!!!!!!!!!!!!!!!!!!!!!! ###
     @is_sender        = is_sender
@@ -387,7 +371,6 @@ class Moonriver
 
   #---------------------------------------------------------------------------------------------------------
   on_change: ( delta ) =>
-    # debug '^moonriver/on_change@233^', { delta, data_count: @data_count + delta, }
     @data_count += delta
     return null
 
@@ -419,15 +402,6 @@ class Moonriver
     #.......................................................................................................
     loop
       for segment, idx in @segments
-        # whisper '^309-1^', '------------------------------------------------'
-        # info '^309-2^', @segments
-        # debug '^309-3^', {
-        #   idx:              idx
-        #   name:             segment.transform.name
-        #   is_over:          segment.is_over
-        #   # is_listener:      segment.is_listener
-        #   is_source:        ( segment.is_source )
-        #   has_input_data:   segment._has_input_data}
         #...................................................................................................
         # if ( segment.is_over or not segment.is_listener )
         if segment.is_over
@@ -498,27 +472,46 @@ class Moonriver
 #
 #-----------------------------------------------------------------------------------------------------------
 demo_2 = ->
-  mr = new Moonriver()
-  mr.push [ 12, 13, 14, ]
-  # mr.push show      = ( d ) -> help CND.reverse '^332-1^', d
-  mr.push multiply  = ( d, send ) -> send 1000 + d; send 2000 + d
-  mr.push show      = ( d ) -> urge CND.reverse '^332-2^', d
-  # mr.drive()
+  mr1 = new Moonriver()
+  mr2 = new Moonriver()
+  #.........................................................................................................
+  mr1.push [ 12, 13, ]
+  mr1.push [ 14, 15, ]
+  mr1.push [ 16, 17, ]
+  # mr1.push show      = ( d ) -> help CND.reverse '^332-1^', d
+  mr1.push show     = ( d ) -> help CND.reverse '^332-2^', d
+  mr1.push tee      = ( d, send ) -> mr2.send d; send d
+  mr1.push multiply = ( d, send ) -> send d * 2
+  mr1.push tee      = ( d, send ) -> mr2.send d; send d
+  mr1.push show     = ( d ) -> urge CND.reverse '^332-2^', d
+  #.........................................................................................................
+  mr2.push add      = ( d, send ) -> send d + 3
+  mr2.push show     = ( d ) -> info CND.reverse '^332-3^', d
+  #.........................................................................................................
+  # mr1.drive()
   ### can send additional inputs: ###
-  help '^343-1^', mr
-  mr.send 100
-  help '^343-2^', mr
-  mr.send 200
-  help '^343-3^', mr
-  # mr.drive { continue: true, }
-  # help '^343-4^', mr
+  help '^343-1^', mr1
+  help '^343-1^', mr2
+  # mr1.send Symbol.for 'exit'
+  mr1.send Symbol.for 'drop'
+  # mr1.send 100
+  help '^343-2^', mr1
+  # mr1.send 200
+  # help '^343-3^', mr1
+  # mr1.drive { continue: true, }
+  # help '^343-4^', mr1
   return null
 
 
 ############################################################################################################
 if module is require.main then do =>
   demo_2()
-
+  # f = -> return @a
+  # d = { a: 42, f, }
+  # e = GUY.lft.freeze d
+  # info d.f()
+  # info e.f()
+  # info f == d.f == e.f
 
 
 
