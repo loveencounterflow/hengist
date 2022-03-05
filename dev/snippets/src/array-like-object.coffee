@@ -56,10 +56,10 @@ class Duct
     cfg           = { @constructor.C.defaults.constructor..., cfg..., }
     @is_oblivious = pluck cfg, 'is_oblivious'
     @on_change    = pluck cfg, 'on_change'
+    @moonriver    = pluck cfg, 'moonriver'
     @cfg          = GUY.lft.freeze @cfg
     @d            = []
     @delta        = 0
-    @moonriver    = null
     # @rear         = null
     # @fore         = null
     @transform    = null ### transform to be called when data arrives ###
@@ -382,10 +382,10 @@ class Moonriver
       segment.set_input last_segment.output
       last_segment.output.set_oblivious false
     else
-      segment.set_input new Duct()
-    segment.set_output new Duct { is_oblivious: true, }
-    @segments.push segment
-    info '^322^', segment
+      segment.set_input new Duct { moonriver: @, }
+    segment.set_output new Duct { moonriver: @, is_oblivious: true, }
+    @segments.push  segment
+    @sources.push   segment if segment.is_source
     return null
 
   #---------------------------------------------------------------------------------------------------------
