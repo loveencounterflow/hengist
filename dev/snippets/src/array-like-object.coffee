@@ -68,7 +68,6 @@ class Duct
   #---------------------------------------------------------------------------------------------------------
   _on_change: ->
     delta       = @length - @prv_length
-    info '^348^', @length, delta, rpr @
     @prv_length = @length
     @on_change? delta
     return null
@@ -322,7 +321,6 @@ class Segment
     last_idx  = list.length - 1
     idx       = -1
     return list_source = ( d, send ) ->
-      urge '^094^', d
       send d
       idx++
       if idx > last_idx
@@ -389,7 +387,7 @@ class Moonriver
 
   #---------------------------------------------------------------------------------------------------------
   on_change: ( delta ) =>
-    debug '^moonriver/on_change@233^', { delta, data_count: @data_count + delta, }
+    # debug '^moonriver/on_change@233^', { delta, data_count: @data_count + delta, }
     @data_count += delta
     return null
 
@@ -421,15 +419,15 @@ class Moonriver
     #.......................................................................................................
     loop
       for segment, idx in @segments
-        whisper '------------------------------------------------'
-        info '^309-1^', @segments
-        debug '^309-1^', {
-          idx:              idx
-          name:             segment.transform.name
-          is_over:          segment.is_over
-          # is_listener:      segment.is_listener
-          is_source:        ( segment.is_source )
-          has_input_data:   segment._has_input_data}
+        # whisper '^309-1^', '------------------------------------------------'
+        # info '^309-2^', @segments
+        # debug '^309-3^', {
+        #   idx:              idx
+        #   name:             segment.transform.name
+        #   is_over:          segment.is_over
+        #   # is_listener:      segment.is_listener
+        #   is_source:        ( segment.is_source )
+        #   has_input_data:   segment._has_input_data}
         #...................................................................................................
         # if ( segment.is_over or not segment.is_listener )
         if segment.is_over
@@ -441,7 +439,7 @@ class Moonriver
           segment.output.push segment.input.shift() while segment.input.length > 0
           continue
         #...................................................................................................
-        if segment.is_source then debug '^592^', { has_input_data: segment._has_input_data}
+        # if segment.is_source then debug '^592^', { has_input_data: segment._has_input_data}
         if segment.is_source and not segment._has_input_data
           ### If current segment is a source and no inputs are waiting to be sent, trigger the transform by
           calling  with a discardable `drop` value: ###
@@ -450,7 +448,7 @@ class Moonriver
         else
           ### Otherwise, call transform with next value from input queue, if any; when in operational mode
           `breadth`, repeat until input queue is empty: ###
-          debug '^309-2^', segment.input
+          # debug '^309-4^', segment.input
           while segment.input.length > 0
             segment.call segment.input.shift()
             break if cfg.mode is 'depth'
@@ -488,6 +486,7 @@ class Moonriver
   send: ( d ) ->
     @segments[ 0 ].input.push d
     @drive { continue: true, }
+
   #=========================================================================================================
   #
   #---------------------------------------------------------------------------------------------------------
@@ -502,10 +501,8 @@ demo_2 = ->
   mr = new Moonriver()
   mr.push [ 12, 13, 14, ]
   # mr.push show      = ( d ) -> help CND.reverse '^332-1^', d
-  mr.push multiply  = ( d, send ) -> send d * 2; send d * 3
-  mr.push show      = ( d ) -> help CND.reverse '^332-2^', d
-  mr.drive()
-  urge '^343^', mr
+  mr.push multiply  = ( d, send ) -> send 1000 + d; send 2000 + d
+  mr.push show      = ( d ) -> urge CND.reverse '^332-2^', d
   # mr.drive()
   ### can send additional inputs: ###
   help '^343-1^', mr
