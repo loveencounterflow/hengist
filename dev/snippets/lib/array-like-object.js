@@ -72,7 +72,6 @@
         cfg = {...this.constructor.C.defaults.constructor, ...cfg};
         this.is_oblivious = pluck(cfg, 'is_oblivious');
         this.on_change = pluck(cfg, 'on_change');
-        this.moonriver = pluck(cfg, 'moonriver');
         this.cfg = GUY.lft.freeze(this.cfg);
         this.d = [];
         // @rear         = null
@@ -85,15 +84,12 @@
 
       //---------------------------------------------------------------------------------------------------------
       _on_change() {
-        var delta, ref;
+        var delta;
         delta = this.length - this.prv_length;
         info('^348^', this.length, delta, rpr(this));
         this.prv_length = this.length;
-        if ((ref = this.moonriver) != null) {
-          ref.on_change(delta);
-        }
         if (typeof this.on_change === "function") {
-          this.on_change();
+          this.on_change(delta);
         }
         return null;
       }
@@ -219,7 +215,6 @@
       //   throw new Error "^segment@1^ modifiers not implemented" if modifiers.length > 0
       this.input = null;
       this.output = null;
-      // @moonriver        = moonriver
       this.modifiers = null;
       this.arity = null;
       this._is_over = false;
@@ -498,6 +493,8 @@
     //---------------------------------------------------------------------------------------------------------
     constructor(transforms = null) {
       var transform;
+      //---------------------------------------------------------------------------------------------------------
+      this.on_change = this.on_change.bind(this);
       this.data_count = 0;
       this.segments = [];
       this.turns = 0;
@@ -549,11 +546,11 @@
         last_segment.output.set_oblivious(false);
       } else {
         segment.set_input(new Duct({
-          moonriver: this
+          on_change: this.on_change
         }));
       }
       segment.set_output(new Duct({
-        moonriver: this,
+        on_change: this.on_change,
         is_oblivious: true
       }));
       this.segments.push(segment);
@@ -563,7 +560,6 @@
       return null;
     }
 
-    //---------------------------------------------------------------------------------------------------------
     on_change(delta) {
       debug('^moonriver/on_change@233^', {
         delta,
