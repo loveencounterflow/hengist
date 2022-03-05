@@ -392,6 +392,7 @@ class Moonriver
 
   #---------------------------------------------------------------------------------------------------------
   on_change: ( delta ) ->
+    debug '^moonriver/on_change@233^', { delta, data_count: @data_count + delta, }
     @data_count += delta
     return null
 
@@ -422,8 +423,12 @@ class Moonriver
     ###
     #.......................................................................................................
     loop
-      for segment in @segments
+      for segment, idx in @segments
+        whisper '------------------------------------------------'
+        info '^309-1^', @segments
         debug '^309-1^', {
+          idx:              idx
+          name:             segment.transform.name
           is_over:          segment.is_over
           # is_listener:      segment.is_listener
           is_source:        ( segment.is_source )
@@ -439,7 +444,7 @@ class Moonriver
           segment.output.push segment.input.shift() while segment.input.length > 0
           continue
         #...................................................................................................
-        debug '^592^', segment.is_source and not segment._has_input_data
+        if segment.is_source then debug '^592^', { has_input_data: segment._has_input_data}
         if segment.is_source and not segment._has_input_data
           ### If current segment is a source and no inputs are waiting to be sent, trigger the transform by
           calling  with a discardable `drop` value: ###
