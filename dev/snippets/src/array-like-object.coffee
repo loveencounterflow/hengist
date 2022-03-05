@@ -186,6 +186,7 @@ class Segment
   _transform_from_raw_transform: ( raw_transform ) ->
     { is_sender
       is_source
+      is_repeatable
       modifications
       transform     } = @_get_transform raw_transform
     @arity            = transform.length
@@ -195,6 +196,7 @@ class Segment
     @modifications    = {} ### !!!!!!!!!!!!!!!!!!!!!!!!!! ###
     @is_sender        = is_sender
     @is_source        = is_source
+    @is_repeatable    = is_repeatable
     #...................................................................................................
     if @is_sender
       if @modifications.do_once_after
@@ -260,6 +262,7 @@ class Segment
   _get_transform_2: ( raw_transform ) ->
     is_source     = false
     is_sender     = true
+    is_repeatable = true
     switch type = type_of raw_transform
       when 'function'
         switch ( arity = raw_transform.length )
@@ -282,7 +285,7 @@ class Segment
         transform       = @_source_from_list raw_transform
       else
         if ( type is 'generator' ) or ( isa.function raw_transform[ Symbol.iterator ] )
-          @is_repeatable  = false
+          is_repeatable   = false
           is_source       = true
           transform       = @_source_from_generator raw_transform
           unless ( arity = transform.length ) is 2
@@ -290,7 +293,7 @@ class Segment
         else
           throw new Error "^moonriver@8^ cannot convert a #{type} to a source"
     transform = transform.bind @
-    return { is_sender, is_source, transform, }
+    return { is_sender, is_source, is_repeatable, transform, }
 
   #---------------------------------------------------------------------------------------------------------
   _source_from_generatorfunction: ( generatorfunction ) ->
