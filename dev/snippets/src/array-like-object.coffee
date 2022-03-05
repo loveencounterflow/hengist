@@ -56,7 +56,6 @@ class Duct
     cfg           = { @constructor.C.defaults.constructor..., cfg..., }
     @is_oblivious = pluck cfg, 'is_oblivious'
     @on_change    = pluck cfg, 'on_change'
-    @moonriver    = pluck cfg, 'moonriver'
     @cfg          = GUY.lft.freeze @cfg
     @d            = []
     # @rear         = null
@@ -71,8 +70,7 @@ class Duct
     delta       = @length - @prv_length
     info '^348^', @length, delta, rpr @
     @prv_length = @length
-    @moonriver?.on_change delta
-    @on_change?()
+    @on_change? delta
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -384,14 +382,14 @@ class Moonriver
       segment.set_input last_segment.output
       last_segment.output.set_oblivious false
     else
-      segment.set_input new Duct { moonriver: @, }
-    segment.set_output new Duct { moonriver: @, is_oblivious: true, }
+      segment.set_input new Duct { on_change: @on_change, }
+    segment.set_output new Duct { on_change: @on_change, is_oblivious: true, }
     @segments.push  segment
     @sources.push   segment if segment.is_source
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  on_change: ( delta ) ->
+  on_change: ( delta ) =>
     debug '^moonriver/on_change@233^', { delta, data_count: @data_count + delta, }
     @data_count += delta
     return null
