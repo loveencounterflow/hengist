@@ -409,9 +409,9 @@ class Moonriver
     ### TAINT validate `cfg` ###
     throw new Error "^moonriver@9^ pipeline is not repeatable" unless @_on_drive_start()
     return null if @segments.length is 0
-    defaults        = { mode: 'depth', }
-    { mode      }   = { defaults..., cfg..., }
-    segment.set_is_over false for segment in @segments
+    defaults        = { mode: 'depth', continue: false, }
+    cfg             = { defaults..., cfg..., }
+    segment.set_is_over false for segment in @segments unless cfg.continue
     do_exit         = false
     #.......................................................................................................
     ###
@@ -453,7 +453,7 @@ class Moonriver
           debug '^309-2^', segment.input
           while segment.input.length > 0
             segment.call segment.input.shift()
-            break if mode is 'depth'
+            break if cfg.mode is 'depth'
         #...................................................................................................
         ### Stop processing if the `exit` signal has been received: ###
         if segment.exit then do_exit = true; break
@@ -484,6 +484,10 @@ class Moonriver
     #.......................................................................................................
     return null
 
+  #---------------------------------------------------------------------------------------------------------
+  send: ( d ) ->
+    @segments[ 0 ].input.push d
+    @drive { continue: true, }
   #=========================================================================================================
   #
   #---------------------------------------------------------------------------------------------------------
@@ -502,6 +506,15 @@ demo_2 = ->
   mr.push show      = ( d ) -> help CND.reverse '^332-2^', d
   mr.drive()
   urge '^343^', mr
+  # mr.drive()
+  ### can send additional inputs: ###
+  help '^343-1^', mr
+  mr.send 100
+  help '^343-2^', mr
+  mr.send 200
+  help '^343-3^', mr
+  # mr.drive { continue: true, }
+  # help '^343-4^', mr
   return null
 
 
