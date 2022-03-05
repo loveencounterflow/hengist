@@ -59,7 +59,6 @@ class Duct
     @moonriver    = pluck cfg, 'moonriver'
     @cfg          = GUY.lft.freeze @cfg
     @d            = []
-    @delta        = 0
     # @rear         = null
     # @fore         = null
     @transform    = null ### transform to be called when data arrives ###
@@ -69,8 +68,8 @@ class Duct
 
   #---------------------------------------------------------------------------------------------------------
   _on_change: ->
-    @delta      = @length - @prv_length
-    info '^348^', @length, ( @delta ), rpr @
+    delta       = @length - @prv_length
+    info '^348^', @length, delta, rpr @
     @prv_length = @length
     @moonriver?.on_change delta
     @on_change?()
