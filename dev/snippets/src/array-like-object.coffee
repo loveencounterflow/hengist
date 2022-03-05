@@ -59,9 +59,9 @@ class Duct
     @cfg          = GUY.lft.freeze @cfg
     @d            = []
     @delta        = 0
-    @rear         = null
-    @fore         = null
     @moonriver    = null
+    # @rear         = null
+    # @fore         = null
     @transform    = null ### transform to be called when data arrives ###
     @prv_length   = 0
     add_length_prop @, 'd'
@@ -83,17 +83,17 @@ class Duct
     @is_oblivious = onoff
     return null
 
-  #---------------------------------------------------------------------------------------------------------
-  set_rear:  ( x ) ->
-    # validate.pond x
-    @rear = x
-    return null
+  # #---------------------------------------------------------------------------------------------------------
+  # set_rear:  ( x ) ->
+  #   # validate.pond x
+  #   @rear = x
+  #   return null
 
-  #---------------------------------------------------------------------------------------------------------
-  set_fore: ( x ) ->
-    # validate.pond x
-    @fore = x
-    return null
+  # #---------------------------------------------------------------------------------------------------------
+  # set_fore: ( x ) ->
+  #   # validate.pond x
+  #   @fore = x
+  #   return null
 
   #---------------------------------------------------------------------------------------------------------
   push: ( x ) ->
@@ -152,7 +152,7 @@ class Segment
   #   throw new Error "^segment@1^ modifiers not implemented" if modifiers.length > 0
     @input            = null
     @output           = null
-    @moonriver        = null
+    # @moonriver        = moonriver
     @modifiers        = null
     @arity            = null
     @_is_over         = false
@@ -497,29 +497,6 @@ demo_2 = ->
   mr.push show      = ( d ) -> help CND.reverse '^332-2^', d
   mr.drive()
   urge '^343^', mr
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-demo_1 = ->
-  d1 = new Duct()
-  d2 = new Duct()
-  d1.transform = multiply  = ( d, send ) -> send d * 2; send d * 3
-  d2.transform = show      = ( d ) -> info '^332-3^', d
-  d1.rear = null; d1.fore = d2
-  d2.rear = d1;   d2.fore = null
-  d1.push 123
-  urge '^958^', d1
-  urge '^958^', d2
-
-  f = =>
-    d.push 42
-    d.push 43
-    d.push 44
-    d.shift()
-    # d.splice 1, 0, 'a', 'b', 'c'
-    urge '^948^', d
-    urge '^948^', d.length
-    return null
   return null
 
 
