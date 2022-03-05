@@ -222,7 +222,7 @@ class Segment
     @send = ( d ) =>
       switch d
         when symbol.drop  then  null
-        when symbol.over  then  @is_over    = true
+        when symbol.over  then  @set_is_over true
         when symbol.exit  then  @has_exited = true
         else
           throw new Error "^moonriver@3^ cannot send values after pipeline has terminated;" \
