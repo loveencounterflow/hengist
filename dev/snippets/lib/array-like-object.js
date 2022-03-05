@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Duct, GUY, Moonriver, Segment, UTIL, add_length_prop, badge, debug, demo_1, demo_2, echo, help, info, isa, misfit, pluck, rpr, symbol, type_of, types, urge, validate, warn, whisper;
+  var CND, Duct, GUY, Moonriver, Segment, UTIL, add_length_prop, badge, debug, demo_2, echo, help, info, isa, misfit, pluck, rpr, symbol, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -72,12 +72,11 @@
         cfg = {...this.constructor.C.defaults.constructor, ...cfg};
         this.is_oblivious = pluck(cfg, 'is_oblivious');
         this.on_change = pluck(cfg, 'on_change');
+        this.moonriver = pluck(cfg, 'moonriver');
         this.cfg = GUY.lft.freeze(this.cfg);
         this.d = [];
-        this.delta = 0;
-        this.rear = null;
-        this.fore = null;
-        this.moonriver = null;
+        // @rear         = null
+        // @fore         = null
         this.transform = null/* transform to be called when data arrives */
         this.prv_length = 0;
         add_length_prop(this, 'd');
@@ -86,9 +85,9 @@
 
       //---------------------------------------------------------------------------------------------------------
       _on_change() {
-        var ref;
-        this.delta = this.length - this.prv_length;
-        info('^348^', this.length, this.delta, rpr(this));
+        var delta, ref;
+        delta = this.length - this.prv_length;
+        info('^348^', this.length, delta, rpr(this));
         this.prv_length = this.length;
         if ((ref = this.moonriver) != null) {
           ref.on_change(delta);
@@ -109,21 +108,19 @@
         return null;
       }
 
-      //---------------------------------------------------------------------------------------------------------
-      set_rear(x) {
-        // validate.pond x
-        this.rear = x;
-        return null;
-      }
+      // #---------------------------------------------------------------------------------------------------------
+      // set_rear:  ( x ) ->
+      //   # validate.pond x
+      //   @rear = x
+      //   return null
 
-      //---------------------------------------------------------------------------------------------------------
-      set_fore(x) {
-        // validate.pond x
-        this.fore = x;
-        return null;
-      }
+        // #---------------------------------------------------------------------------------------------------------
+      // set_fore: ( x ) ->
+      //   # validate.pond x
+      //   @fore = x
+      //   return null
 
-      //---------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------
       push(x) {
         var R;
         if (this.is_oblivious) {
@@ -222,7 +219,7 @@
       //   throw new Error "^segment@1^ modifiers not implemented" if modifiers.length > 0
       this.input = null;
       this.output = null;
-      this.moonriver = null;
+      // @moonriver        = moonriver
       this.modifiers = null;
       this.arity = null;
       this._is_over = false;
@@ -267,8 +264,8 @@
 
     //---------------------------------------------------------------------------------------------------------
     _transform_from_raw_transform(raw_transform) {
-      var is_sender, is_source, modifications, transform;
-      ({is_sender, is_source, modifications, transform} = this._get_transform(raw_transform));
+      var is_repeatable, is_sender, is_source, modifications, transform;
+      ({is_sender, is_source, is_repeatable, modifications, transform} = this._get_transform(raw_transform));
       this.arity = transform.length;
       // input             = if idx is 0         then @first_input else @pipeline[ idx - 1 ].output
       // output            = if idx is last_idx  then @last_output else []
@@ -276,6 +273,7 @@
       this.modifications = {};
       this./* !!!!!!!!!!!!!!!!!!!!!!!!!! */is_sender = is_sender;
       this.is_source = is_source;
+      this.is_repeatable = is_repeatable;
       //...................................................................................................
       if (this.is_sender) {
         if (this.modifications.do_once_after) {
@@ -311,7 +309,7 @@
             null;
             break;
           case symbol.over:
-            this.is_over = true;
+            this.set_is_over(true);
             break;
           case symbol.exit:
             this.has_exited = true;
@@ -363,9 +361,10 @@
 
     //---------------------------------------------------------------------------------------------------------
     _get_transform_2(raw_transform) {
-      var arity, is_sender, is_source, transform, type;
+      var arity, is_repeatable, is_sender, is_source, transform, type;
       is_source = false;
       is_sender = true;
+      is_repeatable = true;
       switch (type = type_of(raw_transform)) {
         case 'function':
           switch ((arity = raw_transform.length)) {
@@ -395,7 +394,7 @@
           break;
         default:
           if ((type === 'generator') || (isa.function(raw_transform[Symbol.iterator]))) {
-            this.is_repeatable = false;
+            is_repeatable = false;
             is_source = true;
             transform = this._source_from_generator(raw_transform);
             if ((arity = transform.length) !== 2) {
@@ -406,7 +405,7 @@
           }
       }
       transform = transform.bind(this);
-      return {is_sender, is_source, transform};
+      return {is_sender, is_source, is_repeatable, transform};
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -549,18 +548,27 @@
         segment.set_input(last_segment.output);
         last_segment.output.set_oblivious(false);
       } else {
-        segment.set_input(new Duct());
+        segment.set_input(new Duct({
+          moonriver: this
+        }));
       }
       segment.set_output(new Duct({
+        moonriver: this,
         is_oblivious: true
       }));
       this.segments.push(segment);
-      info('^322^', segment);
+      if (segment.is_source) {
+        this.sources.push(segment);
+      }
       return null;
     }
 
     //---------------------------------------------------------------------------------------------------------
     on_change(delta) {
+      debug('^moonriver/on_change@233^', {
+        delta,
+        data_count: this.data_count + delta
+      });
       this.data_count += delta;
       return null;
     }
@@ -589,7 +597,7 @@
 
     //---------------------------------------------------------------------------------------------------------
     drive(cfg) {
-      var defaults, do_exit, i, j, len, len1, mode, ref, ref1, segment;
+      var defaults, do_exit, i, idx, j, len, len1, mode, ref, ref1, segment;
       if (!this._on_drive_start()) {
         /* TAINT validate `cfg` */
         throw new Error("^moonriver@9^ pipeline is not repeatable");
@@ -615,9 +623,13 @@
           segment.call segment.modifications.once_before
         */
         //.......................................................................................................
-        for (j = 0, len1 = ref1.length; j < len1; j++) {
-          segment = ref1[j];
+        for (idx = j = 0, len1 = ref1.length; j < len1; idx = ++j) {
+          segment = ref1[idx];
+          whisper('------------------------------------------------');
+          info('^309-1^', this.segments);
           debug('^309-1^', {
+            idx: idx,
+            name: segment.transform.name,
             is_over: segment.is_over,
             // is_listener:      segment.is_listener
             is_source: segment.is_source,
@@ -637,7 +649,11 @@
             continue;
           }
           //...................................................................................................
-          debug('^592^', segment.is_source && !segment._has_input_data);
+          if (segment.is_source) {
+            debug('^592^', {
+              has_input_data: segment._has_input_data
+            });
+          }
           if (segment.is_source && !segment._has_input_data) {
             /* If current segment is a source and no inputs are waiting to be sent, trigger the transform by
                      calling  with a discardable `drop` value: */
@@ -670,9 +686,8 @@
         if (this.sources.every(function(source) {
           return source.is_over;
         })) {
-          if (!this.inputs.some(function(input) {
-            return input.length > 0;
-          })) {
+          if (this.data_count === 0) {
+            // unless @inputs.some ( input ) -> input.length > 0
             // debug '^453453^', "recognized pipeline exhausted"
             // debug '^453453^', @segments[ 2 ].send Symbol.for 'before_last'
             // continue
@@ -717,9 +732,7 @@
     var mr, multiply, show;
     mr = new Moonriver();
     mr.push([12, 13, 14]);
-    mr.push(show = function(d) {
-      return help(CND.reverse('^332-1^', d));
-    });
+    // mr.push show      = ( d ) -> help CND.reverse '^332-1^', d
     mr.push(multiply = function(d, send) {
       send(d * 2);
       return send(d * 3);
@@ -729,38 +742,6 @@
     });
     mr.drive();
     urge('^343^', mr);
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  demo_1 = function() {
-    var d1, d2, f, multiply, show;
-    d1 = new Duct();
-    d2 = new Duct();
-    d1.transform = multiply = function(d, send) {
-      send(d * 2);
-      return send(d * 3);
-    };
-    d2.transform = show = function(d) {
-      return info('^332-3^', d);
-    };
-    d1.rear = null;
-    d1.fore = d2;
-    d2.rear = d1;
-    d2.fore = null;
-    d1.push(123);
-    urge('^958^', d1);
-    urge('^958^', d2);
-    f = () => {
-      d.push(42);
-      d.push(43);
-      d.push(44);
-      d.shift();
-      // d.splice 1, 0, 'a', 'b', 'c'
-      urge('^948^', d);
-      urge('^948^', d.length);
-      return null;
-    };
     return null;
   };
 
