@@ -149,7 +149,6 @@ class Segment
   #   throw new Error "^segment@1^ modifiers not implemented" if modifiers.length > 0
     @input            = null
     @output           = null
-    # @moonriver        = moonriver
     @modifiers        = null
     @arity            = null
     @_is_over         = false
