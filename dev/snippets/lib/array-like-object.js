@@ -86,7 +86,6 @@
       _on_change() {
         var delta;
         delta = this.length - this.prv_length;
-        info('^348^', this.length, delta, rpr(this));
         this.prv_length = this.length;
         if (typeof this.on_change === "function") {
           this.on_change(delta);
@@ -446,7 +445,6 @@
       last_idx = list.length - 1;
       idx = -1;
       return list_source = function(d, send) {
-        urge('^094^', d);
         send(d);
         idx++;
         if (idx > last_idx) {
@@ -561,10 +559,7 @@
     }
 
     on_change(delta) {
-      debug('^moonriver/on_change@233^', {
-        delta,
-        data_count: this.data_count + delta
-      });
+      // debug '^moonriver/on_change@233^', { delta, data_count: @data_count + delta, }
       this.data_count += delta;
       return null;
     }
@@ -593,7 +588,7 @@
 
     //---------------------------------------------------------------------------------------------------------
     drive(cfg) {
-      var defaults, do_exit, i, idx, j, len, len1, mode, ref, ref1, segment;
+      var defaults, do_exit, i, idx, j, len, len1, ref, ref1, segment;
       if (!this._on_drive_start()) {
         /* TAINT validate `cfg` */
         throw new Error("^moonriver@9^ pipeline is not repeatable");
@@ -602,13 +597,16 @@
         return null;
       }
       defaults = {
-        mode: 'depth'
+        mode: 'depth',
+        continue: false
       };
-      ({mode} = {...defaults, ...cfg});
-      ref = this.segments;
-      for (i = 0, len = ref.length; i < len; i++) {
-        segment = ref[i];
-        segment.set_is_over(false);
+      cfg = {...defaults, ...cfg};
+      if (!cfg.continue) {
+        ref = this.segments;
+        for (i = 0, len = ref.length; i < len; i++) {
+          segment = ref[i];
+          segment.set_is_over(false);
+        }
       }
       do_exit = false;
       while (true) {
@@ -621,16 +619,15 @@
         //.......................................................................................................
         for (idx = j = 0, len1 = ref1.length; j < len1; idx = ++j) {
           segment = ref1[idx];
-          whisper('------------------------------------------------');
-          info('^309-1^', this.segments);
-          debug('^309-1^', {
-            idx: idx,
-            name: segment.transform.name,
-            is_over: segment.is_over,
-            // is_listener:      segment.is_listener
-            is_source: segment.is_source,
-            has_input_data: segment._has_input_data
-          });
+          // whisper '^309-1^', '------------------------------------------------'
+          // info '^309-2^', @segments
+          // debug '^309-3^', {
+          //   idx:              idx
+          //   name:             segment.transform.name
+          //   is_over:          segment.is_over
+          //   # is_listener:      segment.is_listener
+          //   is_source:        ( segment.is_source )
+          //   has_input_data:   segment._has_input_data}
           //...................................................................................................
           // if ( segment.is_over or not segment.is_listener )
           if (segment.is_over) {
@@ -645,11 +642,7 @@
             continue;
           }
           //...................................................................................................
-          if (segment.is_source) {
-            debug('^592^', {
-              has_input_data: segment._has_input_data
-            });
-          }
+          // if segment.is_source then debug '^592^', { has_input_data: segment._has_input_data}
           if (segment.is_source && !segment._has_input_data) {
             /* If current segment is a source and no inputs are waiting to be sent, trigger the transform by
                      calling  with a discardable `drop` value: */
@@ -657,11 +650,11 @@
           } else {
             /* Otherwise, call transform with next value from input queue, if any; when in operational mode
                      `breadth`, repeat until input queue is empty: */
+            // debug '^309-4^', segment.input
             //...................................................................................................
-            debug('^309-2^', segment.input);
             while (segment.input.length > 0) {
               segment.call(segment.input.shift());
-              if (mode === 'depth') {
+              if (cfg.mode === 'depth') {
                 break;
               }
             }
@@ -708,6 +701,14 @@
       return null;
     }
 
+    //---------------------------------------------------------------------------------------------------------
+    send(d) {
+      this.segments[0].input.push(d);
+      return this.drive({
+        continue: true
+      });
+    }
+
     //=========================================================================================================
 
     //---------------------------------------------------------------------------------------------------------
@@ -730,14 +731,21 @@
     mr.push([12, 13, 14]);
     // mr.push show      = ( d ) -> help CND.reverse '^332-1^', d
     mr.push(multiply = function(d, send) {
-      send(d * 2);
-      return send(d * 3);
+      send(1000 + d);
+      return send(2000 + d);
     });
     mr.push(show = function(d) {
-      return help(CND.reverse('^332-2^', d));
+      return urge(CND.reverse('^332-2^', d));
     });
-    mr.drive();
-    urge('^343^', mr);
+    // mr.drive()
+    /* can send additional inputs: */
+    help('^343-1^', mr);
+    mr.send(100);
+    help('^343-2^', mr);
+    mr.send(200);
+    help('^343-3^', mr);
+    // mr.drive { continue: true, }
+    // help '^343-4^', mr
     return null;
   };
 
