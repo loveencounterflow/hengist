@@ -74,8 +74,6 @@
         this.on_change = pluck(cfg, 'on_change');
         this.cfg = GUY.lft.freeze(this.cfg);
         this.d = [];
-        // @rear         = null
-        // @fore         = null
         this.transform = null/* transform to be called when data arrives */
         this.prv_length = 0;
         add_length_prop(this, 'd');
@@ -103,19 +101,7 @@
         return null;
       }
 
-      // #---------------------------------------------------------------------------------------------------------
-      // set_rear:  ( x ) ->
-      //   # validate.pond x
-      //   @rear = x
-      //   return null
-
-        // #---------------------------------------------------------------------------------------------------------
-      // set_fore: ( x ) ->
-      //   # validate.pond x
-      //   @fore = x
-      //   return null
-
-        //---------------------------------------------------------------------------------------------------------
+      //---------------------------------------------------------------------------------------------------------
       push(x) {
         var R;
         if (this.is_oblivious) {
@@ -261,8 +247,6 @@
       var is_repeatable, is_sender, is_source, modifications, transform;
       ({is_sender, is_source, is_repeatable, modifications, transform} = this._get_transform(raw_transform));
       this.arity = transform.length;
-      // input             = if idx is 0         then @first_input else @pipeline[ idx - 1 ].output
-      // output            = if idx is last_idx  then @last_output else []
       // @is_listener       = not ( modifications.do_once_before or modifications.do_once_after )
       this.modifications = {};
       this./* !!!!!!!!!!!!!!!!!!!!!!!!!! */is_sender = is_sender;
@@ -559,7 +543,6 @@
     }
 
     on_change(delta) {
-      // debug '^moonriver/on_change@233^', { delta, data_count: @data_count + delta, }
       this.data_count += delta;
       return null;
     }
@@ -619,15 +602,6 @@
         //.......................................................................................................
         for (idx = j = 0, len1 = ref1.length; j < len1; idx = ++j) {
           segment = ref1[idx];
-          // whisper '^309-1^', '------------------------------------------------'
-          // info '^309-2^', @segments
-          // debug '^309-3^', {
-          //   idx:              idx
-          //   name:             segment.transform.name
-          //   is_over:          segment.is_over
-          //   # is_listener:      segment.is_listener
-          //   is_source:        ( segment.is_source )
-          //   has_input_data:   segment._has_input_data}
           //...................................................................................................
           // if ( segment.is_over or not segment.is_listener )
           if (segment.is_over) {
@@ -726,26 +700,51 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_2 = function() {
-    var mr, multiply, show;
-    mr = new Moonriver();
-    mr.push([12, 13, 14]);
-    // mr.push show      = ( d ) -> help CND.reverse '^332-1^', d
-    mr.push(multiply = function(d, send) {
-      send(1000 + d);
-      return send(2000 + d);
+    var add, mr1, mr2, multiply, show, tee;
+    mr1 = new Moonriver();
+    mr2 = new Moonriver();
+    //.........................................................................................................
+    mr1.push([12, 13]);
+    mr1.push([14, 15]);
+    mr1.push([16, 17]);
+    // mr1.push show      = ( d ) -> help CND.reverse '^332-1^', d
+    mr1.push(show = function(d) {
+      return help(CND.reverse('^332-2^', d));
     });
-    mr.push(show = function(d) {
+    mr1.push(tee = function(d, send) {
+      mr2.send(d);
+      return send(d);
+    });
+    mr1.push(multiply = function(d, send) {
+      return send(d * 2);
+    });
+    mr1.push(tee = function(d, send) {
+      mr2.send(d);
+      return send(d);
+    });
+    mr1.push(show = function(d) {
       return urge(CND.reverse('^332-2^', d));
     });
-    // mr.drive()
+    //.........................................................................................................
+    mr2.push(add = function(d, send) {
+      return send(d + 3);
+    });
+    mr2.push(show = function(d) {
+      return info(CND.reverse('^332-3^', d));
+    });
+    //.........................................................................................................
+    // mr1.drive()
     /* can send additional inputs: */
-    help('^343-1^', mr);
-    mr.send(100);
-    help('^343-2^', mr);
-    mr.send(200);
-    help('^343-3^', mr);
-    // mr.drive { continue: true, }
-    // help '^343-4^', mr
+    help('^343-1^', mr1);
+    help('^343-1^', mr2);
+    // mr1.send Symbol.for 'exit'
+    mr1.send(Symbol.for('drop'));
+    // mr1.send 100
+    help('^343-2^', mr1);
+    // mr1.send 200
+    // help '^343-3^', mr1
+    // mr1.drive { continue: true, }
+    // help '^343-4^', mr1
     return null;
   };
 
@@ -755,6 +754,13 @@
       return demo_2();
     })();
   }
+
+  // f = -> return @a
+// d = { a: 42, f, }
+// e = GUY.lft.freeze d
+// info d.f()
+// info e.f()
+// info f == d.f == e.f
 
 }).call(this);
 
