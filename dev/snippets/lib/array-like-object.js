@@ -225,7 +225,7 @@
       this.moonriver = null;
       this.modifiers = null;
       this.arity = null;
-      this.is_over = false;
+      this._is_over = false;
       this.has_exited = false;
       // @is_listener      = false
       this.is_sender = false;
@@ -233,7 +233,12 @@
       this.transform = this._transform_from_raw_transform(raw_transform);
       GUY.props.def(this, '_has_input_data', {
         get: () => {
-          return (this.input == null) || this.input.length === 0;
+          return this.input.length > 0;
+        }
+      });
+      GUY.props.def(this, 'is_over', {
+        get: () => {
+          return this._is_over;
         }
       });
       return void 0;
@@ -248,6 +253,13 @@
     //---------------------------------------------------------------------------------------------------------
     set_output(duct) {
       this.output = duct;
+      return null;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    set_is_over(onoff) {
+      validate.boolean(onoff);
+      this._is_over = onoff;
       return null;
     }
 
@@ -299,13 +311,13 @@
             null;
             break;
           case symbol.over:
-            this.over = true;
+            this.is_over = true;
             break;
           case symbol.exit:
-            this.exit = true;
+            this.has_exited = true;
             break;
           default:
-            if (this.over) {
+            if (this.is_over) {
               throw new Error("^moonriver@3^ cannot send values after pipeline has terminated;" + `error occurred in transform idx ${idx} (${rpr(segment.transform.name)})`);
             }
             this.output.push(d);
@@ -440,6 +452,7 @@
       last_idx = list.length - 1;
       idx = -1;
       return list_source = function(d, send) {
+        urge('^094^', d);
         send(d);
         idx++;
         if (idx > last_idx) {
@@ -472,9 +485,7 @@
     toString() {
       var parts;
       parts = [];
-      if (this.input != null) {
-        parts.push((rpr(this.input)) + ' ➡︎ ');
-      }
+      parts.push((rpr(this.input)) + ' ➡︎ ');
       parts.push(this._name_of_transform() + ' ➡︎ ' + (rpr(this.output)));
       return parts.join(' ');
     }
@@ -537,6 +548,8 @@
       if ((last_segment = this.last_segment) != null) {
         segment.set_input(last_segment.output);
         last_segment.output.set_oblivious(false);
+      } else {
+        segment.set_input(new Duct());
       }
       segment.set_output(new Duct({
         is_oblivious: true
@@ -591,7 +604,7 @@
       ref = this.segments;
       for (i = 0, len = ref.length; i < len; i++) {
         segment = ref[i];
-        segment.over = false;
+        segment.set_is_over(false);
       }
       do_exit = false;
       while (true) {
@@ -604,8 +617,15 @@
         //.......................................................................................................
         for (j = 0, len1 = ref1.length; j < len1; j++) {
           segment = ref1[j];
+          debug('^309-1^', {
+            is_over: segment.is_over,
+            // is_listener:      segment.is_listener
+            is_source: segment.is_source,
+            has_input_data: segment._has_input_data
+          });
           //...................................................................................................
-          if ((segment.input != null) && (segment.over || !segment.is_listener)) {
+          // if ( segment.is_over or not segment.is_listener )
+          if (segment.is_over) {
             while (segment.input.length > 0) {
               /* If current segment has signalled it's gone out of business for this lap or is not a listener
                        in the first place, route all data on its input queue to its output queue: */
@@ -617,6 +637,7 @@
             continue;
           }
           //...................................................................................................
+          debug('^592^', segment.is_source && !segment._has_input_data);
           if (segment.is_source && !segment._has_input_data) {
             /* If current segment is a source and no inputs are waiting to be sent, trigger the transform by
                      calling  with a discardable `drop` value: */
@@ -625,12 +646,11 @@
             /* Otherwise, call transform with next value from input queue, if any; when in operational mode
                      `breadth`, repeat until input queue is empty: */
             //...................................................................................................
-            if (segment.input != null) {
-              while (segment.input.length > 0) {
-                segment.call(segment.input.shift());
-                if (mode === 'depth') {
-                  break;
-                }
+            debug('^309-2^', segment.input);
+            while (segment.input.length > 0) {
+              segment.call(segment.input.shift());
+              if (mode === 'depth') {
+                break;
               }
             }
           }
@@ -648,7 +668,7 @@
         /* When all sources have called it quits and no more input queues have data, end processing: */
         /* TAINT collect stats in above loop */
         if (this.sources.every(function(source) {
-          return source.over;
+          return source.is_over;
         })) {
           if (!this.inputs.some(function(input) {
             return input.length > 0;
@@ -665,13 +685,13 @@
       // modifier, skipping those that have signalled `over` or `exit`: ###
       // ### TAINT make `last` and `once_after` mutually exclusive ###
       // for segment in @on_last
-      //   continue if segment.over or segment.exit
-      //   segment.over = true
+      //   continue if segment.is_over or segment.exit
+      //   segment.is_over = true
       //   segment.call segment.modifications.last, false
       // #.......................................................................................................
       // for segment in @on_once_after
-      //   continue if segment.over or segment.exit
-      //   segment.over = true
+      //   continue if segment.is_over or segment.exit
+      //   segment.is_over = true
       //   segment.call segment.modifications.once_after, false
       //.......................................................................................................
       return null;
@@ -698,17 +718,17 @@
     mr = new Moonriver();
     mr.push([12, 13, 14]);
     mr.push(show = function(d) {
-      return info('^332-1^', d);
+      return help(CND.reverse('^332-1^', d));
     });
     mr.push(multiply = function(d, send) {
       send(d * 2);
       return send(d * 3);
     });
     mr.push(show = function(d) {
-      return info('^332-2^', d);
+      return help(CND.reverse('^332-2^', d));
     });
     mr.drive();
-    debug('^343^', mr);
+    urge('^343^', mr);
     return null;
   };
 
