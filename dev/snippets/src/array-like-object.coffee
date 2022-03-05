@@ -499,7 +499,7 @@ class Moonriver
 demo_2 = ->
   mr = new Moonriver()
   mr.push [ 12, 13, 14, ]
-  mr.push show      = ( d ) -> help CND.reverse '^332-1^', d
+  # mr.push show      = ( d ) -> help CND.reverse '^332-1^', d
   mr.push multiply  = ( d, send ) -> send d * 2; send d * 3
   mr.push show      = ( d ) -> help CND.reverse '^332-2^', d
   mr.drive()
