@@ -401,7 +401,10 @@ class Moonriver
     ###
     #.......................................................................................................
     loop
+      whisper '^534-1^', '-----------------------------'
       for segment, idx in @segments
+        # urge '^534-2^', idx, @
+        # debug '^534-2^', idx, segment
         #...................................................................................................
         # if ( segment.is_over or not segment.is_listener )
         if segment.is_over
@@ -475,19 +478,20 @@ demo_2 = ->
   mr1 = new Moonriver()
   mr2 = new Moonriver()
   #.........................................................................................................
-  mr1.push [ 12, 13, ]
-  mr1.push [ 14, 15, ]
-  mr1.push [ 16, 17, ]
+  mr1.push [ 1, 4, ]
+  mr1.push [ 2, 5, 7, ]
+  mr1.push [ 3, 6, ]
+  mr1.push ( d ) -> yield e for e in Array.from 'abc'
   # mr1.push show      = ( d ) -> help CND.reverse '^332-1^', d
   mr1.push show     = ( d ) -> help CND.reverse '^332-2^', d
-  mr1.push tee      = ( d, send ) -> mr2.send d; send d
-  mr1.push multiply = ( d, send ) -> send d * 2
-  mr1.push tee      = ( d, send ) -> mr2.send d; send d
-  mr1.push show     = ( d ) -> urge CND.reverse '^332-2^', d
-  #.........................................................................................................
-  mr2.push add      = ( d, send ) -> send d + 3
-  mr2.push show     = ( d ) -> info CND.reverse '^332-3^', d
-  #.........................................................................................................
+  # mr1.push tee      = ( d, send ) -> mr2.send d; send d
+  # mr1.push multiply = ( d, send ) -> send d * 100
+  # mr1.push tee      = ( d, send ) -> mr2.send d; send d
+  # mr1.push show     = ( d ) -> urge CND.reverse '^332-2^', d
+  # #.........................................................................................................
+  # mr2.push add      = ( d, send ) -> send d + 300
+  # mr2.push show     = ( d ) -> info CND.reverse '^332-3^', d
+  # #.........................................................................................................
   # mr1.drive()
   ### can send additional inputs: ###
   help '^343-1^', mr1
