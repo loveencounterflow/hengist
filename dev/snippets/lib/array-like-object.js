@@ -593,15 +593,18 @@
       }
       do_exit = false;
       while (true) {
-        ref1 = this.segments;
         //.......................................................................................................
         /*
         for segment in @on_once_before
           segment.call segment.modifications.once_before
         */
         //.......................................................................................................
+        whisper('^534-1^', '-----------------------------');
+        ref1 = this.segments;
         for (idx = j = 0, len1 = ref1.length; j < len1; idx = ++j) {
           segment = ref1[idx];
+          // urge '^534-2^', idx, @
+          // debug '^534-2^', idx, segment
           //...................................................................................................
           // if ( segment.is_over or not segment.is_listener )
           if (segment.is_over) {
@@ -700,39 +703,35 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_2 = function() {
-    var add, mr1, mr2, multiply, show, tee;
+    var mr1, mr2, show;
     mr1 = new Moonriver();
     mr2 = new Moonriver();
     //.........................................................................................................
-    mr1.push([12, 13]);
-    mr1.push([14, 15]);
-    mr1.push([16, 17]);
+    mr1.push([1, 4]);
+    mr1.push([2, 5, 7]);
+    mr1.push([3, 6]);
+    mr1.push(function*(d) {
+      var e, i, len, ref, results;
+      ref = Array.from('abc');
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        e = ref[i];
+        results.push((yield e));
+      }
+      return results;
+    });
     // mr1.push show      = ( d ) -> help CND.reverse '^332-1^', d
     mr1.push(show = function(d) {
       return help(CND.reverse('^332-2^', d));
     });
-    mr1.push(tee = function(d, send) {
-      mr2.send(d);
-      return send(d);
-    });
-    mr1.push(multiply = function(d, send) {
-      return send(d * 2);
-    });
-    mr1.push(tee = function(d, send) {
-      mr2.send(d);
-      return send(d);
-    });
-    mr1.push(show = function(d) {
-      return urge(CND.reverse('^332-2^', d));
-    });
-    //.........................................................................................................
-    mr2.push(add = function(d, send) {
-      return send(d + 3);
-    });
-    mr2.push(show = function(d) {
-      return info(CND.reverse('^332-3^', d));
-    });
-    //.........................................................................................................
+    // mr1.push tee      = ( d, send ) -> mr2.send d; send d
+    // mr1.push multiply = ( d, send ) -> send d * 100
+    // mr1.push tee      = ( d, send ) -> mr2.send d; send d
+    // mr1.push show     = ( d ) -> urge CND.reverse '^332-2^', d
+    // #.........................................................................................................
+    // mr2.push add      = ( d, send ) -> send d + 300
+    // mr2.push show     = ( d ) -> info CND.reverse '^332-3^', d
+    // #.........................................................................................................
     // mr1.drive()
     /* can send additional inputs: */
     help('^343-1^', mr1);
