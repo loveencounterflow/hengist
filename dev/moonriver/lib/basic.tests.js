@@ -760,13 +760,13 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // @[ "send.call_count" ]()
-      return this["appending data before closing"]();
+      return test(this);
     })();
   }
 
-  // test @[ "appending data before closing" ]
+  // @[ "send.call_count" ]()
+// @[ "appending data before closing" ]()
+// test @[ "appending data before closing" ]
 // test @[ "using send() in a once_before transform" ]
 // @[ "once_before, once_after transformers transparent to data" ]()
 // test @[ "once_before, once_after transformers transparent to data" ]
