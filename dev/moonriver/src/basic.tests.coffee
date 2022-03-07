@@ -469,9 +469,9 @@ H                         = require '../../../lib/helpers'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # @[ "send.call_count" ]()
-  @[ "appending data before closing" ]()
+  # @[ "appending data before closing" ]()
   # test @[ "appending data before closing" ]
   # test @[ "using send() in a once_before transform" ]
   # @[ "once_before, once_after transformers transparent to data" ]()
