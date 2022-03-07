@@ -19,6 +19,7 @@ types                     = new ( require 'intertype' ).Intertype()
   type_of
   validate }              = types
 { Moonriver }             = require '../../../apps/moonriver'
+{ $ }                     = Moonriver
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -102,12 +103,122 @@ demo = ->
   drive 'depth'
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_2 = ->
+  collector = []
+  mr1       = new Moonriver()
+  mr2       = new Moonriver()
+  #.........................................................................................................
+  mr1.push [ 1, 5, ]
+  mr1.push [ 2, 6, ]
+  mr1.push [ 3, 7, 9, ]
+  mr1.push ( d, send ) ->
+    send 'abcdefghi'[ d - 1 ]
+    send d
+  mr1.push [ 4, 8, ]
+  # mr1.push ( d ) -> yield e for e in Array.from 'abc'
+  # mr1.push show      = ( d ) -> help CND.reverse '^332-1^', d
+  mr1.push show     = ( d ) -> help CND.reverse " #{rpr d} "
+  mr1.push collect  = ( d ) -> collector.push d
+  # mr1.push tee      = ( d, send ) -> mr2.send d; send d
+  # mr1.push multiply = ( d, send ) -> send d * 100
+  # mr1.push tee      = ( d, send ) -> mr2.send d; send d
+  # mr1.push show     = ( d ) -> urge CND.reverse '^332-2^', d
+  # #.........................................................................................................
+  # mr2.push add      = ( d, send ) -> send d + 300
+  # mr2.push show     = ( d ) -> info CND.reverse '^332-3^', d
+  # #.........................................................................................................
+  # mr1.drive()
+  ### can send additional inputs: ###
+  help '^343-1^', mr1
+  help '^343-2^', mr2
+  #.........................................................................................................
+  mr1.drive { mode: 'depth', }
+  urge '^343-3^', ( d.toString() for d in collector ).join ' '
+  collector.length = 0
+  mr1.drive { mode: 'breadth', }
+  urge '^343-3^', ( d.toString() for d in collector ).join ' '
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_3 = ->
+  collector = []
+  mr1       = new Moonriver()
+  mr2       = new Moonriver()
+  #.........................................................................................................
+  mr1.push [ 1, 2, 3, ]
+  mr1.push ( d, send ) ->
+    # send d
+    send d + 10
+    send d + 100
+  #.........................................................................................................
+  mr1.push show = ( d ) -> whisper CND.reverse " #{rpr d} "
+  mr1.push ( d, send ) ->
+    send d
+    send d + 20
+  #.........................................................................................................
+  mr1.push show = ( d ) -> warn CND.reverse " #{rpr d} "
+  mr1.push ( d, send ) ->
+    send d
+    send d + 30
+  #.........................................................................................................
+  mr1.push show = ( d ) -> help CND.reverse " #{rpr d} "
+  mr1.push collect  = ( d ) -> collector.push d
+  #.........................................................................................................
+  mr1.drive { mode: 'depth', }
+  urge '^343-3^', ( d.toString() for d in collector ).join ' '
+  collector.length = 0
+  mr1.drive { mode: 'breadth', }
+  urge '^343-3^', ( d.toString() for d in collector ).join ' '
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_4 = ->
+  collector = []
+  mr1       = new Moonriver()
+  mr2       = new Moonriver()
+  fas_idx   = 0
+  #.........................................................................................................
+  $function_as_source = ->
+    values  = Array.from 'abc'
+    return fas = ( d, send ) ->
+      # debug '^3439^', fas_idx, d
+      send d
+      if ( e = values[ fas_idx ] )? then  send e
+      else                                send.over()
+      fas_idx++
+      return null
+  #.........................................................................................................
+  # mr1.push $ { is_source: true, }, $function_as_source()
+  # mr1.push show = ( d ) -> help CND.gold CND.reverse " #{rpr d} "
+  mr1.push [ 1, 4, 7, ]
+  # # mr1.push show = ( d ) -> help CND.blue CND.reverse " #{rpr d} "
+  mr1.push [ 2, 5, 8, ]
+  # # mr1.push show = ( d ) -> help CND.lime CND.reverse " #{rpr d} "
+  mr1.push $ { once_after_last: true, }, oal = ( d, send ) ->
+    debug CND.reverse '^398^', d
+    send 10
+    send 11
+    send 12
+  mr1.push [ 3, 6, 9, ]
+  mr1.push show = ( d ) -> help CND.grey CND.reverse " #{rpr d} "
+  #.........................................................................................................
+  mr1.push collect  = ( d ) -> collector.push d
+  #.........................................................................................................
+  urge '^343-5^', mr1
+  mr1.drive { mode: 'depth', }
+  urge '^343-3^', ( d.toString() for d in collector ).join ' '
+  collector.length = 0; fas_idx = 0; whisper '-----------------------------------'
+  mr1.drive { mode: 'breadth', }
+  urge '^343-3^', ( d.toString() for d in collector ).join ' '
+  return null
 
 
 
 ############################################################################################################
 if module is require.main then do =>
-  demo()
-
-
+  # demo()
+  # demo_2()
+  # demo_3()
+  demo_4()
 
