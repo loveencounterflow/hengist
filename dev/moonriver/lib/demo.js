@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var $, CND, GUY, Moonriver, badge, debug, demo, demo_2, demo_3, demo_4, echo, help, info, isa, rpr, type_of, types, urge, validate, warn, whisper;
+  var $, CND, GUY, Moonriver, badge, debug, demo, demo_2, demo_3, demo_4, demo_5, demo_6, demo_7, echo, help, info, isa, rpr, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -120,8 +120,8 @@
     //.........................................................................................................
     $add_call_count = function() {
       return function(d, send) {
-        urge('^449^', send.call_count, d);
-        return send(isa.float ? send.call_count * 10_000 + d : d);
+        urge('^449^', this.call_count, d);
+        return send(isa.float ? this.call_count * 10_000 + d : d);
       };
     };
     //.........................................................................................................
@@ -322,9 +322,18 @@
     mr1.push($({
       once_after_last: true
     }, oal = function(send) {
-      send(10);
+      return send(10);
+    }));
+    mr1.push($({
+      once_after_last: true
+    }, oal = function(send) {
       send(11);
       return send(12);
+    }));
+    mr1.push($({
+      once_after_last: true
+    }, oal = function(send) {
+      return send(13);
     }));
     mr1.push([3, 6, 9]);
     mr1.push(show = function(d) {
@@ -366,13 +375,206 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_5 = function() {
+    var $function_as_source, collect, collector, d, fas_idx, mr1, mr2, oal;
+    collector = [];
+    mr1 = new Moonriver();
+    mr2 = new Moonriver();
+    fas_idx = 0;
+    //.........................................................................................................
+    $function_as_source = function() {
+      var fas, values;
+      values = Array.from('abc');
+      return fas = function(d, send) {
+        var e;
+        // debug '^3439^', fas_idx, d
+        send(d);
+        if ((e = values[fas_idx]) != null) {
+          send(e);
+        } else {
+          send.over();
+        }
+        fas_idx++;
+        return null;
+      };
+    };
+    //.........................................................................................................
+    mr1.push($({
+      once_after_last: true
+    }, oal = function(send) {
+      return send(10);
+    }));
+    mr1.push($({
+      once_after_last: true
+    }, oal = function(send) {
+      send(11);
+      return send(12);
+    }));
+    mr1.push($({
+      once_after_last: true
+    }, oal = function(send) {
+      return send(13);
+    }));
+    //.........................................................................................................
+    mr1.push(collect = function(d) {
+      return collector.push(d);
+    });
+    //.........................................................................................................
+    urge('^343-5^', mr1);
+    mr1.drive({
+      mode: 'depth'
+    });
+    urge('^343-3^', ((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = collector.length; i < len; i++) {
+        d = collector[i];
+        results.push(d.toString());
+      }
+      return results;
+    })()).join(' '));
+    collector.length = 0;
+    fas_idx = 0;
+    whisper('-----------------------------------');
+    mr1.drive({
+      mode: 'breadth'
+    });
+    urge('^343-3^', ((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = collector.length; i < len; i++) {
+        d = collector[i];
+        results.push(d.toString());
+      }
+      return results;
+    })()).join(' '));
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_6 = function() {
+    var circular, collect, collector, d, mr1, oal, obf, show, source;
+    collector = [];
+    mr1 = new Moonriver();
+    //.........................................................................................................
+    source = mr1.push(['A', 'B', 'C']);
+    mr1.push($({
+      once_before_first: true
+    }, obf = function(send) {
+      return mr1.send(-1);
+    }));
+    // mr1.push $ { once_before_first: true, }, obf = ( send ) -> send 0
+    // mr1.push $ {}, obf = ( send ) -> mr1.send 0
+    // mr1.push ( send ) -> source.send 0
+    mr1.push($({
+      once_after_last: true
+    }, oal = function(send) {
+      return mr1.send(1234);
+    }));
+    mr1.push($({
+      once_after_last: true
+    }, oal = function(send) {
+      return send(5678);
+    }));
+    // mr1.push cc = ( d, send ) -> send d; send @call_count
+    circular = mr1.push(circular = function(d, send) {
+      send(d);
+      if (!(this.call_count > 5)) { // @tick > 100
+        // mr1.send @call_count unless @call_count > 5 # @tick > 100
+        // source.input.push @call_count unless @call_count > 5 # @tick > 100
+        return source.send(this.call_count);
+      }
+    });
+    mr1.push(show = function(d) {
+      return help(this, this.call_count, CND.grey(CND.reverse(` ${rpr(d)} `)));
+    });
+    //.........................................................................................................
+    mr1.push(collect = function(d) {
+      return collector.push(d);
+    });
+    //.........................................................................................................
+    urge('^343-5^', mr1);
+    // mr1.drive { mode: 'depth', }
+    // urge '^343-3^', ( d.toString() for d in collector ).join ' '
+    // collector.length = 0; fas_idx = 0; whisper '-----------------------------------'
+    mr1.drive({
+      mode: 'breadth'
+    });
+    urge('^343-3^', ((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = collector.length; i < len; i++) {
+        d = collector[i];
+        results.push(d.toString());
+      }
+      return results;
+    })()).join(' '));
+    urge('^343-5^', mr1);
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_7 = function() {
+    var collect, collector, d, first, last, mr1, show, source;
+    collector = [];
+    mr1 = new Moonriver();
+    first = Symbol('first');
+    last = Symbol('last');
+    //.........................................................................................................
+    source = mr1.push(Array.from('abcdef'));
+    mr1.push($({first}, function(d, send) {
+      if (d === first) {
+        // debug '^348-1^', @
+        // debug '^348-2^', rpr d
+        return send('first!');
+      }
+      return send(d.toUpperCase());
+    }));
+    // mr1.push show = ( d ) -> help @, @call_count, CND.grey CND.reverse " #{rpr d} "
+    mr1.push($({last}, function(d, send) {
+      if (d !== last) {
+        // debug '^348-3^', @
+        // debug '^348-4^', rpr d
+        return send(`(${d})`);
+      }
+      return send('last!');
+    }));
+    mr1.push(Array.from('uvwxyz'));
+    mr1.push(show = function(d) {
+      return help(this, this.call_count, CND.grey(CND.reverse(` ${rpr(d)} `)));
+    });
+    //.........................................................................................................
+    mr1.push(collect = function(d) {
+      return collector.push(d);
+    });
+    //.........................................................................................................
+    urge('^343-5^', mr1);
+    mr1.drive({
+      mode: 'breadth'
+    });
+    urge('^343-3^', ((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = collector.length; i < len; i++) {
+        d = collector[i];
+        results.push(d.toString());
+      }
+      return results;
+    })()).join(' '));
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // demo()
       // demo_2()
       // demo_3()
-      return demo_4();
+      // demo_4()
+      // demo_5()
+      // demo_6()
+      return demo_7();
     })();
   }
 
