@@ -195,8 +195,7 @@ demo_4 = ->
   # # mr1.push show = ( d ) -> help CND.blue CND.reverse " #{rpr d} "
   mr1.push [ 2, 5, 8, ]
   # # mr1.push show = ( d ) -> help CND.lime CND.reverse " #{rpr d} "
-  mr1.push $ { once_after_last: true, }, oal = ( d, send ) ->
-    debug CND.reverse '^398^', d
+  mr1.push $ { once_after_last: true, }, oal = ( send ) ->
     send 10
     send 11
     send 12
