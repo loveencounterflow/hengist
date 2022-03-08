@@ -75,8 +75,8 @@ demo = ->
   #.........................................................................................................
   $add_call_count = ->
     return ( d, send ) ->
-      urge '^449^', send.call_count, d
-      send if isa.float then send.call_count * 10_000 + d else d
+      urge '^449^', @call_count, d
+      send if isa.float then @call_count * 10_000 + d else d
   #.........................................................................................................
   pipeline  = []
   # pipeline.push $source_A [ 1, 2, 3, ]
@@ -195,10 +195,9 @@ demo_4 = ->
   # # mr1.push show = ( d ) -> help CND.blue CND.reverse " #{rpr d} "
   mr1.push [ 2, 5, 8, ]
   # # mr1.push show = ( d ) -> help CND.lime CND.reverse " #{rpr d} "
-  mr1.push $ { once_after_last: true, }, oal = ( send ) ->
-    send 10
-    send 11
-    send 12
+  mr1.push $ { once_after_last: true, }, oal = ( send ) -> send 10
+  mr1.push $ { once_after_last: true, }, oal = ( send ) -> send 11; send 12
+  mr1.push $ { once_after_last: true, }, oal = ( send ) -> send 13
   mr1.push [ 3, 6, 9, ]
   mr1.push show = ( d ) -> help CND.grey CND.reverse " #{rpr d} "
   #.........................................................................................................
@@ -212,6 +211,97 @@ demo_4 = ->
   urge '^343-3^', ( d.toString() for d in collector ).join ' '
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_5 = ->
+  collector = []
+  mr1       = new Moonriver()
+  mr2       = new Moonriver()
+  fas_idx   = 0
+  #.........................................................................................................
+  $function_as_source = ->
+    values  = Array.from 'abc'
+    return fas = ( d, send ) ->
+      # debug '^3439^', fas_idx, d
+      send d
+      if ( e = values[ fas_idx ] )? then  send e
+      else                                send.over()
+      fas_idx++
+      return null
+  #.........................................................................................................
+  mr1.push $ { once_after_last: true, }, oal = ( send ) -> send 10
+  mr1.push $ { once_after_last: true, }, oal = ( send ) -> send 11; send 12
+  mr1.push $ { once_after_last: true, }, oal = ( send ) -> send 13
+  #.........................................................................................................
+  mr1.push collect  = ( d ) -> collector.push d
+  #.........................................................................................................
+  urge '^343-5^', mr1
+  mr1.drive { mode: 'depth', }
+  urge '^343-3^', ( d.toString() for d in collector ).join ' '
+  collector.length = 0; fas_idx = 0; whisper '-----------------------------------'
+  mr1.drive { mode: 'breadth', }
+  urge '^343-3^', ( d.toString() for d in collector ).join ' '
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_6 = ->
+  collector = []
+  mr1       = new Moonriver()
+  #.........................................................................................................
+  source = mr1.push [ 'A', 'B', 'C', ]
+  mr1.push $ { once_before_first: true, }, obf = ( send ) -> mr1.send -1
+  # mr1.push $ { once_before_first: true, }, obf = ( send ) -> send 0
+  # mr1.push $ {}, obf = ( send ) -> mr1.send 0
+  # mr1.push ( send ) -> source.send 0
+  mr1.push $ { once_after_last: true, }, oal = ( send ) -> mr1.send 1234
+  mr1.push $ { once_after_last: true, }, oal = ( send ) -> send 5678
+  # mr1.push cc = ( d, send ) -> send d; send @call_count
+  circular = mr1.push circular = ( d, send ) ->
+    send d
+    # mr1.send @call_count unless @call_count > 5 # @tick > 100
+    # source.input.push @call_count unless @call_count > 5 # @tick > 100
+    source.send @call_count unless @call_count > 5 # @tick > 100
+  mr1.push show = ( d ) -> help @, @call_count, CND.grey CND.reverse " #{rpr d} "
+  #.........................................................................................................
+  mr1.push collect  = ( d ) -> collector.push d
+  #.........................................................................................................
+  urge '^343-5^', mr1
+  # mr1.drive { mode: 'depth', }
+  # urge '^343-3^', ( d.toString() for d in collector ).join ' '
+  # collector.length = 0; fas_idx = 0; whisper '-----------------------------------'
+  mr1.drive { mode: 'breadth', }
+  urge '^343-3^', ( d.toString() for d in collector ).join ' '
+  urge '^343-5^', mr1
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_7 = ->
+  collector = []
+  mr1       = new Moonriver()
+  first     = Symbol 'first'
+  last      = Symbol 'last'
+  #.........................................................................................................
+  source = mr1.push Array.from 'abcdef'
+  mr1.push $ { first, }, ( d, send ) ->
+    # debug '^348-1^', @
+    # debug '^348-2^', rpr d
+    return send 'first!' if d is first
+    send d.toUpperCase()
+  # mr1.push show = ( d ) -> help @, @call_count, CND.grey CND.reverse " #{rpr d} "
+  mr1.push $ { last, }, ( d, send ) ->
+    # debug '^348-3^', @
+    # debug '^348-4^', rpr d
+    return send "(#{d})" unless d is last
+    send 'last!'
+  mr1.push Array.from 'uvwxyz'
+  mr1.push show = ( d ) -> help @, @call_count, CND.grey CND.reverse " #{rpr d} "
+  #.........................................................................................................
+  mr1.push collect  = ( d ) -> collector.push d
+  #.........................................................................................................
+  urge '^343-5^', mr1
+  mr1.drive { mode: 'breadth', }
+  urge '^343-3^', ( d.toString() for d in collector ).join ' '
+  return null
+
 
 
 ############################################################################################################
@@ -219,5 +309,8 @@ if module is require.main then do =>
   # demo()
   # demo_2()
   # demo_3()
-  demo_4()
+  # demo_4()
+  # demo_5()
+  # demo_6()
+  demo_7()
 
