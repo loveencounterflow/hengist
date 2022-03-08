@@ -321,8 +321,7 @@
     // # mr1.push show = ( d ) -> help CND.lime CND.reverse " #{rpr d} "
     mr1.push($({
       once_after_last: true
-    }, oal = function(d, send) {
-      debug(CND.reverse('^398^', d));
+    }, oal = function(send) {
       send(10);
       send(11);
       return send(12);
