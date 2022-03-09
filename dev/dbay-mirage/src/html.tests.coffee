@@ -150,14 +150,14 @@ H                         = require '../../../lib/helpers'
       text } = token
     name ?= 'MISSING'
     return switch $key
-      when '^text'  then text
-      when '^error' then  ( HDML.create_tag '<', 'error', { token.attrs..., message: token.message } ) \
-                        + ( token.text ? '' ) \
-                        + ( HDML.create_tag '>', 'error' )
-      when '<tag'   then HDML.create_tag '<', name, token.atrs
-      when '^tag'   then HDML.create_tag '^', name, token.atrs
-      when '>tag'   then HDML.create_tag '>', name
-      when '^ncr'   then "(NCR:#{text})"
+      when '^text'    then text
+      when '^error'   then  ( HDML.create_tag '<', 'error', { token.attrs..., message: token.message } ) \
+                          + ( token.text ? '' ) \
+                          + ( HDML.create_tag '>', 'error' )
+      when '<tag'     then HDML.create_tag '<', name, token.atrs
+      when '^tag'     then HDML.create_tag '^', name, token.atrs
+      when '>tag'     then HDML.create_tag '>', name
+      when '^entity'  then "(NCR:#{text})"
       else throw new Error "unknown $key #{rpr $key}"
   #.........................................................................................................
   probes_and_matchers = [
@@ -209,7 +209,7 @@ H                         = require '../../../lib/helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "XNCR parsing" ] = ( T, done ) ->
+@[ "Mirage HTML: XNCR parsing 1" ] = ( T, done ) ->
   { Htmlish } = require '../../../apps/dbay-mirage/lib/html'
   # { DBay  } = require '../../../apps/dbay'
   # { Mrg   } = require '../../../apps/dbay-mirage'
@@ -218,18 +218,17 @@ H                         = require '../../../lib/helpers'
   # mrg       = new Mrg { db, }
   #...........................................................................................................
   probes = [
-    [ 'foo &bar; baz',            [ { name: 'bar' },                                          ] ]
-    [ '&bar;',                    [ { name: 'bar' },                                          ] ]
-    [ '&#123;',                   [ { dec: '123' },                                           ] ]
-    [ 'foo &#123; bar',           [ { dec: '123' },                                           ] ]
-    [ 'foo &xy#x123; bar &baz;',  [ { csg: 'xy', hex: '123' }, { name: 'baz' }                ] ]
+    [ 'nothing to see here',  undefined, ]
+    [ '&bar;',                { name: 'bar' },                            ]
+    [ '&#x123;',              { hex: '123' },                             ]
+    [ '&#123;',               { dec: '123' },                             ]
+    [ '&xy#x123;',            { csg: 'xy', hex: '123' }, { name: 'baz' }, ]
     ]
   for [ probe, matcher, ] in probes
-    result = []
-    for match from probe.matchAll Htmlish.C.xncr.matcher
-      groups = { match.groups..., }
-      delete groups[ key ] for key, value of groups when not value?
-      result.push groups
+    match   = probe.match Htmlish.C.xncr.matcher
+    if match?
+      result = { match.groups..., }
+      delete result[ key ] for key, value of result when not value?
     urge '^652^', [ probe, result, ]
     T?.eq matcher, result
   #...........................................................................................................
@@ -237,13 +236,80 @@ H                         = require '../../../lib/helpers'
   return null
 
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "Mirage HTML: XNCR parsing 2" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay  } = require '../../../apps/dbay'
+  { Mrg   } = require '../../../apps/dbay-mirage'
+  { HDML  } = require '../../../apps/hdml'
+  db        = new DBay()
+  mrg       = new Mrg { db, }
+  { lets
+    thaw }  = guy.lft
+  #.........................................................................................................
+  text_from_token = ( token ) ->
+    { $key
+      name
+      type
+      text } = token
+    name ?= 'MISSING'
+    R = switch $key
+      when '^text'  then text
+      when '^error' then  ( HDML.create_tag '<', 'error', { token.attrs..., message: token.message } ) \
+                        + ( token.text ? '' ) \
+                        + ( HDML.create_tag '>', 'error' )
+      when '<tag'   then HDML.create_tag '<', name, token.atrs
+      when '^tag'   then HDML.create_tag '^', name, token.atrs
+      when '>tag'   then HDML.create_tag '>', name
+      when '^entity'
+        "(NCR:#{type}:#{text})"
+      else throw new Error "unknown $key #{rpr $key}"
+    return "(#{token.start}-#{token.stop})#{R}"
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ '&foo;', '(0-5)(NCR:named:&foo;)', null ]
+    [ 'abcdef', '(0-6)abcdef', null ]
+    [ 'xxx&#x123;xxx', '(0-3)xxx(3-10)(NCR:ncr:&#x123;)(10-13)xxx', null ]
+    [ 'xxx&#123;xxx', '(0-3)xxx(3-9)(NCR:ncr:&#123;)(9-12)xxx', null ]
+    [ 'xxx&jzr#xe123;xxx', '(0-3)xxx(3-14)(NCR:xncr:&jzr#xe123;)(14-17)xxx', null ]
+    [ 'xxx&amp;xxx', '(0-3)xxx(3-8)(NCR:named:&amp;)(8-11)xxx', null ]
+    [ 'foo &amp;bar&jzr#xe123; baz', '(0-4)foo (4-9)(NCR:named:&amp;)(9-12)bar(12-23)(NCR:xncr:&jzr#xe123;)(23-27) baz', null ]
+    [ 'xxx&a&mp;xxx', "(0-3)xxx(3-9)<error message='bare active characters'>&a&mp;</error>(9-12)xxx", null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      # help '^435-12^', rpr probe
+      parts = []
+      for d in mrg.html.HTMLISH.parse probe
+        d = thaw d
+        delete d.$
+        delete d.$vnr
+        # urge '^342^', d
+        parts.push text_from_token d
+      result = parts.join ''
+      resolve result
+      return null
+  #.........................................................................................................
+  done()
+  return null
+
+
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # test @[ "altering mirrored source lines causes error" ]
   # @[ "altering mirrored source lines causes error" ]()
   # @[ "Mirage HTML: quotes in attribute values" ]()
   # @[ "Mirage HTML: Basic functionality" ]()
   # test @[ "Mirage HTML: tag syntax variants" ]
-  test @[ "XNCR parsing" ]
+  # @[ "Mirage HTML: XNCR parsing 1" ]()
+  # test @[ "Mirage HTML: XNCR parsing 1" ]
+  # test @[ "Mirage HTML: XNCR parsing 2" ]
+  # for match from 'xxxabcxdefxxx'.matchAll /(?<xs>x{2,})|(?<notx>[^x]+)|(?<any>.+?)/g
+  #   text    = match[ 0 ]
+  #   index   = match.index
+  #   result  = { text, index, }
+  #   result[ k ] = v for k, v of match.groups when v?
+  #   info '^904^', result
 
