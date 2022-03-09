@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, demo_xncr_matching, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -192,7 +192,7 @@
           var d, j, len1, parts, ref, result;
           // help '^435-12^', rpr probe
           parts = [];
-          ref = mrg.html.HTMLISH.parse2(probe);
+          ref = mrg.html.HTMLISH.parse(probe);
           for (j = 0, len1 = ref.length; j < len1; j++) {
             d = ref[j];
             parts.push(text_from_token(d));
@@ -214,24 +214,65 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_xncr_matching = function() {
-    var groups, i, key, len, match, probe, probes, ref, value, xncr;
-    //===========================================================================================================
-    // PATTERNS
-    //-----------------------------------------------------------------------------------------------------------
-    // G: grouped
-    // O: optional
-    xncr = {};
-    xncr.nameG = /(?<name>[a-z][a-z0-9]*)/.source;
-    xncr.nameOG = /(?:(?<csg>(?:[a-z][a-z0-9]*))|)/.source;
-    xncr.hexG = /(?:x(?<hex>[a-fA-F0-9]+))/.source;
-    xncr.decG = /(?<dec>[0-9]+)/.source;
-    xncr.matcher = RegExp(`&${xncr.nameG};|&${xncr.nameOG}\\#(?:${xncr.hexG}|${xncr.decG});`, "g");
+  this["XNCR parsing"] = function(T, done) {
+    var Htmlish, groups, i, key, len, match, matcher, probe, probes, ref, result, value;
+    ({Htmlish} = require('../../../apps/dbay-mirage/lib/html'));
+    // { DBay  } = require '../../../apps/dbay'
+    // { Mrg   } = require '../../../apps/dbay-mirage'
+    // { HDML  } = require '../../../apps/hdml'
+    // db        = new DBay()
+    // mrg       = new Mrg { db, }
     //...........................................................................................................
-    probes = ['&', '&;', 'foo &bar; baz', '&bar;', '&#123;', 'foo &#123; bar', 'foo &xy#x123; bar &baz;'];
+    probes = [
+      [
+        'foo &bar; baz',
+        [
+          {
+            name: 'bar'
+          }
+        ]
+      ],
+      [
+        '&bar;',
+        [
+          {
+            name: 'bar'
+          }
+        ]
+      ],
+      [
+        '&#123;',
+        [
+          {
+            dec: '123'
+          }
+        ]
+      ],
+      [
+        'foo &#123; bar',
+        [
+          {
+            dec: '123'
+          }
+        ]
+      ],
+      [
+        'foo &xy#x123; bar &baz;',
+        [
+          {
+            csg: 'xy',
+            hex: '123'
+          },
+          {
+            name: 'baz'
+          }
+        ]
+      ]
+    ];
     for (i = 0, len = probes.length; i < len; i++) {
-      probe = probes[i];
-      ref = probe.matchAll(xncr.matcher);
+      [probe, matcher] = probes[i];
+      result = [];
+      ref = probe.matchAll(Htmlish.C.xncr.matcher);
       for (match of ref) {
         groups = {...match.groups};
         for (key in groups) {
@@ -240,10 +281,16 @@
             delete groups[key];
           }
         }
-        debug('^334-5^', rpr(probe), groups);
+        result.push(groups);
+      }
+      urge('^652^', [probe, result]);
+      if (T != null) {
+        T.eq(matcher, result);
       }
     }
-    //...........................................................................................................
+    if (typeof done === "function") {
+      done();
+    }
     return null;
   };
 
@@ -255,11 +302,10 @@
       // @[ "altering mirrored source lines causes error" ]()
       // @[ "Mirage HTML: quotes in attribute values" ]()
       // @[ "Mirage HTML: Basic functionality" ]()
-      return test(this["Mirage HTML: tag syntax variants"]);
+      // test @[ "Mirage HTML: tag syntax variants" ]
+      return test(this["XNCR parsing"]);
     })();
   }
-
-  // demo_xncr_matching()
 
 }).call(this);
 
