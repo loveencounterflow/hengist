@@ -175,7 +175,7 @@
           return HDML.create_tag('^', name, token.atrs);
         case '>tag':
           return HDML.create_tag('>', name);
-        case '^ncr':
+        case '^entity':
           return `(NCR:${text})`;
         default:
           throw new Error(`unknown $key ${rpr($key)}`);
@@ -214,8 +214,8 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["XNCR parsing"] = function(T, done) {
-    var Htmlish, groups, i, key, len, match, matcher, probe, probes, ref, result, value;
+  this["Mirage HTML: XNCR parsing 1"] = function(T, done) {
+    var Htmlish, i, key, len, match, matcher, probe, probes, result, value;
     ({Htmlish} = require('../../../apps/dbay-mirage/lib/html'));
     // { DBay  } = require '../../../apps/dbay'
     // { Mrg   } = require '../../../apps/dbay-mirage'
@@ -224,64 +224,48 @@
     // mrg       = new Mrg { db, }
     //...........................................................................................................
     probes = [
-      [
-        'foo &bar; baz',
-        [
-          {
-            name: 'bar'
-          }
-        ]
-      ],
+      ['nothing to see here',
+      void 0],
       [
         '&bar;',
-        [
-          {
-            name: 'bar'
-          }
-        ]
+        {
+          name: 'bar'
+        }
+      ],
+      [
+        '&#x123;',
+        {
+          hex: '123'
+        }
       ],
       [
         '&#123;',
-        [
-          {
-            dec: '123'
-          }
-        ]
+        {
+          dec: '123'
+        }
       ],
       [
-        'foo &#123; bar',
-        [
-          {
-            dec: '123'
-          }
-        ]
-      ],
-      [
-        'foo &xy#x123; bar &baz;',
-        [
-          {
-            csg: 'xy',
-            hex: '123'
-          },
-          {
-            name: 'baz'
-          }
-        ]
+        '&xy#x123;',
+        {
+          csg: 'xy',
+          hex: '123'
+        },
+        {
+          name: 'baz'
+        }
       ]
     ];
     for (i = 0, len = probes.length; i < len; i++) {
       [probe, matcher] = probes[i];
-      result = [];
-      ref = probe.matchAll(Htmlish.C.xncr.matcher);
-      for (match of ref) {
-        groups = {...match.groups};
-        for (key in groups) {
-          value = groups[key];
+      match = probe.match(Htmlish.C.xncr.matcher);
+      if (match != null) {
+        result = {...match.groups};
+        for (key in result) {
+          value = result[key];
           if (value == null) {
-            delete groups[key];
+            delete result[key];
           }
         }
-        result.push(groups);
       }
       urge('^652^', [probe, result]);
       if (T != null) {
@@ -294,18 +278,98 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["Mirage HTML: XNCR parsing 2"] = async function(T, done) {
+    var DBay, HDML, Mrg, db, error, i, len, lets, matcher, mrg, probe, probes_and_matchers, text_from_token, thaw;
+    // T?.halt_on_error()
+    ({DBay} = require('../../../apps/dbay'));
+    ({Mrg} = require('../../../apps/dbay-mirage'));
+    ({HDML} = require('../../../apps/hdml'));
+    db = new DBay();
+    mrg = new Mrg({db});
+    ({lets, thaw} = guy.lft);
+    //.........................................................................................................
+    text_from_token = function(token) {
+      var $key, R, name, text, type;
+      ({$key, name, type, text} = token);
+      if (name == null) {
+        name = 'MISSING';
+      }
+      R = (function() {
+        var ref;
+        switch ($key) {
+          case '^text':
+            return text;
+          case '^error':
+            return (HDML.create_tag('<', 'error', {
+              ...token.attrs,
+              message: token.message
+            })) + ((ref = token.text) != null ? ref : '') + (HDML.create_tag('>', 'error'));
+          case '<tag':
+            return HDML.create_tag('<', name, token.atrs);
+          case '^tag':
+            return HDML.create_tag('^', name, token.atrs);
+          case '>tag':
+            return HDML.create_tag('>', name);
+          case '^entity':
+            return `(NCR:${type}:${text})`;
+          default:
+            throw new Error(`unknown $key ${rpr($key)}`);
+        }
+      })();
+      return `(${token.start}-${token.stop})${R}`;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [['&foo;', '(0-5)(NCR:named:&foo;)', null], ['abcdef', '(0-6)abcdef', null], ['xxx&#x123;xxx', '(0-3)xxx(3-10)(NCR:ncr:&#x123;)(10-13)xxx', null], ['xxx&#123;xxx', '(0-3)xxx(3-9)(NCR:ncr:&#123;)(9-12)xxx', null], ['xxx&jzr#xe123;xxx', '(0-3)xxx(3-14)(NCR:xncr:&jzr#xe123;)(14-17)xxx', null], ['xxx&amp;xxx', '(0-3)xxx(3-8)(NCR:named:&amp;)(8-11)xxx', null], ['foo &amp;bar&jzr#xe123; baz', '(0-4)foo (4-9)(NCR:named:&amp;)(9-12)bar(12-23)(NCR:xncr:&jzr#xe123;)(23-27) baz', null], ['xxx&a&mp;xxx', "(0-3)xxx(3-9)<error message='bare active characters'>&a&mp;</error>(9-12)xxx", null]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, j, len1, parts, ref, result;
+          // help '^435-12^', rpr probe
+          parts = [];
+          ref = mrg.html.HTMLISH.parse(probe);
+          for (j = 0, len1 = ref.length; j < len1; j++) {
+            d = ref[j];
+            d = thaw(d);
+            delete d.$;
+            delete d.$vnr;
+            // urge '^342^', d
+            parts.push(text_from_token(d));
+          }
+          result = parts.join('');
+          resolve(result);
+          return null;
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @[ "altering mirrored source lines causes error" ]
-      // @[ "altering mirrored source lines causes error" ]()
-      // @[ "Mirage HTML: quotes in attribute values" ]()
-      // @[ "Mirage HTML: Basic functionality" ]()
-      // test @[ "Mirage HTML: tag syntax variants" ]
-      return test(this["XNCR parsing"]);
+      return test(this);
     })();
   }
+
+  // test @[ "altering mirrored source lines causes error" ]
+// @[ "altering mirrored source lines causes error" ]()
+// @[ "Mirage HTML: quotes in attribute values" ]()
+// @[ "Mirage HTML: Basic functionality" ]()
+// test @[ "Mirage HTML: tag syntax variants" ]
+// @[ "Mirage HTML: XNCR parsing 1" ]()
+// test @[ "Mirage HTML: XNCR parsing 1" ]
+// test @[ "Mirage HTML: XNCR parsing 2" ]
+// for match from 'xxxabcxdefxxx'.matchAll /(?<xs>x{2,})|(?<notx>[^x]+)|(?<any>.+?)/g
+//   text    = match[ 0 ]
+//   index   = match.index
+//   result  = { text, index, }
+//   result[ k ] = v for k, v of match.groups when v?
+//   info '^904^', result
 
 }).call(this);
 
