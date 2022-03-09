@@ -194,7 +194,7 @@ H                         = require '../../../lib/helpers'
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       # help '^435-12^', rpr probe
       parts = []
-      for d in mrg.html.HTMLISH.parse2 probe
+      for d in mrg.html.HTMLISH.parse probe
         parts.push text_from_token d
         d = thaw d
         delete d.$
