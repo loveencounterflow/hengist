@@ -209,34 +209,31 @@ H                         = require '../../../lib/helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-demo_xncr_matching = ->
-  #===========================================================================================================
-  # PATTERNS
-  #-----------------------------------------------------------------------------------------------------------
-  # G: grouped
-  # O: optional
-  xncr          = {}
-  xncr.nameG    = ( ///     (?<name>      [a-z][a-z0-9]* )       /// ).source
-  xncr.nameOG   = ( /// (?: (?<csg>   (?: [a-z][a-z0-9]* ) ) | ) /// ).source
-  xncr.hexG     = ( /// (?:     x  (?<hex> [a-fA-F0-9]+ )      ) /// ).source
-  xncr.decG     = ( ///            (?<dec> [      0-9]+ )        /// ).source
-  xncr.matcher  = /// & #{xncr.nameG} ; | & #{xncr.nameOG} \# (?: #{xncr.hexG} | #{xncr.decG} ) ; ///g
+@[ "XNCR parsing" ] = ( T, done ) ->
+  { Htmlish } = require '../../../apps/dbay-mirage/lib/html'
+  # { DBay  } = require '../../../apps/dbay'
+  # { Mrg   } = require '../../../apps/dbay-mirage'
+  # { HDML  } = require '../../../apps/hdml'
+  # db        = new DBay()
+  # mrg       = new Mrg { db, }
   #...........................................................................................................
   probes = [
-    '&'
-    '&;'
-    'foo &bar; baz'
-    '&bar;'
-    '&#123;'
-    'foo &#123; bar'
-    'foo &xy#x123; bar &baz;'
+    [ 'foo &bar; baz',            [ { name: 'bar' },                                          ] ]
+    [ '&bar;',                    [ { name: 'bar' },                                          ] ]
+    [ '&#123;',                   [ { dec: '123' },                                           ] ]
+    [ 'foo &#123; bar',           [ { dec: '123' },                                           ] ]
+    [ 'foo &xy#x123; bar &baz;',  [ { csg: 'xy', hex: '123' }, { name: 'baz' }                ] ]
     ]
-  for probe in probes
-    for match from probe.matchAll xncr.matcher
+  for [ probe, matcher, ] in probes
+    result = []
+    for match from probe.matchAll Htmlish.C.xncr.matcher
       groups = { match.groups..., }
       delete groups[ key ] for key, value of groups when not value?
-      debug '^334-5^', ( rpr probe ), groups
+      result.push groups
+    urge '^652^', [ probe, result, ]
+    T?.eq matcher, result
   #...........................................................................................................
+  done?()
   return null
 
 
@@ -247,7 +244,6 @@ if require.main is module then do =>
   # @[ "altering mirrored source lines causes error" ]()
   # @[ "Mirage HTML: quotes in attribute values" ]()
   # @[ "Mirage HTML: Basic functionality" ]()
-  test @[ "Mirage HTML: tag syntax variants" ]
-  # demo_xncr_matching()
-
+  # test @[ "Mirage HTML: tag syntax variants" ]
+  test @[ "XNCR parsing" ]
 
