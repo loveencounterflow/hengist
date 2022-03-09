@@ -143,6 +143,11 @@
     ({HDML} = require('../../../apps/hdml'));
     db = new DBay();
     mrg = new Mrg({db});
+    // debug '^237^', { text, reveal, } = mrg.html.HTMLISH._tunnel 'foo\\';   info rpr reveal text
+    // debug '^237^', { text, reveal, } = mrg.html.HTMLISH._tunnel 'foo\\a';  info rpr reveal text
+    // debug '^237^', { text, reveal, } = mrg.html.HTMLISH._tunnel 'foo\\\n';  info rpr reveal text
+    // debug '^237^', { text, reveal, } = mrg.html.HTMLISH._tunnel 'foo\\\\'; info rpr reveal text
+    // return done()
     ({lets, thaw} = guy.lft);
     // #.........................................................................................................
     // debug '^33673^', rpr ( mrg.html.HTMLISH._tunnel '\\' ).text
@@ -170,61 +175,16 @@
           return HDML.create_tag('^', name, token.atrs);
         case '>tag':
           return HDML.create_tag('>', name);
+        case '^ncr':
+          return `(NCR:${text})`;
         default:
           throw new Error(`unknown $key ${rpr($key)}`);
       }
     };
     //.........................................................................................................
-    // [ '<py/ling3/',         null, ]
-    probes_and_matchers = [['<title>My Page</title>', '<title>|My Page|</title>', null], ['< title>My Page< /title>', "<error message='extraneous whitespace before tag name'>< title></error>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null], ['<title >My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null], ['<title>My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null], ['<title>My Page</ title>', "<title>|My Page|<error message='extraneous whitespace in closing tag'></ title></error>", null], [/* wrong */ '<title>My Page</title >', '<title>|My Page|</title>', null]];
-    await (async() => {      //.........................................................................................................
-      // [ '<title/My\\/Your Page/>',    '<title>|My/Your Page|</title>|>', ]
-      // [ '<title>My Page</>', "<title>|My Page|</title>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;&gt;&#39; &lt;--'>></error>", ]
-      // [ '<title/My Page/>',           '<title>|My Page|</title>|>', ]
-      // [ '<title/My/Your Page/>',      '<title>|My|</title>|Your Page/>', ]
-      // [ '<title/My\npage/',           '<title>|My\npage|</title>', ]
-      // [ '<title k=v j=w/My Page/',    "<title k='v' j='w'>|My Page|</title>", ]
-      // [ '<title/<b>My</b> Page/',     "<title>|<error message='bare active characters'><b>My<</error>|</title>|b> Page/", ]
-      // [ '<title//',                   '<title>|</title>', ]
-      // [ '<title/>',                   '<title/>', ]
-      // [ '<title/My Page/',            '<title>|My Page|</title>', ]
-      // [ '<title#c1.x/My Page/',       '<title>|My Page|</title>', ]
-      // [ '\\<title/>',                 '&lt;title/>', ]
-      // [ '&amp;',                      '&amp;', ]
-      // [ '\\&amp;',                    '&amp;amp;', ]
-      // [ 'foo\\bar',                   'foobar', ]
-      // [ '\\abc',                      'abc', ]
-      // [ 'first\\\nsecond',            'first second', ]
-      // [ 'foo\\\\bar',                 'foo\\bar', ]
-      var error, i, len, matcher, probe, results;
-      return;
-      results = [];
-      for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-        [probe, matcher, error] = probes_and_matchers[i];
-        results.push((await T.perform(probe, matcher, error, function() {
-          return new Promise(function(resolve, reject) {
-            var d, j, len1, parts, ref, result;
-            help('^435-9^', rpr(probe));
-            parts = [];
-            ref = mrg.html.HTMLISH.parse(probe);
-            for (j = 0, len1 = ref.length; j < len1; j++) {
-              d = ref[j];
-              parts.push(text_from_token(d));
-              d = thaw(d);
-              delete d.$;
-              delete d.$vnr;
-              urge('^435-10^', d);
-            }
-            result = parts.join('|');
-            info('^435-11^', rpr(result));
-            resolve(result);
-            return null;
-          });
-        })));
-      }
-      return results;
-    })();
-    await (() => {})();    //.........................................................................................................
+    // # [ '<py/ling3/',         null, ]
+    probes_and_matchers = [['<title>My Page</title>', '<title>|My Page|</title>', null], ['< title>My Page< /title>', "<error message='extraneous whitespace before tag name'>< title></error>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null], ['<title >My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null], ['<title>My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null], ['<title>My Page</ title>', "<title>|My Page|<error message='extraneous whitespace in closing tag'></ title></error>", null], [/* wrong */ '<title>My Page</title >', '<title>|My Page|</title>', null], ['<title/My\\/Your Page/>', '<title>|My/Your Page|</title>|>'], ['<title>My Page</>', "<title>|My Page|</title>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;&gt;&#39; &lt;--'>></error>"], ['<title/My Page/>', '<title>|My Page|</title>|>'], ['<title/My/Your Page/>', '<title>|My|</title>|Your Page/>'], ['<title/My\npage/', '<title>|My\npage|</title>'], ['<title k=v j=w/My Page/', "<title k='v' j='w'>|My Page|</title>"], ['<title/<b>My</b> Page/', "<title>|<error message='bare active characters'><b>My<</error>|</title>|b> Page/"], ['<title//', '<title>|</title>'], ['<title/>', '<title/>'], ['<title/My Page/', '<title>|My Page|</title>'], ['<title#c1.x/My Page/', '<title>|My Page|</title>'], ['\\<title/>', '&lt;title/>'], ['\\&amp;', '&amp;amp;'], ['foo\\bar', 'foobar'], ['\\abc', 'abc'], ['foo\\\\bar', 'foo\\bar'], ['first\\\nsecond', 'firstsecond'], ['xxx&amp;xxx', 'xxx|(NCR:&amp;)|xxx']];
+//.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
