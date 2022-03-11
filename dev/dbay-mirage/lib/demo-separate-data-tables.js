@@ -348,7 +348,7 @@ select name from v1 where type in ( 'table', 'view' ) order by nr;`);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.demo_revover_original_text = function(cfg) {
+  this.demo_recover_original_text = function(cfg) {
     var DBay, Mrg, db, dsk, mrg, path, prefix;
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage'));
@@ -404,7 +404,7 @@ select name from v1 where type in ( 'table', 'view' ) order by nr;`);
       // @demo_datamill()
       // @demo_paragraphs_etc()
       // @demo_html_parsing()
-      return this.demo_revover_original_text();
+      return this.demo_recover_original_text();
     })();
   }
 
