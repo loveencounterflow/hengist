@@ -513,13 +513,42 @@ X                         = require '../../../lib/helpers'
 #   info [ db._statements[ sql ].iterate()..., ]
 #   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY `db.as_object()`" ] = ( T, done ) ->
+  SQL                       = String.raw
+  # T?.halt_on_error()
+  { DBay }          = require H.dbay_path
+  db                = new DBay()
+  #.........................................................................................................
+  db ->
+    db SQL"""
+      drop table if exists integers;
+      create table integers (
+        value   integer not null primary key,
+        name    text    not null,
+        is_even boolean not null );"""
+    insert_into_integers = db.prepare_insert { into: 'integers', }
+    db insert_into_integers, { value: 1, name: 'one',   is_even: 0, }
+    db insert_into_integers, { value: 2, name: 'two',   is_even: 1, }
+    db insert_into_integers, { value: 3, name: 'three', is_even: 0, }
+    db insert_into_integers, { value: 4, name: 'four',  is_even: 1, }
+  #.........................................................................................................
+  X.tabulate 'integers', db SQL"select * from integers;"
+  result = db.as_object 'name', SQL"select * from integers;"
+  T?.eq result, {
+    one: { value: 1, is_even: 0 },
+    two: { value: 2, is_even: 1 },
+    three: { value: 3, is_even: 0 },
+    four: { value: 4, is_even: 1 } }
+  #.........................................................................................................
+  done?()
 
 
 ############################################################################################################
 if require.main is module then do =>
   # test @
   # test @[ "DBAY SQL tag function" ]
-  @[ "DBAY `execute_file()`" ]()
+  test @[ "DBAY `db.as_object()`" ]
   # @[ "DBAY prepared statement allowed in `db.do()`" ]()
   # test @[ "DBAY create DB, insert, query values 1" ]
   # test @[ "DBAY db as callable" ]
