@@ -47,31 +47,10 @@ H                         = require '../../../lib/helpers'
   mrg.append_text { dsk, trk: 1, text: """<div id=c1 x="Q"></div>""", }
   mrg.append_text { dsk, trk: 1, text: '', }
   mrg.append_text { dsk, trk: 1, text: """<div id=c2 x="Q">Some Text</div>""", }
-  H.tabulate "#{prefix}_rwnmirror",                   db SQL"select * from #{prefix}_rwnmirror;"
-  H.tabulate "#{prefix}_parlnrs0",                    db SQL"select * from #{prefix}_parlnrs0;"
-  H.tabulate "#{prefix}_parlnrs",                     db SQL"select * from #{prefix}_parlnrs;"
-  H.tabulate "#{prefix}_pars0",                       db SQL"select * from #{prefix}_pars0;"
-  H.tabulate "#{prefix}_pars",                        db SQL"select * from #{prefix}_pars;"
   H.tabulate "#{prefix}_mirror",                      db SQL"select * from #{prefix}_mirror;"
   H.tabulate "#{prefix}_raw_mirror",                  db SQL"select * from #{prefix}_raw_mirror;"
-  H.tabulate "#{prefix}_parmirror",                   db SQL"select * from #{prefix}_parmirror;"
-  # H.tabulate "#{prefix}_next_free_oln",               db SQL"select * from #{prefix}_next_free_oln;"
-  # H.tabulate "#{prefix}_datasources",                 db SQL"select * from #{prefix}_datasources;"
-
-  # mrg.html.parse_dsk { dsk, }
-  # H.tabulate "#{prefix}_mirror",              db SQL"select * from #{prefix}_mirror;"
-  # H.tabulate "#{prefix}_html_mirror",         db SQL"select * from #{prefix}_html_mirror;"
-  # H.tabulate "#{prefix}_html_tags_and_html",  db SQL"select * from #{prefix}_html_tags_and_html;"
-  # result = db.all_first_values SQL"""
-  #   select
-  #       v
-  #     from #{prefix}_html_mirror as m
-  #     join #{prefix}_html_atrs as a using ( atrid )
-  #     where true
-  #       and ( m.typ = '<' )
-  #       and ( m.tag = 'title' )
-  #       and ( a.k   = 'x' )
-  #     order by m.dsk, m.oln, m.trk, m.pce;"""
+  H.tabulate "#{prefix}_paragraphs",                  db SQL"select * from #{prefix}_paragraphs;"
+  H.tabulate "_#{prefix}_ws_linecounts",              db SQL"select * from _#{prefix}_ws_linecounts;"
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -297,11 +276,11 @@ H                         = require '../../../lib/helpers'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
+  @[ "Mirage HTML: Basic functionality" ]()
+  # @[ "Mirage HTML: quotes in attribute values" ]()
   # test @[ "altering mirrored source lines causes error" ]
   # @[ "altering mirrored source lines causes error" ]()
-  # @[ "Mirage HTML: quotes in attribute values" ]()
-  # @[ "Mirage HTML: Basic functionality" ]()
   # test @[ "Mirage HTML: tag syntax variants" ]
   # @[ "Mirage HTML: XNCR parsing 1" ]()
   # test @[ "Mirage HTML: XNCR parsing 1" ]
