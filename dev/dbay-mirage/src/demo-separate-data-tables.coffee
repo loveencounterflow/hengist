@@ -170,8 +170,8 @@ show_query_plan = ->
   db.create_stdlib()
   # dsk       = 'demo'
   # mrg.register_dsk { dsk, url: 'live:', }
-  dsk       = 'twcm'; path = 'dbay-rustybuzz/htmlish-tags.html'
-  # dsk       = 'ne'; path = 'dbay-rustybuzz/no-errors.html'
+  # dsk       = 'twcm'; path = 'dbay-rustybuzz/htmlish-tags.html'
+  dsk       = 'ne'; path = 'dbay-rustybuzz/no-errors.html'
   # dsk       = 'ne'; path = 'list-of-egyptian-hieroglyphs.html'
   # dsk       = 'pre'; path = 'python-regexes.html'
   path      = PATH.resolve PATH.join __dirname, '../../../assets', path
@@ -209,6 +209,44 @@ show_query_plan = ->
   urge '^3243^', "DB file at #{db.cfg.path}"
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@demo_recover_original_text = ( cfg ) ->
+  { DBay }        = require '../../../apps/dbay'
+  { Mrg }         = require '../../../apps/dbay-mirage'
+  prefix          = 'mrg'
+  path            = PATH.join DBay.C.autolocation, 'demo-html-parsing.sqlite'
+  db              = new DBay { path, recreate: true, }
+  mrg             = new Mrg { db, prefix, }
+  db.create_stdlib()
+  #.........................................................................................................
+  dsk             = 'lb'; path = 'dbay-rustybuzz/literal-blocks.html'
+  # dsk       = 'ne'; path = 'list-of-egyptian-hieroglyphs.html'
+  # dsk       = 'pre'; path = 'python-regexes.html'
+  path            = PATH.resolve PATH.join __dirname, '../../../assets', path
+  db.setv 'dsk', dsk
+  db.setv 'trk', 1
+  time 'register_dsk',        => mrg.register_dsk       { dsk, path, }
+  time 'refresh_datasource',  => mrg.refresh_datasource { dsk, }
+  time 'html.parse_dsk',      => mrg.html.parse_dsk     { dsk, }
+  #.........................................................................................................
+  H.tabulate "tags",         db SQL"""
+      select
+          *
+        from #{prefix}_html_tags
+        where ( syntax != 'html' ) or ( is_empty );"""
+  # H.tabulate "#{prefix}_datasources",         db SQL"select * from #{prefix}_datasources;"
+  # H.tabulate "std_variables()",               db SQL"select * from std_variables();"
+  # H.tabulate "#{prefix}_html_atrs",           db SQL"select * from #{prefix}_html_atrs;"
+  H.tabulate "#{prefix}_html_syntaxes",       db SQL"select * from #{prefix}_html_syntaxes;"
+  H.tabulate "#{prefix}_html_tags_and_html",  db SQL"select * from #{prefix}_html_tags_and_html;"
+  H.tabulate "#{prefix}_html_mirror",         db SQL"select * from #{prefix}_html_mirror;"
+  # H.tabulate "#{prefix}_raw_mirror",          db SQL"select * from #{prefix}_raw_mirror;"
+  # H.tabulate "#{prefix}_html_tags",           db SQL"select * from #{prefix}_html_tags;"
+  H.banner "render_dsk";                      echo mrg.html.render_dsk { dsk, }
+  urge '^3243^', "DB file at #{db.cfg.path}"
+  #.........................................................................................................
+  return null
+
 
 
 ############################################################################################################
@@ -216,5 +254,6 @@ if require.main is module then do =>
   # @demo_html_generation()
   # @demo_datamill()
   # @demo_paragraphs_etc()
-  @demo_html_parsing()
+  # @demo_html_parsing()
+  @demo_recover_original_text()
 
