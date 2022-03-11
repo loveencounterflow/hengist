@@ -73,14 +73,10 @@
       trk: 1,
       text: `<div id=c2 x="Q">Some Text</div>`
     });
-    H.tabulate(`${prefix}_rwnmirror`, db(SQL`select * from ${prefix}_rwnmirror;`));
-    H.tabulate(`${prefix}_parlnrs0`, db(SQL`select * from ${prefix}_parlnrs0;`));
-    H.tabulate(`${prefix}_parlnrs`, db(SQL`select * from ${prefix}_parlnrs;`));
-    H.tabulate(`${prefix}_pars0`, db(SQL`select * from ${prefix}_pars0;`));
-    H.tabulate(`${prefix}_pars`, db(SQL`select * from ${prefix}_pars;`));
     H.tabulate(`${prefix}_mirror`, db(SQL`select * from ${prefix}_mirror;`));
     H.tabulate(`${prefix}_raw_mirror`, db(SQL`select * from ${prefix}_raw_mirror;`));
-    H.tabulate(`${prefix}_parmirror`, db(SQL`select * from ${prefix}_parmirror;`));
+    H.tabulate(`${prefix}_paragraphs`, db(SQL`select * from ${prefix}_paragraphs;`));
+    H.tabulate(`_${prefix}_ws_linecounts`, db(SQL`select * from _${prefix}_ws_linecounts;`));
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -352,14 +348,14 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      return this["Mirage HTML: Basic functionality"]();
     })();
   }
 
-  // test @[ "altering mirrored source lines causes error" ]
+  // @[ "Mirage HTML: quotes in attribute values" ]()
+// test @[ "altering mirrored source lines causes error" ]
 // @[ "altering mirrored source lines causes error" ]()
-// @[ "Mirage HTML: quotes in attribute values" ]()
-// @[ "Mirage HTML: Basic functionality" ]()
 // test @[ "Mirage HTML: tag syntax variants" ]
 // @[ "Mirage HTML: XNCR parsing 1" ]()
 // test @[ "Mirage HTML: XNCR parsing 1" ]

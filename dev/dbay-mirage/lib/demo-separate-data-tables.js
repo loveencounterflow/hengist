@@ -295,9 +295,9 @@
     db.create_stdlib();
     // dsk       = 'demo'
     // mrg.register_dsk { dsk, url: 'live:', }
-    dsk = 'twcm';
-    path = 'dbay-rustybuzz/htmlish-tags.html';
-    // dsk       = 'ne'; path = 'dbay-rustybuzz/no-errors.html'
+    // dsk       = 'twcm'; path = 'dbay-rustybuzz/htmlish-tags.html'
+    dsk = 'ne';
+    path = 'dbay-rustybuzz/no-errors.html';
     // dsk       = 'ne'; path = 'list-of-egyptian-hieroglyphs.html'
     // dsk       = 'pre'; path = 'python-regexes.html'
     path = PATH.resolve(PATH.join(__dirname, '../../../assets', path));
@@ -347,13 +347,64 @@ select name from v1 where type in ( 'table', 'view' ) order by nr;`);
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_revover_original_text = function(cfg) {
+    var DBay, Mrg, db, dsk, mrg, path, prefix;
+    ({DBay} = require('../../../apps/dbay'));
+    ({Mrg} = require('../../../apps/dbay-mirage'));
+    prefix = 'mrg';
+    path = PATH.join(DBay.C.autolocation, 'demo-html-parsing.sqlite');
+    db = new DBay({
+      path,
+      recreate: true
+    });
+    mrg = new Mrg({db, prefix});
+    db.create_stdlib();
+    //.........................................................................................................
+    dsk = 'lb';
+    path = 'dbay-rustybuzz/literal-blocks.html';
+    // dsk       = 'ne'; path = 'list-of-egyptian-hieroglyphs.html'
+    // dsk       = 'pre'; path = 'python-regexes.html'
+    path = PATH.resolve(PATH.join(__dirname, '../../../assets', path));
+    db.setv('dsk', dsk);
+    db.setv('trk', 1);
+    time('register_dsk', () => {
+      return mrg.register_dsk({dsk, path});
+    });
+    time('refresh_datasource', () => {
+      return mrg.refresh_datasource({dsk});
+    });
+    time('html.parse_dsk', () => {
+      return mrg.html.parse_dsk({dsk});
+    });
+    //.........................................................................................................
+    H.tabulate("tags", db(SQL`select
+    *
+  from ${prefix}_html_tags
+  where ( syntax != 'html' ) or ( is_empty );`));
+    // H.tabulate "#{prefix}_datasources",         db SQL"select * from #{prefix}_datasources;"
+    // H.tabulate "std_variables()",               db SQL"select * from std_variables();"
+    // H.tabulate "#{prefix}_html_atrs",           db SQL"select * from #{prefix}_html_atrs;"
+    H.tabulate(`${prefix}_html_syntaxes`, db(SQL`select * from ${prefix}_html_syntaxes;`));
+    H.tabulate(`${prefix}_html_tags_and_html`, db(SQL`select * from ${prefix}_html_tags_and_html;`));
+    H.tabulate(`${prefix}_html_mirror`, db(SQL`select * from ${prefix}_html_mirror;`));
+    // H.tabulate "#{prefix}_raw_mirror",          db SQL"select * from #{prefix}_raw_mirror;"
+    // H.tabulate "#{prefix}_html_tags",           db SQL"select * from #{prefix}_html_tags;"
+    H.banner("render_dsk");
+    echo(mrg.html.render_dsk({dsk}));
+    urge('^3243^', `DB file at ${db.cfg.path}`);
+    //.........................................................................................................
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @demo_html_generation()
       // @demo_datamill()
       // @demo_paragraphs_etc()
-      return this.demo_html_parsing();
+      // @demo_html_parsing()
+      return this.demo_revover_original_text();
     })();
   }
 
