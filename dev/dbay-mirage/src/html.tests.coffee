@@ -40,6 +40,7 @@ H                         = require '../../../lib/helpers'
   probes_and_matchers = []
   dsk       = 'b'
   mrg.register_dsk { dsk, url: 'live:', }
+  help '^307^', "using DB at #{db.cfg.path}"
   # debug '^435^1, mrg.append_text { dsk, trk: 1, text: """<title id=c1 x="Q"></title>""", }
   # debug '^435^2, mrg.append_text { dsk, trk: 1, text: """<title id=c2 x='Q'></title>""", }
   # debug '^435^3, mrg.append_text { dsk, trk: 1, text: """<title id=c3 x='"Q"'></title>""", }
@@ -79,11 +80,18 @@ H                         = require '../../../lib/helpers'
   mrg.append_text { dsk, trk: 1, text, }
   mrg.html.parse_dsk { dsk, }
   H.tabulate "#{prefix}_mirror",              db SQL"select * from #{prefix}_mirror;"
+  H.tabulate "#{prefix}_raw_mirror",          db SQL"select * from #{prefix}_raw_mirror;"
+  H.tabulate "#{prefix}_paragraphs",          db SQL"select * from #{prefix}_paragraphs;"
+  H.tabulate "_#{prefix}_ws_linecounts",      db SQL"select * from _#{prefix}_ws_linecounts;"
+  # H.tabulate "_#{prefix}_ws_linecounts",      db SQL"""select
+  #     *
+  #   from #{prefix}_raw_mirror as raw_mirror
+  #   join #{prefix}_mirror     as mirror using ( dsk, oln, trk, pce );"""
   H.tabulate "#{prefix}_html_mirror",         db SQL"select * from #{prefix}_html_mirror;"
   H.tabulate "#{prefix}_html_tags_and_html",  db SQL"select * from #{prefix}_html_tags_and_html;"
-  result = db.all_first_values SQL"""
+  result = db.all_rows SQL"""
     select
-        v
+        oln, v
       from #{prefix}_html_mirror as m
       join #{prefix}_html_atrs as a using ( atrid )
       where true
@@ -91,7 +99,12 @@ H                         = require '../../../lib/helpers'
         and ( m.tag = 'title' )
         and ( a.k   = 'x' )
       order by m.dsk, m.oln, m.trk, m.pce;"""
-  T?.eq result, [ 'Q', 'Q', '"Q"', "'Q'" ]
+  T?.eq result, [
+    { oln: 1, v: "Q", }
+    { oln: 3, v: 'Q', }
+    { oln: 5, v: '"Q"', }
+    { oln: 7, v: "'Q'", }
+    ]
   # for [ probe, matcher, error, ] in probes_and_matchers
   #   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
   #     url    = mrg._url_from_path probe
@@ -189,7 +202,7 @@ H                         = require '../../../lib/helpers'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "Mirage HTML: XNCR parsing 1" ] = ( T, done ) ->
-  { Htmlish } = require '../../../apps/dbay-mirage/lib/html'
+  { Htmlish } = require '../../../apps/dbay-mirage/lib/htmlish-parser'
   # { DBay  } = require '../../../apps/dbay'
   # { Mrg   } = require '../../../apps/dbay-mirage'
   # { HDML  } = require '../../../apps/hdml'
@@ -277,8 +290,8 @@ H                         = require '../../../lib/helpers'
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  @[ "Mirage HTML: Basic functionality" ]()
-  # @[ "Mirage HTML: quotes in attribute values" ]()
+  # @[ "Mirage HTML: Basic functionality" ]()
+  test @[ "Mirage HTML: quotes in attribute values" ]
   # test @[ "altering mirrored source lines causes error" ]
   # @[ "altering mirrored source lines causes error" ]()
   # test @[ "Mirage HTML: tag syntax variants" ]
