@@ -397,6 +397,71 @@ select name from v1 where type in ( 'table', 'view' ) order by nr;`);
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_parse_markdownish = function(cfg) {
+    var DBay, Mrg, db, dsk, mrg, path, prefix;
+    ({DBay} = require('../../../apps/dbay'));
+    ({Mrg} = require('../../../apps/dbay-mirage'));
+    prefix = 'mrg';
+    path = PATH.join(DBay.C.autolocation, 'demo-html-parsing.sqlite');
+    db = new DBay({
+      path,
+      recreate: true
+    });
+    mrg = new Mrg({db, prefix});
+    db.create_stdlib();
+    //.........................................................................................................
+    dsk = 'mk';
+    path = 'dbay-rustybuzz/markdownish-1.md';
+    // dsk       = 'ne'; path = 'list-of-egyptian-hieroglyphs.html'
+    // dsk       = 'pre'; path = 'python-regexes.html'
+    path = PATH.resolve(PATH.join(__dirname, '../../../assets', path));
+    db.setv('dsk', dsk);
+    db.setv('trk', 1);
+    time('register_dsk', () => {
+      return mrg.register_dsk({dsk, path});
+    });
+    time('refresh_datasource', () => {
+      return mrg.refresh_datasource({dsk});
+    });
+    time('html.parse_dsk', () => {
+      return mrg.html.parse_dsk({dsk});
+    });
+    //.........................................................................................................
+    H.tabulate("tags", db(SQL`select
+    *
+  from ${prefix}_html_tags      as tags
+  join ${prefix}_html_syntaxes  as syntaxes using ( syntax )
+  where ( tags.syntax != 'html' ) or ( tags.is_empty );`));
+    // H.tabulate "#{prefix}_datasources",         db SQL"select * from #{prefix}_datasources;"
+    // H.tabulate "std_variables()",               db SQL"select * from std_variables();"
+    // H.tabulate "#{prefix}_html_atrs",           db SQL"select * from #{prefix}_html_atrs;"
+    H.tabulate(`${prefix}_html_swappers`, db(SQL`select * from ${prefix}_html_swappers;`));
+    H.tabulate(`${prefix}_html_swapper_matches`, db(SQL`select
+    *
+  from ${prefix}_html_swapper_matches
+  order by dsk, oln, trk, pce;`));
+    // H.tabulate "#{prefix}_html_swapper_matches",  db SQL"""
+    //   select
+    //       *
+    //     from #{prefix}_html_swapper_matches as r1
+    //     join #{prefix}_html_swapper_matches as r2
+    //     order by dsk, oln, trk, pce;"""
+    H.tabulate(`${prefix}_raw_mirror`, db(SQL`select
+    *
+  from ${prefix}_raw_mirror
+  left join ${prefix}_html_swapper_matches using ( dsk, oln, trk, pce )
+  order by dsk, oln, trk, pce;`));
+    // H.tabulate "#{prefix}_html_tags_and_html",  db SQL"select * from #{prefix}_html_tags_and_html;"
+    // H.tabulate "#{prefix}_html_mirror",         db SQL"select * from #{prefix}_html_mirror;"
+    // H.tabulate "#{prefix}_raw_mirror",          db SQL"select * from #{prefix}_raw_mirror;"
+    // H.tabulate "#{prefix}_html_tags",           db SQL"select * from #{prefix}_html_tags;"
+    // H.banner "render_dsk";                      echo mrg.html.render_dsk { dsk, }
+    urge('^3243^', `DB file at ${db.cfg.path}`);
+    //.........................................................................................................
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -404,7 +469,8 @@ select name from v1 where type in ( 'table', 'view' ) order by nr;`);
       // @demo_datamill()
       // @demo_paragraphs_etc()
       // @demo_html_parsing()
-      return this.demo_recover_original_text();
+      // @demo_recover_original_text()
+      return this.demo_parse_markdownish();
     })();
   }
 
