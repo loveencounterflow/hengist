@@ -276,23 +276,23 @@ show_query_plan = ->
   # H.tabulate "#{prefix}_datasources",         db SQL"select * from #{prefix}_datasources;"
   # H.tabulate "std_variables()",               db SQL"select * from std_variables();"
   # H.tabulate "#{prefix}_html_atrs",           db SQL"select * from #{prefix}_html_atrs;"
-  H.tabulate "#{prefix}_html_swappers",         db SQL"select * from #{prefix}_html_swappers;"
-  H.tabulate "#{prefix}_html_swapper_matches",  db SQL"""
+  H.tabulate "#{prefix}_html_fences",         db SQL"select * from #{prefix}_html_fences;"
+  H.tabulate "#{prefix}_html_fence_matches",  db SQL"""
     select
         *
-      from #{prefix}_html_swapper_matches
+      from #{prefix}_html_fence_matches
       order by dsk, oln, trk, pce;"""
-  # H.tabulate "#{prefix}_html_swapper_matches",  db SQL"""
+  # H.tabulate "#{prefix}_html_fence_matches",  db SQL"""
   #   select
   #       *
-  #     from #{prefix}_html_swapper_matches as r1
-  #     join #{prefix}_html_swapper_matches as r2
+  #     from #{prefix}_html_fence_matches as r1
+  #     join #{prefix}_html_fence_matches as r2
   #     order by dsk, oln, trk, pce;"""
   H.tabulate "#{prefix}_raw_mirror",  db SQL"""
     select
         *
       from #{prefix}_raw_mirror
-      left join #{prefix}_html_swapper_matches using ( dsk, oln, trk, pce )
+      left join #{prefix}_html_fence_matches using ( dsk, oln, trk, pce )
       order by dsk, oln, trk, pce;"""
   # H.tabulate "#{prefix}_html_tags_and_html",  db SQL"select * from #{prefix}_html_tags_and_html;"
   # H.tabulate "#{prefix}_html_mirror",         db SQL"select * from #{prefix}_html_mirror;"
