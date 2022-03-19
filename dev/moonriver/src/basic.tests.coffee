@@ -44,33 +44,59 @@ H                         = require '../../../lib/helpers'
   #.........................................................................................................
   do =>
     collector = []
-    pipeline  = [
-      [ 1, 2, 3, 5, ]
-      ( d, send ) -> send d * 2
-      ( d, send ) -> send d #; urge d
-      ( d, send ) -> collector.push d #; help collector
-      ]
-    mr = new Moonriver pipeline
+    mr        = new Moonriver()
+    mr.push [ 1, 2, 3, 5, ]
+    mr.push ( d, send ) -> send d * 2
+    mr.push ( d, send ) -> send d #; urge d
+    mr.push ( d, send ) -> collector.push d #; help collector
     mr.drive()
     T?.eq collector, [ 2, 4, 6, 10, ]
   #.........................................................................................................
   do =>
     collector = []
-    pipeline  = [
-      [ 'a', 'b', ]
-      ( d, send ) -> urge '^598^', d; send d
-      ( d, send ) ->
-        send d
-        if send.call_count is 1
-          send e for e from [ 1, 2, 3, 5, ].values()
-        return null
-      ( d, send ) -> send if isa.float d then d * 2 else d
-      ( d       ) -> urge d
-      ( d, send ) -> collector.push d #; help collector
-      ]
-    mr = new Moonriver pipeline
+    mr        = new Moonriver()
+    mr.push [ 'a', 'b', ]
+    mr.push ( d, send ) -> urge '^598^', d; send d
+    mr.push ( d, send ) ->
+      send d
+      if @call_count is 1
+        send e for e from [ 1, 2, 3, 5, ].values()
+      return null
+    mr.push ( d, send ) -> send if isa.float d then d * 2 else d
+    mr.push ( d       ) -> urge d
+    mr.push ( d, send ) -> collector.push d #; help collector
     mr.drive()
     T?.eq collector, [ 'a', 2, 4, 6, 10, 'b' ]
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "modifiers" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Moonriver   }   = require '../../../apps/moonriver'
+  { $           }   = Moonriver
+  first             = Symbol 'first'
+  last              = Symbol 'last'
+  once_before_first = true
+  once_after_last   = true
+  collector         = []
+  protocol          = []
+  mr                = new Moonriver { protocol, }
+  #.........................................................................................................
+  mr.push [ 1, 2, 3, 5, ]
+  mr.push                             ( d, send ) -> send d * 2
+  mr.push $ { first,              },  ( d, send ) -> send d
+  mr.push $ { once_before_first,  },  ( d       ) -> debug '^987^', 'once_before_first'
+  # mr.push $ { once_after_last,    },  ( d       ) -> debug '^987^', 'once_after_last'
+  mr.push $ { last,               },  ( d, send ) -> send d
+  mr.push                             ( d       ) -> urge '^309^', d
+  mr.push                             ( d, send ) -> collector.push d #; help collector
+  mr.drive()
+  T?.eq collector, [ first, 2, 4, 6, 10, last, ]
+  # debug '^453^', d for d in protocol
+  # console.table protocol
+  H.tabulate 'protocol', protocol
   #.........................................................................................................
   done?()
   return null
@@ -132,74 +158,77 @@ H                         = require '../../../lib/helpers'
     ]
   #.........................................................................................................
   do =>
-    first       = Symbol 'first'
-    last        = Symbol 'last'
-    once_before = Symbol.for 'once_before'
-    once_after  = Symbol.for 'once_after'
-    collector   = []
-    counts      =
-      once_before:  0
-      first:        0
-      last:         0
-      once_after:   0
+    first             = Symbol 'first'
+    last              = Symbol 'last'
+    once_before_first = true
+    once_after_last   = true
+    collector         = []
+    counts            =
+      once_before_first:  0
+      first:              0
+      last:               0
+      once_after_last:    0
+    mr                = new Moonriver()
     #.......................................................................................................
-    pipeline  = [
-      #.....................................................................................................
-      source
-      #.....................................................................................................
-      $ { once_before, }, on_first = ( d ) ->
-        counts.once_before++
-      #.....................................................................................................
-      $ { first, }, initialize_stack = ( d ) ->
-        counts.first++
-        if d is first
-          @user.stack = []
-          urge '^3487^', 'initialize_stack()', @.user
-        return null
-      #.....................................................................................................
-      push_opening_to_stack = ( d, send ) ->
-        return send d if  not isa.text d
-        return send d if  not d.startsWith '<'
-        return send d if      d.startsWith '</'
-        left_d  = d.replace /^<([^\s>]+).*$/, '$1'
-        # debug '^039850^', { left_d, }
-        @user.stack.push left_d
-        send d
-      #.....................................................................................................
-      pop_closing_from_stack = ( d, send ) ->
-        return send d if  not isa.text d
-        return send d if  not d.startsWith '</'
-        # debug '^4564^', 'pop_closing_from_stack', @user.stack, d
-        if @user.stack.length < 1
-          send "error: extraneous closing tag #{rpr d}"
-          return send d
-        left_d  = @user.stack.pop()
-        right_d = d.replace /^<\/([^\s>]+).*$/, '$1'
-        # debug '^039850^', { left_d, right_d, }
-        unless left_d is right_d
-          send "error: expected closing tag for <#{rpr left_d}>, got #{rpr d}"
-          return send d
-        send d
-      #.....................................................................................................
-      $ { once_after, }, pop_remaining_from_stack = ( d ) ->
-        debug '^309-1^', d
-        # counts.last++
-        # send d
-      #.....................................................................................................
-      collect = ( d ) ->
-        debug '^309-1^', d
-        collector.push d
-      #.....................................................................................................
-      $ { once_after, }, cleanup = ( d ) ->
-        debug '^309-2^', d
-        counts.once_after++
-      #.....................................................................................................
-      $ { last, }, cleanup = ( d ) ->
-        debug '^309-2^', d
-        counts.last++
-      #.....................................................................................................
-      ]
-    mr = new Moonriver pipeline
+    mr.push source
+    #.......................................................................................................
+    mr.push $ { once_before_first, }, on_first = ( d ) ->
+      debug '^373^', 'once_before_first'
+      debug '^336^', @
+      debug '^336^', type_of @
+      debug '^336^', ( k for k of @ )
+      counts.once_before_first++
+    #.......................................................................................................
+    mr.push $ { first, }, initialize_stack = ( d ) ->
+      debug '^487^', @call_count
+      debug '^487^', d
+      counts.first++
+      if d is first
+        mr.user.stack = []
+        urge '^3487^', 'initialize_stack()', @.user
+      return null
+    #.......................................................................................................
+    mr.push push_opening_to_stack = ( d, send ) ->
+      return send d if  not isa.text d
+      return send d if  not d.startsWith '<'
+      return send d if      d.startsWith '</'
+      left_d  = d.replace /^<([^\s>]+).*$/, '$1'
+      # debug '^039850^', { left_d, }
+      mr.user.stack.push left_d
+      send d
+    #.......................................................................................................
+    mr.push pop_closing_from_stack = ( d, send ) ->
+      return send d if  not isa.text d
+      return send d if  not d.startsWith '</'
+      # debug '^4564^', 'pop_closing_from_stack', mr.user.stack, d
+      if mr.user.stack.length < 1
+        send "error: extraneous closing tag #{rpr d}"
+        return send d
+      left_d  = mr.user.stack.pop()
+      right_d = d.replace /^<\/([^\s>]+).*$/, '$1'
+      # debug '^039850^', { left_d, right_d, }
+      unless left_d is right_d
+        send "error: expected closing tag for <#{rpr left_d}>, got #{rpr d}"
+        return send d
+      send d
+    #.......................................................................................................
+    mr.push $ { once_after_last, }, pop_remaining_from_stack = ( d ) ->
+      debug '^309-1^', d
+      # counts.last++
+      # send d
+    #.......................................................................................................
+    mr.push collect = ( d ) ->
+      debug '^309-1^', d
+      collector.push d
+    #.......................................................................................................
+    mr.push $ { once_after_last, }, cleanup = ( d ) ->
+      debug '^309-2^', d
+      counts.once_after_last++
+    #.......................................................................................................
+    mr.push $ { last, }, cleanup = ( d ) ->
+      debug '^309-2^', d
+      counts.last++
+    #.......................................................................................................
     mr.drive()
     debug '^558^', mr.user
     echo rpr d for d in collector
@@ -219,10 +248,10 @@ H                         = require '../../../lib/helpers'
       '</html>'
       ]
     T?.eq counts, {
-      once_before:  1
+      once_before_first:  1
       first:        source.length + 1
       last:         source.length + 3 + 1
-      once_after:   1 }
+      once_after_last:   1 }
   #.........................................................................................................
   done?()
   return null
@@ -266,18 +295,18 @@ H                         = require '../../../lib/helpers'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "modifier once_after" ] = ( T, done ) ->
+@[ "modifier once_after_last" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Moonriver } = require '../../../apps/moonriver'
   { $ }         = Moonriver
-  once_after    = Symbol 'once_after'
+  once_after_last    = Symbol 'once_after_last'
   collector     = []
   #.......................................................................................................
   pipeline      = [
     [ 'first', 'second', 'third', ]
     #.....................................................................................................
-    $ { once_after, }, finalize = ( d ) ->
-      if d is once_after
+    $ { once_after_last, }, finalize = ( d ) ->
+      if d is once_after_last
         collector.push collector.length
       return null
     #.....................................................................................................
@@ -290,7 +319,7 @@ H                         = require '../../../lib/helpers'
   T?.eq segment.is_sender,                    false
   T?.eq segment.is_listener,                  false
   T?.eq segment.modifications.do_once_after,  true
-  T?.eq segment.modifications.once_after,     once_after
+  T?.eq segment.modifications.once_after_last,     once_after_last
   #.........................................................................................................
   mr.drive()
   T?.eq collector, [ 'first', 'second', 'third', 3, ]
@@ -324,27 +353,27 @@ H                         = require '../../../lib/helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "called even when pipeline empty: once_before, once_after" ] = ( T, done ) ->
+@[ "called even when pipeline empty: once_before_first, once_after_last" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Moonriver } = require '../../../apps/moonriver'
   { $ }         = Moonriver
   collector     = []
-  once_before   = Symbol.for 'once_before'
-  once_after    = Symbol.for 'once_after'
+  once_before_first   = Symbol.for 'once_before_first'
+  once_after_last    = Symbol.for 'once_after_last'
   counts        =
-    once_before:  0
-    once_after:   0
+    once_before_first:  0
+    once_after_last:   0
   #.......................................................................................................
   pipeline      = [
     []
     #.....................................................................................................
-    $ { once_before, }, on_once_before = ( d ) ->
-      counts.once_before++
+    $ { once_before_first, }, on_once_before = ( d ) ->
+      counts.once_before_first++
     #.....................................................................................................
     show_1 = ( d, send ) -> urge '^498-1^', rpr d; send d
     #.....................................................................................................
-    $ { once_after, }, on_once_after = ( d ) ->
-      counts.once_after++
+    $ { once_after_last, }, on_once_after = ( d ) ->
+      counts.once_after_last++
     #.....................................................................................................
     collect = ( d, send ) ->
       collector.push d
@@ -355,42 +384,42 @@ H                         = require '../../../lib/helpers'
     ]
   mr = new Moonriver pipeline
   mr.drive()
-  T?.eq counts, { once_before: 1, once_after: 1 }
+  T?.eq counts, { once_before_first: 1, once_after_last: 1 }
   T?.eq collector, []
   #.........................................................................................................
   done?()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "transforms with once_after must not be senders" ] = ( T, done ) ->
+@[ "transforms with once_after_last must not be senders" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Moonriver } = require '../../../apps/moonriver'
   { $ }         = Moonriver
-  once_after    = Symbol.for 'once_after'
+  once_after_last    = Symbol.for 'once_after_last'
   #.......................................................................................................
   pipeline      = [
-    $ { once_after, }, on_once_after = ( d, send ) ->
+    $ { once_after_last, }, on_once_after = ( d, send ) ->
     ]
   #.........................................................................................................
   error = null
   try mr = new Moonriver pipeline catch error
     # throw error
-    T?.ok /transforms with modifier once_after cannot be senders/.test error.message
+    T?.ok /transforms with modifier once_after_last cannot be senders/.test error.message
   T?.ok error?
   #.........................................................................................................
   done?()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "using send() in a once_before transform" ] = ( T, done ) ->
+@[ "using send() in a once_before_first transform" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Moonriver } = require '../../../apps/moonriver'
   { $ }         = Moonriver
-  once_before   = [ 42, 43, 44, ]
+  once_before_first   = [ 42, 43, 44, ]
   collector     = []
   #.......................................................................................................
   pipeline      = [
-    $ { once_before, }, on_once_before = ( d, send ) ->
+    $ { once_before_first, }, on_once_before = ( d, send ) ->
       debug '^4532^', d
       send e for e in d
     show    = ( d ) -> urge '^4948^', d
@@ -429,7 +458,7 @@ H                         = require '../../../lib/helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "once_before, once_after transformers transparent to data" ] = ( T, done ) ->
+@[ "once_before_first, once_after_last transformers transparent to data" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Moonriver } = require '../../../apps/moonriver'
   { $ }         = Moonriver
@@ -443,9 +472,9 @@ H                         = require '../../../lib/helpers'
   pipeline      = [
     [ 'a', 'b', 'c', ]
     collect = ( d ) ->                                                          collectors.c1.push d
-    $ { once_before:  'bfr', }, on_once_before  = ( d ) -> debug '^453-1^', d;  collectors.c2.push d
+    $ { once_before_first:  'bfr', }, on_once_before  = ( d ) -> debug '^453-1^', d;  collectors.c2.push d
     collect = ( d ) ->                                                          collectors.c3.push d
-    $ { once_after:   'aft', }, on_once_after   = ( d ) -> debug '^453-2^', d;  collectors.c4.push d
+    $ { once_after_last:   'aft', }, on_once_after   = ( d ) -> debug '^453-2^', d;  collectors.c4.push d
     collect = ( d ) ->                                                          collectors.c5.push d
     show    = ( d ) -> urge '^4948^', d
     ]
@@ -469,23 +498,25 @@ H                         = require '../../../lib/helpers'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # @[ "send.call_count" ]()
   # @[ "appending data before closing" ]()
   # test @[ "appending data before closing" ]
-  # test @[ "using send() in a once_before transform" ]
-  # @[ "once_before, once_after transformers transparent to data" ]()
-  # test @[ "once_before, once_after transformers transparent to data" ]
+  # test @[ "using send() in a once_before_first transform" ]
+  # @[ "once_before_first, once_after_last transformers transparent to data" ]()
+  # test @[ "once_before_first, once_after_last transformers transparent to data" ]
+  @[ "modifiers" ]()
+  # test @[ "modifiers" ]
   # @[ "resettable state shared across transforms" ]()
   # test @[ "resettable state shared across transforms" ]
-  # @[ "modifier once_after" ]()
-  # test @[ "modifier once_after" ]
+  # @[ "modifier once_after_last" ]()
+  # test @[ "modifier once_after_last" ]
   # @[ "modifier last" ]()
   # test @[ "modifier last" ]
   # test @[ "modifier last" ]
-  # @[ "called even when pipeline empty: once_before, once_after" ]()
-  # test @[ "called even when pipeline empty: once_before, once_after" ]
-  # test @[ "transforms with once_after must not be senders" ]
+  # @[ "called even when pipeline empty: once_before_first, once_after_last" ]()
+  # test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
+  # test @[ "transforms with once_after_last must not be senders" ]
   # test @[ "exit symbol" ]
   # @[ "can access pipeline from within transform, get user area" ]()
   # test @[ "can access pipeline from within transform, get user area" ]
