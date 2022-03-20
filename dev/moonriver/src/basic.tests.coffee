@@ -107,7 +107,7 @@ H                         = require '../../../lib/helpers'
     # mr.push $ { once_after_last,    },  ( d       ) -> debug '^987^', 'once_after_last'
     mr.push $ { last,               },  ( d, send ) -> send d
     mr.push $ { once_before_first,  },  ( d       ) -> debug '^276^ once_before_first'; collector.push 'once_before_first'
-    mr.push $ { once_after_last,    },  ( d       ) -> debug '^276^ once_after_last';   collector.push 'once_after_last'  
+    mr.push $ { once_after_last,    },  ( d       ) -> debug '^276^ once_after_last';   collector.push 'once_after_last'
     mr.push                             ( d       ) -> urge '^309^', d
     mr.push                             ( d, send ) -> collector.push d #; help collector
     T?.eq mr.on_once_before_first.length, 1
@@ -525,10 +525,8 @@ if require.main is module then do =>
   # test @[ "using send() in a once_before_first transform" ]
   # @[ "once_before_first, once_after_last transformers transparent to data" ]()
   # test @[ "once_before_first, once_after_last transformers transparent to data" ]
-  @[ "modifiers" ]()
-  test @[ "modifiers" ]
-  # @[ "resettable state shared across transforms" ]()
-  # test @[ "resettable state shared across transforms" ]
+  # @[ "modifiers" ]()
+  # test @[ "modifiers" ]
   # @[ "modifier once_after_last" ]()
   # test @[ "modifier once_after_last" ]
   # @[ "modifier last" ]()
@@ -540,5 +538,8 @@ if require.main is module then do =>
   # test @[ "exit symbol" ]
   # @[ "can access pipeline from within transform, get user area" ]()
   # test @[ "can access pipeline from within transform, get user area" ]
-
+  # @[ "resettable state shared across transforms" ]()
+  # test @[ "resettable state shared across transforms" ]
+  @[ "modifier first does not leak into pipeline when used with observer" ]()
+  test @[ "modifier first does not leak into pipeline when used with observer" ]
 

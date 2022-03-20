@@ -399,6 +399,43 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["modifier first does not leak into pipeline when used with observer"] = function(T, done) {
+    var $, Moonriver, collector, first1, first2;
+    // T?.halt_on_error()
+    ({Moonriver} = require('../../../apps/moonriver'));
+    ({$} = Moonriver);
+    first1 = Symbol('first1');
+    first2 = Symbol('first2');
+    collector = [];
+    (() => {      //.......................................................................................................
+      var mr;
+      mr = new Moonriver();
+      mr.push(Array.from('abc'));
+      mr.push($({
+        first: first1
+      }, function(d) {
+        return debug('^765-1^', rpr(d));
+      }));
+      mr.push($({
+        first: first2
+      }, function(d, send) {
+        debug('^765-2^', rpr(d));
+        if (d !== first2) {
+          return send(d);
+        }
+      }));
+      mr.push(function(d) {
+        return collector.push(d);
+      });
+      //.....................................................................................................
+      mr.drive();
+      urge('^859^', collector);
+      return T != null ? T.eq(collector, Array.from('abc')) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["modifier last"] = function(T, done) {
     var $, Moonriver, collector, d, error, finalize, first, i, last, len, mr, pipeline, segment;
     // T?.halt_on_error()
@@ -834,24 +871,25 @@
       // test @[ "using send() in a once_before_first transform" ]
       // @[ "once_before_first, once_after_last transformers transparent to data" ]()
       // test @[ "once_before_first, once_after_last transformers transparent to data" ]
-      this["modifiers"]();
-      return test(this["modifiers"]);
+      // @[ "modifiers" ]()
+      // test @[ "modifiers" ]
+      // @[ "modifier once_after_last" ]()
+      // test @[ "modifier once_after_last" ]
+      // @[ "modifier last" ]()
+      // test @[ "modifier last" ]
+      // test @[ "modifier last" ]
+      // @[ "called even when pipeline empty: once_before_first, once_after_last" ]()
+      // test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
+      // test @[ "transforms with once_after_last must not be senders" ]
+      // test @[ "exit symbol" ]
+      // @[ "can access pipeline from within transform, get user area" ]()
+      // test @[ "can access pipeline from within transform, get user area" ]
+      // @[ "resettable state shared across transforms" ]()
+      // test @[ "resettable state shared across transforms" ]
+      this["modifier first does not leak into pipeline when used with observer"]();
+      return test(this["modifier first does not leak into pipeline when used with observer"]);
     })();
   }
-
-  // @[ "resettable state shared across transforms" ]()
-// test @[ "resettable state shared across transforms" ]
-// @[ "modifier once_after_last" ]()
-// test @[ "modifier once_after_last" ]
-// @[ "modifier last" ]()
-// test @[ "modifier last" ]
-// test @[ "modifier last" ]
-// @[ "called even when pipeline empty: once_before_first, once_after_last" ]()
-// test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
-// test @[ "transforms with once_after_last must not be senders" ]
-// test @[ "exit symbol" ]
-// @[ "can access pipeline from within transform, get user area" ]()
-// test @[ "can access pipeline from within transform, get user area" ]
 
 }).call(this);
 
