@@ -104,14 +104,17 @@ H                         = require '../../../lib/helpers'
     mr.push [ 1, 2, 3, 5, ]
     mr.push                             ( d, send ) -> send d * 2
     mr.push $ { first,              },  ( d, send ) -> send d
-    mr.push $ { once_before_first,  },  ( d       ) -> debug '^987^', 'once_before_first'
     # mr.push $ { once_after_last,    },  ( d       ) -> debug '^987^', 'once_after_last'
     mr.push $ { last,               },  ( d, send ) -> send d
+    mr.push $ { once_before_first,  },  ( d       ) -> debug '^276^ once_before_first'; collector.push 'once_before_first'
+    mr.push $ { once_after_last,    },  ( d       ) -> debug '^276^ once_after_last';   collector.push 'once_after_last'  
     mr.push                             ( d       ) -> urge '^309^', d
     mr.push                             ( d, send ) -> collector.push d #; help collector
+    T?.eq mr.on_once_before_first.length, 1
+    T?.eq mr.on_once_after_last.length,   1
     mr.drive()
-    T?.eq collector, [ first, 2, 4, 6, 10, last, ]
-    # debug '^453^', d for d in protocol
+    T?.eq collector, [ 'once_before_first', first, 2, 4, 6, 10, last, 'once_after_last', ]
+    debug '^453^', collector
     # console.table protocol
     H.tabulate 'protocol', protocol
   #.........................................................................................................
@@ -523,7 +526,7 @@ if require.main is module then do =>
   # @[ "once_before_first, once_after_last transformers transparent to data" ]()
   # test @[ "once_before_first, once_after_last transformers transparent to data" ]
   @[ "modifiers" ]()
-  # test @[ "modifiers" ]
+  test @[ "modifiers" ]
   # @[ "resettable state shared across transforms" ]()
   # test @[ "resettable state shared across transforms" ]
   # @[ "modifier once_after_last" ]()
