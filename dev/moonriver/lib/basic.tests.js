@@ -157,12 +157,17 @@
       mr.push($({first}, function(d, send) {
         return send(d);
       }));
-      mr.push($({once_before_first}, function(d) {
-        return debug('^987^', 'once_before_first');
-      }));
       // mr.push $ { once_after_last,    },  ( d       ) -> debug '^987^', 'once_after_last'
       mr.push($({last}, function(d, send) {
         return send(d);
+      }));
+      mr.push($({once_before_first}, function(d) {
+        debug('^276^ once_before_first');
+        return collector.push('once_before_first');
+      }));
+      mr.push($({once_after_last}, function(d) {
+        debug('^276^ once_after_last');
+        return collector.push('once_after_last');
       }));
       mr.push(function(d) {
         return urge('^309^', d);
@@ -170,11 +175,17 @@
       mr.push(function(d, send) {
         return collector.push(d); //; help collector
       });
+      if (T != null) {
+        T.eq(mr.on_once_before_first.length, 1);
+      }
+      if (T != null) {
+        T.eq(mr.on_once_after_last.length, 1);
+      }
       mr.drive();
       if (T != null) {
-        T.eq(collector, [first, 2, 4, 6, 10, last]);
+        T.eq(collector, ['once_before_first', first, 2, 4, 6, 10, last, 'once_after_last']);
       }
-      // debug '^453^', d for d in protocol
+      debug('^453^', collector);
       // console.table protocol
       return H.tabulate('protocol', protocol);
     })();
@@ -823,12 +834,12 @@
       // test @[ "using send() in a once_before_first transform" ]
       // @[ "once_before_first, once_after_last transformers transparent to data" ]()
       // test @[ "once_before_first, once_after_last transformers transparent to data" ]
-      return this["modifiers"]();
+      this["modifiers"]();
+      return test(this["modifiers"]);
     })();
   }
 
-  // test @[ "modifiers" ]
-// @[ "resettable state shared across transforms" ]()
+  // @[ "resettable state shared across transforms" ]()
 // test @[ "resettable state shared across transforms" ]
 // @[ "modifier once_after_last" ]()
 // test @[ "modifier once_after_last" ]
