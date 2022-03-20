@@ -108,7 +108,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["modifiers"] = function(T, done) {
-    var $, Moonriver, collector, first, last, mr, once_after_last, once_before_first, protocol;
+    var $, Moonriver, first, last, once_after_last, once_before_first;
     // T?.halt_on_error()
     ({Moonriver} = require('../../../apps/moonriver'));
     ({$} = Moonriver);
@@ -116,37 +116,68 @@
     last = Symbol('last');
     once_before_first = true;
     once_after_last = true;
-    collector = [];
-    protocol = [];
-    mr = new Moonriver({protocol});
-    //.........................................................................................................
-    mr.push([1, 2, 3, 5]);
-    mr.push(function(d, send) {
-      return send(d * 2);
-    });
-    mr.push($({first}, function(d, send) {
-      return send(d);
-    }));
-    mr.push($({once_before_first}, function(d) {
-      return debug('^987^', 'once_before_first');
-    }));
-    // mr.push $ { once_after_last,    },  ( d       ) -> debug '^987^', 'once_after_last'
-    mr.push($({last}, function(d, send) {
-      return send(d);
-    }));
-    mr.push(function(d) {
-      return urge('^309^', d);
-    });
-    mr.push(function(d, send) {
-      return collector.push(d); //; help collector
-    });
-    mr.drive();
-    if (T != null) {
-      T.eq(collector, [first, 2, 4, 6, 10, last]);
-    }
-    // debug '^453^', d for d in protocol
-    // console.table protocol
-    H.tabulate('protocol', protocol);
+    (() => {      //.........................................................................................................
+      var collector, mr, protocol;
+      collector = [];
+      protocol = [];
+      mr = new Moonriver({protocol});
+      mr.push([1, 2, 3, 5]);
+      mr.push(function(d, send) {
+        return send(d * 2);
+      });
+      mr.push($({first}, function(d, send) {
+        return send(d);
+      }));
+      mr.push($({last}, function(d, send) {
+        return send(d);
+      }));
+      mr.push(function(d) {
+        return urge('^309^', d);
+      });
+      mr.push(function(d, send) {
+        return collector.push(d); //; help collector
+      });
+      mr.drive();
+      if (T != null) {
+        T.eq(collector, [first, 2, 4, 6, 10, last]);
+      }
+      // debug '^453^', d for d in protocol
+      // console.table protocol
+      return H.tabulate('protocol', protocol);
+    })();
+    (() => {      //.........................................................................................................
+      var collector, mr, protocol;
+      collector = [];
+      protocol = [];
+      mr = new Moonriver({protocol});
+      mr.push([1, 2, 3, 5]);
+      mr.push(function(d, send) {
+        return send(d * 2);
+      });
+      mr.push($({first}, function(d, send) {
+        return send(d);
+      }));
+      mr.push($({once_before_first}, function(d) {
+        return debug('^987^', 'once_before_first');
+      }));
+      // mr.push $ { once_after_last,    },  ( d       ) -> debug '^987^', 'once_after_last'
+      mr.push($({last}, function(d, send) {
+        return send(d);
+      }));
+      mr.push(function(d) {
+        return urge('^309^', d);
+      });
+      mr.push(function(d, send) {
+        return collector.push(d); //; help collector
+      });
+      mr.drive();
+      if (T != null) {
+        T.eq(collector, [first, 2, 4, 6, 10, last]);
+      }
+      // debug '^453^', d for d in protocol
+      // console.table protocol
+      return H.tabulate('protocol', protocol);
+    })();
     if (typeof done === "function") {
       done();
     }
