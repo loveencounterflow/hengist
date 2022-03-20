@@ -328,33 +328,24 @@ H                         = require '../../../lib/helpers'
   first         = Symbol 'first'
   last          = Symbol 'last'
   collector     = []
+  mr            = new Moonriver()
   #.......................................................................................................
-  pipeline      = [
-    [ 'first', 'second', 'third', ]
-    #.....................................................................................................
-    $ { last, }, finalize = ( d, send ) ->
-      if d is last
-        collector.push collector.length
-        return send 'fourth'
-      send d
-      return null
-    #.....................................................................................................
-    ( d ) -> collector.push d
-    #.....................................................................................................
-    ]
+  mr.push [ 'first', 'second', 'third', ]
+  s1 = mr.push $ { last, }, finalize = ( d, send ) ->
+    debug '^347^', rpr d
+    if d is last
+      collector.push collector.length
+      return send 'fourth'
+    send d
+    return null
+  mr.push collect = ( d ) -> collector.push d
   #.........................................................................................................
-  mr      = new Moonriver pipeline
-  segment = mr.pipeline[ 1 ]
-  T?.eq segment.modifications.do_last,  true
-  T?.eq segment.modifications.last,     last
+  T?.eq s1.modifiers.last,          true
+  T?.eq s1.modifiers.values?.last,  last
   #.........................................................................................................
-  error = null
-  try mr.drive() catch error
-    T?.ok /cannot send values after pipeline has terminated/.test error.message
-  T?.ok error?
-  #.........................................................................................................
-  echo rpr d for d in collector
-  T?.eq collector, [ 'first', 'second', 'third', 3, ]
+  mr.drive()
+  debug '^343^', collector
+  T?.eq collector, [ 'first', 'second', 'third', 3, 'fourth', ]
   #.........................................................................................................
   done?()
 
@@ -363,27 +354,17 @@ H                         = require '../../../lib/helpers'
   # T?.halt_on_error()
   { Moonriver } = require '../../../apps/moonriver'
   { $ }         = Moonriver
-  once_after_last    = Symbol 'once_after_last'
   collector     = []
+  mr            = new Moonriver()
   #.......................................................................................................
-  pipeline      = [
-    [ 'first', 'second', 'third', ]
-    #.....................................................................................................
-    $ { once_after_last, }, finalize = ( d ) ->
-      if d is once_after_last
-        collector.push collector.length
-      return null
-    #.....................................................................................................
-    ( d ) -> collector.push d
-    #.....................................................................................................
-    ]
+  mr.push [ 'first', 'second', 'third', ]
+  s1 = mr.push $ { once_after_last: true, }, finalize = ( d ) ->
+    collector.push collector.length
+    return null
+  mr.push ( d ) -> collector.push d
   #.........................................................................................................
-  mr      = new Moonriver pipeline
-  segment = mr.pipeline[ 1 ]
-  T?.eq segment.is_sender,                    false
-  T?.eq segment.is_listener,                  false
-  T?.eq segment.modifications.do_once_after,  true
-  T?.eq segment.modifications.once_after_last,     once_after_last
+  T?.eq s1.is_sender,                 true
+  T?.eq s1.modifiers.once_after_last, true
   #.........................................................................................................
   mr.drive()
   T?.eq collector, [ 'first', 'second', 'third', 3, ]
@@ -397,18 +378,13 @@ H                         = require '../../../lib/helpers'
   { Moonriver } = require '../../../apps/moonriver'
   { $ }         = Moonriver
   collector     = []
+  mr            = new Moonriver()
   #.......................................................................................................
-  pipeline      = [
-    [ 'first', 'second', 'third', 'fourth', 'fifth', ]
-    #.....................................................................................................
-    look_for_third = ( d, send ) ->
-      send if d is 'third' then Symbol.for 'exit' else d
-    #.....................................................................................................
-    collect = ( d, send ) ->
-      collector.push d
-    #.....................................................................................................
-    ]
-  mr = new Moonriver pipeline
+  mr.push [ 'first', 'second', 'third', 'fourth', 'fifth', ]
+  mr.push look_for_third = ( d, send ) ->
+    send if d is 'third' then Symbol.for 'exit' else d
+  mr.push collect = ( d, send ) ->
+    collector.push d
   mr.drive()
   echo rpr d for d in collector
   T?.eq collector, [ 'first', 'second', ]
@@ -575,17 +551,16 @@ if require.main is module then do =>
   # test @[ "modifier once_after_last" ]
   # @[ "modifier last" ]()
   # test @[ "modifier last" ]
-  # test @[ "modifier last" ]
   # @[ "called even when pipeline empty: once_before_first, once_after_last" ]()
   # test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
   # test @[ "transforms with once_after_last must not be senders" ]
-  # test @[ "exit symbol" ]
+  test @[ "exit symbol" ]
   # @[ "can access pipeline from within transform, get user area" ]()
   # test @[ "can access pipeline from within transform, get user area" ]
   # @[ "resettable state shared across transforms" ]()
   # test @[ "resettable state shared across transforms" ]
-  @[ "modifier last does not leak into pipeline when used with observer" ]()
-  test @[ "modifier last does not leak into pipeline when used with observer" ]
+  # @[ "modifier last does not leak into pipeline when used with observer" ]()
+  # test @[ "modifier last does not leak into pipeline when used with observer" ]
   # @[ "modifier first does not leak into pipeline when used with observer" ]()
   # test @[ "modifier first does not leak into pipeline when used with observer" ]
 
