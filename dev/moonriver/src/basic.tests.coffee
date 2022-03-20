@@ -562,6 +562,8 @@ if require.main is module then do =>
   # test @[ "can access pipeline from within transform, get user area" ]
   # @[ "resettable state shared across transforms" ]()
   # test @[ "resettable state shared across transforms" ]
-  @[ "modifier first does not leak into pipeline when used with observer" ]()
-  test @[ "modifier first does not leak into pipeline when used with observer" ]
+  @[ "modifier last does not leak into pipeline when used with observer" ]()
+  test @[ "modifier last does not leak into pipeline when used with observer" ]
+  # @[ "modifier first does not leak into pipeline when used with observer" ]()
+  # test @[ "modifier first does not leak into pipeline when used with observer" ]
 

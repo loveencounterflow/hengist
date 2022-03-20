@@ -436,6 +436,43 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["modifier last does not leak into pipeline when used with observer"] = function(T, done) {
+    var $, Moonriver, collector, last1, last2;
+    // T?.halt_on_error()
+    ({Moonriver} = require('../../../apps/moonriver'));
+    ({$} = Moonriver);
+    last1 = Symbol('last1');
+    last2 = Symbol('last2');
+    collector = [];
+    (() => {      //.......................................................................................................
+      var mr;
+      mr = new Moonriver();
+      mr.push(Array.from('abc'));
+      mr.push($({
+        last: last1
+      }, function(d) {
+        return debug('^765-1^', rpr(d));
+      }));
+      mr.push($({
+        last: last2
+      }, function(d, send) {
+        debug('^765-2^', rpr(d));
+        if (d !== last2) {
+          return send(d);
+        }
+      }));
+      mr.push(function(d) {
+        return collector.push(d);
+      });
+      //.....................................................................................................
+      mr.drive();
+      urge('^859^', collector);
+      return T != null ? T.eq(collector, Array.from('abc')) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["modifier last"] = function(T, done) {
     var $, Moonriver, collector, d, error, finalize, first, i, last, len, mr, pipeline, segment;
     // T?.halt_on_error()
@@ -886,10 +923,13 @@
       // test @[ "can access pipeline from within transform, get user area" ]
       // @[ "resettable state shared across transforms" ]()
       // test @[ "resettable state shared across transforms" ]
-      this["modifier first does not leak into pipeline when used with observer"]();
-      return test(this["modifier first does not leak into pipeline when used with observer"]);
+      this["modifier last does not leak into pipeline when used with observer"]();
+      return test(this["modifier last does not leak into pipeline when used with observer"]);
     })();
   }
+
+  // @[ "modifier first does not leak into pipeline when used with observer" ]()
+// test @[ "modifier first does not leak into pipeline when used with observer" ]
 
 }).call(this);
 
