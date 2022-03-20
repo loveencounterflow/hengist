@@ -299,6 +299,28 @@ H                         = require '../../../lib/helpers'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "modifier last does not leak into pipeline when used with observer" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Moonriver } = require '../../../apps/moonriver'
+  { $ }         = Moonriver
+  last1        = Symbol 'last1'
+  last2        = Symbol 'last2'
+  collector     = []
+  #.......................................................................................................
+  do =>
+    mr = new Moonriver()
+    mr.push Array.from 'abc'
+    mr.push $ { last: last1, }, ( d )       -> debug '^765-1^', rpr d
+    mr.push $ { last: last2, }, ( d, send ) -> debug '^765-2^', rpr d; send d unless d is last2
+    mr.push ( d ) -> collector.push d
+    #.....................................................................................................
+    mr.drive()
+    urge '^859^', collector
+    T?.eq collector, Array.from 'abc'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "modifier last" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Moonriver } = require '../../../apps/moonriver'
