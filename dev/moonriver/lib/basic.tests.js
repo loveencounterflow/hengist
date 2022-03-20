@@ -474,109 +474,69 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["modifier last"] = function(T, done) {
-    var $, Moonriver, collector, d, error, finalize, first, i, last, len, mr, pipeline, segment;
+    var $, Moonriver, collect, collector, finalize, first, last, mr, ref, s1;
     // T?.halt_on_error()
     ({Moonriver} = require('../../../apps/moonriver'));
     ({$} = Moonriver);
     first = Symbol('first');
     last = Symbol('last');
     collector = [];
+    mr = new Moonriver();
     //.......................................................................................................
-    pipeline = [
-      ['first',
-      'second',
-      'third'],
-      //.....................................................................................................
-      $({last},
-      finalize = function(d,
-      send) {
-        if (d === last) {
-          collector.push(collector.length);
-          return send('fourth');
-        }
-        send(d);
-        return null;
-      }),
-      //.....................................................................................................
-      function(d) {
-        return collector.push(d);
+    mr.push(['first', 'second', 'third']);
+    s1 = mr.push($({last}, finalize = function(d, send) {
+      debug('^347^', rpr(d));
+      if (d === last) {
+        collector.push(collector.length);
+        return send('fourth');
       }
-    ];
+      send(d);
+      return null;
+    }));
+    mr.push(collect = function(d) {
+      return collector.push(d);
+    });
     //.........................................................................................................
-    //.....................................................................................................
-    mr = new Moonriver(pipeline);
-    segment = mr.pipeline[1];
     if (T != null) {
-      T.eq(segment.modifications.do_last, true);
+      T.eq(s1.modifiers.last, true);
     }
     if (T != null) {
-      T.eq(segment.modifications.last, last);
+      T.eq((ref = s1.modifiers.values) != null ? ref.last : void 0, last);
     }
     //.........................................................................................................
-    error = null;
-    try {
-      mr.drive();
-    } catch (error1) {
-      error = error1;
-      if (T != null) {
-        T.ok(/cannot send values after pipeline has terminated/.test(error.message));
-      }
-    }
+    mr.drive();
+    debug('^343^', collector);
     if (T != null) {
-      T.ok(error != null);
-    }
-    for (i = 0, len = collector.length; i < len; i++) {
-      d = collector[i];
-      //.........................................................................................................
-      echo(rpr(d));
-    }
-    if (T != null) {
-      T.eq(collector, ['first', 'second', 'third', 3]);
+      T.eq(collector, ['first', 'second', 'third', 3, 'fourth']);
     }
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this["modifier once_after_last"] = function(T, done) {
-    var $, Moonriver, collector, finalize, mr, once_after_last, pipeline, segment;
+    var $, Moonriver, collector, finalize, mr, s1;
     // T?.halt_on_error()
     ({Moonriver} = require('../../../apps/moonriver'));
     ({$} = Moonriver);
-    once_after_last = Symbol('once_after_last');
     collector = [];
+    mr = new Moonriver();
     //.......................................................................................................
-    pipeline = [
-      ['first',
-      'second',
-      'third'],
-      //.....................................................................................................
-      $({once_after_last},
-      finalize = function(d) {
-        if (d === once_after_last) {
-          collector.push(collector.length);
-        }
-        return null;
-      }),
-      //.....................................................................................................
-      function(d) {
-        return collector.push(d);
-      }
-    ];
+    mr.push(['first', 'second', 'third']);
+    s1 = mr.push($({
+      once_after_last: true
+    }, finalize = function(d) {
+      collector.push(collector.length);
+      return null;
+    }));
+    mr.push(function(d) {
+      return collector.push(d);
+    });
     //.........................................................................................................
-    //.....................................................................................................
-    mr = new Moonriver(pipeline);
-    segment = mr.pipeline[1];
     if (T != null) {
-      T.eq(segment.is_sender, false);
+      T.eq(s1.is_sender, true);
     }
     if (T != null) {
-      T.eq(segment.is_listener, false);
-    }
-    if (T != null) {
-      T.eq(segment.modifications.do_once_after, true);
-    }
-    if (T != null) {
-      T.eq(segment.modifications.once_after_last, once_after_last);
+      T.eq(s1.modifiers.once_after_last, true);
     }
     //.........................................................................................................
     mr.drive();
@@ -591,31 +551,20 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["exit symbol"] = function(T, done) {
-    var $, Moonriver, collect, collector, d, i, len, look_for_third, mr, pipeline;
+    var $, Moonriver, collect, collector, d, i, len, look_for_third, mr;
     // T?.halt_on_error()
     ({Moonriver} = require('../../../apps/moonriver'));
     ({$} = Moonriver);
     collector = [];
+    mr = new Moonriver();
     //.......................................................................................................
-    pipeline = [
-      ['first',
-      'second',
-      'third',
-      'fourth',
-      'fifth'],
-      //.....................................................................................................
-      look_for_third = function(d,
-      send) {
-        return send(d === 'third' ? Symbol.for('exit') : d);
-      },
-      //.....................................................................................................
-      collect = function(d,
-      send) {
-        return collector.push(d);
-      }
-    ];
-    //.....................................................................................................
-    mr = new Moonriver(pipeline);
+    mr.push(['first', 'second', 'third', 'fourth', 'fifth']);
+    mr.push(look_for_third = function(d, send) {
+      return send(d === 'third' ? Symbol.for('exit') : d);
+    });
+    mr.push(collect = function(d, send) {
+      return collector.push(d);
+    });
     mr.drive();
     for (i = 0, len = collector.length; i < len; i++) {
       d = collector[i];
@@ -914,21 +863,20 @@
       // test @[ "modifier once_after_last" ]
       // @[ "modifier last" ]()
       // test @[ "modifier last" ]
-      // test @[ "modifier last" ]
       // @[ "called even when pipeline empty: once_before_first, once_after_last" ]()
       // test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
       // test @[ "transforms with once_after_last must not be senders" ]
-      // test @[ "exit symbol" ]
-      // @[ "can access pipeline from within transform, get user area" ]()
-      // test @[ "can access pipeline from within transform, get user area" ]
-      // @[ "resettable state shared across transforms" ]()
-      // test @[ "resettable state shared across transforms" ]
-      this["modifier last does not leak into pipeline when used with observer"]();
-      return test(this["modifier last does not leak into pipeline when used with observer"]);
+      return test(this["exit symbol"]);
     })();
   }
 
-  // @[ "modifier first does not leak into pipeline when used with observer" ]()
+  // @[ "can access pipeline from within transform, get user area" ]()
+// test @[ "can access pipeline from within transform, get user area" ]
+// @[ "resettable state shared across transforms" ]()
+// test @[ "resettable state shared across transforms" ]
+// @[ "modifier last does not leak into pipeline when used with observer" ]()
+// test @[ "modifier last does not leak into pipeline when used with observer" ]
+// @[ "modifier first does not leak into pipeline when used with observer" ]()
 // test @[ "modifier first does not leak into pipeline when used with observer" ]
 
 }).call(this);
