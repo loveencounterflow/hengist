@@ -378,7 +378,8 @@ H                         = require '../../../lib/helpers'
   { Moonriver } = require '../../../apps/moonriver'
   { $ }         = Moonriver
   collector     = []
-  mr            = new Moonriver()
+  protocol      = []
+  mr            = new Moonriver { protocol, }
   #.......................................................................................................
   mr.push [ 'first', 'second', 'third', 'fourth', 'fifth', ]
   mr.push look_for_third = ( d, send ) ->
@@ -388,6 +389,7 @@ H                         = require '../../../lib/helpers'
   mr.drive()
   echo rpr d for d in collector
   T?.eq collector, [ 'first', 'second', ]
+  H.tabulate 'protocol', protocol
   #.........................................................................................................
   done?()
   return null
@@ -395,34 +397,22 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "called even when pipeline empty: once_before_first, once_after_last" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver } = require '../../../apps/moonriver'
-  { $ }         = Moonriver
-  collector     = []
-  once_before_first   = Symbol.for 'once_before_first'
-  once_after_last    = Symbol.for 'once_after_last'
-  counts        =
+  { Moonriver }     = require '../../../apps/moonriver'
+  { $ }             = Moonriver
+  collector         = []
+  once_before_first = true
+  once_after_last   = true
+  counts            =
     once_before_first:  0
-    once_after_last:   0
+    once_after_last:    0
+  mr                = new Moonriver()
   #.......................................................................................................
-  pipeline      = [
-    []
-    #.....................................................................................................
-    $ { once_before_first, }, on_once_before = ( d ) ->
-      counts.once_before_first++
-    #.....................................................................................................
-    show_1 = ( d, send ) -> urge '^498-1^', rpr d; send d
-    #.....................................................................................................
-    $ { once_after_last, }, on_once_after = ( d ) ->
-      counts.once_after_last++
-    #.....................................................................................................
-    collect = ( d, send ) ->
-      collector.push d
-      send d
-    #.....................................................................................................
-    show_2 = ( d, send ) -> urge '^498-2^', rpr d; send d
-    #.....................................................................................................
-    ]
-  mr = new Moonriver pipeline
+  mr.push []
+  mr.push $ { once_before_first,  },  on_once_before  = ( d ) -> counts.once_before_first++
+  mr.push show_1  = ( d       ) -> urge '^498-1^', rpr d
+  mr.push $ { once_after_last,    },  on_once_after   = ( d ) -> counts.once_after_last++
+  mr.push collect = ( d       ) -> collector.push d
+  mr.push show_2  = ( d       ) -> urge '^498-2^', rpr d
   mr.drive()
   T?.eq counts, { once_before_first: 1, once_after_last: 1 }
   T?.eq collector, []
@@ -431,68 +421,69 @@ H                         = require '../../../lib/helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "transforms with once_after_last must not be senders" ] = ( T, done ) ->
+@[ "transforms with once_after_last can (not yet) be senders" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver } = require '../../../apps/moonriver'
-  { $ }         = Moonriver
-  once_after_last    = Symbol.for 'once_after_last'
+  { Moonriver }   = require '../../../apps/moonriver'
+  { $ }           = Moonriver
+  once_after_last = true
+  collector       = []
+  mr              = new Moonriver()
   #.......................................................................................................
-  pipeline      = [
-    $ { once_after_last, }, on_once_after = ( d, send ) ->
-    ]
-  #.........................................................................................................
+  # mr.push [ 1, 2, 3, ]
   error = null
-  try mr = new Moonriver pipeline catch error
-    # throw error
-    T?.ok /transforms with modifier once_after_last cannot be senders/.test error.message
+  try
+    mr.push $ { once_after_last, }, on_once_after = ( d, send ) -> send 'last'
+  catch error
+    if ( error.message.match /transform with arity 2 not implemented for modifiers once_before_first, once_after_last/ )?
+      T?.ok true
+    else
+      throw error
   T?.ok error?
+  # mr.push collect = ( d ) -> collector.push d
+  # mr.drive()
+  # debug '^498^', collector
+  # T?.eq collector, [ 1, 2, 3, 'last', ]
   #.........................................................................................................
   done?()
   return null
 
-#-----------------------------------------------------------------------------------------------------------
-@[ "using send() in a once_before_first transform" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { Moonriver } = require '../../../apps/moonriver'
-  { $ }         = Moonriver
-  once_before_first   = [ 42, 43, 44, ]
-  collector     = []
-  #.......................................................................................................
-  pipeline      = [
-    $ { once_before_first, }, on_once_before = ( d, send ) ->
-      debug '^4532^', d
-      send e for e in d
-    show    = ( d ) -> urge '^4948^', d
-    collect = ( d ) -> collector.push d
-    ]
-  mr = new Moonriver pipeline
-  mr.drive()
-  T?.eq collector, [ 42, 43, 44, ]
-  #.........................................................................................................
-  done?()
-  return null
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "using send() in once_before_first, once_after_last transforms" ] = ( T, done ) ->
+#   # T?.halt_on_error()
+#   { Moonriver } = require '../../../apps/moonriver'
+#   { $ }         = Moonriver
+#   collector     = []
+#   mr            = new Moonriver()
+#   #.......................................................................................................
+#   mr.push [ 0, ]
+#   mr.push $ { once_before_first:  true, }, once_before_first = ( send ) -> send e for e in [ 42, 43, 44, ]
+#   mr.push $ { once_after_last:    true, }, once_after_last   = ( send ) -> send e for e in [ 45, 46, 47, ]
+#   mr.push show    = ( d ) -> urge '^4948^', d
+#   mr.push collect = ( d ) -> collector.push d
+#   mr.drive()
+#   T?.eq collector, [ 42, 43, 44, 0, 45, 46, 47, ]
+#   #.........................................................................................................
+#   done?()
+#   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "appending data before closing" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Moonriver } = require '../../../apps/moonriver'
   { $ }         = Moonriver
-  before_last   = Symbol 'before_last'
+  last          = Symbol 'last'
   collector     = []
+  mr            = new Moonriver()
   #.......................................................................................................
-  pipeline      = [
-    [ -1, ]
-    show    = ( d ) -> urge '^4948-1^', d
-    $ { before_last, }, on_once_before = ( d, send ) ->
-      debug '^4532^', d
-      return send d unless d is before_last
-      send e for e in [ 'a', 'b', 'c', ]
-    show    = ( d ) -> urge '^4948-2^', d
-    collect = ( d ) -> collector.push d
-    ]
-  mr = new Moonriver pipeline
+  mr.push [ -1, ]
+  mr.push show    = ( d ) -> urge '^4948-1^', d
+  mr.push $ { last, }, at_last = ( d, send ) ->
+    return send d unless d is last
+    send e for e in [ 'a', 'b', 'c', ]
+  mr.push show    = ( d ) -> urge '^4948-2^', d
+  mr.push collect = ( d ) -> collector.push d
   mr.drive()
-  help '^894^', collector
+  T?.eq collector, [ -1, 'a', 'b', 'c' ]
   #.........................................................................................................
   done?()
   return null
@@ -507,29 +498,22 @@ H                         = require '../../../lib/helpers'
     c2: []
     c3: []
     c4: []
-    c5: []
+  mr            = new Moonriver()
   #.......................................................................................................
-  pipeline      = [
-    [ 'a', 'b', 'c', ]
-    collect = ( d ) ->                                                          collectors.c1.push d
-    $ { once_before_first:  'bfr', }, on_once_before  = ( d ) -> debug '^453-1^', d;  collectors.c2.push d
-    collect = ( d ) ->                                                          collectors.c3.push d
-    $ { once_after_last:   'aft', }, on_once_after   = ( d ) -> debug '^453-2^', d;  collectors.c4.push d
-    collect = ( d ) ->                                                          collectors.c5.push d
-    show    = ( d ) -> urge '^4948^', d
-    ]
-  mr = new Moonriver pipeline
+  mr.push Array.from 'bcd'
+  mr.push $ { once_before_first:  true,   }, once_before_first  = ( send  ) -> send 'A'
+  mr.push collect2                                              = ( d     ) -> debug '^453-2^', d;  collectors.c2.push d
+  mr.push $ { once_after_last:    true,   }, once_after_last    = ( send  ) -> send 'Z';  collectors.c3.push null
+  mr.push collect4                                              = ( d     ) -> debug '^453-4^', d;  collectors.c4.push d
   mr.drive()
   help '^894^', collectors.c1
   help '^894^', collectors.c2
   help '^894^', collectors.c3
   help '^894^', collectors.c4
-  help '^894^', collectors.c5
-  T?.eq collectors.c1, [ 'a', 'b', 'c', ]
-  T?.eq collectors.c2, [ 'bfr', ]
-  T?.eq collectors.c3, [ 'a', 'b', 'c', ]
-  T?.eq collectors.c4, [ 'aft', ]
-  T?.eq collectors.c5, [ 'a', 'b', 'c', ]
+  T?.eq collectors.c1, [ ( Symbol.for 'drop' ), ]
+  T?.eq collectors.c2, [ 'a', 'b', 'c', ]
+  T?.eq collectors.c3, [ ( Symbol.for 'drop' ), ]
+  T?.eq collectors.c4, [ 'a', 'b', 'c', ]
   #.........................................................................................................
   done?()
   return null
@@ -538,29 +522,8 @@ H                         = require '../../../lib/helpers'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
-  # @[ "send.call_count" ]()
-  # @[ "appending data before closing" ]()
-  # test @[ "appending data before closing" ]
-  # test @[ "using send() in a once_before_first transform" ]
-  # @[ "once_before_first, once_after_last transformers transparent to data" ]()
-  # test @[ "once_before_first, once_after_last transformers transparent to data" ]
-  # @[ "modifiers" ]()
-  # test @[ "modifiers" ]
-  # @[ "modifier once_after_last" ]()
-  # test @[ "modifier once_after_last" ]
-  # @[ "modifier last" ]()
-  # test @[ "modifier last" ]
-  # @[ "called even when pipeline empty: once_before_first, once_after_last" ]()
-  # test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
-  # test @[ "transforms with once_after_last must not be senders" ]
-  test @[ "exit symbol" ]
-  # @[ "can access pipeline from within transform, get user area" ]()
-  # test @[ "can access pipeline from within transform, get user area" ]
-  # @[ "resettable state shared across transforms" ]()
-  # test @[ "resettable state shared across transforms" ]
-  # @[ "modifier last does not leak into pipeline when used with observer" ]()
-  # test @[ "modifier last does not leak into pipeline when used with observer" ]
-  # @[ "modifier first does not leak into pipeline when used with observer" ]()
-  # test @[ "modifier first does not leak into pipeline when used with observer" ]
+  test @
+  # @[ "called even when pipeline empty: once_before_first, once_after_last" ](); test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
+  # @[ "appending data before closing" ](); test @[ "appending data before closing" ]
+  # @[ "once_before_first, once_after_last transformers transparent to data" ](); test @[ "once_before_first, once_after_last transformers transparent to data" ]
 
