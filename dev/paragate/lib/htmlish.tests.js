@@ -1346,7 +1346,7 @@
           start: 46,
           stop: 72,
           atrs: {
-            href: "'greek-mythology'"
+            href: 'greek-mythology'
           },
           '$vnr': [3,
         47]
@@ -1419,7 +1419,7 @@
   this["HTML: parse (dubious)"] = async function(T, done) {
     var HTML, error, i, len, matcher, probe, probes_and_matchers;
     HTML = require('../../../apps/paragate/lib/htmlish.grammar');
-    probes_and_matchers = [['< >', "$key='<tag',$vnr=[ 1, 1 ],start=0,stop=3,text='< >',type='otag'#$key='^error',$vnr=[ 1, 3 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=2,stop=3,text='>'", null], ['< x >', "$key='<tag',$vnr=[ 1, 1 ],name='x',start=0,stop=5,text='< x >',type='otag'", null], ['</x>', "$key='>tag',$vnr=[ 1, 1 ],name='x',start=0,stop=4,text='</x>',type='ctag'", null], ['</x >', "$key='>tag',$vnr=[ 1, 1 ],name='x',start=0,stop=5,text='</x >',type='ctag'", null], ['</ x>', "$key='>tag',$vnr=[ 1, 1 ],name='x',start=0,stop=5,text='</ x>',type='ctag'", null], ['< / x >', "$key='<tag',$vnr=[ 1, 1 ],start=0,stop=3,text='< /',type='ntag'#$key='^error',$vnr=[ 1, 3 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=2,stop=3,text='/'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=7,text=' x >'", null], ['<>', "$key='<tag',$vnr=[ 1, 1 ],start=0,stop=2,text='<>',type='otag'#$key='^error',$vnr=[ 1, 2 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=1,stop=2,text='>'", null], ['<', "$key='^error',$vnr=[ 1, 1 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=0,stop=1,text='<'", null], ['<tag', "$key='<tag',$vnr=[ 1, 1 ],name='tag',start=0,stop=4,text='<tag'#$key='^error',$vnr=[ 1, 2 ],chvtname='NoViableAltException',code='missing',origin='parser',start=1,stop=4,text='tag'", null], ['if <math> a > b </math> then', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=3,text='if '#$key='<tag',$vnr=[ 1, 4 ],name='math',start=3,stop=9,text='<math>',type='otag'#$key='^text',$vnr=[ 1, 10 ],start=9,stop=16,text=' a > b '#$key='>tag',$vnr=[ 1, 17 ],name='math',start=16,stop=23,text='</math>',type='ctag'#$key='^text',$vnr=[ 1, 24 ],start=23,stop=28,text=' then'", null], ['>', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=1,text='>'", null], ['&', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=1,text='&'", null], ['&amp;', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=5,text='&amp;'", null], ["<tag a='<'>", `$key='<tag',$vnr=[ 1, 1 ],atrs={ a: "'<'" },name='tag',start=0,stop=11,text="<tag a='<'>",type='otag'`, null]];
+    probes_and_matchers = [['< >', "$key='<tag',$vnr=[ 1, 1 ],start=0,stop=3,text='< >',type='otag'#$key='^error',$vnr=[ 1, 3 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=2,stop=3,text='>'", null], ['< x >', "$key='<tag',$vnr=[ 1, 1 ],name='x',start=0,stop=5,text='< x >',type='otag'", null], ['</x>', "$key='>tag',$vnr=[ 1, 1 ],name='x',start=0,stop=4,text='</x>',type='ctag'", null], ['</x >', "$key='>tag',$vnr=[ 1, 1 ],name='x',start=0,stop=5,text='</x >',type='ctag'", null], ['</ x>', "$key='>tag',$vnr=[ 1, 1 ],name='x',start=0,stop=5,text='</ x>',type='ctag'", null], ['< / x >', "$key='<tag',$vnr=[ 1, 1 ],start=0,stop=3,text='< /',type='ntag'#$key='^error',$vnr=[ 1, 3 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=2,stop=3,text='/'#$key='^text',$vnr=[ 1, 4 ],start=3,stop=7,text=' x >'", null], ['<>', "$key='<tag',$vnr=[ 1, 1 ],start=0,stop=2,text='<>',type='otag'#$key='^error',$vnr=[ 1, 2 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=1,stop=2,text='>'", null], ['<', "$key='^error',$vnr=[ 1, 1 ],chvtname='MismatchedTokenException',code='mismatch',origin='parser',start=0,stop=1,text='<'", null], ['<tag', "$key='<tag',$vnr=[ 1, 1 ],name='tag',start=0,stop=4,text='<tag'#$key='^error',$vnr=[ 1, 2 ],chvtname='NoViableAltException',code='missing',origin='parser',start=1,stop=4,text='tag'", null], ['if <math> a > b </math> then', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=3,text='if '#$key='<tag',$vnr=[ 1, 4 ],name='math',start=3,stop=9,text='<math>',type='otag'#$key='^text',$vnr=[ 1, 10 ],start=9,stop=16,text=' a > b '#$key='>tag',$vnr=[ 1, 17 ],name='math',start=16,stop=23,text='</math>',type='ctag'#$key='^text',$vnr=[ 1, 24 ],start=23,stop=28,text=' then'", null], ['>', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=1,text='>'", null], ['&', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=1,text='&'", null], ['&amp;', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=5,text='&amp;'", null], ["<tag a='<'>", `$key='<tag',$vnr=[ 1, 1 ],atrs={ a: '<' },name='tag',start=0,stop=11,text="<tag a='<'>",type='otag'`, null]];
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
@@ -2056,17 +2056,18 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => { // await do =>
-      // test @
-      // test @[ "HTML: parse bare" ]
-      // demo()
-      // await demo_streaming()
-      // test @[ "HTML._parse_compact_tagname" ]
-      // test @[ "parse_compact_tagname 2" ]
-      // test @[ "HTML: parse (dubious)" ]
-      // test @[ "HTML: parse escaped" ]
-      return test(this["HTML: quotes in attribute values"]);
+      return test(this);
     })();
   }
+
+  // test @[ "HTML: parse bare" ]
+// demo()
+// await demo_streaming()
+// test @[ "HTML._parse_compact_tagname" ]
+// test @[ "parse_compact_tagname 2" ]
+// test @[ "HTML: parse (dubious)" ]
+// test @[ "HTML: parse escaped" ]
+// test @[ "HTML: quotes in attribute values" ]
 
 }).call(this);
 
