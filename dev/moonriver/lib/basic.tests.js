@@ -743,27 +743,50 @@
     mr.push($({
       once_before_first: true
     }, once_before_first = function(send) {
-      return send('A');
+      send('A');
+      return T != null ? T.eq([...arguments].length, 1) : void 0;
+    }));
+    mr.push($({
+      once_before_first: true
+    }, once_before_first = function() {
+      collectors.c1.push('E');
+      return T != null ? T.eq([...arguments].length, 0) : void 0;
     }));
     mr.push(collect2 = function(d) {
       debug('^453-2^', d);
-      return collectors.c2.push(d);
+      collectors.c2.push(d);
+      return T != null ? T.eq([...arguments].length, 1) : void 0;
     });
     mr.push($({
       once_after_last: true
     }, once_after_last = function(send) {
       send('Z');
-      return collectors.c3.push(null);
+      return T != null ? T.eq([...arguments].length, 1) : void 0;
+    }));
+    mr.push($({
+      once_after_last: true
+    }, once_after_last = function() {
+      collectors.c3.push('F');
+      return T != null ? T.eq([...arguments].length, 0) : void 0;
     }));
     mr.push(collect4 = function(d) {
       debug('^453-4^', d);
-      return collectors.c4.push(d);
+      collectors.c4.push(d);
+      return T != null ? T.eq([...arguments].length, 1) : void 0;
     });
     mr.drive();
+    help('^894^', collectors.c1);
     help('^894^', collectors.c2);
+    help('^894^', collectors.c3);
     help('^894^', collectors.c4);
     if (T != null) {
+      T.eq(collectors.c1, ['E']);
+    }
+    if (T != null) {
       T.eq(collectors.c2, ['A', 'b', 'c', 'd']);
+    }
+    if (T != null) {
+      T.eq(collectors.c3, ['F']);
     }
     if (T != null) {
       T.eq(collectors.c4, ['A', 'b', 'c', 'd', 'Z']);
