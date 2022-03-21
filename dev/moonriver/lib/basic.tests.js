@@ -551,12 +551,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["exit symbol"] = function(T, done) {
-    var $, Moonriver, collect, collector, d, i, len, look_for_third, mr;
+    var $, Moonriver, collect, collector, d, i, len, look_for_third, mr, protocol;
     // T?.halt_on_error()
     ({Moonriver} = require('../../../apps/moonriver'));
     ({$} = Moonriver);
     collector = [];
-    mr = new Moonriver();
+    protocol = [];
+    mr = new Moonriver({protocol});
     //.......................................................................................................
     mr.push(['first', 'second', 'third', 'fourth', 'fifth']);
     mr.push(look_for_third = function(d, send) {
@@ -573,6 +574,7 @@
     if (T != null) {
       T.eq(collector, ['first', 'second']);
     }
+    H.tabulate('protocol', protocol);
     if (typeof done === "function") {
       done();
     }
@@ -581,53 +583,35 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["called even when pipeline empty: once_before_first, once_after_last"] = function(T, done) {
-    var $, Moonriver, collect, collector, counts, mr, on_once_after, on_once_before, once_after_last, once_before_first, pipeline, show_1, show_2;
+    var $, Moonriver, collect, collector, counts, mr, on_once_after, on_once_before, once_after_last, once_before_first, show_1, show_2;
     // T?.halt_on_error()
     ({Moonriver} = require('../../../apps/moonriver'));
     ({$} = Moonriver);
     collector = [];
-    once_before_first = Symbol.for('once_before_first');
-    once_after_last = Symbol.for('once_after_last');
+    once_before_first = true;
+    once_after_last = true;
     counts = {
       once_before_first: 0,
       once_after_last: 0
     };
+    mr = new Moonriver();
     //.......................................................................................................
-    pipeline = [
-      [],
-      //.....................................................................................................
-      $({once_before_first},
-      on_once_before = function(d) {
-        return counts.once_before_first++;
-      }),
-      //.....................................................................................................
-      show_1 = function(d,
-      send) {
-        urge('^498-1^',
-      rpr(d));
-        return send(d);
-      },
-      //.....................................................................................................
-      $({once_after_last},
-      on_once_after = function(d) {
-        return counts.once_after_last++;
-      }),
-      //.....................................................................................................
-      collect = function(d,
-      send) {
-        collector.push(d);
-        return send(d);
-      },
-      //.....................................................................................................
-      show_2 = function(d,
-      send) {
-        urge('^498-2^',
-      rpr(d));
-        return send(d);
-      }
-    ];
-    //.....................................................................................................
-    mr = new Moonriver(pipeline);
+    mr.push([]);
+    mr.push($({once_before_first}, on_once_before = function(d) {
+      return counts.once_before_first++;
+    }));
+    mr.push(show_1 = function(d) {
+      return urge('^498-1^', rpr(d));
+    });
+    mr.push($({once_after_last}, on_once_after = function(d) {
+      return counts.once_after_last++;
+    }));
+    mr.push(collect = function(d) {
+      return collector.push(d);
+    });
+    mr.push(show_2 = function(d) {
+      return urge('^498-2^', rpr(d));
+    });
     mr.drive();
     if (T != null) {
       T.eq(counts, {
@@ -645,23 +629,29 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["transforms with once_after_last must not be senders"] = function(T, done) {
-    var $, Moonriver, error, mr, on_once_after, once_after_last, pipeline;
+  this["transforms with once_after_last can (not yet) be senders"] = function(T, done) {
+    var $, Moonriver, collector, error, mr, on_once_after, once_after_last;
     // T?.halt_on_error()
     ({Moonriver} = require('../../../apps/moonriver'));
     ({$} = Moonriver);
-    once_after_last = Symbol.for('once_after_last');
+    once_after_last = true;
+    collector = [];
+    mr = new Moonriver();
     //.......................................................................................................
-    pipeline = [$({once_after_last}, on_once_after = function(d, send) {})];
-    //.........................................................................................................
+    // mr.push [ 1, 2, 3, ]
     error = null;
     try {
-      mr = new Moonriver(pipeline);
+      mr.push($({once_after_last}, on_once_after = function(d, send) {
+        return send('last');
+      }));
     } catch (error1) {
       error = error1;
-      // throw error
-      if (T != null) {
-        T.ok(/transforms with modifier once_after_last cannot be senders/.test(error.message));
+      if ((error.message.match(/transform with arity 2 not implemented for modifiers once_before_first, once_after_last/)) != null) {
+        if (T != null) {
+          T.ok(true);
+        }
+      } else {
+        throw error;
       }
     }
     if (T != null) {
@@ -673,98 +663,62 @@
     return null;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this["using send() in a once_before_first transform"] = function(T, done) {
-    var $, Moonriver, collect, collector, mr, on_once_before, once_before_first, pipeline, show;
-    // T?.halt_on_error()
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
-    once_before_first = [42, 43, 44];
-    collector = [];
-    //.......................................................................................................
-    pipeline = [
-      $({once_before_first},
-      on_once_before = function(d,
-      send) {
-        var e,
-      i,
-      len,
-      results;
-        debug('^4532^',
-      d);
-        results = [];
-        for (i = 0, len = d.length; i < len; i++) {
-          e = d[i];
-          results.push(send(e));
-        }
-        return results;
-      }),
-      show = function(d) {
-        return urge('^4948^',
-      d);
-      },
-      collect = function(d) {
-        return collector.push(d);
-      }
-    ];
-    mr = new Moonriver(pipeline);
-    mr.drive();
-    if (T != null) {
-      T.eq(collector, [42, 43, 44]);
-    }
-    if (typeof done === "function") {
-      done();
-    }
-    return null;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // @[ "using send() in once_before_first, once_after_last transforms" ] = ( T, done ) ->
+  //   # T?.halt_on_error()
+  //   { Moonriver } = require '../../../apps/moonriver'
+  //   { $ }         = Moonriver
+  //   collector     = []
+  //   mr            = new Moonriver()
+  //   #.......................................................................................................
+  //   mr.push [ 0, ]
+  //   mr.push $ { once_before_first:  true, }, once_before_first = ( send ) -> send e for e in [ 42, 43, 44, ]
+  //   mr.push $ { once_after_last:    true, }, once_after_last   = ( send ) -> send e for e in [ 45, 46, 47, ]
+  //   mr.push show    = ( d ) -> urge '^4948^', d
+  //   mr.push collect = ( d ) -> collector.push d
+  //   mr.drive()
+  //   T?.eq collector, [ 42, 43, 44, 0, 45, 46, 47, ]
+  //   #.........................................................................................................
+  //   done?()
+  //   return null
 
   //-----------------------------------------------------------------------------------------------------------
   this["appending data before closing"] = function(T, done) {
-    var $, Moonriver, before_last, collect, collector, mr, on_once_before, pipeline, show;
+    var $, Moonriver, at_last, collect, collector, last, mr, show;
     // T?.halt_on_error()
     ({Moonriver} = require('../../../apps/moonriver'));
     ({$} = Moonriver);
-    before_last = Symbol('before_last');
+    last = Symbol('last');
     collector = [];
+    mr = new Moonriver();
     //.......................................................................................................
-    pipeline = [
-      [-1],
-      show = function(d) {
-        return urge('^4948-1^',
-      d);
-      },
-      $({before_last},
-      on_once_before = function(d,
-      send) {
-        var e,
-      i,
-      len,
-      ref,
-      results;
-        debug('^4532^',
-      d);
-        if (d !== before_last) {
-          return send(d);
-        }
-        ref = ['a', 'b', 'c'];
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          e = ref[i];
-          results.push(send(e));
-        }
-        return results;
-      }),
-      show = function(d) {
-        return urge('^4948-2^',
-      d);
-      },
-      collect = function(d) {
-        return collector.push(d);
+    mr.push([-1]);
+    mr.push(show = function(d) {
+      return urge('^4948-1^', d);
+    });
+    mr.push($({last}, at_last = function(d, send) {
+      var e, i, len, ref, results;
+      if (d !== last) {
+        return send(d);
       }
-    ];
-    mr = new Moonriver(pipeline);
+      ref = ['a', 'b', 'c'];
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        e = ref[i];
+        results.push(send(e));
+      }
+      return results;
+    }));
+    mr.push(show = function(d) {
+      return urge('^4948-2^', d);
+    });
+    mr.push(collect = function(d) {
+      return collector.push(d);
+    });
     mr.drive();
-    help('^894^', collector);
+    if (T != null) {
+      T.eq(collector, [-1, 'a', 'b', 'c']);
+    }
     if (typeof done === "function") {
       done();
     }
@@ -773,7 +727,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["once_before_first, once_after_last transformers transparent to data"] = function(T, done) {
-    var $, Moonriver, collect, collectors, mr, on_once_after, on_once_before, pipeline, show;
+    var $, Moonriver, collect2, collect4, collectors, mr, once_after_last, once_before_first;
     // T?.halt_on_error()
     ({Moonriver} = require('../../../apps/moonriver'));
     ({$} = Moonriver);
@@ -781,65 +735,46 @@
       c1: [],
       c2: [],
       c3: [],
-      c4: [],
-      c5: []
+      c4: []
     };
+    mr = new Moonriver();
     //.......................................................................................................
-    pipeline = [
-      ['a',
-      'b',
-      'c'],
-      collect = function(d) {
-        return collectors.c1.push(d);
-      },
-      $({
-        once_before_first: 'bfr'
-      },
-      on_once_before = function(d) {
-        debug('^453-1^',
-      d);
-        return collectors.c2.push(d);
-      }),
-      collect = function(d) {
-        return collectors.c3.push(d);
-      },
-      $({
-        once_after_last: 'aft'
-      },
-      on_once_after = function(d) {
-        debug('^453-2^',
-      d);
-        return collectors.c4.push(d);
-      }),
-      collect = function(d) {
-        return collectors.c5.push(d);
-      },
-      show = function(d) {
-        return urge('^4948^',
-      d);
-      }
-    ];
-    mr = new Moonriver(pipeline);
+    mr.push(Array.from('bcd'));
+    mr.push($({
+      once_before_first: true
+    }, once_before_first = function(send) {
+      return send('A');
+    }));
+    mr.push(collect2 = function(d) {
+      debug('^453-2^', d);
+      return collectors.c2.push(d);
+    });
+    mr.push($({
+      once_after_last: true
+    }, once_after_last = function(send) {
+      send('Z');
+      return collectors.c3.push(null);
+    }));
+    mr.push(collect4 = function(d) {
+      debug('^453-4^', d);
+      return collectors.c4.push(d);
+    });
     mr.drive();
     help('^894^', collectors.c1);
     help('^894^', collectors.c2);
     help('^894^', collectors.c3);
     help('^894^', collectors.c4);
-    help('^894^', collectors.c5);
     if (T != null) {
-      T.eq(collectors.c1, ['a', 'b', 'c']);
+      T.eq(collectors.c1, [Symbol.for('drop')]);
     }
     if (T != null) {
-      T.eq(collectors.c2, ['bfr']);
+      T.eq(collectors.c2, ['a', 'b', 'c']);
     }
     if (T != null) {
-      T.eq(collectors.c3, ['a', 'b', 'c']);
+      T.eq(collectors.c3, [Symbol.for('drop')]);
     }
     if (T != null) {
-      T.eq(collectors.c4, ['aft']);
-    }
-    if (T != null) {
-      T.eq(collectors.c5, ['a', 'b', 'c']);
+      T.eq(collectors.c4, ['a', 'b', 'c']);
     }
     if (typeof done === "function") {
       done();
@@ -850,34 +785,13 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // @[ "send.call_count" ]()
-      // @[ "appending data before closing" ]()
-      // test @[ "appending data before closing" ]
-      // test @[ "using send() in a once_before_first transform" ]
-      // @[ "once_before_first, once_after_last transformers transparent to data" ]()
-      // test @[ "once_before_first, once_after_last transformers transparent to data" ]
-      // @[ "modifiers" ]()
-      // test @[ "modifiers" ]
-      // @[ "modifier once_after_last" ]()
-      // test @[ "modifier once_after_last" ]
-      // @[ "modifier last" ]()
-      // test @[ "modifier last" ]
-      // @[ "called even when pipeline empty: once_before_first, once_after_last" ]()
-      // test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
-      // test @[ "transforms with once_after_last must not be senders" ]
-      return test(this["exit symbol"]);
+      return test(this);
     })();
   }
 
-  // @[ "can access pipeline from within transform, get user area" ]()
-// test @[ "can access pipeline from within transform, get user area" ]
-// @[ "resettable state shared across transforms" ]()
-// test @[ "resettable state shared across transforms" ]
-// @[ "modifier last does not leak into pipeline when used with observer" ]()
-// test @[ "modifier last does not leak into pipeline when used with observer" ]
-// @[ "modifier first does not leak into pipeline when used with observer" ]()
-// test @[ "modifier first does not leak into pipeline when used with observer" ]
+  // @[ "called even when pipeline empty: once_before_first, once_after_last" ](); test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
+// @[ "appending data before closing" ](); test @[ "appending data before closing" ]
+// @[ "once_before_first, once_after_last transformers transparent to data" ](); test @[ "once_before_first, once_after_last transformers transparent to data" ]
 
 }).call(this);
 
