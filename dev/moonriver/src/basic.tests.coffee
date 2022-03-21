@@ -506,14 +506,10 @@ H                         = require '../../../lib/helpers'
   mr.push $ { once_after_last:    true,   }, once_after_last    = ( send  ) -> send 'Z';  collectors.c3.push null
   mr.push collect4                                              = ( d     ) -> debug '^453-4^', d;  collectors.c4.push d
   mr.drive()
-  help '^894^', collectors.c1
   help '^894^', collectors.c2
-  help '^894^', collectors.c3
   help '^894^', collectors.c4
-  T?.eq collectors.c1, [ ( Symbol.for 'drop' ), ]
-  T?.eq collectors.c2, [ 'a', 'b', 'c', ]
-  T?.eq collectors.c3, [ ( Symbol.for 'drop' ), ]
-  T?.eq collectors.c4, [ 'a', 'b', 'c', ]
+  T?.eq collectors.c2, [ 'A', 'b', 'c', 'd', ]
+  T?.eq collectors.c4, [ 'A', 'b', 'c', 'd', 'Z', ]
   #.........................................................................................................
   done?()
   return null
