@@ -760,21 +760,13 @@
       return collectors.c4.push(d);
     });
     mr.drive();
-    help('^894^', collectors.c1);
     help('^894^', collectors.c2);
-    help('^894^', collectors.c3);
     help('^894^', collectors.c4);
     if (T != null) {
-      T.eq(collectors.c1, [Symbol.for('drop')]);
+      T.eq(collectors.c2, ['A', 'b', 'c', 'd']);
     }
     if (T != null) {
-      T.eq(collectors.c2, ['a', 'b', 'c']);
-    }
-    if (T != null) {
-      T.eq(collectors.c3, [Symbol.for('drop')]);
-    }
-    if (T != null) {
-      T.eq(collectors.c4, ['a', 'b', 'c']);
+      T.eq(collectors.c4, ['A', 'b', 'c', 'd', 'Z']);
     }
     if (typeof done === "function") {
       done();
