@@ -501,14 +501,20 @@ H                         = require '../../../lib/helpers'
   mr            = new Moonriver()
   #.......................................................................................................
   mr.push Array.from 'bcd'
-  mr.push $ { once_before_first:  true,   }, once_before_first  = ( send  ) -> send 'A'
-  mr.push collect2                                              = ( d     ) -> debug '^453-2^', d;  collectors.c2.push d
-  mr.push $ { once_after_last:    true,   }, once_after_last    = ( send  ) -> send 'Z';  collectors.c3.push null
-  mr.push collect4                                              = ( d     ) -> debug '^453-4^', d;  collectors.c4.push d
+  mr.push $ { once_before_first:  true,   }, once_before_first  = ( send  ) -> send 'A';                                  T?.eq [ arguments..., ].length, 1
+  mr.push $ { once_before_first:  true,   }, once_before_first  =           -> collectors.c1.push 'E';                    T?.eq [ arguments..., ].length, 0
+  mr.push collect2                                              = ( d     ) -> debug '^453-2^', d;  collectors.c2.push d; T?.eq [ arguments..., ].length, 1
+  mr.push $ { once_after_last:    true,   }, once_after_last    = ( send  ) -> send 'Z';                                  T?.eq [ arguments..., ].length, 1
+  mr.push $ { once_after_last:    true,   }, once_after_last    =           -> collectors.c3.push 'F';                    T?.eq [ arguments..., ].length, 0
+  mr.push collect4                                              = ( d     ) -> debug '^453-4^', d;  collectors.c4.push d; T?.eq [ arguments..., ].length, 1
   mr.drive()
+  help '^894^', collectors.c1
   help '^894^', collectors.c2
+  help '^894^', collectors.c3
   help '^894^', collectors.c4
+  T?.eq collectors.c1, [ 'E', ]
   T?.eq collectors.c2, [ 'A', 'b', 'c', 'd', ]
+  T?.eq collectors.c3, [ 'F', ]
   T?.eq collectors.c4, [ 'A', 'b', 'c', 'd', 'Z', ]
   #.........................................................................................................
   done?()
