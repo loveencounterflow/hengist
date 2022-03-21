@@ -149,7 +149,7 @@ GUY                       = require '../../../apps/guy'
       { '$key': '^text', start: 76, stop: 90, text: ' Neméos léōn; ', '$vnr': [ 2, 77 ], }
       { '$vnr': [ 3, 0 ], '$key': '^newline' }
       { '$key': '^text', start: 0, stop: 46, text: 'Latin: Leo Nemeaeus) was a vicious monster in ', '$vnr': [ 3, 1 ], }
-      { '$key': '<tag', name: 'a', type: 'otag', text: "<a href='greek-mythology'>", start: 46, stop: 72, atrs: { href: "'greek-mythology'" }, '$vnr': [ 3, 47 ], }
+      { '$key': '<tag', name: 'a', type: 'otag', text: "<a href='greek-mythology'>", start: 46, stop: 72, atrs: { href: 'greek-mythology' }, '$vnr': [ 3, 47 ], }
       { '$key': '^text', start: 72, stop: 87, text: 'Greek mythology', '$vnr': [ 3, 73 ], }
       { '$key': '>tag', name: 'a', type: 'ctag', text: '</a>', start: 87, stop: 91, '$vnr': [ 3, 88 ], }
       { '$key': '^text', start: 91, stop: 92, text: ' ', '$vnr': [ 3, 92 ], }
@@ -182,7 +182,7 @@ GUY                       = require '../../../apps/guy'
     [ '>', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=1,text='>'", null ]
     [ '&', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=1,text='&'", null ]
     [ '&amp;', "$key='^text',$vnr=[ 1, 1 ],start=0,stop=5,text='&amp;'", null ]
-    [ "<tag a='<'>", """$key='<tag',$vnr=[ 1, 1 ],atrs={ a: "'<'" },name='tag',start=0,stop=11,text="<tag a='<'>",type='otag'""", null ]
+    [ "<tag a='<'>", """$key='<tag',$vnr=[ 1, 1 ],atrs={ a: '<' },name='tag',start=0,stop=11,text="<tag a='<'>",type='otag'""", null ]
     ]
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
@@ -735,7 +735,7 @@ demo_streaming = -> new Promise ( resolve ) ->
 
 ############################################################################################################
 if module is require.main then do => # await do =>
-  # test @
+  test @
   # test @[ "HTML: parse bare" ]
   # demo()
   # await demo_streaming()
@@ -743,7 +743,7 @@ if module is require.main then do => # await do =>
   # test @[ "parse_compact_tagname 2" ]
   # test @[ "HTML: parse (dubious)" ]
   # test @[ "HTML: parse escaped" ]
-  test @[ "HTML: quotes in attribute values" ]
+  # test @[ "HTML: quotes in attribute values" ]
 
 
 
