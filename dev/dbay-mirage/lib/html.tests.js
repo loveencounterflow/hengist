@@ -203,8 +203,82 @@
       }
     };
     //.........................................................................................................
-    // # [ '<py/ling3/',         null, ]
-    probes_and_matchers = [['<title>My Page</title>', '<title>|My Page|</title>', null], ['< title>My Page< /title>', "<error message='extraneous whitespace before tag name'>< title></error>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null], ['<title >My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null], ['<title>My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title>", null], ['<title>My Page</ title>', "<title>|My Page|<error message='extraneous whitespace in closing tag'></ title></error>", null], [/* wrong */ '<title>My Page</title >', '<title>|My Page|</title>', null], ['<title/My\\/Your Page/>', '<title>|My/Your Page|</title>|>'], ['<title>My Page</>', "<title>|My Page|</title>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;&gt;&#39; &lt;--'>></error>"], ['<title/My Page/>', '<title>|My Page|</title>|>'], ['<title/My/Your Page/>', '<title>|My|</title>|Your Page/>'], ['<title/My\npage/', '<title>|My\npage|</title>'], ['<title k=v j=w/My Page/', "<title k='v' j='w'>|My Page|</title>"], ['<title/<b>My</b> Page/', "<title>|<error message='bare active characters'><b>My<</error>|</title>|b> Page/"], ['<title//', '<title>|</title>'], ['<title/>', '<title/>'], ['<title/My Page/', '<title>|My Page|</title>'], ['<title#c1.x/My Page/', '<title>|My Page|</title>'], ['\\<title/>', '&lt;title/>'], ['\\&amp;', '&amp;amp;'], ['foo\\bar', 'foobar'], ['\\abc', 'abc'], ['foo\\\\bar', 'foo\\bar'], ['first\\\nsecond', 'firstsecond'], ['xxx&amp;xxx', 'xxx|(NCR:&amp;)|xxx']];
+    probes_and_matchers = [
+      // # [ '<py/ling3/',         null, ]
+      ['<title>My Page</title>',
+      '<title>|My Page|</title>',
+      null],
+      ['< title>My Page< /title>',
+      `<title&gt;My Page='true'>|<error message='extraneous characters on line 1 column 19: "&lt;"'><</error>|title|(NCR:&gt;)`,
+      null],
+      ['<title >My Page< /title>',
+      "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title|(NCR:&gt;)",
+      null],
+      ['<title>My Page< /title>',
+      "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title|(NCR:&gt;)",
+      null],
+      ['<title>My Page</ title>',
+      "<title>|My Page|<error message='extraneous whitespace in closing tag'></ title&gt;</error>|<error message='Expecting token of type --&gt; i_close &lt;-- but found --&gt; &#39;&#39; &lt;--'>title&gt;</error>",
+      null],
+      // ### wrong ###
+      ['<title>My Page</title >',
+      '<title>|My Page|</title>',
+      null],
+      ['<title/My\\/Your Page/>',
+      '<title>|My/Your Page|</title>|(NCR:&gt;)',
+      null],
+      ['<title>My Page</>',
+      "<title>|My Page|<error message='expected &lt;/title&gt;, got &lt;/&amp;gt;&gt;'></&gt;</error>|<error message='Expecting token of type --&gt; i_close &lt;-- but found --&gt; &#39;&#39; &lt;--'>&gt;</error>",
+      null],
+      ['<title/My Page/>',
+      '<title>|My Page|</title>|(NCR:&gt;)',
+      null],
+      ['<title/My/Your Page/>',
+      '<title>|My|</title>|Your Page/|(NCR:&gt;)',
+      null],
+      ['<title/My\npage/',
+      '<title>|My\npage|</title>',
+      null],
+      ['<title k=v j=w/My Page/',
+      "<title k='v' j='w'>|My Page|</title>",
+      null],
+      ['<title/<b>My</b> Page/',
+      "<title>|<error message='bare active characters'><b>My<</error>|</title>|b> Page/",
+      null],
+      ['<title//',
+      '<title>|</title>',
+      null],
+      ['<title/>',
+      '<title/>',
+      null],
+      ['<title/My Page/',
+      '<title>|My Page|</title>',
+      null],
+      ['<title#c1.x/My Page/',
+      '<title>|My Page|</title>',
+      null],
+      ['\\<title/>',
+      '&lt;title/|(NCR:&gt;)',
+      null],
+      ['\\&amp;',
+      '&amp;amp;',
+      null],
+      ['foo\\bar',
+      'foobar',
+      null],
+      ['\\abc',
+      'abc',
+      null],
+      ['foo\\\\bar',
+      'foo\\bar',
+      null],
+      ['first\\\nsecond',
+      'firstsecond',
+      null],
+      ['xxx&amp;xxx',
+      'xxx|(NCR:&amp;)|xxx',
+      null]
+    ];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -341,7 +415,7 @@
       return `(${token.start}-${token.stop})${R}`;
     };
     //.........................................................................................................
-    probes_and_matchers = [['&foo;', '(0-5)(NCR:named:&foo;)', null], ['abcdef', '(0-6)abcdef', null], ['xxx&#x123;xxx', '(0-3)xxx(3-10)(NCR:ncr:&#x123;)(10-13)xxx', null], ['xxx&#123;xxx', '(0-3)xxx(3-9)(NCR:ncr:&#123;)(9-12)xxx', null], ['xxx&jzr#xe123;xxx', '(0-3)xxx(3-14)(NCR:xncr:&jzr#xe123;)(14-17)xxx', null], ['xxx&amp;xxx', '(0-3)xxx(3-8)(NCR:named:&amp;)(8-11)xxx', null], ['foo &amp;bar&jzr#xe123; baz', '(0-4)foo (4-9)(NCR:named:&amp;)(9-12)bar(12-23)(NCR:xncr:&jzr#xe123;)(23-27) baz', null], ['xxx&a&mp;xxx', "(0-3)xxx(3-9)<error message='bare active characters'>&a&mp;</error>(9-12)xxx", null]];
+    probes_and_matchers = [['<b x="&">&lt;<&foo;', "(0-9)<b x='&amp;'>(0-4)(NCR:named:&lt;)(13-19)<&foo;>(14-19)<error message='Expecting: one of these possible Token sequences:&#10;  1. [i_close]&#10;  2. [i_slash_close]&#10;  3. [stm_slash1]&#10;but found: &#39;&#39;'>&foo;</error>", null], ['&foo;', '(0-5)(NCR:named:&foo;)', null], ['abcdef', '(0-6)abcdef', null], ['xxx&#x123;xxx', '(0-3)xxx(3-10)(NCR:ncr:&#x123;)(10-13)xxx', null], ['xxx&#123;xxx', '(0-3)xxx(3-9)(NCR:ncr:&#123;)(9-12)xxx', null], ['xxx&jzr#xe123;xxx', '(0-3)xxx(3-14)(NCR:xncr:&jzr#xe123;)(14-17)xxx', null], ['xxx&amp;xxx', '(0-3)xxx(3-8)(NCR:named:&amp;)(8-11)xxx', null], ['foo &amp;bar&jzr#xe123; baz', '(0-4)foo (4-9)(NCR:named:&amp;)(9-12)bar(12-23)(NCR:xncr:&jzr#xe123;)(23-27) baz', null], ['xxx&a&mp;xxx', "(0-3)xxx(3-9)<error message='bare active characters'>&a&mp;</error>(9-12)xxx", null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -373,13 +447,13 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // @[ "Mirage HTML: Basic functionality" ]()
-      return test(this["Mirage HTML: quotes in attribute values"]);
+      return test(this);
     })();
   }
 
-  // test @[ "altering mirrored source lines causes error" ]
+  // @[ "Mirage HTML: Basic functionality" ]()
+// test @[ "Mirage HTML: quotes in attribute values" ]
+// test @[ "altering mirrored source lines causes error" ]
 // @[ "altering mirrored source lines causes error" ]()
 // test @[ "Mirage HTML: tag syntax variants" ]
 // @[ "Mirage HTML: XNCR parsing 1" ]()

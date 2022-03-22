@@ -462,6 +462,43 @@ select name from v1 where type in ( 'table', 'view' ) order by nr;`);
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_parse_single_tag = function(cfg) {
+    var CAT, DBay, Mrg, PARAGATE, d, db, i, len, mrg, path, prefix, tokens, txt;
+    ({DBay} = require('../../../apps/dbay'));
+    ({Mrg} = require('../../../apps/dbay-mirage'));
+    prefix = 'mrg';
+    path = PATH.join(DBay.C.autolocation, 'demo-html-parsing.sqlite');
+    db = new DBay({
+      path,
+      recreate: true
+    });
+    mrg = new Mrg({db, prefix});
+    db.create_stdlib();
+    PARAGATE = require('../../../apps/paragate');
+    CAT = require('multimix/lib/cataloguing');
+    //.........................................................................................................
+    // for key from CAT.walk_all_keys_of PARAGATE.HTML.grammar.lexer
+    //   debug '^372^', key
+    // debug PARAGATE.HTML.grammar.lexer.match '<foo>'
+    txt = '<code>foobar</code>';
+    tokens = mrg.html.HTMLISH.parse(txt, mrg.html._get_tag_catalog());
+    for (i = 0, len = tokens.length; i < len; i++) {
+      d = tokens[i];
+      debug('^876^', d);
+    }
+    // find = ( x, pattern ) ->
+    //   for name from walk x, pattern, []
+    // walk = ( x, pattern, stack ) ->
+    // #.........................................................................................................
+    // urge '^438^', k for k of PARAGATE.HTML
+    // debug '^438^', k for k of PARAGATE.HTML.grammar
+    // urge '^438^', k for k of PARAGATE.HTML.grammar.lexer
+    // debug '^438^', k for k of PARAGATE.HTML.grammar.parser
+    //.........................................................................................................
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -470,7 +507,8 @@ select name from v1 where type in ( 'table', 'view' ) order by nr;`);
       // @demo_paragraphs_etc()
       // @demo_html_parsing()
       // @demo_recover_original_text()
-      return this.demo_parse_markdownish();
+      // @demo_parse_markdownish()
+      return this.demo_parse_single_tag();
     })();
   }
 
