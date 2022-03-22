@@ -303,6 +303,35 @@ show_query_plan = ->
   #.........................................................................................................
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@demo_parse_single_tag = ( cfg ) ->
+  { DBay }        = require '../../../apps/dbay'
+  { Mrg }         = require '../../../apps/dbay-mirage'
+  prefix          = 'mrg'
+  path            = PATH.join DBay.C.autolocation, 'demo-html-parsing.sqlite'
+  db              = new DBay { path, recreate: true, }
+  mrg             = new Mrg { db, prefix, }
+  db.create_stdlib()
+  PARAGATE        = require '../../../apps/paragate'
+  CAT             = require 'multimix/lib/cataloguing'
+  #.........................................................................................................
+  # for key from CAT.walk_all_keys_of PARAGATE.HTML.grammar.lexer
+  #   debug '^372^', key
+  # debug PARAGATE.HTML.grammar.lexer.match '<foo>'
+  txt     = '<code>foobar</code>'
+  tokens  = mrg.html.HTMLISH.parse txt, mrg.html._get_tag_catalog()
+  debug '^876^', d for d in tokens
+  # find = ( x, pattern ) ->
+  #   for name from walk x, pattern, []
+  # walk = ( x, pattern, stack ) ->
+  # #.........................................................................................................
+  # urge '^438^', k for k of PARAGATE.HTML
+  # debug '^438^', k for k of PARAGATE.HTML.grammar
+  # urge '^438^', k for k of PARAGATE.HTML.grammar.lexer
+  # debug '^438^', k for k of PARAGATE.HTML.grammar.parser
+  #.........................................................................................................
+  return null
+
 
 
 ############################################################################################################
@@ -312,4 +341,5 @@ if require.main is module then do =>
   # @demo_paragraphs_etc()
   # @demo_html_parsing()
   # @demo_recover_original_text()
-  @demo_parse_markdownish()
+  # @demo_parse_markdownish()
+  @demo_parse_single_tag()
