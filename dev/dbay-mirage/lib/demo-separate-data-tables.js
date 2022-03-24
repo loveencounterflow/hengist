@@ -507,7 +507,7 @@ select name from v1 where type in ( 'table', 'view' ) order by nr;`);
       // @demo_paragraphs_etc()
       // @demo_html_parsing()
       // @demo_recover_original_text()
-      // @demo_parse_markdownish()
+      this.demo_parse_markdownish();
       return this.demo_parse_single_tag();
     })();
   }

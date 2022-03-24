@@ -341,5 +341,13 @@ if require.main is module then do =>
   # @demo_paragraphs_etc()
   # @demo_html_parsing()
   # @demo_recover_original_text()
-  # @demo_parse_markdownish()
+  @demo_parse_markdownish()
   @demo_parse_single_tag()
+
+
+
+
+
+
+
+
