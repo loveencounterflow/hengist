@@ -94,6 +94,7 @@
     "multimix": "^5.0.0",
     "mysql-tokenizer": "^1.0.7",
     "n-readlines": "^1.0.1",
+    "node-ansiparser": "^2.2.0",
     "node-icecream": "^1.0.0",
     "npm": "8.5.1",
     "npm-logical-tree": "^1.2.1",
