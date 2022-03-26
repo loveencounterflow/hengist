@@ -53,9 +53,9 @@
     µ.DOM.append( render_dom, text_dom );
     bottom_dom.scrollIntoView(); }
 
-  var ws = new WebSocket('ws://localhost:8081/');
-  // ws.onopen = function() {          render('CONNECT');                 };
-  // ws.onclose = function() {         render('DISCONNECT');              };
+  var ws = new WebSocket('ws://127.0.0.1:8081/3f16b977b493878f');
+  ws.onopen = function() {          render('CONNECT');                 };
+  ws.onclose = function() {         render('DISCONNECT');              };
   ws.onmessage = function(event) {  render( event.data );  };
   // ws.onmessage = function(event) {  render( event.data );  };
 </script>
