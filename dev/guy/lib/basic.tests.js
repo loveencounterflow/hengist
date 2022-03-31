@@ -773,6 +773,16 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["guy.process.on_exit()"] = function(T, done) {
+    var guy;
+    guy = require(H.guy_path);
+    if (T != null) {
+      T.eq(type_of(guy.process.on_exit), 'function');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
