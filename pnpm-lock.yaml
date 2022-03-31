@@ -36,7 +36,7 @@ specifiers:
   exec-sh: 0.4.0
   execall: 3.0.0
   executive: ^1.6.3
-  exit-hook: 3.0.0
+  exit-hook: '2'
   fast-copy: ^2.1.0
   fast-glob: ^3.2.11
   file-url: ^4.0.0
@@ -168,7 +168,7 @@ dependencies:
   exec-sh: 0.4.0
   execall: 3.0.0
   executive: 1.6.3
-  exit-hook: 3.0.0
+  exit-hook: 2.2.1
   fast-copy: 2.1.1
   fast-glob: 3.2.11
   file-url: 4.0.0
@@ -2140,11 +2140,6 @@ packages:
   /exit-hook/2.2.1:
     resolution: {integrity: sha512-eNTPlAD67BmP31LDINZ3U7HSF8l57TxOY2PmBJ1shpCvpnxBF93mWCE8YHBnXs8qiUZJc9WDcWIeC3a2HIAMfw==}
     engines: {node: '>=6'}
-    dev: false
-
-  /exit-hook/3.0.0:
-    resolution: {integrity: sha512-ElRvnoj3dvOc5WjnQx0CF66rS0xehV6eZdcmqZX17uOLPy3me43frl8UD73Frkx5Aq5kgziMDECjDJR2X1oBFQ==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dev: false
 
   /ext/1.5.0:
