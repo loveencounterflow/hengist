@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, PATH, _strip_ansi, badge, debug, demo_1, demo_2, demo_3, demo_generator, demo_run_1, echo, freeze, help, info, lets, resolve_recursively, rpr, strip_ansi, test, types, urge, warn, whisper;
+  var CND, PATH, _strip_ansi, badge, debug, demo_1, demo_2, demo_3, demo_configurator, demo_generator, echo, freeze, help, info, lets, resolve_recursively, rpr, strip_ansi, test, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -1004,30 +1004,114 @@
       }
     };
     MIXA = require('../../../apps/mixa');
-    T.eq((MIXA.parse(jobdef, ['frobulate', 'path/to/image'])).verdict, {
-      argv: [],
-      parameters: {
-        width: 123,
-        height: 10,
-        image: 'path/to/image'
-      },
-      cmd: 'frobulate'
-    });
+    if (T != null) {
+      T.eq((MIXA.parse(jobdef, ['frobulate', 'path/to/image'])).verdict, {
+        argv: [],
+        parameters: {
+          width: 123,
+          height: 10,
+          image: 'path/to/image'
+        },
+        cmd: 'frobulate'
+      });
+    }
     jobdef.commands.frobulate.flags.image.positional = false;
-    T.eq((MIXA.parse(jobdef, ['frobulate', 'path/to/image'])).verdict, {
-      argv: ['path/to/image'],
-      parameters: {
-        width: 123,
-        height: 10
-      },
-      error: {
-        code: 15,
-        tag: 'EXTRA_FLAGS',
-        message: "command 'frobulate' does not allow extra, got [ 'path/to/image' ]"
-      },
-      cmd: 'help'
-    });
-    if (done != null) {
+    if (T != null) {
+      T.eq((MIXA.parse(jobdef, ['frobulate', 'path/to/image'])).verdict, {
+        argv: ['path/to/image'],
+        parameters: {
+          width: 123,
+          height: 10
+        },
+        error: {
+          code: 15,
+          tag: 'EXTRA_FLAGS',
+          message: "command 'frobulate' does not allow extra, got [ 'path/to/image' ]"
+        },
+        cmd: 'help'
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["MIXA parse with default command"] = function(T, done) {
+    var MIXA, jobdef, jubilee_runner, result;
+    jubilee_runner = function(...P) {
+      return 42;
+    };
+    jobdef = {
+      default_command: 'jubilee',
+      commands: {
+        jubilee: {
+          runner: jubilee_runner
+        },
+        frobulate: {
+          allow_extra: false,
+          flags: {
+            width: {
+              alias: 'w',
+              type: Number,
+              fallback: 123
+            },
+            height: {
+              alias: 'h',
+              type: Number,
+              // positional:     true
+              fallback: 10
+            },
+            image: {
+              alias: 'i',
+              positional: true,
+              type: String
+            }
+          }
+        }
+      }
+    };
+    MIXA = require('../../../apps/mixa');
+    if (T != null) {
+      T.eq((MIXA.parse(jobdef, ['jubilee'])).verdict, {
+        argv: [],
+        parameters: {},
+        runner: jubilee_runner,
+        cmd: 'jubilee'
+      });
+    }
+    if (T != null) {
+      T.eq((MIXA.parse(jobdef, [])).verdict, {
+        argv: [],
+        parameters: {},
+        runner: jubilee_runner,
+        cmd: 'jubilee'
+      });
+    }
+    result = MIXA.run(jobdef, []);
+    if (T != null) {
+      T.eq(types.type_of(result), 'object');
+    }
+    if (T != null) {
+      T.eq(types.type_of(result.verdict), 'object');
+    }
+    if (T != null) {
+      T.eq(result.verdict.argv, []);
+    }
+    if (T != null) {
+      T.eq(result.verdict.parameters, {});
+    }
+    if (T != null) {
+      T.eq(result.verdict.cmd, 'jubilee');
+    }
+    if (T != null) {
+      T.eq(result.verdict.runner, jubilee_runner);
+    }
+    if (T != null) {
+      T.eq(result.output, 42);
+    }
+    if (typeof done === "function") {
       done();
     }
     return null;
@@ -1054,11 +1138,11 @@
     // demonstrate problematic behavior; this should be configurable but for now users must remember to insert
     // `'--'` at the appropriate position:
     result = MIXA.parse(jobdef, ['search', '-iname', 'whatever']);
-    debug('^33344^', result);
+    // debug '^33344^', result
     T.eq(result.verdict.argv, ['-i', '-n', '-a', '-m', '-e', 'whatever']);
     //.........................................................................................................
     result = MIXA.parse(jobdef, ['search', '--', '-iname', 'whatever']);
-    debug('^33344^', result);
+    // debug '^33344^', result
     T.eq(result.verdict.argv, ['-iname', 'whatever']);
     if (done != null) {
       //.........................................................................................................
@@ -1239,99 +1323,51 @@
     return null;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  demo_run_1 = function() {
-    var MIXA, jobdef, line, output, path, ref, ref1, ref2, result;
-    MIXA = require('../../../apps/mixa');
-    jobdef = {
-      exit_on_error: false,
-      meta: {
-        hqx: {
-          type: String
-        }
-      },
-      commands: {
-        list: {
-          allow_extra: true,
-          runner: MIXA.runners.execSync,
-          plus: {
-            executable: 'ls'
-          },
-          flags: {
-            table: {
-              alias: 't',
-              description: "format as ASCII table",
-              type: Boolean
-            }
-          }
-        }
-      }
-    };
-    // debug '^4445-1^', MIXA.parse jobdef, [ 'ls', '-AlF', ]
-    // urge '^21226^', MIXA.parse jobdef, [ '-hd', 'xx/yy', 'ls', '-AlF', ]
-    // urge '^21226^', MIXA.parse jobdef, [ 'ls', 'find', '--', 'dev', '-iname', '*benchmark*', ]
-    // result = MIXA.parse jobdef, [ '--cd', '/tmp', 'list', '--', '-AlF', '.', ]
-    PATH = require('path');
-    path = PATH.relative(process.cwd(), PATH.resolve(PATH.join(__dirname, '../src')));
-    //.........................................................................................................
-    echo('-'.repeat(108));
-    result = MIXA.run(jobdef, ['--cd', path, 'list', '--', '-AlF', '.']);
-    urge('^21226^', result);
-    if ((output = (ref = result.output) != null ? ref.ok : void 0) != null) {
-      (function() {
-        var i, len, ref1, results1;
-        ref1 = output.split('\n');
-        results1 = [];
-        for (i = 0, len = ref1.length; i < len; i++) {
-          line = ref1[i];
-          results1.push(help(line));
-        }
-        return results1;
-      })();
-    }
-    //.........................................................................................................
-    echo('-'.repeat(108));
-    result = MIXA.run(jobdef, ['--cd', path, 'list', '--', '-AlF', '*']);
-    urge('^21226^', result);
-    if ((output = (ref1 = result.output) != null ? ref1.ok : void 0) != null) {
-      (function() {
-        var i, len, ref2, results1;
-        ref2 = output.split('\n');
-        results1 = [];
-        for (i = 0, len = ref2.length; i < len; i++) {
-          line = ref2[i];
-          results1.push(help(line));
-        }
-        return results1;
-      })();
-    }
-    //.........................................................................................................
-    echo('-'.repeat(108));
-    result = MIXA.run(jobdef, ['--cd', path]);
-    urge('^21226^', result);
-    if ((output = (ref2 = result.output) != null ? ref2.ok : void 0) != null) {
-      (function() {
-        var i, len, ref3, results1;
-        ref3 = output.split('\n');
-        results1 = [];
-        for (i = 0, len = ref3.length; i < len; i++) {
-          line = ref3[i];
-          results1.push(help(line));
-        }
-        return results1;
-      })();
-    }
-    //.........................................................................................................
-    echo('-'.repeat(108));
-    debug('^2233^', process.argv);
-    help((MIXA.parse(jobdef, ['--cd', path, 'list'])).verdict);
-    help((MIXA.parse(jobdef, ['node', '--cd', path, 'list'])).verdict);
-    help((MIXA.parse(jobdef, ['/usr/local/bin/node', '--cd', path, 'list'])).verdict);
-    help((MIXA.parse(jobdef, ['/usr/local/bin/node', '/path/to/file', '--cd', path, 'list'])).verdict);
-    help((MIXA.parse(jobdef, process.argv)).verdict);
-    help((MIXA.parse(jobdef, process.argv.slice(0))).verdict);
-    return null;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // @demo_run_1 = ( T, done ) ->
+  //   MIXA = require '../../../apps/mixa'
+  //   jobdef =
+  //     exit_on_error:  false
+  //     meta:
+  //       hqx: { type: String, }
+  //     commands:
+  //       list:
+  //         allow_extra:  true
+  //         runner:       MIXA.runners.execSync
+  //         plus:         { executable: 'ls', }
+  //         flags:
+  //           table: { alias: 't', description: "format as ASCII table", type: Boolean, }
+  //   # debug '^4445-1^', MIXA.parse jobdef, [ 'ls', '-AlF', ]
+  //   # urge '^21226^', MIXA.parse jobdef, [ '-hd', 'xx/yy', 'ls', '-AlF', ]
+  //   # urge '^21226^', MIXA.parse jobdef, [ 'ls', 'find', '--', 'dev', '-iname', '*benchmark*', ]
+  //   # result = MIXA.parse jobdef, [ '--cd', '/tmp', 'list', '--', '-AlF', '.', ]
+  //   PATH = require 'path'
+  //   path = PATH.relative process.cwd(), PATH.resolve PATH.join __dirname, '../src'
+  //   #.........................................................................................................
+  //   echo '-'.repeat 108
+  //   result = MIXA.run jobdef, [ '--cd', path, 'list', '--', '-AlF', '.', ]
+  //   urge '^21226^', result
+  //   ( help line for line in output.split '\n' ) if ( output = result.output?.ok )?
+  //   # #.........................................................................................................
+  //   # echo '-'.repeat 108
+  //   # result = MIXA.run jobdef, [ '--cd', path, 'list', '--', '-AlF', '*', ]
+  //   # urge '^21226^', result
+  //   # ( help line for line in output.split '\n' ) if ( output = result.output?.ok )?
+  //   # #.........................................................................................................
+  //   # echo '-'.repeat 108
+  //   # result = MIXA.run jobdef, [ '--cd', path, ]
+  //   # urge '^21226^', result
+  //   # ( help line for line in output.split '\n' ) if ( output = result.output?.ok )?
+  //   # #.........................................................................................................
+  //   # echo '-'.repeat 108
+  //   # debug '^2233^', process.argv
+  //   # help ( MIXA.parse jobdef, [ '--cd', path, 'list', ] ).verdict
+  //   # help ( MIXA.parse jobdef, [ 'node', '--cd', path, 'list', ] ).verdict
+  //   # help ( MIXA.parse jobdef, [ '/usr/local/bin/node', '--cd', path, 'list', ] ).verdict
+  //   # help ( MIXA.parse jobdef, [ '/usr/local/bin/node', '/path/to/file', '--cd', path, 'list', ] ).verdict
+  //   # help ( MIXA.parse jobdef, process.argv ).verdict
+  //   # help ( MIXA.parse jobdef, process.argv[ .. ] ).verdict
+  //   return done?()
 
   //-----------------------------------------------------------------------------------------------------------
   demo_generator = function() {
@@ -1417,27 +1453,68 @@
     });
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["configurator"] = function(T, done) {
+    var H, MIXA, cfg, key, value;
+    H = require('../../../lib/helpers');
+    MIXA = require('../../../apps/mixa');
+    cfg = MIXA.configurator.read_cfg('hengist-mixa');
+    cfg = (function() {
+      var results1;
+      results1 = [];
+      for (key in cfg) {
+        value = cfg[key];
+        results1.push({key, value});
+      }
+      return results1;
+    })();
+    H.tabulate("cfg", cfg);
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_configurator = function() {
+    var H, MIXA, cfg, key, value;
+    H = require('../../../lib/helpers');
+    MIXA = require('../../../apps/mixa');
+    cfg = MIXA.configurator.read_cfg('hengist');
+    cfg = (function() {
+      var results1;
+      results1 = [];
+      for (key in cfg) {
+        value = cfg[key];
+        results1.push({key, value});
+      }
+      return results1;
+    })();
+    H.tabulate("cfg", cfg);
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
-    (async() => {
+    (() => {
       // MIXA = require '../../../apps/mixa'
       // debug '^4445^', MIXA.parse null, [ '--cd', 'some/place', 'ls', ]
       // debug '^4445^', MIXA.parse null, [ 'cats!' ]
-      // test @
-      // test @[ "MIXA --cd changes process directory" ]
-      // test @[ "MIXA parse with defaults" ]
-      // test @[ "MIXA settings validation 2" ]
-      // test @[ "MIXA types" ]
-      // test @[ "MIXA parse with settings 3" ]
-      // test @[ "MIXA parse with settings 1" ]
-      // @[ "MIXA parse with settings 4" ]()
-      // test @[ "MIXA parse with settings 4" ]
-      // test @[ "MIXA inhibitor avoids rewriting of single-dash flags" ]
-      // demo_3()
-      // demo_run_1()
-      return (await demo_generator());
+      return demo_configurator();
     })();
   }
+
+  // test @
+// test @[ "MIXA --cd changes process directory" ]
+// test @[ "MIXA parse with defaults" ]
+// test @[ "MIXA settings validation 2" ]
+// test @[ "MIXA types" ]
+// test @[ "MIXA parse with settings 3" ]
+// test @[ "MIXA parse with settings 1" ]
+// @[ "MIXA parse with default command" ]()
+// test @[ "MIXA parse with default command" ]
+// test @[ "MIXA inhibitor avoids rewriting of single-dash flags" ]
+// demo_3()
+// @demo_run_1()
+// test @[ "demo_run_1" ]
+// await demo_generator()
 
 }).call(this);
 
