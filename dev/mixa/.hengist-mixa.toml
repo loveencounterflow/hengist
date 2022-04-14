@@ -1,0 +1,17 @@
+
+
+
+
+title = "Hengist/Mixa Sample Configuration"
+
+
+[database]
+server = "192.168.1.1"
+ports = [ 8000, 8001, 8002 ]
+enabled = true
+
+[database.connection]
+max_clients = 5000
+
+
+
