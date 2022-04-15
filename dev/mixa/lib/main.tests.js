@@ -1474,20 +1474,38 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_configurator = function() {
-    var H, MIXA, cfg, key, value;
+    var H, MIXA;
     H = require('../../../lib/helpers');
     MIXA = require('../../../apps/mixa');
-    cfg = MIXA.configurator.read_cfg('hengist');
-    cfg = (function() {
-      var results1;
-      results1 = [];
-      for (key in cfg) {
-        value = cfg[key];
-        results1.push({key, value});
-      }
-      return results1;
+    (() => {      //.........................................................................................................
+      var cfg, key, value;
+      cfg = MIXA.configurator.read_cfg();
+      cfg = (function() {
+        var results1;
+        results1 = [];
+        for (key in cfg) {
+          value = cfg[key];
+          results1.push({key, value});
+        }
+        return results1;
+      })();
+      return H.tabulate("cfg", cfg);
     })();
-    H.tabulate("cfg", cfg);
+    (() => {      //.........................................................................................................
+      var cfg, key, value;
+      cfg = MIXA.configurator.read_cfg(__dirname);
+      cfg = (function() {
+        var results1;
+        results1 = [];
+        for (key in cfg) {
+          value = cfg[key];
+          results1.push({key, value});
+        }
+        return results1;
+      })();
+      return H.tabulate("cfg", cfg);
+    })();
+    //.........................................................................................................
     return null;
   };
 
