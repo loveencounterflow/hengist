@@ -1474,12 +1474,17 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_configurator = function() {
-    var H, MIXA;
+    var H, MIXA, flatten;
     H = require('../../../lib/helpers');
     MIXA = require('../../../apps/mixa');
+    flatten = require('flat');
     (() => {      //.........................................................................................................
       var cfg, key, value;
       cfg = MIXA.configurator.read_cfg();
+      info((require('util')).inspect(cfg));
+      cfg = flatten(cfg, {
+        delimiter: '.'
+      });
       cfg = (function() {
         var results1;
         results1 = [];
@@ -1493,7 +1498,14 @@
     })();
     (() => {      //.........................................................................................................
       var cfg, key, value;
-      cfg = MIXA.configurator.read_cfg(__dirname);
+      cfg = MIXA.configurator.read_cfg({
+        start_path: __dirname,
+        module_name: 'hengist'
+      });
+      info((require('util')).inspect(cfg));
+      cfg = flatten(cfg, {
+        delimiter: '.'
+      });
       cfg = (function() {
         var results1;
         results1 = [];
