@@ -672,9 +672,17 @@ demo_generator = -> new Promise ( done ) =>
 demo_configurator = ->
   H             = require '../../../lib/helpers'
   MIXA          = require '../../../apps/mixa'
-  cfg           = MIXA.configurator.read_cfg 'hengist'
-  cfg           = ( { key, value, } for key, value of cfg )
-  H.tabulate "cfg", cfg
+  #.........................................................................................................
+  do =>
+    cfg           = MIXA.configurator.read_cfg()
+    cfg           = ( { key, value, } for key, value of cfg )
+    H.tabulate "cfg", cfg
+  #.........................................................................................................
+  do =>
+    cfg           = MIXA.configurator.read_cfg __dirname
+    cfg           = ( { key, value, } for key, value of cfg )
+    H.tabulate "cfg", cfg
+  #.........................................................................................................
   return null
 
 
