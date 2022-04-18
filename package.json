@@ -38,6 +38,7 @@
     "csv-parser": "^3.0.0",
     "cupofjoe": "0.2.1",
     "datom": "8.0.3",
+    "dayjs": "^1.11.1",
     "dbay": "13.0.0",
     "deepcopy": "^2.1.0",
     "deepfreeze": "^2.0.0",
