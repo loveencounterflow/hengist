@@ -26,6 +26,7 @@ specifiers:
   csv-parser: ^3.0.0
   cupofjoe: 0.2.1
   datom: 8.0.3
+  dayjs: ^1.11.1
   dbay: 13.0.0
   deepcopy: ^2.1.0
   deepfreeze: ^2.0.0
@@ -162,6 +163,7 @@ dependencies:
   csv-parser: 3.0.0
   cupofjoe: 0.2.1
   datom: 8.0.3
+  dayjs: 1.11.1
   dbay: 13.0.0
   deepcopy: 2.1.0
   deepfreeze: 2.0.0
@@ -1666,6 +1668,10 @@ packages:
       intertype: 7.6.5
       letsfreezethat: 3.1.0
       multimix: 5.0.0
+    dev: false
+
+  /dayjs/1.11.1:
+    resolution: {integrity: sha512-ER7EjqVAMkRRsxNCC5YqJ9d9VQYuWdGt7aiH2qA5R5wt8ZmWaP2dLUSIK6y/kVzLMlmh1Tvu5xUf4M/wdGJ5KA==}
     dev: false
 
   /dbay/13.0.0:
