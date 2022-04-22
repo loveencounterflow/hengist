@@ -295,7 +295,7 @@ show_query_plan = ->
       left join #{prefix}_html_fence_matches using ( dsk, oln, trk, pce )
       order by dsk, oln, trk, pce;"""
   # H.tabulate "#{prefix}_html_tags_and_html",  db SQL"select * from #{prefix}_html_tags_and_html;"
-  # H.tabulate "#{prefix}_html_mirror",         db SQL"select * from #{prefix}_html_mirror;"
+  H.tabulate "#{prefix}_html_mirror",         db SQL"select * from #{prefix}_html_mirror;"
   # H.tabulate "#{prefix}_raw_mirror",          db SQL"select * from #{prefix}_raw_mirror;"
   # H.tabulate "#{prefix}_html_tags",           db SQL"select * from #{prefix}_html_tags;"
   # H.banner "render_dsk";                      echo mrg.html.render_dsk { dsk, }

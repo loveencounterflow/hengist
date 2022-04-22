@@ -30,13 +30,6 @@ H                         = require '../../../lib/helpers'
   freeze }                = GUY.lft
 { to_width }              = require 'to-width'
 { raw }                   = String
-#-----------------------------------------------------------------------------------------------------------
-### https://day.js.org ###
-dayjs                     = require 'dayjs'
-do =>
-  utc           = require 'dayjs/plugin/utc';           dayjs.extend utc
-  relativeTime  = require 'dayjs/plugin/relativeTime';  dayjs.extend relativeTime
-  toObject      = require 'dayjs/plugin/toObject';      dayjs.extend toObject
 
 #-----------------------------------------------------------------------------------------------------------
 tabulate = ( db, query ) -> H.tabulate query, db query
@@ -46,6 +39,13 @@ tabulate = ( db, query ) -> H.tabulate query, db query
 #
 #-----------------------------------------------------------------------------------------------------------
 @demo_datetime = ( cfg ) ->
+  ### https://day.js.org ###
+  dayjs                     = require 'dayjs'
+  do =>
+    utc           = require 'dayjs/plugin/utc';           dayjs.extend utc
+    relativeTime  = require 'dayjs/plugin/relativeTime';  dayjs.extend relativeTime
+    toObject      = require 'dayjs/plugin/toObject';      dayjs.extend toObject
+  #.........................................................................................................
   { DBay }        = require '../../../apps/dbay'
   { SQL }         = DBay
   db              = new DBay()
@@ -85,7 +85,14 @@ tabulate = ( db, query ) -> H.tabulate query, db query
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@demo_stdlib_api = ( cfg ) ->
+@demo_stdlib_api_pre = ( cfg ) ->
+  ### https://day.js.org ###
+  dayjs                     = require 'dayjs'
+  do =>
+    utc           = require 'dayjs/plugin/utc';           dayjs.extend utc
+    relativeTime  = require 'dayjs/plugin/relativeTime';  dayjs.extend relativeTime
+    toObject      = require 'dayjs/plugin/toObject';      dayjs.extend toObject
+  #.........................................................................................................
   { DBay }        = require '../../../apps/dbay'
   { SQL }         = DBay
   db              = new DBay()
@@ -138,6 +145,19 @@ tabulate = ( db, query ) -> H.tabulate query, db query
     debug '^453-2^', dayjs().utc().format                             'YYYY-MM-DD,HH:mm:ss[Z]'
     debug '^453-3^', db.dt_parse '2022-01-01,18:30:00Z'
     debug '^453-3^', db.dt_parse '2022-01-01,18:30:99Z'
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_stdlib_api = ( cfg ) ->
+  { DBay }        = require '../../../apps/dbay'
+  { SQL }         = DBay
+  db              = new DBay()
+  db.create_stdlib()
+  #---------------------------------------------------------------------------------------------------------
+  db ->
+    debug '^34534^', db.dt_now()
+    tabulate db, SQL"""select std_dt_now() as date;"""
+    tabulate db, SQL"""select std_dt_from_now( '2022-01-01,18:30:00Z' ) as date;"""
   return null
 
 ############################################################################################################
