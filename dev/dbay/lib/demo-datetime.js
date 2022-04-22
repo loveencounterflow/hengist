@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, GUY, H, PATH, badge, dayjs, debug, echo, equals, freeze, help, info, isa, lets, raw, rpr, tabulate, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, GUY, H, PATH, badge, debug, echo, equals, freeze, help, info, isa, lets, raw, rpr, tabulate, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -44,20 +44,6 @@
   ({raw} = String);
 
   //-----------------------------------------------------------------------------------------------------------
-  /* https://day.js.org */
-  dayjs = require('dayjs');
-
-  (() => {
-    var relativeTime, toObject, utc;
-    utc = require('dayjs/plugin/utc');
-    dayjs.extend(utc);
-    relativeTime = require('dayjs/plugin/relativeTime');
-    dayjs.extend(relativeTime);
-    toObject = require('dayjs/plugin/toObject');
-    return dayjs.extend(toObject);
-  })();
-
-  //-----------------------------------------------------------------------------------------------------------
   tabulate = function(db, query) {
     return H.tabulate(query, db(query));
   };
@@ -66,7 +52,19 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_datetime = function(cfg) {
-    var DBay, SQL, db;
+    /* https://day.js.org */
+    var DBay, SQL, dayjs, db;
+    dayjs = require('dayjs');
+    (() => {
+      var relativeTime, toObject, utc;
+      utc = require('dayjs/plugin/utc');
+      dayjs.extend(utc);
+      relativeTime = require('dayjs/plugin/relativeTime');
+      dayjs.extend(relativeTime);
+      toObject = require('dayjs/plugin/toObject');
+      return dayjs.extend(toObject);
+    })();
+    //.........................................................................................................
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
     db = new DBay();
@@ -108,8 +106,20 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.demo_stdlib_api = function(cfg) {
-    var DBay, SQL, create_stdlib, db;
+  this.demo_stdlib_api_pre = function(cfg) {
+    /* https://day.js.org */
+    var DBay, SQL, create_stdlib, dayjs, db;
+    dayjs = require('dayjs');
+    (() => {
+      var relativeTime, toObject, utc;
+      utc = require('dayjs/plugin/utc');
+      dayjs.extend(utc);
+      relativeTime = require('dayjs/plugin/relativeTime');
+      dayjs.extend(relativeTime);
+      toObject = require('dayjs/plugin/toObject');
+      return dayjs.extend(toObject);
+    })();
+    //.........................................................................................................
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
     db = new DBay();
@@ -195,6 +205,22 @@
       debug('^453-2^', dayjs().utc().format('YYYY-MM-DD,HH:mm:ss[Z]'));
       debug('^453-3^', db.dt_parse('2022-01-01,18:30:00Z'));
       return debug('^453-3^', db.dt_parse('2022-01-01,18:30:99Z'));
+    });
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_stdlib_api = function(cfg) {
+    var DBay, SQL, db;
+    ({DBay} = require('../../../apps/dbay'));
+    ({SQL} = DBay);
+    db = new DBay();
+    db.create_stdlib();
+    //---------------------------------------------------------------------------------------------------------
+    db(function() {
+      debug('^34534^', db.dt_now());
+      tabulate(db, SQL`select std_dt_now() as date;`);
+      return tabulate(db, SQL`select std_dt_from_now( '2022-01-01,18:30:00Z' ) as date;`);
     });
     return null;
   };
