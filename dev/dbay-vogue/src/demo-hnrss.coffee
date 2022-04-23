@@ -297,10 +297,16 @@ demo_hnrss = ->
   #.........................................................................................................
   # demo_trends_as_table hnrss
   #.........................................................................................................
-  return null
+  return hnrss
 
 #-----------------------------------------------------------------------------------------------------------
-relation_as_html = ( cfg ) ->
+demo_serve = ( cfg ) ->
+  { Vogue_server, } = require '../../../apps/dbay-vogue/lib/server'
+  hnrss         = await demo_hnrss()
+  vogue_server  = new Vogue_server { client: hnrss, }
+  debug '^45345^', vogue_server
+  debug '^45345^', ( k for k of vogue_server )
+  debug '^45345^', await vogue_server.start()
 
 
 
@@ -310,7 +316,8 @@ relation_as_html = ( cfg ) ->
 if module is require.main then do =>
   # await demo_zvg_online_net()
   # await demo_zvg24_net()
-  await demo_hnrss()
+  # await demo_hnrss()
+  await demo_serve()
   # view-source:https://www.skypack.dev/search?q=sqlite&p=1
   # await demo_oanda_com_jsdom()
   # f()
