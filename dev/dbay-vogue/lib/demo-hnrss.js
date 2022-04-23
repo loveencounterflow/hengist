@@ -7,7 +7,7 @@
 
   rpr = CND.rpr;
 
-  badge = 'ISOTERM/CLI';
+  badge = 'DBAY-VOGUE/DEMO';
 
   debug = CND.get_logger('debug', badge);
 
@@ -26,8 +26,7 @@
   types = new (require('intertype')).Intertype();
 
   //...........................................................................................................
-  (require('mixa/lib/check-package-versions'))(require('../pinned-package-versions.json'));
-
+  // ( require 'mixa/lib/check-package-versions' ) require '../pinned-package-versions.json'
   PATH = require('path');
 
   FS = require('fs');
@@ -36,17 +35,17 @@
 
   CHEERIO = require('cheerio');
 
-  H = require('./helpers');
+  GUY = require('../../../apps/guy');
 
-  GUY = require('guy');
-
-  ({Scraper} = require('./main'));
-
-  ({DBay} = require('dbay'));
+  ({DBay} = require('../../../apps/dbay'));
 
   ({SQL} = DBay);
 
-  ({HDML} = require('./hdml2'));
+  ({Scraper} = require('../../../apps/dbay-vogue'));
+
+  ({HDML} = require('../../../apps/dbay-vogue/lib/hdml2'));
+
+  H = require('../../../apps/dbay-vogue/lib/helpers');
 
   //===========================================================================================================
 
@@ -338,22 +337,22 @@
     });
     await (async() => {      //.........................................................................................................
       var buffer;
-      buffer = FS.readFileSync(PATH.join(__dirname, '../sample-data/hnrss.org_,_newest.001.xml'));
+      buffer = FS.readFileSync(PATH.join(__dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.001.xml'));
       return (await hnrss.scrape_html(buffer));
     })();
     await (async() => {      //.........................................................................................................
       var buffer;
-      buffer = FS.readFileSync(PATH.join(__dirname, '../sample-data/hnrss.org_,_newest.002.xml'));
+      buffer = FS.readFileSync(PATH.join(__dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.002.xml'));
       return (await hnrss.scrape_html(buffer));
     })();
     await (async() => {      //.........................................................................................................
       var buffer;
-      buffer = FS.readFileSync(PATH.join(__dirname, '../sample-data/hnrss.org_,_newest.003.xml'));
+      buffer = FS.readFileSync(PATH.join(__dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.003.xml'));
       return (await hnrss.scrape_html(buffer));
     })();
     await (async() => {      //.........................................................................................................
       var buffer;
-      buffer = FS.readFileSync(PATH.join(__dirname, '../sample-data/hnrss.org_,_newest.004.xml'));
+      buffer = FS.readFileSync(PATH.join(__dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.004.xml'));
       return (await hnrss.scrape_html(buffer));
     })();
     //.........................................................................................................
