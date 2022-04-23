@@ -244,16 +244,16 @@ class Hnrss
     title_html  = HDML.text details.title[ 0 .. 50 ] ### TAINT use proper way to shorten string ###
     #.......................................................................................................
     tds         = [
-      HDML.embrace 'td', null, dsk_html
-      HDML.embrace 'td', null, sid_html
-      HDML.embrace 'td', null, id_html
-      HDML.embrace 'td', null, ts_html
-      HDML.embrace 'td', null, rank_html
-      HDML.embrace 'td', null, trend_html
-      HDML.embrace 'td', null, title_html
+      HDML.insert 'td', dsk_html
+      HDML.insert 'td', sid_html
+      HDML.insert 'td', id_html
+      HDML.insert 'td', ts_html
+      HDML.insert 'td', rank_html
+      HDML.insert 'td', trend_html
+      HDML.insert 'td', title_html
       ]
     #.........................................................................................................
-    return HDML.embrace 'tr', null, tds.join ''
+    return HDML.insert 'tr', null, tds.join ''
 
 #-----------------------------------------------------------------------------------------------------------
 demo_hnrss = ->
