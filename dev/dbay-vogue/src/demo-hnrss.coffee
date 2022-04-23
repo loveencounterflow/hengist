@@ -6,7 +6,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'ISOTERM/CLI'
+badge                     = 'DBAY-VOGUE/DEMO'
 debug                     = CND.get_logger 'debug',     badge
 warn                      = CND.get_logger 'warn',      badge
 info                      = CND.get_logger 'info',      badge
@@ -16,17 +16,17 @@ whisper                   = CND.get_logger 'whisper',   badge
 echo                      = CND.echo.bind CND
 types                     = new ( require 'intertype' ).Intertype()
 #...........................................................................................................
-( require 'mixa/lib/check-package-versions' ) require '../pinned-package-versions.json'
+# ( require 'mixa/lib/check-package-versions' ) require '../pinned-package-versions.json'
 PATH                      = require 'path'
 FS                        = require 'fs'
 got                       = require 'got'
 CHEERIO                   = require 'cheerio'
-H                         = require './helpers'
-GUY                       = require 'guy'
-{ Scraper, }              = require './main'
-{ DBay, }                 = require 'dbay'
+GUY                       = require '../../../apps/guy'
+{ DBay, }                 = require '../../../apps/dbay'
 { SQL, }                  = DBay
-{ HDML, }                 = require './hdml2'
+{ Scraper, }              = require '../../../apps/dbay-vogue'
+{ HDML, }                 = require '../../../apps/dbay-vogue/lib/hdml2'
+H                         = require '../../../apps/dbay-vogue/lib/helpers'
 
 
 #===========================================================================================================
@@ -266,19 +266,19 @@ demo_hnrss = ->
   hnrss.scr.queries.insert_datasource.run { dsk: 'hn', url: 'http://nourl', }
   #.........................................................................................................
   await do =>
-    buffer    = FS.readFileSync PATH.join __dirname, '../sample-data/hnrss.org_,_newest.001.xml'
+    buffer    = FS.readFileSync PATH.join __dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.001.xml'
     await hnrss.scrape_html buffer
   #.........................................................................................................
   await do =>
-    buffer    = FS.readFileSync PATH.join __dirname, '../sample-data/hnrss.org_,_newest.002.xml'
+    buffer    = FS.readFileSync PATH.join __dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.002.xml'
     await hnrss.scrape_html buffer
   #.........................................................................................................
   await do =>
-    buffer    = FS.readFileSync PATH.join __dirname, '../sample-data/hnrss.org_,_newest.003.xml'
+    buffer    = FS.readFileSync PATH.join __dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.003.xml'
     await hnrss.scrape_html buffer
   #.........................................................................................................
   await do =>
-    buffer    = FS.readFileSync PATH.join __dirname, '../sample-data/hnrss.org_,_newest.004.xml'
+    buffer    = FS.readFileSync PATH.join __dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.004.xml'
     await hnrss.scrape_html buffer
   #.........................................................................................................
   # H.tabulate "trends", hnrss.scr.db SQL"""select * from _scr_trends order by pid;"""
