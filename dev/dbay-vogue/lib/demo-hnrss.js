@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CHEERIO, CND, DBay, FS, GUY, H, HDML, Hnrss, PATH, SQL, Scraper, badge, debug, demo_1, demo_hnrss, demo_zvg24_net, demo_zvg_online_net, echo, got, help, info, relation_as_html, rpr, types, urge, warn, whisper;
+  var CHEERIO, CND, DBay, FS, GUY, H, HDML, Hnrss, PATH, SQL, Scraper, badge, debug, demo_1, demo_hnrss, demo_serve, demo_zvg24_net, demo_zvg_online_net, echo, got, help, info, rpr, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -315,9 +315,9 @@
       trend_html = HDML.text(JSON.stringify(trend));
       title_html = HDML.text(details.title.slice(0, 51));
       //.......................................................................................................
-      /* TAINT use proper way to shorten string */      tds = [HDML.embrace('td', null, dsk_html), HDML.embrace('td', null, sid_html), HDML.embrace('td', null, id_html), HDML.embrace('td', null, ts_html), HDML.embrace('td', null, rank_html), HDML.embrace('td', null, trend_html), HDML.embrace('td', null, title_html)];
+      /* TAINT use proper way to shorten string */      tds = [HDML.insert('td', dsk_html), HDML.insert('td', sid_html), HDML.insert('td', id_html), HDML.insert('td', ts_html), HDML.insert('td', rank_html), HDML.insert('td', trend_html), HDML.insert('td', title_html)];
       //.........................................................................................................
-      return HDML.embrace('tr', null, tds.join(''));
+      return HDML.insert('tr', null, tds.join(''));
     }
 
   };
@@ -372,18 +372,36 @@
     //.........................................................................................................
     // demo_trends_as_table hnrss
     //.........................................................................................................
-    return null;
+    return hnrss;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  relation_as_html = function(cfg) {};
+  demo_serve = async function(cfg) {
+    var Vogue_server, hnrss, k, vogue_server;
+    ({Vogue_server} = require('../../../apps/dbay-vogue/lib/server'));
+    hnrss = (await demo_hnrss());
+    vogue_server = new Vogue_server({
+      client: hnrss
+    });
+    debug('^45345^', vogue_server);
+    debug('^45345^', (function() {
+      var results;
+      results = [];
+      for (k in vogue_server) {
+        results.push(k);
+      }
+      return results;
+    })());
+    return debug('^45345^', (await vogue_server.start()));
+  };
 
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
       // await demo_zvg_online_net()
       // await demo_zvg24_net()
-      return (await demo_hnrss());
+      // await demo_hnrss()
+      return (await demo_serve());
     })();
   }
 
