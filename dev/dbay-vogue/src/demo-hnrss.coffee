@@ -27,6 +27,7 @@ GUY                       = require '../../../apps/guy'
 { Scraper, }              = require '../../../apps/dbay-vogue'
 { HDML, }                 = require '../../../apps/dbay-vogue/lib/hdml2'
 H                         = require '../../../apps/dbay-vogue/lib/helpers'
+glob                      = require 'glob'
 
 
 #===========================================================================================================
@@ -308,21 +309,11 @@ demo_hnrss = ->
   # H.tabulate "scr", hnrss.scr.db SQL"select * from sqlite_schema;"
   hnrss.scr.queries.insert_datasource.run { dsk: 'hn', url: 'http://nourl', }
   #.........................................................................................................
-  await do =>
-    buffer    = FS.readFileSync PATH.join __dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.001.xml'
-    await hnrss.scrape_html buffer
-  #.........................................................................................................
-  await do =>
-    buffer    = FS.readFileSync PATH.join __dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.002.xml'
-    await hnrss.scrape_html buffer
-  #.........................................................................................................
-  await do =>
-    buffer    = FS.readFileSync PATH.join __dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.003.xml'
-    await hnrss.scrape_html buffer
-  #.........................................................................................................
-  await do =>
-    buffer    = FS.readFileSync PATH.join __dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.004.xml'
-    await hnrss.scrape_html buffer
+  glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/hnrss.org_,_newest.???.xml'
+  for path in glob.sync glob_pattern
+    await do =>
+      buffer    = FS.readFileSync path
+      await hnrss.scrape_html buffer
   #.........................................................................................................
   # H.tabulate "trends", hnrss.scr.db SQL"""select * from _scr_trends order by pid;"""
   # H.tabulate "trends", hnrss.scr.db SQL"""
