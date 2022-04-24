@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CHEERIO, CND, DBay, FS, GUY, H, HDML, Hnrss, PATH, SQL, Scraper, badge, debug, demo_1, demo_hnrss, demo_serve, demo_zvg24_net, demo_zvg_online_net, echo, got, help, info, rpr, types, urge, warn, whisper;
+  var CHEERIO, CND, DBay, FS, GUY, H, HDML, Hnrss, PATH, SQL, Scraper, badge, debug, demo_1, demo_hnrss, demo_serve, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -46,6 +46,8 @@
   ({HDML} = require('../../../apps/dbay-vogue/lib/hdml2'));
 
   H = require('../../../apps/dbay-vogue/lib/helpers');
+
+  glob = require('glob');
 
   //===========================================================================================================
 
@@ -302,12 +304,27 @@
 
     //---------------------------------------------------------------------------------------------------------
     get_sparkline(trend) {
-      var R, i, idx, len, rank, values, values_json;
-      values = [];
+      var R, dense_trend, i, j, len, len1, rank, sid, values, values_json;
+      // # values = [ { sid: -1, rank: -1,  }, ]
+      // values = []
+      // for [ sid, rank, ] in trend
+      //   values.push { sid, rank: -rank, }
+      // values.unshift { sid: -1, rank: -1, } if values.length < 2
+      //.......................................................................................................
+      dense_trend = [];
       for (i = 0, len = trend.length; i < len; i++) {
-        [idx, rank] = trend[i];
-        values.push({idx, rank});
+        [sid, rank] = trend[i];
+        dense_trend[sid] = rank;
       }
+      // for rank, sid in dense_trend
+      //   dense_trend[ sid ] = 21 unless rank?
+      // dense_trend.unshift 21 while dense_trend.length < 12
+      values = [];
+      for (sid = j = 0, len1 = dense_trend.length; j < len1; sid = ++j) {
+        rank = dense_trend[sid];
+        values.push({sid, rank});
+      }
+      //.......................................................................................................
       values_json = JSON.stringify(values);
       //.......................................................................................................
       R = `<script>
@@ -315,20 +332,36 @@ var data      = ${values_json};
 var plot_cfg  = {
   marks: [
     Plot.line( data, {
-      x:            'idx',
+      x:            'sid',
       y:            'rank',
-      // stroke: 'brand',
+      stroke:       'red',
       strokeWidth:  4,
-      curve:        'cardinal' } ),
+      // curve:        'step' } ),
+      curve:        'linear' } ),
+      // curve:        'cardinal' } ),
+    Plot.dot( data, {
+      x:            'sid',
+      y:            'rank',
+      stroke:       'red',
+      fill:         'red',
+      strokeWidth:  4, } ),
     ],
-  width:      100,
+  width:      500,
   height:     100,
-  x:          { ticks: 3 },
+  x:          { ticks: 12, domain: [ 0, 12, ], step: 1, },
+  y:          { ticks: 4, domain: [ 0, 20, ], step: 1, reverse: true, },
   marginLeft: 50,
-  color: {
-    legend: true,
-    width: 554,
-    columns: '120px', } };
+  // color: {
+  //   type: "linear",
+  //   scheme: "cividis",
+  //   legend: true,
+  //   domain: [0, 20],
+  //   range: [0, 1] },
+  };
+  // color: {
+  //   legend: true,
+  //   width: 554,
+  //   columns: '120px', } };
 document.body.append( Plot.plot( plot_cfg ) );
 </script>`;
       //.......................................................................................................
@@ -370,7 +403,7 @@ document.body.append( Plot.plot( plot_cfg ) );
 
   //-----------------------------------------------------------------------------------------------------------
   demo_hnrss = async function() {
-    var hnrss;
+    var glob_pattern, hnrss, i, len, path, ref;
     // #.........................................................................................................
     // do =>
     //   scraper   = new Hnrss()
@@ -381,26 +414,17 @@ document.body.append( Plot.plot( plot_cfg ) );
       dsk: 'hn',
       url: 'http://nourl'
     });
-    await (async() => {      //.........................................................................................................
-      var buffer;
-      buffer = FS.readFileSync(PATH.join(__dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.001.xml'));
-      return (await hnrss.scrape_html(buffer));
-    })();
-    await (async() => {      //.........................................................................................................
-      var buffer;
-      buffer = FS.readFileSync(PATH.join(__dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.002.xml'));
-      return (await hnrss.scrape_html(buffer));
-    })();
-    await (async() => {      //.........................................................................................................
-      var buffer;
-      buffer = FS.readFileSync(PATH.join(__dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.003.xml'));
-      return (await hnrss.scrape_html(buffer));
-    })();
-    await (async() => {      //.........................................................................................................
-      var buffer;
-      buffer = FS.readFileSync(PATH.join(__dirname, '../../../apps/dbay-vogue/sample-data/hnrss.org_,_newest.004.xml'));
-      return (await hnrss.scrape_html(buffer));
-    })();
+    //.........................................................................................................
+    glob_pattern = PATH.join(__dirname, '../../../assets/dbay-vogue/hnrss.org_,_newest.???.xml');
+    ref = glob.sync(glob_pattern);
+    for (i = 0, len = ref.length; i < len; i++) {
+      path = ref[i];
+      await (async() => {
+        var buffer;
+        buffer = FS.readFileSync(path);
+        return (await hnrss.scrape_html(buffer));
+      })();
+    }
     //.........................................................................................................
     // H.tabulate "trends", hnrss.scr.db SQL"""select * from _scr_trends order by pid;"""
     // H.tabulate "trends", hnrss.scr.db SQL"""
