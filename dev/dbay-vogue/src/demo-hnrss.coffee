@@ -20,6 +20,8 @@ types                     = new ( require 'intertype' ).Intertype()
 PATH                      = require 'path'
 FS                        = require 'fs'
 got                       = require 'got'
+sparkline                 = require 'node-sparkline'
+sparkly                   = require 'sparkly'
 CHEERIO                   = require 'cheerio'
 GUY                       = require '../../../apps/guy'
 { DBay, }                 = require '../../../apps/dbay'
@@ -223,7 +225,30 @@ class Hnrss
     #   order by sid, rank;"""
     return null
 
-  #-----------------------------------------------------------------------------------------------------------
+  #---------------------------------------------------------------------------------------------------------
+  get_sparkline: ( trend ) ->
+    values = [ 0, ]
+    for [ idx, rank, ] in trend
+      values[ idx ] = rank
+    for value, idx in values
+      values[ idx ] = 0 unless value?
+    values.unshift 0 while values.length < 10
+    # values = values [ ... 10 ] if values.length > 10
+    cfg =
+      values:         values #* <Array> An array of values to draw the sparkline.
+      # width:          # <Number> The width in pixels to fix for the generated SVG. Default: 135
+      # height:         # <Number> The height in pixels to fix for the generated SVG. Default: 50
+      stroke:         'red' # <String> The stroke color. An hexadecimal value or one of these generic names. Default: #57bd0f
+      strokeWidth:    5   # <Number> The stroke width in pixels. Min: 0 Default: 1.25
+      strokeOpacity:  1   # The stroke opacity. Min: 0 Max: 1 Default: 1
+    r1 = sparkline cfg
+    #.......................................................................................................
+    r2 = sparkly values, { minimum: -5, maximum: 20, }
+    #.......................................................................................................
+    #.......................................................................................................
+    return r1 + r2
+
+  #---------------------------------------------------------------------------------------------------------
   get_html_for_trends: ( row ) ->
     { dsk
       sid
@@ -233,6 +258,10 @@ class Hnrss
       trend
       details } = row
     #.......................................................................................................
+    { title
+      discussion_url
+      article_url   } = details
+    #.......................................................................................................
     trend       = JSON.parse trend
     details     = JSON.parse details
     dsk_html    = HDML.text dsk
@@ -240,8 +269,15 @@ class Hnrss
     ts_html     = HDML.text ts
     id_html     = HDML.text pid
     rank_html   = HDML.text "#{rank}"
+    # debug '^354534^', rpr details
+    # debug '^354534^', rpr details.title
+    # debug '^354534^', rpr title
+    # debug '^354534^', rpr discussion_url
+    # debug '^354534^', rpr article_url
+    # debug '^354534^', types.type_of HDML.insert 'a', { href: discussion_url, }, HDML.text title
+    # process.exit 111
     trend_html  = HDML.text JSON.stringify trend
-    title_html  = HDML.text details.title[ 0 .. 50 ] ### TAINT use proper way to shorten string ###
+    title_html  = HDML.insert 'a', { href: details.discussion_url, }, HDML.text details.title
     #.......................................................................................................
     tds         = [
       HDML.insert 'td', dsk_html
@@ -249,10 +285,11 @@ class Hnrss
       HDML.insert 'td', id_html
       HDML.insert 'td', ts_html
       HDML.insert 'td', rank_html
+      HDML.insert 'td', @get_sparkline trend
       HDML.insert 'td', trend_html
       HDML.insert 'td', title_html
       ]
-    #.........................................................................................................
+    #.......................................................................................................
     return HDML.insert 'tr', null, tds.join ''
 
 #-----------------------------------------------------------------------------------------------------------
