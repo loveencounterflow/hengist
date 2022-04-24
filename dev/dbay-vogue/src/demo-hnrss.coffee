@@ -226,9 +226,20 @@ class Hnrss
 
   #---------------------------------------------------------------------------------------------------------
   get_sparkline: ( trend ) ->
-    values = []
-    for [ idx, rank, ] in trend
-      values.push { idx, rank, }
+    # # values = [ { sid: -1, rank: -1,  }, ]
+    # values = []
+    # for [ sid, rank, ] in trend
+    #   values.push { sid, rank: -rank, }
+    # values.unshift { sid: -1, rank: -1, } if values.length < 2
+    #.......................................................................................................
+    dense_trend         = []
+    dense_trend[ sid ]  = rank for [ sid, rank, ] in trend
+    # for rank, sid in dense_trend
+    #   dense_trend[ sid ] = 21 unless rank?
+    # dense_trend.unshift 21 while dense_trend.length < 12
+    values              = []
+    values.push { sid, rank, } for rank, sid in dense_trend
+    #.......................................................................................................
     values_json = JSON.stringify values
     #.......................................................................................................
     R = """<script>
@@ -236,20 +247,36 @@ class Hnrss
       var plot_cfg  = {
         marks: [
           Plot.line( data, {
-            x:            'idx',
+            x:            'sid',
             y:            'rank',
-            // stroke: 'brand',
+            stroke:       'red',
             strokeWidth:  4,
-            curve:        'cardinal' } ),
+            // curve:        'step' } ),
+            curve:        'linear' } ),
+            // curve:        'cardinal' } ),
+          Plot.dot( data, {
+            x:            'sid',
+            y:            'rank',
+            stroke:       'red',
+            fill:         'red',
+            strokeWidth:  4, } ),
           ],
-        width:      100,
+        width:      500,
         height:     100,
-        x:          { ticks: 3 },
+        x:          { ticks: 12, domain: [ 0, 12, ], step: 1, },
+        y:          { ticks: 4, domain: [ 0, 20, ], step: 1, reverse: true, },
         marginLeft: 50,
-        color: {
-          legend: true,
-          width: 554,
-          columns: '120px', } };
+        // color: {
+        //   type: "linear",
+        //   scheme: "cividis",
+        //   legend: true,
+        //   domain: [0, 20],
+        //   range: [0, 1] },
+        };
+        // color: {
+        //   legend: true,
+        //   width: 554,
+        //   columns: '120px', } };
       document.body.append( Plot.plot( plot_cfg ) );
       </script>"""
     #.......................................................................................................
