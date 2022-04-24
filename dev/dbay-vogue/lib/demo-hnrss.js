@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CHEERIO, CND, DBay, FS, GUY, H, HDML, Hnrss, PATH, SQL, Scraper, badge, debug, demo_1, demo_hnrss, demo_serve, demo_zvg24_net, demo_zvg_online_net, echo, got, help, info, rpr, sparkline, sparkly, types, urge, warn, whisper;
+  var CHEERIO, CND, DBay, FS, GUY, H, HDML, Hnrss, PATH, SQL, Scraper, badge, debug, demo_1, demo_hnrss, demo_serve, demo_zvg24_net, demo_zvg_online_net, echo, got, help, info, rpr, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -32,10 +32,6 @@
   FS = require('fs');
 
   got = require('got');
-
-  sparkline = require('node-sparkline');
-
-  sparkly = require('sparkly');
 
   CHEERIO = require('cheerio');
 
@@ -306,39 +302,37 @@
 
     //---------------------------------------------------------------------------------------------------------
     get_sparkline(trend) {
-      var cfg, i, idx, j, len, len1, r1, r2, rank, value, values;
-      values = [0];
+      var R, i, idx, len, rank, values, values_json;
+      values = [];
       for (i = 0, len = trend.length; i < len; i++) {
         [idx, rank] = trend[i];
-        values[idx] = rank;
+        values.push({idx, rank});
       }
-      for (idx = j = 0, len1 = values.length; j < len1; idx = ++j) {
-        value = values[idx];
-        if (value == null) {
-          values[idx] = 0;
-        }
-      }
-      while (values.length < 10) {
-        values.unshift(0);
-      }
-      // values = values [ ... 10 ] if values.length > 10
-      cfg = {
-        values: values, //* <Array> An array of values to draw the sparkline.
-        // width:          # <Number> The width in pixels to fix for the generated SVG. Default: 135
-        // height:         # <Number> The height in pixels to fix for the generated SVG. Default: 50
-        stroke: 'red', // <String> The stroke color. An hexadecimal value or one of these generic names. Default: #57bd0f
-        strokeWidth: 5, // <Number> The stroke width in pixels. Min: 0 Default: 1.25
-        strokeOpacity: 1 // The stroke opacity. Min: 0 Max: 1 Default: 1
-      };
-      r1 = sparkline(cfg);
+      values_json = JSON.stringify(values);
       //.......................................................................................................
-      r2 = sparkly(values, {
-        minimum: -5,
-        maximum: 20
-      });
+      R = `<script>
+var data      = ${values_json};
+var plot_cfg  = {
+  marks: [
+    Plot.line( data, {
+      x:            'idx',
+      y:            'rank',
+      // stroke: 'brand',
+      strokeWidth:  4,
+      curve:        'cardinal' } ),
+    ],
+  width:      100,
+  height:     100,
+  x:          { ticks: 3 },
+  marginLeft: 50,
+  color: {
+    legend: true,
+    width: 554,
+    columns: '120px', } };
+document.body.append( Plot.plot( plot_cfg ) );
+</script>`;
       //.......................................................................................................
-      //.......................................................................................................
-      return r1 + r2;
+      return R;
     }
 
     //---------------------------------------------------------------------------------------------------------
