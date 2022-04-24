@@ -89,6 +89,7 @@ specifiers:
   n-readlines: ^1.0.1
   node-ansiparser: ^2.2.0
   node-icecream: ^1.0.0
+  node-sparkline: ^1.2.0
   npm: 8.5.1
   npm-logical-tree: ^1.2.1
   number-format.js: ^2.0.9
@@ -115,6 +116,7 @@ specifiers:
   simple-git: 2.47.0
   source-map: ^0.7.3
   source-map-resolve: ^0.6.0
+  sparkly: '5'
   sql-highlight: ^4.0.1
   sql-template: ^1.2.2
   sql.js: 1.6.2
@@ -227,6 +229,7 @@ dependencies:
   n-readlines: 1.0.1
   node-ansiparser: 2.2.0
   node-icecream: 1.0.0
+  node-sparkline: 1.2.0
   npm: 8.5.1
   npm-logical-tree: 1.2.1
   number-format.js: 2.0.9
@@ -253,6 +256,7 @@ dependencies:
   simple-git: 2.47.0
   source-map: 0.7.3
   source-map-resolve: 0.6.0
+  sparkly: 5.0.0
   sql-highlight: 4.0.1
   sql-template: 1.2.2
   sql.js: 1.6.2
@@ -3977,6 +3981,11 @@ packages:
     resolution: {integrity: sha512-CqyzN6z7Q6aMeF/ktcMVTzhAHCEpf8SOarwpzpf8pNBY2k5/oM34UHldUwp8VKI7uxct2HxSRdJjBaZeESzcxA==}
     dev: false
 
+  /node-sparkline/1.2.0:
+    resolution: {integrity: sha512-1ABAWO+/ZZSQiHgrNmOKG+5YC8ZpdrD5lFAlTODXzuxAHplnlZt0WAjQykGTfO7gVxZ3RaGj7z+VwELn6H4KMQ==}
+    engines: {node: '>=10.0.0', npm: '>=5.6.0'}
+    dev: false
+
   /nopt/5.0.0:
     resolution: {integrity: sha512-Tbj67rffqceeLpcRXrT7vKAN8CwfPeIBgM7E6iBkmKLV7bEMwpGgYLGv0jACUsECaa/vuxP0IjEont6umdMgtQ==}
     engines: {node: '>=6'}
@@ -4998,6 +5007,13 @@ packages:
 
   /sourcemap-codec/1.4.8:
     resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
+    dev: false
+
+  /sparkly/5.0.0:
+    resolution: {integrity: sha512-lUyRXSbzXn0A/tnAPPWjTJ/gtq4qq6RJ4+1tGwnjUb+TmeJfxr1Ata36rxvCYrD90yDB2xRSxhpgmusuR8ep3w==}
+    engines: {node: '>=8'}
+    dependencies:
+      chalk: 2.4.2
     dev: false
 
   /spdx-correct/3.1.1:
