@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+home="$(realpath "$(realpath "${BASH_SOURCE[0]}" | xargs dirname)"/.)"
+cd "$home"
+set -x
+
+
+curl https://hnrss.org/newest\?link\=comments > ../../assets/dbay-vogue/hnrss.org_,_newest.001.xml && sleep 5m
+curl https://hnrss.org/newest\?link\=comments > ../../assets/dbay-vogue/hnrss.org_,_newest.002.xml && sleep 5m
+curl https://hnrss.org/newest\?link\=comments > ../../assets/dbay-vogue/hnrss.org_,_newest.003.xml && sleep 5m
+curl https://hnrss.org/newest\?link\=comments > ../../assets/dbay-vogue/hnrss.org_,_newest.004.xml && sleep 5m
+curl https://hnrss.org/newest\?link\=comments > ../../assets/dbay-vogue/hnrss.org_,_newest.005.xml && sleep 5m
+curl https://hnrss.org/newest\?link\=comments > ../../assets/dbay-vogue/hnrss.org_,_newest.006.xml && sleep 5m
+curl https://hnrss.org/newest\?link\=comments > ../../assets/dbay-vogue/hnrss.org_,_newest.007.xml && sleep 5m
+curl https://hnrss.org/newest\?link\=comments > ../../assets/dbay-vogue/hnrss.org_,_newest.008.xml && sleep 5m
+curl https://hnrss.org/newest\?link\=comments > ../../assets/dbay-vogue/hnrss.org_,_newest.009.xml && sleep 5m
+curl https://hnrss.org/newest\?link\=comments > ../../assets/dbay-vogue/hnrss.org_,_newest.010.xml && sleep 5m
+curl https://hnrss.org/newest\?link\=comments > ../../assets/dbay-vogue/hnrss.org_,_newest.011.xml && sleep 5m
+curl https://hnrss.org/newest\?link\=comments > ../../assets/dbay-vogue/hnrss.org_,_newest.012.xml && sleep 5m
+

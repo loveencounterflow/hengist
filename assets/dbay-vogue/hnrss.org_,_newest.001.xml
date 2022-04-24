@@ -1,0 +1,126 @@
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Hacker News: Newest</title><link>https://news.ycombinator.com/newest</link><description>Hacker News RSS</description><docs>https://hnrss.org/</docs><generator>hnrss v1.1-16-gb4aa33c</generator><lastBuildDate>Sun, 24 Apr 2022 12:07:48 +0000</lastBuildDate><atom:link href="https://hnrss.org/newest?link=comments" rel="self" type="application/rss+xml"></atom:link><item><title><![CDATA[EU companies can pay for gas in rubles]]></title><description><![CDATA[
+<p>Article URL: <a href="https://news.cgtn.com/news/2022-04-24/EU-sees-way-to-pay-for-Russian-gas-without-breaching-sanctions-19uonW2LjTW/index.html">https://news.cgtn.com/news/2022-04-24/EU-sees-way-to-pay-for-Russian-gas-without-breaching-sanctions-19uonW2LjTW/index.html</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143267">https://news.ycombinator.com/item?id=31143267</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 12:05:24 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143267</link><dc:creator>clove</dc:creator><comments>https://news.ycombinator.com/item?id=31143267</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143267</guid></item><item><title><![CDATA[Not all SaaS revenue is the same]]></title><description><![CDATA[
+<p>Article URL: <a href="https://www.variance.com/posts/not-every-closed-won-dollar-is-the-same">https://www.variance.com/posts/not-every-closed-won-dollar-is-the-same</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143261">https://news.ycombinator.com/item?id=31143261</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 12:04:51 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143261</link><dc:creator>noahbrier</dc:creator><comments>https://news.ycombinator.com/item?id=31143261</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143261</guid></item><item><title><![CDATA[Netflix is finally going after password sharing]]></title><description><![CDATA[
+<p>Article URL: <a href="https://www.cnbc.com/2022/04/23/how-netflixs-password-sharing-crackdown-is-likely-to-work.html">https://www.cnbc.com/2022/04/23/how-netflixs-password-sharing-crackdown-is-likely-to-work.html</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143216">https://news.ycombinator.com/item?id=31143216</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:57:28 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143216</link><dc:creator>hubraumhugo</dc:creator><comments>https://news.ycombinator.com/item?id=31143216</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143216</guid></item><item><title><![CDATA[Ask HN: How to market a product with two distinct use cases?]]></title><description><![CDATA[
+<p>I am making an e-paper screen that can be:<p><pre><code>  1. An easy to set-up google calendar display
+
+  2. A canvas to render any bmp image served from a server
+
+
+</code></pre>
+To me, these seem almost like two distinct products that appeal to different groups of customers.<p>So I am building two distinct landing pages for each feature...<p>https://www.invisible-computers.com<p>https://www.invisible-computers.com/programmable-e-paper-screen.html<p>These both link to the same store page.<p>I am worried that having a unified store page will be confusing for at least one of the customer groups.<p>But having two store pages also seems wrong - people might get rightfully confused if it's the same product or not. Not even speaking of search engines...<p>HN, what would you do in my situation?<p>PS: I know I should probably just focus on one thing, and make that work. The thing is, that's what I did and it didn't work. So I am trying to test if the second positioning of the product works better... considering a pivot.</p>
+<hr>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143209">https://news.ycombinator.com/item?id=31143209</a></p>
+<p>Points: 1</p>
+<p># Comments: 1</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:56:27 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143209</link><dc:creator>konschubert</dc:creator><comments>https://news.ycombinator.com/item?id=31143209</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143209</guid></item><item><title><![CDATA[Show HN: Come&try Decision Intelligence version “Agar“ environment, Gobigger]]></title><description><![CDATA[
+<p>Article URL: <a href="https://github.com/opendilab/GoBigger">https://github.com/opendilab/GoBigger</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143206">https://news.ycombinator.com/item?id=31143206</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:56:03 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143206</link><dc:creator>vani_ai</dc:creator><comments>https://news.ycombinator.com/item?id=31143206</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143206</guid></item><item><title><![CDATA[Photorealistic Monocular 3D Reconstruction of Humans Wearing Clothing]]></title><description><![CDATA[
+<p>Article URL: <a href="https://phorhum.github.io/">https://phorhum.github.io/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143181">https://news.ycombinator.com/item?id=31143181</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:52:32 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143181</link><dc:creator>contingencies</dc:creator><comments>https://news.ycombinator.com/item?id=31143181</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143181</guid></item><item><title><![CDATA[The 'Great Resignation' is creating pay disparities]]></title><description><![CDATA[
+<p>Article URL: <a href="https://www.businessinsider.com/tech-employee-salaries-pay-google-microsoft-amazon-oracle-great-resignation-2022-4">https://www.businessinsider.com/tech-employee-salaries-pay-google-microsoft-amazon-oracle-great-resignation-2022-4</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143161">https://news.ycombinator.com/item?id=31143161</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:49:04 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143161</link><dc:creator>hubraumhugo</dc:creator><comments>https://news.ycombinator.com/item?id=31143161</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143161</guid></item><item><title><![CDATA[Using deep learning to predict users' superficial judgments of human faces]]></title><description><![CDATA[
+<p>Article URL: <a href="https://techxplore.com/news/2022-04-deep-users-superficial-judgments-human.html">https://techxplore.com/news/2022-04-deep-users-superficial-judgments-human.html</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143151">https://news.ycombinator.com/item?id=31143151</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:47:44 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143151</link><dc:creator>giuliomagnifico</dc:creator><comments>https://news.ycombinator.com/item?id=31143151</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143151</guid></item><item><title><![CDATA[Chicken eggs+household supplies, undergrads on path toward low-cost antiviral]]></title><description><![CDATA[
+<p>Article URL: <a href="https://med.stanford.edu/news/all-news/2022/04/chicken-egg-antibody.html">https://med.stanford.edu/news/all-news/2022/04/chicken-egg-antibody.html</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143134">https://news.ycombinator.com/item?id=31143134</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:45:18 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143134</link><dc:creator>susiecambria</dc:creator><comments>https://news.ycombinator.com/item?id=31143134</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143134</guid></item><item><title><![CDATA[Big Mac Index]]></title><description><![CDATA[
+<p>Article URL: <a href="https://en.wikipedia.org/wiki/Big_Mac_Index">https://en.wikipedia.org/wiki/Big_Mac_Index</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143129">https://news.ycombinator.com/item?id=31143129</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:44:47 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143129</link><dc:creator>tosh</dc:creator><comments>https://news.ycombinator.com/item?id=31143129</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143129</guid></item><item><title><![CDATA[Bypassing PESieve and Moneta]]></title><description><![CDATA[
+<p>Article URL: <a href="https://www.arashparsa.com/bypassing-pesieve-and-moneta-the-easiest-way-i-could-find/">https://www.arashparsa.com/bypassing-pesieve-and-moneta-the-easiest-way-i-could-find/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143116">https://news.ycombinator.com/item?id=31143116</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:42:24 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143116</link><dc:creator>joshbaptiste</dc:creator><comments>https://news.ycombinator.com/item?id=31143116</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143116</guid></item><item><title><![CDATA[It Is the Orthodox Easter]]></title><description><![CDATA[
+<p>Article URL: <a href="https://en.wikipedia.org/wiki/Easter">https://en.wikipedia.org/wiki/Easter</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143110">https://news.ycombinator.com/item?id=31143110</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:41:12 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143110</link><dc:creator>ibobev</dc:creator><comments>https://news.ycombinator.com/item?id=31143110</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143110</guid></item><item><title><![CDATA[How the Desperate Norwegian Salmon Industry Created a Sushi Staple (2015)]]></title><description><![CDATA[
+<p>Article URL: <a href="https://www.npr.org/2015/09/18/441530790/how-the-desperate-norwegian-salmon-industry-created-a-sushi-staple">https://www.npr.org/2015/09/18/441530790/how-the-desperate-norwegian-salmon-industry-created-a-sushi-staple</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143109">https://news.ycombinator.com/item?id=31143109</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:41:05 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143109</link><dc:creator>tosh</dc:creator><comments>https://news.ycombinator.com/item?id=31143109</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143109</guid></item><item><title><![CDATA[The Time Hack Everyone Should Know]]></title><description><![CDATA[
+<p>Article URL: <a href="https://thereader.mitpress.mit.edu/the-time-hack-everyone-should-know/">https://thereader.mitpress.mit.edu/the-time-hack-everyone-should-know/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143095">https://news.ycombinator.com/item?id=31143095</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:38:39 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143095</link><dc:creator>Tomte</dc:creator><comments>https://news.ycombinator.com/item?id=31143095</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143095</guid></item><item><title><![CDATA[Think in Colour]]></title><description><![CDATA[
+<p>Article URL: <a href="https://thinkincolour.eu/start">https://thinkincolour.eu/start</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143087">https://news.ycombinator.com/item?id=31143087</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:37:19 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143087</link><dc:creator>Tomte</dc:creator><comments>https://news.ycombinator.com/item?id=31143087</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143087</guid></item><item><title><![CDATA[The tech company offers the most efficient solution to a meaningful life]]></title><description><![CDATA[
+<p>Article URL: <a href="https://www.theguardian.com/money/2022/apr/24/carolyn-chen-the-tech-company-offers-the-most-efficient-solution-to-providing-a-meaningful-life">https://www.theguardian.com/money/2022/apr/24/carolyn-chen-the-tech-company-offers-the-most-efficient-solution-to-providing-a-meaningful-life</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143056">https://news.ycombinator.com/item?id=31143056</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:29:28 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143056</link><dc:creator>tuukkah</dc:creator><comments>https://news.ycombinator.com/item?id=31143056</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143056</guid></item><item><title><![CDATA[Ask HN: Why is NordVPN changing my router settings?]]></title><description><![CDATA[
+<p>So, here's a weird issue. I run a torrent client on a Raspberry Pi. The client is run within a network namespace (ip netns) and routed through NordVPN with openVPN.<p>When left for a while, Google services stop working for all devices in the local network. Traceroute for meet.google.com looks like this:<p><pre><code>   traceroute meet.google.com
+
+   traceroute to meet.google.com (216.58.208.206), 30 hops max, 60 byte packets
+ 1  192.168.0.80 (192.168.0.80) 4.082 ms 4.046 ms 4.288 ms
+ 2  192.168.0.80 (192.168.0.80) 7.695 ms 9.418 ms 9.497 ms
+ 3  * * *
+ 4  * * *
+ 5  * * *
+ 6  * * *
+ 7  * * *
+ 8  * * *
+ 9  * * *
+ 10 * * *
+ 11 * * *
+ 12 * * *
+
+</code></pre>
+(and then it just times out). 192.168.0.80 is the address of the Raspberry Pi. It happens ONLY to Google services, for two months of this it never happened to any other service. The only way to fix it is to factory-reset my router. ISP claims that something in my network is making RIP traffic and thus changing the internal routing table in my router. Unfortunately, there's no way to access the routing table of the router from the GUI.<p>I've spent two months pinning the issue down and turning off the nordvpn connection has 100% success rate in preventing this issue from appearing.<p>Now... why would OpenVPN connecting to a NordVPN server cause such behaviour? And why only for google services? Any tips are greatly appreciated, as I've oficially ran out of ideas</p>
+<hr>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143053">https://news.ycombinator.com/item?id=31143053</a></p>
+<p>Points: 2</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:28:42 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143053</link><dc:creator>kuba-orlik</dc:creator><comments>https://news.ycombinator.com/item?id=31143053</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143053</guid></item><item><title><![CDATA[A Web Around the World, Part 8: The Intergalactic Computer Network]]></title><description><![CDATA[
+<p>Article URL: <a href="https://www.filfre.net/2022/04/a-web-around-the-world-part-8-the-intergalactic-computer-network/">https://www.filfre.net/2022/04/a-web-around-the-world-part-8-the-intergalactic-computer-network/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143045">https://news.ycombinator.com/item?id=31143045</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:26:59 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143045</link><dc:creator>Fileformat</dc:creator><comments>https://news.ycombinator.com/item?id=31143045</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143045</guid></item><item><title><![CDATA[Motivating Developers to Care About Documentation]]></title><description><![CDATA[
+<p>Article URL: <a href="https://getdx.com/best-practices/documentation-culture-engineering">https://getdx.com/best-practices/documentation-culture-engineering</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143036">https://news.ycombinator.com/item?id=31143036</a></p>
+<p>Points: 2</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:24:46 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143036</link><dc:creator>nelsonmarcos</dc:creator><comments>https://news.ycombinator.com/item?id=31143036</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143036</guid></item><item><title><![CDATA[Say Hello to the CHO]]></title><description><![CDATA[
+<p>Article URL: <a href="https://podtail.com/podcast/wise-decision-maker-show/-66-say-hello-to-the-cho/">https://podtail.com/podcast/wise-decision-maker-show/-66-say-hello-to-the-cho/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31143028">https://news.ycombinator.com/item?id=31143028</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Sun, 24 Apr 2022 11:24:05 +0000</pubDate><link>https://news.ycombinator.com/item?id=31143028</link><dc:creator>paupj</dc:creator><comments>https://news.ycombinator.com/item?id=31143028</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31143028</guid></item></channel></rss>
