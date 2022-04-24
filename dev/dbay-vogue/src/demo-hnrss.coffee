@@ -20,8 +20,6 @@ types                     = new ( require 'intertype' ).Intertype()
 PATH                      = require 'path'
 FS                        = require 'fs'
 got                       = require 'got'
-sparkline                 = require 'node-sparkline'
-sparkly                   = require 'sparkly'
 CHEERIO                   = require 'cheerio'
 GUY                       = require '../../../apps/guy'
 { DBay, }                 = require '../../../apps/dbay'
@@ -227,26 +225,34 @@ class Hnrss
 
   #---------------------------------------------------------------------------------------------------------
   get_sparkline: ( trend ) ->
-    values = [ 0, ]
+    values = []
     for [ idx, rank, ] in trend
-      values[ idx ] = rank
-    for value, idx in values
-      values[ idx ] = 0 unless value?
-    values.unshift 0 while values.length < 10
-    # values = values [ ... 10 ] if values.length > 10
-    cfg =
-      values:         values #* <Array> An array of values to draw the sparkline.
-      # width:          # <Number> The width in pixels to fix for the generated SVG. Default: 135
-      # height:         # <Number> The height in pixels to fix for the generated SVG. Default: 50
-      stroke:         'red' # <String> The stroke color. An hexadecimal value or one of these generic names. Default: #57bd0f
-      strokeWidth:    5   # <Number> The stroke width in pixels. Min: 0 Default: 1.25
-      strokeOpacity:  1   # The stroke opacity. Min: 0 Max: 1 Default: 1
-    r1 = sparkline cfg
+      values.push { idx, rank, }
+    values_json = JSON.stringify values
     #.......................................................................................................
-    r2 = sparkly values, { minimum: -5, maximum: 20, }
+    R = """<script>
+      var data      = #{values_json};
+      var plot_cfg  = {
+        marks: [
+          Plot.line( data, {
+            x:            'idx',
+            y:            'rank',
+            // stroke: 'brand',
+            strokeWidth:  4,
+            curve:        'cardinal' } ),
+          ],
+        width:      100,
+        height:     100,
+        x:          { ticks: 3 },
+        marginLeft: 50,
+        color: {
+          legend: true,
+          width: 554,
+          columns: '120px', } };
+      document.body.append( Plot.plot( plot_cfg ) );
+      </script>"""
     #.......................................................................................................
-    #.......................................................................................................
-    return r1 + r2
+    return R
 
   #---------------------------------------------------------------------------------------------------------
   get_html_for_trends: ( row ) ->
