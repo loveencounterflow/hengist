@@ -24,7 +24,8 @@ CHEERIO                   = require 'cheerio'
 GUY                       = require '../../../apps/guy'
 { DBay, }                 = require '../../../apps/dbay'
 { SQL, }                  = DBay
-{ Scraper, }              = require '../../../apps/dbay-vogue'
+{ Vogue,
+  Scraper }               = require '../../../apps/dbay-vogue'
 { HDML, }                 = require '../../../apps/dbay-vogue/lib/hdml2'
 H                         = require '../../../apps/dbay-vogue/lib/helpers'
 glob                      = require 'glob'
@@ -125,16 +126,20 @@ demo_zvg24_net = ->
     # console.table R
   return null
 
+#===========================================================================================================
+class Ebayde extends Scraper
+
 
 #===========================================================================================================
-class Hnrss
+class Hnrss extends Scraper
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     ### TAINT encoding, url are not configurables ###
+    super()
     defaults  = { encoding: 'utf-8', }
     @cfg      = GUY.lft.freeze { defaults..., cfg..., }
-    GUY.props.hide @, 'scr', new Scraper { client: @, }
+    GUY.props.hide @, 'vogue', new Vogue { client: @, }
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
@@ -163,9 +168,9 @@ class Hnrss
   #---------------------------------------------------------------------------------------------------------
   scrape_html: ( html_or_buffer ) ->
     dsk         = 'hn'
-    { sid, }    = @scr.new_session dsk
-    insert_post = @scr.queries.insert_post
-    seen        = @scr.db.dt_now()
+    { sid, }    = @vogue.new_session dsk
+    insert_post = @vogue.queries.insert_post
+    seen        = @vogue.db.dt_now()
     #.......................................................................................................
     html        = @_html_from_html_or_buffer html_or_buffer
     #.......................................................................................................
@@ -210,10 +215,10 @@ class Hnrss
       ### TAINT avoid duplicate query ###
       details = { title, discussion_url, date, creator, description, }
       details = JSON.stringify details
-      row     = @scr.new_post { sid, pid, details, }
+      row     = @vogue.new_post { sid, pid, details, }
     #.......................................................................................................
     # # H.tabulate "Hacker News", R
-    # H.tabulate "Hacker News", @scr.db SQL"""select
+    # H.tabulate "Hacker News", @vogue.db SQL"""select
     #     sid                     as sid,
     #     pid                      as pid,
     #     rank                    as rank,
@@ -333,8 +338,8 @@ demo_hnrss = ->
   #   scraper   = new Hnrss()
   #   await scraper.scrape()
   hnrss   = new Hnrss()
-  # H.tabulate "scr", hnrss.scr.db SQL"select * from sqlite_schema;"
-  hnrss.scr.queries.insert_datasource.run { dsk: 'hn', url: 'http://nourl', }
+  # H.tabulate "vogue", hnrss.vogue.db SQL"select * from sqlite_schema;"
+  hnrss.vogue.queries.insert_datasource.run { dsk: 'hn', url: 'http://nourl', }
   #.........................................................................................................
   glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/hnrss.org_,_newest.???.xml'
   for path in glob.sync glob_pattern
@@ -342,8 +347,8 @@ demo_hnrss = ->
       buffer    = FS.readFileSync path
       await hnrss.scrape_html buffer
   #.........................................................................................................
-  # H.tabulate "trends", hnrss.scr.db SQL"""select * from _scr_trends order by pid;"""
-  # H.tabulate "trends", hnrss.scr.db SQL"""
+  # H.tabulate "trends", hnrss.vogue.db SQL"""select * from _scr_trends order by pid;"""
+  # H.tabulate "trends", hnrss.vogue.db SQL"""
   #   select
   #       dsk                                           as dsk,
   #       sid                                           as sid,
@@ -354,7 +359,7 @@ demo_hnrss = ->
   #     from scr_trends order by
   #       sid desc,
   #       rank;"""
-  H.tabulate "trends", hnrss.scr.db SQL"""select * from scr_trends_html order by nr;"""
+  H.tabulate "trends", hnrss.vogue.db SQL"""select * from scr_trends_html order by nr;"""
   #.........................................................................................................
   # demo_trends_as_table hnrss
   #.........................................................................................................
