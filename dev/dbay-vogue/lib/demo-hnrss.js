@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CHEERIO, CND, DBay, FS, GUY, H, HDML, Hnrss, PATH, SQL, Scraper, badge, debug, demo_1, demo_hnrss, demo_serve, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, types, urge, warn, whisper;
+  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Scraper, Vogue, badge, debug, demo_1, demo_hnrss, demo_serve, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -41,7 +41,7 @@
 
   ({SQL} = DBay);
 
-  ({Scraper} = require('../../../apps/dbay-vogue'));
+  ({Vogue, Scraper} = require('../../../apps/dbay-vogue'));
 
   ({HDML} = require('../../../apps/dbay-vogue/lib/hdml2'));
 
@@ -186,16 +186,20 @@
   };
 
   //===========================================================================================================
-  Hnrss = class Hnrss {
+  Ebayde = class Ebayde extends Scraper {};
+
+  //===========================================================================================================
+  Hnrss = class Hnrss extends Scraper {
     //---------------------------------------------------------------------------------------------------------
     constructor(cfg) {
-      /* TAINT encoding, url are not configurables */
       var defaults;
+      /* TAINT encoding, url are not configurables */
+      super();
       defaults = {
         encoding: 'utf-8'
       };
       this.cfg = GUY.lft.freeze({...defaults, ...cfg});
-      GUY.props.hide(this, 'scr', new Scraper({
+      GUY.props.hide(this, 'vogue', new Vogue({
         client: this
       }));
       return void 0;
@@ -238,9 +242,9 @@
       /* TAINT avoid duplicate query */
       var $, R, article_url, creator, date, description, details, discussion_url, dsk, href, html, i, insert_post, item, len, pid, ref, row, seen, sid, title;
       dsk = 'hn';
-      ({sid} = this.scr.new_session(dsk));
-      insert_post = this.scr.queries.insert_post;
-      seen = this.scr.db.dt_now();
+      ({sid} = this.vogue.new_session(dsk));
+      insert_post = this.vogue.queries.insert_post;
+      seen = this.vogue.db.dt_now();
       //.......................................................................................................
       html = this._html_from_html_or_buffer(html_or_buffer);
       //.......................................................................................................
@@ -286,11 +290,11 @@
         R.push({pid, title, date, creator, discussion_url, article_url});
         details = {title, discussion_url, date, creator, description};
         details = JSON.stringify(details);
-        row = this.scr.new_post({sid, pid, details});
+        row = this.vogue.new_post({sid, pid, details});
       }
       //.......................................................................................................
       // # H.tabulate "Hacker News", R
-      // H.tabulate "Hacker News", @scr.db SQL"""select
+      // H.tabulate "Hacker News", @vogue.db SQL"""select
       //     sid                     as sid,
       //     pid                      as pid,
       //     rank                    as rank,
@@ -409,8 +413,8 @@ document.body.append( Plot.plot( plot_cfg ) );
     //   scraper   = new Hnrss()
     //   await scraper.scrape()
     hnrss = new Hnrss();
-    // H.tabulate "scr", hnrss.scr.db SQL"select * from sqlite_schema;"
-    hnrss.scr.queries.insert_datasource.run({
+    // H.tabulate "vogue", hnrss.vogue.db SQL"select * from sqlite_schema;"
+    hnrss.vogue.queries.insert_datasource.run({
       dsk: 'hn',
       url: 'http://nourl'
     });
@@ -426,8 +430,8 @@ document.body.append( Plot.plot( plot_cfg ) );
       })();
     }
     //.........................................................................................................
-    // H.tabulate "trends", hnrss.scr.db SQL"""select * from _scr_trends order by pid;"""
-    // H.tabulate "trends", hnrss.scr.db SQL"""
+    // H.tabulate "trends", hnrss.vogue.db SQL"""select * from _scr_trends order by pid;"""
+    // H.tabulate "trends", hnrss.vogue.db SQL"""
     //   select
     //       dsk                                           as dsk,
     //       sid                                           as sid,
@@ -438,7 +442,7 @@ document.body.append( Plot.plot( plot_cfg ) );
     //     from scr_trends order by
     //       sid desc,
     //       rank;"""
-    H.tabulate("trends", hnrss.scr.db(SQL`select * from scr_trends_html order by nr;`));
+    H.tabulate("trends", hnrss.vogue.db(SQL`select * from scr_trends_html order by nr;`));
     //.........................................................................................................
     // demo_trends_as_table hnrss
     //.........................................................................................................
