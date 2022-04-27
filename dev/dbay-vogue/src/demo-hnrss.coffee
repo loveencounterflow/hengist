@@ -25,7 +25,7 @@ GUY                       = require '../../../apps/guy'
 { DBay, }                 = require '../../../apps/dbay'
 { SQL, }                  = DBay
 { Vogue,
-  Scraper }               = require '../../../apps/dbay-vogue'
+  Vogue_scraper }         = require '../../../apps/dbay-vogue'
 { HDML, }                 = require '../../../apps/dbay-vogue/lib/hdml2'
 H                         = require '../../../apps/dbay-vogue/lib/helpers'
 glob                      = require 'glob'
@@ -127,20 +127,11 @@ demo_zvg24_net = ->
   return null
 
 #===========================================================================================================
-class Ebayde extends Scraper
+class Ebayde extends Vogue_scraper
 
 
 #===========================================================================================================
-class Hnrss extends Scraper
-
-  #---------------------------------------------------------------------------------------------------------
-  constructor: ( cfg ) ->
-    ### TAINT encoding, url are not configurables ###
-    super()
-    defaults  = { encoding: 'utf-8', }
-    @cfg      = GUY.lft.freeze { defaults..., cfg..., }
-    GUY.props.hide @, 'vogue', new Vogue { client: @, }
-    return undefined
+class Hnrss extends Vogue_scraper
 
   #---------------------------------------------------------------------------------------------------------
   _remove_cdata: ( text ) -> text.replace /^<!\[CDATA\[(.*)\]\]>$/, '$1'
