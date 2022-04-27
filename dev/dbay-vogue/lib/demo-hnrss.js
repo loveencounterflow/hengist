@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Scraper, Vogue, badge, debug, demo_1, demo_hnrss, demo_serve, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, types, urge, warn, whisper;
+  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Vogue, Vogue_scraper, badge, debug, demo_1, demo_hnrss, demo_serve, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -41,7 +41,7 @@
 
   ({SQL} = DBay);
 
-  ({Vogue, Scraper} = require('../../../apps/dbay-vogue'));
+  ({Vogue, Vogue_scraper} = require('../../../apps/dbay-vogue'));
 
   ({HDML} = require('../../../apps/dbay-vogue/lib/hdml2'));
 
@@ -186,25 +186,10 @@
   };
 
   //===========================================================================================================
-  Ebayde = class Ebayde extends Scraper {};
+  Ebayde = class Ebayde extends Vogue_scraper {};
 
   //===========================================================================================================
-  Hnrss = class Hnrss extends Scraper {
-    //---------------------------------------------------------------------------------------------------------
-    constructor(cfg) {
-      var defaults;
-      /* TAINT encoding, url are not configurables */
-      super();
-      defaults = {
-        encoding: 'utf-8'
-      };
-      this.cfg = GUY.lft.freeze({...defaults, ...cfg});
-      GUY.props.hide(this, 'vogue', new Vogue({
-        client: this
-      }));
-      return void 0;
-    }
-
+  Hnrss = class Hnrss extends Vogue_scraper {
     //---------------------------------------------------------------------------------------------------------
     _remove_cdata(text) {
       return text.replace(/^<!\[CDATA\[(.*)\]\]>$/, '$1');
