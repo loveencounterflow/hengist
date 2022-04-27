@@ -310,12 +310,7 @@ class Hnrss extends Vogue_scraper
 
 #-----------------------------------------------------------------------------------------------------------
 demo_hnrss = ->
-  # #.........................................................................................................
-  # do =>
-  #   scraper   = new Hnrss()
-  #   await scraper.scrape()
   hnrss   = new Hnrss()
-  # H.tabulate "vogue", hnrss.vogue.db SQL"select * from sqlite_schema;"
   hnrss.vogue.queries.insert_datasource.run { dsk: 'hn', url: 'http://nourl', }
   #.........................................................................................................
   glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/hnrss.org_,_newest.???.xml'
