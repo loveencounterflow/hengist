@@ -228,6 +228,8 @@
     debug('^34534534^', (dayjs('19951225-123456Z', 'YYYYMMDD-HHmmssZ')).toISOString());
     debug('^34534534^', dayjs('20220101-123456Z', 'YYYYMMDD-HHmmssZ'));
     debug('^34534534^', (dayjs('20220101-123456Z', 'YYYYMMDD-HHmmssZ')).toISOString());
+    debug('^34534534^', dayjs().utc().format('YYYYMMDD-HHmmssZ'));
+    debug('^34534534^', dayjs().utc().format('YYYYMMDD-HHmmss[Z]'));
     return null;
   };
 
@@ -252,11 +254,10 @@
   if (require.main === module) {
     (() => {
       // @demo_datetime()
-      return this.demo_stdlib_api();
+      this.demo_stdlib_api();
+      return this.demo_dayjs_parse_custom_format();
     })();
   }
-
-  // @demo_dayjs_parse_custom_format()
 
 }).call(this);
 

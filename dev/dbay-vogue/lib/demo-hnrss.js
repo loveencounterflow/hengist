@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Vogue, Vogue_scraper, badge, debug, demo_1, demo_hnrss, demo_serve, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, types, urge, warn, whisper;
+  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Vogue, Vogue_scraper, badge, debug, demo_1, demo_ebayde, demo_hnrss, demo_serve_ebayde, demo_serve_hnrss, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -48,18 +48,6 @@
   H = require('../../../apps/dbay-vogue/lib/helpers');
 
   glob = require('glob');
-
-  //===========================================================================================================
-
-  //-----------------------------------------------------------------------------------------------------------
-  types.declare('scraper_html_or_buffer', {
-    tests: {
-      // "@isa.object x":                        ( x ) -> @isa.object x
-      "@type_of x in [ 'text', 'buffer', ]": function(x) {
-        return this.type_of(x === 'text' || x === 'buffer');
-      }
-    }
-  });
 
   //===========================================================================================================
 
@@ -186,7 +174,89 @@
   };
 
   //===========================================================================================================
-  Ebayde = class Ebayde extends Vogue_scraper {};
+  Ebayde = class Ebayde extends Vogue_scraper {
+    //---------------------------------------------------------------------------------------------------------
+    scrape_html(html_or_buffer) {
+      var $, R, details, dsk, html, i, insert_post, item, item_details, item_id, item_price, item_subtitle, item_title, item_url, len, pid, ref, row, seen, sid, title;
+      dsk = 'ebayde';
+      ({sid} = this.vogue.new_session(dsk));
+      insert_post = this.vogue.queries.insert_post;
+      seen = this.vogue.db.dt_now();
+      //.......................................................................................................
+      html = this._html_from_html_or_buffer(html_or_buffer);
+      $ = CHEERIO.load(html);
+      R = [];
+      ref = $('div.s-item__info');
+      //.......................................................................................................
+      for (i = 0, len = ref.length; i < len; i++) {
+        item = ref[i];
+        whisper('^434554^', '----------------------------------------------------------');
+        item = $(item);
+        item_details = item.find('div.s-item__details');
+        item_title = item.find('h3.s-item__title');
+        item_subtitle = item.find('div.s-item__subtitle');
+        item_price = item.find('span.s-item__price');
+        // urge '^434554^', item_details.text()
+        // info '^434554^', item_title.text()
+        // info '^434554^', item_subtitle.text()
+        // info '^434554^', item_price.text()
+        item_url = (item.find('a')).attr('href');
+        item_url = item_url.replace(/^([^?]+)\?.*$/, '$1');
+        item_id = item_url.replace(/^.*\/([^\/]+)$/, '$1');
+        // info '^434554^', item_url
+        // info '^434554^', item_id
+        pid = `ebayde-${item_id}`;
+        title = item_title;
+        title = item_title + ` / ${item_subtitle}`;
+        //.....................................................................................................
+        details = {title, item_url};
+        details = JSON.stringify(details);
+        row = this.vogue.new_post({sid, pid, details});
+      }
+      //.......................................................................................................
+      return null;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    get_html_for_trends(row) {
+      var details, dsk, dsk_html, id_html, pid, rank, rank_html, sid, sid_html, tds, title_html, trend, trend_html, ts, ts_html;
+      ({dsk, sid, ts, pid, rank, trend, details} = row);
+      //.......................................................................................................
+      trend = JSON.parse(trend);
+      details = JSON.parse(details);
+      dsk_html = HDML.text(dsk);
+      sid_html = HDML.text(`${sid}`);
+      ts_html = HDML.text(ts);
+      id_html = HDML.text(pid);
+      rank_html = HDML.text(`${rank}`);
+      trend_html = HDML.text(JSON.stringify(trend));
+      title_html = HDML.insert('a', {
+        href: details.item_url
+      }, HDML.text(details.title));
+      //.......................................................................................................
+      tds = [
+        HDML.insert('td',
+        dsk_html),
+        HDML.insert('td',
+        sid_html),
+        HDML.insert('td',
+        id_html),
+        HDML.insert('td',
+        ts_html),
+        HDML.insert('td',
+        rank_html),
+        HDML.insert('td',
+        'no sparkline'), // @get_sparkline trend
+        HDML.insert('td',
+        trend_html),
+        HDML.insert('td',
+        title_html)
+      ];
+      //.......................................................................................................
+      return HDML.insert('tr', null, tds.join(''));
+    }
+
+  };
 
   //===========================================================================================================
   Hnrss = class Hnrss extends Vogue_scraper {
@@ -202,15 +272,6 @@
         return match.groups.article_url;
       }
       return null;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    _html_from_html_or_buffer(html_or_buffer) {
-      types.validate.scraper_html_or_buffer(html_or_buffer);
-      if ((types.type_of(html_or_buffer)) === 'buffer') {
-        return html_or_buffer.toString(this.cfg.encoding);
-      }
-      return html_or_buffer;
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -234,6 +295,8 @@
       html = this._html_from_html_or_buffer(html_or_buffer);
       //.......................................................................................................
       /* NOTE This is RSS XML, so `link` doesn't behave like HTML `link` and namespaces are not supported: */
+      /* TAINT Cheerio docs: "can select with XML Namespaces but due to the CSS specification, the colon (:)
+          needs to be escaped for the selector to be valid" */
       html = html.replace(/<dc:creator>/g, '<creator>');
       html = html.replace(/<\/dc:creator>/g, '</creator>');
       html = html.replace(/<link>/g, '<reserved-link>');
@@ -393,12 +456,7 @@ document.body.append( Plot.plot( plot_cfg ) );
   //-----------------------------------------------------------------------------------------------------------
   demo_hnrss = async function() {
     var glob_pattern, hnrss, i, len, path, ref;
-    // #.........................................................................................................
-    // do =>
-    //   scraper   = new Hnrss()
-    //   await scraper.scrape()
     hnrss = new Hnrss();
-    // H.tabulate "vogue", hnrss.vogue.db SQL"select * from sqlite_schema;"
     hnrss.vogue.queries.insert_datasource.run({
       dsk: 'hn',
       url: 'http://nourl'
@@ -435,12 +493,73 @@ document.body.append( Plot.plot( plot_cfg ) );
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_serve = async function(cfg) {
+  demo_ebayde = async function() {
+    var ebayde, glob_pattern, i, len, path, ref;
+    ebayde = new Ebayde();
+    ebayde.vogue.queries.insert_datasource.run({
+      dsk: 'ebayde',
+      url: 'http://nourl'
+    });
+    //.........................................................................................................
+    glob_pattern = PATH.join(__dirname, '../../../assets/dbay-vogue/ebay-de-search-result-rucksack-????????-??????Z.html');
+    ref = glob.sync(glob_pattern);
+    for (i = 0, len = ref.length; i < len; i++) {
+      path = ref[i];
+      debug('^435345^', path);
+      await (async() => {
+        var buffer;
+        buffer = FS.readFileSync(path);
+        return (await ebayde.scrape_html(buffer));
+      })();
+      warn(CND.reverse("^345345345^ finish early after first source"));
+    }
+    //.........................................................................................................
+    // H.tabulate "trends", ebayde.vogue.db SQL"""select * from _scr_trends order by pid;"""
+    // H.tabulate "trends", ebayde.vogue.db SQL"""
+    //   select
+    //       dsk                                           as dsk,
+    //       sid                                           as sid,
+    //       pid                                           as pid,
+    //       rank                                          as rank,
+    //       trend                                         as trend,
+    //       substring( details, 1, 30 )                   as details
+    //     from scr_trends order by
+    //       sid desc,
+    //       rank;"""
+    H.tabulate("trends", ebayde.vogue.db(SQL`select * from scr_trends_html order by nr;`));
+    //.........................................................................................................
+    // demo_trends_as_table ebayde
+    //.........................................................................................................
+    return ebayde;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_serve_hnrss = async function(cfg) {
     var Vogue_server, hnrss, k, vogue_server;
     ({Vogue_server} = require('../../../apps/dbay-vogue/lib/server'));
     hnrss = (await demo_hnrss());
     vogue_server = new Vogue_server({
       client: hnrss
+    });
+    debug('^45345^', vogue_server);
+    debug('^45345^', (function() {
+      var results;
+      results = [];
+      for (k in vogue_server) {
+        results.push(k);
+      }
+      return results;
+    })());
+    return debug('^45345^', (await vogue_server.start()));
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_serve_ebayde = async function(cfg) {
+    var Vogue_server, ebayde, k, vogue_server;
+    ({Vogue_server} = require('../../../apps/dbay-vogue/lib/server'));
+    ebayde = (await demo_ebayde());
+    vogue_server = new Vogue_server({
+      client: ebayde
     });
     debug('^45345^', vogue_server);
     debug('^45345^', (function() {
@@ -460,7 +579,8 @@ document.body.append( Plot.plot( plot_cfg ) );
       // await demo_zvg_online_net()
       // await demo_zvg24_net()
       // await demo_hnrss()
-      return (await demo_serve());
+      // await demo_serve_hnrss()
+      return (await demo_serve_ebayde());
     })();
   }
 
