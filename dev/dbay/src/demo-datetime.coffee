@@ -148,6 +148,20 @@ tabulate = ( db, query ) -> H.tabulate query, db query
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@demo_dayjs_parse_custom_format = ->
+  dayjs                     = require 'dayjs'
+  do =>
+    utc               = require 'dayjs/plugin/utc';               dayjs.extend utc
+    relativeTime      = require 'dayjs/plugin/relativeTime';      dayjs.extend relativeTime
+    toObject          = require 'dayjs/plugin/toObject';          dayjs.extend toObject
+    customParseFormat = require 'dayjs/plugin/customParseFormat'; dayjs.extend customParseFormat
+  debug '^34534534^', ( dayjs '19951225-123456Z', 'YYYYMMDD-HHmmssZ' )
+  debug '^34534534^', ( dayjs '19951225-123456Z', 'YYYYMMDD-HHmmssZ' ).toISOString()
+  debug '^34534534^', ( dayjs '20220101-123456Z', 'YYYYMMDD-HHmmssZ' )
+  debug '^34534534^', ( dayjs '20220101-123456Z', 'YYYYMMDD-HHmmssZ' ).toISOString()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @demo_stdlib_api = ( cfg ) ->
   { DBay }        = require '../../../apps/dbay'
   { SQL }         = DBay
@@ -156,11 +170,13 @@ tabulate = ( db, query ) -> H.tabulate query, db query
   #---------------------------------------------------------------------------------------------------------
   db ->
     debug '^34534^', db.dt_now()
+    debug '^34534^', db.dt_from_now '20220101-183000Z'
     tabulate db, SQL"""select std_dt_now() as date;"""
-    tabulate db, SQL"""select std_dt_from_now( '2022-01-01,18:30:00Z' ) as date;"""
+    tabulate db, SQL"""select std_dt_from_now( '20220101-183000Z' ) as date;"""
   return null
 
 ############################################################################################################
 if require.main is module then do =>
   # @demo_datetime()
   @demo_stdlib_api()
+  # @demo_dayjs_parse_custom_format()
