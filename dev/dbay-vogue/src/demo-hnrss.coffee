@@ -136,13 +136,6 @@ class Hnrss extends Vogue_scraper
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _html_from_html_or_buffer: ( html_or_buffer ) ->
-    types.validate.scraper_html_or_buffer html_or_buffer
-    if ( types.type_of html_or_buffer ) is 'buffer'
-      return html_or_buffer.toString @cfg.encoding
-    return html_or_buffer
-
-  #---------------------------------------------------------------------------------------------------------
   scrape: ->
     url       = 'https://hnrss.org/newest?link=comments'
     encoding  = 'utf8'
