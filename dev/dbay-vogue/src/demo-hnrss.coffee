@@ -189,7 +189,7 @@ class Ebayde extends Vogue_scraper
       HDML.insert 'td', title_html
       ]
     #.......................................................................................................
-    return HDML.insert 'tr', null, tds.join ''
+    return HDML.insert 'tr', null, tds.join '\n'
 
 
 #===========================================================================================================
@@ -377,7 +377,7 @@ class Hnrss extends Vogue_scraper
       HDML.insert 'td', title_html
       ]
     #.......................................................................................................
-    return HDML.insert 'tr', null, tds.join ''
+    return HDML.insert 'tr', null, tds.join '\n'
 
 #-----------------------------------------------------------------------------------------------------------
 demo_hnrss = ->
