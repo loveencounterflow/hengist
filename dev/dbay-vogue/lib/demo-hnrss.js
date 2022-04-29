@@ -177,7 +177,7 @@
   Ebayde = class Ebayde extends Vogue_scraper {
     //---------------------------------------------------------------------------------------------------------
     scrape_html(html_or_buffer) {
-      var $, R, details, dsk, html, i, insert_post, item, item_details, item_id, item_price, item_subtitle, item_title, item_url, len, pid, ref, row, seen, sid, title;
+      var $, R, details, dsk, html, i, insert_post, item, item_details, item_id, item_price, item_subtitle, item_title, item_url, len, pid, ref, row, seen, sid, subtitle, title;
       dsk = 'ebayde';
       ({sid} = this.vogue.new_session(dsk));
       insert_post = this.vogue.queries.insert_post;
@@ -190,7 +190,6 @@
       //.......................................................................................................
       for (i = 0, len = ref.length; i < len; i++) {
         item = ref[i];
-        whisper('^434554^', '----------------------------------------------------------');
         item = $(item);
         item_details = item.find('div.s-item__details');
         item_title = item.find('h3.s-item__title');
@@ -203,17 +202,23 @@
         item_url = (item.find('a')).attr('href');
         item_url = item_url.replace(/^([^?]+)\?.*$/, '$1');
         item_id = item_url.replace(/^.*\/([^\/]+)$/, '$1');
+        if (item_id === '123456') {
+          warn("skipping invalid Item ID (123456)");
+          continue;
+        }
         // info '^434554^', item_url
         // info '^434554^', item_id
         pid = `ebayde-${item_id}`;
-        title = item_title;
-        title = item_title + ` / ${item_subtitle}`;
+        title = item_title.text();
+        subtitle = item_subtitle.text();
+        title = title + ` / ${subtitle}`;
         //.....................................................................................................
         details = {title, item_url};
         details = JSON.stringify(details);
         row = this.vogue.new_post({sid, pid, details});
       }
       //.......................................................................................................
+      // process.exit 111
       return null;
     }
 
@@ -234,26 +239,9 @@
         href: details.item_url
       }, HDML.text(details.title));
       //.......................................................................................................
-      tds = [
-        HDML.insert('td',
-        dsk_html),
-        HDML.insert('td',
-        sid_html),
-        HDML.insert('td',
-        id_html),
-        HDML.insert('td',
-        ts_html),
-        HDML.insert('td',
-        rank_html),
-        HDML.insert('td',
-        'no sparkline'), // @get_sparkline trend
-        HDML.insert('td',
-        trend_html),
-        HDML.insert('td',
-        title_html)
-      ];
+      tds = [HDML.insert('td', dsk_html), HDML.insert('td', sid_html), HDML.insert('td', id_html), HDML.insert('td', ts_html), HDML.insert('td', rank_html), HDML.insert('td', this.get_sparkline(trend)), HDML.insert('td', trend_html), HDML.insert('td', title_html)];
       //.......................................................................................................
-      return HDML.insert('tr', null, tds.join(''));
+      return HDML.insert('tr', null, tds.join('\n'));
     }
 
   };
@@ -355,72 +343,6 @@
     }
 
     //---------------------------------------------------------------------------------------------------------
-    get_sparkline(trend) {
-      var R, dense_trend, i, j, len, len1, rank, sid, values, values_json;
-      // # values = [ { sid: -1, rank: -1,  }, ]
-      // values = []
-      // for [ sid, rank, ] in trend
-      //   values.push { sid, rank: -rank, }
-      // values.unshift { sid: -1, rank: -1, } if values.length < 2
-      //.......................................................................................................
-      dense_trend = [];
-      for (i = 0, len = trend.length; i < len; i++) {
-        [sid, rank] = trend[i];
-        dense_trend[sid] = rank;
-      }
-      // for rank, sid in dense_trend
-      //   dense_trend[ sid ] = 21 unless rank?
-      // dense_trend.unshift 21 while dense_trend.length < 12
-      values = [];
-      for (sid = j = 0, len1 = dense_trend.length; j < len1; sid = ++j) {
-        rank = dense_trend[sid];
-        values.push({sid, rank});
-      }
-      //.......................................................................................................
-      values_json = JSON.stringify(values);
-      //.......................................................................................................
-      R = `<script>
-var data      = ${values_json};
-var plot_cfg  = {
-  marks: [
-    Plot.line( data, {
-      x:            'sid',
-      y:            'rank',
-      stroke:       'red',
-      strokeWidth:  4,
-      // curve:        'step' } ),
-      curve:        'linear' } ),
-      // curve:        'cardinal' } ),
-    Plot.dot( data, {
-      x:            'sid',
-      y:            'rank',
-      stroke:       'red',
-      fill:         'red',
-      strokeWidth:  4, } ),
-    ],
-  width:      500,
-  height:     100,
-  x:          { ticks: 12, domain: [ 0, 12, ], step: 1, },
-  y:          { ticks: 4, domain: [ 0, 20, ], step: 1, reverse: true, },
-  marginLeft: 50,
-  // color: {
-  //   type: "linear",
-  //   scheme: "cividis",
-  //   legend: true,
-  //   domain: [0, 20],
-  //   range: [0, 1] },
-  };
-  // color: {
-  //   legend: true,
-  //   width: 554,
-  //   columns: '120px', } };
-document.body.append( Plot.plot( plot_cfg ) );
-</script>`;
-      //.......................................................................................................
-      return R;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
     get_html_for_trends(row) {
       var article_url, details, discussion_url, dsk, dsk_html, id_html, pid, rank, rank_html, sid, sid_html, tds, title, title_html, trend, trend_html, ts, ts_html;
       ({dsk, sid, ts, pid, rank, trend, details} = row);
@@ -448,7 +370,7 @@ document.body.append( Plot.plot( plot_cfg ) );
       //.......................................................................................................
       tds = [HDML.insert('td', dsk_html), HDML.insert('td', sid_html), HDML.insert('td', id_html), HDML.insert('td', ts_html), HDML.insert('td', rank_html), HDML.insert('td', this.get_sparkline(trend)), HDML.insert('td', trend_html), HDML.insert('td', title_html)];
       //.......................................................................................................
-      return HDML.insert('tr', null, tds.join(''));
+      return HDML.insert('tr', null, tds.join('\n'));
     }
 
   };
@@ -485,7 +407,7 @@ document.body.append( Plot.plot( plot_cfg ) );
     //     from scr_trends order by
     //       sid desc,
     //       rank;"""
-    H.tabulate("trends", hnrss.vogue.db(SQL`select * from scr_trends_html order by nr;`));
+    // H.tabulate "trends", hnrss.vogue.db SQL"""select * from scr_trends_html order by nr;"""
     //.........................................................................................................
     // demo_trends_as_table hnrss
     //.........................................................................................................
@@ -511,8 +433,8 @@ document.body.append( Plot.plot( plot_cfg ) );
         buffer = FS.readFileSync(path);
         return (await ebayde.scrape_html(buffer));
       })();
-      warn(CND.reverse("^345345345^ finish early after first source"));
     }
+    // warn CND.reverse "^345345345^ finish early"
     //.........................................................................................................
     // H.tabulate "trends", ebayde.vogue.db SQL"""select * from _scr_trends order by pid;"""
     // H.tabulate "trends", ebayde.vogue.db SQL"""
@@ -526,7 +448,7 @@ document.body.append( Plot.plot( plot_cfg ) );
     //     from scr_trends order by
     //       sid desc,
     //       rank;"""
-    H.tabulate("trends", ebayde.vogue.db(SQL`select * from scr_trends_html order by nr;`));
+    // H.tabulate "trends", ebayde.vogue.db SQL"""select * from scr_trends_html order by nr;"""
     //.........................................................................................................
     // demo_trends_as_table ebayde
     //.........................................................................................................
