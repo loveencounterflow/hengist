@@ -146,6 +146,9 @@ class Ebayde extends Vogue_scraper
       item_url      = ( item.find 'a' ).attr 'href'
       item_url      = item_url.replace /^([^?]+)\?.*$/, '$1'
       item_id       = item_url.replace /^.*\/([^\/]+)$/, '$1'
+      if item_id is '123456'
+        warn "skipping invalid Item ID (123456)"
+        continue
       # info '^434554^', item_url
       # info '^434554^', item_id
       pid           = "ebayde-#{item_id}"
