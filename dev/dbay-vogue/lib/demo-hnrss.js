@@ -416,9 +416,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_ebayde = async function() {
-    var ebayde, glob_pattern, i, len, path, ref;
+    var Vogue_db, ebayde, glob_pattern, i, len, path, ref, vogue;
+    ({Vogue_db} = require('../../../apps/dbay-vogue'));
+    vogue = new Vogue_db();
     ebayde = new Ebayde();
-    ebayde.vogue.queries.insert_datasource.run({
+    vogue.XXX_add_scraper(ebayde);
+    /* TAINT use API method, don't use query directly */
+    vogue.queries.insert_datasource.run({
       dsk: 'ebayde',
       url: 'http://nourl'
     });
@@ -434,23 +438,6 @@
         return (await ebayde.scrape_html(buffer));
       })();
     }
-    // warn CND.reverse "^345345345^ finish early"
-    //.........................................................................................................
-    // H.tabulate "trends", ebayde.vogue.db SQL"""select * from _scr_trends order by pid;"""
-    // H.tabulate "trends", ebayde.vogue.db SQL"""
-    //   select
-    //       dsk                                           as dsk,
-    //       sid                                           as sid,
-    //       pid                                           as pid,
-    //       rank                                          as rank,
-    //       trend                                         as trend,
-    //       substring( details, 1, 30 )                   as details
-    //     from scr_trends order by
-    //       sid desc,
-    //       rank;"""
-    // H.tabulate "trends", ebayde.vogue.db SQL"""select * from scr_trends_html order by nr;"""
-    //.........................................................................................................
-    // demo_trends_as_table ebayde
     //.........................................................................................................
     return ebayde;
   };
@@ -458,7 +445,7 @@
   //-----------------------------------------------------------------------------------------------------------
   demo_serve_hnrss = async function(cfg) {
     var Vogue_server, hnrss, k, vogue_server;
-    ({Vogue_server} = require('../../../apps/dbay-vogue/lib/server'));
+    ({Vogue_server} = require('../../../apps/dbay-vogue/lib/vogue-server'));
     hnrss = (await demo_hnrss());
     vogue_server = new Vogue_server({
       client: hnrss
@@ -478,7 +465,7 @@
   //-----------------------------------------------------------------------------------------------------------
   demo_serve_ebayde = async function(cfg) {
     var Vogue_server, ebayde, k, vogue_server;
-    ({Vogue_server} = require('../../../apps/dbay-vogue/lib/server'));
+    ({Vogue_server} = require('../../../apps/dbay-vogue/lib/vogue-server'));
     ebayde = (await demo_ebayde());
     vogue_server = new Vogue_server({
       client: ebayde
