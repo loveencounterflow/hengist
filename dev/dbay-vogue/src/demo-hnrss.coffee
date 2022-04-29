@@ -357,8 +357,12 @@ demo_hnrss = ->
 
 #-----------------------------------------------------------------------------------------------------------
 demo_ebayde = ->
-  ebayde   = new Ebayde()
-  ebayde.vogue.queries.insert_datasource.run { dsk: 'ebayde', url: 'http://nourl', }
+  { Vogue_db, } = require '../../../apps/dbay-vogue'
+  vogue         = new Vogue_db()
+  ebayde        = new Ebayde()
+  vogue.XXX_add_scraper ebayde
+  ### TAINT use API method, don't use query directly ###
+  vogue.queries.insert_datasource.run { dsk: 'ebayde', url: 'http://nourl', }
   #.........................................................................................................
   glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/ebay-de-search-result-rucksack-????????-??????Z.html'
   for path in glob.sync glob_pattern
@@ -366,29 +370,12 @@ demo_ebayde = ->
     await do =>
       buffer    = FS.readFileSync path
       await ebayde.scrape_html buffer
-  # warn CND.reverse "^345345345^ finish early"
-  #.........................................................................................................
-  # H.tabulate "trends", ebayde.vogue.db SQL"""select * from _scr_trends order by pid;"""
-  # H.tabulate "trends", ebayde.vogue.db SQL"""
-  #   select
-  #       dsk                                           as dsk,
-  #       sid                                           as sid,
-  #       pid                                           as pid,
-  #       rank                                          as rank,
-  #       trend                                         as trend,
-  #       substring( details, 1, 30 )                   as details
-  #     from scr_trends order by
-  #       sid desc,
-  #       rank;"""
-  # H.tabulate "trends", ebayde.vogue.db SQL"""select * from scr_trends_html order by nr;"""
-  #.........................................................................................................
-  # demo_trends_as_table ebayde
   #.........................................................................................................
   return ebayde
 
 #-----------------------------------------------------------------------------------------------------------
 demo_serve_hnrss = ( cfg ) ->
-  { Vogue_server, } = require '../../../apps/dbay-vogue/lib/server'
+  { Vogue_server, } = require '../../../apps/dbay-vogue/lib/vogue-server'
   hnrss         = await demo_hnrss()
   vogue_server  = new Vogue_server { client: hnrss, }
   debug '^45345^', vogue_server
@@ -397,7 +384,7 @@ demo_serve_hnrss = ( cfg ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 demo_serve_ebayde = ( cfg ) ->
-  { Vogue_server, } = require '../../../apps/dbay-vogue/lib/server'
+  { Vogue_server, } = require '../../../apps/dbay-vogue/lib/vogue-server'
   ebayde        = await demo_ebayde()
   vogue_server  = new Vogue_server { client: ebayde, }
   debug '^45345^', vogue_server
