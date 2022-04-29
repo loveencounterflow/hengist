@@ -152,13 +152,15 @@ class Ebayde extends Vogue_scraper
       # info '^434554^', item_url
       # info '^434554^', item_id
       pid           = "ebayde-#{item_id}"
-      title         = item_title
-      title         = item_title + " / #{item_subtitle}"
+      title         = item_title.text()
+      subtitle      = item_subtitle.text()
+      title         = title + " / #{subtitle}"
       #.....................................................................................................
       details = { title, item_url, }
       details = JSON.stringify details
       row     = @vogue.new_post { sid, pid, details, }
     #.......................................................................................................
+    # process.exit 111
     return null
 
   #---------------------------------------------------------------------------------------------------------
