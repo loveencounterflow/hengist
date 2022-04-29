@@ -134,7 +134,6 @@ class Ebayde extends Vogue_scraper
     R           = []
     #.......................................................................................................
     for item in ( $ 'div.s-item__info' )
-      whisper '^434554^', '----------------------------------------------------------'
       item          = $ item
       item_details  = item.find 'div.s-item__details'
       item_title    = item.find 'h3.s-item__title'
@@ -403,7 +402,7 @@ demo_hnrss = ->
   #     from scr_trends order by
   #       sid desc,
   #       rank;"""
-  H.tabulate "trends", hnrss.vogue.db SQL"""select * from scr_trends_html order by nr;"""
+  # H.tabulate "trends", hnrss.vogue.db SQL"""select * from scr_trends_html order by nr;"""
   #.........................................................................................................
   # demo_trends_as_table hnrss
   #.........................................................................................................
@@ -420,7 +419,7 @@ demo_ebayde = ->
     await do =>
       buffer    = FS.readFileSync path
       await ebayde.scrape_html buffer
-    warn CND.reverse "^345345345^ finish early after first source"
+  # warn CND.reverse "^345345345^ finish early"
   #.........................................................................................................
   # H.tabulate "trends", ebayde.vogue.db SQL"""select * from _scr_trends order by pid;"""
   # H.tabulate "trends", ebayde.vogue.db SQL"""
@@ -434,7 +433,7 @@ demo_ebayde = ->
   #     from scr_trends order by
   #       sid desc,
   #       rank;"""
-  H.tabulate "trends", ebayde.vogue.db SQL"""select * from scr_trends_html order by nr;"""
+  # H.tabulate "trends", ebayde.vogue.db SQL"""select * from scr_trends_html order by nr;"""
   #.........................................................................................................
   # demo_trends_as_table ebayde
   #.........................................................................................................
