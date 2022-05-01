@@ -375,25 +375,27 @@ demo_ebayde = ->
       buffer    = FS.readFileSync path
       await ebayde.scrape_html buffer
   #.........................................................................................................
-  return ebayde
+  return vogue
 
 #-----------------------------------------------------------------------------------------------------------
 demo_serve_hnrss = ( cfg ) ->
   { Vogue_server, } = require '../../../apps/dbay-vogue/lib/vogue-server'
   hnrss         = await demo_hnrss()
   vogue_server  = new Vogue_server { client: hnrss, }
-  debug '^45345^', vogue_server
-  debug '^45345^', ( k for k of vogue_server )
-  debug '^45345^', await vogue_server.start()
+  debug '^45345-1^', vogue_server
+  debug '^45345-2^', ( k for k of vogue_server )
+  debug '^45345-3^', await vogue_server.start()
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 demo_serve_ebayde = ( cfg ) ->
-  { Vogue_server, } = require '../../../apps/dbay-vogue/lib/vogue-server'
-  ebayde        = await demo_ebayde()
-  vogue_server  = new Vogue_server { client: ebayde, }
-  debug '^45345^', vogue_server
-  debug '^45345^', ( k for k of vogue_server )
-  debug '^45345^', await vogue_server.start()
+  vogue         = await demo_ebayde()
+  debug '^45345-4^', vogue.server
+  debug '^45345-5^', ( k for k of vogue.server )
+  debug '^45345-6^', vogue.server.start()
+  # setInterval ( -> info '^342349390^' ), 1000
+  help '^45345-7^', "server started"
+  return null
 
 
 
