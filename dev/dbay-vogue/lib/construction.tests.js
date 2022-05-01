@@ -75,6 +75,10 @@
         return vogue._set_hub({});
       });
     }
+    debug('^35453^', vogue);
+    debug('^35453^', vogue.vdb);
+    debug('^35453^', vogue.vdb.hub);
+    debug('^35453^', vogue.scrapers);
     return typeof done === "function" ? done() : void 0;
   };
 
