@@ -47,6 +47,10 @@ guy                       = require '../../../apps/guy'
   T?.eq ( type_of vogue.vdb ), 'vogue_db'
   T?.ok vogue.vdb.hub is vogue
   T?.throws /unable to set hub on a vogue/, -> vogue._set_hub {}
+  debug '^35453^', vogue
+  debug '^35453^', vogue.vdb
+  debug '^35453^', vogue.vdb.hub
+  debug '^35453^', vogue.scrapers
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
