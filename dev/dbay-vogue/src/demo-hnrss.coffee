@@ -125,9 +125,11 @@ class Ebayde extends Vogue_scraper
   #---------------------------------------------------------------------------------------------------------
   scrape_html: ( html_or_buffer ) ->
     dsk         = 'ebayde'
-    { sid, }    = @vogue.new_session dsk
-    insert_post = @vogue.queries.insert_post
-    seen        = @vogue.db.dt_now()
+    debug '^445345^', @hub
+    debug '^445345^', @hub.vdb
+    { sid, }    = @hub.vdb.new_session dsk
+    insert_post = @hub.vdb.queries.insert_post
+    seen        = @hub.vdb.db.dt_now()
     #.......................................................................................................
     html        = @_html_from_html_or_buffer html_or_buffer
     $           = CHEERIO.load html
@@ -158,7 +160,7 @@ class Ebayde extends Vogue_scraper
       #.....................................................................................................
       details = { title, item_url, }
       details = JSON.stringify details
-      row     = @vogue.new_post { sid, pid, details, }
+      row     = @hub.vdb.new_post { sid, pid, details, }
     #.......................................................................................................
     # process.exit 111
     return null
@@ -219,9 +221,9 @@ class Hnrss extends Vogue_scraper
   #---------------------------------------------------------------------------------------------------------
   scrape_html: ( html_or_buffer ) ->
     dsk         = 'hn'
-    { sid, }    = @vogue.new_session dsk
-    insert_post = @vogue.queries.insert_post
-    seen        = @vogue.db.dt_now()
+    { sid, }    = @hub.new_session dsk
+    insert_post = @hub.vdb.queries.insert_post
+    seen        = @hub.vdb.db.dt_now()
     #.......................................................................................................
     html        = @_html_from_html_or_buffer html_or_buffer
     #.......................................................................................................
@@ -268,10 +270,10 @@ class Hnrss extends Vogue_scraper
       ### TAINT avoid duplicate query ###
       details = { title, discussion_url, date, creator, description, }
       details = JSON.stringify details
-      row     = @vogue.new_post { sid, pid, details, }
+      row     = @hub.new_post { sid, pid, details, }
     #.......................................................................................................
     # # H.tabulate "Hacker News", R
-    # H.tabulate "Hacker News", @vogue.db SQL"""select
+    # H.tabulate "Hacker News", @hub.db SQL"""select
     #     sid                     as sid,
     #     pid                      as pid,
     #     rank                    as rank,
@@ -357,16 +359,18 @@ demo_hnrss = ->
 
 #-----------------------------------------------------------------------------------------------------------
 demo_ebayde = ->
-  { Vogue_db, } = require '../../../apps/dbay-vogue'
-  vogue         = new Vogue_db()
-  ebayde        = new Ebayde()
-  vogue.XXX_add_scraper ebayde
+  { Vogue
+    Vogue_db
+    Vogue_scraper } = require '../../../apps/dbay-vogue'
+  vogue             = new Vogue()
+  ebayde            = new Ebayde()
+  vogue.scrapers.add { dsk: 'ebayde', scraper: ebayde, }
   ### TAINT use API method, don't use query directly ###
-  vogue.queries.insert_datasource.run { dsk: 'ebayde', url: 'http://nourl', }
+  ### TAINT should be done by `vogue.scraper.add()` ###
+  vogue.vdb.queries.insert_datasource.run { dsk: 'ebayde', url: 'http://nourl', }
   #.........................................................................................................
   glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/ebay-de-search-result-rucksack-????????-??????Z.html'
   for path in glob.sync glob_pattern
-    debug '^435345^', path
     await do =>
       buffer    = FS.readFileSync path
       await ebayde.scrape_html buffer
