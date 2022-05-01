@@ -250,12 +250,42 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_dayjs_duration = function() {
+    var DBay, dayjs;
+    ({DBay} = require('../../../apps/dbay'));
+    debug('^353453^', DBay._dayjs);
+    debug('^353453^', (new DBay())._dayjs);
+    dayjs = require('dayjs');
+    (() => {
+      var customParseFormat, duration, relativeTime, toObject, utc;
+      utc = require('dayjs/plugin/utc');
+      dayjs.extend(utc);
+      relativeTime = require('dayjs/plugin/relativeTime');
+      dayjs.extend(relativeTime);
+      toObject = require('dayjs/plugin/toObject');
+      dayjs.extend(toObject);
+      customParseFormat = require('dayjs/plugin/customParseFormat');
+      dayjs.extend(customParseFormat);
+      duration = require('dayjs/plugin/duration');
+      return dayjs.extend(duration);
+    })();
+    help('^45323^', (dayjs.duration({
+      hours: 1
+    })).asSeconds());
+    help('^45323^', (dayjs.duration({
+      minutes: 1
+    })).asSeconds());
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @demo_datetime()
       this.demo_stdlib_api();
-      return this.demo_dayjs_parse_custom_format();
+      this.demo_dayjs_parse_custom_format();
+      return this.demo_dayjs_duration();
     })();
   }
 

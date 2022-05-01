@@ -444,7 +444,7 @@
       })();
     }
     //.........................................................................................................
-    return ebayde;
+    return vogue;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -455,8 +455,8 @@
     vogue_server = new Vogue_server({
       client: hnrss
     });
-    debug('^45345^', vogue_server);
-    debug('^45345^', (function() {
+    debug('^45345-1^', vogue_server);
+    debug('^45345-2^', (function() {
       var results;
       results = [];
       for (k in vogue_server) {
@@ -464,27 +464,27 @@
       }
       return results;
     })());
-    return debug('^45345^', (await vogue_server.start()));
+    debug('^45345-3^', (await vogue_server.start()));
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   demo_serve_ebayde = async function(cfg) {
-    var Vogue_server, ebayde, k, vogue_server;
-    ({Vogue_server} = require('../../../apps/dbay-vogue/lib/vogue-server'));
-    ebayde = (await demo_ebayde());
-    vogue_server = new Vogue_server({
-      client: ebayde
-    });
-    debug('^45345^', vogue_server);
-    debug('^45345^', (function() {
+    var k, vogue;
+    vogue = (await demo_ebayde());
+    debug('^45345-4^', vogue.server);
+    debug('^45345-5^', (function() {
       var results;
       results = [];
-      for (k in vogue_server) {
+      for (k in vogue.server) {
         results.push(k);
       }
       return results;
     })());
-    return debug('^45345^', (await vogue_server.start()));
+    debug('^45345-6^', vogue.server.start());
+    // setInterval ( -> info '^342349390^' ), 1000
+    help('^45345-7^', "server started");
+    return null;
   };
 
   //###########################################################################################################
