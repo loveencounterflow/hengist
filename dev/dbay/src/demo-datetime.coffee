@@ -177,8 +177,26 @@ tabulate = ( db, query ) -> H.tabulate query, db query
     tabulate db, SQL"""select std_dt_from_now( '20220101-183000Z' ) as date;"""
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@demo_dayjs_duration = ->
+  { DBay }                  = require '../../../apps/dbay'
+  debug '^353453^', DBay._dayjs
+  debug '^353453^', ( new DBay() )._dayjs
+  dayjs                     = require 'dayjs'
+  do =>
+    utc               = require 'dayjs/plugin/utc';               dayjs.extend utc
+    relativeTime      = require 'dayjs/plugin/relativeTime';      dayjs.extend relativeTime
+    toObject          = require 'dayjs/plugin/toObject';          dayjs.extend toObject
+    customParseFormat = require 'dayjs/plugin/customParseFormat'; dayjs.extend customParseFormat
+    duration          = require 'dayjs/plugin/duration';          dayjs.extend duration
+  help '^45323^', ( dayjs.duration { hours:   1, } ).asSeconds()
+  help '^45323^', ( dayjs.duration { minutes: 1, } ).asSeconds()
+  return null
+
+
 ############################################################################################################
 if require.main is module then do =>
   # @demo_datetime()
   @demo_stdlib_api()
   @demo_dayjs_parse_custom_format()
+  @demo_dayjs_duration()
