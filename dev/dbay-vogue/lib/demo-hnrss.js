@@ -179,9 +179,11 @@
     scrape_html(html_or_buffer) {
       var $, R, details, dsk, html, i, insert_post, item, item_details, item_id, item_price, item_subtitle, item_title, item_url, len, pid, ref, row, seen, sid, subtitle, title;
       dsk = 'ebayde';
-      ({sid} = this.vogue.new_session(dsk));
-      insert_post = this.vogue.queries.insert_post;
-      seen = this.vogue.db.dt_now();
+      debug('^445345^', this.hub);
+      debug('^445345^', this.hub.vdb);
+      ({sid} = this.hub.vdb.new_session(dsk));
+      insert_post = this.hub.vdb.queries.insert_post;
+      seen = this.hub.vdb.db.dt_now();
       //.......................................................................................................
       html = this._html_from_html_or_buffer(html_or_buffer);
       $ = CHEERIO.load(html);
@@ -215,7 +217,7 @@
         //.....................................................................................................
         details = {title, item_url};
         details = JSON.stringify(details);
-        row = this.vogue.new_post({sid, pid, details});
+        row = this.hub.vdb.new_post({sid, pid, details});
       }
       //.......................................................................................................
       // process.exit 111
@@ -276,9 +278,9 @@
       /* TAINT avoid duplicate query */
       var $, R, article_url, creator, date, description, details, discussion_url, dsk, href, html, i, insert_post, item, len, pid, ref, row, seen, sid, title;
       dsk = 'hn';
-      ({sid} = this.vogue.new_session(dsk));
-      insert_post = this.vogue.queries.insert_post;
-      seen = this.vogue.db.dt_now();
+      ({sid} = this.hub.new_session(dsk));
+      insert_post = this.hub.vdb.queries.insert_post;
+      seen = this.hub.vdb.db.dt_now();
       //.......................................................................................................
       html = this._html_from_html_or_buffer(html_or_buffer);
       //.......................................................................................................
@@ -326,11 +328,11 @@
         R.push({pid, title, date, creator, discussion_url, article_url});
         details = {title, discussion_url, date, creator, description};
         details = JSON.stringify(details);
-        row = this.vogue.new_post({sid, pid, details});
+        row = this.hub.new_post({sid, pid, details});
       }
       //.......................................................................................................
       // # H.tabulate "Hacker News", R
-      // H.tabulate "Hacker News", @vogue.db SQL"""select
+      // H.tabulate "Hacker News", @hub.db SQL"""select
       //     sid                     as sid,
       //     pid                      as pid,
       //     rank                    as rank,
@@ -417,12 +419,16 @@
   //-----------------------------------------------------------------------------------------------------------
   demo_ebayde = async function() {
     var Vogue_db, ebayde, glob_pattern, i, len, path, ref, vogue;
-    ({Vogue_db} = require('../../../apps/dbay-vogue'));
-    vogue = new Vogue_db();
+    ({Vogue, Vogue_db, Vogue_scraper} = require('../../../apps/dbay-vogue'));
+    vogue = new Vogue();
     ebayde = new Ebayde();
-    vogue.XXX_add_scraper(ebayde);
+    vogue.scrapers.add({
+      dsk: 'ebayde',
+      scraper: ebayde
+    });
     /* TAINT use API method, don't use query directly */
-    vogue.queries.insert_datasource.run({
+    /* TAINT should be done by `vogue.scraper.add()` */
+    vogue.vdb.queries.insert_datasource.run({
       dsk: 'ebayde',
       url: 'http://nourl'
     });
@@ -431,7 +437,6 @@
     ref = glob.sync(glob_pattern);
     for (i = 0, len = ref.length; i < len; i++) {
       path = ref[i];
-      debug('^435345^', path);
       await (async() => {
         var buffer;
         buffer = FS.readFileSync(path);
