@@ -22,14 +22,25 @@ types                     = new ( require 'intertype' ).Intertype()
 #
 #-----------------------------------------------------------------------------------------------------------
 demo_scheduler = ->
+  { AUDIOPLAYER   } = require '../../snippets/lib/demo-node-beep'
   { Vogue 
     Vogue_db 
     Vogue_scraper } = require '../../../apps/dbay-vogue'
-  vogue = new Vogue()
-  vogue.scheduler.XXX_get_interval ->
-    help '^543-1^', "start"
-    await vogue.scheduler.sleep 1.5
-    info '^543-1^', "stop"
+  vogue       = new Vogue()
+  paths       =
+    a: '/usr/share/sounds/LinuxMint/stereo/button-pressed.ogg'
+    b: '/usr/share/mint-artwork/sounds/notification.oga'
+    c: '/usr/share/mint-artwork/sounds/logout.ogg'
+  get_metronome_callee  = -> ( path ) => process.stdout.write '.'
+  get_callee  = ( sigil, path ) =>
+    return callee  = ->
+      process.stdout.write sigil
+      AUDIOPLAYER.play path
+      await vogue.scheduler.sleep 0.5
+  vogue.scheduler.add_interval { callee: get_metronome_callee(), amount: 0.1, unit: 'seconds', }
+  vogue.scheduler.add_interval { callee: ( get_callee '+', paths.a ), amount: 1.2,   unit: 'seconds', }
+  vogue.scheduler.add_interval { callee: ( get_callee 'X', paths.b ), amount: 1.5,   unit: 'seconds', }
+  vogue.scheduler.add_interval { callee: ( get_callee '@', paths.c ), amount: 2.1,   unit: 'seconds', }
   return null
 
 
