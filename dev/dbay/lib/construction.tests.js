@@ -315,13 +315,31 @@ create table bar ( n integer );`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY instance has property `_dayjs`"] = function(T, done) {
+    var DBay, db;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
+    if (T != null) {
+      T.eq(type_of(db._dayjs), 'function');
+    }
+    if (T != null) {
+      T.eq(type_of(db._dayjs.utc), 'function');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
       // test @[ "DBAY _get-autolocation" ]
       // test @[ "DBAY constructor arguments 1" ]
-      return this["DBAY instance has property `alt` (alternative connection)"]();
+      // @[ "DBAY instance has property `alt` (alternative connection)" ]()
+      return test(this["DBAY instance has property `_dayjs`"]);
     })();
   }
 

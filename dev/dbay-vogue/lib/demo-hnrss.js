@@ -179,8 +179,6 @@
     scrape_html(html_or_buffer) {
       var $, R, details, dsk, html, i, insert_post, item, item_details, item_id, item_price, item_subtitle, item_title, item_url, len, pid, ref, row, seen, sid, subtitle, title;
       dsk = 'ebayde';
-      debug('^445345^', this.hub);
-      debug('^445345^', this.hub.vdb);
       ({sid} = this.hub.vdb.new_session(dsk));
       insert_post = this.hub.vdb.queries.insert_post;
       seen = this.hub.vdb.db.dt_now();
@@ -358,12 +356,12 @@
       ts_html = HDML.text(ts);
       id_html = HDML.text(pid);
       rank_html = HDML.text(`${rank}`);
-      // debug '^354534^', rpr details
-      // debug '^354534^', rpr details.title
-      // debug '^354534^', rpr title
-      // debug '^354534^', rpr discussion_url
-      // debug '^354534^', rpr article_url
-      // debug '^354534^', types.type_of HDML.insert 'a', { href: discussion_url, }, HDML.text title
+      // debug '^445345-5^', rpr details
+      // debug '^445345-6^', rpr details.title
+      // debug '^445345-7^', rpr title
+      // debug '^445345-8^', rpr discussion_url
+      // debug '^445345-9^', rpr article_url
+      // debug '^445345-10^', types.type_of HDML.insert 'a', { href: discussion_url, }, HDML.text title
       // process.exit 111
       trend_html = HDML.text(JSON.stringify(trend));
       title_html = HDML.insert('a', {
@@ -455,8 +453,8 @@
     vogue_server = new Vogue_server({
       client: hnrss
     });
-    debug('^45345-1^', vogue_server);
-    debug('^45345-2^', (function() {
+    debug('^445345-11^', vogue_server);
+    debug('^445345-12^', (function() {
       var results;
       results = [];
       for (k in vogue_server) {
@@ -464,26 +462,17 @@
       }
       return results;
     })());
-    debug('^45345-3^', (await vogue_server.start()));
+    debug('^445345-13^', (await vogue_server.start()));
     return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   demo_serve_ebayde = async function(cfg) {
-    var k, vogue;
+    var vogue;
     vogue = (await demo_ebayde());
-    debug('^45345-4^', vogue.server);
-    debug('^45345-5^', (function() {
-      var results;
-      results = [];
-      for (k in vogue.server) {
-        results.push(k);
-      }
-      return results;
-    })());
-    debug('^45345-6^', vogue.server.start());
+    debug('^445345-16^', vogue.server.start());
     // setInterval ( -> info '^342349390^' ), 1000
-    help('^45345-7^', "server started");
+    help('^445345-17^', "server started");
     return null;
   };
 
