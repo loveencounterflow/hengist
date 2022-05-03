@@ -29,13 +29,47 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_scheduler = function() {
-    var Vogue, Vogue_db, Vogue_scraper, vogue;
+    var AUDIOPLAYER, Vogue, Vogue_db, Vogue_scraper, get_callee, get_metronome_callee, paths, vogue;
+    ({AUDIOPLAYER} = require('../../snippets/lib/demo-node-beep'));
     ({Vogue, Vogue_db, Vogue_scraper} = require('../../../apps/dbay-vogue'));
     vogue = new Vogue();
-    vogue.scheduler.XXX_get_interval(async function() {
-      help('^543-1^', "start");
-      await vogue.scheduler.sleep(1.5);
-      return info('^543-1^', "stop");
+    paths = {
+      a: '/usr/share/sounds/LinuxMint/stereo/button-pressed.ogg',
+      b: '/usr/share/mint-artwork/sounds/notification.oga',
+      c: '/usr/share/mint-artwork/sounds/logout.ogg'
+    };
+    get_metronome_callee = function() {
+      return (path) => {
+        return process.stdout.write('.');
+      };
+    };
+    get_callee = (sigil, path) => {
+      var callee;
+      return callee = async function() {
+        process.stdout.write(sigil);
+        AUDIOPLAYER.play(path);
+        return (await vogue.scheduler.sleep(0.5));
+      };
+    };
+    vogue.scheduler.add_interval({
+      callee: get_metronome_callee(),
+      amount: 0.1,
+      unit: 'seconds'
+    });
+    vogue.scheduler.add_interval({
+      callee: get_callee('+', paths.a),
+      amount: 1.2,
+      unit: 'seconds'
+    });
+    vogue.scheduler.add_interval({
+      callee: get_callee('X', paths.b),
+      amount: 1.5,
+      unit: 'seconds'
+    });
+    vogue.scheduler.add_interval({
+      callee: get_callee('@', paths.c),
+      amount: 2.1,
+      unit: 'seconds'
     });
     return null;
   };
