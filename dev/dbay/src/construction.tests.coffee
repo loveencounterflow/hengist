@@ -176,6 +176,15 @@ guy                       = require '../../../apps/guy'
   # debug '^332^', db.cfg
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY instance has property `_dayjs`" ] = ( T, done ) ->
+  T?.halt_on_error()
+  { DBay }        = require H.dbay_path
+  db              = new DBay()
+  T?.eq ( type_of db._dayjs ), 'function'
+  T?.eq ( type_of db._dayjs.utc ), 'function'
+  done?()
+
 
 
 
@@ -185,7 +194,8 @@ if require.main is module then do =>
   # test @
   # test @[ "DBAY _get-autolocation" ]
   # test @[ "DBAY constructor arguments 1" ]
-  @[ "DBAY instance has property `alt` (alternative connection)" ]()
+  # @[ "DBAY instance has property `alt` (alternative connection)" ]()
+  test @[ "DBAY instance has property `_dayjs`" ]
   # test @[ "DBAY URL/path conversion" ]
   # test @[ "xxx" ]
   # test @[ "DBAY instance has two connections" ]
