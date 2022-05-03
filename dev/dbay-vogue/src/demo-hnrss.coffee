@@ -125,8 +125,6 @@ class Ebayde extends Vogue_scraper
   #---------------------------------------------------------------------------------------------------------
   scrape_html: ( html_or_buffer ) ->
     dsk         = 'ebayde'
-    debug '^445345^', @hub
-    debug '^445345^', @hub.vdb
     { sid, }    = @hub.vdb.new_session dsk
     insert_post = @hub.vdb.queries.insert_post
     seen        = @hub.vdb.db.dt_now()
@@ -305,12 +303,12 @@ class Hnrss extends Vogue_scraper
     ts_html     = HDML.text ts
     id_html     = HDML.text pid
     rank_html   = HDML.text "#{rank}"
-    # debug '^354534^', rpr details
-    # debug '^354534^', rpr details.title
-    # debug '^354534^', rpr title
-    # debug '^354534^', rpr discussion_url
-    # debug '^354534^', rpr article_url
-    # debug '^354534^', types.type_of HDML.insert 'a', { href: discussion_url, }, HDML.text title
+    # debug '^445345-5^', rpr details
+    # debug '^445345-6^', rpr details.title
+    # debug '^445345-7^', rpr title
+    # debug '^445345-8^', rpr discussion_url
+    # debug '^445345-9^', rpr article_url
+    # debug '^445345-10^', types.type_of HDML.insert 'a', { href: discussion_url, }, HDML.text title
     # process.exit 111
     trend_html  = HDML.text JSON.stringify trend
     title_html  = HDML.insert 'a', { href: details.discussion_url, }, HDML.text details.title
@@ -382,19 +380,17 @@ demo_serve_hnrss = ( cfg ) ->
   { Vogue_server, } = require '../../../apps/dbay-vogue/lib/vogue-server'
   hnrss         = await demo_hnrss()
   vogue_server  = new Vogue_server { client: hnrss, }
-  debug '^45345-1^', vogue_server
-  debug '^45345-2^', ( k for k of vogue_server )
-  debug '^45345-3^', await vogue_server.start()
+  debug '^445345-11^', vogue_server
+  debug '^445345-12^', ( k for k of vogue_server )
+  debug '^445345-13^', await vogue_server.start()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 demo_serve_ebayde = ( cfg ) ->
   vogue         = await demo_ebayde()
-  debug '^45345-4^', vogue.server
-  debug '^45345-5^', ( k for k of vogue.server )
-  debug '^45345-6^', vogue.server.start()
+  debug '^445345-16^', vogue.server.start()
   # setInterval ( -> info '^342349390^' ), 1000
-  help '^45345-7^', "server started"
+  help '^445345-17^', "server started"
   return null
 
 
