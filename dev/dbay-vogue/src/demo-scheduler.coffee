@@ -36,11 +36,11 @@ demo_scheduler = ->
     return callee  = ->
       process.stdout.write sigil
       AUDIOPLAYER.play path
-      await vogue.scheduler.sleep 0.5
-  vogue.scheduler.add_interval { callee: get_metronome_callee(), amount: 0.1, unit: 'seconds', }
-  vogue.scheduler.add_interval { callee: ( get_callee '+', paths.a ), amount: 1.2,   unit: 'seconds', }
-  vogue.scheduler.add_interval { callee: ( get_callee 'X', paths.b ), amount: 1.5,   unit: 'seconds', }
-  vogue.scheduler.add_interval { callee: ( get_callee '@', paths.c ), amount: 2.1,   unit: 'seconds', }
+      await vogue.scheduler.sleep 0.2
+  vogue.scheduler.add_interval { callee: get_metronome_callee(), repeat: "0.1 seconds", }
+  vogue.scheduler.add_interval { callee: ( get_callee '+', paths.a ), repeat: "1.2 seconds", }
+  vogue.scheduler.add_interval { callee: ( get_callee 'X', paths.b ), repeat: "1.5 seconds", }
+  vogue.scheduler.add_interval { callee: ( get_callee '@', paths.c ), repeat: "2.1 seconds", }
   return null
 
 
