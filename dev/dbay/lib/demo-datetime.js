@@ -279,7 +279,7 @@
     help('^45323^', (dayjs.duration({
       minutes: -1
     })).asSeconds());
-    help('^45323^', (dayjs.duration("1 minute")).asSeconds());
+    // help '^45323^', ( dayjs.duration "1 minute" ).asSeconds()
     return null;
   };
 
