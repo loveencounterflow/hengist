@@ -48,28 +48,24 @@
       return callee = async function() {
         process.stdout.write(sigil);
         AUDIOPLAYER.play(path);
-        return (await vogue.scheduler.sleep(0.5));
+        return (await vogue.scheduler.sleep(0.2));
       };
     };
     vogue.scheduler.add_interval({
       callee: get_metronome_callee(),
-      amount: 0.1,
-      unit: 'seconds'
+      repeat: "0.1 seconds"
     });
     vogue.scheduler.add_interval({
       callee: get_callee('+', paths.a),
-      amount: 1.2,
-      unit: 'seconds'
+      repeat: "1.2 seconds"
     });
     vogue.scheduler.add_interval({
       callee: get_callee('X', paths.b),
-      amount: 1.5,
-      unit: 'seconds'
+      repeat: "1.5 seconds"
     });
     vogue.scheduler.add_interval({
       callee: get_callee('@', paths.c),
-      amount: 2.1,
-      unit: 'seconds'
+      repeat: "2.1 seconds"
     });
     return null;
   };
