@@ -191,6 +191,8 @@ tabulate = ( db, query ) -> H.tabulate query, db query
     duration          = require 'dayjs/plugin/duration';          dayjs.extend duration
   help '^45323^', ( dayjs.duration { hours:   1, } ).asSeconds()
   help '^45323^', ( dayjs.duration { minutes: 1, } ).asSeconds()
+  help '^45323^', ( dayjs.duration { minutes: -1, } ).asSeconds()
+  help '^45323^', ( dayjs.duration "1 minute" ).asSeconds()
   return null
 
 
