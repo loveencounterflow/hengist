@@ -37,10 +37,11 @@ demo_scheduler = ->
       process.stdout.write sigil
       AUDIOPLAYER.play path
       await vogue.scheduler.sleep 0.2
-  vogue.scheduler.add_interval { callee: get_metronome_callee(), repeat: "0.1 seconds", }
-  vogue.scheduler.add_interval { callee: ( get_callee '+', paths.a ), repeat: "1.2 seconds", }
-  vogue.scheduler.add_interval { callee: ( get_callee 'X', paths.b ), repeat: "1.5 seconds", }
-  vogue.scheduler.add_interval { callee: ( get_callee '@', paths.c ), repeat: "2.1 seconds", }
+  vogue.scheduler.add_interval { task: get_metronome_callee(), repeat: "0.1 seconds", }
+  vogue.scheduler.add_interval { task: ( get_callee '+', paths.a ), repeat: "1.2 seconds", jitter: "11%" }
+  vogue.scheduler.add_interval { task: ( get_callee 'X', paths.b ), repeat: "1.5 seconds", jitter: "12%" }
+  vogue.scheduler.add_interval { task: ( get_callee '@', paths.c ), repeat: "2.1 seconds", jitter: "13%" }
+  return null
   return null
 
 
