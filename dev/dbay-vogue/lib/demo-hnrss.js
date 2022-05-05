@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Vogue, Vogue_scraper, badge, debug, demo_1, demo_ebayde, demo_hnrss, demo_serve_ebayde, demo_serve_hnrss, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, types, urge, warn, whisper;
+  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Vogue, Vogue_scraper_ABC, badge, debug, demo_1, demo_ebayde, demo_hnrss, demo_serve_ebayde, demo_serve_hnrss, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -41,7 +41,7 @@
 
   ({SQL} = DBay);
 
-  ({Vogue, Vogue_scraper} = require('../../../apps/dbay-vogue'));
+  ({Vogue, Vogue_scraper_ABC} = require('../../../apps/dbay-vogue'));
 
   ({HDML} = require('../../../apps/dbay-vogue/lib/hdml2'));
 
@@ -174,7 +174,7 @@
   };
 
   //===========================================================================================================
-  Ebayde = class Ebayde extends Vogue_scraper {
+  Ebayde = class Ebayde extends Vogue_scraper_ABC {
     //---------------------------------------------------------------------------------------------------------
     scrape_html(html_or_buffer) {
       var $, R, details, dsk, html, i, insert_post, item, item_details, item_id, item_price, item_subtitle, item_title, item_url, len, pid, ref, row, seen, sid, subtitle, title;
@@ -223,7 +223,7 @@
     }
 
     //---------------------------------------------------------------------------------------------------------
-    get_html_for_trends(row) {
+    html_from_details(row) {
       var details, dsk, dsk_html, id_html, pid, rank, rank_html, sid, sid_html, tds, title_html, trend, trend_html, ts, ts_html;
       ({dsk, sid, ts, pid, rank, trend, details} = row);
       //.......................................................................................................
@@ -247,7 +247,7 @@
   };
 
   //===========================================================================================================
-  Hnrss = class Hnrss extends Vogue_scraper {
+  Hnrss = class Hnrss extends Vogue_scraper_ABC {
     //---------------------------------------------------------------------------------------------------------
     _remove_cdata(text) {
       return text.replace(/^<!\[CDATA\[(.*)\]\]>$/, '$1');
@@ -343,7 +343,7 @@
     }
 
     //---------------------------------------------------------------------------------------------------------
-    get_html_for_trends(row) {
+    html_from_details(row) {
       var article_url, details, discussion_url, dsk, dsk_html, id_html, pid, rank, rank_html, sid, sid_html, tds, title, title_html, trend, trend_html, ts, ts_html;
       ({dsk, sid, ts, pid, rank, trend, details} = row);
       //.......................................................................................................
@@ -356,13 +356,6 @@
       ts_html = HDML.text(ts);
       id_html = HDML.text(pid);
       rank_html = HDML.text(`${rank}`);
-      // debug '^445345-5^', rpr details
-      // debug '^445345-6^', rpr details.title
-      // debug '^445345-7^', rpr title
-      // debug '^445345-8^', rpr discussion_url
-      // debug '^445345-9^', rpr article_url
-      // debug '^445345-10^', types.type_of HDML.insert 'a', { href: discussion_url, }, HDML.text title
-      // process.exit 111
       trend_html = HDML.text(JSON.stringify(trend));
       title_html = HDML.insert('a', {
         href: details.discussion_url
@@ -417,7 +410,7 @@
   //-----------------------------------------------------------------------------------------------------------
   demo_ebayde = async function() {
     var Vogue_db, ebayde, glob_pattern, i, len, path, ref, vogue;
-    ({Vogue, Vogue_db, Vogue_scraper} = require('../../../apps/dbay-vogue'));
+    ({Vogue, Vogue_scraper_ABC, Vogue_db} = require('../../../apps/dbay-vogue'));
     vogue = new Vogue();
     ebayde = new Ebayde();
     vogue.scrapers.add({

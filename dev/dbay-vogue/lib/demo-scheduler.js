@@ -31,9 +31,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_scheduler = function() {
-    var AUDIOPLAYER, Vogue, Vogue_db, Vogue_scraper, get_callee, get_metronome_callee, paths, vogue;
+    var AUDIOPLAYER, Vogue, Vogue_db, Vogue_scraper_ABC, get_callee, get_metronome_callee, paths, vogue;
     ({AUDIOPLAYER} = require('../../snippets/lib/demo-node-beep'));
-    ({Vogue, Vogue_db, Vogue_scraper} = require('../../../apps/dbay-vogue'));
+    ({Vogue, Vogue_db, Vogue_scraper_ABC} = require('../../../apps/dbay-vogue'));
     vogue = new Vogue();
     paths = {
       a: '/usr/share/sounds/LinuxMint/stereo/button-pressed.ogg',
@@ -77,9 +77,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_scheduler_with_timeout = function() {
-    var AUDIOPLAYER, Vogue, Vogue_db, Vogue_scraper, attender, callee, get_metronome_callee, paths, promise_a, vogue;
+    var AUDIOPLAYER, Vogue, Vogue_db, Vogue_scraper_ABC, attender, callee, get_metronome_callee, paths, promise_a, vogue;
     ({AUDIOPLAYER} = require('../../snippets/lib/demo-node-beep'));
-    ({Vogue, Vogue_db, Vogue_scraper} = require('../../../apps/dbay-vogue'));
+    ({Vogue, Vogue_db, Vogue_scraper_ABC} = require('../../../apps/dbay-vogue'));
     vogue = new Vogue();
     paths = {
       a: '/usr/share/sounds/LinuxMint/stereo/button-pressed.ogg',

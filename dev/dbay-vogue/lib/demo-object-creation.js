@@ -35,7 +35,7 @@
   // { DBay, }                 = require '../../../apps/dbay'
   // { SQL, }                  = DBay
   // { Vogue,
-  //   Vogue_scraper }         = require '../../../apps/dbay-vogue'
+  //   Vogue_scraper_ABC }         = require '../../../apps/dbay-vogue'
   // { HDML, }                 = require '../../../apps/dbay-vogue/lib/hdml2'
   // H                         = require '../../../apps/dbay-vogue/lib/helpers'
   // glob                      = require 'glob'
@@ -44,11 +44,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_1 = function() {
-    var Vogue, Vogue_db, Vogue_scraper, vogue;
-    ({Vogue, Vogue_db, Vogue_scraper} = require('../../../apps/dbay-vogue'));
+    var Vogue, Vogue_db, Vogue_scraper_ABC, vogue;
+    ({Vogue, Vogue_db, Vogue_scraper_ABC} = require('../../../apps/dbay-vogue'));
     debug('^45354^', {Vogue});
     debug('^45354^', {Vogue_db});
-    debug('^45354^', {Vogue_scraper});
+    debug('^45354^', {Vogue_scraper_ABC});
     vogue = new Vogue();
     debug('^45354^', {vogue});
     debug('^45354^', vogue.vdb);

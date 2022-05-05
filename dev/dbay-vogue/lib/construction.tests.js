@@ -45,7 +45,7 @@
       T.eq(type_of(VOGUE.Vogue_db), 'class');
     }
     if (T != null) {
-      T.eq(type_of(VOGUE.Vogue_scraper), 'class');
+      T.eq(type_of(VOGUE.Vogue_scraper_ABC), 'class');
     }
     if (T != null) {
       T.eq(type_of(VOGUE.Vogue_server), 'class');
@@ -58,11 +58,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["construction 1"] = function(T, done) {
-    var Vogue, Vogue_db, Vogue_scraper, vogue;
+    var Vogue, Vogue_db, Vogue_scraper_ABC, vogue;
     if (T != null) {
       T.halt_on_error();
     }
-    ({Vogue, Vogue_db, Vogue_scraper} = require('../../../apps/dbay-vogue'));
+    ({Vogue, Vogue_db, Vogue_scraper_ABC} = require('../../../apps/dbay-vogue'));
     vogue = new Vogue();
     if (T != null) {
       T.eq(type_of(vogue.vdb), 'vogue_db');
@@ -84,8 +84,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["property `hub` only settable where licensed"] = function(T, done) {
-    var Vogue, Vogue_db, Vogue_scraper;
-    ({Vogue, Vogue_db, Vogue_scraper} = require('../../../apps/dbay-vogue'));
+    var Vogue, Vogue_db, Vogue_scraper_ABC;
+    ({Vogue, Vogue_db, Vogue_scraper_ABC} = require('../../../apps/dbay-vogue'));
     return typeof done === "function" ? done() : void 0;
   };
 
