@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, GUY, H, PATH, X, after, badge, debug, demo_concurrent_writes, echo, equals, every, help, info, isa, rpr, sleep, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, GUY, H, PATH, X, after, badge, debug, demo_concurrent_writes_block_and_error_out, echo, equals, every, help, info, isa, rpr, sleep, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -51,8 +51,8 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_concurrent_writes = async function() {
-    var DBay, SQL, count, insert_numbers, insert_one, insert_two, p1, p2, path;
+  demo_concurrent_writes_block_and_error_out = async function() {
+    var DBay, SQL, count, insert_numbers, insert_one, insert_two, p1, p2, path, show_table;
     // T?.halt_on_error()
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
@@ -71,11 +71,17 @@ create table c (
     s     integer not null,
   primary key ( src, n ) );`);
       });
-      return insert_numbers = db.prepare_insert({
+      return insert_numbers = db.create_insert({
         into: 'c',
         returning: '*'
       });
     })();
+    //.........................................................................................................
+    show_table = () => {
+      var db;
+      db = new DBay({path});
+      return H.tabulate("two c", db(SQL`select * from c order by src, n;`));
+    };
     //.........................................................................................................
     insert_one = async() => {
       var db, error, i, n, row, s, src;
@@ -89,15 +95,21 @@ create table c (
         s = n ** 2;
         row = {count, src, n, s};
         try {
-          row = insert_numbers.get(row);
+          // show_table()
+          row = db.single_row(insert_numbers, row);
         } catch (error1) {
           error = error1;
           warn('^603-1^', error.message, row);
         }
-        help('^603-one^', row);
+        help('^603-one^', db.single_value(SQL`select count(*) from c;`));
         await sleep(0.1);
+        db.commit_transaction();
       }
-      db.commit_transaction();
+      // loop
+      //   error = null
+      //   try db.commit_transaction() catch error
+      //     warn '^603-1^', error.message
+      //   break unless error?
       return null;
     };
     //.........................................................................................................
@@ -113,36 +125,45 @@ create table c (
         s = n ** 2;
         row = {count, src, n, s};
         try {
-          row = insert_numbers.get(row);
+          // show_table()
+          row = db.single_row(insert_numbers, row);
         } catch (error1) {
           error = error1;
           warn('^603-2^', error.message, row);
         }
-        help('^603-two^', row);
+        help('^603-two^', db.single_value(SQL`select count(*) from c;`));
         await sleep(0.1);
       }
-      db.rollback_transaction();
+      db.commit_transaction();
       return null;
     };
     //.........................................................................................................
-    p1 = new Promise((resolve) => {
-      return after(0.5, async() => {
-        await insert_one();
-        return resolve();
+    p1 = () => {
+      return new Promise((resolve) => {
+        return after(0.5, async() => {
+          await insert_one();
+          return resolve();
+        });
       });
-    });
+    };
     //.........................................................................................................
-    p2 = new Promise((resolve) => {
-      return after(0.5, async() => {
-        await insert_two();
-        return resolve();
+    p2 = () => {
+      return new Promise((resolve) => {
+        return after(0.5, async() => {
+          await insert_two();
+          return resolve();
+        });
       });
-    });
-    await Promise.all([p1, p2]);
-    (() => {      //.........................................................................................................
-      var db;
-      db = new DBay({path});
-      return H.tabulate("c", db(SQL`select * from c order by src, n;`));
+    };
+    await (() => {      //.........................................................................................................
+      return new Promise((resolve) => {
+        return (Promise.all([p1(), p2()])).then(() => {
+          var db;
+          db = new DBay({path});
+          H.tabulate("c", db(SQL`select * from c order by src, n;`));
+          return resolve();
+        });
+      });
     })();
     //.........................................................................................................
     return null;
@@ -151,7 +172,7 @@ create table c (
   //###########################################################################################################
   if (require.main === module) {
     (async() => {
-      return (await demo_concurrent_writes());
+      return (await demo_concurrent_writes_block_and_error_out());
     })();
   }
 
