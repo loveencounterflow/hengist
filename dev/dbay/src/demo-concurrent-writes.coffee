@@ -30,7 +30,7 @@ sleep                     = ( dts    ) -> new Promise ( done ) => setTimeout  do
 
 
 #-----------------------------------------------------------------------------------------------------------
-demo_concurrent_writes = ->
+demo_concurrent_writes_block_and_error_out = ->
   # T?.halt_on_error()
   { DBay }            = require '../../../apps/dbay'
   { SQL  }            = DBay
@@ -50,7 +50,11 @@ demo_concurrent_writes = ->
             s     integer not null,
           primary key ( src, n ) );
         """
-    insert_numbers = db.prepare_insert { into: 'c', returning: '*', }
+    insert_numbers = db.create_insert { into: 'c', returning: '*', }
+  #.........................................................................................................
+  show_table = =>
+    db                  = new DBay { path, }
+    H.tabulate "two c", db SQL"select * from c order by src, n;"
   #.........................................................................................................
   insert_one = =>
     db                  = new DBay { path, }
@@ -62,13 +66,19 @@ demo_concurrent_writes = ->
       count++
       s   = n ** 2
       row = { count, src, n, s, }
+      # show_table()
       try
-        row = insert_numbers.get row
+        row = db.single_row insert_numbers, row
       catch error
         warn '^603-1^', error.message, row
-      help '^603-one^', row
+      help '^603-one^', db.single_value SQL"select count(*) from c;"
       await sleep 0.1
-    db.commit_transaction()
+      db.commit_transaction()
+    # loop
+    #   error = null
+    #   try db.commit_transaction() catch error
+    #     warn '^603-1^', error.message
+    #   break unless error?
     return null
   #.........................................................................................................
   insert_two = =>
@@ -81,33 +91,34 @@ demo_concurrent_writes = ->
       count++
       s   = n ** 2
       row = { count, src, n, s, }
+      # show_table()
       try
-        row = insert_numbers.get row
+        row = db.single_row insert_numbers, row
       catch error
         warn '^603-2^', error.message, row
-      help '^603-two^', row
+      help '^603-two^', db.single_value SQL"select count(*) from c;"
       await sleep 0.1
-    db.rollback_transaction()
+    db.commit_transaction()
     return null
   #.........................................................................................................
-  p1 = new Promise ( resolve ) =>
+  p1 = => new Promise ( resolve ) =>
     after 0.5, =>
       await insert_one()
       resolve()
   #.........................................................................................................
-  p2 = new Promise ( resolve ) =>
+  p2 = => new Promise ( resolve ) =>
     after 0.5, =>
       await insert_two()
       resolve()
-  await Promise.all [ p1, p2, ]
   #.........................................................................................................
-  do =>
+  await do => new Promise ( resolve ) => ( Promise.all [ p1(), p2(), ] ).then =>
     db                  = new DBay { path, }
     H.tabulate "c", db SQL"select * from c order by src, n;"
+    resolve()
   #.........................................................................................................
   return null
 
 
 ############################################################################################################
 if require.main is module then do =>
-  await demo_concurrent_writes()
+  await demo_concurrent_writes_block_and_error_out()
