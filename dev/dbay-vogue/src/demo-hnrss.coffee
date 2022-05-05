@@ -25,7 +25,7 @@ GUY                       = require '../../../apps/guy'
 { DBay, }                 = require '../../../apps/dbay'
 { SQL, }                  = DBay
 { Vogue,
-  Vogue_scraper }         = require '../../../apps/dbay-vogue'
+  Vogue_scraper_ABC }     = require '../../../apps/dbay-vogue'
 { HDML, }                 = require '../../../apps/dbay-vogue/lib/hdml2'
 H                         = require '../../../apps/dbay-vogue/lib/helpers'
 glob                      = require 'glob'
@@ -120,7 +120,7 @@ demo_zvg24_net = ->
   return null
 
 #===========================================================================================================
-class Ebayde extends Vogue_scraper
+class Ebayde extends Vogue_scraper_ABC
 
   #---------------------------------------------------------------------------------------------------------
   scrape_html: ( html_or_buffer ) ->
@@ -164,7 +164,7 @@ class Ebayde extends Vogue_scraper
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  get_html_for_trends: ( row ) ->
+  html_from_details: ( row ) ->
     { dsk
       sid
       ts
@@ -198,7 +198,7 @@ class Ebayde extends Vogue_scraper
 
 
 #===========================================================================================================
-class Hnrss extends Vogue_scraper
+class Hnrss extends Vogue_scraper_ABC
 
   #---------------------------------------------------------------------------------------------------------
   _remove_cdata: ( text ) -> text.replace /^<!\[CDATA\[(.*)\]\]>$/, '$1'
@@ -283,7 +283,7 @@ class Hnrss extends Vogue_scraper
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  get_html_for_trends: ( row ) ->
+  html_from_details: ( row ) ->
     { dsk
       sid
       ts
@@ -303,13 +303,6 @@ class Hnrss extends Vogue_scraper
     ts_html     = HDML.text ts
     id_html     = HDML.text pid
     rank_html   = HDML.text "#{rank}"
-    # debug '^445345-5^', rpr details
-    # debug '^445345-6^', rpr details.title
-    # debug '^445345-7^', rpr title
-    # debug '^445345-8^', rpr discussion_url
-    # debug '^445345-9^', rpr article_url
-    # debug '^445345-10^', types.type_of HDML.insert 'a', { href: discussion_url, }, HDML.text title
-    # process.exit 111
     trend_html  = HDML.text JSON.stringify trend
     title_html  = HDML.insert 'a', { href: details.discussion_url, }, HDML.text details.title
     #.......................................................................................................
@@ -358,8 +351,8 @@ demo_hnrss = ->
 #-----------------------------------------------------------------------------------------------------------
 demo_ebayde = ->
   { Vogue
-    Vogue_db
-    Vogue_scraper } = require '../../../apps/dbay-vogue'
+    Vogue_scraper_ABC
+    Vogue_db      } = require '../../../apps/dbay-vogue'
   vogue             = new Vogue()
   ebayde            = new Ebayde()
   vogue.scrapers.add { dsk: 'ebayde', scraper: ebayde, }

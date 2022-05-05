@@ -25,7 +25,7 @@ types                     = new ( require 'intertype' ).Intertype()
 # { DBay, }                 = require '../../../apps/dbay'
 # { SQL, }                  = DBay
 # { Vogue,
-#   Vogue_scraper }         = require '../../../apps/dbay-vogue'
+#   Vogue_scraper_ABC }         = require '../../../apps/dbay-vogue'
 # { HDML, }                 = require '../../../apps/dbay-vogue/lib/hdml2'
 # H                         = require '../../../apps/dbay-vogue/lib/helpers'
 # glob                      = require 'glob'
@@ -38,10 +38,10 @@ types                     = new ( require 'intertype' ).Intertype()
 demo_1 = ->
   { Vogue 
     Vogue_db 
-    Vogue_scraper } = require '../../../apps/dbay-vogue'
+    Vogue_scraper_ABC } = require '../../../apps/dbay-vogue'
   debug '^45354^', { Vogue, }
   debug '^45354^', { Vogue_db, }
-  debug '^45354^', { Vogue_scraper, }
+  debug '^45354^', { Vogue_scraper_ABC, }
   vogue = new Vogue()
   debug '^45354^', { vogue, }
   debug '^45354^', vogue.vdb

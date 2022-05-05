@@ -31,10 +31,10 @@ guy                       = require '../../../apps/guy'
 #-----------------------------------------------------------------------------------------------------------
 @[ "exported names" ] = ( T, done ) ->
   VOGUE = require '../../../apps/dbay-vogue'
-  T?.eq ( type_of VOGUE.Vogue_db      ), 'class'
-  T?.eq ( type_of VOGUE.Vogue_scraper ), 'class'
-  T?.eq ( type_of VOGUE.Vogue_server  ), 'class'
-  T?.eq ( type_of VOGUE.Vogue         ), 'class'
+  T?.eq ( type_of VOGUE.Vogue_db          ), 'class'
+  T?.eq ( type_of VOGUE.Vogue_scraper_ABC ), 'class'
+  T?.eq ( type_of VOGUE.Vogue_server      ), 'class'
+  T?.eq ( type_of VOGUE.Vogue             ), 'class'
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -42,7 +42,7 @@ guy                       = require '../../../apps/guy'
   T?.halt_on_error()
   { Vogue
     Vogue_db
-    Vogue_scraper } = require '../../../apps/dbay-vogue'
+    Vogue_scraper_ABC } = require '../../../apps/dbay-vogue'
   vogue = new Vogue()
   T?.eq ( type_of vogue.vdb ), 'vogue_db'
   T?.ok vogue.vdb.hub is vogue
@@ -57,5 +57,5 @@ guy                       = require '../../../apps/guy'
 @[ "property `hub` only settable where licensed" ] = ( T, done ) ->
   { Vogue
     Vogue_db
-    Vogue_scraper } = require '../../../apps/dbay-vogue'
+    Vogue_scraper_ABC } = require '../../../apps/dbay-vogue'
   return done?()

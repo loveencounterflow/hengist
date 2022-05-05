@@ -25,7 +25,7 @@ demo_scheduler = ->
   { AUDIOPLAYER   } = require '../../snippets/lib/demo-node-beep'
   { Vogue 
     Vogue_db 
-    Vogue_scraper } = require '../../../apps/dbay-vogue'
+    Vogue_scraper_ABC } = require '../../../apps/dbay-vogue'
   vogue       = new Vogue()
   paths       =
     a: '/usr/share/sounds/LinuxMint/stereo/button-pressed.ogg'
@@ -48,7 +48,7 @@ demo_scheduler_with_timeout = ->
   { AUDIOPLAYER   } = require '../../snippets/lib/demo-node-beep'
   { Vogue
     Vogue_db
-    Vogue_scraper } = require '../../../apps/dbay-vogue'
+    Vogue_scraper_ABC } = require '../../../apps/dbay-vogue'
   vogue       = new Vogue()
   paths       =
     a: '/usr/share/sounds/LinuxMint/stereo/button-pressed.ogg'
