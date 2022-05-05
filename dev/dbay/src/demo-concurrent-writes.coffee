@@ -24,10 +24,11 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of }      = types.export()
 GUY                       = require '../../../apps/guy'
 X                         = require '../../../lib/helpers'
-every                     = ( dts, f ) ->                         setInterval f,    dts * 1000
-after                     = ( dts, f ) ->                         setTimeout  f,    dts * 1000
-sleep                     = ( dts    ) -> new Promise ( done ) => setTimeout  done, dts * 1000
-
+{ every
+  after
+  sleep
+  defer
+  cease }                 = GUY.async
 
 #-----------------------------------------------------------------------------------------------------------
 demo_concurrent_writes_block_and_error_out = ->
