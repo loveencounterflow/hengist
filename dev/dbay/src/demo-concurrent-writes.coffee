@@ -32,7 +32,6 @@ X                         = require '../../../lib/helpers'
 
 #-----------------------------------------------------------------------------------------------------------
 demo_concurrent_writes_block_and_error_out = ->
-  # T?.halt_on_error()
   { DBay }            = require '../../../apps/dbay'
   { SQL  }            = DBay
   path                = ( PATH.resolve PATH.join __dirname, '../../../dev-shm/concurrent-writes.sqlite' )
@@ -120,8 +119,7 @@ demo_concurrent_writes_block_and_error_out = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-demo_concurrent_writes_with_implicit_transactions = ->
-  # T?.halt_on_error()
+demo_concurrent_writes_with_implicit_transactions_multiple_connections = ->
   { DBay }            = require '../../../apps/dbay'
   { SQL  }            = DBay
   path                = ( PATH.resolve PATH.join __dirname, '../../../dev-shm/concurrent-writes.sqlite' )
@@ -197,8 +195,82 @@ demo_concurrent_writes_with_implicit_transactions = ->
   #.........................................................................................................
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_concurrent_writes_with_implicit_transactions_single_connection = ->
+  { DBay }            = require '../../../apps/dbay'
+  { SQL  }            = DBay
+  path                = ( PATH.resolve PATH.join __dirname, '../../../dev-shm/concurrent-writes.sqlite' )
+  count               = 0
+  insert_numbers      = null
+  db                  = new DBay { path, }
+  #.........................................................................................................
+  do =>
+    db =>
+      db SQL"""
+        drop table if exists c;
+        create table c (
+            count integer not null,
+            src   text    not null,
+            n     integer not null,
+            s     integer not null,
+          primary key ( src, n ) );
+        """
+    insert_numbers = db.create_insert { into: 'c', returning: '*', }
+  #.........................................................................................................
+  show_table = =>
+    H.tabulate "two c", db SQL"select * from c order by src, n;"
+  #.........................................................................................................
+  insert_one = =>
+    urge '^603-1^', "start one"
+    src = 'one'
+    for n in [ 1 .. 10 ]
+      count++
+      s   = n ** 2
+      row = { count, src, n, s, }
+      # show_table()
+      try
+        row = db.single_row insert_numbers, row
+      catch error
+        warn '^603-1^', error.message, row
+      help '^603-one^', db.single_value SQL"select count(*) from c;"
+      await defer()
+    return null
+  #.........................................................................................................
+  insert_two = =>
+    urge '^603-1^', "start two"
+    src = 'two'
+    for n in [ 1 .. 10 ]
+      count++
+      s   = n ** 2
+      row = { count, src, n, s, }
+      # show_table()
+      try
+        row = db.single_row insert_numbers, row
+      catch error
+        warn '^603-2^', error.message, row
+      help '^603-two^', db.single_value SQL"select count(*) from c;"
+      await defer()
+    return null
+  #.........................................................................................................
+  p1 = => new Promise ( resolve ) =>
+    after 0.5, =>
+      await insert_one()
+      resolve()
+  #.........................................................................................................
+  p2 = => new Promise ( resolve ) =>
+    after 0.5, =>
+      await insert_two()
+      resolve()
+  #.........................................................................................................
+  await Promise.all [ p1(), p2(), ]
+  do =>
+    H.tabulate "c", db SQL"select * from c order by src, n;"
+  #.........................................................................................................
+  return null
+
 
 ############################################################################################################
 if require.main is module then do =>
   # await demo_concurrent_writes_block_and_error_out()
-  await demo_concurrent_writes_with_implicit_transactions()
+  # await demo_concurrent_writes_with_implicit_transactions_multiple_connections()
+  await demo_concurrent_writes_with_implicit_transactions_single_connection()
