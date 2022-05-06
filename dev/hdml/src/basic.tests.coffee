@@ -153,6 +153,23 @@ guy                       = require '../../../apps/guy'
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "HDML V2 API" ] = ( T, done ) ->
+  { HDML, } = require '../../../apps/hdml'
+  T?.eq ( HDML.single  'path', { id: 'c1', d: 'M100,100L200,200', }                                                   ), """<path id='c1' d='M100,100L200,200'/>"""
+  T?.eq ( HDML.open    'div', { id: 'c1', class: 'foo bar', }                                                         ), """<div id='c1' class='foo bar'>"""
+  T?.eq ( HDML.text    "<helo>"                                                                                       ), """&lt;helo&gt;"""
+  T?.eq ( HDML.close   'div'                                                                                          ), """</div>"""
+  T?.eq ( HDML.pair    'div'                                                                                          ), """<div></div>"""
+  T?.eq ( HDML.single  'mrg:loc#baselines'                                                                            ), """<mrg:loc id='baselines'/>"""
+  T?.eq ( HDML.pair    'mrg:loc#baselines'                                                                            ), """<mrg:loc id='baselines'></mrg:loc>"""
+  T?.eq ( HDML.pair 'div', { id: 'c1', class: 'foo bar', }, HDML.text "<helo>"                                        ), """<div id='c1' class='foo bar'>&lt;helo&gt;</div>"""
+  T?.eq ( HDML.pair 'div', { id: 'c1', class: 'foo bar', }, HDML.single 'path', { id: 'c1', d: 'M100,100L200,200', }  ), """<div id='c1' class='foo bar'><path id='c1' d='M100,100L200,200'/></div>"""
+
+  #.........................................................................................................
+  done()
+  return null
+
 
 
 
@@ -166,6 +183,8 @@ if require.main is module then do =>
   # test @[ "HDML use compact tagnames 1" ]
   @[ "can use or not use compact tagnames" ]()
   test @[ "can use or not use compact tagnames" ]
+  @[ "HDML V2 API" ]()
+  test @[ "HDML V2 API" ]
   # @[ "HDML use compact tagnames 1" ]()
 
 
