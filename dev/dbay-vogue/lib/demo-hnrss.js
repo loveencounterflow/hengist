@@ -255,7 +255,7 @@
       /* TAINT avoid duplicate query */
       var $, article_url, creator, date, description, details, discussion_url, dsk, href, html, i, insert_post, item, len, pid, ref, row, seen, sid, title, title_url;
       dsk = 'hn';
-      ({sid} = this.hub.new_session(dsk));
+      ({sid} = this.hub.vdb.new_session(dsk));
       insert_post = this.hub.vdb.queries.insert_post;
       seen = this.hub.vdb.db.dt_now();
       //.......................................................................................................
@@ -298,7 +298,7 @@
         title_url = discussion_url;
         //.....................................................................................................
         href = null;
-        details = {title, discussion_url, date, creator, description};
+        details = {title, title_url, date, creator, description};
         details = JSON.stringify(details);
         row = this.hub.vdb.new_post({sid, pid, details});
       }
@@ -309,10 +309,16 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_hnrss = async function() {
-    var glob_pattern, hnrss, i, len, path, ref;
-    hnrss = new Hnrss();
-    hnrss.vogue.queries.insert_datasource.run({
-      dsk: 'hn',
+    var Vogue_db, dsk, glob_pattern, i, len, path, ref, scraper, vogue;
+    ({Vogue, Vogue_scraper_ABC, Vogue_db} = require('../../../apps/dbay-vogue'));
+    dsk = 'hn';
+    vogue = new Vogue();
+    scraper = new Hnrss();
+    vogue.scrapers.add({dsk, scraper});
+    /* TAINT use API method, don't use query directly */
+    /* TAINT should be done by `vogue.scraper.add()` */
+    vogue.vdb.queries.insert_datasource.run({
+      dsk,
       url: 'http://nourl'
     });
     //.........................................................................................................
@@ -323,43 +329,25 @@
       await (async() => {
         var buffer;
         buffer = FS.readFileSync(path);
-        return (await hnrss.scrape_html(buffer));
+        return (await scraper.scrape_html(buffer));
       })();
     }
     //.........................................................................................................
-    // H.tabulate "trends", hnrss.vogue.db SQL"""select * from _scr_trends order by pid;"""
-    // H.tabulate "trends", hnrss.vogue.db SQL"""
-    //   select
-    //       dsk                                           as dsk,
-    //       sid                                           as sid,
-    //       pid                                           as pid,
-    //       rank                                          as rank,
-    //       trend                                         as trend,
-    //       substring( details, 1, 30 )                   as details
-    //     from scr_trends order by
-    //       sid desc,
-    //       rank;"""
-    // H.tabulate "trends", hnrss.vogue.db SQL"""select * from scr_trends_html order by nr;"""
-    //.........................................................................................................
-    // demo_trends_as_table hnrss
-    //.........................................................................................................
-    return hnrss;
+    return vogue;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   demo_ebayde = async function() {
-    var Vogue_db, ebayde, glob_pattern, i, len, path, ref, vogue;
+    var Vogue_db, dsk, glob_pattern, i, len, path, ref, scraper, vogue;
     ({Vogue, Vogue_scraper_ABC, Vogue_db} = require('../../../apps/dbay-vogue'));
+    dsk = 'ebayde';
     vogue = new Vogue();
-    ebayde = new Ebayde();
-    vogue.scrapers.add({
-      dsk: 'ebayde',
-      scraper: ebayde
-    });
+    scraper = new Ebayde();
+    vogue.scrapers.add({dsk, scraper});
     /* TAINT use API method, don't use query directly */
     /* TAINT should be done by `vogue.scraper.add()` */
     vogue.vdb.queries.insert_datasource.run({
-      dsk: 'ebayde',
+      dsk,
       url: 'http://nourl'
     });
     //.........................................................................................................
@@ -370,7 +358,7 @@
       await (async() => {
         var buffer;
         buffer = FS.readFileSync(path);
-        return (await ebayde.scrape_html(buffer));
+        return (await scraper.scrape_html(buffer));
       })();
     }
     //.........................................................................................................
@@ -379,22 +367,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_serve_hnrss = async function(cfg) {
-    var Vogue_server, hnrss, k, vogue_server;
-    ({Vogue_server} = require('../../../apps/dbay-vogue/lib/vogue-server'));
-    hnrss = (await demo_hnrss());
-    vogue_server = new Vogue_server({
-      client: hnrss
-    });
-    debug('^445345-11^', vogue_server);
-    debug('^445345-12^', (function() {
-      var results;
-      results = [];
-      for (k in vogue_server) {
-        results.push(k);
-      }
-      return results;
-    })());
-    debug('^445345-13^', (await vogue_server.start()));
+    var vogue;
+    vogue = (await demo_hnrss());
+    debug('^445345-16^', vogue.server.start());
+    help('^445345-17^', "server started");
     return null;
   };
 
@@ -403,7 +379,6 @@
     var vogue;
     vogue = (await demo_ebayde());
     debug('^445345-16^', vogue.server.start());
-    // setInterval ( -> info '^342349390^' ), 1000
     help('^445345-17^', "server started");
     return null;
   };
@@ -414,14 +389,11 @@
       // await demo_zvg_online_net()
       // await demo_zvg24_net()
       // await demo_hnrss()
-      // await demo_serve_hnrss()
-      return (await demo_serve_ebayde());
+      return (await demo_serve_hnrss());
     })();
   }
 
-  // view-source:https://www.skypack.dev/search?q=sqlite&p=1
-// await demo_oanda_com_jsdom()
-// f()
+  // await demo_serve_ebayde()
 
 }).call(this);
 

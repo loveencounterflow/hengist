@@ -39,32 +39,30 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["scheduler: duration pattern"] = function(T, done) {
-    var Vogue_scheduler, duration_pattern, ref, ref1, ref2, ref3, ref4, ref5;
-    if (T != null) {
-      T.halt_on_error();
-    }
+    var Vogue_scheduler, abs_duration_pattern, ref, ref1, ref2, ref3, ref4, ref5;
+    // T?.halt_on_error()
     ({Vogue_scheduler} = require('../../../apps/dbay-vogue'));
-    duration_pattern = Vogue_scheduler.C.duration_pattern;
+    abs_duration_pattern = Vogue_scheduler.C.abs_duration_pattern;
     if (T != null) {
-      T.eq(type_of(duration_pattern), 'regex');
+      T.eq(type_of(abs_duration_pattern), 'regex');
     }
     if (T != null) {
-      T.eq((ref = "23 minutes".match(duration_pattern)) != null ? ref.groups.amount : void 0, '23');
+      T.eq((ref = "23 minutes".match(abs_duration_pattern)) != null ? ref.groups.amount : void 0, '23');
     }
     if (T != null) {
-      T.eq((ref1 = "23e2 weeks".match(duration_pattern)) != null ? ref1.groups.amount : void 0, '23e2');
+      T.eq((ref1 = "23e2 weeks".match(abs_duration_pattern)) != null ? ref1.groups.amount : void 0, '23e2');
     }
     if (T != null) {
-      T.eq((ref2 = "23.5e22 weeks".match(duration_pattern)) != null ? ref2.groups.amount : void 0, '23.5e22');
+      T.eq((ref2 = "23.5e22 weeks".match(abs_duration_pattern)) != null ? ref2.groups.amount : void 0, '23.5e22');
     }
     if (T != null) {
-      T.eq((ref3 = "23 minutes".match(duration_pattern)) != null ? ref3.groups.unit : void 0, 'minutes');
+      T.eq((ref3 = "23 minutes".match(abs_duration_pattern)) != null ? ref3.groups.unit : void 0, 'minutes');
     }
     if (T != null) {
-      T.eq((ref4 = "23e2 weeks".match(duration_pattern)) != null ? ref4.groups.unit : void 0, 'weeks');
+      T.eq((ref4 = "23e2 weeks".match(abs_duration_pattern)) != null ? ref4.groups.unit : void 0, 'weeks');
     }
     if (T != null) {
-      T.eq((ref5 = "23.5e22 weeks".match(duration_pattern)) != null ? ref5.groups.unit : void 0, 'weeks');
+      T.eq((ref5 = "23.5e22 weeks".match(abs_duration_pattern)) != null ? ref5.groups.unit : void 0, 'weeks');
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -72,20 +70,26 @@
   //-----------------------------------------------------------------------------------------------------------
   this["scheduler: add_interval_cfg"] = function(T, done) {
     var Vogue_scheduler, voge_scheduler;
-    if (T != null) {
-      T.halt_on_error();
-    }
+    // T?.halt_on_error()
     ({Vogue_scheduler} = require('../../../apps/dbay-vogue'));
     voge_scheduler = new Vogue_scheduler();
     ({types} = voge_scheduler);
     if (T != null) {
       T.eq(type_of(types.isa.vogue_scheduler_add_interval_cfg), 'function');
     }
-    // types.validate.vogue_scheduler_add_interval_cfg { repeat: '1.5 hours', callee: ( -> ), }
+    // types.validate.vogue_scheduler_add_interval_cfg { repeat: '1.5 hours', task: ( -> ), }
+    types.validate.vogue_scheduler_add_interval_cfg({
+      repeat: '1.5 hours',
+      jitter: '10%',
+      pause: '10 minutes',
+      task: (function() {})
+    });
     if (T != null) {
       T.ok(types.isa.vogue_scheduler_add_interval_cfg({
         repeat: '1.5 hours',
-        callee: (function() {})
+        jitter: '10%',
+        pause: '10 minutes',
+        task: (function() {})
       }));
     }
     return typeof done === "function" ? done() : void 0;

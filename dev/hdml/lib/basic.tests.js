@@ -61,7 +61,7 @@
           '<',
           'foo',
           {
-            a: 42,
+            a: '42',
             b: "'",
             c: '"'
           }
@@ -71,10 +71,34 @@
       ],
       [
         [
-          '^',
+          '<',
+          'foo',
+          {
+            a: '42',
+            b: void 0
+          }
+        ],
+        null,
+        'not a valid text: undefined'
+      ],
+      [
+        [
+          '<',
           'foo',
           {
             a: 42,
+            b: void 0
+          }
+        ],
+        null,
+        'not a valid text: 42'
+      ],
+      [
+        [
+          '^',
+          'foo',
+          {
+            a: '42',
             b: "'",
             c: '"'
           }
@@ -87,7 +111,7 @@
           '^',
           'prfx:foo',
           {
-            a: 42,
+            a: '42',
             b: "'",
             c: '"'
           }
@@ -95,15 +119,15 @@
         `<prfx:foo a='42' b='&#39;' c='"'/>`,
         null
       ],
-      [['^',
-      'mrg:loc#baselines'],
-      '<mrg:loc#baselines/>',
-      null],
       // [ [ '^', '$text' ], '<mrg:loc#baselines/>', null ]
       [['>',
       'foo'],
       '</foo>',
-      null]
+      null],
+      [['>',
+      42],
+      null,
+      'not a valid text: 42']
     ];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -122,13 +146,358 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["can use or not use compact tagnames"] = function(T, done) {
+    var Hdml;
+    // T?.halt_on_error()
+    ({Hdml} = require('../../../apps/hdml'));
+    (() => {      //.........................................................................................................
+      var hdml;
+      hdml = new Hdml({
+        use_compact_tags: false
+      });
+      return T != null ? T.eq(hdml.create_tag('^', 'mrg:loc#baselines'), '<mrg:loc#baselines/>') : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var hdml;
+      hdml = new Hdml({
+        use_compact_tags: true
+      });
+      return T != null ? T.eq(hdml.create_tag('^', 'mrg:loc#baselines'), "<mrg:loc id='baselines'/>") : void 0;
+    })();
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["HDML.parse_compact_tagname 1"] = async function(T, done) {
+    var HDML, error, i, len, matcher, probe, probes_and_matchers;
+    ({HDML} = require('../../../apps/hdml'));
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        'foo-bar',
+        {
+          tag: 'foo-bar'
+        },
+        null
+      ],
+      [
+        'foo-bar#c55',
+        {
+          tag: 'foo-bar',
+          id: 'c55'
+        },
+        null
+      ],
+      [
+        'foo-bar.blah.beep',
+        {
+          tag: 'foo-bar',
+          class: ['blah',
+        'beep']
+        },
+        null
+      ],
+      [
+        'foo-bar#c55.blah.beep',
+        {
+          tag: 'foo-bar',
+          id: 'c55',
+          class: ['blah',
+        'beep']
+        },
+        null
+      ],
+      [
+        'dang:blah',
+        {
+          prefix: 'dang',
+          tag: 'blah'
+        },
+        null
+      ],
+      [
+        'dang:blah#c3',
+        {
+          prefix: 'dang',
+          tag: 'blah',
+          id: 'c3'
+        },
+        null
+      ],
+      [
+        'dang:blah#c3.some.thing',
+        {
+          prefix: 'dang',
+          tag: 'blah',
+          id: 'c3',
+          class: ['some',
+        'thing']
+        },
+        null
+      ],
+      [
+        'dang:bar.dub#c3.other',
+        {
+          prefix: 'dang',
+          tag: 'bar',
+          class: ['dub',
+        'other'],
+          id: 'c3'
+        },
+        null
+      ],
+      //.......................................................................................................
+      ['#c55',
+      null,
+      "illegal compact tag syntax"],
+      ['dang:#c3.some.thing',
+      null,
+      "illegal compact tag syntax"],
+      ['.blah.beep',
+      null,
+      "illegal compact tag syntax"],
+      ['...#',
+      null,
+      'illegal compact tag syntax'],
+      ['',
+      null,
+      'illegal compact tag syntax']
+    ];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          return resolve(HDML.parse_compact_tagname(probe));
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["HDML.parse_compact_tagname 2"] = async function(T, done) {
+    var HDML, Hdml, error, i, len, matcher, probe, probes_and_matchers;
+    ({Hdml} = require('../../../apps/hdml'));
+    HDML = new Hdml({
+      strict_compact_tags: false
+    });
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        'foo-bar',
+        {
+          tag: 'foo-bar'
+        },
+        null
+      ],
+      [
+        'foo-bar#c55',
+        {
+          tag: 'foo-bar',
+          id: 'c55'
+        },
+        null
+      ],
+      [
+        'foo-bar.blah.beep',
+        {
+          tag: 'foo-bar',
+          class: ['blah',
+        'beep']
+        },
+        null
+      ],
+      [
+        'foo-bar#c55.blah.beep',
+        {
+          tag: 'foo-bar',
+          id: 'c55',
+          class: ['blah',
+        'beep']
+        },
+        null
+      ],
+      [
+        'dang:blah',
+        {
+          prefix: 'dang',
+          tag: 'blah'
+        },
+        null
+      ],
+      [
+        'dang:blah#c3',
+        {
+          prefix: 'dang',
+          tag: 'blah',
+          id: 'c3'
+        },
+        null
+      ],
+      [
+        'dang:blah#c3.some.thing',
+        {
+          prefix: 'dang',
+          tag: 'blah',
+          id: 'c3',
+          class: ['some',
+        'thing']
+        },
+        null
+      ],
+      [
+        'dang:bar.dub#c3.other',
+        {
+          prefix: 'dang',
+          tag: 'bar',
+          class: ['dub',
+        'other'],
+          id: 'c3'
+        },
+        null
+      ],
+      [
+        //.......................................................................................................
+        '#c55',
+        {
+          id: 'c55'
+        },
+        null
+      ],
+      [
+        'dang:#c3.some.thing',
+        {
+          prefix: 'dang',
+          id: 'c3',
+          class: ['some',
+        'thing']
+        },
+        null
+      ],
+      [
+        '.blah.beep',
+        {
+          class: ['blah',
+        'beep']
+        },
+        null
+      ],
+      ['...#',
+      {},
+      null],
+      ['',
+      {},
+      null]
+    ];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          return resolve(HDML.parse_compact_tagname(probe));
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["HDML use compact tagnames 1"] = async function(T, done) {
+    var HDML, error, i, len, matcher, probe, probes_and_matchers;
+    ({HDML} = require('../../../apps/hdml'));
+    //.........................................................................................................
+    probes_and_matchers = [
+      [['<',
+      'foo-bar'],
+      '<foo-bar>',
+      null],
+      [['<',
+      'foo-bar#c55'],
+      "<foo-bar id='c55'>",
+      null],
+      [['<',
+      'foo-bar.blah.beep'],
+      "<foo-bar class='blah beep'>",
+      null],
+      [['<',
+      'foo-bar#c55.blah.beep'],
+      "<foo-bar id='c55' class='blah beep'>",
+      null],
+      [['<',
+      'dang:blah'],
+      '<dang:blah>',
+      null],
+      [['<',
+      'dang:blah#c3'],
+      "<dang:blah id='c3'>",
+      null],
+      [['<',
+      'dang:blah#c3.some.thing'],
+      "<dang:blah id='c3' class='some thing'>",
+      null],
+      [['<',
+      'dang:bar.dub#c3.other'],
+      "<dang:bar id='c3' class='dub other'>",
+      null],
+      //.......................................................................................................
+      [['<',
+      '#c55'],
+      null,
+      "illegal compact tag syntax"],
+      [['<',
+      'dang:#c3.some.thing'],
+      null,
+      "illegal compact tag syntax"],
+      [['<',
+      '.blah.beep'],
+      null,
+      "illegal compact tag syntax"],
+      [['<',
+      '...#'],
+      null,
+      'illegal compact tag syntax'],
+      [['<',
+      ''],
+      null,
+      'illegal compact tag syntax']
+    ];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      // urge '^609^', rpr probe
+      // urge '^609^', HDML.create_tag probe...
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          return resolve(HDML.create_tag(...probe));
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
-      return test(this["basics"]);
+      // test @[ "basics" ]
+      // test @[ "HDML.parse_compact_tagname 1" ]
+      // test @[ "HDML.parse_compact_tagname 2" ]
+      // test @[ "HDML use compact tagnames 1" ]
+      // test @[ "HDML use compact tagnames 1" ]
+      this["can use or not use compact tagnames"]();
+      return test(this["can use or not use compact tagnames"]);
     })();
   }
+
+  // @[ "HDML use compact tagnames 1" ]()
 
 }).call(this);
 
