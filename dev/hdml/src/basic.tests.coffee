@@ -35,12 +35,14 @@ guy                       = require '../../../apps/guy'
     [ [ '<', 'foo' ], '<foo>', null ]
     [ [ '<', 'foo', null ], '<foo>', null ]
     [ [ '<', 'foo', {} ], '<foo>', null ]
-    [ [ '<', 'foo', { a: 42, b: "'", c: '"' } ], """<foo a='42' b='&#39;' c='"'>""", null ]
-    [ [ '^', 'foo', { a: 42, b: "'", c: '"' } ], """<foo a='42' b='&#39;' c='"'/>""", null ]
-    [ [ '^', 'prfx:foo', { a: 42, b: "'", c: '"' } ], """<prfx:foo a='42' b='&#39;' c='"'/>""", null ]
-    [ [ '^', 'mrg:loc#baselines' ], '<mrg:loc#baselines/>', null ]
+    [ [ '<', 'foo', { a: '42', b: "'", c: '"' } ], """<foo a='42' b='&#39;' c='"'>""", null ]
+    [ [ '<', 'foo', { a: '42', b: undefined } ], null, 'not a valid text: undefined' ]
+    [ [ '<', 'foo', { a: 42, b: undefined } ], null, 'not a valid text: 42' ]
+    [ [ '^', 'foo', { a: '42', b: "'", c: '"' } ], """<foo a='42' b='&#39;' c='"'/>""", null ]
+    [ [ '^', 'prfx:foo', { a: '42', b: "'", c: '"' } ], """<prfx:foo a='42' b='&#39;' c='"'/>""", null ]
     # [ [ '^', '$text' ], '<mrg:loc#baselines/>', null ]
     [ [ '>', 'foo' ], '</foo>', null ]
+    [ [ '>', 42 ], null, 'not a valid text: 42' ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
