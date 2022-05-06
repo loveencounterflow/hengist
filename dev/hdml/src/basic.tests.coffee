@@ -54,13 +54,119 @@ guy                       = require '../../../apps/guy'
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "can use or not use compact tagnames" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { Hdml } = require '../../../apps/hdml'
+  #.........................................................................................................
+  do =>
+    hdml = new Hdml { use_compact_tags: false, }
+    T?.eq ( hdml.create_tag '^', 'mrg:loc#baselines' ), '<mrg:loc#baselines/>'
+  #.........................................................................................................
+  do =>
+    hdml = new Hdml { use_compact_tags: true, }
+    T?.eq ( hdml.create_tag '^', 'mrg:loc#baselines' ), "<mrg:loc id='baselines'/>"
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "HDML.parse_compact_tagname 1" ] = ( T, done ) ->
+  { HDML, } = require '../../../apps/hdml'
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'foo-bar', { tag: 'foo-bar' }, null ]
+    [ 'foo-bar#c55', { tag: 'foo-bar', id: 'c55' }, null ]
+    [ 'foo-bar.blah.beep', { tag: 'foo-bar', class: [ 'blah', 'beep', ] }, null ]
+    [ 'foo-bar#c55.blah.beep', { tag: 'foo-bar', id: 'c55', class: [ 'blah', 'beep', ] }, null ]
+    [ 'dang:blah', { prefix: 'dang', tag: 'blah' }, null ]
+    [ 'dang:blah#c3', { prefix: 'dang', tag: 'blah', id: 'c3' }, null ]
+    [ 'dang:blah#c3.some.thing', { prefix: 'dang', tag: 'blah', id: 'c3', class: [ 'some', 'thing', ] }, null ]
+    [ 'dang:bar.dub#c3.other', { prefix: 'dang', tag: 'bar', class: [ 'dub', 'other', ], id: 'c3' }, null ]
+    #.......................................................................................................
+    [ '#c55',                 null, "illegal compact tag syntax" ]
+    [ 'dang:#c3.some.thing',  null, "illegal compact tag syntax" ]
+    [ '.blah.beep',           null, "illegal compact tag syntax" ]
+    [ '...#',                 null, 'illegal compact tag syntax' ]
+    [ '',                     null, 'illegal compact tag syntax' ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      resolve HDML.parse_compact_tagname probe
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "HDML.parse_compact_tagname 2" ] = ( T, done ) ->
+  { Hdml, } = require '../../../apps/hdml'
+  HDML      = new Hdml { strict_compact_tags: false, }
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'foo-bar', { tag: 'foo-bar' }, null ]
+    [ 'foo-bar#c55', { tag: 'foo-bar', id: 'c55' }, null ]
+    [ 'foo-bar.blah.beep', { tag: 'foo-bar', class: [ 'blah', 'beep', ] }, null ]
+    [ 'foo-bar#c55.blah.beep', { tag: 'foo-bar', id: 'c55', class: [ 'blah', 'beep', ] }, null ]
+    [ 'dang:blah', { prefix: 'dang', tag: 'blah' }, null ]
+    [ 'dang:blah#c3', { prefix: 'dang', tag: 'blah', id: 'c3' }, null ]
+    [ 'dang:blah#c3.some.thing', { prefix: 'dang', tag: 'blah', id: 'c3', class: [ 'some', 'thing', ] }, null ]
+    [ 'dang:bar.dub#c3.other', { prefix: 'dang', tag: 'bar', class: [ 'dub', 'other', ], id: 'c3' }, null ]
+    #.......................................................................................................
+    [ '#c55', { id: 'c55' }, null ]
+    [ 'dang:#c3.some.thing', { prefix: 'dang', id: 'c3', class: [ 'some', 'thing' ] }, null ]
+    [ '.blah.beep', { class: [ 'blah', 'beep' ] }, null ]
+    [ '...#', {}, null ]
+    [ '', {}, null ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      resolve HDML.parse_compact_tagname probe
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "HDML use compact tagnames 1" ] = ( T, done ) ->
+  { HDML, } = require '../../../apps/hdml'
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ [ '<', 'foo-bar' ], '<foo-bar>', null ]
+    [ [ '<', 'foo-bar#c55' ], "<foo-bar id='c55'>", null ]
+    [ [ '<', 'foo-bar.blah.beep' ], "<foo-bar class='blah beep'>", null ]
+    [ [ '<', 'foo-bar#c55.blah.beep' ], "<foo-bar id='c55' class='blah beep'>", null ]
+    [ [ '<', 'dang:blah' ], '<dang:blah>', null ]
+    [ [ '<', 'dang:blah#c3' ], "<dang:blah id='c3'>", null ]
+    [ [ '<', 'dang:blah#c3.some.thing' ], "<dang:blah id='c3' class='some thing'>", null ]
+    [ [ '<', 'dang:bar.dub#c3.other' ], "<dang:bar id='c3' class='dub other'>", null ]
+    #.......................................................................................................
+    [ [ '<', '#c55',                     ], null, "illegal compact tag syntax" ]
+    [ [ '<', 'dang:#c3.some.thing',      ], null, "illegal compact tag syntax" ]
+    [ [ '<', '.blah.beep',               ], null, "illegal compact tag syntax" ]
+    [ [ '<', '...#',                     ], null, 'illegal compact tag syntax' ]
+    [ [ '<', '',                         ], null, 'illegal compact tag syntax' ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    # urge '^609^', rpr probe
+    # urge '^609^', HDML.create_tag probe...
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      resolve HDML.create_tag probe...
+  #.........................................................................................................
+  done()
+  return null
+
 
 
 
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  test @[ "basics" ]
+  # test @[ "basics" ]
+  # test @[ "HDML.parse_compact_tagname 1" ]
+  # test @[ "HDML.parse_compact_tagname 2" ]
+  # test @[ "HDML use compact tagnames 1" ]
+  # test @[ "HDML use compact tagnames 1" ]
+  @[ "can use or not use compact tagnames" ]()
+  test @[ "can use or not use compact tagnames" ]
+  # @[ "HDML use compact tagnames 1" ]()
 
 
 
