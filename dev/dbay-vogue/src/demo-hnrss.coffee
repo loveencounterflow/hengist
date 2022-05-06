@@ -155,46 +155,14 @@ class Ebayde extends Vogue_scraper_ABC
       title         = item_title.text()
       subtitle      = item_subtitle.text()
       title         = title + " / #{subtitle}"
+      title_url     = item_url
       #.....................................................................................................
-      details = { title, item_url, }
+      details = { title, title_url, }
       details = JSON.stringify details
       row     = @hub.vdb.new_post { sid, pid, details, }
     #.......................................................................................................
     # process.exit 111
     return null
-
-  #---------------------------------------------------------------------------------------------------------
-  html_from_details: ( row ) ->
-    { dsk
-      sid
-      ts
-      pid
-      rank
-      trend
-      details } = row
-    #.......................................................................................................
-    trend       = JSON.parse trend
-    details     = JSON.parse details
-    dsk_html    = HDML.text dsk
-    sid_html    = HDML.text "#{sid}"
-    ts_html     = HDML.text ts
-    id_html     = HDML.text pid
-    rank_html   = HDML.text "#{rank}"
-    trend_html  = HDML.text JSON.stringify trend
-    title_html  = HDML.insert 'a', { href: details.item_url, }, HDML.text details.title
-    #.......................................................................................................
-    tds         = [
-      HDML.insert 'td', dsk_html
-      HDML.insert 'td', sid_html
-      HDML.insert 'td', id_html
-      HDML.insert 'td', ts_html
-      HDML.insert 'td', rank_html
-      HDML.insert 'td', @get_sparkline trend
-      HDML.insert 'td', trend_html
-      HDML.insert 'td', title_html
-      ]
-    #.......................................................................................................
-    return HDML.insert 'tr', null, tds.join '\n'
 
 
 #===========================================================================================================
@@ -234,11 +202,6 @@ class Hnrss extends Vogue_scraper_ABC
     html        = html.replace /<\/link>/g,       '</reserved-link>'
     #.......................................................................................................
     $           = CHEERIO.load html
-    R           = []
-    # debug types.type_of $ 'item'
-    # debug ( $ 'item' ).html()
-    # debug ( $ 'item' ).each
-    # debug ( $ 'item' ).forEach
     #.......................................................................................................
     for item in ( $ 'item' )
       item            = $ item
@@ -262,62 +225,14 @@ class Hnrss extends Vogue_scraper_ABC
       description     = description.text()
       description     = @_remove_cdata description
       article_url     = @_article_url_from_description description
+      title_url       = discussion_url
       #.....................................................................................................
       href    = null
-      R.push { pid, title, date, creator, discussion_url, article_url, }
       ### TAINT avoid duplicate query ###
       details = { title, discussion_url, date, creator, description, }
       details = JSON.stringify details
-      row     = @hub.new_post { sid, pid, details, }
-    #.......................................................................................................
-    # # H.tabulate "Hacker News", R
-    # H.tabulate "Hacker News", @hub.db SQL"""select
-    #     sid                     as sid,
-    #     pid                      as pid,
-    #     rank                    as rank,
-    #     substring( details, 1, 100 )  as details
-    #   from scr_posts
-    #   where true
-    #     -- and ( rank < 10 )
-    #   order by sid, rank;"""
+      row     = @hub.vdb.new_post { sid, pid, details, }
     return null
-
-  #---------------------------------------------------------------------------------------------------------
-  html_from_details: ( row ) ->
-    { dsk
-      sid
-      ts
-      pid
-      rank
-      trend
-      details } = row
-    #.......................................................................................................
-    { title
-      discussion_url
-      article_url   } = details
-    #.......................................................................................................
-    trend       = JSON.parse trend
-    details     = JSON.parse details
-    dsk_html    = HDML.text dsk
-    sid_html    = HDML.text "#{sid}"
-    ts_html     = HDML.text ts
-    id_html     = HDML.text pid
-    rank_html   = HDML.text "#{rank}"
-    trend_html  = HDML.text JSON.stringify trend
-    title_html  = HDML.insert 'a', { href: details.discussion_url, }, HDML.text details.title
-    #.......................................................................................................
-    tds         = [
-      HDML.insert 'td', dsk_html
-      HDML.insert 'td', sid_html
-      HDML.insert 'td', id_html
-      HDML.insert 'td', ts_html
-      HDML.insert 'td', rank_html
-      HDML.insert 'td', @get_sparkline trend
-      HDML.insert 'td', trend_html
-      HDML.insert 'td', title_html
-      ]
-    #.......................................................................................................
-    return HDML.insert 'tr', null, tds.join '\n'
 
 #-----------------------------------------------------------------------------------------------------------
 demo_hnrss = ->
