@@ -187,7 +187,7 @@ class Hnrss extends Vogue_scraper_ABC
   #---------------------------------------------------------------------------------------------------------
   scrape_html: ( html_or_buffer ) ->
     dsk         = 'hn'
-    { sid, }    = @hub.new_session dsk
+    { sid, }    = @hub.vdb.new_session dsk
     insert_post = @hub.vdb.queries.insert_post
     seen        = @hub.vdb.db.dt_now()
     #.......................................................................................................
@@ -229,55 +229,64 @@ class Hnrss extends Vogue_scraper_ABC
       #.....................................................................................................
       href    = null
       ### TAINT avoid duplicate query ###
-      details = { title, discussion_url, date, creator, description, }
+      details = { title, title_url, date, creator, description, }
       details = JSON.stringify details
       row     = @hub.vdb.new_post { sid, pid, details, }
     return null
 
 #-----------------------------------------------------------------------------------------------------------
 demo_hnrss = ->
-  hnrss   = new Hnrss()
-  hnrss.vogue.queries.insert_datasource.run { dsk: 'hn', url: 'http://nourl', }
+  { Vogue
+    Vogue_scraper_ABC
+    Vogue_db      } = require '../../../apps/dbay-vogue'
+  dsk               = 'hn'
+  vogue             = new Vogue()
+  scraper           = new Hnrss()
+  vogue.scrapers.add { dsk, scraper, }
+  ### TAINT use API method, don't use query directly ###
+  ### TAINT should be done by `vogue.scraper.add()` ###
+  vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
   #.........................................................................................................
   glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/hnrss.org_,_newest.???.xml'
   for path in glob.sync glob_pattern
     await do =>
       buffer    = FS.readFileSync path
+      await scraper.scrape_html buffer
   #.........................................................................................................
-  return hnrss
+  return vogue
 
 #-----------------------------------------------------------------------------------------------------------
 demo_ebayde = ->
   { Vogue
     Vogue_scraper_ABC
     Vogue_db      } = require '../../../apps/dbay-vogue'
+  dsk               = 'ebayde'
   vogue             = new Vogue()
-  ebayde            = new Ebayde()
-  vogue.scrapers.add { dsk: 'ebayde', scraper: ebayde, }
+  scraper           = new Ebayde()
+  vogue.scrapers.add { dsk, scraper, }
   ### TAINT use API method, don't use query directly ###
   ### TAINT should be done by `vogue.scraper.add()` ###
-  vogue.vdb.queries.insert_datasource.run { dsk: 'ebayde', url: 'http://nourl', }
+  vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
   #.........................................................................................................
   glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/ebay-de-search-result-rucksack-????????-??????Z.html'
   for path in glob.sync glob_pattern
     await do =>
       buffer    = FS.readFileSync path
-      await ebayde.scrape_html buffer
+      await scraper.scrape_html buffer
   #.........................................................................................................
   return vogue
 
 #-----------------------------------------------------------------------------------------------------------
 demo_serve_hnrss = ( cfg ) ->
-  { Vogue_server, } = require '../../../apps/dbay-vogue/lib/vogue-server'
-  hnrss         = await demo_hnrss()
-  vogue_server  = new Vogue_server { client: hnrss, }
+  vogue = await demo_hnrss()
+  debug '^445345-16^', vogue.server.start()
+  help '^445345-17^', "server started"
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 demo_serve_ebayde = ( cfg ) ->
-  vogue         = await demo_ebayde()
+  vogue = await demo_ebayde()
   debug '^445345-16^', vogue.server.start()
-  # setInterval ( -> info '^342349390^' ), 1000
   help '^445345-17^', "server started"
   return null
 
@@ -287,8 +296,8 @@ if module is require.main then do =>
   # await demo_zvg_online_net()
   # await demo_zvg24_net()
   # await demo_hnrss()
-  # await demo_serve_hnrss()
-  await demo_serve_ebayde()
+  await demo_serve_hnrss()
+  # await demo_serve_ebayde()
 
 
 
