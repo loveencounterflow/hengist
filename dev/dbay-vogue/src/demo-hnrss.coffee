@@ -243,23 +243,6 @@ demo_hnrss = ->
   for path in glob.sync glob_pattern
     await do =>
       buffer    = FS.readFileSync path
-      await hnrss.scrape_html buffer
-  #.........................................................................................................
-  # H.tabulate "trends", hnrss.vogue.db SQL"""select * from _scr_trends order by pid;"""
-  # H.tabulate "trends", hnrss.vogue.db SQL"""
-  #   select
-  #       dsk                                           as dsk,
-  #       sid                                           as sid,
-  #       pid                                           as pid,
-  #       rank                                          as rank,
-  #       trend                                         as trend,
-  #       substring( details, 1, 30 )                   as details
-  #     from scr_trends order by
-  #       sid desc,
-  #       rank;"""
-  # H.tabulate "trends", hnrss.vogue.db SQL"""select * from scr_trends_html order by nr;"""
-  #.........................................................................................................
-  # demo_trends_as_table hnrss
   #.........................................................................................................
   return hnrss
 
@@ -288,9 +271,6 @@ demo_serve_hnrss = ( cfg ) ->
   { Vogue_server, } = require '../../../apps/dbay-vogue/lib/vogue-server'
   hnrss         = await demo_hnrss()
   vogue_server  = new Vogue_server { client: hnrss, }
-  debug '^445345-11^', vogue_server
-  debug '^445345-12^', ( k for k of vogue_server )
-  debug '^445345-13^', await vogue_server.start()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -302,9 +282,6 @@ demo_serve_ebayde = ( cfg ) ->
   return null
 
 
-
-
-
 ############################################################################################################
 if module is require.main then do =>
   # await demo_zvg_online_net()
@@ -312,9 +289,6 @@ if module is require.main then do =>
   # await demo_hnrss()
   # await demo_serve_hnrss()
   await demo_serve_ebayde()
-  # view-source:https://www.skypack.dev/search?q=sqlite&p=1
-  # await demo_oanda_com_jsdom()
-  # f()
 
 
 
