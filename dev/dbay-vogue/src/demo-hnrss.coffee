@@ -26,7 +26,7 @@ GUY                       = require '../../../apps/guy'
 { SQL, }                  = DBay
 { Vogue,
   Vogue_scraper_ABC }     = require '../../../apps/dbay-vogue'
-{ HDML, }                 = require '../../../apps/dbay-vogue/lib/hdml2'
+{ HDML, }                 = require '../../../apps/hdml'
 H                         = require '../../../apps/dbay-vogue/lib/helpers'
 glob                      = require 'glob'
 
