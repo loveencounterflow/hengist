@@ -25,21 +25,6 @@
 
   types = new (require('intertype')).Intertype();
 
-  //...........................................................................................................
-  // ( require 'mixa/lib/check-package-versions' ) require '../pinned-package-versions.json'
-  // PATH                      = require 'path'
-  // FS                        = require 'fs'
-  // got                       = require 'got'
-  // CHEERIO                   = require 'cheerio'
-  // GUY                       = require '../../../apps/guy'
-  // { DBay, }                 = require '../../../apps/dbay'
-  // { SQL, }                  = DBay
-  // { Vogue,
-  //   Vogue_scraper_ABC }         = require '../../../apps/dbay-vogue'
-  // { HDML, }                 = require '../../../apps/dbay-vogue/lib/hdml2'
-  // H                         = require '../../../apps/dbay-vogue/lib/helpers'
-  // glob                      = require 'glob'
-
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
