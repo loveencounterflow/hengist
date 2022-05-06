@@ -177,7 +177,7 @@
   Ebayde = class Ebayde extends Vogue_scraper_ABC {
     //---------------------------------------------------------------------------------------------------------
     scrape_html(html_or_buffer) {
-      var $, R, details, dsk, html, i, insert_post, item, item_details, item_id, item_price, item_subtitle, item_title, item_url, len, pid, ref, row, seen, sid, subtitle, title;
+      var $, R, details, dsk, html, i, insert_post, item, item_details, item_id, item_price, item_subtitle, item_title, item_url, len, pid, ref, row, seen, sid, subtitle, title, title_url;
       dsk = 'ebayde';
       ({sid} = this.hub.vdb.new_session(dsk));
       insert_post = this.hub.vdb.queries.insert_post;
@@ -212,36 +212,15 @@
         title = item_title.text();
         subtitle = item_subtitle.text();
         title = title + ` / ${subtitle}`;
+        title_url = item_url;
         //.....................................................................................................
-        details = {title, item_url};
+        details = {title, title_url};
         details = JSON.stringify(details);
         row = this.hub.vdb.new_post({sid, pid, details});
       }
       //.......................................................................................................
       // process.exit 111
       return null;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    html_from_details(row) {
-      var details, dsk, dsk_html, id_html, pid, rank, rank_html, sid, sid_html, tds, title_html, trend, trend_html, ts, ts_html;
-      ({dsk, sid, ts, pid, rank, trend, details} = row);
-      //.......................................................................................................
-      trend = JSON.parse(trend);
-      details = JSON.parse(details);
-      dsk_html = HDML.text(dsk);
-      sid_html = HDML.text(`${sid}`);
-      ts_html = HDML.text(ts);
-      id_html = HDML.text(pid);
-      rank_html = HDML.text(`${rank}`);
-      trend_html = HDML.text(JSON.stringify(trend));
-      title_html = HDML.insert('a', {
-        href: details.item_url
-      }, HDML.text(details.title));
-      //.......................................................................................................
-      tds = [HDML.insert('td', dsk_html), HDML.insert('td', sid_html), HDML.insert('td', id_html), HDML.insert('td', ts_html), HDML.insert('td', rank_html), HDML.insert('td', this.get_sparkline(trend)), HDML.insert('td', trend_html), HDML.insert('td', title_html)];
-      //.......................................................................................................
-      return HDML.insert('tr', null, tds.join('\n'));
     }
 
   };
@@ -274,7 +253,7 @@
     //---------------------------------------------------------------------------------------------------------
     scrape_html(html_or_buffer) {
       /* TAINT avoid duplicate query */
-      var $, R, article_url, creator, date, description, details, discussion_url, dsk, href, html, i, insert_post, item, len, pid, ref, row, seen, sid, title;
+      var $, article_url, creator, date, description, details, discussion_url, dsk, href, html, i, insert_post, item, len, pid, ref, row, seen, sid, title, title_url;
       dsk = 'hn';
       ({sid} = this.hub.new_session(dsk));
       insert_post = this.hub.vdb.queries.insert_post;
@@ -291,12 +270,7 @@
       html = html.replace(/<\/link>/g, '</reserved-link>');
       //.......................................................................................................
       $ = CHEERIO.load(html);
-      R = [];
       ref = $('item');
-      // debug types.type_of $ 'item'
-      // debug ( $ 'item' ).html()
-      // debug ( $ 'item' ).each
-      // debug ( $ 'item' ).forEach
       //.......................................................................................................
       for (i = 0, len = ref.length; i < len; i++) {
         item = ref[i];
@@ -321,49 +295,14 @@
         description = description.text();
         description = this._remove_cdata(description);
         article_url = this._article_url_from_description(description);
+        title_url = discussion_url;
         //.....................................................................................................
         href = null;
-        R.push({pid, title, date, creator, discussion_url, article_url});
         details = {title, discussion_url, date, creator, description};
         details = JSON.stringify(details);
-        row = this.hub.new_post({sid, pid, details});
+        row = this.hub.vdb.new_post({sid, pid, details});
       }
-      //.......................................................................................................
-      // # H.tabulate "Hacker News", R
-      // H.tabulate "Hacker News", @hub.db SQL"""select
-      //     sid                     as sid,
-      //     pid                      as pid,
-      //     rank                    as rank,
-      //     substring( details, 1, 100 )  as details
-      //   from scr_posts
-      //   where true
-      //     -- and ( rank < 10 )
-      //   order by sid, rank;"""
       return null;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    html_from_details(row) {
-      var article_url, details, discussion_url, dsk, dsk_html, id_html, pid, rank, rank_html, sid, sid_html, tds, title, title_html, trend, trend_html, ts, ts_html;
-      ({dsk, sid, ts, pid, rank, trend, details} = row);
-      //.......................................................................................................
-      ({title, discussion_url, article_url} = details);
-      //.......................................................................................................
-      trend = JSON.parse(trend);
-      details = JSON.parse(details);
-      dsk_html = HDML.text(dsk);
-      sid_html = HDML.text(`${sid}`);
-      ts_html = HDML.text(ts);
-      id_html = HDML.text(pid);
-      rank_html = HDML.text(`${rank}`);
-      trend_html = HDML.text(JSON.stringify(trend));
-      title_html = HDML.insert('a', {
-        href: details.discussion_url
-      }, HDML.text(details.title));
-      //.......................................................................................................
-      tds = [HDML.insert('td', dsk_html), HDML.insert('td', sid_html), HDML.insert('td', id_html), HDML.insert('td', ts_html), HDML.insert('td', rank_html), HDML.insert('td', this.get_sparkline(trend)), HDML.insert('td', trend_html), HDML.insert('td', title_html)];
-      //.......................................................................................................
-      return HDML.insert('tr', null, tds.join('\n'));
     }
 
   };
