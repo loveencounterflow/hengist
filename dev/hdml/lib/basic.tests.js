@@ -483,6 +483,57 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["HDML V2 API"] = function(T, done) {
+    var HDML;
+    ({HDML} = require('../../../apps/hdml'));
+    if (T != null) {
+      T.eq(HDML.single('path', {
+        id: 'c1',
+        d: 'M100,100L200,200'
+      }), `<path id='c1' d='M100,100L200,200'/>`);
+    }
+    if (T != null) {
+      T.eq(HDML.open('div', {
+        id: 'c1',
+        class: 'foo bar'
+      }), `<div id='c1' class='foo bar'>`);
+    }
+    if (T != null) {
+      T.eq(HDML.text("<helo>"), `&lt;helo&gt;`);
+    }
+    if (T != null) {
+      T.eq(HDML.close('div'), `</div>`);
+    }
+    if (T != null) {
+      T.eq(HDML.pair('div'), `<div></div>`);
+    }
+    if (T != null) {
+      T.eq(HDML.single('mrg:loc#baselines'), `<mrg:loc id='baselines'/>`);
+    }
+    if (T != null) {
+      T.eq(HDML.pair('mrg:loc#baselines'), `<mrg:loc id='baselines'></mrg:loc>`);
+    }
+    if (T != null) {
+      T.eq(HDML.pair('div', {
+        id: 'c1',
+        class: 'foo bar'
+      }, HDML.text("<helo>")), `<div id='c1' class='foo bar'>&lt;helo&gt;</div>`);
+    }
+    if (T != null) {
+      T.eq(HDML.pair('div', {
+        id: 'c1',
+        class: 'foo bar'
+      }, HDML.single('path', {
+        id: 'c1',
+        d: 'M100,100L200,200'
+      })), `<div id='c1' class='foo bar'><path id='c1' d='M100,100L200,200'/></div>`);
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -493,7 +544,9 @@
       // test @[ "HDML use compact tagnames 1" ]
       // test @[ "HDML use compact tagnames 1" ]
       this["can use or not use compact tagnames"]();
-      return test(this["can use or not use compact tagnames"]);
+      test(this["can use or not use compact tagnames"]);
+      this["HDML V2 API"]();
+      return test(this["HDML V2 API"]);
     })();
   }
 
