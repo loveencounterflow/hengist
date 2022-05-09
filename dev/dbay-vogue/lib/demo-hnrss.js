@@ -309,10 +309,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_hnrss = async function() {
-    var Vogue_db, dsk, glob_pattern, i, len, path, ref, scraper, vogue;
+    var Vogue_db, db, dsk, glob_pattern, i, len, path, ref, scraper, vdb, vogue;
     ({Vogue, Vogue_scraper_ABC, Vogue_db} = require('../../../apps/dbay-vogue'));
+    ({DBay} = require('../../../apps/dbay'));
+    path = PATH.resolve(PATH.join(__dirname, '../../../dev-shm/dbay-vogue.db'));
+    db = new DBay({path});
+    vdb = new Vogue_db({db});
+    vogue = new Vogue({vdb});
     dsk = 'hn';
-    vogue = new Vogue();
     scraper = new Hnrss();
     vogue.scrapers.add({dsk, scraper});
     /* TAINT use API method, don't use query directly */
