@@ -1,0 +1,103 @@
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Hacker News: Newest</title><link>https://news.ycombinator.com/newest</link><description>Hacker News RSS</description><docs>https://hnrss.org/</docs><generator>hnrss v1.1-16-gb4aa33c</generator><lastBuildDate>Mon, 09 May 2022 09:18:55 +0000</lastBuildDate><atom:link href="https://hnrss.org/newest?link=comments" rel="self" type="application/rss+xml"></atom:link><item><title><![CDATA[RecyclerView and NestedScrollView with physics-based bouncy overscroll effect]]></title><description><![CDATA[
+<p>Article URL: <a href="https://github.com/valkriaine/Bouncy">https://github.com/valkriaine/Bouncy</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31312073">https://news.ycombinator.com/item?id=31312073</a></p>
+<p>Points: 1</p>
+<p># Comments: 1</p>
+]]></description><pubDate>Mon, 09 May 2022 09:16:20 +0000</pubDate><link>https://news.ycombinator.com/item?id=31312073</link><dc:creator>valkriaine</dc:creator><comments>https://news.ycombinator.com/item?id=31312073</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31312073</guid></item><item><title><![CDATA[Tesseract.js – Pure JavaScript OCR]]></title><description><![CDATA[
+<p>Article URL: <a href="https://github.com/naptha/tesseract.js">https://github.com/naptha/tesseract.js</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31312064">https://news.ycombinator.com/item?id=31312064</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Mon, 09 May 2022 09:14:49 +0000</pubDate><link>https://news.ycombinator.com/item?id=31312064</link><dc:creator>modinfo</dc:creator><comments>https://news.ycombinator.com/item?id=31312064</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31312064</guid></item><item><title><![CDATA[Show HN: An interactive firewall for inbound and outbound connections]]></title><description><![CDATA[
+<p>Article URL: <a href="https://github.com/nathants/tinysnitch">https://github.com/nathants/tinysnitch</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31312058">https://news.ycombinator.com/item?id=31312058</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Mon, 09 May 2022 09:13:47 +0000</pubDate><link>https://news.ycombinator.com/item?id=31312058</link><dc:creator>nathants</dc:creator><comments>https://news.ycombinator.com/item?id=31312058</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31312058</guid></item><item><title><![CDATA[Micro-Zettelkasten associative notes – WebPad HTTPS://webpad.com.ua/]]></title><description><![CDATA[
+<p>Article URL: <a href="https://webpad.com.ua/">https://webpad.com.ua/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31312055">https://news.ycombinator.com/item?id=31312055</a></p>
+<p>Points: 1</p>
+<p># Comments: 1</p>
+]]></description><pubDate>Mon, 09 May 2022 09:13:47 +0000</pubDate><link>https://news.ycombinator.com/item?id=31312055</link><dc:creator>uprun</dc:creator><comments>https://news.ycombinator.com/item?id=31312055</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31312055</guid></item><item><title><![CDATA[Farewell, Etaoin Shrdlu: The End of Hot Metal Typesetting at the NY Times (1978)]]></title><description><![CDATA[
+<p>Article URL: <a href="https://archive.org/details/FarewellEtaoinShrdlu">https://archive.org/details/FarewellEtaoinShrdlu</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31312035">https://news.ycombinator.com/item?id=31312035</a></p>
+<p>Points: 2</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Mon, 09 May 2022 09:10:17 +0000</pubDate><link>https://news.ycombinator.com/item?id=31312035</link><dc:creator>well_actulily</dc:creator><comments>https://news.ycombinator.com/item?id=31312035</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31312035</guid></item><item><title><![CDATA[First Impressions on GitOps and Kubernetes]]></title><description><![CDATA[
+<p>Article URL: <a href="https://blogg.itverket.no/first-impressions-on-gitops-and-kubernetes/">https://blogg.itverket.no/first-impressions-on-gitops-and-kubernetes/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31312031">https://news.ycombinator.com/item?id=31312031</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Mon, 09 May 2022 09:09:35 +0000</pubDate><link>https://news.ycombinator.com/item?id=31312031</link><dc:creator>cixter</dc:creator><comments>https://news.ycombinator.com/item?id=31312031</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31312031</guid></item><item><title><![CDATA[Uber CEO's email about shifting landscape titled: “the next (best) chapter”]]></title><description><![CDATA[
+<p>Article URL: <a href="https://twitter.com/dee_bosa/status/1523493153218568192">https://twitter.com/dee_bosa/status/1523493153218568192</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31312009">https://news.ycombinator.com/item?id=31312009</a></p>
+<p>Points: 2</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Mon, 09 May 2022 09:06:07 +0000</pubDate><link>https://news.ycombinator.com/item?id=31312009</link><dc:creator>blopeur</dc:creator><comments>https://news.ycombinator.com/item?id=31312009</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31312009</guid></item><item><title><![CDATA[Waterbear is a toolkit for making programming more accessible and fun]]></title><description><![CDATA[
+<p>Article URL: <a href="https://waterbearlang.com/">https://waterbearlang.com/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31312006">https://news.ycombinator.com/item?id=31312006</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Mon, 09 May 2022 09:05:48 +0000</pubDate><link>https://news.ycombinator.com/item?id=31312006</link><dc:creator>memorable</dc:creator><comments>https://news.ycombinator.com/item?id=31312006</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31312006</guid></item><item><title><![CDATA[Colony3 – Exclusive Network of Developers and Experts building the Web3 future]]></title><description><![CDATA[
+<p>Article URL: <a href="https://colony3.org/">https://colony3.org/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31311996">https://news.ycombinator.com/item?id=31311996</a></p>
+<p>Points: 1</p>
+<p># Comments: 1</p>
+]]></description><pubDate>Mon, 09 May 2022 09:04:17 +0000</pubDate><link>https://news.ycombinator.com/item?id=31311996</link><dc:creator>dumitruflorin</dc:creator><comments>https://news.ycombinator.com/item?id=31311996</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31311996</guid></item><item><title><![CDATA[Btctalker]]></title><description><![CDATA[
+<p>Article URL: <a href="https://www.btctalker.com/">https://www.btctalker.com/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31311986">https://news.ycombinator.com/item?id=31311986</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Mon, 09 May 2022 09:02:22 +0000</pubDate><link>https://news.ycombinator.com/item?id=31311986</link><dc:creator>MetaC1142022</dc:creator><comments>https://news.ycombinator.com/item?id=31311986</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31311986</guid></item><item><title><![CDATA[What if you could call your server functions directly from your client?]]></title><description><![CDATA[
+<p>Article URL: <a href="https://gravity.digitak.dev">https://gravity.digitak.dev</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31311984">https://news.ycombinator.com/item?id=31311984</a></p>
+<p>Points: 1</p>
+<p># Comments: 1</p>
+]]></description><pubDate>Mon, 09 May 2022 09:02:17 +0000</pubDate><link>https://news.ycombinator.com/item?id=31311984</link><dc:creator>GinQuin</dc:creator><comments>https://news.ycombinator.com/item?id=31311984</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31311984</guid></item><item><title><![CDATA[A Comparison Between Taichi Lang and Nvidia's CUDA]]></title><description><![CDATA[
+<p>Article URL: <a href="https://docs.taichi.graphics/blog/is-taichi-lang-comparable-to-or-even-faster-than-cuda">https://docs.taichi.graphics/blog/is-taichi-lang-comparable-to-or-even-faster-than-cuda</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31311979">https://news.ycombinator.com/item?id=31311979</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Mon, 09 May 2022 09:01:08 +0000</pubDate><link>https://news.ycombinator.com/item?id=31311979</link><dc:creator>gingerkidney</dc:creator><comments>https://news.ycombinator.com/item?id=31311979</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31311979</guid></item><item><title><![CDATA[On Peter B. Kaufman’s “The New Enlightenment and the Fight to Free Knowledge” (2021)]]></title><description><![CDATA[
+<p>Article URL: <a href="https://lareviewofbooks.org/article/the-noosphere-gazette-on-peter-b-kaufmans-the-new-enlightenment-and-the-fight-to-free-knowledge/">https://lareviewofbooks.org/article/the-noosphere-gazette-on-peter-b-kaufmans-the-new-enlightenment-and-the-fight-to-free-knowledge/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31311925">https://news.ycombinator.com/item?id=31311925</a></p>
+<p>Points: 1</p>
+<p># Comments: 1</p>
+]]></description><pubDate>Mon, 09 May 2022 08:51:47 +0000</pubDate><link>https://news.ycombinator.com/item?id=31311925</link><dc:creator>dredmorbius</dc:creator><comments>https://news.ycombinator.com/item?id=31311925</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31311925</guid></item><item><title><![CDATA[Ask HN: What are some good books for SQL/DBA?]]></title><description><![CDATA[
+<p>Inspired by https://news.ycombinator.com/item?id=31309729.<p>Managing databases has always been one of the most fun things for me, optimising queries, finding inefficiencies, figuring out how to squeeze more performance out of the DB servers.<p>But most of it has come from just trying whatever I can think of, and I'm sure I'm missing some fundamentals or more advanced techniques, so I figured I'd ask y'all for guidance.</p>
+<hr>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31311845">https://news.ycombinator.com/item?id=31311845</a></p>
+<p>Points: 1</p>
+<p># Comments: 1</p>
+]]></description><pubDate>Mon, 09 May 2022 08:35:20 +0000</pubDate><link>https://news.ycombinator.com/item?id=31311845</link><dc:creator>moreira</dc:creator><comments>https://news.ycombinator.com/item?id=31311845</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31311845</guid></item><item><title><![CDATA[I'm a Fucking Webmaster]]></title><description><![CDATA[
+<p>Article URL: <a href="https://justinjackson.ca/webmaster/">https://justinjackson.ca/webmaster/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31311826">https://news.ycombinator.com/item?id=31311826</a></p>
+<p>Points: 5</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Mon, 09 May 2022 08:31:22 +0000</pubDate><link>https://news.ycombinator.com/item?id=31311826</link><dc:creator>memorable</dc:creator><comments>https://news.ycombinator.com/item?id=31311826</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31311826</guid></item><item><title><![CDATA[Fx 24.0.0]]></title><description><![CDATA[
+<p>Hi<p>I’m the author of https://github.com/antonmedv/fx (terminal JSON viewer)<p>Recently I decided to rewrite the entire program to Go. And usually, on second rewrite things end-up better. Main reason for this, I believe, is clear end-result, the target.<p>I think new version of fx is much more superior:) I recommend, to check it out ;) Would like to have some feedback and ideas for improvement.<p>One of new cool features is reducer languages: not only JS, but also now it’s possible to write reducers in Python and Ruby.<p>I’d like to hear some feedback from people with more background in Python and Ruby. For example, should Python reducers come with builtin DotMap or not?<p>Thanks)</p>
+<hr>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31311821">https://news.ycombinator.com/item?id=31311821</a></p>
+<p>Points: 2</p>
+<p># Comments: 1</p>
+]]></description><pubDate>Mon, 09 May 2022 08:30:40 +0000</pubDate><link>https://news.ycombinator.com/item?id=31311821</link><dc:creator>medv</dc:creator><comments>https://news.ycombinator.com/item?id=31311821</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31311821</guid></item><item><title><![CDATA[Show HN: Best and Trendiest Free Chakra UI Components]]></title><description><![CDATA[
+<p>Article URL: <a href="https://horizon-ui.com/components/#/">https://horizon-ui.com/components/#/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31311817">https://news.ycombinator.com/item?id=31311817</a></p>
+<p>Points: 2</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Mon, 09 May 2022 08:30:22 +0000</pubDate><link>https://news.ycombinator.com/item?id=31311817</link><dc:creator>fredyandrei1</dc:creator><comments>https://news.ycombinator.com/item?id=31311817</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31311817</guid></item><item><title><![CDATA[How to Multiply Roman Numerals]]></title><description><![CDATA[
+<p>Article URL: <a href="https://rbutterworth.nfshost.com/Tables/romanmult/">https://rbutterworth.nfshost.com/Tables/romanmult/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31311811">https://news.ycombinator.com/item?id=31311811</a></p>
+<p>Points: 2</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Mon, 09 May 2022 08:29:14 +0000</pubDate><link>https://news.ycombinator.com/item?id=31311811</link><dc:creator>tontonius</dc:creator><comments>https://news.ycombinator.com/item?id=31311811</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31311811</guid></item><item><title><![CDATA[Corals convert sunscreen chemical into a toxin that kills them]]></title><description><![CDATA[
+<p>Article URL: <a href="https://arstechnica.com/science/2022/05/corals-convert-sunscreen-chemical-into-a-toxin-that-kills-them/">https://arstechnica.com/science/2022/05/corals-convert-sunscreen-chemical-into-a-toxin-that-kills-them/</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31311810">https://news.ycombinator.com/item?id=31311810</a></p>
+<p>Points: 2</p>
+<p># Comments: 1</p>
+]]></description><pubDate>Mon, 09 May 2022 08:29:06 +0000</pubDate><link>https://news.ycombinator.com/item?id=31311810</link><dc:creator>leemailll</dc:creator><comments>https://news.ycombinator.com/item?id=31311810</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31311810</guid></item><item><title><![CDATA[Chelsea Agree Sale Terms]]></title><description><![CDATA[
+<p>Article URL: <a href="https://www.telegraphindia.com/sports/football/chelsea-agree-sale-terms/cid/1864049">https://www.telegraphindia.com/sports/football/chelsea-agree-sale-terms/cid/1864049</a></p>
+<p>Comments URL: <a href="https://news.ycombinator.com/item?id=31311746">https://news.ycombinator.com/item?id=31311746</a></p>
+<p>Points: 1</p>
+<p># Comments: 0</p>
+]]></description><pubDate>Mon, 09 May 2022 08:15:49 +0000</pubDate><link>https://news.ycombinator.com/item?id=31311746</link><dc:creator>trifit</dc:creator><comments>https://news.ycombinator.com/item?id=31311746</comments><guid isPermaLink="false">https://news.ycombinator.com/item?id=31311746</guid></item></channel></rss>
