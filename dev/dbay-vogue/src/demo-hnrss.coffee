@@ -239,8 +239,14 @@ demo_hnrss = ->
   { Vogue
     Vogue_scraper_ABC
     Vogue_db      } = require '../../../apps/dbay-vogue'
+  { DBay          } = require '../../../apps/dbay'
+  path              = PATH.resolve PATH.join __dirname, '../../../dev-shm/dbay-vogue.db'
+  trash_path        = PATH.resolve PATH.join __dirname, '../../../dev-shm/dbay-vogue.trashed.db'
+  trash_sql_path    = PATH.resolve PATH.join __dirname, '../../../dev-shm/dbay-vogue.trashed.sql'
+  db                = new DBay { path, }
+  vdb               = new Vogue_db { db, }
+  vogue             = new Vogue { vdb, }
   dsk               = 'hn'
-  vogue             = new Vogue()
   scraper           = new Hnrss()
   vogue.scrapers.add { dsk, scraper, }
   ### TAINT use API method, don't use query directly ###
@@ -252,6 +258,23 @@ demo_hnrss = ->
     await do =>
       buffer    = FS.readFileSync path
       await scraper.scrape_html buffer
+  # H.tabulate "trends", db SQL"""select
+  #     dsk,
+  #     sid,
+  #     ts,
+  #     pid,
+  #     rank,
+  #     substring( trend,   1, 20 ) as trend,
+  #     substring( details, 1, 20 ) as details
+  #   from scr_trends;"""
+  #.........................................................................................................
+  # { Desql         } = require '../../../apps/desql'
+  # desql             = new Desql()
+  # desql.db          = db ### TAINT should be possible to just pass in DB ###
+  # desql.create_trashlib()
+  # desql.trash_to_sql { path: trash_sql_path, overwrite: true, }
+  # desql.trash_to_sqlite { path: trash_path, overwrite: true, }
+  # help '^4564^', "wrote trashed db to #{trash_path}"
   #.........................................................................................................
   return vogue
 
@@ -296,8 +319,8 @@ if module is require.main then do =>
   # await demo_zvg_online_net()
   # await demo_zvg24_net()
   # await demo_hnrss()
-  await demo_serve_hnrss()
-  # await demo_serve_ebayde()
+  # await demo_serve_hnrss()
+  await demo_serve_ebayde()
 
 
 
