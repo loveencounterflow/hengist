@@ -17,7 +17,7 @@ echo                      = CND.echo.bind CND
 test                      = require '../../../apps/guy-test'
 PATH                      = require 'path'
 FS                        = require 'fs'
-H                         = require './helpers'
+H                         = require '../../dbay/lib/helpers'
 types                     = new ( require 'intertype' ).Intertype
 { isa
   equals
@@ -177,14 +177,18 @@ tabulate = ( db, query ) -> X.tabulate query, db query
 #-----------------------------------------------------------------------------------------------------------
 @[ "DBAY trash works with implicit foreign keys" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { DBay }            = require H.dbay_path
-  { SQL  }            = DBay
-  db                  = new DBay()
+  { DBay }                  = require H.dbay_path
+  { SQL  }                  = DBay
+  { Desql }                 = require '../../../apps/desql'
+  db                        = new DBay()
+  desql                     = new Desql()
+  desql.db                  = db ### TAINT should be possible to just pass in DB ###
+  desql.create_trashlib()
   db SQL"""
     create table first ( a integer not null primary key, b text unique not null );
     create table second ( a integer not null, b text not null, foreign key ( a, b ) references first );
     """
-  result  = db.trash_to_sql().replace /--.*\n/g, ''
+  result  = desql.trash_to_sql().replace /--.*\n/g, ''
   debug '^4233^', result
   T?.eq result, """
     .bail on
@@ -302,10 +306,13 @@ tabulate = ( db, query ) -> X.tabulate query, db query
     create table first ( a integer not null primary key, b text unique not null );
     create table second ( x integer references first ( a ), y text references first ( b ) );
     """
-  result    = db.trash_to_sqlite { path: false, }
+  { Desql }                 = require '../../../apps/desql'
+  desql                     = new Desql()
+  desql.create_trashlib()
+  result    = desql.trash_to_sqlite { path: false, }
   T?.eq ( type_of result ), 'buffer'
-  path      = db.trash_to_sqlite { path: true, }
-  help "^534535^ db.trash_to_sqlite() output written to #{path}"
+  path      = desql.trash_to_sqlite { path: true, }
+  help "^534535^ desql.trash_to_sqlite() output written to #{path}"
   T?.eq ( type_of path ), 'text'
   sqlt      = DBay.new_bsqlt3_connection FS.readFileSync path
   statement = sqlt.prepare SQL"select * from sqlite_schema order by name;"
@@ -328,7 +335,7 @@ tabulate = ( db, query ) -> X.tabulate query, db query
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # @[ "DBAY trash relations" ]()
   # @[ "DBAY trash basic functionality with create_trashlib()" ]()
   # test @[ "DBAY trash basic functionality with public API" ]
@@ -337,8 +344,10 @@ if require.main is module then do =>
   # @[ "DBAY trash to file (1)" ]()
   # @[ "DBAY trash to file (2)" ]()
   # @[ "DBAY trash to sqlite" ]()
+  # test @[ "DBAY trash to sqlite" ]
   # @[ "DBAY _trash_with_fs_open_do" ]()
   # @[ "DBAY walk over trash statements" ]()
   # test @[ "DBAY _trash_with_fs_open_do" ]
-  # @[ "DBAY trash works with implicit foreign keys" ]()
+  @[ "DBAY trash works with implicit foreign keys" ]()
+  test @[ "DBAY trash works with implicit foreign keys" ]
 
