@@ -125,7 +125,8 @@ class Ebayde extends Vogue_scraper_ABC
   #---------------------------------------------------------------------------------------------------------
   scrape_html: ( html_or_buffer ) ->
     dsk         = 'ebayde'
-    { sid, }    = @hub.vdb.new_session dsk
+    session     = @hub.vdb.new_session dsk
+    { sid, }    = session
     insert_post = @hub.vdb.queries.insert_post
     seen        = @hub.vdb.db.dt_now()
     #.......................................................................................................
@@ -158,8 +159,7 @@ class Ebayde extends Vogue_scraper_ABC
       title_url     = item_url
       #.....................................................................................................
       details = { title, title_url, }
-      details = JSON.stringify details
-      row     = @hub.vdb.new_post { sid, pid, details, }
+      row     = @hub.vdb.new_post { dsk, sid, pid, session, details, }
     #.......................................................................................................
     # process.exit 111
     return null
@@ -187,7 +187,8 @@ class Hnrss extends Vogue_scraper_ABC
   #---------------------------------------------------------------------------------------------------------
   scrape_html: ( html_or_buffer ) ->
     dsk         = 'hn'
-    { sid, }    = @hub.vdb.new_session dsk
+    session     = @hub.vdb.new_session dsk
+    { sid, }    = session
     insert_post = @hub.vdb.queries.insert_post
     seen        = @hub.vdb.db.dt_now()
     #.......................................................................................................
@@ -230,8 +231,7 @@ class Hnrss extends Vogue_scraper_ABC
       href    = null
       ### TAINT avoid duplicate query ###
       details = { title, title_url, date, creator, description, }
-      details = JSON.stringify details
-      row     = @hub.vdb.new_post { sid, pid, details, }
+      row     = @hub.vdb.new_post { dsk, sid, pid, session, details, }
     return null
 
 #-----------------------------------------------------------------------------------------------------------
