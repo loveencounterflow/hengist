@@ -177,9 +177,10 @@
   Ebayde = class Ebayde extends Vogue_scraper_ABC {
     //---------------------------------------------------------------------------------------------------------
     scrape_html(html_or_buffer) {
-      var $, R, details, dsk, html, i, insert_post, item, item_details, item_id, item_price, item_subtitle, item_title, item_url, len, pid, ref, row, seen, sid, subtitle, title, title_url;
+      var $, R, details, dsk, html, i, insert_post, item, item_details, item_id, item_price, item_subtitle, item_title, item_url, len, pid, ref, row, seen, session, sid, subtitle, title, title_url;
       dsk = 'ebayde';
-      ({sid} = this.hub.vdb.new_session(dsk));
+      session = this.hub.vdb.new_session(dsk);
+      ({sid} = session);
       insert_post = this.hub.vdb.queries.insert_post;
       seen = this.hub.vdb.db.dt_now();
       //.......................................................................................................
@@ -215,8 +216,7 @@
         title_url = item_url;
         //.....................................................................................................
         details = {title, title_url};
-        details = JSON.stringify(details);
-        row = this.hub.vdb.new_post({sid, pid, details});
+        row = this.hub.vdb.new_post({dsk, sid, pid, session, details});
       }
       //.......................................................................................................
       // process.exit 111
@@ -253,9 +253,10 @@
     //---------------------------------------------------------------------------------------------------------
     scrape_html(html_or_buffer) {
       /* TAINT avoid duplicate query */
-      var $, article_url, creator, date, description, details, discussion_url, dsk, href, html, i, insert_post, item, len, pid, ref, row, seen, sid, title, title_url;
+      var $, article_url, creator, date, description, details, discussion_url, dsk, href, html, i, insert_post, item, len, pid, ref, row, seen, session, sid, title, title_url;
       dsk = 'hn';
-      ({sid} = this.hub.vdb.new_session(dsk));
+      session = this.hub.vdb.new_session(dsk);
+      ({sid} = session);
       insert_post = this.hub.vdb.queries.insert_post;
       seen = this.hub.vdb.db.dt_now();
       //.......................................................................................................
@@ -299,8 +300,7 @@
         //.....................................................................................................
         href = null;
         details = {title, title_url, date, creator, description};
-        details = JSON.stringify(details);
-        row = this.hub.vdb.new_post({sid, pid, details});
+        row = this.hub.vdb.new_post({dsk, sid, pid, session, details});
       }
       return null;
     }
