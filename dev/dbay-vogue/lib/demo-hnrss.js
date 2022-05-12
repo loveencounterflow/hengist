@@ -361,10 +361,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_ebayde = async function() {
-    var Vogue_db, dsk, glob_pattern, i, len, path, ref, scraper, vogue;
+    var Vogue_db, db, dsk, glob_pattern, i, len, path, ref, scraper, vdb, vogue;
     ({Vogue, Vogue_scraper_ABC, Vogue_db} = require('../../../apps/dbay-vogue'));
+    ({DBay} = require('../../../apps/dbay'));
     dsk = 'ebayde';
-    vogue = new Vogue();
+    path = PATH.resolve(PATH.join(__dirname, '../../../dev-shm/dbay-vogue.db'));
+    db = new DBay({path});
+    vdb = new Vogue_db({db});
+    vogue = new Vogue({vdb});
     scraper = new Ebayde();
     vogue.scrapers.add({dsk, scraper});
     /* TAINT use API method, don't use query directly */
@@ -412,11 +416,10 @@
       // await demo_zvg_online_net()
       // await demo_zvg24_net()
       // await demo_hnrss()
-      return (await demo_serve_hnrss());
+      // await demo_serve_hnrss()
+      return (await demo_serve_ebayde());
     })();
   }
-
-  // await demo_serve_ebayde()
 
 }).call(this);
 
