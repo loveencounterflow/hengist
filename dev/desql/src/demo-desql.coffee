@@ -15,8 +15,8 @@ help                      = CND.get_logger 'help',      badge
 whisper                   = CND.get_logger 'whisper',   badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
-# PATH                      = require 'path'
-# FS                        = require 'fs'
+PATH                      = require 'path'
+FS                        = require 'fs'
 types                     = new ( require 'intertype' ).Intertype
 { isa
   equals
@@ -213,6 +213,42 @@ queries = [
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@demo_dbay_vogue = ->
+  path  = '../../../assets/desql/dbay-vogue.sql'
+  path  = PATH.resolve __dirname, path
+  sql   = FS.readFileSync path, { encoding: 'utf-8', }
+  # sql   = sql[ 0 .. 1024 ]
+  queries = sql.split /;/
+  for query in queries
+    query = query.trim()
+    continue if query is ''
+    # query += ';' ### NOTE do not use trailing semicolon ###
+    desql = new Desql()
+    desql.parse query
+    tabulate_query desql, query
+    highlight_parsing_result query, desql
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+tabulate_query = ( desql, query ) ->
+  X.tabulate query, desql.db SQL"""
+    select
+        path,
+        pos1,
+        type,
+        substring( txt, 1, 25 ) as txt,
+        codes,
+        acodes,
+        kcodes,
+        icodes,
+        lcodes,
+        scodes,
+        xcodes
+      from terminals_with_grouped_tags
+      where type != 'spc';"""
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 show_missing = ( query, desql ) ->
   rows = []
   for row from desql.db SQL"select * from _coverage_holes;"
@@ -243,7 +279,9 @@ highlight_parsing_result = ( query, desql ) ->
 
 ############################################################################################################
 if module is require.main then do =>
-  @demo_short_query()
+  # @demo_short_query()
+  @demo_dbay_vogue()
+
   # do =>
   #   hashbow = require 'hashbow'
   #   chalk   = require 'chalk'
