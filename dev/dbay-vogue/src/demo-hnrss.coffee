@@ -323,8 +323,8 @@ if module is require.main then do =>
   # await demo_zvg_online_net()
   # await demo_zvg24_net()
   # await demo_hnrss()
-  # await demo_serve_hnrss()
-  await demo_serve_ebayde()
+  await demo_serve_hnrss()
+  # await demo_serve_ebayde()
 
 
 
