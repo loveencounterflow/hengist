@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, Desql, GUY, SQL, X, badge, chalk, debug, echo, equals, hashbow, help, highlight_parsing_result, info, isa, pathsep_lit, queries, rpr, show_missing, show_overview, tabulate, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper, xrpr;
+  var CND, Desql, FS, GUY, PATH, SQL, X, badge, chalk, debug, echo, equals, hashbow, help, highlight_parsing_result, info, isa, pathsep_lit, queries, rpr, show_missing, show_overview, tabulate, tabulate_query, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper, xrpr;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -24,8 +24,10 @@
   echo = CND.echo.bind(CND);
 
   //...........................................................................................................
-  // PATH                      = require 'path'
-  // FS                        = require 'fs'
+  PATH = require('path');
+
+  FS = require('fs');
+
   types = new (require('intertype')).Intertype();
 
   ({isa, equals, type_of, validate, validate_list_of} = types.export());
@@ -234,6 +236,50 @@ select 'helo world' as greetings;`,
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.demo_dbay_vogue = function() {
+    var desql, i, len, path, query, sql;
+    path = '../../../assets/desql/dbay-vogue.sql';
+    path = PATH.resolve(__dirname, path);
+    sql = FS.readFileSync(path, {
+      encoding: 'utf-8'
+    });
+    // sql   = sql[ 0 .. 1024 ]
+    queries = sql.split(/;/);
+    for (i = 0, len = queries.length; i < len; i++) {
+      query = queries[i];
+      query = query.trim();
+      if (query === '') {
+        continue;
+      }
+      // query += ';' ### NOTE do not use trailing semicolon ###
+      desql = new Desql();
+      desql.parse(query);
+      tabulate_query(desql, query);
+      highlight_parsing_result(query, desql);
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  tabulate_query = function(desql, query) {
+    X.tabulate(query, desql.db(SQL`select
+    path,
+    pos1,
+    type,
+    substring( txt, 1, 25 ) as txt,
+    codes,
+    acodes,
+    kcodes,
+    icodes,
+    lcodes,
+    scodes,
+    xcodes
+  from terminals_with_grouped_tags
+  where type != 'spc';`));
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   show_missing = function(query, desql) {
     var ref, row, rows;
     rows = [];
@@ -276,7 +322,8 @@ select 'helo world' as greetings;`,
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return this.demo_short_query();
+      // @demo_short_query()
+      return this.demo_dbay_vogue();
     })();
   }
 
