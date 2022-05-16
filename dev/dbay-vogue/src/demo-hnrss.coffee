@@ -301,6 +301,12 @@ demo_ebayde = ->
       buffer    = FS.readFileSync path
       await scraper.scrape_html buffer
   #.........................................................................................................
+  info '^445345-16^', H.tabulate "distinct PIDs", db SQL"""
+    select 'in vogue_posts'         as "title", count( distinct pid ) as count from vogue_posts
+    union all
+    select 'in vogue_latest_trends' as "title", count( distinct pid ) as count from vogue_latest_trends;
+    """
+  #.........................................................................................................
   return vogue
 
 #-----------------------------------------------------------------------------------------------------------
@@ -313,8 +319,35 @@ demo_serve_hnrss = ( cfg ) ->
 #-----------------------------------------------------------------------------------------------------------
 demo_serve_ebayde = ( cfg ) ->
   vogue = await demo_ebayde()
+  # H.tabulate 'vogue_ordered_trends', vogue.vdb.db SQL"""
+  #   select
+  #     rnr,
+  #     dsk,
+  #     sid,
+  #     ts,
+  #     pid,
+  #     rank,
+  #     substring( raw_trend, 1, 10 ) as raw_trend,
+  #     substring( details, 1, 10 ) as details
+  #   from vogue_ordered_trends;"""
+  # process.exit 111
   debug '^445345-16^', vogue.server.start()
   help '^445345-17^', "server started"
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_statement_type_info = ->
+  { Vogue_db      } = require '../../../apps/dbay-vogue'
+  { DBay          } = require '../../../apps/dbay'
+  db                = new DBay()
+  vdb               = new Vogue_db { db, }
+  for name, query of vdb.queries
+    try
+      H.tabulate name, query.columns()
+    catch error
+      warn '^446^', name, error.message
+  query = db.prepare SQL"select * from vogue_trends;"; H.tabulate "vogue_trends", query.columns()
+  query = db.prepare SQL"select * from vogue_XXX_grouped_ranks;"; H.tabulate "vogue_XXX_grouped_ranks", query.columns()
   return null
 
 
@@ -324,6 +357,7 @@ if module is require.main then do =>
   # await demo_zvg24_net()
   # await demo_hnrss()
   await demo_serve_hnrss()
+  # await demo_statement_type_info()
   # await demo_serve_ebayde()
 
 
