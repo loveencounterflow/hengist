@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Vogue, Vogue_scraper_ABC, badge, debug, demo_1, demo_ebayde, demo_hnrss, demo_serve_ebayde, demo_serve_hnrss, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, types, urge, warn, whisper;
+  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Vogue, Vogue_scraper_ABC, badge, debug, demo_1, demo_ebayde, demo_hnrss, demo_serve_ebayde, demo_serve_hnrss, demo_statement_type_info, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -389,6 +389,10 @@
       })();
     }
     //.........................................................................................................
+    info('^445345-16^', H.tabulate("distinct PIDs", db(SQL`select 'in vogue_posts'         as "title", count( distinct pid ) as count from vogue_posts
+union all
+select 'in vogue_latest_trends' as "title", count( distinct pid ) as count from vogue_latest_trends;`)));
+    //.........................................................................................................
     return vogue;
   };
 
@@ -405,8 +409,44 @@
   demo_serve_ebayde = async function(cfg) {
     var vogue;
     vogue = (await demo_ebayde());
+    // H.tabulate 'vogue_ordered_trends', vogue.vdb.db SQL"""
+    //   select
+    //     rnr,
+    //     dsk,
+    //     sid,
+    //     ts,
+    //     pid,
+    //     rank,
+    //     substring( raw_trend, 1, 10 ) as raw_trend,
+    //     substring( details, 1, 10 ) as details
+    //   from vogue_ordered_trends;"""
+    // process.exit 111
     debug('^445345-16^', vogue.server.start());
     help('^445345-17^', "server started");
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_statement_type_info = function() {
+    var Vogue_db, db, error, name, query, ref, vdb;
+    ({Vogue_db} = require('../../../apps/dbay-vogue'));
+    ({DBay} = require('../../../apps/dbay'));
+    db = new DBay();
+    vdb = new Vogue_db({db});
+    ref = vdb.queries;
+    for (name in ref) {
+      query = ref[name];
+      try {
+        H.tabulate(name, query.columns());
+      } catch (error1) {
+        error = error1;
+        warn('^446^', name, error.message);
+      }
+    }
+    query = db.prepare(SQL`select * from vogue_trends;`);
+    H.tabulate("vogue_trends", query.columns());
+    query = db.prepare(SQL`select * from vogue_XXX_grouped_ranks;`);
+    H.tabulate("vogue_XXX_grouped_ranks", query.columns());
     return null;
   };
 
@@ -420,7 +460,8 @@
     })();
   }
 
-  // await demo_serve_ebayde()
+  // await demo_statement_type_info()
+// await demo_serve_ebayde()
 
 }).call(this);
 
