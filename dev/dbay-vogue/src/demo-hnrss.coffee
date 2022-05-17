@@ -290,10 +290,10 @@ demo_ebayde = ->
 
 #-----------------------------------------------------------------------------------------------------------
 show_post_counts = ( db ) ->
-  H.tabulate "distinct PIDs", db SQL"""
-    select 'in vogue_posts'         as "title", count( distinct pid ) as count from vogue_posts
+  H.tabulate "PIDs", db SQL"""
+    select 'distinct in vogue_posts'  as "title", count( distinct pid ) as count from vogue_posts
     union all
-    select 'in vogue_trends'        as "title", count( distinct pid ) as count from vogue_trends;"""
+    select 'all in vogue_trends'      as "title", count(*)              as count from vogue_trends;"""
   return null
 
 #-----------------------------------------------------------------------------------------------------------
