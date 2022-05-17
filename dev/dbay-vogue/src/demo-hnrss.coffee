@@ -258,24 +258,8 @@ demo_hnrss = ->
     await do =>
       buffer    = FS.readFileSync path
       await scraper.scrape_html buffer
-  # H.tabulate "trends", db SQL"""select
-  #     dsk,
-  #     sid,
-  #     ts,
-  #     pid,
-  #     rank,
-  #     substring( trend,   1, 20 ) as trend,
-  #     substring( details, 1, 20 ) as details
-  #   from scr_trends;"""
   #.........................................................................................................
-  # { Desql         } = require '../../../apps/desql'
-  # desql             = new Desql()
-  # desql.db          = db ### TAINT should be possible to just pass in DB ###
-  # desql.create_trashlib()
-  # desql.trash_to_sql { path: trash_sql_path, overwrite: true, }
-  # desql.trash_to_sqlite { path: trash_path, overwrite: true, }
-  # help '^4564^', "wrote trashed db to #{trash_path}"
-  #.........................................................................................................
+  show_post_counts db
   return vogue
 
 #-----------------------------------------------------------------------------------------------------------
@@ -301,13 +285,16 @@ demo_ebayde = ->
       buffer    = FS.readFileSync path
       await scraper.scrape_html buffer
   #.........................................................................................................
-  info '^445345-16^', H.tabulate "distinct PIDs", db SQL"""
+  show_post_counts db
+  return vogue
+
+#-----------------------------------------------------------------------------------------------------------
+show_post_counts = ( db ) ->
+  H.tabulate "distinct PIDs", db SQL"""
     select 'in vogue_posts'         as "title", count( distinct pid ) as count from vogue_posts
     union all
-    select 'in vogue_latest_trends' as "title", count( distinct pid ) as count from vogue_latest_trends;
-    """
-  #.........................................................................................................
-  return vogue
+    select 'in vogue_trends'        as "title", count( distinct pid ) as count from vogue_trends;"""
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 demo_serve_hnrss = ( cfg ) ->
@@ -356,9 +343,9 @@ if module is require.main then do =>
   # await demo_zvg_online_net()
   # await demo_zvg24_net()
   # await demo_hnrss()
-  await demo_serve_hnrss()
+  # await demo_serve_hnrss()
+  await demo_serve_ebayde()
   # await demo_statement_type_info()
-  # await demo_serve_ebayde()
 
 
 
