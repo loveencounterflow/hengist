@@ -2,6 +2,13 @@
   'use strict';
   var CND, FS, GUY, H, PATH, badge, debug, echo, equals, freeze, help, info, isa, lets, raw, rpr, tabulate, to_width, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
+  /*
+
+  * [*A number NOBODY has thought of - Numberphile*](https://youtu.be/KdZrxkix9Mk?t=423)
+  * [*Frequency of occurrence of numbers in the World Wide Web* (Dorogovtsev
+    &al)](https://www.researchgate.net/publication/2172850_Frequency_of_occurrence_of_numbers_in_the_World_Wide_Web)
+
+   */
   //###########################################################################################################
   CND = require('cnd');
 

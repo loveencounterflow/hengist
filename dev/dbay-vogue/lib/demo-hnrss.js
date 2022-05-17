@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Vogue, Vogue_scraper_ABC, badge, debug, demo_1, demo_ebayde, demo_hnrss, demo_serve_ebayde, demo_serve_hnrss, demo_statement_type_info, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, types, urge, warn, whisper;
+  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Vogue, Vogue_scraper_ABC, badge, debug, demo_1, demo_ebayde, demo_hnrss, demo_serve_ebayde, demo_serve_hnrss, demo_statement_type_info, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, show_post_counts, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -338,24 +338,8 @@
         return (await scraper.scrape_html(buffer));
       })();
     }
-    // H.tabulate "trends", db SQL"""select
-    //     dsk,
-    //     sid,
-    //     ts,
-    //     pid,
-    //     rank,
-    //     substring( trend,   1, 20 ) as trend,
-    //     substring( details, 1, 20 ) as details
-    //   from scr_trends;"""
     //.........................................................................................................
-    // { Desql         } = require '../../../apps/desql'
-    // desql             = new Desql()
-    // desql.db          = db ### TAINT should be possible to just pass in DB ###
-    // desql.create_trashlib()
-    // desql.trash_to_sql { path: trash_sql_path, overwrite: true, }
-    // desql.trash_to_sqlite { path: trash_path, overwrite: true, }
-    // help '^4564^', "wrote trashed db to #{trash_path}"
-    //.........................................................................................................
+    show_post_counts(db);
     return vogue;
   };
 
@@ -389,11 +373,16 @@
       })();
     }
     //.........................................................................................................
-    info('^445345-16^', H.tabulate("distinct PIDs", db(SQL`select 'in vogue_posts'         as "title", count( distinct pid ) as count from vogue_posts
-union all
-select 'in vogue_latest_trends' as "title", count( distinct pid ) as count from vogue_latest_trends;`)));
-    //.........................................................................................................
+    show_post_counts(db);
     return vogue;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  show_post_counts = function(db) {
+    H.tabulate("distinct PIDs", db(SQL`select 'in vogue_posts'         as "title", count( distinct pid ) as count from vogue_posts
+union all
+select 'in vogue_trends'        as "title", count( distinct pid ) as count from vogue_trends;`));
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -456,12 +445,12 @@ select 'in vogue_latest_trends' as "title", count( distinct pid ) as count from 
       // await demo_zvg_online_net()
       // await demo_zvg24_net()
       // await demo_hnrss()
-      return (await demo_serve_hnrss());
+      // await demo_serve_hnrss()
+      return (await demo_serve_ebayde());
     })();
   }
 
   // await demo_statement_type_info()
-// await demo_serve_ebayde()
 
 }).call(this);
 

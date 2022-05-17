@@ -953,12 +953,32 @@ create table integers (
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DBAY query with non-unique field names"] = function(T, done) {
+    var DBay, SQL, db;
+    SQL = String.raw;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    db = new DBay();
+    //.........................................................................................................
+    X.tabulate('integers', db(SQL`select 1 as first, 2 as first;`));
+    if (T != null) {
+      T.eq(db.all_rows(SQL`select 1 as first, 2 as first;`), [
+        {
+          first: 2
+        }
+      ]);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
       // test @[ "DBAY SQL tag function" ]
-      return test(this["DBAY `db.as_object()`"]);
+      // test @[ "DBAY `db.as_object()`" ]
+      return test(this["DBAY query with non-unique field names"]);
     })();
   }
 
