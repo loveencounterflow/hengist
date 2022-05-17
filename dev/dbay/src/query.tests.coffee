@@ -543,12 +543,25 @@ X                         = require '../../../lib/helpers'
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DBAY query with non-unique field names" ] = ( T, done ) ->
+  SQL                       = String.raw
+  # T?.halt_on_error()
+  { DBay }          = require H.dbay_path
+  db                = new DBay()
+  #.........................................................................................................
+  X.tabulate 'integers', db SQL"select 1 as first, 2 as first;"
+  T?.eq ( db.all_rows SQL"select 1 as first, 2 as first;" ), [ { first: 2, }, ]
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
   # test @
   # test @[ "DBAY SQL tag function" ]
-  test @[ "DBAY `db.as_object()`" ]
+  # test @[ "DBAY `db.as_object()`" ]
+  test @[ "DBAY query with non-unique field names" ]
   # @[ "DBAY prepared statement allowed in `db.do()`" ]()
   # test @[ "DBAY create DB, insert, query values 1" ]
   # test @[ "DBAY db as callable" ]
