@@ -1,6 +1,17 @@
 
+
+
 'use strict'
 
+###
+
+
+* [*A number NOBODY has thought of - Numberphile*](https://youtu.be/KdZrxkix9Mk?t=423)
+* [*Frequency of occurrence of numbers in the World Wide Web* (Dorogovtsev
+  &al)](https://www.researchgate.net/publication/2172850_Frequency_of_occurrence_of_numbers_in_the_World_Wide_Web)
+
+
+###
 
 
 ############################################################################################################
