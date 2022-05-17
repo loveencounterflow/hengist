@@ -175,6 +175,8 @@ tabulate = ( db, query ) -> H.tabulate query, db query
     debug '^34534^', db.dt_from_now '20220101-183000Z'
     tabulate db, SQL"""select std_dt_now() as date;"""
     tabulate db, SQL"""select std_dt_from_now( '20220101-183000Z' ) as date;"""
+    debug '^34534^', db.dt_format db.dt_now(), 'YYYYMMDD-HHmmssZ'
+    debug '^34534^', db.dt_format db.dt_now(), 'YYYY-MM-DD HH:mm UTC'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -200,5 +202,5 @@ tabulate = ( db, query ) -> H.tabulate query, db query
 if require.main is module then do =>
   # @demo_datetime()
   @demo_stdlib_api()
-  @demo_dayjs_parse_custom_format()
-  @demo_dayjs_duration()
+  # @demo_dayjs_parse_custom_format()
+  # @demo_dayjs_duration()
