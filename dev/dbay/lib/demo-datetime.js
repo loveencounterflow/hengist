@@ -245,7 +245,9 @@
       debug('^34534^', db.dt_now());
       debug('^34534^', db.dt_from_now('20220101-183000Z'));
       tabulate(db, SQL`select std_dt_now() as date;`);
-      return tabulate(db, SQL`select std_dt_from_now( '20220101-183000Z' ) as date;`);
+      tabulate(db, SQL`select std_dt_from_now( '20220101-183000Z' ) as date;`);
+      debug('^34534^', db.dt_format(db.dt_now(), 'YYYYMMDD-HHmmssZ'));
+      return debug('^34534^', db.dt_format(db.dt_now(), 'YYYY-MM-DD HH:mm UTC'));
     });
     return null;
   };
@@ -287,11 +289,12 @@
   if (require.main === module) {
     (() => {
       // @demo_datetime()
-      this.demo_stdlib_api();
-      this.demo_dayjs_parse_custom_format();
-      return this.demo_dayjs_duration();
+      return this.demo_stdlib_api();
     })();
   }
+
+  // @demo_dayjs_parse_custom_format()
+// @demo_dayjs_duration()
 
 }).call(this);
 
