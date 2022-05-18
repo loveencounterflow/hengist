@@ -1,0 +1,118 @@
+
+'use strict'
+
+
+############################################################################################################
+CND                       = require 'cnd'
+rpr                       = CND.rpr
+badge                     = 'DBAY-VOGUE/TESTS/HTML-GENERATION'
+debug                     = CND.get_logger 'debug',     badge
+warn                      = CND.get_logger 'warn',      badge
+info                      = CND.get_logger 'info',      badge
+urge                      = CND.get_logger 'urge',      badge
+help                      = CND.get_logger 'help',      badge
+whisper                   = CND.get_logger 'whisper',   badge
+echo                      = CND.echo.bind CND
+#...........................................................................................................
+test                      = require '../../../apps/guy-test'
+# PATH                      = require 'path'
+# FS                        = require 'fs'
+# H                         = require './helpers'
+types                     = new ( require 'intertype' ).Intertype
+{ isa
+  equals
+  type_of
+  validate
+  validate_list_of }      = types.export()
+guy                       = require '../../../apps/guy'
+# MMX                       = require '../../../apps/multimix/lib/cataloguing'
+
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DB as_html() 1" ] = ( T, done ) ->
+  { Vogue
+    Vogue_scraper_ABC } = require '../../../apps/dbay-vogue'
+  vogue                 = new Vogue()
+  dsk                   = 'xx'
+  class Xx_scraper extends Vogue_scraper_ABC
+  scraper               = new Xx_scraper()
+  vogue.scrapers.add { dsk, scraper, }
+  ### TAINT use API method, don't use query directly ###
+  ### TAINT should be done by `vogue.scraper.add()` ###
+  vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
+  session               = vogue.vdb.new_session dsk
+  { sid, }              = session
+  pid                   = 'xx-1'
+  # title                 = "helo world"
+  # title_url             = 'https://example.com/blog/1'
+  # details               = { title, title_url, foo: 42, bar: 108, }
+  details               = { foo: 42, bar: 108, }
+  row                   = vogue.vdb.new_post { dsk, sid, pid, session, details, }
+  result                = vogue.vdb.as_html { dsk, table: 'vogue_trends', }
+  debug '^348^', result
+  T?.ok ( result.indexOf "<table class='vogue_trends'>"     ) > -1
+  T?.ok ( result.indexOf "<th class='sid_min'>sid_min</th>" ) > -1
+  T?.ok ( result.indexOf "<th class='sid_max'>sid_max</th>" ) > -1
+  T?.ok ( result.indexOf "<th class='dsk'>dsk</th>" ) > -1
+  T?.ok ( result.indexOf "<th class='ts'>ts</th>"           ) > -1
+  T?.ok ( result.indexOf "<th class='pid'>pid</th>"         ) > -1
+  T?.ok ( result.indexOf """<td class='dsk'>xx</td>"""                                                                    ) > -1
+  T?.ok ( result.indexOf """<td class='sid_min'>1</td>"""                                                                 ) > -1
+  T?.ok ( result.indexOf """<td class='sid_max'>1</td>"""                                                                 ) > -1
+  T?.ok ( result.indexOf """<td class='pid'>xx-1</td>"""                                                                  ) > -1
+  T?.ok ( result.indexOf """<td class='rank'>1</td>"""                                                                    ) > -1
+  T?.ok ( result.indexOf """<td class='raw_trend'>[{"dsk":"xx","pid":"xx-1","sid":1,"rank":1,"first":1,"last":1}]</td>""" ) > -1
+  T?.ok ( result.indexOf """<td class='details'>{"foo":42,"bar":108}</td>"""                                              ) > -1
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DB as_html() 2" ] = ( T, done ) ->
+  { Vogue
+    Vogue_scraper_ABC } = require '../../../apps/dbay-vogue'
+  vogue                 = new Vogue()
+  dsk                   = 'xx'
+  class Xx_scraper extends Vogue_scraper_ABC
+  scraper               = new Xx_scraper()
+  vogue.scrapers.add { dsk, scraper, }
+  ### TAINT use API method, don't use query directly ###
+  ### TAINT should be done by `vogue.scraper.add()` ###
+  vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
+  session               = vogue.vdb.new_session dsk
+  { sid, }              = session
+  pid                   = 'xx-1'
+  details               = { foo: 42, bar: 108, }
+  row                   = vogue.vdb.new_post { dsk, sid, pid, session, details, }
+  T?.eq row.sid, 1
+  T?.eq row.pid, 'xx-1'
+  fields                =
+    dsk:
+      title: "DSK"
+    sid_min:
+      display: false
+    sid_max:
+      title: "SIDs"
+      format:     ( value, { row, } ) => "#{row.sid_min}—#{row.sid_max}"
+      outer_html: ( value, details ) =>
+        help '^4535^', { value, details, }
+        T?.eq value, "1—1"
+        T?.eq details.raw_value, 1
+        return "<td class=sids>#{value}</td>"
+    details:
+      inner_html: ( value, details ) =>
+        return "<div>#{rpr details.raw_value}</div>"
+  result                = vogue.vdb.as_html { dsk, table: 'vogue_trends', fields, }
+  debug '^348^', result
+  T?.ok ( result.indexOf "<th class='dsk'>DSK</th>" ) > -1
+  T?.ok ( not result.indexOf "<th class='sid_min'>" ) > -1
+  T?.ok ( not result.indexOf "<td class='sid_min'>" ) > -1
+  T?.ok ( result.indexOf "<td class=sids>1—1</td>" ) > -1
+  T?.ok ( result.indexOf """<td class='details'><div>'{"foo":42,"bar":108}'</div></td>""" ) > -1
+  return done?()
+
+
+############################################################################################################
+if module is require.main then do =>
+  test @
+  # @[ "DB as_html() 1" ]()
+  # test @[ "DB as_html() 1" ]
+
