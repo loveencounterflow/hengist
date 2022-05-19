@@ -69,11 +69,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["scheduler: add_interval_cfg"] = function(T, done) {
-    var Vogue_scheduler, voge_scheduler;
+    var Vogue_scheduler, vogue_scheduler;
     // T?.halt_on_error()
     ({Vogue_scheduler} = require('../../../apps/dbay-vogue'));
-    voge_scheduler = new Vogue_scheduler();
-    ({types} = voge_scheduler);
+    vogue_scheduler = new Vogue_scheduler();
+    ({types} = vogue_scheduler);
     if (T != null) {
       T.eq(type_of(types.isa.vogue_scheduler_add_interval_cfg), 'function');
     }

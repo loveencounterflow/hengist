@@ -112,7 +112,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["DB as_html() 2"] = function(T, done) {
-    var Vogue, Vogue_scraper_ABC, Xx_scraper, details, dsk, fields, pid, result, row, scraper, session, sid, vogue;
+    var Vogue, Vogue_scraper_ABC, Xx_scraper, cfg, details, dsk, pid, result, row, scraper, session, sid, vogue;
     ({Vogue, Vogue_scraper_ABC} = require('../../../apps/dbay-vogue'));
     vogue = new Vogue();
     dsk = 'xx';
@@ -139,43 +139,55 @@
     if (T != null) {
       T.eq(row.pid, 'xx-1');
     }
-    fields = {
-      dsk: {
-        title: "DSK"
-      },
-      sid_min: {
-        display: false
-      },
-      sid_max: {
-        title: "SIDs",
-        format: (value, {row}) => {
-          return `${row.sid_min}—${row.sid_max}`;
+    cfg = {
+      table: 'vogue_trends',
+      dsk: dsk,
+      fields: {
+        dsk: {
+          title: "DSK"
         },
-        outer_html: (value, details) => {
-          help('^4535^', {value, details});
-          if (T != null) {
-            T.eq(value, "1—1");
+        sid_min: {
+          display: false
+        },
+        sid_max: {
+          title: "SIDs",
+          format: (value, {row}) => {
+            return `${row.sid_min}—${row.sid_max}`;
+          },
+          outer_html: (value, details) => {
+            help('^4535^', {value, details});
+            if (T != null) {
+              T.eq(value, "1—1");
+            }
+            if (T != null) {
+              T.eq(details.raw_value, 1);
+            }
+            return `<td class=sids>${value}</td>`;
           }
-          if (T != null) {
-            T.eq(details.raw_value, 1);
+        },
+        details: {
+          inner_html: (value, details) => {
+            return `<div>${rpr(details.raw_value)}</div>`;
           }
-          return `<td class=sids>${value}</td>`;
-        }
-      },
-      details: {
-        inner_html: (value, details) => {
-          return `<div>${rpr(details.raw_value)}</div>`;
+        },
+        extra: {
+          title: "Extra",
+          format: (value, details) => {
+            return details.row_nr;
+          }
         }
       }
     };
-    result = vogue.vdb.as_html({
-      dsk,
-      table: 'vogue_trends',
-      fields
-    });
+    result = vogue.vdb.as_html(cfg);
     debug('^348^', result);
     if (T != null) {
       T.ok((result.indexOf("<th class='dsk'>DSK</th>")) > -1);
+    }
+    if (T != null) {
+      T.ok((result.indexOf("<th class='extra'>Extra</th>")) > -1);
+    }
+    if (T != null) {
+      T.ok((result.indexOf("<td class='extra'>1</td>")) > -1);
     }
     if (T != null) {
       T.ok((!result.indexOf("<th class='sid_min'>")) > -1);
