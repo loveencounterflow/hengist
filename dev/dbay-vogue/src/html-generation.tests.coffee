@@ -84,25 +84,33 @@ guy                       = require '../../../apps/guy'
   row                   = vogue.vdb.new_post { dsk, sid, pid, session, details, }
   T?.eq row.sid, 1
   T?.eq row.pid, 'xx-1'
-  fields                =
-    dsk:
-      title: "DSK"
-    sid_min:
-      display: false
-    sid_max:
-      title: "SIDs"
-      format:     ( value, { row, } ) => "#{row.sid_min}—#{row.sid_max}"
-      outer_html: ( value, details ) =>
-        help '^4535^', { value, details, }
-        T?.eq value, "1—1"
-        T?.eq details.raw_value, 1
-        return "<td class=sids>#{value}</td>"
-    details:
-      inner_html: ( value, details ) =>
-        return "<div>#{rpr details.raw_value}</div>"
-  result                = vogue.vdb.as_html { dsk, table: 'vogue_trends', fields, }
+  cfg                   =
+    table:  'vogue_trends'
+    dsk:    dsk
+    fields:
+      dsk:
+        title: "DSK"
+      sid_min:
+        display: false
+      sid_max:
+        title: "SIDs"
+        format:     ( value, { row, } ) => "#{row.sid_min}—#{row.sid_max}"
+        outer_html: ( value, details ) =>
+          help '^4535^', { value, details, }
+          T?.eq value, "1—1"
+          T?.eq details.raw_value, 1
+          return "<td class=sids>#{value}</td>"
+      details:
+        inner_html: ( value, details ) =>
+          return "<div>#{rpr details.raw_value}</div>"
+      extra:
+        title: "Extra"
+        format: ( value, details ) => details.row_nr
+  result                = vogue.vdb.as_html cfg
   debug '^348^', result
   T?.ok ( result.indexOf "<th class='dsk'>DSK</th>" ) > -1
+  T?.ok ( result.indexOf "<th class='extra'>Extra</th>" ) > -1
+  T?.ok ( result.indexOf "<td class='extra'>1</td>" ) > -1
   T?.ok ( not result.indexOf "<th class='sid_min'>" ) > -1
   T?.ok ( not result.indexOf "<td class='sid_min'>" ) > -1
   T?.ok ( result.indexOf "<td class=sids>1—1</td>" ) > -1
