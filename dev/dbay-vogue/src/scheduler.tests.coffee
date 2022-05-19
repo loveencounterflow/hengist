@@ -46,8 +46,8 @@ guy                       = require '../../../apps/guy'
 @[ "scheduler: add_interval_cfg" ] = ( T, done ) ->
   # T?.halt_on_error()
   { Vogue_scheduler } = require '../../../apps/dbay-vogue'
-  voge_scheduler      = new Vogue_scheduler()
-  { types }           = voge_scheduler
+  vogue_scheduler     = new Vogue_scheduler()
+  { types }           = vogue_scheduler
   T?.eq ( type_of types.isa.vogue_scheduler_add_interval_cfg ), 'function'
   # types.validate.vogue_scheduler_add_interval_cfg { repeat: '1.5 hours', task: ( -> ), }
   types.validate.vogue_scheduler_add_interval_cfg { repeat: '1.5 hours', jitter: '10%', pause: '10 minutes', task: ( -> ), }
