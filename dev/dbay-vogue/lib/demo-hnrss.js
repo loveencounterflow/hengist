@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Vogue, Vogue_scraper_ABC, badge, debug, demo_1, demo_ebayde, demo_hnrss, demo_serve_ebayde, demo_serve_hnrss, demo_statement_type_info, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, show_post_counts, types, urge, warn, whisper;
+  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Vogue, Vogue_scraper_ABC, badge, debug, demo_1, demo_ebayde, demo_hnrss, demo_read_datasources_start_server, demo_serve_ebayde, demo_serve_hnrss, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, show_post_counts, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -385,12 +385,27 @@ select 'all in vogue_trends'      as "title", count(*)              as count fro
     return null;
   };
 
+  // #-----------------------------------------------------------------------------------------------------------
+  // demo_statement_type_info = ->
+  //   { Vogue_db      } = require '../../../apps/dbay-vogue'
+  //   { DBay          } = require '../../../apps/dbay'
+  //   db                = new DBay()
+  //   vdb               = new Vogue_db { db, }
+  //   for name, query of vdb.queries
+  //     try
+  //       H.tabulate name, query.columns()
+  //     catch error
+  //       warn '^446^', name, error.message
+  //   query = db.prepare SQL"select * from vogue_trends;"; H.tabulate "vogue_trends", query.columns()
+  //   query = db.prepare SQL"select * from vogue_XXX_grouped_ranks;"; H.tabulate "vogue_XXX_grouped_ranks", query.columns()
+  //   return null
+
   //-----------------------------------------------------------------------------------------------------------
   demo_serve_hnrss = async function(cfg) {
     var vogue;
     vogue = (await demo_hnrss());
-    debug('^445345-16^', vogue.server.start());
-    help('^445345-17^', "server started");
+    debug('^445345-1^', vogue.server.start());
+    help('^445345-2^', "server started");
     return null;
   };
 
@@ -398,44 +413,74 @@ select 'all in vogue_trends'      as "title", count(*)              as count fro
   demo_serve_ebayde = async function(cfg) {
     var vogue;
     vogue = (await demo_ebayde());
-    // H.tabulate 'vogue_ordered_trends', vogue.vdb.db SQL"""
-    //   select
-    //     rnr,
-    //     dsk,
-    //     sid,
-    //     ts,
-    //     pid,
-    //     rank,
-    //     substring( raw_trend, 1, 10 ) as raw_trend,
-    //     substring( details, 1, 10 ) as details
-    //   from vogue_ordered_trends;"""
-    // process.exit 111
-    debug('^445345-16^', vogue.server.start());
-    help('^445345-17^', "server started");
+    debug('^445345-3^', vogue.server.start());
+    help('^445345-4^', "server started");
     return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_statement_type_info = function() {
-    var Vogue_db, db, error, name, query, ref, vdb;
-    ({Vogue_db} = require('../../../apps/dbay-vogue'));
+  demo_read_datasources_start_server = function() {
+    var Vogue_db, db, ebayde_scraper, hn_scraper, path, vdb, vogue;
+    ({Vogue, Vogue_scraper_ABC, Vogue_db} = require('../../../apps/dbay-vogue'));
     ({DBay} = require('../../../apps/dbay'));
-    db = new DBay();
+    path = PATH.resolve(PATH.join(__dirname, '../../../dev-shm/dbay-vogue.db'));
+    db = new DBay({path});
     vdb = new Vogue_db({db});
-    ref = vdb.queries;
-    for (name in ref) {
-      query = ref[name];
-      try {
-        H.tabulate(name, query.columns());
-      } catch (error1) {
-        error = error1;
-        warn('^446^', name, error.message);
+    vogue = new Vogue({vdb});
+    ebayde_scraper = new Ebayde();
+    hn_scraper = new Hnrss();
+    vogue.scrapers.add({
+      dsk: 'ebayde',
+      scraper: ebayde_scraper
+    });
+    vogue.scrapers.add({
+      dsk: 'hn',
+      scraper: hn_scraper
+    });
+    /* TAINT use API method, don't use query directly */
+    /* TAINT should be done by `vogue.scraper.add()` */
+    vogue.vdb.queries.insert_datasource.run({
+      dsk: 'ebayde',
+      url: 'http://nourl'
+    });
+    vogue.vdb.queries.insert_datasource.run({
+      dsk: 'hn',
+      url: 'http://nourl'
+    });
+    (async() => {      //.........................................................................................................
+      var data_path, glob_pattern, i, len, ref, results;
+      glob_pattern = PATH.join(__dirname, '../../../assets/dbay-vogue/ebay-de-search-result-rucksack-????????-??????Z.html');
+      ref = glob.sync(glob_pattern);
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        data_path = ref[i];
+        results.push((await (async() => {
+          var buffer;
+          buffer = FS.readFileSync(data_path);
+          return (await ebayde_scraper.scrape_html(buffer));
+        })()));
       }
-    }
-    query = db.prepare(SQL`select * from vogue_trends;`);
-    H.tabulate("vogue_trends", query.columns());
-    query = db.prepare(SQL`select * from vogue_XXX_grouped_ranks;`);
-    H.tabulate("vogue_XXX_grouped_ranks", query.columns());
+      return results;
+    })();
+    (async() => {      //.........................................................................................................
+      var data_path, glob_pattern, i, len, ref, results;
+      glob_pattern = PATH.join(__dirname, '../../../assets/dbay-vogue/hnrss.org_,_newest.???.xml');
+      ref = glob.sync(glob_pattern);
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        data_path = ref[i];
+        results.push((await (async() => {
+          var buffer;
+          buffer = FS.readFileSync(data_path);
+          return (await hn_scraper.scrape_html(buffer));
+        })()));
+      }
+      return results;
+    })();
+    //.........................................................................................................
+    show_post_counts(db);
+    debug('^445345-5^', vogue.server.start());
+    help('^445345-6^', "server started");
     return null;
   };
 
@@ -445,7 +490,8 @@ select 'all in vogue_trends'      as "title", count(*)              as count fro
       // await demo_zvg_online_net()
       // await demo_zvg24_net()
       // await demo_hnrss()
-      return (await demo_serve_hnrss());
+      // await demo_serve_hnrss()
+      return (await demo_read_datasources_start_server());
     })();
   }
 
