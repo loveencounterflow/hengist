@@ -296,46 +296,73 @@ show_post_counts = ( db ) ->
     select 'all in vogue_trends'      as "title", count(*)              as count from vogue_trends;"""
   return null
 
+# #-----------------------------------------------------------------------------------------------------------
+# demo_statement_type_info = ->
+#   { Vogue_db      } = require '../../../apps/dbay-vogue'
+#   { DBay          } = require '../../../apps/dbay'
+#   db                = new DBay()
+#   vdb               = new Vogue_db { db, }
+#   for name, query of vdb.queries
+#     try
+#       H.tabulate name, query.columns()
+#     catch error
+#       warn '^446^', name, error.message
+#   query = db.prepare SQL"select * from vogue_trends;"; H.tabulate "vogue_trends", query.columns()
+#   query = db.prepare SQL"select * from vogue_XXX_grouped_ranks;"; H.tabulate "vogue_XXX_grouped_ranks", query.columns()
+#   return null
+
 #-----------------------------------------------------------------------------------------------------------
 demo_serve_hnrss = ( cfg ) ->
   vogue = await demo_hnrss()
-  debug '^445345-16^', vogue.server.start()
-  help '^445345-17^', "server started"
+  debug '^445345-1^', vogue.server.start()
+  help '^445345-2^', "server started"
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 demo_serve_ebayde = ( cfg ) ->
   vogue = await demo_ebayde()
-  # H.tabulate 'vogue_ordered_trends', vogue.vdb.db SQL"""
-  #   select
-  #     rnr,
-  #     dsk,
-  #     sid,
-  #     ts,
-  #     pid,
-  #     rank,
-  #     substring( raw_trend, 1, 10 ) as raw_trend,
-  #     substring( details, 1, 10 ) as details
-  #   from vogue_ordered_trends;"""
-  # process.exit 111
-  debug '^445345-16^', vogue.server.start()
-  help '^445345-17^', "server started"
+  debug '^445345-3^', vogue.server.start()
+  help '^445345-4^', "server started"
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-demo_statement_type_info = ->
-  { Vogue_db      } = require '../../../apps/dbay-vogue'
+demo_read_datasources_start_server = ->
+  { Vogue
+    Vogue_scraper_ABC
+    Vogue_db      } = require '../../../apps/dbay-vogue'
   { DBay          } = require '../../../apps/dbay'
-  db                = new DBay()
+  path              = PATH.resolve PATH.join __dirname, '../../../dev-shm/dbay-vogue.db'
+  db                = new DBay { path, }
   vdb               = new Vogue_db { db, }
-  for name, query of vdb.queries
-    try
-      H.tabulate name, query.columns()
-    catch error
-      warn '^446^', name, error.message
-  query = db.prepare SQL"select * from vogue_trends;"; H.tabulate "vogue_trends", query.columns()
-  query = db.prepare SQL"select * from vogue_XXX_grouped_ranks;"; H.tabulate "vogue_XXX_grouped_ranks", query.columns()
+  vogue             = new Vogue { vdb, }
+  ebayde_scraper    = new Ebayde()
+  hn_scraper        = new Hnrss()
+  vogue.scrapers.add { dsk: 'ebayde', scraper: ebayde_scraper, }
+  vogue.scrapers.add { dsk: 'hn',     scraper: hn_scraper,     }
+  ### TAINT use API method, don't use query directly ###
+  ### TAINT should be done by `vogue.scraper.add()` ###
+  vogue.vdb.queries.insert_datasource.run { dsk: 'ebayde',  url: 'http://nourl', }
+  vogue.vdb.queries.insert_datasource.run { dsk: 'hn',      url: 'http://nourl', }
+  #.........................................................................................................
+  do =>
+    glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/ebay-de-search-result-rucksack-????????-??????Z.html'
+    for data_path in glob.sync glob_pattern
+      await do =>
+        buffer    = FS.readFileSync data_path
+        await ebayde_scraper.scrape_html buffer
+  #.........................................................................................................
+  do =>
+    glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/hnrss.org_,_newest.???.xml'
+    for data_path in glob.sync glob_pattern
+      await do =>
+        buffer    = FS.readFileSync data_path
+        await hn_scraper.scrape_html buffer
+  #.........................................................................................................
+  show_post_counts db
+  debug '^445345-5^', vogue.server.start()
+  help '^445345-6^', "server started"
   return null
+
 
 
 ############################################################################################################
@@ -343,7 +370,8 @@ if module is require.main then do =>
   # await demo_zvg_online_net()
   # await demo_zvg24_net()
   # await demo_hnrss()
-  await demo_serve_hnrss()
+  # await demo_serve_hnrss()
+  await demo_read_datasources_start_server()
   # await demo_serve_ebayde()
   # await demo_statement_type_info()
 
