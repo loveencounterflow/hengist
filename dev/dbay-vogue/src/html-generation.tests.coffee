@@ -50,10 +50,10 @@ guy                       = require '../../../apps/guy'
   row                   = vogue.vdb.new_post { dsk, sid, pid, session, details, }
   result                = vogue.vdb.as_html { dsk, table: 'vogue_trends', }
   debug '^348^', result
-  T?.ok ( result.indexOf "<table class='vogue_trends'>"     ) > -1
+  T?.ok ( result.indexOf "<table class='vogue'>"            ) > -1
   T?.ok ( result.indexOf "<th class='sid_min'>sid_min</th>" ) > -1
   T?.ok ( result.indexOf "<th class='sid_max'>sid_max</th>" ) > -1
-  T?.ok ( result.indexOf "<th class='dsk'>dsk</th>" ) > -1
+  T?.ok ( result.indexOf "<th class='dsk'>dsk</th>"         ) > -1
   T?.ok ( result.indexOf "<th class='ts'>ts</th>"           ) > -1
   T?.ok ( result.indexOf "<th class='pid'>pid</th>"         ) > -1
   T?.ok ( result.indexOf """<td class='dsk'>xx</td>"""                                                                    ) > -1
@@ -86,7 +86,7 @@ guy                       = require '../../../apps/guy'
   T?.eq row.pid, 'xx-1'
   cfg                   =
     table:  'vogue_trends'
-    dsk:    dsk
+    class:  'vogue_trends'
     fields:
       dsk:
         title: "DSK"
@@ -115,6 +115,52 @@ guy                       = require '../../../apps/guy'
   T?.ok ( not result.indexOf "<td class='sid_min'>" ) > -1
   T?.ok ( result.indexOf "<td class=sids>1—1</td>" ) > -1
   T?.ok ( result.indexOf """<td class='details'><div>'{"foo":42,"bar":108}'</div></td>""" ) > -1
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DB as_html() can use `query`" ] = ( T, done ) ->
+  { Vogue
+    Vogue_scraper_ABC } = require '../../../apps/dbay-vogue'
+  vogue                 = new Vogue()
+  { SQL, }              = ( require '../../../apps/dbay' ).DBay
+  #.........................................................................................................
+  do =>
+    class Xx_scraper extends Vogue_scraper_ABC
+    dsk       = 'xx'
+    scraper   = new Xx_scraper()
+    vogue.scrapers.add { dsk, scraper, }
+    vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
+    session   = vogue.vdb.new_session dsk
+    { sid, }  = session
+    row       = vogue.vdb.new_post { dsk, sid, pid: 'xx-1', session, details: { foo: 41, }, }
+    row       = vogue.vdb.new_post { dsk, sid, pid: 'xx-2', session, details: { foo: 42, }, }
+    row       = vogue.vdb.new_post { dsk, sid, pid: 'xx-3', session, details: { foo: 43, }, }
+    return null
+  #.........................................................................................................
+  do =>
+    class Xx_scraper extends Vogue_scraper_ABC
+    dsk       = 'yy'
+    scraper   = new Xx_scraper()
+    vogue.scrapers.add { dsk, scraper, }
+    vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
+    session   = vogue.vdb.new_session dsk
+    { sid, }  = session
+    row       = vogue.vdb.new_post { dsk, sid, pid: 'yy-1', session, details: { foo: 51, }, }
+    row       = vogue.vdb.new_post { dsk, sid, pid: 'yy-2', session, details: { foo: 52, }, }
+    row       = vogue.vdb.new_post { dsk, sid, pid: 'yy-3', session, details: { foo: 53, }, }
+    return null
+  #.........................................................................................................
+  cfg =
+    class:        'vogue trends xx'
+    query:        SQL"""select * from vogue_trends where dsk = $dsk order by pid;"""
+    parameters:   { dsk: 'xx', }
+  result = vogue.vdb.as_html cfg
+  debug '^348^', result
+  T?.ok ( result.indexOf "<table class='vogue trends xx'>" ) > -1
+  T?.ok ( result.indexOf "<th class='dsk'>dsk</th>" ) > -1
+  T?.ok ( result.indexOf "<td class='pid'>xx-1</td>" ) > -1
+  T?.ok ( result.indexOf "<td class='pid'>xx-2</td>" ) > -1
+  T?.ok ( result.indexOf "<td class='pid'>xx-3</td>" ) > -1
   return done?()
 
 
