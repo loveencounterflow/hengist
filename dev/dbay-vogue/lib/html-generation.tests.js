@@ -142,6 +142,7 @@
     cfg = {
       table: 'vogue_trends',
       class: 'vogue_trends',
+      undefined: "N/A",
       fields: {
         dsk: {
           title: "DSK"
@@ -175,11 +176,12 @@
           format: (value, details) => {
             return details.row_nr;
           }
-        }
+        },
+        asboolean: true
       }
     };
     result = vogue.vdb.as_html(cfg);
-    debug('^348^', result);
+    help('^348^', result);
     if (T != null) {
       T.ok((result.indexOf("<th class='dsk'>DSK</th>")) > -1);
     }
@@ -197,6 +199,9 @@
     }
     if (T != null) {
       T.ok((result.indexOf("<td class=sids>1—1</td>")) > -1);
+    }
+    if (T != null) {
+      T.ok((result.indexOf("<td class='asboolean'>N/A</td>")) > -1);
     }
     if (T != null) {
       T.ok((result.indexOf(`<td class='details'><div>'{"foo":42,"bar":108}'</div></td>`)) > -1);
@@ -320,6 +325,58 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DB as_html() can use `rows`"] = function(T, done) {
+    var Vogue, vogue;
+    ({Vogue} = require('../../../apps/dbay-vogue'));
+    vogue = new Vogue();
+    (() => {      //.........................................................................................................
+      var cfg;
+      cfg = {
+        rows: [],
+        parameters: {
+          dsk: 'xx'
+        }
+      };
+      if (T != null) {
+        T.throws(/not a valid vogue_db_as_html_cfg/, () => {
+          return vogue.vdb.as_html(cfg);
+        });
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var cfg, result;
+      cfg = {
+        rows: []
+      };
+      result = vogue.vdb.as_html(cfg);
+      help('^348^', result);
+      if (T != null) {
+        T.eq(result, "<table class='vogue'>\n</table>");
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var cfg, result;
+      cfg = {
+        rows: [],
+        fields: {
+          a: true,
+          b: true,
+          c: true
+        }
+      };
+      result = vogue.vdb.as_html(cfg);
+      help('^348^', result);
+      if (T != null) {
+        T.eq(result, "<table class='vogue'>\n</table>");
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
@@ -327,7 +384,8 @@
     })();
   }
 
-  // @[ "DB as_html() 1" ]()
+  // test @[ "DB as_html() 2" ]
+// @[ "DB as_html() can use `query`" ]()
 // test @[ "DB as_html() 1" ]
 
 }).call(this);
