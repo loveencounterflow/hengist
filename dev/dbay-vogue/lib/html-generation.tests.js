@@ -69,7 +69,7 @@
     });
     debug('^348^', result);
     if (T != null) {
-      T.ok((result.indexOf("<table class='vogue_trends'>")) > -1);
+      T.ok((result.indexOf("<table class='vogue'>")) > -1);
     }
     if (T != null) {
       T.ok((result.indexOf("<th class='sid_min'>sid_min</th>")) > -1);
@@ -141,7 +141,7 @@
     }
     cfg = {
       table: 'vogue_trends',
-      dsk: dsk,
+      class: 'vogue_trends',
       fields: {
         dsk: {
           title: "DSK"
@@ -200,6 +200,122 @@
     }
     if (T != null) {
       T.ok((result.indexOf(`<td class='details'><div>'{"foo":42,"bar":108}'</div></td>`)) > -1);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["DB as_html() can use `query`"] = function(T, done) {
+    var SQL, Vogue, Vogue_scraper_ABC, cfg, result, vogue;
+    ({Vogue, Vogue_scraper_ABC} = require('../../../apps/dbay-vogue'));
+    vogue = new Vogue();
+    ({SQL} = (require('../../../apps/dbay')).DBay);
+    (() => {      //.........................................................................................................
+      var Xx_scraper, dsk, row, scraper, session, sid;
+      Xx_scraper = class Xx_scraper extends Vogue_scraper_ABC {};
+      dsk = 'xx';
+      scraper = new Xx_scraper();
+      vogue.scrapers.add({dsk, scraper});
+      vogue.vdb.queries.insert_datasource.run({
+        dsk,
+        url: 'http://nourl'
+      });
+      session = vogue.vdb.new_session(dsk);
+      ({sid} = session);
+      row = vogue.vdb.new_post({
+        dsk,
+        sid,
+        pid: 'xx-1',
+        session,
+        details: {
+          foo: 41
+        }
+      });
+      row = vogue.vdb.new_post({
+        dsk,
+        sid,
+        pid: 'xx-2',
+        session,
+        details: {
+          foo: 42
+        }
+      });
+      row = vogue.vdb.new_post({
+        dsk,
+        sid,
+        pid: 'xx-3',
+        session,
+        details: {
+          foo: 43
+        }
+      });
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var Xx_scraper, dsk, row, scraper, session, sid;
+      Xx_scraper = class Xx_scraper extends Vogue_scraper_ABC {};
+      dsk = 'yy';
+      scraper = new Xx_scraper();
+      vogue.scrapers.add({dsk, scraper});
+      vogue.vdb.queries.insert_datasource.run({
+        dsk,
+        url: 'http://nourl'
+      });
+      session = vogue.vdb.new_session(dsk);
+      ({sid} = session);
+      row = vogue.vdb.new_post({
+        dsk,
+        sid,
+        pid: 'yy-1',
+        session,
+        details: {
+          foo: 51
+        }
+      });
+      row = vogue.vdb.new_post({
+        dsk,
+        sid,
+        pid: 'yy-2',
+        session,
+        details: {
+          foo: 52
+        }
+      });
+      row = vogue.vdb.new_post({
+        dsk,
+        sid,
+        pid: 'yy-3',
+        session,
+        details: {
+          foo: 53
+        }
+      });
+      return null;
+    })();
+    //.........................................................................................................
+    cfg = {
+      class: 'vogue trends xx',
+      query: SQL`select * from vogue_trends where dsk = $dsk order by pid;`,
+      parameters: {
+        dsk: 'xx'
+      }
+    };
+    result = vogue.vdb.as_html(cfg);
+    debug('^348^', result);
+    if (T != null) {
+      T.ok((result.indexOf("<table class='vogue trends xx'>")) > -1);
+    }
+    if (T != null) {
+      T.ok((result.indexOf("<th class='dsk'>dsk</th>")) > -1);
+    }
+    if (T != null) {
+      T.ok((result.indexOf("<td class='pid'>xx-1</td>")) > -1);
+    }
+    if (T != null) {
+      T.ok((result.indexOf("<td class='pid'>xx-2</td>")) > -1);
+    }
+    if (T != null) {
+      T.ok((result.indexOf("<td class='pid'>xx-3</td>")) > -1);
     }
     return typeof done === "function" ? done() : void 0;
   };
