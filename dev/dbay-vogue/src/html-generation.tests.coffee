@@ -195,11 +195,29 @@ guy                       = require '../../../apps/guy'
         c: true
     result = vogue.vdb.as_html cfg
     help '^348^', result
-    T?.eq result, "<table class='vogue'>\n</table>"
+    T?.ok ( result.indexOf "<th class='a'>a</th>" ) > -1
+    T?.ok ( result.indexOf "<th class='b'>b</th>" ) > -1
+    T?.ok ( result.indexOf "<th class='c'>c</th>" ) > -1
     return null
   #.........................................................................................................
-  # T?.ok ( result.indexOf "<table class='vogue trends xx'>" ) > -1
-  # T?.ok ( result.indexOf "<th class='dsk'>dsk</th>" ) > -1
+  do =>
+    cfg =
+      rows:         [
+        { a: 1, b: "something", c: "else", }
+        { a: 2, b: "something", c: "else", }
+        { a: 3, b: "something", c: "else", }
+        { a: 4, b: "something", c: "else", }
+        ]
+    result = vogue.vdb.as_html cfg
+    help '^348^', result
+    T?.ok ( result.indexOf "<th class='a'>a</th>" ) > -1
+    T?.ok ( result.indexOf "<th class='b'>b</th>" ) > -1
+    T?.ok ( result.indexOf "<th class='c'>c</th>" ) > -1
+    T?.ok ( result.indexOf "<td class='a'>3</td>" ) > -1
+    T?.ok ( result.indexOf "<td class='b'>something</td>" ) > -1
+    T?.ok ( result.indexOf "<td class='c'>else</td>" ) > -1
+    return null
+  #.........................................................................................................
   # T?.ok ( result.indexOf "<td class='pid'>xx-1</td>" ) > -1
   # T?.ok ( result.indexOf "<td class='pid'>xx-2</td>" ) > -1
   # T?.ok ( result.indexOf "<td class='pid'>xx-3</td>" ) > -1
