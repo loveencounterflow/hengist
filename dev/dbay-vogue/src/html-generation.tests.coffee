@@ -85,8 +85,9 @@ guy                       = require '../../../apps/guy'
   T?.eq row.sid, 1
   T?.eq row.pid, 'xx-1'
   cfg                   =
-    table:  'vogue_trends'
-    class:  'vogue_trends'
+    table:      'vogue_trends'
+    class:      'vogue_trends'
+    undefined:  "N/A"
     fields:
       dsk:
         title: "DSK"
@@ -106,14 +107,16 @@ guy                       = require '../../../apps/guy'
       extra:
         title: "Extra"
         format: ( value, details ) => details.row_nr
+      asboolean: true
   result                = vogue.vdb.as_html cfg
-  debug '^348^', result
+  help '^348^', result
   T?.ok ( result.indexOf "<th class='dsk'>DSK</th>" ) > -1
   T?.ok ( result.indexOf "<th class='extra'>Extra</th>" ) > -1
   T?.ok ( result.indexOf "<td class='extra'>1</td>" ) > -1
   T?.ok ( not result.indexOf "<th class='sid_min'>" ) > -1
   T?.ok ( not result.indexOf "<td class='sid_min'>" ) > -1
   T?.ok ( result.indexOf "<td class=sids>1—1</td>" ) > -1
+  T?.ok ( result.indexOf "<td class='asboolean'>N/A</td>" ) > -1
   T?.ok ( result.indexOf """<td class='details'><div>'{"foo":42,"bar":108}'</div></td>""" ) > -1
   return done?()
 
@@ -163,10 +166,50 @@ guy                       = require '../../../apps/guy'
   T?.ok ( result.indexOf "<td class='pid'>xx-3</td>" ) > -1
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "DB as_html() can use `rows`" ] = ( T, done ) ->
+  { Vogue }             = require '../../../apps/dbay-vogue'
+  vogue                 = new Vogue()
+  #.........................................................................................................
+  do =>
+    cfg =
+      rows:         []
+      parameters:   { dsk: 'xx', }
+    T?.throws /not a valid vogue_db_as_html_cfg/, => vogue.vdb.as_html cfg
+    return null
+  #.........................................................................................................
+  do =>
+    cfg =
+      rows:         []
+    result = vogue.vdb.as_html cfg
+    help '^348^', result
+    T?.eq result, "<table class='vogue'>\n</table>"
+    return null
+  #.........................................................................................................
+  do =>
+    cfg =
+      rows:         []
+      fields:
+        a: true
+        b: true
+        c: true
+    result = vogue.vdb.as_html cfg
+    help '^348^', result
+    T?.eq result, "<table class='vogue'>\n</table>"
+    return null
+  #.........................................................................................................
+  # T?.ok ( result.indexOf "<table class='vogue trends xx'>" ) > -1
+  # T?.ok ( result.indexOf "<th class='dsk'>dsk</th>" ) > -1
+  # T?.ok ( result.indexOf "<td class='pid'>xx-1</td>" ) > -1
+  # T?.ok ( result.indexOf "<td class='pid'>xx-2</td>" ) > -1
+  # T?.ok ( result.indexOf "<td class='pid'>xx-3</td>" ) > -1
+  return done?()
+
 
 ############################################################################################################
 if module is require.main then do =>
   test @
-  # @[ "DB as_html() 1" ]()
+  # test @[ "DB as_html() 2" ]
+  # @[ "DB as_html() can use `query`" ]()
   # test @[ "DB as_html() 1" ]
 
