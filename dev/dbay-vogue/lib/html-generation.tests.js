@@ -63,7 +63,7 @@
       bar: 108
     };
     row = vogue.vdb.new_post({dsk, sid, pid, session, details});
-    result = vogue.vdb.as_html({
+    result = vogue.vdb.db.as_html({
       dsk,
       table: 'vogue_trends'
     });
@@ -152,7 +152,7 @@
         },
         sid_max: {
           title: "SIDs",
-          format: (value, {row}) => {
+          value: (value, {row}) => {
             return `${row.sid_min}—${row.sid_max}`;
           },
           outer_html: (value, details) => {
@@ -173,14 +173,14 @@
         },
         extra: {
           title: "Extra",
-          format: (value, details) => {
+          value: (value, details) => {
             return details.row_nr;
           }
         },
         asboolean: true
       }
     };
-    result = vogue.vdb.as_html(cfg);
+    result = vogue.vdb.db.as_html(cfg);
     help('^348^', result);
     if (T != null) {
       T.ok((result.indexOf("<th class='dsk'>DSK</th>")) > -1);
@@ -305,7 +305,7 @@
         dsk: 'xx'
       }
     };
-    result = vogue.vdb.as_html(cfg);
+    result = vogue.vdb.db.as_html(cfg);
     debug('^348^', result);
     if (T != null) {
       T.ok((result.indexOf("<table class='vogue trends xx'>")) > -1);
@@ -340,7 +340,7 @@
       };
       if (T != null) {
         T.throws(/not a valid vogue_db_as_html_cfg/, () => {
-          return vogue.vdb.as_html(cfg);
+          return vogue.vdb.db.as_html(cfg);
         });
       }
       return null;
@@ -350,7 +350,7 @@
       cfg = {
         rows: []
       };
-      result = vogue.vdb.as_html(cfg);
+      result = vogue.vdb.db.as_html(cfg);
       help('^348^', result);
       if (T != null) {
         T.eq(result, "<table class='vogue'>\n</table>");
@@ -367,7 +367,7 @@
           c: true
         }
       };
-      result = vogue.vdb.as_html(cfg);
+      result = vogue.vdb.db.as_html(cfg);
       help('^348^', result);
       if (T != null) {
         T.ok((result.indexOf("<th class='a'>a</th>")) > -1);
@@ -406,7 +406,7 @@
           }
         ]
       };
-      result = vogue.vdb.as_html(cfg);
+      result = vogue.vdb.db.as_html(cfg);
       help('^348^', result);
       if (T != null) {
         T.ok((result.indexOf("<th class='a'>a</th>")) > -1);
@@ -431,14 +431,51 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["DB as_html() can use subtables"] = function(T, done) {
+    var Vogue, vogue;
+    ({Vogue} = require('../../../apps/dbay-vogue'));
+    vogue = new Vogue();
+    (() => {      //.........................................................................................................
+      var cfg, result;
+      cfg = {
+        rows: [
+          {
+            nr: 1,
+            details: JSON.stringify({
+              "something": "something",
+              c: "else"
+            })
+          }
+        ],
+        // { nr: 2, details: ( JSON.stringify { "something", c: "else" } ), }
+        // { nr: 3, details: ( JSON.stringify { "something", c: "else" } ), }
+        // { nr: 4, details: ( JSON.stringify { "something", c: "else" } ), }
+        fields: {
+          details: {
+            inner_html: function(value) {
+              return vogue.vdb.as_subtable_html(value);
+            }
+          }
+        }
+      };
+      result = vogue.vdb.db.as_html(cfg);
+      help('^348^', result);
+      // T?.ok ( result.indexOf "<td class='c'>else</td>" ) > -1
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this);
+      return test(this["DB as_html() can use subtables"]);
     })();
   }
 
-  // test @[ "DB as_html() 2" ]
+  // test @
+// test @[ "DB as_html() 2" ]
 // @[ "DB as_html() can use `query`" ]()
 // test @[ "DB as_html() 1" ]
 
