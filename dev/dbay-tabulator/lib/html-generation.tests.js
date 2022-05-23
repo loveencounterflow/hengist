@@ -38,38 +38,29 @@
   // MMX                       = require '../../../apps/multimix/lib/cataloguing'
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DB as_html() 1"] = function(T, done) {
-    var Vogue, Vogue_scraper_ABC, Xx_scraper, details, dsk, pid, result, row, scraper, session, sid, vogue;
-    ({Vogue, Vogue_scraper_ABC} = require('../../../apps/dbay-vogue'));
-    vogue = new Vogue();
-    dsk = 'xx';
-    Xx_scraper = class Xx_scraper extends Vogue_scraper_ABC {};
-    scraper = new Xx_scraper();
-    vogue.scrapers.add({dsk, scraper});
-    /* TAINT use API method, don't use query directly */
-    /* TAINT should be done by `vogue.scraper.add()` */
-    vogue.vdb.queries.insert_datasource.run({
-      dsk,
-      url: 'http://nourl'
-    });
-    session = vogue.vdb.new_session(dsk);
-    ({sid} = session);
-    pid = 'xx-1';
-    // title                 = "helo world"
-    // title_url             = 'https://example.com/blog/1'
-    // details               = { title, title_url, foo: 42, bar: 108, }
-    details = {
-      foo: 42,
-      bar: 108
-    };
-    row = vogue.vdb.new_post({dsk, sid, pid, session, details});
-    result = vogue.vdb.db.as_html({
-      dsk,
-      table: 'vogue_trends'
-    });
-    debug('^348^', result);
+  this["as_html() 1"] = function(T, done) {
+    var Tabulator, result, rows, tabulator;
+    ({Tabulator} = require('../../../apps/dbay-tabulator'));
+    tabulator = new Tabulator();
+    rows = [
+      {
+        sid_min: 1,
+        sid_max: 1,
+        pid: 'xx-1',
+        dsk: 'xx',
+        rank: 1,
+        ts: '12345Z',
+        raw_trend: '[{"dsk":"xx","pid":"xx-1","sid":1,"rank":1,"first":1,"last":1}]',
+        details: JSON.stringify({
+          foo: 42,
+          bar: 108
+        })
+      }
+    ];
+    result = tabulator.as_html({rows});
+    help('^348^', result);
     if (T != null) {
-      T.ok((result.indexOf("<table class='vogue'>")) > -1);
+      T.ok((result.indexOf("<table>")) > -1);
     }
     if (T != null) {
       T.ok((result.indexOf("<th class='sid_min'>sid_min</th>")) > -1);
@@ -111,36 +102,25 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DB as_html() 2"] = function(T, done) {
-    var Vogue, Vogue_scraper_ABC, Xx_scraper, cfg, details, dsk, pid, result, row, scraper, session, sid, vogue;
-    ({Vogue, Vogue_scraper_ABC} = require('../../../apps/dbay-vogue'));
-    vogue = new Vogue();
-    dsk = 'xx';
-    Xx_scraper = class Xx_scraper extends Vogue_scraper_ABC {};
-    scraper = new Xx_scraper();
-    vogue.scrapers.add({dsk, scraper});
-    /* TAINT use API method, don't use query directly */
-    /* TAINT should be done by `vogue.scraper.add()` */
-    vogue.vdb.queries.insert_datasource.run({
-      dsk,
-      url: 'http://nourl'
-    });
-    session = vogue.vdb.new_session(dsk);
-    ({sid} = session);
-    pid = 'xx-1';
-    details = {
-      foo: 42,
-      bar: 108
-    };
-    row = vogue.vdb.new_post({dsk, sid, pid, session, details});
-    if (T != null) {
-      T.eq(row.sid, 1);
-    }
-    if (T != null) {
-      T.eq(row.pid, 'xx-1');
-    }
+  this["as_html() 2"] = function(T, done) {
+    var Tabulator, cfg, result, rows, tabulator;
+    ({Tabulator} = require('../../../apps/dbay-tabulator'));
+    tabulator = new Tabulator();
+    rows = [
+      {
+        sid: 1,
+        pid: 'xx-1',
+        dsk: 'xx',
+        sid_min: 1,
+        sid_max: 1,
+        details: JSON.stringify({
+          foo: 42,
+          bar: 108
+        })
+      }
+    ];
     cfg = {
-      table: 'vogue_trends',
+      rows: rows,
       class: 'vogue_trends',
       undefined: "N/A",
       fields: {
@@ -180,7 +160,7 @@
         asboolean: true
       }
     };
-    result = vogue.vdb.db.as_html(cfg);
+    result = tabulator.as_html(cfg);
     help('^348^', result);
     if (T != null) {
       T.ok((result.indexOf("<th class='dsk'>DSK</th>")) > -1);
@@ -210,126 +190,36 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DB as_html() can use `query`"] = function(T, done) {
-    var SQL, Vogue, Vogue_scraper_ABC, cfg, result, vogue;
-    ({Vogue, Vogue_scraper_ABC} = require('../../../apps/dbay-vogue'));
-    vogue = new Vogue();
+  this["`query`, `table` are disallowed"] = function(T, done) {
+    var SQL, Tabulator, tabulator;
+    ({Tabulator} = require('../../../apps/dbay-tabulator'));
+    tabulator = new Tabulator();
     ({SQL} = (require('../../../apps/dbay')).DBay);
     (() => {      //.........................................................................................................
-      var Xx_scraper, dsk, row, scraper, session, sid;
-      Xx_scraper = class Xx_scraper extends Vogue_scraper_ABC {};
-      dsk = 'xx';
-      scraper = new Xx_scraper();
-      vogue.scrapers.add({dsk, scraper});
-      vogue.vdb.queries.insert_datasource.run({
-        dsk,
-        url: 'http://nourl'
-      });
-      session = vogue.vdb.new_session(dsk);
-      ({sid} = session);
-      row = vogue.vdb.new_post({
-        dsk,
-        sid,
-        pid: 'xx-1',
-        session,
-        details: {
-          foo: 41
+      var cfg;
+      cfg = {
+        class: 'tabulator trends xx',
+        query: SQL`select * from vogue_trends where dsk = $dsk order by pid;`,
+        parameters: {
+          dsk: 'xx'
         }
-      });
-      row = vogue.vdb.new_post({
-        dsk,
-        sid,
-        pid: 'xx-2',
-        session,
-        details: {
-          foo: 42
-        }
-      });
-      row = vogue.vdb.new_post({
-        dsk,
-        sid,
-        pid: 'xx-3',
-        session,
-        details: {
-          foo: 43
-        }
-      });
-      return null;
+      };
+      return T != null ? T.throws(/not a valid vogue_db_as_html_cfg/, () => {
+        return tabulator.as_html(cfg);
+      }) : void 0;
     })();
     (() => {      //.........................................................................................................
-      var Xx_scraper, dsk, row, scraper, session, sid;
-      Xx_scraper = class Xx_scraper extends Vogue_scraper_ABC {};
-      dsk = 'yy';
-      scraper = new Xx_scraper();
-      vogue.scrapers.add({dsk, scraper});
-      vogue.vdb.queries.insert_datasource.run({
-        dsk,
-        url: 'http://nourl'
-      });
-      session = vogue.vdb.new_session(dsk);
-      ({sid} = session);
-      row = vogue.vdb.new_post({
-        dsk,
-        sid,
-        pid: 'yy-1',
-        session,
-        details: {
-          foo: 51
+      var cfg;
+      cfg = {
+        table: 'mytable',
+        parameters: {
+          dsk: 'xx'
         }
-      });
-      row = vogue.vdb.new_post({
-        dsk,
-        sid,
-        pid: 'yy-2',
-        session,
-        details: {
-          foo: 52
-        }
-      });
-      row = vogue.vdb.new_post({
-        dsk,
-        sid,
-        pid: 'yy-3',
-        session,
-        details: {
-          foo: 53
-        }
-      });
-      return null;
+      };
+      return T != null ? T.throws(/not a valid vogue_db_as_html_cfg/, () => {
+        return tabulator.as_html(cfg);
+      }) : void 0;
     })();
-    //.........................................................................................................
-    cfg = {
-      class: 'vogue trends xx',
-      query: SQL`select * from vogue_trends where dsk = $dsk order by pid;`,
-      parameters: {
-        dsk: 'xx'
-      }
-    };
-    result = vogue.vdb.db.as_html(cfg);
-    debug('^348^', result);
-    if (T != null) {
-      T.ok((result.indexOf("<table class='vogue trends xx'>")) > -1);
-    }
-    if (T != null) {
-      T.ok((result.indexOf("<th class='dsk'>dsk</th>")) > -1);
-    }
-    if (T != null) {
-      T.ok((result.indexOf("<td class='pid'>xx-1</td>")) > -1);
-    }
-    if (T != null) {
-      T.ok((result.indexOf("<td class='pid'>xx-2</td>")) > -1);
-    }
-    if (T != null) {
-      T.ok((result.indexOf("<td class='pid'>xx-3</td>")) > -1);
-    }
-    return typeof done === "function" ? done() : void 0;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["DB as_html() can use `rows`"] = function(T, done) {
-    var Vogue, vogue;
-    ({Vogue} = require('../../../apps/dbay-vogue'));
-    vogue = new Vogue();
     (() => {      //.........................................................................................................
       var cfg;
       cfg = {
@@ -340,26 +230,35 @@
       };
       if (T != null) {
         T.throws(/not a valid vogue_db_as_html_cfg/, () => {
-          return vogue.vdb.db.as_html(cfg);
+          return tabulator.as_html(cfg);
         });
       }
       return null;
     })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["as_html() can use `rows`"] = function(T, done) {
+    var Tabulator, tabulator;
+    ({Tabulator} = require('../../../apps/dbay-tabulator'));
+    tabulator = new Tabulator();
     (() => {      //.........................................................................................................
       var cfg, result;
       cfg = {
         rows: []
       };
-      result = vogue.vdb.db.as_html(cfg);
+      result = tabulator.as_html(cfg);
       help('^348^', result);
       if (T != null) {
-        T.eq(result, "<table class='vogue'>\n</table>");
+        T.eq(result, "<table>\n</table>");
       }
       return null;
     })();
     (() => {      //.........................................................................................................
       var cfg, result;
       cfg = {
+        class: 'classy',
         rows: [],
         fields: {
           a: true,
@@ -367,8 +266,11 @@
           c: true
         }
       };
-      result = vogue.vdb.db.as_html(cfg);
+      result = tabulator.as_html(cfg);
       help('^348^', result);
+      if (T != null) {
+        T.ok((result.indexOf("<table class='classy'>")) > -1);
+      }
       if (T != null) {
         T.ok((result.indexOf("<th class='a'>a</th>")) > -1);
       }
@@ -406,7 +308,7 @@
           }
         ]
       };
-      result = vogue.vdb.db.as_html(cfg);
+      result = tabulator.as_html(cfg);
       help('^348^', result);
       if (T != null) {
         T.ok((result.indexOf("<th class='a'>a</th>")) > -1);
@@ -432,10 +334,10 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DB as_html() can use subtables"] = function(T, done) {
-    var Vogue, vogue;
-    ({Vogue} = require('../../../apps/dbay-vogue'));
-    vogue = new Vogue();
+  this["as_html() can use subtables"] = function(T, done) {
+    var Tabulator, tabulator;
+    ({Tabulator} = require('../../../apps/dbay-tabulator'));
+    tabulator = new Tabulator();
     (() => {      //.........................................................................................................
       var cfg, result;
       cfg = {
@@ -454,12 +356,12 @@
         fields: {
           details: {
             inner_html: function(value) {
-              return vogue.vdb.as_subtable_html(value);
+              return tabulator.as_subtable_html(value);
             }
           }
         }
       };
-      result = vogue.vdb.db.as_html(cfg);
+      result = tabulator.as_html(cfg);
       help('^348^', result);
       // T?.ok ( result.indexOf "<td class='c'>else</td>" ) > -1
       return null;
@@ -470,14 +372,15 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return test(this["DB as_html() can use subtables"]);
+      // test @[ "as_html() can use subtables" ]
+      return test(this);
     })();
   }
 
-  // test @
-// test @[ "DB as_html() 2" ]
-// @[ "DB as_html() can use `query`" ]()
-// test @[ "DB as_html() 1" ]
+  // test @[ "as_html() 2" ]
+// test @[ "`query`, `table` are disallowed" ]
+// test @[ "as_html() can use `rows`" ]
+// test @[ "as_html() 1" ]
 
 }).call(this);
 
