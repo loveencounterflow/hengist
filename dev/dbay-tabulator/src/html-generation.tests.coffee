@@ -29,28 +29,15 @@ guy                       = require '../../../apps/guy'
 
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DB as_html() 1" ] = ( T, done ) ->
-  { Vogue
-    Vogue_scraper_ABC } = require '../../../apps/dbay-vogue'
-  vogue                 = new Vogue()
-  dsk                   = 'xx'
-  class Xx_scraper extends Vogue_scraper_ABC
-  scraper               = new Xx_scraper()
-  vogue.scrapers.add { dsk, scraper, }
-  ### TAINT use API method, don't use query directly ###
-  ### TAINT should be done by `vogue.scraper.add()` ###
-  vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
-  session               = vogue.vdb.new_session dsk
-  { sid, }              = session
-  pid                   = 'xx-1'
-  # title                 = "helo world"
-  # title_url             = 'https://example.com/blog/1'
-  # details               = { title, title_url, foo: 42, bar: 108, }
-  details               = { foo: 42, bar: 108, }
-  row                   = vogue.vdb.new_post { dsk, sid, pid, session, details, }
-  result                = vogue.vdb.db.as_html { dsk, table: 'vogue_trends', }
-  debug '^348^', result
-  T?.ok ( result.indexOf "<table class='vogue'>"            ) > -1
+@[ "as_html() 1" ] = ( T, done ) ->
+  { Tabulator }         = require '../../../apps/dbay-tabulator'
+  tabulator             = new Tabulator()
+  rows                  = [
+    { sid_min: 1, sid_max: 1, pid: 'xx-1', dsk: 'xx', rank: 1, ts: '12345Z', raw_trend: '[{"dsk":"xx","pid":"xx-1","sid":1,"rank":1,"first":1,"last":1}]', details: ( JSON.stringify { foo: 42, bar: 108, } ), }
+    ]
+  result                = tabulator.as_html { rows, }
+  help '^348^', result
+  T?.ok ( result.indexOf "<table>"                          ) > -1
   T?.ok ( result.indexOf "<th class='sid_min'>sid_min</th>" ) > -1
   T?.ok ( result.indexOf "<th class='sid_max'>sid_max</th>" ) > -1
   T?.ok ( result.indexOf "<th class='dsk'>dsk</th>"         ) > -1
@@ -66,26 +53,14 @@ guy                       = require '../../../apps/guy'
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DB as_html() 2" ] = ( T, done ) ->
-  { Vogue
-    Vogue_scraper_ABC } = require '../../../apps/dbay-vogue'
-  vogue                 = new Vogue()
-  dsk                   = 'xx'
-  class Xx_scraper extends Vogue_scraper_ABC
-  scraper               = new Xx_scraper()
-  vogue.scrapers.add { dsk, scraper, }
-  ### TAINT use API method, don't use query directly ###
-  ### TAINT should be done by `vogue.scraper.add()` ###
-  vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
-  session               = vogue.vdb.new_session dsk
-  { sid, }              = session
-  pid                   = 'xx-1'
-  details               = { foo: 42, bar: 108, }
-  row                   = vogue.vdb.new_post { dsk, sid, pid, session, details, }
-  T?.eq row.sid, 1
-  T?.eq row.pid, 'xx-1'
+@[ "as_html() 2" ] = ( T, done ) ->
+  { Tabulator }         = require '../../../apps/dbay-tabulator'
+  tabulator             = new Tabulator()
+  rows                  = [
+    { sid: 1, pid: 'xx-1', dsk: 'xx', sid_min: 1, sid_max: 1, details: ( JSON.stringify { foo: 42, bar: 108, } ), }
+    ]
   cfg                   =
-    table:      'vogue_trends'
+    rows:      rows
     class:      'vogue_trends'
     undefined:  "N/A"
     fields:
@@ -108,7 +83,7 @@ guy                       = require '../../../apps/guy'
         title: "Extra"
         value: ( value, details ) => details.row_nr
       asboolean: true
-  result                = vogue.vdb.db.as_html cfg
+  result                = tabulator.as_html cfg
   help '^348^', result
   T?.ok ( result.indexOf "<th class='dsk'>DSK</th>" ) > -1
   T?.ok ( result.indexOf "<th class='extra'>Extra</th>" ) > -1
@@ -121,80 +96,57 @@ guy                       = require '../../../apps/guy'
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DB as_html() can use `query`" ] = ( T, done ) ->
-  { Vogue
-    Vogue_scraper_ABC } = require '../../../apps/dbay-vogue'
-  vogue                 = new Vogue()
+@[ "`query`, `table` are disallowed" ] = ( T, done ) ->
+  { Tabulator }         = require '../../../apps/dbay-tabulator'
+  tabulator             = new Tabulator()
   { SQL, }              = ( require '../../../apps/dbay' ).DBay
   #.........................................................................................................
   do =>
-    class Xx_scraper extends Vogue_scraper_ABC
-    dsk       = 'xx'
-    scraper   = new Xx_scraper()
-    vogue.scrapers.add { dsk, scraper, }
-    vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
-    session   = vogue.vdb.new_session dsk
-    { sid, }  = session
-    row       = vogue.vdb.new_post { dsk, sid, pid: 'xx-1', session, details: { foo: 41, }, }
-    row       = vogue.vdb.new_post { dsk, sid, pid: 'xx-2', session, details: { foo: 42, }, }
-    row       = vogue.vdb.new_post { dsk, sid, pid: 'xx-3', session, details: { foo: 43, }, }
-    return null
+    cfg =
+      class:        'tabulator trends xx'
+      query:        SQL"""select * from vogue_trends where dsk = $dsk order by pid;"""
+      parameters:   { dsk: 'xx', }
+    T?.throws /not a valid vogue_db_as_html_cfg/, => tabulator.as_html cfg
   #.........................................................................................................
   do =>
-    class Xx_scraper extends Vogue_scraper_ABC
-    dsk       = 'yy'
-    scraper   = new Xx_scraper()
-    vogue.scrapers.add { dsk, scraper, }
-    vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
-    session   = vogue.vdb.new_session dsk
-    { sid, }  = session
-    row       = vogue.vdb.new_post { dsk, sid, pid: 'yy-1', session, details: { foo: 51, }, }
-    row       = vogue.vdb.new_post { dsk, sid, pid: 'yy-2', session, details: { foo: 52, }, }
-    row       = vogue.vdb.new_post { dsk, sid, pid: 'yy-3', session, details: { foo: 53, }, }
-    return null
-  #.........................................................................................................
-  cfg =
-    class:        'vogue trends xx'
-    query:        SQL"""select * from vogue_trends where dsk = $dsk order by pid;"""
-    parameters:   { dsk: 'xx', }
-  result = vogue.vdb.db.as_html cfg
-  debug '^348^', result
-  T?.ok ( result.indexOf "<table class='vogue trends xx'>" ) > -1
-  T?.ok ( result.indexOf "<th class='dsk'>dsk</th>" ) > -1
-  T?.ok ( result.indexOf "<td class='pid'>xx-1</td>" ) > -1
-  T?.ok ( result.indexOf "<td class='pid'>xx-2</td>" ) > -1
-  T?.ok ( result.indexOf "<td class='pid'>xx-3</td>" ) > -1
-  return done?()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "DB as_html() can use `rows`" ] = ( T, done ) ->
-  { Vogue }             = require '../../../apps/dbay-vogue'
-  vogue                 = new Vogue()
+    cfg =
+      table:        'mytable'
+      parameters:   { dsk: 'xx', }
+    T?.throws /not a valid vogue_db_as_html_cfg/, => tabulator.as_html cfg
   #.........................................................................................................
   do =>
     cfg =
       rows:         []
       parameters:   { dsk: 'xx', }
-    T?.throws /not a valid vogue_db_as_html_cfg/, => vogue.vdb.db.as_html cfg
+    T?.throws /not a valid vogue_db_as_html_cfg/, => tabulator.as_html cfg
     return null
+  #.........................................................................................................
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "as_html() can use `rows`" ] = ( T, done ) ->
+  { Tabulator }             = require '../../../apps/dbay-tabulator'
+  tabulator                 = new Tabulator()
   #.........................................................................................................
   do =>
     cfg =
       rows:         []
-    result = vogue.vdb.db.as_html cfg
+    result = tabulator.as_html cfg
     help '^348^', result
-    T?.eq result, "<table class='vogue'>\n</table>"
+    T?.eq result, "<table>\n</table>"
     return null
   #.........................................................................................................
   do =>
     cfg =
+      class:        'classy'
       rows:         []
       fields:
         a: true
         b: true
         c: true
-    result = vogue.vdb.db.as_html cfg
+    result = tabulator.as_html cfg
     help '^348^', result
+    T?.ok ( result.indexOf "<table class='classy'>" ) > -1
     T?.ok ( result.indexOf "<th class='a'>a</th>" ) > -1
     T?.ok ( result.indexOf "<th class='b'>b</th>" ) > -1
     T?.ok ( result.indexOf "<th class='c'>c</th>" ) > -1
@@ -208,7 +160,7 @@ guy                       = require '../../../apps/guy'
         { a: 3, b: "something", c: "else", }
         { a: 4, b: "something", c: "else", }
         ]
-    result = vogue.vdb.db.as_html cfg
+    result = tabulator.as_html cfg
     help '^348^', result
     T?.ok ( result.indexOf "<th class='a'>a</th>" ) > -1
     T?.ok ( result.indexOf "<th class='b'>b</th>" ) > -1
@@ -221,9 +173,9 @@ guy                       = require '../../../apps/guy'
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DB as_html() can use subtables" ] = ( T, done ) ->
-  { Vogue }             = require '../../../apps/dbay-vogue'
-  vogue                 = new Vogue()
+@[ "as_html() can use subtables" ] = ( T, done ) ->
+  { Tabulator }             = require '../../../apps/dbay-tabulator'
+  tabulator                 = new Tabulator()
   #.........................................................................................................
   do =>
     cfg =
@@ -235,8 +187,8 @@ guy                       = require '../../../apps/guy'
         ]
       fields:
         details:
-          inner_html: ( value ) -> vogue.vdb.as_subtable_html value
-    result = vogue.vdb.db.as_html cfg
+          inner_html: ( value ) -> tabulator.as_subtable_html value
+    result = tabulator.as_html cfg
     help '^348^', result
     # T?.ok ( result.indexOf "<td class='c'>else</td>" ) > -1
     return null
@@ -246,9 +198,10 @@ guy                       = require '../../../apps/guy'
 
 ############################################################################################################
 if module is require.main then do =>
-  test @[ "DB as_html() can use subtables" ]
-  # test @
-  # test @[ "DB as_html() 2" ]
-  # @[ "DB as_html() can use `query`" ]()
-  # test @[ "DB as_html() 1" ]
+  # test @[ "as_html() can use subtables" ]
+  test @
+  # test @[ "as_html() 2" ]
+  # test @[ "`query`, `table` are disallowed" ]
+  # test @[ "as_html() can use `rows`" ]
+  # test @[ "as_html() 1" ]
 
