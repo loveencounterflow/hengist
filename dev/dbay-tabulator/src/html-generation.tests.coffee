@@ -5,7 +5,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'DBAY-VOGUE/TESTS/HTML-GENERATION'
+badge                     = 'DBAY-TABULATOR/TESTS/HTML-GENERATION'
 debug                     = CND.get_logger 'debug',     badge
 warn                      = CND.get_logger 'warn',      badge
 info                      = CND.get_logger 'info',      badge
@@ -48,7 +48,7 @@ guy                       = require '../../../apps/guy'
   # details               = { title, title_url, foo: 42, bar: 108, }
   details               = { foo: 42, bar: 108, }
   row                   = vogue.vdb.new_post { dsk, sid, pid, session, details, }
-  result                = vogue.vdb.as_html { dsk, table: 'vogue_trends', }
+  result                = vogue.vdb.db.as_html { dsk, table: 'vogue_trends', }
   debug '^348^', result
   T?.ok ( result.indexOf "<table class='vogue'>"            ) > -1
   T?.ok ( result.indexOf "<th class='sid_min'>sid_min</th>" ) > -1
@@ -95,7 +95,7 @@ guy                       = require '../../../apps/guy'
         display: false
       sid_max:
         title: "SIDs"
-        format:     ( value, { row, } ) => "#{row.sid_min}—#{row.sid_max}"
+        value:     ( value, { row, } ) => "#{row.sid_min}—#{row.sid_max}"
         outer_html: ( value, details ) =>
           help '^4535^', { value, details, }
           T?.eq value, "1—1"
@@ -106,9 +106,9 @@ guy                       = require '../../../apps/guy'
           return "<div>#{rpr details.raw_value}</div>"
       extra:
         title: "Extra"
-        format: ( value, details ) => details.row_nr
+        value: ( value, details ) => details.row_nr
       asboolean: true
-  result                = vogue.vdb.as_html cfg
+  result                = vogue.vdb.db.as_html cfg
   help '^348^', result
   T?.ok ( result.indexOf "<th class='dsk'>DSK</th>" ) > -1
   T?.ok ( result.indexOf "<th class='extra'>Extra</th>" ) > -1
@@ -157,7 +157,7 @@ guy                       = require '../../../apps/guy'
     class:        'vogue trends xx'
     query:        SQL"""select * from vogue_trends where dsk = $dsk order by pid;"""
     parameters:   { dsk: 'xx', }
-  result = vogue.vdb.as_html cfg
+  result = vogue.vdb.db.as_html cfg
   debug '^348^', result
   T?.ok ( result.indexOf "<table class='vogue trends xx'>" ) > -1
   T?.ok ( result.indexOf "<th class='dsk'>dsk</th>" ) > -1
@@ -175,13 +175,13 @@ guy                       = require '../../../apps/guy'
     cfg =
       rows:         []
       parameters:   { dsk: 'xx', }
-    T?.throws /not a valid vogue_db_as_html_cfg/, => vogue.vdb.as_html cfg
+    T?.throws /not a valid vogue_db_as_html_cfg/, => vogue.vdb.db.as_html cfg
     return null
   #.........................................................................................................
   do =>
     cfg =
       rows:         []
-    result = vogue.vdb.as_html cfg
+    result = vogue.vdb.db.as_html cfg
     help '^348^', result
     T?.eq result, "<table class='vogue'>\n</table>"
     return null
@@ -193,7 +193,7 @@ guy                       = require '../../../apps/guy'
         a: true
         b: true
         c: true
-    result = vogue.vdb.as_html cfg
+    result = vogue.vdb.db.as_html cfg
     help '^348^', result
     T?.ok ( result.indexOf "<th class='a'>a</th>" ) > -1
     T?.ok ( result.indexOf "<th class='b'>b</th>" ) > -1
@@ -208,7 +208,7 @@ guy                       = require '../../../apps/guy'
         { a: 3, b: "something", c: "else", }
         { a: 4, b: "something", c: "else", }
         ]
-    result = vogue.vdb.as_html cfg
+    result = vogue.vdb.db.as_html cfg
     help '^348^', result
     T?.ok ( result.indexOf "<th class='a'>a</th>" ) > -1
     T?.ok ( result.indexOf "<th class='b'>b</th>" ) > -1
@@ -218,15 +218,36 @@ guy                       = require '../../../apps/guy'
     T?.ok ( result.indexOf "<td class='c'>else</td>" ) > -1
     return null
   #.........................................................................................................
-  # T?.ok ( result.indexOf "<td class='pid'>xx-1</td>" ) > -1
-  # T?.ok ( result.indexOf "<td class='pid'>xx-2</td>" ) > -1
-  # T?.ok ( result.indexOf "<td class='pid'>xx-3</td>" ) > -1
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "DB as_html() can use subtables" ] = ( T, done ) ->
+  { Vogue }             = require '../../../apps/dbay-vogue'
+  vogue                 = new Vogue()
+  #.........................................................................................................
+  do =>
+    cfg =
+      rows:         [
+        { nr: 1, details: ( JSON.stringify { "something", c: "else" } ), }
+        # { nr: 2, details: ( JSON.stringify { "something", c: "else" } ), }
+        # { nr: 3, details: ( JSON.stringify { "something", c: "else" } ), }
+        # { nr: 4, details: ( JSON.stringify { "something", c: "else" } ), }
+        ]
+      fields:
+        details:
+          inner_html: ( value ) -> vogue.vdb.as_subtable_html value
+    result = vogue.vdb.db.as_html cfg
+    help '^348^', result
+    # T?.ok ( result.indexOf "<td class='c'>else</td>" ) > -1
+    return null
+  #.........................................................................................................
   return done?()
 
 
 ############################################################################################################
 if module is require.main then do =>
-  test @
+  test @[ "DB as_html() can use subtables" ]
+  # test @
   # test @[ "DB as_html() 2" ]
   # @[ "DB as_html() can use `query`" ]()
   # test @[ "DB as_html() 1" ]

@@ -7,7 +7,7 @@
 
   rpr = CND.rpr;
 
-  badge = 'DBAY-VOGUE/TESTS/HTML-GENERATION';
+  badge = 'DBAY-TABULATOR/TESTS/HTML-GENERATION';
 
   debug = CND.get_logger('debug', badge);
 
