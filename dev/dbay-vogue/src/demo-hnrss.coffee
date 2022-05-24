@@ -29,7 +29,8 @@ GUY                       = require '../../../apps/guy'
 { HDML, }                 = require '../../../apps/hdml'
 H                         = require '../../../apps/dbay-vogue/lib/helpers'
 glob                      = require 'glob'
-
+{ to_width }              = require 'to-width'
+URL                       = require 'node:url'
 
 
 #===========================================================================================================
@@ -176,6 +177,11 @@ class Hnrss extends Vogue_scraper_ABC
     if ( match = description.match /Article URL:\s*(?<article_url>[^\s]+)/ )?
       return match.groups.article_url
     return null
+  #---------------------------------------------------------------------------------------------------------
+  _article_from_article_url: ( article_url ) ->
+    return null unless article_url?
+    url = URL.parse article_url
+    return "#{url.host}#{to_width url.pathname, 50}"
 
   #---------------------------------------------------------------------------------------------------------
   scrape: ->
@@ -212,9 +218,9 @@ class Hnrss extends Vogue_scraper_ABC
       title           = @_remove_cdata title
       title           = title.trim()
       #.....................................................................................................
-      discussion_url  = item.find 'reserved-link'
-      discussion_url  = discussion_url.text()
-      pid             = discussion_url.replace /^.*item\?id=([0-9]+)$/, 'hn-$1'
+      title_url       = item.find 'reserved-link'
+      title_url       = title_url.text()
+      pid             = title_url.replace /^.*item\?id=([0-9]+)$/, 'hn-$1'
       #.....................................................................................................
       date            = item.find 'pubDate'
       date            = date.text()
@@ -225,12 +231,13 @@ class Hnrss extends Vogue_scraper_ABC
       description     = item.find 'description'
       description     = description.text()
       description     = @_remove_cdata description
-      article_url     = @_article_url_from_description description
-      title_url       = discussion_url
+      article_url     = @_article_url_from_description  description
+      article         = @_article_from_article_url      article_url
       #.....................................................................................................
       href    = null
       ### TAINT avoid duplicate query ###
-      details = { title, title_url, date, creator, description, }
+      # details = { title, title_url, article_url, date, creator, description, }
+      details = { title, title_url, article, article_url, date, }
       row     = @hub.vdb.new_post { dsk, sid, pid, session, details, }
     return null
 
@@ -375,9 +382,9 @@ if module is require.main then do =>
   # await demo_zvg24_net()
   # await demo_hnrss()
   # await demo_serve_hnrss()
-  await demo_read_datasources_start_server()
   # await demo_serve_ebayde()
   # await demo_statement_type_info()
+  await demo_read_datasources_start_server()
 
 
 
