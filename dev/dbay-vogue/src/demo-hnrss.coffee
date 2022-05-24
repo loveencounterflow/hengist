@@ -359,8 +359,12 @@ demo_read_datasources_start_server = ->
         await hn_scraper.scrape_html buffer
   #.........................................................................................................
   show_post_counts db
-  debug '^445345-5^', vogue.server.start()
+  debug '^445345-5^', await vogue.server.start()
   help '^445345-6^', "server started"
+  response = await got "http://localhost:3456/trends?dsk=hn"
+  help '^445345-6^', "received #{Buffer.byteLength response.body} bytes"
+  response = await got "http://localhost:3456/trends"
+  help '^445345-6^', "received #{Buffer.byteLength response.body} bytes"
   return null
 
 
