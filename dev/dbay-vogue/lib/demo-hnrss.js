@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, Vogue, Vogue_scraper_ABC, badge, debug, demo_1, demo_ebayde, demo_hnrss, demo_read_datasources_start_server, demo_serve_ebayde, demo_serve_hnrss, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, show_post_counts, types, urge, warn, whisper;
+  var CHEERIO, CND, DBay, Ebayde, FS, GUY, H, HDML, Hnrss, PATH, SQL, URL, Vogue, Vogue_scraper_ABC, badge, debug, demo_1, demo_ebayde, demo_hnrss, demo_read_datasources_start_server, demo_serve_ebayde, demo_serve_hnrss, demo_zvg24_net, demo_zvg_online_net, echo, glob, got, help, info, rpr, show_post_counts, to_width, types, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -48,6 +48,10 @@
   H = require('../../../apps/dbay-vogue/lib/helpers');
 
   glob = require('glob');
+
+  ({to_width} = require('to-width'));
+
+  URL = require('node:url');
 
   //===========================================================================================================
 
@@ -242,6 +246,16 @@
     }
 
     //---------------------------------------------------------------------------------------------------------
+    _article_from_article_url(article_url) {
+      var url;
+      if (article_url == null) {
+        return null;
+      }
+      url = URL.parse(article_url);
+      return `${url.host}${to_width(url.pathname, 50)}`;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
     async scrape() {
       var buffer, encoding, url;
       url = 'https://hnrss.org/newest?link=comments';
@@ -252,8 +266,7 @@
 
     //---------------------------------------------------------------------------------------------------------
     scrape_html(html_or_buffer) {
-      /* TAINT avoid duplicate query */
-      var $, article_url, creator, date, description, details, discussion_url, dsk, href, html, i, insert_post, item, len, pid, ref, row, seen, session, sid, title, title_url;
+      var $, article, article_url, creator, date, description, details, dsk, href, html, i, insert_post, item, len, pid, ref, row, seen, session, sid, title, title_url;
       dsk = 'hn';
       session = this.hub.vdb.new_session(dsk);
       ({sid} = session);
@@ -282,9 +295,9 @@
         title = this._remove_cdata(title);
         title = title.trim();
         //.....................................................................................................
-        discussion_url = item.find('reserved-link');
-        discussion_url = discussion_url.text();
-        pid = discussion_url.replace(/^.*item\?id=([0-9]+)$/, 'hn-$1');
+        title_url = item.find('reserved-link');
+        title_url = title_url.text();
+        pid = title_url.replace(/^.*item\?id=([0-9]+)$/, 'hn-$1');
         //.....................................................................................................
         date = item.find('pubDate');
         date = date.text();
@@ -296,10 +309,12 @@
         description = description.text();
         description = this._remove_cdata(description);
         article_url = this._article_url_from_description(description);
-        title_url = discussion_url;
+        article = this._article_from_article_url(article_url);
         //.....................................................................................................
         href = null;
-        details = {title, title_url, date, creator, description};
+        /* TAINT avoid duplicate query */
+        // details = { title, title_url, article_url, date, creator, description, }
+        details = {title, title_url, article, article_url, date};
         row = this.hub.vdb.new_post({dsk, sid, pid, session, details});
       }
       return null;
@@ -419,8 +434,8 @@ select 'all in vogue_trends'      as "title", count(*)              as count fro
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_read_datasources_start_server = function() {
-    var Vogue_db, db, ebayde_scraper, hn_scraper, path, vdb, vogue;
+  demo_read_datasources_start_server = async function() {
+    var Vogue_db, db, ebayde_scraper, hn_scraper, path, response, vdb, vogue;
     ({Vogue, Vogue_scraper_ABC, Vogue_db} = require('../../../apps/dbay-vogue'));
     ({DBay} = require('../../../apps/dbay'));
     path = PATH.resolve(PATH.join(__dirname, '../../../dev-shm/dbay-vogue.db'));
@@ -479,8 +494,12 @@ select 'all in vogue_trends'      as "title", count(*)              as count fro
     })();
     //.........................................................................................................
     show_post_counts(db);
-    debug('^445345-5^', vogue.server.start());
+    debug('^445345-5^', (await vogue.server.start()));
     help('^445345-6^', "server started");
+    response = (await got("http://localhost:3456/trends?dsk=hn"));
+    help('^445345-6^', `received ${Buffer.byteLength(response.body)} bytes`);
+    response = (await got("http://localhost:3456/trends"));
+    help('^445345-6^', `received ${Buffer.byteLength(response.body)} bytes`);
     return null;
   };
 
@@ -491,12 +510,11 @@ select 'all in vogue_trends'      as "title", count(*)              as count fro
       // await demo_zvg24_net()
       // await demo_hnrss()
       // await demo_serve_hnrss()
+      // await demo_serve_ebayde()
+      // await demo_statement_type_info()
       return (await demo_read_datasources_start_server());
     })();
   }
-
-  // await demo_serve_ebayde()
-// await demo_statement_type_info()
 
 }).call(this);
 
