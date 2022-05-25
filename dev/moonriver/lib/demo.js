@@ -145,7 +145,7 @@
       results = [];
       for (i = 0, len = ref.length; i < len; i++) {
         _ = ref[i];
-        if (!mr.can_repeat()) {
+        if (!mr.is_repeatable) {
           warn("not repeatable");
           break;
         }
@@ -568,12 +568,12 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // demo()
-      // demo_2()
-      // demo_3()
-      // demo_4()
-      // demo_5()
-      // demo_6()
+      demo();
+      demo_2();
+      demo_3();
+      demo_4();
+      demo_5();
+      demo_6();
       return demo_7();
     })();
   }

@@ -2055,15 +2055,15 @@
 
   //###########################################################################################################
   if (module === require.main) {
-    (() => { // await do =>
-      return test(this);
+    (async() => { // await do =>
+      // test @
+      // test @[ "HTML: parse bare" ]
+      // demo()
+      return (await demo_streaming());
     })();
   }
 
-  // test @[ "HTML: parse bare" ]
-// demo()
-// await demo_streaming()
-// test @[ "HTML._parse_compact_tagname" ]
+  // test @[ "HTML._parse_compact_tagname" ]
 // test @[ "parse_compact_tagname 2" ]
 // test @[ "HTML: parse (dubious)" ]
 // test @[ "HTML: parse escaped" ]
