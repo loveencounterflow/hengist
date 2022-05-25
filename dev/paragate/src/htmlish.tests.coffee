@@ -735,10 +735,10 @@ demo_streaming = -> new Promise ( resolve ) ->
 
 ############################################################################################################
 if module is require.main then do => # await do =>
-  test @
+  # test @
   # test @[ "HTML: parse bare" ]
   # demo()
-  # await demo_streaming()
+  await demo_streaming()
   # test @[ "HTML._parse_compact_tagname" ]
   # test @[ "parse_compact_tagname 2" ]
   # test @[ "HTML: parse (dubious)" ]
