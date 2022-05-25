@@ -94,7 +94,7 @@ demo = ->
   drive = ( mode ) ->
     mr = new Moonriver pipeline
     for _ in [ 1, 2, ]
-      unless mr.can_repeat()
+      unless mr.is_repeatable
         warn "not repeatable"
         break
       whisper '————————————————————————————————————————'
