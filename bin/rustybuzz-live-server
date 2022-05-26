@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+home="$(realpath "$(realpath "${BASH_SOURCE[0]}" | xargs dirname)"/.)"
+cd "$home"
+# root=$(realpath "$home/../apps-typesetting")
+root=$(realpath "$home/../apps-typesetting")
+port=3434
+prefixdatetime=$(realpath "./prefix-datetime")
+# shellcheck disable=SC2089
+cmd="live-server --port=$port --wait=0 --no-browser"
+
+
+echo "home:             $home"
+echo "root:             $root"
+echo "port:             $port"
+echo "cmd:              $cmd"
+
+cd "$root"
+# shellcheck disable=SC2090
+$cmd | $prefixdatetime
+
+
+
+
