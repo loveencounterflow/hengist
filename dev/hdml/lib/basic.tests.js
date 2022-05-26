@@ -78,20 +78,7 @@
             b: void 0
           }
         ],
-        null,
-        'not a valid text: undefined'
-      ],
-      [
-        [
-          '<',
-          'foo',
-          {
-            a: 42,
-            b: void 0
-          }
-        ],
-        null,
-        'not a valid text: 42'
+        `<foo a='42'>`
       ],
       [
         [
@@ -127,7 +114,19 @@
       [['>',
       42],
       null,
-      'not a valid text: 42']
+      'not a valid text: 42'],
+      [
+        [
+          '<',
+          'foo',
+          {
+            a: 42,
+            b: void 0
+          }
+        ],
+        null,
+        'not a valid text: 42'
+      ]
     ];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -534,23 +533,115 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["HDML boolean attributes"] = async function(T, done) {
+    var HDML, error, i, len, matcher, probe, probes_and_matchers;
+    ({HDML} = require('../../../apps/hdml'));
+    probes_and_matchers = [
+      [
+        [
+          'foo',
+          {
+            bar: ''
+          }
+        ],
+        "<foo bar>"
+      ],
+      [
+        [
+          'foo',
+          {
+            bar: true
+          }
+        ],
+        "<foo bar>"
+      ],
+      [
+        [
+          'foo',
+          {
+            bar: false
+          }
+        ],
+        "<foo>"
+      ],
+      [
+        [
+          'foo',
+          {
+            bar: null
+          }
+        ],
+        "<foo>"
+      ],
+      [
+        [
+          'foo',
+          {
+            bar: void 0
+          }
+        ],
+        "<foo>"
+      ]
+    ];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          return resolve(HDML.open(...probe));
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["HDML datom API"] = async function(T, done) {
+    var HTML, SP, source;
+    SP = require('../../../apps/steampipes');
+    HTML = require('../../../apps/paragate/lib/htmlish.grammar');
+    //.........................................................................................................
+    source = ["<title>A Short Document</title>", "<p>The Nemean lion (<ipa>/nɪˈmiːən/</ipa>; Greek: <greek>Νεμέος λέων</greek> Neméos léōn; ", "Latin: Leo Nemeaeus) was a vicious monster in <a href='greek-mythology'>Greek mythology</a> ", "that lived at Nemea.", "</p>"];
+    await (() => {
+      return new Promise((resolve) => {
+        var pipeline;
+        pipeline = [];
+        pipeline.push(source);
+        pipeline.push(HTML.$parse());
+        pipeline.push(SP.$watch(function(d) {
+          return info(d);
+        }));
+        pipeline.push(SP.$drain(function() {
+          return resolve();
+        }));
+        return SP.pull(...pipeline);
+      });
+    })();
+    done();
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
-      // test @[ "basics" ]
-      // test @[ "HDML.parse_compact_tagname 1" ]
-      // test @[ "HDML.parse_compact_tagname 2" ]
-      // test @[ "HDML use compact tagnames 1" ]
-      // test @[ "HDML use compact tagnames 1" ]
-      this["can use or not use compact tagnames"]();
-      test(this["can use or not use compact tagnames"]);
-      this["HDML V2 API"]();
-      return test(this["HDML V2 API"]);
+      return test(this["basics"]);
     })();
   }
 
-  // @[ "HDML use compact tagnames 1" ]()
+  // test @[ "HDML.parse_compact_tagname 1" ]
+// test @[ "HDML.parse_compact_tagname 2" ]
+// test @[ "HDML use compact tagnames 1" ]
+// test @[ "HDML use compact tagnames 1" ]
+// @[ "can use or not use compact tagnames" ]()
+// test @[ "can use or not use compact tagnames" ]
+// @[ "HDML V2 API" ]()
+// test @[ "HDML V2 API" ]
+// test @[ "HDML datom API" ]
+// test @[ "HDML boolean attributes" ]
+// @[ "HDML use compact tagnames 1" ]()
 
 }).call(this);
 

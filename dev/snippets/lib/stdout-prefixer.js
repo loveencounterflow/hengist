@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, badge, debug, echo, help, info, prefix, rpr, urge, warn, whisper;
+  var CND, badge, dayjs, debug, echo, help, info, prefix, rpr, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -23,10 +23,18 @@
 
   echo = CND.echo.bind(CND);
 
+  dayjs = require('dayjs');
+
+  // do =>
+  //   utc               = require 'dayjs/plugin/utc';               dayjs.extend utc
+  //   relativeTime      = require 'dayjs/plugin/relativeTime';      dayjs.extend relativeTime
+  //   toObject          = require 'dayjs/plugin/toObject';          dayjs.extend toObject
+  //   customParseFormat = require 'dayjs/plugin/customParseFormat'; dayjs.extend customParseFormat
+  //   duration          = require 'dayjs/plugin/duration';          dayjs.extend duration
+
   //-----------------------------------------------------------------------------------------------------------
   prefix = function() {
     var stderr, stdin, stdout;
-    info('^34534^');
     // debug date = Temporal.Now.plainDateISO()
     // info date.toString()
     ({stdin, stdout, stderr} = process);
@@ -34,7 +42,8 @@
     // stdin.resume()
     stdin.on('data', (data) => {
       var i, len, line, now, ref, results;
-      now = new Date().toString();
+      data = data.replace(/\n$/, '');
+      now = dayjs().format("HH:mm:ss");
       ref = data.split('\n');
       results = [];
       for (i = 0, len = ref.length; i < len; i++) {
