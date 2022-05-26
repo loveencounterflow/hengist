@@ -36,13 +36,13 @@ guy                       = require '../../../apps/guy'
     [ [ '<', 'foo', null ], '<foo>', null ]
     [ [ '<', 'foo', {} ], '<foo>', null ]
     [ [ '<', 'foo', { a: '42', b: "'", c: '"' } ], """<foo a='42' b='&#39;' c='"'>""", null ]
-    [ [ '<', 'foo', { a: '42', b: undefined } ], null, 'not a valid text: undefined' ]
-    [ [ '<', 'foo', { a: 42, b: undefined } ], null, 'not a valid text: 42' ]
+    [ [ '<', 'foo', { a: '42', b: undefined } ], """<foo a='42'>""", ]
     [ [ '^', 'foo', { a: '42', b: "'", c: '"' } ], """<foo a='42' b='&#39;' c='"'/>""", null ]
     [ [ '^', 'prfx:foo', { a: '42', b: "'", c: '"' } ], """<prfx:foo a='42' b='&#39;' c='"'/>""", null ]
     # [ [ '^', '$text' ], '<mrg:loc#baselines/>', null ]
     [ [ '>', 'foo' ], '</foo>', null ]
     [ [ '>', 42 ], null, 'not a valid text: 42' ]
+    [ [ '<', 'foo', { a: 42, b: undefined } ], null, 'not a valid text: 42' ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -165,8 +165,47 @@ guy                       = require '../../../apps/guy'
   T?.eq ( HDML.pair    'mrg:loc#baselines'                                                                            ), """<mrg:loc id='baselines'></mrg:loc>"""
   T?.eq ( HDML.pair 'div', { id: 'c1', class: 'foo bar', }, HDML.text "<helo>"                                        ), """<div id='c1' class='foo bar'>&lt;helo&gt;</div>"""
   T?.eq ( HDML.pair 'div', { id: 'c1', class: 'foo bar', }, HDML.single 'path', { id: 'c1', d: 'M100,100L200,200', }  ), """<div id='c1' class='foo bar'><path id='c1' d='M100,100L200,200'/></div>"""
-
   #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "HDML boolean attributes" ] = ( T, done ) ->
+  { HDML, } = require '../../../apps/hdml'
+  probes_and_matchers = [
+   [ [ 'foo', { bar: '',        }, ], "<foo bar>" ]
+   [ [ 'foo', { bar: true,      }, ], "<foo bar>" ]
+   [ [ 'foo', { bar: false,     }, ], "<foo>" ]
+   [ [ 'foo', { bar: null,      }, ], "<foo>" ]
+   [ [ 'foo', { bar: undefined, }, ], "<foo>" ]
+   ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      resolve HDML.open probe...
+  #.........................................................................................................
+  done()
+  return null
+
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "HDML datom API" ] = ( T, done ) ->
+  SP        = require '../../../apps/steampipes'
+  HTML      = require '../../../apps/paragate/lib/htmlish.grammar'
+  #.........................................................................................................
+  source    = [
+    "<title>A Short Document</title>"
+    "<p>The Nemean lion (<ipa>/nɪˈmiːən/</ipa>; Greek: <greek>Νεμέος λέων</greek> Neméos léōn; "
+    "Latin: Leo Nemeaeus) was a vicious monster in <a href='greek-mythology'>Greek mythology</a> "
+    "that lived at Nemea."
+    "</p>"
+    ]
+  await do => new Promise ( resolve ) =>
+    pipeline  = []
+    pipeline.push source
+    pipeline.push HTML.$parse()
+    pipeline.push SP.$watch ( d ) -> info d
+    pipeline.push SP.$drain -> resolve()
+    SP.pull pipeline...
   done()
   return null
 
@@ -176,15 +215,17 @@ guy                       = require '../../../apps/guy'
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  # test @[ "basics" ]
+  test @[ "basics" ]
   # test @[ "HDML.parse_compact_tagname 1" ]
   # test @[ "HDML.parse_compact_tagname 2" ]
   # test @[ "HDML use compact tagnames 1" ]
   # test @[ "HDML use compact tagnames 1" ]
-  @[ "can use or not use compact tagnames" ]()
-  test @[ "can use or not use compact tagnames" ]
-  @[ "HDML V2 API" ]()
-  test @[ "HDML V2 API" ]
+  # @[ "can use or not use compact tagnames" ]()
+  # test @[ "can use or not use compact tagnames" ]
+  # @[ "HDML V2 API" ]()
+  # test @[ "HDML V2 API" ]
+  # test @[ "HDML datom API" ]
+  # test @[ "HDML boolean attributes" ]
   # @[ "HDML use compact tagnames 1" ]()
 
 
