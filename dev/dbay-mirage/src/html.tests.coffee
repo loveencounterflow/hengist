@@ -153,9 +153,9 @@ H                         = require '../../../lib/helpers'
       else throw new Error "unknown $key #{rpr $key}"
   #.........................................................................................................
   probes_and_matchers = [
-    # # [ '<py/ling3/',         null, ]
+    # [ '<py/ling3/',         null, ]
     [ '<title>My Page</title>', '<title>|My Page|</title>', null ]
-    [ '< title>My Page< /title>', """<title&gt;My Page='true'>|<error message='extraneous characters on line 1 column 19: "&lt;"'><</error>|title|(NCR:&gt;)""", null ]
+    [ '< title>My Page< /title>', """<title&gt;My Page>|<error message='extraneous characters on line 1 column 19: "&lt;"'><</error>|title|(NCR:&gt;)""", null ]
     [ '<title >My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title|(NCR:&gt;)", null ]
     [ '<title>My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title|(NCR:&gt;)", null ]
     [ '<title>My Page</ title>', "<title>|My Page|<error message='extraneous whitespace in closing tag'></ title&gt;</error>|<error message='Expecting token of type --&gt; i_close &lt;-- but found --&gt; &#39;&#39; &lt;--'>title&gt;</error>", null ]
