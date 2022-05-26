@@ -1186,7 +1186,7 @@ packages:
     dev: false
 
   /audio-sink/1.1.6:
-    resolution: {integrity: sha1-4UVOsTeFIimNIXC3ywMsM/0faIU=}
+    resolution: {integrity: sha512-RoaAZV7WTgAk036LXdWZ5sjqvBZ9yx6cgPbpSUVZxWLO0bKUu+WTG2f/sFuI34FvwlwI8pBP5boHgdezVYV6vg==}
     deprecated: Sad to admit that was wrong.
     requiresBuild: true
     dependencies:
