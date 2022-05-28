@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, text_from_token, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -38,6 +38,39 @@
   guy = require('../../../apps/guy');
 
   H = require('../../../lib/helpers');
+
+  //-----------------------------------------------------------------------------------------------------------
+  text_from_token = function(token) {
+    var $key, HDML, R, name, text, type;
+    ({HDML} = require('../../../apps/hdml'));
+    ({$key, name, type, text} = token);
+    if (name == null) {
+      name = 'MISSING';
+    }
+    R = (function() {
+      var ref;
+      switch ($key) {
+        case '^text':
+          return text;
+        case '^error':
+          return (HDML.create_tag('<', 'error', {
+            ...token.attrs,
+            message: token.message
+          })) + ((ref = token.text) != null ? ref : '') + (HDML.create_tag('>', 'error'));
+        case '<tag':
+          return HDML.create_tag('<', name, token.atrs);
+        case '^tag':
+          return HDML.create_tag('^', name, token.atrs);
+        case '>tag':
+          return HDML.create_tag('>', name);
+        case '^entity':
+          return `(NCR:${type}:${text})`;
+        default:
+          throw new Error(`unknown $key ${rpr($key)}`);
+      }
+    })();
+    return `(${token.start}-${token.stop})${R}`;
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this["Mirage HTML: Basic functionality"] = function(T, done) {
@@ -157,7 +190,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["Mirage HTML: tag syntax variants"] = async function(T, done) {
-    var DBay, HDML, Mrg, db, error, i, len, lets, matcher, mrg, probe, probes_and_matchers, text_from_token, thaw;
+    var DBay, HDML, Mrg, db, error, i, len, lets, matcher, mrg, probe, probes_and_matchers, thaw;
     // T?.halt_on_error()
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage'));
@@ -176,109 +209,8 @@
     // debug '^33673^', rpr ( mrg.html.HTMLISH._tunnel '\\&amp;' ).text
     // return done?()
     //.........................................................................................................
-    text_from_token = function(token) {
-      var $key, name, ref, text, type;
-      ({$key, name, type, text} = token);
-      if (name == null) {
-        name = 'MISSING';
-      }
-      switch ($key) {
-        case '^text':
-          return text;
-        case '^error':
-          return (HDML.create_tag('<', 'error', {
-            ...token.attrs,
-            message: token.message
-          })) + ((ref = token.text) != null ? ref : '') + (HDML.create_tag('>', 'error'));
-        case '<tag':
-          return HDML.create_tag('<', name, token.atrs);
-        case '^tag':
-          return HDML.create_tag('^', name, token.atrs);
-        case '>tag':
-          return HDML.create_tag('>', name);
-        case '^entity':
-          return `(NCR:${text})`;
-        default:
-          throw new Error(`unknown $key ${rpr($key)}`);
-      }
-    };
-    //.........................................................................................................
-    probes_and_matchers = [
-      // [ '<py/ling3/',         null, ]
-      ['<title>My Page</title>',
-      '<title>|My Page|</title>',
-      null],
-      ['< title>My Page< /title>',
-      `<title&gt;My Page>|<error message='extraneous characters on line 1 column 19: "&lt;"'><</error>|title|(NCR:&gt;)`,
-      null],
-      ['<title >My Page< /title>',
-      "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title|(NCR:&gt;)",
-      null],
-      ['<title>My Page< /title>',
-      "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title|(NCR:&gt;)",
-      null],
-      ['<title>My Page</ title>',
-      "<title>|My Page|<error message='extraneous whitespace in closing tag'></ title&gt;</error>|<error message='Expecting token of type --&gt; i_close &lt;-- but found --&gt; &#39;&#39; &lt;--'>title&gt;</error>",
-      null],
-      // ### wrong ###
-      ['<title>My Page</title >',
-      '<title>|My Page|</title>',
-      null],
-      ['<title/My\\/Your Page/>',
-      '<title>|My/Your Page|</title>|(NCR:&gt;)',
-      null],
-      ['<title>My Page</>',
-      "<title>|My Page|<error message='expected &lt;/title&gt;, got &lt;/&amp;gt;&gt;'></&gt;</error>|<error message='Expecting token of type --&gt; i_close &lt;-- but found --&gt; &#39;&#39; &lt;--'>&gt;</error>",
-      null],
-      ['<title/My Page/>',
-      '<title>|My Page|</title>|(NCR:&gt;)',
-      null],
-      ['<title/My/Your Page/>',
-      '<title>|My|</title>|Your Page/|(NCR:&gt;)',
-      null],
-      ['<title/My\npage/',
-      '<title>|My\npage|</title>',
-      null],
-      ['<title k=v j=w/My Page/',
-      "<title k='v' j='w'>|My Page|</title>",
-      null],
-      ['<title/<b>My</b> Page/',
-      "<title>|<error message='bare active characters'><b>My<</error>|</title>|b> Page/",
-      null],
-      ['<title//',
-      '<title>|</title>',
-      null],
-      ['<title/>',
-      '<title/>',
-      null],
-      ['<title/My Page/',
-      '<title>|My Page|</title>',
-      null],
-      ['<title#c1.x/My Page/',
-      '<title>|My Page|</title>',
-      null],
-      ['\\<title/>',
-      '&lt;title/|(NCR:&gt;)',
-      null],
-      ['\\&amp;',
-      '&amp;amp;',
-      null],
-      ['foo\\bar',
-      'foobar',
-      null],
-      ['\\abc',
-      'abc',
-      null],
-      ['foo\\\\bar',
-      'foo\\bar',
-      null],
-      ['first\\\nsecond',
-      'firstsecond',
-      null],
-      ['xxx&amp;xxx',
-      'xxx|(NCR:&amp;)|xxx',
-      null]
-    ];
+    // [ '<py/ling3/',         null, ]
+    probes_and_matchers = [['<title>My Page</title>', '(0-7)<title>|(7-14)My Page|(14-22)</title>', null], ['< title>My Page< /title>', "(0-8)<error message='extraneous whitespace before tag name'>< title></error>|(8-15)My Page|(15-18)<MISSING>|(17-18)<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|(18-24)title>", null], ['<title >My Page< /title>', "(0-8)<title>|(8-15)My Page|(15-18)<MISSING>|(17-18)<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|(18-24)title>", null], ['<title>My Page< /title>', "(0-7)<title>|(7-14)My Page|(14-17)<MISSING>|(16-17)<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|(17-23)title>", null], ['<title>My Page</ title>', "(0-7)<title>|(7-14)My Page|(14-23)<error message='extraneous whitespace in closing tag'></ title></error>", null], ['<title>My Page</title >', '(0-7)<title>|(7-14)My Page|(14-23)</title>', null], ['<title/My\\/Your Page/>', '(0-7)<title>|(7-21)My/Your Page|(21-22)</title>|(22-23)>', null], ['<title>My Page</>', "(0-7)<title>|(7-14)My Page|(14-17)</title>|(16-17)<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;&gt;&#39; &lt;--'>></error>", null], ['<title/My Page/>', '(0-7)<title>|(7-14)My Page|(14-15)</title>|(15-16)>', null], ['<title/My/Your Page/>', '(0-7)<title>|(7-9)My|(9-10)</title>|(10-21)Your Page/>', null], ['<title/My\npage/', '(0-7)<title>|(7-14)My\npage|(14-15)</title>', null], ['<title k=v j=w/My Page/', "(0-15)<title k='v' j='w'>|(15-22)My Page|(22-23)</title>", null], ['<title/<b>My</b> Page/', "(0-7)<title>|(7-13)<error message='bare active characters'><b>My<</error>|(13-14)</title>|(14-22)b> Page/", null], ['<title//', '(0-7)<title>|(7-8)</title>', null], ['<title/>', '(0-8)<title/>', null], ['<title/My Page/', '(0-7)<title>|(7-14)My Page|(14-15)</title>', null], ['<title#c1.x/My Page/', '(0-12)<title>|(12-19)My Page|(19-20)</title>', null], ['\\<title/>', '(0-10)&lt;title/>', null], ['\\&amp;', '(0-7)&amp;amp;', null], ['foo\\bar', '(0-8)foobar', null], ['\\abc', '(0-5)abc', null], ['foo\\\\bar', '(0-9)foo\\bar', null], ['first\\\nsecond', '(0-14)firstsecond', null], ['xxx&amp;xxx', '(0-3)xxx|(3-8)(NCR:named:&amp;)|(8-11)xxx', null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -375,7 +307,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["Mirage HTML: XNCR parsing 2"] = async function(T, done) {
-    var DBay, HDML, Mrg, db, error, i, len, lets, matcher, mrg, probe, probes_and_matchers, text_from_token, thaw;
+    var DBay, HDML, Mrg, db, error, i, len, lets, matcher, mrg, probe, probes_and_matchers, thaw;
     // T?.halt_on_error()
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage'));
@@ -383,37 +315,6 @@
     db = new DBay();
     mrg = new Mrg({db});
     ({lets, thaw} = guy.lft);
-    //.........................................................................................................
-    text_from_token = function(token) {
-      var $key, R, name, text, type;
-      ({$key, name, type, text} = token);
-      if (name == null) {
-        name = 'MISSING';
-      }
-      R = (function() {
-        var ref;
-        switch ($key) {
-          case '^text':
-            return text;
-          case '^error':
-            return (HDML.create_tag('<', 'error', {
-              ...token.attrs,
-              message: token.message
-            })) + ((ref = token.text) != null ? ref : '') + (HDML.create_tag('>', 'error'));
-          case '<tag':
-            return HDML.create_tag('<', name, token.atrs);
-          case '^tag':
-            return HDML.create_tag('^', name, token.atrs);
-          case '>tag':
-            return HDML.create_tag('>', name);
-          case '^entity':
-            return `(NCR:${type}:${text})`;
-          default:
-            throw new Error(`unknown $key ${rpr($key)}`);
-        }
-      })();
-      return `(${token.start}-${token.stop})${R}`;
-    };
     //.........................................................................................................
     probes_and_matchers = [['<b x="&">&lt;<&foo;', "(0-9)<b x='&amp;'>(0-4)(NCR:named:&lt;)(13-19)<&foo;>(14-19)<error message='Expecting: one of these possible Token sequences:&#10;  1. [i_close]&#10;  2. [i_slash_close]&#10;  3. [stm_slash1]&#10;but found: &#39;&#39;'>&foo;</error>", null], ['&foo;', '(0-5)(NCR:named:&foo;)', null], ['abcdef', '(0-6)abcdef', null], ['xxx&#x123;xxx', '(0-3)xxx(3-10)(NCR:ncr:&#x123;)(10-13)xxx', null], ['xxx&#123;xxx', '(0-3)xxx(3-9)(NCR:ncr:&#123;)(9-12)xxx', null], ['xxx&jzr#xe123;xxx', '(0-3)xxx(3-14)(NCR:xncr:&jzr#xe123;)(14-17)xxx', null], ['xxx&amp;xxx', '(0-3)xxx(3-8)(NCR:named:&amp;)(8-11)xxx', null], ['foo &amp;bar&jzr#xe123; baz', '(0-4)foo (4-9)(NCR:named:&amp;)(9-12)bar(12-23)(NCR:xncr:&jzr#xe123;)(23-27) baz', null], ['xxx&a&mp;xxx', "(0-3)xxx(3-9)<error message='bare active characters'>&a&mp;</error>(9-12)xxx", null]];
 //.........................................................................................................
@@ -444,6 +345,45 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["Mirage HTML: parse stretch with compact tagnames"] = async function(T, done) {
+    var DBay, HDML, Mrg, db, error, i, len, lets, matcher, mrg, probe, probes_and_matchers, thaw;
+    // T?.halt_on_error()
+    ({DBay} = require('../../../apps/dbay'));
+    ({Mrg} = require('../../../apps/dbay-mirage'));
+    ({HDML} = require('../../../apps/hdml'));
+    db = new DBay();
+    mrg = new Mrg({db});
+    ({lets, thaw} = guy.lft);
+    //.........................................................................................................
+    probes_and_matchers = [['<foo-bar#c55>*xxx*</foo-bar>', '(0-13)<foo-bar>#(13-17)<em>#(17-20)xxx#(20-25)</em>#(25-35)</foo-bar>', null], ['1 \\< 2', '(0-7)1 &lt; 2', null], ['<foo-bar#c55.blah.beep>xxx</foo-bar>', '(0-23)<foo-bar>#(23-26)xxx#(26-36)</foo-bar>', null], ['<foo-bar#c55>here &amp; there</foo-bar>', '(0-13)<foo-bar>#(0-5)here #(5-10)(NCR:named:&amp;)#(10-16) there#(29-39)</foo-bar>', null], ['<foo-bar#c55>1 < 2</foo-bar>', `(0-13)<foo-bar>#(13-15)1 #(15-20)<2>#(18-19)<error message='extraneous characters on line 1 column 19: "&lt;"'><</error>#(20-28)foo-bar>`, null]];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          var d, j, k, len1, len2, parts, token, tokens;
+          tokens = mrg.html.HTMLISH.parse(probe);
+          for (j = 0, len1 = tokens.length; j < len1; j++) {
+            token = tokens[j];
+            if (token.message == null) {
+              token.message = null;
+            }
+          }
+          H.tabulate(probe, tokens);
+          parts = [];
+          for (k = 0, len2 = tokens.length; k < len2; k++) {
+            d = tokens[k];
+            parts.push(text_from_token(d));
+          }
+          return resolve(parts.join('#'));
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -451,7 +391,8 @@
     })();
   }
 
-  // @[ "Mirage HTML: Basic functionality" ]()
+  // test @[ "Mirage HTML: parse stretch with compact tagnames" ]
+// @[ "Mirage HTML: Basic functionality" ]()
 // test @[ "Mirage HTML: quotes in attribute values" ]
 // test @[ "altering mirrored source lines causes error" ]
 // @[ "altering mirrored source lines causes error" ]()

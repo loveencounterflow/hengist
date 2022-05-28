@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, GUY, H, INTERTEXT, alert, badge, debug, demo, demo_streaming, echo, help, info, isa, jr, lets, log, rpr, test, type_of, urge, warn, whisper;
+  var CND, GUY, H, INTERTEXT, X, alert, badge, debug, demo, demo_streaming, echo, help, info, isa, jr, lets, log, rpr, test, type_of, urge, warn, whisper;
 
   // coffeelint: disable=max_line_length
 
@@ -43,6 +43,8 @@
   H = require('./test-helpers');
 
   GUY = require('../../../apps/guy');
+
+  X = require('../../../lib/helpers');
 
   //===========================================================================================================
   // TESTS
@@ -1973,6 +1975,33 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["parse stretch with compact tagnames"] = async function(T, done) {
+    var HTML, error, i, len, matcher, probe, probes_and_matchers;
+    HTML = require('../../../apps/paragate/lib/htmlish.grammar');
+    //.........................................................................................................
+    probes_and_matchers = [['<foo-bar#c55>xxx</foo-bar>', "$key='<tag',$vnr=[ 1, 1 ],id='c55',name='foo-bar',start=0,stop=13,text='<foo-bar#c55>',type='otag'#$key='^text',$vnr=[ 1, 14 ],start=13,stop=16,text='xxx'#$key='>tag',$vnr=[ 1, 17 ],name='foo-bar',start=16,stop=26,text='</foo-bar>',type='ctag'", null], ['<foo-bar#c55.blah.beep>xxx</foo-bar>', "$key='<tag',$vnr=[ 1, 1 ],class=[ 'blah', 'beep' ],id='c55',name='foo-bar',start=0,stop=23,text='<foo-bar#c55.blah.beep>',type='otag'#$key='^text',$vnr=[ 1, 24 ],start=23,stop=26,text='xxx'#$key='>tag',$vnr=[ 1, 27 ],name='foo-bar',start=26,stop=36,text='</foo-bar>',type='ctag'", null]];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve) {
+          var j, len1, token, tokens;
+          tokens = HTML.grammar.parse(probe);
+          tokens = tokens.slice(1, tokens.length - 1);
+          X.tabulate('^645464^', tokens);
+          for (j = 0, len1 = tokens.length; j < len1; j++) {
+            token = tokens[j];
+            echo(token);
+          }
+          return resolve(H.condense_tokens(tokens));
+        });
+      });
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   // #-----------------------------------------------------------------------------------------------------------
   // @[ "HTML.tag" ] = ( T, done ) ->
   //   INTERTEXT                 = require '../../../apps/intertext'
@@ -2055,11 +2084,12 @@
 
   //###########################################################################################################
   if (module === require.main) {
-    (async() => { // await do =>
+    (() => { // await do =>
       // test @
       // test @[ "HTML: parse bare" ]
       // demo()
-      return (await demo_streaming());
+      // await demo_streaming()
+      return test(this["parse stretch with compact tagnames"]);
     })();
   }
 
