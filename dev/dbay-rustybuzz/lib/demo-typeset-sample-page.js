@@ -621,18 +621,18 @@ order by clm, bln;`, {doc});
       // @demo_typeset_sample_page { set_id: 'gaga-b42', }
       // @demo_typeset_sample_page { set_id: 'medium-n1518', }
       // @demo_typeset_sample_page { set_id: 'shorties-b42', }
-      // @demo_typeset_sample_page { set_id: 'shorties-eg8i', }
-      // @demo_typeset_sample_page { set_id: 'specials-eg8i', }
-      // @demo_typeset_sample_page { set_id: 'twolines-eg8i', }
-      // @demo_typeset_sample_page { set_id: 'typo-b36', }
-      // @demo_typeset_sample_page { set_id: 'typo-gr', }
       return this.demo_typeset_sample_page({
-        set_id: 'small-eg8i'
+        set_id: 'shorties-eg8i'
       });
     })();
   }
 
-  // @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
+  // @demo_typeset_sample_page { set_id: 'specials-eg8i', }
+// @demo_typeset_sample_page { set_id: 'twolines-eg8i', }
+// @demo_typeset_sample_page { set_id: 'typo-b36', }
+// @demo_typeset_sample_page { set_id: 'typo-gr', }
+// @demo_typeset_sample_page { set_id: 'small-eg8i', }
+// @demo_typeset_sample_page { set_id: 'egypt-eg12i', }
 // @demo_typeset_sample_page { set_id: 'egypt-b42', }
 // @demo_store_outlines()
 // @demo_store_outlines { set_id: 'all', }
