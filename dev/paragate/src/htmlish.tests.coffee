@@ -24,6 +24,7 @@ INTERTEXT                 = require 'intertext'
 { lets }                  = ( require 'datom' ).export()
 H                         = require './test-helpers'
 GUY                       = require '../../../apps/guy'
+X                         = require '../../../lib/helpers'
 
 
 #===========================================================================================================
@@ -660,6 +661,25 @@ GUY                       = require '../../../apps/guy'
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "parse stretch with compact tagnames" ] = ( T, done ) ->
+  HTML      = require '../../../apps/paragate/lib/htmlish.grammar'
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ '<foo-bar#c55>xxx</foo-bar>', "$key='<tag',$vnr=[ 1, 1 ],id='c55',name='foo-bar',start=0,stop=13,text='<foo-bar#c55>',type='otag'#$key='^text',$vnr=[ 1, 14 ],start=13,stop=16,text='xxx'#$key='>tag',$vnr=[ 1, 17 ],name='foo-bar',start=16,stop=26,text='</foo-bar>',type='ctag'", null ]
+    [ '<foo-bar#c55.blah.beep>xxx</foo-bar>', "$key='<tag',$vnr=[ 1, 1 ],class=[ 'blah', 'beep' ],id='c55',name='foo-bar',start=0,stop=23,text='<foo-bar#c55.blah.beep>',type='otag'#$key='^text',$vnr=[ 1, 24 ],start=23,stop=26,text='xxx'#$key='>tag',$vnr=[ 1, 27 ],name='foo-bar',start=26,stop=36,text='</foo-bar>',type='ctag'", null ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      tokens  = HTML.grammar.parse probe
+      tokens  = tokens[ 1 ... tokens.length - 1 ]
+      X.tabulate '^645464^', tokens
+      echo token for token in tokens
+      resolve H.condense_tokens tokens
+  #.........................................................................................................
+  done()
+  return null
+
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "HTML.tag" ] = ( T, done ) ->
 #   INTERTEXT                 = require '../../../apps/intertext'
@@ -738,7 +758,8 @@ if module is require.main then do => # await do =>
   # test @
   # test @[ "HTML: parse bare" ]
   # demo()
-  await demo_streaming()
+  # await demo_streaming()
+  test @[ "parse stretch with compact tagnames" ]
   # test @[ "HTML._parse_compact_tagname" ]
   # test @[ "parse_compact_tagname 2" ]
   # test @[ "HTML: parse (dubious)" ]

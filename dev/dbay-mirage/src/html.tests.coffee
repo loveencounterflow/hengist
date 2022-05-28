@@ -268,10 +268,42 @@ text_from_token = ( token ) ->
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "Mirage HTML: parse stretch with compact tagnames" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay  } = require '../../../apps/dbay'
+  { Mrg   } = require '../../../apps/dbay-mirage'
+  { HDML  } = require '../../../apps/hdml'
+  db        = new DBay()
+  mrg       = new Mrg { db, }
+  { lets
+    thaw }  = guy.lft
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ '<foo-bar#c55>*xxx*</foo-bar>', '(0-13)<foo-bar>#(13-17)<em>#(17-20)xxx#(20-25)</em>#(25-35)</foo-bar>', null ]
+    [ '1 \\< 2', '(0-7)1 &lt; 2', null ]
+    [ '<foo-bar#c55.blah.beep>xxx</foo-bar>', '(0-23)<foo-bar>#(23-26)xxx#(26-36)</foo-bar>', null ]
+    [ '<foo-bar#c55>here &amp; there</foo-bar>', '(0-13)<foo-bar>#(0-5)here #(5-10)(NCR:named:&amp;)#(10-16) there#(29-39)</foo-bar>', null ]
+    [ '<foo-bar#c55>1 < 2</foo-bar>', """(0-13)<foo-bar>#(13-15)1 #(15-20)<2>#(18-19)<error message='extraneous characters on line 1 column 19: "&lt;"'><</error>#(20-28)foo-bar>""", null ]
+    ]
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> new Promise ( resolve ) ->
+      tokens  = mrg.html.HTMLISH.parse probe
+      token.message ?= null for token in tokens
+      H.tabulate probe, tokens
+      parts = []
+      for d in tokens
+        parts.push text_from_token d
+      resolve parts.join '#'
+  #.........................................................................................................
+  done()
+  return null
+
 
 ############################################################################################################
 if require.main is module then do =>
   test @
+  # test @[ "Mirage HTML: parse stretch with compact tagnames" ]
   # @[ "Mirage HTML: Basic functionality" ]()
   # test @[ "Mirage HTML: quotes in attribute values" ]
   # test @[ "altering mirrored source lines causes error" ]
