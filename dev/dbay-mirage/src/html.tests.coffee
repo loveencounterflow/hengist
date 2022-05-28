@@ -27,7 +27,26 @@ SQL                       = String.raw
 guy                       = require '../../../apps/guy'
 H                         = require '../../../lib/helpers'
 
-
+#-----------------------------------------------------------------------------------------------------------
+text_from_token = ( token ) ->
+  { HDML } = require '../../../apps/hdml'
+  { $key
+    name
+    type
+    text } = token
+  name ?= 'MISSING'
+  R = switch $key
+    when '^text'  then text
+    when '^error' then  ( HDML.create_tag '<', 'error', { token.attrs..., message: token.message } ) \
+                      + ( token.text ? '' ) \
+                      + ( HDML.create_tag '>', 'error' )
+    when '<tag'   then HDML.create_tag '<', name, token.atrs
+    when '^tag'   then HDML.create_tag '^', name, token.atrs
+    when '>tag'   then HDML.create_tag '>', name
+    when '^entity'
+      "(NCR:#{type}:#{text})"
+    else throw new Error "unknown $key #{rpr $key}"
+  return "(#{token.start}-#{token.stop})#{R}"
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "Mirage HTML: Basic functionality" ] = ( T, done ) ->
@@ -135,51 +154,32 @@ H                         = require '../../../lib/helpers'
   # debug '^33673^', rpr ( mrg.html.HTMLISH._tunnel '\\&amp;' ).text
   # return done?()
   #.........................................................................................................
-  text_from_token = ( token ) ->
-    { $key
-      name
-      type
-      text } = token
-    name ?= 'MISSING'
-    return switch $key
-      when '^text'    then text
-      when '^error'   then  ( HDML.create_tag '<', 'error', { token.attrs..., message: token.message } ) \
-                          + ( token.text ? '' ) \
-                          + ( HDML.create_tag '>', 'error' )
-      when '<tag'     then HDML.create_tag '<', name, token.atrs
-      when '^tag'     then HDML.create_tag '^', name, token.atrs
-      when '>tag'     then HDML.create_tag '>', name
-      when '^entity'  then "(NCR:#{text})"
-      else throw new Error "unknown $key #{rpr $key}"
-  #.........................................................................................................
   probes_and_matchers = [
     # [ '<py/ling3/',         null, ]
-    [ '<title>My Page</title>', '<title>|My Page|</title>', null ]
-    [ '< title>My Page< /title>', """<title&gt;My Page>|<error message='extraneous characters on line 1 column 19: "&lt;"'><</error>|title|(NCR:&gt;)""", null ]
-    [ '<title >My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title|(NCR:&gt;)", null ]
-    [ '<title>My Page< /title>', "<title>|My Page|<MISSING>|<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|title|(NCR:&gt;)", null ]
-    [ '<title>My Page</ title>', "<title>|My Page|<error message='extraneous whitespace in closing tag'></ title&gt;</error>|<error message='Expecting token of type --&gt; i_close &lt;-- but found --&gt; &#39;&#39; &lt;--'>title&gt;</error>", null ]
-    # ### wrong ###
-    [ '<title>My Page</title >', '<title>|My Page|</title>', null ]
-
-    [ '<title/My\\/Your Page/>', '<title>|My/Your Page|</title>|(NCR:&gt;)', null ]
-    [ '<title>My Page</>', "<title>|My Page|<error message='expected &lt;/title&gt;, got &lt;/&amp;gt;&gt;'></&gt;</error>|<error message='Expecting token of type --&gt; i_close &lt;-- but found --&gt; &#39;&#39; &lt;--'>&gt;</error>", null ]
-    [ '<title/My Page/>', '<title>|My Page|</title>|(NCR:&gt;)', null ]
-    [ '<title/My/Your Page/>', '<title>|My|</title>|Your Page/|(NCR:&gt;)', null ]
-    [ '<title/My\npage/', '<title>|My\npage|</title>', null ]
-    [ '<title k=v j=w/My Page/', "<title k='v' j='w'>|My Page|</title>", null ]
-    [ '<title/<b>My</b> Page/', "<title>|<error message='bare active characters'><b>My<</error>|</title>|b> Page/", null ]
-    [ '<title//', '<title>|</title>', null ]
-    [ '<title/>', '<title/>', null ]
-    [ '<title/My Page/', '<title>|My Page|</title>', null ]
-    [ '<title#c1.x/My Page/', '<title>|My Page|</title>', null ]
-    [ '\\<title/>', '&lt;title/|(NCR:&gt;)', null ]
-    [ '\\&amp;', '&amp;amp;', null ]
-    [ 'foo\\bar', 'foobar', null ]
-    [ '\\abc', 'abc', null ]
-    [ 'foo\\\\bar', 'foo\\bar', null ]
-    [ 'first\\\nsecond', 'firstsecond', null ]
-    [ 'xxx&amp;xxx', 'xxx|(NCR:&amp;)|xxx', null ]
+    [ '<title>My Page</title>', '(0-7)<title>|(7-14)My Page|(14-22)</title>', null ]
+    [ '< title>My Page< /title>', "(0-8)<error message='extraneous whitespace before tag name'>< title></error>|(8-15)My Page|(15-18)<MISSING>|(17-18)<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|(18-24)title>", null ]
+    [ '<title >My Page< /title>', "(0-8)<title>|(8-15)My Page|(15-18)<MISSING>|(17-18)<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|(18-24)title>", null ]
+    [ '<title>My Page< /title>', "(0-7)<title>|(7-14)My Page|(14-17)<MISSING>|(16-17)<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;/&#39; &lt;--'>/</error>|(17-23)title>", null ]
+    [ '<title>My Page</ title>', "(0-7)<title>|(7-14)My Page|(14-23)<error message='extraneous whitespace in closing tag'></ title></error>", null ]
+    [ '<title>My Page</title >', '(0-7)<title>|(7-14)My Page|(14-23)</title>', null ]
+    [ '<title/My\\/Your Page/>', '(0-7)<title>|(7-21)My/Your Page|(21-22)</title>|(22-23)>', null ]
+    [ '<title>My Page</>', "(0-7)<title>|(7-14)My Page|(14-17)</title>|(16-17)<error message='Expecting token of type --&gt; i_name &lt;-- but found --&gt; &#39;&gt;&#39; &lt;--'>></error>", null ]
+    [ '<title/My Page/>', '(0-7)<title>|(7-14)My Page|(14-15)</title>|(15-16)>', null ]
+    [ '<title/My/Your Page/>', '(0-7)<title>|(7-9)My|(9-10)</title>|(10-21)Your Page/>', null ]
+    [ '<title/My\npage/', '(0-7)<title>|(7-14)My\npage|(14-15)</title>', null ]
+    [ '<title k=v j=w/My Page/', "(0-15)<title k='v' j='w'>|(15-22)My Page|(22-23)</title>", null ]
+    [ '<title/<b>My</b> Page/', "(0-7)<title>|(7-13)<error message='bare active characters'><b>My<</error>|(13-14)</title>|(14-22)b> Page/", null ]
+    [ '<title//', '(0-7)<title>|(7-8)</title>', null ]
+    [ '<title/>', '(0-8)<title/>', null ]
+    [ '<title/My Page/', '(0-7)<title>|(7-14)My Page|(14-15)</title>', null ]
+    [ '<title#c1.x/My Page/', '(0-12)<title>|(12-19)My Page|(19-20)</title>', null ]
+    [ '\\<title/>', '(0-10)&lt;title/>', null ]
+    [ '\\&amp;', '(0-7)&amp;amp;', null ]
+    [ 'foo\\bar', '(0-8)foobar', null ]
+    [ '\\abc', '(0-5)abc', null ]
+    [ 'foo\\\\bar', '(0-9)foo\\bar', null ]
+    [ 'first\\\nsecond', '(0-14)firstsecond', null ]
+    [ 'xxx&amp;xxx', '(0-3)xxx|(3-8)(NCR:named:&amp;)|(8-11)xxx', null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -238,25 +238,6 @@ H                         = require '../../../lib/helpers'
   mrg       = new Mrg { db, }
   { lets
     thaw }  = guy.lft
-  #.........................................................................................................
-  text_from_token = ( token ) ->
-    { $key
-      name
-      type
-      text } = token
-    name ?= 'MISSING'
-    R = switch $key
-      when '^text'  then text
-      when '^error' then  ( HDML.create_tag '<', 'error', { token.attrs..., message: token.message } ) \
-                        + ( token.text ? '' ) \
-                        + ( HDML.create_tag '>', 'error' )
-      when '<tag'   then HDML.create_tag '<', name, token.atrs
-      when '^tag'   then HDML.create_tag '^', name, token.atrs
-      when '>tag'   then HDML.create_tag '>', name
-      when '^entity'
-        "(NCR:#{type}:#{text})"
-      else throw new Error "unknown $key #{rpr $key}"
-    return "(#{token.start}-#{token.stop})#{R}"
   #.........................................................................................................
   probes_and_matchers = [
     [ '<b x="&">&lt;<&foo;', "(0-9)<b x='&amp;'>(0-4)(NCR:named:&lt;)(13-19)<&foo;>(14-19)<error message='Expecting: one of these possible Token sequences:&#10;  1. [i_close]&#10;  2. [i_slash_close]&#10;  3. [stm_slash1]&#10;but found: &#39;&#39;'>&foo;</error>", null ]
