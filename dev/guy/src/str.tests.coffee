@@ -44,10 +44,43 @@ types                     = new ( require 'intertype' ).Intertype
     ```
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "____guy.str.SQL tag function" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  # guy     = require H.guy_path
+  #=========================================================================================================
+  class Sql
+
+    #-------------------------------------------------------------------------------------------------------
+    constructor: ( q = {} ) ->
+      @q = q
+      return undefined
+
+    #-------------------------------------------------------------------------------------------------------
+    SQL: ( parts, expressions... ) =>
+      whisper '^344^', '--------------------------'
+      debug '^344^', parts
+      debug '^344^', parts.raw
+      debug '^344^', expressions
+      debug '^344^', @q
+      R = parts[ 0 ]
+      for expression, idx in expressions
+        R += expression.toString() + parts[ idx + 1 ]
+      return R
+  #.........................................................................................................
+  { SQL } = new Sql()
+  urge '^344^', rpr SQL"helo"
+  urge '^344^', rpr SQL"helo \n#{42}"
+  urge '^344^', rpr SQL"helo #x{42}"
+  urge '^344^', rpr SQL"helo \i{42}, \L{xy}"
+  return done?()
+
+
 
 ############################################################################################################
 if require.main is module then do =>
   test @, { timeout: 5000, }
+  # @[ "guy.str.SQL tag function" ]()
 
 
 
