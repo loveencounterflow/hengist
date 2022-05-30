@@ -38,7 +38,7 @@ text_from_token = ( token ) ->
   R = switch $key
     when '^text'  then text
     when '^error' then  ( HDML.create_tag '<', 'error', { token.attrs..., message: token.message } ) \
-                      + ( token.text ? '' ) \
+                      + ( HDML.text token.text ? '' ) \
                       + ( HDML.create_tag '>', 'error' )
     when '<tag'   then HDML.create_tag '<', name, token.atrs
     when '^tag'   then HDML.create_tag '^', name, token.atrs
