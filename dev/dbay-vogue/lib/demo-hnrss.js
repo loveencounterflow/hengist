@@ -324,12 +324,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_hnrss = async function() {
-    var Vogue_db, db, dsk, glob_pattern, i, len, path, ref, scraper, trash_path, trash_sql_path, vdb, vogue;
+    var Vogue_db, db, dsk, glob_pattern, i, len, path, ref, scraper, vdb, vogue;
     ({Vogue, Vogue_scraper_ABC, Vogue_db} = require('../../../apps/dbay-vogue'));
     ({DBay} = require('../../../apps/dbay'));
     path = PATH.resolve(PATH.join(__dirname, '../../../dev-shm/dbay-vogue.db'));
-    trash_path = PATH.resolve(PATH.join(__dirname, '../../../dev-shm/dbay-vogue.trashed.db'));
-    trash_sql_path = PATH.resolve(PATH.join(__dirname, '../../../dev-shm/dbay-vogue.trashed.sql'));
     db = new DBay({path});
     vdb = new Vogue_db({db});
     vogue = new Vogue({vdb});
