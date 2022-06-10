@@ -241,57 +241,125 @@ class Hnrss extends Vogue_scraper_ABC
       row     = @hub.vdb.new_post { dsk, sid, pid, session, details, }
     return null
 
-#-----------------------------------------------------------------------------------------------------------
-demo_hnrss = ->
-  { Vogue
-    Vogue_scraper_ABC
-    Vogue_db      } = require '../../../apps/dbay-vogue'
-  { DBay          } = require '../../../apps/dbay'
-  path              = PATH.resolve PATH.join __dirname, '../../../dev-shm/dbay-vogue.db'
-  db                = new DBay { path, }
-  vdb               = new Vogue_db { db, }
-  vogue             = new Vogue { vdb, }
-  dsk               = 'hn'
-  scraper           = new Hnrss()
-  vogue.scrapers.add { dsk, scraper, }
-  ### TAINT use API method, don't use query directly ###
-  ### TAINT should be done by `vogue.scraper.add()` ###
-  vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
-  #.........................................................................................................
-  glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/hnrss.org_,_newest.???.xml'
-  for path in glob.sync glob_pattern
-    await do =>
-      buffer    = FS.readFileSync path
-      await scraper.scrape_html buffer
-  #.........................................................................................................
-  show_post_counts db
-  return vogue
 
-#-----------------------------------------------------------------------------------------------------------
-demo_ebayde = ->
-  { Vogue
-    Vogue_scraper_ABC
-    Vogue_db      } = require '../../../apps/dbay-vogue'
-  { DBay          } = require '../../../apps/dbay'
-  dsk               = 'ebayde'
-  path              = PATH.resolve PATH.join __dirname, '../../../dev-shm/dbay-vogue.db'
-  db                = new DBay { path, }
-  vdb               = new Vogue_db { db, }
-  vogue             = new Vogue { vdb, }
-  scraper           = new Ebayde()
-  vogue.scrapers.add { dsk, scraper, }
-  ### TAINT use API method, don't use query directly ###
-  ### TAINT should be done by `vogue.scraper.add()` ###
-  vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
-  #.........................................................................................................
-  glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/ebay-de-search-result-rucksack-????????-??????Z.html'
-  for path in glob.sync glob_pattern
-    await do =>
-      buffer    = FS.readFileSync path
-      await scraper.scrape_html buffer
-  #.........................................................................................................
-  show_post_counts db
-  return vogue
+#===========================================================================================================
+class Github extends Vogue_scraper_ABC
+
+  #---------------------------------------------------------------------------------------------------------
+  scrape: ->
+    # curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/users/loveencounterflow/repos
+    username  = 'loveencounterflow'
+    urls      =
+      ### TAINT use proper URL builder ###
+      repos:    "https://api.github.com/users/#{username}/repos"
+    got_cfg   =
+      # json:     true
+      headers:  { 'accept': 'application/vnd.github.v3+json', }
+    buffer    = await got urls.repos, got_cfg
+    repos     = JSON.parse buffer.rawBody.toString()
+    for repo in repos
+      { name
+        description } = repo
+      debug '^33423^', { name, description, }
+    process.exit 111
+    # url       = 'https://hnrss.org/newest?link=comments'
+    # encoding  = 'utf8'
+    # return @scrape_html buffer.rawBody
+    return ''
+
+  #---------------------------------------------------------------------------------------------------------
+  scrape_html: ( html_or_buffer ) ->
+    dsk         = 'gh'
+    session     = @hub.vdb.new_session dsk
+    { sid, }    = session
+    insert_post = @hub.vdb.queries.insert_post
+    seen        = @hub.vdb.db.dt_now()
+    #.......................................................................................................
+    html        = @_html_from_html_or_buffer html_or_buffer
+    # $           = CHEERIO.load html
+    # R           = []
+    # #.......................................................................................................
+    # for item in ( $ 'div.s-item__info' )
+    #   item          = $ item
+    #   item_details  = item.find 'div.s-item__details'
+    #   item_title    = item.find 'h3.s-item__title'
+    #   item_subtitle = item.find 'div.s-item__subtitle'
+    #   item_price    = item.find 'span.s-item__price'
+    #   # urge '^434554^', item_details.text()
+    #   # info '^434554^', item_title.text()
+    #   # info '^434554^', item_subtitle.text()
+    #   # info '^434554^', item_price.text()
+    #   item_url      = ( item.find 'a' ).attr 'href'
+    #   item_url      = item_url.replace /^([^?]+)\?.*$/, '$1'
+    #   item_id       = item_url.replace /^.*\/([^\/]+)$/, '$1'
+    #   if item_id is '123456'
+    #     warn "skipping invalid Item ID (123456)"
+    #     continue
+    #   # info '^434554^', item_url
+    #   # info '^434554^', item_id
+    #   pid           = "ebayde-#{item_id}"
+    #   title         = item_title.text()
+    #   subtitle      = item_subtitle.text()
+    #   title         = title + " / #{subtitle}"
+    #   title_url     = item_url
+    #   #.....................................................................................................
+    #   details = { title, title_url, }
+    #   row     = @hub.vdb.new_post { dsk, sid, pid, session, details, }
+    # #.......................................................................................................
+    # # process.exit 111
+    return null
+
+# #-----------------------------------------------------------------------------------------------------------
+# demo_hnrss = ->
+#   { Vogue
+#     Vogue_scraper_ABC
+#     Vogue_db      } = require '../../../apps/dbay-vogue'
+#   { DBay          } = require '../../../apps/dbay'
+#   path              = PATH.resolve PATH.join __dirname, '../../../dev-shm/dbay-vogue.db'
+#   db                = new DBay { path, }
+#   vdb               = new Vogue_db { db, }
+#   vogue             = new Vogue { vdb, }
+#   dsk               = 'hn'
+#   scraper           = new Hnrss()
+#   vogue.scrapers.add { dsk, scraper, }
+#   ### TAINT use API method, don't use query directly ###
+#   ### TAINT should be done by `vogue.scraper.add()` ###
+#   vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
+#   #.........................................................................................................
+#   glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/hnrss.org_,_newest.???.xml'
+#   for path in glob.sync glob_pattern
+#     await do =>
+#       buffer    = FS.readFileSync path
+#       await scraper.scrape_html buffer
+#   #.........................................................................................................
+#   show_post_counts db
+#   return vogue
+
+# #-----------------------------------------------------------------------------------------------------------
+# demo_ebayde = ->
+#   { Vogue
+#     Vogue_scraper_ABC
+#     Vogue_db      } = require '../../../apps/dbay-vogue'
+#   { DBay          } = require '../../../apps/dbay'
+#   dsk               = 'ebayde'
+#   path              = PATH.resolve PATH.join __dirname, '../../../dev-shm/dbay-vogue.db'
+#   db                = new DBay { path, }
+#   vdb               = new Vogue_db { db, }
+#   vogue             = new Vogue { vdb, }
+#   scraper           = new Ebayde()
+#   vogue.scrapers.add { dsk, scraper, }
+#   ### TAINT use API method, don't use query directly ###
+#   ### TAINT should be done by `vogue.scraper.add()` ###
+#   vogue.vdb.queries.insert_datasource.run { dsk, url: 'http://nourl', }
+#   #.........................................................................................................
+#   glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/ebay-de-search-result-rucksack-????????-??????Z.html'
+#   for path in glob.sync glob_pattern
+#     await do =>
+#       buffer    = FS.readFileSync path
+#       await scraper.scrape_html buffer
+#   #.........................................................................................................
+#   show_post_counts db
+#   return vogue
 
 #-----------------------------------------------------------------------------------------------------------
 show_post_counts = ( db ) ->
@@ -316,22 +384,24 @@ show_post_counts = ( db ) ->
 #   query = db.prepare SQL"select * from vogue_XXX_grouped_ranks;"; H.tabulate "vogue_XXX_grouped_ranks", query.columns()
 #   return null
 
-#-----------------------------------------------------------------------------------------------------------
-demo_serve_hnrss = ( cfg ) ->
-  vogue = await demo_hnrss()
-  debug '^445345-1^', vogue.server.start()
-  help '^445345-2^', "server started"
-  return null
+# #-----------------------------------------------------------------------------------------------------------
+# demo_serve_hnrss = ( cfg ) ->
+#   vogue = await demo_hnrss()
+#   debug '^445345-1^', vogue.server.start()
+#   help '^445345-2^', "server started"
+#   return null
+
+# #-----------------------------------------------------------------------------------------------------------
+# demo_serve_ebayde = ( cfg ) ->
+#   vogue = await demo_ebayde()
+#   debug '^445345-3^', vogue.server.start()
+#   help '^445345-4^', "server started"
+#   return null
 
 #-----------------------------------------------------------------------------------------------------------
-demo_serve_ebayde = ( cfg ) ->
-  vogue = await demo_ebayde()
-  debug '^445345-3^', vogue.server.start()
-  help '^445345-4^', "server started"
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-demo_read_datasources_start_server = ->
+demo_read_datasources_start_server = ( cfg ) ->
+  defaults          = { hnrss: true, ebayde: true, gh: true, }
+  cfg               = { defaults..., cfg..., }
   { Vogue
     Vogue_scraper_ABC
     Vogue_db      } = require '../../../apps/dbay-vogue'
@@ -340,34 +410,44 @@ demo_read_datasources_start_server = ->
   db                = new DBay { path, }
   vdb               = new Vogue_db { db, }
   vogue             = new Vogue { vdb, }
-  ebayde_scraper    = new Ebayde()
-  hn_scraper        = new Hnrss()
-  vogue.scrapers.add { dsk: 'ebayde', scraper: ebayde_scraper, }
-  vogue.scrapers.add { dsk: 'hn',     scraper: hn_scraper,     }
-  ### TAINT use API method, don't use query directly ###
-  ### TAINT should be done by `vogue.scraper.add()` ###
-  vogue.vdb.queries.insert_datasource.run { dsk: 'ebayde',  url: 'http://nourl', }
-  vogue.vdb.queries.insert_datasource.run { dsk: 'hn',      url: 'http://nourl', }
   #.........................................................................................................
-  do =>
-    glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/ebay-de-search-result-rucksack-????????-??????Z.html'
+  if cfg.ebayde then await do =>
+    ebayde_scraper  = new Ebayde()
+    vogue.scrapers.add                      { dsk: 'ebayde', scraper: ebayde_scraper, }
+    vogue.vdb.queries.insert_datasource.run { dsk: 'ebayde',  url: 'http://nourl', }
+    glob_pattern    = PATH.join __dirname, '../../../assets/dbay-vogue/ebay-de-search-result-rucksack-????????-??????Z.html'
     for data_path in glob.sync glob_pattern
       await do =>
         buffer    = FS.readFileSync data_path
         await ebayde_scraper.scrape_html buffer
   #.........................................................................................................
-  do =>
-    glob_pattern  = PATH.join __dirname, '../../../assets/dbay-vogue/hnrss.org_,_newest.???.xml'
+  if cfg.hnrss then await do =>
+    hn_scraper      = new Hnrss()
+    vogue.vdb.queries.insert_datasource.run { dsk: 'hn', url: 'http://nourl', }
+    vogue.scrapers.add                      { dsk: 'hn', scraper: hn_scraper, }
+    glob_pattern    = PATH.join __dirname, '../../../assets/dbay-vogue/hnrss.org_,_newest.???.xml'
     for data_path in glob.sync glob_pattern
       await do =>
         buffer    = FS.readFileSync data_path
         await hn_scraper.scrape_html buffer
   #.........................................................................................................
+  if cfg.gh then await do =>
+    gh_scraper      = new Github()
+    ### TAINT use API method, don't use query directly ###
+    ### TAINT should be done by `vogue.scraper.add()` ###
+    vogue.scrapers.add                      { dsk: 'gh', scraper: gh_scraper, }
+    vogue.vdb.queries.insert_datasource.run { dsk: 'gh', url: 'http://nourl', }
+    await gh_scraper.scrape()
+  #.........................................................................................................
   show_post_counts db
   debug '^445345-5^', await vogue.server.start()
   help '^445345-6^', "server started"
-  response = await got "http://localhost:3456/trends?dsk=hn"
-  help '^445345-6^', "received #{Buffer.byteLength response.body} bytes"
+  if cfg.hnrss
+    response = await got "http://localhost:3456/trends?dsk=hn"
+    help '^445345-6^', "received #{Buffer.byteLength response.body} bytes"
+  if cfg.gh
+    response = await got "http://localhost:3456/trends?dsk=gh"
+    help '^445345-6^', "received #{Buffer.byteLength response.body} bytes"
   response = await got "http://localhost:3456/trends"
   help '^445345-6^', "received #{Buffer.byteLength response.body} bytes"
   return null
@@ -378,11 +458,10 @@ demo_read_datasources_start_server = ->
 if module is require.main then do =>
   # await demo_zvg_online_net()
   # await demo_zvg24_net()
-  # await demo_hnrss()
   # await demo_serve_hnrss()
   # await demo_serve_ebayde()
   # await demo_statement_type_info()
-  await demo_read_datasources_start_server()
+  await demo_read_datasources_start_server { hnrss: false, ebayde: false, gh: true, }
 
 
 
