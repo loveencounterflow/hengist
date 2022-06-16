@@ -242,12 +242,35 @@
     db.create_stdlib();
     //---------------------------------------------------------------------------------------------------------
     db(function() {
-      debug('^34534^', db.dt_now());
-      debug('^34534^', db.dt_from_now('20220101-183000Z'));
+      var d;
+      debug('^34534-1^', db.dt_from_now('20220101-183000Z'));
       tabulate(db, SQL`select std_dt_now() as date;`);
       tabulate(db, SQL`select std_dt_from_now( '20220101-183000Z' ) as date;`);
-      debug('^34534^', db.dt_format(db.dt_now(), 'YYYYMMDD-HHmmssZ'));
-      return debug('^34534^', db.dt_format(db.dt_now(), 'YYYY-MM-DD HH:mm UTC'));
+      debug('^34534-2^', db.dt_format(db.dt_now(), 'YYYYMMDD-HHmmssZ'));
+      debug('^34534-3^', db.dt_format(db.dt_now(), 'YYYY-MM-DD HH:mm UTC'));
+      debug('^34534-4^', db.dt_dbayts_from_isots('2022-05-17T19:40:58Z'));
+      // since Only show notifications updated after the given time. This is a timestamp in ISO 8601 format: YYYY-MM-DDTHH:MM:SSZ.
+      d = db._dayjs().subtract(7, 'year');
+      // db.dt_
+      debug('^34534-5^', d);
+      debug('^34534-6^', db.dt_isots_from_dbayts('20220101-183000Z'));
+      debug('^34534-7^', db.dt_now());
+      debug('^34534-8^', db.dt_now({
+        subtract: [1, 'week']
+      }));
+      debug('^34534-9^', db.dt_now({
+        subtract: [1, 'month']
+      }));
+      debug('^34534-10^', db.dt_now({
+        add: [1, 'week']
+      }));
+      debug('^34534-11^', db.dt_now({
+        subtract: [1, 'week'],
+        add: [1, 'week']
+      }));
+      return debug('^34534-9^', db.dt_isots_from_dbayts(db.dt_now({
+        subtract: [1, 'month']
+      })));
     });
     return null;
   };

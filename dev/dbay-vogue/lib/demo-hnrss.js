@@ -324,76 +324,101 @@
 
   //===========================================================================================================
   Github = class Github extends Vogue_scraper_ABC {
+    /*
+
+    Properties of `repo`:
+
+    allow_forking archive_url archived assignees_url blobs_url branches_url clone_url collaborators_url
+    comments_url commits_url compare_url contents_url contributors_url created_at default_branch deployments_url
+    description disabled downloads_url events_url fork forks forks_count forks_url full_name git_commits_url
+    git_refs_url git_tags_url git_url has_downloads has_issues has_pages has_projects has_wiki homepage
+    hooks_url html_url id is_template issue_comment_url issue_events_url issues_url keys_url labels_url language
+    languages_url license merges_url milestones_url mirror_url name node_id notifications_url open_issues
+    open_issues_count owner private pulls_url pushed_at releases_url size ssh_url stargazers_count
+    stargazers_url statuses_url subscribers_url subscription_url svn_url tags_url teams_url topics trees_url
+    updated_at url visibility watchers watchers_count
+
+    */
     //---------------------------------------------------------------------------------------------------------
-    async scrape() {
-      var buffer, description, got_cfg, i, len, name, repo, repos, urls, username;
-      // curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/users/loveencounterflow/repos
-      username = 'loveencounterflow';
-      urls = {
-        /* TAINT use proper URL builder */
-        repos: `https://api.github.com/users/${username}/repos`
-      };
-      got_cfg = {
-        // json:     true
-        headers: {
-          'accept': 'application/vnd.github.v3+json'
-        }
-      };
-      buffer = (await got(urls.repos, got_cfg));
-      repos = JSON.parse(buffer.rawBody.toString());
-      for (i = 0, len = repos.length; i < len; i++) {
-        repo = repos[i];
-        ({name, description} = repo);
-        debug('^33423^', {name, description});
-      }
-      process.exit(111);
-      // url       = 'https://hnrss.org/newest?link=comments'
-      // encoding  = 'utf8'
-      // return @scrape_html buffer.rawBody
-      return '';
+    _get_authorization() {
+      var mimi_path;
+      mimi_path = PATH.resolve(PATH.join(__dirname, '../../../../../temp/mimi'));
+      return (FS.readFileSync(mimi_path, {
+        encoding: 'utf-8'
+      })).trim();
     }
 
     //---------------------------------------------------------------------------------------------------------
-    scrape_html(html_or_buffer) {
-      var dsk, html, insert_post, seen, session, sid;
+    async scrape() {
+      /* TAINT make `dsk` a `cfg` property of instance */
+      var buffer, description, dsk, got_cfg, i, len, q, ref, repo, repo_d, repo_name, repo_url, repos_d, repos_url, session, sid, username;
       dsk = 'gh';
+      // { dsk, }    = @cfg
       session = this.hub.vdb.new_session(dsk);
       ({sid} = session);
-      insert_post = this.hub.vdb.queries.insert_post;
-      seen = this.hub.vdb.db.dt_now();
+      username = 'loveencounterflow';
       //.......................................................................................................
-      html = this._html_from_html_or_buffer(html_or_buffer);
-      // $           = CHEERIO.load html
-      // R           = []
-      // #.......................................................................................................
-      // for item in ( $ 'div.s-item__info' )
-      //   item          = $ item
-      //   item_details  = item.find 'div.s-item__details'
-      //   item_title    = item.find 'h3.s-item__title'
-      //   item_subtitle = item.find 'div.s-item__subtitle'
-      //   item_price    = item.find 'span.s-item__price'
-      //   # urge '^434554^', item_details.text()
-      //   # info '^434554^', item_title.text()
-      //   # info '^434554^', item_subtitle.text()
-      //   # info '^434554^', item_price.text()
-      //   item_url      = ( item.find 'a' ).attr 'href'
-      //   item_url      = item_url.replace /^([^?]+)\?.*$/, '$1'
-      //   item_id       = item_url.replace /^.*\/([^\/]+)$/, '$1'
-      //   if item_id is '123456'
-      //     warn "skipping invalid Item ID (123456)"
-      //     continue
-      //   # info '^434554^', item_url
-      //   # info '^434554^', item_id
-      //   pid           = "ebayde-#{item_id}"
-      //   title         = item_title.text()
-      //   subtitle      = item_subtitle.text()
-      //   title         = title + " / #{subtitle}"
-      //   title_url     = item_url
-      //   #.....................................................................................................
-      //   details = { title, title_url, }
-      //   row     = @hub.vdb.new_post { dsk, sid, pid, session, details, }
-      // #.......................................................................................................
-      // # process.exit 111
+      /* TAINT use proper URL builder */
+      repos_url = `https://api.github.com/users/${encodeURIComponent(username)}/repos`;
+      q = {
+        per_page: 100,
+        page: 0
+      };
+      got_cfg = {
+        headers: {
+          'accept': 'application/vnd.github.v3+json',
+          authorization: this._get_authorization()
+        },
+        searchParams: q
+      };
+      while (true) {
+        whisper('^342-1^', '——————————————————————————————————————————————————————');
+        q.page++;
+        if (q.page > 10) {
+          process.exit(111);
+        }
+        buffer = (await got(repos_url, got_cfg));
+        repos_d = JSON.parse(buffer.rawBody.toString());
+        if (repos_d.length === 0) {
+          break;
+        }
+        for (i = 0, len = repos_d.length; i < len; i++) {
+          repo_d = repos_d[i];
+          repo_name = repo_d.name;
+          repo_url = repo_d.url;
+          description = (ref = repo_d.description) != null ? ref : '';
+          description = (Array.from(description)).slice(0, 81).join('');
+          if (description.length > 0) {
+            repo = `${repo_name} (${description})`;
+          } else {
+            repo = repo_name;
+          }
+          debug('^342-2^', repo);
+          echo(repo_name);
+        }
+      }
+      // #.....................................................................................................
+      // ### TAINT use proper URL builder ###
+      // debug '^34534-9^', db.dt_isots_from_dbayts db.dt_now { subtract: [ 1, 'month', ], }
+      // commits_url = "https://api.github.com/repos/#{encodeURIComponent username}/#{encodeURIComponent repo_name}/commits"
+      // buffer      = await got commits_url, got_cfg
+      // commits     = JSON.parse buffer.rawBody.toString()
+      // for commit in commits
+      //   title_url = commit.html_url
+      //   title     = ( ( commit.commit.message ? '' ).split '\n' )[ 0 ]
+      //   sha       = commit.sha
+      //   sha       = sha[ .. 7 ]
+      //   pid       = "#{dsk}-#{repo_name}-#{sha}"
+      //   date      = @hub.vdb.db.dt_from_iso commit.commit.author.date
+      //   details   = { title, title_url, date, repo, repo_url, }
+      //   row       = @hub.vdb.new_post { dsk, sid, pid, session, details, }
+      //   whisper '^33423^', { repo, sha, date, title, title_url, }
+      //   debug '^33423^', row
+      // #.....................................................................................................
+      // process.exit 111
+      // url       = 'https://hnrss.org/newest?link=comments'
+      // encoding  = 'utf8'
+      // return @scrape_html buffer.rawBody
       return null;
     }
 
@@ -506,14 +531,14 @@ select 'all in vogue_trends'      as "title", count(*)              as count fro
     //.........................................................................................................
     if (cfg.ebayde) {
       await (async() => {
-        var data_path, ebayde_scraper, glob_pattern, i, len, ref, results;
-        ebayde_scraper = new Ebayde();
+        var data_path, dsk, ebayde_scraper, glob_pattern, i, len, ref, results;
+        dsk = 'ebayde';
+        ebayde_scraper = new Ebayde({dsk});
         vogue.scrapers.add({
-          dsk: 'ebayde',
           scraper: ebayde_scraper
         });
         vogue.vdb.queries.insert_datasource.run({
-          dsk: 'ebayde',
+          dsk,
           url: 'http://nourl'
         });
         glob_pattern = PATH.join(__dirname, '../../../assets/dbay-vogue/ebay-de-search-result-rucksack-????????-??????Z.html');
@@ -533,15 +558,15 @@ select 'all in vogue_trends'      as "title", count(*)              as count fro
     //.........................................................................................................
     if (cfg.hnrss) {
       await (async() => {
-        var data_path, glob_pattern, hn_scraper, i, len, ref, results;
-        hn_scraper = new Hnrss();
-        vogue.vdb.queries.insert_datasource.run({
-          dsk: 'hn',
-          url: 'http://nourl'
-        });
+        var data_path, dsk, glob_pattern, hn_scraper, i, len, ref, results;
+        dsk = 'hn';
+        hn_scraper = new Hnrss({dsk});
         vogue.scrapers.add({
-          dsk: 'hn',
           scraper: hn_scraper
+        });
+        vogue.vdb.queries.insert_datasource.run({
+          dsk,
+          url: 'http://nourl'
         });
         glob_pattern = PATH.join(__dirname, '../../../assets/dbay-vogue/hnrss.org_,_newest.???.xml');
         ref = glob.sync(glob_pattern);
@@ -560,16 +585,16 @@ select 'all in vogue_trends'      as "title", count(*)              as count fro
     //.........................................................................................................
     if (cfg.gh) {
       await (async() => {
-        var gh_scraper;
-        gh_scraper = new Github();
+        var dsk, gh_scraper;
+        dsk = 'gh';
+        gh_scraper = new Github({dsk});
         /* TAINT use API method, don't use query directly */
         /* TAINT should be done by `vogue.scraper.add()` */
         vogue.scrapers.add({
-          dsk: 'gh',
           scraper: gh_scraper
         });
         vogue.vdb.queries.insert_datasource.run({
-          dsk: 'gh',
+          dsk,
           url: 'http://nourl'
         });
         return (await gh_scraper.scrape());
@@ -607,6 +632,8 @@ select 'all in vogue_trends'      as "title", count(*)              as count fro
       }));
     })();
   }
+
+  // await demo_read_datasources_start_server { hnrss: true, ebayde: true, gh: false, }
 
 }).call(this);
 
