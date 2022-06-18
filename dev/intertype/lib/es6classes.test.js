@@ -387,7 +387,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["_es6classes equals"] = function(T, done) {
-    var check, equals, intertype, isa;
+    var INTERTYPE, check, equals, intertype, isa;
+    INTERTYPE = require('../../../apps/intertype');
     intertype = new Intertype();
     ({isa, check, equals} = intertype.export());
     /* TAINT copy more extensive tests from CND, `js_eq`? */
@@ -396,6 +397,52 @@
     if (done != null) {
       return done();
     }
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["es6classes Symbol.toStringTag"] = function(T, done) {
+    var Intertype, intertype, isa, type_of;
+    ({Intertype} = require('../../../apps/intertype'));
+    intertype = new Intertype();
+    ({isa, type_of} = intertype.export());
+    (() => {      //.........................................................................................................
+      var target, x;
+      target = {};
+      x = new Proxy(target, {
+        get: (target, key) => {
+          return target[key] !== void 0;
+        }
+      });
+      //.......................................................................................................
+      if (T != null) {
+        T.eq(typeof x, 'object');
+      }
+      if (T != null) {
+        T.eq(type_of(x), 'object');
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var target, x;
+      target = {};
+      x = new Proxy(target, {
+        get: (target, key) => {
+          if (key === Symbol.toStringTag) {
+            return 'fooey';
+          }
+          return target[key] !== void 0;
+        }
+      });
+      //.......................................................................................................
+      if (T != null) {
+        T.eq(typeof x, 'object');
+      }
+      if (T != null) {
+        T.eq(type_of(x), 'fooey');
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -492,13 +539,13 @@
   if (module === require.main) {
     (() => {
       // demo_test_for_generator()
-      return test(this);
+      // test @
+      // test @[  "undeclared types cause correct error (loupe breakage fix)" ]
+      // @[ "undeclared types cause correct error (loupe breakage fix)" ]()
+      // test @[ "undeclared but implement types can be used" ]
+      return test(this["es6classes Symbol.toStringTag"]);
     })();
   }
-
-  // test @[  "undeclared types cause correct error (loupe breakage fix)" ]
-// @[ "undeclared types cause correct error (loupe breakage fix)" ]()
-// test @[ "undeclared but implement types can be used" ]
 
 }).call(this);
 
