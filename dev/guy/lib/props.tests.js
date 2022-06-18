@@ -423,13 +423,13 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["GUY.props.Strict_proprietor 1"] = function(T, done) {
+  this["GUY.props.Strict_owner 1"] = function(T, done) {
     var CAT, GUY, X, error, x;
     GUY = require(H.guy_path);
     CAT = require('../../../apps/multimix/lib/cataloguing');
     X = (function() {
       //.........................................................................................................
-      class X extends GUY.props.Strict_proprietor {
+      class X extends GUY.props.Strict_owner {
         constructor() {
           super();
           this.prop_on_instance_2 = 'prop_on_instance_2';
@@ -519,13 +519,13 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["GUY.props.Strict_proprietor 2"] = function(T, done) {
+  this["GUY.props.Strict_owner 2"] = function(T, done) {
     var CAT, GUY, X, x;
     GUY = require(H.guy_path);
     CAT = require('../../../apps/multimix/lib/cataloguing');
     X = (function() {
       //.........................................................................................................
-      class X extends GUY.props.Strict_proprietor {};
+      class X extends GUY.props.Strict_owner {};
 
       X.prototype.prop_on_instance_1 = 'prop_on_instance_1';
 
@@ -554,10 +554,10 @@
   if (require.main === module) {
     (() => {
       // test @
-      // @[ "GUY.props.Strict_proprietor 1" ]()
-      // test @[ "GUY.props.Strict_proprietor 1" ]
-      this["GUY.props.Strict_proprietor 2"]();
-      return test(this["GUY.props.Strict_proprietor 2"]);
+      // @[ "GUY.props.Strict_owner 1" ]()
+      // test @[ "GUY.props.Strict_owner 1" ]
+      this["GUY.props.Strict_owner 2"]();
+      return test(this["GUY.props.Strict_owner 2"]);
     })();
   }
 
