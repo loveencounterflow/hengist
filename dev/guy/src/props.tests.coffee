@@ -152,11 +152,11 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "GUY.props.Strict_proprietor 1" ] = ( T, done ) ->
+@[ "GUY.props.Strict_owner 1" ] = ( T, done ) ->
   GUY     = require H.guy_path
   CAT     = require '../../../apps/multimix/lib/cataloguing'
   #.........................................................................................................
-  class X extends GUY.props.Strict_proprietor
+  class X extends GUY.props.Strict_owner
     prop_on_instance_1: 'prop_on_instance_1'
     constructor: ->
       super()
@@ -197,11 +197,11 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "GUY.props.Strict_proprietor 2" ] = ( T, done ) ->
+@[ "GUY.props.Strict_owner 2" ] = ( T, done ) ->
   GUY     = require H.guy_path
   CAT     = require '../../../apps/multimix/lib/cataloguing'
   #.........................................................................................................
-  class X extends GUY.props.Strict_proprietor
+  class X extends GUY.props.Strict_owner
     prop_on_instance_1: 'prop_on_instance_1'
     get: 42
     has: 108
@@ -218,9 +218,9 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  # @[ "GUY.props.Strict_proprietor 1" ]()
-  # test @[ "GUY.props.Strict_proprietor 1" ]
-  @[ "GUY.props.Strict_proprietor 2" ]()
-  test @[ "GUY.props.Strict_proprietor 2" ]
+  # @[ "GUY.props.Strict_owner 1" ]()
+  # test @[ "GUY.props.Strict_owner 1" ]
+  @[ "GUY.props.Strict_owner 2" ]()
+  test @[ "GUY.props.Strict_owner 2" ]
 
 
