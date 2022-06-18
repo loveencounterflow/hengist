@@ -251,6 +251,7 @@ type_of_v3 = ( xP... ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "_es6classes equals" ] = ( T, done ) ->
+  INTERTYPE                 = require '../../../apps/intertype'
   intertype = new Intertype()
   { isa
     check
@@ -259,6 +260,36 @@ type_of_v3 = ( xP... ) ->
   T.eq ( equals 3, 3 ), true
   T.eq ( equals 3, 4 ), false
   done() if done?
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "es6classes Symbol.toStringTag" ] = ( T, done ) ->
+  { Intertype } = require '../../../apps/intertype'
+  intertype     = new Intertype()
+  { isa
+    type_of }   = intertype.export()
+  #.........................................................................................................
+  do =>
+    target      = {}
+    x           = new Proxy target,
+      get: ( target, key ) =>
+        return target[ key ] isnt undefined
+    #.......................................................................................................
+    T?.eq ( typeof x  ), 'object'
+    T?.eq ( type_of x ), 'object'
+    return null
+  #.........................................................................................................
+  do =>
+    target      = {}
+    x           = new Proxy target,
+      get: ( target, key ) =>
+        return 'fooey' if key is Symbol.toStringTag
+        return target[ key ] isnt undefined
+    #.......................................................................................................
+    T?.eq ( typeof x  ), 'object'
+    T?.eq ( type_of x ), 'fooey'
+    return null
+  #.........................................................................................................
+  return done?()
 
 #-----------------------------------------------------------------------------------------------------------
 demo_test_for_generator = ->
@@ -333,8 +364,10 @@ demo = ->
 ############################################################################################################
 if module is require.main then do =>
   # demo_test_for_generator()
-  test @
+  # test @
   # test @[  "undeclared types cause correct error (loupe breakage fix)" ]
   # @[ "undeclared types cause correct error (loupe breakage fix)" ]()
   # test @[ "undeclared but implement types can be used" ]
+  test @[ "es6classes Symbol.toStringTag" ]
+
 
