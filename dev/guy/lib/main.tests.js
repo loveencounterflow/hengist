@@ -39,6 +39,7 @@
   (function() {
     var i, key, len, module, path, paths, value;
     paths = FS.readdirSync(__dirname);
+// debug '^324^', paths; process.exit 111
     for (i = 0, len = paths.length; i < len; i++) {
       path = paths[i];
       if (!path.endsWith('.tests.js')) {
