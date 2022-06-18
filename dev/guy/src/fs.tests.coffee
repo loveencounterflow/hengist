@@ -144,10 +144,6 @@ if require.main is module then do =>
   # test @[ "guy.fs.get_content_hash" ]
   # @[ "guy.fs.get_content_hash" ]()
   # test @[ "guy.props.def(), .hide()" ]
-  # test @[ "guy.obj.pick_with_fallback()" ]
-  # test @[ "guy.obj.pluck_with_fallback()" ]
-  # test @[ "guy.obj.nullify_undefined()" ]
-  # test @[ "guy.obj.omit_nullish()" ]
   # @[ "configurator" ]()
   # test @[ "await with async steampipes" ]
   # test @[ "nowait with async steampipes" ]

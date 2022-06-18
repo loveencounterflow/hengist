@@ -24,6 +24,7 @@ test                      = require '../../../apps/guy-test'
 L = @
 do ->
   paths = FS.readdirSync __dirname
+  # debug '^324^', paths; process.exit 111
   for path in paths
     continue unless path.endsWith '.tests.js'
     continue if path is 'main.tests.js'

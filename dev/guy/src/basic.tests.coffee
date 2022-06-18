@@ -258,131 +258,6 @@ types                     = new ( require 'intertype' ).Intertype
   #.........................................................................................................
   done?()
 
-
-#===========================================================================================================
-# OBJ
-#-----------------------------------------------------------------------------------------------------------
-@[ "guy.obj.pick_with_fallback()" ] = ( T, done ) ->
-  guy = require H.guy_path
-  #.........................................................................................................
-  probes_and_matchers = [
-    [ [ { a: 1, b: 2, c: 3, },        null, [ 'a', 'c',     ], ], { a: 1, c: 3, } ]
-    [ [ { foo: 'bar', baz: 'gnu', },  null, [ 'foo', 'wat', ], ], { foo: 'bar', wat: null } ]
-    [ [ { foo: 'bar', baz: 'gnu', },  42,   [ 'foo', 'wat', ], ], { foo: 'bar', wat: 42 } ]
-    [ [ { foo: null,  baz: 'gnu', },  42,   [ 'foo', 'wat', ], ], { foo: null, wat: 42 } ]
-    [ [ {},  undefined, undefined, ], {} ]
-    ]
-  #.........................................................................................................
-  for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      [ d
-        fallback
-        keys      ] = probe
-      # debug '^443^', { d, fallback, keys, }
-      d_copy        = { d..., }
-      if keys?
-        result        = guy.obj.pick_with_fallback d, fallback, keys...
-      else
-        result        = guy.obj.pick_with_fallback d, fallback
-      T?.eq d, d_copy
-      T?.ok ( d isnt result )
-      resolve result
-  #.........................................................................................................
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "guy.obj.pluck_with_fallback()" ] = ( T, done ) ->
-  guy = require H.guy_path
-  #.........................................................................................................
-  probes_and_matchers = [
-    [ [ { a: 1, b: 2, c: 3, },        null,  [ 'a', 'c',     ], { b: 2, },       ], { a: 1, c: 3, },           ]
-    [ [ { foo: 'bar', baz: 'gnu', },  null,  [ 'foo', 'wat', ], { baz: 'gnu', }, ], { foo: 'bar', wat: null }, ]
-    [ [ { foo: 'bar', baz: 'gnu', },  42,    [ 'foo', 'wat', ], { baz: 'gnu', }, ], { foo: 'bar', wat: 42 },   ]
-    [ [ { foo: null,  baz: 'gnu', },  42,    [ 'foo', 'wat', ], { baz: 'gnu', }, ], { foo: null, wat: 42 },    ]
-    [ [ {},                           null,  undefined,         {},              ], {},                        ]
-    ]
-  #.........................................................................................................
-  for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      [ d
-        fallback
-        keys
-        d_changed ] = probe
-      d_copy        = { d..., }
-      if keys?
-        result        = guy.obj.pluck_with_fallback d, fallback, keys...
-      else
-        result        = guy.obj.pluck_with_fallback d, fallback
-      T?.eq d, d_changed
-      T?.ok ( d isnt result )
-      resolve result
-  #.........................................................................................................
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "guy.obj.nullify_undefined()" ] = ( T, done ) ->
-  guy = require H.guy_path
-  #.........................................................................................................
-  probes_and_matchers = [
-    [ {}, {} ]
-    [ null, {} ]
-    [ undefined, {} ]
-    [ { a: 1, b: 2, c: 3, }, { a: 1, b: 2, c: 3, } ]
-    [ { a: undefined, b: 2, c: 3, }, { a: null, b: 2, c: 3, } ]
-    ]
-  #.........................................................................................................
-  for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      d             = probe
-      d_copy        = { d..., }
-      result        = guy.obj.nullify_undefined d
-      T?.eq d, d_copy if d?
-      T?.ok ( d isnt result )
-      resolve result
-  #.........................................................................................................
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "guy.obj.omit_nullish()" ] = ( T, done ) ->
-  guy = require H.guy_path
-  #.........................................................................................................
-  probes_and_matchers = [
-    [ {}, {} ]
-    [ null, {} ]
-    [ undefined, {} ]
-    [ { a: 1, b: 2, c: 3, }, { a: 1, b: 2, c: 3, } ]
-    [ { a: undefined, b: 2, c: 3, }, { b: 2, c: 3, } ]
-    [ { a: undefined, b: 2, c: null, }, { b: 2, } ]
-    ]
-  #.........................................................................................................
-  for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      d             = probe
-      d_copy        = { d..., }
-      result        = guy.obj.omit_nullish d
-      T?.eq d, d_copy if d?
-      T?.ok ( d isnt result )
-      resolve result
-  #.........................................................................................................
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "guy.props.def(), .hide()" ] = ( T, done ) ->
-  guy = require H.guy_path
-  #.........................................................................................................
-  do =>
-    x = {}
-    guy.props.def   x, 'foo', { enumerable: false, value: 42, }
-    T?.eq ( rpr x ), '{}'
-    T?.eq ( Object.getOwnPropertyDescriptor x, 'foo' ), { value: 42, writable: false, enumerable: false, configurable: false }
-  do =>
-    x = {}
-    guy.props.hide  x, 'foo', 42
-    T?.eq ( rpr x ), '{}'
-    T?.eq ( Object.getOwnPropertyDescriptor x, 'foo' ), { value: 42, writable: false, enumerable: false, configurable: false }
-  #.........................................................................................................
-  done?()
-
 #-----------------------------------------------------------------------------------------------------------
 @[ "guy.process.on_exit()" ] = ( T, done ) ->
   guy = require H.guy_path
@@ -394,10 +269,9 @@ types                     = new ( require 'intertype' ).Intertype
 if require.main is module then do =>
   test @, { timeout: 5000, }
   # test @[ "guy.props.def(), .hide()" ]
-  # test @[ "guy.obj.pick_with_fallback()" ]
-  # test @[ "guy.obj.pluck_with_fallback()" ]
-  # test @[ "guy.obj.nullify_undefined()" ]
-  # test @[ "guy.obj.omit_nullish()" ]
+  # test @[ "guy.props.pick_with_fallback()" ]
+  # test @[ "guy.props.pluck_with_fallback()" ]
+  # test @[ "guy.props.nullify_undefined()" ]
   # @[ "configurator" ]()
   # test @[ "await with async steampipes" ]
   # test @[ "nowait with async steampipes" ]
