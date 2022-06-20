@@ -33,11 +33,11 @@ H                         = require '../../../lib/helpers'
   types           = new Intertype()
   jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
   types.declare 'null',                           test: ( x ) -> x is null
-  types.declare 'array',       collection: true,  test: ( x ) -> ( jto x ) is 'array'
-  ### @isa 'empty', 'collection', x ###
+  types.declare 'array',       isa_collection: true,  test: ( x ) -> ( jto x ) is 'array'
+  ### @isa 'empty', 'isa_collection', x ###
   # types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
   types.declare 'list',                           test: ( x ) -> @isa 'array', x
-  types.declare 'integer',      numeric: true,    test: ( x ) -> @isa 'array', x
+  types.declare 'integer',      isa_numeric: true,    test: ( x ) -> @isa 'array', x
   #.........................................................................................................
   T?.eq ( types.isa 'null',                         null          ), true
   T?.eq ( types.isa 'optional', 'null',             null          ), true
@@ -53,11 +53,47 @@ H                         = require '../../../lib/helpers'
   #   debug '^34234^', type, declaration
   H.tabulate 'types._types', ( -> yield type for _, type of types._types )()
   #.........................................................................................................
-  done()
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo = ->
+  { Intertype }   = require '../../../apps/intertype'
+  types           = new Intertype()
+  jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
+  types.declare 'null',                           test: ( x ) -> x is null
+  types.declare 'array',       isa_collection: true,  test: ( x ) -> ( jto x ) is 'array'
+  ### @isa 'empty', 'isa_collection', x ###
+  # types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
+  types.declare 'list',                           test: ( x ) -> @isa 'array', x
+  types.declare 'integer',      isa_numeric: true,    test: ( x ) -> @isa 'array', x
+  #.........................................................................................................
+  info '^509-1', types.isa 'null',                         null
+  info '^509-2', types.isa 'optional', 'null',             null
+  info '^509-3', types.isa 'optional', 'null',             undefined
+  info '^509-4', types.isa 'null',                         undefined
+  info '^509-5', types.isa 'array',                        []
+  info '^509-6', types.isa 'list',                         []
+  info '^509-7', types.isa 'empty', 'array',               []
+  info '^509-8', types.isa 'optional', 'empty', 'array',   []
+  #.........................................................................................................
+  try ( types.declare 'optional', 'integer', test: -> ) catch error
+    warn '^509-9^', CND.reverse error.message
+  H.tabulate 'types._types', ( -> yield type for _, type of types._types )()
+  #.........................................................................................................
   return null
 
 
 
 ############################################################################################################
 unless module.parent?
+  demo()
   test @
+
+
+
+
+
+
+
+
