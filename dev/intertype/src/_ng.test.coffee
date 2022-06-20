@@ -83,12 +83,43 @@ demo = ->
   #.........................................................................................................
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_hedges = ->
+  { Intertype
+    Type_cfg }  = require '../../../apps/intertype'
+  type          = 'integer'
+  type_cfg      = new Type_cfg { isa_numeric: true, }
+  debug '^234^', type_cfg
+  lists         = ( [ null, hedge.x..., ] for hedge in Intertype.hedges )
+  hedgepaths    = generate_permutations type_cfg, lists, 0
+  for hedgepath in hedgepaths
+    debug '^2434^', hedgepath # + ' ' + 'text'
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+generate_permutations = ( type_cfg, lists, list_idx, current_path = [], R = [] ) ->
+  ### thx to https://itecnote.com/tecnote/java-generate-all-combinations-from-multiple-lists/ ###
+  if list_idx is lists.length
+    R.push current_path
+    return R
+  list = lists[ list_idx ]
+  for term, term_idx in list
+    next_path = [ current_path..., ]
+    next_path.push term if term?
+    generate_permutations type_cfg, lists, list_idx + 1, next_path, R
+  return R
+
+
+
+
+
 
 
 ############################################################################################################
 unless module.parent?
   demo()
-  test @
+  demo_hedges()
+  # test @
 
 
 
