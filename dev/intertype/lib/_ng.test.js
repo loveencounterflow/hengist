@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, alert, badge, debug, echo, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper;
+  var CND, H, alert, badge, debug, demo, echo, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -54,12 +54,12 @@
       }
     });
     types.declare('array', {
-      collection: true,
+      isa_collection: true,
       test: function(x) {
         return (jto(x)) === 'array';
       }
     });
-    /* @isa 'empty', 'collection', x */
+    /* @isa 'empty', 'isa_collection', x */
     // types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
     types.declare('list', {
       test: function(x) {
@@ -67,7 +67,7 @@
       }
     });
     types.declare('integer', {
-      numeric: true,
+      isa_numeric: true,
       test: function(x) {
         return this.isa('array', x);
       }
@@ -117,13 +117,79 @@
       }
       return results;
     })());
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo = function() {
+    var Intertype, error, jto, types;
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    jto = (x) => {
+      return ((Object.prototype.toString.call(x)).slice(8, -1)).toLowerCase().replace(/\s+/g, '');
+    };
+    types.declare('null', {
+      test: function(x) {
+        return x === null;
+      }
+    });
+    types.declare('array', {
+      isa_collection: true,
+      test: function(x) {
+        return (jto(x)) === 'array';
+      }
+    });
+    /* @isa 'empty', 'isa_collection', x */
+    // types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
+    types.declare('list', {
+      test: function(x) {
+        return this.isa('array', x);
+      }
+    });
+    types.declare('integer', {
+      isa_numeric: true,
+      test: function(x) {
+        return this.isa('array', x);
+      }
+    });
     //.........................................................................................................
-    done();
+    info('^509-1', types.isa('null', null));
+    info('^509-2', types.isa('optional', 'null', null));
+    info('^509-3', types.isa('optional', 'null', void 0));
+    info('^509-4', types.isa('null', void 0));
+    info('^509-5', types.isa('array', []));
+    info('^509-6', types.isa('list', []));
+    info('^509-7', types.isa('empty', 'array', []));
+    info('^509-8', types.isa('optional', 'empty', 'array', []));
+    try {
+      //.........................................................................................................
+      types.declare('optional', 'integer', {
+        test: function() {}
+      });
+    } catch (error1) {
+      error = error1;
+      warn('^509-9^', CND.reverse(error.message));
+    }
+    H.tabulate('types._types', (function*() {
+      var _, ref, results, type;
+      ref = types._types;
+      results = [];
+      for (_ in ref) {
+        type = ref[_];
+        results.push((yield type));
+      }
+      return results;
+    })());
+    //.........................................................................................................
     return null;
   };
 
   //###########################################################################################################
   if (module.parent == null) {
+    demo();
     test(this);
   }
 
