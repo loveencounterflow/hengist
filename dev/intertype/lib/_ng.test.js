@@ -189,18 +189,41 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_hedges = function() {
-    var Intertype, Type_cfg, hedgepath, ref, type, type_cfg, types;
+    var Intertype, Type_cfg, types;
     ({Intertype, Type_cfg} = require('../../../apps/intertype'));
     types = new Intertype();
-    type = 'integer';
-    type_cfg = new Type_cfg({
-      isa_numeric: true
-    });
-    debug('^234^', type_cfg);
-    ref = types._XXX_walk_permutations(type_cfg);
-    for (hedgepath of ref) {
-      debug('^2434^', hedgepath); // + ' ' + 'text'
-    }
+    (() => {
+      var count, hedgepath, ref, results, type, type_cfg;
+      count = 0;
+      type = 'integer';
+      type_cfg = new Type_cfg({
+        isa_numeric: true
+      });
+      urge('^234^', type, type_cfg);
+      ref = types._walk_hedgepaths(type_cfg);
+      results = [];
+      for (hedgepath of ref) {
+        count++;
+        results.push(info('^2434^', count, (hedgepath.join(' ')) + ' ' + type));
+      }
+      return results;
+    })();
+    (() => {
+      var count, hedgepath, ref, results, type, type_cfg;
+      count = 0;
+      type = 'text';
+      type_cfg = new Type_cfg({
+        isa_collection: true
+      });
+      urge('^234^', type, type_cfg);
+      ref = types._walk_hedgepaths(type_cfg);
+      results = [];
+      for (hedgepath of ref) {
+        count++;
+        results.push(info('^2434^', count, (hedgepath.join(' ')) + ' ' + type));
+      }
+      return results;
+    })();
     return null;
   };
 
