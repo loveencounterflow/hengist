@@ -91,8 +91,7 @@ demo_hedges = ->
   type          = 'integer'
   type_cfg      = new Type_cfg { isa_numeric: true, }
   debug '^234^', type_cfg
-  hedgepaths    = types._XXX_generate_permutations type_cfg
-  for hedgepath in hedgepaths
+  for hedgepath from types._XXX_walk_permutations type_cfg
     debug '^2434^', hedgepath # + ' ' + 'text'
   return null
 
