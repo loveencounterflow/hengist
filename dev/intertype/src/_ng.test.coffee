@@ -88,11 +88,22 @@ demo_hedges = ->
   { Intertype
     Type_cfg }  = require '../../../apps/intertype'
   types         = new Intertype()
-  type          = 'integer'
-  type_cfg      = new Type_cfg { isa_numeric: true, }
-  debug '^234^', type_cfg
-  for hedgepath from types._XXX_walk_permutations type_cfg
-    debug '^2434^', hedgepath # + ' ' + 'text'
+  do =>
+    count         = 0
+    type          = 'integer'
+    type_cfg      = new Type_cfg { isa_numeric: true, }
+    urge '^234^', type, type_cfg
+    for hedgepath from types._walk_hedgepaths type_cfg
+      count++
+      info '^2434^', count, ( hedgepath.join ' ' ) + ' ' + type
+  do =>
+    count         = 0
+    type          = 'text'
+    type_cfg      = new Type_cfg { isa_collection: true, }
+    urge '^234^', type, type_cfg
+    for hedgepath from types._walk_hedgepaths type_cfg
+      count++
+      info '^2434^', count, ( hedgepath.join ' ' ) + ' ' + type
   return null
 
 
