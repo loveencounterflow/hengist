@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, alert, badge, debug, demo, demo_hedges, echo, generate_permutations, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper;
+  var CND, H, alert, badge, debug, demo, demo_hedges, echo, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -189,49 +189,20 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_hedges = function() {
-    var Intertype, Type_cfg, hedge, hedgepath, hedgepaths, i, len, lists, type, type_cfg;
+    var Intertype, Type_cfg, hedgepath, hedgepaths, i, len, type, type_cfg, types;
     ({Intertype, Type_cfg} = require('../../../apps/intertype'));
+    types = new Intertype();
     type = 'integer';
     type_cfg = new Type_cfg({
       isa_numeric: true
     });
     debug('^234^', type_cfg);
-    lists = (function() {
-      var i, len, ref, results;
-      ref = Intertype.hedges;
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        hedge = ref[i];
-        results.push([null, ...hedge.x]);
-      }
-      return results;
-    })();
-    hedgepaths = generate_permutations(type_cfg, lists, 0);
+    hedgepaths = types._XXX_generate_permutations(type_cfg);
     for (i = 0, len = hedgepaths.length; i < len; i++) {
       hedgepath = hedgepaths[i];
       debug('^2434^', hedgepath); // + ' ' + 'text'
     }
     return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  generate_permutations = function(type_cfg, lists, list_idx, current_path = [], R = []) {
-    var i, len, list, next_path, term, term_idx;
-    /* thx to https://itecnote.com/tecnote/java-generate-all-combinations-from-multiple-lists/ */
-    if (list_idx === lists.length) {
-      R.push(current_path);
-      return R;
-    }
-    list = lists[list_idx];
-    for (term_idx = i = 0, len = list.length; i < len; term_idx = ++i) {
-      term = list[term_idx];
-      next_path = [...current_path];
-      if (term != null) {
-        next_path.push(term);
-      }
-      generate_permutations(type_cfg, lists, list_idx + 1, next_path, R);
-    }
-    return R;
   };
 
   //###########################################################################################################
