@@ -189,7 +189,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_hedges = function() {
-    var Intertype, Type_cfg, hedgepath, hedgepaths, i, len, type, type_cfg, types;
+    var Intertype, Type_cfg, hedgepath, ref, type, type_cfg, types;
     ({Intertype, Type_cfg} = require('../../../apps/intertype'));
     types = new Intertype();
     type = 'integer';
@@ -197,9 +197,8 @@
       isa_numeric: true
     });
     debug('^234^', type_cfg);
-    hedgepaths = types._XXX_generate_permutations(type_cfg);
-    for (i = 0, len = hedgepaths.length; i < len; i++) {
-      hedgepath = hedgepaths[i];
+    ref = types._XXX_walk_permutations(type_cfg);
+    for (hedgepath of ref) {
       debug('^2434^', hedgepath); // + ' ' + 'text'
     }
     return null;
