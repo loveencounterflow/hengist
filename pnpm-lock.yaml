@@ -62,7 +62,7 @@ specifiers:
   intershop-intertext: file:../intershop-intertext
   intertext: 5.0.2
   intertext-splitlines: 1.2.1
-  intertype: 7.7.0
+  intertype: 7.7.1
   jake: ^10.8.2
   javascript-state-machine: ^3.1.0
   jfee: 0.1.4
@@ -195,7 +195,7 @@ dependencies:
   intershop-intertext: file:../intershop-intertext
   intertext: 5.0.2
   intertext-splitlines: 1.2.1
-  intertype: 7.7.0
+  intertype: 7.7.1
   jake: 10.8.5
   javascript-state-machine: 3.1.0
   jfee: 0.1.4
@@ -1484,7 +1484,7 @@ packages:
     resolution: {integrity: sha512-lNapdhUmwN0y94FGYvGubow+ZznI/A8+AlETPRli5+N4WkSnCys9Md1MiG8ZFPhjpS5Z+/NYC8nWdu+sLOOd/Q==}
     dependencies:
       cnd: 9.2.2
-      intertype: 7.7.0
+      intertype: 7.7.1
       multimix: 4.1.0
     dev: false
 
@@ -1542,7 +1542,7 @@ packages:
       cnd: 9.2.2
       cupofjoe: 0.1.1
       emittery: 0.6.0
-      intertype: 7.7.0
+      intertype: 7.7.1
       letsfreezethat: 2.2.5
       multimix: 4.1.0
     dev: false
@@ -1553,7 +1553,7 @@ packages:
       cnd: 9.2.2
       cupofjoe: 0.1.1
       emittery: 0.6.0
-      intertype: 7.7.0
+      intertype: 7.7.1
       letsfreezethat: 3.1.0
       multimix: 4.1.0
     dev: false
@@ -2601,7 +2601,7 @@ packages:
     dependencies:
       cnd: 9.2.2
       datom: 7.0.3
-      intertype: 7.7.0
+      intertype: 7.7.1
       multimix: 4.1.0
       steampipes: 6.7.1
     dev: false
@@ -2610,7 +2610,7 @@ packages:
     resolution: {integrity: sha512-wbJT06yDygPP1b8QcMeQeTcu4RJAvusz2TpN6CaSnVMwifUqexOp6FuCdYKw/v2gvT/jpOYeoyfNB5umLiQKeA==}
     dependencies:
       cnd: 9.2.1
-      intertype: 7.7.0
+      intertype: 7.7.1
       interval-skip-list: 2.0.1
       multimix006modern: 0.0.6
     dev: false
@@ -2673,6 +2673,12 @@ packages:
 
   /intertype/7.7.0:
     resolution: {integrity: sha512-Sv923oXpq9In8/CuxP5KAKc3FIETOEl23ltwSfLOnn/8V8A5pDRlxWo0vhaA6p7WybRMgeZXsE4Etw98tWUMPA==}
+    dependencies:
+      multimix: 5.0.0
+    dev: false
+
+  /intertype/7.7.1:
+    resolution: {integrity: sha512-GgGJYdbHaZ5AM4TvxzXSfkgFwAIEl6w3yIFiDY15uc85W41YfSRL0vNuO68tjNQ3gNIJ+U+xOYA8cw9NN8j0JQ==}
     dependencies:
       multimix: 5.0.0
     dev: false
@@ -2904,7 +2910,7 @@ packages:
     resolution: {integrity: sha512-TteheV7ceYKk1AVoU74tngE9vTAn1EtNhZD5tYWJmfT8JMc+wn0H4RYQl7kwsJ/yTWErvJcrtFMDeY0vpJWcUQ==}
     dependencies:
       cnd: 9.2.2
-      intertype: 7.7.0
+      intertype: 7.7.1
     dev: false
 
   /jfee/0.1.4:
@@ -3380,7 +3386,7 @@ packages:
     resolution: {integrity: sha512-H8Aw9aYm6UaokHAxSj2BZnXhErx8G5yH0mu6B1or1XhKvMl6jD3QF68Z5SR03iWxxMQQIASobelJPic5GwSCow==}
     dependencies:
       cnd: 9.2.2
-      intertype: 7.7.0
+      intertype: 7.7.1
       ncr-norangereader: 2.1.3
       nearley: 2.20.1
     dev: false
@@ -3428,7 +3434,7 @@ packages:
     resolution: {integrity: sha512-r7Kfb/jZtgEj8EuVnqIsHydQ0u+rNdo2zUFOTSQ/bBpUnZsJkAQj4/8t+/fXpDlzKpN1LckkghV4WsL84DQpTQ==}
     dependencies:
       cnd: 9.2.1
-      intertype: 7.7.0
+      intertype: 7.7.1
     dev: false
 
   /mysql-tokenizer/1.0.7:
@@ -3449,7 +3455,7 @@ packages:
     dependencies:
       cnd: 9.2.1
       interskiplist: 0.3.0
-      intertype: 7.7.0
+      intertype: 7.7.1
       multimix006modern: 0.0.6
     dev: false
 
@@ -3802,7 +3808,7 @@ packages:
       cnd: 9.2.2
       datom: 8.0.3
       intertext: 8.0.0
-      intertype: 7.7.0
+      intertype: 7.7.1
       multimix: 5.0.0
       steampipes: 6.7.1
     dev: false
@@ -4433,7 +4439,7 @@ packages:
     dev: false
 
   /source-map/0.5.7:
-    resolution: {integrity: sha1-igOdLRAh0i0eoUyA2OpGi6LvP8w=}
+    resolution: {integrity: sha512-LbrmJOMUSdEVxIKvdcJzQC+nQhe8FUZQTXQy6+I75skNgn3OoQ0DZA8YnFa7gp8tqtL3KPf1kmo0R5DoApeSGQ==}
     engines: {node: '>=0.10.0'}
     dev: false
 
@@ -4470,7 +4476,7 @@ packages:
     dev: false
 
   /split/0.3.3:
-    resolution: {integrity: sha1-zQ7qXmOiEd//frDwkcQTPi0N0o8=}
+    resolution: {integrity: sha512-wD2AeVmxXRBoX44wAycgjVpMhvbwdI2aZjCkvfNcH1YqHQvJVa1duWc73OyVGJUc05fhFaTZeQ/PYsrmyH0JVA==}
     dependencies:
       through: 2.3.8
     dev: false
@@ -4538,7 +4544,7 @@ packages:
       cnd: 9.2.2
       datom: 8.0.0
       intertext-splitlines: 1.2.1
-      intertype: 7.7.0
+      intertype: 7.7.1
       jfee: 0.1.3
       multimix: 5.0.0
       timsort: 0.3.0
@@ -4558,7 +4564,7 @@ packages:
     dev: false
 
   /stream-combiner/0.0.4:
-    resolution: {integrity: sha1-TV5DPBhSYd3mI8o/RMWGvPXErRQ=}
+    resolution: {integrity: sha512-rT00SPnTVyRsaSz5zgSPma/aHSOic5U1prhYdRy5HS2kTZviFpmDgzilbtsJsxiroqACmayynDN/9VzIbX5DOw==}
     dependencies:
       duplexer: 0.1.2
     dev: false
@@ -4684,7 +4690,7 @@ packages:
     hasBin: true
     dependencies:
       cnd: 9.2.2
-      intertype: 7.7.0
+      intertype: 7.7.1
       opentype.js: 1.3.4
     dev: false
 
@@ -4777,7 +4783,7 @@ packages:
     dev: false
 
   /through/2.3.8:
-    resolution: {integrity: sha1-DdTJ/6q8NXlgsbckEV1+Doai4fU=}
+    resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
     dev: false
 
   /through2/3.0.2:
@@ -5272,7 +5278,7 @@ packages:
     dev: false
 
   /yallist/2.1.2:
-    resolution: {integrity: sha1-HBH5IY8HYImkfdUS+TxmmaaoHVI=}
+    resolution: {integrity: sha512-ncTzHV7NvsQZkYe1DW7cbDLm0YpzHmZF5r/iyP3ZnQtMiJ+pjzisCiMNI+Sj+xQF5pXhSHxSB3uDbsBTzY/c2A==}
     dev: false
 
   /yallist/4.0.0:
