@@ -61,12 +61,31 @@ demo = ->
   { Intertype }   = require '../../../apps/intertype'
   types           = new Intertype()
   jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
-  types.declare 'null',                           test: ( x ) -> x is null
-  types.declare 'array',       isa_collection: true,  test: ( x ) -> ( jto x ) is 'array'
-  ### @isa 'empty', 'isa_collection', x ###
-  # types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
-  types.declare 'list',                           test: ( x ) -> @isa 'array', x
-  types.declare 'integer',      isa_numeric: true,    test: ( x ) -> @isa 'array', x
+  # types.declare 'null',                           test: ( x ) -> x is null
+  types.declare 'text',       isa_collection: true,  test: ( x ) -> ( jto x ) is 'string'
+  # types.declare 'list',       isa_collection: true,  test: ( x ) -> ( jto x ) is 'list'
+  # ### @isa 'empty', 'isa_collection', x ###
+  # # types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
+  # types.declare 'list',                           test: ( x ) -> @isa 'array', x
+  # types.declare 'integer',      isa_numeric: true,    test: ( x ) -> @isa 'array', x
+  debug '^5345-1^', k for k of types.isa
+  debug '^5345-2^', types.isa
+  debug '^5345-3^', types.isa.empty
+  debug '^5345-4^', types.isa.empty.text ''
+  debug '^5345-5^', types.isa.empty.text 'x'
+  debug '^5345-6^', types.isa.nonempty.text ''
+  debug '^5345-7^', types.isa.nonempty.text 'x'
+  debug '^5345-8^', types.isa.empty.text 42
+  debug '^5345-9^', types.isa.list_of.text 42
+  debug '^5345-10^', types.isa.empty.list_of.text 42
+  debug '^5345-11^', types.isa.empty.list_of.text []
+  debug '^5345-12^', types.isa.optional.empty.text 42
+  debug '^5345-13^', types.isa.optional.empty.text null
+  # debug '^5345^', types.isa.optional
+  # debug '^5345^', types.isa.optional.empty
+  # debug '^5345^', types.isa.optional.empty.list_of
+  # debug '^5345^', types.isa.optional.empty.list_of.text
+  process.exit 111
   #.........................................................................................................
   info '^509-1', types.isa 'null',                         null
   info '^509-2', types.isa 'optional', 'null',             null
