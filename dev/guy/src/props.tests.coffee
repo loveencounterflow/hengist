@@ -22,7 +22,8 @@ echo                      = CND.echo.bind CND
 test                      = require '../../../apps/guy-test'
 H                         = require './helpers'
 { freeze }                = require 'letsfreezethat'
-types                     = new ( require '../../../apps/intertype' ).Intertype
+# types                     = new ( require '../../../apps/intertype' ).Intertype
+types                     = new ( require 'intertype' ).Intertype
 { isa
   type_of
   validate
@@ -199,7 +200,6 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "GUY.props.Strict_owner 2" ] = ( T, done ) ->
   GUY     = require H.guy_path
-  CAT     = require '../../../apps/multimix/lib/cataloguing'
   #.........................................................................................................
   class X extends GUY.props.Strict_owner
     prop_on_instance_1: 'prop_on_instance_1'
@@ -215,6 +215,21 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "GUY.props.Strict_owner can use explicit target" ] = ( T, done ) ->
+  GUY     = require H.guy_path
+  #.........................................................................................................
+  f = ( x ) -> x * 2
+  debug x = new GUY.props.Strict_owner { target: f, }
+  debug '^4458^', type_of x
+  debug '^4458^', typeof x
+  debug x 42
+  try urge x.bar catch error then warn CND.reverse error.message
+  T?.throws /Strict_owner instance does not have property 'bar'/, => x.bar
+  #.........................................................................................................
+  done?()
+  return null
+
 
 
 ############################################################################################################
@@ -222,7 +237,8 @@ if require.main is module then do =>
   # test @
   # @[ "GUY.props.Strict_owner 1" ]()
   # test @[ "GUY.props.Strict_owner 1" ]
-  @[ "GUY.props.Strict_owner 2" ]()
-  test @[ "GUY.props.Strict_owner 2" ]
+  # @[ "GUY.props.Strict_owner 2" ]()
+  # test @[ "GUY.props.Strict_owner 2" ]
+  test @[ "GUY.props.Strict_owner can use explicit target" ]
 
 
