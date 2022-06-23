@@ -39,7 +39,8 @@
 
   ({freeze} = require('letsfreezethat'));
 
-  types = new (require('../../../apps/intertype')).Intertype();
+  // types                     = new ( require '../../../apps/intertype' ).Intertype
+  types = new (require('intertype')).Intertype();
 
   ({isa, type_of, validate, validate_list_of, equals} = types.export());
 
@@ -520,9 +521,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["GUY.props.Strict_owner 2"] = function(T, done) {
-    var CAT, GUY, X, x;
+    var GUY, X, x;
     GUY = require(H.guy_path);
-    CAT = require('../../../apps/multimix/lib/cataloguing');
     X = (function() {
       //.........................................................................................................
       class X extends GUY.props.Strict_owner {};
@@ -552,14 +552,46 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this["GUY.props.Strict_owner can use explicit target"] = function(T, done) {
+    var GUY, error, f, x;
+    GUY = require(H.guy_path);
+    //.........................................................................................................
+    f = function(x) {
+      return x * 2;
+    };
+    debug(x = new GUY.props.Strict_owner({
+      target: f
+    }));
+    debug('^4458^', type_of(x));
+    debug('^4458^', typeof x);
+    debug(x(42));
+    try {
+      urge(x.bar);
+    } catch (error1) {
+      error = error1;
+      warn(CND.reverse(error.message));
+    }
+    if (T != null) {
+      T.throws(/Strict_owner instance does not have property 'bar'/, () => {
+        return x.bar;
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
       // @[ "GUY.props.Strict_owner 1" ]()
       // test @[ "GUY.props.Strict_owner 1" ]
-      this["GUY.props.Strict_owner 2"]();
-      return test(this["GUY.props.Strict_owner 2"]);
+      // @[ "GUY.props.Strict_owner 2" ]()
+      // test @[ "GUY.props.Strict_owner 2" ]
+      return test(this["GUY.props.Strict_owner can use explicit target"]);
     })();
   }
 
