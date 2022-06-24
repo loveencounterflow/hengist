@@ -103,6 +103,31 @@ demo = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+demo_test_with_protocol = ->
+  { Intertype
+    Type_cfg }  = require '../../../apps/intertype'
+  types         = new Intertype()
+  #.........................................................................................................
+  types.declare 'integer', isa_numeric: true, test: ( x ) -> urge '^342-1^', rpr x; Number.isInteger x
+  info '^342-2^', types.isa.integer                     42
+  info '^342-2^', types.isa.optional.integer            42
+  info '^342-2^', types.isa.optional.positive0.integer  42
+  info '^342-2^', types.isa.integer                     42.1
+  info '^342-2^', types.isa.optional.integer            42.1
+  info '^342-2^', types.isa.optional.positive0.integer  42.1
+  info '^342-2^', types.isa.integer                     null
+  info '^342-2^', types.isa.optional.integer            null
+  info '^342-2^', types.isa.optional.positive0.integer  null
+  info '^342-2^', types.isa.list_of.integer             null
+  info '^342-2^', types.isa.list_of.integer             []
+  info '^342-2^', types.isa.list_of.integer             [ 1, 2, 3, ]
+  info '^342-2^', types.isa.list_of.integer             [ 1, 2, 3.5, ]
+  info '^342-2^', types.isa.list_of.optional.integer    [ 1, 2, null, ]
+  info '^342-2^', types.isa.list_of.optional.integer    [ 1, 2, 3.5, ]
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 demo_hedges = ->
   { Intertype
     Type_cfg }  = require '../../../apps/intertype'
