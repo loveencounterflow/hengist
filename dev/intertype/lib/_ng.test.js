@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, alert, badge, debug, demo, demo_hedges, echo, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper;
+  var CND, H, alert, badge, debug, demo, demo_combinate, demo_hedges, demo_multipart_hedges, demo_test_with_protocol, echo, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -56,12 +56,11 @@
     types.declare('array', {
       isa_collection: true,
       test: function(x) {
-        return (jto(x)) === 'array';
+        return Array.isArray(x);
       }
     });
-    /* @isa 'empty', 'isa_collection', x */
-    // types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
     types.declare('list', {
+      isa_collection: true,
       test: function(x) {
         return this.isa('array', x);
       }
@@ -69,7 +68,13 @@
     types.declare('integer', {
       isa_numeric: true,
       test: function(x) {
-        return this.isa('array', x);
+        return Number.isInteger(x);
+      }
+    });
+    types.declare('text', {
+      isa_collection: true,
+      test: function(x) {
+        return (jto(x)) === 'string';
       }
     });
     //.........................................................................................................
@@ -97,6 +102,15 @@
     if (T != null) {
       T.eq(types.isa('optional', 'empty', 'array', []), true);
     }
+    if (T != null) {
+      T.eq(types.isa('optional', 'empty', 'array', null), true);
+    }
+    if (T != null) {
+      T.eq(types.isa('optional', 'empty', 'array', 42), false);
+    }
+    if (T != null) {
+      T.eq(types.isa('optional', 'empty', 'array', [42]), false);
+    }
     //.........................................................................................................
     if (T != null) {
       T.throws(/'optional' cannot be a hedge in declarations/, () => {
@@ -105,18 +119,6 @@
         });
       });
     }
-    // for type, declaration of types._types
-    //   debug '^34234^', type, declaration
-    H.tabulate('types._types', (function*() {
-      var _, ref, results, type;
-      ref = types._types;
-      results = [];
-      for (_ in ref) {
-        type = ref[_];
-        results.push((yield type));
-      }
-      return results;
-    })());
     if (typeof done === "function") {
       done();
     }
@@ -131,14 +133,8 @@
     jto = (x) => {
       return ((Object.prototype.toString.call(x)).slice(8, -1)).toLowerCase().replace(/\s+/g, '');
     };
-    // types.declare 'null',                           test: ( x ) -> x is null
-    types.declare('text', {
-      isa_collection: true,
-      test: function(x) {
-        return (jto(x)) === 'string';
-      }
-    });
     for (k in types.isa) {
+      // types.declare 'null',                           test: ( x ) -> x is null
       // types.declare 'list',       isa_collection: true,  test: ( x ) -> ( jto x ) is 'list'
       // ### @isa 'empty', 'isa_collection', x ###
       // # types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
@@ -196,6 +192,38 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  demo_test_with_protocol = function() {
+    var Intertype, Type_cfg, types;
+    ({Intertype, Type_cfg} = require('../../../apps/intertype'));
+    types = new Intertype();
+    //.........................................................................................................
+    types.declare('integer', {
+      isa_numeric: true,
+      test: function(x) {
+        urge('^342-1^', rpr(x));
+        return Number.isInteger(x);
+      }
+    });
+    info('^342-2^', types.isa.integer(42));
+    info('^342-2^', types.isa.optional.integer(42));
+    info('^342-2^', types.isa.optional.positive0.integer(42));
+    info('^342-2^', types.isa.integer(42.1));
+    info('^342-2^', types.isa.optional.integer(42.1));
+    info('^342-2^', types.isa.optional.positive0.integer(42.1));
+    info('^342-2^', types.isa.integer(null));
+    info('^342-2^', types.isa.optional.integer(null));
+    info('^342-2^', types.isa.optional.positive0.integer(null));
+    info('^342-2^', types.isa.list_of.integer(null));
+    info('^342-2^', types.isa.list_of.integer([]));
+    info('^342-2^', types.isa.list_of.integer([1, 2, 3]));
+    info('^342-2^', types.isa.list_of.integer([1, 2, 3.5]));
+    info('^342-2^', types.isa.list_of.optional.integer([1, 2, null]));
+    info('^342-2^', types.isa.list_of.optional.integer([1, 2, 3.5]));
+    //.........................................................................................................
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_hedges = function() {
     var Intertype, Type_cfg, types;
     ({Intertype, Type_cfg} = require('../../../apps/intertype'));
@@ -235,13 +263,114 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_multipart_hedges = function() {
+    var chain, chains, hedge, i, j, kernel, l, len, len1, m, prefix, prefix_idx, ref, ref1, ref2, ref3, suffix_idx;
+    hedge = {
+      terms: {
+        optional_prefixes: ['empty', 'nonempty'],
+        mandatory_kernels: ['list_of', 'set_of'],
+        optional_suffixes: ['optional']
+      },
+      match: {
+        all: true
+      }
+    };
+    //.........................................................................................................
+    chains = [];
+    for (prefix_idx = i = -1, ref = hedge.terms.optional_prefixes.length; (-1 <= ref ? i < ref : i > ref); prefix_idx = -1 <= ref ? ++i : --i) {
+      if ((prefix = (ref1 = hedge.terms.optional_prefixes[prefix_idx]) != null ? ref1 : null) != null) {
+        chain = [prefix];
+      } else {
+        chain = [];
+      }
+      ref2 = hedge.terms.mandatory_kernels;
+      for (j = 0, len = ref2.length; j < len; j++) {
+        kernel = ref2[j];
+        chains.push([...chain, kernel]);
+      }
+    }
+    for (suffix_idx = l = -1, ref3 = hedge.terms.mandatory_kernels.length; (-1 <= ref3 ? l < ref3 : l > ref3); suffix_idx = -1 <= ref3 ? ++l : --l) {
+      if ((suffix_idx = hedge.terms.optional_suffixes[suffix_idx]) != null) {
+        chains.push;
+      }
+    }
+    for (m = 0, len1 = chains.length; m < len1; m++) {
+      chain = chains[m];
+      //.........................................................................................................
+      debug('^509^', chain);
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_combinate = function() {
+    var combinate, combinations, combine, k, v, values, x;
+    combinate = (require("combinate")).default;
+    values = {
+      optional: [null, 'optional'],
+      collections: {
+        prefix: [null, 'empty', 'nonempty'],
+        kernel: ['list_of', 'set_of'],
+        suffix: [null, 'optional']
+      },
+      empty: [null, 'empty', 'nonempty']
+    };
+    // combine = ( terms ) => ( ( v for _, v of x when v? ) for x in combinate terms )
+    combine = (terms) => {
+      var _, i, len, ref, results, v, x;
+      ref = combinate(terms);
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        x = ref[i];
+        results.push((function() {
+          var results1;
+          results1 = [];
+          for (_ in x) {
+            v = x[_];
+            results1.push(v);
+          }
+          return results1;
+        })());
+      }
+      return results;
+    };
+    // combinations[ idx ] = ( e for e in x when e? ) for x, idx in combinations
+    values = {...values};
+    for (k in values) {
+      v = values[k];
+      if (Array.isArray(v)) {
+        continue;
+      }
+      values[k] = combine(v);
+    }
+    combinations = (function() {
+      var i, len, ref, results;
+      ref = combine(values);
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        x = ref[i];
+        results.push(x.flat());
+      }
+      return results;
+    })();
+    debug(combinations);
+    combinations.unshift([null, null, null, null, null]);
+    combinations.sort();
+    H.tabulate('combinate', combinations);
+    return null;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
-    demo();
+    // demo()
+    // demo_hedges()
+    // demo_test_with_protocol()
+    // demo_multipart_hedges()
+    demo_combinate();
   }
 
-  // demo_hedges()
-// test @
+  // test @
 
 }).call(this);
 
