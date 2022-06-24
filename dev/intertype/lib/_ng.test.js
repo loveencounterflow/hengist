@@ -305,7 +305,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_combinate = function() {
-    var combinate, combinations, combine, k, v, values, x;
+    var combinate, combinations, combine, compile_hedges, compiled_hedges, get_hedgepaths, values;
     combinate = (require("combinate")).default;
     values = {
       optional: [null, 'optional'],
@@ -336,27 +336,54 @@
       return results;
     };
     // combinations[ idx ] = ( e for e in x when e? ) for x, idx in combinations
-    values = {...values};
-    for (k in values) {
-      v = values[k];
-      if (Array.isArray(v)) {
-        continue;
+    compile_hedges = function(hedges) {
+      var R, k, v;
+      R = {...hedges};
+      for (k in R) {
+        v = R[k];
+        if (Array.isArray(v)) {
+          continue;
+        }
+        R[k] = combine(v);
       }
-      values[k] = combine(v);
-    }
-    combinations = (function() {
-      var i, len, ref, results;
-      ref = combine(values);
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        x = ref[i];
-        results.push(x.flat());
-      }
-      return results;
-    })();
-    debug(combinations);
+      return R;
+    };
+    get_hedgepaths = function(compiled_hedges) {
+      var R, v, x;
+      R = (function() {
+        var i, len, ref, results;
+        ref = combine(compiled_hedges);
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          x = ref[i];
+          results.push(x.flat());
+        }
+        return results;
+      })();
+      return (function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = R.length; i < len; i++) {
+          x = R[i];
+          results.push((function() {
+            var j, len1, results1;
+            results1 = [];
+            for (j = 0, len1 = x.length; j < len1; j++) {
+              v = x[j];
+              if (v != null) {
+                results1.push(v);
+              }
+            }
+            return results1;
+          })());
+        }
+        return results;
+      })();
+    };
+    compiled_hedges = compile_hedges(values);
+    combinations = get_hedgepaths(compiled_hedges);
     combinations.unshift([null, null, null, null, null]);
-    combinations.sort();
+    // combinations.sort()
     H.tabulate('combinate', combinations);
     return null;
   };
