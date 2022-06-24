@@ -32,12 +32,11 @@ H                         = require '../../../lib/helpers'
   { Intertype }   = require '../../../apps/intertype'
   types           = new Intertype()
   jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
-  types.declare 'null',                           test: ( x ) -> x is null
-  types.declare 'array',       isa_collection: true,  test: ( x ) -> ( jto x ) is 'array'
-  ### @isa 'empty', 'isa_collection', x ###
-  # types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
-  types.declare 'list',                           test: ( x ) -> @isa 'array', x
-  types.declare 'integer',      isa_numeric: true,    test: ( x ) -> @isa 'array', x
+  types.declare 'null',                             test: ( x ) -> x is null
+  types.declare 'array',    isa_collection: true,   test: ( x ) -> Array.isArray x
+  types.declare 'list',     isa_collection: true,   test: ( x ) -> @isa 'array', x
+  types.declare 'integer',  isa_numeric: true,      test: ( x ) -> Number.isInteger x
+  types.declare 'text',     isa_collection: true,   test: ( x ) -> ( jto x ) is 'string'
   #.........................................................................................................
   T?.eq ( types.isa 'null',                         null          ), true
   T?.eq ( types.isa 'optional', 'null',             null          ), true
@@ -47,11 +46,14 @@ H                         = require '../../../lib/helpers'
   T?.eq ( types.isa 'list',                         []            ), true
   T?.eq ( types.isa 'empty', 'array',               []            ), true
   T?.eq ( types.isa 'optional', 'empty', 'array',   []            ), true
+  T?.eq ( types.isa 'optional', 'empty', 'array',   null          ), true
+  T?.eq ( types.isa 'optional', 'empty', 'array',   42            ), false
+  T?.eq ( types.isa 'optional', 'empty', 'array',   [ 42, ]       ), false
   #.........................................................................................................
   T?.throws /'optional' cannot be a hedge in declarations/, => types.declare 'optional', 'integer', test: ->
   # for type, declaration of types._types
   #   debug '^34234^', type, declaration
-  H.tabulate 'types._types', ( -> yield type for _, type of types._types )()
+  # H.tabulate 'types._types', ( -> yield type for _, type of types._types )()
   #.........................................................................................................
   done?()
   return null
@@ -62,7 +64,6 @@ demo = ->
   types           = new Intertype()
   jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
   # types.declare 'null',                           test: ( x ) -> x is null
-  types.declare 'text',       isa_collection: true,  test: ( x ) -> ( jto x ) is 'string'
   # types.declare 'list',       isa_collection: true,  test: ( x ) -> ( jto x ) is 'list'
   # ### @isa 'empty', 'isa_collection', x ###
   # # types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
