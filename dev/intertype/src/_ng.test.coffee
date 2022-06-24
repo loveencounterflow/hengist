@@ -188,14 +188,19 @@ demo_combinate = ->
   # combine = ( terms ) => ( ( v for _, v of x when v? ) for x in combinate terms )
   combine = ( terms ) => ( ( v for _, v of x         ) for x in combinate terms )
     # combinations[ idx ] = ( e for e in x when e? ) for x, idx in combinations
-  values = { values..., }
-  for k, v of values
-    continue if Array.isArray v
-    values[ k ] = combine v
-  combinations = ( x.flat() for x in combine values)
-  debug combinations
+  compile_hedges = ( hedges ) ->
+    R = { hedges..., }
+    for k, v of R
+      continue if Array.isArray v
+      R[ k ] = combine v
+    return R
+  get_hedgepaths = ( compiled_hedges ) ->
+    R = ( x.flat() for x in combine compiled_hedges )
+    return ( ( v for v in x when v? ) for x in R )
+  compiled_hedges = compile_hedges values
+  combinations    = get_hedgepaths compiled_hedges
   combinations.unshift [ null, null, null, null, null ]
-  combinations.sort()
+  # combinations.sort()
   H.tabulate 'combinate', combinations
   return null
 
