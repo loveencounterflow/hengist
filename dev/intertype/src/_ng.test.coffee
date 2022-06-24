@@ -151,6 +151,56 @@ demo_hedges = ->
       info '^2434^', count, ( hedgepath.join ' ' ) + ' ' + type
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_multipart_hedges = ->
+  hedge =
+    terms:
+      optional_prefixes:  [ 'empty', 'nonempty', ]
+      mandatory_kernels:  [ 'list_of', 'set_of', ]
+      optional_suffixes:  [ 'optional', ]
+    match: { all: true, }
+  #.........................................................................................................
+  chains = []
+  for prefix_idx in [ -1 ... hedge.terms.optional_prefixes.length ]
+    if ( prefix = hedge.terms.optional_prefixes[ prefix_idx ] ? null )?
+      chain = [ prefix ]
+    else
+      chain = []
+    for kernel in hedge.terms.mandatory_kernels
+      chains.push [ chain..., kernel, ]
+  for suffix_idx in [ -1 ... hedge.terms.mandatory_kernels.length ]
+    if ( suffix_idx = hedge.terms.optional_suffixes[ suffix_idx ] )?
+      chains.push
+  #.........................................................................................................
+  debug '^509^', chain for chain in chains
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_combinate = ->
+  combinate = ( require "combinate" ).default
+  values =
+    optional:     [ null, 'optional', ]
+    collections:
+      prefix:     [ null, 'empty', 'nonempty', ]
+      kernel:     [ 'list_of', 'set_of', ]
+      suffix:     [ null, 'optional', ]
+    empty: [ null, 'empty', 'nonempty', ]
+  # combine = ( terms ) => ( ( v for _, v of x when v? ) for x in combinate terms )
+  combine = ( terms ) => ( ( v for _, v of x         ) for x in combinate terms )
+    # combinations[ idx ] = ( e for e in x when e? ) for x, idx in combinations
+  values = { values..., }
+  for k, v of values
+    continue if Array.isArray v
+    values[ k ] = combine v
+  combinations = ( x.flat() for x in combine values)
+  debug combinations
+  combinations.unshift [ null, null, null, null, null ]
+  combinations.sort()
+  H.tabulate 'combinate', combinations
+  return null
+
+
+
 
 
 
@@ -159,8 +209,11 @@ demo_hedges = ->
 
 ############################################################################################################
 unless module.parent?
-  demo()
+  # demo()
   # demo_hedges()
+  # demo_test_with_protocol()
+  # demo_multipart_hedges()
+  demo_combinate()
   # test @
 
 
