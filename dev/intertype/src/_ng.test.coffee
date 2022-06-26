@@ -240,23 +240,34 @@ demo_combinate_2 = ->
   types.get_hedgepaths = ( compiled_hedges ) ->
     R = ( x.flat() for x in combine compiled_hedges )
     return R
+  types._reduce_hedgepaths = ( combinations ) -> ( ( e for e in hp when e? ) for hp in combinations )
   #.........................................................................................................
-  # compiled_hedges = types._compile_hedges hedges, { isa_collection: true, }
-  # compiled_hedges = types._compile_hedges hedges, { isa_numeric: true, }
-  # combinations    = types.get_hedgepaths compiled_hedges
-  urge '^540^', types._compile_hedges hedges, {}
   combinations    = types.get_hedgepaths hedges[ 1 ].terms[ 1 ]
   # combinations    = types.get_hedgepaths types._compile_hedges hedges, {}
   # combinations    = types.get_hedgepaths types._compile_hedges hedges, { isa_collection: true, }
   combinations    = types.get_hedgepaths types._compile_hedges hedges, { isa_numeric: true, }
-  combinations.unshift [ null, ]
   info '^540^', combinations
   combinations.sort()
+  combinations    = types._reduce_hedgepaths combinations
   combinations.unshift [ null, null, null, null, null, null, null ]
   H.tabulate 'combinate', combinations
   return null
 
 
+#-----------------------------------------------------------------------------------------------------------
+demo_intertype_hedge_combinator = ->
+#-----------------------------------------------------------------------------------------------------------
+  { Intertype
+    Type_cfg }  = require '../../../apps/intertype'
+  types         = new Intertype()
+  #.........................................................................................................
+  hedges = types._hedges.constructor.hedges
+  combinations    = types._hedges.get_hedgepaths types._hedges._compile_hedges hedges, { isa_numeric: true, }
+  info '^540^', combinations
+  combinations.sort()
+  combinations    = types._hedges._reduce_hedgepaths combinations
+  combinations.unshift [ null, null, null, null, null, null, null ]
+  H.tabulate 'combinate', combinations
 
 
 
@@ -270,7 +281,8 @@ unless module.parent?
   # demo_hedges()
   # demo_test_with_protocol()
   # demo_multipart_hedges()
-  demo_combinate_2()
+  # demo_combinate_2()
+  demo_intertype_hedge_combinator()
   # test @
 
 
