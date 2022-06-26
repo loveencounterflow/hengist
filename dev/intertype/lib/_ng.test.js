@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, GUY, H, alert, badge, debug, demo, demo_combinate, demo_combinate_2, demo_hedges, demo_multipart_hedges, demo_test_with_protocol, echo, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper;
+  var CND, GUY, H, alert, badge, debug, demo, demo_combinate, demo_combinate_2, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_test_with_protocol, echo, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -493,23 +493,56 @@
       })();
       return R;
     };
+    types._reduce_hedgepaths = function(combinations) {
+      var e, hp, i, len, results;
+      results = [];
+      for (i = 0, len = combinations.length; i < len; i++) {
+        hp = combinations[i];
+        results.push((function() {
+          var j, len1, results1;
+          results1 = [];
+          for (j = 0, len1 = hp.length; j < len1; j++) {
+            e = hp[j];
+            if (e != null) {
+              results1.push(e);
+            }
+          }
+          return results1;
+        })());
+      }
+      return results;
+    };
     //.........................................................................................................
-    // compiled_hedges = types._compile_hedges hedges, { isa_collection: true, }
-    // compiled_hedges = types._compile_hedges hedges, { isa_numeric: true, }
-    // combinations    = types.get_hedgepaths compiled_hedges
-    urge('^540^', types._compile_hedges(hedges, {}));
     combinations = types.get_hedgepaths(hedges[1].terms[1]);
     // combinations    = types.get_hedgepaths types._compile_hedges hedges, {}
     // combinations    = types.get_hedgepaths types._compile_hedges hedges, { isa_collection: true, }
     combinations = types.get_hedgepaths(types._compile_hedges(hedges, {
       isa_numeric: true
     }));
-    combinations.unshift([null]);
     info('^540^', combinations);
     combinations.sort();
+    combinations = types._reduce_hedgepaths(combinations);
     combinations.unshift([null, null, null, null, null, null, null]);
     H.tabulate('combinate', combinations);
     return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_intertype_hedge_combinator = function() {
+    var Intertype, Type_cfg, combinations, hedges, types;
+    //-----------------------------------------------------------------------------------------------------------
+    ({Intertype, Type_cfg} = require('../../../apps/intertype'));
+    types = new Intertype();
+    //.........................................................................................................
+    hedges = types._hedges.constructor.hedges;
+    combinations = types._hedges.get_hedgepaths(types._hedges._compile_hedges(hedges, {
+      isa_numeric: true
+    }));
+    info('^540^', combinations);
+    combinations.sort();
+    combinations = types._hedges._reduce_hedgepaths(combinations);
+    combinations.unshift([null, null, null, null, null, null, null]);
+    return H.tabulate('combinate', combinations);
   };
 
   //###########################################################################################################
@@ -518,7 +551,8 @@
     // demo_hedges()
     // demo_test_with_protocol()
     // demo_multipart_hedges()
-    demo_combinate_2();
+    // demo_combinate_2()
+    demo_intertype_hedge_combinator();
   }
 
   // test @
