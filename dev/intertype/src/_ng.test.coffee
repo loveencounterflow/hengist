@@ -261,13 +261,16 @@ demo_intertype_hedge_combinator = ->
     Type_cfg }  = require '../../../apps/intertype'
   types         = new Intertype()
   #.........................................................................................................
+  # debug '^33545^', types._hedges.groupnames
   hedges = types._hedges.constructor.hedges
-  combinations    = types._hedges.get_hedgepaths types._hedges._compile_hedges hedges, { isa_numeric: true, }
-  info '^540^', combinations
-  combinations.sort()
-  combinations    = types._hedges._reduce_hedgepaths combinations
-  combinations.unshift [ null, null, null, null, null, null, null ]
-  H.tabulate 'combinate', combinations
+  for groupname from types._hedges._get_groupnames()
+    compiled_hedges = types._hedges._compile_hedges groupname, hedges
+    hedgepaths      = types._hedges.get_hedgepaths compiled_hedges
+    # info '^540^', hedgepaths
+    hedgepaths.sort()
+    hedgepaths      = types._hedges._reduce_hedgepaths hedgepaths
+    hedgepaths.unshift [ null, null, null, null, null, null, null ]
+    H.tabulate "hedgepaths for group #{rpr groupname}", hedgepaths
 
 
 
