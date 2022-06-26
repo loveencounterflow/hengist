@@ -228,21 +228,31 @@ demo_combinate_2 = ->
     R = []
     for hedge in hedges
       continue unless @_match_hedge_and_type_cfg hedge, type_cfg
-      if Array.isArray hedge.terms[ 0 ]
-        R.push combine hedge.terms
-      else
-        R.push hedge.terms
+      # termses = [ hedge.terms..., ]
+      target = []
+      R.push target
+      for termgroup in hedge.terms
+        if Array.isArray termgroup
+          target.splice target.length - 1, 0, ( @get_hedgepaths termgroup )...
+        else
+          target.push termgroup
     return R
   types.get_hedgepaths = ( compiled_hedges ) ->
     R = ( x.flat() for x in combine compiled_hedges )
-    # return ( ( v for v in x when v? ) for x in R )
-    return ( ( v for v in x         ) for x in R )
+    return R
   #.........................................................................................................
   # compiled_hedges = types._compile_hedges hedges, { isa_collection: true, }
-  compiled_hedges = types._compile_hedges hedges, { isa_numeric: true, }
-  combinations    = types.get_hedgepaths compiled_hedges
+  # compiled_hedges = types._compile_hedges hedges, { isa_numeric: true, }
+  # combinations    = types.get_hedgepaths compiled_hedges
+  urge '^540^', types._compile_hedges hedges, {}
+  combinations    = types.get_hedgepaths hedges[ 1 ].terms[ 1 ]
+  # combinations    = types.get_hedgepaths types._compile_hedges hedges, {}
+  # combinations    = types.get_hedgepaths types._compile_hedges hedges, { isa_collection: true, }
+  combinations    = types.get_hedgepaths types._compile_hedges hedges, { isa_numeric: true, }
+  combinations.unshift [ null, ]
+  info '^540^', combinations
+  combinations.sort()
   combinations.unshift [ null, null, null, null, null, null, null ]
-  # combinations.sort()
   H.tabulate 'combinate', combinations
   return null
 
