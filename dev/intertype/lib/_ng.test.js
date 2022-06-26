@@ -529,20 +529,25 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_intertype_hedge_combinator = function() {
-    var Intertype, Type_cfg, combinations, hedges, types;
+    var Intertype, Type_cfg, compiled_hedges, groupname, hedgepaths, hedges, ref, results, types;
     //-----------------------------------------------------------------------------------------------------------
     ({Intertype, Type_cfg} = require('../../../apps/intertype'));
     types = new Intertype();
     //.........................................................................................................
+    // debug '^33545^', types._hedges.groupnames
     hedges = types._hedges.constructor.hedges;
-    combinations = types._hedges.get_hedgepaths(types._hedges._compile_hedges(hedges, {
-      isa_numeric: true
-    }));
-    info('^540^', combinations);
-    combinations.sort();
-    combinations = types._hedges._reduce_hedgepaths(combinations);
-    combinations.unshift([null, null, null, null, null, null, null]);
-    return H.tabulate('combinate', combinations);
+    ref = types._hedges._get_groupnames();
+    results = [];
+    for (groupname of ref) {
+      compiled_hedges = types._hedges._compile_hedges(groupname, hedges);
+      hedgepaths = types._hedges.get_hedgepaths(compiled_hedges);
+      // info '^540^', hedgepaths
+      hedgepaths.sort();
+      hedgepaths = types._hedges._reduce_hedgepaths(hedgepaths);
+      hedgepaths.unshift([null, null, null, null, null, null, null]);
+      results.push(H.tabulate(`hedgepaths for group ${rpr(groupname)}`, hedgepaths));
+    }
+    return results;
   };
 
   //###########################################################################################################
