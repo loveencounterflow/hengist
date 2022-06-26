@@ -24,7 +24,7 @@ echo                      = CND.echo.bind CND
 test                      = require 'guy-test'
 # { intersection_of }       = require '../../../apps/intertype/lib/helpers'
 H                         = require '../../../lib/helpers'
-
+GUY                       = require 'guy'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -204,6 +204,48 @@ demo_combinate = ->
   H.tabulate 'combinate', combinations
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_combinate_2 = ->
+  { Intertype
+    Type_cfg }  = require '../../../apps/intertype'
+  types         = new Intertype()
+  combinate     = ( require "combinate" ).default
+  #.........................................................................................................
+  hedges = GUY.lft.freeze [
+    { terms: [ null, 'optional', ],                                         match: { all: true, }, }
+    { terms: [
+      null,
+      [ [ null, 'empty', 'nonempty', ]
+        [ 'list_of', 'set_of', ]
+        [ null, 'optional', ]
+        ], ],                                                               match: { all: true, }, }
+    { terms: [ null, 'empty', 'nonempty', ],                                match: { isa_collection: true, }, }
+    { terms: [ null, 'positive0', 'positive1', 'negative0', 'negative1', ], match: { isa_numeric: true, }, }
+    ]
+  #.........................................................................................................
+  combine = ( terms ) => ( ( v for _, v of x ) for x in combinate terms )
+  types._compile_hedges = ( hedges, type_cfg ) ->
+    R = []
+    for hedge in hedges
+      continue unless @_match_hedge_and_type_cfg hedge, type_cfg
+      if Array.isArray hedge.terms[ 0 ]
+        R.push combine hedge.terms
+      else
+        R.push hedge.terms
+    return R
+  types.get_hedgepaths = ( compiled_hedges ) ->
+    R = ( x.flat() for x in combine compiled_hedges )
+    # return ( ( v for v in x when v? ) for x in R )
+    return ( ( v for v in x         ) for x in R )
+  #.........................................................................................................
+  # compiled_hedges = types._compile_hedges hedges, { isa_collection: true, }
+  compiled_hedges = types._compile_hedges hedges, { isa_numeric: true, }
+  combinations    = types.get_hedgepaths compiled_hedges
+  combinations.unshift [ null, null, null, null, null, null, null ]
+  # combinations.sort()
+  H.tabulate 'combinate', combinations
+  return null
+
 
 
 
@@ -218,7 +260,7 @@ unless module.parent?
   # demo_hedges()
   # demo_test_with_protocol()
   # demo_multipart_hedges()
-  demo_combinate()
+  demo_combinate_2()
   # test @
 
 
