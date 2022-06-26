@@ -392,7 +392,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_combinate_2 = function() {
-    var Intertype, Type_cfg, combinate, combinations, combine, compiled_hedges, hedges, types;
+    var Intertype, Type_cfg, combinate, combinations, combine, hedges, types;
     ({Intertype, Type_cfg} = require('../../../apps/intertype'));
     types = new Intertype();
     combinate = (require("combinate")).default;
@@ -457,23 +457,30 @@
       return results;
     };
     types._compile_hedges = function(hedges, type_cfg) {
-      var R, hedge, i, len;
+      var R, hedge, i, j, len, len1, ref, target, termgroup;
       R = [];
       for (i = 0, len = hedges.length; i < len; i++) {
         hedge = hedges[i];
         if (!this._match_hedge_and_type_cfg(hedge, type_cfg)) {
           continue;
         }
-        if (Array.isArray(hedge.terms[0])) {
-          R.push(combine(hedge.terms));
-        } else {
-          R.push(hedge.terms);
+        // termses = [ hedge.terms..., ]
+        target = [];
+        R.push(target);
+        ref = hedge.terms;
+        for (j = 0, len1 = ref.length; j < len1; j++) {
+          termgroup = ref[j];
+          if (Array.isArray(termgroup)) {
+            target.splice(target.length - 1, 0, ...(this.get_hedgepaths(termgroup)));
+          } else {
+            target.push(termgroup);
+          }
         }
       }
       return R;
     };
     types.get_hedgepaths = function(compiled_hedges) {
-      var R, v, x;
+      var R, x;
       R = (function() {
         var i, len, ref, results;
         ref = combine(compiled_hedges);
@@ -484,33 +491,23 @@
         }
         return results;
       })();
-      return (function() {
-        var i, len, results;
-        results = [];
-        for (i = 0, len = R.length; i < len; i++) {
-          x = R[i];
-          results.push((function() {
-            var j, len1, results1;
-            results1 = [];
-            for (j = 0, len1 = x.length; j < len1; j++) {
-              v = x[j];
-              // return ( ( v for v in x when v? ) for x in R )
-              results1.push(v);
-            }
-            return results1;
-          })());
-        }
-        return results;
-      })();
+      return R;
     };
     //.........................................................................................................
     // compiled_hedges = types._compile_hedges hedges, { isa_collection: true, }
-    compiled_hedges = types._compile_hedges(hedges, {
+    // compiled_hedges = types._compile_hedges hedges, { isa_numeric: true, }
+    // combinations    = types.get_hedgepaths compiled_hedges
+    urge('^540^', types._compile_hedges(hedges, {}));
+    combinations = types.get_hedgepaths(hedges[1].terms[1]);
+    // combinations    = types.get_hedgepaths types._compile_hedges hedges, {}
+    // combinations    = types.get_hedgepaths types._compile_hedges hedges, { isa_collection: true, }
+    combinations = types.get_hedgepaths(types._compile_hedges(hedges, {
       isa_numeric: true
-    });
-    combinations = types.get_hedgepaths(compiled_hedges);
+    }));
+    combinations.unshift([null]);
+    info('^540^', combinations);
+    combinations.sort();
     combinations.unshift([null, null, null, null, null, null, null]);
-    // combinations.sort()
     H.tabulate('combinate', combinations);
     return null;
   };
