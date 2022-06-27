@@ -25,6 +25,7 @@ test                      = require 'guy-test'
 # { intersection_of }       = require '../../../apps/intertype/lib/helpers'
 H                         = require '../../../lib/helpers'
 GUY                       = require 'guy'
+equals                    = require '../../../apps/intertype/deps/jkroso-equals'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -263,15 +264,16 @@ demo_intertype_hedge_combinator = ->
   #.........................................................................................................
   # debug '^33545^', types._hedges.groupnames
   hedges = types._hedges.constructor.hedges
-  for groupname from types._hedges._get_groupnames()
+  for groupname in [ 'collections', 'numbers', 'other', ]
     compiled_hedges = types._hedges._compile_hedges groupname, hedges
     hedgepaths      = types._hedges.get_hedgepaths compiled_hedges
-    # info '^540^', hedgepaths
     hedgepaths.sort()
     hedgepaths      = types._hedges._reduce_hedgepaths hedgepaths
-    hedgepaths.unshift [ null, null, null, null, null, null, null ]
-    H.tabulate "hedgepaths for group #{rpr groupname}", hedgepaths
-
+    H.tabulate "hedgepaths for group #{rpr groupname}", [ [ null, null, null, null, null, null, null ], hedgepaths..., ]
+    info '^540^', hedgepaths
+    if groupname is 'other'
+      info CND.truth equals hedgepaths, [ [], [ 'list_of' ], [ 'list_of', 'optional' ], [ 'set_of' ], [ 'set_of', 'optional' ], [ 'empty', 'list_of' ], [ 'empty', 'list_of', 'optional' ], [ 'empty', 'set_of' ], [ 'empty', 'set_of', 'optional' ], [ 'nonempty', 'list_of' ], [ 'nonempty', 'list_of', 'optional' ], [ 'nonempty', 'set_of' ], [ 'nonempty', 'set_of', 'optional' ], [ 'optional' ], [ 'optional', 'list_of' ], [ 'optional', 'list_of', 'optional' ], [ 'optional', 'set_of' ], [ 'optional', 'set_of', 'optional' ], [ 'optional', 'empty', 'list_of' ], [ 'optional', 'empty', 'list_of', 'optional' ], [ 'optional', 'empty', 'set_of' ], [ 'optional', 'empty', 'set_of', 'optional' ], [ 'optional', 'nonempty', 'list_of' ], [ 'optional', 'nonempty', 'list_of', 'optional' ], [ 'optional', 'nonempty', 'set_of' ], [ 'optional', 'nonempty', 'set_of', 'optional' ] ]
+  return null
 
 
 
