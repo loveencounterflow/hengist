@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, GUY, H, alert, badge, debug, demo, demo_combinate, demo_combinate_2, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_test_with_protocol, echo, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper;
+  var CND, GUY, H, alert, badge, debug, demo, demo_combinate, demo_combinate_2, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_test_with_protocol, echo, equals, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -41,6 +41,8 @@
   H = require('../../../lib/helpers');
 
   GUY = require('guy');
+
+  equals = require('../../../apps/intertype/deps/jkroso-equals');
 
   //-----------------------------------------------------------------------------------------------------------
   this["isa"] = function(T, done) {
@@ -529,25 +531,27 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_intertype_hedge_combinator = function() {
-    var Intertype, Type_cfg, compiled_hedges, groupname, hedgepaths, hedges, ref, results, types;
+    var Intertype, Type_cfg, compiled_hedges, groupname, hedgepaths, hedges, i, len, ref, types;
     //-----------------------------------------------------------------------------------------------------------
     ({Intertype, Type_cfg} = require('../../../apps/intertype'));
     types = new Intertype();
     //.........................................................................................................
     // debug '^33545^', types._hedges.groupnames
     hedges = types._hedges.constructor.hedges;
-    ref = types._hedges._get_groupnames();
-    results = [];
-    for (groupname of ref) {
+    ref = ['collections', 'numbers', 'other'];
+    for (i = 0, len = ref.length; i < len; i++) {
+      groupname = ref[i];
       compiled_hedges = types._hedges._compile_hedges(groupname, hedges);
       hedgepaths = types._hedges.get_hedgepaths(compiled_hedges);
-      // info '^540^', hedgepaths
       hedgepaths.sort();
       hedgepaths = types._hedges._reduce_hedgepaths(hedgepaths);
-      hedgepaths.unshift([null, null, null, null, null, null, null]);
-      results.push(H.tabulate(`hedgepaths for group ${rpr(groupname)}`, hedgepaths));
+      H.tabulate(`hedgepaths for group ${rpr(groupname)}`, [[null, null, null, null, null, null, null], ...hedgepaths]);
+      info('^540^', hedgepaths);
+      if (groupname === 'other') {
+        info(CND.truth(equals(hedgepaths, [[], ['list_of'], ['list_of', 'optional'], ['set_of'], ['set_of', 'optional'], ['empty', 'list_of'], ['empty', 'list_of', 'optional'], ['empty', 'set_of'], ['empty', 'set_of', 'optional'], ['nonempty', 'list_of'], ['nonempty', 'list_of', 'optional'], ['nonempty', 'set_of'], ['nonempty', 'set_of', 'optional'], ['optional'], ['optional', 'list_of'], ['optional', 'list_of', 'optional'], ['optional', 'set_of'], ['optional', 'set_of', 'optional'], ['optional', 'empty', 'list_of'], ['optional', 'empty', 'list_of', 'optional'], ['optional', 'empty', 'set_of'], ['optional', 'empty', 'set_of', 'optional'], ['optional', 'nonempty', 'list_of'], ['optional', 'nonempty', 'list_of', 'optional'], ['optional', 'nonempty', 'set_of'], ['optional', 'nonempty', 'set_of', 'optional']])));
+      }
     }
-    return results;
+    return null;
   };
 
   //###########################################################################################################
