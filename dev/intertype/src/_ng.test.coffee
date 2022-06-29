@@ -64,7 +64,8 @@ demo = ->
   { Intertype }   = require '../../../apps/intertype'
   types           = new Intertype()
   jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
-  # types.declare 'null',                           test: ( x ) -> x is null
+  # types.declare 'null',               groups: 'other',            test: ( x ) -> x is null
+  types.declare 'text',               groups: 'collections',            test: ( x ) -> typeof x is 'string'
   # types.declare 'list',       isa_collection: true,  test: ( x ) -> ( jto x ) is 'list'
   # ### @isa 'empty', 'isa_collection', x ###
   # # types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
@@ -79,14 +80,18 @@ demo = ->
   debug '^5345-7^', types.isa.nonempty.text 'x'
   debug '^5345-8^', types.isa.empty.text 42
   debug '^5345-9^', types.isa.list_of.text 42
-  debug '^5345-10^', types.isa.empty.list_of.text 42
-  debug '^5345-11^', types.isa.empty.list_of.text []
-  debug '^5345-12^', types.isa.optional.empty.text 42
-  debug '^5345-13^', types.isa.optional.empty.text null
-  # debug '^5345^', types.isa.optional
-  # debug '^5345^', types.isa.optional.empty
-  # debug '^5345^', types.isa.optional.empty.list_of
-  # debug '^5345^', types.isa.optional.empty.list_of.text
+  debug '^5345-10^', types.isa.list_of.text []
+  debug '^5345-11^', types.isa.list_of.text [ 'a', 'b', ]
+  debug '^5345-12^', types.isa.nonempty.list_of.text [ 'a', 'b', ]
+  debug '^5345-13^', types.isa.nonempty.list_of.nonempty.text [ 'a', 'b', ]
+  debug '^5345-14^', types.isa.empty.list_of.text 42
+  debug '^5345-15^', types.isa.empty.list_of.text []
+  debug '^5345-16^', types.isa.optional.empty.text 42
+  debug '^5345-17^', types.isa.optional.empty.text null
+  # debug '^5345-18^', types.isa.optional
+  # debug '^5345-19^', types.isa.optional.empty
+  # debug '^5345-20^', types.isa.optional.empty.list_of
+  # debug '^5345-21^', types.isa.optional.empty.list_of.text
   process.exit 111
   #.........................................................................................................
   info '^509-1', types.isa 'null',                         null
@@ -103,6 +108,337 @@ demo = ->
   H.tabulate 'types._types', ( -> yield type for _, type of types._types )()
   #.........................................................................................................
   return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "intertype hedgepaths" ] = ( T, done ) ->
+  { Intertype
+    Type_cfg }  = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    types       = new Intertype()
+    hedgepaths  = types._hedges.hedgepaths
+    groupname   = 'other'
+    H.tabulate "hedgepaths for group #{rpr groupname}", [ [ null, null, null, null, null, null, null ], hedgepaths[ groupname ]..., ]
+    T?.eq hedgepaths[ groupname ], [ [], [ 'list_of' ], [ 'list_of', 'optional' ], [ 'set_of' ], [ 'set_of', 'optional' ], [ 'empty', 'list_of' ], [ 'empty', 'list_of', 'optional' ], [ 'empty', 'set_of' ], [ 'empty', 'set_of', 'optional' ], [ 'nonempty', 'list_of' ], [ 'nonempty', 'list_of', 'optional' ], [ 'nonempty', 'set_of' ], [ 'nonempty', 'set_of', 'optional' ], [ 'optional' ], [ 'optional', 'list_of' ], [ 'optional', 'list_of', 'optional' ], [ 'optional', 'set_of' ], [ 'optional', 'set_of', 'optional' ], [ 'optional', 'empty', 'list_of' ], [ 'optional', 'empty', 'list_of', 'optional' ], [ 'optional', 'empty', 'set_of' ], [ 'optional', 'empty', 'set_of', 'optional' ], [ 'optional', 'nonempty', 'list_of' ], [ 'optional', 'nonempty', 'list_of', 'optional' ], [ 'optional', 'nonempty', 'set_of' ], [ 'optional', 'nonempty', 'set_of', 'optional' ] ]
+    #.......................................................................................................
+    typenames =
+      other:        'boolean'
+      collections:  'set'
+      numbers:      'integer'
+    for groupname, hedgepaths of types._hedges.hedgepaths
+      info groupname
+      typename = typenames[ groupname ]
+      for hedgepath in hedgepaths
+        urge [ hedgepath..., typename ].join '.'
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "intertype all hedgepaths" ] = ( T, done ) ->
+  # T.halt_on_error true
+  { Intertype
+    Type_cfg }  = require '../../../apps/intertype'
+  types         = new Intertype()
+  { declare
+    isa       } = types
+  declare 'boolean',  groups: 'other',        test: ( x ) ->  ( x is true ) or ( x is false )
+  # declare 'integer',  groups: 'numbers',      test: ( x ) -> Number.isInteger x
+  # declare 'set',      groups: 'collections',  test: ( x ) -> x instanceof Set
+  # debug '^453-1^', isa.optional.list_of.boolean [ true, false, ]
+  # debug '^453-5^', isa.positive0.integer 42
+  # debug '^453-7^', types._types.positive0$integer.test 42
+  debug '^453-2^', isa.optional.boolean null
+  debug '^453-8^', types._types.optional$boolean.test true
+  debug '^453-8^', types._types.optional$boolean.test null
+  # debug '^453-3^', isa.optional.boolean null
+  # debug '^453-4^', isa.positive0.integer 42.1
+  # debug '^453-6^', isa.positive0.integer -42
+  # debug '^453-8^', types._types.positive0$integer.test -42
+  # # debug '^453-9^', isa.list_of.optional.boolean []
+  # # debug '^453-10^', isa.list_of.optional.boolean [ true, ]
+  # # debug '^453-11^', isa.list_of.optional.boolean [ null, ]
+  # # debug '^453-12^', ( k for k of types._types )
+  # # debug '^453-13^', types._types.list_of$optional$boolean.test [ null, ]
+  # # debug '^453-14^', isa.optional.boolean 42
+  # # debug '^453-15^', isa.list_of.optional.boolean [ 42, ]
+  # debug '^453-16^', isa.list_of.optional.integer [ null, ]
+  # debug '^453-17^', isa.list_of.optional.integer [ 42, ]
+  # debug '^453-18^', isa.list_of.optional.integer [ 42.1, ]
+  # debug '^453-19^', isa.list_of.positive0.integer [ 42.1, ]
+  # debug '^453-20^', isa.list_of.positive0.integer [ 42, ]
+  return done?()
+  #.........................................................................................................
+  ### other ###
+  info 'isa.boolean                                               '; T?.eq ( isa.boolean                                               true                      ), true
+  info 'isa.list_of.boolean                                       '; T?.eq ( isa.list_of.boolean                                       [ true, ]                 ), true
+  info 'isa.list_of.boolean                                       '; T?.eq ( isa.list_of.boolean                                       []                        ), true
+  info 'isa.list_of.optional.boolean                              '; T?.eq ( isa.list_of.optional.boolean                              []                        ), true
+  # info 'isa.list_of.optional.boolean                              '; T?.eq ( isa.list_of.optional.boolean                              [ null, ]                 ), true
+  # info 'isa.list_of.optional.boolean                              '; T?.eq ( isa.list_of.optional.boolean                              [ null, true, ]           ), true
+  info 'isa.set_of.boolean                                        '; T?.eq ( isa.set_of.boolean                                        new Set []                ), true
+  info 'isa.set_of.boolean                                        '; T?.eq ( isa.set_of.boolean                                        new Set [ false, ]        ), true
+  info 'isa.set_of.optional.boolean                               '; T?.eq ( isa.set_of.optional.boolean                               new Set []                ), true
+  # info 'isa.set_of.optional.boolean                               '; T?.eq ( isa.set_of.optional.boolean                               new Set [ null, ]         ), true
+  # info 'isa.set_of.optional.boolean                               '; T?.eq ( isa.set_of.optional.boolean                               new Set [ null, false, ]  ), true
+  info 'isa.empty.list_of.boolean                                 '; T?.eq ( isa.empty.list_of.boolean                                 []                        ), true
+  info 'isa.empty.list_of.optional.boolean                        '; T?.eq ( isa.empty.list_of.optional.boolean                        []                        ), true
+  info 'isa.empty.set_of.boolean                                  '; T?.eq ( isa.empty.set_of.boolean                                  new Set()                 ), true
+  info 'isa.empty.set_of.optional.boolean                         '; T?.eq ( isa.empty.set_of.optional.boolean                         new Set()                 ), true
+  info 'isa.nonempty.list_of.boolean                              '; T?.eq ( isa.nonempty.list_of.boolean                              [ true, ]                 ), true
+  # info 'isa.nonempty.list_of.optional.boolean                     '; T?.eq ( isa.nonempty.list_of.optional.boolean                     [ true, null, ]           ), true
+  info 'isa.nonempty.set_of.boolean                               '; T?.eq ( isa.nonempty.set_of.boolean                               new Set [ true, false, ]  ), true
+  # info 'isa.nonempty.set_of.optional.boolean                      '; T?.eq ( isa.nonempty.set_of.optional.boolean                      new Set [ null, null, ]   ), true
+  info 'isa.optional.boolean                                      '; T?.eq ( isa.optional.boolean                                      true                      ), true
+  info 'isa.optional.boolean                                      '; T?.eq ( isa.optional.boolean                                      false                     ), true
+  info 'isa.optional.boolean                                      '; T?.eq ( isa.optional.boolean                                      null                      ), true
+  info 'isa.optional.list_of.boolean                              '; T?.eq ( isa.optional.list_of.boolean                              null                      ), true
+  info 'isa.optional.list_of.boolean                              '; T?.eq ( isa.optional.list_of.boolean                              []                        ), true
+  info 'isa.optional.list_of.boolean                              '; T?.eq ( isa.optional.list_of.boolean                              [ true, ]                 ), true
+  info 'isa.optional.list_of.optional.boolean                     '; T?.eq ( isa.optional.list_of.optional.boolean                     null                      ), true
+  info 'isa.optional.list_of.optional.boolean                     '; T?.eq ( isa.optional.list_of.optional.boolean                     []                        ), true
+  # info 'isa.optional.list_of.optional.boolean                     '; T?.eq ( isa.optional.list_of.optional.boolean                     [ true, ]                 ), true
+  # info 'isa.optional.list_of.optional.boolean                     '; T?.eq ( isa.optional.list_of.optional.boolean                     [ true, null, ]           ), true
+  info 'isa.optional.set_of.boolean                               '; T?.eq ( isa.optional.set_of.boolean                               null                      ), true
+  info 'isa.optional.set_of.boolean                               '; T?.eq ( isa.optional.set_of.boolean                               new Set()                 ), true
+  info 'isa.optional.set_of.boolean                               '; T?.eq ( isa.optional.set_of.boolean                               new Set [ true, ]         ), true
+  info 'isa.optional.set_of.optional.boolean                      '; T?.eq ( isa.optional.set_of.optional.boolean                      null                      ), true
+  info 'isa.optional.set_of.optional.boolean                      '; T?.eq ( isa.optional.set_of.optional.boolean                      new Set()                 ), true
+  # info 'isa.optional.set_of.optional.boolean                      '; T?.eq ( isa.optional.set_of.optional.boolean                      new Set [ true, ]         ), true
+  # info 'isa.optional.set_of.optional.boolean                      '; T?.eq ( isa.optional.set_of.optional.boolean                      new Set [ null, ]         ), true
+  info 'isa.optional.empty.list_of.boolean                        '; T?.eq ( isa.optional.empty.list_of.boolean                        null                      ), true
+  info 'isa.optional.empty.list_of.boolean                        '; T?.eq ( isa.optional.empty.list_of.boolean                        []                        ), true
+  info 'isa.optional.empty.list_of.optional.boolean               '; T?.eq ( isa.optional.empty.list_of.optional.boolean               null                      ), true
+  info 'isa.optional.empty.list_of.optional.boolean               '; T?.eq ( isa.optional.empty.list_of.optional.boolean               []                        ), true
+  info 'isa.optional.empty.set_of.boolean                         '; T?.eq ( isa.optional.empty.set_of.boolean                         null                      ), true
+  info 'isa.optional.empty.set_of.boolean                         '; T?.eq ( isa.optional.empty.set_of.boolean                         new Set()                 ), true
+  info 'isa.optional.empty.set_of.optional.boolean                '; T?.eq ( isa.optional.empty.set_of.optional.boolean                null                      ), true
+  info 'isa.optional.empty.set_of.optional.boolean                '; T?.eq ( isa.optional.empty.set_of.optional.boolean                new Set()                 ), true
+  info 'isa.optional.nonempty.list_of.boolean                     '; T?.eq ( isa.optional.nonempty.list_of.boolean                     null                      ), true
+  info 'isa.optional.nonempty.list_of.boolean                     '; T?.eq ( isa.optional.nonempty.list_of.boolean                     [ true, ]                 ), true
+  info 'isa.optional.nonempty.list_of.boolean                     '; T?.eq ( isa.optional.nonempty.list_of.boolean                     [ false, ]                ), true
+  info 'isa.optional.nonempty.list_of.optional.boolean            '; T?.eq ( isa.optional.nonempty.list_of.optional.boolean            null                      ), true
+  # info 'isa.optional.nonempty.list_of.optional.boolean            '; T?.eq ( isa.optional.nonempty.list_of.optional.boolean            [ true, ]                 ), true
+  # info 'isa.optional.nonempty.list_of.optional.boolean            '; T?.eq ( isa.optional.nonempty.list_of.optional.boolean            [ null, null, ]           ), true
+  info 'isa.optional.nonempty.set_of.boolean                      '; T?.eq ( isa.optional.nonempty.set_of.boolean                      null                      ), true
+  info 'isa.optional.nonempty.set_of.boolean                      '; T?.eq ( isa.optional.nonempty.set_of.boolean                      new Set [ true, ]         ), true
+  info 'isa.optional.nonempty.set_of.optional.boolean             '; T?.eq ( isa.optional.nonempty.set_of.optional.boolean             null                      ), true
+  # info 'isa.optional.nonempty.set_of.optional.boolean             '; T?.eq ( isa.optional.nonempty.set_of.optional.boolean             new Set [ true, ]         ), true
+  # info 'isa.optional.nonempty.set_of.optional.boolean             '; T?.eq ( isa.optional.nonempty.set_of.optional.boolean             new Set [ false, null, ]  ), true
+  # #.........................................................................................................
+  # ### collections ###
+  # for [ v, matcher, ] in [ [ ( new Set() ), true, ], [ ( new Map() ), false, ], ]
+  #   T?.eq ( isa.set                                                   v ), matcher
+  #   T?.eq ( isa.empty.set                                             v ), matcher
+  #   T?.eq ( isa.list_of.set                                           v ), matcher
+  #   T?.eq ( isa.list_of.empty.set                                     v ), matcher
+  #   T?.eq ( isa.list_of.nonempty.set                                  v ), matcher
+  #   T?.eq ( isa.list_of.optional.set                                  v ), matcher
+  #   T?.eq ( isa.list_of.optional.empty.set                            v ), matcher
+  #   T?.eq ( isa.list_of.optional.nonempty.set                         v ), matcher
+  #   T?.eq ( isa.nonempty.set                                          v ), matcher
+  #   T?.eq ( isa.set_of.set                                            v ), matcher
+  #   T?.eq ( isa.set_of.empty.set                                      v ), matcher
+  #   T?.eq ( isa.set_of.nonempty.set                                   v ), matcher
+  #   T?.eq ( isa.set_of.optional.set                                   v ), matcher
+  #   T?.eq ( isa.set_of.optional.empty.set                             v ), matcher
+  #   T?.eq ( isa.set_of.optional.nonempty.set                          v ), matcher
+  #   T?.eq ( isa.empty.list_of.set                                     v ), matcher
+  #   T?.eq ( isa.empty.list_of.empty.set                               v ), matcher
+  #   T?.eq ( isa.empty.list_of.nonempty.set                            v ), matcher
+  #   T?.eq ( isa.empty.list_of.optional.set                            v ), matcher
+  #   T?.eq ( isa.empty.list_of.optional.empty.set                      v ), matcher
+  #   T?.eq ( isa.empty.list_of.optional.nonempty.set                   v ), matcher
+  #   T?.eq ( isa.empty.set_of.set                                      v ), matcher
+  #   T?.eq ( isa.empty.set_of.empty.set                                v ), matcher
+  #   T?.eq ( isa.empty.set_of.nonempty.set                             v ), matcher
+  #   T?.eq ( isa.empty.set_of.optional.set                             v ), matcher
+  #   T?.eq ( isa.empty.set_of.optional.empty.set                       v ), matcher
+  #   T?.eq ( isa.empty.set_of.optional.nonempty.set                    v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.set                                  v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.empty.set                            v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.nonempty.set                         v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.optional.set                         v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.optional.empty.set                   v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.optional.nonempty.set                v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.set                                   v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.empty.set                             v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.nonempty.set                          v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.optional.set                          v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.optional.empty.set                    v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.optional.nonempty.set                 v ), matcher
+  #   T?.eq ( isa.optional.set                                          v ), matcher
+  #   T?.eq ( isa.optional.empty.set                                    v ), matcher
+  #   T?.eq ( isa.optional.list_of.set                                  v ), matcher
+  #   T?.eq ( isa.optional.list_of.empty.set                            v ), matcher
+  #   T?.eq ( isa.optional.list_of.nonempty.set                         v ), matcher
+  #   T?.eq ( isa.optional.list_of.optional.set                         v ), matcher
+  #   T?.eq ( isa.optional.list_of.optional.empty.set                   v ), matcher
+  #   T?.eq ( isa.optional.list_of.optional.nonempty.set                v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set                                 v ), matcher
+  #   T?.eq ( isa.optional.set_of.set                                   v ), matcher
+  #   T?.eq ( isa.optional.set_of.empty.set                             v ), matcher
+  #   T?.eq ( isa.optional.set_of.nonempty.set                          v ), matcher
+  #   T?.eq ( isa.optional.set_of.optional.set                          v ), matcher
+  #   T?.eq ( isa.optional.set_of.optional.empty.set                    v ), matcher
+  #   T?.eq ( isa.optional.set_of.optional.nonempty.set                 v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.set                            v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.empty.set                      v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.nonempty.set                   v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.optional.set                   v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.optional.empty.set             v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.optional.nonempty.set          v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.set                             v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.empty.set                       v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.nonempty.set                    v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.optional.set                    v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.optional.empty.set              v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.optional.nonempty.set           v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.set                         v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.empty.set                   v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.nonempty.set                v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.optional.set                v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.optional.empty.set          v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.optional.nonempty.set       v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.set                          v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.empty.set                    v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.nonempty.set                 v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.optional.set                 v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.optional.empty.set           v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.optional.nonempty.set        v ), matcher
+  # #.........................................................................................................
+  # ### numbers ###
+  # for [ v, matcher, ] in [ [ 42, true, ], [ 42.1, false, ], ]
+  #   T?.eq ( isa.integer                                               v ), matcher
+  #   T?.eq ( isa.list_of.integer                                       v ), matcher
+  #   T?.eq ( isa.list_of.negative0.integer                             v ), matcher
+  #   T?.eq ( isa.list_of.negative1.integer                             v ), matcher
+  #   T?.eq ( isa.list_of.positive0.integer                             v ), matcher
+  #   T?.eq ( isa.list_of.positive1.integer                             v ), matcher
+  #   T?.eq ( isa.list_of.optional.integer                              v ), matcher
+  #   T?.eq ( isa.list_of.optional.negative0.integer                    v ), matcher
+  #   T?.eq ( isa.list_of.optional.negative1.integer                    v ), matcher
+  #   T?.eq ( isa.list_of.optional.positive0.integer                    v ), matcher
+  #   T?.eq ( isa.list_of.optional.positive1.integer                    v ), matcher
+  #   T?.eq ( isa.negative0.integer                                     v ), matcher
+  #   T?.eq ( isa.negative1.integer                                     v ), matcher
+  #   T?.eq ( isa.positive0.integer                                     v ), matcher
+  #   T?.eq ( isa.positive1.integer                                     v ), matcher
+  #   T?.eq ( isa.set_of.integer                                        v ), matcher
+  #   T?.eq ( isa.set_of.negative0.integer                              v ), matcher
+  #   T?.eq ( isa.set_of.negative1.integer                              v ), matcher
+  #   T?.eq ( isa.set_of.positive0.integer                              v ), matcher
+  #   T?.eq ( isa.set_of.positive1.integer                              v ), matcher
+  #   T?.eq ( isa.set_of.optional.integer                               v ), matcher
+  #   T?.eq ( isa.set_of.optional.negative0.integer                     v ), matcher
+  #   T?.eq ( isa.set_of.optional.negative1.integer                     v ), matcher
+  #   T?.eq ( isa.set_of.optional.positive0.integer                     v ), matcher
+  #   T?.eq ( isa.set_of.optional.positive1.integer                     v ), matcher
+  #   T?.eq ( isa.empty.list_of.integer                                 v ), matcher
+  #   T?.eq ( isa.empty.list_of.negative0.integer                       v ), matcher
+  #   T?.eq ( isa.empty.list_of.negative1.integer                       v ), matcher
+  #   T?.eq ( isa.empty.list_of.positive0.integer                       v ), matcher
+  #   T?.eq ( isa.empty.list_of.positive1.integer                       v ), matcher
+  #   T?.eq ( isa.empty.list_of.optional.integer                        v ), matcher
+  #   T?.eq ( isa.empty.list_of.optional.negative0.integer              v ), matcher
+  #   T?.eq ( isa.empty.list_of.optional.negative1.integer              v ), matcher
+  #   T?.eq ( isa.empty.list_of.optional.positive0.integer              v ), matcher
+  #   T?.eq ( isa.empty.list_of.optional.positive1.integer              v ), matcher
+  #   T?.eq ( isa.empty.set_of.integer                                  v ), matcher
+  #   T?.eq ( isa.empty.set_of.negative0.integer                        v ), matcher
+  #   T?.eq ( isa.empty.set_of.negative1.integer                        v ), matcher
+  #   T?.eq ( isa.empty.set_of.positive0.integer                        v ), matcher
+  #   T?.eq ( isa.empty.set_of.positive1.integer                        v ), matcher
+  #   T?.eq ( isa.empty.set_of.optional.integer                         v ), matcher
+  #   T?.eq ( isa.empty.set_of.optional.negative0.integer               v ), matcher
+  #   T?.eq ( isa.empty.set_of.optional.negative1.integer               v ), matcher
+  #   T?.eq ( isa.empty.set_of.optional.positive0.integer               v ), matcher
+  #   T?.eq ( isa.empty.set_of.optional.positive1.integer               v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.integer                              v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.negative0.integer                    v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.negative1.integer                    v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.positive0.integer                    v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.positive1.integer                    v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.optional.integer                     v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.optional.negative0.integer           v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.optional.negative1.integer           v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.optional.positive0.integer           v ), matcher
+  #   T?.eq ( isa.nonempty.list_of.optional.positive1.integer           v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.integer                               v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.negative0.integer                     v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.negative1.integer                     v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.positive0.integer                     v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.positive1.integer                     v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.optional.integer                      v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.optional.negative0.integer            v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.optional.negative1.integer            v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.optional.positive0.integer            v ), matcher
+  #   T?.eq ( isa.nonempty.set_of.optional.positive1.integer            v ), matcher
+  #   T?.eq ( isa.optional.integer                                      v ), matcher
+  #   T?.eq ( isa.optional.list_of.integer                              v ), matcher
+  #   T?.eq ( isa.optional.list_of.negative0.integer                    v ), matcher
+  #   T?.eq ( isa.optional.list_of.negative1.integer                    v ), matcher
+  #   T?.eq ( isa.optional.list_of.positive0.integer                    v ), matcher
+  #   T?.eq ( isa.optional.list_of.positive1.integer                    v ), matcher
+  #   T?.eq ( isa.optional.list_of.optional.integer                     v ), matcher
+  #   T?.eq ( isa.optional.list_of.optional.negative0.integer           v ), matcher
+  #   T?.eq ( isa.optional.list_of.optional.negative1.integer           v ), matcher
+  #   T?.eq ( isa.optional.list_of.optional.positive0.integer           v ), matcher
+  #   T?.eq ( isa.optional.list_of.optional.positive1.integer           v ), matcher
+  #   T?.eq ( isa.optional.negative0.integer                            v ), matcher
+  #   T?.eq ( isa.optional.negative1.integer                            v ), matcher
+  #   T?.eq ( isa.optional.positive0.integer                            v ), matcher
+  #   T?.eq ( isa.optional.positive1.integer                            v ), matcher
+  #   T?.eq ( isa.optional.set_of.integer                               v ), matcher
+  #   T?.eq ( isa.optional.set_of.negative0.integer                     v ), matcher
+  #   T?.eq ( isa.optional.set_of.negative1.integer                     v ), matcher
+  #   T?.eq ( isa.optional.set_of.positive0.integer                     v ), matcher
+  #   T?.eq ( isa.optional.set_of.positive1.integer                     v ), matcher
+  #   T?.eq ( isa.optional.set_of.optional.integer                      v ), matcher
+  #   T?.eq ( isa.optional.set_of.optional.negative0.integer            v ), matcher
+  #   T?.eq ( isa.optional.set_of.optional.negative1.integer            v ), matcher
+  #   T?.eq ( isa.optional.set_of.optional.positive0.integer            v ), matcher
+  #   T?.eq ( isa.optional.set_of.optional.positive1.integer            v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.integer                        v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.negative0.integer              v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.negative1.integer              v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.positive0.integer              v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.positive1.integer              v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.optional.integer               v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.optional.negative0.integer     v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.optional.negative1.integer     v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.optional.positive0.integer     v ), matcher
+  #   T?.eq ( isa.optional.empty.list_of.optional.positive1.integer     v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.integer                         v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.negative0.integer               v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.negative1.integer               v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.positive0.integer               v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.positive1.integer               v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.optional.integer                v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.optional.negative0.integer      v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.optional.negative1.integer      v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.optional.positive0.integer      v ), matcher
+  #   T?.eq ( isa.optional.empty.set_of.optional.positive1.integer      v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.integer                     v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.negative0.integer           v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.negative1.integer           v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.positive0.integer           v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.positive1.integer           v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.optional.integer            v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.optional.negative0.integer  v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.optional.negative1.integer  v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.optional.positive0.integer  v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list_of.optional.positive1.integer  v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.integer                      v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.negative0.integer            v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.negative1.integer            v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.positive0.integer            v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.positive1.integer            v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.optional.integer             v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.optional.negative0.integer   v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.optional.negative1.integer   v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.optional.positive0.integer   v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set_of.optional.positive1.integer   v ), matcher
+  done?()
 
 #-----------------------------------------------------------------------------------------------------------
 demo_test_with_protocol = ->
@@ -301,13 +637,16 @@ list_all_builtin_type_testers = ->
 ############################################################################################################
 unless module.parent?
   # demo()
+  # list_all_builtin_type_testers()
   # demo_hedges()
   # demo_test_with_protocol()
   # demo_multipart_hedges()
   # demo_combinate_2()
-  demo_intertype_hedge_combinator()
+  # demo_intertype_hedge_combinator()
   # test @
-
+  # @[ "intertype hedgepaths" ]()
+  @[ "intertype all hedgepaths" ]()
+  # test @[ "intertype all hedgepaths" ]
 
 
 
