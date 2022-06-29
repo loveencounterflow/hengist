@@ -284,7 +284,17 @@ demo_intertype_hedge_combinator = ->
   return null
 
 
-
+#-----------------------------------------------------------------------------------------------------------
+list_all_builtin_type_testers = ->
+  CAT                       = require 'multimix/lib/cataloguing'
+  pattern                   = /^is/
+  excludes                  = new Set [ 'isPrototypeOf', ]
+  for top_level_name in CAT.all_keys_of global
+    info top_level_name if ( top_level_name.match pattern )? and not excludes.has top_level_name
+    # whisper '^3424^', top_level_name
+    for second_level_name in CAT.all_keys_of global[ top_level_name ]
+      info "#{top_level_name}.#{second_level_name}" if ( second_level_name.match pattern )? and not excludes.has second_level_name
+  return null
 
 
 
