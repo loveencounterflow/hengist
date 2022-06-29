@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, GUY, H, alert, badge, debug, demo, demo_combinate, demo_combinate_2, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_test_with_protocol, echo, equals, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper;
+  var CND, GUY, H, alert, badge, debug, demo, demo_combinate, demo_combinate_2, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_test_with_protocol, echo, equals, help, info, list_all_builtin_type_testers, log, njs_path, praise, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -137,8 +137,14 @@
     jto = (x) => {
       return ((Object.prototype.toString.call(x)).slice(8, -1)).toLowerCase().replace(/\s+/g, '');
     };
+    // types.declare 'null',               groups: 'other',            test: ( x ) -> x is null
+    types.declare('text', {
+      groups: 'collections',
+      test: function(x) {
+        return typeof x === 'string';
+      }
+    });
     for (k in types.isa) {
-      // types.declare 'null',                           test: ( x ) -> x is null
       // types.declare 'list',       isa_collection: true,  test: ( x ) -> ( jto x ) is 'list'
       // ### @isa 'empty', 'isa_collection', x ###
       // # types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
@@ -154,14 +160,18 @@
     debug('^5345-7^', types.isa.nonempty.text('x'));
     debug('^5345-8^', types.isa.empty.text(42));
     debug('^5345-9^', types.isa.list_of.text(42));
-    debug('^5345-10^', types.isa.empty.list_of.text(42));
-    debug('^5345-11^', types.isa.empty.list_of.text([]));
-    debug('^5345-12^', types.isa.optional.empty.text(42));
-    debug('^5345-13^', types.isa.optional.empty.text(null));
-    // debug '^5345^', types.isa.optional
-    // debug '^5345^', types.isa.optional.empty
-    // debug '^5345^', types.isa.optional.empty.list_of
-    // debug '^5345^', types.isa.optional.empty.list_of.text
+    debug('^5345-10^', types.isa.list_of.text([]));
+    debug('^5345-11^', types.isa.list_of.text(['a', 'b']));
+    debug('^5345-12^', types.isa.nonempty.list_of.text(['a', 'b']));
+    debug('^5345-13^', types.isa.nonempty.list_of.nonempty.text(['a', 'b']));
+    debug('^5345-14^', types.isa.empty.list_of.text(42));
+    debug('^5345-15^', types.isa.empty.list_of.text([]));
+    debug('^5345-16^', types.isa.optional.empty.text(42));
+    debug('^5345-17^', types.isa.optional.empty.text(null));
+    // debug '^5345-18^', types.isa.optional
+    // debug '^5345-19^', types.isa.optional.empty
+    // debug '^5345-20^', types.isa.optional.empty.list_of
+    // debug '^5345-21^', types.isa.optional.empty.list_of.text
     process.exit(111);
     //.........................................................................................................
     info('^509-1', types.isa('null', null));
@@ -193,6 +203,252 @@
     })());
     //.........................................................................................................
     return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["intertype hedgepaths"] = function(T, done) {
+    var Intertype, Type_cfg;
+    ({Intertype, Type_cfg} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var groupname, hedgepath, hedgepaths, ref, results, typename, typenames, types;
+      types = new Intertype();
+      hedgepaths = types._hedges.hedgepaths;
+      groupname = 'other';
+      H.tabulate(`hedgepaths for group ${rpr(groupname)}`, [[null, null, null, null, null, null, null], ...hedgepaths[groupname]]);
+      if (T != null) {
+        T.eq(hedgepaths[groupname], [[], ['list_of'], ['list_of', 'optional'], ['set_of'], ['set_of', 'optional'], ['empty', 'list_of'], ['empty', 'list_of', 'optional'], ['empty', 'set_of'], ['empty', 'set_of', 'optional'], ['nonempty', 'list_of'], ['nonempty', 'list_of', 'optional'], ['nonempty', 'set_of'], ['nonempty', 'set_of', 'optional'], ['optional'], ['optional', 'list_of'], ['optional', 'list_of', 'optional'], ['optional', 'set_of'], ['optional', 'set_of', 'optional'], ['optional', 'empty', 'list_of'], ['optional', 'empty', 'list_of', 'optional'], ['optional', 'empty', 'set_of'], ['optional', 'empty', 'set_of', 'optional'], ['optional', 'nonempty', 'list_of'], ['optional', 'nonempty', 'list_of', 'optional'], ['optional', 'nonempty', 'set_of'], ['optional', 'nonempty', 'set_of', 'optional']]);
+      }
+      //.......................................................................................................
+      typenames = {
+        other: 'boolean',
+        collections: 'set',
+        numbers: 'integer'
+      };
+      ref = types._hedges.hedgepaths;
+      results = [];
+      for (groupname in ref) {
+        hedgepaths = ref[groupname];
+        info(groupname);
+        typename = typenames[groupname];
+        results.push((function() {
+          var i, len, results1;
+          results1 = [];
+          for (i = 0, len = hedgepaths.length; i < len; i++) {
+            hedgepath = hedgepaths[i];
+            results1.push(urge([...hedgepath, typename].join('.')));
+          }
+          return results1;
+        })());
+      }
+      return results;
+    })();
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["intertype all hedgepaths"] = function(T, done) {
+    var Intertype, Type_cfg, declare, isa, types;
+    // T.halt_on_error true
+    ({Intertype, Type_cfg} = require('../../../apps/intertype'));
+    types = new Intertype();
+    ({declare, isa} = types);
+    declare('boolean', {
+      groups: 'other',
+      test: function(x) {
+        return (x === true) || (x === false);
+      }
+    });
+    // declare 'integer',  groups: 'numbers',      test: ( x ) -> Number.isInteger x
+    // declare 'set',      groups: 'collections',  test: ( x ) -> x instanceof Set
+    // debug '^453-1^', isa.optional.list_of.boolean [ true, false, ]
+    // debug '^453-5^', isa.positive0.integer 42
+    // debug '^453-7^', types._types.positive0$integer.test 42
+    debug('^453-2^', isa.optional.boolean(null));
+    debug('^453-8^', types._types.optional$boolean.test(true));
+    debug('^453-8^', types._types.optional$boolean.test(null));
+    return typeof done === "function" ? done() : void 0;
+    //.........................................................................................................
+    /* other */
+    info('isa.boolean                                               ');
+    if (T != null) {
+      T.eq(isa.boolean(true), true);
+    }
+    info('isa.list_of.boolean                                       ');
+    if (T != null) {
+      T.eq(isa.list_of.boolean([true]), true);
+    }
+    info('isa.list_of.boolean                                       ');
+    if (T != null) {
+      T.eq(isa.list_of.boolean([]), true);
+    }
+    info('isa.list_of.optional.boolean                              ');
+    if (T != null) {
+      T.eq(isa.list_of.optional.boolean([]), true);
+    }
+    // info 'isa.list_of.optional.boolean                              '; T?.eq ( isa.list_of.optional.boolean                              [ null, ]                 ), true
+    // info 'isa.list_of.optional.boolean                              '; T?.eq ( isa.list_of.optional.boolean                              [ null, true, ]           ), true
+    info('isa.set_of.boolean                                        ');
+    if (T != null) {
+      T.eq(isa.set_of.boolean(new Set([])), true);
+    }
+    info('isa.set_of.boolean                                        ');
+    if (T != null) {
+      T.eq(isa.set_of.boolean(new Set([false])), true);
+    }
+    info('isa.set_of.optional.boolean                               ');
+    if (T != null) {
+      T.eq(isa.set_of.optional.boolean(new Set([])), true);
+    }
+    // info 'isa.set_of.optional.boolean                               '; T?.eq ( isa.set_of.optional.boolean                               new Set [ null, ]         ), true
+    // info 'isa.set_of.optional.boolean                               '; T?.eq ( isa.set_of.optional.boolean                               new Set [ null, false, ]  ), true
+    info('isa.empty.list_of.boolean                                 ');
+    if (T != null) {
+      T.eq(isa.empty.list_of.boolean([]), true);
+    }
+    info('isa.empty.list_of.optional.boolean                        ');
+    if (T != null) {
+      T.eq(isa.empty.list_of.optional.boolean([]), true);
+    }
+    info('isa.empty.set_of.boolean                                  ');
+    if (T != null) {
+      T.eq(isa.empty.set_of.boolean(new Set()), true);
+    }
+    info('isa.empty.set_of.optional.boolean                         ');
+    if (T != null) {
+      T.eq(isa.empty.set_of.optional.boolean(new Set()), true);
+    }
+    info('isa.nonempty.list_of.boolean                              ');
+    if (T != null) {
+      T.eq(isa.nonempty.list_of.boolean([true]), true);
+    }
+    // info 'isa.nonempty.list_of.optional.boolean                     '; T?.eq ( isa.nonempty.list_of.optional.boolean                     [ true, null, ]           ), true
+    info('isa.nonempty.set_of.boolean                               ');
+    if (T != null) {
+      T.eq(isa.nonempty.set_of.boolean(new Set([true, false])), true);
+    }
+    // info 'isa.nonempty.set_of.optional.boolean                      '; T?.eq ( isa.nonempty.set_of.optional.boolean                      new Set [ null, null, ]   ), true
+    info('isa.optional.boolean                                      ');
+    if (T != null) {
+      T.eq(isa.optional.boolean(true), true);
+    }
+    info('isa.optional.boolean                                      ');
+    if (T != null) {
+      T.eq(isa.optional.boolean(false), true);
+    }
+    info('isa.optional.boolean                                      ');
+    if (T != null) {
+      T.eq(isa.optional.boolean(null), true);
+    }
+    info('isa.optional.list_of.boolean                              ');
+    if (T != null) {
+      T.eq(isa.optional.list_of.boolean(null), true);
+    }
+    info('isa.optional.list_of.boolean                              ');
+    if (T != null) {
+      T.eq(isa.optional.list_of.boolean([]), true);
+    }
+    info('isa.optional.list_of.boolean                              ');
+    if (T != null) {
+      T.eq(isa.optional.list_of.boolean([true]), true);
+    }
+    info('isa.optional.list_of.optional.boolean                     ');
+    if (T != null) {
+      T.eq(isa.optional.list_of.optional.boolean(null), true);
+    }
+    info('isa.optional.list_of.optional.boolean                     ');
+    if (T != null) {
+      T.eq(isa.optional.list_of.optional.boolean([]), true);
+    }
+    // info 'isa.optional.list_of.optional.boolean                     '; T?.eq ( isa.optional.list_of.optional.boolean                     [ true, ]                 ), true
+    // info 'isa.optional.list_of.optional.boolean                     '; T?.eq ( isa.optional.list_of.optional.boolean                     [ true, null, ]           ), true
+    info('isa.optional.set_of.boolean                               ');
+    if (T != null) {
+      T.eq(isa.optional.set_of.boolean(null), true);
+    }
+    info('isa.optional.set_of.boolean                               ');
+    if (T != null) {
+      T.eq(isa.optional.set_of.boolean(new Set()), true);
+    }
+    info('isa.optional.set_of.boolean                               ');
+    if (T != null) {
+      T.eq(isa.optional.set_of.boolean(new Set([true])), true);
+    }
+    info('isa.optional.set_of.optional.boolean                      ');
+    if (T != null) {
+      T.eq(isa.optional.set_of.optional.boolean(null), true);
+    }
+    info('isa.optional.set_of.optional.boolean                      ');
+    if (T != null) {
+      T.eq(isa.optional.set_of.optional.boolean(new Set()), true);
+    }
+    // info 'isa.optional.set_of.optional.boolean                      '; T?.eq ( isa.optional.set_of.optional.boolean                      new Set [ true, ]         ), true
+    // info 'isa.optional.set_of.optional.boolean                      '; T?.eq ( isa.optional.set_of.optional.boolean                      new Set [ null, ]         ), true
+    info('isa.optional.empty.list_of.boolean                        ');
+    if (T != null) {
+      T.eq(isa.optional.empty.list_of.boolean(null), true);
+    }
+    info('isa.optional.empty.list_of.boolean                        ');
+    if (T != null) {
+      T.eq(isa.optional.empty.list_of.boolean([]), true);
+    }
+    info('isa.optional.empty.list_of.optional.boolean               ');
+    if (T != null) {
+      T.eq(isa.optional.empty.list_of.optional.boolean(null), true);
+    }
+    info('isa.optional.empty.list_of.optional.boolean               ');
+    if (T != null) {
+      T.eq(isa.optional.empty.list_of.optional.boolean([]), true);
+    }
+    info('isa.optional.empty.set_of.boolean                         ');
+    if (T != null) {
+      T.eq(isa.optional.empty.set_of.boolean(null), true);
+    }
+    info('isa.optional.empty.set_of.boolean                         ');
+    if (T != null) {
+      T.eq(isa.optional.empty.set_of.boolean(new Set()), true);
+    }
+    info('isa.optional.empty.set_of.optional.boolean                ');
+    if (T != null) {
+      T.eq(isa.optional.empty.set_of.optional.boolean(null), true);
+    }
+    info('isa.optional.empty.set_of.optional.boolean                ');
+    if (T != null) {
+      T.eq(isa.optional.empty.set_of.optional.boolean(new Set()), true);
+    }
+    info('isa.optional.nonempty.list_of.boolean                     ');
+    if (T != null) {
+      T.eq(isa.optional.nonempty.list_of.boolean(null), true);
+    }
+    info('isa.optional.nonempty.list_of.boolean                     ');
+    if (T != null) {
+      T.eq(isa.optional.nonempty.list_of.boolean([true]), true);
+    }
+    info('isa.optional.nonempty.list_of.boolean                     ');
+    if (T != null) {
+      T.eq(isa.optional.nonempty.list_of.boolean([false]), true);
+    }
+    info('isa.optional.nonempty.list_of.optional.boolean            ');
+    if (T != null) {
+      T.eq(isa.optional.nonempty.list_of.optional.boolean(null), true);
+    }
+    // info 'isa.optional.nonempty.list_of.optional.boolean            '; T?.eq ( isa.optional.nonempty.list_of.optional.boolean            [ true, ]                 ), true
+    // info 'isa.optional.nonempty.list_of.optional.boolean            '; T?.eq ( isa.optional.nonempty.list_of.optional.boolean            [ null, null, ]           ), true
+    info('isa.optional.nonempty.set_of.boolean                      ');
+    if (T != null) {
+      T.eq(isa.optional.nonempty.set_of.boolean(null), true);
+    }
+    info('isa.optional.nonempty.set_of.boolean                      ');
+    if (T != null) {
+      T.eq(isa.optional.nonempty.set_of.boolean(new Set([true])), true);
+    }
+    info('isa.optional.nonempty.set_of.optional.boolean             ');
+    if (T != null) {
+      T.eq(isa.optional.nonempty.set_of.optional.boolean(null), true);
+    }
+    return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -568,17 +824,45 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  list_all_builtin_type_testers = function() {
+    var CAT, excludes, i, j, len, len1, pattern, ref, ref1, second_level_name, top_level_name;
+    CAT = require('multimix/lib/cataloguing');
+    pattern = /^is/;
+    excludes = new Set(['isPrototypeOf']);
+    ref = CAT.all_keys_of(global);
+    for (i = 0, len = ref.length; i < len; i++) {
+      top_level_name = ref[i];
+      if (((top_level_name.match(pattern)) != null) && !excludes.has(top_level_name)) {
+        info(top_level_name);
+      }
+      ref1 = CAT.all_keys_of(global[top_level_name]);
+      // whisper '^3424^', top_level_name
+      for (j = 0, len1 = ref1.length; j < len1; j++) {
+        second_level_name = ref1[j];
+        if (((second_level_name.match(pattern)) != null) && !excludes.has(second_level_name)) {
+          info(`${top_level_name}.${second_level_name}`);
+        }
+      }
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // demo()
+    // list_all_builtin_type_testers()
     // demo_hedges()
     // demo_test_with_protocol()
     // demo_multipart_hedges()
     // demo_combinate_2()
-    demo_intertype_hedge_combinator();
+    // demo_intertype_hedge_combinator()
+    // test @
+    // @[ "intertype hedgepaths" ]()
+    this["intertype all hedgepaths"]();
   }
 
-  // test @
+  // test @[ "intertype all hedgepaths" ]
 
 }).call(this);
 
