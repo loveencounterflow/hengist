@@ -249,8 +249,8 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["intertype all hedgepaths"] = function(T, done) {
-    var Intertype, Type_cfg, declare, isa, types;
+  this["intertype all hedgepaths"] = async function(T, done) {
+    var Intertype, Type_cfg, declare, error, i, isa, len, matcher, probe, probes_and_matchers, types, value;
     // T.halt_on_error true
     ({Intertype, Type_cfg} = require('../../../apps/intertype'));
     types = new Intertype();
@@ -263,190 +263,31 @@
     });
     // declare 'integer',  groups: 'numbers',      test: ( x ) -> Number.isInteger x
     // declare 'set',      groups: 'collections',  test: ( x ) -> x instanceof Set
-    // debug '^453-1^', isa.optional.list_of.boolean [ true, false, ]
-    // debug '^453-5^', isa.positive0.integer 42
-    // debug '^453-7^', types._types.positive0$integer.test 42
-    debug('^453-2^', isa.optional.boolean(null));
-    debug('^453-8^', types._types.optional$boolean.test(true));
-    debug('^453-8^', types._types.optional$boolean.test(null));
-    return typeof done === "function" ? done() : void 0;
     //.........................................................................................................
-    /* other */
-    info('isa.boolean                                               ');
-    if (T != null) {
-      T.eq(isa.boolean(true), true);
-    }
-    info('isa.list_of.boolean                                       ');
-    if (T != null) {
-      T.eq(isa.list_of.boolean([true]), true);
-    }
-    info('isa.list_of.boolean                                       ');
-    if (T != null) {
-      T.eq(isa.list_of.boolean([]), true);
-    }
-    info('isa.list_of.optional.boolean                              ');
-    if (T != null) {
-      T.eq(isa.list_of.optional.boolean([]), true);
-    }
-    // info 'isa.list_of.optional.boolean                              '; T?.eq ( isa.list_of.optional.boolean                              [ null, ]                 ), true
-    // info 'isa.list_of.optional.boolean                              '; T?.eq ( isa.list_of.optional.boolean                              [ null, true, ]           ), true
-    info('isa.set_of.boolean                                        ');
-    if (T != null) {
-      T.eq(isa.set_of.boolean(new Set([])), true);
-    }
-    info('isa.set_of.boolean                                        ');
-    if (T != null) {
-      T.eq(isa.set_of.boolean(new Set([false])), true);
-    }
-    info('isa.set_of.optional.boolean                               ');
-    if (T != null) {
-      T.eq(isa.set_of.optional.boolean(new Set([])), true);
-    }
-    // info 'isa.set_of.optional.boolean                               '; T?.eq ( isa.set_of.optional.boolean                               new Set [ null, ]         ), true
-    // info 'isa.set_of.optional.boolean                               '; T?.eq ( isa.set_of.optional.boolean                               new Set [ null, false, ]  ), true
-    info('isa.empty.list_of.boolean                                 ');
-    if (T != null) {
-      T.eq(isa.empty.list_of.boolean([]), true);
-    }
-    info('isa.empty.list_of.optional.boolean                        ');
-    if (T != null) {
-      T.eq(isa.empty.list_of.optional.boolean([]), true);
-    }
-    info('isa.empty.set_of.boolean                                  ');
-    if (T != null) {
-      T.eq(isa.empty.set_of.boolean(new Set()), true);
-    }
-    info('isa.empty.set_of.optional.boolean                         ');
-    if (T != null) {
-      T.eq(isa.empty.set_of.optional.boolean(new Set()), true);
-    }
-    info('isa.nonempty.list_of.boolean                              ');
-    if (T != null) {
-      T.eq(isa.nonempty.list_of.boolean([true]), true);
-    }
-    // info 'isa.nonempty.list_of.optional.boolean                     '; T?.eq ( isa.nonempty.list_of.optional.boolean                     [ true, null, ]           ), true
-    info('isa.nonempty.set_of.boolean                               ');
-    if (T != null) {
-      T.eq(isa.nonempty.set_of.boolean(new Set([true, false])), true);
-    }
-    // info 'isa.nonempty.set_of.optional.boolean                      '; T?.eq ( isa.nonempty.set_of.optional.boolean                      new Set [ null, null, ]   ), true
-    info('isa.optional.boolean                                      ');
-    if (T != null) {
-      T.eq(isa.optional.boolean(true), true);
-    }
-    info('isa.optional.boolean                                      ');
-    if (T != null) {
-      T.eq(isa.optional.boolean(false), true);
-    }
-    info('isa.optional.boolean                                      ');
-    if (T != null) {
-      T.eq(isa.optional.boolean(null), true);
-    }
-    info('isa.optional.list_of.boolean                              ');
-    if (T != null) {
-      T.eq(isa.optional.list_of.boolean(null), true);
-    }
-    info('isa.optional.list_of.boolean                              ');
-    if (T != null) {
-      T.eq(isa.optional.list_of.boolean([]), true);
-    }
-    info('isa.optional.list_of.boolean                              ');
-    if (T != null) {
-      T.eq(isa.optional.list_of.boolean([true]), true);
-    }
-    info('isa.optional.list_of.optional.boolean                     ');
-    if (T != null) {
-      T.eq(isa.optional.list_of.optional.boolean(null), true);
-    }
-    info('isa.optional.list_of.optional.boolean                     ');
-    if (T != null) {
-      T.eq(isa.optional.list_of.optional.boolean([]), true);
-    }
-    // info 'isa.optional.list_of.optional.boolean                     '; T?.eq ( isa.optional.list_of.optional.boolean                     [ true, ]                 ), true
-    // info 'isa.optional.list_of.optional.boolean                     '; T?.eq ( isa.optional.list_of.optional.boolean                     [ true, null, ]           ), true
-    info('isa.optional.set_of.boolean                               ');
-    if (T != null) {
-      T.eq(isa.optional.set_of.boolean(null), true);
-    }
-    info('isa.optional.set_of.boolean                               ');
-    if (T != null) {
-      T.eq(isa.optional.set_of.boolean(new Set()), true);
-    }
-    info('isa.optional.set_of.boolean                               ');
-    if (T != null) {
-      T.eq(isa.optional.set_of.boolean(new Set([true])), true);
-    }
-    info('isa.optional.set_of.optional.boolean                      ');
-    if (T != null) {
-      T.eq(isa.optional.set_of.optional.boolean(null), true);
-    }
-    info('isa.optional.set_of.optional.boolean                      ');
-    if (T != null) {
-      T.eq(isa.optional.set_of.optional.boolean(new Set()), true);
-    }
-    // info 'isa.optional.set_of.optional.boolean                      '; T?.eq ( isa.optional.set_of.optional.boolean                      new Set [ true, ]         ), true
-    // info 'isa.optional.set_of.optional.boolean                      '; T?.eq ( isa.optional.set_of.optional.boolean                      new Set [ null, ]         ), true
-    info('isa.optional.empty.list_of.boolean                        ');
-    if (T != null) {
-      T.eq(isa.optional.empty.list_of.boolean(null), true);
-    }
-    info('isa.optional.empty.list_of.boolean                        ');
-    if (T != null) {
-      T.eq(isa.optional.empty.list_of.boolean([]), true);
-    }
-    info('isa.optional.empty.list_of.optional.boolean               ');
-    if (T != null) {
-      T.eq(isa.optional.empty.list_of.optional.boolean(null), true);
-    }
-    info('isa.optional.empty.list_of.optional.boolean               ');
-    if (T != null) {
-      T.eq(isa.optional.empty.list_of.optional.boolean([]), true);
-    }
-    info('isa.optional.empty.set_of.boolean                         ');
-    if (T != null) {
-      T.eq(isa.optional.empty.set_of.boolean(null), true);
-    }
-    info('isa.optional.empty.set_of.boolean                         ');
-    if (T != null) {
-      T.eq(isa.optional.empty.set_of.boolean(new Set()), true);
-    }
-    info('isa.optional.empty.set_of.optional.boolean                ');
-    if (T != null) {
-      T.eq(isa.optional.empty.set_of.optional.boolean(null), true);
-    }
-    info('isa.optional.empty.set_of.optional.boolean                ');
-    if (T != null) {
-      T.eq(isa.optional.empty.set_of.optional.boolean(new Set()), true);
-    }
-    info('isa.optional.nonempty.list_of.boolean                     ');
-    if (T != null) {
-      T.eq(isa.optional.nonempty.list_of.boolean(null), true);
-    }
-    info('isa.optional.nonempty.list_of.boolean                     ');
-    if (T != null) {
-      T.eq(isa.optional.nonempty.list_of.boolean([true]), true);
-    }
-    info('isa.optional.nonempty.list_of.boolean                     ');
-    if (T != null) {
-      T.eq(isa.optional.nonempty.list_of.boolean([false]), true);
-    }
-    info('isa.optional.nonempty.list_of.optional.boolean            ');
-    if (T != null) {
-      T.eq(isa.optional.nonempty.list_of.optional.boolean(null), true);
-    }
-    // info 'isa.optional.nonempty.list_of.optional.boolean            '; T?.eq ( isa.optional.nonempty.list_of.optional.boolean            [ true, ]                 ), true
-    // info 'isa.optional.nonempty.list_of.optional.boolean            '; T?.eq ( isa.optional.nonempty.list_of.optional.boolean            [ null, null, ]           ), true
-    info('isa.optional.nonempty.set_of.boolean                      ');
-    if (T != null) {
-      T.eq(isa.optional.nonempty.set_of.boolean(null), true);
-    }
-    info('isa.optional.nonempty.set_of.boolean                      ');
-    if (T != null) {
-      T.eq(isa.optional.nonempty.set_of.boolean(new Set([true])), true);
-    }
-    info('isa.optional.nonempty.set_of.optional.boolean             ');
-    if (T != null) {
-      T.eq(isa.optional.nonempty.set_of.optional.boolean(null), true);
+    probes_and_matchers = [[/* other */ 'isa.boolean', true, true], ['isa.list_of.boolean', [true], true], ['isa.list_of.boolean', [], true], ['isa.list_of.optional.boolean', [], true], ['isa.list_of.optional.boolean', [null], true], ['isa.list_of.optional.boolean', [null, true], true], ['isa.set_of.boolean', new Set([]), true], ['isa.set_of.boolean', new Set([false]), true], ['isa.set_of.optional.boolean', new Set([]), true], ['isa.set_of.optional.boolean', new Set([null]), true], ['isa.set_of.optional.boolean', new Set([null, false]), true], ['isa.empty.list_of.boolean', [], true], ['isa.empty.list_of.optional.boolean', [], true], ['isa.empty.set_of.boolean', new Set(), true], ['isa.empty.set_of.optional.boolean', new Set(), true], ['isa.nonempty.list_of.boolean', [true], true], ['isa.nonempty.list_of.optional.boolean', [true, null], true], ['isa.nonempty.set_of.boolean', new Set([true, false]), true], ['isa.nonempty.set_of.optional.boolean', new Set([null, null]), true], ['isa.optional.boolean', true, true], ['isa.optional.boolean', false, true], ['isa.optional.boolean', null, true], ['isa.optional.list_of.boolean', null, true], ['isa.optional.list_of.boolean', [], true], ['isa.optional.list_of.boolean', [true], true], ['isa.optional.list_of.optional.boolean', null, true], ['isa.optional.list_of.optional.boolean', [], true], ['isa.optional.list_of.optional.boolean', [true], true], ['isa.optional.list_of.optional.boolean', [true, null], true], ['isa.optional.set_of.boolean', null, true], ['isa.optional.set_of.boolean', new Set(), true], ['isa.optional.set_of.boolean', new Set([true]), true], ['isa.optional.set_of.optional.boolean', null, true], ['isa.optional.set_of.optional.boolean', new Set(), true], ['isa.optional.set_of.optional.boolean', new Set([true]), true], ['isa.optional.set_of.optional.boolean', new Set([null]), true], ['isa.optional.empty.list_of.boolean', null, true], ['isa.optional.empty.list_of.boolean', [], true], ['isa.optional.empty.list_of.optional.boolean', null, true], ['isa.optional.empty.list_of.optional.boolean', [], true], ['isa.optional.empty.set_of.boolean', null, true], ['isa.optional.empty.set_of.boolean', new Set(), true], ['isa.optional.empty.set_of.optional.boolean', null, true], ['isa.optional.empty.set_of.optional.boolean', new Set(), true], ['isa.optional.nonempty.list_of.boolean', null, true], ['isa.optional.nonempty.list_of.boolean', [true], true], ['isa.optional.nonempty.list_of.boolean', [false], true], ['isa.optional.nonempty.list_of.optional.boolean', null, true], ['isa.optional.nonempty.list_of.optional.boolean', [true], true], ['isa.optional.nonempty.list_of.optional.boolean', [null, null], true], ['isa.optional.nonempty.set_of.boolean', null, true], ['isa.optional.nonempty.set_of.boolean', new Set([true]), true], ['isa.optional.nonempty.set_of.optional.boolean', null, true], ['isa.optional.nonempty.set_of.optional.boolean', new Set([true]), true], ['isa.optional.nonempty.set_of.optional.boolean', new Set([false, null]), true]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, value, matcher, error] = probes_and_matchers[i];
+      await T.perform([probe, value], matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var _, callable, hedges, result;
+          [_, ...hedges] = probe.split('.');
+          callable = isa;
+          callable = (() => {
+            var j, len1, term;
+            for (j = 0, len1 = hedges.length; j < len1; j++) {
+              term = hedges[j];
+              callable = callable[term];
+            }
+            return callable;
+          })();
+          result = callable(value);
+          // log rpr [ probe, result, ]
+          // resolve result
+          resolve(result);
+          return null;
+        });
+      });
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -859,10 +700,9 @@
     // demo_intertype_hedge_combinator()
     // test @
     // @[ "intertype hedgepaths" ]()
-    this["intertype all hedgepaths"]();
+    // @[ "intertype all hedgepaths" ]()
+    test(this["intertype all hedgepaths"]);
   }
-
-  // test @[ "intertype all hedgepaths" ]
 
 }).call(this);
 
