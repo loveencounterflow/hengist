@@ -144,86 +144,79 @@ demo = ->
   declare 'boolean',  groups: 'other',        test: ( x ) ->  ( x is true ) or ( x is false )
   # declare 'integer',  groups: 'numbers',      test: ( x ) -> Number.isInteger x
   # declare 'set',      groups: 'collections',  test: ( x ) -> x instanceof Set
-  # debug '^453-1^', isa.optional.list_of.boolean [ true, false, ]
-  # debug '^453-5^', isa.positive0.integer 42
-  # debug '^453-7^', types._types.positive0$integer.test 42
-  debug '^453-2^', isa.optional.boolean null
-  debug '^453-8^', types._types.optional$boolean.test true
-  debug '^453-8^', types._types.optional$boolean.test null
-  # debug '^453-3^', isa.optional.boolean null
-  # debug '^453-4^', isa.positive0.integer 42.1
-  # debug '^453-6^', isa.positive0.integer -42
-  # debug '^453-8^', types._types.positive0$integer.test -42
-  # # debug '^453-9^', isa.list_of.optional.boolean []
-  # # debug '^453-10^', isa.list_of.optional.boolean [ true, ]
-  # # debug '^453-11^', isa.list_of.optional.boolean [ null, ]
-  # # debug '^453-12^', ( k for k of types._types )
-  # # debug '^453-13^', types._types.list_of$optional$boolean.test [ null, ]
-  # # debug '^453-14^', isa.optional.boolean 42
-  # # debug '^453-15^', isa.list_of.optional.boolean [ 42, ]
-  # debug '^453-16^', isa.list_of.optional.integer [ null, ]
-  # debug '^453-17^', isa.list_of.optional.integer [ 42, ]
-  # debug '^453-18^', isa.list_of.optional.integer [ 42.1, ]
-  # debug '^453-19^', isa.list_of.positive0.integer [ 42.1, ]
-  # debug '^453-20^', isa.list_of.positive0.integer [ 42, ]
-  return done?()
   #.........................................................................................................
-  ### other ###
-  info 'isa.boolean                                               '; T?.eq ( isa.boolean                                               true                      ), true
-  info 'isa.list_of.boolean                                       '; T?.eq ( isa.list_of.boolean                                       [ true, ]                 ), true
-  info 'isa.list_of.boolean                                       '; T?.eq ( isa.list_of.boolean                                       []                        ), true
-  info 'isa.list_of.optional.boolean                              '; T?.eq ( isa.list_of.optional.boolean                              []                        ), true
-  # info 'isa.list_of.optional.boolean                              '; T?.eq ( isa.list_of.optional.boolean                              [ null, ]                 ), true
-  # info 'isa.list_of.optional.boolean                              '; T?.eq ( isa.list_of.optional.boolean                              [ null, true, ]           ), true
-  info 'isa.set_of.boolean                                        '; T?.eq ( isa.set_of.boolean                                        new Set []                ), true
-  info 'isa.set_of.boolean                                        '; T?.eq ( isa.set_of.boolean                                        new Set [ false, ]        ), true
-  info 'isa.set_of.optional.boolean                               '; T?.eq ( isa.set_of.optional.boolean                               new Set []                ), true
-  # info 'isa.set_of.optional.boolean                               '; T?.eq ( isa.set_of.optional.boolean                               new Set [ null, ]         ), true
-  # info 'isa.set_of.optional.boolean                               '; T?.eq ( isa.set_of.optional.boolean                               new Set [ null, false, ]  ), true
-  info 'isa.empty.list_of.boolean                                 '; T?.eq ( isa.empty.list_of.boolean                                 []                        ), true
-  info 'isa.empty.list_of.optional.boolean                        '; T?.eq ( isa.empty.list_of.optional.boolean                        []                        ), true
-  info 'isa.empty.set_of.boolean                                  '; T?.eq ( isa.empty.set_of.boolean                                  new Set()                 ), true
-  info 'isa.empty.set_of.optional.boolean                         '; T?.eq ( isa.empty.set_of.optional.boolean                         new Set()                 ), true
-  info 'isa.nonempty.list_of.boolean                              '; T?.eq ( isa.nonempty.list_of.boolean                              [ true, ]                 ), true
-  # info 'isa.nonempty.list_of.optional.boolean                     '; T?.eq ( isa.nonempty.list_of.optional.boolean                     [ true, null, ]           ), true
-  info 'isa.nonempty.set_of.boolean                               '; T?.eq ( isa.nonempty.set_of.boolean                               new Set [ true, false, ]  ), true
-  # info 'isa.nonempty.set_of.optional.boolean                      '; T?.eq ( isa.nonempty.set_of.optional.boolean                      new Set [ null, null, ]   ), true
-  info 'isa.optional.boolean                                      '; T?.eq ( isa.optional.boolean                                      true                      ), true
-  info 'isa.optional.boolean                                      '; T?.eq ( isa.optional.boolean                                      false                     ), true
-  info 'isa.optional.boolean                                      '; T?.eq ( isa.optional.boolean                                      null                      ), true
-  info 'isa.optional.list_of.boolean                              '; T?.eq ( isa.optional.list_of.boolean                              null                      ), true
-  info 'isa.optional.list_of.boolean                              '; T?.eq ( isa.optional.list_of.boolean                              []                        ), true
-  info 'isa.optional.list_of.boolean                              '; T?.eq ( isa.optional.list_of.boolean                              [ true, ]                 ), true
-  info 'isa.optional.list_of.optional.boolean                     '; T?.eq ( isa.optional.list_of.optional.boolean                     null                      ), true
-  info 'isa.optional.list_of.optional.boolean                     '; T?.eq ( isa.optional.list_of.optional.boolean                     []                        ), true
-  # info 'isa.optional.list_of.optional.boolean                     '; T?.eq ( isa.optional.list_of.optional.boolean                     [ true, ]                 ), true
-  # info 'isa.optional.list_of.optional.boolean                     '; T?.eq ( isa.optional.list_of.optional.boolean                     [ true, null, ]           ), true
-  info 'isa.optional.set_of.boolean                               '; T?.eq ( isa.optional.set_of.boolean                               null                      ), true
-  info 'isa.optional.set_of.boolean                               '; T?.eq ( isa.optional.set_of.boolean                               new Set()                 ), true
-  info 'isa.optional.set_of.boolean                               '; T?.eq ( isa.optional.set_of.boolean                               new Set [ true, ]         ), true
-  info 'isa.optional.set_of.optional.boolean                      '; T?.eq ( isa.optional.set_of.optional.boolean                      null                      ), true
-  info 'isa.optional.set_of.optional.boolean                      '; T?.eq ( isa.optional.set_of.optional.boolean                      new Set()                 ), true
-  # info 'isa.optional.set_of.optional.boolean                      '; T?.eq ( isa.optional.set_of.optional.boolean                      new Set [ true, ]         ), true
-  # info 'isa.optional.set_of.optional.boolean                      '; T?.eq ( isa.optional.set_of.optional.boolean                      new Set [ null, ]         ), true
-  info 'isa.optional.empty.list_of.boolean                        '; T?.eq ( isa.optional.empty.list_of.boolean                        null                      ), true
-  info 'isa.optional.empty.list_of.boolean                        '; T?.eq ( isa.optional.empty.list_of.boolean                        []                        ), true
-  info 'isa.optional.empty.list_of.optional.boolean               '; T?.eq ( isa.optional.empty.list_of.optional.boolean               null                      ), true
-  info 'isa.optional.empty.list_of.optional.boolean               '; T?.eq ( isa.optional.empty.list_of.optional.boolean               []                        ), true
-  info 'isa.optional.empty.set_of.boolean                         '; T?.eq ( isa.optional.empty.set_of.boolean                         null                      ), true
-  info 'isa.optional.empty.set_of.boolean                         '; T?.eq ( isa.optional.empty.set_of.boolean                         new Set()                 ), true
-  info 'isa.optional.empty.set_of.optional.boolean                '; T?.eq ( isa.optional.empty.set_of.optional.boolean                null                      ), true
-  info 'isa.optional.empty.set_of.optional.boolean                '; T?.eq ( isa.optional.empty.set_of.optional.boolean                new Set()                 ), true
-  info 'isa.optional.nonempty.list_of.boolean                     '; T?.eq ( isa.optional.nonempty.list_of.boolean                     null                      ), true
-  info 'isa.optional.nonempty.list_of.boolean                     '; T?.eq ( isa.optional.nonempty.list_of.boolean                     [ true, ]                 ), true
-  info 'isa.optional.nonempty.list_of.boolean                     '; T?.eq ( isa.optional.nonempty.list_of.boolean                     [ false, ]                ), true
-  info 'isa.optional.nonempty.list_of.optional.boolean            '; T?.eq ( isa.optional.nonempty.list_of.optional.boolean            null                      ), true
-  # info 'isa.optional.nonempty.list_of.optional.boolean            '; T?.eq ( isa.optional.nonempty.list_of.optional.boolean            [ true, ]                 ), true
-  # info 'isa.optional.nonempty.list_of.optional.boolean            '; T?.eq ( isa.optional.nonempty.list_of.optional.boolean            [ null, null, ]           ), true
-  info 'isa.optional.nonempty.set_of.boolean                      '; T?.eq ( isa.optional.nonempty.set_of.boolean                      null                      ), true
-  info 'isa.optional.nonempty.set_of.boolean                      '; T?.eq ( isa.optional.nonempty.set_of.boolean                      new Set [ true, ]         ), true
-  info 'isa.optional.nonempty.set_of.optional.boolean             '; T?.eq ( isa.optional.nonempty.set_of.optional.boolean             null                      ), true
-  # info 'isa.optional.nonempty.set_of.optional.boolean             '; T?.eq ( isa.optional.nonempty.set_of.optional.boolean             new Set [ true, ]         ), true
-  # info 'isa.optional.nonempty.set_of.optional.boolean             '; T?.eq ( isa.optional.nonempty.set_of.optional.boolean             new Set [ false, null, ]  ), true
+  probes_and_matchers = [
+    ### other ###
+    [ 'isa.boolean',                                   (   true                    ), true, ]
+    [ 'isa.list_of.boolean',                           (   [ true, ]               ), true, ]
+    [ 'isa.list_of.boolean',                           (   []                      ), true, ]
+    [ 'isa.list_of.optional.boolean',                  ( []                        ), true, ]
+    [ 'isa.list_of.optional.boolean',                  ( [ null, ]                 ), true, ]
+    [ 'isa.list_of.optional.boolean',                  ( [ null, true, ]           ), true, ]
+    [ 'isa.set_of.boolean',                            ( new Set []                ), true, ]
+    [ 'isa.set_of.boolean',                            ( new Set [ false, ]        ), true, ]
+    [ 'isa.set_of.optional.boolean',                   ( new Set []                ), true, ]
+    [ 'isa.set_of.optional.boolean',                   ( new Set [ null, ]         ), true, ]
+    [ 'isa.set_of.optional.boolean',                   ( new Set [ null, false, ]  ), true, ]
+    [ 'isa.empty.list_of.boolean',                     ( []                        ), true, ]
+    [ 'isa.empty.list_of.optional.boolean',            ( []                        ), true, ]
+    [ 'isa.empty.set_of.boolean',                      ( new Set()                 ), true, ]
+    [ 'isa.empty.set_of.optional.boolean',             ( new Set()                 ), true, ]
+    [ 'isa.nonempty.list_of.boolean',                  ( [ true, ]                 ), true, ]
+    [ 'isa.nonempty.list_of.optional.boolean',         ( [ true, null, ]           ), true, ]
+    [ 'isa.nonempty.set_of.boolean',                   ( new Set [ true, false, ]  ), true, ]
+    [ 'isa.nonempty.set_of.optional.boolean',          ( new Set [ null, null, ]   ), true, ]
+    [ 'isa.optional.boolean',                          ( true                      ), true, ]
+    [ 'isa.optional.boolean',                          ( false                     ), true, ]
+    [ 'isa.optional.boolean',                          ( null                      ), true, ]
+    [ 'isa.optional.list_of.boolean',                  ( null                      ), true, ]
+    [ 'isa.optional.list_of.boolean',                  ( []                        ), true, ]
+    [ 'isa.optional.list_of.boolean',                  ( [ true, ]                 ), true, ]
+    [ 'isa.optional.list_of.optional.boolean',         ( null                      ), true, ]
+    [ 'isa.optional.list_of.optional.boolean',         ( []                        ), true, ]
+    [ 'isa.optional.list_of.optional.boolean',         ( [ true, ]                 ), true, ]
+    [ 'isa.optional.list_of.optional.boolean',         ( [ true, null, ]           ), true, ]
+    [ 'isa.optional.set_of.boolean',                   ( null                      ), true, ]
+    [ 'isa.optional.set_of.boolean',                   ( new Set()                 ), true, ]
+    [ 'isa.optional.set_of.boolean',                   ( new Set [ true, ]         ), true, ]
+    [ 'isa.optional.set_of.optional.boolean',          ( null                      ), true, ]
+    [ 'isa.optional.set_of.optional.boolean',          ( new Set()                 ), true, ]
+    [ 'isa.optional.set_of.optional.boolean',          ( new Set [ true, ]         ), true, ]
+    [ 'isa.optional.set_of.optional.boolean',          ( new Set [ null, ]         ), true, ]
+    [ 'isa.optional.empty.list_of.boolean',            ( null                      ), true, ]
+    [ 'isa.optional.empty.list_of.boolean',            ( []                        ), true, ]
+    [ 'isa.optional.empty.list_of.optional.boolean',   ( null                      ), true, ]
+    [ 'isa.optional.empty.list_of.optional.boolean',   ( []                        ), true, ]
+    [ 'isa.optional.empty.set_of.boolean',             ( null                      ), true, ]
+    [ 'isa.optional.empty.set_of.boolean',             ( new Set()                 ), true, ]
+    [ 'isa.optional.empty.set_of.optional.boolean',    ( null                      ), true, ]
+    [ 'isa.optional.empty.set_of.optional.boolean',    ( new Set()                 ), true, ]
+    [ 'isa.optional.nonempty.list_of.boolean',         ( null                      ), true, ]
+    [ 'isa.optional.nonempty.list_of.boolean',         ( [ true, ]                 ), true, ]
+    [ 'isa.optional.nonempty.list_of.boolean',         ( [ false, ]                ), true, ]
+    [ 'isa.optional.nonempty.list_of.optional.boolean',( null                      ), true, ]
+    [ 'isa.optional.nonempty.list_of.optional.boolean',( [ true, ]                 ), true, ]
+    [ 'isa.optional.nonempty.list_of.optional.boolean',( [ null, null, ]           ), true, ]
+    [ 'isa.optional.nonempty.set_of.boolean',          ( null                      ), true, ]
+    [ 'isa.optional.nonempty.set_of.boolean',          ( new Set [ true, ]         ), true, ]
+    [ 'isa.optional.nonempty.set_of.optional.boolean', ( null                      ), true, ]
+    [ 'isa.optional.nonempty.set_of.optional.boolean', ( new Set [ true, ]         ), true, ]
+    [ 'isa.optional.nonempty.set_of.optional.boolean', ( new Set [ false, null, ]  ), true, ]
+    ]
+  #.........................................................................................................
+  for [ probe, value, matcher, error, ] in probes_and_matchers
+    await T.perform [ probe, value, ], matcher, error, -> return new Promise ( resolve, reject ) ->
+      [ _, hedges..., ] = probe.split '.'
+      callable          = isa
+      callable          = do =>
+        for term in hedges
+          callable = callable[ term ]
+        return callable
+      result = callable value
+      # log rpr [ probe, result, ]
+      # resolve result
+      resolve result
+      return null
   # #.........................................................................................................
   # ### collections ###
   # for [ v, matcher, ] in [ [ ( new Set() ), true, ], [ ( new Map() ), false, ], ]
@@ -645,8 +638,8 @@ unless module.parent?
   # demo_intertype_hedge_combinator()
   # test @
   # @[ "intertype hedgepaths" ]()
-  @[ "intertype all hedgepaths" ]()
-  # test @[ "intertype all hedgepaths" ]
+  # @[ "intertype all hedgepaths" ]()
+  test @[ "intertype all hedgepaths" ]
 
 
 
