@@ -52,7 +52,7 @@ specifiers:
   gitlog: ^4.0.4
   glob: 7.2.0
   got: ^11.8.2
-  guy: 4.1.2
+  guy: 5.1.0
   guy-test: 4.2.1
   hamt: ^2.2.2
   hashbow: ^1.1.1
@@ -186,7 +186,7 @@ dependencies:
   gitlog: 4.0.4
   glob: 7.2.0
   got: 11.8.5
-  guy: 4.1.2
+  guy: 5.1.0
   guy-test: 4.2.1
   hamt: 2.2.2
   hashbow: 1.1.1
@@ -2351,11 +2351,11 @@ packages:
       letsfreezethat: 3.1.0
     dev: false
 
-  /guy/4.1.2:
-    resolution: {integrity: sha512-U9C12Dxk/yUNzV58cQutW5noGH6Y8pkqsbdNc60Yn/cHtudRCJ1ITju+dnLEV/juaUsOUxZdi3KJrBbBZOKiOw==}
+  /guy/5.1.0:
+    resolution: {integrity: sha512-1EDYpUsCTkO4mwQOH+ohPZBrKTzhh75M8AD+aYRZJ5LSUrF4ao4ok5XfdF5WEy66cD2sdLfOqbl6Rsb4viEXHg==}
     dependencies:
       cnd: 9.2.2
-      intertype: 7.6.7
+      intertype: 7.7.1
       letsfreezethat: 3.1.0
     dev: false
 
