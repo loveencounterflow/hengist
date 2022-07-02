@@ -139,13 +139,18 @@
     };
     // types.declare 'null',               groups: 'other',            test: ( x ) -> x is null
     types.declare('text', {
-      groups: 'collections',
+      groups: 'collection',
       test: function(x) {
         return typeof x === 'string';
       }
     });
-    debug('^45345^', types.isa);
-    debug('^45345^', (function() {
+    // debug '^5345-1^', types
+    debug('^5345-2^', types.groups);
+    // debug '^5345-3^', types.isa
+    debug('^5345-4^', types.isa.collection);
+    debug('^5345-5^', types.type_of('x'));
+    debug('^5345-6^', types.isa.collection('x'));
+    debug('^5345-7^', (function() {
       var results;
       results = [];
       for (k in types.isa) {
@@ -159,33 +164,33 @@
       // # types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
       // types.declare 'list',                           test: ( x ) -> @isa 'array', x
       // types.declare 'integer',      isa_numeric: true,    test: ( x ) -> @isa 'array', x
-      debug('^5345-1^', k);
+      debug('^5345-8^', k);
     }
-    debug('^5345-2^', types._isa);
-    debug('^5345-3^', types._isa('text', ''));
-    debug('^5345-4^', types._isa('text', 'xxx'));
-    debug('^5345-5^', types._isa('text', 42));
-    // debug '^5345-6^', types._isa 'empty'
-    debug('^5345-7^', types._isa('empty', 'text', ''));
-    debug('^5345-9^', types._isa('empty', 'text', 'xxx'));
-    debug('^5345-10^', types._isa('empty', 'text', 42));
-    // debug '^5345-5^', types.isa.empty.text 'x'
-    // debug '^5345-6^', types.isa.nonempty.text ''
-    // debug '^5345-7^', types.isa.nonempty.text 'x'
-    // debug '^5345-8^', types.isa.empty.text 42
-    // debug '^5345-9^', types.isa.list_of.text 42
-    // debug '^5345-10^', types.isa.list_of.text []
-    // debug '^5345-11^', types.isa.list_of.text [ 'a', 'b', ]
-    // debug '^5345-12^', types.isa.nonempty.list_of.text [ 'a', 'b', ]
-    // debug '^5345-13^', types.isa.nonempty.list_of.nonempty.text [ 'a', 'b', ]
-    // debug '^5345-14^', types.isa.empty.list_of.text 42
-    // debug '^5345-15^', types.isa.empty.list_of.text []
-    // debug '^5345-16^', types.isa.optional.empty.text 42
-    // debug '^5345-17^', types.isa.optional.empty.text null
-    // debug '^5345-18^', types.isa.optional
-    // debug '^5345-19^', types.isa.optional.empty
-    // debug '^5345-20^', types.isa.optional.empty.list_of
-    // debug '^5345-21^', types.isa.optional.empty.list_of.text
+    debug('^5345-9^', types._isa);
+    debug('^5345-10^', types._isa('text', ''));
+    debug('^5345-11^', types._isa('text', 'xxx'));
+    debug('^5345-12^', types._isa('text', 42));
+    // debug '^5345-13^', types._isa 'empty'
+    debug('^5345-14^', types._isa('empty', 'text', ''));
+    debug('^5345-15^', types._isa('empty', 'text', 'xxx'));
+    debug('^5345-16^', types._isa('empty', 'text', 42));
+    // debug '^5345-17^', types.isa.empty.text 'x'
+    // debug '^5345-18^', types.isa.nonempty.text ''
+    // debug '^5345-19^', types.isa.nonempty.text 'x'
+    // debug '^5345-20^', types.isa.empty.text 42
+    // debug '^5345-21^', types.isa.list_of.text 42
+    // debug '^5345-22^', types.isa.list_of.text []
+    // debug '^5345-23^', types.isa.list_of.text [ 'a', 'b', ]
+    // debug '^5345-24^', types.isa.nonempty.list_of.text [ 'a', 'b', ]
+    // debug '^5345-25^', types.isa.nonempty.list_of.nonempty.text [ 'a', 'b', ]
+    // debug '^5345-26^', types.isa.empty.list_of.text 42
+    // debug '^5345-27^', types.isa.empty.list_of.text []
+    // debug '^5345-28^', types.isa.optional.empty.text 42
+    // debug '^5345-29^', types.isa.optional.empty.text null
+    // debug '^5345-30^', types.isa.optional
+    // debug '^5345-31^', types.isa.optional.empty
+    // debug '^5345-32^', types.isa.optional.empty.list_of
+    // debug '^5345-33^', types.isa.optional.empty.list_of.text
     process.exit(111);
     //.........................................................................................................
     info('^509-1', types.isa('null', null));
@@ -705,18 +710,19 @@
 
   //###########################################################################################################
   if (module.parent == null) {
-    // demo()
-    // list_all_builtin_type_testers()
-    // demo_hedges()
-    // demo_test_with_protocol()
-    // demo_multipart_hedges()
-    // demo_combinate_2()
-    // demo_intertype_hedge_combinator()
-    // test @
-    // @[ "intertype hedgepaths" ]()
-    // @[ "intertype all hedgepaths" ]()
-    test(this["intertype all hedgepaths"]);
+    demo();
   }
+
+  // list_all_builtin_type_testers()
+// demo_hedges()
+// demo_test_with_protocol()
+// demo_multipart_hedges()
+// demo_combinate_2()
+// demo_intertype_hedge_combinator()
+// test @
+// @[ "intertype hedgepaths" ]()
+// @[ "intertype all hedgepaths" ]()
+// test @[ "intertype all hedgepaths" ]
 
 }).call(this);
 
