@@ -144,6 +144,15 @@
         return typeof x === 'string';
       }
     });
+    debug('^45345^', types.isa);
+    debug('^45345^', (function() {
+      var results;
+      results = [];
+      for (k in types.isa) {
+        results.push(k);
+      }
+      return results;
+    })());
     for (k in types.isa) {
       // types.declare 'list',       isa_collection: true,  test: ( x ) -> ( jto x ) is 'list'
       // ### @isa 'empty', 'isa_collection', x ###
@@ -152,22 +161,27 @@
       // types.declare 'integer',      isa_numeric: true,    test: ( x ) -> @isa 'array', x
       debug('^5345-1^', k);
     }
-    debug('^5345-2^', types.isa);
-    debug('^5345-3^', types.isa.empty);
-    debug('^5345-4^', types.isa.empty.text(''));
-    debug('^5345-5^', types.isa.empty.text('x'));
-    debug('^5345-6^', types.isa.nonempty.text(''));
-    debug('^5345-7^', types.isa.nonempty.text('x'));
-    debug('^5345-8^', types.isa.empty.text(42));
-    debug('^5345-9^', types.isa.list_of.text(42));
-    debug('^5345-10^', types.isa.list_of.text([]));
-    debug('^5345-11^', types.isa.list_of.text(['a', 'b']));
-    debug('^5345-12^', types.isa.nonempty.list_of.text(['a', 'b']));
-    debug('^5345-13^', types.isa.nonempty.list_of.nonempty.text(['a', 'b']));
-    debug('^5345-14^', types.isa.empty.list_of.text(42));
-    debug('^5345-15^', types.isa.empty.list_of.text([]));
-    debug('^5345-16^', types.isa.optional.empty.text(42));
-    debug('^5345-17^', types.isa.optional.empty.text(null));
+    debug('^5345-2^', types._isa);
+    debug('^5345-3^', types._isa('text', ''));
+    debug('^5345-4^', types._isa('text', 'xxx'));
+    debug('^5345-5^', types._isa('text', 42));
+    // debug '^5345-6^', types._isa 'empty'
+    debug('^5345-7^', types._isa('empty', 'text', ''));
+    debug('^5345-9^', types._isa('empty', 'text', 'xxx'));
+    debug('^5345-10^', types._isa('empty', 'text', 42));
+    // debug '^5345-5^', types.isa.empty.text 'x'
+    // debug '^5345-6^', types.isa.nonempty.text ''
+    // debug '^5345-7^', types.isa.nonempty.text 'x'
+    // debug '^5345-8^', types.isa.empty.text 42
+    // debug '^5345-9^', types.isa.list_of.text 42
+    // debug '^5345-10^', types.isa.list_of.text []
+    // debug '^5345-11^', types.isa.list_of.text [ 'a', 'b', ]
+    // debug '^5345-12^', types.isa.nonempty.list_of.text [ 'a', 'b', ]
+    // debug '^5345-13^', types.isa.nonempty.list_of.nonempty.text [ 'a', 'b', ]
+    // debug '^5345-14^', types.isa.empty.list_of.text 42
+    // debug '^5345-15^', types.isa.empty.list_of.text []
+    // debug '^5345-16^', types.isa.optional.empty.text 42
+    // debug '^5345-17^', types.isa.optional.empty.text null
     // debug '^5345-18^', types.isa.optional
     // debug '^5345-19^', types.isa.optional.empty
     // debug '^5345-20^', types.isa.optional.empty.list_of
