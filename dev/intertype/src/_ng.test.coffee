@@ -26,6 +26,7 @@ test                      = require 'guy-test'
 H                         = require '../../../lib/helpers'
 GUY                       = require 'guy'
 equals                    = require '../../../apps/intertype/deps/jkroso-equals'
+S                         = ( parts ) -> new Set eval parts.raw[ 0 ]
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -165,6 +166,26 @@ demo = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "intertype size_of" ] = ( T, done ) ->
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  probes_and_matchers = [
+    [ [ [],           ], 0, ]
+    [ [ [ 1, 2, 3, ], ], 3, ]
+    [ [ 42,           ], null, 'expected an object with `x.length` or `x.size`, got a float' ]
+    [ [ 42, null,     ], null, ]
+    [ [ 42, 0,        ], 0, ]
+    [ [ S"",          ], 0, ]
+    [ [ S"'abc𪜁'",    ], 4, ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      resolve result = types.size_of probe...
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "intertype all hedgepaths" ] = ( T, done ) ->
   # T?.halt_on_error true
   { Intertype
@@ -175,9 +196,6 @@ demo = ->
   declare 'boolean',  groups: 'other',        test: ( x ) ->  ( x is true ) or ( x is false )
   declare 'integer',  groups: 'number',       test: ( x ) -> Number.isInteger x
   declare 'set',      groups: 'collection',   test: ( x ) -> x instanceof Set
-  #.........................................................................................................
-  VM = require 'node:vm'
-  S = ( parts ) -> new Set eval parts.raw[ 0 ]
   #.........................................................................................................
   probes_and_matchers = [
     ### other ###
@@ -265,22 +283,24 @@ demo = ->
     [ 'isa.set_of.optional.nonempty.set',                     ( S""                    ), true, ]
     [ 'isa.set_of.optional.nonempty.set',                     ( S"null"                    ), true, ]
     [ 'isa.set_of.optional.nonempty.set',                     ( S"[new Set('a')]"                    ), true, ]
-    # [ 'isa.empty.list_of.set',                                ( null                    ), true, ]
-    # [ 'isa.empty.list_of.empty.set',                          ( null                    ), true, ]
-    # [ 'isa.empty.list_of.nonempty.set',                       ( null                    ), true, ]
-    # [ 'isa.empty.list_of.optional.set',                       ( null                    ), true, ]
-    # [ 'isa.empty.list_of.optional.empty.set',                 ( null                    ), true, ]
-    # [ 'isa.empty.list_of.optional.nonempty.set',              ( null                    ), true, ]
-    # [ 'isa.empty.set_of.set',                                 ( null                    ), true, ]
-    # [ 'isa.empty.set_of.empty.set',                           ( null                    ), true, ]
-    # [ 'isa.empty.set_of.nonempty.set',                        ( null                    ), true, ]
-    # [ 'isa.empty.set_of.optional.set',                        ( null                    ), true, ]
-    # [ 'isa.empty.set_of.optional.empty.set',                  ( null                    ), true, ]
-    # [ 'isa.empty.set_of.optional.nonempty.set',               ( null                    ), true, ]
-    # [ 'isa.nonempty.list_of.set',                             ( null                    ), true, ]
-    # [ 'isa.nonempty.list_of.empty.set',                       ( null                    ), true, ]
-    # [ 'isa.nonempty.list_of.nonempty.set',                    ( null                    ), true, ]
-    # [ 'isa.nonempty.list_of.optional.set',                    ( null                    ), true, ]
+    [ 'isa.empty.list_of.set',                                ( []                    ), true, ]
+    [ 'isa.empty.list_of.empty.set',                          ( []                    ), true, ]
+    [ 'isa.empty.list_of.nonempty.set',                       ( []                    ), true, ]
+    [ 'isa.empty.list_of.optional.set',                       ( []                    ), true, ]
+    [ 'isa.empty.list_of.optional.empty.set',                 ( []                    ), true, ]
+    [ 'isa.empty.list_of.optional.nonempty.set',              ( []                    ), true, ]
+    [ 'isa.empty.set_of.set',                                 ( S""                    ), true, ]
+    [ 'isa.empty.set_of.empty.set',                           ( S""                    ), true, ]
+    [ 'isa.empty.set_of.nonempty.set',                        ( S""                    ), true, ]
+    [ 'isa.empty.set_of.optional.set',                        ( S""                    ), true, ]
+    [ 'isa.empty.set_of.optional.empty.set',                  ( S""                    ), true, ]
+    [ 'isa.empty.set_of.optional.nonempty.set',               ( S""                    ), true, ]
+    [ 'isa.nonempty.list_of.set',                             ( [ S"", ]                    ), true, ]
+    [ 'isa.nonempty.list_of.set',                             ( [ S"'x'", ]                    ), true, ]
+    [ 'isa.nonempty.list_of.empty.set',                       ( [ S"", S"", ]                    ), true, ]
+    [ 'isa.nonempty.list_of.nonempty.set',                    ( [ S"[1]", S"[2]", ]                    ), true, ]
+    [ 'isa.nonempty.list_of.optional.set',                    ( [ null, ]                    ), true, ]
+    [ 'isa.nonempty.list_of.optional.set',                    ( [ null, S"'abc'", ]                    ), true, ]
     # [ 'isa.nonempty.list_of.optional.empty.set',              ( null                    ), true, ]
     # [ 'isa.nonempty.list_of.optional.nonempty.set',           ( null                    ), true, ]
     # [ 'isa.nonempty.set_of.set',                              ( null                    ), true, ]
@@ -686,8 +706,13 @@ unless module.parent?
   # @[ "intertype hedgepaths" ]()
   # @[ "intertype all hedgepaths" ]()
   test @[ "intertype all hedgepaths" ]
-
-
+  # test @[ "intertype size_of" ]
+  # parser = require 'acorn-loose'
+  # { generate } = require 'astring'
+  # debug parser.parse ( ( x ) -> @isa.foo x ).toString(), { ecmaVersion: '2022', }
+  # urge generate { type: 'Program', start: 0, end: 49, body: [ { type: 'FunctionDeclaration', start: 0, end: 49, id: { type: 'Identifier', start: 8, end: 8, name: '✖' }, params: [ { type: 'Identifier', start: 9, end: 10, name: 'x' } ], generator: false, expression: false, async: false, body: { type: 'BlockStatement', start: 12, end: 49, body: [ { type: 'ReturnStatement', start: 20, end: 43, argument: { type: 'CallExpression', start: 27, end: 42, callee: { type: 'MemberExpression', start: 27, end: 39, object: { type: 'MemberExpression', start: 27, end: 35, object: { type: 'ThisExpression', start: 27, end: 31 }, property: { type: 'Identifier', start: 32, end: 35, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 36, end: 39, name: 'foo' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 40, end: 41, name: 'x' } ], optional: false } } ] } } ], sourceType: 'script' }
+  # urge generate { type: 'BlockStatement', start: 12, end: 49, body: [ { type: 'ReturnStatement', start: 20, end: 43, argument: { type: 'CallExpression', start: 27, end: 42, callee: { type: 'MemberExpression', start: 27, end: 39, object: { type: 'MemberExpression', start: 27, end: 35, object: { type: 'ThisExpression', start: 27, end: 31 }, property: { type: 'Identifier', start: 32, end: 35, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 36, end: 39, name: 'foo' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 40, end: 41, name: 'x' } ], optional: false } } ] }
+  # urge generate { type: 'ReturnStatement', start: 20, end: 43, argument: { type: 'CallExpression', start: 27, end: 42, callee: { type: 'MemberExpression', start: 27, end: 39, object: { type: 'MemberExpression', start: 27, end: 35, object: { type: 'ThisExpression', start: 27, end: 31 }, property: { type: 'Identifier', start: 32, end: 35, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 36, end: 39, name: 'foo' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 40, end: 41, name: 'x' } ], optional: false } }
 
 
 
