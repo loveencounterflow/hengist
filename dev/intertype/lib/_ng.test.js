@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, GUY, H, alert, badge, debug, demo, demo_combinate, demo_combinate_2, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_test_with_protocol, echo, equals, help, info, list_all_builtin_type_testers, log, njs_path, praise, rpr, test, urge, warn, whisper;
+  var CND, GUY, H, S, alert, badge, debug, demo, demo_combinate, demo_combinate_2, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_test_with_protocol, echo, equals, help, info, list_all_builtin_type_testers, log, njs_path, praise, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -43,6 +43,10 @@
   GUY = require('guy');
 
   equals = require('../../../apps/intertype/deps/jkroso-equals');
+
+  S = function(parts) {
+    return new Set(eval(parts.raw[0]));
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this["isa"] = function(T, done) {
@@ -287,8 +291,27 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["intertype size_of"] = async function(T, done) {
+    var Intertype, error, i, len, matcher, probe, probes_and_matchers, types;
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    probes_and_matchers = [[[[]], 0], [[[1, 2, 3]], 3], [[42], null, 'expected an object with `x.length` or `x.size`, got a float'], [[42, null], null], [[42, 0], 0], [[S``], 0], [[S`'abc𪜁'`], 4]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var result;
+          return resolve(result = types.size_of(...probe));
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["intertype all hedgepaths"] = async function(T, done) {
-    var Intertype, S, Type_cfg, VM, declare, error, i, isa, len, matcher, probe, probes_and_matchers, types, value;
+    var Intertype, Type_cfg, declare, error, i, isa, len, matcher, probe, probes_and_matchers, types, value;
     // T?.halt_on_error true
     ({Intertype, Type_cfg} = require('../../../apps/intertype'));
     types = new Intertype();
@@ -311,11 +334,6 @@
         return x instanceof Set;
       }
     });
-    //.........................................................................................................
-    VM = require('node:vm');
-    S = function(parts) {
-      return new Set(eval(parts.raw[0]));
-    };
     //.........................................................................................................
     probes_and_matchers = [
       [/* other */
@@ -573,6 +591,63 @@
       true],
       ['isa.set_of.optional.nonempty.set',
       S`[new Set('a')]`,
+      true],
+      ['isa.empty.list_of.set',
+      [],
+      true],
+      ['isa.empty.list_of.empty.set',
+      [],
+      true],
+      ['isa.empty.list_of.nonempty.set',
+      [],
+      true],
+      ['isa.empty.list_of.optional.set',
+      [],
+      true],
+      ['isa.empty.list_of.optional.empty.set',
+      [],
+      true],
+      ['isa.empty.list_of.optional.nonempty.set',
+      [],
+      true],
+      ['isa.empty.set_of.set',
+      S``,
+      true],
+      ['isa.empty.set_of.empty.set',
+      S``,
+      true],
+      ['isa.empty.set_of.nonempty.set',
+      S``,
+      true],
+      ['isa.empty.set_of.optional.set',
+      S``,
+      true],
+      ['isa.empty.set_of.optional.empty.set',
+      S``,
+      true],
+      ['isa.empty.set_of.optional.nonempty.set',
+      S``,
+      true],
+      ['isa.nonempty.list_of.set',
+      [S``],
+      true],
+      ['isa.nonempty.list_of.set',
+      [S`'x'`],
+      true],
+      ['isa.nonempty.list_of.empty.set',
+      [S``,
+      S``],
+      true],
+      ['isa.nonempty.list_of.nonempty.set',
+      [S`[1]`,
+      S`[2]`],
+      true],
+      ['isa.nonempty.list_of.optional.set',
+      [null],
+      true],
+      ['isa.nonempty.list_of.optional.set',
+      [null,
+      S`'abc'`],
       true]
     ];
 // #.........................................................................................................
@@ -709,22 +784,6 @@
 //   T?.eq ( isa.optional.nonempty.set_of.optional.positive0.integer   v ), matcher
 //   T?.eq ( isa.optional.nonempty.set_of.optional.positive1.integer   v ), matcher
 //.........................................................................................................
-// [ 'isa.empty.list_of.set',                                ( null                    ), true, ]
-// [ 'isa.empty.list_of.empty.set',                          ( null                    ), true, ]
-// [ 'isa.empty.list_of.nonempty.set',                       ( null                    ), true, ]
-// [ 'isa.empty.list_of.optional.set',                       ( null                    ), true, ]
-// [ 'isa.empty.list_of.optional.empty.set',                 ( null                    ), true, ]
-// [ 'isa.empty.list_of.optional.nonempty.set',              ( null                    ), true, ]
-// [ 'isa.empty.set_of.set',                                 ( null                    ), true, ]
-// [ 'isa.empty.set_of.empty.set',                           ( null                    ), true, ]
-// [ 'isa.empty.set_of.nonempty.set',                        ( null                    ), true, ]
-// [ 'isa.empty.set_of.optional.set',                        ( null                    ), true, ]
-// [ 'isa.empty.set_of.optional.empty.set',                  ( null                    ), true, ]
-// [ 'isa.empty.set_of.optional.nonempty.set',               ( null                    ), true, ]
-// [ 'isa.nonempty.list_of.set',                             ( null                    ), true, ]
-// [ 'isa.nonempty.list_of.empty.set',                       ( null                    ), true, ]
-// [ 'isa.nonempty.list_of.nonempty.set',                    ( null                    ), true, ]
-// [ 'isa.nonempty.list_of.optional.set',                    ( null                    ), true, ]
 // [ 'isa.nonempty.list_of.optional.empty.set',              ( null                    ), true, ]
 // [ 'isa.nonempty.list_of.optional.nonempty.set',           ( null                    ), true, ]
 // [ 'isa.nonempty.set_of.set',                              ( null                    ), true, ]
@@ -1209,6 +1268,14 @@
     // @[ "intertype all hedgepaths" ]()
     test(this["intertype all hedgepaths"]);
   }
+
+  // test @[ "intertype size_of" ]
+// parser = require 'acorn-loose'
+// { generate } = require 'astring'
+// debug parser.parse ( ( x ) -> @isa.foo x ).toString(), { ecmaVersion: '2022', }
+// urge generate { type: 'Program', start: 0, end: 49, body: [ { type: 'FunctionDeclaration', start: 0, end: 49, id: { type: 'Identifier', start: 8, end: 8, name: '✖' }, params: [ { type: 'Identifier', start: 9, end: 10, name: 'x' } ], generator: false, expression: false, async: false, body: { type: 'BlockStatement', start: 12, end: 49, body: [ { type: 'ReturnStatement', start: 20, end: 43, argument: { type: 'CallExpression', start: 27, end: 42, callee: { type: 'MemberExpression', start: 27, end: 39, object: { type: 'MemberExpression', start: 27, end: 35, object: { type: 'ThisExpression', start: 27, end: 31 }, property: { type: 'Identifier', start: 32, end: 35, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 36, end: 39, name: 'foo' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 40, end: 41, name: 'x' } ], optional: false } } ] } } ], sourceType: 'script' }
+// urge generate { type: 'BlockStatement', start: 12, end: 49, body: [ { type: 'ReturnStatement', start: 20, end: 43, argument: { type: 'CallExpression', start: 27, end: 42, callee: { type: 'MemberExpression', start: 27, end: 39, object: { type: 'MemberExpression', start: 27, end: 35, object: { type: 'ThisExpression', start: 27, end: 31 }, property: { type: 'Identifier', start: 32, end: 35, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 36, end: 39, name: 'foo' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 40, end: 41, name: 'x' } ], optional: false } } ] }
+// urge generate { type: 'ReturnStatement', start: 20, end: 43, argument: { type: 'CallExpression', start: 27, end: 42, callee: { type: 'MemberExpression', start: 27, end: 39, object: { type: 'MemberExpression', start: 27, end: 35, object: { type: 'ThisExpression', start: 27, end: 31 }, property: { type: 'Identifier', start: 32, end: 35, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 36, end: 39, name: 'foo' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 40, end: 41, name: 'x' } ], optional: false } }
 
 }).call(this);
 
