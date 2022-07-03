@@ -648,6 +648,41 @@
       ['isa.nonempty.list_of.optional.set',
       [null,
       S`'abc'`],
+      true],
+      ['isa.nonempty.list_of.optional.empty.set',
+      [null],
+      true],
+      ['isa.nonempty.list_of.optional.empty.set',
+      [null,
+      S``],
+      true],
+      ['isa.nonempty.list_of.optional.nonempty.set',
+      [null],
+      true],
+      ['isa.nonempty.list_of.optional.nonempty.set',
+      [null,
+      S`'abc'`],
+      true],
+      ['isa.nonempty.set_of.set',
+      S`[new Set()]`,
+      true],
+      ['isa.nonempty.set_of.empty.set',
+      S`[new Set()]`,
+      true],
+      ['isa.nonempty.set_of.nonempty.set',
+      S`[new Set('abc')]`,
+      true],
+      ['isa.nonempty.set_of.optional.set',
+      S`[null]`,
+      true],
+      ['isa.nonempty.set_of.optional.set',
+      S`[null, new Set('a')]`,
+      true],
+      ['isa.nonempty.set_of.optional.empty.set',
+      S`[new Set(), null,]`,
+      true],
+      ['isa.nonempty.set_of.optional.nonempty.set',
+      S`[null,new Set('abc')]`,
       true]
     ];
 // #.........................................................................................................
@@ -784,53 +819,45 @@
 //   T?.eq ( isa.optional.nonempty.set_of.optional.positive0.integer   v ), matcher
 //   T?.eq ( isa.optional.nonempty.set_of.optional.positive1.integer   v ), matcher
 //.........................................................................................................
-// [ 'isa.nonempty.list_of.optional.empty.set',              ( null                    ), true, ]
-// [ 'isa.nonempty.list_of.optional.nonempty.set',           ( null                    ), true, ]
-// [ 'isa.nonempty.set_of.set',                              ( null                    ), true, ]
-// [ 'isa.nonempty.set_of.empty.set',                        ( null                    ), true, ]
-// [ 'isa.nonempty.set_of.nonempty.set',                     ( null                    ), true, ]
-// [ 'isa.nonempty.set_of.optional.set',                     ( null                    ), true, ]
-// [ 'isa.nonempty.set_of.optional.empty.set',               ( null                    ), true, ]
-// [ 'isa.nonempty.set_of.optional.nonempty.set',            ( null                    ), true, ]
-// [ 'isa.optional.set',                                     ( null                    ), true, ]
-// [ 'isa.optional.empty.set',                               ( null                    ), true, ]
-// [ 'isa.optional.list_of.set',                             ( null                    ), true, ]
-// [ 'isa.optional.list_of.empty.set',                       ( null                    ), true, ]
-// [ 'isa.optional.list_of.nonempty.set',                    ( null                    ), true, ]
-// [ 'isa.optional.list_of.optional.set',                    ( null                    ), true, ]
-// [ 'isa.optional.list_of.optional.empty.set',              ( null                    ), true, ]
-// [ 'isa.optional.list_of.optional.nonempty.set',           ( null                    ), true, ]
-// [ 'isa.optional.nonempty.set',                            ( null                    ), true, ]
-// [ 'isa.optional.set_of.set',                              ( null                    ), true, ]
-// [ 'isa.optional.set_of.empty.set',                        ( null                    ), true, ]
-// [ 'isa.optional.set_of.nonempty.set',                     ( null                    ), true, ]
-// [ 'isa.optional.set_of.optional.set',                     ( null                    ), true, ]
-// [ 'isa.optional.set_of.optional.empty.set',               ( null                    ), true, ]
-// [ 'isa.optional.set_of.optional.nonempty.set',            ( null                    ), true, ]
-// [ 'isa.optional.empty.list_of.set',                       ( null                    ), true, ]
-// [ 'isa.optional.empty.list_of.empty.set',                 ( null                    ), true, ]
-// [ 'isa.optional.empty.list_of.nonempty.set',              ( null                    ), true, ]
-// [ 'isa.optional.empty.list_of.optional.set',              ( null                    ), true, ]
-// [ 'isa.optional.empty.list_of.optional.empty.set',        ( null                    ), true, ]
-// [ 'isa.optional.empty.list_of.optional.nonempty.set',     ( null                    ), true, ]
-// [ 'isa.optional.empty.set_of.set',                        ( null                    ), true, ]
-// [ 'isa.optional.empty.set_of.empty.set',                  ( null                    ), true, ]
-// [ 'isa.optional.empty.set_of.nonempty.set',               ( null                    ), true, ]
-// [ 'isa.optional.empty.set_of.optional.set',               ( null                    ), true, ]
-// [ 'isa.optional.empty.set_of.optional.empty.set',         ( null                    ), true, ]
-// [ 'isa.optional.empty.set_of.optional.nonempty.set',      ( null                    ), true, ]
-// [ 'isa.optional.nonempty.list_of.set',                    ( null                    ), true, ]
-// [ 'isa.optional.nonempty.list_of.empty.set',              ( null                    ), true, ]
-// [ 'isa.optional.nonempty.list_of.nonempty.set',           ( null                    ), true, ]
-// [ 'isa.optional.nonempty.list_of.optional.set',           ( null                    ), true, ]
-// [ 'isa.optional.nonempty.list_of.optional.empty.set',     ( null                    ), true, ]
-// [ 'isa.optional.nonempty.list_of.optional.nonempty.set',  ( null                    ), true, ]
-// [ 'isa.optional.nonempty.set_of.set',                     ( null                    ), true, ]
-// [ 'isa.optional.nonempty.set_of.empty.set',               ( null                    ), true, ]
-// [ 'isa.optional.nonempty.set_of.nonempty.set',            ( null                    ), true, ]
-// [ 'isa.optional.nonempty.set_of.optional.set',            ( null                    ), true, ]
-// [ 'isa.optional.nonempty.set_of.optional.empty.set',      ( null                    ), true, ]
-// [ 'isa.optional.nonempty.set_of.optional.nonempty.set',   ( null                    ), true, ]
+// [ 'isa.optional.set',                                     ( null                                      ), true, ]
+// [ 'isa.optional.empty.set',                               ( null                                      ), true, ]
+// [ 'isa.optional.list_of.set',                             ( null                                      ), true, ]
+// [ 'isa.optional.list_of.empty.set',                       ( null                                      ), true, ]
+// [ 'isa.optional.list_of.nonempty.set',                    ( null                                      ), true, ]
+// [ 'isa.optional.list_of.optional.set',                    ( null                                      ), true, ]
+// [ 'isa.optional.list_of.optional.empty.set',              ( null                                      ), true, ]
+// [ 'isa.optional.list_of.optional.nonempty.set',           ( null                                      ), true, ]
+// [ 'isa.optional.nonempty.set',                            ( null                                      ), true, ]
+// [ 'isa.optional.set_of.set',                              ( null                                      ), true, ]
+// [ 'isa.optional.set_of.empty.set',                        ( null                                      ), true, ]
+// [ 'isa.optional.set_of.nonempty.set',                     ( null                                      ), true, ]
+// [ 'isa.optional.set_of.optional.set',                     ( null                                      ), true, ]
+// [ 'isa.optional.set_of.optional.empty.set',               ( null                                      ), true, ]
+// [ 'isa.optional.set_of.optional.nonempty.set',            ( null                                      ), true, ]
+// [ 'isa.optional.empty.list_of.set',                       ( null                                      ), true, ]
+// [ 'isa.optional.empty.list_of.empty.set',                 ( null                                      ), true, ]
+// [ 'isa.optional.empty.list_of.nonempty.set',              ( null                                      ), true, ]
+// [ 'isa.optional.empty.list_of.optional.set',              ( null                                      ), true, ]
+// [ 'isa.optional.empty.list_of.optional.empty.set',        ( null                                      ), true, ]
+// [ 'isa.optional.empty.list_of.optional.nonempty.set',     ( null                                      ), true, ]
+// [ 'isa.optional.empty.set_of.set',                        ( null                                      ), true, ]
+// [ 'isa.optional.empty.set_of.empty.set',                  ( null                                      ), true, ]
+// [ 'isa.optional.empty.set_of.nonempty.set',               ( null                                      ), true, ]
+// [ 'isa.optional.empty.set_of.optional.set',               ( null                                      ), true, ]
+// [ 'isa.optional.empty.set_of.optional.empty.set',         ( null                                      ), true, ]
+// [ 'isa.optional.empty.set_of.optional.nonempty.set',      ( null                                      ), true, ]
+// [ 'isa.optional.nonempty.list_of.set',                    ( null                                      ), true, ]
+// [ 'isa.optional.nonempty.list_of.empty.set',              ( null                                      ), true, ]
+// [ 'isa.optional.nonempty.list_of.nonempty.set',           ( null                                      ), true, ]
+// [ 'isa.optional.nonempty.list_of.optional.set',           ( null                                      ), true, ]
+// [ 'isa.optional.nonempty.list_of.optional.empty.set',     ( null                                      ), true, ]
+// [ 'isa.optional.nonempty.list_of.optional.nonempty.set',  ( null                                      ), true, ]
+// [ 'isa.optional.nonempty.set_of.set',                     ( null                                      ), true, ]
+// [ 'isa.optional.nonempty.set_of.empty.set',               ( null                                      ), true, ]
+// [ 'isa.optional.nonempty.set_of.nonempty.set',            ( null                                      ), true, ]
+// [ 'isa.optional.nonempty.set_of.optional.set',            ( null                                      ), true, ]
+// [ 'isa.optional.nonempty.set_of.optional.empty.set',      ( null                                      ), true, ]
+// [ 'isa.optional.nonempty.set_of.optional.nonempty.set',   ( null                                      ), true, ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, value, matcher, error] = probes_and_matchers[i];
       await T.perform([probe, value], matcher, error, function() {
