@@ -8,7 +8,9 @@ specifiers:
   '@scotttrinh/number-ranges': ^2.1.0
   '@sindresorhus/slugify': ^2.1.0
   '@sindresorhus/transliterate': ^1.5.0
+  acorn-loose: ^8.3.0
   argparse: ^2.0.1
+  astring: ^1.8.3
   bytewise: ^1.1.0
   chalk: '4'
   chance: 1.1.8
@@ -142,7 +144,9 @@ dependencies:
   '@scotttrinh/number-ranges': 2.1.0
   '@sindresorhus/slugify': 2.1.0
   '@sindresorhus/transliterate': 1.5.0
+  acorn-loose: 8.3.0
   argparse: 2.0.1
+  astring: 1.8.3
   bytewise: 1.1.0
   chalk: 4.1.2
   chance: 1.1.8
@@ -731,6 +735,13 @@ packages:
     dependencies:
       acorn: 7.4.1
       acorn-walk: 7.2.0
+    dev: false
+
+  /acorn-loose/8.3.0:
+    resolution: {integrity: sha512-75lAs9H19ldmW+fAbyqHdjgdCrz0pWGXKmnqFoh8PyVd1L2RIb4RzYrSjmopeqv3E1G3/Pimu6GgLlrGbrkF7w==}
+    engines: {node: '>=0.4.0'}
+    dependencies:
+      acorn: 8.7.1
     dev: false
 
   /acorn-walk/7.2.0:
