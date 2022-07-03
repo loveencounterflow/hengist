@@ -144,13 +144,12 @@
         return typeof x === 'string';
       }
     });
-    // debug '^5345-1^', types
-    debug('^5345-2^', types.groups);
-    // debug '^5345-3^', types.isa
-    debug('^5345-4^', types.isa.collection);
-    debug('^5345-5^', types.type_of('x'));
-    debug('^5345-6^', types.isa.collection('x'));
-    debug('^5345-7^', (function() {
+    debug('^5345-1^', types);
+    debug('^5345-2^', types.isa);
+    debug('^5345-3^', types.isa.collection);
+    debug('^5345-4^', types.type_of('x'));
+    debug('^5345-5^', types.isa.collection('x'));
+    debug('^5345-6^', (function() {
       var results;
       results = [];
       for (k in types.isa) {
@@ -164,33 +163,53 @@
       // # types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
       // types.declare 'list',                           test: ( x ) -> @isa 'array', x
       // types.declare 'integer',      isa_numeric: true,    test: ( x ) -> @isa 'array', x
-      debug('^5345-8^', k);
+      debug('^5345-7^', k);
     }
+    // debug '^5345-8^', types._isa 'empty'
     debug('^5345-9^', types._isa);
     debug('^5345-10^', types._isa('text', ''));
     debug('^5345-11^', types._isa('text', 'xxx'));
-    debug('^5345-12^', types._isa('text', 42));
-    // debug '^5345-13^', types._isa 'empty'
-    debug('^5345-14^', types._isa('empty', 'text', ''));
-    debug('^5345-15^', types._isa('empty', 'text', 'xxx'));
-    debug('^5345-16^', types._isa('empty', 'text', 42));
-    // debug '^5345-17^', types.isa.empty.text 'x'
-    // debug '^5345-18^', types.isa.nonempty.text ''
-    // debug '^5345-19^', types.isa.nonempty.text 'x'
-    // debug '^5345-20^', types.isa.empty.text 42
-    // debug '^5345-21^', types.isa.list_of.text 42
-    // debug '^5345-22^', types.isa.list_of.text []
-    // debug '^5345-23^', types.isa.list_of.text [ 'a', 'b', ]
-    // debug '^5345-24^', types.isa.nonempty.list_of.text [ 'a', 'b', ]
-    // debug '^5345-25^', types.isa.nonempty.list_of.nonempty.text [ 'a', 'b', ]
-    // debug '^5345-26^', types.isa.empty.list_of.text 42
-    // debug '^5345-27^', types.isa.empty.list_of.text []
-    // debug '^5345-28^', types.isa.optional.empty.text 42
-    // debug '^5345-29^', types.isa.optional.empty.text null
-    // debug '^5345-30^', types.isa.optional
-    // debug '^5345-31^', types.isa.optional.empty
-    // debug '^5345-32^', types.isa.optional.empty.list_of
-    // debug '^5345-33^', types.isa.optional.empty.list_of.text
+    debug('^5345-12^', types._isa('empty', 'text', ''));
+    debug('^5345-13^', types.isa.text('x'));
+    debug('^5345-14^', types.isa.nonempty.text('x'));
+    debug('^5345-15^', types._isa('nonempty', 'text', 'x'));
+    debug('^5345-16^', types._isa('empty', 'set_of', 'text', new Set()));
+    debug('^5345-17^', types.isa.empty.set_of.text(new Set()));
+    debug('^5345-18^', types.isa.list_of.text([]));
+    debug('^5345-19^', types.isa.list_of.text(['x', '']));
+    debug('^5345-20^', types.isa.list_of.nonempty.text(['x']));
+    debug('^5345-21^', types.isa.list_of.empty.text(['']));
+    debug('^5345-22^', types.isa.optional.text(''));
+    debug('^5345-23^', types.isa.optional.text(null));
+    debug('^5345-24^', types.isa.optional.list_of.text(null));
+    debug('^5345-25^', types.isa.optional.list_of.optional.text(null));
+    debug('^5345-26^', types.isa.optional.list_of.optional.nonempty.text(null));
+    debug('^5345-27^', types.isa.optional.nonempty.list_of.optional.nonempty.text(null));
+    info(CND.reverse('        '));
+    debug('^5345-28^', types._isa('nonempty', 'text', ''));
+    debug('^5345-29^', types._isa('text', 42));
+    debug('^5345-30^', types._isa('empty', 'text', 'xxx'));
+    debug('^5345-31^', types._isa('empty', 'text', 42));
+    debug('^5345-32^', types.isa.empty.text('x'));
+    debug('^5345-33^', types.isa.nonempty.text(''));
+    debug('^5345-34^', types.isa.empty.text(42));
+    debug('^5345-35^', types.isa.list_of.text('x'));
+    debug('^5345-36^', types.isa.list_of.text(['x', 42]));
+    debug('^5345-37^', types.isa.list_of.nonempty.text(['', 'x']));
+    debug('^5345-38^', types.isa.list_of.empty.text(['x', '']));
+    // debug '^5345-39^', types.isa.list_of.text 42
+    // debug '^5345-40^', types.isa.list_of.text []
+    // debug '^5345-41^', types.isa.list_of.text [ 'a', 'b', ]
+    // debug '^5345-42^', types.isa.nonempty.list_of.text [ 'a', 'b', ]
+    // debug '^5345-43^', types.isa.nonempty.list_of.nonempty.text [ 'a', 'b', ]
+    // debug '^5345-44^', types.isa.empty.list_of.text 42
+    // debug '^5345-45^', types.isa.empty.list_of.text []
+    // debug '^5345-46^', types.isa.optional.empty.text 42
+    // debug '^5345-47^', types.isa.optional.empty.text null
+    // debug '^5345-48^', types.isa.optional
+    // debug '^5345-49^', types.isa.optional.empty
+    // debug '^5345-50^', types.isa.optional.empty.list_of
+    // debug '^5345-51^', types.isa.optional.empty.list_of.text
     process.exit(111);
     //.........................................................................................................
     info('^509-1', types.isa('null', null));
@@ -269,8 +288,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["intertype all hedgepaths"] = async function(T, done) {
-    var Intertype, Type_cfg, declare, error, i, isa, len, matcher, probe, probes_and_matchers, types, value;
-    // T.halt_on_error true
+    var Intertype, S, Type_cfg, VM, declare, error, i, isa, len, matcher, probe, probes_and_matchers, types, value;
+    // T?.halt_on_error true
     ({Intertype, Type_cfg} = require('../../../apps/intertype'));
     types = new Intertype();
     ({declare, isa} = types);
@@ -280,11 +299,479 @@
         return (x === true) || (x === false);
       }
     });
-    // declare 'integer',  groups: 'numbers',      test: ( x ) -> Number.isInteger x
-    // declare 'set',      groups: 'collections',  test: ( x ) -> x instanceof Set
+    declare('integer', {
+      groups: 'number',
+      test: function(x) {
+        return Number.isInteger(x);
+      }
+    });
+    declare('set', {
+      groups: 'collection',
+      test: function(x) {
+        return x instanceof Set;
+      }
+    });
     //.........................................................................................................
-    probes_and_matchers = [[/* other */ 'isa.boolean', true, true], ['isa.list_of.boolean', [true], true], ['isa.list_of.boolean', [], true], ['isa.list_of.optional.boolean', [], true], ['isa.list_of.optional.boolean', [null], true], ['isa.list_of.optional.boolean', [null, true], true], ['isa.set_of.boolean', new Set([]), true], ['isa.set_of.boolean', new Set([false]), true], ['isa.set_of.optional.boolean', new Set([]), true], ['isa.set_of.optional.boolean', new Set([null]), true], ['isa.set_of.optional.boolean', new Set([null, false]), true], ['isa.empty.list_of.boolean', [], true], ['isa.empty.list_of.optional.boolean', [], true], ['isa.empty.set_of.boolean', new Set(), true], ['isa.empty.set_of.optional.boolean', new Set(), true], ['isa.nonempty.list_of.boolean', [true], true], ['isa.nonempty.list_of.optional.boolean', [true, null], true], ['isa.nonempty.set_of.boolean', new Set([true, false]), true], ['isa.nonempty.set_of.optional.boolean', new Set([null, null]), true], ['isa.optional.boolean', true, true], ['isa.optional.boolean', false, true], ['isa.optional.boolean', null, true], ['isa.optional.list_of.boolean', null, true], ['isa.optional.list_of.boolean', [], true], ['isa.optional.list_of.boolean', [true], true], ['isa.optional.list_of.optional.boolean', null, true], ['isa.optional.list_of.optional.boolean', [], true], ['isa.optional.list_of.optional.boolean', [true], true], ['isa.optional.list_of.optional.boolean', [true, null], true], ['isa.optional.set_of.boolean', null, true], ['isa.optional.set_of.boolean', new Set(), true], ['isa.optional.set_of.boolean', new Set([true]), true], ['isa.optional.set_of.optional.boolean', null, true], ['isa.optional.set_of.optional.boolean', new Set(), true], ['isa.optional.set_of.optional.boolean', new Set([true]), true], ['isa.optional.set_of.optional.boolean', new Set([null]), true], ['isa.optional.empty.list_of.boolean', null, true], ['isa.optional.empty.list_of.boolean', [], true], ['isa.optional.empty.list_of.optional.boolean', null, true], ['isa.optional.empty.list_of.optional.boolean', [], true], ['isa.optional.empty.set_of.boolean', null, true], ['isa.optional.empty.set_of.boolean', new Set(), true], ['isa.optional.empty.set_of.optional.boolean', null, true], ['isa.optional.empty.set_of.optional.boolean', new Set(), true], ['isa.optional.nonempty.list_of.boolean', null, true], ['isa.optional.nonempty.list_of.boolean', [true], true], ['isa.optional.nonempty.list_of.boolean', [false], true], ['isa.optional.nonempty.list_of.optional.boolean', null, true], ['isa.optional.nonempty.list_of.optional.boolean', [true], true], ['isa.optional.nonempty.list_of.optional.boolean', [null, null], true], ['isa.optional.nonempty.set_of.boolean', null, true], ['isa.optional.nonempty.set_of.boolean', new Set([true]), true], ['isa.optional.nonempty.set_of.optional.boolean', null, true], ['isa.optional.nonempty.set_of.optional.boolean', new Set([true]), true], ['isa.optional.nonempty.set_of.optional.boolean', new Set([false, null]), true]];
+    VM = require('node:vm');
+    S = function(parts) {
+      return new Set(eval(parts.raw[0]));
+    };
+    //.........................................................................................................
+    probes_and_matchers = [
+      [/* other */
+      'isa.boolean',
+      true,
+      true],
+      ['isa.list_of.boolean',
+      [true],
+      true],
+      ['isa.list_of.boolean',
+      [],
+      true],
+      ['isa.list_of.optional.boolean',
+      [],
+      true],
+      ['isa.list_of.optional.boolean',
+      [null],
+      true],
+      ['isa.list_of.optional.boolean',
+      [null,
+      true],
+      true],
+      ['isa.set_of.boolean',
+      S`[]`,
+      true],
+      ['isa.set_of.boolean',
+      S`[ false, ]`,
+      true],
+      ['isa.set_of.optional.boolean',
+      S`[]`,
+      true],
+      ['isa.set_of.optional.boolean',
+      S`[ null, ]`,
+      true],
+      ['isa.set_of.optional.boolean',
+      S`[ null, false, ]`,
+      true],
+      ['isa.empty.list_of.boolean',
+      [],
+      true],
+      ['isa.empty.list_of.optional.boolean',
+      [],
+      true],
+      ['isa.empty.set_of.boolean',
+      S``,
+      true],
+      ['isa.empty.set_of.optional.boolean',
+      S``,
+      true],
+      ['isa.nonempty.list_of.boolean',
+      [true],
+      true],
+      ['isa.nonempty.list_of.optional.boolean',
+      [true,
+      null],
+      true],
+      ['isa.nonempty.set_of.boolean',
+      S`[ true, false, ]`,
+      true],
+      ['isa.nonempty.set_of.optional.boolean',
+      S`[ null, null, ]`,
+      true],
+      ['isa.optional.boolean',
+      true,
+      true],
+      ['isa.optional.boolean',
+      false,
+      true],
+      ['isa.optional.boolean',
+      null,
+      true],
+      ['isa.optional.list_of.boolean',
+      null,
+      true],
+      ['isa.optional.list_of.boolean',
+      [],
+      true],
+      ['isa.optional.list_of.boolean',
+      [true],
+      true],
+      ['isa.optional.list_of.optional.boolean',
+      null,
+      true],
+      ['isa.optional.list_of.optional.boolean',
+      [],
+      true],
+      ['isa.optional.list_of.optional.boolean',
+      [true],
+      true],
+      ['isa.optional.list_of.optional.boolean',
+      [true,
+      null],
+      true],
+      ['isa.optional.set_of.boolean',
+      null,
+      true],
+      ['isa.optional.set_of.boolean',
+      S``,
+      true],
+      ['isa.optional.set_of.boolean',
+      S`[ true, ]`,
+      true],
+      ['isa.optional.set_of.optional.boolean',
+      null,
+      true],
+      ['isa.optional.set_of.optional.boolean',
+      S``,
+      true],
+      ['isa.optional.set_of.optional.boolean',
+      S`[ true, ]`,
+      true],
+      ['isa.optional.set_of.optional.boolean',
+      S`[ null, ]`,
+      true],
+      ['isa.optional.empty.list_of.boolean',
+      null,
+      true],
+      ['isa.optional.empty.list_of.boolean',
+      [],
+      true],
+      ['isa.optional.empty.list_of.optional.boolean',
+      null,
+      true],
+      ['isa.optional.empty.list_of.optional.boolean',
+      [],
+      true],
+      ['isa.optional.empty.set_of.boolean',
+      null,
+      true],
+      ['isa.optional.empty.set_of.boolean',
+      S``,
+      true],
+      ['isa.optional.empty.set_of.optional.boolean',
+      null,
+      true],
+      ['isa.optional.empty.set_of.optional.boolean',
+      S``,
+      true],
+      ['isa.optional.nonempty.list_of.boolean',
+      null,
+      true],
+      ['isa.optional.nonempty.list_of.boolean',
+      [true],
+      true],
+      ['isa.optional.nonempty.list_of.boolean',
+      [false],
+      true],
+      ['isa.optional.nonempty.list_of.optional.boolean',
+      null,
+      true],
+      ['isa.optional.nonempty.list_of.optional.boolean',
+      [true],
+      true],
+      ['isa.optional.nonempty.list_of.optional.boolean',
+      [null,
+      null],
+      true],
+      ['isa.optional.nonempty.set_of.boolean',
+      null,
+      true],
+      ['isa.optional.nonempty.set_of.boolean',
+      S`[ true, ]`,
+      true],
+      ['isa.optional.nonempty.set_of.optional.boolean',
+      null,
+      true],
+      ['isa.optional.nonempty.set_of.optional.boolean',
+      S`[ true, ]`,
+      true],
+      ['isa.optional.nonempty.set_of.optional.boolean',
+      S`[ false, null, ]`,
+      true],
+      //.........................................................................................................
+      /* collections */
+      ['isa.set',
+      S``,
+      true],
+      ['isa.empty.set',
+      S``,
+      true],
+      ['isa.list_of.set',
+      [],
+      true],
+      ['isa.list_of.set',
+      [S``],
+      true],
+      ['isa.list_of.empty.set',
+      [S``],
+      true],
+      ['isa.list_of.nonempty.set',
+      [S`[42]`,
+      S`'x'`],
+      true],
+      ['isa.list_of.optional.set',
+      [],
+      true],
+      ['isa.list_of.optional.set',
+      [S``],
+      true],
+      ['isa.list_of.optional.empty.set',
+      [],
+      true],
+      ['isa.list_of.optional.nonempty.set',
+      [],
+      true],
+      ['isa.list_of.optional.nonempty.set',
+      [null,
+      S`'x'`],
+      true],
+      ['isa.list_of.optional.nonempty.set',
+      [S`'x'`,
+      S`'abc𪜁'`],
+      true],
+      ['isa.nonempty.set',
+      S`'abc𪜁'`,
+      true],
+      ['isa.set_of.set',
+      S`[new Set()]`,
+      true],
+      ['isa.set_of.empty.set',
+      S`[]`,
+      true],
+      ['isa.set_of.empty.set',
+      S`[new Set()]`,
+      true],
+      ['isa.set_of.nonempty.set',
+      S`[]`,
+      true],
+      ['isa.set_of.nonempty.set',
+      S`[new Set('a')]`,
+      true],
+      ['isa.set_of.optional.set',
+      S``,
+      true],
+      ['isa.set_of.optional.set',
+      S`null`,
+      true],
+      ['isa.set_of.optional.set',
+      S`[null,new Set()]`,
+      true],
+      ['isa.set_of.optional.empty.set',
+      S``,
+      true],
+      ['isa.set_of.optional.empty.set',
+      S`null`,
+      true],
+      ['isa.set_of.optional.empty.set',
+      S`[new Set()]`,
+      true],
+      ['isa.set_of.optional.nonempty.set',
+      S``,
+      true],
+      ['isa.set_of.optional.nonempty.set',
+      S`null`,
+      true],
+      ['isa.set_of.optional.nonempty.set',
+      S`[new Set('a')]`,
+      true]
+    ];
+// #.........................................................................................................
+// ### numbers ###
+// for [ v, matcher, ] in [ [ 42, true, ], [ 42.1, false, ], ]
+//   T?.eq ( isa.integer                                               v ), matcher
+//   T?.eq ( isa.list_of.integer                                       v ), matcher
+//   T?.eq ( isa.list_of.negative0.integer                             v ), matcher
+//   T?.eq ( isa.list_of.negative1.integer                             v ), matcher
+//   T?.eq ( isa.list_of.positive0.integer                             v ), matcher
+//   T?.eq ( isa.list_of.positive1.integer                             v ), matcher
+//   T?.eq ( isa.list_of.optional.integer                              v ), matcher
+//   T?.eq ( isa.list_of.optional.negative0.integer                    v ), matcher
+//   T?.eq ( isa.list_of.optional.negative1.integer                    v ), matcher
+//   T?.eq ( isa.list_of.optional.positive0.integer                    v ), matcher
+//   T?.eq ( isa.list_of.optional.positive1.integer                    v ), matcher
+//   T?.eq ( isa.negative0.integer                                     v ), matcher
+//   T?.eq ( isa.negative1.integer                                     v ), matcher
+//   T?.eq ( isa.positive0.integer                                     v ), matcher
+//   T?.eq ( isa.positive1.integer                                     v ), matcher
+//   T?.eq ( isa.set_of.integer                                        v ), matcher
+//   T?.eq ( isa.set_of.negative0.integer                              v ), matcher
+//   T?.eq ( isa.set_of.negative1.integer                              v ), matcher
+//   T?.eq ( isa.set_of.positive0.integer                              v ), matcher
+//   T?.eq ( isa.set_of.positive1.integer                              v ), matcher
+//   T?.eq ( isa.set_of.optional.integer                               v ), matcher
+//   T?.eq ( isa.set_of.optional.negative0.integer                     v ), matcher
+//   T?.eq ( isa.set_of.optional.negative1.integer                     v ), matcher
+//   T?.eq ( isa.set_of.optional.positive0.integer                     v ), matcher
+//   T?.eq ( isa.set_of.optional.positive1.integer                     v ), matcher
+//   T?.eq ( isa.empty.list_of.integer                                 v ), matcher
+//   T?.eq ( isa.empty.list_of.negative0.integer                       v ), matcher
+//   T?.eq ( isa.empty.list_of.negative1.integer                       v ), matcher
+//   T?.eq ( isa.empty.list_of.positive0.integer                       v ), matcher
+//   T?.eq ( isa.empty.list_of.positive1.integer                       v ), matcher
+//   T?.eq ( isa.empty.list_of.optional.integer                        v ), matcher
+//   T?.eq ( isa.empty.list_of.optional.negative0.integer              v ), matcher
+//   T?.eq ( isa.empty.list_of.optional.negative1.integer              v ), matcher
+//   T?.eq ( isa.empty.list_of.optional.positive0.integer              v ), matcher
+//   T?.eq ( isa.empty.list_of.optional.positive1.integer              v ), matcher
+//   T?.eq ( isa.empty.set_of.integer                                  v ), matcher
+//   T?.eq ( isa.empty.set_of.negative0.integer                        v ), matcher
+//   T?.eq ( isa.empty.set_of.negative1.integer                        v ), matcher
+//   T?.eq ( isa.empty.set_of.positive0.integer                        v ), matcher
+//   T?.eq ( isa.empty.set_of.positive1.integer                        v ), matcher
+//   T?.eq ( isa.empty.set_of.optional.integer                         v ), matcher
+//   T?.eq ( isa.empty.set_of.optional.negative0.integer               v ), matcher
+//   T?.eq ( isa.empty.set_of.optional.negative1.integer               v ), matcher
+//   T?.eq ( isa.empty.set_of.optional.positive0.integer               v ), matcher
+//   T?.eq ( isa.empty.set_of.optional.positive1.integer               v ), matcher
+//   T?.eq ( isa.nonempty.list_of.integer                              v ), matcher
+//   T?.eq ( isa.nonempty.list_of.negative0.integer                    v ), matcher
+//   T?.eq ( isa.nonempty.list_of.negative1.integer                    v ), matcher
+//   T?.eq ( isa.nonempty.list_of.positive0.integer                    v ), matcher
+//   T?.eq ( isa.nonempty.list_of.positive1.integer                    v ), matcher
+//   T?.eq ( isa.nonempty.list_of.optional.integer                     v ), matcher
+//   T?.eq ( isa.nonempty.list_of.optional.negative0.integer           v ), matcher
+//   T?.eq ( isa.nonempty.list_of.optional.negative1.integer           v ), matcher
+//   T?.eq ( isa.nonempty.list_of.optional.positive0.integer           v ), matcher
+//   T?.eq ( isa.nonempty.list_of.optional.positive1.integer           v ), matcher
+//   T?.eq ( isa.nonempty.set_of.integer                               v ), matcher
+//   T?.eq ( isa.nonempty.set_of.negative0.integer                     v ), matcher
+//   T?.eq ( isa.nonempty.set_of.negative1.integer                     v ), matcher
+//   T?.eq ( isa.nonempty.set_of.positive0.integer                     v ), matcher
+//   T?.eq ( isa.nonempty.set_of.positive1.integer                     v ), matcher
+//   T?.eq ( isa.nonempty.set_of.optional.integer                      v ), matcher
+//   T?.eq ( isa.nonempty.set_of.optional.negative0.integer            v ), matcher
+//   T?.eq ( isa.nonempty.set_of.optional.negative1.integer            v ), matcher
+//   T?.eq ( isa.nonempty.set_of.optional.positive0.integer            v ), matcher
+//   T?.eq ( isa.nonempty.set_of.optional.positive1.integer            v ), matcher
+//   T?.eq ( isa.optional.integer                                      v ), matcher
+//   T?.eq ( isa.optional.list_of.integer                              v ), matcher
+//   T?.eq ( isa.optional.list_of.negative0.integer                    v ), matcher
+//   T?.eq ( isa.optional.list_of.negative1.integer                    v ), matcher
+//   T?.eq ( isa.optional.list_of.positive0.integer                    v ), matcher
+//   T?.eq ( isa.optional.list_of.positive1.integer                    v ), matcher
+//   T?.eq ( isa.optional.list_of.optional.integer                     v ), matcher
+//   T?.eq ( isa.optional.list_of.optional.negative0.integer           v ), matcher
+//   T?.eq ( isa.optional.list_of.optional.negative1.integer           v ), matcher
+//   T?.eq ( isa.optional.list_of.optional.positive0.integer           v ), matcher
+//   T?.eq ( isa.optional.list_of.optional.positive1.integer           v ), matcher
+//   T?.eq ( isa.optional.negative0.integer                            v ), matcher
+//   T?.eq ( isa.optional.negative1.integer                            v ), matcher
+//   T?.eq ( isa.optional.positive0.integer                            v ), matcher
+//   T?.eq ( isa.optional.positive1.integer                            v ), matcher
+//   T?.eq ( isa.optional.set_of.integer                               v ), matcher
+//   T?.eq ( isa.optional.set_of.negative0.integer                     v ), matcher
+//   T?.eq ( isa.optional.set_of.negative1.integer                     v ), matcher
+//   T?.eq ( isa.optional.set_of.positive0.integer                     v ), matcher
+//   T?.eq ( isa.optional.set_of.positive1.integer                     v ), matcher
+//   T?.eq ( isa.optional.set_of.optional.integer                      v ), matcher
+//   T?.eq ( isa.optional.set_of.optional.negative0.integer            v ), matcher
+//   T?.eq ( isa.optional.set_of.optional.negative1.integer            v ), matcher
+//   T?.eq ( isa.optional.set_of.optional.positive0.integer            v ), matcher
+//   T?.eq ( isa.optional.set_of.optional.positive1.integer            v ), matcher
+//   T?.eq ( isa.optional.empty.list_of.integer                        v ), matcher
+//   T?.eq ( isa.optional.empty.list_of.negative0.integer              v ), matcher
+//   T?.eq ( isa.optional.empty.list_of.negative1.integer              v ), matcher
+//   T?.eq ( isa.optional.empty.list_of.positive0.integer              v ), matcher
+//   T?.eq ( isa.optional.empty.list_of.positive1.integer              v ), matcher
+//   T?.eq ( isa.optional.empty.list_of.optional.integer               v ), matcher
+//   T?.eq ( isa.optional.empty.list_of.optional.negative0.integer     v ), matcher
+//   T?.eq ( isa.optional.empty.list_of.optional.negative1.integer     v ), matcher
+//   T?.eq ( isa.optional.empty.list_of.optional.positive0.integer     v ), matcher
+//   T?.eq ( isa.optional.empty.list_of.optional.positive1.integer     v ), matcher
+//   T?.eq ( isa.optional.empty.set_of.integer                         v ), matcher
+//   T?.eq ( isa.optional.empty.set_of.negative0.integer               v ), matcher
+//   T?.eq ( isa.optional.empty.set_of.negative1.integer               v ), matcher
+//   T?.eq ( isa.optional.empty.set_of.positive0.integer               v ), matcher
+//   T?.eq ( isa.optional.empty.set_of.positive1.integer               v ), matcher
+//   T?.eq ( isa.optional.empty.set_of.optional.integer                v ), matcher
+//   T?.eq ( isa.optional.empty.set_of.optional.negative0.integer      v ), matcher
+//   T?.eq ( isa.optional.empty.set_of.optional.negative1.integer      v ), matcher
+//   T?.eq ( isa.optional.empty.set_of.optional.positive0.integer      v ), matcher
+//   T?.eq ( isa.optional.empty.set_of.optional.positive1.integer      v ), matcher
+//   T?.eq ( isa.optional.nonempty.list_of.integer                     v ), matcher
+//   T?.eq ( isa.optional.nonempty.list_of.negative0.integer           v ), matcher
+//   T?.eq ( isa.optional.nonempty.list_of.negative1.integer           v ), matcher
+//   T?.eq ( isa.optional.nonempty.list_of.positive0.integer           v ), matcher
+//   T?.eq ( isa.optional.nonempty.list_of.positive1.integer           v ), matcher
+//   T?.eq ( isa.optional.nonempty.list_of.optional.integer            v ), matcher
+//   T?.eq ( isa.optional.nonempty.list_of.optional.negative0.integer  v ), matcher
+//   T?.eq ( isa.optional.nonempty.list_of.optional.negative1.integer  v ), matcher
+//   T?.eq ( isa.optional.nonempty.list_of.optional.positive0.integer  v ), matcher
+//   T?.eq ( isa.optional.nonempty.list_of.optional.positive1.integer  v ), matcher
+//   T?.eq ( isa.optional.nonempty.set_of.integer                      v ), matcher
+//   T?.eq ( isa.optional.nonempty.set_of.negative0.integer            v ), matcher
+//   T?.eq ( isa.optional.nonempty.set_of.negative1.integer            v ), matcher
+//   T?.eq ( isa.optional.nonempty.set_of.positive0.integer            v ), matcher
+//   T?.eq ( isa.optional.nonempty.set_of.positive1.integer            v ), matcher
+//   T?.eq ( isa.optional.nonempty.set_of.optional.integer             v ), matcher
+//   T?.eq ( isa.optional.nonempty.set_of.optional.negative0.integer   v ), matcher
+//   T?.eq ( isa.optional.nonempty.set_of.optional.negative1.integer   v ), matcher
+//   T?.eq ( isa.optional.nonempty.set_of.optional.positive0.integer   v ), matcher
+//   T?.eq ( isa.optional.nonempty.set_of.optional.positive1.integer   v ), matcher
 //.........................................................................................................
+// [ 'isa.empty.list_of.set',                                ( null                    ), true, ]
+// [ 'isa.empty.list_of.empty.set',                          ( null                    ), true, ]
+// [ 'isa.empty.list_of.nonempty.set',                       ( null                    ), true, ]
+// [ 'isa.empty.list_of.optional.set',                       ( null                    ), true, ]
+// [ 'isa.empty.list_of.optional.empty.set',                 ( null                    ), true, ]
+// [ 'isa.empty.list_of.optional.nonempty.set',              ( null                    ), true, ]
+// [ 'isa.empty.set_of.set',                                 ( null                    ), true, ]
+// [ 'isa.empty.set_of.empty.set',                           ( null                    ), true, ]
+// [ 'isa.empty.set_of.nonempty.set',                        ( null                    ), true, ]
+// [ 'isa.empty.set_of.optional.set',                        ( null                    ), true, ]
+// [ 'isa.empty.set_of.optional.empty.set',                  ( null                    ), true, ]
+// [ 'isa.empty.set_of.optional.nonempty.set',               ( null                    ), true, ]
+// [ 'isa.nonempty.list_of.set',                             ( null                    ), true, ]
+// [ 'isa.nonempty.list_of.empty.set',                       ( null                    ), true, ]
+// [ 'isa.nonempty.list_of.nonempty.set',                    ( null                    ), true, ]
+// [ 'isa.nonempty.list_of.optional.set',                    ( null                    ), true, ]
+// [ 'isa.nonempty.list_of.optional.empty.set',              ( null                    ), true, ]
+// [ 'isa.nonempty.list_of.optional.nonempty.set',           ( null                    ), true, ]
+// [ 'isa.nonempty.set_of.set',                              ( null                    ), true, ]
+// [ 'isa.nonempty.set_of.empty.set',                        ( null                    ), true, ]
+// [ 'isa.nonempty.set_of.nonempty.set',                     ( null                    ), true, ]
+// [ 'isa.nonempty.set_of.optional.set',                     ( null                    ), true, ]
+// [ 'isa.nonempty.set_of.optional.empty.set',               ( null                    ), true, ]
+// [ 'isa.nonempty.set_of.optional.nonempty.set',            ( null                    ), true, ]
+// [ 'isa.optional.set',                                     ( null                    ), true, ]
+// [ 'isa.optional.empty.set',                               ( null                    ), true, ]
+// [ 'isa.optional.list_of.set',                             ( null                    ), true, ]
+// [ 'isa.optional.list_of.empty.set',                       ( null                    ), true, ]
+// [ 'isa.optional.list_of.nonempty.set',                    ( null                    ), true, ]
+// [ 'isa.optional.list_of.optional.set',                    ( null                    ), true, ]
+// [ 'isa.optional.list_of.optional.empty.set',              ( null                    ), true, ]
+// [ 'isa.optional.list_of.optional.nonempty.set',           ( null                    ), true, ]
+// [ 'isa.optional.nonempty.set',                            ( null                    ), true, ]
+// [ 'isa.optional.set_of.set',                              ( null                    ), true, ]
+// [ 'isa.optional.set_of.empty.set',                        ( null                    ), true, ]
+// [ 'isa.optional.set_of.nonempty.set',                     ( null                    ), true, ]
+// [ 'isa.optional.set_of.optional.set',                     ( null                    ), true, ]
+// [ 'isa.optional.set_of.optional.empty.set',               ( null                    ), true, ]
+// [ 'isa.optional.set_of.optional.nonempty.set',            ( null                    ), true, ]
+// [ 'isa.optional.empty.list_of.set',                       ( null                    ), true, ]
+// [ 'isa.optional.empty.list_of.empty.set',                 ( null                    ), true, ]
+// [ 'isa.optional.empty.list_of.nonempty.set',              ( null                    ), true, ]
+// [ 'isa.optional.empty.list_of.optional.set',              ( null                    ), true, ]
+// [ 'isa.optional.empty.list_of.optional.empty.set',        ( null                    ), true, ]
+// [ 'isa.optional.empty.list_of.optional.nonempty.set',     ( null                    ), true, ]
+// [ 'isa.optional.empty.set_of.set',                        ( null                    ), true, ]
+// [ 'isa.optional.empty.set_of.empty.set',                  ( null                    ), true, ]
+// [ 'isa.optional.empty.set_of.nonempty.set',               ( null                    ), true, ]
+// [ 'isa.optional.empty.set_of.optional.set',               ( null                    ), true, ]
+// [ 'isa.optional.empty.set_of.optional.empty.set',         ( null                    ), true, ]
+// [ 'isa.optional.empty.set_of.optional.nonempty.set',      ( null                    ), true, ]
+// [ 'isa.optional.nonempty.list_of.set',                    ( null                    ), true, ]
+// [ 'isa.optional.nonempty.list_of.empty.set',              ( null                    ), true, ]
+// [ 'isa.optional.nonempty.list_of.nonempty.set',           ( null                    ), true, ]
+// [ 'isa.optional.nonempty.list_of.optional.set',           ( null                    ), true, ]
+// [ 'isa.optional.nonempty.list_of.optional.empty.set',     ( null                    ), true, ]
+// [ 'isa.optional.nonempty.list_of.optional.nonempty.set',  ( null                    ), true, ]
+// [ 'isa.optional.nonempty.set_of.set',                     ( null                    ), true, ]
+// [ 'isa.optional.nonempty.set_of.empty.set',               ( null                    ), true, ]
+// [ 'isa.optional.nonempty.set_of.nonempty.set',            ( null                    ), true, ]
+// [ 'isa.optional.nonempty.set_of.optional.set',            ( null                    ), true, ]
+// [ 'isa.optional.nonempty.set_of.optional.empty.set',      ( null                    ), true, ]
+// [ 'isa.optional.nonempty.set_of.optional.nonempty.set',   ( null                    ), true, ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, value, matcher, error] = probes_and_matchers[i];
       await T.perform([probe, value], matcher, error, function() {
@@ -710,19 +1197,18 @@
 
   //###########################################################################################################
   if (module.parent == null) {
-    demo();
+    // demo()
+    // list_all_builtin_type_testers()
+    // demo_hedges()
+    // demo_test_with_protocol()
+    // demo_multipart_hedges()
+    // demo_combinate_2()
+    // demo_intertype_hedge_combinator()
+    // test @
+    // @[ "intertype hedgepaths" ]()
+    // @[ "intertype all hedgepaths" ]()
+    test(this["intertype all hedgepaths"]);
   }
-
-  // list_all_builtin_type_testers()
-// demo_hedges()
-// demo_test_with_protocol()
-// demo_multipart_hedges()
-// demo_combinate_2()
-// demo_intertype_hedge_combinator()
-// test @
-// @[ "intertype hedgepaths" ]()
-// @[ "intertype all hedgepaths" ]()
-// test @[ "intertype all hedgepaths" ]
 
 }).call(this);
 
