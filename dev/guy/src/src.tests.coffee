@@ -135,6 +135,40 @@ demo_acorn_walk = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+demo_acorn_walk = ->
+  ### Count return statements; if more than one, return first BlockStatement, otherwise `argument` property
+  of first and only ReturnStatement ###
+  GUY       = require H.guy_path
+  acorn     = require 'acorn'
+  walk      = require 'acorn-walk'
+  # ast     = acorn.parse "let x = 10;", { ecmaVersion: '2022', }
+  cfg       = function: ( x ) -> if x? then true else false
+  # cfg       = function: ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x )
+  ast       = GUY.src.parse cfg
+  collector =
+    rtn:    []
+    blk:    []
+  walk.simple ast,
+    ReturnStatement:      ( node ) -> collector.rtn.push node
+    BlockStatement:       ( node ) -> collector.blk.push node
+    # FunctionDeclaration:  ( node ) -> collector.fnd ?= node
+  debug '^234^', ast
+  debug '^234^', collector.rtn.length
+  debug '^234^', collector.blk.length
+  source = null
+  if collector.rtn.length is 1
+    source = GUY.src._generate collector.rtn[ 0 ]
+    source = source.trim().replace /\s*\n\s*/g, ' '
+    source = source.replace /^return\s*/, ''
+    source = source.replace /;$/, ''
+  else if collector.blk.length > 0
+    source = GUY.src._generate collector.blk.at -1
+    source = source.trim().replace /\s*\n\s*/g, ' '
+    source = source.replace /^\{\s*(.*?)\s*\}$/, '$1'
+  debug '^5345^', rpr source
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 demo_parse_use_and_fallback = ->
   GUY           = require H.guy_path
   error_literal = { type: 'Literal', start: 0, end: 7, value: 'ERROR', raw: "'ERROR'" }
@@ -156,7 +190,7 @@ demo_parse_use_and_fallback = ->
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # @[ "guy.str.SQL tag function" ]()
   # demo_return_clauses()
   # demo_acorn_walk()
@@ -164,5 +198,5 @@ if require.main is module then do =>
   # @[ "guy.src.parse()" ]()
   # test @[ "guy.src.parse()" ]
   # demo_parse_use_and_fallback()
-
+  demo_acorn_walk()
 
