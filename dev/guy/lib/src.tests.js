@@ -593,6 +593,57 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  demo_acorn_walk = function() {
+    /* Count return statements; if more than one, return first BlockStatement, otherwise `argument` property
+     of first and only ReturnStatement */
+    var GUY, acorn, ast, cfg, collector, source, walk;
+    GUY = require(H.guy_path);
+    acorn = require('acorn');
+    walk = require('acorn-walk');
+    // ast     = acorn.parse "let x = 10;", { ecmaVersion: '2022', }
+    cfg = {
+      function: function(x) {
+        if (x != null) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    };
+    // cfg       = function: ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x )
+    ast = GUY.src.parse(cfg);
+    collector = {
+      rtn: [],
+      blk: []
+    };
+    walk.simple(ast, {
+      ReturnStatement: function(node) {
+        return collector.rtn.push(node);
+      },
+      BlockStatement: function(node) {
+        return collector.blk.push(node);
+      }
+    });
+    // FunctionDeclaration:  ( node ) -> collector.fnd ?= node
+    debug('^234^', ast);
+    debug('^234^', collector.rtn.length);
+    debug('^234^', collector.blk.length);
+    source = null;
+    if (collector.rtn.length === 1) {
+      source = GUY.src._generate(collector.rtn[0]);
+      source = source.trim().replace(/\s*\n\s*/g, ' ');
+      source = source.replace(/^return\s*/, '');
+      source = source.replace(/;$/, '');
+    } else if (collector.blk.length > 0) {
+      source = GUY.src._generate(collector.blk.at(-1));
+      source = source.trim().replace(/\s*\n\s*/g, ' ');
+      source = source.replace(/^\{\s*(.*?)\s*\}$/, '$1');
+    }
+    debug('^5345^', rpr(source));
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_parse_use_and_fallback = function() {
     var GUY, error_literal, result;
     GUY = require(H.guy_path);
@@ -649,17 +700,17 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // @[ "guy.str.SQL tag function" ]()
+      // demo_return_clauses()
+      // demo_acorn_walk()
+      // test @[ "guy.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
+      // @[ "guy.src.parse()" ]()
+      // test @[ "guy.src.parse()" ]
+      // demo_parse_use_and_fallback()
+      return demo_acorn_walk();
     })();
   }
-
-  // @[ "guy.str.SQL tag function" ]()
-// demo_return_clauses()
-// demo_acorn_walk()
-// test @[ "guy.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
-// @[ "guy.src.parse()" ]()
-// test @[ "guy.src.parse()" ]
-// demo_parse_use_and_fallback()
 
 }).call(this);
 
