@@ -142,30 +142,43 @@ demo_acorn_walk = ->
   acorn     = require 'acorn'
   walk      = require 'acorn-walk'
   # ast     = acorn.parse "let x = 10;", { ecmaVersion: '2022', }
-  cfg       = function: ( x ) -> if x? then true else false
-  # cfg       = function: ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x )
-  ast       = GUY.src.parse cfg
-  collector =
-    rtn:    []
-    blk:    []
-  walk.simple ast,
-    ReturnStatement:      ( node ) -> collector.rtn.push node
-    BlockStatement:       ( node ) -> collector.blk.push node
-    # FunctionDeclaration:  ( node ) -> collector.fnd ?= node
-  debug '^234^', ast
-  debug '^234^', collector.rtn.length
-  debug '^234^', collector.blk.length
-  source = null
-  if collector.rtn.length is 1
-    source = GUY.src._generate collector.rtn[ 0 ]
-    source = source.trim().replace /\s*\n\s*/g, ' '
-    source = source.replace /^return\s*/, ''
-    source = source.replace /;$/, ''
-  else if collector.blk.length > 0
-    source = GUY.src._generate collector.blk.at -1
-    source = source.trim().replace /\s*\n\s*/g, ' '
-    source = source.replace /^\{\s*(.*?)\s*\}$/, '$1'
-  debug '^5345^', rpr source
+  slug_from_simple_function = ( cfg ) ->
+    ast       = GUY.src.parse cfg
+    collector =
+      rtn:    []
+      blk:    []
+    walk.simple ast,
+      ReturnStatement:      ( node ) -> collector.rtn.push node
+      BlockStatement:       ( node ) -> collector.blk.push node
+      # FunctionDeclaration:  ( node ) -> collector.fnd ?= node
+    # debug '^234^', ast
+    # debug '^234^', collector.rtn.length
+    # debug '^234^', collector.blk.length
+    R = null
+    if collector.rtn.length is 1
+      R = GUY.src._generate collector.rtn[ 0 ]
+      R = R.trim().replace /\s*\n\s*/g, ' '
+      R = R.replace /^return\s*/, ''
+      R = R.replace /;$/, ''
+    else if collector.blk.length > 0
+      R = GUY.src._generate collector.blk.at -1
+      R = R.trim().replace /\s*\n\s*/g, ' '
+      R = R.replace /^\{\s*(.*?)\s*\}$/, '$1'
+    return R
+  f3 =  ( x ) ->
+    return true if x > 0
+    return false if x < 0
+    return null
+  cfgs = [
+    { function: ( `function ( x ) { 42; }` ), }
+    { function: ( `function ( x ) { return 42; }` ), }
+    { function: ( ( x ) -> if x? then true else false ), }
+    { function: ( ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x ) ), }
+    { function: f3, }
+    ]
+  for cfg in cfgs
+    urge '^5345^', cfg.function.toString()
+    info '^5345^', rpr slug_from_simple_function cfg
   return null
 
 #-----------------------------------------------------------------------------------------------------------
