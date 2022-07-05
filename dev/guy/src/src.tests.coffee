@@ -109,6 +109,32 @@ convert_to_plain_objects = ( ast ) ->
   #.........................................................................................................
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "GUY.src.slug_from_simple_function()" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY     = require H.guy_path
+  f3      =  ( x ) ->
+    return true if x > 0
+    return false if x < 0
+    return null
+  probes_and_matchers = [
+    [ { function: ( -> ), },                                                                    '', ]
+    [ { function: ( ( x ) -> 42 ), },                                                           '42', ]
+    [ { function: ( ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x ) ), },  'x == null || this.isa.object(x) || this.isa.nonempty.text(x)', ]
+    [ { function: ( `function ( x ) { 42; }` ), },                                              '42;', ]
+    [ { function: ( `function ( x ) { return 42; }` ), },                                       '42', ]
+    [ { function: ( ( x ) -> if x? then true else false ), },                                   'if (x != null) { return true; } else { return false; }', ]
+    [ { function: ( ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x ) ), },  'x == null || this.isa.object(x) || this.isa.nonempty.text(x)', ]
+    [ { function: f3, },                                                                        'if (x > 0) { return true; } if (x < 0) { return false; } return null;', ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      result  = GUY.src.slug_from_simple_function probe
+      # urge '^33424^', rpr result
+      resolve result
+  #.........................................................................................................
+  return done?()
 
 #-----------------------------------------------------------------------------------------------------------
 demo_return_clauses = ->
