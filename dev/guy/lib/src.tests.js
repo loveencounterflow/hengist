@@ -62,7 +62,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["guy.src.parse()"] = function(T, done) {
+  this["GUY.src.parse()"] = function(T, done) {
     var GUY;
     // T?.halt_on_error()
     GUY = require(H.guy_path);
@@ -199,7 +199,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["guy.src.parse() accepts `fallback` argument, otherwise errors where appropriate"] = async function(T, done) {
+  this["GUY.src.parse() accepts `fallback` argument, otherwise errors where appropriate"] = async function(T, done) {
     var GUY, error, i, len, matcher, probe, probes_and_matchers;
     // T?.halt_on_error()
     GUY = require(H.guy_path);
@@ -492,7 +492,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["guy.src.slug_node_from_simple_function()"] = async function(T, done) {
+  this["GUY.src.slug_node_from_simple_function()"] = async function(T, done) {
     var GUY, error, f3, i, len, matcher, probe, probes_and_matchers;
     // T?.halt_on_error()
     GUY = require(H.guy_path);
@@ -1079,6 +1079,97 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["GUY.src.slug_from_simple_function()"] = async function(T, done) {
+    var GUY, error, f3, i, len, matcher, probe, probes_and_matchers;
+    // T?.halt_on_error()
+    GUY = require(H.guy_path);
+    f3 = function(x) {
+      if (x > 0) {
+        return true;
+      }
+      if (x < 0) {
+        return false;
+      }
+      return null;
+    };
+    probes_and_matchers = [
+      [
+        {
+          function: (function() {})
+        },
+        ''
+      ],
+      [
+        {
+          function: (function(x) {
+            return 42;
+          })
+        },
+        '42'
+      ],
+      [
+        {
+          function: (function(x) {
+            return (x == null) || (this.isa.object(x)) || (this.isa.nonempty.text(x));
+          })
+        },
+        'x == null || this.isa.object(x) || this.isa.nonempty.text(x)'
+      ],
+      [
+        {
+          function: function ( x ) { 42; }
+        },
+        '42;'
+      ],
+      [
+        {
+          function: function ( x ) { return 42; }
+        },
+        '42'
+      ],
+      [
+        {
+          function: (function(x) {
+            if (x != null) {
+              return true;
+            } else {
+              return false;
+            }
+          })
+        },
+        'if (x != null) { return true; } else { return false; }'
+      ],
+      [
+        {
+          function: (function(x) {
+            return (x == null) || (this.isa.object(x)) || (this.isa.nonempty.text(x));
+          })
+        },
+        'x == null || this.isa.object(x) || this.isa.nonempty.text(x)'
+      ],
+      [
+        {
+          function: f3
+        },
+        'if (x > 0) { return true; } if (x < 0) { return false; } return null;'
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var result;
+          result = GUY.src.slug_from_simple_function(probe);
+          // urge '^33424^', rpr result
+          return resolve(result);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_return_clauses = function() {
     var GUY, ast, f, functions, i, len;
     GUY = require(H.guy_path);
@@ -1288,10 +1379,11 @@
       // @[ "guy.str.SQL tag function" ]()
       // demo_return_clauses()
       // demo_acorn_walk()
-      // test @[ "guy.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
-      // @[ "guy.src.parse()" ]()
-      // test @[ "guy.src.parse()" ]
-      return test(this["guy.src.slug_node_from_simple_function()"]);
+      // test @[ "GUY.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
+      // @[ "GUY.src.parse()" ]()
+      // test @[ "GUY.src.parse()" ]
+      // test @[ "GUY.src.slug_node_from_simple_function()" ]
+      return test(this["GUY.src.slug_from_simple_function()"]);
     })();
   }
 
