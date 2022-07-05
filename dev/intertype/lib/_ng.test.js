@@ -40,7 +40,7 @@
   // { intersection_of }       = require '../../../apps/intertype/lib/helpers'
   H = require('../../../lib/helpers');
 
-  GUY = require('guy');
+  GUY = require('../../../apps/guy');
 
   equals = require('../../../apps/intertype/deps/jkroso-equals');
 
@@ -1411,7 +1411,8 @@
     // @[ "intertype hedgepaths" ]()
     // @[ "intertype all hedgepaths" ]()
     // test @[ "intertype all hedgepaths" ]
-    urge(GUY.src.get_first_return_clause_text({
+    urge(GUY.src.get_first_return_clause_text);
+    urge(GUY.src.slug_from_simple_function({
       function: function(x) {
         return this.isa.optional.integer(x);
       }
