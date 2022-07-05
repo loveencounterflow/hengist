@@ -41,7 +41,7 @@ convert_to_plain_objects = ( ast ) ->
   return ast
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "guy.src.parse()" ] = ( T, done ) ->
+@[ "GUY.src.parse()" ] = ( T, done ) ->
   # T?.halt_on_error()
   GUY     = require H.guy_path
   do =>
@@ -61,7 +61,7 @@ convert_to_plain_objects = ( ast ) ->
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "guy.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ] = ( T, done ) ->
+@[ "GUY.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ] = ( T, done ) ->
   # T?.halt_on_error()
   GUY     = require H.guy_path
   probes_and_matchers = [
@@ -82,7 +82,7 @@ convert_to_plain_objects = ( ast ) ->
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "guy.src.slug_node_from_simple_function()" ] = ( T, done ) ->
+@[ "GUY.src.slug_node_from_simple_function()" ] = ( T, done ) ->
   # T?.halt_on_error()
   GUY     = require H.guy_path
   f3      =  ( x ) ->
@@ -222,10 +222,11 @@ if require.main is module then do =>
   # @[ "guy.str.SQL tag function" ]()
   # demo_return_clauses()
   # demo_acorn_walk()
-  # test @[ "guy.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
-  # @[ "guy.src.parse()" ]()
-  # test @[ "guy.src.parse()" ]
-  test @[ "guy.src.slug_node_from_simple_function()" ]
+  # test @[ "GUY.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
+  # @[ "GUY.src.parse()" ]()
+  # test @[ "GUY.src.parse()" ]
+  # test @[ "GUY.src.slug_node_from_simple_function()" ]
+  test @[ "GUY.src.slug_from_simple_function()" ]
   # demo_parse_use_and_fallback()
   # demo_acorn_walk()
 
