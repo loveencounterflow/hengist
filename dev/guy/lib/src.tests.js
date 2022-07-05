@@ -492,37 +492,589 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["guy.src.get_first_return_clause()"] = function(T, done) {
-    var GUY;
+  this["guy.src.slug_node_from_simple_function()"] = async function(T, done) {
+    var GUY, error, f3, i, len, matcher, probe, probes_and_matchers;
     // T?.halt_on_error()
     GUY = require(H.guy_path);
-    (() => {
-      var result;
-      result = convert_to_plain_objects(GUY.src.get_first_return_clause_node(function(x) {
-        return 42;
-      }));
-      debug('^975-1^', result);
-      return T != null ? T.eq(result, {
-        type: 'ReturnStatement',
-        start: 22,
-        end: 32,
-        argument: {
-          type: 'Literal',
-          start: 29,
-          end: 31,
-          value: 42,
-          raw: '42'
+    f3 = function(x) {
+      if (x > 0) {
+        return true;
+      }
+      if (x < 0) {
+        return false;
+      }
+      return null;
+    };
+    probes_and_matchers = [
+      [
+        {
+          function: (function() {})
+        },
+        {
+          type: 'BlockStatement',
+          start: 11,
+          end: 13,
+          body: []
         }
-      }) : void 0;
-    })();
-    (() => {
-      var result;
-      result = GUY.src.get_first_return_clause_text(function(x) {
-        return 42;
+      ],
+      [
+        {
+          function: (function(x) {
+            return 42;
+          })
+        },
+        {
+          type: 'ReturnStatement',
+          start: 26,
+          end: 36,
+          argument: {
+            type: 'Literal',
+            start: 33,
+            end: 35,
+            value: 42,
+            raw: '42'
+          }
+        }
+      ],
+      [
+        {
+          function: (function(x) {
+            return (x == null) || (this.isa.object(x)) || (this.isa.nonempty.text(x));
+          })
+        },
+        {
+          type: 'ReturnStatement',
+          start: 26,
+          end: 100,
+          argument: {
+            type: 'LogicalExpression',
+            start: 33,
+            end: 99,
+            left: {
+              type: 'LogicalExpression',
+              start: 33,
+              end: 68,
+              left: {
+                type: 'BinaryExpression',
+                start: 34,
+                end: 43,
+                left: {
+                  type: 'Identifier',
+                  start: 34,
+                  end: 35,
+                  name: 'x'
+                },
+                operator: '==',
+                right: {
+                  type: 'Literal',
+                  start: 39,
+                  end: 43,
+                  value: null,
+                  raw: 'null'
+                }
+              },
+              operator: '||',
+              right: {
+                type: 'CallExpression',
+                start: 49,
+                end: 67,
+                callee: {
+                  type: 'MemberExpression',
+                  start: 49,
+                  end: 64,
+                  object: {
+                    type: 'MemberExpression',
+                    start: 49,
+                    end: 57,
+                    object: {
+                      type: 'ThisExpression',
+                      start: 49,
+                      end: 53
+                    },
+                    property: {
+                      type: 'Identifier',
+                      start: 54,
+                      end: 57,
+                      name: 'isa'
+                    },
+                    computed: false,
+                    optional: false
+                  },
+                  property: {
+                    type: 'Identifier',
+                    start: 58,
+                    end: 64,
+                    name: 'object'
+                  },
+                  computed: false,
+                  optional: false
+                },
+                arguments: [
+                  {
+                    type: 'Identifier',
+                    start: 65,
+                    end: 66,
+                    name: 'x'
+                  }
+                ],
+                optional: false
+              }
+            },
+            operator: '||',
+            right: {
+              type: 'CallExpression',
+              start: 73,
+              end: 98,
+              callee: {
+                type: 'MemberExpression',
+                start: 73,
+                end: 95,
+                object: {
+                  type: 'MemberExpression',
+                  start: 73,
+                  end: 90,
+                  object: {
+                    type: 'MemberExpression',
+                    start: 73,
+                    end: 81,
+                    object: {
+                      type: 'ThisExpression',
+                      start: 73,
+                      end: 77
+                    },
+                    property: {
+                      type: 'Identifier',
+                      start: 78,
+                      end: 81,
+                      name: 'isa'
+                    },
+                    computed: false,
+                    optional: false
+                  },
+                  property: {
+                    type: 'Identifier',
+                    start: 82,
+                    end: 90,
+                    name: 'nonempty'
+                  },
+                  computed: false,
+                  optional: false
+                },
+                property: {
+                  type: 'Identifier',
+                  start: 91,
+                  end: 95,
+                  name: 'text'
+                },
+                computed: false,
+                optional: false
+              },
+              arguments: [
+                {
+                  type: 'Identifier',
+                  start: 96,
+                  end: 97,
+                  name: 'x'
+                }
+              ],
+              optional: false
+            }
+          }
+        }
+      ],
+      [
+        {
+          function: function ( x ) { 42; }
+        },
+        {
+          type: 'BlockStatement',
+          start: 15,
+          end: 22,
+          body: [
+            {
+              type: 'ExpressionStatement',
+              start: 17,
+              end: 20,
+              expression: {
+                type: 'Literal',
+                start: 17,
+                end: 19,
+                value: 42,
+                raw: '42'
+              }
+            }
+          ]
+        }
+      ],
+      [
+        {
+          function: function ( x ) { return 42; }
+        },
+        {
+          type: 'ReturnStatement',
+          start: 17,
+          end: 27,
+          argument: {
+            type: 'Literal',
+            start: 24,
+            end: 26,
+            value: 42,
+            raw: '42'
+          }
+        }
+      ],
+      [
+        {
+          function: (function(x) {
+            if (x != null) {
+              return true;
+            } else {
+              return false;
+            }
+          })
+        },
+        {
+          type: 'BlockStatement',
+          start: 12,
+          end: 144,
+          body: [
+            {
+              type: 'IfStatement',
+              start: 26,
+              end: 132,
+              test: {
+                type: 'BinaryExpression',
+                start: 30,
+                end: 39,
+                left: {
+                  type: 'Identifier',
+                  start: 30,
+                  end: 31,
+                  name: 'x'
+                },
+                operator: '!=',
+                right: {
+                  type: 'Literal',
+                  start: 35,
+                  end: 39,
+                  value: null,
+                  raw: 'null'
+                }
+              },
+              consequent: {
+                type: 'BlockStatement',
+                start: 41,
+                end: 83,
+                body: [
+                  {
+                    type: 'ReturnStatement',
+                    start: 57,
+                    end: 69,
+                    argument: {
+                      type: 'Literal',
+                      start: 64,
+                      end: 68,
+                      value: true,
+                      raw: 'true'
+                    }
+                  }
+                ]
+              },
+              alternate: {
+                type: 'BlockStatement',
+                start: 89,
+                end: 132,
+                body: [
+                  {
+                    type: 'ReturnStatement',
+                    start: 105,
+                    end: 118,
+                    argument: {
+                      type: 'Literal',
+                      start: 112,
+                      end: 117,
+                      value: false,
+                      raw: 'false'
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      [
+        {
+          function: (function(x) {
+            return (x == null) || (this.isa.object(x)) || (this.isa.nonempty.text(x));
+          })
+        },
+        {
+          type: 'ReturnStatement',
+          start: 26,
+          end: 100,
+          argument: {
+            type: 'LogicalExpression',
+            start: 33,
+            end: 99,
+            left: {
+              type: 'LogicalExpression',
+              start: 33,
+              end: 68,
+              left: {
+                type: 'BinaryExpression',
+                start: 34,
+                end: 43,
+                left: {
+                  type: 'Identifier',
+                  start: 34,
+                  end: 35,
+                  name: 'x'
+                },
+                operator: '==',
+                right: {
+                  type: 'Literal',
+                  start: 39,
+                  end: 43,
+                  value: null,
+                  raw: 'null'
+                }
+              },
+              operator: '||',
+              right: {
+                type: 'CallExpression',
+                start: 49,
+                end: 67,
+                callee: {
+                  type: 'MemberExpression',
+                  start: 49,
+                  end: 64,
+                  object: {
+                    type: 'MemberExpression',
+                    start: 49,
+                    end: 57,
+                    object: {
+                      type: 'ThisExpression',
+                      start: 49,
+                      end: 53
+                    },
+                    property: {
+                      type: 'Identifier',
+                      start: 54,
+                      end: 57,
+                      name: 'isa'
+                    },
+                    computed: false,
+                    optional: false
+                  },
+                  property: {
+                    type: 'Identifier',
+                    start: 58,
+                    end: 64,
+                    name: 'object'
+                  },
+                  computed: false,
+                  optional: false
+                },
+                arguments: [
+                  {
+                    type: 'Identifier',
+                    start: 65,
+                    end: 66,
+                    name: 'x'
+                  }
+                ],
+                optional: false
+              }
+            },
+            operator: '||',
+            right: {
+              type: 'CallExpression',
+              start: 73,
+              end: 98,
+              callee: {
+                type: 'MemberExpression',
+                start: 73,
+                end: 95,
+                object: {
+                  type: 'MemberExpression',
+                  start: 73,
+                  end: 90,
+                  object: {
+                    type: 'MemberExpression',
+                    start: 73,
+                    end: 81,
+                    object: {
+                      type: 'ThisExpression',
+                      start: 73,
+                      end: 77
+                    },
+                    property: {
+                      type: 'Identifier',
+                      start: 78,
+                      end: 81,
+                      name: 'isa'
+                    },
+                    computed: false,
+                    optional: false
+                  },
+                  property: {
+                    type: 'Identifier',
+                    start: 82,
+                    end: 90,
+                    name: 'nonempty'
+                  },
+                  computed: false,
+                  optional: false
+                },
+                property: {
+                  type: 'Identifier',
+                  start: 91,
+                  end: 95,
+                  name: 'text'
+                },
+                computed: false,
+                optional: false
+              },
+              arguments: [
+                {
+                  type: 'Identifier',
+                  start: 96,
+                  end: 97,
+                  name: 'x'
+                }
+              ],
+              optional: false
+            }
+          }
+        }
+      ],
+      [
+        {
+          function: f3
+        },
+        {
+          type: 'BlockStatement',
+          start: 12,
+          end: 135,
+          body: [
+            {
+              type: 'IfStatement',
+              start: 20,
+              end: 61,
+              test: {
+                type: 'BinaryExpression',
+                start: 24,
+                end: 29,
+                left: {
+                  type: 'Identifier',
+                  start: 24,
+                  end: 25,
+                  name: 'x'
+                },
+                operator: '>',
+                right: {
+                  type: 'Literal',
+                  start: 28,
+                  end: 29,
+                  value: 0,
+                  raw: '0'
+                }
+              },
+              consequent: {
+                type: 'BlockStatement',
+                start: 31,
+                end: 61,
+                body: [
+                  {
+                    type: 'ReturnStatement',
+                    start: 41,
+                    end: 53,
+                    argument: {
+                      type: 'Literal',
+                      start: 48,
+                      end: 52,
+                      value: true,
+                      raw: 'true'
+                    }
+                  }
+                ]
+              },
+              alternate: null
+            },
+            {
+              type: 'IfStatement',
+              start: 68,
+              end: 110,
+              test: {
+                type: 'BinaryExpression',
+                start: 72,
+                end: 77,
+                left: {
+                  type: 'Identifier',
+                  start: 72,
+                  end: 73,
+                  name: 'x'
+                },
+                operator: '<',
+                right: {
+                  type: 'Literal',
+                  start: 76,
+                  end: 77,
+                  value: 0,
+                  raw: '0'
+                }
+              },
+              consequent: {
+                type: 'BlockStatement',
+                start: 79,
+                end: 110,
+                body: [
+                  {
+                    type: 'ReturnStatement',
+                    start: 89,
+                    end: 102,
+                    argument: {
+                      type: 'Literal',
+                      start: 96,
+                      end: 101,
+                      value: false,
+                      raw: 'false'
+                    }
+                  }
+                ]
+              },
+              alternate: null
+            },
+            {
+              type: 'ReturnStatement',
+              start: 117,
+              end: 129,
+              argument: {
+                type: 'Literal',
+                start: 124,
+                end: 128,
+                value: null,
+                raw: 'null'
+              }
+            }
+          ]
+        }
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var result;
+          result = GUY.src.slug_node_from_simple_function(probe);
+          result = convert_to_plain_objects(result);
+          urge('^33424^', result);
+          return resolve(result);
+        });
       });
-      debug('^975-1^', result);
-      return T != null ? T.eq(result, "return 42;") : void 0;
-    })();
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -739,10 +1291,12 @@
       // test @[ "guy.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
       // @[ "guy.src.parse()" ]()
       // test @[ "guy.src.parse()" ]
-      // demo_parse_use_and_fallback()
-      return demo_acorn_walk();
+      return test(this["guy.src.slug_node_from_simple_function()"]);
     })();
   }
+
+  // demo_parse_use_and_fallback()
+// demo_acorn_walk()
 
 }).call(this);
 
