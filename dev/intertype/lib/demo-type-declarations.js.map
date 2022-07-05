@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/demo-type-declarations.coffee"
+  ],
+  "names": [],
+  "mappings": "AACA;EAAA;AAAA,MAAA,OAAA,EAAA,GAAA,EAAA,GAAA,EAAA;;EAEA,KAAA,GAAc,IAAI,CAAE,OAAA,CAAQ,yBAAR,CAAF,CAAqC,CAAC,SAA1C,CAAA;;EACd,CAAA,CAAE,GAAF,EACE,OADF,CAAA,GACc,KADd;;EAEA,GAAA,GAAc,OAAO,CAAC;;EAEtB,OAAA,CAAQ,aAAR,EAAuB;IAAA,IAAA,EAAM;MAC3B,QAAA,CAAE,CAAF,CAAA;eAAS,IAAC,CAAA,GAAG,CAAC,MAAL,CAAqB,CAArB;MAAT,CAD2B;MAE3B,QAAA,CAAE,CAAF,CAAA;eAAS,IAAC,CAAA,GAAG,CAAC,KAAL,CAAqB,CAAC,CAAC,KAAvB;MAAT,CAF2B;MAG3B,QAAA,CAAE,CAAF,CAAA;eAAS,IAAC,CAAA,GAAG,CAAC,QAAQ,CAAC,IAAd,CAAqB,CAAC,CAAC,IAAvB;MAAT,CAH2B;;EAAN,CAAvB;;EAMA,GAAA,CAAI,OAAJ,EAAa,GAAG,CAAC,WAAJ,CAAgB,IAAhB,CAAb;;EACA,GAAA,CAAI,OAAJ,EAAa,GAAG,CAAC,WAAJ,CAAgB,EAAhB,CAAb;;EACA,GAAA,CAAI,OAAJ,EAAa,GAAG,CAAC,WAAJ,CAAgB;IAAE,KAAA,EAAO,EAAT;IAAa,IAAA,EAAM;EAAnB,CAAhB,CAAb;AAfA",
+  "sourcesContent": [
+    "\n'use strict'\n\ntypes       = new ( require '../../../apps/intertype' ).Intertype()\n{ isa\n  declare } = types\nlog         = console.log\n\ndeclare 'xy_quantity', test: [\n  ( x ) -> @isa.object          x\n  ( x ) -> @isa.float           x.value\n  ( x ) -> @isa.nonempty.text   x.unit\n  ]\n\nlog '^1-1^', isa.xy_quantity null\nlog '^1-1^', isa.xy_quantity 42\nlog '^1-1^', isa.xy_quantity { value: 42, unit: 'm', }\n\n"
+  ]
+}
