@@ -82,18 +82,33 @@ convert_to_plain_objects = ( ast ) ->
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "guy.src.get_first_return_clause()" ] = ( T, done ) ->
+@[ "guy.src.slug_node_from_simple_function()" ] = ( T, done ) ->
   # T?.halt_on_error()
   GUY     = require H.guy_path
-  do =>
-    result = convert_to_plain_objects GUY.src.get_first_return_clause_node ( x ) -> 42
-    debug '^975-1^', result
-    T?.eq result, { type: 'ReturnStatement', start: 22, end: 32, argument: { type: 'Literal', start: 29, end: 31, value: 42, raw: '42' } }
-  do =>
-    result = GUY.src.get_first_return_clause_text ( x ) -> 42
-    debug '^975-1^', result
-    T?.eq result, "return 42;"
+  f3      =  ( x ) ->
+    return true if x > 0
+    return false if x < 0
+    return null
+  probes_and_matchers = [
+    [ { function: ( -> ), },                                                                    { type: 'BlockStatement', start: 11, end: 13, body: [] }, ]
+    [ { function: ( ( x ) -> 42 ), },                                                           { type: 'ReturnStatement', start: 26, end: 36, argument: { type: 'Literal', start: 33, end: 35, value: 42, raw: '42' } }, ]
+    [ { function: ( ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x ) ), },  { type: 'ReturnStatement', start: 26, end: 100, argument: { type: 'LogicalExpression', start: 33, end: 99, left: { type: 'LogicalExpression', start: 33, end: 68, left: { type: 'BinaryExpression', start: 34, end: 43, left: { type: 'Identifier', start: 34, end: 35, name: 'x' }, operator: '==', right: { type: 'Literal', start: 39, end: 43, value: null, raw: 'null' } }, operator: '||', right: { type: 'CallExpression', start: 49, end: 67, callee: { type: 'MemberExpression', start: 49, end: 64, object: { type: 'MemberExpression', start: 49, end: 57, object: { type: 'ThisExpression', start: 49, end: 53 }, property: { type: 'Identifier', start: 54, end: 57, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 58, end: 64, name: 'object' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 65, end: 66, name: 'x' } ], optional: false } }, operator: '||', right: { type: 'CallExpression', start: 73, end: 98, callee: { type: 'MemberExpression', start: 73, end: 95, object: { type: 'MemberExpression', start: 73, end: 90, object: { type: 'MemberExpression', start: 73, end: 81, object: { type: 'ThisExpression', start: 73, end: 77 }, property: { type: 'Identifier', start: 78, end: 81, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 82, end: 90, name: 'nonempty' }, computed: false, optional: false }, property: { type: 'Identifier', start: 91, end: 95, name: 'text' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 96, end: 97, name: 'x' } ], optional: false } } }, ]
+    [ { function: ( `function ( x ) { 42; }` ), },                                              { type: 'BlockStatement', start: 15, end: 22, body: [ { type: 'ExpressionStatement', start: 17, end: 20, expression: { type: 'Literal', start: 17, end: 19, value: 42, raw: '42' } } ] }, ]
+    [ { function: ( `function ( x ) { return 42; }` ), },                                       { type: 'ReturnStatement', start: 17, end: 27, argument: { type: 'Literal', start: 24, end: 26, value: 42, raw: '42' } }, ]
+    [ { function: ( ( x ) -> if x? then true else false ), },                                   { type: 'BlockStatement', start: 12, end: 144, body: [ { type: 'IfStatement', start: 26, end: 132, test: { type: 'BinaryExpression', start: 30, end: 39, left: { type: 'Identifier', start: 30, end: 31, name: 'x' }, operator: '!=', right: { type: 'Literal', start: 35, end: 39, value: null, raw: 'null' } }, consequent: { type: 'BlockStatement', start: 41, end: 83, body: [ { type: 'ReturnStatement', start: 57, end: 69, argument: { type: 'Literal', start: 64, end: 68, value: true, raw: 'true' } } ] }, alternate: { type: 'BlockStatement', start: 89, end: 132, body: [ { type: 'ReturnStatement', start: 105, end: 118, argument: { type: 'Literal', start: 112, end: 117, value: false, raw: 'false' } } ] } } ] }, ]
+    [ { function: ( ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x ) ), },  { type: 'ReturnStatement', start: 26, end: 100, argument: { type: 'LogicalExpression', start: 33, end: 99, left: { type: 'LogicalExpression', start: 33, end: 68, left: { type: 'BinaryExpression', start: 34, end: 43, left: { type: 'Identifier', start: 34, end: 35, name: 'x' }, operator: '==', right: { type: 'Literal', start: 39, end: 43, value: null, raw: 'null' } }, operator: '||', right: { type: 'CallExpression', start: 49, end: 67, callee: { type: 'MemberExpression', start: 49, end: 64, object: { type: 'MemberExpression', start: 49, end: 57, object: { type: 'ThisExpression', start: 49, end: 53 }, property: { type: 'Identifier', start: 54, end: 57, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 58, end: 64, name: 'object' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 65, end: 66, name: 'x' } ], optional: false } }, operator: '||', right: { type: 'CallExpression', start: 73, end: 98, callee: { type: 'MemberExpression', start: 73, end: 95, object: { type: 'MemberExpression', start: 73, end: 90, object: { type: 'MemberExpression', start: 73, end: 81, object: { type: 'ThisExpression', start: 73, end: 77 }, property: { type: 'Identifier', start: 78, end: 81, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 82, end: 90, name: 'nonempty' }, computed: false, optional: false }, property: { type: 'Identifier', start: 91, end: 95, name: 'text' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 96, end: 97, name: 'x' } ], optional: false } } }, ]
+    [ { function: f3, },                                                                        { type: 'BlockStatement', start: 12, end: 135, body: [ { type: 'IfStatement', start: 20, end: 61, test: { type: 'BinaryExpression', start: 24, end: 29, left: { type: 'Identifier', start: 24, end: 25, name: 'x' }, operator: '>', right: { type: 'Literal', start: 28, end: 29, value: 0, raw: '0' } }, consequent: { type: 'BlockStatement', start: 31, end: 61, body: [ { type: 'ReturnStatement', start: 41, end: 53, argument: { type: 'Literal', start: 48, end: 52, value: true, raw: 'true' } } ] }, alternate: null }, { type: 'IfStatement', start: 68, end: 110, test: { type: 'BinaryExpression', start: 72, end: 77, left: { type: 'Identifier', start: 72, end: 73, name: 'x' }, operator: '<', right: { type: 'Literal', start: 76, end: 77, value: 0, raw: '0' } }, consequent: { type: 'BlockStatement', start: 79, end: 110, body: [ { type: 'ReturnStatement', start: 89, end: 102, argument: { type: 'Literal', start: 96, end: 101, value: false, raw: 'false' } } ] }, alternate: null }, { type: 'ReturnStatement', start: 117, end: 129, argument: { type: 'Literal', start: 124, end: 128, value: null, raw: 'null' } } ] }, ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      result  = GUY.src.slug_node_from_simple_function probe
+      result  = convert_to_plain_objects result
+      urge '^33424^', result
+      resolve result
+  #.........................................................................................................
   return done?()
+
 
 #-----------------------------------------------------------------------------------------------------------
 demo_return_clauses = ->
@@ -210,6 +225,7 @@ if require.main is module then do =>
   # test @[ "guy.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
   # @[ "guy.src.parse()" ]()
   # test @[ "guy.src.parse()" ]
+  test @[ "guy.src.slug_node_from_simple_function()" ]
   # demo_parse_use_and_fallback()
-  demo_acorn_walk()
+  # demo_acorn_walk()
 
