@@ -126,6 +126,7 @@ convert_to_plain_objects = ( ast ) ->
     [ { function: ( ( x ) -> if x? then true else false ), },                                   'if (x != null) { return true; } else { return false; }', ]
     [ { function: ( ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x ) ), },  'x == null || this.isa.object(x) || this.isa.nonempty.text(x)', ]
     [ { function: f3, },                                                                        'if (x > 0) { return true; } if (x < 0) { return false; } return null;', ]
+    [ { text: 'let x = 42;' }, 'let x = 42;', null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -180,46 +181,25 @@ demo_acorn_walk = ->
   ### Count return statements; if more than one, return first BlockStatement, otherwise `argument` property
   of first and only ReturnStatement ###
   GUY       = require H.guy_path
-  acorn     = require 'acorn'
-  walk      = require 'acorn-walk'
-  # ast     = acorn.parse "let x = 10;", { ecmaVersion: '2022', }
-  slug_from_simple_function = ( cfg ) ->
-    ast       = GUY.src.parse cfg
-    collector =
-      rtn:    []
-      blk:    []
-    walk.simple ast,
-      ReturnStatement:      ( node ) -> collector.rtn.push node
-      BlockStatement:       ( node ) -> collector.blk.push node
-      # FunctionDeclaration:  ( node ) -> collector.fnd ?= node
-    # debug '^234^', ast
-    # debug '^234^', collector.rtn.length
-    # debug '^234^', collector.blk.length
-    R = null
-    if collector.rtn.length is 1
-      R = GUY.src._generate collector.rtn[ 0 ]
-      R = R.trim().replace /\s*\n\s*/g, ' '
-      R = R.replace /^return\s*/, ''
-      R = R.replace /;$/, ''
-    else if collector.blk.length > 0
-      R = GUY.src._generate collector.blk.at -1
-      R = R.trim().replace /\s*\n\s*/g, ' '
-      R = R.replace /^\{\s*(.*?)\s*\}$/, '$1'
-    return R
-  f3 =  ( x ) ->
+  f3        =  ( x ) ->
     return true if x > 0
     return false if x < 0
     return null
-  cfgs = [
-    { function: ( `function ( x ) { 42; }` ), }
-    { function: ( `function ( x ) { return 42; }` ), }
-    { function: ( ( x ) -> if x? then true else false ), }
-    { function: ( ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x ) ), }
-    { function: f3, }
+  cfgs      = [
+    # { function: ( `function ( x ) { 42; }` ), }
+    # { function: ( `function ( x ) { return 42; }` ), }
+    # { function: ( ( x ) -> if x? then true else false ), }
+    # { function: ( ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x ) ), }
+    # { function: f3, }
+    { text: 'let x ^^^ 42;', use: 'strict', fallback: 'NOTGOOD', }
+    # { text: 'let x ^^^ 42;', use: 'strict', }
+    { text: 'let x = 42;', use: 'strict', }
+    { text: 'let x = 42;', }
     ]
   for cfg in cfgs
-    urge '^5345^', cfg.function.toString()
-    info '^5345^', rpr slug_from_simple_function cfg
+    whisper '————————————————————————————————————————————————————'
+    urge '^5345^', ( cfg.function ? cfg.text ).toString()
+    info '^5345^', rpr GUY.src.slug_from_simple_function cfg
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -244,15 +224,14 @@ demo_parse_use_and_fallback = ->
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # @[ "guy.str.SQL tag function" ]()
   # demo_return_clauses()
-  # demo_acorn_walk()
   # test @[ "GUY.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
   # @[ "GUY.src.parse()" ]()
   # test @[ "GUY.src.parse()" ]
-  # test @[ "GUY.src.slug_node_from_simple_function()" ]
-  test @[ "GUY.src.slug_from_simple_function()" ]
   # demo_parse_use_and_fallback()
   # demo_acorn_walk()
+  # test @[ "GUY.src.slug_node_from_simple_function()" ]
+  # test @[ "GUY.src.slug_from_simple_function()" ]
 
