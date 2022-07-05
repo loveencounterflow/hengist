@@ -24,7 +24,7 @@ echo                      = CND.echo.bind CND
 test                      = require 'guy-test'
 # { intersection_of }       = require '../../../apps/intertype/lib/helpers'
 H                         = require '../../../lib/helpers'
-GUY                       = require 'guy'
+GUY                       = require '../../../apps/guy'
 equals                    = require '../../../apps/intertype/deps/jkroso-equals'
 S                         = ( parts ) -> new Set eval parts.raw[ 0 ]
 
@@ -737,7 +737,8 @@ unless module.parent?
   # @[ "intertype hedgepaths" ]()
   # @[ "intertype all hedgepaths" ]()
   # test @[ "intertype all hedgepaths" ]
-  urge GUY.src.get_first_return_clause_text function: ( x ) -> @isa.optional.integer x
+  urge GUY.src.get_first_return_clause_text
+  urge GUY.src.slug_from_simple_function function: ( x ) -> @isa.optional.integer x
 
 
 
