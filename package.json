@@ -79,7 +79,6 @@
     "intershop-intertext": "file:../intershop-intertext",
     "intertext": "5.0.2",
     "intertext-splitlines": "1.2.1",
-    "intertype": "link:../../../apps/intertype",
     "jake": "^10.8.2",
     "javascript-state-machine": "^3.1.0",
     "jfee": "0.1.4",
