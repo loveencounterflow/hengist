@@ -27,32 +27,33 @@ H                         = require '../../../lib/helpers'
 GUY                       = require '../../../apps/guy'
 equals                    = require '../../../apps/intertype/deps/jkroso-equals'
 S                         = ( parts ) -> new Set eval parts.raw[ 0 ]
+{ to_width }              = require 'to-width'
 
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "isa" ] = ( T, done ) ->
   { Intertype }   = require '../../../apps/intertype'
   types           = new Intertype()
-  jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
+  # jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
   types.declare 'null',                             test: ( x ) -> x is null
   types.declare 'array',    isa_collection: true,   test: ( x ) -> Array.isArray x
-  types.declare 'list',     isa_collection: true,   test: ( x ) -> @isa 'array', x
+  types.declare 'list',     isa_collection: true,   test: ( x ) -> @_isa 'array', x
   types.declare 'integer',  isa_numeric: true,      test: ( x ) -> Number.isInteger x
-  types.declare 'text',     isa_collection: true,   test: ( x ) -> ( jto x ) is 'string'
+  # types.declare 'text',     isa_collection: true,   test: ( x ) -> ( jto x ) is 'string'
   #.........................................................................................................
-  T?.eq ( types.isa 'null',                         null          ), true
-  T?.eq ( types.isa 'optional', 'null',             null          ), true
-  T?.eq ( types.isa 'optional', 'null',             undefined     ), true
-  T?.eq ( types.isa 'null',                         undefined     ), false
-  T?.eq ( types.isa 'array',                        []            ), true
-  T?.eq ( types.isa 'list',                         []            ), true
-  T?.eq ( types.isa 'empty', 'array',               []            ), true
-  T?.eq ( types.isa 'optional', 'empty', 'array',   []            ), true
-  T?.eq ( types.isa 'optional', 'empty', 'array',   null          ), true
-  T?.eq ( types.isa 'optional', 'empty', 'array',   42            ), false
-  T?.eq ( types.isa 'optional', 'empty', 'array',   [ 42, ]       ), false
+  T?.eq ( types._isa 'null',                         null          ), true
+  T?.eq ( types._isa 'optional', 'null',             null          ), true
+  T?.eq ( types._isa 'optional', 'null',             undefined     ), true
+  T?.eq ( types._isa 'null',                         undefined     ), false
+  T?.eq ( types._isa 'array',                        []            ), true
+  T?.eq ( types._isa 'list',                         []            ), true
+  T?.eq ( types._isa 'empty', 'array',               []            ), true
+  T?.eq ( types._isa 'optional', 'empty', 'array',   []            ), true
+  T?.eq ( types._isa 'optional', 'empty', 'array',   null          ), true
+  T?.eq ( types._isa 'optional', 'empty', 'array',   42            ), false
+  T?.eq ( types._isa 'optional', 'empty', 'array',   [ 42, ]       ), false
   #.........................................................................................................
-  T?.throws /'optional' cannot be a hedge in declarations/, => types.declare 'optional', 'integer', test: ->
+  # T?.throws /'optional' cannot be a hedge in declarations/, => types.declare 'optional', 'integer', test: ->
   # for type, declaration of types._types
   #   debug '^34234^', type, declaration
   # H.tabulate 'types._types', ( -> yield type for _, type of types._types )()
@@ -172,6 +173,7 @@ demo = ->
   probes_and_matchers = [
     [ [ [],           ], 0, ]
     [ [ [ 1, 2, 3, ], ], 3, ]
+    [ [ null,         ], null, 'expected an object with `x.length` or `x.size`, got a null' ]
     [ [ 42,           ], null, 'expected an object with `x.length` or `x.size`, got a float' ]
     [ [ 42, null,     ], null, ]
     [ [ 42, 0,        ], 0, ]
@@ -722,6 +724,41 @@ list_all_builtin_type_testers = ->
       info "#{top_level_name}.#{second_level_name}" if ( second_level_name.match pattern )? and not excludes.has second_level_name
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_picomatch_for_hedgepaths = ->
+  pmatch = require 'picomatch'
+  hedgepaths = [
+    'integer'
+    'list_of.integer'
+    'optional.integer'
+    'optional.list_of.integer'
+    'optional.list_of.optional.integer'
+    ]
+  globpatterns = [
+    # 'optional'
+    'optional.*'
+    '!(*optional*)'
+    '*.optional.*'
+    '!(*.optional.*)'
+    '*.!(optional).*'
+    '!(optional)?(.*)'
+    ]
+  for globpattern in globpatterns
+    echo CND.yellow CND.reverse " #{globpattern} "
+    for hedgepath in hedgepaths
+      v = pmatch.isMatch hedgepath, globpattern
+      echo ( to_width ( CND.truth v ), 10 ), hedgepath
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_enumerate_hedgepaths = ->
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  debug Reflect.ownKeys types.isa
+  # for k, v of Object.own types.isa
+  #   debug '^4432^', k
+  return null
+
 
 
 ############################################################################################################
@@ -733,13 +770,15 @@ unless module.parent?
   # demo_multipart_hedges()
   # demo_combinate_2()
   # demo_intertype_hedge_combinator()
-  # test @
+  test @
   # @[ "intertype hedgepaths" ]()
   # @[ "intertype all hedgepaths" ]()
   # test @[ "intertype all hedgepaths" ]
+  # test @[ "intertype size_of" ]
   urge GUY.src.get_first_return_clause_text
   urge GUY.src.slug_from_simple_function function: ( x ) -> @isa.optional.integer x
-
+  demo_picomatch_for_hedgepaths()
+  demo_enumerate_hedgepaths()
 
 
 
