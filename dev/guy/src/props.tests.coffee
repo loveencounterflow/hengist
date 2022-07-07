@@ -287,15 +287,126 @@ types                     = new ( require 'intertype' ).Intertype
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_keys_1 = ->
+  GUY       = require '../../../apps/guy'
+  H         = require '../../../apps/guy/lib/_helpers'
+  builtins  = require '../../../apps/guy/lib/_builtins'
+  defaults  = { symbols: true, builtins: true, }
+  #-----------------------------------------------------------------------------------------------------------
+  @walk_keys = ( owner, cfg ) ->
+    cfg = { defaults..., cfg..., }
+    return @_walk_keys owner, cfg
+  #-----------------------------------------------------------------------------------------------------------
+  @_walk_keys = ( owner, cfg ) ->
+    seen = new Set()
+    for { key, } from @_walk_keyowners owner, cfg
+      continue if seen.has key
+      seen.add key
+      yield key
+    return null
+  #-----------------------------------------------------------------------------------------------------------
+  @_walk_keyowners = ( owner, cfg ) ->
+    # urge '^3354^', owner
+    return null if ( not cfg.builtins ) and builtins.has owner
+    for key in Reflect.ownKeys owner
+      if H.types.isa.symbol key
+        yield { key, owner, } if cfg.symbols
+      else
+        yield { key, owner, }
+    #.........................................................................................................
+    if ( proto_owner = Object.getPrototypeOf owner )?
+      yield from @_walk_keyowners proto_owner, cfg
+    return null
+  #.........................................................................................................
+  class A
+    is_a: true
+  class B extends A
+    is_b: true
+  class C extends B
+    is_c: true
+  class D extends C
+    is_d: true
+    constructor: ->
+      super()
+      @something = 'something'
+      return undefined
+    instance_method_on_d: ->
+    @class_method_on_D: ->
+  # d = { y: 42, z: { a: 1, b: 2, }, ξ: { [1], [2], [3], }, [Symbol.for 'x'], }
+  d = new D()
+  d[ Symbol.for 'x' ] = 'x'
+  GUY.props.hide d, 'hidden', 'hidden'
+  debug '^333^', Reflect.ownKeys d
+  n = Object.create null
+  e = new SyntaxError null
+  for owner in [ e, D, d, n, ]
+    whisper '————————————————————————————————————————————————————————————'
+    whisper owner
+    for keyowner from @_walk_keyowners owner, { symbols: true, builtins: true, }
+      # info '^442^', keyowner, ( Object.getOwnPropertyDescriptor keyowner.owner, keyowner.key ).value
+      # info '^442^', keyowner, keyowner.owner is Object
+      # info '^442^', keyowner, keyowner.owner is Object::
+      # info '^442^', keyowner, keyowner.owner is Function::
+      info '^442^', keyowner, builtins.has keyowner.owner
+  debug '^4453^', Object.keys d
+  debug '^4453^', ( k for k of d )
+  debug '^4453^', ( k for k from @walk_keys d, { builtins: true, } )
+  debug '^4453^', ( k for k from @walk_keys d, {builtins: false, } )
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_keys_2 = ->
+  GUY       = require '../../../apps/guy'
+  #.........................................................................................................
+  class A
+    is_a: true
+  class B extends A
+    is_b: true
+  class C extends B
+    is_c: true
+  class D extends C
+    is_d: true
+    constructor: ->
+      super()
+      @something = 'something'
+      return undefined
+    instance_method_on_d: ->
+    @class_method_on_D: ->
+  #.........................................................................................................
+  # d = { y: 42, z: { a: 1, b: 2, }, ξ: { [1], [2], [3], }, [Symbol.for 'x'], }
+  d = new D()
+  d[ Symbol.for 'x' ] = 'x'
+  GUY.props.hide d, 'hidden', 'hidden'
+  n = Object.create null
+  e = new SyntaxError null
+  for owner in [ e, D, d, n, ]
+    whisper '————————————————————————————————————————————————————————————'
+    whisper owner
+    for keyowner from GUY.props._walk_keyowners owner, { symbols: true, builtins: true, }
+      info '^442^', keyowner
+  debug '^4453^', Object.keys d
+  debug '^4453^', ( k for k of d )
+  debug '^4453^', ( k for k from GUY.props.walk_keys d, { builtins: true, } )
+  debug '^4453^', ( k for k from GUY.props.walk_keys d, { builtins: false, } )
+  debug '^4453^', ( k for k from GUY.props.walk_keys d, { symbols: false, builtins: false, } )
+  return null
 
 
 ############################################################################################################
 if require.main is module then do =>
   # test @
+  demo_keys_2()
   # @[ "GUY.props.Strict_owner 1" ]()
   # test @[ "GUY.props.Strict_owner 1" ]
+  # @[ "GUY.props.has()" ]()
+  # test @[ "GUY.props.has()" ]
+  # @[ "GUY.props.get()" ]()
+  # test @[ "GUY.props.get()" ]
   # @[ "GUY.props.Strict_owner 2" ]()
   # test @[ "GUY.props.Strict_owner 2" ]
-  test @[ "GUY.props.Strict_owner can use explicit target" ]
+  # test @[ "GUY.props.Strict_owner can use explicit target" ]
+  # @[ "GUY.props.Strict_owner can use Reflect.has" ]()
+  # test @[ "GUY.props.Strict_owner can use Reflect.has" ]
 
 
