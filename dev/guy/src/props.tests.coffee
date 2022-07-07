@@ -153,6 +153,49 @@ types                     = new ( require 'intertype' ).Intertype
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "GUY.props.has()" ] = ( T, done ) ->
+  GUY     = require H.guy_path
+  T?.eq ( GUY.props.has null, 'xy'            ), false
+  T?.eq ( GUY.props.has 42, 'xy'              ), false
+  T?.eq ( GUY.props.has {}, 'xy'              ), false
+  T?.eq ( GUY.props.has { xy: false, }, 'xy'  ), true
+  #.........................................................................................................
+  class X
+    xy1: 'foo'
+    xy2: undefined
+    constructor: ->
+      @xy3 = true
+      GUY.props.def @, 'oops', get: -> throw new Error 'Oops'
+      return undefined
+  class Y extends X
+  x = new X()
+  y = new Y()
+  T?.eq ( GUY.props.has x, 'xy1' ), true
+  T?.eq ( GUY.props.has x, 'xy2' ), true
+  T?.eq ( GUY.props.has x, 'xy3' ), true
+  T?.eq ( GUY.props.has y, 'xy1' ), true
+  T?.eq ( GUY.props.has y, 'xy2' ), true
+  T?.eq ( GUY.props.has y, 'xy3' ), true
+  T?.throws 'Oops', -> x.oops
+  T?.eq ( GUY.props.has x, 'oops' ), true
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "GUY.props.get()" ] = ( T, done ) ->
+  GUY       = require H.guy_path
+  fallback  = Symbol 'fallback'
+  value     = Symbol 'value'
+  T?.eq ( GUY.props.get undefined, 'xy',  fallback  ), fallback
+  T?.eq ( GUY.props.get null, 'xy',       fallback  ), fallback
+  T?.eq ( GUY.props.get 42, 'xy',         fallback  ), fallback
+  T?.eq ( GUY.props.get {}, 'xy',         fallback  ), fallback
+  T?.eq ( GUY.props.get { xy: value, }, 'xy'        ), value
+  T?.throws /no such property/, -> GUY.props.get undefined, 'xy'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "GUY.props.Strict_owner 1" ] = ( T, done ) ->
   GUY     = require H.guy_path
   CAT     = require '../../../apps/multimix/lib/cataloguing'
@@ -169,28 +212,20 @@ types                     = new ( require 'intertype' ).Intertype
   T?.eq x.prop_on_instance_1, 'prop_on_instance_1'
   T?.eq x.prop_on_instance_2, 'prop_on_instance_2'
   T?.eq x.prop_on_instance_3, 'prop_on_instance_3'
+  # #.........................................................................................................
+  # T?.eq ( GUY.props.has.prop_on_instance_1 x      ), true
+  # T?.eq ( GUY.props.has.prop_on_instance_2 x      ), true
+  # T?.eq ( GUY.props.has.prop_on_instance_3 x      ), true
+  # T?.eq ( GUY.props.has.foobar x                  ), false
+  # T?.eq ( GUY.props.has[ Symbol.toStringTag ] x   ), true
   #.........................................................................................................
-  T?.eq ( x.has.prop_on_instance_1      ), true
-  T?.eq ( x.has.prop_on_instance_2      ), true
-  T?.eq ( x.has.prop_on_instance_3      ), true
-  T?.eq ( x.has.foobar                  ), false
-  T?.eq ( x.has[ Symbol.toStringTag ]   ), true
+  T?.eq ( GUY.props.has x, 'prop_on_instance_1'    ), true
+  T?.eq ( GUY.props.has x, 'prop_on_instance_2'    ), true
+  T?.eq ( GUY.props.has x, 'prop_on_instance_3'    ), true
+  T?.eq ( GUY.props.has x, 'foobar'                ), false
   #.........................................................................................................
-  T?.eq ( x.has 'prop_on_instance_1'    ), true
-  T?.eq ( x.has 'prop_on_instance_2'    ), true
-  T?.eq ( x.has 'prop_on_instance_3'    ), true
-  T?.eq ( x.has 'foobar'                ), false
-  T?.eq ( x.has Symbol.toStringTag      ), true
-  #.........................................................................................................
-  T?.eq ( type_of x.has ), 'object'
-  T?.eq ( type_of x.get ), 'function'
-  urge '^067-1^', x
-  urge '^067-2^', ( CAT.all_keys_of x ).sort().join '\n'
-  urge '^067-3^', x.has
-  urge '^067-4^', x.has 'foo'
-  urge '^067-5^', x.has 'prop_on_instance_1'
-  urge '^067-6^', x.has.foo
-  urge '^067-7^', x.get
+  T?.eq ( GUY.props.has x, 'has' ), false
+  T?.eq ( GUY.props.has x, 'get' ), false
   try urge x.bar catch error then warn CND.reverse error.message
   T?.throws /X instance does not have property 'bar'/, => x.bar
   #.........................................................................................................
@@ -211,6 +246,28 @@ types                     = new ( require 'intertype' ).Intertype
   debug '^4458^', typeof x
   T?.eq x.get, 42
   T?.eq x.has, 108
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "GUY.props.Strict_owner can use Reflect.has" ] = ( T, done ) ->
+  GUY     = require H.guy_path
+  #.........................................................................................................
+  class X extends GUY.props.Strict_owner
+    constructor: ->
+      super()
+      @prop_in_constructor = 'prop_in_constructor'
+    prop_on_instance: 'prop_on_instance_1'
+  #.........................................................................................................
+  x = new X()
+  debug '^4458^', x.prop_in_constructor
+  debug '^4458^', x.prop_on_instance
+  try x.no_such_prop catch error then warn CND.reverse error.message
+  T?.throws /X instance does not have property 'no_such_prop'/, -> x.no_such_prop
+  T?.eq ( Reflect.has x, 'prop_in_constructor'  ), true
+  T?.eq ( Reflect.has x, 'prop_on_instance'     ), true
+  T?.eq ( Reflect.has x, 'no_such_prop'         ), false
   #.........................................................................................................
   done?()
   return null
