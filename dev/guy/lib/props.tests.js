@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, H, PATH, alert, badge, debug, echo, equals, freeze, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, H, PATH, alert, badge, debug, demo_keys_1, demo_keys_2, echo, equals, freeze, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   PATH = require('path');
@@ -424,6 +424,109 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["GUY.props.has()"] = function(T, done) {
+    var GUY, X, Y, x, y;
+    GUY = require(H.guy_path);
+    if (T != null) {
+      T.eq(GUY.props.has(null, 'xy'), false);
+    }
+    if (T != null) {
+      T.eq(GUY.props.has(42, 'xy'), false);
+    }
+    if (T != null) {
+      T.eq(GUY.props.has({}, 'xy'), false);
+    }
+    if (T != null) {
+      T.eq(GUY.props.has({
+        xy: false
+      }, 'xy'), true);
+    }
+    X = (function() {
+      //.........................................................................................................
+      class X {
+        constructor() {
+          this.xy3 = true;
+          GUY.props.def(this, 'oops', {
+            get: function() {
+              throw new Error('Oops');
+            }
+          });
+          return void 0;
+        }
+
+      };
+
+      X.prototype.xy1 = 'foo';
+
+      X.prototype.xy2 = void 0;
+
+      return X;
+
+    }).call(this);
+    Y = class Y extends X {};
+    x = new X();
+    y = new Y();
+    if (T != null) {
+      T.eq(GUY.props.has(x, 'xy1'), true);
+    }
+    if (T != null) {
+      T.eq(GUY.props.has(x, 'xy2'), true);
+    }
+    if (T != null) {
+      T.eq(GUY.props.has(x, 'xy3'), true);
+    }
+    if (T != null) {
+      T.eq(GUY.props.has(y, 'xy1'), true);
+    }
+    if (T != null) {
+      T.eq(GUY.props.has(y, 'xy2'), true);
+    }
+    if (T != null) {
+      T.eq(GUY.props.has(y, 'xy3'), true);
+    }
+    if (T != null) {
+      T.throws('Oops', function() {
+        return x.oops;
+      });
+    }
+    if (T != null) {
+      T.eq(GUY.props.has(x, 'oops'), true);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["GUY.props.get()"] = function(T, done) {
+    var GUY, fallback, value;
+    GUY = require(H.guy_path);
+    fallback = Symbol('fallback');
+    value = Symbol('value');
+    if (T != null) {
+      T.eq(GUY.props.get(void 0, 'xy', fallback), fallback);
+    }
+    if (T != null) {
+      T.eq(GUY.props.get(null, 'xy', fallback), fallback);
+    }
+    if (T != null) {
+      T.eq(GUY.props.get(42, 'xy', fallback), fallback);
+    }
+    if (T != null) {
+      T.eq(GUY.props.get({}, 'xy', fallback), fallback);
+    }
+    if (T != null) {
+      T.eq(GUY.props.get({
+        xy: value
+      }, 'xy'), value);
+    }
+    if (T != null) {
+      T.throws(/no such property/, function() {
+        return GUY.props.get(void 0, 'xy');
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["GUY.props.Strict_owner 1"] = function(T, done) {
     var CAT, GUY, X, error, x;
     GUY = require(H.guy_path);
@@ -456,52 +559,32 @@
     if (T != null) {
       T.eq(x.prop_on_instance_3, 'prop_on_instance_3');
     }
+    // #.........................................................................................................
+    // T?.eq ( GUY.props.has.prop_on_instance_1 x      ), true
+    // T?.eq ( GUY.props.has.prop_on_instance_2 x      ), true
+    // T?.eq ( GUY.props.has.prop_on_instance_3 x      ), true
+    // T?.eq ( GUY.props.has.foobar x                  ), false
+    // T?.eq ( GUY.props.has[ Symbol.toStringTag ] x   ), true
     //.........................................................................................................
     if (T != null) {
-      T.eq(x.has.prop_on_instance_1, true);
+      T.eq(GUY.props.has(x, 'prop_on_instance_1'), true);
     }
     if (T != null) {
-      T.eq(x.has.prop_on_instance_2, true);
+      T.eq(GUY.props.has(x, 'prop_on_instance_2'), true);
     }
     if (T != null) {
-      T.eq(x.has.prop_on_instance_3, true);
+      T.eq(GUY.props.has(x, 'prop_on_instance_3'), true);
     }
     if (T != null) {
-      T.eq(x.has.foobar, false);
-    }
-    if (T != null) {
-      T.eq(x.has[Symbol.toStringTag], true);
-    }
-    //.........................................................................................................
-    if (T != null) {
-      T.eq(x.has('prop_on_instance_1'), true);
-    }
-    if (T != null) {
-      T.eq(x.has('prop_on_instance_2'), true);
-    }
-    if (T != null) {
-      T.eq(x.has('prop_on_instance_3'), true);
-    }
-    if (T != null) {
-      T.eq(x.has('foobar'), false);
-    }
-    if (T != null) {
-      T.eq(x.has(Symbol.toStringTag), true);
+      T.eq(GUY.props.has(x, 'foobar'), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(type_of(x.has), 'object');
+      T.eq(GUY.props.has(x, 'has'), false);
     }
     if (T != null) {
-      T.eq(type_of(x.get), 'function');
+      T.eq(GUY.props.has(x, 'get'), false);
     }
-    urge('^067-1^', x);
-    urge('^067-2^', (CAT.all_keys_of(x)).sort().join('\n'));
-    urge('^067-3^', x.has);
-    urge('^067-4^', x.has('foo'));
-    urge('^067-5^', x.has('prop_on_instance_1'));
-    urge('^067-6^', x.has.foo);
-    urge('^067-7^', x.get);
     try {
       urge(x.bar);
     } catch (error1) {
@@ -553,6 +636,55 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["GUY.props.Strict_owner can use Reflect.has"] = function(T, done) {
+    var GUY, X, error, x;
+    GUY = require(H.guy_path);
+    X = (function() {
+      //.........................................................................................................
+      class X extends GUY.props.Strict_owner {
+        constructor() {
+          super();
+          this.prop_in_constructor = 'prop_in_constructor';
+        }
+
+      };
+
+      X.prototype.prop_on_instance = 'prop_on_instance_1';
+
+      return X;
+
+    }).call(this);
+    //.........................................................................................................
+    x = new X();
+    debug('^4458^', x.prop_in_constructor);
+    debug('^4458^', x.prop_on_instance);
+    try {
+      x.no_such_prop;
+    } catch (error1) {
+      error = error1;
+      warn(CND.reverse(error.message));
+    }
+    if (T != null) {
+      T.throws(/X instance does not have property 'no_such_prop'/, function() {
+        return x.no_such_prop;
+      });
+    }
+    if (T != null) {
+      T.eq(Reflect.has(x, 'prop_in_constructor'), true);
+    }
+    if (T != null) {
+      T.eq(Reflect.has(x, 'prop_on_instance'), true);
+    }
+    if (T != null) {
+      T.eq(Reflect.has(x, 'no_such_prop'), false);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["GUY.props.Strict_owner can use explicit target"] = function(T, done) {
     var GUY, error, f, x;
     GUY = require(H.guy_path);
@@ -583,17 +715,295 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_keys_1 = function() {
+    var A, B, C, D, GUY, builtins, d, defaults, e, i, k, keyowner, len, n, owner, ref, ref1;
+    GUY = require('../../../apps/guy');
+    H = require('../../../apps/guy/lib/_helpers');
+    builtins = require('../../../apps/guy/lib/_builtins');
+    defaults = {
+      symbols: true,
+      builtins: true
+    };
+    //-----------------------------------------------------------------------------------------------------------
+    this.walk_keys = function(owner, cfg) {
+      cfg = {...defaults, ...cfg};
+      return this._walk_keys(owner, cfg);
+    };
+    //-----------------------------------------------------------------------------------------------------------
+    this._walk_keys = function*(owner, cfg) {
+      var key, ref, seen, z;
+      seen = new Set();
+      ref = this._walk_keyowners(owner, cfg);
+      for (z of ref) {
+        ({key} = z);
+        if (seen.has(key)) {
+          continue;
+        }
+        seen.add(key);
+        yield key;
+      }
+      return null;
+    };
+    //-----------------------------------------------------------------------------------------------------------
+    this._walk_keyowners = function*(owner, cfg) {
+      var i, key, len, proto_owner, ref;
+      if ((!cfg.builtins) && builtins.has(owner)) {
+        // urge '^3354^', owner
+        return null;
+      }
+      ref = Reflect.ownKeys(owner);
+      for (i = 0, len = ref.length; i < len; i++) {
+        key = ref[i];
+        if (H.types.isa.symbol(key)) {
+          if (cfg.symbols) {
+            yield ({key, owner});
+          }
+        } else {
+          yield ({key, owner});
+        }
+      }
+      //.........................................................................................................
+      if ((proto_owner = Object.getPrototypeOf(owner)) != null) {
+        yield* this._walk_keyowners(proto_owner, cfg);
+      }
+      return null;
+    };
+    A = (function() {
+      //.........................................................................................................
+      class A {};
+
+      A.prototype.is_a = true;
+
+      return A;
+
+    }).call(this);
+    B = (function() {
+      class B extends A {};
+
+      B.prototype.is_b = true;
+
+      return B;
+
+    }).call(this);
+    C = (function() {
+      class C extends B {};
+
+      C.prototype.is_c = true;
+
+      return C;
+
+    }).call(this);
+    D = (function() {
+      class D extends C {
+        constructor() {
+          super();
+          this.something = 'something';
+          return void 0;
+        }
+
+        instance_method_on_d() {}
+
+        static class_method_on_D() {}
+
+      };
+
+      D.prototype.is_d = true;
+
+      return D;
+
+    }).call(this);
+    // d = { y: 42, z: { a: 1, b: 2, }, ξ: { [1], [2], [3], }, [Symbol.for 'x'], }
+    d = new D();
+    d[Symbol.for('x')] = 'x';
+    GUY.props.hide(d, 'hidden', 'hidden');
+    debug('^333^', Reflect.ownKeys(d));
+    n = Object.create(null);
+    e = new SyntaxError(null);
+    ref = [e, D, d, n];
+    for (i = 0, len = ref.length; i < len; i++) {
+      owner = ref[i];
+      whisper('————————————————————————————————————————————————————————————');
+      whisper(owner);
+      ref1 = this._walk_keyowners(owner, {
+        symbols: true,
+        builtins: true
+      });
+      for (keyowner of ref1) {
+        // info '^442^', keyowner, ( Object.getOwnPropertyDescriptor keyowner.owner, keyowner.key ).value
+        // info '^442^', keyowner, keyowner.owner is Object
+        // info '^442^', keyowner, keyowner.owner is Object::
+        // info '^442^', keyowner, keyowner.owner is Function::
+        info('^442^', keyowner, builtins.has(keyowner.owner));
+      }
+    }
+    debug('^4453^', Object.keys(d));
+    debug('^4453^', (function() {
+      var results;
+      results = [];
+      for (k in d) {
+        results.push(k);
+      }
+      return results;
+    })());
+    debug('^4453^', (function() {
+      var ref2, results;
+      ref2 = this.walk_keys(d, {
+        builtins: true
+      });
+      results = [];
+      for (k of ref2) {
+        results.push(k);
+      }
+      return results;
+    }).call(this));
+    debug('^4453^', (function() {
+      var ref2, results;
+      ref2 = this.walk_keys(d, {
+        builtins: false
+      });
+      results = [];
+      for (k of ref2) {
+        results.push(k);
+      }
+      return results;
+    }).call(this));
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_keys_2 = function() {
+    var A, B, C, D, GUY, d, e, i, k, keyowner, len, n, owner, ref, ref1;
+    GUY = require('../../../apps/guy');
+    A = (function() {
+      //.........................................................................................................
+      class A {};
+
+      A.prototype.is_a = true;
+
+      return A;
+
+    }).call(this);
+    B = (function() {
+      class B extends A {};
+
+      B.prototype.is_b = true;
+
+      return B;
+
+    }).call(this);
+    C = (function() {
+      class C extends B {};
+
+      C.prototype.is_c = true;
+
+      return C;
+
+    }).call(this);
+    D = (function() {
+      class D extends C {
+        constructor() {
+          super();
+          this.something = 'something';
+          return void 0;
+        }
+
+        instance_method_on_d() {}
+
+        static class_method_on_D() {}
+
+      };
+
+      D.prototype.is_d = true;
+
+      return D;
+
+    }).call(this);
+    //.........................................................................................................
+    // d = { y: 42, z: { a: 1, b: 2, }, ξ: { [1], [2], [3], }, [Symbol.for 'x'], }
+    d = new D();
+    d[Symbol.for('x')] = 'x';
+    GUY.props.hide(d, 'hidden', 'hidden');
+    n = Object.create(null);
+    e = new SyntaxError(null);
+    ref = [e, D, d, n];
+    for (i = 0, len = ref.length; i < len; i++) {
+      owner = ref[i];
+      whisper('————————————————————————————————————————————————————————————');
+      whisper(owner);
+      ref1 = GUY.props._walk_keyowners(owner, {
+        symbols: true,
+        builtins: true
+      });
+      for (keyowner of ref1) {
+        info('^442^', keyowner);
+      }
+    }
+    debug('^4453^', Object.keys(d));
+    debug('^4453^', (function() {
+      var results;
+      results = [];
+      for (k in d) {
+        results.push(k);
+      }
+      return results;
+    })());
+    debug('^4453^', (function() {
+      var ref2, results;
+      ref2 = GUY.props.walk_keys(d, {
+        builtins: true
+      });
+      results = [];
+      for (k of ref2) {
+        results.push(k);
+      }
+      return results;
+    })());
+    debug('^4453^', (function() {
+      var ref2, results;
+      ref2 = GUY.props.walk_keys(d, {
+        builtins: false
+      });
+      results = [];
+      for (k of ref2) {
+        results.push(k);
+      }
+      return results;
+    })());
+    debug('^4453^', (function() {
+      var ref2, results;
+      ref2 = GUY.props.walk_keys(d, {
+        symbols: false,
+        builtins: false
+      });
+      results = [];
+      for (k of ref2) {
+        results.push(k);
+      }
+      return results;
+    })());
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
-      // @[ "GUY.props.Strict_owner 1" ]()
-      // test @[ "GUY.props.Strict_owner 1" ]
-      // @[ "GUY.props.Strict_owner 2" ]()
-      // test @[ "GUY.props.Strict_owner 2" ]
-      return test(this["GUY.props.Strict_owner can use explicit target"]);
+      return demo_keys_2();
     })();
   }
+
+  // @[ "GUY.props.Strict_owner 1" ]()
+// test @[ "GUY.props.Strict_owner 1" ]
+// @[ "GUY.props.has()" ]()
+// test @[ "GUY.props.has()" ]
+// @[ "GUY.props.get()" ]()
+// test @[ "GUY.props.get()" ]
+// @[ "GUY.props.Strict_owner 2" ]()
+// test @[ "GUY.props.Strict_owner 2" ]
+// test @[ "GUY.props.Strict_owner can use explicit target" ]
+// @[ "GUY.props.Strict_owner can use Reflect.has" ]()
+// test @[ "GUY.props.Strict_owner can use Reflect.has" ]
 
 }).call(this);
 

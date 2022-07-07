@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, GUY, H, S, alert, badge, debug, demo, demo_combinate, demo_combinate_2, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_test_with_protocol, echo, equals, help, info, list_all_builtin_type_testers, log, njs_path, praise, rpr, test, urge, warn, whisper;
+  var CND, GUY, H, S, alert, badge, debug, demo, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_test_with_protocol, echo, equals, help, info, list_all_builtin_type_testers, log, njs_path, praise, rpr, test, to_width, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -48,14 +48,14 @@
     return new Set(eval(parts.raw[0]));
   };
 
+  ({to_width} = require('to-width'));
+
   //-----------------------------------------------------------------------------------------------------------
   this["isa"] = function(T, done) {
-    var Intertype, jto, types;
+    var Intertype, types;
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype();
-    jto = (x) => {
-      return ((Object.prototype.toString.call(x)).slice(8, -1)).toLowerCase().replace(/\s+/g, '');
-    };
+    // jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
     types.declare('null', {
       test: function(x) {
         return x === null;
@@ -70,7 +70,7 @@
     types.declare('list', {
       isa_collection: true,
       test: function(x) {
-        return this.isa('array', x);
+        return this._isa('array', x);
       }
     });
     types.declare('integer', {
@@ -79,53 +79,40 @@
         return Number.isInteger(x);
       }
     });
-    types.declare('text', {
-      isa_collection: true,
-      test: function(x) {
-        return (jto(x)) === 'string';
-      }
-    });
+    // types.declare 'text',     isa_collection: true,   test: ( x ) -> ( jto x ) is 'string'
     //.........................................................................................................
     if (T != null) {
-      T.eq(types.isa('null', null), true);
+      T.eq(types._isa('null', null), true);
     }
     if (T != null) {
-      T.eq(types.isa('optional', 'null', null), true);
+      T.eq(types._isa('optional', 'null', null), true);
     }
     if (T != null) {
-      T.eq(types.isa('optional', 'null', void 0), true);
+      T.eq(types._isa('optional', 'null', void 0), true);
     }
     if (T != null) {
-      T.eq(types.isa('null', void 0), false);
+      T.eq(types._isa('null', void 0), false);
     }
     if (T != null) {
-      T.eq(types.isa('array', []), true);
+      T.eq(types._isa('array', []), true);
     }
     if (T != null) {
-      T.eq(types.isa('list', []), true);
+      T.eq(types._isa('list', []), true);
     }
     if (T != null) {
-      T.eq(types.isa('empty', 'array', []), true);
+      T.eq(types._isa('empty', 'array', []), true);
     }
     if (T != null) {
-      T.eq(types.isa('optional', 'empty', 'array', []), true);
+      T.eq(types._isa('optional', 'empty', 'array', []), true);
     }
     if (T != null) {
-      T.eq(types.isa('optional', 'empty', 'array', null), true);
+      T.eq(types._isa('optional', 'empty', 'array', null), true);
     }
     if (T != null) {
-      T.eq(types.isa('optional', 'empty', 'array', 42), false);
+      T.eq(types._isa('optional', 'empty', 'array', 42), false);
     }
     if (T != null) {
-      T.eq(types.isa('optional', 'empty', 'array', [42]), false);
-    }
-    //.........................................................................................................
-    if (T != null) {
-      T.throws(/'optional' cannot be a hedge in declarations/, () => {
-        return types.declare('optional', 'integer', {
-          test: function() {}
-        });
-      });
+      T.eq(types._isa('optional', 'empty', 'array', [42]), false);
     }
     if (typeof done === "function") {
       done();
@@ -295,7 +282,7 @@
     var Intertype, error, i, len, matcher, probe, probes_and_matchers, types;
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype();
-    probes_and_matchers = [[[[]], 0], [[[1, 2, 3]], 3], [[42], null, 'expected an object with `x.length` or `x.size`, got a float'], [[42, null], null], [[42, 0], 0], [[S``], 0], [[S`'abc𪜁'`], 4]];
+    probes_and_matchers = [[[[]], 0], [[[1, 2, 3]], 3], [[null], null, 'expected an object with `x.length` or `x.size`, got a null'], [[42], null, 'expected an object with `x.length` or `x.size`, got a float'], [[42, null], null], [[42, 0], 0], [[S``], 0], [[S`'abc𪜁'`], 4]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -1398,6 +1385,36 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_picomatch_for_hedgepaths = function() {
+    var globpattern, globpatterns, hedgepath, hedgepaths, i, j, len, len1, pmatch, v;
+    pmatch = require('picomatch');
+    hedgepaths = ['integer', 'list_of.integer', 'optional.integer', 'optional.list_of.integer', 'optional.list_of.optional.integer'];
+    // 'optional'
+    globpatterns = ['optional.*', '!(*optional*)', '*.optional.*', '!(*.optional.*)', '*.!(optional).*', '!(optional)?(.*)'];
+    for (i = 0, len = globpatterns.length; i < len; i++) {
+      globpattern = globpatterns[i];
+      echo(CND.yellow(CND.reverse(` ${globpattern} `)));
+      for (j = 0, len1 = hedgepaths.length; j < len1; j++) {
+        hedgepath = hedgepaths[j];
+        v = pmatch.isMatch(hedgepath, globpattern);
+        echo(to_width(CND.truth(v), 10), hedgepath);
+      }
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_enumerate_hedgepaths = function() {
+    var Intertype, types;
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    debug(Reflect.ownKeys(types.isa));
+    // for k, v of Object.own types.isa
+    //   debug '^4432^', k
+    return null;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // demo()
@@ -1407,16 +1424,19 @@
     // demo_multipart_hedges()
     // demo_combinate_2()
     // demo_intertype_hedge_combinator()
-    // test @
+    test(this);
     // @[ "intertype hedgepaths" ]()
     // @[ "intertype all hedgepaths" ]()
     // test @[ "intertype all hedgepaths" ]
+    // test @[ "intertype size_of" ]
     urge(GUY.src.get_first_return_clause_text);
     urge(GUY.src.slug_from_simple_function({
       function: function(x) {
         return this.isa.optional.integer(x);
       }
     }));
+    demo_picomatch_for_hedgepaths();
+    demo_enumerate_hedgepaths();
   }
 
 }).call(this);
