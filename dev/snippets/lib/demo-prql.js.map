@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/demo-prql.coffee"
+  ],
+  "names": [],
+  "mappings": "AAEA;EAAA;AAAA,MAAA,GAAA,EAAA,EAAA,EAAA,IAAA,EAAA,KAAA,EAAA,KAAA,EAAA,KAAA,EAAA,IAAA,EAAA,IAAA,EAAA,IAAA,EAAA,IAAA,EAAA,GAAA,EAAA,GAAA,EAAA,IAAA,EAAA,IAAA,EAAA,OAAA;;;EAIA,IAAA,GAA4B,OAAA,CAAQ,MAAR;;EAC5B,EAAA,GAA4B,OAAA,CAAQ,IAAR,EAL5B;;;EAOA,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,GAAA,GAA4B,GAAG,CAAC;;EAChC,KAAA,GAA4B;;EAC5B,GAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,OAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,SAAf,EAA4B,KAA5B;;EAC5B,KAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,KAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,OAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,UAAJ,CAAe,MAAf,EAA4B,KAA5B;;EAC5B,IAAA,GAA4B,GAAG,CAAC,IAAI,CAAC,IAAT,CAAc,GAAd,EAlB5B;;;EAsBA,IAAA,GAAO,QAAA,CAAA,CAAA;IACL,KAAA,CAAM,OAAA,CAAQ,SAAR,CAAN;AACA,WAAO;EAFF,EAtBP;;;EA4BA,IAAG,OAAO,CAAC,IAAR,KAAgB,MAAnB;IAAkC,CAAA,CAAA,CAAA,GAAA;aAChC,IAAA,CAAA;IADgC,CAAA,IAAlC;;AA5BA",
+  "sourcesContent": [
+    "\n\n'use strict'\n\n\n############################################################################################################\nPATH                      = require 'path'\nFS                        = require 'fs'\n#...........................................................................................................\nCND                       = require 'cnd'\nrpr                       = CND.rpr\nbadge                     = 'SNIPPETS/PRQL'\nlog                       = CND.get_logger 'plain',     badge\ninfo                      = CND.get_logger 'info',      badge\nwhisper                   = CND.get_logger 'whisper',   badge\nalert                     = CND.get_logger 'alert',     badge\ndebug                     = CND.get_logger 'debug',     badge\nwarn                      = CND.get_logger 'warn',      badge\nhelp                      = CND.get_logger 'help',      badge\nurge                      = CND.get_logger 'urge',      badge\necho                      = CND.echo.bind CND\n\n\n#-----------------------------------------------------------------------------------------------------------\ndemo = ->\n  debug require 'prql-js'\n  return null\n\n\n############################################################################################################\nif require.main is module then do =>\n  demo()\n"
+  ]
+}
