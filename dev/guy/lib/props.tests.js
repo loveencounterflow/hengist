@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, H, PATH, alert, badge, debug, demo_keys_1, demo_keys_2, echo, equals, freeze, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, FS, H, PATH, alert, badge, debug, demo_keys, echo, equals, freeze, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   PATH = require('path');
@@ -716,164 +716,8 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_keys_1 = function() {
-    var A, B, C, D, GUY, builtins, d, defaults, e, i, k, keyowner, len, n, owner, ref, ref1;
-    GUY = require('../../../apps/guy');
-    H = require('../../../apps/guy/lib/_helpers');
-    builtins = require('../../../apps/guy/lib/_builtins');
-    defaults = {
-      symbols: true,
-      builtins: true
-    };
-    //-----------------------------------------------------------------------------------------------------------
-    this.walk_keys = function(owner, cfg) {
-      cfg = {...defaults, ...cfg};
-      return this._walk_keys(owner, cfg);
-    };
-    //-----------------------------------------------------------------------------------------------------------
-    this._walk_keys = function*(owner, cfg) {
-      var key, ref, seen, z;
-      seen = new Set();
-      ref = this._walk_keyowners(owner, cfg);
-      for (z of ref) {
-        ({key} = z);
-        if (seen.has(key)) {
-          continue;
-        }
-        seen.add(key);
-        yield key;
-      }
-      return null;
-    };
-    //-----------------------------------------------------------------------------------------------------------
-    this._walk_keyowners = function*(owner, cfg) {
-      var i, key, len, proto_owner, ref;
-      if ((!cfg.builtins) && builtins.has(owner)) {
-        // urge '^3354^', owner
-        return null;
-      }
-      ref = Reflect.ownKeys(owner);
-      for (i = 0, len = ref.length; i < len; i++) {
-        key = ref[i];
-        if (H.types.isa.symbol(key)) {
-          if (cfg.symbols) {
-            yield ({key, owner});
-          }
-        } else {
-          yield ({key, owner});
-        }
-      }
-      //.........................................................................................................
-      if ((proto_owner = Object.getPrototypeOf(owner)) != null) {
-        yield* this._walk_keyowners(proto_owner, cfg);
-      }
-      return null;
-    };
-    A = (function() {
-      //.........................................................................................................
-      class A {};
-
-      A.prototype.is_a = true;
-
-      return A;
-
-    }).call(this);
-    B = (function() {
-      class B extends A {};
-
-      B.prototype.is_b = true;
-
-      return B;
-
-    }).call(this);
-    C = (function() {
-      class C extends B {};
-
-      C.prototype.is_c = true;
-
-      return C;
-
-    }).call(this);
-    D = (function() {
-      class D extends C {
-        constructor() {
-          super();
-          this.something = 'something';
-          return void 0;
-        }
-
-        instance_method_on_d() {}
-
-        static class_method_on_D() {}
-
-      };
-
-      D.prototype.is_d = true;
-
-      return D;
-
-    }).call(this);
-    // d = { y: 42, z: { a: 1, b: 2, }, ξ: { [1], [2], [3], }, [Symbol.for 'x'], }
-    d = new D();
-    d[Symbol.for('x')] = 'x';
-    GUY.props.hide(d, 'hidden', 'hidden');
-    debug('^333^', Reflect.ownKeys(d));
-    n = Object.create(null);
-    e = new SyntaxError(null);
-    ref = [e, D, d, n];
-    for (i = 0, len = ref.length; i < len; i++) {
-      owner = ref[i];
-      whisper('————————————————————————————————————————————————————————————');
-      whisper(owner);
-      ref1 = this._walk_keyowners(owner, {
-        symbols: true,
-        builtins: true
-      });
-      for (keyowner of ref1) {
-        // info '^442^', keyowner, ( Object.getOwnPropertyDescriptor keyowner.owner, keyowner.key ).value
-        // info '^442^', keyowner, keyowner.owner is Object
-        // info '^442^', keyowner, keyowner.owner is Object::
-        // info '^442^', keyowner, keyowner.owner is Function::
-        info('^442^', keyowner, builtins.has(keyowner.owner));
-      }
-    }
-    debug('^4453^', Object.keys(d));
-    debug('^4453^', (function() {
-      var results;
-      results = [];
-      for (k in d) {
-        results.push(k);
-      }
-      return results;
-    })());
-    debug('^4453^', (function() {
-      var ref2, results;
-      ref2 = this.walk_keys(d, {
-        builtins: true
-      });
-      results = [];
-      for (k of ref2) {
-        results.push(k);
-      }
-      return results;
-    }).call(this));
-    debug('^4453^', (function() {
-      var ref2, results;
-      ref2 = this.walk_keys(d, {
-        builtins: false
-      });
-      results = [];
-      for (k of ref2) {
-        results.push(k);
-      }
-      return results;
-    }).call(this));
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  demo_keys_2 = function() {
-    var A, B, C, D, GUY, d, e, i, k, keyowner, len, n, owner, ref, ref1;
+  demo_keys = function() {
+    var A, B, C, D, GUY, d, e, k, n;
     GUY = require('../../../apps/guy');
     A = (function() {
       //.........................................................................................................
@@ -904,7 +748,7 @@
       class D extends C {
         constructor() {
           super();
-          this.something = 'something';
+          this.in_constructor = 's';
           return void 0;
         }
 
@@ -915,81 +759,406 @@
       };
 
       D.prototype.is_d = true;
+
+      D.prototype.in_declaration = 42;
 
       return D;
 
     }).call(this);
     //.........................................................................................................
-    // d = { y: 42, z: { a: 1, b: 2, }, ξ: { [1], [2], [3], }, [Symbol.for 'x'], }
     d = new D();
     d[Symbol.for('x')] = 'x';
     GUY.props.hide(d, 'hidden', 'hidden');
     n = Object.create(null);
     e = new SyntaxError(null);
-    ref = [e, D, d, n];
-    for (i = 0, len = ref.length; i < len; i++) {
-      owner = ref[i];
-      whisper('————————————————————————————————————————————————————————————');
-      whisper(owner);
-      ref1 = GUY.props._walk_keyowners(owner, {
-        symbols: true,
-        builtins: true
-      });
-      for (keyowner of ref1) {
-        info('^442^', keyowner);
-      }
-    }
-    debug('^4453^', Object.keys(d));
-    debug('^4453^', (function() {
+    //.........................................................................................................
+    urge('^3453-1^', Object.keys(d)); // 00:00 GUY/TESTS/PROPS  ?  ^3453-1^ [ 'in_constructor' ]
+    urge('^3453-2^', (function() {
       var results;
+// 00:00 GUY/TESTS/PROPS  ?  ^3453-2^ [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
       results = [];
       for (k in d) {
         results.push(k);
       }
       return results;
     })());
-    debug('^4453^', (function() {
-      var ref2, results;
-      ref2 = GUY.props.walk_keys(d, {
+    //......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+    info();
+    info("depth: null"); // 00:00 GUY/TESTS/PROPS  ▶  depth: null
+    urge('^3453-3^', "standard  ", GUY.props.keys(d, {
+      depth: null // 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+    }));
+    urge('^3453-5^', "symbols   ", GUY.props.keys(d, {
+      depth: null,
+      symbols: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x), 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+    }));
+    urge('^3453-5^', "builtins  ", GUY.props.keys(d, {
+      depth: null,
+      builtins: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString' ]
+    }));
+    urge('^3453-5^', "hidden    ", GUY.props.keys(d, {
+      depth: null,
+      hidden: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+    }));
+    //......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+    info();
+    info("depth: 0"); // 00:00 GUY/TESTS/PROPS  ▶  depth: 0
+    urge('^3453-3^', "standard  ", GUY.props.keys(d, {
+      depth: 0 // 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor' ]
+    }));
+    urge('^3453-5^', "symbols   ", GUY.props.keys(d, {
+      depth: 0,
+      symbols: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x) ]
+    }));
+    urge('^3453-5^', "builtins  ", GUY.props.keys(d, {
+      depth: 0,
+      builtins: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden' ]
+    }));
+    urge('^3453-5^', "hidden    ", GUY.props.keys(d, {
+      depth: 0,
+      hidden: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden' ]
+    }));
+    //......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+    info();
+    info("depth: 1"); // 00:00 GUY/TESTS/PROPS  ▶  depth: 1
+    urge('^3453-3^', "standard  ", GUY.props.keys(d, {
+      depth: 1 // 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor', 'is_d', 'in_declaration' ]
+    }));
+    urge('^3453-5^', "symbols   ", GUY.props.keys(d, {
+      depth: 1,
+      symbols: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x), 'is_d', 'in_declaration' ]
+    }));
+    urge('^3453-5^', "builtins  ", GUY.props.keys(d, {
+      depth: 1,
+      builtins: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration' ]
+    }));
+    urge('^3453-5^', "hidden    ", GUY.props.keys(d, {
+      depth: 1,
+      hidden: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration' ]
+    }));
+    //......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+    info();
+    info("depth: 2"); // 00:00 GUY/TESTS/PROPS  ▶  depth: 2
+    urge('^3453-3^', "standard  ", GUY.props.keys(d, {
+      depth: 2 // 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor', 'is_d', 'in_declaration', 'is_c' ]
+    }));
+    urge('^3453-5^', "symbols   ", GUY.props.keys(d, {
+      depth: 2,
+      symbols: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x), 'is_d', 'in_declaration', 'is_c' ]
+    }));
+    urge('^3453-5^', "builtins  ", GUY.props.keys(d, {
+      depth: 2,
+      builtins: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c' ]
+    }));
+    urge('^3453-5^', "hidden    ", GUY.props.keys(d, {
+      depth: 2,
+      hidden: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c' ]
+    }));
+    //......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+    info();
+    info("depth: 3"); // 00:00 GUY/TESTS/PROPS  ▶  depth: 3
+    urge('^3453-3^', "standard  ", GUY.props.keys(d, {
+      depth: 3 // 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b' ]
+    }));
+    urge('^3453-5^', "symbols   ", GUY.props.keys(d, {
+      depth: 3,
+      symbols: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x), 'is_d', 'in_declaration', 'is_c', 'is_b' ]
+    }));
+    urge('^3453-5^', "builtins  ", GUY.props.keys(d, {
+      depth: 3,
+      builtins: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b' ]
+    }));
+    urge('^3453-5^', "hidden    ", GUY.props.keys(d, {
+      depth: 3,
+      hidden: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b' ]
+    }));
+    //......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+    info();
+    info("depth: 4"); // 00:00 GUY/TESTS/PROPS  ▶  depth: 4
+    urge('^3453-3^', "standard  ", GUY.props.keys(d, {
+      depth: 4 // 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+    }));
+    urge('^3453-5^', "symbols   ", GUY.props.keys(d, {
+      depth: 4,
+      symbols: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x), 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+    }));
+    urge('^3453-5^', "builtins  ", GUY.props.keys(d, {
+      depth: 4,
+      builtins: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+    }));
+    urge('^3453-5^', "hidden    ", GUY.props.keys(d, {
+      depth: 4,
+      hidden: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+    }));
+    //......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+    info();
+    info("depth: 5"); // 00:00 GUY/TESTS/PROPS  ▶  depth: 5
+    urge('^3453-3^', "standard  ", GUY.props.keys(d, {
+      depth: 5 // 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+    }));
+    urge('^3453-5^', "symbols   ", GUY.props.keys(d, {
+      depth: 5,
+      symbols: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x), 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+    }));
+    urge('^3453-5^', "builtins  ", GUY.props.keys(d, {
+      depth: 5,
+      builtins: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString' ]
+    }));
+    urge('^3453-5^', "hidden    ", GUY.props.keys(d, {
+      depth: 5,
+      hidden: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+    }));
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["GUY.props.keys()"] = function(T, done) {
+    var A, B, C, D, GUY, d, e, k, n;
+    GUY = require('../../../apps/guy');
+    A = (function() {
+      //.........................................................................................................
+      class A {};
+
+      A.prototype.is_a = true;
+
+      return A;
+
+    }).call(this);
+    B = (function() {
+      class B extends A {};
+
+      B.prototype.is_b = true;
+
+      return B;
+
+    }).call(this);
+    C = (function() {
+      class C extends B {};
+
+      C.prototype.is_c = true;
+
+      return C;
+
+    }).call(this);
+    D = (function() {
+      class D extends C {
+        constructor() {
+          super();
+          this.in_constructor = 's';
+          return void 0;
+        }
+
+        instance_method_on_d() {}
+
+        static class_method_on_D() {}
+
+      };
+
+      D.prototype.is_d = true;
+
+      D.prototype.in_declaration = 42;
+
+      return D;
+
+    }).call(this);
+    //.........................................................................................................
+    d = new D();
+    d[Symbol.for('x')] = 'x';
+    GUY.props.hide(d, 'hidden', 'hidden');
+    n = Object.create(null);
+    e = new SyntaxError(null);
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(Object.keys(d), ['in_constructor']);
+    }
+    if (T != null) {
+      T.eq((function() {
+        var results;
+        results = [];
+        for (k in d) {
+          results.push(k);
+        }
+        return results;
+      })(), ['in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: null
+      }), ['in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: null,
+        symbols: true
+      }), ['in_constructor', Symbol.for('x'), 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: null,
         builtins: true
-      });
-      results = [];
-      for (k of ref2) {
-        results.push(k);
-      }
-      return results;
-    })());
-    debug('^4453^', (function() {
-      var ref2, results;
-      ref2 = GUY.props.walk_keys(d, {
-        builtins: false
-      });
-      results = [];
-      for (k of ref2) {
-        results.push(k);
-      }
-      return results;
-    })());
-    debug('^4453^', (function() {
-      var ref2, results;
-      ref2 = GUY.props.walk_keys(d, {
-        symbols: false,
-        builtins: false
-      });
-      results = [];
-      for (k of ref2) {
-        results.push(k);
-      }
-      return results;
-    })());
-    return null;
+      }), ['in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: null,
+        hidden: true
+      }), ['in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 0
+      }), ['in_constructor']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 0,
+        symbols: true
+      }), ['in_constructor', Symbol.for('x')]);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 0,
+        builtins: true
+      }), ['in_constructor', 'hidden']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 0,
+        hidden: true
+      }), ['in_constructor', 'hidden']);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 1
+      }), ['in_constructor', 'is_d', 'in_declaration']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 1,
+        symbols: true
+      }), ['in_constructor', Symbol.for('x'), 'is_d', 'in_declaration']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 1,
+        builtins: true
+      }), ['in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 1,
+        hidden: true
+      }), ['in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration']);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 2
+      }), ['in_constructor', 'is_d', 'in_declaration', 'is_c']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 2,
+        symbols: true
+      }), ['in_constructor', Symbol.for('x'), 'is_d', 'in_declaration', 'is_c']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 2,
+        builtins: true
+      }), ['in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 2,
+        hidden: true
+      }), ['in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c']);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 3
+      }), ['in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 3,
+        symbols: true
+      }), ['in_constructor', Symbol.for('x'), 'is_d', 'in_declaration', 'is_c', 'is_b']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 3,
+        builtins: true
+      }), ['in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 3,
+        hidden: true
+      }), ['in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b']);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 4
+      }), ['in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 4,
+        symbols: true
+      }), ['in_constructor', Symbol.for('x'), 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 4,
+        builtins: true
+      }), ['in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 4,
+        hidden: true
+      }), ['in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 5
+      }), ['in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 5,
+        symbols: true
+      }), ['in_constructor', Symbol.for('x'), 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 5,
+        builtins: true
+      }), ['in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: 5,
+        hidden: true
+      }), ['in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
+    }
+    return typeof done === "function" ? done() : void 0;
   };
 
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
-      return demo_keys_2();
+      demo_keys();
+      this["GUY.props.keys()"]();
+      return test(this["GUY.props.keys()"]);
     })();
   }
 
