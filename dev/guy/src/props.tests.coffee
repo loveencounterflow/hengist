@@ -288,36 +288,8 @@ types                     = new ( require 'intertype' ).Intertype
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-demo_keys_1 = ->
+demo_keys = ->
   GUY       = require '../../../apps/guy'
-  H         = require '../../../apps/guy/lib/_helpers'
-  builtins  = require '../../../apps/guy/lib/_builtins'
-  defaults  = { symbols: true, builtins: true, }
-  #-----------------------------------------------------------------------------------------------------------
-  @walk_keys = ( owner, cfg ) ->
-    cfg = { defaults..., cfg..., }
-    return @_walk_keys owner, cfg
-  #-----------------------------------------------------------------------------------------------------------
-  @_walk_keys = ( owner, cfg ) ->
-    seen = new Set()
-    for { key, } from @_walk_keyowners owner, cfg
-      continue if seen.has key
-      seen.add key
-      yield key
-    return null
-  #-----------------------------------------------------------------------------------------------------------
-  @_walk_keyowners = ( owner, cfg ) ->
-    # urge '^3354^', owner
-    return null if ( not cfg.builtins ) and builtins.has owner
-    for key in Reflect.ownKeys owner
-      if H.types.isa.symbol key
-        yield { key, owner, } if cfg.symbols
-      else
-        yield { key, owner, }
-    #.........................................................................................................
-    if ( proto_owner = Object.getPrototypeOf owner )?
-      yield from @_walk_keyowners proto_owner, cfg
-    return null
   #.........................................................................................................
   class A
     is_a: true
@@ -329,34 +301,67 @@ demo_keys_1 = ->
     is_d: true
     constructor: ->
       super()
-      @something = 'something'
+      @in_constructor = 's'
       return undefined
+    in_declaration: 42
     instance_method_on_d: ->
     @class_method_on_D: ->
-  # d = { y: 42, z: { a: 1, b: 2, }, ξ: { [1], [2], [3], }, [Symbol.for 'x'], }
+  #.........................................................................................................
   d = new D()
   d[ Symbol.for 'x' ] = 'x'
   GUY.props.hide d, 'hidden', 'hidden'
-  debug '^333^', Reflect.ownKeys d
   n = Object.create null
   e = new SyntaxError null
-  for owner in [ e, D, d, n, ]
-    whisper '————————————————————————————————————————————————————————————'
-    whisper owner
-    for keyowner from @_walk_keyowners owner, { symbols: true, builtins: true, }
-      # info '^442^', keyowner, ( Object.getOwnPropertyDescriptor keyowner.owner, keyowner.key ).value
-      # info '^442^', keyowner, keyowner.owner is Object
-      # info '^442^', keyowner, keyowner.owner is Object::
-      # info '^442^', keyowner, keyowner.owner is Function::
-      info '^442^', keyowner, builtins.has keyowner.owner
-  debug '^4453^', Object.keys d
-  debug '^4453^', ( k for k of d )
-  debug '^4453^', ( k for k from @walk_keys d, { builtins: true, } )
-  debug '^4453^', ( k for k from @walk_keys d, {builtins: false, } )
-  return null
+  #.........................................................................................................
+  urge '^3453-1^', ( Object.keys d    )                                                                      # 00:00 GUY/TESTS/PROPS  ?  ^3453-1^ [ 'in_constructor' ]
+  urge '^3453-2^', ( ( k for k of d ) )                                                                      # 00:00 GUY/TESTS/PROPS  ?  ^3453-2^ [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  #......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+  info(); info "depth: null"                                                                                 # 00:00 GUY/TESTS/PROPS  ▶  depth: null
+  urge '^3453-3^', "standard  ", ( GUY.props.keys d, { depth: null, } )                                      # 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  urge '^3453-5^', "symbols   ", ( GUY.props.keys d, { depth: null, symbols: true, } )                       # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x), 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  urge '^3453-5^', "builtins  ", ( GUY.props.keys d, { depth: null, builtins: true, } )                      # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString' ]
+  urge '^3453-5^', "hidden    ", ( GUY.props.keys d, { depth: null, hidden: true, } )                        # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  #......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+  info(); info "depth: 0"                                                                                    # 00:00 GUY/TESTS/PROPS  ▶  depth: 0
+  urge '^3453-3^', "standard  ", ( GUY.props.keys d, { depth: 0, } )                                         # 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor' ]
+  urge '^3453-5^', "symbols   ", ( GUY.props.keys d, { depth: 0, symbols: true, } )                          # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x) ]
+  urge '^3453-5^', "builtins  ", ( GUY.props.keys d, { depth: 0, builtins: true, } )                         # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden' ]
+  urge '^3453-5^', "hidden    ", ( GUY.props.keys d, { depth: 0, hidden: true, } )                           # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden' ]
+  #......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+  info(); info "depth: 1"                                                                                    # 00:00 GUY/TESTS/PROPS  ▶  depth: 1
+  urge '^3453-3^', "standard  ", ( GUY.props.keys d, { depth: 1, } )                                         # 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor', 'is_d', 'in_declaration' ]
+  urge '^3453-5^', "symbols   ", ( GUY.props.keys d, { depth: 1, symbols: true, } )                          # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x), 'is_d', 'in_declaration' ]
+  urge '^3453-5^', "builtins  ", ( GUY.props.keys d, { depth: 1, builtins: true, } )                         # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration' ]
+  urge '^3453-5^', "hidden    ", ( GUY.props.keys d, { depth: 1, hidden: true, } )                           # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration' ]
+  #......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+  info(); info "depth: 2"                                                                                    # 00:00 GUY/TESTS/PROPS  ▶  depth: 2
+  urge '^3453-3^', "standard  ", ( GUY.props.keys d, { depth: 2, } )                                         # 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor', 'is_d', 'in_declaration', 'is_c' ]
+  urge '^3453-5^', "symbols   ", ( GUY.props.keys d, { depth: 2, symbols: true, } )                          # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x), 'is_d', 'in_declaration', 'is_c' ]
+  urge '^3453-5^', "builtins  ", ( GUY.props.keys d, { depth: 2, builtins: true, } )                         # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c' ]
+  urge '^3453-5^', "hidden    ", ( GUY.props.keys d, { depth: 2, hidden: true, } )                           # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c' ]
+  #......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+  info(); info "depth: 3"                                                                                    # 00:00 GUY/TESTS/PROPS  ▶  depth: 3
+  urge '^3453-3^', "standard  ", ( GUY.props.keys d, { depth: 3, } )                                         # 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b' ]
+  urge '^3453-5^', "symbols   ", ( GUY.props.keys d, { depth: 3, symbols: true, } )                          # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x), 'is_d', 'in_declaration', 'is_c', 'is_b' ]
+  urge '^3453-5^', "builtins  ", ( GUY.props.keys d, { depth: 3, builtins: true, } )                         # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b' ]
+  urge '^3453-5^', "hidden    ", ( GUY.props.keys d, { depth: 3, hidden: true, } )                           # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b' ]
+  #......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+  info(); info "depth: 4"                                                                                    # 00:00 GUY/TESTS/PROPS  ▶  depth: 4
+  urge '^3453-3^', "standard  ", ( GUY.props.keys d, { depth: 4, } )                                         # 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  urge '^3453-5^', "symbols   ", ( GUY.props.keys d, { depth: 4, symbols: true, } )                          # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x), 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  urge '^3453-5^', "builtins  ", ( GUY.props.keys d, { depth: 4, builtins: true, } )                         # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  urge '^3453-5^', "hidden    ", ( GUY.props.keys d, { depth: 4, hidden: true, } )                           # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  #......................................................................................................... # 00:00 GUY/TESTS/PROPS  ▶
+  info(); info "depth: 5"                                                                                    # 00:00 GUY/TESTS/PROPS  ▶  depth: 5
+  urge '^3453-3^', "standard  ", ( GUY.props.keys d, { depth: 5, } )                                         # 00:00 GUY/TESTS/PROPS  ?  ^3453-3^ standard   [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  urge '^3453-5^', "symbols   ", ( GUY.props.keys d, { depth: 5, symbols: true, } )                          # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ symbols    [ 'in_constructor', Symbol(x), 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  urge '^3453-5^', "builtins  ", ( GUY.props.keys d, { depth: 5, builtins: true, } )                         # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString' ]
+  urge '^3453-5^', "hidden    ", ( GUY.props.keys d, { depth: 5, hidden: true, } )                           # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  #.........................................................................................................
+  done?()
 
 #-----------------------------------------------------------------------------------------------------------
-demo_keys_2 = ->
+@[ "GUY.props.keys()" ] = ( T, done ) ->
   GUY       = require '../../../apps/guy'
   #.........................................................................................................
   class A
@@ -369,34 +374,69 @@ demo_keys_2 = ->
     is_d: true
     constructor: ->
       super()
-      @something = 'something'
+      @in_constructor = 's'
       return undefined
+    in_declaration: 42
     instance_method_on_d: ->
     @class_method_on_D: ->
   #.........................................................................................................
-  # d = { y: 42, z: { a: 1, b: 2, }, ξ: { [1], [2], [3], }, [Symbol.for 'x'], }
   d = new D()
   d[ Symbol.for 'x' ] = 'x'
   GUY.props.hide d, 'hidden', 'hidden'
   n = Object.create null
   e = new SyntaxError null
-  for owner in [ e, D, d, n, ]
-    whisper '————————————————————————————————————————————————————————————'
-    whisper owner
-    for keyowner from GUY.props._walk_keyowners owner, { symbols: true, builtins: true, }
-      info '^442^', keyowner
-  debug '^4453^', Object.keys d
-  debug '^4453^', ( k for k of d )
-  debug '^4453^', ( k for k from GUY.props.walk_keys d, { builtins: true, } )
-  debug '^4453^', ( k for k from GUY.props.walk_keys d, { builtins: false, } )
-  debug '^4453^', ( k for k from GUY.props.walk_keys d, { symbols: false, builtins: false, } )
-  return null
+  #.........................................................................................................
+  T?.eq ( Object.keys d    ), [ 'in_constructor' ]
+  T?.eq ( ( k for k of d ) ), [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  #.........................................................................................................
+  T?.eq ( GUY.props.keys d, { depth: null, }                 ), [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  T?.eq ( GUY.props.keys d, { depth: null, symbols: true, }  ), [ 'in_constructor', ( Symbol.for 'x' ), 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  T?.eq ( GUY.props.keys d, { depth: null, builtins: true, } ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString' ]
+  T?.eq ( GUY.props.keys d, { depth: null, hidden: true, }   ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  #.........................................................................................................
+  T?.eq ( GUY.props.keys d, { depth: 0, }                    ), [ 'in_constructor' ]
+  T?.eq ( GUY.props.keys d, { depth: 0, symbols: true, }     ), [ 'in_constructor', ( Symbol.for 'x' ) ]
+  T?.eq ( GUY.props.keys d, { depth: 0, builtins: true, }    ), [ 'in_constructor', 'hidden' ]
+  T?.eq ( GUY.props.keys d, { depth: 0, hidden: true, }      ), [ 'in_constructor', 'hidden' ]
+  #.........................................................................................................
+  T?.eq ( GUY.props.keys d, { depth: 1, }                    ), [ 'in_constructor', 'is_d', 'in_declaration' ]
+  T?.eq ( GUY.props.keys d, { depth: 1, symbols: true, }     ), [ 'in_constructor', ( Symbol.for 'x' ), 'is_d', 'in_declaration' ]
+  T?.eq ( GUY.props.keys d, { depth: 1, builtins: true, }    ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration' ]
+  T?.eq ( GUY.props.keys d, { depth: 1, hidden: true, }      ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration' ]
+  #.........................................................................................................
+  T?.eq ( GUY.props.keys d, { depth: 2, }                    ), [ 'in_constructor', 'is_d', 'in_declaration', 'is_c' ]
+  T?.eq ( GUY.props.keys d, { depth: 2, symbols: true, }     ), [ 'in_constructor', ( Symbol.for 'x' ), 'is_d', 'in_declaration', 'is_c' ]
+  T?.eq ( GUY.props.keys d, { depth: 2, builtins: true, }    ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c' ]
+  T?.eq ( GUY.props.keys d, { depth: 2, hidden: true, }      ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c' ]
+  #.........................................................................................................
+  T?.eq ( GUY.props.keys d, { depth: 3, }                    ), [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b' ]
+  T?.eq ( GUY.props.keys d, { depth: 3, symbols: true, }     ), [ 'in_constructor', ( Symbol.for 'x' ), 'is_d', 'in_declaration', 'is_c', 'is_b' ]
+  T?.eq ( GUY.props.keys d, { depth: 3, builtins: true, }    ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b' ]
+  T?.eq ( GUY.props.keys d, { depth: 3, hidden: true, }      ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b' ]
+  #.........................................................................................................
+  T?.eq ( GUY.props.keys d, { depth: 4, }                    ), [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  T?.eq ( GUY.props.keys d, { depth: 4, symbols: true, }     ), [ 'in_constructor', ( Symbol.for 'x' ), 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  T?.eq ( GUY.props.keys d, { depth: 4, builtins: true, }    ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  T?.eq ( GUY.props.keys d, { depth: 4, hidden: true, }      ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  #.........................................................................................................
+  T?.eq ( GUY.props.keys d, { depth: 5, }                    ), [ 'in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  T?.eq ( GUY.props.keys d, { depth: 5, symbols: true, }     ), [ 'in_constructor', ( Symbol.for 'x' ), 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  T?.eq ( GUY.props.keys d, { depth: 5, builtins: true, }    ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString' ]
+  T?.eq ( GUY.props.keys d, { depth: 5, hidden: true, }      ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  done?()
+
+
+
+
+
 
 
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  demo_keys_2()
+  demo_keys()
+  @[ "GUY.props.keys()" ]()
+  test @[ "GUY.props.keys()" ]
   # @[ "GUY.props.Strict_owner 1" ]()
   # test @[ "GUY.props.Strict_owner 1" ]
   # @[ "GUY.props.has()" ]()
