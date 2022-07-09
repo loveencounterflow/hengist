@@ -105,6 +105,7 @@ specifiers:
   path-intersection: ^2.2.1
   picomatch: ^2.3.1
   pkg-dir: ^6.0.1
+  prql-js: ^0.1.3
   railroad-diagrams: ^1.0.0
   random-ext: 2.7.1
   react: ^17.0.2
@@ -244,6 +245,7 @@ dependencies:
   path-intersection: 2.2.1
   picomatch: 2.3.1
   pkg-dir: 6.0.1
+  prql-js: 0.1.3
   railroad-diagrams: 1.0.0
   random-ext: 2.7.1
   react: 17.0.2
@@ -4091,6 +4093,10 @@ packages:
   /process/0.11.10:
     resolution: {integrity: sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==}
     engines: {node: '>= 0.6.0'}
+    dev: false
+
+  /prql-js/0.1.3:
+    resolution: {integrity: sha512-bEU57yQPx/CilJZjLaWv/ceMSkTkTkI8HwwzjbUSPSW85NWTo0toWG9TeHpiF+iicHcOfwdbosMb9yXdjBzrqw==}
     dev: false
 
   /ps-tree/1.2.0:
