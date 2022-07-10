@@ -984,6 +984,21 @@
     //.........................................................................................................
     if (T != null) {
       T.eq(GUY.props.keys(d, {
+        depth: null,
+        symbols: true,
+        builtins: true
+      }), ['in_constructor', 'hidden', Symbol.for('x'), 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        depth: null,
+        symbols: true,
+        hidden: true
+      }), ['in_constructor', 'hidden', Symbol.for('x'), 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
         depth: null
       }), ['in_constructor', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
     }
