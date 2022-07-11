@@ -717,7 +717,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_keys = function() {
-    var A, B, C, D, GUY, d, e, k, n;
+    var A, B, C, D, GUY, d, e, k, lst, n;
     GUY = require('../../../apps/guy');
     A = (function() {
       //.........................................................................................................
@@ -908,12 +908,28 @@
       depth: 5,
       hidden: true // 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
     }));
+    //.........................................................................................................
+    lst = ['x'];
+    urge('^3453-6^', Object.keys(lst));
+    urge('^3453-6^', (function() {
+      var results;
+      results = [];
+      for (k in lst) {
+        results.push(k);
+      }
+      return results;
+    })());
+    urge('^3453-6^', GUY.props.keys(lst));
+    urge('^3453-6^', GUY.props.keys(lst, {
+      symbols: true,
+      builtins: true
+    }));
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this["GUY.props.keys()"] = function(T, done) {
-    var A, B, C, D, GUY, d, e, k, n;
+    var A, B, C, D, GUY, d, e, k, lst, n;
     GUY = require('../../../apps/guy');
     A = (function() {
       //.........................................................................................................
@@ -964,6 +980,7 @@
     //.........................................................................................................
     d = new D();
     d[Symbol.for('x')] = 'x';
+    // y = Symbol 'y'; d[ y ] = y
     GUY.props.hide(d, 'hidden', 'hidden');
     n = Object.create(null);
     e = new SyntaxError(null);
@@ -1163,6 +1180,36 @@
         depth: 5,
         hidden: true
       }), ['in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a']);
+    }
+    //.........................................................................................................
+    lst = ['x'];
+    if (T != null) {
+      T.eq(Object.keys(lst), ['0']);
+    }
+    if (T != null) {
+      T.eq((function() {
+        var results;
+        results = [];
+        for (k in lst) {
+          results.push(k);
+        }
+        return results;
+      })(), ['0']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(lst), ['0']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(lst, {
+        symbols: true,
+        builtins: true
+      }), ['0', 'length', 'constructor', 'concat', 'copyWithin', 'fill', 'find', 'findIndex', 'lastIndexOf', 'pop', 'push', 'reverse', 'shift', 'unshift', 'slice', 'sort', 'splice', 'includes', 'indexOf', 'join', 'keys', 'entries', 'values', 'forEach', 'filter', 'flat', 'flatMap', 'map', 'every', 'some', 'reduce', 'reduceRight', 'toLocaleString', 'toString', 'at', 'findLast', 'findLastIndex', Symbol.iterator, Symbol.unscopables, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(Array, {
+        symbols: true,
+        builtins: true
+      }), ['length', 'name', 'prototype', 'isArray', 'from', 'of', Symbol.species, 'arguments', 'caller', 'constructor', 'apply', 'bind', 'call', 'toString', Symbol.hasInstance, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__', 'toLocaleString']);
     }
     return typeof done === "function" ? done() : void 0;
   };

@@ -174,11 +174,11 @@
 
   //###########################################################################################################
   if (module.parent == null) {
-    // test @, { timeout: 2500, }
-    test(this["format_number"]);
+    test(this);
   }
 
-  // test @[ "rpr" ]
+  // test @[ "format_number" ]
+// test @[ "rpr" ]
 // test @[ "inspect" ]
 
   // debug '^33376^', require 'jsx-number-format'
