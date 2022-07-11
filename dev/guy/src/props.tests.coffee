@@ -358,6 +358,12 @@ demo_keys = ->
   urge '^3453-5^', "builtins  ", ( GUY.props.keys d, { depth: 5, builtins: true, } )                         # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ builtins   [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString' ]
   urge '^3453-5^', "hidden    ", ( GUY.props.keys d, { depth: 5, hidden: true, } )                           # 00:00 GUY/TESTS/PROPS  ?  ^3453-5^ hidden     [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
   #.........................................................................................................
+  lst = [ 'x', ]
+  urge '^3453-6^', ( Object.keys lst    )
+  urge '^3453-6^', ( ( k for k of lst ) )
+  urge '^3453-6^', ( GUY.props.keys lst )
+  urge '^3453-6^', ( GUY.props.keys lst, { symbols: true, builtins: true, } )
+  #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -382,6 +388,7 @@ demo_keys = ->
   #.........................................................................................................
   d = new D()
   d[ Symbol.for 'x' ] = 'x'
+  # y = Symbol 'y'; d[ y ] = y
   GUY.props.hide d, 'hidden', 'hidden'
   n = Object.create null
   e = new SyntaxError null
@@ -426,6 +433,14 @@ demo_keys = ->
   T?.eq ( GUY.props.keys d, { depth: 5, symbols: true, }     ), [ 'in_constructor', ( Symbol.for 'x' ), 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
   T?.eq ( GUY.props.keys d, { depth: 5, builtins: true, }    ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString' ]
   T?.eq ( GUY.props.keys d, { depth: 5, hidden: true, }      ), [ 'in_constructor', 'hidden', 'constructor', 'instance_method_on_d', 'is_d', 'in_declaration', 'is_c', 'is_b', 'is_a' ]
+  #.........................................................................................................
+  lst = [ 'x', ]
+  T?.eq ( Object.keys lst    ), [ '0', ]
+  T?.eq ( ( k for k of lst ) ), [ '0', ]
+  T?.eq ( GUY.props.keys lst ), [ '0', ]
+  T?.eq ( GUY.props.keys lst, { symbols: true, builtins: true, } ), [ '0', 'length', 'constructor', 'concat', 'copyWithin', 'fill', 'find', 'findIndex', 'lastIndexOf', 'pop', 'push', 'reverse', 'shift', 'unshift', 'slice', 'sort', 'splice', 'includes', 'indexOf', 'join', 'keys', 'entries', 'values', 'forEach', 'filter', 'flat', 'flatMap', 'map', 'every', 'some', 'reduce', 'reduceRight', 'toLocaleString', 'toString', 'at', 'findLast', 'findLastIndex', Symbol.iterator, Symbol.unscopables, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__' ]
+  T?.eq ( GUY.props.keys Array, { symbols: true, builtins: true, } ), [ 'length', 'name', 'prototype', 'isArray', 'from', 'of', Symbol.species, 'arguments', 'caller', 'constructor', 'apply', 'bind', 'call', 'toString', Symbol.hasInstance, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__', 'toLocaleString' ]
+  #.........................................................................................................
   done?()
 
 
