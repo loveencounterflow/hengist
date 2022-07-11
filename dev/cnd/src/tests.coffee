@@ -127,8 +127,8 @@ test                      = require 'guy-test'
 
 ############################################################################################################
 unless module.parent?
-  # test @, { timeout: 2500, }
-  test @[ "format_number" ]
+  test @
+  # test @[ "format_number" ]
   # test @[ "rpr" ]
   # test @[ "inspect" ]
 
