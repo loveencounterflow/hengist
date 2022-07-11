@@ -6,18 +6,20 @@
 PATH                      = require 'path'
 FS                        = require 'fs'
 #...........................................................................................................
-CND                       = require 'cnd'
-rpr                       = CND.rpr
-badge                     = 'GUY/TESTS/PROPS'
-log                       = CND.get_logger 'plain',     badge
-info                      = CND.get_logger 'info',      badge
-whisper                   = CND.get_logger 'whisper',   badge
-alert                     = CND.get_logger 'alert',     badge
-debug                     = CND.get_logger 'debug',     badge
-warn                      = CND.get_logger 'warn',      badge
-help                      = CND.get_logger 'help',      badge
-urge                      = CND.get_logger 'urge',      badge
-echo                      = CND.echo.bind CND
+_GUY                      = require 'guy'
+{ alert
+  debug
+  help
+  info
+  plain
+  praise
+  urge
+  warn
+  whisper }               = _GUY.trm.get_loggers 'GUY/props/tests'
+{ rpr
+  inspect
+  echo
+  log     }               = _GUY.trm
 #...........................................................................................................
 test                      = require '../../../apps/guy-test'
 H                         = require './helpers'
@@ -226,7 +228,7 @@ types                     = new ( require 'intertype' ).Intertype
   #.........................................................................................................
   T?.eq ( GUY.props.has x, 'has' ), false
   T?.eq ( GUY.props.has x, 'get' ), false
-  try urge x.bar catch error then warn CND.reverse error.message
+  try urge x.bar catch error then warn _GUY.trm.reverse error.message
   T?.throws /X instance does not have property 'bar'/, => x.bar
   #.........................................................................................................
   done?()
@@ -263,7 +265,7 @@ types                     = new ( require 'intertype' ).Intertype
   x = new X()
   debug '^4458^', x.prop_in_constructor
   debug '^4458^', x.prop_on_instance
-  try x.no_such_prop catch error then warn CND.reverse error.message
+  try x.no_such_prop catch error then warn _GUY.trm.reverse error.message
   T?.throws /X instance does not have property 'no_such_prop'/, -> x.no_such_prop
   T?.eq ( Reflect.has x, 'prop_in_constructor'  ), true
   T?.eq ( Reflect.has x, 'prop_on_instance'     ), true
@@ -281,7 +283,7 @@ types                     = new ( require 'intertype' ).Intertype
   debug '^4458^', type_of x
   debug '^4458^', typeof x
   debug x 42
-  try urge x.bar catch error then warn CND.reverse error.message
+  try urge x.bar catch error then warn _GUY.trm.reverse error.message
   T?.throws /Strict_owner instance does not have property 'bar'/, => x.bar
   #.........................................................................................................
   done?()

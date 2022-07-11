@@ -3,18 +3,20 @@
 
 
 ############################################################################################################
-CND                       = require 'cnd'
-rpr                       = CND.rpr
-badge                     = 'GUY/TESTS/SRC'
-log                       = CND.get_logger 'plain',     badge
-info                      = CND.get_logger 'info',      badge
-whisper                   = CND.get_logger 'whisper',   badge
-alert                     = CND.get_logger 'alert',     badge
-debug                     = CND.get_logger 'debug',     badge
-warn                      = CND.get_logger 'warn',      badge
-help                      = CND.get_logger 'help',      badge
-urge                      = CND.get_logger 'urge',      badge
-echo                      = CND.echo.bind CND
+_GUY                      = require 'guy'
+{ alert
+  debug
+  help
+  info
+  plain
+  praise
+  urge
+  warn
+  whisper }               = _GUY.trm.get_loggers 'GUY/trm/tests'
+{ rpr
+  inspect
+  echo
+  log     }               = _GUY.trm
 #...........................................................................................................
 test                      = require '../../../apps/guy-test'
 # PATH                      = require 'path'

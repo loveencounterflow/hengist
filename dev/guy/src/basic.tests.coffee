@@ -40,7 +40,7 @@ types                     = new ( require 'intertype' ).Intertype
   rq                  = createRequire guy_realpath
   guy                 = require H.guy_path
   urge '^83443^', H.guy_path
-  help '^83443^', rq.resolve 'cnd'
+  help '^83443^', rq.resolve 'letsfreezethat'
   help '^83443^', rq.resolve 'intertype-legacy'
   # help '^83443^', rq.resolve 'deasync'
   # help '^83443^', rq.resolve 'frob'
