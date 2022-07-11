@@ -458,6 +458,18 @@ demo_keys = ->
   done?()
 
 
+#-----------------------------------------------------------------------------------------------------------
+demo_tree = ->
+  GUY       = require '../../../apps/guy'
+  #.........................................................................................................
+  d = { a: [ 0, 1, 2, ], e: { 11, 12, 13, }, }
+  debug d
+  for x from GUY.props._walk_tree d
+    praise '^453^', rpr x
+  # debug GUY.props.tree d
+  #.........................................................................................................
+  return null
+
 
 
 
@@ -466,9 +478,11 @@ demo_keys = ->
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  demo_keys()
-  @[ "GUY.props.keys()" ]()
-  test @[ "GUY.props.keys()" ]
+  # demo_tree()
+  test @[ "GUY.props.keys() works for all JS values, including null and undefined" ]
+  # demo_keys()
+  # @[ "GUY.props.keys()" ]()
+  # test @[ "GUY.props.keys()" ]
   # @[ "GUY.props.Strict_owner 1" ]()
   # test @[ "GUY.props.Strict_owner 1" ]
   # @[ "GUY.props.has()" ]()
