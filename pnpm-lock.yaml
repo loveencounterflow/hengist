@@ -56,7 +56,7 @@ specifiers:
   gitlog: ^4.0.4
   glob: 7.2.0
   got: ^11.8.2
-  guy: 5.2.0
+  guy: 7.0.0
   guy-test: 4.2.2
   hamt: ^2.2.2
   hashbow: ^1.1.1
@@ -196,7 +196,7 @@ dependencies:
   gitlog: 4.0.4
   glob: 7.2.0
   got: 11.8.5
-  guy: 5.2.0_4k6qy6fwzytg4mnvcbxw7o5eay
+  guy: 7.0.0_4prdxtoba2tordf5bhh3dou7hy
   guy-test: 4.2.2
   hamt: 2.2.2
   hashbow: 1.1.1
@@ -2382,16 +2382,19 @@ packages:
       letsfreezethat: 3.1.0
     dev: false
 
-  /guy/5.2.0_4k6qy6fwzytg4mnvcbxw7o5eay:
-    resolution: {integrity: sha512-c47bRCXKFUp9NSPGlJBDhuk1tVmJlkq7MWT5AEclUIaUk5Hz3bQEula9STx2MbdxrI8PJ+qYLhTdB1dTeW3flA==}
+  /guy/7.0.0_4prdxtoba2tordf5bhh3dou7hy:
+    resolution: {integrity: sha512-s1slrjVzISAH+lqMCqVZzfWhRiHMhbMQdBYBmgK/9M1z3p5P3+rqspgicPa+SnKo7yDh7UiDH0ctKg1zvIoieQ==}
     peerDependencies:
+      acorn: ^8.7.1
       acorn-loose: ^8.3.0
+      acorn-walk: ^8.2.0
       astring: ^1.8.3
     dependencies:
+      acorn: 8.7.1
       acorn-loose: 8.3.0
+      acorn-walk: 8.2.0
       astring: 1.8.3
-      cnd: 9.2.2
-      intertype: 7.7.1
+      intertype-legacy: 7.7.1
       letsfreezethat: 3.1.0
     dev: false
 
@@ -2693,6 +2696,12 @@ packages:
       multimix: 5.0.0
       steampipes: 6.7.1
       to-width: 1.2.0
+    dev: false
+
+  /intertype-legacy/7.7.1:
+    resolution: {integrity: sha512-Bj3k9bCu8vA6JLIvnCrJXOdkecgY5wtCmORclJ87uq22N53swREHT5bezSeK5TwcxgSJEDg2wEfcn4kNr9Qv8A==}
+    dependencies:
+      multimix: 5.0.0
     dev: false
 
   /intertype/7.6.3:
