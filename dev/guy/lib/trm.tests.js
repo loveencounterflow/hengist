@@ -1,31 +1,13 @@
 (function() {
   'use strict';
-  var CND, H, alert, badge, debug, echo, equals, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var H, _GUY, alert, debug, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
-  CND = require('cnd');
+  _GUY = require('guy');
 
-  rpr = CND.rpr;
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = _GUY.trm.get_loggers('GUY/trm/tests'));
 
-  badge = 'GUY/TESTS/SRC';
-
-  log = CND.get_logger('plain', badge);
-
-  info = CND.get_logger('info', badge);
-
-  whisper = CND.get_logger('whisper', badge);
-
-  alert = CND.get_logger('alert', badge);
-
-  debug = CND.get_logger('debug', badge);
-
-  warn = CND.get_logger('warn', badge);
-
-  help = CND.get_logger('help', badge);
-
-  urge = CND.get_logger('urge', badge);
-
-  echo = CND.echo.bind(CND);
+  ({rpr, inspect, echo, log} = _GUY.trm);
 
   //...........................................................................................................
   test = require('../../../apps/guy-test');

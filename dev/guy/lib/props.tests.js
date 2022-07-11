@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, H, PATH, alert, badge, debug, demo_keys, echo, equals, freeze, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var FS, H, PATH, _GUY, alert, debug, demo_keys, demo_tree, echo, equals, freeze, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   PATH = require('path');
@@ -8,29 +8,11 @@
   FS = require('fs');
 
   //...........................................................................................................
-  CND = require('cnd');
+  _GUY = require('guy');
 
-  rpr = CND.rpr;
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = _GUY.trm.get_loggers('GUY/props/tests'));
 
-  badge = 'GUY/TESTS/PROPS';
-
-  log = CND.get_logger('plain', badge);
-
-  info = CND.get_logger('info', badge);
-
-  whisper = CND.get_logger('whisper', badge);
-
-  alert = CND.get_logger('alert', badge);
-
-  debug = CND.get_logger('debug', badge);
-
-  warn = CND.get_logger('warn', badge);
-
-  help = CND.get_logger('help', badge);
-
-  urge = CND.get_logger('urge', badge);
-
-  echo = CND.echo.bind(CND);
+  ({rpr, inspect, echo, log} = _GUY.trm);
 
   //...........................................................................................................
   test = require('../../../apps/guy-test');
@@ -589,7 +571,7 @@
       urge(x.bar);
     } catch (error1) {
       error = error1;
-      warn(CND.reverse(error.message));
+      warn(_GUY.trm.reverse(error.message));
     }
     if (T != null) {
       T.throws(/X instance does not have property 'bar'/, () => {
@@ -662,7 +644,7 @@
       x.no_such_prop;
     } catch (error1) {
       error = error1;
-      warn(CND.reverse(error.message));
+      warn(_GUY.trm.reverse(error.message));
     }
     if (T != null) {
       T.throws(/X instance does not have property 'no_such_prop'/, function() {
@@ -702,7 +684,7 @@
       urge(x.bar);
     } catch (error1) {
       error = error1;
-      warn(CND.reverse(error.message));
+      warn(_GUY.trm.reverse(error.message));
     }
     if (T != null) {
       T.throws(/Strict_owner instance does not have property 'bar'/, () => {
@@ -924,6 +906,39 @@
       symbols: true,
       builtins: true
     }));
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["GUY.props.keys() works for all JS values, including null and undefined"] = function(T, done) {
+    var GUY;
+    GUY = require('../../../apps/guy');
+    //.........................................................................................................
+    if (T != null) {
+      T.throws(/called on non-object/, function() {
+        return GUY.props.keys(null);
+      });
+    }
+    if (T != null) {
+      T.throws(/called on non-object/, function() {
+        return GUY.props.keys(42);
+      });
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(42, {
+        allow_any: true
+      }), []);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(null, {
+        allow_any: true
+      }), []);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(void 0, {
+        allow_any: true
+      }), []);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -1214,17 +1229,38 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_tree = function() {
+    var GUY, d, ref, x;
+    GUY = require('../../../apps/guy');
+    //.........................................................................................................
+    d = {
+      a: [0, 1, 2],
+      e: {11: 11, 12: 12, 13: 13}
+    };
+    debug(d);
+    ref = GUY.props._walk_tree(d);
+    for (x of ref) {
+      praise('^453^', rpr(x));
+    }
+    // debug GUY.props.tree d
+    //.........................................................................................................
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
-      demo_keys();
-      this["GUY.props.keys()"]();
-      return test(this["GUY.props.keys()"]);
+      // demo_tree()
+      return test(this["GUY.props.keys() works for all JS values, including null and undefined"]);
     })();
   }
 
-  // @[ "GUY.props.Strict_owner 1" ]()
+  // demo_keys()
+// @[ "GUY.props.keys()" ]()
+// test @[ "GUY.props.keys()" ]
+// @[ "GUY.props.Strict_owner 1" ]()
 // test @[ "GUY.props.Strict_owner 1" ]
 // @[ "GUY.props.has()" ]()
 // test @[ "GUY.props.has()" ]
