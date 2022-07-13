@@ -511,6 +511,17 @@ demo_tree = ->
       praise '^453^', rpr path
     return null
   #.........................................................................................................
+  do =>
+    whisper '————————————————————————————————————————————————————————————'
+    evaluate = ({ owner, key, value, }) ->
+      return 'take' unless isa.object value
+      return 'take' unless GUY.props.has_keys value
+      return 'descend'
+    whisper cfg = { evaluate, joiner: '.', }
+    for path in GUY.props.tree d, cfg
+      praise '^453^', rpr path
+    return null
+  #.........................................................................................................
   return null
 
 
