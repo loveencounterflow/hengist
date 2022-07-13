@@ -62,6 +62,19 @@ S                         = ( parts ) -> new Set eval parts.raw[ 0 ]
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "forbidden to overwrite declarations" ] = ( T, done ) ->
+  { Intertype }   = require '../../../apps/intertype'
+  types           = new Intertype()
+  T?.eq ( GUY.props.has types.isa, 'weirdo' ), false
+  types.declare 'weirdo', test: ( x ) -> x is weirdo
+  T?.eq ( GUY.props.has types.isa, 'weirdo' ), true
+  debug '^353^', GUY.props.has types.isa, 'weirdo'
+  T?.throws /Strict_owner instance already has property 'weirdo'/, => types.declare 'weirdo', test: ( x ) -> x is weirdo
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 demo = ->
   { Intertype }   = require '../../../apps/intertype'
   types           = new Intertype()
