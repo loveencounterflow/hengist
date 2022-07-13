@@ -1353,6 +1353,29 @@
       }
       return null;
     })();
+    (() => {      //.........................................................................................................
+      var cfg, evaluate, i, len, path, ref;
+      whisper('————————————————————————————————————————————————————————————');
+      evaluate = function({owner, key, value}) {
+        if (!isa.object(value)) {
+          return 'take';
+        }
+        if (!GUY.props.has_keys(value)) {
+          return 'take';
+        }
+        return 'descend';
+      };
+      whisper(cfg = {
+        evaluate,
+        joiner: '.'
+      });
+      ref = GUY.props.tree(d, cfg);
+      for (i = 0, len = ref.length; i < len; i++) {
+        path = ref[i];
+        praise('^453^', rpr(path));
+      }
+      return null;
+    })();
     //.........................................................................................................
     return null;
   };
