@@ -400,11 +400,11 @@ demo_keys = ->
 @[ "GUY.props.keys() works for all JS values, including null and undefined" ] = ( T, done ) ->
   GUY       = require '../../../apps/guy'
   #.........................................................................................................
-  T?.throws /called on non-object/, -> GUY.props.keys null
-  T?.throws /called on non-object/, -> GUY.props.keys 42
-  T?.eq ( GUY.props.keys 42,         { allow_any: true, } ), []
-  T?.eq ( GUY.props.keys null,       { allow_any: true, } ), []
-  T?.eq ( GUY.props.keys undefined,  { allow_any: true, } ), []
+  T?.throws /called on non-object/, -> GUY.props.keys null, { allow_any: false, }
+  T?.throws /called on non-object/, -> GUY.props.keys 42,   { allow_any: false, }
+  T?.eq ( GUY.props.keys 42         ), []
+  T?.eq ( GUY.props.keys null       ), []
+  T?.eq ( GUY.props.keys undefined  ), []
   #.........................................................................................................
   done?()
 
