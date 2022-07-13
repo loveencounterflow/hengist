@@ -114,6 +114,23 @@ types                     = new ( require 'intertype' ).Intertype
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "guy.props.crossmerge()" ] = ( T, done ) ->
+  GUY = require H.guy_path
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ { keys: {},               values: {},                                 }, {}                   ]
+    [ { keys: { x: 42, },       values: { x: 108, },                        }, { x: 108, }          ]
+    [ { keys: { a: 1, b: 2, },  values: { b: 3, c: 4, }, fallback: 'oops',  }, { a: 'oops', b: 3, } ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      result        = GUY.props.crossmerge probe
+      resolve result
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "guy.props.omit_nullish()" ] = ( T, done ) ->
   guy = require H.guy_path
   #.........................................................................................................
@@ -285,6 +302,17 @@ types                     = new ( require 'intertype' ).Intertype
   debug x 42
   try urge x.bar catch error then warn _GUY.trm.reverse error.message
   T?.throws /Strict_owner instance does not have property 'bar'/, => x.bar
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "GUY.props.Strict_owner can disallow redefining keys" ] = ( T, done ) ->
+  GUY     = require H.guy_path
+  #.........................................................................................................
+  debug x = new GUY.props.Strict_owner { reset: false, }
+  x.foo   = 42
+  T?.throws /Strict_owner instance already has property 'foo'/, => x.foo = 42
   #.........................................................................................................
   done?()
   return null
@@ -462,11 +490,26 @@ demo_keys = ->
 demo_tree = ->
   GUY       = require '../../../apps/guy'
   #.........................................................................................................
-  d = { a: [ 0, 1, 2, ], e: { 11, 12, 13, }, }
+  d = { a: [ 0, 1, 2, ], e: { g: { some: 'thing', }, h: 42, h: null, }, empty: {}, }
   debug d
-  for x from GUY.props._walk_tree d
-    praise '^453^', rpr x
-  # debug GUY.props.tree d
+  #.........................................................................................................
+  do =>
+    whisper '————————————————————————————————————————————————————————————'
+    whisper cfg = {}
+    for path in GUY.props.tree d, cfg
+      praise '^453^', rpr path
+    return null
+  #.........................................................................................................
+  do =>
+    whisper '————————————————————————————————————————————————————————————'
+    evaluate = ({ owner, key, value, }) ->
+      return 'take' unless isa.object value
+      return 'take' unless GUY.props.has_keys value
+      return 'descend'
+    whisper cfg = { evaluate, }
+    for path in GUY.props.tree d, cfg
+      praise '^453^', rpr path
+    return null
   #.........................................................................................................
   return null
 
@@ -478,8 +521,10 @@ demo_tree = ->
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  # demo_tree()
-  test @[ "GUY.props.keys() works for all JS values, including null and undefined" ]
+  demo_tree()
+  # @[ "guy.props.crossmerge()" ]()
+  # test @[ "guy.props.crossmerge()" ]
+  # test @[ "GUY.props.keys() works for all JS values, including null and undefined" ]
   # demo_keys()
   # @[ "GUY.props.keys()" ]()
   # test @[ "GUY.props.keys()" ]
@@ -494,5 +539,6 @@ if require.main is module then do =>
   # test @[ "GUY.props.Strict_owner can use explicit target" ]
   # @[ "GUY.props.Strict_owner can use Reflect.has" ]()
   # test @[ "GUY.props.Strict_owner can use Reflect.has" ]
+  # test @[ "GUY.props.Strict_owner can disallow redefining keys" ]
 
 
