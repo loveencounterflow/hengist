@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, GUY, H, S, alert, badge, debug, demo, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_test_with_protocol, echo, equals, help, info, list_all_builtin_type_testers, log, njs_path, praise, rpr, test, to_width, urge, warn, whisper;
+  var GUY, H, S, alert, debug, demo, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_test_with_protocol, echo, equals, help, info, inspect, list_all_builtin_type_testers, log, njs_path, plain, praise, rpr, test, to_width, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -8,39 +8,17 @@
 
   // njs_fs                    = require 'fs'
   //...........................................................................................................
-  CND = require('cnd');
+  GUY = require('../../../apps/guy');
 
-  rpr = CND.rpr.bind(CND);
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('GUY/props/tests'));
 
-  badge = 'INTERTYPE/tests/basics';
-
-  log = CND.get_logger('plain', badge);
-
-  info = CND.get_logger('info', badge);
-
-  whisper = CND.get_logger('whisper', badge);
-
-  alert = CND.get_logger('alert', badge);
-
-  debug = CND.get_logger('debug', badge);
-
-  warn = CND.get_logger('warn', badge);
-
-  help = CND.get_logger('help', badge);
-
-  urge = CND.get_logger('urge', badge);
-
-  praise = CND.get_logger('praise', badge);
-
-  echo = CND.echo.bind(CND);
+  ({rpr, inspect, echo, log} = GUY.trm);
 
   //...........................................................................................................
   test = require('guy-test');
 
   // { intersection_of }       = require '../../../apps/intertype/lib/helpers'
   H = require('../../../lib/helpers');
-
-  GUY = require('../../../apps/guy');
 
   equals = require('../../../apps/intertype/deps/jkroso-equals');
 
@@ -113,6 +91,38 @@
     }
     if (T != null) {
       T.eq(types._isa('optional', 'empty', 'array', [42]), false);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["forbidden to overwrite declarations"] = function(T, done) {
+    var Intertype, types;
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    if (T != null) {
+      T.eq(GUY.props.has(types.isa, 'weirdo'), false);
+    }
+    types.declare('weirdo', {
+      test: function(x) {
+        return x === weirdo;
+      }
+    });
+    if (T != null) {
+      T.eq(GUY.props.has(types.isa, 'weirdo'), true);
+    }
+    debug('^353^', GUY.props.has(types.isa, 'weirdo'));
+    if (T != null) {
+      T.throws(/Strict_owner instance already has property 'weirdo'/, () => {
+        return types.declare('weirdo', {
+          test: function(x) {
+            return x === weirdo;
+          }
+        });
+      });
     }
     if (typeof done === "function") {
       done();
@@ -1406,10 +1416,19 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_enumerate_hedgepaths = function() {
-    var Intertype, types;
+    var Intertype, ref, types, x;
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype();
-    debug(Reflect.ownKeys(types.isa));
+    // types.declare 'list', groups: 'collection', test: ( x ) -> Array.isArray x
+    // types.declare 'integer', groups: 'number', test: ( x ) -> Number.isInteger x
+    debug(GUY.props._walk_tree);
+    debug(GUY.props.keys(types.isa, {
+      hidden: true
+    }));
+    ref = GUY.props._walk_tree(types.isa);
+    for (x of ref) {
+      praise(x.join('.'));
+    }
     // for k, v of Object.own types.isa
     //   debug '^4432^', k
     return null;
@@ -1424,18 +1443,16 @@
     // demo_multipart_hedges()
     // demo_combinate_2()
     // demo_intertype_hedge_combinator()
-    test(this);
+    // test @
     // @[ "intertype hedgepaths" ]()
     // @[ "intertype all hedgepaths" ]()
     // test @[ "intertype all hedgepaths" ]
     // test @[ "intertype size_of" ]
-    urge(GUY.src.get_first_return_clause_text);
-    urge(GUY.src.slug_from_simple_function({
-      function: function(x) {
-        return this.isa.optional.integer(x);
-      }
-    }));
-    demo_picomatch_for_hedgepaths();
+    // urge GUY.src.get_first_return_clause_text
+    // urge GUY.src.slug_from_simple_function function: ( x ) -> @isa.optional.integer x
+    // demo_picomatch_for_hedgepaths()
+    // @[ "forbidden to overwrite declarations" ]()
+    // test @[ "forbidden to overwrite declarations" ]
     demo_enumerate_hedgepaths();
   }
 

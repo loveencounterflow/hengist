@@ -298,6 +298,64 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["guy.props.crossmerge()"] = async function(T, done) {
+    var GUY, error, i, len, matcher, probe, probes_and_matchers;
+    GUY = require(H.guy_path);
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        {
+          keys: {},
+          values: {}
+        },
+        {}
+      ],
+      [
+        {
+          keys: {
+            x: 42
+          },
+          values: {
+            x: 108
+          }
+        },
+        {
+          x: 108
+        }
+      ],
+      [
+        {
+          keys: {
+            a: 1,
+            b: 2
+          },
+          values: {
+            b: 3,
+            c: 4
+          },
+          fallback: 'oops'
+        },
+        {
+          a: 'oops',
+          b: 3
+        }
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var result;
+          result = GUY.props.crossmerge(probe);
+          return resolve(result);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["guy.props.omit_nullish()"] = async function(T, done) {
     var error, guy, i, len, matcher, probe, probes_and_matchers;
     guy = require(H.guy_path);
@@ -698,6 +756,26 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["GUY.props.Strict_owner can disallow redefining keys"] = function(T, done) {
+    var GUY, x;
+    GUY = require(H.guy_path);
+    //.........................................................................................................
+    debug(x = new GUY.props.Strict_owner({
+      reset: false
+    }));
+    x.foo = 42;
+    if (T != null) {
+      T.throws(/Strict_owner instance already has property 'foo'/, () => {
+        return x.foo = 42;
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_keys = function() {
     var A, B, C, D, GUY, d, e, k, lst, n;
     GUY = require('../../../apps/guy');
@@ -916,28 +994,26 @@
     //.........................................................................................................
     if (T != null) {
       T.throws(/called on non-object/, function() {
-        return GUY.props.keys(null);
+        return GUY.props.keys(null, {
+          allow_any: false
+        });
       });
     }
     if (T != null) {
       T.throws(/called on non-object/, function() {
-        return GUY.props.keys(42);
+        return GUY.props.keys(42, {
+          allow_any: false
+        });
       });
     }
     if (T != null) {
-      T.eq(GUY.props.keys(42, {
-        allow_any: true
-      }), []);
+      T.eq(GUY.props.keys(42), []);
     }
     if (T != null) {
-      T.eq(GUY.props.keys(null, {
-        allow_any: true
-      }), []);
+      T.eq(GUY.props.keys(null), []);
     }
     if (T != null) {
-      T.eq(GUY.props.keys(void 0, {
-        allow_any: true
-      }), []);
+      T.eq(GUY.props.keys(void 0), []);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -1231,19 +1307,52 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_tree = function() {
-    var GUY, d, ref, x;
+    var GUY, d;
     GUY = require('../../../apps/guy');
     //.........................................................................................................
     d = {
       a: [0, 1, 2],
-      e: {11: 11, 12: 12, 13: 13}
+      e: {
+        g: {
+          some: 'thing'
+        },
+        h: 42,
+        h: null
+      },
+      empty: {}
     };
     debug(d);
-    ref = GUY.props._walk_tree(d);
-    for (x of ref) {
-      praise('^453^', rpr(x));
-    }
-    // debug GUY.props.tree d
+    (() => {      //.........................................................................................................
+      var cfg, i, len, path, ref;
+      whisper('————————————————————————————————————————————————————————————');
+      whisper(cfg = {});
+      ref = GUY.props.tree(d, cfg);
+      for (i = 0, len = ref.length; i < len; i++) {
+        path = ref[i];
+        praise('^453^', rpr(path));
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var cfg, evaluate, i, len, path, ref;
+      whisper('————————————————————————————————————————————————————————————');
+      evaluate = function({owner, key, value}) {
+        if (!isa.object(value)) {
+          return 'take';
+        }
+        if (!GUY.props.has_keys(value)) {
+          return 'take';
+        }
+        return 'descend';
+      };
+      whisper(cfg = {evaluate});
+      ref = GUY.props.tree(d, cfg);
+      for (i = 0, len = ref.length; i < len; i++) {
+        path = ref[i];
+        praise('^453^', rpr(path));
+      }
+      return null;
+    })();
     //.........................................................................................................
     return null;
   };
@@ -1252,12 +1361,14 @@
   if (require.main === module) {
     (() => {
       // test @
-      // demo_tree()
-      return test(this["GUY.props.keys() works for all JS values, including null and undefined"]);
+      return demo_tree();
     })();
   }
 
-  // demo_keys()
+  // @[ "guy.props.crossmerge()" ]()
+// test @[ "guy.props.crossmerge()" ]
+// test @[ "GUY.props.keys() works for all JS values, including null and undefined" ]
+// demo_keys()
 // @[ "GUY.props.keys()" ]()
 // test @[ "GUY.props.keys()" ]
 // @[ "GUY.props.Strict_owner 1" ]()
@@ -1271,6 +1382,7 @@
 // test @[ "GUY.props.Strict_owner can use explicit target" ]
 // @[ "GUY.props.Strict_owner can use Reflect.has" ]()
 // test @[ "GUY.props.Strict_owner can use Reflect.has" ]
+// test @[ "GUY.props.Strict_owner can disallow redefining keys" ]
 
 }).call(this);
 
