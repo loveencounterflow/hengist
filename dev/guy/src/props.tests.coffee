@@ -512,7 +512,7 @@ demo_tree = ->
     whisper '————————————————————————————————————————————————————————————'
     evaluate = ({ owner, key, value, }) ->
       return 'take' unless isa.object value
-      return 'take' unless GUY.props.has_keys value
+      return 'take' unless GUY.props.has_any_keys value
       return 'descend'
     whisper cfg = { evaluate, }
     for path in GUY.props.tree d, cfg
@@ -523,7 +523,7 @@ demo_tree = ->
     whisper '————————————————————————————————————————————————————————————'
     evaluate = ({ owner, key, value, }) ->
       return 'take' unless isa.object value
-      return 'take' unless GUY.props.has_keys value
+      return 'take' unless GUY.props.has_any_keys value
       return 'descend'
     whisper cfg = { evaluate, joiner: '.', }
     for path in GUY.props.tree d, cfg
