@@ -205,12 +205,20 @@ types                     = new ( require 'intertype' ).Intertype
   GUY       = require H.guy_path
   fallback  = Symbol 'fallback'
   value     = Symbol 'value'
-  T?.eq ( GUY.props.get undefined, 'xy',  fallback  ), fallback
-  T?.eq ( GUY.props.get null, 'xy',       fallback  ), fallback
-  T?.eq ( GUY.props.get 42, 'xy',         fallback  ), fallback
-  T?.eq ( GUY.props.get {}, 'xy',         fallback  ), fallback
-  T?.eq ( GUY.props.get { xy: value, }, 'xy'        ), value
-  T?.throws /no such property/, -> GUY.props.get undefined, 'xy'
+  # debug '^345-1^', GUY.props.keys ( new Set() ), { builtins: true, }
+  # debug '^345-2^', GUY.props.keys ( ''        ), { builtins: true, }
+  # debug '^345-3^', ( k for k of new Set() )
+  # debug '^345-4^', ( k for k of '' )
+  # debug '^345-5^', Object.getOwnPropertyDescriptors ( new Set() )
+  # debug '^345-6^', Object.getOwnPropertyDescriptors ( ''        )
+  # debug '^345-5^', Reflect.has ( new Set() ), 'size'
+  # debug '^345-6^', Reflect.has ( ''        ), 'length'
+  debug '^334-1^'; T?.eq ( GUY.props.get undefined, 'xy',  fallback  ), fallback
+  debug '^334-2^'; T?.eq ( GUY.props.get null, 'xy',       fallback  ), fallback
+  debug '^334-3^'; T?.eq ( GUY.props.get 42, 'xy',         fallback  ), fallback
+  debug '^334-4^'; T?.eq ( GUY.props.get {}, 'xy',         fallback  ), fallback
+  debug '^334-5^'; T?.eq ( GUY.props.get { xy: value, }, 'xy'        ), value
+  debug '^334-6^'; T?.throws /no such property/, -> GUY.props.get undefined, 'xy'
   #.........................................................................................................
   done?()
 
