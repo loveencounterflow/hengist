@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var FS, H, PATH, _GUY, alert, debug, demo_keys, demo_tree, echo, equals, freeze, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var FS, H, PATH, _GUY, alert, debug, demo_keys, demo_tree, demo_tree_readme, echo, equals, freeze, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   PATH = require('path');
@@ -541,23 +541,37 @@
     GUY = require(H.guy_path);
     fallback = Symbol('fallback');
     value = Symbol('value');
+    // debug '^345-1^', GUY.props.keys ( new Set() ), { builtins: true, }
+    // debug '^345-2^', GUY.props.keys ( ''        ), { builtins: true, }
+    // debug '^345-3^', ( k for k of new Set() )
+    // debug '^345-4^', ( k for k of '' )
+    // debug '^345-5^', Object.getOwnPropertyDescriptors ( new Set() )
+    // debug '^345-6^', Object.getOwnPropertyDescriptors ( ''        )
+    // debug '^345-5^', Reflect.has ( new Set() ), 'size'
+    // debug '^345-6^', Reflect.has ( ''        ), 'length'
+    debug('^334-1^');
     if (T != null) {
       T.eq(GUY.props.get(void 0, 'xy', fallback), fallback);
     }
+    debug('^334-2^');
     if (T != null) {
       T.eq(GUY.props.get(null, 'xy', fallback), fallback);
     }
+    debug('^334-3^');
     if (T != null) {
       T.eq(GUY.props.get(42, 'xy', fallback), fallback);
     }
+    debug('^334-4^');
     if (T != null) {
       T.eq(GUY.props.get({}, 'xy', fallback), fallback);
     }
+    debug('^334-5^');
     if (T != null) {
       T.eq(GUY.props.get({
         xy: value
       }, 'xy'), value);
     }
+    debug('^334-6^');
     if (T != null) {
       T.throws(/no such property/, function() {
         return GUY.props.get(void 0, 'xy');
@@ -1307,7 +1321,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_tree = function() {
-    var GUY, d;
+    var GUY, d, rcrsv, x;
     GUY = require('../../../apps/guy');
     //.........................................................................................................
     d = {
@@ -1321,15 +1335,26 @@
       },
       empty: {}
     };
-    debug(d);
+    x = Object.create(d);
+    rcrsv = {
+      somekey: {
+        subkey: 'somevalue'
+      }
+    };
+    rcrsv.rcrsv = rcrsv;
     (() => {      //.........................................................................................................
-      var cfg, i, len, path, ref;
-      whisper('————————————————————————————————————————————————————————————');
-      whisper(cfg = {});
-      ref = GUY.props.tree(d, cfg);
+      var cfg, i, j, len, len1, o, path, ref, ref1;
+      ref = [d, x, rcrsv];
       for (i = 0, len = ref.length; i < len; i++) {
-        path = ref[i];
-        praise('^453^', rpr(path));
+        o = ref[i];
+        whisper('————————————————————————————————————————————————————————————');
+        whisper(o);
+        whisper(cfg = {});
+        ref1 = GUY.props.tree(o, cfg);
+        for (j = 0, len1 = ref1.length; j < len1; j++) {
+          path = ref1[j];
+          praise('^453^', rpr(path));
+        }
       }
       return null;
     })();
@@ -1340,7 +1365,7 @@
         if (!isa.object(value)) {
           return 'take';
         }
-        if (!GUY.props.has_keys(value)) {
+        if (!GUY.props.has_any_keys(value)) {
           return 'take';
         }
         return 'descend';
@@ -1360,7 +1385,7 @@
         if (!isa.object(value)) {
           return 'take';
         }
-        if (!GUY.props.has_keys(value)) {
+        if (!GUY.props.has_any_keys(value)) {
           return 'take';
         }
         return 'descend';
@@ -1376,7 +1401,103 @@
       }
       return null;
     })();
+    (() => {      //.........................................................................................................
+      var cfg, i, len, path, ref;
+      whisper('————————————————————————————————————————————————————————————');
+      whisper(GUY.props.keys(d, {
+        depth: 0
+      }));
+      whisper(GUY.props.keys(x, {
+        depth: 0
+      }));
+      whisper(GUY.props.keys(x, {
+        depth: 1
+      }));
+      whisper(GUY.props.keys(rcrsv, {
+        depth: 1
+      }));
+      whisper(cfg = {
+        joiner: '.',
+        depth: null
+      });
+      ref = GUY.props.tree(x, cfg);
+      for (i = 0, len = ref.length; i < len; i++) {
+        path = ref[i];
+        praise('^453^', rpr(path));
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var cfg, path, ref;
+      whisper('————————————————————————————————————————————————————————————');
+      whisper(rcrsv);
+      whisper(cfg = {
+        depth: 0,
+        joiner: '.',
+        symbols: true,
+        hidden: true,
+        builtins: true
+      });
+      ref = GUY.props.tree(rcrsv, cfg);
+      for (path of ref) {
+        praise('^453^', rpr(path));
+      }
+      return null;
+    })();
     //.........................................................................................................
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_tree_readme = function() {
+    var GUY, d, evaluate, i, j, l, len, len1, len2, path, ref, ref1, ref2;
+    GUY = require(H.guy_path);
+    log = console.log;
+    ({inspect} = require('util'));
+    d = {
+      a: [0, 1, 2],
+      e: {
+        g: {
+          some: 'thing'
+        },
+        h: 42,
+        h: null
+      },
+      empty: {}
+    };
+    urge('—————————————————————————————————————————————————————————————');
+    ref = GUY.props.tree(d);
+    for (i = 0, len = ref.length; i < len; i++) {
+      path = ref[i];
+      log(inspect(path));
+    }
+    urge('—————————————————————————————————————————————————————————————');
+    ref1 = GUY.props.tree(d, {
+      joiner: '.'
+    });
+    for (j = 0, len1 = ref1.length; j < len1; j++) {
+      path = ref1[j];
+      log(inspect(path));
+    }
+    urge('—————————————————————————————————————————————————————————————');
+    evaluate = function({owner, key, value}) {
+      if (Array.isArray(value)) {
+        return 'take';
+      }
+      if (!GUY.props.has_any_keys(value)) {
+        return 'take';
+      }
+      return 'descend';
+    };
+    ref2 = GUY.props.tree(d, {
+      evaluate,
+      joiner: '.'
+    });
+    for (l = 0, len2 = ref2.length; l < len2; l++) {
+      path = ref2[l];
+      log(inspect(path));
+    }
+    urge('—————————————————————————————————————————————————————————————');
     return null;
   };
 
@@ -1384,23 +1505,24 @@
   if (require.main === module) {
     (() => {
       // test @
-      return demo_tree();
+      // demo_tree()
+      // demo_tree_readme()
+      // @[ "guy.props.crossmerge()" ]()
+      // test @[ "guy.props.crossmerge()" ]
+      // test @[ "GUY.props.keys() works for all JS values, including null and undefined" ]
+      // demo_keys()
+      // @[ "GUY.props.keys()" ]()
+      // test @[ "GUY.props.keys()" ]
+      // @[ "GUY.props.Strict_owner 1" ]()
+      // test @[ "GUY.props.Strict_owner 1" ]
+      // @[ "GUY.props.has()" ]()
+      // test @[ "GUY.props.has()" ]
+      // @[ "GUY.props.get()" ]()
+      return test(this["GUY.props.get()"]);
     })();
   }
 
-  // @[ "guy.props.crossmerge()" ]()
-// test @[ "guy.props.crossmerge()" ]
-// test @[ "GUY.props.keys() works for all JS values, including null and undefined" ]
-// demo_keys()
-// @[ "GUY.props.keys()" ]()
-// test @[ "GUY.props.keys()" ]
-// @[ "GUY.props.Strict_owner 1" ]()
-// test @[ "GUY.props.Strict_owner 1" ]
-// @[ "GUY.props.has()" ]()
-// test @[ "GUY.props.has()" ]
-// @[ "GUY.props.get()" ]()
-// test @[ "GUY.props.get()" ]
-// @[ "GUY.props.Strict_owner 2" ]()
+  // @[ "GUY.props.Strict_owner 2" ]()
 // test @[ "GUY.props.Strict_owner 2" ]
 // test @[ "GUY.props.Strict_owner can use explicit target" ]
 // @[ "GUY.props.Strict_owner can use Reflect.has" ]()
