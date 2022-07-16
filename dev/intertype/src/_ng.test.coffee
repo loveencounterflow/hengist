@@ -7,27 +7,28 @@
 njs_path                  = require 'path'
 # njs_fs                    = require 'fs'
 #...........................................................................................................
-CND                       = require 'cnd'
-rpr                       = CND.rpr.bind CND
-badge                     = 'INTERTYPE/tests/basics'
-log                       = CND.get_logger 'plain',     badge
-info                      = CND.get_logger 'info',      badge
-whisper                   = CND.get_logger 'whisper',   badge
-alert                     = CND.get_logger 'alert',     badge
-debug                     = CND.get_logger 'debug',     badge
-warn                      = CND.get_logger 'warn',      badge
-help                      = CND.get_logger 'help',      badge
-urge                      = CND.get_logger 'urge',      badge
-praise                    = CND.get_logger 'praise',    badge
-echo                      = CND.echo.bind CND
+GUY                       = require '../../../apps/guy'
+{ alert
+  debug
+  help
+  info
+  plain
+  praise
+  urge
+  warn
+  whisper }               = GUY.trm.get_loggers 'GUY/props/tests'
+{ rpr
+  inspect
+  echo
+  log     }               = GUY.trm
 #...........................................................................................................
 test                      = require 'guy-test'
 # { intersection_of }       = require '../../../apps/intertype/lib/helpers'
 H                         = require '../../../lib/helpers'
-GUY                       = require '../../../apps/guy'
 equals                    = require '../../../apps/intertype/deps/jkroso-equals'
 S                         = ( parts ) -> new Set eval parts.raw[ 0 ]
 { to_width }              = require 'to-width'
+_types                    = new ( require 'intertype' ).Intertype()
 
 
 #-----------------------------------------------------------------------------------------------------------
