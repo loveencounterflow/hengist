@@ -796,10 +796,129 @@ demo_picomatch_for_hedgepaths = ->
 demo_enumerate_hedgepaths = ->
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
-  debug Reflect.ownKeys types.isa
+  # types.declare 'list', groups: 'collection', test: ( x ) -> Array.isArray x
+  # types.declare 'integer', groups: 'number', test: ( x ) -> Number.isInteger x
+  evaluate = ({ owner, key, value, }) ->
+    # debug '^324^', key, ( types.type_of value )
+    return 'take' if ( types.type_of value ) is 'function'
+    return 'take' unless GUY.props.has_any_keys value
+    return 'descend'
+  for path in GUY.props.tree types.isa, { evaluate, joiner: '.', }
+    praise path
   # for k, v of Object.own types.isa
   #   debug '^4432^', k
   return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_size_of = ->
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  info '^905-1^', types.size_of [ 1, 2, 3, ]
+  info '^905-2^', types.size_of new Set [ 1, 2, 3, ]
+  info '^905-3^', GUY.props.get ( new Set "abc" ), 'length', null
+  info '^905-4^', GUY.props.get ( new Set "abc" ), 'size', null
+  info '^905-5^', GUY.props.get ( "abc" ), 'length', null
+  info '^905-6^', GUY.props.get ( "abc" ), 'size', null
+  info '^905-7^', types.size_of "abc"
+  info '^905-8^', types.size_of "abc𪜁"
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@declare_NG = ( T, done ) ->
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  types.declare.list
+    groups:   'collection'
+    test:     ( x ) -> Array.isArray x
+  types.declare.integer
+    groups:   'number'
+    test:     ( x ) -> Number.isInteger x
+  types.declare.null
+    test: ( x ) -> x is null
+  info '^323423^', types
+  info '^323423^', types.declare
+  T?.eq ( types.isa.list    []    ), true
+  T?.eq ( types.isa.list    42    ), false
+  T?.eq ( types.isa.list    null  ), false
+  T?.eq ( types.isa.integer []    ), false
+  T?.eq ( types.isa.integer 42    ), true
+  T?.eq ( types.isa.integer null  ), false
+  T?.eq ( types.isa.null    []    ), false
+  T?.eq ( types.isa.null    42    ), false
+  T?.eq ( types.isa.null    null  ), true
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@types_isa_empty_nonempty_text = ( T, done ) ->
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  #.........................................................................................................
+  types.declare.text
+    groups:   'collection'
+    test:     ( x ) -> ( typeof x ) is 'string'
+  #.........................................................................................................
+  T?.eq ( _types.type_of types.registry.text    ), 'type_cfg'
+  # T?.eq ( types.isa.text          'helo'        ), true
+  # T?.eq ( types.isa.nonempty.text 'helo'        ), true
+  T?.eq ( types.isa.empty.text    'helo'        ), false
+  whisper '-------------------------------------------------------------'
+  # T?.eq ( types.isa.text          42            ), false
+  # T?.eq ( types.isa.optional.text 42            ), false
+  # T?.eq ( types.isa.optional.text null          ), true
+  # T?.eq ( types.isa.optional.text ''            ), true
+  # T?.eq ( types.isa.optional.text 'helo'        ), true
+  T?.eq ( types.isa.empty.text    ''            ), true
+  # T?.eq ( types.isa.nonempty.text ''            ), false
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@declare_NG_defaults = ( T, done ) ->
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  #.........................................................................................................
+  types.declare.list
+    groups:   'collection'
+    test:     ( x ) -> Array.isArray x
+  #.........................................................................................................
+  types.declare.object
+    test:     ( x ) -> _types.isa.object x
+  #.........................................................................................................
+  types.declare.text
+    groups:   'collection'
+    test:     ( x ) -> ( typeof x ) is 'string'
+  #.........................................................................................................
+  types.declare.integer
+    groups:   'number'
+    test:     ( x ) -> Number.isInteger x
+  #.........................................................................................................
+  types.declare.float
+    groups:   'number'
+    test:     ( x ) -> Number.isFinite x
+  #.........................................................................................................
+  types.declare.null
+    test: ( x ) -> x is null
+  #.........................................................................................................
+  types.declare.quantity
+    test: [
+      ( x ) -> @isa.object        x
+      ( x ) -> @isa.float         x.value
+      ( x ) -> @isa.nonempty.text x.unit
+      ]
+  #.........................................................................................................
+  info '^868-1^', types
+  T?.eq ( _types.type_of types.declare          ), 'function'
+  T?.eq ( _types.type_of types.registry         ), 'strict_owner'
+  T?.eq ( _types.type_of types.registry.text    ), 'type_cfg'
+  # info '^868-2^', types.registry
+  info '^868-3^', types.registry.integer
+  info '^868-4^', types.registry.null
+  info '^868-5^', types.registry.text
+  info '^868-6^', types.registry.quantity
+  info '^868-7^', types.registry.quantity.test
+  info '^868-8^', types.registry.quantity.test 42
+  info '^868-9^', types.registry.quantity.test { value: 1.23, unit: '', }
+  info '^868-10^', types.registry.quantity.test { value: 1.23, unit: 'm', }
+  done?()
 
 
 
@@ -812,15 +931,21 @@ unless module.parent?
   # demo_multipart_hedges()
   # demo_combinate_2()
   # demo_intertype_hedge_combinator()
-  test @
   # @[ "intertype hedgepaths" ]()
   # @[ "intertype all hedgepaths" ]()
   # test @[ "intertype all hedgepaths" ]
+  # demo_size_of()
   # test @[ "intertype size_of" ]
-  urge GUY.src.get_first_return_clause_text
-  urge GUY.src.slug_from_simple_function function: ( x ) -> @isa.optional.integer x
-  demo_picomatch_for_hedgepaths()
-  demo_enumerate_hedgepaths()
-
+  # urge GUY.src.get_first_return_clause_text
+  # urge GUY.src.slug_from_simple_function function: ( x ) -> @isa.optional.integer x
+  # demo_picomatch_for_hedgepaths()
+  # @[ "forbidden to overwrite declarations" ]()
+  # test @[ "forbidden to overwrite declarations" ]
+  # test @[ "intertype quantified types" ]
+  # demo_enumerate_hedgepaths()
+  # test @declare_NG
+  # test @types_isa_empty_nonempty_text
+  # test @declare_NG_defaults
+  test @
 
 
