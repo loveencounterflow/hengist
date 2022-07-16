@@ -206,6 +206,30 @@ demo = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "intertype quantified types" ] = ( T, done ) ->
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  types.declare 'anything',  test: ( x ) -> true
+  types.declare 'something', test: ( x ) -> x?
+  types.declare 'nothing',   test: ( x ) -> not x?
+  probes_and_matchers = [
+    [ [ 'isa',  'anything',   null, ], true,  ]
+    [ [ 'isa',  'nothing',    null, ], true,  ]
+    [ [ 'isnt', 'something',  null, ], true,  ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      [ mode, type, value, ] = probe
+      switch mode
+        when 'isa'  then result =     types.isa[ type ] value
+        when 'isnt' then result = not types.isa[ type ] value
+        else throw new Error "unknown mode #{rpr mode}"
+      resolve result
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @[ "intertype all hedgepaths" ] = ( T, done ) ->
   # T?.halt_on_error true
   { Intertype
