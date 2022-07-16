@@ -498,14 +498,18 @@ demo_keys = ->
 demo_tree = ->
   GUY       = require '../../../apps/guy'
   #.........................................................................................................
-  d = { a: [ 0, 1, 2, ], e: { g: { some: 'thing', }, h: 42, h: null, }, empty: {}, }
-  debug d
+  d           = { a: [ 0, 1, 2, ], e: { g: { some: 'thing', }, h: 42, h: null, }, empty: {}, }
+  x           = Object.create d
+  rcrsv       = { somekey: { subkey: 'somevalue', }, }
+  rcrsv.rcrsv = rcrsv
   #.........................................................................................................
   do =>
-    whisper '————————————————————————————————————————————————————————————'
-    whisper cfg = {}
-    for path in GUY.props.tree d, cfg
-      praise '^453^', rpr path
+    for o in [ d, x, rcrsv, ]
+      whisper '————————————————————————————————————————————————————————————'
+      whisper o
+      whisper cfg = {}
+      for path in GUY.props.tree o, cfg
+        praise '^453^', rpr path
     return null
   #.........................................................................................................
   do =>
@@ -530,17 +534,57 @@ demo_tree = ->
       praise '^453^', rpr path
     return null
   #.........................................................................................................
+  do =>
+    whisper '————————————————————————————————————————————————————————————'
+    whisper GUY.props.keys d, { depth: 0, }
+    whisper GUY.props.keys x, { depth: 0, }
+    whisper GUY.props.keys x, { depth: 1, }
+    whisper GUY.props.keys rcrsv, { depth: 1, }
+    whisper cfg = { joiner: '.', depth: null, }
+    for path in GUY.props.tree x, cfg
+      praise '^453^', rpr path
+    return null
+  #.........................................................................................................
+  do =>
+    whisper '————————————————————————————————————————————————————————————'
+    whisper rcrsv
+    whisper cfg = { depth: 0, joiner: '.', symbols: true, hidden: true, builtins: true, }
+    for path from GUY.props.tree rcrsv, cfg
+      praise '^453^', rpr path
+    return null
+  #.........................................................................................................
   return null
 
 
-
+#-----------------------------------------------------------------------------------------------------------
+demo_tree_readme = ->
+  GUY           = require H.guy_path
+  log           = console.log
+  { inspect, }  = require 'util'
+  d = { a: [ 0, 1, 2, ], e: { g: { some: 'thing', }, h: 42, h: null, }, empty: {}, }
+  urge '—————————————————————————————————————————————————————————————'
+  for path in GUY.props.tree d
+    log inspect path
+  urge '—————————————————————————————————————————————————————————————'
+  for path in GUY.props.tree d, { joiner: '.', }
+    log inspect path
+  urge '—————————————————————————————————————————————————————————————'
+  evaluate = ({ owner, key, value, }) ->
+    return 'take' if Array.isArray value
+    return 'take' unless GUY.props.has_any_keys value
+    return 'descend'
+  for path in GUY.props.tree d, { evaluate, joiner: '.', }
+    log inspect path
+  urge '—————————————————————————————————————————————————————————————'
+  return null
 
 
 
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  demo_tree()
+  # demo_tree()
+  # demo_tree_readme()
   # @[ "guy.props.crossmerge()" ]()
   # test @[ "guy.props.crossmerge()" ]
   # test @[ "GUY.props.keys() works for all JS values, including null and undefined" ]
@@ -552,7 +596,7 @@ if require.main is module then do =>
   # @[ "GUY.props.has()" ]()
   # test @[ "GUY.props.has()" ]
   # @[ "GUY.props.get()" ]()
-  # test @[ "GUY.props.get()" ]
+  test @[ "GUY.props.get()" ]
   # @[ "GUY.props.Strict_owner 2" ]()
   # test @[ "GUY.props.Strict_owner 2" ]
   # test @[ "GUY.props.Strict_owner can use explicit target" ]
