@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var GUY, H, S, _types, alert, debug, demo, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_size_of, demo_test_with_protocol, echo, equals, help, info, inspect, list_all_builtin_type_testers, log, njs_path, plain, praise, rpr, test, to_width, urge, warn, whisper;
+  var GUY, H, S, _types, alert, debug, demo, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_size_of, demo_test_with_protocol, echo, equals, help, info, inspect, list_all_builtin_type_testers, log, njs_path, plain, praise, rpr, test, to_width, urge, warn, whisper,
+    modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -10,7 +11,7 @@
   //...........................................................................................................
   GUY = require('../../../apps/guy');
 
-  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('GUY/props/tests'));
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('INTERTYPE/tests'));
 
   ({rpr, inspect, echo, log} = GUY.trm);
 
@@ -1512,23 +1513,69 @@
     var Intertype, types;
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype();
+    //.........................................................................................................
     types.declare.list({
       groups: 'collection',
       test: function(x) {
         return Array.isArray(x);
       }
     });
+    //.........................................................................................................
     types.declare.integer({
       groups: 'number',
       test: function(x) {
         return Number.isInteger(x);
       }
     });
+    //.........................................................................................................
     types.declare.null({
       test: function(x) {
         return x === null;
       }
     });
+    //.........................................................................................................
+    types.declare.div3int({
+      groups: 'number',
+      all: [
+        'integer',
+        {
+          name: 'divisible by 3',
+          test: (function(x) {
+            return modulo(x,
+        3) === 0;
+          })
+        }
+      ]
+    });
+    //.........................................................................................................
+    types.declare.Type_cfg_groups_element({
+      all: [
+        'nonempty.text',
+        {
+          not_match: /[\s,]/
+        }
+      ]
+    });
+    types.declare.Type_cfg_groups({
+      any: ['nonempty.text', 'list_of.Type_cfg_groups_element']
+    });
+    //.........................................................................................................
+    types.declare.Type_cfg_constructor_cfg({
+      $all: [
+        'object',
+        {
+          $subs: {
+            name: 'nonempty.text',
+            test: {
+              $any: ['function',
+        'list_of.function']
+            },
+            groups: 'Type_cfg_groups'
+          }
+        }
+      ]
+    });
+    //.........................................................................................................
     info('^323423^', types);
     info('^323423^', types.declare);
     if (T != null) {
@@ -1557,6 +1604,12 @@
     }
     if (T != null) {
       T.eq(types.isa.null(null), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.div3int(null), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.div3int(33), true);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -1592,6 +1645,88 @@
       T.eq(types.isa.empty.text(''), true);
     }
     return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._demo_validate = function(T, done) {
+    var Intertype, types;
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    //.........................................................................................................
+    types.declare.list({
+      groups: 'collection',
+      test: function(x) {
+        return Array.isArray(x);
+      }
+    });
+    //.........................................................................................................
+    types.declare.object({
+      test: function(x) {
+        return _types.isa.object(x);
+      }
+    });
+    //.........................................................................................................
+    types.declare.text({
+      groups: 'collection',
+      test: function(x) {
+        return (typeof x) === 'string';
+      }
+    });
+    //.........................................................................................................
+    types.declare.integer({
+      groups: 'number',
+      test: function(x) {
+        return Number.isInteger(x);
+      }
+    });
+    //.........................................................................................................
+    types.declare.float({
+      groups: 'number',
+      test: function(x) {
+        return Number.isFinite(x);
+      }
+    });
+    //.........................................................................................................
+    types.declare.null({
+      test: function(x) {
+        return x === null;
+      }
+    });
+    //.........................................................................................................
+    types.declare.Type_cfg_constructor_cfg({
+      test: [
+        function(x) {
+          return this.isa.object(x);
+        },
+        function(x) {
+          return this.isa.nonempty.text(x.name);
+        },
+        function(x) {
+          return (this.isa.function(x.test)) || (this.isa.list_of.function(x.test));
+        },
+        function(x) {
+          if (this.isa.nonempty.text(x.groups)) {
+            return true;
+          }
+          if (!this.isa.list(x.groups)) {
+            return false;
+          }
+          return x.groups.every((e) => {
+            return (this.isa.nonempty.text(e)) && !/[\s,]/.test(e);
+          });
+        }
+      ]
+    });
+    //.........................................................................................................
+    types.validate.list([]);
+    types.validate('list', []);
+    praise('^459-1^', types.isa.Type_cfg_constructor_cfg({}));
+    praise('^459-2^', types.isa.optional.list_of.float({}));
+    praise('^459-3^', types.isa.optional.list_of.float(null));
+    praise('^459-4^', types.isa.list_of.float({}));
+    praise('^459-5^', types.isa.list_of.float([1, 2, 3]));
+    praise('^459-6^', types.isa.list_of.float([1, 2, 3, null]));
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -1651,7 +1786,11 @@
         function(x) {
           return this.isa.nonempty.text(x.unit);
         }
-      ]
+      ],
+      defaults: {
+        value: 1,
+        unit: 'm'
+      }
     });
     //.........................................................................................................
     info('^868-1^', types);
@@ -1670,15 +1809,42 @@
     info('^868-5^', types.registry.text);
     info('^868-6^', types.registry.quantity);
     info('^868-7^', types.registry.quantity.test);
-    info('^868-8^', types.registry.quantity.test(42));
-    info('^868-9^', types.registry.quantity.test({
+    info('^868-8^', T != null ? T.eq(types.registry.quantity.test(42), false) : void 0);
+    info('^868-9^', T != null ? T.eq(types.registry.quantity.test({
       value: 1.23,
       unit: ''
-    }));
-    info('^868-10^', types.registry.quantity.test({
+    }), false) : void 0);
+    info('^868-10^', T != null ? T.eq(types.registry.quantity.test({
       value: 1.23,
       unit: 'm'
-    }));
+    }), true) : void 0);
+    info('^868-11^', T != null ? T.eq(types.isa.quantity(42), false) : void 0);
+    info('^868-12^', T != null ? T.eq(types.isa.quantity({
+      value: 1.23,
+      unit: ''
+    }), false) : void 0);
+    info('^868-13^', T != null ? T.eq(types.isa.quantity({
+      value: 1.23,
+      unit: 'm'
+    }), true) : void 0);
+    info('^868-14^', T != null ? T.eq(types.validate.quantity({...types.registry.quantity.defaults, ...{
+        value: 44
+      }}), true) : void 0);
+    info('^868-17^', T != null ? T.throws(/not a valid text/, function() {
+      return types.validate.text(42);
+    }) : void 0);
+    info('^868-18^', T != null ? T.throws(/not a valid empty\.text/, function() {
+      return types.validate.empty.text(42);
+    }) : void 0);
+    info('^868-19^', T != null ? T.throws(/not a valid quantity/, function() {
+      return types.validate.quantity({...types.registry.quantity.defaults, ...{
+          value: null
+        }});
+    }) : void 0);
+    info('^868-20^', T != null ? T.eq(types.validate.empty.text(''), true) : void 0);
+    info('^868-20^', T != null ? T.eq(types.validate.nonempty.text('x'), true) : void 0);
+    info('^868-20^', T != null ? T.eq(types.validate.optional.nonempty.text(null), true) : void 0);
+    info('^868-20^', T != null ? T.eq(types.validate.optional.nonempty.text('x'), true) : void 0);
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -1703,11 +1869,13 @@
     // test @[ "forbidden to overwrite declarations" ]
     // test @[ "intertype quantified types" ]
     // demo_enumerate_hedgepaths()
-    // test @declare_NG
-    // test @types_isa_empty_nonempty_text
-    // test @declare_NG_defaults
-    test(this);
+    test(this.declare_NG);
   }
+
+  // test @types_isa_empty_nonempty_text
+// test @declare_NG_defaults
+// test @
+// @_demo_validate()
 
 }).call(this);
 

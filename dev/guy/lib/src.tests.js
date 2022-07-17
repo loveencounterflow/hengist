@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var CND, H, alert, badge, convert_to_plain_objects, debug, demo_acorn_walk, demo_parse_use_and_fallback, demo_return_clauses, echo, equals, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, alert, badge, convert_to_plain_objects, debug, demo_acorn_walk, demo_parse_use_and_fallback, demo_return_clauses, demo_slug_for_inadvertent_multiline_function, echo, equals, help, info, isa, log, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
+    modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
   CND = require('cnd');
@@ -148,12 +149,12 @@
       return T != null ? T.eq(result, {
         type: 'Program',
         start: 0,
-        end: 40,
+        end: 26,
         body: [
           {
             type: 'FunctionDeclaration',
             start: 0,
-            end: 40,
+            end: 26,
             id: {
               type: 'Identifier',
               start: 8,
@@ -174,16 +175,16 @@
             body: {
               type: 'BlockStatement',
               start: 12,
-              end: 40,
+              end: 26,
               body: [
                 {
                   type: 'ReturnStatement',
-                  start: 22,
-                  end: 32,
+                  start: 14,
+                  end: 24,
                   argument: {
                     type: 'Literal',
-                    start: 29,
-                    end: 31,
+                    start: 21,
+                    end: 23,
                     value: 42,
                     raw: '42'
                   }
@@ -525,12 +526,12 @@
         },
         {
           type: 'ReturnStatement',
-          start: 26,
-          end: 36,
+          start: 14,
+          end: 24,
           argument: {
             type: 'Literal',
-            start: 33,
-            end: 35,
+            start: 21,
+            end: 23,
             value: 42,
             raw: '42'
           }
@@ -544,31 +545,31 @@
         },
         {
           type: 'ReturnStatement',
-          start: 26,
-          end: 100,
+          start: 14,
+          end: 88,
           argument: {
             type: 'LogicalExpression',
-            start: 33,
-            end: 99,
+            start: 21,
+            end: 87,
             left: {
               type: 'LogicalExpression',
-              start: 33,
-              end: 68,
+              start: 21,
+              end: 56,
               left: {
                 type: 'BinaryExpression',
-                start: 34,
-                end: 43,
+                start: 22,
+                end: 31,
                 left: {
                   type: 'Identifier',
-                  start: 34,
-                  end: 35,
+                  start: 22,
+                  end: 23,
                   name: 'x'
                 },
                 operator: '==',
                 right: {
                   type: 'Literal',
-                  start: 39,
-                  end: 43,
+                  start: 27,
+                  end: 31,
                   value: null,
                   raw: 'null'
                 }
@@ -576,25 +577,25 @@
               operator: '||',
               right: {
                 type: 'CallExpression',
-                start: 49,
-                end: 67,
+                start: 37,
+                end: 55,
                 callee: {
                   type: 'MemberExpression',
-                  start: 49,
-                  end: 64,
+                  start: 37,
+                  end: 52,
                   object: {
                     type: 'MemberExpression',
-                    start: 49,
-                    end: 57,
+                    start: 37,
+                    end: 45,
                     object: {
                       type: 'ThisExpression',
-                      start: 49,
-                      end: 53
+                      start: 37,
+                      end: 41
                     },
                     property: {
                       type: 'Identifier',
-                      start: 54,
-                      end: 57,
+                      start: 42,
+                      end: 45,
                       name: 'isa'
                     },
                     computed: false,
@@ -602,8 +603,8 @@
                   },
                   property: {
                     type: 'Identifier',
-                    start: 58,
-                    end: 64,
+                    start: 46,
+                    end: 52,
                     name: 'object'
                   },
                   computed: false,
@@ -612,8 +613,8 @@
                 arguments: [
                   {
                     type: 'Identifier',
-                    start: 65,
-                    end: 66,
+                    start: 53,
+                    end: 54,
                     name: 'x'
                   }
                 ],
@@ -623,29 +624,29 @@
             operator: '||',
             right: {
               type: 'CallExpression',
-              start: 73,
-              end: 98,
+              start: 61,
+              end: 86,
               callee: {
                 type: 'MemberExpression',
-                start: 73,
-                end: 95,
+                start: 61,
+                end: 83,
                 object: {
                   type: 'MemberExpression',
-                  start: 73,
-                  end: 90,
+                  start: 61,
+                  end: 78,
                   object: {
                     type: 'MemberExpression',
-                    start: 73,
-                    end: 81,
+                    start: 61,
+                    end: 69,
                     object: {
                       type: 'ThisExpression',
-                      start: 73,
-                      end: 77
+                      start: 61,
+                      end: 65
                     },
                     property: {
                       type: 'Identifier',
-                      start: 78,
-                      end: 81,
+                      start: 66,
+                      end: 69,
                       name: 'isa'
                     },
                     computed: false,
@@ -653,8 +654,8 @@
                   },
                   property: {
                     type: 'Identifier',
-                    start: 82,
-                    end: 90,
+                    start: 70,
+                    end: 78,
                     name: 'nonempty'
                   },
                   computed: false,
@@ -662,8 +663,8 @@
                 },
                 property: {
                   type: 'Identifier',
-                  start: 91,
-                  end: 95,
+                  start: 79,
+                  end: 83,
                   name: 'text'
                 },
                 computed: false,
@@ -672,8 +673,8 @@
               arguments: [
                 {
                   type: 'Identifier',
-                  start: 96,
-                  end: 97,
+                  start: 84,
+                  end: 85,
                   name: 'x'
                 }
               ],
@@ -736,44 +737,44 @@
         {
           type: 'BlockStatement',
           start: 12,
-          end: 144,
+          end: 70,
           body: [
             {
               type: 'IfStatement',
-              start: 26,
-              end: 132,
+              start: 14,
+              end: 68,
               test: {
                 type: 'BinaryExpression',
-                start: 30,
-                end: 39,
+                start: 18,
+                end: 27,
                 left: {
                   type: 'Identifier',
-                  start: 30,
-                  end: 31,
+                  start: 18,
+                  end: 19,
                   name: 'x'
                 },
                 operator: '!=',
                 right: {
                   type: 'Literal',
-                  start: 35,
-                  end: 39,
+                  start: 23,
+                  end: 27,
                   value: null,
                   raw: 'null'
                 }
               },
               consequent: {
                 type: 'BlockStatement',
-                start: 41,
-                end: 83,
+                start: 29,
+                end: 45,
                 body: [
                   {
                     type: 'ReturnStatement',
-                    start: 57,
-                    end: 69,
+                    start: 31,
+                    end: 43,
                     argument: {
                       type: 'Literal',
-                      start: 64,
-                      end: 68,
+                      start: 38,
+                      end: 42,
                       value: true,
                       raw: 'true'
                     }
@@ -782,17 +783,17 @@
               },
               alternate: {
                 type: 'BlockStatement',
-                start: 89,
-                end: 132,
+                start: 51,
+                end: 68,
                 body: [
                   {
                     type: 'ReturnStatement',
-                    start: 105,
-                    end: 118,
+                    start: 53,
+                    end: 66,
                     argument: {
                       type: 'Literal',
-                      start: 112,
-                      end: 117,
+                      start: 60,
+                      end: 65,
                       value: false,
                       raw: 'false'
                     }
@@ -811,31 +812,31 @@
         },
         {
           type: 'ReturnStatement',
-          start: 26,
-          end: 100,
+          start: 14,
+          end: 88,
           argument: {
             type: 'LogicalExpression',
-            start: 33,
-            end: 99,
+            start: 21,
+            end: 87,
             left: {
               type: 'LogicalExpression',
-              start: 33,
-              end: 68,
+              start: 21,
+              end: 56,
               left: {
                 type: 'BinaryExpression',
-                start: 34,
-                end: 43,
+                start: 22,
+                end: 31,
                 left: {
                   type: 'Identifier',
-                  start: 34,
-                  end: 35,
+                  start: 22,
+                  end: 23,
                   name: 'x'
                 },
                 operator: '==',
                 right: {
                   type: 'Literal',
-                  start: 39,
-                  end: 43,
+                  start: 27,
+                  end: 31,
                   value: null,
                   raw: 'null'
                 }
@@ -843,25 +844,25 @@
               operator: '||',
               right: {
                 type: 'CallExpression',
-                start: 49,
-                end: 67,
+                start: 37,
+                end: 55,
                 callee: {
                   type: 'MemberExpression',
-                  start: 49,
-                  end: 64,
+                  start: 37,
+                  end: 52,
                   object: {
                     type: 'MemberExpression',
-                    start: 49,
-                    end: 57,
+                    start: 37,
+                    end: 45,
                     object: {
                       type: 'ThisExpression',
-                      start: 49,
-                      end: 53
+                      start: 37,
+                      end: 41
                     },
                     property: {
                       type: 'Identifier',
-                      start: 54,
-                      end: 57,
+                      start: 42,
+                      end: 45,
                       name: 'isa'
                     },
                     computed: false,
@@ -869,8 +870,8 @@
                   },
                   property: {
                     type: 'Identifier',
-                    start: 58,
-                    end: 64,
+                    start: 46,
+                    end: 52,
                     name: 'object'
                   },
                   computed: false,
@@ -879,8 +880,8 @@
                 arguments: [
                   {
                     type: 'Identifier',
-                    start: 65,
-                    end: 66,
+                    start: 53,
+                    end: 54,
                     name: 'x'
                   }
                 ],
@@ -890,29 +891,29 @@
             operator: '||',
             right: {
               type: 'CallExpression',
-              start: 73,
-              end: 98,
+              start: 61,
+              end: 86,
               callee: {
                 type: 'MemberExpression',
-                start: 73,
-                end: 95,
+                start: 61,
+                end: 83,
                 object: {
                   type: 'MemberExpression',
-                  start: 73,
-                  end: 90,
+                  start: 61,
+                  end: 78,
                   object: {
                     type: 'MemberExpression',
-                    start: 73,
-                    end: 81,
+                    start: 61,
+                    end: 69,
                     object: {
                       type: 'ThisExpression',
-                      start: 73,
-                      end: 77
+                      start: 61,
+                      end: 65
                     },
                     property: {
                       type: 'Identifier',
-                      start: 78,
-                      end: 81,
+                      start: 66,
+                      end: 69,
                       name: 'isa'
                     },
                     computed: false,
@@ -920,8 +921,8 @@
                   },
                   property: {
                     type: 'Identifier',
-                    start: 82,
-                    end: 90,
+                    start: 70,
+                    end: 78,
                     name: 'nonempty'
                   },
                   computed: false,
@@ -929,8 +930,8 @@
                 },
                 property: {
                   type: 'Identifier',
-                  start: 91,
-                  end: 95,
+                  start: 79,
+                  end: 83,
                   name: 'text'
                 },
                 computed: false,
@@ -939,8 +940,8 @@
               arguments: [
                 {
                   type: 'Identifier',
-                  start: 96,
-                  end: 97,
+                  start: 84,
+                  end: 85,
                   name: 'x'
                 }
               ],
@@ -956,44 +957,44 @@
         {
           type: 'BlockStatement',
           start: 12,
-          end: 135,
+          end: 85,
           body: [
             {
               type: 'IfStatement',
-              start: 20,
-              end: 61,
+              start: 14,
+              end: 41,
               test: {
                 type: 'BinaryExpression',
-                start: 24,
-                end: 29,
+                start: 18,
+                end: 23,
                 left: {
                   type: 'Identifier',
-                  start: 24,
-                  end: 25,
+                  start: 18,
+                  end: 19,
                   name: 'x'
                 },
                 operator: '>',
                 right: {
                   type: 'Literal',
-                  start: 28,
-                  end: 29,
+                  start: 22,
+                  end: 23,
                   value: 0,
                   raw: '0'
                 }
               },
               consequent: {
                 type: 'BlockStatement',
-                start: 31,
-                end: 61,
+                start: 25,
+                end: 41,
                 body: [
                   {
                     type: 'ReturnStatement',
-                    start: 41,
-                    end: 53,
+                    start: 27,
+                    end: 39,
                     argument: {
                       type: 'Literal',
-                      start: 48,
-                      end: 52,
+                      start: 34,
+                      end: 38,
                       value: true,
                       raw: 'true'
                     }
@@ -1004,40 +1005,40 @@
             },
             {
               type: 'IfStatement',
-              start: 68,
-              end: 110,
+              start: 42,
+              end: 70,
               test: {
                 type: 'BinaryExpression',
-                start: 72,
-                end: 77,
+                start: 46,
+                end: 51,
                 left: {
                   type: 'Identifier',
-                  start: 72,
-                  end: 73,
+                  start: 46,
+                  end: 47,
                   name: 'x'
                 },
                 operator: '<',
                 right: {
                   type: 'Literal',
-                  start: 76,
-                  end: 77,
+                  start: 50,
+                  end: 51,
                   value: 0,
                   raw: '0'
                 }
               },
               consequent: {
                 type: 'BlockStatement',
-                start: 79,
-                end: 110,
+                start: 53,
+                end: 70,
                 body: [
                   {
                     type: 'ReturnStatement',
-                    start: 89,
-                    end: 102,
+                    start: 55,
+                    end: 68,
                     argument: {
                       type: 'Literal',
-                      start: 96,
-                      end: 101,
+                      start: 62,
+                      end: 67,
                       value: false,
                       raw: 'false'
                     }
@@ -1048,12 +1049,12 @@
             },
             {
               type: 'ReturnStatement',
-              start: 117,
-              end: 129,
+              start: 71,
+              end: 83,
               argument: {
                 type: 'Literal',
-                start: 124,
-                end: 128,
+                start: 78,
+                end: 82,
                 value: null,
                 raw: 'null'
               }
@@ -1065,6 +1066,9 @@
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
+      // result  = GUY.src.slug_node_from_simple_function probe
+      // result  = convert_to_plain_objects result
+      // urge '^33424^', result
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           var result;
@@ -1098,6 +1102,15 @@
           function: (function() {})
         },
         ''
+      ],
+      [
+        {
+          function: (function(x) {
+            return modulo(x,
+        3) === 0;
+          })
+        },
+        'modulo(x, 3) === 0'
       ],
       [
         {
@@ -1172,6 +1185,32 @@
           return resolve(result);
         });
       });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["GUY.src.slug_from_simple_function() for bound functions"] = function(T, done) {
+    var GUY, f3, f4, result;
+    // T?.halt_on_error()
+    GUY = require(H.guy_path);
+    f3 = function(x) {
+      return 42;
+    };
+    f4 = f3.bind(null);
+    if (T != null) {
+      T.throws(/unable to parse native code/, function() {
+        return GUY.src.slug_from_simple_function({
+          function: f4
+        });
+      });
+    }
+    result = GUY.src.slug_from_simple_function({
+      function: f4,
+      fallback: null
+    });
+    if (T != null) {
+      T.eq(result, null);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -1340,22 +1379,56 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_slug_for_inadvertent_multiline_function = function() {
+    var GUY, div3int, text;
+    GUY = require(H.guy_path);
+    div3int = function(x) {
+      return modulo(x, 3) === 0;
+    };
+    
+  const div3int_js = {
+          function: (function(x) {
+            return modulo(x,
+        3) === 0;
+          })
+        };
+  ;
+    whisper('————————————————————————————————————————————————————');
+    info('^353^', div3int.toString());
+    urge('^353^', rpr(GUY.src.slug_from_simple_function({
+      function: div3int
+    })));
+    whisper('————————————————————————————————————————————————————');
+    info('^353^', div3int_js.function.toString());
+    urge('^353^', rpr(GUY.src.slug_from_simple_function({
+      function: div3int_js.function
+    })));
+    whisper('————————————————————————————————————————————————————');
+    info('^353^', text = div3int_js.function.toString().replace(/\s*\n\s*/g, ' '));
+    urge('^353^', rpr(GUY.src.slug_from_simple_function({text})));
+    whisper('————————————————————————————————————————————————————');
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "GUY.src.slug_from_simple_function() for bound functions" ]
+      // @[ "guy.str.SQL tag function" ]()
+      // demo_return_clauses()
+      // test @[ "GUY.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
+      // @[ "GUY.src.parse()" ]()
+      // test @[ "GUY.src.parse()" ]
+      // demo_parse_use_and_fallback()
+      // demo_acorn_walk()
+      // test @[ "GUY.src.slug_node_from_simple_function()" ]
+      return test(this["GUY.src.slug_from_simple_function()"]);
     })();
   }
 
-  // @[ "guy.str.SQL tag function" ]()
-// demo_return_clauses()
-// test @[ "GUY.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
-// @[ "GUY.src.parse()" ]()
-// test @[ "GUY.src.parse()" ]
-// demo_parse_use_and_fallback()
-// demo_acorn_walk()
-// test @[ "GUY.src.slug_node_from_simple_function()" ]
-// test @[ "GUY.src.slug_from_simple_function()" ]
+  // demo_slug_for_inadvertent_multiline_function()
 
 }).call(this);
 
