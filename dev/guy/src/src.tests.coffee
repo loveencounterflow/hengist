@@ -57,7 +57,7 @@ convert_to_plain_objects = ( ast ) ->
     debug '^975-3^', f.toString()
     result  = convert_to_plain_objects GUY.src.parse { function: f, use: 'loose', }
     debug '^975-3^', result
-    T?.eq result, { type: 'Program', start: 0, end: 40, body: [ { type: 'FunctionDeclaration', start: 0, end: 40, id: { type: 'Identifier', start: 8, end: 8, name: '✖' }, params: [ { type: 'Identifier', start: 9, end: 10, name: 'x' } ], generator: false, expression: false, async: false, body: { type: 'BlockStatement', start: 12, end: 40, body: [ { type: 'ReturnStatement', start: 22, end: 32, argument: { type: 'Literal', start: 29, end: 31, value: 42, raw: '42' } } ] } } ], sourceType: 'script' }
+    T?.eq result, { type: 'Program', start: 0, end: 26, body: [ { type: 'FunctionDeclaration', start: 0, end: 26, id: { type: 'Identifier', start: 8, end: 8, name: '✖' }, params: [ { type: 'Identifier', start: 9, end: 10, name: 'x' } ], generator: false, expression: false, async: false, body: { type: 'BlockStatement', start: 12, end: 26, body: [ { type: 'ReturnStatement', start: 14, end: 24, argument: { type: 'Literal', start: 21, end: 23, value: 42, raw: '42' } } ] } } ], sourceType: 'script' }
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -91,16 +91,19 @@ convert_to_plain_objects = ( ast ) ->
     return null
   probes_and_matchers = [
     [ { function: ( -> ), },                                                                    { type: 'BlockStatement', start: 11, end: 13, body: [] }, ]
-    [ { function: ( ( x ) -> 42 ), },                                                           { type: 'ReturnStatement', start: 26, end: 36, argument: { type: 'Literal', start: 33, end: 35, value: 42, raw: '42' } }, ]
-    [ { function: ( ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x ) ), },  { type: 'ReturnStatement', start: 26, end: 100, argument: { type: 'LogicalExpression', start: 33, end: 99, left: { type: 'LogicalExpression', start: 33, end: 68, left: { type: 'BinaryExpression', start: 34, end: 43, left: { type: 'Identifier', start: 34, end: 35, name: 'x' }, operator: '==', right: { type: 'Literal', start: 39, end: 43, value: null, raw: 'null' } }, operator: '||', right: { type: 'CallExpression', start: 49, end: 67, callee: { type: 'MemberExpression', start: 49, end: 64, object: { type: 'MemberExpression', start: 49, end: 57, object: { type: 'ThisExpression', start: 49, end: 53 }, property: { type: 'Identifier', start: 54, end: 57, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 58, end: 64, name: 'object' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 65, end: 66, name: 'x' } ], optional: false } }, operator: '||', right: { type: 'CallExpression', start: 73, end: 98, callee: { type: 'MemberExpression', start: 73, end: 95, object: { type: 'MemberExpression', start: 73, end: 90, object: { type: 'MemberExpression', start: 73, end: 81, object: { type: 'ThisExpression', start: 73, end: 77 }, property: { type: 'Identifier', start: 78, end: 81, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 82, end: 90, name: 'nonempty' }, computed: false, optional: false }, property: { type: 'Identifier', start: 91, end: 95, name: 'text' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 96, end: 97, name: 'x' } ], optional: false } } }, ]
+    [ { function: ( ( x ) -> 42 ), },                                                           { type: 'ReturnStatement', start: 14, end: 24, argument: { type: 'Literal', start: 21, end: 23, value: 42, raw: '42' } }, ]
+    [ { function: ( ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x ) ), },  { type: 'ReturnStatement', start: 14, end: 88, argument: { type: 'LogicalExpression', start: 21, end: 87, left: { type: 'LogicalExpression', start: 21, end: 56, left: { type: 'BinaryExpression', start: 22, end: 31, left: { type: 'Identifier', start: 22, end: 23, name: 'x' }, operator: '==', right: { type: 'Literal', start: 27, end: 31, value: null, raw: 'null' } }, operator: '||', right: { type: 'CallExpression', start: 37, end: 55, callee: { type: 'MemberExpression', start: 37, end: 52, object: { type: 'MemberExpression', start: 37, end: 45, object: { type: 'ThisExpression', start: 37, end: 41 }, property: { type: 'Identifier', start: 42, end: 45, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 46, end: 52, name: 'object' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 53, end: 54, name: 'x' } ], optional: false } }, operator: '||', right: { type: 'CallExpression', start: 61, end: 86, callee: { type: 'MemberExpression', start: 61, end: 83, object: { type: 'MemberExpression', start: 61, end: 78, object: { type: 'MemberExpression', start: 61, end: 69, object: { type: 'ThisExpression', start: 61, end: 65 }, property: { type: 'Identifier', start: 66, end: 69, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 70, end: 78, name: 'nonempty' }, computed: false, optional: false }, property: { type: 'Identifier', start: 79, end: 83, name: 'text' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 84, end: 85, name: 'x' } ], optional: false } } }, ]
     [ { function: ( `function ( x ) { 42; }` ), },                                              { type: 'BlockStatement', start: 15, end: 22, body: [ { type: 'ExpressionStatement', start: 17, end: 20, expression: { type: 'Literal', start: 17, end: 19, value: 42, raw: '42' } } ] }, ]
     [ { function: ( `function ( x ) { return 42; }` ), },                                       { type: 'ReturnStatement', start: 17, end: 27, argument: { type: 'Literal', start: 24, end: 26, value: 42, raw: '42' } }, ]
-    [ { function: ( ( x ) -> if x? then true else false ), },                                   { type: 'BlockStatement', start: 12, end: 144, body: [ { type: 'IfStatement', start: 26, end: 132, test: { type: 'BinaryExpression', start: 30, end: 39, left: { type: 'Identifier', start: 30, end: 31, name: 'x' }, operator: '!=', right: { type: 'Literal', start: 35, end: 39, value: null, raw: 'null' } }, consequent: { type: 'BlockStatement', start: 41, end: 83, body: [ { type: 'ReturnStatement', start: 57, end: 69, argument: { type: 'Literal', start: 64, end: 68, value: true, raw: 'true' } } ] }, alternate: { type: 'BlockStatement', start: 89, end: 132, body: [ { type: 'ReturnStatement', start: 105, end: 118, argument: { type: 'Literal', start: 112, end: 117, value: false, raw: 'false' } } ] } } ] }, ]
-    [ { function: ( ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x ) ), },  { type: 'ReturnStatement', start: 26, end: 100, argument: { type: 'LogicalExpression', start: 33, end: 99, left: { type: 'LogicalExpression', start: 33, end: 68, left: { type: 'BinaryExpression', start: 34, end: 43, left: { type: 'Identifier', start: 34, end: 35, name: 'x' }, operator: '==', right: { type: 'Literal', start: 39, end: 43, value: null, raw: 'null' } }, operator: '||', right: { type: 'CallExpression', start: 49, end: 67, callee: { type: 'MemberExpression', start: 49, end: 64, object: { type: 'MemberExpression', start: 49, end: 57, object: { type: 'ThisExpression', start: 49, end: 53 }, property: { type: 'Identifier', start: 54, end: 57, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 58, end: 64, name: 'object' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 65, end: 66, name: 'x' } ], optional: false } }, operator: '||', right: { type: 'CallExpression', start: 73, end: 98, callee: { type: 'MemberExpression', start: 73, end: 95, object: { type: 'MemberExpression', start: 73, end: 90, object: { type: 'MemberExpression', start: 73, end: 81, object: { type: 'ThisExpression', start: 73, end: 77 }, property: { type: 'Identifier', start: 78, end: 81, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 82, end: 90, name: 'nonempty' }, computed: false, optional: false }, property: { type: 'Identifier', start: 91, end: 95, name: 'text' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 96, end: 97, name: 'x' } ], optional: false } } }, ]
-    [ { function: f3, },                                                                        { type: 'BlockStatement', start: 12, end: 135, body: [ { type: 'IfStatement', start: 20, end: 61, test: { type: 'BinaryExpression', start: 24, end: 29, left: { type: 'Identifier', start: 24, end: 25, name: 'x' }, operator: '>', right: { type: 'Literal', start: 28, end: 29, value: 0, raw: '0' } }, consequent: { type: 'BlockStatement', start: 31, end: 61, body: [ { type: 'ReturnStatement', start: 41, end: 53, argument: { type: 'Literal', start: 48, end: 52, value: true, raw: 'true' } } ] }, alternate: null }, { type: 'IfStatement', start: 68, end: 110, test: { type: 'BinaryExpression', start: 72, end: 77, left: { type: 'Identifier', start: 72, end: 73, name: 'x' }, operator: '<', right: { type: 'Literal', start: 76, end: 77, value: 0, raw: '0' } }, consequent: { type: 'BlockStatement', start: 79, end: 110, body: [ { type: 'ReturnStatement', start: 89, end: 102, argument: { type: 'Literal', start: 96, end: 101, value: false, raw: 'false' } } ] }, alternate: null }, { type: 'ReturnStatement', start: 117, end: 129, argument: { type: 'Literal', start: 124, end: 128, value: null, raw: 'null' } } ] }, ]
+    [ { function: ( ( x ) -> if x? then true else false ), },                                   { type: 'BlockStatement', start: 12, end: 70, body: [ { type: 'IfStatement', start: 14, end: 68, test: { type: 'BinaryExpression', start: 18, end: 27, left: { type: 'Identifier', start: 18, end: 19, name: 'x' }, operator: '!=', right: { type: 'Literal', start: 23, end: 27, value: null, raw: 'null' } }, consequent: { type: 'BlockStatement', start: 29, end: 45, body: [ { type: 'ReturnStatement', start: 31, end: 43, argument: { type: 'Literal', start: 38, end: 42, value: true, raw: 'true' } } ] }, alternate: { type: 'BlockStatement', start: 51, end: 68, body: [ { type: 'ReturnStatement', start: 53, end: 66, argument: { type: 'Literal', start: 60, end: 65, value: false, raw: 'false' } } ] } } ] }, ]
+    [ { function: ( ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x ) ), },  { type: 'ReturnStatement', start: 14, end: 88, argument: { type: 'LogicalExpression', start: 21, end: 87, left: { type: 'LogicalExpression', start: 21, end: 56, left: { type: 'BinaryExpression', start: 22, end: 31, left: { type: 'Identifier', start: 22, end: 23, name: 'x' }, operator: '==', right: { type: 'Literal', start: 27, end: 31, value: null, raw: 'null' } }, operator: '||', right: { type: 'CallExpression', start: 37, end: 55, callee: { type: 'MemberExpression', start: 37, end: 52, object: { type: 'MemberExpression', start: 37, end: 45, object: { type: 'ThisExpression', start: 37, end: 41 }, property: { type: 'Identifier', start: 42, end: 45, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 46, end: 52, name: 'object' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 53, end: 54, name: 'x' } ], optional: false } }, operator: '||', right: { type: 'CallExpression', start: 61, end: 86, callee: { type: 'MemberExpression', start: 61, end: 83, object: { type: 'MemberExpression', start: 61, end: 78, object: { type: 'MemberExpression', start: 61, end: 69, object: { type: 'ThisExpression', start: 61, end: 65 }, property: { type: 'Identifier', start: 66, end: 69, name: 'isa' }, computed: false, optional: false }, property: { type: 'Identifier', start: 70, end: 78, name: 'nonempty' }, computed: false, optional: false }, property: { type: 'Identifier', start: 79, end: 83, name: 'text' }, computed: false, optional: false }, arguments: [ { type: 'Identifier', start: 84, end: 85, name: 'x' } ], optional: false } } }, ]
+    [ { function: f3, },                                                                        { type: 'BlockStatement', start: 12, end: 85, body: [ { type: 'IfStatement', start: 14, end: 41, test: { type: 'BinaryExpression', start: 18, end: 23, left: { type: 'Identifier', start: 18, end: 19, name: 'x' }, operator: '>', right: { type: 'Literal', start: 22, end: 23, value: 0, raw: '0' } }, consequent: { type: 'BlockStatement', start: 25, end: 41, body: [ { type: 'ReturnStatement', start: 27, end: 39, argument: { type: 'Literal', start: 34, end: 38, value: true, raw: 'true' } } ] }, alternate: null }, { type: 'IfStatement', start: 42, end: 70, test: { type: 'BinaryExpression', start: 46, end: 51, left: { type: 'Identifier', start: 46, end: 47, name: 'x' }, operator: '<', right: { type: 'Literal', start: 50, end: 51, value: 0, raw: '0' } }, consequent: { type: 'BlockStatement', start: 53, end: 70, body: [ { type: 'ReturnStatement', start: 55, end: 68, argument: { type: 'Literal', start: 62, end: 67, value: false, raw: 'false' } } ] }, alternate: null }, { type: 'ReturnStatement', start: 71, end: 83, argument: { type: 'Literal', start: 78, end: 82, value: null, raw: 'null' } } ] }, ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
+    # result  = GUY.src.slug_node_from_simple_function probe
+    # result  = convert_to_plain_objects result
+    # urge '^33424^', result
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       result  = GUY.src.slug_node_from_simple_function probe
       result  = convert_to_plain_objects result
@@ -119,6 +122,7 @@ convert_to_plain_objects = ( ast ) ->
     return null
   probes_and_matchers = [
     [ { function: ( -> ), },                                                                    '', ]
+    [ { function: ( ( x ) -> x %% 3 is 0 ), },                                                  'modulo(x, 3) === 0', ]
     [ { function: ( ( x ) -> 42 ), },                                                           '42', ]
     [ { function: ( ( x ) -> ( not x? ) or ( @isa.object x ) or ( @isa.nonempty.text x ) ), },  'x == null || this.isa.object(x) || this.isa.nonempty.text(x)', ]
     [ { function: ( `function ( x ) { 42; }` ), },                                              '42;', ]
@@ -134,6 +138,19 @@ convert_to_plain_objects = ( ast ) ->
       result  = GUY.src.slug_from_simple_function probe
       # urge '^33424^', rpr result
       resolve result
+  #.........................................................................................................
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "GUY.src.slug_from_simple_function() for bound functions" ] = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY     = require H.guy_path
+  f3      = ( x ) -> 42
+  f4      = f3.bind null
+  T?.throws /unable to parse native code/, -> GUY.src.slug_from_simple_function { function: f4, }
+  result  = GUY.src.slug_from_simple_function { function: f4, fallback: null, }
+  T?.eq result, null
+  # urge '^33424^', rpr result
   #.........................................................................................................
   return done?()
 
@@ -221,10 +238,34 @@ demo_parse_use_and_fallback = ->
   info rpr GUY.src._generate result
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_slug_for_inadvertent_multiline_function = ->
+  GUY           = require H.guy_path
+  div3int       = ( x ) -> x %% 3 is 0
+  ```
+  const div3int_js = {
+          function: (function(x) {
+            return modulo(x,
+        3) === 0;
+          })
+        };
+  ```
+  whisper '————————————————————————————————————————————————————'
+  info '^353^', div3int.toString()
+  urge '^353^', rpr GUY.src.slug_from_simple_function { function: div3int, }
+  whisper '————————————————————————————————————————————————————'
+  info '^353^', div3int_js.function.toString()
+  urge '^353^', rpr GUY.src.slug_from_simple_function { function: div3int_js.function, }
+  whisper '————————————————————————————————————————————————————'
+  info '^353^', text = div3int_js.function.toString().replace /\s*\n\s*/g, ' '
+  urge '^353^', rpr GUY.src.slug_from_simple_function { text, }
+  whisper '————————————————————————————————————————————————————'
+  return null
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
+  # test @[ "GUY.src.slug_from_simple_function() for bound functions" ]
   # @[ "guy.str.SQL tag function" ]()
   # demo_return_clauses()
   # test @[ "GUY.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
@@ -233,5 +274,5 @@ if require.main is module then do =>
   # demo_parse_use_and_fallback()
   # demo_acorn_walk()
   # test @[ "GUY.src.slug_node_from_simple_function()" ]
-  # test @[ "GUY.src.slug_from_simple_function()" ]
-
+  test @[ "GUY.src.slug_from_simple_function()" ]
+  # demo_slug_for_inadvertent_multiline_function()
