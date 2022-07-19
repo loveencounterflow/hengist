@@ -890,8 +890,25 @@ demo_size_of = ->
   #.........................................................................................................
   types.declare.null
     test: ( x ) -> x is null
-  info '^323423^', types
-  info '^323423^', types.declare
+  # #.........................................................................................................
+  # types.declare.div3int
+  #   groups:   'number'
+  #   all: [
+  #     'integer'
+  #     { name: 'divisible by 3', test: ( ( x ) -> x %% 3 is 0 ), } ]
+  # #.........................................................................................................
+  # types.declare.Type_cfg_groups_element all: [ 'nonempty.text', { not_match: /[\s,]/, }, ]
+  # types.declare.Type_cfg_groups         any: [ 'nonempty.text', 'list_of.Type_cfg_groups_element', ]
+  # #.........................................................................................................
+  # types.declare.Type_cfg_constructor_cfg
+  #   $all: [
+  #     'object'
+  #     $subs:
+  #       name:     'nonempty.text'
+  #       test:     $any:  [ 'function', 'list_of.function', ]
+  #       groups:   'Type_cfg_groups'
+  #     ]
+  #.........................................................................................................
   T?.eq ( types.isa.list    []    ), true
   T?.eq ( types.isa.list    42    ), false
   T?.eq ( types.isa.list    null  ), false
@@ -901,6 +918,8 @@ demo_size_of = ->
   T?.eq ( types.isa.null    []    ), false
   T?.eq ( types.isa.null    42    ), false
   T?.eq ( types.isa.null    null  ), true
+  # T?.eq ( types.isa.div3int null  ), false
+  # T?.eq ( types.isa.div3int 33    ), true
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
