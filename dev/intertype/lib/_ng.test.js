@@ -1492,12 +1492,24 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_autovivify_hedgepaths = function() {
-    var _isa, base_proxy_cfg, isa, proxy_cfg;
-    // { Intertype } = require '../../../apps/intertype'
-    // types         = new Intertype { hedgematch: null, }
-    // # types         = new Intertype { hedgematch: '*', }
-    // types.declare 'list', groups: 'collection', test: ( x ) -> Array.isArray x
-    // types.declare 'integer', groups: 'number', test: ( x ) -> Number.isInteger x
+    var Intertype, _isa, base_proxy_cfg, isa, proxy_cfg, types;
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype({
+      hedgematch: null
+    });
+    // types         = new Intertype { hedgematch: '*', }
+    types.declare('list', {
+      groups: 'collection',
+      test: function(x) {
+        return Array.isArray(x);
+      }
+    });
+    types.declare('integer', {
+      groups: 'number',
+      test: function(x) {
+        return Number.isInteger(x);
+      }
+    });
     // debug '^353-1^', [ types._walk_hedgepaths()..., ].length
     // debug '^353-2^', [ types._walk_hedgepaths()..., ]
     // debug '^353-3^', types.isa
@@ -1505,14 +1517,15 @@
     // # debug '^353-5^', types.isa.empty.list
     // debug '^353-5^', types.isa.list     [], { optional: true, empty: true, }
     // debug '^353-5^', types.isa.integer  123, { optional: true, empty: true, }
+    //---------------------------------------------------------------------------------------------------------
     base_proxy_cfg = {
       get: (target, key) => {
         var R, f/* TAINT use `get()` */;
         if (key === Symbol.toStringTag) {
           return void 0;
         }
-        debug('^878-1^', target, rpr(key));
         _isa.collector.length = 0;
+        _isa.collector.push('_isa');
         _isa.collector.push(key);
         if ((R = target[key])) {
           return R;
@@ -1526,6 +1539,7 @@
         return target[key] = new Proxy(f, proxy_cfg);
       }
     };
+    //---------------------------------------------------------------------------------------------------------
     proxy_cfg = {
       get: (target, key) => {
         var R, f/* TAINT use `get()` */;
@@ -1538,9 +1552,11 @@
           return R;
         }
         f = function(x) {
+          var method_name;
           praise('^878-1^', _isa.collector);
           praise('^878-1^', rpr(x));
-          return 'something';
+          method_name = _isa.collector.shift();
+          return types[method_name](..._isa.collector, x);
         };
         f = {
           [`${key}`]: f
@@ -1548,22 +1564,21 @@
         return target[key] = new Proxy(f, proxy_cfg);
       }
     };
-    _isa = function(x) {
-      return 'base';
-    };
+    //---------------------------------------------------------------------------------------------------------
+    _isa = {};
     _isa.collector = [];
     isa = new Proxy(_isa, base_proxy_cfg);
     info('^878-3^', isa);
-    urge('^878-3^', _isa.collector);
-    info('^878-3^', isa(42));
-    urge('^878-3^', _isa.collector);
+    info('^878-3^', isa.optional.integer(42));
+    info('^878-3^', isa.optional.integer(null));
     info('^878-4^', isa.x);
-    urge('^878-3^', _isa.collector);
-    info('^878-6^', isa.x.y.z);
-    urge('^878-3^', _isa.collector);
-    info('^878-6^', isa.x.y.z(42));
-    urge('^878-3^', _isa.collector);
-    // info '^878-6^', isa.x.y.z.u.v.w.a.b.c.d
+    info('^878-3^', isa.optional.empty.list_of.integer(null));
+    info('^878-3^', isa.optional.empty.list_of.integer([]));
+    info('^878-3^', isa.optional.empty.list_of.integer([42]));
+    info('^878-3^', isa.optional.empty.list_of.integer([42, 3.1]));
+    // info '^878-6^', isa.x.y.z
+    // info '^878-6^', isa.x.y.z 42
+    // # info '^878-6^', isa.x.y.z.u.v.w.a.b.c.d
     // info '^878-7^', isa.x.y.z.u.v.w.a.b.c.d 42
     return null;
   };
