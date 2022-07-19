@@ -1,7 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, S, _types, alert, debug, demo, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_size_of, demo_test_with_protocol, echo, equals, help, info, inspect, list_all_builtin_type_testers, log, njs_path, plain, praise, rpr, test, to_width, urge, warn, whisper,
-    modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
+  var GUY, H, S, _types, alert, debug, demo, demo_autovivify_hedgepaths, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_size_of, demo_test_with_protocol, echo, equals, help, info, inspect, list_all_builtin_type_testers, log, njs_path, plain, praise, rpr, test, to_width, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -1448,15 +1447,14 @@
     var globpattern, globpatterns, hedgepath, hedgepaths, i, j, len, len1, pmatch, v;
     pmatch = require('picomatch');
     hedgepaths = ['integer', 'list_of.integer', 'optional.integer', 'optional.list_of.integer', 'optional.list_of.optional.integer'];
-    // 'optional'
-    globpatterns = ['optional.*', '!(*optional*)', '*.optional.*', '!(*.optional.*)', '*.!(optional).*', '!(optional)?(.*)'];
+    globpatterns = ['*', 'optional.*', '!(*optional*)', '*.optional.*', '!(*.optional.*)', '*.!(optional).*', '!(optional)?(.*)'];
     for (i = 0, len = globpatterns.length; i < len; i++) {
       globpattern = globpatterns[i];
-      echo(CND.yellow(CND.reverse(` ${globpattern} `)));
+      echo(GUY.trm.yellow(GUY.trm.reverse(` ${globpattern} `)));
       for (j = 0, len1 = hedgepaths.length; j < len1; j++) {
         hedgepath = hedgepaths[j];
         v = pmatch.isMatch(hedgepath, globpattern);
-        echo(to_width(CND.truth(v), 10), hedgepath);
+        echo(to_width(GUY.trm.truth(v), 10), hedgepath);
       }
     }
     return null;
@@ -1481,7 +1479,7 @@
     };
     ref = GUY.props.tree(types.isa, {
       evaluate,
-      joiner: '.'
+      sep: '.'
     });
     for (i = 0, len = ref.length; i < len; i++) {
       path = ref[i];
@@ -1489,6 +1487,84 @@
     }
     // for k, v of Object.own types.isa
     //   debug '^4432^', k
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_autovivify_hedgepaths = function() {
+    var _isa, base_proxy_cfg, isa, proxy_cfg;
+    // { Intertype } = require '../../../apps/intertype'
+    // types         = new Intertype { hedgematch: null, }
+    // # types         = new Intertype { hedgematch: '*', }
+    // types.declare 'list', groups: 'collection', test: ( x ) -> Array.isArray x
+    // types.declare 'integer', groups: 'number', test: ( x ) -> Number.isInteger x
+    // debug '^353-1^', [ types._walk_hedgepaths()..., ].length
+    // debug '^353-2^', [ types._walk_hedgepaths()..., ]
+    // debug '^353-3^', types.isa
+    // debug '^353-4^', types.isa.list
+    // # debug '^353-5^', types.isa.empty.list
+    // debug '^353-5^', types.isa.list     [], { optional: true, empty: true, }
+    // debug '^353-5^', types.isa.integer  123, { optional: true, empty: true, }
+    base_proxy_cfg = {
+      get: (target, key) => {
+        var R, f/* TAINT use `get()` */;
+        if (key === Symbol.toStringTag) {
+          return void 0;
+        }
+        debug('^878-1^', target, rpr(key));
+        _isa.collector.length = 0;
+        _isa.collector.push(key);
+        if ((R = target[key])) {
+          return R;
+        }
+        f = {
+          [`${key}`]: (function(x) {
+            praise('^878-1^', rpr(x));
+            return 'something';
+          })
+        }[key];
+        return target[key] = new Proxy(f, proxy_cfg);
+      }
+    };
+    proxy_cfg = {
+      get: (target, key) => {
+        var R, f/* TAINT use `get()` */;
+        if (key === Symbol.toStringTag) {
+          return void 0;
+        }
+        debug('^878-1^', target, rpr(key));
+        _isa.collector.push(key);
+        if ((R = target[key])) {
+          return R;
+        }
+        f = function(x) {
+          praise('^878-1^', _isa.collector);
+          praise('^878-1^', rpr(x));
+          return 'something';
+        };
+        f = {
+          [`${key}`]: f
+        }[key];
+        return target[key] = new Proxy(f, proxy_cfg);
+      }
+    };
+    _isa = function(x) {
+      return 'base';
+    };
+    _isa.collector = [];
+    isa = new Proxy(_isa, base_proxy_cfg);
+    info('^878-3^', isa);
+    urge('^878-3^', _isa.collector);
+    info('^878-3^', isa(42));
+    urge('^878-3^', _isa.collector);
+    info('^878-4^', isa.x);
+    urge('^878-3^', _isa.collector);
+    info('^878-6^', isa.x.y.z);
+    urge('^878-3^', _isa.collector);
+    info('^878-6^', isa.x.y.z(42));
+    urge('^878-3^', _isa.collector);
+    // info '^878-6^', isa.x.y.z.u.v.w.a.b.c.d
+    // info '^878-7^', isa.x.y.z.u.v.w.a.b.c.d 42
     return null;
   };
 
@@ -1533,51 +1609,25 @@
         return x === null;
       }
     });
+    // #.........................................................................................................
+    // types.declare.div3int
+    //   groups:   'number'
+    //   all: [
+    //     'integer'
+    //     { name: 'divisible by 3', test: ( ( x ) -> x %% 3 is 0 ), } ]
+    // #.........................................................................................................
+    // types.declare.Type_cfg_groups_element all: [ 'nonempty.text', { not_match: /[\s,]/, }, ]
+    // types.declare.Type_cfg_groups         any: [ 'nonempty.text', 'list_of.Type_cfg_groups_element', ]
+    // #.........................................................................................................
+    // types.declare.Type_cfg_constructor_cfg
+    //   $all: [
+    //     'object'
+    //     $subs:
+    //       name:     'nonempty.text'
+    //       test:     $any:  [ 'function', 'list_of.function', ]
+    //       groups:   'Type_cfg_groups'
+    //     ]
     //.........................................................................................................
-    types.declare.div3int({
-      groups: 'number',
-      all: [
-        'integer',
-        {
-          name: 'divisible by 3',
-          test: (function(x) {
-            return modulo(x,
-        3) === 0;
-          })
-        }
-      ]
-    });
-    //.........................................................................................................
-    types.declare.Type_cfg_groups_element({
-      all: [
-        'nonempty.text',
-        {
-          not_match: /[\s,]/
-        }
-      ]
-    });
-    types.declare.Type_cfg_groups({
-      any: ['nonempty.text', 'list_of.Type_cfg_groups_element']
-    });
-    //.........................................................................................................
-    types.declare.Type_cfg_constructor_cfg({
-      $all: [
-        'object',
-        {
-          $subs: {
-            name: 'nonempty.text',
-            test: {
-              $any: ['function',
-        'list_of.function']
-            },
-            groups: 'Type_cfg_groups'
-          }
-        }
-      ]
-    });
-    //.........................................................................................................
-    info('^323423^', types);
-    info('^323423^', types.declare);
     if (T != null) {
       T.eq(types.isa.list([]), true);
     }
@@ -1604,12 +1654,6 @@
     }
     if (T != null) {
       T.eq(types.isa.null(null), true);
-    }
-    if (T != null) {
-      T.eq(types.isa.div3int(null), false);
-    }
-    if (T != null) {
-      T.eq(types.isa.div3int(33), true);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -1830,21 +1874,22 @@
     info('^868-14^', T != null ? T.eq(types.validate.quantity({...types.registry.quantity.defaults, ...{
         value: 44
       }}), true) : void 0);
-    info('^868-17^', T != null ? T.throws(/not a valid text/, function() {
+    info('^868-15^', T != null ? T.throws(/not a valid text/, function() {
       return types.validate.text(42);
     }) : void 0);
-    info('^868-18^', T != null ? T.throws(/not a valid empty\.text/, function() {
+    info('^868-16^', T != null ? T.throws(/not a valid empty\.text/, function() {
       return types.validate.empty.text(42);
     }) : void 0);
-    info('^868-19^', T != null ? T.throws(/not a valid quantity/, function() {
+    info('^868-17^', T != null ? T.throws(/not a valid quantity/, function() {
       return types.validate.quantity({...types.registry.quantity.defaults, ...{
           value: null
         }});
     }) : void 0);
-    info('^868-20^', T != null ? T.eq(types.validate.empty.text(''), true) : void 0);
+    info('^868-18^', T != null ? T.eq(types.isa.empty.text(''), true) : void 0);
+    info('^868-19^', T != null ? T.eq(types.validate.empty.text(''), true) : void 0);
     info('^868-20^', T != null ? T.eq(types.validate.nonempty.text('x'), true) : void 0);
-    info('^868-20^', T != null ? T.eq(types.validate.optional.nonempty.text(null), true) : void 0);
-    info('^868-20^', T != null ? T.eq(types.validate.optional.nonempty.text('x'), true) : void 0);
+    info('^868-21^', T != null ? T.eq(types.validate.optional.nonempty.text(null), true) : void 0);
+    info('^868-22^', T != null ? T.eq(types.validate.optional.nonempty.text('x'), true) : void 0);
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -1869,10 +1914,12 @@
     // test @[ "forbidden to overwrite declarations" ]
     // test @[ "intertype quantified types" ]
     // demo_enumerate_hedgepaths()
-    test(this.declare_NG);
+    demo_autovivify_hedgepaths();
   }
 
-  // test @types_isa_empty_nonempty_text
+  // @declare_NG()
+// test @declare_NG
+// test @types_isa_empty_nonempty_text
 // test @declare_NG_defaults
 // test @
 // @_demo_validate()

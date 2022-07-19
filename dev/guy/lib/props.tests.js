@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var FS, H, PATH, _GUY, alert, debug, demo_keys, demo_tree, demo_tree_readme, echo, equals, freeze, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var FS, H, PATH, _GUY, alert, debug, demo_keys, demo_strict_owner_with_proxy, demo_tree, demo_tree_readme, echo, equals, freeze, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   PATH = require('path');
@@ -1501,6 +1501,31 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_strict_owner_with_proxy = function() {
+    var GUY, X, t;
+    GUY = require(H.guy_path);
+    X = class X extends GUY.props.Strict_owner {
+      constructor() {
+        super();
+        // return new Proxy @,
+        //   get:      ( t, k ) => debug GUY.trm.reverse GUY.trm.steel '^323^', rpr k; t[ k ]
+        //   ownKeys:  ( t ) => debug '^323^', 'ownKeys()'; Reflect.ownKeys t
+        //   getOwnPropertyDescriptor: ( t, k ) => debug '^323^', 'getOwnPropertyDescriptor()'; { configurable: true, enumerable: true, }
+        return void 0;
+      }
+
+    };
+    t = new X();
+    console.log('^323423^', t.toString());
+    console.log('^323423^', t);
+    console.log('^323423^', rpr(t));
+    info((require('util')).inspect(t, {
+      depth: 0
+    }));
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -1518,16 +1543,16 @@
       // @[ "GUY.props.has()" ]()
       // test @[ "GUY.props.has()" ]
       // @[ "GUY.props.get()" ]()
-      return test(this["GUY.props.get()"]);
+      // test @[ "GUY.props.get()" ]
+      // @[ "GUY.props.Strict_owner 2" ]()
+      // test @[ "GUY.props.Strict_owner 2" ]
+      // test @[ "GUY.props.Strict_owner can use explicit target" ]
+      // @[ "GUY.props.Strict_owner can use Reflect.has" ]()
+      // test @[ "GUY.props.Strict_owner can use Reflect.has" ]
+      // test @[ "GUY.props.Strict_owner can disallow redefining keys" ]
+      return demo_strict_owner_with_proxy();
     })();
   }
-
-  // @[ "GUY.props.Strict_owner 2" ]()
-// test @[ "GUY.props.Strict_owner 2" ]
-// test @[ "GUY.props.Strict_owner can use explicit target" ]
-// @[ "GUY.props.Strict_owner can use Reflect.has" ]()
-// test @[ "GUY.props.Strict_owner can use Reflect.has" ]
-// test @[ "GUY.props.Strict_owner can disallow redefining keys" ]
 
 }).call(this);
 
