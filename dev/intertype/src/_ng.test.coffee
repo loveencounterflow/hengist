@@ -946,6 +946,52 @@ demo_size_of = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@_demo_validate = ( T, done ) ->
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  #.........................................................................................................
+  types.declare.list
+    groups:   'collection'
+    test:     ( x ) -> Array.isArray x
+  #.........................................................................................................
+  types.declare.object
+    test:     ( x ) -> _types.isa.object x
+  #.........................................................................................................
+  types.declare.text
+    groups:   'collection'
+    test:     ( x ) -> ( typeof x ) is 'string'
+  #.........................................................................................................
+  types.declare.integer
+    groups:   'number'
+    test:     ( x ) -> Number.isInteger x
+  #.........................................................................................................
+  types.declare.float
+    groups:   'number'
+    test:     ( x ) -> Number.isFinite x
+  #.........................................................................................................
+  types.declare.null
+    test: ( x ) -> x is null
+  #.........................................................................................................
+  types.declare.Type_cfg_constructor_cfg
+    test: [
+      ( x ) -> @isa.object x
+      ( x ) -> @isa.nonempty.text x.name
+      ( x ) -> ( @isa.function x.test ) or ( @isa.list_of.function x.test )
+      ( x ) ->
+        return true if @isa.nonempty.text x.groups
+        return false unless @isa.list x.groups
+        return x.groups.every ( e ) => ( @isa.nonempty.text e ) and not ( /[\s,]/ ).test e
+      ]
+  #.........................................................................................................
+  types.validate.list []
+  types.validate 'list', []
+  praise '^459-1^', types.isa.Type_cfg_constructor_cfg {}
+  praise '^459-2^', types.isa.optional.list_of.float {}
+  praise '^459-3^', types.isa.optional.list_of.float null
+  praise '^459-4^', types.isa.list_of.float {}
+  praise '^459-5^', types.isa.list_of.float [ 1, 2, 3, ]
+  praise '^459-6^', types.isa.list_of.float [ 1, 2, 3, null, ]
+  return null
 @declare_NG_defaults = ( T, done ) ->
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
