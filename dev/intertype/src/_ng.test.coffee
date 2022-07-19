@@ -16,7 +16,7 @@ GUY                       = require '../../../apps/guy'
   praise
   urge
   warn
-  whisper }               = GUY.trm.get_loggers 'GUY/props/tests'
+  whisper }               = GUY.trm.get_loggers 'INTERTYPE/tests'
 { rpr
   inspect
   echo
