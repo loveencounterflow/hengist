@@ -578,6 +578,23 @@ demo_tree_readme = ->
   urge '—————————————————————————————————————————————————————————————'
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_strict_owner_with_proxy = ->
+  GUY           = require H.guy_path
+  class X extends GUY.props.Strict_owner
+    constructor: ->
+      super()
+      # return new Proxy @,
+      #   get:      ( t, k ) => debug GUY.trm.reverse GUY.trm.steel '^323^', rpr k; t[ k ]
+      #   ownKeys:  ( t ) => debug '^323^', 'ownKeys()'; Reflect.ownKeys t
+      #   getOwnPropertyDescriptor: ( t, k ) => debug '^323^', 'getOwnPropertyDescriptor()'; { configurable: true, enumerable: true, }
+      return undefined
+  t = new X()
+  console.log '^323423^', t.toString()
+  console.log '^323423^', t
+  console.log '^323423^', rpr t
+  info ( require 'util' ).inspect t, { depth: 0, }
+  return null
 
 
 ############################################################################################################
@@ -596,12 +613,12 @@ if require.main is module then do =>
   # @[ "GUY.props.has()" ]()
   # test @[ "GUY.props.has()" ]
   # @[ "GUY.props.get()" ]()
-  test @[ "GUY.props.get()" ]
+  # test @[ "GUY.props.get()" ]
   # @[ "GUY.props.Strict_owner 2" ]()
   # test @[ "GUY.props.Strict_owner 2" ]
   # test @[ "GUY.props.Strict_owner can use explicit target" ]
   # @[ "GUY.props.Strict_owner can use Reflect.has" ]()
   # test @[ "GUY.props.Strict_owner can use Reflect.has" ]
   # test @[ "GUY.props.Strict_owner can disallow redefining keys" ]
-
+  demo_strict_owner_with_proxy()
 
