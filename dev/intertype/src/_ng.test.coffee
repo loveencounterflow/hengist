@@ -860,6 +860,8 @@ demo_autovivify_hedgepaths = ->
   # info '^878-6^', isa.x.y.z.u.v.w.a.b.c.d
   # info '^878-7^', isa.x.y.z.u.v.w.a.b.c.d 42
   return null
+
+#-----------------------------------------------------------------------------------------------------------
 demo_size_of = ->
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
@@ -877,12 +879,15 @@ demo_size_of = ->
 @declare_NG = ( T, done ) ->
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
+  #.........................................................................................................
   types.declare.list
     groups:   'collection'
     test:     ( x ) -> Array.isArray x
+  #.........................................................................................................
   types.declare.integer
     groups:   'number'
     test:     ( x ) -> Number.isInteger x
+  #.........................................................................................................
   types.declare.null
     test: ( x ) -> x is null
   info '^323423^', types
