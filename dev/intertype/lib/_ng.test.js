@@ -1546,15 +1546,15 @@
         if (key === Symbol.toStringTag) {
           return void 0;
         }
-        debug('^878-1^', target, rpr(key));
+        debug('^878-2^', target, rpr(key));
         _isa.collector.push(key);
         if ((R = target[key])) {
           return R;
         }
         f = function(x) {
           var method_name;
-          praise('^878-1^', _isa.collector);
-          praise('^878-1^', rpr(x));
+          praise('^878-3^', _isa.collector);
+          praise('^878-4^', rpr(x));
           method_name = _isa.collector.shift();
           return types[method_name](..._isa.collector, x);
         };
@@ -1568,19 +1568,21 @@
     _isa = {};
     _isa.collector = [];
     isa = new Proxy(_isa, base_proxy_cfg);
-    info('^878-3^', isa);
-    info('^878-3^', isa.optional.integer(42));
-    info('^878-3^', isa.optional.integer(null));
-    info('^878-4^', isa.x);
-    info('^878-3^', isa.optional.empty.list_of.integer(null));
-    info('^878-3^', isa.optional.empty.list_of.integer([]));
-    info('^878-3^', isa.optional.empty.list_of.integer([42]));
-    info('^878-3^', isa.optional.empty.list_of.integer([42, 3.1]));
-    // info '^878-6^', isa.x.y.z
-    // info '^878-6^', isa.x.y.z 42
-    // # info '^878-6^', isa.x.y.z.u.v.w.a.b.c.d
-    // info '^878-7^', isa.x.y.z.u.v.w.a.b.c.d 42
-    return null;
+    info('^878-5^', isa);
+    info('^878-6^', isa.optional.integer(42));
+    info('^878-7^', isa.optional.integer(null));
+    info('^878-8^', isa.x);
+    info('^878-9^', isa.optional.empty.list_of.integer(null));
+    info('^878-10^', isa.optional.empty.list_of.integer([]));
+    info('^878-11^', isa.optional.empty.list_of.integer([42]));
+    info('^878-12^', isa.optional.empty.list_of.integer([42, 3.1]));
+    info('^878-13^', isa.empty.integer(5));
+    /* TAINT returns `false` */    info('^878-14^', isa.nonempty.integer(5));
+// info '^878-15^', isa.x.y.z
+// info '^878-16^', isa.x.y.z 42
+// # info '^878-17^', isa.x.y.z.u.v.w.a.b.c.d
+// info '^878-18^', isa.x.y.z.u.v.w.a.b.c.d 42
+/* TAINT returns `true` */    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
