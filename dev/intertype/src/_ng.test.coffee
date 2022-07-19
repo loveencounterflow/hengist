@@ -992,6 +992,8 @@ demo_size_of = ->
   praise '^459-5^', types.isa.list_of.float [ 1, 2, 3, ]
   praise '^459-6^', types.isa.list_of.float [ 1, 2, 3, null, ]
   return null
+
+#-----------------------------------------------------------------------------------------------------------
 @declare_NG_defaults = ( T, done ) ->
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
@@ -1024,6 +1026,9 @@ demo_size_of = ->
       ( x ) -> @isa.float         x.value
       ( x ) -> @isa.nonempty.text x.unit
       ]
+    defaults:
+      value:    1
+      unit:     'm'
   #.........................................................................................................
   info '^868-1^', types
   T?.eq ( _types.type_of types.declare          ), 'function'
@@ -1035,9 +1040,23 @@ demo_size_of = ->
   info '^868-5^', types.registry.text
   info '^868-6^', types.registry.quantity
   info '^868-7^', types.registry.quantity.test
-  info '^868-8^', types.registry.quantity.test 42
-  info '^868-9^', types.registry.quantity.test { value: 1.23, unit: '', }
-  info '^868-10^', types.registry.quantity.test { value: 1.23, unit: 'm', }
+  info '^868-8^',  T?.eq ( types.registry.quantity.test  42                           ), false
+  info '^868-9^',  T?.eq ( types.registry.quantity.test  { value: 1.23, unit: '', }   ), false
+  info '^868-10^', T?.eq ( types.registry.quantity.test  { value: 1.23, unit: 'm', }  ), true
+  info '^868-11^', T?.eq ( types.isa.quantity            42                           ), false
+  info '^868-12^', T?.eq ( types.isa.quantity            { value: 1.23, unit: '', }   ), false
+  info '^868-13^', T?.eq ( types.isa.quantity            { value: 1.23, unit: 'm', }  ), true
+  info '^868-14^', T?.eq ( types.validate.quantity { types.registry.quantity.defaults..., { value: 44, }..., } ), true
+  info '^868-15^', T?.throws /not a valid text/, -> types.validate.text 42
+  info '^868-16^', T?.throws /not a valid empty\.text/, -> types.validate.empty.text 42
+  info '^868-17^', T?.throws /not a valid quantity/, -> types.validate.quantity { types.registry.quantity.defaults..., { value: null, }..., }
+  info '^868-18^', T?.eq ( types.isa.empty.text '' ), true
+  info '^868-19^', T?.eq ( types.validate.empty.text '' ), true
+  info '^868-20^', T?.eq ( types.validate.nonempty.text 'x' ), true
+  info '^868-21^', T?.eq ( types.validate.optional.nonempty.text null ), true
+  info '^868-22^', T?.eq ( types.validate.optional.nonempty.text 'x' ), true
+  # praise hedgepath for hedgepath from GUY.props.walk_tree types.isa,      { sep: '.', }
+  # info   hedgepath for hedgepath from GUY.props.walk_tree types.validate, { sep: '.', }
   done?()
 
 
@@ -1063,9 +1082,11 @@ unless module.parent?
   # test @[ "forbidden to overwrite declarations" ]
   # test @[ "intertype quantified types" ]
   # demo_enumerate_hedgepaths()
+  demo_autovivify_hedgepaths()
+  # @declare_NG()
   # test @declare_NG
   # test @types_isa_empty_nonempty_text
   # test @declare_NG_defaults
-  test @
-
+  # test @
+  # @_demo_validate()
 
