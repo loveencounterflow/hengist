@@ -803,7 +803,7 @@ demo_enumerate_hedgepaths = ->
     return 'take' if ( types.type_of value ) is 'function'
     return 'take' unless GUY.props.has_any_keys value
     return 'descend'
-  for path in GUY.props.tree types.isa, { evaluate, joiner: '.', }
+  for path in GUY.props.tree types.isa, { evaluate, sep: '.', }
     praise path
   # for k, v of Object.own types.isa
   #   debug '^4432^', k
