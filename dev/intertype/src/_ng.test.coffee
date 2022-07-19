@@ -777,7 +777,7 @@ demo_picomatch_for_hedgepaths = ->
     'optional.list_of.optional.integer'
     ]
   globpatterns = [
-    # 'optional'
+    '*'
     'optional.*'
     '!(*optional*)'
     '*.optional.*'
@@ -786,10 +786,10 @@ demo_picomatch_for_hedgepaths = ->
     '!(optional)?(.*)'
     ]
   for globpattern in globpatterns
-    echo CND.yellow CND.reverse " #{globpattern} "
+    echo GUY.trm.yellow GUY.trm.reverse " #{globpattern} "
     for hedgepath in hedgepaths
       v = pmatch.isMatch hedgepath, globpattern
-      echo ( to_width ( CND.truth v ), 10 ), hedgepath
+      echo ( to_width ( GUY.trm.truth v ), 10 ), hedgepath
   return null
 
 #-----------------------------------------------------------------------------------------------------------
