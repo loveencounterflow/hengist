@@ -811,11 +811,11 @@ demo_enumerate_hedgepaths = ->
 
 #-----------------------------------------------------------------------------------------------------------
 demo_autovivify_hedgepaths = ->
-  # { Intertype } = require '../../../apps/intertype'
-  # types         = new Intertype { hedgematch: null, }
-  # # types         = new Intertype { hedgematch: '*', }
-  # types.declare 'list', groups: 'collection', test: ( x ) -> Array.isArray x
-  # types.declare 'integer', groups: 'number', test: ( x ) -> Number.isInteger x
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype { hedgematch: null, }
+  # types         = new Intertype { hedgematch: '*', }
+  types.declare 'list', groups: 'collection', test: ( x ) -> Array.isArray x
+  types.declare 'integer', groups: 'number', test: ( x ) -> Number.isInteger x
   # debug '^353-1^', [ types._walk_hedgepaths()..., ].length
   # debug '^353-2^', [ types._walk_hedgepaths()..., ]
   # debug '^353-3^', types.isa
@@ -823,42 +823,48 @@ demo_autovivify_hedgepaths = ->
   # # debug '^353-5^', types.isa.empty.list
   # debug '^353-5^', types.isa.list     [], { optional: true, empty: true, }
   # debug '^353-5^', types.isa.integer  123, { optional: true, empty: true, }
+  #---------------------------------------------------------------------------------------------------------
   base_proxy_cfg =
     get: ( target, key ) =>
       return undefined if key is Symbol.toStringTag
-      debug '^878-1^', target, rpr key
       _isa.collector.length = 0
+      _isa.collector.push '_isa'
       _isa.collector.push key
       return R if ( R = target[ key ] ) ### TAINT use `get()` ###
       f = { "#{key}": ( ( x ) -> praise '^878-1^', rpr x; 'something' ), }[ key ]
       return target[ key ] = new Proxy f, proxy_cfg
+  #---------------------------------------------------------------------------------------------------------
   proxy_cfg =
     get: ( target, key ) =>
       return undefined if key is Symbol.toStringTag
-      debug '^878-1^', target, rpr key
+      debug '^878-2^', target, rpr key
       _isa.collector.push key
       return R if ( R = target[ key ] ) ### TAINT use `get()` ###
       f =  ( x ) ->
-        praise '^878-1^', _isa.collector
-        praise '^878-1^', rpr x
-        return 'something'
+        praise '^878-3^', _isa.collector
+        praise '^878-4^', rpr x
+        method_name = _isa.collector.shift()
+        return types[ method_name ] _isa.collector..., x
       f = { "#{key}": f, }[ key ]
       return target[ key ] = new Proxy f, proxy_cfg
-  _isa            = ( x ) -> 'base'
+  #---------------------------------------------------------------------------------------------------------
+  _isa            = {}
   _isa.collector  = []
   isa             = new Proxy _isa, base_proxy_cfg
-  info '^878-3^', isa
-  urge '^878-3^', _isa.collector
-  info '^878-3^', isa 42
-  urge '^878-3^', _isa.collector
-  info '^878-4^', isa.x
-  urge '^878-3^', _isa.collector
-  info '^878-6^', isa.x.y.z
-  urge '^878-3^', _isa.collector
-  info '^878-6^', isa.x.y.z 42
-  urge '^878-3^', _isa.collector
-  # info '^878-6^', isa.x.y.z.u.v.w.a.b.c.d
-  # info '^878-7^', isa.x.y.z.u.v.w.a.b.c.d 42
+  info '^878-5^', isa
+  info '^878-6^', isa.optional.integer 42
+  info '^878-7^', isa.optional.integer null
+  info '^878-8^', isa.x
+  info '^878-9^', isa.optional.empty.list_of.integer null
+  info '^878-10^', isa.optional.empty.list_of.integer []
+  info '^878-11^', isa.optional.empty.list_of.integer [ 42, ]
+  info '^878-12^', isa.optional.empty.list_of.integer [ 42, 3.1, ]
+  info '^878-13^', isa.empty.integer     5 ### TAINT returns `false` ###
+  info '^878-14^', isa.nonempty.integer  5 ### TAINT returns `true` ###
+  # info '^878-15^', isa.x.y.z
+  # info '^878-16^', isa.x.y.z 42
+  # # info '^878-17^', isa.x.y.z.u.v.w.a.b.c.d
+  # info '^878-18^', isa.x.y.z.u.v.w.a.b.c.d 42
   return null
 
 #-----------------------------------------------------------------------------------------------------------
