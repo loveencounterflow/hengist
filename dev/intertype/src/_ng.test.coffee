@@ -810,7 +810,7 @@ demo_enumerate_hedgepaths = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-demo_autovivify_hedgepaths = ->
+demo_preview_autovivify_hedgepaths = ->
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype { hedgematch: null, }
   # types         = new Intertype { hedgematch: '*', }
