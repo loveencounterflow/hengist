@@ -1049,31 +1049,24 @@ demo_size_of = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@declare_NG_defaults = ( T, done ) ->
+@validate_returns_value = ( T, done ) ->
+  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
-  #.........................................................................................................
-  types.declare.list
-    groups:   'collection'
-    test:     ( x ) -> Array.isArray x
-  #.........................................................................................................
-  types.declare.object
-    test:     ( x ) -> _types.isa.object x
-  #.........................................................................................................
-  types.declare.text
-    groups:   'collection'
-    test:     ( x ) -> ( typeof x ) is 'string'
-  #.........................................................................................................
-  types.declare.integer
-    groups:   'number'
-    test:     ( x ) -> Number.isInteger x
   #.........................................................................................................
   types.declare.float
     groups:   'number'
     test:     ( x ) -> Number.isFinite x
+    default:  0
   #.........................................................................................................
-  types.declare.null
-    test: ( x ) -> x is null
+  types.declare.text
+    groups:   'collection'
+    test:     ( x ) -> ( typeof x ) is 'string'
+    default:  ''
+  #.........................................................................................................
+  types.declare.object
+    test:     ( x ) -> _types.isa.object x
+    default:  {}
   #.........................................................................................................
   types.declare.quantity
     test: [
@@ -1081,9 +1074,126 @@ demo_size_of = ->
       ( x ) -> @isa.float         x.value
       ( x ) -> @isa.nonempty.text x.unit
       ]
-    defaults:
-      value:    1
-      unit:     'm'
+    default:
+      value:    0
+      unit:     null
+  d = { value: 4, unit: 'kB', }
+  #.........................................................................................................
+  info ( types.validate.float 12.3 )
+  info ( types.validate.quantity d )
+  info ( types.validate.quantity d )
+  T?.eq ( types.validate.float 12.3 ), 12.3
+  T?.eq ( types.validate.quantity d ), d
+  T?.ok ( types.validate.quantity d ) is d
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@create_returns_deep_copy_of_default = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  #.........................................................................................................
+  types.declare.text
+    groups:   'collection'
+    test:     ( x ) -> ( typeof x ) is 'string'
+    default:  ''
+  #.........................................................................................................
+  types.declare.list
+    groups:   'collection'
+    test:     ( x ) -> Array.isArray x
+    default:  []
+  #.........................................................................................................
+  types.declare.object
+    test:     ( x ) -> _types.isa.object x
+    default:  {}
+  #.........................................................................................................
+  types.declare.frob
+    test: [
+      ( x ) -> @isa.object        x
+      ( x ) -> @isa.list          x.list
+      ( x ) -> @isa.nonempty.text x.blah
+      ]
+    default:
+      list:     []
+      blah:     null
+  #.........................................................................................................
+  mylist  = [ 1, 2, 3, ]
+  d       = { list: mylist, blah: 'blub', }
+  T?.eq ( types.validate.frob d ), d
+  T?.ok ( types.validate.frob d ) is d
+  e       = types.create.frob d
+  debug '^45345^', d
+  debug '^45345^', e
+  T?.ok equals e, d
+  T?.ok e isnt d
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@declare_NG_defaults = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  #.........................................................................................................
+  types.declare.null
+    # groups:   'bottom'
+    test:     ( x ) -> x is null
+    default:  null
+  #.........................................................................................................
+  types.declare.undefined
+    # groups:   'bottom'
+    test:     ( x ) -> x is undefined
+    default:  undefined
+  #.........................................................................................................
+  types.declare.boolean
+    test:     ( x ) -> ( x is true ) or ( x is false )
+    default:  false
+  #.........................................................................................................
+  types.declare.list
+    groups:   'collection'
+    test:     ( x ) -> Array.isArray x
+    default:  []
+  #.........................................................................................................
+  types.declare.object
+    test:     ( x ) -> _types.isa.object x
+    default:  {}
+  #.........................................................................................................
+  types.declare.text
+    groups:   'collection'
+    test:     ( x ) -> ( typeof x ) is 'string'
+    default:  ''
+  #.........................................................................................................
+  types.declare.integer
+    groups:   'number'
+    test:     ( x ) -> Number.isInteger x
+    default:  0
+  #.........................................................................................................
+  types.declare.float
+    groups:   'number'
+    test:     ( x ) -> Number.isFinite x
+    default:  0
+  #.........................................................................................................
+  types.declare.quantity
+    test: [
+      ( x ) -> @isa.object        x
+      ( x ) -> @isa.float         x.value
+      ( x ) -> @isa.nonempty.text x.unit
+      ]
+    default:
+      value:    0
+      unit:     null
+  #.........................................................................................................
+  types.declare.point2d
+    test: [
+      ( x ) -> @isa.object        x
+      ( x ) -> @isa.float         x.x
+      ( x ) -> @isa.float         x.y
+      ]
+    default:
+      x:    0
+      y:    0
+    create: ( cfg ) -> { { x: 1, y: 1, }..., cfg..., }
   #.........................................................................................................
   info '^868-1^', types
   T?.eq ( _types.type_of types.declare          ), 'function'
@@ -1101,15 +1211,32 @@ demo_size_of = ->
   info '^868-11^', T?.eq ( types.isa.quantity            42                           ), false
   info '^868-12^', T?.eq ( types.isa.quantity            { value: 1.23, unit: '', }   ), false
   info '^868-13^', T?.eq ( types.isa.quantity            { value: 1.23, unit: 'm', }  ), true
-  info '^868-14^', T?.eq ( types.validate.quantity { types.registry.quantity.defaults..., { value: 44, }..., } ), true
+  info '^868-14^', T?.eq ( types.validate.quantity { types.registry.quantity.default..., { value: 44, unit: 'g', }..., } ), { value: 44, unit: 'g', }
   info '^868-15^', T?.throws /not a valid text/, -> types.validate.text 42
   info '^868-16^', T?.throws /not a valid empty\.text/, -> types.validate.empty.text 42
-  info '^868-17^', T?.throws /not a valid quantity/, -> types.validate.quantity { types.registry.quantity.defaults..., { value: null, }..., }
+  info '^868-17^', T?.throws /not a valid quantity/, -> types.validate.quantity { types.registry.quantity.default..., { value: null, }..., }
   info '^868-18^', T?.eq ( types.isa.empty.text '' ), true
-  info '^868-19^', T?.eq ( types.validate.empty.text '' ), true
-  info '^868-20^', T?.eq ( types.validate.nonempty.text 'x' ), true
-  info '^868-21^', T?.eq ( types.validate.optional.nonempty.text null ), true
-  info '^868-22^', T?.eq ( types.validate.optional.nonempty.text 'x' ), true
+  info '^868-19^', T?.eq ( types.validate.empty.text '' ), ''
+  info '^868-20^', T?.eq ( types.validate.nonempty.text 'x' ), 'x'
+  info '^868-21^', T?.eq ( types.validate.optional.nonempty.text null ), null
+  info '^868-22^', T?.eq ( types.validate.optional.nonempty.text 'x' ), 'x'
+  # info '^868-23^', T?.eq ( types.create.text() ), ''
+  praise '^868-24^', rpr types.create.text()
+  praise '^868-25^', rpr types.create.integer()
+  # praise '^868-25^', rpr types.isa.integer.or.text 'x'
+  info '^868-22^', T?.eq ( types.create.null()       ), null
+  info '^868-22^', T?.eq ( types.create.undefined()  ), undefined
+  info '^868-22^', T?.eq ( types.create.boolean()    ), false
+  info '^868-22^', T?.eq ( types.create.list()       ), []
+  info '^868-22^', T?.eq ( types.create.object()     ), {}
+  info '^868-22^', T?.eq ( types.create.text()       ), ''
+  info '^868-22^', T?.eq ( types.create.integer()    ), 0
+  info '^868-22^', T?.eq ( types.create.quantity {            unit: 'km', } ), { value:  0, unit: 'km', }
+  info '^868-22^', T?.eq ( types.create.quantity { value: 32, unit: 'km', } ), { value: 32, unit: 'km', }
+  # info '^868-22^', T?.eq ( types.create.integer 42   ), 42
+  # info '^868-22^', T?.throws /not a valid integer/, -> types.create.integer 4.2
+  info '^868-22^', T?.eq ( types.create.float()      ), 0
+  info '^868-22^', T?.eq ( types.create.point2d()    ), { x: 1, y: 1, }
   # praise hedgepath for hedgepath from GUY.props.walk_tree types.isa,      { sep: '.', }
   # info   hedgepath for hedgepath from GUY.props.walk_tree types.validate, { sep: '.', }
   done?()
@@ -1137,11 +1264,16 @@ unless module.parent?
   # test @[ "forbidden to overwrite declarations" ]
   # test @[ "intertype quantified types" ]
   # demo_enumerate_hedgepaths()
-  demo_autovivify_hedgepaths()
+  # demo_preview_autovivify_hedgepaths()
+  # demo_intertype_autovivify_hedgepaths()
   # @declare_NG()
   # test @declare_NG
   # test @types_isa_empty_nonempty_text
+  # @declare_NG_defaults()
+  # @validate_returns_value()
+  # @create_returns_deep_copy_of_default()
+  # test @create_returns_deep_copy_of_default
   # test @declare_NG_defaults
-  # test @
+  test @
   # @_demo_validate()
 
