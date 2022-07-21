@@ -827,44 +827,93 @@ demo_preview_autovivify_hedgepaths = ->
   base_proxy_cfg =
     get: ( target, key ) =>
       return undefined if key is Symbol.toStringTag
-      _isa.collector.length = 0
-      _isa.collector.push '_isa'
-      _isa.collector.push key
+      XXXX_collector.length = 0
+      XXXX_collector.push '_isa'
+      XXXX_collector.push key
       return R if ( R = target[ key ] ) ### TAINT use `get()` ###
       f = { "#{key}": ( ( x ) -> praise '^878-1^', rpr x; 'something' ), }[ key ]
-      return target[ key ] = new Proxy f, proxy_cfg
+      return target[ key ] = new Proxy f, sub_proxy_cfg
   #---------------------------------------------------------------------------------------------------------
-  proxy_cfg =
+  sub_proxy_cfg =
     get: ( target, key ) =>
       return undefined if key is Symbol.toStringTag
-      debug '^878-2^', target, rpr key
-      _isa.collector.push key
-      return R if ( R = target[ key ] ) ### TAINT use `get()` ###
+      # debug '^878-2^', target, rpr key
+      XXXX_collector.push key
+      return R if ( R = GUY.props.get target, key, no_such_value ) isnt no_such_value
       f =  ( x ) ->
-        praise '^878-3^', _isa.collector
-        praise '^878-4^', rpr x
-        method_name = _isa.collector.shift()
-        return types[ method_name ] _isa.collector..., x
+        praise '^878-3^', XXXX_collector
+        # praise '^878-4^', rpr x
+        method_name = XXXX_collector.shift()
+        return types[ method_name ] XXXX_collector..., x
       f = { "#{key}": f, }[ key ]
-      return target[ key ] = new Proxy f, proxy_cfg
+      return target[ key ] = new Proxy f, sub_proxy_cfg
   #---------------------------------------------------------------------------------------------------------
+  no_such_value   = Symbol 'no_such_value'
   _isa            = {}
-  _isa.collector  = []
+  XXXX_collector  = []
   isa             = new Proxy _isa, base_proxy_cfg
   info '^878-5^', isa
   info '^878-6^', isa.optional.integer 42
   info '^878-7^', isa.optional.integer null
-  info '^878-8^', isa.x
-  info '^878-9^', isa.optional.empty.list_of.integer null
-  info '^878-10^', isa.optional.empty.list_of.integer []
-  info '^878-11^', isa.optional.empty.list_of.integer [ 42, ]
-  info '^878-12^', isa.optional.empty.list_of.integer [ 42, 3.1, ]
-  info '^878-13^', isa.empty.integer     5 ### TAINT returns `false` ###
-  info '^878-14^', isa.nonempty.integer  5 ### TAINT returns `true` ###
-  # info '^878-15^', isa.x.y.z
-  # info '^878-16^', isa.x.y.z 42
-  # # info '^878-17^', isa.x.y.z.u.v.w.a.b.c.d
-  # info '^878-18^', isa.x.y.z.u.v.w.a.b.c.d 42
+  info '^878-8^', isa.optional.optional.optional.optional.optional.integer null
+  info '^878-9^', isa.x
+  info '^878-10^', isa.optional.empty.list_of.integer null
+  info '^878-11^', isa.optional.empty.list_of.integer []
+  info '^878-12^', isa.optional.empty.list_of.integer [ 42, ]
+  info '^878-13^', isa.optional.empty.list_of.integer [ 42, 3.1, ]
+  info '^878-14^', isa.empty.integer     5 ### TAINT returns `false` ###
+  info '^878-15^', isa.nonempty.integer  5 ### TAINT returns `true` ###
+  console.log ( require 'util' ).inspect isa, { colors: true, depth: Infinity, }
+  info '^878-12^', isa.optional.empty.list_of.list_of.integer [ 42, ]
+  info '^878-12^', isa.optional.empty.list_of.list_of.integer [ [ 42,] ]
+  praise '^353-2^', path for path from GUY.props.walk_tree isa, { sep: '.', }
+  # info '^878-16^', isa.x.y.z
+  # info '^878-17^', isa.x.y.z 42
+  # # info '^878-18^', isa.x.y.z.u.v.w.a.b.c.d
+  # info '^878-19^', isa.x.y.z.u.v.w.a.b.c.d 42
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_intertype_autovivify_hedgepaths = ->
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  { isa
+    validate
+    declare   } = types
+  declare 'list',     groups: 'collection', test: ( x ) -> Array.isArray x
+  declare 'integer',  groups: 'number',     test: ( x ) -> Number.isInteger x
+  # info '^879-1^', isa 42
+  info '^879-4^', isa.integer 42                        ; praise '^879-5^',  ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-8^', isa.optional 42                       ; praise '^879-9^',  ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-10^', isa.optional.integer                 ; praise '^879-11^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-12^', isa.optional.integer 42              ; praise '^879-13^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-14^', isa.optional.integer 42              ; praise '^879-15^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-16^', isa.optional.integer null            ; praise '^879-17^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-18^', isa.optional.optional.integer null   ; praise '^879-19^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-20^', isa.empty.integer null               ; praise '^879-21^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-22^', isa.empty.integer 42                 ; praise '^879-23^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-24^', isa.empty.integer 0                  ; praise '^879-25^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-26^', isa.negative0.integer 0              ; praise '^879-27^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-28^', isa.positive0.integer 0              ; praise '^879-29^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-30^', isa.negative1.integer 0              ; praise '^879-31^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-32^', isa.positive1.integer 0              ; praise '^879-33^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-34^', isa.negative0.list 0                 ; praise '^879-35^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  info '^879-36^', isa.negative0.list []                ; praise '^879-37^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
+  # info '^879-38^', isa.x
+  # info '^879-39^', isa.optional.empty.list_of.integer null
+  # info '^879-40^', isa.optional.empty.list_of.integer []
+  # info '^879-41^', isa.optional.empty.list_of.integer [ 42, ]
+  # info '^879-42^', isa.optional.empty.list_of.integer [ 42, 3.1, ]
+  # info '^879-43^', isa.empty.integer     5 ### TAINT returns `false` ###
+  # info '^879-44^', isa.nonempty.integer  5 ### TAINT returns `true` ###
+  # console.log ( require 'util' ).inspect isa, { colors: true, depth: Infinity, }
+  # info '^879-45^', isa.optional.empty.list_of.list_of.integer [ 42, ]
+  # info '^879-46^', isa.optional.empty.list_of.list_of.integer [ [ 42,] ]
+  # praise '^353-2^', path for path from GUY.props.walk_tree isa, { sep: '.', }
+  # # info '^879-47^', isa.x.y.z
+  # # info '^879-48^', isa.x.y.z 42
+  # # # info '^879-49^', isa.x.y.z.u.v.w.a.b.c.d
+  # # info '^879-50^', isa.x.y.z.u.v.w.a.b.c.d 42
   return null
 
 #-----------------------------------------------------------------------------------------------------------
