@@ -1993,6 +1993,170 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.create_with_seal_freeze_extra = function(T, done) {
+    var Intertype, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    //.........................................................................................................
+    types.declare.text({
+      groups: 'collection',
+      test: function(x) {
+        return (typeof x) === 'string';
+      },
+      default: ''
+    });
+    //.........................................................................................................
+    types.declare.list({
+      groups: 'collection',
+      test: function(x) {
+        return Array.isArray(x);
+      },
+      default: []
+    });
+    //.........................................................................................................
+    types.declare.object({
+      test: function(x) {
+        return _types.isa.object(x);
+      },
+      default: {}
+    });
+    // #.........................................................................................................
+    // types.declare.sealed_frob
+    //   test: [
+    //     ( x ) -> @isa.object        x
+    //     ( x ) -> @isa.list          x.list
+    //     ( x ) -> @isa.nonempty.text x.blah
+    //     ]
+    //   seal:     'deep'
+    //   default:
+    //     list:     []
+    //     blah:     null
+    //.........................................................................................................
+    types.declare.frozen_frob({
+      test: [
+        function(x) {
+          return this.isa.object(x);
+        },
+        function(x) {
+          return this.isa.list(x.list);
+        },
+        function(x) {
+          return this.isa.nonempty.text(x.blah);
+        }
+      ],
+      freeze: 'deep',
+      default: {
+        list: [],
+        blah: null
+      }
+    });
+    //.........................................................................................................
+    types.declare.extra_frob({
+      test: [
+        function(x) {
+          return this.isa.object(x);
+        },
+        function(x) {
+          return this.isa.list(x.list);
+        },
+        function(x) {
+          return this.isa.nonempty.text(x.blah);
+        }
+      ],
+      extras: false,
+      default: {
+        list: [],
+        blah: null
+      }
+    });
+    (() => {      //.........................................................................................................
+      var d, d_copy, d_frozen_copy, mylist;
+      // debug types.registry.frozen_frob
+      // debug ( k for k of GUY.lft )
+      mylist = [1, 2, 3];
+      d = {
+        list: mylist,
+        blah: 'blub'
+      };
+      d_copy = GUY.lft._deep_copy(d);
+      d_frozen_copy = GUY.lft.freeze(d_copy);
+      urge('^549-1^', "d                                    ", d);
+      urge('^549-2^', "d_copy                               ", d_copy);
+      urge('^549-2^', "d_frozen_copy                        ", d_frozen_copy);
+      info('^549-3^', "d.list is mylist                     ", GUY.trm.truth(d.list === mylist));
+      info('^549-4^', "d_copy.list is mylist                ", GUY.trm.truth(d_copy.list === mylist));
+      info('^549-4^', "d_frozen_copy.list is mylist         ", GUY.trm.truth(d_frozen_copy.list === mylist));
+      info('^549-4^', "d_frozen_copy.list is d_copy.list    ", GUY.trm.truth(d_frozen_copy.list === d_copy.list));
+      info('^549-5^', "Object.isFrozen mylist               ", GUY.trm.truth(Object.isFrozen(mylist)));
+      info('^549-6^', "Object.isFrozen d                    ", GUY.trm.truth(Object.isFrozen(d)));
+      info('^549-5^', "Object.isFrozen d.list               ", GUY.trm.truth(Object.isFrozen(d.list)));
+      info('^549-6^', "Object.isFrozen d_copy               ", GUY.trm.truth(Object.isFrozen(d_copy)));
+      info('^549-5^', "Object.isFrozen d_copy.list          ", GUY.trm.truth(Object.isFrozen(d_copy.list)));
+      info('^549-6^', "Object.isFrozen d_frozen_copy        ", GUY.trm.truth(Object.isFrozen(d_frozen_copy)));
+      return info('^549-5^', "Object.isFrozen d_frozen_copy.list   ", GUY.trm.truth(Object.isFrozen(d_frozen_copy.list)));
+    })();
+    (() => {      //.........................................................................................................
+      var cfg, frozen_frob, mylist;
+      mylist = [1, 2, 3];
+      cfg = {
+        list: mylist,
+        blah: 'blub'
+      };
+      frozen_frob = types.create.frozen_frob(cfg);
+      info('^879-1^', "cfg.list is mylist                 ", GUY.trm.truth(cfg.list === mylist));
+      info('^879-2^', "frozen_frob.list isnt mylist       ", GUY.trm.truth(frozen_frob.list !== mylist));
+      info('^879-3^', "not Object.isFrozen mylist         ", GUY.trm.truth(!Object.isFrozen(mylist)));
+      info('^879-4^', "not Object.isFrozen cfg            ", GUY.trm.truth(!Object.isFrozen(cfg)));
+      info('^879-5^', "Object.isFrozen frozen_frob        ", GUY.trm.truth(Object.isFrozen(frozen_frob)));
+      info('^879-6^', "Object.isFrozen frozen_frob.list   ", GUY.trm.truth(Object.isFrozen(frozen_frob.list)));
+      if (T != null) {
+        T.ok(cfg.list === mylist);
+      }
+      if (T != null) {
+        T.ok(frozen_frob.list !== mylist);
+      }
+      if (T != null) {
+        T.ok(!Object.isFrozen(mylist));
+      }
+      if (T != null) {
+        T.ok(!Object.isFrozen(cfg));
+      }
+      if (T != null) {
+        T.ok(Object.isFrozen(frozen_frob));
+      }
+      return T != null ? T.ok(Object.isFrozen(frozen_frob.list)) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var cfg, extra_frob, mylist;
+      mylist = [1, 2, 3];
+      cfg = {
+        list: mylist,
+        blah: 'blub'
+      };
+      extra_frob = types.create.extra_frob(cfg);
+      debug('^4535-1^', types.registry.extra_frob);
+      debug('^4535-3^', extra_frob);
+      if (T != null) {
+        T.ok(types.registry.extra_frob.extras === false);
+      }
+      if (T != null) {
+        T.ok(types.isa.extra_frob(extra_frob));
+      }
+      extra_frob.extra_prop = true;
+      debug('^4535-4^', extra_frob);
+      if (T != null) {
+        T.ok(!types.isa.extra_frob(extra_frob));
+      }
+      // types.validate.extra_frob extra_frob
+      return T != null ? T.throws(/not a valid extra_frob/, function() {
+        return types.validate.extra_frob(extra_frob);
+      }) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.declare_NG_defaults = function(T, done) {
     var Intertype, types;
     // T?.halt_on_error()
@@ -2225,6 +2389,8 @@
     // @create_returns_deep_copy_of_default()
     // test @create_returns_deep_copy_of_default
     // test @declare_NG_defaults
+    // @create_with_seal_freeze_extra()
+    // test @create_with_seal_freeze_extra
     test(this);
   }
 
