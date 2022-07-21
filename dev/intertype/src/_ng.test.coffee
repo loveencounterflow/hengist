@@ -156,29 +156,29 @@ demo = ->
   #.........................................................................................................
   return null
 
-#-----------------------------------------------------------------------------------------------------------
-@[ "intertype hedgepaths" ] = ( T, done ) ->
-  { Intertype
-    Type_cfg }  = require '../../../apps/intertype'
-  #.........................................................................................................
-  do =>
-    types       = new Intertype()
-    hedgepaths  = types._hedges.hedgepaths
-    groupname   = 'other'
-    H.tabulate "hedgepaths for group #{rpr groupname}", [ [ null, null, null, null, null, null, null ], hedgepaths[ groupname ]..., ]
-    T?.eq hedgepaths[ groupname ], [ [], [ 'list_of' ], [ 'list_of', 'optional' ], [ 'set_of' ], [ 'set_of', 'optional' ], [ 'empty', 'list_of' ], [ 'empty', 'list_of', 'optional' ], [ 'empty', 'set_of' ], [ 'empty', 'set_of', 'optional' ], [ 'nonempty', 'list_of' ], [ 'nonempty', 'list_of', 'optional' ], [ 'nonempty', 'set_of' ], [ 'nonempty', 'set_of', 'optional' ], [ 'optional' ], [ 'optional', 'list_of' ], [ 'optional', 'list_of', 'optional' ], [ 'optional', 'set_of' ], [ 'optional', 'set_of', 'optional' ], [ 'optional', 'empty', 'list_of' ], [ 'optional', 'empty', 'list_of', 'optional' ], [ 'optional', 'empty', 'set_of' ], [ 'optional', 'empty', 'set_of', 'optional' ], [ 'optional', 'nonempty', 'list_of' ], [ 'optional', 'nonempty', 'list_of', 'optional' ], [ 'optional', 'nonempty', 'set_of' ], [ 'optional', 'nonempty', 'set_of', 'optional' ] ]
-    #.......................................................................................................
-    typenames =
-      other:        'boolean'
-      collections:  'set'
-      numbers:      'integer'
-    for groupname, hedgepaths of types._hedges.hedgepaths
-      info groupname
-      typename = typenames[ groupname ]
-      for hedgepath in hedgepaths
-        urge [ hedgepath..., typename ].join '.'
-  done?()
-  return null
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "intertype hedgepaths" ] = ( T, done ) ->
+#   { Intertype
+#     Type_cfg }  = require '../../../apps/intertype'
+#   #.........................................................................................................
+#   do =>
+#     types       = new Intertype()
+#     hedgepaths  = types._hedges.hedgepaths
+#     groupname   = 'other'
+#     H.tabulate "hedgepaths for group #{rpr groupname}", [ [ null, null, null, null, null, null, null ], hedgepaths[ groupname ]..., ]
+#     T?.eq hedgepaths[ groupname ], [ [], [ 'list_of' ], [ 'list_of', 'optional' ], [ 'set_of' ], [ 'set_of', 'optional' ], [ 'empty', 'list_of' ], [ 'empty', 'list_of', 'optional' ], [ 'empty', 'set_of' ], [ 'empty', 'set_of', 'optional' ], [ 'nonempty', 'list_of' ], [ 'nonempty', 'list_of', 'optional' ], [ 'nonempty', 'set_of' ], [ 'nonempty', 'set_of', 'optional' ], [ 'optional' ], [ 'optional', 'list_of' ], [ 'optional', 'list_of', 'optional' ], [ 'optional', 'set_of' ], [ 'optional', 'set_of', 'optional' ], [ 'optional', 'empty', 'list_of' ], [ 'optional', 'empty', 'list_of', 'optional' ], [ 'optional', 'empty', 'set_of' ], [ 'optional', 'empty', 'set_of', 'optional' ], [ 'optional', 'nonempty', 'list_of' ], [ 'optional', 'nonempty', 'list_of', 'optional' ], [ 'optional', 'nonempty', 'set_of' ], [ 'optional', 'nonempty', 'set_of', 'optional' ] ]
+#     #.......................................................................................................
+#     typenames =
+#       other:        'boolean'
+#       collections:  'set'
+#       numbers:      'integer'
+#     for groupname, hedgepaths of types._hedges.hedgepaths
+#       info groupname
+#       typename = typenames[ groupname ]
+#       for hedgepath in hedgepaths
+#         urge [ hedgepath..., typename ].join '.'
+#   done?()
+#   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "intertype size_of" ] = ( T, done ) ->
