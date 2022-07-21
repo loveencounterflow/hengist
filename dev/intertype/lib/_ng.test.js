@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, S, _types, alert, debug, demo, demo_autovivify_hedgepaths, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_size_of, demo_test_with_protocol, echo, equals, help, info, inspect, list_all_builtin_type_testers, log, njs_path, plain, praise, rpr, test, to_width, urge, warn, whisper;
+  var GUY, H, S, _types, alert, debug, demo, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_autovivify_hedgepaths, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_preview_autovivify_hedgepaths, demo_size_of, demo_test_with_protocol, echo, equals, help, info, inspect, list_all_builtin_type_testers, log, njs_path, plain, praise, rpr, test, to_width, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -246,48 +246,29 @@
     return null;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this["intertype hedgepaths"] = function(T, done) {
-    var Intertype, Type_cfg;
-    ({Intertype, Type_cfg} = require('../../../apps/intertype'));
-    (() => {      //.........................................................................................................
-      var groupname, hedgepath, hedgepaths, ref, results, typename, typenames, types;
-      types = new Intertype();
-      hedgepaths = types._hedges.hedgepaths;
-      groupname = 'other';
-      H.tabulate(`hedgepaths for group ${rpr(groupname)}`, [[null, null, null, null, null, null, null], ...hedgepaths[groupname]]);
-      if (T != null) {
-        T.eq(hedgepaths[groupname], [[], ['list_of'], ['list_of', 'optional'], ['set_of'], ['set_of', 'optional'], ['empty', 'list_of'], ['empty', 'list_of', 'optional'], ['empty', 'set_of'], ['empty', 'set_of', 'optional'], ['nonempty', 'list_of'], ['nonempty', 'list_of', 'optional'], ['nonempty', 'set_of'], ['nonempty', 'set_of', 'optional'], ['optional'], ['optional', 'list_of'], ['optional', 'list_of', 'optional'], ['optional', 'set_of'], ['optional', 'set_of', 'optional'], ['optional', 'empty', 'list_of'], ['optional', 'empty', 'list_of', 'optional'], ['optional', 'empty', 'set_of'], ['optional', 'empty', 'set_of', 'optional'], ['optional', 'nonempty', 'list_of'], ['optional', 'nonempty', 'list_of', 'optional'], ['optional', 'nonempty', 'set_of'], ['optional', 'nonempty', 'set_of', 'optional']]);
-      }
-      //.......................................................................................................
-      typenames = {
-        other: 'boolean',
-        collections: 'set',
-        numbers: 'integer'
-      };
-      ref = types._hedges.hedgepaths;
-      results = [];
-      for (groupname in ref) {
-        hedgepaths = ref[groupname];
-        info(groupname);
-        typename = typenames[groupname];
-        results.push((function() {
-          var i, len, results1;
-          results1 = [];
-          for (i = 0, len = hedgepaths.length; i < len; i++) {
-            hedgepath = hedgepaths[i];
-            results1.push(urge([...hedgepath, typename].join('.')));
-          }
-          return results1;
-        })());
-      }
-      return results;
-    })();
-    if (typeof done === "function") {
-      done();
-    }
-    return null;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // @[ "intertype hedgepaths" ] = ( T, done ) ->
+  //   { Intertype
+  //     Type_cfg }  = require '../../../apps/intertype'
+  //   #.........................................................................................................
+  //   do =>
+  //     types       = new Intertype()
+  //     hedgepaths  = types._hedges.hedgepaths
+  //     groupname   = 'other'
+  //     H.tabulate "hedgepaths for group #{rpr groupname}", [ [ null, null, null, null, null, null, null ], hedgepaths[ groupname ]..., ]
+  //     T?.eq hedgepaths[ groupname ], [ [], [ 'list_of' ], [ 'list_of', 'optional' ], [ 'set_of' ], [ 'set_of', 'optional' ], [ 'empty', 'list_of' ], [ 'empty', 'list_of', 'optional' ], [ 'empty', 'set_of' ], [ 'empty', 'set_of', 'optional' ], [ 'nonempty', 'list_of' ], [ 'nonempty', 'list_of', 'optional' ], [ 'nonempty', 'set_of' ], [ 'nonempty', 'set_of', 'optional' ], [ 'optional' ], [ 'optional', 'list_of' ], [ 'optional', 'list_of', 'optional' ], [ 'optional', 'set_of' ], [ 'optional', 'set_of', 'optional' ], [ 'optional', 'empty', 'list_of' ], [ 'optional', 'empty', 'list_of', 'optional' ], [ 'optional', 'empty', 'set_of' ], [ 'optional', 'empty', 'set_of', 'optional' ], [ 'optional', 'nonempty', 'list_of' ], [ 'optional', 'nonempty', 'list_of', 'optional' ], [ 'optional', 'nonempty', 'set_of' ], [ 'optional', 'nonempty', 'set_of', 'optional' ] ]
+  //     #.......................................................................................................
+  //     typenames =
+  //       other:        'boolean'
+  //       collections:  'set'
+  //       numbers:      'integer'
+  //     for groupname, hedgepaths of types._hedges.hedgepaths
+  //       info groupname
+  //       typename = typenames[ groupname ]
+  //       for hedgepath in hedgepaths
+  //         urge [ hedgepath..., typename ].join '.'
+  //   done?()
+  //   return null
 
   //-----------------------------------------------------------------------------------------------------------
   this["intertype size_of"] = async function(T, done) {
@@ -1491,8 +1472,8 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_autovivify_hedgepaths = function() {
-    var Intertype, _isa, base_proxy_cfg, isa, proxy_cfg, types;
+  demo_preview_autovivify_hedgepaths = function() {
+    var Intertype, XXXX_collector, _isa, base_proxy_cfg, isa, no_such_value, path, ref, sub_proxy_cfg, types;
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype({
       hedgematch: null
@@ -1524,9 +1505,9 @@
         if (key === Symbol.toStringTag) {
           return void 0;
         }
-        _isa.collector.length = 0;
-        _isa.collector.push('_isa');
-        _isa.collector.push(key);
+        XXXX_collector.length = 0;
+        XXXX_collector.push('_isa');
+        XXXX_collector.push(key);
         if ((R = target[key])) {
           return R;
         }
@@ -1536,53 +1517,136 @@
             return 'something';
           })
         }[key];
-        return target[key] = new Proxy(f, proxy_cfg);
+        return target[key] = new Proxy(f, sub_proxy_cfg);
       }
     };
     //---------------------------------------------------------------------------------------------------------
-    proxy_cfg = {
+    sub_proxy_cfg = {
       get: (target, key) => {
-        var R, f/* TAINT use `get()` */;
+        var R, f;
         if (key === Symbol.toStringTag) {
           return void 0;
         }
-        debug('^878-2^', target, rpr(key));
-        _isa.collector.push(key);
-        if ((R = target[key])) {
+        // debug '^878-2^', target, rpr key
+        XXXX_collector.push(key);
+        if ((R = GUY.props.get(target, key, no_such_value)) !== no_such_value) {
           return R;
         }
         f = function(x) {
           var method_name;
-          praise('^878-3^', _isa.collector);
-          praise('^878-4^', rpr(x));
-          method_name = _isa.collector.shift();
-          return types[method_name](..._isa.collector, x);
+          praise('^878-3^', XXXX_collector);
+          // praise '^878-4^', rpr x
+          method_name = XXXX_collector.shift();
+          return types[method_name](...XXXX_collector, x);
         };
         f = {
           [`${key}`]: f
         }[key];
-        return target[key] = new Proxy(f, proxy_cfg);
+        return target[key] = new Proxy(f, sub_proxy_cfg);
       }
     };
     //---------------------------------------------------------------------------------------------------------
+    no_such_value = Symbol('no_such_value');
     _isa = {};
-    _isa.collector = [];
+    XXXX_collector = [];
     isa = new Proxy(_isa, base_proxy_cfg);
     info('^878-5^', isa);
     info('^878-6^', isa.optional.integer(42));
     info('^878-7^', isa.optional.integer(null));
-    info('^878-8^', isa.x);
-    info('^878-9^', isa.optional.empty.list_of.integer(null));
-    info('^878-10^', isa.optional.empty.list_of.integer([]));
-    info('^878-11^', isa.optional.empty.list_of.integer([42]));
-    info('^878-12^', isa.optional.empty.list_of.integer([42, 3.1]));
-    info('^878-13^', isa.empty.integer(5));
-    /* TAINT returns `false` */    info('^878-14^', isa.nonempty.integer(5));
-// info '^878-15^', isa.x.y.z
-// info '^878-16^', isa.x.y.z 42
-// # info '^878-17^', isa.x.y.z.u.v.w.a.b.c.d
-// info '^878-18^', isa.x.y.z.u.v.w.a.b.c.d 42
-/* TAINT returns `true` */    return null;
+    info('^878-8^', isa.optional.optional.optional.optional.optional.integer(null));
+    info('^878-9^', isa.x);
+    info('^878-10^', isa.optional.empty.list_of.integer(null));
+    info('^878-11^', isa.optional.empty.list_of.integer([]));
+    info('^878-12^', isa.optional.empty.list_of.integer([42]));
+    info('^878-13^', isa.optional.empty.list_of.integer([42, 3.1]));
+    info('^878-14^', isa.empty.integer(5));
+    /* TAINT returns `false` */    info('^878-15^', isa.nonempty.integer(5));
+    /* TAINT returns `true` */    console.log((require('util')).inspect(isa, {
+      colors: true,
+      depth: 2e308
+    }));
+    info('^878-12^', isa.optional.empty.list_of.list_of.integer([42]));
+    info('^878-12^', isa.optional.empty.list_of.list_of.integer([[42]]));
+    ref = GUY.props.walk_tree(isa, {
+      sep: '.'
+    });
+    for (path of ref) {
+      praise('^353-2^', path);
+    }
+    // info '^878-16^', isa.x.y.z
+    // info '^878-17^', isa.x.y.z 42
+    // # info '^878-18^', isa.x.y.z.u.v.w.a.b.c.d
+    // info '^878-19^', isa.x.y.z.u.v.w.a.b.c.d 42
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_intertype_autovivify_hedgepaths = function() {
+    var Intertype, declare, isa, types, validate;
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    ({isa, validate, declare} = types);
+    declare('list', {
+      groups: 'collection',
+      test: function(x) {
+        return Array.isArray(x);
+      }
+    });
+    declare('integer', {
+      groups: 'number',
+      test: function(x) {
+        return Number.isInteger(x);
+      }
+    });
+    // info '^879-1^', isa 42
+    info('^879-4^', isa.integer(42));
+    praise('^879-5^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-8^', isa.optional(42));
+    praise('^879-9^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-10^', isa.optional.integer);
+    praise('^879-11^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-12^', isa.optional.integer(42));
+    praise('^879-13^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-14^', isa.optional.integer(42));
+    praise('^879-15^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-16^', isa.optional.integer(null));
+    praise('^879-17^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-18^', isa.optional.optional.integer(null));
+    praise('^879-19^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-20^', isa.empty.integer(null));
+    praise('^879-21^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-22^', isa.empty.integer(42));
+    praise('^879-23^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-24^', isa.empty.integer(0));
+    praise('^879-25^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-26^', isa.negative0.integer(0));
+    praise('^879-27^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-28^', isa.positive0.integer(0));
+    praise('^879-29^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-30^', isa.negative1.integer(0));
+    praise('^879-31^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-32^', isa.positive1.integer(0));
+    praise('^879-33^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-34^', isa.negative0.list(0));
+    praise('^879-35^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    info('^879-36^', isa.negative0.list([]));
+    praise('^879-37^', GUY.trm.reverse(types.state.method), types.state.hedges.join('.'));
+    // info '^879-38^', isa.x
+    // info '^879-39^', isa.optional.empty.list_of.integer null
+    // info '^879-40^', isa.optional.empty.list_of.integer []
+    // info '^879-41^', isa.optional.empty.list_of.integer [ 42, ]
+    // info '^879-42^', isa.optional.empty.list_of.integer [ 42, 3.1, ]
+    // info '^879-43^', isa.empty.integer     5 ### TAINT returns `false` ###
+    // info '^879-44^', isa.nonempty.integer  5 ### TAINT returns `true` ###
+    // console.log ( require 'util' ).inspect isa, { colors: true, depth: Infinity, }
+    // info '^879-45^', isa.optional.empty.list_of.list_of.integer [ 42, ]
+    // info '^879-46^', isa.optional.empty.list_of.list_of.integer [ [ 42,] ]
+    // praise '^353-2^', path for path from GUY.props.walk_tree isa, { sep: '.', }
+    // # info '^879-47^', isa.x.y.z
+    // # info '^879-48^', isa.x.y.z 42
+    // # # info '^879-49^', isa.x.y.z.u.v.w.a.b.c.d
+    // # info '^879-50^', isa.x.y.z.u.v.w.a.b.c.d 42
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -1791,49 +1855,33 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.declare_NG_defaults = function(T, done) {
-    var Intertype, types;
+  this.validate_returns_value = function(T, done) {
+    var Intertype, d, types;
+    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype();
     //.........................................................................................................
-    types.declare.list({
-      groups: 'collection',
+    types.declare.float({
+      groups: 'number',
       test: function(x) {
-        return Array.isArray(x);
-      }
-    });
-    //.........................................................................................................
-    types.declare.object({
-      test: function(x) {
-        return _types.isa.object(x);
-      }
+        return Number.isFinite(x);
+      },
+      default: 0
     });
     //.........................................................................................................
     types.declare.text({
       groups: 'collection',
       test: function(x) {
         return (typeof x) === 'string';
-      }
+      },
+      default: ''
     });
     //.........................................................................................................
-    types.declare.integer({
-      groups: 'number',
+    types.declare.object({
       test: function(x) {
-        return Number.isInteger(x);
-      }
-    });
-    //.........................................................................................................
-    types.declare.float({
-      groups: 'number',
-      test: function(x) {
-        return Number.isFinite(x);
-      }
-    });
-    //.........................................................................................................
-    types.declare.null({
-      test: function(x) {
-        return x === null;
-      }
+        return _types.isa.object(x);
+      },
+      default: {}
     });
     //.........................................................................................................
     types.declare.quantity({
@@ -1848,9 +1896,210 @@
           return this.isa.nonempty.text(x.unit);
         }
       ],
-      defaults: {
-        value: 1,
-        unit: 'm'
+      default: {
+        value: 0,
+        unit: null
+      }
+    });
+    d = {
+      value: 4,
+      unit: 'kB'
+    };
+    //.........................................................................................................
+    info(types.validate.float(12.3));
+    info(types.validate.quantity(d));
+    info(types.validate.quantity(d));
+    if (T != null) {
+      T.eq(types.validate.float(12.3), 12.3);
+    }
+    if (T != null) {
+      T.eq(types.validate.quantity(d), d);
+    }
+    if (T != null) {
+      T.ok((types.validate.quantity(d)) === d);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.create_returns_deep_copy_of_default = function(T, done) {
+    var Intertype, d, e, mylist, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    //.........................................................................................................
+    types.declare.text({
+      groups: 'collection',
+      test: function(x) {
+        return (typeof x) === 'string';
+      },
+      default: ''
+    });
+    //.........................................................................................................
+    types.declare.list({
+      groups: 'collection',
+      test: function(x) {
+        return Array.isArray(x);
+      },
+      default: []
+    });
+    //.........................................................................................................
+    types.declare.object({
+      test: function(x) {
+        return _types.isa.object(x);
+      },
+      default: {}
+    });
+    //.........................................................................................................
+    types.declare.frob({
+      test: [
+        function(x) {
+          return this.isa.object(x);
+        },
+        function(x) {
+          return this.isa.list(x.list);
+        },
+        function(x) {
+          return this.isa.nonempty.text(x.blah);
+        }
+      ],
+      default: {
+        list: [],
+        blah: null
+      }
+    });
+    //.........................................................................................................
+    mylist = [1, 2, 3];
+    d = {
+      list: mylist,
+      blah: 'blub'
+    };
+    if (T != null) {
+      T.eq(types.validate.frob(d), d);
+    }
+    if (T != null) {
+      T.ok((types.validate.frob(d)) === d);
+    }
+    e = types.create.frob(d);
+    debug('^45345^', d);
+    debug('^45345^', e);
+    if (T != null) {
+      T.ok(equals(e, d));
+    }
+    if (T != null) {
+      T.ok(e !== d);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.declare_NG_defaults = function(T, done) {
+    var Intertype, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    //.........................................................................................................
+    types.declare.null({
+      // groups:   'bottom'
+      test: function(x) {
+        return x === null;
+      },
+      default: null
+    });
+    //.........................................................................................................
+    types.declare.undefined({
+      // groups:   'bottom'
+      test: function(x) {
+        return x === void 0;
+      },
+      default: void 0
+    });
+    //.........................................................................................................
+    types.declare.boolean({
+      test: function(x) {
+        return (x === true) || (x === false);
+      },
+      default: false
+    });
+    //.........................................................................................................
+    types.declare.list({
+      groups: 'collection',
+      test: function(x) {
+        return Array.isArray(x);
+      },
+      default: []
+    });
+    //.........................................................................................................
+    types.declare.object({
+      test: function(x) {
+        return _types.isa.object(x);
+      },
+      default: {}
+    });
+    //.........................................................................................................
+    types.declare.text({
+      groups: 'collection',
+      test: function(x) {
+        return (typeof x) === 'string';
+      },
+      default: ''
+    });
+    //.........................................................................................................
+    types.declare.integer({
+      groups: 'number',
+      test: function(x) {
+        return Number.isInteger(x);
+      },
+      default: 0
+    });
+    //.........................................................................................................
+    types.declare.float({
+      groups: 'number',
+      test: function(x) {
+        return Number.isFinite(x);
+      },
+      default: 0
+    });
+    //.........................................................................................................
+    types.declare.quantity({
+      test: [
+        function(x) {
+          return this.isa.object(x);
+        },
+        function(x) {
+          return this.isa.float(x.value);
+        },
+        function(x) {
+          return this.isa.nonempty.text(x.unit);
+        }
+      ],
+      default: {
+        value: 0,
+        unit: null
+      }
+    });
+    //.........................................................................................................
+    types.declare.point2d({
+      test: [
+        function(x) {
+          return this.isa.object(x);
+        },
+        function(x) {
+          return this.isa.float(x.x);
+        },
+        function(x) {
+          return this.isa.float(x.y);
+        }
+      ],
+      default: {
+        x: 0,
+        y: 0
+      },
+      create: function(cfg) {
+        return {...{
+            x: 1,
+            y: 1
+          }, ...cfg};
       }
     });
     //.........................................................................................................
@@ -1888,9 +2137,13 @@
       value: 1.23,
       unit: 'm'
     }), true) : void 0);
-    info('^868-14^', T != null ? T.eq(types.validate.quantity({...types.registry.quantity.defaults, ...{
-        value: 44
-      }}), true) : void 0);
+    info('^868-14^', T != null ? T.eq(types.validate.quantity({...types.registry.quantity.default, ...{
+        value: 44,
+        unit: 'g'
+      }}), {
+      value: 44,
+      unit: 'g'
+    }) : void 0);
     info('^868-15^', T != null ? T.throws(/not a valid text/, function() {
       return types.validate.text(42);
     }) : void 0);
@@ -1898,15 +2151,46 @@
       return types.validate.empty.text(42);
     }) : void 0);
     info('^868-17^', T != null ? T.throws(/not a valid quantity/, function() {
-      return types.validate.quantity({...types.registry.quantity.defaults, ...{
+      return types.validate.quantity({...types.registry.quantity.default, ...{
           value: null
         }});
     }) : void 0);
     info('^868-18^', T != null ? T.eq(types.isa.empty.text(''), true) : void 0);
-    info('^868-19^', T != null ? T.eq(types.validate.empty.text(''), true) : void 0);
-    info('^868-20^', T != null ? T.eq(types.validate.nonempty.text('x'), true) : void 0);
-    info('^868-21^', T != null ? T.eq(types.validate.optional.nonempty.text(null), true) : void 0);
-    info('^868-22^', T != null ? T.eq(types.validate.optional.nonempty.text('x'), true) : void 0);
+    info('^868-19^', T != null ? T.eq(types.validate.empty.text(''), '') : void 0);
+    info('^868-20^', T != null ? T.eq(types.validate.nonempty.text('x'), 'x') : void 0);
+    info('^868-21^', T != null ? T.eq(types.validate.optional.nonempty.text(null), null) : void 0);
+    info('^868-22^', T != null ? T.eq(types.validate.optional.nonempty.text('x'), 'x') : void 0);
+    // info '^868-23^', T?.eq ( types.create.text() ), ''
+    praise('^868-24^', rpr(types.create.text()));
+    praise('^868-25^', rpr(types.create.integer()));
+    // praise '^868-25^', rpr types.isa.integer.or.text 'x'
+    info('^868-22^', T != null ? T.eq(types.create.null(), null) : void 0);
+    info('^868-22^', T != null ? T.eq(types.create.undefined(), void 0) : void 0);
+    info('^868-22^', T != null ? T.eq(types.create.boolean(), false) : void 0);
+    info('^868-22^', T != null ? T.eq(types.create.list(), []) : void 0);
+    info('^868-22^', T != null ? T.eq(types.create.object(), {}) : void 0);
+    info('^868-22^', T != null ? T.eq(types.create.text(), '') : void 0);
+    info('^868-22^', T != null ? T.eq(types.create.integer(), 0) : void 0);
+    info('^868-22^', T != null ? T.eq(types.create.quantity({
+      unit: 'km'
+    }), {
+      value: 0,
+      unit: 'km'
+    }) : void 0);
+    info('^868-22^', T != null ? T.eq(types.create.quantity({
+      value: 32,
+      unit: 'km'
+    }), {
+      value: 32,
+      unit: 'km'
+    }) : void 0);
+    // info '^868-22^', T?.eq ( types.create.integer 42   ), 42
+    // info '^868-22^', T?.throws /not a valid integer/, -> types.create.integer 4.2
+    info('^868-22^', T != null ? T.eq(types.create.float(), 0) : void 0);
+    info('^868-22^', T != null ? T.eq(types.create.point2d(), {
+      x: 1,
+      y: 1
+    }) : void 0);
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -1931,15 +2215,20 @@
     // test @[ "forbidden to overwrite declarations" ]
     // test @[ "intertype quantified types" ]
     // demo_enumerate_hedgepaths()
-    demo_autovivify_hedgepaths();
+    // demo_preview_autovivify_hedgepaths()
+    // demo_intertype_autovivify_hedgepaths()
+    // @declare_NG()
+    // test @declare_NG
+    // test @types_isa_empty_nonempty_text
+    // @declare_NG_defaults()
+    // @validate_returns_value()
+    // @create_returns_deep_copy_of_default()
+    // test @create_returns_deep_copy_of_default
+    // test @declare_NG_defaults
+    test(this);
   }
 
-  // @declare_NG()
-// test @declare_NG
-// test @types_isa_empty_nonempty_text
-// test @declare_NG_defaults
-// test @
-// @_demo_validate()
+  // @_demo_validate()
 
 }).call(this);
 
