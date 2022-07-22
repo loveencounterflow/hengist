@@ -2311,6 +2311,14 @@
     info('^868-15^', T != null ? T.throws(/not a valid text/, function() {
       return types.validate.text(42);
     }) : void 0);
+    // praise '^521-1^', types.isa.text ''
+    // praise '^521-2^', types.validate.text ''
+    // praise '^521-3^', types.isa.optional.text null
+    // praise '^521-4^', types.isa.optional.text ''
+    // praise '^521-5^', types.isa.optional.text 42
+    // praise '^521-6^', types.validate.optional.text null
+    // praise '^521-7^', types.validate.empty.text null
+    // praise '^521-8^', types.validate.empty.text 42
     info('^868-16^', T != null ? T.throws(/not a valid empty\.text/, function() {
       return types.validate.empty.text(42);
     }) : void 0);
@@ -2324,10 +2332,8 @@
     info('^868-20^', T != null ? T.eq(types.validate.nonempty.text('x'), 'x') : void 0);
     info('^868-21^', T != null ? T.eq(types.validate.optional.nonempty.text(null), null) : void 0);
     info('^868-22^', T != null ? T.eq(types.validate.optional.nonempty.text('x'), 'x') : void 0);
-    // info '^868-23^', T?.eq ( types.create.text() ), ''
     praise('^868-24^', rpr(types.create.text()));
     praise('^868-25^', rpr(types.create.integer()));
-    // praise '^868-25^', rpr types.isa.integer.or.text 'x'
     info('^868-22^', T != null ? T.eq(types.create.null(), null) : void 0);
     info('^868-22^', T != null ? T.eq(types.create.undefined(), void 0) : void 0);
     info('^868-22^', T != null ? T.eq(types.create.boolean(), false) : void 0);
@@ -2348,13 +2354,80 @@
       value: 32,
       unit: 'km'
     }) : void 0);
-    // info '^868-22^', T?.eq ( types.create.integer 42   ), 42
-    // info '^868-22^', T?.throws /not a valid integer/, -> types.create.integer 4.2
     info('^868-22^', T != null ? T.eq(types.create.float(), 0) : void 0);
     info('^868-22^', T != null ? T.eq(types.create.point2d(), {
       x: 1,
       y: 1
     }) : void 0);
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.isa_x_or_y = function(T, done) {
+    var Intertype, entry, k, ref, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    //.........................................................................................................
+    types.declare.null({
+      // groups:   'bottom'
+      test: function(x) {
+        return x === null;
+      },
+      default: null
+    });
+    //.........................................................................................................
+    types.declare.boolean({
+      test: function(x) {
+        return (x === true) || (x === false);
+      },
+      default: false
+    });
+    //.........................................................................................................
+    types.declare.text({
+      groups: 'collection',
+      test: function(x) {
+        return (typeof x) === 'string';
+      },
+      default: ''
+    });
+    //.........................................................................................................
+    types.declare.list({
+      groups: 'collection',
+      test: function(x) {
+        return Array.isArray(x);
+      },
+      default: ''
+    });
+    //.........................................................................................................
+    types.declare.integer({
+      groups: 'number',
+      test: function(x) {
+        return Number.isInteger(x);
+      },
+      default: 0
+    });
+    //.........................................................................................................
+    // try types.isa.integer.foobar 24 catch error then warn GUY.trm.reverse error.message
+    // T?.throws /unknown type 'foobar'/, -> types.isa.integer.foobar 24
+    // praise '^868-25^', GUY.trm.truth      types.isa.integer 24
+    // praise '^868-25^', GUY.trm.truth      types.isa.optional.integer 24
+    praise('^868-25^', GUY.trm.truth(types.isa.collection(24)));
+    praise('^868-25^', GUY.trm.truth(types.isa.collection([24])));
+    praise('^868-25^', GUY.trm.truth(types.isa.text.or.integer(24)));
+    ref = types.registry;
+    for (k in ref) {
+      entry = ref[k];
+      // praise '^868-25^', GUY.trm.truth      types.isa.integer.or.text 24
+      // praise '^868-25^', GUY.trm.truth      types.isa.integer.or.text
+      // praise '^868-25^', GUY.trm.truth      types.isa.optional.nonempty.text
+      // praise '^868-25^', path for path from GUY.props.walk_tree types.isa
+      // praise '^868-25^', GUY.trm.truth      types.isa.integer.or.text 'x'
+      // praise '^868-25^', GUY.trm.truth not  types.isa.integer.or.text false
+      // praise '^868-25^', GUY.trm.truth not  types.isa.integer.or.text {}
+      //.........................................................................................................
+      praise(to_width(k, 20), entry);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -2384,13 +2457,15 @@
     // @declare_NG()
     // test @declare_NG
     // test @types_isa_empty_nonempty_text
-    // @declare_NG_defaults()
     // @validate_returns_value()
     // @create_returns_deep_copy_of_default()
     // test @create_returns_deep_copy_of_default
+    // @declare_NG_defaults()
     // test @declare_NG_defaults
     // @create_with_seal_freeze_extra()
     // test @create_with_seal_freeze_extra
+    // @isa_x_or_y()
+    // test @isa_x_or_y
     test(this);
   }
 
