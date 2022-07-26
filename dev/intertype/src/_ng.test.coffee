@@ -21,6 +21,7 @@ GUY                       = require '../../../apps/guy'
   inspect
   echo
   log     }               = GUY.trm
+rvr                       = GUY.trm.reverse
 #...........................................................................................................
 test                      = require 'guy-test'
 # { intersection_of }       = require '../../../apps/intertype/lib/helpers'
@@ -1362,47 +1363,84 @@ demo_size_of = ->
   # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
+  { declare
+    isa
+    validate  } = types
   #.........................................................................................................
-  types.declare.null
+  declare.null
     # groups:   'bottom'
     test:     ( x ) -> x is null
     default:  null
   #.........................................................................................................
-  types.declare.boolean
+  declare.boolean
     test:     ( x ) -> ( x is true ) or ( x is false )
     default:  false
   #.........................................................................................................
-  types.declare.text
+  declare.text
     groups:   'collection'
     test:     ( x ) -> ( typeof x ) is 'string'
     default:  ''
   #.........................................................................................................
-  types.declare.list
+  declare.codepoint_text
+    groups:   'other'
+    test:     ( x ) -> /^.$/u.test x
+    default:  '\x00'
+  #.........................................................................................................
+  declare.codepoint_number
+    groups:   'other'
+    test:     ( x ) -> @isa.integer x and ( 0x00000 <= x <= 0x1ffff )
+    default:  '\x00'
+  #.........................................................................................................
+  declare.list
     groups:   'collection'
     test:     ( x ) -> Array.isArray x
     default:  ''
   #.........................................................................................................
-  types.declare.integer
+  declare.integer
     groups:   'number'
     test:     ( x ) -> Number.isInteger x
     default:  0
   #.........................................................................................................
-  # try types.isa.integer.foobar 24 catch error then warn GUY.trm.reverse error.message
-  # T?.throws /unknown type 'foobar'/, -> types.isa.integer.foobar 24
-  # praise '^868-25^', GUY.trm.truth      types.isa.integer 24
-  # praise '^868-25^', GUY.trm.truth      types.isa.optional.integer 24
-  praise '^868-25^', GUY.trm.truth      types.isa.collection 24
-  praise '^868-25^', GUY.trm.truth      types.isa.collection [ 24, ]
-  praise '^868-25^', GUY.trm.truth      types.isa.text.or.integer 24
-  # praise '^868-25^', GUY.trm.truth      types.isa.integer.or.text 24
-  # praise '^868-25^', GUY.trm.truth      types.isa.integer.or.text
-  # praise '^868-25^', GUY.trm.truth      types.isa.optional.nonempty.text
-  # praise '^868-25^', path for path from GUY.props.walk_tree types.isa
-  # praise '^868-25^', GUY.trm.truth      types.isa.integer.or.text 'x'
-  # praise '^868-25^', GUY.trm.truth not  types.isa.integer.or.text false
-  # praise '^868-25^', GUY.trm.truth not  types.isa.integer.or.text {}
+  # try isa.integer.foobar 24 catch error then warn GUY.trm.reverse error.message
+  # T?.throws /unknown type 'foobar'/, -> isa.integer.foobar 24
+  # praise '^868-25^', GUY.trm.truth      isa.integer 24
+  # praise '^868-25^', GUY.trm.truth      isa.optional.integer 24
+  # praise '^868-25^', GUY.trm.truth      isa.collection 24
+  # praise '^868-25^', GUY.trm.truth      isa.collection [ 24, ]
+  # praise '^868-25^', GUY.trm.truth      isa.text.or.integer 24
+  # praise '^868-25^', GUY.trm.truth      isa.integer.or.text 24
+  # praise '^868-25^', GUY.trm.truth      isa.integer.or.text
+  # praise '^868-25^', GUY.trm.truth      isa.optional.nonempty.text
+  # praise '^868-25^', path for path from GUY.props.walk_tree isa
+  # praise '^868-25^', GUY.trm.truth      isa.integer.or.text 'x'
+  # praise '^868-25^', GUY.trm.truth not  isa.integer.or.text false
+  # praise '^868-25^', GUY.trm.truth not  isa.integer.or.text {}
+  praise '^341-1^', isa.text.or.integer 42
+  praise '^341-2^', isa.text.or.integer ''
+  praise '^341-1^', isa.optional.text.or.integer null
+  praise '^341-1^', isa.optional.text.or.integer ''
+  praise '^341-1^', isa.optional.text.or.integer 42
+  praise '^341-1^', isa.optional.text.or.integer 2.3
   #.........................................................................................................
-  praise ( to_width k, 20 ), entry for k, entry of types.registry
+  # info '^871-1^',  try T?.eq ( isa.integer 42                     ), true   catch e then warn '^871-2^', rvr e.message; T?.ok false
+  # info '^871-3^',  try T?.eq ( isa.text ''                        ), true   catch e then warn '^871-4^', rvr e.message; T?.ok false
+  # info '^871-5^',  try T?.eq ( isa.integer ''                     ), false  catch e then warn '^871-6^', rvr e.message; T?.ok false
+  # info '^871-7^',  try T?.eq ( isa.text 42                        ), false  catch e then warn '^871-8^', rvr e.message; T?.ok false
+  # info '^871-9^',  try T?.eq ( isa.text.or.integer 42             ), true   catch e then warn '^871-10^', rvr e.message; T?.ok false
+  # info '^871-11^',  try T?.eq ( isa.text.or.integer ''             ), true   catch e then warn '^871-12^', rvr e.message; T?.ok false
+  # info '^871-13^',  try T?.eq ( isa.integer.or.text 42             ), true   catch e then warn '^871-14^', rvr e.message; T?.ok false
+  # info '^871-15^',  try T?.eq ( isa.integer.or.text ''             ), true   catch e then warn '^871-16^', rvr e.message; T?.ok false
+  # info '^871-17^',  try T?.eq ( isa.text.or.integer false          ), false  catch e then warn '^871-18^', rvr e.message; T?.ok false
+  # info '^871-19^', try T?.eq ( isa.integer.or.text false          ), false  catch e then warn '^871-20^', rvr e.message; T?.ok false
+  # info '^871-21^', try T?.eq ( isa.text.or.integer null           ), false  catch e then warn '^871-22^', rvr e.message; T?.ok false
+  # info '^871-23^', try T?.eq ( isa.integer.or.text null           ), false  catch e then warn '^871-24^', rvr e.message; T?.ok false
+  # info '^871-25^', try T?.eq ( isa.optional.text.or.integer null  ), true   catch e then warn '^871-26^', rvr e.message; T?.ok false
+  # info '^871-27^', try T?.eq ( isa.optional.integer.or.text null  ), true   catch e then warn '^871-28^', rvr e.message; T?.ok false
+  #.........................................................................................................
+  # T?.throws /unknown type 'foobar'/, -> isa.integer.foobar 24
+  # praise ( to_width k, 20 ), entry for k, entry of types.registry
+  help types.registry.text
+  help types.registry.integer
   #.........................................................................................................
   done?()
 
@@ -1440,8 +1478,8 @@ unless module.parent?
   # test @declare_NG_defaults
   # @create_with_seal_freeze_extra()
   # test @create_with_seal_freeze_extra
-  # @isa_x_or_y()
-  # test @isa_x_or_y
-  test @
+  # test @
   # @_demo_validate()
+  @isa_x_or_y()
+  # test @isa_x_or_y
 
