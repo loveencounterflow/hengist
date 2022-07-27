@@ -337,7 +337,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["intertype all hedgepaths"] = async function(T, done) {
+  this.intertype_all_hedgepaths = async function(T, done) {
     var Intertype, Type_cfg, declare, error, i, isa, len, matcher, probe, probes_and_matchers, types, value;
     // T?.halt_on_error true
     ({Intertype, Type_cfg} = require('../../../apps/intertype'));
@@ -2366,7 +2366,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.isa_x_or_y = function(T, done) {
-    var Intertype, declare, isa, types, validate;
+    var Intertype, declare, e, isa, types, validate;
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype();
@@ -2441,27 +2441,140 @@
     // praise '^868-25^', GUY.trm.truth      isa.integer.or.text 'x'
     // praise '^868-25^', GUY.trm.truth not  isa.integer.or.text false
     // praise '^868-25^', GUY.trm.truth not  isa.integer.or.text {}
-    praise('^341-1^', isa.text.or.integer(42));
-    praise('^341-2^', isa.text.or.integer(''));
-    praise('^341-1^', isa.optional.text.or.integer(null));
-    praise('^341-1^', isa.optional.text.or.integer(''));
-    praise('^341-1^', isa.optional.text.or.integer(42));
-    praise('^341-1^', isa.optional.text.or.integer(2.3));
-    //.........................................................................................................
-    // info '^871-1^',  try T?.eq ( isa.integer 42                     ), true   catch e then warn '^871-2^', rvr e.message; T?.ok false
-    // info '^871-3^',  try T?.eq ( isa.text ''                        ), true   catch e then warn '^871-4^', rvr e.message; T?.ok false
-    // info '^871-5^',  try T?.eq ( isa.integer ''                     ), false  catch e then warn '^871-6^', rvr e.message; T?.ok false
-    // info '^871-7^',  try T?.eq ( isa.text 42                        ), false  catch e then warn '^871-8^', rvr e.message; T?.ok false
-    // info '^871-9^',  try T?.eq ( isa.text.or.integer 42             ), true   catch e then warn '^871-10^', rvr e.message; T?.ok false
-    // info '^871-11^',  try T?.eq ( isa.text.or.integer ''             ), true   catch e then warn '^871-12^', rvr e.message; T?.ok false
-    // info '^871-13^',  try T?.eq ( isa.integer.or.text 42             ), true   catch e then warn '^871-14^', rvr e.message; T?.ok false
-    // info '^871-15^',  try T?.eq ( isa.integer.or.text ''             ), true   catch e then warn '^871-16^', rvr e.message; T?.ok false
-    // info '^871-17^',  try T?.eq ( isa.text.or.integer false          ), false  catch e then warn '^871-18^', rvr e.message; T?.ok false
-    // info '^871-19^', try T?.eq ( isa.integer.or.text false          ), false  catch e then warn '^871-20^', rvr e.message; T?.ok false
-    // info '^871-21^', try T?.eq ( isa.text.or.integer null           ), false  catch e then warn '^871-22^', rvr e.message; T?.ok false
-    // info '^871-23^', try T?.eq ( isa.integer.or.text null           ), false  catch e then warn '^871-24^', rvr e.message; T?.ok false
-    // info '^871-25^', try T?.eq ( isa.optional.text.or.integer null  ), true   catch e then warn '^871-26^', rvr e.message; T?.ok false
-    // info '^871-27^', try T?.eq ( isa.optional.integer.or.text null  ), true   catch e then warn '^871-28^', rvr e.message; T?.ok false
+
+    // praise '^341-1^', isa.text.or.integer 42
+    // praise '^341-2^', isa.text.or.integer ''
+    // praise '^341-1^', isa.optional.text.or.integer null
+    // praise '^341-1^', isa.optional.text.or.integer ''
+    // praise '^341-1^', isa.optional.text.or.integer 42
+    // praise '^341-1^', isa.optional.text.or.integer false
+    // #.........................................................................................................
+    info('^871-1^', (function() {
+      try {
+        return T != null ? T.eq(isa.integer(42), true) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-2^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
+    info('^871-3^', (function() {
+      try {
+        return T != null ? T.eq(isa.text(''), true) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-4^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
+    info('^871-5^', (function() {
+      try {
+        return T != null ? T.eq(isa.integer(''), false) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-6^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
+    info('^871-7^', (function() {
+      try {
+        return T != null ? T.eq(isa.text(42), false) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-8^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
+    info('^871-9^', (function() {
+      try {
+        return T != null ? T.eq(isa.text.or.integer(42), true) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-10^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
+    info('^871-11^', (function() {
+      try {
+        return T != null ? T.eq(isa.text.or.integer(''), true) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-12^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
+    info('^871-13^', (function() {
+      try {
+        return T != null ? T.eq(isa.integer.or.text(42), true) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-14^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
+    info('^871-15^', (function() {
+      try {
+        return T != null ? T.eq(isa.integer.or.text(''), true) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-16^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
+    info('^871-17^', (function() {
+      try {
+        return T != null ? T.eq(isa.text.or.integer(false), false) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-18^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
+    info('^871-19^', (function() {
+      try {
+        return T != null ? T.eq(isa.integer.or.text(false), false) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-20^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
+    info('^871-21^', (function() {
+      try {
+        return T != null ? T.eq(isa.text.or.integer(null), false) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-22^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
+    info('^871-23^', (function() {
+      try {
+        return T != null ? T.eq(isa.integer.or.text(null), false) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-24^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
+    info('^871-25^', (function() {
+      try {
+        return T != null ? T.eq(isa.optional.text.or.integer(null), true) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-26^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
+    info('^871-27^', (function() {
+      try {
+        return T != null ? T.eq(isa.optional.integer.or.text(null), true) : void 0;
+      } catch (error1) {
+        e = error1;
+        warn('^871-28^', rvr(e.message));
+        return T != null ? T.ok(false) : void 0;
+      }
+    })());
     //.........................................................................................................
     // T?.throws /unknown type 'foobar'/, -> isa.integer.foobar 24
     // praise ( to_width k, 20 ), entry for k, entry of types.registry
@@ -2480,8 +2593,8 @@
     // demo_combinate_2()
     // demo_intertype_hedge_combinator()
     // @[ "intertype hedgepaths" ]()
-    // @[ "intertype all hedgepaths" ]()
-    // test @[ "intertype all hedgepaths" ]
+    // @intertype_all_hedgepaths()
+    // test @intertype_all_hedgepaths
     // demo_size_of()
     // test @[ "intertype size_of" ]
     // urge GUY.src.get_first_return_clause_text
@@ -2506,9 +2619,8 @@
     // test @
     // @_demo_validate()
     this.isa_x_or_y();
+    test(this.isa_x_or_y);
   }
-
-  // test @isa_x_or_y
 
 }).call(this);
 
