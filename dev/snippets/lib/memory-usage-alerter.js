@@ -79,7 +79,11 @@
     this.demo();
   }
 
-  /*
+  // { free, l, exa, } = require 'tinysh'
+// debug free()
+// help l().status
+// help exa()
+/*
 MemTotal:        3442252 kB
 MemFree:          160728 kB
 MemAvailable:     437192 kB
