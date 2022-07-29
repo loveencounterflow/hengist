@@ -37,11 +37,7 @@ _types                    = new ( require 'intertype' ).Intertype()
   { Intertype }   = require '../../../apps/intertype'
   types           = new Intertype()
   # jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
-  types.declare 'null',                             test: ( x ) -> x is null
-  types.declare 'array',    isa_collection: true,   test: ( x ) -> Array.isArray x
-  types.declare 'list',     isa_collection: true,   test: ( x ) -> @_isa 'array', x
-  types.declare 'integer',  isa_numeric: true,      test: ( x ) -> Number.isInteger x
-  # types.declare 'text',     isa_collection: true,   test: ( x ) -> ( jto x ) is 'string'
+  types.declare 'array',    isa_collection: true,   test: ( x ) -> @isa.list x
   #.........................................................................................................
   T?.eq ( types._isa 'null',                         null          ), true
   T?.eq ( types._isa 'optional', 'null',             null          ), true
@@ -81,8 +77,6 @@ demo = ->
   { Intertype }   = require '../../../apps/intertype'
   types           = new Intertype()
   jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
-  # types.declare 'null',               groups: 'other',            test: ( x ) -> x is null
-  types.declare 'text',               groups: 'collection',            test: ( x ) -> typeof x is 'string'
   debug '^5345-1^', types
   debug '^5345-2^', types.isa
   debug '^5345-3^', types.isa.collection
@@ -103,18 +97,18 @@ demo = ->
   debug '^5345-13^', types.isa.text 'x'
   debug '^5345-14^', types.isa.nonempty.text 'x'
   debug '^5345-15^', types._isa 'nonempty', 'text', 'x'
-  debug '^5345-16^', types._isa 'empty', 'set_of', 'text', new Set()
-  debug '^5345-17^', types.isa.empty.set_of.text new Set()
-  debug '^5345-18^', types.isa.list_of.text []
-  debug '^5345-19^', types.isa.list_of.text [ 'x', '', ]
-  debug '^5345-20^', types.isa.list_of.nonempty.text [ 'x', ]
-  debug '^5345-21^', types.isa.list_of.empty.text [ '', ]
+  debug '^5345-16^', types._isa 'empty', 'set', 'of', 'text', new Set()
+  debug '^5345-17^', types.isa.empty.set.of.text new Set()
+  debug '^5345-18^', types.isa.list.of.text []
+  debug '^5345-19^', types.isa.list.of.text [ 'x', '', ]
+  debug '^5345-20^', types.isa.list.of.nonempty.text [ 'x', ]
+  debug '^5345-21^', types.isa.list.of.empty.text [ '', ]
   debug '^5345-22^', types.isa.optional.text ''
   debug '^5345-23^', types.isa.optional.text null
-  debug '^5345-24^', types.isa.optional.list_of.text null
-  debug '^5345-25^', types.isa.optional.list_of.optional.text null
-  debug '^5345-26^', types.isa.optional.list_of.optional.nonempty.text null
-  debug '^5345-27^', types.isa.optional.nonempty.list_of.optional.nonempty.text null
+  debug '^5345-24^', types.isa.optional.list.of.text null
+  debug '^5345-25^', types.isa.optional.list.of.optional.text null
+  debug '^5345-26^', types.isa.optional.list.of.optional.nonempty.text null
+  debug '^5345-27^', types.isa.optional.nonempty.list.of.optional.nonempty.text null
   info CND.reverse '        '
   debug '^5345-28^', types._isa 'nonempty', 'text', ''
   debug '^5345-29^', types._isa 'text', 42
@@ -123,23 +117,23 @@ demo = ->
   debug '^5345-32^', types.isa.empty.text 'x'
   debug '^5345-33^', types.isa.nonempty.text ''
   debug '^5345-34^', types.isa.empty.text 42
-  debug '^5345-35^', types.isa.list_of.text 'x'
-  debug '^5345-36^', types.isa.list_of.text [ 'x', 42, ]
-  debug '^5345-37^', types.isa.list_of.nonempty.text [ '', 'x' ]
-  debug '^5345-38^', types.isa.list_of.empty.text [ 'x', '', ]
-  # debug '^5345-39^', types.isa.list_of.text 42
-  # debug '^5345-40^', types.isa.list_of.text []
-  # debug '^5345-41^', types.isa.list_of.text [ 'a', 'b', ]
-  # debug '^5345-42^', types.isa.nonempty.list_of.text [ 'a', 'b', ]
-  # debug '^5345-43^', types.isa.nonempty.list_of.nonempty.text [ 'a', 'b', ]
-  # debug '^5345-44^', types.isa.empty.list_of.text 42
-  # debug '^5345-45^', types.isa.empty.list_of.text []
+  debug '^5345-35^', types.isa.list.of.text 'x'
+  debug '^5345-36^', types.isa.list.of.text [ 'x', 42, ]
+  debug '^5345-37^', types.isa.list.of.nonempty.text [ '', 'x' ]
+  debug '^5345-38^', types.isa.list.of.empty.text [ 'x', '', ]
+  # debug '^5345-39^', types.isa.list.of.text 42
+  # debug '^5345-40^', types.isa.list.of.text []
+  # debug '^5345-41^', types.isa.list.of.text [ 'a', 'b', ]
+  # debug '^5345-42^', types.isa.nonempty.list.of.text [ 'a', 'b', ]
+  # debug '^5345-43^', types.isa.nonempty.list.of.nonempty.text [ 'a', 'b', ]
+  # debug '^5345-44^', types.isa.empty.list.of.text 42
+  # debug '^5345-45^', types.isa.empty.list.of.text []
   # debug '^5345-46^', types.isa.optional.empty.text 42
   # debug '^5345-47^', types.isa.optional.empty.text null
   # debug '^5345-48^', types.isa.optional
   # debug '^5345-49^', types.isa.optional.empty
-  # debug '^5345-50^', types.isa.optional.empty.list_of
-  # debug '^5345-51^', types.isa.optional.empty.list_of.text
+  # debug '^5345-50^', types.isa.optional.empty.list.of
+  # debug '^5345-51^', types.isa.optional.empty.list.of.text
   process.exit 111
   #.........................................................................................................
   info '^509-1', types.isa 'null',                         null
@@ -167,7 +161,7 @@ demo = ->
 #     hedgepaths  = types._hedges.hedgepaths
 #     groupname   = 'other'
 #     H.tabulate "hedgepaths for group #{rpr groupname}", [ [ null, null, null, null, null, null, null ], hedgepaths[ groupname ]..., ]
-#     T?.eq hedgepaths[ groupname ], [ [], [ 'list_of' ], [ 'list_of', 'optional' ], [ 'set_of' ], [ 'set_of', 'optional' ], [ 'empty', 'list_of' ], [ 'empty', 'list_of', 'optional' ], [ 'empty', 'set_of' ], [ 'empty', 'set_of', 'optional' ], [ 'nonempty', 'list_of' ], [ 'nonempty', 'list_of', 'optional' ], [ 'nonempty', 'set_of' ], [ 'nonempty', 'set_of', 'optional' ], [ 'optional' ], [ 'optional', 'list_of' ], [ 'optional', 'list_of', 'optional' ], [ 'optional', 'set_of' ], [ 'optional', 'set_of', 'optional' ], [ 'optional', 'empty', 'list_of' ], [ 'optional', 'empty', 'list_of', 'optional' ], [ 'optional', 'empty', 'set_of' ], [ 'optional', 'empty', 'set_of', 'optional' ], [ 'optional', 'nonempty', 'list_of' ], [ 'optional', 'nonempty', 'list_of', 'optional' ], [ 'optional', 'nonempty', 'set_of' ], [ 'optional', 'nonempty', 'set_of', 'optional' ] ]
+#     T?.eq hedgepaths[ groupname ], [ [], [ 'list', 'of' ], [ 'list', 'of', 'optional' ], [ 'set', 'of' ], [ 'set', 'of', 'optional' ], [ 'empty', 'list', 'of' ], [ 'empty', 'list', 'of', 'optional' ], [ 'empty', 'set', 'of' ], [ 'empty', 'set', 'of', 'optional' ], [ 'nonempty', 'list', 'of' ], [ 'nonempty', 'list', 'of', 'optional' ], [ 'nonempty', 'set', 'of' ], [ 'nonempty', 'set', 'of', 'optional' ], [ 'optional' ], [ 'optional', 'list', 'of' ], [ 'optional', 'list', 'of', 'optional' ], [ 'optional', 'set', 'of' ], [ 'optional', 'set', 'of', 'optional' ], [ 'optional', 'empty', 'list', 'of' ], [ 'optional', 'empty', 'list', 'of', 'optional' ], [ 'optional', 'empty', 'set', 'of' ], [ 'optional', 'empty', 'set', 'of', 'optional' ], [ 'optional', 'nonempty', 'list', 'of' ], [ 'optional', 'nonempty', 'list', 'of', 'optional' ], [ 'optional', 'nonempty', 'set', 'of' ], [ 'optional', 'nonempty', 'set', 'of', 'optional' ] ]
 #     #.......................................................................................................
 #     typenames =
 #       other:        'boolean'
@@ -238,326 +232,323 @@ demo = ->
   types         = new Intertype()
   { declare
     isa       } = types
-  declare 'boolean',  groups: 'other',        test: ( x ) ->  ( x is true ) or ( x is false )
-  declare 'integer',  groups: 'number',       test: ( x ) -> Number.isInteger x
-  declare 'set',      groups: 'collection',   test: ( x ) -> x instanceof Set
   #.........................................................................................................
   probes_and_matchers = [
     ### other ###
     [ 'isa.boolean',                                   (   true                                             ), true, ]
-    [ 'isa.list_of.boolean',                           (   [ true, ]                                        ), true, ]
-    [ 'isa.list_of.boolean',                           (   []                                               ), true, ]
-    [ 'isa.list_of.optional.boolean',                  ( []                                                 ), true, ]
-    [ 'isa.list_of.optional.boolean',                  ( [ null, ]                                          ), true, ]
-    [ 'isa.list_of.optional.boolean',                  ( [ null, true, ]                                    ), true, ]
-    [ 'isa.set_of.boolean',                            ( S"[]"                                              ), true, ]
-    [ 'isa.set_of.boolean',                            ( S"[ false, ]"                                      ), true, ]
-    [ 'isa.set_of.optional.boolean',                   ( S"[]"                                              ), true, ]
-    [ 'isa.set_of.optional.boolean',                   ( S"[ null, ]"                                       ), true, ]
-    [ 'isa.set_of.optional.boolean',                   ( S"[ null, false, ]"                                ), true, ]
-    [ 'isa.empty.list_of.boolean',                     ( []                                                 ), true, ]
-    [ 'isa.empty.list_of.optional.boolean',            ( []                                                 ), true, ]
-    [ 'isa.empty.set_of.boolean',                      ( S""                                                ), true, ]
-    [ 'isa.empty.set_of.optional.boolean',             ( S""                                                ), true, ]
-    [ 'isa.nonempty.list_of.boolean',                  ( [ true, ]                                          ), true, ]
-    [ 'isa.nonempty.list_of.optional.boolean',         ( [ true, null, ]                                    ), true, ]
-    [ 'isa.nonempty.set_of.boolean',                   ( S"[ true, false, ]"                                ), true, ]
-    [ 'isa.nonempty.set_of.optional.boolean',          ( S"[ null, null, ]"                                 ), true, ]
+    [ 'isa.list.of.boolean',                           (   [ true, ]                                        ), true, ]
+    [ 'isa.list.of.boolean',                           (   []                                               ), true, ]
+    [ 'isa.list.of.optional.boolean',                  ( []                                                 ), true, ]
+    [ 'isa.list.of.optional.boolean',                  ( [ null, ]                                          ), true, ]
+    [ 'isa.list.of.optional.boolean',                  ( [ null, true, ]                                    ), true, ]
+    [ 'isa.set.of.boolean',                            ( S"[]"                                              ), true, ]
+    [ 'isa.set.of.boolean',                            ( S"[ false, ]"                                      ), true, ]
+    [ 'isa.set.of.optional.boolean',                   ( S"[]"                                              ), true, ]
+    [ 'isa.set.of.optional.boolean',                   ( S"[ null, ]"                                       ), true, ]
+    [ 'isa.set.of.optional.boolean',                   ( S"[ null, false, ]"                                ), true, ]
+    [ 'isa.empty.list.of.boolean',                     ( []                                                 ), true, ]
+    [ 'isa.empty.list.of.optional.boolean',            ( []                                                 ), true, ]
+    [ 'isa.empty.set.of.boolean',                      ( S""                                                ), true, ]
+    [ 'isa.empty.set.of.optional.boolean',             ( S""                                                ), true, ]
+    [ 'isa.nonempty.list.of.boolean',                  ( [ true, ]                                          ), true, ]
+    [ 'isa.nonempty.list.of.optional.boolean',         ( [ true, null, ]                                    ), true, ]
+    [ 'isa.nonempty.set.of.boolean',                   ( S"[ true, false, ]"                                ), true, ]
+    [ 'isa.nonempty.set.of.optional.boolean',          ( S"[ null, null, ]"                                 ), true, ]
     [ 'isa.optional.boolean',                          ( true                                               ), true, ]
     [ 'isa.optional.boolean',                          ( false                                              ), true, ]
     [ 'isa.optional.boolean',                          ( null                                               ), true, ]
-    [ 'isa.optional.list_of.boolean',                  ( null                                               ), true, ]
-    [ 'isa.optional.list_of.boolean',                  ( []                                                 ), true, ]
-    [ 'isa.optional.list_of.boolean',                  ( [ true, ]                                          ), true, ]
-    [ 'isa.optional.list_of.optional.boolean',         ( null                                               ), true, ]
-    [ 'isa.optional.list_of.optional.boolean',         ( []                                                 ), true, ]
-    [ 'isa.optional.list_of.optional.boolean',         ( [ true, ]                                          ), true, ]
-    [ 'isa.optional.list_of.optional.boolean',         ( [ true, null, ]                                    ), true, ]
-    [ 'isa.optional.set_of.boolean',                   ( null                                               ), true, ]
-    [ 'isa.optional.set_of.boolean',                   ( S""                                                ), true, ]
-    [ 'isa.optional.set_of.boolean',                   ( S"[ true, ]"                                       ), true, ]
-    [ 'isa.optional.set_of.optional.boolean',          ( null                                               ), true, ]
-    [ 'isa.optional.set_of.optional.boolean',          ( S""                                                ), true, ]
-    [ 'isa.optional.set_of.optional.boolean',          ( S"[ true, ]"                                       ), true, ]
-    [ 'isa.optional.set_of.optional.boolean',          ( S"[ null, ]"                                       ), true, ]
-    [ 'isa.optional.empty.list_of.boolean',            ( null                                               ), true, ]
-    [ 'isa.optional.empty.list_of.boolean',            ( []                                                 ), true, ]
-    [ 'isa.optional.empty.list_of.optional.boolean',   ( null                                               ), true, ]
-    [ 'isa.optional.empty.list_of.optional.boolean',   ( []                                                 ), true, ]
-    [ 'isa.optional.empty.set_of.boolean',             ( null                                               ), true, ]
-    [ 'isa.optional.empty.set_of.boolean',             ( S""                                                ), true, ]
-    [ 'isa.optional.empty.set_of.optional.boolean',    ( null                                               ), true, ]
-    [ 'isa.optional.empty.set_of.optional.boolean',    ( S""                                                ), true, ]
-    [ 'isa.optional.nonempty.list_of.boolean',         ( null                                               ), true, ]
-    [ 'isa.optional.nonempty.list_of.boolean',         ( [ true, ]                                          ), true, ]
-    [ 'isa.optional.nonempty.list_of.boolean',         ( [ false, ]                                         ), true, ]
-    [ 'isa.optional.nonempty.list_of.optional.boolean',( null                                               ), true, ]
-    [ 'isa.optional.nonempty.list_of.optional.boolean',( [ true, ]                                          ), true, ]
-    [ 'isa.optional.nonempty.list_of.optional.boolean',( [ null, null, ]                                    ), true, ]
-    [ 'isa.optional.nonempty.set_of.boolean',          ( null                                               ), true, ]
-    [ 'isa.optional.nonempty.set_of.boolean',          ( S"[ true, ]"                                       ), true, ]
-    [ 'isa.optional.nonempty.set_of.optional.boolean', ( null                                               ), true, ]
-    [ 'isa.optional.nonempty.set_of.optional.boolean', ( S"[ true, ]"                                       ), true, ]
-    [ 'isa.optional.nonempty.set_of.optional.boolean', ( S"[ false, null, ]"                                ), true, ]
+    [ 'isa.optional.list.of.boolean',                  ( null                                               ), true, ]
+    [ 'isa.optional.list.of.boolean',                  ( []                                                 ), true, ]
+    [ 'isa.optional.list.of.boolean',                  ( [ true, ]                                          ), true, ]
+    [ 'isa.optional.list.of.optional.boolean',         ( null                                               ), true, ]
+    [ 'isa.optional.list.of.optional.boolean',         ( []                                                 ), true, ]
+    [ 'isa.optional.list.of.optional.boolean',         ( [ true, ]                                          ), true, ]
+    [ 'isa.optional.list.of.optional.boolean',         ( [ true, null, ]                                    ), true, ]
+    [ 'isa.optional.set.of.boolean',                   ( null                                               ), true, ]
+    [ 'isa.optional.set.of.boolean',                   ( S""                                                ), true, ]
+    [ 'isa.optional.set.of.boolean',                   ( S"[ true, ]"                                       ), true, ]
+    [ 'isa.optional.set.of.optional.boolean',          ( null                                               ), true, ]
+    [ 'isa.optional.set.of.optional.boolean',          ( S""                                                ), true, ]
+    [ 'isa.optional.set.of.optional.boolean',          ( S"[ true, ]"                                       ), true, ]
+    [ 'isa.optional.set.of.optional.boolean',          ( S"[ null, ]"                                       ), true, ]
+    [ 'isa.optional.empty.list.of.boolean',            ( null                                               ), true, ]
+    [ 'isa.optional.empty.list.of.boolean',            ( []                                                 ), true, ]
+    [ 'isa.optional.empty.list.of.optional.boolean',   ( null                                               ), true, ]
+    [ 'isa.optional.empty.list.of.optional.boolean',   ( []                                                 ), true, ]
+    [ 'isa.optional.empty.set.of.boolean',             ( null                                               ), true, ]
+    [ 'isa.optional.empty.set.of.boolean',             ( S""                                                ), true, ]
+    [ 'isa.optional.empty.set.of.optional.boolean',    ( null                                               ), true, ]
+    [ 'isa.optional.empty.set.of.optional.boolean',    ( S""                                                ), true, ]
+    [ 'isa.optional.nonempty.list.of.boolean',         ( null                                               ), true, ]
+    [ 'isa.optional.nonempty.list.of.boolean',         ( [ true, ]                                          ), true, ]
+    [ 'isa.optional.nonempty.list.of.boolean',         ( [ false, ]                                         ), true, ]
+    [ 'isa.optional.nonempty.list.of.optional.boolean',( null                                               ), true, ]
+    [ 'isa.optional.nonempty.list.of.optional.boolean',( [ true, ]                                          ), true, ]
+    [ 'isa.optional.nonempty.list.of.optional.boolean',( [ null, null, ]                                    ), true, ]
+    [ 'isa.optional.nonempty.set.of.boolean',          ( null                                               ), true, ]
+    [ 'isa.optional.nonempty.set.of.boolean',          ( S"[ true, ]"                                       ), true, ]
+    [ 'isa.optional.nonempty.set.of.optional.boolean', ( null                                               ), true, ]
+    [ 'isa.optional.nonempty.set.of.optional.boolean', ( S"[ true, ]"                                       ), true, ]
+    [ 'isa.optional.nonempty.set.of.optional.boolean', ( S"[ false, null, ]"                                ), true, ]
   #.........................................................................................................
   ### collections ###
     [ 'isa.set',                                              ( S""                                         ), true, ]
     [ 'isa.empty.set',                                        ( S""                                         ), true, ]
-    [ 'isa.list_of.set',                                      ( []                                          ), true, ]
-    [ 'isa.list_of.set',                                      ( [ S"", ]                                    ), true, ]
-    [ 'isa.list_of.empty.set',                                ( [ S"", ]                                    ), true, ]
-    [ 'isa.list_of.nonempty.set',                             ( [ S"[42]", S"'x'", ]                        ), true, ]
-    [ 'isa.list_of.optional.set',                             ( []                                          ), true, ]
-    [ 'isa.list_of.optional.set',                             ( [ S"" ]                                     ), true, ]
-    [ 'isa.list_of.optional.empty.set',                       ( []                                          ), true, ]
-    [ 'isa.list_of.optional.nonempty.set',                    ( []                                          ), true, ]
-    [ 'isa.list_of.optional.nonempty.set',                    ( [ null, S"'x'", ]                           ), true, ]
-    [ 'isa.list_of.optional.nonempty.set',                    ( [ S"'x'", S"'abc𪜁'", ]                      ), true, ]
+    [ 'isa.list.of.set',                                      ( []                                          ), true, ]
+    [ 'isa.list.of.set',                                      ( [ S"", ]                                    ), true, ]
+    [ 'isa.list.of.empty.set',                                ( [ S"", ]                                    ), true, ]
+    [ 'isa.list.of.nonempty.set',                             ( [ S"[42]", S"'x'", ]                        ), true, ]
+    [ 'isa.list.of.optional.set',                             ( []                                          ), true, ]
+    [ 'isa.list.of.optional.set',                             ( [ S"" ]                                     ), true, ]
+    [ 'isa.list.of.optional.empty.set',                       ( []                                          ), true, ]
+    [ 'isa.list.of.optional.nonempty.set',                    ( []                                          ), true, ]
+    [ 'isa.list.of.optional.nonempty.set',                    ( [ null, S"'x'", ]                           ), true, ]
+    [ 'isa.list.of.optional.nonempty.set',                    ( [ S"'x'", S"'abc𪜁'", ]                      ), true, ]
     [ 'isa.nonempty.set',                                     ( S"'abc𪜁'"                                   ), true, ]
-    [ 'isa.set_of.set',                                       ( S"[new Set()]"                              ), true, ]
-    [ 'isa.set_of.empty.set',                                 ( S"[]"                                       ), true, ]
-    [ 'isa.set_of.empty.set',                                 ( S"[new Set()]"                              ), true, ]
-    [ 'isa.set_of.nonempty.set',                              ( S"[]"                                       ), true, ]
-    [ 'isa.set_of.nonempty.set',                              ( S"[new Set('a')]"                           ), true, ]
-    [ 'isa.set_of.optional.set',                              ( S""                                         ), true, ]
-    [ 'isa.set_of.optional.set',                              ( S"null"                                     ), true, ]
-    [ 'isa.set_of.optional.set',                              ( S"[null,new Set()]"                         ), true, ]
-    [ 'isa.set_of.optional.empty.set',                        ( S""                                         ), true, ]
-    [ 'isa.set_of.optional.empty.set',                        ( S"null"                                     ), true, ]
-    [ 'isa.set_of.optional.empty.set',                        ( S"[new Set()]"                              ), true, ]
-    [ 'isa.set_of.optional.nonempty.set',                     ( S""                                         ), true, ]
-    [ 'isa.set_of.optional.nonempty.set',                     ( S"null"                                     ), true, ]
-    [ 'isa.set_of.optional.nonempty.set',                     ( S"[new Set('a')]"                           ), true, ]
-    [ 'isa.empty.list_of.set',                                ( []                                          ), true, ]
-    [ 'isa.empty.list_of.empty.set',                          ( []                                          ), true, ]
-    [ 'isa.empty.list_of.nonempty.set',                       ( []                                          ), true, ]
-    [ 'isa.empty.list_of.optional.set',                       ( []                                          ), true, ]
-    [ 'isa.empty.list_of.optional.empty.set',                 ( []                                          ), true, ]
-    [ 'isa.empty.list_of.optional.nonempty.set',              ( []                                          ), true, ]
-    [ 'isa.empty.set_of.set',                                 ( S""                                         ), true, ]
-    [ 'isa.empty.set_of.empty.set',                           ( S""                                         ), true, ]
-    [ 'isa.empty.set_of.nonempty.set',                        ( S""                                         ), true, ]
-    [ 'isa.empty.set_of.optional.set',                        ( S""                                         ), true, ]
-    [ 'isa.empty.set_of.optional.empty.set',                  ( S""                                         ), true, ]
-    [ 'isa.empty.set_of.optional.nonempty.set',               ( S""                                         ), true, ]
-    [ 'isa.nonempty.list_of.set',                             ( [ S"", ]                                    ), true, ]
-    [ 'isa.nonempty.list_of.set',                             ( [ S"'x'", ]                                 ), true, ]
-    [ 'isa.nonempty.list_of.empty.set',                       ( [ S"", S"", ]                               ), true, ]
-    [ 'isa.nonempty.list_of.nonempty.set',                    ( [ S"[1]", S"[2]", ]                         ), true, ]
-    [ 'isa.nonempty.list_of.optional.set',                    ( [ null, ]                                   ), true, ]
-    [ 'isa.nonempty.list_of.optional.set',                    ( [ null, S"'abc'", ]                         ), true, ]
-    [ 'isa.nonempty.list_of.optional.empty.set',              ( [ null, ]                                   ), true, ]
-    [ 'isa.nonempty.list_of.optional.empty.set',              ( [ null, S"", ]                              ), true, ]
-    [ 'isa.nonempty.list_of.optional.nonempty.set',           ( [ null, ]                                   ), true, ]
-    [ 'isa.nonempty.list_of.optional.nonempty.set',           ( [ null, S"'abc'" ]                          ), true, ]
-    [ 'isa.nonempty.set_of.set',                              ( S"[new Set()]"                              ), true, ]
-    [ 'isa.nonempty.set_of.empty.set',                        ( S"[new Set()]"                              ), true, ]
-    [ 'isa.nonempty.set_of.nonempty.set',                     ( S"[new Set('abc')]"                         ), true, ]
-    [ 'isa.nonempty.set_of.optional.set',                     ( S"[null]"                                   ), true, ]
-    [ 'isa.nonempty.set_of.optional.set',                     ( S"[null, new Set('a')]"                     ), true, ]
-    [ 'isa.nonempty.set_of.optional.empty.set',               ( S"[new Set(), null,]"                       ), true, ]
-    [ 'isa.nonempty.set_of.optional.nonempty.set',            ( S"[null,new Set('abc')]"                    ), true, ]
+    [ 'isa.set.of.set',                                       ( S"[new Set()]"                              ), true, ]
+    [ 'isa.set.of.empty.set',                                 ( S"[]"                                       ), true, ]
+    [ 'isa.set.of.empty.set',                                 ( S"[new Set()]"                              ), true, ]
+    [ 'isa.set.of.nonempty.set',                              ( S"[]"                                       ), true, ]
+    [ 'isa.set.of.nonempty.set',                              ( S"[new Set('a')]"                           ), true, ]
+    [ 'isa.set.of.optional.set',                              ( S""                                         ), true, ]
+    [ 'isa.set.of.optional.set',                              ( S"null"                                     ), true, ]
+    [ 'isa.set.of.optional.set',                              ( S"[null,new Set()]"                         ), true, ]
+    [ 'isa.set.of.optional.empty.set',                        ( S""                                         ), true, ]
+    [ 'isa.set.of.optional.empty.set',                        ( S"null"                                     ), true, ]
+    [ 'isa.set.of.optional.empty.set',                        ( S"[new Set()]"                              ), true, ]
+    [ 'isa.set.of.optional.nonempty.set',                     ( S""                                         ), true, ]
+    [ 'isa.set.of.optional.nonempty.set',                     ( S"null"                                     ), true, ]
+    [ 'isa.set.of.optional.nonempty.set',                     ( S"[new Set('a')]"                           ), true, ]
+    [ 'isa.empty.list.of.set',                                ( []                                          ), true, ]
+    [ 'isa.empty.list.of.empty.set',                          ( []                                          ), true, ]
+    [ 'isa.empty.list.of.nonempty.set',                       ( []                                          ), true, ]
+    [ 'isa.empty.list.of.optional.set',                       ( []                                          ), true, ]
+    [ 'isa.empty.list.of.optional.empty.set',                 ( []                                          ), true, ]
+    [ 'isa.empty.list.of.optional.nonempty.set',              ( []                                          ), true, ]
+    [ 'isa.empty.set.of.set',                                 ( S""                                         ), true, ]
+    [ 'isa.empty.set.of.empty.set',                           ( S""                                         ), true, ]
+    [ 'isa.empty.set.of.nonempty.set',                        ( S""                                         ), true, ]
+    [ 'isa.empty.set.of.optional.set',                        ( S""                                         ), true, ]
+    [ 'isa.empty.set.of.optional.empty.set',                  ( S""                                         ), true, ]
+    [ 'isa.empty.set.of.optional.nonempty.set',               ( S""                                         ), true, ]
+    [ 'isa.nonempty.list.of.set',                             ( [ S"", ]                                    ), true, ]
+    [ 'isa.nonempty.list.of.set',                             ( [ S"'x'", ]                                 ), true, ]
+    [ 'isa.nonempty.list.of.empty.set',                       ( [ S"", S"", ]                               ), true, ]
+    [ 'isa.nonempty.list.of.nonempty.set',                    ( [ S"[1]", S"[2]", ]                         ), true, ]
+    [ 'isa.nonempty.list.of.optional.set',                    ( [ null, ]                                   ), true, ]
+    [ 'isa.nonempty.list.of.optional.set',                    ( [ null, S"'abc'", ]                         ), true, ]
+    [ 'isa.nonempty.list.of.optional.empty.set',              ( [ null, ]                                   ), true, ]
+    [ 'isa.nonempty.list.of.optional.empty.set',              ( [ null, S"", ]                              ), true, ]
+    [ 'isa.nonempty.list.of.optional.nonempty.set',           ( [ null, ]                                   ), true, ]
+    [ 'isa.nonempty.list.of.optional.nonempty.set',           ( [ null, S"'abc'" ]                          ), true, ]
+    [ 'isa.nonempty.set.of.set',                              ( S"[new Set()]"                              ), true, ]
+    [ 'isa.nonempty.set.of.empty.set',                        ( S"[new Set()]"                              ), true, ]
+    [ 'isa.nonempty.set.of.nonempty.set',                     ( S"[new Set('abc')]"                         ), true, ]
+    [ 'isa.nonempty.set.of.optional.set',                     ( S"[null]"                                   ), true, ]
+    [ 'isa.nonempty.set.of.optional.set',                     ( S"[null, new Set('a')]"                     ), true, ]
+    [ 'isa.nonempty.set.of.optional.empty.set',               ( S"[new Set(), null,]"                       ), true, ]
+    [ 'isa.nonempty.set.of.optional.nonempty.set',            ( S"[null,new Set('abc')]"                    ), true, ]
     [ 'isa.optional.set',                                     ( null                                      ), true, ]
     [ 'isa.optional.set',                                     ( S""                                      ), true, ]
     [ 'isa.optional.empty.set',                               ( null                                      ), true, ]
     [ 'isa.optional.empty.set',                               ( S""                                      ), true, ]
-    [ 'isa.optional.list_of.set',                             ( null                                      ), true, ]
-    [ 'isa.optional.list_of.set',                             ( []                                      ), true, ]
-    [ 'isa.optional.list_of.set',                             ( [ S"", ]                                      ), true, ]
-    [ 'isa.optional.list_of.empty.set',                       ( null                                      ), true, ]
-    [ 'isa.optional.list_of.empty.set',                       ( []                                      ), true, ]
-    [ 'isa.optional.list_of.empty.set',                       ( [ S"", ]                                      ), true, ]
-    [ 'isa.optional.list_of.nonempty.set',                    ( null                                      ), true, ]
-    [ 'isa.optional.list_of.nonempty.set',                    ( [ S"'xxx'", ]                                      ), true, ]
-    [ 'isa.optional.list_of.optional.set',                    ( null                                      ), true, ]
-    [ 'isa.optional.list_of.optional.set',                    ( []                                      ), true, ]
-    [ 'isa.optional.list_of.optional.set',                    ( [ null, ]                                      ), true, ]
-    [ 'isa.optional.list_of.optional.set',                    ( [ null, S"", ]                                      ), true, ]
-    [ 'isa.optional.list_of.optional.empty.set',              ( null                                      ), true, ]
-    [ 'isa.optional.list_of.optional.empty.set',              ( []                                      ), true, ]
-    [ 'isa.optional.list_of.optional.empty.set',              ( [ null, ]                                      ), true, ]
-    [ 'isa.optional.list_of.optional.empty.set',              ( [ null, S"", ]                                      ), true, ]
-    [ 'isa.optional.list_of.optional.nonempty.set',           ( null                                      ), true, ]
-    [ 'isa.optional.list_of.optional.nonempty.set',           ( []                                      ), true, ]
-    [ 'isa.optional.list_of.optional.nonempty.set',           ( [ null, S"'abc'", ]                                      ), true, ]
+    [ 'isa.optional.list.of.set',                             ( null                                      ), true, ]
+    [ 'isa.optional.list.of.set',                             ( []                                      ), true, ]
+    [ 'isa.optional.list.of.set',                             ( [ S"", ]                                      ), true, ]
+    [ 'isa.optional.list.of.empty.set',                       ( null                                      ), true, ]
+    [ 'isa.optional.list.of.empty.set',                       ( []                                      ), true, ]
+    [ 'isa.optional.list.of.empty.set',                       ( [ S"", ]                                      ), true, ]
+    [ 'isa.optional.list.of.nonempty.set',                    ( null                                      ), true, ]
+    [ 'isa.optional.list.of.nonempty.set',                    ( [ S"'xxx'", ]                                      ), true, ]
+    [ 'isa.optional.list.of.optional.set',                    ( null                                      ), true, ]
+    [ 'isa.optional.list.of.optional.set',                    ( []                                      ), true, ]
+    [ 'isa.optional.list.of.optional.set',                    ( [ null, ]                                      ), true, ]
+    [ 'isa.optional.list.of.optional.set',                    ( [ null, S"", ]                                      ), true, ]
+    [ 'isa.optional.list.of.optional.empty.set',              ( null                                      ), true, ]
+    [ 'isa.optional.list.of.optional.empty.set',              ( []                                      ), true, ]
+    [ 'isa.optional.list.of.optional.empty.set',              ( [ null, ]                                      ), true, ]
+    [ 'isa.optional.list.of.optional.empty.set',              ( [ null, S"", ]                                      ), true, ]
+    [ 'isa.optional.list.of.optional.nonempty.set',           ( null                                      ), true, ]
+    [ 'isa.optional.list.of.optional.nonempty.set',           ( []                                      ), true, ]
+    [ 'isa.optional.list.of.optional.nonempty.set',           ( [ null, S"'abc'", ]                                      ), true, ]
     [ 'isa.optional.nonempty.set',                            ( null                                      ), true, ]
     [ 'isa.optional.nonempty.set',                            ( S"'abc'"                                      ), true, ]
-    [ 'isa.optional.set_of.set',                              ( null                                      ), true, ]
-    [ 'isa.optional.set_of.set',                              ( S""                                      ), true, ]
-    [ 'isa.optional.set_of.set',                              ( S"[new Set()]"                                      ), true, ]
-    [ 'isa.optional.set_of.set',                              ( S"[new Set('abc')]"                                      ), true, ]
-    [ 'isa.optional.set_of.empty.set',                        ( null                                      ), true, ]
-    [ 'isa.optional.set_of.empty.set',                        ( S""                                      ), true, ]
-    [ 'isa.optional.set_of.empty.set',                        ( S"[new Set()]"                                      ), true, ]
-    [ 'isa.optional.set_of.nonempty.set',                     ( null                                      ), true, ]
-    [ 'isa.optional.set_of.nonempty.set',                     ( S"[new Set('abc')]"                                      ), true, ]
-    [ 'isa.optional.set_of.optional.set',                     ( null                                      ), true, ]
-    [ 'isa.optional.set_of.optional.set',                     ( S""                                      ), true, ]
-    [ 'isa.optional.set_of.optional.set',                     ( S"[null, new Set(),]"                                      ), true, ]
-    [ 'isa.optional.set_of.optional.empty.set',               ( null                                      ), true, ]
-    [ 'isa.optional.set_of.optional.empty.set',               ( S""                                      ), true, ]
-    [ 'isa.optional.set_of.optional.empty.set',               ( S"[null, new Set()]"                                      ), true, ]
-    [ 'isa.optional.set_of.optional.nonempty.set',            ( null                                      ), true, ]
-    [ 'isa.optional.set_of.optional.nonempty.set',            ( S""                                      ), true, ]
-    [ 'isa.optional.set_of.optional.nonempty.set',            ( S"[null, new Set('abc')]"                                      ), true, ]
-    # [ 'isa.optional.empty.list_of.set',                       ( null                                      ), true, ]
-    # [ 'isa.optional.empty.list_of.empty.set',                 ( null                                      ), true, ]
-    # [ 'isa.optional.empty.list_of.nonempty.set',              ( null                                      ), true, ]
-    # [ 'isa.optional.empty.list_of.optional.set',              ( null                                      ), true, ]
-    # [ 'isa.optional.empty.list_of.optional.empty.set',        ( null                                      ), true, ]
-    # [ 'isa.optional.empty.list_of.optional.nonempty.set',     ( null                                      ), true, ]
-    # [ 'isa.optional.empty.set_of.set',                        ( null                                      ), true, ]
-    # [ 'isa.optional.empty.set_of.empty.set',                  ( null                                      ), true, ]
-    # [ 'isa.optional.empty.set_of.nonempty.set',               ( null                                      ), true, ]
-    # [ 'isa.optional.empty.set_of.optional.set',               ( null                                      ), true, ]
-    # [ 'isa.optional.empty.set_of.optional.empty.set',         ( null                                      ), true, ]
-    # [ 'isa.optional.empty.set_of.optional.nonempty.set',      ( null                                      ), true, ]
-    # [ 'isa.optional.nonempty.list_of.set',                    ( null                                      ), true, ]
-    # [ 'isa.optional.nonempty.list_of.empty.set',              ( null                                      ), true, ]
-    # [ 'isa.optional.nonempty.list_of.nonempty.set',           ( null                                      ), true, ]
-    # [ 'isa.optional.nonempty.list_of.optional.set',           ( null                                      ), true, ]
-    # [ 'isa.optional.nonempty.list_of.optional.empty.set',     ( null                                      ), true, ]
-    # [ 'isa.optional.nonempty.list_of.optional.nonempty.set',  ( null                                      ), true, ]
-    # [ 'isa.optional.nonempty.set_of.set',                     ( null                                      ), true, ]
-    # [ 'isa.optional.nonempty.set_of.empty.set',               ( null                                      ), true, ]
-    # [ 'isa.optional.nonempty.set_of.nonempty.set',            ( null                                      ), true, ]
-    # [ 'isa.optional.nonempty.set_of.optional.set',            ( null                                      ), true, ]
-    # [ 'isa.optional.nonempty.set_of.optional.empty.set',      ( null                                      ), true, ]
-    # [ 'isa.optional.nonempty.set_of.optional.nonempty.set',   ( null                                      ), true, ]
+    [ 'isa.optional.set.of.set',                              ( null                                      ), true, ]
+    [ 'isa.optional.set.of.set',                              ( S""                                      ), true, ]
+    [ 'isa.optional.set.of.set',                              ( S"[new Set()]"                                      ), true, ]
+    [ 'isa.optional.set.of.set',                              ( S"[new Set('abc')]"                                      ), true, ]
+    [ 'isa.optional.set.of.empty.set',                        ( null                                      ), true, ]
+    [ 'isa.optional.set.of.empty.set',                        ( S""                                      ), true, ]
+    [ 'isa.optional.set.of.empty.set',                        ( S"[new Set()]"                                      ), true, ]
+    [ 'isa.optional.set.of.nonempty.set',                     ( null                                      ), true, ]
+    [ 'isa.optional.set.of.nonempty.set',                     ( S"[new Set('abc')]"                                      ), true, ]
+    [ 'isa.optional.set.of.optional.set',                     ( null                                      ), true, ]
+    [ 'isa.optional.set.of.optional.set',                     ( S""                                      ), true, ]
+    [ 'isa.optional.set.of.optional.set',                     ( S"[null, new Set(),]"                                      ), true, ]
+    [ 'isa.optional.set.of.optional.empty.set',               ( null                                      ), true, ]
+    [ 'isa.optional.set.of.optional.empty.set',               ( S""                                      ), true, ]
+    [ 'isa.optional.set.of.optional.empty.set',               ( S"[null, new Set()]"                                      ), true, ]
+    [ 'isa.optional.set.of.optional.nonempty.set',            ( null                                      ), true, ]
+    [ 'isa.optional.set.of.optional.nonempty.set',            ( S""                                      ), true, ]
+    [ 'isa.optional.set.of.optional.nonempty.set',            ( S"[null, new Set('abc')]"                                      ), true, ]
+    # [ 'isa.optional.empty.list.of.set',                       ( null                                      ), true, ]
+    # [ 'isa.optional.empty.list.of.empty.set',                 ( null                                      ), true, ]
+    # [ 'isa.optional.empty.list.of.nonempty.set',              ( null                                      ), true, ]
+    # [ 'isa.optional.empty.list.of.optional.set',              ( null                                      ), true, ]
+    # [ 'isa.optional.empty.list.of.optional.empty.set',        ( null                                      ), true, ]
+    # [ 'isa.optional.empty.list.of.optional.nonempty.set',     ( null                                      ), true, ]
+    # [ 'isa.optional.empty.set.of.set',                        ( null                                      ), true, ]
+    # [ 'isa.optional.empty.set.of.empty.set',                  ( null                                      ), true, ]
+    # [ 'isa.optional.empty.set.of.nonempty.set',               ( null                                      ), true, ]
+    # [ 'isa.optional.empty.set.of.optional.set',               ( null                                      ), true, ]
+    # [ 'isa.optional.empty.set.of.optional.empty.set',         ( null                                      ), true, ]
+    # [ 'isa.optional.empty.set.of.optional.nonempty.set',      ( null                                      ), true, ]
+    # [ 'isa.optional.nonempty.list.of.set',                    ( null                                      ), true, ]
+    # [ 'isa.optional.nonempty.list.of.empty.set',              ( null                                      ), true, ]
+    # [ 'isa.optional.nonempty.list.of.nonempty.set',           ( null                                      ), true, ]
+    # [ 'isa.optional.nonempty.list.of.optional.set',           ( null                                      ), true, ]
+    # [ 'isa.optional.nonempty.list.of.optional.empty.set',     ( null                                      ), true, ]
+    # [ 'isa.optional.nonempty.list.of.optional.nonempty.set',  ( null                                      ), true, ]
+    # [ 'isa.optional.nonempty.set.of.set',                     ( null                                      ), true, ]
+    # [ 'isa.optional.nonempty.set.of.empty.set',               ( null                                      ), true, ]
+    # [ 'isa.optional.nonempty.set.of.nonempty.set',            ( null                                      ), true, ]
+    # [ 'isa.optional.nonempty.set.of.optional.set',            ( null                                      ), true, ]
+    # [ 'isa.optional.nonempty.set.of.optional.empty.set',      ( null                                      ), true, ]
+    # [ 'isa.optional.nonempty.set.of.optional.nonempty.set',   ( null                                      ), true, ]
     ]
   # #.........................................................................................................
   # ### numbers ###
   # for [ v, matcher, ] in [ [ 42, true, ], [ 42.1, false, ], ]
   #   T?.eq ( isa.integer                                               v ), matcher
-  #   T?.eq ( isa.list_of.integer                                       v ), matcher
-  #   T?.eq ( isa.list_of.negative0.integer                             v ), matcher
-  #   T?.eq ( isa.list_of.negative1.integer                             v ), matcher
-  #   T?.eq ( isa.list_of.positive0.integer                             v ), matcher
-  #   T?.eq ( isa.list_of.positive1.integer                             v ), matcher
-  #   T?.eq ( isa.list_of.optional.integer                              v ), matcher
-  #   T?.eq ( isa.list_of.optional.negative0.integer                    v ), matcher
-  #   T?.eq ( isa.list_of.optional.negative1.integer                    v ), matcher
-  #   T?.eq ( isa.list_of.optional.positive0.integer                    v ), matcher
-  #   T?.eq ( isa.list_of.optional.positive1.integer                    v ), matcher
+  #   T?.eq ( isa.list.of.integer                                       v ), matcher
+  #   T?.eq ( isa.list.of.negative0.integer                             v ), matcher
+  #   T?.eq ( isa.list.of.negative1.integer                             v ), matcher
+  #   T?.eq ( isa.list.of.positive0.integer                             v ), matcher
+  #   T?.eq ( isa.list.of.positive1.integer                             v ), matcher
+  #   T?.eq ( isa.list.of.optional.integer                              v ), matcher
+  #   T?.eq ( isa.list.of.optional.negative0.integer                    v ), matcher
+  #   T?.eq ( isa.list.of.optional.negative1.integer                    v ), matcher
+  #   T?.eq ( isa.list.of.optional.positive0.integer                    v ), matcher
+  #   T?.eq ( isa.list.of.optional.positive1.integer                    v ), matcher
   #   T?.eq ( isa.negative0.integer                                     v ), matcher
   #   T?.eq ( isa.negative1.integer                                     v ), matcher
   #   T?.eq ( isa.positive0.integer                                     v ), matcher
   #   T?.eq ( isa.positive1.integer                                     v ), matcher
-  #   T?.eq ( isa.set_of.integer                                        v ), matcher
-  #   T?.eq ( isa.set_of.negative0.integer                              v ), matcher
-  #   T?.eq ( isa.set_of.negative1.integer                              v ), matcher
-  #   T?.eq ( isa.set_of.positive0.integer                              v ), matcher
-  #   T?.eq ( isa.set_of.positive1.integer                              v ), matcher
-  #   T?.eq ( isa.set_of.optional.integer                               v ), matcher
-  #   T?.eq ( isa.set_of.optional.negative0.integer                     v ), matcher
-  #   T?.eq ( isa.set_of.optional.negative1.integer                     v ), matcher
-  #   T?.eq ( isa.set_of.optional.positive0.integer                     v ), matcher
-  #   T?.eq ( isa.set_of.optional.positive1.integer                     v ), matcher
-  #   T?.eq ( isa.empty.list_of.integer                                 v ), matcher
-  #   T?.eq ( isa.empty.list_of.negative0.integer                       v ), matcher
-  #   T?.eq ( isa.empty.list_of.negative1.integer                       v ), matcher
-  #   T?.eq ( isa.empty.list_of.positive0.integer                       v ), matcher
-  #   T?.eq ( isa.empty.list_of.positive1.integer                       v ), matcher
-  #   T?.eq ( isa.empty.list_of.optional.integer                        v ), matcher
-  #   T?.eq ( isa.empty.list_of.optional.negative0.integer              v ), matcher
-  #   T?.eq ( isa.empty.list_of.optional.negative1.integer              v ), matcher
-  #   T?.eq ( isa.empty.list_of.optional.positive0.integer              v ), matcher
-  #   T?.eq ( isa.empty.list_of.optional.positive1.integer              v ), matcher
-  #   T?.eq ( isa.empty.set_of.integer                                  v ), matcher
-  #   T?.eq ( isa.empty.set_of.negative0.integer                        v ), matcher
-  #   T?.eq ( isa.empty.set_of.negative1.integer                        v ), matcher
-  #   T?.eq ( isa.empty.set_of.positive0.integer                        v ), matcher
-  #   T?.eq ( isa.empty.set_of.positive1.integer                        v ), matcher
-  #   T?.eq ( isa.empty.set_of.optional.integer                         v ), matcher
-  #   T?.eq ( isa.empty.set_of.optional.negative0.integer               v ), matcher
-  #   T?.eq ( isa.empty.set_of.optional.negative1.integer               v ), matcher
-  #   T?.eq ( isa.empty.set_of.optional.positive0.integer               v ), matcher
-  #   T?.eq ( isa.empty.set_of.optional.positive1.integer               v ), matcher
-  #   T?.eq ( isa.nonempty.list_of.integer                              v ), matcher
-  #   T?.eq ( isa.nonempty.list_of.negative0.integer                    v ), matcher
-  #   T?.eq ( isa.nonempty.list_of.negative1.integer                    v ), matcher
-  #   T?.eq ( isa.nonempty.list_of.positive0.integer                    v ), matcher
-  #   T?.eq ( isa.nonempty.list_of.positive1.integer                    v ), matcher
-  #   T?.eq ( isa.nonempty.list_of.optional.integer                     v ), matcher
-  #   T?.eq ( isa.nonempty.list_of.optional.negative0.integer           v ), matcher
-  #   T?.eq ( isa.nonempty.list_of.optional.negative1.integer           v ), matcher
-  #   T?.eq ( isa.nonempty.list_of.optional.positive0.integer           v ), matcher
-  #   T?.eq ( isa.nonempty.list_of.optional.positive1.integer           v ), matcher
-  #   T?.eq ( isa.nonempty.set_of.integer                               v ), matcher
-  #   T?.eq ( isa.nonempty.set_of.negative0.integer                     v ), matcher
-  #   T?.eq ( isa.nonempty.set_of.negative1.integer                     v ), matcher
-  #   T?.eq ( isa.nonempty.set_of.positive0.integer                     v ), matcher
-  #   T?.eq ( isa.nonempty.set_of.positive1.integer                     v ), matcher
-  #   T?.eq ( isa.nonempty.set_of.optional.integer                      v ), matcher
-  #   T?.eq ( isa.nonempty.set_of.optional.negative0.integer            v ), matcher
-  #   T?.eq ( isa.nonempty.set_of.optional.negative1.integer            v ), matcher
-  #   T?.eq ( isa.nonempty.set_of.optional.positive0.integer            v ), matcher
-  #   T?.eq ( isa.nonempty.set_of.optional.positive1.integer            v ), matcher
+  #   T?.eq ( isa.set.of.integer                                        v ), matcher
+  #   T?.eq ( isa.set.of.negative0.integer                              v ), matcher
+  #   T?.eq ( isa.set.of.negative1.integer                              v ), matcher
+  #   T?.eq ( isa.set.of.positive0.integer                              v ), matcher
+  #   T?.eq ( isa.set.of.positive1.integer                              v ), matcher
+  #   T?.eq ( isa.set.of.optional.integer                               v ), matcher
+  #   T?.eq ( isa.set.of.optional.negative0.integer                     v ), matcher
+  #   T?.eq ( isa.set.of.optional.negative1.integer                     v ), matcher
+  #   T?.eq ( isa.set.of.optional.positive0.integer                     v ), matcher
+  #   T?.eq ( isa.set.of.optional.positive1.integer                     v ), matcher
+  #   T?.eq ( isa.empty.list.of.integer                                 v ), matcher
+  #   T?.eq ( isa.empty.list.of.negative0.integer                       v ), matcher
+  #   T?.eq ( isa.empty.list.of.negative1.integer                       v ), matcher
+  #   T?.eq ( isa.empty.list.of.positive0.integer                       v ), matcher
+  #   T?.eq ( isa.empty.list.of.positive1.integer                       v ), matcher
+  #   T?.eq ( isa.empty.list.of.optional.integer                        v ), matcher
+  #   T?.eq ( isa.empty.list.of.optional.negative0.integer              v ), matcher
+  #   T?.eq ( isa.empty.list.of.optional.negative1.integer              v ), matcher
+  #   T?.eq ( isa.empty.list.of.optional.positive0.integer              v ), matcher
+  #   T?.eq ( isa.empty.list.of.optional.positive1.integer              v ), matcher
+  #   T?.eq ( isa.empty.set.of.integer                                  v ), matcher
+  #   T?.eq ( isa.empty.set.of.negative0.integer                        v ), matcher
+  #   T?.eq ( isa.empty.set.of.negative1.integer                        v ), matcher
+  #   T?.eq ( isa.empty.set.of.positive0.integer                        v ), matcher
+  #   T?.eq ( isa.empty.set.of.positive1.integer                        v ), matcher
+  #   T?.eq ( isa.empty.set.of.optional.integer                         v ), matcher
+  #   T?.eq ( isa.empty.set.of.optional.negative0.integer               v ), matcher
+  #   T?.eq ( isa.empty.set.of.optional.negative1.integer               v ), matcher
+  #   T?.eq ( isa.empty.set.of.optional.positive0.integer               v ), matcher
+  #   T?.eq ( isa.empty.set.of.optional.positive1.integer               v ), matcher
+  #   T?.eq ( isa.nonempty.list.of.integer                              v ), matcher
+  #   T?.eq ( isa.nonempty.list.of.negative0.integer                    v ), matcher
+  #   T?.eq ( isa.nonempty.list.of.negative1.integer                    v ), matcher
+  #   T?.eq ( isa.nonempty.list.of.positive0.integer                    v ), matcher
+  #   T?.eq ( isa.nonempty.list.of.positive1.integer                    v ), matcher
+  #   T?.eq ( isa.nonempty.list.of.optional.integer                     v ), matcher
+  #   T?.eq ( isa.nonempty.list.of.optional.negative0.integer           v ), matcher
+  #   T?.eq ( isa.nonempty.list.of.optional.negative1.integer           v ), matcher
+  #   T?.eq ( isa.nonempty.list.of.optional.positive0.integer           v ), matcher
+  #   T?.eq ( isa.nonempty.list.of.optional.positive1.integer           v ), matcher
+  #   T?.eq ( isa.nonempty.set.of.integer                               v ), matcher
+  #   T?.eq ( isa.nonempty.set.of.negative0.integer                     v ), matcher
+  #   T?.eq ( isa.nonempty.set.of.negative1.integer                     v ), matcher
+  #   T?.eq ( isa.nonempty.set.of.positive0.integer                     v ), matcher
+  #   T?.eq ( isa.nonempty.set.of.positive1.integer                     v ), matcher
+  #   T?.eq ( isa.nonempty.set.of.optional.integer                      v ), matcher
+  #   T?.eq ( isa.nonempty.set.of.optional.negative0.integer            v ), matcher
+  #   T?.eq ( isa.nonempty.set.of.optional.negative1.integer            v ), matcher
+  #   T?.eq ( isa.nonempty.set.of.optional.positive0.integer            v ), matcher
+  #   T?.eq ( isa.nonempty.set.of.optional.positive1.integer            v ), matcher
   #   T?.eq ( isa.optional.integer                                      v ), matcher
-  #   T?.eq ( isa.optional.list_of.integer                              v ), matcher
-  #   T?.eq ( isa.optional.list_of.negative0.integer                    v ), matcher
-  #   T?.eq ( isa.optional.list_of.negative1.integer                    v ), matcher
-  #   T?.eq ( isa.optional.list_of.positive0.integer                    v ), matcher
-  #   T?.eq ( isa.optional.list_of.positive1.integer                    v ), matcher
-  #   T?.eq ( isa.optional.list_of.optional.integer                     v ), matcher
-  #   T?.eq ( isa.optional.list_of.optional.negative0.integer           v ), matcher
-  #   T?.eq ( isa.optional.list_of.optional.negative1.integer           v ), matcher
-  #   T?.eq ( isa.optional.list_of.optional.positive0.integer           v ), matcher
-  #   T?.eq ( isa.optional.list_of.optional.positive1.integer           v ), matcher
+  #   T?.eq ( isa.optional.list.of.integer                              v ), matcher
+  #   T?.eq ( isa.optional.list.of.negative0.integer                    v ), matcher
+  #   T?.eq ( isa.optional.list.of.negative1.integer                    v ), matcher
+  #   T?.eq ( isa.optional.list.of.positive0.integer                    v ), matcher
+  #   T?.eq ( isa.optional.list.of.positive1.integer                    v ), matcher
+  #   T?.eq ( isa.optional.list.of.optional.integer                     v ), matcher
+  #   T?.eq ( isa.optional.list.of.optional.negative0.integer           v ), matcher
+  #   T?.eq ( isa.optional.list.of.optional.negative1.integer           v ), matcher
+  #   T?.eq ( isa.optional.list.of.optional.positive0.integer           v ), matcher
+  #   T?.eq ( isa.optional.list.of.optional.positive1.integer           v ), matcher
   #   T?.eq ( isa.optional.negative0.integer                            v ), matcher
   #   T?.eq ( isa.optional.negative1.integer                            v ), matcher
   #   T?.eq ( isa.optional.positive0.integer                            v ), matcher
   #   T?.eq ( isa.optional.positive1.integer                            v ), matcher
-  #   T?.eq ( isa.optional.set_of.integer                               v ), matcher
-  #   T?.eq ( isa.optional.set_of.negative0.integer                     v ), matcher
-  #   T?.eq ( isa.optional.set_of.negative1.integer                     v ), matcher
-  #   T?.eq ( isa.optional.set_of.positive0.integer                     v ), matcher
-  #   T?.eq ( isa.optional.set_of.positive1.integer                     v ), matcher
-  #   T?.eq ( isa.optional.set_of.optional.integer                      v ), matcher
-  #   T?.eq ( isa.optional.set_of.optional.negative0.integer            v ), matcher
-  #   T?.eq ( isa.optional.set_of.optional.negative1.integer            v ), matcher
-  #   T?.eq ( isa.optional.set_of.optional.positive0.integer            v ), matcher
-  #   T?.eq ( isa.optional.set_of.optional.positive1.integer            v ), matcher
-  #   T?.eq ( isa.optional.empty.list_of.integer                        v ), matcher
-  #   T?.eq ( isa.optional.empty.list_of.negative0.integer              v ), matcher
-  #   T?.eq ( isa.optional.empty.list_of.negative1.integer              v ), matcher
-  #   T?.eq ( isa.optional.empty.list_of.positive0.integer              v ), matcher
-  #   T?.eq ( isa.optional.empty.list_of.positive1.integer              v ), matcher
-  #   T?.eq ( isa.optional.empty.list_of.optional.integer               v ), matcher
-  #   T?.eq ( isa.optional.empty.list_of.optional.negative0.integer     v ), matcher
-  #   T?.eq ( isa.optional.empty.list_of.optional.negative1.integer     v ), matcher
-  #   T?.eq ( isa.optional.empty.list_of.optional.positive0.integer     v ), matcher
-  #   T?.eq ( isa.optional.empty.list_of.optional.positive1.integer     v ), matcher
-  #   T?.eq ( isa.optional.empty.set_of.integer                         v ), matcher
-  #   T?.eq ( isa.optional.empty.set_of.negative0.integer               v ), matcher
-  #   T?.eq ( isa.optional.empty.set_of.negative1.integer               v ), matcher
-  #   T?.eq ( isa.optional.empty.set_of.positive0.integer               v ), matcher
-  #   T?.eq ( isa.optional.empty.set_of.positive1.integer               v ), matcher
-  #   T?.eq ( isa.optional.empty.set_of.optional.integer                v ), matcher
-  #   T?.eq ( isa.optional.empty.set_of.optional.negative0.integer      v ), matcher
-  #   T?.eq ( isa.optional.empty.set_of.optional.negative1.integer      v ), matcher
-  #   T?.eq ( isa.optional.empty.set_of.optional.positive0.integer      v ), matcher
-  #   T?.eq ( isa.optional.empty.set_of.optional.positive1.integer      v ), matcher
-  #   T?.eq ( isa.optional.nonempty.list_of.integer                     v ), matcher
-  #   T?.eq ( isa.optional.nonempty.list_of.negative0.integer           v ), matcher
-  #   T?.eq ( isa.optional.nonempty.list_of.negative1.integer           v ), matcher
-  #   T?.eq ( isa.optional.nonempty.list_of.positive0.integer           v ), matcher
-  #   T?.eq ( isa.optional.nonempty.list_of.positive1.integer           v ), matcher
-  #   T?.eq ( isa.optional.nonempty.list_of.optional.integer            v ), matcher
-  #   T?.eq ( isa.optional.nonempty.list_of.optional.negative0.integer  v ), matcher
-  #   T?.eq ( isa.optional.nonempty.list_of.optional.negative1.integer  v ), matcher
-  #   T?.eq ( isa.optional.nonempty.list_of.optional.positive0.integer  v ), matcher
-  #   T?.eq ( isa.optional.nonempty.list_of.optional.positive1.integer  v ), matcher
-  #   T?.eq ( isa.optional.nonempty.set_of.integer                      v ), matcher
-  #   T?.eq ( isa.optional.nonempty.set_of.negative0.integer            v ), matcher
-  #   T?.eq ( isa.optional.nonempty.set_of.negative1.integer            v ), matcher
-  #   T?.eq ( isa.optional.nonempty.set_of.positive0.integer            v ), matcher
-  #   T?.eq ( isa.optional.nonempty.set_of.positive1.integer            v ), matcher
-  #   T?.eq ( isa.optional.nonempty.set_of.optional.integer             v ), matcher
-  #   T?.eq ( isa.optional.nonempty.set_of.optional.negative0.integer   v ), matcher
-  #   T?.eq ( isa.optional.nonempty.set_of.optional.negative1.integer   v ), matcher
-  #   T?.eq ( isa.optional.nonempty.set_of.optional.positive0.integer   v ), matcher
-  #   T?.eq ( isa.optional.nonempty.set_of.optional.positive1.integer   v ), matcher
+  #   T?.eq ( isa.optional.set.of.integer                               v ), matcher
+  #   T?.eq ( isa.optional.set.of.negative0.integer                     v ), matcher
+  #   T?.eq ( isa.optional.set.of.negative1.integer                     v ), matcher
+  #   T?.eq ( isa.optional.set.of.positive0.integer                     v ), matcher
+  #   T?.eq ( isa.optional.set.of.positive1.integer                     v ), matcher
+  #   T?.eq ( isa.optional.set.of.optional.integer                      v ), matcher
+  #   T?.eq ( isa.optional.set.of.optional.negative0.integer            v ), matcher
+  #   T?.eq ( isa.optional.set.of.optional.negative1.integer            v ), matcher
+  #   T?.eq ( isa.optional.set.of.optional.positive0.integer            v ), matcher
+  #   T?.eq ( isa.optional.set.of.optional.positive1.integer            v ), matcher
+  #   T?.eq ( isa.optional.empty.list.of.integer                        v ), matcher
+  #   T?.eq ( isa.optional.empty.list.of.negative0.integer              v ), matcher
+  #   T?.eq ( isa.optional.empty.list.of.negative1.integer              v ), matcher
+  #   T?.eq ( isa.optional.empty.list.of.positive0.integer              v ), matcher
+  #   T?.eq ( isa.optional.empty.list.of.positive1.integer              v ), matcher
+  #   T?.eq ( isa.optional.empty.list.of.optional.integer               v ), matcher
+  #   T?.eq ( isa.optional.empty.list.of.optional.negative0.integer     v ), matcher
+  #   T?.eq ( isa.optional.empty.list.of.optional.negative1.integer     v ), matcher
+  #   T?.eq ( isa.optional.empty.list.of.optional.positive0.integer     v ), matcher
+  #   T?.eq ( isa.optional.empty.list.of.optional.positive1.integer     v ), matcher
+  #   T?.eq ( isa.optional.empty.set.of.integer                         v ), matcher
+  #   T?.eq ( isa.optional.empty.set.of.negative0.integer               v ), matcher
+  #   T?.eq ( isa.optional.empty.set.of.negative1.integer               v ), matcher
+  #   T?.eq ( isa.optional.empty.set.of.positive0.integer               v ), matcher
+  #   T?.eq ( isa.optional.empty.set.of.positive1.integer               v ), matcher
+  #   T?.eq ( isa.optional.empty.set.of.optional.integer                v ), matcher
+  #   T?.eq ( isa.optional.empty.set.of.optional.negative0.integer      v ), matcher
+  #   T?.eq ( isa.optional.empty.set.of.optional.negative1.integer      v ), matcher
+  #   T?.eq ( isa.optional.empty.set.of.optional.positive0.integer      v ), matcher
+  #   T?.eq ( isa.optional.empty.set.of.optional.positive1.integer      v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list.of.integer                     v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list.of.negative0.integer           v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list.of.negative1.integer           v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list.of.positive0.integer           v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list.of.positive1.integer           v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list.of.optional.integer            v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list.of.optional.negative0.integer  v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list.of.optional.negative1.integer  v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list.of.optional.positive0.integer  v ), matcher
+  #   T?.eq ( isa.optional.nonempty.list.of.optional.positive1.integer  v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set.of.integer                      v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set.of.negative0.integer            v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set.of.negative1.integer            v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set.of.positive0.integer            v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set.of.positive1.integer            v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set.of.optional.integer             v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set.of.optional.negative0.integer   v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set.of.optional.negative1.integer   v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set.of.optional.positive0.integer   v ), matcher
+  #   T?.eq ( isa.optional.nonempty.set.of.optional.positive1.integer   v ), matcher
   #.........................................................................................................
   for [ probe, value, matcher, error, ] in probes_and_matchers
     await T.perform [ probe, value, ], matcher, error, -> return new Promise ( resolve, reject ) ->
@@ -576,12 +567,44 @@ demo = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@_demo_hedgepath_resolution = ->
+  # T?.halt_on_error true
+  { Intertype
+    Type_cfg }  = require '../../../apps/intertype'
+  types         = new Intertype()
+  { declare
+    isa       } = types
+  #.........................................................................................................
+  probes_and_matchers = [
+    ### other ###
+    [ 'isa.boolean',                                   (   true                                             ), true, ]
+    [ 'isa.list.of.boolean',                           (   [ true, ]                                        ), true, ]
+    [ 'isa.list.of.boolean',                           (   []                                               ), true, ]
+    [ 'isa.list.of.optional.boolean',                  ( []                                                 ), true, ]
+    [ 'isa.list.of.optional.boolean',                  ( [ null, ]                                          ), true, ]
+    [ 'isa.list.of.optional.boolean',                  ( [ null, true, ]                                    ), true, ]
+    [ 'isa.set.of.boolean',                            ( S"[]"                                              ), true, ]
+    [ 'isa.set.of.boolean',                            ( S"[ false, ]"                                      ), true, ]
+    ]
+  #.........................................................................................................
+  for [ probe, value, matcher, error, ] in probes_and_matchers
+    [ _, hedges..., ] = probe.split '.'
+    callable          = isa
+    callable          = do =>
+      for term in hedges
+        callable = callable[ term ]
+      return callable
+    result = callable value
+    urge { probe, value, result, }
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 demo_test_with_protocol = ->
   { Intertype
     Type_cfg }  = require '../../../apps/intertype'
   types         = new Intertype()
   #.........................................................................................................
-  types.declare 'integer', isa_numeric: true, test: ( x ) -> urge '^342-1^', rpr x; Number.isInteger x
   info '^342-2^', types.isa.integer                     42
   info '^342-2^', types.isa.optional.integer            42
   info '^342-2^', types.isa.optional.positive0.integer  42
@@ -591,12 +614,12 @@ demo_test_with_protocol = ->
   info '^342-2^', types.isa.integer                     null
   info '^342-2^', types.isa.optional.integer            null
   info '^342-2^', types.isa.optional.positive0.integer  null
-  info '^342-2^', types.isa.list_of.integer             null
-  info '^342-2^', types.isa.list_of.integer             []
-  info '^342-2^', types.isa.list_of.integer             [ 1, 2, 3, ]
-  info '^342-2^', types.isa.list_of.integer             [ 1, 2, 3.5, ]
-  info '^342-2^', types.isa.list_of.optional.integer    [ 1, 2, null, ]
-  info '^342-2^', types.isa.list_of.optional.integer    [ 1, 2, 3.5, ]
+  info '^342-2^', types.isa.list.of.integer             null
+  info '^342-2^', types.isa.list.of.integer             []
+  info '^342-2^', types.isa.list.of.integer             [ 1, 2, 3, ]
+  info '^342-2^', types.isa.list.of.integer             [ 1, 2, 3.5, ]
+  info '^342-2^', types.isa.list.of.optional.integer    [ 1, 2, null, ]
+  info '^342-2^', types.isa.list.of.optional.integer    [ 1, 2, 3.5, ]
   #.........................................................................................................
   return null
 
@@ -628,7 +651,7 @@ demo_multipart_hedges = ->
   hedge =
     terms:
       optional_prefixes:  [ 'empty', 'nonempty', ]
-      mandatory_kernels:  [ 'list_of', 'set_of', ]
+      mandatory_kernels:  [ 'list', 'of', 'set', 'of', ]
       optional_suffixes:  [ 'optional', ]
     match: { all: true, }
   #.........................................................................................................
@@ -654,7 +677,7 @@ demo_combinate = ->
     optional:     [ null, 'optional', ]
     collections:
       prefix:     [ null, 'empty', 'nonempty', ]
-      kernel:     [ 'list_of', 'set_of', ]
+      kernel:     [ 'list', 'of', 'set', 'of', ]
       suffix:     [ null, 'optional', ]
     empty: [ null, 'empty', 'nonempty', ]
   # combine = ( terms ) => ( ( v for _, v of x when v? ) for x in combinate terms )
@@ -688,7 +711,7 @@ demo_combinate_2 = ->
     { terms: [
       null,
       [ [ null, 'empty', 'nonempty', ]
-        [ 'list_of', 'set_of', ]
+        [ 'list', 'of', 'set', 'of', ]
         [ null, 'optional', ]
         ], ],                                                               match: { all: true, }, }
     { terms: [ null, 'empty', 'nonempty', ],                                match: { isa_collection: true, }, }
@@ -743,7 +766,7 @@ demo_intertype_hedge_combinator = ->
       H.tabulate "hedgepaths for group #{rpr groupname}", [ [ null, null, null, null, null, null, null ], hedgepaths..., ]
       info '^540^', hedgepaths
       if groupname is 'other'
-        info CND.truth equals hedgepaths, [ [], [ 'list_of' ], [ 'list_of', 'optional' ], [ 'set_of' ], [ 'set_of', 'optional' ], [ 'empty', 'list_of' ], [ 'empty', 'list_of', 'optional' ], [ 'empty', 'set_of' ], [ 'empty', 'set_of', 'optional' ], [ 'nonempty', 'list_of' ], [ 'nonempty', 'list_of', 'optional' ], [ 'nonempty', 'set_of' ], [ 'nonempty', 'set_of', 'optional' ], [ 'optional' ], [ 'optional', 'list_of' ], [ 'optional', 'list_of', 'optional' ], [ 'optional', 'set_of' ], [ 'optional', 'set_of', 'optional' ], [ 'optional', 'empty', 'list_of' ], [ 'optional', 'empty', 'list_of', 'optional' ], [ 'optional', 'empty', 'set_of' ], [ 'optional', 'empty', 'set_of', 'optional' ], [ 'optional', 'nonempty', 'list_of' ], [ 'optional', 'nonempty', 'list_of', 'optional' ], [ 'optional', 'nonempty', 'set_of' ], [ 'optional', 'nonempty', 'set_of', 'optional' ] ]
+        info CND.truth equals hedgepaths, [ [], [ 'list', 'of' ], [ 'list', 'of', 'optional' ], [ 'set', 'of' ], [ 'set', 'of', 'optional' ], [ 'empty', 'list', 'of' ], [ 'empty', 'list', 'of', 'optional' ], [ 'empty', 'set', 'of' ], [ 'empty', 'set', 'of', 'optional' ], [ 'nonempty', 'list', 'of' ], [ 'nonempty', 'list', 'of', 'optional' ], [ 'nonempty', 'set', 'of' ], [ 'nonempty', 'set', 'of', 'optional' ], [ 'optional' ], [ 'optional', 'list', 'of' ], [ 'optional', 'list', 'of', 'optional' ], [ 'optional', 'set', 'of' ], [ 'optional', 'set', 'of', 'optional' ], [ 'optional', 'empty', 'list', 'of' ], [ 'optional', 'empty', 'list', 'of', 'optional' ], [ 'optional', 'empty', 'set', 'of' ], [ 'optional', 'empty', 'set', 'of', 'optional' ], [ 'optional', 'nonempty', 'list', 'of' ], [ 'optional', 'nonempty', 'list', 'of', 'optional' ], [ 'optional', 'nonempty', 'set', 'of' ], [ 'optional', 'nonempty', 'set', 'of', 'optional' ] ]
   #.........................................................................................................
   do =>
     types       = new Intertype()
@@ -751,7 +774,7 @@ demo_intertype_hedge_combinator = ->
     debug '^453^', hedgepaths
     groupname   = 'other'
     H.tabulate "hedgepaths for group #{rpr groupname}", [ [ null, null, null, null, null, null, null ], hedgepaths[ groupname ]..., ]
-    info CND.truth equals hedgepaths[ groupname ], [ [], [ 'list_of' ], [ 'list_of', 'optional' ], [ 'set_of' ], [ 'set_of', 'optional' ], [ 'empty', 'list_of' ], [ 'empty', 'list_of', 'optional' ], [ 'empty', 'set_of' ], [ 'empty', 'set_of', 'optional' ], [ 'nonempty', 'list_of' ], [ 'nonempty', 'list_of', 'optional' ], [ 'nonempty', 'set_of' ], [ 'nonempty', 'set_of', 'optional' ], [ 'optional' ], [ 'optional', 'list_of' ], [ 'optional', 'list_of', 'optional' ], [ 'optional', 'set_of' ], [ 'optional', 'set_of', 'optional' ], [ 'optional', 'empty', 'list_of' ], [ 'optional', 'empty', 'list_of', 'optional' ], [ 'optional', 'empty', 'set_of' ], [ 'optional', 'empty', 'set_of', 'optional' ], [ 'optional', 'nonempty', 'list_of' ], [ 'optional', 'nonempty', 'list_of', 'optional' ], [ 'optional', 'nonempty', 'set_of' ], [ 'optional', 'nonempty', 'set_of', 'optional' ] ]
+    info CND.truth equals hedgepaths[ groupname ], [ [], [ 'list', 'of' ], [ 'list', 'of', 'optional' ], [ 'set', 'of' ], [ 'set', 'of', 'optional' ], [ 'empty', 'list', 'of' ], [ 'empty', 'list', 'of', 'optional' ], [ 'empty', 'set', 'of' ], [ 'empty', 'set', 'of', 'optional' ], [ 'nonempty', 'list', 'of' ], [ 'nonempty', 'list', 'of', 'optional' ], [ 'nonempty', 'set', 'of' ], [ 'nonempty', 'set', 'of', 'optional' ], [ 'optional' ], [ 'optional', 'list', 'of' ], [ 'optional', 'list', 'of', 'optional' ], [ 'optional', 'set', 'of' ], [ 'optional', 'set', 'of', 'optional' ], [ 'optional', 'empty', 'list', 'of' ], [ 'optional', 'empty', 'list', 'of', 'optional' ], [ 'optional', 'empty', 'set', 'of' ], [ 'optional', 'empty', 'set', 'of', 'optional' ], [ 'optional', 'nonempty', 'list', 'of' ], [ 'optional', 'nonempty', 'list', 'of', 'optional' ], [ 'optional', 'nonempty', 'set', 'of' ], [ 'optional', 'nonempty', 'set', 'of', 'optional' ] ]
   return null
 
 
@@ -772,10 +795,10 @@ demo_picomatch_for_hedgepaths = ->
   pmatch = require 'picomatch'
   hedgepaths = [
     'integer'
-    'list_of.integer'
+    'list.of.integer'
     'optional.integer'
-    'optional.list_of.integer'
-    'optional.list_of.optional.integer'
+    'optional.list.of.integer'
+    'optional.list.of.optional.integer'
     ]
   globpatterns = [
     '*'
@@ -797,8 +820,6 @@ demo_picomatch_for_hedgepaths = ->
 demo_enumerate_hedgepaths = ->
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
-  # types.declare 'list', groups: 'collection', test: ( x ) -> Array.isArray x
-  # types.declare 'integer', groups: 'number', test: ( x ) -> Number.isInteger x
   evaluate = ({ owner, key, value, }) ->
     # debug '^324^', key, ( types.type_of value )
     return 'take' if ( types.type_of value ) is 'function'
@@ -811,79 +832,12 @@ demo_enumerate_hedgepaths = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-demo_preview_autovivify_hedgepaths = ->
-  { Intertype } = require '../../../apps/intertype'
-  types         = new Intertype { hedgematch: null, }
-  # types         = new Intertype { hedgematch: '*', }
-  types.declare 'list', groups: 'collection', test: ( x ) -> Array.isArray x
-  types.declare 'integer', groups: 'number', test: ( x ) -> Number.isInteger x
-  # debug '^353-1^', [ types._walk_hedgepaths()..., ].length
-  # debug '^353-2^', [ types._walk_hedgepaths()..., ]
-  # debug '^353-3^', types.isa
-  # debug '^353-4^', types.isa.list
-  # # debug '^353-5^', types.isa.empty.list
-  # debug '^353-5^', types.isa.list     [], { optional: true, empty: true, }
-  # debug '^353-5^', types.isa.integer  123, { optional: true, empty: true, }
-  #---------------------------------------------------------------------------------------------------------
-  base_proxy_cfg =
-    get: ( target, key ) =>
-      return undefined if key is Symbol.toStringTag
-      XXXX_collector.length = 0
-      XXXX_collector.push '_isa'
-      XXXX_collector.push key
-      return R if ( R = target[ key ] ) ### TAINT use `get()` ###
-      f = { "#{key}": ( ( x ) -> praise '^878-1^', rpr x; 'something' ), }[ key ]
-      return target[ key ] = new Proxy f, sub_proxy_cfg
-  #---------------------------------------------------------------------------------------------------------
-  sub_proxy_cfg =
-    get: ( target, key ) =>
-      return undefined if key is Symbol.toStringTag
-      # debug '^878-2^', target, rpr key
-      XXXX_collector.push key
-      return R if ( R = GUY.props.get target, key, no_such_value ) isnt no_such_value
-      f =  ( x ) ->
-        praise '^878-3^', XXXX_collector
-        # praise '^878-4^', rpr x
-        method_name = XXXX_collector.shift()
-        return types[ method_name ] XXXX_collector..., x
-      f = { "#{key}": f, }[ key ]
-      return target[ key ] = new Proxy f, sub_proxy_cfg
-  #---------------------------------------------------------------------------------------------------------
-  no_such_value   = Symbol 'no_such_value'
-  _isa            = {}
-  XXXX_collector  = []
-  isa             = new Proxy _isa, base_proxy_cfg
-  info '^878-5^', isa
-  info '^878-6^', isa.optional.integer 42
-  info '^878-7^', isa.optional.integer null
-  info '^878-8^', isa.optional.optional.optional.optional.optional.integer null
-  info '^878-9^', isa.x
-  info '^878-10^', isa.optional.empty.list_of.integer null
-  info '^878-11^', isa.optional.empty.list_of.integer []
-  info '^878-12^', isa.optional.empty.list_of.integer [ 42, ]
-  info '^878-13^', isa.optional.empty.list_of.integer [ 42, 3.1, ]
-  info '^878-14^', isa.empty.integer     5 ### TAINT returns `false` ###
-  info '^878-15^', isa.nonempty.integer  5 ### TAINT returns `true` ###
-  console.log ( require 'util' ).inspect isa, { colors: true, depth: Infinity, }
-  info '^878-12^', isa.optional.empty.list_of.list_of.integer [ 42, ]
-  info '^878-12^', isa.optional.empty.list_of.list_of.integer [ [ 42,] ]
-  praise '^353-2^', path for path from GUY.props.walk_tree isa, { sep: '.', }
-  # info '^878-16^', isa.x.y.z
-  # info '^878-17^', isa.x.y.z 42
-  # # info '^878-18^', isa.x.y.z.u.v.w.a.b.c.d
-  # info '^878-19^', isa.x.y.z.u.v.w.a.b.c.d 42
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
 demo_intertype_autovivify_hedgepaths = ->
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
   { isa
     validate
     declare   } = types
-  declare 'list',     groups: 'collection', test: ( x ) -> Array.isArray x
-  declare 'integer',  groups: 'number',     test: ( x ) -> Number.isInteger x
-  # info '^879-1^', isa 42
   info '^879-4^', isa.integer 42                        ; praise '^879-5^',  ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
   info '^879-8^', isa.optional 42                       ; praise '^879-9^',  ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
   info '^879-10^', isa.optional.integer                 ; praise '^879-11^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
@@ -901,15 +855,15 @@ demo_intertype_autovivify_hedgepaths = ->
   info '^879-34^', isa.negative0.list 0                 ; praise '^879-35^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
   info '^879-36^', isa.negative0.list []                ; praise '^879-37^', ( GUY.trm.reverse types.state.method ), types.state.hedges.join '.'
   # info '^879-38^', isa.x
-  # info '^879-39^', isa.optional.empty.list_of.integer null
-  # info '^879-40^', isa.optional.empty.list_of.integer []
-  # info '^879-41^', isa.optional.empty.list_of.integer [ 42, ]
-  # info '^879-42^', isa.optional.empty.list_of.integer [ 42, 3.1, ]
+  # info '^879-39^', isa.optional.empty.list.of.integer null
+  # info '^879-40^', isa.optional.empty.list.of.integer []
+  # info '^879-41^', isa.optional.empty.list.of.integer [ 42, ]
+  # info '^879-42^', isa.optional.empty.list.of.integer [ 42, 3.1, ]
   # info '^879-43^', isa.empty.integer     5 ### TAINT returns `false` ###
   # info '^879-44^', isa.nonempty.integer  5 ### TAINT returns `true` ###
   # console.log ( require 'util' ).inspect isa, { colors: true, depth: Infinity, }
-  # info '^879-45^', isa.optional.empty.list_of.list_of.integer [ 42, ]
-  # info '^879-46^', isa.optional.empty.list_of.list_of.integer [ [ 42,] ]
+  # info '^879-45^', isa.optional.empty.list.of.list.of.integer [ 42, ]
+  # info '^879-46^', isa.optional.empty.list.of.list.of.integer [ [ 42,] ]
   # praise '^353-2^', path for path from GUY.props.walk_tree isa, { sep: '.', }
   # # info '^879-47^', isa.x.y.z
   # # info '^879-48^', isa.x.y.z 42
@@ -931,143 +885,49 @@ demo_size_of = ->
   info '^905-8^', types.size_of "abc𪜁"
   return null
 
-#-----------------------------------------------------------------------------------------------------------
-@declare_NG = ( T, done ) ->
-  { Intertype } = require '../../../apps/intertype'
-  types         = new Intertype()
-  #.........................................................................................................
-  types.declare.list
-    groups:   'collection'
-    test:     ( x ) -> Array.isArray x
-  #.........................................................................................................
-  types.declare.integer
-    groups:   'number'
-    test:     ( x ) -> Number.isInteger x
-  #.........................................................................................................
-  types.declare.null
-    test: ( x ) -> x is null
-  # #.........................................................................................................
-  # types.declare.div3int
-  #   groups:   'number'
-  #   all: [
-  #     'integer'
-  #     { name: 'divisible by 3', test: ( ( x ) -> x %% 3 is 0 ), } ]
-  # #.........................................................................................................
-  # types.declare.Type_cfg_groups_element all: [ 'nonempty.text', { not_match: /[\s,]/, }, ]
-  # types.declare.Type_cfg_groups         any: [ 'nonempty.text', 'list_of.Type_cfg_groups_element', ]
-  # #.........................................................................................................
-  # types.declare.Type_cfg_constructor_cfg
-  #   $all: [
-  #     'object'
-  #     $subs:
-  #       name:     'nonempty.text'
-  #       test:     $any:  [ 'function', 'list_of.function', ]
-  #       groups:   'Type_cfg_groups'
-  #     ]
-  #.........................................................................................................
-  T?.eq ( types.isa.list    []    ), true
-  T?.eq ( types.isa.list    42    ), false
-  T?.eq ( types.isa.list    null  ), false
-  T?.eq ( types.isa.integer []    ), false
-  T?.eq ( types.isa.integer 42    ), true
-  T?.eq ( types.isa.integer null  ), false
-  T?.eq ( types.isa.null    []    ), false
-  T?.eq ( types.isa.null    42    ), false
-  T?.eq ( types.isa.null    null  ), true
-  # T?.eq ( types.isa.div3int null  ), false
-  # T?.eq ( types.isa.div3int 33    ), true
-  done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@types_isa_empty_nonempty_text = ( T, done ) ->
+@validate_1 = ( T, done ) ->
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
+  { declare
+    isa
+    validate  } = types
   #.........................................................................................................
-  types.declare.text
-    groups:   'collection'
-    test:     ( x ) -> ( typeof x ) is 'string'
-  #.........................................................................................................
-  T?.eq ( _types.type_of types.registry.text    ), 'type_cfg'
-  # T?.eq ( types.isa.text          'helo'        ), true
-  # T?.eq ( types.isa.nonempty.text 'helo'        ), true
-  T?.eq ( types.isa.empty.text    'helo'        ), false
-  whisper '-------------------------------------------------------------'
-  # T?.eq ( types.isa.text          42            ), false
-  # T?.eq ( types.isa.optional.text 42            ), false
-  # T?.eq ( types.isa.optional.text null          ), true
-  # T?.eq ( types.isa.optional.text ''            ), true
-  # T?.eq ( types.isa.optional.text 'helo'        ), true
-  T?.eq ( types.isa.empty.text    ''            ), true
-  # T?.eq ( types.isa.nonempty.text ''            ), false
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
-@_demo_validate = ( T, done ) ->
-  { Intertype } = require '../../../apps/intertype'
-  types         = new Intertype()
-  #.........................................................................................................
-  types.declare.list
-    groups:   'collection'
-    test:     ( x ) -> Array.isArray x
-  #.........................................................................................................
-  types.declare.object
-    test:     ( x ) -> _types.isa.object x
-  #.........................................................................................................
-  types.declare.text
-    groups:   'collection'
-    test:     ( x ) -> ( typeof x ) is 'string'
-  #.........................................................................................................
-  types.declare.integer
-    groups:   'number'
-    test:     ( x ) -> Number.isInteger x
-  #.........................................................................................................
-  types.declare.float
-    groups:   'number'
-    test:     ( x ) -> Number.isFinite x
-  #.........................................................................................................
-  types.declare.null
-    test: ( x ) -> x is null
-  #.........................................................................................................
-  types.declare.Type_cfg_constructor_cfg
+  declare.Type_cfg_constructor_cfg
     test: [
       ( x ) -> @isa.object x
       ( x ) -> @isa.nonempty.text x.name
-      ( x ) -> ( @isa.function x.test ) or ( @isa.list_of.function x.test )
+      ( x ) -> ( @isa.function x.test ) or ( @isa.list.of.function x.test )
       ( x ) ->
         return true if @isa.nonempty.text x.groups
         return false unless @isa.list x.groups
         return x.groups.every ( e ) => ( @isa.nonempty.text e ) and not ( /[\s,]/ ).test e
       ]
   #.........................................................................................................
-  types.validate.list []
-  types.validate 'list', []
+  T?.eq ( validate.list [] ), []
+  # isa 'list', []
+  # validate 'list', []
+  # debug '^33453^', isa.foobar
+  debug '^33453^', isa.list.of.float
   praise '^459-1^', types.isa.Type_cfg_constructor_cfg {}
-  praise '^459-2^', types.isa.optional.list_of.float {}
-  praise '^459-3^', types.isa.optional.list_of.float null
-  praise '^459-4^', types.isa.list_of.float {}
-  praise '^459-5^', types.isa.list_of.float [ 1, 2, 3, ]
-  praise '^459-6^', types.isa.list_of.float [ 1, 2, 3, null, ]
-  return null
+  praise '^459-2^', types.isa.optional.list.of.float {}
+  praise '^459-3^', types.isa.optional.list.of.float null
+  praise '^459-4^', types.isa.list.of.float {}
+  praise '^459-5^', types.isa.list.of.float [ 1, 2, 3, ]
+  praise '^459-6^', types.isa.list.of.float [ 1, 2, 3, null, ]
+  #.........................................................................................................
+  validate.list []
+  validate.list new Array()
+  validate.list Array.from 'abc'
+  #.........................................................................................................
+  done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @validate_returns_value = ( T, done ) ->
   # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
-  #.........................................................................................................
-  types.declare.float
-    groups:   'number'
-    test:     ( x ) -> Number.isFinite x
-    default:  0
-  #.........................................................................................................
-  types.declare.text
-    groups:   'collection'
-    test:     ( x ) -> ( typeof x ) is 'string'
-    default:  ''
-  #.........................................................................................................
-  types.declare.object
-    test:     ( x ) -> _types.isa.object x
-    default:  {}
   #.........................................................................................................
   types.declare.quantity
     test: [
@@ -1094,20 +954,6 @@ demo_size_of = ->
   # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
-  #.........................................................................................................
-  types.declare.text
-    groups:   'collection'
-    test:     ( x ) -> ( typeof x ) is 'string'
-    default:  ''
-  #.........................................................................................................
-  types.declare.list
-    groups:   'collection'
-    test:     ( x ) -> Array.isArray x
-    default:  []
-  #.........................................................................................................
-  types.declare.object
-    test:     ( x ) -> _types.isa.object x
-    default:  {}
   #.........................................................................................................
   types.declare.frob
     test: [
@@ -1136,20 +982,6 @@ demo_size_of = ->
   # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
-  #.........................................................................................................
-  types.declare.text
-    groups:   'collection'
-    test:     ( x ) -> ( typeof x ) is 'string'
-    default:  ''
-  #.........................................................................................................
-  types.declare.list
-    groups:   'collection'
-    test:     ( x ) -> Array.isArray x
-    default:  []
-  #.........................................................................................................
-  types.declare.object
-    test:     ( x ) -> _types.isa.object x
-    default:  {}
   # #.........................................................................................................
   # types.declare.sealed_frob
   #   test: [
@@ -1245,44 +1077,6 @@ demo_size_of = ->
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
   #.........................................................................................................
-  types.declare.null
-    # groups:   'bottom'
-    test:     ( x ) -> x is null
-    default:  null
-  #.........................................................................................................
-  types.declare.undefined
-    # groups:   'bottom'
-    test:     ( x ) -> x is undefined
-    default:  undefined
-  #.........................................................................................................
-  types.declare.boolean
-    test:     ( x ) -> ( x is true ) or ( x is false )
-    default:  false
-  #.........................................................................................................
-  types.declare.list
-    groups:   'collection'
-    test:     ( x ) -> Array.isArray x
-    default:  []
-  #.........................................................................................................
-  types.declare.object
-    test:     ( x ) -> _types.isa.object x
-    default:  {}
-  #.........................................................................................................
-  types.declare.text
-    groups:   'collection'
-    test:     ( x ) -> ( typeof x ) is 'string'
-    default:  ''
-  #.........................................................................................................
-  types.declare.integer
-    groups:   'number'
-    test:     ( x ) -> Number.isInteger x
-    default:  0
-  #.........................................................................................................
-  types.declare.float
-    groups:   'number'
-    test:     ( x ) -> Number.isFinite x
-    default:  0
-  #.........................................................................................................
   types.declare.quantity
     test: [
       ( x ) -> @isa.object        x
@@ -1367,42 +1161,12 @@ demo_size_of = ->
     isa
     validate  } = types
   #.........................................................................................................
-  declare.null
-    # groups:   'bottom'
-    test:     ( x ) -> x is null
-    default:  null
-  #.........................................................................................................
-  declare.boolean
-    test:     ( x ) -> ( x is true ) or ( x is false )
-    default:  false
-  #.........................................................................................................
-  declare.text
-    groups:   'collection'
-    test:     ( x ) -> ( typeof x ) is 'string'
-    default:  ''
-  #.........................................................................................................
-  declare.codepoint_text
-    groups:   'other'
-    test:     ( x ) -> /^.$/u.test x
-    default:  '\x00'
-  #.........................................................................................................
-  declare.codepoint_number
-    groups:   'other'
-    test:     ( x ) -> @isa.integer x and ( 0x00000 <= x <= 0x1ffff )
-    default:  '\x00'
-  #.........................................................................................................
-  declare.list
-    groups:   'collection'
-    test:     ( x ) -> Array.isArray x
-    default:  ''
-  #.........................................................................................................
-  declare.integer
-    groups:   'number'
-    test:     ( x ) -> Number.isInteger x
-    default:  0
-  #.........................................................................................................
-  # try isa.integer.foobar 24 catch error then warn GUY.trm.reverse error.message
-  # T?.throws /unknown type 'foobar'/, -> isa.integer.foobar 24
+  try isa.integer.foobar 24 catch error then warn GUY.trm.reverse error.message
+  T?.throws /unknown hedge or type 'foobar'/, -> isa.integer.foobar
+  T?.throws /unknown hedge or type 'foobar'/, -> isa.integer.foobar 24
+  T?.throws /unknown hedge or type 'list_of'/, -> isa.list_of
+  T?.throws /unknown hedge or type 'list_of'/, -> isa.list_of.integer
+  T?.throws /unknown hedge or type 'list_of'/, -> isa.list_of.integer 24
   # praise '^868-25^', GUY.trm.truth      isa.integer 24
   # praise '^868-25^', GUY.trm.truth      isa.optional.integer 24
   # praise '^868-25^', GUY.trm.truth      isa.collection 24
@@ -1423,25 +1187,113 @@ demo_size_of = ->
   # praise '^341-1^', isa.optional.text.or.integer 42
   # praise '^341-1^', isa.optional.text.or.integer false
   # #.........................................................................................................
-  info '^871-1^',  try T?.eq ( isa.integer 42                     ), true   catch e then warn '^871-2^', rvr e.message; T?.ok false
-  info '^871-3^',  try T?.eq ( isa.text ''                        ), true   catch e then warn '^871-4^', rvr e.message; T?.ok false
-  info '^871-5^',  try T?.eq ( isa.integer ''                     ), false  catch e then warn '^871-6^', rvr e.message; T?.ok false
-  info '^871-7^',  try T?.eq ( isa.text 42                        ), false  catch e then warn '^871-8^', rvr e.message; T?.ok false
-  info '^871-9^',  try T?.eq ( isa.text.or.integer 42             ), true   catch e then warn '^871-10^', rvr e.message; T?.ok false
-  info '^871-11^',  try T?.eq ( isa.text.or.integer ''             ), true   catch e then warn '^871-12^', rvr e.message; T?.ok false
-  info '^871-13^',  try T?.eq ( isa.integer.or.text 42             ), true   catch e then warn '^871-14^', rvr e.message; T?.ok false
-  info '^871-15^',  try T?.eq ( isa.integer.or.text ''             ), true   catch e then warn '^871-16^', rvr e.message; T?.ok false
-  info '^871-17^',  try T?.eq ( isa.text.or.integer false          ), false  catch e then warn '^871-18^', rvr e.message; T?.ok false
-  info '^871-19^', try T?.eq ( isa.integer.or.text false          ), false  catch e then warn '^871-20^', rvr e.message; T?.ok false
-  info '^871-21^', try T?.eq ( isa.text.or.integer null           ), false  catch e then warn '^871-22^', rvr e.message; T?.ok false
-  info '^871-23^', try T?.eq ( isa.integer.or.text null           ), false  catch e then warn '^871-24^', rvr e.message; T?.ok false
-  info '^871-25^', try T?.eq ( isa.optional.text.or.integer null  ), true   catch e then warn '^871-26^', rvr e.message; T?.ok false
-  info '^871-27^', try T?.eq ( isa.optional.integer.or.text null  ), true   catch e then warn '^871-28^', rvr e.message; T?.ok false
+  info '^871-1^',   try T?.eq ( isa.integer 42                                ), true   catch e then warn '^871-2^', rvr e.message; T?.ok false
+  info '^871-3^',   try T?.eq ( isa.text ''                                   ), true   catch e then warn '^871-4^', rvr e.message; T?.ok false
+  info '^871-5^',   try T?.eq ( isa.integer ''                                ), false  catch e then warn '^871-6^', rvr e.message; T?.ok false
+  info '^871-7^',   try T?.eq ( isa.text 42                                   ), false  catch e then warn '^871-8^', rvr e.message; T?.ok false
+  info '^871-9^',   try T?.eq ( isa.text.or.integer 42                        ), true   catch e then warn '^871-10^', rvr e.message; T?.ok false
+  info '^871-11^',  try T?.eq ( isa.text.or.integer ''                        ), true   catch e then warn '^871-12^', rvr e.message; T?.ok false
+  info '^871-13^',  try T?.eq ( isa.integer.or.text 42                        ), true   catch e then warn '^871-14^', rvr e.message; T?.ok false
+  info '^871-15^',  try T?.eq ( isa.integer.or.text ''                        ), true   catch e then warn '^871-16^', rvr e.message; T?.ok false
+  info '^871-17^',  try T?.eq ( isa.text.or.integer false                     ), false  catch e then warn '^871-18^', rvr e.message; T?.ok false
+  info '^871-19^',  try T?.eq ( isa.integer.or.text false                     ), false  catch e then warn '^871-20^', rvr e.message; T?.ok false
+  info '^871-21^',  try T?.eq ( isa.text.or.integer null                      ), false  catch e then warn '^871-22^', rvr e.message; T?.ok false
+  info '^871-23^',  try T?.eq ( isa.integer.or.text null                      ), false  catch e then warn '^871-24^', rvr e.message; T?.ok false
+  info '^871-25^',  try T?.eq ( isa.optional.text.or.integer null             ), true   catch e then warn '^871-26^', rvr e.message; T?.ok false
+  info '^871-27^',  try T?.eq ( isa.optional.integer.or.text null             ), true   catch e then warn '^871-28^', rvr e.message; T?.ok false
+  info '^871-29^',  try T?.eq ( isa.optional.integer.or.text.or.boolean null  ), true   catch e then warn '^871-30^', rvr e.message; T?.ok false
+  info '^871-31^',  try T?.eq ( isa.optional.integer.or.text.or.boolean false ), true   catch e then warn '^871-32^', rvr e.message; T?.ok false
+  info '^871-33^',  try T?.eq ( isa.optional.integer.or.text.or.boolean 42    ), true   catch e then warn '^871-34^', rvr e.message; T?.ok false
+  info '^871-35^',  try T?.eq ( isa.optional.integer.or.text.or.boolean 'x'   ), true   catch e then warn '^871-36^', rvr e.message; T?.ok false
+  info '^871-37^',  try T?.eq ( isa.optional.integer.or.text.or.boolean {}    ), false  catch e then warn '^871-38^', rvr e.message; T?.ok false
+  info '^871-37^',  try T?.eq ( isa.positive0.integer 0                       ), true   catch e then warn '^871-38^', rvr e.message; T?.ok false
+  info '^871-37^',  try T?.eq ( isa.positive0.integer 1                       ), true   catch e then warn '^871-38^', rvr e.message; T?.ok false
+  info '^871-37^',  try T?.eq ( isa.positive0.integer Infinity                ), false  catch e then warn '^871-38^', rvr e.message; T?.ok false
+  info '^871-37^',  try T?.eq ( isa.positive0.integer 123456                  ), true   catch e then warn '^871-38^', rvr e.message; T?.ok false
+  info '^871-37^',  try T?.eq ( isa.positive0.integer -1                      ), false  catch e then warn '^871-38^', rvr e.message; T?.ok false
+  info '^871-37^',  try T?.eq ( isa.positive0.integer true                    ), false  catch e then warn '^871-38^', rvr e.message; T?.ok false
   #.........................................................................................................
   # T?.throws /unknown type 'foobar'/, -> isa.integer.foobar 24
   # praise ( to_width k, 20 ), entry for k, entry of types.registry
-  help types.registry.text
-  help types.registry.integer
+  # help types.registry.text
+  # help types.registry.integer
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_collection_of_t = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  { declare
+    isa
+    validate  } = types
+  #.........................................................................................................
+  praise '^222-1^', isa.list.of.integer             []
+  praise '^222-1^', isa.list.of.integer             [ 1, ]
+  praise '^222-1^', isa.list.of.integer             [ 1, 'x', ]
+  praise '^222-1^', isa.nonempty.list.of.integer    [ 1, ]
+  praise '^222-1^', isa.nonempty.set.of.integer     [ 1, ]
+  praise '^222-1^', isa.nonempty.set.of.integer     new Set [ 1, ]
+  praise '^222-1^', isa.nonempty.set.of.integer     new Set()
+  praise '^222-1^', isa.set.of.codepoint            new Set "helo world\u{20000}"
+  praise '^222-1^', isa.list.of.text                42
+  praise '^222-1^', isa.list.of.integer             42
+  try praise '^222-1^', isa.integer.of.text             '???' catch error then warn rvr error.message
+  try praise '^222-1^', isa.integer.of.text             42    catch error then warn rvr error.message
+  #.........................................................................................................
+  info '^854-1^',   T?.eq ( isa.list.of.integer                   []                              ), true
+  info '^854-2^',   T?.eq ( isa.list.of.integer                   [ 1, ]                          ), true
+  info '^854-3^',   T?.eq ( isa.list.of.integer                   [ 1, 'x', ]                     ), false
+  info '^854-4^',   T?.eq ( isa.nonempty.list.of.integer          [ 1, ]                          ), true
+  info '^854-5^',   T?.eq ( isa.nonempty.set.of.integer           [ 1, ]                          ), false
+  info '^854-6^',   T?.eq ( isa.nonempty.set.of.integer           new Set [ 1, ]                  ), true
+  info '^854-7^',   T?.eq ( isa.nonempty.set.of.integer           new Set()                       ), false
+  info '^854-8^',   T?.eq ( isa.set.of.codepoint                  new Set "helo world\u{20000}"   ), true
+  info '^854-9^',  T?.eq ( isa.list.of.text                      42                              ), false
+  info '^854-10^',  T?.eq ( isa.list.of.integer                   42                              ), false
+  info '^854-11^',  T?.eq ( isa.list.of.integer.or.text           [ 'abc', 42, ]                  ), true
+  info '^854-12^',  T?.eq ( isa.list.of.optional.integer.or.text  [ 'abc', 42, ]                  ), true
+  info '^854-13^',  T?.eq ( isa.list.of.optional.integer.or.text  [ 'abc', 42, null, ]            ), true
+  info '^854-14^',  T?.eq ( isa.list.of.optional.integer.or.text  [ 'abc', 42, null, true, ]      ), false
+  info '^854-15^',  T?.throws /hedgerow cannot start with `or`/, -> isa.or.text ### throws at declaration time ###
+  info '^854-16^',  T?.throws /hedgerow cannot start with `of`/, -> isa.of.text ### throws at declaration time ###
+  info '^854-17^',  T?.throws /expected type before `of` to be a collection/, -> isa.integer.of.text ### throws at declaration time ###
+  info '^854-18^',  T?.throws /expected type before `of` to be a collection/, -> isa.integer.of.text 42
+  info '^854-19^',  T?.throws /expected type before `of` to be a collection/, -> isa.integer.of.text '???'
+  info '^854-20^',  T?.throws /hedgerow cannot begin or end with `of` or `or`/, -> isa.list.of.list.of 42
+  #.........................................................................................................
+  info '^854-21^',  T?.eq ( isa.list.of.list.of.integer []                                    ), true
+  info '^854-22^',  T?.eq ( isa.list.of.list.of.integer [ [], ]                               ), true
+  info '^854-23^',  T?.eq ( isa.list.of.optional.list.of.integer [ null, ]                    ), true
+  info '^854-24^',  T?.eq ( isa.list.of.optional.list.of.integer [ [], ]                      ), true
+  info '^854-25^',  T?.eq ( isa.list.of.list.of.integer [ [ 1, ], ]                           ), true
+  info '^854-26^',  T?.eq ( isa.list.of.list.of.integer [ [ 1, ], [ 2, 3, ], [ 4, 5, 6, ], ]  ), true
+  #.........................................................................................................
+  info '^854-27^',  T?.eq ( isa.list.of.list.of.integer [ null, ]                             ), false
+  info '^854-28^',  T?.eq ( isa.list.of.optional.list.of.integer [ [ null, ], ]               ), false
+  info '^854-29^',  T?.eq ( isa.list.of.list.of.optional.integer [ null, ]                    ), false
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_even_odd_for_bigints = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  { declare
+    isa
+    validate  } = types
+  #.........................................................................................................
+  info '^430-1^', isa.even.numeric 1
+  info '^430-2^', isa.even.numeric 2
+  info '^430-3^', T?.eq ( isa.even.numeric 1                     ), false
+  info '^430-4^', T?.eq ( isa.even.numeric 2                     ), true
+  info '^430-5^', isa.even.numeric 1n
+  info '^430-6^', isa.even.numeric 2n
+  info '^430-7^', T?.eq ( isa.even.numeric 1n                    ), false
+  info '^430-8^', T?.eq ( isa.even.numeric 2n                    ), true
+  # debug isa.even.integer 1n
   #.........................................................................................................
   done?()
 
@@ -1449,38 +1301,22 @@ demo_size_of = ->
 ############################################################################################################
 unless module.parent?
   # demo()
-  # list_all_builtin_type_testers()
-  # demo_hedges()
-  # demo_test_with_protocol()
-  # demo_multipart_hedges()
-  # demo_combinate_2()
-  # demo_intertype_hedge_combinator()
-  # @[ "intertype hedgepaths" ]()
-  # @intertype_all_hedgepaths()
-  # test @intertype_all_hedgepaths
-  # demo_size_of()
-  # test @[ "intertype size_of" ]
-  # urge GUY.src.get_first_return_clause_text
-  # urge GUY.src.slug_from_simple_function function: ( x ) -> @isa.optional.integer x
-  # demo_picomatch_for_hedgepaths()
-  # @[ "forbidden to overwrite declarations" ]()
-  # test @[ "forbidden to overwrite declarations" ]
-  # test @[ "intertype quantified types" ]
-  # demo_enumerate_hedgepaths()
-  # demo_preview_autovivify_hedgepaths()
-  # demo_intertype_autovivify_hedgepaths()
-  # @declare_NG()
-  # test @declare_NG
-  # test @types_isa_empty_nonempty_text
-  # @validate_returns_value()
-  # @create_returns_deep_copy_of_default()
-  # test @create_returns_deep_copy_of_default
-  # @declare_NG_defaults()
-  # test @declare_NG_defaults
-  # @create_with_seal_freeze_extra()
+  # @_demo_hedgepath_resolution()
+  # @validate_1()
+  # @isa_x_or_y()
+  # test @isa_x_or_y
   # test @create_with_seal_freeze_extra
-  # test @
-  # @_demo_validate()
-  @isa_x_or_y()
-  test @isa_x_or_y
+  test @
+  # @intertype_collection_of_t()
+  # test @intertype_collection_of_t
+  # test @validate_1
+  # @intertype_even_odd_for_bigints()
+  # test @intertype_even_odd_for_bigints
+
+
+
+
+
+
+
 
