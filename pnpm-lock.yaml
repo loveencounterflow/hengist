@@ -136,6 +136,7 @@ specifiers:
   text-metrics: ^2.0.2
   through2: ^4.0.2
   timetunnel: ^1.1.1
+  tinysh: ^1.0.0
   to-width: 1.2.0
   trash: 8.0.0
   validate-npm-package-name: ^3.0.0
@@ -277,6 +278,7 @@ dependencies:
   text-metrics: 2.0.9
   through2: 4.0.2
   timetunnel: 1.1.1
+  tinysh: 1.0.0
   to-width: 1.2.0
   trash: 8.0.0
   validate-npm-package-name: 3.0.0
@@ -4913,6 +4915,10 @@ packages:
 
   /tiny-inflate/1.0.3:
     resolution: {integrity: sha512-pkY1fj1cKHb2seWDy0B16HeWyczlJA9/WW3u3c4z/NiWDsO3DOU5D7nhTLE9CF0yXv/QZFY7sEJmj24dK+Rrqw==}
+    dev: false
+
+  /tinysh/1.0.0:
+    resolution: {integrity: sha512-+PGLmylE9jL1s0Ys/3dbmllxqTU8nep0PJAU829all9kL90c8cxPhD2sBAfj7st+A9g3xt4LqdRDr9eBmWdzUg==}
     dev: false
 
   /to-fast-properties/2.0.0:
