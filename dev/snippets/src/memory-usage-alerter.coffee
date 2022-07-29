@@ -71,6 +71,10 @@ NOTIFIER                  = require 'node-notifier'
 ############################################################################################################
 unless module.parent?
   @demo()
+  # { free, l, exa, } = require 'tinysh'
+  # debug free()
+  # help l().status
+  # help exa()
 
   ###
   MemTotal:        3442252 kB
