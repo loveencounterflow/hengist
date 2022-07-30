@@ -37,7 +37,7 @@ _types                    = new ( require 'intertype' ).Intertype()
   { Intertype }   = require '../../../apps/intertype'
   types           = new Intertype()
   # jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
-  types.declare 'array',    isa_collection: true,   test: ( x ) -> @isa.list x
+  types.declare 'array', collection: true, test: ( x ) -> @isa.list x
   #.........................................................................................................
   T?.eq ( types._isa 'null',                         null          ), true
   T?.eq ( types._isa 'optional', 'null',             null          ), true
@@ -197,30 +197,6 @@ demo = ->
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       resolve result = types.size_of probe...
-  #.........................................................................................................
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "intertype quantified types" ] = ( T, done ) ->
-  { Intertype } = require '../../../apps/intertype'
-  types         = new Intertype()
-  types.declare 'anything',  test: ( x ) -> true
-  types.declare 'something', test: ( x ) -> x?
-  types.declare 'nothing',   test: ( x ) -> not x?
-  probes_and_matchers = [
-    [ [ 'isa',  'anything',   null, ], true,  ]
-    [ [ 'isa',  'nothing',    null, ], true,  ]
-    [ [ 'isnt', 'something',  null, ], true,  ]
-    ]
-  #.........................................................................................................
-  for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      [ mode, type, value, ] = probe
-      switch mode
-        when 'isa'  then result =     types.isa[ type ] value
-        when 'isnt' then result = not types.isa[ type ] value
-        else throw new Error "unknown mode #{rpr mode}"
-      resolve result
   #.........................................................................................................
   done?()
 
@@ -916,6 +892,8 @@ demo_size_of = ->
   praise '^459-4^', types.isa.list.of.float {}
   praise '^459-5^', types.isa.list.of.float [ 1, 2, 3, ]
   praise '^459-6^', types.isa.list.of.float [ 1, 2, 3, null, ]
+  # praise '^459-6^', types.isa.integer.of.float
+  # praise '^459-6^', types.isa.integer.of.float [ 1, 2, 3, null, ]
   #.........................................................................................................
   validate.list []
   validate.list new Array()
@@ -1297,6 +1275,86 @@ demo_size_of = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@intertype_existential_types = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  { declare
+    isa
+    validate  } = types
+  #.........................................................................................................
+  info '^430-1^', isa.anything    1
+  info '^430-1^', isa.something   1
+  info '^430-2^', isa.nothing     1
+  info '^430-3^', T?.eq ( isa.anything  1         ), true
+  info '^430-3^', T?.eq ( isa.something 1         ), true
+  info '^430-3^', T?.eq ( isa.nothing   1         ), false
+  info '^430-3^', T?.eq ( isa.anything  false     ), true
+  info '^430-3^', T?.eq ( isa.something false     ), true
+  info '^430-3^', T?.eq ( isa.nothing   false     ), false
+  info '^430-3^', T?.eq ( isa.anything  null      ), true
+  info '^430-3^', T?.eq ( isa.something null      ), false
+  info '^430-3^', T?.eq ( isa.nothing   null      ), true
+  info '^430-3^', T?.eq ( isa.anything  undefined ), true
+  info '^430-3^', T?.eq ( isa.something undefined ), false
+  info '^430-3^', T?.eq ( isa.nothing   undefined ), true
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_declaration_with_per_key_clauses = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    types         = new Intertype()
+    { declare
+      create
+      validate
+      isa       } = types
+    whisper '^46464^', '————————————————————————————————————————————————————————'
+    #.......................................................................................................
+    types.declare.quantity
+      test: [
+        ( x ) -> @isa.object        x
+        ( x ) -> @isa.float         x.value
+        ( x ) -> @isa.nonempty.text x.unit
+        ]
+    help '^960-1^', isa.quantity null
+    help '^960-2^', isa.quantity {}
+    help '^960-3^', isa.quantity { value: 1024, unit: 'kB', }
+  #.........................................................................................................
+  do =>
+    types         = new Intertype()
+    { declare
+      create
+      validate
+      isa       } = types
+    whisper '^46464^', '————————————————————————————————————————————————————————'
+    declare.quantity
+      $:      'object'
+      $value: 'float'
+      $unit:  'nonempty.text'
+      default:
+        value:    0
+        unit:     null
+    #.........................................................................................................
+    # d = { value: 4, unit: 'kB', }
+    # T?.eq ( validate.quantity d ), d
+    # T?.ok ( validate.quantity d ) is d
+    # # info '^3453^', create.quantity { unit: 'kB', }
+    # info '^3453^', types.registry.quantity.test.toString()
+    # # try validate.quantity {}                           catch error then warn GUY.trm.reverse error.message
+    # # try validate.quantity { unit: '', }                catch error then warn GUY.trm.reverse error.message
+    # # try validate.quantity { unit: 'kB', }              catch error then warn GUY.trm.reverse error.message
+    help '^960-4^', isa.quantity null
+    help '^960-5^', isa.quantity {}
+    help '^960-6^', isa.quantity { value: 1024, unit: 'kB', }
+    # try validate.quantity { value: 1024, unit: 'kB', } catch error then warn GUY.trm.reverse error.message
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 unless module.parent?
@@ -1305,13 +1363,17 @@ unless module.parent?
   # @validate_1()
   # @isa_x_or_y()
   # test @isa_x_or_y
+  # @create_with_seal_freeze_extra()
   # test @create_with_seal_freeze_extra
-  test @
+  # test @intertype_existential_types
   # @intertype_collection_of_t()
   # test @intertype_collection_of_t
   # test @validate_1
   # @intertype_even_odd_for_bigints()
   # test @intertype_even_odd_for_bigints
+  @intertype_declaration_with_per_key_clauses()
+  # test @intertype_declaration_with_per_key_clauses
+  # test @
 
 
 
