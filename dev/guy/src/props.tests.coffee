@@ -596,10 +596,20 @@ demo_strict_owner_with_proxy = ->
   info ( require 'util' ).inspect t, { depth: 0, }
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@GUY_props_resolve_property_chain = ( T, done ) ->
+  GUY       = require '../../../apps/guy'
+  #.........................................................................................................
+  owner           = { first: { second: { other: { last: 42, }, }, }, }
+  property_chain  = [ 'first', 'second', 'other', 'last', ]
+  T?.eq ( GUY.props.resolve_property_chain owner, property_chain ), 42
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # demo_tree()
   # demo_tree_readme()
   # @[ "guy.props.crossmerge()" ]()
