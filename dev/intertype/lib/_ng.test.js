@@ -39,7 +39,7 @@
     types = new Intertype();
     // jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
     types.declare('array', {
-      isa_collection: true,
+      collection: true,
       test: function(x) {
         return this.isa.list(x);
       }
@@ -260,51 +260,6 @@
         return new Promise(function(resolve, reject) {
           var result;
           return resolve(result = types.size_of(...probe));
-        });
-      });
-    }
-    return typeof done === "function" ? done() : void 0;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["intertype quantified types"] = async function(T, done) {
-    var Intertype, error, i, len, matcher, probe, probes_and_matchers, types;
-    ({Intertype} = require('../../../apps/intertype'));
-    types = new Intertype();
-    types.declare('anything', {
-      test: function(x) {
-        return true;
-      }
-    });
-    types.declare('something', {
-      test: function(x) {
-        return x != null;
-      }
-    });
-    types.declare('nothing', {
-      test: function(x) {
-        return x == null;
-      }
-    });
-    probes_and_matchers = [[['isa', 'anything', null], true], [['isa', 'nothing', null], true], [['isnt', 'something', null], true]];
-//.........................................................................................................
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher, error] = probes_and_matchers[i];
-      await T.perform(probe, matcher, error, function() {
-        return new Promise(function(resolve, reject) {
-          var mode, result, type, value;
-          [mode, type, value] = probe;
-          switch (mode) {
-            case 'isa':
-              result = types.isa[type](value);
-              break;
-            case 'isnt':
-              result = !types.isa[type](value);
-              break;
-            default:
-              throw new Error(`unknown mode ${rpr(mode)}`);
-          }
-          return resolve(result);
         });
       });
     }
@@ -1569,6 +1524,8 @@
     praise('^459-4^', types.isa.list.of.float({}));
     praise('^459-5^', types.isa.list.of.float([1, 2, 3]));
     praise('^459-6^', types.isa.list.of.float([1, 2, 3, null]));
+    // praise '^459-6^', types.isa.integer.of.float
+    // praise '^459-6^', types.isa.integer.of.float [ 1, 2, 3, null, ]
     //.........................................................................................................
     validate.list([]);
     validate.list(new Array());
@@ -2336,6 +2293,96 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_existential_types = function(T, done) {
+    var Intertype, declare, isa, types, validate;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    ({declare, isa, validate} = types);
+    //.........................................................................................................
+    info('^430-1^', isa.anything(1));
+    info('^430-1^', isa.something(1));
+    info('^430-2^', isa.nothing(1));
+    info('^430-3^', T != null ? T.eq(isa.anything(1), true) : void 0);
+    info('^430-3^', T != null ? T.eq(isa.something(1), true) : void 0);
+    info('^430-3^', T != null ? T.eq(isa.nothing(1), false) : void 0);
+    info('^430-3^', T != null ? T.eq(isa.anything(false), true) : void 0);
+    info('^430-3^', T != null ? T.eq(isa.something(false), true) : void 0);
+    info('^430-3^', T != null ? T.eq(isa.nothing(false), false) : void 0);
+    info('^430-3^', T != null ? T.eq(isa.anything(null), true) : void 0);
+    info('^430-3^', T != null ? T.eq(isa.something(null), false) : void 0);
+    info('^430-3^', T != null ? T.eq(isa.nothing(null), true) : void 0);
+    info('^430-3^', T != null ? T.eq(isa.anything(void 0), true) : void 0);
+    info('^430-3^', T != null ? T.eq(isa.something(void 0), false) : void 0);
+    info('^430-3^', T != null ? T.eq(isa.nothing(void 0), true) : void 0);
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_declaration_with_per_key_clauses = function(T, done) {
+    var Intertype;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var create, declare, isa, types, validate;
+      types = new Intertype();
+      ({declare, create, validate, isa} = types);
+      whisper('^46464^', '————————————————————————————————————————————————————————');
+      //.......................................................................................................
+      types.declare.quantity({
+        test: [
+          function(x) {
+            return this.isa.object(x);
+          },
+          function(x) {
+            return this.isa.float(x.value);
+          },
+          function(x) {
+            return this.isa.nonempty.text(x.unit);
+          }
+        ]
+      });
+      help('^960-1^', isa.quantity(null));
+      help('^960-2^', isa.quantity({}));
+      return help('^960-3^', isa.quantity({
+        value: 1024,
+        unit: 'kB'
+      }));
+    })();
+    (() => {      //.........................................................................................................
+      var create, declare, isa, types, validate;
+      types = new Intertype();
+      ({declare, create, validate, isa} = types);
+      whisper('^46464^', '————————————————————————————————————————————————————————');
+      declare.quantity({
+        $: 'object',
+        $value: 'float',
+        $unit: 'nonempty.text',
+        default: {
+          value: 0,
+          unit: null
+        }
+      });
+      //.........................................................................................................
+      // d = { value: 4, unit: 'kB', }
+      // T?.eq ( validate.quantity d ), d
+      // T?.ok ( validate.quantity d ) is d
+      // # info '^3453^', create.quantity { unit: 'kB', }
+      // info '^3453^', types.registry.quantity.test.toString()
+      // # try validate.quantity {}                           catch error then warn GUY.trm.reverse error.message
+      // # try validate.quantity { unit: '', }                catch error then warn GUY.trm.reverse error.message
+      // # try validate.quantity { unit: 'kB', }              catch error then warn GUY.trm.reverse error.message
+      help('^960-4^', isa.quantity(null));
+      help('^960-5^', isa.quantity({}));
+      return help('^960-6^', isa.quantity({
+        value: 1024,
+        unit: 'kB'
+      }));
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // demo()
@@ -2343,15 +2390,19 @@
     // @validate_1()
     // @isa_x_or_y()
     // test @isa_x_or_y
+    // @create_with_seal_freeze_extra()
     // test @create_with_seal_freeze_extra
-    test(this);
+    // test @intertype_existential_types
+    // @intertype_collection_of_t()
+    // test @intertype_collection_of_t
+    // test @validate_1
+    // @intertype_even_odd_for_bigints()
+    // test @intertype_even_odd_for_bigints
+    this.intertype_declaration_with_per_key_clauses();
   }
 
-  // @intertype_collection_of_t()
-// test @intertype_collection_of_t
-// test @validate_1
-// @intertype_even_odd_for_bigints()
-// test @intertype_even_odd_for_bigints
+  // test @intertype_declaration_with_per_key_clauses
+// test @
 
 }).call(this);
 

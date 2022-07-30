@@ -1526,10 +1526,31 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_props_resolve_property_chain = function(T, done) {
+    var GUY, owner, property_chain;
+    GUY = require('../../../apps/guy');
+    //.........................................................................................................
+    owner = {
+      first: {
+        second: {
+          other: {
+            last: 42
+          }
+        }
+      }
+    };
+    property_chain = ['first', 'second', 'other', 'last'];
+    if (T != null) {
+      T.eq(GUY.props.resolve_property_chain(owner, property_chain), 42);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
+      test(this);
       // demo_tree()
       // demo_tree_readme()
       // @[ "guy.props.crossmerge()" ]()
