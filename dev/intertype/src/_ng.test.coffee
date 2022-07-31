@@ -1313,6 +1313,7 @@ demo_size_of = ->
       create
       validate
       isa       } = types
+    info '^443322^', k, v for k, v of types.registry
     whisper '^46464^', '————————————————————————————————————————————————————————'
     #.......................................................................................................
     types.declare.quantity
@@ -1355,6 +1356,52 @@ demo_size_of = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@_demo_type_cfgs_as_funmctions_1 = ->
+  whisper '#############################################'
+  class F extends Function
+    constructor: ( ...P ) ->
+      super '...P', 'return this._me.do(...P)'
+      @_me      = @bind @
+      @_me.hub  = @
+      return @_me
+    do: ( x ) -> x ** 2
+  info '^981-1^', f = new F()
+  info '^981-1^', f._me
+  info '^981-1^', f.hub
+  info '^981-1^', f instanceof F
+  info '^981-1^', f()
+  info '^981-1^', f 42
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_demo_type_cfgs_as_funmctions_2 = ->
+  whisper '#############################################'
+  class Intertype
+    create_type_cfg: ( cfg ) ->
+      defaults  = { extras: true, collection: false, type: null, }
+      cfg       = { defaults..., cfg..., }
+      name      = cfg.type
+      R         = ( ( x ) -> x ** 2 ).bind @
+      Object.defineProperty R, 'name', { value: name, }
+      R[ k ]    = v for k, v of cfg
+      R         = new GUY.props.Strict_owner target: R
+      Object.seal R
+      # R         = GUY.lft.freeze R1 = R
+      Object.freeze R
+      return R
+  types = new Intertype()
+  urge '^982-1^', f = types.create_type_cfg { type: 'foobar', }
+  # Object is frozen, sealed, and has a strict `get()`ter:
+  urge '^982-2^', Object.isFrozen f
+  urge '^982-3^', Object.isSealed f
+  try f.collection = true catch error then warn rvr error.message
+  try f.xxx               catch error then warn rvr error.message
+  try f.xxx = 111         catch error then warn rvr error.message
+  info '^982-4^', f.name
+  info '^982-5^', f 42
+  return null
+
 
 ############################################################################################################
 unless module.parent?
@@ -1371,10 +1418,11 @@ unless module.parent?
   # test @validate_1
   # @intertype_even_odd_for_bigints()
   # test @intertype_even_odd_for_bigints
-  @intertype_declaration_with_per_key_clauses()
+  # @intertype_declaration_with_per_key_clauses()
   # test @intertype_declaration_with_per_key_clauses
   # test @
-
+  @_demo_type_cfgs_as_funmctions_1()
+  @_demo_type_cfgs_as_funmctions_2()
 
 
 
