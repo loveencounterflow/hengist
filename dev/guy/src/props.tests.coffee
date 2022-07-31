@@ -318,9 +318,9 @@ types                     = new ( require 'intertype' ).Intertype
 @[ "GUY.props.Strict_owner can disallow redefining keys" ] = ( T, done ) ->
   GUY     = require H.guy_path
   #.........................................................................................................
-  debug x = new GUY.props.Strict_owner { reset: false, }
-  x.foo   = 42
-  T?.throws /Strict_owner instance already has property 'foo'/, => x.foo = 42
+  debug x = new GUY.props.Strict_owner { seal: true, }
+  # x.foo   = 42
+  T?.throws /Cannot define property foo, object is not extensible/, => x.foo = 42
   #.........................................................................................................
   done?()
   return null
@@ -606,10 +606,23 @@ demo_strict_owner_with_proxy = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+demo_seal_freeze = ->
+  GUY       = require '../../../apps/guy'
+  d   = { x: 42, }
+  # dso = new GUY.props.Strict_owner { target: d, seal: true, freeze: true, }
+  # dso = new GUY.props.Strict_owner { target: d, seal: true, freeze: false, }
+  dso = new GUY.props.Strict_owner { target: d, seal: false, freeze: true, }
+  dso.x
+  try dso.y               catch error then warn '^424-1^', GUY.trm.reverse error.message
+  try dso.x = 48          catch error then warn '^424-2^', GUY.trm.reverse error.message
+  try dso.y = 'something' catch error then warn '^424-3^', GUY.trm.reverse error.message
+  return null
+
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # demo_tree()
   # demo_tree_readme()
   # @[ "guy.props.crossmerge()" ]()
@@ -630,5 +643,5 @@ if require.main is module then do =>
   # @[ "GUY.props.Strict_owner can use Reflect.has" ]()
   # test @[ "GUY.props.Strict_owner can use Reflect.has" ]
   # test @[ "GUY.props.Strict_owner can disallow redefining keys" ]
-  demo_strict_owner_with_proxy()
-
+  # demo_strict_owner_with_proxy()
+  demo_seal_freeze()
