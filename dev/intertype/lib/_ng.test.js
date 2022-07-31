@@ -2431,31 +2431,34 @@
         R = (function(x) {
           return x ** 2;
         }).bind(this);
-        Object.defineProperty(R, 'name', {
-          value: name
-        });
         for (k in cfg) {
           v = cfg[k];
-          R[k] = v;
+          GUY.props.hide(R, k, v);
         }
+        GUY.props.hide(R, 'name', name);
         R = new GUY.props.Strict_owner({
           target: R
         });
         Object.seal(R);
-        // R         = GUY.lft.freeze R1 = R
         Object.freeze(R);
         return R;
       }
 
     };
     types = new Intertype();
-    urge('^982-1^', f = types.create_type_cfg({
+    f = types.create_type_cfg({
       type: 'foobar'
-    }));
-    // Object is frozen, sealed, and has a strict `get()`ter:
-    urge('^982-2^', Object.isFrozen(f));
-    urge('^982-3^', Object.isSealed(f));
+    });
+    urge('^982-1^', (require('util')).inspect(f)); // [Function: foobar]
+    urge('^982-2^', rpr(f)); // [Function: foobar]
+    urge('^982-3^', f); // [Function: foobar]
+    urge('^982-4^', f.toString()); // function () { [native code] }
+    urge('^982-5^', typeof f); // function
+    urge('^982-6^', {f}); // { f: [Function: foobar] }
+    urge('^982-7^', Object.isFrozen(f)); // true
+    urge('^982-8^', Object.isSealed(f)); // true
     try {
+      // Object is frozen, sealed, and has a strict `get()`ter:
       f.collection = true;
     } catch (error1) {
       error = error1;
@@ -2473,8 +2476,8 @@
       error = error1;
       warn(rvr(error.message));
     }
-    info('^982-4^', f.name);
-    info('^982-5^', f(42));
+    info('^982-9^', f.name);
+    info('^982-10^', f(42));
     return null;
   };
 

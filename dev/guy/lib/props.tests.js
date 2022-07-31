@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var FS, H, PATH, _GUY, alert, debug, demo_keys, demo_strict_owner_with_proxy, demo_tree, demo_tree_readme, echo, equals, freeze, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var FS, H, PATH, _GUY, alert, debug, demo_keys, demo_seal_freeze, demo_strict_owner_with_proxy, demo_tree, demo_tree_readme, echo, equals, freeze, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   PATH = require('path');
@@ -775,11 +775,11 @@
     GUY = require(H.guy_path);
     //.........................................................................................................
     debug(x = new GUY.props.Strict_owner({
-      reset: false
+      seal: true
     }));
-    x.foo = 42;
+    // x.foo   = 42
     if (T != null) {
-      T.throws(/Strict_owner instance already has property 'foo'/, () => {
+      T.throws(/Cannot define property foo, object is not extensible/, () => {
         return x.foo = 42;
       });
     }
@@ -1547,10 +1547,46 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_seal_freeze = function() {
+    var GUY, d, dso, error;
+    GUY = require('../../../apps/guy');
+    d = {
+      x: 42
+    };
+    // dso = new GUY.props.Strict_owner { target: d, seal: true, freeze: true, }
+    // dso = new GUY.props.Strict_owner { target: d, seal: true, freeze: false, }
+    dso = new GUY.props.Strict_owner({
+      target: d,
+      seal: false,
+      freeze: true
+    });
+    dso.x;
+    try {
+      dso.y;
+    } catch (error1) {
+      error = error1;
+      warn('^424-1^', GUY.trm.reverse(error.message));
+    }
+    try {
+      dso.x = 48;
+    } catch (error1) {
+      error = error1;
+      warn('^424-2^', GUY.trm.reverse(error.message));
+    }
+    try {
+      dso.y = 'something';
+    } catch (error1) {
+      error = error1;
+      warn('^424-3^', GUY.trm.reverse(error.message));
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      test(this);
+      // test @
       // demo_tree()
       // demo_tree_readme()
       // @[ "guy.props.crossmerge()" ]()
@@ -1571,7 +1607,8 @@
       // @[ "GUY.props.Strict_owner can use Reflect.has" ]()
       // test @[ "GUY.props.Strict_owner can use Reflect.has" ]
       // test @[ "GUY.props.Strict_owner can disallow redefining keys" ]
-      return demo_strict_owner_with_proxy();
+      // demo_strict_owner_with_proxy()
+      return demo_seal_freeze();
     })();
   }
 
