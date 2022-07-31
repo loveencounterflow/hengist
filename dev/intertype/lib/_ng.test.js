@@ -2325,9 +2325,14 @@
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var create, declare, isa, types, validate;
+      var create, declare, isa, k, ref, types, v, validate;
       types = new Intertype();
       ({declare, create, validate, isa} = types);
+      ref = types.registry;
+      for (k in ref) {
+        v = ref[k];
+        info('^443322^', k, v);
+      }
       whisper('^46464^', '————————————————————————————————————————————————————————');
       //.......................................................................................................
       types.declare.quantity({
@@ -2383,6 +2388,96 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this._demo_type_cfgs_as_funmctions_1 = function() {
+    var F, f;
+    whisper('#############################################');
+    F = class F extends Function {
+      constructor(...P) {
+        super('...P', 'return this._me.do(...P)');
+        this._me = this.bind(this);
+        this._me.hub = this;
+        return this._me;
+      }
+
+      do(x) {
+        return x ** 2;
+      }
+
+    };
+    info('^981-1^', f = new F());
+    info('^981-1^', f._me);
+    info('^981-1^', f.hub);
+    info('^981-1^', f instanceof F);
+    info('^981-1^', f());
+    info('^981-1^', f(42));
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._demo_type_cfgs_as_funmctions_2 = function() {
+    var Intertype, error, f, types;
+    whisper('#############################################');
+    Intertype = class Intertype {
+      create_type_cfg(cfg) {
+        var R, defaults, k, name, v;
+        defaults = {
+          extras: true,
+          collection: false,
+          type: null
+        };
+        cfg = {...defaults, ...cfg};
+        name = cfg.type;
+        R = (function(x) {
+          return x ** 2;
+        }).bind(this);
+        Object.defineProperty(R, 'name', {
+          value: name
+        });
+        for (k in cfg) {
+          v = cfg[k];
+          R[k] = v;
+        }
+        R = new GUY.props.Strict_owner({
+          target: R
+        });
+        Object.seal(R);
+        // R         = GUY.lft.freeze R1 = R
+        Object.freeze(R);
+        return R;
+      }
+
+    };
+    types = new Intertype();
+    urge('^982-1^', f = types.create_type_cfg({
+      type: 'foobar'
+    }));
+    // Object is frozen, sealed, and has a strict `get()`ter:
+    urge('^982-2^', Object.isFrozen(f));
+    urge('^982-3^', Object.isSealed(f));
+    try {
+      f.collection = true;
+    } catch (error1) {
+      error = error1;
+      warn(rvr(error.message));
+    }
+    try {
+      f.xxx;
+    } catch (error1) {
+      error = error1;
+      warn(rvr(error.message));
+    }
+    try {
+      f.xxx = 111;
+    } catch (error1) {
+      error = error1;
+      warn(rvr(error.message));
+    }
+    info('^982-4^', f.name);
+    info('^982-5^', f(42));
+    return null;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // demo()
@@ -2398,11 +2493,12 @@
     // test @validate_1
     // @intertype_even_odd_for_bigints()
     // test @intertype_even_odd_for_bigints
-    this.intertype_declaration_with_per_key_clauses();
+    // @intertype_declaration_with_per_key_clauses()
+    // test @intertype_declaration_with_per_key_clauses
+    // test @
+    this._demo_type_cfgs_as_funmctions_1();
+    this._demo_type_cfgs_as_funmctions_2();
   }
-
-  // test @intertype_declaration_with_per_key_clauses
-// test @
 
 }).call(this);
 
