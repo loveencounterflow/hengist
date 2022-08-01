@@ -22,6 +22,7 @@ GUY                       = require '../../../apps/guy'
   echo
   log     }               = GUY.trm
 rvr                       = GUY.trm.reverse
+truth                     = GUY.trm.truth.bind GUY.trm
 #...........................................................................................................
 test                      = require 'guy-test'
 # { intersection_of }       = require '../../../apps/intertype/lib/helpers'
@@ -65,6 +66,7 @@ _types                    = new ( require 'intertype' ).Intertype()
   types           = new Intertype()
   T?.eq ( GUY.props.has types.isa, 'weirdo' ), false
   types.declare 'weirdo', test: ( x ) -> x is weirdo
+  # types.declare 'weirdo', test: ( x ) -> x is weirdo
   T?.eq ( GUY.props.has types.isa, 'weirdo' ), true
   debug '^353^', GUY.props.has types.isa, 'weirdo'
   T?.throws /Strict_owner instance already has property 'weirdo'/, => types.declare 'weirdo', test: ( x ) -> x is weirdo
@@ -1357,7 +1359,7 @@ demo_size_of = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@_demo_type_cfgs_as_funmctions_1 = ->
+@_demo_type_cfgs_as_functions_1 = ->
   whisper '#############################################'
   class F extends Function
     constructor: ( ...P ) ->
@@ -1375,7 +1377,7 @@ demo_size_of = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@_demo_type_cfgs_as_funmctions_2 = ->
+@_demo_type_cfgs_as_functions_2 = ->
   whisper '#############################################'
   class Intertype
     create_type_cfg: ( cfg ) ->
@@ -1383,25 +1385,74 @@ demo_size_of = ->
       cfg       = { defaults..., cfg..., }
       name      = cfg.type
       R         = ( ( x ) -> x ** 2 ).bind @
-      Object.defineProperty R, 'name', { value: name, }
-      R[ k ]    = v for k, v of cfg
-      R         = new GUY.props.Strict_owner target: R
-      Object.seal R
-      # R         = GUY.lft.freeze R1 = R
-      Object.freeze R
+      GUY.props.hide R, k, v for k, v of cfg
+      GUY.props.hide R, 'name', name
+      R         = new GUY.props.Strict_owner { target: R, freeze: true, }
       return R
   types = new Intertype()
-  urge '^982-1^', f = types.create_type_cfg { type: 'foobar', }
+  f     = types.create_type_cfg { type: 'foobar', }
+  urge '^982-1^', ( require 'util' ).inspect f  # [Function: foobar]
+  urge '^982-2^', rpr f                         # [Function: foobar]
+  urge '^982-3^', f                             # [Function: foobar]
+  urge '^982-4^', f.toString()                  # function () { [native code] }
+  urge '^982-5^', typeof f                      # function
+  urge '^982-6^', { f, }                        # { f: [Function: foobar] }
+  urge '^982-7^', Object.isFrozen f             # true
+  urge '^982-8^', Object.isSealed f             # true
   # Object is frozen, sealed, and has a strict `get()`ter:
-  urge '^982-2^', Object.isFrozen f
-  urge '^982-3^', Object.isSealed f
   try f.collection = true catch error then warn rvr error.message
   try f.xxx               catch error then warn rvr error.message
   try f.xxx = 111         catch error then warn rvr error.message
-  info '^982-4^', f.name
-  info '^982-5^', f 42
+  info '^982-9^', f.name
+  info '^982-10^', f 42
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@_demo_type_cfgs_as_functions_3 = ->
+  # T?.halt_on_error()
+  { Intertype
+    Type_factory  } = require '../../../apps/intertype'
+  types = new Intertype()
+  TF    = new Type_factory types
+  #.........................................................................................................
+  do =>
+    type  = TF.create_type { name: 'integer', test: ( ( x ) -> Number.isInteger x ), }
+    debug '^030-1^', TF
+    debug '^030-1^', type
+    debug '^030-1^', type.tests
+    try ( type.foo       ) catch error then whisper rvr error.message
+    try ( type.foo = 42  ) catch error then whisper rvr error.message
+    info '^031-1^', truth type 42
+    info '^031-1^', truth type 42.5
+  #.........................................................................................................
+  do =>
+    # type  = TF.create_type
+    #   name: 'quantity', tests: ( ( x ) -> Number.isInteger x ), }
+    debug '^030-1^', TF
+    debug '^030-1^', type
+    debug '^030-1^', type.tests
+    try ( type.foo       ) catch error then whisper rvr error.message
+    try ( type.foo = 42  ) catch error then whisper rvr error.message
+    info '^031-1^', truth type 42
+    info '^031-1^', truth type 42.5
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_intermezzo_private_class_features_in_coffeescript = ->
+  ### thx to https://crimefighter.svbtle.com/using-private-methods-in-coffeescript ###
+  class SomeClass
+    # this line is identical to `publicMethod: ->`
+    this::publicMethod = -> '*' + privateMethod() + '*'
+    privateProperty = 'foo'
+    privateMethod = -> privateProperty
+  #.........................................................................................................
+  x = new SomeClass()
+  for key from GUY.props.walk_keys x, { hidden: true, symbols: true, builtins: true, }
+    debug '^342-1^', key
+  info '^343-2^', x.publicMethod()
+  #.........................................................................................................
+  return null
 
 ############################################################################################################
 unless module.parent?
@@ -1420,11 +1471,13 @@ unless module.parent?
   # test @intertype_even_odd_for_bigints
   # @intertype_declaration_with_per_key_clauses()
   # test @intertype_declaration_with_per_key_clauses
+  # @_demo_type_cfgs_as_functions_1()
+  # @_demo_type_cfgs_as_functions_2()
+  # @_demo_nameit()
+  # test @[ "forbidden to overwrite declarations" ]
+  # @_demo_type_cfgs_as_functions_3()
+  @_intermezzo_private_class_features_in_coffeescript()
   # test @
-  @_demo_type_cfgs_as_funmctions_1()
-  @_demo_type_cfgs_as_funmctions_2()
-
-
 
 
 
