@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, S, _types, alert, debug, demo, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_autovivify_hedgepaths, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_size_of, demo_test_with_protocol, echo, equals, help, info, inspect, list_all_builtin_type_testers, log, njs_path, plain, praise, rpr, rvr, test, to_width, urge, warn, whisper;
+  var GUY, H, S, _types, alert, debug, demo, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_autovivify_hedgepaths, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_size_of, demo_test_with_protocol, echo, equals, help, info, inspect, list_all_builtin_type_testers, log, njs_path, plain, praise, rpr, rvr, test, to_width, truth, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -15,6 +15,8 @@
   ({rpr, inspect, echo, log} = GUY.trm);
 
   rvr = GUY.trm.reverse;
+
+  truth = GUY.trm.truth.bind(GUY.trm);
 
   //...........................................................................................................
   test = require('guy-test');
@@ -97,6 +99,7 @@
         return x === weirdo;
       }
     });
+    // types.declare 'weirdo', test: ( x ) -> x is weirdo
     if (T != null) {
       T.eq(GUY.props.has(types.isa, 'weirdo'), true);
     }
@@ -2389,7 +2392,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._demo_type_cfgs_as_funmctions_1 = function() {
+  this._demo_type_cfgs_as_functions_1 = function() {
     var F, f;
     whisper('#############################################');
     F = class F extends Function {
@@ -2415,7 +2418,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._demo_type_cfgs_as_funmctions_2 = function() {
+  this._demo_type_cfgs_as_functions_2 = function() {
     var Intertype, error, f, types;
     whisper('#############################################');
     Intertype = class Intertype {
@@ -2437,10 +2440,9 @@
         }
         GUY.props.hide(R, 'name', name);
         R = new GUY.props.Strict_owner({
-          target: R
+          target: R,
+          freeze: true
         });
-        Object.seal(R);
-        Object.freeze(R);
         return R;
       }
 
@@ -2481,6 +2483,103 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this._demo_type_cfgs_as_functions_3 = function() {
+    var Intertype, TF, Type_factory, types;
+    // T?.halt_on_error()
+    ({Intertype, Type_factory} = require('../../../apps/intertype'));
+    types = new Intertype();
+    TF = new Type_factory(types);
+    (() => {      //.........................................................................................................
+      var error, type;
+      type = TF.create_type({
+        name: 'integer',
+        test: (function(x) {
+          return Number.isInteger(x);
+        })
+      });
+      debug('^030-1^', TF);
+      debug('^030-1^', type);
+      debug('^030-1^', type.tests);
+      try {
+        type.foo;
+      } catch (error1) {
+        error = error1;
+        whisper(rvr(error.message));
+      }
+      try {
+        (type.foo = 42);
+      } catch (error1) {
+        error = error1;
+        whisper(rvr(error.message));
+      }
+      info('^031-1^', truth(type(42)));
+      return info('^031-1^', truth(type(42.5)));
+    })();
+    (() => {      //.........................................................................................................
+      var error;
+      // type  = TF.create_type
+      //   name: 'quantity', tests: ( ( x ) -> Number.isInteger x ), }
+      debug('^030-1^', TF);
+      debug('^030-1^', type);
+      debug('^030-1^', type.tests);
+      try {
+        type.foo;
+      } catch (error1) {
+        error = error1;
+        whisper(rvr(error.message));
+      }
+      try {
+        (type.foo = 42);
+      } catch (error1) {
+        error = error1;
+        whisper(rvr(error.message));
+      }
+      info('^031-1^', truth(type(42)));
+      return info('^031-1^', truth(type(42.5)));
+    })();
+    //.........................................................................................................
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._intermezzo_private_class_features_in_coffeescript = function() {
+    /* thx to https://crimefighter.svbtle.com/using-private-methods-in-coffeescript */
+    var SomeClass, key, ref, x;
+    SomeClass = (function() {
+      var privateMethod, privateProperty;
+
+      class SomeClass {};
+
+      // this line is identical to `publicMethod: ->`
+      SomeClass.prototype.publicMethod = function() {
+        return '*' + privateMethod() + '*';
+      };
+
+      privateProperty = 'foo';
+
+      privateMethod = function() {
+        return privateProperty;
+      };
+
+      return SomeClass;
+
+    }).call(this);
+    //.........................................................................................................
+    x = new SomeClass();
+    ref = GUY.props.walk_keys(x, {
+      hidden: true,
+      symbols: true,
+      builtins: true
+    });
+    for (key of ref) {
+      debug('^342-1^', key);
+    }
+    info('^343-2^', x.publicMethod());
+    //.........................................................................................................
+    return null;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // demo()
@@ -2498,10 +2597,15 @@
     // test @intertype_even_odd_for_bigints
     // @intertype_declaration_with_per_key_clauses()
     // test @intertype_declaration_with_per_key_clauses
-    // test @
-    this._demo_type_cfgs_as_funmctions_1();
-    this._demo_type_cfgs_as_funmctions_2();
+    // @_demo_type_cfgs_as_functions_1()
+    // @_demo_type_cfgs_as_functions_2()
+    // @_demo_nameit()
+    // test @[ "forbidden to overwrite declarations" ]
+    // @_demo_type_cfgs_as_functions_3()
+    this._intermezzo_private_class_features_in_coffeescript();
   }
+
+  // test @
 
 }).call(this);
 

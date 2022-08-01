@@ -790,6 +790,37 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["GUY.props.Strict_owner can disallow reassining keys"] = function(T, done) {
+    var GUY, d, x;
+    GUY = require(H.guy_path);
+    //.........................................................................................................
+    d = {
+      a: 1,
+      b: 2,
+      d: 3
+    };
+    x = new GUY.props.Strict_owner({
+      target: d,
+      oneshot: true
+    });
+    if (T != null) {
+      T.throws(/Strict_owner instance already has property 'a'/, () => {
+        return x.a = 42;
+      });
+    }
+    x.foo = 42;
+    if (T != null) {
+      T.throws(/Strict_owner instance already has property 'foo'/, () => {
+        return x.foo = 42;
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_keys = function() {
     var A, B, C, D, GUY, d, e, k, lst, n;
     GUY = require('../../../apps/guy');
@@ -1549,37 +1580,64 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_seal_freeze = function() {
-    var GUY, d, dso, error;
+    var GUY;
     GUY = require('../../../apps/guy');
-    d = {
-      x: 42
-    };
-    // dso = new GUY.props.Strict_owner { target: d, seal: true, freeze: true, }
-    // dso = new GUY.props.Strict_owner { target: d, seal: true, freeze: false, }
-    dso = new GUY.props.Strict_owner({
-      target: d,
-      seal: false,
-      freeze: true
-    });
-    dso.x;
-    try {
-      dso.y;
-    } catch (error1) {
-      error = error1;
-      warn('^424-1^', GUY.trm.reverse(error.message));
-    }
-    try {
-      dso.x = 48;
-    } catch (error1) {
-      error = error1;
-      warn('^424-2^', GUY.trm.reverse(error.message));
-    }
-    try {
-      dso.y = 'something';
-    } catch (error1) {
-      error = error1;
-      warn('^424-3^', GUY.trm.reverse(error.message));
-    }
+    (() => {
+      var d, dso, error;
+      d = {
+        x: 42
+      };
+      // dso = new GUY.props.Strict_owner { target: d, seal: true, freeze: true, }
+      // dso = new GUY.props.Strict_owner { target: d, seal: true, freeze: false, }
+      dso = new GUY.props.Strict_owner({
+        target: d,
+        seal: false,
+        freeze: true
+      });
+      dso.x;
+      try {
+        dso.y;
+      } catch (error1) {
+        error = error1;
+        warn('^424-1^', GUY.trm.reverse(error.message));
+      }
+      try {
+        dso.x = 48;
+      } catch (error1) {
+        error = error1;
+        warn('^424-2^', GUY.trm.reverse(error.message));
+      }
+      try {
+        return dso.y = 'something';
+      } catch (error1) {
+        error = error1;
+        return warn('^424-3^', GUY.trm.reverse(error.message));
+      }
+    })();
+    (() => {
+      var d, dso;
+      d = {
+        x: 42
+      };
+      dso = new GUY.props.Strict_owner({
+        target: d,
+        oneshot: true
+      });
+      dso.xy = new GUY.props.Strict_owner({
+        target: {
+          foo: 'bar'
+        },
+        freeze: true
+      });
+      // dso.x     = 123     # Strict_owner instance already has property 'x'
+      // dso.xy    = {}      # Strict_owner instance already has property 'xy'
+      // dso.xy.foo  = 'gnu' # TypeError: Cannot assign to read only property 'foo'
+      debug('^35345^', dso); // { x: 42, xy: { foo: 'bar' } }
+      debug('^35345^', d); // { x: 42, xy: { foo: 'bar' } }
+      d.x = 123;
+      debug('^35345^', dso); // { x: 123, xy: { foo: 'bar' } }
+      return debug('^35345^', d); // { x: 123, xy: { foo: 'bar' } }
+    })();
     return null;
   };
 
@@ -1607,6 +1665,8 @@
       // @[ "GUY.props.Strict_owner can use Reflect.has" ]()
       // test @[ "GUY.props.Strict_owner can use Reflect.has" ]
       // test @[ "GUY.props.Strict_owner can disallow redefining keys" ]
+      // @[ "GUY.props.Strict_owner can disallow reassining keys" ]()
+      // test @[ "GUY.props.Strict_owner can disallow reassining keys" ]
       // demo_strict_owner_with_proxy()
       return demo_seal_freeze();
     })();
