@@ -1305,6 +1305,47 @@ demo_size_of = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@intertype_empty_and_nonempty = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  types         = new Intertype()
+  { declare
+    isa
+    validate  } = types
+  #.........................................................................................................
+  info '^931-1^',   T?.eq ( types.isa.empty     42.5    ), false
+  info '^931-2^',   T?.eq ( types.isa.empty     ''      ), true
+  info '^931-3^',   T?.eq ( types.isa.empty     'x'     ), false
+  info '^931-4^',   T?.eq ( types.isa.empty     []      ), true
+  info '^931-5^',   T?.eq ( types.isa.empty     [ 1, ]  ), false
+  info '^931-6^',   T?.eq ( types.isa.nonempty  42.5    ), false
+  info '^931-7^',   T?.eq ( types.isa.nonempty  ''      ), false
+  info '^931-8^',   T?.eq ( types.isa.nonempty  'x'     ), true
+  info '^931-9^',   T?.eq ( types.isa.nonempty  [ 1, ]  ), true
+  #.........................................................................................................
+  info '^931-10^',  T?.eq ( types.isa.empty.list     42.5    ), false
+  info '^931-11^',  T?.eq ( types.isa.empty.text     ''      ), true
+  info '^931-12^',  T?.eq ( types.isa.empty.text     'x'     ), false
+  info '^931-13^',  T?.eq ( types.isa.empty.list     []      ), true
+  info '^931-14^',  T?.eq ( types.isa.empty.list     [ 1, ]  ), false
+  info '^931-15^',  T?.eq ( types.isa.nonempty.list  42.5    ), false
+  info '^931-16^',  T?.eq ( types.isa.nonempty.text  ''      ), false
+  info '^931-17^',  T?.eq ( types.isa.nonempty.text  'x'     ), true
+  info '^931-18^',  T?.eq ( types.isa.nonempty.list  [ 1, ]  ), true
+  #.........................................................................................................
+  info '^931-19^',  T?.eq ( types.isa.list.empty     42.5    ), false
+  info '^931-20^',  T?.eq ( types.isa.text.empty     ''      ), true
+  info '^931-21^',  T?.eq ( types.isa.text.empty     'x'     ), false
+  info '^931-22^',  T?.eq ( types.isa.list.empty     []      ), true
+  info '^931-23^',  T?.eq ( types.isa.list.empty     [ 1, ]  ), false
+  info '^931-24^',  T?.eq ( types.isa.list.nonempty  42.5    ), false
+  info '^931-25^',  T?.eq ( types.isa.text.nonempty  ''      ), false
+  info '^931-26^',  T?.eq ( types.isa.text.nonempty  'x'     ), true
+  info '^931-27^',  T?.eq ( types.isa.list.nonempty  [ 1, ]  ), true
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @intertype_declaration_with_per_key_clauses = ( T, done ) ->
   # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
@@ -1422,19 +1463,19 @@ demo_size_of = ->
     debug '^030-1^', type.tests
     try ( type.foo       ) catch error then whisper rvr error.message
     try ( type.foo = 42  ) catch error then whisper rvr error.message
-    info '^031-1^', truth type 42
-    info '^031-1^', truth type 42.5
+    info '^031-1^', truth type                42
+    info '^031-2^', truth type                42.5
   #.........................................................................................................
   do =>
-    # type  = TF.create_type
-    #   name: 'quantity', tests: ( ( x ) -> Number.isInteger x ), }
-    debug '^030-1^', TF
+    type = TF._create_type
+      name:         'quantity'
+      # $:            'object'
+      $value:       'float'
+      $unit:        'unit'
     debug '^030-1^', type
     debug '^030-1^', type.tests
-    try ( type.foo       ) catch error then whisper rvr error.message
-    try ( type.foo = 42  ) catch error then whisper rvr error.message
-    info '^031-1^', truth type 42
-    info '^031-1^', truth type 42.5
+    info '^031-7^', truth type 42
+    info '^031-8^', truth type 42.5
   #.........................................................................................................
   return null
 
@@ -1475,8 +1516,9 @@ unless module.parent?
   # @_demo_type_cfgs_as_functions_2()
   # @_demo_nameit()
   # test @[ "forbidden to overwrite declarations" ]
-  # @_demo_type_cfgs_as_functions_3()
-  @_intermezzo_private_class_features_in_coffeescript()
+  @_demo_type_cfgs_as_functions_3()
+  # @_intermezzo_private_class_features_in_coffeescript()
+  # test @intertype_empty_and_nonempty
   # test @
 
 
