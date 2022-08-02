@@ -2323,6 +2323,46 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.intertype_empty_and_nonempty = function(T, done) {
+    var Intertype, declare, isa, types, validate;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    ({declare, isa, validate} = types);
+    //.........................................................................................................
+    info('^931-1^', T != null ? T.eq(types.isa.empty(42.5), false) : void 0);
+    info('^931-2^', T != null ? T.eq(types.isa.empty(''), true) : void 0);
+    info('^931-3^', T != null ? T.eq(types.isa.empty('x'), false) : void 0);
+    info('^931-4^', T != null ? T.eq(types.isa.empty([]), true) : void 0);
+    info('^931-5^', T != null ? T.eq(types.isa.empty([1]), false) : void 0);
+    info('^931-6^', T != null ? T.eq(types.isa.nonempty(42.5), false) : void 0);
+    info('^931-7^', T != null ? T.eq(types.isa.nonempty(''), false) : void 0);
+    info('^931-8^', T != null ? T.eq(types.isa.nonempty('x'), true) : void 0);
+    info('^931-9^', T != null ? T.eq(types.isa.nonempty([1]), true) : void 0);
+    //.........................................................................................................
+    info('^931-10^', T != null ? T.eq(types.isa.empty.list(42.5), false) : void 0);
+    info('^931-11^', T != null ? T.eq(types.isa.empty.text(''), true) : void 0);
+    info('^931-12^', T != null ? T.eq(types.isa.empty.text('x'), false) : void 0);
+    info('^931-13^', T != null ? T.eq(types.isa.empty.list([]), true) : void 0);
+    info('^931-14^', T != null ? T.eq(types.isa.empty.list([1]), false) : void 0);
+    info('^931-15^', T != null ? T.eq(types.isa.nonempty.list(42.5), false) : void 0);
+    info('^931-16^', T != null ? T.eq(types.isa.nonempty.text(''), false) : void 0);
+    info('^931-17^', T != null ? T.eq(types.isa.nonempty.text('x'), true) : void 0);
+    info('^931-18^', T != null ? T.eq(types.isa.nonempty.list([1]), true) : void 0);
+    //.........................................................................................................
+    info('^931-19^', T != null ? T.eq(types.isa.list.empty(42.5), false) : void 0);
+    info('^931-20^', T != null ? T.eq(types.isa.text.empty(''), true) : void 0);
+    info('^931-21^', T != null ? T.eq(types.isa.text.empty('x'), false) : void 0);
+    info('^931-22^', T != null ? T.eq(types.isa.list.empty([]), true) : void 0);
+    info('^931-23^', T != null ? T.eq(types.isa.list.empty([1]), false) : void 0);
+    info('^931-24^', T != null ? T.eq(types.isa.list.nonempty(42.5), false) : void 0);
+    info('^931-25^', T != null ? T.eq(types.isa.text.nonempty(''), false) : void 0);
+    info('^931-26^', T != null ? T.eq(types.isa.text.nonempty('x'), true) : void 0);
+    info('^931-27^', T != null ? T.eq(types.isa.list.nonempty([1]), true) : void 0);
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.intertype_declaration_with_per_key_clauses = function(T, done) {
     var Intertype;
     // T?.halt_on_error()
@@ -2514,29 +2554,20 @@
         whisper(rvr(error.message));
       }
       info('^031-1^', truth(type(42)));
-      return info('^031-1^', truth(type(42.5)));
+      return info('^031-2^', truth(type(42.5)));
     })();
     (() => {      //.........................................................................................................
-      var error;
-      // type  = TF.create_type
-      //   name: 'quantity', tests: ( ( x ) -> Number.isInteger x ), }
-      debug('^030-1^', TF);
+      var type;
+      type = TF._create_type({
+        name: 'quantity',
+        // $:            'object'
+        $value: 'float',
+        $unit: 'unit'
+      });
       debug('^030-1^', type);
       debug('^030-1^', type.tests);
-      try {
-        type.foo;
-      } catch (error1) {
-        error = error1;
-        whisper(rvr(error.message));
-      }
-      try {
-        (type.foo = 42);
-      } catch (error1) {
-        error = error1;
-        whisper(rvr(error.message));
-      }
-      info('^031-1^', truth(type(42)));
-      return info('^031-1^', truth(type(42.5)));
+      info('^031-7^', truth(type(42)));
+      return info('^031-8^', truth(type(42.5)));
     })();
     //.........................................................................................................
     return null;
@@ -2601,11 +2632,12 @@
     // @_demo_type_cfgs_as_functions_2()
     // @_demo_nameit()
     // test @[ "forbidden to overwrite declarations" ]
-    // @_demo_type_cfgs_as_functions_3()
-    this._intermezzo_private_class_features_in_coffeescript();
+    this._demo_type_cfgs_as_functions_3();
   }
 
-  // test @
+  // @_intermezzo_private_class_features_in_coffeescript()
+// test @intertype_empty_and_nonempty
+// test @
 
 }).call(this);
 
