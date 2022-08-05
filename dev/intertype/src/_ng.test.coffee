@@ -1449,35 +1449,41 @@ demo_size_of = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@_demo_type_cfgs_as_functions_3 = ->
+@intertype_normalize_type_cfg = ( T, done ) ->
   # T?.halt_on_error()
   { Intertype
     Type_factory  } = require '../../../apps/intertype'
   types = new Intertype()
   TF    = new Type_factory types
+  f     = Symbol 'f'
   #.........................................................................................................
-  do =>
-    type  = TF.create_type { name: 'integer', test: ( ( x ) -> Number.isInteger x ), }
-    debug '^030-1^', TF
-    debug '^030-1^', type
-    debug '^030-1^', type.tests
-    try ( type.foo       ) catch error then whisper rvr error.message
-    try ( type.foo = 42  ) catch error then whisper rvr error.message
-    info '^031-1^', truth type                42
-    info '^031-2^', truth type                42.5
+  prep = ( d ) ->
+    R = {}
+    for k in ( Object.keys d ).sort()
+      v       = d[ k ]
+      R[ k ]  = if _types.isa.function v then f else v
+    return R
+  debug prep TF._normalize_type_cfg 't', 'list.of.integer'
   #.........................................................................................................
-  do =>
-    type = TF._create_type
-      name:         'quantity'
-      # $:            'object'
-      $value:       'float'
-      $unit:        'unit'
-    debug '^030-1^', type
-    debug '^030-1^', type.tests
-    info '^031-7^', truth type 42
-    info '^031-8^', truth type 42.5
+  probes_and_matchers = [
+    [ ['t'                                                                      ], null, /not a valid Type_factory_type_dsc/,                ]
+    [ [{ name: 't', collection: false, }                                        ], null, /not a valid Type_factory_type_dsc/,                ]
+    [ ['t', ( ( x ) -> @isa.object x ), { x: 'float', y: 'float', }             ], null, /expected a function or a nonempty text for `isa`/, ]
+    [ [ 't', 'list.of.integer'                                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'list.of.integer', name: 't' }, ]
+    [ [ { name: 't', collection: false, isa: 'positive0.integer', }             ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'positive0.integer', name: 't' }, ]
+    [ [ 't', { collection: false, }, 'list.of.integer'                          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'list.of.integer', name: 't' }, ]
+    [ [ 't', { collection: false, }, ( x ) -> @isa.positive0.integer x          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
+    [ [ 't', ( x ) -> @isa.positive0.integer x                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
+    [ [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
+    [ [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ], { collection: false, create: null, extras: true, fields: { value: 'float', unit: 'nonempty.text' }, freeze: false, isa: 'object', name: 'quantity', }, ]
+    [ [ 'foobar', { $foo: 'text', $bar: 'text', create: ( -> ), default: {}, extras: false, freeze: true, seal: true, collection: true, }, ( ( x ) -> x instanceof Foobar )                ], { collection: true, create: f, default: {}, extras: false, fields: { foo: 'text', bar: 'text' }, freeze: true, isa: f, name: 'foobar', seal: true }, ]
+    ]
   #.........................................................................................................
-  return null
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      resolve prep TF._normalize_type_cfg probe...
+  #.........................................................................................................
+  done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @_intermezzo_private_class_features_in_coffeescript = ->
@@ -1516,7 +1522,8 @@ unless module.parent?
   # @_demo_type_cfgs_as_functions_2()
   # @_demo_nameit()
   # test @[ "forbidden to overwrite declarations" ]
-  @_demo_type_cfgs_as_functions_3()
+  # @intertype_normalize_type_cfg()
+  test @intertype_normalize_type_cfg
   # @_intermezzo_private_class_features_in_coffeescript()
   # test @intertype_empty_and_nonempty
   # test @
