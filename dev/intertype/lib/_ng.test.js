@@ -2524,53 +2524,225 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._demo_type_cfgs_as_functions_3 = function() {
-    var Intertype, TF, Type_factory, types;
+  this.intertype_normalize_type_cfg = async function(T, done) {
+    var Intertype, TF, Type_factory, error, f, i, len, matcher, prep, probe, probes_and_matchers, types;
     // T?.halt_on_error()
     ({Intertype, Type_factory} = require('../../../apps/intertype'));
     types = new Intertype();
     TF = new Type_factory(types);
-    (() => {      //.........................................................................................................
-      var error, type;
-      type = TF.create_type({
-        name: 'integer',
-        test: (function(x) {
-          return Number.isInteger(x);
-        })
-      });
-      debug('^030-1^', TF);
-      debug('^030-1^', type);
-      debug('^030-1^', type.tests);
-      try {
-        type.foo;
-      } catch (error1) {
-        error = error1;
-        whisper(rvr(error.message));
-      }
-      try {
-        (type.foo = 42);
-      } catch (error1) {
-        error = error1;
-        whisper(rvr(error.message));
-      }
-      info('^031-1^', truth(type(42)));
-      return info('^031-2^', truth(type(42.5)));
-    })();
-    (() => {      //.........................................................................................................
-      var type;
-      type = TF._create_type({
-        name: 'quantity',
-        // $:            'object'
-        $value: 'float',
-        $unit: 'unit'
-      });
-      debug('^030-1^', type);
-      debug('^030-1^', type.tests);
-      info('^031-7^', truth(type(42)));
-      return info('^031-8^', truth(type(42.5)));
-    })();
+    f = Symbol('f');
     //.........................................................................................................
-    return null;
+    prep = function(d) {
+      var R, i, k, len, ref, v;
+      R = {};
+      ref = (Object.keys(d)).sort();
+      for (i = 0, len = ref.length; i < len; i++) {
+        k = ref[i];
+        v = d[k];
+        R[k] = _types.isa.function(v) ? f : v;
+      }
+      return R;
+    };
+    debug(prep(TF._normalize_type_cfg('t', 'list.of.integer')));
+    //.........................................................................................................
+    probes_and_matchers = [
+      [['t'],
+      null,
+      /not a valid Type_factory_type_dsc/],
+      [
+        [
+          {
+            name: 't',
+            collection: false
+          }
+        ],
+        null,
+        /not a valid Type_factory_type_dsc/
+      ],
+      [
+        [
+          't',
+          (function(x) {
+            return this.isa.object(x);
+          }),
+          {
+            x: 'float',
+            y: 'float'
+          }
+        ],
+        null,
+        /expected a function or a nonempty text for `isa`/
+      ],
+      [
+        ['t',
+        'list.of.integer'],
+        {
+          collection: false,
+          create: null,
+          extras: true,
+          fields: null,
+          freeze: false,
+          isa: 'list.of.integer',
+          name: 't'
+        }
+      ],
+      [
+        [
+          {
+            name: 't',
+            collection: false,
+            isa: 'positive0.integer'
+          }
+        ],
+        {
+          collection: false,
+          create: null,
+          extras: true,
+          fields: null,
+          freeze: false,
+          isa: 'positive0.integer',
+          name: 't'
+        }
+      ],
+      [
+        [
+          't',
+          {
+            collection: false
+          },
+          'list.of.integer'
+        ],
+        {
+          collection: false,
+          create: null,
+          extras: true,
+          fields: null,
+          freeze: false,
+          isa: 'list.of.integer',
+          name: 't'
+        }
+      ],
+      [
+        [
+          't',
+          {
+            collection: false
+          },
+          function(x) {
+            return this.isa.positive0.integer(x);
+          }
+        ],
+        {
+          collection: false,
+          create: null,
+          extras: true,
+          fields: null,
+          freeze: false,
+          isa: f,
+          name: 't'
+        }
+      ],
+      [
+        [
+          't',
+          function(x) {
+            return this.isa.positive0.integer(x);
+          }
+        ],
+        {
+          collection: false,
+          create: null,
+          extras: true,
+          fields: null,
+          freeze: false,
+          isa: f,
+          name: 't'
+        }
+      ],
+      [
+        [
+          't',
+          {
+            collection: false,
+            isa: (function(x) {
+              return this.isa.positive0.integer(x);
+            })
+          }
+        ],
+        {
+          collection: false,
+          create: null,
+          extras: true,
+          fields: null,
+          freeze: false,
+          isa: f,
+          name: 't'
+        }
+      ],
+      [
+        [
+          'quantity',
+          {
+            $value: 'float',
+            $unit: 'nonempty.text'
+          }
+        ],
+        {
+          collection: false,
+          create: null,
+          extras: true,
+          fields: {
+            value: 'float',
+            unit: 'nonempty.text'
+          },
+          freeze: false,
+          isa: 'object',
+          name: 'quantity'
+        }
+      ],
+      [
+        [
+          'foobar',
+          {
+            $foo: 'text',
+            $bar: 'text',
+            create: (function() {}),
+            default: {},
+            extras: false,
+            freeze: true,
+            seal: true,
+            collection: true
+          },
+          (function(x) {
+            return x instanceof Foobar;
+          })
+        ],
+        {
+          collection: true,
+          create: f,
+          default: {},
+          extras: false,
+          fields: {
+            foo: 'text',
+            bar: 'text'
+          },
+          freeze: true,
+          isa: f,
+          name: 'foobar',
+          seal: true
+        }
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          return resolve(prep(TF._normalize_type_cfg(...probe)));
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -2632,7 +2804,8 @@
     // @_demo_type_cfgs_as_functions_2()
     // @_demo_nameit()
     // test @[ "forbidden to overwrite declarations" ]
-    this._demo_type_cfgs_as_functions_3();
+    // @intertype_normalize_type_cfg()
+    test(this.intertype_normalize_type_cfg);
   }
 
   // @_intermezzo_private_class_features_in_coffeescript()
