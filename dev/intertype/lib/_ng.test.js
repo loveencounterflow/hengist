@@ -2543,7 +2543,7 @@
       }
       return R;
     };
-    debug(prep(TF._normalize_type_cfg('t', 'list.of.integer')));
+    // debug prep TF._normalize_type_cfg 't', 'list.of.integer'
     //.........................................................................................................
     probes_and_matchers = [
       [['t'],
@@ -2582,7 +2582,7 @@
           extras: true,
           fields: null,
           freeze: false,
-          isa: 'list.of.integer',
+          isa: f,
           name: 't'
         }
       ],
@@ -2600,7 +2600,7 @@
           extras: true,
           fields: null,
           freeze: false,
-          isa: 'positive0.integer',
+          isa: f,
           name: 't'
         }
       ],
@@ -2618,7 +2618,7 @@
           extras: true,
           fields: null,
           freeze: false,
-          isa: 'list.of.integer',
+          isa: f,
           name: 't'
         }
       ],
@@ -2696,7 +2696,7 @@
             unit: 'nonempty.text'
           },
           freeze: false,
-          isa: 'object',
+          isa: f,
           name: 'quantity'
         }
       ],
@@ -2736,6 +2736,7 @@
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
+      // debug '^23-1^', { probe, matcher, error, }
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           return resolve(prep(TF._normalize_type_cfg(...probe)));
