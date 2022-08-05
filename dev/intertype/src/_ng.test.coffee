@@ -1463,23 +1463,24 @@ demo_size_of = ->
       v       = d[ k ]
       R[ k ]  = if _types.isa.function v then f else v
     return R
-  debug prep TF._normalize_type_cfg 't', 'list.of.integer'
+  # debug prep TF._normalize_type_cfg 't', 'list.of.integer'
   #.........................................................................................................
   probes_and_matchers = [
     [ ['t'                                                                      ], null, /not a valid Type_factory_type_dsc/,                ]
     [ [{ name: 't', collection: false, }                                        ], null, /not a valid Type_factory_type_dsc/,                ]
     [ ['t', ( ( x ) -> @isa.object x ), { x: 'float', y: 'float', }             ], null, /expected a function or a nonempty text for `isa`/, ]
-    [ [ 't', 'list.of.integer'                                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'list.of.integer', name: 't' }, ]
-    [ [ { name: 't', collection: false, isa: 'positive0.integer', }             ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'positive0.integer', name: 't' }, ]
-    [ [ 't', { collection: false, }, 'list.of.integer'                          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'list.of.integer', name: 't' }, ]
+    [ [ 't', 'list.of.integer'                                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
+    [ [ { name: 't', collection: false, isa: 'positive0.integer', }             ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
+    [ [ 't', { collection: false, }, 'list.of.integer'                          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
     [ [ 't', { collection: false, }, ( x ) -> @isa.positive0.integer x          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
     [ [ 't', ( x ) -> @isa.positive0.integer x                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
     [ [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
-    [ [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ], { collection: false, create: null, extras: true, fields: { value: 'float', unit: 'nonempty.text' }, freeze: false, isa: 'object', name: 'quantity', }, ]
+    [ [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ], { collection: false, create: null, extras: true, fields: { value: 'float', unit: 'nonempty.text' }, freeze: false, isa: f, name: 'quantity', }, ]
     [ [ 'foobar', { $foo: 'text', $bar: 'text', create: ( -> ), default: {}, extras: false, freeze: true, seal: true, collection: true, }, ( ( x ) -> x instanceof Foobar )                ], { collection: true, create: f, default: {}, extras: false, fields: { foo: 'text', bar: 'text' }, freeze: true, isa: f, name: 'foobar', seal: true }, ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
+    # debug '^23-1^', { probe, matcher, error, }
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       resolve prep TF._normalize_type_cfg probe...
   #.........................................................................................................
