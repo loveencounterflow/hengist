@@ -1461,6 +1461,9 @@ demo_size_of = ->
     for k in ( Object.keys d ).sort()
       v       = d[ k ]
       R[ k ]  = if _types.isa.function v then "f(#{v.name})" else v
+    if d.fields?
+      for k, v of d.fields
+        d.fields[ k ] = "f(#{v.name})"
     return R
   # debug prep TF._normalize_type_cfg 't', 'list.of.integer'
   #.........................................................................................................
@@ -1474,9 +1477,9 @@ demo_size_of = ->
     [ [ 't', { collection: false, }, ( x ) -> @isa.positive0.integer x          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't' }, ]
     [ [ 't', ( x ) -> @isa.positive0.integer x                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't' }, ]
     [ [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't' }, ]
-    [ [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ], { collection: false, create: null, extras: true, fields: { value: 'float', unit: 'nonempty.text' }, freeze: false, isa: 'f(quantity:object)', name: 'quantity' }, ]
+    [ [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ], { collection: false, create: null, extras: true, fields: { value: 'f(quantity.value:float)', unit: 'f(quantity.unit:nonempty.text)' }, freeze: false, isa: 'f(quantity:object)', name: 'quantity' }, ]
     [ [ 'foobar', { $foo: 'text', $bar: 'text', create: ( -> ), default: {}, extras: false, freeze: true, seal: true, collection: true, }, ( ( x ) -> x instanceof Foobar )                ], \
-      { collection: true, create: 'f(create)', default: {}, extras: false, fields: { foo: 'text', bar: 'text' }, freeze: true, isa: 'f(foobar:#0)', name: 'foobar', seal: true }, ]
+      { collection: true, create: 'f(create)', default: {}, extras: false, fields: { foo: 'f(foobar.foo:text)', bar: 'f(foobar.bar:text)' }, freeze: true, isa: 'f(foobar:#0)', name: 'foobar', seal: true }, ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
