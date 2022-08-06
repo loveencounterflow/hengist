@@ -2532,13 +2532,20 @@
     TF = new Type_factory(types);
     //.........................................................................................................
     prep = function(d) {
-      var R, i, k, len, ref, v;
+      var R, i, k, len, ref, ref1, v;
       R = {};
       ref = (Object.keys(d)).sort();
       for (i = 0, len = ref.length; i < len; i++) {
         k = ref[i];
         v = d[k];
         R[k] = _types.isa.function(v) ? `f(${v.name})` : v;
+      }
+      if (d.fields != null) {
+        ref1 = d.fields;
+        for (k in ref1) {
+          v = ref1[k];
+          d.fields[k] = `f(${v.name})`;
+        }
       }
       return R;
     };
@@ -2691,8 +2698,8 @@
           create: null,
           extras: true,
           fields: {
-            value: 'float',
-            unit: 'nonempty.text'
+            value: 'f(quantity.value:float)',
+            unit: 'f(quantity.unit:nonempty.text)'
           },
           freeze: false,
           isa: 'f(quantity:object)',
@@ -2722,8 +2729,8 @@
           default: {},
           extras: false,
           fields: {
-            foo: 'text',
-            bar: 'text'
+            foo: 'f(foobar.foo:text)',
+            bar: 'f(foobar.bar:text)'
           },
           freeze: true,
           isa: 'f(foobar:#0)',
