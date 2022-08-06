@@ -56,10 +56,11 @@ NOTIFIER                  = require 'node-notifier'
   ratio       = ( used / total ) * 100
   free_ratio  = ( free / total ) * 100
   message     = "RAM usage: #{ratio.toFixed 1}%"
+  max_ratio   = 85
   # debug free + used
   # debug total - ( free + used )
   # debug { total, used, ratio, free_ratio, }
-  if ratio > 75
+  if ratio > max_ratio
     # @sync()
     warn rvr message
     @notify_warn message
