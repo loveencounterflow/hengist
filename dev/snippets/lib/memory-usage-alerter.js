@@ -47,7 +47,7 @@
   this.demo = function() {
     /* thx to https://github.com/sebhildebrandt/systeminformation/blob/master/lib/memory.js#L79
      (commit a2c76a198c33f8b1019bf4af0b047528804f5574 2022 07 14) */
-    var free, free_ratio, message, ratio, report, total, used;
+    var free, free_ratio, max_ratio, message, ratio, report, total, used;
     report = CP.execSync('free', {
       encoding: 'utf-8'
     });
@@ -58,10 +58,11 @@
     ratio = (used / total) * 100;
     free_ratio = (free / total) * 100;
     message = `RAM usage: ${ratio.toFixed(1)}%`;
+    max_ratio = 85;
     // debug free + used
     // debug total - ( free + used )
     // debug { total, used, ratio, free_ratio, }
-    if (ratio > 75) {
+    if (ratio > max_ratio) {
       // @sync()
       warn(rvr(message));
       this.notify_warn(message);

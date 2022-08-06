@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, S, _types, alert, debug, demo, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_autovivify_hedgepaths, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_size_of, demo_test_with_protocol, echo, equals, help, info, inspect, list_all_builtin_type_testers, log, njs_path, plain, praise, rpr, rvr, test, to_width, truth, urge, warn, whisper;
+  var GUY, H, S, _types, alert, debug, demo, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_autovivify_hedgepaths, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_size_of, demo_test_with_protocol, echo, equals, f, help, info, inspect, list_all_builtin_type_testers, log, njs_path, plain, praise, rpr, rvr, test, to_width, truth, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -2525,12 +2525,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.intertype_normalize_type_cfg = async function(T, done) {
-    var Intertype, TF, Type_factory, error, f, i, len, matcher, prep, probe, probes_and_matchers, types;
+    var Intertype, TF, Type_factory, error, i, len, matcher, prep, probe, probes_and_matchers, types;
     // T?.halt_on_error()
     ({Intertype, Type_factory} = require('../../../apps/intertype'));
     types = new Intertype();
     TF = new Type_factory(types);
-    f = Symbol('f');
     //.........................................................................................................
     prep = function(d) {
       var R, i, k, len, ref, v;
@@ -2539,7 +2538,7 @@
       for (i = 0, len = ref.length; i < len; i++) {
         k = ref[i];
         v = d[k];
-        R[k] = _types.isa.function(v) ? f : v;
+        R[k] = _types.isa.function(v) ? `f(${v.name})` : v;
       }
       return R;
     };
@@ -2582,7 +2581,7 @@
           extras: true,
           fields: null,
           freeze: false,
-          isa: f,
+          isa: 'f(t:list.of.integer)',
           name: 't'
         }
       ],
@@ -2600,7 +2599,7 @@
           extras: true,
           fields: null,
           freeze: false,
-          isa: f,
+          isa: 'f(t:positive0.integer)',
           name: 't'
         }
       ],
@@ -2618,7 +2617,7 @@
           extras: true,
           fields: null,
           freeze: false,
-          isa: f,
+          isa: 'f(t:list.of.integer)',
           name: 't'
         }
       ],
@@ -2638,7 +2637,7 @@
           extras: true,
           fields: null,
           freeze: false,
-          isa: f,
+          isa: 'f(t:#0)',
           name: 't'
         }
       ],
@@ -2655,7 +2654,7 @@
           extras: true,
           fields: null,
           freeze: false,
-          isa: f,
+          isa: 'f(t:#0)',
           name: 't'
         }
       ],
@@ -2675,7 +2674,7 @@
           extras: true,
           fields: null,
           freeze: false,
-          isa: f,
+          isa: 'f(t:#0)',
           name: 't'
         }
       ],
@@ -2696,7 +2695,7 @@
             unit: 'nonempty.text'
           },
           freeze: false,
-          isa: f,
+          isa: 'f(quantity:object)',
           name: 'quantity'
         }
       ],
@@ -2719,7 +2718,7 @@
         ],
         {
           collection: true,
-          create: f,
+          create: 'f(create)',
           default: {},
           extras: false,
           fields: {
@@ -2727,7 +2726,7 @@
             bar: 'text'
           },
           freeze: true,
-          isa: f,
+          isa: 'f(foobar:#0)',
           name: 'foobar',
           seal: true
         }
@@ -2744,6 +2743,32 @@
       });
     }
     return typeof done === "function" ? done() : void 0;
+  };
+
+  f = function() {
+    var Intertype, TF, Type_factory, types;
+    ({Intertype, Type_factory} = require('../../../apps/intertype'));
+    types = new Intertype();
+    TF = new Type_factory(types);
+    // info '^345-1^', TF._normalize_type_cfg [ 't', 'list.of.integer'                                                  ]...
+    // info '^345-2^', TF._normalize_type_cfg [ { name: 't', collection: false, isa: 'positive0.integer', }             ]...
+    // info '^345-3^', TF._normalize_type_cfg [ 't', { collection: false, }, 'list.of.integer'                          ]...
+    // info '^345-4^', TF._normalize_type_cfg [ 't', { collection: false, }, ( x ) -> @isa.positive0.integer x          ]...
+    // info '^345-5^', TF._normalize_type_cfg [ 't', ( x ) -> @isa.positive0.integer x                                  ]...
+    // info '^345-6^', TF._normalize_type_cfg [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ]...
+    // info '^345-7^', TF._normalize_type_cfg [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ]...
+    return info('^345-8^', TF._normalize_type_cfg('foobar', {
+      $foo: 'text',
+      $bar: 'text',
+      create: (function() {}),
+      default: {},
+      extras: false,
+      freeze: true,
+      seal: true,
+      collection: true
+    }, (function(x) {
+      return x instanceof Foobar;
+    })));
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -2812,6 +2837,7 @@
   // @_intermezzo_private_class_features_in_coffeescript()
 // test @intertype_empty_and_nonempty
 // test @
+// f()
 
 }).call(this);
 
