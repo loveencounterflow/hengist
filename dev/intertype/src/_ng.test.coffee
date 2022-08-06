@@ -1455,13 +1455,12 @@ demo_size_of = ->
     Type_factory  } = require '../../../apps/intertype'
   types = new Intertype()
   TF    = new Type_factory types
-  f     = Symbol 'f'
   #.........................................................................................................
   prep = ( d ) ->
     R = {}
     for k in ( Object.keys d ).sort()
       v       = d[ k ]
-      R[ k ]  = if _types.isa.function v then f else v
+      R[ k ]  = if _types.isa.function v then "f(#{v.name})" else v
     return R
   # debug prep TF._normalize_type_cfg 't', 'list.of.integer'
   #.........................................................................................................
@@ -1469,14 +1468,15 @@ demo_size_of = ->
     [ ['t'                                                                      ], null, /not a valid Type_factory_type_dsc/,                ]
     [ [{ name: 't', collection: false, }                                        ], null, /not a valid Type_factory_type_dsc/,                ]
     [ ['t', ( ( x ) -> @isa.object x ), { x: 'float', y: 'float', }             ], null, /expected a function or a nonempty text for `isa`/, ]
-    [ [ 't', 'list.of.integer'                                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
-    [ [ { name: 't', collection: false, isa: 'positive0.integer', }             ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
-    [ [ 't', { collection: false, }, 'list.of.integer'                          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
-    [ [ 't', { collection: false, }, ( x ) -> @isa.positive0.integer x          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
-    [ [ 't', ( x ) -> @isa.positive0.integer x                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
-    [ [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: f, name: 't' }, ]
-    [ [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ], { collection: false, create: null, extras: true, fields: { value: 'float', unit: 'nonempty.text' }, freeze: false, isa: f, name: 'quantity', }, ]
-    [ [ 'foobar', { $foo: 'text', $bar: 'text', create: ( -> ), default: {}, extras: false, freeze: true, seal: true, collection: true, }, ( ( x ) -> x instanceof Foobar )                ], { collection: true, create: f, default: {}, extras: false, fields: { foo: 'text', bar: 'text' }, freeze: true, isa: f, name: 'foobar', seal: true }, ]
+    [ [ 't', 'list.of.integer'                                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:list.of.integer)', name: 't' }, ]
+    [ [ { name: 't', collection: false, isa: 'positive0.integer', }             ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:positive0.integer)', name: 't' }, ]
+    [ [ 't', { collection: false, }, 'list.of.integer'                          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:list.of.integer)', name: 't' }, ]
+    [ [ 't', { collection: false, }, ( x ) -> @isa.positive0.integer x          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't' }, ]
+    [ [ 't', ( x ) -> @isa.positive0.integer x                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't' }, ]
+    [ [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't' }, ]
+    [ [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ], { collection: false, create: null, extras: true, fields: { value: 'float', unit: 'nonempty.text' }, freeze: false, isa: 'f(quantity:object)', name: 'quantity' }, ]
+    [ [ 'foobar', { $foo: 'text', $bar: 'text', create: ( -> ), default: {}, extras: false, freeze: true, seal: true, collection: true, }, ( ( x ) -> x instanceof Foobar )                ], \
+      { collection: true, create: 'f(create)', default: {}, extras: false, fields: { foo: 'text', bar: 'text' }, freeze: true, isa: 'f(foobar:#0)', name: 'foobar', seal: true }, ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -1485,6 +1485,22 @@ demo_size_of = ->
       resolve prep TF._normalize_type_cfg probe...
   #.........................................................................................................
   done?()
+
+f = ->
+  { Intertype
+    Type_factory  } = require '../../../apps/intertype'
+  types = new Intertype()
+  TF    = new Type_factory types
+  # info '^345-1^', TF._normalize_type_cfg [ 't', 'list.of.integer'                                                  ]...
+  # info '^345-2^', TF._normalize_type_cfg [ { name: 't', collection: false, isa: 'positive0.integer', }             ]...
+  # info '^345-3^', TF._normalize_type_cfg [ 't', { collection: false, }, 'list.of.integer'                          ]...
+  # info '^345-4^', TF._normalize_type_cfg [ 't', { collection: false, }, ( x ) -> @isa.positive0.integer x          ]...
+  # info '^345-5^', TF._normalize_type_cfg [ 't', ( x ) -> @isa.positive0.integer x                                  ]...
+  # info '^345-6^', TF._normalize_type_cfg [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ]...
+  # info '^345-7^', TF._normalize_type_cfg [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ]...
+  info '^345-8^', TF._normalize_type_cfg 'foobar', \
+    { $foo: 'text', $bar: 'text', create: ( -> ), default: {}, extras: false, freeze: true, seal: true, collection: true, }, \
+    ( ( x ) -> x instanceof Foobar )
 
 #-----------------------------------------------------------------------------------------------------------
 @_intermezzo_private_class_features_in_coffeescript = ->
@@ -1528,7 +1544,7 @@ unless module.parent?
   # @_intermezzo_private_class_features_in_coffeescript()
   # test @intertype_empty_and_nonempty
   # test @
-
+  # f()
 
 
 
