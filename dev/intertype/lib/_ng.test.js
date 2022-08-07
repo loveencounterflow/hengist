@@ -2578,6 +2578,15 @@
       if (T != null) {
         T.eq(types.state.error, null); // 18 Alex
       }
+      if (T != null) {
+        T.eq(types.isa.optional.list.of.oops([42]), false); // 15 Kevin
+      }
+      if (T != null) {
+        T.ok(types.state.error instanceof Error); // 10 Jayna
+      }
+      if (T != null) {
+        T.eq(types.state.error.message, 'oops'); // 11 Tobias
+      }
       //....................................................................................................... # 19 Morgan
       if (T != null) {
         T.throws(/oops/, () => {
@@ -2651,6 +2660,74 @@
         });
       }) : void 0;
     })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._intertype_isa_arity_check = function(T, done) {
+    var Intertype, e, types;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Intertype} = require('../../../apps/intertype'));
+    //.........................................................................................................
+    types = new Intertype();
+    debug('^3454^', (function() {
+      try {
+        return types.isa.integer(42);
+      } catch (error1) {
+        e = error1;
+        return warn(rvr(error.message));
+      }
+    })());
+    debug('^3454^', (function() {
+      try {
+        return types.isa.integer(42, 43);
+      } catch (error1) {
+        e = error1;
+        return warn(rvr(error.message));
+      }
+    })());
+    debug('^3454^', (function() {
+      try {
+        return types.isa.optional.integer(null);
+      } catch (error1) {
+        e = error1;
+        return warn(rvr(error.message));
+      }
+    })());
+    debug('^3454^', (function() {
+      try {
+        return types.isa.optional.integer(null, null);
+      } catch (error1) {
+        e = error1;
+        return warn(rvr(error.message));
+      }
+    })());
+    debug('^3454^', (function() {
+      try {
+        return types.isa.optional.integer(42, null);
+      } catch (error1) {
+        e = error1;
+        return warn(rvr(error.message));
+      }
+    })());
+    debug('^3454^', (function() {
+      try {
+        return types.isa.optional.list.of.integer(42, null);
+      } catch (error1) {
+        e = error1;
+        return warn(rvr(error.message));
+      }
+    })());
+    debug('^3454^', (function() {
+      try {
+        return types.isa.optional.list.of.integer([], null);
+      } catch (error1) {
+        e = error1;
+        return warn(rvr(error.message));
+      }
+    })());
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -3005,11 +3082,12 @@
     // test @intertype_normalize_type_cfg
     // @_intermezzo_private_class_features_in_coffeescript()
     // test @intertype_empty_and_nonempty
-    // test @
-    test(this.intertype_exception_guarding);
+    test(this);
   }
 
-  // f()
+  // test @intertype_exception_guarding
+// test @intertype_isa_arity_check
+// f()
 
 }).call(this);
 
