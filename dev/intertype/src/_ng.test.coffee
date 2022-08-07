@@ -1472,6 +1472,9 @@ demo_size_of = ->
     T?.eq types.state.error, null                                                                            # 16 Erick
     T?.eq ( types.isa.optional.list.of.oops null ), true                                                     # 17 Jody
     T?.eq types.state.error, null                                                                            # 18 Alex
+    T?.eq ( types.isa.optional.list.of.oops [ 42, ] ), false                                                 # 15 Kevin
+    T?.ok types.state.error instanceof Error                                                                 # 10 Jayna
+    T?.eq types.state.error.message, 'oops'                                                                  # 11 Tobias
     #....................................................................................................... # 19 Morgan
     T?.throws /oops/, => types.isa.oops_anyway 42                                                            # 20 Britta
     T?.eq types.state.error, null                                                                            # 18 Alex
