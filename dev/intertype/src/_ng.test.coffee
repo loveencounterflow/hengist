@@ -1449,6 +1449,60 @@ demo_size_of = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@intertype_exception_guarding = ( T, done ) ->
+  T?.halt_on_error()
+  { Intertype
+    Intertype_user_error } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>                                                                                                      # 1  Branden
+    types = new Intertype()                                                                                  # 2  Thomasine
+    T?.eq types.cfg.errors, false                                                                            # 3  Kellee
+    T?.eq types.state.error, null                                                                            # 4  Latosha
+    types.declare.oops          ( x ) -> throw new Error 'oops'                                              # 5  Marline
+    types.declare.oops_anyway   ( x ) -> throw new Intertype_user_error 'oops'                               # 6  Hana
+    types.declare.nevah         ( x ) -> false                                                               # 7  Inger
+    #....................................................................................................... # 8  Ebony
+    T?.eq ( types.isa.oops 42 ), false;                                                                      # 9  Tanesha
+    T?.ok types.state.error instanceof Error                                                                 # 10 Jayna
+    T?.eq types.state.error.message, 'oops'                                                                  # 11 Tobias
+    #....................................................................................................... # 12 Leisha
+    T?.eq ( types.isa.optional.list.of.oops 42 ), false                                                      # 13 Raina
+    T?.eq types.state.error, null                                                                            # 14 Hermila
+    T?.eq ( types.isa.optional.list.of.oops [] ), true                                                       # 15 Kevin
+    T?.eq types.state.error, null                                                                            # 16 Erick
+    T?.eq ( types.isa.optional.list.of.oops null ), true                                                     # 17 Jody
+    T?.eq types.state.error, null                                                                            # 18 Alex
+    #....................................................................................................... # 19 Morgan
+    T?.throws /oops/, => types.isa.oops_anyway 42                                                            # 20 Britta
+    T?.eq types.state.error, null                                                                            # 18 Alex
+    #....................................................................................................... # 23 Gillian
+    T?.eq ( types.isa.nevah 42 ), false                                                                      # 24 Collin
+    T?.eq types.state.error, null                                                                            # 25 Tijuana
+    return null                                                                                              # 26 Fannie
+  #......................................................................................................... # 27 Carl
+  do =>                                                                                                      # 28 Alia
+    types = new Intertype { errors: 'throw', }                                                               # 29 Nella
+    T?.eq types.cfg.errors, 'throw'                                                                          # 30 Mauricio
+    T?.eq types.state.error, null                                                                            # 31 Fe
+    types.declare.oops          ( x ) -> throw new Error 'oops'                                              # 32 Edra
+    types.declare.oops_anyway   ( x ) -> throw new Intertype_user_error 'oops'                               # 33 Corazon
+    types.declare.nevah         ( x ) -> false                                                               # 34 Nola
+    #....................................................................................................... # 35 Laine
+    T?.throws /oops/, => types.isa.oops 42                                                                   # 36 Joanna
+    T?.eq types.state.error, null                                                                            # 37 Vito
+    T?.eq ( types.isa.nevah 42 ), false                                                                      # 38 Talisha
+    T?.eq types.state.error, null                                                                            # 39 Alex
+    #....................................................................................................... # 40 Latina
+    T?.throws /oops/, => types.isa.oops_anyway 42                                                            # 41 Francisca
+    T?.eq types.state.error, null                                                                            # 25 Tijuana
+    return null                                                                                              # 44 Zenaida
+  #.........................................................................................................
+  do =>
+    T?.throws /not a valid Intertype_constructor_cfg/, => types = new Intertype { errors: 42, }
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @intertype_normalize_type_cfg = ( T, done ) ->
   # T?.halt_on_error()
   { Intertype
@@ -1501,9 +1555,16 @@ f = ->
   # info '^345-5^', TF._normalize_type_cfg [ 't', ( x ) -> @isa.positive0.integer x                                  ]...
   # info '^345-6^', TF._normalize_type_cfg [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ]...
   # info '^345-7^', TF._normalize_type_cfg [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ]...
-  info '^345-8^', TF._normalize_type_cfg 'foobar', \
-    { $foo: 'text', $bar: 'text', create: ( -> ), default: {}, extras: false, freeze: true, seal: true, collection: true, }, \
-    ( ( x ) -> x instanceof Foobar )
+  info '^345-8^', foobar = TF.create_type 'foobar', \
+    { $foo: 'text', $bar: 'text', create: ( -> ), default: {}, extras: false, freeze: true, seal: true, collection: true, }
+  info '^345-9^', ( 42                              ), GUY.trm.truth foobar 42
+  info '^345-10^', ( {}                              ), GUY.trm.truth foobar {}
+  info '^345-11^', ( { bar: 'world', }               ), GUY.trm.truth foobar { bar: 'world', }
+  info '^345-12^', ( { foo: 'helo', }                ), GUY.trm.truth foobar { foo: 'helo', }
+  info '^345-13^', ( { foo: 'helo', bar: 'world', }  ), GUY.trm.truth foobar { foo: 'helo', bar: 'world', }
+  info '^345-14^', ( { foo: 'helo', bar: 'world', }  ), GUY.trm.truth foobar new GUY.props.Strict_owner target: { foo: 'helo', bar: 'world', }
+  info '^345-15^', ( { foo: 'helo', bar: 'world', }  ), GUY.trm.truth foobar new GUY.props.Strict_owner target: {}
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @_intermezzo_private_class_features_in_coffeescript = ->
@@ -1543,10 +1604,11 @@ unless module.parent?
   # @_demo_nameit()
   # test @[ "forbidden to overwrite declarations" ]
   # @intertype_normalize_type_cfg()
-  test @intertype_normalize_type_cfg
+  # test @intertype_normalize_type_cfg
   # @_intermezzo_private_class_features_in_coffeescript()
   # test @intertype_empty_and_nonempty
   # test @
+  test @intertype_exception_guarding
   # f()
 
 
