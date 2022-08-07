@@ -2524,6 +2524,137 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.intertype_exception_guarding = function(T, done) {
+    var Intertype, Intertype_user_error;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Intertype, Intertype_user_error} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      // 1  Branden
+      var types;
+      types = new Intertype(); // 2  Thomasine
+      if (T != null) {
+        T.eq(types.cfg.errors, false); // 3  Kellee
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 4  Latosha
+      }
+      types.declare.oops(function(x) {
+        throw new Error('oops'); // 5  Marline
+      });
+      types.declare.oops_anyway(function(x) {
+        throw new Intertype_user_error('oops'); // 6  Hana
+      });
+      types.declare.nevah(function(x) {
+        return false; // 7  Inger
+      });
+      //....................................................................................................... # 8  Ebony
+      if (T != null) {
+        T.eq(types.isa.oops(42), false);
+      }
+      if (T != null) {
+        T.ok(types.state.error instanceof Error); // 10 Jayna
+      }
+      if (T != null) {
+        T.eq(types.state.error.message, 'oops'); // 11 Tobias
+      }
+      //....................................................................................................... # 12 Leisha
+      if (T != null) {
+        T.eq(types.isa.optional.list.of.oops(42), false); // 13 Raina
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 14 Hermila
+      }
+      if (T != null) {
+        T.eq(types.isa.optional.list.of.oops([]), true); // 15 Kevin
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 16 Erick
+      }
+      if (T != null) {
+        T.eq(types.isa.optional.list.of.oops(null), true); // 17 Jody
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 18 Alex
+      }
+      //....................................................................................................... # 19 Morgan
+      if (T != null) {
+        T.throws(/oops/, () => {
+          return types.isa.oops_anyway(42); // 20 Britta
+        });
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 18 Alex
+      }
+      //....................................................................................................... # 23 Gillian
+      if (T != null) {
+        T.eq(types.isa.nevah(42), false); // 24 Collin
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 25 Tijuana
+      }
+      return null; // 26 Fannie
+    })();
+    (() => {      //......................................................................................................... # 27 Carl
+      // 28 Alia
+      var types;
+      types = new Intertype({
+        errors: 'throw' // 29 Nella
+      });
+      if (T != null) {
+        T.eq(types.cfg.errors, 'throw'); // 30 Mauricio
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 31 Fe
+      }
+      types.declare.oops(function(x) {
+        throw new Error('oops'); // 32 Edra
+      });
+      types.declare.oops_anyway(function(x) {
+        throw new Intertype_user_error('oops'); // 33 Corazon
+      });
+      types.declare.nevah(function(x) {
+        return false; // 34 Nola
+      });
+      //....................................................................................................... # 35 Laine
+      if (T != null) {
+        T.throws(/oops/, () => {
+          return types.isa.oops(42); // 36 Joanna
+        });
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 37 Vito
+      }
+      if (T != null) {
+        T.eq(types.isa.nevah(42), false); // 38 Talisha
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 39 Alex
+      }
+      //....................................................................................................... # 40 Latina
+      if (T != null) {
+        T.throws(/oops/, () => {
+          return types.isa.oops_anyway(42); // 41 Francisca
+        });
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 25 Tijuana
+      }
+      return null; // 44 Zenaida
+    })();
+    (() => {      //.........................................................................................................
+      return T != null ? T.throws(/not a valid Intertype_constructor_cfg/, () => {
+        var types;
+        return types = new Intertype({
+          errors: 42
+        });
+      }) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.intertype_normalize_type_cfg = async function(T, done) {
     var Intertype, TF, Type_factory, error, i, len, matcher, prep, probe, probes_and_matchers, types;
     // T?.halt_on_error()
@@ -2753,7 +2884,7 @@
   };
 
   f = function() {
-    var Intertype, TF, Type_factory, types;
+    var Intertype, TF, Type_factory, foobar, types;
     ({Intertype, Type_factory} = require('../../../apps/intertype'));
     types = new Intertype();
     TF = new Type_factory(types);
@@ -2764,7 +2895,7 @@
     // info '^345-5^', TF._normalize_type_cfg [ 't', ( x ) -> @isa.positive0.integer x                                  ]...
     // info '^345-6^', TF._normalize_type_cfg [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ]...
     // info '^345-7^', TF._normalize_type_cfg [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ]...
-    return info('^345-8^', TF._normalize_type_cfg('foobar', {
+    info('^345-8^', foobar = TF.create_type('foobar', {
       $foo: 'text',
       $bar: 'text',
       create: (function() {}),
@@ -2773,9 +2904,42 @@
       freeze: true,
       seal: true,
       collection: true
-    }, (function(x) {
-      return x instanceof Foobar;
+    }));
+    info('^345-9^', 42, GUY.trm.truth(foobar(42)));
+    info('^345-10^', {}, GUY.trm.truth(foobar({})));
+    info('^345-11^', {
+      bar: 'world'
+    }, GUY.trm.truth(foobar({
+      bar: 'world'
     })));
+    info('^345-12^', {
+      foo: 'helo'
+    }, GUY.trm.truth(foobar({
+      foo: 'helo'
+    })));
+    info('^345-13^', {
+      foo: 'helo',
+      bar: 'world'
+    }, GUY.trm.truth(foobar({
+      foo: 'helo',
+      bar: 'world'
+    })));
+    info('^345-14^', {
+      foo: 'helo',
+      bar: 'world'
+    }, GUY.trm.truth(foobar(new GUY.props.Strict_owner({
+      target: {
+        foo: 'helo',
+        bar: 'world'
+      }
+    }))));
+    info('^345-15^', {
+      foo: 'helo',
+      bar: 'world'
+    }, GUY.trm.truth(foobar(new GUY.props.Strict_owner({
+      target: {}
+    }))));
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -2838,13 +3002,14 @@
     // @_demo_nameit()
     // test @[ "forbidden to overwrite declarations" ]
     // @intertype_normalize_type_cfg()
-    test(this.intertype_normalize_type_cfg);
+    // test @intertype_normalize_type_cfg
+    // @_intermezzo_private_class_features_in_coffeescript()
+    // test @intertype_empty_and_nonempty
+    // test @
+    test(this.intertype_exception_guarding);
   }
 
-  // @_intermezzo_private_class_features_in_coffeescript()
-// test @intertype_empty_and_nonempty
-// test @
-// f()
+  // f()
 
 }).call(this);
 

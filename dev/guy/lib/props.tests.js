@@ -536,19 +536,12 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["GUY.props.get()"] = function(T, done) {
+  this.GUY_props_get = function(T, done) {
     var GUY, fallback, value;
     GUY = require(H.guy_path);
     fallback = Symbol('fallback');
     value = Symbol('value');
-    // debug '^345-1^', GUY.props.keys ( new Set() ), { builtins: true, }
-    // debug '^345-2^', GUY.props.keys ( ''        ), { builtins: true, }
-    // debug '^345-3^', ( k for k of new Set() )
-    // debug '^345-4^', ( k for k of '' )
-    // debug '^345-5^', Object.getOwnPropertyDescriptors ( new Set() )
-    // debug '^345-6^', Object.getOwnPropertyDescriptors ( ''        )
-    // debug '^345-5^', Reflect.has ( new Set() ), 'size'
-    // debug '^345-6^', Reflect.has ( ''        ), 'length'
+    debug('^334-1^', GUY.props.get({}, 'xy', void 0));
     debug('^334-1^');
     if (T != null) {
       T.eq(GUY.props.get(void 0, 'xy', fallback), fallback);
@@ -565,6 +558,10 @@
     if (T != null) {
       T.eq(GUY.props.get({}, 'xy', fallback), fallback);
     }
+    debug('^334-4^');
+    if (T != null) {
+      T.eq(GUY.props.get({}, 'xy', void 0), void 0);
+    }
     debug('^334-5^');
     if (T != null) {
       T.eq(GUY.props.get({
@@ -575,6 +572,18 @@
     if (T != null) {
       T.throws(/no such property/, function() {
         return GUY.props.get(void 0, 'xy');
+      });
+    }
+    debug('^334-6^');
+    if (T != null) {
+      T.throws(/expected 2 or 3 arguments, got 1/, function() {
+        return GUY.props.get(void 0);
+      });
+    }
+    debug('^334-6^');
+    if (T != null) {
+      T.throws(/no such property/, function() {
+        return GUY.props.get({}, 'xy');
       });
     }
     return typeof done === "function" ? done() : void 0;
@@ -1657,20 +1666,21 @@
       // test @[ "GUY.props.Strict_owner 1" ]
       // @[ "GUY.props.has()" ]()
       // test @[ "GUY.props.has()" ]
-      // @[ "GUY.props.get()" ]()
-      // test @[ "GUY.props.get()" ]
-      // @[ "GUY.props.Strict_owner 2" ]()
-      // test @[ "GUY.props.Strict_owner 2" ]
-      // test @[ "GUY.props.Strict_owner can use explicit target" ]
-      // @[ "GUY.props.Strict_owner can use Reflect.has" ]()
-      // test @[ "GUY.props.Strict_owner can use Reflect.has" ]
-      // test @[ "GUY.props.Strict_owner can disallow redefining keys" ]
-      // @[ "GUY.props.Strict_owner can disallow reassining keys" ]()
-      // test @[ "GUY.props.Strict_owner can disallow reassining keys" ]
-      // demo_strict_owner_with_proxy()
-      return demo_seal_freeze();
+      this.GUY_props_get();
+      return test(this.GUY_props_get);
     })();
   }
+
+  // @[ "GUY.props.Strict_owner 2" ]()
+// test @[ "GUY.props.Strict_owner 2" ]
+// test @[ "GUY.props.Strict_owner can use explicit target" ]
+// @[ "GUY.props.Strict_owner can use Reflect.has" ]()
+// test @[ "GUY.props.Strict_owner can use Reflect.has" ]
+// test @[ "GUY.props.Strict_owner can disallow redefining keys" ]
+// @[ "GUY.props.Strict_owner can disallow reassining keys" ]()
+// test @[ "GUY.props.Strict_owner can disallow reassining keys" ]
+// demo_strict_owner_with_proxy()
+// demo_seal_freeze()
 
 }).call(this);
 
