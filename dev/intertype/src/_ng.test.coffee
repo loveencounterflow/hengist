@@ -1506,6 +1506,22 @@ demo_size_of = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@_intertype_isa_arity_check = ( T, done ) ->
+  T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  types = new Intertype()
+  debug '^3454^', try types.isa.integer 42                          catch e then warn rvr error.message
+  debug '^3454^', try types.isa.integer 42, 43                      catch e then warn rvr error.message
+  debug '^3454^', try types.isa.optional.integer null               catch e then warn rvr error.message
+  debug '^3454^', try types.isa.optional.integer null, null         catch e then warn rvr error.message
+  debug '^3454^', try types.isa.optional.integer 42, null           catch e then warn rvr error.message
+  debug '^3454^', try types.isa.optional.list.of.integer 42, null   catch e then warn rvr error.message
+  debug '^3454^', try types.isa.optional.list.of.integer [], null   catch e then warn rvr error.message
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @intertype_normalize_type_cfg = ( T, done ) ->
   # T?.halt_on_error()
   { Intertype
