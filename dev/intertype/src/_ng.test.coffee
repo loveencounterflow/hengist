@@ -1626,8 +1626,9 @@ unless module.parent?
   # test @intertype_normalize_type_cfg
   # @_intermezzo_private_class_features_in_coffeescript()
   # test @intertype_empty_and_nonempty
-  # test @
-  test @intertype_exception_guarding
+  test @
+  # test @intertype_exception_guarding
+  # test @intertype_isa_arity_check
   # f()
 
 
