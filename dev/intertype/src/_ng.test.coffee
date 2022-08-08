@@ -871,24 +871,22 @@ demo_size_of = ->
   { declare
     isa
     validate  } = types
-  #.........................................................................................................
-  declare.Type_cfg_constructor_cfg
-    test: [
-      ( x ) -> @isa.object x
-      ( x ) -> @isa.nonempty.text x.name
-      ( x ) -> ( @isa.function x.test ) or ( @isa.list.of.function x.test )
-      ( x ) ->
-        return true if @isa.nonempty.text x.groups
-        return false unless @isa.list x.groups
-        return x.groups.every ( e ) => ( @isa.nonempty.text e ) and not ( /[\s,]/ ).test e
-      ]
+  # #.........................................................................................................
+  # declare.Type_cfg_constructor_cfg
+  #     ( x ) -> @isa.nonempty.text x.name
+  #     ( x ) -> ( @isa.function x.test ) or ( @isa.list.of.function x.test )
+  #     ( x ) ->
+  #       return true if @isa.nonempty.text x.groups
+  #       return false unless @isa.list x.groups
+  #       return x.groups.every ( e ) => ( @isa.nonempty.text e ) and not ( /[\s,]/ ).test e
+  #     ]
   #.........................................................................................................
   T?.eq ( validate.list [] ), []
   # isa 'list', []
   # validate 'list', []
   # debug '^33453^', isa.foobar
   debug '^33453^', isa.list.of.float
-  praise '^459-1^', types.isa.Type_cfg_constructor_cfg {}
+  # praise '^459-1^', types.isa.Type_cfg_constructor_cfg {}
   praise '^459-2^', types.isa.optional.list.of.float {}
   praise '^459-3^', types.isa.optional.list.of.float null
   praise '^459-4^', types.isa.list.of.float {}
@@ -910,11 +908,8 @@ demo_size_of = ->
   types         = new Intertype()
   #.........................................................................................................
   types.declare.quantity
-    test: [
-      ( x ) -> @isa.object        x
-      ( x ) -> @isa.float         x.value
-      ( x ) -> @isa.nonempty.text x.unit
-      ]
+    $value:   'float'
+    $unit:    'nonempty.text'
     default:
       value:    0
       unit:     null
@@ -936,11 +931,8 @@ demo_size_of = ->
   types         = new Intertype()
   #.........................................................................................................
   types.declare.frob
-    test: [
-      ( x ) -> @isa.object        x
-      ( x ) -> @isa.list          x.list
-      ( x ) -> @isa.nonempty.text x.blah
-      ]
+      $list:  'list'
+      $blah:  'nonempty.text'
     default:
       list:     []
       blah:     null
@@ -975,22 +967,16 @@ demo_size_of = ->
   #     blah:     null
   #.........................................................................................................
   types.declare.frozen_frob
-    test: [
-      ( x ) -> @isa.object        x
-      ( x ) -> @isa.list          x.list
-      ( x ) -> @isa.nonempty.text x.blah
-      ]
+      $list:  'list'
+      $blah:  'nonempty.text'
     freeze:   'deep'
     default:
       list:     []
       blah:     null
   #.........................................................................................................
   types.declare.extra_frob
-    test: [
-      ( x ) -> @isa.object        x
-      ( x ) -> @isa.list          x.list
-      ( x ) -> @isa.nonempty.text x.blah
-      ]
+      $list:  'list'
+      $blah:  'nonempty.text'
     extras:   false
     default:
       list:     []
@@ -1058,21 +1044,15 @@ demo_size_of = ->
   types         = new Intertype()
   #.........................................................................................................
   types.declare.quantity
-    test: [
-      ( x ) -> @isa.object        x
-      ( x ) -> @isa.float         x.value
-      ( x ) -> @isa.nonempty.text x.unit
-      ]
+    $value:   'float'
+    $unit:    'nonempty.text'
     default:
       value:    0
       unit:     null
   #.........................................................................................................
   types.declare.point2d
-    test: [
-      ( x ) -> @isa.object        x
-      ( x ) -> @isa.float         x.x
-      ( x ) -> @isa.float         x.y
-      ]
+    $x: 'float'
+    $y: 'float'
     default:
       x:    0
       y:    0
@@ -1081,16 +1061,16 @@ demo_size_of = ->
   info '^868-1^', types
   T?.eq ( _types.type_of types.declare          ), 'function'
   T?.eq ( _types.type_of types.registry         ), 'strict_owner'
-  T?.eq ( _types.type_of types.registry.text    ), 'type_cfg'
+  T?.eq ( _types.type_of types.registry.text    ), 'strict_owner'
   # info '^868-2^', types.registry
   info '^868-3^', types.registry.integer
   info '^868-4^', types.registry.null
   info '^868-5^', types.registry.text
   info '^868-6^', types.registry.quantity
-  info '^868-7^', types.registry.quantity.test
-  info '^868-8^',  T?.eq ( types.registry.quantity.test  42                           ), false
-  info '^868-9^',  T?.eq ( types.registry.quantity.test  { value: 1.23, unit: '', }   ), false
-  info '^868-10^', T?.eq ( types.registry.quantity.test  { value: 1.23, unit: 'm', }  ), true
+  # info '^868-7^', types.registry.quantity.test
+  # info '^868-8^',  T?.eq ( types.registry.quantity.test  42                           ), false
+  # info '^868-9^',  T?.eq ( types.registry.quantity.test  { value: 1.23, unit: '', }   ), false
+  # info '^868-10^', T?.eq ( types.registry.quantity.test  { value: 1.23, unit: 'm', }  ), true
   info '^868-11^', T?.eq ( types.isa.quantity            42                           ), false
   info '^868-12^', T?.eq ( types.isa.quantity            { value: 1.23, unit: '', }   ), false
   info '^868-13^', T?.eq ( types.isa.quantity            { value: 1.23, unit: 'm', }  ), true
@@ -1360,11 +1340,8 @@ demo_size_of = ->
     whisper '^46464^', '————————————————————————————————————————————————————————'
     #.......................................................................................................
     types.declare.quantity
-      test: [
-        ( x ) -> @isa.object        x
-        ( x ) -> @isa.float         x.value
-        ( x ) -> @isa.nonempty.text x.unit
-        ]
+        $value:   'float'
+        $unit:    'nonempty.text'
     help '^960-1^', isa.quantity null
     help '^960-2^', isa.quantity {}
     help '^960-3^', isa.quantity { value: 1024, unit: 'kB', }
@@ -1377,7 +1354,6 @@ demo_size_of = ->
       isa       } = types
     whisper '^46464^', '————————————————————————————————————————————————————————'
     declare.quantity
-      $:      'object'
       $value: 'float'
       $unit:  'nonempty.text'
       default:
@@ -1450,7 +1426,7 @@ demo_size_of = ->
 
 #-----------------------------------------------------------------------------------------------------------
 @intertype_exception_guarding = ( T, done ) ->
-  T?.halt_on_error()
+  # T?.halt_on_error()
   { Intertype
     Intertype_user_error } = require '../../../apps/intertype'
   #.........................................................................................................
@@ -1461,26 +1437,27 @@ demo_size_of = ->
     types.declare.oops          ( x ) -> throw new Error 'oops'                                              # 5  Marline
     types.declare.oops_anyway   ( x ) -> throw new Intertype_user_error 'oops'                               # 6  Hana
     types.declare.nevah         ( x ) -> false                                                               # 7  Inger
+    types.isa.oops 42
     #....................................................................................................... # 8  Ebony
     T?.eq ( types.isa.oops 42 ), false;                                                                      # 9  Tanesha
-    T?.ok types.state.error instanceof Error                                                                 # 10 Jayna
-    T?.eq types.state.error.message, 'oops'                                                                  # 11 Tobias
-    #....................................................................................................... # 12 Leisha
-    T?.eq ( types.isa.optional.list.of.oops 42 ), false                                                      # 13 Raina
-    T?.eq types.state.error, null                                                                            # 14 Hermila
-    T?.eq ( types.isa.optional.list.of.oops [] ), true                                                       # 15 Kevin
-    T?.eq types.state.error, null                                                                            # 16 Erick
-    T?.eq ( types.isa.optional.list.of.oops null ), true                                                     # 17 Jody
-    T?.eq types.state.error, null                                                                            # 18 Alex
-    T?.eq ( types.isa.optional.list.of.oops [ 42, ] ), false                                                 # 15 Kevin
-    T?.ok types.state.error instanceof Error                                                                 # 10 Jayna
-    T?.eq types.state.error.message, 'oops'                                                                  # 11 Tobias
-    #....................................................................................................... # 19 Morgan
-    T?.throws /oops/, => types.isa.oops_anyway 42                                                            # 20 Britta
-    T?.eq types.state.error, null                                                                            # 18 Alex
-    #....................................................................................................... # 23 Gillian
-    T?.eq ( types.isa.nevah 42 ), false                                                                      # 24 Collin
-    T?.eq types.state.error, null                                                                            # 25 Tijuana
+    # T?.ok types.state.error instanceof Error                                                                 # 10 Jayna
+    # T?.eq types.state.error.message, 'oops'                                                                  # 11 Tobias
+    # #....................................................................................................... # 12 Leisha
+    # T?.eq ( types.isa.optional.list.of.oops 42 ), false                                                      # 13 Raina
+    # T?.eq types.state.error, null                                                                            # 14 Hermila
+    # T?.eq ( types.isa.optional.list.of.oops [] ), true                                                       # 15 Kevin
+    # T?.eq types.state.error, null                                                                            # 16 Erick
+    # T?.eq ( types.isa.optional.list.of.oops null ), true                                                     # 17 Jody
+    # T?.eq types.state.error, null                                                                            # 18 Alex
+    # T?.eq ( types.isa.optional.list.of.oops [ 42, ] ), false                                                 # 15 Kevin
+    # T?.ok types.state.error instanceof Error                                                                 # 10 Jayna
+    # T?.eq types.state.error.message, 'oops'                                                                  # 11 Tobias
+    # #....................................................................................................... # 19 Morgan
+    # T?.throws /oops/, => types.isa.oops_anyway 42                                                            # 20 Britta
+    # T?.eq types.state.error, null                                                                            # 18 Alex
+    # #....................................................................................................... # 23 Gillian
+    # T?.eq ( types.isa.nevah 42 ), false                                                                      # 24 Collin
+    # T?.eq types.state.error, null                                                                            # 25 Tijuana
     return null                                                                                              # 26 Fannie
   #......................................................................................................... # 27 Carl
   do =>                                                                                                      # 28 Alia
@@ -1511,13 +1488,13 @@ demo_size_of = ->
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   types = new Intertype()
-  debug '^3454^', try types.isa.integer 42                          catch e then warn rvr error.message
-  debug '^3454^', try types.isa.integer 42, 43                      catch e then warn rvr error.message
-  debug '^3454^', try types.isa.optional.integer null               catch e then warn rvr error.message
-  debug '^3454^', try types.isa.optional.integer null, null         catch e then warn rvr error.message
-  debug '^3454^', try types.isa.optional.integer 42, null           catch e then warn rvr error.message
-  debug '^3454^', try types.isa.optional.list.of.integer 42, null   catch e then warn rvr error.message
-  debug '^3454^', try types.isa.optional.list.of.integer [], null   catch e then warn rvr error.message
+  debug '^3454^', try types.isa.integer 42                          catch e then warn rvr e.message
+  debug '^3454^', try types.isa.integer 42, 43                      catch e then warn rvr e.message
+  debug '^3454^', try types.isa.optional.integer null               catch e then warn rvr e.message
+  debug '^3454^', try types.isa.optional.integer null, null         catch e then warn rvr e.message
+  debug '^3454^', try types.isa.optional.integer 42, null           catch e then warn rvr e.message
+  debug '^3454^', try types.isa.optional.list.of.integer 42, null   catch e then warn rvr e.message
+  debug '^3454^', try types.isa.optional.list.of.integer [], null   catch e then warn rvr e.message
   #.........................................................................................................
   done?()
 
@@ -1541,18 +1518,18 @@ demo_size_of = ->
   # debug prep TF._normalize_type_cfg 't', 'list.of.integer'
   #.........................................................................................................
   probes_and_matchers = [
-    [ ['t'                                                                      ], null, /not a valid Type_factory_type_dsc/,                ]
-    [ [{ name: 't', collection: false, }                                        ], null, /not a valid Type_factory_type_dsc/,                ]
-    [ ['t', ( ( x ) -> @isa.object x ), { x: 'float', y: 'float', }             ], null, /expected a function or a nonempty text for `isa`/, ]
-    [ [ 't', 'list.of.integer'                                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:list.of.integer)', name: 't' }, ]
-    [ [ { name: 't', collection: false, isa: 'positive0.integer', }             ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:positive0.integer)', name: 't' }, ]
-    [ [ 't', { collection: false, }, 'list.of.integer'                          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:list.of.integer)', name: 't' }, ]
-    [ [ 't', { collection: false, }, ( x ) -> @isa.positive0.integer x          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't' }, ]
-    [ [ 't', ( x ) -> @isa.positive0.integer x                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't' }, ]
-    [ [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't' }, ]
-    [ [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ], { collection: false, create: null, extras: true, fields: { value: 'f(quantity.value:float)', unit: 'f(quantity.unit:nonempty.text)' }, freeze: false, isa: 'f(quantity:object)', name: 'quantity' }, ]
-    [ [ 'foobar', { $foo: 'text', $bar: 'text', create: ( -> ), default: {}, extras: false, freeze: true, seal: true, collection: true, }, ( ( x ) -> x instanceof Foobar )                ], \
-      { collection: true, create: 'f(create)', default: {}, extras: false, fields: { foo: 'f(foobar.foo:text)', bar: 'f(foobar.bar:text)' }, freeze: true, isa: 'f(foobar:#0)', name: 'foobar', seal: true }, ]
+    # [ [ 't'                                                                     ], null, /not a valid Type_factory_type_dsc/,                ]
+    # [ [ { name: 't', collection: false, }                                       ], null, /not a valid Type_factory_type_dsc/,                ]
+    # [ ['t', ( ( x ) -> @isa.object x ), { x: 'float', y: 'float', }             ], null, /expected a function or a nonempty text for `isa`/, ]
+    # [ [ 't', 'list.of.integer'                                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:list.of.integer)', name: 't', typename: 't', }, ]
+    [ [ { name: 't', collection: false, isa: 'positive0.integer', }             ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:positive0.integer)', name: 't', typename: 't', }, ]
+    # [ [ 't', { collection: false, }, 'list.of.integer'                          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:list.of.integer)', name: 't', typename: 't', }, ]
+    # [ [ 't', { collection: false, }, ( x ) -> @isa.positive0.integer x          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', }, ]
+    # [ [ 't', ( x ) -> @isa.positive0.integer x                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', }, ]
+    # [ [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', }, ]
+    # [ [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ], { collection: false, create: null, extras: true, fields: { value: 'f(quantity.value:float)', unit: 'f(quantity.unit:nonempty.text)' }, freeze: false, isa: 'f(quantity:object)', name: 'quantity', typename: 'quantity', }, ]
+    # [ [ 'foobar', { $foo: 'text', $bar: 'text', create: ( -> ), default: {}, extras: false, freeze: true, seal: true, collection: true, }, ( ( x ) -> x instanceof Foobar )                ], \
+    #   { collection: true, create: 'f(create)', default: {}, extras: false, fields: { foo: 'f(foobar.foo:text)', bar: 'f(foobar.bar:text)' }, freeze: true, isa: 'f(foobar:#0)', name: 'foobar', seal: true, typename: 'foobar', }, ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -1626,8 +1603,10 @@ unless module.parent?
   # test @intertype_normalize_type_cfg
   # @_intermezzo_private_class_features_in_coffeescript()
   # test @intertype_empty_and_nonempty
-  test @
+  # @_intertype_isa_arity_check()
   # test @intertype_exception_guarding
+  # @intertype_declaration_with_per_key_clauses()
+  test @
   # test @intertype_isa_arity_check
   # f()
 
