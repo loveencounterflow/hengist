@@ -502,6 +502,47 @@ demo_keys = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@GUY_props_xray = ( T, done ) ->
+  GUY       = require '../../../apps/guy'
+  { Strict_owner
+    hide
+    keys
+    xray  } = GUY.props
+  #.........................................................................................................
+  hs  = Symbol 'hidden_symbol'
+  d   = new Strict_owner { oneshot: true, }
+  hide d, 'a', 1
+  hide d, 'b', 2
+  hide d, 'c', 3
+  hide d, hs, 4
+  do =>
+    e = { d..., }
+    T?.eq ( rpr { d, e, } ), '{ d: Strict_owner {}, e: {} }'
+    T?.eq d[ hs ], 4
+    T?.eq e[ hs ], undefined
+    return null
+  do =>
+    T?.eq ( keys d, { hidden: true, symbols: true, builtins: false, } ), [ 'a', 'b', 'c', hs, 'constructor' ]
+    T?.eq ( xray d ), { a: 1, b: 2, c: 3, constructor: Strict_owner, [hs]: 4, }
+    return null
+  do =>
+    e             = []
+    e.a           = 1
+    e.b           = 2
+    e.c           = 3
+    e[ hs ]       = 4
+    e.constructor = Strict_owner
+    debug e
+    T?.eq ( xray d, [] ), e
+    return null
+  do =>
+    T?.eq ( xray [ 1, 2, 3, ] ), { '0': 1, '1': 2, '2': 3, length: 3 }
+    T?.eq ( xray [ 1, 2, 3, ], [] ), [ 1, 2, 3, ]
+    return null
+  #.........................................................................................................
+  done?()
+
 
 #-----------------------------------------------------------------------------------------------------------
 demo_tree = ->
@@ -661,8 +702,10 @@ if require.main is module then do =>
   # test @[ "GUY.props.Strict_owner 1" ]
   # @[ "GUY.props.has()" ]()
   # test @[ "GUY.props.has()" ]
-  @GUY_props_get()
-  test @GUY_props_get
+  # @GUY_props_get()
+  # test @GUY_props_get
+  @GUY_props_xray()
+  test @GUY_props_xray
   # @[ "GUY.props.Strict_owner 2" ]()
   # test @[ "GUY.props.Strict_owner 2" ]
   # test @[ "GUY.props.Strict_owner can use explicit target" ]
