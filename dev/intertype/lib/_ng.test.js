@@ -42,7 +42,7 @@
     // jto = ( x ) => ( ( Object::toString.call x ).slice 8, -1 ).toLowerCase().replace /\s+/g, ''
     types.declare('array', {
       collection: true,
-      test: function(x) {
+      isa: function(x) {
         return this.isa.list(x);
       }
     });
@@ -95,11 +95,11 @@
       T.eq(GUY.props.has(types.isa, 'weirdo'), false);
     }
     types.declare('weirdo', {
-      test: function(x) {
+      isa: function(x) {
         return x === weirdo;
       }
     });
-    // types.declare 'weirdo', test: ( x ) -> x is weirdo
+    // types.declare 'weirdo', isa: ( x ) -> x is weirdo
     if (T != null) {
       T.eq(GUY.props.has(types.isa, 'weirdo'), true);
     }
@@ -107,7 +107,7 @@
     if (T != null) {
       T.throws(/Strict_owner instance already has property 'weirdo'/, () => {
         return types.declare('weirdo', {
-          test: function(x) {
+          isa: function(x) {
             return x === weirdo;
           }
         });
@@ -141,11 +141,11 @@
       return results;
     })());
     for (k in types.isa) {
-      // types.declare 'list',       isa_collection: true,  test: ( x ) -> ( jto x ) is 'list'
+      // types.declare 'list',       isa_collection: true,  isa: ( x ) -> ( jto x ) is 'list'
       // ### @isa 'empty', 'isa_collection', x ###
-      // # types.declare 'empty_array',                  test: ( x ) -> ( @isa 'array', x ) and x.length is 0
-      // types.declare 'list',                           test: ( x ) -> @isa 'array', x
-      // types.declare 'integer',      isa_numeric: true,    test: ( x ) -> @isa 'array', x
+      // # types.declare 'empty_array',                  isa: ( x ) -> ( @isa 'array', x ) and x.length is 0
+      // types.declare 'list',                           isa: ( x ) -> @isa 'array', x
+      // types.declare 'integer',      isa_numeric: true,    isa: ( x ) -> @isa 'array', x
       debug('^5345-7^', k);
     }
     // debug '^5345-8^', types._isa 'empty'
@@ -206,7 +206,7 @@
     try {
       //.........................................................................................................
       types.declare('optional', 'integer', {
-        test: function() {}
+        isa: function() {}
       });
     } catch (error1) {
       error = error1;
@@ -1564,9 +1564,7 @@
     //.........................................................................................................
     types.declare.frob({
       $list: 'list',
-      $blah: 'nonempty.text'
-    });
-    ({
+      $blah: 'nonempty.text',
       default: {
         list: [],
         blah: null
@@ -1604,7 +1602,7 @@
     types = new Intertype();
     // #.........................................................................................................
     // types.declare.sealed_frob
-    //   test: [
+    //   isa: [
     //     ( x ) -> @isa.object        x
     //     ( x ) -> @isa.list          x.list
     //     ( x ) -> @isa.nonempty.text x.blah
@@ -1616,9 +1614,7 @@
     //.........................................................................................................
     types.declare.frozen_frob({
       $list: 'list',
-      $blah: 'nonempty.text'
-    });
-    ({
+      $blah: 'nonempty.text',
       freeze: 'deep',
       default: {
         list: [],
@@ -1626,11 +1622,9 @@
       }
     });
     //.........................................................................................................
-    types.declare.extra_frob({
+    types.declare.noextra_frob({
       $list: 'list',
-      $blah: 'nonempty.text'
-    });
-    ({
+      $blah: 'nonempty.text',
       extras: false,
       default: {
         list: [],
@@ -1695,29 +1689,29 @@
       return T != null ? T.ok(Object.isFrozen(frozen_frob.list)) : void 0;
     })();
     (() => {      //.........................................................................................................
-      var cfg, extra_frob, mylist;
+      var cfg, mylist, noextra_frob;
       mylist = [1, 2, 3];
       cfg = {
         list: mylist,
         blah: 'blub'
       };
-      extra_frob = types.create.extra_frob(cfg);
-      debug('^4535-1^', types.registry.extra_frob);
-      debug('^4535-3^', extra_frob);
+      noextra_frob = types.create.noextra_frob(cfg);
+      debug('^4535-1^', types.registry.noextra_frob);
+      debug('^4535-3^', noextra_frob);
       if (T != null) {
-        T.ok(types.registry.extra_frob.extras === false);
+        T.ok(types.registry.noextra_frob.extras === false);
       }
       if (T != null) {
-        T.ok(types.isa.extra_frob(extra_frob));
+        T.ok(types.isa.noextra_frob(noextra_frob));
       }
-      extra_frob.extra_prop = true;
-      debug('^4535-4^', extra_frob);
+      noextra_frob.extra_prop = true;
+      debug('^4535-4^', noextra_frob);
       if (T != null) {
-        T.ok(!types.isa.extra_frob(extra_frob));
+        T.ok(!types.isa.noextra_frob(noextra_frob));
       }
-      // types.validate.extra_frob extra_frob
-      return T != null ? T.throws(/not a valid extra_frob/, function() {
-        return types.validate.extra_frob(extra_frob);
+      // types.validate.noextra_frob noextra_frob
+      return T != null ? T.throws(/not a valid noextra_frob/, function() {
+        return types.validate.noextra_frob(noextra_frob);
       }) : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
@@ -2472,6 +2466,56 @@
       if (T != null) {
         T.eq(types.isa.oops(42), false);
       }
+      if (T != null) {
+        T.ok(types.state.error instanceof Error); // 10 Jayna
+      }
+      if (T != null) {
+        T.eq(types.state.error.message, 'oops'); // 11 Tobias
+      }
+      //....................................................................................................... # 12 Leisha
+      if (T != null) {
+        T.eq(types.isa.optional.list.of.oops(42), false); // 13 Raina
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 14 Hermila
+      }
+      if (T != null) {
+        T.eq(types.isa.optional.list.of.oops([]), true); // 15 Kevin
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 16 Erick
+      }
+      if (T != null) {
+        T.eq(types.isa.optional.list.of.oops(null), true); // 17 Jody
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 18 Alex
+      }
+      if (T != null) {
+        T.eq(types.isa.optional.list.of.oops([42]), false); // 15 Kevin
+      }
+      if (T != null) {
+        T.ok(types.state.error instanceof Error); // 10 Jayna
+      }
+      if (T != null) {
+        T.eq(types.state.error.message, 'oops'); // 11 Tobias
+      }
+      //....................................................................................................... # 19 Morgan
+      if (T != null) {
+        T.throws(/oops/, () => {
+          return types.isa.oops_anyway(42); // 20 Britta
+        });
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 18 Alex
+      }
+      //....................................................................................................... # 23 Gillian
+      if (T != null) {
+        T.eq(types.isa.nevah(42), false); // 24 Collin
+      }
+      if (T != null) {
+        T.eq(types.state.error, null); // 25 Tijuana
+      }
       return null; // 26 Fannie
     })();
     (() => {      //......................................................................................................... # 27 Carl
@@ -2673,62 +2717,21 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
   f = function() {
-    var Intertype, TF, Type_factory, foobar, types;
+    var Intertype, Type_factory, d, isa, types;
     ({Intertype, Type_factory} = require('../../../apps/intertype'));
-    types = new Intertype();
-    TF = new Type_factory(types);
-    // info '^345-1^', TF._normalize_type_cfg [ 't', 'list.of.integer'                                                  ]...
-    // info '^345-2^', TF._normalize_type_cfg [ { name: 't', collection: false, isa: 'positive0.integer', }             ]...
-    // info '^345-3^', TF._normalize_type_cfg [ 't', { collection: false, }, 'list.of.integer'                          ]...
-    // info '^345-4^', TF._normalize_type_cfg [ 't', { collection: false, }, ( x ) -> @isa.positive0.integer x          ]...
-    // info '^345-5^', TF._normalize_type_cfg [ 't', ( x ) -> @isa.positive0.integer x                                  ]...
-    // info '^345-6^', TF._normalize_type_cfg [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ]...
-    // info '^345-7^', TF._normalize_type_cfg [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ]...
-    info('^345-8^', foobar = TF.create_type('foobar', {
-      $foo: 'text',
-      $bar: 'text',
-      create: (function() {}),
-      default: {},
-      extras: false,
-      freeze: true,
-      seal: true,
-      collection: true
-    }));
-    info('^345-9^', 42, GUY.trm.truth(foobar(42)));
-    info('^345-10^', {}, GUY.trm.truth(foobar({})));
-    info('^345-11^', {
-      bar: 'world'
-    }, GUY.trm.truth(foobar({
-      bar: 'world'
-    })));
-    info('^345-12^', {
-      foo: 'helo'
-    }, GUY.trm.truth(foobar({
-      foo: 'helo'
-    })));
-    info('^345-13^', {
-      foo: 'helo',
-      bar: 'world'
-    }, GUY.trm.truth(foobar({
-      foo: 'helo',
-      bar: 'world'
-    })));
-    info('^345-14^', {
-      foo: 'helo',
-      bar: 'world'
-    }, GUY.trm.truth(foobar(new GUY.props.Strict_owner({
-      target: {
-        foo: 'helo',
-        bar: 'world'
-      }
-    }))));
-    info('^345-15^', {
-      foo: 'helo',
-      bar: 'world'
-    }, GUY.trm.truth(foobar(new GUY.props.Strict_owner({
-      target: {}
-    }))));
+    types = new Intertype({
+      errors: 'throw'
+    });
+    ({isa} = types);
+    debug('^032-1^', rpr(d = 42), GUY.trm.truth(true), GUY.trm.truth(isa.integer(d)));
+    debug('^032-2^', rpr(d = '42'), GUY.trm.truth(false), GUY.trm.truth(isa.integer(d)));
+    debug('^032-3^', rpr(d = 42), GUY.trm.truth(true), GUY.trm.truth(isa.optional.integer(d)));
+    debug('^032-3^', rpr(d = null), GUY.trm.truth(true), GUY.trm.truth(isa.optional.integer(d)));
+    debug('^032-4^', rpr(d = 42), GUY.trm.truth(false), GUY.trm.truth(isa.list.of.integer(d)));
+    debug('^032-5^', rpr(d = []), GUY.trm.truth(true), GUY.trm.truth(isa.list.of.integer(d)));
+    debug('^032-6^', rpr(d = [42]), GUY.trm.truth(true), GUY.trm.truth(isa.list.of.integer(d)));
     return null;
   };
 

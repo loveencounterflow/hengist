@@ -1360,6 +1360,84 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.GUY_props_xray = function(T, done) {
+    var GUY, Strict_owner, d, hide, hs, keys, xray;
+    GUY = require('../../../apps/guy');
+    ({Strict_owner, hide, keys, xray} = GUY.props);
+    //.........................................................................................................
+    hs = Symbol('hidden_symbol');
+    d = new Strict_owner({
+      oneshot: true
+    });
+    hide(d, 'a', 1);
+    hide(d, 'b', 2);
+    hide(d, 'c', 3);
+    hide(d, hs, 4);
+    (() => {
+      var e;
+      e = {...d};
+      if (T != null) {
+        T.eq(rpr({d, e}), '{ d: Strict_owner {}, e: {} }');
+      }
+      if (T != null) {
+        T.eq(d[hs], 4);
+      }
+      if (T != null) {
+        T.eq(e[hs], void 0);
+      }
+      return null;
+    })();
+    (() => {
+      if (T != null) {
+        T.eq(keys(d, {
+          hidden: true,
+          symbols: true,
+          builtins: false
+        }), ['a', 'b', 'c', hs, 'constructor']);
+      }
+      if (T != null) {
+        T.eq(xray(d), {
+          a: 1,
+          b: 2,
+          c: 3,
+          constructor: Strict_owner,
+          [hs]: 4
+        });
+      }
+      return null;
+    })();
+    (() => {
+      var e;
+      e = [];
+      e.a = 1;
+      e.b = 2;
+      e.c = 3;
+      e[hs] = 4;
+      e.constructor = Strict_owner;
+      debug(e);
+      if (T != null) {
+        T.eq(xray(d, []), e);
+      }
+      return null;
+    })();
+    (() => {
+      if (T != null) {
+        T.eq(xray([1, 2, 3]), {
+          '0': 1,
+          '1': 2,
+          '2': 3,
+          length: 3
+        });
+      }
+      if (T != null) {
+        T.eq(xray([1, 2, 3], []), [1, 2, 3]);
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_tree = function() {
     var GUY, d, rcrsv, x;
     GUY = require('../../../apps/guy');
@@ -1666,8 +1744,10 @@
       // test @[ "GUY.props.Strict_owner 1" ]
       // @[ "GUY.props.has()" ]()
       // test @[ "GUY.props.has()" ]
-      this.GUY_props_get();
-      return test(this.GUY_props_get);
+      // @GUY_props_get()
+      // test @GUY_props_get
+      this.GUY_props_xray();
+      return test(this.GUY_props_xray);
     })();
   }
 
