@@ -66,6 +66,12 @@
       T.eq(types._isa('list', []), true);
     }
     if (T != null) {
+      T.eq(types._isa('object', {}), true);
+    }
+    if (T != null) {
+      T.eq(types._isa('object', []), false);
+    }
+    if (T != null) {
       T.eq(types._isa('empty', 'array', []), true);
     }
     if (T != null) {
@@ -2673,13 +2679,50 @@
     // debug prep TF._normalize_type_cfg 't', 'list.of.integer'
     //.........................................................................................................
     probes_and_matchers = [
+      [['t'],
+      null,
+      /not a valid Type_factory_type_dsc/],
       [
         [
           {
-            // [ [ 't'                                                                     ], null, /not a valid Type_factory_type_dsc/,                ]
-            // [ [ { name: 't', collection: false, }                                       ], null, /not a valid Type_factory_type_dsc/,                ]
-            // [ ['t', ( ( x ) -> @isa.object x ), { x: 'float', y: 'float', }             ], null, /expected a function or a nonempty text for `isa`/, ]
-            // [ [ 't', 'list.of.integer'                                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:list.of.integer)', name: 't', typename: 't', }, ]
+            name: 't',
+            collection: false
+          }
+        ],
+        null,
+        /not a valid Type_factory_type_dsc/
+      ],
+      [
+        [
+          't',
+          (function(x) {
+            return this.isa.object(x);
+          }),
+          {
+            x: 'float',
+            y: 'float'
+          }
+        ],
+        null,
+        /expected a function or a nonempty text for `isa`/
+      ],
+      [
+        ['t',
+        'list.of.integer'],
+        {
+          collection: false,
+          create: null,
+          extras: true,
+          fields: null,
+          freeze: false,
+          isa: 'f(t:list.of.integer)',
+          name: 't',
+          typename: 't'
+        }
+      ],
+      [
+        [
+          {
             name: 't',
             collection: false,
             isa: 'positive0.integer'
@@ -2695,16 +2738,143 @@
           name: 't',
           typename: 't'
         }
+      ],
+      [
+        [
+          't',
+          {
+            collection: false
+          },
+          'list.of.integer'
+        ],
+        {
+          collection: false,
+          create: null,
+          extras: true,
+          fields: null,
+          freeze: false,
+          isa: 'f(t:list.of.integer)',
+          name: 't',
+          typename: 't'
+        }
+      ],
+      [
+        [
+          't',
+          {
+            collection: false
+          },
+          function(x) {
+            return this.isa.positive0.integer(x);
+          }
+        ],
+        {
+          collection: false,
+          create: null,
+          extras: true,
+          fields: null,
+          freeze: false,
+          isa: 'f(t:#0)',
+          name: 't',
+          typename: 't'
+        }
+      ],
+      [
+        [
+          't',
+          function(x) {
+            return this.isa.positive0.integer(x);
+          }
+        ],
+        {
+          collection: false,
+          create: null,
+          extras: true,
+          fields: null,
+          freeze: false,
+          isa: 'f(t:#0)',
+          name: 't',
+          typename: 't'
+        }
+      ],
+      [
+        [
+          't',
+          {
+            collection: false,
+            isa: (function(x) {
+              return this.isa.positive0.integer(x);
+            })
+          }
+        ],
+        {
+          collection: false,
+          create: null,
+          extras: true,
+          fields: null,
+          freeze: false,
+          isa: 'f(t:#0)',
+          name: 't',
+          typename: 't'
+        }
+      ],
+      [
+        [
+          'quantity',
+          {
+            $value: 'float',
+            $unit: 'nonempty.text'
+          }
+        ],
+        {
+          collection: false,
+          create: null,
+          extras: true,
+          fields: {
+            value: 'f(quantity.value:float)',
+            unit: 'f(quantity.unit:nonempty.text)'
+          },
+          freeze: false,
+          isa: 'f(quantity:object)',
+          name: 'quantity',
+          typename: 'quantity'
+        }
+      ],
+      [
+        [
+          'foobar',
+          {
+            $foo: 'text',
+            $bar: 'text',
+            create: (function() {}),
+            default: {},
+            extras: false,
+            freeze: true,
+            seal: true,
+            collection: true
+          },
+          (function(x) {
+            return x instanceof Foobar;
+          })
+        ],
+        {
+          collection: true,
+          create: 'f(create)',
+          default: {},
+          extras: false,
+          fields: {
+            foo: 'f(foobar.foo:text)',
+            bar: 'f(foobar.bar:text)'
+          },
+          freeze: true,
+          isa: 'f(foobar:#0)',
+          name: 'foobar',
+          seal: true,
+          typename: 'foobar'
+        }
       ]
     ];
 //.........................................................................................................
-// [ [ 't', { collection: false, }, 'list.of.integer'                          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:list.of.integer)', name: 't', typename: 't', }, ]
-// [ [ 't', { collection: false, }, ( x ) -> @isa.positive0.integer x          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', }, ]
-// [ [ 't', ( x ) -> @isa.positive0.integer x                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', }, ]
-// [ [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', }, ]
-// [ [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ], { collection: false, create: null, extras: true, fields: { value: 'f(quantity.value:float)', unit: 'f(quantity.unit:nonempty.text)' }, freeze: false, isa: 'f(quantity:object)', name: 'quantity', typename: 'quantity', }, ]
-// [ [ 'foobar', { $foo: 'text', $bar: 'text', create: ( -> ), default: {}, extras: false, freeze: true, seal: true, collection: true, }, ( ( x ) -> x instanceof Foobar )                ], \
-//   { collection: true, create: 'f(create)', default: {}, extras: false, fields: { foo: 'f(foobar.foo:text)', bar: 'f(foobar.bar:text)' }, freeze: true, isa: 'f(foobar:#0)', name: 'foobar', seal: true, typename: 'foobar', }, ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       // debug '^23-1^', { probe, matcher, error, }
@@ -2719,19 +2889,71 @@
 
   //-----------------------------------------------------------------------------------------------------------
   f = function() {
-    var Intertype, Type_factory, d, isa, types;
-    ({Intertype, Type_factory} = require('../../../apps/intertype'));
+    var Intertype, create, d, declare, i, isa, j, len, len1, ref, ref1, types, validate;
+    ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype({
       errors: 'throw'
     });
-    ({isa} = types);
-    debug('^032-1^', rpr(d = 42), GUY.trm.truth(true), GUY.trm.truth(isa.integer(d)));
-    debug('^032-2^', rpr(d = '42'), GUY.trm.truth(false), GUY.trm.truth(isa.integer(d)));
-    debug('^032-3^', rpr(d = 42), GUY.trm.truth(true), GUY.trm.truth(isa.optional.integer(d)));
-    debug('^032-3^', rpr(d = null), GUY.trm.truth(true), GUY.trm.truth(isa.optional.integer(d)));
-    debug('^032-4^', rpr(d = 42), GUY.trm.truth(false), GUY.trm.truth(isa.list.of.integer(d)));
-    debug('^032-5^', rpr(d = []), GUY.trm.truth(true), GUY.trm.truth(isa.list.of.integer(d)));
-    debug('^032-6^', rpr(d = [42]), GUY.trm.truth(true), GUY.trm.truth(isa.list.of.integer(d)));
+    ({declare, isa, validate, create} = types);
+    declare.quantity({
+      $value: 'float',
+      $unit: 'nonempty.text',
+      extras: false,
+      default: {
+        value: 0,
+        unit: null
+      }
+    });
+    // length_1 = create.quantity { unit: 'm', }
+    // info '^070-1^', length_1
+    // info '^070-2^', isa.quantity length_1
+    // length_1.mantissa = 4
+    // info '^070-3^', isa.quantity length_1
+    // info '^070-4^', types
+    // warn '^070-5^', try validate.quantity length_1 catch error then rvr error.message
+    // info '^070-6^', types
+    // info '^070-7^', isa.optional.list.of.quantity null
+    // urge '^070-8^', d for d in types.state.hedgeresults
+    // info '^070-9^', isa.optional.list.of.quantity []
+    // urge '^070-10^', d for d in types.state.hedgeresults
+    // info '^070-11^', isa.optional.list.of.quantity [ { value: 23, unit: 'foo', }, ]
+    // urge '^070-12^', d for d in types.state.hedgeresults
+    info('^070-13^', isa.quantity(42));
+    info('^070-14^', isa.object([]));
+    info('^070-15^', isa.quantity([
+      {
+        value: null,
+        unit: 'foo'
+      }
+    ]));
+    info('^070-16^', isa.quantity({
+      value: null,
+      unit: 'foo'
+    }));
+    info('^070-16^', isa.quantity({
+      value: 432,
+      unit: 'foo'
+    }));
+    ref = types.state.hedgeresults;
+    for (i = 0, len = ref.length; i < len; i++) {
+      d = ref[i];
+      urge('^070-17^', d);
+    }
+    info('^070-18^', isa.optional.list.of.quantity([
+      {
+        value: null,
+        unit: 'foo'
+      }
+    ]));
+    ref1 = types.state.hedgeresults;
+    for (j = 0, len1 = ref1.length; j < len1; j++) {
+      d = ref1[j];
+      urge('^070-19^', d);
+    }
+    // info '^070-20^', isa.optional.list.of.optional.integer.or.nonempty.text [ 'foo', ]
+    // info '^070-21^', isa.optional.list.of.optional.integer.or.nonempty.text false
+    // info '^070-22^', isa.optional.list.of.optional.integer.or.nonempty.text null
+    // info '^070-23^', types
     return null;
   };
 
@@ -2801,11 +3023,10 @@
     // @_intertype_isa_arity_check()
     // test @intertype_exception_guarding
     // @intertype_declaration_with_per_key_clauses()
-    test(this);
+    // test @
+    // test @intertype_isa_arity_check
+    f();
   }
-
-  // test @intertype_isa_arity_check
-// f()
 
 }).call(this);
 
