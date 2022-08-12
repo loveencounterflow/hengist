@@ -46,6 +46,8 @@ _types                    = new ( require 'intertype' ).Intertype()
   T?.eq ( types._isa 'null',                         undefined     ), false
   T?.eq ( types._isa 'array',                        []            ), true
   T?.eq ( types._isa 'list',                         []            ), true
+  T?.eq ( types._isa 'object',                       {}            ), true
+  T?.eq ( types._isa 'object',                       []            ), false
   T?.eq ( types._isa 'empty', 'array',               []            ), true
   T?.eq ( types._isa 'optional', 'empty', 'array',   []            ), true
   T?.eq ( types._isa 'optional', 'empty', 'array',   null          ), true
