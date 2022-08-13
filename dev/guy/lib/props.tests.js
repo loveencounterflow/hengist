@@ -1361,11 +1361,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.GUY_props_xray = function(T, done) {
-    var GUY, Strict_owner, d, hide, hs, keys, xray;
+    var GUY, Strict_owner, d, hide, hs, keys, soc, xray;
     GUY = require('../../../apps/guy');
     ({Strict_owner, hide, keys, xray} = GUY.props);
     //.........................................................................................................
     hs = Symbol('hidden_symbol');
+    soc = Symbol('Strict_owner_cfg');
     d = new Strict_owner({
       oneshot: true
     });
@@ -1389,11 +1390,11 @@
     })();
     (() => {
       if (T != null) {
-        T.eq(keys(d, {
+        T.eq(rpr(keys(d, {
           hidden: true,
           symbols: true,
           builtins: false
-        }), ['a', 'b', 'c', hs, 'constructor']);
+        })), "[ 'a', 'b', 'c', Symbol(Strict_owner_cfg), Symbol(hidden_symbol), 'constructor' ]");
       }
       if (T != null) {
         T.eq(xray(d), {
@@ -1433,6 +1434,149 @@
         T.eq(xray([1, 2, 3], []), [1, 2, 3]);
       }
       return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_props_locking = function(T, done) {
+    var GUY, Strict_owner, hide, keys, xray;
+    GUY = require('../../../apps/guy');
+    ({Strict_owner, hide, keys, xray} = GUY.props);
+    (() => {      //.........................................................................................................
+      var X, x;
+      X = class X extends Strict_owner {
+        constructor(cfg) {
+          super(cfg);
+          this.a = 1;
+          this.b = 2;
+        }
+
+      };
+      x = new X();
+      if (T != null) {
+        T.throws(/X instance does not have property 'c'/, function() {
+          return x.c;
+        });
+      }
+      if (T != null) {
+        T.throws(/X instance does not have property 'get_locked'/, function() {
+          return x.get_locked;
+        });
+      }
+      if (T != null) {
+        T.eq(Strict_owner.get_locked(x), true);
+      }
+      if (T != null) {
+        T.eq(Strict_owner.set_locked(x, false), false);
+      }
+      return T != null ? T.eq(x.c, void 0) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var target, x;
+      target = [1, 2, 3];
+      x = new Strict_owner({target});
+      if (T != null) {
+        T.eq(x[0], 1);
+      }
+      if (T != null) {
+        T.eq(x[1], 2);
+      }
+      if (T != null) {
+        T.throws(/Strict_owner instance does not have property '3'/, function() {
+          return x[3];
+        });
+      }
+      if (T != null) {
+        T.throws(/Strict_owner instance does not have property 'get_locked'/, function() {
+          return x.get_locked;
+        });
+      }
+      if (T != null) {
+        T.eq(Strict_owner.get_locked(x), true);
+      }
+      if (T != null) {
+        T.eq(Strict_owner.set_locked(x, false), false);
+      }
+      return T != null ? T.eq(x.c, void 0) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var X, x;
+      X = class X extends Strict_owner {
+        constructor(cfg) {
+          var seal;
+          cfg = {
+            freeze: false,
+            seal: false,
+            ...cfg
+          };
+          ({freeze, seal} = cfg);
+          cfg.freeze = false;
+          cfg.seal = false;
+          super(cfg);
+          this.a = 1;
+          this.b = 2;
+          if (freeze) {
+            Object.freeze(this);
+          }
+          if (seal) {
+            Object.seal(this);
+          }
+          return void 0;
+        }
+
+      };
+      x = new X({
+        freeze: true
+      });
+      if (T != null) {
+        T.throws(/X instance does not have property 'c'/, function() {
+          return x.c;
+        });
+      }
+      if (T != null) {
+        T.throws(/X instance does not have property 'get_locked'/, function() {
+          return x.get_locked;
+        });
+      }
+      if (T != null) {
+        T.eq(Strict_owner.get_locked(x), true);
+      }
+      if (T != null) {
+        T.eq(Strict_owner.set_locked(x, false), false);
+      }
+      return T != null ? T.eq(x.c, void 0) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var target, x;
+      target = [1, 2, 3];
+      x = new Strict_owner({
+        target,
+        freeze: true
+      });
+      if (T != null) {
+        T.eq(x[0], 1);
+      }
+      if (T != null) {
+        T.eq(x[1], 2);
+      }
+      if (T != null) {
+        T.throws(/Strict_owner instance does not have property '3'/, function() {
+          return x[3];
+        });
+      }
+      if (T != null) {
+        T.throws(/Strict_owner instance does not have property 'get_locked'/, function() {
+          return x.get_locked;
+        });
+      }
+      if (T != null) {
+        T.eq(Strict_owner.get_locked(x), true);
+      }
+      if (T != null) {
+        T.eq(Strict_owner.set_locked(x, false), false);
+      }
+      return T != null ? T.eq(x.c, void 0) : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -1746,8 +1890,10 @@
       // test @[ "GUY.props.has()" ]
       // @GUY_props_get()
       // test @GUY_props_get
-      this.GUY_props_xray();
-      return test(this.GUY_props_xray);
+      // @GUY_props_xray()
+      // test @GUY_props_xray
+      this.GUY_props_locking();
+      return test(this.GUY_props_locking);
     })();
   }
 

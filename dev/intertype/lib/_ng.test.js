@@ -2889,7 +2889,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   f = function() {
-    var Intertype, create, d, declare, i, isa, j, len, len1, ref, ref1, types, validate;
+    var Intertype, create, declare, hedgerow, hedges, i, isa, len, probes_and_matchers, result, types, validate, value;
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype({
       errors: 'throw'
@@ -2918,38 +2918,70 @@
     // urge '^070-10^', d for d in types.state.hedgeresults
     // info '^070-11^', isa.optional.list.of.quantity [ { value: 23, unit: 'foo', }, ]
     // urge '^070-12^', d for d in types.state.hedgeresults
-    info('^070-13^', isa.quantity(42));
-    info('^070-14^', isa.object([]));
-    info('^070-15^', isa.quantity([
-      {
-        value: null,
-        unit: 'foo'
-      }
-    ]));
-    info('^070-16^', isa.quantity({
-      value: null,
-      unit: 'foo'
-    }));
-    info('^070-16^', isa.quantity({
-      value: 432,
-      unit: 'foo'
-    }));
-    ref = types.state.hedgeresults;
-    for (i = 0, len = ref.length; i < len; i++) {
-      d = ref[i];
-      urge('^070-17^', d);
+    // info '^070-13^', isa.quantity 42
+    probes_and_matchers = [
+      ['object',
+      []],
+      [
+        'quantity',
+        [
+          {
+            value: null,
+            unit: 'foo'
+          }
+        ]
+      ],
+      [
+        'quantity',
+        {
+          value: null,
+          unit: 'foo'
+        }
+      ],
+      [
+        'quantity',
+        {
+          value: 432,
+          unit: 'foo'
+        }
+      ],
+      [
+        'optional.list.of.quantity',
+        [
+          {
+            value: null,
+            unit: 'foo'
+          }
+        ]
+      ],
+      ['optional.list.of.optional.integer.or.nonempty.text',
+      ['foo']],
+      ['optional.list.of.optional.integer.or.nonempty.text',
+      false],
+      ['optional.list.of.optional.integer.or.nonempty.text',
+      null]
+    ];
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [hedgerow, value] = probes_and_matchers[i];
+      whisper('—————————————————————————————————————————————————————————————————');
+      hedges = hedgerow.split('.');
+      debug(hedges);
+      result = (GUY.props.resolve_property_chain(isa, hedges))(value);
+      info(result);
     }
-    info('^070-18^', isa.optional.list.of.quantity([
-      {
-        value: null,
-        unit: 'foo'
-      }
-    ]));
-    ref1 = types.state.hedgeresults;
-    for (j = 0, len1 = ref1.length; j < len1; j++) {
-      d = ref1[j];
-      urge('^070-19^', d);
-    }
+    debug(isa.object);
+    debug(isa.quantity);
+    debug(isa.optional.list.of.quantity);
+    // info '^070-14^', isa.object []
+    // urge '^070-17^', d for d in types.state.hedgeresults
+    // info '^070-15^', isa.quantity [ { value: null, unit: 'foo', }, ]
+    // urge '^070-17^', d for d in types.state.hedgeresults
+    // info '^070-16^', isa.quantity { value: null, unit: 'foo', }
+    // urge '^070-17^', d for d in types.state.hedgeresults
+    // info '^070-16^', isa.quantity { value: 432, unit: 'foo', }
+    // urge '^070-17^', d for d in types.state.hedgeresults
+    // info '^070-18^', isa.optional.list.of.quantity [ { value: null, unit: 'foo', }, ]
+    // urge '^070-19^', d for d in types.state.hedgeresults
     // info '^070-20^', isa.optional.list.of.optional.integer.or.nonempty.text [ 'foo', ]
     // info '^070-21^', isa.optional.list.of.optional.integer.or.nonempty.text false
     // info '^070-22^', isa.optional.list.of.optional.integer.or.nonempty.text null
