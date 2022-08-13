@@ -511,6 +511,7 @@ demo_keys = ->
     xray  } = GUY.props
   #.........................................................................................................
   hs  = Symbol 'hidden_symbol'
+  soc = Symbol 'Strict_owner_cfg'
   d   = new Strict_owner { oneshot: true, }
   hide d, 'a', 1
   hide d, 'b', 2
@@ -523,7 +524,7 @@ demo_keys = ->
     T?.eq e[ hs ], undefined
     return null
   do =>
-    T?.eq ( keys d, { hidden: true, symbols: true, builtins: false, } ), [ 'a', 'b', 'c', hs, 'constructor' ]
+    T?.eq ( rpr keys d, { hidden: true, symbols: true, builtins: false, } ), "[ 'a', 'b', 'c', Symbol(Strict_owner_cfg), Symbol(hidden_symbol), 'constructor' ]"
     T?.eq ( xray d ), { a: 1, b: 2, c: 3, constructor: Strict_owner, [hs]: 4, }
     return null
   do =>
@@ -540,6 +541,72 @@ demo_keys = ->
     T?.eq ( xray [ 1, 2, 3, ] ), { '0': 1, '1': 2, '2': 3, length: 3 }
     T?.eq ( xray [ 1, 2, 3, ], [] ), [ 1, 2, 3, ]
     return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@GUY_props_locking = ( T, done ) ->
+  GUY       = require '../../../apps/guy'
+  { Strict_owner
+    hide
+    keys
+    xray  } = GUY.props
+  #.........................................................................................................
+  do =>
+    class X extends Strict_owner
+      constructor: ( cfg ) ->
+        super cfg
+        @a  = 1
+        @b  = 2
+    x = new X()
+    T?.throws /X instance does not have property 'c'/, -> x.c
+    T?.throws /X instance does not have property 'get_locked'/, -> x.get_locked
+    T?.eq ( Strict_owner.get_locked x ), true
+    T?.eq ( Strict_owner.set_locked x, false ), false
+    T?.eq x.c, undefined
+  #.........................................................................................................
+  do =>
+    target  = [ 1, 2, 3, ]
+    x       = new Strict_owner { target, }
+    T?.eq x[ 0 ], 1
+    T?.eq x[ 1 ], 2
+    T?.throws /Strict_owner instance does not have property '3'/, -> x[ 3 ]
+    T?.throws /Strict_owner instance does not have property 'get_locked'/, -> x.get_locked
+    T?.eq ( Strict_owner.get_locked x ), true
+    T?.eq ( Strict_owner.set_locked x, false ), false
+    T?.eq x.c, undefined
+  #.........................................................................................................
+  do =>
+    class X extends Strict_owner
+      constructor: ( cfg ) ->
+        cfg         = { freeze: false, seal: false, cfg..., }
+        { freeze
+          seal    } = cfg
+        cfg.freeze  = false
+        cfg.seal    = false
+        super cfg
+        @a          = 1
+        @b          = 2
+        Object.freeze @ if freeze
+        Object.seal   @ if seal
+        return undefined
+    x = new X { freeze: true, }
+    T?.throws /X instance does not have property 'c'/, -> x.c
+    T?.throws /X instance does not have property 'get_locked'/, -> x.get_locked
+    T?.eq ( Strict_owner.get_locked x ), true
+    T?.eq ( Strict_owner.set_locked x, false ), false
+    T?.eq x.c, undefined
+  #.........................................................................................................
+  do =>
+    target  = [ 1, 2, 3, ]
+    x       = new Strict_owner { target, freeze: true, }
+    T?.eq x[ 0 ], 1
+    T?.eq x[ 1 ], 2
+    T?.throws /Strict_owner instance does not have property '3'/, -> x[ 3 ]
+    T?.throws /Strict_owner instance does not have property 'get_locked'/, -> x.get_locked
+    T?.eq ( Strict_owner.get_locked x ), true
+    T?.eq ( Strict_owner.set_locked x, false ), false
+    T?.eq x.c, undefined
   #.........................................................................................................
   done?()
 
@@ -704,8 +771,10 @@ if require.main is module then do =>
   # test @[ "GUY.props.has()" ]
   # @GUY_props_get()
   # test @GUY_props_get
-  @GUY_props_xray()
-  test @GUY_props_xray
+  # @GUY_props_xray()
+  # test @GUY_props_xray
+  @GUY_props_locking()
+  test @GUY_props_locking
   # @[ "GUY.props.Strict_owner 2" ]()
   # test @[ "GUY.props.Strict_owner 2" ]
   # test @[ "GUY.props.Strict_owner can use explicit target" ]
