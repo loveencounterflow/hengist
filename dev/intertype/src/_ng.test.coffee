@@ -1485,6 +1485,48 @@ demo_size_of = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@intertype_check_complex_recursive_types = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  types             = new Intertype { errors: 'throw', }
+  { declare
+    isa
+    validate
+    create        } = types
+  #.........................................................................................................
+  declare.quantity
+    $value:         'float'
+    $unit:          'nonempty.text'
+    extras:         false
+    default:
+      value:    0
+      unit:     null
+  #.........................................................................................................
+  declare.rectangle
+    $width:         'quantity'
+    $height:        'quantity'
+    extras:         false
+    default:
+      width:        { value: 0, unit: 'mm', }
+      height:       { value: 0, unit: 'mm', }
+  #.........................................................................................................
+  debug '^342-1^', T?.eq ( isa.quantity           { value: 0, unit: 'mm', }                                                                                                                                 \
+                                                                                                    ), true
+  debug '^342-1^', T?.eq ( isa.rectangle          { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }                                                                                  \
+                                                                                                    ), true
+  debug '^342-2^', T?.eq ( isa.list.of.quantity   [ { value: 0, unit: 'mm', }, { value: 0, unit: 'mm', }, ]                                                                                                 \
+                                                                                                    ), true
+  debug '^342-2^', T?.eq ( isa.list.of.rectangle  [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ]   \
+                                                                                                    ), true
+  debug '^342-3^', T?.eq ( isa.rectangle          []                                                                                                                                                        \
+                                                                                                    ), false
+  debug '^342-4^', T?.eq ( isa.rectangle          { value: 0, unit: null, }                                                                                                                                 \
+                                                                                                    ), false
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @_intertype_isa_arity_check = ( T, done ) ->
   T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
@@ -1556,6 +1598,13 @@ f = ->
     default:
       value:    0
       unit:     null
+  declare.rectangle
+    $width:         'quantity'
+    $height:        'quantity'
+    extras:         false
+    default:
+      width:        { value: 0, unit: 'mm', }
+      height:       { value: 0, unit: 'mm', }
   # length_1 = create.quantity { unit: 'm', }
   # info '^070-1^', length_1
   # info '^070-2^', isa.quantity length_1
