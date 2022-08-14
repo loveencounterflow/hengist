@@ -111,7 +111,7 @@
     }
     debug('^353^', GUY.props.has(types.isa, 'weirdo'));
     if (T != null) {
-      T.throws(/Strict_owner instance already has property 'weirdo'/, () => {
+      T.throws(/Object instance already has property 'weirdo'/, () => {
         return types.declare('weirdo', {
           isa: function(x) {
             return x === weirdo;
@@ -1759,10 +1759,10 @@
       T.eq(_types.type_of(types.declare), 'function');
     }
     if (T != null) {
-      T.eq(_types.type_of(types.registry), 'strict_owner');
+      T.eq(_types.type_of(types.registry), 'object');
     }
     if (T != null) {
-      T.eq(_types.type_of(types.registry.text), 'strict_owner');
+      T.eq(_types.type_of(types.registry.text), 'function');
     }
     // info '^868-2^', types.registry
     info('^868-3^', types.registry.integer);
@@ -2583,6 +2583,97 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.intertype_check_complex_recursive_types = function(T, done) {
+    var Intertype, create, declare, isa, types, validate;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    //.........................................................................................................
+    types = new Intertype({
+      errors: 'throw'
+    });
+    ({declare, isa, validate, create} = types);
+    //.........................................................................................................
+    declare.quantity({
+      $value: 'float',
+      $unit: 'nonempty.text',
+      extras: false,
+      default: {
+        value: 0,
+        unit: null
+      }
+    });
+    //.........................................................................................................
+    declare.rectangle({
+      $width: 'quantity',
+      $height: 'quantity',
+      extras: false,
+      default: {
+        width: {
+          value: 0,
+          unit: 'mm'
+        },
+        height: {
+          value: 0,
+          unit: 'mm'
+        }
+      }
+    });
+    //.........................................................................................................
+    debug('^342-1^', T != null ? T.eq(isa.quantity({
+      value: 0,
+      unit: 'mm'
+    }), true) : void 0);
+    debug('^342-1^', T != null ? T.eq(isa.rectangle({
+      width: {
+        value: 0,
+        unit: 'mm'
+      },
+      height: {
+        value: 0,
+        unit: 'mm'
+      }
+    }), true) : void 0);
+    debug('^342-2^', T != null ? T.eq(isa.list.of.quantity([
+      {
+        value: 0,
+        unit: 'mm'
+      },
+      {
+        value: 0,
+        unit: 'mm'
+      }
+    ]), true) : void 0);
+    debug('^342-2^', T != null ? T.eq(isa.list.of.rectangle([
+      {
+        width: {
+          value: 0,
+          unit: 'mm'
+        },
+        height: {
+          value: 0,
+          unit: 'mm'
+        }
+      },
+      {
+        width: {
+          value: 0,
+          unit: 'mm'
+        },
+        height: {
+          value: 0,
+          unit: 'mm'
+        }
+      }
+    ]), true) : void 0);
+    debug('^342-3^', T != null ? T.eq(isa.rectangle([]), false) : void 0);
+    debug('^342-4^', T != null ? T.eq(isa.rectangle({
+      value: 0,
+      unit: null
+    }), false) : void 0);
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this._intertype_isa_arity_check = function(T, done) {
     var Intertype, e, types;
     if (T != null) {
@@ -2889,7 +2980,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   f = function() {
-    var Intertype, create, declare, hedgerow, hedges, i, isa, len, probes_and_matchers, result, types, validate, value;
+    var Intertype, create, declare, dent, hedge, hedgerow, hedges, i, isa, j, len, len1, level, line, probes_and_matchers, r, ref, result, types, validate, value;
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype({
       errors: 'throw'
@@ -2902,6 +2993,21 @@
       default: {
         value: 0,
         unit: null
+      }
+    });
+    declare.rectangle({
+      $width: 'quantity',
+      $height: 'quantity',
+      extras: false,
+      default: {
+        width: {
+          value: 0,
+          unit: 'mm'
+        },
+        height: {
+          value: 0,
+          unit: 'mm'
+        }
       }
     });
     // length_1 = create.quantity { unit: 'm', }
@@ -2957,35 +3063,115 @@
       ['optional.list.of.optional.integer.or.nonempty.text',
       ['foo']],
       ['optional.list.of.optional.integer.or.nonempty.text',
+      ['foo',
+      'bar',
+      'baz',
+      1234]],
+      ['optional.list.of.optional.integer.or.nonempty.text',
+      ['foo',
+      'bar',
+      'baz',
+      3.5]],
+      ['optional.list.of.optional.integer.or.nonempty.text',
       false],
       ['optional.list.of.optional.integer.or.nonempty.text',
-      null]
+      null],
+      ['rectangle',
+      []],
+      [
+        'rectangle',
+        {
+          value: 0,
+          unit: 'mm'
+        }
+      ],
+      [
+        'rectangle',
+        {
+          width: {
+            value: 0,
+            unit: 'mm'
+          },
+          height: {
+            value: 0,
+            unit: 'mm'
+          }
+        }
+      ],
+      [
+        'list.of.rectangle',
+        [
+          {
+            width: {
+              value: 0,
+              unit: 'mm'
+            },
+            height: {
+              value: 0,
+              unit: 'mm'
+            }
+          },
+          {
+            width: {
+              value: 0,
+              unit: 'mm'
+            },
+            height: {
+              value: 0,
+              unit: 'mm'
+            }
+          }
+        ]
+      ],
+      [
+        'list.of.rectangle',
+        [
+          {
+            width: {
+              value: 0,
+              unit: 'mm'
+            },
+            height: {
+              value: 0,
+              unit: 'mm'
+            }
+          },
+          {
+            width: {
+              value: null,
+              unit: 'mm'
+            },
+            height: {
+              value: 0,
+              unit: 'mm'
+            }
+          }
+        ]
+      ]
     ];
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [hedgerow, value] = probes_and_matchers[i];
       whisper('—————————————————————————————————————————————————————————————————');
       hedges = hedgerow.split('.');
-      debug(hedges);
+      debug(value);
       result = (GUY.props.resolve_property_chain(isa, hedges))(value);
+      urge(types.state.hedges);
+      ref = types.state.hedgeresults;
+      for (j = 0, len1 = ref.length; j < len1; j++) {
+        [level, hedge, value, r] = ref[j];
+        dent = '  '.repeat(level);
+        line = `${dent} ${hedge}`;
+        line = to_width(line, 50);
+        help(line, GUY.trm.truth(r), GUY.trm.grey(to_width(rpr(value), 75)));
+      }
       info(result);
     }
-    debug(isa.object);
-    debug(isa.quantity);
-    debug(isa.optional.list.of.quantity);
-    // info '^070-14^', isa.object []
-    // urge '^070-17^', d for d in types.state.hedgeresults
-    // info '^070-15^', isa.quantity [ { value: null, unit: 'foo', }, ]
-    // urge '^070-17^', d for d in types.state.hedgeresults
-    // info '^070-16^', isa.quantity { value: null, unit: 'foo', }
-    // urge '^070-17^', d for d in types.state.hedgeresults
-    // info '^070-16^', isa.quantity { value: 432, unit: 'foo', }
-    // urge '^070-17^', d for d in types.state.hedgeresults
-    // info '^070-18^', isa.optional.list.of.quantity [ { value: null, unit: 'foo', }, ]
-    // urge '^070-19^', d for d in types.state.hedgeresults
-    // info '^070-20^', isa.optional.list.of.optional.integer.or.nonempty.text [ 'foo', ]
-    // info '^070-21^', isa.optional.list.of.optional.integer.or.nonempty.text false
-    // info '^070-22^', isa.optional.list.of.optional.integer.or.nonempty.text null
-    // info '^070-23^', types
+    // help isa.float
+    // help isa.rectangle
+    // help isa.rectangle.fields
+    // help isa.rectangle.fields.width
+    // help isa.quantity
+    // help isa.quantity.fields
     return null;
   };
 
@@ -3057,6 +3243,7 @@
     // @intertype_declaration_with_per_key_clauses()
     // test @
     // test @intertype_isa_arity_check
+    // test @intertype_check_complex_recursive_types
     f();
   }
 
