@@ -71,7 +71,7 @@ _types                    = new ( require 'intertype' ).Intertype()
   # types.declare 'weirdo', isa: ( x ) -> x is weirdo
   T?.eq ( GUY.props.has types.isa, 'weirdo' ), true
   debug '^353^', GUY.props.has types.isa, 'weirdo'
-  T?.throws /Strict_owner instance already has property 'weirdo'/, => types.declare 'weirdo', isa: ( x ) -> x is weirdo
+  T?.throws /Object instance already has property 'weirdo'/, => types.declare 'weirdo', isa: ( x ) -> x is weirdo
   #.........................................................................................................
   done?()
   return null
@@ -1062,8 +1062,8 @@ demo_size_of = ->
   #.........................................................................................................
   info '^868-1^', types
   T?.eq ( _types.type_of types.declare          ), 'function'
-  T?.eq ( _types.type_of types.registry         ), 'strict_owner'
-  T?.eq ( _types.type_of types.registry.text    ), 'strict_owner'
+  T?.eq ( _types.type_of types.registry         ), 'object'
+  T?.eq ( _types.type_of types.registry.text    ), 'function'
   # info '^868-2^', types.registry
   info '^868-3^', types.registry.integer
   info '^868-4^', types.registry.null
