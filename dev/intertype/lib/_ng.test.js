@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, S, _types, alert, debug, demo, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_autovivify_hedgepaths, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_size_of, demo_test_with_protocol, echo, equals, f, help, info, inspect, list_all_builtin_type_testers, log, njs_path, plain, praise, rpr, rvr, test, to_width, truth, urge, warn, whisper;
+  var GUY, H, S, _types, alert, debug, demo, demo_combinate, demo_combinate_2, demo_enumerate_hedgepaths, demo_hedges, demo_intertype_autovivify_hedgepaths, demo_intertype_hedge_combinator, demo_multipart_hedges, demo_picomatch_for_hedgepaths, demo_size_of, demo_test_with_protocol, echo, equals, help, info, inspect, list_all_builtin_type_testers, log, njs_path, plain, praise, rpr, rvr, test, to_width, truth, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -2979,12 +2979,16 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  f = function() {
-    var Intertype, create, declare, dent, hedge, hedgerow, hedges, i, isa, j, len, len1, level, line, probes_and_matchers, r, ref, result, types, validate, value;
+  this.intertype_tracing = async function(T, done) {
+    var Intertype, create, declare, error, i, isa, len, matcher, noresult, probe, probes_and_matchers, types, validate;
+    if (T != null) {
+      T.halt_on_error();
+    }
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype({
-      errors: 'throw'
+      errors: false
     });
+    noresult = Symbol('noresult');
     ({declare, isa, validate, create} = types);
     declare.quantity({
       $value: 'float',
@@ -3010,135 +3014,85 @@
         }
       }
     });
-    // length_1 = create.quantity { unit: 'm', }
-    // info '^070-1^', length_1
-    // info '^070-2^', isa.quantity length_1
-    // length_1.mantissa = 4
-    // info '^070-3^', isa.quantity length_1
-    // info '^070-4^', types
-    // warn '^070-5^', try validate.quantity length_1 catch error then rvr error.message
-    // info '^070-6^', types
-    // info '^070-7^', isa.optional.list.of.quantity null
-    // urge '^070-8^', d for d in types.state.hedgeresults
-    // info '^070-9^', isa.optional.list.of.quantity []
-    // urge '^070-10^', d for d in types.state.hedgeresults
-    // info '^070-11^', isa.optional.list.of.quantity [ { value: 23, unit: 'foo', }, ]
-    // urge '^070-12^', d for d in types.state.hedgeresults
-    // info '^070-13^', isa.quantity 42
+    declare.oops(function(x) {
+      throw new Error('oops');
+    });
     probes_and_matchers = [
-      ['object',
-      []],
+      [['object',
+      []]],
       [
-        'quantity',
         [
-          {
-            value: null,
-            unit: 'foo'
-          }
-        ]
-      ],
-      [
-        'quantity',
-        {
-          value: null,
-          unit: 'foo'
-        }
-      ],
-      [
-        'quantity',
-        {
-          value: 432,
-          unit: 'foo'
-        }
-      ],
-      [
-        'optional.list.of.quantity',
-        [
-          {
-            value: null,
-            unit: 'foo'
-          }
-        ]
-      ],
-      ['optional.list.of.optional.integer.or.nonempty.text',
-      ['foo']],
-      ['optional.list.of.optional.integer.or.nonempty.text',
-      ['foo',
-      'bar',
-      'baz',
-      1234]],
-      ['optional.list.of.optional.integer.or.nonempty.text',
-      ['foo',
-      'bar',
-      'baz',
-      3.5]],
-      ['optional.list.of.optional.integer.or.nonempty.text',
-      false],
-      ['optional.list.of.optional.integer.or.nonempty.text',
-      null],
-      ['rectangle',
-      []],
-      [
-        'rectangle',
-        {
-          value: 0,
-          unit: 'mm'
-        }
-      ],
-      [
-        'rectangle',
-        {
-          width: {
-            value: 0,
-            unit: 'mm'
-          },
-          height: {
-            value: 0,
-            unit: 'mm'
-          }
-        }
-      ],
-      [
-        'list.of.rectangle',
-        [
-          {
-            width: {
-              value: 0,
-              unit: 'mm'
-            },
-            height: {
-              value: 0,
-              unit: 'mm'
-            }
-          },
-          {
-            width: {
-              value: 0,
-              unit: 'mm'
-            },
-            height: {
-              value: 0,
-              unit: 'mm'
-            }
-          }
-        ]
-      ],
-      [
-        'list.of.rectangle',
-        [
-          {
-            width: {
-              value: 0,
-              unit: 'mm'
-            },
-            height: {
-              value: 0,
-              unit: 'mm'
-            }
-          },
-          {
-            width: {
+          'quantity',
+          [
+            {
               value: null,
+              unit: 'foo'
+            }
+          ]
+        ]
+      ],
+      [
+        [
+          'quantity',
+          {
+            value: null,
+            unit: 'foo'
+          }
+        ]
+      ],
+      [
+        [
+          'quantity',
+          {
+            value: 432,
+            unit: 'foo'
+          }
+        ]
+      ],
+      [
+        [
+          'optional.list.of.quantity',
+          [
+            {
+              value: null,
+              unit: 'foo'
+            }
+          ]
+        ]
+      ],
+      [['optional.list.of.optional.integer.or.nonempty.text',
+      ['foo']]],
+      [['optional.list.of.optional.integer.or.nonempty.text',
+      ['foo',
+      'bar',
+      'baz',
+      1234]]],
+      [['optional.list.of.optional.integer.or.nonempty.text',
+      ['foo',
+      'bar',
+      'baz',
+      3.5]]],
+      [['optional.list.of.optional.integer.or.nonempty.text',
+      false]],
+      [['optional.list.of.optional.integer.or.nonempty.text',
+      null]],
+      [['rectangle',
+      []]],
+      [
+        [
+          'rectangle',
+          {
+            value: 0,
+            unit: 'mm'
+          }
+        ]
+      ],
+      [
+        [
+          'rectangle',
+          {
+            width: {
+              value: 0,
               unit: 'mm'
             },
             height: {
@@ -3147,32 +3101,253 @@
             }
           }
         ]
-      ]
+      ],
+      [
+        [
+          'list.of.rectangle',
+          [
+            {
+              width: {
+                value: 0,
+                unit: 'mm'
+              },
+              height: {
+                value: 0,
+                unit: 'mm'
+              }
+            },
+            {
+              width: {
+                value: 0,
+                unit: 'mm'
+              },
+              height: {
+                value: 0,
+                unit: 'mm'
+              }
+            }
+          ]
+        ]
+      ],
+      [
+        [
+          'list.of.rectangle',
+          [
+            {
+              width: {
+                value: 0,
+                unit: 'mm'
+              },
+              height: {
+                value: 0,
+                unit: 'mm'
+              }
+            },
+            {
+              width: {
+                value: null,
+                unit: 'mm'
+              },
+              height: {
+                value: 0,
+                unit: 'mm'
+              }
+            }
+          ]
+        ]
+      ],
+      [['integer.or.boolean',
+      42]],
+      [['integer.or.boolean',
+      true]],
+      [['integer.or.boolean',
+      'wat']],
+      [['integer.or.boolean.or.text',
+      'wat']],
+      [['integer.or.boolean.or.text',
+      'wat']],
+      [['integer.or.boolean.or.text.or.list.of.integer',
+      []]],
+      [['integer.or.boolean.or.text.or.list.of.integer',
+      ['x']]],
+      [['oops',
+      []]],
+      [['integer.or.text.or.bigint.or.oops',
+      []]]
     ];
+//.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [hedgerow, value] = probes_and_matchers[i];
-      whisper('—————————————————————————————————————————————————————————————————');
-      hedges = hedgerow.split('.');
-      debug(value);
-      result = (GUY.props.resolve_property_chain(isa, hedges))(value);
-      urge(types.state.hedges);
-      ref = types.state.hedgeresults;
-      for (j = 0, len1 = ref.length; j < len1; j++) {
-        [level, hedge, value, r] = ref[j];
-        dent = '  '.repeat(level);
-        line = `${dent} ${hedge}`;
-        line = to_width(line, 50);
-        help(line, GUY.trm.truth(r), GUY.trm.grey(to_width(rpr(value), 75)));
-      }
-      info(result);
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var hedgerow, hedges, j, len1, ref, result, value, verb;
+          [hedgerow, value] = probe;
+          whisper('—————————————————————————————————————————————————————————————————');
+          error = null;
+          result = false;
+          hedges = hedgerow.split('.');
+          ref = ['isa'];
+          for (j = 0, len1 = ref.length; j < len1; j++) {
+            verb = ref[j];
+            // for verb in [ 'isa', 'validate', ]
+            result = (GUY.props.resolve_property_chain(types[verb], hedges))(value);
+            echo(types.get_state_report());
+          }
+          return resolve(void 0);
+        });
+      });
     }
-    // help isa.float
-    // help isa.rectangle
-    // help isa.rectangle.fields
-    // help isa.rectangle.fields.width
-    // help isa.quantity
-    // help isa.quantity.fields
-    return null;
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._demo_postconditions = function(T, done) {
+    var Intertype, create, declare, error, isa, plus_1, plus_2, types, validate;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    ({declare, isa, validate, create} = types);
+    //.........................................................................................................
+    plus_1 = function(a, b) {
+      var R, error;
+      R = a + b;
+      try {
+        return validate.float.or.bigint(R);
+      } catch (error1) {
+        error = error1;
+        return 0;
+      }
+    };
+    //.........................................................................................................
+    plus_2 = function(a, b) {
+      var R, error;
+      R = a + b;
+      try {
+        return validate.float.or.bigint(R);
+      } catch (error1) {
+        error = error1;
+        throw new Error(`these values can not be added: a: ${rpr(a)}, b: ${rpr(b)}`);
+      }
+    };
+    //.........................................................................................................
+    debug('^210-1^', (function() {
+      try {
+        return rpr(plus_1(4, 6));
+      } catch (error1) {
+        error = error1;
+        warn(rvr(error.message));
+        return './.';
+      }
+    })());
+    debug('^210-2^', (function() {
+      try {
+        return rpr(plus_1(4n, 6n));
+      } catch (error1) {
+        error = error1;
+        warn(rvr(error.message));
+        return './.';
+      }
+    })());
+    debug('^210-2^', (function() {
+      try {
+        return rpr(plus_2(4n, 6n));
+      } catch (error1) {
+        error = error1;
+        warn(rvr(error.message));
+        return './.';
+      }
+    })());
+    debug('^210-3^', (function() {
+      try {
+        return rpr(plus_1('4', '6'));
+      } catch (error1) {
+        error = error1;
+        warn(rvr(error.message));
+        return './.';
+      }
+    })());
+    debug('^210-4^', (function() {
+      try {
+        return rpr(plus_1('4', 6));
+      } catch (error1) {
+        error = error1;
+        warn(rvr(error.message));
+        return './.';
+      }
+    })());
+    debug('^210-5^', (function() {
+      try {
+        return rpr(plus_1(4, '6'));
+      } catch (error1) {
+        error = error1;
+        warn(rvr(error.message));
+        return './.';
+      }
+    })());
+    debug('^210-6^', (function() {
+      try {
+        return rpr(plus_1(4, true));
+      } catch (error1) {
+        error = error1;
+        warn(rvr(error.message));
+        return './.';
+      }
+    })());
+    debug('^210-7^', (function() {
+      try {
+        return rpr(plus_1(4, false));
+      } catch (error1) {
+        error = error1;
+        warn(rvr(error.message));
+        return './.';
+      }
+    })());
+    debug('^210-8^', (function() {
+      try {
+        return rpr(plus_1(4, null));
+      } catch (error1) {
+        error = error1;
+        warn(rvr(error.message));
+        return './.';
+      }
+    })());
+    debug('^210-9^', (function() {
+      try {
+        return rpr(plus_1(4, void 0));
+      } catch (error1) {
+        error = error1;
+        warn(rvr(error.message));
+        return './.';
+      }
+    })());
+    debug('^210-10^', (function() {
+      try {
+        return rpr(plus_2(4, void 0));
+      } catch (error1) {
+        error = error1;
+        warn(rvr(error.message));
+        return './.';
+      }
+    })());
+    debug('^210-11^', (function() {
+      try {
+        return rpr(plus_2(4, {}));
+      } catch (error1) {
+        error = error1;
+        warn(rvr(error.message));
+        return './.';
+      }
+    })());
+    debug('^210-3^', (function() {
+      try {
+        return rpr(plus_2('4', '6'));
+      } catch (error1) {
+        error = error1;
+        warn(rvr(error.message));
+        return './.';
+      }
+    })());
+    return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -3244,7 +3419,8 @@
     // test @
     // test @intertype_isa_arity_check
     // test @intertype_check_complex_recursive_types
-    f();
+    // @_demo_postconditions()
+    test(this.intertype_tracing);
   }
 
 }).call(this);
