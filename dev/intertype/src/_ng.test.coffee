@@ -1657,6 +1657,42 @@ f = ->
   # help isa.quantity
   # help isa.quantity.fields
   return null
+#-----------------------------------------------------------------------------------------------------------
+@_demo_postconditions = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types = new Intertype()
+  { declare
+    isa
+    validate
+    create        } = types
+  #.........................................................................................................
+  plus_1 = ( a, b ) ->
+    R = a + b
+    return try validate.float.or.bigint R catch error
+      0
+  #.........................................................................................................
+  plus_2 = ( a, b ) ->
+    R = a + b
+    return try validate.float.or.bigint R catch error
+      throw new Error "these values can not be added: a: #{rpr a}, b: #{rpr b}"
+  #.........................................................................................................
+  debug '^210-1^',  try rpr plus_1 4, 6           catch error then warn rvr error.message; './.'
+  debug '^210-2^',  try rpr plus_1 4n, 6n         catch error then warn rvr error.message; './.'
+  debug '^210-2^',  try rpr plus_2 4n, 6n         catch error then warn rvr error.message; './.'
+  debug '^210-3^',  try rpr plus_1 '4', '6'       catch error then warn rvr error.message; './.'
+  debug '^210-4^',  try rpr plus_1 '4', 6         catch error then warn rvr error.message; './.'
+  debug '^210-5^',  try rpr plus_1 4, '6'         catch error then warn rvr error.message; './.'
+  debug '^210-6^',  try rpr plus_1 4, true        catch error then warn rvr error.message; './.'
+  debug '^210-7^',  try rpr plus_1 4, false       catch error then warn rvr error.message; './.'
+  debug '^210-8^',  try rpr plus_1 4, null        catch error then warn rvr error.message; './.'
+  debug '^210-9^',  try rpr plus_1 4, undefined   catch error then warn rvr error.message; './.'
+  debug '^210-10^', try rpr plus_2 4, undefined   catch error then warn rvr error.message; './.'
+  debug '^210-11^', try rpr plus_2 4, {}          catch error then warn rvr error.message; './.'
+  debug '^210-3^',  try rpr plus_2 '4', '6'       catch error then warn rvr error.message; './.'
+  # T?.eq ( )
+  #.........................................................................................................
+  done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @_intermezzo_private_class_features_in_coffeescript = ->
