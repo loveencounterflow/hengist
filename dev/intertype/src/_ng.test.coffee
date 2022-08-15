@@ -1584,9 +1584,11 @@ demo_size_of = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-f = ->
+@intertype_tracing = ( T, done ) ->
+  T?.halt_on_error()
   { Intertype     } = require '../../../apps/intertype'
-  types             = new Intertype { errors: 'throw', }
+  types             = new Intertype { errors: false, }
+  noresult          = Symbol 'noresult'
   { declare
     isa
     validate
@@ -1605,58 +1607,49 @@ f = ->
     default:
       width:        { value: 0, unit: 'mm', }
       height:       { value: 0, unit: 'mm', }
-  # length_1 = create.quantity { unit: 'm', }
-  # info '^070-1^', length_1
-  # info '^070-2^', isa.quantity length_1
-  # length_1.mantissa = 4
-  # info '^070-3^', isa.quantity length_1
-  # info '^070-4^', types
-  # warn '^070-5^', try validate.quantity length_1 catch error then rvr error.message
-  # info '^070-6^', types
-  # info '^070-7^', isa.optional.list.of.quantity null
-  # urge '^070-8^', d for d in types.state.hedgeresults
-  # info '^070-9^', isa.optional.list.of.quantity []
-  # urge '^070-10^', d for d in types.state.hedgeresults
-  # info '^070-11^', isa.optional.list.of.quantity [ { value: 23, unit: 'foo', }, ]
-  # urge '^070-12^', d for d in types.state.hedgeresults
-  # info '^070-13^', isa.quantity 42
-
+  declare.oops      ( x ) -> throw new Error 'oops'
   probes_and_matchers = [
-    [ 'object',                                             [],                                 ]
-    [ 'quantity',                                           [ { value: null, unit: 'foo', }, ], ]
-    [ 'quantity',                                           { value: null, unit: 'foo', },      ]
-    [ 'quantity',                                           { value: 432, unit: 'foo', },       ]
-    [ 'optional.list.of.quantity',                          [ { value: null, unit: 'foo', }, ], ]
-    [ 'optional.list.of.optional.integer.or.nonempty.text', [ 'foo', ],                         ]
-    [ 'optional.list.of.optional.integer.or.nonempty.text', [ 'foo', 'bar', 'baz', 1234, ],     ]
-    [ 'optional.list.of.optional.integer.or.nonempty.text', [ 'foo', 'bar', 'baz', 3.5, ],      ]
-    [ 'optional.list.of.optional.integer.or.nonempty.text', false,                              ]
-    [ 'optional.list.of.optional.integer.or.nonempty.text', null,                               ]
-    [ 'rectangle',                                          [], ]
-    [ 'rectangle',                                          { value: 0, unit: 'mm', }, ]
-    [ 'rectangle',                                          { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ]
-    [ 'list.of.rectangle',                                  [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ], ]
-    [ 'list.of.rectangle',                                  [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: null, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ], ]
+    [ [ 'object',                                             [],                                                                                                                                                         ], ]
+    [ [ 'quantity',                                           [ { value: null, unit: 'foo', }, ],                                                                                                                         ], ]
+    [ [ 'quantity',                                           { value: null, unit: 'foo', },                                                                                                                              ], ]
+    [ [ 'quantity',                                           { value: 432, unit: 'foo', },                                                                                                                               ], ]
+    [ [ 'optional.list.of.quantity',                          [ { value: null, unit: 'foo', }, ],                                                                                                                         ], ]
+    [ [ 'optional.list.of.optional.integer.or.nonempty.text', [ 'foo', ],                                                                                                                                                 ], ]
+    [ [ 'optional.list.of.optional.integer.or.nonempty.text', [ 'foo', 'bar', 'baz', 1234, ],                                                                                                                             ], ]
+    [ [ 'optional.list.of.optional.integer.or.nonempty.text', [ 'foo', 'bar', 'baz', 3.5, ],                                                                                                                              ], ]
+    [ [ 'optional.list.of.optional.integer.or.nonempty.text', false,                                                                                                                                                      ], ]
+    [ [ 'optional.list.of.optional.integer.or.nonempty.text', null,                                                                                                                                                       ], ]
+    [ [ 'rectangle',                                          [],                                                                                                                                                         ], ]
+    [ [ 'rectangle',                                          { value: 0, unit: 'mm', },                                                                                                                                  ], ]
+    [ [ 'rectangle',                                          { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, },                                                                                   ], ]
+    [ [ 'list.of.rectangle',                                  [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ],    ], ]
+    [ [ 'list.of.rectangle',                                  [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: null, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ], ], ]
+    [ [ 'integer.or.boolean',                                 42,                                                                                                                                                         ], ]
+    [ [ 'integer.or.boolean',                                 true,                                                                                                                                                       ], ]
+    [ [ 'integer.or.boolean',                                 'wat',                                                                                                                                                      ], ]
+    [ [ 'integer.or.boolean.or.text',                         'wat',                                                                                                                                                      ], ]
+    [ [ 'integer.or.boolean.or.text',                         'wat',                                                                                                                                                      ], ]
+    [ [ 'integer.or.boolean.or.text.or.list.of.integer',      [],                                                                                                                                                         ], ]
+    [ [ 'integer.or.boolean.or.text.or.list.of.integer',      [ 'x', ],                                                                                                                                                   ], ]
+    [ [ 'oops',                                               [],                                                                                                                                                         ], ]
+    [ [ 'integer.or.text.or.bigint.or.oops',                  [],                                                                                                                                                         ], ]
     ]
-  for [ hedgerow, value, ] in probes_and_matchers
-    whisper '—————————————————————————————————————————————————————————————————'
-    hedges = hedgerow.split '.'
-    debug value
-    result = ( GUY.props.resolve_property_chain isa, hedges ) value
-    urge types.state.hedges
-    for [ level, hedge, value, r, ] in types.state.hedgeresults
-      dent  = '  '.repeat level
-      line  = "#{dent} #{hedge}"
-      line  = to_width line, 50
-      help line, ( GUY.trm.truth r ), GUY.trm.grey to_width ( rpr value ), 75
-    info result
-  # help isa.float
-  # help isa.rectangle
-  # help isa.rectangle.fields
-  # help isa.rectangle.fields.width
-  # help isa.quantity
-  # help isa.quantity.fields
-  return null
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      [ hedgerow, value, ] = probe
+      whisper '—————————————————————————————————————————————————————————————————'
+      error   = null
+      result  = false
+      hedges  = hedgerow.split '.'
+      for verb in [ 'isa', ]
+      # for verb in [ 'isa', 'validate', ]
+        result = ( GUY.props.resolve_property_chain types[ verb ], hedges ) value
+        echo types.get_state_report()
+      resolve undefined
+  #.........................................................................................................
+  done?()
+
 #-----------------------------------------------------------------------------------------------------------
 @_demo_postconditions = ( T, done ) ->
   # T?.halt_on_error()
@@ -1741,7 +1734,8 @@ unless module.parent?
   # test @
   # test @intertype_isa_arity_check
   # test @intertype_check_complex_recursive_types
-  f()
+  # @_demo_postconditions()
+  test @intertype_tracing
 
 
 
