@@ -3018,8 +3018,6 @@
       throw new Error('oops');
     });
     probes_and_matchers = [
-      [['object',
-      []]],
       [
         [
           'quantity',
@@ -3077,7 +3075,7 @@
       [['optional.list.of.optional.integer.or.nonempty.text',
       null]],
       [['rectangle',
-      []]],
+      [1]]],
       [
         [
           'rectangle',
@@ -3167,13 +3165,15 @@
       [['integer.or.boolean.or.text',
       'wat']],
       [['integer.or.boolean.or.text.or.list.of.integer',
-      []]],
+      [2]]],
       [['integer.or.boolean.or.text.or.list.of.integer',
       ['x']]],
-      [['oops',
-      []]],
       [['integer.or.text.or.bigint.or.oops',
-      []]]
+      [3]]],
+      [['object',
+      [4]]],
+      [['oops',
+      [5]]]
     ];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -3182,7 +3182,10 @@
         return new Promise(function(resolve, reject) {
           var hedgerow, hedges, j, len1, ref, result, value, verb;
           [hedgerow, value] = probe;
-          whisper('—————————————————————————————————————————————————————————————————');
+          echo();
+          echo();
+          echo(GUY.trm.grey('—————————————————————————————————————————————————————————————————'));
+          echo();
           error = null;
           result = false;
           hedges = hedgerow.split('.');
