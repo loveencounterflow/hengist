@@ -1609,7 +1609,6 @@ demo_size_of = ->
       height:       { value: 0, unit: 'mm', }
   declare.oops      ( x ) -> throw new Error 'oops'
   probes_and_matchers = [
-    [ [ 'object',                                             [],                                                                                                                                                         ], ]
     [ [ 'quantity',                                           [ { value: null, unit: 'foo', }, ],                                                                                                                         ], ]
     [ [ 'quantity',                                           { value: null, unit: 'foo', },                                                                                                                              ], ]
     [ [ 'quantity',                                           { value: 432, unit: 'foo', },                                                                                                                               ], ]
@@ -1619,7 +1618,7 @@ demo_size_of = ->
     [ [ 'optional.list.of.optional.integer.or.nonempty.text', [ 'foo', 'bar', 'baz', 3.5, ],                                                                                                                              ], ]
     [ [ 'optional.list.of.optional.integer.or.nonempty.text', false,                                                                                                                                                      ], ]
     [ [ 'optional.list.of.optional.integer.or.nonempty.text', null,                                                                                                                                                       ], ]
-    [ [ 'rectangle',                                          [],                                                                                                                                                         ], ]
+    [ [ 'rectangle',                                          [ 1, ],                                                                                                                                                         ], ]
     [ [ 'rectangle',                                          { value: 0, unit: 'mm', },                                                                                                                                  ], ]
     [ [ 'rectangle',                                          { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, },                                                                                   ], ]
     [ [ 'list.of.rectangle',                                  [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ],    ], ]
@@ -1629,16 +1628,20 @@ demo_size_of = ->
     [ [ 'integer.or.boolean',                                 'wat',                                                                                                                                                      ], ]
     [ [ 'integer.or.boolean.or.text',                         'wat',                                                                                                                                                      ], ]
     [ [ 'integer.or.boolean.or.text',                         'wat',                                                                                                                                                      ], ]
-    [ [ 'integer.or.boolean.or.text.or.list.of.integer',      [],                                                                                                                                                         ], ]
+    [ [ 'integer.or.boolean.or.text.or.list.of.integer',      [ 2, ],                                                                                                                                                         ], ]
     [ [ 'integer.or.boolean.or.text.or.list.of.integer',      [ 'x', ],                                                                                                                                                   ], ]
-    [ [ 'oops',                                               [],                                                                                                                                                         ], ]
-    [ [ 'integer.or.text.or.bigint.or.oops',                  [],                                                                                                                                                         ], ]
+    [ [ 'integer.or.text.or.bigint.or.oops',                  [ 3, ],                                                                                                                                                         ], ]
+    [ [ 'object',                                             [ 4, ],                                                                                                                                                         ], ]
+    [ [ 'oops',                                               [ 5, ],                                                                                                                                                         ], ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       [ hedgerow, value, ] = probe
-      whisper '—————————————————————————————————————————————————————————————————'
+      echo()
+      echo()
+      echo GUY.trm.grey '—————————————————————————————————————————————————————————————————'
+      echo()
       error   = null
       result  = false
       hedges  = hedgerow.split '.'
@@ -1647,6 +1650,10 @@ demo_size_of = ->
         result = ( GUY.props.resolve_property_chain types[ verb ], hedges ) value
         echo types.get_state_report()
       resolve undefined
+  # debug '^15345^', isa.optional.object 42
+  # debug '^15345^', isa.optional.object {}
+  # debug '^15345^', ( isa.object 42 ), types.state
+  # debug '^15345^', ( isa.object {} ), types.state
   #.........................................................................................................
   done?()
 
