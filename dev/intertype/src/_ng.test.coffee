@@ -1716,6 +1716,57 @@ demo_size_of = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@intertype_improved_validation_errors = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype { errors: false, }
+  noresult          = Symbol 'noresult'
+  { declare
+    isa
+    validate
+    create        } = types
+  declare.quantity
+    $value:         'float'
+    $unit:          'nonempty.text'
+    extras:         false
+    default:
+      value:    0
+      unit:     null
+  declare.rectangle
+    $width:         'quantity'
+    $height:        'quantity'
+    extras:         false
+    default:
+      width:        { value: 0, unit: 'mm', }
+      height:       { value: 0, unit: 'mm', }
+  declare.oops      ( x ) -> throw new Error 'oops'
+  #.........................................................................................................
+  cleanup = ( text ) ->
+    R = text
+    R = R.replace /\n/g, '⏎'
+    R = R.replace /\s+/g, ' '
+    return R
+  #.........................................................................................................
+  probe = [
+    { width: { value: 0,    unit: 'mm', }, height: { value: 0, unit: 'mm', }, },
+    { width: { value: null, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ]
+  #.........................................................................................................
+  do =>
+    # debug '^4234^', validate.optional.list.of.rectangle null
+    try
+      validate.optional.list.of.rectangle 123
+    catch error
+      warn '^443^', error.message
+  #.........................................................................................................
+  do =>
+    try
+      validate.list.of.rectangle probe
+    catch error
+      warn '^443^', error.message
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @_demo_postconditions = ( T, done ) ->
   # T?.halt_on_error()
   { Intertype     } = require '../../../apps/intertype'
@@ -1801,7 +1852,8 @@ unless module.parent?
   # test @intertype_check_complex_recursive_types
   # @_demo_postconditions()
   # test @intertype_tracing
-  test @intertype_tracing_2
+  # test @intertype_tracing_2
+  test @intertype_improved_validation_errors
 
 
 
