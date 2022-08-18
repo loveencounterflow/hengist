@@ -1648,9 +1648,9 @@ demo_size_of = ->
       for verb in [ 'isa', ]
       # for verb in [ 'isa', 'validate', ]
         result = ( GUY.props.resolve_property_chain types[ verb ], hedges ) value
-        echo types.get_state_report { mode: 'all', }
-        echo types.get_state_report { mode: 'failing', }
-        echo types.get_state_report { mode: 'all', colors: false, }
+        echo types.get_state_report { format: 'all', }
+        echo types.get_state_report { format: 'failing', }
+        echo types.get_state_report { format: 'all', colors: false, }
       resolve undefined
   # debug '^15345^', isa.optional.object 42
   # debug '^15345^', isa.optional.object {}
@@ -1693,22 +1693,23 @@ demo_size_of = ->
   #.........................................................................................................
   do =>
     isa.list.of.rectangle [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ]
-    echo types.get_state_report { mode: 'all', }
-    result = cleanup types.get_state_report { mode: 'all', colors: false, }
-    T?.eq result, " T isa list [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { val…⏎ T isa of [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { val…⏎ T isa object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle:object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.width:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.height:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle:object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.width:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.height:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa list.of.rectangle [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { val…⏎"
-  do =>
-    isa.list.of.rectangle [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: null, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ]
-    echo types.get_state_report { mode: 'all', }
-    echo types.get_state_report { mode: 'failing', }
-    result = cleanup types.get_state_report { mode: 'failing', colors: false, }
+    echo types.get_state_report { format: 'all', }
+    result = cleanup types.get_state_report { width: 191, format: 'all', colors: false, }
     urge rpr result
-    T?.eq result, " F isa float null ⏎ F isa quantity.value:float { value: null, unit: 'mm' } ⏎ F isa rectangle.width:quantity { width: { value: null, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ F isa list.of.rectangle [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { val…⏎"
+    T?.eq result, " T isa list [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { value: 0, unit: 'mm' }, height: { …⏎ T isa of [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { value: 0, unit: 'mm' }, height: { …⏎ T isa object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle:object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.width:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.height:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle:object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.width:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.height:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa list.of.rectangle [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { value: 0, unit: 'mm' }, height: { …⏎"
   do =>
     isa.list.of.rectangle [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: null, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ]
-    echo types.get_state_report { mode: 'failing', }
-    echo types.get_state_report { mode: 'short', }
-    echo types.get_state_report { mode: 'short', colors: false, }
-    result = cleanup types.get_state_report { mode: 'short', colors: false, }
+    echo types.get_state_report { format: 'all', }
+    echo types.get_state_report { format: 'failing', }
+    result = cleanup types.get_state_report { width: 191, format: 'failing', colors: false, }
+    urge rpr result
+    T?.eq result, " F isa float null ⏎ F isa quantity.value:float { value: null, unit: 'mm' } ⏎ F isa rectangle.width:quantity { width: { value: null, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ F isa list.of.rectangle [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { value: null, unit: 'mm' }, height:…⏎"
+  do =>
+    isa.list.of.rectangle [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: null, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ]
+    echo types.get_state_report { format: 'failing', }
+    echo types.get_state_report { format: 'short', }
+    echo types.get_state_report { format: 'short', colors: false, }
+    result = cleanup types.get_state_report { width: 191, format: 'short', colors: false, }
     urge rpr result
     T?.eq result, " F isa float null ◀ F isa quantity.value:float { value: null, unit: 'mm' } ◀ F isa rectangle.width:quantity { width: { value: null, unit: 'mm' }, height: { v… "
   #.........................................................................................................
