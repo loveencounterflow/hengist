@@ -1612,12 +1612,6 @@ demo_size_of = ->
     [ [ 'quantity',                                           [ { value: null, unit: 'foo', }, ],                                                                                                                         ], ]
     [ [ 'quantity',                                           { value: null, unit: 'foo', },                                                                                                                              ], ]
     [ [ 'quantity',                                           { value: 432, unit: 'foo', },                                                                                                                               ], ]
-    [ [ 'optional.list.of.quantity',                          [ { value: null, unit: 'foo', }, ],                                                                                                                         ], ]
-    [ [ 'optional.list.of.optional.integer.or.nonempty.text', [ 'foo', ],                                                                                                                                                 ], ]
-    [ [ 'optional.list.of.optional.integer.or.nonempty.text', [ 'foo', 'bar', 'baz', 1234, ],                                                                                                                             ], ]
-    [ [ 'optional.list.of.optional.integer.or.nonempty.text', [ 'foo', 'bar', 'baz', 3.5, ],                                                                                                                              ], ]
-    [ [ 'optional.list.of.optional.integer.or.nonempty.text', false,                                                                                                                                                      ], ]
-    [ [ 'optional.list.of.optional.integer.or.nonempty.text', null,                                                                                                                                                       ], ]
     [ [ 'rectangle',                                          [ 1, ],                                                                                                                                                         ], ]
     [ [ 'rectangle',                                          { value: 0, unit: 'mm', },                                                                                                                                  ], ]
     [ [ 'rectangle',                                          { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, },                                                                                   ], ]
@@ -1629,10 +1623,16 @@ demo_size_of = ->
     [ [ 'integer.or.boolean.or.text',                         'wat',                                                                                                                                                      ], ]
     [ [ 'integer.or.boolean.or.text',                         'wat',                                                                                                                                                      ], ]
     [ [ 'integer.or.boolean.or.text.or.list.of.integer',      [ 2, ],                                                                                                                                                         ], ]
-    [ [ 'integer.or.boolean.or.text.or.list.of.integer',      [ 'x', ],                                                                                                                                                   ], ]
     [ [ 'integer.or.text.or.bigint.or.oops',                  [ 3, ],                                                                                                                                                         ], ]
     [ [ 'object',                                             [ 4, ],                                                                                                                                                         ], ]
     [ [ 'oops',                                               [ 5, ],                                                                                                                                                         ], ]
+    [ [ 'optional.list.of.quantity',                          [ { value: null, unit: 'foo', }, ],                                                                                                                         ], ]
+    [ [ 'optional.list.of.optional.integer.or.nonempty.text', [ 'foo', ],                                                                                                                                                 ], ]
+    [ [ 'optional.list.of.optional.integer.or.nonempty.text', [ 'foo', 'bar', 'baz', 1234, ],                                                                                                                             ], ]
+    [ [ 'optional.list.of.optional.integer.or.nonempty.text', [ 'foo', 'bar', 'baz', 3.5, ],                                                                                                                              ], ]
+    [ [ 'optional.list.of.optional.integer.or.nonempty.text', false,                                                                                                                                                      ], ]
+    [ [ 'optional.list.of.optional.integer.or.nonempty.text', null,                                                                                                                                                       ], ]
+    [ [ 'integer.or.boolean.or.text.or.list.of.integer',      [ 'x', ],                                                                                                                                                   ], ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -1648,12 +1648,68 @@ demo_size_of = ->
       for verb in [ 'isa', ]
       # for verb in [ 'isa', 'validate', ]
         result = ( GUY.props.resolve_property_chain types[ verb ], hedges ) value
-        echo types.get_state_report()
+        echo types.get_state_report { mode: 'all', }
+        echo types.get_state_report { mode: 'failing', }
+        echo types.get_state_report { mode: 'all', colors: false, }
       resolve undefined
   # debug '^15345^', isa.optional.object 42
   # debug '^15345^', isa.optional.object {}
   # debug '^15345^', ( isa.object 42 ), types.state
   # debug '^15345^', ( isa.object {} ), types.state
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_tracing_2 = ( T, done ) ->
+  T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype { errors: false, }
+  noresult          = Symbol 'noresult'
+  { declare
+    isa
+    validate
+    create        } = types
+  declare.quantity
+    $value:         'float'
+    $unit:          'nonempty.text'
+    extras:         false
+    default:
+      value:    0
+      unit:     null
+  declare.rectangle
+    $width:         'quantity'
+    $height:        'quantity'
+    extras:         false
+    default:
+      width:        { value: 0, unit: 'mm', }
+      height:       { value: 0, unit: 'mm', }
+  declare.oops      ( x ) -> throw new Error 'oops'
+  #.........................................................................................................
+  cleanup = ( text ) ->
+    R = text
+    R = R.replace /\n/g, '⏎'
+    R = R.replace /\s+/g, ' '
+    return R
+  #.........................................................................................................
+  do =>
+    isa.list.of.rectangle [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ]
+    echo types.get_state_report { mode: 'all', }
+    result = cleanup types.get_state_report { mode: 'all', colors: false, }
+    T?.eq result, " T isa list [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { val…⏎ T isa of [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { val…⏎ T isa object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle:object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.width:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.height:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle:object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.width:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.height:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa list.of.rectangle [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { val…⏎"
+  do =>
+    isa.list.of.rectangle [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: null, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ]
+    echo types.get_state_report { mode: 'all', }
+    echo types.get_state_report { mode: 'failing', }
+    result = cleanup types.get_state_report { mode: 'failing', colors: false, }
+    urge rpr result
+    T?.eq result, " F isa float null ⏎ F isa quantity.value:float { value: null, unit: 'mm' } ⏎ F isa rectangle.width:quantity { width: { value: null, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ F isa list.of.rectangle [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { val…⏎"
+  do =>
+    isa.list.of.rectangle [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: null, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ]
+    echo types.get_state_report { mode: 'failing', }
+    echo types.get_state_report { mode: 'short', }
+    result = cleanup types.get_state_report { mode: 'short', colors: false, }
+    urge rpr result
+    T?.eq result, "float (null) —‣ quantity.value:float ({ value: null, unit: 'mm' }) —‣ rectangle.width:quantity ({ width: { value: null, unit: 'mm' }, height: { v…)"
   #.........................................................................................................
   done?()
 
@@ -1742,7 +1798,8 @@ unless module.parent?
   # test @intertype_isa_arity_check
   # test @intertype_check_complex_recursive_types
   # @_demo_postconditions()
-  test @intertype_tracing
+  # test @intertype_tracing
+  test @intertype_tracing_2
 
 
 
