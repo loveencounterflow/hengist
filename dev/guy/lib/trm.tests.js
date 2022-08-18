@@ -171,15 +171,36 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_trm_strip_ansi = async function(T, done) {
+    var GUY, error, i, len, matcher, probe, probes_and_matchers;
+    GUY = require('../../../apps/guy');
+    // debug '^33321^', GUY.trm._ansi_pattern
+    //.........................................................................................................
+    probes_and_matchers = [[GUY.trm.red("helo"), "helo"], [GUY.trm.blink(GUY.trm.reverse(GUY.trm.red("helo"))), "helo"], ['\x1B[38;05;240m00:00\x1B[0m\x1B[5m\x1B[38;05;124m ⚠ \x1B[0m\x1B[25m \x1B[38;05;240mGUY\x1B[0m \x1B[38;05;124mXXXXXXX\x1B[0m\n', '00:00 ⚠  GUY XXXXXXX\n', null], ['\x1B[38;05;240m00:00\x1B[0m\x1B[38;05;240m ⚙ \x1B[0m \x1B[38;05;240mGUY\x1B[0m \x1B[38;05;199mXXXXXXX\x1B[0m\n', '00:00 ⚙  GUY XXXXXXX\n', null], ['\x1B[38;05;240m00:00\x1B[0m\x1B[38;05;214m ☛ \x1B[0m \x1B[38;05;240mGUY\x1B[0m \x1B[38;05;118mXXXXXXX\x1B[0m\n', '00:00 ☛  GUY XXXXXXX\n', null], ['\x1B[38;05;240m00:00\x1B[0m\x1B[38;05;240m ▶ \x1B[0m \x1B[38;05;240mGUY\x1B[0m \x1B[38;05;33mXXXXXXX\x1B[0m\n', '00:00 ▶  GUY XXXXXXX\n', null]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var result;
+          result = GUY.trm.strip_ansi(probe);
+          return resolve(result);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
-      return test(this["GUY.trm.rpr"]);
+      // test @[ "GUY.trm.rpr" ]
+      // test @[ "GUY.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
+      return test(this.GUY_trm_strip_ansi);
     })();
   }
-
-  // test @[ "GUY.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
 
 }).call(this);
 
