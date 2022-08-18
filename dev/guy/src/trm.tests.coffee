@@ -72,12 +72,33 @@ types                     = new ( require 'intertype' ).Intertype
   #.........................................................................................................
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@GUY_trm_strip_ansi = ( T, done ) ->
+  GUY = require '../../../apps/guy'
+  # debug '^33321^', GUY.trm._ansi_pattern
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ ( GUY.trm.red "helo" ), "helo" ]
+    [ ( GUY.trm.blink GUY.trm.reverse GUY.trm.red "helo" ), "helo" ]
+    [ '\x1B[38;05;240m00:00\x1B[0m\x1B[5m\x1B[38;05;124m ⚠ \x1B[0m\x1B[25m \x1B[38;05;240mGUY\x1B[0m \x1B[38;05;124mXXXXXXX\x1B[0m\n', '00:00 ⚠  GUY XXXXXXX\n', null ]
+    [ '\x1B[38;05;240m00:00\x1B[0m\x1B[38;05;240m ⚙ \x1B[0m \x1B[38;05;240mGUY\x1B[0m \x1B[38;05;199mXXXXXXX\x1B[0m\n', '00:00 ⚙  GUY XXXXXXX\n', null ]
+    [ '\x1B[38;05;240m00:00\x1B[0m\x1B[38;05;214m ☛ \x1B[0m \x1B[38;05;240mGUY\x1B[0m \x1B[38;05;118mXXXXXXX\x1B[0m\n', '00:00 ☛  GUY XXXXXXX\n', null ]
+    [ '\x1B[38;05;240m00:00\x1B[0m\x1B[38;05;240m ▶ \x1B[0m \x1B[38;05;240mGUY\x1B[0m \x1B[38;05;33mXXXXXXX\x1B[0m\n', '00:00 ▶  GUY XXXXXXX\n', null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      result = GUY.trm.strip_ansi probe
+      resolve result
+  #.........................................................................................................
+  return done?()
+
 
 
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  test @[ "GUY.trm.rpr" ]
+  # test @[ "GUY.trm.rpr" ]
   # test @[ "GUY.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
-
+  test @GUY_trm_strip_ansi
 
