@@ -1661,7 +1661,7 @@ demo_size_of = ->
 
 #-----------------------------------------------------------------------------------------------------------
 @intertype_tracing_2 = ( T, done ) ->
-  T?.halt_on_error()
+  # T?.halt_on_error()
   { Intertype     } = require '../../../apps/intertype'
   types             = new Intertype { errors: false, }
   noresult          = Symbol 'noresult'
@@ -1707,9 +1707,10 @@ demo_size_of = ->
     isa.list.of.rectangle [ { width: { value: 0, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, { width: { value: null, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ]
     echo types.get_state_report { mode: 'failing', }
     echo types.get_state_report { mode: 'short', }
+    echo types.get_state_report { mode: 'short', colors: false, }
     result = cleanup types.get_state_report { mode: 'short', colors: false, }
     urge rpr result
-    T?.eq result, "float (null) —‣ quantity.value:float ({ value: null, unit: 'mm' }) —‣ rectangle.width:quantity ({ width: { value: null, unit: 'mm' }, height: { v…)"
+    T?.eq result, " F isa float null ◀ F isa quantity.value:float { value: null, unit: 'mm' } ◀ F isa rectangle.width:quantity { width: { value: null, unit: 'mm' }, height: { v… "
   #.........................................................................................................
   done?()
 
