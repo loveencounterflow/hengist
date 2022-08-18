@@ -3195,13 +3195,13 @@
             // for verb in [ 'isa', 'validate', ]
             result = (GUY.props.resolve_property_chain(types[verb], hedges))(value);
             echo(types.get_state_report({
-              mode: 'all'
+              format: 'all'
             }));
             echo(types.get_state_report({
-              mode: 'failing'
+              format: 'failing'
             }));
             echo(types.get_state_report({
-              mode: 'all',
+              format: 'all',
               colors: false
             }));
           }
@@ -3282,50 +3282,15 @@
         }
       ]);
       echo(types.get_state_report({
-        mode: 'all'
+        format: 'all'
       }));
       result = cleanup(types.get_state_report({
-        mode: 'all',
-        colors: false
-      }));
-      return T != null ? T.eq(result, " T isa list [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { val…⏎ T isa of [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { val…⏎ T isa object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle:object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.width:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.height:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle:object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.width:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.height:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa list.of.rectangle [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { val…⏎") : void 0;
-    })();
-    (() => {
-      var result;
-      isa.list.of.rectangle([
-        {
-          width: {
-            value: 0,
-            unit: 'mm'
-          },
-          height: {
-            value: 0,
-            unit: 'mm'
-          }
-        },
-        {
-          width: {
-            value: null,
-            unit: 'mm'
-          },
-          height: {
-            value: 0,
-            unit: 'mm'
-          }
-        }
-      ]);
-      echo(types.get_state_report({
-        mode: 'all'
-      }));
-      echo(types.get_state_report({
-        mode: 'failing'
-      }));
-      result = cleanup(types.get_state_report({
-        mode: 'failing',
+        width: 191,
+        format: 'all',
         colors: false
       }));
       urge(rpr(result));
-      return T != null ? T.eq(result, " F isa float null ⏎ F isa quantity.value:float { value: null, unit: 'mm' } ⏎ F isa rectangle.width:quantity { width: { value: null, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ F isa list.of.rectangle [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { val…⏎") : void 0;
+      return T != null ? T.eq(result, " T isa list [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { value: 0, unit: 'mm' }, height: { …⏎ T isa of [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { value: 0, unit: 'mm' }, height: { …⏎ T isa object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle:object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.width:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.height:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa rectangle:object { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.width:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa object { value: 0, unit: 'mm' } ⏎ T isa quantity { value: 0, unit: 'mm' } ⏎ T isa quantity:object { value: 0, unit: 'mm' } ⏎ T isa float 0 ⏎ T isa quantity.value:float { value: 0, unit: 'mm' } ⏎ T isa nonempty 'mm' ⏎ T isa text 'mm' ⏎ T isa quantity.unit:nonempty.text { value: 0, unit: 'mm' } ⏎ T isa rectangle.height:quantity { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ T isa list.of.rectangle [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { value: 0, unit: 'mm' }, height: { …⏎") : void 0;
     })();
     (() => {
       var result;
@@ -3352,21 +3317,150 @@
         }
       ]);
       echo(types.get_state_report({
-        mode: 'failing'
+        format: 'all'
       }));
       echo(types.get_state_report({
-        mode: 'short'
+        format: 'failing'
+      }));
+      result = cleanup(types.get_state_report({
+        width: 191,
+        format: 'failing',
+        colors: false
+      }));
+      urge(rpr(result));
+      return T != null ? T.eq(result, " F isa float null ⏎ F isa quantity.value:float { value: null, unit: 'mm' } ⏎ F isa rectangle.width:quantity { width: { value: null, unit: 'mm' }, height: { value: 0, unit: 'mm' } } ⏎ F isa list.of.rectangle [ { width: { value: 0, unit: 'mm' }, height: { value: 0, unit: 'mm' } }, { width: { value: null, unit: 'mm' }, height:…⏎") : void 0;
+    })();
+    (() => {
+      var result;
+      isa.list.of.rectangle([
+        {
+          width: {
+            value: 0,
+            unit: 'mm'
+          },
+          height: {
+            value: 0,
+            unit: 'mm'
+          }
+        },
+        {
+          width: {
+            value: null,
+            unit: 'mm'
+          },
+          height: {
+            value: 0,
+            unit: 'mm'
+          }
+        }
+      ]);
+      echo(types.get_state_report({
+        format: 'failing'
       }));
       echo(types.get_state_report({
-        mode: 'short',
+        format: 'short'
+      }));
+      echo(types.get_state_report({
+        format: 'short',
         colors: false
       }));
       result = cleanup(types.get_state_report({
-        mode: 'short',
+        width: 191,
+        format: 'short',
         colors: false
       }));
       urge(rpr(result));
       return T != null ? T.eq(result, " F isa float null ◀ F isa quantity.value:float { value: null, unit: 'mm' } ◀ F isa rectangle.width:quantity { width: { value: null, unit: 'mm' }, height: { v… ") : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_improved_validation_errors = function(T, done) {
+    var Intertype, cleanup, create, declare, isa, noresult, probe, types, validate;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype({
+      errors: false
+    });
+    noresult = Symbol('noresult');
+    ({declare, isa, validate, create} = types);
+    declare.quantity({
+      $value: 'float',
+      $unit: 'nonempty.text',
+      extras: false,
+      default: {
+        value: 0,
+        unit: null
+      }
+    });
+    declare.rectangle({
+      $width: 'quantity',
+      $height: 'quantity',
+      extras: false,
+      default: {
+        width: {
+          value: 0,
+          unit: 'mm'
+        },
+        height: {
+          value: 0,
+          unit: 'mm'
+        }
+      }
+    });
+    declare.oops(function(x) {
+      throw new Error('oops');
+    });
+    //.........................................................................................................
+    cleanup = function(text) {
+      var R;
+      R = text;
+      R = R.replace(/\n/g, '⏎');
+      R = R.replace(/\s+/g, ' ');
+      return R;
+    };
+    //.........................................................................................................
+    probe = [
+      {
+        width: {
+          value: 0,
+          unit: 'mm'
+        },
+        height: {
+          value: 0,
+          unit: 'mm'
+        }
+      },
+      {
+        width: {
+          value: null,
+          unit: 'mm'
+        },
+        height: {
+          value: 0,
+          unit: 'mm'
+        }
+      }
+    ];
+    (() => {      //.........................................................................................................
+      var error;
+      try {
+        // debug '^4234^', validate.optional.list.of.rectangle null
+        return validate.optional.list.of.rectangle(123);
+      } catch (error1) {
+        error = error1;
+        return warn('^443^', error.message);
+      }
+    })();
+    (() => {      //.........................................................................................................
+      var error;
+      try {
+        return validate.list.of.rectangle(probe);
+      } catch (error1) {
+        error = error1;
+        return warn('^443^', error.message);
+      }
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -3592,7 +3686,8 @@
     // test @intertype_check_complex_recursive_types
     // @_demo_postconditions()
     // test @intertype_tracing
-    test(this.intertype_tracing_2);
+    // test @intertype_tracing_2
+    test(this.intertype_improved_validation_errors);
   }
 
 }).call(this);
