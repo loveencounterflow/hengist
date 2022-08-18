@@ -3215,9 +3215,7 @@
   //-----------------------------------------------------------------------------------------------------------
   this.intertype_tracing_2 = function(T, done) {
     var Intertype, cleanup, create, declare, isa, noresult, types, validate;
-    if (T != null) {
-      T.halt_on_error();
-    }
+    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype({
       errors: false
@@ -3359,12 +3357,16 @@
       echo(types.get_state_report({
         mode: 'short'
       }));
+      echo(types.get_state_report({
+        mode: 'short',
+        colors: false
+      }));
       result = cleanup(types.get_state_report({
         mode: 'short',
         colors: false
       }));
       urge(rpr(result));
-      return T != null ? T.eq(result, "float (null) —‣ quantity.value:float ({ value: null, unit: 'mm' }) —‣ rectangle.width:quantity ({ width: { value: null, unit: 'mm' }, height: { v…)") : void 0;
+      return T != null ? T.eq(result, " F isa float null ◀ F isa quantity.value:float { value: null, unit: 'mm' } ◀ F isa rectangle.width:quantity { width: { value: null, unit: 'mm' }, height: { v… ") : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
   };
