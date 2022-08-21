@@ -1,6 +1,6 @@
 (function() {
   //###########################################################################################################
-  var GUY, Hedge, Intertype, alert, create, debug, declare, echo, help, info, inspect, isa, log, plain, praise, rpr, rvr, truth, types, urge, validate, warn, whisper;
+  var GUY, Hedge, Intertype, alert, create, debug, declare, echo, help, info, inspect, isa, log, node_inspect, plain, praise, rpr, rvr, truth, types, urge, validate, warn, whisper;
 
   GUY = require('../../../apps/guy');
 
@@ -17,6 +17,8 @@
   types = new Intertype();
 
   ({declare, create, isa, validate} = types);
+
+  node_inspect = Symbol.for('nodejs.util.inspect.custom');
 
   //-----------------------------------------------------------------------------------------------------------
   declare.hdg_new_hedge_cfg({
@@ -54,6 +56,32 @@
         //-----------------------------------------------------------------------------------------------------
         get: (target, key) => {
           var R, hedges, sub_owner;
+          if (key === Symbol.toStringTag) {
+            return `${target.constructor.name}`;
+          }
+          if (key === 'constructor') {
+            return target.constructor;
+          }
+          if (key === 'toString') {
+            return target.toString;
+          }
+          if (key === 'call') {
+            return target.call;
+          }
+          if (key === 'apply') {
+            return target.apply;
+          }
+          if (key === Symbol.iterator) {
+            return target[Symbol.iterator];
+          }
+          if (key === node_inspect) {
+            return target[node_inspect];
+          }
+          if (key === '0') {
+            /* NOTE necessitated by behavior of `node:util.inspect()`: */
+            return target[0];
+          }
+          //...................................................................................................
           if (is_top) {
             this.state.hedges = [key];
           } else {
@@ -80,19 +108,34 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      var _isa, error;
+      var _create, _isa, error;
       //---------------------------------------------------------------------------------------------------------
       _isa = function(hedges, x) {
         var arity;
         if ((arity = arguments.length) !== 2) {
-          throw new Error(`^387^ expected 2 arguments, got ${arity}`);
+          throw new Error(`^387^ expected single argument, got ${arity - 1}`);
         }
         help('^450-5^', {hedges, x});
         return true;
       };
       //---------------------------------------------------------------------------------------------------------
+      _create = function(hedges, isa) {
+        var hedgecount;
+        // unless ( arity = arguments.length ) is 1
+        //   throw new Error "^387^ expected no arguments, got #{arity - 1}"
+        /* TAINT also check for hedges being a list */
+        if ((hedgecount = hedges.length) !== 1) {
+          throw new Error(`^387^ expected single hedge, got ${rpr(hedges)}`);
+        }
+        help('^450-5^', {hedges, isa});
+        return true;
+      };
+      //---------------------------------------------------------------------------------------------------------
       info('^450-6^', isa = new Hedge({
         target: _isa
+      }));
+      info('^450-6^', create = new Hedge({
+        target: _create
       }));
       //.........................................................................................................
       info('^450-12^', (function() {
@@ -111,6 +154,10 @@
           return warn(rvr(error.message));
         }
       })());
+      //.........................................................................................................
+      info('^450-12^', create.one(function(x) {
+        return (x === 1) || (x === '1');
+      }));
       //.........................................................................................................
       info('^450-12^', isa(['one'], 1));
       info('^450-12^', isa.one(1));
