@@ -46,32 +46,24 @@ class Hedge
     @cfg    = create.hdg_new_hedge_cfg cfg
     @state  =
       hedges: null
-    R       = @_get_top_proxy @cfg
+    R       = @_get_hedge_proxy true, cfg.target
     return R
 
   #---------------------------------------------------------------------------------------------------------
-  _get_top_proxy: ( cfg ) ->
+  _get_hedge_proxy: ( is_top, owner ) ->
     dsc =
+      #-----------------------------------------------------------------------------------------------------
       get: ( target, key ) =>
-        @state.hedges = [ key, ]
+        if is_top then  @state.hedges = [ key, ]
+        else            @state.hedges.push key
+        #...................................................................................................
         return R if ( R = target[ key ] ) isnt undefined
         hedges        = [ @state.hedges..., ]
-        sub_target    = ( P... ) => @cfg.target hedges, P...
-        return target[ key ] ?= @_get_sub_proxy { target: sub_target, }
-    R = new Proxy cfg.target, dsc
-
-  #---------------------------------------------------------------------------------------------------------
-  _get_sub_proxy: ( cfg ) ->
-    dsc =
-      get: ( target, key ) =>
-        @state.hedges.push key
-        return R if ( R = target[ key ] ) isnt undefined
-        hedges        = [ @state.hedges..., ]
-        sub_target    = ( P... ) => @cfg.target hedges, P...
-        return target[ key ] ?= @_get_sub_proxy { target: sub_target, }
-    R = new Proxy cfg.target, dsc
-
-
+        #...................................................................................................
+        sub_owner     = ( P... ) => @cfg.target hedges, P...
+        return target[ key ] ?= @_get_hedge_proxy false, sub_owner
+    #.......................................................................................................
+    R = new Proxy owner, dsc
 
 
 ############################################################################################################
