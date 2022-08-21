@@ -115,7 +115,7 @@
         if ((arity = arguments.length) !== 2) {
           throw new Error(`^387^ expected single argument, got ${arity - 1}`);
         }
-        help('^450-5^', {hedges, x});
+        help('^450-1^', {hedges, x});
         return true;
       };
       //---------------------------------------------------------------------------------------------------------
@@ -127,18 +127,18 @@
         if ((hedgecount = hedges.length) !== 1) {
           throw new Error(`^387^ expected single hedge, got ${rpr(hedges)}`);
         }
-        help('^450-5^', {hedges, isa});
+        help('^450-2^', {hedges, isa});
         return true;
       };
       //---------------------------------------------------------------------------------------------------------
-      info('^450-6^', isa = new Hedge({
+      info('^450-3^', isa = new Hedge({
         target: _isa
       }));
-      info('^450-6^', create = new Hedge({
+      info('^450-4^', create = new Hedge({
         target: _create
       }));
       //.........................................................................................................
-      info('^450-12^', (function() {
+      info('^450-5^', (function() {
         try {
           return isa(1);
         } catch (error1) {
@@ -146,7 +146,7 @@
           return warn(rvr(error.message));
         }
       })());
-      info('^450-12^', (function() {
+      info('^450-6^', (function() {
         try {
           return isa(1, 2, 3);
         } catch (error1) {
@@ -155,17 +155,17 @@
         }
       })());
       //.........................................................................................................
-      info('^450-12^', create.one(function(x) {
+      info('^450-7^', create.one(function(x) {
         return (x === 1) || (x === '1');
       }));
       //.........................................................................................................
-      info('^450-12^', isa(['one'], 1));
-      info('^450-12^', isa.one(1));
-      info('^450-13^', isa.one.two(2));
-      info('^450-14^', isa.one.two.three(3));
-      info('^450-15^', isa.one.two.three.four(4));
-      info('^450-16^', isa(['one', 'two', 'three', 'four', 'five'], 5));
-      info('^450-16^', isa.one.two.three.four.five(5));
+      info('^450-8^', isa(['one'], 1));
+      info('^450-9^', isa.one(1));
+      info('^450-10^', isa.one.two(2));
+      info('^450-11^', isa.one.two.three(3));
+      info('^450-12^', isa.one.two.three.four(4));
+      info('^450-13^', isa(['one', 'two', 'three', 'four', 'five'], 5));
+      info('^450-14^', isa.one.two.three.four.five(5));
       //---------------------------------------------------------------------------------------------------------
       return null;
     })();
