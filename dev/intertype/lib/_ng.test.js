@@ -1494,35 +1494,16 @@
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype();
     ({declare, isa, validate} = types);
-    // #.........................................................................................................
-    // declare.Type_cfg_constructor_cfg
-    //     ( x ) -> @isa.nonempty.text x.name
-    //     ( x ) -> ( @isa.function x.test ) or ( @isa.list.of.function x.test )
-    //     ( x ) ->
-    //       return true if @isa.nonempty.text x.groups
-    //       return false unless @isa.list x.groups
-    //       return x.groups.every ( e ) => ( @isa.nonempty.text e ) and not ( /[\s,]/ ).test e
-    //     ]
     //.........................................................................................................
     if (T != null) {
       T.eq(validate.list([]), []);
     }
-    // isa 'list', []
-    // validate 'list', []
-    // debug '^33453^', isa.foobar
-    debug('^33453^', isa.list.of.float);
-    // praise '^459-1^', types.isa.Type_cfg_constructor_cfg {}
-    praise('^459-2^', types.isa.optional.list.of.float({}));
-    praise('^459-3^', types.isa.optional.list.of.float(null));
-    praise('^459-4^', types.isa.list.of.float({}));
-    praise('^459-5^', types.isa.list.of.float([1, 2, 3]));
-    praise('^459-6^', types.isa.list.of.float([1, 2, 3, null]));
-    // praise '^459-6^', types.isa.integer.of.float
-    // praise '^459-6^', types.isa.integer.of.float [ 1, 2, 3, null, ]
-    //.........................................................................................................
-    validate.list([]);
-    validate.list(new Array());
-    validate.list(Array.from('abc'));
+    if (T != null) {
+      T.eq(validate.optional.list([]), []);
+    }
+    if (T != null) {
+      T.eq(validate.optional.list(null), null);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -1534,6 +1515,9 @@
     types = new Intertype();
     //.........................................................................................................
     types.declare.quantity({
+      isa: function(x) {
+        return this.isa.object(x);
+      },
       $value: 'float',
       $unit: 'nonempty.text',
       default: {
@@ -1541,14 +1525,42 @@
         unit: null
       }
     });
+    types.declare.fortytwo(function(x) {
+      return x === 42;
+    });
     d = {
       value: 4,
       unit: 'kB'
     };
     //.........................................................................................................
-    info(types.validate.float(12.3));
-    info(types.validate.quantity(d));
-    info(types.validate.quantity(d));
+    info('^321-1^', types.validate.float(12.3));
+    echo(types.get_state_report({
+      format: 'failing'
+    }));
+    info('^321-1^', types.validate.fortytwo(12.3));
+    echo(types.get_state_report({
+      format: 'failing'
+    }));
+    info('^321-1^', types.validate.fortytwo(42));
+    echo(types.get_state_report({
+      format: 'failing'
+    }));
+    info('^321-2^', types.isa.object(d));
+    echo(types.get_state_report({
+      format: 'failing'
+    }));
+    info('^321-3^', types.isa.quantity(d));
+    echo(types.get_state_report({
+      format: 'failing'
+    }));
+    info('^321-3^', types.isa.quantity(null));
+    echo(types.get_state_report({
+      format: 'failing'
+    }));
+    info('^321-4^', types.validate.quantity(d));
+    echo(types.get_state_report({
+      format: 'failing'
+    }));
     if (T != null) {
       T.eq(types.validate.float(12.3), 12.3);
     }
@@ -3198,6 +3210,10 @@
               format: 'all'
             }));
             echo(types.get_state_report({
+              format: 'all',
+              refs: true
+            }));
+            echo(types.get_state_report({
               format: 'failing'
             }));
             echo(types.get_state_report({
@@ -3370,14 +3386,14 @@
         colors: false
       }));
       urge(rpr(result));
-      return T != null ? T.eq(result, " F isa float null ◀ F isa quantity.value:float { value: null, unit: 'mm' } ◀ F isa rectangle.width:quantity { width: { value: null, unit: 'mm' }, height: { v… ") : void 0;
+      return T != null ? T.eq(result, "F isa float null ◀ F isa quantity.value:float { value: null, unit: 'mm' } ◀ F isa rectangle.width:quantity { width: { value: null, unit: 'mm' }, height: { v…") : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.intertype_improved_validation_errors = function(T, done) {
-    var Intertype, cleanup, create, declare, isa, noresult, probe, types, validate;
+    var Intertype, bad_probe, cleanup, create, declare, good_probe, isa, noresult, types, validate;
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype({
@@ -3421,7 +3437,30 @@
       return R;
     };
     //.........................................................................................................
-    probe = [
+    good_probe = [
+      {
+        width: {
+          value: 0,
+          unit: 'mm'
+        },
+        height: {
+          value: 0,
+          unit: 'mm'
+        }
+      },
+      {
+        width: {
+          value: 1234,
+          unit: 'mm'
+        },
+        height: {
+          value: 0,
+          unit: 'mm'
+        }
+      }
+    ];
+    //.........................................................................................................
+    bad_probe = [
       {
         width: {
           value: 0,
@@ -3444,6 +3483,16 @@
       }
     ];
     (() => {      //.........................................................................................................
+      var result;
+      result = validate.optional.list.of.rectangle(null);
+      return T != null ? T.ok(result === null) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var result;
+      result = validate.optional.list.of.rectangle(good_probe);
+      return T != null ? T.ok(result === good_probe) : void 0;
+    })();
+    (() => {      //.........................................................................................................
       var error;
       try {
         // debug '^4234^', validate.optional.list.of.rectangle null
@@ -3454,12 +3503,14 @@
       }
     })();
     (() => {      //.........................................................................................................
-      var error;
+      var error, result;
       try {
-        return validate.list.of.rectangle(probe);
+        return validate.list.of.rectangle(bad_probe);
       } catch (error1) {
         error = error1;
-        return warn('^443^', error.message);
+        warn('^443^', error.message);
+        result = error.message;
+        return T != null ? T.ok((result.match(/\(Intertype_validation_error\) not a valid list\.of\.rectangle; failing tests: F validate float null ◀ F validate quantity.value:float \{/)) !== null) : void 0;
       }
     })();
     return typeof done === "function" ? done() : void 0;
@@ -3665,7 +3716,6 @@
     // test @intertype_existential_types
     // @intertype_collection_of_t()
     // test @intertype_collection_of_t
-    // test @validate_1
     // @intertype_even_odd_for_bigints()
     // test @intertype_even_odd_for_bigints
     // @intertype_declaration_with_per_key_clauses()
@@ -3681,13 +3731,17 @@
     // @_intertype_isa_arity_check()
     // test @intertype_exception_guarding
     // @intertype_declaration_with_per_key_clauses()
-    // test @
     // test @intertype_isa_arity_check
     // test @intertype_check_complex_recursive_types
     // @_demo_postconditions()
+    // @validate_1()
+    // test @validate_1
+    // test @
     // test @intertype_tracing
     // test @intertype_tracing_2
-    test(this.intertype_improved_validation_errors);
+    // test @intertype_improved_validation_errors
+    this.validate_returns_value();
+    test(this.validate_returns_value);
   }
 
 }).call(this);
