@@ -56,8 +56,7 @@ class Hedge
         @state.hedges = [ key, ]
         return R if ( R = target[ key ] ) isnt undefined
         hedges        = [ @state.hedges..., ]
-        # debug '^450-1^', @state
-        sub_target    = ( P... ) => urge '^450-2^', { hedges, P, }; @cfg.target hedges, P...
+        sub_target    = ( P... ) => @cfg.target hedges, P...
         return target[ key ] ?= @_get_sub_proxy { target: sub_target, }
     R = new Proxy cfg.target, dsc
 
@@ -68,8 +67,7 @@ class Hedge
         @state.hedges.push key
         return R if ( R = target[ key ] ) isnt undefined
         hedges        = [ @state.hedges..., ]
-        # debug '^450-3^', @state
-        sub_target    = ( P... ) => urge '^450-4^', { hedges, P, }; @cfg.target hedges, P...
+        sub_target    = ( P... ) => @cfg.target hedges, P...
         return target[ key ] ?= @_get_sub_proxy { target: sub_target, }
     R = new Proxy cfg.target, dsc
 
@@ -78,26 +76,28 @@ class Hedge
 
 ############################################################################################################
 if module is require.main then do =>
-  target  = ( hedges, P ) -> help '^450-5^', { hedges, P, }
-  info '^450-6^', h = new Hedge { target, }
-  # info '^450-7^', h.foo.bar
-  # info '^450-8^', h.one.two.three.four.five
-  # info '^450-9^', h.one.two
-  # info '^450-10^', h
-  # info '^450-11^', h.foo.bar                 42
+
+  #---------------------------------------------------------------------------------------------------------
+  isa  = ( hedges, x ) ->
+    unless ( arity = arguments.length ) is 2
+      throw new Error "^387^ expected 2 arguments, got #{arity}"
+    help '^450-5^', { hedges, x, }
+    return true
+
+  #---------------------------------------------------------------------------------------------------------
+  info '^450-6^', h = new Hedge { target: isa, }
+  #.........................................................................................................
+  info '^450-12^', try h 1        catch error then warn rvr error.message
+  info '^450-12^', try h 1, 2, 3  catch error then warn rvr error.message
+  #.........................................................................................................
+  info '^450-12^', h [ 'one', ], 1
   info '^450-12^', h.one 1
   info '^450-13^', h.one.two 2
   info '^450-14^', h.one.two.three 3
   info '^450-14^', h.one.two.three 3
   info '^450-15^', h.one.two.three.four 4
+  info '^450-16^', h [ 'one', 'two', 'three', 'four', 'five', ], 5
   info '^450-16^', h.one.two.three.four.five 5
-  # info '^450-17^', h.one.two                 42
-  # info '^450-18^', h                         42
 
-  # test_non_identity = ->
-  #   a = create.hdg_get_proxy_cfg()
-  #   b = create.hdg_get_proxy_cfg()
-  #   debug a
-  #   debug b
-  #   debug a is b
-  #   debug a.target is b.target
+  #---------------------------------------------------------------------------------------------------------
+  return null
