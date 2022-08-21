@@ -19,7 +19,7 @@ echo                      = CND.echo.bind CND
 assign                    = Object.assign
 after                     = ( time_s, f ) -> setTimeout f, time_s * 1000
 ### TAINT use standard JS solution ###
-nf                        = require '/home/flow/jzr/benchmarks/node_modules/number-format.js'
+nf                        = require 'number-format.js'
 INTERTEXT                 = require 'intertext'
 #...........................................................................................................
 # H                         = require '../helpers'
