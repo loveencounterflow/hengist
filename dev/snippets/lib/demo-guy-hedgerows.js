@@ -1,32 +1,16 @@
 (function() {
   //###########################################################################################################
-  var CND, GUY, Hedge, Intertype, alert, badge, create, debug, declare, echo, help, info, isa, log, rpr, types, urge, validate, warn, whisper;
-
-  CND = require('cnd');
-
-  rpr = CND.rpr;
-
-  badge = 'GUY/TESTS';
-
-  log = CND.get_logger('plain', badge);
-
-  info = CND.get_logger('info', badge);
-
-  whisper = CND.get_logger('whisper', badge);
-
-  alert = CND.get_logger('alert', badge);
-
-  debug = CND.get_logger('debug', badge);
-
-  warn = CND.get_logger('warn', badge);
-
-  help = CND.get_logger('help', badge);
-
-  urge = CND.get_logger('urge', badge);
-
-  echo = CND.echo.bind(CND);
+  var GUY, Hedge, Intertype, alert, create, debug, declare, echo, help, info, inspect, isa, log, plain, praise, rpr, rvr, truth, types, urge, validate, warn, whisper;
 
   GUY = require('../../../apps/guy');
+
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('GUY/demo-guy-hedgerows'));
+
+  ({rpr, inspect, echo, log} = GUY.trm);
+
+  rvr = GUY.trm.reverse;
+
+  truth = GUY.trm.truth.bind(GUY.trm);
 
   ({Intertype} = require('../../../apps/intertype'));
 
@@ -74,9 +58,7 @@
             return R;
           }
           hedges = [...this.state.hedges];
-          // debug '^450-1^', @state
           sub_target = (...P) => {
-            urge('^450-2^', {hedges, P});
             return this.cfg.target(hedges, ...P);
           };
           return target[key] != null ? target[key] : target[key] = this._get_sub_proxy({
@@ -98,9 +80,7 @@
             return R;
           }
           hedges = [...this.state.hedges];
-          // debug '^450-3^', @state
           sub_target = (...P) => {
-            urge('^450-4^', {hedges, P});
             return this.cfg.target(hedges, ...P);
           };
           return target[key] != null ? target[key] : target[key] = this._get_sub_proxy({
@@ -116,35 +96,50 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      var h, target;
-      target = function(hedges, P) {
-        return help('^450-5^', {hedges, P});
+      var error, h;
+      //---------------------------------------------------------------------------------------------------------
+      isa = function(hedges, x) {
+        var arity;
+        if ((arity = arguments.length) !== 2) {
+          throw new Error(`^387^ expected 2 arguments, got ${arity}`);
+        }
+        help('^450-5^', {hedges, x});
+        return true;
       };
-      info('^450-6^', h = new Hedge({target}));
-      // info '^450-7^', h.foo.bar
-      // info '^450-8^', h.one.two.three.four.five
-      // info '^450-9^', h.one.two
-      // info '^450-10^', h
-      // info '^450-11^', h.foo.bar                 42
+      //---------------------------------------------------------------------------------------------------------
+      info('^450-6^', h = new Hedge({
+        target: isa
+      }));
+      //.........................................................................................................
+      info('^450-12^', (function() {
+        try {
+          return h(1);
+        } catch (error1) {
+          error = error1;
+          return warn(rvr(error.message));
+        }
+      })());
+      info('^450-12^', (function() {
+        try {
+          return h(1, 2, 3);
+        } catch (error1) {
+          error = error1;
+          return warn(rvr(error.message));
+        }
+      })());
+      //.........................................................................................................
+      info('^450-12^', h(['one'], 1));
       info('^450-12^', h.one(1));
       info('^450-13^', h.one.two(2));
       info('^450-14^', h.one.two.three(3));
       info('^450-14^', h.one.two.three(3));
       info('^450-15^', h.one.two.three.four(4));
-      return info('^450-16^', h.one.two.three.four.five(5));
+      info('^450-16^', h(['one', 'two', 'three', 'four', 'five'], 5));
+      info('^450-16^', h.one.two.three.four.five(5));
+      //---------------------------------------------------------------------------------------------------------
+      return null;
     })();
   }
-
-  // info '^450-17^', h.one.two                 42
-// info '^450-18^', h                         42
-
-  // test_non_identity = ->
-//   a = create.hdg_get_proxy_cfg()
-//   b = create.hdg_get_proxy_cfg()
-//   debug a
-//   debug b
-//   debug a is b
-//   debug a.target is b.target
 
 }).call(this);
 
