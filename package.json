@@ -74,6 +74,8 @@
     "hashbow": "^1.1.1",
     "highlight.js": "^11.4.0",
     "icql-dba": "^10.1.0",
+    "immer": "^9.0.15",
+    "immutable": "^4.1.0",
     "intermatic": "0.5.4",
     "intershop": "file:../intershop",
     "intershop-intertext": "file:../intershop-intertext",
