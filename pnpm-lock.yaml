@@ -62,6 +62,8 @@ specifiers:
   hashbow: ^1.1.1
   highlight.js: ^11.4.0
   icql-dba: ^10.1.0
+  immer: ^9.0.15
+  immutable: ^4.1.0
   intermatic: 0.5.4
   intershop: file:../intershop
   intershop-intertext: file:../intershop-intertext
@@ -204,6 +206,8 @@ dependencies:
   hashbow: 1.1.1
   highlight.js: 11.5.1
   icql-dba: 10.1.0
+  immer: 9.0.15
+  immutable: 4.1.0
   intermatic: 0.5.4
   intershop: file:../intershop
   intershop-intertext: file:../intershop-intertext
@@ -2590,6 +2594,14 @@ packages:
   /ignore/5.2.0:
     resolution: {integrity: sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ==}
     engines: {node: '>= 4'}
+    dev: false
+
+  /immer/9.0.15:
+    resolution: {integrity: sha512-2eB/sswms9AEUSkOm4SbV5Y7Vmt/bKRwByd52jfLkW4OLYeaTP3EEiJ9agqU0O/tq6Dk62Zfj+TJSqfm1rLVGQ==}
+    dev: false
+
+  /immutable/4.1.0:
+    resolution: {integrity: sha512-oNkuqVTA8jqG1Q6c+UglTOD1xhC1BtjKI7XkCXRkZHrN5m18/XsnUp8Q89GkQO/z+0WjonSvl0FLhDYftp46nQ==}
     dev: false
 
   /in-publish/2.0.1:
