@@ -25,6 +25,8 @@ types                     = new Intertype()
   create
   isa
   validate  }             = types
+node_inspect              = Symbol.for 'nodejs.util.inspect.custom'
+
 
 #-----------------------------------------------------------------------------------------------------------
 declare.hdg_new_hedge_cfg
@@ -54,6 +56,16 @@ class Hedge
     dsc =
       #-----------------------------------------------------------------------------------------------------
       get: ( target, key ) =>
+        return "#{target.constructor.name}"   if key is Symbol.toStringTag
+        return target.constructor             if key is 'constructor'
+        return target.toString                if key is 'toString'
+        return target.call                    if key is 'call'
+        return target.apply                   if key is 'apply'
+        return target[ Symbol.iterator  ]     if key is Symbol.iterator
+        return target[ node_inspect     ]     if key is node_inspect
+        ### NOTE necessitated by behavior of `node:util.inspect()`: ###
+        return target[ 0                ]     if key is '0'
+        #...................................................................................................
         if is_top then  @state.hedges = [ key, ]
         else            @state.hedges.push key
         #...................................................................................................
