@@ -78,26 +78,25 @@ class Hedge
 if module is require.main then do =>
 
   #---------------------------------------------------------------------------------------------------------
-  isa  = ( hedges, x ) ->
+  _isa  = ( hedges, x ) ->
     unless ( arity = arguments.length ) is 2
       throw new Error "^387^ expected 2 arguments, got #{arity}"
     help '^450-5^', { hedges, x, }
     return true
 
   #---------------------------------------------------------------------------------------------------------
-  info '^450-6^', h = new Hedge { target: isa, }
+  info '^450-6^', isa = new Hedge { target: _isa, }
   #.........................................................................................................
-  info '^450-12^', try h 1        catch error then warn rvr error.message
-  info '^450-12^', try h 1, 2, 3  catch error then warn rvr error.message
+  info '^450-12^', try isa 1        catch error then warn rvr error.message
+  info '^450-12^', try isa 1, 2, 3  catch error then warn rvr error.message
   #.........................................................................................................
-  info '^450-12^', h [ 'one', ], 1
-  info '^450-12^', h.one 1
-  info '^450-13^', h.one.two 2
-  info '^450-14^', h.one.two.three 3
-  info '^450-14^', h.one.two.three 3
-  info '^450-15^', h.one.two.three.four 4
-  info '^450-16^', h [ 'one', 'two', 'three', 'four', 'five', ], 5
-  info '^450-16^', h.one.two.three.four.five 5
+  info '^450-12^', isa [ 'one', ], 1
+  info '^450-12^', isa.one 1
+  info '^450-13^', isa.one.two 2
+  info '^450-14^', isa.one.two.three 3
+  info '^450-15^', isa.one.two.three.four 4
+  info '^450-16^', isa [ 'one', 'two', 'three', 'four', 'five', ], 5
+  info '^450-16^', isa.one.two.three.four.five 5
 
   #---------------------------------------------------------------------------------------------------------
   return null
