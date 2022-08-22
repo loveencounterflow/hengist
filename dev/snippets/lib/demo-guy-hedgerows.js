@@ -1,7 +1,41 @@
 (function() {
-  //###########################################################################################################
-  var GUY, Hedge, Intertype, alert, create, debug, declare, echo, help, info, inspect, isa, log, node_inspect, plain, praise, rpr, rvr, truth, types, urge, validate, warn, whisper;
+  /*
 
+  * class `Hedge`
+    * purpose: enable turning property access to function calls
+      * propoerties may be predefined
+      * or auto-generated, either
+        * as plain objects
+        * or by calling a custom factory function
+      * example:
+
+        ```coffee
+        handler = ( hedges, a, b, c ) ->
+          log hedges, [ a, b, c, ]
+          return null
+        h = new Hedge { handler, }
+        h.foo
+   * [ 'foo',  ]
+        ```
+
+  * since hubs and properties are proxies, can do things on property access, no call needed, so both `d.foo`
+    and `d.foo 42` can potentially do things
+
+  * 'handler': function to be called on prop access, call, or both
+
+  * 'hub': optional reference / base object (re 'hub': as if props were spokes)
+
+  * `cfg`:
+
+    * `cfg.create`: ??????????????????
+      * `true`: missing props will be auto-generated as plain objects
+      * `true`: no missing props will be generated
+      * a function: to be called, return value becomes new property where property is missing
+
+   */
+  var GUY, Hedge, Intertype, alert, create, debug, declare, echo, help, info, inspect, isa, log, nameit, node_inspect, plain, praise, rpr, rvr, truth, types, urge, validate, warn, whisper;
+
+  //###########################################################################################################
   GUY = require('../../../apps/guy');
 
   ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('GUY/demo-guy-hedgerows'));
@@ -20,19 +54,21 @@
 
   node_inspect = Symbol.for('nodejs.util.inspect.custom');
 
-  //-----------------------------------------------------------------------------------------------------------
-  declare.hdg_new_hedge_cfg({
-    $target: 'function',
-    default: {
-      target: null
-    }
-  });
+  nameit = function(name, f) {
+    return Object.defineProperty(f, 'name', {
+      value: name
+    });
+  };
 
   //-----------------------------------------------------------------------------------------------------------
-  declare.hdg_get_proxy_cfg({
-    $target: 'function',
+  declare.hdg_new_hedge_cfg({
+    $handler: 'function',
+    $hub: 'optional.function.or.object',
+    $state: 'optional.object',
     default: {
-      target: null
+      hub: null,
+      handler: null,
+      state: null
     }
   });
 
@@ -40,22 +76,26 @@
   Hedge = class Hedge {
     //---------------------------------------------------------------------------------------------------------
     constructor(cfg) {
-      var R;
-      this.cfg = create.hdg_new_hedge_cfg(cfg);
-      this.state = {
+      var R, ref, ref1;
+      /* TAINT bug in Intertype::create() / Intertype::validate(), returns `true` instead of input value */
+      // cfg     = create.hdg_new_hedge_cfg cfg
+      // urge '^345^', rvr cfg
+      this.hub = (ref = cfg.hub) != null ? ref : null;
+      this.handler = cfg.handler; // .bind @hub
+      this.state = (ref1 = cfg.state) != null ? ref1 : {
         hedges: null
       };
-      R = this._get_hedge_proxy(true, cfg.target);
+      R = this._get_hedge_proxy(true, this.handler);
       return R;
     }
 
     //---------------------------------------------------------------------------------------------------------
-    _get_hedge_proxy(is_top, owner) {
+    _get_hedge_proxy(is_top, handler) {
       var R, dsc;
       dsc = {
         //-----------------------------------------------------------------------------------------------------
         get: (target, key) => {
-          var R, hedges, sub_owner;
+          var R, hedges, sub_handler;
           if (key === Symbol.toStringTag) {
             return `${target.constructor.name}`;
           }
@@ -81,6 +121,7 @@
             /* NOTE necessitated by behavior of `node:util.inspect()`: */
             return target[0];
           }
+          // whisper '^450-1^', { target, key, }
           //...................................................................................................
           if (is_top) {
             this.state.hedges = [key];
@@ -89,18 +130,21 @@
           }
           if ((R = target[key]) !== void 0) {
             //...................................................................................................
+            /* put call for prop access here: */
+            // @handler @state.hedges
             return R;
           }
           hedges = [...this.state.hedges];
           //...................................................................................................
-          sub_owner = (...P) => {
-            return this.cfg.target(hedges, ...P);
-          };
-          return target[key] != null ? target[key] : target[key] = this._get_hedge_proxy(false, sub_owner);
+          sub_handler = nameit(key, (...P) => {
+            whisper('^450-2^', "call with", {hedges, P});
+            return this.handler(hedges, ...P);
+          });
+          return target[key] != null ? target[key] : target[key] = this._get_hedge_proxy(false, sub_handler);
         }
       };
       //.......................................................................................................
-      return R = new Proxy(owner, dsc);
+      return R = new Proxy(handler, dsc);
     }
 
   };
@@ -108,64 +152,126 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      var _create, _isa, error;
-      //---------------------------------------------------------------------------------------------------------
-      _isa = function(hedges, x) {
-        var arity;
-        if ((arity = arguments.length) !== 2) {
-          throw new Error(`^387^ expected single argument, got ${arity - 1}`);
+      var hub, paragons;
+      //=========================================================================================================
+      paragons = {
+        //-------------------------------------------------------------------------------------------------------
+        isa: function(hedges, x) {
+          var R, arity, hedge, i, len;
+          // if arguments.length < 2
+          //   debug '^450-3^', "`isa()` called with no argument; leaving"
+          //   return null
+          if ((arity = arguments.length) !== 2) {
+            throw new Error(`^387^ expected single argument, got ${arity - 1}`);
+          }
+          /* TAINT very much simplified version of `Intertype::_inner_isa()` */
+          // return isa[ hedge ] x
+          whisper('^450-4^', {hedges, x});
+          for (i = 0, len = hedges.length; i < len; i++) {
+            hedge = hedges[i];
+            R = this.isa[hedge] === false;
+            whisper('^450-5^', {
+              R,
+              hedge,
+              handler: this.isa[hedge],
+              x
+            });
+            if (R === false) {
+              return false;
+            }
+            if (R !== true) {
+              return R;
+            }
+          }
+          return true;
+        },
+        //-------------------------------------------------------------------------------------------------------
+        declare: function(hedges, isa) {
+          /* NOTE here chance to add tracing */
+          var handler, hedgecount, name;
+          // if arguments.length < 2
+          //   debug '^450-6^', "`declare()` called with no argument; leaving"
+          //   return null
+          // unless ( arity = arguments.length ) is 1
+          //   throw new Error "^387^ expected no arguments, got #{arity - 1}"
+          /* TAINT also check for hedges being a list */
+          if ((hedgecount = hedges.length) !== 1) {
+            throw new Error(`^387^ expected single hedge, got ${rpr(hedges)}`);
+          }
+          [name] = hedges;
+          handler = (x) => {
+            return isa.call(this, x);
+          };
+          this.isa[name] = nameit(name, new Hedge({
+            state: this.state,
+            hub: this,
+            handler
+          }));
+          return true;
         }
-        help('^450-1^', {hedges, x});
+      };
+      //=========================================================================================================
+      Intertype = class Intertype {
+        //-------------------------------------------------------------------------------------------------------
+        constructor(cfg) {
+          // GUY_props.hide @, 'isa', new Hedge
+          this.state = {
+            hedges: null
+          };
+          this.isa = nameit('isa', new Hedge({
+            state: this.state,
+            hub: this,
+            handler: paragons.isa.bind(this)
+          }));
+          this.declare = nameit('declare', new Hedge({
+            state: this.state,
+            hub: this,
+            handler: paragons.declare.bind(this)
+          }));
+          // debug '^450-10^', rvr @
+          return void 0;
+        }
+
+      };
+      //=========================================================================================================
+      hub = function(...P) {
+        urge('^450-11^', P);
         return true;
       };
-      //---------------------------------------------------------------------------------------------------------
-      _create = function(hedges, isa) {
-        var hedgecount;
-        // unless ( arity = arguments.length ) is 1
-        //   throw new Error "^387^ expected no arguments, got #{arity - 1}"
-        /* TAINT also check for hedges being a list */
-        if ((hedgecount = hedges.length) !== 1) {
-          throw new Error(`^387^ expected single hedge, got ${rpr(hedges)}`);
-        }
-        help('^450-2^', {hedges, isa});
-        return true;
-      };
-      //---------------------------------------------------------------------------------------------------------
-      info('^450-3^', isa = new Hedge({
-        target: _isa
-      }));
-      info('^450-4^', create = new Hedge({
-        target: _create
-      }));
-      //.........................................................................................................
-      info('^450-5^', (function() {
-        try {
-          return isa(1);
-        } catch (error1) {
-          error = error1;
-          return warn(rvr(error.message));
-        }
-      })());
-      info('^450-6^', (function() {
-        try {
-          return isa(1, 2, 3);
-        } catch (error1) {
-          error = error1;
-          return warn(rvr(error.message));
-        }
-      })());
-      //.........................................................................................................
-      info('^450-7^', create.one(function(x) {
-        return (x === 1) || (x === '1');
-      }));
-      //.........................................................................................................
-      info('^450-8^', isa(['one'], 1));
-      info('^450-9^', isa.one(1));
-      info('^450-10^', isa.one.two(2));
-      info('^450-11^', isa.one.two.three(3));
-      info('^450-12^', isa.one.two.three.four(4));
-      info('^450-13^', isa(['one', 'two', 'three', 'four', 'five'], 5));
-      info('^450-14^', isa.one.two.three.four.five(5));
+      (() => {        //=========================================================================================================
+        // do =>
+        //   info '^450-12^', hub.isa     = new Hedge { hub, handler: ( paragons.isa.bind    hub ), }
+        //   info '^450-13^', hub.declare  = new Hedge { hub, handler: ( paragons.declare.bind hub ), }
+        //   #.........................................................................................................
+        //   info '^450-14^', try hub.isa 1        catch error then warn rvr error.message
+        //   info '^450-15^', try hub.isa 1, 2, 3  catch error then warn rvr error.message
+        //   return null
+        // #=========================================================================================================
+        // do =>
+        //   info '^450-16^', hub.declare.one ( x ) -> debug '^450-17^', { x, }; ( x is 1 ) or ( x is '1' )
+        //   #.........................................................................................................
+        //   info '^450-18^', hub.isa [ 'one', ], 1
+        //   info '^450-19^', hub.isa.one 1
+        //   info '^450-20^', hub.isa.one.two 2
+        //   info '^450-21^', hub.isa.one.two.three 3
+        //   info '^450-22^', hub.isa.one.two.three.four 4
+        //   info '^450-23^', hub.isa [ 'one', 'two', 'three', 'four', 'five', ], 5
+        //   info '^450-24^', hub.isa.one.two.three.four.five 5
+        //   return null
+        //=========================================================================================================
+        types = new Intertype();
+        info('^450-25^', types);
+        info('^450-26^', types.isa);
+        info('^450-27^', types.declare);
+        info('^450-28^', types.declare.one);
+        info('^450-29^', types.declare.one(function(x) {
+          return (x === 1) || (x === '1');
+        }));
+        info('^450-31^', types.isa.one(1));
+        info('^450-32^', types.isa.one('1'));
+        info('^450-33^', types.isa.one(2));
+        return null;
+      })();
       //---------------------------------------------------------------------------------------------------------
       return null;
     })();
