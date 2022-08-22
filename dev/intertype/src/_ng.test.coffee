@@ -873,33 +873,10 @@ demo_size_of = ->
   { declare
     isa
     validate  } = types
-  # #.........................................................................................................
-  # declare.Type_cfg_constructor_cfg
-  #     ( x ) -> @isa.nonempty.text x.name
-  #     ( x ) -> ( @isa.function x.test ) or ( @isa.list.of.function x.test )
-  #     ( x ) ->
-  #       return true if @isa.nonempty.text x.groups
-  #       return false unless @isa.list x.groups
-  #       return x.groups.every ( e ) => ( @isa.nonempty.text e ) and not ( /[\s,]/ ).test e
-  #     ]
   #.........................................................................................................
   T?.eq ( validate.list [] ), []
-  # isa 'list', []
-  # validate 'list', []
-  # debug '^33453^', isa.foobar
-  debug '^33453^', isa.list.of.float
-  # praise '^459-1^', types.isa.Type_cfg_constructor_cfg {}
-  praise '^459-2^', types.isa.optional.list.of.float {}
-  praise '^459-3^', types.isa.optional.list.of.float null
-  praise '^459-4^', types.isa.list.of.float {}
-  praise '^459-5^', types.isa.list.of.float [ 1, 2, 3, ]
-  praise '^459-6^', types.isa.list.of.float [ 1, 2, 3, null, ]
-  # praise '^459-6^', types.isa.integer.of.float
-  # praise '^459-6^', types.isa.integer.of.float [ 1, 2, 3, null, ]
-  #.........................................................................................................
-  validate.list []
-  validate.list new Array()
-  validate.list Array.from 'abc'
+  T?.eq ( validate.optional.list [] ), []
+  T?.eq ( validate.optional.list null ), null
   #.........................................................................................................
   done?()
 
@@ -910,16 +887,22 @@ demo_size_of = ->
   types         = new Intertype()
   #.........................................................................................................
   types.declare.quantity
+    isa:      ( x ) -> @isa.object x
     $value:   'float'
     $unit:    'nonempty.text'
     default:
       value:    0
       unit:     null
+  types.declare.fortytwo ( x ) -> x is 42
   d = { value: 4, unit: 'kB', }
   #.........................................................................................................
-  info ( types.validate.float 12.3 )
-  info ( types.validate.quantity d )
-  info ( types.validate.quantity d )
+  info '^321-1^', ( types.validate.float 12.3     );  echo types.get_state_report { format: 'failing', }
+  info '^321-1^', ( types.validate.fortytwo 12.3  );  echo types.get_state_report { format: 'failing', }
+  info '^321-1^', ( types.validate.fortytwo 42    );  echo types.get_state_report { format: 'failing', }
+  info '^321-2^', ( types.isa.object d            );  echo types.get_state_report { format: 'failing', }
+  info '^321-3^', ( types.isa.quantity d          );  echo types.get_state_report { format: 'failing', }
+  info '^321-3^', ( types.isa.quantity null       );  echo types.get_state_report { format: 'failing', }
+  info '^321-4^', ( types.validate.quantity d     );  echo types.get_state_report { format: 'failing', }
   T?.eq ( types.validate.float 12.3 ), 12.3
   T?.eq ( types.validate.quantity d ), d
   T?.ok ( types.validate.quantity d ) is d
@@ -1649,6 +1632,7 @@ demo_size_of = ->
       # for verb in [ 'isa', 'validate', ]
         result = ( GUY.props.resolve_property_chain types[ verb ], hedges ) value
         echo types.get_state_report { format: 'all', }
+        echo types.get_state_report { format: 'all', refs: true, }
         echo types.get_state_report { format: 'failing', }
         echo types.get_state_report { format: 'all', colors: false, }
       resolve undefined
@@ -1711,7 +1695,7 @@ demo_size_of = ->
     echo types.get_state_report { format: 'short', colors: false, }
     result = cleanup types.get_state_report { width: 191, format: 'short', colors: false, }
     urge rpr result
-    T?.eq result, " F isa float null ◀ F isa quantity.value:float { value: null, unit: 'mm' } ◀ F isa rectangle.width:quantity { width: { value: null, unit: 'mm' }, height: { v… "
+    T?.eq result, "F isa float null ◀ F isa quantity.value:float { value: null, unit: 'mm' } ◀ F isa rectangle.width:quantity { width: { value: null, unit: 'mm' }, height: { v…"
   #.........................................................................................................
   done?()
 
@@ -1747,9 +1731,21 @@ demo_size_of = ->
     R = R.replace /\s+/g, ' '
     return R
   #.........................................................................................................
-  probe = [
+  good_probe = [
+    { width: { value: 0,    unit: 'mm', }, height: { value: 0, unit: 'mm', }, },
+    { width: { value: 1234, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ]
+  #.........................................................................................................
+  bad_probe = [
     { width: { value: 0,    unit: 'mm', }, height: { value: 0, unit: 'mm', }, },
     { width: { value: null, unit: 'mm', }, height: { value: 0, unit: 'mm', }, }, ]
+  #.........................................................................................................
+  do =>
+    result = validate.optional.list.of.rectangle null
+    T?.ok result is null
+  #.........................................................................................................
+  do =>
+    result = validate.optional.list.of.rectangle good_probe
+    T?.ok result is good_probe
   #.........................................................................................................
   do =>
     # debug '^4234^', validate.optional.list.of.rectangle null
@@ -1760,9 +1756,13 @@ demo_size_of = ->
   #.........................................................................................................
   do =>
     try
-      validate.list.of.rectangle probe
+      validate.list.of.rectangle bad_probe
     catch error
       warn '^443^', error.message
+      result = error.message
+      T?.ok ( result.match \
+        /\(Intertype_validation_error\) not a valid list\.of\.rectangle; failing tests: F validate float null ◀ F validate quantity.value:float \{/ \
+          ) isnt null
   #.........................................................................................................
   done?()
 
@@ -1831,7 +1831,6 @@ unless module.parent?
   # test @intertype_existential_types
   # @intertype_collection_of_t()
   # test @intertype_collection_of_t
-  # test @validate_1
   # @intertype_even_odd_for_bigints()
   # test @intertype_even_odd_for_bigints
   # @intertype_declaration_with_per_key_clauses()
@@ -1847,14 +1846,17 @@ unless module.parent?
   # @_intertype_isa_arity_check()
   # test @intertype_exception_guarding
   # @intertype_declaration_with_per_key_clauses()
-  # test @
   # test @intertype_isa_arity_check
   # test @intertype_check_complex_recursive_types
   # @_demo_postconditions()
+  # @validate_1()
+  # test @validate_1
+  # test @
   # test @intertype_tracing
   # test @intertype_tracing_2
-  test @intertype_improved_validation_errors
-
+  # test @intertype_improved_validation_errors
+  @validate_returns_value()
+  test @validate_returns_value
 
 
 
