@@ -3,187 +3,269 @@
 
 
 ############################################################################################################
-# njs_util                  = require 'util'
-njs_path                  = require 'path'
-# njs_fs                    = require 'fs'
-#...........................................................................................................
-CND                       = require 'cnd'
-rpr                       = CND.rpr.bind CND
-badge                     = 'MULTIMIX/TESTS/BASICS'
-log                       = CND.get_logger 'plain',     badge
-info                      = CND.get_logger 'info',      badge
-whisper                   = CND.get_logger 'whisper',   badge
-alert                     = CND.get_logger 'alert',     badge
-debug                     = CND.get_logger 'debug',     badge
-warn                      = CND.get_logger 'warn',      badge
-help                      = CND.get_logger 'help',      badge
-urge                      = CND.get_logger 'urge',      badge
-praise                    = CND.get_logger 'praise',    badge
-echo                      = CND.echo.bind CND
+GUY                       = require 'guy'
+{ alert
+  debug
+  help
+  info
+  plain
+  praise
+  urge
+  warn
+  whisper }               = GUY.trm.get_loggers 'MULTIMIX/tests/basics'
+{ rpr
+  inspect
+  echo
+  log     }               = GUY.trm
+rvr                       = GUY.trm.reverse
+nameit                    = ( name, f ) -> Object.defineProperty f, 'name', { value: name, }
 #...........................................................................................................
 test                      = require 'guy-test'
-
-
-# #===========================================================================================================
-# # OBJECT PROPERTY CATALOGUING
-# #-----------------------------------------------------------------------------------------------------------
-# provide_cataloguing = ->
-#   @keys_of              = ( P... ) -> @values_of @walk_keys_of      P...
-#   @all_keys_of          = ( P... ) -> @values_of @walk_all_keys_of  P...
-#   @all_own_keys_of      = ( x    ) -> if x? then Object.getOwnPropertyNames x else []
-#   @walk_all_own_keys_of = ( x    ) -> yield k for k in @all_own_keys_of x
-
-#   #-----------------------------------------------------------------------------------------------------------
-#   @walk_keys_of = ( x, settings ) ->
-#     defaults = { skip_undefined: true, }
-#     settings = if settings? then ( assign {}, settings, defaults ) else defaults
-#     for k of x
-#       ### TAINT should use property descriptors to avoid possible side effects ###
-#       continue if ( x[ k ] is undefined ) and settings.skip_undefined
-#       yield k
-
-#   #-----------------------------------------------------------------------------------------------------------
-#   @walk_all_keys_of = ( x, settings ) ->
-#     defaults = { skip_object: true, skip_undefined: true, }
-#     settings = { defaults..., settings..., }
-#     return @_walk_all_keys_of x, new Set(), settings
-
-#   #-----------------------------------------------------------------------------------------------------------
-#   @_walk_all_keys_of = ( x, seen, settings ) ->
-#     if ( not settings.skip_object ) and x is Object::
-#       yield return
-#     #.........................................................................................................
-#     for k from @walk_all_own_keys_of x
-#       continue if seen.has k
-#       seen.add k
-#       ### TAINT should use property descriptors to avoid possible side effects ###
-#       ### TAINT trying to access `arguments` causes error ###
-#       try value = x[ k ] catch error then continue
-#       continue if ( value is undefined ) and settings.skip_undefined
-#       if settings.symbol?
-#         continue unless value?
-#         continue unless value[ settings.symbol ]
-#       yield [ x, k, ]
-#     #.........................................................................................................
-#     if ( proto = Object.getPrototypeOf x )?
-#       yield from @_walk_all_keys_of proto, seen, settings
-# provide_cataloguing.apply C = {}
+types                     = new ( require '../../../../apps/intertype' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "classes with MultiMix" ] = ( T, done ) ->
-  Multimix                  = require '../../../../apps/multimix'
+@mmx_instance_methods = ( T, done ) ->
+  { Multimix } = require '../../../../apps/multimix'
+
+  #=========================================================================================================
+  class Foobar
+
+    #-------------------------------------------------------------------------------------------------------
+    constructor: ->
+      @collector = []
+      get_handler = ( name ) => ( props, P... ) =>
+        help '^434-1^', { name, props, P, }
+        @collector.push { name, props, P, }
+        return null
+      @blah   = new Multimix { hub: @, handler: ( get_handler 'blah' ), }
+      @blurb  = new Multimix { hub: @, handler: ( get_handler 'blurb' ), }
+      @state  = @blah[Multimix.symbol].state
+      debug '^434-2^', @state
+      return undefined
+
+  #=========================================================================================================
+  debug '^434-3^', d = new Foobar()
+  debug '^434-4^', d.blah.something
   #.........................................................................................................
-  class A
-    method1: ( x ) -> x + 2
-    method2: ( x ) -> ( @method1 x ) * 2
-  a = new A()
-  T.eq ( a.method1 100 ), 102
-  T.eq ( a.method2 100 ), 204
+  debug '^434-5^', d.blah.something 42
+  debug '^434-8^', d.state
+  T?.eq d.collector, [ { name: 'blah', props: [ 'something' ], P: [ 42 ] } ]
   #.........................................................................................................
-  class B extends Multimix
-    method1: ( x ) -> x + 2
-    method2: ( x ) -> ( @method1 x ) * 2
-  b = new B()
-  T.eq ( b.method1 100 ), 102
-  T.eq ( b.method2 100 ), 204
-  done()
+  debug '^434-5^', d.blah.something.one.two.three 42
+  debug '^434-8^', d.state
+  T?.eq d.collector, [ { name: 'blah', props: [ 'something' ], P: [ 42 ] }, { name: 'blah', props: [ 'something', 'one', 'two', 'three' ], P: [ 42 ] } ]
+  #.........................................................................................................
+  debug '^434-6^', d.blurb.otherthing 42
+  debug '^434-7^', d.blah[Multimix.symbol].state is d.blurb[Multimix.symbol].state
+  debug '^434-8^', d.state
+  T?.eq d.collector, [ { name: 'blah', props: [ 'something' ], P: [ 42 ] }, { name: 'blah', props: [ 'something', 'one', 'two', 'three' ], P: [ 42 ] }, { name: 'blurb', props: [ 'otherthing' ], P: [ 42 ] } ]
+  other = new Multimix { handler: -> }
+  T?.eq ( types.type_of d.state                               ), 'object'
+  T?.eq ( types.type_of d.state.hedges                        ), 'list'
+  T?.eq ( types.type_of d.blah[Multimix.symbol].state         ), 'object'
+  T?.eq ( types.type_of d.blah[Multimix.symbol].state.hedges  ), 'list'
+  T?.ok d.blah[Multimix.symbol].state is d.blurb[Multimix.symbol].state
+  T?.ok d.blah[Multimix.symbol].state isnt other[Multimix.symbol].state
+  done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "multimix.export()" ] = ( T, done ) ->
-  Multimix                  = require '../../../../apps/multimix'
+@mmx_can_inhibit_prop_creation = ( T, done ) ->
+  { Multimix }  = require '../../../../apps/multimix'
+  hub           = {}
+  collectors    = { handler: [], foo: [], }
+  handler       = ( hedges, x ) ->
+    collectors.handler.push { hedges, x, }
+    urge '^334^', { hedges, x, }
+    return null
+  T?.throws /expected boolean or function/, -> d = new Multimix { hub, handler, create: 123, }
   #.........................................................................................................
-  class A extends Multimix
-    constructor: -> super(); @name = 'class A'
-    identify_1: -> @name
+  d             = new Multimix { hub, handler, create: false, }
+  d.foo         = ( hedges, x ) ->
+    collectors.foo.push { hedges, x, }
+    return null
   #.........................................................................................................
-  class B extends A
-    constructor: -> super(); @name = 'class B'
-    identify_2: -> @name
+  d.foo 42
+  T?.eq d.bar, undefined
+  T?.throws /not a function/, -> d.bar 42
+  T?.eq collectors, { handler: [], foo: [ { hedges: 42, x: undefined } ] }
   #.........................................................................................................
-  a = new A()
-  b = new B()
-  #.........................................................................................................
-  { identify_1
-    identify_2 } = a.export()
-  T.eq identify_1(), 'class A'
-  T.eq identify_2,   undefined
-  #.........................................................................................................
-  { identify_1
-    identify_2 } = b.export()
-  T.eq identify_1(), 'class B'
-  T.eq identify_2(), 'class B'
-  #.........................................................................................................
-  done()
+  done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "multimix.new()" ] = ( T, done ) ->
-  Multimix                  = require '../../../../apps/multimix'
+@mmx_can_use_function_for_create = ( T, done ) ->
+  { Multimix }  = require '../../../../apps/multimix'
+  hub           = {}
+  collector     = []
+  handler       = ( hedges, x ) -> debug '^403-1^', { hedges, x, }; collector.push { hedges, x, }; return x * 2
+  create        = ( key, target ) ->
+    # debug '^403-1^', { key, }
+    collector.push key
+    target[ key ] = new Multimix { hub, create, handler, }
+    return null
   #.........................................................................................................
-  class A extends Multimix
-    defaults: { drab: 'anything', }
-    foobar:   42
-    constructor: ( settings ) ->
-      super()
-      @settings = { @defaults..., settings..., }
-      return @
+  d             = new Multimix { hub, handler, create: true, }
+  mmx           = d[Multimix.symbol]
   #.........................................................................................................
-  a = new A { drab: 'something', }
-  T.eq a.foobar,        42
-  T.eq a.settings.drab, 'something'
+  urge '^002-1^', ( rpr d.foo         )
+  urge '^002-2^', ( rpr d.bar         )
+  urge '^002-3^', ( rpr d.foo.bar     )
+  urge '^002-4^', ( rpr d.foo.bar.baz )
+  help '^002-4^', branch for branch in GUY.props.tree d
+  T?.eq ( rpr d.foo         ), '[Function: foo]'
+  T?.eq ( rpr d.bar         ), '[Function: bar]'
+  T?.eq ( rpr d.foo.bar     ), '[Function: bar]'
+  T?.eq ( rpr d.foo.bar.baz ), '[Function: baz]'
+  T?.ok d.uno.duo.tres is   d.uno.duo.tres
+  T?.ok d.uno.duo.tres isnt d.uno.duo.quatro
+  urge '^002-5^', "d             1          ", ( rvr d                        1 ), mmx.state
+  urge '^002-6^', "d.foo.bar.baz 2          ", ( rvr d.foo.bar.baz            2 ), mmx.state
+  urge '^002-7^', "d             3          ", ( rvr d                        3 ), mmx.state
+  urge '^002-8^', "d.foo.bar.baz 4          ", ( rvr d.foo.bar.baz            4 ), mmx.state
+  urge '^002-9^', "d.foo.bar.baz d.one.two 3", ( rvr d.foo.bar.baz d.one.two  3 ), mmx.state
+  # T?.eq collector, [ 'foo', 'bar', 'baz', 'uno', 'duo', 'tres', 'quatro' ]
   #.........................................................................................................
-  b = a.new { drab: 'nothing', }
-  T.eq b.foobar,        42
-  T.eq b.settings.drab, 'nothing'
-  #.........................................................................................................
-  done()
+  done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "bound methods" ] = ( T, done ) ->
-  Multimix                  = require '../../../../apps/multimix'
+@mmx_props_are_hidden_by_default = ( T, done ) ->
+  { Multimix }  = require '../../../../apps/multimix'
+  nope          = Symbol 'nope'
+  handler       = ->
+  d             = new Multimix { handler, }
   #.........................................................................................................
-  class A extends Multimix
-    myprop: "a property"
-    constructor: ( settings ) ->
-      super()
-      debug '^3344^', 'A', ( k for k of @ )
-    frob: -> echo "frob: @myprop: #{@myprop}"
+  urge '^002-1^', ( rpr d.foo         )
+  urge '^002-2^', ( rpr d.bar         )
+  urge '^002-3^', ( rpr d.foo.bar     )
+  urge '^002-4^', ( rpr d.foo.bar.baz )
+  T?.ok ( GUY.props.get d, 'xxx', nope ) is nope
+  T?.ok ( GUY.props.get d, 'foo', nope ) isnt nope
+  T?.ok ( GUY.props.get d, 'duo', nope ) is nope
+  T?.eq ( Object.getOwnPropertyDescriptor d, 'foo' ).enumerable, false
+  help '^002-1^', ( props.join '.' ) for props in GUY.props.tree d
   #.........................................................................................................
-  class B extends A
-    defaults: { drab: 'anything', }
-    foobar:   42
-    constructor: ( settings ) ->
-      super()
-      @settings = { @defaults..., settings..., }
-      debug '^3344^', 'B', ( k for k of @ )
-      debug '^3344^', 'B', ( k for k of @:: )
-      @export @ ### <-- should we always bind all methods? ###
-      return @
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@mmx_no_assignment_with_create_function = ( T, done ) ->
+  { Multimix }  = require '../../../../apps/multimix'
+  collector     = []
+  handler       = ( props, P... ) -> debug '^888-1^', { props, P, }
+  create        = ( key, target ) ->
+    debug '^888-2^', key
+    collector.push key
+    ### return value to be silently discarded ###
+    return { key: 'value', }
   #.........................................................................................................
-  class C extends Multimix
-    myproperty: "-=(#)=-"
-    fatarrow:   => echo "@myproperty: #{@myproperty}"
-    slimarrow:  -> echo "@myproperty: #{@myproperty}"
-  class D extends C
+  d             = new Multimix { handler, create, }
   #.........................................................................................................
-  a = new A()
-  b = new B()
-  urge '^458^', ( k for k of b )
-  b.frob()
-  { frob, } = b
-  frob()
-  c = new C()
-  { fatarrow, slimarrow, } = c
-  fatarrow()
-  try slimarrow() catch error then warn error.message
-  d = new D()
-  urge '^3536^', c.fatarrow is d.fatarrow
-  urge '^3536^', c.slimarrow is d.slimarrow
+  T?.eq d.foo, undefined
+  T?.throws /undefined/, -> try d.foo.bar catch error then warn '^888-3^', rvr error.message; throw error
+  T?.eq collector, [ 'foo', 'foo', ]
   #.........................................................................................................
-  done()
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@mmx_cfg_strict = ( T, done ) ->
+  { Multimix }  = require '../../../../apps/multimix'
+  hub           = {}
+  handler       = ->
+  handler.bar   = 123
+  #.........................................................................................................
+  do =>
+    d             = new Multimix { hub, handler, strict: true, }
+    mmx           = d[Multimix.symbol]
+    debug '^080^', mmx
+    debug '^080^', GUY.props.get handler, 'bar', Symbol 'nope'
+    debug '^080^', GUY.props.has handler, 'bar'
+    debug '^080^', GUY.props.get d, 'bar', Symbol 'nope'
+    debug '^080^', GUY.props.has d, 'bar'
+    T?.eq d.bar, 123
+    T?.eq mmx.strict, true
+    T?.eq mmx.create, false
+    T?.throws /no such property/, -> try d.anything catch error then warn '^454-1^', rvr error.message; throw error
+  #.........................................................................................................
+  do =>
+    T?.throws /cannot set both `create` and `strict`/, -> try d = new Multimix { hub, handler, create: true,   strict: true, } catch error then warn '^454-2^', rvr error.message; throw error
+    T?.throws /cannot set both `create` and `strict`/, -> try d = new Multimix { hub, handler, create: ( -> ), strict: true, } catch error then warn '^454-3^', rvr error.message; throw error
+  #.........................................................................................................
+  do =>
+    d             = new Multimix { hub, handler, }
+    mmx           = d[Multimix.symbol]
+    debug '^080^', mmx
+    T?.eq mmx.strict, false
+    T?.eq mmx.create, true
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@mmx_cfg_oneshot = ( T, done ) ->
+  { Multimix }  = require '../../../../apps/multimix'
+  hub           = {}
+  handler       = ( props, x ) ->
+  #.........................................................................................................
+  do =>
+    isa           = ( hedges, x ) ->
+      throw new Error "no types given"    if hedges.length is 0
+      return ( typeof x ) is hedges[ 0 ]  if hedges.length is 1
+      for hedge in hedges
+        return false unless isa [ hedge, ], x
+      return true
+    d             = new Multimix { hub, handler: isa, strict: false, oneshot: true }
+    mmx           = d[Multimix.symbol]
+    debug '^080-1^', mmx
+    T?.ok types.isa.function d.bar
+    T?.eq mmx.strict,   false
+    T?.eq mmx.create,   true
+    T?.eq mmx.oneshot,  true
+    T?.eq mmx.deletion, true
+    T?.eq ( types.type_of d.function ), 'function'
+    T?.eq ( d.function ->   ), true
+    T?.eq ( d.function null ), false
+    T?.throws /oneshot object does not allow re-assignment to property 'function'/, \
+      -> try d.function = 9 catch error then warn '^080-1^', rvr error.message; throw error
+    delete d.function
+    T?.eq ( types.type_of d.function ), 'function'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@mmx_cfg_deletion = ( T, done ) ->
+  { Multimix }  = require '../../../../apps/multimix'
+  hub           = {}
+  handler       = ( props, x ) ->
+  #.........................................................................................................
+  do =>
+    isa           = ( hedges, x ) ->
+      throw new Error "no types given"    if hedges.length is 0
+      return ( typeof x ) is hedges[ 0 ]  if hedges.length is 1
+      for hedge in hedges
+        return false unless isa [ hedge, ], x
+      return true
+    d             = new Multimix { hub, handler: isa, deletion: false, }
+    mmx           = d[Multimix.symbol]
+    debug '^081-1^', mmx
+    T?.ok types.isa.function d.bar
+    T?.eq mmx.strict,   false
+    T?.eq mmx.create,   true
+    T?.eq mmx.oneshot,  false
+    T?.eq mmx.deletion, false
+    T?.eq ( types.type_of d.function ), 'function'
+    T?.throws /object does not allow deletion of property 'function'/, \
+      -> try delete d.function catch error then warn '^082-1^', rvr error.message; throw error
+  #.........................................................................................................
+  done?()
+
 
 
 ############################################################################################################
 if module is require.main then do =>
+  # @_demo_intertype_with_multimix()
+  # test @mmx_instance_methods
+  # @mmx_can_inhibit_prop_creation()
+  # test @mmx_can_inhibit_prop_creation
+  # @mmx_cfg_strict()
+  # test @mmx_cfg_strict
+  # test @mmx_can_use_function_for_create
+  # test @mmx_no_assignment_with_create_function
+  # test @mmx_props_are_hidden_by_default
   test @
-  # test @[ "multimix.new()" ]
-  # test @[ "bound methods" ]
