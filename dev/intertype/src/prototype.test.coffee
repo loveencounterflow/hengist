@@ -68,6 +68,13 @@ _types                    = new ( require 'intertype' ).Intertype()
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@itproto_isa_needs_at_least_one_prop = ( T, done ) ->
+  TY = require './intertype-prototype'
+  T?.throws /expected at least one property/, -> TY.isa 42
+  T?.throws /expected at least one property/, -> TY.isa()
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @itproto_can_access_mmx_state = ( T, done ) ->
   TY = require './intertype-prototype'
   T?.eq ( typeof TY.Multimix ), 'function'
@@ -92,7 +99,11 @@ _types                    = new ( require 'intertype' ).Intertype()
 #-----------------------------------------------------------------------------------------------------------
 @itproto_or = ( T, done ) ->
   TY = require './intertype-prototype'
-  T?.ok TY.isa.integer 42
+  # T?.ok TY.isa.integer 42
+  # T?.ok TY.isa.text 'helo'
+  # T?.eq ( TY.isa.integer.or.text 42         ), true
+  # T?.eq ( TY.isa.integer.or.text 'helo'     ), true
+  T?.eq ( TY.isa.integer.or.text null       ), false
   done?()
 
 

@@ -32,7 +32,8 @@ Multimix                  = @Multimix
 
 #-----------------------------------------------------------------------------------------------------------
 @registry =
-  integer: ( x ) -> ( Number.isFinite x ) and ( x is Math.floor x )
+  integer:  ( x ) -> ( Number.isFinite x ) and ( x is Math.floor x )
+  text:     ( x ) -> ( typeof x ) is 'string'
   #.........................................................................................................
   even: ( x ) ->
     if ( Number.isInteger x )     then return ( x % 2  ) is   0
@@ -49,16 +50,41 @@ Multimix                  = @Multimix
 
   #---------------------------------------------------------------------------------------------------------
   isa: ( props, x ) ->
-    # whisper '^321-1^', '---------------------------------------'
-    # debug '^321-1^', { props, x, }
-    for prop in props
-      # debug '^321-2^', prop
-      # debug '^321-3^', hub.registry
-      # debug '^321-4^', hub.registry[ prop ]
+    unless ( arity = props.length ) > 0
+      throw new Error "expected at least one property, got #{arity}: #{rpr props}"
+    whisper '^321-1^', '---------------------------------------'
+    debug '^445-1^', { props, x, }
+    advance     = false
+    last_idx    = props.length - 1
+    R = true
+    #.......................................................................................................
+    for prop, idx in props
+      debug '^445-2^', { idx, prop, R, advance, }
+      return R if idx > last_idx
+      #.....................................................................................................
+      if advance
+        debug '^445-3^'
+        if prop is 'or'
+          return true if R
+          advance = false
+        continue
+      #.....................................................................................................
+      if prop is 'or'
+        return true if R
+        debug '^445-4^'
+        advance = true
+        continue
+      #.....................................................................................................
       unless ( fn = hub.registry[ prop ] )?
         throw new Error "unknown type #{rpr prop}"
-      return false unless fn.call hub, x
-    return true
+      #.....................................................................................................
+      unless ( R = fn.call hub, x ) is true or R is false
+        ### TAINT use this library to determine type: ###
+        throw new Error "expected test result to be boolean, go a #{typeof R}: #{rpr R}"
+      debug '^445-5^', GUY.trm.reverse { idx, prop, R, advance, }
+      advance = not R
+    #.......................................................................................................
+    return R
 
   #---------------------------------------------------------------------------------------------------------
   declare: ( props, isa ) ->
