@@ -186,10 +186,21 @@
   this.itproto_or = function(T, done) {
     var TY;
     TY = require('./intertype-prototype');
-    // T?.ok TY.isa.integer 42
-    // T?.ok TY.isa.text 'helo'
-    // T?.eq ( TY.isa.integer.or.text 42         ), true
-    // T?.eq ( TY.isa.integer.or.text 'helo'     ), true
+    if (T != null) {
+      T.eq(TY.isa.integer(42), true);
+    }
+    if (T != null) {
+      T.eq(TY.isa.text('helo'), true);
+    }
+    if (T != null) {
+      T.eq(TY.isa.text(null), false);
+    }
+    if (T != null) {
+      T.eq(TY.isa.integer.or.text(42), true);
+    }
+    if (T != null) {
+      T.eq(TY.isa.integer.or.text('helo'), true);
+    }
     if (T != null) {
       T.eq(TY.isa.integer.or.text(null), false);
     }
