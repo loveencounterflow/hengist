@@ -221,7 +221,6 @@ types                     = new ( require 'intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 @[ "GUY.props.Strict_owner 1" ] = ( T, done ) ->
   GUY     = require H.guy_path
-  CAT     = require '../../../apps/multimix/lib/cataloguing'
   #.........................................................................................................
   class X extends GUY.props.Strict_owner
     prop_on_instance_1: 'prop_on_instance_1'
