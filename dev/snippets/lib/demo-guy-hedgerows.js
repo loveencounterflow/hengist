@@ -1,4 +1,7 @@
 (function() {
+  /* NOTE this code moved to MultiMix */
+  var GUY, Hedge, Intertype, alert, create, debug, declare, echo, help, info, inspect, isa, log, nameit, node_inspect, plain, praise, rpr, rvr, truth, types, urge, validate, warn, whisper;
+
   /*
 
   * class `Hedge`
@@ -33,8 +36,6 @@
       * a function: to be called, return value becomes new property where property is missing
 
    */
-  var GUY, Hedge, Intertype, alert, create, debug, declare, echo, help, info, inspect, isa, log, nameit, node_inspect, plain, praise, rpr, rvr, truth, types, urge, validate, warn, whisper;
-
   //###########################################################################################################
   GUY = require('../../../apps/guy');
 
@@ -80,6 +81,15 @@
       /* TAINT bug in Intertype::create() / Intertype::validate(), returns `true` instead of input value */
       // cfg     = create.hdg_new_hedge_cfg cfg
       // urge '^345^', rvr cfg
+      //.......................................................................................................
+      /* TAINT temporary code to avoid faulty `Intertype::validate` */
+      /* NOTE use `create` when `validate` is fixed */
+      /* TAINT circular dependency Intertype <--> GUY.props.Hedge ??? */
+      cfg = {...isa.hdg_new_hedge_cfg.default, ...cfg};
+      if (!isa.function(cfg.handler)) {
+        throw new Error(`^343^ need handler, got ${rpr(cfg.handler)}`);
+      }
+      //.......................................................................................................
       this.hub = (ref = cfg.hub) != null ? ref : null;
       this.handler = cfg.handler; // .bind @hub
       this.state = (ref1 = cfg.state) != null ? ref1 : {
@@ -152,7 +162,7 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      var hub, paragons;
+      var paragons;
       //=========================================================================================================
       paragons = {
         //-------------------------------------------------------------------------------------------------------
@@ -233,32 +243,16 @@
         }
 
       };
-      //=========================================================================================================
-      hub = function(...P) {
-        urge('^450-11^', P);
-        return true;
-      };
       (() => {        //=========================================================================================================
-        // do =>
-        //   info '^450-12^', hub.isa     = new Hedge { hub, handler: ( paragons.isa.bind    hub ), }
-        //   info '^450-13^', hub.declare  = new Hedge { hub, handler: ( paragons.declare.bind hub ), }
-        //   #.........................................................................................................
-        //   info '^450-14^', try hub.isa 1        catch error then warn rvr error.message
-        //   info '^450-15^', try hub.isa 1, 2, 3  catch error then warn rvr error.message
-        //   return null
-        // #=========================================================================================================
-        // do =>
-        //   info '^450-16^', hub.declare.one ( x ) -> debug '^450-17^', { x, }; ( x is 1 ) or ( x is '1' )
-        //   #.........................................................................................................
-        //   info '^450-18^', hub.isa [ 'one', ], 1
-        //   info '^450-19^', hub.isa.one 1
-        //   info '^450-20^', hub.isa.one.two 2
-        //   info '^450-21^', hub.isa.one.two.three 3
-        //   info '^450-22^', hub.isa.one.two.three.four 4
-        //   info '^450-23^', hub.isa [ 'one', 'two', 'three', 'four', 'five', ], 5
-        //   info '^450-24^', hub.isa.one.two.three.four.five 5
-        //   return null
-        //=========================================================================================================
+        var handler, hub;
+        handler = function(hedges, ...P) {
+          return [...hedges, ...P];
+        };
+        hub = new Hedge({handler});
+        info('^450-24^', hub.one.two.three.four.five(5));
+        return null;
+      })();
+      (() => {        //=========================================================================================================
         types = new Intertype();
         info('^450-25^', types);
         info('^450-26^', types.isa);

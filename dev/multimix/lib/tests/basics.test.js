@@ -1,339 +1,572 @@
 (function() {
   'use strict';
-  var CND, alert, badge, debug, echo, help, info, log, njs_path, praise, rpr, test, urge, warn, whisper,
-    boundMethodCheck = function(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new Error('Bound instance method accessed before binding'); } };
+  var GUY, alert, debug, echo, help, info, inspect, log, nameit, plain, praise, rpr, rvr, test, types, urge, warn, whisper;
 
   //###########################################################################################################
-  // njs_util                  = require 'util'
-  njs_path = require('path');
+  GUY = require('guy');
 
-  // njs_fs                    = require 'fs'
-  //...........................................................................................................
-  CND = require('cnd');
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('MULTIMIX/tests/basics'));
 
-  rpr = CND.rpr.bind(CND);
+  ({rpr, inspect, echo, log} = GUY.trm);
 
-  badge = 'MULTIMIX/TESTS/BASICS';
+  rvr = GUY.trm.reverse;
 
-  log = CND.get_logger('plain', badge);
-
-  info = CND.get_logger('info', badge);
-
-  whisper = CND.get_logger('whisper', badge);
-
-  alert = CND.get_logger('alert', badge);
-
-  debug = CND.get_logger('debug', badge);
-
-  warn = CND.get_logger('warn', badge);
-
-  help = CND.get_logger('help', badge);
-
-  urge = CND.get_logger('urge', badge);
-
-  praise = CND.get_logger('praise', badge);
-
-  echo = CND.echo.bind(CND);
+  nameit = function(name, f) {
+    return Object.defineProperty(f, 'name', {
+      value: name
+    });
+  };
 
   //...........................................................................................................
   test = require('guy-test');
 
-  // #===========================================================================================================
-  // # OBJECT PROPERTY CATALOGUING
-  // #-----------------------------------------------------------------------------------------------------------
-  // provide_cataloguing = ->
-  //   @keys_of              = ( P... ) -> @values_of @walk_keys_of      P...
-  //   @all_keys_of          = ( P... ) -> @values_of @walk_all_keys_of  P...
-  //   @all_own_keys_of      = ( x    ) -> if x? then Object.getOwnPropertyNames x else []
-  //   @walk_all_own_keys_of = ( x    ) -> yield k for k in @all_own_keys_of x
-
-  //   #-----------------------------------------------------------------------------------------------------------
-  //   @walk_keys_of = ( x, settings ) ->
-  //     defaults = { skip_undefined: true, }
-  //     settings = if settings? then ( assign {}, settings, defaults ) else defaults
-  //     for k of x
-  //       ### TAINT should use property descriptors to avoid possible side effects ###
-  //       continue if ( x[ k ] is undefined ) and settings.skip_undefined
-  //       yield k
-
-  //   #-----------------------------------------------------------------------------------------------------------
-  //   @walk_all_keys_of = ( x, settings ) ->
-  //     defaults = { skip_object: true, skip_undefined: true, }
-  //     settings = { defaults..., settings..., }
-  //     return @_walk_all_keys_of x, new Set(), settings
-
-  //   #-----------------------------------------------------------------------------------------------------------
-  //   @_walk_all_keys_of = ( x, seen, settings ) ->
-  //     if ( not settings.skip_object ) and x is Object::
-  //       yield return
-  //     #.........................................................................................................
-  //     for k from @walk_all_own_keys_of x
-  //       continue if seen.has k
-  //       seen.add k
-  //       ### TAINT should use property descriptors to avoid possible side effects ###
-  //       ### TAINT trying to access `arguments` causes error ###
-  //       try value = x[ k ] catch error then continue
-  //       continue if ( value is undefined ) and settings.skip_undefined
-  //       if settings.symbol?
-  //         continue unless value?
-  //         continue unless value[ settings.symbol ]
-  //       yield [ x, k, ]
-  //     #.........................................................................................................
-  //     if ( proto = Object.getPrototypeOf x )?
-  //       yield from @_walk_all_keys_of proto, seen, settings
-  // provide_cataloguing.apply C = {}
+  types = new (require('../../../../apps/intertype')).Intertype();
 
   //-----------------------------------------------------------------------------------------------------------
-  this["classes with MultiMix"] = function(T, done) {
-    var A, B, Multimix, a, b;
-    Multimix = require('../../../../apps/multimix');
-    //.........................................................................................................
-    A = class A {
-      method1(x) {
-        return x + 2;
-      }
-
-      method2(x) {
-        return (this.method1(x)) * 2;
-      }
-
-    };
-    a = new A();
-    T.eq(a.method1(100), 102);
-    T.eq(a.method2(100), 204);
-    //.........................................................................................................
-    B = class B extends Multimix {
-      method1(x) {
-        return x + 2;
-      }
-
-      method2(x) {
-        return (this.method1(x)) * 2;
-      }
-
-    };
-    b = new B();
-    T.eq(b.method1(100), 102);
-    T.eq(b.method2(100), 204);
-    return done();
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["multimix.export()"] = function(T, done) {
-    var A, B, Multimix, a, b, identify_1, identify_2;
-    Multimix = require('../../../../apps/multimix');
-    //.........................................................................................................
-    A = class A extends Multimix {
+  this.mmx_instance_methods = function(T, done) {
+    var Foobar, Multimix, d, other;
+    ({Multimix} = require('../../../../apps/multimix'));
+    //=========================================================================================================
+    Foobar = class Foobar {
+      //-------------------------------------------------------------------------------------------------------
       constructor() {
-        super();
-        this.name = 'class A';
-      }
-
-      identify_1() {
-        return this.name;
+        var get_handler;
+        this.collector = [];
+        get_handler = (name) => {
+          return (props, ...P) => {
+            help('^434-1^', {name, props, P});
+            this.collector.push({name, props, P});
+            return null;
+          };
+        };
+        this.blah = new Multimix({
+          hub: this,
+          handler: get_handler('blah')
+        });
+        this.blurb = new Multimix({
+          hub: this,
+          handler: get_handler('blurb')
+        });
+        this.state = this.blah[Multimix.symbol].state;
+        debug('^434-2^', this.state);
+        return void 0;
       }
 
     };
+    //=========================================================================================================
+    debug('^434-3^', d = new Foobar());
+    debug('^434-4^', d.blah.something);
     //.........................................................................................................
-    B = class B extends A {
-      constructor() {
-        super();
-        this.name = 'class B';
-      }
-
-      identify_2() {
-        return this.name;
-      }
-
-    };
-    //.........................................................................................................
-    a = new A();
-    b = new B();
-    //.........................................................................................................
-    ({identify_1, identify_2} = a.export());
-    T.eq(identify_1(), 'class A');
-    T.eq(identify_2, void 0);
-    //.........................................................................................................
-    ({identify_1, identify_2} = b.export());
-    T.eq(identify_1(), 'class B');
-    T.eq(identify_2(), 'class B');
-    //.........................................................................................................
-    return done();
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["multimix.new()"] = function(T, done) {
-    var A, Multimix, a, b;
-    Multimix = require('../../../../apps/multimix');
-    A = (function() {
-      //.........................................................................................................
-      class A extends Multimix {
-        constructor(settings) {
-          super();
-          this.settings = {...this.defaults, ...settings};
-          return this;
+    debug('^434-5^', d.blah.something(42));
+    debug('^434-8^', d.state);
+    if (T != null) {
+      T.eq(d.collector, [
+        {
+          name: 'blah',
+          props: ['something'],
+          P: [42]
         }
-
-      };
-
-      A.prototype.defaults = {
-        drab: 'anything'
-      };
-
-      A.prototype.foobar = 42;
-
-      return A;
-
-    }).call(this);
-    //.........................................................................................................
-    a = new A({
-      drab: 'something'
-    });
-    T.eq(a.foobar, 42);
-    T.eq(a.settings.drab, 'something');
-    //.........................................................................................................
-    b = a.new({
-      drab: 'nothing'
-    });
-    T.eq(b.foobar, 42);
-    T.eq(b.settings.drab, 'nothing');
-    //.........................................................................................................
-    return done();
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["bound methods"] = function(T, done) {
-    var A, B, C, D, Multimix, a, b, c, d, error, fatarrow, frob, k, slimarrow;
-    Multimix = require('../../../../apps/multimix');
-    A = (function() {
-      //.........................................................................................................
-      class A extends Multimix {
-        constructor(settings) {
-          var k;
-          super();
-          debug('^3344^', 'A', (function() {
-            var results;
-            results = [];
-            for (k in this) {
-              results.push(k);
-            }
-            return results;
-          }).call(this));
-        }
-
-        frob() {
-          return echo(`frob: @myprop: ${this.myprop}`);
-        }
-
-      };
-
-      A.prototype.myprop = "a property";
-
-      return A;
-
-    }).call(this);
-    B = (function() {
-      //.........................................................................................................
-      class B extends A {
-        constructor(settings) {
-          var k;
-          super();
-          this.settings = {...this.defaults, ...settings};
-          debug('^3344^', 'B', (function() {
-            var results;
-            results = [];
-            for (k in this) {
-              results.push(k);
-            }
-            return results;
-          }).call(this));
-          debug('^3344^', 'B', (function() {
-            var results;
-            results = [];
-            for (k in this.prototype) {
-              results.push(k);
-            }
-            return results;
-          }).call(this));
-          this.export(this);
-/* <-- should we always bind all methods? */          return this;
-        }
-
-      };
-
-      B.prototype.defaults = {
-        drab: 'anything'
-      };
-
-      B.prototype.foobar = 42;
-
-      return B;
-
-    }).call(this);
-    C = (function() {
-      //.........................................................................................................
-      class C extends Multimix {
-        constructor() {
-          super(...arguments);
-          this.fatarrow = this.fatarrow.bind(this);
-        }
-
-        fatarrow() {
-          boundMethodCheck(this, C);
-          return echo(`@myproperty: ${this.myproperty}`);
-        }
-
-        slimarrow() {
-          return echo(`@myproperty: ${this.myproperty}`);
-        }
-
-      };
-
-      C.prototype.myproperty = "-=(#)=-";
-
-      return C;
-
-    }).call(this);
-    D = class D extends C {};
-    //.........................................................................................................
-    a = new A();
-    b = new B();
-    urge('^458^', (function() {
-      var results;
-      results = [];
-      for (k in b) {
-        results.push(k);
-      }
-      return results;
-    })());
-    b.frob();
-    ({frob} = b);
-    frob();
-    c = new C();
-    ({fatarrow, slimarrow} = c);
-    fatarrow();
-    try {
-      slimarrow();
-    } catch (error1) {
-      error = error1;
-      warn(error.message);
+      ]);
     }
-    d = new D();
-    urge('^3536^', c.fatarrow === d.fatarrow);
-    urge('^3536^', c.slimarrow === d.slimarrow);
     //.........................................................................................................
-    return done();
+    debug('^434-5^', d.blah.something.one.two.three(42));
+    debug('^434-8^', d.state);
+    if (T != null) {
+      T.eq(d.collector, [
+        {
+          name: 'blah',
+          props: ['something'],
+          P: [42]
+        },
+        {
+          name: 'blah',
+          props: ['something',
+        'one',
+        'two',
+        'three'],
+          P: [42]
+        }
+      ]);
+    }
+    //.........................................................................................................
+    debug('^434-6^', d.blurb.otherthing(42));
+    debug('^434-7^', d.blah[Multimix.symbol].state === d.blurb[Multimix.symbol].state);
+    debug('^434-8^', d.state);
+    if (T != null) {
+      T.eq(d.collector, [
+        {
+          name: 'blah',
+          props: ['something'],
+          P: [42]
+        },
+        {
+          name: 'blah',
+          props: ['something',
+        'one',
+        'two',
+        'three'],
+          P: [42]
+        },
+        {
+          name: 'blurb',
+          props: ['otherthing'],
+          P: [42]
+        }
+      ]);
+    }
+    other = new Multimix({
+      handler: function() {}
+    });
+    if (T != null) {
+      T.eq(types.type_of(d.state), 'object');
+    }
+    if (T != null) {
+      T.eq(types.type_of(d.state.hedges), 'list');
+    }
+    if (T != null) {
+      T.eq(types.type_of(d.blah[Multimix.symbol].state), 'object');
+    }
+    if (T != null) {
+      T.eq(types.type_of(d.blah[Multimix.symbol].state.hedges), 'list');
+    }
+    if (T != null) {
+      T.ok(d.blah[Multimix.symbol].state === d.blurb[Multimix.symbol].state);
+    }
+    if (T != null) {
+      T.ok(d.blah[Multimix.symbol].state !== other[Multimix.symbol].state);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.mmx_can_inhibit_prop_creation = function(T, done) {
+    var Multimix, collectors, d, handler, hub;
+    ({Multimix} = require('../../../../apps/multimix'));
+    hub = {};
+    collectors = {
+      handler: [],
+      foo: []
+    };
+    handler = function(hedges, x) {
+      collectors.handler.push({hedges, x});
+      urge('^334^', {hedges, x});
+      return null;
+    };
+    if (T != null) {
+      T.throws(/expected boolean or function/, function() {
+        var d;
+        return d = new Multimix({
+          hub,
+          handler,
+          create: 123
+        });
+      });
+    }
+    //.........................................................................................................
+    d = new Multimix({
+      hub,
+      handler,
+      create: false
+    });
+    d.foo = function(hedges, x) {
+      collectors.foo.push({hedges, x});
+      return null;
+    };
+    //.........................................................................................................
+    d.foo(42);
+    if (T != null) {
+      T.eq(d.bar, void 0);
+    }
+    if (T != null) {
+      T.throws(/not a function/, function() {
+        return d.bar(42);
+      });
+    }
+    if (T != null) {
+      T.eq(collectors, {
+        handler: [],
+        foo: [
+          {
+            hedges: 42,
+            x: void 0
+          }
+        ]
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.mmx_can_use_function_for_create = function(T, done) {
+    var Multimix, branch, collector, create, d, handler, hub, i, len, mmx, ref;
+    ({Multimix} = require('../../../../apps/multimix'));
+    hub = {};
+    collector = [];
+    handler = function(hedges, x) {
+      debug('^403-1^', {hedges, x});
+      collector.push({hedges, x});
+      return x * 2;
+    };
+    create = function(key, target) {
+      // debug '^403-1^', { key, }
+      collector.push(key);
+      target[key] = new Multimix({hub, create, handler});
+      return null;
+    };
+    //.........................................................................................................
+    d = new Multimix({
+      hub,
+      handler,
+      create: true
+    });
+    mmx = d[Multimix.symbol];
+    //.........................................................................................................
+    urge('^002-1^', rpr(d.foo));
+    urge('^002-2^', rpr(d.bar));
+    urge('^002-3^', rpr(d.foo.bar));
+    urge('^002-4^', rpr(d.foo.bar.baz));
+    ref = GUY.props.tree(d);
+    for (i = 0, len = ref.length; i < len; i++) {
+      branch = ref[i];
+      help('^002-4^', branch);
+    }
+    if (T != null) {
+      T.eq(rpr(d.foo), '[Function: foo]');
+    }
+    if (T != null) {
+      T.eq(rpr(d.bar), '[Function: bar]');
+    }
+    if (T != null) {
+      T.eq(rpr(d.foo.bar), '[Function: bar]');
+    }
+    if (T != null) {
+      T.eq(rpr(d.foo.bar.baz), '[Function: baz]');
+    }
+    if (T != null) {
+      T.ok(d.uno.duo.tres === d.uno.duo.tres);
+    }
+    if (T != null) {
+      T.ok(d.uno.duo.tres !== d.uno.duo.quatro);
+    }
+    urge('^002-5^', "d             1          ", rvr(d(1)), mmx.state);
+    urge('^002-6^', "d.foo.bar.baz 2          ", rvr(d.foo.bar.baz(2)), mmx.state);
+    urge('^002-7^', "d             3          ", rvr(d(3)), mmx.state);
+    urge('^002-8^', "d.foo.bar.baz 4          ", rvr(d.foo.bar.baz(4)), mmx.state);
+    urge('^002-9^', "d.foo.bar.baz d.one.two 3", rvr(d.foo.bar.baz(d.one.two(3))), mmx.state);
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.mmx_props_are_hidden_by_default = function(T, done) {
+    var Multimix, d, handler, i, len, nope, props, ref;
+    ({Multimix} = require('../../../../apps/multimix'));
+    nope = Symbol('nope');
+    handler = function() {};
+    d = new Multimix({handler});
+    //.........................................................................................................
+    urge('^002-1^', rpr(d.foo));
+    urge('^002-2^', rpr(d.bar));
+    urge('^002-3^', rpr(d.foo.bar));
+    urge('^002-4^', rpr(d.foo.bar.baz));
+    if (T != null) {
+      T.ok((GUY.props.get(d, 'xxx', nope)) === nope);
+    }
+    if (T != null) {
+      T.ok((GUY.props.get(d, 'foo', nope)) !== nope);
+    }
+    if (T != null) {
+      T.ok((GUY.props.get(d, 'duo', nope)) === nope);
+    }
+    if (T != null) {
+      T.eq((Object.getOwnPropertyDescriptor(d, 'foo')).enumerable, false);
+    }
+    ref = GUY.props.tree(d);
+    for (i = 0, len = ref.length; i < len; i++) {
+      props = ref[i];
+      help('^002-1^', props.join('.'));
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.mmx_no_assignment_with_create_function = function(T, done) {
+    var Multimix, collector, create, d, handler;
+    ({Multimix} = require('../../../../apps/multimix'));
+    collector = [];
+    handler = function(props, ...P) {
+      return debug('^888-1^', {props, P});
+    };
+    create = function(key, target) {
+      debug('^888-2^', key);
+      collector.push(key);
+      return {
+        /* return value to be silently discarded */
+        key: 'value'
+      };
+    };
+    //.........................................................................................................
+    d = new Multimix({handler, create});
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(d.foo, void 0);
+    }
+    if (T != null) {
+      T.throws(/undefined/, function() {
+        var error;
+        try {
+          return d.foo.bar;
+        } catch (error1) {
+          error = error1;
+          warn('^888-3^', rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.eq(collector, ['foo', 'foo']);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.mmx_cfg_strict = function(T, done) {
+    var Multimix, handler, hub;
+    ({Multimix} = require('../../../../apps/multimix'));
+    hub = {};
+    handler = function() {};
+    handler.bar = 123;
+    (() => {      //.........................................................................................................
+      var d, mmx;
+      d = new Multimix({
+        hub,
+        handler,
+        strict: true
+      });
+      mmx = d[Multimix.symbol];
+      debug('^080^', mmx);
+      debug('^080^', GUY.props.get(handler, 'bar', Symbol('nope')));
+      debug('^080^', GUY.props.has(handler, 'bar'));
+      debug('^080^', GUY.props.get(d, 'bar', Symbol('nope')));
+      debug('^080^', GUY.props.has(d, 'bar'));
+      if (T != null) {
+        T.eq(d.bar, 123);
+      }
+      if (T != null) {
+        T.eq(mmx.strict, true);
+      }
+      if (T != null) {
+        T.eq(mmx.create, false);
+      }
+      return T != null ? T.throws(/no such property/, function() {
+        var error;
+        try {
+          return d.anything;
+        } catch (error1) {
+          error = error1;
+          warn('^454-1^', rvr(error.message));
+          throw error;
+        }
+      }) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      if (T != null) {
+        T.throws(/cannot set both `create` and `strict`/, function() {
+          var d, error;
+          try {
+            return d = new Multimix({
+              hub,
+              handler,
+              create: true,
+              strict: true
+            });
+          } catch (error1) {
+            error = error1;
+            warn('^454-2^', rvr(error.message));
+            throw error;
+          }
+        });
+      }
+      return T != null ? T.throws(/cannot set both `create` and `strict`/, function() {
+        var d, error;
+        try {
+          return d = new Multimix({
+            hub,
+            handler,
+            create: (function() {}),
+            strict: true
+          });
+        } catch (error1) {
+          error = error1;
+          warn('^454-3^', rvr(error.message));
+          throw error;
+        }
+      }) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var d, mmx;
+      d = new Multimix({hub, handler});
+      mmx = d[Multimix.symbol];
+      debug('^080^', mmx);
+      if (T != null) {
+        T.eq(mmx.strict, false);
+      }
+      return T != null ? T.eq(mmx.create, true) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.mmx_cfg_oneshot = function(T, done) {
+    var Multimix, handler, hub;
+    ({Multimix} = require('../../../../apps/multimix'));
+    hub = {};
+    handler = function(props, x) {};
+    (() => {      //.........................................................................................................
+      var d, isa, mmx;
+      isa = function(hedges, x) {
+        var hedge, i, len;
+        if (hedges.length === 0) {
+          throw new Error("no types given");
+        }
+        if (hedges.length === 1) {
+          return (typeof x) === hedges[0];
+        }
+        for (i = 0, len = hedges.length; i < len; i++) {
+          hedge = hedges[i];
+          if (!isa([hedge], x)) {
+            return false;
+          }
+        }
+        return true;
+      };
+      d = new Multimix({
+        hub,
+        handler: isa,
+        strict: false,
+        oneshot: true
+      });
+      mmx = d[Multimix.symbol];
+      debug('^080-1^', mmx);
+      if (T != null) {
+        T.ok(types.isa.function(d.bar));
+      }
+      if (T != null) {
+        T.eq(mmx.strict, false);
+      }
+      if (T != null) {
+        T.eq(mmx.create, true);
+      }
+      if (T != null) {
+        T.eq(mmx.oneshot, true);
+      }
+      if (T != null) {
+        T.eq(mmx.deletion, true);
+      }
+      if (T != null) {
+        T.eq(types.type_of(d.function), 'function');
+      }
+      if (T != null) {
+        T.eq(d.function(function() {}), true);
+      }
+      if (T != null) {
+        T.eq(d.function(null), false);
+      }
+      if (T != null) {
+        T.throws(/oneshot object does not allow re-assignment to property 'function'/, function() {
+          var error;
+          try {
+            return d.function = 9;
+          } catch (error1) {
+            error = error1;
+            warn('^080-1^', rvr(error.message));
+            throw error;
+          }
+        });
+      }
+      delete d.function;
+      return T != null ? T.eq(types.type_of(d.function), 'function') : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.mmx_cfg_deletion = function(T, done) {
+    var Multimix, handler, hub;
+    ({Multimix} = require('../../../../apps/multimix'));
+    hub = {};
+    handler = function(props, x) {};
+    (() => {      //.........................................................................................................
+      var d, isa, mmx;
+      isa = function(hedges, x) {
+        var hedge, i, len;
+        if (hedges.length === 0) {
+          throw new Error("no types given");
+        }
+        if (hedges.length === 1) {
+          return (typeof x) === hedges[0];
+        }
+        for (i = 0, len = hedges.length; i < len; i++) {
+          hedge = hedges[i];
+          if (!isa([hedge], x)) {
+            return false;
+          }
+        }
+        return true;
+      };
+      d = new Multimix({
+        hub,
+        handler: isa,
+        deletion: false
+      });
+      mmx = d[Multimix.symbol];
+      debug('^081-1^', mmx);
+      if (T != null) {
+        T.ok(types.isa.function(d.bar));
+      }
+      if (T != null) {
+        T.eq(mmx.strict, false);
+      }
+      if (T != null) {
+        T.eq(mmx.create, true);
+      }
+      if (T != null) {
+        T.eq(mmx.oneshot, false);
+      }
+      if (T != null) {
+        T.eq(mmx.deletion, false);
+      }
+      if (T != null) {
+        T.eq(types.type_of(d.function), 'function');
+      }
+      return T != null ? T.throws(/object does not allow deletion of property 'function'/, function() {
+        var error;
+        try {
+          return delete d.function;
+        } catch (error1) {
+          error = error1;
+          warn('^082-1^', rvr(error.message));
+          throw error;
+        }
+      }) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
   };
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
+      // @_demo_intertype_with_multimix()
+      // test @mmx_instance_methods
+      // @mmx_can_inhibit_prop_creation()
+      // test @mmx_can_inhibit_prop_creation
+      // @mmx_cfg_strict()
+      // test @mmx_cfg_strict
+      // test @mmx_can_use_function_for_create
+      // test @mmx_no_assignment_with_create_function
+      // test @mmx_props_are_hidden_by_default
       return test(this);
     })();
   }
-
-  // test @[ "multimix.new()" ]
-// test @[ "bound methods" ]
 
 }).call(this);
 

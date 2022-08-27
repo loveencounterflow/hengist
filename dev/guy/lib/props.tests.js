@@ -455,9 +455,9 @@
       }
       return T != null ? T.eq(Object.getOwnPropertyDescriptor(x, 'foo'), {
         value: 42,
-        writable: false,
+        writable: true,
         enumerable: false,
-        configurable: false
+        configurable: true
       }) : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
@@ -591,9 +591,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["GUY.props.Strict_owner 1"] = function(T, done) {
-    var CAT, GUY, X, error, x;
+    var GUY, X, error, x;
     GUY = require(H.guy_path);
-    CAT = require('../../../apps/multimix/lib/cataloguing');
     X = (function() {
       //.........................................................................................................
       class X extends GUY.props.Strict_owner {
