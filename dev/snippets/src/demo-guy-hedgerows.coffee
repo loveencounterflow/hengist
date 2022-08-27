@@ -1,5 +1,6 @@
 
 
+### NOTE this code moved to MultiMix ###
 
 
 ###
@@ -86,6 +87,13 @@ class Hedge
     ### TAINT bug in Intertype::create() / Intertype::validate(), returns `true` instead of input value ###
     # cfg     = create.hdg_new_hedge_cfg cfg
     # urge '^345^', rvr cfg
+    #.......................................................................................................
+    ### TAINT temporary code to avoid faulty `Intertype::validate` ###
+    ### NOTE use `create` when `validate` is fixed ###
+    ### TAINT circular dependency Intertype <--> GUY.props.Hedge ??? ###
+    cfg       = { isa.hdg_new_hedge_cfg.default..., cfg..., }
+    throw new Error "^343^ need handler, got #{rpr cfg.handler}" unless isa.function cfg.handler
+    #.......................................................................................................
     @hub      = cfg.hub ? null
     @handler  = cfg.handler # .bind @hub
     @state    = cfg.state ? { hedges: null, }
@@ -176,27 +184,11 @@ if module is require.main then do =>
       return undefined
 
   #=========================================================================================================
-  hub = ( P... ) -> urge '^450-11^', P; return true
-  #=========================================================================================================
-  # do =>
-  #   info '^450-12^', hub.isa     = new Hedge { hub, handler: ( paragons.isa.bind    hub ), }
-  #   info '^450-13^', hub.declare  = new Hedge { hub, handler: ( paragons.declare.bind hub ), }
-  #   #.........................................................................................................
-  #   info '^450-14^', try hub.isa 1        catch error then warn rvr error.message
-  #   info '^450-15^', try hub.isa 1, 2, 3  catch error then warn rvr error.message
-  #   return null
-  # #=========================================================================================================
-  # do =>
-  #   info '^450-16^', hub.declare.one ( x ) -> debug '^450-17^', { x, }; ( x is 1 ) or ( x is '1' )
-  #   #.........................................................................................................
-  #   info '^450-18^', hub.isa [ 'one', ], 1
-  #   info '^450-19^', hub.isa.one 1
-  #   info '^450-20^', hub.isa.one.two 2
-  #   info '^450-21^', hub.isa.one.two.three 3
-  #   info '^450-22^', hub.isa.one.two.three.four 4
-  #   info '^450-23^', hub.isa [ 'one', 'two', 'three', 'four', 'five', ], 5
-  #   info '^450-24^', hub.isa.one.two.three.four.five 5
-  #   return null
+  do =>
+    handler = ( hedges, P... ) -> [ hedges..., P..., ]
+    hub = new Hedge { handler, }
+    info '^450-24^', hub.one.two.three.four.five 5
+    return null
   #=========================================================================================================
   do =>
     types = new Intertype()
