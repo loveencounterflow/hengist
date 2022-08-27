@@ -167,7 +167,7 @@ types                     = new ( require 'intertype' ).Intertype
     x = {}
     guy.props.hide  x, 'foo', 42
     T?.eq ( rpr x ), '{}'
-    T?.eq ( Object.getOwnPropertyDescriptor x, 'foo' ), { value: 42, writable: false, enumerable: false, configurable: false }
+    T?.eq ( Object.getOwnPropertyDescriptor x, 'foo' ), { value: 42, writable: true, enumerable: false, configurable: true, }
   #.........................................................................................................
   done?()
 
