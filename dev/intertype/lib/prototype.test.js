@@ -104,6 +104,23 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.itproto_isa_needs_at_least_one_prop = function(T, done) {
+    var TY;
+    TY = require('./intertype-prototype');
+    if (T != null) {
+      T.throws(/expected at least one property/, function() {
+        return TY.isa(42);
+      });
+    }
+    if (T != null) {
+      T.throws(/expected at least one property/, function() {
+        return TY.isa();
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.itproto_can_access_mmx_state = function(T, done) {
     var TY, mmx, state;
     TY = require('./intertype-prototype');
@@ -169,8 +186,12 @@
   this.itproto_or = function(T, done) {
     var TY;
     TY = require('./intertype-prototype');
+    // T?.ok TY.isa.integer 42
+    // T?.ok TY.isa.text 'helo'
+    // T?.eq ( TY.isa.integer.or.text 42         ), true
+    // T?.eq ( TY.isa.integer.or.text 'helo'     ), true
     if (T != null) {
-      T.ok(TY.isa.integer(42));
+      T.eq(TY.isa.integer.or.text(null), false);
     }
     return typeof done === "function" ? done() : void 0;
   };

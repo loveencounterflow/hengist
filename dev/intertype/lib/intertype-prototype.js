@@ -36,6 +36,9 @@
     integer: function(x) {
       return (Number.isFinite(x)) && (x === Math.floor(x));
     },
+    text: function(x) {
+      return (typeof x) === 'string';
+    },
     //.........................................................................................................
     even: function(x) {
       if (Number.isInteger(x)) {
@@ -60,22 +63,56 @@
   this.handlers = {
     //---------------------------------------------------------------------------------------------------------
     isa: function(props, x) {
-      var fn, i, len, prop;
-// whisper '^321-1^', '---------------------------------------'
-// debug '^321-1^', { props, x, }
-      for (i = 0, len = props.length; i < len; i++) {
-        prop = props[i];
-        // debug '^321-2^', prop
-        // debug '^321-3^', hub.registry
-        // debug '^321-4^', hub.registry[ prop ]
+      var R, advance, arity, fn, i, idx, last_idx, len, prop;
+      if (!((arity = props.length) > 0)) {
+        throw new Error(`expected at least one property, got ${arity}: ${rpr(props)}`);
+      }
+      whisper('^321-1^', '---------------------------------------');
+      debug('^445-1^', {props, x});
+      advance = false;
+      last_idx = props.length - 1;
+      R = true;
+//.......................................................................................................
+      for (idx = i = 0, len = props.length; i < len; idx = ++i) {
+        prop = props[idx];
+        debug('^445-2^', {idx, prop, R, advance});
+        if (idx > last_idx) {
+          return R;
+        }
+        //.....................................................................................................
+        if (advance) {
+          debug('^445-3^');
+          if (prop === 'or') {
+            if (R) {
+              return true;
+            }
+            advance = false;
+          }
+          continue;
+        }
+        //.....................................................................................................
+        if (prop === 'or') {
+          if (R) {
+            return true;
+          }
+          debug('^445-4^');
+          advance = true;
+          continue;
+        }
+        //.....................................................................................................
         if ((fn = hub.registry[prop]) == null) {
           throw new Error(`unknown type ${rpr(prop)}`);
         }
-        if (!fn.call(hub, x)) {
-          return false;
+        //.....................................................................................................
+        if (!((R = fn.call(hub, x)) === true || R === false)) {
+          /* TAINT use this library to determine type: */
+          throw new Error(`expected test result to be boolean, go a ${typeof R}: ${rpr(R)}`);
         }
+        debug('^445-5^', GUY.trm.reverse({idx, prop, R, advance}));
+        advance = !R;
       }
-      return true;
+      //.......................................................................................................
+      return R;
     },
     //---------------------------------------------------------------------------------------------------------
     declare: function(props, isa) {
