@@ -56,7 +56,7 @@ specifiers:
   gitlog: ^4.0.4
   glob: 7.2.0
   got: ^11.8.2
-  guy: 7.0.0
+  guy: '11.8'
   guy-test: 4.2.2
   hamt: ^2.2.2
   hashbow: ^1.1.1
@@ -200,7 +200,7 @@ dependencies:
   gitlog: 4.0.4
   glob: 7.2.0
   got: 11.8.5
-  guy: 7.0.0_4prdxtoba2tordf5bhh3dou7hy
+  guy: 11.8.0_4prdxtoba2tordf5bhh3dou7hy
   guy-test: 4.2.2
   hamt: 2.2.2
   hashbow: 1.1.1
@@ -2376,6 +2376,22 @@ packages:
       intertype: 7.7.1
     dev: false
 
+  /guy/11.8.0_4prdxtoba2tordf5bhh3dou7hy:
+    resolution: {integrity: sha512-jKsvKM8iT1BRJSxgsxlgRkTXPTCsK0TQog2Sc9r8XbGVRoMk2GZcnYtkGkFqZrVamecwcrZVA4jrehC9Q8NycQ==}
+    peerDependencies:
+      acorn: ^8.7.1
+      acorn-loose: ^8.3.0
+      acorn-walk: ^8.2.0
+      astring: ^1.8.3
+    dependencies:
+      acorn: 8.7.1
+      acorn-loose: 8.3.0
+      acorn-walk: 8.2.0
+      astring: 1.8.3
+      intertype-legacy: 7.7.1
+      letsfreezethat: 3.1.0
+    dev: false
+
   /guy/2.7.0:
     resolution: {integrity: sha512-yA2pHwCesUoAR/b5Y4bbIvZYLDNYKAymbih+tvTeSnNjp9/6YvDJXlTjsQiPLC6vaftWl1OQ1ErchiK4F9wXjg==}
     peerDependencies:
@@ -2391,22 +2407,6 @@ packages:
     dependencies:
       cnd: 9.2.2
       intertype: 7.6.7
-      letsfreezethat: 3.1.0
-    dev: false
-
-  /guy/7.0.0_4prdxtoba2tordf5bhh3dou7hy:
-    resolution: {integrity: sha512-s1slrjVzISAH+lqMCqVZzfWhRiHMhbMQdBYBmgK/9M1z3p5P3+rqspgicPa+SnKo7yDh7UiDH0ctKg1zvIoieQ==}
-    peerDependencies:
-      acorn: ^8.7.1
-      acorn-loose: ^8.3.0
-      acorn-walk: ^8.2.0
-      astring: ^1.8.3
-    dependencies:
-      acorn: 8.7.1
-      acorn-loose: 8.3.0
-      acorn-walk: 8.2.0
-      astring: 1.8.3
-      intertype-legacy: 7.7.1
       letsfreezethat: 3.1.0
     dev: false
 
@@ -4915,7 +4915,7 @@ packages:
     dev: false
 
   /timsort/0.3.0:
-    resolution: {integrity: sha1-QFQRqOfmM5/mTbmiNN4R3DHgK9Q=}
+    resolution: {integrity: sha512-qsdtZH+vMoCARQtyod4imc2nIJwg9Cc7lPRrw9CzF8ZKR0khdr8+2nX80PBhET3tcyTtJDxAffGh2rXH4tyU8A==}
     dev: false
 
   /tiny-glob/0.2.6:
