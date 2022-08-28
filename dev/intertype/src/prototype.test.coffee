@@ -191,6 +191,20 @@ _types                    = new ( require 'intertype' ).Intertype()
   urge '^003-18^', checkpoint for checkpoint in types.state.trace
   help '^003-19^', types.state.trace
   T?.eq types.state.trace, [ { ref: '▲i3', level: 0, prop: 'integer', x: null, R: false }, { ref: '▲i1', level: 0, prop: 'or', x: null, R: false }, { ref: '▲i3', level: 0, prop: 'text', x: null, R: false } ]
+  whisper '^003-20^', '———————————————————————————————'
+  types.isa.set.of.list.of.text   new Set [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ]
+  urge '^003-21^', checkpoint for checkpoint in types.state.trace
+  result = ( rpr checkpoint for checkpoint in types.state.trace ).join '\n'
+  urge '^003-22^', result
+  T?.eq result, """
+    { ref: '▲i3', level: 0, prop: 'set', x: Set(3) { [ 'a', 'b' ], [ 'c' ], [ 'd' ] }, R: true }
+    { ref: '▲i3', level: 1, prop: 'list', x: [ 'a', 'b' ], R: true }
+    { ref: '▲i3', level: 2, prop: 'text', x: 'a', R: true }
+    { ref: '▲i3', level: 2, prop: 'text', x: 'b', R: true }
+    { ref: '▲i3', level: 1, prop: 'list', x: [ 'c' ], R: true }
+    { ref: '▲i3', level: 2, prop: 'text', x: 'c', R: true }
+    { ref: '▲i3', level: 1, prop: 'list', x: [ 'd' ], R: true }
+    { ref: '▲i3', level: 2, prop: 'text', x: 'd', R: true }"""
   done?()
 
 # #-----------------------------------------------------------------------------------------------------------
