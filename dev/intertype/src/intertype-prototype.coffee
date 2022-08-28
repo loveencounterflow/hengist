@@ -72,6 +72,47 @@ class @Intertype
   #---------------------------------------------------------------------------------------------------------
   _reset_trace: -> @state.trace = []
 
+  #-------------------------------------------------------------------------------------------------------
+  _isa: ( props, x, level ) ->
+    @_reset_trace() if level is 0
+    advance   = false
+    last_idx  = props.length - 1
+    R         = true
+    idx       = -1
+    prop      = null
+    nxt_prop  = null
+    #.....................................................................................................
+    loop
+      idx++
+      return R if idx > last_idx
+      [ prop, nxt_prop, ] = [ props[ idx ], props[ idx + 1 ], ]
+      #...................................................................................................
+      if advance
+        if prop is 'or'
+          @_trace { ref: '▲i1', level, prop, x, R, }
+          return true if R
+          advance = false
+        continue
+      #...................................................................................................
+      if prop is 'or'
+        if nxt_prop is 'or'
+          throw new Error "cannot have two `or` props in succession, got #{rpr props.join '.'}"
+        @_trace { ref: '▲i2', level, prop, x, R, }
+        return true if R
+        advance = true
+        continue
+      #...................................................................................................
+      unless ( fn = @registry[ prop ] )?
+        throw new Error "unknown type #{rpr prop}"
+      #...................................................................................................
+      R = R = fn.call @, x
+      @_trace { ref: '▲i3', level, prop, x, R, }
+      unless R is true or R is false
+        ### TAINT use this library to determine type: ###
+        throw new Error "expected test result to be boolean, go a #{typeof R}: #{rpr R}"
+      advance = not R
+    #.....................................................................................................
+    return R
 
 #-----------------------------------------------------------------------------------------------------------
 @Intertype._get_handlers = ( hub ) ->
@@ -80,54 +121,7 @@ class @Intertype
     isa: ( props, x ) ->
       unless ( arity = props.length ) > 0
         throw new Error "expected at least one property, got #{arity}: #{rpr props}"
-      # whisper '^321-1^', '---------------------------------------'
-      level = 0 ### !!!!!!!!!!!!!!!! ###
-      hub._reset_trace() if level is 0
-      # debug '^445-1^', { props, x, }
-      advance   = false
-      last_idx  = props.length - 1
-      R         = true
-      idx       = -1
-      # prv_prop  = null
-      prop      = null
-      nxt_prop  = null
-      #.....................................................................................................
-      loop
-        idx++
-        # debug '^445-2^', { idx, prop, R, advance, }
-        return R if idx > last_idx
-        # [ prv_prop, prop, nxt_prop, ] = prop, props[ idx ], props[ idx + 1 ]
-        [ prop, nxt_prop, ] = [ props[ idx ], props[ idx + 1 ], ]
-        #...................................................................................................
-        if advance
-          # debug '^445-3^'
-          if prop is 'or'
-            hub._trace { ref: '▲i1', level, prop, x, R, }
-            return true if R
-            advance = false
-          continue
-        #...................................................................................................
-        if prop is 'or'
-          if nxt_prop is 'or'
-            throw new Error "cannot have two `or` props in succession, got #{rpr props.join '.'}"
-          hub._trace { ref: '▲i2', level, prop, x, R, }
-          return true if R
-          # debug '^445-4^'
-          advance = true
-          continue
-        #...................................................................................................
-        unless ( fn = hub.registry[ prop ] )?
-          throw new Error "unknown type #{rpr prop}"
-        #...................................................................................................
-        R = R = fn.call hub, x
-        hub._trace { ref: '▲i3', level, prop, x, R, }
-        unless R is true or R is false
-          ### TAINT use this library to determine type: ###
-          throw new Error "expected test result to be boolean, go a #{typeof R}: #{rpr R}"
-        # debug '^445-5^', GUY.trm.reverse { idx, prop, R, advance, }
-        advance = not R
-      #.....................................................................................................
-      return R
+      return hub._isa props, x, 0
 
     #-------------------------------------------------------------------------------------------------------
     declare: ( props, isa ) ->
