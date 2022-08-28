@@ -136,6 +136,8 @@ _types                    = new ( require 'intertype' ).Intertype()
   types = new ( require './intertype-prototype' ).Intertype()
   T?.eq ( types.isa.list []                     ), true
   T?.eq ( types.isa.list 'helo'                 ), false
+  T?.eq ( types.isa.set  new Set 'helo'         ), true
+  T?.eq ( types.isa.set  new Map()              ), false
   #.........................................................................................................
   T?.throws /cannot have two `of` props in succession/, -> try types.isa.list.of.of.text [ 42, ] catch error
     warn rvr error.message; throw error
@@ -144,15 +146,39 @@ _types                    = new ( require 'intertype' ).Intertype()
   T?.throws /cannot have `of` as last prop/,            -> try types.isa.list.of [ 42, ] catch error
     warn rvr error.message; throw error
   #.........................................................................................................
-  T?.eq ( types.isa.list.of.integer   [ 4, 5, 6, true, ]  ), false
-  T?.eq ( types.isa.list.of.integer   [ 'helo', ]         ), false
-  T?.eq ( types.isa.list.of.integer   6                   ), false
-  T?.eq ( types.isa.list.of.text      'helo'              ), false
+  T?.eq ( types.isa.list.of.integer       [ 4, 5, 6, true, ]                              ), false
+  T?.eq ( types.isa.list.of.integer       [ 'helo', ]                                     ), false
+  T?.eq ( types.isa.list.of.integer       6                                               ), false
+  T?.eq ( types.isa.list.of.text          'helo'                                          ), false
+  T?.eq ( types.isa.set.of.text           'helo'                                          ), false
+  T?.eq ( types.isa.set.of.list.of.text   'helo'                                          ), false
+  T?.eq ( types.isa.list.of.list.of.text          [ [ 'a', 'b', ], [ 'c', ], [ 42, ], ]   ), false
   #.........................................................................................................
-  T?.eq ( types.isa.list.of.text      []                  ), true
-  T?.eq ( types.isa.list.of.integer   []                  ), true
-  T?.eq ( types.isa.list.of.text      [ 'helo', ]         ), true
-  T?.eq ( types.isa.list.of.integer   [ 4, 5, 6, ]        ), true
+  T?.eq ( types.isa.list.of.text          []                                              ), true
+  T?.eq ( types.isa.list.of.integer       []                                              ), true
+  T?.eq ( types.isa.list.of.text          [ 'helo', ]                                     ), true
+  T?.eq ( types.isa.list.of.integer       [ 4, 5, 6, ]                                    ), true
+  T?.eq ( types.isa.set.of.text           new Set 'helo'                                  ), true
+  T?.eq ( types.isa.list.of.list.of.text          [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ]  ), true
+  T?.eq ( types.isa.set.of.list.of.text   new Set [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ]  ), true
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@itproto_transitive_of = ( T, done ) ->
+  types = new ( require './intertype-prototype' ).Intertype()
+  #.........................................................................................................
+  T?.eq ( types.isa.list.or.text.or.integer new Set()     ), false
+  T?.eq ( types.isa.empty.list.or.set [ 1, 3, 5, ]        ), false
+  T?.eq ( types.isa.empty.list.or.empty.set new Set 'abc' ), false
+  #.........................................................................................................
+  T?.eq ( types.isa.list.or.text.or.integer []            ), true
+  T?.eq ( types.isa.list.or.text.or.integer 'txt'         ), true
+  T?.eq ( types.isa.list.or.text.or.integer 1234          ), true
+  T?.eq ( types.isa.empty.list.or.set []                  ), true
+  T?.eq ( types.isa.empty.list.or.set new Set()           ), true
+  T?.eq ( types.isa.empty.list.or.set new Set 'abc'       ), true
+  T?.eq ( types.isa.empty.list.or.empty.set new Set()     ), true
+  #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -224,7 +250,7 @@ _types                    = new ( require 'intertype' ).Intertype()
 #   types.isa.integer.or.text null
 #   #.........................................................................................................
 #   T?.eq collector.length, 0
-#   warn '^003-20^', rvr collector unless collector.length is 0
+#   warn '^003-23^', rvr collector unless collector.length is 0
 #   done?()
 
 
@@ -232,4 +258,6 @@ _types                    = new ( require 'intertype' ).Intertype()
 if module is require.main then do =>
   # test @itproto_can_access_mmx_state
   # test @itproto_of
+  # @itproto_transitive_of()
+  # test @itproto_transitive_of
   test @

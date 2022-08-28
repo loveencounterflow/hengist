@@ -27,6 +27,16 @@ types                     = new ( require '../../../apps/intertype' ).Intertype(
 #...........................................................................................................
 hide @, 'Multimix', ( require '../../../apps/multimix' ).Multimix
 Multimix                  = @Multimix
+notavalue                 = Symbol 'notavalue'
+misfit                    = Symbol 'misfit'
+
+#---------------------------------------------------------------------------------------------------------
+size_of = ( x, fallback = misfit ) ->
+  return R unless ( R = GUY.props.get x, 'length',  notavalue ) is notavalue
+  return R unless ( R = GUY.props.get x, 'size',    notavalue ) is notavalue
+  return fallback unless fallback is misfit
+  throw new E.Intertype_ETEMPTBD '^intertype.size_of@1^', \
+    "expected an object with `x.length` or `x.size`, got a #{@type_of x} with neither"
 
 
 #===========================================================================================================
@@ -48,6 +58,9 @@ class @Intertype
       integer:  ( x ) -> ( Number.isFinite x ) and ( x is Math.floor x )
       text:     ( x ) -> ( typeof x ) is 'string'
       list:     ( x ) -> Array.isArray x
+      set:      ( x ) -> x instanceof Set
+      empty:    ( x ) -> ( R = size_of x, null )? and R is 0
+      nonempty: ( x ) -> ( R = size_of x, null )? and R isnt 0
       #.......................................................................................................
       even: ( x ) ->
         if ( Number.isInteger x )     then return ( x % 2  ) is   0
