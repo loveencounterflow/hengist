@@ -295,6 +295,12 @@
     if (T != null) {
       T.eq(types.isa.list('helo'), false);
     }
+    if (T != null) {
+      T.eq(types.isa.set(new Set('helo')), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.set(new Map()), false);
+    }
     //.........................................................................................................
     if (T != null) {
       T.throws(/cannot have two `of` props in succession/, function() {
@@ -345,6 +351,15 @@
     if (T != null) {
       T.eq(types.isa.list.of.text('helo'), false);
     }
+    if (T != null) {
+      T.eq(types.isa.set.of.text('helo'), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.set.of.list.of.text('helo'), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.list.of.list.of.text([['a', 'b'], ['c'], [42]]), false);
+    }
     //.........................................................................................................
     if (T != null) {
       T.eq(types.isa.list.of.text([]), true);
@@ -358,12 +373,60 @@
     if (T != null) {
       T.eq(types.isa.list.of.integer([4, 5, 6]), true);
     }
+    if (T != null) {
+      T.eq(types.isa.set.of.text(new Set('helo')), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.list.of.list.of.text([['a', 'b'], ['c'], ['d']]), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.set.of.list.of.text(new Set([['a', 'b'], ['c'], ['d']])), true);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.itproto_transitive_of = function(T, done) {
+    var types;
+    types = new (require('./intertype-prototype')).Intertype();
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.isa.list.or.text.or.integer(new Set()), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.empty.list.or.set([1, 3, 5]), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.empty.list.or.empty.set(new Set('abc')), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.isa.list.or.text.or.integer([]), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.list.or.text.or.integer('txt'), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.list.or.text.or.integer(1234), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.empty.list.or.set([]), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.empty.list.or.set(new Set()), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.empty.list.or.set(new Set('abc')), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.empty.list.or.empty.set(new Set()), true);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.itproto_traces_are_being_written = function(T, done) {
-    var checkpoint, i, j, k, l, len, len1, len2, len3, len4, len5, m, n, ref, ref1, ref2, ref3, ref4, ref5, types;
+    var checkpoint, i, j, k, l, len, len1, len2, len3, len4, len5, len6, m, n, o, ref, ref1, ref2, ref3, ref4, ref5, ref6, result, types;
     types = new (require('./intertype-prototype')).Intertype();
     if (T != null) {
       T.eq(types.state.trace, []);
@@ -521,6 +584,34 @@
         }
       ]);
     }
+    whisper('^003-20^', '———————————————————————————————');
+    types.isa.set.of.list.of.text(new Set([['a', 'b'], ['c'], ['d']]));
+    ref6 = types.state.trace;
+    for (o = 0, len6 = ref6.length; o < len6; o++) {
+      checkpoint = ref6[o];
+      urge('^003-21^', checkpoint);
+    }
+    result = ((function() {
+      var len7, p, ref7, results;
+      ref7 = types.state.trace;
+      results = [];
+      for (p = 0, len7 = ref7.length; p < len7; p++) {
+        checkpoint = ref7[p];
+        results.push(rpr(checkpoint));
+      }
+      return results;
+    })()).join('\n');
+    urge('^003-22^', result);
+    if (T != null) {
+      T.eq(result, `{ ref: '▲i3', level: 0, prop: 'set', x: Set(3) { [ 'a', 'b' ], [ 'c' ], [ 'd' ] }, R: true }
+{ ref: '▲i3', level: 1, prop: 'list', x: [ 'a', 'b' ], R: true }
+{ ref: '▲i3', level: 2, prop: 'text', x: 'a', R: true }
+{ ref: '▲i3', level: 2, prop: 'text', x: 'b', R: true }
+{ ref: '▲i3', level: 1, prop: 'list', x: [ 'c' ], R: true }
+{ ref: '▲i3', level: 2, prop: 'text', x: 'c', R: true }
+{ ref: '▲i3', level: 1, prop: 'list', x: [ 'd' ], R: true }
+{ ref: '▲i3', level: 2, prop: 'text', x: 'd', R: true }`);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -541,7 +632,7 @@
   //   types.isa.integer.or.text null
   //   #.........................................................................................................
   //   T?.eq collector.length, 0
-  //   warn '^003-20^', rvr collector unless collector.length is 0
+  //   warn '^003-23^', rvr collector unless collector.length is 0
   //   done?()
 
   //###########################################################################################################
@@ -549,6 +640,8 @@
     (() => {
       // test @itproto_can_access_mmx_state
       // test @itproto_of
+      // @itproto_transitive_of()
+      // test @itproto_transitive_of
       return test(this);
     })();
   }

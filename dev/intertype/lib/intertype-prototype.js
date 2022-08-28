@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, Multimix, alert, debug, echo, help, hide, info, inspect, log, nameit, plain, praise, rpr, rvr, test, tree, types, urge, warn, whisper;
+  var GUY, Multimix, alert, debug, echo, help, hide, info, inspect, log, misfit, nameit, notavalue, plain, praise, rpr, rvr, size_of, test, tree, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -28,6 +28,25 @@
   hide(this, 'Multimix', (require('../../../apps/multimix')).Multimix);
 
   Multimix = this.Multimix;
+
+  notavalue = Symbol('notavalue');
+
+  misfit = Symbol('misfit');
+
+  //---------------------------------------------------------------------------------------------------------
+  size_of = function(x, fallback = misfit) {
+    var R;
+    if ((R = GUY.props.get(x, 'length', notavalue)) !== notavalue) {
+      return R;
+    }
+    if ((R = GUY.props.get(x, 'size', notavalue)) !== notavalue) {
+      return R;
+    }
+    if (fallback !== misfit) {
+      return fallback;
+    }
+    throw new E.Intertype_ETEMPTBD('^intertype.size_of@1^', `expected an object with \`x.length\` or \`x.size\`, got a ${this.type_of(x)} with neither`);
+  };
 
   //===========================================================================================================
   this.Intertype = class Intertype {
@@ -59,6 +78,17 @@
         },
         list: function(x) {
           return Array.isArray(x);
+        },
+        set: function(x) {
+          return x instanceof Set;
+        },
+        empty: function(x) {
+          var R;
+          return ((R = size_of(x, null)) != null) && R === 0;
+        },
+        nonempty: function(x) {
+          var R;
+          return ((R = size_of(x, null)) != null) && R !== 0;
         },
         //.......................................................................................................
         even: function(x) {
