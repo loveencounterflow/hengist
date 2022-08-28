@@ -552,6 +552,65 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.mmx_state_shared_or_not = function(T, done) {
+    var Multimix, hub, mmx_1a, mmx_1b, mmx_2a, mmx_2b, mmx_3a, mmx_3b, mmxs;
+    ({Multimix} = require('../../../../apps/multimix'));
+    mmxs = Multimix.symbol;
+    hub = {};
+    mmx_1a = (new Multimix({
+      hub: {},
+      handler: (function() {})
+    }))[mmxs];
+    mmx_1b = (new Multimix({
+      hub: {},
+      handler: (function() {})
+    }))[mmxs];
+    mmx_2a = (new Multimix({
+      handler: (function() {})
+    }))[mmxs];
+    mmx_2b = (new Multimix({
+      handler: (function() {})
+    }))[mmxs];
+    mmx_3a = (new Multimix({
+      hub,
+      handler: (function() {})
+    }))[mmxs];
+    mmx_3b = (new Multimix({
+      hub,
+      handler: (function() {})
+    }))[mmxs];
+    //.........................................................................................................
+    if (T != null) {
+      T.ok(mmx_1a.hub !== mmx_1b.hub);
+    }
+    if (T != null) {
+      T.ok(mmx_1a.state !== mmx_1b.state);
+    }
+    if (T != null) {
+      T.ok(mmx_1a.state.hedges !== mmx_1b.state.hedges);
+    }
+    if (T != null) {
+      T.ok(mmx_2a.hub !== mmx_2b.hub);
+    }
+    if (T != null) {
+      T.ok(mmx_2a.state !== mmx_2b.state);
+    }
+    if (T != null) {
+      T.ok(mmx_2a.state.hedges !== mmx_2b.state.hedges);
+    }
+    if (T != null) {
+      T.ok(mmx_3a.hub === mmx_3b.hub);
+    }
+    if (T != null) {
+      T.ok(mmx_3a.state === mmx_3b.state);
+    }
+    if (T != null) {
+      T.ok(mmx_3a.state.hedges === mmx_3b.state.hedges);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
@@ -564,6 +623,8 @@
       // test @mmx_can_use_function_for_create
       // test @mmx_no_assignment_with_create_function
       // test @mmx_props_are_hidden_by_default
+      // @mmx_state_shared_or_not()
+      // test @mmx_state_shared_or_not
       return test(this);
     })();
   }
