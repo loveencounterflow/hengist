@@ -56,7 +56,7 @@ specifiers:
   gitlog: ^4.0.4
   glob: 7.2.0
   got: ^11.8.2
-  guy: '11.8'
+  guy: '11'
   guy-test: 4.2.2
   hamt: ^2.2.2
   hashbow: ^1.1.1
@@ -90,7 +90,7 @@ specifiers:
   mkdirp: ^1.0.4
   mojikura-idl: ^2.0.0
   mori: ^0.3.2
-  multimix: ^5.0.0
+  multimix: '6'
   mysql-tokenizer: ^1.0.7
   n-readlines: ^1.0.1
   node-ansiparser: ^2.2.0
@@ -234,7 +234,7 @@ dependencies:
   mkdirp: 1.0.4
   mojikura-idl: 2.1.6
   mori: 0.3.2
-  multimix: 5.0.0
+  multimix: 6.0.0_4prdxtoba2tordf5bhh3dou7hy
   mysql-tokenizer: 1.0.7
   n-readlines: 1.0.1
   node-ansiparser: 2.2.0
@@ -2376,6 +2376,22 @@ packages:
       intertype: 7.7.1
     dev: false
 
+  /guy/11.6.0_4prdxtoba2tordf5bhh3dou7hy:
+    resolution: {integrity: sha512-oh9KwRWTwwnZXvVqIS7HCdJfAHd1aLF50s//vkxc1ZbMXrh7RfmXuVzKKwgh04WAxPWwdqn63kx+icWwdX94RQ==}
+    peerDependencies:
+      acorn: ^8.7.1
+      acorn-loose: ^8.3.0
+      acorn-walk: ^8.2.0
+      astring: ^1.8.3
+    dependencies:
+      acorn: 8.7.1
+      acorn-loose: 8.3.0
+      acorn-walk: 8.2.0
+      astring: 1.8.3
+      intertype-legacy: 7.7.1
+      letsfreezethat: 3.1.0
+    dev: false
+
   /guy/11.8.0_4prdxtoba2tordf5bhh3dou7hy:
     resolution: {integrity: sha512-jKsvKM8iT1BRJSxgsxlgRkTXPTCsK0TQog2Sc9r8XbGVRoMk2GZcnYtkGkFqZrVamecwcrZVA4jrehC9Q8NycQ==}
     peerDependencies:
@@ -2722,6 +2738,19 @@ packages:
     resolution: {integrity: sha512-Bj3k9bCu8vA6JLIvnCrJXOdkecgY5wtCmORclJ87uq22N53swREHT5bezSeK5TwcxgSJEDg2wEfcn4kNr9Qv8A==}
     dependencies:
       multimix: 5.0.0
+    dev: false
+
+  /intertype/10.1.0_4prdxtoba2tordf5bhh3dou7hy:
+    resolution: {integrity: sha512-KsO8iYx31U1ApABuXWiJQsDQvsJvxJYh7laW78WiA8xs5rDxD6nq98LaMshdbstoksWGtxf4hda99l0DhhL/Hw==}
+    dependencies:
+      guy: 11.6.0_4prdxtoba2tordf5bhh3dou7hy
+      intertype-legacy: 7.7.1
+      to-width: 1.2.0
+    transitivePeerDependencies:
+      - acorn
+      - acorn-loose
+      - acorn-walk
+      - astring
     dev: false
 
   /intertype/7.6.3:
@@ -3512,6 +3541,18 @@ packages:
 
   /multimix/5.0.0:
     resolution: {integrity: sha512-N9cdGSDDD7kxOV7R6e4iZqsHTZ4F4iiSDWqMcVqx4gEH6HBtRXav39Gj3fgT1YqvBcwPCQuf0Oa5R2cDaLWK8A==}
+    dev: false
+
+  /multimix/6.0.0_4prdxtoba2tordf5bhh3dou7hy:
+    resolution: {integrity: sha512-WOhoooTPnM+MMYuUTEI5IZAcNPMqM8jyOSgKfBdgJ18tj16vsaJcfBvc0846S2dAU7QH+t/OOXAcEd/u/iNxdw==}
+    dependencies:
+      guy: 11.8.0_4prdxtoba2tordf5bhh3dou7hy
+      intertype: 10.1.0_4prdxtoba2tordf5bhh3dou7hy
+    transitivePeerDependencies:
+      - acorn
+      - acorn-loose
+      - acorn-walk
+      - astring
     dev: false
 
   /multimix006modern/0.0.6:
@@ -5307,7 +5348,7 @@ packages:
     dev: false
 
   /wrappy/1.0.2:
-    resolution: {integrity: sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=}
+    resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
     dev: false
 
   /ws/7.5.8:
