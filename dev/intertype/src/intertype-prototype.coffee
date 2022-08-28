@@ -47,6 +47,7 @@ class @Intertype
     @registry =
       integer:  ( x ) -> ( Number.isFinite x ) and ( x is Math.floor x )
       text:     ( x ) -> ( typeof x ) is 'string'
+      list:     ( x ) -> Array.isArray x
       #.......................................................................................................
       even: ( x ) ->
         if ( Number.isInteger x )     then return ( x % 2  ) is   0
@@ -95,12 +96,27 @@ class @Intertype
         continue
       #...................................................................................................
       if prop is 'or'
-        if nxt_prop is 'or'
-          throw new Error "cannot have two `or` props in succession, got #{rpr props.join '.'}"
+        throw new Error "cannot have `or` as first prop, got #{rpr props.join '.'}" if idx is 0
+        throw new Error "cannot have `or` as last prop, got #{rpr props.join '.'}" if idx is last_idx
+        throw new Error "cannot have two `or` props in succession, got #{rpr props.join '.'}" if nxt_prop is 'or'
         @_trace { ref: '▲i2', level, prop, x, R, }
         return true if R
         advance = true
         continue
+      #...................................................................................................
+      if prop is 'of'
+        throw new Error "cannot have `of` as first prop, got #{rpr props.join '.'}" if idx is 0
+        throw new Error "cannot have `of` as last prop, got #{rpr props.join '.'}" if idx is last_idx
+        throw new Error "cannot have two `of` props in succession, got #{rpr props.join '.'}" if nxt_prop is 'of'
+        props_tail = props[ idx + 1 ... ]
+        try
+          for element from x
+            return false unless @_isa props_tail, element, level + 1
+        catch error
+          throw error unless ( error.name is 'TypeError' ) and ( error.message is 'x is not iterable' )
+          throw new E.Intertype_ETEMPTBD '^intertype.isa@7^', \
+            "`of` must be preceded by collection name, got #{rpr hedges[ hedge_idx - 1 ]}"
+        return true
       #...................................................................................................
       unless ( fn = @registry[ prop ] )?
         throw new Error "unknown type #{rpr prop}"

@@ -118,11 +118,41 @@ _types                    = new ( require 'intertype' ).Intertype()
   T?.eq ( types.isa.integer 42                 ), true
   T?.eq ( types.isa.text 'helo'                ), true
   T?.eq ( types.isa.text null                  ), false
+  #.........................................................................................................
+  T?.throws /cannot have two `or` props in succession/, -> try types.isa.even.integer.or.or.text 42 catch error
+    warn rvr error.message; throw error
+  T?.throws /cannot have `or` as first prop/,           -> try types.isa.or.integer 42 catch error
+    warn rvr error.message; throw error
+  T?.throws /cannot have `or` as last prop/,            -> try types.isa.even.integer.or 42 catch error
+    warn rvr error.message; throw error
+  #.........................................................................................................
   T?.eq ( types.isa.integer.or.text 42         ), true
   T?.eq ( types.isa.integer.or.text 'helo'     ), true
   T?.eq ( types.isa.integer.or.text null       ), false
-  T?.throws /cannot have two `or` props in succession/, -> try types.isa.even.integer.or.or.text 42 catch error
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@itproto_of = ( T, done ) ->
+  types = new ( require './intertype-prototype' ).Intertype()
+  T?.eq ( types.isa.list []                     ), true
+  T?.eq ( types.isa.list 'helo'                 ), false
+  #.........................................................................................................
+  T?.throws /cannot have two `of` props in succession/, -> try types.isa.list.of.of.text [ 42, ] catch error
     warn rvr error.message; throw error
+  T?.throws /cannot have `of` as first prop/,           -> try types.isa.of.integer 42 catch error
+    warn rvr error.message; throw error
+  T?.throws /cannot have `of` as last prop/,            -> try types.isa.list.of [ 42, ] catch error
+    warn rvr error.message; throw error
+  #.........................................................................................................
+  T?.eq ( types.isa.list.of.integer   [ 4, 5, 6, true, ]  ), false
+  T?.eq ( types.isa.list.of.integer   [ 'helo', ]         ), false
+  T?.eq ( types.isa.list.of.integer   6                   ), false
+  T?.eq ( types.isa.list.of.text      'helo'              ), false
+  #.........................................................................................................
+  T?.eq ( types.isa.list.of.text      []                  ), true
+  T?.eq ( types.isa.list.of.integer   []                  ), true
+  T?.eq ( types.isa.list.of.text      [ 'helo', ]         ), true
+  T?.eq ( types.isa.list.of.integer   [ 4, 5, 6, ]        ), true
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -187,4 +217,5 @@ _types                    = new ( require 'intertype' ).Intertype()
 ############################################################################################################
 if module is require.main then do =>
   # test @itproto_can_access_mmx_state
+  # test @itproto_of
   test @
