@@ -255,6 +255,37 @@ types                     = new ( require '../../../../apps/intertype' ).Interty
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@mmx_state_shared_or_not = ( T, done ) ->
+  { Multimix }  = require '../../../../apps/multimix'
+  mmxs    = Multimix.symbol
+  hub     = {}
+  mmx_1a  = ( new Multimix { hub: {}, handler: ( -> ), } )[mmxs]
+  mmx_1b  = ( new Multimix { hub: {}, handler: ( -> ), } )[mmxs]
+  mmx_2a  = ( new Multimix {          handler: ( -> ), } )[mmxs]
+  mmx_2b  = ( new Multimix {          handler: ( -> ), } )[mmxs]
+  mmx_3a  = ( new Multimix { hub,     handler: ( -> ), } )[mmxs]
+  mmx_3b  = ( new Multimix { hub,     handler: ( -> ), } )[mmxs]
+  #.........................................................................................................
+  T?.ok mmx_1a.hub          isnt  mmx_1b.hub
+  T?.ok mmx_1a.state        isnt  mmx_1b.state
+  T?.ok mmx_1a.state.hedges isnt  mmx_1b.state.hedges
+  T?.ok mmx_2a.hub          isnt  mmx_2b.hub
+  T?.ok mmx_2a.state        isnt  mmx_2b.state
+  T?.ok mmx_2a.state.hedges isnt  mmx_2b.state.hedges
+  T?.ok mmx_3a.hub          is    mmx_3b.hub
+  T?.ok mmx_3a.state        is    mmx_3b.state
+  T?.ok mmx_3a.state.hedges is    mmx_3b.state.hedges
+  # urge '^310-1^', mmx_1a.hub, mmx_1b.hub
+  # urge '^310-1^', mmx_2a.hub, mmx_2b.hub
+  # urge '^310-1^', mmx_3a.hub, mmx_3b.hub
+  # hub.x = 1
+  # urge '^310-1^', mmx_3a.hub, mmx_3b.hub
+  # urge '^310-1^', mmx_3a.hub.x, mmx_3b.hub.x
+  # urge '^310-1^', mmx_3a.hub.x(), mmx_3b.hub.x()
+  #.........................................................................................................
+  done?()
+
 
 
 ############################################################################################################
@@ -268,4 +299,7 @@ if module is require.main then do =>
   # test @mmx_can_use_function_for_create
   # test @mmx_no_assignment_with_create_function
   # test @mmx_props_are_hidden_by_default
+  # @mmx_state_shared_or_not()
+  # test @mmx_state_shared_or_not
   test @
+
