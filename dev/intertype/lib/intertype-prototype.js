@@ -95,65 +95,30 @@
       return this.state.trace = [];
     }
 
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.Intertype._get_handlers = function(hub) {
-    var R;
-    R = {
-      //-------------------------------------------------------------------------------------------------------
-      isa: function(props, x) {
-        var advance, arity, fn, idx, last_idx, level, nxt_prop, prop;
-        if (!((arity = props.length) > 0)) {
-          throw new Error(`expected at least one property, got ${arity}: ${rpr(props)}`);
+    //-------------------------------------------------------------------------------------------------------
+    _isa(props, x, level) {
+      var R, advance, fn, idx, last_idx, nxt_prop, prop;
+      if (level === 0) {
+        this._reset_trace();
+      }
+      advance = false;
+      last_idx = props.length - 1;
+      R = true;
+      idx = -1;
+      prop = null;
+      nxt_prop = null;
+      while (true) {
+        //.....................................................................................................
+        idx++;
+        if (idx > last_idx) {
+          return R;
         }
-        // whisper '^321-1^', '---------------------------------------'
-        level = 0/* !!!!!!!!!!!!!!!! */
-        if (level === 0) {
-          hub._reset_trace();
-        }
-        // debug '^445-1^', { props, x, }
-        advance = false;
-        last_idx = props.length - 1;
-        R = true;
-        idx = -1;
-        // prv_prop  = null
-        prop = null;
-        nxt_prop = null;
-        while (true) {
-          //.....................................................................................................
-          idx++;
-          if (idx > last_idx) {
-            // debug '^445-2^', { idx, prop, R, advance, }
-            return R;
-          }
-          // [ prv_prop, prop, nxt_prop, ] = prop, props[ idx ], props[ idx + 1 ]
-          [prop, nxt_prop] = [props[idx], props[idx + 1]];
-          //...................................................................................................
-          if (advance) {
-            // debug '^445-3^'
-            if (prop === 'or') {
-              hub._trace({
-                ref: '▲i1',
-                level,
-                prop,
-                x,
-                R
-              });
-              if (R) {
-                return true;
-              }
-              advance = false;
-            }
-            continue;
-          }
-          //...................................................................................................
+        [prop, nxt_prop] = [props[idx], props[idx + 1]];
+        //...................................................................................................
+        if (advance) {
           if (prop === 'or') {
-            if (nxt_prop === 'or') {
-              throw new Error(`cannot have two \`or\` props in succession, got ${rpr(props.join('.'))}`);
-            }
-            hub._trace({
-              ref: '▲i2',
+            this._trace({
+              ref: '▲i1',
               level,
               prop,
               x,
@@ -162,32 +127,64 @@
             if (R) {
               return true;
             }
-            // debug '^445-4^'
-            advance = true;
-            continue;
+            advance = false;
           }
-          //...................................................................................................
-          if ((fn = hub.registry[prop]) == null) {
-            throw new Error(`unknown type ${rpr(prop)}`);
+          continue;
+        }
+        //...................................................................................................
+        if (prop === 'or') {
+          if (nxt_prop === 'or') {
+            throw new Error(`cannot have two \`or\` props in succession, got ${rpr(props.join('.'))}`);
           }
-          //...................................................................................................
-          R = R = fn.call(hub, x);
-          hub._trace({
-            ref: '▲i3',
+          this._trace({
+            ref: '▲i2',
             level,
             prop,
             x,
             R
           });
-          if (!(R === true || R === false)) {
-            /* TAINT use this library to determine type: */
-            throw new Error(`expected test result to be boolean, go a ${typeof R}: ${rpr(R)}`);
+          if (R) {
+            return true;
           }
-          // debug '^445-5^', GUY.trm.reverse { idx, prop, R, advance, }
-          advance = !R;
+          advance = true;
+          continue;
         }
-        //.....................................................................................................
-        return R;
+        //...................................................................................................
+        if ((fn = this.registry[prop]) == null) {
+          throw new Error(`unknown type ${rpr(prop)}`);
+        }
+        //...................................................................................................
+        R = R = fn.call(this, x);
+        this._trace({
+          ref: '▲i3',
+          level,
+          prop,
+          x,
+          R
+        });
+        if (!(R === true || R === false)) {
+          /* TAINT use this library to determine type: */
+          throw new Error(`expected test result to be boolean, go a ${typeof R}: ${rpr(R)}`);
+        }
+        advance = !R;
+      }
+      //.....................................................................................................
+      return R;
+    }
+
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.Intertype._get_handlers = function(hub) {
+    var R;
+    R = {
+      //-------------------------------------------------------------------------------------------------------
+      isa: function(props, x) {
+        var arity;
+        if (!((arity = props.length) > 0)) {
+          throw new Error(`expected at least one property, got ${arity}: ${rpr(props)}`);
+        }
+        return hub._isa(props, x, 0);
       },
       //-------------------------------------------------------------------------------------------------------
       declare: function(props, isa) {
