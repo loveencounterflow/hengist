@@ -235,15 +235,7 @@
     if (T != null) {
       T.eq(types.isa.text(null), false);
     }
-    if (T != null) {
-      T.eq(types.isa.integer.or.text(42), true);
-    }
-    if (T != null) {
-      T.eq(types.isa.integer.or.text('helo'), true);
-    }
-    if (T != null) {
-      T.eq(types.isa.integer.or.text(null), false);
-    }
+    //.........................................................................................................
     if (T != null) {
       T.throws(/cannot have two `or` props in succession/, function() {
         var error;
@@ -255,6 +247,116 @@
           throw error;
         }
       });
+    }
+    if (T != null) {
+      T.throws(/cannot have `or` as first prop/, function() {
+        var error;
+        try {
+          return types.isa.or.integer(42);
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/cannot have `or` as last prop/, function() {
+        var error;
+        try {
+          return types.isa.even.integer.or(42);
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.isa.integer.or.text(42), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.integer.or.text('helo'), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.integer.or.text(null), false);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.itproto_of = function(T, done) {
+    var types;
+    types = new (require('./intertype-prototype')).Intertype();
+    if (T != null) {
+      T.eq(types.isa.list([]), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.list('helo'), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.throws(/cannot have two `of` props in succession/, function() {
+        var error;
+        try {
+          return types.isa.list.of.of.text([42]);
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/cannot have `of` as first prop/, function() {
+        var error;
+        try {
+          return types.isa.of.integer(42);
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/cannot have `of` as last prop/, function() {
+        var error;
+        try {
+          return types.isa.list.of([42]);
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.isa.list.of.integer([4, 5, 6, true]), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.list.of.integer(['helo']), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.list.of.integer(6), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.list.of.text('helo'), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.isa.list.of.text([]), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.list.of.integer([]), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.list.of.text(['helo']), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.list.of.integer([4, 5, 6]), true);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -446,6 +548,7 @@
   if (module === require.main) {
     (() => {
       // test @itproto_can_access_mmx_state
+      // test @itproto_of
       return test(this);
     })();
   }

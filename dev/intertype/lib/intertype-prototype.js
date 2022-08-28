@@ -57,6 +57,9 @@
         text: function(x) {
           return (typeof x) === 'string';
         },
+        list: function(x) {
+          return Array.isArray(x);
+        },
         //.......................................................................................................
         even: function(x) {
           if (Number.isInteger(x)) {
@@ -97,7 +100,7 @@
 
     //-------------------------------------------------------------------------------------------------------
     _isa(props, x, level) {
-      var R, advance, fn, idx, last_idx, nxt_prop, prop;
+      var R, advance, element, error, fn, idx, last_idx, nxt_prop, prop, props_tail;
       if (level === 0) {
         this._reset_trace();
       }
@@ -133,6 +136,12 @@
         }
         //...................................................................................................
         if (prop === 'or') {
+          if (idx === 0) {
+            throw new Error(`cannot have \`or\` as first prop, got ${rpr(props.join('.'))}`);
+          }
+          if (idx === last_idx) {
+            throw new Error(`cannot have \`or\` as last prop, got ${rpr(props.join('.'))}`);
+          }
           if (nxt_prop === 'or') {
             throw new Error(`cannot have two \`or\` props in succession, got ${rpr(props.join('.'))}`);
           }
@@ -148,6 +157,33 @@
           }
           advance = true;
           continue;
+        }
+        //...................................................................................................
+        if (prop === 'of') {
+          if (idx === 0) {
+            throw new Error(`cannot have \`of\` as first prop, got ${rpr(props.join('.'))}`);
+          }
+          if (idx === last_idx) {
+            throw new Error(`cannot have \`of\` as last prop, got ${rpr(props.join('.'))}`);
+          }
+          if (nxt_prop === 'of') {
+            throw new Error(`cannot have two \`of\` props in succession, got ${rpr(props.join('.'))}`);
+          }
+          props_tail = props.slice(idx + 1);
+          try {
+            for (element of x) {
+              if (!this._isa(props_tail, element, level + 1)) {
+                return false;
+              }
+            }
+          } catch (error1) {
+            error = error1;
+            if (!((error.name === 'TypeError') && (error.message === 'x is not iterable'))) {
+              throw error;
+            }
+            throw new E.Intertype_ETEMPTBD('^intertype.isa@7^', `\`of\` must be preceded by collection name, got ${rpr(hedges[hedge_idx - 1])}`);
+          }
+          return true;
         }
         //...................................................................................................
         if ((fn = this.registry[prop]) == null) {
