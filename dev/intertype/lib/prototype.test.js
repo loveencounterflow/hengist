@@ -635,6 +635,205 @@
   //   warn '^003-23^', rvr collector unless collector.length is 0
   //   done?()
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.itproto_validate = function(T, done) {
+    var types;
+    types = new (require('./intertype-prototype')).Intertype();
+    //.........................................................................................................
+    if (T != null) {
+      T.throws(/cannot have two `of` props in succession/, function() {
+        var error;
+        try {
+          return types.validate.list.of.of.text([42]);
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/cannot have `of` as first prop/, function() {
+        var error;
+        try {
+          return types.validate.of.integer(42);
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/cannot have `of` as last prop/, function() {
+        var error;
+        try {
+          return types.validate.list.of([42]);
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/unknown type 'omg'/, function() {
+        var error;
+        try {
+          return types.validate.omg('helo');
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.throws(/not a valid list/, function() {
+        var error;
+        try {
+          return types.validate.list('helo');
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/not a valid set/, function() {
+        var error;
+        try {
+          return types.validate.set(new Map());
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/not a valid list\.of\.integer/, function() {
+        var error;
+        try {
+          return types.validate.list.of.integer([4, 5, 6, true]);
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/not a valid list\.of\.integer/, function() {
+        var error;
+        try {
+          return types.validate.list.of.integer(['helo']);
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/not a valid list\.of\.integer/, function() {
+        var error;
+        try {
+          return types.validate.list.of.integer(6);
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/not a valid list\.of\.text/, function() {
+        var error;
+        try {
+          return types.validate.list.of.text('helo');
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/not a valid set\.of\.text/, function() {
+        var error;
+        try {
+          return types.validate.set.of.text('helo');
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/not a valid set\.of\.list\.of\.text/, function() {
+        var error;
+        try {
+          return types.validate.set.of.list.of.text('helo');
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/not a valid list\.of\.list\.of\.text/, function() {
+        var error;
+        try {
+          return types.validate.list.of.list.of.text([['a', 'b'], ['c'], [42]]);
+        } catch (error1) {
+          error = error1;
+          warn(rvr(error.message));
+          throw error;
+        }
+      });
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.validate.list([]), []);
+    }
+    if (T != null) {
+      T.eq(types.validate.set(new Set('helo')), new Set('helo'));
+    }
+    if (T != null) {
+      T.eq(types.validate.boolean(true), true);
+    }
+    if (T != null) {
+      T.eq(types.validate.boolean(false), false);
+    }
+    if (T != null) {
+      T.eq(types.validate.list.of.text([]), []);
+    }
+    if (T != null) {
+      T.eq(types.validate.list.of.integer([]), []);
+    }
+    if (T != null) {
+      T.eq(types.validate.list.of.text(['helo']), ['helo']);
+    }
+    if (T != null) {
+      T.eq(types.validate.list.of.integer([4, 5, 6]), [4, 5, 6]);
+    }
+    if (T != null) {
+      T.eq(types.validate.set.of.text(new Set('helo')), new Set('helo'));
+    }
+    if (T != null) {
+      T.eq(types.validate.list.of.list.of.text([['a', 'b'], ['c'], ['d']]), [['a', 'b'], ['c'], ['d']]);
+    }
+    if (T != null) {
+      T.eq(types.validate.set.of.list.of.text(new Set([['a', 'b'], ['c'], ['d']])), new Set([['a', 'b'], ['c'], ['d']]));
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
@@ -642,9 +841,12 @@
       // test @itproto_of
       // @itproto_transitive_of()
       // test @itproto_transitive_of
-      return test(this);
+      this.itproto_validate();
+      return test(this.itproto_validate);
     })();
   }
+
+  // test @
 
 }).call(this);
 

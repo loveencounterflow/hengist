@@ -56,13 +56,17 @@
       hub = this;
       clasz = this.constructor;
       handlers = clasz._get_handlers(hub);
-      this.isa = new Multimix({
-        hub,
-        handler: handlers.isa
-      });
       this.declare = new Multimix({
         hub,
         handler: handlers.declare
+      });
+      this.validate = new Multimix({
+        hub,
+        handler: handlers.validate
+      });
+      this.isa = new Multimix({
+        hub,
+        handler: handlers.isa
       });
       this.mmx = this.isa[Multimix.symbol];
       this.state = this.mmx.state;
@@ -70,6 +74,9 @@
       //---------------------------------------------------------------------------------------------------------
       /* TAINT this part goes into declarations */
       this.registry = {
+        boolean: function(x) {
+          return (x === true) || (x === false);
+        },
         integer: function(x) {
           return (Number.isFinite(x)) && (x === Math.floor(x));
         },
@@ -245,14 +252,6 @@
     var R;
     R = {
       //-------------------------------------------------------------------------------------------------------
-      isa: function(props, x) {
-        var arity;
-        if (!((arity = props.length) > 0)) {
-          throw new Error(`expected at least one property, got ${arity}: ${rpr(props)}`);
-        }
-        return hub._isa(props, x, 0);
-      },
-      //-------------------------------------------------------------------------------------------------------
       declare: function(props, isa) {
         var arity, name;
         if ((arity = props.length) !== 1) {
@@ -263,6 +262,26 @@
           return isa(x);
         });
         return R;
+      },
+      //-------------------------------------------------------------------------------------------------------
+      validate: function(props, x) {
+        var arity;
+        if (!((arity = props.length) > 0)) {
+          throw new Error(`expected at least one property, got ${arity}: ${rpr(props)}`);
+        }
+        if (hub._isa(props, x, 0)) {
+          return x;
+        }
+        /* TAINT use tracing */
+        throw new Error(`not a valid ${props.join('.')}: ${rpr(x)}`);
+      },
+      //-------------------------------------------------------------------------------------------------------
+      isa: function(props, x) {
+        var arity;
+        if (!((arity = props.length) > 0)) {
+          throw new Error(`expected at least one property, got ${arity}: ${rpr(props)}`);
+        }
+        return hub._isa(props, x, 0);
       }
     };
     //---------------------------------------------------------------------------------------------------------
