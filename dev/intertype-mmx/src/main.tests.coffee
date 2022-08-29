@@ -33,11 +33,11 @@ S                         = ( parts ) -> new Set eval parts.raw[ 0 ]
 _types                    = new ( require 'intertype' ).Intertype()
 { isa
   type_of }               = _types.export()
-
+intertype_path            = './main'
 
 #-----------------------------------------------------------------------------------------------------------
 @itproto_sample_test_function = ( T, done ) ->
-  types = new ( require './intertype-prototype' ).Intertype()
+  types = new ( require intertype_path ).Intertype()
   T?.eq ( type_of types.registry.integer ), 'function'
   T?.eq types.registry.integer.length, 1
   T?.eq ( types.registry.integer 1 ), true
@@ -48,7 +48,7 @@ _types                    = new ( require 'intertype' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
 @itproto_isa = ( T, done ) ->
-  types = new ( require './intertype-prototype' ).Intertype()
+  types = new ( require intertype_path ).Intertype()
   handlers  = types.constructor._get_handlers types
   T?.eq ( type_of handlers.isa ), 'function'
   T?.eq handlers.isa.length, 2
@@ -63,14 +63,14 @@ _types                    = new ( require 'intertype' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
 @itproto_can_chain_props = ( T, done ) ->
-  types = new ( require './intertype-prototype' ).Intertype()
+  types = new ( require intertype_path ).Intertype()
   T?.eq ( types.isa.even.integer 42   ),  true
   T?.eq ( types.isa.even.integer 42.3 ),  false
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @itproto_isa_needs_at_least_one_prop = ( T, done ) ->
-  types = new ( require './intertype-prototype' ).Intertype()
+  types = new ( require intertype_path ).Intertype()
   T?.throws /expected at least one property/, -> try types.isa 42  catch error
     warn rvr error.message; throw error
   T?.throws /expected at least one property/, -> try types.isa()   catch error
@@ -79,8 +79,8 @@ _types                    = new ( require 'intertype' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
 @itproto_can_access_mmx_state = ( T, done ) ->
-  TY = require './intertype-prototype'
-  types = new ( require './intertype-prototype' ).Intertype()
+  TY = require intertype_path
+  types = new ( require intertype_path ).Intertype()
   T?.eq ( typeof TY.Multimix                                ), 'function'
   T?.eq ( typeof TY.Multimix.symbol                         ), 'symbol'
   T?.eq ( typeof mmx    = types.isa[TY.Multimix.symbol]        ), 'object'
@@ -94,27 +94,16 @@ _types                    = new ( require 'intertype' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
 @itproto_state_and_trace_not_shared = ( T, done ) ->
-  types_1 = new ( require './intertype-prototype' ).Intertype()
-  types_2 = new ( require './intertype-prototype' ).Intertype()
+  types_1 = new ( require intertype_path ).Intertype()
+  types_2 = new ( require intertype_path ).Intertype()
   T?.ok types_1.state         isnt types_2.state
   T?.ok types_1.state.hedges  isnt types_2.state.hedges
   T?.ok types_1.state.trace   isnt types_2.state.trace
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@itproto_declare_creates_types = ( T, done ) ->
-  types = new ( require './intertype-prototype' ).Intertype()
-  T?.eq ( typeof types.registry.TEST_float ), 'undefined'
-  T?.throws /expected single property, got 2/, -> try types.declare.even.TEST_float ( x ) -> Number.isFinite x catch error
-    warn rvr error.message; throw error
-  fn = types.declare.TEST_float ( x ) -> Number.isFinite x
-  T?.eq ( typeof types.registry.TEST_float ), 'function'
-  T?.ok types.registry.TEST_float is fn
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
 @itproto_or = ( T, done ) ->
-  types = new ( require './intertype-prototype' ).Intertype()
+  types = new ( require intertype_path ).Intertype()
   T?.eq ( types.isa.integer 42                 ), true
   T?.eq ( types.isa.text 'helo'                ), true
   T?.eq ( types.isa.text null                  ), false
@@ -133,7 +122,7 @@ _types                    = new ( require 'intertype' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
 @itproto_of = ( T, done ) ->
-  types = new ( require './intertype-prototype' ).Intertype()
+  types = new ( require intertype_path ).Intertype()
   T?.eq ( types.isa.list []                     ), true
   T?.eq ( types.isa.list 'helo'                 ), false
   T?.eq ( types.isa.set  new Set 'helo'         ), true
@@ -165,7 +154,7 @@ _types                    = new ( require 'intertype' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
 @itproto_transitive_of = ( T, done ) ->
-  types = new ( require './intertype-prototype' ).Intertype()
+  types = new ( require intertype_path ).Intertype()
   #.........................................................................................................
   T?.eq ( types.isa.list.or.text.or.integer new Set()     ), false
   T?.eq ( types.isa.empty.list.or.set [ 1, 3, 5, ]        ), false
@@ -183,7 +172,7 @@ _types                    = new ( require 'intertype' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
 @itproto_traces_are_being_written = ( T, done ) ->
-  types = new ( require './intertype-prototype' ).Intertype()
+  types = new ( require intertype_path ).Intertype()
   T?.eq types.state.trace, []
   help '^003-1^', types.state.trace
   T?.eq types.state.trace, []
@@ -241,7 +230,7 @@ _types                    = new ( require 'intertype' ).Intertype()
 #   Object.defineProperty process, 'stdout', value: ( text ) -> collector.push text; stdout.write text
 #   Object.defineProperty process, 'stderr', value: ( text ) -> collector.push text; stderr.write text
 #   #.........................................................................................................
-#   types = new ( require './intertype-prototype' ).Intertype()
+#   types = new ( require intertype_path ).Intertype()
 #   types.isa.integer 42
 #   types.isa.text 'helo'
 #   types.isa.text null
@@ -256,7 +245,7 @@ _types                    = new ( require 'intertype' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
 @itproto_validate = ( T, done ) ->
-  types = new ( require './intertype-prototype' ).Intertype()
+  types = new ( require intertype_path ).Intertype()
   #.........................................................................................................
   T?.throws /cannot have two `of` props in succession/, -> try types.validate.list.of.of.text [ 42, ] catch error
     warn rvr error.message; throw error
@@ -299,6 +288,74 @@ _types                    = new ( require 'intertype' ).Intertype()
   T?.eq ( types.validate.set.of.list.of.text   new Set [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ] ), new Set [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ]
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@itproto_declare_with_function = ( T, done ) ->
+  types = new ( require intertype_path ).Intertype()
+  T?.eq ( typeof types.registry.TEST_float ), 'undefined'
+  T?.throws /expected single property, got 2/, -> try types.declare.even.TEST_float ( x ) -> Number.isFinite x catch error
+    warn rvr error.message; throw error
+  fn = types.declare.TEST_float ( x ) -> Number.isFinite x
+  T?.eq ( typeof types.registry.TEST_float ), 'function'
+  T?.ok types.registry.TEST_float is fn
+  #.........................................................................................................
+  T?.eq ( types.isa.TEST_float 1234.5678    ), true
+  T?.eq ( types.isa.TEST_float -1e26        ), true
+  T?.eq ( types.isa.TEST_float '1234.5678'  ), false
+  T?.eq ( types.isa.TEST_float NaN          ), false
+  T?.eq ( types.isa.TEST_float Infinity     ), false
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@itproto_declare_with_object = ( T, done ) ->
+  types = new ( require intertype_path ).Intertype()
+  T?.eq ( typeof types.registry.TEST_quantity ), 'undefined'
+  #.........................................................................................................
+  fn = types.declare.TEST_quantity
+    isa:      ( x ) -> @isa.object x
+    $value:   'float'
+    $unit:    'nonempty.text'
+    default:
+      value:    0
+      unit:     null
+  #.........................................................................................................
+  T?.eq ( typeof types.registry.TEST_quantity ), 'function'
+  T?.ok types.registry.TEST_quantity is fn
+  #.........................................................................................................
+  T?.eq ( types.isa.TEST_quantity { value: 1, unit: 'm', }        ), true
+  T?.eq ( types.isa.TEST_quantity 'red'        ), false
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@itproto_declare_with_list = ( T, done ) ->
+  types = new ( require intertype_path ).Intertype()
+  T?.eq ( typeof types.registry.TEST_color ), 'undefined'
+  fn = types.declare.TEST_color [ 'red', 'green', 'blue', ]
+  T?.eq ( typeof types.registry.TEST_color ), 'function'
+  T?.ok types.registry.TEST_color is fn
+  #.........................................................................................................
+  debug '^011-1^', types.isa.TEST_color 'red'
+  debug '^011-1^', types.isa.TEST_color 'mauve'
+  T?.eq ( types.isa.TEST_color 'red'        ), true
+  T?.eq ( types.isa.TEST_color 'green'      ), true
+  T?.eq ( types.isa.TEST_color 'blue'       ), true
+  T?.eq ( types.isa.TEST_color 'mauve'      ), false
+  T?.eq ( types.isa.TEST_color [ 'red', ]   ), false
+  T?.eq ( types.isa.TEST_color [ 'mauve', ] ), false
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@itproto_cannot_redeclare = ( T, done ) ->
+  types = new ( require intertype_path ).Intertype()
+  T?.eq ( typeof types.registry.TEST_float ), 'undefined'
+  types.declare.TEST_color [ 'red', 'green', 'blue', ]
+  T?.throws /cannot redeclare type 'TEST_color'/, -> try types.declare.TEST_color -> catch error
+    warn rvr error.message; throw error
+  done?()
+
+
 
 ############################################################################################################
 if module is require.main then do =>
@@ -306,6 +363,8 @@ if module is require.main then do =>
   # test @itproto_of
   # @itproto_transitive_of()
   # test @itproto_transitive_of
-  @itproto_validate()
-  test @itproto_validate
-  # test @
+  # @itproto_validate()
+  # test @itproto_validate
+  # @itproto_declare_with_list()
+  # test @itproto_declare_with_list
+  test @

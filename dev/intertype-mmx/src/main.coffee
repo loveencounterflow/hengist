@@ -23,7 +23,7 @@ rvr                       = GUY.trm.reverse
 nameit                    = ( name, f ) -> Object.defineProperty f, 'name', { value: name, }
 #...........................................................................................................
 test                      = require 'guy-test'
-types                     = new ( require '../../../apps/intertype' ).Intertype()
+types                     = new ( require 'intertype-legacy' ).Intertype()
 #...........................................................................................................
 hide @, 'Multimix', ( require '../../../apps/multimix' ).Multimix
 Multimix                  = @Multimix
@@ -149,10 +149,15 @@ class @Intertype
 @Intertype._get_handlers = ( hub ) ->
   R =
     #-------------------------------------------------------------------------------------------------------
-    declare: ( props, isa ) ->
+    declare: ( props, dsc ) ->
       unless ( arity = props.length ) is 1
         throw new Error "expected single property, got #{arity}: #{rpr props}"
       [ name, ]             = props
+      if hub.registry[ name ]?
+        throw new Error "cannot redeclare type #{rpr name}"
+      #.....................................................................................................
+      isa = dsc # intertype_declare_dsc
+      #.....................................................................................................
       hub.registry[ name ]  = R = nameit name, ( props, x ) -> isa x
       return R
 
