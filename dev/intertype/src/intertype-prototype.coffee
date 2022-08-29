@@ -47,14 +47,16 @@ class @Intertype
     hub           = @
     clasz         = @constructor
     handlers      = clasz._get_handlers hub
-    @isa          = new Multimix { hub, handler: handlers.isa,     }
-    @declare      = new Multimix { hub, handler: handlers.declare, }
+    @declare      = new Multimix { hub, handler: handlers.declare,  }
+    @validate     = new Multimix { hub, handler: handlers.validate, }
+    @isa          = new Multimix { hub, handler: handlers.isa,      }
     @mmx          = @isa[Multimix.symbol]
     @state        = @mmx.state
     @state.trace  = []
     #---------------------------------------------------------------------------------------------------------
     ### TAINT this part goes into declarations ###
     @registry =
+      boolean:  ( x ) -> ( x is true ) or ( x is false )
       integer:  ( x ) -> ( Number.isFinite x ) and ( x is Math.floor x )
       text:     ( x ) -> ( typeof x ) is 'string'
       list:     ( x ) -> Array.isArray x
@@ -147,18 +149,26 @@ class @Intertype
 @Intertype._get_handlers = ( hub ) ->
   R =
     #-------------------------------------------------------------------------------------------------------
-    isa: ( props, x ) ->
-      unless ( arity = props.length ) > 0
-        throw new Error "expected at least one property, got #{arity}: #{rpr props}"
-      return hub._isa props, x, 0
-
-    #-------------------------------------------------------------------------------------------------------
     declare: ( props, isa ) ->
       unless ( arity = props.length ) is 1
         throw new Error "expected single property, got #{arity}: #{rpr props}"
       [ name, ]             = props
       hub.registry[ name ]  = R = nameit name, ( props, x ) -> isa x
       return R
+
+    #-------------------------------------------------------------------------------------------------------
+    validate: ( props, x ) ->
+      unless ( arity = props.length ) > 0
+        throw new Error "expected at least one property, got #{arity}: #{rpr props}"
+      return x if hub._isa props, x, 0
+      ### TAINT use tracing ###
+      throw new Error "not a valid #{props.join '.'}: #{rpr x}"
+
+    #-------------------------------------------------------------------------------------------------------
+    isa: ( props, x ) ->
+      unless ( arity = props.length ) > 0
+        throw new Error "expected at least one property, got #{arity}: #{rpr props}"
+      return hub._isa props, x, 0
 
   #---------------------------------------------------------------------------------------------------------
   return R

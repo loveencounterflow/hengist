@@ -254,10 +254,58 @@ _types                    = new ( require 'intertype' ).Intertype()
 #   done?()
 
 
+#-----------------------------------------------------------------------------------------------------------
+@itproto_validate = ( T, done ) ->
+  types = new ( require './intertype-prototype' ).Intertype()
+  #.........................................................................................................
+  T?.throws /cannot have two `of` props in succession/, -> try types.validate.list.of.of.text [ 42, ] catch error
+    warn rvr error.message; throw error
+  T?.throws /cannot have `of` as first prop/,           -> try types.validate.of.integer 42 catch error
+    warn rvr error.message; throw error
+  T?.throws /cannot have `of` as last prop/,            -> try types.validate.list.of [ 42, ] catch error
+    warn rvr error.message; throw error
+  T?.throws /unknown type 'omg'/, -> try types.validate.omg 'helo' catch error
+    warn rvr error.message; throw error
+  #.........................................................................................................
+  T?.throws /not a valid list/, -> try types.validate.list 'helo' catch error
+    warn rvr error.message; throw error
+  T?.throws /not a valid set/, -> try types.validate.set new Map() catch error
+    warn rvr error.message; throw error
+  T?.throws /not a valid list\.of\.integer/,        -> try types.validate.list.of.integer       [ 4, 5, 6, true, ]                            catch error
+    warn rvr error.message; throw error
+  T?.throws /not a valid list\.of\.integer/,        -> try types.validate.list.of.integer       [ 'helo', ]                                   catch error
+    warn rvr error.message; throw error
+  T?.throws /not a valid list\.of\.integer/,        -> try types.validate.list.of.integer       6                                             catch error
+    warn rvr error.message; throw error
+  T?.throws /not a valid list\.of\.text/,           -> try types.validate.list.of.text          'helo'                                        catch error
+    warn rvr error.message; throw error
+  T?.throws /not a valid set\.of\.text/,            -> try types.validate.set.of.text           'helo'                                        catch error
+    warn rvr error.message; throw error
+  T?.throws /not a valid set\.of\.list\.of\.text/,  -> try types.validate.set.of.list.of.text   'helo'                                        catch error
+    warn rvr error.message; throw error
+  T?.throws /not a valid list\.of\.list\.of\.text/, -> try types.validate.list.of.list.of.text          [ [ 'a', 'b', ], [ 'c', ], [ 42, ], ] catch error
+    warn rvr error.message; throw error
+  #.........................................................................................................
+  T?.eq ( types.validate.list []                                                              ), []
+  T?.eq ( types.validate.set  new Set 'helo'                                                  ), new Set 'helo'
+  T?.eq ( types.validate.boolean               true                                           ), true
+  T?.eq ( types.validate.boolean               false                                          ), false
+  T?.eq ( types.validate.list.of.text          []                                             ), []
+  T?.eq ( types.validate.list.of.integer       []                                             ), []
+  T?.eq ( types.validate.list.of.text          [ 'helo', ]                                    ), [ 'helo', ]
+  T?.eq ( types.validate.list.of.integer       [ 4, 5, 6, ]                                   ), [ 4, 5, 6, ]
+  T?.eq ( types.validate.set.of.text           new Set 'helo'                                 ), new Set 'helo'
+  T?.eq ( types.validate.list.of.list.of.text          [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ] ),         [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ]
+  T?.eq ( types.validate.set.of.list.of.text   new Set [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ] ), new Set [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ]
+  done?()
+
+
 ############################################################################################################
 if module is require.main then do =>
   # test @itproto_can_access_mmx_state
   # test @itproto_of
   # @itproto_transitive_of()
   # test @itproto_transitive_of
-  test @
+  @itproto_validate()
+  test @itproto_validate
+  # test @
