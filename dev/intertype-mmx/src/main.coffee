@@ -23,12 +23,20 @@ rvr                       = GUY.trm.reverse
 nameit                    = ( name, f ) -> Object.defineProperty f, 'name', { value: name, }
 #...........................................................................................................
 test                      = require 'guy-test'
-types                     = new ( require 'intertype-legacy' ).Intertype()
+### TAINT preliminary ###
+types                     = ( require './types' ).types
+defaults                  = ( require './types' ).defaults
 #...........................................................................................................
-hide @, 'Multimix', ( require '../../../apps/multimix' ).Multimix
+hide @, 'Multimix', ( require 'multimix' ).Multimix
 Multimix                  = @Multimix
+E                         = require './errors'
 notavalue                 = Symbol 'notavalue'
 misfit                    = Symbol 'misfit'
+Type_factory              = ( require './type-factory' ).Type_factory
+#...........................................................................................................
+hide @, 'errors',       E
+hide @, 'Type_factory', Type_factory
+
 
 #---------------------------------------------------------------------------------------------------------
 size_of = ( x, fallback = misfit ) ->
@@ -47,6 +55,7 @@ class @Intertype
     hub           = @
     clasz         = @constructor
     handlers      = clasz._get_handlers hub
+    GUY.props.hide @, 'type_factory', new Type_factory @
     @declare      = new Multimix { hub, handler: handlers.declare,  }
     @validate     = new Multimix { hub, handler: handlers.validate, }
     @isa          = new Multimix { hub, handler: handlers.isa,      }
@@ -148,18 +157,19 @@ class @Intertype
 #-----------------------------------------------------------------------------------------------------------
 @Intertype._get_handlers = ( hub ) ->
   R =
-    #-------------------------------------------------------------------------------------------------------
+
+    #---------------------------------------------------------------------------------------------------------
     declare: ( props, dsc ) ->
       unless ( arity = props.length ) is 1
         throw new Error "expected single property, got #{arity}: #{rpr props}"
       [ name, ]             = props
       if hub.registry[ name ]?
         throw new Error "cannot redeclare type #{rpr name}"
-      #.....................................................................................................
-      isa = dsc # intertype_declare_dsc
-      #.....................................................................................................
-      hub.registry[ name ]  = R = nameit name, ( props, x ) -> isa x
-      return R
+      dsc                       = @type_factory.create_type name, dsc
+      debug '^400-1^', dsc
+      @registry[ dsc.name ]     = dsc
+      # @_collections.add dsc.typename if dsc.collection
+      return dsc
 
     #-------------------------------------------------------------------------------------------------------
     validate: ( props, x ) ->

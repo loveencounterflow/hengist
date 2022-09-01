@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/helpers.coffee"
+  ],
+  "names": [],
+  "mappings": "AACA;EAAA;EAGA,IAAC,CAAA,SAAD,GAA8B,gBAH9B;;;EAKA,IAAC,CAAA,MAAD,GAA8B,QAAA,CAAE,IAAF,EAAQ,CAAR,CAAA;WAAe,MAAM,CAAC,cAAP,CAAsB,CAAtB,EAAyB,MAAzB,EAAiC;MAAE,KAAA,EAAO;IAAT,CAAjC;EAAf;;EACxB,IAAC,CAAA,gBAAP,MAAA,cAAA,CAAA;AANA",
+  "sourcesContent": [
+    "\n'use strict'\n\n\n@deep_copy                  = structuredClone\n# @equals                     = require '../deps/jkroso-equals'\n@nameit                     = ( name, f ) -> Object.defineProperty f, 'name', { value: name, }\nclass @Intertype_abc\n\n\n\n"
+  ]
+}
