@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var GUY, Multimix, alert, debug, echo, help, hide, info, inspect, log, misfit, nameit, notavalue, plain, praise, rpr, rvr, size_of, test, tree, types, urge, warn, whisper;
+  /* TAINT preliminary */
+  var E, GUY, Multimix, Type_factory, alert, debug, defaults, echo, help, hide, info, inspect, log, misfit, nameit, notavalue, plain, praise, rpr, rvr, size_of, test, tree, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -22,16 +23,27 @@
   //...........................................................................................................
   test = require('guy-test');
 
-  types = new (require('intertype-legacy')).Intertype();
+  types = (require('./types')).types;
+
+  defaults = (require('./types')).defaults;
 
   //...........................................................................................................
-  hide(this, 'Multimix', (require('../../../apps/multimix')).Multimix);
+  hide(this, 'Multimix', (require('multimix')).Multimix);
 
   Multimix = this.Multimix;
+
+  E = require('./errors');
 
   notavalue = Symbol('notavalue');
 
   misfit = Symbol('misfit');
+
+  Type_factory = (require('./type-factory')).Type_factory;
+
+  //...........................................................................................................
+  hide(this, 'errors', E);
+
+  hide(this, 'Type_factory', Type_factory);
 
   //---------------------------------------------------------------------------------------------------------
   size_of = function(x, fallback = misfit) {
@@ -56,6 +68,7 @@
       hub = this;
       clasz = this.constructor;
       handlers = clasz._get_handlers(hub);
+      GUY.props.hide(this, 'type_factory', new Type_factory(this));
       this.declare = new Multimix({
         hub,
         handler: handlers.declare
@@ -251,9 +264,9 @@
   this.Intertype._get_handlers = function(hub) {
     var R;
     R = {
-      //-------------------------------------------------------------------------------------------------------
+      //---------------------------------------------------------------------------------------------------------
       declare: function(props, dsc) {
-        var arity, isa, name;
+        var arity, name;
         if ((arity = props.length) !== 1) {
           throw new Error(`expected single property, got ${arity}: ${rpr(props)}`);
         }
@@ -261,13 +274,11 @@
         if (hub.registry[name] != null) {
           throw new Error(`cannot redeclare type ${rpr(name)}`);
         }
-        //.....................................................................................................
-        isa = dsc; // intertype_declare_dsc
-        //.....................................................................................................
-        hub.registry[name] = R = nameit(name, function(props, x) {
-          return isa(x);
-        });
-        return R;
+        dsc = this.type_factory.create_type(name, dsc);
+        debug('^400-1^', dsc);
+        this.registry[dsc.name] = dsc;
+        // @_collections.add dsc.typename if dsc.collection
+        return dsc;
       },
       //-------------------------------------------------------------------------------------------------------
       validate: function(props, x) {
