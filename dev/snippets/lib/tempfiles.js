@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, FS, PATH, TEMP, UTIL, badge, data, debug, demo_temp, demo_tempy_directory, demo_tempy_file, echo, glob, help, info, rpr, temp, time_now, urge, warn, whisper;
+  var CND, FS, PATH, badge, debug, demo_temp, demo_tempy_directory, demo_tempy_file, echo, glob, help, info, rpr, time_now, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -98,32 +98,26 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_temp = function() {};
-
-  TEMP = require('temp');
-
-  FS = require('fs');
-
-  UTIL = require('util');
-
-  data = "foo\nbar\nfoo\nbaz";
-
-  // exec  = ( require 'child_process' ).exec
-  // Automatically track and cleanup files at exit
-  // TEMP.track()
-  TEMP.cleanupSync();
-
-  debug(temp = TEMP.openSync({
-    dir: '/dev/shm',
-    prefix: 'dbay-',
-    suffix: '.sqlite'
-  }));
-
-  FS.writeSync(temp.fd, data);
-
-  debug(rpr(FS.readFileSync(temp.path, {
-    encoding: 'utf-8'
-  })));
+  demo_temp = function() {
+    var TEMP, UTIL, data, temp;
+    TEMP = require('temp');
+    FS = require('fs');
+    UTIL = require('util');
+    data = "foo\nbar\nfoo\nbaz";
+    // exec  = ( require 'child_process' ).exec
+    // Automatically track and cleanup files at exit
+    // TEMP.track()
+    TEMP.cleanupSync();
+    debug(temp = TEMP.openSync({
+      dir: '/dev/shm',
+      prefix: 'dbay-',
+      suffix: '.sqlite'
+    }));
+    FS.writeSync(temp.fd, data);
+    return debug(rpr(FS.readFileSync(temp.path, {
+      encoding: 'utf-8'
+    })));
+  };
 
   //   if (!err) {
   //     fs.write(info.fd, data, (err) => {
