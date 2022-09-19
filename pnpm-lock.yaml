@@ -107,6 +107,7 @@ specifiers:
   paper-jsdom: ^0.12.15
   paragate: 4.0.0
   path-intersection: ^2.2.1
+  pdf-lib: '1.4'
   picomatch: ^2.3.1
   pkg-dir: ^6.0.1
   prql-js: ^0.1.3
@@ -252,6 +253,7 @@ dependencies:
   paper-jsdom: 0.12.15
   paragate: 4.0.0
   path-intersection: 2.2.1
+  pdf-lib: 1.4.1
   picomatch: 2.3.1
   pkg-dir: 6.0.1
   prql-js: 0.1.3
@@ -621,6 +623,19 @@ packages:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.13.0
+    dev: false
+
+  /@pdf-lib/standard-fonts/0.0.4:
+    resolution: {integrity: sha512-2pg8hXnChVAF6aSFraXtwB0cx/AgE15FvuLJbdPJSq9LYp1xMp0lapH4+t1HsdD9cA05rnWYLqlEBwS4YK1jLg==}
+    dependencies:
+      base64-arraybuffer: 0.1.5
+      pako: 1.0.11
+    dev: false
+
+  /@pdf-lib/upng/1.0.1:
+    resolution: {integrity: sha512-dQK2FUMQtowVP00mtIksrlZhdFXQZPC+taih1q4CvPZ5vqdxR/LKBaFg0oAfzd1GlHZXXSPdQfzQnt+ViGvEIQ==}
+    dependencies:
+      pako: 1.0.11
     dev: false
 
   /@prantlf/railroad-diagrams/1.0.1:
@@ -995,6 +1010,11 @@ packages:
 
   /balanced-match/1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
+    dev: false
+
+  /base64-arraybuffer/0.1.5:
+    resolution: {integrity: sha512-437oANT9tP582zZMwSvZGy2nmSeAb8DW2me3y+Uv1Wp2Rulr8Mqlyrv3E7MLxmsiaPSMMDmiDVzgE+e8zlMx9g==}
+    engines: {node: '>= 0.6.0'}
     dev: false
 
   /base64-js/0.0.8:
@@ -3912,6 +3932,10 @@ packages:
     resolution: {integrity: sha512-NUcwaKxUxWrZLpDG+z/xZaCgQITkA/Dv4V/T6bw7VON6l1Xz/VnrBqrYjZQ12TamKHzITTfOEIYUj48y2KXImA==}
     dev: false
 
+  /pako/1.0.11:
+    resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
+    dev: false
+
   /panzoom/9.4.3:
     resolution: {integrity: sha512-xaxCpElcRbQsUtIdwlrZA90P90+BHip4Vda2BC8MEb4tkI05PmR6cKECdqUCZ85ZvBHjpI9htJrZBxV5Gp/q/w==}
     dependencies:
@@ -4045,6 +4069,15 @@ packages:
     resolution: {integrity: sha512-e3FBlXLmN/D1S+zHzanP4E/4Z60oFAa3O051qt1pxa7DEJWKAyil6upYVXCWadEnuoqa4Pkc9oUx9zsxYeRv8A==}
     dependencies:
       through: 2.3.8
+    dev: false
+
+  /pdf-lib/1.4.1:
+    resolution: {integrity: sha512-Fj72wP2ZNIr797953v+8iQSH0argRdFkd8nbW+q0ngsuocgwCC9FT7sSXLsaSsUGM5eNKQlKJNHvWQlo7+ROJA==}
+    dependencies:
+      '@pdf-lib/standard-fonts': 0.0.4
+      '@pdf-lib/upng': 1.0.1
+      pako: 1.0.11
+      tslib: 1.14.1
     dev: false
 
   /permute/1.0.0:
