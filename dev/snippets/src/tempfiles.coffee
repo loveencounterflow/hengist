@@ -70,25 +70,25 @@ demo_tempy_file = ->
 
 #-----------------------------------------------------------------------------------------------------------
 demo_temp = ->
-TEMP  = require 'temp'
-FS    = require 'fs'
-UTIL  = require 'util'
-data  = "foo\nbar\nfoo\nbaz"
-# exec  = ( require 'child_process' ).exec
-# Automatically track and cleanup files at exit
-# TEMP.track()
-TEMP.cleanupSync()
-debug temp = TEMP.openSync { dir: '/dev/shm', prefix: 'dbay-', suffix: '.sqlite' }
-FS.writeSync temp.fd, data
-debug rpr FS.readFileSync temp.path, { encoding: 'utf-8', }
-#   if (!err) {
-#     fs.write(info.fd, data, (err) => {
-#         console.log(err)
-#     })
-#     fs.close(info.fd, function(err) {
-#       exec("grep foo '" + info.path + "' | wc -l", function(err, stdout) {
-#         util.puts(stdout.trim())
-#   return null
+  TEMP  = require 'temp'
+  FS    = require 'fs'
+  UTIL  = require 'util'
+  data  = "foo\nbar\nfoo\nbaz"
+  # exec  = ( require 'child_process' ).exec
+  # Automatically track and cleanup files at exit
+  # TEMP.track()
+  TEMP.cleanupSync()
+  debug temp = TEMP.openSync { dir: '/dev/shm', prefix: 'dbay-', suffix: '.sqlite' }
+  FS.writeSync temp.fd, data
+  debug rpr FS.readFileSync temp.path, { encoding: 'utf-8', }
+  #   if (!err) {
+  #     fs.write(info.fd, data, (err) => {
+  #         console.log(err)
+  #     })
+  #     fs.close(info.fd, function(err) {
+  #       exec("grep foo '" + info.path + "' | wc -l", function(err, stdout) {
+  #         util.puts(stdout.trim())
+  #   return null
 
 
 ############################################################################################################
