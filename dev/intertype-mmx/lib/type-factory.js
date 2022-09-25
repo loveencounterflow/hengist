@@ -140,7 +140,7 @@
   //           try
   //             return f x
   //           catch error
-  //             throw error if @hub.cfg.errors is 'throw' or error instanceof E.Intertype_error
+  //             throw error if @hub.cfg.errors or error instanceof E.Intertype_error
   //             @hub.state.error = error
   //           return false
   //         @hub.push_hedgeresult [ '▲nt2', @hub.state.isa_depth, dsc.name, x, R ]
