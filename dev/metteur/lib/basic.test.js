@@ -34,8 +34,8 @@
         var e;
         try {
           return new MTR.Template();
-        } catch (error) {
-          e = error;
+        } catch (error1) {
+          e = error1;
           warn(rvr(e.message));
           throw e;
         }
@@ -61,8 +61,8 @@
         var e;
         try {
           return tpl.NONEXISTANT;
-        } catch (error) {
-          e = error;
+        } catch (error1) {
+          e = error1;
           warn(rvr(e.message));
           throw e;
         }
@@ -73,8 +73,8 @@
         var e;
         try {
           return tpl.cfg.NONEXISTANT;
-        } catch (error) {
-          e = error;
+        } catch (error1) {
+          e = error1;
           warn(rvr(e.message));
           throw e;
         }
@@ -131,8 +131,8 @@
           return tpl.fill_all({
             answer: 42
           });
-        } catch (error) {
-          e = error;
+        } catch (error1) {
+          e = error1;
           warn(rvr(e.message));
           throw e;
         }
@@ -152,8 +152,8 @@
         var e;
         try {
           return tpl.fill_all({});
-        } catch (error) {
-          e = error;
+        } catch (error1) {
+          e = error1;
           warn(rvr(e.message));
           throw e;
         }
@@ -325,8 +325,8 @@
         var e;
         try {
           return tpl.fill_all(facets);
-        } catch (error) {
-          e = error;
+        } catch (error1) {
+          e = error1;
           warn(rvr(e.message));
           throw e;
         }
@@ -336,15 +336,98 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.mtr_template_demo_splitting = function(T, done) {
-    var MTR, template, tpl;
+  this.mtr_split_caches_validation_results = async function(T, done) {
+    var MTR, error, i, k, len, matcher, mtr, probe, probes_and_matchers;
     MTR = require('../../../apps/metteur');
+    mtr = new MTR.Metteur();
     //.........................................................................................................
-    template = "I have {count1} {fruit1...} and {count2} {fruit2} and that's {what}.";
-    tpl = new MTR.Template({template});
-    debug('^4534^', tpl._segments);
-    debug('^4534^', tpl._mark_idxs);
-    debug('^4534^', tpl._idx_directions);
+    probes_and_matchers = [
+      [
+        '3',
+        [
+          {
+            pnr: 3,
+            count: -1
+          }
+        ]
+      ],
+      [
+        '3,-1',
+        [
+          {
+            pnr: 3,
+            count: -1
+          },
+          {
+            pnr: -1,
+            count: -1
+          }
+        ]
+      ],
+      ['x',
+      null,
+      /not a valid/],
+      ['3,x',
+      null,
+      /not a valid/],
+      [
+        '3:1',
+        [
+          {
+            pnr: 3,
+            count: 1
+          }
+        ]
+      ],
+      [
+        '3:1,-1:2',
+        [
+          {
+            pnr: 3,
+            count: 1
+          },
+          {
+            pnr: -1,
+            count: 2
+          }
+        ]
+      ],
+      [
+        '-0',
+        [
+          {
+            pnr: -0,
+            count: -1
+          }
+        ]
+      ]
+    ];
+    //.........................................................................................................
+    // mtr.types.validate.mtr_split '3,x'
+    // mtr.types.validate.mtr_split 'x'
+    debug((function() {
+      var results;
+      results = [];
+      for (k in T) {
+        results.push(k);
+      }
+      return results;
+    })());
+    if (T != null) {
+      T.neq(+0, -0);
+    }
+    if (T != null) {
+      T.eq(+0, +0);
+    }
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          mtr.types.validate.mtr_split(probe);
+          return resolve(mtr.types.state.data.mtr_split.pnrs);
+        });
+      });
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -356,9 +439,12 @@
       // @mtr_template_demo_splitting()
       // test @mtr_template_accepts_custom_braces
       // test @mtr_template_honours_triple_dots
-      return test(this);
+      // @mtr_split_caches_validation_results()
+      return test(this.mtr_split_caches_validation_results);
     })();
   }
+
+  // test @
 
 }).call(this);
 

@@ -1509,7 +1509,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.validate_returns_value = function(T, done) {
-    var Intertype, d, types;
+    var Intertype, d, error, types;
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype();
@@ -1532,43 +1532,18 @@
       value: 4,
       unit: 'kB'
     };
-    //.........................................................................................................
-    info('^321-1^', types.validate.float(12.3));
-    echo(types.get_state_report({
-      format: 'failing'
-    }));
-    info('^321-1^', types.validate.fortytwo(12.3));
-    echo(types.get_state_report({
-      format: 'failing'
-    }));
-    info('^321-1^', types.validate.fortytwo(42));
-    echo(types.get_state_report({
-      format: 'failing'
-    }));
-    info('^321-2^', types.isa.object(d));
-    echo(types.get_state_report({
-      format: 'failing'
-    }));
-    info('^321-3^', types.isa.quantity(d));
-    echo(types.get_state_report({
-      format: 'failing'
-    }));
-    info('^321-3^', types.isa.quantity(null));
-    echo(types.get_state_report({
-      format: 'failing'
-    }));
-    info('^321-4^', types.validate.quantity(d));
-    echo(types.get_state_report({
-      format: 'failing'
-    }));
-    if (T != null) {
-      T.eq(types.validate.float(12.3), 12.3);
+    types.validate.fortytwo(42);
+    try {
+      types.validate.fortytwo(123);
+    } catch (error1) {
+      error = error1;
+      warn(rvr(error.message));
     }
-    if (T != null) {
-      T.eq(types.validate.quantity(d), d);
-    }
-    if (T != null) {
-      T.ok((types.validate.quantity(d)) === d);
+    try {
+      types.validate.positive1.fortytwo(123);
+    } catch (error1) {
+      error = error1;
+      warn(rvr(error.message));
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -2463,7 +2438,9 @@
     (() => {      //.........................................................................................................
       // 1  Branden
       var types;
-      types = new Intertype(); // 2  Thomasine
+      types = new Intertype({
+        errors: false // 2  Thomasine
+      });
       if (T != null) {
         T.eq(types.cfg.errors, false); // 3  Kellee
       }
@@ -2539,11 +2516,9 @@
     (() => {      //......................................................................................................... # 27 Carl
       // 28 Alia
       var types;
-      types = new Intertype({
-        errors: 'throw' // 29 Nella
-      });
+      types = new Intertype(); // 29 Nella
       if (T != null) {
-        T.eq(types.cfg.errors, 'throw'); // 30 Mauricio
+        T.eq(types.cfg.errors, true); // 30 Mauricio
       }
       if (T != null) {
         T.eq(types.state.error, null); // 31 Fe
@@ -2600,9 +2575,7 @@
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     //.........................................................................................................
-    types = new Intertype({
-      errors: 'throw'
-    });
+    types = new Intertype();
     ({declare, isa, validate, create} = types);
     //.........................................................................................................
     declare.quantity({
@@ -3182,8 +3155,7 @@
       3.5]]],
       [['optional.list.of.optional.integer.or.nonempty.text',
       false]],
-      [['optional.list.of.optional.integer.or.nonempty.text',
-      null]],
+      // [ [ 'optional.list.of.optional.integer.or.nonempty.text', null, ], ] ### TAINT doesn't work??? ###
       [['integer.or.boolean.or.text.or.list.of.integer',
       ['x']]]
     ];
@@ -3197,6 +3169,7 @@
           echo();
           echo();
           echo(GUY.trm.grey('—————————————————————————————————————————————————————————————————'));
+          echo({hedgerow, value});
           echo();
           error = null;
           result = false;
@@ -3229,7 +3202,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.intertype_tracing_2 = function(T, done) {
+  this._intertype_tracing_2 = function(T, done) {
     var Intertype, cleanup, create, declare, isa, noresult, types, validate;
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
@@ -3499,7 +3472,7 @@
         return validate.optional.list.of.rectangle(123);
       } catch (error1) {
         error = error1;
-        return warn('^443^', error.message);
+        return warn('^443-1^', error.message);
       }
     })();
     (() => {      //.........................................................................................................
@@ -3508,12 +3481,31 @@
         return validate.list.of.rectangle(bad_probe);
       } catch (error1) {
         error = error1;
-        warn('^443^', error.message);
+        warn('^443-2^', rvr(error.message));
         result = error.message;
         return T != null ? T.ok((result.match(/\(Intertype_validation_error\) not a valid list\.of\.rectangle; failing tests: F validate float null ◀ F validate quantity.value:float \{/)) !== null) : void 0;
       }
     })();
     return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._intertype_demo_improved_validation_errors = function() {
+    var Intertype, error, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype({
+      errors: false
+    });
+    try {
+      types.validate.text(42);
+    } catch (error1) {
+      error = error1;
+      warn(error.message);
+    }
+    types.validate.text(42);
+    //.........................................................................................................
+    return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -3736,13 +3728,15 @@
     // @_demo_postconditions()
     // @validate_1()
     // test @validate_1
-    // test @
-    // test @intertype_tracing
-    // test @intertype_tracing_2
-    // test @intertype_improved_validation_errors
-    this.validate_returns_value();
-    test(this.validate_returns_value);
+    // @_intertype_demo_improved_validation_errors()
+    test(this);
   }
+
+  // test @intertype_tracing
+// test @_intertype_tracing_2
+// test @intertype_improved_validation_errors
+// @validate_returns_value()
+// test @validate_returns_value
 
 }).call(this);
 
