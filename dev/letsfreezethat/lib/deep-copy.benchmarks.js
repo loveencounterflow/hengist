@@ -272,10 +272,10 @@
   //-----------------------------------------------------------------------------------------------------------
   this.run_benchmarks = async function() {
     var _, bench, cfg, i, j, len, ref, ref1, repetitions, test_name, test_names;
-    // debug '^446^', Object.keys ( require '../letsfreezethat@2.2.5' )
-    // debug '^446^', Object.keys lft225
-    // debug '^446^', Object.keys lft310
-    // process.exit 119
+    debug('^446^', Object.keys(require('../letsfreezethat@2.2.5')));
+    debug('^446^', Object.keys(lft225));
+    debug('^446^', Object.keys(lft310));
+    process.exit(119);
     bench = BM.new_benchmarks();
     cfg = {
       set_count: 100,
@@ -310,7 +310,7 @@
     })();
   }
 
-  // globalThis.structuredClone
+  globalThis.structuredClone;
 
 }).call(this);
 
