@@ -106,6 +106,9 @@
       },
       "@isa_optional.function x.create": function(x) {
         return this.isa_optional.function(x.create);
+      },
+      "@isa_optional.function x.cast": function(x) {
+        return this.isa_optional.function(x.cast);
       }
     }
   });
@@ -118,7 +121,8 @@
     fields: null,
     collection: false,
     /* `default` omitted on purpose */
-    create: null, // refers to result of `type.create()`
+    create: null,
+    cast: null,
     // copy:             false     # refers to result of `type.create()`
     // seal:             false     # refers to result of `type.create()`
     freeze: false, // refers to result of `type.create()`

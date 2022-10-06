@@ -347,7 +347,7 @@
         [
           {
             pnr: 3,
-            count: -1
+            count: 2e308
           }
         ]
       ],
@@ -356,11 +356,11 @@
         [
           {
             pnr: 3,
-            count: -1
+            count: 2e308
           },
           {
             pnr: -1,
-            count: -1
+            count: 2e308
           }
         ]
       ],
@@ -397,7 +397,7 @@
         [
           {
             pnr: -0,
-            count: -1
+            count: 2e308
           }
         ]
       ]
@@ -413,21 +413,86 @@
       }
       return results;
     })());
-    if (T != null) {
-      T.neq(+0, -0);
-    }
-    if (T != null) {
-      T.eq(+0, +0);
-    }
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           mtr.types.validate.mtr_split(probe);
-          return resolve(mtr.types.state.data.mtr_split.pnrs);
+          return resolve(mtr.types.data.mtr_split);
         });
       });
     }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._demo_pdf_generation_jspdf = async function(T, done) {
+    var FS, PATH, jsPDF;
+    PATH = require('node:path');
+    FS = require('node:fs');
+    ({jsPDF} = require('jspdf'));
+    await GUY.temp.with_directory({
+      keep: true
+    }, function({path}) {
+      var doc, dy, i, my_font, x, y;
+      doc = new jsPDF();
+      y = 0;
+      dy = 10;
+      // font_path = PATH.join __dirname, '../../../apps/metteur/fonts/EBGaramond08-Regular.ttf'
+      // font_path = '/home/flow/io/mingkwai-rack/jizura-fonts/fonts/Alegreya/Alegreya-Italic.ttf'
+      my_font = FS.readFileSync(font_path);
+      doc.addFileToVFS('my_font.ttf', my_font);
+      doc.addFont('my_font.ttf', 'my_font', 'normal');
+      return null;
+      doc.setFont('my_font');
+      for (x = i = 0; i <= 210; x = i += +10) {
+        doc.text("Hello world!", x, y);
+        y += dy;
+      }
+      path = '/tmp/guy.temp--2905412-Uu7YRujOlg0V/a4.pdf';
+      // path = PATH.join path, 'a4.pdf'
+      doc.save(path);
+      return help(`^53784^ output saved to ${path}`);
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._demo_pdf_generation_pdflib = async function(T, done) {
+    var FS, PATH, PDFDocument, doc_path, doc_raw, fontBytes, font_path, fontkit, jsPDF, mm_from_pt, my_font, page, pdfDoc, pt_from_mm, size, x, y;
+    PATH = require('node:path');
+    FS = require('node:fs');
+    ({jsPDF} = require('jspdf'));
+    // await GUY.temp.with_directory { keep: true, }, ({ path }) ->
+    ({PDFDocument} = require('pdf-lib'));
+    doc_path = '/tmp/guy.temp--2905412-Uu7YRujOlg0V/a4.pdf';
+    fontkit = require('@pdf-lib/fontkit');
+    font_path = PATH.join(__dirname, '../../../apps/metteur/fonts/EBGaramond08-Regular.ttf');
+    fontBytes = FS.readFileSync(font_path);
+    // debug ( k for k of fontBytes )
+    // fontBytes = fontBytes.arrayBuffer()
+    mm_from_pt = function(pt) {
+      return pt / 72 * 25.4;
+    };
+    pt_from_mm = function(mm) {
+      return mm / 25.4 * 72;
+    };
+    pdfDoc = (await PDFDocument.create());
+    pdfDoc.registerFontkit(fontkit);
+    my_font = (await pdfDoc.embedFont(fontBytes));
+    page = pdfDoc.addPage();
+    page.moveTo(5, 200);
+    size = pt_from_mm(10);
+    x = pt_from_mm(10);
+    y = pt_from_mm(10);
+    page.drawText("Some fancy Unicode text in the ŪЬȕǹƚü font", {
+      font: my_font,
+      x,
+      y,
+      size
+    });
+    doc_raw = (await pdfDoc.save());
+    FS.writeFileSync(doc_path, doc_raw);
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -440,11 +505,12 @@
       // test @mtr_template_accepts_custom_braces
       // test @mtr_template_honours_triple_dots
       // @mtr_split_caches_validation_results()
-      return test(this.mtr_split_caches_validation_results);
+      // test @mtr_split_caches_validation_results
+      // test @
+      // @_demo_pdf_generation_jspdf()
+      return this._demo_pdf_generation_pdflib();
     })();
   }
-
-  // test @
 
 }).call(this);
 

@@ -3696,6 +3696,523 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_equals_distinguishes_positive_from_negative_zero = function(T, done) {
+    var Intertype, types;
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    equals = require('../../../apps/intertype/deps/jkroso-equals');
+    debug('^34-1^', types.equals(-0, +0));
+    debug('^34-2^', types.equals(+0, +0));
+    debug('^34-3^', types.equals(-0, -0));
+    if (T != null) {
+      T.eq(types.equals(-0, +0), false);
+    }
+    if (T != null) {
+      T.eq(equals(-0, +0), false);
+    }
+    if (T != null) {
+      T.eq(equals(0/0, 0/0), true);
+    }
+    if (T != null) {
+      T.eq(types.equals(0/0, 0/0), true);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_can_use_detached_type_of_method = function(T, done) {
+    var Intertype, type_of, types;
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    ({type_of} = types);
+    if (T != null) {
+      T.eq(type_of(55), 'float');
+    }
+    if (T != null) {
+      T.eq(type_of({}), 'object');
+    }
+    if (T != null) {
+      T.eq(type_of(function() {}), 'function');
+    }
+    if (T != null) {
+      T.eq(type_of(async function() {
+        return (await x);
+      }), 'asyncfunction');
+    }
+    if (T != null) {
+      T.eq(type_of(/x/), 'regex');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_has_type_for_negative_zero = function(T, done) {
+    var Intertype, types;
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.isa.positive0(+0), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.negative0(-0), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.positive(+0), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.negative(-0), true);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.isa.negative(+0), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.negative0(+0), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.positive0(-0), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.positive(-0), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.positive1(-0), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.positive1(+0), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.negative1(-0), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.negative1(+0), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.isa.zero(-0), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.zero(+0), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.negative.zero(-0), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.positive.zero(+0), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.positive.zero(-0), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.negative.zero(+0), false);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_has_data_property = function(T, done) {
+    var Intertype, types;
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    //.........................................................................................................
+    if (T != null) {
+      T.ok(types.isa.object(types.data));
+    }
+    types.declare('foobar', function(x) {
+      var base;
+      ((base = this.data).foobar != null ? base.foobar : base.foobar = []).push(x);
+      return true;
+    });
+    types.isa.foobar(42);
+    types.isa.foobar("yes");
+    types.validate.foobar(false);
+    if (T != null) {
+      T.eq(types.data, {
+        foobar: [42, "yes", false]
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_ordering_of_field_and_isa_tests = function(T, done) {
+    var Intertype, collector, e, types;
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    //.........................................................................................................
+    collector = [];
+    types.declare('foobar', {
+      $myfield: 'cardinal',
+      isa: function(x) {
+        collector.push(x);
+        return true;
+      }
+    });
+    types.validate.foobar({
+      myfield: 42
+    });
+    try {
+      types.validate.foobar({
+        myfield: 1.2
+      });
+    } catch (error1) {
+      e = error1;
+      warn(rvr(e.message));
+    }
+    /* NOTE because `isa()` is now called after fields are validated, it will never be called if any field
+     is nonconformant, so only the tracing of the first probe is present in the collector: */
+    if (T != null) {
+      T.eq(collector, [
+        {
+          myfield: 42
+        }
+      ]);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_can_use_subobject_fields = function(T, done) {
+    var Intertype, create, declare, isa, noresult, types, validate;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype({
+      errors: false
+    });
+    noresult = Symbol('noresult');
+    ({declare, isa, validate, create} = types);
+    declare.quantity({
+      fields: {
+        value: 'float',
+        unit: 'nonempty.text'
+      },
+      extras: false,
+      default: {
+        value: 0,
+        unit: null
+      }
+    });
+    declare.rectangle({
+      fields: {
+        width: 'quantity',
+        height: 'quantity'
+      },
+      extras: false,
+      default: {
+        width: {
+          value: 0,
+          unit: 'mm'
+        },
+        height: {
+          value: 0,
+          unit: 'mm'
+        }
+      }
+    });
+    //.........................................................................................................
+    if (T != null) {
+      T.throws(/not a valid quantity/, function() {
+        return validate.quantity(null);
+      });
+    }
+    if (T != null) {
+      T.throws(/not a valid quantity/, function() {
+        return validate.quantity({
+          unit: 'kg'
+        });
+      });
+    }
+    if (T != null) {
+      T.eq(validate.quantity({
+        value: 0,
+        unit: 'kg'
+      }), {
+        value: 0,
+        unit: 'kg'
+      });
+    }
+    if (T != null) {
+      T.eq(create.quantity({
+        unit: 'kg'
+      }), {
+        value: 0,
+        unit: 'kg'
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_cast = function(T, done) {
+    var Intertype, cast, collector, create, declare, e, isa, show, type_of, types, validate, x;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype({
+      errors: false
+    });
+    collector = [];
+    ({declare, isa, type_of, validate, create, cast} = types);
+    declare.quantity({
+      fields: {
+        value: 'float',
+        unit: 'nonempty.text'
+      },
+      extras: false,
+      default: {
+        value: 0,
+        unit: null
+      },
+      cast: function(x) {
+        var match, unit, value;
+        if (T != null) {
+          T.ok(this instanceof Intertype);
+        }
+        if (T != null) {
+          T.ok(this === types);
+        }
+        if (!this.isa.nonempty.text(x)) {
+          return x;
+        }
+        if ((match = x.match(/^(?<value>.*?)(?<unit>\D*)$/)) == null) {
+          return x;
+        }
+        ({value, unit} = match.groups);
+        value = parseFloat(value);
+        if (!isa.float(value)) {
+          return x;
+        }
+        if (!isa.nonempty.text(unit)) {
+          return x;
+        }
+        return {value, unit};
+      }
+    });
+    declare.rectangle({
+      fields: {
+        width: 'quantity',
+        height: 'quantity'
+      },
+      extras: false,
+      default: {
+        width: {
+          value: 0,
+          unit: 'mm'
+        },
+        height: {
+          value: 0,
+          unit: 'mm'
+        }
+      },
+      cast: function(width, height) {
+        if (T != null) {
+          T.ok(this instanceof Intertype);
+        }
+        if (T != null) {
+          T.ok(this === types);
+        }
+        return {
+          width: {
+            value: width,
+            unit: 'mm'
+          },
+          height: {
+            value: height,
+            unit: 'mm'
+          }
+        };
+      }
+    });
+    //.........................................................................................................
+    // T?.eq ( type_of types.registry.quantity.cast ), 'function'
+    if (T != null) {
+      T.ok(isa.quantity({
+        value: 102,
+        unit: 'kg'
+      }));
+    }
+    show = function(x) {
+      info('^show@454^', rpr(x));
+      return x;
+    };
+    debug('^4456-1^', isa.quantity('2kg'));
+    debug('^4456-2^', cast.quantity('102kg'));
+    try {
+      cast.quantity('2e3');
+    } catch (error1) {
+      e = error1;
+      warn(rvr(e.message));
+    }
+    if (T != null) {
+      T.throws(/not a valid/, function() {
+        try {
+          return cast.quantity('2e3');
+        } catch (error1) {
+          e = error1;
+          warn(rvr(e.message));
+          throw e;
+        }
+      });
+    }
+    if (T != null) {
+      T.throws(/not a valid/, function() {
+        try {
+          return cast.quantity('kg');
+        } catch (error1) {
+          e = error1;
+          warn(rvr(e.message));
+          throw e;
+        }
+      });
+    }
+    if (T != null) {
+      T.eq(show(create.quantity(show({
+        value: 102,
+        unit: 'kg'
+      }))), {
+        value: 102,
+        unit: 'kg'
+      });
+    }
+    // T?.eq ( show create.quantity show cast.quantity '102kg'  ), { value: 102, unit: 'kg', }
+    // x = show cast.quantity '123kg'
+    // T?.eq ( show create.quantity show x  ), { value: 123, unit: 'kg', }
+    if (T != null) {
+      T.eq((x = cast.rectangle(3, 4)), {
+        width: {
+          value: 3,
+          unit: 'mm'
+        },
+        height: {
+          value: 4,
+          unit: 'mm'
+        }
+      });
+    }
+    validate.rectangle(x);
+    if (T != null) {
+      T.eq(create.rectangle(x), {
+        width: {
+          value: 3,
+          unit: 'mm'
+        },
+        height: {
+          value: 4,
+          unit: 'mm'
+        }
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_create_has_correct_binding = function(T, done) {
+    var Intertype, cast, collector, create, declare, isa, type_of, types, validate;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype({
+      errors: false
+    });
+    collector = [];
+    ({declare, isa, type_of, validate, create, cast} = types);
+    declare.quantity({
+      fields: {
+        value: 'float',
+        unit: 'nonempty.text'
+      },
+      extras: false,
+      default: {
+        value: 0,
+        unit: null
+      },
+      create: function(x) {
+        debug('^3434^', this);
+        if (T != null) {
+          T.ok(this instanceof Intertype);
+        }
+        if (T != null) {
+          T.ok(this === types);
+        }
+        return x;
+      }
+    });
+    //.........................................................................................................
+    // T?.eq ( type_of types.registry.quantity.cast ), 'function'
+    if (T != null) {
+      T.ok(isa.quantity({
+        value: 102,
+        unit: 'kg'
+      }));
+    }
+    if (T != null) {
+      T.eq(create.quantity({
+        value: 3,
+        unit: 'mm'
+      }), {
+        value: 3,
+        unit: 'mm'
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_create_may_return_frozen_sealed_value = function(T, done) {
+    var Intertype, cast, collector, create, declare, isa, type_of, types, validate;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype({
+      errors: false
+    });
+    collector = [];
+    ({declare, isa, type_of, validate, create, cast} = types);
+    declare.quantity({
+      fields: {
+        value: 'float',
+        unit: 'nonempty.text'
+      },
+      extras: false,
+      default: {
+        value: 0,
+        unit: null
+      },
+      create: function(x) {
+        return Object.freeze(Object.seal(x));
+      }
+    });
+    //.........................................................................................................
+    // T?.eq ( type_of types.registry.quantity.cast ), 'function'
+    if (T != null) {
+      T.ok(isa.quantity({
+        value: 102,
+        unit: 'kg'
+      }));
+    }
+    if (T != null) {
+      T.eq(create.quantity({
+        value: 3,
+        unit: 'mm'
+      }), {
+        value: 3,
+        unit: 'mm'
+      });
+    }
+    if (T != null) {
+      T.ok(Object.isFrozen(create.quantity({
+        value: 3,
+        unit: 'mm'
+      })));
+    }
+    if (T != null) {
+      T.ok(Object.isSealed(create.quantity({
+        value: 3,
+        unit: 'mm'
+      })));
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // demo()
@@ -3729,10 +4246,14 @@
     // @validate_1()
     // test @validate_1
     // @_intertype_demo_improved_validation_errors()
+    // test @intertype_cast
+    // test @intertype_can_use_subobject_fields
+    // test @intertype_create_has_correct_binding
     test(this);
   }
 
-  // test @intertype_tracing
+  // test @intertype_ordering_of_field_and_isa_tests
+// test @intertype_tracing
 // test @_intertype_tracing_2
 // test @intertype_improved_validation_errors
 // @validate_returns_value()

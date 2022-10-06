@@ -829,6 +829,27 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this["GUY.props.Strict_owner can allows peeking for `.then`"] = function(T, done) {
+    var GUY, d, x;
+    GUY = require(H.guy_path);
+    //.........................................................................................................
+    d = {
+      a: 1,
+      b: 2,
+      d: 3
+    };
+    x = new GUY.props.Strict_owner({
+      target: d,
+      oneshot: true
+    });
+    debug(x.then);
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_keys = function() {
     var A, B, C, D, GUY, d, e, k, lst, n;
     GUY = require('../../../apps/guy');
