@@ -1836,6 +1836,252 @@ demo_size_of = ->
   #.........................................................................................................
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@intertype_equals_distinguishes_positive_from_negative_zero = ( T, done ) ->
+  { Intertype }   = require '../../../apps/intertype'
+  types           = new Intertype()
+  equals          = require '../../../apps/intertype/deps/jkroso-equals'
+  debug '^34-1^', types.equals -0, +0
+  debug '^34-2^', types.equals +0, +0
+  debug '^34-3^', types.equals -0, -0
+  T?.eq ( types.equals -0, +0 ), false
+  T?.eq ( equals -0, +0 ), false
+  T?.eq ( equals NaN, NaN ), true
+  T?.eq ( types.equals NaN, NaN ), true
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_can_use_detached_type_of_method = ( T, done ) ->
+  { Intertype }   = require '../../../apps/intertype'
+  types           = new Intertype()
+  { type_of }     = types
+  T?.eq ( type_of 55          ), 'float'
+  T?.eq ( type_of {}          ), 'object'
+  T?.eq ( type_of ->          ), 'function'
+  T?.eq ( type_of -> await x  ), 'asyncfunction'
+  T?.eq ( type_of /x/         ), 'regex'
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_has_type_for_negative_zero = ( T, done ) ->
+  { Intertype }   = require '../../../apps/intertype'
+  types           = new Intertype()
+  #.........................................................................................................
+  T?.eq ( types.isa.positive0 +0 ), true
+  T?.eq ( types.isa.negative0 -0 ), true
+  T?.eq ( types.isa.positive  +0 ), true
+  T?.eq ( types.isa.negative  -0 ), true
+  #.........................................................................................................
+  T?.eq ( types.isa.negative  +0 ), false
+  T?.eq ( types.isa.negative0 +0 ), false
+  T?.eq ( types.isa.positive0 -0 ), false
+  T?.eq ( types.isa.positive  -0 ), false
+  T?.eq ( types.isa.positive1 -0 ), false
+  T?.eq ( types.isa.positive1 +0 ), false
+  T?.eq ( types.isa.negative1 -0 ), false
+  T?.eq ( types.isa.negative1 +0 ), false
+  #.........................................................................................................
+  T?.eq ( types.isa.zero          -0 ), true
+  T?.eq ( types.isa.zero          +0 ), true
+  T?.eq ( types.isa.negative.zero -0 ), true
+  T?.eq ( types.isa.positive.zero +0 ), true
+  T?.eq ( types.isa.positive.zero -0 ), false
+  T?.eq ( types.isa.negative.zero +0 ), false
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_has_data_property = ( T, done ) ->
+  { Intertype }   = require '../../../apps/intertype'
+  types           = new Intertype()
+  #.........................................................................................................
+  T?.ok types.isa.object types.data
+  types.declare 'foobar', ( x ) -> ( @data.foobar ?= [] ).push x; return true
+  types.isa.foobar 42
+  types.isa.foobar "yes"
+  types.validate.foobar false
+  T?.eq types.data, { foobar: [ 42, "yes", false, ] }
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_ordering_of_field_and_isa_tests = ( T, done ) ->
+  { Intertype }   = require '../../../apps/intertype'
+  types           = new Intertype()
+  #.........................................................................................................
+  collector       = []
+  types.declare 'foobar',
+    $myfield: 'cardinal'
+    isa: ( x ) -> collector.push x; return true
+  types.validate.foobar { myfield: 42, }
+  try types.validate.foobar { myfield: 1.2, } catch e then warn rvr e.message
+  ### NOTE because `isa()` is now called after fields are validated, it will never be called if any field
+  is nonconformant, so only the tracing of the first probe is present in the collector: ###
+  T?.eq collector, [ { myfield: 42 } ]
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_can_use_subobject_fields = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype { errors: false, }
+  noresult          = Symbol 'noresult'
+  { declare
+    isa
+    validate
+    create        } = types
+  declare.quantity
+    fields:
+      value:         'float'
+      unit:          'nonempty.text'
+    extras:         false
+    default:
+      value:    0
+      unit:     null
+  declare.rectangle
+    fields:
+      width:         'quantity'
+      height:        'quantity'
+    extras:         false
+    default:
+      width:        { value: 0, unit: 'mm', }
+      height:       { value: 0, unit: 'mm', }
+  #.........................................................................................................
+  T?.throws /not a valid quantity/, -> validate.quantity null
+  T?.throws /not a valid quantity/, -> validate.quantity { unit: 'kg', }
+  T?.eq ( validate.quantity { value: 0, unit: 'kg', } ), { value: 0, unit: 'kg', }
+  T?.eq ( create.quantity { unit: 'kg', } ), { value: 0, unit: 'kg', }
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_cast = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype { errors: false, }
+  collector         = []
+  { declare
+    isa
+    type_of
+    validate
+    create
+    cast          } = types
+  declare.quantity
+    fields:
+      value:         'float'
+      unit:          'nonempty.text'
+    extras:         false
+    default:
+      value:    0
+      unit:     null
+    cast: ( x ) ->
+      T?.ok @ instanceof Intertype
+      T?.ok @ is types
+      return x unless @isa.nonempty.text x
+      return x unless ( match = x.match /^(?<value>.*?)(?<unit>\D*)$/ )?
+      { value
+        unit  } = match.groups
+      value     = parseFloat value
+      return x unless isa.float value
+      return x unless isa.nonempty.text unit
+      return { value, unit, }
+  declare.rectangle
+    fields:
+      width:         'quantity'
+      height:        'quantity'
+    extras:         false
+    default:
+      width:        { value: 0, unit: 'mm', }
+      height:       { value: 0, unit: 'mm', }
+    cast: ( width, height ) ->
+      T?.ok @ instanceof Intertype
+      T?.ok @ is types
+      return
+        width:  { value: width,   unit: 'mm', }
+        height: { value: height,  unit: 'mm', }
+  #.........................................................................................................
+  # T?.eq ( type_of types.registry.quantity.cast ), 'function'
+  T?.ok isa.quantity { value: 102, unit: 'kg', }
+  show = ( x ) -> info '^show@454^', rpr x; x
+  debug '^4456-1^', isa.quantity '2kg'
+  debug '^4456-2^', cast.quantity '102kg'
+  try cast.quantity '2e3' catch e then warn rvr e.message
+  T?.throws /not a valid/, -> try cast.quantity '2e3' catch e then warn rvr e.message; throw e
+  T?.throws /not a valid/, -> try cast.quantity 'kg'  catch e then warn rvr e.message; throw e
+  T?.eq ( show create.quantity show { value: 102, unit: 'kg', }              ), { value: 102, unit: 'kg', }
+  # T?.eq ( show create.quantity show cast.quantity '102kg'  ), { value: 102, unit: 'kg', }
+  # x = show cast.quantity '123kg'
+  # T?.eq ( show create.quantity show x  ), { value: 123, unit: 'kg', }
+  T?.eq ( x = cast.rectangle 3, 4 ), { width: { value: 3, unit: 'mm' }, height: { value: 4, unit: 'mm' } }
+  validate.rectangle x
+  T?.eq ( create.rectangle x ), { width: { value: 3, unit: 'mm' }, height: { value: 4, unit: 'mm' } }
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_create_has_correct_binding = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype { errors: false, }
+  collector         = []
+  { declare
+    isa
+    type_of
+    validate
+    create
+    cast          } = types
+  declare.quantity
+    fields:
+      value:         'float'
+      unit:          'nonempty.text'
+    extras:         false
+    default:
+      value:    0
+      unit:     null
+    create: ( x ) ->
+      debug '^3434^', @
+      T?.ok @ instanceof Intertype
+      T?.ok @ is types
+      return x
+  #.........................................................................................................
+  # T?.eq ( type_of types.registry.quantity.cast ), 'function'
+  T?.ok isa.quantity { value: 102, unit: 'kg', }
+  T?.eq ( create.quantity { value: 3, unit: 'mm' } ), { value: 3, unit: 'mm' }
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_create_may_return_frozen_sealed_value = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype { errors: false, }
+  collector         = []
+  { declare
+    isa
+    type_of
+    validate
+    create
+    cast          } = types
+  declare.quantity
+    fields:
+      value:         'float'
+      unit:          'nonempty.text'
+    extras:         false
+    default:
+      value:    0
+      unit:     null
+    create: ( x ) ->
+      return Object.freeze Object.seal x
+  #.........................................................................................................
+  # T?.eq ( type_of types.registry.quantity.cast ), 'function'
+  T?.ok isa.quantity { value: 102, unit: 'kg', }
+  T?.eq ( create.quantity { value: 3, unit: 'mm' } ), { value: 3, unit: 'mm' }
+  T?.ok Object.isFrozen create.quantity { value: 3, unit: 'mm' }
+  T?.ok Object.isSealed create.quantity { value: 3, unit: 'mm' }
+  #.........................................................................................................
+  done?()
+
+
 ############################################################################################################
 unless module.parent?
   # demo()
@@ -1869,7 +2115,11 @@ unless module.parent?
   # @validate_1()
   # test @validate_1
   # @_intertype_demo_improved_validation_errors()
+  # test @intertype_cast
+  # test @intertype_can_use_subobject_fields
+  # test @intertype_create_has_correct_binding
   test @
+  # test @intertype_ordering_of_field_and_isa_tests
   # test @intertype_tracing
   # test @_intertype_tracing_2
   # test @intertype_improved_validation_errors
