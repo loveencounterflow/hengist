@@ -176,24 +176,25 @@ types                     = new ( require '../../../apps/intertype' ).Intertype(
   mtr       = new MTR.Metteur()
   #.........................................................................................................
   probes_and_matchers = [
-    [ '3', [ { pnr: 3, count: -1 } ], ]
-    [ '3,-1', [ { pnr: 3, count: -1 }, { pnr: -1, count: -1 } ], ]
+    [ '3', [ { pnr: 3, count: Infinity } ], ]
+    [ '3,-1', [ { pnr: 3, count: Infinity }, { pnr: -1, count: Infinity } ], ]
     [ 'x',    null, /not a valid/, ]
     [ '3,x',  null, /not a valid/, ]
     [ '3:1', [ { pnr: 3, count: 1 } ], ]
     [ '3:1,-1:2', [ { pnr: 3, count: 1 }, { pnr: -1, count: 2 } ], ]
-    [ '-0', [ { pnr: -0, count: -1 } ], ]
+    [ '-0', [ { pnr: -0, count: Infinity } ], ]
     ]
   #.........................................................................................................
   # mtr.types.validate.mtr_split '3,x'
   # mtr.types.validate.mtr_split 'x'
   debug ( k for k of T )
-  T?.neq +0, -0
-  T?.eq +0, +0
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       mtr.types.validate.mtr_split probe
-      resolve mtr.types.state.data.mtr_split.pnrs
+      resolve mtr.types.data.mtr_split
+  #.........................................................................................................
+  done?()
+
 #-----------------------------------------------------------------------------------------------------------
 @_demo_pdf_generation_jspdf = ( T, done ) ->
   PATH      = require 'node:path'
@@ -259,5 +260,7 @@ if module is require.main then do =>
   # test @mtr_template_accepts_custom_braces
   # test @mtr_template_honours_triple_dots
   # @mtr_split_caches_validation_results()
-  test @mtr_split_caches_validation_results
+  # test @mtr_split_caches_validation_results
   # test @
+  # @_demo_pdf_generation_jspdf()
+  @_demo_pdf_generation_pdflib()
