@@ -85,6 +85,7 @@ idf                         = ( x ) -> x ### IDentity Function ###
   "@isa.boolean x.extras":                          ( x ) -> @isa.boolean x.extras        # refers to result of `type.create()`
   "if extras is false, default must be an object":  ( x ) -> ( x.extras ) or ( @isa.object x.default )
   "@isa_optional.function x.create":                ( x ) -> @isa_optional.function x.create
+  "@isa_optional.function x.cast":                  ( x ) -> @isa_optional.function x.cast
 #...........................................................................................................
 @defaults.intertype_declare_dsc =
   name:             null
@@ -93,7 +94,8 @@ idf                         = ( x ) -> x ### IDentity Function ###
   fields:           null
   collection:       false
   ### `default` omitted on purpose ###
-  create:           null      # refers to result of `type.create()`
+  create:           null
+  cast:             null
   # copy:             false     # refers to result of `type.create()`
   # seal:             false     # refers to result of `type.create()`
   freeze:           false     # refers to result of `type.create()`
