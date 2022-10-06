@@ -194,6 +194,58 @@ types                     = new ( require '../../../apps/intertype' ).Intertype(
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       mtr.types.validate.mtr_split probe
       resolve mtr.types.state.data.mtr_split.pnrs
+#-----------------------------------------------------------------------------------------------------------
+@_demo_pdf_generation_jspdf = ( T, done ) ->
+  PATH      = require 'node:path'
+  FS        = require 'node:fs'
+  { jsPDF } = require 'jspdf'
+  await GUY.temp.with_directory { keep: true, }, ({ path }) ->
+    doc       = new jsPDF()
+    y         = 0
+    dy        = 10
+    # font_path = PATH.join __dirname, '../../../apps/metteur/fonts/EBGaramond08-Regular.ttf'
+    # font_path = '/home/flow/io/mingkwai-rack/jizura-fonts/fonts/Alegreya/Alegreya-Italic.ttf'
+    my_font   = FS.readFileSync font_path
+    doc.addFileToVFS 'my_font.ttf', my_font
+    doc.addFont 'my_font.ttf', 'my_font', 'normal'
+    return null
+    doc.setFont 'my_font'
+    for x in [ 0 .. 210 ] by +10
+      doc.text "Hello world!", x, y
+      y += dy
+    path = '/tmp/guy.temp--2905412-Uu7YRujOlg0V/a4.pdf'
+    # path = PATH.join path, 'a4.pdf'
+    doc.save path
+    help "^53784^ output saved to #{path}"
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@_demo_pdf_generation_pdflib = ( T, done ) ->
+  PATH      = require 'node:path'
+  FS        = require 'node:fs'
+  { jsPDF } = require 'jspdf'
+  # await GUY.temp.with_directory { keep: true, }, ({ path }) ->
+  { PDFDocument } = require 'pdf-lib'
+  doc_path  = '/tmp/guy.temp--2905412-Uu7YRujOlg0V/a4.pdf'
+  fontkit   = require '@pdf-lib/fontkit'
+  font_path = PATH.join __dirname, '../../../apps/metteur/fonts/EBGaramond08-Regular.ttf'
+  fontBytes = FS.readFileSync font_path
+  # debug ( k for k of fontBytes )
+  # fontBytes = fontBytes.arrayBuffer()
+  mm_from_pt = ( pt ) -> pt / 72 * 25.4
+  pt_from_mm = ( mm ) -> mm / 25.4 * 72
+  pdfDoc    = await PDFDocument.create()
+  pdfDoc.registerFontkit fontkit
+  my_font   = await pdfDoc.embedFont fontBytes
+  page      = pdfDoc.addPage()
+  page.moveTo 5, 200
+  size      = pt_from_mm 10
+  x         = pt_from_mm 10
+  y         = pt_from_mm 10
+  page.drawText "Some fancy Unicode text in the ŪЬȕǹƚü font", { font: my_font, x, y, size, }
+  doc_raw   = await pdfDoc.save()
+  FS.writeFileSync doc_path, doc_raw
   #.........................................................................................................
   done?()
 
