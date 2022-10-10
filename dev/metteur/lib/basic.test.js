@@ -481,7 +481,7 @@
     pdfDoc.registerFontkit(fontkit);
     my_font = (await pdfDoc.embedFont(fontBytes));
     page = pdfDoc.addPage();
-    page.moveTo(5, 200);
+    // page.moveTo 5, 200
     size = pt_from_mm(10);
     x = pt_from_mm(10);
     y = pt_from_mm(10);

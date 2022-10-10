@@ -1527,12 +1527,12 @@
       // MIXA = require '../../../apps/mixa'
       // debug '^4445^', MIXA.parse null, [ '--cd', 'some/place', 'ls', ]
       // debug '^4445^', MIXA.parse null, [ 'cats!' ]
-      return demo_configurator();
+      demo_configurator();
+      return test(this);
     })();
   }
 
-  // test @
-// test @[ "MIXA --cd changes process directory" ]
+  // test @[ "MIXA --cd changes process directory" ]
 // test @[ "MIXA parse with defaults" ]
 // test @[ "MIXA settings validation 2" ]
 // test @[ "MIXA types" ]
