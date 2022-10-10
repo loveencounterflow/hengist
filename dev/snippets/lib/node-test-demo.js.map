@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/node-test-demo.coffee"
+  ],
+  "names": [],
+  "mappings": "AAEA;EAAA;AAAA,MAAA,GAAA,EAAA,YAAA,EAAA,KAAA,EAAA,IAAA,EAAA,IAAA,EAAA,IAAA,EAAA,CAAA,EAAA,GAAA,EAAA,IAAA,EAAA,IAAA,EAAA,IAAA,EAAA,OAAA;;;EAIA,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,CAAA,CAAE,KAAF,EACE,IADF,EAEE,OAFF,EAGE,IAHF,EAIE,IAJF,EAKE,IALF,CAAA,GAK4B,GAAG,CAAC,GAAG,CAAC,WAAR,CAAoB,SAApB,CAL5B;;EAMA,CAAA,CAAE,GAAF,EACE,IADF,CAAA,GAC4B,GAAG,CAAC,GADhC,EAXA;;;;EAeA,YAAA,GAAe,OAAO,CAAC,WAAW,CAAC,IAApB,CAAyB,OAAzB;;EACf,OAAO,CAAC,WAAR,GAAsB,QAAA,CAAE,OAAF,EAAW,IAAX,CAAA;IACpB,IAA0B,IAAA,KAAQ,qBAAlC;AAAA,aAAO,OAAA,CAAQ,OAAR,EAAP;;AACA,WAAO,YAAA,CAAa,OAAb,EAAsB,IAAtB;EAFa,EAhBtB;;;EAoBA,IAAA,GAA4B,OAAA,CAAQ,WAAR;;EAE5B,KAAA,CAAM,QAAN,EAAgB,IAAhB;;EACA,KAAA,CAAM,QAAN;;AAAkB;IAAA,KAAA,SAAA;mBAAA;IAAA,CAAA;;MAAlB,EAvBA;;;;;;;;EA+BA,IAAA,CAAK,eAAL,EAAsB,QAAA,CAAE,CAAF,CAAA;AACtB,QAAA,CAAA,EAAA;IAAE,KAAS,0BAAT;MACE,CAAC,CAAC,IAAF,CAAO,CAAA,QAAA,CAAA,CAAW,CAAX,CAAA,CAAP,EAAuB,QAAA,CAAA,CAAA;eAAG;MAAH,CAAvB;IADF;AAEA,WAAO;EAHa,CAAtB;AA/BA",
+  "sourcesContent": [
+    "\n\n'use strict'\n\n\n############################################################################################################\nGUY                       = require 'guy'\n{ debug\n  info\n  whisper\n  warn\n  urge\n  help }                  = GUY.trm.get_loggers 'METTEUR'\n{ rpr\n  echo }                  = GUY.trm\n#...........................................................................................................\n### thx to https://github.com/nodejs/node/issues/30810#issuecomment-1107861393 ###\n_emitWarning = process.emitWarning.bind process\nprocess.emitWarning = ( message, type ) ->\n  return whisper message if type is 'ExperimentalWarning'\n  return _emitWarning message, type\n#...........................................................................................................\ntest                      = require 'node:test'\n\ndebug '^3453^', test\ndebug '^3453^', ( k for k of test )\n\n# test \"^tc-1^ 42 > 1\", ( t ) -> throw new Error \"foo\" unless 42 > 1\n# test \"^tc-2^ 42 < 0\", ( t ) -> throw new Error \"foo\" unless 42 < 0\n# test \"^tc-3^ 42 < 0\", ( t, done ) -> done()\n# test \"^tc-4^ 42 < 0\", ( t, done ) -> done false\n# test \"^tc-5^ 42 < 0\", ( t, done ) -> done true\n# test \"^tc-5^ 42 < 0\", ( t, done ) -> throw new Error \"foobar\"\ntest \"^tc-6^ 42 < 0\", ( t ) ->\n  for n in [ 1 .. 3 ]\n    t.test \"subtest #{n}\", -> true\n  return null\n\n\n"
+  ]
+}
