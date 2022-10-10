@@ -697,7 +697,7 @@ if module is require.main then do =>
   # debug '^4445^', MIXA.parse null, [ '--cd', 'some/place', 'ls', ]
   # debug '^4445^', MIXA.parse null, [ 'cats!' ]
   demo_configurator()
-  # test @
+  test @
   # test @[ "MIXA --cd changes process directory" ]
   # test @[ "MIXA parse with defaults" ]
   # test @[ "MIXA settings validation 2" ]
