@@ -30,15 +30,13 @@ H                         = require '../../../lib/helpers'
 equals                    = ( require 'util' ).isDeepStrictEqual
 S                         = ( parts ) -> new Set eval parts.raw[ 0 ]
 { to_width }              = require 'to-width'
-_types                    = new ( require 'intertype' ).Intertype()
-{ isa
-  type_of }               = _types.export()
+_types                    = new ( require '../../../apps/intertype' ).Intertype()
 intertype_path            = './main'
 
 #-----------------------------------------------------------------------------------------------------------
 @itproto_sample_test_function = ( T, done ) ->
   types = new ( require intertype_path ).Intertype()
-  T?.eq ( type_of types.registry.integer ), 'function'
+  T?.eq ( _types.type_of types.registry.integer ), 'function'
   T?.eq types.registry.integer.length, 1
   T?.eq ( types.registry.integer 1 ), true
   T?.eq ( types.registry.integer 1.2345678e26 ), true
@@ -50,12 +48,12 @@ intertype_path            = './main'
 @itproto_isa = ( T, done ) ->
   types = new ( require intertype_path ).Intertype()
   handlers  = types.constructor._get_handlers types
-  T?.eq ( type_of handlers.isa ), 'function'
+  T?.eq ( _types.type_of handlers.isa ), 'function'
   T?.eq handlers.isa.length, 2
   #.........................................................................................................
-  T?.eq ( type_of types.isa ), 'function'
+  T?.eq ( _types.type_of types.isa ), 'function'
   T?.eq types.isa.length, 0
-  T?.eq ( type_of types.isa.integer ), 'function'
+  T?.eq ( _types.type_of types.isa.integer ), 'function'
   T?.eq types.isa.integer.length, 0 ### function only takes single spread-argument `( P... ) ->` ###
   T?.eq ( types.isa.integer 42   ),  true
   T?.eq ( types.isa.integer 42.3 ),  false
@@ -275,17 +273,23 @@ intertype_path            = './main'
   T?.throws /not a valid list\.of\.list\.of\.text/, -> try types.validate.list.of.list.of.text          [ [ 'a', 'b', ], [ 'c', ], [ 42, ], ] catch error
     warn rvr error.message; throw error
   #.........................................................................................................
-  T?.eq ( types.validate.list []                                                              ), []
-  T?.eq ( types.validate.set  new Set 'helo'                                                  ), new Set 'helo'
-  T?.eq ( types.validate.boolean               true                                           ), true
-  T?.eq ( types.validate.boolean               false                                          ), false
-  T?.eq ( types.validate.list.of.text          []                                             ), []
-  T?.eq ( types.validate.list.of.integer       []                                             ), []
-  T?.eq ( types.validate.list.of.text          [ 'helo', ]                                    ), [ 'helo', ]
-  T?.eq ( types.validate.list.of.integer       [ 4, 5, 6, ]                                   ), [ 4, 5, 6, ]
-  T?.eq ( types.validate.set.of.text           new Set 'helo'                                 ), new Set 'helo'
-  T?.eq ( types.validate.list.of.list.of.text          [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ] ),         [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ]
-  T?.eq ( types.validate.set.of.list.of.text   new Set [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ] ), new Set [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ]
+  T?.ok equals ( types.validate.list []                                                              ), []
+  T?.ok equals ( types.validate.set  new Set 'helo'                                                  ), new Set 'helo'
+  T?.ok equals ( types.validate.boolean               true                                           ), true
+  T?.ok equals ( types.validate.boolean               false                                          ), false
+  T?.ok equals ( types.validate.list.of.text          []                                             ), []
+  T?.ok equals ( types.validate.list.of.integer       []                                             ), []
+  T?.ok equals ( types.validate.list.of.text          [ 'helo', ]                                    ), [ 'helo', ]
+  T?.ok equals ( types.validate.list.of.integer       [ 4, 5, 6, ]                                   ), [ 4, 5, 6, ]
+  T?.ok equals ( types.validate.set.of.text           new Set 'helo'                                 ), new Set 'helo'
+  T?.ok equals ( types.validate.list.of.list.of.text          [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ] ),         [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ]
+  T?.ok equals ( types.validate.set.of.list.of.text   new Set [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ] ), new Set [ [ 'a', 'b', ], [ 'c', ], [ 'd', ], ]
+  # debug '^345-1^', T?.eq ( new Set 'abc' ), ( new Set 'abc' )
+  # debug '^345-2^', ( require '/home/flow/jzr/guy-test/node_modules/intertype/deps/jkroso-equals.js' ) ( new Set 'abc' ), ( new Set 'abc' )
+  # debug '^345-3^', ( require '/home/flow/jzr/hengist/node_modules/intertype/deps/jkroso-equals.js' )  ( new Set 'abc' ), ( new Set 'abc' )
+  # debug '^345-4^', ( require '/home/flow/jzr/hengist/apps/intertype/deps/jkroso-equals' )             ( new Set 'abc' ), ( new Set 'abc' )
+  # debug '^345-5^', ( require '/home/flow/jzr/intertype/deps/jkroso-equals' )                          ( new Set 'abc' ), ( new Set 'abc' )
+  # debug '^345-5^', ( require '/home/flow//3rd-party-repos/jkroso-equals' )                            ( new Set 'abc' ), ( new Set 'abc' )
   done?()
 
 
