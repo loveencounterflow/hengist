@@ -27,6 +27,7 @@ _IMPLEMENTATIONS          = require '../../../apps/jseq/lib/implementations'
 IMPLEMENTATIONS           = {}
 
 do =>
+  debug '^344534^', k for k in ( k for k of _IMPLEMENTATIONS ).sort()
   for key, value of _IMPLEMENTATIONS
     unless ( match = key.match /^(?<nick>[^:]+)/ )?
       throw new Error "^bm/jseq@245 unexpected key #{rpr key}"
@@ -70,10 +71,38 @@ do =>
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@FDQ = ( cfg ) -> @_benchmark_by_name cfg, 'FDQ'
-@FDE = ( cfg ) -> @_benchmark_by_name cfg, 'FDE'
-@JKR = ( cfg ) -> @_benchmark_by_name cfg, 'JKR'
+# @FDQ = ( cfg ) -> @_benchmark_by_name cfg, 'FDQ'
+# @FDE = ( cfg ) -> @_benchmark_by_name cfg, 'FDE'
+# @JKR = ( cfg ) -> @_benchmark_by_name cfg, 'JKR'
+# # @ADS = ( cfg ) -> @_benchmark_by_name cfg, 'ADS'
+# @NUI = ( cfg ) -> @_benchmark_by_name cfg, 'NUI'
+# @FEQ = ( cfg ) -> @_benchmark_by_name cfg, 'FEQ'
 
+@[ '*EQ'  ] = ( cfg ) -> @_benchmark_by_name cfg, '*EQ'
+@[ '*JV'  ] = ( cfg ) -> @_benchmark_by_name cfg, '*JV'
+@[ '=='   ] = ( cfg ) -> @_benchmark_by_name cfg, '=='
+@[ '==='  ] = ( cfg ) -> @_benchmark_by_name cfg, '==='
+@[ 'ADE'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'ADE'
+@[ 'ADS'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'ADS'
+@[ 'AEQ'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'AEQ'
+@[ 'APE'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'APE'
+@[ 'ASE'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'ASE'
+@[ 'CHA'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'CHA'
+@[ 'CND'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'CND'
+@[ 'DEQ'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'DEQ'
+@[ 'DQI'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'DQI'
+@[ 'EQ'   ] = ( cfg ) -> @_benchmark_by_name cfg, 'EQ'
+@[ 'FDE'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'FDE'
+@[ 'FDQ'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'FDQ'
+@[ 'FEQ'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'FEQ'
+@[ 'ISE'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'ISE'
+@[ 'JDQ'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'JDQ'
+@[ 'JKR'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'JKR'
+@[ 'LDS'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'LDS'
+@[ 'NUI'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'NUI'
+@[ 'OIS'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'OIS'
+@[ 'UDS'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'UDS'
+@[ 'o23'  ] = ( cfg ) -> @_benchmark_by_name cfg, 'o23'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -84,9 +113,38 @@ do =>
   cfg         = { set_count: 1e5, }
   repetitions = 3
   test_names  = [
-    'FDQ'
+    # 'FDQ'
+    # 'FDE'
+    # 'JKR'
+    # # 'ADS'
+    # 'NUI'
+    # 'FEQ'
+
+    '*EQ'
+    '*JV'
+    # '=='
+    # '==='
+    # 'ADE'
+    # 'ADS'
+    # 'AEQ'
+    # 'APE'
+    # 'ASE'
+    'CHA'
+    'CND'
+    # 'DEQ'
+    'DQI'
+    'EQ'
     'FDE'
+    'FDQ'
+    'FEQ'
+    # 'ISE'
+    'JDQ'
     'JKR'
+    'LDS'
+    'NUI'
+    # 'OIS'
+    'UDS'
+    'o23'
     ]
   global.gc() if global.gc?
   for _ in [ 1 .. repetitions ]
