@@ -47,7 +47,19 @@
   IMPLEMENTATIONS = {};
 
   (() => {
-    var key, match, nick, value;
+    var i, k, key, len, match, nick, ref, value;
+    ref = ((function() {
+      var results;
+      results = [];
+      for (k in _IMPLEMENTATIONS) {
+        results.push(k);
+      }
+      return results;
+    })()).sort();
+    for (i = 0, len = ref.length; i < len; i++) {
+      k = ref[i];
+      debug('^344534^', k);
+    }
     for (key in _IMPLEMENTATIONS) {
       value = _IMPLEMENTATIONS[key];
       if ((match = key.match(/^(?<nick>[^:]+)/)) == null) {
@@ -113,16 +125,110 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.FDQ = function(cfg) {
-    return this._benchmark_by_name(cfg, 'FDQ');
+  // @FDQ = ( cfg ) -> @_benchmark_by_name cfg, 'FDQ'
+  // @FDE = ( cfg ) -> @_benchmark_by_name cfg, 'FDE'
+  // @JKR = ( cfg ) -> @_benchmark_by_name cfg, 'JKR'
+  // # @ADS = ( cfg ) -> @_benchmark_by_name cfg, 'ADS'
+  // @NUI = ( cfg ) -> @_benchmark_by_name cfg, 'NUI'
+  // @FEQ = ( cfg ) -> @_benchmark_by_name cfg, 'FEQ'
+  this['*EQ'] = function(cfg) {
+    return this._benchmark_by_name(cfg, '*EQ');
   };
 
-  this.FDE = function(cfg) {
+  this['*JV'] = function(cfg) {
+    return this._benchmark_by_name(cfg, '*JV');
+  };
+
+  this['=='] = function(cfg) {
+    return this._benchmark_by_name(cfg, '==');
+  };
+
+  this['==='] = function(cfg) {
+    return this._benchmark_by_name(cfg, '===');
+  };
+
+  this['ADE'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'ADE');
+  };
+
+  this['ADS'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'ADS');
+  };
+
+  this['AEQ'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'AEQ');
+  };
+
+  this['APE'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'APE');
+  };
+
+  this['ASE'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'ASE');
+  };
+
+  this['CHA'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'CHA');
+  };
+
+  this['CND'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'CND');
+  };
+
+  this['DEQ'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'DEQ');
+  };
+
+  this['DQI'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'DQI');
+  };
+
+  this['EQ'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'EQ');
+  };
+
+  this['FDE'] = function(cfg) {
     return this._benchmark_by_name(cfg, 'FDE');
   };
 
-  this.JKR = function(cfg) {
+  this['FDQ'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'FDQ');
+  };
+
+  this['FEQ'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'FEQ');
+  };
+
+  this['ISE'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'ISE');
+  };
+
+  this['JDQ'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'JDQ');
+  };
+
+  this['JKR'] = function(cfg) {
     return this._benchmark_by_name(cfg, 'JKR');
+  };
+
+  this['LDS'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'LDS');
+  };
+
+  this['NUI'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'NUI');
+  };
+
+  this['OIS'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'OIS');
+  };
+
+  this['UDS'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'UDS');
+  };
+
+  this['o23'] = function(cfg) {
+    return this._benchmark_by_name(cfg, 'o23');
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -139,7 +245,39 @@
       set_count: 1e5
     };
     repetitions = 3;
-    test_names = ['FDQ', 'FDE', 'JKR'];
+    test_names = [
+      // 'FDQ'
+      // 'FDE'
+      // 'JKR'
+      // # 'ADS'
+      // 'NUI'
+      // 'FEQ'
+      '*EQ',
+      '*JV',
+      // '=='
+      // '==='
+      // 'ADE'
+      // 'ADS'
+      // 'AEQ'
+      // 'APE'
+      // 'ASE'
+      'CHA',
+      'CND',
+      // 'DEQ'
+      'DQI',
+      'EQ',
+      'FDE',
+      'FDQ',
+      'FEQ',
+      // 'ISE'
+      'JDQ',
+      'JKR',
+      'LDS',
+      'NUI',
+      // 'OIS'
+      'UDS',
+      'o23'
+    ];
     if (global.gc != null) {
       global.gc();
     }

@@ -61,117 +61,143 @@
   };
 
   //===========================================================================================================
-  this.Intertype = class Intertype {
-    //---------------------------------------------------------------------------------------------------------
-    constructor() {
-      var clasz, handlers, hub;
-      hub = this;
-      clasz = this.constructor;
-      handlers = clasz._get_handlers(hub);
-      GUY.props.hide(this, 'type_factory', new Type_factory(this));
-      this.declare = new Multimix({
-        hub,
-        handler: handlers.declare
-      });
-      this.validate = new Multimix({
-        hub,
-        handler: handlers.validate
-      });
-      this.isa = new Multimix({
-        hub,
-        handler: handlers.isa
-      });
-      this.mmx = this.isa[Multimix.symbol];
-      this.state = this.mmx.state;
-      this.state.trace = [];
+  this.Intertype = (function() {
+    class Intertype {
       //---------------------------------------------------------------------------------------------------------
-      /* TAINT this part goes into declarations */
-      this.registry = {
-        boolean: function(x) {
-          return (x === true) || (x === false);
-        },
-        integer: function(x) {
-          return (Number.isFinite(x)) && (x === Math.floor(x));
-        },
-        text: function(x) {
-          return (typeof x) === 'string';
-        },
-        list: function(x) {
-          return Array.isArray(x);
-        },
-        set: function(x) {
-          return x instanceof Set;
-        },
-        empty: function(x) {
-          var R;
-          return ((R = size_of(x, null)) != null) && R === 0;
-        },
-        nonempty: function(x) {
-          var R;
-          return ((R = size_of(x, null)) != null) && R !== 0;
-        },
-        //.......................................................................................................
-        even: function(x) {
-          if (Number.isInteger(x)) {
-            return (x % 2) === 0;
-          } else if (typeof x === 'bigint') {
-            return (x % 2n) === 0n;
+      constructor() {
+        var clasz, handlers, hub;
+        hub = this;
+        clasz = this.constructor;
+        handlers = clasz._get_handlers(hub);
+        GUY.props.hide(this, 'type_factory', new Type_factory(this));
+        this.declare = new Multimix({
+          hub,
+          handler: handlers.declare
+        });
+        this.validate = new Multimix({
+          hub,
+          handler: handlers.validate
+        });
+        this.isa = new Multimix({
+          hub,
+          handler: handlers.isa
+        });
+        this.mmx = this.isa[Multimix.symbol];
+        this.state = this.mmx.state;
+        this.state.trace = [];
+        //---------------------------------------------------------------------------------------------------------
+        /* TAINT this part goes into declarations */
+        this.registry = {
+          boolean: function(x) {
+            return (x === true) || (x === false);
+          },
+          integer: function(x) {
+            return (Number.isFinite(x)) && (x === Math.floor(x));
+          },
+          text: function(x) {
+            return (typeof x) === 'string';
+          },
+          list: function(x) {
+            return Array.isArray(x);
+          },
+          set: function(x) {
+            return x instanceof Set;
+          },
+          empty: function(x) {
+            var R;
+            return ((R = size_of(x, null)) != null) && R === 0;
+          },
+          nonempty: function(x) {
+            var R;
+            return ((R = size_of(x, null)) != null) && R !== 0;
+          },
+          //.......................................................................................................
+          even: function(x) {
+            if (Number.isInteger(x)) {
+              return (x % 2) === 0;
+            } else if (typeof x === 'bigint') {
+              return (x % 2n) === 0n;
+            }
+            return false;
+          },
+          //.......................................................................................................
+          odd: function(x) {
+            if (Number.isInteger(x)) {
+              return (x % 2) !== 0;
+            } else if (typeof x === 'bigint') {
+              return (x % 2n) !== 0n;
+            }
+            return false;
           }
-          return false;
-        },
-        //.......................................................................................................
-        odd: function(x) {
-          if (Number.isInteger(x)) {
-            return (x % 2) !== 0;
-          } else if (typeof x === 'bigint') {
-            return (x % 2n) !== 0n;
-          }
-          return false;
-        }
-      };
-      return void 0;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    _trace({ref, level, prop, x, R}) {
-      /* [ ref, level, prop, value, R, ] = checkpoint */
-      // H.types.validate.nonempty_text  ref
-      // H.types.validate.cardinal       level
-      // H.types.validate.nonempty_text  prop
-      // H.types.validate.boolean        R
-      this.state.trace.push({ref, level, prop, x, R});
-      return R;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    _reset_trace() {
-      return this.state.trace = [];
-    }
-
-    //-------------------------------------------------------------------------------------------------------
-    _isa(props, x, level) {
-      var R, advance, element, error, fn, idx, last_idx, nxt_prop, prop, props_tail;
-      if (level === 0) {
-        this._reset_trace();
+        };
+        return void 0;
       }
-      advance = false;
-      last_idx = props.length - 1;
-      R = true;
-      idx = -1;
-      prop = null;
-      nxt_prop = null;
-      while (true) {
-        //.....................................................................................................
-        idx++;
-        if (idx > last_idx) {
-          return R;
+
+      //---------------------------------------------------------------------------------------------------------
+      _trace({ref, level, prop, x, R}) {
+        /* [ ref, level, prop, value, R, ] = checkpoint */
+        // H.types.validate.nonempty_text  ref
+        // H.types.validate.cardinal       level
+        // H.types.validate.nonempty_text  prop
+        // H.types.validate.boolean        R
+        this.state.trace.push({ref, level, prop, x, R});
+        return R;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _reset_trace() {
+        return this.state.trace = [];
+      }
+
+      //-------------------------------------------------------------------------------------------------------
+      _isa(props, x, level) {
+        var R, advance, element, error, fn, idx, last_idx, nxt_prop, prop, props_tail;
+        if (level === 0) {
+          this._reset_trace();
         }
-        [prop, nxt_prop] = [props[idx], props[idx + 1]];
-        //...................................................................................................
-        if (advance) {
+        advance = false;
+        last_idx = props.length - 1;
+        R = true;
+        idx = -1;
+        prop = null;
+        nxt_prop = null;
+        while (true) {
+          //.....................................................................................................
+          idx++;
+          if (idx > last_idx) {
+            return R;
+          }
+          [prop, nxt_prop] = [props[idx], props[idx + 1]];
+          //...................................................................................................
+          if (advance) {
+            if (prop === 'or') {
+              this._trace({
+                ref: '▲i1',
+                level,
+                prop,
+                x,
+                R
+              });
+              if (R) {
+                return true;
+              }
+              advance = false;
+            }
+            continue;
+          }
+          //...................................................................................................
           if (prop === 'or') {
+            if (idx === 0) {
+              throw new Error(`cannot have \`or\` as first prop, got ${rpr(props.join('.'))}`);
+            }
+            if (idx === last_idx) {
+              throw new Error(`cannot have \`or\` as last prop, got ${rpr(props.join('.'))}`);
+            }
+            if (nxt_prop === 'or') {
+              throw new Error(`cannot have two \`or\` props in succession, got ${rpr(props.join('.'))}`);
+            }
             this._trace({
-              ref: '▲i1',
+              ref: '▲i2',
               level,
               prop,
               x,
@@ -180,85 +206,67 @@
             if (R) {
               return true;
             }
-            advance = false;
+            advance = true;
+            continue;
           }
-          continue;
-        }
-        //...................................................................................................
-        if (prop === 'or') {
-          if (idx === 0) {
-            throw new Error(`cannot have \`or\` as first prop, got ${rpr(props.join('.'))}`);
+          //...................................................................................................
+          if (prop === 'of') {
+            if (idx === 0) {
+              throw new Error(`cannot have \`of\` as first prop, got ${rpr(props.join('.'))}`);
+            }
+            if (idx === last_idx) {
+              throw new Error(`cannot have \`of\` as last prop, got ${rpr(props.join('.'))}`);
+            }
+            if (nxt_prop === 'of') {
+              throw new Error(`cannot have two \`of\` props in succession, got ${rpr(props.join('.'))}`);
+            }
+            props_tail = props.slice(idx + 1);
+            try {
+              for (element of x) {
+                if (!this._isa(props_tail, element, level + 1)) {
+                  return false;
+                }
+              }
+            } catch (error1) {
+              error = error1;
+              if (!((error.name === 'TypeError') && (error.message === 'x is not iterable'))) {
+                throw error;
+              }
+              throw new E.Intertype_ETEMPTBD('^intertype.isa@7^', `\`of\` must be preceded by collection name, got ${rpr(hedges[hedge_idx - 1])}`);
+            }
+            return true;
           }
-          if (idx === last_idx) {
-            throw new Error(`cannot have \`or\` as last prop, got ${rpr(props.join('.'))}`);
+          //...................................................................................................
+          if ((fn = this.registry[prop]) == null) {
+            throw new Error(`unknown type ${rpr(prop)}`);
           }
-          if (nxt_prop === 'or') {
-            throw new Error(`cannot have two \`or\` props in succession, got ${rpr(props.join('.'))}`);
-          }
+          //...................................................................................................
+          R = R = fn.call(this, x);
           this._trace({
-            ref: '▲i2',
+            ref: '▲i3',
             level,
             prop,
             x,
             R
           });
-          if (R) {
-            return true;
+          if (!(R === true || R === false)) {
+            /* TAINT use this library to determine type: */
+            throw new Error(`expected test result to be boolean, go a ${typeof R}: ${rpr(R)}`);
           }
-          advance = true;
-          continue;
+          advance = !R;
         }
-        //...................................................................................................
-        if (prop === 'of') {
-          if (idx === 0) {
-            throw new Error(`cannot have \`of\` as first prop, got ${rpr(props.join('.'))}`);
-          }
-          if (idx === last_idx) {
-            throw new Error(`cannot have \`of\` as last prop, got ${rpr(props.join('.'))}`);
-          }
-          if (nxt_prop === 'of') {
-            throw new Error(`cannot have two \`of\` props in succession, got ${rpr(props.join('.'))}`);
-          }
-          props_tail = props.slice(idx + 1);
-          try {
-            for (element of x) {
-              if (!this._isa(props_tail, element, level + 1)) {
-                return false;
-              }
-            }
-          } catch (error1) {
-            error = error1;
-            if (!((error.name === 'TypeError') && (error.message === 'x is not iterable'))) {
-              throw error;
-            }
-            throw new E.Intertype_ETEMPTBD('^intertype.isa@7^', `\`of\` must be preceded by collection name, got ${rpr(hedges[hedge_idx - 1])}`);
-          }
-          return true;
-        }
-        //...................................................................................................
-        if ((fn = this.registry[prop]) == null) {
-          throw new Error(`unknown type ${rpr(prop)}`);
-        }
-        //...................................................................................................
-        R = R = fn.call(this, x);
-        this._trace({
-          ref: '▲i3',
-          level,
-          prop,
-          x,
-          R
-        });
-        if (!(R === true || R === false)) {
-          /* TAINT use this library to determine type: */
-          throw new Error(`expected test result to be boolean, go a ${typeof R}: ${rpr(R)}`);
-        }
-        advance = !R;
+        //.....................................................................................................
+        return R;
       }
-      //.....................................................................................................
-      return R;
-    }
 
-  };
+    };
+
+    //---------------------------------------------------------------------------------------------------------
+    Intertype.prototype.equals = (require('util')).isDeepStrictEqual;
+
+    return Intertype;
+
+  }).call(this);
 
   //-----------------------------------------------------------------------------------------------------------
   this.Intertype._get_handlers = function(hub) {

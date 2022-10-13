@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, S, _types, alert, debug, echo, equals, help, info, inspect, intertype_path, isa, log, njs_path, plain, praise, rpr, rvr, test, to_width, truth, type_of, urge, warn, whisper;
+  var GUY, H, S, _types, alert, debug, echo, equals, help, info, inspect, intertype_path, log, njs_path, plain, praise, rpr, rvr, test, to_width, truth, urge, warn, whisper;
 
   //###########################################################################################################
   // njs_util                  = require 'util'
@@ -24,7 +24,7 @@
   // { intersection_of }       = require '../../../apps/intertype/lib/helpers'
   H = require('../../../lib/helpers');
 
-  equals = require('../../../apps/intertype/deps/jkroso-equals');
+  equals = (require('util')).isDeepStrictEqual;
 
   S = function(parts) {
     return new Set(eval(parts.raw[0]));
@@ -32,9 +32,7 @@
 
   ({to_width} = require('to-width'));
 
-  _types = new (require('intertype')).Intertype();
-
-  ({isa, type_of} = _types.export());
+  _types = new (require('../../../apps/intertype')).Intertype();
 
   intertype_path = './main';
 
@@ -43,7 +41,7 @@
     var types;
     types = new (require(intertype_path)).Intertype();
     if (T != null) {
-      T.eq(type_of(types.registry.integer), 'function');
+      T.eq(_types.type_of(types.registry.integer), 'function');
     }
     if (T != null) {
       T.eq(types.registry.integer.length, 1);
@@ -66,20 +64,20 @@
     types = new (require(intertype_path)).Intertype();
     handlers = types.constructor._get_handlers(types);
     if (T != null) {
-      T.eq(type_of(handlers.isa), 'function');
+      T.eq(_types.type_of(handlers.isa), 'function');
     }
     if (T != null) {
       T.eq(handlers.isa.length, 2);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(type_of(types.isa), 'function');
+      T.eq(_types.type_of(types.isa), 'function');
     }
     if (T != null) {
       T.eq(types.isa.length, 0);
     }
     if (T != null) {
-      T.eq(type_of(types.isa.integer), 'function');
+      T.eq(_types.type_of(types.isa.integer), 'function');
     }
     if (T != null) {
       T.eq(types.isa.integer.length, 0);
@@ -768,37 +766,37 @@
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(types.validate.list([]), []);
+      T.ok(equals(types.validate.list([]), []));
     }
     if (T != null) {
-      T.eq(types.validate.set(new Set('helo')), new Set('helo'));
+      T.ok(equals(types.validate.set(new Set('helo')), new Set('helo')));
     }
     if (T != null) {
-      T.eq(types.validate.boolean(true), true);
+      T.ok(equals(types.validate.boolean(true), true));
     }
     if (T != null) {
-      T.eq(types.validate.boolean(false), false);
+      T.ok(equals(types.validate.boolean(false), false));
     }
     if (T != null) {
-      T.eq(types.validate.list.of.text([]), []);
+      T.ok(equals(types.validate.list.of.text([]), []));
     }
     if (T != null) {
-      T.eq(types.validate.list.of.integer([]), []);
+      T.ok(equals(types.validate.list.of.integer([]), []));
     }
     if (T != null) {
-      T.eq(types.validate.list.of.text(['helo']), ['helo']);
+      T.ok(equals(types.validate.list.of.text(['helo']), ['helo']));
     }
     if (T != null) {
-      T.eq(types.validate.list.of.integer([4, 5, 6]), [4, 5, 6]);
+      T.ok(equals(types.validate.list.of.integer([4, 5, 6]), [4, 5, 6]));
     }
     if (T != null) {
-      T.eq(types.validate.set.of.text(new Set('helo')), new Set('helo'));
+      T.ok(equals(types.validate.set.of.text(new Set('helo')), new Set('helo')));
     }
     if (T != null) {
-      T.eq(types.validate.list.of.list.of.text([['a', 'b'], ['c'], ['d']]), [['a', 'b'], ['c'], ['d']]);
+      T.ok(equals(types.validate.list.of.list.of.text([['a', 'b'], ['c'], ['d']]), [['a', 'b'], ['c'], ['d']]));
     }
     if (T != null) {
-      T.eq(types.validate.set.of.list.of.text(new Set([['a', 'b'], ['c'], ['d']])), new Set([['a', 'b'], ['c'], ['d']]));
+      T.ok(equals(types.validate.set.of.list.of.text(new Set([['a', 'b'], ['c'], ['d']])), new Set([['a', 'b'], ['c'], ['d']])));
     }
     return typeof done === "function" ? done() : void 0;
   };
