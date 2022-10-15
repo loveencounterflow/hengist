@@ -64,13 +64,9 @@ X                         = require '../../../lib/helpers'
   db.resolve = ( sqlx ) ->
     @types.validate.nonempty_text sqlx
     return sqlx.replace /(?<name>@[^\s^(]+)\(\s*(?<values>[^)]*?)\s*\)/g, ( P..., groups ) =>
-      debug '^3534^', P
-      debug '^3534^', groups
       { name, values, } = groups
       values            = values.split /\s*,\s*/
       unless ( definition = @definitions[ name ] )?
-        throw new E.DBay_sqlx_error '^dbay/sqlx@3^', "unknown name #{rpr name}"
-      debug { name, values, definition, }
       unless ( call_arity = values.length ) is ( definition_arity = definition.parameters.length )
         throw new E.DBay_sqlx_error '^dbay/sqlx@4^', "expected #{definition_arity} arguments, got #{call_arity}"
       #.....................................................................................................
@@ -78,7 +74,6 @@ X                         = require '../../../lib/helpers'
       for parameter, idx in definition.parameters
         value = values[ idx ]
         R = R.replace ///#{parameter}///g, value
-        debug rpr R
       return R
   #.........................................................................................................
   db ->
