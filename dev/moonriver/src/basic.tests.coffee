@@ -520,10 +520,67 @@ H                         = require '../../../lib/helpers'
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@can_use_asyncfunction_as_source = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY           = require '../../../apps/guy'
+  { Moonriver } = require '../../../apps/moonriver'
+  { $ }         = Moonriver
+  collector     = []
+  mr            = new Moonriver()
+  #.......................................................................................................
+  count = 0
+  get_source = ( send ) ->
+    return -> new Promise ( resolve ) ->
+      GUY.async.after 0.2, -> count++; info count; send count; resolve()
+  # source = -> await setTimeout ( -> count++; return count ), 1
+  #.......................................................................................................
+  mr.push show = ( d ) -> urge '^4948-1^', d
+  mr.push collect = ( d ) -> collector.push d
+  source = get_source mr.send.bind mr
+  for _ in [ 1 .. 5 ]
+    await source()
+  #.........................................................................................................
+  debug collector
+  T?.eq collector, [ 1, 2, 3, 4, 5 ]
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@can_use_nodejs_readable_stream_as_source = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY             = require '../../../apps/guy'
+  { Moonriver }   = require '../../../apps/moonriver'
+  { readlines }   = require 'readlines-ng'
+  FS              = require 'node:fs'
+  path            = PATH.join __dirname, '../../../assets/short-proposal.mkts.md'
+  source          = FS.createReadStream path, { encoding: 'utf-8', }
+  collector       = []
+  mr              = new Moonriver()
+  mr.push show    = ( d ) -> urge '^4948-1^', d
+  mr.push collect = ( d ) -> collector.push d
+  #.......................................................................................................
+  count         = 0
+  for await line from readlines source
+    count++
+    continue if count > 5
+    mr.send line
+    ### to achieve interleaving of data ingestion steps and data processing steps use `sleep 0`; ###
+    ### here we use a bigger value to demonstrate that output actually happens in a piecemeal fashion: ###
+    info count
+    await GUY.async.sleep 0.2
+  #.........................................................................................................
+  T?.eq collector, [ '<title>A Proposal</title>', '<h1>Motivation</h1>', '<p>It has been suggested to further the cause.</p>', '<p>This is <i>very</i> desirable indeed.</p>', '' ]
+  done?()
+  return null
+
 
 
 ############################################################################################################
 if require.main is module then do =>
+  # test @can_use_asyncfunction_as_source
+  # @can_use_nodejs_readable_stream_as_source()
+  # test @can_use_nodejs_readable_stream_as_source
   test @
   # @[ "called even when pipeline empty: once_before_first, once_after_last" ](); test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
   # @[ "appending data before closing" ](); test @[ "appending data before closing" ]
