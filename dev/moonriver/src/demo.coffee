@@ -302,15 +302,47 @@ demo_7 = ->
   urge '^343-3^', ( d.toString() for d in collector ).join ' '
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_8 = ->
+  whisper '—'.repeat 108
+  collector = []
+  mr1       = new Moonriver()
+  first     = Symbol 'first'
+  last      = Symbol 'last'
+  #.........................................................................................................
+  source = ( -> yield chr for chr in Array.from 'abcdef' )()
+  mr1.push $ source
+  mr1.push $ { first, }, ( d, send ) ->
+    return send 'first!' if d is first
+    send d
+  mr1.push $ { last, }, ( d, send ) ->
+    return send d unless d is last
+    send 'last!'
+  mr1.push show = ( d ) -> help @, @call_count, CND.grey CND.reverse " #{rpr d} "
+  mr1.push collect  = ( d ) -> collector.push d
+  #.........................................................................................................
+  urge '^343-5^', mr1
+  whisper '-----------'
+  urge '^343-5^', mr1.has_run
+  mr1.drive { mode: 'breadth', }
+  urge '^343-3^', ( d.toString() for d in collector ).join ' '
+  whisper '-----------'
+  urge '^343-5^', mr1.has_run
+  mr1.drive { mode: 'breadth', }
+  collector.length = 0
+  urge '^343-3^', ( d.toString() for d in collector ).join ' '
+  return null
+
 
 
 ############################################################################################################
 if module is require.main then do =>
-  demo()
-  demo_2()
-  demo_3()
-  demo_4()
-  demo_5()
-  demo_6()
-  demo_7()
+  # demo()
+  # demo_2()
+  # demo_3()
+  # demo_4()
+  # demo_5()
+  # demo_6()
+  # demo_7()
+  demo_8()
 
