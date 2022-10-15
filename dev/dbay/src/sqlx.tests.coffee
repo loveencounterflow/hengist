@@ -42,7 +42,7 @@ X                         = require '../../../lib/helpers'
     constructor: ( ref, message )     -> super ref, message
   #.........................................................................................................
   db.definitions = {}
-  db.define = ( sqlx ) ->
+  db.declare = ( sqlx ) ->
     @types.validate.nonempty_text sqlx
     #.......................................................................................................
     name_re                 = /^(?<name>@[^\s^(]+)/y
@@ -82,7 +82,7 @@ X                         = require '../../../lib/helpers'
       return R
   #.........................................................................................................
   db ->
-    db.define SQL"""@secret_power( @a, @b ) = power( @a, @b ) / @b;"""
+    db.declare SQL"""@secret_power( @a, @b ) = power( @a, @b ) / @b;"""
     sqlx  = SQL"""select @secret_power( 3, 2 );"""
     sql   = db.resolve sqlx
     help rpr sqlx
