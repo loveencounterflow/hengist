@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var $, CND, GUY, Moonriver, badge, debug, demo, demo_2, demo_3, demo_4, demo_5, demo_6, demo_7, echo, help, info, isa, rpr, type_of, types, urge, validate, warn, whisper;
+  var $, CND, GUY, Moonriver, badge, debug, demo, demo_2, demo_3, demo_4, demo_5, demo_6, demo_7, demo_8, echo, help, info, isa, rpr, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -565,16 +565,89 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_8 = function() {
+    var collect, collector, d, first, last, mr1, show, source;
+    whisper('—'.repeat(108));
+    collector = [];
+    mr1 = new Moonriver();
+    first = Symbol('first');
+    last = Symbol('last');
+    //.........................................................................................................
+    source = (function*() {
+      var chr, i, len, ref, results;
+      ref = Array.from('abcdef');
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        chr = ref[i];
+        results.push((yield chr));
+      }
+      return results;
+    })();
+    mr1.push($(source));
+    mr1.push($({first}, function(d, send) {
+      if (d === first) {
+        return send('first!');
+      }
+      return send(d);
+    }));
+    mr1.push($({last}, function(d, send) {
+      if (d !== last) {
+        return send(d);
+      }
+      return send('last!');
+    }));
+    mr1.push(show = function(d) {
+      return help(this, this.call_count, CND.grey(CND.reverse(` ${rpr(d)} `)));
+    });
+    mr1.push(collect = function(d) {
+      return collector.push(d);
+    });
+    //.........................................................................................................
+    urge('^343-5^', mr1);
+    whisper('-----------');
+    urge('^343-5^', mr1.has_run);
+    mr1.drive({
+      mode: 'breadth'
+    });
+    urge('^343-3^', ((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = collector.length; i < len; i++) {
+        d = collector[i];
+        results.push(d.toString());
+      }
+      return results;
+    })()).join(' '));
+    whisper('-----------');
+    urge('^343-5^', mr1.has_run);
+    mr1.drive({
+      mode: 'breadth'
+    });
+    collector.length = 0;
+    urge('^343-3^', ((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = collector.length; i < len; i++) {
+        d = collector[i];
+        results.push(d.toString());
+      }
+      return results;
+    })()).join(' '));
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      demo();
-      demo_2();
-      demo_3();
-      demo_4();
-      demo_5();
-      demo_6();
-      return demo_7();
+      // demo()
+      // demo_2()
+      // demo_3()
+      // demo_4()
+      // demo_5()
+      // demo_6()
+      // demo_7()
+      return demo_8();
     })();
   }
 

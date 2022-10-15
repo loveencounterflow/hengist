@@ -797,9 +797,102 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.can_use_asyncfunction_as_source = async function(T, done) {
+    var $, GUY, Moonriver, _, collect, collector, count, get_source, i, mr, show, source;
+    // T?.halt_on_error()
+    GUY = require('../../../apps/guy');
+    ({Moonriver} = require('../../../apps/moonriver'));
+    ({$} = Moonriver);
+    collector = [];
+    mr = new Moonriver();
+    //.......................................................................................................
+    count = 0;
+    get_source = function(send) {
+      return function() {
+        return new Promise(function(resolve) {
+          return GUY.async.after(0.2, function() {
+            count++;
+            info(count);
+            send(count);
+            return resolve();
+          });
+        });
+      };
+    };
+    // source = -> await setTimeout ( -> count++; return count ), 1
+    //.......................................................................................................
+    mr.push(show = function(d) {
+      return urge('^4948-1^', d);
+    });
+    mr.push(collect = function(d) {
+      return collector.push(d);
+    });
+    source = get_source(mr.send.bind(mr));
+    for (_ = i = 1; i <= 5; _ = ++i) {
+      await source();
+    }
+    //.........................................................................................................
+    debug(collector);
+    if (T != null) {
+      T.eq(collector, [1, 2, 3, 4, 5]);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.can_use_nodejs_readable_stream_as_source = async function(T, done) {
+    var FS, GUY, Moonriver, collect, collector, count, line, mr, path, readlines, ref, show, source;
+    // T?.halt_on_error()
+    GUY = require('../../../apps/guy');
+    ({Moonriver} = require('../../../apps/moonriver'));
+    ({readlines} = require('readlines-ng'));
+    FS = require('node:fs');
+    path = PATH.join(__dirname, '../../../assets/short-proposal.mkts.md');
+    source = FS.createReadStream(path, {
+      encoding: 'utf-8'
+    });
+    collector = [];
+    mr = new Moonriver();
+    mr.push(show = function(d) {
+      return urge('^4948-1^', d);
+    });
+    mr.push(collect = function(d) {
+      return collector.push(d);
+    });
+    //.......................................................................................................
+    count = 0;
+    ref = readlines(source);
+    for await (line of ref) {
+      count++;
+      if (count > 5) {
+        continue;
+      }
+      mr.send(line);
+      /* to achieve interleaving of data ingestion steps and data processing steps use `sleep 0`; */
+      /* here we use a bigger value to demonstrate that output actually happens in a piecemeal fashion: */
+      info(count);
+      await GUY.async.sleep(0.2);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(collector, ['<title>A Proposal</title>', '<h1>Motivation</h1>', '<p>It has been suggested to further the cause.</p>', '<p>This is <i>very</i> desirable indeed.</p>', '']);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
+      // test @can_use_asyncfunction_as_source
+      // @can_use_nodejs_readable_stream_as_source()
+      // test @can_use_nodejs_readable_stream_as_source
       return test(this);
     })();
   }
