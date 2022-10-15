@@ -88,17 +88,6 @@ X                         = require '../../../lib/helpers'
     help rpr sqlx
     info rpr sql
     echo dtab._tabulate db db.resolve sql
-    # db SQL"""
-    #   create table xy (
-    #     n   integer not null primary key,
-    #     nx  integer not null );"""
-    # insert_into_xy = db.prepare_insert { into: 'xy', exclude: [ 'a', ], }
-    # db insert_into_xy, { b: 'one', c: 1, }
-    # db insert_into_xy, { b: 'two', c: 1, }
-    # db insert_into_xy, { b: 'three', c: 1, }
-    # db insert_into_xy, { b: 'four', c: 1, }
-    # T?.eq ( db.all_rows SQL"select * from xy order by a;" ), [ { a: 1, b: 'one', c: 1 }, { a: 2, b: 'two', c: 1 }, { a: 3, b: 'three', c: 1 }, { a: 4, b: 'four', c: 1 } ]
-    # db SQL"rollback;"
   #.........................................................................................................
   done?()
 
