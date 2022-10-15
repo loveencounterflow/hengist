@@ -62,9 +62,10 @@
     };
     //.........................................................................................................
     db.definitions = {};
-    db.define = function(sqlx) {
-      var body, match, name, name_re, parameters, parameters_re;
+    db.declare = function(sqlx) {
+      var body, current_idx, match, name, name_re, parameters, parameters_re, ref1;
       this.types.validate.nonempty_text(sqlx);
+      parameters_re = null;
       //.......................................................................................................
       name_re = /^(?<name>@[^\s^(]+)/y;
       if ((match = sqlx.match(name_re)) == null) {
@@ -72,14 +73,21 @@
       }
       ({name} = match.groups);
       //.......................................................................................................
-      parameters_re = /\(\s*(?<parameters>[^)]*?)\s*\)\s*=\s*/y;
-      parameters_re.lastIndex = name_re.lastIndex;
-      if ((match = sqlx.match(parameters_re)) == null) {
-        throw new E.DBay_sqlx_error('^dbay/sqlx@2^', `syntax error in ${rpr(sqlx)}`);
+      if (sqlx[name_re.lastIndex] === '(') {
+        parameters_re = /\(\s*(?<parameters>[^)]*?)\s*\)\s*=\s*/y;
+        parameters_re.lastIndex = name_re.lastIndex;
+        if ((match = sqlx.match(parameters_re)) == null) {
+          throw new E.DBay_sqlx_error('^dbay/sqlx@2^', `syntax error in ${rpr(sqlx)}`);
+        }
+        ({parameters} = match.groups);
+        parameters = parameters.split(/\s*,\s*/);
+      } else {
+        /* extension for declaration, call w/out parentheses left for later */
+        throw new E.DBay_sqlx_error('^dbay/sqlx@3^', `syntax error: parentheses are obligatory but missing in ${rpr(sqlx)}`);
       }
-      ({parameters} = match.groups);
-      parameters = parameters.split(/\s*,\s*/);
-      body = sqlx.slice(parameters_re.lastIndex).replace(/\s*;\s*$/, '');
+      // parameters              = []
+      current_idx = (ref1 = parameters_re != null ? parameters_re.lastIndex : void 0) != null ? ref1 : name_re.lastIndex;
+      body = sqlx.slice(current_idx).replace(/\s*;\s*$/, '');
       this.definitions[name] = {name, parameters, body};
       //.......................................................................................................
       return null;
@@ -90,16 +98,13 @@
       return sqlx.replace(/(?<name>@[^\s^(]+)\(\s*(?<values>[^)]*?)\s*\)/g, (...P) => {
         var R, call_arity, definition, definition_arity, groups, i, idx, len, name, parameter, ref1, ref2, value, values;
         ref1 = P, [...P] = ref1, [groups] = splice.call(P, -1);
-        debug('^3534^', P);
-        debug('^3534^', groups);
         ({name, values} = groups);
         values = values.split(/\s*,\s*/);
         if ((definition = this.definitions[name]) == null) {
-          throw new E.DBay_sqlx_error('^dbay/sqlx@3^', `unknown name ${rpr(name)}`);
+          throw new E.DBay_sqlx_error('^dbay/sqlx@4^', `unknown name ${rpr(name)}`);
         }
-        debug({name, values, definition});
         if ((call_arity = values.length) !== (definition_arity = definition.parameters.length)) {
-          throw new E.DBay_sqlx_error('^dbay/sqlx@4^', `expected ${definition_arity} arguments, got ${call_arity}`);
+          throw new E.DBay_sqlx_error('^dbay/sqlx@5^', `expected ${definition_arity} arguments, got ${call_arity}`);
         }
         //.....................................................................................................
         R = definition.body;
@@ -108,7 +113,6 @@
           parameter = ref2[idx];
           value = values[idx];
           R = R.replace(RegExp(`${parameter}`, "g"), value);
-          debug(rpr(R));
         }
         return R;
       });
@@ -116,12 +120,32 @@
     //.........................................................................................................
     db(function() {
       var sql, sqlx;
-      db.define(SQL`@secret_power( @a, @b ) = power( @a, @b ) / @b;`);
+      db.declare(SQL`@secret_power( @a, @b ) = power( @a, @b ) / @b;`);
       sqlx = SQL`select @secret_power( 3, 2 );`;
       sql = db.resolve(sqlx);
       help(rpr(sqlx));
       info(rpr(sql));
       return echo(dtab._tabulate(db(db.resolve(sql))));
+    });
+    //.........................................................................................................
+    db(function() {
+      var sql, sqlx;
+      db.declare(SQL`@max( @a, @b ) = case when @a > @b then @a else @b end;`);
+      sqlx = SQL`select @max( 3, 2 ) as the_bigger_the_better;`;
+      sql = db.resolve(sqlx);
+      help(rpr(sqlx));
+      info(rpr(sql));
+      return echo(dtab._tabulate(db(db.resolve(sql))));
+    });
+    //.........................................................................................................
+    db(function() {
+      var sql, sqlx;
+      db.declare(SQL`@intnn() = integer not null;`);
+      sqlx = SQL`create table numbers (
+  n @intnn() primary key );`;
+      sql = db.resolve(sqlx);
+      help(rpr(sqlx));
+      return info(rpr(sql));
     });
     return typeof done === "function" ? done() : void 0;
   };
