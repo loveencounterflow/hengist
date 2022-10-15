@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, MMX, PATH, X, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, X, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -37,8 +37,7 @@
 
   guy = require('../../../apps/guy');
 
-  MMX = require('../../../apps/multimix/lib/cataloguing');
-
+  // MMX                       = require '../../../apps/multimix/lib/cataloguing'
   X = require('../../../lib/helpers');
 
   //-----------------------------------------------------------------------------------------------------------
@@ -80,7 +79,7 @@
       temporary: true
     });
     try {
-      debug('^447^', MMX.all_keys_of(db));
+      // debug '^447^', MMX.all_keys_of db
       if (T != null) {
         T.ok(DH.is_file(db._dbs.main.path));
       }
