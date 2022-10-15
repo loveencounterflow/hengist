@@ -25,7 +25,7 @@ types                     = new ( require 'intertype' ).Intertype
   validate
   validate_list_of }      = types.export()
 guy                       = require '../../../apps/guy'
-MMX                       = require '../../../apps/multimix/lib/cataloguing'
+# MMX                       = require '../../../apps/multimix/lib/cataloguing'
 X                         = require '../../../lib/helpers'
 
 
@@ -53,7 +53,7 @@ X                         = require '../../../lib/helpers'
   DH                  = require PATH.join H.dbay_path, 'lib/helpers'
   db                  = new DBay { path, temporary: true, }
   try
-    debug '^447^', MMX.all_keys_of db
+    # debug '^447^', MMX.all_keys_of db
     T?.ok DH.is_file db._dbs.main.path
     db.execute SQL"create table texts ( nr integer not null primary key, text text );"
     db.destroy()
