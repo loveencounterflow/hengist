@@ -44,21 +44,28 @@ X                         = require '../../../lib/helpers'
   db.definitions = {}
   db.declare = ( sqlx ) ->
     @types.validate.nonempty_text sqlx
+    parameters_re           = null
     #.......................................................................................................
     name_re                 = /^(?<name>@[^\s^(]+)/y
     unless ( match = sqlx.match name_re )?
       throw new E.DBay_sqlx_error '^dbay/sqlx@1^', "syntax error in #{rpr sqlx}"
     { name, }               = match.groups
     #.......................................................................................................
-    parameters_re           = /\(\s*(?<parameters>[^)]*?)\s*\)\s*=\s*/y
-    parameters_re.lastIndex = name_re.lastIndex
-    unless ( match = sqlx.match parameters_re )?
-      throw new E.DBay_sqlx_error '^dbay/sqlx@2^', "syntax error in #{rpr sqlx}"
-    { parameters, }         = match.groups
-    parameters              = parameters.split /\s*,\s*/
-    body                    = sqlx[ parameters_re.lastIndex ... ].replace /\s*;\s*$/, ''
+    if sqlx[ name_re.lastIndex ] is '('
+      parameters_re           = /\(\s*(?<parameters>[^)]*?)\s*\)\s*=\s*/y
+      parameters_re.lastIndex = name_re.lastIndex
+      unless ( match = sqlx.match parameters_re )?
+        throw new E.DBay_sqlx_error '^dbay/sqlx@2^', "syntax error in #{rpr sqlx}"
+      { parameters, }         = match.groups
+      parameters              = parameters.split /\s*,\s*/
+    else
+      ### extension for declaration, call w/out parentheses left for later ###
+      throw new E.DBay_sqlx_error '^dbay/sqlx@3^', "syntax error: parentheses are obligatory but missing in #{rpr sqlx}"
+      # parameters              = []
+    current_idx             = parameters_re?.lastIndex ? name_re.lastIndex
+    body                    = sqlx[ current_idx ... ].replace /\s*;\s*$/, ''
     @definitions[ name ]    = { name, parameters, body, }
-    #.......................................................................................................
+  #.......................................................................................................
     return null
   #.........................................................................................................
   db.resolve = ( sqlx ) ->
@@ -67,8 +74,9 @@ X                         = require '../../../lib/helpers'
       { name, values, } = groups
       values            = values.split /\s*,\s*/
       unless ( definition = @definitions[ name ] )?
+        throw new E.DBay_sqlx_error '^dbay/sqlx@4^', "unknown name #{rpr name}"
       unless ( call_arity = values.length ) is ( definition_arity = definition.parameters.length )
-        throw new E.DBay_sqlx_error '^dbay/sqlx@4^', "expected #{definition_arity} arguments, got #{call_arity}"
+        throw new E.DBay_sqlx_error '^dbay/sqlx@5^', "expected #{definition_arity} arguments, got #{call_arity}"
       #.....................................................................................................
       R = definition.body
       for parameter, idx in definition.parameters
@@ -83,6 +91,32 @@ X                         = require '../../../lib/helpers'
     help rpr sqlx
     info rpr sql
     echo dtab._tabulate db db.resolve sql
+  #.........................................................................................................
+  db ->
+    db.declare SQL"""@max( @a, @b ) = case when @a > @b then @a else @b end;"""
+    sqlx  = SQL"""select @max( 3, 2 ) as the_bigger_the_better;"""
+    sql   = db.resolve sqlx
+    help rpr sqlx
+    info rpr sql
+    echo dtab._tabulate db db.resolve sql
+  #.........................................................................................................
+  db ->
+    db.declare SQL"""@intnn() = integer not null;"""
+    sqlx  = SQL"""
+      create table numbers (
+        n @intnn() primary key );"""
+    sql   = db.resolve sqlx
+    help rpr sqlx
+    info rpr sql
+  # #.........................................................................................................
+  # db ->
+  #   db.declare SQL"""@intnn = integer not null;"""
+  #   sqlx  = SQL"""
+  #     create table numbers (
+  #       n @intnn primary key );"""
+  #   sql   = db.resolve sqlx
+  #   help rpr sqlx
+  #   info rpr sql
   #.........................................................................................................
   done?()
 
