@@ -29,6 +29,8 @@ types                     = new ( require 'intertype' ).Intertype
   validate
   validate_list_of }      = types.export()
 # X                         = require '../../../lib/helpers'
+r                         = String.raw
+new_xregex                = require 'xregexp'
 
 
 #===========================================================================================================
@@ -95,6 +97,33 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
   #---------------------------------------------------------------------------------------------------------
   resolve: ( sqlx ) ->
     @types.validate.nonempty_text sqlx
+    return sqlx.replace @_sqlx_get_cmd_re(), ( _matches..., idx, _sqlx, groups ) =>
+      # debug '^546^', rpr sqlx[ idx ... idx + groups.name.length ]
+      { name, } = groups
+      tail      = sqlx[ idx + name.length ... ]
+      #.....................................................................................................
+      unless ( definition = @_sqlx_declarations[ name ] )?
+        ### NOTE should never happen as we always re-compile pattern from declaration keys ###
+        throw new E.DBay_sqlx_error '^dbay/sqlx@4^', "unknown name #{rpr name}"
+      #.....................................................................................................
+      if tail.startsWith '('
+        debug '^87-4^', rpr tail
+        # debug '^87-4^', new_xregex.matchRecursive tail, '(?<!\\\\)\x5c(', '(?<!\\\\)\x5c)', 'g', { unbalanced: 'skip' }
+        # debug '^87-4^', try new_xregex.matchRecursive tail, '\\(', '\\)', 'g', { escapeChar: '\\', unbalanced: 'error' } catch e then warn GUY.trm.reverse e.message
+        # debug '^87-4^', new_xregex.matchRecursive tail, '\\(', '\\)', 'g', { escapeChar: '\\', unbalanced: 'skip' }
+        tail = "foo ( bar ), ( baz \\) ), ( 1, 2, 3, )"
+        matches = new_xregex.matchRecursive tail, '\\(', '\\)', '', \
+          { escapeChar: '\\', unbalanced: 'skip-lazy', valueNames: [ 'outside', 'before', 'between', 'after', ], }
+        debug '^87-4^', match for match in matches when match.name is 'between'
+      else
+        call_arity = 0
+      # #.....................................................................................................
+      # unless ( call_arity = values.length ) is ( definition_arity = definition.parameters.length )
+      #   throw new E.DBay_sqlx_error '^dbay/sqlx@5^', "expected #{definition_arity} arguments, got #{call_arity}"
+      # #.....................................................................................................
+      # debug '^546^', groups
+      return '*'
+
     return sqlx.replace /(?<name>@[^\s^(]+)\(\s*(?<values>[^)]*?)\s*\)/g, ( P..., groups ) =>
       { name, values, } = groups
       values            = values.split /\s*,\s*/
@@ -128,23 +157,42 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
     sql   = db.resolve sqlx
     help rpr sqlx
     info rpr sql
-    echo dtab._tabulate db db.resolve sql
+    # echo dtab._tabulate db db.resolve sql
   #.........................................................................................................
   db ->
     db.declare SQL"""@max( @a, @b ) = case when @a > @b then @a else @b end;"""
     sqlx  = SQL"""select @max( 3, 2 ) as the_bigger_the_better;"""
-    debug '^87-1^', db._sqlx_get_cmd_re()
-    debug '^87-1^', [ ( sqlx.matchAll db._sqlx_get_cmd_re() )..., ]
+    # debug '^87-1^', db._sqlx_get_cmd_re()
+    # debug '^87-1^', [ ( sqlx.matchAll db._sqlx_get_cmd_re() )..., ]
     sql   = db.resolve sqlx
     help rpr sqlx
     info rpr sql
-    echo dtab._tabulate db db.resolve sql
+    # echo dtab._tabulate db db.resolve sql
+  #.........................................................................................................
+  db ->
+    db.declare SQL"""@concat( @first, @second ) = @first || @second;"""
+    sqlx  = SQL"""select @concat( 'here', '\\)' ) as the_bigger_the_better;"""
+    # debug '^87-1^', db._sqlx_get_cmd_re()
+    # debug '^87-1^', [ ( sqlx.matchAll db._sqlx_get_cmd_re() )..., ]
+    sql   = db.resolve sqlx
+    help rpr sqlx
+    info rpr sql
+    # echo dtab._tabulate db db.resolve sql
   #.........................................................................................................
   db ->
     db.declare SQL"""@intnn() = integer not null;"""
     sqlx  = SQL"""
       create table numbers (
         n @intnn() primary key );"""
+    sql   = db.resolve sqlx
+    help rpr sqlx
+    info rpr sql
+  #.........................................................................................................
+  db ->
+    db.declare SQL"""@intnn( @a ) = integer not null;"""
+    sqlx  = SQL"""
+      create table numbers (
+        n @intnn( true ) primary key );"""
     sql   = db.resolve sqlx
     help rpr sqlx
     info rpr sql
