@@ -150,6 +150,7 @@ specifiers:
   trash: 8.0.0
   validate-npm-package-name: ^3.0.0
   xql: ^1.4.12
+  xregexp: ^5.1.1
 
 dependencies:
   '@ef-carbon/deep-freeze': 1.0.1
@@ -301,6 +302,7 @@ dependencies:
   trash: 8.0.0
   validate-npm-package-name: 3.0.0
   xql: 1.4.12
+  xregexp: 5.1.1
 
 packages:
 
@@ -502,6 +504,14 @@ packages:
       babel-plugin-dynamic-import-node: 2.3.3
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /@babel/runtime-corejs3/7.19.4:
+    resolution: {integrity: sha512-HzjQ8+dzdx7dmZy4DQ8KV8aHi/74AjEbBGTFutBmg/pd3dY5/q1sfuOGPTFGEytlQhWoeVXqcK5BwMgIkRkNDQ==}
+    engines: {node: '>=6.9.0'}
+    dependencies:
+      core-js-pure: 3.25.5
+      regenerator-runtime: 0.13.9
     dev: false
 
   /@babel/runtime/7.19.0:
@@ -1513,6 +1523,11 @@ packages:
     resolution: {integrity: sha512-+OQdjP49zViI/6i7nIJpA8rAl4sV/JdPfU9nZs3VqOwGIgizICvuN2ru6fMd+4llL0tar18UYJXfZ/TWtmhUjA==}
     dependencies:
       safe-buffer: 5.1.2
+    dev: false
+
+  /core-js-pure/3.25.5:
+    resolution: {integrity: sha512-oml3M22pHM+igfWHDfdLVq2ShWmjM2V4L+dQEBs0DWVIqEm9WHCwGAlZ6BmyBQGy5sFrJmcx+856D9lVKyGWYg==}
+    requiresBuild: true
     dev: false
 
   /core-js/3.25.5:
@@ -5661,6 +5676,12 @@ packages:
   /xql/1.4.12:
     resolution: {integrity: sha512-h/Eu8PBS8jZ4oDBUH3k9mdbimJtrBCkQPBnnQ/pya3MmYPQhIwelAsEb2v6hQm7UDAgo/Q414EyNJsVPJF8idg==}
     engines: {node: '>=6'}
+    dev: false
+
+  /xregexp/5.1.1:
+    resolution: {integrity: sha512-fKXeVorD+CzWvFs7VBuKTYIW63YD1e1osxwQ8caZ6o1jg6pDAbABDG54LCIq0j5cy7PjRvGIq6sef9DYPXpncg==}
+    dependencies:
+      '@babel/runtime-corejs3': 7.19.4
     dev: false
 
   /xtend/4.0.2:
