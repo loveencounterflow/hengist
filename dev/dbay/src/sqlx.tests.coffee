@@ -28,8 +28,7 @@ types                     = new ( require 'intertype' ).Intertype
   type_of
   validate
   validate_list_of }      = types.export()
-guy                       = require '../../../apps/guy'
-X                         = require '../../../lib/helpers'
+# X                         = require '../../../lib/helpers'
 
 #-----------------------------------------------------------------------------------------------------------
 @dbay_sqlx_function = ( T, done ) ->
