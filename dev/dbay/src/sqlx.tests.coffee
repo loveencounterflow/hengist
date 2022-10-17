@@ -63,8 +63,8 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
       parameters              = parameters.split /\s*,\s*/
     else
       ### extension for declaration, call w/out parentheses left for later ###
-      throw new E.DBay_sqlx_error '^dbay/sqlx@3^', "syntax error: parentheses are obligatory but missing in #{rpr sqlx}"
-      # parameters              = []
+      # throw new E.DBay_sqlx_error '^dbay/sqlx@3^', "syntax error: parentheses are obligatory but missing in #{rpr sqlx}"
+      parameters              = []
     #.......................................................................................................
     current_idx                 = parameters_re?.lastIndex ? name_re.lastIndex
     body                        = sqlx[ current_idx ... ].replace /\s*;\s*$/, ''
