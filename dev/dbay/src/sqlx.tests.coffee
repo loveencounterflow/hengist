@@ -91,6 +91,8 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
 
   #---------------------------------------------------------------------------------------------------------
   _sqlx_declare: ( cfg ) ->
+    if @_sqlx_declarations[ cfg.name ]?
+      throw new E.DBay_sqlx_error '^dbay/sqlx@2^', "can not re-declare #{rpr cfg.name}"
     @_sqlx_cmd_re                   = null
     @_sqlx_declarations[ cfg.name ] = cfg
     return null
