@@ -362,6 +362,7 @@
     _test(SQL` 3, f( 2, 4 ) `, ['3', 'f( 2, 4 )']);
     _test(SQL` 3, f( 2, @g( 4, 5, 6 ) ) `, ['3', 'f( 2, @g( 4, 5, 6 ) )']);
     _test(SQL` 3, 2, "strange,name" `, ['3', '2', '"strange,name"']);
+    _test(SQL`           `, []);
     return typeof done === "function" ? done() : void 0;
   };
 
