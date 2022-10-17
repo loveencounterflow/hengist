@@ -40,6 +40,11 @@ sql_lexer                 = require '../../../../dbay-sql-lexer'
 
 
 #===========================================================================================================
+class E.DBay_sqlx_error            extends E.DBay_error
+  constructor: ( ref, message )     -> super ref, message
+
+
+#===========================================================================================================
 class DBay_sqlx extends ( require H.dbay_path ).DBay
 
   #---------------------------------------------------------------------------------------------------------
@@ -189,9 +194,6 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
   # T?.halt_on_error()
   { SQL  }          = DBay_sqlx
   db                = new DBay_sqlx()
-  #.........................................................................................................
-  class E.DBay_sqlx_error            extends E.DBay_error
-    constructor: ( ref, message )     -> super ref, message
   #.........................................................................................................
   _test = ( probe, matcher ) ->
     try
