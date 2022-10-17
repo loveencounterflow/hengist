@@ -128,12 +128,7 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
             between
             after   ] = matches
           tail        = tail[ after.end ... ]
-          values      = between.value.trim()
-          values      = between.value.trim()
-          ### TAINT this part to be done with lexer ###
-          values      = values.split /\s*,\s*/
-          values      = [] if equals values, [ '', ]
-          ### ------------------------------------- ###
+          values      = @_find_arguments between.value
           call_arity  = values.length
         else
           call_arity  = 0
@@ -151,6 +146,43 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
       sql_before = sql_after
     #.......................................................................................................
     return sql_after
+
+  #---------------------------------------------------------------------------------------------------------
+  _find_arguments: ( sqlx ) ->
+    sqlx    = sqlx.trim()
+    tokens  = []
+    R       = []
+    #.......................................................................................................
+    _tokens = sql_lexer.tokenize sqlx
+    for [ type, text, lnr, offset, ] in _tokens
+      tokens.push { type, text, lnr, offset, }
+    #.......................................................................................................
+    # echo dtab._tabulate tokens
+    level       = 0
+    comma_idxs  = [ { start: null, stop: 0, }, ]
+    for token in tokens
+      switch token.type
+        when 'LEFT_PAREN'
+          # info "bracket #{rpr token} (#{level})"
+          level++
+        when 'RIGHT_PAREN'
+          level--
+          # info "bracket #{rpr token} (#{level})"
+        when 'COMMA'
+          # info "comma #{rpr token} (#{level})"
+          if level is 0
+            comma_idxs.push { start: token.offset, stop: token.offset + token.text.length, }
+        else
+          null
+          # warn "skipping #{rpr token}"
+    comma_idxs.push { start: sqlx.length, stop: null, }
+    #.......................................................................................................
+    for idx in [ 1 ... comma_idxs.length ]
+      start = comma_idxs[ idx - 1 ].stop
+      stop  = comma_idxs[ idx     ].start
+      R.push sqlx[ start ... stop ].trim()
+    #.......................................................................................................
+    return R
 
 #-----------------------------------------------------------------------------------------------------------
 @dbay_sqlx_function = ( T, done ) ->
@@ -227,6 +259,22 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@dbay_sqlx_find_arguments = ( T, done ) ->
+  # T?.halt_on_error()
+  { SQL  }  = DBay_sqlx
+  db        = new DBay_sqlx()
+  _test     = ( probe, matcher ) ->
+    result = db._find_arguments probe
+    help '^43-1^', probe
+    urge '^43-1^', result
+    T?.eq result, matcher
+  _test SQL""" 3, 2 """,                      [ '3', '2', ]
+  _test SQL""" 3, f( 2, 4 ) """,              [ '3', 'f( 2, 4 )' ]
+  _test SQL""" 3, f( 2, @g( 4, 5, 6 ) ) """,  [ '3', 'f( 2, @g( 4, 5, 6 ) )' ]
+  _test SQL""" 3, 2, "strange,name" """,      [ '3', '2', '"strange,name"' ]
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @dbay_sql_lexer = ( T, done ) ->
   { SQL  }          = DBay_sqlx
   lexer             = require '../../../../dbay-sql-lexer'
@@ -261,6 +309,9 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
 if require.main is module then do =>
   # test @
   # @dbay_sql_lexer()
+  @dbay_sqlx_find_arguments()
+  test @dbay_sqlx_find_arguments
   # @dbay_sqlx_function()
-  test @dbay_sqlx_function
+  # test @dbay_sqlx_function
+
 
