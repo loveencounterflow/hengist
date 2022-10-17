@@ -32,6 +32,7 @@ types                     = new ( require 'intertype' ).Intertype
 r                         = String.raw
 new_xregex                = require 'xregexp'
 E                         = require '../../../apps/dbay/lib/errors'
+equals                    = ( require 'util' ).isDeepStrictEqual
 
 
 #===========================================================================================================
@@ -61,6 +62,7 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
         throw new E.DBay_sqlx_error '^dbay/sqlx@2^', "syntax error in #{rpr sqlx}"
       { parameters, }         = match.groups
       parameters              = parameters.split /\s*,\s*/
+      parameters              = [] if equals parameters, [ '', ]
     else
       ### extension for declaration, call w/out parentheses left for later ###
       # throw new E.DBay_sqlx_error '^dbay/sqlx@3^', "syntax error: parentheses are obligatory but missing in #{rpr sqlx}"
@@ -68,7 +70,8 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
     #.......................................................................................................
     current_idx                 = parameters_re?.lastIndex ? name_re.lastIndex
     body                        = sqlx[ current_idx ... ].replace /\s*;\s*$/, ''
-    @_sqlx_declare { name, parameters, body, }
+    arity                       = parameters.length
+    @_sqlx_declare { name, parameters, arity, body, }
   #.......................................................................................................
     return null
 
@@ -82,7 +85,7 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
       return -1 if a < b
       return 0
     names = ( @_escape_literal_for_regex name for name in names ).join '|'
-    return @_sqlx_cmd_re = /// (?<= \W | ^ ) (?<name> #{names} ) (?= \W | $ ) ///g
+    return @_sqlx_cmd_re = /// (?<= \W | ^ ) (?<name> #{names} ) (?= \W | $ ) (?<tail> .* ) $ ///g
 
   #---------------------------------------------------------------------------------------------------------
   ### thx to https://stackoverflow.com/a/6969486/7568091 and
@@ -100,45 +103,49 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
   #---------------------------------------------------------------------------------------------------------
   resolve: ( sqlx ) ->
     @types.validate.nonempty_text sqlx
-    return sqlx.replace @_sqlx_get_cmd_re(), ( _matches..., idx, _sqlx, groups ) =>
-      # debug '^546^', rpr sqlx[ idx ... idx + groups.name.length ]
-      { name, } = groups
-      tail      = sqlx[ idx + name.length ... ]
-      #.....................................................................................................
-      unless ( definition = @_sqlx_declarations[ name ] )?
-        ### NOTE should never happen as we always re-compile pattern from declaration keys ###
-        throw new E.DBay_sqlx_error '^dbay/sqlx@4^', "unknown name #{rpr name}"
-      #.....................................................................................................
-      if tail.startsWith '('
-        debug '^87-1^', rpr tail
-        matches = new_xregex.matchRecursive tail, '\\(', '\\)', '', \
-          { escapeChar: '\\', unbalanced: 'skip-lazy', valueNames: [ 'outside', 'before', 'between', 'after', ], }
-        for match in matches when match.name is 'between'
-          debug '^87-2^', rpr match.value
-          break
-      else
-        call_arity = 0
-      # #.....................................................................................................
-      # unless ( call_arity = values.length ) is ( definition_arity = definition.parameters.length )
-      #   throw new E.DBay_sqlx_error '^dbay/sqlx@5^', "expected #{definition_arity} arguments, got #{call_arity}"
-      # #.....................................................................................................
-      # debug '^546^', groups
-      return '*'
-
-    return sqlx.replace /(?<name>@[^\s^(]+)\(\s*(?<values>[^)]*?)\s*\)/g, ( P..., groups ) =>
-      { name, values, } = groups
-      values            = values.split /\s*,\s*/
-      unless ( definition = @_sqlx_declarations[ name ] )?
-        throw new E.DBay_sqlx_error '^dbay/sqlx@4^', "unknown name #{rpr name}"
-      unless ( call_arity = values.length ) is ( definition_arity = definition.parameters.length )
-        throw new E.DBay_sqlx_error '^dbay/sqlx@5^', "expected #{definition_arity} arguments, got #{call_arity}"
-      #.....................................................................................................
-      R = definition.body
-      for parameter, idx in definition.parameters
-        value = values[ idx ]
-        R = R.replace ///#{parameter}///g, value
-      return R
-
+    sql_before  = sqlx
+    count       = 0
+    #.......................................................................................................
+    loop
+      break if count++ > 10_000 ### NOTE to avoid deadlock, just in case ###
+      sql_after = sql_before.replace @_sqlx_get_cmd_re(), ( _matches..., idx, _sqlx, groups ) =>
+        # debug '^546^', rpr sqlx[ idx ... idx + groups.name.length ]
+        { name
+          tail  } = groups
+        #.....................................................................................................
+        unless ( declaration = @_sqlx_declarations[ name ] )?
+          ### NOTE should never happen as we always re-compile pattern from declaration keys ###
+          throw new E.DBay_sqlx_error '^dbay/sqlx@4^', "unknown name #{rpr name}"
+        #.....................................................................................................
+        if tail.startsWith '('
+          matches = new_xregex.matchRecursive tail, '\\(', '\\)', '', \
+            { escapeChar: '\\', unbalanced: 'skip-lazy', valueNames: [ 'outside', 'before', 'between', 'after', ], }
+          [ before
+            between
+            after   ] = matches
+          tail    = tail[ after.end ... ]
+          values  = between.value.trim()
+          values  = between.value.trim()
+          ### TAINT this part to be done with lexer ###
+          values  = values.split /\s*,\s*/
+          values  = [] if equals values, [ '', ]
+          ### ------------------------------------- ###
+          call_arity = values.length
+        else
+          call_arity = 0
+        #.....................................................................................................
+        unless call_arity is declaration.arity
+          throw new E.DBay_sqlx_error '^dbay/sqlx@5^', "expected #{declaration.arity} argument(s), got #{call_arity}"
+        #.....................................................................................................
+        R = declaration.body
+        for parameter, idx in declaration.parameters
+          value = values[ idx ]
+          R = R.replace ///#{parameter}///g, value
+        return R + tail
+      break if sql_after is sql_before
+      sql_before = sql_after
+    #.......................................................................................................
+    return sql_after
 
 #-----------------------------------------------------------------------------------------------------------
 @dbay_sqlx_function = ( T, done ) ->
@@ -210,6 +217,7 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
     help rpr sqlx
     info rpr sql
     T?.eq sql, SQL"""select 'a' || 'b' as c1, 'c' || 'd' as c2;"""
+  return done?() #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   #.........................................................................................................
   db ->
     sqlx  = SQL"""select @concat( 'a', @concat( 'c', 'd' ) );"""
@@ -256,8 +264,7 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  # @dbay_sqlx_lexer()
-  @dbay_sql_lexer()
-  # @dbay_sqlx_function()
-  # test @dbay_sqlx_function
+  # @dbay_sql_lexer()
+  @dbay_sqlx_function()
+  test @dbay_sqlx_function
 
