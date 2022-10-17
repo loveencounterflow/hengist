@@ -110,14 +110,12 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
         throw new E.DBay_sqlx_error '^dbay/sqlx@4^', "unknown name #{rpr name}"
       #.....................................................................................................
       if tail.startsWith '('
-        debug '^87-4^', rpr tail
-        # debug '^87-4^', new_xregex.matchRecursive tail, '(?<!\\\\)\x5c(', '(?<!\\\\)\x5c)', 'g', { unbalanced: 'skip' }
-        # debug '^87-4^', try new_xregex.matchRecursive tail, '\\(', '\\)', 'g', { escapeChar: '\\', unbalanced: 'error' } catch e then warn GUY.trm.reverse e.message
-        # debug '^87-4^', new_xregex.matchRecursive tail, '\\(', '\\)', 'g', { escapeChar: '\\', unbalanced: 'skip' }
-        tail = "foo ( bar ), ( baz \\) ), ( 1, 2, 3, )"
+        debug '^87-1^', rpr tail
         matches = new_xregex.matchRecursive tail, '\\(', '\\)', '', \
           { escapeChar: '\\', unbalanced: 'skip-lazy', valueNames: [ 'outside', 'before', 'between', 'after', ], }
-        debug '^87-4^', match for match in matches when match.name is 'between'
+        for match in matches when match.name is 'between'
+          debug '^87-2^', rpr match.value
+          break
       else
         call_arity = 0
       # #.....................................................................................................
