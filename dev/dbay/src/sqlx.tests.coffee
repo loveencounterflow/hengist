@@ -145,7 +145,6 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
         for parameter, idx in declaration.parameters
           value = values[ idx ]
           R = R.replace ///#{parameter}///g, value
-          debug '^43-1^', rpr R + tail
         return R + tail
       break if sql_after is sql_before
       sql_before = sql_after
@@ -162,24 +161,19 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
     for [ type, text, lnr, offset, ] in _tokens
       tokens.push { type, text, lnr, offset, }
     #.......................................................................................................
-    # echo dtab._tabulate tokens
     level       = 0
     comma_idxs  = [ { start: null, stop: 0, }, ]
     for token in tokens
       switch token.type
         when 'LEFT_PAREN'
-          # info "bracket #{rpr token} (#{level})"
           level++
         when 'RIGHT_PAREN'
           level--
-          # info "bracket #{rpr token} (#{level})"
         when 'COMMA'
-          # info "comma #{rpr token} (#{level})"
           if level is 0
             comma_idxs.push { start: token.offset, stop: token.offset + token.text.length, }
         else
           null
-          # warn "skipping #{rpr token}"
     comma_idxs.push { start: sqlx.length, stop: null, }
     #.......................................................................................................
     for idx in [ 1 ... comma_idxs.length ]
@@ -190,6 +184,9 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
     R = [] if equals R, [ '', ]
     return R
 
+
+#===========================================================================================================
+#
 #-----------------------------------------------------------------------------------------------------------
 @dbay_sqlx_function = ( T, done ) ->
   # T?.halt_on_error()
