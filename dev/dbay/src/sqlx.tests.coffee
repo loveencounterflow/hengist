@@ -160,7 +160,7 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
   class E.DBay_sqlx_error            extends E.DBay_error
     constructor: ( ref, message )     -> super ref, message
   #.........................................................................................................
-  test = ( probe, matcher ) ->
+  _test = ( probe, matcher ) ->
     try
       sqlx  = probe
       sql   = db.resolve sqlx
@@ -178,17 +178,17 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
   do ->
     sqlx  = SQL"""select @secret_power( 3, 2 );"""
     sql   = SQL"""select power( 3, 2 ) / 2;"""
-    test sqlx, sql
+    _test sqlx, sql
   #.........................................................................................................
   do ->
     sqlx  = SQL"""select @max( 3, 2 ) as the_bigger_the_better;"""
     sql   = SQL"""select case when 3 > 2 then 3 else 2 end as the_bigger_the_better;"""
-    test sqlx, sql
+    _test sqlx, sql
   #.........................................................................................................
   do ->
     sqlx  = SQL"""select @concat( 'here', '\\)' );"""
     sql   = SQL"""select 'here' || '\\)';"""
-    test sqlx, sql
+    _test sqlx, sql
   #.........................................................................................................
   do ->
     sqlx  = SQL"""
@@ -197,7 +197,7 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
     sql   = SQL"""
       create table numbers (
         n integer not null primary key );"""
-    test sqlx, sql
+    _test sqlx, sql
   #.........................................................................................................
   do ->
     sqlx  = SQL"""
@@ -206,22 +206,22 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
     sql   = SQL"""
       create table numbers (
         n integer not null primary key );"""
-    test sqlx, sql
+    _test sqlx, sql
   #.........................................................................................................
   do ->
     sqlx  = SQL"""select @concat( 'a', 'b' ) as c1, @concat( 'c', 'd' ) as c2;"""
     sql   = SQL"""select 'a' || 'b' as c1, 'c' || 'd' as c2;"""
-    test sqlx, sql
+    _test sqlx, sql
   #.........................................................................................................
   do ->
     sqlx  = SQL"""select @concat( 'a', @concat( 'c', 'd' ) );"""
     sql   = SQL"""select 'a' || 'c' || 'd';"""
-    test sqlx, sql
+    _test sqlx, sql
   #.........................................................................................................
   do ->
     sqlx  = SQL"""select @concat( ',', @concat( ',', ',' ) );"""
     sql   = SQL"""select ',' || ',' || ',';"""
-    test sqlx, sql
+    _test sqlx, sql
   #.........................................................................................................
   done?()
 
