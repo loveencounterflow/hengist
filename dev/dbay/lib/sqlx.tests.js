@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var DBay_sqlx, E, FS, GUY, H, PATH, alert, debug, echo, equals, help, info, inspect, isa, log, new_xregex, plain, praise, r, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
+  var DBay_sqlx, E, GUY, H, PATH, alert, debug, echo, equals, help, info, inspect, isa, log, new_xregex, plain, praise, r, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
     splice = [].splice;
 
   //###########################################################################################################
@@ -15,8 +15,7 @@
 
   PATH = require('path');
 
-  FS = require('fs');
-
+  // FS                        = require 'fs'
   H = require('./helpers');
 
   types = new (require('intertype')).Intertype();
