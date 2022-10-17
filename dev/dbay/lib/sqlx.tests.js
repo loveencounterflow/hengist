@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var DBay_sqlx, GUY, H, PATH, alert, debug, echo, equals, help, info, inspect, isa, log, new_xregex, plain, praise, r, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
+  var DBay_sqlx, E, FS, GUY, H, PATH, alert, debug, echo, equals, help, info, inspect, isa, log, new_xregex, plain, praise, r, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
     splice = [].splice;
 
   //###########################################################################################################
@@ -15,7 +15,8 @@
 
   PATH = require('path');
 
-  // FS                        = require 'fs'
+  FS = require('fs');
+
   H = require('./helpers');
 
   types = new (require('intertype')).Intertype();
@@ -26,6 +27,8 @@
   r = String.raw;
 
   new_xregex = require('xregexp');
+
+  E = require('../../../apps/dbay/lib/errors');
 
   //===========================================================================================================
   DBay_sqlx = class DBay_sqlx extends (require(H.dbay_path)).DBay {
@@ -59,9 +62,9 @@
         parameters = parameters.split(/\s*,\s*/);
       } else {
         /* extension for declaration, call w/out parentheses left for later */
-        throw new E.DBay_sqlx_error('^dbay/sqlx@3^', `syntax error: parentheses are obligatory but missing in ${rpr(sqlx)}`);
+        // throw new E.DBay_sqlx_error '^dbay/sqlx@3^', "syntax error: parentheses are obligatory but missing in #{rpr sqlx}"
+        parameters = [];
       }
-      // parameters              = []
       //.......................................................................................................
       current_idx = (ref1 = parameters_re != null ? parameters_re.lastIndex : void 0) != null ? ref1 : name_re.lastIndex;
       body = sqlx.slice(current_idx).replace(/\s*;\s*$/, '');
@@ -108,6 +111,9 @@
 
     //---------------------------------------------------------------------------------------------------------
     _sqlx_declare(cfg) {
+      if (this._sqlx_declarations[cfg.name] != null) {
+        throw new E.DBay_sqlx_error('^dbay/sqlx@2^', `can not re-declare ${rpr(cfg.name)}`);
+      }
       this._sqlx_cmd_re = null;
       this._sqlx_declarations[cfg.name] = cfg;
       return null;
@@ -129,11 +135,7 @@
         }
         //.....................................................................................................
         if (tail.startsWith('(')) {
-          debug('^87-4^', rpr(tail));
-          // debug '^87-4^', new_xregex.matchRecursive tail, '(?<!\\\\)\x5c(', '(?<!\\\\)\x5c)', 'g', { unbalanced: 'skip' }
-          // debug '^87-4^', try new_xregex.matchRecursive tail, '\\(', '\\)', 'g', { escapeChar: '\\', unbalanced: 'error' } catch e then warn GUY.trm.reverse e.message
-          // debug '^87-4^', new_xregex.matchRecursive tail, '\\(', '\\)', 'g', { escapeChar: '\\', unbalanced: 'skip' }
-          tail = "foo ( bar ), ( baz \\) ), ( 1, 2, 3, )";
+          debug('^87-1^', rpr(tail));
           matches = new_xregex.matchRecursive(tail, '\\(', '\\)', '', {
             escapeChar: '\\',
             unbalanced: 'skip-lazy',
@@ -141,9 +143,11 @@
           });
           for (i = 0, len = matches.length; i < len; i++) {
             match = matches[i];
-            if (match.name === 'between') {
-              debug('^87-4^', match);
+            if (!(match.name === 'between')) {
+              continue;
             }
+            debug('^87-2^', rpr(match.value));
+            break;
           }
         } else {
           call_arity = 0;
@@ -182,9 +186,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_sqlx_function = function(T, done) {
-    var E, SQL, Tbl, db, dtab;
+    var SQL, Tbl, db, dtab;
     // T?.halt_on_error()
-    E = require('../../../apps/dbay/lib/errors');
     ({SQL} = DBay_sqlx);
     db = new DBay_sqlx();
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
@@ -205,33 +208,34 @@
       sqlx = SQL`select @secret_power( 3, 2 );`;
       sql = db.resolve(sqlx);
       help(rpr(sqlx));
-      return info(rpr(sql));
+      info(rpr(sql));
+      // echo dtab._tabulate db db.resolve sql
+      return T != null ? T.eq(sql, SQL`select power( 3, 2 ) / 2;`) : void 0;
     });
-    // echo dtab._tabulate db db.resolve sql
     //.........................................................................................................
     db(function() {
       var sql, sqlx;
       db.declare(SQL`@max( @a, @b ) = case when @a > @b then @a else @b end;`);
       sqlx = SQL`select @max( 3, 2 ) as the_bigger_the_better;`;
-      // debug '^87-1^', db._sqlx_get_cmd_re()
-      // debug '^87-1^', [ ( sqlx.matchAll db._sqlx_get_cmd_re() )..., ]
       sql = db.resolve(sqlx);
       help(rpr(sqlx));
-      return info(rpr(sql));
+      info(rpr(sql));
+      // echo dtab._tabulate db db.resolve sql
+      return T != null ? T.eq(sql, SQL`select case when 3 > 2 then 3 else 2 end as the_bigger_the_better;`) : void 0;
     });
-    // echo dtab._tabulate db db.resolve sql
     //.........................................................................................................
     db(function() {
       var sql, sqlx;
       db.declare(SQL`@concat( @first, @second ) = @first || @second;`);
-      sqlx = SQL`select @concat( 'here', '\\)' ) as the_bigger_the_better;`;
-      // debug '^87-1^', db._sqlx_get_cmd_re()
-      // debug '^87-1^', [ ( sqlx.matchAll db._sqlx_get_cmd_re() )..., ]
+      sqlx = SQL`select @concat( 'here', '\\)' );`;
+      // debug '^87-5^', db._sqlx_get_cmd_re()
+      // debug '^87-6^', [ ( sqlx.matchAll db._sqlx_get_cmd_re() )..., ]
       sql = db.resolve(sqlx);
       help(rpr(sqlx));
-      return info(rpr(sql));
+      info(rpr(sql));
+      // echo dtab._tabulate db db.resolve sql
+      return T != null ? T.eq(sql, SQL`select 'here' || '\\)';`) : void 0;
     });
-    // echo dtab._tabulate db db.resolve sql
     //.........................................................................................................
     db(function() {
       var sql, sqlx;
@@ -240,18 +244,85 @@
   n @intnn() primary key );`;
       sql = db.resolve(sqlx);
       help(rpr(sqlx));
-      return info(rpr(sql));
+      info(rpr(sql));
+      return T != null ? T.eq(sql, SQL`create table numbers (
+  n integer not null primary key );`) : void 0;
     });
     //.........................................................................................................
     db(function() {
       var sql, sqlx;
-      db.declare(SQL`@intnn( @a ) = integer not null;`);
+      // db.declare SQL"""@intnn = integer not null;"""
       sqlx = SQL`create table numbers (
-  n @intnn( true ) primary key );`;
+  n @intnn primary key );`;
       sql = db.resolve(sqlx);
       help(rpr(sqlx));
-      return info(rpr(sql));
+      info(rpr(sql));
+      return T != null ? T.eq(sql, SQL`create table numbers (
+  n integer not null primary key );`) : void 0;
     });
+    //.........................................................................................................
+    db(function() {
+      var sql, sqlx;
+      sqlx = SQL`select @concat( 'a', 'b' ) as c1, @concat( 'c', 'd' ) as c2;`;
+      sql = db.resolve(sqlx);
+      help(rpr(sqlx));
+      info(rpr(sql));
+      return T != null ? T.eq(sql, SQL`select 'a' || 'b' as c1, 'c' || 'd' as c2;`) : void 0;
+    });
+    //.........................................................................................................
+    db(function() {
+      var sql, sqlx;
+      sqlx = SQL`select @concat( 'a', @concat( 'c', 'd' ) );`;
+      sql = db.resolve(sqlx);
+      help(rpr(sqlx));
+      info(rpr(sql));
+      return T != null ? T.eq(sql, SQL`select 'a' || 'c' || 'd';`) : void 0;
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_sql_lexer = function(T, done) {
+    var SQL, Tbl, dtab, i, k, len, lexer, ref1, show;
+    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+    dtab = new Tbl({
+      dba: null
+    });
+    ({SQL} = DBay_sqlx);
+    lexer = require('../../../../dbay-sql-lexer');
+    ref1 = (GUY.props.keys(lexer)).sort();
+    for (i = 0, len = ref1.length; i < len; i++) {
+      k = ref1[i];
+      info(k);
+    }
+    show = function(sql) {
+      var _tokens, error, j, len1, start, stop, text, tokens, type;
+      info(rpr(sql));
+      try {
+        _tokens = lexer.tokenize(sql);
+      } catch (error1) {
+        error = error1;
+        warn('^35345^', GUY.trm.reverse(GUY.props.keys(error)));
+        warn('^35345^', GUY.trm.reverse(error.message));
+        warn('^35345^', GUY.trm.reverse(error.name));
+        return null;
+      }
+      tokens = [];
+      for (j = 0, len1 = _tokens.length; j < len1; j++) {
+        [type, text, start, stop] = _tokens[j];
+        tokens.push({type, text, start, stop});
+      }
+      // urge type, text, start, stop
+      echo(dtab._tabulate(tokens));
+      return null;
+    };
+    show(SQL`select * from my_table`);
+    show(SQL`42`);
+    show(SQL`( 'text', 'another''text', 42 )`);
+    show(SQL`( 'text', @f( 1, 2, 3 ), 42 )`);
+    show(SQL`SELECT 42 as c;`);
+    show(SQL`select 'helo', 'world''';`);
+    show(SQL`select 'helo', 'world'''`);
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -259,11 +330,13 @@
   if (require.main === module) {
     (() => {
       // test @
-      return this.dbay_sqlx_function();
+      // @dbay_sqlx_lexer()
+      return this.dbay_sql_lexer();
     })();
   }
 
-  // test @dbay_sqlx_function
+  // @dbay_sqlx_function()
+// test @dbay_sqlx_function
 
 }).call(this);
 

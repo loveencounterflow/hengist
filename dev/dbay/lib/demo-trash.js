@@ -384,8 +384,7 @@ create view c as select a.d1 as d1, b.d2 as d2 from a join b using ( d1, d2 );`)
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_rhombic_antlr = function() {
-    var CATALOG, antlr, i, len, lineage_cfg, parser_cfg, q, query, ref;
-    CATALOG = require('multimix/lib/cataloguing');
+    var antlr, i, len, lineage_cfg, parser_cfg, q, query, ref;
     ({antlr} = require('rhombic'));
     parser_cfg = {
       doubleQuotedIdentifier: true
@@ -404,7 +403,7 @@ create view c as select a.d1 as d1, b.d2 as d2 from a join b using ( d1, d2 );`)
       X.banner(query);
       q = antlr.parse(query, parser_cfg);
       // debug type_of q
-      debug(CATALOG.all_keys_of(q));
+      debug(GUY.props.keys(q));
       info(q.getUsedTables());
       show_antler_tree(q.tree);
     }
@@ -502,8 +501,7 @@ create view c as select a.d1 as d1, b.d2 as d2 from a join b using ( d1, d2 );`)
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_rhombic_chevrotain = function() {
-    var CATALOG, error, i, len, query, rhombic;
-    CATALOG = require('multimix/lib/cataloguing');
+    var error, i, len, query, rhombic;
     rhombic = (require('rhombic')).default;
     for (i = 0, len = queries.length; i < len; i++) {
       query = queries[i];
