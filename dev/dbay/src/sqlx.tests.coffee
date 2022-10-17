@@ -33,6 +33,10 @@ r                         = String.raw
 new_xregex                = require 'xregexp'
 E                         = require '../../../apps/dbay/lib/errors'
 equals                    = ( require 'util' ).isDeepStrictEqual
+{ Tbl, }                  = require '../../../apps/icql-dba-tabulate'
+dtab                      = new Tbl { dba: null, }
+# { SQL  }          = DBay_sqlx
+sql_lexer                 = require '../../../../dbay-sql-lexer'
 
 
 #===========================================================================================================
@@ -153,9 +157,6 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
   # T?.halt_on_error()
   { SQL  }          = DBay_sqlx
   db                = new DBay_sqlx()
-  { Tbl, }          = require '../../../apps/icql-dba-tabulate'
-  dtab              = new Tbl { dba: db, }
-  # echo dtab._tabulate db db.resolve sql
   #.........................................................................................................
   class E.DBay_sqlx_error            extends E.DBay_error
     constructor: ( ref, message )     -> super ref, message
@@ -227,8 +228,6 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
 
 #-----------------------------------------------------------------------------------------------------------
 @dbay_sql_lexer = ( T, done ) ->
-  { Tbl, }          = require '../../../apps/icql-dba-tabulate'
-  dtab              = new Tbl { dba: null, }
   { SQL  }          = DBay_sqlx
   lexer             = require '../../../../dbay-sql-lexer'
   info k for k in ( GUY.props.keys lexer ).sort()
