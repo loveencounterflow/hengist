@@ -187,7 +187,6 @@
             parameter = ref2[idx];
             value = values[idx];
             R = R.replace(RegExp(`${parameter}`, "g"), value);
-            debug('^43-1^', rpr(R + tail));
           }
           return R + tail;
         });
@@ -213,7 +212,6 @@
         tokens.push({type, text, lnr, offset});
       }
       //.......................................................................................................
-      // echo dtab._tabulate tokens
       level = 0;
       comma_idxs = [
         {
@@ -225,15 +223,12 @@
         token = tokens[j];
         switch (token.type) {
           case 'LEFT_PAREN':
-            // info "bracket #{rpr token} (#{level})"
             level++;
             break;
           case 'RIGHT_PAREN':
             level--;
             break;
-          // info "bracket #{rpr token} (#{level})"
           case 'COMMA':
-            // info "comma #{rpr token} (#{level})"
             if (level === 0) {
               comma_idxs.push({
                 start: token.offset,
@@ -245,7 +240,6 @@
             null;
         }
       }
-      // warn "skipping #{rpr token}"
       comma_idxs.push({
         start: sqlx.length,
         stop: null
@@ -264,6 +258,8 @@
     }
 
   };
+
+  //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_sqlx_function = function(T, done) {
