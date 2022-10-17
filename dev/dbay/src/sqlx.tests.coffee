@@ -112,35 +112,36 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
         # debug '^546^', rpr sqlx[ idx ... idx + groups.name.length ]
         { name
           tail  } = groups
-        #.....................................................................................................
+        #...................................................................................................
         unless ( declaration = @_sqlx_declarations[ name ] )?
           ### NOTE should never happen as we always re-compile pattern from declaration keys ###
           throw new E.DBay_sqlx_error '^dbay/sqlx@4^', "unknown name #{rpr name}"
-        #.....................................................................................................
+        #...................................................................................................
         if tail.startsWith '('
-          matches = new_xregex.matchRecursive tail, '\\(', '\\)', '', \
+          matches     = new_xregex.matchRecursive tail, '\\(', '\\)', '', \
             { escapeChar: '\\', unbalanced: 'skip-lazy', valueNames: [ 'outside', 'before', 'between', 'after', ], }
           [ before
             between
             after   ] = matches
-          tail    = tail[ after.end ... ]
-          values  = between.value.trim()
-          values  = between.value.trim()
+          tail        = tail[ after.end ... ]
+          values      = between.value.trim()
+          values      = between.value.trim()
           ### TAINT this part to be done with lexer ###
-          values  = values.split /\s*,\s*/
-          values  = [] if equals values, [ '', ]
+          values      = values.split /\s*,\s*/
+          values      = [] if equals values, [ '', ]
           ### ------------------------------------- ###
-          call_arity = values.length
+          call_arity  = values.length
         else
-          call_arity = 0
-        #.....................................................................................................
+          call_arity  = 0
+        #...................................................................................................
         unless call_arity is declaration.arity
           throw new E.DBay_sqlx_error '^dbay/sqlx@5^', "expected #{declaration.arity} argument(s), got #{call_arity}"
-        #.....................................................................................................
+        #...................................................................................................
         R = declaration.body
         for parameter, idx in declaration.parameters
           value = values[ idx ]
           R = R.replace ///#{parameter}///g, value
+          debug '^43-1^', rpr R + tail
         return R + tail
       break if sql_after is sql_before
       sql_before = sql_after
@@ -154,77 +155,73 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
   db                = new DBay_sqlx()
   { Tbl, }          = require '../../../apps/icql-dba-tabulate'
   dtab              = new Tbl { dba: db, }
+  # echo dtab._tabulate db db.resolve sql
   #.........................................................................................................
   class E.DBay_sqlx_error            extends E.DBay_error
     constructor: ( ref, message )     -> super ref, message
   #.........................................................................................................
-  db ->
-    db.declare SQL"""@secret_power( @a, @b ) = power( @a, @b ) / @b;"""
+  test = ( probe, matcher ) ->
+    try
+      sqlx  = probe
+      sql   = db.resolve sqlx
+      help rpr sqlx
+      info rpr sql
+      T?.eq sql, matcher
+    catch error
+      T?.eq "ERROR", error.message
+  #.........................................................................................................
+  db.declare SQL"""@secret_power( @a, @b ) = power( @a, @b ) / @b;"""
+  db.declare SQL"""@max( @a, @b ) = case when @a > @b then @a else @b end;"""
+  db.declare SQL"""@concat( @first, @second ) = @first || @second;"""
+  db.declare SQL"""@intnn() = integer not null;"""
+  #.........................................................................................................
+  do ->
     sqlx  = SQL"""select @secret_power( 3, 2 );"""
-    sql   = db.resolve sqlx
-    help rpr sqlx
-    info rpr sql
-    # echo dtab._tabulate db db.resolve sql
-    T?.eq sql, SQL"""select power( 3, 2 ) / 2;"""
+    sql   = SQL"""select power( 3, 2 ) / 2;"""
+    test sqlx, sql
   #.........................................................................................................
-  db ->
-    db.declare SQL"""@max( @a, @b ) = case when @a > @b then @a else @b end;"""
+  do ->
     sqlx  = SQL"""select @max( 3, 2 ) as the_bigger_the_better;"""
-    sql   = db.resolve sqlx
-    help rpr sqlx
-    info rpr sql
-    # echo dtab._tabulate db db.resolve sql
-    T?.eq sql, SQL"""select case when 3 > 2 then 3 else 2 end as the_bigger_the_better;"""
+    sql   = SQL"""select case when 3 > 2 then 3 else 2 end as the_bigger_the_better;"""
+    test sqlx, sql
   #.........................................................................................................
-  db ->
-    db.declare SQL"""@concat( @first, @second ) = @first || @second;"""
+  do ->
     sqlx  = SQL"""select @concat( 'here', '\\)' );"""
-    # debug '^87-5^', db._sqlx_get_cmd_re()
-    # debug '^87-6^', [ ( sqlx.matchAll db._sqlx_get_cmd_re() )..., ]
-    sql   = db.resolve sqlx
-    help rpr sqlx
-    info rpr sql
-    # echo dtab._tabulate db db.resolve sql
-    T?.eq sql, SQL"""select 'here' || '\\)';"""
+    sql   = SQL"""select 'here' || '\\)';"""
+    test sqlx, sql
   #.........................................................................................................
-  db ->
-    db.declare SQL"""@intnn() = integer not null;"""
+  do ->
     sqlx  = SQL"""
       create table numbers (
         n @intnn() primary key );"""
-    sql   = db.resolve sqlx
-    help rpr sqlx
-    info rpr sql
-    T?.eq sql, SQL"""
+    sql   = SQL"""
       create table numbers (
         n integer not null primary key );"""
+    test sqlx, sql
   #.........................................................................................................
-  db ->
-    # db.declare SQL"""@intnn = integer not null;"""
+  do ->
     sqlx  = SQL"""
       create table numbers (
         n @intnn primary key );"""
-    sql   = db.resolve sqlx
-    help rpr sqlx
-    info rpr sql
-    T?.eq sql, SQL"""
+    sql   = SQL"""
       create table numbers (
         n integer not null primary key );"""
+    test sqlx, sql
   #.........................................................................................................
-  db ->
+  do ->
     sqlx  = SQL"""select @concat( 'a', 'b' ) as c1, @concat( 'c', 'd' ) as c2;"""
-    sql   = db.resolve sqlx
-    help rpr sqlx
-    info rpr sql
-    T?.eq sql, SQL"""select 'a' || 'b' as c1, 'c' || 'd' as c2;"""
-  return done?() #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    sql   = SQL"""select 'a' || 'b' as c1, 'c' || 'd' as c2;"""
+    test sqlx, sql
   #.........................................................................................................
-  db ->
+  do ->
     sqlx  = SQL"""select @concat( 'a', @concat( 'c', 'd' ) );"""
-    sql   = db.resolve sqlx
-    help rpr sqlx
-    info rpr sql
-    T?.eq sql, SQL"""select 'a' || 'c' || 'd';"""
+    sql   = SQL"""select 'a' || 'c' || 'd';"""
+    test sqlx, sql
+  #.........................................................................................................
+  do ->
+    sqlx  = SQL"""select @concat( ',', @concat( ',', ',' ) );"""
+    sql   = SQL"""select ',' || ',' || ',';"""
+    test sqlx, sql
   #.........................................................................................................
   done?()
 
@@ -265,6 +262,6 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
 if require.main is module then do =>
   # test @
   # @dbay_sql_lexer()
-  @dbay_sqlx_function()
+  # @dbay_sqlx_function()
   test @dbay_sqlx_function
 
