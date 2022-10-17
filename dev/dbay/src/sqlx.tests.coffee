@@ -158,26 +158,27 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
     help rpr sqlx
     info rpr sql
     # echo dtab._tabulate db db.resolve sql
+    T?.eq sql, SQL"""select power( 3, 2 ) / 2;"""
   #.........................................................................................................
   db ->
     db.declare SQL"""@max( @a, @b ) = case when @a > @b then @a else @b end;"""
     sqlx  = SQL"""select @max( 3, 2 ) as the_bigger_the_better;"""
-    # debug '^87-1^', db._sqlx_get_cmd_re()
-    # debug '^87-1^', [ ( sqlx.matchAll db._sqlx_get_cmd_re() )..., ]
     sql   = db.resolve sqlx
     help rpr sqlx
     info rpr sql
     # echo dtab._tabulate db db.resolve sql
+    T?.eq sql, SQL"""select case when 3 > 2 then 3 else 2 end as the_bigger_the_better;"""
   #.........................................................................................................
   db ->
     db.declare SQL"""@concat( @first, @second ) = @first || @second;"""
-    sqlx  = SQL"""select @concat( 'here', '\\)' ) as the_bigger_the_better;"""
-    # debug '^87-1^', db._sqlx_get_cmd_re()
-    # debug '^87-1^', [ ( sqlx.matchAll db._sqlx_get_cmd_re() )..., ]
+    sqlx  = SQL"""select @concat( 'here', '\\)' );"""
+    # debug '^87-5^', db._sqlx_get_cmd_re()
+    # debug '^87-6^', [ ( sqlx.matchAll db._sqlx_get_cmd_re() )..., ]
     sql   = db.resolve sqlx
     help rpr sqlx
     info rpr sql
     # echo dtab._tabulate db db.resolve sql
+    T?.eq sql, SQL"""select 'here' || '\\)';"""
   #.........................................................................................................
   db ->
     db.declare SQL"""@intnn() = integer not null;"""
@@ -187,24 +188,35 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
     sql   = db.resolve sqlx
     help rpr sqlx
     info rpr sql
+    T?.eq sql, SQL"""
+      create table numbers (
+        n integer not null primary key );"""
   #.........................................................................................................
   db ->
-    db.declare SQL"""@intnn( @a ) = integer not null;"""
+    # db.declare SQL"""@intnn = integer not null;"""
     sqlx  = SQL"""
       create table numbers (
-        n @intnn( true ) primary key );"""
+        n @intnn primary key );"""
     sql   = db.resolve sqlx
     help rpr sqlx
     info rpr sql
-  # #.........................................................................................................
-  # db ->
-  #   db.declare SQL"""@intnn = integer not null;"""
-  #   sqlx  = SQL"""
-  #     create table numbers (
-  #       n @intnn primary key );"""
-  #   sql   = db.resolve sqlx
-  #   help rpr sqlx
-  #   info rpr sql
+    T?.eq sql, SQL"""
+      create table numbers (
+        n integer not null primary key );"""
+  #.........................................................................................................
+  db ->
+    sqlx  = SQL"""select @concat( 'a', 'b' ) as c1, @concat( 'c', 'd' ) as c2;"""
+    sql   = db.resolve sqlx
+    help rpr sqlx
+    info rpr sql
+    T?.eq sql, SQL"""select 'a' || 'b' as c1, 'c' || 'd' as c2;"""
+  #.........................................................................................................
+  db ->
+    sqlx  = SQL"""select @concat( 'a', @concat( 'c', 'd' ) );"""
+    sql   = db.resolve sqlx
+    help rpr sqlx
+    info rpr sql
+    T?.eq sql, SQL"""select 'a' || 'c' || 'd';"""
   #.........................................................................................................
   done?()
 
