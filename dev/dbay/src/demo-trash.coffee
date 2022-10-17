@@ -287,7 +287,6 @@ queries = [
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_rhombic_antlr = ->
-  CATALOG = require 'multimix/lib/cataloguing'
   { antlr  } = require 'rhombic'
   parser_cfg =
     doubleQuotedIdentifier: true
@@ -302,7 +301,7 @@ queries = [
     X.banner query
     q = antlr.parse query, parser_cfg
     # debug type_of q
-    debug CATALOG.all_keys_of q
+    debug GUY.props.keys q
     info q.getUsedTables()
     show_antler_tree q.tree
   return null
@@ -364,7 +363,6 @@ _show_antler_tree = ( tree, level, R ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_rhombic_chevrotain = ->
-  CATALOG = require 'multimix/lib/cataloguing'
   rhombic = ( require 'rhombic' ).default
   for query in queries
     X.banner query
