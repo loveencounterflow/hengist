@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var DBay_sqlx, E, GUY, H, PATH, alert, debug, echo, equals, help, info, inspect, isa, log, new_xregex, plain, praise, r, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
+  var DBay_sqlx, E, GUY, H, PATH, Tbl, alert, debug, dtab, echo, equals, help, info, inspect, isa, log, new_xregex, plain, praise, r, rpr, sql_lexer, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
     splice = [].splice;
 
   //###########################################################################################################
@@ -30,6 +30,15 @@
   E = require('../../../apps/dbay/lib/errors');
 
   equals = (require('util')).isDeepStrictEqual;
+
+  ({Tbl} = require('../../../apps/icql-dba-tabulate'));
+
+  dtab = new Tbl({
+    dba: null
+  });
+
+  // { SQL  }          = DBay_sqlx
+  sql_lexer = require('../../../../dbay-sql-lexer');
 
   //===========================================================================================================
   DBay_sqlx = class DBay_sqlx extends (require(H.dbay_path)).DBay {
@@ -136,8 +145,6 @@
           break;
         }
         sql_after = sql_before.replace(this._sqlx_get_cmd_re(), (..._matches) => {
-          /* ------------------------------------- */
-          /* TAINT this part to be done with lexer */
           var R, _sqlx, after, before, between, call_arity, declaration, groups, i, idx, len, matches, name, parameter, ref1, ref2, tail, value, values;
           ref1 = _matches, [..._matches] = ref1, [idx, _sqlx, groups] = splice.call(_matches, -3);
           // debug '^546^', rpr sqlx[ idx ... idx + groups.name.length ]
@@ -156,12 +163,7 @@
             });
             [before, between, after] = matches;
             tail = tail.slice(after.end);
-            values = between.value.trim();
-            values = between.value.trim();
-            values = values.split(/\s*,\s*/);
-            if (equals(values, [''])) {
-              values = [];
-            }
+            values = this._find_arguments(between.value);
             call_arity = values.length;
           } else {
             call_arity = 0;
@@ -190,19 +192,74 @@
       return sql_after;
     }
 
+    //---------------------------------------------------------------------------------------------------------
+    _find_arguments(sqlx) {
+      var R, _tokens, comma_idxs, i, idx, j, l, len, len1, level, lnr, offset, ref1, start, stop, text, token, tokens, type;
+      sqlx = sqlx.trim();
+      tokens = [];
+      R = [];
+      //.......................................................................................................
+      _tokens = sql_lexer.tokenize(sqlx);
+      for (i = 0, len = _tokens.length; i < len; i++) {
+        [type, text, lnr, offset] = _tokens[i];
+        tokens.push({type, text, lnr, offset});
+      }
+      //.......................................................................................................
+      // echo dtab._tabulate tokens
+      level = 0;
+      comma_idxs = [
+        {
+          start: null,
+          stop: 0
+        }
+      ];
+      for (j = 0, len1 = tokens.length; j < len1; j++) {
+        token = tokens[j];
+        switch (token.type) {
+          case 'LEFT_PAREN':
+            // info "bracket #{rpr token} (#{level})"
+            level++;
+            break;
+          case 'RIGHT_PAREN':
+            level--;
+            break;
+          // info "bracket #{rpr token} (#{level})"
+          case 'COMMA':
+            // info "comma #{rpr token} (#{level})"
+            if (level === 0) {
+              comma_idxs.push({
+                start: token.offset,
+                stop: token.offset + token.text.length
+              });
+            }
+            break;
+          default:
+            null;
+        }
+      }
+      // warn "skipping #{rpr token}"
+      comma_idxs.push({
+        start: sqlx.length,
+        stop: null
+      });
+//.......................................................................................................
+      for (idx = l = 1, ref1 = comma_idxs.length; (1 <= ref1 ? l < ref1 : l > ref1); idx = 1 <= ref1 ? ++l : --l) {
+        start = comma_idxs[idx - 1].stop;
+        stop = comma_idxs[idx].start;
+        R.push(sqlx.slice(start, stop).trim());
+      }
+      //.......................................................................................................
+      return R;
+    }
+
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_sqlx_function = function(T, done) {
-    var SQL, Tbl, db, dtab;
+    var SQL, _test, db;
     // T?.halt_on_error()
     ({SQL} = DBay_sqlx);
     db = new DBay_sqlx();
-    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
-    dtab = new Tbl({
-      dba: db
-    });
-    // echo dtab._tabulate db db.resolve sql
     //.........................................................................................................
     E.DBay_sqlx_error = class DBay_sqlx_error extends E.DBay_error {
       constructor(ref, message) {
@@ -211,7 +268,7 @@
 
     };
     //.........................................................................................................
-    test = function(probe, matcher) {
+    _test = function(probe, matcher) {
       var error, sql, sqlx;
       try {
         sqlx = probe;
@@ -233,19 +290,19 @@
       var sql, sqlx;
       sqlx = SQL`select @secret_power( 3, 2 );`;
       sql = SQL`select power( 3, 2 ) / 2;`;
-      return test(sqlx, sql);
+      return _test(sqlx, sql);
     })();
     (function() {      //.........................................................................................................
       var sql, sqlx;
       sqlx = SQL`select @max( 3, 2 ) as the_bigger_the_better;`;
       sql = SQL`select case when 3 > 2 then 3 else 2 end as the_bigger_the_better;`;
-      return test(sqlx, sql);
+      return _test(sqlx, sql);
     })();
     (function() {      //.........................................................................................................
       var sql, sqlx;
       sqlx = SQL`select @concat( 'here', '\\)' );`;
       sql = SQL`select 'here' || '\\)';`;
-      return test(sqlx, sql);
+      return _test(sqlx, sql);
     })();
     (function() {      //.........................................................................................................
       var sql, sqlx;
@@ -253,7 +310,7 @@
   n @intnn() primary key );`;
       sql = SQL`create table numbers (
   n integer not null primary key );`;
-      return test(sqlx, sql);
+      return _test(sqlx, sql);
     })();
     (function() {      //.........................................................................................................
       var sql, sqlx;
@@ -261,36 +318,52 @@
   n @intnn primary key );`;
       sql = SQL`create table numbers (
   n integer not null primary key );`;
-      return test(sqlx, sql);
+      return _test(sqlx, sql);
     })();
     (function() {      //.........................................................................................................
       var sql, sqlx;
       sqlx = SQL`select @concat( 'a', 'b' ) as c1, @concat( 'c', 'd' ) as c2;`;
       sql = SQL`select 'a' || 'b' as c1, 'c' || 'd' as c2;`;
-      return test(sqlx, sql);
+      return _test(sqlx, sql);
     })();
     (function() {      //.........................................................................................................
       var sql, sqlx;
       sqlx = SQL`select @concat( 'a', @concat( 'c', 'd' ) );`;
       sql = SQL`select 'a' || 'c' || 'd';`;
-      return test(sqlx, sql);
+      return _test(sqlx, sql);
     })();
     (function() {      //.........................................................................................................
       var sql, sqlx;
       sqlx = SQL`select @concat( ',', @concat( ',', ',' ) );`;
       sql = SQL`select ',' || ',' || ',';`;
-      return test(sqlx, sql);
+      return _test(sqlx, sql);
     })();
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.dbay_sqlx_find_arguments = function(T, done) {
+    var SQL, _test, db;
+    // T?.halt_on_error()
+    ({SQL} = DBay_sqlx);
+    db = new DBay_sqlx();
+    _test = function(probe, matcher) {
+      var result;
+      result = db._find_arguments(probe);
+      help('^43-1^', probe);
+      urge('^43-1^', result);
+      return T != null ? T.eq(result, matcher) : void 0;
+    };
+    _test(SQL` 3, 2 `, ['3', '2']);
+    _test(SQL` 3, f( 2, 4 ) `, ['3', 'f( 2, 4 )']);
+    _test(SQL` 3, f( 2, @g( 4, 5, 6 ) ) `, ['3', 'f( 2, @g( 4, 5, 6 ) )']);
+    _test(SQL` 3, 2, "strange,name" `, ['3', '2', '"strange,name"']);
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.dbay_sql_lexer = function(T, done) {
-    var SQL, Tbl, dtab, i, k, len, lexer, ref1, show;
-    ({Tbl} = require('../../../apps/icql-dba-tabulate'));
-    dtab = new Tbl({
-      dba: null
-    });
+    var SQL, i, k, len, lexer, ref1, show;
     ({SQL} = DBay_sqlx);
     lexer = require('../../../../dbay-sql-lexer');
     ref1 = (GUY.props.keys(lexer)).sort();
@@ -334,10 +407,13 @@
     (() => {
       // test @
       // @dbay_sql_lexer()
-      // @dbay_sqlx_function()
-      return test(this.dbay_sqlx_function);
+      this.dbay_sqlx_find_arguments();
+      return test(this.dbay_sqlx_find_arguments);
     })();
   }
+
+  // @dbay_sqlx_function()
+// test @dbay_sqlx_function
 
 }).call(this);
 
