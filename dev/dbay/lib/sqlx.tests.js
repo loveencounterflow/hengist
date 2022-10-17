@@ -41,6 +41,14 @@
   sql_lexer = require('../../../../dbay-sql-lexer');
 
   //===========================================================================================================
+  E.DBay_sqlx_error = class DBay_sqlx_error extends E.DBay_error {
+    constructor(ref, message) {
+      super(ref, message);
+    }
+
+  };
+
+  //===========================================================================================================
   DBay_sqlx = class DBay_sqlx extends (require(H.dbay_path)).DBay {
     //---------------------------------------------------------------------------------------------------------
     constructor(...P) {
@@ -248,7 +256,10 @@
         stop = comma_idxs[idx].start;
         R.push(sqlx.slice(start, stop).trim());
       }
-      //.......................................................................................................
+      if (equals(R, [''])) {
+        //.......................................................................................................
+        R = [];
+      }
       return R;
     }
 
@@ -261,13 +272,6 @@
     ({SQL} = DBay_sqlx);
     db = new DBay_sqlx();
     //.........................................................................................................
-    E.DBay_sqlx_error = class DBay_sqlx_error extends E.DBay_error {
-      constructor(ref, message) {
-        super(ref, message);
-      }
-
-    };
-    //.........................................................................................................
     _test = function(probe, matcher) {
       var error, sql, sqlx;
       try {
@@ -278,7 +282,7 @@
         return T != null ? T.eq(sql, matcher) : void 0;
       } catch (error1) {
         error = error1;
-        return T != null ? T.eq("ERROR", error.message) : void 0;
+        return T != null ? T.eq("ERROR", `${error.message}\n${rpr(probe)}`) : void 0;
       }
     };
     //.........................................................................................................
@@ -405,14 +409,14 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // @dbay_sql_lexer()
-      this.dbay_sqlx_find_arguments();
-      return test(this.dbay_sqlx_find_arguments);
+      return test(this);
     })();
   }
 
-  // @dbay_sqlx_function()
+  // @dbay_sql_lexer()
+// @dbay_sqlx_find_arguments()
+// test @dbay_sqlx_find_arguments
+// @dbay_sqlx_function()
 // test @dbay_sqlx_function
 
 }).call(this);
