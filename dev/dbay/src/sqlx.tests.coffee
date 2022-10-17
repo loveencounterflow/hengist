@@ -31,6 +31,7 @@ types                     = new ( require 'intertype' ).Intertype
 # X                         = require '../../../lib/helpers'
 r                         = String.raw
 new_xregex                = require 'xregexp'
+E                         = require '../../../apps/dbay/lib/errors'
 
 
 #===========================================================================================================
