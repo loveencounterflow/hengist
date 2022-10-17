@@ -143,7 +143,6 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
 #-----------------------------------------------------------------------------------------------------------
 @dbay_sqlx_function = ( T, done ) ->
   # T?.halt_on_error()
-  E                 = require '../../../apps/dbay/lib/errors'
   { SQL  }          = DBay_sqlx
   db                = new DBay_sqlx()
   { Tbl, }          = require '../../../apps/icql-dba-tabulate'
