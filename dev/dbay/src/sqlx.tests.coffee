@@ -220,12 +220,44 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
   #.........................................................................................................
   done?()
 
-
+#-----------------------------------------------------------------------------------------------------------
+@dbay_sql_lexer = ( T, done ) ->
+  { Tbl, }          = require '../../../apps/icql-dba-tabulate'
+  dtab              = new Tbl { dba: null, }
+  { SQL  }          = DBay_sqlx
+  lexer             = require '../../../../dbay-sql-lexer'
+  info k for k in ( GUY.props.keys lexer ).sort()
+  show = ( sql ) ->
+    info rpr sql
+    try
+      _tokens = lexer.tokenize sql
+    catch error
+      warn '^35345^', GUY.trm.reverse GUY.props.keys error
+      warn '^35345^', GUY.trm.reverse error.message
+      warn '^35345^', GUY.trm.reverse error.name
+      return null
+    tokens = []
+    for [ type, text, start, stop, ] in _tokens
+      tokens.push { type, text, start, stop, }
+      # urge type, text, start, stop
+    echo dtab._tabulate tokens
+    return null
+  show SQL"""select * from my_table"""
+  show SQL"""42"""
+  show SQL"""( 'text', 'another''text', 42 )"""
+  show SQL"""( 'text', @f( 1, 2, 3 ), 42 )"""
+  show SQL"""SELECT 42 as c;"""
+  show SQL"""select 'helo', 'world''';"""
+  show SQL"""select 'helo', 'world'''"""
+  #.........................................................................................................
+  done?()
 
 
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  @dbay_sqlx_function()
+  # @dbay_sqlx_lexer()
+  @dbay_sql_lexer()
+  # @dbay_sqlx_function()
   # test @dbay_sqlx_function
 
