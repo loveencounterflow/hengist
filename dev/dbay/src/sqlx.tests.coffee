@@ -204,7 +204,7 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
       info rpr sql
       T?.eq sql, matcher
     catch error
-      T?.eq "ERROR", error.message
+      T?.eq "ERROR", "#{error.message}\n#{rpr probe}"
   #.........................................................................................................
   db.declare SQL"""@secret_power( @a, @b ) = power( @a, @b ) / @b;"""
   db.declare SQL"""@max( @a, @b ) = case when @a > @b then @a else @b end;"""
@@ -310,10 +310,10 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # @dbay_sql_lexer()
-  @dbay_sqlx_find_arguments()
-  test @dbay_sqlx_find_arguments
+  # @dbay_sqlx_find_arguments()
+  # test @dbay_sqlx_find_arguments
   # @dbay_sqlx_function()
   # test @dbay_sqlx_function
 
