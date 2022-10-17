@@ -142,12 +142,12 @@
           ref1 = _matches, [..._matches] = ref1, [idx, _sqlx, groups] = splice.call(_matches, -3);
           // debug '^546^', rpr sqlx[ idx ... idx + groups.name.length ]
           ({name, tail} = groups);
-          //.....................................................................................................
+          //...................................................................................................
           if ((declaration = this._sqlx_declarations[name]) == null) {
             /* NOTE should never happen as we always re-compile pattern from declaration keys */
             throw new E.DBay_sqlx_error('^dbay/sqlx@4^', `unknown name ${rpr(name)}`);
           }
-          //.....................................................................................................
+          //...................................................................................................
           if (tail.startsWith('(')) {
             matches = new_xregex.matchRecursive(tail, '\\(', '\\)', '', {
               escapeChar: '\\',
@@ -166,17 +166,18 @@
           } else {
             call_arity = 0;
           }
-          //.....................................................................................................
+          //...................................................................................................
           if (call_arity !== declaration.arity) {
             throw new E.DBay_sqlx_error('^dbay/sqlx@5^', `expected ${declaration.arity} argument(s), got ${call_arity}`);
           }
-          //.....................................................................................................
+          //...................................................................................................
           R = declaration.body;
           ref2 = declaration.parameters;
           for (idx = i = 0, len = ref2.length; i < len; idx = ++i) {
             parameter = ref2[idx];
             value = values[idx];
             R = R.replace(RegExp(`${parameter}`, "g"), value);
+            debug('^43-1^', rpr(R + tail));
           }
           return R + tail;
         });
@@ -201,6 +202,7 @@
     dtab = new Tbl({
       dba: db
     });
+    // echo dtab._tabulate db db.resolve sql
     //.........................................................................................................
     E.DBay_sqlx_error = class DBay_sqlx_error extends E.DBay_error {
       constructor(ref, message) {
@@ -209,83 +211,76 @@
 
     };
     //.........................................................................................................
-    db(function() {
+    test = function(probe, matcher) {
+      var error, sql, sqlx;
+      try {
+        sqlx = probe;
+        sql = db.resolve(sqlx);
+        help(rpr(sqlx));
+        info(rpr(sql));
+        return T != null ? T.eq(sql, matcher) : void 0;
+      } catch (error1) {
+        error = error1;
+        return T != null ? T.eq("ERROR", error.message) : void 0;
+      }
+    };
+    //.........................................................................................................
+    db.declare(SQL`@secret_power( @a, @b ) = power( @a, @b ) / @b;`);
+    db.declare(SQL`@max( @a, @b ) = case when @a > @b then @a else @b end;`);
+    db.declare(SQL`@concat( @first, @second ) = @first || @second;`);
+    db.declare(SQL`@intnn() = integer not null;`);
+    (function() {      //.........................................................................................................
       var sql, sqlx;
-      db.declare(SQL`@secret_power( @a, @b ) = power( @a, @b ) / @b;`);
       sqlx = SQL`select @secret_power( 3, 2 );`;
-      sql = db.resolve(sqlx);
-      help(rpr(sqlx));
-      info(rpr(sql));
-      // echo dtab._tabulate db db.resolve sql
-      return T != null ? T.eq(sql, SQL`select power( 3, 2 ) / 2;`) : void 0;
-    });
-    //.........................................................................................................
-    db(function() {
+      sql = SQL`select power( 3, 2 ) / 2;`;
+      return test(sqlx, sql);
+    })();
+    (function() {      //.........................................................................................................
       var sql, sqlx;
-      db.declare(SQL`@max( @a, @b ) = case when @a > @b then @a else @b end;`);
       sqlx = SQL`select @max( 3, 2 ) as the_bigger_the_better;`;
-      sql = db.resolve(sqlx);
-      help(rpr(sqlx));
-      info(rpr(sql));
-      // echo dtab._tabulate db db.resolve sql
-      return T != null ? T.eq(sql, SQL`select case when 3 > 2 then 3 else 2 end as the_bigger_the_better;`) : void 0;
-    });
-    //.........................................................................................................
-    db(function() {
+      sql = SQL`select case when 3 > 2 then 3 else 2 end as the_bigger_the_better;`;
+      return test(sqlx, sql);
+    })();
+    (function() {      //.........................................................................................................
       var sql, sqlx;
-      db.declare(SQL`@concat( @first, @second ) = @first || @second;`);
       sqlx = SQL`select @concat( 'here', '\\)' );`;
-      // debug '^87-5^', db._sqlx_get_cmd_re()
-      // debug '^87-6^', [ ( sqlx.matchAll db._sqlx_get_cmd_re() )..., ]
-      sql = db.resolve(sqlx);
-      help(rpr(sqlx));
-      info(rpr(sql));
-      // echo dtab._tabulate db db.resolve sql
-      return T != null ? T.eq(sql, SQL`select 'here' || '\\)';`) : void 0;
-    });
-    //.........................................................................................................
-    db(function() {
+      sql = SQL`select 'here' || '\\)';`;
+      return test(sqlx, sql);
+    })();
+    (function() {      //.........................................................................................................
       var sql, sqlx;
-      db.declare(SQL`@intnn() = integer not null;`);
       sqlx = SQL`create table numbers (
   n @intnn() primary key );`;
-      sql = db.resolve(sqlx);
-      help(rpr(sqlx));
-      info(rpr(sql));
-      return T != null ? T.eq(sql, SQL`create table numbers (
-  n integer not null primary key );`) : void 0;
-    });
-    //.........................................................................................................
-    db(function() {
+      sql = SQL`create table numbers (
+  n integer not null primary key );`;
+      return test(sqlx, sql);
+    })();
+    (function() {      //.........................................................................................................
       var sql, sqlx;
-      // db.declare SQL"""@intnn = integer not null;"""
       sqlx = SQL`create table numbers (
   n @intnn primary key );`;
-      sql = db.resolve(sqlx);
-      help(rpr(sqlx));
-      info(rpr(sql));
-      return T != null ? T.eq(sql, SQL`create table numbers (
-  n integer not null primary key );`) : void 0;
-    });
-    //.........................................................................................................
-    db(function() {
+      sql = SQL`create table numbers (
+  n integer not null primary key );`;
+      return test(sqlx, sql);
+    })();
+    (function() {      //.........................................................................................................
       var sql, sqlx;
       sqlx = SQL`select @concat( 'a', 'b' ) as c1, @concat( 'c', 'd' ) as c2;`;
-      sql = db.resolve(sqlx);
-      help(rpr(sqlx));
-      info(rpr(sql));
-      return T != null ? T.eq(sql, SQL`select 'a' || 'b' as c1, 'c' || 'd' as c2;`) : void 0;
-    });
-    return typeof done === "function" ? done() : void 0;
-    //.........................................................................................................
-    db(function() {
+      sql = SQL`select 'a' || 'b' as c1, 'c' || 'd' as c2;`;
+      return test(sqlx, sql);
+    })();
+    (function() {      //.........................................................................................................
       var sql, sqlx;
       sqlx = SQL`select @concat( 'a', @concat( 'c', 'd' ) );`;
-      sql = db.resolve(sqlx);
-      help(rpr(sqlx));
-      info(rpr(sql));
-      return T != null ? T.eq(sql, SQL`select 'a' || 'c' || 'd';`) : void 0;
-    });
+      sql = SQL`select 'a' || 'c' || 'd';`;
+      return test(sqlx, sql);
+    })();
+    (function() {      //.........................................................................................................
+      var sql, sqlx;
+      sqlx = SQL`select @concat( ',', @concat( ',', ',' ) );`;
+      sql = SQL`select ',' || ',' || ',';`;
+      return test(sqlx, sql);
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -339,7 +334,7 @@
     (() => {
       // test @
       // @dbay_sql_lexer()
-      this.dbay_sqlx_function();
+      // @dbay_sqlx_function()
       return test(this.dbay_sqlx_function);
     })();
   }
