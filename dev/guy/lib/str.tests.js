@@ -48,11 +48,11 @@
   ({isa, type_of, validate, validate_list_of, equals} = types.export());
 
   //-----------------------------------------------------------------------------------------------------------
-  this["guy.str.SQL tag function"] = function(T, done) {
-    var SQL, guy;
+  this.guy_str_SQL_tag_function = function(T, done) {
+    var GUY, SQL;
     // T?.halt_on_error()
-    guy = require(H.guy_path);
-    ({SQL} = guy.str);
+    GUY = require(H.guy_path);
+    ({SQL} = GUY.str);
     if (T != null) {
       T.eq(SQL`x\n\nx`, "x\n\nx");
     }
@@ -68,55 +68,26 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["____guy.str.SQL tag function"] = function(T, done) {
-    var SQL, Sql;
+  this.guy_str_escape_for_regex = function(T, done) {
+    var GUY;
     // T?.halt_on_error()
-    // guy     = require H.guy_path
-    //=========================================================================================================
-    Sql = class Sql {
-      //-------------------------------------------------------------------------------------------------------
-      constructor(q = {}) {
-        //-------------------------------------------------------------------------------------------------------
-        this.SQL = this.SQL.bind(this);
-        this.q = q;
-        return void 0;
-      }
-
-      SQL(parts, ...expressions) {
-        var R, expression, i, idx, len;
-        whisper('^344^', '--------------------------');
-        debug('^344^', parts);
-        debug('^344^', parts.raw);
-        debug('^344^', expressions);
-        debug('^344^', this.q);
-        R = parts[0];
-        for (idx = i = 0, len = expressions.length; i < len; idx = ++i) {
-          expression = expressions[idx];
-          R += expression.toString() + parts[idx + 1];
-        }
-        return R;
-      }
-
-    };
-    //.........................................................................................................
-    ({SQL} = new Sql());
-    urge('^344^', rpr(SQL`helo`));
-    urge('^344^', rpr(SQL`helo \n${42}`));
-    urge('^344^', rpr(SQL`helo #x{42}`));
-    urge('^344^', rpr(SQL`helo \i{42}, \L{xy}`));
+    GUY = require(H.guy_path);
+    if (T != null) {
+      T.eq(GUY.str.escape_for_regex(''), '');
+    }
+    if (T != null) {
+      T.eq(GUY.str.escape_for_regex('.*+?^${}()|[]\\'), '\\.\\*\\+\\?\\^\\$\\{\\}\\(\\)\\|\\[\\]\\\\');
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this, {
-        timeout: 5000
-      });
+      // @guy_str_escape_for_regex()
+      return test(this);
     })();
   }
-
-  // @[ "guy.str.SQL tag function" ]()
 
 }).call(this);
 
