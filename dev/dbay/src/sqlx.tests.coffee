@@ -128,12 +128,12 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
         #...................................................................................................
         if tail.startsWith '('
           matches     = new_xregex.matchRecursive tail, '\\(', '\\)', '', \
-            { escapeChar: '\\', unbalanced: 'skip-lazy', valueNames: [ 'outside', 'before', 'between', 'after', ], }
-          [ before
-            between
-            after   ] = matches
-          tail        = tail[ after.end ... ]
-          values      = @_find_arguments between.value
+            { escapeChar: '\\', unbalanced: 'skip-lazy', valueNames: [ 'ignore', 'left', 'center', 'right', ], }
+          [ left
+            center
+            right   ] = matches
+          tail        = tail[ right.end ... ]
+          values      = @_find_arguments center.value
           call_arity  = values.length
         else
           call_arity  = 0
