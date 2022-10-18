@@ -300,13 +300,22 @@ class DBay_sqlx # extends ( require H.dbay_path ).DBay
       # urge type, text, start, stop
     echo dtab._tabulate tokens
     return null
-  show SQL"""select * from my_table"""
-  show SQL"""42"""
-  show SQL"""( 'text', 'another''text', 42 )"""
-  show SQL"""( 'text', @f( 1, 2, 3 ), 42 )"""
-  show SQL"""SELECT 42 as c;"""
-  show SQL"""select 'helo', 'world''';"""
-  show SQL"""select 'helo', 'world'''"""
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ SQL"""select * from my_table""",            [ [ 'SELECT', 'select', 1, 0 ], [ 'STAR', '*', 1, 7 ], [ 'FROM', 'from', 1, 9 ], [ 'LITERAL', 'my_table', 1, 14 ], [ 'EOF', '', 1, 22 ] ],                                                                                                                                                                                                                                                                                                        ]
+    [ SQL"""42""",                                [ [ 'NUMBER', '42', 1, 0 ], [ 'EOF', '', 1, 2 ] ],                                                                                                                                                                                                                                                                                                                                                                                                ]
+    [ SQL"""( 'text', 'another''text', 42 )""",   [ [ 'LEFT_PAREN', '(', 1, 0 ], [ 'STRING', 'text', 1, 2 ], [ 'COMMA', ',', 1, 8 ], [ 'STRING', "another'text", 1, 10 ], [ 'COMMA', ',', 1, 25 ], [ 'NUMBER', '42', 1, 27 ], [ 'RIGHT_PAREN', ')', 1, 30 ], [ 'EOF', '', 1, 31 ] ],                                                                                                                                                                                                                ]
+    [ SQL"""( 'text', @f( 1, 2, 3 ), 42 )""",     [ [ 'LEFT_PAREN', '(', 1, 0 ], [ 'STRING', 'text', 1, 2 ], [ 'COMMA', ',', 1, 8 ], [ 'UNKNOWN', '@', 1, 10 ], [ 'LITERAL', 'f', 1, 11 ], [ 'LEFT_PAREN', '(', 1, 12 ], [ 'NUMBER', '1', 1, 14 ], [ 'COMMA', ',', 1, 15 ], [ 'NUMBER', '2', 1, 17 ], [ 'COMMA', ',', 1, 18 ], [ 'NUMBER', '3', 1, 20 ], [ 'RIGHT_PAREN', ')', 1, 22 ], [ 'COMMA', ',', 1, 23 ], [ 'NUMBER', '42', 1, 25 ], [ 'RIGHT_PAREN', ')', 1, 28 ], [ 'EOF', '', 1, 29 ] ],  ]
+    [ SQL"""SELECT 42 as c;""",                   [ [ 'SELECT', 'SELECT', 1, 0 ], [ 'NUMBER', '42', 1, 7 ], [ 'AS', 'as', 1, 10 ], [ 'LITERAL', 'c', 1, 13 ], [ 'SEMICOLON', ';', 1, 14 ], [ 'EOF', '', 1, 15 ] ],                                                                                                                                                                                                                                                                                  ]
+    [ SQL"""select 'helo', 'world''';""",         [ [ 'SELECT', 'select', 1, 0 ], [ 'STRING', 'helo', 1, 7 ], [ 'COMMA', ',', 1, 13 ], [ 'STRING', "world'", 1, 15 ], [ 'SEMICOLON', ';', 1, 24 ], [ 'EOF', '', 1, 25 ] ],                                                                                                                                                                                                                                                                          ]
+    [ SQL"""select 'helo', 'world'''""",          [ [ 'SELECT', 'select', 1, 0 ], [ 'STRING', 'helo', 1, 7 ], [ 'COMMA', ',', 1, 13 ], [ 'STRING', "world'", 1, 15 ], [ 'EOF', '', 1, 24 ] ],                                                                                                                                                                                                                                                                                                       ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      result = lexer.tokenize probe
+      show probe
+      resolve result
   #.........................................................................................................
   done?()
 
