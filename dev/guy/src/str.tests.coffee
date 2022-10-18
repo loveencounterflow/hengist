@@ -32,10 +32,10 @@ types                     = new ( require 'intertype' ).Intertype
   equals }                = types.export()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "guy.str.SQL tag function" ] = ( T, done ) ->
+@guy_str_SQL_tag_function = ( T, done ) ->
   # T?.halt_on_error()
-  guy     = require H.guy_path
-  { SQL } = guy.str
+  GUY     = require H.guy_path
+  { SQL } = GUY.str
   T?.eq SQL"x\n\nx", "x\n\nx"
   T?.eq SQL"foo #{1+2+3} bar", "foo 6 bar"
   if T?
@@ -45,42 +45,19 @@ types                     = new ( require 'intertype' ).Intertype
   return done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "____guy.str.SQL tag function" ] = ( T, done ) ->
+@guy_str_escape_for_regex = ( T, done ) ->
   # T?.halt_on_error()
-  # guy     = require H.guy_path
-  #=========================================================================================================
-  class Sql
-
-    #-------------------------------------------------------------------------------------------------------
-    constructor: ( q = {} ) ->
-      @q = q
-      return undefined
-
-    #-------------------------------------------------------------------------------------------------------
-    SQL: ( parts, expressions... ) =>
-      whisper '^344^', '--------------------------'
-      debug '^344^', parts
-      debug '^344^', parts.raw
-      debug '^344^', expressions
-      debug '^344^', @q
-      R = parts[ 0 ]
-      for expression, idx in expressions
-        R += expression.toString() + parts[ idx + 1 ]
-      return R
-  #.........................................................................................................
-  { SQL } = new Sql()
-  urge '^344^', rpr SQL"helo"
-  urge '^344^', rpr SQL"helo \n#{42}"
-  urge '^344^', rpr SQL"helo #x{42}"
-  urge '^344^', rpr SQL"helo \i{42}, \L{xy}"
+  GUY     = require H.guy_path
+  T?.eq ( GUY.str.escape_for_regex ''                 ), ''
+  T?.eq ( GUY.str.escape_for_regex '.*+?^${}()|[]\\'  ), '\\.\\*\\+\\?\\^\\$\\{\\}\\(\\)\\|\\[\\]\\\\'
   return done?()
 
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @, { timeout: 5000, }
-  # @[ "guy.str.SQL tag function" ]()
+  # @guy_str_escape_for_regex()
+  test @
 
 
 
