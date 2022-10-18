@@ -153,7 +153,7 @@
           break;
         }
         sql_after = sql_before.replace(this._sqlx_get_cmd_re(), (..._matches) => {
-          var R, _sqlx, after, before, between, call_arity, declaration, groups, i, idx, len, matches, name, parameter, ref1, ref2, tail, value, values;
+          var R, _sqlx, call_arity, center, declaration, groups, i, idx, left, len, matches, name, parameter, ref1, ref2, right, tail, value, values;
           ref1 = _matches, [..._matches] = ref1, [idx, _sqlx, groups] = splice.call(_matches, -3);
           // debug '^546^', rpr sqlx[ idx ... idx + groups.name.length ]
           ({name, tail} = groups);
@@ -167,11 +167,11 @@
             matches = new_xregex.matchRecursive(tail, '\\(', '\\)', '', {
               escapeChar: '\\',
               unbalanced: 'skip-lazy',
-              valueNames: ['outside', 'before', 'between', 'after']
+              valueNames: ['ignore', 'left', 'center', 'right']
             });
-            [before, between, after] = matches;
-            tail = tail.slice(after.end);
-            values = this._find_arguments(between.value);
+            [left, center, right] = matches;
+            tail = tail.slice(right.end);
+            values = this._find_arguments(center.value);
             call_arity = values.length;
           } else {
             call_arity = 0;
