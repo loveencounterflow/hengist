@@ -49,12 +49,14 @@
   };
 
   //===========================================================================================================
-  DBay_sqlx = class DBay_sqlx extends (require(H.dbay_path)).DBay {
-    //---------------------------------------------------------------------------------------------------------
+  DBay_sqlx = class DBay_sqlx { // extends ( require H.dbay_path ).DBay
+    
+      //---------------------------------------------------------------------------------------------------------
     constructor(...P) {
-      super(...P);
+      // super P...
       GUY.props.hide(this, '_sqlx_declarations', {});
       GUY.props.hide(this, '_sqlx_cmd_re', null);
+      GUY.props.hide(this, 'types', types);
       return void 0;
     }
 
@@ -263,9 +265,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_sqlx_function = function(T, done) {
-    var SQL, _test, db;
+    var DBay, SQL, _test, db;
     // T?.halt_on_error()
-    ({SQL} = DBay_sqlx);
+    ({DBay} = require(H.dbay_path));
+    ({SQL} = DBay);
     db = new DBay_sqlx();
     //.........................................................................................................
     _test = function(probe, matcher) {
@@ -343,9 +346,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_sqlx_find_arguments = function(T, done) {
-    var SQL, _test, db;
+    var DBay, SQL, _test, db;
     // T?.halt_on_error()
-    ({SQL} = DBay_sqlx);
+    ({DBay} = require(H.dbay_path));
+    ({SQL} = DBay);
     db = new DBay_sqlx();
     _test = function(probe, matcher) {
       var result;
@@ -363,15 +367,17 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.dbay_sql_lexer = function(T, done) {
-    var SQL, i, k, len, lexer, ref1, show;
-    ({SQL} = DBay_sqlx);
+  this.dbay_sql_lexer = async function(T, done) {
+    var DBay, SQL, error, i, j, k, len, len1, lexer, matcher, probe, probes_and_matchers, ref1, show;
+    ({DBay} = require(H.dbay_path));
+    ({SQL} = DBay);
     lexer = require('../../../../dbay-sql-lexer');
     ref1 = (GUY.props.keys(lexer)).sort();
     for (i = 0, len = ref1.length; i < len; i++) {
       k = ref1[i];
       info(k);
     }
+    //.........................................................................................................
     show = function(sql) {
       var _tokens, error, j, len1, start, stop, text, tokens, type;
       info(rpr(sql));
@@ -393,13 +399,20 @@
       echo(dtab._tabulate(tokens));
       return null;
     };
-    show(SQL`select * from my_table`);
-    show(SQL`42`);
-    show(SQL`( 'text', 'another''text', 42 )`);
-    show(SQL`( 'text', @f( 1, 2, 3 ), 42 )`);
-    show(SQL`SELECT 42 as c;`);
-    show(SQL`select 'helo', 'world''';`);
-    show(SQL`select 'helo', 'world'''`);
+    //.........................................................................................................
+    probes_and_matchers = [[SQL`select * from my_table`, [['SELECT', 'select', 1, 0], ['STAR', '*', 1, 7], ['FROM', 'from', 1, 9], ['LITERAL', 'my_table', 1, 14], ['EOF', '', 1, 22]]], [SQL`42`, [['NUMBER', '42', 1, 0], ['EOF', '', 1, 2]]], [SQL`( 'text', 'another''text', 42 )`, [['LEFT_PAREN', '(', 1, 0], ['STRING', 'text', 1, 2], ['COMMA', ',', 1, 8], ['STRING', "another'text", 1, 10], ['COMMA', ',', 1, 25], ['NUMBER', '42', 1, 27], ['RIGHT_PAREN', ')', 1, 30], ['EOF', '', 1, 31]]], [SQL`( 'text', @f( 1, 2, 3 ), 42 )`, [['LEFT_PAREN', '(', 1, 0], ['STRING', 'text', 1, 2], ['COMMA', ',', 1, 8], ['UNKNOWN', '@', 1, 10], ['LITERAL', 'f', 1, 11], ['LEFT_PAREN', '(', 1, 12], ['NUMBER', '1', 1, 14], ['COMMA', ',', 1, 15], ['NUMBER', '2', 1, 17], ['COMMA', ',', 1, 18], ['NUMBER', '3', 1, 20], ['RIGHT_PAREN', ')', 1, 22], ['COMMA', ',', 1, 23], ['NUMBER', '42', 1, 25], ['RIGHT_PAREN', ')', 1, 28], ['EOF', '', 1, 29]]], [SQL`SELECT 42 as c;`, [['SELECT', 'SELECT', 1, 0], ['NUMBER', '42', 1, 7], ['AS', 'as', 1, 10], ['LITERAL', 'c', 1, 13], ['SEMICOLON', ';', 1, 14], ['EOF', '', 1, 15]]], [SQL`select 'helo', 'world''';`, [['SELECT', 'select', 1, 0], ['STRING', 'helo', 1, 7], ['COMMA', ',', 1, 13], ['STRING', "world'", 1, 15], ['SEMICOLON', ';', 1, 24], ['EOF', '', 1, 25]]], [SQL`select 'helo', 'world'''`, [['SELECT', 'select', 1, 0], ['STRING', 'helo', 1, 7], ['COMMA', ',', 1, 13], ['STRING', "world'", 1, 15], ['EOF', '', 1, 24]]]];
+//.........................................................................................................
+    for (j = 0, len1 = probes_and_matchers.length; j < len1; j++) {
+      [probe, matcher, error] = probes_and_matchers[j];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var result;
+          result = lexer.tokenize(probe);
+          show(probe);
+          return resolve(result);
+        });
+      });
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
