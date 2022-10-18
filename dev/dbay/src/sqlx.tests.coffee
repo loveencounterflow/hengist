@@ -45,13 +45,14 @@ class E.DBay_sqlx_error            extends E.DBay_error
 
 
 #===========================================================================================================
-class DBay_sqlx extends ( require H.dbay_path ).DBay
+class DBay_sqlx # extends ( require H.dbay_path ).DBay
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( P... ) ->
-    super P...
+    # super P...
     GUY.props.hide @, '_sqlx_declarations', {}
     GUY.props.hide @, '_sqlx_cmd_re',       null
+    GUY.props.hide @, 'types',              types
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
@@ -190,7 +191,8 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
 #-----------------------------------------------------------------------------------------------------------
 @dbay_sqlx_function = ( T, done ) ->
   # T?.halt_on_error()
-  { SQL  }          = DBay_sqlx
+  { DBay }          = require H.dbay_path
+  { SQL  }          = DBay
   db                = new DBay_sqlx()
   #.........................................................................................................
   _test = ( probe, matcher ) ->
@@ -261,9 +263,10 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
 #-----------------------------------------------------------------------------------------------------------
 @dbay_sqlx_find_arguments = ( T, done ) ->
   # T?.halt_on_error()
-  { SQL  }  = DBay_sqlx
-  db        = new DBay_sqlx()
-  _test     = ( probe, matcher ) ->
+  { DBay }          = require H.dbay_path
+  { SQL  }          = DBay
+  db                = new DBay_sqlx()
+  _test             = ( probe, matcher ) ->
     result = db._find_arguments probe
     help '^43-1^', probe
     urge '^43-1^', result
@@ -277,9 +280,11 @@ class DBay_sqlx extends ( require H.dbay_path ).DBay
 
 #-----------------------------------------------------------------------------------------------------------
 @dbay_sql_lexer = ( T, done ) ->
-  { SQL  }          = DBay_sqlx
+  { DBay }          = require H.dbay_path
+  { SQL  }          = DBay
   lexer             = require '../../../../dbay-sql-lexer'
   info k for k in ( GUY.props.keys lexer ).sort()
+  #.........................................................................................................
   show = ( sql ) ->
     info rpr sql
     try
