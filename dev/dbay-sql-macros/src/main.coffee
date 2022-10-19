@@ -122,9 +122,54 @@ dtab                      = new Tbl { dba: null, }
   done?()
 
 
+#-----------------------------------------------------------------------------------------------------------
+@dbay_macros_parameter_name_clashes = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  db                = new DBay_sqlx()
+  #.........................................................................................................
+  db.declare SQL"""@add( @a, @b ) = ( @a + @b );"""
+  db.declare SQL"""@mul( @a, @b ) = ( @a * @b );"""
+  db.declare SQL"""@frob( @a, @b ) = ( @add( @a * @b, @mul( @a, @b ) ) );"""
+  #.........................................................................................................
+  do ->
+    probe   = SQL"""select @add( @mul( @add( 1, 2 ), 3 ), @add( 4, @mul( 5, 6 ) ) ) as p;"""
+    matcher = 'select ( ( ( 1 + 2 ) * 3 ) + ( 4 + ( 5 * 6 ) ) ) as p;'
+    result  = db.resolve probe
+    debug '^5345^', rpr result
+    T?.eq result, matcher
+  #.........................................................................................................
+  do ->
+    probe   = SQL"""select @frob( 1, 2 ) as p;"""
+    matcher = 'select ( ( ( 1 * 2 ) + ( 1 * 2 ) ) ) as p;'
+    result  = db.resolve probe
+    debug '^5345^', rpr result
+    T?.eq result, matcher
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dbay_macros_recursive_expansion = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  db                = new DBay_sqlx()
+  db                = new DBay { macros: true, }
+  #.........................................................................................................
+  db.declare SQL"""@add_2( @a ) = @a + @ @b ) / @b;"""
+  #.........................................................................................................
+  do ->
+    probe   = SQL"""select @secret_power( 3, 2 ) as p;"""
+    matcher = [ { p: 4.5 } ]
+    result  = db.resolve probe
+    T?.eq result, matcher
+  #.........................................................................................................
+  done?()
+
+
 
 ############################################################################################################
 if require.main is module then do =>
+  test @dbay_macros_parameter_name_clashes
   test @
   # @dbay_sql_lexer()
   # @dbay_sqlx_find_arguments()
