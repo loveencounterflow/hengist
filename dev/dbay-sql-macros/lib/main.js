@@ -130,9 +130,64 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_parameter_name_clashes = function(T, done) {
+    var DBay_sqlx, db;
+    // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    db = new DBay_sqlx();
+    //.........................................................................................................
+    db.declare(SQL`@add( @a, @b ) = ( @a + @b );`);
+    db.declare(SQL`@mul( @a, @b ) = ( @a * @b );`);
+    db.declare(SQL`@frob( @a, @b ) = ( @add( @a * @b, @mul( @a, @b ) ) );`);
+    (function() {      //.........................................................................................................
+      var matcher, probe, result;
+      probe = SQL`select @add( @mul( @add( 1, 2 ), 3 ), @add( 4, @mul( 5, 6 ) ) ) as p;`;
+      matcher = 'select ( ( ( 1 + 2 ) * 3 ) + ( 4 + ( 5 * 6 ) ) ) as p;';
+      result = db.resolve(probe);
+      debug('^5345^', rpr(result));
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var matcher, probe, result;
+      probe = SQL`select @frob( 1, 2 ) as p;`;
+      matcher = 'select ( ( ( 1 * 2 ) + ( 1 * 2 ) ) ) as p;';
+      result = db.resolve(probe);
+      debug('^5345^', rpr(result));
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_recursive_expansion = function(T, done) {
+    var DBay_sqlx, db;
+    // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    db = new DBay_sqlx();
+    db = new DBay({
+      macros: true
+    });
+    //.........................................................................................................
+    db.declare(SQL`@add_2( @a ) = @a + @ @b ) / @b;`);
+    (function() {      //.........................................................................................................
+      var matcher, probe, result;
+      probe = SQL`select @secret_power( 3, 2 ) as p;`;
+      matcher = [
+        {
+          p: 4.5
+        }
+      ];
+      result = db.resolve(probe);
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
+      test(this.dbay_macros_parameter_name_clashes);
       return test(this);
     })();
   }

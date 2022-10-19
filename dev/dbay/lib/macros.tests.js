@@ -58,7 +58,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.dbay_macros_function = function(T, done) {
+  this.dbay_macros_assert_basic_functionality = function(T, done) {
     var DBay, SQL, _test, db;
     /* NOTE this test is a shortened version of the more extensive tests to be found at
      https://github.com/loveencounterflow/hengist/tree/master/dev/dbay-sql-macros/src; it's only here to
@@ -92,11 +92,56 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_implicit_expansion = function(T, done) {
+    var DBay, SQL, db;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({SQL} = DBay);
+    db = new DBay({
+      macros: true
+    });
+    //.........................................................................................................
+    db.macros.declare(SQL`@secret_power( @a, @b ) = power( @a, @b ) / @b;`);
+    (function() {      //.........................................................................................................
+      var matcher, probe, result;
+      probe = SQL`select @secret_power( 3, 2 ) as p;`;
+      matcher = [
+        {
+          p: 4.5
+        }
+      ];
+      result = db.all_rows(probe);
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var matcher, probe, result;
+      probe = SQL`select @secret_power( 3, 2 ) as p;`;
+      matcher = [4.5];
+      result = db.all_first_values(probe);
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var matcher, probe, result;
+      probe = SQL`select @secret_power( 3, 2 ) as p;`;
+      matcher = [
+        {
+          p: 4.5
+        }
+      ];
+      result = db(probe);
+      result = [...result];
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @dbay_macros_methods()
       // test @dbay_macros_methods
+      // @dbay_macros_implicit_expansion()
       return test(this);
     })();
   }
