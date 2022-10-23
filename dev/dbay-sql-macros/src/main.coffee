@@ -34,7 +34,7 @@ dtab                      = new Tbl { dba: null, }
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@dbay_sqlx_function = ( T, done ) ->
+@dbay_macros_function = ( T, done ) ->
   # T?.halt_on_error()
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
   db                = new DBay_sqlx()
@@ -105,7 +105,7 @@ dtab                      = new Tbl { dba: null, }
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@dbay_sqlx_find_arguments = ( T, done ) ->
+@dbay_macros_find_arguments = ( T, done ) ->
   # T?.halt_on_error()
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
   db                = new DBay_sqlx()
