@@ -129,21 +129,37 @@ dtab                      = new Tbl { dba: null, }
   db                = new DBay_sqlx()
   #.........................................................................................................
   db.declare SQL"""@add( @a, @b ) = ( @a + @b );"""
+  db.declare SQL"""@程( @a, @b ) = ( @a * @b );"""
+  db.declare SQL"""@程_2( @a, @b ) = ( @a * @b );"""
   db.declare SQL"""@mul( @a, @b ) = ( @a * @b );"""
   db.declare SQL"""@frob( @a, @b ) = ( @add( @a * @b, @mul( @a, @b ) ) );"""
   #.........................................................................................................
   do ->
     probe   = SQL"""select @add( @mul( @add( 1, 2 ), 3 ), @add( 4, @mul( 5, 6 ) ) ) as p;"""
-    matcher = 'select ( ( ( 1 + 2 ) * 3 ) + ( 4 + ( 5 * 6 ) ) ) as p;'
+    matcher = SQL"""select ( ( ( 1 + 2 ) * 3 ) + ( 4 + ( 5 * 6 ) ) ) as p;"""
     result  = db.resolve probe
-    debug '^5345^', rpr result
+    help '^5345^', rpr result
     T?.eq result, matcher
   #.........................................................................................................
   do ->
-    probe   = SQL"""select @frob( 1, 2 ) as p;"""
-    matcher = 'select ( ( ( 1 * 2 ) + ( 1 * 2 ) ) ) as p;'
+    probe   = SQL"""select @add( @程( @add( 1, 2 ), 3 ), @add( 4, @程( 5, 6 ) ) ) as p;"""
+    matcher = SQL"""select ( ( ( 1 + 2 ) * 3 ) + ( 4 + ( 5 * 6 ) ) ) as p;"""
     result  = db.resolve probe
-    debug '^5345^', rpr result
+    help '^5345^', rpr result
+    T?.eq result, matcher
+  #.........................................................................................................
+  do ->
+    probe   = SQL"""select @add( @程_2( @add( 1, 2 ), 3 ), @add( 4, @程_2( 5, 6 ) ) ) as p;"""
+    matcher = SQL"""select ( ( ( 1 + 2 ) * 3 ) + ( 4 + ( 5 * 6 ) ) ) as p;"""
+    result  = db.resolve probe
+    help '^5345^', rpr result
+    T?.eq result, matcher
+  #.........................................................................................................
+  do ->
+    probe   = SQL"""select @frob( 1, 2 ) as q;"""
+    matcher = SQL"""select ( ( 1 * 2 + ( 1 * 2 ) ) ) as q;"""
+    result  = db.resolve probe
+    help '^5345^', rpr result
     T?.eq result, matcher
   #.........................................................................................................
   done?()
