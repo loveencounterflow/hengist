@@ -27,7 +27,7 @@ truth                     = GUY.trm.truth.bind GUY.trm
 test                      = require 'guy-test'
 # { intersection_of }       = require '../../../apps/intertype/lib/helpers'
 H                         = require '../../../lib/helpers'
-equals                    = require '../../../apps/intertype/deps/jkroso-equals'
+equals                    = GUY.samesame.equals
 S                         = ( parts ) -> new Set eval parts.raw[ 0 ]
 { to_width }              = require 'to-width'
 _types                    = new ( require 'intertype' ).Intertype()
@@ -2139,6 +2139,19 @@ demo_size_of = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@intertype_equals_available_as_module_static_method = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  { equals        } = require '../../../apps/intertype'
+  types             = new Intertype { errors: false, }
+  #.........................................................................................................
+  T?.eq ( _types.type_of        equals ), 'function'
+  T?.eq ( _types.type_of  types.equals ), 'function'
+  T?.ok equals is types.equals
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 unless module.parent?
@@ -2176,7 +2189,9 @@ unless module.parent?
   # test @intertype_cast
   # test @intertype_can_use_subobject_fields
   # test @intertype_create_has_correct_binding
-  test @
+  @intertype_type_regex()
+  test @intertype_type_regex
+  # test @
   # test @intertype_ordering_of_field_and_isa_tests
   # test @intertype_tracing
   # test @_intertype_tracing_2
