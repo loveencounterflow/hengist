@@ -165,13 +165,15 @@ dtab                      = new Tbl { dba: null, }
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@dbay_macros_recursive_expansion = ( T, done ) ->
+@dbay_macros_works_without_any_declarations = ( T, done ) ->
   # T?.halt_on_error()
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
-  db                = new DBay_sqlx()
-  db                = new DBay { macros: true, }
+  m                 = new DBay_sqlx()
+  probe             = SQL"""select 42 as answer;"""
+  help '^12-1^', rpr result  = m.resolve probe
+  T?.eq probe, SQL"""select 42 as answer;"""
   #.........................................................................................................
-  db.declare SQL"""@add_2( @a ) = @a + @ @b ) / @b;"""
+  done?()
   #.........................................................................................................
   do ->
     probe   = SQL"""select @secret_power( 3, 2 ) as p;"""
