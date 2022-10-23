@@ -16,7 +16,8 @@ GUY                       = require 'guy'
 { rpr
   inspect
   echo
-  log     }               = GUY.trm
+  log
+  reverse }               = GUY.trm
 #...........................................................................................................
 test                      = require '../../../apps/guy-test'
 PATH                      = require 'path'
@@ -189,6 +190,33 @@ dtab                      = new Tbl { dba: null, }
   T?.throws /found unresolved macros @secret_power, @strange_thing/, -> m.resolve probe
   #.........................................................................................................
   done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dbay_macros_use_case_virtual_types = ( T, done ) ->
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  { DBay      }     = require '../../../apps/dbay'
+  m                 = new DBay_sqlx()
+  ### NOTE using a 'generic' DB connection w/out implicit macro handling ###
+  db                = new DBay { macros: false, }
+  #.........................................................................................................
+  m.declare SQL"""@id( @name )    = @name text    check ( @name regexp '^[a-z]{3}-[0-9]{2}' )"""
+  m.declare SQL"""@month( @name ) = @name integer check ( @name between 1 and 12 )"""
+  debug '^14-1^', d for _, d of m._declarations
+  db ->
+    sql = m.resolve SQL"""
+      create table bookings (
+        @id( "booking_id" ),
+        @month( "booking_period" )
+        );"""
+    T?.eq sql, SQL"""
+      create table bookings (
+        "booking_id" text    check ( "booking_id" regexp '^[a-z]{3}-[0-9]{2}' ),
+        "booking_period" integer check ( "booking_period" between 1 and 12 )
+        );"""
+    urge '^34-1^', sql
+    # db sql
+    db.rollback_transaction()
+    return null
   #.........................................................................................................
   done?()
 
@@ -217,12 +245,17 @@ dtab                      = new Tbl { dba: null, }
 
 ############################################################################################################
 if require.main is module then do =>
-  test @dbay_macros_parameter_name_clashes
+  # @dbay_macros_use_case_virtual_types()
+  # test @dbay_macros_use_case_virtual_types
+  @dbay_macros_parameter_name_clashes()
+  # test @dbay_macros_parameter_name_clashes
+  # @dbay_macros_checks_for_leftovers()
+  # test @dbay_macros_checks_for_leftovers
   test @
   # @dbay_sql_lexer()
-  # @dbay_sqlx_find_arguments()
-  # test @dbay_sqlx_find_arguments
-  # @dbay_sqlx_function()
-  # test @dbay_sqlx_function
+  # @dbay_macros_find_arguments()
+  # test @dbay_macros_find_arguments
+  # @dbay_macros_function()
+  # test @dbay_macros_function
 
 
