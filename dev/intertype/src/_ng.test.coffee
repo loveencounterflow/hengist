@@ -1859,7 +1859,65 @@ demo_size_of = ->
   T?.eq ( type_of {}          ), 'object'
   T?.eq ( type_of ->          ), 'function'
   T?.eq ( type_of -> await x  ), 'asyncfunction'
-  T?.eq ( type_of /x/         ), 'regex'
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_type_regex = ( T, done ) ->
+  { Intertype }   = require '../../../apps/intertype'
+  #.........................................................................................................
+  show_error = ( error ) -> warn rvr ( error.message.split /\n/ )[ 0 ]
+  #.........................................................................................................
+  do ->
+    types           = new Intertype()
+    debug '^77-1^',     types.type_of /x/
+    debug '^77-2^',     types.isa.regex /x/
+    debug '^77-3^', not types.isa.regex 'x'
+    debug '^77-4^', not types.isa.regex 42
+    T?.eq ( types.type_of /x/ ), 'regex'
+    T?.ok     types.isa.regex /x/
+    T?.ok not types.isa.regex 'x'
+    T?.ok not types.isa.regex 42
+  #.........................................................................................................
+  do ->
+    types           = new Intertype()
+    types.declare.foo
+      fields:
+        bar:    'text'
+      default:
+        bar:    'baz'
+    debug '^77-5^', try types.create.foo()                  catch e then show_error e
+    debug '^77-6^', try types.create.foo {}                 catch e then show_error e
+    debug '^77-7^', try types.create.foo { bar: 'helo', }   catch e then show_error e
+    # debug '^77-8^', try types.create.foo { bar: /world/y, } catch e then show_error e
+  #.........................................................................................................
+  do ->
+    types           = new Intertype()
+    types.declare.foo
+      fields:
+        bar:    'regex'
+      default:
+        bar:    /baz/
+    debug '^77-9^', try types.create.foo()                  catch e then show_error e
+    debug '^77-10^', try types.create.foo {}                 catch e then show_error e
+    # debug '^77-11^', try types.create.foo { bar: 'helo', }   catch e then show_error e
+    debug '^77-12^', try types.create.foo { bar: /world/y, } catch e then show_error e
+  #.........................................................................................................
+  do ->
+    types           = new Intertype()
+    types.declare.foo
+      fields:
+        bar:    'text.or.regex'
+      default:
+        bar:    /baz/
+    debug '^77-13^', try types.create.foo()                  catch e then show_error e
+    debug '^77-14^', try types.create.foo {}                 catch e then show_error e
+    debug '^77-15^', try types.create.foo { bar: 'helo', }   catch e then show_error e
+    debug '^77-16^', try types.create.foo { bar: /world/y, } catch e then show_error e
+    T?.eq ( types.create.foo()                  ), { bar: /baz/, }
+    T?.eq ( types.create.foo {}                 ), { bar: /baz/, }
+    T?.eq ( types.create.foo { bar: 'helo', }   ), { bar: 'helo', }
+    T?.eq ( types.create.foo { bar: /world/y, } ), { bar: /world/y, }
+  #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
