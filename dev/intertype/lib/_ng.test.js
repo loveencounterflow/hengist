@@ -24,7 +24,7 @@
   // { intersection_of }       = require '../../../apps/intertype/lib/helpers'
   H = require('../../../lib/helpers');
 
-  equals = require('../../../apps/intertype/deps/jkroso-equals');
+  equals = GUY.samesame.equals;
 
   S = function(parts) {
     return new Set(eval(parts.raw[0]));
@@ -3740,9 +3740,183 @@
         return (await x);
       }), 'asyncfunction');
     }
-    if (T != null) {
-      T.eq(type_of(/x/), 'regex');
-    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_type_regex = function(T, done) {
+    var Intertype, show_error;
+    ({Intertype} = require('../../../apps/intertype'));
+    //.........................................................................................................
+    show_error = function(error) {
+      return warn(rvr((error.message.split(/\n/))[0]));
+    };
+    (function() {      //.........................................................................................................
+      var types;
+      types = new Intertype();
+      debug('^77-1^', types.type_of(/x/));
+      debug('^77-2^', types.isa.regex(/x/));
+      debug('^77-3^', !types.isa.regex('x'));
+      debug('^77-4^', !types.isa.regex(42));
+      if (T != null) {
+        T.eq(types.type_of(/x/), 'regex');
+      }
+      if (T != null) {
+        T.ok(types.isa.regex(/x/));
+      }
+      if (T != null) {
+        T.ok(!types.isa.regex('x'));
+      }
+      return T != null ? T.ok(!types.isa.regex(42)) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var e, types;
+      types = new Intertype();
+      types.declare.foo({
+        fields: {
+          bar: 'text'
+        },
+        default: {
+          bar: 'baz'
+        }
+      });
+      debug('^77-5^', (function() {
+        try {
+          return types.create.foo();
+        } catch (error1) {
+          e = error1;
+          return show_error(e);
+        }
+      })());
+      debug('^77-6^', (function() {
+        try {
+          return types.create.foo({});
+        } catch (error1) {
+          e = error1;
+          return show_error(e);
+        }
+      })());
+      return debug('^77-7^', (function() {
+        try {
+          return types.create.foo({
+            bar: 'helo'
+          });
+        } catch (error1) {
+          e = error1;
+          return show_error(e);
+        }
+      })());
+    })();
+    (function() {      // debug '^77-8^', try types.create.foo { bar: /world/y, } catch e then show_error e
+      //.........................................................................................................
+      var e, types;
+      types = new Intertype();
+      types.declare.foo({
+        fields: {
+          bar: 'regex'
+        },
+        default: {
+          bar: /baz/
+        }
+      });
+      debug('^77-9^', (function() {
+        try {
+          return types.create.foo();
+        } catch (error1) {
+          e = error1;
+          return show_error(e);
+        }
+      })());
+      debug('^77-10^', (function() {
+        try {
+          return types.create.foo({});
+        } catch (error1) {
+          e = error1;
+          return show_error(e);
+        }
+      })());
+      // debug '^77-11^', try types.create.foo { bar: 'helo', }   catch e then show_error e
+      return debug('^77-12^', (function() {
+        try {
+          return types.create.foo({
+            bar: /world/y
+          });
+        } catch (error1) {
+          e = error1;
+          return show_error(e);
+        }
+      })());
+    })();
+    (function() {      //.........................................................................................................
+      var e, types;
+      types = new Intertype();
+      types.declare.foo({
+        fields: {
+          bar: 'text.or.regex'
+        },
+        default: {
+          bar: /baz/
+        }
+      });
+      debug('^77-13^', (function() {
+        try {
+          return types.create.foo();
+        } catch (error1) {
+          e = error1;
+          return show_error(e);
+        }
+      })());
+      debug('^77-14^', (function() {
+        try {
+          return types.create.foo({});
+        } catch (error1) {
+          e = error1;
+          return show_error(e);
+        }
+      })());
+      debug('^77-15^', (function() {
+        try {
+          return types.create.foo({
+            bar: 'helo'
+          });
+        } catch (error1) {
+          e = error1;
+          return show_error(e);
+        }
+      })());
+      debug('^77-16^', (function() {
+        try {
+          return types.create.foo({
+            bar: /world/y
+          });
+        } catch (error1) {
+          e = error1;
+          return show_error(e);
+        }
+      })());
+      if (T != null) {
+        T.eq(types.create.foo(), {
+          bar: /baz/
+        });
+      }
+      if (T != null) {
+        T.eq(types.create.foo({}), {
+          bar: /baz/
+        });
+      }
+      if (T != null) {
+        T.eq(types.create.foo({
+          bar: 'helo'
+        }), {
+          bar: 'helo'
+        });
+      }
+      return T != null ? T.eq(types.create.foo({
+        bar: /world/y
+      }), {
+        bar: /world/y
+      }) : void 0;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -4213,6 +4387,28 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_equals_available_as_module_static_method = function(T, done) {
+    var Intertype, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    ({equals} = require('../../../apps/intertype'));
+    types = new Intertype({
+      errors: false
+    });
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(_types.type_of(equals), 'function');
+    }
+    if (T != null) {
+      T.eq(_types.type_of(types.equals), 'function');
+    }
+    if (T != null) {
+      T.ok(equals === types.equals);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // demo()
@@ -4249,10 +4445,12 @@
     // test @intertype_cast
     // test @intertype_can_use_subobject_fields
     // test @intertype_create_has_correct_binding
-    test(this);
+    this.intertype_type_regex();
+    test(this.intertype_type_regex);
   }
 
-  // test @intertype_ordering_of_field_and_isa_tests
+  // test @
+// test @intertype_ordering_of_field_and_isa_tests
 // test @intertype_tracing
 // test @_intertype_tracing_2
 // test @intertype_improved_validation_errors

@@ -1,13 +1,13 @@
 (function() {
   'use strict';
-  var GUY, PATH, SQL, Tbl, alert, debug, dtab, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var GUY, PATH, SQL, Tbl, alert, debug, dtab, echo, equals, help, info, inspect, isa, log, plain, praise, reverse, rpr, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
 
   ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('DBAY-SQL-MACROS'));
 
-  ({rpr, inspect, echo, log} = GUY.trm);
+  ({rpr, inspect, echo, log, reverse} = GUY.trm);
 
   //...........................................................................................................
   test = require('../../../apps/guy-test');
@@ -30,7 +30,7 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.dbay_sqlx_function = function(T, done) {
+  this.dbay_macros_function = function(T, done) {
     var DBay_sqlx, _test, db;
     // T?.halt_on_error()
     ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
@@ -110,7 +110,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.dbay_sqlx_find_arguments = function(T, done) {
+  this.dbay_macros_find_arguments = function(T, done) {
     var DBay_sqlx, _test, db;
     // T?.halt_on_error()
     ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
@@ -138,65 +138,192 @@
     db = new DBay_sqlx();
     //.........................................................................................................
     db.declare(SQL`@add( @a, @b ) = ( @a + @b );`);
+    db.declare(SQL`@程( @a, @b ) = ( @a * @b );`);
+    db.declare(SQL`@程_2( @a, @b ) = ( @a * @b );`);
     db.declare(SQL`@mul( @a, @b ) = ( @a * @b );`);
     db.declare(SQL`@frob( @a, @b ) = ( @add( @a * @b, @mul( @a, @b ) ) );`);
     (function() {      //.........................................................................................................
       var matcher, probe, result;
       probe = SQL`select @add( @mul( @add( 1, 2 ), 3 ), @add( 4, @mul( 5, 6 ) ) ) as p;`;
-      matcher = 'select ( ( ( 1 + 2 ) * 3 ) + ( 4 + ( 5 * 6 ) ) ) as p;';
+      matcher = SQL`select ( ( ( 1 + 2 ) * 3 ) + ( 4 + ( 5 * 6 ) ) ) as p;`;
       result = db.resolve(probe);
-      debug('^5345^', rpr(result));
+      help('^5345^', rpr(result));
       return T != null ? T.eq(result, matcher) : void 0;
     })();
     (function() {      //.........................................................................................................
       var matcher, probe, result;
-      probe = SQL`select @frob( 1, 2 ) as p;`;
-      matcher = 'select ( ( ( 1 * 2 ) + ( 1 * 2 ) ) ) as p;';
+      probe = SQL`select @add( @程( @add( 1, 2 ), 3 ), @add( 4, @程( 5, 6 ) ) ) as p;`;
+      matcher = SQL`select ( ( ( 1 + 2 ) * 3 ) + ( 4 + ( 5 * 6 ) ) ) as p;`;
       result = db.resolve(probe);
-      debug('^5345^', rpr(result));
+      help('^5345^', rpr(result));
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var matcher, probe, result;
+      probe = SQL`select @add( @程_2( @add( 1, 2 ), 3 ), @add( 4, @程_2( 5, 6 ) ) ) as p;`;
+      matcher = SQL`select ( ( ( 1 + 2 ) * 3 ) + ( 4 + ( 5 * 6 ) ) ) as p;`;
+      result = db.resolve(probe);
+      help('^5345^', rpr(result));
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var matcher, probe, result;
+      probe = SQL`select @frob( 1, 2 ) as q;`;
+      matcher = SQL`select ( ( 1 * 2 + ( 1 * 2 ) ) ) as q;`;
+      result = db.resolve(probe);
+      help('^5345^', rpr(result));
       return T != null ? T.eq(result, matcher) : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.dbay_macros_recursive_expansion = function(T, done) {
-    var DBay_sqlx, db;
+  this.dbay_macros_works_without_any_declarations = function(T, done) {
+    var DBay_sqlx, m, probe, result;
     // T?.halt_on_error()
     ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
-    db = new DBay_sqlx();
+    m = new DBay_sqlx();
+    probe = SQL`select 42 as answer;`;
+    help('^12-1^', rpr(result = m.resolve(probe)));
+    if (T != null) {
+      T.eq(probe, SQL`select 42 as answer;`);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_checks_for_leftovers = function(T, done) {
+    var DBay_sqlx, e, m, probe;
+    // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    m = new DBay_sqlx();
+    probe = SQL`select
+  @strange_thing()      as c1,
+  @secret_power( 3, 2 ) as c2,
+  @strange_thing        as c3;`;
+    debug('^79-1^', (function() {
+      try {
+        return m.resolve(probe);
+      } catch (error1) {
+        e = error1;
+        return warn(reverse(e.message));
+      }
+    })());
+    if (T != null) {
+      T.throws(/found unresolved macros @secret_power, @strange_thing/, function() {
+        return m.resolve(probe);
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_use_case_virtual_types = function(T, done) {
+    /* NOTE using a 'generic' DB connection w/out implicit macro handling */
+    var DBay, DBay_sqlx, _, d, db, m, ref;
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    ({DBay} = require('../../../apps/dbay'));
+    m = new DBay_sqlx();
     db = new DBay({
-      macros: true
+      macros: false
     });
     //.........................................................................................................
-    db.declare(SQL`@add_2( @a ) = @a + @ @b ) / @b;`);
-    (function() {      //.........................................................................................................
-      var matcher, probe, result;
-      probe = SQL`select @secret_power( 3, 2 ) as p;`;
-      matcher = [
-        {
-          p: 4.5
+    m.declare(SQL`@id( @name )    = @name text    check ( @name regexp '^[a-z]{3}-[0-9]{2}' )`);
+    m.declare(SQL`@month( @name ) = @name integer check ( @name between 1 and 12 )`);
+    ref = m._declarations;
+    for (_ in ref) {
+      d = ref[_];
+      debug('^14-1^', d);
+    }
+    db(function() {
+      var sql;
+      sql = m.resolve(SQL`create table bookings (
+  @id( "booking_id" ),
+  @month( "booking_period" )
+  );`);
+      if (T != null) {
+        T.eq(sql, SQL`create table bookings (
+  "booking_id" text    check ( "booking_id" regexp '^[a-z]{3}-[0-9]{2}' ),
+  "booking_period" integer check ( "booking_period" between 1 and 12 )
+  );`);
+      }
+      urge('^34-1^', sql);
+      // db sql
+      db.rollback_transaction();
+      return null;
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_declarations_undone_on_rollback_or_not = function(T, done) {
+    /* NOTE using a 'generic' DB connection w/out implicit macro handling */
+    var DBay, DBay_sqlx, db, key, m;
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    ({DBay} = require('../../../apps/dbay'));
+    m = new DBay_sqlx();
+    db = new DBay({
+      macros: false
+    });
+    //.........................................................................................................
+    m.declare(SQL`@declared_without_tx = whatever;`);
+    if (T != null) {
+      T.eq((function() {
+        var results;
+        results = [];
+        for (key in m._declarations) {
+          results.push(key);
         }
-      ];
-      result = db.resolve(probe);
-      return T != null ? T.eq(result, matcher) : void 0;
-    })();
+        return results;
+      })(), ['@declared_without_tx']);
+    }
+    db(function() {
+      m.declare(SQL`@declared_within_tx = whatever;`);
+      if (T != null) {
+        T.eq((function() {
+          var results;
+          results = [];
+          for (key in m._declarations) {
+            results.push(key);
+          }
+          return results;
+        })(), ['@declared_without_tx', '@declared_within_tx']);
+      }
+      db.rollback_transaction();
+      return null;
+    });
+    /* current behavior: */
+    if (T != null) {
+      T.eq((function() {
+        var results;
+        results = [];
+        for (key in m._declarations) {
+          results.push(key);
+        }
+        return results;
+      })(), ['@declared_without_tx', '@declared_within_tx']);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      test(this.dbay_macros_parameter_name_clashes);
+      // @dbay_macros_use_case_virtual_types()
+      // test @dbay_macros_use_case_virtual_types
+      this.dbay_macros_parameter_name_clashes();
+      // test @dbay_macros_parameter_name_clashes
+      // @dbay_macros_checks_for_leftovers()
+      // test @dbay_macros_checks_for_leftovers
       return test(this);
     })();
   }
 
   // @dbay_sql_lexer()
-// @dbay_sqlx_find_arguments()
-// test @dbay_sqlx_find_arguments
-// @dbay_sqlx_function()
-// test @dbay_sqlx_function
+// @dbay_macros_find_arguments()
+// test @dbay_macros_find_arguments
+// @dbay_macros_function()
+// test @dbay_macros_function
 
 }).call(this);
 
