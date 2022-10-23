@@ -174,12 +174,21 @@ dtab                      = new Tbl { dba: null, }
   T?.eq probe, SQL"""select 42 as answer;"""
   #.........................................................................................................
   done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dbay_macros_checks_for_leftovers = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  m                 = new DBay_sqlx()
+  probe             = SQL"""
+    select
+      @strange_thing()      as c1,
+      @secret_power( 3, 2 ) as c2,
+      @strange_thing        as c3;"""
+  debug '^79-1^', try m.resolve probe catch e then warn reverse e.message
+  T?.throws /found unresolved macros @secret_power, @strange_thing/, -> m.resolve probe
   #.........................................................................................................
-  do ->
-    probe   = SQL"""select @secret_power( 3, 2 ) as p;"""
-    matcher = [ { p: 4.5 } ]
-    result  = db.resolve probe
-    T?.eq result, matcher
+  done?()
   #.........................................................................................................
   done?()
 
