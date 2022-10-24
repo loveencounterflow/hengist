@@ -12,7 +12,7 @@ GUY                       = require 'guy'
   praise
   urge
   warn
-  whisper }               = GUY.trm.get_loggers 'DBAY-SQL-MACROS'
+  whisper }               = GUY.trm.get_loggers 'DBAY-SQL-MACROS/tests'
 { rpr
   inspect
   echo
@@ -34,6 +34,53 @@ dtab                      = new Tbl { dba: null, }
 
 #===========================================================================================================
 #
+#-----------------------------------------------------------------------------------------------------------
+@dbay_macros_simple_resolution = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  #.........................................................................................................
+  _test = ( ref, m, probe, matcher, error ) ->
+    try
+      if error?
+        T?.throws error, -> try m.resolve probe catch e then warn ref, reverse e.message; throw e
+      else
+        result = m.resolve probe
+        help ref, rpr probe
+        if result is matcher then ( info ref, rpr result ) else ( warn ref, rpr result )
+        T?.eq result, matcher
+    catch error
+      T?.eq "ERROR #{ref}", "#{error.message}\n#{rpr probe}"
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    m.declare SQL"""@secret_power( @a, @b ) = power( @a, @b ) / @b;"""
+    sqlx  = SQL"""select @secret_power( 3, 2 ) as x;"""
+    sql   = SQL"""select power( 3, 2 ) / 2 as x;"""
+    _test '^t#1^', m, sqlx, sql
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    m.declare SQL"""@hoax( @a ) = @a || '@a' || @a;"""
+    sqlx  = SQL"""select @hoax( 'x' ) as hoax;"""
+    sql   = SQL"""select 'x' || ''x'' || 'x' as hoax;"""
+    _test '^t#2^', m, sqlx, sql
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    m.declare SQL"""@hoax( @a ) = @a || '\\@a' || @a;"""
+    sqlx  = SQL"""select @hoax( 'x' ) as hoax;"""
+    sql   = SQL"""select 'x' || '@a' || 'x' as hoax;"""
+    _test '^t#3^', m, sqlx, sql
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    # m.declare SQL"""@power( @a, @b ) = @a ** @b;"""
+    m.declare SQL"""@secret_power( @a, @b ) = @power( @a, @b ) / @b;"""
+    sqlx  = SQL"""select @secret_power( 3, 2 ) as x;"""
+    _test '^t#4^', m, sqlx, null, /xxx/
+  #.........................................................................................................
+  done?()
+
 #-----------------------------------------------------------------------------------------------------------
 @dbay_macros_function = ( T, done ) ->
   # T?.halt_on_error()
@@ -115,11 +162,11 @@ dtab                      = new Tbl { dba: null, }
     help '^43-1^', probe
     urge '^43-1^', result
     T?.eq result, matcher
-  _test SQL""" 3, 2 """,                      [ '3', '2', ]
-  _test SQL""" 3, f( 2, 4 ) """,              [ '3', 'f( 2, 4 )' ]
-  _test SQL""" 3, f( 2, @g( 4, 5, 6 ) ) """,  [ '3', 'f( 2, @g( 4, 5, 6 ) )' ]
-  _test SQL""" 3, 2, "strange,name" """,      [ '3', '2', '"strange,name"' ]
-  _test SQL"""           """,                 []
+  _test SQL"""( 3, 2 )""",                      [ '3', '2', ]
+  _test SQL"""( 3, f( 2, 4 ) )""",              [ '3', 'f( 2, 4 )' ]
+  _test SQL"""( 3, f( 2, @g( 4, 5, 6 ) ) )""",  [ '3', 'f( 2, @g( 4, 5, 6 ) )' ]
+  _test SQL"""( 3, 2, "strange,name" )""",      [ '3', '2', '"strange,name"' ]
+  # _test SQL"""           """,                 []
   done?()
 
 
@@ -172,7 +219,7 @@ dtab                      = new Tbl { dba: null, }
   m                 = new DBay_sqlx()
   probe             = SQL"""select 42 as answer;"""
   help '^12-1^', rpr result  = m.resolve probe
-  T?.eq probe, SQL"""select 42 as answer;"""
+  T?.eq result, SQL"""select 42 as answer;"""
   #.........................................................................................................
   done?()
 
@@ -180,14 +227,43 @@ dtab                      = new Tbl { dba: null, }
 @dbay_macros_checks_for_leftovers = ( T, done ) ->
   # T?.halt_on_error()
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
-  m                 = new DBay_sqlx()
-  probe             = SQL"""
-    select
-      @strange_thing()      as c1,
-      @secret_power( 3, 2 ) as c2,
-      @strange_thing        as c3;"""
-  debug '^79-1^', try m.resolve probe catch e then warn reverse e.message
-  T?.throws /found unresolved macros @secret_power, @strange_thing/, -> m.resolve probe
+  #.........................................................................................................
+  do ->
+    m                 = new DBay_sqlx()
+    probe             = SQL"""
+      select
+        @strange_thing()      as c1,
+        @secret_power( 3, 2 ) as c2,
+        @strange_thing        as c3;"""
+    debug '^79-1^', try m.resolve probe catch e then warn reverse e.message
+    T?.throws /unknown macro '@strange_thing'/, -> m.resolve probe
+  #.........................................................................................................
+  do ->
+    m                 = new DBay_sqlx()
+    m.declare SQL"""@secret_power( @a, @b ) = @power( @a, @b ) / @b;"""
+    sqlx  = SQL"""select @secret_power( 3, 2 ) as x;"""
+    debug '^79-1^', try m.resolve sqlx catch e then warn reverse e.message
+    T?.throws /unknown macro '@power'/, -> m.resolve probe
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dbay_macros_dont_allow_name_reuse_or_recursive_usage = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  do ->
+    m = new DBay_sqlx()
+    try m.declare SQL"""@foo_1( @foo_1 ) = whatever;""" catch e then warn reverse e.message
+    try m.declare SQL"""@foo_2( @a, @a ) = whatever;""" catch e then warn reverse e.message
+  # T?.throws /found unresolved macros @secret_power, @strange_thing/, -> m.resolve probe
+  do ->
+    m = new DBay_sqlx()
+    try m.declare SQL"""@a( @b ) = (a @b );""" catch e then warn reverse e.message
+    try m.declare SQL"""@b( @a ) = (b @b );""" catch e then warn reverse e.message
+    urge '^80-1^', m.resolve "@a( 'b' )"
+    urge '^80-1^', m.resolve "@b( 'a' )"
+    urge '^80-1^', m.resolve "@a( @b( 'a' ) )"
+    urge '^80-1^', m.resolve "@b( @a( 'b' ) )"
   #.........................................................................................................
   done?()
 
@@ -201,7 +277,7 @@ dtab                      = new Tbl { dba: null, }
   #.........................................................................................................
   m.declare SQL"""@id( @name )    = @name text    check ( @name regexp '^[a-z]{3}-[0-9]{2}' )"""
   m.declare SQL"""@month( @name ) = @name integer check ( @name between 1 and 12 )"""
-  debug '^14-1^', d for _, d of m._declarations
+  # debug '^14-1^', d for _, d of m._declarations
   db ->
     sql = m.resolve SQL"""
       create table bookings (
@@ -247,15 +323,15 @@ dtab                      = new Tbl { dba: null, }
 if require.main is module then do =>
   # @dbay_macros_use_case_virtual_types()
   # test @dbay_macros_use_case_virtual_types
-  @dbay_macros_parameter_name_clashes()
-  # test @dbay_macros_parameter_name_clashes
-  # @dbay_macros_checks_for_leftovers()
-  # test @dbay_macros_checks_for_leftovers
-  test @
-  # @dbay_sql_lexer()
   # @dbay_macros_find_arguments()
   # test @dbay_macros_find_arguments
+  # test @dbay_macros_works_without_any_declarations
+  @dbay_macros_simple_resolution()
+  test @dbay_macros_simple_resolution
   # @dbay_macros_function()
   # test @dbay_macros_function
+  # @dbay_macros_checks_for_leftovers()
+  # test @dbay_macros_checks_for_leftovers
+  # test @
 
 
