@@ -5,7 +5,7 @@
   //###########################################################################################################
   GUY = require('guy');
 
-  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('DBAY-SQL-MACROS'));
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('DBAY-SQL-MACROS/tests'));
 
   ({rpr, inspect, echo, log, reverse} = GUY.trm);
 
@@ -28,6 +28,76 @@
   ({SQL} = (require('../../../apps/guy')).str);
 
   //===========================================================================================================
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_simple_resolution = function(T, done) {
+    var DBay_sqlx, _test;
+    // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    //.........................................................................................................
+    _test = function(ref, m, probe, matcher, error) {
+      var result;
+      try {
+        if (error != null) {
+          return T != null ? T.throws(error, function() {
+            var e;
+            try {
+              return m.resolve(probe);
+            } catch (error1) {
+              e = error1;
+              warn(ref, reverse(e.message));
+              throw e;
+            }
+          }) : void 0;
+        } else {
+          result = m.resolve(probe);
+          help(ref, rpr(probe));
+          if (result === matcher) {
+            info(ref, rpr(result));
+          } else {
+            warn(ref, rpr(result));
+          }
+          return T != null ? T.eq(result, matcher) : void 0;
+        }
+      } catch (error1) {
+        error = error1;
+        return T != null ? T.eq(`ERROR ${ref}`, `${error.message}\n${rpr(probe)}`) : void 0;
+      }
+    };
+    (function() {      //.........................................................................................................
+      var m, sql, sqlx;
+      m = new DBay_sqlx();
+      m.declare(SQL`@secret_power( @a, @b ) = power( @a, @b ) / @b;`);
+      sqlx = SQL`select @secret_power( 3, 2 ) as x;`;
+      sql = SQL`select power( 3, 2 ) / 2 as x;`;
+      return _test('^t#1^', m, sqlx, sql);
+    })();
+    (function() {      //.........................................................................................................
+      var m, sql, sqlx;
+      m = new DBay_sqlx();
+      m.declare(SQL`@hoax( @a ) = @a || '@a' || @a;`);
+      sqlx = SQL`select @hoax( 'x' ) as hoax;`;
+      sql = SQL`select 'x' || ''x'' || 'x' as hoax;`;
+      return _test('^t#2^', m, sqlx, sql);
+    })();
+    (function() {      //.........................................................................................................
+      var m, sql, sqlx;
+      m = new DBay_sqlx();
+      m.declare(SQL`@hoax( @a ) = @a || '\\@a' || @a;`);
+      sqlx = SQL`select @hoax( 'x' ) as hoax;`;
+      sql = SQL`select 'x' || '@a' || 'x' as hoax;`;
+      return _test('^t#3^', m, sqlx, sql);
+    })();
+    (function() {      //.........................................................................................................
+      var m, sqlx;
+      m = new DBay_sqlx();
+      // m.declare SQL"""@power( @a, @b ) = @a ** @b;"""
+      m.declare(SQL`@secret_power( @a, @b ) = @power( @a, @b ) / @b;`);
+      sqlx = SQL`select @secret_power( 3, 2 ) as x;`;
+      return _test('^t#4^', m, sqlx, null, /xxx/);
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_macros_function = function(T, done) {
@@ -122,11 +192,10 @@
       urge('^43-1^', result);
       return T != null ? T.eq(result, matcher) : void 0;
     };
-    _test(SQL` 3, 2 `, ['3', '2']);
-    _test(SQL` 3, f( 2, 4 ) `, ['3', 'f( 2, 4 )']);
-    _test(SQL` 3, f( 2, @g( 4, 5, 6 ) ) `, ['3', 'f( 2, @g( 4, 5, 6 ) )']);
-    _test(SQL` 3, 2, "strange,name" `, ['3', '2', '"strange,name"']);
-    _test(SQL`           `, []);
+    _test(SQL`( 3, 2 )`, ['3', '2']);
+    _test(SQL`( 3, f( 2, 4 ) )`, ['3', 'f( 2, 4 )']);
+    _test(SQL`( 3, f( 2, @g( 4, 5, 6 ) ) )`, ['3', 'f( 2, @g( 4, 5, 6 ) )']);
+    _test(SQL`( 3, 2, "strange,name" )`, ['3', '2', '"strange,name"']);
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -186,41 +255,103 @@
     probe = SQL`select 42 as answer;`;
     help('^12-1^', rpr(result = m.resolve(probe)));
     if (T != null) {
-      T.eq(probe, SQL`select 42 as answer;`);
+      T.eq(result, SQL`select 42 as answer;`);
     }
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_macros_checks_for_leftovers = function(T, done) {
-    var DBay_sqlx, e, m, probe;
+    var DBay_sqlx;
     // T?.halt_on_error()
     ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
-    m = new DBay_sqlx();
-    probe = SQL`select
+    (function() {      //.........................................................................................................
+      var e, m, probe;
+      m = new DBay_sqlx();
+      probe = SQL`select
   @strange_thing()      as c1,
   @secret_power( 3, 2 ) as c2,
   @strange_thing        as c3;`;
-    debug('^79-1^', (function() {
-      try {
+      debug('^79-1^', (function() {
+        try {
+          return m.resolve(probe);
+        } catch (error1) {
+          e = error1;
+          return warn(reverse(e.message));
+        }
+      })());
+      return T != null ? T.throws(/unknown macro '@strange_thing'/, function() {
         return m.resolve(probe);
+      }) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var e, m, sqlx;
+      m = new DBay_sqlx();
+      m.declare(SQL`@secret_power( @a, @b ) = @power( @a, @b ) / @b;`);
+      sqlx = SQL`select @secret_power( 3, 2 ) as x;`;
+      debug('^79-1^', (function() {
+        try {
+          return m.resolve(sqlx);
+        } catch (error1) {
+          e = error1;
+          return warn(reverse(e.message));
+        }
+      })());
+      return T != null ? T.throws(/unknown macro '@power'/, function() {
+        return m.resolve(probe);
+      }) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_dont_allow_name_reuse_or_recursive_usage = function(T, done) {
+    var DBay_sqlx;
+    // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    (function() {
+      var e, m;
+      m = new DBay_sqlx();
+      try {
+        m.declare(SQL`@foo_1( @foo_1 ) = whatever;`);
+      } catch (error1) {
+        e = error1;
+        warn(reverse(e.message));
+      }
+      try {
+        return m.declare(SQL`@foo_2( @a, @a ) = whatever;`);
       } catch (error1) {
         e = error1;
         return warn(reverse(e.message));
       }
-    })());
-    if (T != null) {
-      T.throws(/found unresolved macros @secret_power, @strange_thing/, function() {
-        return m.resolve(probe);
-      });
-    }
+    })();
+    (function() {      // T?.throws /found unresolved macros @secret_power, @strange_thing/, -> m.resolve probe
+      var e, m;
+      m = new DBay_sqlx();
+      try {
+        m.declare(SQL`@a( @b ) = (a @b );`);
+      } catch (error1) {
+        e = error1;
+        warn(reverse(e.message));
+      }
+      try {
+        m.declare(SQL`@b( @a ) = (b @b );`);
+      } catch (error1) {
+        e = error1;
+        warn(reverse(e.message));
+      }
+      urge('^80-1^', m.resolve("@a( 'b' )"));
+      urge('^80-1^', m.resolve("@b( 'a' )"));
+      urge('^80-1^', m.resolve("@a( @b( 'a' ) )"));
+      return urge('^80-1^', m.resolve("@b( @a( 'b' ) )"));
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_macros_use_case_virtual_types = function(T, done) {
     /* NOTE using a 'generic' DB connection w/out implicit macro handling */
-    var DBay, DBay_sqlx, _, d, db, m, ref;
+    var DBay, DBay_sqlx, db, m;
     ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
     ({DBay} = require('../../../apps/dbay'));
     m = new DBay_sqlx();
@@ -230,11 +361,7 @@
     //.........................................................................................................
     m.declare(SQL`@id( @name )    = @name text    check ( @name regexp '^[a-z]{3}-[0-9]{2}' )`);
     m.declare(SQL`@month( @name ) = @name integer check ( @name between 1 and 12 )`);
-    ref = m._declarations;
-    for (_ in ref) {
-      d = ref[_];
-      debug('^14-1^', d);
-    }
+    // debug '^14-1^', d for _, d of m._declarations
     db(function() {
       var sql;
       sql = m.resolve(SQL`create table bookings (
@@ -311,19 +438,19 @@
     (() => {
       // @dbay_macros_use_case_virtual_types()
       // test @dbay_macros_use_case_virtual_types
-      this.dbay_macros_parameter_name_clashes();
-      // test @dbay_macros_parameter_name_clashes
-      // @dbay_macros_checks_for_leftovers()
-      // test @dbay_macros_checks_for_leftovers
-      return test(this);
+      // @dbay_macros_find_arguments()
+      // test @dbay_macros_find_arguments
+      // test @dbay_macros_works_without_any_declarations
+      this.dbay_macros_simple_resolution();
+      return test(this.dbay_macros_simple_resolution);
     })();
   }
 
-  // @dbay_sql_lexer()
-// @dbay_macros_find_arguments()
-// test @dbay_macros_find_arguments
-// @dbay_macros_function()
+  // @dbay_macros_function()
 // test @dbay_macros_function
+// @dbay_macros_checks_for_leftovers()
+// test @dbay_macros_checks_for_leftovers
+// test @
 
 }).call(this);
 
