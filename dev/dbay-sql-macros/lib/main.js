@@ -30,6 +30,31 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_regexen = function(T, done) {
+    var DBay_sqlx, m;
+    // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    m = new DBay_sqlx();
+    urge('^87-1^', m.cfg);
+    if (T != null) {
+      T.eq(m.cfg.prefix, '@');
+    }
+    if (T != null) {
+      T.eq(type_of(m.cfg.name_re), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(m.cfg._bare_name_re), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(m.cfg._name_paren_re), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(m.cfg._global_name_re), 'regex');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.dbay_macros_simple_resolution = function(T, done) {
     var DBay_sqlx, _test;
     // T?.halt_on_error()
@@ -91,10 +116,17 @@
     (function() {      //.........................................................................................................
       var m, sqlx;
       m = new DBay_sqlx();
-      // m.declare SQL"""@power( @a, @b ) = @a ** @b;"""
       m.declare(SQL`@secret_power( @a, @b ) = @power( @a, @b ) / @b;`);
       sqlx = SQL`select @secret_power( 3, 2 ) as x;`;
       return _test('^t#4^', m, sqlx, null, /xxx/);
+    })();
+    (function() {      //.........................................................................................................
+      var m, sqlx;
+      m = new DBay_sqlx();
+      m.declare(SQL`@power( @a, @b ) = ( @a ** @b );`);
+      m.declare(SQL`@secret_power( @a, @b ) = ( @power( @a, @b ) / @b );`);
+      sqlx = SQL`select @secret_power( @power( 1, 2 ), 3 ) as x;`;
+      return _test('^t#4^', m, sqlx, SQL`select ( ( ( 1 ** 2 ) / 2 ) ** 3 / 3 ) as x;`);
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -441,12 +473,13 @@
       // @dbay_macros_find_arguments()
       // test @dbay_macros_find_arguments
       // test @dbay_macros_works_without_any_declarations
-      this.dbay_macros_simple_resolution();
-      return test(this.dbay_macros_simple_resolution);
+      return test(this.dbay_macros_regexen);
     })();
   }
 
-  // @dbay_macros_function()
+  // @dbay_macros_simple_resolution()
+// test @dbay_macros_simple_resolution
+// @dbay_macros_function()
 // test @dbay_macros_function
 // @dbay_macros_checks_for_leftovers()
 // test @dbay_macros_checks_for_leftovers
