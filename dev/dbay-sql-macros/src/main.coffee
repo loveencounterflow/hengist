@@ -35,6 +35,20 @@ dtab                      = new Tbl { dba: null, }
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
+@dbay_macros_regexen = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  m     = new DBay_sqlx()
+  urge '^87-1^', m.cfg
+  T?.eq ( m.cfg.prefix                    ), '@'
+  T?.eq ( type_of m.cfg.name_re           ), 'regex'
+  T?.eq ( type_of m.cfg._bare_name_re     ), 'regex'
+  T?.eq ( type_of m.cfg._name_paren_re    ), 'regex'
+  T?.eq ( type_of m.cfg._global_name_re   ), 'regex'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @dbay_macros_simple_resolution = ( T, done ) ->
   # T?.halt_on_error()
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
@@ -74,10 +88,16 @@ dtab                      = new Tbl { dba: null, }
   #.........................................................................................................
   do ->
     m     = new DBay_sqlx()
-    # m.declare SQL"""@power( @a, @b ) = @a ** @b;"""
     m.declare SQL"""@secret_power( @a, @b ) = @power( @a, @b ) / @b;"""
     sqlx  = SQL"""select @secret_power( 3, 2 ) as x;"""
     _test '^t#4^', m, sqlx, null, /xxx/
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    m.declare SQL"""@power( @a, @b ) = ( @a ** @b );"""
+    m.declare SQL"""@secret_power( @a, @b ) = ( @power( @a, @b ) / @b );"""
+    sqlx  = SQL"""select @secret_power( @power( 1, 2 ), 3 ) as x;"""
+    _test '^t#4^', m, sqlx, SQL"""select ( ( ( 1 ** 2 ) / 2 ) ** 3 / 3 ) as x;"""
   #.........................................................................................................
   done?()
 
@@ -326,8 +346,9 @@ if require.main is module then do =>
   # @dbay_macros_find_arguments()
   # test @dbay_macros_find_arguments
   # test @dbay_macros_works_without_any_declarations
-  @dbay_macros_simple_resolution()
-  test @dbay_macros_simple_resolution
+  test @dbay_macros_regexen
+  # @dbay_macros_simple_resolution()
+  # test @dbay_macros_simple_resolution
   # @dbay_macros_function()
   # test @dbay_macros_function
   # @dbay_macros_checks_for_leftovers()
