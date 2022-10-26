@@ -104,7 +104,7 @@ dtab                      = new Tbl { dba: null, }
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@dbay_macros_function = ( T, done ) ->
+@dbay_macros_more_resolutions = ( T, done ) ->
   # T?.halt_on_error()
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
   db                = new DBay_sqlx()
@@ -351,8 +351,8 @@ if require.main is module then do =>
   test @dbay_macros_regexen
   # @dbay_macros_simple_resolution()
   # test @dbay_macros_simple_resolution
-  # @dbay_macros_function()
-  # test @dbay_macros_function
+  # @dbay_macros_more_resolutions()
+  # test @dbay_macros_more_resolutions
   # @dbay_macros_checks_for_leftovers()
   # test @dbay_macros_checks_for_leftovers
   # test @
