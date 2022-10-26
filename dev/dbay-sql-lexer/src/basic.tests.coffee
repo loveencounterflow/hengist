@@ -32,17 +32,17 @@ r                         = String.raw
 dtab                      = new Tbl { dba: null, }
 { DBay }                  = require '../../../apps/dbay'
 { SQL  }                  = DBay
+#-----------------------------------------------------------------------------------------------------------
+show = ( sql, tokens ) ->
+  info rpr sql
+  echo dtab._tabulate tokens
+  return tokens
 
 
 #-----------------------------------------------------------------------------------------------------------
 @dbay_sql_lexer = ( T, done ) ->
   lexer             = require '../../../apps/dbay-sql-lexer'
   info k for k in ( GUY.props.keys lexer ).sort()
-  #.........................................................................................................
-  show = ( sql, tokens ) ->
-    info rpr sql
-    echo dtab._tabulate tokens
-    return null
   #.........................................................................................................
   probes_and_matchers = [
     [ SQL"select * from my_table",          [
