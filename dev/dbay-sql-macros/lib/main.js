@@ -31,11 +31,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_macros_regexen = function(T, done) {
-    var DBay_sqlx, m;
+    var DBay_sqlx, _bare_name_re, _paren_name_re, m;
     // T?.halt_on_error()
     ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
     m = new DBay_sqlx();
-    urge('^87-1^', m.cfg);
+    ({_bare_name_re, _paren_name_re} = m.cfg);
+    urge('^87-1^', '_bare_name_re   ', _bare_name_re);
+    urge('^87-2^', '_paren_name_re  ', _paren_name_re);
+    // urge '^87-3^', '_global_name_re ', _global_name_re
     if (T != null) {
       T.eq(m.cfg.prefix, '@');
     }
@@ -43,14 +46,99 @@
       T.eq(type_of(m.cfg.name_re), 'regex');
     }
     if (T != null) {
-      T.eq(type_of(m.cfg._bare_name_re), 'regex');
+      T.eq(type_of(_bare_name_re), 'regex');
     }
     if (T != null) {
-      T.eq(type_of(m.cfg._name_paren_re), 'regex');
+      T.eq(type_of(_paren_name_re), 'regex');
     }
-    if (T != null) {
-      T.eq(type_of(m.cfg._global_name_re), 'regex');
-    }
+    (function() {      // T?.eq ( type_of _global_name_re   ), 'regex'
+      //.........................................................................................................
+      var match, result, sqlx;
+      sqlx = "foo @bar( baz @what's @that( @辻 oops @程(";
+      //.......................................................................................................
+      result = (function() {
+        var ref1, results;
+        ref1 = sqlx.matchAll(_bare_name_re);
+        results = [];
+        for (match of ref1) {
+          results.push({
+            index: match.index,
+            name: match[0]
+          });
+        }
+        return results;
+      })();
+      if (T != null) {
+        T.eq(result, [
+          {
+            index: 14,
+            name: '@what'
+          },
+          {
+            index: 29,
+            name: '@辻'
+          }
+        ]);
+      }
+      //.......................................................................................................
+      result = (function() {
+        var ref1, results;
+        ref1 = sqlx.matchAll(_paren_name_re);
+        results = [];
+        for (match of ref1) {
+          results.push({
+            index: match.index,
+            name: match[0]
+          });
+        }
+        return results;
+      })();
+      if (T != null) {
+        T.eq(result, [
+          {
+            index: 4,
+            name: '@bar'
+          },
+          {
+            index: 22,
+            name: '@that'
+          },
+          {
+            index: 37,
+            name: '@程'
+          }
+        ]);
+      }
+      //.......................................................................................................
+      return T != null ? T.eq(("辻".match(m.cfg.name_re)) != null, true) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_declarations = function(T, done) {
+    var DBay_sqlx;
+    // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    (function() {      //.........................................................................................................
+      var k, m, ref1, ref2;
+      m = new DBay_sqlx();
+      m.declare(`@secret_power( @a, @b ) = power( @a, @b ) / @b;`);
+      if (T != null) {
+        T.eq((function() {
+          var results;
+          results = [];
+          for (k in m._declarations) {
+            results.push(k);
+          }
+          return results;
+        })(), ['@secret_power']);
+      }
+      if (T != null) {
+        T.eq((ref1 = m._declarations['@secret_power']) != null ? ref1.body : void 0, `power( @a, @b ) / @b`);
+      }
+      return T != null ? T.eq((ref2 = m._declarations['@secret_power']) != null ? ref2.parameters : void 0, ['@a', '@b']) : void 0;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -62,21 +150,24 @@
     //.........................................................................................................
     _test = function(ref, m, probe, matcher, error) {
       var result;
+      help(ref, rpr(probe));
       try {
         if (error != null) {
-          return T != null ? T.throws(error, function() {
-            var e;
-            try {
-              return m.resolve(probe);
-            } catch (error1) {
-              e = error1;
-              warn(ref, reverse(e.message));
-              throw e;
-            }
-          }) : void 0;
+          if (T != null) {
+            T.throws(error, function() {
+              var e, result;
+              try {
+                return result = m.resolve(probe);
+              } catch (error1) {
+                e = error1;
+                warn(ref, reverse(e.message));
+                throw e;
+              }
+            });
+          }
+          return warn(ref, rpr(result));
         } else {
           result = m.resolve(probe);
-          help(ref, rpr(probe));
           if (result === matcher) {
             info(ref, rpr(result));
           } else {
@@ -92,10 +183,18 @@
     (function() {      //.........................................................................................................
       var m, sql, sqlx;
       m = new DBay_sqlx();
+      m.declare(SQL`@power( @a, @b ) = ( /* power */ @a ** @b );`);
+      sqlx = SQL`select @power( 3, 2 ) as x;`;
+      sql = SQL`select ( /* power */ 3 ** 2 ) as x;`;
+      return _test('^t#1^', m, sqlx, sql);
+    })();
+    (function() {      //.........................................................................................................
+      var m, sql, sqlx;
+      m = new DBay_sqlx();
       m.declare(SQL`@secret_power( @a, @b ) = power( @a, @b ) / @b;`);
       sqlx = SQL`select @secret_power( 3, 2 ) as x;`;
       sql = SQL`select power( 3, 2 ) / 2 as x;`;
-      return _test('^t#1^', m, sqlx, sql);
+      return _test('^t#2^', m, sqlx, sql);
     })();
     (function() {      //.........................................................................................................
       var m, sql, sqlx;
@@ -103,7 +202,7 @@
       m.declare(SQL`@hoax( @a ) = @a || '@a' || @a;`);
       sqlx = SQL`select @hoax( 'x' ) as hoax;`;
       sql = SQL`select 'x' || ''x'' || 'x' as hoax;`;
-      return _test('^t#2^', m, sqlx, sql);
+      return _test('^t#3^', m, sqlx, sql);
     })();
     (function() {      //.........................................................................................................
       var m, sql, sqlx;
@@ -111,28 +210,30 @@
       m.declare(SQL`@hoax( @a ) = @a || '\\@a' || @a;`);
       sqlx = SQL`select @hoax( 'x' ) as hoax;`;
       sql = SQL`select 'x' || '@a' || 'x' as hoax;`;
-      return _test('^t#3^', m, sqlx, sql);
+      return _test('^t#4^', m, sqlx, sql);
     })();
     (function() {      //.........................................................................................................
       var m, sqlx;
       m = new DBay_sqlx();
       m.declare(SQL`@secret_power( @a, @b ) = @power( @a, @b ) / @b;`);
       sqlx = SQL`select @secret_power( 3, 2 ) as x;`;
-      return _test('^t#4^', m, sqlx, null, /xxx/);
+      return _test('^t#5^', m, sqlx, null, /unknown macro '@power'/);
     })();
     (function() {      //.........................................................................................................
       var m, sqlx;
       m = new DBay_sqlx();
-      m.declare(SQL`@power( @a, @b ) = ( @a ** @b );`);
-      m.declare(SQL`@secret_power( @a, @b ) = ( @power( @a, @b ) / @b );`);
-      sqlx = SQL`select @secret_power( @power( 1, 2 ), 3 ) as x;`;
-      return _test('^t#4^', m, sqlx, SQL`select ( ( ( 1 ** 2 ) / 2 ) ** 3 / 3 ) as x;`);
+      m.declare(SQL`@add(     @a, @b ) = /*\\@add*/( @a + @b );`);
+      m.declare(SQL`@power(   @a, @b ) = /*\\@power*/( @a ** @b );`);
+      m.declare(SQL`@secret(  @a, @b ) = /*\\@secret*/( @power( @a, @b ) / @b );`);
+      sqlx = SQL`select @secret( @add( 1, 2 ), 3 ) as x;`;
+      // _test '^t#6^', m, sqlx, SQL"""select /*@secret*/( /*@power*/( /*@add*/( 1 + 2 ) ** 3 ) / 3 ) as x;"""
+      return m.resolve(sqlx);
     })();
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.dbay_macros_function = function(T, done) {
+  this.dbay_macros_more_resolutions = function(T, done) {
     var DBay_sqlx, _test, db;
     // T?.halt_on_error()
     ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
@@ -184,14 +285,6 @@
     })();
     (function() {      //.........................................................................................................
       var sql, sqlx;
-      sqlx = SQL`create table numbers (
-  n @intnn primary key );`;
-      sql = SQL`create table numbers (
-  n integer not null primary key );`;
-      return _test(sqlx, sql);
-    })();
-    (function() {      //.........................................................................................................
-      var sql, sqlx;
       sqlx = SQL`select @concat( 'a', 'b' ) as c1, @concat( 'c', 'd' ) as c2;`;
       sql = SQL`select 'a' || 'b' as c1, 'c' || 'd' as c2;`;
       return _test(sqlx, sql);
@@ -220,14 +313,46 @@
     _test = function(probe, matcher) {
       var result;
       result = db._find_arguments(probe);
-      help('^43-1^', probe);
+      // help '^43-1^', probe
       urge('^43-1^', result);
       return T != null ? T.eq(result, matcher) : void 0;
     };
-    _test(SQL`( 3, 2 )`, ['3', '2']);
-    _test(SQL`( 3, f( 2, 4 ) )`, ['3', 'f( 2, 4 )']);
-    _test(SQL`( 3, f( 2, @g( 4, 5, 6 ) ) )`, ['3', 'f( 2, @g( 4, 5, 6 ) )']);
-    _test(SQL`( 3, 2, "strange,name" )`, ['3', '2', '"strange,name"']);
+    _test(SQL`( 3, 2 )`, {
+      values: ['3', '2'],
+      stop_idx: 8
+    });
+    _test(SQL`( 3, f( 2, 4 ) )`, {
+      values: ['3', 'f( 2, 4 )'],
+      stop_idx: 16
+    });
+    _test(SQL`( 3, f( 2, @g( 4, 5, 6 ) ) )`, {
+      values: ['3', 'f( 2, @g( 4, 5, 6 ) )'],
+      stop_idx: 28
+    });
+    _test(SQL`( 3, 2, "strange,name" )`, {
+      values: ['3', '2', '"strange,name"'],
+      stop_idx: 24
+    });
+    _test(SQL`(           )`, {
+      values: [],
+      stop_idx: 13
+    });
+    _test(SQL`()`, {
+      values: [],
+      stop_idx: 2
+    });
+    _test(SQL`( @power( 1, 2 ), 3 ) as x;`, {
+      values: ['@power( 1, 2 )', '3'],
+      stop_idx: 21
+    });
+    _test(SQL`( @power( 1, @f( 2, 3, @g( 4 ) ) ), 5 ) as x;`, {
+      values: ['@power( 1, @f( 2, 3, @g( 4 ) ) )', '5'],
+      stop_idx: 39
+    });
+    _test(SQL`( /*@add*/( 1 + 2 ), 3 ) / 3 )`, {
+      values: ['/*@add*/( 1 + 2 )', '3'],
+      stop_idx: 24
+    });
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -465,6 +590,119 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this._dbay_macros_demo_boundaries = function(T, done) {
+    /* see [*Regex Boundaries and Delimiters—Standard and
+     Advanced*](https://www.rexegg.com/regex-boundaries.html) */
+    var probe_2, probe_3;
+    probe_2 = "catfoo22cat1bar5cat2bazcat";
+    probe_3 = "cat dog cat bird cat";
+    (function() {      //.........................................................................................................
+      var A1, A1_re, cat_re, match, ref1, ref2, results;
+      whisper('1 ——————————————————————————————————————————————————————————————————————————————————————————————');
+      info('^82-1^', "DIY Boundary: between a letter and a digit");
+      A1_re = /(?:(?:(?<=^)|(?<![a-z]))(?=[a-z])|(?<=[a-z])(?:(?=$)|(?![a-z])))/;
+      A1 = A1_re.source;
+      cat_re = RegExp(`${A1}cat${A1}`, "g");
+      help('^82-2^', cat_re);
+      info('^82-2^', probe_2);
+      ref1 = probe_2.matchAll(cat_re);
+      for (match of ref1) {
+        urge('^82-3^', match);
+      }
+      info('^82-2^', probe_3);
+      ref2 = probe_3.matchAll(cat_re);
+      results = [];
+      for (match of ref2) {
+        results.push(urge('^82-3^', match));
+      }
+      return results;
+    })();
+    return;
+    (function() {      //.........................................................................................................
+      var match, ref1, results, word_re;
+      whisper('3 ——————————————————————————————————————————————————————————————————————————————————————————————');
+      info('^82-7^', "should match `cat` at SOT or after a digit");
+      //   (?:     (?<= ^   |  \d        )   (?= [a-z] ) )/
+      word_re = /(?:(?:(?<=^)|(?<![a-z]))(?=[a-z]))cat/g;
+      help('^82-8^', word_re);
+      ref1 = probe_2.matchAll(word_re);
+      results = [];
+      for (match of ref1) {
+        results.push(urge('^82-9^', match));
+      }
+      return results;
+    })();
+    (function() {      //.........................................................................................................
+      var match, ref1, results, word_re;
+      whisper('4 ——————————————————————————————————————————————————————————————————————————————————————————————');
+      info('^82-10^', "should match `cat` at EOT or before a digit");
+      word_re = /cat(?:(?<=[a-z])(?:(?=$)|(?![a-z])))/g;
+      help('^82-11^', word_re);
+      ref1 = probe_2.matchAll(word_re);
+      results = [];
+      for (match of ref1) {
+        results.push(urge('^82-12^', match));
+      }
+      return results;
+    })();
+    (function() {      //.........................................................................................................
+      var match, ref1, results, word_re;
+      whisper('5 ——————————————————————————————————————————————————————————————————————————————————————————————');
+      info('^82-13^', "should match `cat` at SOT or after a digit");
+      word_re = /(?:(?:(?:(?<=^)|(?<![a-z]))(?=[a-z]))|(?:(?<=[a-z])(?:(?=$)|(?![a-z]))))cat/g;
+      help('^82-14^', word_re);
+      ref1 = probe_2.matchAll(word_re);
+      results = [];
+      for (match of ref1) {
+        results.push(urge('^82-15^', match));
+      }
+      return results;
+    })();
+    (function() {      //.........................................................................................................
+      var match, ref1, results, word_re;
+      whisper('6 ——————————————————————————————————————————————————————————————————————————————————————————————');
+      info('^82-16^', "should match `cat` at EOT or before a digit");
+      word_re = /cat(?:(?:(?:(?<=^)|(?<![a-z]))(?=[a-z]))|(?:(?<=[a-z])(?:(?=$)|(?![a-z]))))/g;
+      help('^82-17^', word_re);
+      ref1 = probe_2.matchAll(word_re);
+      results = [];
+      for (match of ref1) {
+        results.push(urge('^82-18^', match));
+      }
+      return results;
+    })();
+    (function() {      //.........................................................................................................
+      var match, ref1, results, word_re;
+      whisper('7 ——————————————————————————————————————————————————————————————————————————————————————————————');
+      info('^82-19^', "should match `cat` ( at SOT or after a digit ) or ( at EOT or before a digit )");
+      word_re = /(?:(?:(?:(?<=^)|(?<![a-z]))(?=[a-z]))|(?:(?<=[a-z])(?:(?=$)|(?![a-z]))))cat(?:(?:(?:(?<=^)|(?<![a-z]))(?=[a-z]))|(?:(?<=[a-z])(?:(?=$)|(?![a-z]))))/g;
+      help('^82-20^', word_re);
+      ref1 = probe_2.matchAll(word_re);
+      results = [];
+      for (match of ref1) {
+        results.push(urge('^82-21^', match));
+      }
+      return results;
+    })();
+    (function() {      //.........................................................................................................
+      var ANA, ANA_re, cat_re, match, ref1, results;
+      whisper('8 ——————————————————————————————————————————————————————————————————————————————————————————————');
+      info('^82-22^', "should match `cat` ( at SOT or after a digit ) or ( at EOT or before a digit )");
+      ANA_re = /(?:(?:(?:(?<=^)|(?<![a-z]))(?=[a-z]))|(?:(?<=[a-z])(?:(?=$)|(?![a-z]))))/g;
+      ANA = ANA_re.source;
+      cat_re = RegExp(`${ANA}cat${ANA}`, "g");
+      help('^82-23^', cat_re);
+      ref1 = probe_2.matchAll(cat_re);
+      results = [];
+      for (match of ref1) {
+        results.push(urge('^82-24^', match));
+      }
+      return results;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -473,17 +711,19 @@
       // @dbay_macros_find_arguments()
       // test @dbay_macros_find_arguments
       // test @dbay_macros_works_without_any_declarations
-      return test(this.dbay_macros_regexen);
+      // test @dbay_macros_regexen
+      // test @dbay_macros_declarations
+      // @dbay_macros_simple_resolution()
+      // test @dbay_macros_simple_resolution
+      // @dbay_macros_more_resolutions()
+      // test @dbay_macros_more_resolutions
+      // @dbay_macros_checks_for_leftovers()
+      // test @dbay_macros_checks_for_leftovers
+      return this._dbay_macros_demo_boundaries();
     })();
   }
 
-  // @dbay_macros_simple_resolution()
-// test @dbay_macros_simple_resolution
-// @dbay_macros_function()
-// test @dbay_macros_function
-// @dbay_macros_checks_for_leftovers()
-// test @dbay_macros_checks_for_leftovers
-// test @
+  // test @
 
 }).call(this);
 

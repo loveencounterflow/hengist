@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var DBay, GUY, PATH, SQL, Tbl, alert, debug, dtab, echo, equals, help, info, inspect, isa, log, plain, praise, r, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var DBay, GUY, PATH, SQL, Tbl, alert, debug, dtab, echo, equals, help, info, inspect, isa, log, plain, praise, r, rpr, show, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -33,20 +33,21 @@
   ({SQL} = DBay);
 
   //-----------------------------------------------------------------------------------------------------------
+  show = function(sql, tokens) {
+    info(rpr(sql));
+    echo(dtab._tabulate(tokens));
+    return tokens;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.dbay_sql_lexer = async function(T, done) {
-    var error, i, j, k, len, len1, lexer, matcher, probe, probes_and_matchers, ref, show;
+    var error, i, j, k, len, len1, lexer, matcher, probe, probes_and_matchers, ref;
     lexer = require('../../../apps/dbay-sql-lexer');
     ref = (GUY.props.keys(lexer)).sort();
     for (i = 0, len = ref.length; i < len; i++) {
       k = ref[i];
       info(k);
     }
-    //.........................................................................................................
-    show = function(sql, tokens) {
-      info(rpr(sql));
-      echo(dtab._tabulate(tokens));
-      return null;
-    };
     //.........................................................................................................
     probes_and_matchers = [
       [
@@ -426,57 +427,18 @@
         null
       ],
       [
-        SQL`'a' "b" [c] \`d\` {e}`,
-        [
-          {
-            type: 'string',
-            text: 'a',
-            idx: 0
-          },
-          {
-            type: 'quoted_identifier',
-            text: 'b',
-            idx: 4
-          },
-          {
-            type: 'unknown',
-            text: '[',
-            idx: 8
-          },
-          {
-            type: 'identifier',
-            text: 'c',
-            idx: 9
-          },
-          {
-            type: 'unknown',
-            text: ']',
-            idx: 10
-          },
-          {
-            type: 'identifier',
-            text: 'd',
-            idx: 12
-          },
-          {
-            type: 'unknown',
-            text: '{',
-            idx: 16
-          },
-          {
-            type: 'identifier',
-            text: 'e',
-            idx: 17
-          },
-          {
-            type: 'unknown',
-            text: '}',
-            idx: 18
-          }
-        ],
-        null
-      ],
-      [
+        /* TAINT reactivate */
+        // [ SQL"""'a' "b" [c] `d` {e}""",         [
+        //   { type: 'string',             text: 'a', idx: 0 },
+        //   { type: 'quoted_identifier',  text: 'b', idx: 4 },
+        //   { type: 'unknown',            text: '[', idx: 8 },
+        //   { type: 'identifier',         text: 'c', idx: 9 },
+        //   { type: 'unknown',            text: ']', idx: 10 },
+        //   { type: 'identifier',         text: 'd', idx: 12 },
+        //   { type: 'unknown',            text: '{', idx: 16 },
+        //   { type: 'identifier',         text: 'e', idx: 17 },
+        //   { type: 'unknown',            text: '}', idx: 18 },
+        //   ], null ]
         SQL`select * from t where t.a between 0 and 1;`,
         [
           {
@@ -824,6 +786,54 @@
           return resolve(result);
         });
       });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_sql_lexer_recognizes_comments = function(T, done) {
+    var lexer, sqlx;
+    lexer = require('../../../apps/dbay-sql-lexer');
+    //.........................................................................................................
+    sqlx = SQL`foobar -- whatever`;
+    if (T != null) {
+      T.eq(show(sqlx, lexer.tokenize(sqlx)), [
+        {
+          type: 'identifier',
+          text: 'foobar',
+          idx: 0
+        },
+        {
+          type: 'eolcomment',
+          text: '--',
+          idx: 7
+        },
+        {
+          type: 'identifier',
+          text: 'whatever',
+          idx: 10
+        }
+      ]);
+    }
+    sqlx = SQL`foo /* whatever */ bar`;
+    if (T != null) {
+      T.eq(show(sqlx, lexer.tokenize(sqlx)), [
+        {
+          type: 'identifier',
+          text: 'foo',
+          idx: 0
+        },
+        {
+          type: 'blockcomment',
+          text: '/* whatever */',
+          idx: 4
+        },
+        {
+          type: 'identifier',
+          text: 'bar',
+          idx: 19
+        }
+      ]);
     }
     return typeof done === "function" ? done() : void 0;
   };
