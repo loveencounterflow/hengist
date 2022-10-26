@@ -72,17 +72,18 @@ show = ( sql, tokens ) ->
     [ SQL"select 'helo', 'world''';",       [ { type: 'select', text: 'select', idx: 0 }, { type: 'string', text: 'helo', idx: 7 }, { type: 'comma', text: ',', idx: 13 }, { type: 'string', text: "world'", idx: 15 }, { type: 'semicolon', text: ';', idx: 24 }, ], null ]
     [ SQL"select 'helo', 'world'''",        [ { type: 'select', text: 'select', idx: 0 }, { type: 'string', text: 'helo', idx: 7 }, { type: 'comma', text: ',', idx: 13 }, { type: 'string', text: "world'", idx: 15 }, ], null ]
     [ SQL"this is any text $%§'§",          [ { type: 'identifier', text: 'this', idx: 0 }, { type: 'operator', text: 'is', idx: 5 }, { type: 'sub_select_op', text: 'any', idx: 8 }, { type: 'identifier', text: 'text', idx: 12 }, { type: 'unknown', text: '$', idx: 17 }, { type: 'unknown', text: '%', idx: 18 }, { type: 'unknown', text: '§', idx: 19 }, { type: 'unknown', text: "'", idx: 20 }, { type: 'unknown', text: '§', idx: 21 }, ], null ]
-    [ SQL"""'a' "b" [c] `d` {e}""",         [
-      { type: 'string',             text: 'a', idx: 0 },
-      { type: 'quoted_identifier',  text: 'b', idx: 4 },
-      { type: 'unknown',            text: '[', idx: 8 },
-      { type: 'identifier',         text: 'c', idx: 9 },
-      { type: 'unknown',            text: ']', idx: 10 },
-      { type: 'identifier',         text: 'd', idx: 12 },
-      { type: 'unknown',            text: '{', idx: 16 },
-      { type: 'identifier',         text: 'e', idx: 17 },
-      { type: 'unknown',            text: '}', idx: 18 },
-      ], null ]
+    ### TAINT reactivate ###
+    # [ SQL"""'a' "b" [c] `d` {e}""",         [
+    #   { type: 'string',             text: 'a', idx: 0 },
+    #   { type: 'quoted_identifier',  text: 'b', idx: 4 },
+    #   { type: 'unknown',            text: '[', idx: 8 },
+    #   { type: 'identifier',         text: 'c', idx: 9 },
+    #   { type: 'unknown',            text: ']', idx: 10 },
+    #   { type: 'identifier',         text: 'd', idx: 12 },
+    #   { type: 'unknown',            text: '{', idx: 16 },
+    #   { type: 'identifier',         text: 'e', idx: 17 },
+    #   { type: 'unknown',            text: '}', idx: 18 },
+    #   ], null ]
     [ SQL"select * from t where t.a between 0 and 1;", [
       { type: 'select',       text: 'select',   idx: 0 },
       { type: 'star',         text: '*',        idx: 7 },
