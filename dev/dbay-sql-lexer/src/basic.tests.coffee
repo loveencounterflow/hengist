@@ -160,6 +160,17 @@ show = ( sql, tokens ) ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@dbay_sql_lexer_recognizes_comments = ( T, done ) ->
+  lexer             = require '../../../apps/dbay-sql-lexer'
+  #.........................................................................................................
+  sqlx = SQL"foobar -- whatever";     T?.eq ( show sqlx, lexer.tokenize sqlx ), [ { type: 'identifier', text: 'foobar', idx: 0 }, { type: 'eolcomment', text: '--', idx: 7 }, { type: 'identifier', text: 'whatever', idx: 10 } ]
+  sqlx = SQL"foo /* whatever */ bar"; T?.eq ( show sqlx, lexer.tokenize sqlx ), [ { type: 'identifier', text: 'foo', idx: 0 }, { type: 'blockcomment', text: '/* whatever */', idx: 4 }, { type: 'identifier', text: 'bar', idx: 19 } ]
+  #.........................................................................................................
+  done?()
+
+
+
 
 ############################################################################################################
 if require.main is module then do =>
