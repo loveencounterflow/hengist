@@ -94,10 +94,12 @@ dtab                      = new Tbl { dba: null, }
   #.........................................................................................................
   do ->
     m     = new DBay_sqlx()
-    m.declare SQL"""@power( @a, @b ) = ( @a ** @b );"""
-    m.declare SQL"""@secret_power( @a, @b ) = ( @power( @a, @b ) / @b );"""
-    sqlx  = SQL"""select @secret_power( @power( 1, 2 ), 3 ) as x;"""
-    _test '^t#4^', m, sqlx, SQL"""select ( ( ( 1 ** 2 ) / 2 ) ** 3 / 3 ) as x;"""
+    m.declare SQL"""@add(     @a, @b ) = /*\\@add*/( @a + @b );"""
+    m.declare SQL"""@power(   @a, @b ) = /*\\@power*/( @a ** @b );"""
+    m.declare SQL"""@secret(  @a, @b ) = /*\\@secret*/( @power( @a, @b ) / @b );"""
+    sqlx  = SQL"""select @secret( @add( 1, 2 ), 3 ) as x;"""
+    # _test '^t#6^', m, sqlx, SQL"""select /*@secret*/( /*@power*/( /*@add*/( 1 + 2 ) ** 3 ) / 3 ) as x;"""
+    m.resolve sqlx
   #.........................................................................................................
   done?()
 
