@@ -70,27 +70,27 @@ dtab                      = new Tbl { dba: null, }
     m.declare SQL"""@secret_power( @a, @b ) = power( @a, @b ) / @b;"""
     sqlx  = SQL"""select @secret_power( 3, 2 ) as x;"""
     sql   = SQL"""select power( 3, 2 ) / 2 as x;"""
-    _test '^t#1^', m, sqlx, sql
+    _test '^t#2^', m, sqlx, sql
   #.........................................................................................................
   do ->
     m     = new DBay_sqlx()
     m.declare SQL"""@hoax( @a ) = @a || '@a' || @a;"""
     sqlx  = SQL"""select @hoax( 'x' ) as hoax;"""
     sql   = SQL"""select 'x' || ''x'' || 'x' as hoax;"""
-    _test '^t#2^', m, sqlx, sql
+    _test '^t#3^', m, sqlx, sql
   #.........................................................................................................
   do ->
     m     = new DBay_sqlx()
     m.declare SQL"""@hoax( @a ) = @a || '\\@a' || @a;"""
     sqlx  = SQL"""select @hoax( 'x' ) as hoax;"""
     sql   = SQL"""select 'x' || '@a' || 'x' as hoax;"""
-    _test '^t#3^', m, sqlx, sql
+    _test '^t#4^', m, sqlx, sql
   #.........................................................................................................
   do ->
     m     = new DBay_sqlx()
     m.declare SQL"""@secret_power( @a, @b ) = @power( @a, @b ) / @b;"""
     sqlx  = SQL"""select @secret_power( 3, 2 ) as x;"""
-    _test '^t#4^', m, sqlx, null, /xxx/
+    _test '^t#5^', m, sqlx, null, /unknown macro '@power'/
   #.........................................................................................................
   do ->
     m     = new DBay_sqlx()
