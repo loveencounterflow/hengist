@@ -39,12 +39,41 @@ dtab                      = new Tbl { dba: null, }
   # T?.halt_on_error()
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
   m     = new DBay_sqlx()
-  urge '^87-1^', m.cfg
-  T?.eq ( m.cfg.prefix                    ), '@'
-  T?.eq ( type_of m.cfg.name_re           ), 'regex'
-  T?.eq ( type_of m.cfg._bare_name_re     ), 'regex'
-  T?.eq ( type_of m.cfg._name_paren_re    ), 'regex'
-  T?.eq ( type_of m.cfg._global_name_re   ), 'regex'
+  { _bare_name_re
+    _paren_name_re }  = m.cfg
+  urge '^87-1^', '_bare_name_re   ', _bare_name_re
+  urge '^87-2^', '_paren_name_re  ', _paren_name_re
+  # urge '^87-3^', '_global_name_re ', _global_name_re
+  T?.eq ( m.cfg.prefix              ), '@'
+  T?.eq ( type_of m.cfg.name_re     ), 'regex'
+  T?.eq ( type_of _bare_name_re     ), 'regex'
+  T?.eq ( type_of _paren_name_re    ), 'regex'
+  # T?.eq ( type_of _global_name_re   ), 'regex'
+  #.........................................................................................................
+  do ->
+    sqlx  = "foo @bar( baz @what's @that( @辻 oops @程("
+    #.......................................................................................................
+    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll _bare_name_re   )
+    T?.eq result, [ { index: 14, name: '@what' }, { index: 29, name: '@辻' }, ]
+    #.......................................................................................................
+    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll _paren_name_re  )
+    T?.eq result, [ { index: 4, name: '@bar' }, { index: 22, name: '@that' }, { index: 37, name: '@程' }, ]
+    #.......................................................................................................
+    T?.eq ( "辻".match m.cfg.name_re )?, true
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dbay_macros_declarations = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    m.declare """@secret_power( @a, @b ) = power( @a, @b ) / @b;"""
+    T?.eq ( k for k of m._declarations ),                 [ '@secret_power', ]
+    T?.eq m._declarations[ '@secret_power' ]?.body,       """power( @a, @b ) / @b"""
+    T?.eq m._declarations[ '@secret_power' ]?.parameters, [ '@a', '@b' ]
   #.........................................................................................................
   done?()
 
@@ -54,16 +83,24 @@ dtab                      = new Tbl { dba: null, }
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
   #.........................................................................................................
   _test = ( ref, m, probe, matcher, error ) ->
+    help ref, rpr probe
     try
       if error?
-        T?.throws error, -> try m.resolve probe catch e then warn ref, reverse e.message; throw e
+        T?.throws error, -> try result = m.resolve probe catch e then warn ref, reverse e.message; throw e
+        warn ref, rpr result
       else
         result = m.resolve probe
-        help ref, rpr probe
         if result is matcher then ( info ref, rpr result ) else ( warn ref, rpr result )
         T?.eq result, matcher
     catch error
       T?.eq "ERROR #{ref}", "#{error.message}\n#{rpr probe}"
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    m.declare SQL"""@power( @a, @b ) = ( /* power */ @a ** @b );"""
+    sqlx  = SQL"""select @power( 3, 2 ) as x;"""
+    sql   = SQL"""select ( /* power */ 3 ** 2 ) as x;"""
+    _test '^t#1^', m, sqlx, sql
   #.........................................................................................................
   do ->
     m     = new DBay_sqlx()
@@ -149,15 +186,6 @@ dtab                      = new Tbl { dba: null, }
     _test sqlx, sql
   #.........................................................................................................
   do ->
-    sqlx  = SQL"""
-      create table numbers (
-        n @intnn primary key );"""
-    sql   = SQL"""
-      create table numbers (
-        n integer not null primary key );"""
-    _test sqlx, sql
-  #.........................................................................................................
-  do ->
     sqlx  = SQL"""select @concat( 'a', 'b' ) as c1, @concat( 'c', 'd' ) as c2;"""
     sql   = SQL"""select 'a' || 'b' as c1, 'c' || 'd' as c2;"""
     _test sqlx, sql
@@ -181,16 +209,19 @@ dtab                      = new Tbl { dba: null, }
   db                = new DBay_sqlx()
   _test             = ( probe, matcher ) ->
     result = db._find_arguments probe
-    help '^43-1^', probe
+    # help '^43-1^', probe
     urge '^43-1^', result
     T?.eq result, matcher
-  _test SQL"""( 3, 2 )""",                      [ '3', '2', ]
-  _test SQL"""( 3, f( 2, 4 ) )""",              [ '3', 'f( 2, 4 )' ]
-  _test SQL"""( 3, f( 2, @g( 4, 5, 6 ) ) )""",  [ '3', 'f( 2, @g( 4, 5, 6 ) )' ]
-  _test SQL"""( 3, 2, "strange,name" )""",      [ '3', '2', '"strange,name"' ]
-  # _test SQL"""           """,                 []
+  _test SQL"""( 3, 2 )""",                                      { values: [ '3', '2' ], stop_idx: 8 }
+  _test SQL"""( 3, f( 2, 4 ) )""",                              { values: [ '3', 'f( 2, 4 )' ], stop_idx: 16 }
+  _test SQL"""( 3, f( 2, @g( 4, 5, 6 ) ) )""",                  { values: [ '3', 'f( 2, @g( 4, 5, 6 ) )' ], stop_idx: 28 }
+  _test SQL"""( 3, 2, "strange,name" )""",                      { values: [ '3', '2', '"strange,name"' ], stop_idx: 24 }
+  _test SQL"""(           )""",                                 { values: [], stop_idx: 13 }
+  _test SQL"""()""",                                            { values: [], stop_idx: 2 }
+  _test SQL"""( @power( 1, 2 ), 3 ) as x;""",                   { values: [ '@power( 1, 2 )', '3' ], stop_idx: 21 }
+  _test SQL"""( @power( 1, @f( 2, 3, @g( 4 ) ) ), 5 ) as x;""", { values: [ '@power( 1, @f( 2, 3, @g( 4 ) ) )', '5' ], stop_idx: 39 }
+  _test SQL"""( /*@add*/( 1 + 2 ), 3 ) / 3 )""",                { values: [ '/*@add*/( 1 + 2 )', '3' ], stop_idx: 24 }
   done?()
-
 
 #-----------------------------------------------------------------------------------------------------------
 @dbay_macros_parameter_name_clashes = ( T, done ) ->
