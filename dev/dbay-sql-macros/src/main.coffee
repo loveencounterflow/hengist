@@ -371,6 +371,122 @@ dtab                      = new Tbl { dba: null, }
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@_dbay_macros_demo_boundaries = ( T, done ) ->
+  ### see [*Regex Boundaries and Delimiters—Standard and
+  Advanced*](https://www.rexegg.com/regex-boundaries.html) ###
+  probe_2 = "catfoo22cat1bar5cat2bazcat"
+  probe_3 = "cat dog cat bird cat"
+  #.........................................................................................................
+  do ->
+    whisper '1 ——————————————————————————————————————————————————————————————————————————————————————————————'
+    info '^82-1^', "DIY Boundary: between a letter and a digit"
+    A1_re   = ///
+                  (?:
+                    (?: (?<= ^ ) | (?<! [a-z] ) )
+                    (?= [a-z]   )
+                    |
+                    (?<= [a-z] )
+                    (?: (?= $ ) | (?! [a-z] ) )
+                    )
+                ///
+    A1      = A1_re.source
+    cat_re  = /// #{A1} cat #{A1} ///g
+    help '^82-2^', cat_re
+    info '^82-2^', probe_2
+    urge '^82-3^', match for match from probe_2.matchAll cat_re
+    info '^82-2^', probe_3
+    urge '^82-3^', match for match from probe_3.matchAll cat_re
+
+  return
+  #.........................................................................................................
+  do ->
+    whisper '3 ——————————————————————————————————————————————————————————————————————————————————————————————'
+    info '^82-7^', "should match `cat` at SOT or after a digit"
+              #   (?:     (?<= ^   |  \d        )   (?= [a-z] ) )/
+    word_re = /// (?: (?: (?<= ^ ) | (?<! [a-z] ) ) (?= [a-z] ) ) cat ///g
+    help '^82-8^', word_re
+    urge '^82-9^', match for match from probe_2.matchAll word_re
+  #.........................................................................................................
+  do ->
+    whisper '4 ——————————————————————————————————————————————————————————————————————————————————————————————'
+    info '^82-10^', "should match `cat` at EOT or before a digit"
+    word_re = /// cat (?: (?<= [a-z] ) (?: (?= $ ) | (?! [a-z] ) ) ) ///g
+    help '^82-11^', word_re
+    urge '^82-12^', match for match from probe_2.matchAll word_re
+  #.........................................................................................................
+  do ->
+    whisper '5 ——————————————————————————————————————————————————————————————————————————————————————————————'
+    info '^82-13^', "should match `cat` at SOT or after a digit"
+    word_re = ///
+                  (?:
+                    (?: (?: (?<= ^ ) | (?<! [a-z] ) ) (?= [a-z] ) )
+                    |
+                    (?: (?<= [a-z] ) (?: (?= $ ) | (?! [a-z] ) ) )
+                    )
+                  cat
+                    ///g
+    help '^82-14^', word_re
+    urge '^82-15^', match for match from probe_2.matchAll word_re
+  #.........................................................................................................
+  do ->
+    whisper '6 ——————————————————————————————————————————————————————————————————————————————————————————————'
+    info '^82-16^', "should match `cat` at EOT or before a digit"
+    word_re = /// cat
+                    (?:
+                      (?: (?: (?<= ^ ) | (?<! [a-z] ) ) (?= [a-z] ) )
+                      |
+                      (?: (?<= [a-z] ) (?: (?= $ ) | (?! [a-z] ) ) )
+                      )
+                    ///g
+    help '^82-17^', word_re
+    urge '^82-18^', match for match from probe_2.matchAll word_re
+  #.........................................................................................................
+  do ->
+    whisper '7 ——————————————————————————————————————————————————————————————————————————————————————————————'
+    info '^82-19^', "should match `cat` ( at SOT or after a digit ) or ( at EOT or before a digit )"
+    word_re = ///
+                  (?:
+                    (?: (?: (?<= ^ ) | (?<! [a-z] ) ) (?= [a-z] ) )
+                    |
+                    (?: (?<= [a-z] ) (?: (?= $ ) | (?! [a-z] ) ) )
+                    )
+                  cat
+                  (?:
+                    (?: (?: (?<= ^ ) | (?<! [a-z] ) ) (?= [a-z] ) )
+                    |
+                    (?: (?<= [a-z] ) (?: (?= $ ) | (?! [a-z] ) ) )
+                    )
+                    ///g
+    help '^82-20^', word_re
+    urge '^82-21^', match for match from probe_2.matchAll word_re
+  #.........................................................................................................
+  do ->
+    whisper '8 ——————————————————————————————————————————————————————————————————————————————————————————————'
+    info '^82-22^', "should match `cat` ( at SOT or after a digit ) or ( at EOT or before a digit )"
+    ANA_re  = /// (?: (?: (?: (?<= ^ ) | (?<! [a-z] ) ) (?= [a-z] ) ) | (?: (?<= [a-z] ) (?: (?= $ ) | (?! [a-z] ) ) ) ) ///g
+    ANA     = ANA_re.source
+    cat_re  = /// #{ANA} cat #{ANA} ///g
+    help '^82-23^', cat_re
+    urge '^82-24^', match for match from probe_2.matchAll cat_re
+  # #.........................................................................................................
+  # do ->
+  #   whisper '9 ——————————————————————————————————————————————————————————————————————————————————————————————'
+  #   new_boundary = ( chrclass ) ->
+  #     #   (?: (?<=^ |\d       ) (?= [a-z]        ) | (?<= [a-z]       ) (?= $ | \d ) )
+  #     /// (?: (?= #{chrclass} ) (?<! #{chrclass} ) | (?<= #{chrclass} ) (?! #{chrclass} ) ) ///
+  #   LB_re   = new_boundary '[a-zA-Z]'
+  #   LB      = LB_re.source
+  #   # word_re = /// #{LB} (?<word> .*? ) #{LB} ///g
+  #   word_re = /// #{LB} cat #{LB} ///g
+  #   help '^82-25^', word_re
+  #   urge '^82-26^', match for match from probe_1.matchAll word_re
+  #   nr_re   = /// #{LB} \d+ #{LB} ///g
+  #   help '^82-27^', nr_re
+  #   urge '^82-28^', match for match from probe_1.matchAll nr_re
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
@@ -379,13 +495,15 @@ if require.main is module then do =>
   # @dbay_macros_find_arguments()
   # test @dbay_macros_find_arguments
   # test @dbay_macros_works_without_any_declarations
-  test @dbay_macros_regexen
+  # test @dbay_macros_regexen
+  # test @dbay_macros_declarations
   # @dbay_macros_simple_resolution()
   # test @dbay_macros_simple_resolution
   # @dbay_macros_more_resolutions()
   # test @dbay_macros_more_resolutions
   # @dbay_macros_checks_for_leftovers()
   # test @dbay_macros_checks_for_leftovers
+  @_dbay_macros_demo_boundaries()
   # test @
 
 
