@@ -349,13 +349,15 @@ dtab                      = new Tbl { dba: null, }
         @secret_power( 3, 2 ) as c2,
         @strange_thing        as c3;"""
     debug '^79-1^', try m.resolve probe catch e then warn reverse e.message
+    try m.resolve probe catch e then warn reverse e.message
     T?.throws /unknown macro '@strange_thing'/, -> m.resolve probe
   #.........................................................................................................
   do ->
     m                 = new DBay_sqlx()
     m.declare SQL"""@secret_power( @a, @b ) = @power( @a, @b ) / @b;"""
-    sqlx  = SQL"""select @secret_power( 3, 2 ) as x;"""
-    debug '^79-1^', try m.resolve sqlx catch e then warn reverse e.message
+    probe  = SQL"""select @secret_power( 3, 2 ) as x;"""
+    debug '^79-1^', try m.resolve probe catch e then warn reverse e.message
+    try m.resolve probe catch e then warn reverse e.message
     T?.throws /unknown macro '@power'/, -> m.resolve probe
   #.........................................................................................................
   done?()
