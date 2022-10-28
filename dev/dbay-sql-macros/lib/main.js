@@ -507,15 +507,56 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_macros_works_without_any_declarations = function(T, done) {
-    var DBay_sqlx, m, probe, result;
+    var DBay_sqlx, m;
     // T?.halt_on_error()
     ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
     m = new DBay_sqlx();
-    probe = SQL`select 42 as answer;`;
-    help('^12-1^', rpr(result = m.resolve(probe)));
-    if (T != null) {
-      T.eq(result, SQL`select 42 as answer;`);
-    }
+    (function() {      //.........................................................................................................
+      var probe, result;
+      probe = SQL`select 42 as answer;`;
+      help('^12-1^', rpr(result = m.resolve(probe)));
+      return T != null ? T.eq(result, SQL`select 42 as answer;`) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var probe, result;
+      probe = SQL`select
+42
+as
+answer;`;
+      help('^12-1^', rpr(result = m.resolve(probe)));
+      return T != null ? T.eq(result, SQL`select
+42
+as
+answer;`) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_works_without_any_matching_declarations = function(T, done) {
+    var DBay_sqlx, m;
+    // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    m = new DBay_sqlx();
+    m.declare(SQL`@add( @a, @b ) = ( @a + @b );`);
+    (function() {      //.........................................................................................................
+      var probe, result;
+      probe = SQL`select 42 as answer;`;
+      help('^12-1^', rpr(result = m.resolve(probe)));
+      return T != null ? T.eq(result, SQL`select 42 as answer;`) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var probe, result;
+      probe = SQL`select
+42
+as
+answer;`;
+      help('^12-1^', rpr(result = m.resolve(probe)));
+      return T != null ? T.eq(result, SQL`select
+42
+as
+answer;`) : void 0;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -693,7 +734,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.dbay_macros_demo_legal_chrs_in_identifiers = function(T, done) {
+  this._dbay_macros_demo_legal_chrs_in_identifiers = function(T, done) {
     var DBay, db;
     ({DBay} = require('../../../apps/dbay'));
     db = new DBay();
@@ -734,21 +775,20 @@
       // @dbay_macros_find_arguments()
       // test @dbay_macros_find_arguments
       // test @dbay_macros_works_without_any_declarations
-      // @dbay_macros_demo_legal_chrs_in_identifiers()
+      // @_dbay_macros_demo_legal_chrs_in_identifiers()
       // @dbay_macros_regexen()
       // test @dbay_macros_regexen
       // test @dbay_macros_declarations
-      this.dbay_macros_simple_resolution();
-      return test(this.dbay_macros_simple_resolution);
+      // @dbay_macros_simple_resolution()
+      // test @dbay_macros_simple_resolution
+      // @dbay_macros_more_resolutions()
+      // test @dbay_macros_more_resolutions
+      // @dbay_macros_checks_for_leftovers()
+      // test @dbay_macros_checks_for_leftovers
+      // @_dbay_macros_demo_boundaries()
+      return test(this);
     })();
   }
-
-  // @dbay_macros_more_resolutions()
-// test @dbay_macros_more_resolutions
-// @dbay_macros_checks_for_leftovers()
-// test @dbay_macros_checks_for_leftovers
-// @_dbay_macros_demo_boundaries()
-// test @
 
 }).call(this);
 
