@@ -56,6 +56,7 @@ dtab                      = new Tbl { dba: null, }
   T?.eq ( type_of rx_for_bare_name        = regexes.get_rx_for_bare_name()          ), 'regex'
   T?.eq ( type_of rx_for_paren_name       = regexes.get_rx_for_paren_name()         ), 'regex'
   T?.eq ( type_of rx_for_start_paren_name = regexes.get_rx_for_start_paren_name()   ), 'regex'
+  T?.eq ( type_of rx_for_parameter_a      = regexes.get_rx_for_parameter 'practical', '|', '@a' ), 'regex'
   sqlx  = "22@foo @bar( baz @what's @that( @辻 oops @程　たたみ() @blah"
   #.........................................................................................................
   do ->
@@ -73,10 +74,24 @@ dtab                      = new Tbl { dba: null, }
     T?.eq result, [ { index: 2, name: '@foo' }, { index: 17, name: '@what' }, { index: 32, name: '@辻' }, { index: 49, name: '@blah' } ]
   #.........................................................................................................
   do ->
-    whisper '^49-7^', rx_for_paren_name
-    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll rx_for_paren_name   )
+    whisper '^49-7^', rx_for_parameter_a
+    result = ( { index: match.index, name: match[ 0 ], } for match from "foo@a bar".matchAll rx_for_parameter_a   )
     urge '^49-8^', result
     info '^49-9^', match for match in result
+    T?.eq result, [ { index: 3, name: '@a' } ]
+  #.........................................................................................................
+  do ->
+    whisper '^49-10^', rx_for_parameter_a
+    result = ( { index: match.index, name: match[ 0 ], } for match from "foo@a|bar".matchAll rx_for_parameter_a   )
+    urge '^49-11^', result
+    info '^49-12^', match for match in result
+    T?.eq result, [ { index: 3, name: '@a|' } ]
+  #.........................................................................................................
+  do ->
+    whisper '^49-13^', rx_for_paren_name
+    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll rx_for_paren_name   )
+    urge '^49-14^', result
+    info '^49-15^', match for match in result
     T?.eq result, [ { index: 7, name: '@bar' }, { index: 25, name: '@that' }, { index: 40, name: '@程　たたみ' } ]
   #.........................................................................................................
   done?()
@@ -453,6 +468,21 @@ dtab                      = new Tbl { dba: null, }
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@dbay_vanishing_terminator = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  m                 = new DBay_sqlx()
+  m.declare SQL"""@mymacro( @a ) = FOO@a|BAR;"""
+  #.........................................................................................................
+  do ->
+    sqlx              = "@mymacro( value_of_a )"
+    result            = m.resolve sqlx
+    urge '^50-8^', result
+    T?.eq result, "FOOvalue_of_aBAR"
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
@@ -472,6 +502,8 @@ if require.main is module then do =>
   # @dbay_macros_checks_for_leftovers()
   # test @dbay_macros_checks_for_leftovers
   # @_dbay_macros_demo_boundaries()
+  # @dbay_vanishing_terminator()
+  # test @dbay_vanishing_terminator
   test @
 
 
