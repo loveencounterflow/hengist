@@ -580,23 +580,35 @@ answer;`) : void 0;
           return warn(reverse(e.message));
         }
       })());
+      try {
+        m.resolve(probe);
+      } catch (error1) {
+        e = error1;
+        warn(reverse(e.message));
+      }
       return T != null ? T.throws(/unknown macro '@strange_thing'/, function() {
         return m.resolve(probe);
       }) : void 0;
     })();
     (function() {      //.........................................................................................................
-      var e, m, sqlx;
+      var e, m, probe;
       m = new DBay_sqlx();
       m.declare(SQL`@secret_power( @a, @b ) = @power( @a, @b ) / @b;`);
-      sqlx = SQL`select @secret_power( 3, 2 ) as x;`;
+      probe = SQL`select @secret_power( 3, 2 ) as x;`;
       debug('^79-1^', (function() {
         try {
-          return m.resolve(sqlx);
+          return m.resolve(probe);
         } catch (error1) {
           e = error1;
           return warn(reverse(e.message));
         }
       })());
+      try {
+        m.resolve(probe);
+      } catch (error1) {
+        e = error1;
+        warn(reverse(e.message));
+      }
       return T != null ? T.throws(/unknown macro '@power'/, function() {
         return m.resolve(probe);
       }) : void 0;
@@ -693,7 +705,7 @@ answer;`) : void 0;
       macros: false
     });
     //.........................................................................................................
-    m.declare(SQL`@declared_without_tx = whatever;`);
+    m.declare(SQL`@declared_without_tx() = whatever;`);
     if (T != null) {
       T.eq((function() {
         var results;
@@ -705,7 +717,7 @@ answer;`) : void 0;
       })(), ['@declared_without_tx']);
     }
     db(function() {
-      m.declare(SQL`@declared_within_tx = whatever;`);
+      m.declare(SQL`@declared_within_tx() = whatever;`);
       if (T != null) {
         T.eq((function() {
           var results;
