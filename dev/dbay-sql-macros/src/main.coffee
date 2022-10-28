@@ -37,35 +37,6 @@ dtab                      = new Tbl { dba: null, }
 #-----------------------------------------------------------------------------------------------------------
 @dbay_macros_regexen = ( T, done ) ->
   # T?.halt_on_error()
-  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
-  m     = new DBay_sqlx()
-  { _bare_name_re
-    _paren_name_re }  = m.cfg
-  urge '^87-1^', '_bare_name_re   ', _bare_name_re
-  urge '^87-2^', '_paren_name_re  ', _paren_name_re
-  # urge '^87-3^', '_global_name_re ', _global_name_re
-  T?.eq ( m.cfg.prefix              ), '@'
-  T?.eq ( type_of m.cfg.name_re     ), 'regex'
-  T?.eq ( type_of _bare_name_re     ), 'regex'
-  T?.eq ( type_of _paren_name_re    ), 'regex'
-  # T?.eq ( type_of _global_name_re   ), 'regex'
-  #.........................................................................................................
-  do ->
-    sqlx  = "foo @bar( baz @what's @that( @辻 oops @程("
-    #.......................................................................................................
-    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll _bare_name_re   )
-    T?.eq result, [ { index: 14, name: '@what' }, { index: 29, name: '@辻' }, ]
-    #.......................................................................................................
-    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll _paren_name_re  )
-    T?.eq result, [ { index: 4, name: '@bar' }, { index: 22, name: '@that' }, { index: 37, name: '@程' }, ]
-    #.......................................................................................................
-    T?.eq ( "辻".match m.cfg.name_re )?, true
-  #.........................................................................................................
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
-@dbay_macros_regexen_2 = ( T, done ) ->
-  # T?.halt_on_error()
   regexes = require '../../../apps/dbay-sql-macros/lib/regexes'
   T?.eq ( type_of regexes.rx.chrs.strict.allowed.head       ), 'regex'
   T?.eq ( type_of regexes.rx.chrs.strict.allowed.tail       ), 'regex'
