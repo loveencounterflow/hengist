@@ -64,6 +64,34 @@ dtab                      = new Tbl { dba: null, }
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@dbay_macros_regexen_2 = ( T, done ) ->
+  # T?.halt_on_error()
+  rx = require '../../../apps/dbay-sql-macros/lib/regexes'
+  T?.eq ( rx.prefix                           ), '@'
+  T?.eq ( type_of rx.chrs.strict.allowed.tail ), 'regex'
+  T?.eq ( type_of rx.name                     ), 'regex'
+  #.........................................................................................................
+  do ->
+    ### NOTE U+3000 'Ideographic space' does not count as whitespace in SQLite ###
+    ### NOTE we do not require any kind of word break; macros and parameters can appear anywhere ###
+    sqlx  = "22@foo @bar( baz @what's @that( @辻 oops @程　たたみ() @blah"
+    #.......................................................................................................
+    debug '^43545^', rx.name
+    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll rx.name   )
+    urge '^43545^', match for match in result
+    #.......................................................................................................
+    debug '^43545^', rx.bare_name
+    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll rx.bare_name   )
+    urge '^43545^', match for match in result
+    #.......................................................................................................
+    debug '^43545^', rx.paren_name
+    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll rx.paren_name   )
+    urge '^43545^', match for match in result
+  #   T?.eq result, [ { index: 14, name: '@what' }, { index: 29, name: '@辻' }, ]
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @dbay_macros_declarations = ( T, done ) ->
   # T?.halt_on_error()
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
@@ -372,70 +400,22 @@ dtab                      = new Tbl { dba: null, }
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@_dbay_macros_demo_boundaries = ( T, done ) ->
-  ### see [*Regex Boundaries and Delimiters—Standard and
-  Advanced*](https://www.rexegg.com/regex-boundaries.html) ###
-  probe_3 = "cat,dog cat123 bird 45 cat"
+@dbay_macros_demo_legal_chrs_in_identifiers = ( T, done ) ->
+  { DBay      }     = require '../../../apps/dbay'
+  db                = new DBay()
   #.........................................................................................................
-  do ->
-    whisper '^82-1^ ——————————————————————————————————————————————————————————————————————————————————————————————'
-    info '^82-2^', "DIY Boundary: between an ASCII letter and a non-ASCII letter"
-    A1_re   = ///
-                  (?:
-                    (?: (?<= ^ ) | (?<! [a-z] ) )
-                    (?= [a-z]   )
-                    |
-                    (?<= [a-z] )
-                    (?: (?= $ ) | (?! [a-z] ) )
-                    )
-                ///
-    A1      = A1_re.source
-    cat_re  = /// #{A1} cat #{A1} ///g
-    help '^82-3^', cat_re
-    info '^82-4^', probe_3
-    urge '^82-5^', match for match from probe_3.matchAll cat_re
-  #.........................................................................................................
-  do ->
-    whisper '^82-6^ ——————————————————————————————————————————————————————————————————————————————————————————————'
-    new_boundary = ( pattern ) ->
-      return ///
-        (?:
-          (?: (?<= ^ ) | (?<! #{pattern} ) )
-          (?= #{pattern} )
-          |
-          (?<= #{pattern} | )
-          (?: (?= $ ) | (?! #{pattern} ) )
-          )
-      ///.source
-      # return ///
-      #   (?:
-      #     (?: (?<= ^ ) | (?<! #{cfg.tail} ) )
-      #     (?= #{cfg.head} )
-      #     |
-      #     (?<= #{cfg.tail} )
-      #     (?: (?= $ ) | (?! #{cfg.head} ) )
-      #     )
-      # ///.source
-    LB      = new_boundary '[a-zA-Z]'
-    word_re = /// #{LB} cat #{LB} ///g
-    help '^82-7^', word_re
-    urge '^82-8^', match for match from probe_3.matchAll word_re
-    nr_re   = /// #{LB} \d+ #{LB} ///g
-    help '^82-9^', nr_re
-    urge '^82-10^', match for match from probe_3.matchAll nr_re
-    #.......................................................................................................
-    head    = '[a-zA-Z_]'
-    tail    = '[a-zA-Z0-9_]'
-    name_b  = new_boundary head
-    name_re = /// #{LB} (?<name> #{head}#{tail}* ) #{LB} ///g
-    help '^82-11^', name_re
-    urge '^82-12^', match for match from probe_3.matchAll name_re
-    #.......................................................................................................
-    pattern = '[a-zA-Z_][a-zA-Z0-9_]*'
-    name_b  = new_boundary pattern
-    name_re = /// #{LB} (?<name> #{pattern} ) #{LB} ///g
-    help '^82-13^', name_re
-    urge '^82-14^', match for match from probe_3.matchAll name_re
+  db ->
+    for cid in [ 0x0000 .. 0xffff ]
+      cid_hex = '0x' + ( cid.toString 16 ).padStart 4, '0'
+      chr   = String.fromCodePoint cid
+      name  = "#{chr}x"
+      # name  = "x#{chr}x"
+      try
+        rows = ( row for row from db SQL"""select 42 as #{name};""" )
+        # debug '^434^', cid_hex, rows[ 0 ]
+      catch error
+        warn cid_hex, GUY.trm.reverse error.message
+    debug '^645^', cid_hex
   #.........................................................................................................
   done?()
 
@@ -447,6 +427,10 @@ if require.main is module then do =>
   # @dbay_macros_find_arguments()
   # test @dbay_macros_find_arguments
   # test @dbay_macros_works_without_any_declarations
+  # @dbay_macros_demo_legal_chrs_in_identifiers()
+  @dbay_macros_regexen_2()
+  test @dbay_macros_regexen_2
+  # @dbay_macros_regexen()
   # test @dbay_macros_regexen
   # test @dbay_macros_declarations
   # @dbay_macros_simple_resolution()
@@ -455,7 +439,7 @@ if require.main is module then do =>
   # test @dbay_macros_more_resolutions
   # @dbay_macros_checks_for_leftovers()
   # test @dbay_macros_checks_for_leftovers
-  @_dbay_macros_demo_boundaries()
+  # @_dbay_macros_demo_boundaries()
   # test @
 
 
