@@ -288,9 +288,51 @@ dtab                      = new Tbl { dba: null, }
   # T?.halt_on_error()
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
   m                 = new DBay_sqlx()
-  probe             = SQL"""select 42 as answer;"""
-  help '^12-1^', rpr result  = m.resolve probe
-  T?.eq result, SQL"""select 42 as answer;"""
+  #.........................................................................................................
+  do ->
+    probe             = SQL"""select 42 as answer;"""
+    help '^12-1^', rpr result  = m.resolve probe
+    T?.eq result, SQL"""select 42 as answer;"""
+  #.........................................................................................................
+  do ->
+    probe             = SQL"""
+      select
+      42
+      as
+      answer;"""
+    help '^12-1^', rpr result  = m.resolve probe
+    T?.eq result, SQL"""
+      select
+      42
+      as
+      answer;"""
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dbay_macros_works_without_any_matching_declarations = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  m                 = new DBay_sqlx()
+  m.declare SQL"""@add( @a, @b ) = ( @a + @b );"""
+  #.........................................................................................................
+  do ->
+    probe             = SQL"""select 42 as answer;"""
+    help '^12-1^', rpr result  = m.resolve probe
+    T?.eq result, SQL"""select 42 as answer;"""
+  #.........................................................................................................
+  do ->
+    probe             = SQL"""
+      select
+      42
+      as
+      answer;"""
+    help '^12-1^', rpr result  = m.resolve probe
+    T?.eq result, SQL"""
+      select
+      42
+      as
+      answer;"""
   #.........................................................................................................
   done?()
 
@@ -390,7 +432,7 @@ dtab                      = new Tbl { dba: null, }
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@dbay_macros_demo_legal_chrs_in_identifiers = ( T, done ) ->
+@_dbay_macros_demo_legal_chrs_in_identifiers = ( T, done ) ->
   { DBay      }     = require '../../../apps/dbay'
   db                = new DBay()
   #.........................................................................................................
@@ -417,17 +459,17 @@ if require.main is module then do =>
   # @dbay_macros_find_arguments()
   # test @dbay_macros_find_arguments
   # test @dbay_macros_works_without_any_declarations
-  # @dbay_macros_demo_legal_chrs_in_identifiers()
+  # @_dbay_macros_demo_legal_chrs_in_identifiers()
   # @dbay_macros_regexen()
   # test @dbay_macros_regexen
   # test @dbay_macros_declarations
-  @dbay_macros_simple_resolution()
-  test @dbay_macros_simple_resolution
+  # @dbay_macros_simple_resolution()
+  # test @dbay_macros_simple_resolution
   # @dbay_macros_more_resolutions()
   # test @dbay_macros_more_resolutions
   # @dbay_macros_checks_for_leftovers()
   # test @dbay_macros_checks_for_leftovers
   # @_dbay_macros_demo_boundaries()
-  # test @
+  test @
 
 
