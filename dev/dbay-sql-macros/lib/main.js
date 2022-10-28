@@ -31,93 +31,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_macros_regexen = function(T, done) {
-    var DBay_sqlx, _bare_name_re, _paren_name_re, m;
-    // T?.halt_on_error()
-    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
-    m = new DBay_sqlx();
-    ({_bare_name_re, _paren_name_re} = m.cfg);
-    urge('^87-1^', '_bare_name_re   ', _bare_name_re);
-    urge('^87-2^', '_paren_name_re  ', _paren_name_re);
-    // urge '^87-3^', '_global_name_re ', _global_name_re
-    if (T != null) {
-      T.eq(m.cfg.prefix, '@');
-    }
-    if (T != null) {
-      T.eq(type_of(m.cfg.name_re), 'regex');
-    }
-    if (T != null) {
-      T.eq(type_of(_bare_name_re), 'regex');
-    }
-    if (T != null) {
-      T.eq(type_of(_paren_name_re), 'regex');
-    }
-    (function() {      // T?.eq ( type_of _global_name_re   ), 'regex'
-      //.........................................................................................................
-      var match, result, sqlx;
-      sqlx = "foo @bar( baz @what's @that( @辻 oops @程(";
-      //.......................................................................................................
-      result = (function() {
-        var ref1, results;
-        ref1 = sqlx.matchAll(_bare_name_re);
-        results = [];
-        for (match of ref1) {
-          results.push({
-            index: match.index,
-            name: match[0]
-          });
-        }
-        return results;
-      })();
-      if (T != null) {
-        T.eq(result, [
-          {
-            index: 14,
-            name: '@what'
-          },
-          {
-            index: 29,
-            name: '@辻'
-          }
-        ]);
-      }
-      //.......................................................................................................
-      result = (function() {
-        var ref1, results;
-        ref1 = sqlx.matchAll(_paren_name_re);
-        results = [];
-        for (match of ref1) {
-          results.push({
-            index: match.index,
-            name: match[0]
-          });
-        }
-        return results;
-      })();
-      if (T != null) {
-        T.eq(result, [
-          {
-            index: 4,
-            name: '@bar'
-          },
-          {
-            index: 22,
-            name: '@that'
-          },
-          {
-            index: 37,
-            name: '@程'
-          }
-        ]);
-      }
-      //.......................................................................................................
-      return T != null ? T.eq(("辻".match(m.cfg.name_re)) != null, true) : void 0;
-    })();
-    return typeof done === "function" ? done() : void 0;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.dbay_macros_regexen_2 = function(T, done) {
-    var regexes, rx_for_any_name, rx_for_bare_name, rx_for_paren_name, sqlx;
+    var regexes, rx_for_any_name, rx_for_bare_name, rx_for_paren_name, rx_for_start_paren_name, sqlx;
     // T?.halt_on_error()
     regexes = require('../../../apps/dbay-sql-macros/lib/regexes');
     if (T != null) {
@@ -160,6 +74,9 @@
       T.eq(type_of(regexes.get_rx_for_paren_name), 'function');
     }
     if (T != null) {
+      T.eq(type_of(regexes.get_rx_for_start_paren_name), 'function');
+    }
+    if (T != null) {
       T.eq(type_of(rx_for_any_name = regexes.get_rx_for_any_name()), 'regex');
     }
     if (T != null) {
@@ -167,6 +84,9 @@
     }
     if (T != null) {
       T.eq(type_of(rx_for_paren_name = regexes.get_rx_for_paren_name()), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(rx_for_start_paren_name = regexes.get_rx_for_start_paren_name()), 'regex');
     }
     sqlx = "22@foo @bar( baz @what's @that( @辻 oops @程　たたみ() @blah";
     (function() {      //.........................................................................................................
@@ -815,17 +735,15 @@
       // test @dbay_macros_find_arguments
       // test @dbay_macros_works_without_any_declarations
       // @dbay_macros_demo_legal_chrs_in_identifiers()
-      this.dbay_macros_regexen_2();
-      return test(this.dbay_macros_regexen_2);
+      // @dbay_macros_regexen()
+      // test @dbay_macros_regexen
+      // test @dbay_macros_declarations
+      this.dbay_macros_simple_resolution();
+      return test(this.dbay_macros_simple_resolution);
     })();
   }
 
-  // @dbay_macros_regexen()
-// test @dbay_macros_regexen
-// test @dbay_macros_declarations
-// @dbay_macros_simple_resolution()
-// test @dbay_macros_simple_resolution
-// @dbay_macros_more_resolutions()
+  // @dbay_macros_more_resolutions()
 // test @dbay_macros_more_resolutions
 // @dbay_macros_checks_for_leftovers()
 // test @dbay_macros_checks_for_leftovers
