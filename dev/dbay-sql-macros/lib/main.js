@@ -117,28 +117,64 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_macros_regexen_2 = function(T, done) {
-    var rx;
+    var regexes, rx_for_any_name, rx_for_bare_name, rx_for_paren_name, sqlx;
     // T?.halt_on_error()
-    rx = require('../../../apps/dbay-sql-macros/lib/regexes');
+    regexes = require('../../../apps/dbay-sql-macros/lib/regexes');
     if (T != null) {
-      T.eq(rx.prefix, '@');
+      T.eq(type_of(regexes.rx.chrs.strict.allowed.head), 'regex');
     }
     if (T != null) {
-      T.eq(type_of(rx.chrs.strict.allowed.tail), 'regex');
+      T.eq(type_of(regexes.rx.chrs.strict.allowed.tail), 'regex');
     }
     if (T != null) {
-      T.eq(type_of(rx.name), 'regex');
+      T.eq(type_of(regexes.rx.chrs.strict.forbidden.head), 'regex');
     }
+    if (T != null) {
+      T.eq(type_of(regexes.rx.chrs.strict.forbidden.tail), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(regexes.rx.chrs.strict.forbidden.paren), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(regexes.rx.chrs.practical.allowed.head), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(regexes.rx.chrs.practical.allowed.tail), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(regexes.rx.chrs.practical.forbidden.head), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(regexes.rx.chrs.practical.forbidden.tail), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(regexes.rx.chrs.practical.forbidden.paren), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(regexes.get_rx_for_any_name), 'function');
+    }
+    if (T != null) {
+      T.eq(type_of(regexes.get_rx_for_bare_name), 'function');
+    }
+    if (T != null) {
+      T.eq(type_of(regexes.get_rx_for_paren_name), 'function');
+    }
+    if (T != null) {
+      T.eq(type_of(rx_for_any_name = regexes.get_rx_for_any_name()), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(rx_for_bare_name = regexes.get_rx_for_bare_name()), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(rx_for_paren_name = regexes.get_rx_for_paren_name()), 'regex');
+    }
+    sqlx = "22@foo @bar( baz @what's @that( @辻 oops @程　たたみ() @blah";
     (function() {      //.........................................................................................................
-      /* NOTE U+3000 'Ideographic space' does not count as whitespace in SQLite */
-      /* NOTE we do not require any kind of word break; macros and parameters can appear anywhere */
-      var i, j, l, len, len1, len2, match, result, results, sqlx;
-      sqlx = "22@foo @bar( baz @what's @that( @辻 oops @程　たたみ() @blah";
-      //.......................................................................................................
-      debug('^43545^', rx.name);
+      var i, len, match, result;
+      whisper('^49-1^', rx_for_any_name);
       result = (function() {
         var ref1, results;
-        ref1 = sqlx.matchAll(rx.name);
+        ref1 = sqlx.matchAll(rx_for_any_name);
         results = [];
         for (match of ref1) {
           results.push({
@@ -148,15 +184,48 @@
         }
         return results;
       })();
+      urge('^49-2^', result);
       for (i = 0, len = result.length; i < len; i++) {
         match = result[i];
-        urge('^43545^', match);
+        info('^49-3^', match);
       }
-      //.......................................................................................................
-      debug('^43545^', rx.bare_name);
+      return T != null ? T.eq(result, [
+        {
+          index: 2,
+          name: '@foo'
+        },
+        {
+          index: 7,
+          name: '@bar'
+        },
+        {
+          index: 17,
+          name: '@what'
+        },
+        {
+          index: 25,
+          name: '@that'
+        },
+        {
+          index: 32,
+          name: '@辻'
+        },
+        {
+          index: 40,
+          name: '@程　たたみ'
+        },
+        {
+          index: 49,
+          name: '@blah'
+        }
+      ]) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var i, len, match, result;
+      whisper('^49-4^', rx_for_bare_name);
       result = (function() {
         var ref1, results;
-        ref1 = sqlx.matchAll(rx.bare_name);
+        ref1 = sqlx.matchAll(rx_for_bare_name);
         results = [];
         for (match of ref1) {
           results.push({
@@ -166,15 +235,36 @@
         }
         return results;
       })();
-      for (j = 0, len1 = result.length; j < len1; j++) {
-        match = result[j];
-        urge('^43545^', match);
+      urge('^49-5^', result);
+      for (i = 0, len = result.length; i < len; i++) {
+        match = result[i];
+        info('^49-6^', match);
       }
-      //.......................................................................................................
-      debug('^43545^', rx.paren_name);
+      return T != null ? T.eq(result, [
+        {
+          index: 2,
+          name: '@foo'
+        },
+        {
+          index: 17,
+          name: '@what'
+        },
+        {
+          index: 32,
+          name: '@辻'
+        },
+        {
+          index: 49,
+          name: '@blah'
+        }
+      ]) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var i, len, match, result;
+      whisper('^49-7^', rx_for_paren_name);
       result = (function() {
         var ref1, results;
-        ref1 = sqlx.matchAll(rx.paren_name);
+        ref1 = sqlx.matchAll(rx_for_paren_name);
         results = [];
         for (match of ref1) {
           results.push({
@@ -184,12 +274,25 @@
         }
         return results;
       })();
-      results = [];
-      for (l = 0, len2 = result.length; l < len2; l++) {
-        match = result[l];
-        results.push(urge('^43545^', match));
+      urge('^49-8^', result);
+      for (i = 0, len = result.length; i < len; i++) {
+        match = result[i];
+        info('^49-9^', match);
       }
-      return results;
+      return T != null ? T.eq(result, [
+        {
+          index: 7,
+          name: '@bar'
+        },
+        {
+          index: 25,
+          name: '@that'
+        },
+        {
+          index: 40,
+          name: '@程　たたみ'
+        }
+      ]) : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
   };
