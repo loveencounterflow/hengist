@@ -66,28 +66,45 @@ dtab                      = new Tbl { dba: null, }
 #-----------------------------------------------------------------------------------------------------------
 @dbay_macros_regexen_2 = ( T, done ) ->
   # T?.halt_on_error()
-  rx = require '../../../apps/dbay-sql-macros/lib/regexes'
-  T?.eq ( rx.prefix                           ), '@'
-  T?.eq ( type_of rx.chrs.strict.allowed.tail ), 'regex'
-  T?.eq ( type_of rx.name                     ), 'regex'
+  regexes = require '../../../apps/dbay-sql-macros/lib/regexes'
+  T?.eq ( type_of regexes.rx.chrs.strict.allowed.head       ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.strict.allowed.tail       ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.strict.forbidden.head     ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.strict.forbidden.tail     ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.strict.forbidden.paren    ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.practical.allowed.head    ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.practical.allowed.tail    ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.practical.forbidden.head  ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.practical.forbidden.tail  ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.practical.forbidden.paren ), 'regex'
+  T?.eq ( type_of regexes.get_rx_for_any_name               ), 'function'
+  T?.eq ( type_of regexes.get_rx_for_bare_name              ), 'function'
+  T?.eq ( type_of regexes.get_rx_for_paren_name             ), 'function'
+  T?.eq ( type_of rx_for_any_name   = regexes.get_rx_for_any_name()   ), 'regex'
+  T?.eq ( type_of rx_for_bare_name  = regexes.get_rx_for_bare_name()  ), 'regex'
+  T?.eq ( type_of rx_for_paren_name = regexes.get_rx_for_paren_name() ), 'regex'
+  sqlx  = "22@foo @bar( baz @what's @that( @辻 oops @程　たたみ() @blah"
   #.........................................................................................................
   do ->
-    ### NOTE U+3000 'Ideographic space' does not count as whitespace in SQLite ###
-    ### NOTE we do not require any kind of word break; macros and parameters can appear anywhere ###
-    sqlx  = "22@foo @bar( baz @what's @that( @辻 oops @程　たたみ() @blah"
-    #.......................................................................................................
-    debug '^43545^', rx.name
-    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll rx.name   )
-    urge '^43545^', match for match in result
-    #.......................................................................................................
-    debug '^43545^', rx.bare_name
-    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll rx.bare_name   )
-    urge '^43545^', match for match in result
-    #.......................................................................................................
-    debug '^43545^', rx.paren_name
-    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll rx.paren_name   )
-    urge '^43545^', match for match in result
-  #   T?.eq result, [ { index: 14, name: '@what' }, { index: 29, name: '@辻' }, ]
+    whisper '^49-1^', rx_for_any_name
+    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll rx_for_any_name   )
+    urge '^49-2^', result
+    info '^49-3^', match for match in result
+    T?.eq result, [ { index: 2, name: '@foo' }, { index: 7, name: '@bar' }, { index: 17, name: '@what' }, { index: 25, name: '@that' }, { index: 32, name: '@辻' }, { index: 40, name: '@程　たたみ' }, { index: 49, name: '@blah' } ]
+  #.........................................................................................................
+  do ->
+    whisper '^49-4^', rx_for_bare_name
+    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll rx_for_bare_name   )
+    urge '^49-5^', result
+    info '^49-6^', match for match in result
+    T?.eq result, [ { index: 2, name: '@foo' }, { index: 17, name: '@what' }, { index: 32, name: '@辻' }, { index: 49, name: '@blah' } ]
+  #.........................................................................................................
+  do ->
+    whisper '^49-7^', rx_for_paren_name
+    result = ( { index: match.index, name: match[ 0 ], } for match from sqlx.matchAll rx_for_paren_name   )
+    urge '^49-8^', result
+    info '^49-9^', match for match in result
+    T?.eq result, [ { index: 7, name: '@bar' }, { index: 25, name: '@that' }, { index: 40, name: '@程　たたみ' } ]
   #.........................................................................................................
   done?()
 
