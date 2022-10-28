@@ -31,7 +31,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_macros_regexen = function(T, done) {
-    var regexes, rx_for_any_name, rx_for_bare_name, rx_for_paren_name, rx_for_start_paren_name, sqlx;
+    var regexes, rx_for_any_name, rx_for_bare_name, rx_for_parameter_a, rx_for_paren_name, rx_for_start_paren_name, sqlx;
     // T?.halt_on_error()
     regexes = require('../../../apps/dbay-sql-macros/lib/regexes');
     if (T != null) {
@@ -87,6 +87,9 @@
     }
     if (T != null) {
       T.eq(type_of(rx_for_start_paren_name = regexes.get_rx_for_start_paren_name()), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(rx_for_parameter_a = regexes.get_rx_for_parameter('practical', '|', '@a')), 'regex');
     }
     sqlx = "22@foo @bar( baz @what's @that( @辻 oops @程　たたみ() @blah";
     (function() {      //.........................................................................................................
@@ -181,10 +184,10 @@
     })();
     (function() {      //.........................................................................................................
       var i, len, match, result;
-      whisper('^49-7^', rx_for_paren_name);
+      whisper('^49-7^', rx_for_parameter_a);
       result = (function() {
         var ref1, results;
-        ref1 = sqlx.matchAll(rx_for_paren_name);
+        ref1 = "foo@a bar".matchAll(rx_for_parameter_a);
         results = [];
         for (match of ref1) {
           results.push({
@@ -198,6 +201,60 @@
       for (i = 0, len = result.length; i < len; i++) {
         match = result[i];
         info('^49-9^', match);
+      }
+      return T != null ? T.eq(result, [
+        {
+          index: 3,
+          name: '@a'
+        }
+      ]) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var i, len, match, result;
+      whisper('^49-10^', rx_for_parameter_a);
+      result = (function() {
+        var ref1, results;
+        ref1 = "foo@a|bar".matchAll(rx_for_parameter_a);
+        results = [];
+        for (match of ref1) {
+          results.push({
+            index: match.index,
+            name: match[0]
+          });
+        }
+        return results;
+      })();
+      urge('^49-11^', result);
+      for (i = 0, len = result.length; i < len; i++) {
+        match = result[i];
+        info('^49-12^', match);
+      }
+      return T != null ? T.eq(result, [
+        {
+          index: 3,
+          name: '@a|'
+        }
+      ]) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var i, len, match, result;
+      whisper('^49-13^', rx_for_paren_name);
+      result = (function() {
+        var ref1, results;
+        ref1 = sqlx.matchAll(rx_for_paren_name);
+        results = [];
+        for (match of ref1) {
+          results.push({
+            index: match.index,
+            name: match[0]
+          });
+        }
+        return results;
+      })();
+      urge('^49-14^', result);
+      for (i = 0, len = result.length; i < len; i++) {
+        match = result[i];
+        info('^49-15^', match);
       }
       return T != null ? T.eq(result, [
         {
@@ -779,6 +836,23 @@ answer;`) : void 0;
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_vanishing_terminator = function(T, done) {
+    var DBay_sqlx, m;
+    // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    m = new DBay_sqlx();
+    m.declare(SQL`@mymacro( @a ) = FOO@a|BAR;`);
+    (function() {      //.........................................................................................................
+      var result, sqlx;
+      sqlx = "@mymacro( value_of_a )";
+      result = m.resolve(sqlx);
+      urge('^50-8^', result);
+      return T != null ? T.eq(result, "FOOvalue_of_aBAR") : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -798,6 +872,8 @@ answer;`) : void 0;
       // @dbay_macros_checks_for_leftovers()
       // test @dbay_macros_checks_for_leftovers
       // @_dbay_macros_demo_boundaries()
+      // @dbay_vanishing_terminator()
+      // test @dbay_vanishing_terminator
       return test(this);
     })();
   }
