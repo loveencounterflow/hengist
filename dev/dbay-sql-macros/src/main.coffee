@@ -38,22 +38,24 @@ dtab                      = new Tbl { dba: null, }
 @dbay_macros_regexen = ( T, done ) ->
   # T?.halt_on_error()
   regexes = require '../../../apps/dbay-sql-macros/lib/regexes'
-  T?.eq ( type_of regexes.rx.chrs.strict.allowed.head       ), 'regex'
-  T?.eq ( type_of regexes.rx.chrs.strict.allowed.tail       ), 'regex'
-  T?.eq ( type_of regexes.rx.chrs.strict.forbidden.head     ), 'regex'
-  T?.eq ( type_of regexes.rx.chrs.strict.forbidden.tail     ), 'regex'
-  T?.eq ( type_of regexes.rx.chrs.strict.forbidden.paren    ), 'regex'
-  T?.eq ( type_of regexes.rx.chrs.practical.allowed.head    ), 'regex'
-  T?.eq ( type_of regexes.rx.chrs.practical.allowed.tail    ), 'regex'
-  T?.eq ( type_of regexes.rx.chrs.practical.forbidden.head  ), 'regex'
-  T?.eq ( type_of regexes.rx.chrs.practical.forbidden.tail  ), 'regex'
-  T?.eq ( type_of regexes.rx.chrs.practical.forbidden.paren ), 'regex'
-  T?.eq ( type_of regexes.get_rx_for_any_name               ), 'function'
-  T?.eq ( type_of regexes.get_rx_for_bare_name              ), 'function'
-  T?.eq ( type_of regexes.get_rx_for_paren_name             ), 'function'
-  T?.eq ( type_of rx_for_any_name   = regexes.get_rx_for_any_name()   ), 'regex'
-  T?.eq ( type_of rx_for_bare_name  = regexes.get_rx_for_bare_name()  ), 'regex'
-  T?.eq ( type_of rx_for_paren_name = regexes.get_rx_for_paren_name() ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.strict.allowed.head                               ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.strict.allowed.tail                               ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.strict.forbidden.head                             ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.strict.forbidden.tail                             ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.strict.forbidden.paren                            ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.practical.allowed.head                            ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.practical.allowed.tail                            ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.practical.forbidden.head                          ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.practical.forbidden.tail                          ), 'regex'
+  T?.eq ( type_of regexes.rx.chrs.practical.forbidden.paren                         ), 'regex'
+  T?.eq ( type_of regexes.get_rx_for_any_name                                       ), 'function'
+  T?.eq ( type_of regexes.get_rx_for_bare_name                                      ), 'function'
+  T?.eq ( type_of regexes.get_rx_for_paren_name                                     ), 'function'
+  T?.eq ( type_of regexes.get_rx_for_start_paren_name                               ), 'function'
+  T?.eq ( type_of rx_for_any_name         = regexes.get_rx_for_any_name()           ), 'regex'
+  T?.eq ( type_of rx_for_bare_name        = regexes.get_rx_for_bare_name()          ), 'regex'
+  T?.eq ( type_of rx_for_paren_name       = regexes.get_rx_for_paren_name()         ), 'regex'
+  T?.eq ( type_of rx_for_start_paren_name = regexes.get_rx_for_start_paren_name()   ), 'regex'
   sqlx  = "22@foo @bar( baz @what's @that( @辻 oops @程　たたみ() @blah"
   #.........................................................................................................
   do ->
@@ -416,13 +418,11 @@ if require.main is module then do =>
   # test @dbay_macros_find_arguments
   # test @dbay_macros_works_without_any_declarations
   # @dbay_macros_demo_legal_chrs_in_identifiers()
-  @dbay_macros_regexen_2()
-  test @dbay_macros_regexen_2
   # @dbay_macros_regexen()
   # test @dbay_macros_regexen
   # test @dbay_macros_declarations
-  # @dbay_macros_simple_resolution()
-  # test @dbay_macros_simple_resolution
+  @dbay_macros_simple_resolution()
+  test @dbay_macros_simple_resolution
   # @dbay_macros_more_resolutions()
   # test @dbay_macros_more_resolutions
   # @dbay_macros_checks_for_leftovers()
