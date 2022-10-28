@@ -116,6 +116,85 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_regexen_2 = function(T, done) {
+    var rx;
+    // T?.halt_on_error()
+    rx = require('../../../apps/dbay-sql-macros/lib/regexes');
+    if (T != null) {
+      T.eq(rx.prefix, '@');
+    }
+    if (T != null) {
+      T.eq(type_of(rx.chrs.strict.allowed.tail), 'regex');
+    }
+    if (T != null) {
+      T.eq(type_of(rx.name), 'regex');
+    }
+    (function() {      //.........................................................................................................
+      /* NOTE U+3000 'Ideographic space' does not count as whitespace in SQLite */
+      /* NOTE we do not require any kind of word break; macros and parameters can appear anywhere */
+      var i, j, l, len, len1, len2, match, result, results, sqlx;
+      sqlx = "22@foo @bar( baz @what's @that( @辻 oops @程　たたみ() @blah";
+      //.......................................................................................................
+      debug('^43545^', rx.name);
+      result = (function() {
+        var ref1, results;
+        ref1 = sqlx.matchAll(rx.name);
+        results = [];
+        for (match of ref1) {
+          results.push({
+            index: match.index,
+            name: match[0]
+          });
+        }
+        return results;
+      })();
+      for (i = 0, len = result.length; i < len; i++) {
+        match = result[i];
+        urge('^43545^', match);
+      }
+      //.......................................................................................................
+      debug('^43545^', rx.bare_name);
+      result = (function() {
+        var ref1, results;
+        ref1 = sqlx.matchAll(rx.bare_name);
+        results = [];
+        for (match of ref1) {
+          results.push({
+            index: match.index,
+            name: match[0]
+          });
+        }
+        return results;
+      })();
+      for (j = 0, len1 = result.length; j < len1; j++) {
+        match = result[j];
+        urge('^43545^', match);
+      }
+      //.......................................................................................................
+      debug('^43545^', rx.paren_name);
+      result = (function() {
+        var ref1, results;
+        ref1 = sqlx.matchAll(rx.paren_name);
+        results = [];
+        for (match of ref1) {
+          results.push({
+            index: match.index,
+            name: match[0]
+          });
+        }
+        return results;
+      })();
+      results = [];
+      for (l = 0, len2 = result.length; l < len2; l++) {
+        match = result[l];
+        results.push(urge('^43545^', match));
+      }
+      return results;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.dbay_macros_declarations = function(T, done) {
     var DBay_sqlx;
     // T?.halt_on_error()
@@ -591,77 +670,36 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this._dbay_macros_demo_boundaries = function(T, done) {
-    /* see [*Regex Boundaries and Delimiters—Standard and
-     Advanced*](https://www.rexegg.com/regex-boundaries.html) */
-    var probe_3;
-    probe_3 = "cat,dog cat123 bird 45 cat";
-    (function() {      //.........................................................................................................
-      var A1, A1_re, cat_re, match, ref1, results;
-      whisper('^82-1^ ——————————————————————————————————————————————————————————————————————————————————————————————');
-      info('^82-2^', "DIY Boundary: between an ASCII letter and a non-ASCII letter");
-      A1_re = /(?:(?:(?<=^)|(?<![a-z]))(?=[a-z])|(?<=[a-z])(?:(?=$)|(?![a-z])))/;
-      A1 = A1_re.source;
-      cat_re = RegExp(`${A1}cat${A1}`, "g");
-      help('^82-3^', cat_re);
-      info('^82-4^', probe_3);
-      ref1 = probe_3.matchAll(cat_re);
-      results = [];
-      for (match of ref1) {
-        results.push(urge('^82-5^', match));
+  this.dbay_macros_demo_legal_chrs_in_identifiers = function(T, done) {
+    var DBay, db;
+    ({DBay} = require('../../../apps/dbay'));
+    db = new DBay();
+    //.........................................................................................................
+    db(function() {
+      var chr, cid, cid_hex, error, i, name, row, rows;
+      for (cid = i = 0x0000; i <= 65535; cid = ++i) {
+        cid_hex = '0x' + (cid.toString(16)).padStart(4, '0');
+        chr = String.fromCodePoint(cid);
+        name = `${chr}x`;
+        try {
+          // name  = "x#{chr}x"
+          rows = (function() {
+            var ref1, results;
+            ref1 = db(SQL`select 42 as ${name};`);
+            results = [];
+            for (row of ref1) {
+              results.push(row);
+            }
+            return results;
+          })();
+        } catch (error1) {
+          // debug '^434^', cid_hex, rows[ 0 ]
+          error = error1;
+          warn(cid_hex, GUY.trm.reverse(error.message));
+        }
       }
-      return results;
-    })();
-    (function() {      //.........................................................................................................
-      var LB, head, match, name_b, name_re, new_boundary, nr_re, pattern, ref1, ref2, ref3, ref4, results, tail, word_re;
-      whisper('^82-6^ ——————————————————————————————————————————————————————————————————————————————————————————————');
-      new_boundary = function(pattern) {
-        return RegExp(`(?:(?:(?<=^)|(?<!${pattern}))(?=${pattern})|(?<=${pattern}|)(?:(?=$)|(?!${pattern})))`).source;
-      };
-      // return ///
-      //   (?:
-      //     (?: (?<= ^ ) | (?<! #{cfg.tail} ) )
-      //     (?= #{cfg.head} )
-      //     |
-      //     (?<= #{cfg.tail} )
-      //     (?: (?= $ ) | (?! #{cfg.head} ) )
-      //     )
-      // ///.source
-      LB = new_boundary('[a-zA-Z]');
-      word_re = RegExp(`${LB}cat${LB}`, "g");
-      help('^82-7^', word_re);
-      ref1 = probe_3.matchAll(word_re);
-      for (match of ref1) {
-        urge('^82-8^', match);
-      }
-      nr_re = RegExp(`${LB}\\d+${LB}`, "g");
-      help('^82-9^', nr_re);
-      ref2 = probe_3.matchAll(nr_re);
-      for (match of ref2) {
-        urge('^82-10^', match);
-      }
-      //.......................................................................................................
-      head = '[a-zA-Z_]';
-      tail = '[a-zA-Z0-9_]';
-      name_b = new_boundary(head);
-      name_re = RegExp(`${LB}(?<name>${head}${tail}*)${LB}`, "g");
-      help('^82-11^', name_re);
-      ref3 = probe_3.matchAll(name_re);
-      for (match of ref3) {
-        urge('^82-12^', match);
-      }
-      //.......................................................................................................
-      pattern = '[a-zA-Z_][a-zA-Z0-9_]*';
-      name_b = new_boundary(pattern);
-      name_re = RegExp(`${LB}(?<name>${pattern})${LB}`, "g");
-      help('^82-13^', name_re);
-      ref4 = probe_3.matchAll(name_re);
-      results = [];
-      for (match of ref4) {
-        results.push(urge('^82-14^', match));
-      }
-      return results;
-    })();
+      return debug('^645^', cid_hex);
+    });
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -673,19 +711,23 @@
       // @dbay_macros_find_arguments()
       // test @dbay_macros_find_arguments
       // test @dbay_macros_works_without_any_declarations
-      // test @dbay_macros_regexen
-      // test @dbay_macros_declarations
-      // @dbay_macros_simple_resolution()
-      // test @dbay_macros_simple_resolution
-      // @dbay_macros_more_resolutions()
-      // test @dbay_macros_more_resolutions
-      // @dbay_macros_checks_for_leftovers()
-      // test @dbay_macros_checks_for_leftovers
-      return this._dbay_macros_demo_boundaries();
+      // @dbay_macros_demo_legal_chrs_in_identifiers()
+      this.dbay_macros_regexen_2();
+      return test(this.dbay_macros_regexen_2);
     })();
   }
 
-  // test @
+  // @dbay_macros_regexen()
+// test @dbay_macros_regexen
+// test @dbay_macros_declarations
+// @dbay_macros_simple_resolution()
+// test @dbay_macros_simple_resolution
+// @dbay_macros_more_resolutions()
+// test @dbay_macros_more_resolutions
+// @dbay_macros_checks_for_leftovers()
+// test @dbay_macros_checks_for_leftovers
+// @_dbay_macros_demo_boundaries()
+// test @
 
 }).call(this);
 
