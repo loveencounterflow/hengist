@@ -417,10 +417,10 @@ dtab                      = new Tbl { dba: null, }
   ### NOTE using a 'generic' DB connection w/out implicit macro handling ###
   db                = new DBay { macros: false, }
   #.........................................................................................................
-  m.declare SQL"""@declared_without_tx = whatever;"""
+  m.declare SQL"""@declared_without_tx() = whatever;"""
   T?.eq ( key for key of m._declarations ), [ '@declared_without_tx', ]
   db ->
-    m.declare SQL"""@declared_within_tx = whatever;"""
+    m.declare SQL"""@declared_within_tx() = whatever;"""
     T?.eq ( key for key of m._declarations ), [ '@declared_without_tx', '@declared_within_tx', ]
     db.rollback_transaction()
     return null
