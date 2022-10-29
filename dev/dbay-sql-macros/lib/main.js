@@ -381,9 +381,9 @@
     (function() {      //.........................................................................................................
       var m, sqlx;
       m = new DBay_sqlx();
-      m.declare(SQL`@add(     @a, @b ) = /*\\@add*/( @a + @b );`);
-      m.declare(SQL`@power(   @a, @b ) = /*\\@power*/( @a ** @b );`);
-      m.declare(SQL`@secret(  @a, @b ) = /*\\@secret*/( @power( @a, @b ) / @b );`);
+      m.declare(SQL`@add(     @a, @b ) = /*\\add*/( @a + @b );`);
+      m.declare(SQL`@power(   @a, @b ) = /*\\power*/( @a ** @b );`);
+      m.declare(SQL`@secret(  @a, @b ) = /*\\secret*/( @power( @a, @b ) / @b );`);
       sqlx = SQL`select @secret( @add( 1, 2 ), 3 ) as x;`;
       // _test '^t#6^', m, sqlx, SQL"""select /*@secret*/( /*@power*/( /*@add*/( 1 + 2 ) ** 3 ) / 3 ) as x;"""
       return m.resolve(sqlx);
@@ -674,27 +674,114 @@ answer;`) : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_dont_allow_undeclared_parameters = function(T, done) {
+    var DBay_sqlx, probe;
+    // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    probe = SQL`@macro( @parameter ) = ( @parameter * @undeclared + @invented );`;
+    (function() {      //.........................................................................................................
+      var e, m;
+      m = new DBay_sqlx();
+      try {
+        m.declare(probe);
+      } catch (error1) {
+        e = error1;
+        warn(reverse(e.message));
+      }
+      return null;
+    })();
+    (function() {      //.........................................................................................................
+      var m;
+      m = new DBay_sqlx();
+      if (T != null) {
+        T.throws(/unknown parameters '@undeclared', '@invented'/, function() {
+          return m.declare(probe);
+        });
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_dont_allow_reduplicated_parameters = function(T, done) {
+    var DBay_sqlx, probe;
+    // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    probe = SQL`@macro( @a, @parameter, @a, @parameter, @b ) = whatever;`;
+    (function() {      //.........................................................................................................
+      var e, m;
+      m = new DBay_sqlx();
+      try {
+        m.declare(probe);
+      } catch (error1) {
+        e = error1;
+        warn(reverse(e.message));
+      }
+      return null;
+    })();
+    (function() {      //.........................................................................................................
+      var m;
+      m = new DBay_sqlx();
+      if (T != null) {
+        T.throws(/duplicate parameters '@a', '@parameter'/, function() {
+          return m.declare(probe);
+        });
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_dont_allow_unprefixed_parameters = function(T, done) {
+    var DBay_sqlx, probe;
+    // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    probe = SQL`@macro( @a, naked, @b ) = whatever;`;
+    (function() {      //.........................................................................................................
+      var e, m;
+      m = new DBay_sqlx();
+      try {
+        m.declare(probe);
+      } catch (error1) {
+        e = error1;
+        warn(reverse(e.message));
+      }
+      return null;
+    })();
+    (function() {      //.........................................................................................................
+      var m;
+      m = new DBay_sqlx();
+      if (T != null) {
+        T.throws(/syntax error in parameters of declaration/, function() {
+          return m.declare(probe);
+        });
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.dbay_macros_dont_allow_name_reuse_or_recursive_usage = function(T, done) {
     var DBay_sqlx;
     // T?.halt_on_error()
     ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
     (function() {
-      var e, m;
+      var e, m, result;
       m = new DBay_sqlx();
       try {
-        m.declare(SQL`@foo_1( @foo_1 ) = whatever;`);
+        m.declare(SQL`@foo_1( @foo_1 ) = ( @foo_1 * @foo_1 );`);
       } catch (error1) {
         e = error1;
         warn(reverse(e.message));
       }
-      try {
-        return m.declare(SQL`@foo_2( @a, @a ) = whatever;`);
-      } catch (error1) {
-        e = error1;
-        return warn(reverse(e.message));
-      }
+      result = m.resolve(SQL`select @foo_1( 42 );`);
+      urge('^80-1^', rpr(result));
+      return T != null ? T.eq(result, SQL`select ( 42 * 42 );`) : void 0;
     })();
-    (function() {      // T?.throws /found unresolved macros @secret_power, @strange_thing/, -> m.resolve probe
+    (function() {
       var e, m;
       m = new DBay_sqlx();
       try {
@@ -704,15 +791,21 @@ answer;`) : void 0;
         warn(reverse(e.message));
       }
       try {
-        m.declare(SQL`@b( @a ) = (b @b );`);
+        m.declare(SQL`@b( @a ) = (b @a );`);
       } catch (error1) {
         e = error1;
         warn(reverse(e.message));
       }
-      urge('^80-1^', m.resolve("@a( 'b' )"));
-      urge('^80-1^', m.resolve("@b( 'a' )"));
-      urge('^80-1^', m.resolve("@a( @b( 'a' ) )"));
-      return urge('^80-1^', m.resolve("@b( @a( 'b' ) )"));
+      if (T != null) {
+        T.eq(m.resolve("@a( 'b' )"), SQL`(a 'b' )`);
+      }
+      if (T != null) {
+        T.eq(m.resolve("@b( 'a' )"), SQL`(b 'a' )`);
+      }
+      if (T != null) {
+        T.eq(m.resolve("@a( @b( 'a' ) )"), SQL`(a (b 'a' ) )`);
+      }
+      return T != null ? T.eq(m.resolve("@b( @a( 'b' ) )"), SQL`(b (a 'b' ) )`) : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -882,6 +975,16 @@ answer;`) : void 0;
       // @_dbay_macros_demo_boundaries()
       // @dbay_vanishing_terminator()
       // test @dbay_vanishing_terminator
+      // @dbay_macros_dont_allow_name_reuse_or_recursive_usage()
+      // test @dbay_macros_dont_allow_name_reuse_or_recursive_usage
+      // @dbay_macros_dont_allow_undeclared_parameters()
+      // test @dbay_macros_dont_allow_undeclared_parameters
+      // @dbay_macros_dont_allow_reduplicated_parameters()
+      // test @dbay_macros_dont_allow_reduplicated_parameters
+      // @dbay_macros_dont_allow_unprefixed_parameters()
+      // test @dbay_macros_dont_allow_unprefixed_parameters
+      // @dbay_macros_declarations_undone_on_rollback_or_not()
+      // test @dbay_macros_declarations_undone_on_rollback_or_not
       return test(this);
     })();
   }
