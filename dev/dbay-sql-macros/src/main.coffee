@@ -164,9 +164,9 @@ dtab                      = new Tbl { dba: null, }
   #.........................................................................................................
   do ->
     m     = new DBay_sqlx()
-    m.declare SQL"""@add(     @a, @b ) = /*\\@add*/( @a + @b );"""
-    m.declare SQL"""@power(   @a, @b ) = /*\\@power*/( @a ** @b );"""
-    m.declare SQL"""@secret(  @a, @b ) = /*\\@secret*/( @power( @a, @b ) / @b );"""
+    m.declare SQL"""@add(     @a, @b ) = /*\\add*/( @a + @b );"""
+    m.declare SQL"""@power(   @a, @b ) = /*\\power*/( @a ** @b );"""
+    m.declare SQL"""@secret(  @a, @b ) = /*\\secret*/( @power( @a, @b ) / @b );"""
     sqlx  = SQL"""select @secret( @add( 1, 2 ), 3 ) as x;"""
     # _test '^t#6^', m, sqlx, SQL"""select /*@secret*/( /*@power*/( /*@add*/( 1 + 2 ) ** 3 ) / 3 ) as x;"""
     m.resolve sqlx
@@ -378,22 +378,77 @@ dtab                      = new Tbl { dba: null, }
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@dbay_macros_dont_allow_undeclared_parameters = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  probe             = SQL"""@macro( @parameter ) = ( @parameter * @undeclared + @invented );"""
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    try m.declare probe catch e then warn reverse e.message
+    return null
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    T?.throws /unknown parameters '@undeclared', '@invented'/, -> m.declare probe
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dbay_macros_dont_allow_reduplicated_parameters = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  probe             = SQL"""@macro( @a, @parameter, @a, @parameter, @b ) = whatever;"""
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    try m.declare probe catch e then warn reverse e.message
+    return null
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    T?.throws /duplicate parameters '@a', '@parameter'/, -> m.declare probe
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dbay_macros_dont_allow_unprefixed_parameters = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  probe             = SQL"""@macro( @a, naked, @b ) = whatever;"""
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    try m.declare probe catch e then warn reverse e.message
+    return null
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    T?.throws /syntax error in parameters of declaration/, -> m.declare probe
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @dbay_macros_dont_allow_name_reuse_or_recursive_usage = ( T, done ) ->
   # T?.halt_on_error()
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
   do ->
     m = new DBay_sqlx()
-    try m.declare SQL"""@foo_1( @foo_1 ) = whatever;""" catch e then warn reverse e.message
-    try m.declare SQL"""@foo_2( @a, @a ) = whatever;""" catch e then warn reverse e.message
-  # T?.throws /found unresolved macros @secret_power, @strange_thing/, -> m.resolve probe
+    try m.declare SQL"""@foo_1( @foo_1 ) = ( @foo_1 * @foo_1 );""" catch e then warn reverse e.message
+    result = m.resolve SQL"""select @foo_1( 42 );"""
+    urge '^80-1^', rpr result
+    T?.eq result, SQL"""select ( 42 * 42 );"""
   do ->
     m = new DBay_sqlx()
     try m.declare SQL"""@a( @b ) = (a @b );""" catch e then warn reverse e.message
-    try m.declare SQL"""@b( @a ) = (b @b );""" catch e then warn reverse e.message
-    urge '^80-1^', m.resolve "@a( 'b' )"
-    urge '^80-1^', m.resolve "@b( 'a' )"
-    urge '^80-1^', m.resolve "@a( @b( 'a' ) )"
-    urge '^80-1^', m.resolve "@b( @a( 'b' ) )"
+    try m.declare SQL"""@b( @a ) = (b @a );""" catch e then warn reverse e.message
+    T?.eq ( m.resolve "@a( 'b' )"       ), SQL"""(a 'b' )"""
+    T?.eq ( m.resolve "@b( 'a' )"       ), SQL"""(b 'a' )"""
+    T?.eq ( m.resolve "@a( @b( 'a' ) )" ), SQL"""(a (b 'a' ) )"""
+    T?.eq ( m.resolve "@b( @a( 'b' ) )" ), SQL"""(b (a 'b' ) )"""
   #.........................................................................................................
   done?()
 
@@ -511,6 +566,15 @@ if require.main is module then do =>
   # @_dbay_macros_demo_boundaries()
   # @dbay_vanishing_terminator()
   # test @dbay_vanishing_terminator
+  # @dbay_macros_dont_allow_name_reuse_or_recursive_usage()
+  # test @dbay_macros_dont_allow_name_reuse_or_recursive_usage
+  # @dbay_macros_dont_allow_undeclared_parameters()
+  # test @dbay_macros_dont_allow_undeclared_parameters
+  # @dbay_macros_dont_allow_reduplicated_parameters()
+  # test @dbay_macros_dont_allow_reduplicated_parameters
+  # @dbay_macros_dont_allow_unprefixed_parameters()
+  # test @dbay_macros_dont_allow_unprefixed_parameters
+  # @dbay_macros_declarations_undone_on_rollback_or_not()
+  # test @dbay_macros_declarations_undone_on_rollback_or_not
   test @
-
 
