@@ -474,12 +474,19 @@ dtab                      = new Tbl { dba: null, }
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
   m                 = new DBay_sqlx()
   m.declare SQL"""@mymacro( @a ) = FOO@a|BAR;"""
+  m.declare SQL"""@othermacro( @a ) = FOO@a||BAR;"""
   #.........................................................................................................
   do ->
     sqlx              = "@mymacro( value_of_a )"
     result            = m.resolve sqlx
     urge '^50-8^', result
     T?.eq result, "FOOvalue_of_aBAR"
+  #.........................................................................................................
+  do ->
+    sqlx              = "@othermacro( value_of_a )"
+    result            = m.resolve sqlx
+    urge '^50-8^', result
+    T?.eq result, "FOOvalue_of_a|BAR"
   #.........................................................................................................
   done?()
 
