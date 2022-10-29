@@ -843,12 +843,20 @@ answer;`) : void 0;
     ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
     m = new DBay_sqlx();
     m.declare(SQL`@mymacro( @a ) = FOO@a|BAR;`);
+    m.declare(SQL`@othermacro( @a ) = FOO@a||BAR;`);
     (function() {      //.........................................................................................................
       var result, sqlx;
       sqlx = "@mymacro( value_of_a )";
       result = m.resolve(sqlx);
       urge('^50-8^', result);
       return T != null ? T.eq(result, "FOOvalue_of_aBAR") : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var result, sqlx;
+      sqlx = "@othermacro( value_of_a )";
+      result = m.resolve(sqlx);
+      urge('^50-8^', result);
+      return T != null ? T.eq(result, "FOOvalue_of_a|BAR") : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
   };
