@@ -84,10 +84,10 @@ dtab                      = new Tbl { dba: null, }
   #.........................................................................................................
   do ->
     whisper '^49-10^', rx_for_parameter_a
-    result = ( { index: match.index, name: match[ 0 ], } for match from "foo@a|bar".matchAll rx_for_parameter_a   )
+    result = ( { index: match.index, name: match[ 0 ], } for match from "foo@a%bar".matchAll rx_for_parameter_a   )
     urge '^49-11^', result
     info '^49-12^', match for match in result
-    T?.eq result, [ { index: 3, name: '@a|' } ]
+    T?.eq result, [ { index: 3, name: '@a' } ]
   #.........................................................................................................
   do ->
     whisper '^49-13^', rx_for_paren_name
@@ -566,12 +566,12 @@ dtab                      = new Tbl { dba: null, }
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@dbay_vanishing_terminator = ( T, done ) ->
+@dbay_use_escape_as_terminator = ( T, done ) ->
   # T?.halt_on_error()
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
   m                 = new DBay_sqlx()
-  m.declare SQL"""@mymacro( @a ) = FOO@a|BAR;"""
-  m.declare SQL"""@othermacro( @a ) = FOO@a||BAR;"""
+  m.declare SQL"""@mymacro( @a ) = FOO@a%BAR;"""
+  m.declare SQL"""@othermacro( @a ) = FOO@a%%BAR;"""
   #.........................................................................................................
   do ->
     sqlx              = "@mymacro( value_of_a )"
@@ -583,7 +583,16 @@ dtab                      = new Tbl { dba: null, }
     sqlx              = "@othermacro( value_of_a )"
     result            = m.resolve sqlx
     urge '^50-8^', result
-    T?.eq result, "FOOvalue_of_a|BAR"
+    T?.eq result, "FOOvalue_of_a%BAR"
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dbm_replace_escape = ( T, done ) ->
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  m                 = new DBay_sqlx()
+  sqlx              = SQL"""foo %bar() baz 0% 1%% 1%%% 2%%%% 2%%%%% 3%%%%%% 3%%%%%%% 4%%%%%%%%"""
+  T?.eq ( m.resolve sqlx ), "foo bar() baz 0 1% 1% 2%% 2%% 3%%% 3%%% 4%%%%"
   #.........................................................................................................
   done?()
 
@@ -605,9 +614,8 @@ if require.main is module then do =>
   # test @dbay_macros_more_resolutions
   # @dbay_macros_checks_for_leftovers()
   # test @dbay_macros_checks_for_leftovers
-  # @_dbay_macros_demo_boundaries()
-  # @dbay_vanishing_terminator()
-  # test @dbay_vanishing_terminator
+  # @dbay_use_escape_as_terminator()
+  # test @dbay_use_escape_as_terminator
   # @dbay_macros_dont_allow_circular_references()
   # test @dbay_macros_dont_allow_circular_references
   # @dbay_macros_dont_allow_undeclared_parameters()
@@ -618,8 +626,8 @@ if require.main is module then do =>
   # test @dbay_macros_dont_allow_unprefixed_parameters
   # @dbay_macros_declarations_undone_on_rollback_or_not()
   # test @dbay_macros_declarations_undone_on_rollback_or_not
-  # @dbay_macros_parameter_name_clashes()
-  # test @dbay_macros_parameter_name_clashes
+  # @dbm_replace_escape()
+  # test @dbm_replace_escape
   test @
 
 
