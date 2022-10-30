@@ -379,7 +379,7 @@
       m.declare(SQL`@hoax( @a ) = @a || '%@a' || @a;`);
       sqlx = SQL`select @hoax( 'x' ) as hoax;`;
       sql = SQL`select 'x' || '@a' || 'x' as hoax;`;
-      return _test('^t#4^', m, sqlx, sql);
+      return _test('^t#5^', m, sqlx, sql);
     })();
     (function() {      //.........................................................................................................
       var m, sql, sqlx;
@@ -389,27 +389,54 @@
       m.declare(SQL`@hoax( @a ) = @a || '\\@a' || @a;`);
       sqlx = SQL`select @hoax( 'x' ) as hoax;`;
       sql = SQL`select 'x' || '@a' || 'x' as hoax;`;
-      return _test('^t#4^', m, sqlx, sql);
+      return _test('^t#6^', m, sqlx, sql);
     })();
     (function() {      //.........................................................................................................
       var m, sqlx;
       m = new DBay_sqlx();
       m.declare(SQL`@secret_power( @a, @b ) = @power( @a, @b ) / @b;`);
       sqlx = SQL`select @secret_power( 3, 2 ) as x;`;
-      return _test('^t#5^', m, sqlx, null, /unknown macro '@power'/);
+      return _test('^t#7^', m, sqlx, null, /unknown macro '@power'/);
     })();
     (function() {      //.........................................................................................................
       var m, sqlx;
       m = new DBay_sqlx();
-      m.declare(SQL`@add(     @a, @b ) = /*\\add*/( @a + @b );`);
-      m.declare(SQL`@power(   @a, @b ) = /*\\power*/( @a ** @b );`);
-      m.declare(SQL`@secret(  @a, @b ) = /*\\secret*/( @power( @a, @b ) / @b );`);
+      m.declare(SQL`@add(     @a, @b ) = /*add*/( @a + @b );`);
+      m.declare(SQL`@power(   @a, @b ) = /*power*/( @a ** @b );`);
+      m.declare(SQL`@secret(  @a, @b ) = /*secret*/( @power( @a, @b ) / @b );`);
       sqlx = SQL`select @secret( @add( 1, 2 ), 3 ) as x;`;
-      // _test '^t#6^', m, sqlx, SQL"""select /*@secret*/( /*@power*/( /*@add*/( 1 + 2 ) ** 3 ) / 3 ) as x;"""
+      _test('^t#8^', m, sqlx, SQL`select /*secret*/( /*power*/( /*add*/( 1 + 2 ) ** 3 ) / 3 ) as x;`);
       return m.resolve(sqlx);
+    })();
+    (function() {      //.........................................................................................................
+      var m, sqlx;
+      m = new DBay_sqlx();
+      m.declare(SQL`@call( @f ) = @f%();`);
+      sqlx = SQL`select @call( myfunction );`;
+      _test('^t#9^', m, sqlx, SQL`select myfunction();`);
+      return m.resolve(sqlx);
+    })();
+    (function() {      //.........................................................................................................
+      var m, sqlx;
+      m = new DBay_sqlx();
+      m.declare(SQL`@call( @f ) = @f();`);
+      sqlx = SQL`select @call( myfunction );`;
+      return _test('^t#10^', m, sqlx, null, /unknown macro '@f'/);
     })();
     return typeof done === "function" ? done() : void 0;
   };
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // @xxx = ( T, done ) ->
+  //   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  //   #.........................................................................................................
+  //   do ->
+  //     m     = new DBay_sqlx()
+  //     m.declare SQL"""@call( @f ) = @f%();"""
+  //     sqlx  = SQL"""select @call( myfunction );"""
+  //     debug m.resolve sqlx
+  //   #.........................................................................................................
+  //   done?()
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_macros_more_resolutions = function(T, done) {
@@ -1052,28 +1079,29 @@ answer;`) : void 0;
       // test @dbay_macros_regexen
       // test @dbay_macros_declarations
       // @dbay_macros_simple_resolution()
-      // test @dbay_macros_simple_resolution
-      // @dbay_macros_more_resolutions()
-      // test @dbay_macros_more_resolutions
-      // @dbay_macros_checks_for_leftovers()
-      // test @dbay_macros_checks_for_leftovers
-      // @dbay_use_escape_as_terminator()
-      // test @dbay_use_escape_as_terminator
-      // @dbay_macros_dont_allow_circular_references()
-      // test @dbay_macros_dont_allow_circular_references
-      // @dbay_macros_dont_allow_undeclared_parameters()
-      // test @dbay_macros_dont_allow_undeclared_parameters
-      // @dbay_macros_dont_allow_reduplicated_parameters()
-      // test @dbay_macros_dont_allow_reduplicated_parameters
-      // @dbay_macros_dont_allow_unprefixed_parameters()
-      // test @dbay_macros_dont_allow_unprefixed_parameters
-      // @dbay_macros_declarations_undone_on_rollback_or_not()
-      // test @dbay_macros_declarations_undone_on_rollback_or_not
-      // @dbm_replace_escape()
-      // test @dbm_replace_escape
-      return test(this);
+      return test(this.dbay_macros_simple_resolution);
     })();
   }
+
+  // @dbay_macros_more_resolutions()
+// test @dbay_macros_more_resolutions
+// @dbay_macros_checks_for_leftovers()
+// test @dbay_macros_checks_for_leftovers
+// @dbay_use_escape_as_terminator()
+// test @dbay_use_escape_as_terminator
+// @dbay_macros_dont_allow_circular_references()
+// test @dbay_macros_dont_allow_circular_references
+// @dbay_macros_dont_allow_undeclared_parameters()
+// test @dbay_macros_dont_allow_undeclared_parameters
+// @dbay_macros_dont_allow_reduplicated_parameters()
+// test @dbay_macros_dont_allow_reduplicated_parameters
+// @dbay_macros_dont_allow_unprefixed_parameters()
+// test @dbay_macros_dont_allow_unprefixed_parameters
+// @dbay_macros_declarations_undone_on_rollback_or_not()
+// test @dbay_macros_declarations_undone_on_rollback_or_not
+// @dbm_replace_escape()
+// test @dbm_replace_escape
+// test @
 
 }).call(this);
 
