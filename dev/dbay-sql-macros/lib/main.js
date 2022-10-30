@@ -764,7 +764,7 @@ answer;`) : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.dbay_macros_dont_allow_name_reuse_or_recursive_usage = function(T, done) {
+  this.dbay_macros_allow_name_reuse_between_macros_and_parameters = function(T, done) {
     var DBay_sqlx;
     // T?.halt_on_error()
     ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
@@ -806,6 +806,53 @@ answer;`) : void 0;
         T.eq(m.resolve("@a( @b( 'a' ) )"), SQL`(a (b 'a' ) )`);
       }
       return T != null ? T.eq(m.resolve("@b( @a( 'b' ) )"), SQL`(b (a 'b' ) )`) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_macros_dont_allow_circular_references = function(T, done) {
+    var DBay_sqlx;
+    // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    (function() {      //.........................................................................................................
+      var e, m, probe;
+      probe = SQL`@recursive( @x ) = ( @recursive( @x ) + @recursive( @x ) );`;
+      m = new DBay_sqlx();
+      try {
+        m.declare(probe);
+      } catch (error1) {
+        e = error1;
+        warn(reverse(e.message));
+      }
+      return T != null ? T.throws(/detected circular references/, function() {
+        return m.declare(probe);
+      }) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var m;
+      m = new DBay_sqlx();
+      m.declare(SQL`@f( @x ) = ( @g( @x ) + @h( @x ) );`);
+      m.declare(SQL`@g( @x ) = sin( @x );`);
+      m.declare(SQL`@h( @x ) = cos( @x ) / @k( @x );`);
+      help('^5345^', rpr((require('ltsort')).group(m._topograph)));
+      return T != null ? T.throws(/detected circular references/, function() {
+        return m.declare(SQL`@k( @x ) = @f( @x ) * @g( @x );`);
+      }) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var m, matcher, probe, result;
+      m = new DBay_sqlx();
+      m.declare(SQL`@add( @a, @b ) = ( @a + @b );`);
+      m.declare(SQL`@mul( @a, @b ) = ( @a * @b );`);
+      probe = SQL`select @add( @mul( @add( 1, 2 ), 3 ), @add( 4, @mul( 5, 6 ) ) ) as p;`;
+      matcher = SQL`select ( ( ( 1 + 2 ) * 3 ) + ( 4 + ( 5 * 6 ) ) ) as p;`;
+      result = m.resolve(probe);
+      help('^5345^', rpr(result));
+      if (T != null) {
+        T.eq(result, matcher);
+      }
+      return help('^5345^', rpr((require('ltsort')).group(m._topograph)));
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -975,8 +1022,8 @@ answer;`) : void 0;
       // @_dbay_macros_demo_boundaries()
       // @dbay_vanishing_terminator()
       // test @dbay_vanishing_terminator
-      // @dbay_macros_dont_allow_name_reuse_or_recursive_usage()
-      // test @dbay_macros_dont_allow_name_reuse_or_recursive_usage
+      // @dbay_macros_dont_allow_circular_references()
+      // test @dbay_macros_dont_allow_circular_references
       // @dbay_macros_dont_allow_undeclared_parameters()
       // test @dbay_macros_dont_allow_undeclared_parameters
       // @dbay_macros_dont_allow_reduplicated_parameters()
@@ -985,6 +1032,8 @@ answer;`) : void 0;
       // test @dbay_macros_dont_allow_unprefixed_parameters
       // @dbay_macros_declarations_undone_on_rollback_or_not()
       // test @dbay_macros_declarations_undone_on_rollback_or_not
+      // @dbay_macros_parameter_name_clashes()
+      // test @dbay_macros_parameter_name_clashes
       return test(this);
     })();
   }
