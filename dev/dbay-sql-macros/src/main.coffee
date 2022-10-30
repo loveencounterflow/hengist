@@ -37,6 +37,8 @@ dtab                      = new Tbl { dba: null, }
 #-----------------------------------------------------------------------------------------------------------
 @dbay_macros_regexen = ( T, done ) ->
   # T?.halt_on_error()
+  { DBay_sqlx } = require '../../../apps/dbay-sql-macros'
+  m             = new DBay_sqlx()
   regexes = require '../../../apps/dbay-sql-macros/lib/regexes'
   T?.eq ( type_of regexes.rx.chrs.strict.allowed.head                               ), 'regex'
   T?.eq ( type_of regexes.rx.chrs.strict.allowed.tail                               ), 'regex'
@@ -52,11 +54,11 @@ dtab                      = new Tbl { dba: null, }
   T?.eq ( type_of regexes.get_rx_for_bare_name                                      ), 'function'
   T?.eq ( type_of regexes.get_rx_for_paren_name                                     ), 'function'
   T?.eq ( type_of regexes.get_rx_for_start_paren_name                               ), 'function'
-  T?.eq ( type_of rx_for_any_name         = regexes.get_rx_for_any_name()           ), 'regex'
-  T?.eq ( type_of rx_for_bare_name        = regexes.get_rx_for_bare_name()          ), 'regex'
-  T?.eq ( type_of rx_for_paren_name       = regexes.get_rx_for_paren_name()         ), 'regex'
-  T?.eq ( type_of rx_for_start_paren_name = regexes.get_rx_for_start_paren_name()   ), 'regex'
-  T?.eq ( type_of rx_for_parameter_a      = regexes.get_rx_for_parameter 'practical', '|', '@a' ), 'regex'
+  T?.eq ( type_of rx_for_any_name         = regexes.get_rx_for_any_name         m.cfg ), 'regex'
+  T?.eq ( type_of rx_for_bare_name        = regexes.get_rx_for_bare_name        m.cfg ), 'regex'
+  T?.eq ( type_of rx_for_paren_name       = regexes.get_rx_for_paren_name       m.cfg ), 'regex'
+  T?.eq ( type_of rx_for_start_paren_name = regexes.get_rx_for_start_paren_name m.cfg ), 'regex'
+  T?.eq ( type_of rx_for_parameter_a      = regexes.get_rx_for_parameter        m.cfg, '@a' ), 'regex'
   sqlx  = "22@foo @bar( baz @what's @that( @辻 oops @程　たたみ() @blah"
   #.........................................................................................................
   do ->
@@ -151,6 +153,13 @@ dtab                      = new Tbl { dba: null, }
   #.........................................................................................................
   do ->
     m     = new DBay_sqlx()
+    m.declare SQL"""@hoax( @a ) = @a || '%@a' || @a;"""
+    sqlx  = SQL"""select @hoax( 'x' ) as hoax;"""
+    sql   = SQL"""select 'x' || '@a' || 'x' as hoax;"""
+    _test '^t#4^', m, sqlx, sql
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx { escape: '\\', }
     m.declare SQL"""@hoax( @a ) = @a || '\\@a' || @a;"""
     sqlx  = SQL"""select @hoax( 'x' ) as hoax;"""
     sql   = SQL"""select 'x' || '@a' || 'x' as hoax;"""
@@ -469,6 +478,7 @@ dtab                      = new Tbl { dba: null, }
     m.declare SQL"""@g( @x ) = sin( @x );"""
     m.declare SQL"""@h( @x ) = cos( @x ) / @k( @x );"""
     help '^5345^', rpr ( require 'ltsort' ).group m._topograph
+    try m.declare SQL"""@k( @x ) = @f( @x ) * @g( @x );""" catch e then warn reverse e.message
     T?.throws /detected circular references/, -> m.declare SQL"""@k( @x ) = @f( @x ) * @g( @x );"""
   #.........................................................................................................
   do ->
