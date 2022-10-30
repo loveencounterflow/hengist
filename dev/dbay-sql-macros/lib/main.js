@@ -31,8 +31,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_macros_regexen = function(T, done) {
-    var regexes, rx_for_any_name, rx_for_bare_name, rx_for_parameter_a, rx_for_paren_name, rx_for_start_paren_name, sqlx;
+    var DBay_sqlx, m, regexes, rx_for_any_name, rx_for_bare_name, rx_for_parameter_a, rx_for_paren_name, rx_for_start_paren_name, sqlx;
     // T?.halt_on_error()
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    m = new DBay_sqlx();
     regexes = require('../../../apps/dbay-sql-macros/lib/regexes');
     if (T != null) {
       T.eq(type_of(regexes.rx.chrs.strict.allowed.head), 'regex');
@@ -77,19 +79,19 @@
       T.eq(type_of(regexes.get_rx_for_start_paren_name), 'function');
     }
     if (T != null) {
-      T.eq(type_of(rx_for_any_name = regexes.get_rx_for_any_name()), 'regex');
+      T.eq(type_of(rx_for_any_name = regexes.get_rx_for_any_name(m.cfg)), 'regex');
     }
     if (T != null) {
-      T.eq(type_of(rx_for_bare_name = regexes.get_rx_for_bare_name()), 'regex');
+      T.eq(type_of(rx_for_bare_name = regexes.get_rx_for_bare_name(m.cfg)), 'regex');
     }
     if (T != null) {
-      T.eq(type_of(rx_for_paren_name = regexes.get_rx_for_paren_name()), 'regex');
+      T.eq(type_of(rx_for_paren_name = regexes.get_rx_for_paren_name(m.cfg)), 'regex');
     }
     if (T != null) {
-      T.eq(type_of(rx_for_start_paren_name = regexes.get_rx_for_start_paren_name()), 'regex');
+      T.eq(type_of(rx_for_start_paren_name = regexes.get_rx_for_start_paren_name(m.cfg)), 'regex');
     }
     if (T != null) {
-      T.eq(type_of(rx_for_parameter_a = regexes.get_rx_for_parameter('practical', '|', '@a')), 'regex');
+      T.eq(type_of(rx_for_parameter_a = regexes.get_rx_for_parameter(m.cfg, '@a')), 'regex');
     }
     sqlx = "22@foo @bar( baz @what's @that( @辻 oops @程　たたみ() @blah";
     (function() {      //.........................................................................................................
@@ -366,6 +368,16 @@
     (function() {      //.........................................................................................................
       var m, sql, sqlx;
       m = new DBay_sqlx();
+      m.declare(SQL`@hoax( @a ) = @a || '%@a' || @a;`);
+      sqlx = SQL`select @hoax( 'x' ) as hoax;`;
+      sql = SQL`select 'x' || '@a' || 'x' as hoax;`;
+      return _test('^t#4^', m, sqlx, sql);
+    })();
+    (function() {      //.........................................................................................................
+      var m, sql, sqlx;
+      m = new DBay_sqlx({
+        escape: '\\'
+      });
       m.declare(SQL`@hoax( @a ) = @a || '\\@a' || @a;`);
       sqlx = SQL`select @hoax( 'x' ) as hoax;`;
       sql = SQL`select 'x' || '@a' || 'x' as hoax;`;
@@ -830,12 +842,18 @@ answer;`) : void 0;
       }) : void 0;
     })();
     (function() {      //.........................................................................................................
-      var m;
+      var e, m;
       m = new DBay_sqlx();
       m.declare(SQL`@f( @x ) = ( @g( @x ) + @h( @x ) );`);
       m.declare(SQL`@g( @x ) = sin( @x );`);
       m.declare(SQL`@h( @x ) = cos( @x ) / @k( @x );`);
       help('^5345^', rpr((require('ltsort')).group(m._topograph)));
+      try {
+        m.declare(SQL`@k( @x ) = @f( @x ) * @g( @x );`);
+      } catch (error1) {
+        e = error1;
+        warn(reverse(e.message));
+      }
       return T != null ? T.throws(/detected circular references/, function() {
         return m.declare(SQL`@k( @x ) = @f( @x ) * @g( @x );`);
       }) : void 0;
