@@ -369,6 +369,14 @@
       var m, sql, sqlx;
       m = new DBay_sqlx();
       m.declare(SQL`@hoax( @a ) = @a || '%@a' || @a;`);
+      sqlx = SQL`select %@hoax( 'x' ) as hoax;`;
+      sql = SQL`select @hoax( 'x' ) as hoax;`;
+      return _test('^t#4^', m, sqlx, sql);
+    })();
+    (function() {      //.........................................................................................................
+      var m, sql, sqlx;
+      m = new DBay_sqlx();
+      m.declare(SQL`@hoax( @a ) = @a || '%@a' || @a;`);
       sqlx = SQL`select @hoax( 'x' ) as hoax;`;
       sql = SQL`select 'x' || '@a' || 'x' as hoax;`;
       return _test('^t#4^', m, sqlx, sql);
