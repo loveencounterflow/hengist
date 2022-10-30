@@ -432,7 +432,7 @@ dtab                      = new Tbl { dba: null, }
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@dbay_macros_dont_allow_name_reuse_or_recursive_usage = ( T, done ) ->
+@dbay_macros_allow_name_reuse_between_macros_and_parameters = ( T, done ) ->
   # T?.halt_on_error()
   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
   do ->
@@ -449,6 +449,38 @@ dtab                      = new Tbl { dba: null, }
     T?.eq ( m.resolve "@b( 'a' )"       ), SQL"""(b 'a' )"""
     T?.eq ( m.resolve "@a( @b( 'a' ) )" ), SQL"""(a (b 'a' ) )"""
     T?.eq ( m.resolve "@b( @a( 'b' ) )" ), SQL"""(b (a 'b' ) )"""
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dbay_macros_dont_allow_circular_references = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+  #.........................................................................................................
+  do ->
+    probe = SQL"""@recursive( @x ) = ( @recursive( @x ) + @recursive( @x ) );"""
+    m = new DBay_sqlx()
+    try m.declare probe catch e then warn reverse e.message
+    T?.throws /detected circular references/, -> m.declare probe
+  #.........................................................................................................
+  do ->
+    m = new DBay_sqlx()
+    m.declare SQL"""@f( @x ) = ( @g( @x ) + @h( @x ) );"""
+    m.declare SQL"""@g( @x ) = sin( @x );"""
+    m.declare SQL"""@h( @x ) = cos( @x ) / @k( @x );"""
+    help '^5345^', rpr ( require 'ltsort' ).group m._topograph
+    T?.throws /detected circular references/, -> m.declare SQL"""@k( @x ) = @f( @x ) * @g( @x );"""
+  #.........................................................................................................
+  do ->
+    m = new DBay_sqlx()
+    m.declare SQL"""@add( @a, @b ) = ( @a + @b );"""
+    m.declare SQL"""@mul( @a, @b ) = ( @a * @b );"""
+    probe   = SQL"""select @add( @mul( @add( 1, 2 ), 3 ), @add( 4, @mul( 5, 6 ) ) ) as p;"""
+    matcher = SQL"""select ( ( ( 1 + 2 ) * 3 ) + ( 4 + ( 5 * 6 ) ) ) as p;"""
+    result  = m.resolve probe
+    help '^5345^', rpr result
+    T?.eq result, matcher
+    help '^5345^', rpr ( require 'ltsort' ).group m._topograph
   #.........................................................................................................
   done?()
 
@@ -566,8 +598,8 @@ if require.main is module then do =>
   # @_dbay_macros_demo_boundaries()
   # @dbay_vanishing_terminator()
   # test @dbay_vanishing_terminator
-  # @dbay_macros_dont_allow_name_reuse_or_recursive_usage()
-  # test @dbay_macros_dont_allow_name_reuse_or_recursive_usage
+  # @dbay_macros_dont_allow_circular_references()
+  # test @dbay_macros_dont_allow_circular_references
   # @dbay_macros_dont_allow_undeclared_parameters()
   # test @dbay_macros_dont_allow_undeclared_parameters
   # @dbay_macros_dont_allow_reduplicated_parameters()
@@ -576,5 +608,8 @@ if require.main is module then do =>
   # test @dbay_macros_dont_allow_unprefixed_parameters
   # @dbay_macros_declarations_undone_on_rollback_or_not()
   # test @dbay_macros_declarations_undone_on_rollback_or_not
+  # @dbay_macros_parameter_name_clashes()
+  # test @dbay_macros_parameter_name_clashes
   test @
+
 
