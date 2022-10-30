@@ -154,6 +154,13 @@ dtab                      = new Tbl { dba: null, }
   do ->
     m     = new DBay_sqlx()
     m.declare SQL"""@hoax( @a ) = @a || '%@a' || @a;"""
+    sqlx  = SQL"""select %@hoax( 'x' ) as hoax;"""
+    sql   = SQL"""select @hoax( 'x' ) as hoax;"""
+    _test '^t#4^', m, sqlx, sql
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    m.declare SQL"""@hoax( @a ) = @a || '%@a' || @a;"""
     sqlx  = SQL"""select @hoax( 'x' ) as hoax;"""
     sql   = SQL"""select 'x' || '@a' || 'x' as hoax;"""
     _test '^t#4^', m, sqlx, sql
