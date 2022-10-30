@@ -216,7 +216,7 @@
       whisper('^49-10^', rx_for_parameter_a);
       result = (function() {
         var ref1, results;
-        ref1 = "foo@a|bar".matchAll(rx_for_parameter_a);
+        ref1 = "foo@a%bar".matchAll(rx_for_parameter_a);
         results = [];
         for (match of ref1) {
           results.push({
@@ -234,7 +234,7 @@
       return T != null ? T.eq(result, [
         {
           index: 3,
-          name: '@a|'
+          name: '@a'
         }
       ]) : void 0;
     })();
@@ -995,13 +995,13 @@ answer;`) : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.dbay_vanishing_terminator = function(T, done) {
+  this.dbay_use_escape_as_terminator = function(T, done) {
     var DBay_sqlx, m;
     // T?.halt_on_error()
     ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
     m = new DBay_sqlx();
-    m.declare(SQL`@mymacro( @a ) = FOO@a|BAR;`);
-    m.declare(SQL`@othermacro( @a ) = FOO@a||BAR;`);
+    m.declare(SQL`@mymacro( @a ) = FOO@a%BAR;`);
+    m.declare(SQL`@othermacro( @a ) = FOO@a%%BAR;`);
     (function() {      //.........................................................................................................
       var result, sqlx;
       sqlx = "@mymacro( value_of_a )";
@@ -1014,8 +1014,20 @@ answer;`) : void 0;
       sqlx = "@othermacro( value_of_a )";
       result = m.resolve(sqlx);
       urge('^50-8^', result);
-      return T != null ? T.eq(result, "FOOvalue_of_a|BAR") : void 0;
+      return T != null ? T.eq(result, "FOOvalue_of_a%BAR") : void 0;
     })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbm_replace_escape = function(T, done) {
+    var DBay_sqlx, m, sqlx;
+    ({DBay_sqlx} = require('../../../apps/dbay-sql-macros'));
+    m = new DBay_sqlx();
+    sqlx = SQL`foo %bar() baz 0% 1%% 1%%% 2%%%% 2%%%%% 3%%%%%% 3%%%%%%% 4%%%%%%%%`;
+    if (T != null) {
+      T.eq(m.resolve(sqlx), "foo bar() baz 0 1% 1% 2%% 2%% 3%%% 3%%% 4%%%%");
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -1037,9 +1049,8 @@ answer;`) : void 0;
       // test @dbay_macros_more_resolutions
       // @dbay_macros_checks_for_leftovers()
       // test @dbay_macros_checks_for_leftovers
-      // @_dbay_macros_demo_boundaries()
-      // @dbay_vanishing_terminator()
-      // test @dbay_vanishing_terminator
+      // @dbay_use_escape_as_terminator()
+      // test @dbay_use_escape_as_terminator
       // @dbay_macros_dont_allow_circular_references()
       // test @dbay_macros_dont_allow_circular_references
       // @dbay_macros_dont_allow_undeclared_parameters()
@@ -1050,8 +1061,8 @@ answer;`) : void 0;
       // test @dbay_macros_dont_allow_unprefixed_parameters
       // @dbay_macros_declarations_undone_on_rollback_or_not()
       // test @dbay_macros_declarations_undone_on_rollback_or_not
-      // @dbay_macros_parameter_name_clashes()
-      // test @dbay_macros_parameter_name_clashes
+      // @dbm_replace_escape()
+      // test @dbm_replace_escape
       return test(this);
     })();
   }
