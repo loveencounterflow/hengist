@@ -163,31 +163,57 @@ dtab                      = new Tbl { dba: null, }
     m.declare SQL"""@hoax( @a ) = @a || '%@a' || @a;"""
     sqlx  = SQL"""select @hoax( 'x' ) as hoax;"""
     sql   = SQL"""select 'x' || '@a' || 'x' as hoax;"""
-    _test '^t#4^', m, sqlx, sql
+    _test '^t#5^', m, sqlx, sql
   #.........................................................................................................
   do ->
     m     = new DBay_sqlx { escape: '\\', }
     m.declare SQL"""@hoax( @a ) = @a || '\\@a' || @a;"""
     sqlx  = SQL"""select @hoax( 'x' ) as hoax;"""
     sql   = SQL"""select 'x' || '@a' || 'x' as hoax;"""
-    _test '^t#4^', m, sqlx, sql
+    _test '^t#6^', m, sqlx, sql
   #.........................................................................................................
   do ->
     m     = new DBay_sqlx()
     m.declare SQL"""@secret_power( @a, @b ) = @power( @a, @b ) / @b;"""
     sqlx  = SQL"""select @secret_power( 3, 2 ) as x;"""
-    _test '^t#5^', m, sqlx, null, /unknown macro '@power'/
+    _test '^t#7^', m, sqlx, null, /unknown macro '@power'/
   #.........................................................................................................
   do ->
     m     = new DBay_sqlx()
-    m.declare SQL"""@add(     @a, @b ) = /*\\add*/( @a + @b );"""
-    m.declare SQL"""@power(   @a, @b ) = /*\\power*/( @a ** @b );"""
-    m.declare SQL"""@secret(  @a, @b ) = /*\\secret*/( @power( @a, @b ) / @b );"""
+    m.declare SQL"""@add(     @a, @b ) = /*add*/( @a + @b );"""
+    m.declare SQL"""@power(   @a, @b ) = /*power*/( @a ** @b );"""
+    m.declare SQL"""@secret(  @a, @b ) = /*secret*/( @power( @a, @b ) / @b );"""
     sqlx  = SQL"""select @secret( @add( 1, 2 ), 3 ) as x;"""
-    # _test '^t#6^', m, sqlx, SQL"""select /*@secret*/( /*@power*/( /*@add*/( 1 + 2 ) ** 3 ) / 3 ) as x;"""
+    _test '^t#8^', m, sqlx, SQL"""select /*secret*/( /*power*/( /*add*/( 1 + 2 ) ** 3 ) / 3 ) as x;"""
     m.resolve sqlx
   #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    m.declare SQL"""@call( @f ) = @f%();"""
+    sqlx  = SQL"""select @call( myfunction );"""
+    _test '^t#9^', m, sqlx, SQL"""select myfunction();"""
+    m.resolve sqlx
+  #.........................................................................................................
+  do ->
+    m     = new DBay_sqlx()
+    m.declare SQL"""@call( @f ) = @f();"""
+    sqlx  = SQL"""select @call( myfunction );"""
+    _test '^t#10^', m, sqlx, null, /unknown macro '@f'/
+  #.........................................................................................................
   done?()
+
+
+# #-----------------------------------------------------------------------------------------------------------
+# @xxx = ( T, done ) ->
+#   { DBay_sqlx }     = require '../../../apps/dbay-sql-macros'
+#   #.........................................................................................................
+#   do ->
+#     m     = new DBay_sqlx()
+#     m.declare SQL"""@call( @f ) = @f%();"""
+#     sqlx  = SQL"""select @call( myfunction );"""
+#     debug m.resolve sqlx
+#   #.........................................................................................................
+#   done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @dbay_macros_more_resolutions = ( T, done ) ->
@@ -616,7 +642,7 @@ if require.main is module then do =>
   # test @dbay_macros_regexen
   # test @dbay_macros_declarations
   # @dbay_macros_simple_resolution()
-  # test @dbay_macros_simple_resolution
+  test @dbay_macros_simple_resolution
   # @dbay_macros_more_resolutions()
   # test @dbay_macros_more_resolutions
   # @dbay_macros_checks_for_leftovers()
@@ -635,6 +661,5 @@ if require.main is module then do =>
   # test @dbay_macros_declarations_undone_on_rollback_or_not
   # @dbm_replace_escape()
   # test @dbm_replace_escape
-  test @
-
+  # test @
 
