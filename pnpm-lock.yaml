@@ -57,7 +57,7 @@ specifiers:
   gitlog: ^4.0.4
   glob: 7.2.0
   got: ^11.8.2
-  guy: 11.10.1
+  guy: 11.13.0
   guy-test: 5.0.1
   hamt: ^2.2.2
   hashbow: ^1.1.1
@@ -93,6 +93,8 @@ specifiers:
   mixa: 0.6.1
   mkdirp: ^1.0.4
   mojikura-idl: ^2.0.0
+  moo: ^0.5.2
+  moo-patched: ^0.5.2
   mori: ^0.3.2
   multimix: '6'
   mysql-tokenizer: ^1.0.7
@@ -210,7 +212,7 @@ dependencies:
   gitlog: 4.0.4
   glob: 7.2.0
   got: 11.8.5
-  guy: 11.10.1_ht6cs7t3bgv2a4e27mplshtqbi
+  guy: 11.13.0_ht6cs7t3bgv2a4e27mplshtqbi
   guy-test: 5.0.1_4prdxtoba2tordf5bhh3dou7hy
   hamt: 2.2.2
   hashbow: 1.1.1
@@ -246,6 +248,8 @@ dependencies:
   mixa: 0.6.1
   mkdirp: 1.0.4
   mojikura-idl: 2.1.6
+  moo: 0.5.2
+  moo-patched: 0.5.2
   mori: 0.3.2
   multimix: 6.0.0_4prdxtoba2tordf5bhh3dou7hy
   mysql-tokenizer: 1.0.7
@@ -2499,8 +2503,8 @@ packages:
       - astring
     dev: false
 
-  /guy/11.10.1_ht6cs7t3bgv2a4e27mplshtqbi:
-    resolution: {integrity: sha512-8NC314Iwba0ltCAcXd92NdyZ9kEZ2B72tfHkdWBbunf0Ax6sMnm/POSKHQNgxkqIB3gDBt6BzilhqretaCk4rA==}
+  /guy/11.13.0_ht6cs7t3bgv2a4e27mplshtqbi:
+    resolution: {integrity: sha512-IgEGJqibhhwf2/XynDwIjQUGr6rTGpEXQQuLhpNPH6+jyphFnZkZFLhrvRhI7jp/tjlrb54eqLMGUEUURoKNPw==}
     peerDependencies:
       acorn: ^8.7.1
       acorn-loose: ^8.3.0
@@ -3690,8 +3694,12 @@ packages:
       nearley: 2.20.1
     dev: false
 
-  /moo/0.5.1:
-    resolution: {integrity: sha512-I1mnb5xn4fO80BH9BLcF0yLypy2UKl+Cb01Fu0hJRkJjlCRtxZMWkTdAtDd5ZqCOxtCkhmRwyI57vWT+1iZ67w==}
+  /moo-patched/0.5.2:
+    resolution: {integrity: sha512-LyH8Da/JPtDrX0uiwhMPbueSkUYLd9pbvD+TpEPkPxeE/H1G/3/4Kyk0XO4q0uF8CJ7RS5guKH0ro/ijM8brLw==}
+    dev: false
+
+  /moo/0.5.2:
+    resolution: {integrity: sha512-iSAJLHYKnX41mKcJKjqvnAN9sf0LMDTXDEvFv+ffuRR9a1MIuXLjMNL6EsnDHSkKLTWNqQQ5uo61P4EbU4NU+Q==}
     dev: false
 
   /mori/0.3.2:
@@ -3775,7 +3783,7 @@ packages:
     hasBin: true
     dependencies:
       commander: 2.20.3
-      moo: 0.5.1
+      moo: 0.5.2
       railroad-diagrams: 1.0.0
       randexp: 0.4.6
     dev: false
