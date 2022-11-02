@@ -611,13 +611,43 @@ H                         = require '../../../lib/helpers'
   debug '^45-2^', collector
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@simple = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY             = require '../../../apps/guy'
+  { Moonriver }   = require '../../../apps/moonriver'
+  { $ }           = Moonriver
+  collector       = []
+  mr              = new Moonriver()
+  last            = Symbol 'last'
+  source          = [ ( Array.from 'abcdef' )..., last, ]
+  #.........................................................................................................
+  mr.push source
+  # mr.push show    = ( d ) -> urge '^45-1^', d
+  mr.push collect = ( d, send ) -> send d; send d.toUpperCase?()
+  mr.push collect = ( d, send ) -> send d
+  mr.push collect = ( d, send ) -> send d
+  mr.push collect = ( d ) -> collector.push d
+  info '^54-1^', source
+  loop
+    mr.drive { laps: 1, }
+    for d in collector
+      break if d is last
+      urge '^45-3^', rpr d
+    collector.length = 0
+    break if d is last
+  done?()
+
+
 
 ############################################################################################################
 if require.main is module then do =>
   # test @can_use_asyncfunction_as_source
   # @can_use_nodejs_readable_stream_as_source()
   # test @can_use_nodejs_readable_stream_as_source
-  test @
+  # @window_transform()
+  @simple()
+  # test @
   # @[ "called even when pipeline empty: once_before_first, once_after_last" ](); test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
   # @[ "appending data before closing" ](); test @[ "appending data before closing" ]
   # @[ "once_before_first, once_after_last transformers transparent to data" ](); test @[ "once_before_first, once_after_last transformers transparent to data" ]
