@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, Tbl, alert, debug, dtab, echo, equals, help, info, inspect, log, plain, praise, rpr, urge, warn, whisper;
+  var GUY, Tbl, alert, debug, dtab, echo, equals, help, info, inspect, log, plain, praise, rpr, rx, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -21,7 +21,7 @@
   });
 
   //-----------------------------------------------------------------------------------------------------------
-  this.rx = {
+  this.rx = rx = {
     chrs: {
       strict: {
         allowed: {
@@ -51,47 +51,49 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.demo = function() {
-    var Lexer, cfg, d, lexer, tokens;
-    ({Lexer} = require('../../../apps/dbay-sql-lexer'));
-    cfg = {
-      // segment: /[\n\x20]/
-      tokens: {
-        ws_linear: /[\x20\x09\xa0]+/u/* TAINT incomplete but ¿good enough? for SQLite */,
-        ws_nl: /\n/u,
-        //.....................................................................................................
-        keyword_select: /select\b/u,
-        keyword_as: /as\b/u,
-        keyword_from: /from\b/u,
-        //.....................................................................................................
-        paren_left: '(',
-        paren_right: ')',
-        //.....................................................................................................
-        op_plus: '+',
-        op_minus: '-',
-        // op_caret:         '^' ### NOTE not an actual operator in SQLite ###
-        // op_dollar:        '$' ### NOTE not an actual operator in SQLite ###
-        op_star: '*',
-        op_slash: '/',
-        op_dsolidus: '||',
-        //.....................................................................................................
-        sep_comma: ',',
-        sep_semicolon: ';',
-        //.....................................................................................................
-        literal_string: /'(?:\\['\\]|[^'\\])*'/us, // , value: ( ( s ) => s.slice 1, -1 ), }
-        //.....................................................................................................
-        identifier_dq: /"[^"]+"/u,
-        identifier_bare: RegExp(`${this.rx.chrs.practical.allowed.head.source}${this.rx.chrs.practical.allowed.tail.source}*`, "u"),
-        //.....................................................................................................
-        other_illegal: /\x00/u,
-        other_unknown: {
-          matcher: /./u,
-          consolidate: true
-        }
+  this.cfg = {
+    // segment: /[\n\x20]/
+    tokens: {
+      ws_linear: /[\x20\x09\xa0]+/u/* TAINT incomplete but ¿good enough? for SQLite */,
+      ws_nl: /\n/u,
+      //.....................................................................................................
+      keyword_select: /select\b/u,
+      keyword_as: /as\b/u,
+      keyword_from: /from\b/u,
+      //.....................................................................................................
+      paren_left: '(',
+      paren_right: ')',
+      //.....................................................................................................
+      op_plus: '+',
+      op_minus: '-',
+      // op_caret:         '^' ### NOTE not an actual operator in SQLite ###
+      // op_dollar:        '$' ### NOTE not an actual operator in SQLite ###
+      op_star: '*',
+      op_slash: '/',
+      op_dsolidus: '||',
+      //.....................................................................................................
+      sep_comma: ',',
+      sep_semicolon: ';',
+      //.....................................................................................................
+      literal_string: /'(?:\\['\\]|[^'\\])*'/us, // , value: ( ( s ) => s.slice 1, -1 ), }
+      //.....................................................................................................
+      identifier_dq: /"[^"]+"/u,
+      identifier_bare: RegExp(`${rx.chrs.practical.allowed.head.source}${rx.chrs.practical.allowed.tail.source}*`, "u"),
+      //.....................................................................................................
+      other_illegal: /\x00/u,
+      other_unknown: {
+        matcher: /./u,
+        consolidate: true
       }
-    };
+    }
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo = function() {
+    var Lexer, d, lexer, tokens;
+    ({Lexer} = require('../../../apps/dbay-sql-lexer'));
     //.........................................................................................................
-    lexer = new Lexer(cfg);
+    lexer = new Lexer(this.cfg);
     tokens = lexer.read(`select
   'foo
   bar' as 国字,

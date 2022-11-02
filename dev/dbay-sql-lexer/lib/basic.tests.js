@@ -41,15 +41,24 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_sql_lexer = function(T, done) {
+    var Lexer, cfg, lexer, mr, rx;
+    ({rx, cfg} = require('./demo-sticky-regex-lexer'));
+    ({Lexer} = require('../../../apps/dbay-sql-lexer'));
+    lexer = new Lexer(cfg);
+    mr = lexer._create_pipeline();
+    mr.send("select a + b as sum from mytable;");
+    mr.drive();
     return typeof done === "function" ? done() : void 0;
   };
 
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      return this.dbay_sql_lexer();
     })();
   }
+
+  // test @
 
   // is identifier: '"foo"" bar"'
 // syntax error: 'select +1 as "foo\" bar";'

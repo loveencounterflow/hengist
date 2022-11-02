@@ -887,17 +887,110 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.window_transform = function(T, done) {
+    var $, $window, GUY, Moonriver, collect, collector, i, misfit, mr, nr, show;
+    // T?.halt_on_error()
+    GUY = require('../../../apps/guy');
+    ({Moonriver} = require('../../../apps/moonriver'));
+    ({$} = Moonriver);
+    ({$window} = require('../../../apps/moonriver/lib/transforms'));
+    collector = [];
+    mr = new Moonriver();
+    misfit = Symbol('misfit');
+    // #.........................................................................................................
+    // $window = ( min, max, empty = misfit ) ->
+    //   last          = Symbol 'last'
+    //   buffer        = {}
+    //   buffer[ nr ]  = empty for nr in [ min .. max ]
+    //   advance       = -> buffer[ nr - 1 ]  = buffer[ nr ] for nr in [ min + 1 .. max ]
+    //   return $ { last, }, ( d, send ) ->
+    //     if d is last
+    //       loop
+    //         advance()
+    //         buffer[ max ] = empty
+    //         break if buffer[ 0 ] is empty
+    //         send { buffer..., }
+    //       return null
+    //     advance()
+    //     buffer[ max ] = d
+    //     send { buffer..., } unless buffer[ 0 ] is empty
+    //.........................................................................................................
+    mr.push($window(-2, +2, null));
+    mr.push(show = function(d) {
+      return urge('^45-1^', d);
+    });
+    mr.push(collect = function(d) {
+      return collector.push(d);
+    });
+    for (nr = i = 1; i <= 9; nr = ++i) {
+      mr.send(nr);
+    }
+    mr.drive();
+    debug('^45-2^', collector);
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.simple = function(T, done) {
+    var $, GUY, Moonriver, collect, collector, d, i, last, len, mr, source;
+    // T?.halt_on_error()
+    GUY = require('../../../apps/guy');
+    ({Moonriver} = require('../../../apps/moonriver'));
+    ({$} = Moonriver);
+    collector = [];
+    mr = new Moonriver();
+    last = Symbol('last');
+    source = [...(Array.from('abcdef')), last];
+    //.........................................................................................................
+    mr.push(source);
+    // mr.push show    = ( d ) -> urge '^45-1^', d
+    mr.push(collect = function(d, send) {
+      send(d);
+      return send(typeof d.toUpperCase === "function" ? d.toUpperCase() : void 0);
+    });
+    mr.push(collect = function(d, send) {
+      return send(d);
+    });
+    mr.push(collect = function(d, send) {
+      return send(d);
+    });
+    mr.push(collect = function(d) {
+      return collector.push(d);
+    });
+    info('^54-1^', source);
+    while (true) {
+      mr.drive({
+        laps: 1
+      });
+      for (i = 0, len = collector.length; i < len; i++) {
+        d = collector[i];
+        if (d === last) {
+          break;
+        }
+        urge('^45-3^', rpr(d));
+      }
+      collector.length = 0;
+      if (d === last) {
+        break;
+      }
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @can_use_asyncfunction_as_source
       // @can_use_nodejs_readable_stream_as_source()
       // test @can_use_nodejs_readable_stream_as_source
-      return test(this);
+      // @window_transform()
+      return this.simple();
     })();
   }
 
-  // @[ "called even when pipeline empty: once_before_first, once_after_last" ](); test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
+  // test @
+// @[ "called even when pipeline empty: once_before_first, once_after_last" ](); test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
 // @[ "appending data before closing" ](); test @[ "appending data before closing" ]
 // @[ "once_before_first, once_after_last transformers transparent to data" ](); test @[ "once_before_first, once_after_last transformers transparent to data" ]
 
