@@ -41,13 +41,21 @@ show = ( sql, tokens ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @dbay_sql_lexer = ( T, done ) ->
+  { rx
+    cfg }   = require './demo-sticky-regex-lexer'
+  { Lexer } = require '../../../apps/dbay-sql-lexer'
+  lexer     = new Lexer cfg
+  mr        = lexer._create_pipeline()
+  mr.send "select a + b as sum from mytable;"
+  mr.drive()
   done?()
 
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  @dbay_sql_lexer()
+  # test @
 
 
 # is identifier: '"foo"" bar"'
