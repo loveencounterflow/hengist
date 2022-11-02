@@ -574,6 +574,42 @@ H                         = require '../../../lib/helpers'
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@window_transform = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY             = require '../../../apps/guy'
+  { Moonriver }   = require '../../../apps/moonriver'
+  { $ }           = Moonriver
+  { $window }     = require '../../../apps/moonriver/lib/transforms'
+  collector       = []
+  mr              = new Moonriver()
+  misfit          = Symbol 'misfit'
+  # #.........................................................................................................
+  # $window = ( min, max, empty = misfit ) ->
+  #   last          = Symbol 'last'
+  #   buffer        = {}
+  #   buffer[ nr ]  = empty for nr in [ min .. max ]
+  #   advance       = -> buffer[ nr - 1 ]  = buffer[ nr ] for nr in [ min + 1 .. max ]
+  #   return $ { last, }, ( d, send ) ->
+  #     if d is last
+  #       loop
+  #         advance()
+  #         buffer[ max ] = empty
+  #         break if buffer[ 0 ] is empty
+  #         send { buffer..., }
+  #       return null
+  #     advance()
+  #     buffer[ max ] = d
+  #     send { buffer..., } unless buffer[ 0 ] is empty
+  #.........................................................................................................
+  mr.push $window -2, +2, null
+  mr.push show    = ( d ) -> urge '^45-1^', d
+  mr.push collect = ( d ) -> collector.push d
+  for nr in [ 1 .. 9 ]
+    mr.send nr
+  mr.drive()
+  debug '^45-2^', collector
+  done?()
 
 
 ############################################################################################################
