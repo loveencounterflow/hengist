@@ -120,15 +120,17 @@
   Pipeline = class Pipeline {
     //---------------------------------------------------------------------------------------------------------
     constructor(cfg) {
-      var ref, ref1;
+      var ref, ref1, ref2, ref3;
       cfg = {...{}, ...cfg};
-      // cfg             = types.create.mr_pipeline_cfg cfg
+      // cfg                 = types.create.mr_pipeline_cfg cfg
       this.datacount = 0;
       this.input = this._new_collector();
       this.output = [];
       this./* pipeline output buffer does not participate in datacount */segments = [];
       this.on_before_step = (ref = cfg.on_before_step) != null ? ref : null;
       this.on_after_step = (ref1 = cfg.on_after_step) != null ? ref1 : null;
+      this.on_before_process = (ref2 = cfg.on_before_process) != null ? ref2 : null;
+      this.on_after_process = (ref3 = cfg.on_after_process) != null ? ref3 : null;
       return void 0;
     }
 
@@ -167,6 +169,9 @@
     //---------------------------------------------------------------------------------------------------------
     process() {
       var i, len, ref, segment, segment_idx;
+      if (this.on_before_process != null) {
+        this.on_before_process();
+      }
       ref = this.segments;
       for (segment_idx = i = 0, len = ref.length; i < len; segment_idx = ++i) {
         segment = ref[segment_idx];
@@ -177,6 +182,9 @@
         if (this.on_after_step != null) {
           this.on_after_step(segment_idx);
         }
+      }
+      if (this.on_after_process != null) {
+        this.on_after_process();
       }
       return null;
     }
@@ -194,12 +202,17 @@
 
     //---------------------------------------------------------------------------------------------------------
     * walk() {
+      var d, i, len, ref;
       while (true) {
         this.process();
-        while (this.output.length > 0) {
-          yield this.output.shift();
+        ref = this.output;
+        for (i = 0, len = ref.length; i < len; i++) {
+          d = ref[i];
+          yield d;
         }
+        this.output.length = [];
         if (this.datacount < 1) {
+          // yield @output.shift() while @output.length > 0
           break;
         }
       }
@@ -207,21 +220,23 @@
     }
 
     //---------------------------------------------------------------------------------------------------------
-    show() {
-      var i, len, ref, segment;
-      /* TAINT return string, do not output */
-      echo({
-        input: this.input
-      });
+    [UTIL.inspect.custom]() {
+      return this.toString();
+    }
+
+    toString() {
+      var R, i, len, ref, segment;
+      R = [];
       ref = this.segments;
       for (i = 0, len = ref.length; i < len; i++) {
         segment = ref[i];
-        echo(segment);
+        R.push(rpr(segment.input));
+        R.push('▶');
+        R.push(segment.transform.name);
+        R.push('▶');
       }
-      echo({
-        output: this.output
-      });
-      return null;
+      R.push(rpr(this.output));
+      return R.join(' ');
     }
 
   };
@@ -233,47 +248,46 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      var on_after_step, on_before_step, p, plus_2, times_2, times_3;
+      var on_after_process, on_after_step, on_before_process, on_before_step, p, plus_2, times_2, times_3;
+      on_before_process = function() {
+        return urge(this);
+      };
+      on_after_process = function() {
+        return urge(this);
+      };
       on_before_step = function(sidx) {
-        var datacount;
-        ({datacount} = this);
-        info('-'.repeat(108));
-        info({sidx, datacount});
-        return this.show();
+        return urge(sidx, this);
       };
       on_after_step = function(sidx) {
-        var datacount;
-        ({datacount} = this);
-        urge({sidx, datacount});
-        return this.show();
+        return urge(sidx, this);
       };
       on_before_step = null;
       on_after_step = null;
-      p = new Pipeline({on_before_step, on_after_step});
+      p = new Pipeline({on_before_process, on_after_step, on_after_process});
       p.push(times_2 = function(d, send) {
         if (isa.float(d)) {
-          send('(');
-          send(d * 2);
-          return send(')');
+          // send '('
+          return send(d * 2);
         } else {
+          // send ')'
           return send(d);
         }
       });
       p.push(plus_2 = function(d, send) {
         if (isa.float(d)) {
-          send('[');
-          send(d + 2);
-          return send(']');
+          // send '['
+          return send(d + 2);
         } else {
+          // send ']'
           return send(d);
         }
       });
       p.push(times_3 = function(d, send) {
         if (isa.float(d)) {
-          send('{');
-          send(d * 3);
-          return send('}');
+          // send '{'
+          return send(d * 3);
         } else {
+          // send '}'
           return send(d);
         }
       });
