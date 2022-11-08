@@ -932,49 +932,107 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.simple = function(T, done) {
-    var $, GUY, Moonriver, collect, collector, d, i, last, len, mr, source;
+  this.walk_is_repeatable = function(T, done) {
+    var $, GUY, Moonriver, collector, create_pipeline, first, last, source;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
     ({Moonriver} = require('../../../apps/moonriver'));
     ({$} = Moonriver);
     collector = [];
-    mr = new Moonriver();
+    first = Symbol('first');
     last = Symbol('last');
-    source = [...(Array.from('abcdef')), last];
+    // source          = [ ( Array.from 'abcdef' )..., last, ]
+    source = Array.from('abcdef');
     //.........................................................................................................
-    mr.push(source);
-    // mr.push show    = ( d ) -> urge '^45-1^', d
-    mr.push(collect = function(d, send) {
-      send(d);
-      return send(typeof d.toUpperCase === "function" ? d.toUpperCase() : void 0);
-    });
-    mr.push(collect = function(d, send) {
-      return send(d);
-    });
-    mr.push(collect = function(d, send) {
-      return send(d);
-    });
-    mr.push(collect = function(d) {
-      return collector.push(d);
-    });
-    info('^54-1^', source);
-    while (true) {
-      mr.drive({
-        laps: 1
+    create_pipeline = function() {
+      var collect, extra, mr, show;
+      mr = new Moonriver();
+      mr.push(source);
+      // mr.push insert  = ( d, send ) -> send d; send d.toUpperCase() if isa.text d
+      mr.push(extra = function(d, send) {
+        return send(d);
       });
-      for (i = 0, len = collector.length; i < len; i++) {
-        d = collector[i];
-        if (d === last) {
-          break;
-        }
-        urge('^45-3^', rpr(d));
-      }
+      mr.push(extra = $({first}, function(d, send) {
+        return send(d);
+      }));
+      mr.push(extra = $({last}, function(d, send) {
+        return send(d);
+      }));
+      mr.push(extra = function(d, send) {
+        return send(d);
+      });
+      mr.push(show = function(d) {
+        return whisper('^45-1^', d);
+      });
+      mr.push(collect = function(d) {
+        return collector.push(d);
+      });
+      return mr;
+    };
+    (function() {      // #.........................................................................................................
+      // do ->
+      //   mr = create_pipeline()
+      //   info '^54-1^', source
+      //   mr.drive()
+      //   help '^54-2^', collector
+      //   return null
+      // #.........................................................................................................
+      // do ->
+      //   mr = create_pipeline()
+      //   loop
+      //     mr.drive { laps: 1, resume: true, }
+      //     # break if d is last
+      //     for d in collector
+      //       urge '^54-3^', rpr d
+      //     collector.length = 0
+      //     break if mr.is_over
+      //   return null
+      // #.........................................................................................................
+      // do ->
+      //   mr = create_pipeline()
+      //   debug '^54-9^', mr.length
+      //   for d from mr.walk() # { laps: 1, }
+      //     urge '^54-4^', rpr d
+      //   # break if d is last
+      //   info '^54-4^', collector
+      //   debug '^54-9^', mr.length
+      //   collector.length = 0
+      //   for d from mr.walk() # { laps: 1, }
+      //     urge '^54-4^', rpr d
+      //   # break if d is last
+      //   info '^54-4^', collector
+      //   debug '^54-9^', mr.length
+      //   collector.length = 0
+      //   # mr.drive()
+      //   # info '^54-4^', collector
+      //   return null
+      //.........................................................................................................
+      // do ->
+      //   mr = create_pipeline()
+      //   rsults = [ mr.walk()..., ]
+      //   info '^54-4^', collector
+      //   collector.length = 0
+      //   rsults = [ mr.walk()..., ]
+      //   info '^54-4^', collector
+      //   collector.length = 0
+      //   rsults = [ mr.walk()..., ]
+      //   info '^54-4^', collector
+      //   collector.length = 0
+      //   return null
+      //.........................................................................................................
+      var mr;
+      mr = create_pipeline();
+      mr.drive();
+      info('^54-4^', collector);
       collector.length = 0;
-      if (d === last) {
-        break;
-      }
-    }
+      mr.drive();
+      info('^54-4^', collector);
+      collector.length = 0;
+      mr.drive();
+      info('^54-4^', collector);
+      collector.length = 0;
+      return null;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -985,7 +1043,7 @@
       // @can_use_nodejs_readable_stream_as_source()
       // test @can_use_nodejs_readable_stream_as_source
       // @window_transform()
-      return this.simple();
+      return this.walk_is_repeatable();
     })();
   }
 

@@ -640,14 +640,55 @@
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // demo()
-      // demo_2()
-      // demo_3()
-      // demo_4()
-      // demo_5()
-      // demo_6()
-      // demo_7()
-      return demo_8();
+      var e;
+      try {
+        demo();
+      } catch (error) {
+        e = error;
+        warn(GUY.trm.reverse(e.message));
+      }
+      try {
+        demo_2();
+      } catch (error) {
+        e = error;
+        warn(GUY.trm.reverse(e.message));
+      }
+      try {
+        demo_3();
+      } catch (error) {
+        e = error;
+        warn(GUY.trm.reverse(e.message));
+      }
+      try {
+        demo_4();
+      } catch (error) {
+        e = error;
+        warn(GUY.trm.reverse(e.message));
+      }
+      try {
+        demo_5();
+      } catch (error) {
+        e = error;
+        warn(GUY.trm.reverse(e.message));
+      }
+      try {
+        demo_6();
+      } catch (error) {
+        e = error;
+        warn(GUY.trm.reverse(e.message));
+      }
+      try {
+        demo_7();
+      } catch (error) {
+        e = error;
+        warn(GUY.trm.reverse(e.message));
+      }
+      try {
+        return demo_8();
+      } catch (error) {
+        e = error;
+        return warn(GUY.trm.reverse(e.message));
+      }
     })();
   }
 
