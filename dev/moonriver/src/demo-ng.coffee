@@ -35,11 +35,26 @@ class Segment
   constructor: ( cfg ) ->
     @input      = cfg.input  ? []
     @output     = cfg.output ? []
-    name        = cfg.transform.name
-    name        = 'ƒ' if name is ''
-    hide @, 'transform', nameit name, cfg.transform.bind @ ### binding is optional ###
+    hide @, 'transform', @_as_transform cfg.transform
     hide @, '_send', send = ( d ) => @output.push d; d ### 'inner' send method ###
     return undefined
+
+  #---------------------------------------------------------------------------------------------------------
+  _as_transform: ( transform ) ->
+    switch type = type_of transform
+      when 'function'
+        ### TAINT validate arity ###
+        R = transform
+      when 'list'
+        source  = transform
+        R       = ( d, send ) ->
+          debug arguments
+      else
+        throw new Error "unable to push value of type #{rpr type}"
+    #.......................................................................................................
+    name  = R.name
+    name  = 'ƒ' if name is ''
+    return nameit name, R
 
   #---------------------------------------------------------------------------------------------------------
   ### 'outer' send method ###
