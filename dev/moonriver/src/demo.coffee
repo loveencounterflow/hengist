@@ -337,12 +337,12 @@ demo_8 = ->
 
 ############################################################################################################
 if module is require.main then do =>
-  # demo()
-  # demo_2()
-  # demo_3()
-  # demo_4()
-  # demo_5()
-  # demo_6()
-  # demo_7()
-  demo_8()
+  try demo()    catch e then warn GUY.trm.reverse e.message
+  try demo_2()  catch e then warn GUY.trm.reverse e.message
+  try demo_3()  catch e then warn GUY.trm.reverse e.message
+  try demo_4()  catch e then warn GUY.trm.reverse e.message
+  try demo_5()  catch e then warn GUY.trm.reverse e.message
+  try demo_6()  catch e then warn GUY.trm.reverse e.message
+  try demo_7()  catch e then warn GUY.trm.reverse e.message
+  try demo_8()  catch e then warn GUY.trm.reverse e.message
 
