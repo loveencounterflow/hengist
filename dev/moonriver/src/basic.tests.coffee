@@ -612,30 +612,91 @@ H                         = require '../../../lib/helpers'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@simple = ( T, done ) ->
+@walk_is_repeatable = ( T, done ) ->
   # T?.halt_on_error()
   GUY             = require '../../../apps/guy'
   { Moonriver }   = require '../../../apps/moonriver'
   { $ }           = Moonriver
   collector       = []
-  mr              = new Moonriver()
+  first           = Symbol 'first'
   last            = Symbol 'last'
-  source          = [ ( Array.from 'abcdef' )..., last, ]
+  # source          = [ ( Array.from 'abcdef' )..., last, ]
+  source          = Array.from 'abcdef'
   #.........................................................................................................
-  mr.push source
-  # mr.push show    = ( d ) -> urge '^45-1^', d
-  mr.push collect = ( d, send ) -> send d; send d.toUpperCase?()
-  mr.push collect = ( d, send ) -> send d
-  mr.push collect = ( d, send ) -> send d
-  mr.push collect = ( d ) -> collector.push d
-  info '^54-1^', source
-  loop
-    mr.drive { laps: 1, }
-    for d in collector
-      break if d is last
-      urge '^45-3^', rpr d
+  create_pipeline = ->
+    mr              = new Moonriver()
+    mr.push source
+    # mr.push insert  = ( d, send ) -> send d; send d.toUpperCase() if isa.text d
+    mr.push extra   = ( d, send ) -> send d
+    mr.push extra   = $ { first, }, ( d, send ) -> send d
+    mr.push extra   = $ { last, }, ( d, send ) -> send d
+    mr.push extra   = ( d, send ) -> send d
+    mr.push show    = ( d ) -> whisper '^45-1^', d
+    mr.push collect = ( d ) -> collector.push d
+    return mr
+  # #.........................................................................................................
+  # do ->
+  #   mr = create_pipeline()
+  #   info '^54-1^', source
+  #   mr.drive()
+  #   help '^54-2^', collector
+  #   return null
+  # #.........................................................................................................
+  # do ->
+  #   mr = create_pipeline()
+  #   loop
+  #     mr.drive { laps: 1, resume: true, }
+  #     # break if d is last
+  #     for d in collector
+  #       urge '^54-3^', rpr d
+  #     collector.length = 0
+  #     break if mr.is_over
+  #   return null
+  # #.........................................................................................................
+  # do ->
+  #   mr = create_pipeline()
+  #   debug '^54-9^', mr.length
+  #   for d from mr.walk() # { laps: 1, }
+  #     urge '^54-4^', rpr d
+  #   # break if d is last
+  #   info '^54-4^', collector
+  #   debug '^54-9^', mr.length
+  #   collector.length = 0
+  #   for d from mr.walk() # { laps: 1, }
+  #     urge '^54-4^', rpr d
+  #   # break if d is last
+  #   info '^54-4^', collector
+  #   debug '^54-9^', mr.length
+  #   collector.length = 0
+  #   # mr.drive()
+  #   # info '^54-4^', collector
+  #   return null
+  #.........................................................................................................
+  # do ->
+  #   mr = create_pipeline()
+  #   rsults = [ mr.walk()..., ]
+  #   info '^54-4^', collector
+  #   collector.length = 0
+  #   rsults = [ mr.walk()..., ]
+  #   info '^54-4^', collector
+  #   collector.length = 0
+  #   rsults = [ mr.walk()..., ]
+  #   info '^54-4^', collector
+  #   collector.length = 0
+  #   return null
+  #.........................................................................................................
+  do ->
+    mr = create_pipeline()
+    mr.drive()
+    info '^54-4^', collector
     collector.length = 0
-    break if d is last
+    mr.drive()
+    info '^54-4^', collector
+    collector.length = 0
+    mr.drive()
+    info '^54-4^', collector
+    collector.length = 0
+    return null
   done?()
 
 
@@ -646,7 +707,7 @@ if require.main is module then do =>
   # @can_use_nodejs_readable_stream_as_source()
   # test @can_use_nodejs_readable_stream_as_source
   # @window_transform()
-  @simple()
+  @walk_is_repeatable()
   # test @
   # @[ "called even when pipeline empty: once_before_first, once_after_last" ](); test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
   # @[ "appending data before closing" ](); test @[ "appending data before closing" ]
