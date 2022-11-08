@@ -82,14 +82,16 @@ class Pipeline
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
-    cfg             = { {}..., cfg..., }
-    # cfg             = types.create.mr_pipeline_cfg cfg
-    @datacount        = 0
-    @input            = @_new_collector()
-    @output           = [] ### pipeline output buffer does not participate in datacount ###
-    @segments         = []
-    @on_before_step   = cfg.on_before_step ? null
-    @on_after_step    = cfg.on_after_step  ? null
+    cfg                 = { {}..., cfg..., }
+    # cfg                 = types.create.mr_pipeline_cfg cfg
+    @datacount          = 0
+    @input              = @_new_collector()
+    @output             = [] ### pipeline output buffer does not participate in datacount ###
+    @segments           = []
+    @on_before_step     = cfg.on_before_step ? null
+    @on_after_step      = cfg.on_after_step  ? null
+    @on_before_process  = cfg.on_before_process ? null
+    @on_after_process   = cfg.on_after_process  ? null
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
@@ -112,10 +114,12 @@ class Pipeline
 
   #---------------------------------------------------------------------------------------------------------
   process: ->
+    @on_before_process() if @on_before_process?
     for segment, segment_idx in @segments
       @on_before_step segment_idx if @on_before_step?
       segment.process()
       @on_after_step segment_idx if @on_after_step?
+    @on_after_process() if @on_after_process?
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -125,17 +129,23 @@ class Pipeline
   walk: ->
     loop
       @process()
-      yield @output.shift() while @output.length > 0
+      yield d for d in @output
+      @output.length = []
+      # yield @output.shift() while @output.length > 0
       break if @datacount < 1
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  show: ->
-    ### TAINT return string, do not output ###
-    echo { input: @input, }
-    echo segment for segment in @segments
-    echo { output: @output, }
-    return null
+  [UTIL.inspect.custom]:  -> @toString()
+  toString:               ->
+    R = []
+    for segment in @segments
+      R.push rpr segment.input
+      R.push '▶'
+      R.push segment.transform.name
+      R.push '▶'
+    R.push rpr @output
+    return R.join ' '
 
 
 #===========================================================================================================
@@ -146,37 +156,32 @@ class Pipeline
 
 ############################################################################################################
 if module is require.main then do =>
-  on_before_step =  ( sidx ) ->
-    { datacount, } = @
-    info '-'.repeat 108
-    info { sidx, datacount, }
-    @show()
-  on_after_step =  ( sidx ) ->
-    { datacount, } = @
-    urge { sidx, datacount, }
-    @show()
-  on_before_step  = null
-  on_after_step   = null
-  p = new Pipeline { on_before_step, on_after_step, }
+  on_before_process = -> urge @
+  on_after_process  = -> urge @
+  on_before_step    =  ( sidx ) -> urge sidx, @
+  on_after_step     =  ( sidx ) -> urge sidx, @
+  on_before_step    = null
+  on_after_step     = null
+  p = new Pipeline { on_before_process, on_after_step, on_after_process, }
   p.push times_2 = ( d, send ) ->
     if isa.float d
-      send '('
+      # send '('
       send d * 2
-      send ')'
+      # send ')'
     else
       send d
   p.push plus_2  = ( d, send ) ->
     if isa.float d
-      send '['
+      # send '['
       send d + 2
-      send ']'
+      # send ']'
     else
       send d
   p.push times_3 = ( d, send ) ->
     if isa.float d
-      send '{'
+      # send '{'
       send d * 3
-      send '}'
+      # send '}'
     else
       send d
   p.send 1
