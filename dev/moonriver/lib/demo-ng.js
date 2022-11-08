@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, Pipeline, Reporting_collector, Segment, UTIL, alert, debug, def, echo, help, hide, info, inspect, isa, log, nameit, plain, praise, rpr, type_of, types, urge, validate, validate_optional, warn, whisper;
+  var GUY, Pipeline, Reporting_collector, Segment, UTIL, alert, debug, def, demo_1, demo_2, echo, help, hide, info, inspect, isa, log, nameit, plain, praise, rpr, type_of, types, urge, validate, validate_optional, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -28,19 +28,40 @@
   Segment = class Segment {
     //---------------------------------------------------------------------------------------------------------
     constructor(cfg) {
-      var name, ref, ref1, send;
+      var ref, ref1, send;
       this.input = (ref = cfg.input) != null ? ref : [];
       this.output = (ref1 = cfg.output) != null ? ref1 : [];
-      name = cfg.transform.name;
-      if (name === '') {
-        name = 'ƒ';
-      }
-      hide(this, 'transform', nameit(name, cfg.transform.bind(this)));
-      /* binding is optional */      hide(this, '_send', send = (d) => {
+      hide(this, 'transform', this._as_transform(cfg.transform));
+      hide(this, '_send', send = (d) => {
         this.output.push(d);
         return d/* 'inner' send method */;
       });
       return void 0;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    _as_transform(transform) {
+      /* TAINT validate arity */
+      var R, name, source, type;
+      switch (type = type_of(transform)) {
+        case 'function':
+          R = transform;
+          break;
+        case 'list':
+          source = transform;
+          R = function(d, send) {
+            return debug(arguments);
+          };
+          break;
+        default:
+          throw new Error(`unable to push value of type ${rpr(type)}`);
+      }
+      //.......................................................................................................
+      name = R.name;
+      if (name === '') {
+        name = 'ƒ';
+      }
+      return nameit(name, R);
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -244,59 +265,88 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
+  demo_1 = function() {
+    var on_after_process, on_after_step, on_before_process, on_before_step, p, plus_2, times_2, times_3;
+    on_before_process = function() {
+      return help('^97-1^', this);
+    };
+    on_after_process = function() {
+      return warn('^97-2^', this);
+    };
+    on_before_step = function(sidx) {
+      return urge('^97-3^', sidx, this);
+    };
+    on_after_step = function(sidx) {
+      return urge('^97-4^', sidx, this);
+    };
+    on_before_step = null;
+    // on_after_step     = null
+    on_after_process = null;
+    p = new Pipeline({on_before_process, on_before_step, on_after_step, on_after_process});
+    p.push(times_2 = function(d, send) {
+      if (isa.float(d)) {
+        // send '('
+        return send(d * 2);
+      } else {
+        // send ')'
+        return send(d);
+      }
+    });
+    p.push(plus_2 = function(d, send) {
+      if (isa.float(d)) {
+        // send '['
+        return send(d + 2);
+      } else {
+        // send ']'
+        return send(d);
+      }
+    });
+    p.push(times_3 = function(d, send) {
+      if (isa.float(d)) {
+        // send '{'
+        return send(d * 3);
+      } else {
+        // send '}'
+        return send(d);
+      }
+    });
+    p.send(1);
+    p.send(2);
+    p.send(3);
+    // urge '^97-4^', d for d from p.walk()
+    info('^97-4^', p.run());
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_2 = function() {
+    var on_after_process, on_after_step, on_before_process, on_before_step, p;
+    on_before_process = function() {
+      return help('^97-1^', this);
+    };
+    on_after_process = function() {
+      return warn('^97-2^', this);
+    };
+    on_before_step = function(sidx) {
+      return urge('^97-3^', sidx, this);
+    };
+    on_after_step = function(sidx) {
+      return urge('^97-4^', sidx, this);
+    };
+    on_before_step = null;
+    // on_after_step     = null
+    on_after_process = null;
+    p = new Pipeline({on_before_process, on_before_step, on_after_step, on_after_process});
+    p.push([1, 2, 3]);
+    info('^97-4^', p.run());
+    return null;
+  };
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      var on_after_process, on_after_step, on_before_process, on_before_step, p, plus_2, times_2, times_3;
-      on_before_process = function() {
-        return urge(this);
-      };
-      on_after_process = function() {
-        return urge(this);
-      };
-      on_before_step = function(sidx) {
-        return urge(sidx, this);
-      };
-      on_after_step = function(sidx) {
-        return urge(sidx, this);
-      };
-      on_before_step = null;
-      on_after_step = null;
-      p = new Pipeline({on_before_process, on_after_step, on_after_process});
-      p.push(times_2 = function(d, send) {
-        if (isa.float(d)) {
-          // send '('
-          return send(d * 2);
-        } else {
-          // send ')'
-          return send(d);
-        }
-      });
-      p.push(plus_2 = function(d, send) {
-        if (isa.float(d)) {
-          // send '['
-          return send(d + 2);
-        } else {
-          // send ']'
-          return send(d);
-        }
-      });
-      p.push(times_3 = function(d, send) {
-        if (isa.float(d)) {
-          // send '{'
-          return send(d * 3);
-        } else {
-          // send '}'
-          return send(d);
-        }
-      });
-      p.send(1);
-      p.send(2);
-      p.send(3);
-      // urge '^97-4^', d for d from p.walk()
-      urge('^97-4^', p.run());
-      return null;
+      demo_1();
+      return demo_2();
     })();
   }
 
