@@ -204,12 +204,40 @@
       return this._get_source_transform(source());
     }
 
+    [stf_prefix + 'arrayiterator'](source) {
+      return this[stf_prefix + 'generator'](source);
+    }
+
+    [stf_prefix + 'setiterator'](source) {
+      return this[stf_prefix + 'generator'](source);
+    }
+
+    [stf_prefix + 'mapiterator'](source) {
+      return this[stf_prefix + 'generator'](source);
+    }
+
     [stf_prefix + 'list'](source) {
       return this._get_source_transform(source.values());
     }
 
-    [stf_prefix + 'arrayiterator'](source) {
-      return this[stf_prefix + 'generator'](source);
+    [stf_prefix + 'object'](source) {
+      return this._get_source_transform(function*() {
+        var k, results, v;
+        results = [];
+        for (k in source) {
+          v = source[k];
+          results.push((yield [k, v]));
+        }
+        return results;
+      });
+    }
+
+    [stf_prefix + 'set'](source) {
+      return this._get_source_transform(source.values());
+    }
+
+    [stf_prefix + 'map'](source) {
+      return this._get_source_transform(source.entries());
     }
 
     //=========================================================================================================
@@ -324,6 +352,7 @@
       this.on_after_step = (ref1 = cfg.on_after_step) != null ? ref1 : null;
       this.on_before_process = (ref2 = cfg.on_before_process) != null ? ref2 : null;
       this.on_after_process = (ref3 = cfg.on_after_process) != null ? ref3 : null;
+      hide(this, 'types', get_types());
       hide(this, 'sources', []);
       def(this, 'has_finished', {
         get: function() {
@@ -359,7 +388,7 @@
 
     //---------------------------------------------------------------------------------------------------------
     push(fitting) {
-      var R, count, input, prv_segment;
+      var R, count, error, input, prv_segment;
       if ((count = this.segments.length) === 0) {
         input = this.input;
       } else {
@@ -367,11 +396,16 @@
         prv_segment.output = this._new_collector();
         input = prv_segment.output;
       }
-      R = new Segment({
-        input,
-        fitting,
-        output: this.output
-      });
+      try {
+        R = new Segment({
+          input,
+          fitting,
+          output: this.output
+        });
+      } catch (error1) {
+        error = error1;
+        throw new Error(`unable to convert a ${this.types.type_of(fitting)} into a segment\n` + error.message);
+      }
       this.segments.push(R);
       if (R.transform_type === 'source') {
         this.sources.push(R);
@@ -522,6 +556,13 @@
     // p.push 'CD'
     // p.push [ 1, 2, 3, ]
     // p.push [ 4, 5, 6, ]
+    p.push({
+      one: 'cat',
+      two: 'dog',
+      three: 'pony'
+    });
+    p.push(new Set('+-*'));
+    p.push(new Map([[11, 12], [13, 14]]));
     p.push('ABC');
     p.push('DEF');
     p.push('GHIJ');
