@@ -27,6 +27,7 @@ UTIL                      = require 'node:util'
 { hide
   def }                   = GUY.props
 nameit                    = ( name, f ) -> def f, 'name', { value: name, }
+stf_prefix                = '_source_transform_from_'
 
 #===========================================================================================================
 class Segment
@@ -77,6 +78,30 @@ class Segment
     R.type = transform_type
     return R
 
+
+  #=========================================================================================================
+  # SOURCE TRANSFORMS
+  #---------------------------------------------------------------------------------------------------------
+  _get_source_transform: ( source ) ->
+    type = @types.type_of source
+    unless ( method = @[ stf_prefix + type ] )?
+      throw new Error "unable to convert a #{type} to a transform"
+    return method.call @, source
+
+  #---------------------------------------------------------------------------------------------------------
+  [ stf_prefix + 'generator' ]: ( source ) ->
+    done = false
+    return ( send ) ->
+      return null if done
+      { value: d
+        done      } = source.next()
+      send d unless done
+      return null
+
+  #---------------------------------------------------------------------------------------------------------
+  [ stf_prefix + 'generatorfunction' ]: ( source ) -> @_get_source_transform source()
+  [ stf_prefix + 'list' ]:              ( source ) -> @_get_source_transform source.values()
+  [ stf_prefix + 'arrayiterator' ]:     ( source ) -> @[ stf_prefix + 'generator' ] source
   #---------------------------------------------------------------------------------------------------------
   ### 'outer' send method ###
   send: ( d ) -> @input.push d; d
@@ -247,12 +272,12 @@ model_2b = ->
   source  = [ 5, 6, 7, ]
   send    = ( d ) -> info '^61-1^', d; d
   mr      =
-    _get_tf: ( source ) ->
+    _get_source_transform: ( source ) ->
       type = type_of source
-      unless ( method = @[ "_transform_from_#{type}"] )?
+      unless ( method = @[ "_source_transform_from_#{type}"] )?
         throw new Error "unable to convert a #{type} to a transform"
       return method.call @, source
-    _transform_from_generator: ( source ) ->
+    _source_transform_from_generator: ( source ) ->
       done = false
       return ( send ) ->
         return null if done
@@ -260,24 +285,24 @@ model_2b = ->
           done      } = source.next()
         send d unless done
         return null
-    _transform_from_generatorfunction: ( source ) -> @_get_tf source()
-    _transform_from_list:              ( source ) -> @_get_tf source.values()
-    _transform_from_arrayiterator:     ( source ) -> @_transform_from_generator source
+    _source_transform_from_generatorfunction: ( source ) -> @_get_source_transform source()
+    _source_transform_from_list:              ( source ) -> @_get_source_transform source.values()
+    _source_transform_from_arrayiterator:     ( source ) -> @_source_transform_from_generator source
   do ->
     whisper '...................'
-    tf = mr._get_tf source
+    tf = mr._get_source_transform source
     tf send for _ in [ 1 .. 5 ]
   do ->
     whisper '...................'
-    tf = mr._get_tf ( -> yield from source )
+    tf = mr._get_source_transform ( -> yield from source )
     tf send for _ in [ 1 .. 5 ]
   do ->
     whisper '...................'
-    tf = mr._get_tf ( -> yield from source )()
+    tf = mr._get_source_transform ( -> yield from source )()
     tf send for _ in [ 1 .. 5 ]
   do ->
     whisper '...................'
-    tf = mr._get_tf source.values()
+    tf = mr._get_source_transform source.values()
     tf send for _ in [ 1 .. 5 ]
   return null
 
