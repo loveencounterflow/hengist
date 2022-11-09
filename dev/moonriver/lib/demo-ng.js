@@ -71,7 +71,7 @@
           fitting_type = 'observer';
           break;
         case 2:
-          fitting_type = 'transducer';
+          fitting_type = 'transform';
           break;
         default:
           throw new Error(`fittings with arity ${arity} not implemented`);
