@@ -165,8 +165,8 @@
 
     //---------------------------------------------------------------------------------------------------------
     [stf_prefix + 'generator'](source) {
-      var R;
-      R = (send) => {
+      this.has_finished = false;
+      return (send) => {
         var dsc;
         if (this.has_finished) {
           return null;
@@ -178,8 +178,25 @@
         }
         return null;
       };
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    [stf_prefix + 'text'](source) {
+      var letter_re;
+      letter_re = /./uy;
       this.has_finished = false;
-      return R;
+      return (send) => {
+        var match;
+        if (this.has_finished) {
+          return null;
+        }
+        if ((match = source.match(letter_re)) == null) {
+          this.has_finished = true;
+          return null;
+        }
+        send(match[0]);
+        return null;
+      };
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -208,6 +225,9 @@
     process() {
       var d;
       if (this.transform_type === 'source') {
+        while (this.input.length > 0) {
+          this._send(this.input.shift());
+        }
         if (this.transform.has_finished) {
           return 0;
         }
@@ -483,7 +503,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_2 = function() {
-    var _types, on_after_process, on_after_step, on_before_proces, on_before_process, on_before_step, p, show_1, show_2;
+    var _types, on_after_process, on_after_step, on_before_proces, on_before_process, on_before_step, p, show_2;
     echo('—————————————————————————————————————————————');
     _types = new (require('../../../apps/intertype')).Intertype();
     on_before_process = function() {
@@ -505,10 +525,9 @@
     p = new Pipeline({on_before_process, on_before_step, on_after_step, on_after_process});
     p = new Pipeline();
     p.push([1, 2, 3]);
-    p.push(show_1 = function(d, send) {
-      whisper(rpr(d));
-      return send(d);
-    });
+    p.push([4, 5, 6]);
+    p.push('ABC');
+    // p.push show_1 = ( d, send ) -> whisper rpr d; send d
     p.push(show_2 = function(d) {
       return whisper(rpr(d));
     });
