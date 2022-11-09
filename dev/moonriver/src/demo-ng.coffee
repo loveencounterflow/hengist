@@ -57,12 +57,14 @@ get_types = ->
       input:    'mr_collector'
       output:   'mr_collector'
       fitting:  'mr_fitting'
-    create: ( x ) ->
-      return x unless @isa.optional.object x
-      R         = x
-      x.input  ?= []
-      x.output ?= []
-      return R
+    default:
+      input:    null
+      output:   null
+      fitting:  null
+    # create: ( x ) ->
+    #   return x unless @isa.optional.object x
+    #   R         = x
+    #   return R
 
   #---------------------------------------------------------------------------------------------------------
   return types
