@@ -324,21 +324,28 @@ demo_1 = ->
 demo_2 = ->
   echo '—————————————————————————————————————————————'
   _types = new ( require '../../../apps/intertype' ).Intertype()
-  on_before_process = -> help '^98-1^', @
-  on_after_process  = -> warn '^98-2^', @
-  on_before_step    =  ( sidx ) -> urge '^98-3^', sidx, @
-  on_after_step     =  ( sidx ) -> urge '^98-4^', sidx, @
-  on_before_proces  = null
+  on_before_process = null
   on_before_step    = null
   on_after_step     = null
   on_after_process  = null
+  # on_before_process = -> help '^98-1^', @
+  on_after_process  = -> warn '^98-2^', @
+  # on_before_step    =  ( sidx ) -> urge '^98-3^', sidx, @
+  # on_after_step     =  ( sidx ) -> urge '^98-4^', sidx, @
   p = new Pipeline { on_before_process, on_before_step, on_after_step, on_after_process, }
-  p = new Pipeline()
-  p.push [ 1, 2, 3, ]
-  p.push [ 4, 5, 6, ]
+  # p = new Pipeline()
+  # p.push 'AB'
+  # p.push 'CD'
+  # p.push [ 1, 2, 3, ]
+  # p.push [ 4, 5, 6, ]
   p.push 'ABC'
+  p.push 'DEF'
+  p.push 'GHIJ'
   # p.push show_1 = ( d, send ) -> whisper rpr d; send d
   p.push show_2 = ( d       ) -> whisper rpr d
+  p.send 0
+  p.send 1
+  p.send 2
   info '^98-5^', p
   info '^98-6^', p.run()
   return null
