@@ -1,6 +1,6 @@
 (function() {
-  'use strict';
-  var GUY, Pipeline, Reporting_collector, Segment, UTIL, alert, debug, def, demo_1, demo_2, echo, help, hide, info, inspect, isa, log, nameit, plain, praise, rpr, type_of, types, urge, validate, validate_optional, warn, whisper;
+  'xxxxxxxxxuse strict';
+  var GUY, Pipeline, Reporting_collector, Segment, UTIL, alert, debug, def, demo_1, demo_2, echo, help, hide, info, inspect, isa, log, model_1, model_2a, model_2b, nameit, plain, praise, rpr, type_of, types, urge, validate, validate_optional, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -31,7 +31,7 @@
       var ref, ref1, send;
       this.input = (ref = cfg.input) != null ? ref : [];
       this.output = (ref1 = cfg.output) != null ? ref1 : [];
-      hide(this, 'fitting', this._as_fitting(cfg.fitting));
+      hide(this, 'transform', this._as_transform(cfg.fitting));
       hide(this, '_send', send = (d) => {
         this.output.push(d);
         return d/* 'inner' send method */;
@@ -40,11 +40,27 @@
     }
 
     //---------------------------------------------------------------------------------------------------------
-    _as_fitting(fitting) {
+    _as_transform(fitting) {
       /* TAINT validate arity */
-      var R, arity, fitting_type, ref, type;
-      fitting_type = null;
-      switch (type = type_of(fitting)) {
+      /*
+
+      * `fitting`: a value that may be used as (the central part of) a transform in a pipeline. This may be a
+        function of arity 2 (a transducer), a list (a source) &c.
+      * `transform`: one of the serial elements that constitute a pipeline. While a `fitting` may be of
+        various types, a `transform` is always a function. `transform`s have a `type` attribute which takes
+        one of the following values:
+        * `source`: a `transform` that does not take any arguments and will yield one value per call
+        * `observer`: a `transform` that takes one argument (the current value) and does not send any values
+          into the pipeline; the value an observer gets called with will be the same value that the next
+          transformer will be called with. Note that if an observer receives a mutable value it can modify it
+          and thereby affect one data item at a time.
+        * `transducer`: a `transform` that takes two arguments, the current data item and a `send()` function
+          that can be used any number of times to send values to the ensuing transform.
+
+       */
+      var R, arity, fitting_type, ref, transform_type;
+      transform_type = null;
+      switch (fitting_type = type_of(fitting)) {
         case 'function':
           R = fitting;
           break;
@@ -60,18 +76,18 @@
           })();
           break;
         default:
-          throw new Error(`unable to use a ${rpr(type)} as a fitting`);
+          throw new Error(`unable to use a ${rpr(fitting_type)} as a fitting`);
       }
       //.......................................................................................................
       switch (arity = (ref = R.length) != null ? ref : 0) {
         case 0:
-          fitting_type = 'source';
+          transform_type = 'source';
           break;
         case 1:
-          fitting_type = 'observer';
+          transform_type = 'observer';
           break;
         case 2:
-          fitting_type = 'transform';
+          transform_type = 'transducer';
           break;
         default:
           throw new Error(`fittings with arity ${arity} not implemented`);
@@ -80,7 +96,7 @@
         //.......................................................................................................
         nameit('ƒ', R);
       }
-      R.type = fitting_type;
+      R.type = transform_type;
       return R;
     }
 
@@ -94,7 +110,7 @@
     //---------------------------------------------------------------------------------------------------------
     process() {
       if (this.input.length > 0) {
-        this.fitting.call(null, this.input.shift(), this._send);
+        this.transform.call(null, this.input.shift(), this._send);
         return 1;
       }
       return 0;
@@ -106,7 +122,7 @@
     }
 
     toString() {
-      return `${rpr(this.input)} ▶ ${this.fitting.name} ▶ ${rpr(this.output)}`;
+      return `${rpr(this.input)} ▶ ${this.transform.name} ▶ ${rpr(this.output)}`;
     }
 
   };
@@ -273,7 +289,7 @@
         segment = ref[i];
         R.push(rpr(segment.input));
         R.push('▶');
-        R.push(segment.fitting.name);
+        R.push(segment.transform.name);
         R.push('▶');
       }
       R.push(rpr(this.output));
@@ -287,6 +303,7 @@
   //-----------------------------------------------------------------------------------------------------------
   demo_1 = function() {
     var on_after_process, on_after_step, on_before_process, on_before_step, p, plus_2, times_2, times_3;
+    echo('—————————————————————————————————————————————');
     on_before_process = function() {
       return help('^97-1^', this);
     };
@@ -341,6 +358,7 @@
   //-----------------------------------------------------------------------------------------------------------
   demo_2 = function() {
     var on_after_process, on_after_step, on_before_process, on_before_step, p;
+    echo('—————————————————————————————————————————————');
     on_before_process = function() {
       return help('^97-1^', this);
     };
@@ -362,11 +380,178 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  model_1 = function() {
+    /* use a transform of arity 0 whose return value is the next data item. Must use special value `nothing`
+     to unambiguously decide between 'has value', has no value'. Flag `done` could be made attribute of `tf`
+     so unwarranted calls can be avoided. */
+    var $tf, _, g, i, nothing, s, tf;
+    echo('—————————————————————————————————————————————');
+    s = [5, 6, 7];
+    // g       = ( -> yield from s )() # the more general formulation
+    g = s.values();
+    nothing = Symbol('nothing');
+    $tf = function(g) {
+      var done;
+      done = false;
+      return function() {
+        var value;
+        if (done) {
+          return nothing;
+        }
+        ({value, done} = g.next());
+        whisper('^59-1^', {value, done});
+        if (done) {
+          return nothing;
+        } else {
+          return value;
+        }
+      };
+    };
+    tf = $tf(g);
+    for (_ = i = 1; i <= 5; _ = ++i) {
+      info('^59-2^', tf());
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  model_2a = function() {
+    /* use a transform of arity 0, to be called with `send()` method as other transforms are, too. */
+    var $tf, _, i, s, send, tf;
+    echo('—————————————————————————————————————————————');
+    s = [5, 6, 7];
+    // gf  = -> yield from s # s.values()
+    // g   = gf()
+    send = function(d) {
+      info('^60-1^', d);
+      return d;
+    };
+    $tf = function(source) {
+      var idx, last_idx;
+      idx = -1;
+      last_idx = s.length - 1;
+      return function(send) {
+        if (idx >= last_idx) {
+          return null;
+        }
+        idx++;
+        send(s[idx]);
+        return null;
+      };
+    };
+    tf = $tf(s);
+    for (_ = i = 1; i <= 5; _ = ++i) {
+      debug(tf(send));
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  model_2b = function() {
+    /* Same as `model_2a()`, but using a generator as the more general solution. */
+    var mr, s, send;
+    echo('—————————————————————————————————————————————');
+    s = [5, 6, 7];
+    // gf  = -> yield from s # s.values()
+    // g   = gf()
+    send = function(d) {
+      info('^61-1^', d);
+      return d;
+    };
+    mr = {
+      get_tf: function(s) {
+        var method, type;
+        type = type_of(s);
+        if ((method = this[`tf_from_${type}`]) == null) {
+          throw new Error(`unable to convert a ${type} to a transform`);
+        }
+        return method.call(this, s);
+      },
+      tf_from_generator: function(s) {
+        var done;
+        debug('^61-2^', s);
+        done = false;
+        return function(send) {
+          var d;
+          if (done) {
+            return null;
+          }
+          ({
+            value: d,
+            done
+          } = s.next());
+          if (!done) {
+            send(d);
+          }
+          return null;
+        };
+      },
+      tf_from_generatorfunction: function(s) {
+        debug('^61-3^', type_of(s));
+        return this.get_tf(s());
+      },
+      tf_from_list: function(s) {
+        debug('^61-4^', type_of(s));
+        return this.get_tf(s.values());
+      },
+      tf_from_arrayiterator: function(s) {
+        debug('^61-4^', type_of(s));
+        return this.tf_from_generator(s);
+      }
+    };
+    debug('^61-5^', type_of(s));
+    debug('^61-6^', type_of(s.values));
+    debug('^61-7^', type_of(s.values()));
+    debug('^61-8^', type_of((function*() {
+      return (yield 1);
+    })));
+    debug('^61-9^', type_of((function*() {
+      return (yield 1);
+    })()));
+    (function() {
+      var _, i, results, tf;
+      whisper('...................');
+      tf = mr.get_tf(s);
+      results = [];
+      for (_ = i = 1; i <= 5; _ = ++i) {
+        results.push(debug(tf(send)));
+      }
+      return results;
+    })();
+    (function() {
+      var _, i, results, tf;
+      whisper('...................');
+      tf = mr.get_tf((function*() {
+        return (yield* 'ABC');
+      }));
+      results = [];
+      for (_ = i = 1; i <= 5; _ = ++i) {
+        results.push(debug(tf(send)));
+      }
+      return results;
+    })();
+    (function() {
+      var _, i, results, tf;
+      whisper('...................');
+      tf = mr.get_tf(s.values());
+      results = [];
+      for (_ = i = 1; i <= 5; _ = ++i) {
+        results.push(debug(tf(send)));
+      }
+      return results;
+    })();
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       demo_1();
-      return demo_2();
+      demo_2();
+      model_1();
+      model_2a();
+      return model_2b();
     })();
   }
 
