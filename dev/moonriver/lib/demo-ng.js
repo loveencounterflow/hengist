@@ -412,7 +412,7 @@
           d = ref[i];
           yield d;
         }
-        this.output.length = [];
+        this.output.length = 0;
         if (this.has_finished) {
           // yield @output.shift() while @output.length > 0
           break;
