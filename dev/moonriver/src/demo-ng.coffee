@@ -35,26 +35,28 @@ class Segment
   constructor: ( cfg ) ->
     @input      = cfg.input  ? []
     @output     = cfg.output ? []
-    hide @, 'transform', @_as_transform cfg.transform
+    hide @, 'fitting', @_as_fitting cfg.fitting
     hide @, '_send', send = ( d ) => @output.push d; d ### 'inner' send method ###
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
-  _as_transform: ( transform ) ->
-    switch type = type_of transform
+  _as_fitting: ( fitting ) ->
+    fitting_type = null
+    switch type = type_of fitting
       when 'function'
         ### TAINT validate arity ###
-        R = transform
+        R = fitting
       when 'list'
-        source  = transform
-        R       = ( d, send ) ->
-          debug arguments
+        R       = ( -> yield d for d in fitting )()
       else
-        throw new Error "unable to push value of type #{rpr type}"
+        throw new Error "unable to use a #{rpr type} as a fitting"
     #.......................................................................................................
     name  = R.name
     name  = 'ƒ' if name is ''
     return nameit name, R
+    nameit 'ƒ', R if R.name is ''
+    R.type = fitting_type
+    return R
 
   #---------------------------------------------------------------------------------------------------------
   ### 'outer' send method ###
@@ -63,13 +65,13 @@ class Segment
   #---------------------------------------------------------------------------------------------------------
   process: ->
     if @input.length > 0
-      @transform.call null, @input.shift(), @_send
+      @fitting.call null, @input.shift(), @_send
       return 1
     return 0
 
   #---------------------------------------------------------------------------------------------------------
   [UTIL.inspect.custom]:  -> @toString()
-  toString:               -> "#{rpr @input} ▶ #{@transform.name} ▶ #{rpr @output}"
+  toString:               -> "#{rpr @input} ▶ #{@fitting.name} ▶ #{rpr @output}"
 
 #===========================================================================================================
 class Reporting_collector
@@ -113,14 +115,14 @@ class Pipeline
   _new_collector: -> new Reporting_collector ( delta ) => @datacount += delta
 
   #---------------------------------------------------------------------------------------------------------
-  push: ( transform ) ->
+  push: ( fitting ) ->
     if ( count = @segments.length ) is 0
       input               = @input
     else
       prv_segment         = @segments[ count - 1 ]
       prv_segment.output  = @_new_collector()
       input               = prv_segment.output
-    R = new Segment { input, transform, output: @output, }
+    R = new Segment { input, fitting, output: @output, }
     @segments.push R
     return R
 
@@ -157,7 +159,7 @@ class Pipeline
     for segment in @segments
       R.push rpr segment.input
       R.push '▶'
-      R.push segment.transform.name
+      R.push segment.fitting.name
       R.push '▶'
     R.push rpr @output
     return R.join ' '
