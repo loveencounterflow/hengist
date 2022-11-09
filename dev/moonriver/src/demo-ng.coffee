@@ -77,8 +77,10 @@ class Segment
   constructor: ( cfg ) ->
     hide @, 'types',      get_types()
     @types.create.mr_segment_cfg cfg
-    @input      = cfg.input
-    @output     = cfg.output
+    @input          = cfg.input
+    @output         = cfg.output
+    @has_finished   = null
+    @transform_type = null
     hide @, 'transform',  @_as_transform cfg.fitting
     hide @, '_send', send = ( d ) => @output.push d; d ### 'inner' send method ###
     return undefined
@@ -101,20 +103,18 @@ class Segment
         that can be used any number of times to send values to the ensuing transform.
 
     ###
-    transform_type = null
     if @types.isa.mr_source_fitting fitting
-      R = @_get_source_transform fitting
-      transform_type  = 'source'
+      R               = @_get_source_transform fitting
+      @transform_type = 'source'
     #.......................................................................................................
     else
       R = fitting
       switch arity = R.length ? 0
-        when 1 then transform_type = 'observer'
-        when 2 then transform_type = 'transducer'
+        when 1 then @transform_type = 'observer'
+        when 2 then @transform_type = 'transducer'
         else throw new Error "fittings with arity #{arity} not implemented"
     #.......................................................................................................
     nameit 'ƒ', R if R.name is ''
-    R.type = transform_type
     return R
 
 
@@ -125,22 +125,24 @@ class Segment
     type = @types.type_of source
     unless ( method = @[ stf_prefix + type ] )?
       throw new Error "unable to convert a #{type} to a transform"
+    @has_finished = false
     return method.call @, source
 
   #---------------------------------------------------------------------------------------------------------
   [ stf_prefix + 'generator' ]: ( source ) ->
-    done = false
-    return ( send ) ->
-      return null if done
-      { value: d
-        done      } = source.next()
-      send d unless done
+    R = ( send ) =>
+      return null if @has_finished
+      dsc           = source.next()
+      @has_finished = dsc.done
+      send dsc.value unless @has_finished
       return null
+    @has_finished = false
+    return R
 
   #---------------------------------------------------------------------------------------------------------
-  [ stf_prefix + 'generatorfunction' ]: ( source ) -> @_get_source_transform source()
-  [ stf_prefix + 'list' ]:              ( source ) -> @_get_source_transform source.values()
-  [ stf_prefix + 'arrayiterator' ]:     ( source ) -> @[ stf_prefix + 'generator' ] source
+  [ stf_prefix + 'generatorfunction'  ]:  ( source ) -> @_get_source_transform source()
+  [ stf_prefix + 'list'               ]:  ( source ) -> @_get_source_transform source.values()
+  [ stf_prefix + 'arrayiterator'      ]:  ( source ) -> @[ stf_prefix + 'generator' ] source
 
 
   #=========================================================================================================
@@ -151,14 +153,27 @@ class Segment
 
   #---------------------------------------------------------------------------------------------------------
   process: ->
+    if @transform_type is 'source'
+      return 0 if @transform.has_finished
+      @transform @_send
+      return 1
     if @input.length > 0
-      @transform.call null, @input.shift(), @_send
+      d = @input.shift()
+      switch @transform_type
+        when 'observer'
+          @transform  d
+          @_send      d
+        when 'transducer'
+          @transform d, @_send
+        else
+          throw new Error "internal error: unknown transform type #{rpr @transform_type}"
       return 1
     return 0
 
   #---------------------------------------------------------------------------------------------------------
   [UTIL.inspect.custom]:  -> @toString()
   toString:               -> "#{rpr @input} ▶ #{@transform.name} ▶ #{rpr @output}"
+
 
 #===========================================================================================================
 class Reporting_collector
@@ -196,10 +211,14 @@ class Pipeline
     @on_after_step      = cfg.on_after_step  ? null
     @on_before_process  = cfg.on_before_process ? null
     @on_after_process   = cfg.on_after_process  ? null
+    hide  @, 'sources',       []
+    def   @, 'has_finished',  get: -> ( @datacount < 1 ) and @sources.every ( s ) -> s.has_finished
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
-  _new_collector: -> new Reporting_collector ( delta ) => @datacount += delta
+  _new_collector:                   -> new Reporting_collector ( delta ) => @datacount += delta
+  send:                       ( d ) -> @input.push d; d
+  run:                              -> ( d for d from @walk() )
 
   #---------------------------------------------------------------------------------------------------------
   push: ( fitting ) ->
@@ -210,11 +229,9 @@ class Pipeline
       prv_segment.output  = @_new_collector()
       input               = prv_segment.output
     R = new Segment { input, fitting, output: @output, }
-    @segments.push R
+    @segments.push  R
+    @sources.push   R if R.transform_type is 'source'
     return R
-
-  #---------------------------------------------------------------------------------------------------------
-  send: ( d ) -> @input.push d; d
 
   #---------------------------------------------------------------------------------------------------------
   process: ->
@@ -227,16 +244,13 @@ class Pipeline
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  run: -> ( d for d from @walk() )
-
-  #---------------------------------------------------------------------------------------------------------
   walk: ->
     loop
       @process()
       yield d for d in @output
       @output.length = []
       # yield @output.shift() while @output.length > 0
-      break if @datacount < 1
+      break if @has_finished
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -297,27 +311,34 @@ demo_1 = ->
 #-----------------------------------------------------------------------------------------------------------
 demo_2 = ->
   echo '—————————————————————————————————————————————'
-  on_before_process = -> help '^97-1^', @
-  on_after_process  = -> warn '^97-2^', @
-  on_before_step    =  ( sidx ) -> urge '^97-3^', sidx, @
-  on_after_step     =  ( sidx ) -> urge '^97-4^', sidx, @
+  _types = new ( require '../../../apps/intertype' ).Intertype()
+  on_before_process = -> help '^98-1^', @
+  on_after_process  = -> warn '^98-2^', @
+  on_before_step    =  ( sidx ) -> urge '^98-3^', sidx, @
+  on_after_step     =  ( sidx ) -> urge '^98-4^', sidx, @
+  on_before_proces  = null
   on_before_step    = null
-  # on_after_step     = null
+  on_after_step     = null
   on_after_process  = null
   p = new Pipeline { on_before_process, on_before_step, on_after_step, on_after_process, }
+  p = new Pipeline()
   p.push [ 1, 2, 3, ]
-  info '^97-4^', p.run()
+  p.push show_1 = ( d, send ) -> whisper rpr d; send d
+  p.push show_2 = ( d       ) -> whisper rpr d
+  info '^98-5^', p
+  info '^98-6^', p.run()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 model_2b = ->
   echo '—————————————————————————————————————————————'
+  _types = new ( require '../../../apps/intertype' ).Intertype()
   ### Same as `model_2a()`, but using a generator as the more general solution. ###
   source  = [ 5, 6, 7, ]
   send    = ( d ) -> info '^61-1^', d; d
   mr      =
     _get_source_transform: ( source ) ->
-      type = type_of source
+      type = _types.type_of source
       unless ( method = @[ "_source_transform_from_#{type}"] )?
         throw new Error "unable to convert a #{type} to a transform"
       return method.call @, source
