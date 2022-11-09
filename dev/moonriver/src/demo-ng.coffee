@@ -241,90 +241,44 @@ demo_2 = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-model_1 = ->
-  echo '—————————————————————————————————————————————'
-  ### use a transform of arity 0 whose return value is the next data item. Must use special value `nothing`
-  to unambiguously decide between 'has value', has no value'. Flag `done` could be made attribute of `tf`
-  so unwarranted calls can be avoided. ###
-  s       = [ 5, 6, 7, ]
-  # g       = ( -> yield from s )() # the more general formulation
-  g       = s.values()
-  nothing = Symbol 'nothing'
-  $tf     = ( g ) ->
-    done = false
-    return ->
-      return nothing if done
-      { value
-        done }      = g.next()
-      whisper '^59-1^', { value, done, }
-      return if done then nothing else value
-  tf    = $tf g
-  info '^59-2^', tf() for _ in [ 1 .. 5 ]
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-model_2a = ->
-  echo '—————————————————————————————————————————————'
-  ### use a transform of arity 0, to be called with `send()` method as other transforms are, too. ###
-  s     = [ 5, 6, 7, ]
-  # gf  = -> yield from s # s.values()
-  # g   = gf()
-  send  = ( d ) -> info '^60-1^', d; d
-  $tf   = ( source ) ->
-    idx       = -1
-    last_idx  = s.length - 1
-    return ( send ) ->
-      return null if idx >= last_idx
-      idx++
-      send s[ idx ]
-      return null
-  tf = $tf s
-  debug tf send for _ in [ 1 .. 5 ]
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
 model_2b = ->
   echo '—————————————————————————————————————————————'
   ### Same as `model_2a()`, but using a generator as the more general solution. ###
-  s     = [ 5, 6, 7, ]
-  # gf  = -> yield from s # s.values()
-  # g   = gf()
-  send  = ( d ) -> info '^61-1^', d; d
-  mr =
-    get_tf: ( s ) ->
-      type = type_of s
-      unless ( method = @[ "tf_from_#{type}"] )?
+  source  = [ 5, 6, 7, ]
+  send    = ( d ) -> info '^61-1^', d; d
+  mr      =
+    _get_tf: ( source ) ->
+      type = type_of source
+      unless ( method = @[ "_transform_from_#{type}"] )?
         throw new Error "unable to convert a #{type} to a transform"
-      return method.call @, s
-    tf_from_generator: ( s ) ->
-      debug '^61-2^', s
+      return method.call @, source
+    _transform_from_generator: ( source ) ->
       done = false
       return ( send ) ->
         return null if done
         { value: d
-          done      } = s.next()
+          done      } = source.next()
         send d unless done
         return null
-    tf_from_generatorfunction: ( s ) -> debug '^61-3^', type_of s; @get_tf s()
-    tf_from_list:              ( s ) -> debug '^61-4^', type_of s; @get_tf s.values()
-    tf_from_arrayiterator:     ( s ) -> debug '^61-4^', type_of s; @tf_from_generator s
-  debug '^61-5^', type_of s
-  debug '^61-6^', type_of s.values
-  debug '^61-7^', type_of s.values()
-  debug '^61-8^', type_of ( -> yield 1 )
-  debug '^61-9^', type_of ( -> yield 1 )()
+    _transform_from_generatorfunction: ( source ) -> @_get_tf source()
+    _transform_from_list:              ( source ) -> @_get_tf source.values()
+    _transform_from_arrayiterator:     ( source ) -> @_transform_from_generator source
   do ->
     whisper '...................'
-    tf = mr.get_tf s
-    debug tf send for _ in [ 1 .. 5 ]
+    tf = mr._get_tf source
+    tf send for _ in [ 1 .. 5 ]
   do ->
     whisper '...................'
-    tf = mr.get_tf ( -> yield from 'ABC' )
-    debug tf send for _ in [ 1 .. 5 ]
+    tf = mr._get_tf ( -> yield from source )
+    tf send for _ in [ 1 .. 5 ]
   do ->
     whisper '...................'
-    tf = mr.get_tf s.values()
-    debug tf send for _ in [ 1 .. 5 ]
+    tf = mr._get_tf ( -> yield from source )()
+    tf send for _ in [ 1 .. 5 ]
+  do ->
+    whisper '...................'
+    tf = mr._get_tf source.values()
+    tf send for _ in [ 1 .. 5 ]
   return null
 
 
@@ -332,6 +286,4 @@ model_2b = ->
 if module is require.main then do =>
   demo_1()
   demo_2()
-  model_1()
-  model_2a()
   model_2b()
