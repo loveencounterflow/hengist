@@ -335,7 +335,9 @@ demo_2 = ->
   p = new Pipeline { on_before_process, on_before_step, on_after_step, on_after_process, }
   p = new Pipeline()
   p.push [ 1, 2, 3, ]
-  p.push show_1 = ( d, send ) -> whisper rpr d; send d
+  p.push [ 4, 5, 6, ]
+  p.push 'ABC'
+  # p.push show_1 = ( d, send ) -> whisper rpr d; send d
   p.push show_2 = ( d       ) -> whisper rpr d
   info '^98-5^', p
   info '^98-6^', p.run()
@@ -390,3 +392,4 @@ if module is require.main then do =>
   demo_2()
   # model_2b()
   # get_types()
+
