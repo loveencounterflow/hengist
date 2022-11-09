@@ -160,7 +160,7 @@
         throw new Error(`unable to convert a ${type} to a transform`);
       }
       this.has_finished = false;
-      return method.call(this, source);
+      return nameit(type, method.call(this, source));
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -225,7 +225,7 @@
     process() {
       var d;
       if (this.transform_type === 'source') {
-        while (this.input.length > 0) {
+        while (this.input.length > 0/* TAINT could be done with `.splice()` */) {
           this._send(this.input.shift());
         }
         if (this.transform.has_finished) {
@@ -503,34 +503,35 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_2 = function() {
-    var _types, on_after_process, on_after_step, on_before_proces, on_before_process, on_before_step, p, show_2;
+    var _types, on_after_process, on_after_step, on_before_process, on_before_step, p, show_2;
     echo('—————————————————————————————————————————————');
     _types = new (require('../../../apps/intertype')).Intertype();
-    on_before_process = function() {
-      return help('^98-1^', this);
-    };
-    on_after_process = function() {
-      return warn('^98-2^', this);
-    };
-    on_before_step = function(sidx) {
-      return urge('^98-3^', sidx, this);
-    };
-    on_after_step = function(sidx) {
-      return urge('^98-4^', sidx, this);
-    };
-    on_before_proces = null;
+    on_before_process = null;
     on_before_step = null;
     on_after_step = null;
     on_after_process = null;
+    // on_before_process = -> help '^98-1^', @
+    on_after_process = function() {
+      return warn('^98-2^', this);
+    };
+    // on_before_step    =  ( sidx ) -> urge '^98-3^', sidx, @
+    // on_after_step     =  ( sidx ) -> urge '^98-4^', sidx, @
     p = new Pipeline({on_before_process, on_before_step, on_after_step, on_after_process});
-    p = new Pipeline();
-    p.push([1, 2, 3]);
-    p.push([4, 5, 6]);
+    // p = new Pipeline()
+    // p.push 'AB'
+    // p.push 'CD'
+    // p.push [ 1, 2, 3, ]
+    // p.push [ 4, 5, 6, ]
     p.push('ABC');
+    p.push('DEF');
+    p.push('GHIJ');
     // p.push show_1 = ( d, send ) -> whisper rpr d; send d
     p.push(show_2 = function(d) {
       return whisper(rpr(d));
     });
+    p.send(0);
+    p.send(1);
+    p.send(2);
     info('^98-5^', p);
     info('^98-6^', p.run());
     return null;
