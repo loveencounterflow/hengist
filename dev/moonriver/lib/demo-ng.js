@@ -73,21 +73,17 @@
         output: 'mr_collector',
         fitting: 'mr_fitting'
       },
-      create: function(x) {
-        var R;
-        if (!this.isa.optional.object(x)) {
-          return x;
-        }
-        R = x;
-        if (x.input == null) {
-          x.input = [];
-        }
-        if (x.output == null) {
-          x.output = [];
-        }
-        return R;
+      default: {
+        input: null,
+        output: null,
+        fitting: null
       }
     });
+    // create: ( x ) ->
+    //   return x unless @isa.optional.object x
+    //   R         = x
+    //   return R
+
     //---------------------------------------------------------------------------------------------------------
     return types;
   };
@@ -101,6 +97,8 @@
       this.types.create.mr_segment_cfg(cfg);
       this.input = cfg.input;
       this.output = cfg.output;
+      this.has_finished = null;
+      this.transform_type = null;
       hide(this, 'transform', this._as_transform(cfg.fitting));
       hide(this, '_send', send = (d) => {
         this.output.push(d);
@@ -111,6 +109,7 @@
 
     //---------------------------------------------------------------------------------------------------------
     _as_transform(fitting) {
+      var R, arity, ref;
       /*
 
       * `fitting`: a value that may be used as (the central part of) a transform in a pipeline. This may be a
@@ -127,20 +126,18 @@
           that can be used any number of times to send values to the ensuing transform.
 
        */
-      var R, arity, ref, transform_type;
-      transform_type = null;
       if (this.types.isa.mr_source_fitting(fitting)) {
         R = this._get_source_transform(fitting);
-        transform_type = 'source';
+        this.transform_type = 'source';
       } else {
         //.......................................................................................................
         R = fitting;
         switch (arity = (ref = R.length) != null ? ref : 0) {
           case 1:
-            transform_type = 'observer';
+            this.transform_type = 'observer';
             break;
           case 2:
-            transform_type = 'transducer';
+            this.transform_type = 'transducer';
             break;
           default:
             throw new Error(`fittings with arity ${arity} not implemented`);
@@ -150,7 +147,6 @@
         //.......................................................................................................
         nameit('ƒ', R);
       }
-      R.type = transform_type;
       return R;
     }
 
@@ -163,27 +159,27 @@
       if ((method = this[stf_prefix + type]) == null) {
         throw new Error(`unable to convert a ${type} to a transform`);
       }
+      this.has_finished = false;
       return method.call(this, source);
     }
 
     //---------------------------------------------------------------------------------------------------------
     [stf_prefix + 'generator'](source) {
-      var done;
-      done = false;
-      return function(send) {
-        var d;
-        if (done) {
+      var R;
+      R = (send) => {
+        var dsc;
+        if (this.has_finished) {
           return null;
         }
-        ({
-          value: d,
-          done
-        } = source.next());
-        if (!done) {
-          send(d);
+        dsc = source.next();
+        this.has_finished = dsc.done;
+        if (!this.has_finished) {
+          send(dsc.value);
         }
         return null;
       };
+      this.has_finished = false;
+      return R;
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -210,8 +206,27 @@
 
     //---------------------------------------------------------------------------------------------------------
     process() {
+      var d;
+      if (this.transform_type === 'source') {
+        if (this.transform.has_finished) {
+          return 0;
+        }
+        this.transform(this._send);
+        return 1;
+      }
       if (this.input.length > 0) {
-        this.transform.call(null, this.input.shift(), this._send);
+        d = this.input.shift();
+        switch (this.transform_type) {
+          case 'observer':
+            this.transform(d);
+            this._send(d);
+            break;
+          case 'transducer':
+            this.transform(d, this._send);
+            break;
+          default:
+            throw new Error(`internal error: unknown transform type ${rpr(this.transform_type)}`);
+        }
         return 1;
       }
       return 0;
@@ -289,6 +304,14 @@
       this.on_after_step = (ref1 = cfg.on_after_step) != null ? ref1 : null;
       this.on_before_process = (ref2 = cfg.on_before_process) != null ? ref2 : null;
       this.on_after_process = (ref3 = cfg.on_after_process) != null ? ref3 : null;
+      hide(this, 'sources', []);
+      def(this, 'has_finished', {
+        get: function() {
+          return (this.datacount < 1) && this.sources.every(function(s) {
+            return s.has_finished;
+          });
+        }
+      });
       return void 0;
     }
 
@@ -297,6 +320,21 @@
       return new Reporting_collector((delta) => {
         return this.datacount += delta;
       });
+    }
+
+    send(d) {
+      this.input.push(d);
+      return d;
+    }
+
+    run() {
+      var d, ref, results;
+      ref = this.walk();
+      results = [];
+      for (d of ref) {
+        results.push(d);
+      }
+      return results;
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -315,13 +353,10 @@
         output: this.output
       });
       this.segments.push(R);
+      if (R.transform_type === 'source') {
+        this.sources.push(R);
+      }
       return R;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    send(d) {
-      this.input.push(d);
-      return d;
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -348,17 +383,6 @@
     }
 
     //---------------------------------------------------------------------------------------------------------
-    run() {
-      var d, ref, results;
-      ref = this.walk();
-      results = [];
-      for (d of ref) {
-        results.push(d);
-      }
-      return results;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
     * walk() {
       var d, i, len, ref;
       while (true) {
@@ -369,7 +393,7 @@
           yield d;
         }
         this.output.length = [];
-        if (this.datacount < 1) {
+        if (this.has_finished) {
           // yield @output.shift() while @output.length > 0
           break;
         }
@@ -459,34 +483,46 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_2 = function() {
-    var on_after_process, on_after_step, on_before_process, on_before_step, p;
+    var _types, on_after_process, on_after_step, on_before_proces, on_before_process, on_before_step, p, show_1, show_2;
     echo('—————————————————————————————————————————————');
+    _types = new (require('../../../apps/intertype')).Intertype();
     on_before_process = function() {
-      return help('^97-1^', this);
+      return help('^98-1^', this);
     };
     on_after_process = function() {
-      return warn('^97-2^', this);
+      return warn('^98-2^', this);
     };
     on_before_step = function(sidx) {
-      return urge('^97-3^', sidx, this);
+      return urge('^98-3^', sidx, this);
     };
     on_after_step = function(sidx) {
-      return urge('^97-4^', sidx, this);
+      return urge('^98-4^', sidx, this);
     };
+    on_before_proces = null;
     on_before_step = null;
-    // on_after_step     = null
+    on_after_step = null;
     on_after_process = null;
     p = new Pipeline({on_before_process, on_before_step, on_after_step, on_after_process});
+    p = new Pipeline();
     p.push([1, 2, 3]);
-    info('^97-4^', p.run());
+    p.push(show_1 = function(d, send) {
+      whisper(rpr(d));
+      return send(d);
+    });
+    p.push(show_2 = function(d) {
+      return whisper(rpr(d));
+    });
+    info('^98-5^', p);
+    info('^98-6^', p.run());
     return null;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   model_2b = function() {
     /* Same as `model_2a()`, but using a generator as the more general solution. */
-    var mr, send, source;
+    var _types, mr, send, source;
     echo('—————————————————————————————————————————————');
+    _types = new (require('../../../apps/intertype')).Intertype();
     source = [5, 6, 7];
     send = function(d) {
       info('^61-1^', d);
@@ -495,7 +531,7 @@
     mr = {
       _get_source_transform: function(source) {
         var method, type;
-        type = type_of(source);
+        type = _types.type_of(source);
         if ((method = this[`_source_transform_from_${type}`]) == null) {
           throw new Error(`unable to convert a ${type} to a transform`);
         }
