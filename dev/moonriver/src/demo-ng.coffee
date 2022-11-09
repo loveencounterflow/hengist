@@ -51,9 +51,12 @@ class Segment
       else
         throw new Error "unable to use a #{rpr type} as a fitting"
     #.......................................................................................................
-    name  = R.name
-    name  = 'ƒ' if name is ''
-    return nameit name, R
+    switch arity = R.length ? 0
+      when 0 then fitting_type = 'source'
+      when 1 then fitting_type = 'observer'
+      when 2 then fitting_type = 'transform'
+      else throw new Error "fittings with arity #{arity} not implemented"
+    #.......................................................................................................
     nameit 'ƒ', R if R.name is ''
     R.type = fitting_type
     return R
