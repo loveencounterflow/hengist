@@ -260,7 +260,7 @@ class Pipeline
     loop
       @process()
       yield d for d in @output
-      @output.length = []
+      @output.length = 0
       # yield @output.shift() while @output.length > 0
       break if @has_finished
     return null
