@@ -165,6 +165,7 @@ class Segment
   #---------------------------------------------------------------------------------------------------------
   process: ->
     if @transform_type is 'source'
+      @_send @input.shift() while @input.length > 0
       return 0 if @transform.has_finished
       @transform @_send
       return 1
