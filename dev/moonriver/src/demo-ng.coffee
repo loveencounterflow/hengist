@@ -151,9 +151,14 @@ class Segment
       return null
 
   #---------------------------------------------------------------------------------------------------------
-  [ stf_prefix + 'generatorfunction'  ]:  ( source ) -> @_get_source_transform source()
-  [ stf_prefix + 'list'               ]:  ( source ) -> @_get_source_transform source.values()
-  [ stf_prefix + 'arrayiterator'      ]:  ( source ) -> @[ stf_prefix + 'generator' ] source
+  [ stf_prefix + 'generatorfunction'  ]: ( source ) -> @_get_source_transform source()
+  [ stf_prefix + 'arrayiterator'      ]: ( source ) -> @[ stf_prefix + 'generator' ] source
+  [ stf_prefix + 'setiterator'        ]: ( source ) -> @[ stf_prefix + 'generator' ] source
+  [ stf_prefix + 'mapiterator'        ]: ( source ) -> @[ stf_prefix + 'generator' ] source
+  [ stf_prefix + 'list'               ]: ( source ) -> @_get_source_transform source.values()
+  [ stf_prefix + 'object'             ]: ( source ) -> @_get_source_transform -> yield [ k, v, ] for k, v of source
+  [ stf_prefix + 'set'                ]: ( source ) -> @_get_source_transform source.values()
+  [ stf_prefix + 'map'                ]: ( source ) -> @_get_source_transform source.entries()
 
 
   #=========================================================================================================
@@ -223,6 +228,7 @@ class Pipeline
     @on_after_step      = cfg.on_after_step  ? null
     @on_before_process  = cfg.on_before_process ? null
     @on_after_process   = cfg.on_after_process  ? null
+    hide  @, 'types',         get_types()
     hide  @, 'sources',       []
     def   @, 'has_finished',  get: -> ( @datacount < 1 ) and @sources.every ( s ) -> s.has_finished
     return undefined
@@ -240,7 +246,8 @@ class Pipeline
       prv_segment         = @segments[ count - 1 ]
       prv_segment.output  = @_new_collector()
       input               = prv_segment.output
-    R = new Segment { input, fitting, output: @output, }
+    try R = new Segment { input, fitting, output: @output, } catch error
+      throw new Error "unable to convert a #{@types.type_of fitting} into a segment\n" + error.message
     @segments.push  R
     @sources.push   R if R.transform_type is 'source'
     return R
@@ -338,6 +345,9 @@ demo_2 = ->
   # p.push 'CD'
   # p.push [ 1, 2, 3, ]
   # p.push [ 4, 5, 6, ]
+  p.push { one: 'cat', two: 'dog', three: 'pony', }
+  p.push new Set '+-*'
+  p.push new Map [ [ 11, 12, ], [ 13, 14, ], ]
   p.push 'ABC'
   p.push 'DEF'
   p.push 'GHIJ'
