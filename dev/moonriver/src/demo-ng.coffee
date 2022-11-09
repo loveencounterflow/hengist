@@ -1,5 +1,5 @@
 
-'xxxxxxxxxuse strict'
+'use strict'
 
 
 ############################################################################################################
@@ -18,25 +18,66 @@ GUY                       = require 'guy'
   echo
   log     }               = GUY.trm
 #...........................................................................................................
-types                     = new ( require 'intertype' ).Intertype()
-{ isa
-  type_of
-  validate
-  validate_optional }     = types
+types                     = null
 UTIL                      = require 'node:util'
 { hide
   def }                   = GUY.props
 nameit                    = ( name, f ) -> def f, 'name', { value: name, }
 stf_prefix                = '_source_transform_from_'
 
+
+#===========================================================================================================
+get_types = ->
+  return types if types?
+  types = new ( require '../../../apps/intertype' ).Intertype()
+
+  #---------------------------------------------------------------------------------------------------------
+  source_fitting_types  = new Set do =>
+    ( name.replace stf_prefix, '' \
+      for name in ( Object.getOwnPropertyNames Segment:: ) \ ### thx to https://stackoverflow.com/a/31055009/7568091 ###
+        when name.startsWith stf_prefix )
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.mr_source_fitting ( x ) -> source_fitting_types.has @type_of x
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.mr_nonsource_fitting ( x ) ->
+    return false unless @isa.function x
+    return false unless 1 <= x.length <= 2
+    return true
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.mr_reporting_collector ( x ) -> x instanceof Reporting_collector
+  types.declare.mr_collector 'list.or.mr_reporting_collector'
+  types.declare.mr_fitting 'mr_nonsource_fitting.or.mr_source_fitting'
+
+  #---------------------------------------------------------------------------------------------------------
+  types.declare.mr_segment_cfg
+    fields:
+      input:    'mr_collector'
+      output:   'mr_collector'
+      fitting:  'mr_fitting'
+    create: ( x ) ->
+      return x unless @isa.optional.object x
+      R         = x
+      x.input  ?= []
+      x.output ?= []
+      return R
+
+  #---------------------------------------------------------------------------------------------------------
+  return types
+
+
 #===========================================================================================================
 class Segment
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
-    @input      = cfg.input  ? []
-    @output     = cfg.output ? []
-    hide @, 'transform', @_as_transform cfg.fitting
+    hide @, 'types',      get_types()
+    @types.create.mr_segment_cfg cfg
+    @input      = cfg.input
+    @output     = cfg.output
+    hide @, 'transform',  @_as_transform cfg.fitting
     hide @, '_send', send = ( d ) => @output.push d; d ### 'inner' send method ###
     return undefined
 
@@ -59,20 +100,16 @@ class Segment
 
     ###
     transform_type = null
-    switch fitting_type = type_of fitting
-      when 'function'
-        ### TAINT validate arity ###
-        R = fitting
-      when 'list'
-        R       = ( -> yield d for d in fitting )()
-      else
-        throw new Error "unable to use a #{rpr fitting_type} as a fitting"
+    if @types.isa.mr_source_fitting fitting
+      R = @_get_source_transform fitting
+      transform_type  = 'source'
     #.......................................................................................................
-    switch arity = R.length ? 0
-      when 0 then transform_type = 'source'
-      when 1 then transform_type = 'observer'
-      when 2 then transform_type = 'transducer'
-      else throw new Error "fittings with arity #{arity} not implemented"
+    else
+      R = fitting
+      switch arity = R.length ? 0
+        when 1 then transform_type = 'observer'
+        when 2 then transform_type = 'transducer'
+        else throw new Error "fittings with arity #{arity} not implemented"
     #.......................................................................................................
     nameit 'ƒ', R if R.name is ''
     R.type = transform_type
@@ -102,6 +139,10 @@ class Segment
   [ stf_prefix + 'generatorfunction' ]: ( source ) -> @_get_source_transform source()
   [ stf_prefix + 'list' ]:              ( source ) -> @_get_source_transform source.values()
   [ stf_prefix + 'arrayiterator' ]:     ( source ) -> @[ stf_prefix + 'generator' ] source
+
+
+  #=========================================================================================================
+  #
   #---------------------------------------------------------------------------------------------------------
   ### 'outer' send method ###
   send: ( d ) -> @input.push d; d
@@ -214,6 +255,7 @@ class Pipeline
 #-----------------------------------------------------------------------------------------------------------
 demo_1 = ->
   echo '—————————————————————————————————————————————'
+  _types = new ( require '../../../apps/intertype' ).Intertype()
   on_before_process = -> help '^97-1^', @
   on_after_process  = -> warn '^97-2^', @
   on_before_step    =  ( sidx ) -> urge '^97-3^', sidx, @
@@ -223,21 +265,21 @@ demo_1 = ->
   on_after_process  = null
   p = new Pipeline { on_before_process, on_before_step, on_after_step, on_after_process, }
   p.push times_2 = ( d, send ) ->
-    if isa.float d
+    if _types.isa.float d
       # send '('
       send d * 2
       # send ')'
     else
       send d
   p.push plus_2  = ( d, send ) ->
-    if isa.float d
+    if _types.isa.float d
       # send '['
       send d + 2
       # send ']'
     else
       send d
   p.push times_3 = ( d, send ) ->
-    if isa.float d
+    if _types.isa.float d
       # send '{'
       send d * 3
       # send '}'
@@ -311,4 +353,5 @@ model_2b = ->
 if module is require.main then do =>
   demo_1()
   demo_2()
-  model_2b()
+  # model_2b()
+  # get_types()
