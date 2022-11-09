@@ -137,8 +137,18 @@ class Segment
       @has_finished = dsc.done
       send dsc.value unless @has_finished
       return null
+
+  #---------------------------------------------------------------------------------------------------------
+  [ stf_prefix + 'text' ]: ( source ) ->
+    letter_re     = /./uy
     @has_finished = false
     return ( send ) =>
+      return null if @has_finished
+      unless ( match = source.match letter_re )?
+        @has_finished = true
+        return null
+      send match[ 0 ]
+      return null
 
   #---------------------------------------------------------------------------------------------------------
   [ stf_prefix + 'generatorfunction'  ]:  ( source ) -> @_get_source_transform source()
