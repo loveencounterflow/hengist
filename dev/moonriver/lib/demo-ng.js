@@ -1,6 +1,6 @@
 (function() {
   'xxxxxxxxxuse strict';
-  var GUY, Pipeline, Reporting_collector, Segment, UTIL, alert, debug, def, demo_1, demo_2, echo, help, hide, info, inspect, isa, log, model_1, model_2a, model_2b, nameit, plain, praise, rpr, type_of, types, urge, validate, validate_optional, warn, whisper;
+  var GUY, Pipeline, Reporting_collector, Segment, UTIL, alert, debug, def, demo_1, demo_2, echo, help, hide, info, inspect, isa, log, model_2b, nameit, plain, praise, rpr, type_of, types, urge, validate, validate_optional, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -381,96 +381,26 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  model_1 = function() {
-    /* use a transform of arity 0 whose return value is the next data item. Must use special value `nothing`
-     to unambiguously decide between 'has value', has no value'. Flag `done` could be made attribute of `tf`
-     so unwarranted calls can be avoided. */
-    var $tf, _, g, i, nothing, s, tf;
-    echo('—————————————————————————————————————————————');
-    s = [5, 6, 7];
-    // g       = ( -> yield from s )() # the more general formulation
-    g = s.values();
-    nothing = Symbol('nothing');
-    $tf = function(g) {
-      var done;
-      done = false;
-      return function() {
-        var value;
-        if (done) {
-          return nothing;
-        }
-        ({value, done} = g.next());
-        whisper('^59-1^', {value, done});
-        if (done) {
-          return nothing;
-        } else {
-          return value;
-        }
-      };
-    };
-    tf = $tf(g);
-    for (_ = i = 1; i <= 5; _ = ++i) {
-      info('^59-2^', tf());
-    }
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  model_2a = function() {
-    /* use a transform of arity 0, to be called with `send()` method as other transforms are, too. */
-    var $tf, _, i, s, send, tf;
-    echo('—————————————————————————————————————————————');
-    s = [5, 6, 7];
-    // gf  = -> yield from s # s.values()
-    // g   = gf()
-    send = function(d) {
-      info('^60-1^', d);
-      return d;
-    };
-    $tf = function(source) {
-      var idx, last_idx;
-      idx = -1;
-      last_idx = s.length - 1;
-      return function(send) {
-        if (idx >= last_idx) {
-          return null;
-        }
-        idx++;
-        send(s[idx]);
-        return null;
-      };
-    };
-    tf = $tf(s);
-    for (_ = i = 1; i <= 5; _ = ++i) {
-      debug(tf(send));
-    }
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   model_2b = function() {
     /* Same as `model_2a()`, but using a generator as the more general solution. */
-    var mr, s, send;
+    var mr, send, source;
     echo('—————————————————————————————————————————————');
-    s = [5, 6, 7];
-    // gf  = -> yield from s # s.values()
-    // g   = gf()
+    source = [5, 6, 7];
     send = function(d) {
       info('^61-1^', d);
       return d;
     };
     mr = {
-      get_tf: function(s) {
+      _get_tf: function(source) {
         var method, type;
-        type = type_of(s);
-        if ((method = this[`tf_from_${type}`]) == null) {
+        type = type_of(source);
+        if ((method = this[`_transform_from_${type}`]) == null) {
           throw new Error(`unable to convert a ${type} to a transform`);
         }
-        return method.call(this, s);
+        return method.call(this, source);
       },
-      tf_from_generator: function(s) {
+      _transform_from_generator: function(source) {
         var done;
-        debug('^61-2^', s);
         done = false;
         return function(send) {
           var d;
@@ -480,64 +410,64 @@
           ({
             value: d,
             done
-          } = s.next());
+          } = source.next());
           if (!done) {
             send(d);
           }
           return null;
         };
       },
-      tf_from_generatorfunction: function(s) {
-        debug('^61-3^', type_of(s));
-        return this.get_tf(s());
+      _transform_from_generatorfunction: function(source) {
+        return this._get_tf(source());
       },
-      tf_from_list: function(s) {
-        debug('^61-4^', type_of(s));
-        return this.get_tf(s.values());
+      _transform_from_list: function(source) {
+        return this._get_tf(source.values());
       },
-      tf_from_arrayiterator: function(s) {
-        debug('^61-4^', type_of(s));
-        return this.tf_from_generator(s);
+      _transform_from_arrayiterator: function(source) {
+        return this._transform_from_generator(source);
       }
     };
-    debug('^61-5^', type_of(s));
-    debug('^61-6^', type_of(s.values));
-    debug('^61-7^', type_of(s.values()));
-    debug('^61-8^', type_of((function*() {
-      return (yield 1);
-    })));
-    debug('^61-9^', type_of((function*() {
-      return (yield 1);
-    })()));
     (function() {
       var _, i, results, tf;
       whisper('...................');
-      tf = mr.get_tf(s);
+      tf = mr._get_tf(source);
       results = [];
       for (_ = i = 1; i <= 5; _ = ++i) {
-        results.push(debug(tf(send)));
+        results.push(tf(send));
       }
       return results;
     })();
     (function() {
       var _, i, results, tf;
       whisper('...................');
-      tf = mr.get_tf((function*() {
-        return (yield* 'ABC');
+      tf = mr._get_tf((function*() {
+        return (yield* source);
       }));
       results = [];
       for (_ = i = 1; i <= 5; _ = ++i) {
-        results.push(debug(tf(send)));
+        results.push(tf(send));
       }
       return results;
     })();
     (function() {
       var _, i, results, tf;
       whisper('...................');
-      tf = mr.get_tf(s.values());
+      tf = mr._get_tf((function*() {
+        return (yield* source);
+      })());
       results = [];
       for (_ = i = 1; i <= 5; _ = ++i) {
-        results.push(debug(tf(send)));
+        results.push(tf(send));
+      }
+      return results;
+    })();
+    (function() {
+      var _, i, results, tf;
+      whisper('...................');
+      tf = mr._get_tf(source.values());
+      results = [];
+      for (_ = i = 1; i <= 5; _ = ++i) {
+        results.push(tf(send));
       }
       return results;
     })();
@@ -549,8 +479,6 @@
     (() => {
       demo_1();
       demo_2();
-      model_1();
-      model_2a();
       return model_2b();
     })();
   }
