@@ -31,7 +31,7 @@
       var ref, ref1, send;
       this.input = (ref = cfg.input) != null ? ref : [];
       this.output = (ref1 = cfg.output) != null ? ref1 : [];
-      hide(this, 'transform', this._as_transform(cfg.transform));
+      hide(this, 'fitting', this._as_fitting(cfg.fitting));
       hide(this, '_send', send = (d) => {
         this.output.push(d);
         return d/* 'inner' send method */;
@@ -40,28 +40,48 @@
     }
 
     //---------------------------------------------------------------------------------------------------------
-    _as_transform(transform) {
+    _as_fitting(fitting) {
       /* TAINT validate arity */
-      var R, name, source, type;
-      switch (type = type_of(transform)) {
+      var R, arity, fitting_type, ref, type;
+      fitting_type = null;
+      switch (type = type_of(fitting)) {
         case 'function':
-          R = transform;
+          R = fitting;
           break;
         case 'list':
-          source = transform;
-          R = function(d, send) {
-            return debug(arguments);
-          };
+          R = (function*() {
+            var d, i, len, results;
+            results = [];
+            for (i = 0, len = fitting.length; i < len; i++) {
+              d = fitting[i];
+              results.push((yield d));
+            }
+            return results;
+          })();
           break;
         default:
-          throw new Error(`unable to push value of type ${rpr(type)}`);
+          throw new Error(`unable to use a ${rpr(type)} as a fitting`);
       }
       //.......................................................................................................
-      name = R.name;
-      if (name === '') {
-        name = 'ƒ';
+      switch (arity = (ref = R.length) != null ? ref : 0) {
+        case 0:
+          fitting_type = 'source';
+          break;
+        case 1:
+          fitting_type = 'observer';
+          break;
+        case 2:
+          fitting_type = 'transducer';
+          break;
+        default:
+          throw new Error(`fittings with arity ${arity} not implemented`);
       }
-      return nameit(name, R);
+      if (R.name === '') {
+        //.......................................................................................................
+        nameit('ƒ', R);
+      }
+      R.type = fitting_type;
+      return R;
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -74,7 +94,7 @@
     //---------------------------------------------------------------------------------------------------------
     process() {
       if (this.input.length > 0) {
-        this.transform.call(null, this.input.shift(), this._send);
+        this.fitting.call(null, this.input.shift(), this._send);
         return 1;
       }
       return 0;
@@ -86,7 +106,7 @@
     }
 
     toString() {
-      return `${rpr(this.input)} ▶ ${this.transform.name} ▶ ${rpr(this.output)}`;
+      return `${rpr(this.input)} ▶ ${this.fitting.name} ▶ ${rpr(this.output)}`;
     }
 
   };
@@ -163,7 +183,7 @@
     }
 
     //---------------------------------------------------------------------------------------------------------
-    push(transform) {
+    push(fitting) {
       var R, count, input, prv_segment;
       if ((count = this.segments.length) === 0) {
         input = this.input;
@@ -174,7 +194,7 @@
       }
       R = new Segment({
         input,
-        transform,
+        fitting,
         output: this.output
       });
       this.segments.push(R);
@@ -253,7 +273,7 @@
         segment = ref[i];
         R.push(rpr(segment.input));
         R.push('▶');
-        R.push(segment.transform.name);
+        R.push(segment.fitting.name);
         R.push('▶');
       }
       R.push(rpr(this.output));
