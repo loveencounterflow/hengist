@@ -126,7 +126,7 @@ class Segment
     unless ( method = @[ stf_prefix + type ] )?
       throw new Error "unable to convert a #{type} to a transform"
     @has_finished = false
-    return method.call @, source
+    return nameit type, method.call @, source
 
   #---------------------------------------------------------------------------------------------------------
   [ stf_prefix + 'generator' ]: ( source ) ->
