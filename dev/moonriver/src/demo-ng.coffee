@@ -1,5 +1,5 @@
 
-'use strict'
+'xxxxxxxxxuse strict'
 
 
 ############################################################################################################
@@ -35,30 +35,46 @@ class Segment
   constructor: ( cfg ) ->
     @input      = cfg.input  ? []
     @output     = cfg.output ? []
-    hide @, 'fitting', @_as_fitting cfg.fitting
+    hide @, 'transform', @_as_transform cfg.fitting
     hide @, '_send', send = ( d ) => @output.push d; d ### 'inner' send method ###
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
-  _as_fitting: ( fitting ) ->
-    fitting_type = null
-    switch type = type_of fitting
+  _as_transform: ( fitting ) ->
+    ###
+
+    * `fitting`: a value that may be used as (the central part of) a transform in a pipeline. This may be a
+      function of arity 2 (a transducer), a list (a source) &c.
+    * `transform`: one of the serial elements that constitute a pipeline. While a `fitting` may be of
+      various types, a `transform` is always a function. `transform`s have a `type` attribute which takes
+      one of the following values:
+      * `source`: a `transform` that does not take any arguments and will yield one value per call
+      * `observer`: a `transform` that takes one argument (the current value) and does not send any values
+        into the pipeline; the value an observer gets called with will be the same value that the next
+        transformer will be called with. Note that if an observer receives a mutable value it can modify it
+        and thereby affect one data item at a time.
+      * `transducer`: a `transform` that takes two arguments, the current data item and a `send()` function
+        that can be used any number of times to send values to the ensuing transform.
+
+    ###
+    transform_type = null
+    switch fitting_type = type_of fitting
       when 'function'
         ### TAINT validate arity ###
         R = fitting
       when 'list'
         R       = ( -> yield d for d in fitting )()
       else
-        throw new Error "unable to use a #{rpr type} as a fitting"
+        throw new Error "unable to use a #{rpr fitting_type} as a fitting"
     #.......................................................................................................
     switch arity = R.length ? 0
-      when 0 then fitting_type = 'source'
-      when 1 then fitting_type = 'observer'
-      when 2 then fitting_type = 'transform'
+      when 0 then transform_type = 'source'
+      when 1 then transform_type = 'observer'
+      when 2 then transform_type = 'transducer'
       else throw new Error "fittings with arity #{arity} not implemented"
     #.......................................................................................................
     nameit 'ƒ', R if R.name is ''
-    R.type = fitting_type
+    R.type = transform_type
     return R
 
   #---------------------------------------------------------------------------------------------------------
@@ -68,13 +84,13 @@ class Segment
   #---------------------------------------------------------------------------------------------------------
   process: ->
     if @input.length > 0
-      @fitting.call null, @input.shift(), @_send
+      @transform.call null, @input.shift(), @_send
       return 1
     return 0
 
   #---------------------------------------------------------------------------------------------------------
   [UTIL.inspect.custom]:  -> @toString()
-  toString:               -> "#{rpr @input} ▶ #{@fitting.name} ▶ #{rpr @output}"
+  toString:               -> "#{rpr @input} ▶ #{@transform.name} ▶ #{rpr @output}"
 
 #===========================================================================================================
 class Reporting_collector
@@ -162,7 +178,7 @@ class Pipeline
     for segment in @segments
       R.push rpr segment.input
       R.push '▶'
-      R.push segment.fitting.name
+      R.push segment.transform.name
       R.push '▶'
     R.push rpr @output
     return R.join ' '
@@ -172,6 +188,7 @@ class Pipeline
 #
 #-----------------------------------------------------------------------------------------------------------
 demo_1 = ->
+  echo '—————————————————————————————————————————————'
   on_before_process = -> help '^97-1^', @
   on_after_process  = -> warn '^97-2^', @
   on_before_step    =  ( sidx ) -> urge '^97-3^', sidx, @
@@ -210,6 +227,7 @@ demo_1 = ->
 
 #-----------------------------------------------------------------------------------------------------------
 demo_2 = ->
+  echo '—————————————————————————————————————————————'
   on_before_process = -> help '^97-1^', @
   on_after_process  = -> warn '^97-2^', @
   on_before_step    =  ( sidx ) -> urge '^97-3^', sidx, @
@@ -222,7 +240,98 @@ demo_2 = ->
   info '^97-4^', p.run()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+model_1 = ->
+  echo '—————————————————————————————————————————————'
+  ### use a transform of arity 0 whose return value is the next data item. Must use special value `nothing`
+  to unambiguously decide between 'has value', has no value'. Flag `done` could be made attribute of `tf`
+  so unwarranted calls can be avoided. ###
+  s       = [ 5, 6, 7, ]
+  # g       = ( -> yield from s )() # the more general formulation
+  g       = s.values()
+  nothing = Symbol 'nothing'
+  $tf     = ( g ) ->
+    done = false
+    return ->
+      return nothing if done
+      { value
+        done }      = g.next()
+      whisper '^59-1^', { value, done, }
+      return if done then nothing else value
+  tf    = $tf g
+  info '^59-2^', tf() for _ in [ 1 .. 5 ]
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+model_2a = ->
+  echo '—————————————————————————————————————————————'
+  ### use a transform of arity 0, to be called with `send()` method as other transforms are, too. ###
+  s     = [ 5, 6, 7, ]
+  # gf  = -> yield from s # s.values()
+  # g   = gf()
+  send  = ( d ) -> info '^60-1^', d; d
+  $tf   = ( source ) ->
+    idx       = -1
+    last_idx  = s.length - 1
+    return ( send ) ->
+      return null if idx >= last_idx
+      idx++
+      send s[ idx ]
+      return null
+  tf = $tf s
+  debug tf send for _ in [ 1 .. 5 ]
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+model_2b = ->
+  echo '—————————————————————————————————————————————'
+  ### Same as `model_2a()`, but using a generator as the more general solution. ###
+  s     = [ 5, 6, 7, ]
+  # gf  = -> yield from s # s.values()
+  # g   = gf()
+  send  = ( d ) -> info '^61-1^', d; d
+  mr =
+    get_tf: ( s ) ->
+      type = type_of s
+      unless ( method = @[ "tf_from_#{type}"] )?
+        throw new Error "unable to convert a #{type} to a transform"
+      return method.call @, s
+    tf_from_generator: ( s ) ->
+      debug '^61-2^', s
+      done = false
+      return ( send ) ->
+        return null if done
+        { value: d
+          done      } = s.next()
+        send d unless done
+        return null
+    tf_from_generatorfunction: ( s ) -> debug '^61-3^', type_of s; @get_tf s()
+    tf_from_list:              ( s ) -> debug '^61-4^', type_of s; @get_tf s.values()
+    tf_from_arrayiterator:     ( s ) -> debug '^61-4^', type_of s; @tf_from_generator s
+  debug '^61-5^', type_of s
+  debug '^61-6^', type_of s.values
+  debug '^61-7^', type_of s.values()
+  debug '^61-8^', type_of ( -> yield 1 )
+  debug '^61-9^', type_of ( -> yield 1 )()
+  do ->
+    whisper '...................'
+    tf = mr.get_tf s
+    debug tf send for _ in [ 1 .. 5 ]
+  do ->
+    whisper '...................'
+    tf = mr.get_tf ( -> yield from 'ABC' )
+    debug tf send for _ in [ 1 .. 5 ]
+  do ->
+    whisper '...................'
+    tf = mr.get_tf s.values()
+    debug tf send for _ in [ 1 .. 5 ]
+  return null
+
+
 ############################################################################################################
 if module is require.main then do =>
   demo_1()
   demo_2()
+  model_1()
+  model_2a()
+  model_2b()
