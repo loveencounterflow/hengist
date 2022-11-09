@@ -130,14 +130,15 @@ class Segment
 
   #---------------------------------------------------------------------------------------------------------
   [ stf_prefix + 'generator' ]: ( source ) ->
-    R = ( send ) =>
+    @has_finished = false
+    return ( send ) =>
       return null if @has_finished
       dsc           = source.next()
       @has_finished = dsc.done
       send dsc.value unless @has_finished
       return null
     @has_finished = false
-    return R
+    return ( send ) =>
 
   #---------------------------------------------------------------------------------------------------------
   [ stf_prefix + 'generatorfunction'  ]:  ( source ) -> @_get_source_transform source()
