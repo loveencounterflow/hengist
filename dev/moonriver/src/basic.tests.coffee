@@ -39,12 +39,12 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "send.call_count" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver
+  { Pipeline
     $once     } = require '../../../apps/moonriver'
   #.........................................................................................................
   do =>
     collector = []
-    mr        = new Moonriver()
+    mr        = new Pipeline()
     mr.push [ 1, 2, 3, 5, ]
     mr.push ( d, send ) -> send d * 2
     mr.push ( d, send ) -> send d #; urge d
@@ -54,7 +54,7 @@ H                         = require '../../../lib/helpers'
   #.........................................................................................................
   do =>
     collector = []
-    mr        = new Moonriver()
+    mr        = new Pipeline()
     mr.push [ 'a', 'b', ]
     mr.push ( d, send ) -> urge '^598^', d; send d
     mr.push ( d, send ) ->
@@ -74,8 +74,8 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "modifiers" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver   }   = require '../../../apps/moonriver'
-  { $           }   = Moonriver
+  { Pipeline    }   = require '../../../apps/moonriver'
+  { $           }   = Pipeline
   first             = Symbol 'first'
   last              = Symbol 'last'
   once_before_first = true
@@ -84,7 +84,7 @@ H                         = require '../../../lib/helpers'
   do =>
     collector         = []
     protocol          = []
-    mr                = new Moonriver { protocol, }
+    mr                = new Pipeline { protocol, }
     mr.push [ 1, 2, 3, 5, ]
     mr.push                             ( d, send ) -> send d * 2
     mr.push $ { first,              },  ( d, send ) -> send d
@@ -100,7 +100,7 @@ H                         = require '../../../lib/helpers'
   do =>
     collector         = []
     protocol          = []
-    mr                = new Moonriver { protocol, }
+    mr                = new Pipeline { protocol, }
     mr.push [ 1, 2, 3, 5, ]
     mr.push                             ( d, send ) -> send d * 2
     mr.push $ { first,              },  ( d, send ) -> send d
@@ -124,7 +124,7 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "can access pipeline from within transform, get user area" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver } = require '../../../apps/moonriver'
+  { Pipeline } = require '../../../apps/moonriver'
   #.........................................................................................................
   do =>
     collector = []
@@ -150,7 +150,7 @@ H                         = require '../../../lib/helpers'
         return null
       #.....................................................................................................
       ]
-    mr = new Moonriver pipeline
+    mr = new Pipeline pipeline
     debug '^558^', mr
     mr.drive()
     # T?.eq collector, [ 2, 4, 6, 10, ]
@@ -161,8 +161,8 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "resettable state shared across transforms" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver } = require '../../../apps/moonriver'
-  { $ }         = Moonriver
+  { Pipeline } = require '../../../apps/moonriver'
+  { $ }         = Pipeline
   #.........................................................................................................
   source = [
     '<h1>'
@@ -188,7 +188,7 @@ H                         = require '../../../lib/helpers'
       first:              0
       last:               0
       once_after_last:    0
-    mr                = new Moonriver()
+    mr                = new Pipeline()
     #.......................................................................................................
     mr.push source
     #.......................................................................................................
@@ -279,14 +279,14 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "modifier first does not leak into pipeline when used with observer" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver } = require '../../../apps/moonriver'
-  { $ }         = Moonriver
+  { Pipeline } = require '../../../apps/moonriver'
+  { $ }         = Pipeline
   first1        = Symbol 'first1'
   first2        = Symbol 'first2'
   collector     = []
   #.......................................................................................................
   do =>
-    mr = new Moonriver()
+    mr = new Pipeline()
     mr.push Array.from 'abc'
     mr.push $ { first: first1, }, ( d )       -> debug '^765-1^', rpr d
     mr.push $ { first: first2, }, ( d, send ) -> debug '^765-2^', rpr d; send d unless d is first2
@@ -301,14 +301,14 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "modifier last does not leak into pipeline when used with observer" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver } = require '../../../apps/moonriver'
-  { $ }         = Moonriver
+  { Pipeline } = require '../../../apps/moonriver'
+  { $ }         = Pipeline
   last1        = Symbol 'last1'
   last2        = Symbol 'last2'
   collector     = []
   #.......................................................................................................
   do =>
-    mr = new Moonriver()
+    mr = new Pipeline()
     mr.push Array.from 'abc'
     mr.push $ { last: last1, }, ( d )       -> debug '^765-1^', rpr d
     mr.push $ { last: last2, }, ( d, send ) -> debug '^765-2^', rpr d; send d unless d is last2
@@ -323,12 +323,12 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "modifier last" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver } = require '../../../apps/moonriver'
-  { $ }         = Moonriver
+  { Pipeline } = require '../../../apps/moonriver'
+  { $ }         = Pipeline
   first         = Symbol 'first'
   last          = Symbol 'last'
   collector     = []
-  mr            = new Moonriver()
+  mr            = new Pipeline()
   #.......................................................................................................
   mr.push [ 'first', 'second', 'third', ]
   s1 = mr.push $ { last, }, finalize = ( d, send ) ->
@@ -352,10 +352,10 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "modifier once_after_last" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver } = require '../../../apps/moonriver'
-  { $ }         = Moonriver
+  { Pipeline } = require '../../../apps/moonriver'
+  { $ }         = Pipeline
   collector     = []
-  mr            = new Moonriver()
+  mr            = new Pipeline()
   #.......................................................................................................
   mr.push [ 'first', 'second', 'third', ]
   s1 = mr.push $ { once_after_last: true, }, finalize = ( d ) ->
@@ -375,11 +375,11 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "exit symbol" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver } = require '../../../apps/moonriver'
-  { $ }         = Moonriver
+  { Pipeline } = require '../../../apps/moonriver'
+  { $ }         = Pipeline
   collector     = []
   protocol      = []
-  mr            = new Moonriver { protocol, }
+  mr            = new Pipeline { protocol, }
   #.......................................................................................................
   mr.push [ 'first', 'second', 'third', 'fourth', 'fifth', ]
   mr.push look_for_third = ( d, send ) ->
@@ -397,15 +397,15 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "called even when pipeline empty: once_before_first, once_after_last" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver }     = require '../../../apps/moonriver'
-  { $ }             = Moonriver
+  { Pipeline }     = require '../../../apps/moonriver'
+  { $ }             = Pipeline
   collector         = []
   once_before_first = true
   once_after_last   = true
   counts            =
     once_before_first:  0
     once_after_last:    0
-  mr                = new Moonriver()
+  mr                = new Pipeline()
   #.......................................................................................................
   mr.push []
   mr.push $ { once_before_first,  },  on_once_before  = ( d ) -> counts.once_before_first++
@@ -423,11 +423,11 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "transforms with once_after_last can (not yet) be senders" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver }   = require '../../../apps/moonriver'
-  { $ }           = Moonriver
+  { Pipeline }   = require '../../../apps/moonriver'
+  { $ }           = Pipeline
   once_after_last = true
   collector       = []
-  mr              = new Moonriver()
+  mr              = new Pipeline()
   #.......................................................................................................
   # mr.push [ 1, 2, 3, ]
   error = null
@@ -450,10 +450,10 @@ H                         = require '../../../lib/helpers'
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "using send() in once_before_first, once_after_last transforms" ] = ( T, done ) ->
 #   # T?.halt_on_error()
-#   { Moonriver } = require '../../../apps/moonriver'
-#   { $ }         = Moonriver
+#   { Pipeline } = require '../../../apps/moonriver'
+#   { $ }         = Pipeline
 #   collector     = []
-#   mr            = new Moonriver()
+#   mr            = new Pipeline()
 #   #.......................................................................................................
 #   mr.push [ 0, ]
 #   mr.push $ { once_before_first:  true, }, once_before_first = ( send ) -> send e for e in [ 42, 43, 44, ]
@@ -469,11 +469,11 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "appending data before closing" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver } = require '../../../apps/moonriver'
-  { $ }         = Moonriver
+  { Pipeline } = require '../../../apps/moonriver'
+  { $ }         = Pipeline
   last          = Symbol 'last'
   collector     = []
-  mr            = new Moonriver()
+  mr            = new Pipeline()
   #.......................................................................................................
   mr.push [ -1, ]
   mr.push show    = ( d ) -> urge '^4948-1^', d
@@ -491,14 +491,14 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @[ "once_before_first, once_after_last transformers transparent to data" ] = ( T, done ) ->
   # T?.halt_on_error()
-  { Moonriver } = require '../../../apps/moonriver'
-  { $ }         = Moonriver
+  { Pipeline } = require '../../../apps/moonriver'
+  { $ }         = Pipeline
   collectors    =
     c1: []
     c2: []
     c3: []
     c4: []
-  mr            = new Moonriver()
+  mr            = new Pipeline()
   #.......................................................................................................
   mr.push Array.from 'bcd'
   mr.push $ { once_before_first:  true,   }, once_before_first  = ( send  ) -> send 'A';                                  T?.eq [ arguments..., ].length, 1
@@ -524,10 +524,10 @@ H                         = require '../../../lib/helpers'
 @can_use_asyncfunction_as_source = ( T, done ) ->
   # T?.halt_on_error()
   GUY           = require '../../../apps/guy'
-  { Moonriver } = require '../../../apps/moonriver'
-  { $ }         = Moonriver
+  { Pipeline } = require '../../../apps/moonriver'
+  { $ }         = Pipeline
   collector     = []
-  mr            = new Moonriver()
+  mr            = new Pipeline()
   #.......................................................................................................
   count = 0
   get_source = ( send ) ->
@@ -550,13 +550,13 @@ H                         = require '../../../lib/helpers'
 @can_use_nodejs_readable_stream_as_source = ( T, done ) ->
   # T?.halt_on_error()
   GUY             = require '../../../apps/guy'
-  { Moonriver }   = require '../../../apps/moonriver'
+  { Pipeline }   = require '../../../apps/moonriver'
   { readlines }   = require 'readlines-ng'
   FS              = require 'node:fs'
   path            = PATH.join __dirname, '../../../assets/short-proposal.mkts.md'
   source          = FS.createReadStream path, { encoding: 'utf-8', }
   collector       = []
-  mr              = new Moonriver()
+  mr              = new Pipeline()
   mr.push show    = ( d ) -> urge '^4948-1^', d
   mr.push collect = ( d ) -> collector.push d
   #.......................................................................................................
@@ -578,11 +578,11 @@ H                         = require '../../../lib/helpers'
 @window_transform = ( T, done ) ->
   # T?.halt_on_error()
   GUY             = require '../../../apps/guy'
-  { Moonriver }   = require '../../../apps/moonriver'
-  { $ }           = Moonriver
+  { Pipeline }   = require '../../../apps/moonriver'
+  { $ }           = Pipeline
   { $window }     = require '../../../apps/moonriver/lib/transforms'
   collector       = []
-  mr              = new Moonriver()
+  mr              = new Pipeline()
   misfit          = Symbol 'misfit'
   # #.........................................................................................................
   # $window = ( min, max, empty = misfit ) ->
@@ -615,8 +615,8 @@ H                         = require '../../../lib/helpers'
 @walk_is_repeatable = ( T, done ) ->
   # T?.halt_on_error()
   GUY             = require '../../../apps/guy'
-  { Moonriver }   = require '../../../apps/moonriver'
-  { $ }           = Moonriver
+  { Pipeline }   = require '../../../apps/moonriver'
+  { $ }           = Pipeline
   collector       = []
   first           = Symbol 'first'
   last            = Symbol 'last'
@@ -624,7 +624,7 @@ H                         = require '../../../lib/helpers'
   source          = Array.from 'abcdef'
   #.........................................................................................................
   create_pipeline = ->
-    mr              = new Moonriver()
+    mr              = new Pipeline()
     mr.push source
     # mr.push insert  = ( d, send ) -> send d; send d.toUpperCase() if isa.text d
     mr.push extra   = ( d, send ) -> send d
@@ -707,8 +707,8 @@ if require.main is module then do =>
   # @can_use_nodejs_readable_stream_as_source()
   # test @can_use_nodejs_readable_stream_as_source
   # @window_transform()
-  @walk_is_repeatable()
-  # test @
+  # @walk_is_repeatable()
+  test @
   # @[ "called even when pipeline empty: once_before_first, once_after_last" ](); test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
   # @[ "appending data before closing" ](); test @[ "appending data before closing" ]
   # @[ "once_before_first, once_after_last transformers transparent to data" ](); test @[ "once_before_first, once_after_last transformers transparent to data" ]
