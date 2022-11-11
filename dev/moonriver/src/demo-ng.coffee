@@ -85,9 +85,9 @@ demo_2 = ->
   p.push new Set '+-*'
   p.push new Map [ [ 11, 12, ], [ 13, 14, ], ]
   p.push 'ABC'
-  p.push 'DEF'
-  p.push 'GHIJ'
-  # p.push show_1 = ( d, send ) -> whisper rpr d; send d
+  # p.push 'DEF'
+  # p.push 'GHIJ'
+  # # p.push show_1 = ( d, send ) -> whisper rpr d; send d
   p.push show_2 = ( d       ) -> whisper rpr d
   p.send 0
   p.send 1
@@ -102,4 +102,3 @@ demo_2 = ->
 if module is require.main then do =>
   demo_1()
   demo_2()
-
