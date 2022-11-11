@@ -96,9 +96,43 @@ demo_2 = ->
   info '^98-6^', p.run()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_3a = ->
+  echo '—————————————————————————————————————————————'
+  { Pipeline
+    Async_pipeline }  = require '../../../apps/moonriver'
+  p = new Async_pipeline()
+  p.push [ 1, 2, 3, ]
+  p.push show_2 = ( d ) -> whisper 'Ⅱ', rpr d
+  p.push mul_3b = ( d, send ) -> send new Promise ( resolve ) -> GUY.async.after 0.1, -> resolve d * 3
+  p.push show_2 = ( d ) -> whisper 'Ⅲ', rpr d
+  info '^23-1^', p
+  info '^23-4^', await p.run()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_3b = ->
+  echo '—————————————————————————————————————————————'
+  { Pipeline
+    Async_pipeline
+    Segment
+    Async_segment } = require '../../../apps/moonriver'
+  after  = ( dts, f  ) => new Promise ( resolve ) -> setTimeout ( -> resolve f() ), dts * 1000
+  p = new Async_pipeline()
+  p.push [ 1, 2, 3, ]
+  p.push show_2 = ( d ) -> whisper 'Ⅱ', rpr d
+  p.push mul_3b = ( d, send ) -> send await after 0.1, -> d * 3
+  p.push show_2 = ( d ) -> whisper 'Ⅲ', rpr d
+  info '^24-7^', p
+  info '^24-8^', await p.run()
+  return null
+
 
 
 ############################################################################################################
 if module is require.main then do =>
-  demo_1()
-  demo_2()
+  # demo_1()
+  # demo_2()
+  # await demo_3a()
+  await demo_3b()
+
