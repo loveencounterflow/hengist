@@ -3701,7 +3701,6 @@
     var Intertype, types;
     ({Intertype} = require('../../../apps/intertype'));
     types = new Intertype();
-    equals = require('../../../apps/intertype/deps/jkroso-equals');
     debug('^34-1^', types.equals(-0, +0));
     debug('^34-2^', types.equals(+0, +0));
     debug('^34-3^', types.equals(-0, -0));
@@ -3709,13 +3708,13 @@
       T.eq(types.equals(-0, +0), false);
     }
     if (T != null) {
-      T.eq(equals(-0, +0), false);
-    }
-    if (T != null) {
-      T.eq(equals(0/0, 0/0), true);
+      T.eq(GUY.samesame.equals(-0, +0), false);
     }
     if (T != null) {
       T.eq(types.equals(0/0, 0/0), true);
+    }
+    if (T != null) {
+      T.eq(GUY.samesame.equals(0/0, 0/0), true);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -4409,6 +4408,49 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_asyncfunction_isnt_a_function = function(T, done) {
+    var Intertype, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype({
+      errors: false
+    });
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.type_of((function() {
+        return 42;
+      })), 'function');
+    }
+    if (T != null) {
+      T.eq(types.isa.function((function() {
+        return 42;
+      })), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.function((async function() {
+        return (await 42);
+      })), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.type_of((async function() {
+        return (await 42);
+      })), 'asyncfunction');
+    }
+    if (T != null) {
+      T.eq(types.isa.asyncfunction((async function() {
+        return (await 42);
+      })), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.asyncfunction((function() {
+        return 42;
+      })), false);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // demo()
@@ -4445,12 +4487,12 @@
     // test @intertype_cast
     // test @intertype_can_use_subobject_fields
     // test @intertype_create_has_correct_binding
-    this.intertype_type_regex();
-    test(this.intertype_type_regex);
+    // @intertype_type_regex()
+    // test @intertype_type_regex
+    test(this);
   }
 
-  // test @
-// test @intertype_ordering_of_field_and_isa_tests
+  // test @intertype_ordering_of_field_and_isa_tests
 // test @intertype_tracing
 // test @_intertype_tracing_2
 // test @intertype_improved_validation_errors

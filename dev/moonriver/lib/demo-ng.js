@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, alert, debug, demo_1, demo_2, echo, help, info, inspect, log, plain, praise, rpr, types, urge, warn, whisper;
+  var GUY, alert, debug, demo_1, demo_2, demo_3a, demo_3b, echo, help, info, inspect, log, plain, praise, rpr, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -110,11 +110,68 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_3a = async function() {
+    var Async_pipeline, Pipeline, mul_3b, p, show_2;
+    echo('—————————————————————————————————————————————');
+    ({Pipeline, Async_pipeline} = require('../../../apps/moonriver'));
+    p = new Async_pipeline();
+    p.push([1, 2, 3]);
+    p.push(show_2 = function(d) {
+      return whisper('Ⅱ', rpr(d));
+    });
+    p.push(mul_3b = function(d, send) {
+      return send(new Promise(function(resolve) {
+        return GUY.async.after(0.1, function() {
+          return resolve(d * 3);
+        });
+      }));
+    });
+    p.push(show_2 = function(d) {
+      return whisper('Ⅲ', rpr(d));
+    });
+    info('^23-1^', p);
+    info('^23-4^', (await p.run()));
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_3b = async function() {
+    var Async_pipeline, Async_segment, Pipeline, Segment, after, mul_3b, p, show_2;
+    echo('—————————————————————————————————————————————');
+    ({Pipeline, Async_pipeline, Segment, Async_segment} = require('../../../apps/moonriver'));
+    after = (dts, f) => {
+      return new Promise(function(resolve) {
+        return setTimeout((function() {
+          return resolve(f());
+        }), dts * 1000);
+      });
+    };
+    p = new Async_pipeline();
+    p.push([1, 2, 3]);
+    p.push(show_2 = function(d) {
+      return whisper('Ⅱ', rpr(d));
+    });
+    p.push(mul_3b = async function(d, send) {
+      return send((await after(0.1, function() {
+        return d * 3;
+      })));
+    });
+    p.push(show_2 = function(d) {
+      return whisper('Ⅲ', rpr(d));
+    });
+    info('^24-7^', p);
+    info('^24-8^', (await p.run()));
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
-    (() => {
-      demo_1();
-      return demo_2();
+    (async() => {
+      // demo_1()
+      // demo_2()
+      // await demo_3a()
+      return (await demo_3b());
     })();
   }
 
