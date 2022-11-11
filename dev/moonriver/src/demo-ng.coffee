@@ -144,11 +144,12 @@ demo_4 = ->
 demo_5 = ->
   echo '—————————————————————————————————————————————'
   FS                  = require 'node:fs'
-  { Async_pipeline  } = require '../../../apps/moonriver'
+  { Async_pipeline, \
+    transforms: T,  } = require '../../../apps/moonriver'
   p = new Async_pipeline()
-  p.push FS.createReadStream __filename
+  p.push FS.createReadStream __filename, { highWaterMark: 50, }
+  p.push T.$split_lines()
   p.push show_2 = ( d ) -> whisper 'Ⅱ', rpr d
-  # p.push show_2 = ( d ) -> whisper 'Ⅲ', rpr d
   info '^24-7^', p
   await p.run()
   return null
@@ -157,29 +158,11 @@ demo_5 = ->
 
 ############################################################################################################
 if module is require.main then do =>
-  # demo_1()
-  # demo_2()
-  # await demo_3a()
-  # await demo_3b()
-  # demo_4()
-  # demo_5()
-
-  { Receiver }        = require '../../../apps/jfee'
-  SL                  = require '../../../apps/intertext-splitlines'
-  FS                  = require 'node:fs'
-  source = FS.createReadStream __filename, { highWaterMark: 10, } #, { encoding: 'utf-8', }
-  rcv = Receiver.from_readstream source, { bare: true, }
-  ctx = SL.new_context()
-
-  # # source.on 'readable', -> debug '^29-2^', rpr source.read 10
-  # source.on 'data',   ( data ) -> debug '^29-3^', 'data'; debug '^29-4^', rpr data[ .. 100 ]
-  # source.on 'end',    -> debug '^29-5^', 'end';   @has_finished = true
-  # source.on 'close',  -> debug '^29-6^', 'close'; @has_finished = true
-  debug '^29-6^', rcv
-  for await d from rcv
-    debug '^29-6^', '.'
-    for await line from SL.walk_lines ctx, d
-      debug rpr line # .toString()
-  return null
+  demo_1()
+  demo_2()
+  await demo_3a()
+  await demo_3b()
+  demo_4()
+  demo_5()
 
 
