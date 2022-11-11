@@ -1840,14 +1840,13 @@ demo_size_of = ->
 @intertype_equals_distinguishes_positive_from_negative_zero = ( T, done ) ->
   { Intertype }   = require '../../../apps/intertype'
   types           = new Intertype()
-  equals          = require '../../../apps/intertype/deps/jkroso-equals'
   debug '^34-1^', types.equals -0, +0
   debug '^34-2^', types.equals +0, +0
   debug '^34-3^', types.equals -0, -0
-  T?.eq ( types.equals -0, +0 ), false
-  T?.eq ( equals -0, +0 ), false
-  T?.eq ( equals NaN, NaN ), true
-  T?.eq ( types.equals NaN, NaN ), true
+  T?.eq ( types.equals        -0, +0    ), false
+  T?.eq ( GUY.samesame.equals -0, +0    ), false
+  T?.eq ( types.equals        NaN, NaN  ), true
+  T?.eq ( GUY.samesame.equals NaN, NaN  ), true
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
