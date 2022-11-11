@@ -18,7 +18,8 @@ GUY                       = require 'guy'
   echo
   log     }               = GUY.trm
 types                     = new ( require '../../../apps/intertype' ).Intertype()
-
+{ isa
+  type_of }               = types
 
 
 #===========================================================================================================
@@ -127,6 +128,17 @@ demo_3b = ->
   info '^24-8^', await p.run()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_4 = ->
+  echo '—————————————————————————————————————————————'
+  { Pipeline } = require '../../../apps/moonriver'
+  p = new Pipeline()
+  p.push GUY.fs.walk_lines __filename
+  p.push show_2 = ( d ) -> whisper 'Ⅱ', rpr d
+  # p.push show_2 = ( d ) -> whisper 'Ⅲ', rpr d
+  info '^24-7^', p
+  p.run()
+  return null
 
 
 ############################################################################################################
