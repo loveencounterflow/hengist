@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, alert, debug, demo_1, demo_2, demo_3a, demo_3b, echo, help, info, inspect, log, plain, praise, rpr, types, urge, warn, whisper;
+  var GUY, alert, debug, demo_1, demo_2, demo_3a, demo_3b, demo_4, demo_5, echo, help, info, inspect, isa, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -10,6 +10,8 @@
   ({rpr, inspect, echo, log} = GUY.trm);
 
   types = new (require('../../../apps/intertype')).Intertype();
+
+  ({isa, type_of} = types);
 
   //===========================================================================================================
 
@@ -165,13 +167,72 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_4 = function() {
+    var Pipeline, p, show_2;
+    echo('—————————————————————————————————————————————');
+    ({Pipeline} = require('../../../apps/moonriver'));
+    p = new Pipeline();
+    p.push(GUY.fs.walk_lines(__filename));
+    p.push(show_2 = function(d) {
+      return whisper('Ⅱ', rpr(d));
+    });
+    // p.push show_2 = ( d ) -> whisper 'Ⅲ', rpr d
+    info('^24-7^', p);
+    p.run();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_5 = async function() {
+    var Async_pipeline, FS, p, show_2;
+    echo('—————————————————————————————————————————————');
+    FS = require('node:fs');
+    ({Async_pipeline} = require('../../../apps/moonriver'));
+    p = new Async_pipeline();
+    p.push(FS.createReadStream(__filename));
+    p.push(show_2 = function(d) {
+      return whisper('Ⅱ', rpr(d));
+    });
+    // p.push show_2 = ( d ) -> whisper 'Ⅲ', rpr d
+    info('^24-7^', p);
+    await p.run();
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (async() => {
+      var FS, Receiver, SL, ctx, d, line, rcv, ref, source;
       // demo_1()
       // demo_2()
       // await demo_3a()
-      return (await demo_3b());
+      // await demo_3b()
+      // demo_4()
+      // demo_5()
+      ({Receiver} = require('../../../apps/jfee'));
+      SL = require('../../../apps/intertext-splitlines');
+      FS = require('node:fs');
+      source = FS.createReadStream(__filename, {
+        highWaterMark: 10 //, { encoding: 'utf-8', }
+      });
+      rcv = Receiver.from_readstream(source, {
+        bare: true
+      });
+      ctx = SL.new_context();
+      // # source.on 'readable', -> debug '^29-2^', rpr source.read 10
+      // source.on 'data',   ( data ) -> debug '^29-3^', 'data'; debug '^29-4^', rpr data[ .. 100 ]
+      // source.on 'end',    -> debug '^29-5^', 'end';   @has_finished = true
+      // source.on 'close',  -> debug '^29-6^', 'close'; @has_finished = true
+      debug('^29-6^', rcv);
+      for await (d of rcv) {
+        debug('^29-6^', '.');
+        ref = SL.walk_lines(ctx, d);
+        for await (line of ref) {
+          debug(rpr(line)); // .toString()
+        }
+      }
+      return null;
     })();
   }
 
