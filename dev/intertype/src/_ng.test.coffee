@@ -2151,6 +2151,22 @@ demo_size_of = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@intertype_asyncfunction_isnt_a_function = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype { errors: false, }
+  #.........................................................................................................
+  T?.eq ( types.type_of           ( -> 42       ) ), 'function'
+  T?.eq ( types.isa.function      ( -> 42       ) ), true
+  T?.eq ( types.isa.function      ( -> await 42 ) ), false
+  #.........................................................................................................
+  T?.eq ( types.type_of           ( -> await 42 ) ), 'asyncfunction'
+  T?.eq ( types.isa.asyncfunction ( -> await 42 ) ), true
+  T?.eq ( types.isa.asyncfunction ( -> 42       ) ), false
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 unless module.parent?
@@ -2188,9 +2204,9 @@ unless module.parent?
   # test @intertype_cast
   # test @intertype_can_use_subobject_fields
   # test @intertype_create_has_correct_binding
-  @intertype_type_regex()
-  test @intertype_type_regex
-  # test @
+  # @intertype_type_regex()
+  # test @intertype_type_regex
+  test @
   # test @intertype_ordering_of_field_and_isa_tests
   # test @intertype_tracing
   # test @_intertype_tracing_2
