@@ -96,9 +96,9 @@
     p.push(new Set('+-*'));
     p.push(new Map([[11, 12], [13, 14]]));
     p.push('ABC');
-    p.push('DEF');
-    p.push('GHIJ');
-    // p.push show_1 = ( d, send ) -> whisper rpr d; send d
+    // p.push 'DEF'
+    // p.push 'GHIJ'
+    // # p.push show_1 = ( d, send ) -> whisper rpr d; send d
     p.push(show_2 = function(d) {
       return whisper(rpr(d));
     });

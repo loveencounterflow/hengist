@@ -48,13 +48,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["send.call_count"] = function(T, done) {
-    var $once, Moonriver;
+    var $once, Pipeline;
     // T?.halt_on_error()
-    ({Moonriver, $once} = require('../../../apps/moonriver'));
+    ({Pipeline, $once} = require('../../../apps/moonriver'));
     (() => {      //.........................................................................................................
       var collector, mr;
       collector = [];
-      mr = new Moonriver();
+      mr = new Pipeline();
       mr.push([1, 2, 3, 5]);
       mr.push(function(d, send) {
         return send(d * 2);
@@ -71,7 +71,7 @@
     (() => {      //.........................................................................................................
       var collector, mr;
       collector = [];
-      mr = new Moonriver();
+      mr = new Pipeline();
       mr.push(['a', 'b']);
       mr.push(function(d, send) {
         urge('^598^', d);
@@ -108,10 +108,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["modifiers"] = function(T, done) {
-    var $, Moonriver, first, last, once_after_last, once_before_first;
+    var $, Pipeline, first, last, once_after_last, once_before_first;
     // T?.halt_on_error()
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     first = Symbol('first');
     last = Symbol('last');
     once_before_first = true;
@@ -120,7 +120,7 @@
       var collector, mr, protocol;
       collector = [];
       protocol = [];
-      mr = new Moonriver({protocol});
+      mr = new Pipeline({protocol});
       mr.push([1, 2, 3, 5]);
       mr.push(function(d, send) {
         return send(d * 2);
@@ -149,7 +149,7 @@
       var collector, mr, protocol;
       collector = [];
       protocol = [];
-      mr = new Moonriver({protocol});
+      mr = new Pipeline({protocol});
       mr.push([1, 2, 3, 5]);
       mr.push(function(d, send) {
         return send(d * 2);
@@ -197,9 +197,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["can access pipeline from within transform, get user area"] = function(T, done) {
-    var Moonriver;
+    var Pipeline;
     // T?.halt_on_error()
-    ({Moonriver} = require('../../../apps/moonriver'));
+    ({Pipeline} = require('../../../apps/moonriver'));
     (() => {      //.........................................................................................................
       var can_access_pipeline_1, can_access_pipeline_2, collector, has_user_area, mr, pipeline;
       collector = [];
@@ -253,7 +253,7 @@
         }
       ];
       //.....................................................................................................
-      mr = new Moonriver(pipeline);
+      mr = new Pipeline(pipeline);
       debug('^558^', mr);
       return mr.drive();
     })();
@@ -265,10 +265,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["resettable state shared across transforms"] = function(T, done) {
-    var $, Moonriver, source;
+    var $, Pipeline, source;
     // T?.halt_on_error()
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     //.........................................................................................................
     source = ['<h1>', 'The Opening', '</h1>', '<p>', 'Twas brillig, and the slithy toves Did gyre and gimble in the', '<em>', 'wabe', '</p>', '</body>', '</html>'];
     (() => {      //.........................................................................................................
@@ -284,7 +284,7 @@
         last: 0,
         once_after_last: 0
       };
-      mr = new Moonriver();
+      mr = new Pipeline();
       //.......................................................................................................
       mr.push(source);
       //.......................................................................................................
@@ -400,16 +400,16 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["modifier first does not leak into pipeline when used with observer"] = function(T, done) {
-    var $, Moonriver, collector, first1, first2;
+    var $, Pipeline, collector, first1, first2;
     // T?.halt_on_error()
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     first1 = Symbol('first1');
     first2 = Symbol('first2');
     collector = [];
     (() => {      //.......................................................................................................
       var mr;
-      mr = new Moonriver();
+      mr = new Pipeline();
       mr.push(Array.from('abc'));
       mr.push($({
         first: first1
@@ -437,16 +437,16 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["modifier last does not leak into pipeline when used with observer"] = function(T, done) {
-    var $, Moonriver, collector, last1, last2;
+    var $, Pipeline, collector, last1, last2;
     // T?.halt_on_error()
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     last1 = Symbol('last1');
     last2 = Symbol('last2');
     collector = [];
     (() => {      //.......................................................................................................
       var mr;
-      mr = new Moonriver();
+      mr = new Pipeline();
       mr.push(Array.from('abc'));
       mr.push($({
         last: last1
@@ -474,14 +474,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["modifier last"] = function(T, done) {
-    var $, Moonriver, collect, collector, finalize, first, last, mr, ref, s1;
+    var $, Pipeline, collect, collector, finalize, first, last, mr, ref, s1;
     // T?.halt_on_error()
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     first = Symbol('first');
     last = Symbol('last');
     collector = [];
-    mr = new Moonriver();
+    mr = new Pipeline();
     //.......................................................................................................
     mr.push(['first', 'second', 'third']);
     s1 = mr.push($({last}, finalize = function(d, send) {
@@ -514,12 +514,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["modifier once_after_last"] = function(T, done) {
-    var $, Moonriver, collector, finalize, mr, s1;
+    var $, Pipeline, collector, finalize, mr, s1;
     // T?.halt_on_error()
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     collector = [];
-    mr = new Moonriver();
+    mr = new Pipeline();
     //.......................................................................................................
     mr.push(['first', 'second', 'third']);
     s1 = mr.push($({
@@ -551,13 +551,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["exit symbol"] = function(T, done) {
-    var $, Moonriver, collect, collector, d, i, len, look_for_third, mr, protocol;
+    var $, Pipeline, collect, collector, d, i, len, look_for_third, mr, protocol;
     // T?.halt_on_error()
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     collector = [];
     protocol = [];
-    mr = new Moonriver({protocol});
+    mr = new Pipeline({protocol});
     //.......................................................................................................
     mr.push(['first', 'second', 'third', 'fourth', 'fifth']);
     mr.push(look_for_third = function(d, send) {
@@ -583,10 +583,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["called even when pipeline empty: once_before_first, once_after_last"] = function(T, done) {
-    var $, Moonriver, collect, collector, counts, mr, on_once_after, on_once_before, once_after_last, once_before_first, show_1, show_2;
+    var $, Pipeline, collect, collector, counts, mr, on_once_after, on_once_before, once_after_last, once_before_first, show_1, show_2;
     // T?.halt_on_error()
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     collector = [];
     once_before_first = true;
     once_after_last = true;
@@ -594,7 +594,7 @@
       once_before_first: 0,
       once_after_last: 0
     };
-    mr = new Moonriver();
+    mr = new Pipeline();
     //.......................................................................................................
     mr.push([]);
     mr.push($({once_before_first}, on_once_before = function(d) {
@@ -630,13 +630,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["transforms with once_after_last can (not yet) be senders"] = function(T, done) {
-    var $, Moonriver, collector, error, mr, on_once_after, once_after_last;
+    var $, Pipeline, collector, error, mr, on_once_after, once_after_last;
     // T?.halt_on_error()
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     once_after_last = true;
     collector = [];
-    mr = new Moonriver();
+    mr = new Pipeline();
     //.......................................................................................................
     // mr.push [ 1, 2, 3, ]
     error = null;
@@ -666,10 +666,10 @@
   // #-----------------------------------------------------------------------------------------------------------
   // @[ "using send() in once_before_first, once_after_last transforms" ] = ( T, done ) ->
   //   # T?.halt_on_error()
-  //   { Moonriver } = require '../../../apps/moonriver'
-  //   { $ }         = Moonriver
+  //   { Pipeline } = require '../../../apps/moonriver'
+  //   { $ }         = Pipeline
   //   collector     = []
-  //   mr            = new Moonriver()
+  //   mr            = new Pipeline()
   //   #.......................................................................................................
   //   mr.push [ 0, ]
   //   mr.push $ { once_before_first:  true, }, once_before_first = ( send ) -> send e for e in [ 42, 43, 44, ]
@@ -684,13 +684,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["appending data before closing"] = function(T, done) {
-    var $, Moonriver, at_last, collect, collector, last, mr, show;
+    var $, Pipeline, at_last, collect, collector, last, mr, show;
     // T?.halt_on_error()
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     last = Symbol('last');
     collector = [];
-    mr = new Moonriver();
+    mr = new Pipeline();
     //.......................................................................................................
     mr.push([-1]);
     mr.push(show = function(d) {
@@ -727,17 +727,17 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["once_before_first, once_after_last transformers transparent to data"] = function(T, done) {
-    var $, Moonriver, collect2, collect4, collectors, mr, once_after_last, once_before_first;
+    var $, Pipeline, collect2, collect4, collectors, mr, once_after_last, once_before_first;
     // T?.halt_on_error()
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     collectors = {
       c1: [],
       c2: [],
       c3: [],
       c4: []
     };
-    mr = new Moonriver();
+    mr = new Pipeline();
     //.......................................................................................................
     mr.push(Array.from('bcd'));
     mr.push($({
@@ -799,13 +799,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.can_use_asyncfunction_as_source = async function(T, done) {
-    var $, GUY, Moonriver, _, collect, collector, count, get_source, i, mr, show, source;
+    var $, GUY, Pipeline, _, collect, collector, count, get_source, i, mr, show, source;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     collector = [];
-    mr = new Moonriver();
+    mr = new Pipeline();
     //.......................................................................................................
     count = 0;
     get_source = function(send) {
@@ -845,10 +845,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.can_use_nodejs_readable_stream_as_source = async function(T, done) {
-    var FS, GUY, Moonriver, collect, collector, count, line, mr, path, readlines, ref, show, source;
+    var FS, GUY, Pipeline, collect, collector, count, line, mr, path, readlines, ref, show, source;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
-    ({Moonriver} = require('../../../apps/moonriver'));
+    ({Pipeline} = require('../../../apps/moonriver'));
     ({readlines} = require('readlines-ng'));
     FS = require('node:fs');
     path = PATH.join(__dirname, '../../../assets/short-proposal.mkts.md');
@@ -856,7 +856,7 @@
       encoding: 'utf-8'
     });
     collector = [];
-    mr = new Moonriver();
+    mr = new Pipeline();
     mr.push(show = function(d) {
       return urge('^4948-1^', d);
     });
@@ -889,14 +889,14 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.window_transform = function(T, done) {
-    var $, $window, GUY, Moonriver, collect, collector, i, misfit, mr, nr, show;
+    var $, $window, GUY, Pipeline, collect, collector, i, misfit, mr, nr, show;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     ({$window} = require('../../../apps/moonriver/lib/transforms'));
     collector = [];
-    mr = new Moonriver();
+    mr = new Pipeline();
     misfit = Symbol('misfit');
     // #.........................................................................................................
     // $window = ( min, max, empty = misfit ) ->
@@ -933,11 +933,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.walk_is_repeatable = function(T, done) {
-    var $, GUY, Moonriver, collector, create_pipeline, first, last, source;
+    var $, GUY, Pipeline, collector, create_pipeline, first, last, source;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
-    ({Moonriver} = require('../../../apps/moonriver'));
-    ({$} = Moonriver);
+    ({Pipeline} = require('../../../apps/moonriver'));
+    ({$} = Pipeline);
     collector = [];
     first = Symbol('first');
     last = Symbol('last');
@@ -946,7 +946,7 @@
     //.........................................................................................................
     create_pipeline = function() {
       var collect, extra, mr, show;
-      mr = new Moonriver();
+      mr = new Pipeline();
       mr.push(source);
       // mr.push insert  = ( d, send ) -> send d; send d.toUpperCase() if isa.text d
       mr.push(extra = function(d, send) {
@@ -1043,12 +1043,12 @@
       // @can_use_nodejs_readable_stream_as_source()
       // test @can_use_nodejs_readable_stream_as_source
       // @window_transform()
-      return this.walk_is_repeatable();
+      // @walk_is_repeatable()
+      return test(this);
     })();
   }
 
-  // test @
-// @[ "called even when pipeline empty: once_before_first, once_after_last" ](); test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
+  // @[ "called even when pipeline empty: once_before_first, once_after_last" ](); test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
 // @[ "appending data before closing" ](); test @[ "appending data before closing" ]
 // @[ "once_before_first, once_after_last transformers transparent to data" ](); test @[ "once_before_first, once_after_last transformers transparent to data" ]
 
