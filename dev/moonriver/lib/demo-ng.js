@@ -197,6 +197,7 @@
       highWaterMark: 50
     }));
     p.push(T.$split_lines());
+    p.push(T.$limit(5));
     p.push(show_2 = function(d) {
       return whisper('Ⅱ', rpr(d));
     });
