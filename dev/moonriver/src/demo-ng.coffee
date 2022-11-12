@@ -149,6 +149,7 @@ demo_5 = ->
   p = new Async_pipeline()
   p.push FS.createReadStream __filename, { highWaterMark: 50, }
   p.push T.$split_lines()
+  p.push T.$limit 5
   p.push show_2 = ( d ) -> whisper 'Ⅱ', rpr d
   info '^24-7^', p
   await p.run()
