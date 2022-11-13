@@ -37,7 +37,7 @@ H                         = require '../../../lib/helpers'
 
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "send.call_count" ] = ( T, done ) ->
+@simple = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline
     $once     } = require '../../../apps/moonriver'
@@ -49,74 +49,8 @@ H                         = require '../../../lib/helpers'
     mr.push ( d, send ) -> send d * 2
     mr.push ( d, send ) -> send d #; urge d
     mr.push ( d, send ) -> collector.push d #; help collector
-    mr.drive()
+    mr.run()
     T?.eq collector, [ 2, 4, 6, 10, ]
-  #.........................................................................................................
-  do =>
-    collector = []
-    mr        = new Pipeline()
-    mr.push [ 'a', 'b', ]
-    mr.push ( d, send ) -> urge '^598^', d; send d
-    mr.push ( d, send ) ->
-      send d
-      if @call_count is 1
-        send e for e from [ 1, 2, 3, 5, ].values()
-      return null
-    mr.push ( d, send ) -> send if isa.float d then d * 2 else d
-    mr.push ( d       ) -> urge d
-    mr.push ( d, send ) -> collector.push d #; help collector
-    mr.drive()
-    T?.eq collector, [ 'a', 2, 4, 6, 10, 'b' ]
-  #.........................................................................................................
-  done?()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "modifiers" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { Pipeline    }   = require '../../../apps/moonriver'
-  { $           }   = Pipeline
-  first             = Symbol 'first'
-  last              = Symbol 'last'
-  once_before_first = true
-  once_after_last   = true
-  #.........................................................................................................
-  do =>
-    collector         = []
-    protocol          = []
-    mr                = new Pipeline { protocol, }
-    mr.push [ 1, 2, 3, 5, ]
-    mr.push                             ( d, send ) -> send d * 2
-    mr.push $ { first,              },  ( d, send ) -> send d
-    mr.push $ { last,               },  ( d, send ) -> send d
-    mr.push                             ( d       ) -> urge '^309^', d
-    mr.push                             ( d, send ) -> collector.push d #; help collector
-    mr.drive()
-    T?.eq collector, [ first, 2, 4, 6, 10, last, ]
-    # debug '^453^', d for d in protocol
-    # console.table protocol
-    H.tabulate 'protocol', protocol
-  #.........................................................................................................
-  do =>
-    collector         = []
-    protocol          = []
-    mr                = new Pipeline { protocol, }
-    mr.push [ 1, 2, 3, 5, ]
-    mr.push                             ( d, send ) -> send d * 2
-    mr.push $ { first,              },  ( d, send ) -> send d
-    # mr.push $ { once_after_last,    },  ( d       ) -> debug '^987^', 'once_after_last'
-    mr.push $ { last,               },  ( d, send ) -> send d
-    mr.push $ { once_before_first,  },  ( d       ) -> debug '^276^ once_before_first'; collector.push 'once_before_first'
-    mr.push $ { once_after_last,    },  ( d       ) -> debug '^276^ once_after_last';   collector.push 'once_after_last'
-    mr.push                             ( d       ) -> urge '^309^', d
-    mr.push                             ( d, send ) -> collector.push d #; help collector
-    T?.eq mr.on_once_before_first.length, 1
-    T?.eq mr.on_once_after_last.length,   1
-    mr.drive()
-    T?.eq collector, [ 'once_before_first', first, 2, 4, 6, 10, last, 'once_after_last', ]
-    debug '^453^', collector
-    # console.table protocol
-    H.tabulate 'protocol', protocol
   #.........................................................................................................
   done?()
   return null
@@ -152,548 +86,140 @@ H                         = require '../../../lib/helpers'
       ]
     mr = new Pipeline pipeline
     debug '^558^', mr
-    mr.drive()
+    mr.run()
     # T?.eq collector, [ 2, 4, 6, 10, ]
   #.........................................................................................................
   done?()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "resettable state shared across transforms" ] = ( T, done ) ->
+@can_use_asyncgenerator_as_source = ( T, done ) ->
   # T?.halt_on_error()
-  { Pipeline } = require '../../../apps/moonriver'
-  { $ }         = Pipeline
+  GUY                 = require '../../../apps/guy'
+  { Async_pipeline }  = require '../../../apps/moonriver'
+  count               = 0
+  source              = -> await yield d for d in [ 3, 5, 7, 11, ]
+  debug '^49-1^', source
+  debug '^49-1^', source()
+  debug '^49-1^', source().next
+  #.......................................................................................................
+  p = new Async_pipeline()
+  p.push source()
+  p.push square = ( d, send ) -> send d * d
+  p.push show = ( d ) -> urge '^49-1^', d
   #.........................................................................................................
-  source = [
-    '<h1>'
-    'The Opening'
-    '</h1>'
-    '<p>'
-    'Twas brillig, and the slithy toves Did gyre and gimble in the'
-    '<em>'
-    'wabe'
-    '</p>'
-    '</body>'
-    '</html>'
-    ]
-  #.........................................................................................................
-  do =>
-    first             = Symbol 'first'
-    last              = Symbol 'last'
-    once_before_first = true
-    once_after_last   = true
-    collector         = []
-    counts            =
-      once_before_first:  0
-      first:              0
-      last:               0
-      once_after_last:    0
-    mr                = new Pipeline()
-    #.......................................................................................................
-    mr.push source
-    #.......................................................................................................
-    mr.push $ { once_before_first, }, on_first = ( d ) ->
-      debug '^373^', 'once_before_first'
-      debug '^336^', @
-      debug '^336^', type_of @
-      debug '^336^', ( k for k of @ )
-      counts.once_before_first++
-    #.......................................................................................................
-    mr.push $ { first, }, initialize_stack = ( d ) ->
-      debug '^487^', @call_count
-      debug '^487^', d
-      counts.first++
-      if d is first
-        mr.user.stack = []
-        urge '^3487^', 'initialize_stack()', @.user
-      return null
-    #.......................................................................................................
-    mr.push push_opening_to_stack = ( d, send ) ->
-      return send d if  not isa.text d
-      return send d if  not d.startsWith '<'
-      return send d if      d.startsWith '</'
-      left_d  = d.replace /^<([^\s>]+).*$/, '$1'
-      # debug '^039850^', { left_d, }
-      mr.user.stack.push left_d
-      send d
-    #.......................................................................................................
-    mr.push pop_closing_from_stack = ( d, send ) ->
-      return send d if  not isa.text d
-      return send d if  not d.startsWith '</'
-      # debug '^4564^', 'pop_closing_from_stack', mr.user.stack, d
-      if mr.user.stack.length < 1
-        send "error: extraneous closing tag #{rpr d}"
-        return send d
-      left_d  = mr.user.stack.pop()
-      right_d = d.replace /^<\/([^\s>]+).*$/, '$1'
-      # debug '^039850^', { left_d, right_d, }
-      unless left_d is right_d
-        send "error: expected closing tag for <#{rpr left_d}>, got #{rpr d}"
-        return send d
-      send d
-    #.......................................................................................................
-    mr.push $ { once_after_last, }, pop_remaining_from_stack = ( d ) ->
-      debug '^309-1^', d
-      # counts.last++
-      # send d
-    #.......................................................................................................
-    mr.push collect = ( d ) ->
-      debug '^309-1^', d
-      collector.push d
-    #.......................................................................................................
-    mr.push $ { once_after_last, }, cleanup = ( d ) ->
-      debug '^309-2^', d
-      counts.once_after_last++
-    #.......................................................................................................
-    mr.push $ { last, }, cleanup = ( d ) ->
-      debug '^309-2^', d
-      counts.last++
-    #.......................................................................................................
-    mr.drive()
-    debug '^558^', mr.user
-    echo rpr d for d in collector
-    T?.eq collector, [
-      '<h1>'
-      'The Opening'
-      '</h1>'
-      '<p>'
-      'Twas brillig, and the slithy toves Did gyre and gimble in the'
-      '<em>'
-      'wabe'
-      "error: expected closing tag for <'em'>, got '</p>'"
-      '</p>'
-      "error: expected closing tag for <'p'>, got '</body>'"
-      '</body>'
-      "error: extraneous closing tag '</html>'"
-      '</html>'
-      ]
-    T?.eq counts, {
-      once_before_first:  1
-      first:        source.length + 1
-      last:         source.length + 3 + 1
-      once_after_last:   1 }
-  #.........................................................................................................
+  result = await p.run()
+  info '^49-1^', result
+  T?.eq result, [ 9, 25, 49, 121, ]
   done?()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "modifier first does not leak into pipeline when used with observer" ] = ( T, done ) ->
+@can_use_asyncgeneratorfunction_as_source = ( T, done ) ->
   # T?.halt_on_error()
-  { Pipeline } = require '../../../apps/moonriver'
-  { $ }         = Pipeline
-  first1        = Symbol 'first1'
-  first2        = Symbol 'first2'
-  collector     = []
+  GUY                 = require '../../../apps/guy'
+  { Async_pipeline }  = require '../../../apps/moonriver'
+  count               = 0
+  source              = -> await yield d for d in [ 3, 5, 7, 11, ]
+  debug '^49-1^', source
+  debug '^49-1^', source()
+  debug '^49-1^', source().next
   #.......................................................................................................
-  do =>
-    mr = new Pipeline()
-    mr.push Array.from 'abc'
-    mr.push $ { first: first1, }, ( d )       -> debug '^765-1^', rpr d
-    mr.push $ { first: first2, }, ( d, send ) -> debug '^765-2^', rpr d; send d unless d is first2
-    mr.push ( d ) -> collector.push d
-    #.....................................................................................................
-    mr.drive()
-    urge '^859^', collector
-    T?.eq collector, Array.from 'abc'
+  p = new Async_pipeline()
+  p.push source
+  p.push square = ( d, send ) -> send d * d
+  p.push show = ( d ) -> urge '^49-1^', d
   #.........................................................................................................
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "modifier last does not leak into pipeline when used with observer" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { Pipeline } = require '../../../apps/moonriver'
-  { $ }         = Pipeline
-  last1        = Symbol 'last1'
-  last2        = Symbol 'last2'
-  collector     = []
-  #.......................................................................................................
-  do =>
-    mr = new Pipeline()
-    mr.push Array.from 'abc'
-    mr.push $ { last: last1, }, ( d )       -> debug '^765-1^', rpr d
-    mr.push $ { last: last2, }, ( d, send ) -> debug '^765-2^', rpr d; send d unless d is last2
-    mr.push ( d ) -> collector.push d
-    #.....................................................................................................
-    mr.drive()
-    urge '^859^', collector
-    T?.eq collector, Array.from 'abc'
-  #.........................................................................................................
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "modifier last" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { Pipeline } = require '../../../apps/moonriver'
-  { $ }         = Pipeline
-  first         = Symbol 'first'
-  last          = Symbol 'last'
-  collector     = []
-  mr            = new Pipeline()
-  #.......................................................................................................
-  mr.push [ 'first', 'second', 'third', ]
-  s1 = mr.push $ { last, }, finalize = ( d, send ) ->
-    debug '^347^', rpr d
-    if d is last
-      collector.push collector.length
-      return send 'fourth'
-    send d
-    return null
-  mr.push collect = ( d ) -> collector.push d
-  #.........................................................................................................
-  T?.eq s1.modifiers.last,          true
-  T?.eq s1.modifiers.values?.last,  last
-  #.........................................................................................................
-  mr.drive()
-  debug '^343^', collector
-  T?.eq collector, [ 'first', 'second', 'third', 3, 'fourth', ]
-  #.........................................................................................................
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "modifier once_after_last" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { Pipeline } = require '../../../apps/moonriver'
-  { $ }         = Pipeline
-  collector     = []
-  mr            = new Pipeline()
-  #.......................................................................................................
-  mr.push [ 'first', 'second', 'third', ]
-  s1 = mr.push $ { once_after_last: true, }, finalize = ( d ) ->
-    collector.push collector.length
-    return null
-  mr.push ( d ) -> collector.push d
-  #.........................................................................................................
-  T?.eq s1.is_sender,                 true
-  T?.eq s1.modifiers.once_after_last, true
-  #.........................................................................................................
-  mr.drive()
-  T?.eq collector, [ 'first', 'second', 'third', 3, ]
-  #.........................................................................................................
+  result = await p.run()
+  info '^49-1^', result
+  T?.eq result, [ 9, 25, 49, 121, ]
   done?()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "exit symbol" ] = ( T, done ) ->
+@can_use_asyncfunction_as_transform = ( T, done ) ->
   # T?.halt_on_error()
-  { Pipeline } = require '../../../apps/moonriver'
-  { $ }         = Pipeline
-  collector     = []
-  protocol      = []
-  mr            = new Pipeline { protocol, }
+  GUY               = require '../../../apps/guy'
+  { Async_pipeline
+    $           }   = require '../../../apps/moonriver'
+  after             = ( dts, f  ) => new Promise ( resolve ) -> setTimeout ( -> resolve f() ), dts * 1000
+  count             = 0
   #.......................................................................................................
-  mr.push [ 'first', 'second', 'third', 'fourth', 'fifth', ]
-  mr.push look_for_third = ( d, send ) ->
-    send if d is 'third' then Symbol.for 'exit' else d
-  mr.push collect = ( d, send ) ->
-    collector.push d
-  mr.drive()
-  echo rpr d for d in collector
-  T?.eq collector, [ 'first', 'second', ]
-  H.tabulate 'protocol', protocol
+  p = new Async_pipeline()
+  p.push Array.from '覚える'
+  p.push ( d, send ) -> send await after 0.1, -> "(#{d})"
+  p.push show = ( d ) -> urge '^49-1^', d
   #.........................................................................................................
-  done?()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "called even when pipeline empty: once_before_first, once_after_last" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { Pipeline }     = require '../../../apps/moonriver'
-  { $ }             = Pipeline
-  collector         = []
-  once_before_first = true
-  once_after_last   = true
-  counts            =
-    once_before_first:  0
-    once_after_last:    0
-  mr                = new Pipeline()
-  #.......................................................................................................
-  mr.push []
-  mr.push $ { once_before_first,  },  on_once_before  = ( d ) -> counts.once_before_first++
-  mr.push show_1  = ( d       ) -> urge '^498-1^', rpr d
-  mr.push $ { once_after_last,    },  on_once_after   = ( d ) -> counts.once_after_last++
-  mr.push collect = ( d       ) -> collector.push d
-  mr.push show_2  = ( d       ) -> urge '^498-2^', rpr d
-  mr.drive()
-  T?.eq counts, { once_before_first: 1, once_after_last: 1 }
-  T?.eq collector, []
-  #.........................................................................................................
-  done?()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "transforms with once_after_last can (not yet) be senders" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { Pipeline }   = require '../../../apps/moonriver'
-  { $ }           = Pipeline
-  once_after_last = true
-  collector       = []
-  mr              = new Pipeline()
-  #.......................................................................................................
-  # mr.push [ 1, 2, 3, ]
-  error = null
-  try
-    mr.push $ { once_after_last, }, on_once_after = ( d, send ) -> send 'last'
-  catch error
-    if ( error.message.match /transform with arity 2 not implemented for modifiers once_before_first, once_after_last/ )?
-      T?.ok true
-    else
-      throw error
-  T?.ok error?
-  # mr.push collect = ( d ) -> collector.push d
-  # mr.drive()
-  # debug '^498^', collector
-  # T?.eq collector, [ 1, 2, 3, 'last', ]
-  #.........................................................................................................
-  done?()
-  return null
-
-# #-----------------------------------------------------------------------------------------------------------
-# @[ "using send() in once_before_first, once_after_last transforms" ] = ( T, done ) ->
-#   # T?.halt_on_error()
-#   { Pipeline } = require '../../../apps/moonriver'
-#   { $ }         = Pipeline
-#   collector     = []
-#   mr            = new Pipeline()
-#   #.......................................................................................................
-#   mr.push [ 0, ]
-#   mr.push $ { once_before_first:  true, }, once_before_first = ( send ) -> send e for e in [ 42, 43, 44, ]
-#   mr.push $ { once_after_last:    true, }, once_after_last   = ( send ) -> send e for e in [ 45, 46, 47, ]
-#   mr.push show    = ( d ) -> urge '^4948^', d
-#   mr.push collect = ( d ) -> collector.push d
-#   mr.drive()
-#   T?.eq collector, [ 42, 43, 44, 0, 45, 46, 47, ]
-#   #.........................................................................................................
-#   done?()
-#   return null
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "appending data before closing" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { Pipeline } = require '../../../apps/moonriver'
-  { $ }         = Pipeline
-  last          = Symbol 'last'
-  collector     = []
-  mr            = new Pipeline()
-  #.......................................................................................................
-  mr.push [ -1, ]
-  mr.push show    = ( d ) -> urge '^4948-1^', d
-  mr.push $ { last, }, at_last = ( d, send ) ->
-    return send d unless d is last
-    send e for e in [ 'a', 'b', 'c', ]
-  mr.push show    = ( d ) -> urge '^4948-2^', d
-  mr.push collect = ( d ) -> collector.push d
-  mr.drive()
-  T?.eq collector, [ -1, 'a', 'b', 'c' ]
-  #.........................................................................................................
-  done?()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "once_before_first, once_after_last transformers transparent to data" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { Pipeline } = require '../../../apps/moonriver'
-  { $ }         = Pipeline
-  collectors    =
-    c1: []
-    c2: []
-    c3: []
-    c4: []
-  mr            = new Pipeline()
-  #.......................................................................................................
-  mr.push Array.from 'bcd'
-  mr.push $ { once_before_first:  true,   }, once_before_first  = ( send  ) -> send 'A';                                  T?.eq [ arguments..., ].length, 1
-  mr.push $ { once_before_first:  true,   }, once_before_first  =           -> collectors.c1.push 'E';                    T?.eq [ arguments..., ].length, 0
-  mr.push collect2                                              = ( d     ) -> debug '^453-2^', d;  collectors.c2.push d; T?.eq [ arguments..., ].length, 1
-  mr.push $ { once_after_last:    true,   }, once_after_last    = ( send  ) -> send 'Z';                                  T?.eq [ arguments..., ].length, 1
-  mr.push $ { once_after_last:    true,   }, once_after_last    =           -> collectors.c3.push 'F';                    T?.eq [ arguments..., ].length, 0
-  mr.push collect4                                              = ( d     ) -> debug '^453-4^', d;  collectors.c4.push d; T?.eq [ arguments..., ].length, 1
-  mr.drive()
-  help '^894^', collectors.c1
-  help '^894^', collectors.c2
-  help '^894^', collectors.c3
-  help '^894^', collectors.c4
-  T?.eq collectors.c1, [ 'E', ]
-  T?.eq collectors.c2, [ 'A', 'b', 'c', 'd', ]
-  T?.eq collectors.c3, [ 'F', ]
-  T?.eq collectors.c4, [ 'A', 'b', 'c', 'd', 'Z', ]
-  #.........................................................................................................
-  done?()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@can_use_asyncfunction_as_source = ( T, done ) ->
-  # T?.halt_on_error()
-  GUY           = require '../../../apps/guy'
-  { Pipeline } = require '../../../apps/moonriver'
-  { $ }         = Pipeline
-  collector     = []
-  mr            = new Pipeline()
-  #.......................................................................................................
-  count = 0
-  get_source = ( send ) ->
-    return -> new Promise ( resolve ) ->
-      GUY.async.after 0.2, -> count++; info count; send count; resolve()
-  # source = -> await setTimeout ( -> count++; return count ), 1
-  #.......................................................................................................
-  mr.push show = ( d ) -> urge '^4948-1^', d
-  mr.push collect = ( d ) -> collector.push d
-  source = get_source mr.send.bind mr
-  for _ in [ 1 .. 5 ]
-    await source()
-  #.........................................................................................................
-  debug collector
-  T?.eq collector, [ 1, 2, 3, 4, 5 ]
+  result = await p.run()
+  info '^49-1^', result
+  T?.eq result, [ '(覚)', '(え)', '(る)' ]
   done?()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @can_use_nodejs_readable_stream_as_source = ( T, done ) ->
   # T?.halt_on_error()
-  GUY             = require '../../../apps/guy'
-  { Pipeline }   = require '../../../apps/moonriver'
-  { readlines }   = require 'readlines-ng'
-  FS              = require 'node:fs'
-  path            = PATH.join __dirname, '../../../assets/short-proposal.mkts.md'
-  source          = FS.createReadStream path, { encoding: 'utf-8', }
-  collector       = []
-  mr              = new Pipeline()
-  mr.push show    = ( d ) -> urge '^4948-1^', d
-  mr.push collect = ( d ) -> collector.push d
+  GUY                   = require '../../../apps/guy'
+  { Pipeline,           \
+    Async_pipeline,     \
+    transforms: TF }    = require '../../../apps/moonriver'
+  FS                    = require 'node:fs'
+  path                  = PATH.join __dirname, '../../../assets/short-proposal.mkts.md'
+  get_source            = -> FS.createReadStream path #, { encoding: 'utf-8', }
   #.......................................................................................................
-  count         = 0
-  for await line from readlines source
-    count++
-    continue if count > 5
-    mr.send line
-    ### to achieve interleaving of data ingestion steps and data processing steps use `sleep 0`; ###
-    ### here we use a bigger value to demonstrate that output actually happens in a piecemeal fashion: ###
-    info count
-    await GUY.async.sleep 0.2
+  matcher = do =>
+    count   = 0
+    matcher = []
+    for line from GUY.fs.walk_lines path
+      count++
+      continue if count > 5
+      info count, rpr line
+      matcher.push line
+    return matcher
+  #.......................................................................................................
+  result = await do =>
+    p = new Async_pipeline()
+    debug '^34-2^', p
+    p.push get_source()
+    # p.push 'rtethg'
+    p.push TF.$split_lines()
+    p.push TF.$limit 5
+    p.push show = ( d ) -> urge '^34-3^', rpr d
+    return await p.run()
   #.........................................................................................................
-  T?.eq collector, [ '<title>A Proposal</title>', '<h1>Motivation</h1>', '<p>It has been suggested to further the cause.</p>', '<p>This is <i>very</i> desirable indeed.</p>', '' ]
+  T?.eq result, matcher
   done?()
   return null
-
-#-----------------------------------------------------------------------------------------------------------
-@window_transform = ( T, done ) ->
-  # T?.halt_on_error()
-  GUY             = require '../../../apps/guy'
-  { Pipeline }   = require '../../../apps/moonriver'
-  { $ }           = Pipeline
-  { $window }     = require '../../../apps/moonriver/lib/transforms'
-  collector       = []
-  mr              = new Pipeline()
-  misfit          = Symbol 'misfit'
-  # #.........................................................................................................
-  # $window = ( min, max, empty = misfit ) ->
-  #   last          = Symbol 'last'
-  #   buffer        = {}
-  #   buffer[ nr ]  = empty for nr in [ min .. max ]
-  #   advance       = -> buffer[ nr - 1 ]  = buffer[ nr ] for nr in [ min + 1 .. max ]
-  #   return $ { last, }, ( d, send ) ->
-  #     if d is last
-  #       loop
-  #         advance()
-  #         buffer[ max ] = empty
-  #         break if buffer[ 0 ] is empty
-  #         send { buffer..., }
-  #       return null
-  #     advance()
-  #     buffer[ max ] = d
-  #     send { buffer..., } unless buffer[ 0 ] is empty
-  #.........................................................................................................
-  mr.push $window -2, +2, null
-  mr.push show    = ( d ) -> urge '^45-1^', d
-  mr.push collect = ( d ) -> collector.push d
-  for nr in [ 1 .. 9 ]
-    mr.send nr
-  mr.drive()
-  debug '^45-2^', collector
-  done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @walk_is_repeatable = ( T, done ) ->
   # T?.halt_on_error()
   GUY             = require '../../../apps/guy'
-  { Pipeline }   = require '../../../apps/moonriver'
-  { $ }           = Pipeline
+  { Pipeline
+    $           }   = require '../../../apps/moonriver'
   collector       = []
   first           = Symbol 'first'
   last            = Symbol 'last'
   # source          = [ ( Array.from 'abcdef' )..., last, ]
-  source          = Array.from 'abcdef'
   #.........................................................................................................
   create_pipeline = ->
     mr              = new Pipeline()
-    mr.push source
+    mr.push Array.from 'abcdef'
     # mr.push insert  = ( d, send ) -> send d; send d.toUpperCase() if isa.text d
-    mr.push extra   = ( d, send ) -> send d
-    mr.push extra   = $ { first, }, ( d, send ) -> send d
-    mr.push extra   = $ { last, }, ( d, send ) -> send d
-    mr.push extra   = ( d, send ) -> send d
+    mr.push extra   = ( d, send ) -> send "*#{d}*"
     mr.push show    = ( d ) -> whisper '^45-1^', d
     mr.push collect = ( d ) -> collector.push d
     return mr
-  # #.........................................................................................................
-  # do ->
-  #   mr = create_pipeline()
-  #   info '^54-1^', source
-  #   mr.drive()
-  #   help '^54-2^', collector
-  #   return null
-  # #.........................................................................................................
-  # do ->
-  #   mr = create_pipeline()
-  #   loop
-  #     mr.drive { laps: 1, resume: true, }
-  #     # break if d is last
-  #     for d in collector
-  #       urge '^54-3^', rpr d
-  #     collector.length = 0
-  #     break if mr.is_over
-  #   return null
-  # #.........................................................................................................
-  # do ->
-  #   mr = create_pipeline()
-  #   debug '^54-9^', mr.length
-  #   for d from mr.walk() # { laps: 1, }
-  #     urge '^54-4^', rpr d
-  #   # break if d is last
-  #   info '^54-4^', collector
-  #   debug '^54-9^', mr.length
-  #   collector.length = 0
-  #   for d from mr.walk() # { laps: 1, }
-  #     urge '^54-4^', rpr d
-  #   # break if d is last
-  #   info '^54-4^', collector
-  #   debug '^54-9^', mr.length
-  #   collector.length = 0
-  #   # mr.drive()
-  #   # info '^54-4^', collector
-  #   return null
-  #.........................................................................................................
-  # do ->
-  #   mr = create_pipeline()
-  #   rsults = [ mr.walk()..., ]
-  #   info '^54-4^', collector
-  #   collector.length = 0
-  #   rsults = [ mr.walk()..., ]
-  #   info '^54-4^', collector
-  #   collector.length = 0
-  #   rsults = [ mr.walk()..., ]
-  #   info '^54-4^', collector
-  #   collector.length = 0
-  #   return null
   #.........................................................................................................
   do ->
     mr = create_pipeline()
-    mr.drive()
+    mr.run()
     info '^54-4^', collector
     collector.length = 0
-    mr.drive()
+    mr.run()
     info '^54-4^', collector
     collector.length = 0
-    mr.drive()
+    mr.run()
     info '^54-4^', collector
     collector.length = 0
     return null
@@ -703,9 +229,12 @@ H                         = require '../../../lib/helpers'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @can_use_asyncfunction_as_source
-  # @can_use_nodejs_readable_stream_as_source()
-  # test @can_use_nodejs_readable_stream_as_source
+  # await @can_use_asyncgenerator_as_source()
+  # await @can_use_asyncgeneratorfunction_as_source()
+  # test @can_use_asyncgenerator_as_source
+  # test @can_use_asyncgeneratorfunction_as_source
+  # @can_use_asyncfunction_as_transform()
+  # test @can_use_asyncfunction_as_transform
   # @window_transform()
   # @walk_is_repeatable()
   test @
