@@ -49,7 +49,7 @@
           if (count2 > 5) {
             break;
           }
-          hel(p`^423^`, path2);
+          help('^423^', path2);
           h2 = (await PHASH.compute(path2));
           info('^423^', (await PHASH.compare(h1, h2)));
         }
