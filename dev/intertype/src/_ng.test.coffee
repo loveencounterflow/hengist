@@ -2167,6 +2167,41 @@ demo_size_of = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@override_types_are_honored = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype { errors: false, }
+  { declare }       = types
+  #.........................................................................................................
+  declare.function0
+    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 0 )
+    default:    ->
+    override:   true
+  #.........................................................................................................
+  declare.function1
+    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 1 )
+    default:    ( x ) ->
+    override:   true
+  #.........................................................................................................
+  declare.function2
+    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 2 )
+    default:    ( x, y ) ->
+    override:   true
+  #.........................................................................................................
+  declare.function3
+    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 3 )
+    default:    ( x, y, z ) ->
+    override:   true
+  #.........................................................................................................
+  T?.eq ( types.type_of ->                  ), 'function0'
+  T?.eq ( types.type_of ( x ) ->            ), 'function1'
+  T?.eq ( types.type_of ( x, y ) ->         ), 'function2'
+  T?.eq ( types.type_of ( x, y, z ) ->      ), 'function3'
+  T?.eq ( types.type_of ( x, y, z, a ) ->   ), 'function'
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 unless module.parent?
@@ -2206,6 +2241,7 @@ unless module.parent?
   # test @intertype_create_has_correct_binding
   # @intertype_type_regex()
   # test @intertype_type_regex
+  # @override_types_are_honored()
   test @
   # test @intertype_ordering_of_field_and_isa_tests
   # test @intertype_tracing
