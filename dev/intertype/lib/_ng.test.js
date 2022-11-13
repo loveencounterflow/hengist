@@ -4451,6 +4451,66 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.override_types_are_honored = function(T, done) {
+    var Intertype, declare, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype({
+      errors: false
+    });
+    ({declare} = types);
+    //.........................................................................................................
+    declare.function0({
+      isa: function(x) {
+        return (this.isa.function(x)) && (x.length === 0);
+      },
+      default: function() {},
+      override: true
+    });
+    //.........................................................................................................
+    declare.function1({
+      isa: function(x) {
+        return (this.isa.function(x)) && (x.length === 1);
+      },
+      default: function(x) {},
+      override: true
+    });
+    //.........................................................................................................
+    declare.function2({
+      isa: function(x) {
+        return (this.isa.function(x)) && (x.length === 2);
+      },
+      default: function(x, y) {},
+      override: true
+    });
+    //.........................................................................................................
+    declare.function3({
+      isa: function(x) {
+        return (this.isa.function(x)) && (x.length === 3);
+      },
+      default: function(x, y, z) {},
+      override: true
+    });
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.type_of(function() {}), 'function0');
+    }
+    if (T != null) {
+      T.eq(types.type_of(function(x) {}), 'function1');
+    }
+    if (T != null) {
+      T.eq(types.type_of(function(x, y) {}), 'function2');
+    }
+    if (T != null) {
+      T.eq(types.type_of(function(x, y, z) {}), 'function3');
+    }
+    if (T != null) {
+      T.eq(types.type_of(function(x, y, z, a) {}), 'function');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // demo()
@@ -4489,6 +4549,7 @@
     // test @intertype_create_has_correct_binding
     // @intertype_type_regex()
     // test @intertype_type_regex
+    // @override_types_are_honored()
     test(this);
   }
 
