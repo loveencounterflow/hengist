@@ -143,27 +143,60 @@ demo_4 = ->
 #-----------------------------------------------------------------------------------------------------------
 demo_5 = ->
   echo '—————————————————————————————————————————————'
-  FS                  = require 'node:fs'
+  FS                    = require 'node:fs'
+  PATH                  = require 'node:path'
   { Async_pipeline, \
-    transforms: T,  } = require '../../../apps/moonriver'
+    transforms: T,  }   = require '../../../apps/moonriver'
+  path                  = PATH.join __dirname, '../../../assets/short-proposal.mkts.md'
+  get_source            = -> FS.createReadStream path #, { encoding: 'utf-8', }
   p = new Async_pipeline()
-  p.push FS.createReadStream __filename, { highWaterMark: 50, }
+  p.push get_source()
   p.push T.$split_lines()
   p.push T.$limit 5
-  p.push show_2 = ( d ) -> whisper 'Ⅱ', rpr d
+  p.push show = ( d ) -> whisper 'Ⅱ', rpr d
   info '^24-7^', p
   await p.run()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_6 = ->
+  echo '—————————————————————————————————————————————'
+  FS                  = require 'node:fs'
+  { Pipeline, \
+    transforms: T,  } = require '../../../apps/moonriver'
+  p                   = new Pipeline()
+  { $ }               = p
+  last                = Symbol 'last'
+  #.........................................................................................................
+  $with_stars         = $ with_stars = ( d, send ) -> debug '^4456546^', send; send "*#{d}*"
+  #.........................................................................................................
+  $collect            = $ collect = { last, }, ->
+    collector = []
+    return ( d, send ) ->
+      return send collector if d is last
+      collector.push d
+      return null
+  #.........................................................................................................
+  info '^40-1^', $with_stars
+  info '^40-2^', $collect
+  #.........................................................................................................
+  p.push Array.from '氣場全開'
+  p.push $with_stars # ()
+  p.push show = ( d ) -> whisper rpr d
+  p.run()
+  #.........................................................................................................
   return null
 
 
 
 ############################################################################################################
 if module is require.main then do =>
-  demo_1()
-  demo_2()
-  await demo_3a()
-  await demo_3b()
-  demo_4()
+  # demo_1()
+  # demo_2()
+  # await demo_3a()
+  # await demo_3b()
+  # demo_4()
   demo_5()
+  # demo_6()
 
 
